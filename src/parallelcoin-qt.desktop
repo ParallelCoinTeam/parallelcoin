@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Parallelcoin Qt wallet
-Exec=/usr/local/bin/parallelcoin-qt
+Exec=parallelcoin-qt
 Icon=parallelcoin
 Terminal=false
 Type=Application

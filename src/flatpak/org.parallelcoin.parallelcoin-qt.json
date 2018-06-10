@@ -1,0 +1,22 @@
+{
+    "app-id": "org.parallelcoin.parallelcoin-qt",
+    "runtime": "org.freedesktop.Platform",
+    "runtime-version": "1.6",
+    "sdk": "org.freedesktop.Sdk",
+    "command": "parallelcoin-qt",
+    "modules": [
+        {
+            "name": "parallelcoind",
+            "buildsystem": "simple",
+            "build-commands": [
+                "cp parallelcoin-qt /app/bin/parallelcoin-qt"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "path": "parallelcoin-qt"
+                }
+            ]
+        }
+    ]
+}
