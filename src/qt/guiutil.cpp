@@ -6,8 +6,8 @@
 #include "walletmodel.h"
 #include "bitcoinunits.h"
 
-#include "util.h"
-#include "init.h"
+#include "../util.h"
+#include "../init.h"
 
 #include <QDateTime>
 #include <QDoubleValidator>

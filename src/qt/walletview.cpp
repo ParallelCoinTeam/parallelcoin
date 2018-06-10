@@ -16,7 +16,7 @@
 #include "transactionview.h"
 #include "overviewpage.h"
 #include "askpassphrasedialog.h"
-#include "ui_interface.h"
+#include "../ui_interface.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>

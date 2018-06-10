@@ -1,6 +1,6 @@
 #include "intro.h"
 #include "ui_intro.h"
-#include "util.h"
+#include "../util.h"
 
 #include <QFileDialog>
 #include <QSettings>

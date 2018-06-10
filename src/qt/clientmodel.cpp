@@ -5,11 +5,11 @@
 #include "addresstablemodel.h"
 #include "transactiontablemodel.h"
 
-#include "chainparams.h"
-#include "alert.h"
-#include "main.h"
-#include "checkpoints.h"
-#include "ui_interface.h"
+#include "../chainparams.h"
+#include "../alert.h"
+#include "../main.h"
+#include "../checkpoints.h"
+#include "../ui_interface.h"
 
 #include <QDateTime>
 #include <QTimer>

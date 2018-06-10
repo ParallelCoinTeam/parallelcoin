@@ -44,6 +44,7 @@ For Qt 5 you need the following, otherwise you get an error with lrelease when r
 
 then execute the following:
 
+    cd src/
     qmake
     make
 
@@ -60,6 +61,12 @@ sudo pacman -S qt5-base qt5-tools pkg-config \
     qrencode make automoc4 automake autoconf \
     libtool zeromq
 ```
+
+then execute the following:
+
+    cd src/
+    qmake
+    make
 
 ### Mac OS X
 
@@ -89,9 +96,9 @@ Build Configuration Options
 
 To use UPnP for port forwarding behind a NAT router (recommended, as more connections overall allow for a faster and more stable bitcoin experience), pass the following argument to qmake:
 
-
-
     qmake "USE_UPNP=1"
+
+    (note that this is enabled by default now)
 
 (in **Qt Creator**, you can find the setting for additional qmake arguments under "Projects" -> "Build Settings" -> "Build Steps", then click "Details" next to **qmake**)
 

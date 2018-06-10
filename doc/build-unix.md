@@ -33,8 +33,8 @@ http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
 turned off by default.  Set USE_UPNP to a different value to control this:
 
 	USE_UPNP=     No UPnP support miniupnp not required
-	USE_UPNP=0    (the default) UPnP support turned off by default at runtime
-	USE_UPNP=1    UPnP support turned on by default at runtime
+	USE_UPNP=0    UPnP support turned off by default at runtime
+	USE_UPNP=1    (the default) UPnP support turned on by default at runtime
 
 IPv6 support may be disabled by setting:
 

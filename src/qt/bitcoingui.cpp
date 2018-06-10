@@ -22,9 +22,9 @@
 #include "notificator.h"
 #include "guiutil.h"
 #include "rpcconsole.h"
-#include "ui_interface.h"
-#include "wallet.h"
-#include "init.h"
+#include "../ui_interface.h"
+#include "../wallet.h"
+#include "../init.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"

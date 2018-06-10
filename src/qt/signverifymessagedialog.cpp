@@ -2,13 +2,13 @@
 #include "ui_signverifymessagedialog.h"
 
 #include "addressbookpage.h"
-#include "base58.h"
+#include "../base58.h"
 #include "guiutil.h"
-#include "init.h"
-#include "main.h"
+#include "../init.h"
+#include "../main.h"
 #include "optionsmodel.h"
 #include "walletmodel.h"
-#include "wallet.h"
+#include "../wallet.h"
 
 #include <QClipboard>
 
