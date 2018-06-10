@@ -5,6 +5,13 @@ Contains build and configuration instructions for Bitcoin-Qt (Qt4 GUI for Bitcoi
 Build Instructions
 ---------------------
 
+Both the daemon and the Qt GUI wallet client versions need to have an old version of SSL installed to compile, so:
+
+	cd src/openssl-1.0.1u
+	./config
+	make -j$(nproc)
+	sudo make install
+
 ### Debian
 
 

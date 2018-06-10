@@ -5,8 +5,14 @@ Some notes on how to build Bitcoin in Unix.
 To Build
 ---------------------
 
-	cd src/
-	make -f makefile.unix		# Headless bitcoin
+The build requires the use of an old version of openssl, so it is bundled rather than require another thing that might change later.
+
+	cd src/openssl-1.0.1u
+	./config
+	make -j$(nproc)
+	sudo make install
+	make -j$(nproc) -f makefile.unix		# Headless bitcoin
+	sudo make -f makefile.unix install
 
 See [readme-qt.md](readme-qt.md) for instructions on building Bitcoin-Qt, the graphical user interface.
 
@@ -18,7 +24,7 @@ Dependencies
  libssl     | SSL Support  |     Secure communications (Requires an outdated version, it is included in the `src` directory)
  libdb4.8   | Berkeley DB  |     Blockchain & wallet storage
  libboost   | Boost        |     C++ Library (version 1.59 is recommended and available as a binary package for many distributions)
- miniupnpc  | UPnP Support |     Optional firewall-jumping support (may not be working currently)
+ miniupnpc  | UPnP Support |     Optional firewall-jumping support
 
 [miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
 http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
@@ -27,8 +33,6 @@ turned off by default.  Set USE_UPNP to a different value to control this:
 	USE_UPNP=     No UPnP support miniupnp not required
 	USE_UPNP=0    (the default) UPnP support turned off by default at runtime
 	USE_UPNP=1    UPnP support turned on by default at runtime
-
-UPNP has been disabled as it is not currently working in the build
 
 IPv6 support may be disabled by setting:
 
@@ -80,9 +84,9 @@ Dependency Build Instructions: Arch Linux
 
 Install `downgrade` from the AUR (`aurman` is recommended) and downgrade `boost` and `boost-libs` to 1.59.0-5
 
-UPNP support is currently not working, and disabled
-
 Go into the directory `src/openssl-1.0.1u` and run `./config` and then `make -j$(nproc) && sudo make install` to install the correct version of openssl (dependency is quite outdated)
+
+Other than that, the standard `base-devel` toolchain is required.
 
 Dependency Build Instructions: Gentoo
 -------------------------------------
