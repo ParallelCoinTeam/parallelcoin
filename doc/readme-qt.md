@@ -12,6 +12,10 @@ Both the daemon and the Qt GUI wallet client versions need to have an old versio
 	make -j$(nproc)
 	sudo make install
 
+Then go down in later sections to find relevant instructions on how to get it to build.
+
+Copy the executable from `src/` to your preferred binary folder, `/usr/local/bin` or `$HOME/bin` or whatever you like
+
 ### Debian
 
 

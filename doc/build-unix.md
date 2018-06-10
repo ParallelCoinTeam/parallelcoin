@@ -14,6 +14,8 @@ The build requires the use of an old version of openssl, so it is bundled rather
 	make -j$(nproc) -f makefile.unix		# Headless bitcoin
 	sudo make -f makefile.unix install
 
+Copy the executable from `src/` to your preferred binary folder, `/usr/local/bin` or `$HOME/bin` or whatever you like
+
 See [readme-qt.md](readme-qt.md) for instructions on building Bitcoin-Qt, the graphical user interface.
 
 Dependencies
