@@ -2,6 +2,8 @@ UNIX BUILD NOTES
 ====================
 Some notes on how to build Bitcoin in Unix. 
 
+If you are lazy, you can just use the `src/linux-install.sh` script (er, or if you have better things to do!)
+
 To Build
 ---------------------
 
@@ -11,8 +13,8 @@ The build requires the use of an old version of openssl, so it is bundled rather
 	./config
 	make -j$(nproc)
 	sudo make install
+	cd ..
 	make -j$(nproc) -f makefile.unix		# Headless bitcoin
-	sudo make -f makefile.unix install
 
 Copy the executable from `src/` to your preferred binary folder, `/usr/local/bin` or `$HOME/bin` or whatever you like
 
