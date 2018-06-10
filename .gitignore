@@ -5,3 +5,9 @@ CMakeFiles/
 CMakeCache.txt
 .qmake.stash
 build/
+parallelcoind
+Makefile
+parallelcoin-qt
+src/parallelcoind
+Makefile
+qrc_bitcoin.cpp

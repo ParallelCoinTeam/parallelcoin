@@ -19,6 +19,9 @@ CONFIG += thread
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
 #    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
 
+OPENSSL_INCLUDE_PATH=/usr/local/ssl/include
+OPENSSL_LIB_PATH=/usr/local/ssl/lib
+
 OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
@@ -44,7 +47,10 @@ contains(RELEASE, 1) {
     # This can be enabled for Windows, when we switch to MinGW >= 4.4.x.
 }
 # for extra security (see: https://wiki.debian.org/Hardening): this flag is GCC compiler-specific
-QMAKE_CXXFLAGS *= -D_FORTIFY_SOURCE=2 -march=native
+QMAKE_CXXFLAGS *= -D_FORTIFY_SOURCE=2 -O2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
+    -Wno-deprecated-declarations -Wno-deprecated -Wno-unused-local-typedefs -Wno-class-memaccess \
+    -Wno-unused-but-set-parameter -Wno-placement-new -Wno-maybe-uninitialized \
+    -Wno-implicit-fallthrough
 # for extra security on Windows: enable ASLR and DEP via GCC linker flags
 win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
 # on Windows: enable GCC large address aware linker flag

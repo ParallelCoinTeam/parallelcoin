@@ -19,6 +19,10 @@ CONFIG += thread
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
 #    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
 
+# Because ancient version is required, set the path to /usr/local locations
+OPENSSL_INCLUDE_PATH=/usr/local/ssl/include
+OPENSSL_LIB_PATH=/usr/local/ssl/lib
+
 win32 {
 BOOST_LIB_SUFFIX=-mgw49-mt-s-1_57
 BOOST_INCLUDE_PATH=C:/deps/boost_1_57_0
@@ -49,6 +53,12 @@ contains(RELEASE, 1) {
         LIBS += -Wl,-Bstatic -Wl,-z,relro -Wl,-z,now
     }
 }
+
+# Make all those dumb warnings go away
+QMAKE_CXXFLAGS *= -O2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
+    -Wno-deprecated-declarations -Wno-deprecated -Wno-unused-local-typedefs -Wno-class-memaccess \
+    -Wno-unused-but-set-parameter -Wno-placement-new -Wno-maybe-uninitialized \
+    -Wno-implicit-fallthrough \
 
 !win32 {
     # for extra security against potential buffer overflows: enable GCCs Stack Smashing Protection
