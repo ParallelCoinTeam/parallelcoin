@@ -39,7 +39,16 @@ then execute the following:
 Alternatively, install [Qt Creator](http://qt-project.org/downloads/) and open the `bitcoin-qt.pro` file. 
 An executable named `bitcoin-qt` will be built.
 
+### Arch Linux
 
+The following dependencies need to be installed:
+
+```
+sudo pacman -S qt5-base qt5-tools pkg-config \
+    db4.8 git boost-libs boost gcc gcc-libs \
+    qrencode make automoc4 automake autoconf \
+    libtool zeromq
+```
 
 ### Mac OS X
 

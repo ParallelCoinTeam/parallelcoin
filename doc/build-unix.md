@@ -13,12 +13,12 @@ See [readme-qt.md](readme-qt.md) for instructions on building Bitcoin-Qt, the gr
 Dependencies
 ---------------------
 
- Library     Purpose           Description
- -------     -------           -----------
- libssl      SSL Support       Secure communications
- libdb4.8    Berkeley DB       Blockchain & wallet storage
- libboost    Boost             C++ Library
- miniupnpc   UPnP Support      Optional firewall-jumping support
+ Library    | Purpose      |      Description
+ -----------|--------------|----------------
+ libssl     | SSL Support  |     Secure communications (Requires an outdated version, it is included in the `src` directory)
+ libdb4.8   | Berkeley DB  |     Blockchain & wallet storage
+ libboost   | Boost        |     C++ Library (version 1.59 is recommended and available as a binary package for many distributions)
+ miniupnpc  | UPnP Support |     Optional firewall-jumping support (may not be working currently)
 
 [miniupnpc](http://miniupnp.free.fr/) may be used for UPnP port mapping.  It can be downloaded from [here](
 http://miniupnp.tuxfamily.org/files/).  UPnP support is compiled in and
@@ -27,6 +27,8 @@ turned off by default.  Set USE_UPNP to a different value to control this:
 	USE_UPNP=     No UPnP support miniupnp not required
 	USE_UPNP=0    (the default) UPnP support turned off by default at runtime
 	USE_UPNP=1    UPnP support turned on by default at runtime
+
+UPNP has been disabled as it is not currently working in the build
 
 IPv6 support may be disabled by setting:
 
@@ -72,6 +74,15 @@ Optional:
 
 	sudo apt-get install libminiupnpc-dev (see USE_UPNP compile flag)
 
+
+Dependency Build Instructions: Arch Linux
+-----------------------------------------
+
+Install `downgrade` from the AUR (`aurman` is recommended) and downgrade `boost` and `boost-libs` to 1.59.0-5
+
+UPNP support is currently not working, and disabled
+
+Go into the directory `src/openssl-1.0.1u` and run `./config` and then `make -j$(nproc) && sudo make install` to install the correct version of openssl (dependency is quite outdated)
 
 Dependency Build Instructions: Gentoo
 -------------------------------------

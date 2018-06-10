@@ -1,0 +1,7 @@
+CMakeFiles/
+*.o
+*.P
+*.s
+CMakeCache.txt
+.qmake.stash
+build/

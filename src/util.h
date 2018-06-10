@@ -20,12 +20,12 @@
 #include <vector>
 #include <string>
 
-#include <boost/version.hpp>
-#include <boost/thread.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/date_time/gregorian/gregorian_types.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "boost/version.hpp"
+#include "boost/thread.hpp"
+#include "boost/filesystem.hpp"
+#include "boost/filesystem/path.hpp"
+#include "boost/date_time/gregorian/gregorian_types.hpp"
+#include "boost/date_time/posix_time/posix_time_types.hpp"
 
 #include "netbase.h" // for AddTimeData
 
@@ -109,11 +109,11 @@ inline void MilliSleep(int64 n)
 // until fixed in 1.52. Use the deprecated sleep method for the broken case.
 // See: https://svn.boost.org/trac/boost/ticket/7238
 
-#if BOOST_VERSION >= 105000 && (!defined(BOOST_HAS_NANOSLEEP) || BOOST_VERSION >= 105200)
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(n));
-#else
+// #if BOOST_VERSION >= 105000 && (!defined(BOOST_HAS_NANOSLEEP) || BOOST_VERSION >= 105200)
+//     boost::this_thread::sleep_for(boost::chrono::milliseconds(n));
+// #else
     boost::this_thread::sleep(boost::posix_time::milliseconds(n));
-#endif
+// #endif
 }
 
 /* This GNU C extension enables the compiler to check the format string against the parameters provided.
@@ -237,7 +237,7 @@ void runCommand(std::string strCommand);
 
 inline std::string i64tostr(int64 n)
 {
-    return strprintf("%"PRI64d, n);
+    return strprintf("%" PRI64d , n);
 }
 
 inline std::string itostr(int n)

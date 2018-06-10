@@ -5,7 +5,7 @@
 # :=0 --> UPnP support turned off by default at runtime
 # :=1 --> UPnP support turned on by default at runtime
 # :=- --> No UPnP support - miniupnp not required
-USE_UPNP:=0
+USE_UPNP:=1
 
 # :=1 --> Enable IPv6 support
 # :=0 --> Disable IPv6 support
@@ -14,6 +14,9 @@ USE_IPV6:=1
 LINK:=$(CXX)
 
 DEFS=-DBOOST_SPIRIT_THREADSAFE -D_FILE_OFFSET_BITS=64
+
+OPENSSL_INCLUDE_PATH=/usr/local/ssl/include
+OPENSSL_LIB_PATH=/usr/local/ssl/lib
 
 DEFS += $(addprefix -I,$(CURDIR) $(CURDIR)/obj $(BOOST_INCLUDE_PATH) $(BDB_INCLUDE_PATH) $(OPENSSL_INCLUDE_PATH))
 LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
@@ -62,7 +65,7 @@ LIBS+= \
  -Wl,-B$(LMODE2) \
    -l z \
    -l dl \
-   -l pthread
+   -l pthread -lboost_thread -lboost_filesystem  -lboost_system
 
 
 # Hardening
@@ -104,6 +107,9 @@ DEBUGFLAGS=-g
 # CXXFLAGS can be specified on the make command line, so we use xCXXFLAGS that only
 # adds some defaults in front. Unfortunately, CXXFLAGS=... $(CXXFLAGS) does not work.
 xCXXFLAGS=-O2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
+    -Wno-deprecated-declarations -Wno-deprecated -Wno-unused-local-typedefs -Wno-class-memaccess \
+    -Wno-unused-but-set-parameter -Wno-placement-new -Wno-maybe-uninitialized \
+    -Wno-implicit-fallthrough \
     $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
 
 # LDFLAGS can be specified on the make command line, so we use xLDFLAGS that only

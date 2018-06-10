@@ -1059,7 +1059,7 @@ void ThreadSocketHandler()
 
 
 
-
+/*
 #ifdef USE_UPNP
 void ThreadMapPort()
 {
@@ -1070,10 +1070,10 @@ void ThreadMapPort()
     char lanaddr[64];
 
 #ifndef UPNPDISCOVER_SUCCESS
-    /* miniupnpc 1.5 */
+    // miniupnpc 1.5
     devlist = upnpDiscover(2000, multicastif, minissdpdpath, 0);
 #else
-    /* miniupnpc 1.6 */
+    // miniupnpc 1.6
     int error = 0;
     devlist = upnpDiscover(2000, multicastif, minissdpdpath, 0, 0, &error);
 #endif
@@ -1107,11 +1107,11 @@ void ThreadMapPort()
         try {
             loop {
 #ifndef UPNPDISCOVER_SUCCESS
-                /* miniupnpc 1.5 */
+                // miniupnpc 1.5 
                 r = UPNP_AddPortMapping(urls.controlURL, data.first.servicetype,
                                     port.c_str(), port.c_str(), lanaddr, strDesc.c_str(), "TCP", 0);
 #else
-                /* miniupnpc 1.6 */
+                // miniupnpc 1.6 
                 r = UPNP_AddPortMapping(urls.controlURL, data.first.servicetype,
                                     port.c_str(), port.c_str(), lanaddr, strDesc.c_str(), "TCP", 0, "0");
 #endif
@@ -1161,13 +1161,13 @@ void MapPort(bool fUseUPnP)
         upnp_thread = NULL;
     }
 }
-
-#else
+*/
+// #else 
 void MapPort(bool)
 {
     // Intentionally left blank.
 }
-#endif
+// #endif
 
 
 
@@ -1223,7 +1223,7 @@ void DumpAddresses()
     CAddrDB adb;
     adb.Write(addrman);
 
-    printf("Flushed %d addresses to peers.dat  %"PRI64d"ms\n",
+    printf("Flushed %d addresses to peers.dat  %" PRI64d "ms\n",
            addrman.size(), GetTimeMillis() - nStart);
 }
 
@@ -1719,10 +1719,10 @@ void StartNode(boost::thread_group& threadGroup)
     else
         threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "dnsseed", &ThreadDNSAddressSeed));
 
-#ifdef USE_UPNP
-    // Map ports with UPnP
-    MapPort(GetBoolArg("-upnp", USE_UPNP));
-#endif
+// #ifdef USE_UPNP
+//     // Map ports with UPnP
+//     MapPort(GetBoolArg("-upnp", USE_UPNP));
+// #endif
 
     // Send and receive from sockets, accept connections
     threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "net", &ThreadSocketHandler));
