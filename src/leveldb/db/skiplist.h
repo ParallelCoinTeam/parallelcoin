@@ -26,9 +26,9 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "port/port.h"
-#include "util/arena.h"
-#include "util/random.h"
+#include "leveldb/port/port.h"
+#include "leveldb/util/arena.h"
+#include "leveldb/util/random.h"
 
 namespace leveldb {
 

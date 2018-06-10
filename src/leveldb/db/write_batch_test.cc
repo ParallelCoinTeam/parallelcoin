@@ -4,11 +4,11 @@
 
 #include "leveldb/db.h"
 
-#include "db/memtable.h"
-#include "db/write_batch_internal.h"
+#include "leveldb/db/memtable.h"
+#include "leveldb/db/write_batch_internal.h"
 #include "leveldb/env.h"
-#include "util/logging.h"
-#include "util/testharness.h"
+#include "leveldb/util/logging.h"
+#include "leveldb/util/testharness.h"
 
 namespace leveldb {
 

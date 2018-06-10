@@ -4,10 +4,10 @@
 
 #include "leveldb/filter_policy.h"
 
-#include "util/coding.h"
-#include "util/logging.h"
-#include "util/testharness.h"
-#include "util/testutil.h"
+#include "leveldb/util/coding.h"
+#include "leveldb/util/logging.h"
+#include "leveldb/util/testharness.h"
+#include "leveldb/util/testutil.h"
 
 namespace leveldb {
 

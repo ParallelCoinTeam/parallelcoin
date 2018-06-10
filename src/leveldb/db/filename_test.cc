@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include "db/filename.h"
+#include "leveldb/db/filename.h"
 
-#include "db/dbformat.h"
-#include "port/port.h"
-#include "util/logging.h"
-#include "util/testharness.h"
+#include "leveldb/db/dbformat.h"
+#include "leveldb/port/port.h"
+#include "leveldb/util/logging.h"
+#include "leveldb/util/testharness.h"
 
 namespace leveldb {
 

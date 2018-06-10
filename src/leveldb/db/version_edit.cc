@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include "db/version_edit.h"
+#include "leveldb/db/version_edit.h"
 
-#include "db/version_set.h"
-#include "util/coding.h"
+#include "leveldb/db/version_set.h"
+#include "leveldb/util/coding.h"
 
 namespace leveldb {
 
@@ -98,7 +98,7 @@ static bool GetInternalKey(Slice* input, InternalKey* dst) {
 static bool GetLevel(Slice* input, int* level) {
   uint32_t v;
   if (GetVarint32(input, &v) &&
-      v < config::kNumLevels) {
+      v < (int)config::kNumLevels) {
     *level = v;
     return true;
   } else {

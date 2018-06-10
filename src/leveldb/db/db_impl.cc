@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include "db/db_impl.h"
+#include "leveldb/db/db_impl.h"
 
 #include <algorithm>
 #include <set>
@@ -10,28 +10,28 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <vector>
-#include "db/builder.h"
-#include "db/db_iter.h"
-#include "db/dbformat.h"
-#include "db/filename.h"
-#include "db/log_reader.h"
-#include "db/log_writer.h"
-#include "db/memtable.h"
-#include "db/table_cache.h"
-#include "db/version_set.h"
-#include "db/write_batch_internal.h"
+#include "leveldb/db/builder.h"
+#include "leveldb/db/db_iter.h"
+#include "leveldb/db/dbformat.h"
+#include "leveldb/db/filename.h"
+#include "leveldb/db/log_reader.h"
+#include "leveldb/db/log_writer.h"
+#include "leveldb/db/memtable.h"
+#include "leveldb/db/table_cache.h"
+#include "leveldb/db/version_set.h"
+#include "leveldb/db/write_batch_internal.h"
 #include "leveldb/db.h"
 #include "leveldb/env.h"
 #include "leveldb/status.h"
 #include "leveldb/table.h"
 #include "leveldb/table_builder.h"
-#include "port/port.h"
-#include "table/block.h"
-#include "table/merger.h"
-#include "table/two_level_iterator.h"
-#include "util/coding.h"
-#include "util/logging.h"
-#include "util/mutexlock.h"
+#include "leveldb/port/port.h"
+#include "leveldb/table/block.h"
+#include "leveldb/table/merger.h"
+#include "leveldb/table/two_level_iterator.h"
+#include "leveldb/util/coding.h"
+#include "leveldb/util/logging.h"
+#include "leveldb/util/mutexlock.h"
 
 namespace leveldb {
 
@@ -1359,7 +1359,7 @@ bool DBImpl::GetProperty(const Slice& property, std::string* value) {
     in.remove_prefix(strlen("num-files-at-level"));
     uint64_t level;
     bool ok = ConsumeDecimalNumber(&in, &level) && in.empty();
-    if (!ok || level >= config::kNumLevels) {
+    if (!ok || level >= (uint64_t)config::kNumLevels) {
       return false;
     } else {
       char buf[100];

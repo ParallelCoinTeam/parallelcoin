@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include "db/log_writer.h"
+#include "leveldb/db/log_writer.h"
 
 #include <stdint.h>
 #include "leveldb/env.h"
-#include "util/coding.h"
-#include "util/crc32c.h"
+#include "leveldb/util/coding.h"
+#include "leveldb/util/crc32c.h"
 
 namespace leveldb {
 namespace log {
@@ -74,7 +74,7 @@ Status Writer::AddRecord(const Slice& slice) {
 
 Status Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n) {
   assert(n <= 0xffff);  // Must fit in two bytes
-  assert(block_offset_ + kHeaderSize + n <= kBlockSize);
+  assert(block_offset_ + kHeaderSize + n <= (int)kBlockSize);
 
   // Format the header
   char buf[kHeaderSize];

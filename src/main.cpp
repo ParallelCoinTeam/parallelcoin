@@ -4964,7 +4964,7 @@ void static ScryptMiner(CWallet *pwallet)
         }
     }
 }
-
+/* NOT USED
 void static GenericMiner(CWallet *pwallet, int algo)
 {
     // Each thread has its own key and counter
@@ -5065,7 +5065,7 @@ void static GenericMiner(CWallet *pwallet, int algo)
         }
     } 
 }
-
+*/
 void static ThreadBitcoinMiner(CWallet *pwallet)
 {
     printf("Parallelcoin miner started\n");
