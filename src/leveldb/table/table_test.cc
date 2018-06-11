@@ -6,19 +6,19 @@
 
 #include <map>
 #include <string>
-#include "leveldb/db/dbformat.h"
-#include "leveldb/db/memtable.h"
-#include "leveldb/db/write_batch_internal.h"
+#include "db/dbformat.h"
+#include "db/memtable.h"
+#include "db/write_batch_internal.h"
 #include "leveldb/db.h"
 #include "leveldb/env.h"
 #include "leveldb/iterator.h"
 #include "leveldb/table_builder.h"
-#include "leveldb/table/block.h"
-#include "leveldb/table/block_builder.h"
-#include "leveldb/table/format.h"
-#include "leveldb/util/random.h"
-#include "leveldb/util/testharness.h"
-#include "leveldb/util/testutil.h"
+#include "table/block.h"
+#include "table/block_builder.h"
+#include "table/format.h"
+#include "util/random.h"
+#include "util/testharness.h"
+#include "util/testutil.h"
 
 namespace leveldb {
 

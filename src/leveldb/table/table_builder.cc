@@ -9,11 +9,11 @@
 #include "leveldb/env.h"
 #include "leveldb/filter_policy.h"
 #include "leveldb/options.h"
-#include "leveldb/table/block_builder.h"
-#include "leveldb/table/filter_block.h"
-#include "leveldb/table/format.h"
-#include "leveldb/util/coding.h"
-#include "leveldb/util/crc32c.h"
+#include "table/block_builder.h"
+#include "table/filter_block.h"
+#include "table/format.h"
+#include "util/coding.h"
+#include "util/crc32c.h"
 
 namespace leveldb {
 

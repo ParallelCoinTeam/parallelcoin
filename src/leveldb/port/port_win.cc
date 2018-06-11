@@ -28,7 +28,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include "leveldb/port/port_win.h"
+#include "port/port_win.h"
 
 #include <windows.h>
 #include <cassert>

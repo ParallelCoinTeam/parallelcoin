@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "leveldb/db/log_format.h"
+#include "db/log_format.h"
 #include "leveldb/slice.h"
 #include "leveldb/status.h"
 

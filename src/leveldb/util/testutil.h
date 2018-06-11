@@ -7,7 +7,7 @@
 
 #include "leveldb/env.h"
 #include "leveldb/slice.h"
-#include "leveldb/util/random.h"
+#include "util/random.h"
 
 namespace leveldb {
 namespace test {

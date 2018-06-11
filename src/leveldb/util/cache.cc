@@ -7,9 +7,9 @@
 #include <stdlib.h>
 
 #include "leveldb/cache.h"
-#include "leveldb/port/port.h"
-#include "leveldb/util/hash.h"
-#include "leveldb/util/mutexlock.h"
+#include "port/port.h"
+#include "util/hash.h"
+#include "util/mutexlock.h"
 
 namespace leveldb {
 

@@ -5,8 +5,8 @@
 #include "leveldb/cache.h"
 
 #include <vector>
-#include "leveldb/util/coding.h"
-#include "leveldb/util/testharness.h"
+#include "util/coding.h"
+#include "util/testharness.h"
 
 namespace leveldb {
 
