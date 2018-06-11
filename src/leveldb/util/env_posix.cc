@@ -23,10 +23,10 @@
 #endif
 #include "leveldb/env.h"
 #include "leveldb/slice.h"
-#include "leveldb/port/port.h"
-#include "leveldb/util/logging.h"
-#include "leveldb/util/mutexlock.h"
-#include "leveldb/util/posix_logger.h"
+#include "port/port.h"
+#include "util/logging.h"
+#include "util/mutexlock.h"
+#include "util/posix_logger.h"
 
 namespace leveldb {
 

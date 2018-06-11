@@ -3,9 +3,9 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 #include <stdio.h>
-#include "leveldb/db/dbformat.h"
-#include "leveldb/port/port.h"
-#include "leveldb/util/coding.h"
+#include "db/dbformat.h"
+#include "port/port.h"
+#include "util/coding.h"
 
 namespace leveldb {
 

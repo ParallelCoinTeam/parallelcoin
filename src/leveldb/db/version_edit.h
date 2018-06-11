@@ -8,7 +8,7 @@
 #include <set>
 #include <utility>
 #include <vector>
-#include "leveldb/db/dbformat.h"
+#include "db/dbformat.h"
 
 namespace leveldb {
 

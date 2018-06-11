@@ -5,18 +5,18 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "leveldb/db/db_impl.h"
-#include "leveldb/db/version_set.h"
+#include "db/db_impl.h"
+#include "db/version_set.h"
 #include "leveldb/cache.h"
 #include "leveldb/db.h"
 #include "leveldb/env.h"
 #include "leveldb/write_batch.h"
-#include "leveldb/port/port.h"
-#include "leveldb/util/crc32c.h"
-#include "leveldb/util/histogram.h"
-#include "leveldb/util/mutexlock.h"
-#include "leveldb/util/random.h"
-#include "leveldb/util/testutil.h"
+#include "port/port.h"
+#include "util/crc32c.h"
+#include "util/histogram.h"
+#include "util/mutexlock.h"
+#include "util/random.h"
+#include "util/testutil.h"
 
 // Comma-separated list of operations to run in the specified order
 //   Actual benchmarks:

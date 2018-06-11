@@ -10,9 +10,9 @@
 
 #include "leveldb/env.h"
 
-#include "leveldb/port/port.h"
+#include "port/port.h"
 #include "leveldb/slice.h"
-#include "leveldb/util/logging.h"
+#include "util/logging.h"
 
 #include <shlwapi.h>
 #include <process.h>

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-#include "leveldb/db/memtable.h"
-#include "leveldb/db/dbformat.h"
+#include "db/memtable.h"
+#include "db/dbformat.h"
 #include "leveldb/comparator.h"
 #include "leveldb/env.h"
 #include "leveldb/iterator.h"
-#include "leveldb/util/coding.h"
+#include "util/coding.h"
 
 namespace leveldb {
 
