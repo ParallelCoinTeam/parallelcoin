@@ -11,11 +11,6 @@ parallelcoin-qt
 src/parallelcoind
 Makefile
 qrc_bitcoin.cpp
-src/openssl-1.0.1u/Makefile.bak
-src/openssl-1.0.1u/libcrypto.a
-src/openssl-1.0.1u/stBc8n0c
-src/openssl-1.0.1u/crypto/buildinf.h
-src/openssl-1.0.1u/crypto/opensslconf.h.bak
-src/openssl-1.0.1u/tools/c_rehash.bak
 src/.flatpak-builder
 src/build-dir
+src/parallelcoind
