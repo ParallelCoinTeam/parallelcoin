@@ -8,7 +8,7 @@ build/
 parallelcoind
 Makefile
 parallelcoin-qt
-src/parallelcoind
+parallelcoind
 Makefile
 qrc_bitcoin.cpp
 src/.flatpak-builder
