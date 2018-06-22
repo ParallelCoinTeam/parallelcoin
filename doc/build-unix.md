@@ -90,6 +90,8 @@ Install `downgrade` from the AUR (`aurman` is recommended) and downgrade `boost`
 
 Go into the directory `src/openssl-1.0.1u` and run `./config` and then `make -j$(nproc) && sudo make install` to install the correct version of openssl (dependency is quite outdated)
 
+Install `db4.8` for berkeleydb.
+
 Other than that, the standard `base-devel` toolchain is required.
 
 Dependency Build Instructions: Gentoo
