@@ -1,0 +1,21 @@
+{
+	"onDidClearBookmarkEmitter": {},
+	"onDidClearAllBookmarksEmitter": {},
+	"onDidAddBookmarkEmitter": {},
+	"onDidRemoveBookmarkEmitter": {},
+	"onDidUpdateBookmarkEmitter": {},
+	"bookmarks": [
+		{
+			"fsPath": "$ROOTPATH$/src/init.cpp",
+			"bookmarks": [
+				319
+			]
+		},
+		{
+			"fsPath": "$ROOTPATH$/src/bitcoind.cpp",
+			"bookmarks": [
+				26
+			]
+		}
+	]
+}
