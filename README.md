@@ -22,3 +22,10 @@ License
 
 Parallelcoin is released under the terms of the MIT license. See `COPYING` for more
 information or see http://opensource.org/licenses/MIT.
+
+Building
+--------
+
+A full GNU C/C++ toolchain, Qt5 headers and BerkeleyDB 4.8 are required to build parallelcoind and parallelcoin-qt. Miniupnpc is optional but recommended, it is enabled by default in the build.
+
+This branch of the repository only the linux build has been tested and there is a script in the `src/` directory called `linux-build.sh` which builds everything, installs the desktop files for the GUI wallet and then cleans up after itself.
