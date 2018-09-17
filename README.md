@@ -1,4 +1,4 @@
-[![Release](https://img.shields.io/gitlab/release/parallelcoin/parallelcoin.svg?style=flat-square)](https://gitlab.com/parallelcointeam/parallelcoin/releases/latest)
+<!-- [![Release](https://img.shields.io/gitlab/release/parallelcoin/parallelcoin.svg?style=flat-square)](https://gitlab.com/parallelcointeam/parallelcoin/releases/latest) -->
 
 Parallelcoin integration/staging tree
 ====================================
