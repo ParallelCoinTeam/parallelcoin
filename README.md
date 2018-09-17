@@ -6,7 +6,7 @@ Parallelcoin integration/staging tree
 Copyright (c) 2009-2014 Bitcoin Developers,
 Copyright (c) 2013-2015 Parallelcoin Developers
 
-Parallelcoin v1.2.0.0
+Parallelcoin v1.2.1.2
 
 What is Parallelcoin?
 --------------------
