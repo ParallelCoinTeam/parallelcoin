@@ -13,6 +13,8 @@ qmake
 make -j$(nproc)
 echo "Installing (you will need to enter your password for sudo)"
 sudo cp parallelcoind parallelcoin-qt /usr/local/bin/
+sudo cp parallelcoind.service /etc/systemd/system/
+sed "s/####/`whoami`/g"
 cp parallelcoin-qt.desktop $HOME/.local/share/applications/
 cp qt/res/images/Wallet_Logo.png $HOME/.local/share/icons/parallelcoin.png
 echo "cleaning up"

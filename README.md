@@ -43,3 +43,5 @@ On Arch Linux this means you will need these packages:
     qt5 (select all when asked which packages to install)
 
 This branch of the repository only the linux build has been tested and there is a script in the `src/` directory called `linux-build.sh` which builds everything, installs the desktop files for the GUI wallet and then cleans up after itself.
+
+The installer also places a systemd service file to run the parallelcoin client as a service. Note that if it is running this way the Qt client will refuse to run without further configuration (maybe?)
