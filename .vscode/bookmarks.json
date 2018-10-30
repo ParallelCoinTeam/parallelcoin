@@ -1,21 +1,22 @@
-{
-	"onDidClearBookmarkEmitter": {},
-	"onDidClearAllBookmarksEmitter": {},
-	"onDidAddBookmarkEmitter": {},
-	"onDidRemoveBookmarkEmitter": {},
-	"onDidUpdateBookmarkEmitter": {},
-	"bookmarks": [
-		{
-			"fsPath": "$ROOTPATH$/src/init.cpp",
-			"bookmarks": [
-				319
-			]
-		},
-		{
-			"fsPath": "$ROOTPATH$/src/bitcoind.cpp",
-			"bookmarks": [
-				26
-			]
-		}
-	]
-}
+[
+	{
+		"path": "$ROOTPATH$/src/main.cpp",
+		"bookmarks": [
+			{
+				"line": 1259,
+				"column": 2,
+				"label": ""
+			},
+			{
+				"line": 1332,
+				"column": 8,
+				"label": ""
+			},
+			{
+				"line": 1384,
+				"column": 0,
+				"label": ""
+			}
+		]
+	}
+]
