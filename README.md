@@ -20,7 +20,7 @@
 >
 > The final piece is, along with the short average block time at 9 seconds, dramatically disadvantages efficiency improvements that increase startup-latency in a trade-off that does not work with much shorter blocks, the initial CPU miner and custom built reliable UDP, with forward error correction, running a mining work delivery system that aims to further reduce the response time to new blocks.
 >
-> As a whole, this arrangement of 
+> As a whole, this arrangement of averagers causes it to be unproductive to attempt to specialise, as well, as all of the algorithms seek to maintain their same target and frequency staying in synchrony, it creates a complex equilibrium that dampens resonance and smooths out the big bumps, not slowing or speeding up too quickly and distributing this change in distribution between the algorithms in naturally unpredictable ways.
 > 
 > Initial tests show that this complex unified and partially separating difficulty adjustment achieves a divergence under 20% from recent average times from target and should produce a reduced long-range divergence - as this old server here in this repository has, over the time since genesis in early 2014, has slowly stretched out towards 12.5 minute blocks.
 > 
