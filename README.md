@@ -4,6 +4,8 @@
 >
 > Herein lies the most up to date version of the original Parallelcoin server, mainly updated to more easily build on current versions of Linux. 
 >
+> ## Universal Binaries now available!
+>
 > Note that there is now available **AppImage universal binaries** of the [wallet and full node available](https://github.com/parallelcointeam/parallelcoin/releases)
 
 > #$# Where is the current development version?
