@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/util/hdkeychain"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
 
 func TestPoolEnsureUsedAddr(	t *testing.T) {

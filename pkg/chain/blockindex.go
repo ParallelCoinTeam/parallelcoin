@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	database "git.parallelcoin.io/dev/pod/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	database "github.com/parallelcointeam/parallelcoin/pkg/db"
 )
 
 // blockStatus is a bit field representing the validation state of the block.

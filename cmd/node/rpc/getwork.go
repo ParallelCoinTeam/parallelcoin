@@ -11,13 +11,13 @@ import (
    
    "github.com/conformal/fastsha256"
    
-   blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-   "git.parallelcoin.io/dev/pod/pkg/chain/fork"
-   chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-   "git.parallelcoin.io/dev/pod/pkg/chain/wire"
-   "git.parallelcoin.io/dev/pod/pkg/rpc/json"
-   "git.parallelcoin.io/dev/pod/pkg/util"
-   "git.parallelcoin.io/dev/pod/pkg/util/cl"
+   blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+   "github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+   "github.com/parallelcointeam/parallelcoin/pkg/util"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // Uint256Size is the number of bytes needed to represent an unsigned 256-bit

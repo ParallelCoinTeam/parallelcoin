@@ -1,7 +1,7 @@
 # wire
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/git.parallelcoin.io/dev/pod/wire)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/parallelcointeam/parallelcoin/wire)
 
 Package wire implements the bitcoin wire protocol. A comprehensive suite of tests with 100% test coverage is provided to ensure proper functionality.
 
@@ -10,7 +10,7 @@ This package has intentionally been designed so it can be used as a standalone p
 ## Installation and Updating
 
 ```bash
-$ go get -u git.parallelcoin.io/dev/pod/wire
+$ go get -u github.com/parallelcointeam/parallelcoin/wire
 ```
 
 ## Bitcoin Message Overview

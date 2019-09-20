@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/util/gcs"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
 
 type MockChainClient struct {

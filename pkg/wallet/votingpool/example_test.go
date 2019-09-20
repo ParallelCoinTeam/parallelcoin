@@ -8,15 +8,15 @@ import (
 	"path/filepath"
 	"time"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	wtxmgr "git.parallelcoin.io/dev/pod/pkg/chain/tx/mgr"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
-	_ "git.parallelcoin.io/dev/pod/pkg/wallet/db/bdb"
-	"git.parallelcoin.io/dev/pod/pkg/wallet/votingpool"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet/votingpool"
 )
 
 var (

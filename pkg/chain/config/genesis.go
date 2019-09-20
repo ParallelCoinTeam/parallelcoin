@@ -3,9 +3,9 @@ package chaincfg
 import (
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 )
 
 // genesisCoinbaseTx is the coinbase transaction for the genesis blocks for the main network, regression test network, and test network (version 3).

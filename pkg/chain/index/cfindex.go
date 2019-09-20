@@ -3,14 +3,14 @@ package indexers
 import (
 	"errors"
 
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	database "git.parallelcoin.io/dev/pod/pkg/db"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/gcs"
-	"git.parallelcoin.io/dev/pod/pkg/util/gcs/builder"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
 )
 
 const (

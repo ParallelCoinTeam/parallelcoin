@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	rpcclient "git.parallelcoin.io/dev/pod/pkg/rpc/client"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 func main() {

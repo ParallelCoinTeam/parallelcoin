@@ -9,8 +9,8 @@ import (
 
 	"github.com/urfave/cli"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 type Schema struct {

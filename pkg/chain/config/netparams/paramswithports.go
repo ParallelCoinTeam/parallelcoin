@@ -3,7 +3,7 @@ package netparams
 import (
 	"sync"
 	
-	chaincfg `git.parallelcoin.io/dev/pod/pkg/chain/config`
+	chaincfg `github.com/parallelcointeam/parallelcoin/pkg/chain/config`
 )
 
 // Params is used to group parameters for various networks such as the main network and test networks.

@@ -7,11 +7,11 @@ import (
    
    "github.com/jessevdk/go-flags"
    
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   "git.parallelcoin.io/dev/pod/pkg/chain/wire"
-   database "git.parallelcoin.io/dev/pod/pkg/db"
-   _ "git.parallelcoin.io/dev/pod/pkg/db/ffldb"
-   "git.parallelcoin.io/dev/pod/pkg/util"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+   database "github.com/parallelcointeam/parallelcoin/pkg/db"
+   _ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+   "github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 const (

@@ -5,10 +5,10 @@ import (
 
 	"github.com/urfave/cli"
 
-	"git.parallelcoin.io/dev/pod/cmd/node"
-	"git.parallelcoin.io/dev/pod/cmd/node/rpc"
-	"git.parallelcoin.io/dev/pod/pkg/conte"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/cmd/node"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {

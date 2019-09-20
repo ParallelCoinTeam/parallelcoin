@@ -1,8 +1,8 @@
 package rpc
 
 import (
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/util/pkgs"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/pkgs"
 )
 
 type _dtype int

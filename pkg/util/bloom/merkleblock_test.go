@@ -5,10 +5,10 @@ import (
 	"encoding/hex"
 	"testing"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/bloom"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/bloom"
 )
 
 func TestMerkleBlock3(	t *testing.T) {

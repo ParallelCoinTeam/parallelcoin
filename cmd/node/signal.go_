@@ -5,7 +5,7 @@ import (
 	"os/signal"
 	"runtime/trace"
 
-	cl "git.parallelcoin.io/dev/pod/pkg/util/cl"
+	cl "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // shutdownRequestChannel is used to initiate shutdown from one of the subsystems using the same code paths as when an interrupt signal is received.

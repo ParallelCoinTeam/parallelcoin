@@ -7,7 +7,7 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   "git.parallelcoin.io/dev/pod/pkg/chain/wire"
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 )
 
 // genTestTx creates a random transaction for uses within test cases.

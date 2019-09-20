@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"sort"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 )
 
 // Provides functions for sorting tx inputs and outputs according to BIP 69

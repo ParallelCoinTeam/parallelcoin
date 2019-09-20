@@ -6,9 +6,9 @@
 //  import (
 //          "flag"
 //          "fmt"
-//          "git.parallelcoin.io/dev/pod/pkg/util/cl"
-//          "git.parallelcoin.io/dev/pod/pkg/util"
-//          "git.parallelcoin.io/dev/pod/pkg/chain/config"
+//          "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+//          "github.com/parallelcointeam/parallelcoin/pkg/util"
+//          "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
 //  )
 //  var testnet = flag.Bool("testnet", false, "operate on the testnet Bitcoin network")
 //  // By default (without -testnet), use mainnet.

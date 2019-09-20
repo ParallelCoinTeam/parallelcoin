@@ -5,7 +5,7 @@ import (
 	"os"
 	"reflect"
 
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 // errSubTestFail is used to signal that a sub test returned false.

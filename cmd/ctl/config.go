@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"git.parallelcoin.io/dev/pod/pkg/rpc/json"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // unusableFlags are the command usage flags which this utility are not able to

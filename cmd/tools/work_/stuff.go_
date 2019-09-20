@@ -1,6 +1,6 @@
 package main
 
-import "git.parallelcoin.io/dev/pod/clog"
+import "github.com/parallelcointeam/parallelcoin/clog"
 
 var (
 	lf = &clog.Ftl.Chan

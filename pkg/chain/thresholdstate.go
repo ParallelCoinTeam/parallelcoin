@@ -3,7 +3,7 @@ package blockchain
 import (
 	"fmt"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 )
 
 // ThresholdState define the various threshold states used when voting on consensus changes.

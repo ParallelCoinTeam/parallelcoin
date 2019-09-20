@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // // TestHaveBlock tests the HaveBlock API to ensure proper functionality.

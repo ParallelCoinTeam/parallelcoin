@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/util/prompt"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/prompt"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 // A bunch of constants

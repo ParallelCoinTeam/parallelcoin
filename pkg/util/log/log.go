@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // defaultFlags specifies changes to the default logger behavior.  It is set

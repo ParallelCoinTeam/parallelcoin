@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // blockProgressLogger provides periodic logging for other services in order to show users progress of certain "actions" involving some or all current blocks. Ex: syncing to best chain, indexing all blocks, etc.

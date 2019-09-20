@@ -3,7 +3,7 @@ package votingpool_test
 import (
 	"testing"
 
-	vp "git.parallelcoin.io/dev/pod/pkg/wallet/votingpool"
+	vp "github.com/parallelcointeam/parallelcoin/pkg/wallet/votingpool"
 )
 
 // TestErrorCodeStringer tests that all error codes has a text

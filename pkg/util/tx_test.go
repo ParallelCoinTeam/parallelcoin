@@ -8,8 +8,8 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-   "git.parallelcoin.io/dev/pod/pkg/util"
+   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+   "github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // TestTx tests the API for Tx.

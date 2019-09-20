@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	btcjson "git.parallelcoin.io/dev/pod/pkg/rpc/json"
+	btcjson "github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
 )
 
 // TestPodExtCustomResults ensures any results that have custom marshalling work as intedned and unmarshal code of results are as expected.

@@ -3,7 +3,7 @@ package chaincfg
 import (
 	"strings"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 )
 
 // String returns the hostname of the DNS seed in human-readable form.

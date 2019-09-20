@@ -3,9 +3,9 @@ package util
 import (
    "golang.org/x/crypto/ripemd160"
    
-   "git.parallelcoin.io/dev/pod/pkg/util/base58"
-   "git.parallelcoin.io/dev/pod/pkg/util/bech32"
-   ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/base58"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/bech32"
+   ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 // SetBlockBytes sets the internal serialized block byte buffer to the passed buffer.  It is used to inject errors and is only available to the test package.

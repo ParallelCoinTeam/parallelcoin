@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	. "git.parallelcoin.io/dev/pod/pkg/chain/config"
+	. "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
 )
 
 // Define some of the required parameters for a user-registered network.  This is necessary to test the registration of and lookup of encoding magics from the network.

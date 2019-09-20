@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 )
 
 // addrIndexBucket provides a mock address index database bucket by implementing the internalBucket interface.

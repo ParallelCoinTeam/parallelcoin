@@ -5,10 +5,10 @@ import (
 	"math/big"
 	"time"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 )
 
 // newHashFromStr converts the passed big-endian hex string into a wire.Hash.  It only differs from the one available in chainhash in that it panics on an error since it will only (and must only) be called with hard-coded, and therefore known good, hashes.

@@ -1,12 +1,12 @@
 package addresses
 
 import (
-	"git.parallelcoin.io/dev/pod/app/save"
-	"git.parallelcoin.io/dev/pod/cmd/node/state"
-	"git.parallelcoin.io/dev/pod/pkg/pod"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/wallet"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
+	"github.com/parallelcointeam/parallelcoin/app/save"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
+	"github.com/parallelcointeam/parallelcoin/pkg/pod"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
 
 func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Config) {

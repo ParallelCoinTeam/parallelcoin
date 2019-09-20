@@ -11,15 +11,15 @@ import (
 	"runtime"
 	"time"
 
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   "git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 const (

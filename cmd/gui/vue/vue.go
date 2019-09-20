@@ -3,16 +3,16 @@ package vue
 import (
 	"encoding/base64"
 	"fmt"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/comp"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/core"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/core"
 
 	"github.com/zserge/webview"
 
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/alert"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/comp/conf"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/comp/lib"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/db"
-	"git.parallelcoin.io/dev/pod/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/alert"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/conf"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/lib"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 )
 
 func GetDuoVUE(cx *conte.Xt) *DuoVUE {

@@ -3,9 +3,9 @@ package txscript
 import (
 	"fmt"
 
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   "git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // ScriptClass is an enumeration for the list of standard types of script.

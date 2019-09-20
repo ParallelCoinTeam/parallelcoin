@@ -7,14 +7,14 @@ import (
 	"sync"
 	"time"
 
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-	`git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/mining"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // CPUMiner provides facilities for solving blocks (mining) using the CPU in a

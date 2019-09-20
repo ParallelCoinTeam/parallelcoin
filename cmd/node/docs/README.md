@@ -54,7 +54,7 @@ It properly downloads, validates, and serves the block chain using the exact rul
 
 It also properly relays newly mined blocks, maintains a transaction pool, and relays individual transactions that have not yet made it into a block. It ensures all individual transactions admitted to the pool follow the rules required by the block chain and also includes more strict checks which filter transactions based on miner requirements ("standard" transactions).
 
-One key difference between pod and Bitcoin Core is that pod does _NOT_ include wallet functionality and this was a very intentional design decision. See the blog entry [here](https://blog.conformal.com/pod-not-your-moms-bitcoin-daemon) for more details. This means you can't actually make or receive payments directly with pod. That functionality is provided by the [btcwallet](https://git.parallelcoin.io/dev/pod/walletmain).
+One key difference between pod and Bitcoin Core is that pod does _NOT_ include wallet functionality and this was a very intentional design decision. See the blog entry [here](https://blog.conformal.com/pod-not-your-moms-bitcoin-daemon) for more details. This means you can't actually make or receive payments directly with pod. That functionality is provided by the [btcwallet](https://github.com/parallelcointeam/parallelcoin/walletmain).
 
 <a name="GettingStarted" />
 
@@ -70,7 +70,7 @@ The first step is to install pod. See one of the following sections for details 
 
 **2.1.1 Windows Installation**<br />
 
-- Install the MSI available at: https://git.parallelcoin.io/dev/pod/releases
+- Install the MSI available at: https://github.com/parallelcointeam/parallelcoin/releases
 
 - Launch pod from the Start Menu
 
@@ -93,8 +93,8 @@ NOTE: The `GOROOT` and `GOPATH` above must not be the same path. It is recommend
 
 ```bash
 $ go get -u github.com/Masterminds/glide
-$ git clone https://git.parallelcoin.io/dev/pod $GOPATH/src/git.parallelcoin.io/dev/pod
-$ cd $GOPATH/src/git.parallelcoin.io/dev/pod
+$ git clone https://github.com/parallelcointeam/parallelcoin $GOPATH/src/github.com/parallelcointeam/parallelcoin
+$ cd $GOPATH/src/github.com/parallelcointeam/parallelcoin
 $ glide install
 $ go install . ./cmd/...
 ```
@@ -108,7 +108,7 @@ $ go install . ./cmd/...
 - Run the following commands to update pod, all dependencies, and install it:
 
 ```bash
-$ cd $GOPATH/src/git.parallelcoin.io/dev/pod
+$ cd $GOPATH/src/github.com/parallelcointeam/parallelcoin
 $ git pull && glide install
 $ go install . ./cmd/...
 ```
@@ -129,7 +129,7 @@ $ go install . ./cmd/...
 
 **2.2 Configuration**
 
-pod has a number of [configuration](http://godoc.org/git.parallelcoin.io/dev/pod) options, which can be viewed by running: `$ pod --help`.
+pod has a number of [configuration](http://godoc.org/github.com/parallelcointeam/parallelcoin) options, which can be viewed by running: `$ pod --help`.
 
 <a name="BtcctlConfig" />
 
@@ -211,19 +211,19 @@ Typically pod will run and start downloading the block chain with no extra confi
 
 **3.1.1 bootstrap.dat**
 
-- [Using bootstrap.dat](https://git.parallelcoin.io/dev/pod/tree/master/docs/using_bootstrap_dat.md)
+- [Using bootstrap.dat](https://github.com/parallelcointeam/parallelcoin/tree/master/docs/using_bootstrap_dat.md)
 
 <a name="NetworkConfig" />
 
 **3.1.2 Network Configuration**
 
-- [What Ports Are Used by Default?](https://git.parallelcoin.io/dev/pod/tree/master/docs/default_ports.md)
+- [What Ports Are Used by Default?](https://github.com/parallelcointeam/parallelcoin/tree/master/docs/default_ports.md)
 
-- [How To Listen on Specific Interfaces](https://git.parallelcoin.io/dev/pod/tree/master/docs/configure_peer_server_listen_interfaces.md)
+- [How To Listen on Specific Interfaces](https://github.com/parallelcointeam/parallelcoin/tree/master/docs/configure_peer_server_listen_interfaces.md)
 
-- [How To Configure RPC Server to Listen on Specific Interfaces](https://git.parallelcoin.io/dev/pod/tree/master/docs/configure_rpc_server_listen_interfaces.md)
+- [How To Configure RPC Server to Listen on Specific Interfaces](https://github.com/parallelcointeam/parallelcoin/tree/master/docs/configure_rpc_server_listen_interfaces.md)
 
-- [Configuring pod with Tor](https://git.parallelcoin.io/dev/pod/tree/master/docs/configuring_tor.md)
+- [Configuring pod with Tor](https://github.com/parallelcointeam/parallelcoin/tree/master/docs/configuring_tor.md)
 
 <a name="Wallet" />
 
@@ -257,41 +257,41 @@ pod was intentionally developed without an integrated wallet for security reason
 
 <a name="ContributionGuidelines" />
 
-- [Code Contribution Guidelines](https://git.parallelcoin.io/dev/pod/tree/master/docs/code_contribution_guidelines.md)
+- [Code Contribution Guidelines](https://github.com/parallelcointeam/parallelcoin/tree/master/docs/code_contribution_guidelines.md)
 
 <a name="JSONRPCReference" />
 
-- [JSON-RPC Reference](https://git.parallelcoin.io/dev/pod/tree/master/docs/json_rpc_api.md)
+- [JSON-RPC Reference](https://github.com/parallelcointeam/parallelcoin/tree/master/docs/json_rpc_api.md)
 
-- [RPC Examples](https://git.parallelcoin.io/dev/pod/tree/master/docs/json_rpc_api.md#ExampleCode)
+- [RPC Examples](https://github.com/parallelcointeam/parallelcoin/tree/master/docs/json_rpc_api.md#ExampleCode)
 
 <a name="GoPackages" />
 
 - The btcsuite Bitcoin-related Go Packages:
 
-  - [btcrpcclient](https://git.parallelcoin.io/dev/pod/tree/master/rpcclient) - Implements a robust and easy to use Websocket-enabled Bitcoin JSON-RPC client
+  - [btcrpcclient](https://github.com/parallelcointeam/parallelcoin/tree/master/rpcclient) - Implements a robust and easy to use Websocket-enabled Bitcoin JSON-RPC client
 
-  - [btcjson](https://git.parallelcoin.io/dev/pod/tree/master/btcjson) - Provides an extensive API for the underlying JSON-RPC command and return values
+  - [btcjson](https://github.com/parallelcointeam/parallelcoin/tree/master/btcjson) - Provides an extensive API for the underlying JSON-RPC command and return values
 
-  - [wire](https://git.parallelcoin.io/dev/pod/tree/master/wire) - Implements the
+  - [wire](https://github.com/parallelcointeam/parallelcoin/tree/master/wire) - Implements the
     Bitcoin wire protocol
 
-  - [peer](https://git.parallelcoin.io/dev/pod/tree/master/peer) - Provides a common base for creating and managing Bitcoin network peers.
+  - [peer](https://github.com/parallelcointeam/parallelcoin/tree/master/peer) - Provides a common base for creating and managing Bitcoin network peers.
 
-  - [blockchain](https://git.parallelcoin.io/dev/pod/tree/master/blockchain) - Implements Bitcoin block handling and chain selection rules
+  - [blockchain](https://github.com/parallelcointeam/parallelcoin/tree/master/blockchain) - Implements Bitcoin block handling and chain selection rules
 
-  - [blockchain/fullblocktests](https://git.parallelcoin.io/dev/pod/tree/master/blockchain/fullblocktests) - Provides a set of block tests for testing the consensus validation rules
+  - [blockchain/fullblocktests](https://github.com/parallelcointeam/parallelcoin/tree/master/blockchain/fullblocktests) - Provides a set of block tests for testing the consensus validation rules
 
-  - [txscript](https://git.parallelcoin.io/dev/pod/tree/master/txscript) - Implements the Bitcoin transaction scripting language
+  - [txscript](https://github.com/parallelcointeam/parallelcoin/tree/master/txscript) - Implements the Bitcoin transaction scripting language
 
-  - [btcec](https://git.parallelcoin.io/dev/pod/tree/master/btcec) - Implements support for the elliptic curve cryptographic functions needed for the Bitcoin scripts
+  - [btcec](https://github.com/parallelcointeam/parallelcoin/tree/master/btcec) - Implements support for the elliptic curve cryptographic functions needed for the Bitcoin scripts
 
-  - [database](https://git.parallelcoin.io/dev/pod/tree/master/database) - Provides a database interface for the Bitcoin block chain
+  - [database](https://github.com/parallelcointeam/parallelcoin/tree/master/database) - Provides a database interface for the Bitcoin block chain
 
-  - [mempool](https://git.parallelcoin.io/dev/pod/tree/master/mempool) - Package mempool provides a policy-enforced pool of unmined bitcoin transactions.
+  - [mempool](https://github.com/parallelcointeam/parallelcoin/tree/master/mempool) - Package mempool provides a policy-enforced pool of unmined bitcoin transactions.
 
-  - [util](https://git.parallelcoin.io/dev/pod/util) - Provides Bitcoin-specific convenience functions and types
+  - [util](https://github.com/parallelcointeam/parallelcoin/util) - Provides Bitcoin-specific convenience functions and types
 
-  - [chainhash](https://git.parallelcoin.io/dev/pod/tree/master/chaincfg/chainhash) - Provides a generic hash type and associated functions that allows the specific hash algorithm to be abstracted.
+  - [chainhash](https://github.com/parallelcointeam/parallelcoin/tree/master/chaincfg/chainhash) - Provides a generic hash type and associated functions that allows the specific hash algorithm to be abstracted.
 
-  - [connmgr](https://git.parallelcoin.io/dev/pod/tree/master/connmgr) - Package connmgr implements a generic Bitcoin network connection manager.
+  - [connmgr](https://github.com/parallelcointeam/parallelcoin/tree/master/connmgr) - Package connmgr implements a generic Bitcoin network connection manager.

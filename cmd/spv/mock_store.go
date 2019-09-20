@@ -3,11 +3,11 @@ package spv
 import (
 	"fmt"
 
-	"git.parallelcoin.io/dev/pod/cmd/spv/headerfs"
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
+	"github.com/parallelcointeam/parallelcoin/cmd/spv/headerfs"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
 
 // mockBlockHeaderStore is an implementation of the BlockHeaderStore backed by

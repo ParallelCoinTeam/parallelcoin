@@ -4,10 +4,10 @@ import (
 	"os"
 	"time"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	database "git.parallelcoin.io/dev/pod/pkg/db"
-	_ "git.parallelcoin.io/dev/pod/pkg/db/ffldb"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
 )
 
 const (

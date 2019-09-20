@@ -1,8 +1,8 @@
 package blockchain
 
 import (
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 // In order to reduce the size of stored scripts, a domain specific compression algorithm is used which recognizes standard scripts and stores them using less bytes than the original script.  The compression algorithm used here was obtained from Bitcoin Core, so all credits for the algorithm go to it.

@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"strings"
 
-	wtxmgr "git.parallelcoin.io/dev/pod/pkg/chain/tx/mgr"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
-	"git.parallelcoin.io/dev/pod/pkg/wallet/chain"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 func (w *Wallet) handleChainNotifications() {

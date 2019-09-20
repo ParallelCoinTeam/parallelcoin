@@ -8,16 +8,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/cmd/node/mempool"
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	database "git.parallelcoin.io/dev/pod/pkg/db"
-	peerpkg "git.parallelcoin.io/dev/pod/pkg/peer"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/mempool"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	peerpkg "github.com/parallelcointeam/parallelcoin/pkg/peer"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 type (

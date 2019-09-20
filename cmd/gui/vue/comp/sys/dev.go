@@ -1,6 +1,6 @@
 package sys
 
-import "git.parallelcoin.io/dev/pod/cmd/gui/vue/mod"
+import "github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
 
 func Dev() mod.DuoVUEcomp {
 	return mod.DuoVUEcomp{

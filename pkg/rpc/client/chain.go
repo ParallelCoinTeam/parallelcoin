@@ -5,9 +5,9 @@ import (
 	"encoding/hex"
 	js "encoding/json"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/rpc/json"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
 )
 
 // FutureGetBestBlockHashResult is a future promise to deliver the result of a GetBestBlockAsync RPC invocation (or an applicable error).

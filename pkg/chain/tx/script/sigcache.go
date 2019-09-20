@@ -3,8 +3,8 @@ package txscript
 import (
 	"sync"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 // sigCacheEntry represents an entry in the SigCache. Entries within the

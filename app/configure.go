@@ -9,21 +9,21 @@ import (
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/app/apputil"
-	"git.parallelcoin.io/dev/pod/app/save"
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	"git.parallelcoin.io/dev/pod/pkg/conte"
-	"git.parallelcoin.io/dev/pod/pkg/discovery"
-	"git.parallelcoin.io/dev/pod/pkg/normalize"
-	"git.parallelcoin.io/dev/pod/pkg/peer/connmgr"
+	"github.com/parallelcointeam/parallelcoin/app/apputil"
+	"github.com/parallelcointeam/parallelcoin/app/save"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
+	"github.com/parallelcointeam/parallelcoin/pkg/normalize"
+	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
 
 	"github.com/btcsuite/go-socks/socks"
 
-	"git.parallelcoin.io/dev/pod/cmd/node"
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/cmd/node"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // Configure loads and sanitises the configuration from urfave/cli

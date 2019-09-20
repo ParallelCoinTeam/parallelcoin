@@ -4,11 +4,11 @@ package txauthor_test
 import (
 	"testing"
 
-	. "git.parallelcoin.io/dev/pod/pkg/chain/tx/author"
-	txrules "git.parallelcoin.io/dev/pod/pkg/chain/tx/rules"
-	txsizes "git.parallelcoin.io/dev/pod/pkg/chain/tx/sizes"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	. "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/author"
+	txrules "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/rules"
+	txsizes "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/sizes"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 func p2pkhOutputs(	amounts ...util.Amount) []*wire.TxOut {

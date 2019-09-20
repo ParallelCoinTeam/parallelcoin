@@ -6,9 +6,9 @@ import (
    "fmt"
    "time"
    
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-   walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 const (

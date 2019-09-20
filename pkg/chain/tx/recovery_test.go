@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/pkg/wallet"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
 
 // Harness holds the BranchRecoveryState being tested, the recovery window being

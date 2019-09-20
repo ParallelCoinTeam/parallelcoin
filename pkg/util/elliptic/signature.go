@@ -11,7 +11,7 @@ import (
 	"hash"
 	"math/big"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // Errors returned by canonicalPadding.

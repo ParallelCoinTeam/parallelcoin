@@ -3,13 +3,13 @@ package rpc
 import (
 	"sync/atomic"
 
-	"git.parallelcoin.io/dev/pod/cmd/node/mempool"
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	netsync "git.parallelcoin.io/dev/pod/pkg/chain/sync"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/peer"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/mempool"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	netsync "github.com/parallelcointeam/parallelcoin/pkg/chain/sync"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/peer"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // Peer provides a peer for use with the RPC server and implements the

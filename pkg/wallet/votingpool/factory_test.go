@@ -10,15 +10,15 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	wtxmgr "git.parallelcoin.io/dev/pod/pkg/chain/tx/mgr"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/hdkeychain"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 var (

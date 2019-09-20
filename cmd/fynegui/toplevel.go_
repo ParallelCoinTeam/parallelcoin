@@ -6,9 +6,9 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-	"git.parallelcoin.io/dev/pod/cmd/node/con"
-	"git.parallelcoin.io/dev/pod/pkg/logo"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/con"
+	"github.com/parallelcointeam/parallelcoin/pkg/logo"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // TopLevel is the the top level navigation of the interface

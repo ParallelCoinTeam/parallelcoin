@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"testing"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 // genRandomSig returns a random message, a signature of the message under the public key and the public key. This function is used to generate randomized test data.

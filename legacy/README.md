@@ -8,8 +8,8 @@
 >
 > Note that there is now available **AppImage universal binaries** of the [wallet and full node available](https://github.com/parallelcointeam/parallelcoin/releases)
 
-> ### Where is the [current development version](https://git.parallelcoin.io/dev/pod)?
-> The replacement, based on conformal's [btcd](https://github.com/btcsuite/btcd), is found at our **new** git host in the [pod](https://git.parallelcoin.io/dev/pod) repository.
+> ### Where is the [current development version](https://github.com/parallelcointeam/parallelcoin)?
+> The replacement, based on conformal's [btcd](https://github.com/btcsuite/btcd), is found at our **new** git host in the [pod](https://github.com/parallelcointeam/parallelcoin) repository.
 >
 > The new version is significantly improved in performance with the channel based logging system, tweaks in network parameters that reduce latency delays with the peer manager, and combines in fact three of the btcsuite applications, the CLI controller, the full node, and wallet server, which have been merged into one application, mirroring the design of the original, but brought into the present.
 > 

@@ -7,7 +7,7 @@ import (
 	"math/rand"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // AlgoParams are the identifying block version number and their minimum target bits

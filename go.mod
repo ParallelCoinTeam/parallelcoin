@@ -1,4 +1,4 @@
-module git.parallelcoin.io/dev/pod
+module github.com/parallelcointeam/parallelcoin
 
 go 1.13
 

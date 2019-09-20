@@ -3,7 +3,7 @@ package legacy
 import (
 	"errors"
 
-	"git.parallelcoin.io/dev/pod/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
 )
 
 // TODO(jrick): There are several error paths which 'replace' various errors

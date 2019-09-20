@@ -11,7 +11,7 @@ import (
 // Ine (cl.Ine) returns caller location in source code
 var Ine = func() string {
 	_, file, line, _ := runtime.Caller(1)
-	files := strings.Split(file, "git.parallelcoin.io/dev/pod/")
+	files := strings.Split(file, "github.com/parallelcointeam/parallelcoin/")
 	file = "./" + files[1]
 	return colorstring.Color(fmt.Sprintf(" [dim]%s:%d", file, line))
 }

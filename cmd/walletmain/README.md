@@ -30,7 +30,7 @@ encryption will extend to transactions as well.
 btcwallet is not an SPV client and requires connecting to a local or
 remote pod instance for asynchronous blockchain queries and
 notifications over websockets.  Full pod installation instructions
-can be found [here](https://git.parallelcoin.io/dev/pod).  An alternative
+can be found [here](https://github.com/parallelcointeam/parallelcoin).  An alternative
 SPV mode that is compatible with pod and Bitcoin Core is planned for
 a future release.
 
@@ -60,9 +60,9 @@ Wallet clients can use one of two RPC servers:
 
 Install the latest MSIs available here:
 
-https://git.parallelcoin.io/dev/pod/releases
+https://github.com/parallelcointeam/parallelcoin/releases
 
-https://git.parallelcoin.io/dev/pod/walletmain/releases
+https://github.com/parallelcointeam/parallelcoin/walletmain/releases
 
 ### Windows/Linux/BSD/POSIX - Build from source
 
@@ -96,8 +96,8 @@ For a first time installation, the project and dependency sources can be
 obtained manually with `git` and `glide` (create directories as needed):
 
 ```
-git clone https://git.parallelcoin.io/dev/pod/walletmain $GOPATH/src/git.parallelcoin.io/dev/pod/walletmain
-cd $GOPATH/src/git.parallelcoin.io/dev/pod/walletmain
+git clone https://github.com/parallelcointeam/parallelcoin/walletmain $GOPATH/src/github.com/parallelcointeam/parallelcoin/walletmain
+cd $GOPATH/src/github.com/parallelcointeam/parallelcoin/walletmain
 glide install
 ```
 
@@ -105,7 +105,7 @@ To update an existing source tree, pull the latest changes and install the
 matching dependencies:
 
 ```
-cd $GOPATH/src/git.parallelcoin.io/dev/pod/walletmain
+cd $GOPATH/src/github.com/parallelcointeam/parallelcoin/walletmain
 git pull
 glide install
 ```
@@ -182,15 +182,15 @@ PS> $editor $env:LOCALAPPDATA\Btcwallet\btcwallet.conf
 
 Linux/BSD/POSIX (Installed from source):
 ```bash
-$ cp $GOPATH/src/git.parallelcoin.io/dev/pod/sample-pod.conf ~/.pod/pod.conf
-$ cp $GOPATH/src/git.parallelcoin.io/dev/pod/walletmain/sample-btcwallet.conf ~/.btcwallet/btcwallet.conf
+$ cp $GOPATH/src/github.com/parallelcointeam/parallelcoin/sample-pod.conf ~/.pod/pod.conf
+$ cp $GOPATH/src/github.com/parallelcointeam/parallelcoin/walletmain/sample-btcwallet.conf ~/.btcwallet/btcwallet.conf
 $ $EDITOR ~/.pod/pod.conf
 $ $EDITOR ~/.btcwallet/btcwallet.conf
 ```
 
 ## Issue Tracker
 
-The [integrated github issue tracker](https://git.parallelcoin.io/dev/pod/walletmain/issues)
+The [integrated github issue tracker](https://github.com/parallelcointeam/parallelcoin/walletmain/issues)
 is used for this project.
 
 ## GPG Verification Key

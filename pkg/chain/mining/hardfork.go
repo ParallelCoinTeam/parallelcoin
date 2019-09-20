@@ -1,13 +1,13 @@
 package mining
 
 import (
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   "git.parallelcoin.io/dev/pod/pkg/chain/hardfork"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/hardfork"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // createHardForkSubsidyTx creates the transaction that must be on the hard fork activation block in place of a standard coinbase transaction. The main difference is the value set on this coinbase and that it pays out to multiple addresses, several being to the developers and to a 3 of 4 multisig to the development team for marketing and ongoing development costs

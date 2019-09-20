@@ -6,9 +6,9 @@ import (
 	"io"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MaxBlockHeaderPayload is the maximum number of bytes a block header can be. Version 4 bytes + Timestamp 4 bytes + Bits 4 bytes + Nonce 4 bytes + PrevBlock and MerkleRoot hashes.

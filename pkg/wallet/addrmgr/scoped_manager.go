@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"sync"
 
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   "git.parallelcoin.io/dev/pod/pkg/util"
-	ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
-	"git.parallelcoin.io/dev/pod/pkg/util/hdkeychain"
-	"git.parallelcoin.io/dev/pod/pkg/util/zero"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   "github.com/parallelcointeam/parallelcoin/pkg/util"
+	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/zero"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 // DerivationPath represents a derivation path from a particular key manager's

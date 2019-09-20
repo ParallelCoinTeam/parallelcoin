@@ -1,6 +1,6 @@
 package conf
 
-import "git.parallelcoin.io/dev/pod/cmd/gui/vue/mod"
+import "github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
 
 func GetPanels() map[string]mod.EJSlayout {
 	return map[string]mod.EJSlayout{

@@ -8,18 +8,18 @@ import (
 	"strings"
 	"time"
 	
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	database "git.parallelcoin.io/dev/pod/pkg/db"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	database "github.com/parallelcointeam/parallelcoin/pkg/db"
 	
 	"github.com/jessevdk/go-flags"
 	"github.com/urfave/cli"
 	
 	// This ensures the database drivers get registered
-	_ "git.parallelcoin.io/dev/pod/pkg/db/ffldb"
-	"git.parallelcoin.io/dev/pod/pkg/peer"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+	"github.com/parallelcointeam/parallelcoin/pkg/peer"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // Config defines the configuration options for pod. See loadConfig for details on the configuration load process.

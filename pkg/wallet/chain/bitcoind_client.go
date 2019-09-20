@@ -9,15 +9,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	wtxmgr "git.parallelcoin.io/dev/pod/pkg/chain/tx/mgr"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/rpc/json"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
 
 var (

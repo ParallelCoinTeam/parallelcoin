@@ -1,7 +1,7 @@
 # cpuminer
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/git.parallelcoin.io/dev/pod/mining/cpuminer)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/parallelcointeam/parallelcoin/mining/cpuminer)
 
 ## Overview
 
@@ -10,7 +10,7 @@ This package is currently a work in progress. It works without issue since it us
 ## Installation and Updating
 
 ```bash
-$ go get -u git.parallelcoin.io/dev/pod/mining/cpuminer
+$ go get -u github.com/parallelcointeam/parallelcoin/mining/cpuminer
 ```
 
 ## License

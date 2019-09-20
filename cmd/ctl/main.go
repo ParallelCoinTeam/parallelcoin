@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 	
-	"git.parallelcoin.io/dev/pod/pkg/conte"
-	"git.parallelcoin.io/dev/pod/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
 )
 
 // HelpPrint is the uninitialized help print function

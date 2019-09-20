@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MaxUserAgentLen is the maximum allowed length for the user agent field in a version message (MsgVersion).

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	btcjson "git.parallelcoin.io/dev/pod/pkg/rpc/json"
+	btcjson "github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
 )
 
 // TestChainSvrCustomResults ensures any results that have custom marshalling work as intended and unmarshal code of results are as expected.

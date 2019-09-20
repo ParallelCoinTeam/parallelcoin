@@ -11,7 +11,7 @@ import (
 	"os"
 	"testing"
 
-	walletdbtest "git.parallelcoin.io/dev/pod/pkg/wallet/db/test"
+	walletdbtest "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/test"
 )
 
 // TestInterface performs all interfaces tests for this database driver.
