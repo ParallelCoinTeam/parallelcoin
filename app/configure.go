@@ -30,7 +30,7 @@ import (
 func Configure(cx *conte.Xt) {
 	log <- cl.Trace{"configuring pod", cl.Ine()}
 	var err error
-
+	*cx.Config.DataDir = util.AppDataDir("pod", false)
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
 	cfg.Lock()
