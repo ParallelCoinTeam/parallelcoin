@@ -12,7 +12,7 @@ import (
    "github.com/btcsuite/golangcrypto/nacl/secretbox"
    "github.com/btcsuite/golangcrypto/scrypt"
    
-   "git.parallelcoin.io/dev/pod/pkg/util/zero"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/zero"
 )
 
 var (

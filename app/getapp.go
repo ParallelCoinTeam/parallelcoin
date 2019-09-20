@@ -7,14 +7,14 @@ import (
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
 
-	"git.parallelcoin.io/dev/pod/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 
-	"git.parallelcoin.io/dev/pod/app/apputil"
-	"git.parallelcoin.io/dev/pod/cmd/node"
-	"git.parallelcoin.io/dev/pod/cmd/node/mempool"
-	"git.parallelcoin.io/dev/pod/pkg/util/base58"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/util/hdkeychain"
+	"github.com/parallelcointeam/parallelcoin/app/apputil"
+	"github.com/parallelcointeam/parallelcoin/cmd/node"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/mempool"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
 )
 
 // getApp defines the pod app

@@ -12,13 +12,13 @@ import (
 	"fmt"
 	"math/big"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/base58"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 const (

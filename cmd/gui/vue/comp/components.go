@@ -1,12 +1,12 @@
 package comp
 
 import (
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/comp/panel"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/comp/part"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/comp/serv"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/comp/sys"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/db"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/mod"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/panel"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/part"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/serv"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/sys"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/db"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
 )
 
 func Components(d db.DuoVUEdb) (c []mod.DuoVUEcomp) {

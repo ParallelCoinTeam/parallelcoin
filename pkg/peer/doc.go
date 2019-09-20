@@ -105,6 +105,6 @@ This package provides extensive logging capabilities through the UseLogger funct
 
 Bitcoin Improvement Proposals
 
-This package supports all BIPS supported by the wire package. (https://godoc.org/git.parallelcoin.io/dev/pod/wire#hdr-Bitcoin_Improvement_Proposals)
+This package supports all BIPS supported by the wire package. (https://godoc.org/github.com/parallelcointeam/parallelcoin/wire#hdr-Bitcoin_Improvement_Proposals)
 */
 package peer

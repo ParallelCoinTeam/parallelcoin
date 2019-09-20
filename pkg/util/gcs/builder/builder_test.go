@@ -4,13 +4,13 @@ import (
 	"encoding/hex"
 	"testing"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/gcs"
-	"git.parallelcoin.io/dev/pod/pkg/util/gcs/builder"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
 )
 
 var (

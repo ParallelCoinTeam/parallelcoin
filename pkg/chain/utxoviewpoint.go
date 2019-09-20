@@ -3,11 +3,11 @@ package blockchain
 import (
 	"fmt"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	database "git.parallelcoin.io/dev/pod/pkg/db"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // txoFlags is a bitmask defining additional information and state for a

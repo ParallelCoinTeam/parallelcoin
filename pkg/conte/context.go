@@ -8,15 +8,15 @@ import (
 	scribble "github.com/nanobox-io/golang-scribble"
 	"github.com/urfave/cli"
 
-	"git.parallelcoin.io/dev/pod/cmd/node/rpc"
-	"git.parallelcoin.io/dev/pod/cmd/node/state"
-	`git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-	"git.parallelcoin.io/dev/pod/pkg/discovery"
-	"git.parallelcoin.io/dev/pod/pkg/pod"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/util/pkgs"
-	"git.parallelcoin.io/dev/pod/pkg/wallet"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
+	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
+	"github.com/parallelcointeam/parallelcoin/pkg/pod"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/pkgs"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
 
 type _dtype int

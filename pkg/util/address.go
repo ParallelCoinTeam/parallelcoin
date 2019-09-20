@@ -9,11 +9,11 @@ import (
    
    "golang.org/x/crypto/ripemd160"
    
-   chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   "git.parallelcoin.io/dev/pod/pkg/util/base58"
-   "git.parallelcoin.io/dev/pod/pkg/util/bech32"
-   ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
+   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   "github.com/parallelcointeam/parallelcoin/pkg/util/base58"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/bech32"
+   ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 // UnsupportedWitnessVerError describes an error where a segwit address being decoded has an unsupported witness version.

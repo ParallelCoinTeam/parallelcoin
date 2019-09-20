@@ -3,9 +3,9 @@ package wtxmgr
 import (
 	"fmt"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 // CreditRecord contains metadata regarding a transaction credit for a known

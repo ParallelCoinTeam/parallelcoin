@@ -2,7 +2,7 @@
 
 package wtxmgr
 
-import chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
+import chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 
 type graphNode struct {
 	value    *TxRecord

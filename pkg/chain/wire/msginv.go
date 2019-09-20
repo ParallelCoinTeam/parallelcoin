@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // defaultInvListAlloc is the default size used for the backing array for an inventory list.  The array will dynamically grow as needed, but this figure is intended to provide enough space for the max number of inventory vectors in a *typical* inventory message without needing to grow the backing array multiple times.  Technically, the list can grow to MaxInvPerMsg, but rather than using that large figure, this figure more accurately reflects the typical case.

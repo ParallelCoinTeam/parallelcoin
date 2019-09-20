@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/interrupt"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
 )
 
 func main() {

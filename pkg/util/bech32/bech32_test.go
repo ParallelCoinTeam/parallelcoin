@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/bech32"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/bech32"
 )
 
 func TestBech32(	t *testing.T) {

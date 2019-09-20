@@ -6,14 +6,14 @@ import (
 	"sort"
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/cmd/spv/headerfs"
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util/gcs"
-	"git.parallelcoin.io/dev/pod/pkg/util/gcs/builder"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	"github.com/parallelcointeam/parallelcoin/cmd/spv/headerfs"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 func decodeHashNoError(	str string) *chainhash.Hash {

@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	database "git.parallelcoin.io/dev/pod/pkg/db"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // dbType is the database type name for this driver.

@@ -3,7 +3,7 @@ package base58_test
 import (
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/base58"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
 )
 
 var checkEncodingStringTests = []struct {

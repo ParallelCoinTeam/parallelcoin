@@ -12,9 +12,9 @@ import (
 	
 	"github.com/btcsuite/go-socks/socks"
 	
-	"git.parallelcoin.io/dev/pod/pkg/conte"
-	"git.parallelcoin.io/dev/pod/pkg/pod"
-	"git.parallelcoin.io/dev/pod/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/pod"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
 )
 
 // newHTTPClient returns a new HTTP client that is configured according to the

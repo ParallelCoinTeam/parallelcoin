@@ -6,14 +6,14 @@ import (
 	"sync"
 	"time"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	database "git.parallelcoin.io/dev/pod/pkg/db"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 const (

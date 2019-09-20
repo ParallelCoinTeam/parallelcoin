@@ -1,7 +1,7 @@
 # peer
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/git.parallelcoin.io/dev/pod/peer)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/parallelcointeam/parallelcoin/peer)
 
 Package peer provides a common base for creating and managing bitcoin network peers.
 
@@ -60,12 +60,12 @@ A quick overview of the major features peer provides are as follows:
 ## Installation and Updating
 
 ```bash
-$ go get -u git.parallelcoin.io/dev/pod/peer
+$ go get -u github.com/parallelcointeam/parallelcoin/peer
 ```
 
 ## Examples
 
-- [New Outbound Peer Example](https://godoc.org/git.parallelcoin.io/dev/pod/peer#example-package--NewOutboundPeer)  
+- [New Outbound Peer Example](https://godoc.org/github.com/parallelcointeam/parallelcoin/peer#example-package--NewOutboundPeer)  
   Demonstrates the basic process for initializing and creating an outbound peer. Peers negotiate by exchanging version and verack messages. For demonstration, a simple handler for the version message is attached to the peer.
 
 ## License

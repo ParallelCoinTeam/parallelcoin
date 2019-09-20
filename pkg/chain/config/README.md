@@ -1,7 +1,7 @@
 # chaincfg
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/git.parallelcoin.io/dev/pod/chaincfg)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/parallelcointeam/parallelcoin/chaincfg)
 
 Package chaincfg defines chain configuration parameters for the three standard Parallelcoin networks and provides the ability for callers to define their own custom networks.
 
@@ -19,7 +19,7 @@ import (
 
 
 
-"git.parallelcoin.io/dev/pod/pkg/chain/config"
+"github.com/parallelcointeam/parallelcoin/pkg/chain/config"
 "git.parallelcoin.io/util"
 )
 var testnet = flag.Bool("testnet", false, "operate on the testnet Bitcoin network")
@@ -52,7 +52,7 @@ log.Fatal(err)
 ## Installation and Updating
 
 ```bash
-$ go get -u git.parallelcoin.io/dev/pod/chaincfg
+$ go get -u github.com/parallelcointeam/parallelcoin/chaincfg
 ```
 
 ## License

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"unicode"
 
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // TestAppDataDir tests the API for AppDataDir to ensure it gives expected results for various operating systems.

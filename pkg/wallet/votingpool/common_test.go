@@ -5,9 +5,9 @@ import (
 	"runtime"
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 func init() {

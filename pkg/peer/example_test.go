@@ -5,9 +5,9 @@ import (
 	"net"
 	"time"
 
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/peer"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/peer"
 )
 
 // mockRemotePeer creates a basic inbound peer listening on the simnet port for use with Example_peerConnection.  It does not return until the listner is active.

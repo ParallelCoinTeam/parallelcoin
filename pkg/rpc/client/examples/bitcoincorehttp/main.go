@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	rpcclient "git.parallelcoin.io/dev/pod/pkg/rpc/client"
+	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 )
 
 func main() {

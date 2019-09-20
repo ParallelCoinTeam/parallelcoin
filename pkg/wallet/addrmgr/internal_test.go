@@ -9,7 +9,7 @@ package waddrmgr
 import (
 	"errors"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/snacl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/snacl"
 )
 
 // // TstLatestMgrVersion makes the unexported latestMgrVersion variable available

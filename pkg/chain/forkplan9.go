@@ -8,9 +8,9 @@ import (
 
 	"github.com/VividCortex/ewma"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // CalcNextRequiredDifficultyPlan9 calculates the required difficulty for the

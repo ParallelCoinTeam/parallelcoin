@@ -5,11 +5,11 @@ import (
 
 	"github.com/urfave/cli"
 
-	"git.parallelcoin.io/dev/pod/app/apputil"
-	"git.parallelcoin.io/dev/pod/cmd/walletmain"
-	"git.parallelcoin.io/dev/pod/pkg/conte"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/wallet"
+	"github.com/parallelcointeam/parallelcoin/app/apputil"
+	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
 
 func walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {

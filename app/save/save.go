@@ -5,8 +5,8 @@ import (
    
    "github.com/pelletier/go-toml"
    
-   "git.parallelcoin.io/dev/pod/app/apputil"
-   "git.parallelcoin.io/dev/pod/pkg/pod"
+   "github.com/parallelcointeam/parallelcoin/app/apputil"
+   "github.com/parallelcointeam/parallelcoin/pkg/pod"
 )
 
 func Pod(c *pod.Config) (success bool) {

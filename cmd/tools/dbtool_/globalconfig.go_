@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/config"
-	"git.parallelcoin.io/dev/pod/pkg/db"
-	_ "git.parallelcoin.io/dev/pod/pkg/db/ffldb"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/db"
+	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 )
 
 var (

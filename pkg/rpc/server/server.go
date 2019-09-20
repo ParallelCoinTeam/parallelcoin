@@ -4,11 +4,11 @@
 // Full documentation of the API implemented by this package is maintained in a
 // language-agnostic document:
 //
-//   https://git.parallelcoin.io/dev/pod/walletmain/blob/master/rpc/documentation/api.md
+//   https://github.com/parallelcointeam/parallelcoin/walletmain/blob/master/rpc/documentation/api.md
 //
 // Any API changes must be performed according to the steps listed here:
 //
-//   https://git.parallelcoin.io/dev/pod/walletmain/blob/master/rpc/documentation/serverchanges.md
+//   https://github.com/parallelcointeam/parallelcoin/walletmain/blob/master/rpc/documentation/serverchanges.md
 package rpcserver
 
 import (
@@ -23,21 +23,21 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	rpcclient "git.parallelcoin.io/dev/pod/pkg/rpc/client"
-	pb "git.parallelcoin.io/dev/pod/pkg/rpc/walletrpc"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	cfgutil "git.parallelcoin.io/dev/pod/pkg/util/config"
-	"git.parallelcoin.io/dev/pod/pkg/util/hdkeychain"
-	"git.parallelcoin.io/dev/pod/pkg/util/zero"
-	"git.parallelcoin.io/dev/pod/pkg/wallet"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
-	"git.parallelcoin.io/dev/pod/pkg/wallet/chain"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
+	pb "github.com/parallelcointeam/parallelcoin/pkg/rpc/walletrpc"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	cfgutil "github.com/parallelcointeam/parallelcoin/pkg/util/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/zero"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 // Public API version constants

@@ -3,8 +3,8 @@
 package helpers
 
 import (
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // SumOutputValues sums up the list of TxOuts and returns an Amount.

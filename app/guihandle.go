@@ -10,14 +10,14 @@ import (
 
 	"github.com/urfave/cli"
 
-	"git.parallelcoin.io/dev/pod/cmd/gui"
-	"git.parallelcoin.io/dev/pod/cmd/node"
-	"git.parallelcoin.io/dev/pod/cmd/node/rpc"
-	"git.parallelcoin.io/dev/pod/cmd/walletmain"
-	"git.parallelcoin.io/dev/pod/pkg/conte"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/util/interrupt"
-	"git.parallelcoin.io/dev/pod/pkg/wallet"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui"
+	"github.com/parallelcointeam/parallelcoin/cmd/node"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
+	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {

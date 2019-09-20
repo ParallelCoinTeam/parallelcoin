@@ -9,12 +9,12 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-   chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-   txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-   "git.parallelcoin.io/dev/pod/pkg/util"
-   "git.parallelcoin.io/dev/pod/pkg/util/cl"
-   ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
+   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+   txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+   "github.com/parallelcointeam/parallelcoin/pkg/util"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+   ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 const dummyDir = ""

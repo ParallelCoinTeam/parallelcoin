@@ -4,13 +4,13 @@ import (
    "bytes"
    "time"
    
-   blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-   `git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-   chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-   "git.parallelcoin.io/dev/pod/pkg/chain/wire"
-   "git.parallelcoin.io/dev/pod/pkg/util"
-   "git.parallelcoin.io/dev/pod/pkg/util/cl"
-   walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+   blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+   "github.com/parallelcointeam/parallelcoin/pkg/util"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 type (

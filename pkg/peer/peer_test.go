@@ -10,10 +10,10 @@ import (
    
    "github.com/btcsuite/go-socks/socks"
    
-   chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-   chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-   "git.parallelcoin.io/dev/pod/pkg/chain/wire"
-   "git.parallelcoin.io/dev/pod/pkg/peer"
+   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+   "github.com/parallelcointeam/parallelcoin/pkg/peer"
 )
 
 // conn mocks a network connection by implementing the net.Conn interface.  It is used to test peer connection without actually opening a network connection.

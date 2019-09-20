@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/peer/addrmgr"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/peer/addrmgr"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // naTest is used to describe a test to be performed against the NetAddressKey method.

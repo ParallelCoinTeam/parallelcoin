@@ -4,7 +4,7 @@ import (
    "github.com/btcsuite/goleveldb/leveldb/iterator"
    "github.com/btcsuite/goleveldb/leveldb/util"
    
-   "git.parallelcoin.io/dev/pod/pkg/util/treap"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/treap"
 )
 
 // ldbTreapIter wraps a treap iterator to provide the additional functionality needed to satisfy the leveldb iterator.Iterator interface.

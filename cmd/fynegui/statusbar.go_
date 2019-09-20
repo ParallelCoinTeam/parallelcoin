@@ -7,10 +7,10 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
-	"git.parallelcoin.io/dev/pod/cmd/node/con"
-	"git.parallelcoin.io/dev/pod/cmd/node/rpc"
-	"git.parallelcoin.io/dev/pod/pkg/rpc/json"
-	"git.parallelcoin.io/dev/pod/pkg/rpc/legacy"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/con"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/legacy"
 )
 
 // Statusbar contains the controls to the statusbar

@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 	
-	`git.parallelcoin.io/dev/pod/pkg/chain/config/netparams`
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	rpcclient "git.parallelcoin.io/dev/pod/pkg/rpc/client"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 const (

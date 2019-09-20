@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/cmd/node/state"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // DefaultConnectTimeout is a reasonable 30 seconds

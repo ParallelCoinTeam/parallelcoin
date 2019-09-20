@@ -10,7 +10,7 @@ import (
    "github.com/btcsuite/goleveldb/leveldb/iterator"
    "github.com/btcsuite/goleveldb/leveldb/util"
    
-   "git.parallelcoin.io/dev/pod/pkg/util/treap"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/treap"
 )
 
 const (

@@ -1,9 +1,9 @@
 package blockchain
 
 import (
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // ContainsBlacklisted returns true if one of the given addresses

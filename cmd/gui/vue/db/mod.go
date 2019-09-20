@@ -5,7 +5,7 @@ package db
 
 import (
 	"fmt"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/mod"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
 
 	scribble "github.com/nanobox-io/golang-scribble"
 )

@@ -8,7 +8,7 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   "git.parallelcoin.io/dev/pod/pkg/util/cl"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // TestHeaders tests the MsgHeaders API.

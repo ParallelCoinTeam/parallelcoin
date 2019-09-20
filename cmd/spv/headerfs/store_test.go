@@ -14,11 +14,11 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-   "git.parallelcoin.io/dev/pod/pkg/chain/wire"
-   walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 func createTestBlockHeaderStore() (func(), walletdb.DB, string,

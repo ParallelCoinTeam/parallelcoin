@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
 )
 
 func main() {

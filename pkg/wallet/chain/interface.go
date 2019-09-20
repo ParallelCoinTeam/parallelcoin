@@ -3,11 +3,11 @@ package chain
 import (
 	"time"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	wtxmgr "git.parallelcoin.io/dev/pod/pkg/chain/tx/mgr"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
 
 // BackEnds returns a list of the available back ends.

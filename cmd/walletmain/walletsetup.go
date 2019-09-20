@@ -7,20 +7,20 @@ import (
 	"path/filepath"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/pod"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
-	"git.parallelcoin.io/dev/pod/pkg/util/legacy/keystore"
-	"git.parallelcoin.io/dev/pod/pkg/util/prompt"
-	"git.parallelcoin.io/dev/pod/pkg/wallet"
-	waddrmgr "git.parallelcoin.io/dev/pod/pkg/wallet/addrmgr"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/pod"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/legacy/keystore"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/prompt"
+	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 
 	// This initializes the bdb driver
-	_ "git.parallelcoin.io/dev/pod/pkg/wallet/db/bdb"
+	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
 )
 
 const slash = string(os.PathSeparator)

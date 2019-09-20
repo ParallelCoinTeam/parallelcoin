@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 )
 
 // mruInventoryMap provides a concurrency safe map that is limited to a maximum number of items with eviction for the oldest entry when the limit is exceeded.

@@ -24,15 +24,15 @@ import (
 	"github.com/dchest/blake256"
 	"golang.org/x/crypto/pbkdf2"
 
-	"git.parallelcoin.io/dev/pod/cmd/node/state"
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	"git.parallelcoin.io/dev/pod/pkg/chain/mining"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/pod"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/pod"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 const (

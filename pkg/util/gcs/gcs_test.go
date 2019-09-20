@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/gcs"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
 )
 
 var (

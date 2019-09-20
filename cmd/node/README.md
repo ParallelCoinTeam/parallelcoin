@@ -1,6 +1,6 @@
 ![](https://gitlab.com/parallelcoin/node/raw/master/assets/logo.png)
 
-# The Parallelcoin Node [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org) [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/git.parallelcoin.io/dev/pod/node)
+# The Parallelcoin Node [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org) [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/parallelcointeam/parallelcoin/node)
 
 Next generation full node for Parallelcoin, forked from [btcd](https://github.com/btcsuite/btcd)
 
@@ -36,7 +36,7 @@ After the upcoming hardfork, Parallelcoin will have the following features in it
 
 ### Wallet
 
-The pod has no RPC wallet functionality, only core chain functions. It is fully compliant with the original [parallelcoind](https://github.com/marcetin/parallelcoin) for these functions. For the wallet server, [mod](https://git.parallelcoin.io/dev/pod/walletmain), which works also with the CLI controller [podctl](https://git.parallelcoin.io/dev/pod/), it will be possible to send commands to both mod (wallet) and pod full node using the command line.
+The pod has no RPC wallet functionality, only core chain functions. It is fully compliant with the original [parallelcoind](https://github.com/marcetin/parallelcoin) for these functions. For the wallet server, [mod](https://github.com/parallelcointeam/parallelcoin/walletmain), which works also with the CLI controller [podctl](https://github.com/parallelcointeam/parallelcoin/), it will be possible to send commands to both mod (wallet) and pod full node using the command line.
 
 A Webview/Golang based GUI wallet will come a little later, following the release, and will be able to run on all platforms with with browser or supported built-in web application platforms, Blink and Webkit engines.
 
@@ -47,13 +47,13 @@ A Webview/Golang based GUI wallet will come a little later, following the releas
 For the main full node server:
 
 ```bash
-go get git.parallelcoin.io/dev/pod
+go get github.com/parallelcointeam/parallelcoin
 ```
 
 You probably will also want CLI client (can also speak to other bitcoin protocol RPC endpoints also):
 
 ```bash
-go get git.parallelcoin.io/dev/pod/cmd/podctl
+go get github.com/parallelcointeam/parallelcoin/cmd/podctl
 ```
 
 ## Requirements
@@ -66,7 +66,7 @@ go get git.parallelcoin.io/dev/pod/cmd/podctl
 
 When it is, it will be available here:
 
-https://git.parallelcoin.io/dev/pod/releases
+https://github.com/parallelcointeam/parallelcoin/releases
 
 #### Linux/BSD/MacOSX/POSIX - Build from Source
 
@@ -83,7 +83,7 @@ NOTE: The `GOROOT` and `GOPATH` above must not be the same path. It is recommend
 - Run the following commands to obtain pod, all dependencies, and install it:
 
 ```bash
-$ go get git.parallelcoin.io/dev/pod
+$ go get github.com/parallelcointeam/parallelcoin
 ```
 
 - pod (and utilities) will now be installed in `$GOPATH/bin`. If you did
@@ -101,7 +101,7 @@ Install a newer MSI
 - Run the following commands to update pod, all dependencies, and install it:
 
 ```bash
-$ cd $GOPATH/src/git.parallelcoin.io/dev/pod
+$ cd $GOPATH/src/github.com/parallelcointeam/parallelcoin
 $ git pull && glide install
 $ go install . ./cmd/...
 ```
@@ -126,12 +126,12 @@ Come and chat at our (discord server](https://discord.gg/nJKts94)
 
 ## Issue Tracker
 
-The [integrated github issue tracker](https://git.parallelcoin.io/dev/pod/issues)
+The [integrated github issue tracker](https://github.com/parallelcointeam/parallelcoin/issues)
 is used for this project.
 
 ## Documentation
 
-The documentation is a work-in-progress. It is located in the [docs](https://git.parallelcoin.io/dev/pod/tree/master/docs) folder.
+The documentation is a work-in-progress. It is located in the [docs](https://github.com/parallelcointeam/parallelcoin/tree/master/docs) folder.
 
 ## License
 

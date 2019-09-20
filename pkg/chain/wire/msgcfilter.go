@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 )
 
 // FilterType is used to represent a filter type.

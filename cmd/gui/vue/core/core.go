@@ -3,10 +3,10 @@ package core
 import (
 	"bytes"
 	"fmt"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/comp"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp"
 	"text/template"
 
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/db"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/db"
 )
 
 func CoreJs(d db.DuoVUEdb) string {

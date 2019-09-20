@@ -5,9 +5,9 @@ import (
 	js "encoding/json"
 	"errors"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	"git.parallelcoin.io/dev/pod/pkg/rpc/json"
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // FutureGenerateResult is a future promise to deliver the result of a GenerateAsync RPC invocation (or an applicable error).

@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	blockchain "git.parallelcoin.io/dev/pod/pkg/chain"
-	chaincfg "git.parallelcoin.io/dev/pod/pkg/chain/config"
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
-	txscript "git.parallelcoin.io/dev/pod/pkg/chain/tx/script"
-	"git.parallelcoin.io/dev/pod/pkg/chain/wire"
-	"git.parallelcoin.io/dev/pod/pkg/util"
-	ec "git.parallelcoin.io/dev/pod/pkg/util/elliptic"
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 // fakeChain is used by the pool harness to provide generated test utxos and

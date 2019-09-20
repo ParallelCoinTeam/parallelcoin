@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	chainhash "git.parallelcoin.io/dev/pod/pkg/chain/hash"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 )
 
 const (

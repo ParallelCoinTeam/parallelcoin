@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"runtime/debug"
 
-	"git.parallelcoin.io/dev/pod/app"
-	"git.parallelcoin.io/dev/pod/pkg/util/limits"
+	"github.com/parallelcointeam/parallelcoin/app"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/limits"
 )
 
 // Main is the main entry point for pod

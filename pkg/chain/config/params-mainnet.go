@@ -1,6 +1,6 @@
 package chaincfg
 
-import "git.parallelcoin.io/dev/pod/pkg/chain/wire"
+import "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 
 // MainNetParams defines the network parameters for the main Bitcoin network.
 var MainNetParams = Params{

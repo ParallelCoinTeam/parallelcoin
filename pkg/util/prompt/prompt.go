@@ -10,8 +10,8 @@ import (
    
    "github.com/btcsuite/golangcrypto/ssh/terminal"
    
-   "git.parallelcoin.io/dev/pod/pkg/util/hdkeychain"
-   "git.parallelcoin.io/dev/pod/pkg/util/legacy/keystore"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+   "github.com/parallelcointeam/parallelcoin/pkg/util/legacy/keystore"
 )
 
 // ProvideSeed is used to prompt for the wallet seed which maybe required during

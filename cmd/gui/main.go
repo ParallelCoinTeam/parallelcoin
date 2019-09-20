@@ -3,11 +3,11 @@
 package gui
 
 import (
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue"
-	"git.parallelcoin.io/dev/pod/cmd/gui/vue/comp"
-	"git.parallelcoin.io/dev/pod/pkg/conte"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	"git.parallelcoin.io/dev/pod/pkg/util/interrupt"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
 	"github.com/zserge/webview"
 	"sync"
 	"sync/atomic"

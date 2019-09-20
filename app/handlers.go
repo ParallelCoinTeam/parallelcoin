@@ -7,10 +7,10 @@ import (
 
 	"github.com/urfave/cli"
 
-	"git.parallelcoin.io/dev/pod/pkg/conte"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 
-	"git.parallelcoin.io/dev/pod/cmd/ctl"
+	"github.com/parallelcointeam/parallelcoin/cmd/ctl"
 )
 
 const slash = string(os.PathSeparator)

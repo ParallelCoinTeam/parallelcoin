@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/pkg/util"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // TestTxFeePrioHeap ensures the priority queue for transaction fees and priorities works as expected.

@@ -9,8 +9,8 @@ import (
 
 	"github.com/grandcat/zeroconf"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/config/netparams"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 type Request struct {

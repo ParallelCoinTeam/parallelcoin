@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // JSONRPC is a handler for sending queries and receiving responses from a JSONRPC endpoint

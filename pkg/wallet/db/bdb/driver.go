@@ -3,7 +3,7 @@ package bdb
 import (
 	"fmt"
 
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 const (

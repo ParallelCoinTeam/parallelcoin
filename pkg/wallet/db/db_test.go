@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
-	walletdb "git.parallelcoin.io/dev/pod/pkg/wallet/db"
-	_ "git.parallelcoin.io/dev/pod/pkg/wallet/db/bdb"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
 )
 
 // var (

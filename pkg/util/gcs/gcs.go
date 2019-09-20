@@ -9,7 +9,7 @@ import (
    "github.com/aead/siphash"
    "github.com/kkdai/bstream"
    
-   "git.parallelcoin.io/dev/pod/pkg/chain/wire"
+   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 )
 
 // Inspired by https://github.com/rasky/gcs

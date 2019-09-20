@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // TODO: tighten maxAllowedOffsetSecs for hf1 - also, consider changing to a

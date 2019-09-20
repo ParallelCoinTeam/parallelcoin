@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"git.parallelcoin.io/dev/pod/pkg/chain/fork"
-	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // Bench is an item in a benchmark
