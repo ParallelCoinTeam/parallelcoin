@@ -1,0 +1,113 @@
+package fynegui
+
+import (
+	"fmt"
+	"os"
+	"sync/atomic"
+
+	"fyne.io/fyne"
+	"git.parallelcoin.io/dev/pod/app/apputil"
+	"git.parallelcoin.io/dev/pod/pkg/util/cl"
+	"git.parallelcoin.io/dev/pod/pkg/wallet"
+
+	"fyne.io/fyne/app"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/widget"
+	"git.parallelcoin.io/dev/pod/cmd/node/con"
+)
+
+// Log log glorious log
+var Log = cl.NewSubSystem(reflect.TypeOf(log).PkgPath(), "info")
+var log = Log.Ch
+var startednode, startedwallet, guiopen bool
+var slash = string(os.PathSeparator)
+
+// Main is the entrypoint for the fyne interface
+func Main(cx *con.Text) error {
+	var nodeerr, walleterr error
+	_, _ = nodeerr, walleterr
+	// initialize the state indicators for the servers
+	cx.Node = &atomic.Value{}
+	cx.TestNode = &atomic.Value{}
+	cx.Wallet = &atomic.Value{}
+	cx.Node.Store(false)
+	cx.TestNode.Store(false)
+	cx.Wallet.Store(false)
+	a := app.New()
+	log <- cl.Debug{"opening GUI", cl.Ine()}
+	w := OpenGUI(cx, a)
+	w.SetOnClosed(func() {
+		log <- cl.Info{"shutting down", cl.Ine()}
+		// shut down the node when quitting
+		if cx.Node.Load().(bool) {
+			log <- cl.Info{"shutting down node", cl.Ine()}
+			close(cx.NodeKill)
+		}
+		// shut down the testnode when quitting
+		if cx.TestNode.Load().(bool) {
+			log <- cl.Info{"shutting down testnode", cl.Ine()}
+			close(cx.TestNodeKill)
+		}
+		// also shut down the wallet
+		if cx.Wallet.Load().(bool) {
+			log <- cl.Info{"shutting down wallet", cl.Ine()}
+			close(cx.WalletKill)
+		}
+	})
+	fmt.Println("setting content")
+	w.ShowAndRun()
+	return nodeerr
+}
+
+// OpenGUI opens the wallet GUI
+func OpenGUI(cx *con.Text, a fyne.App) fyne.Window {
+	w := a.NewWindow("pod wallet gui")
+	// w.SetIcon(canvas.NewImageFromResource(logo.PNG).Resource)
+	// w.SetPadded(false)
+	mainpage := Frame("overview", CenteredLabel("content"))
+	// mainpage.Resize(fyne.NewSize(600, 400))
+	var toplevel *widget.Box
+	var statusbar *fyne.Container
+	_, _ = toplevel, statusbar
+	dbfilename :=
+		*cx.Config.DataDir + slash +
+			cx.ActiveNet.Params.Name + slash +
+			wallet.WalletDbName
+	log <- cl.Info{"dbfilename", dbfilename}
+	// check first if the wallet exists, if not prompt the user to create
+	// one
+	if !apputil.FileExists(dbfilename) {
+		var mainbox *widget.Box
+		log <- cl.Warn{"no wallet found at", dbfilename}
+		mainpage, mainbox = CreateWallet(toplevel, statusbar, mainpage)
+		_ = mainbox
+		size := mainbox.Size()
+		w.Resize(size)
+		toplevel = widget.NewVBox()
+		statusbar = fyne.NewContainer()
+	} else {
+		log <- cl.Debug{"creating toplevel", cl.Ine()}
+		toplevel = TopLevel(cx, a, mainpage)
+		log <- cl.Debug{"creating statusbar", cl.Ine()}
+		statusbar = NewStatusbar(cx, a, w).Container
+	}
+	w.SetContent(mainpage)
+	// getMainContainer(toplevel, sbar, mainpage))
+	return w
+}
+
+func getMainContainer(toplevel *widget.Box, statusbar *fyne.Container, mainpage *fyne.Container) *fyne.Container {
+	return fyne.NewContainerWithLayout(
+		layout.NewBorderLayout(
+			toplevel,
+			statusbar,
+			layout.NewSpacer(),
+			layout.NewSpacer(),
+		),
+		toplevel,
+		statusbar,
+		layout.NewSpacer(),
+		layout.NewSpacer(),
+		mainpage,
+	)
+}
