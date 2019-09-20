@@ -1,0 +1,54 @@
+package fynegui
+
+import (
+	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/widget"
+	"git.parallelcoin.io/dev/pod/pkg/logo"
+)
+
+var sp = func() fyne.CanvasObject {
+	return layout.NewSpacer()
+}
+
+// Frame makes a labeled placeholder container
+func Frame(title string, content *fyne.Container) *fyne.Container {
+	return fyne.NewContainerWithLayout(
+		layout.NewMaxLayout(),
+		widget.NewScrollContainer(
+			fyne.NewContainerWithLayout(
+				layout.NewBorderLayout(Title(title), sp(), sp(), sp()),
+				Title(title), sp(), sp(), sp(),
+				content,
+			),
+		),
+	)
+}
+
+// CenteredBox creates a label centered in a centered layout
+func CenteredBox(content *fyne.Container) *fyne.Container {
+	return fyne.NewContainerWithLayout(
+		layout.NewCenterLayout(),
+		content,
+	)
+}
+
+// CenteredLabel creates a label centered in a centered layout
+func CenteredLabel(label string) *fyne.Container {
+	return fyne.NewContainerWithLayout(
+		layout.NewCenterLayout(),
+		widget.NewLabel(label),
+	)
+}
+
+// Title creates a title bar with logo
+func Title(title string) *widget.Box {
+	mainlogo := canvas.NewImageFromResource(logo.SVG)
+	mainlogo.SetMinSize(fyne.NewSize(64, 64))
+	l := widget.NewHBox(
+		mainlogo,
+		widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+	)
+	return l
+}
