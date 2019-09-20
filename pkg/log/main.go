@@ -77,8 +77,32 @@ func Empty() *Logger {
 
 }
 
-func NewLogger(level, logPath, logFileName string) (l *Logger, close func(),
-	err error) {
+// sanitizeLoglevel accepts a string and returns a
+// default if the input is not in the Levels slice
+func sanitizeLoglevel(level string) string {
+	found := false
+	for i := range Levels {
+		if level == Levels[i] {
+			found = true
+			break
+		}
+	}
+	if !found {
+		level = "info"
+	}
+	return level
+}
+
+// NewLogger creates a new logger with json entries
+func NewLogger(level string) (l *Logger) {
+	l = Empty()
+	l.SetLevel(level)
+	Register.Add(l)
+	return
+}
+
+// SetLogPaths sets a file path to write logs
+func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	const timeFormat = "2006-01-02_15-04-05"
 	path := filepath.Join(logFileName, logPath)
 	var logFileHandle *os.File

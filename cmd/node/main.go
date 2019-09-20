@@ -40,18 +40,18 @@ var winServiceMain func() (bool, error)
 func Main(cx *conte.Xt, shutdownChan chan struct{},
 	killswitch chan struct{}, nodechan chan *rpc.Server,
 	wg *sync.WaitGroup) (err error) {
-	log <- cl.Trace{"starting up node main", cl.Ine()}
-	log <- cl.Trace{"wg+1", cl.Ine()}
+	L.Trace("starting up node main")
+	L.Trace("wg+1")
 	wg.Add(1)
 	shutdownChan = make(chan struct{})
 	interrupt.AddHandler(
 		func() {
-			log <- cl.Trace{"closing shutdown channel", cl.Ine()}
+			L.Trace("closing shutdown channel")
 			close(shutdownChan)
 		},
 	)
 	// show version at startup
-	log <- cl.Info{"version", version.Version(), cl.Ine()}
+	L.Info("version", version.Version())
 	// enable http profiling server if requested
 	if *cx.Config.Profile != "" {
 		log <- cl.Debug{"profiling requested", cl.Ine()}
