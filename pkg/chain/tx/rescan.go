@@ -200,7 +200,7 @@ func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
 		log <- cl.Errorf{
-			"rescanRPCHandler called without an RPC client", err, cl.Ine()}
+			"rescanRPCHandler called without an RPC client", err}
 		w.wg.Done()
 		return
 	}
@@ -226,7 +226,7 @@ out:
 					"rescan for %d %s failed: %v %s",
 					numAddrs,
 					noun,
-					err, cl.Ine()}
+					err}
 			}
 			batch.done(err)
 		case <-quit:

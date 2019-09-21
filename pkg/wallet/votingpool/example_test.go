@@ -51,7 +51,7 @@ func ExampleCreate() {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 	}()
 	// Create a new walletdb namespace for the address manager.
@@ -146,7 +146,7 @@ func Example_empowerSeries() {
 		defer func() {
 			err := mgr.Lock()
 			if err != nil {
-				fmt.Println(err, cl.Ine())
+				fmt.Println(err)
 			}
 		}()
 		privKey := "xprv9s21ZrQH143K2j9PK4CXkCu8sgxkpUxCF7p1KVwiV5tdnkeYzJXReUkxz5iB2FUzTXC1L15abCDG4RMxSYT5zhm67uvsnLYxuDhZfoFcB6a"
@@ -183,7 +183,7 @@ func Example_startWithdrawal() {
 		defer func() {
 			err := mgr.Lock()
 			if err != nil {
-				fmt.Println(err, cl.Ine())
+				fmt.Println(err)
 			}
 		}()
 		addr, _ := util.DecodeAddress("1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX", mgr.ChainParams())

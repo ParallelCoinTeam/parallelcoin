@@ -5,7 +5,6 @@ import (
 	"io"
 
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 const (
@@ -73,7 +72,7 @@ func (msg *MsgCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) 
 		}
 		err = msg.AddCFHash(&cfh)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 	}
 	return nil

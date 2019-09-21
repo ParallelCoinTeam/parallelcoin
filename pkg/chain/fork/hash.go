@@ -104,10 +104,10 @@ func DivHash(hf func([]byte) []byte, blockbytes []byte, howmany int) []byte {
 // Hash computes the hash of bytes using the named hash
 func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
 	// if IsTestnet && height < 10 {
-	// 	// log <- cl.Warn{"hash", name, height, cl.Ine()}
+	// 	// log <- cl.Warn{"hash", name, height}
 	// 	time.Sleep(time.Second / 20)
 	// }
-	// log <- cl.Info{"hash", name, height, cl.Ine()}
+	// INFO("hash", name, height}
 	switch name {
 	case "blake2b":
 		_ = out.SetBytes(DivHash(Blake2b, bytes, HashReps))

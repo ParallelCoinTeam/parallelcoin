@@ -73,7 +73,7 @@ func ExampleDB_createTopLevelBucket() {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 	}()
 	// Get or create a bucket in the database as needed.  This bucket

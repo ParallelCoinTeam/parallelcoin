@@ -1,8 +1,10 @@
 package log
 
 import (
-"fmt"
-"sync"
+	"fmt"
+	"sync"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // Register is the registry of subsystems in operation
@@ -18,11 +20,10 @@ type Registry map[string]*Logger
 
 // Add appends a new subsystem to its map for access and introspection
 func (r *Registry) Add(s *Logger) {
+	spew.Dump(s)
 	mutex.Lock()
 	_, ok := (*r)[s.Name]
-	if ok {
-		fmt.Println(s.Name, "subsystem already registered")
-	} else {
+	if !ok {
 		(*r)[s.Name] = s
 	}
 	mutex.Unlock()
@@ -31,8 +32,9 @@ func (r *Registry) Add(s *Logger) {
 // List returns a string slice containing all the registered loggers
 func (r *Registry) List() (out []string) {
 	mutex.Lock()
-	for _, x := range *r {
-		out = append(out, x.Name)
+	for i := range *r {
+		fmt.Println("List", (*r)[i].Name)
+		out = append(out, (*r)[i].Name)
 	}
 	mutex.Unlock()
 	return
@@ -60,12 +62,16 @@ func (r *Registry) GetGlobalLevel() string {
 
 // SetAllLevels sets the level in all registered loggers
 func (r *Registry) SetAllLevels(level string) {
+	fmt.Println(level)
 	level = sanitizeLoglevel(level)
+	fmt.Println(level)
 	mutex.Lock()
 	globalLevel = level
+	fmt.Println(globalLevel)
 	mutex.Unlock()
 	loggers := r.List()
 	for _, x := range loggers {
+		fmt.Println(x)
 		r.Get(x).SetLevel(level)
 	}
 }

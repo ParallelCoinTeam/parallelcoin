@@ -12,7 +12,7 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
 	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/legacy"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	btcutil "github.com/parallelcointeam/parallelcoin/pkg/util"
@@ -25,7 +25,7 @@ import (
 func (d *DuoVUE) GetBalance() DuoVUEbalance {
 	acct := "default"
 	minconf := 0
-	getBalance, err := legacy.GetBalance(&json.GetBalanceCmd{Account: &acct, MinConf: &minconf}, d.cx.WalletServer)
+	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct, MinConf: &minconf}, d.cx.WalletServer)
 	if err != nil {
 		alert.Alert.Time = time.Now()
 		alert.Alert.Alert = err.Error()
@@ -37,7 +37,7 @@ func (d *DuoVUE) GetBalance() DuoVUEbalance {
 		d.Status.Balance.Balance = bb
 	}
 
-	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&json.GetUnconfirmedBalanceCmd{Account: &acct}, d.cx.WalletServer)
+	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, d.cx.WalletServer)
 	if err != nil {
 		alert.Alert.Time = time.Now()
 		alert.Alert.Alert = err.Error()
@@ -159,7 +159,7 @@ func (d *DuoVUE) GetAddressBook() (addressbook DuoVUEAddressBook) {
 	// Massage address data into output format.
 	addressbook.Num = len(allAddrData)
 	for address, addrData := range allAddrData {
-		addr := json.ListReceivedByAddressResult{
+		addr := btcjson.ListReceivedByAddressResult{
 			Address: address,
 			Amount:  addrData.amount.ToDUO(),
 		}
@@ -182,9 +182,9 @@ func (d *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 			alert.Alert.Alert = err.Error()
 			alert.Alert.AlertType = "error"
 		}
-		result, ok := getBlockChain.(*json.GetBlockChainInfoResult)
+		result, ok := getBlockChain.(*btcjson.GetBlockChainInfoResult)
 		if !ok {
-			result = &json.GetBlockChainInfoResult{}
+			result = &btcjson.GetBlockChainInfoResult{}
 		}
 		var defaultNet *netparams.Params
 		switch result.Chain {
@@ -205,19 +205,19 @@ func (d *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 			alert.Alert.Alert = err.Error()
 			alert.Alert.AlertType = "error"
 		}
-		var validateAddr *json.ValidateAddressWalletResult
+		var validateAddr *btcjson.ValidateAddressWalletResult
 		if err == nil {
 			var va interface{}
-			va, err = legacy.ValidateAddress(&json.ValidateAddressCmd{Address: addr.String()}, d.cx.WalletServer)
+			va, err = legacy.ValidateAddress(&btcjson.ValidateAddressCmd{Address: addr.String()}, d.cx.WalletServer)
 			if err != nil {
 				alert.Alert.Time = time.Now()
 				alert.Alert.Alert = err.Error()
 				alert.Alert.AlertType = "error"
 			}
-			vva := va.(json.ValidateAddressWalletResult)
+			vva := va.(btcjson.ValidateAddressWalletResult)
 			validateAddr = &vva
 			if validateAddr.IsValid {
-				legacy.WalletPassphrase(json.NewWalletPassphraseCmd(wp, 5), d.cx.WalletServer)
+				legacy.WalletPassphrase(btcjson.NewWalletPassphraseCmd(wp, 5), d.cx.WalletServer)
 				if err != nil {
 					alert.Alert.Time = time.Now()
 					alert.Alert.Alert = err.Error()
@@ -225,7 +225,7 @@ func (d *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 				}
 
 				_, err = legacy.SendToAddress(
-					&json.SendToAddressCmd{
+					&btcjson.SendToAddressCmd{
 						Address: addr.EncodeAddress(), Amount: amount.ToDUO(),
 					}, d.cx.WalletServer)
 				if err != nil {

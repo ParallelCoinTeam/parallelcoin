@@ -3,8 +3,6 @@ package wire
 import (
 	"fmt"
 	"io"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MaxAddrPerMsg is the maximum number of addresses that can be in a single bitcoin addr message (MsgAddr).
@@ -64,7 +62,7 @@ func (msg *MsgAddr) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) err
 		}
 		err = msg.AddAddress(na)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 	}
 	return nil

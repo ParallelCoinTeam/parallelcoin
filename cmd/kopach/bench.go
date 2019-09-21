@@ -53,7 +53,7 @@ func (b Benches) getOps(a string) int {
 
 // Benchmark generates a benchmark for kopach
 func Benchmark(conf string) {
-	log <- cl.Info{"generating benchmarks...", cl.Ine()}
+	INFO("generating benchmarks..."}
 	b := [80]byte{}
 	block := b[:]
 	log <- cl.Warn{"initial short rough benchmark (64 rounds):"}
@@ -75,10 +75,10 @@ func Benchmark(conf string) {
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
-		log <- cl.Info{an, rightJustify(fmt.Sprint(ops/1000), 15), " us/op"}
+		INFO(an, rightJustify(fmt.Sprint(ops/1000), 15), " us/op"}
 	}
 	sort.Sort(initial)
-	log <- cl.Info{"initial ", initial}
+	INFO("initial ", initial}
 	k := 1 << 9
 	log <- cl.Warn{"running benchmark with ", k, " reps"}
 	for i := range initial {
@@ -96,16 +96,16 @@ func Benchmark(conf string) {
 			an += strings.Repeat(" ", pad)
 		}
 		sort.Sort(initial)
-		log <- cl.Info{an, " ", initial[i].Ops, " ns/op ", int(time.Second) / initial[i].Ops, " ops/s"}
+		INFO(an, " ", initial[i].Ops, " ns/op ", int(time.Second) / initial[i].Ops, " ops/s"}
 	}
 	if yp, e := json.MarshalIndent(&initial, "", "  "); e == nil {
 		log <- cl.Trace{"\n", string(yp)}
 		ensureDir(conf)
 		if e := ioutil.WriteFile(conf, yp, 0600); e != nil {
-			log <- cl.Error{"error writing ", e, cl.Ine()}
+			log <- cl.Error{"error writing ", e}
 		}
 	} else {
-		log <- cl.Error{"error marshalling ", e, cl.Ine()}
+		log <- cl.Error{"error marshalling ", e}
 	}
 	log <- cl.Trace{"results ", initial}
 	time.Sleep(time.Second)

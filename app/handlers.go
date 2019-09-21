@@ -40,7 +40,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 
 func kopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		L.Warn("not implemented")
+		WARN("not implemented")
 		// Configure(cx)
 		// kopachQuit := make(chan struct{})
 		// interrupt.AddHandler(func() { close(kopachQuit) })

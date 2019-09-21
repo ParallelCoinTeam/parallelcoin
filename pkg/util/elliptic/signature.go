@@ -10,8 +10,6 @@ import (
 	"fmt"
 	"hash"
 	"math/big"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // Errors returned by canonicalPadding.
@@ -397,7 +395,7 @@ func mac(alg func() hash.Hash, k, m []byte) []byte {
 	h := hmac.New(alg, k)
 	_, err := h.Write(m)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	return h.Sum(nil)
 }

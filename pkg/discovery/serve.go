@@ -10,7 +10,6 @@ import (
 	"github.com/grandcat/zeroconf"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 type Request struct {
@@ -26,8 +25,8 @@ func GetParallelcoinServiceName(params *netparams.Params) string {
 
 func Serve(params *netparams.Params, lanInterface *net.Interface,
 	group string) (cancel context.CancelFunc, request RequestFunc, err error) {
-	log <- cl.Warn{"starting discovery server", cl.Ine()}
-	texts := []string{"group="+group}
+	WARN("starting discovery server")
+	texts := []string{"group=" + group}
 	domain := "local."
 	requests := make(chan Request)
 	request = func(key, address string) {
@@ -39,22 +38,21 @@ func Serve(params *netparams.Params, lanInterface *net.Interface,
 		server, err := zeroconf.Register(alias, GetParallelcoinServiceName(
 			params), domain, 1, texts, []net.Interface{*lanInterface})
 		if err != nil {
-			log <- cl.Error{"error registering ", err, cl.Ine()}
+			ERROR("error registering ", err)
 			return
 		}
-		log <- cl.Trace{"registered", cl.Ine()}
+		TRACE("registered")
 		for {
 			select {
 			case r := <-requests:
 				found := false
 				for i := range texts {
 					split := strings.Split(texts[i], "=")
-					// log <- cl.Warn{"'",split[0],"' '", r.Key,"'"}
+					// WARN("'",split[0],"' '", r.Key,"'")
 					if split[0] == r.Key {
 						found = true
 						if r.Address == "" {
-							log <- cl.Debug{"discovery: removing key ", r.Key,
-								cl.Ine()}
+							DEBUG("discovery: removing key ", r.Key)
 							switch {
 							case i == 0:
 								texts = texts[1:]
@@ -72,19 +70,18 @@ func Serve(params *netparams.Params, lanInterface *net.Interface,
 				if !found && r.Address != "" {
 					nt := r.Key + "=" + r.Address
 					texts = append(texts, nt)
-					log <- cl.Debug{"appending ", nt, " to texts ", texts,
-						cl.Ine()}
+					DEBUG("appending ", nt, " to texts ", texts)
 				}
 				server.Shutdown()
-				log <- cl.Trace{"shut down server", cl.Ine()}
+				TRACE("shut down server")
 				server, err = zeroconf.Register(alias,
 					GetParallelcoinServiceName(
 						params), domain, 1, texts, []net.Interface{*lanInterface})
 				if err != nil {
-					log <- cl.Error{"error registering ", err, cl.Ine()}
+					ERROR("error registering ", err)
 					return
 				}
-				log <- cl.Trace{"restarted server", cl.Ine()}
+				TRACE("restarted server")
 			case <-ctx.Done():
 				server.Shutdown()
 				break

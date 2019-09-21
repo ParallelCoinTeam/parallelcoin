@@ -17,7 +17,6 @@ import (
 	indexers "github.com/parallelcointeam/parallelcoin/pkg/chain/index"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
 )
 
@@ -40,29 +39,29 @@ var winServiceMain func() (bool, error)
 func Main(cx *conte.Xt, shutdownChan chan struct{},
 	killswitch chan struct{}, nodechan chan *rpc.Server,
 	wg *sync.WaitGroup) (err error) {
-	L.Trace("starting up node main")
-	L.Trace("wg+1")
+	TRACE("starting up node main")
+	TRACE("wg+1")
 	wg.Add(1)
 	shutdownChan = make(chan struct{})
 	interrupt.AddHandler(
 		func() {
-			L.Trace("closing shutdown channel")
+			TRACE("closing shutdown channel")
 			close(shutdownChan)
 		},
 	)
 	// show version at startup
-	L.Info("version", version.Version())
+	INFO("version", version.Version())
 	// enable http profiling server if requested
 	if *cx.Config.Profile != "" {
-		L.Debug("profiling requested")
+		DEBUG("profiling requested")
 		go func() {
 			listenAddr := net.JoinHostPort("",
 				*cx.Config.Profile)
-			L.Info("profile server listening on", listenAddr)
+			INFO("profile server listening on", listenAddr)
 			profileRedirect := http.RedirectHandler(
 				"/debug/pprof", http.StatusSeeOther)
 			http.Handle("/", profileRedirect)
-			L.Error("profile server", http.ListenAndServe(listenAddr, nil))
+			ERROR("profile server", http.ListenAndServe(listenAddr, nil))
 		}()
 	}
 	// write cpu profile if requested
@@ -70,12 +69,12 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		var f *os.File
 		f, err = os.Create(*cx.Config.CPUProfile)
 		if err != nil {
-			L.Error("unable to create cpu profile:", err)
+			ERROR("unable to create cpu profile:", err)
 			return
 		}
 		e := pprof.StartCPUProfile(f)
 		if e != nil {
-			L.Warn("failed to start up cpu profiler:", e)
+			WARN("failed to start up cpu profiler:", e)
 		} else {
 			defer f.Close()
 			defer pprof.StopCPUProfile()
@@ -83,7 +82,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	}
 	// perform upgrades to pod as new versions require it
 	if err = doUpgrades(cx); err != nil {
-		L.Error(err)
+		ERROR(err)
 		return
 	}
 	// return now if an interrupt signal was triggered
@@ -94,12 +93,12 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	var db database.DB
 	db, err = loadBlockDB(cx)
 	if err != nil {
-		L.Error(err)
+		ERROR(err)
 		return
 	}
 	defer func() {
 		// ensure the database is sync'd and closed on shutdown
-		L.Trace("gracefully shutting down the database...")
+		TRACE("gracefully shutting down the database")
 		db.Close()
 		time.Sleep(time.Second / 4)
 	}()
@@ -111,26 +110,26 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	// NOTE: The order is important here because dropping the
 	// tx index also drops the address index since it relies on it
 	if cx.StateCfg.DropAddrIndex {
-		L.Warn("dropping address index", cl.Ine())
+		WARN("dropping address index")
 		if err = indexers.DropAddrIndex(db,
 			interrupt.ShutdownRequestChan); err != nil {
-			L.Error(err)
+			ERROR(err)
 			return
 		}
 	}
 	if cx.StateCfg.DropTxIndex {
-		L.Warn("dropping transaction index")
+		WARN("dropping transaction index")
 		if err = indexers.DropTxIndex(db,
 			interrupt.ShutdownRequestChan); err != nil {
-			L.Error(err)
+			ERROR(err)
 			return
 		}
 	}
 	if cx.StateCfg.DropCfIndex {
-		L.Warn("dropping cfilter index", cl.Ine())
+		WARN("dropping cfilter index")
 		if err = indexers.DropCfIndex(db,
 			interrupt.ShutdownRequestChan); err != nil {
-			L.Error(err)
+			ERROR(err)
 			if err != nil {
 				return
 			}
@@ -144,28 +143,28 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		*cx.Config.WalletRPCListeners = []string{":0"}
 	}
 	// create server and start it
-	L.Trace("rpc.NewNode ", *cx.Config.Listeners, db,
+	TRACE("rpc.NewNode", *cx.Config.Listeners, db,
 		cx.ActiveNet, interrupt.ShutdownRequestChan, *cx.Config.Algo)
 	server, err := rpc.NewNode(cx.Config, cx.StateCfg, cx.ActiveNet,
 		*cx.Config.Listeners, db, cx.ActiveNet,
 		interrupt.ShutdownRequestChan, *cx.Config.Algo)
 	if err != nil {
-		L.Errorf("unable to start server on %v: %v %s",
+		ERRORF("unable to start server on %v: %v %s",
 			*cx.Config.Listeners, err)
 		return err
 	}
 	cx.RealNode = server
 	// set up interrupt shutdown handlers to stop servers
 	interrupt.AddHandler(func() {
-		L.Warn("shutting down node from interrupt", cl.Ine())
+		WARN("shutting down node from interrupt")
 		close(killswitch)
 	})
 	server.Start()
 	if len(server.RPCServers) > 0 {
-		L.Trace("propagating rpc server handle")
+		TRACE("propagating rpc server handle")
 		cx.RPCServer = server.RPCServers[0]
 		if nodechan != nil {
-			L.Trace("sending back node")
+			TRACE("sending back node")
 			nodechan <- server.RPCServers[0]
 		}
 	}
@@ -176,13 +175,13 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	// RPC server.
 	select {
 	case <-killswitch:
-		L.Info("gracefully shutting down the server...")
+		INFO("gracefully shutting down the server...")
 		e := server.Stop()
 		if e != nil {
-			L.Warn("failed to stop server", e, cl.Ine())
+			WARN("failed to stop server", e)
 		}
 		server.WaitForShutdown()
-		L.Info("server shutdown complete")
+		INFO("server shutdown complete")
 		cancelDiscovery()
 		cx.StateCfg.DiscoveryUpdate("node", "")
 		wg.Done()
@@ -204,7 +203,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 	// We also don't want to worry about the multiple database type
 	// warnings when running with the memory database.
 	if *cx.Config.DbType == "memdb" {
-		L.Info("creating block database in memory")
+		INFO("creating block database in memory")
 		db, err := database.Create(*cx.Config.DbType)
 		if err != nil {
 			return nil, err
@@ -218,9 +217,9 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 	// for each run, so remove it now if it already exists.
 	e := removeRegressionDB(cx, dbPath)
 	if e != nil {
-		L.Debug("failed to remove regression db:", e)
+		DEBUG("failed to remove regression db:", e)
 	}
-	L.Infof("loading block database from '%s'", dbPath)
+	INFOF("loading block database from '%s'", dbPath)
 	db, err := database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
 	if err != nil {
 		// return the error if it's not because the database doesn't exist
@@ -238,7 +237,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 			return nil, err
 		}
 	}
-	L.Trace("block database loaded")
+	TRACE("block database loaded")
 	return db, nil
 }
 
@@ -252,7 +251,7 @@ func removeRegressionDB(cx *conte.Xt, dbPath string) error {
 	// remove the old regression test database if it already exists
 	fi, err := os.Stat(dbPath)
 	if err == nil {
-		L.Infof("removing regression test database from '%s' %s", dbPath)
+		INFOF("removing regression test database from '%s' %s", dbPath)
 		if fi.IsDir() {
 			if err = os.RemoveAll(dbPath); err != nil {
 				return err
@@ -288,7 +287,7 @@ func warnMultipleDBs(cx *conte.Xt) {
 	// warn if there are extra databases
 	if len(duplicateDbPaths) > 0 {
 		selectedDbPath := path.BlockDb(cx, *cx.Config.DbType)
-		L.Warnf(
+		WARNF(
 			"\nThere are multiple block chain databases using different"+
 				" database types.\nYou probably don't want to waste disk"+
 				" space by having more than one."+

@@ -80,7 +80,7 @@ func Settings(cx *con.Text, a fyne.App) *widget.ScrollContainer {
 		if on {
 			if !cx.Node.Load().(bool) {
 				go func() {
-					log <- cl.Info{"starting node", cl.Ine()}
+					INFO("starting node"}
 					cx.NodeKill = make(chan struct{})
 					nodeerr = node.Main(cx, shutdownChan, cx.NodeKill)
 				}()
@@ -138,7 +138,7 @@ func Settings(cx *con.Text, a fyne.App) *widget.ScrollContainer {
 					*cx0.Config.LogDir = dd
 					peer.AllowSelfConns = true
 					go func() {
-						log <- cl.Trace{"starting testnode", cl.Ine()}
+						log <- cl.Trace{"starting testnode"}
 						cx.TestNodeKill = make(chan struct{})
 						err := node.Main(cx0, shutdownChan, cx.TestNodeKill)
 						if err != nil {
@@ -155,7 +155,7 @@ func Settings(cx *con.Text, a fyne.App) *widget.ScrollContainer {
 				}
 			} else {
 				if cx.TestNode.Load().(bool) {
-					log <- cl.Info{"stopping testnode", cl.Ine()}
+					INFO("stopping testnode"}
 					close(cx.TestNodeKill)
 					*cx.Config.TestNodeOff = true
 					save.Pod(cx.Config)

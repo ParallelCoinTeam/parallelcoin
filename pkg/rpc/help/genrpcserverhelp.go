@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	btcjson "github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	btcjson "github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	rpchelp "github.com/parallelcointeam/parallelcoin/pkg/rpc/help"
 )
 

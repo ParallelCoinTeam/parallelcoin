@@ -284,7 +284,7 @@ func (b *Backend) print(lvl, tag string, args ...interface{}) {
 	b.mu.Lock()
 	_, err := b.w.Write(*bytebuf)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	b.mu.Unlock()
 	recycleBuffer(bytebuf)
@@ -309,7 +309,7 @@ func (b *Backend) printf(lvl, tag string, format string, args ...interface{}) {
 	b.mu.Lock()
 	_, err := b.w.Write(*bytebuf)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	b.mu.Unlock()
 	recycleBuffer(bytebuf)

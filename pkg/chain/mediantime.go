@@ -5,8 +5,6 @@ import (
 	"sort"
 	"sync"
 	"time"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // TODO: tighten maxAllowedOffsetSecs for hf1 - also, consider changing to a
@@ -29,64 +27,65 @@ var (
 	maxMedianTimeEntries = 200
 )
 
-// MedianTimeSource provides a mechanism to add several time samples which are
-// used to determine a median time which is then used as an offset to the local
-// clock.
-type MedianTimeSource interface {
-	// AdjustedTime returns the current time adjusted by the median time offset
-	// as calculated from the time samples added by AddTimeSample.
-	AdjustedTime() time.Time
-	// AddTimeSample adds a time sample that is used when determining the median
-	// time of the added samples.
-	AddTimeSample(id string, timeVal time.Time)
-	// Offset returns the number of seconds to adjust the local clock based upon
-	// the median of the time samples added by AddTimeData.
-	Offset() time.Duration
-}
+type // MedianTimeSource provides a mechanism to add several time samples
+	// which are used to determine a median time which is then used as an offset
+	// to the local clock.
+	MedianTimeSource interface {
+		// AdjustedTime returns the current time adjusted by the median time offset
+		// as calculated from the time samples added by AddTimeSample.
+		AdjustedTime() time.Time
+		// AddTimeSample adds a time sample that is used when determining the median
+		// time of the added samples.
+		AddTimeSample(id string, timeVal time.Time)
+		// Offset returns the number of seconds to adjust the local clock based upon
+		// the median of the time samples added by AddTimeData.
+		Offset() time.Duration
+	}
 
-// int64Sorter implements sort.Interface to allow a slice of 64-bit integers to
-// be sorted.
-type int64Sorter []int64
+type // int64Sorter implements sort.
+	// Interface to allow a slice of 64-bit integers to
+	// be sorted.
+	int64Sorter []int64
 
-// Len returns the number of 64-bit integers in the slice.  It is part of the
-// sort.Interface implementation.
-func (s int64Sorter) Len() int {
+func // Len returns the number of 64-bit integers in the slice.
+// It is part of the sort.Interface implementation.
+(s int64Sorter) Len() int {
 	return len(s)
 }
 
-// Swap swaps the 64-bit integers at the passed indices.  It is part of the
+func // Swap swaps the 64-bit integers at the passed indices.  It is part of the
 // sort.Interface implementation.
-func (s int64Sorter) Swap(i, j int) {
+(s int64Sorter) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-// Less returns whether the 64-bit integer with index i should sort before the
-// 64-bit integer with index j.  It is part of the sort.Interface
+func // Less returns whether the 64-bit integer with index i should sort
+// before the 64-bit integer with index j.  It is part of the sort.Interface
 // implementation.
-func (s int64Sorter) Less(i, j int) bool {
+(s int64Sorter) Less(i, j int) bool {
 	return s[i] < s[j]
 }
 
-// medianTime provides an implementation of the MedianTimeSource interface. It
-// is limited to maxMedianTimeEntries includes the same buggy behavior as the
-// time offset mechanism in Bitcoin Core.  This is necessary because it is used
-// in the consensus code.
-type medianTime struct {
-	mtx                sync.Mutex
-	knownIDs           map[string]struct{}
-	offsets            []int64
-	offsetSecs         int64
-	invalidTimeChecked bool
-}
+type // medianTime provides an implementation of the MedianTimeSource
+	// interface. It is limited to maxMedianTimeEntries includes the same buggy
+	// behavior as the time offset mechanism in Bitcoin Core.
+	// This is necessary because it is used in the consensus code.
+	medianTime struct {
+		mtx                sync.Mutex
+		knownIDs           map[string]struct{}
+		offsets            []int64
+		offsetSecs         int64
+		invalidTimeChecked bool
+	}
 
-// Ensure the medianTime type implements the MedianTimeSource interface.
-var _ MedianTimeSource = (*medianTime)(nil)
+var // Ensure the medianTime type implements the MedianTimeSource interface.
+	_ MedianTimeSource = (*medianTime)(nil)
 
-// AdjustedTime returns the current time adjusted by the median time offset as
-// calculated from the time samples added by AddTimeSample. This function is
-// safe for concurrent access and is part of the MedianTimeSource interface
-// implementation.
-func (m *medianTime) AdjustedTime() time.Time {
+func // AdjustedTime returns the current time adjusted by the median time
+// offset as calculated from the time samples added by AddTimeSample.
+// This function is safe for concurrent access and is part of the
+// MedianTimeSource interface implementation.
+(m *medianTime) AdjustedTime() time.Time {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
 	// Limit the adjusted time to 1 second precision.
@@ -94,10 +93,11 @@ func (m *medianTime) AdjustedTime() time.Time {
 	return now.Add(time.Duration(m.offsetSecs) * time.Second)
 }
 
-// AddTimeSample adds a time sample that is used when determining the median
-// time of the added samples. This function is safe for concurrent access and
-// is part of the MedianTimeSource interface implementation.
-func (m *medianTime) AddTimeSample(sourceID string, timeVal time.Time) {
+func // AddTimeSample adds a time sample that is used when determining the
+// median time of the added samples.
+// This function is safe for concurrent access and is part of the
+// MedianTimeSource interface implementation.
+(m *medianTime) AddTimeSample(sourceID string, timeVal time.Time) {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
 	// Don't add time data from the same source.
@@ -123,13 +123,8 @@ func (m *medianTime) AddTimeSample(sourceID string, timeVal time.Time) {
 	copy(sortedOffsets, m.offsets)
 	sort.Sort(int64Sorter(sortedOffsets))
 	offsetDuration := time.Duration(offsetSecs) * time.Second
-	log <- cl.Tracef{
-		"Added time sample of %v (total: %v) %s",
-		offsetDuration,
-		numOffsets,
-		cl.Ine(),
-	}
-	log <- cl.Trace{"samples:", sortedOffsets, cl.Ine()}
+	TRACEF("Added time sample of %v (total: %v)", offsetDuration, numOffsets)
+	TRACE("samples:", sortedOffsets)
 	// NOTE: The following code intentionally has a bug to mirror the buggy
 	// behavior in Bitcoin Core since the median time is used in the consensus
 	// rules. In particular, the offset is only updated when the number of
@@ -167,32 +162,32 @@ func (m *medianTime) AddTimeSample(sourceID string, timeVal time.Time) {
 			}
 			// Warn if none of the time samples are close.
 			if !remoteHasCloseTime {
-				log <- cl.Wrn(
-					"Please check your date and time are correct!  pod will not work properly with an invalid time",
-				)
+				WARN("Please check your date and time are correct!  pod will" +
+					" not work properly with an invalid time")
 			}
 		}
 	}
 	medianDuration := time.Duration(m.offsetSecs) * time.Second
-	log <- cl.Debug{"new time offset:", medianDuration, cl.Ine()}
+	DEBUG("new time offset:", medianDuration)
 }
 
-// Offset returns the number of seconds to adjust the local clock based upon
-// the median of the time samples added by AddTimeData. This function is safe
-// for concurrent access and is part of the MedianTimeSource interface
-// implementation.
-func (m *medianTime) Offset() time.Duration {
+func // Offset returns the number of seconds to adjust the local clock based
+// upon the median of the time samples added by AddTimeData.
+// This function is safe for concurrent access and is part of the
+// MedianTimeSource interface implementation.
+(m *medianTime) Offset() time.Duration {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
 	return time.Duration(m.offsetSecs) * time.Second
 }
 
-// NewMedianTime returns a new instance of concurrency-safe implementation of
-// the MedianTimeSource interface.  The returned implementation contains the
-// rules necessary for proper time handling in the chain consensus rules and
-// expects the time samples to be added from the timestamp field of the version
-// message received from remote peers that successfully connect and negotiate.
-func NewMedianTime() MedianTimeSource {
+func // NewMedianTime returns a new instance of concurrency-safe
+// implementation of the MedianTimeSource interface.
+// The returned implementation contains the rules necessary for proper time
+// handling in the chain consensus rules and expects the time samples to be
+// added from the timestamp field of the version message received from remote
+// peers that successfully connect and negotiate.
+NewMedianTime() MedianTimeSource {
 	return &medianTime{
 		knownIDs: make(map[string]struct{}),
 		offsets:  make([]int64, 0, maxMedianTimeEntries),

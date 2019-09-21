@@ -8,37 +8,44 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/pkgs"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
-// Log is the logger for the peer package
-type _dtype int
-
-var _d _dtype
-var Log = cl.NewSubSystem(pkgs.Name(_d), "info")
-var log = Log.Ch
-
-// UseLogger uses a specified Logger to output package logging info. This should be used in preference to SetLogWriter if the caller is also using log.
-func UseLogger(logger *cl.SubSystem) {
-	Log = logger
-	log = Log.Ch
-}
-
 const (
-	// maxRejectReasonLen is the maximum length of a sanitized reject reason that will be logged.
+	// maxRejectReasonLen is the maximum length of a sanitized reject reason
+	// that will be logged.
 	maxRejectReasonLen = 250
 )
 
-// // LogClosure is a closure that can be printed with %v to be used to generate expensive-to-create data for a detailed log level and avoid doing the work if the data isn't printed.
-// type logClosure func() string
+type _dtype int
 
-// func (c logClosure) String() string {
-// 	return c()
-// }
-// func newLogClosure(// 	c func() string) logClosure {
-// 	return logClosure(c)
-// }
+var _d _dtype
+var l = log.NewLogger("info")
+
+func UseLogger(logger *log.Logger) {
+	l = logger
+}
+
+var (
+	FATAL  = l.Fatal
+	ERROR  = l.Error
+	WARN   = l.Warn
+	INFO   = l.Info
+	DEBUG  = l.Debug
+	TRACE  = l.Trace
+	FATALF = l.Fatalf
+	ERRORF = l.Errorf
+	WARNF  = l.Warnf
+	INFOF  = l.Infof
+	DEBUGF = l.Debugf
+	TRACEF = l.Tracef
+	FATALC = l.Fatalc
+	ERRORC = l.Errorc
+	WARNC  = l.Warnc
+	INFOC  = l.Infoc
+	DEBUGC = l.Debugc
+	TRACEC = l.Tracec
+)
 
 // directionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
 func directionString(inbound bool) string {

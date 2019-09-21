@@ -10,11 +10,11 @@ import (
 
 	"git.parallelcoin.io/dev/rpcx/client"
 
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
 	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
 	"github.com/parallelcointeam/parallelcoin/pkg/kcpx"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MineFunc is a function that stops on the semaphore closing and ostensibly
@@ -25,6 +25,7 @@ type MineFunc func(submit func(*util.Block) string, semaphore chan struct{},
 // Kopach is a worker
 type Kopach struct {
 	sync.Mutex
+	params      *netparams.Params
 	service     string
 	group       string
 	X           client.XClient
@@ -38,11 +39,11 @@ type Kopach struct {
 
 // discover starts a search and updates
 func (k *Kopach) discover() {
-	serviceName := discovery.GetParallelcoinServiceName(cx.ActiveNet)
+	serviceName := discovery.GetParallelcoinServiceName(k.params)
 	cancelSearch, resultsChan, err := discovery.AsyncZeroConfSearch(
 		serviceName, k.group)
 	if err != nil {
-		log <- cl.Error{"error running zeroconf search ", err, cl.Ine()}
+		ERROR("error running zeroconf search ", err)
 	}
 	go func() {
 		for {
@@ -76,11 +77,13 @@ func (k *Kopach) discover() {
 // - MineFunc hashes blocks and calls submit when it finds a solution,
 // stops when the semaphore channel is closed
 func NewKopach(service, group, address, password string, controllers []string,
-	m MineFunc, nodiscovery bool) (k *Kopach, shutdown func(),
+	m MineFunc, nodiscovery bool, activeNet *netparams.Params) (k *Kopach,
+	shutdown func(),
 	done <-chan struct{}) {
 	k = &Kopach{
-		group:       group,
+		params:      activeNet,
 		service:     service,
+		group:       group,
 		Mine:        m,
 		password:    password,
 		Controllers: &controllers,
@@ -118,7 +121,7 @@ func NewKopach(service, group, address, password string, controllers []string,
 				kc := (*k.Controllers)[rn]
 				err := k.X.Call(ctx, "Subscribe", kc, &deadline)
 				if err != nil {
-					log <- cl.Error{"error sending block ", err, cl.Ine()}
+					ERROR("error sending block ", err)
 					if nodiscovery {
 						// in nodiscovery mode we roll to the next on failure
 						k.Lock()
@@ -143,8 +146,7 @@ func NewKopach(service, group, address, password string, controllers []string,
 				}
 				go func() {
 					<-ctx.Done()
-					log <- cl.Warn{"subscription accepted, expires ", deadline,
-						cl.Ine()}
+					WARN("subscription accepted, expires ", deadline, )
 					cancel()
 				}()
 			}
@@ -164,13 +166,13 @@ func NewKopach(service, group, address, password string, controllers []string,
 func (k *Kopach) Block(ctx context.Context, args *[]mining.BlockTemplate,
 	reply *time.Time) (err error) {
 	if *args == nil {
-		log <- cl.Warn{"empty block means don't work", cl.Ine()}
+		WARN("empty block means don't work")
 		return errors.New("empty block, not working :)")
 	}
 	defer func() {
 		// most likely panic because close of closed channel, ignore
 		if r := recover(); r != nil {
-			log <- cl.Debug{"Recovered in f", r, cl.Ine()}
+			DEBUG("Recovered in f", r)
 			err = errors.New("worker is busy in submit")
 		}
 		// receiving a block while submitting usually will lead here,
@@ -209,13 +211,12 @@ func (k *Kopach) Submit(b *util.Block) (reply string) {
 	for try := 0; try < 3; try++ {
 		err := k.X.Call(ctx, "Submit", &b, &reply)
 		if err != nil {
-			log <- cl.Error{"error sending block ", err, cl.Ine()}
+			ERROR("error sending block ", err)
 			return err.Error()
 		}
 	}
 	<-ctx.Done()
-	log <- cl.Warn{"controller replied ", reply, " to block submit",
-		cl.Ine()}
+	WARN("controller replied ", reply, " to block submit", )
 	cancel()
 	return reply
 }

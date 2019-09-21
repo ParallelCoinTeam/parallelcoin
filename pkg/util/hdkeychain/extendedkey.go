@@ -17,7 +17,6 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
@@ -160,7 +159,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 	hmac512 := hmac.New(sha512.New, k.chainCode)
 	_, err := hmac512.Write(data)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	ilr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -335,7 +334,7 @@ func NewMaster(seed []byte, net *netparams.Params) (*ExtendedKey, error) {
 	hmac512 := hmac.New(sha512.New, masterKey)
 	_, err := hmac512.Write(seed)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	lr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:

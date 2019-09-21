@@ -14,7 +14,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
@@ -197,10 +196,10 @@ func (s *NeutrinoClient) FilterBlocks(
 		} else if !matched {
 			continue
 		}
-		log <- cl.Tracef{
+		TRACEF(
 			"fetching block height=%d hash=%v",
 			blk.Height, blk.Hash,
-		}
+		)
 		// TODO(conner): can optimize bandwidth by only fetching
 		// stripped blocks
 		rawBlock, err := s.GetBlock(&blk.Hash)
@@ -342,7 +341,7 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 	for op, addr := range outPoints {
 		addrScript, err := txscript.PayToAddrScript(addr)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 		inputsToWatch = append(inputsToWatch, sac.InputWithScript{
 			OutPoint: op,
@@ -444,8 +443,9 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 		rec, err := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx(),
 			header.Timestamp)
 		if err != nil {
-			log <- cl.Error{
-				"cannot create transaction record for relevant tx:", err, cl.Ine()}
+			ERROR(
+				"cannot create transaction record for relevant tx:", err,
+			)
 			// TODO(aakselrod): Return?
 			continue
 		}
@@ -461,7 +461,7 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 	// Handle RescanFinished notification if required.
 	bs, err := s.CS.BestBlock()
 	if err != nil {
-		log <- cl.Error{"can't get chain service's best block:", err, cl.Ine()}
+		ERROR("can't get chain service's best block:", err)
 		return
 	}
 	if bs.Hash == header.BlockHash() {
@@ -573,7 +573,7 @@ func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
 func (s *NeutrinoClient) notificationHandler() {
 	hash, height, err := s.GetBestBlock()
 	if err != nil {
-		log <- cl.Errorf{"failed to get best block from chain service:", err, cl.Ine()}
+		ERRORF("failed to get best block from chain service:", err)
 		s.Stop()
 		s.wg.Done()
 		return
@@ -632,7 +632,7 @@ out:
 			}
 		case err := <-rescanErr:
 			if err != nil {
-				log <- cl.Error{"neutrino rescan ended with error:", err, cl.Ine()}
+				ERROR("neutrino rescan ended with error:", err)
 			}
 		case s.currentBlock <- bs:
 		case <-s.quit:

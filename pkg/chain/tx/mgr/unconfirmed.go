@@ -3,7 +3,6 @@ package wtxmgr
 import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
@@ -27,7 +26,7 @@ func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) erro
 			return nil
 		}
 	}
-	log <- cl.Info{"inserting unconfirmed transaction", rec.Hash}
+	INFO("inserting unconfirmed transaction", rec.Hash)
 	v, err := valueTxRecord(rec)
 	if err != nil {
 		return err
@@ -76,9 +75,9 @@ func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) e
 			if err != nil {
 				return err
 			}
-			log <- cl.Debug{
-				"removing double spending transaction", doubleSpend.Hash, cl.Ine()}
-			if err := s.removeConflict(ns, &doubleSpend); err != nil {
+			DEBUG(
+				"removing double spending transaction", doubleSpend.Hash)
+			if err := RemoveConflict(ns, &doubleSpend); err != nil {
 				return err
 			}
 		}
@@ -86,11 +85,12 @@ func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) e
 	return nil
 }
 
-// removeConflict removes an unmined transaction record and all spend chains
-// deriving from it from the store.  This is designed to remove transactions
-// that would otherwise result in double spend conflicts if left in the store,
+func // RemoveConflict removes an unmined transaction record and all spend
+// chains deriving from it from the store.
+// This is designed to remove transactions that would otherwise result in
+// double spend conflicts if left in the store,
 // and to remove transactions that spend coinbase transactions on reorgs.
-func (s *Store) removeConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
+RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
 	// For each potential credit for this record, each spender (if any) must
 	// be recursively removed as well.  Once the spenders are removed, the
 	// credit is deleted.
@@ -113,10 +113,10 @@ func (s *Store) removeConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error
 			if err != nil {
 				return err
 			}
-			log <- cl.Debugf{
+			DEBUGF(
 				"transaction %v is part of a removed conflict chain -- removing as well %s",
-				spender.Hash, cl.Ine()}
-			if err := s.removeConflict(ns, &spender); err != nil {
+				spender.Hash)
+			if err := RemoveConflict(ns, &spender); err != nil {
 				return err
 			}
 		}
@@ -137,10 +137,10 @@ func (s *Store) removeConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error
 	return deleteRawUnmined(ns, rec.Hash[:])
 }
 
-// UnminedTxs returns the underlying transactions for all unmined transactions
-// which are not known to have been mined in a block.  Transactions are
-// guaranteed to be sorted by their dependency order.
-func (s *Store) UnminedTxs(ns walletdb.ReadBucket) ([]*wire.MsgTx, error) {
+func // UnminedTxs returns the underlying transactions for all unmined
+// transactions which are not known to have been mined in a block.
+// Transactions are guaranteed to be sorted by their dependency order.
+(s *Store) UnminedTxs(ns walletdb.ReadBucket) ([]*wire.MsgTx, error) {
 	recSet, err := s.unminedTxRecords(ns)
 	if err != nil {
 		return nil, err
@@ -152,7 +152,8 @@ func (s *Store) UnminedTxs(ns walletdb.ReadBucket) ([]*wire.MsgTx, error) {
 	}
 	return txs, nil
 }
-func (s *Store) unminedTxRecords(ns walletdb.ReadBucket) (map[chainhash.Hash]*TxRecord, error) {
+func
+(s *Store) unminedTxRecords(ns walletdb.ReadBucket) (map[chainhash.Hash]*TxRecord, error) {
 	unmined := make(map[chainhash.Hash]*TxRecord)
 	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) error {
 		var txHash chainhash.Hash
@@ -171,9 +172,9 @@ func (s *Store) unminedTxRecords(ns walletdb.ReadBucket) (map[chainhash.Hash]*Tx
 	return unmined, err
 }
 
-// UnminedTxHashes returns the hashes of all transactions not known to have been
-// mined in a block.
-func (s *Store) UnminedTxHashes(ns walletdb.ReadBucket) ([]*chainhash.Hash, error) {
+func // UnminedTxHashes returns the hashes of all transactions not known to
+// have been mined in a block.
+(s *Store) UnminedTxHashes(ns walletdb.ReadBucket) ([]*chainhash.Hash, error) {
 	return s.unminedTxHashes(ns)
 }
 func (s *Store) unminedTxHashes(ns walletdb.ReadBucket) ([]*chainhash.Hash, error) {

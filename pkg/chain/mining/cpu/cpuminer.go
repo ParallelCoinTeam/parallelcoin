@@ -14,7 +14,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // CPUMiner provides facilities for solving blocks (mining) using the CPU in a
@@ -108,12 +107,12 @@ var (
 // The function returns a list of the hashes of generated blocks.
 func (m *CPUMiner) GenerateNBlocks(n uint32, algo string) ([]*chainhash.Hash, error) {
 	m.Lock()
-	log <- cl.Warnf{"generating %s blocks...", m.cfg.Algo}
+	WARNF("generating %s blocks...", m.cfg.Algo)
 	// Respond with an error if server is already mining.
 	if m.started || m.discreteMining {
 		m.Unlock()
 		return nil, errors.New("server is already CPU mining; call " +
-			"`setgenerate 0` before calling discrete `generate` commands.")
+			"`setgenerate 0` before calling discrete `generate` commands")
 	}
 	m.started = true
 	m.discreteMining = true
@@ -121,7 +120,7 @@ func (m *CPUMiner) GenerateNBlocks(n uint32, algo string) ([]*chainhash.Hash, er
 	m.wg.Add(1)
 	go m.speedMonitor()
 	m.Unlock()
-	log <- cl.Warnf{"generating %d blocks", n}
+	WARNF("generating %d blocks", n)
 	i := uint32(0)
 	blockHashes := make([]*chainhash.Hash, n)
 	// Start a ticker which is used to signal checks for stale work and updates to the speed monitor.
@@ -149,7 +148,7 @@ func (m *CPUMiner) GenerateNBlocks(n uint32, algo string) ([]*chainhash.Hash, er
 		template, err := m.g.NewBlockTemplate(payToAddr, algo)
 		m.submitBlockLock.Unlock()
 		if err != nil {
-			log <- cl.Warnf{"failed to create new block template:", err, cl.Ine()}
+			WARNF("failed to create new block template:", err)
 			continue
 		}
 		// Attempt to solve the block.  The function will exit early with false
@@ -162,7 +161,7 @@ func (m *CPUMiner) GenerateNBlocks(n uint32, algo string) ([]*chainhash.Hash, er
 			blockHashes[i] = block.Hash()
 			i++
 			if i == n {
-				log <- cl.Warnf{"generated %d blocks", i}
+				WARNF("generated %d blocks", i)
 				m.Lock()
 				close(m.speedMonitorQuit)
 				m.wg.Wait()
@@ -194,7 +193,7 @@ func (m *CPUMiner) HashesPerSecond() float64 {
 }
 
 // IsMining returns whether or not the CPU miner has been started and is
-// therefore currenting mining. This function is safe for concurrent access.
+// therefore currently mining. This function is safe for concurrent access.
 func (m *CPUMiner) IsMining() bool {
 	m.Lock()
 	defer m.Unlock()
@@ -249,7 +248,7 @@ func (m *CPUMiner) Start() {
 	}
 	m.Lock()
 	defer m.Unlock()
-	log <- cl.Info{"starting cpu miner", cl.Ine()}
+	INFO("starting cpu miner")
 	// Nothing to do if the miner is already running or if running in discrete mode (using GenerateNBlocks).
 	if m.started || m.discreteMining {
 		return
@@ -260,7 +259,7 @@ func (m *CPUMiner) Start() {
 	go m.speedMonitor()
 	go m.miningWorkerController()
 	m.started = true
-	log <- cl.Trace{"CPU miner started mining", m.cfg.Algo, cl.Ine()}
+	TRACE("CPU miner started mining", m.cfg.Algo)
 }
 
 // Stop gracefully stops the mining process by signalling all workers, and the
@@ -277,7 +276,7 @@ func (m *CPUMiner) Stop() {
 	close(m.quit)
 	m.wg.Wait()
 	m.started = false
-	log <- cl.Warn{"CPU miner stopped", cl.Ine()}
+	WARN("CPU miner stopped")
 }
 
 // generateBlocks is a worker that is controlled by the miningWorkerController.
@@ -292,7 +291,7 @@ func (m *CPUMiner) generateBlocks(quit chan struct{}) {
 	defer ticker.Stop()
 out:
 	for {
-		log <- cl.Trace{"generateBlocksLoop start", cl.Ine()}
+		TRACE("generateBlocksLoop start")
 		// Quit when the miner is stopped.
 		select {
 		case <-quit:
@@ -305,7 +304,7 @@ out:
 		// on when there are no connected peers.
 		if m.cfg.ConnectedCount() == 0 &&
 			m.cfg.ChainParams.Net == wire.MainNet {
-			log <- cl.Trace{"server has no peers, waiting", cl.Ine()}
+			TRACE("server has no peers, waiting")
 			time.Sleep(time.Second)
 			continue
 		}
@@ -317,7 +316,7 @@ out:
 		curHeight := m.g.BestSnapshot().Height
 		if curHeight != 0 && !m.cfg.IsCurrent() {
 			m.submitBlockLock.Unlock()
-			log <- cl.Warnf{"server is not current yet, waiting", cl.Ine()}
+			WARNF("server is not current yet, waiting")
 			time.Sleep(time.Second)
 			continue
 		}
@@ -328,21 +327,21 @@ out:
 		// memory pool as a source of transactions to potentially include in the
 		// block.
 		// algo := fork.GetAlgoVer(m.cfg.Algo, m.b.BestSnapshot().Height)
-		// log <- cl.Warnf{"before gbt1", m.cfg.Algo, algo, cl.Ine()}
+		// WARNF{"before gbt1", m.cfg.Algo, algo}
 		// algoname := fork.GetAlgoName(algo, m.b.BestSnapshot().Height)
-		// log <- cl.Warnf{"before gbt2", algoname, cl.Ine()}
-		log <- cl.Trace{"getting new block template", cl.Ine()}
+		// WARNF{"before gbt2", algoname}
+		TRACE("getting new block template")
 		template, err := m.g.NewBlockTemplate(payToAddr, m.cfg.Algo)
 		m.submitBlockLock.Unlock()
 		if err != nil {
-			log <- cl.Warnf{"failed to create new block template:", err, cl.Ine()}
+			WARNF("failed to create new block template:", err)
 			continue
 		}
 		// Attempt to solve the block.  The function will exit early with false
 		// when conditions that trigger a stale block, so a new block template
 		// can be generated.  When the return is true a solution was found, so
 		// submit the solved block.
-		log <- cl.Trace{"attempting to solve block", cl.Ine()}
+		TRACE("attempting to solve block")
 		if m.solveBlock(template.Block, curHeight+1, m.cfg.ChainParams.Name == "testnet", ticker, quit) {
 			block := util.NewBlock(template.Block)
 			// if m.cfg.ChainParams.Name == "testnet" {
@@ -355,7 +354,7 @@ out:
 			m.submitBlock(block)
 		}
 	}
-	log <- cl.Trace{"cpu miner worker finished", cl.Ine()}
+	TRACE("cpu miner worker finished")
 	m.workerWg.Done()
 }
 
@@ -364,7 +363,7 @@ out:
 // dynamically adjust the number of running worker goroutines. It must be run
 // as a goroutine.
 func (m *CPUMiner) miningWorkerController() {
-	log <- cl.Trace{"starting mining worker controller", cl.Ine()}
+	TRACE("starting mining worker controller")
 	// launchWorkers groups common code to launch a specified number of workers
 	// for generating blocks.
 	var runningWorkers []chan struct{}
@@ -376,7 +375,7 @@ func (m *CPUMiner) miningWorkerController() {
 			go m.generateBlocks(quit)
 		}
 	}
-	log <- cl.Tracef{"spawning %d worker(s) %s", m.numWorkers, cl.Ine()}
+	TRACEF("spawning %d worker(s) %s", m.numWorkers)
 	// Launch the current number of workers by default.
 	runningWorkers = make([]chan struct{}, 0, m.numWorkers)
 	launchWorkers(m.numWorkers)
@@ -425,13 +424,14 @@ out:
 func (m *CPUMiner) solveBlock(
 	msgBlock *wire.MsgBlock, blockHeight int32, testnet bool,
 	ticker *time.Ticker, quit chan struct{}) bool {
-	log <- cl.Trace{"running solveBlock", cl.Ine()}
+	TRACE("running solveBlock")
 	// algoName := fork.GetAlgoName(
 	// 	msgBlock.Header.Version, m.b.BestSnapshot().Height)
 	// Choose a random extra nonce offset for this block template and worker.
 	enOffset, err := wire.RandomUint64()
 	if err != nil {
-		log <- cl.Warnf{"unexpected error while generating random extra nonce offset:", err, cl.Ine()}
+		WARNF("unexpected error while generating random extra nonce offset:",
+			err)
 		enOffset = 0
 	}
 	// Create some convenience variables.
@@ -450,10 +450,10 @@ func (m *CPUMiner) solveBlock(
 		// Update the extra nonce in the block template with the new value by
 		// regenerating the coinbase script and setting the merkle root to the
 		// new value.
-		log <- cl.Trace{"updating extraNonce", cl.Ine()}
+		TRACE("updating extraNonce")
 		err := m.g.UpdateExtraNonce(msgBlock, blockHeight, extraNonce+enOffset)
 		if err != nil {
-			log <- cl.Warnf{err, cl.Ine()}
+			WARN(err)
 		}
 		// Search through the entire nonce range for a solution while
 		// periodically checking for early quit and stale block conditions along
@@ -467,7 +467,7 @@ func (m *CPUMiner) solveBlock(
 			rn -= 1 << shifter
 		}
 		rn += 1 << shifter
-		rnonce := uint32(rn)
+		rNonce := uint32(rn)
 		// Do more rounds the more the difficulty will adjust down
 		mn := uint32(27)
 		if testnet {
@@ -476,8 +476,8 @@ func (m *CPUMiner) solveBlock(
 		if fork.GetCurrent(blockHeight) == 0 {
 			mn = 1 << 16
 		}
-		log <- cl.Trace{"starting round from ", rnonce, cl.Ine()}
-		for i := uint32(rnonce); i <= rnonce+mn; i++ {
+		TRACE("starting round from ", rNonce)
+		for i := rNonce; i <= rNonce+mn; i++ {
 			if time.Now().Sub(now) > time.Second*3 {
 				return false
 			}
@@ -501,7 +501,7 @@ func (m *CPUMiner) solveBlock(
 				}
 				err := m.g.UpdateBlockTime(msgBlock)
 				if err != nil {
-					log <- cl.Warnf{err, cl.Ine()}
+					WARN(err)
 				}
 			default:
 			}
@@ -544,12 +544,12 @@ out:
 			hashesPerSec = (hashesPerSec + curHashesPerSec) / 2
 			totalHashes = 0
 			if hashesPerSec != 0 {
-				log <- cl.Warnf{
+				WARNF(
 					"%s Hash speed: %6.4f Kh/s %0.2f h/s",
 					m.cfg.Algo,
-					hashesPerSec / 1000,
+					hashesPerSec/1000,
 					hashesPerSec,
-				}
+				)
 			}
 		// Request for the number of hashes per second.
 		case m.queryHashesPerSec <- hashesPerSec:
@@ -564,7 +564,7 @@ out:
 // submitBlock submits the passed block to network after ensuring it passes all
 // of the consensus validation rules.
 func (m *CPUMiner) submitBlock(block *util.Block) bool {
-	log <- cl.Trace{"submitting block", cl.Ine()}
+	TRACE("submitting block")
 	m.submitBlockLock.Lock()
 	defer m.submitBlockLock.Unlock()
 	// Ensure the block is not stale since a new block could have shown up while
@@ -574,12 +574,12 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	// and submitted in between.
 	msgBlock := block.MsgBlock()
 	if !msgBlock.Header.PrevBlock.IsEqual(&m.g.BestSnapshot().Hash) {
-		log <- cl.Warnf{
+		WARNF(
 			"Block submitted via CPU miner with previous block %s is stale %s",
-			msgBlock.Header.PrevBlock, cl.Ine()}
+			msgBlock.Header.PrevBlock)
 		return false
 	}
-	log <- cl.Trace{"found block is fresh ", m.cfg.ProcessBlock, cl.Ine()}
+	TRACE("found block is fresh ", m.cfg.ProcessBlock)
 	// Process this block using the same rules as blocks coming from other
 	// nodes.  This will in turn relay it to the network like normal.
 	isOrphan, err := m.cfg.ProcessBlock(block, blockchain.BFNone)
@@ -587,39 +587,37 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 		// Anything other than a rule violation is an unexpected error, so log
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
-			log <- cl.Warnf{
+			WARNF(
 				"Unexpected error while processing block submitted via CPU miner:", err,
-			}
+			)
 			return false
 		}
-		log <- cl.Warnf{"block submitted via CPU miner rejected:", err}
+		WARNF("block submitted via CPU miner rejected:", err)
 		return false
 	}
 	if isOrphan {
 		return false
 	}
-	log <- cl.Trace{"the block was accepted", cl.Ine()}
+	TRACE("the block was accepted")
 	coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
 	prevHeight := block.Height() - 1
 	prevBlock, _ := m.b.BlockByHeight(prevHeight)
 	prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
 	since := block.MsgBlock().Header.Timestamp.Unix() - prevTime
-	bhash := block.MsgBlock().BlockHashWithAlgos(block.Height())
-	log <- cl.Warnf{"new block height %d %s\n%10d %08x %v %s %ds since prev %s",
+	bHash := block.MsgBlock().BlockHashWithAlgos(block.Height())
+	WARNF("new block height %d %s\n%10d %08x %v %s %ds since prev %s",
 		block.Height(),
-		bhash,
+		bHash,
 		block.MsgBlock().Header.Timestamp.Unix(),
 		block.MsgBlock().Header.Bits,
 		util.Amount(coinbaseTx.Value),
 		fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()),
-		since,
-		cl.Ine(),
-		// fmt.Sprintf("%08x %08x", time.Now().UTC().Unix(), block.MsgBlock().Header.Timestamp.Unix()),
-		// graf.Convert(bhash.String()),
-		// graf.Convert(fmt.Sprintf("%064x",
-		// 	fork.CompactToBig(block.MsgBlock().Header.Bits).Bytes())),
-	}
-	// Log.Wrnc(func() string {
+		since)
+	// fmt.Sprintf("%08x %08x", time.Now().UTC().Unix(), block.MsgBlock().Header.Timestamp.Unix()),
+	// graf.Convert(bHash.String()),
+	// graf.Convert(fmt.Sprintf("%064x",
+	// 	fork.CompactToBig(block.MsgBlock().Header.Bits).Bytes())),
+	// }
 	// 	return fmt.Sprintf(
 	// 		"Block submitted via CPU miner accepted (algo %s, hash %s, amount %v) %s",
 	// 		fork.GetAlgoName(block.MsgBlock().Header.Version,

@@ -24,7 +24,7 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 		if dbtx != nil {
 			err := dbtx.Rollback()
 			if err != nil {
-				log <- cl.Debug{err, cl.Ine()}
+				log <- cl.Debug{err}
 			}
 		}
 	}()

@@ -17,7 +17,7 @@ import (
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	cfgutil "github.com/parallelcointeam/parallelcoin/pkg/util/config"
 )
@@ -131,7 +131,7 @@ func (noInputValue) Error() string { return "no input value" }
 // scripts as they are not needed for creating the unsinged transaction and are
 // looked up again by the wallet during the call to signrawtransaction.
 func makeInputSource(
-	outputs []json.ListUnspentResult) txauthor.InputSource {
+	outputs []btcjson.ListUnspentResult) txauthor.InputSource {
 	var (
 		totalInputValue util.Amount
 		inputs          = make([]*wire.TxIn, 0, len(outputs))
@@ -223,7 +223,7 @@ func sweep() error {
 	if err != nil {
 		return errContext(err, "failed to fetch unspent outputs")
 	}
-	sourceOutputs := make(map[string][]json.ListUnspentResult)
+	sourceOutputs := make(map[string][]btcjson.ListUnspentResult)
 	for _, unspentOutput := range unspentOutputs {
 		if !unspentOutput.Spendable {
 			continue
@@ -316,7 +316,7 @@ func saneOutputValue(
 	return amount >= 0 && amount <= util.MaxSatoshi
 }
 func parseOutPoint(
-	input *json.ListUnspentResult) (wire.OutPoint, error) {
+	input *btcjson.ListUnspentResult) (wire.OutPoint, error) {
 	txHash, err := chainhash.NewHashFromStr(input.TxID)
 	if err != nil {
 		return wire.OutPoint{}, err

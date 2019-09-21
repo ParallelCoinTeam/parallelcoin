@@ -36,7 +36,7 @@ func (c *JSONRPC) Call(method string, params interface{}) (interface{}, error) {
 	args["netparams"] = params
 	j, err := json.Marshal(args)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 		return nil, err
 	}
 	req.Body = ioutil.NopCloser(strings.NewReader(string(j)))
@@ -50,7 +50,7 @@ func (c *JSONRPC) Call(method string, params interface{}) (interface{}, error) {
 	var data map[string]interface{}
 	err = json.Unmarshal(bytes, &data)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	if err, found := data["error"]; found && err != nil {
 		str, _ := json.Marshal(err)

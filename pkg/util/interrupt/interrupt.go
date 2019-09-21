@@ -4,22 +4,21 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
-//nolint
 var (
 	requested bool
-	// InterruptChan is used to receive SIGINT (Ctrl+C) signals.
-	InterruptChan chan os.Signal
-	// InterruptSignals is the list of signals that cause the interrupt
-	InterruptSignals = []os.Signal{os.Interrupt, syscall.SIGTERM}
+	// Chan is used to receive SIGINT (Ctrl+C) signals.
+	Chan chan os.Signal
+	// Signals is the list of signals that cause the interrupt
+	Signals = []os.Signal{os.Interrupt, syscall.SIGTERM}
 	// ShutdownRequestChan is a channel that can receive shutdown requests
 	ShutdownRequestChan = make(chan struct{})
-	// AddHandlerChannel is used to add an interrupt handler to the list of handlers to be invoked on SIGINT (Ctrl+C) signals.
-	AddHandlerChannel = make(chan func())
-	// HandlersDone is closed after all interrupt handlers run the first time an interrupt is signaled.
+	// AddHandlerChan is used to add an interrupt handler to the list of
+	// handlers to be invoked on SIGINT (Ctrl+C) signals.
+	AddHandlerChan = make(chan func())
+	// HandlersDone is closed after all interrupt handlers run the first time
+	// an interrupt is signaled.
 	HandlersDone = make(chan struct{})
 )
 
@@ -37,18 +36,18 @@ func Listener() {
 	}
 	for {
 		select {
-		case sig := <-InterruptChan:
-			log <- cl.Warnf{"received signal (%s) - shutting down... %s", sig, cl.Ine()}
+		case sig := <-Chan:
+			WARNF("received signal (%s) - shutting down... %s", sig)
 			_ = sig
 			requested = true
 			invokeCallbacks()
 			return
 		case <-ShutdownRequestChan:
-			log <- cl.Warn{"received shutdown request - shutting down...", cl.Ine()}
+			WARN("received shutdown request - shutting down...")
 			requested = true
 			invokeCallbacks()
 			return
-		case handler := <-AddHandlerChannel:
+		case handler := <-AddHandlerChan:
 			interruptCallbacks = append(interruptCallbacks, handler)
 		}
 	}
@@ -58,12 +57,12 @@ func Listener() {
 func AddHandler(handler func()) {
 	// Create the channel and start the main interrupt handler which invokes all
 	// other callbacks and exits if not already done.
-	if InterruptChan == nil {
-		InterruptChan = make(chan os.Signal, 1)
-		signal.Notify(InterruptChan, InterruptSignals...)
+	if Chan == nil {
+		Chan = make(chan os.Signal, 1)
+		signal.Notify(Chan, Signals...)
 		go Listener()
 	}
-	AddHandlerChannel <- handler
+	AddHandlerChan <- handler
 }
 
 // Request programatically requests a shutdown

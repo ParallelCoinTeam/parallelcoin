@@ -4,10 +4,8 @@ import (
 	"net"
 	"strings"
 
-	externalip "github.com/GlenDC/go-external-ip"
+	externalip "github.com/glendc/go-external-ip"
 	"github.com/jackpal/gateway"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // GetRouteableInterface returns the address and interface of the internet
@@ -16,14 +14,14 @@ func GetRouteableInterface() (lanInterface *net.Interface) {
 	var gw net.IP
 	var err error
 	if gw, err = gateway.DiscoverGateway(); err != nil {
-		log <- cl.Error{"gateway error: ", err, cl.Ine()}
+		ERROR("gateway error: ", err)
 		return nil
 	}
 	gwMasked := gw.Mask(gw.DefaultMask())
 	var ifAddrs []net.Addr
 	ifAddrs, err = net.InterfaceAddrs()
 	if err != nil {
-		log <- cl.Error{"gateway mask error: ", err, cl.Ine()}
+		ERROR("gateway mask error: ", err)
 		return nil
 	}
 	var ad net.IP
@@ -36,16 +34,16 @@ func GetRouteableInterface() (lanInterface *net.Interface) {
 		}
 	}
 	if ad == nil {
-		log <- cl.Error{"somehow didn't find a LAN interface even though we" +
-			" have a gateway", cl.Ine()}
+		ERROR("somehow didn't find a LAN interface even though we" +
+			" have a gateway")
 		return nil
 	}
 	consensus := externalip.DefaultConsensus(nil, nil)
 	ip, err := consensus.ExternalIP()
 	nat := false
 	if err != nil {
-		log <- cl.Error{"could not get external IP, " +
-			"probably no network connection", cl.Ine()}
+		ERROR("could not get external IP, " +
+			"probably no network connection")
 		return nil
 	} else {
 		if ip.String() != ad.String() {
@@ -53,12 +51,12 @@ func GetRouteableInterface() (lanInterface *net.Interface) {
 		}
 	}
 	if !nat {
-		log <- cl.Warn{"we are directly on the internet", cl.Ine()}
+		WARN("we are directly on the internet")
 	}
 	var interfaces []net.Interface
 	interfaces, err = net.Interfaces()
 	if err != nil {
-		log <- cl.Error{"error:", err}
+		ERROR("error:", err)
 	}
 	for i := range interfaces {
 		if ifs, err := interfaces[i].Addrs(); err == nil {

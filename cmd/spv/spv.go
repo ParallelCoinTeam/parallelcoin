@@ -21,7 +21,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/peer/addrmgr"
 	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
@@ -126,9 +125,9 @@ type (
 		// continueHash   *chainhash.Hash
 		// requestQueue   []*wire.InvVect
 		knownAddresses map[string]struct{}
-		//nolint
+		// nolint
 		banScore connmgr.DynamicBanScore
-		//nolint
+		// nolint
 		quit chan struct{}
 		// The following map of subcribers is used to subscribe to messages
 		// from the peer. This allows broadcast to multiple subscribers at
@@ -310,9 +309,9 @@ func (s *ChainService) NetTotals() (uint64, uint64) {
 // PeerByAddr lets the caller look up a peer address in the service's peer
 // table, if connected to that peer address.
 func (s *ChainService) PeerByAddr(addr string) *ServerPeer {
-	for _, peer := range s.Peers() {
-		if peer.Addr() == addr {
-			return peer
+	for _, serverPeer := range s.Peers() {
+		if serverPeer.Addr() == addr {
+			return serverPeer
 		}
 	}
 	return nil
@@ -406,44 +405,45 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 	}
 	// Ignore new peers if we're shutting down.
 	if atomic.LoadInt32(&s.shutdown) != 0 {
-		log <- cl.Infof{"new peer %s ignored - server is shutting down", sp, cl.Ine()}
+		INFOF("new peer %s ignored - server is shutting down", sp)
 		sp.Disconnect()
 		return false
 	}
 	// Disconnect banned peers.
 	host, _, err := net.SplitHostPort(sp.Addr())
 	if err != nil {
-		log <- cl.Debug{"can't split host/port:", err, cl.Ine()}
+		DEBUG("can't split host/port:", err)
 		sp.Disconnect()
 		return false
 	}
 	if banEnd, ok := state.banned[host]; ok {
 		if time.Now().Before(banEnd) {
-			log <- cl.Debugf{
+			DEBUGF(
 				"peer %s is banned for another %v - disconnecting %s",
-				host, time.Until(banEnd), cl.Ine()}
+				host, time.Until(banEnd),
+			)
 			sp.Disconnect()
 			return false
 		}
-		log <- cl.Infof{
+		INFOF(
 			"peer %s is no longer banned", host,
-		}
+		)
 		delete(state.banned, host)
 	}
 	// TODO: Check for max peers from a single IP.
-	// Limit max number of total peers.
+	//  Limit max number of total peers.
 	if state.Count() >= MaxPeers {
-		log <- cl.Infof{
+		INFOF(
 			"max peers reached [%d] - disconnecting peer %s",
 			MaxPeers, sp,
-		}
+		)
 		sp.Disconnect()
 		// TODO: how to handle permanent peers here?
 		// they should be rescheduled.
 		return false
 	}
 	// Add the new peer and start it.
-	log <- cl.Debug{"new peer", sp, cl.Ine()}
+	DEBUG("new peer", sp)
 	state.outboundGroups[addrmgr.GroupKey(sp.NA())]++
 	if sp.persistent {
 		state.persistentPeers[sp.ID()] = sp
@@ -458,12 +458,13 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 func (s *ChainService) handleBanPeerMsg(state *peerState, sp *ServerPeer) {
 	host, _, err := net.SplitHostPort(sp.Addr())
 	if err != nil {
-		log <- cl.Debugf{
+		DEBUGF(
 			"can't split ban peer %s: %s %s",
-			sp.Addr(), err, cl.Ine()}
+			sp.Addr(), err,
+		)
 		return
 	}
-	log <- cl.Infof{"banned peer %s for %v", host, BanDuration}
+	INFOF("banned peer %s for %v", host, BanDuration)
 	state.banned[host] = time.Now().Add(BanDuration)
 }
 
@@ -484,7 +485,7 @@ func (s *ChainService) handleDonePeerMsg(state *peerState, sp *ServerPeer) {
 			s.connManager.Disconnect(sp.connReq.ID())
 		}
 		delete(list, sp.ID())
-		log <- cl.Debug{"removed peer", sp, cl.Ine()}
+		DEBUG("removed peer", sp)
 		return
 	}
 	if sp.connReq != nil {
@@ -533,8 +534,9 @@ func (s *ChainService) outboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) 
 	sp := newServerPeer(s, c.Permanent)
 	p, err := peer.NewOutboundPeer(newPeerConfig(sp), c.Addr.String())
 	if err != nil {
-		log <- cl.Debugf{
-			"cannot create outbound peer %s: %s %s", c.Addr, err, cl.Ine()}
+		DEBUGF(
+			"cannot create outbound peer %s: %s %s", c.Addr, err,
+			)
 		s.connManager.Disconnect(c.ID())
 	}
 	sp.Peer = p
@@ -569,7 +571,7 @@ func (s *ChainService) peerHandler() {
 	s.blockManager.Start()
 	err := s.utxoScanner.Start()
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		DEBUG(err)
 	}
 	state := &peerState{
 		persistentPeers: make(map[int32]*ServerPeer),
@@ -611,7 +613,7 @@ out:
 		case <-s.quit:
 			// Disconnect all peers on server shutdown.
 			state.forAllPeers(func(sp *ServerPeer) {
-				log <- cl.Trace{"shutdown peer", sp}
+				TRACE("shutdown peer", sp)
 				sp.Disconnect()
 			})
 			break out
@@ -620,15 +622,15 @@ out:
 	s.connManager.Stop()
 	err = s.utxoScanner.Stop()
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		DEBUG(err)
 	}
 	err = s.blockManager.Stop()
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		DEBUG(err)
 	}
 	err = s.addrManager.Stop()
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		DEBUG(err)
 	}
 	// Drain channels before exiting so nothing is left waiting around
 	// to send.
@@ -719,9 +721,10 @@ func (sp *ServerPeer) OnAddr(_ *peer.Peer, msg *wire.MsgAddr) {
 	}
 	// A message that has no addresses is invalid.
 	if len(msg.AddrList) == 0 {
-		log <- cl.Errorf{
+		ERRORF(
 			"command [%s] from %s does not contain any addresses",
-			msg.Command(), sp.Addr(), cl.Ine()}
+			msg.Command(), sp.Addr(),
+		)
 		sp.Disconnect()
 		return
 	}
@@ -754,10 +757,11 @@ func (sp *ServerPeer) OnAddr(_ *peer.Peer, msg *wire.MsgAddr) {
 // disconnected if an invalid fee filter value is provided.
 func (sp *ServerPeer) OnFeeFilter(_ *peer.Peer, msg *wire.MsgFeeFilter) {
 	// Check that the passed minimum fee is a valid amount.
-	if msg.MinFee < 0 || msg.MinFee > util.MaxSatoshi {
-		log <- cl.Debugf{
+	if msg.MinFee < 0 || msg.MinFee > int64(util.MaxSatoshi) {
+		DEBUGF(
 			"peer %v sent an invalid feefilter '%v' -- disconnecting %s",
-			sp, util.Amount(msg.MinFee), cl.Ine()}
+			sp, util.Amount(msg.MinFee),
+		)
 		sp.Disconnect()
 		return
 	}
@@ -767,10 +771,10 @@ func (sp *ServerPeer) OnFeeFilter(_ *peer.Peer, msg *wire.MsgFeeFilter) {
 // OnHeaders is invoked when a peer receives a headers bitcoin
 // message.  The message is passed down to the block manager.
 func (sp *ServerPeer) OnHeaders(p *peer.Peer, msg *wire.MsgHeaders) {
-	log <- cl.Tracef{
+	TRACEF(
 		"got headers with %d items from %s",
 		len(msg.Headers), p.Addr(),
-	}
+	)
 	sp.server.blockManager.QueueHeaders(msg, sp)
 }
 
@@ -779,20 +783,20 @@ func (sp *ServerPeer) OnHeaders(p *peer.Peer, msg *wire.MsgHeaders) {
 // accordingly.  We pass the message down to blockmanager which will call
 // QueueMessage with any appropriate responses.
 func (sp *ServerPeer) OnInv(p *peer.Peer, msg *wire.MsgInv) {
-	log <- cl.Tracef{
+	TRACEF(
 		"got inv with %d items from %s", len(msg.InvList), p.Addr(),
-	}
+	)
 	newInv := wire.NewMsgInvSizeHint(uint(len(msg.InvList)))
 	for _, invVect := range msg.InvList {
 		if invVect.Type == wire.InvTypeTx {
-			log <- cl.Tracef{
+			TRACEF(
 				"ignoring tx %s in inv from %v -- SPV mode",
 				invVect.Hash, sp,
-			}
+			)
 			if sp.ProtocolVersion() >= wire.BIP0037Version {
-				log <- cl.Infof{
+				INFOF(
 					"peer %v is announcing transactions -- disconnecting", sp,
-				}
+				)
 				sp.Disconnect()
 				return
 			}
@@ -800,7 +804,7 @@ func (sp *ServerPeer) OnInv(p *peer.Peer, msg *wire.MsgInv) {
 		}
 		err := newInv.AddInvVect(invVect)
 		if err != nil {
-			log <- cl.Error{"failed to add inventory vector:", err, cl.Ine()}
+			ERROR("failed to add inventory vector:", err)
 			break
 		}
 	}
@@ -844,7 +848,7 @@ func (sp *ServerPeer) OnReject(_ *peer.Peer, msg *wire.MsgReject) {
 func (sp *ServerPeer) OnVerAck(_ *peer.Peer, msg *wire.MsgVerAck) {
 	err := sp.pushSendHeadersMsg()
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		DEBUG(err)
 	}
 }
 
@@ -861,9 +865,9 @@ func (sp *ServerPeer) OnVersion(_ *peer.Peer, msg *wire.MsgVersion) *wire.MsgRej
 	peerServices := sp.Services()
 	if peerServices&wire.SFNodeWitness != wire.SFNodeWitness ||
 		peerServices&wire.SFNodeCF != wire.SFNodeCF {
-		log <- cl.Infof{
+		INFOF(
 			"disconnecting peer %v, cannot serve compact filters", sp,
-		}
+		)
 		sp.Disconnect()
 		return nil
 	}
@@ -911,7 +915,7 @@ func (sp *ServerPeer) OnWrite(_ *peer.Peer, bytesWritten int, msg wire.Message, 
 // 		// logged if the score is above the warn threshold.
 // 		score := sp.banScore.Int()
 // 		if score > warnThreshold {
-// 			log <- cl.Warnf{
+// 			WARNF{
 // 				"misbehaving peer %s: %s -- ban score is %d, it was not increased this time",
 // 				sp, reason, score,
 // 			}
@@ -920,12 +924,12 @@ func (sp *ServerPeer) OnWrite(_ *peer.Peer, bytesWritten int, msg wire.Message, 
 // 	}
 // 	score := sp.banScore.Increase(persistent, transient)
 // 	if score > warnThreshold {
-// 		log <- cl.Warnf{
+// 		WARNF{
 // 			"misbehaving peer %s: %s -- ban score increased to %d",
 // 			sp, reason, score,
 // 		}
 // 		if score > BanThreshold {
-// 			log <- cl.Warnf{
+// 			WARNF{
 // 				"misbehaving peer %s -- banning and disconnecting",
 // 				sp,
 // 			}
@@ -1190,15 +1194,15 @@ func NewChainService(cfg Config) (*ChainService, error) {
 // isn't nil, we call it with the peer as the argument before it is removed
 // from the peerList, and is disconnected from the server.
 func disconnectPeer(peerList map[int32]*ServerPeer, compareFunc func(*ServerPeer) bool, whenFound func(*ServerPeer)) bool {
-	for addr, peer := range peerList {
-		if compareFunc(peer) {
+	for addr, serverPeer := range peerList {
+		if compareFunc(serverPeer) {
 			if whenFound != nil {
-				whenFound(peer)
+				whenFound(serverPeer)
 			}
 			// This is ok because we are not continuing
 			// to iterate so won't corrupt the loop.
 			delete(peerList, addr)
-			peer.Disconnect()
+			serverPeer.Disconnect()
 			return true
 		}
 	}
@@ -1210,7 +1214,7 @@ func newPeerConfig(sp *ServerPeer) *peer.Config {
 	return &peer.Config{
 		Listeners: peer.MessageListeners{
 			OnVersion: sp.OnVersion,
-			//OnVerAck:    sp.OnVerAck, // Don't use sendheaders yet
+			// OnVerAck:    sp.OnVerAck, // Don't use sendheaders yet
 			OnInv:       sp.OnInv,
 			OnHeaders:   sp.OnHeaders,
 			OnReject:    sp.OnReject,

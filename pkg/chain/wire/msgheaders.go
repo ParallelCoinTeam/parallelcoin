@@ -3,8 +3,6 @@ package wire
 import (
 	"fmt"
 	"io"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MaxBlockHeadersPerMsg is the maximum number of block headers that can be in a single bitcoin headers message.
@@ -59,7 +57,7 @@ func (msg *MsgHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		}
 		err = msg.AddBlockHeader(bh)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 	}
 	return nil

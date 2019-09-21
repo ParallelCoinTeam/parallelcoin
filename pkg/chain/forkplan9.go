@@ -10,7 +10,6 @@ import (
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // CalcNextRequiredDifficultyPlan9 calculates the required difficulty for the
@@ -21,7 +20,7 @@ import (
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	adjustment float64, err error) {
-	log <- cl.Trace{"algoname ", algoname, cl.Ine()}
+	TRACE("algoname ", algoname)
 	const max float64 = 10000
 	const maxA, minA = max, 1 / max
 	const minAvSamples = 9
@@ -36,7 +35,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	if b.params.Net == wire.MainNet {
 		if fork.List[1].ActivationHeight == nH {
 			if l {
-				log <- cl.Debug{"on plan 9 hardfork", cl.Ine()}
+				DEBUG("on plan 9 hardfork")
 			}
 			return fork.FirstPowLimitBits, 1, nil
 		}
@@ -44,14 +43,14 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	if b.params.Net == wire.TestNet3 {
 		if fork.List[1].TestnetStart == nH {
 			if l {
-				log <- cl.Debug{"on plan 9 hardfork", cl.Ine()}
+				DEBUG("on plan 9 hardfork")
 			}
 			return fork.FirstPowLimitBits, 1, nil
 		}
 	}
 	algoVer := fork.GetAlgoVer(algoname, nH)
 	newTargetBits = fork.SecondPowLimitBits
-	log <- cl.Tracef{"newTarget %08x %s %d %s", newTargetBits, algoname, algoVer, cl.Ine()}
+	TRACEF("newTarget %08x %s %d %s", newTargetBits, algoname, algoVer)
 	last := lastNode
 	// find the most recent block of the same algo
 	//
@@ -69,7 +68,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 				//
 				if ln == nil {
 					if l {
-						log <- cl.Debug{"before first ", algoname, cl.Ine()}
+						DEBUG("before first ", algoname)
 					}
 					return fork.FirstPowLimitBits, 1, nil
 				}
@@ -126,7 +125,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		}
 		if intervals > minAvSamples {
 			if l {
-				log <- cl.Trace{"algs", algIntervals, cl.Ine()}
+				TRACE("algs", algIntervals)
 			}
 			// calculate exponential weighted moving average from intervals
 			awi := ewma.NewMovingAverage()
@@ -180,7 +179,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			}
 			if intervals > minAvSamples {
 				if l {
-					log <- cl.Trace{"da", dayIntervals, cl.Ine()}
+					TRACE("da", dayIntervals)
 				}
 				// calculate exponential weighted moving average from intervals
 				dw := ewma.NewMovingAverage()
@@ -223,7 +222,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			}
 			if intervals > minAvSamples {
 				if l {
-					log <- cl.Trace{"hr", hourIntervals, cl.Ine()}
+					TRACE("hr", hourIntervals)
 				}
 				// calculate exponential weighted moving average from intervals
 				hw := ewma.NewMovingAverage()
@@ -266,7 +265,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			}
 			if intervals > 1 {
 				if l {
-					log <- cl.Trace{"qh", qhourIntervals, cl.Ine()}
+					TRACE("qh", qhourIntervals)
 				}
 				// calculate exponential weighted moving average from intervals
 				qhw := ewma.NewMovingAverage()
@@ -284,18 +283,18 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		}
 	}
 	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv + timeSinceAlgo) / 6
-	log <- cl.Trace{"adjustment %3.4f %08x %s", adjustment, last.bits, cl.Ine()}
+	TRACE("adjustment %3.4f %08x %s", adjustment, last.bits)
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
-		log <- cl.Info{"newTarget is nil ", cl.Ine()}
+		INFO("newTarget is nil ")
 		return newTargetBits, 1, nil
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
 		newTargetBits = BigToCompact(newTarget)
-		log <- cl.Tracef{"newTarget %064x %08x %s", newTarget, newTargetBits, cl.Ine()}
+		TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
 		an := fork.List[1].AlgoVers[algoVer]
@@ -303,20 +302,20 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
-		log <- cl.Debugf{
-			"%d %s %s %s %s %s %s %s %s %s %s",
-			lastNode.height + 1,
-			an,
-			RightJustify(fmt.Sprintf("%3.2f", allTimeAv), 5),
-			RightJustify(fmt.Sprintf("%3.2fa", allTimeDiv*ttpb), 7),
-			RightJustify(fmt.Sprintf("%3.2fd", dayDiv*ttpb), 7),
-			RightJustify(fmt.Sprintf("%3.2fh", hourDiv*ttpb), 7),
-			RightJustify(fmt.Sprintf("%3.2fq", qhourDiv*ttpb), 7),
-			RightJustify(fmt.Sprintf("%3.2fA", algDiv*ttpb), 7),
-			RightJustify(fmt.Sprintf("%3.0f %3.3fD",
-				since-ttpb*float64(len(fork.List[1].Algos)), timeSinceAlgo*ttpb), 13),
-			RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11),
-			cl.Ine()}
+		DEBUGC(func() string {
+			return fmt.Sprintf("%d %s %s %s %s %s %s %s %s %s",
+				lastNode.height+1,
+				an,
+				RightJustify(fmt.Sprintf("%3.2f", allTimeAv), 5),
+				RightJustify(fmt.Sprintf("%3.2fa", allTimeDiv*ttpb), 7),
+				RightJustify(fmt.Sprintf("%3.2fd", dayDiv*ttpb), 7),
+				RightJustify(fmt.Sprintf("%3.2fh", hourDiv*ttpb), 7),
+				RightJustify(fmt.Sprintf("%3.2fq", qhourDiv*ttpb), 7),
+				RightJustify(fmt.Sprintf("%3.2fA", algDiv*ttpb), 7),
+				RightJustify(fmt.Sprintf("%3.0f %3.3fD",
+					since-ttpb*float64(len(fork.List[1].Algos)), timeSinceAlgo*ttpb), 13),
+				RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11))
+		})
 	}
 	return newTargetBits, adjustment, nil
 }

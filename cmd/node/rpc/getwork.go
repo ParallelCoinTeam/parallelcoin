@@ -1,23 +1,22 @@
 package rpc
 
 import (
-   "bytes"
-   "encoding/binary"
-   "encoding/hex"
-   "fmt"
-   "math/big"
-   "math/rand"
-   "time"
-   
-   "github.com/conformal/fastsha256"
-   
-   blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   "github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"encoding/binary"
+	"encoding/hex"
+	"fmt"
+	"math/big"
+	"math/rand"
+	"time"
+
+	"github.com/conformal/fastsha256"
+
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 // Uint256Size is the number of bytes needed to represent an unsigned 256-bit
@@ -63,25 +62,25 @@ func BigToLEUint256(n *big.Int) [Uint256Size]byte {
 
 // HandleGetWork handles the getwork call
 func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
-	c := cmd.(*json.GetWorkCmd)
+	c := cmd.(*btcjson.GetWorkCmd)
 	if len(s.StateCfg.ActiveMiningAddrs) == 0 {
-		return nil, &json.RPCError{
-			Code: json.ErrRPCInternal.Code,
+		return nil, &btcjson.RPCError{
+			Code:    btcjson.ErrRPCInternal.Code,
 			Message: "No payment addresses specified via --miningaddr",
 		}
 	}
 	if !(*s.Config.RegressionTest || *s.Config.SimNet) && s.Cfg.ConnMgr.
 		ConnectedCount() == 0 {
-		return nil, &json.RPCError{
-			Code:    json.ErrRPCClientNotConnected,
+		return nil, &btcjson.RPCError{
+			Code:    btcjson.ErrRPCClientNotConnected,
 			Message: "Pod is not connected to network",
 		}
 	}
 	// No point in generating or accepting work before the chain is synced.
 	latestHeight := s.Cfg.Chain.BestSnapshot().Height
 	if latestHeight != 0 && !s.Cfg.SyncMgr.IsCurrent() {
-		return nil, &json.RPCError{
-			Code:    json.ErrRPCClientInInitialDownload,
+		return nil, &btcjson.RPCError{
+			Code:    btcjson.ErrRPCClientInInitialDownload,
 			Message: "Pod is not yet synchronised...",
 		}
 	}
@@ -114,7 +113,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		if state.prevHash != nil && !state.prevHash.IsEqual(latestHash) {
 			e := state.UpdateBlockTemplate(s, false)
 			if e != nil {
-				log <- cl.Warn{"failed to update block template", e}
+				l.Warn("failed to update block template", e)
 			}
 		}
 		//	Reset the previous best hash the block template was generated
@@ -124,10 +123,10 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		var err error
 		state.Template, err = generator.NewBlockTemplate(payToAddr, s.Cfg.Algo)
 		if err != nil {
-			errStr := fmt.Sprintf("Failed to create new block template: %v %s", err, cl.Ine())
-			log <- cl.Error{errStr, cl.Ine()}
-			return nil, &json.RPCError{
-				Code:    json.ErrRPCInternal.Code,
+			errStr := fmt.Sprintf("Failed to create new block template: %v %s", err)
+			l.Error(errStr)
+			return nil, &btcjson.RPCError{
+				Code:    btcjson.ErrRPCInternal.Code,
 				Message: errStr,
 			}
 		}
@@ -138,14 +137,13 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		state.LastGenerated = time.Now()
 		state.LastTxUpdate = lastTxUpdate
 		state.prevHash = latestHash
-
-		Log.Dbgc(func() string {
+		l.Debugc(func() string {
 			return fmt.Sprintf(
-				"generated block template (timestamp %v, target %064x, " +
+				"generated block template (timestamp %v, target %064x, "+
 					"merkle root %s, signature script %x)",
 				msgBlock.Header.Timestamp, fork.CompactToBig(msgBlock.Header.
 					Bits), msgBlock.Header.MerkleRoot,
-					msgBlock.Transactions[0].TxIn[0].SignatureScript,
+				msgBlock.Transactions[0].TxIn[0].SignatureScript,
 			)
 		})
 	} else {
@@ -160,17 +158,17 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		// several blocks per the chain consensus rules.
 		e := generator.UpdateBlockTime(msgBlock)
 		if e != nil {
-			log <- cl.Warn{"failed to update block time", e}
+			l.Warn("failed to update block time", e)
 		}
 		// Increment the extra nonce and update the block template with the new
 		// value by regenerating the coinbase script and setting the merkle root
 		// to the new value.
-		log <- cl.Debugf{
-			"updated block template (timestamp %v, target %064x, " +
+		l.Debugf(
+			"updated block template (timestamp %v, target %064x, "+
 				"merkle root %s, signature script %x)",
 			msgBlock.Header.Timestamp, fork.CompactToBig(msgBlock.Header.Bits),
 			msgBlock.Header.MerkleRoot, msgBlock.Transactions[0].TxIn[0].
-				SignatureScript, cl.Ine()}
+				SignatureScript)
 	}
 	//	In order to efficiently store the variations of block templates that
 	//	have been provided to callers save a pointer to the block as well as the
@@ -192,9 +190,9 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 	err := msgBlock.Header.Serialize(buf)
 	if err != nil {
 		errStr := fmt.Sprintf("Failed to serialize data: %v", err)
-		log <- cl.Wrn(errStr)
-		return nil, &json.RPCError{
-			Code:    json.ErrRPCInternal.Code,
+		l.Warn(errStr)
+		return nil, &btcjson.RPCError{
+			Code:    btcjson.ErrRPCInternal.Code,
 			Message: errStr,
 		}
 	}
@@ -234,7 +232,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 	ReverseUint32Array(hash1)
 	ReverseUint32Array(midstate[:])
 	target := BigToLEUint256(fork.CompactToBig(msgBlock.Header.Bits))
-	reply := &json.GetWorkResult{
+	reply := &btcjson.GetWorkResult{
 		Data:     hex.EncodeToString(data),
 		Hash1:    hex.EncodeToString(hash1),
 		Midstate: hex.EncodeToString(midstate[:]),
@@ -253,15 +251,15 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	}
 	data, err := hex.DecodeString(hexData)
 	if err != nil {
-		return nil, &json.RPCError{
-			Code: json.ErrRPCInvalidParameter,
+		return nil, &btcjson.RPCError{
+			Code: btcjson.ErrRPCInvalidParameter,
 			Message: fmt.Sprintf("argument must be "+
 				"hexadecimal string (not %q)", hexData),
 		}
 	}
 	if len(data) != GetworkDataLen {
-		return false, &json.RPCError{
-			Code: json.ErrRPCInvalidParameter,
+		return false, &btcjson.RPCError{
+			Code: btcjson.ErrRPCInvalidParameter,
 			Message: fmt.Sprintf("argument must be "+
 				"%d bytes (not %d)", GetworkDataLen,
 				len(data)),
@@ -277,8 +275,8 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	bhBuf := bytes.NewBuffer(data[0:wire.MaxBlockHeaderPayload])
 	err = submittedHeader.Deserialize(bhBuf)
 	if err != nil {
-		return false, &json.RPCError{
-			Code: json.ErrRPCInvalidParameter,
+		return false, &btcjson.RPCError{
+			Code: btcjson.ErrRPCInvalidParameter,
 			Message: fmt.Sprintf("argument does not "+
 				"contain a valid block header: %v", err),
 		}
@@ -288,9 +286,9 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	state := s.GBTWorkState
 
 	if state.Template.Block.Header.MerkleRoot.String() == "" {
-		log <- cl.Debug{
+		l.Debug(
 			"Block submitted via getwork has no matching template for merkle root",
-			submittedHeader.MerkleRoot, cl.Ine()}
+			submittedHeader.MerkleRoot)
 		return false, nil
 	}
 	// Reconstruct the block using the submitted header stored block info.
@@ -309,21 +307,21 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 		// Anything other than a rule violation is an unexpected error, so return
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
-			return nil, &json.RPCError{
-				Code:    json.ErrRPCInternal.Code,
-				Message: fmt.Sprintf("Unexpected error while checking proof" +
+			return nil, &btcjson.RPCError{
+				Code: btcjson.ErrRPCInternal.Code,
+				Message: fmt.Sprintf("Unexpected error while checking proof"+
 					" of work: %v", err),
 			}
 		}
-		log <- cl.Debug{
-			"block submitted via getwork does not meet the required proof of" +
-				" work:", err, cl.Ine()}
+		l.Debug("block submitted via getwork does not meet the required proof of"+
+			" work:", err)
 		return false, nil
 	}
 	latestHash := &s.Cfg.Chain.BestSnapshot().Hash
 	if !msgBlock.Header.PrevBlock.IsEqual(latestHash) {
-		log <- cl.Debugf{"block submitted via getwork with previous block %s" +
-			" is stale", msgBlock.Header.PrevBlock, cl.Ine()}
+		l.Debugf(
+			"block submitted via getwork with previous block %s is stale",
+			msgBlock.Header.PrevBlock)
 		return false, nil
 	}
 	// Process this block using the same rules as blocks coming from other
@@ -334,18 +332,18 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 		// Anything other than a rule violation is an unexpected error, so return
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
-			return nil, &json.RPCError{
-				Code:    json.ErrRPCInternal.Code,
-				Message: fmt.Sprintf("Unexpected error while processing block" +
+			return nil, &btcjson.RPCError{
+				Code: btcjson.ErrRPCInternal.Code,
+				Message: fmt.Sprintf("Unexpected error while processing block"+
 					": %v", err),
 			}
 		}
-		log <- cl.Info{"block submitted via getwork rejected:", err}
+		l.Info("block submitted via getwork rejected:", err)
 		return false, nil
 	}
 	// The block was accepted.
 	blockSha := block.Hash()
-	log <- cl.Info{"block submitted via getwork accepted:", blockSha}
+	l.Info("block submitted via getwork accepted:", blockSha)
 	return true, nil
 }
 

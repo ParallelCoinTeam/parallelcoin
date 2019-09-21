@@ -22,7 +22,7 @@ func walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			cl.Register.SetAllLevels("off")
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				cx.Log <- cl.Error{"failed to create wallet",
-					err, cl.Ine()}
+					err}
 				return err
 			}
 			cl.Register.SetAllLevels(*cx.Config.LogLevel)
@@ -34,7 +34,7 @@ func walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				cx.ActiveNet, walletChan, cx.WalletKill, &wg)
 			if err != nil {
 				cx.Log <- cl.Error{"failed to start up wallet",
-					 err, cl.Ine()}
+					 err}
 			}
 		}()
 		cx.WalletServer = <-walletChan

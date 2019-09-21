@@ -6,8 +6,6 @@ import (
 	"io"
 	"strings"
 	"time"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MaxUserAgentLen is the maximum allowed length for the user agent field in a version message (MsgVersion).
@@ -101,7 +99,7 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		var relayTx bool
 		err = readElement(r, &relayTx)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 		msg.DisableRelayTx = !relayTx
 	}

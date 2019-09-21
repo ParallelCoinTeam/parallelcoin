@@ -11,13 +11,12 @@ import (
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
+	tm "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	am "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
 
 var (
@@ -46,7 +45,7 @@ type BitcoindClient struct {
 	chainConn *BitcoindConn
 	// bestBlock keeps track of the tip of the current best chain.
 	bestBlockMtx sync.RWMutex
-	bestBlock    waddrmgr.BlockStamp
+	bestBlock    am.BlockStamp
 	// notifyBlocks signals whether the client is sending block
 	// notifications to the caller.
 	notifyBlocks uint32
@@ -106,15 +105,15 @@ func (c *BitcoindClient) BackEnd() string {
 
 // GetBestBlock returns the highest block known to bitcoind.
 func (c *BitcoindClient) GetBestBlock() (*chainhash.Hash, int32, error) {
-	bcinfo, err := c.chainConn.client.GetBlockChainInfo()
+	bcInfo, err := c.chainConn.client.GetBlockChainInfo()
 	if err != nil {
 		return nil, 0, err
 	}
-	hash, err := chainhash.NewHashFromStr(bcinfo.BestBlockHash)
+	hash, err := chainhash.NewHashFromStr(bcInfo.BestBlockHash)
 	if err != nil {
 		return nil, 0, err
 	}
-	return hash, bcinfo.Blocks, nil
+	return hash, bcInfo.Blocks, nil
 }
 
 // GetBlockHeight returns the height for the hash, if known, or returns an
@@ -134,7 +133,7 @@ func (c *BitcoindClient) GetBlock(hash *chainhash.Hash) (*wire.MsgBlock, error) 
 
 // GetBlockVerbose returns a verbose block from the hash.
 func (c *BitcoindClient) GetBlockVerbose(
-	hash *chainhash.Hash) (*json.GetBlockVerboseResult, error) {
+	hash *chainhash.Hash) (*btcjson.GetBlockVerboseResult, error) {
 	return c.chainConn.client.GetBlockVerbose(hash)
 }
 
@@ -151,19 +150,19 @@ func (c *BitcoindClient) GetBlockHeader(
 
 // GetBlockHeaderVerbose returns a block header from the hash.
 func (c *BitcoindClient) GetBlockHeaderVerbose(
-	hash *chainhash.Hash) (*json.GetBlockHeaderVerboseResult, error) {
+	hash *chainhash.Hash) (*btcjson.GetBlockHeaderVerboseResult, error) {
 	return c.chainConn.client.GetBlockHeaderVerbose(hash)
 }
 
 // GetRawTransactionVerbose returns a transaction from the tx hash.
 func (c *BitcoindClient) GetRawTransactionVerbose(
-	hash *chainhash.Hash) (*json.TxRawResult, error) {
+	hash *chainhash.Hash) (*btcjson.TxRawResult, error) {
 	return c.chainConn.client.GetRawTransactionVerbose(hash)
 }
 
 // GetTxOut returns a txout from the outpoint info provided.
 func (c *BitcoindClient) GetTxOut(txHash *chainhash.Hash, index uint32,
-	mempool bool) (*json.GetTxOutResult, error) {
+	mempool bool) (*btcjson.GetTxOutResult, error) {
 	return c.chainConn.client.GetTxOut(txHash, index, mempool)
 }
 
@@ -187,7 +186,7 @@ func (c *BitcoindClient) Notifications() <-chan interface{} {
 func (c *BitcoindClient) NotifyReceived(addrs []util.Address) error {
 	err := c.NotifyBlocks()
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	select {
 	case c.rescanUpdate <- addrs:
@@ -202,7 +201,7 @@ func (c *BitcoindClient) NotifyReceived(addrs []util.Address) error {
 func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) error {
 	err := c.NotifyBlocks()
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	select {
 	case c.rescanUpdate <- outPoints:
@@ -217,7 +216,7 @@ func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) error {
 func (c *BitcoindClient) NotifyTx(txids []chainhash.Hash) error {
 	err := c.NotifyBlocks()
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	select {
 	case c.rescanUpdate <- txids:
@@ -293,31 +292,31 @@ func (c *BitcoindClient) LoadTxFilter(reset bool, filters ...interface{}) error 
 // RescanBlocks rescans any blocks passed, returning only the blocks that
 // matched as []json.BlockDetails.
 func (c *BitcoindClient) RescanBlocks(
-	blockHashes []chainhash.Hash) ([]json.RescannedBlock, error) {
-	rescannedBlocks := make([]json.RescannedBlock, 0, len(blockHashes))
+	blockHashes []chainhash.Hash) ([]btcjson.RescannedBlock, error) {
+	rescannedBlocks := make([]btcjson.RescannedBlock, 0, len(blockHashes))
 	for _, hash := range blockHashes {
 		header, err := c.GetBlockHeaderVerbose(&hash)
 		if err != nil {
-			log <- cl.Warnf{
+			WARNF(
 				"unable to get header %s from bitcoind: %s",
 				hash, err,
-			}
+			)
 			continue
 		}
 		block, err := c.GetBlock(&hash)
 		if err != nil {
-			log <- cl.Warnf{
+			WARNF(
 				"unable to get block %s from bitcoind: %s",
 				hash, err,
-			}
+			)
 			continue
 		}
 		relevantTxs, err := c.filterBlock(block, header.Height, false)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 		if len(relevantTxs) > 0 {
-			rescannedBlock := json.RescannedBlock{
+			rescannedBlock := btcjson.RescannedBlock{
 				Hash: hash.String(),
 			}
 			for _, tx := range relevantTxs {
@@ -385,7 +384,7 @@ func (c *BitcoindClient) Start() error {
 			"%v", err)
 	}
 	c.bestBlockMtx.Lock()
-	c.bestBlock = waddrmgr.BlockStamp{
+	c.bestBlock = am.BlockStamp{
 		Hash:      *bestHash,
 		Height:    bestHeight,
 		Timestamp: time.Unix(bestHeader.Time, 0),
@@ -485,12 +484,14 @@ func (c *BitcoindClient) rescanHandler() {
 			// We're starting a rescan from the hash.
 			case chainhash.Hash:
 				if err := c.rescan(update); err != nil {
-					log <- cl.Error{
-						"unable to complete chain rescan:", err, cl.Ine()}
+					ERROR(
+						"unable to complete chain rescan:", err,
+					)
 				}
 			default:
-				log <- cl.Warnf{
-					"received unexpected filter type %T", update, cl.Ine()}
+				WARNF(
+					"received unexpected filter type %T", update,
+				)
 			}
 		case <-c.quit:
 			return
@@ -508,9 +509,10 @@ func (c *BitcoindClient) ntfnHandler() {
 		select {
 		case tx := <-c.zmqTxNtfns:
 			if _, _, err := c.filterTx(tx, nil, true); err != nil {
-				log <- cl.Errorf{
+				ERRORF(
 					"unable to filter transaction %v: %v %s",
-					tx.TxHash(), err, cl.Ine()}
+					tx.TxHash(), err,
+				)
 			}
 		case newBlock := <-c.zmqBlockNtfns:
 			// If the new block's previous hash matches the best
@@ -527,12 +529,13 @@ func (c *BitcoindClient) ntfnHandler() {
 					newBlock, newBlockHeight, true,
 				)
 				if err != nil {
-					log <- cl.Errorf{
+					ERRORF(
 						"unable to filter block %v: %v",
-						newBlock.BlockHash(), err, cl.Ine()}
+						newBlock.BlockHash(), err,
+					)
 					continue
 				}
-				// With the block succesfully filtered, we'll
+				// With the block successfully filtered, we'll
 				// make it our new best block.
 				bestBlock.Hash = newBlock.BlockHash()
 				bestBlock.Height = newBlockHeight
@@ -544,8 +547,9 @@ func (c *BitcoindClient) ntfnHandler() {
 			}
 			// Otherwise, we've encountered a reorg.
 			if err := c.reorg(bestBlock, newBlock); err != nil {
-				log <- cl.Error{
-					"unable to process chain reorg:", err, cl.Ine()}
+				ERROR(
+					"unable to process chain reorg:", err,
+				)
 			}
 		case <-c.quit:
 			return
@@ -563,7 +567,7 @@ func (c *BitcoindClient) SetBirthday(t time.Time) {
 
 // BlockStamp returns the latest block notified by the client, or an error
 // if the client has been shut down.
-func (c *BitcoindClient) BlockStamp() (*waddrmgr.BlockStamp, error) {
+func (c *BitcoindClient) BlockStamp() (*am.BlockStamp, error) {
 	c.bestBlockMtx.RLock()
 	bestBlock := c.bestBlock
 	c.bestBlockMtx.RUnlock()
@@ -577,7 +581,7 @@ func (c *BitcoindClient) onBlockConnected(hash *chainhash.Hash, height int32,
 	if c.shouldNotifyBlocks() {
 		select {
 		case c.notificationQueue.ChanIn() <- BlockConnected{
-			Block: wtxmgr.Block{
+			Block: tm.Block{
 				Hash:   *hash,
 				Height: height,
 			},
@@ -594,12 +598,12 @@ func (c *BitcoindClient) onBlockConnected(hash *chainhash.Hash, height int32,
 // found within the block being connected. This will queue a
 // FilteredBlockConnected notification to the caller.
 func (c *BitcoindClient) onFilteredBlockConnected(height int32,
-	header *wire.BlockHeader, relevantTxs []*wtxmgr.TxRecord) {
+	header *wire.BlockHeader, relevantTxs []*tm.TxRecord) {
 	if c.shouldNotifyBlocks() {
 		select {
 		case c.notificationQueue.ChanIn() <- FilteredBlockConnected{
-			Block: &wtxmgr.BlockMeta{
-				Block: wtxmgr.Block{
+			Block: &tm.BlockMeta{
+				Block: tm.Block{
 					Hash:   header.BlockHash(),
 					Height: height,
 				},
@@ -620,7 +624,7 @@ func (c *BitcoindClient) onBlockDisconnected(hash *chainhash.Hash, height int32,
 	if c.shouldNotifyBlocks() {
 		select {
 		case c.notificationQueue.ChanIn() <- BlockDisconnected{
-			Block: wtxmgr.Block{
+			Block: tm.Block{
 				Hash:   *hash,
 				Height: height,
 			},
@@ -635,12 +639,14 @@ func (c *BitcoindClient) onBlockDisconnected(hash *chainhash.Hash, height int32,
 // to the caller. This means that the transaction matched a specific item in the
 // client's different filters. This will queue a RelevantTx notification to the
 // caller.
-func (c *BitcoindClient) onRelevantTx(tx *wtxmgr.TxRecord,
-	blockDetails *json.BlockDetails) {
+func (c *BitcoindClient) onRelevantTx(tx *tm.TxRecord,
+	blockDetails *btcjson.BlockDetails) {
 	block, err := parseBlock(blockDetails)
 	if err != nil {
-		log <- cl.Error{
-			"unable to send onRelevantTx notification, failed parse block:", err, cl.Ine()}
+		ERROR(
+			"unable to send onRelevantTx notification, failed parse block:",
+			err,
+		)
 		return
 	}
 	select {
@@ -672,10 +678,10 @@ func (c *BitcoindClient) onRescanProgress(hash *chainhash.Hash, height int32,
 // the details of the last block in the range of the rescan.
 func (c *BitcoindClient) onRescanFinished(hash *chainhash.Hash, height int32,
 	timestamp time.Time) {
-	log <- cl.Infof{
+	INFOF(
 		"rescan finished at %d (%s)",
 		height, hash,
-	}
+	)
 	select {
 	case c.notificationQueue.ChanIn() <- &RescanFinished{
 		Hash:   hash,
@@ -689,9 +695,9 @@ func (c *BitcoindClient) onRescanFinished(hash *chainhash.Hash, height int32,
 // reorg processes a reorganization during chain synchronization. This is
 // separate from a rescan's handling of a reorg. This will rewind back until it
 // finds a common ancestor and notify all the new blocks since then.
-func (c *BitcoindClient) reorg(currentBlock waddrmgr.BlockStamp,
+func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 	reorgBlock *wire.MsgBlock) error {
-	log <- cl.Debug{"possible reorg at block", reorgBlock.BlockHash(), cl.Ine()}
+	DEBUG("possible reorg at block", reorgBlock.BlockHash())
 	// Retrieve the best known height based on the block which caused the
 	// reorg. This way, we can preserve the chain of blocks we need to
 	// retrieve.
@@ -701,7 +707,7 @@ func (c *BitcoindClient) reorg(currentBlock waddrmgr.BlockStamp,
 		return err
 	}
 	if bestHeight < currentBlock.Height {
-		log <- cl.Debug{"detected multiple reorgs", cl.Ine()}
+		DEBUG("detected multiple reorgs")
 		return nil
 	}
 	// We'll now keep track of all the blocks known to the *chain*, starting
@@ -733,10 +739,11 @@ func (c *BitcoindClient) reorg(currentBlock waddrmgr.BlockStamp,
 		// Since the previous hashes don't match, the current block has
 		// been reorged out of the chain, so we should send a
 		// BlockDisconnected notification for it.
-		log <- cl.Debugf{
+		DEBUGF(
 			"disconnecting block %d (%v) %s",
 			currentBlock.Height,
-			currentBlock.Hash, cl.Ine()}
+			currentBlock.Hash,
+		)
 		c.onBlockDisconnected(
 			&currentBlock.Hash, currentBlock.Height,
 			currentBlock.Timestamp,
@@ -762,9 +769,10 @@ func (c *BitcoindClient) reorg(currentBlock waddrmgr.BlockStamp,
 	// Disconnect the last block from the old chain. Since the previous
 	// block remains the same between the old and new chains, the tip will
 	// now be the last common ancestor.
-	log <- cl.Debugf{
+	DEBUGF(
 		"disconnecting block %d (%v) %s",
-		currentBlock.Height, currentBlock.Hash, cl.Ine()}
+		currentBlock.Height, currentBlock.Hash,
+	)
 	c.onBlockDisconnected(
 		&currentBlock.Hash, currentBlock.Height, currentHeader.Timestamp,
 	)
@@ -795,7 +803,7 @@ func (c *BitcoindClient) reorg(currentBlock waddrmgr.BlockStamp,
 
 // FilterBlocks scans the blocks contained in the FilterBlocksRequest for any
 // addresses of interest. Each block will be fetched and filtered sequentially,
-// returning a FilterBlocksReponse for the first block containing a matching
+// returning a FilterBlocksResponse for the first block containing a matching
 // address. If no matches are found in the range of blocks requested, the
 // returned response will be nil.
 //
@@ -841,7 +849,7 @@ func (c *BitcoindClient) FilterBlocks(
 // the client in the watch list. This is called only within a queue processing
 // loop.
 func (c *BitcoindClient) rescan(start chainhash.Hash) error {
-	log <- cl.Info{"starting rescan from block", start, cl.Ine()}
+	INFO("starting rescan from block", start)
 	// We start by getting the best already processed block. We only use
 	// the height, as the hash can change during a reorganization, which we
 	// catch by testing connectivity from known blocks to the previous
@@ -854,7 +862,7 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 	if err != nil {
 		return err
 	}
-	bestBlock := waddrmgr.BlockStamp{
+	bestBlock := am.BlockStamp{
 		Hash:      *bestHash,
 		Height:    bestHeight,
 		Timestamp: time.Unix(bestHeader.Time, 0),
@@ -942,7 +950,7 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 				headers.Remove(headers.Back())
 				if headers.Back() != nil {
 					previousHeader = headers.Back().
-						Value.(*json.GetBlockHeaderVerboseResult)
+						Value.(*btcjson.GetBlockHeaderVerboseResult)
 					previousHash, err = chainhash.NewHashFromStr(
 						previousHeader.Hash,
 					)
@@ -970,14 +978,14 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 		// add the current block header to our list of headers.
 		blockHash := block.BlockHash()
 		previousHash = &blockHash
-		previousHeader = &json.GetBlockHeaderVerboseResult{
+		previousHeader = &btcjson.GetBlockHeaderVerboseResult{
 			Hash:         blockHash.String(),
 			Height:       i,
 			PreviousHash: block.Header.PrevBlock.String(),
 			Time:         block.Header.Timestamp.Unix(),
 		}
 		headers.PushBack(previousHeader)
-		// Notify the block and any of its relevant transacations.
+		// Notify the block and any of its relevant transactions.
 		if _, err = c.filterBlock(block, i, true); err != nil {
 			return err
 		}
@@ -1009,25 +1017,26 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 
 // filterBlock filters a block for watched outpoints and addresses, and returns any matching transactions, sending notifications along the way.
 func (c *BitcoindClient) filterBlock(block *wire.MsgBlock, height int32,
-	notify bool) ([]*wtxmgr.TxRecord, error) {
+	notify bool) ([]*tm.TxRecord, error) {
 	// If this block happened before the client's birthday, then we'll skip it entirely.
 	if block.Header.Timestamp.Before(c.birthday) {
 		return nil, nil
 	}
 	if c.shouldNotifyBlocks() {
-		log <- cl.Debugf{
+		DEBUGF(
 			"filtering block %d (%s) with %d transactions %s",
-			height, block.BlockHash(), len(block.Transactions), cl.Ine()}
+			height, block.BlockHash(), len(block.Transactions),
+		)
 	}
 	// Create a block details template to use for all of the confirmed transactions found within this block.
 	blockHash := block.BlockHash()
-	blockDetails := &json.BlockDetails{
+	blockDetails := &btcjson.BlockDetails{
 		Hash:   blockHash.String(),
 		Height: height,
 		Time:   block.Header.Timestamp.Unix(),
 	}
 	// Now, we'll through all of the transactions in the block keeping track of any relevant to the caller.
-	var relevantTxs []*wtxmgr.TxRecord
+	var relevantTxs []*tm.TxRecord
 	confirmedTxs := make(map[chainhash.Hash]struct{})
 	for i, tx := range block.Transactions {
 		// Update the index in the block details with the index of this
@@ -1035,10 +1044,10 @@ func (c *BitcoindClient) filterBlock(block *wire.MsgBlock, height int32,
 		blockDetails.Index = i
 		isRelevant, rec, err := c.filterTx(tx, blockDetails, notify)
 		if err != nil {
-			log <- cl.Warnf{
+			WARNF(
 				"Unable to filter transaction %v: %v",
 				tx.TxHash(), err,
-			}
+			)
 			continue
 		}
 		if isRelevant {
@@ -1068,16 +1077,17 @@ func (c *BitcoindClient) filterBlock(block *wire.MsgBlock, height int32,
 // filterTx determines whether a transaction is relevant to the client by
 // inspecting the client's different filters.
 func (c *BitcoindClient) filterTx(tx *wire.MsgTx,
-	blockDetails *json.BlockDetails,
-	notify bool) (bool, *wtxmgr.TxRecord, error) {
+	blockDetails *btcjson.BlockDetails,
+	notify bool) (bool, *tm.TxRecord, error) {
 	txDetails := util.NewTx(tx)
 	if blockDetails != nil {
 		txDetails.SetIndex(blockDetails.Index)
 	}
-	rec, err := wtxmgr.NewTxRecordFromMsgTx(txDetails.MsgTx(), time.Now())
+	rec, err := tm.NewTxRecordFromMsgTx(txDetails.MsgTx(), time.Now())
 	if err != nil {
-		log <- cl.Error{
-			"Cannot create transaction record for relevant tx:", err, cl.Ine()}
+		ERROR(
+			"Cannot create transaction record for relevant tx:", err,
+		)
 		return false, nil, err
 	}
 	if blockDetails != nil {
@@ -1107,9 +1117,10 @@ func (c *BitcoindClient) filterTx(tx *wire.MsgTx,
 			out.PkScript, c.chainParams,
 		)
 		if err != nil {
-			log <- cl.Debugf{
+			DEBUGF(
 				"Unable to parse output script in %s:%d: %v %s",
-				tx.TxHash(), i, err, cl.Ine()}
+				tx.TxHash(), i, err,
+			)
 			continue
 		}
 		for _, addr := range addrs {

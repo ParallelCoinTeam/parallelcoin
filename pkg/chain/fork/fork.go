@@ -6,8 +6,6 @@ import (
 	"math/big"
 	"math/rand"
 	"time"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // AlgoParams are the identifying block version number and their minimum target bits
@@ -41,15 +39,15 @@ var (
 	// Algos are the specifications identifying the algorithm used in the
 	// block proof
 	Algos = map[string]AlgoParams{
-		AlgoVers[2]:   {
+		AlgoVers[2]: {
 			Version: 2,
 			MinBits: MainPowLimitBits,
 			NSperOp: 824,
-		},                 // 824 ns/op
+		}, // 824 ns/op
 		AlgoVers[514]: {
 			Version: 514,
 			MinBits: MainPowLimitBits,
-			AlgoID: 1,
+			AlgoID:  1,
 			NSperOp: 740839,
 		}, // 740839 ns/op
 	}
@@ -152,7 +150,8 @@ func GetAlgoID(algoname string, height int32) uint32 {
 	return Algos[algoname].AlgoID
 }
 
-// GetAlgoName returns the string identifier of an algorithm depending on hard fork activation status
+// GetAlgoName returns the string identifier of an algorithm depending on
+// hard fork activation status
 func GetAlgoName(algoVer int32, height int32) (name string) {
 	hf := GetCurrent(height)
 	var ok bool
@@ -160,7 +159,7 @@ func GetAlgoName(algoVer int32, height int32) (name string) {
 	if hf < 1 && !ok {
 		name = "sha256d"
 	}
-	// log <- cl.Info{"GetAlgoName", algoVer, height, name, cl.Ine()}
+	// INFO("GetAlgoName", algoVer, height, name}
 	return
 }
 
@@ -170,15 +169,15 @@ func GetAlgoName(algoVer int32, height int32) (name string) {
 func GetAlgoVer(name string, height int32) (version int32) {
 	n := "sha256d"
 	hf := GetCurrent(height)
-	// log <- cl.Info{"GetAlgoVer", name, height, hf, cl.Ine()}
+	// INFO("GetAlgoVer", name, height, hf}
 	if name == "random" {
 		rng := rand.New(rand.NewSource(time.Now().Unix()))
 		rn := rng.Intn(len(List[hf].AlgoVers)) + 5
-		log <- cl.Trace{"random!", rn, cl.Ine()}
+		TRACE("random!", rn)
 		randomalgover := int32(rn)
 		switch hf {
 		case 0:
-			// log <- cl.Info{"rng", randomalgover, randomalgover , cl.Ine()}
+			// INFO("rng", randomalgover, randomalgover }
 			switch randomalgover & 1 {
 			case 0:
 				version = 2
@@ -187,13 +186,13 @@ func GetAlgoVer(name string, height int32) (version int32) {
 			}
 			return
 		case 1:
-			// log <- cl.Info{"rng", randomalgover, randomalgover , cl.Ine()}
+			// INFO("rng", randomalgover, randomalgover }
 			actualver := randomalgover
-			// log <- cl.Info{"actualver", actualver, cl.Ine()}
+			// INFO("actualver", actualver}
 			rndalgo := List[1].AlgoVers[actualver]
-			// log <- cl.Info{"algo", rndalgo, cl.Ine()}
+			// INFO("algo", rndalgo}
 			algo := List[1].Algos[rndalgo].Version
-			// log <- cl.Info{"actualalgo", algo, cl.Ine()}
+			// INFO("actualalgo", algo}
 			return algo
 		}
 	} else {
@@ -203,7 +202,8 @@ func GetAlgoVer(name string, height int32) (version int32) {
 	return
 }
 
-// GetAveragingInterval returns the active block interval target based on hard fork status
+// GetAveragingInterval returns the active block interval target based on
+// hard fork status
 func GetAveragingInterval(height int32) (r int64) {
 	r = List[GetCurrent(height)].AveragingInterval
 	return
@@ -229,20 +229,21 @@ func GetCurrent(height int32) (curr int) {
 
 // GetMinBits returns the minimum diff bits based on height and testnet
 func GetMinBits(algoname string, height int32) (mb uint32) {
-	log <- cl.Trace{"GetMinBits", algoname, cl.Ine()}
+	TRACE("GetMinBits", algoname)
 	curr := GetCurrent(height)
 	mb = List[curr].Algos[algoname].MinBits
-	log <- cl.Trace{"minbits", mb, cl.Ine()}
+	TRACE("minbits", mb)
 	return
 }
 
 // GetMinDiff returns the minimum difficulty in uint256 form
 func GetMinDiff(algoname string, height int32) (md *big.Int) {
-	log <- cl.Trace{"GetMinDiff", algoname, cl.Ine()}
+	TRACE("GetMinDiff", algoname)
 	return CompactToBig(GetMinBits(algoname, height))
 }
 
-// GetTargetTimePerBlock returns the active block interval target based on hard fork status
+// GetTargetTimePerBlock returns the active block interval target based on
+// hard fork status
 func GetTargetTimePerBlock(height int32) (r int64) {
 	r = int64(List[GetCurrent(height)].TargetTimePerBlock)
 	return

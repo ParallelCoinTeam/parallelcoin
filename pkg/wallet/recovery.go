@@ -3,13 +3,12 @@ package wallet
 import (
 	"time"
 
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
@@ -37,7 +36,7 @@ type RecoveryManager struct {
 // NewRecoveryManager initializes a new RecoveryManager with a derivation
 // look-ahead of `recoveryWindow` child indexes, and pre-allocates a backing
 // array for `batchSize` blocks to scan at once.
-func NewRecoveryManager(	recoveryWindow, batchSize uint32,
+func NewRecoveryManager(recoveryWindow, batchSize uint32,
 	chainParams *netparams.Params) *RecoveryManager {
 	return &RecoveryManager{
 		recoveryWindow: recoveryWindow,
@@ -133,10 +132,10 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 func (rm *RecoveryManager) AddToBlockBatch(hash *chainhash.Hash, height int32,
 	timestamp time.Time) {
 	if !rm.started {
-		log <- cl.Tracef{
+		TRACEF(
 			"Seed birthday surpassed, starting recovery of wallet from height=%d hash=%v with recovery-window=%d",
 			height, *hash, rm.recoveryWindow,
-		}
+		)
 		rm.started = true
 	}
 	block := wtxmgr.BlockMeta{
@@ -195,7 +194,7 @@ type RecoveryState struct {
 // NewRecoveryState creates a new RecoveryState using the provided
 // recoveryWindow. Each RecoveryState that is subsequently initialized for a
 // particular key scope will receive the same recoveryWindow.
-func NewRecoveryState(	recoveryWindow uint32) *RecoveryState {
+func NewRecoveryState(recoveryWindow uint32) *RecoveryState {
 	scopes := make(map[waddrmgr.KeyScope]*ScopeRecoveryState)
 	return &RecoveryState{
 		recoveryWindow:   recoveryWindow,
@@ -246,7 +245,7 @@ type ScopeRecoveryState struct {
 
 // NewScopeRecoveryState initializes an ScopeRecoveryState with the chosen
 // recovery window.
-func NewScopeRecoveryState(	recoveryWindow uint32) *ScopeRecoveryState {
+func NewScopeRecoveryState(recoveryWindow uint32) *ScopeRecoveryState {
 	return &ScopeRecoveryState{
 		ExternalBranch: NewBranchRecoveryState(recoveryWindow),
 		InternalBranch: NewBranchRecoveryState(recoveryWindow),
@@ -283,7 +282,7 @@ type BranchRecoveryState struct {
 
 // NewBranchRecoveryState creates a new BranchRecoveryState that can be used to
 // track either the external or internal branch of an account's derivation path.
-func NewBranchRecoveryState(	recoveryWindow uint32) *BranchRecoveryState {
+func NewBranchRecoveryState(recoveryWindow uint32) *BranchRecoveryState {
 	return &BranchRecoveryState{
 		recoveryWindow:  recoveryWindow,
 		addresses:       make(map[uint32]util.Address),

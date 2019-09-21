@@ -3,6 +3,8 @@ git.parallelcoin.io/dev/cryptonight v0.3.1 h1:KOYA3re83Sg6pzKSByrmMT1WOeQk/AR9zz
 git.parallelcoin.io/dev/cryptonight v0.3.1/go.mod h1:n1SWthC+JOElqDnUkMYQrkdxuc6Z62QXw+21fZ1JdzE=
 git.parallelcoin.io/dev/kcp9 v5.2.8+incompatible h1:Pjcay4IR7Kkxlt4sifsoT9XJBB/3qSWOESijILwq12U=
 git.parallelcoin.io/dev/kcp9 v5.2.8+incompatible/go.mod h1:2J9JYq4Gsf4PqAorPtq8+X03GnPM0IbOkZWIW+oAmpE=
+git.parallelcoin.io/dev/pod v0.0.1 h1:jO1ZHSkx4sBR2y7GpbGtRjirdkLEvdDl2n/fHFLxihk=
+git.parallelcoin.io/dev/pod v0.0.1/go.mod h1:NPi1qJ1E2W8B2jmV/tFvMTlhcxBfe9P5E91NTsBXSpg=
 git.parallelcoin.io/dev/rpcx v0.0.0-20190829033934-d995e874b384 h1:uR5/2AaSrGLZ/fnk35zaF1X7Imxm2KEG5bPm/8E8IX8=
 git.parallelcoin.io/dev/rpcx v0.0.0-20190829033934-d995e874b384/go.mod h1:vF6taqk1k/mfxWvxTK0MSMrAl128WfOW9hfs8lkZUoc=
 git.parallelcoin.io/dev/rudp v0.0.0-20190508142724-02f4144efc82 h1:yTwK53V8UY57UBaf4UdNAZSxlOXWrRi1w7MdPkGStkk=
@@ -110,6 +112,8 @@ github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
+github.com/glendc/go-external-ip v0.0.0-20170425150139-139229dcdddd h1:1BzxHapafGJd/XlpMvocLeDBin2EKn90gXv2AQt5sfo=
+github.com/glendc/go-external-ip v0.0.0-20170425150139-139229dcdddd/go.mod h1:o9OoDQyE1WHvYVUH1FdFapy1/rCZHHq3O5wS4VA83ig=
 github.com/glycerine/go-unsnap-stream v0.0.0-20180323001048-9f0cb55181dd/go.mod h1:/20jfyN9Y5QPEAprSgKAUr+glWDY39ZiUEAYOEv5dsE=
 github.com/glycerine/goconvey v0.0.0-20180728074245-46e3a41ad493/go.mod h1:Ogl1Tioa0aV7gstGFO7KhffUsb9M4ydbEbbxpcEDc24=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=

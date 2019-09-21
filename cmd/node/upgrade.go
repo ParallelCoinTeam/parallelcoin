@@ -104,17 +104,17 @@ func upgradeDBPaths(cx *conte.Xt) error {
 	oldDbRoot := filepath.Join(oldPodHomeDir(), "db")
 	err := upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet")
 	if err != nil {
-		L.Debug(err)
+		DEBUG(err)
 	}
 	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_testnet.db"),
 		"testnet")
 	if err != nil {
-		L.Debug(err)
+		DEBUG(err)
 	}
 	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_regtest.db"),
 		"regtest")
 	if err != nil {
-		L.Debug(err)
+		DEBUG(err)
 	}
 	// Remove the old db directory
 	//
@@ -133,7 +133,7 @@ func upgradeDataPaths() error {
 	// Only migrate if the old path exists and the new one doesn't
 	if apputil.FileExists(oldHomePath) && !apputil.FileExists(newHomePath) {
 		// Create the new path
-		L.Infof("migrating application home path from '%s' to '%s'",
+		INFOF("migrating application home path from '%s' to '%s'",
 			oldHomePath, newHomePath)
 		err := os.MkdirAll(newHomePath, 0700)
 		if err != nil {
@@ -168,7 +168,7 @@ func upgradeDataPaths() error {
 				return err
 			}
 		} else {
-			L.Warnf("not removing '%s' since it contains files not created by"+
+			WARNF("not removing '%s' since it contains files not created by"+
 				" this application you may want to manually move them or"+
 				" delete them.", oldHomePath)
 		}

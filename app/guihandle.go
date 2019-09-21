@@ -21,7 +21,7 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		L.Warn("starting gui")
+		WARN("starting gui")
 		Configure(cx)
 		shutdownChan := make(chan struct{})
 		walletChan := make(chan *wallet.Wallet)
@@ -36,21 +36,21 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		var wg sync.WaitGroup
 		if !*cx.Config.NodeOff {
 			go func() {
-				L.Info("starting node")
+				INFO("starting node")
 				err = node.Main(cx, shutdownChan, cx.NodeKill, nodeChan, &wg)
 				if err != nil {
 					fmt.Println("error running node:", err)
 					os.Exit(1)
 				}
 			}()
-			L.Debug("waiting for nodeChan")
+			DEBUG("waiting for nodeChan")
 			cx.RPCServer = <-nodeChan
-			L.Debug("nodeChan sent")
+			DEBUG("nodeChan sent")
 			cx.Node.Store(true)
 		}
 		if !*cx.Config.WalletOff {
 			go func() {
-				L.Info("starting wallet")
+				INFO("starting wallet")
 				err = walletmain.Main(cx.Config, cx.StateCfg,
 					cx.ActiveNet, walletChan, cx.WalletKill, &wg)
 				if err != nil {
@@ -58,13 +58,13 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 					os.Exit(1)
 				}
 			}()
-			L.Debug("waiting for walletChan")
+			DEBUG("waiting for walletChan")
 			cx.WalletServer = <-walletChan
-			L.Debug("walletChan sent")
+			DEBUG("walletChan sent")
 			cx.Wallet.Store(true)
 		}
 		interrupt.AddHandler(func() {
-			L.Warn("interrupt received, " +
+			WARN("interrupt received, " +
 				"shutting down shell modules")
 			close(cx.WalletKill)
 			close(cx.NodeKill)

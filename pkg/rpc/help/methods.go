@@ -3,7 +3,7 @@
 package rpchelp
 
 import (
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 )
 
 // HelpDescs contains the locale-specific help strings along with the locale.
@@ -21,7 +21,7 @@ var Methods = []struct {
 	ResultTypes []interface{}
 }{
 	{"addmultisigaddress", returnsString},
-	{"createmultisig", []interface{}{(*json.CreateMultiSigResult)(nil)}},
+	{"createmultisig", []interface{}{(*btcjson.CreateMultiSigResult)(nil)}},
 	{"dumpprivkey", returnsString},
 	{"getaccount", returnsString},
 	{"getaccountaddress", returnsString},
@@ -29,37 +29,37 @@ var Methods = []struct {
 	{"getbalance", append(returnsNumber, returnsNumber[0])},
 	{"getbestblockhash", returnsString},
 	{"getblockcount", returnsNumber},
-	{"getinfo", []interface{}{(*json.InfoWalletResult)(nil)}},
+	{"getinfo", []interface{}{(*btcjson.InfoWalletResult)(nil)}},
 	{"getnewaddress", returnsString},
 	{"getrawchangeaddress", returnsString},
 	{"getreceivedbyaccount", returnsNumber},
 	{"getreceivedbyaddress", returnsNumber},
-	{"gettransaction", []interface{}{(*json.GetTransactionResult)(nil)}},
+	{"gettransaction", []interface{}{(*btcjson.GetTransactionResult)(nil)}},
 	{"help", append(returnsString, returnsString[0])},
 	{"importprivkey", nil},
 	{"keypoolrefill", nil},
 	{"listaccounts", []interface{}{(*map[string]float64)(nil)}},
-	{"listlockunspent", []interface{}{(*[]json.TransactionInput)(nil)}},
-	{"listreceivedbyaccount", []interface{}{(*[]json.ListReceivedByAccountResult)(nil)}},
-	{"listreceivedbyaddress", []interface{}{(*[]json.ListReceivedByAddressResult)(nil)}},
-	{"listsinceblock", []interface{}{(*json.ListSinceBlockResult)(nil)}},
+	{"listlockunspent", []interface{}{(*[]btcjson.TransactionInput)(nil)}},
+	{"listreceivedbyaccount", []interface{}{(*[]btcjson.ListReceivedByAccountResult)(nil)}},
+	{"listreceivedbyaddress", []interface{}{(*[]btcjson.ListReceivedByAddressResult)(nil)}},
+	{"listsinceblock", []interface{}{(*btcjson.ListSinceBlockResult)(nil)}},
 	{"listtransactions", returnsLTRArray},
-	{"listunspent", []interface{}{(*json.ListUnspentResult)(nil)}},
+	{"listunspent", []interface{}{(*btcjson.ListUnspentResult)(nil)}},
 	{"lockunspent", returnsBool},
 	{"sendfrom", returnsString},
 	{"sendmany", returnsString},
 	{"sendtoaddress", returnsString},
 	{"settxfee", returnsBool},
 	{"signmessage", returnsString},
-	{"signrawtransaction", []interface{}{(*json.SignRawTransactionResult)(nil)}},
-	{"validateaddress", []interface{}{(*json.ValidateAddressWalletResult)(nil)}},
+	{"signrawtransaction", []interface{}{(*btcjson.SignRawTransactionResult)(nil)}},
+	{"validateaddress", []interface{}{(*btcjson.ValidateAddressWalletResult)(nil)}},
 	{"verifymessage", returnsBool},
 	{"walletlock", nil},
 	{"walletpassphrase", nil},
 	{"walletpassphrasechange", nil},
 	{"createnewaccount", nil},
 	{"exportwatchingwallet", returnsString},
-	{"getbestblock", []interface{}{(*json.GetBestBlockResult)(nil)}},
+	{"getbestblock", []interface{}{(*btcjson.GetBestBlockResult)(nil)}},
 	{"getunconfirmedbalance", returnsNumber},
 	{"listaddresstransactions", returnsLTRArray},
 	{"listalltransactions", returnsLTRArray},
@@ -71,7 +71,7 @@ var Methods = []struct {
 var returnsBool = []interface{}{(*bool)(nil)}
 
 // Common return types.
-var returnsLTRArray = []interface{}{(*[]json.ListTransactionsResult)(nil)}
+var returnsLTRArray = []interface{}{(*[]btcjson.ListTransactionsResult)(nil)}
 
 // Common return types.
 var returnsNumber = []interface{}{(*float64)(nil)}

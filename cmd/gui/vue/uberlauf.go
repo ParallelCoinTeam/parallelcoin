@@ -7,7 +7,7 @@ import (
 	enjs "encoding/json"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/alert"
 	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/zserge/webview"
 	"log"
 	"strings"
@@ -67,9 +67,9 @@ func (d *DuoVUE) GetBlockChainInfo() {
 		alert.PushAlert(err.Error(), "error")
 	}
 	var ok bool
-	d.Core.Node.BlockChainInfo, ok = getBlockChainInfo.(*json.GetBlockChainInfoResult)
+	d.Core.Node.BlockChainInfo, ok = getBlockChainInfo.(*btcjson.GetBlockChainInfoResult)
 	if !ok {
-		d.Core.Node.BlockChainInfo = &json.GetBlockChainInfoResult{}
+		d.Core.Node.BlockChainInfo = &btcjson.GetBlockChainInfoResult{}
 	}
 
 }
@@ -83,7 +83,7 @@ func (d *DuoVUE) GetBlockCount() int64 {
 	return d.Status.BlockCount
 }
 func (d *DuoVUE) GetBlockHash(blockHeight int) {
-	hcmd := json.GetBlockHashCmd{
+	hcmd := btcjson.GetBlockHashCmd{
 		Index: int64(blockHeight),
 	}
 	hash, err := rpc.HandleGetBlockHash(d.cx.RPCServer, &hcmd, nil)
@@ -94,7 +94,7 @@ func (d *DuoVUE) GetBlockHash(blockHeight int) {
 }
 func (d *DuoVUE) GetBlock(hash string) {
 	verbose, verbosetx := true, true
-	bcmd := json.GetBlockCmd{
+	bcmd := btcjson.GetBlockCmd{
 		Hash:      hash,
 		Verbose:   &verbose,
 		VerboseTx: &verbosetx,
@@ -103,7 +103,7 @@ func (d *DuoVUE) GetBlock(hash string) {
 	if err != nil {
 		alert.PushAlert(err.Error(), "error")
 	}
-	d.Core.Node.Block = bl.(json.GetBlockVerboseResult)
+	d.Core.Node.Block = bl.(btcjson.GetBlockVerboseResult)
 }
 
 // func (v *DuoVUEnode) Getblockheader(a *json.GetBlockHeaderCmd) {
@@ -118,7 +118,7 @@ func (d *DuoVUE) GetConnectionCount() int32 {
 }
 
 func (d *DuoVUE) GetDifficulty() float64 {
-	c := json.GetDifficultyCmd{}
+	c := btcjson.GetDifficultyCmd{}
 	r, err := rpc.HandleGetDifficulty(d.cx.RPCServer, c, nil)
 	if err != nil {
 		alert.PushAlert(err.Error(), "error")
@@ -162,12 +162,12 @@ func (d *DuoVUE) GetDifficulty() float64 {
 // 	r = int64(0)
 // 	return
 // }
-func (d *DuoVUE) GetPeerInfo() []*json.GetPeerInfoResult {
+func (d *DuoVUE) GetPeerInfo() []*btcjson.GetPeerInfoResult {
 	getPeers, err := rpc.HandleGetPeerInfo(d.cx.RPCServer, nil, nil)
 	if err != nil {
 		alert.PushAlert(err.Error(), "error")
 	}
-	d.Status.Peers = getPeers.([]*json.GetPeerInfoResult)
+	d.Status.Peers = getPeers.([]*btcjson.GetPeerInfoResult)
 	//fmt.Println("ssssssssssssssssss", d.Status.Peers)
 	return d.Status.Peers
 }
@@ -199,11 +199,11 @@ func (d *DuoVUE) Uptime() (r int64) {
 // 	r = ""
 // 	return
 // }
-func (s *DuoVUEstatus) GetWalletVersion(d DuoVUE) map[string]json.VersionResult {
+func (s *DuoVUEstatus) GetWalletVersion(d DuoVUE) map[string]btcjson.VersionResult {
 	v, err := rpc.HandleVersion(d.cx.RPCServer, nil, nil)
 	if err != nil {
 	}
-	return v.(map[string]json.VersionResult)
+	return v.(map[string]btcjson.VersionResult)
 }
 
 func render(w webview.WebView, cmd string, data interface{}) {
