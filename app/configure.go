@@ -14,6 +14,7 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/normalize"
 	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
 
@@ -23,12 +24,11 @@ import (
 	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // Configure loads and sanitises the configuration from urfave/cli
 func Configure(cx *conte.Xt) {
-	L.Trace("configuring pod")
+	TRACE("configuring pod")
 	var err error
 	*cx.Config.DataDir = util.AppDataDir("pod", false)
 	// theoretically, the configuration should be accessed only when locked
@@ -48,29 +48,29 @@ func Configure(cx *conte.Xt) {
 	}
 	switch network {
 	case "testnet", "testnet3", "t":
-		L.Trace("on testnet")
+		TRACE("on testnet")
 		*cfg.TestNet3 = true
 		*cfg.SimNet = false
 		*cfg.RegressionTest = false
 		cx.ActiveNet = &netparams.TestNet3Params
 		fork.IsTestnet = true
 	case "regtestnet", "regressiontest", "r":
-		L.Trace("on regression testnet")
+		TRACE("on regression testnet")
 		*cfg.TestNet3 = false
 		*cfg.SimNet = false
 		*cfg.RegressionTest = true
 		cx.ActiveNet = &netparams.RegressionTestParams
 	case "simnet", "s":
-		L.Trace("on simnet")
+		TRACE("on simnet")
 		*cfg.TestNet3 = false
 		*cfg.SimNet = true
 		*cfg.RegressionTest = false
 		cx.ActiveNet = &netparams.SimNetParams
 	default:
 		if network != "mainnet" && network != "m" {
-			L.Warn("using mainnet for node")
+			WARN("using mainnet for node")
 		}
-		L.Trace("on mainnet")
+		TRACE("on mainnet")
 		*cfg.TestNet3 = false
 		*cfg.SimNet = false
 		*cfg.RegressionTest = false
@@ -84,7 +84,7 @@ func Configure(cx *conte.Xt) {
 	cx.StopDiscovery, cx.RequestDiscoveryUpdate, err = discovery.
 		Serve(cx.ActiveNet, cx.RouteableInterface, *cx.Config.Group)
 	if err != nil {
-		L.Error("error starting discovery server: ", err)
+		ERROR("error starting discovery server: ", err)
 	}
 	cx.StateCfg.DiscoveryUpdate = cx.RequestDiscoveryUpdate
 	cx.StateCfg.RouteableAddress = routeableString
@@ -116,17 +116,17 @@ func Configure(cx *conte.Xt) {
 	loglevel := *cfg.LogLevel
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
-		L.Trace("log level", loglevel)
+		TRACE("log level", loglevel)
 	default:
-		L.Info("unrecognised loglevel", loglevel, "setting default info")
+		INFO("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
 	}
-	cl.Register.SetAllLevels(*cfg.LogLevel)
+	log.Register.SetAllLevels(*cfg.LogLevel)
 	if !*cfg.Onion {
 		*cfg.OnionProxy = ""
 	}
 
-	L.Trace("normalising addresses")
+	TRACE("normalising addresses")
 	port := node.DefaultPort
 	nrm := normalize.StringSliceAddresses
 	nrm(cfg.AddPeers, port)
@@ -145,14 +145,14 @@ func Configure(cx *conte.Xt) {
 	default:
 		*cfg.Algo = "random"
 	}
-	L.Trace("mining algorithm ", *cfg.Algo)
+	TRACE("mining algorithm ", *cfg.Algo)
 	relayNonStd := *cfg.RelayNonStd
 	funcName := "loadConfig"
 	switch {
 	case *cfg.RelayNonStd && *cfg.RejectNonStd:
 		errf := "%s: rejectnonstd and relaynonstd cannot be used together" +
 			" -- choose only one %s"
-		L.Errorf(errf, funcName)
+		ERRORF(errf, funcName)
 		// just leave both false
 		*cfg.RelayNonStd = false
 		*cfg.RejectNonStd = false
@@ -163,48 +163,48 @@ func Configure(cx *conte.Xt) {
 	}
 	*cfg.RelayNonStd = relayNonStd
 	// Validate database type.
-	L.Trace("validating database type")
+	TRACE("validating database type")
 	if !node.ValidDbType(*cfg.DbType) {
 		str := "%s: The specified database type [%v] is invalid -- " +
 			"supported types %v"
 		err := fmt.Errorf(str, funcName, *cfg.DbType, node.KnownDbTypes)
-		L.Error(funcName, err)
+		ERROR(funcName, err)
 		// set to default
 		*cfg.DbType = node.KnownDbTypes[0]
 	}
 	// Validate profile port number
-	L.Trace("validating profile port number")
+	TRACE("validating profile port number")
 	if *cfg.Profile != "" {
 		profilePort, err := strconv.Atoi(*cfg.Profile)
 		if err != nil || profilePort < 1024 || profilePort > 65535 {
 			str := "%s: The profile port must be between 1024 and 65535"
 			err := fmt.Errorf(str, funcName)
-			L.Error(funcName, err)
+			ERROR(funcName, err)
 			*cfg.Profile = ""
 		}
 	}
 	// Don't allow ban durations that are too short.
-	L.Trace("validating ban duration")
+	TRACE("validating ban duration")
 	if *cfg.BanDuration < time.Second {
 		err := fmt.Errorf("%s: The banduration option may not be less than 1s -- parsed [%v]",
 			funcName, *cfg.BanDuration)
-		L.Info(funcName, err)
+		INFO(funcName, err)
 		*cfg.BanDuration = node.DefaultBanDuration
 	}
 	// Validate any given whitelisted IP addresses and networks.
-	L.Trace("validating whitelists")
+	TRACE("validating whitelists")
 	if len(*cfg.Whitelists) > 0 {
 		var ip net.IP
 		state.ActiveWhitelists = make([]*net.IPNet, 0, len(*cfg.Whitelists))
 		for _, addr := range *cfg.Whitelists {
 			_, ipnet, err := net.ParseCIDR(addr)
 			if err != nil {
-				err = fmt.Errorf("%s '%s'", cl.Ine(), err.Error())
+				err = fmt.Errorf("%s '%s'", err.Error())
 				ip = net.ParseIP(addr)
 				if ip == nil {
 					str := err.Error() + " %s: The whitelist value of '%s' is invalid"
 					err = fmt.Errorf(str, funcName, addr)
-					L.Error(err)
+					ERROR(err)
 					fmt.Fprintln(os.Stderr, err)
 					os.Exit(1)
 				}
@@ -223,7 +223,7 @@ func Configure(cx *conte.Xt) {
 			state.ActiveWhitelists = append(state.ActiveWhitelists, ipnet)
 		}
 	}
-	L.Trace("checking addpeer and connectpeer lists")
+	TRACE("checking addpeer and connectpeer lists")
 	if len(*cfg.AddPeers) > 0 && len(*cfg.ConnectPeers) > 0 {
 		err := fmt.Errorf(
 			"%s: the --addpeer and --connect options can not be mixed",
@@ -232,19 +232,19 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// --proxy or --connect without --listen disables listening.
-	L.Trace("checking proxy/connect for disabling listening")
+	TRACE("checking proxy/connect for disabling listening")
 	if (*cfg.Proxy != "" || len(*cfg.ConnectPeers) > 0) &&
 		len(*cfg.Listeners) == 0 {
 		*cfg.DisableListen = true
 	}
 	// Add the default listener if none were specified. The default listener is
 	// all addresses on the listen port for the network we are to connect to.
-	L.Trace("checking if listener was set")
+	TRACE("checking if listener was set")
 	if len(*cfg.Listeners) == 0 {
 		*cfg.Listeners = []string{":" + cx.ActiveNet.DefaultPort}
 	}
 	// Check to make sure limited and admin users don't have the same username
-	L.Trace("checking admin and limited username is different")
+	TRACE("checking admin and limited username is different")
 	if *cfg.Username != "" &&
 		*cfg.Username == *cfg.LimitUser {
 		str := "%s: --username and --limituser must not specify the same username"
@@ -253,7 +253,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Check to make sure limited and admin users don't have the same password
-	L.Trace("checking limited and admin passwords are not the same")
+	TRACE("checking limited and admin passwords are not the same")
 	if *cfg.Password != "" &&
 		*cfg.Password == *cfg.LimitPass {
 		str := "%s: --password and --limitpass must not specify the same password"
@@ -262,30 +262,30 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// The RPC server is disabled if no username or password is provided.
-	L.Trace("checking rpc server has a login enabled")
+	TRACE("checking rpc server has a login enabled")
 	if (*cfg.Username == "" || *cfg.Password == "") &&
 		(*cfg.LimitUser == "" || *cfg.LimitPass == "") {
 		*cfg.DisableRPC = true
 	}
 	if *cfg.DisableRPC {
-		L.Trace("RPC service is disabled")
+		TRACE("RPC service is disabled")
 	}
-	L.Trace("checking rpc server has listeners set")
+	TRACE("checking rpc server has listeners set")
 	if !*cfg.DisableRPC && len(*cfg.RPCListeners) == 0 {
-		L.Debug("looking up default listener")
+		DEBUG("looking up default listener")
 		addrs, err := net.LookupHost(node.DefaultRPCListener)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 		*cfg.RPCListeners = make([]string, 0, len(addrs))
-		L.Debug("setting listeners")
+		DEBUG("setting listeners")
 		for _, addr := range addrs {
 			addr = net.JoinHostPort(addr, cx.ActiveNet.RPCClientPort)
 			*cfg.RPCListeners = append(*cfg.RPCListeners, addr)
 		}
 	}
-	L.Trace("checking rpc max concurrent requests")
+	TRACE("checking rpc max concurrent requests")
 	if *cfg.RPCMaxConcurrentReqs < 0 {
 		str := "%s: The rpcmaxwebsocketconcurrentrequests option may not be less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.RPCMaxConcurrentReqs)
@@ -293,7 +293,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Validate the the minrelaytxfee.
-	L.Trace("checking min relay tx fee")
+	TRACE("checking min relay tx fee")
 	state.ActiveMinRelayTxFee, err = util.NewAmount(*cfg.MinRelayTxFee)
 	if err != nil {
 		str := "%s: invalid minrelaytxfee: %v"
@@ -302,7 +302,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Limit the max block size to a sane value.
-	L.Trace("checking max block size")
+	TRACE("checking max block size")
 	if *cfg.BlockMaxSize < node.BlockMaxSizeMin ||
 		*cfg.BlockMaxSize > node.BlockMaxSizeMax {
 		str := "%s: The blockmaxsize option must be in between %d and %d -- parsed [%d]"
@@ -312,7 +312,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Limit the max block weight to a sane value.
-	L.Trace("checking max block weight")
+	TRACE("checking max block weight")
 	if *cfg.BlockMaxWeight < node.BlockMaxWeightMin ||
 		*cfg.BlockMaxWeight > node.BlockMaxWeightMax {
 		str := "%s: The blockmaxweight option must be in between %d and %d -- parsed [%d]"
@@ -322,7 +322,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Limit the max orphan count to a sane vlue.
-	L.Trace("checking max orphan limit")
+	TRACE("checking max orphan limit")
 	if *cfg.MaxOrphanTxs < 0 {
 		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
@@ -330,7 +330,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Limit the block priority and minimum block sizes to max block size.
-	L.Trace("validating block priority and minimum size/weight")
+	TRACE("validating block priority and minimum size/weight")
 	*cfg.BlockPrioritySize = int(apputil.MinUint32(
 		uint32(*cfg.BlockPrioritySize),
 		uint32(*cfg.BlockMaxSize)))
@@ -354,7 +354,7 @@ func Configure(cx *conte.Xt) {
 		*cfg.BlockMaxWeight = *cfg.BlockMaxSize * blockchain.WitnessScaleFactor
 	}
 	// Look for illegal characters in the user agent comments.
-	L.Trace("checking user agent comments")
+	TRACE("checking user agent comments")
 	for _, uaComment := range *cfg.UserAgentComments {
 		if strings.ContainsAny(uaComment, "/:()") {
 			err := fmt.Errorf("%s: The following characters must not "+
@@ -365,7 +365,7 @@ func Configure(cx *conte.Xt) {
 		}
 	}
 	// Check mining addresses are valid and saved parsed versions.
-	L.Trace("checking mining addresses")
+	TRACE("checking mining addresses")
 	state.ActiveMiningAddrs = make([]util.Address, 0, len(*cfg.MiningAddrs))
 	for _, strAddr := range *cfg.MiningAddrs {
 		addr, err := util.DecodeAddress(strAddr, cx.ActiveNet)
@@ -396,7 +396,7 @@ func Configure(cx *conte.Xt) {
 	if *cfg.MinerPass != "" {
 		state.ActiveMinerKey = fork.Argon2i([]byte(*cfg.MinerPass))
 	}
-	L.Trace("checking rpc listener addresses")
+	TRACE("checking rpc listener addresses")
 	nrms := normalize.Addresses
 	// Add default port to all rpc listener addresses if needed and remove duplicate addresses.
 	// *cfg.RPCListeners = nrms(*cfg.RPCListeners, cx.ActiveNet.RPCClientPort)
@@ -415,7 +415,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Check the checkpoints for syntax errors.
-	L.Trace("checking the checkpoints")
+	TRACE("checking the checkpoints")
 	state.AddedCheckpoints, err = node.ParseCheckpoints(*cfg.AddCheckpoints)
 	if err != nil {
 		str := "%s: Error parsing checkpoints: %v"
@@ -438,11 +438,11 @@ func Configure(cx *conte.Xt) {
 	// the dial function is set to the proxy specific dial function and the
 	// lookup is set to use tor (unless --noonion is specified in which case the
 	// system DNS resolver is used).
-	L.Trace("setting network dialer and lookup")
+	TRACE("setting network dialer and lookup")
 	state.Dial = net.DialTimeout
 	state.Lookup = net.LookupIP
 	if *cfg.Proxy != "" {
-		L.Trace("we are loading a proxy!")
+		TRACE("we are loading a proxy!")
 		_, _, err := net.SplitHostPort(*cfg.Proxy)
 		if err != nil {
 			str := "%s: Proxy address '%s' is invalid: %v"
@@ -459,7 +459,7 @@ func Configure(cx *conte.Xt) {
 			(*cfg.ProxyUser != "" ||
 				*cfg.ProxyPass != "") {
 			torIsolation = true
-			L.Warn("Tor isolation set -- overriding specified" +
+			WARN("Tor isolation set -- overriding specified" +
 				" proxy user credentials")
 		}
 		proxy := &socks.Proxy{
@@ -485,7 +485,7 @@ func Configure(cx *conte.Xt) {
 	// set to use the onion-specific proxy while leaving the normal dial
 	// function as selected above.  This allows .onion address traffic to be
 	// routed through a different proxy than normal traffic.
-	L.Trace("setting up tor proxy if enabled")
+	TRACE("setting up tor proxy if enabled")
 	if *cfg.OnionProxy != "" {
 		_, _, err := net.SplitHostPort(*cfg.OnionProxy)
 		if err != nil {
@@ -497,7 +497,7 @@ func Configure(cx *conte.Xt) {
 		// Tor isolation flag means onion proxy credentials will be overridden.
 		if *cfg.TorIsolation &&
 			(*cfg.OnionProxyUser != "" || *cfg.OnionProxyPass != "") {
-			L.Warn("Tor isolation set - overriding specified onionproxy user credentials")
+			WARN("Tor isolation set - overriding specified onionproxy user credentials")
 		}
 	}
 	state.Oniondial =
@@ -530,12 +530,12 @@ func Configure(cx *conte.Xt) {
 	}
 	// if the user set the save flag, or file doesn't exist save the file now
 	if state.Save {
-		L.Warn("saving configuration on user request")
+		WARN("saving configuration on user request")
 			state.Save = false
 			save.Pod(cx.Config)
 		}
 		if !apputil.FileExists(*cx.Config.ConfigFile) {
-			L.Warn("saving configuration because none existed")
+			WARN("saving configuration because none existed")
 			save.Pod(cx.Config)
 		}
 		// if we are using discovery we override the listeners with ":0" and

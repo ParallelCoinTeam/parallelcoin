@@ -10,7 +10,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
 	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // DiscoverPeers connects lan peers in the same group.
@@ -25,7 +24,7 @@ func DiscoverPeers(cx *conte.Xt) (cancel func()) {
 	cancelSearch, resultsChan, err := discovery.AsyncZeroConfSearch(
 		serviceName, *cx.Config.Group)
 	if err != nil {
-		L.Error("error running zeroconf search ", err, cl.Ine())
+		ERROR("error running zeroconf search ", err)
 		return func() {}
 	}
 	ticker := time.NewTicker(time.Second * 10)
@@ -59,7 +58,7 @@ func DiscoverPeers(cx *conte.Xt) (cancel func()) {
 							Permanent: true,
 						})
 						zcPeers = append(zcPeers, r)
-						L.Warn("connecting to zeroconf peer ", nodeAddress)
+						WARN("connecting to zeroconf peer ", nodeAddress)
 					}
 				}
 			case <-quit:
@@ -68,6 +67,6 @@ func DiscoverPeers(cx *conte.Xt) (cancel func()) {
 			}
 		}
 	}()
-	L.Warn("started up discovery loop")
+	WARN("started up discovery loop")
 	return func() {}
 }

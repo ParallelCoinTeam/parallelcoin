@@ -21,7 +21,7 @@ import (
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
@@ -400,7 +400,7 @@ func (w *Wallet) syncWithChain() error {
 			if err != nil {
 				e := tx.Rollback()
 				if e != nil {
-					log <- cl.Debug{err, cl.Ine()}
+					log <- cl.Debug{err}
 				}
 				return err
 			}
@@ -427,7 +427,7 @@ func (w *Wallet) syncWithChain() error {
 				if err != nil {
 					e := tx.Rollback()
 					if e != nil {
-						log <- cl.Debug{err, cl.Ine()}
+						log <- cl.Debug{err}
 					}
 					return err
 				}
@@ -475,7 +475,7 @@ func (w *Wallet) syncWithChain() error {
 			if err != nil {
 				e := tx.Rollback()
 				if e != nil {
-					log <- cl.Debug{err, cl.Ine()}
+					log <- cl.Debug{err}
 				}
 				return err
 			}
@@ -492,7 +492,7 @@ func (w *Wallet) syncWithChain() error {
 				if err != nil {
 					e := tx.Rollback()
 					if e != nil {
-						log <- cl.Debug{err, cl.Ine()}
+						log <- cl.Debug{err}
 					}
 					return err
 				}
@@ -505,11 +505,11 @@ func (w *Wallet) syncWithChain() error {
 				if err != nil {
 					e := tx.Rollback()
 					if e != nil {
-						log <- cl.Debug{err, cl.Ine()}
+						log <- cl.Debug{err}
 					}
 					return err
 				}
-				log <- cl.Info{
+				INFO(
 					"Caught up to height", height,
 				}
 				tx, err = w.db.BeginReadWriteTx()
@@ -529,7 +529,7 @@ func (w *Wallet) syncWithChain() error {
 			if err != nil {
 				e := tx.Rollback()
 				if e != nil {
-					log <- cl.Debug{err, cl.Ine()}
+					log <- cl.Debug{err}
 				}
 				return err
 			}
@@ -539,11 +539,11 @@ func (w *Wallet) syncWithChain() error {
 		if err != nil {
 			e := tx.Rollback()
 			if e != nil {
-				log <- cl.Debug{err, cl.Ine()}
+				log <- cl.Debug{err}
 			}
 			return err
 		}
-		log <- cl.Info{"done catching up block hashes", cl.Ine()}
+		INFO("done catching up block hashes"}
 		// Since we've spent some time catching up block hashes, we
 		// might have new addresses waiting for us that were requested
 		// during initial sync. Make sure we have those before we
@@ -1169,7 +1169,7 @@ out:
 		err := w.Manager.Lock()
 		if err != nil && !waddrmgr.IsError(err, waddrmgr.ErrLocked) {
 			log <- cl.Error{
-				"could not lock wallet:", err, cl.Ine()}
+				"could not lock wallet:", err}
 		} else {
 			log <- cl.Inf("the wallet has been locked")
 		}
@@ -1611,7 +1611,7 @@ func (w *Wallet) NextAccount(scope waddrmgr.KeyScope, name string) (uint32, erro
 	if err != nil {
 		log <- cl.Error{
 			"cannot fetch new account properties for notification after account creation:",
-			err, cl.Ine()}
+			err}
 	} else {
 		w.NtfnServer.notifyAccountProperties(props)
 	}
@@ -1670,7 +1670,7 @@ func RecvCategory(details *wtxmgr.TxDetails, syncHeight int32, net *netparams.Pa
 //
 // TODO: This should be moved to the legacyrpc package.
 func listTransactions(tx walletdb.ReadTx, details *wtxmgr.TxDetails, addrMgr *waddrmgr.Manager,
-	syncHeight int32, net *netparams.Params) []json.ListTransactionsResult {
+	syncHeight int32, net *netparams.Params) []btcjson.ListTransactionsResult {
 	addrmgrNs := tx.ReadBucket(waddrmgrNamespaceKey)
 	var (
 		blockHashStr  string
@@ -1682,7 +1682,7 @@ func listTransactions(tx walletdb.ReadTx, details *wtxmgr.TxDetails, addrMgr *wa
 		blockTime = details.Block.Time.Unix()
 		confirmations = int64(confirms(details.Block.Height, syncHeight))
 	}
-	results := []json.ListTransactionsResult{}
+	results := []btcjson.ListTransactionsResult{}
 	txHashStr := details.Hash.String()
 	received := details.Received.Unix()
 	generated := blockchain.IsCoinBaseTx(&details.MsgTx)
@@ -1736,7 +1736,7 @@ outputs:
 			}
 		}
 		amountF64 := util.Amount(output.Value).ToDUO()
-		result := json.ListTransactionsResult{
+		result := btcjson.ListTransactionsResult{
 			// Fields left zeroed:
 			//   InvolvesWatchOnly
 			//   BlockIndex
@@ -1786,8 +1786,8 @@ outputs:
 // ListSinceBlock returns a slice of objects with details about transactions
 // since the given block. If the block is -1 then all transactions are included.
 // This is intended to be used for listsinceblock RPC replies.
-func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) ([]json.ListTransactionsResult, error) {
-	txList := []json.ListTransactionsResult{}
+func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) ([]btcjson.ListTransactionsResult, error) {
+	txList := []btcjson.ListTransactionsResult{}
 	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		rangeFn := func(details []wtxmgr.TxDetails) (bool, error) {
@@ -1806,8 +1806,8 @@ func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) ([]json.ListTransa
 // ListTransactions returns a slice of objects with details about a recorded
 // transaction.  This is intended to be used for listtransactions RPC
 // replies.
-func (w *Wallet) ListTransactions(from, count int) ([]json.ListTransactionsResult, error) {
-	txList := []json.ListTransactionsResult{}
+func (w *Wallet) ListTransactions(from, count int) ([]btcjson.ListTransactionsResult, error) {
+	txList := []btcjson.ListTransactionsResult{}
 	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		// Get current block.  The block height used for calculating
@@ -1850,8 +1850,8 @@ func (w *Wallet) ListTransactions(from, count int) ([]json.ListTransactionsResul
 // ListAddressTransactions returns a slice of objects with details about
 // recorded transactions to or from any address belonging to a set.  This is
 // intended to be used for listaddresstransactions RPC replies.
-func (w *Wallet) ListAddressTransactions(pkHashes map[string]struct{}) ([]json.ListTransactionsResult, error) {
-	txList := []json.ListTransactionsResult{}
+func (w *Wallet) ListAddressTransactions(pkHashes map[string]struct{}) ([]btcjson.ListTransactionsResult, error) {
+	txList := []btcjson.ListTransactionsResult{}
 	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		// Get current block.  The block height used for calculating
@@ -1895,8 +1895,8 @@ func (w *Wallet) ListAddressTransactions(pkHashes map[string]struct{}) ([]json.L
 // ListAllTransactions returns a slice of objects with details about a recorded
 // transaction.  This is intended to be used for listalltransactions RPC
 // replies.
-func (w *Wallet) ListAllTransactions() ([]json.ListTransactionsResult, error) {
-	txList := []json.ListTransactionsResult{}
+func (w *Wallet) ListAllTransactions() ([]btcjson.ListTransactionsResult, error) {
+	txList := []btcjson.ListTransactionsResult{}
 	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		// Get current block.  The block height used for calculating
@@ -2254,8 +2254,8 @@ func (s creditSlice) Swap(i, j int) {
 // contained within it will be considered.  If we know nothing about a
 // transaction an empty array will be returned.
 func (w *Wallet) ListUnspent(minconf, maxconf int32,
-	addresses map[string]struct{}) ([]*json.ListUnspentResult, error) {
-	var results []*json.ListUnspentResult
+	addresses map[string]struct{}) ([]*btcjson.ListUnspentResult, error) {
+	var results []*btcjson.ListUnspentResult
 	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		addrmgrNs := tx.ReadBucket(waddrmgrNamespaceKey)
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
@@ -2267,7 +2267,7 @@ func (w *Wallet) ListUnspent(minconf, maxconf int32,
 		}
 		sort.Sort(sort.Reverse(creditSlice(unspent)))
 		defaultAccountName := "default"
-		results = make([]*json.ListUnspentResult, 0, len(unspent))
+		results = make([]*btcjson.ListUnspentResult, 0, len(unspent))
 		for i := range unspent {
 			output := unspent[i]
 			// Outputs with fewer confirmations than the minimum or more
@@ -2353,7 +2353,7 @@ func (w *Wallet) ListUnspent(minconf, maxconf int32,
 				}
 				spendable = true
 			}
-			result := &json.ListUnspentResult{
+			result := &btcjson.ListUnspentResult{
 				TxID:          output.OutPoint.Hash.String(),
 				Vout:          output.OutPoint.Index,
 				Account:       acctName,
@@ -2501,7 +2501,7 @@ func (w *Wallet) ImportPrivateKey(scope waddrmgr.KeyScope, wif *util.WIF,
 		}
 	}
 	addrStr := addr.EncodeAddress()
-	log <- cl.Info{
+	INFO(
 		"imported payment address",
 		addrStr,
 	}
@@ -2538,11 +2538,11 @@ func (w *Wallet) ResetLockedOutpoints() {
 // LockedOutpoints returns a slice of currently locked outpoints.  This is
 // intended to be used by marshaling the result as a JSON array for
 // listlockunspent RPC results.
-func (w *Wallet) LockedOutpoints() []json.TransactionInput {
-	locked := make([]json.TransactionInput, len(w.lockedOutpoints))
+func (w *Wallet) LockedOutpoints() []btcjson.TransactionInput {
+	locked := make([]btcjson.TransactionInput, len(w.lockedOutpoints))
 	i := 0
 	for op := range w.lockedOutpoints {
-		locked[i] = json.TransactionInput{
+		locked[i] = btcjson.TransactionInput{
 			Txid: op.Hash.String(),
 			Vout: op.Index,
 		}
@@ -2558,7 +2558,7 @@ func (w *Wallet) resendUnminedTxs() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
 		log <- cl.Error{
-			"no chain server available to resend unmined transactions", err, cl.Ine()}
+			"no chain server available to resend unmined transactions", err}
 		return
 	}
 	var txs []*wire.MsgTx
@@ -2570,7 +2570,7 @@ func (w *Wallet) resendUnminedTxs() {
 	})
 	if err != nil {
 		log <- cl.Error{
-			"cannot load unmined transactions for resending:", err, cl.Ine()}
+			"cannot load unmined transactions for resending:", err}
 		return
 	}
 	for _, tx := range txs {
@@ -2578,7 +2578,7 @@ func (w *Wallet) resendUnminedTxs() {
 		if err != nil {
 			log <- cl.Debugf{
 				"could not resend transaction %v: %v %s",
-				tx.TxHash(), err, cl.Ine()}
+				tx.TxHash(), err}
 			// We'll only stop broadcasting transactions if we
 			// detect that the output has already been fully spent,
 			// is an orphan, or is conflicting with another
@@ -2629,7 +2629,7 @@ func (w *Wallet) resendUnminedTxs() {
 			continue
 		}
 		log <- cl.Debug{
-			"resent unmined transaction", resp, cl.Ine()}
+			"resent unmined transaction", resp}
 	}
 }
 
@@ -2693,7 +2693,7 @@ func (w *Wallet) newAddress(addrmgrNs walletdb.ReadWriteBucket, account uint32,
 	props, err := manager.AccountProperties(addrmgrNs, account)
 	if err != nil {
 		log <- cl.Errorf{
-			"cannot fetch account properties for notification after deriving next external address: %v %s", err, cl.Ine()}
+			"cannot fetch account properties for notification after deriving next external address: %v %s", err}
 		return nil, nil, err
 	}
 	return addrs[0].Address(), props, nil
@@ -3196,7 +3196,7 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 	if err != nil {
 		return nil, err
 	}
-	log <- cl.Info{"opened wallet", cl.Ine()} // TODO: log balance? last sync height?
+	INFO("opened wallet"} // TODO: log balance? last sync height?
 	w := &Wallet{
 		publicPassphrase:    pubPass,
 		db:                  db,

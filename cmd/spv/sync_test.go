@@ -20,7 +20,7 @@ import (
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
@@ -1302,7 +1302,7 @@ func startRescan(t *testing.T, svc *spv.ChainService, addr util.Address,
 					rescanMtx.Unlock()
 				},
 				OnRecvTx: func(tx *util.Tx,
-					details *json.BlockDetails) {
+					details *btcjson.BlockDetails) {
 					rescanMtx.Lock()
 					hash, err := chainhash.
 						NewHashFromStr(
@@ -1322,7 +1322,7 @@ func startRescan(t *testing.T, svc *spv.ChainService, addr util.Address,
 					rescanMtx.Unlock()
 				},
 				OnRedeemingTx: func(tx *util.Tx,
-					details *json.BlockDetails) {
+					details *btcjson.BlockDetails) {
 					rescanMtx.Lock()
 					hash, err := chainhash.
 						NewHashFromStr(

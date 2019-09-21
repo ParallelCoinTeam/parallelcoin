@@ -4,9 +4,8 @@ import (
 	"github.com/parallelcointeam/parallelcoin/app/save"
 	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
 	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	wm "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
 
 func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Config) {
@@ -18,15 +17,15 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 		if toMake < 1 {
 			return
 		}
-		log <- cl.Warn{"refilling mining addresses", cl.Ine()}
-		account, err := w.AccountNumber(waddrmgr.KeyScopeBIP0044,
+		WARN("refilling mining addresses")
+		account, err := w.AccountNumber(wm.KeyScopeBIP0044,
 			"default")
 		if err != nil {
-			log <- cl.Error{"error getting account number ", err,
-				cl.Ine()}
+			ERROR("error getting account number ", err,
+			)
 		}
 		for i := 0; i < toMake; i++ {
-			addr, err := w.NewAddress(account, waddrmgr.KeyScopeBIP0044,
+			addr, err := w.NewAddress(account, wm.KeyScopeBIP0044,
 				true)
 			if err == nil {
 				// add them to the configuration to be saved
@@ -37,14 +36,13 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 				stateCfg.ActiveMiningAddrs = append(stateCfg.
 					ActiveMiningAddrs, addr)
 			} else {
-				log <- cl.Error{"error adding new address ", err,
-					cl.Ine()}
+				ERROR("error adding new address ", err)
 			}
 		}
 		if save.Pod(cfg) {
-			log <- cl.Warn{"saved config with new addresses", cl.Ine()}
+			WARN("saved config with new addresses")
 		} else {
-			log <- cl.Error{"failed to save config", cl.Ine()}
+			ERROR("failed to save config")
 		}
 	}()
 }

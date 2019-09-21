@@ -1,12 +1,11 @@
 package wallet
 
 import (
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	tm "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
+	txs "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	wm "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
 )
 
@@ -33,7 +32,7 @@ type RescanJob struct {
 	InitialSync bool
 	Addrs       []util.Address
 	OutPoints   map[wire.OutPoint]util.Address
-	BlockStamp  waddrmgr.BlockStamp
+	BlockStamp  wm.BlockStamp
 	err         chan error
 }
 
@@ -43,7 +42,7 @@ type rescanBatch struct {
 	initialSync bool
 	addrs       []util.Address
 	outpoints   map[wire.OutPoint]util.Address
-	bs          waddrmgr.BlockStamp
+	bs          wm.BlockStamp
 	errChans    []chan error
 }
 
@@ -122,7 +121,7 @@ out:
 			switch n := n.(type) {
 			case *chain.RescanProgress:
 				if curBatch == nil {
-					log <- cl.Wrn(
+					WARN(
 						"received rescan progress notification but no rescan currently running",
 					)
 					continue
@@ -133,7 +132,7 @@ out:
 				}
 			case *chain.RescanFinished:
 				if curBatch == nil {
-					log <- cl.Wrn(
+					WARN(
 						"received rescan finished notification but no rescan currently running",
 					)
 					continue
@@ -166,18 +165,18 @@ out:
 		select {
 		case msg := <-w.rescanProgress:
 			n := msg.Notification
-			log <- cl.Infof{
+			INFOF(
 				"rescanned through block %v (height %d)",
 				n.Hash, n.Height,
-			}
+			)
 		case msg := <-w.rescanFinished:
 			n := msg.Notification
 			addrs := msg.Addresses
 			noun := pickNoun(len(addrs), "address", "addresses")
-			log <- cl.Infof{
+			INFOF(
 				"finished rescan for %d %s (synced to block %s, height %d)",
 				len(addrs), noun, n.Hash, n.Height,
-			}
+			)
 			go w.resendUnminedTxs()
 		case <-quit:
 			break out
@@ -192,7 +191,7 @@ out:
 func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		log <- cl.Error{"rescanRPCHandler called without an RPC client", err, cl.Ine()}
+		ERROR("rescanRPCHandler called without an RPC client", err)
 		w.wg.Done()
 		return
 	}
@@ -204,15 +203,15 @@ out:
 			// Log the newly-started rescan.
 			numAddrs := len(batch.addrs)
 			noun := pickNoun(numAddrs, "address", "addresses")
-			log <- cl.Infof{
+			INFOF(
 				"started rescan from block %v (height %d) for %d %s",
 				batch.bs.Hash, batch.bs.Height, numAddrs, noun,
-			}
+			)
 			err := chainClient.Rescan(&batch.bs.Hash, batch.addrs,
 				batch.outpoints)
 			if err != nil {
-				log <- cl.Errorf{
-					"rescan for %d %s failed: %v", numAddrs, noun, err, cl.Ine()}
+				ERRORF(
+					"rescan for %d %s failed: %v", numAddrs, noun, err)
 			}
 			batch.done(err)
 		case <-quit:
@@ -226,17 +225,17 @@ out:
 // a wallet.  This is intended to be used to sync a wallet back up to the
 // current best block in the main chain, and is considered an initial sync
 // rescan.
-func (w *Wallet) Rescan(addrs []util.Address, unspent []wtxmgr.Credit) error {
+func (w *Wallet) Rescan(addrs []util.Address, unspent []tm.Credit) error {
 	return w.rescanWithTarget(addrs, unspent, nil)
 }
 
 // rescanWithTarget performs a rescan starting at the optional startStamp. If
 // none is provided, the rescan will begin from the manager's sync tip.
 func (w *Wallet) rescanWithTarget(addrs []util.Address,
-	unspent []wtxmgr.Credit, startStamp *waddrmgr.BlockStamp) error {
+	unspent []tm.Credit, startStamp *wm.BlockStamp) error {
 	outpoints := make(map[wire.OutPoint]util.Address, len(unspent))
 	for _, output := range unspent {
-		_, outputAddrs, _, err := txscript.ExtractPkScriptAddrs(
+		_, outputAddrs, _, err := txs.ExtractPkScriptAddrs(
 			output.PkScript, w.chainParams,
 		)
 		if err != nil {
@@ -247,7 +246,7 @@ func (w *Wallet) rescanWithTarget(addrs []util.Address,
 	// If a start block stamp was provided, we will use that as the initial
 	// starting point for the rescan.
 	if startStamp == nil {
-		startStamp = &waddrmgr.BlockStamp{}
+		startStamp = &wm.BlockStamp{}
 		*startStamp = w.Manager.SyncedTo()
 	}
 	job := &RescanJob{

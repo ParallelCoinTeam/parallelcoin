@@ -3,14 +3,15 @@
 package gui
 
 import (
+	"sync"
+	"sync/atomic"
+
+	"github.com/zserge/webview"
+
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
-	"github.com/zserge/webview"
-	"sync"
-	"sync/atomic"
 )
 
 const (
@@ -32,20 +33,20 @@ var getWebView = func(v vue.DuoVUE, t string) webview.WebView {
 }
 
 func Main(cx *conte.Xt, wg *sync.WaitGroup) {
-	log <- cl.Warn{"starting gui", cl.Ine()}
+	WARN("starting gui")
 	v := vue.GetDuoVUE(cx)
-	w := getWebView(*v, string(comp.GetAppHtml))
+	w := getWebView(*v, comp.GetAppHtml)
 	cleaned := &atomic.Value{}
 	cleaned.Store(false)
 	cleanup := func() {
 		if !cleaned.Load().(bool) {
 			cleaned.Store(true)
-			log <- cl.Debug{"terminating webview", cl.Ine()}
+			DEBUG("terminating webview")
 			w.Terminate()
 			interrupt.Request()
-			log <- cl.Debug{"waiting for waitgroup", cl.Ine()}
+			DEBUG("waiting for waitgroup")
 			wg.Wait()
-			log <- cl.Debug{"exiting webview", cl.Ine()}
+			DEBUG("exiting webview")
 			w.Exit()
 		}
 	}

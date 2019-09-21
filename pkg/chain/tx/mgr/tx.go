@@ -1,20 +1,20 @@
 package wtxmgr
 
 import (
-   "bytes"
-   "time"
-   
-   blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	"bytes"
+	"time"
+
+	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
+	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
 type (
-	// Block contains the minimum amount of data to uniquely identify any block on
+	// Block contains the minimum amount of data to uniquely identify any
+	// block on
 	// either the best or side chain.
 	Block struct {
 		Hash   chainhash.Hash
@@ -27,16 +27,19 @@ type (
 		Block
 		Time time.Time
 	}
-	// blockRecord is an in-memory representation of the block record saved in the
+	// blockRecord is an in-memory representation of the block record saved
+	// in the
 	// database.
 	blockRecord struct {
 		Block
 		Time         time.Time
 		transactions []chainhash.Hash
 	}
-	// incidence records the block hash and blockchain height of a mined transaction.
+	// incidence records the block hash and blockchain height of a mined
+	// transaction.
 	// Since a transaction hash alone is not enough to uniquely identify a mined
-	// transaction (duplicate transaction hashes are allowed), the incidence is used
+	// transaction (duplicate transaction hashes are allowed),
+	// the incidence is used
 	// instead.
 	incidence struct {
 		txHash chainhash.Hash
@@ -48,7 +51,8 @@ type (
 		incidence
 		index uint32
 	}
-	// // debit records the debits a transaction record makes from previous wallet
+	// // debit records the debits a transaction record makes from previous
+	// wallet
 	// // transaction credits.
 	// debit struct {
 	// 	// txHash chainhash.Hash
@@ -56,7 +60,8 @@ type (
 	// 	// amount util.Amount
 	// 	// spends indexedIncidence
 	// }
-	// credit describes a transaction output which was or is spendable by wallet.
+	// credit describes a transaction output which was or is spendable by
+	// wallet.
 	credit struct {
 		outPoint wire.OutPoint
 		block    Block
@@ -135,9 +140,9 @@ func DoUpgrades(db walletdb.DB, namespaceKey []byte) error {
 	return nil
 }
 
-// Open opens the wallet transaction store from a walletdb namespace.  If the
-// store does not exist, ErrNoExist is returned.
-func Open(ns walletdb.ReadBucket, chainParams *netparams.Params) (*Store, error) {
+func // Open opens the wallet transaction store from a walletdb namespace.
+// If the store does not exist, ErrNoExist is returned.
+Open(ns walletdb.ReadBucket, chainParams *netparams.Params) (*Store, error) {
 	// Open the store.
 	err := openStore(ns)
 	if err != nil {
@@ -147,16 +152,17 @@ func Open(ns walletdb.ReadBucket, chainParams *netparams.Params) (*Store, error)
 	return s, nil
 }
 
-// Create creates a new persistent transaction store in the walletdb namespace.
+func // Create creates a new persistent transaction store in the walletdb
+// namespace.
 // Creating the store when one already exists in this namespace will error with
 // ErrAlreadyExists.
-func Create(ns walletdb.ReadWriteBucket) error {
+Create(ns walletdb.ReadWriteBucket) error {
 	return createStore(ns)
 }
 
-// updateMinedBalance updates the mined balance within the store, if changed,
-// after processing the given transaction record.
-func (s *Store) updateMinedBalance(ns walletdb.ReadWriteBucket, rec *TxRecord,
+func // updateMinedBalance updates the mined balance within the store,
+// if changed, after processing the given transaction record.
+(s *Store) updateMinedBalance(ns walletdb.ReadWriteBucket, rec *TxRecord,
 	block *BlockMeta) error {
 	// Fetch the mined balance in case we need to update it.
 	minedBalance, err := fetchMinedBalance(ns)
@@ -258,10 +264,9 @@ func (s *Store) updateMinedBalance(ns walletdb.ReadWriteBucket, rec *TxRecord,
 	return nil
 }
 
-// deleteUnminedTx deletes an unmined transaction from the store.
-//
+func // deleteUnminedTx deletes an unmined transaction from the store.
 // NOTE: This should only be used once the transaction has been mined.
-func (s *Store) deleteUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
+(s *Store) deleteUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
 	for i := range rec.MsgTx.TxOut {
 		k := canonicalOutPoint(&rec.Hash, uint32(i))
 		if err := deleteRawUnminedCredit(ns, k); err != nil {
@@ -271,35 +276,35 @@ func (s *Store) deleteUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) erro
 	return deleteRawUnmined(ns, rec.Hash[:])
 }
 
-// InsertTx records a transaction as belonging to a wallet's transaction
+func // InsertTx records a transaction as belonging to a wallet's transaction
 // history.  If block is nil, the transaction is considered unspent, and the
 // transaction's index must be unset.
-func (s *Store) InsertTx(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta) error {
+(s *Store) InsertTx(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta) error {
 	if block == nil {
 		return s.insertMemPoolTx(ns, rec)
 	}
 	return s.insertMinedTx(ns, rec, block)
 }
 
-// RemoveUnminedTx attempts to remove an unmined transaction from the
+func // RemoveUnminedTx attempts to remove an unmined transaction from the
 // transaction store. This is to be used in the scenario that a transaction
 // that we attempt to rebroadcast, turns out to double spend one of our
 // existing inputs. This function we remove the conflicting transaction
 // identified by the tx record, and also recursively remove all transactions
 // that depend on it.
-func (s *Store) RemoveUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
+(s *Store) RemoveUnminedTx(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
 	// As we already have a tx record, we can directly call the
-	// removeConflict method. This will do the job of recursively removing
+	// RemoveConflict method. This will do the job of recursively removing
 	// this unmined transaction, and any transactions that depend on it.
-	return s.removeConflict(ns, rec)
+	return RemoveConflict(ns, rec)
 }
 
-// insertMinedTx inserts a new transaction record for a mined transaction into
-// the database under the confirmed bucket. It guarantees that, if the
-// tranasction was previously unconfirmed, then it will take care of cleaning up
-// the unconfirmed state. All other unconfirmed double spend attempts will be
-// removed as well.
-func (s *Store) insertMinedTx(ns walletdb.ReadWriteBucket, rec *TxRecord,
+func // insertMinedTx inserts a new transaction record for a mined
+// transaction into the database under the confirmed bucket.
+// It guarantees that, if the tranasction was previously unconfirmed,
+// then it will take care of cleaning up the unconfirmed state.
+// All other unconfirmed double spend attempts will be removed as well.
+(s *Store) insertMinedTx(ns walletdb.ReadWriteBucket, rec *TxRecord,
 	block *BlockMeta) error {
 	// If a transaction record for this hash and block already exists, we
 	// can exit early.
@@ -334,10 +339,10 @@ func (s *Store) insertMinedTx(ns walletdb.ReadWriteBucket, rec *TxRecord,
 	// If this transaction previously existed within the store as unmined,
 	// we'll need to remove it from the unmined bucket.
 	if v := existsRawUnmined(ns, rec.Hash[:]); v != nil {
-		log <- cl.Infof{
+		INFOF(
 			"marking unconfirmed transaction %v mined in block %d",
 			&rec.Hash, block.Height,
-		}
+		)
 		if err := s.deleteUnminedTx(ns, rec); err != nil {
 			return err
 		}
@@ -350,14 +355,14 @@ func (s *Store) insertMinedTx(ns walletdb.ReadWriteBucket, rec *TxRecord,
 	return s.removeDoubleSpends(ns, rec)
 }
 
-// AddCredit marks a transaction record as containing a transaction output
+func // AddCredit marks a transaction record as containing a transaction output
 // spendable by wallet.  The output is added unspent, and is marked spent
 // when a new transaction spending the output is inserted into the store.
 //
 // TODO(jrick): This should not be necessary.  Instead, pass the indexes
 // that are known to contain credits when a transaction or merkleblock is
 // inserted into the store.
-func (s *Store) AddCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta, index uint32, change bool) error {
+(s *Store) AddCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta, index uint32, change bool) error {
 	if int(index) >= len(rec.MsgTx.TxOut) {
 		str := "transaction output does not exist"
 		return storeError(ErrInput, str, nil)
@@ -369,10 +374,10 @@ func (s *Store) AddCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *Blo
 	return err
 }
 
-// addCredit is an AddCredit helper that runs in an update transaction.  The
-// bool return specifies whether the unspent output is newly added (true) or a
-// duplicate (false).
-func (s *Store) addCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta, index uint32, change bool) (bool, error) {
+func // addCredit is an AddCredit helper that runs in an update transaction.
+// The bool return specifies whether the unspent output is newly added (
+// true) or a duplicate (false).
+(s *Store) addCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *BlockMeta, index uint32, change bool) (bool, error) {
 	if block == nil {
 		// If the outpoint that we should mark as credit already exists
 		// within the store, either as unconfirmed or confirmed, then we
@@ -392,9 +397,9 @@ func (s *Store) addCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *Blo
 		return false, nil
 	}
 	txOutAmt := util.Amount(rec.MsgTx.TxOut[index].Value)
-	log <- cl.Debugf{
+	DEBUGF(
 		"marking transaction %v output %d (%v) spendable %s",
-		rec.Hash, index, txOutAmt, cl.Ine()}
+		rec.Hash, index, txOutAmt)
 	cred := credit{
 		outPoint: wire.OutPoint{
 			Hash:  rec.Hash,
@@ -421,12 +426,13 @@ func (s *Store) addCredit(ns walletdb.ReadWriteBucket, rec *TxRecord, block *Blo
 	return true, putUnspent(ns, &cred.outPoint, &block.Block)
 }
 
-// Rollback removes all blocks at height onwards, moving any transactions within
-// each block to the unconfirmed pool.
-func (s *Store) Rollback(ns walletdb.ReadWriteBucket, height int32) error {
+func // Rollback removes all blocks at height onwards,
+// moving any transactions within each block to the unconfirmed pool.
+(s *Store) Rollback(ns walletdb.ReadWriteBucket, height int32) error {
 	return s.rollback(ns, height)
 }
-func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
+func
+(s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
 	minedBalance, err := fetchMinedBalance(ns)
 	if err != nil {
 		return err
@@ -447,10 +453,10 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
 			break
 		}
 		heightsToRemove = append(heightsToRemove, it.elem.Height)
-		log <- cl.Infof{
+		INFOF(
 			"rolling back %d transactions from block %v height %d",
 			len(b.transactions), b.Hash, b.Height,
-		}
+		)
 		for i := range b.transactions {
 			txHash := &b.transactions[i]
 			recKey := keyTxRecord(txHash, &b.Block)
@@ -629,10 +635,10 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
 			if err != nil {
 				return err
 			}
-			log <- cl.Debugf{
+			DEBUGF(
 				"transaction %v spends a removed coinbase output -- removing as well %s",
-				unminedRec.Hash, cl.Ine()}
-			err = s.removeConflict(ns, &unminedRec)
+				unminedRec.Hash)
+			err = RemoveConflict(ns, &unminedRec)
 			if err != nil {
 				return err
 			}
@@ -641,9 +647,9 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
 	return putMinedBalance(ns, minedBalance)
 }
 
-// UnspentOutputs returns all unspent received transaction outputs.
+func // UnspentOutputs returns all unspent received transaction outputs.
 // The order is undefined.
-func (s *Store) UnspentOutputs(ns walletdb.ReadBucket) ([]Credit, error) {
+(s *Store) UnspentOutputs(ns walletdb.ReadBucket) ([]Credit, error) {
 	var unspent []Credit
 	var op wire.OutPoint
 	var block Block
@@ -736,14 +742,14 @@ func (s *Store) UnspentOutputs(ns walletdb.ReadBucket) ([]Credit, error) {
 	return unspent, nil
 }
 
-// Balance returns the spendable wallet balance (total value of all unspent
+func // Balance returns the spendable wallet balance (total value of all unspent
 // transaction outputs) given a minimum of minConf confirmations, calculated
 // at a current chain height of curHeight.  Coinbase outputs are only included
 // in the balance if maturity has been reached.
 //
 // Balance may return unexpected results if syncHeight is lower than the block
 // height of the most recent mined transaction in the store.
-func (s *Store) Balance(ns walletdb.ReadBucket, minConf int32, syncHeight int32) (util.Amount, error) {
+(s *Store) Balance(ns walletdb.ReadBucket, minConf int32, syncHeight int32) (util.Amount, error) {
 	bal, err := fetchMinedBalance(ns)
 	if err != nil {
 		return 0, err

@@ -34,23 +34,23 @@ func Main(cx *con.Text) error {
 	cx.TestNode.Store(false)
 	cx.Wallet.Store(false)
 	a := app.New()
-	log <- cl.Debug{"opening GUI", cl.Ine()}
+	log <- cl.Debug{"opening GUI"}
 	w := OpenGUI(cx, a)
 	w.SetOnClosed(func() {
-		log <- cl.Info{"shutting down", cl.Ine()}
+		INFO("shutting down"}
 		// shut down the node when quitting
 		if cx.Node.Load().(bool) {
-			log <- cl.Info{"shutting down node", cl.Ine()}
+			INFO("shutting down node"}
 			close(cx.NodeKill)
 		}
 		// shut down the testnode when quitting
 		if cx.TestNode.Load().(bool) {
-			log <- cl.Info{"shutting down testnode", cl.Ine()}
+			INFO("shutting down testnode"}
 			close(cx.TestNodeKill)
 		}
 		// also shut down the wallet
 		if cx.Wallet.Load().(bool) {
-			log <- cl.Info{"shutting down wallet", cl.Ine()}
+			INFO("shutting down wallet"}
 			close(cx.WalletKill)
 		}
 	})
@@ -73,7 +73,7 @@ func OpenGUI(cx *con.Text, a fyne.App) fyne.Window {
 		*cx.Config.DataDir + slash +
 			cx.ActiveNet.Params.Name + slash +
 			wallet.WalletDbName
-	log <- cl.Info{"dbfilename", dbfilename}
+	INFO("dbfilename", dbfilename}
 	// check first if the wallet exists, if not prompt the user to create
 	// one
 	if !apputil.FileExists(dbfilename) {
@@ -86,9 +86,9 @@ func OpenGUI(cx *con.Text, a fyne.App) fyne.Window {
 		toplevel = widget.NewVBox()
 		statusbar = fyne.NewContainer()
 	} else {
-		log <- cl.Debug{"creating toplevel", cl.Ine()}
+		log <- cl.Debug{"creating toplevel"}
 		toplevel = TopLevel(cx, a, mainpage)
-		log <- cl.Debug{"creating statusbar", cl.Ine()}
+		log <- cl.Debug{"creating statusbar"}
 		statusbar = NewStatusbar(cx, a, w).Container
 	}
 	w.SetContent(mainpage)

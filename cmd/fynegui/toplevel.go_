@@ -119,7 +119,7 @@ func TopLevel(cx *con.Text, a fyne.App, mainpage *fyne.Container) *widget.Box {
 	})
 	topbarSpacer := layout.NewSpacer()
 	topbarSpacer.Resize(fyne.NewSize(24, 24))
-	log <- cl.Info{"creating settings page", cl.Ine()}
+	INFO("creating settings page"}
 	return widget.NewHBox(
 		fyne.NewContainerWithLayout(
 			layout.NewCenterLayout(),

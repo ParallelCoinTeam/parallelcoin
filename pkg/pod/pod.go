@@ -35,9 +35,9 @@ type Field struct {
 
 func GetConfigSchema() Schema {
 	t := reflect.TypeOf(Config{})
-	var leveloptions, network, algos []string
+	var levelOptions, network, algos []string
 	for i := range cl.Levels {
-		leveloptions = append(leveloptions, i)
+		levelOptions = append(levelOptions, i)
 	}
 	algos = append(algos, "random")
 	for _, x := range fork.P9AlgoVers {
@@ -53,7 +53,7 @@ func GetConfigSchema() Schema {
 		var options []string
 		switch {
 		case field.Name == "LogLevel":
-			options = leveloptions
+			options = levelOptions
 		case field.Name == "Network":
 			options = network
 		case field.Name == "Algo":
@@ -90,198 +90,198 @@ func GetConfigSchema() Schema {
 }
 
 // Config is
-// nolint
 type Config struct {
 	sync.Mutex
+	AddCheckpoints           *cli.StringSlice `group:"debug" name:"AddCheckpoints" description:"add custom checkpoints" type:"input" inputType:"text" model:"AddCheckpoints" featured:"false"`
+	AddPeers                 *cli.StringSlice `group:"node" name:"Add Peers" description:"Manually adds addresses to try to connect to" type:"input" inputType:"text" model:"AddPeers" featured:"false"`
+	AddrIndex                *bool            `group:"node" name:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"switch" model:"AddrIndex" featured:"false"`
+	Algo                     *string          `group:"mining" name:"Algo" description:"algorithm to mine, random is best" type:"input" inputType:"text" model:"Algo" featured:"false"`
+	BanDuration              *time.Duration   `group:"debug" name:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"input" inputType:"text" model:"BanDuration" featured:"false"`
+	BanThreshold             *int             `group:"debug" name:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"input" inputType:"number" model:"BanThreshold" featured:"false"`
+	BlockMaxSize             *int             `group:"mining" name:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"input" inputType:"number" model:"BlockMaxSize" featured:"false"`
+	BlockMaxWeight           *int             `group:"mining" name:"Block Max Weight" description:"maximum block weight to be used when creating a block" type:"input" inputType:"number" model:"BlockMaxWeight" featured:"false"`
+	BlockMinSize             *int             `group:"mining" name:"Block Min Size" description:"minimum block size in bytes to be used when creating a block" type:"input" inputType:"number" model:"BlockMinSize" featured:"false"`
+	BlockMinWeight           *int             `group:"mining" name:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"input" inputType:"number" model:"BlockMinWeight" featured:"false"`
+	BlockPrioritySize        *int             `group:"mining" name:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"input" inputType:"number" model:"BlockPrioritySize" featured:"false"`
+	BlocksOnly               *bool            `group:"node" name:"Blocks Only" description:"do not accept transactions from remote peers" type:"switch" model:"BlocksOnly" featured:"false"`
+	CAFile                   *string          `group:"tls" name:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
 	ConfigFile               *string
-	DataDir                  *string          `category:"config" name:"DataDir" description:"Root folder where application data is stored" type:"input" inputType:"text" model:"DataDir" featured:"false"`
-	LogDir                   *string          `category:"config" name:"LogDir" description:"Folder where log files are written" type:"input" inputType:"text" model:"LogDir" featured:"false"`
-	Network                  *string          `category:"node" name:"Network" description:"Which network are you connected to (eg.: mainnet, testnet)" type:"input" inputType:"text" model:"Network" featured:"false"`
-	LogLevel                 *string          `category:"config" name:"LogLevel" description:"Verbosity of log printouts" type:"input" inputType:"text" model:"LogLevel" featured:"false"`
-	Subsystems               *cli.StringSlice `category:"config" name:"Subsystems" description:"Specific systems' verbosity levels" type:"input" inputType:"text" model:"Subsystems" featured:"false"`
-	Group                    *string          `category:"debug" name:"Zeroconf Group" description:"if set to non-empty zeroconf will set all found peers to connect peers (dns seeding can be on, this is mainly for testnets)"`
-	NoDiscovery              *bool            `category:"node" name:"NoDiscovery" description:"disables zeroconf peer autodiscovery"`
-	AddPeers                 *cli.StringSlice `category:"node" name:"Add Peers" description:"Manually adds addresses to try to connect to" type:"input" inputType:"text" model:"AddPeers" featured:"false"`
-	ConnectPeers             *cli.StringSlice `category:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"input" inputType:"text" model:"ConnectPeers" featured:"false"`
-	MaxPeers                 *int             `category:"node" name:"MaxPeers" description:"Maximum number of peers to hold connections with" type:"input" inputType:"number" model:"MaxPeers" featured:"false"`
-	Listeners                *cli.StringSlice `category:"node" name:"Listeners" description:"List of addresses to bind the node listener to" type:"input" inputType:"text" model:"Listeners" featured:"false"`
-	DisableListen            *bool            `category:"node" name:"DisableListen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
-	DisableBanning           *bool            `category:"debug" name:"Disable  Banning" description:"Disables banning of misbehaving peers" type:"switch" model:"DisableBanning" featured:"false"`
-	BanDuration              *time.Duration   `category:"debug" name:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"input" inputType:"text" model:"BanDuration" featured:"false"`
-	BanThreshold             *int             `category:"debug" name:"BanThreshold" description:"ban score that triggers a ban (default 100)" type:"input" inputType:"number" model:"BanThreshold" featured:"false"`
-	Whitelists               *cli.StringSlice `category:"debug" name:"Whitelists" description:"peers that you don't want to ever ban" type:"input" inputType:"text" model:"Whitelists" featured:"false"`
-	Username                 *string          `category:"rpc" name:"Username" description:"password for client RPC connections" type:"input" inputType:"text" model:"Username" featured:"false"`
-	Password                 *string          `category:"rpc" name:"Password" type:"password" description:"password for client RPC connections" type:"input" inputType:"text" model:"Password" featured:"false"`
-	ServerUser               *string          `category:"rpc" name:"ServerUser" description:"username for server connections" type:"input" inputType:"text" model:"ServerUser" featured:"false"`
-	ServerPass               *string          `category:"rpc" name:"ServerPass" type:"password" description:"password for server connections" type:"input" inputType:"text" model:"ServerPass" featured:"false"`
-	LimitUser                *string          `category:"rpc" name:"LimitUser" description:"limited user name" type:"input" inputType:"text" model:"LimitUser" featured:"false"`
-	LimitPass                *string          `category:"rpc" name:"LimitPass" type:"password" description:"limited user password" type:"input" inputType:"text" model:"LimitPass" featured:"false"`
-	RPCConnect               *string          `category:"wallet" name:"RPCConnect" description:"full node RPC for wallet" type:"input" inputType:"text" model:"RPCConnect" featured:"false"`
-	RPCListeners             *cli.StringSlice `category:"rpc" name:"RPC Listeners" description:"addresses to listen for RPC connections" type:"input" inputType:"text" model:"RPCListeners" featured:"false"`
-	RPCCert                  *string          `category:"rpc" name:"RPC Cert" description:"location of rpc TLS certificate" type:"input" inputType:"text" model:"RPCCert" featured:"false"`
-	RPCKey                   *string          `category:"rpc" name:"RPC Key" description:"location of rpc TLS key" type:"input" inputType:"text" model:"RPCKey" featured:"false"`
-	RPCMaxClients            *int             `category:"rpc" name:"RPC MaxClients" description:"maximum number of clients for regular RPC" type:"input" inputType:"number" model:"RPCMaxClients" featured:"false"`
-	RPCMaxWebsockets         *int             `category:"rpc" name:"RPC MaxWebsockets" description:"maximum number of websocket clients to allow" type:"input" inputType:"number" model:"RPCMaxWebsockets" featured:"false"`
-	RPCMaxConcurrentReqs     *int             `category:"rpc" name:"RPC MaxConcurrent Reqs" description:"maximum number of requests to process concurrently" type:"input" inputType:"number" model:"RPCMaxConcurrentReqs" featured:"false"`
-	RPCQuirks                *bool            `category:"rpc" name:"RPCQuirks" description:"enable bugs that replicate bitcoin core RPC's JSON" type:"switch" model:"RPCQuirks" featured:"false"`
-	DisableRPC               *bool            `category:"rpc" name:"DisableRPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
-	TLS                      *bool            `category:"tls" name:"TLS" description:"enable TLS for RPC connections" type:"switch" model:"TLS" featured:"false"`
-	DisableDNSSeed           *bool            `category:"node" name:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"switch" model:"DisableDNSSeed" featured:"false"`
-	ExternalIPs              *cli.StringSlice `category:"node" name:"External IPs" description:"extra addresses to tell peers they can connect to" type:"input" inputType:"text" model:"ExternalIPs" featured:"false"`
-	Proxy                    *string          `category:"proxy" name:"Proxy" description:"address of proxy to connect to for outbound connections" type:"input" inputType:"text" model:"Proxy" featured:"false"`
-	ProxyUser                *string          `category:"proxy" name:"ProxyUser" description:"proxy username, if required" type:"input" inputType:"text" model:"ProxyUser" featured:"false"`
-	ProxyPass                *string          `category:"proxy" name:"ProxyPass" type:"password" description:"proxy password, if required" type:"input" inputType:"text" model:"ProxyPass" featured:"false"`
-	OnionProxy               *string          `category:"proxy" name:"OnionProxy" description:"address of tor proxy you want to connect to" type:"input" inputType:"text" model:"OnionProxy" featured:"false"`
-	OnionProxyUser           *string          `category:"proxy" name:"OnionProxy User" description:"tor proxy username" type:"input" inputType:"text" model:"OnionProxyUser" featured:"false"`
-	OnionProxyPass           *string          `category:"proxy" name:"OnionProxy Pass" type:"password" description:"password for tor proxy" type:"input" inputType:"text" model:"OnionProxyPass" featured:"false"`
-	Onion                    *bool            `category:"proxy" name:"Onion" description:"enable tor proxy" type:"switch" model:"Onion" featured:"false"`
-	TorIsolation             *bool            `category:"proxy" name:"TorIsolation" description:"makes a separate proxy connection for each connection" type:"switch" model:"TorIsolation" featured:"false"`
-	TestNet3                 *bool
-	RegressionTest           *bool
-	SimNet                   *bool
-	AddCheckpoints           *cli.StringSlice `category:"debug" name:"AddCheckpoints" description:"add custom checkpoints"`
-	DisableCheckpoints       *bool            `category:"debug" name:"Disable Checkpoints" description:"disables all checkpoints"`
-	DbType                   *string          `category:"debug" name:"Db Type" description:"type of database storage engine to use (only one right now)"`
-	Profile                  *string          `category:"debug" name:"Profile" description:"http profiling on given port (1024-40000)"`
-	CPUProfile               *string          `category:"debug" name:"CPU Profile" description:"write cpu profile to this file"`
-	Upnp                     *bool            `category:"node" name:"Upnp" description:"enable UPNP for NAT traversal"`
-	MinRelayTxFee            *float64         `category:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee"`
-	FreeTxRelayLimit         *float64         `category:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute"`
-	NoRelayPriority          *bool            `category:"policy" name:"No Relay Priority" description:"do not require free or low-fee transactions to have high priority for relaying"`
-	TrickleInterval          *time.Duration   `category:"policy" name:"Trickle Interval" description:"minimum time between attempts to send new inventory to a connected peer"`
-	MaxOrphanTxs             *int             `category:"policy" name:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory"`
-	Algo                     *string          `category:"mining" name:"Algo" description:"algorithm to mine, random is best"`
-	Generate                 *bool            `category:"mining" name:"Generate" description:"turn on built in CPU miner"`
-	GenThreads               *int             `category:"mining" name:"Gen Threads" description:"number of CPU threads to mine using"`
+	ConnectPeers             *cli.StringSlice `group:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"input" inputType:"text" model:"ConnectPeers" featured:"false"`
 	Controller               *string          `category:"mining" name:"Controller Listener" description:"address to bind miner controller to"`
+	CPUProfile               *string          `group:"debug" name:"CPU Profile" description:"write cpu profile to this file" type:"input" inputType:"text" model:"CPUProfile" featured:"false"`
+	DataDir                  *string          `group:"config" name:"Data Dir" description:"Root folder where application data is stored" type:"input" inputType:"text" model:"DataDir" featured:"false"`
+	DbType                   *string          `group:"debug" name:"Db Type" description:"type of database storage engine to use (only one right now)" type:"input" inputType:"text" model:"DbType" featured:"false"`
+	DisableBanning           *bool            `group:"debug" name:"Disable Banning" description:"Disables banning of misbehaving peers" type:"switch" model:"DisableBanning" featured:"false"`
+	DisableCheckpoints       *bool            `group:"debug" name:"Disable Checkpoints" description:"disables all checkpoints" type:"switch" model:"DisableCheckpoints" featured:"false"`
+	DisableDNSSeed           *bool            `group:"node" name:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"switch" model:"DisableDNSSeed" featured:"false"`
+	DisableListen            *bool            `group:"node" name:"Disable Listen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
+	DisableRPC               *bool            `group:"rpc" name:"Disable RPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
+	ExperimentalRPCListeners *cli.StringSlice `group:"wallet" name:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"input" inputType:"text" model:"ExperimentalRPCListeners" featured:"false"`
+	ExternalIPs              *cli.StringSlice `group:"node" name:"External IPs" description:"extra addresses to tell peers they can connect to" type:"input" inputType:"text" model:"ExternalIPs" featured:"false"`
+	FreeTxRelayLimit         *float64         `group:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"text" model:"FreeTxRelayLimit" featured:"false"`
+	Generate                 *bool            `group:"mining" name:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
+	GenThreads               *int             `group:"mining" name:"Gen Threads" description:"number of CPU threads to mine using" type:"input" inputType:"number" model:"GenThreads" featured:"false"`
+	Group                    *string          `category:"debug" name:"Zeroconf Group" description:"if set to non-empty zeroconf will set all found peers to connect peers (dns seeding can be on, this is mainly for testnets)"`
+	LimitPass                *string          `group:"rpc" name:"Limit Pass" type:"password" description:"limited user password" type:"input" inputType:"text" model:"LimitPass" featured:"false"`
+	LimitUser                *string          `group:"rpc" name:"Limit User" description:"limited user name" type:"input" inputType:"text" model:"LimitUser" featured:"false"`
+	Listeners                *cli.StringSlice `group:"node" name:"Listeners" description:"List of addresses to bind the node listener to" type:"input" inputType:"text" model:"Listeners" featured:"false"`
+	LogDir                   *string          `group:"config" name:"Log Dir" description:"Folder where log files are written" type:"input" inputType:"text" model:"LogDir" featured:"false"`
+	LogLevel                 *string          `group:"config" name:"Log Level" description:"Verbosity of log printouts" type:"input" inputType:"text" model:"LogLevel" featured:"false"`
+	MaxOrphanTxs             *int             `group:"policy" name:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"input" inputType:"number" model:"MaxOrphanTxs" featured:"false"`
+	MaxPeers                 *int             `group:"node" name:"Max Peers" description:"Maximum number of peers to hold connections with" type:"input" inputType:"number" model:"MaxPeers" featured:"false"`
+	MinerListener            *string          `group:"mining" name:"Miner Listener" description:"address to listen on for standalone miners to connect to" type:"input" inputType:"text" model:"MinerListener" featured:"false"`
+	MinerPass                *string          `group:"mining" name:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"input" inputType:"text" model:"MinerPass" featured:"false"`
+	MiningAddrs              *cli.StringSlice `group:"mining" name:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"input" inputType:"text" model:"MiningAddrs" featured:"false"`
+	MinRelayTxFee            *float64         `group:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"text" model:"MinRelayTxFee" featured:"false"`
+	Network                  *string          `group:"node" name:"Network" description:"Which network are you connected to (eg.: mainnet, testnet)" type:"input" inputType:"text" model:"Network" featured:"false"`
+	NoCFilters               *bool            `group:"node" name:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" model:"NoCFilters" featured:"false"`
 	NoController             *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer discovery/miner controller system"`
-	MiningAddrs              *cli.StringSlice `category:"mining" name:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)"`
-	MinerPass                *string          `category:"mining" name:"Miner Pass" description:"password that encrypts the connection to the mining controller"`
-	BlockMinSize             *int             `category:"mining" name:"Block Min Size" description:"mininum block size in bytes to be used when creating a block"`
-	BlockMaxSize             *int             `category:"mining" name:"Block Max Size" description:"maximum block size in bytes to be used when creating a block"`
-	BlockMinWeight           *int             `category:"mining" name:"Block Min Weight" description:"mininum block weight to be used when creating a block"`
-	BlockMaxWeight           *int             `category:"mining" name:"Block Max Weight" description:"maximum block weight to be used when creating a block"`
-	BlockPrioritySize        *int             `category:"mining" name:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block"`
-	UserAgentComments        *cli.StringSlice `category:"node" name:"User Agent Comments" description:"Comment to add to the user agent -- See BIP 14 for more information"`
-	NoPeerBloomFilters       *bool            `category:"node" name:"No Peer Bloom Filters" description:"disable bloom filtering support"`
-	NoCFilters               *bool            `category:"node" name:"No CFilters" description:"disable committed filtering (CF) support"`
-	SigCacheMaxSize          *int             `category:"node" name:"Sig Cache Max Size" description:"the maximum number of entries in the signature verification cache"`
-	BlocksOnly               *bool            `category:"node" name:"BlockC Only" description:"do not accept transactions from remote peers"`
-	TxIndex                  *bool            `category:"node" name:"Tx Index" description:"maintain a full hash-based transaction index which makes all transactions available via the getrawtransaction RPC"`
-	AddrIndex                *bool            `category:"node" name:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available"`
-	RelayNonStd              *bool            `category:"node" name:"Relay Non Std" description:"relay non-standard transactions regardless of the default settings for the active network"`
-	RejectNonStd             *bool            `category:"node" name:"Reject Non Std" description:"reject non-standard transactions regardless of the default settings for the active network"`
-	TLSSkipVerify            *bool            `category:"tls" name:"TLS Skip Verify" description:"skip TLS certificate verification (ignore CA errors)"`
-	Wallet                   *bool
+	NodeOff                  *bool            `group:"debug" name:"Node Off" description:"turn off the node backend" type:"switch" model:"NodeOff" featured:"false"`
+	NoDiscovery              *bool            `category:"node" name:"NoDiscovery" description:"disables zeroconf peer autodiscovery"`
 	NoInitialLoad            *bool
-	WalletPass               *string          `category:"wallet" name:"Wallet Pass" description:"password encrypting public data in wallet" type:"input" inputType:"text" model:"WalletPass" featured:"false"`
-	WalletServer             *string          `category:"wallet" name:"Node Address to connect wallet server to" type:"input" inputType:"text" model:"WalletServer" featured:"false"`
-	CAFile                   *string          `category:"tls" name:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
-	OneTimeTLSKey            *bool            `category:"wallet" name:"OneTime TLS Key" description:"generate a new TLS certpair at startup,  but only write the certificate to disk" type:"switch" model:"OneTimeTLSKey" featured:"false"`
-	ServerTLS                *bool            `category:"wallet" name:"Server TLS" description:"Enable TLS for the wallet connection to node RPC server" type:"switch" model:"ServerTLS" featured:"false"`
-	WalletRPCListeners       *cli.StringSlice `category:"wallet" name:"Legacy RPC Listeners" description:"addresses for wallet RPC server to listen on" type:"input" inputType:"text" model:"WalletRPCListeners" featured:"false"`
-	WalletRPCMaxClients      *int             `category:"wallet" name:"Legacy RPC Max Clients" description:"maximum number of RPC clients allowed for wallet RPC" type:"input" inputType:"number" model:"WalletRPCMaxClients" featured:"false"`
-	WalletRPCMaxWebsockets   *int             `category:"wallet" name:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"input" inputType:"number" model:"WalletRPCMaxWebsockets" featured:"false"`
-	ExperimentalRPCListeners *cli.StringSlice `category:"wallet" name:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"input" inputType:"text" model:"ExperimentalRPCListeners" featured:"false"`
-	NodeOff                  *bool            `category:"debug" name:"NodeOff" description:"turn off the node backend" type:"switch" model:"NodeOff" featured:"false"`
-	TestNodeOff              *bool            `category:"debug" name:"TestNodeOff" description:"turn off the testnode (testnet only)" type:"switch" model:"TestNodeOff" featured:"false"`
-	WalletOff                *bool            `category:"debug" name:"WalletOff" description:"turn off the wallet backend" type:"switch" model:"WalletOff" featured:"false"`
+	NoPeerBloomFilters       *bool   `group:"node" name:"No Peer Bloom Filters" description:"disable bloom filtering support" type:"switch" model:"NoPeerBloomFilters" featured:"false"`
+	NoRelayPriority          *bool   `group:"policy" name:"No Relay Priority" description:"do not require free or low-fee transactions to have high priority for relaying" type:"switch" model:"NoRelayPriority" featured:"false"`
+	OneTimeTLSKey            *bool   `group:"wallet" name:"One Time TLS Key" description:"generate a new TLS certpair at startup, but only write the certificate to disk" type:"switch" model:"OneTimeTLSKey" featured:"false"`
+	Onion                    *bool   `group:"proxy" name:"Onion" description:"enable tor proxy" type:"switch" model:"Onion" featured:"false"`
+	OnionProxy               *string `group:"proxy" name:"Onion Proxy" description:"address of tor proxy you want to connect to" type:"input" inputType:"text" model:"OnionProxy" featured:"false"`
+	OnionProxyPass           *string `group:"proxy" name:"Onion Proxy Pass" type:"password" description:"password for tor proxy" type:"input" inputType:"text" model:"OnionProxyPass" featured:"false"`
+	OnionProxyUser           *string `group:"proxy" name:"Onion Proxy User" description:"tor proxy username" type:"input" inputType:"text" model:"OnionProxyUser" featured:"false"`
+	Password                 *string `group:"rpc" name:"Password" type:"password" description:"password for client RPC connections" type:"input" inputType:"text" model:"Password" featured:"false"`
+	Profile                  *string `group:"debug" name:"Profile" description:"http profiling on given port (1024-40000)" type:"input" inputType:"text" model:"Profile" featured:"false"`
+	Proxy                    *string `group:"proxy" name:"Proxy" description:"address of proxy to connect to for outbound connections" type:"input" inputType:"text" model:"Proxy" featured:"false"`
+	ProxyPass                *string `group:"proxy" name:"Proxy Pass" type:"password" description:"proxy password, if required" type:"input" inputType:"text" model:"ProxyPass" featured:"false"`
+	ProxyUser                *string `group:"proxy" name:"ProxyUser" description:"proxy username, if required" type:"input" inputType:"text" model:"ProxyUser" featured:"false"`
+	RegressionTest           *bool
+	RejectNonStd             *bool            `group:"node" name:"Reject Non Std" description:"reject non-standard transactions regardless of the default settings for the active network" type:"switch" model:"RejectNonStd" featured:"false"`
+	RelayNonStd              *bool            `group:"node" name:"Relay Non Std" description:"relay non-standard transactions regardless of the default settings for the active network" type:"switch" model:"RelayNonStd" featured:"false"`
+	RPCCert                  *string          `group:"rpc" name:"RPC Cert" description:"location of rpc TLS certificate" type:"input" inputType:"text" model:"RPCCert" featured:"false"`
+	RPCConnect               *string          `group:"wallet" name:"RPC Connect" description:"full node RPC for wallet" type:"input" inputType:"text" model:"RPCConnect" featured:"false"`
+	RPCKey                   *string          `group:"rpc" name:"RPC Key" description:"location of rpc TLS key" type:"input" inputType:"text" model:"RPCKey" featured:"false"`
+	RPCListeners             *cli.StringSlice `group:"rpc" name:"RPC Listeners" description:"addresses to listen for RPC connections" type:"input" inputType:"text" model:"RPCListeners" featured:"false"`
+	RPCMaxClients            *int             `group:"rpc" name:"RPC Max Clients" description:"maximum number of clients for regular RPC" type:"input" inputType:"number" model:"RPCMaxClients" featured:"false"`
+	RPCMaxConcurrentReqs     *int             `group:"rpc" name:"RPC Max Concurrent Reqs" description:"maximum number of requests to process concurrently" type:"input" inputType:"number" model:"RPCMaxConcurrentReqs" featured:"false"`
+	RPCMaxWebsockets         *int             `group:"rpc" name:"RPC Max Websockets" description:"maximum number of websocket clients to allow" type:"input" inputType:"number" model:"RPCMaxWebsockets" featured:"false"`
+	RPCQuirks                *bool            `group:"rpc" name:"RPC Quirks" description:"enable bugs that replicate bitcoin core RPC's JSON" type:"switch" model:"RPCQuirks" featured:"false"`
+	ServerPass               *string          `group:"rpc" name:"Server Pass" type:"password" description:"password for server connections" type:"input" inputType:"text" model:"ServerPass" featured:"false"`
+	ServerTLS                *bool            `group:"wallet" name:"Server TLS" description:"Enable TLS for the wallet connection to node RPC server" type:"switch" model:"ServerTLS" featured:"false"`
+	ServerUser               *string          `group:"rpc" name:"Server User" description:"username for server connections" type:"input" inputType:"text" model:"ServerUser" featured:"false"`
+	SigCacheMaxSize          *int             `group:"node" name:"Sig Cache Max Size" description:"the maximum number of entries in the signature verification cache" type:"input" inputType:"number" model:"SigCacheMaxSize" featured:"false"`
+	SimNet                   *bool
+	Subsystems               *cli.StringSlice `group:"config" name:"Subsystems" description:"Specific systems' verbosity levels" type:"input" inputType:"text" model:"Subsystems" featured:"false"`
+	TestNet3                 *bool
+	TestNodeOff              *bool            `group:"debug" name:"Test Node Off" description:"turn off the testnode (testnet only)" type:"switch" model:"TestNodeOff" featured:"false"`
+	TLS                      *bool            `group:"tls" name:"TLS" description:"enable TLS for RPC connections" type:"switch" model:"TLS" featured:"false"`
+	TLSSkipVerify            *bool            `group:"tls" name:"TLS Skip Verify" description:"skip TLS certificate verification (ignore CA errors)" type:"switch" model:"TLSSkipVerify" featured:"false"`
+	TorIsolation             *bool            `group:"proxy" name:"Tor Isolation" description:"makes a separate proxy connection for each connection" type:"switch" model:"TorIsolation" featured:"false"`
+	TrickleInterval          *time.Duration   `group:"policy" name:"Trickle Interval" description:"minimum time between attempts to send new inventory to a connected peer" type:"input" inputType:"text" model:"TrickleInterval" featured:"false"`
+	TxIndex                  *bool            `group:"node" name:"Tx Index" description:"maintain a full hash-based transaction index which makes all transactions available via the getrawtransaction RPC" type:"switch" model:"TxIndex" featured:"false"`
+	Upnp                     *bool            `group:"node" name:"Upnp" description:"enable UPNP for NAT traversal" type:"switch" model:"Upnp" featured:"false"`
+	UserAgentComments        *cli.StringSlice `group:"node" name:"User Agent Comments" description:"Comment to add to the user agent -- See BIP 14 for more information" type:"input" inputType:"text" model:"UserAgentComments" featured:"false"`
+	Username                 *string          `group:"rpc" name:"Username" description:"password for client RPC connections" type:"input" inputType:"text" model:"Username" featured:"false"`
+	Wallet                   *bool
+	WalletOff                *bool            `group:"debug" name:"Wallet Off" description:"turn off the wallet backend" type:"switch" model:"WalletOff" featured:"false"`
+	WalletPass               *string          `group:"wallet" name:"Wallet Pass" description:"password encrypting public data in wallet" type:"input" inputType:"text" model:"WalletPass" featured:"false"`
+	WalletRPCListeners       *cli.StringSlice `group:"wallet" name:"Legacy RPC Listeners" description:"addresses for wallet RPC server to listen on" type:"input" inputType:"text" model:"LegacyRPCListeners" featured:"false"`
+	WalletRPCMaxClients      *int             `group:"wallet" name:"Legacy RPC Max Clients" description:"maximum number of RPC clients allowed for wallet RPC" type:"input" inputType:"number" model:"LegacyRPCMaxClients" featured:"false"`
+	WalletRPCMaxWebsockets   *int             `group:"wallet" name:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"input" inputType:"number" model:"LegacyRPCMaxWebsockets" featured:"false"`
+	WalletServer             *string          `group:"wallet" name:"node address to connect wallet server to" type:"input" inputType:"text" model:"WalletServer" featured:"false"`
+	Whitelists               *cli.StringSlice `group:"debug" name:"Whitelists" description:"peers that you don't want to ever ban" type:"input" inputType:"text" model:"Whitelists" featured:"false"`
 }
 
-func PodDefConfig() *Config {
+func DefConfig() *Config {
 	return &Config{
-		ConfigFile:               new(string),
-		DataDir:                  new(string),
-		LogDir:                   new(string),
-		Network:                  new(string),
-		LogLevel:                 new(string),
-		Subsystems:               new(cli.StringSlice),
-		NoDiscovery:              new(bool),
+		AddCheckpoints:           new(cli.StringSlice),
 		AddPeers:                 new(cli.StringSlice),
-		ConnectPeers:             new(cli.StringSlice),
-		MaxPeers:                 new(int),
-		Listeners:                new(cli.StringSlice),
-		DisableListen:            new(bool),
-		DisableBanning:           new(bool),
+		AddrIndex:                new(bool),
+		Algo:                     new(string),
 		BanDuration:              new(time.Duration),
 		BanThreshold:             new(int),
-		Whitelists:               new(cli.StringSlice),
-		Username:                 new(string),
-		Password:                 new(string),
-		ServerUser:               new(string),
-		ServerPass:               new(string),
-		LimitUser:                new(string),
-		LimitPass:                new(string),
-		RPCConnect:               new(string),
-		RPCListeners:             new(cli.StringSlice),
-		RPCCert:                  new(string),
-		RPCKey:                   new(string),
-		RPCMaxClients:            new(int),
-		RPCMaxWebsockets:         new(int),
-		RPCMaxConcurrentReqs:     new(int),
-		RPCQuirks:                new(bool),
-		DisableRPC:               new(bool),
-		TLS:                      new(bool),
-		DisableDNSSeed:           new(bool),
-		ExternalIPs:              new(cli.StringSlice),
-		Proxy:                    new(string),
-		ProxyUser:                new(string),
-		ProxyPass:                new(string),
-		OnionProxy:               new(string),
-		OnionProxyUser:           new(string),
-		OnionProxyPass:           new(string),
-		Onion:                    new(bool),
-		TorIsolation:             new(bool),
-		TestNet3:                 new(bool),
-		RegressionTest:           new(bool),
-		SimNet:                   new(bool),
-		AddCheckpoints:           new(cli.StringSlice),
-		DisableCheckpoints:       new(bool),
-		DbType:                   new(string),
-		Profile:                  new(string),
+		BlockMaxSize:             new(int),
+		BlockMaxWeight:           new(int),
+		BlockMinSize:             new(int),
+		BlockMinWeight:           new(int),
+		BlockPrioritySize:        new(int),
+		BlocksOnly:               new(bool),
+		CAFile:                   new(string),
+		ConfigFile:               new(string),
+		ConnectPeers:             new(cli.StringSlice),
+		Controller:               new(string),
 		CPUProfile:               new(string),
-		Upnp:                     new(bool),
-		MinRelayTxFee:            new(float64),
+		DataDir:                  new(string),
+		DbType:                   new(string),
+		DisableBanning:           new(bool),
+		DisableCheckpoints:       new(bool),
+		DisableDNSSeed:           new(bool),
+		DisableListen:            new(bool),
+		DisableRPC:               new(bool),
+		ExperimentalRPCListeners: new(cli.StringSlice),
+		ExternalIPs:              new(cli.StringSlice),
 		FreeTxRelayLimit:         new(float64),
-		NoRelayPriority:          new(bool),
-		TrickleInterval:          new(time.Duration),
-		MaxOrphanTxs:             new(int),
-		Algo:                     new(string),
 		Generate:                 new(bool),
 		GenThreads:               new(int),
-		Controller:               new(string),
-		NoController:             new(bool),
-		MiningAddrs:              new(cli.StringSlice),
-		MinerPass:                new(string),
 		Group:                    new(string),
-		BlockMinSize:             new(int),
-		BlockMaxSize:             new(int),
-		BlockMinWeight:           new(int),
-		BlockMaxWeight:           new(int),
-		BlockPrioritySize:        new(int),
-		UserAgentComments:        new(cli.StringSlice),
-		NoPeerBloomFilters:       new(bool),
+		LimitPass:                new(string),
+		LimitUser:                new(string),
+		Listeners:                new(cli.StringSlice),
+		LogDir:                   new(string),
+		LogLevel:                 new(string),
+		MaxOrphanTxs:             new(int),
+		MaxPeers:                 new(int),
+		MinerPass:                new(string),
+		MiningAddrs:              new(cli.StringSlice),
+		MinRelayTxFee:            new(float64),
+		Network:                  new(string),
 		NoCFilters:               new(bool),
-		SigCacheMaxSize:          new(int),
-		BlocksOnly:               new(bool),
-		TxIndex:                  new(bool),
-		AddrIndex:                new(bool),
-		RelayNonStd:              new(bool),
-		RejectNonStd:             new(bool),
-		TLSSkipVerify:            new(bool),
-		Wallet:                   new(bool),
+		NoController:             new(bool),
+		NodeOff:                  new(bool),
+		NoDiscovery:              new(bool),
 		NoInitialLoad:            new(bool),
-		WalletPass:               new(string),
-		WalletServer:             new(string),
-		CAFile:                   new(string),
+		NoPeerBloomFilters:       new(bool),
+		NoRelayPriority:          new(bool),
 		OneTimeTLSKey:            new(bool),
+		Onion:                    new(bool),
+		OnionProxy:               new(string),
+		OnionProxyPass:           new(string),
+		OnionProxyUser:           new(string),
+		Password:                 new(string),
+		Profile:                  new(string),
+		Proxy:                    new(string),
+		ProxyPass:                new(string),
+		ProxyUser:                new(string),
+		RegressionTest:           new(bool),
+		RejectNonStd:             new(bool),
+		RelayNonStd:              new(bool),
+		RPCCert:                  new(string),
+		RPCConnect:               new(string),
+		RPCKey:                   new(string),
+		RPCListeners:             new(cli.StringSlice),
+		RPCMaxClients:            new(int),
+		RPCMaxConcurrentReqs:     new(int),
+		RPCMaxWebsockets:         new(int),
+		RPCQuirks:                new(bool),
+		ServerPass:               new(string),
 		ServerTLS:                new(bool),
+		ServerUser:               new(string),
+		SigCacheMaxSize:          new(int),
+		SimNet:                   new(bool),
+		Subsystems:               new(cli.StringSlice),
+		TestNet3:                 new(bool),
+		TestNodeOff:              new(bool),
+		TLS:                      new(bool),
+		TLSSkipVerify:            new(bool),
+		TorIsolation:             new(bool),
+		TrickleInterval:          new(time.Duration),
+		TxIndex:                  new(bool),
+		Upnp:                     new(bool),
+		UserAgentComments:        new(cli.StringSlice),
+		Username:                 new(string),
+		Wallet:                   new(bool),
+		WalletOff:                new(bool),
+		WalletPass:               new(string),
 		WalletRPCListeners:       new(cli.StringSlice),
 		WalletRPCMaxClients:      new(int),
 		WalletRPCMaxWebsockets:   new(int),
-		ExperimentalRPCListeners: new(cli.StringSlice),
-		NodeOff:                  new(bool),
-		TestNodeOff:              new(bool),
-		WalletOff:                new(bool),
+		WalletServer:             new(string),
+		Whitelists:               new(cli.StringSlice),
 	}
 }

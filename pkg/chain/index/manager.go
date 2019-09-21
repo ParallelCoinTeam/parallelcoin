@@ -59,8 +59,8 @@ func dbIndexConnectBlock(dbTx database.Tx, indexer Indexer, block *util.Block,
 	if !curTipHash.IsEqual(&block.MsgBlock().Header.PrevBlock) {
 		return AssertError(fmt.Sprintf("dbIndexConnectBlock must be "+
 			"called with a block that extends the current index "+
-			"tip (%s, tip %s, block %s) %s", indexer.Name(),
-			curTipHash, block.Hash(), cl.Ine()))
+			"tip (%s, tip %s, block %s)", indexer.Name(),
+			curTipHash, block.Hash()))
 	}
 	// Notify the indexer with the connected block so it can index it.
 	if err := indexer.ConnectBlock(dbTx, block, stxo); err != nil {
@@ -140,7 +140,7 @@ func (m *Manager) maybeFinishDrops(interrupt <-chan struct{}) error {
 		if !indexNeedsDrop[i] {
 			continue
 		}
-		Log.Infc(func() string {
+		INFOC(func() string {
 			return fmt.Sprintf("Resuming %s drop", indexer.Name())
 		})
 		err := dropIndex(m.db, indexer.Key(), indexer.Name(), interrupt)
@@ -270,13 +270,13 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			}
 		}
 		if initialHeight != height {
-			log <- cl.Infof{
+			INFOF(
 				"removed %d orphaned blocks from %s (heights %d to %d)",
-				initialHeight - height,
+				initialHeight-height,
 				indexer.Name(),
-				height + 1,
+				height+1,
 				initialHeight,
-			}
+			)
 		}
 	}
 	// Fetch the current tip heights for each index along with tracking the lowest one so the catchup code only needs to start at the earliest block and is able to skip connecting the block for the indexes that don't need it.
@@ -290,13 +290,12 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			if err != nil {
 				return err
 			}
-			log <- cl.Tracef{
+			TRACEF(
 				"current %s tip (height %d, hash %v) %s",
 				indexer.Name(),
 				height,
 				hash,
-				cl.Ine(),
-			}
+			)
 			indexerHeights[i] = height
 			if height < lowestHeight {
 				lowestHeight = height
@@ -312,14 +311,14 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 		return nil
 	}
 	// Create a progress logger for the indexing process below.
-	progressLogger := newBlockProgressLogger("Indexed", Log)
+	progressLogger := newBlockProgressLogger("Indexed",
+		cl.NewSubSystem("idx", "info"))
 	// At this point, one or more indexes are behind the current best chain tip and need to be caught up, so log the details and loop through each block that needs to be indexed.
-	log <- cl.Infof{
+	INFOF(
 		"catching up indexes from height %d to %d %s",
 		lowestHeight,
 		bestHeight,
-		cl.Ine(),
-	}
+	)
 	for height := lowestHeight + 1; height <= bestHeight; height++ {
 		// Load the block for the height since it is required to index it.
 		block, err := chain.BlockByHeight(height)
@@ -359,7 +358,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			return errInterruptRequested
 		}
 	}
-	log <- cl.Info{"indexes caught up to height", bestHeight}
+	INFO("indexes caught up to height", bestHeight)
 	return nil
 }
 
@@ -444,11 +443,11 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 		return err
 	}
 	if !needsDelete {
-		log <- cl.Warnf{"not dropping %s because it does not exist", idxName}
+		WARNF("not dropping %s because it does not exist", idxName)
 		return nil
 	}
 	// Mark that the index is in the process of being dropped so that it can be resumed on the next start if interrupted before the process is complete.
-	log <- cl.Infof{"dropping all %s entries.  This might take a while...", idxName}
+	INFOF("dropping all %s entries.  This might take a while...", idxName)
 	err = db.Update(func(dbTx database.Tx) error {
 		indexesBucket := dbTx.Metadata().Bucket(indexTipsBucketName)
 		return indexesBucket.Put(indexDropKey(idxKey), idxKey)
@@ -514,7 +513,8 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 			}
 			if numDeleted > 0 {
 				totalDeleted += uint64(numDeleted)
-				log <- cl.Infof{"deleted %d keys (%d total) from %s", numDeleted, totalDeleted, idxName}
+				INFOF("deleted %d keys (%d total) from %s", numDeleted,
+					totalDeleted, idxName)
 			}
 		}
 		if interruptRequested(interrupt) {
@@ -529,7 +529,7 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 			return bucket.DeleteBucket(bucketName[len(bucketName)-1])
 		})
 		if err != nil {
-			log <- cl.Debug{err, cl.Ine()}
+			DEBUG(err)
 		}
 	}
 	// Call extra index specific deinitialization for the transaction index.
@@ -550,6 +550,6 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 	if err != nil {
 		return err
 	}
-	log <- cl.Info{"dropped", idxName}
+	INFO("dropped", idxName)
 	return nil
 }

@@ -73,7 +73,7 @@ type Xt struct {
 func GetNewContext(appName string, subtext string) *Xt {
 	return &Xt{
 		App:      cli.NewApp(),
-		Config:   pod.PodDefConfig(),
+		Config:   pod.DefConfig(),
 		StateCfg: new(state.Config),
 		DataDir:  util.AppDataDir(appName, false),
 		Log:      cl.NewSubSystem(pkgs.Name(_d)+"/"+subtext, "info").Ch,

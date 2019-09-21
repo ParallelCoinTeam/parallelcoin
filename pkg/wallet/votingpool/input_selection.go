@@ -120,7 +120,7 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 		if err != nil {
 			return nil, newError(ErrInputSelection, "failed to get next withdrawal address", err)
 		} else if nAddr == nil {
-			log <- cl.Debug{"getEligibleInputs: reached last addr, stopping", cl.Ine()}
+			log <- cl.Debug{"getEligibleInputs: reached last addr, stopping"}
 			break
 		}
 		address = *nAddr
@@ -151,7 +151,7 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 					"moving on to next series (%d) %s",
 				branch,
 				index,
-				seriesID, cl.Ine()}
+				seriesID}
 			index = 0
 		} else {
 			index++
@@ -171,7 +171,7 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 				"as it hasn't been used before %s",
 			seriesID,
 			branch,
-			index, cl.Ine()}
+			index}
 		return nextAddr(p, ns, addrmgrNs, seriesID, branch, index, stopSeriesID)
 	}
 	return addr, err

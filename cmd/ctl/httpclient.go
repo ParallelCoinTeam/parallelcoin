@@ -14,7 +14,7 @@ import (
 	
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 )
 
 // newHTTPClient returns a new HTTP client that is configured according to the
@@ -117,7 +117,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 		return nil, fmt.Errorf("%s", respBytes)
 	}
 	// Unmarshal the response.
-	var resp json.Response
+	var resp btcjson.Response
 	if err := js.Unmarshal(respBytes, &resp); err != nil {
 		return nil, err
 	}

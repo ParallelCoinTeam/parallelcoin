@@ -154,7 +154,7 @@ func (l *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool)
 	db, err := walletdb.Open("bdb", dbPath)
 	if err != nil {
 		log <- cl.Error{
-			"failed to open database:", err, cl.Ine()}
+			"failed to open database:", err}
 		return nil, err
 	}
 	var cbs *waddrmgr.OpenCallbacks

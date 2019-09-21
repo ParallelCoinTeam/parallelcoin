@@ -1,7 +1,7 @@
 package mod
 
 import (
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 )
 
 type DuoGuiTemplates struct {
@@ -12,9 +12,9 @@ type DuoGuiTemplates struct {
 type Blocks struct {
 	// Per         int                          `json:"per"`
 	// Page        int                          `json:"page"`
-	CurrentPage int                          `json:"currentpage"`
-	PageCount   int                          `json:"pagecount"`
-	Blocks      []json.GetBlockVerboseResult `json:"blocks"`
+	CurrentPage int                             `json:"currentpage"`
+	PageCount   int                             `json:"pagecount"`
+	Blocks      []btcjson.GetBlockVerboseResult `json:"blocks"`
 }
 
 type DbAddress string

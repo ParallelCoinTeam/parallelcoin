@@ -1,30 +1,35 @@
 package rpc
 
 import (
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/pkgs"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 type _dtype int
 
 var _d _dtype
-var Log = cl.NewSubSystem(pkgs.Name(_d), "info")
-var log = Log.Ch
+var l = log.NewLogger("info")
 
-// DirectionString is a helper function that returns a string that represents
-// the direction of a connection (inbound or outbound).
-func DirectionString(inbound bool) string {
-	if inbound {
-		return "inbound"
-	}
-	return "outbound"
+func UseLogger(logger *log.Logger) {
+	l = logger
 }
 
-// PickNoun returns the singular or plural form of a noun depending on the
-// count n.
-func PickNoun(n uint64, singular, plural string) string {
-	if n == 1 {
-		return singular
-	}
-	return plural
-}
+var (
+	FATAL  = l.Fatal
+	ERROR  = l.Error
+	WARN   = l.Warn
+	INFO   = l.Info
+	DEBUG  = l.Debug
+	TRACE  = l.Trace
+	FATALF = l.Fatalf
+	ERRORF = l.Errorf
+	WARNF  = l.Warnf
+	INFOF  = l.Infof
+	DEBUGF = l.Debugf
+	TRACEF = l.Tracef
+	FATALC = l.Fatalc
+	ERRORC = l.Errorc
+	WARNC  = l.Warnc
+	INFOC  = l.Infoc
+	DEBUGC = l.Debugc
+	TRACEC = l.Tracec
+)

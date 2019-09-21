@@ -38,7 +38,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			go func() {
 				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
 				if err != nil {
-					L.Error("error starting node ", err)
+					ERROR("error starting node ", err)
 				}
 			}()
 			cx.RPCServer = <-nodeChan

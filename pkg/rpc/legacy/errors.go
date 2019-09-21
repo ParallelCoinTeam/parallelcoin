@@ -3,7 +3,7 @@ package legacy
 import (
 	"errors"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 )
 
 // TODO(jrick): There are several error paths which 'replace' various errors
@@ -38,32 +38,32 @@ var (
 	ErrNeedPositiveMinconf = InvalidParameterError{
 		errors.New("minconf must be positive"),
 	}
-	ErrAddressNotInWallet = json.RPCError{
-		Code:    json.ErrRPCWallet,
+	ErrAddressNotInWallet = btcjson.RPCError{
+		Code:    btcjson.ErrRPCWallet,
 		Message: "address not found in wallet",
 	}
-	ErrAccountNameNotFound = json.RPCError{
-		Code:    json.ErrRPCWalletInvalidAccountName,
+	ErrAccountNameNotFound = btcjson.RPCError{
+		Code:    btcjson.ErrRPCWalletInvalidAccountName,
 		Message: "account name not found",
 	}
-	ErrUnloadedWallet = json.RPCError{
-		Code:    json.ErrRPCWallet,
+	ErrUnloadedWallet = btcjson.RPCError{
+		Code:    btcjson.ErrRPCWallet,
 		Message: "Request requires a wallet but wallet has not loaded yet",
 	}
-	ErrWalletUnlockNeeded = json.RPCError{
-		Code:    json.ErrRPCWalletUnlockNeeded,
+	ErrWalletUnlockNeeded = btcjson.RPCError{
+		Code:    btcjson.ErrRPCWalletUnlockNeeded,
 		Message: "Enter the wallet passphrase with walletpassphrase first",
 	}
-	ErrNotImportedAccount = json.RPCError{
-		Code:    json.ErrRPCWallet,
+	ErrNotImportedAccount = btcjson.RPCError{
+		Code:    btcjson.ErrRPCWallet,
 		Message: "imported addresses must belong to the imported account",
 	}
-	ErrNoTransactionInfo = json.RPCError{
-		Code:    json.ErrRPCNoTxInfo,
+	ErrNoTransactionInfo = btcjson.RPCError{
+		Code:    btcjson.ErrRPCNoTxInfo,
 		Message: "No information for transaction",
 	}
-	ErrReservedAccountName = json.RPCError{
-		Code:    json.ErrRPCInvalidParameter,
+	ErrReservedAccountName = btcjson.RPCError{
+		Code:    btcjson.ErrRPCInvalidParameter,
 		Message: "Account name is reserved by RPC server",
 	}
 )

@@ -3,7 +3,7 @@ package rpcclient
 import (
 	js "encoding/json"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 )
 
 // AddNodeCommand enumerates the available commands that the AddNode function accepts.
@@ -35,7 +35,7 @@ func (r FutureAddNodeResult) Receive() error {
 
 // AddNodeAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See AddNode for the blocking version and more details.
 func (c *Client) AddNodeAsync(host string, command AddNodeCommand) FutureAddNodeResult {
-	cmd := json.NewAddNodeCmd(host, json.AddNodeSubCmd(command))
+	cmd := btcjson.NewAddNodeCmd(host, btcjson.AddNodeSubCmd(command))
 	return c.sendCmd(cmd)
 }
 
@@ -54,14 +54,14 @@ func (r FutureNodeResult) Receive() error {
 }
 
 // NodeAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See Node for the blocking version and more details.
-func (c *Client) NodeAsync(command json.NodeSubCmd, host string,
+func (c *Client) NodeAsync(command btcjson.NodeSubCmd, host string,
 	connectSubCmd *string) FutureNodeResult {
-	cmd := json.NewNodeCmd(command, host, connectSubCmd)
+	cmd := btcjson.NewNodeCmd(command, host, connectSubCmd)
 	return c.sendCmd(cmd)
 }
 
 // Node attempts to perform the passed node command on the host. For example, it can be used to add or a remove a persistent peer, or to do connect or diconnect a non-persistent one. The connectSubCmd should be set either "perm" or "temp", depending on whether we are targetting a persistent or non-persistent peer. Passing nil will cause the default value to be used, which currently is "temp".
-func (c *Client) Node(command json.NodeSubCmd, host string,
+func (c *Client) Node(command btcjson.NodeSubCmd, host string,
 	connectSubCmd *string) error {
 	return c.NodeAsync(command, host, connectSubCmd).Receive()
 }
@@ -70,13 +70,13 @@ func (c *Client) Node(command json.NodeSubCmd, host string,
 type FutureGetAddedNodeInfoResult chan *response
 
 // Receive waits for the response promised by the future and returns information about manually added (persistent) peers.
-func (r FutureGetAddedNodeInfoResult) Receive() ([]json.GetAddedNodeInfoResult, error) {
+func (r FutureGetAddedNodeInfoResult) Receive() ([]btcjson.GetAddedNodeInfoResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
 		return nil, err
 	}
 	// Unmarshal as an array of getaddednodeinfo result objects.
-	var nodeInfo []json.GetAddedNodeInfoResult
+	var nodeInfo []btcjson.GetAddedNodeInfoResult
 	err = js.Unmarshal(res, &nodeInfo)
 	if err != nil {
 		return nil, err
@@ -86,12 +86,12 @@ func (r FutureGetAddedNodeInfoResult) Receive() ([]json.GetAddedNodeInfoResult, 
 
 // GetAddedNodeInfoAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetAddedNodeInfo for the blocking version and more details.
 func (c *Client) GetAddedNodeInfoAsync(peer string) FutureGetAddedNodeInfoResult {
-	cmd := json.NewGetAddedNodeInfoCmd(true, &peer)
+	cmd := btcjson.NewGetAddedNodeInfoCmd(true, &peer)
 	return c.sendCmd(cmd)
 }
 
 // GetAddedNodeInfo returns information about manually added (persistent) peers. See GetAddedNodeInfoNoDNS to retrieve only a list of the added (persistent) peers.
-func (c *Client) GetAddedNodeInfo(peer string) ([]json.GetAddedNodeInfoResult, error) {
+func (c *Client) GetAddedNodeInfo(peer string) ([]btcjson.GetAddedNodeInfoResult, error) {
 	return c.GetAddedNodeInfoAsync(peer).Receive()
 }
 
@@ -115,7 +115,7 @@ func (r FutureGetAddedNodeInfoNoDNSResult) Receive() ([]string, error) {
 
 // GetAddedNodeInfoNoDNSAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetAddedNodeInfoNoDNS for the blocking version and more details.
 func (c *Client) GetAddedNodeInfoNoDNSAsync(peer string) FutureGetAddedNodeInfoNoDNSResult {
-	cmd := json.NewGetAddedNodeInfoCmd(false, &peer)
+	cmd := btcjson.NewGetAddedNodeInfoCmd(false, &peer)
 	return c.sendCmd(cmd)
 }
 
@@ -144,7 +144,7 @@ func (r FutureGetConnectionCountResult) Receive() (int64, error) {
 
 // GetConnectionCountAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetConnectionCount for the blocking version and more details.
 func (c *Client) GetConnectionCountAsync() FutureGetConnectionCountResult {
-	cmd := json.NewGetConnectionCountCmd()
+	cmd := btcjson.NewGetConnectionCountCmd()
 	return c.sendCmd(cmd)
 }
 
@@ -164,7 +164,7 @@ func (r FuturePingResult) Receive() error {
 
 // PingAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See Ping for the blocking version and more details.
 func (c *Client) PingAsync() FuturePingResult {
-	cmd := json.NewPingCmd()
+	cmd := btcjson.NewPingCmd()
 	return c.sendCmd(cmd)
 }
 
@@ -177,13 +177,13 @@ func (c *Client) Ping() error {
 type FutureGetPeerInfoResult chan *response
 
 // Receive waits for the response promised by the future and returns  data about each connected network peer.
-func (r FutureGetPeerInfoResult) Receive() ([]json.GetPeerInfoResult, error) {
+func (r FutureGetPeerInfoResult) Receive() ([]btcjson.GetPeerInfoResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
 		return nil, err
 	}
 	// Unmarshal result as an array of getpeerinfo result objects.
-	var peerInfo []json.GetPeerInfoResult
+	var peerInfo []btcjson.GetPeerInfoResult
 	err = js.Unmarshal(res, &peerInfo)
 	if err != nil {
 		return nil, err
@@ -193,12 +193,12 @@ func (r FutureGetPeerInfoResult) Receive() ([]json.GetPeerInfoResult, error) {
 
 // GetPeerInfoAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetPeerInfo for the blocking version and more details.
 func (c *Client) GetPeerInfoAsync() FutureGetPeerInfoResult {
-	cmd := json.NewGetPeerInfoCmd()
+	cmd := btcjson.NewGetPeerInfoCmd()
 	return c.sendCmd(cmd)
 }
 
 // GetPeerInfo returns data about each connected network peer.
-func (c *Client) GetPeerInfo() ([]json.GetPeerInfoResult, error) {
+func (c *Client) GetPeerInfo() ([]btcjson.GetPeerInfoResult, error) {
 	return c.GetPeerInfoAsync().Receive()
 }
 
@@ -206,13 +206,13 @@ func (c *Client) GetPeerInfo() ([]json.GetPeerInfoResult, error) {
 type FutureGetNetTotalsResult chan *response
 
 // Receive waits for the response promised by the future and returns network statistics.
-func (r FutureGetNetTotalsResult) Receive() (*json.GetNetTotalsResult, error) {
+func (r FutureGetNetTotalsResult) Receive() (*btcjson.GetNetTotalsResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
 		return nil, err
 	}
 	// Unmarshal result as a getnettotals result object.
-	var totals json.GetNetTotalsResult
+	var totals btcjson.GetNetTotalsResult
 	err = js.Unmarshal(res, &totals)
 	if err != nil {
 		return nil, err
@@ -222,11 +222,11 @@ func (r FutureGetNetTotalsResult) Receive() (*json.GetNetTotalsResult, error) {
 
 // GetNetTotalsAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetNetTotals for the blocking version and more details.
 func (c *Client) GetNetTotalsAsync() FutureGetNetTotalsResult {
-	cmd := json.NewGetNetTotalsCmd()
+	cmd := btcjson.NewGetNetTotalsCmd()
 	return c.sendCmd(cmd)
 }
 
 // GetNetTotals returns network traffic statistics.
-func (c *Client) GetNetTotals() (*json.GetNetTotalsResult, error) {
+func (c *Client) GetNetTotals() (*btcjson.GetNetTotalsResult, error) {
 	return c.GetNetTotalsAsync().Receive()
 }

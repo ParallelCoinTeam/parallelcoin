@@ -45,7 +45,7 @@ func Serve(address, serviceName, password string,
 	err := srv.RegisterName(serviceName, service, "")
 	if err != nil {
 		log <- cl.Error{"error registering interface ", serviceName, " ",
-			err, cl.Ine()}
+			err}
 		return
 	}
 	cs := &ConfigUDPSession{}
@@ -54,13 +54,13 @@ func Serve(address, serviceName, password string,
 	shutdown = func() <-chan struct{} {
 		err := srv.Shutdown(ctx)
 		if err != nil {
-			log <- cl.Error{"error shutting down server ", err, cl.Ine()}
+			log <- cl.Error{"error shutting down server ", err}
 		}
 		return ctx.Done()
 	}
 	err = srv.Serve("kcp", address)
 	if err != nil {
-		log <- cl.Error{"error serving ", serviceName, " ", err, cl.Ine()}
+		log <- cl.Error{"error serving ", serviceName, " ", err}
 	}
 	return
 }

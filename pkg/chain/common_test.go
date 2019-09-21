@@ -84,7 +84,7 @@ func isSupportedDbType(	dbType string) bool {
 // 		// read block
 // 		_, err = dr.Read(rbytes)
 // 		if err != nil {
-// 			fmt.Println(err, cl.Ine())
+// 			fmt.Println(err)
 // 		}
 // 		block, err = util.NewBlockFromBytes(rbytes)
 // 		if err != nil {

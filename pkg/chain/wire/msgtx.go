@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 const (
@@ -38,9 +37,9 @@ const (
 	// minTxPayload is the minimum payload size for a transaction.  Note that any realistically usable transaction must have at least one input or output, but that is a rule enforced at a higher layer, so it is intentionally not included here. Version 4 bytes + Varint number of transaction inputs 1 byte + Varint number of transaction outputs 1 byte + LockTime 4 bytes + min input payload + min output payload.
 	minTxPayload = 10
 	// freeListMaxScriptSize is the size of each buffer in the free list that	is used for deserializing scripts from the wire before they are concatenated into a single contiguous buffers.  This value was chosen because it is slightly more than twice the size of the vast majority of all "standard" scripts.  Larger scripts are still deserialized properly as the free list will simply be bypassed for them.
-	freeListMaxScriptSize = 1024 //512
+	freeListMaxScriptSize = 1024 // 512
 	// freeListMaxItems is the number of buffers to keep in the free list to use for script deserialization.  This value allows up to 100 scripts per transaction being simultaneously deserialized by 125 peers.  Thus, the peak usage of the free list is 12,500 * 512 = 6,400,000 bytes.
-	freeListMaxItems = 50000 //12500
+	freeListMaxItems = 50000 // 12500
 	// maxWitnessItemsPerInput is the maximum number of witness items to be read for the witness data for a single TxIn. This number is derived using a possble lower bound for the encoding of a witness item: 1 byte for length + 1 byte for the witness item itself, or two bytes. This value is then divided by the currently allowed maximum "cost" for a transaction.
 	maxWitnessItemsPerInput = 500000
 	// maxWitnessItemSize is the maximum allowed size for an item within an input's witness data. This number is derived from the fact that for script validation, each pushed item onto the stack must be less than 10k bytes.
@@ -220,7 +219,7 @@ func (msg *MsgTx) Copy() *MsgTx {
 		newOutPoint := OutPoint{}
 		err := newOutPoint.Hash.SetBytes(oldOutPoint.Hash[:])
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 		newOutPoint.Index = oldOutPoint.Index
 		// Deep copy the old signature script.

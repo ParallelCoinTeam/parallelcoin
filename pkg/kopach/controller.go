@@ -125,7 +125,7 @@ func (c *Controller) SendBlock(b []mining.BlockTemplate) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		err := subs[i].Call(ctx, "Block", &b, &receivedTime)
 		if err != nil {
-			log <- cl.Error{"error sending block ", err, cl.Ine()}
+			log <- cl.Error{"error sending block ", err}
 			continue
 		}
 		go func() {

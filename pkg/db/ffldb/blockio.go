@@ -33,7 +33,7 @@ const (
 	//  [4:8]  File offset (4 bytes)
 	//
 	//  [8:12] Block length (4 bytes)
-	//nolint
+	// nolint
 	blockLocSize = 12
 )
 
@@ -424,12 +424,11 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		wc.curFileNum = oldBlockFileNum
 		wc.curOffset = oldBlockOffset
 	}()
-	log <- cl.Debugf{
+	DEBUGF(
 		"ROLLBACK: Rolling back to file %d, offset %d %s",
 		oldBlockFileNum,
 		oldBlockOffset,
-		cl.Ine(),
-	}
+		cl.Ine())
 	// Close the current write file if it needs to be deleted.  Then delete all files that are newer than the provided rollback file while also moving the write cursor file backwards accordingly.
 	if wc.curFileNum > oldBlockFileNum {
 		wc.curFile.Lock()
@@ -441,10 +440,9 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	}
 	for ; wc.curFileNum > oldBlockFileNum; wc.curFileNum-- {
 		if err := s.deleteFileFunc(wc.curFileNum); err != nil {
-			log <- cl.Warnf{
+			WARNF(
 				"ROLLBACK: Failed to delete block file number %d: %v %s",
-				wc.curFileNum, err, cl.Ine(),
-			}
+				wc.curFileNum, err)
 			return
 		}
 	}
@@ -454,7 +452,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		obf, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
 			wc.curFile.Unlock()
-			log <- cl.Warn{"ROLLBACK:", err, cl.Ine()}
+			WARN("ROLLBACK:", err)
 			return
 		}
 		wc.curFile.file = obf
@@ -462,24 +460,22 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	// Truncate the to the provided rollback offset.
 	if err := wc.curFile.file.Truncate(int64(oldBlockOffset)); err != nil {
 		wc.curFile.Unlock()
-		log <- cl.Warnf{
+		WARNF(
 			"ROLLBACK: Failed to truncate file %d: %v %s",
 			wc.curFileNum,
 			err,
-			cl.Ine(),
-		}
+			cl.Ine())
 		return
 	}
 	// Sync the file to disk.
 	err := wc.curFile.file.Sync()
 	wc.curFile.Unlock()
 	if err != nil {
-		log <- cl.Warnf{
+		WARNF(
 			"ROLLBACK: Failed to sync file %d: %v %s",
 			wc.curFileNum,
 			err,
-			cl.Ine(),
-		}
+			cl.Ine())
 		return
 	}
 }
@@ -497,11 +493,10 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		lastFile = i
 		fileLen = uint32(st.Size())
 	}
-	log <- cl.Tracef{
+	TRACEF(
 		"Scan found latest block file #%d with length %d",
 		lastFile,
-		fileLen,
-	}
+		fileLen)
 	return lastFile, fileLen
 }
 

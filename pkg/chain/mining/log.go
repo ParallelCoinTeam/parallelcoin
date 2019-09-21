@@ -1,20 +1,35 @@
 package mining
 
 import (
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/pkgs"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
-// Log is the logger for the peer package
 type _dtype int
 
 var _d _dtype
-var Log = cl.NewSubSystem(pkgs.Name(_d), "info")
-var log = Log.Ch
+var l = log.NewLogger("info")
 
-// UseLogger uses a specified Logger to output package logging info. This should be used in preference to SetLogWriter if the caller is also using log.
-func UseLogger(logger *cl.SubSystem) {
-
-	Log = logger
-	log = Log.Ch
+func UseLogger(logger *log.Logger) {
+	l = logger
 }
+
+var (
+	FATAL  = l.Fatal
+	ERROR  = l.Error
+	WARN   = l.Warn
+	INFO   = l.Info
+	DEBUG  = l.Debug
+	TRACE  = l.Trace
+	FATALF = l.Fatalf
+	ERRORF = l.Errorf
+	WARNF  = l.Warnf
+	INFOF  = l.Infof
+	DEBUGF = l.Debugf
+	TRACEF = l.Tracef
+	FATALC = l.Fatalc
+	ERRORC = l.Errorc
+	WARNC  = l.Warnc
+	INFOC  = l.Infoc
+	DEBUGC = l.Debugc
+	TRACEC = l.Tracec
+)

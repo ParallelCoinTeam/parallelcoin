@@ -5,6 +5,7 @@ go 1.13
 require (
 	git.parallelcoin.io/dev/cryptonight v0.3.1
 	git.parallelcoin.io/dev/kcp9 v5.2.8+incompatible
+	git.parallelcoin.io/dev/pod v0.0.1
 	git.parallelcoin.io/dev/rpcx v0.0.0-20190829033934-d995e874b384
 	github.com/GlenDC/go-external-ip v0.0.0-20170425150139-139229dcdddd
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
@@ -22,6 +23,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dchest/blake256 v1.1.0
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
+	github.com/glendc/go-external-ip v0.0.0-20170425150139-139229dcdddd
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/grandcat/zeroconf v0.0.0-20190424104450-85eadb44205c
@@ -33,6 +35,7 @@ require (
 	github.com/minio/highwayhash v1.0.0
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
+	github.com/opentracing/opentracing-go v1.1.0
 	github.com/pelletier/go-toml v1.4.0
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/shirou/gopsutil v2.18.12+incompatible

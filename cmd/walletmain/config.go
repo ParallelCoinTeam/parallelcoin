@@ -493,7 +493,7 @@ err := fmt.Errorf("The flags --create and --createtemp can not " +
 			}
 			dbFileExists, err := cfgutil.FileExists(dbPath)
 			if err != nil {
-log <- cl.Error{err, cl.Ine()}
+log <- cl.Error{err}
 					return nil, nil, err
 				}
 				if cfg.CreateTemp {

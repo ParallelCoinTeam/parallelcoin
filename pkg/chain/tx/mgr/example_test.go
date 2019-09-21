@@ -58,7 +58,7 @@ func ExampleStore_Balance() {
 		defer func() {
 			err := dbtx.Rollback()
 			if err != nil {
-				fmt.Println(err, cl.Ine())
+				fmt.Println(err)
 			}
 		}()
 		ns := dbtx.ReadBucket(namespaceKey)
@@ -165,7 +165,7 @@ func Example_basicUsage() {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 	}()
 	// Create a bucket for the transaction store.

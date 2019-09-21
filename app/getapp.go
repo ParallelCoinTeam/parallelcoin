@@ -33,7 +33,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 		},
 		Before: beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			L.Trace("subcommand completed")
+			TRACE("subcommand completed")
 			return nil
 		},
 		Commands: []cli.Command{

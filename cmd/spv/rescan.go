@@ -12,56 +12,54 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
 
-var (
-	// ErrRescanExit is an error returned to the caller in case the ongoing
+var // ErrRescanExit is an error returned to the caller in case the ongoing
 	// rescan exits.
 	ErrRescanExit = errors.New("rescan exited")
-)
 
-// rescanOptions holds the set of functional parameters for Rescan.
-type rescanOptions struct {
-	chain        *ChainService
-	queryOptions []QueryOption
-	ntfn         rpcclient.NotificationHandlers
-	startTime    time.Time
-	startBlock   *waddrmgr.BlockStamp
-	endBlock     *waddrmgr.BlockStamp
-	watchAddrs   []util.Address
-	watchInputs  []InputWithScript
-	watchList    [][]byte
-	txIdx        uint32
-	update       <-chan *updateOptions
-	quit         <-chan struct{}
-}
+type // rescanOptions holds the set of functional parameters for Rescan.
+	rescanOptions struct {
+		chain        *ChainService
+		queryOptions []QueryOption
+		ntfn         rpcclient.NotificationHandlers
+		startTime    time.Time
+		startBlock   *waddrmgr.BlockStamp
+		endBlock     *waddrmgr.BlockStamp
+		watchAddrs   []util.Address
+		watchInputs  []InputWithScript
+		watchList    [][]byte
+		txIdx        uint32
+		update       <-chan *updateOptions
+		quit         <-chan struct{}
+	}
 
-// RescanOption is a functional option argument to any of the rescan and
-// notification subscription methods. These are always processed in order, with
-// later options overriding earlier ones.
-type RescanOption func(ro *rescanOptions)
+type // RescanOption is a functional option argument to any of the rescan and
+	// notification subscription methods. These are always processed in order, with
+	// later options overriding earlier ones.
+	RescanOption func(ro *rescanOptions)
 
-func defaultRescanOptions() *rescanOptions {
+func
+defaultRescanOptions() *rescanOptions {
 	return &rescanOptions{}
 }
 
-// QueryOptions pass onto the underlying queries.
-func QueryOptions(options ...QueryOption) RescanOption {
+func // QueryOptions pass onto the underlying queries.
+QueryOptions(options ...QueryOption) RescanOption {
 	return func(ro *rescanOptions) {
 		ro.queryOptions = options
 	}
 }
 
-// NotificationHandlers specifies notification handlers for the rescan. These
-// will always run in the same goroutine as the caller.
-func NotificationHandlers(ntfn rpcclient.NotificationHandlers) RescanOption {
+func // NotificationHandlers specifies notification handlers for the rescan.
+// These will always run in the same goroutine as the caller.
+NotificationHandlers(ntfn rpcclient.NotificationHandlers) RescanOption {
 	return func(ro *rescanOptions) {
 		ro.ntfn = ntfn
 	}
@@ -90,37 +88,40 @@ func StartTime(startTime time.Time) RescanOption {
 	}
 }
 
-// EndBlock specifies the end block. The hash is checked first; if there's no
-// such hash (zero hash avoids lookup), the height is checked next. If the
-// height is 0 or in the future or the end block isn't specified, the quit
+func // EndBlock specifies the end block.
+// The hash is checked first; if there's no such hash
+// (zero hash avoids lookup), the height is checked next.
+// If the height is 0 or in the future or the end block isn't specified, the quit
 // channel MUST be specified as Rescan will sync to the tip of the blockchain
 // and continue to stay in sync and pass notifications. This is enforced at
 // runtime.
-func EndBlock(endBlock *waddrmgr.BlockStamp) RescanOption {
+EndBlock(endBlock *waddrmgr.BlockStamp) RescanOption {
 	return func(ro *rescanOptions) {
 		ro.endBlock = endBlock
 	}
 }
 
-// WatchAddrs specifies the addresses to watch/filter for. Each call to this
-// function adds to the list of addresses being watched rather than replacing
-// the list. Each time a transaction spends to the specified address, the
+func // WatchAddrs specifies the addresses to watch/filter for.
+// Each call to this function adds to the list of addresses being watched
+// rather than replacing the list.
+// Each time a transaction spends to the specified address, the
 // outpoint is added to the WatchOutPoints list.
-func WatchAddrs(watchAddrs ...util.Address) RescanOption {
+WatchAddrs(watchAddrs ...util.Address) RescanOption {
 	return func(ro *rescanOptions) {
 		ro.watchAddrs = append(ro.watchAddrs, watchAddrs...)
 	}
 }
 
-// InputWithScript couples an previous outpoint along with its input script.
-// We'll use the prev script to match the filter itself, but then scan for the
-// particular outpoint when we need to make a notification decision.
-type InputWithScript struct {
-	// OutPoint identifies the previous output to watch.
-	OutPoint wire.OutPoint
-	// PkScript is the script of the previous output.
-	PkScript []byte
-}
+type // InputWithScript couples an previous outpoint along with its input
+	// script.
+	// We'll use the prev script to match the filter itself, but then scan for the
+	// particular outpoint when we need to make a notification decision.
+	InputWithScript struct {
+		// OutPoint identifies the previous output to watch.
+		OutPoint wire.OutPoint
+		// PkScript is the script of the previous output.
+		PkScript []byte
+	}
 
 // WatchInputs specifies the outpoints to watch for on-chain spends. We also
 // require the script as we'll match on the script, but then notify based on
@@ -132,9 +133,9 @@ func WatchInputs(watchInputs ...InputWithScript) RescanOption {
 	}
 }
 
-// TxIdx specifies a hint transaction index into the block in which the UTXO is
-// created (eg, coinbase is 0, next transaction is 1, etc.)
-func TxIdx(txIdx uint32) RescanOption {
+func // TxIdx specifies a hint transaction index into the block in which the
+// UTXO is created (eg, coinbase is 0, next transaction is 1, etc.)
+TxIdx(txIdx uint32) RescanOption {
 	return func(ro *rescanOptions) {
 		ro.txIdx = txIdx
 	}
@@ -267,10 +268,11 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 	s.blockManager.newFilterHeadersMtx.RLock()
 	filterHeaderHeight := s.blockManager.filterHeaderTip
 	s.blockManager.newFilterHeadersMtx.RUnlock()
-	log <- cl.Debugf{
-		"waiting for filter headers (" +
+	DEBUGF(
+		"waiting for filter headers ("+
 			"height=%v) to catch up the rescan start (height=%v) %s",
-		filterHeaderHeight, curStamp.Height, cl.Ine()}
+		filterHeaderHeight, curStamp.Height,
+	)
 	// We'll wait here at this point until we have enough filter headers to
 	// actually start walking forwards in the chain. To be able to wake up
 	// in cause we are being asked to exit, we'll launch a new goroutine to
@@ -317,9 +319,10 @@ filterHeaderWaitLoop:
 			return err
 		}
 	}
-	log <- cl.Debugf{
+	DEBUGF(
 		"starting rescan from known block %d (%s) %s",
-		curStamp.Height, curStamp.Hash, cl.Ine()}
+		curStamp.Height, curStamp.Hash,
+	)
 	// Compare the start time to the start block. If the start time is
 	// later, cycle through blocks until we find a block timestamp later
 	// than the start time, and begin filter download at that block. Since
@@ -350,17 +353,17 @@ filterHeaderWaitLoop:
 		if blockReFetchTimer != nil {
 			blockReFetchTimer.Stop()
 		}
-		log <- cl.Infof{
+		INFOF(
 			"setting timer to attempt to re-fetch filter for hash=%v, height=%v",
 			headerTip.BlockHash(), height,
-		}
+		)
 		// We'll start a timer to re-send this header so we re-process
 		// if in the case that we don't get a re-org soon afterwards.
 		blockReFetchTimer = time.AfterFunc(blockRetryInterval, func() {
-			log <- cl.Infof{
+			INFOF(
 				"resending rescan header for block hash=%v, height=%v",
 				headerTip.BlockHash(), height,
-			}
+			)
 			select {
 			case blockConnected <- headerTip:
 			case <-ro.quit:
@@ -409,10 +412,10 @@ rescanLoop:
 				// current. This is our way of doing a manual
 				// rescan.
 				if rewound {
-					log <- cl.Tracef{
+					TRACEF(
 						"rewound to block %d (%s), no longer current",
 						curStamp.Height, curStamp.Hash,
-					}
+					)
 					current = false
 					s.unsubscribeBlockMsgs(subscription)
 					subscription = nil
@@ -431,12 +434,13 @@ rescanLoop:
 				// state transition back to the !current state.
 				if header.PrevBlock != curStamp.Hash &&
 					header.BlockHash() != curStamp.Hash {
-					log <- cl.Debugf{
-						"rescan got out of order block %s with previous block" +
+					DEBUGF(
+						"rescan got out of order block %s with previous block"+
 							" %s, curHeader: %s %s",
 						header.BlockHash(),
 						header.PrevBlock,
-						curStamp.Hash, cl.Ine()}
+						curStamp.Hash,
+					)
 					current = false
 					continue rescanLoop
 				}
@@ -448,10 +452,10 @@ rescanLoop:
 				// re-process it without any issues.
 				if header.BlockHash() != curStamp.Hash &&
 					!s.hasFilterHeadersByHeight(uint32(curStamp.Height+1)) {
-					log <- cl.Warnf{
+					WARNF(
 						"missing filter header for height=%v, skipping",
-						curStamp.Height + 1,
-					}
+						curStamp.Height+1,
+					)
 					continue rescanLoop
 				}
 				// As this could be a re-try, we'll ensure that
@@ -462,10 +466,10 @@ rescanLoop:
 					curStamp.Hash = header.BlockHash()
 					curStamp.Height++
 				}
-				log <- cl.Tracef{
+				TRACEF(
 					"rescan got block %d (%s)",
 					curStamp.Height, curStamp.Hash,
-				}
+				)
 				// We're only scanning if the header is beyond the horizon of
 				// our start time.
 				if !scanning {
@@ -517,9 +521,10 @@ rescanLoop:
 				// to nil.
 				blockReFetchTimer = nil
 			case header := <-blockDisconnected:
-				log <- cl.Debugf{
+				DEBUGF(
 					"rescan disconnect block %d (%s) %s",
-					curStamp.Height, curStamp.Hash, cl.Ine()}
+					curStamp.Height, curStamp.Hash,
+				)
 				// Only deal with it if it's the current block
 				// we know about. Otherwise, it's in the
 				// future.
@@ -582,10 +587,11 @@ rescanLoop:
 			// ourselves as current and follow notifications.
 			nextHeight := curStamp.Height + 1
 			if nextHeight > bestBlock.Height {
-				log <- cl.Debugf{
-					"rescan became current at %d (%s), " +
+				DEBUGF(
+					"rescan became current at %d (%s), "+
 						"subscribing to block notifications %s",
-					curStamp.Height, curStamp.Hash, cl.Ine()}
+					curStamp.Height, curStamp.Hash,
+				)
 				current = true
 				// Ensure we cancel the old subscription if we're going back
 				// to scan for missed blocks.
@@ -682,7 +688,7 @@ func (s *ChainService) extractBlockMatches(ro *rescanOptions,
 			"network", curStamp.Height, curStamp.Hash)
 	}
 	blockHeader := block.MsgBlock().Header
-	blockDetails := json.BlockDetails{
+	blockDetails := btcjson.BlockDetails{
 		Height: block.Height(),
 		Hash:   block.Hash().String(),
 		Time:   blockHeader.Timestamp.Unix(),
@@ -1008,33 +1014,35 @@ func AddAddrs(addrs ...util.Address) UpdateOption {
 	}
 }
 
-// AddInputs adds inputs to watch to the filter.
-func AddInputs(inputs ...InputWithScript) UpdateOption {
+func // AddInputs adds inputs to watch to the filter.
+AddInputs(inputs ...InputWithScript) UpdateOption {
 	return func(uo *updateOptions) {
 		uo.inputs = append(uo.inputs, inputs...)
 	}
 }
 
-// Rewind rewinds the rescan to the specified height (meaning, disconnects down
-// to the block immediately after the specified height) and restarts it from
-// that point with the (possibly) newly expanded filter. Especially useful when
-// called in the same Update() as one of the previous three options.
-func Rewind(height uint32) UpdateOption {
+func // Rewind rewinds the rescan to the specified height (meaning,
+// disconnects down to the block immediately after the specified height) and
+// restarts it from that point with the (possibly) newly expanded filter.
+// Especially useful when called in the same Update() as one of the previous
+// three options.
+Rewind(height uint32) UpdateOption {
 	return func(uo *updateOptions) {
 		uo.rewind = height
 	}
 }
 
-// DisableDisconnectedNtfns tells the rescan not to send `OnBlockDisconnected`
-// and `OnFilteredBlockDisconnected` notifications when rewinding.
-func DisableDisconnectedNtfns(disabled bool) UpdateOption {
+func // DisableDisconnectedNtfns tells the rescan not to send
+// `OnBlockDisconnected` and `OnFilteredBlockDisconnected` notifications when
+// rewinding.
+DisableDisconnectedNtfns(disabled bool) UpdateOption {
 	return func(uo *updateOptions) {
 		uo.disableDisconnectedNtfns = disabled
 	}
 }
 
-// Update sends an update to a long-running rescan/notification goroutine.
-func (r *Rescan) Update(options ...UpdateOption) error {
+func // Update sends an update to a long-running rescan/notification goroutine.
+(r *Rescan) Update(options ...UpdateOption) error {
 	ro := defaultRescanOptions()
 	for _, option := range r.options {
 		option(ro)
@@ -1059,44 +1067,44 @@ func (r *Rescan) Update(options ...UpdateOption) error {
 	return nil
 }
 
-// SpendReport is a struct which describes the current spentness state of a
-// particular output. In the case that an output is spent, then the spending
-// transaction and related details will be populated. Otherwise, only the
-// target unspent output in the chain will be returned.
-type SpendReport struct {
-	// SpendingTx is the transaction that spent the output that a spend
-	// report was requested for.
-	//
-	// NOTE: This field will only be populated if the target output has
-	// been spent.
-	SpendingTx *wire.MsgTx
-	// SpendingTxIndex is the input index of the transaction above which
-	// spends the target output.
-	//
-	// NOTE: This field will only be populated if the target output has
-	// been spent.
-	SpendingInputIndex uint32
-	// SpendingTxHeight is the hight of the block that included the
-	// transaction  above which spent the target output.
-	//
-	// NOTE: This field will only be populated if the target output has
-	// been spent.
-	SpendingTxHeight uint32
-	// Output is the raw output of the target outpoint.
-	//
-	// NOTE: This field will only be populated if the target is still
-	// unspent.
-	Output *wire.TxOut
-}
+type // SpendReport is a struct which describes the current spentness state of a
+	// particular output. In the case that an output is spent, then the spending
+	// transaction and related details will be populated. Otherwise, only the
+	// target unspent output in the chain will be returned.
+	SpendReport struct {
+		// SpendingTx is the transaction that spent the output that a spend
+		// report was requested for.
+		//
+		// NOTE: This field will only be populated if the target output has
+		// been spent.
+		SpendingTx *wire.MsgTx
+		// SpendingTxIndex is the input index of the transaction above which
+		// spends the target output.
+		//
+		// NOTE: This field will only be populated if the target output has
+		// been spent.
+		SpendingInputIndex uint32
+		// SpendingTxHeight is the hight of the block that included the
+		// transaction  above which spent the target output.
+		//
+		// NOTE: This field will only be populated if the target output has
+		// been spent.
+		SpendingTxHeight uint32
+		// Output is the raw output of the target outpoint.
+		//
+		// NOTE: This field will only be populated if the target is still
+		// unspent.
+		Output *wire.TxOut
+	}
 
-// GetUtxo gets the appropriate TxOut or errors if it's spent. The option
+func // GetUtxo gets the appropriate TxOut or errors if it's spent. The option
 // WatchOutPoints (with a single outpoint) is required. StartBlock can be used
 // to give a hint about which block the transaction is in, and TxIdx can be
 // used to give a hint of which transaction in the block matches it (coinbase
 // is 0, first normal transaction is 1, etc.).
 //
 // TODO(roasbeef): WTB utxo-commitments
-func (s *ChainService) GetUtxo(options ...RescanOption) (*SpendReport, error) {
+(s *ChainService) GetUtxo(options ...RescanOption) (*SpendReport, error) {
 	// Before we start we'll fetch the set of default options, and apply
 	// any user specified options in a functional manner.
 	ro := defaultRescanOptions()
@@ -1122,21 +1130,23 @@ func (s *ChainService) GetUtxo(options ...RescanOption) (*SpendReport, error) {
 	// is signaled.
 	report, err := req.Result(ro.quit)
 	if err != nil {
-		log <- cl.Debugf{
+		DEBUGF(
 			"error finding spends for %s: %v %s",
 			ro.watchInputs[0].OutPoint.String(),
-			err, cl.Ine()}
+			err,
+		)
 		return nil, err
 	}
 	return report, nil
 }
 
-// getReorgTip gets a block header from the chain service's cache. This is only
+func // getReorgTip gets a block header from the chain service's cache.
+// This is only
 // required until the block subscription API is factored out into its own
 // package.
 //
 // TODO(aakselrod): Get rid of this as described above.
-func (s *ChainService) getReorgTip(hash chainhash.Hash) *wire.BlockHeader {
+(s *ChainService) getReorgTip(hash chainhash.Hash) *wire.BlockHeader {
 	s.mtxReorgHeader.RLock()
 	defer s.mtxReorgHeader.RUnlock()
 	return s.reorgedBlockHeaders[hash]

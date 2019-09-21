@@ -5,7 +5,7 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
 	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
@@ -33,16 +33,16 @@ type DuoVUEcore struct {
 }
 type DuoVUEnode struct {
 	rpc              *rpc.Server
-	IsCurrent        bool                             `json:"iscurrent"`
-	NetworkLastBlock int32                            `json:"networklastblock"`
-	PeerInfo         []*json.GetPeerInfoResult        `json:"peerinfo"`
-	Tx               json.GetTransactionResult        `json:"tx"`
-	TxDetail         json.GetTransactionDetailsResult `json:"txdetail"`
-	BlockChainInfo   *json.GetBlockChainInfoResult    `json:"blockchaininfo"`
-	BlockCount       int32                            `json:"blockcount"`
-	BlockHash        string                           `json:"blockhash"`
-	Block            json.GetBlockVerboseResult       `json:"block"`
-	ConnectionCount  int32                            `json:"connectioncount"`
+	IsCurrent        bool                                `json:"iscurrent"`
+	NetworkLastBlock int32                               `json:"networklastblock"`
+	PeerInfo         []*btcjson.GetPeerInfoResult        `json:"peerinfo"`
+	Tx               btcjson.GetTransactionResult        `json:"tx"`
+	TxDetail         btcjson.GetTransactionDetailsResult `json:"txdetail"`
+	BlockChainInfo   *btcjson.GetBlockChainInfoResult    `json:"blockchaininfo"`
+	BlockCount       int32                               `json:"blockcount"`
+	BlockHash        string                              `json:"blockhash"`
+	Block            btcjson.GetBlockVerboseResult       `json:"block"`
+	ConnectionCount  int32                               `json:"connectioncount"`
 }
 
 type DuoVUEbalance struct {
@@ -51,8 +51,8 @@ type DuoVUEbalance struct {
 }
 
 type DuoVUEtransactions struct {
-	Txs       []json.ListTransactionsResult `json:"txs"`
-	TxsNumber int                           `json:"txsnumber"`
+	Txs       []btcjson.ListTransactionsResult `json:"txs"`
+	TxsNumber int                              `json:"txsnumber"`
 }
 
 type DuoVUEAddressBook struct {
@@ -80,20 +80,20 @@ type DuoVUEchain struct {
 type DuoVUEstatus struct {
 	dv *DuoVUE
 	//BCI           interface{}                   `json:"bci"`
-	Version       string                        `json:"ver"`
-	WalletVersion map[string]json.VersionResult `json:"walletver"`
-	UpTime        int64                         `json:"uptime"`
-	Cpu           []cpu.InfoStat                `json:"cpu"`
-	CpuPercent    []float64                     `json:"cpupercent"`
-	Memory        mem.VirtualMemoryStat         `json:"mem"`
-	Disk          disk.UsageStat                `json:"disk"`
-	CurrentNet    string                        `json:"net"`
-	Chain         string                        `json:"chain"`
-	HashesPerSec  int64                         `json:"hashrate"`
-	Height        int32                         `json:"height"`
-	BestBlockHash string                        `json:"bestblockhash"`
-	NetworkHashPS int64                         `json:"networkhashrate"`
-	Peers         []*json.GetPeerInfoResult     `json:"peers"`
+	Version       string                           `json:"ver"`
+	WalletVersion map[string]btcjson.VersionResult `json:"walletver"`
+	UpTime        int64                            `json:"uptime"`
+	Cpu           []cpu.InfoStat                   `json:"cpu"`
+	CpuPercent    []float64                        `json:"cpupercent"`
+	Memory        mem.VirtualMemoryStat            `json:"mem"`
+	Disk          disk.UsageStat                   `json:"disk"`
+	CurrentNet    string                           `json:"net"`
+	Chain         string                           `json:"chain"`
+	HashesPerSec  int64                            `json:"hashrate"`
+	Height        int32                            `json:"height"`
+	BestBlockHash string                           `json:"bestblockhash"`
+	NetworkHashPS int64                            `json:"networkhashrate"`
+	Peers         []*btcjson.GetPeerInfoResult     `json:"peers"`
 	//MempoolInfo      string                        `json:"ver"`
 	Difficulty       float64       `json:"diff"`
 	Balance          DuoVUEbalance `json:"balance"`
@@ -118,7 +118,7 @@ func (d *DuoVUE) GetStatus() DuoVUEstatus {
 	params := d.cx.RPCServer.Cfg.ChainParams
 	chain := d.cx.RPCServer.Cfg.Chain
 	chainSnapshot := chain.BestSnapshot()
-	gnhpsCmd := json.NewGetNetworkHashPSCmd(nil, nil)
+	gnhpsCmd := btcjson.NewGetNetworkHashPSCmd(nil, nil)
 	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(d.cx.RPCServer, gnhpsCmd, nil)
 	if err != nil {
 	}
@@ -129,7 +129,7 @@ func (d *DuoVUE) GetStatus() DuoVUEstatus {
 	if err != nil {
 	}
 	d.Status.Version = "0.0.1"
-	d.Status.WalletVersion = v.(map[string]json.VersionResult)
+	d.Status.WalletVersion = v.(map[string]btcjson.VersionResult)
 	d.Status.UpTime = time.Now().Unix() - d.cx.RPCServer.Cfg.StartupTime
 	d.Status.CurrentNet = d.cx.RPCServer.Cfg.ChainParams.Net.String()
 	d.Status.NetworkHashPS = networkHashesPerSec

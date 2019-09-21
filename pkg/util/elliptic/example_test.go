@@ -26,7 +26,7 @@ func Example_decryptMessage() {
 		"a44166dc61ea1c419d47077b748a9c06b8d57af72deb2819d98a9d503efc59fc8307" +
 		"d14174f8b83354fac3ff56075162")
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	// Try decrypting the message.
 	plaintext, err := ec.Decrypt(privKey, ciphertext)

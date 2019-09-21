@@ -11,7 +11,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/pod"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/legacy/keystore"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/prompt"
@@ -35,7 +34,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 	netDir := NetworkDir(*cfg.AppDataDir, activenet)
 	// Create the wallet.
 	dbPath := filepath.Join(netDir, WalletDbName)
-	log <- cl.Info{"Creating the wallet...", cl.Ine()}
+	INFO("Creating the wallet...")
 	// Create the wallet database backed by bolt db.
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
@@ -47,7 +46,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 	if err != nil {
 		return err
 	}
-	log <- cl.Info{"The wallet has been created successfully.", cl.Ine()}
+	INFO("The wallet has been created successfully.")
 	return nil
 }
 
@@ -81,7 +80,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	reader := bufio.NewReader(os.Stdin)
 	privPass, err := prompt.PrivatePass(reader, legacyKeyStore)
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		DEBUG(err)
 		time.Sleep(time.Second * 3)
 		return err
 	}
@@ -98,10 +97,10 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 			defer func() {
 				err := legacyKeyStore.Lock()
 				if err != nil {
-					log <- cl.Debug{err, cl.Ine()}
+					DEBUG(err)
 				}
 			}()
-			log <- cl.Info{"Importing addresses from existing wallet...", cl.Ine()}
+			INFO("Importing addresses from existing wallet...")
 			lockChan := make(chan time.Time, 1)
 			defer func() {
 				lockChan <- time.Time{}
@@ -109,13 +108,13 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 			err := w.Unlock(privPass, lockChan)
 			if err != nil {
 				fmt.Printf("ERR: Failed to unlock new wallet "+
-					"during old wallet key import: %v %s", err, cl.Ine())
+					"during old wallet key import: %v %s", err)
 				return
 			}
 			err = convertLegacyKeystore(legacyKeyStore, w)
 			if err != nil {
 				fmt.Printf("ERR: Failed to import keys from old "+
-					"wallet format: %v %s", err, cl.Ine())
+					"wallet format: %v %s", err)
 				return
 			}
 			// Remove the legacy key store.
@@ -132,7 +131,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	pubPass, err := prompt.PublicPass(reader, privPass, []byte(""),
 		[]byte(*config.WalletPass))
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		DEBUG(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
@@ -141,19 +140,19 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	// value the user has entered which has already been validated.
 	seed, err := prompt.Seed(reader)
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		DEBUG(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
-	log <- cl.Debug{"Creating the wallet...", cl.Ine()}
+	DEBUG("Creating the wallet")
 	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now())
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		DEBUG(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
 	w.Manager.Close()
-	log <- cl.Debug{"The wallet has been created successfully.", cl.Ine()}
+	DEBUG("The wallet has been created successfully.")
 	return nil
 }
 

@@ -43,7 +43,7 @@ func (u AmountUnit) String() string {
 type Amount int64
 
 // round converts a floating point number, which may or may not be representable as an integer, to the Amount integer type by rounding to the nearest integer. This is performed by adding or subtracting 0.5 depending on the sign, and relying on integer truncation to round the value to the nearest Amount.
-func round(	f float64) Amount {
+func round(f float64) Amount {
 	if f < 0 {
 		return Amount(f - 0.5)
 	}
@@ -61,7 +61,7 @@ func NewAmount(f float64) (Amount, error) {
 	case math.IsInf(f, -1):
 		return 0, errors.New("invalid bitcoin amount")
 	}
-	return round(f * SatoshiPerBitcoin), nil
+	return round(f * float64(SatoshiPerBitcoin)), nil
 }
 
 // ToUnit converts a monetary amount counted in bitcoin base units to a floating point value representing an amount of bitcoin.

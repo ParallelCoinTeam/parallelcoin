@@ -22,7 +22,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/legacy"
 	rpcserver "github.com/parallelcointeam/parallelcoin/pkg/rpc/server"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
 
@@ -32,9 +31,9 @@ type listenFunc func(net string, laddr string) (net.Listener, error)
 // possibly also the key in PEM format to the paths specified by the config.  If
 // successful, the new keypair is returned.
 func generateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, error) {
-	log <- cl.Inf("generating TLS certificates...")
+	INFO("generating TLS certificates")
 	// Create directories for cert and key files if they do not yet exist.
-	log <- cl.Warn{"rpc tls ", *config.RPCCert, " ", *config.RPCKey, cl.Ine()}
+	WARN("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
 	certDir, _ := filepath.Split(*config.RPCCert)
 	keyDir, _ := filepath.Split(*config.RPCKey)
 	err := os.MkdirAll(certDir, 0700)
@@ -66,12 +65,12 @@ func generateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 		if err != nil {
 			rmErr := os.Remove(*config.RPCCert)
 			if rmErr != nil {
-				log <- cl.Warn{"cannot remove written certificates:", rmErr}
+				WARN("cannot remove written certificates:", rmErr)
 			}
 			return tls.Certificate{}, err
 		}
 	}
-	log <- cl.Inf("done generating TLS certificates")
+	INFO("done generating TLS certificates")
 	return keyPair, nil
 }
 
@@ -85,8 +84,8 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 		host, _, err := net.SplitHostPort(addr)
 		if err != nil {
 			// Shouldn't happen due to already being normalized.
-			log <- cl.Errorf{
-				"`%s` is not a normalized listener address", addr, cl.Ine()}
+			ERRORF(
+				"`%s` is not a normalized listener address", addr)
 			continue
 		}
 		// Empty host or host of * on plan9 is both IPv4 and IPv6.
@@ -107,7 +106,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 		ip := net.ParseIP(host)
 		switch {
 		case ip == nil:
-			log <- cl.Warnf{"`%s` is not a valid IP address", host}
+			WARNF("`%s` is not a valid IP address", host)
 		case ip.To4() == nil:
 			ipv6Addrs = append(ipv6Addrs, addr)
 		default:
@@ -118,9 +117,9 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range ipv4Addrs {
 		listener, err := listen("tcp4", addr)
 		if err != nil {
-			log <- cl.Warnf{
+			WARNF(
 				"Can't listen on %s: %v", addr, err,
-			}
+			)
 			continue
 		}
 		listeners = append(listeners, listener)
@@ -128,9 +127,9 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range ipv6Addrs {
 		listener, err := listen("tcp6", addr)
 		if err != nil {
-			log <- cl.Warnf{
+			WARNF(
 				"Can't listen on %s: %v", addr, err,
-			}
+			)
 			continue
 		}
 		listeners = append(listeners, listener)
@@ -168,7 +167,7 @@ func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 func startRPCServers(config *pod.Config, stateCfg *state.Config,
 	activeNet *netparams.Params, walletLoader *wallet.Loader) (*grpc.Server,
 	*legacy.Server, error) {
-	log <- cl.Trc("startRPCServers")
+	TRACE("startRPCServers")
 	var (
 		server       *grpc.Server
 		legacyServer *legacy.Server
@@ -177,8 +176,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config,
 		err          error
 	)
 	if !*config.TLS {
-		log <- cl.Info{
-			"server TLS is disabled - only legacy RPC may be used", cl.Ine()}
+		INFO("server TLS is disabled - only legacy RPC may be used")
 	} else {
 		keyPair, err = openRPCKeyPair(config)
 		if err != nil {
@@ -216,18 +214,15 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config,
 			for _, lis := range listeners {
 				listener := lis
 				go func() {
-					log <- cl.Info{"experimental RPC server listening on",
-						listener.Addr(), cl.Ine()}
+					INFO("experimental RPC server listening on", listener)
 					err = server.Serve(lis)
-					log <- cl.Trace{"finished serving experimental RPC:", err}
+					TRACE("finished serving experimental RPC:", err)
 				}()
 			}
 		}
 	}
 	if *config.Username == "" || *config.Password == "" {
-		log <- cl.Inf(
-			"legacy RPC server disabled (requires username and password)",
-		)
+		INFO("legacy RPC server disabled (requires username and password)")
 	} else if len(*config.WalletRPCListeners) != 0 {
 		listeners := makeListeners(*config.WalletRPCListeners, walletListen)
 		if len(listeners) == 0 {
@@ -264,11 +259,11 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config,
 func startWalletRPCServices(wallet *wallet.Wallet, server *grpc.Server,
 	legacyServer *legacy.Server) {
 	if server != nil {
-		log <- cl.Warn{"starting grpc experimental wallet rpc server", cl.Ine()}
+		WARN("starting grpc experimental wallet rpc server")
 		rpcserver.StartWalletService(server, wallet)
 	}
 	if legacyServer != nil {
-		log <- cl.Warn{"starting legacy wallet rpc server", cl.Ine()}
+		WARN("starting legacy wallet rpc server")
 		legacyServer.RegisterWallet(wallet)
 	}
 }

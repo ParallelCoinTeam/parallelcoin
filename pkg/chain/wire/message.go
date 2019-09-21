@@ -7,7 +7,6 @@ import (
 	"unicode/utf8"
 
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MessageHeaderSize is the number of bytes in a bitcoin message header. Bitcoin network (magic) 4 bytes + command 12 bytes + payload length 4 bytes + checksum 4 bytes.
@@ -168,7 +167,7 @@ func readMessageHeader(r io.Reader) (int, *messageHeader, error) {
 	var command [CommandSize]byte
 	err = readElements(hr, &hdr.magic, &command, &hdr.length, &hdr.checksum)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	// Strip trailing zeros from command string.
 	hdr.command = string(bytes.TrimRight(command[:], string(0)))
@@ -185,7 +184,7 @@ func discardInput(r io.Reader, n uint32) {
 		for i := uint32(0); i < numReads; i++ {
 			_, err := io.ReadFull(r, buf)
 			if err != nil {
-				fmt.Println(err, cl.Ine())
+				fmt.Println(err)
 			}
 		}
 	}
@@ -193,7 +192,7 @@ func discardInput(r io.Reader, n uint32) {
 		buf := make([]byte, bytesRemaining)
 		_, err := io.ReadFull(r, buf)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 	}
 }
@@ -257,7 +256,7 @@ func WriteMessageWithEncodingN(w io.Writer, msg Message, pver uint32,
 	hw := bytes.NewBuffer(make([]byte, 0, MessageHeaderSize))
 	err = writeElements(hw, hdr.magic, command, hdr.length, hdr.checksum)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	// Write header.
 	n, err := w.Write(hw.Bytes())

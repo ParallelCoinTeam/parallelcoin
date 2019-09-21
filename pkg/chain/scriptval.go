@@ -14,16 +14,18 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
-// txValidateItem holds a transaction along with which input to validate.
-type txValidateItem struct {
-	txInIndex int
-	txIn      *wire.TxIn
-	tx        *util.Tx
-	sigHashes *txscript.TxSigHashes
-}
+type // txValidateItem holds a transaction along with which input to validate.
+	txValidateItem struct {
+		txInIndex int
+		txIn      *wire.TxIn
+		tx        *util.Tx
+		sigHashes *txscript.TxSigHashes
+	}
 
-// txValidator provides a type which asynchronously validates transaction inputs.  It provides several channels for communication and a processing function that is intended to be in run multiple goroutines.
-type txValidator struct {
+type // txValidator provides a type which asynchronously validates transaction
+// inputs.  It provides several channels for communication and a processing
+// function that is intended to be in run multiple goroutines.
+txValidator struct {
 	validateChan chan *txValidateItem
 	quitChan     chan struct{}
 	resultChan   chan error
@@ -33,16 +35,21 @@ type txValidator struct {
 	hashCache    *txscript.HashCache
 }
 
-// sendResult sends the result of a script pair validation on the internal result channel while respecting the quit channel.  This allows orderly shutdown when the validation process is aborted early due to a validation error in one of the other goroutines.
-func (v *txValidator) sendResult(result error) {
+func // sendResult sends the result of a script pair validation on the internal
+// result channel while respecting the quit channel.
+// This allows orderly shutdown when the validation process is aborted early
+// due to a validation error in one of the other goroutines.
+(v *txValidator) sendResult(result error) {
 	select {
 	case v.resultChan <- result:
 	case <-v.quitChan:
 	}
 }
 
-// validateHandler consumes items to validate from the internal validate channel and returns the result of the validation on the internal result channel. It must be run as a goroutine.
-func (v *txValidator) validateHandler() {
+func // validateHandler consumes items to validate from the internal validate
+// channel and returns the result of the validation on the internal result
+// channel. It must be run as a goroutine.
+(v *txValidator) validateHandler() {
 out:
 	for {
 		select {
@@ -101,12 +108,16 @@ out:
 	}
 }
 
-// Validate validates the scripts for all of the passed transaction inputs using multiple goroutines.
-func (v *txValidator) Validate(items []*txValidateItem) error {
+func // Validate validates the scripts for all of the passed transaction inputs
+// using multiple goroutines.
+(v *txValidator) Validate(items []*txValidateItem) error {
 	if len(items) == 0 {
 		return nil
 	}
-	// Limit the number of goroutines to do script validation based on the number of processor cores.  This helps ensure the system stays reasonably responsive under heavy load.
+	// Limit the number of goroutines to do script validation based on the
+	// number of processor cores.
+	// This helps ensure the system stays reasonably responsive under heavy
+	// load.
 	maxGoRoutines := runtime.NumCPU() * 3
 	if maxGoRoutines <= 0 {
 		maxGoRoutines = 1
@@ -114,16 +125,20 @@ func (v *txValidator) Validate(items []*txValidateItem) error {
 	if maxGoRoutines > len(items) {
 		maxGoRoutines = len(items)
 	}
-	// Start up validation handlers that are used to asynchronously validate each transaction input.
+	// Start up validation handlers that are used to asynchronously validate
+	// each transaction input.
 	for i := 0; i < maxGoRoutines; i++ {
 		go v.validateHandler()
 	}
-	// Validate each of the inputs.  The quit channel is closed when any errors occur so all processing goroutines exit regardless of which input had the validation error.
+	// Validate each of the inputs.
+	// The quit channel is closed when any errors occur so all processing
+	// goroutines exit regardless of which input had the validation error.
 	numInputs := len(items)
 	currentItem := 0
 	processedItems := 0
 	for processedItems < numInputs {
-		// Only send items while there are still items that need to be processed.  The select statement will never select a nil channel.
+		// Only send items while there are still items that need to be
+		// processed.  The select statement will never select a nil channel.
 		var validateChan chan *txValidateItem
 		var item *txValidateItem
 		if currentItem < numInputs {
@@ -145,8 +160,9 @@ func (v *txValidator) Validate(items []*txValidateItem) error {
 	return nil
 }
 
-// newTxValidator returns a new instance of txValidator to be used for validating transaction scripts asynchronously.
-func newTxValidator(utxoView *UtxoViewpoint, flags txscript.ScriptFlags,
+func // newTxValidator returns a new instance of txValidator to be used for
+// validating transaction scripts asynchronously.
+newTxValidator(utxoView *UtxoViewpoint, flags txscript.ScriptFlags,
 	sigCache *txscript.SigCache, hashCache *txscript.HashCache) *txValidator {
 	return &txValidator{
 		validateChan: make(chan *txValidateItem),
@@ -159,25 +175,33 @@ func newTxValidator(utxoView *UtxoViewpoint, flags txscript.ScriptFlags,
 	}
 }
 
-// ValidateTransactionScripts validates the scripts for the passed transaction using multiple goroutines.
-func ValidateTransactionScripts(b *BlockChain, tx *util.Tx, utxoView *UtxoViewpoint, flags txscript.ScriptFlags, sigCache *txscript.SigCache,
+func // ValidateTransactionScripts validates the scripts for the passed
+// transaction using multiple goroutines.
+ValidateTransactionScripts(b *BlockChain, tx *util.Tx, utxoView *UtxoViewpoint, flags txscript.ScriptFlags, sigCache *txscript.SigCache,
 	hashCache *txscript.HashCache) error {
-	// First determine if segwit is active according to the scriptFlags. If it isn't then we don't need to interact with the HashCache.
+	// First determine if segwit is active according to the scriptFlags.
+	// If it isn't then we don't need to interact with the HashCache.
 	segwitActive := flags&txscript.ScriptVerifyWitness == txscript.ScriptVerifyWitness
-	// If the hashcache doesn't yet has the sighash midstate for this transaction, then we'll compute them now so we can re-use them amongst all worker validation goroutines.
+	// If the hashcache doesn't yet has the sighash midstate for this
+	// transaction, then we'll compute them now so we can re-use them amongst
+	// all worker validation goroutines.
 	if segwitActive && tx.MsgTx().HasWitness() &&
 		!hashCache.ContainsHashes(tx.Hash()) {
 		hashCache.AddSigHashes(tx.MsgTx())
 	}
 	var cachedHashes *txscript.TxSigHashes
 	if segwitActive && tx.MsgTx().HasWitness() {
-		// The same pointer to the transaction's sighash midstate will be re-used amongst all validation goroutines. By pre-computing the sighash here instead of during validation, we ensure the sighashes are only computed once.
+		// The same pointer to the transaction's sighash midstate will be re
+		// -used amongst all validation goroutines.
+		// By pre-computing the sighash here instead of during validation,
+		// we ensure the sighashes are only computed once.
 		cachedHashes, _ = hashCache.GetSigHashes(tx.Hash())
 	}
 	if ContainsBlacklisted(b, tx, hardfork.Blacklist) {
 		return ruleError(ErrBlacklisted, "transaction contains blacklisted address "+cl.Ine())
 	}
-	// Collect all of the transaction inputs and required information for validation.
+	// Collect all of the transaction inputs and required information for
+	// validation.
 	txIns := tx.MsgTx().TxIn
 	txValItems := make([]*txValidateItem, 0, len(txIns))
 	for txInIdx, txIn := range txIns {
@@ -198,13 +222,16 @@ func ValidateTransactionScripts(b *BlockChain, tx *util.Tx, utxoView *UtxoViewpo
 	return validator.Validate(txValItems)
 }
 
-// checkBlockScripts executes and validates the scripts for all transactions in the passed block using multiple goroutines.
-func checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
+func // checkBlockScripts executes and validates the scripts for all
+// transactions in the passed block using multiple goroutines.
+checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 	scriptFlags txscript.ScriptFlags, sigCache *txscript.SigCache,
 	hashCache *txscript.HashCache) error {
-	// First determine if segwit is active according to the scriptFlags. If it isn't then we don't need to interact with the HashCache.
+	// First determine if segwit is active according to the scriptFlags.
+	// If it isn't then we don't need to interact with the HashCache.
 	segwitActive := scriptFlags&txscript.ScriptVerifyWitness == txscript.ScriptVerifyWitness
-	// Collect all of the transaction inputs and required information for validation for all transactions in the block into a single slice.
+	// Collect all of the transaction inputs and required information for
+	// validation for all transactions in the block into a single slice.
 	numInputs := 0
 	for _, tx := range block.Transactions() {
 		numInputs += len(tx.MsgTx().TxIn)
@@ -212,7 +239,11 @@ func checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 	txValItems := make([]*txValidateItem, 0, numInputs)
 	for _, tx := range block.Transactions() {
 		hash := tx.Hash()
-		// If the HashCache is present, and it doesn't yet contain the partial sighashes for this transaction, then we add the sighashes for the transaction. This allows us to take advantage of the potential speed savings due to the new digest algorithm (BIP0143).
+		// If the HashCache is present,
+		// and it doesn't yet contain the partial sighashes for this
+		// transaction, then we add the sighashes for the transaction.
+		// This allows us to take advantage of the potential speed savings
+		// due to the new digest algorithm (BIP0143).
 		if segwitActive && tx.HasWitness() && hashCache != nil &&
 			!hashCache.ContainsHashes(hash) {
 			hashCache.AddSigHashes(tx.MsgTx())
@@ -246,10 +277,12 @@ func checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 		return err
 	}
 	elapsed := time.Since(start)
-	log <- cl.Tracec(func() string {
+	TRACEC(func() string {
 		return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
 	})
-	// If the HashCache is present, once we have validated the block, we no longer need the cached hashes for these transactions, so we purge them from the cache.
+	// If the HashCache is present, once we have validated the block,
+	// we no longer need the cached hashes for these transactions,
+	// so we purge them from the cache.
 	if segwitActive && hashCache != nil {
 		for _, tx := range block.Transactions() {
 			if tx.MsgTx().HasWitness() {

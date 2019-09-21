@@ -30,7 +30,6 @@ import (
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	pb "github.com/parallelcointeam/parallelcoin/pkg/rpc/walletrpc"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	cfgutil "github.com/parallelcointeam/parallelcoin/pkg/util/config"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/zero"
@@ -130,9 +129,9 @@ func (*versionServer) Version(ctx context.Context, req *pb.VersionRequest) (*pb.
 // registers it with the gRPC server.
 func StartWalletService(server *grpc.Server, wallet *wallet.Wallet) {
 	service := &walletServer{wallet}
-	fmt.Println("registering wallet service grpc", cl.Ine())
+	fmt.Println("registering wallet service grpc")
 	pb.RegisterWalletServiceServer(server, service)
-	fmt.Println("registered wallet service grpc", cl.Ine())
+	fmt.Println("registered wallet service grpc")
 }
 func (s *walletServer) Ping(ctx context.Context, req *pb.PingRequest) (*pb.PingResponse, error) {
 	return &pb.PingResponse{}, nil
@@ -276,7 +275,7 @@ func (s *walletServer) Balance(ctx context.Context, req *pb.BalanceRequest) (
 // confirms returns the number of confirmations for a transaction in a block at
 // height txHeight (or -1 for an unconfirmed tx) given the chain height
 // curHeight.
-//nolint
+// nolint
 func confirms(txHeight, curHeight int32) int32 {
 	switch {
 	case txHeight == -1, txHeight > curHeight:
@@ -650,7 +649,7 @@ func (s *loaderServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 	}
 	s.mu.Lock()
 	if s.rpcClient != nil {
-		log <- cl.Debug{"starting SynchroniseRPC", cl.Ine()}
+		DEBUG("starting SynchroniseRPC")
 		wallet.SynchronizeRPC(s.rpcClient)
 	}
 	s.mu.Unlock()
@@ -669,7 +668,7 @@ func (s *loaderServer) OpenWallet(ctx context.Context, req *pb.OpenWalletRequest
 	}
 	s.mu.Lock()
 	if s.rpcClient != nil {
-		log <- cl.Debug{"starting SynchroniseRPC", cl.Ine()}
+		DEBUG("starting SynchroniseRPC")
 		wallet.SynchronizeRPC(s.rpcClient)
 	}
 	s.mu.Unlock()
@@ -730,7 +729,7 @@ func (s *loaderServer) StartConsensusRPC(ctx context.Context, req *pb.StartConse
 	}
 	s.rpcClient = rpcClient
 	if walletLoaded {
-		log <- cl.Debug{"starting SynchroniseRPC", cl.Ine()}
+		DEBUG("starting SynchroniseRPC")
 		wallet.SynchronizeRPC(rpcClient)
 	}
 	return &pb.StartConsensusRPCResponse{}, nil

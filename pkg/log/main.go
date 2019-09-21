@@ -198,7 +198,7 @@ func Println(level string, fh *os.File) func(a ...interface{}) {
 		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
 		codeLoc := fmt.Sprint(files[1], ":", rightJustify(line))
 		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
-			Millisecond * time.Millisecond)
+			Second * time.Second)
 		text := since + " " + level + " "
 		indent := strings.Repeat(" ", len(text))
 		text += trimReturn(fmt.Sprintln(a...))
@@ -209,19 +209,22 @@ func Println(level string, fh *os.File) func(a ...interface{}) {
 		cod := false
 		for i := range split {
 			if i > 0 {
-				if len(out)+len(split[i])+1+len(codeLoc) > 79 {
-					cod=true
+				if len(out)+len(split[i])+1+len(codeLoc) > 80 && !cod {
+					cod = true
 					final += out + strings.Repeat(".",
-						79-len(out)-len(codeLoc)) + " " +
+						80-len(out)-len(codeLoc)) + " " +
 						codeLoc + "\n"
-					out = indent
+					out = indent + split[i] + " "
+				} else if len(out)+len(split[i]) > 80 {
+					out = indent + split[i] + " "
+				} else {
+					out += split[i] + " "
 				}
-				out += split[i] + " "
 			}
 		}
 		final += out
 		if !cod {
-			rem := 80 - len(out) - len(codeLoc) - 1
+			rem := 80 - len(out) - len(codeLoc)
 			if rem < 1 {
 				final += "\n" + strings.Repeat(" ", 80-len(codeLoc)) + codeLoc
 			} else {
@@ -248,7 +251,7 @@ func Printf(level string, fh *os.File) func(format string, a ...interface{}) {
 		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
 		codeLoc := fmt.Sprint(files[1], ":", rightJustify(line))
 		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
-			Millisecond * time.Millisecond)
+			Second * time.Second)
 		text := since + " " + level + " "
 		indent := strings.Repeat(" ", len(text))
 		text += trimReturn(fmt.Sprintln(a...))
@@ -259,19 +262,22 @@ func Printf(level string, fh *os.File) func(format string, a ...interface{}) {
 		cod := false
 		for i := range split {
 			if i > 0 {
-				if len(out)+len(split[i])+1+len(codeLoc) > 79 {
-					cod=true
+				if len(out)+len(split[i])+1+len(codeLoc) > 80 && !cod {
+					cod = true
 					final += out + strings.Repeat(".",
-						79-len(out)-len(codeLoc)) + " " +
+						80-len(out)-len(codeLoc)) + " " +
 						codeLoc + "\n"
-					out = indent
+					out = indent + split[i] + " "
+				} else if len(out)+len(split[i]) > 80 {
+					out = indent + split[i] + " "
+				} else {
+					out += split[i] + " "
 				}
-				out += split[i] + " "
 			}
 		}
 		final += out
 		if !cod {
-			rem := 80 - len(out) - len(codeLoc) - 1
+			rem := 80 - len(out) - len(codeLoc)
 			if rem < 1 {
 				final += "\n" + strings.Repeat(" ", 80-len(codeLoc)) + codeLoc
 			} else {
@@ -299,7 +305,7 @@ func Printc(level string, fh *os.File) func(fn func() string) {
 		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
 		codeLoc := fmt.Sprint(files[1], ":", rightJustify(line))
 		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
-			Millisecond * time.Millisecond)
+			Second * time.Second)
 		t := since + " " + level + " "
 		indent := strings.Repeat(" ", len(t))
 		t += trimReturn(text)
@@ -310,19 +316,22 @@ func Printc(level string, fh *os.File) func(fn func() string) {
 		cod := false
 		for i := range split {
 			if i > 0 {
-				if len(out)+len(split[i])+1+len(codeLoc) > 79 {
-					cod=true
+				if len(out)+len(split[i])+1+len(codeLoc) > 80 && !cod {
+					cod = true
 					final += out + strings.Repeat(".",
-						79-len(out)-len(codeLoc)) + " " +
+						80-len(out)-len(codeLoc)) + " " +
 						codeLoc + "\n"
-					out = indent
+					out = indent + split[i] + " "
+				} else if len(out)+len(split[i]) > 80 {
+					out = indent + split[i] + " "
+				} else {
+					out += split[i] + " "
 				}
-				out += split[i] + " "
 			}
 		}
 		final += out
 		if !cod {
-			rem := 80 - len(out) - len(codeLoc) - 1
+			rem := 80 - len(out) - len(codeLoc)
 			if rem < 1 {
 				final += "\n" + strings.Repeat(" ", 80-len(codeLoc)) + codeLoc
 			} else {
@@ -345,4 +354,21 @@ func Printc(level string, fh *os.File) func(fn func() string) {
 func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return err == nil
+}
+
+// DirectionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
+func DirectionString(inbound bool) string {
+	if inbound {
+		return "inbound"
+	}
+	return "outbound"
+}
+
+// PickNoun returns the singular or plural form of a noun depending
+// on the count n.
+func PickNoun(n int, singular, plural string) string {
+	if n == 1 {
+		return singular
+	}
+	return plural
 }
