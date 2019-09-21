@@ -1,13 +1,14 @@
 package app
 
 import (
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/pkgs"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
-// Log is the logger for node
 type _dtype int
 
 var _d _dtype
-var Log = cl.NewSubSystem(pkgs.Name(_d), "info")
-var log = Log.Ch
+var L = log.NewLogger("info")
+
+func UseLogger(logger *log.Logger) {
+	L = logger
+}

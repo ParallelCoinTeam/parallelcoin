@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var StartupTime = time.Now()
+
 type PrintlnFunc func(a ...interface{})
 type PrintfFunc func(format string, a ...interface{})
 type Closure func(func() string)
@@ -24,7 +26,13 @@ const (
 	Trace = "trace"
 )
 
+var Levels = []string{
+	Off, Fatal, Error, Warn, Info, Debug, Trace,
+}
+
+// Logger is a struct containing all the functions with nice handy names
 type Logger struct {
+	Name          string
 	Fatal         PrintlnFunc
 	Error         PrintlnFunc
 	Warn          PrintlnFunc
@@ -46,6 +54,7 @@ type Logger struct {
 	LogFileHandle *os.File
 }
 
+// Entry is a log entry to be printed as json to the log file
 type Entry struct {
 	Time         time.Time
 	Level        string
@@ -114,52 +123,49 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 			return
 		}
 	}
-	logFileHandle, err = os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
+	logFileHandle, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		fmt.Println("error opening log file", logFileName)
 	}
-	l = Empty()
-	l.SetLevel(level)
 	l.LogFileHandle = logFileHandle
 	_, _ = fmt.Fprintln(logFileHandle, "{")
-
-	return
 }
 
+// SetLevel enables or disables the various print functions
 func (l *Logger) SetLevel(level string) {
 	*l = *Empty()
 	var fallen bool
 	switch {
 	case level == Fatal:
-		l.Fatal = Println(level, l.LogFileHandle)
-		l.Fatalf = Printf(level, l.LogFileHandle)
-		l.Fatalc = Printc(level, l.LogFileHandle)
+		l.Fatal = Println("F", l.LogFileHandle)
+		l.Fatalf = Printf("F", l.LogFileHandle)
+		l.Fatalc = Printc("F", l.LogFileHandle)
 		fallen = true
 		fallthrough
-	case level == Error && fallen:
-		l.Error = Println(level, l.LogFileHandle)
-		l.Errorf = Printf(level, l.LogFileHandle)
-		l.Errorc = Printc(level, l.LogFileHandle)
+	case level == Error || fallen:
+		l.Error = Println("E", l.LogFileHandle)
+		l.Errorf = Printf("E", l.LogFileHandle)
+		l.Errorc = Printc("E", l.LogFileHandle)
 		fallthrough
-	case level == Warn && fallen:
-		l.Warn = Println(level, l.LogFileHandle)
-		l.Warnf = Printf(level, l.LogFileHandle)
-		l.Warnc = Printc(level, l.LogFileHandle)
+	case level == Warn || fallen:
+		l.Warn = Println("W", l.LogFileHandle)
+		l.Warnf = Printf("W", l.LogFileHandle)
+		l.Warnc = Printc("W", l.LogFileHandle)
 		fallthrough
-	case level == Info && fallen:
-		l.Info = Println(level, l.LogFileHandle)
-		l.Infof = Printf(level, l.LogFileHandle)
-		l.Infoc = Printc(level, l.LogFileHandle)
+	case level == Info || fallen:
+		l.Info = Println("I", l.LogFileHandle)
+		l.Infof = Printf("I", l.LogFileHandle)
+		l.Infoc = Printc("I", l.LogFileHandle)
 		fallthrough
-	case level == Debug && fallen:
-		l.Debug = Println(level, l.LogFileHandle)
-		l.Debugf = Printf(level, l.LogFileHandle)
-		l.Debugc = Printc(level, l.LogFileHandle)
+	case level == Debug || fallen:
+		l.Debug = Println("D", l.LogFileHandle)
+		l.Debugf = Printf("D", l.LogFileHandle)
+		l.Debugc = Printc("D", l.LogFileHandle)
 		fallthrough
-	case level == Trace && fallen:
-		l.Trace = Println(level, l.LogFileHandle)
-		l.Tracef = Printf(level, l.LogFileHandle)
-		l.Tracec = Printc(level, l.LogFileHandle)
+	case level == Trace || fallen:
+		l.Trace = Println("T", l.LogFileHandle)
+		l.Tracef = Printf("T", l.LogFileHandle)
+		l.Tracec = Printc("T", l.LogFileHandle)
 	}
 }
 
@@ -167,56 +173,170 @@ func NoPrintln(_ ...interface{})          {}
 func NoPrintf(_ string, _ ...interface{}) {}
 func NoClosure(_ func() string)           {}
 
+func trimReturn(s string) string {
+	return s[:len(s)-1]
+}
+
+func rightJustify(n int) string {
+	s := fmt.Sprint(n)
+	switch len(s) {
+	case 1:
+		s += "   "
+	case 2:
+		s += "  "
+	case 3:
+		s += " "
+	}
+	return s
+}
+
+// Println prints a log entry like Println
 func Println(level string, fh *os.File) func(a ...interface{}) {
+	// level = strings.ToUpper(string(level[0]))
 	return func(a ...interface{}) {
 		_, loc, line, _ := runtime.Caller(1)
-		files := strings.Split(codeLoc, "github.com/parallelcointeam/parallelcoin/")
-		codeLoc := fmt.Sprint(files[1], ":", line)
-		text := fmt.Sprintln(a...)
-		fmt.Println(text, codeLoc)
+		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
+		codeLoc := fmt.Sprint(files[1], ":", rightJustify(line))
+		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
+			Millisecond * time.Millisecond)
+		text := since + " " + level + " "
+		indent := strings.Repeat(" ", len(text))
+		text += trimReturn(fmt.Sprintln(a...))
+		// wordwrap :p
+		split := strings.Split(text, " ")
+		out := split[0] + " "
+		var final string
+		cod := false
+		for i := range split {
+			if i > 0 {
+				if len(out)+len(split[i])+1+len(codeLoc) > 79 {
+					cod=true
+					final += out + strings.Repeat(".",
+						79-len(out)-len(codeLoc)) + " " +
+						codeLoc + "\n"
+					out = indent
+				}
+				out += split[i] + " "
+			}
+		}
+		final += out
+		if !cod {
+			rem := 80 - len(out) - len(codeLoc) - 1
+			if rem < 1 {
+				final += "\n" + strings.Repeat(" ", 80-len(codeLoc)) + codeLoc
+			} else {
+				final += strings.Repeat(".", rem) + " " + codeLoc
+			}
+		}
+		fmt.Println(final)
 		if fh != nil {
 			out := Entry{time.Now(), level, loc, text}
 			j, err := json.Marshal(out)
 			if err != nil {
 				fmt.Println("logging error:", err)
 			}
-			_, _ = fmt.Fprintln(fh, string(j))
+			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
 	}
 }
 
+// Printf prints a log entry with formatting
 func Printf(level string, fh *os.File) func(format string, a ...interface{}) {
+	// level = strings.ToUpper(string(level[0]))
 	return func(format string, a ...interface{}) {
 		_, loc, line, _ := runtime.Caller(1)
 		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
-		codeLoc := fmt.Sprint(files[1], ":", line)
-		text := fmt.Sprintf(format, a...)
-		fmt.Printf("%s %s", text, codeLoc)
+		codeLoc := fmt.Sprint(files[1], ":", rightJustify(line))
+		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
+			Millisecond * time.Millisecond)
+		text := since + " " + level + " "
+		indent := strings.Repeat(" ", len(text))
+		text += trimReturn(fmt.Sprintln(a...))
+		// wordwrap :p
+		split := strings.Split(text, " ")
+		out := split[0] + " "
+		var final string
+		cod := false
+		for i := range split {
+			if i > 0 {
+				if len(out)+len(split[i])+1+len(codeLoc) > 79 {
+					cod=true
+					final += out + strings.Repeat(".",
+						79-len(out)-len(codeLoc)) + " " +
+						codeLoc + "\n"
+					out = indent
+				}
+				out += split[i] + " "
+			}
+		}
+		final += out
+		if !cod {
+			rem := 80 - len(out) - len(codeLoc) - 1
+			if rem < 1 {
+				final += "\n" + strings.Repeat(" ", 80-len(codeLoc)) + codeLoc
+			} else {
+				final += strings.Repeat(".", rem) + " " + codeLoc
+			}
+		}
+		fmt.Println(final)
 		if fh != nil {
 			out := Entry{time.Now(), level, loc, text}
 			j, err := json.Marshal(out)
 			if err != nil {
 				fmt.Println("logging error:", err)
 			}
-			_, _ = fmt.Fprintln(fh, j)
+			_, _ = fmt.Fprintln(fh, string(j)+",")
 		}
 	}
 }
 
+// Printc prints from a closure returning a string
 func Printc(level string, fh *os.File) func(fn func() string) {
+	// level = strings.ToUpper(string(level[0]))
 	return func(fn func() string) {
 		text := fn()
 		_, loc, line, _ := runtime.Caller(1)
 		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
-		codeLoc := fmt.Sprint(files[1], ":", line)
-		fmt.Printf("%s %s", text, codeLoc)
+		codeLoc := fmt.Sprint(files[1], ":", rightJustify(line))
+		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
+			Millisecond * time.Millisecond)
+		t := since + " " + level + " "
+		indent := strings.Repeat(" ", len(t))
+		t += trimReturn(text)
+		// wordwrap :p
+		split := strings.Split(text, " ")
+		out := split[0] + " "
+		var final string
+		cod := false
+		for i := range split {
+			if i > 0 {
+				if len(out)+len(split[i])+1+len(codeLoc) > 79 {
+					cod=true
+					final += out + strings.Repeat(".",
+						79-len(out)-len(codeLoc)) + " " +
+						codeLoc + "\n"
+					out = indent
+				}
+				out += split[i] + " "
+			}
+		}
+		final += out
+		if !cod {
+			rem := 80 - len(out) - len(codeLoc) - 1
+			if rem < 1 {
+				final += "\n" + strings.Repeat(" ", 80-len(codeLoc)) + codeLoc
+			} else {
+				final += strings.Repeat(".", rem) + " " + codeLoc
+			}
+		}
+		fmt.Println(final)
 		if fh != nil {
 			out := Entry{time.Now(), level, loc, text}
 			j, err := json.Marshal(out)
 			if err != nil {
 				fmt.Println("logging error:", err)
 			}
-			_, _ = fmt.Fprintln(fh, j)
+			_, _ = fmt.Fprintln(fh, string(j)+",")
 		}
 	}
 }
