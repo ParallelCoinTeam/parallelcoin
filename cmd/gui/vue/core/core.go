@@ -27,7 +27,7 @@ const duoSystem = {
 	alert:system.data.d.alert,
 	config:null,
 	status: system.data.d.status,
-	addressbook:null,
+	addressbook:system.data.d.addressbook,
 	transactions:null,
 	peers:null,
 	blocks:[],

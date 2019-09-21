@@ -19,7 +19,7 @@ func Components(d db.DuoVUEdb) (c []mod.DuoVUEcomp) {
 	//c = append(c, serv.Blocks())
 	//c = append(c, part.PartAddress())
 	//c = append(c, panel.Send())
-	//c = append(c, panel.AddressBook())
+	c = append(c, panel.AddressBook())
 	//c = append(c, panel.Blocks())
 	c = append(c, panel.Peers())
 	//c = append(c, panel.Settings())
