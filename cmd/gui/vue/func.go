@@ -2,21 +2,23 @@ package vue
 
 import (
 	"fmt"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
 	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
 func (d *DuoVUE) GetNetworkLastBlock() int32 {
 	for _, g := range d.cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
 		l := g.ToPeer().StatsSnapshot().LastBlock
-		if l > d.Status.NetworkLastBlock {
-			d.Status.NetworkLastBlock = l
+		if l > d.Data.Status.NetworkLastBlock {
+			d.Data.Status.NetworkLastBlock = l
 		}
 	}
-	return d.Status.NetworkLastBlock
+	return d.Data.Status.NetworkLastBlock
 }
 
 //func (n *DuoVUEnode) GetBlocks() {
@@ -115,8 +117,9 @@ func (d *DuoVUE) GetNetworkLastBlock() int32 {
 //
 //}
 
-func (d DuoVUE) GetBlockExcerpt(height int) (b DuoVUEblock) {
-	hashHeight, err := d.cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
+func (dv DuoVUE) GetBlockExcerpt(height int) (b mod.DuoVUEblock) {
+	b = *new(mod.DuoVUEblock)
+	hashHeight, err := dv.cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
 	if err != nil {
 	}
 	// Load the raw block bytes from the database.
@@ -124,7 +127,7 @@ func (d DuoVUE) GetBlockExcerpt(height int) (b DuoVUEblock) {
 	if err != nil {
 	}
 	var blkBytes []byte
-	err = d.cx.RPCServer.Cfg.DB.View(func(dbTx database.Tx) error {
+	err = dv.cx.RPCServer.Cfg.DB.View(func(dbTx database.Tx) error {
 		var err error
 		blkBytes, err = dbTx.FetchBlock(hash)
 		return err
@@ -137,11 +140,11 @@ func (d DuoVUE) GetBlockExcerpt(height int) (b DuoVUEblock) {
 	if err != nil {
 	}
 	// Get the block height from chain.
-	blockHeight, err := d.cx.RPCServer.Cfg.Chain.BlockHeightByHash(hash)
+	blockHeight, err := dv.cx.RPCServer.Cfg.Chain.BlockHeightByHash(hash)
 	if err != nil {
 	}
 	blk.SetHeight(blockHeight)
-	params := d.cx.RPCServer.Cfg.ChainParams
+	params := dv.cx.RPCServer.Cfg.ChainParams
 	blockHeader := &blk.MsgBlock().Header
 	algoname := fork.GetAlgoName(blockHeader.Version, blockHeight)
 	a := fork.GetAlgoVer(algoname, blockHeight)
@@ -197,10 +200,212 @@ func (d DuoVUE) GetBlockExcerpt(height int) (b DuoVUEblock) {
 	return
 }
 
-func (d *DuoVUE) GetBlocksExcerpts(startBlock, blockHeight int) (b *DuoVUEchain) {
+func (dv *DuoVUE) GetBlocksExcerpts(startBlock, blockHeight int) mod.DuoVUEblocks {
 	for i := startBlock; i <= blockHeight; i++ {
 
-		b.Blocks = append(b.Blocks, d.GetBlockExcerpt(i))
+		dv.Data.Blocks = append(dv.Data.Blocks, dv.GetBlockExcerpt(i))
 	}
-	return
+	return dv.Data.Blocks
+}
+
+
+
+
+
+// func (v *DuoVUEnode) Addnode(a *json.AddNodeCmd) {
+// 	r, err := v.cx.RPCServer.HandleAddNode(v.cx.RPCServer, a, nil)
+// 	return
+// }
+// func (v *DuoVUEnode) Createrawtransaction(a *json.CreateRawTransactionCmd) {
+// 	r, err := v.cx.RPCServer.HandleCreateRawTransaction(v.cx.RPCServer, a, nil)
+// 	r = ""
+// 	return
+// }
+// func (v *DuoVUEnode) Decoderawtransaction(a *json.DecodeRawTransactionCmd) {
+// 	r, err := v.cx.RPCServer.HandleDecodeRawTransaction(v.cx.RPCServer, a, nil)
+// 	r = json.TxRawDecodeResult{}
+// 	return
+// }
+// func (v *DuoVUEnode) Decodescript(a *json.DecodeScriptCmd) {
+// 	r, err := v.cx.RPCServer.HandleDecodeScript(v.cx.RPCServer, a, nil)
+// 	return
+// }
+// func (v *DuoVUEnode) Estimatefee(a *json.EstimateFeeCmd) {
+// 	r, err := v.cx.RPCServer.HandleEstimateFee(v.cx.RPCServer, a, nil)
+// 	r = 0.0
+// 	return
+// }
+// func (v *DuoVUEnode) Generate(a *json.GenerateCmd) {
+// 	r, err := v.cx.RPCServer.HandleGenerate(v.cx.RPCServer, a, nil)
+// 	r = []string{}
+// 	return
+// }
+// func (v *DuoVUEnode) Getaddednodeinfo(a *json.GetAddedNodeInfoCmd) {
+// 	r, err := v.cx.RPCServer.HandleGetAddedNodeInfo(v.cx.RPCServer, a, nil)
+// 	r = []string{}
+// 	return
+// }
+// func (v *DuoVUEnode) Getbestblock() {
+// 	r, err := v.cx.RPCServer.HandleGetBestBlock(v.cx.RPCServer, a, nil)
+// 	r = json.GetBestBlockResult{}
+// 	return
+// }
+// func (v *DuoVUEnode) Getbestblockhash() {
+// 	r, err := v.cx.RPCServer.HandleGetBestBlockHash(v.cx.RPCServer, a, nil)
+// 	r = ""
+// 	return
+// }
+// func (v *DuoVUEnode) Getblock(a *json.GetBlockCmd) {
+// 	r, err := v.cx.RPCServer.HandleGetBlock(v.cx.RPCServer, a, nil)
+// 	r = json.GetBlockVerboseResult{}
+// 	return
+// }
+//func (dv *DuoVUE) GetBlockChainInfo() {
+//	getBlockChainInfo, err := rpc.HandleGetBlockChainInfo(dv.cx.RPCServer, nil, nil)
+//	if err != nil {
+//		dv.PushDuoVUEalert(err.Error(), "error")
+//	}
+//	var ok bool
+//	dv.Core.Node.BlockChainInfo, ok = getBlockChainInfo.(*json.GetBlockChainInfoResult)
+//	if !ok {
+//		dv.Core.Node.BlockChainInfo = &json.GetBlockChainInfoResult{}
+//	}
+//
+//}
+
+func (dv *DuoVUE) GetBlockCount() int64 {
+	getBlockCount, err := rpc.HandleGetBlockCount(dv.cx.RPCServer, nil, nil)
+	if err != nil {
+		dv.PushDuoVUEalert(err.Error(), "error")
+	}
+	dv.Data.Status.BlockCount = getBlockCount.(int64)
+	return dv.Data.Status.BlockCount
+}
+func (dv *DuoVUE) GetBlockHash(blockHeight int) string{
+	hcmd := json.GetBlockHashCmd{
+		Index: int64(blockHeight),
+	}
+	hash, err := rpc.HandleGetBlockHash(dv.cx.RPCServer, &hcmd, nil)
+	if err != nil {
+		dv.PushDuoVUEalert(err.Error(), "error")
+	}
+	return hash.(string)
+}
+func (dv *DuoVUE) GetBlock(hash string) (json.GetBlockVerboseResult){
+	verbose, verbosetx := true, true
+	bcmd := json.GetBlockCmd{
+		Hash:      hash,
+		Verbose:   &verbose,
+		VerboseTx: &verbosetx,
+	}
+	bl, err := rpc.HandleGetBlock(dv.cx.RPCServer, &bcmd, nil)
+	if err != nil {
+		dv.PushDuoVUEalert(err.Error(), "error")
+	}
+	return bl.(json.GetBlockVerboseResult)
+}
+
+// func (v *DuoVUEnode) Getblockheader(a *json.GetBlockHeaderCmd) {
+// 	r, err := v.cx.RPCServer.HandleGetBlockHeader(v.cx.RPCServer, a, nil)
+// 	r = json.GetBlockHeaderVerboseResult{}
+// 	return
+// }
+
+func (dv *DuoVUE) GetConnectionCount() int32 {
+	dv.Data.Status.ConnectionCount = dv.cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+	return dv.Data.Status.ConnectionCount
+}
+
+func (dv *DuoVUE) GetDifficulty() float64 {
+	c := json.GetDifficultyCmd{}
+	r, err := rpc.HandleGetDifficulty(dv.cx.RPCServer, c, nil)
+	if err != nil {
+		dv.PushDuoVUEalert(err.Error(), "error")
+	}
+	dv.Data.Status.Difficulty = r.(float64)
+	return dv.Data.Status.Difficulty
+}
+
+// func (v *DuoVUEnode) Gethashespersec() {
+// 	r, err := v.cx.RPCServer.HandleGetHashesPerSec(v.cx.RPCServer, a, nil)
+// 	r = int64(0)
+// 	return
+// }
+// func (v *DuoVUEnode) Getheaders(a *json.GetHeadersCmd) {
+// 	r, err := v.cx.RPCServer.HandleGetHeaders(v.cx.RPCServer, a, nil)
+// 	r = []string{}
+// 	return
+// }
+// func (v *DuoVUEnode) Getinfo() {
+// 	r, err := v.cx.RPCServer.HandleGetInfo(v.cx.RPCServer, a, nil)
+// 	r = json.InfoChainResult{}
+// 	return
+// }
+// func (v *DuoVUEnode) Getmempoolinfo() {
+// 	r, err := v.cx.RPCServer.HandleGetMempoolInfo(v.cx.RPCServer, a, nil)
+// 	r = json.GetMempoolInfoResult{}
+// 	return
+// }
+// func (v *DuoVUEnode) Getmininginfo() {
+// 	r, err := v.cx.RPCServer.HandleGetMiningInfo(v.cx.RPCServer, a, nil)
+// 	r = json.GetMiningInfoResult{}
+// 	return
+// }
+// func (v *DuoVUEnode) Getnettotals() {
+// 	r, err := v.cx.RPCServer.HandleGetNetTotals(v.cx.RPCServer, a, nil)
+// 	r = json.GetNetTotalsResult{}
+// 	return
+// }
+// func (v *DuoVUEnode) Getnetworkhashps(a *json.GetNetworkHashPSCmd) {
+// 	r, err := v.cx.RPCServer.HandleGetNetworkHashPS(v.cx.RPCServer, a, nil)
+// 	r = int64(0)
+// 	return
+// }
+func (dV *DuoVUE) GetPeerInfo() []*json.GetPeerInfoResult {
+	dV.cr.AddFunc("@every 1s", func() {
+		dV.Web.Dispatch(func() {
+			getPeers, err := rpc.HandleGetPeerInfo(dV.cx.RPCServer, nil, nil)
+			if err != nil {
+				dV.PushDuoVUEalert(err.Error(), "error")
+			}
+			dV.Data.Peers = getPeers.([]*json.GetPeerInfoResult)
+			fmt.Println("ssssssssssssssssss", dV.Data.Peers)
+			dV.Render("peers", dV.Data.Peers)
+		})
+	})
+	return dV.Data.Peers
+}
+
+// func (v *DuoVUEnode) Stop() {
+// 	r, err := v.cx.RPCServer.HandleStop(v.cx.RPCServer, a, nil)
+// 	r = ""
+// 	return
+// }
+func (dv *DuoVUE) Uptime() (r int64) {
+	rRaw, err := rpc.HandleUptime(dv.cx.RPCServer, nil, nil)
+	if err != nil {
+	}
+	//rRaw = int64(0)
+	dv.Data.Status.UpTime = rRaw.(int64)
+	return dv.Data.Status.UpTime
+}
+
+// func (v *DuoVUEnode) Validateaddress(a *json.ValidateAddressCmd) {
+// 	r, err := v.cx.RPCServer.HandleValidateAddress(v.cx.RPCServer, a, nil)
+// 	r = json.ValidateAddressChainResult{}
+// 	return
+// }
+// func (v *DuoVUEnode) Verifychain(a *json.VerifyChainCmd) {
+// 	r, err := v.cx.RPCServer.HandleVerifyChain(v.cx.RPCServer, a, nil)
+// }
+// func (v *DuoVUEnode) Verifymessage(a *json.VerifyMessageCmd) {
+// 	r, err := v.cx.RPCServer.HandleVerifyMessage(v.cx.RPCServer, a, nil)
+// 	r = ""
+// 	return
+// }
+func (dv *DuoVUE) GetWalletVersion(d DuoVUE) map[string]json.VersionResult {
+	v, err := rpc.HandleVersion(dv.cx.RPCServer, nil, nil)
+	if err != nil {
+	}
+	return v.(map[string]json.VersionResult)
 }

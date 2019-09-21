@@ -2,7 +2,7 @@ package serv
 
 import "github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
 
-func SrvNode() mod.DuoVUEcomp {
+func Services() mod.DuoVUEcomp {
 	return mod.DuoVUEcomp{
 		IsApp:    true,
 		Name:     "Node Services",
@@ -18,16 +18,27 @@ func SrvNode() mod.DuoVUEcomp {
 		txCat:'default'
 	}},
 	created: function() {
-		this.getStatus();
-		this.duoSystem.timer = setInterval(this.getStatus, 1000);
-		external.invoke('addressBook');
 		this.goGetTransactions();
 	},
-	watch: {}, 
-	methods: { 
-		getStatus: function(){
-			external.invoke('status');	
+	watch: {
+		'this.duoSystem.alert.time': function(newVal, oldVal) {
+			setTimeout(() => {
+				this.$refs.defaultRef.show({
+					title: 'Adaptive Tiles Meeting', content: 'Conference Room 01 / Building 135 10:00 AM-10:30 AM',
+					icon: 'e-meeting'
+					});
+				},200);
+			}
 		},
+	mounted: function() {
+		setTimeout(() => {
+			this.$refs.defaultRef.show({
+				title: 'Adaptive Tiles Meeting', content: 'Conference Room 01 / Building 135 10:00 AM-10:30 AM',
+				icon: 'e-meeting'
+            	});
+			},200);
+	},
+ 	methods: { 
 		goGetTransactions: function(){
 			const txsCmd = {
 			from: this.txFrom,
@@ -43,5 +54,6 @@ func SrvNode() mod.DuoVUEcomp {
 		clearInterval(this.duoSystem.timer)
 	} 
 `,
+Template: `<div><ejs-toast ref='defaultRef' id='toast_default' :created="created" :position='position'></ejs-toast></div>`,
 	}
 }

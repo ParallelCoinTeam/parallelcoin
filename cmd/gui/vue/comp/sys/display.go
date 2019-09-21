@@ -57,6 +57,8 @@ func Display() mod.DuoVUEcomp {
 			}`,
 		Template: `
     <div id="container">
+    <div v-html></div>
+
         <div class="control-section flx fii flc">
     <div class="col-lg-12 col-sm-12 col-md-12 flx flc fii" id="sidebar-section">
       <div id="head">
