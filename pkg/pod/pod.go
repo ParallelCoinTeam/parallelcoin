@@ -84,6 +84,8 @@ func GetConfigSchema() Schema {
 		}
 		outGroups = append(outGroups, group)
 	}
+
+
 	return Schema{
 		Groups: outGroups,
 	}

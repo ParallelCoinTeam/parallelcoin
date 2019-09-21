@@ -29,6 +29,7 @@ type DuoVUE struct {
 }
 
 type DuoVUEdata struct {
+	Alert        DuoVUEalert               `json:"alert"`
 	Status       mod.DuoVUEstatus          `json:"status"`
 	Addressbook  mod.DuoVUEaddressBook     `json:"addressbook"`
 	Peers        []*json.GetPeerInfoResult `json:"peers"`

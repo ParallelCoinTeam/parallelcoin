@@ -3,24 +3,22 @@
 package vue
 
 import (
-	"fmt"
 	"time"
 )
 
 type DuoVUEalert struct {
 	Time      time.Time   `json:"time"`
-	Alert     interface{} `json:"alert"`
+	Title    string      `json:"title"`
+	Message   interface{} `json:"message"`
 	AlertType string      `json:"type"`
 }
 
-
 // GetMsg loads the message variable
-func (dv *DuoVUE) PushDuoVUEalert(m interface{}, t string) {
-			a := new(DuoVUEalert)
-			a.Time = time.Now()
-			a.Alert = m
-			a.AlertType = t
-			dv.Render("alert", a)
-			fmt.Println("dadafddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
-	fmt.Println("dadafggf da", a)
+func (dv *DuoVUE) PushDuoVUEalert(t string, m interface{}, at string) {
+	a := new(DuoVUEalert)
+	a.Time = time.Now()
+	a.Title = t
+	a.Message = m
+	a.AlertType = at
+	dv.Render("alert", a)
 }
