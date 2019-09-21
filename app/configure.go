@@ -28,7 +28,7 @@ import (
 
 // Configure loads and sanitises the configuration from urfave/cli
 func Configure(cx *conte.Xt) {
-	log <- cl.Trace{"configuring pod", cl.Ine()}
+	L.Trace("configuring pod")
 	var err error
 	*cx.Config.DataDir = util.AppDataDir("pod", false)
 	// theoretically, the configuration should be accessed only when locked
@@ -48,29 +48,29 @@ func Configure(cx *conte.Xt) {
 	}
 	switch network {
 	case "testnet", "testnet3", "t":
-		cx.Log <- cl.Trace{"on testnet", cl.Ine()}
+		L.Trace("on testnet")
 		*cfg.TestNet3 = true
 		*cfg.SimNet = false
 		*cfg.RegressionTest = false
 		cx.ActiveNet = &netparams.TestNet3Params
 		fork.IsTestnet = true
 	case "regtestnet", "regressiontest", "r":
-		cx.Log <- cl.Trace{"on regression testnet", cl.Ine()}
+		L.Trace("on regression testnet")
 		*cfg.TestNet3 = false
 		*cfg.SimNet = false
 		*cfg.RegressionTest = true
 		cx.ActiveNet = &netparams.RegressionTestParams
 	case "simnet", "s":
-		cx.Log <- cl.Trace{"on simnet", cl.Ine()}
+		L.Trace("on simnet")
 		*cfg.TestNet3 = false
 		*cfg.SimNet = true
 		*cfg.RegressionTest = false
 		cx.ActiveNet = &netparams.SimNetParams
 	default:
 		if network != "mainnet" && network != "m" {
-			cx.Log <- cl.Warn{"using mainnet for node", cl.Ine()}
+			L.Warn("using mainnet for node")
 		}
-		cx.Log <- cl.Trace{"on mainnet", cl.Ine()}
+		L.Trace("on mainnet")
 		*cfg.TestNet3 = false
 		*cfg.SimNet = false
 		*cfg.RegressionTest = false
@@ -84,7 +84,7 @@ func Configure(cx *conte.Xt) {
 	cx.StopDiscovery, cx.RequestDiscoveryUpdate, err = discovery.
 		Serve(cx.ActiveNet, cx.RouteableInterface, *cx.Config.Group)
 	if err != nil {
-		log <- cl.Error{"error starting discovery server: ", err, cl.Ine()}
+		L.Error("error starting discovery server: ", err)
 	}
 	cx.StateCfg.DiscoveryUpdate = cx.RequestDiscoveryUpdate
 	cx.StateCfg.RouteableAddress = routeableString
@@ -116,9 +116,9 @@ func Configure(cx *conte.Xt) {
 	loglevel := *cfg.LogLevel
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
-		cx.Log <- cl.Trace{"log level", loglevel}
+		L.Trace("log level", loglevel)
 	default:
-		cx.Log <- cl.Info{"unrecognised loglevel", loglevel, "setting default info"}
+		L.Info("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
 	}
 	cl.Register.SetAllLevels(*cfg.LogLevel)
@@ -126,7 +126,7 @@ func Configure(cx *conte.Xt) {
 		*cfg.OnionProxy = ""
 	}
 
-	cx.Log <- cl.Trace{"normalising addresses", cl.Ine()}
+	L.Trace("normalising addresses")
 	port := node.DefaultPort
 	nrm := normalize.StringSliceAddresses
 	nrm(cfg.AddPeers, port)
@@ -145,14 +145,14 @@ func Configure(cx *conte.Xt) {
 	default:
 		*cfg.Algo = "random"
 	}
-	cx.Log <- cl.Trace{"mining algorithm ", *cfg.Algo, cl.Ine()}
+	L.Trace("mining algorithm ", *cfg.Algo)
 	relayNonStd := *cfg.RelayNonStd
 	funcName := "loadConfig"
 	switch {
 	case *cfg.RelayNonStd && *cfg.RejectNonStd:
 		errf := "%s: rejectnonstd and relaynonstd cannot be used together" +
 			" -- choose only one %s"
-		cx.Log <- cl.Errorf{errf, funcName, cl.Ine()}
+		L.Errorf(errf, funcName)
 		// just leave both false
 		*cfg.RelayNonStd = false
 		*cfg.RejectNonStd = false
@@ -163,36 +163,36 @@ func Configure(cx *conte.Xt) {
 	}
 	*cfg.RelayNonStd = relayNonStd
 	// Validate database type.
-	cx.Log <- cl.Trace{"validating database type", cl.Ine()}
+	L.Trace("validating database type")
 	if !node.ValidDbType(*cfg.DbType) {
 		str := "%s: The specified database type [%v] is invalid -- " +
 			"supported types %v"
 		err := fmt.Errorf(str, funcName, *cfg.DbType, node.KnownDbTypes)
-		log <- cl.Error{funcName, err, cl.Ine()}
+		L.Error(funcName, err)
 		// set to default
 		*cfg.DbType = node.KnownDbTypes[0]
 	}
 	// Validate profile port number
-	cx.Log <- cl.Trace{"validating profile port number", cl.Ine()}
+	L.Trace("validating profile port number")
 	if *cfg.Profile != "" {
 		profilePort, err := strconv.Atoi(*cfg.Profile)
 		if err != nil || profilePort < 1024 || profilePort > 65535 {
 			str := "%s: The profile port must be between 1024 and 65535"
 			err := fmt.Errorf(str, funcName)
-			log <- cl.Error{funcName, err, cl.Ine()}
+			L.Error(funcName, err)
 			*cfg.Profile = ""
 		}
 	}
 	// Don't allow ban durations that are too short.
-	cx.Log <- cl.Trace{"validating ban duration", cl.Ine()}
+	L.Trace("validating ban duration")
 	if *cfg.BanDuration < time.Second {
 		err := fmt.Errorf("%s: The banduration option may not be less than 1s -- parsed [%v]",
 			funcName, *cfg.BanDuration)
-		log <- cl.Info{funcName, err, cl.Ine()}
+		L.Info(funcName, err)
 		*cfg.BanDuration = node.DefaultBanDuration
 	}
 	// Validate any given whitelisted IP addresses and networks.
-	cx.Log <- cl.Trace{"validating whitelists", cl.Ine()}
+	L.Trace("validating whitelists")
 	if len(*cfg.Whitelists) > 0 {
 		var ip net.IP
 		state.ActiveWhitelists = make([]*net.IPNet, 0, len(*cfg.Whitelists))
@@ -204,7 +204,7 @@ func Configure(cx *conte.Xt) {
 				if ip == nil {
 					str := err.Error() + " %s: The whitelist value of '%s' is invalid"
 					err = fmt.Errorf(str, funcName, addr)
-					cx.Log <- cl.Error{err, cl.Ine()}
+					L.Error(err)
 					fmt.Fprintln(os.Stderr, err)
 					os.Exit(1)
 				}
@@ -223,7 +223,7 @@ func Configure(cx *conte.Xt) {
 			state.ActiveWhitelists = append(state.ActiveWhitelists, ipnet)
 		}
 	}
-	cx.Log <- cl.Trace{"checking addpeer and connectpeer lists", cl.Ine()}
+	L.Trace("checking addpeer and connectpeer lists")
 	if len(*cfg.AddPeers) > 0 && len(*cfg.ConnectPeers) > 0 {
 		err := fmt.Errorf(
 			"%s: the --addpeer and --connect options can not be mixed",
@@ -232,19 +232,19 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// --proxy or --connect without --listen disables listening.
-	cx.Log <- cl.Trace{"checking proxy/connect for disabling listening", cl.Ine()}
+	L.Trace("checking proxy/connect for disabling listening")
 	if (*cfg.Proxy != "" || len(*cfg.ConnectPeers) > 0) &&
 		len(*cfg.Listeners) == 0 {
 		*cfg.DisableListen = true
 	}
 	// Add the default listener if none were specified. The default listener is
 	// all addresses on the listen port for the network we are to connect to.
-	cx.Log <- cl.Trace{"checking if listener was set", cl.Ine()}
+	L.Trace("checking if listener was set")
 	if len(*cfg.Listeners) == 0 {
 		*cfg.Listeners = []string{":" + cx.ActiveNet.DefaultPort}
 	}
 	// Check to make sure limited and admin users don't have the same username
-	cx.Log <- cl.Trace{"checking admin and limited username is different", cl.Ine()}
+	L.Trace("checking admin and limited username is different")
 	if *cfg.Username != "" &&
 		*cfg.Username == *cfg.LimitUser {
 		str := "%s: --username and --limituser must not specify the same username"
@@ -253,7 +253,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Check to make sure limited and admin users don't have the same password
-	cx.Log <- cl.Trace{"checking limited and admin passwords are not the same", cl.Ine()}
+	L.Trace("checking limited and admin passwords are not the same")
 	if *cfg.Password != "" &&
 		*cfg.Password == *cfg.LimitPass {
 		str := "%s: --password and --limitpass must not specify the same password"
@@ -262,30 +262,30 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// The RPC server is disabled if no username or password is provided.
-	cx.Log <- cl.Trace{"checking rpc server has a login enabled", cl.Ine()}
+	L.Trace("checking rpc server has a login enabled")
 	if (*cfg.Username == "" || *cfg.Password == "") &&
 		(*cfg.LimitUser == "" || *cfg.LimitPass == "") {
 		*cfg.DisableRPC = true
 	}
 	if *cfg.DisableRPC {
-		cx.Log <- cl.Trc("RPC service is disabled")
+		L.Trace("RPC service is disabled")
 	}
-	cx.Log <- cl.Trace{"checking rpc server has listeners set", cl.Ine()}
+	L.Trace("checking rpc server has listeners set")
 	if !*cfg.DisableRPC && len(*cfg.RPCListeners) == 0 {
-		cx.Log <- cl.Debug{"looking up default listener"}
+		L.Debug("looking up default listener")
 		addrs, err := net.LookupHost(node.DefaultRPCListener)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 		*cfg.RPCListeners = make([]string, 0, len(addrs))
-		cx.Log <- cl.Debug{"setting listeners"}
+		L.Debug("setting listeners")
 		for _, addr := range addrs {
 			addr = net.JoinHostPort(addr, cx.ActiveNet.RPCClientPort)
 			*cfg.RPCListeners = append(*cfg.RPCListeners, addr)
 		}
 	}
-	cx.Log <- cl.Trace{"checking rpc max concurrent requests", cl.Ine()}
+	L.Trace("checking rpc max concurrent requests")
 	if *cfg.RPCMaxConcurrentReqs < 0 {
 		str := "%s: The rpcmaxwebsocketconcurrentrequests option may not be less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.RPCMaxConcurrentReqs)
@@ -293,7 +293,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Validate the the minrelaytxfee.
-	cx.Log <- cl.Trace{"checking min relay tx fee", cl.Ine()}
+	L.Trace("checking min relay tx fee")
 	state.ActiveMinRelayTxFee, err = util.NewAmount(*cfg.MinRelayTxFee)
 	if err != nil {
 		str := "%s: invalid minrelaytxfee: %v"
@@ -302,7 +302,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Limit the max block size to a sane value.
-	cx.Log <- cl.Trace{"checking max block size", cl.Ine()}
+	L.Trace("checking max block size")
 	if *cfg.BlockMaxSize < node.BlockMaxSizeMin ||
 		*cfg.BlockMaxSize > node.BlockMaxSizeMax {
 		str := "%s: The blockmaxsize option must be in between %d and %d -- parsed [%d]"
@@ -312,7 +312,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Limit the max block weight to a sane value.
-	cx.Log <- cl.Trace{"checking max block weight", cl.Ine()}
+	L.Trace("checking max block weight")
 	if *cfg.BlockMaxWeight < node.BlockMaxWeightMin ||
 		*cfg.BlockMaxWeight > node.BlockMaxWeightMax {
 		str := "%s: The blockmaxweight option must be in between %d and %d -- parsed [%d]"
@@ -322,7 +322,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Limit the max orphan count to a sane vlue.
-	cx.Log <- cl.Trace{"checking max orphan limit", cl.Ine()}
+	L.Trace("checking max orphan limit")
 	if *cfg.MaxOrphanTxs < 0 {
 		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
@@ -330,7 +330,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Limit the block priority and minimum block sizes to max block size.
-	cx.Log <- cl.Trace{"validating block priority and minimum size/weight", cl.Ine()}
+	L.Trace("validating block priority and minimum size/weight")
 	*cfg.BlockPrioritySize = int(apputil.MinUint32(
 		uint32(*cfg.BlockPrioritySize),
 		uint32(*cfg.BlockMaxSize)))
@@ -354,7 +354,7 @@ func Configure(cx *conte.Xt) {
 		*cfg.BlockMaxWeight = *cfg.BlockMaxSize * blockchain.WitnessScaleFactor
 	}
 	// Look for illegal characters in the user agent comments.
-	cx.Log <- cl.Trace{"checking user agent comments", cl.Ine()}
+	L.Trace("checking user agent comments")
 	for _, uaComment := range *cfg.UserAgentComments {
 		if strings.ContainsAny(uaComment, "/:()") {
 			err := fmt.Errorf("%s: The following characters must not "+
@@ -365,7 +365,7 @@ func Configure(cx *conte.Xt) {
 		}
 	}
 	// Check mining addresses are valid and saved parsed versions.
-	cx.Log <- cl.Trace{"checking mining addresses", cl.Ine()}
+	L.Trace("checking mining addresses")
 	state.ActiveMiningAddrs = make([]util.Address, 0, len(*cfg.MiningAddrs))
 	for _, strAddr := range *cfg.MiningAddrs {
 		addr, err := util.DecodeAddress(strAddr, cx.ActiveNet)
@@ -396,7 +396,7 @@ func Configure(cx *conte.Xt) {
 	if *cfg.MinerPass != "" {
 		state.ActiveMinerKey = fork.Argon2i([]byte(*cfg.MinerPass))
 	}
-	cx.Log <- cl.Trace{"checking rpc listener addresses", cl.Ine()}
+	L.Trace("checking rpc listener addresses")
 	nrms := normalize.Addresses
 	// Add default port to all rpc listener addresses if needed and remove duplicate addresses.
 	// *cfg.RPCListeners = nrms(*cfg.RPCListeners, cx.ActiveNet.RPCClientPort)
@@ -415,7 +415,7 @@ func Configure(cx *conte.Xt) {
 		os.Exit(1)
 	}
 	// Check the checkpoints for syntax errors.
-	cx.Log <- cl.Trace{"checking the checkpoints", cl.Ine()}
+	L.Trace("checking the checkpoints")
 	state.AddedCheckpoints, err = node.ParseCheckpoints(*cfg.AddCheckpoints)
 	if err != nil {
 		str := "%s: Error parsing checkpoints: %v"
@@ -438,11 +438,11 @@ func Configure(cx *conte.Xt) {
 	// the dial function is set to the proxy specific dial function and the
 	// lookup is set to use tor (unless --noonion is specified in which case the
 	// system DNS resolver is used).
-	cx.Log <- cl.Trace{"setting network dialer and lookup", cl.Ine()}
+	L.Trace("setting network dialer and lookup")
 	state.Dial = net.DialTimeout
 	state.Lookup = net.LookupIP
 	if *cfg.Proxy != "" {
-		cx.Log <- cl.Trace{"we are loading a proxy!"}
+		L.Trace("we are loading a proxy!")
 		_, _, err := net.SplitHostPort(*cfg.Proxy)
 		if err != nil {
 			str := "%s: Proxy address '%s' is invalid: %v"
@@ -459,8 +459,8 @@ func Configure(cx *conte.Xt) {
 			(*cfg.ProxyUser != "" ||
 				*cfg.ProxyPass != "") {
 			torIsolation = true
-			cx.Log <- cl.Warn{
-				"Tor isolation set -- overriding specified proxy user credentials"}
+			L.Warn("Tor isolation set -- overriding specified" +
+				" proxy user credentials")
 		}
 		proxy := &socks.Proxy{
 			Addr:         *cfg.Proxy,
@@ -485,7 +485,7 @@ func Configure(cx *conte.Xt) {
 	// set to use the onion-specific proxy while leaving the normal dial
 	// function as selected above.  This allows .onion address traffic to be
 	// routed through a different proxy than normal traffic.
-	cx.Log <- cl.Trace{"setting up tor proxy if enabled", cl.Ine()}
+	L.Trace("setting up tor proxy if enabled")
 	if *cfg.OnionProxy != "" {
 		_, _, err := net.SplitHostPort(*cfg.OnionProxy)
 		if err != nil {
@@ -497,27 +497,26 @@ func Configure(cx *conte.Xt) {
 		// Tor isolation flag means onion proxy credentials will be overridden.
 		if *cfg.TorIsolation &&
 			(*cfg.OnionProxyUser != "" || *cfg.OnionProxyPass != "") {
-			cx.Log <- cl.Warn{
-				"Tor isolation set - overriding specified onionproxy user credentials "}
+			L.Warn("Tor isolation set - overriding specified onionproxy user credentials")
 		}
-		state.Oniondial =
-			func(network, addr string, timeout time.Duration) (net.Conn, error) {
-				proxy := &socks.Proxy{
-					Addr:         *cfg.OnionProxy,
-					Username:     *cfg.OnionProxyUser,
-					Password:     *cfg.OnionProxyPass,
-					TorIsolation: *cfg.TorIsolation,
-				}
-				return proxy.DialTimeout(network, addr, timeout)
+	}
+	state.Oniondial =
+		func(network, addr string, timeout time.Duration) (net.Conn, error) {
+			proxy := &socks.Proxy{
+				Addr:         *cfg.OnionProxy,
+				Username:     *cfg.OnionProxyUser,
+				Password:     *cfg.OnionProxyPass,
+				TorIsolation: *cfg.TorIsolation,
 			}
-		// When configured in bridge mode (both --onion and --proxy are
-		// configured), it means that the proxy configured by --proxy is not a
-		// tor proxy, so override the DNS resolution to use the onion-specific
-		// proxy.
-		if *cfg.Proxy != "" {
-			state.Lookup = func(host string) ([]net.IP, error) {
-				return connmgr.TorLookupIP(host, *cfg.OnionProxy)
-			}
+			return proxy.DialTimeout(network, addr, timeout)
+		}
+	// When configured in bridge mode (both --onion and --proxy are
+	// configured), it means that the proxy configured by --proxy is not a
+	// tor proxy, so override the DNS resolution to use the onion-specific
+	// proxy.
+	if *cfg.Proxy != "" {
+		state.Lookup = func(host string) ([]net.IP, error) {
+			return connmgr.TorLookupIP(host, *cfg.OnionProxy)
 		}
 	} else {
 		state.Oniondial = state.Dial
@@ -531,22 +530,21 @@ func Configure(cx *conte.Xt) {
 	}
 	// if the user set the save flag, or file doesn't exist save the file now
 	if state.Save {
-		log <- cl.Warn{"saving configuration on user request", cl.Ine()}
-		state.Save = false
-		save.Pod(cx.Config)
+		L.Warn("saving configuration on user request")
+			state.Save = false
+			save.Pod(cx.Config)
+		}
+		if !apputil.FileExists(*cx.Config.ConfigFile) {
+			L.Warn("saving configuration because none existed")
+			save.Pod(cx.Config)
+		}
+		// if we are using discovery we override the listeners with ":0" and
+		// the system takes care of interfaces and port allocation
+		if !*cx.Config.NoDiscovery {
+			*cx.Config.Listeners = []string{":0"}
+			*cx.Config.RPCListeners = []string{":0"}
+			*cx.Config.WalletRPCListeners = []string{":0"}
+			*cx.Config.ExperimentalRPCListeners = []string{":0"}
+		}
+		cfg.Unlock()
 	}
-	if !apputil.FileExists(*cx.Config.ConfigFile) {
-		log <- cl.Warn{"saving configuration because none existed",
-			cl.Ine()}
-		save.Pod(cx.Config)
-	}
-	// if we are using discovery we override the listeners with ":0" and
-	// the system takes care of interfaces and port allocation
-	if !*cx.Config.NoDiscovery {
-		*cx.Config.Listeners = []string{":0"}
-		*cx.Config.RPCListeners = []string{":0"}
-		*cx.Config.WalletRPCListeners = []string{":0"}
-		*cx.Config.ExperimentalRPCListeners = []string{":0"}
-	}
-	cfg.Unlock()
-}

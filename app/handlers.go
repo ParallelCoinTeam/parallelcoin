@@ -7,10 +7,8 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-
 	"github.com/parallelcointeam/parallelcoin/cmd/ctl"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 )
 
 const slash = string(os.PathSeparator)
@@ -42,7 +40,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 
 func kopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		log <- cl.Warn{"not implemented", cl.Ine()}
+		L.Warn("not implemented")
 		// Configure(cx)
 		// kopachQuit := make(chan struct{})
 		// interrupt.AddHandler(func() { close(kopachQuit) })

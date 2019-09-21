@@ -13,7 +13,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/node"
 	"github.com/parallelcointeam/parallelcoin/cmd/node/mempool"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
 )
 
@@ -34,7 +33,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 		},
 		Before: beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			log <- cl.Trace{"subcommand completed", cl.Ine()}
+			L.Trace("subcommand completed")
 			return nil
 		},
 		Commands: []cli.Command{

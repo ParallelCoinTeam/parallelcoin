@@ -25,7 +25,7 @@ func DiscoverPeers(cx *conte.Xt) (cancel func()) {
 	cancelSearch, resultsChan, err := discovery.AsyncZeroConfSearch(
 		serviceName, *cx.Config.Group)
 	if err != nil {
-		log <- cl.Error{"error running zeroconf search ", err, cl.Ine()}
+		L.Error("error running zeroconf search ", err, cl.Ine())
 		return func() {}
 	}
 	ticker := time.NewTicker(time.Second * 10)
@@ -59,8 +59,7 @@ func DiscoverPeers(cx *conte.Xt) (cancel func()) {
 							Permanent: true,
 						})
 						zcPeers = append(zcPeers, r)
-						log <- cl.Warn{"connecting to zeroconf peer ",
-							nodeAddress, cl.Ine()}
+						L.Warn("connecting to zeroconf peer ", nodeAddress)
 					}
 				}
 			case <-quit:
@@ -69,6 +68,6 @@ func DiscoverPeers(cx *conte.Xt) (cancel func()) {
 			}
 		}
 	}()
-	log <- cl.Warn{"started up discovery loop", cl.Ine()}
+	L.Warn("started up discovery loop")
 	return func() {}
 }

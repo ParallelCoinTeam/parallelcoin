@@ -13,7 +13,7 @@ import (
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-		log <- cl.Warn{"running node handler", cl.Ine()}
+		L.Warn("running node handler")
 		var wg sync.WaitGroup
 		Configure(cx)
 		// serviceOptions defines the configuration options for the daemon as a service on Windows.
@@ -44,8 +44,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		go func() {
 			err = node.Main(cx, shutdownChan, killswitch, nodeChan, &wg)
 			if err != nil {
-				log <- cl.Error{"error starting node ", err,
-					cl.Ine()}
+				L.Error("error starting node ", err)
 			}
 		}()
 		cx.RPCServer = <-nodeChan
