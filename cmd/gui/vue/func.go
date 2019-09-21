@@ -263,7 +263,7 @@ func (dv *DuoVUE) GetBlocksExcerpts(startBlock, blockHeight int) mod.DuoVUEblock
 //func (dv *DuoVUE) GetBlockChainInfo() {
 //	getBlockChainInfo, err := rpc.HandleGetBlockChainInfo(dv.cx.RPCServer, nil, nil)
 //	if err != nil {
-//		dv.PushDuoVUEalert(err.Error(), "error")
+//		dv.PushDuoVUEalert("Error",err.Error(), "error")
 //	}
 //	var ok bool
 //	dv.Core.Node.BlockChainInfo, ok = getBlockChainInfo.(*json.GetBlockChainInfoResult)
@@ -276,7 +276,7 @@ func (dv *DuoVUE) GetBlocksExcerpts(startBlock, blockHeight int) mod.DuoVUEblock
 func (dv *DuoVUE) GetBlockCount() int64 {
 	getBlockCount, err := rpc.HandleGetBlockCount(dv.cx.RPCServer, nil, nil)
 	if err != nil {
-		dv.PushDuoVUEalert(err.Error(), "error")
+		dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
 	dv.Data.Status.BlockCount = getBlockCount.(int64)
 	return dv.Data.Status.BlockCount
@@ -287,7 +287,7 @@ func (dv *DuoVUE) GetBlockHash(blockHeight int) string{
 	}
 	hash, err := rpc.HandleGetBlockHash(dv.cx.RPCServer, &hcmd, nil)
 	if err != nil {
-		dv.PushDuoVUEalert(err.Error(), "error")
+		dv.PushDuoVUEalert("Error",err.Error(), "error")
 	}
 	return hash.(string)
 }
@@ -300,7 +300,7 @@ func (dv *DuoVUE) GetBlock(hash string) (json.GetBlockVerboseResult){
 	}
 	bl, err := rpc.HandleGetBlock(dv.cx.RPCServer, &bcmd, nil)
 	if err != nil {
-		dv.PushDuoVUEalert(err.Error(), "error")
+		dv.PushDuoVUEalert("Error",err.Error(), "error")
 	}
 	return bl.(json.GetBlockVerboseResult)
 }
@@ -320,7 +320,7 @@ func (dv *DuoVUE) GetDifficulty() float64 {
 	c := json.GetDifficultyCmd{}
 	r, err := rpc.HandleGetDifficulty(dv.cx.RPCServer, c, nil)
 	if err != nil {
-		dv.PushDuoVUEalert(err.Error(), "error")
+		dv.PushDuoVUEalert("Error",err.Error(), "error")
 	}
 	dv.Data.Status.Difficulty = r.(float64)
 	return dv.Data.Status.Difficulty
@@ -366,7 +366,7 @@ func (dV *DuoVUE) GetPeerInfo() []*json.GetPeerInfoResult {
 		dV.Web.Dispatch(func() {
 			getPeers, err := rpc.HandleGetPeerInfo(dV.cx.RPCServer, nil, nil)
 			if err != nil {
-				dV.PushDuoVUEalert(err.Error(), "error")
+				dV.PushDuoVUEalert("Error",err.Error(), "error")
 			}
 			dV.Data.Peers = getPeers.([]*json.GetPeerInfoResult)
 			fmt.Println("ssssssssssssssssss", dV.Data.Peers)

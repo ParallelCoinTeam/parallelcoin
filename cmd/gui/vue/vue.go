@@ -7,6 +7,7 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/core"
 	"github.com/robfig/cron"
 	"github.com/zserge/webview"
+	"time"
 
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/conf"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/lib"
@@ -22,7 +23,7 @@ const (
 func GetDuoVUE(cx *conte.Xt, cr *cron.Cron) *DuoVUE {
 	dV := &DuoVUE{}
 	dV.cx = cx
-	dV.Config = GetCoreCofig(dV.cx)
+	dV.Config = GetCoreCofig(cx)
 	dV.cr = cr
 	dV.Web = webview.New(webview.Settings{
 		Width:                  windowWidth,
@@ -42,8 +43,14 @@ func GetDuoVUE(cx *conte.Xt, cr *cron.Cron) *DuoVUE {
 
 func RunVue(dV DuoVUE) {
 	var err error
-
+	a := DuoVUEalert{
+		Time: time.Now(),
+		Title: "Welcome",
+		Message:"to ParallelCoin",
+		AlertType:"success",
+	}
 	d := DuoVUEdata{
+		Alert:       a,
 		Status:      dV.GetDuoVUEstatus(),
 		Addressbook: dV.GetAddressBook(),
 	}
@@ -75,7 +82,6 @@ func RunVue(dV DuoVUE) {
 	//dV.GetPeerInfo()
 
 	evalJs(dV)
-
 
 	dV.cr.AddFunc("@every 1s", func() {
 		dV.Web.Dispatch(func() {
@@ -117,10 +123,16 @@ func evalJs(dV DuoVUE) {
 		fmt.Println("error binding to webview:", err)
 	}
 
+	err = dV.Web.Eval(core.CompLoopJs(dV.db))
+	if err != nil {
+		fmt.Println("error binding to webview:", err)
+	}
+
 	err = dV.Web.Eval(core.AppsLoopJs(dV.db))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
+
 	err = dV.Web.Eval(core.CoreJs)
 	if err != nil {
 		fmt.Println("error binding to webview:", err)

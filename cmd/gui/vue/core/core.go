@@ -25,7 +25,7 @@ Vue.prototype.$eventHub = new Vue();
 
 const duoSystem = {
 	alert:system.data.d.alert,
-	config:null,
+	config:system.data.conf,
 	status: system.data.d.status,
 	addressbook:system.data.d.addressbook,
 	transactions:null,
@@ -45,7 +45,7 @@ func AppsLoopJs(d db.DuoVUEdb) string {
 	vueapp := `
 {{define "vueapp"}}
 	{{ range $key, $value := . }}
-		var {{ .ID }} = {{ if .IsApp }}new Vue({{ end }}{
+		var {{ .ID }} = new Vue({
 		el: '#{{ .ID }}',
 		name: '{{ .Name }}',
 		{{ if .Template }}template: ` + "`" + `{{ .Template }}` + "`" + `,{{end}}
@@ -55,7 +55,27 @@ func AppsLoopJs(d db.DuoVUEdb) string {
 {{ end }}`
 	var js bytes.Buffer
 	jsRaw := template.Must(template.New("").Parse(string(vueapp)))
-	err := jsRaw.ExecuteTemplate(&js, "vueapp", comp.Components(d))
+	err := jsRaw.ExecuteTemplate(&js, "vueapp", comp.Apps(d))
+	if err != nil {
+		fmt.Println("error binding to webview:", err)
+	}
+	return js.String()
+}
+
+func CompLoopJs(d db.DuoVUEdb) string {
+	vuecomp := `
+{{define "vuecomp"}}
+	{{ range $key, $value := . }}
+		var {{ .ID }} = {
+		name: '{{ .Name }}',
+		{{ if .Template }}template: ` + "`" + `{{ .Template }}` + "`" + `,{{end}}
+		{{ if .Js }}{{ .Js }}{{ end }}
+		}
+	{{ end }}
+{{ end }}`
+	var js bytes.Buffer
+	jsRaw := template.Must(template.New("").Parse(string(vuecomp)))
+	err := jsRaw.ExecuteTemplate(&js, "vuecomp", comp.Components(d))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
