@@ -302,7 +302,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
-		DEBUGC(func() string {
+		INFOC(func() string {
 			return fmt.Sprintf("%d %s %s %s %s %s %s %s %s %s",
 				lastNode.height+1,
 				an,
