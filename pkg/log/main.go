@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const screenWidth = 144
+
 var StartupTime = time.Now()
 
 type PrintlnFunc func(a ...interface{})
@@ -64,24 +66,24 @@ type Entry struct {
 
 func Empty() *Logger {
 	return &Logger{
-		Fatal:  NoPrintln,
-		Error:  NoPrintln,
-		Warn:   NoPrintln,
-		Info:   NoPrintln,
-		Debug:  NoPrintln,
-		Trace:  NoPrintln,
-		Fatalf: NoPrintf,
-		Errorf: NoPrintf,
-		Warnf:  NoPrintf,
-		Infof:  NoPrintf,
-		Debugf: NoPrintf,
-		Tracef: NoPrintf,
-		Fatalc: NoClosure,
-		Errorc: NoClosure,
-		Warnc:  NoClosure,
-		Infoc:  NoClosure,
-		Debugc: NoClosure,
-		Tracec: NoClosure,
+		Fatal:  NoPrintln(),
+		Error:  NoPrintln(),
+		Warn:   NoPrintln(),
+		Info:   NoPrintln(),
+		Debug:  NoPrintln(),
+		Trace:  NoPrintln(),
+		Fatalf: NoPrintf(),
+		Errorf: NoPrintf(),
+		Warnf:  NoPrintf(),
+		Infof:  NoPrintf(),
+		Debugf: NoPrintf(),
+		Tracef: NoPrintf(),
+		Fatalc: NoClosure(),
+		Errorc: NoClosure(),
+		Warnc:  NoClosure(),
+		Infoc:  NoClosure(),
+		Debugc: NoClosure(),
+		Tracec: NoClosure(),
 	}
 
 }
@@ -89,6 +91,7 @@ func Empty() *Logger {
 // sanitizeLoglevel accepts a string and returns a
 // default if the input is not in the Levels slice
 func sanitizeLoglevel(level string) string {
+	fmt.Println("sanitise")
 	found := false
 	for i := range Levels {
 		if level == Levels[i] {
@@ -96,7 +99,9 @@ func sanitizeLoglevel(level string) string {
 			break
 		}
 	}
+	fmt.Println(level, found)
 	if !found {
+		fmt.Println("default info")
 		level = "info"
 	}
 	return level
@@ -136,42 +141,56 @@ func (l *Logger) SetLevel(level string) {
 	*l = *Empty()
 	var fallen bool
 	switch {
-	case level == Fatal:
-		l.Fatal = Println("F", l.LogFileHandle)
-		l.Fatalf = Printf("F", l.LogFileHandle)
-		l.Fatalc = Printc("F", l.LogFileHandle)
+	case level == Trace || fallen:
+		l.Trace = Println("T", l.LogFileHandle)
+		l.Tracef = Printf("T", l.LogFileHandle)
+		l.Tracec = Printc("T", l.LogFileHandle)
+		fallen = true
+		fallthrough
+	case level == Debug || fallen:
+		l.Debug = Println("D", l.LogFileHandle)
+		l.Debugf = Printf("D", l.LogFileHandle)
+		l.Debugc = Printc("D", l.LogFileHandle)
+		fallen = true
+		fallthrough
+	case level == Info || fallen:
+		l.Info = Println("I", l.LogFileHandle)
+		l.Infof = Printf("I", l.LogFileHandle)
+		l.Infoc = Printc("I", l.LogFileHandle)
+		fallen = true
+		fallthrough
+	case level == Warn || fallen:
+		l.Warn = Println("W", l.LogFileHandle)
+		l.Warnf = Printf("W", l.LogFileHandle)
+		l.Warnc = Printc("W", l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Error || fallen:
 		l.Error = Println("E", l.LogFileHandle)
 		l.Errorf = Printf("E", l.LogFileHandle)
 		l.Errorc = Printc("E", l.LogFileHandle)
+		fallen = true
 		fallthrough
-	case level == Warn || fallen:
-		l.Warn = Println("W", l.LogFileHandle)
-		l.Warnf = Printf("W", l.LogFileHandle)
-		l.Warnc = Printc("W", l.LogFileHandle)
-		fallthrough
-	case level == Info || fallen:
-		l.Info = Println("I", l.LogFileHandle)
-		l.Infof = Printf("I", l.LogFileHandle)
-		l.Infoc = Printc("I", l.LogFileHandle)
-		fallthrough
-	case level == Debug || fallen:
-		l.Debug = Println("D", l.LogFileHandle)
-		l.Debugf = Printf("D", l.LogFileHandle)
-		l.Debugc = Printc("D", l.LogFileHandle)
-		fallthrough
-	case level == Trace || fallen:
-		l.Trace = Println("T", l.LogFileHandle)
-		l.Tracef = Printf("T", l.LogFileHandle)
-		l.Tracec = Printc("T", l.LogFileHandle)
+	case level == Fatal:
+		l.Fatal = Println("F", l.LogFileHandle)
+		l.Fatalf = Printf("F", l.LogFileHandle)
+		l.Fatalc = Printc("F", l.LogFileHandle)
+		fallen = true
 	}
 }
 
-func NoPrintln(_ ...interface{})          {}
-func NoPrintf(_ string, _ ...interface{}) {}
-func NoClosure(_ func() string)           {}
+var NoPrintln = func() func(_ ...interface{}) {
+	return func(_ ...interface{}) {
+	}
+}
+var NoPrintf = func() func(_ string, _ ...interface{}) {
+	return func(_ string, _ ...interface{}) {
+	}
+}
+var NoClosure = func() func(_ func() string) {
+	return func(_ func() string) {
+	}
+}
 
 func trimReturn(s string) string {
 	return s[:len(s)-1]
@@ -209,13 +228,13 @@ func Println(level string, fh *os.File) func(a ...interface{}) {
 		cod := false
 		for i := range split {
 			if i > 0 {
-				if len(out)+len(split[i])+1+len(codeLoc) > 80 && !cod {
+				if len(out)+len(split[i])+1+len(codeLoc) > screenWidth && !cod {
 					cod = true
 					final += out + strings.Repeat(".",
-						80-len(out)-len(codeLoc)) + " " +
+						screenWidth-len(out)-len(codeLoc)) + " " +
 						codeLoc + "\n"
 					out = indent + split[i] + " "
-				} else if len(out)+len(split[i]) > 80 {
+				} else if len(out)+len(split[i]) > screenWidth {
 					out = indent + split[i] + " "
 				} else {
 					out += split[i] + " "
@@ -224,9 +243,9 @@ func Println(level string, fh *os.File) func(a ...interface{}) {
 		}
 		final += out
 		if !cod {
-			rem := 80 - len(out) - len(codeLoc)
+			rem := screenWidth - len(out) - len(codeLoc)
 			if rem < 1 {
-				final += "\n" + strings.Repeat(" ", 80-len(codeLoc)) + codeLoc
+				final += "\n" + strings.Repeat(" ", screenWidth-len(codeLoc)) + codeLoc
 			} else {
 				final += strings.Repeat(".", rem) + " " + codeLoc
 			}
@@ -262,13 +281,13 @@ func Printf(level string, fh *os.File) func(format string, a ...interface{}) {
 		cod := false
 		for i := range split {
 			if i > 0 {
-				if len(out)+len(split[i])+1+len(codeLoc) > 80 && !cod {
+				if len(out)+len(split[i])+1+len(codeLoc) > screenWidth && !cod {
 					cod = true
 					final += out + strings.Repeat(".",
-						80-len(out)-len(codeLoc)) + " " +
+						screenWidth-len(out)-len(codeLoc)) + " " +
 						codeLoc + "\n"
 					out = indent + split[i] + " "
-				} else if len(out)+len(split[i]) > 80 {
+				} else if len(out)+len(split[i]) > screenWidth {
 					out = indent + split[i] + " "
 				} else {
 					out += split[i] + " "
@@ -277,9 +296,9 @@ func Printf(level string, fh *os.File) func(format string, a ...interface{}) {
 		}
 		final += out
 		if !cod {
-			rem := 80 - len(out) - len(codeLoc)
+			rem := screenWidth - len(out) - len(codeLoc)
 			if rem < 1 {
-				final += "\n" + strings.Repeat(" ", 80-len(codeLoc)) + codeLoc
+				final += "\n" + strings.Repeat(" ", screenWidth-len(codeLoc)) + codeLoc
 			} else {
 				final += strings.Repeat(".", rem) + " " + codeLoc
 			}
@@ -300,15 +319,15 @@ func Printf(level string, fh *os.File) func(format string, a ...interface{}) {
 func Printc(level string, fh *os.File) func(fn func() string) {
 	// level = strings.ToUpper(string(level[0]))
 	return func(fn func() string) {
-		text := fn()
+		t := fn()
 		_, loc, line, _ := runtime.Caller(1)
 		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
 		codeLoc := fmt.Sprint(files[1], ":", rightJustify(line))
 		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
 			Second * time.Second)
-		t := since + " " + level + " "
+		text := since + " " + level + " "
 		indent := strings.Repeat(" ", len(t))
-		t += trimReturn(text)
+		text += trimReturn(t)
 		// wordwrap :p
 		split := strings.Split(text, " ")
 		out := split[0] + " "
@@ -316,13 +335,13 @@ func Printc(level string, fh *os.File) func(fn func() string) {
 		cod := false
 		for i := range split {
 			if i > 0 {
-				if len(out)+len(split[i])+1+len(codeLoc) > 80 && !cod {
+				if len(out)+len(split[i])+1+len(codeLoc) > screenWidth && !cod {
 					cod = true
 					final += out + strings.Repeat(".",
-						80-len(out)-len(codeLoc)) + " " +
+						screenWidth-len(out)-len(codeLoc)) + " " +
 						codeLoc + "\n"
 					out = indent + split[i] + " "
-				} else if len(out)+len(split[i]) > 80 {
+				} else if len(out)+len(split[i]) > screenWidth {
 					out = indent + split[i] + " "
 				} else {
 					out += split[i] + " "
@@ -331,9 +350,9 @@ func Printc(level string, fh *os.File) func(fn func() string) {
 		}
 		final += out
 		if !cod {
-			rem := 80 - len(out) - len(codeLoc)
+			rem := screenWidth - len(out) - len(codeLoc)
 			if rem < 1 {
-				final += "\n" + strings.Repeat(" ", 80-len(codeLoc)) + codeLoc
+				final += "\n" + strings.Repeat(" ", screenWidth-len(codeLoc)) + codeLoc
 			} else {
 				final += strings.Repeat(".", rem) + " " + codeLoc
 			}
