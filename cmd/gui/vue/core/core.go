@@ -9,26 +9,27 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/db"
 )
 
-func CoreJs(d db.DuoVUEdb) string {
-	vueapp := `
-	{{define "vueapp"}}
+var CoreJs = `
+const core = new Vue({ 
+	el: '#core', 
+	data () { return { 
+	duoSystem }},
+});
+`
 
+var CoreHeadJs = `
 Vue.config.devtools = true;
 Vue.use(VueFormGenerator);
 
 Vue.prototype.$eventHub = new Vue(); 
 
- 
 const duoSystem = {
+	alert:system.data.d.alert,
 	config:null,
-	node:null,
-	wallet:null,
-	status:null,
-	balance:null,
-	connectionCount:0,
-	addressBook:null,
+	status: system.data.d.status,
+	addressbook:null,
 	transactions:null,
-	peerInfo:null,
+	peers:null,
 	blocks:[],
 	theme:false,
 	isBoot:false,
@@ -37,24 +38,20 @@ const duoSystem = {
 	isScreen:'overview',
 	timer: '',
 };
+`
 
 
-{{ range $key, $value := . }}
-var {{ .ID }} = {{ if .IsApp }}new Vue({{ end }}{
-{{ if .IsApp }}el: '#{{ .ID }}',{{ end }}
-  name: '{{ .Name }}',
-{{ if .Template }}template: ` + "`" + `{{ .Template }}` + "`" + `,{{end}}
-{{ if .Js }}{{ .Js }}{{ end }}
-}{{ if .IsApp }});{{ end }}
-{{ end }}
-
-
-const core = new Vue({ 
-	el: '#core', 
-	data () { return { 
-	duoSystem }},
-});
-
+func AppsLoopJs(d db.DuoVUEdb) string {
+	vueapp := `
+{{define "vueapp"}}
+	{{ range $key, $value := . }}
+		var {{ .ID }} = {{ if .IsApp }}new Vue({{ end }}{
+		el: '#{{ .ID }}',
+		name: '{{ .Name }}',
+		{{ if .Template }}template: ` + "`" + `{{ .Template }}` + "`" + `,{{end}}
+		{{ if .Js }}{{ .Js }}{{ end }}
+		});
+	{{ end }}
 {{ end }}`
 	var js bytes.Buffer
 	jsRaw := template.Must(template.New("").Parse(string(vueapp)))
@@ -62,6 +59,5 @@ const core = new Vue({
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
-
 	return js.String()
 }

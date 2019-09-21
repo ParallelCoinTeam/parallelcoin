@@ -5,89 +5,104 @@ import (
 	"fmt"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/core"
-
+	"github.com/robfig/cron"
 	"github.com/zserge/webview"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/alert"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/conf"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/lib"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/db"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 )
 
-func GetDuoVUE(cx *conte.Xt) *DuoVUE {
-	v := &DuoVUE{}
-	v.cx = cx
-	// v.Cfg = DuoGuiCfg{}
-	// cr := DuoVUEcore{}
-	// cr.mod.DuoGuiItem.Name = "Sys"
-	// cr.mod.DuoGuiItem.Slug = "sys"
-	// cr.mod.DuoGuiItem.Version = "0.0.1"
-	// cr.mod.DuoGuiItem.CompType = "System"
-	// v.Core = cr
-	//v.Status.GetDuoVUEstatus()
-	// v.initVueSystem()
-	v.db.DuoVueDbInit(v.cx.DataDir)
-	// v.getVUEduoNode()
-	v.Components = comp.Components(v.db)
-	v.Config = GetCoreCofig(v.cx)
-	return v
-}
+const (
+	windowWidth  = 1440
+	windowHeight = 900
+)
 
-func RunVue(w webview.WebView, v DuoVUE) {
-	// cx.RPCServer.Cfg.SyncMgr.IsCurrent()
-	var err error
-	_, err = w.Bind("system", &DuoVUE{
-		cx:         v.cx,
-		db:         v.db,
-		Components: v.Components,
-		Config:     v.Config,
-		Repo:       conf.GetParallelCoinRepo,
-		Icons:      lib.GetIcons(),
+func GetDuoVUE(cx *conte.Xt, cr *cron.Cron) *DuoVUE {
+	dV := &DuoVUE{}
+	dV.cx = cx
+	dV.Config = GetCoreCofig(dV.cx)
+	dV.cr = cr
+	dV.Web = webview.New(webview.Settings{
+		Width:                  windowWidth,
+		Height:                 windowHeight,
+		Title:                  "ParallelCoin - DUO - True Story",
+		Resizable:              false,
+		Debug:                  true,
+		URL:                    `data:text/html,` + string(comp.GetAppHtml),
+		ExternalInvokeCallback: dV.HandleRPC,
 	})
 
-	// Db inteface
-	_, err = w.Bind("db", &db.DuoVUEdb{})
-	if err != nil {
-		fmt.Println("error binding to webview:", err)
-	}
+	dV.Components = comp.Components(dV.db)
+	dV.db.DuoVueDbInit(dV.cx.DataDir)
 
-	_, err = w.Bind("alert", &alert.DuoVUEalert{})
-	if err != nil {
-		fmt.Println("error binding to webview:", err)
-	}
-
-	if err != nil {
-		fmt.Println("error binding to webview:", err)
-	}
-	// Css
-	injectCss(w, v.db)
-
-	// Js
-	evalJs(w, v.db)
-	//fmt.Println("MIkaaaaaaaaaa:", v.Icons)
-
+	return dV
 }
 
-func evalJs(w webview.WebView, d db.DuoVUEdb) {
+func RunVue(dV DuoVUE) {
+	var err error
+
+	d := DuoVUEdata{
+		Status:      dV.GetDuoVUEstatus(),
+		Addressbook: dV.GetAddressBook(),
+	}
+	_, err = dV.Web.Bind("system", &DuoVUE{
+		cx:         dV.cx,
+		db:         dV.db,
+		Components: dV.Components,
+		Config:     dV.Config,
+		Repo:       conf.GetParallelCoinRepo,
+		Icons:      lib.GetIcons(),
+		Data:       d,
+	})
+	// Db inteface
+	_, err = dV.Web.Bind("db", &db.DuoVUEdb{})
+	if err != nil {
+		fmt.Println("error binding to webview:", err)
+	}
+
+	//_, err = dV.Web.Bind("alert", &DuoVUEalert{})
+	//if err != nil {
+	//	fmt.Println("error binding to webview:", err)
+	//}
+
+	// Css
+	injectCss(dV)
+
+	// Js
+
+	//dV.GetPeerInfo()
+
+	evalJs(dV)
+
+
+	dV.cr.AddFunc("@every 1s", func() {
+		dV.Web.Dispatch(func() {
+			dV.Render("status", dV.GetDuoVUEstatus())
+		})
+	})
+}
+
+func evalJs(dV DuoVUE) {
 	// vue
 	vueLib, err := base64.StdEncoding.DecodeString(lib.GetLibVue)
 	if err != nil {
 		fmt.Printf("Error decoding string: %s ", err.Error())
 		return
 	}
-	err = w.Eval(string(vueLib))
+	err = dV.Web.Eval(string(vueLib))
 	// ej2
 	getEj2Vue, err := base64.StdEncoding.DecodeString(lib.GetEjs2Vue)
 	if err != nil {
 		fmt.Printf("Error decoding string: %s ", err.Error())
 		return
 	}
-	err = w.Eval(string(getEj2Vue))
+	err = dV.Web.Eval(string(getEj2Vue))
 	// libs
 	for _, lib := range lib.GetLibs() {
 		lb, err := base64.StdEncoding.DecodeString(string(lib))
-		err = w.Eval(string(lb))
+		err = dV.Web.Eval(string(lb))
 		if err != nil {
 			fmt.Printf("Error decoding string: %s ", err.Error())
 			return
@@ -96,25 +111,35 @@ func evalJs(w webview.WebView, d db.DuoVUEdb) {
 	// for _, js := range t.Data["js"] {
 	// 	err = w.Eval(string(js))
 	// }
-	err = w.Eval(core.CoreJs(d))
+
+	err = dV.Web.Eval(core.CoreHeadJs)
+	if err != nil {
+		fmt.Println("error binding to webview:", err)
+	}
+
+	err = dV.Web.Eval(core.AppsLoopJs(dV.db))
+	if err != nil {
+		fmt.Println("error binding to webview:", err)
+	}
+	err = dV.Web.Eval(core.CoreJs)
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 	//fmt.Println("MIkaaaaaaaaaa:", core.CoreJs(d))
 }
 
-func injectCss(w webview.WebView, d db.DuoVUEdb) {
+func injectCss(dV DuoVUE) {
 	// material
 	// getMaterial, err := base64.StdEncoding.DecodeString(lib.GetMaterial)
 	// if err != nil {
 	// 	fmt.Printf("Error decoding string: %s ", err.Error())
 	// 	return
 	// }
-	w.InjectCSS(string(lib.GetMaterial))
+	dV.Web.InjectCSS(string(lib.GetMaterial))
 	// comp
-	for _, c := range comp.Components(d) {
-		w.InjectCSS(string(c.Css))
+	for _, c := range comp.Components(dV.db) {
+		dV.Web.InjectCSS(string(c.Css))
 	}
 	// Core Css
-	w.InjectCSS(string(comp.GetCoreCss))
+	dV.Web.InjectCSS(string(comp.GetCoreCss))
 }

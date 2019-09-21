@@ -67,7 +67,7 @@ methods: {
         <ejs-grid
 ref='grid'
 height="100%" 
-:dataSource='this.duoSystem.addressBook.addresses'
+:dataSource='this.duoSystem.addressbook.addresses'
 :allowSorting='true' 
 :allowPaging='true'
 :sortSettings='sortOptions' 

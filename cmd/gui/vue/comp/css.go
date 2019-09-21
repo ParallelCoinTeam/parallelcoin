@@ -473,11 +473,7 @@ html, body{
     font-size: 25px;
   }
 
-  .dashboardParent {
-    width: 100%;
-  }
-
-  .chart-content, .map-content, .maps-content{
+  .dashboardParent , .chart-content, .map-content, .maps-content{
     height: 100%;
     width:100%;
   }
