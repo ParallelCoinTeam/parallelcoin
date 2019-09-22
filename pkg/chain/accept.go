@@ -5,6 +5,7 @@ import (
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/hardfork"
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
@@ -20,7 +21,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 // See their documentation for how the flags modify their behavior.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) maybeAcceptBlock(block *util.Block, flags BehaviorFlags) (bool, error) {
-	TRACE("maybeAcceptBlock")
+	log.TRACE("maybeAcceptBlock")
 	// The height of this block is one more than the referenced previous block.
 	prevHash := &block.MsgBlock().Header.PrevBlock
 	prevNode := b.Index.LookupNode(prevHash)
@@ -57,14 +58,14 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 			}
 		}
 	}
-	TRACE("check for blacklisted addresses")
+	log.TRACE("check for blacklisted addresses")
 	txs := block.Transactions()
 	for i := range txs {
 		if ContainsBlacklisted(b, txs[i], hardfork.Blacklist) {
 			return false, ruleError(ErrBlacklisted, "block contains a blacklisted address "+cl.Ine())
 		}
 	}
-	TRACE("found no blacklisted addresses")
+	log.TRACE("found no blacklisted addresses")
 	var err error
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on
@@ -90,7 +91,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	if err != nil {
 		return false, err
 	}
-	TRACE("creating new block node for new block")
+	log.TRACE("creating new block node for new block")
 	// Create a new block node for the block and add it to the node index.
 	// Even if the block ultimately gets connected to the main chain,
 	// it starts out on a side chain.

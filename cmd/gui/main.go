@@ -11,6 +11,7 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
 )
 
@@ -33,7 +34,7 @@ var getWebView = func(v vue.DuoVUE, t string) webview.WebView {
 }
 
 func Main(cx *conte.Xt, wg *sync.WaitGroup) {
-	WARN("starting gui")
+	log.WARN("starting gui")
 	v := vue.GetDuoVUE(cx)
 	w := getWebView(*v, comp.GetAppHtml)
 	cleaned := &atomic.Value{}
@@ -41,12 +42,12 @@ func Main(cx *conte.Xt, wg *sync.WaitGroup) {
 	cleanup := func() {
 		if !cleaned.Load().(bool) {
 			cleaned.Store(true)
-			DEBUG("terminating webview")
+			log.DEBUG("terminating webview")
 			w.Terminate()
 			interrupt.Request()
-			DEBUG("waiting for waitgroup")
+			log.DEBUG("waiting for waitgroup")
 			wg.Wait()
-			DEBUG("exiting webview")
+			log.DEBUG("exiting webview")
 			w.Exit()
 		}
 	}

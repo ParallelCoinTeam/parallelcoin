@@ -172,7 +172,7 @@ func (k *Kopach) Block(ctx context.Context, args *[]mining.BlockTemplate,
 	defer func() {
 		// most likely panic because close of closed channel, ignore
 		if r := recover(); r != nil {
-			DEBUG("Recovered in f", r)
+			log.DEBUG("Recovered in f", r)
 			err = errors.New("worker is busy in submit")
 		}
 		// receiving a block while submitting usually will lead here,

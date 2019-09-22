@@ -57,12 +57,10 @@ func (b *headerProgressLogger) SetLastLogTime(time time.Time) {
 // The progress message is templated as follows:
 //  {progressAction} {numProcessed} {blocks|block} in the last {timePeriod}
 //  ({numTxs}, height {lastBlockHeight}, {lastBlockTimeStamp})
-func newBlockProgressLogger(progressMessage string, entityType string,
-	logger *log.Logger) *headerProgressLogger {
+func newBlockProgressLogger(progressMessage string, entityType string) *headerProgressLogger {
 	return &headerProgressLogger{
 		entityType:       entityType,
 		lastBlockLogTime: time.Now(),
 		progressAction:   progressMessage,
-		subsystemLogger:  logger,
 	}
 }

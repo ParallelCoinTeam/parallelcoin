@@ -8,12 +8,12 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/node"
 	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-		WARN("running node handler")
+		log.WARN("running node handler")
 		var wg sync.WaitGroup
 		Configure(cx)
 		// serviceOptions defines the configuration options for the daemon as a service on Windows.
@@ -33,7 +33,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
 			err := runServiceCommand(serviceOpts.ServiceCommand)
 			if err != nil {
-				cx.Log <- cl.Error{err}
+				log.ERROR(err)
 				return err
 			}
 			return nil
@@ -44,7 +44,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		go func() {
 			err = node.Main(cx, shutdownChan, killswitch, nodeChan, &wg)
 			if err != nil {
-				ERROR("error starting node ", err)
+				log.ERROR("error starting node ", err)
 			}
 		}()
 		cx.RPCServer = <-nodeChan

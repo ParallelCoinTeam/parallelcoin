@@ -8,7 +8,6 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 const (
@@ -17,50 +16,16 @@ const (
 	maxRejectReasonLen = 250
 )
 
-type _dtype int
-
-var _d _dtype
-var l = log.NewLogger("info")
-
-func UseLogger(logger *log.Logger) {
-	l = logger
-}
-
-var (
-	FATAL  = l.Fatal
-	ERROR  = l.Error
-	WARN   = l.Warn
-	INFO   = l.Info
-	DEBUG  = l.Debug
-	TRACE  = l.Trace
-	FATALF = l.Fatalf
-	ERRORF = l.Errorf
-	WARNF  = l.Warnf
-	INFOF  = l.Infof
-	DEBUGF = l.Debugf
-	TRACEF = l.Tracef
-	FATALC = l.Fatalc
-	ERRORC = l.Errorc
-	WARNC  = l.Warnc
-	INFOC  = l.Infoc
-	DEBUGC = l.Debugc
-	TRACEC = l.Tracec
-)
-
-// directionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
-func directionString(inbound bool) string {
-	if inbound {
-		return "inbound"
-	}
-	return "outbound"
-}
-
 // formatLockTime returns a transaction lock time as a human-readable string.
 func formatLockTime(lockTime uint32) string {
-	// The lock time field of a transaction is either a block height at which the transaction is finalized or a timestamp depending on if the value is before the lockTimeThreshold.  When it is under the threshold it is a block height.
+	// The lock time field of a transaction is either a block height at
+	// which the transaction is finalized or a timestamp depending on if the
+	// value is before the lockTimeThreshold.  When it is under the
+	// threshold it is a block height.
 	if lockTime < txscript.LockTimeThreshold {
 		return fmt.Sprintf("height %d", lockTime)
 	}
+
 	return time.Unix(int64(lockTime), 0).String()
 }
 
@@ -71,6 +36,7 @@ func invSummary(invList []*wire.InvVect) string {
 	if invLen == 0 {
 		return "empty"
 	}
+
 	// One inventory item.
 	if invLen == 1 {
 		iv := invList[0]
@@ -86,8 +52,10 @@ func invSummary(invList []*wire.InvVect) string {
 		case wire.InvTypeTx:
 			return fmt.Sprintf("tx %s", iv.Hash)
 		}
+
 		return fmt.Sprintf("unknown (%d) %s", uint32(iv.Type), iv.Hash)
 	}
+
 	// More than one inv item.
 	return fmt.Sprintf("size %d", invLen)
 }
@@ -97,21 +65,27 @@ func locatorSummary(locator []*chainhash.Hash, stopHash *chainhash.Hash) string 
 	if len(locator) > 0 {
 		return fmt.Sprintf("locator %s, stop %s", locator[0], stopHash)
 	}
+
 	return fmt.Sprintf("no locator, stop %s", stopHash)
+
 }
 
-// sanitizeString strips any characters which are even remotely dangerous, such as html control characters, from the passed string.  It also limits it to the passed maximum size, which can be 0 for unlimited.  When the string is limited, it will also add "..." to the string to indicate it was truncated.
+// sanitizeString strips any characters which are even remotely dangerous, such
+// as html control characters, from the passed string.  It also limits it to
+// the passed maximum size, which can be 0 for unlimited.  When the string is
+// limited, it will also add "..." to the string to indicate it was truncated.
 func sanitizeString(str string, maxLength uint) string {
 	const safeChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY" +
 		"Z01234567890 .,;_/:?@"
+
 	// Strip any characters not in the safeChars string removed.
 	str = strings.Map(func(r rune) rune {
 		if strings.ContainsRune(safeChars, r) {
 			return r
 		}
 		return -1
-	},
-		str)
+	}, str)
+
 	// Limit the string to the max allowed length.
 	if maxLength > 0 && uint(len(str)) > maxLength {
 		str = str[:maxLength]
@@ -120,54 +94,76 @@ func sanitizeString(str string, maxLength uint) string {
 	return str
 }
 
-// messageSummary returns a human-readable string which summarizes a message. Not all messages have or need a summary.  This is used for debug logging.
+// messageSummary returns a human-readable string which summarizes a message.
+// Not all messages have or need a summary.  This is used for debug logging.
 func messageSummary(msg wire.Message) string {
 	switch msg := msg.(type) {
 	case *wire.MsgVersion:
 		return fmt.Sprintf("agent %s, pver %d, block %d",
 			msg.UserAgent, msg.ProtocolVersion, msg.LastBlock)
+
 	case *wire.MsgVerAck:
 		// No summary.
+
 	case *wire.MsgGetAddr:
 		// No summary.
+
 	case *wire.MsgAddr:
 		return fmt.Sprintf("%d addr", len(msg.AddrList))
+
 	case *wire.MsgPing:
 		// No summary - perhaps add nonce.
+
 	case *wire.MsgPong:
 		// No summary - perhaps add nonce.
+
 	case *wire.MsgAlert:
 		// No summary.
+
 	case *wire.MsgMemPool:
 		// No summary.
+
 	case *wire.MsgTx:
 		return fmt.Sprintf("hash %s, %d inputs, %d outputs, lock %s",
 			msg.TxHash(), len(msg.TxIn), len(msg.TxOut),
 			formatLockTime(msg.LockTime))
+
 	case *wire.MsgBlock:
 		header := &msg.Header
 		return fmt.Sprintf("hash %s, ver %d, %d tx, %s", msg.BlockHash(),
 			header.Version, len(msg.Transactions), header.Timestamp)
+
 	case *wire.MsgInv:
 		return invSummary(msg.InvList)
+
 	case *wire.MsgNotFound:
 		return invSummary(msg.InvList)
+
 	case *wire.MsgGetData:
 		return invSummary(msg.InvList)
+
 	case *wire.MsgGetBlocks:
 		return locatorSummary(msg.BlockLocatorHashes, &msg.HashStop)
+
 	case *wire.MsgGetHeaders:
 		return locatorSummary(msg.BlockLocatorHashes, &msg.HashStop)
+
 	case *wire.MsgHeaders:
 		return fmt.Sprintf("num %d", len(msg.Headers))
+
 	case *wire.MsgGetCFHeaders:
 		return fmt.Sprintf("start_height=%d, stop_hash=%v",
 			msg.StartHeight, msg.StopHash)
+
 	case *wire.MsgCFHeaders:
 		return fmt.Sprintf("stop_hash=%v, num_filter_hashes=%d",
 			msg.StopHash, len(msg.FilterHashes))
+
 	case *wire.MsgReject:
-		// Ensure the variable length strings don't contain any characters which are even remotely dangerous such as HTML control characters, etc.  Also limit them to sane length for logging.
+		// Ensure the variable length strings don't contain any
+		// characters which are even remotely dangerous such as HTML
+		// control characters, etc.  Also limit them to sane length for
+		// logging.
 		rejCommand := sanitizeString(msg.Cmd, wire.CommandSize)
 		rejReason := sanitizeString(msg.Reason, maxRejectReasonLen)
 		summary := fmt.Sprintf("cmd %v, code %v, reason %v", rejCommand,
@@ -177,6 +173,7 @@ func messageSummary(msg wire.Message) string {
 		}
 		return summary
 	}
+
 	// No summary for other messages.
 	return ""
 }

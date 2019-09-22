@@ -27,7 +27,7 @@ type Logger interface {
 	Trace(v ...interface{})
 	// Debug formats message using the default formats for its operands
 	// and writes to log with LevelDebug.
-	Debug(v ...interface{})
+	log.DEBUG(v ...interface{})
 	// Info formats message using the default formats for its operands
 	// and writes to log with LevelInfo.
 	Info(v ...interface{})

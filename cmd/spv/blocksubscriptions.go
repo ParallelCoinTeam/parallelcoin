@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 type (
@@ -82,7 +83,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 		if filterHeaderTip == bestHeight {
 			return nil
 		}
-		DEBUGF(
+		log.DEBUGF(
 			"delivering backlog block notifications from height=%v, to height=%v %s",
 			bestHeight, filterHeaderTip,
 		)

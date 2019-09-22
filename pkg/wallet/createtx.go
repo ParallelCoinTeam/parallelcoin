@@ -10,6 +10,7 @@ import (
 	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
@@ -147,7 +148,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 	}
 	if tx.ChangeIndex >= 0 && account == waddrmgr.ImportedAddrAccount {
 		changeAmount := util.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
-		WARNF(
+		log.WARNF(
 			"spend from imported account produced change: "+
 				"moving %v from imported account into default account.",
 			changeAmount,

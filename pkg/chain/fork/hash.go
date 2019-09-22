@@ -18,7 +18,7 @@ import (
    chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 )
 
-const HashReps = 0
+const HashReps = 8
 
 // Argon2i takes bytes, generates a Lyra2REv2 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {

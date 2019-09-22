@@ -3,6 +3,7 @@ package addresses
 import (
 	"github.com/parallelcointeam/parallelcoin/app/save"
 	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/pod"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 	wm "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
@@ -17,11 +18,11 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 		if toMake < 1 {
 			return
 		}
-		WARN("refilling mining addresses")
+		log.WARN("refilling mining addresses")
 		account, err := w.AccountNumber(wm.KeyScopeBIP0044,
 			"default")
 		if err != nil {
-			ERROR("error getting account number ", err,
+			log.ERROR("error getting account number ", err,
 			)
 		}
 		for i := 0; i < toMake; i++ {
@@ -36,13 +37,13 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 				stateCfg.ActiveMiningAddrs = append(stateCfg.
 					ActiveMiningAddrs, addr)
 			} else {
-				ERROR("error adding new address ", err)
+				log.ERROR("error adding new address ", err)
 			}
 		}
 		if save.Pod(cfg) {
-			WARN("saved config with new addresses")
+			log.WARN("saved config with new addresses")
 		} else {
-			ERROR("failed to save config")
+			log.ERROR("failed to save config")
 		}
 	}()
 }

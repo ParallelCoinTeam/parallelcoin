@@ -18,6 +18,7 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
@@ -297,7 +298,7 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 // This function is safe for concurrent access.
 (mp *TxPool) ProcessTransaction(b *blockchain.BlockChain, tx *util.Tx,
 	allowOrphan, rateLimit bool, tag Tag) ([]*TxDesc, error) {
-	TRACE("processing transaction", tx.Hash())
+	log.TRACE("processing transaction", tx.Hash())
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	defer mp.mtx.Unlock()
@@ -479,7 +480,7 @@ func // addOrphan adds an orphan transaction to the orphan pool.
 	// orphan if space is still needed.
 	e := mp.limitNumOrphans()
 	if e != nil {
-		WARN("failed to set orphan limit", e)
+		log.WARN("failed to set orphan limit", e)
 	}
 	mp.orphans[*tx.Hash()] = &orphanTx{
 		tx:         tx,
@@ -493,7 +494,7 @@ func // addOrphan adds an orphan transaction to the orphan pool.
 		}
 		mp.orphansByPrev[txIn.PreviousOutPoint][*tx.Hash()] = tx
 	}
-	DEBUG(
+	log.DEBUG(
 		"stored orphan transaction", tx.Hash(), "(total:", len(mp.orphans), ")",
 	)
 }
@@ -626,8 +627,8 @@ func // limitNumOrphans limits the number of orphan transactions by evicting a
 		mp.nextExpireScan = now.Add(orphanExpireScanInterval)
 		numOrphans := len(mp.orphans)
 		if numExpired := origNumOrphans - numOrphans; numExpired > 0 {
-			DEBUGF("Expired %d %s (remaining: %d)",
-				numExpired, pickNoun(numExpired, "orphan", "orphans"),
+			log.DEBUGF("Expired %d %s (remaining: %d)",
+				numExpired, log.PickNoun(numExpired, "orphan", "orphans"),
 				numOrphans,
 			)
 		}
@@ -898,7 +899,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 		}
 		oldTotal := mp.pennyTotal
 		mp.pennyTotal += float64(serializedSize)
-		TRACEF(
+		log.TRACEF(
 			"rate limit: curTotal %v, nextTotal: %v, limit %v",
 			oldTotal,
 			mp.pennyTotal,
@@ -918,7 +919,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	}
 	// Add to transaction pool.
 	txD := mp.addTransaction(utxoView, tx, bestHeight, txFee)
-	DEBUGF(
+	log.DEBUGF(
 		"accepted transaction %v (pool size: %v) %s",
 		txHash,
 		len(mp.pool),

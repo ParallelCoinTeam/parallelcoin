@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"github.com/grandcat/zeroconf"
+
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 type ResultsChan chan *zeroconf.ServiceEntry
@@ -15,10 +17,10 @@ func AsyncZeroConfSearch(service, group string) (cancel context.CancelFunc,
 	r = make(ResultsChan, 10)
 	myInstance := fmt.Sprint(os.Getppid())
 	domain := "local."
-	WARN("starting search")
+	log.WARN("starting search")
 	resolver, err := zeroconf.NewResolver(nil)
 	if err != nil {
-		ERROR("Failed to initialize resolver:", err)
+		log.ERROR("Failed to initialize resolver:", err)
 		return
 	}
 	entries := make(chan *zeroconf.ServiceEntry)
@@ -30,7 +32,7 @@ func AsyncZeroConfSearch(service, group string) (cancel context.CancelFunc,
 				if entry.Instance == myInstance {
 					continue
 				} else {
-					r <-entry
+					r <- entry
 				}
 			}
 		}
@@ -39,7 +41,7 @@ func AsyncZeroConfSearch(service, group string) (cancel context.CancelFunc,
 	ctx, cancel = context.WithCancel(context.Background())
 	err = resolver.Browse(ctx, service, domain, entries)
 	if err != nil {
-		ERROR("Failed to browse:", err)
+		log.ERROR("Failed to browse:", err)
 	}
 	return
 }

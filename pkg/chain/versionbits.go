@@ -4,6 +4,7 @@ import (
 	"math"
 
 	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 const (
@@ -204,13 +205,13 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 		switch state {
 		case ThresholdActive:
 			if !b.unknownRulesWarned {
-				WARNF("unknown new rules activated (bit %d)", bit)
+				log.WARNF("unknown new rules activated (bit %d)", bit)
 				b.unknownRulesWarned = true
 			}
 		case ThresholdLockedIn:
 			window := int32(checker.MinerConfirmationWindow())
 			activationHeight := window - (node.height % window)
-			WARNF("Unknown new rules are about to activate in %d blocks ("+
+			log.WARNF("Unknown new rules are about to activate in %d blocks ("+
 				"bit %d)", activationHeight, bit)
 		}
 	}

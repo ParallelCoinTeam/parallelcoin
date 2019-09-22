@@ -14,6 +14,7 @@ import (
 	tm "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	am "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
@@ -297,7 +298,7 @@ func (c *BitcoindClient) RescanBlocks(
 	for _, hash := range blockHashes {
 		header, err := c.GetBlockHeaderVerbose(&hash)
 		if err != nil {
-			WARNF(
+			log.WARNF(
 				"unable to get header %s from bitcoind: %s",
 				hash, err,
 			)
@@ -305,7 +306,7 @@ func (c *BitcoindClient) RescanBlocks(
 		}
 		block, err := c.GetBlock(&hash)
 		if err != nil {
-			WARNF(
+			log.WARNF(
 				"unable to get block %s from bitcoind: %s",
 				hash, err,
 			)
@@ -484,12 +485,12 @@ func (c *BitcoindClient) rescanHandler() {
 			// We're starting a rescan from the hash.
 			case chainhash.Hash:
 				if err := c.rescan(update); err != nil {
-					ERROR(
+					log.ERROR(
 						"unable to complete chain rescan:", err,
 					)
 				}
 			default:
-				WARNF(
+				log.WARNF(
 					"received unexpected filter type %T", update,
 				)
 			}
@@ -509,7 +510,7 @@ func (c *BitcoindClient) ntfnHandler() {
 		select {
 		case tx := <-c.zmqTxNtfns:
 			if _, _, err := c.filterTx(tx, nil, true); err != nil {
-				ERRORF(
+				log.ERRORF(
 					"unable to filter transaction %v: %v %s",
 					tx.TxHash(), err,
 				)
@@ -529,7 +530,7 @@ func (c *BitcoindClient) ntfnHandler() {
 					newBlock, newBlockHeight, true,
 				)
 				if err != nil {
-					ERRORF(
+					log.ERRORF(
 						"unable to filter block %v: %v",
 						newBlock.BlockHash(), err,
 					)
@@ -547,7 +548,7 @@ func (c *BitcoindClient) ntfnHandler() {
 			}
 			// Otherwise, we've encountered a reorg.
 			if err := c.reorg(bestBlock, newBlock); err != nil {
-				ERROR(
+				log.ERROR(
 					"unable to process chain reorg:", err,
 				)
 			}
@@ -643,7 +644,7 @@ func (c *BitcoindClient) onRelevantTx(tx *tm.TxRecord,
 	blockDetails *btcjson.BlockDetails) {
 	block, err := parseBlock(blockDetails)
 	if err != nil {
-		ERROR(
+		log.ERROR(
 			"unable to send onRelevantTx notification, failed parse block:",
 			err,
 		)
@@ -678,7 +679,7 @@ func (c *BitcoindClient) onRescanProgress(hash *chainhash.Hash, height int32,
 // the details of the last block in the range of the rescan.
 func (c *BitcoindClient) onRescanFinished(hash *chainhash.Hash, height int32,
 	timestamp time.Time) {
-	INFOF(
+	log.INFOF(
 		"rescan finished at %d (%s)",
 		height, hash,
 	)
@@ -697,7 +698,7 @@ func (c *BitcoindClient) onRescanFinished(hash *chainhash.Hash, height int32,
 // finds a common ancestor and notify all the new blocks since then.
 func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 	reorgBlock *wire.MsgBlock) error {
-	DEBUG("possible reorg at block", reorgBlock.BlockHash())
+	log.DEBUG("possible reorg at block", reorgBlock.BlockHash())
 	// Retrieve the best known height based on the block which caused the
 	// reorg. This way, we can preserve the chain of blocks we need to
 	// retrieve.
@@ -707,7 +708,7 @@ func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 		return err
 	}
 	if bestHeight < currentBlock.Height {
-		DEBUG("detected multiple reorgs")
+		log.DEBUG("detected multiple reorgs")
 		return nil
 	}
 	// We'll now keep track of all the blocks known to the *chain*, starting
@@ -739,7 +740,7 @@ func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 		// Since the previous hashes don't match, the current block has
 		// been reorged out of the chain, so we should send a
 		// BlockDisconnected notification for it.
-		DEBUGF(
+		log.DEBUGF(
 			"disconnecting block %d (%v) %s",
 			currentBlock.Height,
 			currentBlock.Hash,
@@ -769,7 +770,7 @@ func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 	// Disconnect the last block from the old chain. Since the previous
 	// block remains the same between the old and new chains, the tip will
 	// now be the last common ancestor.
-	DEBUGF(
+	log.DEBUGF(
 		"disconnecting block %d (%v) %s",
 		currentBlock.Height, currentBlock.Hash,
 	)
@@ -849,7 +850,7 @@ func (c *BitcoindClient) FilterBlocks(
 // the client in the watch list. This is called only within a queue processing
 // loop.
 func (c *BitcoindClient) rescan(start chainhash.Hash) error {
-	INFO("starting rescan from block", start)
+	log.INFO("starting rescan from block", start)
 	// We start by getting the best already processed block. We only use
 	// the height, as the hash can change during a reorganization, which we
 	// catch by testing connectivity from known blocks to the previous
@@ -1023,7 +1024,7 @@ func (c *BitcoindClient) filterBlock(block *wire.MsgBlock, height int32,
 		return nil, nil
 	}
 	if c.shouldNotifyBlocks() {
-		DEBUGF(
+		log.DEBUGF(
 			"filtering block %d (%s) with %d transactions %s",
 			height, block.BlockHash(), len(block.Transactions),
 		)
@@ -1044,7 +1045,7 @@ func (c *BitcoindClient) filterBlock(block *wire.MsgBlock, height int32,
 		blockDetails.Index = i
 		isRelevant, rec, err := c.filterTx(tx, blockDetails, notify)
 		if err != nil {
-			WARNF(
+			log.WARNF(
 				"Unable to filter transaction %v: %v",
 				tx.TxHash(), err,
 			)
@@ -1085,7 +1086,7 @@ func (c *BitcoindClient) filterTx(tx *wire.MsgTx,
 	}
 	rec, err := tm.NewTxRecordFromMsgTx(txDetails.MsgTx(), time.Now())
 	if err != nil {
-		ERROR(
+		log.ERROR(
 			"Cannot create transaction record for relevant tx:", err,
 		)
 		return false, nil, err
@@ -1117,7 +1118,7 @@ func (c *BitcoindClient) filterTx(tx *wire.MsgTx,
 			out.PkScript, c.chainParams,
 		)
 		if err != nil {
-			DEBUGF(
+			log.DEBUGF(
 				"Unable to parse output script in %s:%d: %v %s",
 				tx.TxHash(), i, err,
 			)

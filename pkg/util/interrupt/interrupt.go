@@ -4,6 +4,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 var (
@@ -37,13 +39,13 @@ func Listener() {
 	for {
 		select {
 		case sig := <-Chan:
-			WARNF("received signal (%s) - shutting down... %s", sig)
+			log.WARNF("received signal (%s) - shutting down", sig)
 			_ = sig
 			requested = true
 			invokeCallbacks()
 			return
 		case <-ShutdownRequestChan:
-			WARN("received shutdown request - shutting down...")
+			log.WARN("received shutdown request - shutting down...")
 			requested = true
 			invokeCallbacks()
 			return

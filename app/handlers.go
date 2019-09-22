@@ -9,6 +9,7 @@ import (
 
 	"github.com/parallelcointeam/parallelcoin/cmd/ctl"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 const slash = string(os.PathSeparator)
@@ -40,7 +41,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 
 func kopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		WARN("not implemented")
+		log.WARN("not implemented")
 		// Configure(cx)
 		// kopachQuit := make(chan struct{})
 		// interrupt.AddHandler(func() { close(kopachQuit) })

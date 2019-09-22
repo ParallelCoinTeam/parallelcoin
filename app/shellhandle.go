@@ -11,6 +11,7 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
 	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
@@ -27,7 +28,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if !apputil.FileExists(dbFilename) {
 			cl.Register.SetAllLevels("off")
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				cx.Log <- cl.Error{"failed to create wallet", err}
+				log.ERROR("failed to create wallet", err)
 			}
 			cl.Register.SetAllLevels(*cx.Config.LogLevel)
 		}
@@ -38,7 +39,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			go func() {
 				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
 				if err != nil {
-					ERROR("error starting node ", err)
+					log.ERROR("error starting node ", err)
 				}
 			}()
 			cx.RPCServer = <-nodeChan

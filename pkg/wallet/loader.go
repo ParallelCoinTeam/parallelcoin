@@ -8,6 +8,7 @@ import (
 	"time"
 
 	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/prompt"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
@@ -104,12 +105,12 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 	ld.Mutex.Lock()
 	// INFO("opening existing wallet", ld.DDDirPath}
 	if ld.Loaded {
-		INFO("already loaded wallet")
+		log.INFO("already loaded wallet")
 		return nil, ErrLoaded
 	}
 	// Ensure that the network directory exists.
 	if err := checkCreateDir(ld.DDDirPath); err != nil {
-		ERROR("cannot create directory", ld.DDDirPath)
+		log.ERROR("cannot create directory", ld.DDDirPath)
 		return nil, err
 	}
 	// INFO("directory exists"}
@@ -118,7 +119,7 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 	// INFO("opening database", dbPath}
 	db, err := walletdb.Open("bdb", dbPath)
 	if err != nil {
-		ERROR("failed to open database '", ld.DDDirPath, "':", err)
+		log.ERROR("failed to open database '", ld.DDDirPath, "':", err)
 		return nil, err
 	}
 	var cbs *waddrmgr.OpenCallbacks
@@ -133,25 +134,25 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 			ObtainPrivatePass: noConsole,
 		}
 	}
-	TRACE("opening wallet")
+	log.TRACE("opening wallet")
 	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow)
 	if err != nil {
-		INFO("failed to open wallet", err)
+		log.INFO("failed to open wallet", err)
 		// If opening the wallet fails (e.g. because of wrong
 		// passphrase), we must close the backing database to
 		// allow future calls to walletdb.Open().
 		e := db.Close()
 		if e != nil {
-			WARN("error closing database:", e)
+			log.WARN("error closing database:", e)
 		}
 		return nil, err
 	}
 	ld.Wallet = w
-	TRACE("starting wallet", w != nil)
+	log.TRACE("starting wallet", w != nil)
 	w.Start()
-	TRACE("waiting for load", db != nil)
+	log.TRACE("waiting for load", db != nil)
 	ld.onLoaded(db)
-	TRACE("wallet opened successfully", w != nil)
+	log.TRACE("wallet opened successfully", w != nil)
 	return w, nil
 }
 
@@ -175,28 +176,28 @@ func (ld *Loader) RunAfterLoad(fn func(*Wallet)) {
 // CreateNewWallet or LoadExistingWallet.  The Loader may be reused if this
 // function returns without error.
 func (ld *Loader) UnloadWallet() error {
-	TRACE("unloading wallet")
+	log.TRACE("unloading wallet")
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	if ld.Wallet == nil {
-		DEBUG("wallet not loaded")
+		log.DEBUG("wallet not loaded")
 		return ErrNotLoaded
 	}
-	TRACE("wallet stopping")
+	log.TRACE("wallet stopping")
 	ld.Wallet.Stop()
-	TRACE("waiting for wallet shutdown")
+	log.TRACE("waiting for wallet shutdown")
 	ld.Wallet.WaitForShutdown()
 	if ld.DB == nil {
-		DEBUG("there was no database")
+		log.DEBUG("there was no database")
 		return ErrNotLoaded
 	}
-	TRACE("wallet stopped")
+	log.TRACE("wallet stopped")
 	err := ld.DB.Close()
 	if err != nil {
-		DEBUG("error closing database", err)
+		log.DEBUG("error closing database", err)
 		return err
 	}
-	TRACE("database closed")
+	log.TRACE("database closed")
 	time.Sleep(time.Second / 4)
 	ld.Loaded = false
 	ld.DB = nil
@@ -213,11 +214,11 @@ func (ld *Loader) WalletExists() (bool, error) {
 // onLoaded executes each added callback and prevents loader from loading any
 // additional wallets.  Requires mutex to be locked.
 func (ld *Loader) onLoaded(db walletdb.DB) {
-	TRACE("wallet loader callbacks running ", ld.Wallet != nil)
+	log.TRACE("wallet loader callbacks running ", ld.Wallet != nil)
 	for _, fn := range ld.Callbacks {
 		fn(ld.Wallet)
 	}
-	TRACE("wallet loader callbacks finished")
+	log.TRACE("wallet loader callbacks finished")
 	ld.Loaded = true
 	ld.DB = db
 	ld.Callbacks = nil // not needed anymore

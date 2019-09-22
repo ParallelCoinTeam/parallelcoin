@@ -8,6 +8,7 @@ import (
 	"github.com/parallelcointeam/parallelcoin/app/apputil"
 	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
@@ -21,8 +22,7 @@ func walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if !apputil.FileExists(dbFilename) {
 			cl.Register.SetAllLevels("off")
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				cx.Log <- cl.Error{"failed to create wallet",
-					err}
+				log.ERROR("failed to create wallet", err)
 				return err
 			}
 			cl.Register.SetAllLevels(*cx.Config.LogLevel)
@@ -33,8 +33,7 @@ func walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			err = walletmain.Main(cx.Config, cx.StateCfg,
 				cx.ActiveNet, walletChan, cx.WalletKill, &wg)
 			if err != nil {
-				cx.Log <- cl.Error{"failed to start up wallet",
-					 err}
+				log.ERROR("failed to start up wallet",err)
 			}
 		}()
 		cx.WalletServer = <-walletChan

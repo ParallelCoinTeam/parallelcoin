@@ -10,6 +10,7 @@ import (
 	"github.com/grandcat/zeroconf"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 type Request struct {
@@ -25,7 +26,7 @@ func GetParallelcoinServiceName(params *netparams.Params) string {
 
 func Serve(params *netparams.Params, lanInterface *net.Interface,
 	group string) (cancel context.CancelFunc, request RequestFunc, err error) {
-	WARN("starting discovery server")
+	log.WARN("starting discovery server")
 	texts := []string{"group=" + group}
 	domain := "local."
 	requests := make(chan Request)
@@ -38,21 +39,21 @@ func Serve(params *netparams.Params, lanInterface *net.Interface,
 		server, err := zeroconf.Register(alias, GetParallelcoinServiceName(
 			params), domain, 1, texts, []net.Interface{*lanInterface})
 		if err != nil {
-			ERROR("error registering ", err)
+			log.ERROR("error registering ", err)
 			return
 		}
-		TRACE("registered")
+		log.TRACE("registered")
 		for {
 			select {
 			case r := <-requests:
 				found := false
 				for i := range texts {
 					split := strings.Split(texts[i], "=")
-					// WARN("'",split[0],"' '", r.Key,"'")
+					// log.WARN("'",split[0],"' '", r.Key,"'")
 					if split[0] == r.Key {
 						found = true
 						if r.Address == "" {
-							DEBUG("discovery: removing key ", r.Key)
+							log.DEBUG("discovery: removing key", r.Key)
 							switch {
 							case i == 0:
 								texts = texts[1:]
@@ -70,18 +71,18 @@ func Serve(params *netparams.Params, lanInterface *net.Interface,
 				if !found && r.Address != "" {
 					nt := r.Key + "=" + r.Address
 					texts = append(texts, nt)
-					DEBUG("appending ", nt, " to texts ", texts)
+					log.DEBUG("appending", nt, "to texts", texts)
 				}
 				server.Shutdown()
-				TRACE("shut down server")
+				log.TRACE("shut down server")
 				server, err = zeroconf.Register(alias,
 					GetParallelcoinServiceName(
 						params), domain, 1, texts, []net.Interface{*lanInterface})
 				if err != nil {
-					ERROR("error registering ", err)
+					log.ERROR("error registering ", err)
 					return
 				}
-				TRACE("restarted server")
+				log.TRACE("restarted server")
 			case <-ctx.Done():
 				server.Shutdown()
 				break

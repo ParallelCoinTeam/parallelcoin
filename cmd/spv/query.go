@@ -13,6 +13,7 @@ import (
 	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
@@ -260,7 +261,7 @@ queryChainServiceBatch(
 					atomic.LoadUint32(&queryStates[i]) ==
 						uint32(queryAnswered) {
 					firstUnfinished++
-					TRACEF(
+					log.TRACEF(
 						"query #%v already answered, skipping", i,
 					)
 					continue
@@ -273,7 +274,7 @@ queryChainServiceBatch(
 					uint32(queryWaitSubmit),
 					uint32(queryWaitResponse),
 				) {
-					TRACEF(
+					log.TRACEF(
 						"query #%v already being queried for, skipping", i,
 					)
 					continue
@@ -331,7 +332,7 @@ queryChainServiceBatch(
 				if !sp.Connected() {
 					return
 				}
-				TRACEC(func() string {
+				log.TRACEC(func() string {
 					return fmt.Sprintf(
 						"query for #%v failed, moving on: %v",
 						handleQuery,
@@ -343,7 +344,7 @@ queryChainServiceBatch(
 				// query a success.
 				atomic.StoreUint32(&queryStates[handleQuery],
 					uint32(queryAnswered))
-				TRACEF(
+				log.TRACEF(
 					"query #%v answered, updating state", handleQuery,
 				)
 			}
@@ -703,10 +704,10 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 	}
 	if block.BlockHash() != blockHash {
 		str := "couldn't get header for block %s from database"
-		DEBUG(str, blockHash)
+		log.DEBUG(str, blockHash)
 		return nil, fmt.Errorf(str, blockHash)
 	}
-	DEBUGF(
+	log.DEBUGF(
 		"fetching filter for height=%v, hash=%v %s",
 		height, blockHash,
 	)
@@ -782,7 +783,7 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 		// the caller requested it.
 		err := s.putFilterToCache(&blockHash, dbFilterType, filter)
 		if err != nil {
-			WARN(
+			log.WARN(
 				"couldn't write filter to cache:", err,
 			)
 		}
@@ -793,7 +794,7 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 			if err != nil {
 				return nil, err
 			}
-			TRACEF(
+			log.TRACEF(
 				"Wrote filter for block %s, type %d",
 				blockHash, filterType,
 			)
@@ -838,7 +839,7 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 	getData := wire.NewMsgGetData()
 	err = getData.AddInvVect(inv)
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	// The block is only updated from the checkResponse function argument,
 	// which is always called single-threadedly. We don't check the block
@@ -882,7 +883,7 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 					false,
 					block.Height(),
 				); err != nil {
-					WARNF(
+					log.WARNF(
 						"Invalid block for %s received from %s -- disconnecting peer",
 						blockHash, sp.Addr(),
 					)
@@ -909,7 +910,7 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 	// Add block to the cache before returning it.
 	err = s.BlockCache.Put(*inv, &cache.CacheableBlock{Block: foundBlock})
 	if err != nil {
-		WARN("couldn't write block to cache:", err)
+		log.WARN("couldn't write block to cache:", err)
 	}
 	return foundBlock, nil
 }
@@ -937,7 +938,7 @@ func // SendTransaction sends a transaction to all peers.
 	inv := wire.NewMsgInv()
 	err = inv.AddInvVect(wire.NewInvVect(invType, &txHash))
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	// Send the peer query and listen for getdata.
 	s.queryAllPeers(
@@ -958,7 +959,7 @@ func // SendTransaction sends a transaction to all peers.
 						"rejected by %s: %s",
 						tx.TxHash(), sp.Addr(),
 						response.Reason)
-					ERROR(err)
+					log.ERROR(err)
 					close(quit)
 				}
 			}

@@ -9,6 +9,7 @@ import (
 
 	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 const (
@@ -39,11 +40,11 @@ func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
 			randSource := mrand.New(mrand.NewSource(time.Now().UnixNano()))
 			seedpeers, err := lookupFn(host)
 			if err != nil {
-				INFOF("DNS discovery failed on seed %s: %v", host, err)
+				log.INFO("DNS discovery failed on seed %s: %v", host, err)
 				return
 			}
 			numPeers := len(seedpeers)
-			DEBUGF("%d addresses found from DNS seed %s %s", numPeers, host)
+			log.DEBUGF("%d addresses found from DNS seed %s", numPeers, host)
 			if numPeers == 0 {
 				return
 			}
