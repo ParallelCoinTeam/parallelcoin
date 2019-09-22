@@ -13,6 +13,7 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
@@ -424,7 +425,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		wc.curFileNum = oldBlockFileNum
 		wc.curOffset = oldBlockOffset
 	}()
-	DEBUGF(
+	log.DEBUG(
 		"ROLLBACK: Rolling back to file %d, offset %d %s",
 		oldBlockFileNum,
 		oldBlockOffset,
@@ -440,7 +441,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	}
 	for ; wc.curFileNum > oldBlockFileNum; wc.curFileNum-- {
 		if err := s.deleteFileFunc(wc.curFileNum); err != nil {
-			WARNF(
+			log.WARN(
 				"ROLLBACK: Failed to delete block file number %d: %v %s",
 				wc.curFileNum, err)
 			return
@@ -452,7 +453,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		obf, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
 			wc.curFile.Unlock()
-			WARN("ROLLBACK:", err)
+			log.WARN("ROLLBACK:", err)
 			return
 		}
 		wc.curFile.file = obf
@@ -460,7 +461,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	// Truncate the to the provided rollback offset.
 	if err := wc.curFile.file.Truncate(int64(oldBlockOffset)); err != nil {
 		wc.curFile.Unlock()
-		WARNF(
+		log.WARN(
 			"ROLLBACK: Failed to truncate file %d: %v %s",
 			wc.curFileNum,
 			err,
@@ -471,7 +472,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	err := wc.curFile.file.Sync()
 	wc.curFile.Unlock()
 	if err != nil {
-		WARNF(
+		log.WARN(
 			"ROLLBACK: Failed to sync file %d: %v %s",
 			wc.curFileNum,
 			err,
@@ -493,7 +494,7 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		lastFile = i
 		fileLen = uint32(st.Size())
 	}
-	TRACEF(
+	log.TRACE(
 		"Scan found latest block file #%d with length %d",
 		lastFile,
 		fileLen)

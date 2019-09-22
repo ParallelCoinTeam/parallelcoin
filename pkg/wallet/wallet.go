@@ -20,6 +20,7 @@ import (
 	txrules "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/rules"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
@@ -105,18 +106,18 @@ type Wallet struct {
 
 // Start starts the goroutines necessary to manage a wallet.
 func (w *Wallet) Start() {
-	TRACE("starting wallet")
+	log.TRACE("starting wallet")
 	w.quitMu.Lock()
 	select {
 	case <-w.quit:
-		TRACE("waiting for wallet shutdown")
+		log.TRACE("waiting for wallet shutdown")
 		// Restart the wallet goroutines after shutdown finishes.
 		w.WaitForShutdown()
 		w.quit = make(chan struct{})
 	default:
 		if w.started {
 		// Ignore when the wallet is still running.
-		INFO("wallet already started")
+			log.INFO("wallet already started")
 			w.quitMu.Unlock()
 			return
 		}
@@ -317,7 +318,7 @@ func (w *Wallet) syncWithChain() error {
 		return err
 	})
 	if err != nil {
-		WARN("error starting sync", err)
+		log.WARN("error starting sync", err)
 		return err
 	}
 	startHeight := w.Manager.SyncedTo().Height
@@ -361,7 +362,7 @@ func (w *Wallet) syncWithChain() error {
 		if bestHeight > logHeight {
 			logHeight = bestHeight
 		}
-		INFOF(
+		log.INFOF(
 			"catching up block hashes to height %d, this will take a while... %s",
 			logHeight,
 		)
@@ -374,7 +375,7 @@ func (w *Wallet) syncWithChain() error {
 		// Only allocate the recoveryMgr if we are actually in recovery mode.
 		var recoveryMgr *RecoveryManager
 		if isRecovery {
-			INFO(
+			log.INFO(
 				"RECOVERY MODE ENABLED -- rescanning for used addresses with recovery_window =",
 				w.recoveryWindow,
 			)
@@ -512,7 +513,7 @@ func (w *Wallet) syncWithChain() error {
 					}
 					return err
 				}
-				INFO(
+				log.INFO(
 					"caught up to height", height,
 				)
 				tx, err = w.db.BeginReadWriteTx()
@@ -546,7 +547,7 @@ func (w *Wallet) syncWithChain() error {
 			}
 			return err
 		}
-		INFO("done catching up block hashes")
+		log.INFO("done catching up block hashes")
 		// Since we've spent some time catching up block hashes, we might have new addresses waiting for us that were requested during initial sync. Make sure we have those before we request a rescan later on.
 		err = walletdb.View(w.db, func(dbtx walletdb.ReadTx) error {
 			var err error
@@ -680,7 +681,7 @@ func (w *Wallet) recoverScopedAddresses(
 	if len(batch) == 0 {
 		return nil
 	}
-	INFOF(
+	log.INFOF(
 		"scanning %d blocks for recoverable addresses",
 		len(batch),
 	)
@@ -964,7 +965,7 @@ func logFilterBlocksResp(block wtxmgr.BlockMeta,
 		nFoundExternal += len(indexes)
 	}
 	if nFoundExternal > 0 {
-		INFOF(
+		log.INFOF(
 			"recovered %d external addrs at height=%d hash=%v",
 			nFoundExternal, block.Height, block.Hash,
 		)
@@ -975,7 +976,7 @@ func logFilterBlocksResp(block wtxmgr.BlockMeta,
 		nFoundInternal += len(indexes)
 	}
 	if nFoundInternal > 0 {
-		INFOF(
+		log.INFOF(
 			"recovered %d internal addrs at height=%d hash=%v",
 			nFoundInternal, block.Height, block.Hash,
 		)
@@ -983,7 +984,7 @@ func logFilterBlocksResp(block wtxmgr.BlockMeta,
 	// Log the number of outpoints found in this block.
 	nFoundOutPoints := len(resp.FoundOutPoints)
 	if nFoundOutPoints > 0 {
-		INFOF(
+		log.INFOF(
 			"found %d spends from watched outpoints at height=%d hash=%v",
 			nFoundOutPoints, block.Height, block.Hash,
 		)
@@ -1099,9 +1100,9 @@ out:
 			}
 			timeout = req.lockAfter
 			if timeout == nil {
-				INFO("the wallet has been unlocked without a time limit")
+				log.INFO("the wallet has been unlocked without a time limit")
 			} else {
-				INFO("the wallet has been temporarily unlocked")
+				log.INFO("the wallet has been temporarily unlocked")
 			}
 			req.err <- nil
 			continue
@@ -1162,9 +1163,9 @@ out:
 		timeout = nil
 		err := w.Manager.Lock()
 		if err != nil && !waddrmgr.IsError(err, waddrmgr.ErrLocked) {
-			ERROR("could not lock wallet:", err)
+			log.ERROR("could not lock wallet:", err)
 		} else {
-			INFO("the wallet has been locked")
+			log.INFO("the wallet has been locked")
 		}
 	}
 	w.wg.Done()
@@ -1602,7 +1603,7 @@ func (w *Wallet) NextAccount(scope waddrmgr.KeyScope, name string) (uint32, erro
 		return err
 	})
 	if err != nil {
-		ERROR(
+		log.ERROR(
 			"cannot fetch new account properties for notification after" +
 				" account creation:", err)
 	}
@@ -2491,7 +2492,7 @@ func (w *Wallet) ImportPrivateKey(scope waddrmgr.KeyScope, wif *util.WIF,
 		}
 	}
 	addrStr := addr.EncodeAddress()
-	INFO("imported payment address", addrStr)
+	log.INFO("imported payment address", addrStr)
 	w.NtfnServer.notifyAccountProperties(props)
 	// Return the payment address string of the imported private key.
 	return addrStr, nil
@@ -2544,7 +2545,7 @@ func (w *Wallet) LockedOutpoints() []btcjson.TransactionInput {
 func (w *Wallet) resendUnminedTxs() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		ERROR("no chain server available to resend unmined transactions", err)
+		log.ERROR("no chain server available to resend unmined transactions", err)
 		return
 	}
 	var txs []*wire.MsgTx
@@ -2555,13 +2556,13 @@ func (w *Wallet) resendUnminedTxs() {
 		return err
 	})
 	if err != nil {
-		ERROR("cannot load unmined transactions for resending:", err)
+		log.ERROR("cannot load unmined transactions for resending:", err)
 		return
 	}
 	for _, tx := range txs {
 		resp, err := chainClient.SendRawTransaction(tx, false)
 		if err != nil {
-			DEBUGF(
+			log.DEBUGF(
 				"could not resend transaction %v: %v %s",
 				tx.TxHash(), err)
 			// We'll only stop broadcasting transactions if we
@@ -2604,17 +2605,17 @@ func (w *Wallet) resendUnminedTxs() {
 				return w.TxStore.RemoveUnminedTx(txmgrNs, txRec)
 			})
 			if err != nil {
-				WARNF(
+				log.WARNF(
 					"unable to remove conflicting tx %v: %v %s", tt.TxHash(),
 					err)
 				continue
 			}
-			INFOC(func() string {
+			log.INFOC(func() string {
 				return "removed conflicting tx:" + spew.Sdump(tt) + " " + cl.Ine()
 			})
 			continue
 		}
-		DEBUG("resent unmined transaction", resp)
+		log.DEBUG("resent unmined transaction", resp)
 	}
 }
 
@@ -2683,7 +2684,7 @@ func (w *Wallet) newAddress(addrmgrNs walletdb.ReadWriteBucket, account uint32,
 	}
 	props, err := manager.AccountProperties(addrmgrNs, account)
 	if err != nil {
-		ERROR(
+		log.ERROR(
 			"cannot fetch account properties for notification after deriving next external address:",
 			err)
 		return nil, nil, err
@@ -3188,7 +3189,7 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 	if err != nil {
 		return nil, err
 	}
-	TRACE("opened wallet")// TODO: log balance? last sync height?
+	log.TRACE("opened wallet")// TODO: log balance? last sync height?
 	w := &Wallet{
 		publicPassphrase:    pubPass,
 		db:                  db,

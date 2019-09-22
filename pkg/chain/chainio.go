@@ -12,6 +12,7 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
@@ -894,7 +895,7 @@ func // createChainState initializes both the database and the chain state to
 	(b *BlockChain) createChainState() error {
 	// Create a new node from the genesis block and set it as the best node.
 	genesisBlock := util.NewBlock(b.params.GenesisBlock)
-	TRACEC(func() string {
+	log.TRACEC(func() string {
 		xx, _ := genesisBlock.Bytes()
 		return hex.EncodeToString(xx)
 	})
@@ -1012,7 +1013,7 @@ func // initChainState attempts to load and initialize the chain state from the
 		// yet, so break out now to allow that to happen under a writable
 		// database transaction.
 		serializedData := dbTx.Metadata().Get(chainStateKeyName)
-		TRACEF("serialized chain state: %0x", serializedData)
+		log.TRACEF("serialized chain state: %0x", serializedData)
 		state, err := deserializeBestChainState(serializedData)
 		if err != nil {
 			return err
@@ -1022,7 +1023,7 @@ func // initChainState attempts to load and initialize the chain state from the
 		// Since the number of nodes are already known,
 		// perform a single alloc for them versus a whole bunch of little
 		// ones to reduce pressure on the GC.
-		TRACE("loading block index...")
+		log.TRACE("loading block index...")
 		blockIndexBucket := dbTx.Metadata().Bucket(blockIndexBucketName)
 		// Determine how many blocks will be loaded into the index so we can
 		// allocate the right amount.
@@ -1105,7 +1106,8 @@ func // initChainState attempts to load and initialize the chain state from the
 			// then we'll mark it as valid now to ensure consistency once we
 			// 're up and running.
 			if !iterNode.status.KnownValid() {
-				INFOF("Block %v (height=%v) ancestor of chain tip not marked as valid, upgrading to valid for consistency",
+				log.INFOF("Block %v (height=%v) ancestor of chain tip not" +
+					" marked as valid, upgrading to valid for consistency",
 					iterNode.hash, iterNode.height)
 				b.Index.SetStatusFlags(iterNode, statusValid)
 			}

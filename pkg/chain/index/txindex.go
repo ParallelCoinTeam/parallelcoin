@@ -8,6 +8,7 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
@@ -280,7 +281,7 @@ func // Init initializes the hash-based transaction index.  In particular,
 			highestKnown = testBlockID
 			testBlockID += increment
 		}
-		TRACEF(
+		log.TRACEF(
 			"forward scan (highest known %d, next unknown %d)",
 			highestKnown,
 			nextUnknown,
@@ -299,7 +300,7 @@ func // Init initializes the hash-based transaction index.  In particular,
 			} else {
 				highestKnown = testBlockID
 			}
-			TRACEF(
+			log.TRACEF(
 				"binary scan (highest known %d, next unknown %d)",
 				highestKnown,
 				nextUnknown,
@@ -314,7 +315,7 @@ func // Init initializes the hash-based transaction index.  In particular,
 	if err != nil {
 		return err
 	}
-	TRACE("current internal block ID:", idx.curBlockID)
+	log.TRACE("current internal block ID:", idx.curBlockID)
 	return nil
 }
 

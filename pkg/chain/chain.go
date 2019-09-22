@@ -12,6 +12,7 @@ import (
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
@@ -523,14 +524,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	if !prevHash.IsEqual(&b.bestChain.Tip().hash) {
 		str := "connectBlock must be called with a block that extends the" +
 			" main chain"
-		DEBUG(str)
+		log.DEBUG(str)
 		return AssertError(str)
 	}
 	// Sanity check the correct number of stxos are provided.
 	if len(stxos) != countSpentOutputs(block) {
 		str := "connectBlock called with inconsistent spent transaction out" +
 			" information"
-		DEBUG(str)
+		log.DEBUG(str)
 		return AssertError(str)
 	}
 
@@ -539,7 +540,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// Warn if any unknown new rules are either about to activate or have
 		// already been activated.
 		if err := b.warnUnknownRuleActivations(node); err != nil {
-			TRACE("warnUnknownRuleActivations ", err)
+			log.TRACE("warnUnknownRuleActivations ", err)
 			return err
 		}
 	}
@@ -564,14 +565,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
 		if err != nil {
-			TRACE("dbPutBestState", err)
+			log.TRACE("dbPutBestState", err)
 			return err
 		}
 		// Add the block hash and height to the block index which tracks the
 		// main chain.
 		err = dbPutBlockIndex(dbTx, block.Hash(), node.height)
 		if err != nil {
-			TRACE("dbPutBlockIndex", err)
+			log.TRACE("dbPutBlockIndex", err)
 			return err
 		}
 		// update the utxo set using the state of the utxo view.
@@ -579,7 +580,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// ones created by the block.
 		err = dbPutUtxoView(dbTx, view)
 		if err != nil {
-			TRACE("dbPutUtxoView", err)
+			log.TRACE("dbPutUtxoView", err)
 			return err
 		}
 
@@ -587,7 +588,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// block that contains all txos spent by it.
 		err = dbPutSpendJournalEntry(dbTx, block.Hash(), stxos)
 		if err != nil {
-			TRACE("dbPutSpendJournalEntry", err)
+			log.TRACE("dbPutSpendJournalEntry", err)
 			return err
 		}
 		// Allow the index manager to call each of the currently active
@@ -596,14 +597,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		if b.indexManager != nil {
 			err := b.indexManager.ConnectBlock(dbTx, block, stxos)
 			if err != nil {
-				TRACE("connectBlock ", err)
+				log.TRACE("connectBlock ", err)
 				return err
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		TRACE("error updating database ", err)
+		log.TRACE("error updating database ", err)
 		return err
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified
@@ -962,12 +963,12 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 	// Log the point where the chain forked and old and new best chain
 	// heads.
 	if forkNode != nil {
-		INFOF("REORGANIZE: Chain forks at %v (height %v)",
+		log.INFOF("REORGANIZE: Chain forks at %v (height %v)",
 			forkNode.hash, forkNode.height)
 	}
-	INFOF("REORGANIZE: Old best chain head was %v (height %v)",
+	log.INFOF("REORGANIZE: Old best chain head was %v (height %v)",
 		&oldBest.hash, oldBest.height)
-	INFOF("REORGANIZE: New best chain head is %v (height %v)",
+	log.INFOF("REORGANIZE: New best chain head is %v (height %v)",
 		newBest.hash, newBest.height)
 	return nil
 }
@@ -988,7 +989,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) connectBestChain(node *blockNode, block *util.Block,
 	flags BehaviorFlags) (bool, error) {
-	TRACE("connectBestChain")
+	log.TRACE("connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
 		// Intentionally ignore errors writing updated node status to DB.
@@ -997,14 +998,14 @@ func // connectBestChain handles connecting the passed block to the chain while
 		// we flush in connectBlock and if the block is invalid,
 		// the worst that can happen is we revalidate the block after a restart.
 		if writeErr := b.Index.flushToDB(); writeErr != nil {
-			TRACE("Error flushing block index changes to disk:", writeErr)
+			log.TRACE("Error flushing block index changes to disk:", writeErr)
 		}
 	}
 	// We are extending the main (best) chain with a new block.
 	// This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.bestChain.Tip().hash) {
-		TRACE("can attach to tip")
+		log.TRACE("can attach to tip")
 	}
 	// Skip checks if node has already been fully validated.
 	fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
@@ -1014,7 +1015,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	view := NewUtxoViewpoint()
 	view.SetBestHash(parentHash)
 	stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
-	TRACE("fast adding:", fastAdd)
+	log.TRACE("fast adding:", fastAdd)
 	err := b.checkConnectBlock(node, block, view, &stxos)
 	if err == nil {
 		b.Index.SetStatusFlags(node, statusValid)
@@ -1025,7 +1026,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	}
 	flushIndexState()
 	if err != nil {
-		TRACE("error", err)
+		log.TRACE("error", err)
 		return false, err
 	}
 	// In the fast add case the code to check the block connection was
@@ -1044,7 +1045,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// Connect the block to the main chain.
 	err = b.connectBlock(node, block, view, stxos)
 	if err != nil {
-		TRACE("connect block error: ", err)
+		log.TRACE("connect block error: ", err)
 	}
 	// If we got hit with a rule error,
 	// then we'll mark that status of the block as invalid and flush
@@ -1063,7 +1064,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 		return true, nil
 	}
 	if fastAdd {
-		WARNF("fastAdd set in the side chain case? %v\n", block.Hash())
+		log.WARNF("fastAdd set in the side chain case? %v\n", block.Hash())
 	}
 	node.workSum = CalcWork(node.bits, node.height, node.version)
 	// We're extending (or creating) a side chain,
@@ -1073,11 +1074,13 @@ func // connectBestChain handles connecting the passed block to the chain while
 		// Log information about how the block is forking the chain.
 		f := b.bestChain.FindFork(node)
 		if f.hash.IsEqual(parentHash) {
-			TRACEF("FORK: Block %v forks the chain at height %d/block %v, "+
+			log.TRACEF("FORK: Block %v forks the chain at height %d/block %v, "+
 				"but does not cause a reorganize. workSum=%d",
 				node.hash, f.height, f.hash, f.workSum)
 		} else {
-			INFOF("EXTEND FORK: Block %v extends a side chain which forks the"+
+			log.TRACEF("EXTEND FORK: Block %v extends a side chain which" +
+				" forks" +
+				" the"+
 				" chain at height %d/block %v. workSum=%d",
 				node.hash, f.height, f.hash, f.workSum,
 			)
@@ -1095,7 +1098,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// starting at the common ancestor (the point where the chain forked).
 	detachNodes, attachNodes := b.getReorganizeNodes(node)
 	// Reorganize the chain.
-	INFOF("REORGANIZE: block %v is causing a reorganize", node.hash)
+	log.INFOF("REORGANIZE: block %v is causing a reorganize", node.hash)
 	err = b.reorganizeChain(detachNodes, attachNodes)
 	// Either getReorganizeNodes or reorganizeChain could have made unsaved
 	// changes to the block index,
@@ -1103,18 +1106,18 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// The index would only be dirty if the block failed to connect,
 	// so we can ignore any errors writing.
 	if writeErr := b.Index.flushToDB(); writeErr != nil {
-		TRACE("Error flushing block index changes to disk:", writeErr)
+		log.TRACE("Error flushing block index changes to disk:", writeErr)
 	}
 	return err == nil, err
 }
 
-func // isCurrent returns whether or not the chain believes it is current.
-// Several factors are used to guess,
-// but the key factors that allow the chain to believe it is current are:
-//
-//  - Latest block height is after the latest checkpoint (if enabled)
-//  - Latest block has a timestamp newer than 24 hours ago
-//
+func // // isCurrent returns whether or not the chain believes it is current.
+// ////// Several factors are used to guess,
+// ///// but the key factors that allow the chain to believe it is current are:
+// ////
+// ///  - Latest block height is after the latest checkpoint (if enabled)
+// //  - Latest block has a timestamp newer than 24 hours ago
+// /
 // This function MUST be called with the chain state lock held (for reads).
 (b *BlockChain) isCurrent() bool {
 	// Not current if the latest main (best) chain height is before the
@@ -1615,7 +1618,7 @@ New(config *Config) (*BlockChain, error) {
 		return nil, err
 	}
 	bestNode := b.bestChain.Tip()
-	INFOF("chain state (height %d, hash %v, totaltx %d, work %v) %s",
+	log.INFOF("chain state (height %d, hash %v, totaltx %d, work %v)",
 		bestNode.height, bestNode.hash, b.stateSnapshot.TotalTxns,
 		bestNode.workSum)
 	return &b, nil

@@ -14,8 +14,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
 	"github.com/parallelcointeam/parallelcoin/pkg/pod"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/pkgs"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
 
@@ -36,8 +34,6 @@ type Xt struct {
 	ActiveNet *netparams.Params
 	// DataDir is the default data dir
 	DataDir string
-	// Log is the logger for node
-	Log chan interface{}
 	// Node is the run state of the node
 	Node *atomic.Value
 	// NodeKill is the killswitch for the Node
@@ -76,6 +72,5 @@ func GetNewContext(appName string, subtext string) *Xt {
 		Config:   pod.DefConfig(),
 		StateCfg: new(state.Config),
 		DataDir:  util.AppDataDir(appName, false),
-		Log:      cl.NewSubSystem(pkgs.Name(_d)+"/"+subtext, "info").Ch,
 	}
 }

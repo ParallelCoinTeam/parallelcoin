@@ -6,6 +6,8 @@ import (
 	"math/big"
 	"math/rand"
 	"time"
+
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 // AlgoParams are the identifying block version number and their minimum target bits
@@ -130,7 +132,7 @@ var (
 	// SecondPowLimit is
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
-			"000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+			"0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	SecondPowLimitBits = BigToCompact(&SecondPowLimit)
@@ -173,7 +175,7 @@ func GetAlgoVer(name string, height int32) (version int32) {
 	if name == "random" {
 		rng := rand.New(rand.NewSource(time.Now().Unix()))
 		rn := rng.Intn(len(List[hf].AlgoVers)) + 5
-		TRACE("random!", rn)
+		log.TRACE("random!", rn)
 		randomalgover := int32(rn)
 		switch hf {
 		case 0:
@@ -229,16 +231,16 @@ func GetCurrent(height int32) (curr int) {
 
 // GetMinBits returns the minimum diff bits based on height and testnet
 func GetMinBits(algoname string, height int32) (mb uint32) {
-	TRACE("GetMinBits", algoname)
+	log.TRACE("GetMinBits", algoname)
 	curr := GetCurrent(height)
 	mb = List[curr].Algos[algoname].MinBits
-	TRACE("minbits", mb)
+	log.TRACE("minbits", mb)
 	return
 }
 
 // GetMinDiff returns the minimum difficulty in uint256 form
 func GetMinDiff(algoname string, height int32) (md *big.Int) {
-	TRACE("GetMinDiff", algoname)
+	log.TRACE("GetMinDiff", algoname)
 	return CompactToBig(GetMinBits(algoname, height))
 }
 

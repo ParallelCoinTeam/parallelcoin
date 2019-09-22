@@ -7,6 +7,7 @@ import (
 	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
 
@@ -66,7 +67,7 @@ func // verifyCheckpoint returns whether the passed block height and hash
 	if !checkpoint.Hash.IsEqual(hash) {
 		return false
 	}
-	INFOF("Verified checkpoint at height %d/block %s", checkpoint.Height,
+	log.INFOF("Verified checkpoint at height %d/block %s", checkpoint.Height,
 		checkpoint.Hash)
 	return true
 }

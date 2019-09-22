@@ -8,6 +8,7 @@ import (
 	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
@@ -132,7 +133,7 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 func (rm *RecoveryManager) AddToBlockBatch(hash *chainhash.Hash, height int32,
 	timestamp time.Time) {
 	if !rm.started {
-		TRACEF(
+		log.TRACEF(
 			"Seed birthday surpassed, starting recovery of wallet from height=%d hash=%v with recovery-window=%d",
 			height, *hash, rm.recoveryWindow,
 		)

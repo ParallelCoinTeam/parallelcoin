@@ -25,12 +25,10 @@ func // newBlockProgressLogger returns a new block progress logger.
 // The progress message is templated as follows:  {progressAction }
 // {numProcessed} {blocks|block} in the last {timePeriod}
 // ({numTxs}, height {lastBlockHeight}, {lastBlockTimeStamp})
-newBlockProgressLogger(progressMessage string,
-	logger *log.Logger) *blockProgressLogger {
+newBlockProgressLogger(progressMessage string) *blockProgressLogger {
 	return &blockProgressLogger{
 		lastBlockLogTime: time.Now(),
 		progressAction:   progressMessage,
-		subsystemLogger:  l,
 	}
 }
 
@@ -60,7 +58,7 @@ func // LogBlockHeight logs a new block height as an information message to
 	if b.receivedLogTx == 1 {
 		txStr = "transaction "
 	}
-	INFOF(
+	log.INFOF(
 		"%s %6d %s in the last %s (%6d %s, height %8d, %s)",
 		b.progressAction,
 		b.receivedLogBlocks,

@@ -15,13 +15,14 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
 	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		WARN("starting gui")
+		log.WARN("starting gui")
 		Configure(cx)
 		shutdownChan := make(chan struct{})
 		walletChan := make(chan *wallet.Wallet)
@@ -36,21 +37,21 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		var wg sync.WaitGroup
 		if !*cx.Config.NodeOff {
 			go func() {
-				INFO("starting node")
+				log.INFO("starting node")
 				err = node.Main(cx, shutdownChan, cx.NodeKill, nodeChan, &wg)
 				if err != nil {
 					fmt.Println("error running node:", err)
 					os.Exit(1)
 				}
 			}()
-			DEBUG("waiting for nodeChan")
+			log.DEBUG("waiting for nodeChan")
 			cx.RPCServer = <-nodeChan
-			DEBUG("nodeChan sent")
+			log.DEBUG("nodeChan sent")
 			cx.Node.Store(true)
 		}
 		if !*cx.Config.WalletOff {
 			go func() {
-				INFO("starting wallet")
+				log.INFO("starting wallet")
 				err = walletmain.Main(cx.Config, cx.StateCfg,
 					cx.ActiveNet, walletChan, cx.WalletKill, &wg)
 				if err != nil {
@@ -58,13 +59,13 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 					os.Exit(1)
 				}
 			}()
-			DEBUG("waiting for walletChan")
+			log.DEBUG("waiting for walletChan")
 			cx.WalletServer = <-walletChan
-			DEBUG("walletChan sent")
+			log.DEBUG("walletChan sent")
 			cx.Wallet.Store(true)
 		}
 		interrupt.AddHandler(func() {
-			WARN("interrupt received, " +
+			log.WARN("interrupt received, " +
 				"shutting down shell modules")
 			close(cx.WalletKill)
 			close(cx.NodeKill)

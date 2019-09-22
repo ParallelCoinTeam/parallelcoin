@@ -27,6 +27,7 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	pb "github.com/parallelcointeam/parallelcoin/pkg/rpc/walletrpc"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
@@ -649,7 +650,7 @@ func (s *loaderServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 	}
 	s.mu.Lock()
 	if s.rpcClient != nil {
-		DEBUG("starting SynchroniseRPC")
+		log.DEBUG("starting SynchroniseRPC")
 		wallet.SynchronizeRPC(s.rpcClient)
 	}
 	s.mu.Unlock()
@@ -668,7 +669,7 @@ func (s *loaderServer) OpenWallet(ctx context.Context, req *pb.OpenWalletRequest
 	}
 	s.mu.Lock()
 	if s.rpcClient != nil {
-		DEBUG("starting SynchroniseRPC")
+		log.DEBUG("starting SynchroniseRPC")
 		wallet.SynchronizeRPC(s.rpcClient)
 	}
 	s.mu.Unlock()
@@ -729,7 +730,7 @@ func (s *loaderServer) StartConsensusRPC(ctx context.Context, req *pb.StartConse
 	}
 	s.rpcClient = rpcClient
 	if walletLoaded {
-		DEBUG("starting SynchroniseRPC")
+		log.DEBUG("starting SynchroniseRPC")
 		wallet.SynchronizeRPC(rpcClient)
 	}
 	return &pb.StartConsensusRPCResponse{}, nil

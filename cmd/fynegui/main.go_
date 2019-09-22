@@ -17,7 +17,7 @@ import (
 )
 
 // Log log glorious log
-var Log = cl.NewSubSystem(reflect.TypeOf(log).PkgPath(), "info")
+var Log *log.Logger(reflect.TypeOf(log).PkgPath(), "info")
 var log = Log.Ch
 var startednode, startedwallet, guiopen bool
 var slash = string(os.PathSeparator)

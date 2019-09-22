@@ -12,6 +12,7 @@ import (
 
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
@@ -1726,7 +1727,7 @@ func // calcHash calculates the hash of hasher over buf.
 calcHash(buf []byte, hasher hash.Hash) []byte {
 	_, err := hasher.Write(buf)
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	return hasher.Sum(nil)
 }

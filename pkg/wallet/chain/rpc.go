@@ -9,6 +9,7 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	tm "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
@@ -213,7 +214,7 @@ func (c *RPCClient) FilterBlocks(
 		} else if !matched {
 			continue
 		}
-		TRACEF(
+		log.TRACEF(
 			"fetching block height=%d hash=%v",
 			blk.Height, blk.Hash,
 		)
@@ -297,14 +298,14 @@ func (c *RPCClient) onRecvTx(tx *util.Tx, block *btcjson.BlockDetails) {
 	blk, err := parseBlock(block)
 	if err != nil {
 		// Log and drop improper notification.
-		ERROR(
+		log.ERROR(
 			"recvtx notification bad block:", err,
 			)
 		return
 	}
 	rec, err := tm.NewTxRecordFromMsgTx(tx.MsgTx(), time.Now())
 	if err != nil {
-		ERROR(
+		log.ERROR(
 			"cannot create transaction record for relevant tx:", err,
 		)
 		return
@@ -336,7 +337,7 @@ func (c *RPCClient) onRescanFinished(hash *chainhash.Hash, height int32, blkTime
 func (c *RPCClient) handler() {
 	hash, height, err := c.GetBestBlock()
 	if err != nil {
-		ERROR(
+		log.ERROR(
 			"failed to receive best block from chain server:", err,
 		)
 		c.Stop()

@@ -8,6 +8,7 @@ import (
 	"github.com/parallelcointeam/parallelcoin/app/apputil"
 	"github.com/parallelcointeam/parallelcoin/cmd/node/path"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 // dirEmpty returns whether or not the specified directory path is empty
@@ -104,17 +105,17 @@ func upgradeDBPaths(cx *conte.Xt) error {
 	oldDbRoot := filepath.Join(oldPodHomeDir(), "db")
 	err := upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet")
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_testnet.db"),
 		"testnet")
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_regtest.db"),
 		"regtest")
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	// Remove the old db directory
 	//
@@ -133,7 +134,7 @@ func upgradeDataPaths() error {
 	// Only migrate if the old path exists and the new one doesn't
 	if apputil.FileExists(oldHomePath) && !apputil.FileExists(newHomePath) {
 		// Create the new path
-		INFOF("migrating application home path from '%s' to '%s'",
+		log.INFOF("migrating application home path from '%s' to '%s'",
 			oldHomePath, newHomePath)
 		err := os.MkdirAll(newHomePath, 0700)
 		if err != nil {
@@ -168,7 +169,7 @@ func upgradeDataPaths() error {
 				return err
 			}
 		} else {
-			WARNF("not removing '%s' since it contains files not created by"+
+			log.WARNF("not removing '%s' since it contains files not created by"+
 				" this application you may want to manually move them or"+
 				" delete them.", oldHomePath)
 		}

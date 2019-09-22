@@ -5,6 +5,8 @@ import (
 	"sort"
 	"sync"
 	"time"
+
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 // TODO: tighten maxAllowedOffsetSecs for hf1 - also, consider changing to a
@@ -123,8 +125,9 @@ func // AddTimeSample adds a time sample that is used when determining the
 	copy(sortedOffsets, m.offsets)
 	sort.Sort(int64Sorter(sortedOffsets))
 	offsetDuration := time.Duration(offsetSecs) * time.Second
-	TRACEF("Added time sample of %v (total: %v)", offsetDuration, numOffsets)
-	TRACE("samples:", sortedOffsets)
+	log.TRACEF("Added time sample of %v (total: %v)", offsetDuration,
+		numOffsets)
+	log.TRACE("samples:", sortedOffsets)
 	// NOTE: The following code intentionally has a bug to mirror the buggy
 	// behavior in Bitcoin Core since the median time is used in the consensus
 	// rules. In particular, the offset is only updated when the number of
@@ -162,13 +165,14 @@ func // AddTimeSample adds a time sample that is used when determining the
 			}
 			// Warn if none of the time samples are close.
 			if !remoteHasCloseTime {
-				WARN("Please check your date and time are correct!  pod will" +
+				log.WARN("Please check your date and time are correct!  pod" +
+					" will" +
 					" not work properly with an invalid time")
 			}
 		}
 	}
 	medianDuration := time.Duration(m.offsetSecs) * time.Second
-	DEBUG("new time offset:", medianDuration)
+	log.DEBUG("new time offset:", medianDuration)
 }
 
 func // Offset returns the number of seconds to adjust the local clock based

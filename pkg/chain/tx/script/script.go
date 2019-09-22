@@ -8,6 +8,7 @@ import (
 
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 var // Bip16Activation is the timestamp where BIP0016 is valid to use in the
@@ -388,7 +389,7 @@ calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
 	for _, out := range tx.TxOut {
 		err := wire.WriteTxOut(&b, 0, 0, out)
 		if err != nil {
-			DEBUG(err)
+			log.DEBUG(err)
 		}
 	}
 	return chainhash.DoubleHashH(b.Bytes())
@@ -462,7 +463,7 @@ calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashT
 		rawScript, _ := unparseScript(subScript)
 		err := wire.WriteVarBytes(&sigHash, 0, rawScript)
 		if err != nil {
-			DEBUG(err)
+			log.DEBUG(err)
 		}
 	}
 	// Next, add the input amount,
@@ -484,7 +485,7 @@ calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashT
 		var b bytes.Buffer
 		err := wire.WriteTxOut(&b, 0, 0, tx.TxOut[idx])
 		if err != nil {
-			DEBUG(err)
+			log.DEBUG(err)
 		}
 		sigHash.Write(chainhash.DoubleHashB(b.Bytes()))
 	} else {
@@ -632,11 +633,11 @@ calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.MsgTx, i
 	wbuf := bytes.NewBuffer(make([]byte, 0, txCopy.SerializeSizeStripped()+4))
 	err := txCopy.SerializeNoWitness(wbuf)
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	err = binary.Write(wbuf, binary.LittleEndian, hashType)
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	return chainhash.DoubleHashB(wbuf.Bytes())
 }

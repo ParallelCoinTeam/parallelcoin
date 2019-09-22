@@ -9,6 +9,7 @@ import (
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/pod"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
@@ -34,7 +35,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 	netDir := NetworkDir(*cfg.AppDataDir, activenet)
 	// Create the wallet.
 	dbPath := filepath.Join(netDir, WalletDbName)
-	INFO("Creating the wallet...")
+	log.INFO("Creating the wallet...")
 	// Create the wallet database backed by bolt db.
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
@@ -46,7 +47,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 	if err != nil {
 		return err
 	}
-	INFO("The wallet has been created successfully.")
+	log.INFO("The wallet has been created successfully.")
 	return nil
 }
 
@@ -80,7 +81,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	reader := bufio.NewReader(os.Stdin)
 	privPass, err := prompt.PrivatePass(reader, legacyKeyStore)
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 		time.Sleep(time.Second * 3)
 		return err
 	}
@@ -97,10 +98,10 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 			defer func() {
 				err := legacyKeyStore.Lock()
 				if err != nil {
-					DEBUG(err)
+					log.DEBUG(err)
 				}
 			}()
-			INFO("Importing addresses from existing wallet...")
+			log.INFO("Importing addresses from existing wallet...")
 			lockChan := make(chan time.Time, 1)
 			defer func() {
 				lockChan <- time.Time{}
@@ -131,7 +132,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	pubPass, err := prompt.PublicPass(reader, privPass, []byte(""),
 		[]byte(*config.WalletPass))
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
@@ -140,19 +141,19 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	// value the user has entered which has already been validated.
 	seed, err := prompt.Seed(reader)
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
-	DEBUG("Creating the wallet")
+	log.DEBUG("Creating the wallet")
 	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now())
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
 	w.Manager.Close()
-	DEBUG("The wallet has been created successfully.")
+	log.DEBUG("The wallet has been created successfully.")
 	return nil
 }
 

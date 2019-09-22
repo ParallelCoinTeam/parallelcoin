@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/altsrc"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 
 	"github.com/parallelcointeam/parallelcoin/app/apputil"
 	"github.com/parallelcointeam/parallelcoin/cmd/node"
@@ -33,7 +34,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 		},
 		Before: beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			TRACE("subcommand completed")
+			log.TRACE("subcommand completed")
 			return nil
 		},
 		Commands: []cli.Command{

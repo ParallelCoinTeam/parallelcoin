@@ -10,6 +10,7 @@ import (
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 // CalcNextRequiredDifficultyPlan9 calculates the required difficulty for the
@@ -20,7 +21,7 @@ import (
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	adjustment float64, err error) {
-	TRACE("algoname ", algoname)
+	log.TRACE("algoname ", algoname)
 	const max float64 = 10000
 	const maxA, minA = max, 1 / max
 	const minAvSamples = 9
@@ -35,7 +36,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	if b.params.Net == wire.MainNet {
 		if fork.List[1].ActivationHeight == nH {
 			if l {
-				DEBUG("on plan 9 hardfork")
+				log.DEBUG("on plan 9 hardfork")
 			}
 			return fork.FirstPowLimitBits, 1, nil
 		}
@@ -43,14 +44,14 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	if b.params.Net == wire.TestNet3 {
 		if fork.List[1].TestnetStart == nH {
 			if l {
-				DEBUG("on plan 9 hardfork")
+				log.DEBUG("on plan 9 hardfork")
 			}
 			return fork.FirstPowLimitBits, 1, nil
 		}
 	}
 	algoVer := fork.GetAlgoVer(algoname, nH)
 	newTargetBits = fork.SecondPowLimitBits
-	TRACEF("newTarget %08x %s %d %s", newTargetBits, algoname, algoVer)
+	log.TRACEF("newTarget %08x %s %d %s", newTargetBits, algoname, algoVer)
 	last := lastNode
 	// find the most recent block of the same algo
 	//
@@ -68,7 +69,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 				//
 				if ln == nil {
 					if l {
-						DEBUG("before first ", algoname)
+						log.DEBUG("before first ", algoname)
 					}
 					return fork.FirstPowLimitBits, 1, nil
 				}
@@ -103,7 +104,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	}
 	allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv
 	// collect timestamps of same algo of equal number as avinterval
-	algDiv := float64(1)
+	algDiv := allTimeDiv
 	algStamps := []int64{last.timestamp}
 	for ln := last; ln != nil && ln.height > startHeight &&
 		len(algStamps) <= int(fork.List[1].AveragingInterval); {
@@ -125,7 +126,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		}
 		if intervals > minAvSamples {
 			if l {
-				TRACE("algs", algIntervals)
+				log.TRACE("algs", algIntervals)
 			}
 			// calculate exponential weighted moving average from intervals
 			awi := ewma.NewMovingAverage()
@@ -179,7 +180,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			}
 			if intervals > minAvSamples {
 				if l {
-					TRACE("da", dayIntervals)
+					log.TRACE("da", dayIntervals)
 				}
 				// calculate exponential weighted moving average from intervals
 				dw := ewma.NewMovingAverage()
@@ -222,7 +223,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			}
 			if intervals > minAvSamples {
 				if l {
-					TRACE("hr", hourIntervals)
+					log.TRACE("hr", hourIntervals)
 				}
 				// calculate exponential weighted moving average from intervals
 				hw := ewma.NewMovingAverage()
@@ -265,7 +266,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			}
 			if intervals > 1 {
 				if l {
-					TRACE("qh", qhourIntervals)
+					log.TRACE("qh", qhourIntervals)
 				}
 				// calculate exponential weighted moving average from intervals
 				qhw := ewma.NewMovingAverage()
@@ -283,18 +284,18 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		}
 	}
 	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv + timeSinceAlgo) / 6
-	TRACE("adjustment %3.4f %08x %s", adjustment, last.bits)
+	log.TRACE("adjustment %3.4f %08x %s", adjustment, last.bits)
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
-		INFO("newTarget is nil ")
+		log.INFO("newTarget is nil ")
 		return newTargetBits, 1, nil
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
 		newTargetBits = BigToCompact(newTarget)
-		TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
+		log.TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
 		an := fork.List[1].AlgoVers[algoVer]
@@ -302,7 +303,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
-		INFOC(func() string {
+		log.INFOC(func() string {
 			return fmt.Sprintf("%d %s %s %s %s %s %s %s %s %s",
 				lastNode.height+1,
 				an,

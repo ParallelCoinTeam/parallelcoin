@@ -8,6 +8,7 @@ import (
 	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
@@ -339,7 +340,7 @@ func // insertMinedTx inserts a new transaction record for a mined
 	// If this transaction previously existed within the store as unmined,
 	// we'll need to remove it from the unmined bucket.
 	if v := existsRawUnmined(ns, rec.Hash[:]); v != nil {
-		INFOF(
+		log.INFOF(
 			"marking unconfirmed transaction %v mined in block %d",
 			&rec.Hash, block.Height,
 		)
@@ -397,7 +398,7 @@ func // addCredit is an AddCredit helper that runs in an update transaction.
 		return false, nil
 	}
 	txOutAmt := util.Amount(rec.MsgTx.TxOut[index].Value)
-	DEBUGF(
+	log.DEBUGF(
 		"marking transaction %v output %d (%v) spendable %s",
 		rec.Hash, index, txOutAmt)
 	cred := credit{
@@ -453,7 +454,7 @@ func
 			break
 		}
 		heightsToRemove = append(heightsToRemove, it.elem.Height)
-		INFOF(
+		log.INFOF(
 			"rolling back %d transactions from block %v height %d",
 			len(b.transactions), b.Hash, b.Height,
 		)
@@ -635,7 +636,7 @@ func
 			if err != nil {
 				return err
 			}
-			DEBUGF(
+			log.DEBUGF(
 				"transaction %v spends a removed coinbase output -- removing as well %s",
 				unminedRec.Hash)
 			err = RemoveConflict(ns, &unminedRec)

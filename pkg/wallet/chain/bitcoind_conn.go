@@ -14,6 +14,7 @@ import (
 	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 )
 
@@ -149,7 +150,7 @@ func (c *BitcoindConn) Stop() {
 func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
 	defer conn.Close()
-	INFO(
+	log.INFO(
 		"started listening for bitcoind block notifications via ZMQ on", c.zmqBlockHost,
 	)
 	for {
@@ -170,7 +171,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			if ok && netErr.Timeout() {
 				continue
 			}
-			ERROR(
+			log.ERROR(
 				"unable to receive ZMQ rawblock message:", err,
 			)
 			continue
@@ -184,7 +185,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			block := &wire.MsgBlock{}
 			r := bytes.NewReader(msgBytes[1])
 			if err := block.Deserialize(r); err != nil {
-				ERROR(
+				log.ERROR(
 					"unable to deserialize block:", err,
 				)
 				continue
@@ -208,7 +209,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			if eventType == "" || !isASCII(eventType) {
 				continue
 			}
-			WARN(
+			log.WARN(
 				"received unexpected event type from rawblock subscription:",
 				eventType,
 			)
@@ -223,7 +224,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
 	defer conn.Close()
-	INFO(
+	log.INFO(
 		"started listening for bitcoind transaction notifications via ZMQ on",
 		c.zmqTxHost,
 	)
@@ -245,7 +246,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			if ok && netErr.Timeout() {
 				continue
 			}
-			ERROR(
+			log.ERROR(
 				"unable to receive ZMQ rawtx message:", err,
 			)
 			continue
@@ -259,7 +260,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			tx := &wire.MsgTx{}
 			r := bytes.NewReader(msgBytes[1])
 			if err := tx.Deserialize(r); err != nil {
-				ERROR(
+				log.ERROR(
 					"unable to deserialize transaction:", err,
 				)
 				continue
@@ -283,7 +284,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			if eventType == "" || !isASCII(eventType) {
 				continue
 			}
-			WARN(
+			log.WARN(
 				"received unexpected event type from rawtx subscription:",
 				eventType,
 			)

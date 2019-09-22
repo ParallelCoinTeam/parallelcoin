@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/hardfork"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
@@ -277,7 +278,7 @@ checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 		return err
 	}
 	elapsed := time.Since(start)
-	TRACEC(func() string {
+	log.TRACEC(func() string {
 		return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
 	})
 	// If the HashCache is present, once we have validated the block,

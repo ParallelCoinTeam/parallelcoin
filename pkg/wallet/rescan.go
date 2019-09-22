@@ -4,6 +4,7 @@ import (
 	tm "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txs "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	wm "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
@@ -121,7 +122,7 @@ out:
 			switch n := n.(type) {
 			case *chain.RescanProgress:
 				if curBatch == nil {
-					WARN(
+					log.WARN(
 						"received rescan progress notification but no rescan currently running",
 					)
 					continue
@@ -132,7 +133,7 @@ out:
 				}
 			case *chain.RescanFinished:
 				if curBatch == nil {
-					WARN(
+					log.WARN(
 						"received rescan finished notification but no rescan currently running",
 					)
 					continue
@@ -165,15 +166,15 @@ out:
 		select {
 		case msg := <-w.rescanProgress:
 			n := msg.Notification
-			INFOF(
+			log.INFOF(
 				"rescanned through block %v (height %d)",
 				n.Hash, n.Height,
 			)
 		case msg := <-w.rescanFinished:
 			n := msg.Notification
 			addrs := msg.Addresses
-			noun := pickNoun(len(addrs), "address", "addresses")
-			INFOF(
+			noun := log.PickNoun(len(addrs), "address", "addresses")
+			log.INFOF(
 				"finished rescan for %d %s (synced to block %s, height %d)",
 				len(addrs), noun, n.Hash, n.Height,
 			)
@@ -191,7 +192,7 @@ out:
 func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		ERROR("rescanRPCHandler called without an RPC client", err)
+		log.ERROR("rescanRPCHandler called without an RPC client", err)
 		w.wg.Done()
 		return
 	}
@@ -202,15 +203,15 @@ out:
 		case batch := <-w.rescanBatch:
 			// Log the newly-started rescan.
 			numAddrs := len(batch.addrs)
-			noun := pickNoun(numAddrs, "address", "addresses")
-			INFOF(
+			noun := log.PickNoun(numAddrs, "address", "addresses")
+			log.INFOF(
 				"started rescan from block %v (height %d) for %d %s",
 				batch.bs.Hash, batch.bs.Height, numAddrs, noun,
 			)
 			err := chainClient.Rescan(&batch.bs.Hash, batch.addrs,
 				batch.outpoints)
 			if err != nil {
-				ERRORF(
+				log.ERRORF(
 					"rescan for %d %s failed: %v", numAddrs, noun, err)
 			}
 			batch.done(err)

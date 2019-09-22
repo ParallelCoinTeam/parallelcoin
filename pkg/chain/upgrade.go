@@ -10,6 +10,7 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 const // blockHdrOffset defines the offsets into a v1 block index row for the
@@ -60,7 +61,7 @@ migrateBlockIndex(db database.DB) error {
 		if v1BlockIdxBucket == nil {
 			return fmt.Errorf("bucket %s does not exist", v1BucketName)
 		}
-		INFO("Re-indexing block information in the database. " +
+		log.INFO("Re-indexing block information in the database. " +
 			"This might take a while")
 		v2BlockIdxBucket, err :=
 			dbTx.Metadata().CreateBucketIfNotExists(v2BucketName)
@@ -121,7 +122,7 @@ migrateBlockIndex(db database.DB) error {
 	if err != nil {
 		return err
 	}
-	INFO("Block database migration complete")
+	log.INFO("Block database migration complete")
 	return nil
 }
 
@@ -393,7 +394,7 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 		v1BucketName = []byte("utxoset")
 		v2BucketName = []byte("utxosetv2")
 	)
-	INFO("Upgrading utxo set to v2.  This will take a while")
+	log.INFO("Upgrading utxo set to v2.  This will take a while")
 	start := time.Now()
 	// Create the new utxo set bucket as needed.
 	err := db.Update(func(dbTx database.Tx) error {
@@ -484,7 +485,7 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 			break
 		}
 		totalUtxos += uint64(numUtxos)
-		INFOF("migrated %d utxos (%d total)", numUtxos, totalUtxos)
+		log.INFOF("migrated %d utxos (%d total)", numUtxos, totalUtxos)
 	}
 	// Remove the old bucket and update the utxo set version once it has
 	// been fully migrated.
@@ -499,7 +500,7 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 		return err
 	}
 	seconds := int64(time.Since(start) / time.Second)
-	INFOF("Done upgrading utxo set.  Total utxos: %d in %d seconds",
+	log.INFOF("Done upgrading utxo set.  Total utxos: %d in %d seconds",
 		totalUtxos, seconds)
 	return nil
 }

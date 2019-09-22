@@ -4,6 +4,7 @@ import (
 	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	am "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
@@ -133,7 +134,7 @@ func (bf *BlockFilterer) FilterTx(tx *wire.MsgTx) bool {
 			out.PkScript, bf.Params,
 		)
 		if err != nil {
-			WARNF(
+			log.WARNF(
 				"could not parse output script in %s:%d: %v",
 				tx.TxHash(), i, err,
 			)

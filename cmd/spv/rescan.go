@@ -12,6 +12,7 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
@@ -268,7 +269,7 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 	s.blockManager.newFilterHeadersMtx.RLock()
 	filterHeaderHeight := s.blockManager.filterHeaderTip
 	s.blockManager.newFilterHeadersMtx.RUnlock()
-	DEBUGF(
+	log.DEBUGF(
 		"waiting for filter headers ("+
 			"height=%v) to catch up the rescan start (height=%v) %s",
 		filterHeaderHeight, curStamp.Height,
@@ -319,7 +320,7 @@ filterHeaderWaitLoop:
 			return err
 		}
 	}
-	DEBUGF(
+	log.DEBUGF(
 		"starting rescan from known block %d (%s) %s",
 		curStamp.Height, curStamp.Hash,
 	)
@@ -353,14 +354,14 @@ filterHeaderWaitLoop:
 		if blockReFetchTimer != nil {
 			blockReFetchTimer.Stop()
 		}
-		INFOF(
+		log.INFOF(
 			"setting timer to attempt to re-fetch filter for hash=%v, height=%v",
 			headerTip.BlockHash(), height,
 		)
 		// We'll start a timer to re-send this header so we re-process
 		// if in the case that we don't get a re-org soon afterwards.
 		blockReFetchTimer = time.AfterFunc(blockRetryInterval, func() {
-			INFOF(
+			log.INFOF(
 				"resending rescan header for block hash=%v, height=%v",
 				headerTip.BlockHash(), height,
 			)
@@ -412,7 +413,7 @@ rescanLoop:
 				// current. This is our way of doing a manual
 				// rescan.
 				if rewound {
-					TRACEF(
+					log.TRACEF(
 						"rewound to block %d (%s), no longer current",
 						curStamp.Height, curStamp.Hash,
 					)
@@ -434,7 +435,7 @@ rescanLoop:
 				// state transition back to the !current state.
 				if header.PrevBlock != curStamp.Hash &&
 					header.BlockHash() != curStamp.Hash {
-					DEBUGF(
+					log.DEBUGF(
 						"rescan got out of order block %s with previous block"+
 							" %s, curHeader: %s %s",
 						header.BlockHash(),
@@ -452,7 +453,7 @@ rescanLoop:
 				// re-process it without any issues.
 				if header.BlockHash() != curStamp.Hash &&
 					!s.hasFilterHeadersByHeight(uint32(curStamp.Height+1)) {
-					WARNF(
+					log.WARNF(
 						"missing filter header for height=%v, skipping",
 						curStamp.Height+1,
 					)
@@ -466,7 +467,7 @@ rescanLoop:
 					curStamp.Hash = header.BlockHash()
 					curStamp.Height++
 				}
-				TRACEF(
+				log.TRACEF(
 					"rescan got block %d (%s)",
 					curStamp.Height, curStamp.Hash,
 				)
@@ -521,7 +522,7 @@ rescanLoop:
 				// to nil.
 				blockReFetchTimer = nil
 			case header := <-blockDisconnected:
-				DEBUGF(
+				log.DEBUGF(
 					"rescan disconnect block %d (%s) %s",
 					curStamp.Height, curStamp.Hash,
 				)
@@ -587,7 +588,7 @@ rescanLoop:
 			// ourselves as current and follow notifications.
 			nextHeight := curStamp.Height + 1
 			if nextHeight > bestBlock.Height {
-				DEBUGF(
+				log.DEBUGF(
 					"rescan became current at %d (%s), "+
 						"subscribing to block notifications %s",
 					curStamp.Height, curStamp.Hash,
@@ -1130,7 +1131,7 @@ func // GetUtxo gets the appropriate TxOut or errors if it's spent. The option
 	// is signaled.
 	report, err := req.Result(ro.quit)
 	if err != nil {
-		DEBUGF(
+		log.DEBUGF(
 			"error finding spends for %s: %v %s",
 			ro.watchInputs[0].OutPoint.String(),
 			err,

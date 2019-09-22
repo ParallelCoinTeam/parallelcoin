@@ -7,6 +7,7 @@ import (
 	"time"
 
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	am "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 )
@@ -97,7 +98,7 @@ func // deliver tries to deliver the report or error to any subscribers. If
 	select {
 	case r.resultChan <- &getUtxoResult{report, err}:
 	default:
-		WARNF(
+		log.WARNF(
 			"duplicate getutxo result delivered for outpoint=%v, spend=%v, err=%v",
 			r.Input.OutPoint, report, err,
 		)
@@ -136,7 +137,7 @@ func // Push is called by the heap.
 func // Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
 (s *UtxoScanner) Enqueue(input *InputWithScript,
 	birthHeight uint32) (*GetUtxoRequest, error) {
-	DEBUGF(
+	log.DEBUGF(
 		"enqueuing request for %s with birth height %d %s",
 		input.OutPoint.String(), birthHeight,
 	)
@@ -232,7 +233,7 @@ func // batchManager is responsible for scheduling batches of UTXOs to scan. Any
 		// least-height request currently in the queue.
 		err := s.scanFromHeight(req.BirthHeight)
 		if err != nil {
-			ERRORF(
+			log.ERRORF(
 				"UXTO scan failed: %v", err,
 			)
 		}
@@ -325,7 +326,7 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		TRACEF(
+		log.TRACEF(
 			"fetching block height=%d hash=%s %s", height, hash,
 		)
 		block, err := s.cfg.GetBlock(*hash)
@@ -338,7 +339,7 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		DEBUGF("processing block height=%d hash=%s %s", height, hash)
+		log.DEBUGF("processing block height=%d hash=%s %s", height, hash)
 		reporter.ProcessBlock(block.MsgBlock(), newReqs, height)
 	}
 	// We've scanned up to the end height, now perform a check to see if we

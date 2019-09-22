@@ -10,6 +10,7 @@ import (
 
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 )
@@ -136,7 +137,7 @@ func // handleNotification examines the passed notification type,
 		}
 		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid block connected notification:", err)
+			log.WARN("received invalid block connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnBlockConnected(blockHash, blockHeight, blockTime)
@@ -149,7 +150,8 @@ func // handleNotification examines the passed notification type,
 		blockHeight, blockHeader, transactions, err :=
 			parseFilteredBlockConnectedParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid filtered block connected notification:", err)
+			log.WARN("received invalid filtered block connected notification:",
+				err)
 			return
 		}
 		c.ntfnHandlers.OnFilteredBlockConnected(blockHeight,
@@ -162,7 +164,7 @@ func // handleNotification examines the passed notification type,
 		}
 		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid block connected notification:", err)
+			log.WARN("received invalid block connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnBlockDisconnected(blockHash, blockHeight, blockTime)
@@ -174,7 +176,9 @@ func // handleNotification examines the passed notification type,
 		}
 		blockHeight, blockHeader, err := parseFilteredBlockDisconnectedParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid filtered block disconnected notification:", err)
+			log.WARN("received invalid filtered block disconnected" +
+				" notification" +
+				":", err)
 			return
 		}
 		c.ntfnHandlers.OnFilteredBlockDisconnected(blockHeight, blockHeader)
@@ -186,7 +190,7 @@ func // handleNotification examines the passed notification type,
 		}
 		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid recvtx notification:", err)
+			log.WARN("received invalid recvtx notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRecvTx(tx, block)
@@ -198,7 +202,7 @@ func // handleNotification examines the passed notification type,
 		}
 		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid redeemingtx notification:", err)
+			log.WARN("received invalid redeemingtx notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRedeemingTx(tx, block)
@@ -210,7 +214,7 @@ func // handleNotification examines the passed notification type,
 		}
 		transaction, err := parseRelevantTxAcceptedParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid relevanttxaccepted notification:", err)
+			log.WARN("received invalid relevanttxaccepted notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRelevantTxAccepted(transaction)
@@ -222,7 +226,7 @@ func // handleNotification examines the passed notification type,
 		}
 		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid rescanfinished notification:", err)
+			log.WARN("received invalid rescanfinished notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRescanFinished(hash, height, blkTime)
@@ -234,7 +238,7 @@ func // handleNotification examines the passed notification type,
 		}
 		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid rescanprogress notification:", err)
+			log.WARN("received invalid rescanprogress notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRescanProgress(hash, height, blkTime)
@@ -246,7 +250,7 @@ func // handleNotification examines the passed notification type,
 		}
 		hash, amt, err := parseTxAcceptedNtfnParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid tx accepted notification:", err)
+			log.WARN("received invalid tx accepted notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnTxAccepted(hash, amt)
@@ -258,7 +262,7 @@ func // handleNotification examines the passed notification type,
 		}
 		rawTx, err := parseTxAcceptedVerboseNtfnParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid tx accepted verbose notification:", err)
+			log.WARN("received invalid tx accepted verbose notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnTxAcceptedVerbose(rawTx)
@@ -270,7 +274,7 @@ func // handleNotification examines the passed notification type,
 		}
 		connected, err := parsePodConnectedNtfnParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid pod connected notification:", err)
+			log.WARN("received invalid pod connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnPodConnected(connected)
@@ -282,7 +286,7 @@ func // handleNotification examines the passed notification type,
 		}
 		account, bal, conf, err := parseAccountBalanceNtfnParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid account balance notification:", err)
+			log.WARN("received invalid account balance notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnAccountBalance(account, bal, conf)
@@ -295,7 +299,7 @@ func // handleNotification examines the passed notification type,
 		// The account name is not notified, so the return value is discarded.
 		_, locked, err := parseWalletLockStateNtfnParams(ntfn.Params)
 		if err != nil {
-			WARN("received invalid wallet lock state notification:", err)
+			log.WARN("received invalid wallet lock state notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnWalletLockState(locked)

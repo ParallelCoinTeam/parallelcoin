@@ -12,6 +12,7 @@ import (
 	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
@@ -196,7 +197,7 @@ func (s *NeutrinoClient) FilterBlocks(
 		} else if !matched {
 			continue
 		}
-		TRACEF(
+		log.TRACEF(
 			"fetching block height=%d hash=%v",
 			blk.Height, blk.Hash,
 		)
@@ -443,7 +444,7 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 		rec, err := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx(),
 			header.Timestamp)
 		if err != nil {
-			ERROR(
+			log.ERROR(
 				"cannot create transaction record for relevant tx:", err,
 			)
 			// TODO(aakselrod): Return?
@@ -461,7 +462,7 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 	// Handle RescanFinished notification if required.
 	bs, err := s.CS.BestBlock()
 	if err != nil {
-		ERROR("can't get chain service's best block:", err)
+		log.ERROR("can't get chain service's best block:", err)
 		return
 	}
 	if bs.Hash == header.BlockHash() {
@@ -573,7 +574,7 @@ func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
 func (s *NeutrinoClient) notificationHandler() {
 	hash, height, err := s.GetBestBlock()
 	if err != nil {
-		ERRORF("failed to get best block from chain service:", err)
+		log.ERRORF("failed to get best block from chain service:", err)
 		s.Stop()
 		s.wg.Done()
 		return
@@ -632,7 +633,7 @@ out:
 			}
 		case err := <-rescanErr:
 			if err != nil {
-				ERROR("neutrino rescan ended with error:", err)
+				log.ERROR("neutrino rescan ended with error:", err)
 			}
 		case s.currentBlock <- bs:
 		case <-s.quit:

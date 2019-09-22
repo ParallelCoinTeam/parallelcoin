@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 // calcNextRequiredDifficultyHalcyon calculates the required difficulty for the
@@ -17,7 +18,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	err error) {
 
-	TRACE("algoname", algoname)
+	log.TRACE("algoname", algoname)
 	nH := lastNode.height + 1
 	// INFO{nH}
 
@@ -25,12 +26,12 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(lastNode *blockNode,
 	algoName := fork.GetAlgoName(algo, nH)
 	newTargetBits = fork.GetMinBits(algoName, nH)
 	if lastNode == nil {
-		TRACE("lastnode was nil", newTargetBits)
+		log.TRACE("lastnode was nil", newTargetBits)
 		return newTargetBits, nil
 	}
 	prevNode := lastNode.GetLastWithAlgo(algo)
 	if prevNode == nil {
-		TRACE("prevnode was nil", newTargetBits)
+		log.TRACE("prevnode was nil", newTargetBits)
 		return newTargetBits, nil
 	}
 	firstNode := prevNode
@@ -40,7 +41,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(lastNode *blockNode,
 		firstNode = firstNode.GetLastWithAlgo(algo)
 	}
 	if firstNode == nil {
-		TRACE("firstnode was nil", newTargetBits)
+		log.TRACE("firstnode was nil", newTargetBits)
 		return newTargetBits, nil
 	}
 	actualTimespan := prevNode.timestamp - firstNode.timestamp
@@ -50,27 +51,27 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(lastNode *blockNode,
 	} else if actualTimespan > b.params.MaxActualTimespan {
 		adjustedTimespan = b.params.MaxActualTimespan
 	}
-	TRACE("from bits", newTargetBits)
+	log.TRACE("from bits", newTargetBits)
 	newTarget := fork.CompactToBig(prevNode.bits)
-	TRACE("to big", newTarget)
+	log.TRACE("to big", newTarget)
 	bigAdjustedTimespan := big.NewInt(adjustedTimespan)
 	newTarget = newTarget.Mul(bigAdjustedTimespan, newTarget)
-	TRACE("multiplied", newTarget, bigAdjustedTimespan)
+	log.TRACE("multiplied", newTarget, bigAdjustedTimespan)
 	newTarget = newTarget.Div(newTarget, big.NewInt(b.params.AveragingTargetTimespan))
-	TRACE("divided", newTarget)
+	log.TRACE("divided", newTarget)
 	if newTarget.Cmp(fork.CompactToBig(newTargetBits)) > 0 {
-		TRACE("fell under", newTarget)
+		log.TRACE("fell under", newTarget)
 	}
 	newTarget.Set(fork.CompactToBig(newTargetBits))
-	TRACE("newTarget", newTarget)
+	log.TRACE("newTarget", newTarget)
 	newTargetBits = BigToCompact(newTarget)
-	TRACE("divided", newTargetBits)
-	DEBUGC(func() string {
+	log.TRACE("divided", newTargetBits)
+	log.DEBUGC(func() string {
 		return fmt.Sprintf("difficulty retarget at block height %d, "+
 			"old %08x new %08x", lastNode.height+1, prevNode.bits,
 			newTargetBits)
 	})
-	TRACEC(func() string {
+	log.TRACEC(func() string {
 		return fmt.Sprintf(
 			"actual timespan %v, adjusted timespan %v, target timespan %v",
 			// "\nOld %064x\nNew %064x",
@@ -81,7 +82,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(lastNode *blockNode,
 			// fork.CompactToBig(newTargetBits),
 		)
 	})
-	TRACEF("newtarget bits %8x %s", newTargetBits)
+	log.TRACEF("newtarget bits %8x %s", newTargetBits)
 	return BigToCompact(newTarget), nil
 
 }

@@ -16,6 +16,7 @@ import (
 	txrules "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/rules"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
@@ -180,9 +181,9 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			}
 		}
 	}
-	INFO("handler", handlerData.Handler, "wallet", w)
+	log.INFO("handler", handlerData.Handler, "wallet", w)
 	if ok && handlerData.Handler != nil && w != nil {
-		INFO("handling", request.Method)
+		log.INFO("handling", request.Method)
 		return func() (interface{}, *btcjson.RPCError) {
 			cmd, err := btcjson.UnmarshalCmd(request)
 			if err != nil {
@@ -197,7 +198,7 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 	}
 	// Fallback to RPC passthrough
 	return func() (interface{}, *btcjson.RPCError) {
-		INFO("passing to node", request.Method)
+		log.INFO("passing to node", request.Method)
 		if chainClient == nil {
 			return nil, &btcjson.RPCError{
 				Code:    -1,
@@ -1297,7 +1298,7 @@ func SendPairs(w *wallet.Wallet, amounts map[string]util.Amount,
 		}
 	}
 	txHashStr := txHash.String()
-	INFO("successfully sent transaction", txHashStr)
+	log.INFO("successfully sent transaction", txHashStr)
 	return txHashStr, nil
 }
 func IsNilOrEmpty(s *string) bool {
@@ -1439,11 +1440,11 @@ func SignMessage(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	var buf bytes.Buffer
 	err = wire.WriteVarString(&buf, 0, "Bitcoin Signed Message:\n")
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	err = wire.WriteVarString(&buf, 0, cmd.Message)
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	messageHash := chainhash.DoubleHashB(buf.Bytes())
 	sigbytes, err := ec.SignCompact(ec.S256(), privKey,
@@ -1697,11 +1698,11 @@ func VerifyMessage(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	var buf bytes.Buffer
 	err = wire.WriteVarString(&buf, 0, "Parallelcoin Signed Message:\n")
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	err = wire.WriteVarString(&buf, 0, cmd.Message)
 	if err != nil {
-		DEBUG(err)
+		log.DEBUG(err)
 	}
 	expectedMessageHash := chainhash.DoubleHashB(buf.Bytes())
 	pk, wasCompressed, err := ec.RecoverCompact(ec.S256(), sig,

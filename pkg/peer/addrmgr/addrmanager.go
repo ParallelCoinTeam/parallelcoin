@@ -20,6 +20,7 @@ import (
 
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 // AddrManager provides a concurrency safe address manager for caching
@@ -188,7 +189,7 @@ func // updateAddress is a helper function to either update an address
 	// Add to new bucket.
 	ka.refs++
 	a.addrNew[bucket][addr] = ka
-	TRACEF("added new address %s for a total of %d addresses", addr,
+	log.TRACEF("added new address %s for a total of %d addresses", addr,
 		a.nTried+a.nNew)
 }
 
@@ -203,7 +204,7 @@ func // expireNew makes space in the new buckets by expiring the really bad entr
 	var oldest *KnownAddress
 	for k, v := range a.addrNew[bucket] {
 		if v.isBad() {
-			TRACEF("expiring bad address %v", k)
+			log.TRACEF("expiring bad address %v", k)
 			delete(a.addrNew[bucket], k)
 			v.refs--
 			if v.refs == 0 {
@@ -220,7 +221,7 @@ func // expireNew makes space in the new buckets by expiring the really bad entr
 	}
 	if oldest != nil {
 		key := NetAddressKey(oldest.na)
-		TRACEF("expiring oldest address %v", key)
+		log.TRACEF("expiring oldest address %v", key)
 		delete(a.addrNew[bucket], key)
 		oldest.refs--
 		if oldest.refs == 0 {
@@ -289,14 +290,14 @@ func (a *AddrManager) getTriedBucket(netAddr *wire.NetAddress) int {
 func // addressHandler is the main handler for the address manager.
 // It must be run as a goroutine.
 (a *AddrManager) addressHandler() {
-	TRACE("starting address handler")
+	log.TRACE("starting address handler")
 	dumpAddressTicker := time.NewTicker(dumpAddressInterval)
 	defer dumpAddressTicker.Stop()
 out:
 	for {
 		select {
 		case <-dumpAddressTicker.C:
-			INFO("saving peers data")
+			log.INFO("saving peers data")
 			a.savePeers()
 		case <-a.quit:
 			break out
@@ -304,7 +305,7 @@ out:
 	}
 	a.savePeers()
 	a.wg.Done()
-	TRACE("address handler done")
+	log.TRACE("address handler done")
 }
 
 // savePeers saves all the known addresses to a file so they can be read back
@@ -349,13 +350,13 @@ func (a *AddrManager) savePeers() {
 	}
 	w, err := os.Create(a.peersFile)
 	if err != nil {
-		ERRORF("error opening file %s: %v", a.peersFile, err)
+		log.ERRORF("error opening file %s: %v", a.peersFile, err)
 		return
 	}
 	enc := json.NewEncoder(w)
 	defer w.Close()
 	if err := enc.Encode(&sam); err != nil {
-		ERRORF("failed to encode file %s: %v", a.peersFile, err)
+		log.ERRORF("failed to encode file %s: %v", a.peersFile, err)
 		return
 	}
 }
@@ -363,22 +364,23 @@ func (a *AddrManager) savePeers() {
 // loadPeers loads the known address from the saved file.  If empty, missing,
 // or malformed file, just don't load anything and start fresh
 func (a *AddrManager) loadPeers() {
-	TRACE("loading peers")
+	log.TRACE("loading peers")
 
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	err := a.deserializePeers(a.peersFile)
 	if err != nil {
-		ERRORF("failed to parse file %s: %v %s", a.peersFile, err)
+		log.ERRORF("failed to parse file %s: %v %s", a.peersFile, err)
 		// if it is invalid we nuke the old one unconditionally.
 		err = os.Remove(a.peersFile)
 		if err != nil {
-			WARNF("failed to remove corrupt peers file %s: %v", a.peersFile, err)
+			log.WARNF("failed to remove corrupt peers file %s: %v", a.peersFile,
+				err)
 		}
 		a.reset()
 		return
 	}
-	TRACEC(func() string {
+	log.TRACEC(func() string {
 		return fmt.Sprintf(
 			"loaded %d addresses from file '%s' %s",
 			a.numAddresses(), a.peersFile,
@@ -488,7 +490,7 @@ func // Start begins the core address handler which manages a pool of known
 		return
 	}
 	// Load peers we already know about from file.
-	TRACE("loading peers data")
+	log.TRACE("loading peers data")
 	a.loadPeers()
 	// Start the address ticker to save addresses periodically.
 	a.wg.Add(1)
@@ -498,10 +500,10 @@ func // Start begins the core address handler which manages a pool of known
 func // Stop gracefully shuts down the address manager by stopping the main handler.
 (a *AddrManager) Stop() error {
 	if atomic.AddInt32(&a.shutdown, 1) != 1 {
-		WARN("address manager is already in the process of shutting down")
+		log.WARN("address manager is already in the process of shutting down")
 		return nil
 	}
-	// DEBUG("address manager shutting down"}
+	// log.DEBUG("address manager shutting down"}
 	close(a.quit)
 	a.wg.Wait()
 	return nil
@@ -605,7 +607,7 @@ func // reset resets the address manager by reinitialising the random source and
 	// fill key with bytes from a good random source.
 	_, err := io.ReadFull(crand.Reader, a.key[:])
 	if err != nil {
-		ERROR(err)
+		log.ERROR(err)
 	}
 	for i := range a.addrNew {
 		a.addrNew[i] = make(map[string]*KnownAddress)
@@ -695,7 +697,7 @@ func // GetAddress returns a single address that should be routable.  It picks a
 			ka := e.Value.(*KnownAddress)
 			randval := a.rand.Intn(large)
 			if float64(randval) < (factor * ka.chance() * float64(large)) {
-				TRACEC(func() string {
+				log.TRACEC(func() string {
 					return fmt.Sprintf("selected %v from tried bucket", NetAddressKey(ka.na))
 				})
 				return ka
@@ -724,7 +726,7 @@ func // GetAddress returns a single address that should be routable.  It picks a
 			}
 			randval := a.rand.Intn(large)
 			if float64(randval) < (factor * ka.chance() * float64(large)) {
-				TRACEC(func() string {
+				log.TRACEC(func() string {
 					return fmt.Sprintf("Selected %v from new bucket",
 						NetAddressKey(ka.na))
 				})
@@ -840,7 +842,7 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	// back.
 	a.nNew++
 	rmkey := NetAddressKey(rmka.na)
-	TRACEF("replacing %s with %s in tried", rmkey, addrKey)
+	log.TRACEF("replacing %s with %s in tried", rmkey, addrKey)
 
 	// We made sure there is space here just above.
 	a.addrNew[newBucket][rmkey] = rmka
@@ -969,10 +971,11 @@ func // GetBestLocalAddress returns the most appropriate local address to use
 		}
 	}
 	if bestAddress != nil {
-		TRACEF("suggesting address %s:%d for %s:%d %s", bestAddress.IP,
+		log.TRACEF("suggesting address %s:%d for %s:%d %s", bestAddress.IP,
 			bestAddress.Port, remoteAddr.IP, remoteAddr.Port)
 	} else {
-		TRACEF("no worthy address for %s:%d %s", remoteAddr.IP, remoteAddr.Port)
+		log.TRACEF("no worthy address for %s:%d %s", remoteAddr.IP,
+			remoteAddr.Port)
 		// Send something unroutable if nothing suitable.
 		var ip net.IP
 		if !IsIPv4(remoteAddr) && !IsOnionCatTor(remoteAddr) {
