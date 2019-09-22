@@ -10,8 +10,24 @@ func Boot() mod.DuoVUEcomp {
 		Version:  "0.0.1",
 		CompType: "core",
 		SubType:  "boot",
-		Js:       "",
-		Template: `<div class="rwrap boot" v-show="duoSystem.isBoot"><h1>Boot</h1></div>`,
+		Js:       `
+	data () { return { 
+	duoSystem }},
+mounted: function(){
+this.btnSClick();
+},
+	methods:{
+        btnSClick: function(event) {
+			this.duoSystem.bios.isBoot = false;
+		}
+	}
+		`,
+		Template: `<boot class="swrap boot" v-show="this.duoSystem.bios.isBoot">
+<h1>Boot</h1>
+ 				<ejs-button cssClass='e-link' v-on:click.native='btnSClick'>Start!</ejs-button>
+
+
+</boot>`,
 		Css: `
 		.boot{
 			background:red;

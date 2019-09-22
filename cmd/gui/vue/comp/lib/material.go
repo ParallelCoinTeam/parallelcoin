@@ -25694,7 +25694,6 @@ ejs-calendar {
 }
 
 .e-listview .e-list-item {
-  background-color: #fff;
   border-bottom: 0 solid transparent;
   border-left: 0 solid transparent;
   border-right: 0 solid transparent;

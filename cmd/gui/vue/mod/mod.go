@@ -75,7 +75,6 @@ type DuoVUEcomp struct {
 	Css         string `json:"css"`
 }
 
-
 type DuoVUEbalance struct {
 	Balance     string `json:"balance"`
 	Unconfirmed string `json:"unconfirmed"`

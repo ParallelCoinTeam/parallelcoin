@@ -44,10 +44,10 @@ func GetDuoVUE(cx *conte.Xt, cr *cron.Cron) *DuoVUE {
 func RunVue(dV DuoVUE) {
 	var err error
 	a := DuoVUEalert{
-		Time: time.Now(),
-		Title: "Welcome",
-		Message:"to ParallelCoin",
-		AlertType:"success",
+		Time:      time.Now(),
+		Title:     "Welcome",
+		Message:   "to ParallelCoin",
+		AlertType: "success",
 	}
 	d := DuoVUEdata{
 		Alert:       a,
@@ -69,11 +69,6 @@ func RunVue(dV DuoVUE) {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	//_, err = dV.Web.Bind("alert", &DuoVUEalert{})
-	//if err != nil {
-	//	fmt.Println("error binding to webview:", err)
-	//}
-
 	// Css
 	injectCss(dV)
 
@@ -88,6 +83,7 @@ func RunVue(dV DuoVUE) {
 			dV.Render("status", dV.GetDuoVUEstatus())
 		})
 	})
+
 }
 
 func evalJs(dV DuoVUE) {
@@ -148,10 +144,16 @@ func injectCss(dV DuoVUE) {
 	// 	return
 	// }
 	dV.Web.InjectCSS(string(lib.GetMaterial))
+
+	// Core Css
+	dV.Web.InjectCSS(string(comp.GetCoreCss))
+
 	// comp
 	for _, c := range comp.Components(dV.db) {
 		dV.Web.InjectCSS(string(c.Css))
 	}
-	// Core Css
-	dV.Web.InjectCSS(string(comp.GetCoreCss))
+
+	for _, alj := range comp.Apps(dV.db) {
+		dV.Web.InjectCSS(string(alj.Css))
+	}
 }
