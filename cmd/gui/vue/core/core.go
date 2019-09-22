@@ -11,7 +11,7 @@ import (
 
 var CoreJs = `
 const core = new Vue({ 
-	el: '#core', 
+	el: '#x', 
 	data () { return { 
 	duoSystem }},
 });
@@ -32,10 +32,13 @@ const duoSystem = {
 	peers:null,
 	blocks:[],
 	theme:false,
-	isBoot:false,
+	logo:system.data.ico,
+	bios:{
+		isBoot:true,
+		isDev:false,
+	},
 	isLoading:false,
-	isDev:true,
-	isScreen:'overview',
+	activeLayout: 'overview',
 	timer: '',
 };
 `
