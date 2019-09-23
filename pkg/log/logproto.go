@@ -1,94 +1,137 @@
 package log
 
-var L = Empty()
+var L = Empty().SetLevel("trace", true)
 
 func FATAL(a ...interface{}) {
 	if L.Fatal != nil {
-		(*L).Fatal(a...)
+		f := L.Fatal
+		fd := *f
+		fd(a...)
 	}
 }
 func ERROR(a ...interface{}) {
 	if L.Error != nil {
-		(*L).Error(a...)
+		f := L.Error
+		fd := *f
+		fd(a...)
 	}
 }
 func WARN(a ...interface{}) {
 	if L.Warn != nil {
-		(*L).Warn(a...)
+		f := L.Warn
+		fd := *f
+		fd(a...)
 	}
 }
 func INFO(a ...interface{}) {
 	if L.Info != nil {
-		(*L).Info(a...)
+		f := L.Info
+		fd := *f
+		fd(a...)
 	}
 }
 func DEBUG(a ...interface{}) {
 	if L.Debug != nil {
-		(*L).Debug(a...)
+		f := L.Debug
+		fd := *f
+		fd(a...)
 	}
 }
 func TRACE(a ...interface{}) {
 	if L.Trace != nil {
-		(*L).Trace(a...)
+		f := L.Trace
+		fd := *f
+		fd(a...)
+	}
+}
+func SPEW(a interface{}) {
+	if L.Traces != nil {
+		f := L.Traces
+		fd := *f
+		fd(a)
 	}
 }
 func FATALF(format string, a ...interface{}) {
 	if L.Fatalf != nil {
-		(*L).Fatalf(format, a...)
+		f := L.Fatalf
+		fd := *f
+		fd(format, a...)
 	}
 }
 func ERRORF(format string, a ...interface{}) {
 	if L.Errorf != nil {
-		(*L).Errorf(format, a...)
+		f := L.Errorf
+		fd := *f
+		fd(format, a...)
 	}
 }
 func WARNF(format string, a ...interface{}) {
 	if L.Warnf != nil {
-		(*L).Warnf(format, a...)
+		f := L.Warnf
+		fd := *f
+		fd(format, a...)
 	}
 }
 func INFOF(format string, a ...interface{}) {
 	if L.Infof != nil {
-		(*L).Infof(format, a...)
+		f := L.Infof
+		fd := *f
+		fd(format, a...)
 	}
 }
 func DEBUGF(format string, a ...interface{}) {
 	if L.Debugf != nil {
-		(*L).Debugf(format, a...)
+		f := L.Debugf
+		fd := *f
+		fd(format, a...)
 	}
 }
 func TRACEF(format string, a ...interface{}) {
 	if L.Tracef != nil {
-		(*L).Tracef(format, a...)
+		f := L.Tracef
+		fd := *f
+		fd(format, a...)
 	}
 }
-func FATALC(f func() string) {
+func FATALC(fn func() string) {
 	if L.Fatalc != nil {
-		(*L).Fatalc(f)
+		f := L.Fatalc
+		fd := *f
+		fd(fn)
 	}
 }
-func ERRORC(f func() string) {
+func ERRORC(fn func() string) {
 	if L.Errorc != nil {
-		(*L).Errorc(f)
+		f := L.Errorc
+		fd := *f
+		fd(fn)
 	}
 }
-func WARNC(f func() string) {
+func WARNC(fn func() string) {
 	if L.Warnc != nil {
-		(*L).Warnc(f)
+		f := L.Warnc
+		fd := *f
+		fd(fn)
 	}
 }
-func INFOC(f func() string) {
+func INFOC(fn func() string) {
 	if L.Infoc != nil {
-		(*L).Infoc(f)
+		f := L.Infoc
+		fd := *f
+		fd(fn)
 	}
 }
-func DEBUGC(f func() string) {
+func DEBUGC(fn func() string) {
 	if L.Debugc != nil {
-		(*L).Debugc(f)
+		f := L.Debugc
+		fd := *f
+		fd(fn)
 	}
 }
-func TRACEC(f func() string) {
+func TRACEC(fn func() string) {
 	if L.Tracec != nil {
-		(*L).Tracec(f)
+		f := L.Tracec
+		fd := *f
+		fd(fn)
 	}
 }

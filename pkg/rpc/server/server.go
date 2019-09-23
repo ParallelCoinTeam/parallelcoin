@@ -4,11 +4,11 @@
 // Full documentation of the API implemented by this package is maintained in a
 // language-agnostic document:
 //
-//   https://github.com/parallelcointeam/parallelcoin/walletmain/blob/master/rpc/documentation/api.md
+//   https://github.com/p9c/pod/walletmain/blob/master/rpc/documentation/api.md
 //
 // Any API changes must be performed according to the steps listed here:
 //
-//   https://github.com/parallelcointeam/parallelcoin/walletmain/blob/master/rpc/documentation/serverchanges.md
+//   https://github.com/p9c/pod/walletmain/blob/master/rpc/documentation/serverchanges.md
 package rpcserver
 
 import (
@@ -23,21 +23,21 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	pb "github.com/parallelcointeam/parallelcoin/pkg/rpc/walletrpc"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	cfgutil "github.com/parallelcointeam/parallelcoin/pkg/util/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/zero"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	pb "github.com/p9c/pod/pkg/rpc/walletrpc"
+	"github.com/p9c/pod/pkg/util"
+	cfgutil "github.com/p9c/pod/pkg/util/config"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/zero"
+	"github.com/p9c/pod/pkg/wallet"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/chain"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // Public API version constants

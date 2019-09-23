@@ -18,11 +18,12 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb/opt"
 	"github.com/btcsuite/goleveldb/leveldb/util"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	u "github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/treap"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
+	u "github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/treap"
 )
 
 const (
@@ -1073,7 +1074,7 @@ func // StoreBlock stores the provided block into the database.
 		hash:  blockHash,
 		bytes: blockBytes,
 	})
-	// log.TRACEF("added block %s to pending blocks", blockHash)
+	log.TRACEF("added block %s to pending blocks", blockHash)
 	return nil
 }
 
@@ -1439,7 +1440,7 @@ func // writePendingAndCommit writes pending block data to the flat block
 	}
 	// Loop through all of the pending blocks to store and write them.
 	for _, blockData := range tx.pendingBlockData {
-		// log.TRACEF("storing block %s", blockData.hash)
+		log.TRACEF("storing block %s", blockData.hash)
 		location, err := tx.db.store.writeBlock(blockData.bytes)
 		if err != nil {
 			rollback()

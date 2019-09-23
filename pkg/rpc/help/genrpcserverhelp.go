@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	btcjson "github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
-	rpchelp "github.com/parallelcointeam/parallelcoin/pkg/rpc/help"
+	btcjson "github.com/p9c/pod/pkg/rpc/btcjson"
+	rpchelp "github.com/p9c/pod/pkg/rpc/help"
 )
 
 var outputFile = func() *os.File {

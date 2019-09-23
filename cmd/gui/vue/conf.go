@@ -4,12 +4,12 @@
 package vue
 
 import (
-	"github.com/parallelcointeam/parallelcoin/app/save"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/conf"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/db"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/cmd/gui/vue/comp/conf"
+	"github.com/p9c/pod/cmd/gui/vue/db"
+	"github.com/p9c/pod/cmd/gui/vue/mod"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/pod"
 )
 
 type DuoVUEConfig struct {

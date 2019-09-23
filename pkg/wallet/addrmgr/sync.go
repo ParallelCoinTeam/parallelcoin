@@ -3,8 +3,8 @@ package waddrmgr
 import (
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // BlockStamp defines a block (by height and a unique hash) and is used to mark

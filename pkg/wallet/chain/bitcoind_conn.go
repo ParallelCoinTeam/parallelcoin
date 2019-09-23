@@ -10,12 +10,12 @@ import (
 
 	"github.com/lightninglabs/gozmq"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	`github.com/p9c/pod/pkg/chain/config/netparams`
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
 // BitcoindConn represents a persistent client connection to a bitcoind node

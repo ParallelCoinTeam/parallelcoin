@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (
@@ -280,11 +281,7 @@ func // Init initializes the hash-based transaction index.  In particular,
 			highestKnown = testBlockID
 			testBlockID += increment
 		}
-		// log.TRACEF(
-		// 	"forward scan (highest known %d, next unknown %d)",
-		// 	highestKnown,
-		// 	nextUnknown,
-		// )
+		log.TRACEF("forward scan (highest known %d, next unknown %d)", highestKnown, nextUnknown, )
 		// No used block IDs due to new database.
 		if nextUnknown == 1 {
 			return nil
@@ -299,11 +296,11 @@ func // Init initializes the hash-based transaction index.  In particular,
 			} else {
 				highestKnown = testBlockID
 			}
-			// log.TRACEF(
-			// 	"binary scan (highest known %d, next unknown %d)",
-			// 	highestKnown,
-			// 	nextUnknown,
-			// )
+			log.TRACEF(
+				"binary scan (highest known %d, next unknown %d)",
+				highestKnown,
+				nextUnknown,
+			)
 			if highestKnown+1 == nextUnknown {
 				break
 			}
@@ -314,7 +311,7 @@ func // Init initializes the hash-based transaction index.  In particular,
 	if err != nil {
 		return err
 	}
-	// log.TRACE("current internal block ID:", idx.curBlockID)
+	log.TRACE("current internal block ID:", idx.curBlockID)
 	return nil
 }
 

@@ -4,8 +4,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/log"
 )
 
 // calcNextRequiredDifficultyHalcyon calculates the required difficulty for the
@@ -81,6 +81,6 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(lastNode *blockNode,
 	// 			// fork.CompactToBig(newTargetBits),
 	// 		)
 	// })
-	// log.TRACEF("newtarget bits %8x %s", newTargetBits)
+	log.TRACEF("newtarget bits %8x %s", newTargetBits)
 	return BigToCompact(newTarget), nil
 }

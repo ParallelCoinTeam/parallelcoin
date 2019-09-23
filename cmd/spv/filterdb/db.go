@@ -3,11 +3,11 @@ package filterdb
 import (
 	"fmt"
    
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+   `github.com/p9c/pod/pkg/chain/config/netparams`
+   chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 var (

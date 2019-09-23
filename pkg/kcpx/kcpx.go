@@ -6,12 +6,12 @@ import (
 	"crypto/sha1"
 	"net"
 
-	kcp "git.parallelcoin.io/dev/kcp9"
-	"git.parallelcoin.io/dev/rpcx/client"
-	"git.parallelcoin.io/dev/rpcx/server"
+	kcp "github.com/p9c/kcp"
+	"github.com/p9c/rpcx/client"
+	"github.com/p9c/rpcx/server"
 	"golang.org/x/crypto/pbkdf2"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/pkg/log"
 )
 
 // NewXClient returns a new XClient configured for parallelcoin rpcx service

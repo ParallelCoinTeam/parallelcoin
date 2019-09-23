@@ -7,7 +7,7 @@ import (
 
 	"github.com/grandcat/zeroconf"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/pkg/log"
 )
 
 type ResultsChan chan *zeroconf.ServiceEntry

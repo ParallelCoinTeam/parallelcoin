@@ -8,8 +8,8 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
+   rpcclient "github.com/p9c/pod/pkg/rpc/client"
+   "github.com/p9c/pod/pkg/util"
 )
 
 func main() {

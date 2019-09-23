@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // HelpDescsEnUS defines the English descriptions used for the help strings.

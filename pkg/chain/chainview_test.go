@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // testNoncePrng provides a deterministic prng for the nonce in generated fake nodes.  The ensures that the node have unique hashes.

@@ -1,9 +1,9 @@
 package wallettx
 
 import (
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // OutputSelectionPolicy describes the rules for selecting an output from the

@@ -4,7 +4,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // SimNetParams defines the network parameters for the simulation test Bitcoin network.  This network is similar to the normal test network except it is intended for private use within a group of individuals doing simulation testing.  The functionality is intended to differ in that the only nodes which are specifically specified are used to create the network rather than following normal discovery rules.  This is important as otherwise it would just turn into another public testnet.

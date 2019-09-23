@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // maxFlagsPerMerkleBlock is the maximum number of flag bytes that could possibly fit into a merkle block.  Since each transaction is represented by a single bit, this is the max number of transactions per block divided by 8 bits per byte.  Then an extra one to cover partials.

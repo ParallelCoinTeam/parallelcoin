@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"sync"
 
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/zero"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/zero"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // AddressType represents the various address types waddrmgr is currently able

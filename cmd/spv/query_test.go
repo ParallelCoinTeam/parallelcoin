@@ -6,12 +6,12 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/cache"
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/cache/lru"
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/filterdb"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
+	"github.com/p9c/pod/cmd/spv/cache"
+	"github.com/p9c/pod/cmd/spv/cache/lru"
+	"github.com/p9c/pod/cmd/spv/filterdb"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
 )
 
 var (

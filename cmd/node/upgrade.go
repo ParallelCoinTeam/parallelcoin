@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/path"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/app/util"
+	"github.com/p9c/pod/cmd/node/path"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/log"
 )
 
 // dirEmpty returns whether or not the specified directory path is empty
@@ -132,7 +132,7 @@ func upgradeDataPaths() error {
 		return nil
 	}
 	// Only migrate if the old path exists and the new one doesn't
-	if apputil.FileExists(oldHomePath) && !apputil.FileExists(newHomePath) {
+	if util.FileExists(oldHomePath) && !util.FileExists(newHomePath) {
 		// Create the new path
 		log.INFOF("migrating application home path from '%s' to '%s'",
 			oldHomePath, newHomePath)
@@ -143,7 +143,7 @@ func upgradeDataPaths() error {
 		// Move old pod.conf into new location if needed
 		oldConfPath := filepath.Join(oldHomePath, DefaultConfigFilename)
 		newConfPath := filepath.Join(newHomePath, DefaultConfigFilename)
-		if apputil.FileExists(oldConfPath) && !apputil.FileExists(newConfPath) {
+		if util.FileExists(oldConfPath) && !util.FileExists(newConfPath) {
 			err := os.Rename(oldConfPath, newConfPath)
 			if err != nil {
 				return err
@@ -152,7 +152,7 @@ func upgradeDataPaths() error {
 		// Move old data directory into new location if needed
 		oldDataPath := filepath.Join(oldHomePath, DefaultDataDirname)
 		newDataPath := filepath.Join(newHomePath, DefaultDataDirname)
-		if apputil.FileExists(oldDataPath) && !apputil.FileExists(newDataPath) {
+		if util.FileExists(oldDataPath) && !util.FileExists(newDataPath) {
 			err := os.Rename(oldDataPath, newDataPath)
 			if err != nil {
 				return err

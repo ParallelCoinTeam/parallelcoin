@@ -1,13 +1,13 @@
 package wallet
 
 import (
-	tm "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	txs "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	wm "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
+	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txs "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
+	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 // RescanProgressMsg reports the current progress made by a rescan for a

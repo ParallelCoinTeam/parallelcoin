@@ -7,20 +7,20 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/legacy/keystore"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/prompt"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
+	"github.com/p9c/pod/pkg/util/legacy/keystore"
+	"github.com/p9c/pod/pkg/util/prompt"
+	"github.com/p9c/pod/pkg/wallet"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 
 	// This initializes the bdb driver
-	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 const slash = string(os.PathSeparator)

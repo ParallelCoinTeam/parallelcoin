@@ -1,6 +1,6 @@
 package serv
 
-import "github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
+import "github.com/p9c/pod/cmd/gui/vue/mod"
 
 func SrvNode() mod.DuoVUEcomp {
 	return mod.DuoVUEcomp{

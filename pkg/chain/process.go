@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
 )
 
 type // BehaviorFlags is a bitmask defining tweaks to the normal behavior when
@@ -246,8 +246,8 @@ func // processOrphans determines if there are any orphans which depend on the
 		for i := 0; i < len(b.prevOrphans[*processHash]); i++ {
 			orphan := b.prevOrphans[*processHash][i]
 			if orphan == nil {
-				// log.TRACEF("found a nil entry at index %d in the orphan"+
-				// 	" dependency list for block %v", i, processHash)
+				log.TRACEF("found a nil entry at index %d in the orphan"+
+					" dependency list for block %v", i, processHash)
 				continue
 			}
 			// Remove the orphan from the orphan pool.

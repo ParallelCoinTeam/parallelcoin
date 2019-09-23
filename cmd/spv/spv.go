@@ -9,21 +9,21 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/cache/lru"
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/filterdb"
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/headerfs"
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/addrmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	"github.com/p9c/pod/cmd/spv/cache/lru"
+	"github.com/p9c/pod/cmd/spv/filterdb"
+	"github.com/p9c/pod/cmd/spv/headerfs"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/peer/addrmgr"
+	"github.com/p9c/pod/pkg/peer/connmgr"
+	"github.com/p9c/pod/pkg/util"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 type (
@@ -614,7 +614,7 @@ out:
 		case <-s.quit:
 			// Disconnect all peers on server shutdown.
 			state.forAllPeers(func(sp *ServerPeer) {
-				// log.TRACE("shutdown peer", sp)
+				log.TRACE("shutdown peer", sp)
 				sp.Disconnect()
 			})
 			break out
@@ -772,10 +772,10 @@ func (sp *ServerPeer) OnFeeFilter(_ *peer.Peer, msg *wire.MsgFeeFilter) {
 // OnHeaders is invoked when a peer receives a headers bitcoin
 // message.  The message is passed down to the block manager.
 func (sp *ServerPeer) OnHeaders(p *peer.Peer, msg *wire.MsgHeaders) {
-	// log.TRACEF(
-	// 	"got headers with %d items from %s",
-	// 	len(msg.Headers), p.Addr(),
-	// )
+	log.TRACEF(
+		"got headers with %d items from %s",
+		len(msg.Headers), p.Addr(),
+	)
 	sp.server.blockManager.QueueHeaders(msg, sp)
 }
 
@@ -784,16 +784,16 @@ func (sp *ServerPeer) OnHeaders(p *peer.Peer, msg *wire.MsgHeaders) {
 // accordingly.  We pass the message down to blockmanager which will call
 // QueueMessage with any appropriate responses.
 func (sp *ServerPeer) OnInv(p *peer.Peer, msg *wire.MsgInv) {
-	// log.TRACEF(
-	// 	"got inv with %d items from %s", len(msg.InvList), p.Addr(),
-	// )
+	log.TRACEF(
+		"got inv with %d items from %s", len(msg.InvList), p.Addr(),
+	)
 	newInv := wire.NewMsgInvSizeHint(uint(len(msg.InvList)))
 	for _, invVect := range msg.InvList {
 		if invVect.Type == wire.InvTypeTx {
-			// log.TRACEF(
-			// 	"ignoring tx %s in inv from %v -- SPV mode",
-			// 	invVect.Hash, sp,
-			// )
+			log.TRACEF(
+				"ignoring tx %s in inv from %v -- SPV mode",
+				invVect.Hash, sp,
+			)
 			if sp.ProtocolVersion() >= wire.BIP0037Version {
 				log.INFOF(
 					"peer %v is announcing transactions -- disconnecting", sp,

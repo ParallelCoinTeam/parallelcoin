@@ -1,7 +1,7 @@
 package mod
 
 import (
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 type DuoGuiTemplates struct {

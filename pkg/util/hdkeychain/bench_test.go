@@ -3,7 +3,7 @@ package hdkeychain_test
 import (
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
 // bip0032MasterPriv1 is the master private extended key from the first set of test vectors in BIP0032.

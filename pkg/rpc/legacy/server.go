@@ -16,10 +16,10 @@ import (
 
 	"github.com/btcsuite/websocket"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/wallet"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 type WebsocketClient struct {
@@ -173,8 +173,8 @@ func (s *Server) Serve(lis net.Listener) {
 	s.WG.Add(1)
 	go func() {
 		log.INFO("wallet RPC server listening on ", lis.Addr())
-		_ = s.HTTPServer.Serve(lis)
-		// log.TRACE("finished serving wallet RPC:", err)
+		err := s.HTTPServer.Serve(lis)
+		log.TRACE("finished serving wallet RPC:", err)
 		s.WG.Done()
 	}()
 }

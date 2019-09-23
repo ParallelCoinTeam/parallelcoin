@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"strings"
 
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/log"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/chain"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 func (w *Wallet) handleChainNotifications() {
@@ -259,7 +259,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 				if err != nil {
 					return err
 				}
-				// log.DEBUGF("marked address %v used", addr)
+				log.DEBUGF("marked address %v used", addr)
 				continue
 			}
 			// Missing addresses are skipped.  Other errors should
@@ -290,7 +290,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 		} else {
 			details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, &block.Block)
 			if err != nil {
-				// log.ERROR("cannot query transaction details for notification:", err)
+				log.ERROR("cannot query transaction details for notification:", err)
 			}
 			// We'll only notify the transaction if it was found within the
 			// wallet's set of confirmed transactions.

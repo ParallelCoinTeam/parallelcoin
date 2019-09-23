@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"time"
 	
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
 // JoinType is an enum representing a particular type of "node join". A node

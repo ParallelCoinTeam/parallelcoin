@@ -1,11 +1,11 @@
 package vue
 
 import (
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/db"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	"github.com/p9c/pod/cmd/gui/vue/db"
+	"github.com/p9c/pod/cmd/gui/vue/mod"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"

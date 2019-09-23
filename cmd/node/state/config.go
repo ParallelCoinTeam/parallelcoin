@@ -4,9 +4,9 @@ import (
 	"net"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/discovery"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Config stores current state of the node

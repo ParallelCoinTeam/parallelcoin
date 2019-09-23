@@ -1,9 +1,9 @@
 package spv
 
 import (
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
 )
 
 // batchSpendReporter orchestrates the delivery of spend reports to
@@ -177,9 +177,9 @@ func // findInitialTransactions searches the given block for the creation of the
 				req.Input.OutPoint)
 			initialTxns[req.Input.OutPoint] = nil
 		case tx != nil:
-			// log.TRACEF(
-			// 	"block %d creates output %s", height, req.Input.OutPoint,
-			// )
+			log.TRACEF(
+				"block %d creates output %s", height, req.Input.OutPoint,
+			)
 		default:
 		}
 		b.initialTxns[req.Input.OutPoint] = tx

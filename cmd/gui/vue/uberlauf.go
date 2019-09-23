@@ -5,9 +5,9 @@ package vue
 
 import (
 	enjs "encoding/json"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/alert"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	"github.com/p9c/pod/cmd/gui/vue/alert"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/zserge/webview"
 	"log"
 	"strings"

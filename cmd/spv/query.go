@@ -6,15 +6,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/cache"
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/filterdb"
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
+	"github.com/davecgh/go-spew/spew"
+
+	"github.com/p9c/pod/cmd/spv/cache"
+	"github.com/p9c/pod/cmd/spv/filterdb"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
 )
 
 var (
@@ -259,9 +261,9 @@ queryChainServiceBatch(
 					atomic.LoadUint32(&queryStates[i]) ==
 						uint32(queryAnswered) {
 					firstUnfinished++
-					// log.TRACEF(
-					// 	"query #%v already answered, skipping", i,
-					// )
+					log.TRACEF(
+						"query #%v already answered, skipping", i,
+					)
 					continue
 				}
 				// We check to see if the query is waiting to
@@ -272,9 +274,9 @@ queryChainServiceBatch(
 					uint32(queryWaitSubmit),
 					uint32(queryWaitResponse),
 				) {
-					// log.TRACEF(
-					// 	"query #%v already being queried for, skipping", i,
-					// )
+					log.TRACEF(
+						"query #%v already being queried for, skipping", i,
+					)
 					continue
 				}
 				// The query is now marked as in-process. We
@@ -330,21 +332,21 @@ queryChainServiceBatch(
 				if !sp.Connected() {
 					return
 				}
-				// log.TRACEC(func() string {
-				// 	return fmt.Sprintf(
-				// 		"query for #%v failed, moving on: %v",
-				// 		handleQuery,
-				// 		spew.Sdump(queryMsgs[handleQuery]),
-				// 	)
-				// })
+				log.TRACEC(func() string {
+					return fmt.Sprintf(
+						"query for #%v failed, moving on: %v",
+						handleQuery,
+						spew.Sdump(queryMsgs[handleQuery]),
+					)
+				})
 			case <-matchSignal:
 				// We got a match signal so we can mark this
 				// query a success.
 				atomic.StoreUint32(&queryStates[handleQuery],
 					uint32(queryAnswered))
-				// log.TRACEF(
-				// 	"query #%v answered, updating state", handleQuery,
-				// )
+				log.TRACEF(
+					"query #%v answered, updating state", handleQuery,
+				)
 			}
 		}
 	}
@@ -792,10 +794,10 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 			if err != nil {
 				return nil, err
 			}
-			// log.TRACEF(
-			// 	"Wrote filter for block %s, type %d",
-			// 	blockHash, filterType,
-			// )
+			log.TRACEF(
+				"Wrote filter for block %s, type %d",
+				blockHash, filterType,
+			)
 		}
 	}
 	return filter, nil
