@@ -298,7 +298,7 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 // This function is safe for concurrent access.
 (mp *TxPool) ProcessTransaction(b *blockchain.BlockChain, tx *util.Tx,
 	allowOrphan, rateLimit bool, tag Tag) ([]*TxDesc, error) {
-	log.TRACE("processing transaction", tx.Hash())
+	// log.TRACE("processing transaction", tx.Hash())
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	defer mp.mtx.Unlock()
@@ -897,14 +897,14 @@ func // maybeAcceptTransaction is the internal function which implements the
 				"by the rate limiter due to low fees", txHash)
 			return nil, nil, txRuleError(wire.RejectInsufficientFee, str)
 		}
-		oldTotal := mp.pennyTotal
+		// oldTotal := mp.pennyTotal
 		mp.pennyTotal += float64(serializedSize)
-		log.TRACEF(
-			"rate limit: curTotal %v, nextTotal: %v, limit %v",
-			oldTotal,
-			mp.pennyTotal,
-			mp.cfg.Policy.FreeTxRelayLimit*10*1000,
-		)
+		// log.TRACEF(
+		// 	"rate limit: curTotal %v, nextTotal: %v, limit %v",
+		// 	oldTotal,
+		// 	mp.pennyTotal,
+		// 	mp.cfg.Policy.FreeTxRelayLimit*10*1000,
+		// )
 	}
 	// Verify crypto signatures for each input and reject the transaction if
 	// any don't verify.

@@ -8,7 +8,6 @@ import (
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 var (
@@ -72,8 +71,8 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 (b *BlockChain) calcNextRequiredDifficulty(lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	err error) {
-	log.WARN("algoname ", algoname, fork.GetAlgoName(lastNode.version,
-		lastNode.height))
+	// log.WARN("algoname ", algoname, fork.GetAlgoName(lastNode.version,
+	// 	lastNode.height))
 	nH := lastNode.height + 1
 	// INFO(nH)
 	switch fork.GetCurrent(nH) {

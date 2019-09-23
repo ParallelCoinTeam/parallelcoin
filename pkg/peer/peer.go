@@ -1,7 +1,6 @@
 package peer
 
 import (
-	"bytes"
 	"container/list"
 	"errors"
 	"fmt"
@@ -14,7 +13,6 @@ import (
 	"time"
 
 	"github.com/btcsuite/go-socks/socks"
-	"github.com/davecgh/go-spew/spew"
 
 	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
@@ -417,12 +415,12 @@ func (p *Peer) String() string {
 // This function is safe for concurrent access.
 func (p *Peer) UpdateLastBlockHeight(newHeight int32) {
 	p.statsMtx.Lock()
-	log.TRACEF(
-		"updating last block height of peer %v from %v to %v",
-		p.addr,
-		p.lastBlock,
-		newHeight,
-	)
+	// log.TRACEF(
+	// 	"updating last block height of peer %v from %v to %v",
+	// 	p.addr,
+	// 	p.lastBlock,
+	// 	newHeight,
+	// )
 	p.lastBlock = newHeight
 	p.statsMtx.Unlock()
 }
@@ -430,7 +428,7 @@ func (p *Peer) UpdateLastBlockHeight(newHeight int32) {
 // UpdateLastAnnouncedBlock updates meta-data about the last block hash this
 // peer is known to have announced. This function is safe for concurrent access.
 func (p *Peer) UpdateLastAnnouncedBlock(blkHash *chainhash.Hash) {
-	log.TRACE("updating last blk for peer", p.addr, ",", blkHash)
+	// log.TRACE("updating last blk for peer", p.addr, ",", blkHash)
 	p.statsMtx.Lock()
 	p.lastAnnouncedBlock = blkHash
 	p.statsMtx.Unlock()
@@ -723,11 +721,11 @@ func (p *Peer) PushGetBlocksMsg(locator blockchain.BlockLocator, stopHash *chain
 		beginHash.IsEqual(p.prevGetBlocksBegin)
 	p.prevGetBlocksMtx.Unlock()
 	if isDuplicate {
-		log.TRACEF(
-			"filtering duplicate [getblocks] with begin hash %v, stop hash %v",
-			beginHash,
-			stopHash,
-		)
+		// log.TRACEF(
+		// 	"filtering duplicate [getblocks] with begin hash %v, stop hash %v",
+		// 	beginHash,
+		// 	stopHash,
+		// )
 		return nil
 	}
 	// Construct the getblocks request and queue it to be sent.
@@ -765,9 +763,9 @@ func (p *Peer) PushGetHeadersMsg(locator blockchain.BlockLocator, stopHash *chai
 		beginHash.IsEqual(p.prevGetHdrsBegin)
 	p.prevGetHdrsMtx.Unlock()
 	if isDuplicate {
-		log.TRACE(
-			"Filtering duplicate [getheaders] with begin hash", beginHash,
-		)
+		// log.TRACE(
+		// 	"Filtering duplicate [getheaders] with begin hash", beginHash,
+		// )
 		return nil
 	}
 	// Construct the getheaders request and queue it to be sent.
@@ -869,19 +867,19 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 	}
 	// Use closures to log expensive operations so they are only run when the
 	// logging level requires it.
-	log.TRACEC(func() string {
-		// Debug summary of message.
-		summary := messageSummary(msg)
-		if len(summary) > 0 {
-			summary = " (" + summary + ")"
-		}
-		o := fmt.Sprintf(
-			"Received %v%s from %s\n",
-			msg.Command(), summary, p,
-		)
-		o += spew.Sdump(msg)
-		return o + spew.Sdump(buf)
-	})
+	// log.TRACEC(func() string {
+	// 	// Debug summary of message.
+	// 	summary := messageSummary(msg)
+	// 	if len(summary) > 0 {
+	// 		summary = " (" + summary + ")"
+	// 	}
+	// 	o := fmt.Sprintf(
+	// 		"Received %v%s from %s\n",
+	// 		msg.Command(), summary, p,
+	// 	)
+	// 	o += spew.Sdump(msg)
+	// 	return o + spew.Sdump(buf)
+	// })
 	return msg, buf, nil
 }
 
@@ -893,23 +891,23 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) error {
 	}
 	// Use closures to log expensive operations so they are only run when the
 	// logging level requires it.
-	log.TRACEC(func() string {
-		// Debug summary of message.
-		summary := messageSummary(msg)
-		if len(summary) > 0 {
-			summary = " (" + summary + ")"
-		}
-		o := fmt.Sprintf("Sending %v%s to %s\n", msg.Command(),
-			summary, p)
-		o += spew.Sdump(msg)
-		var buf bytes.Buffer
-		_, err := wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(),
-			p.cfg.ChainParams.Net, enc)
-		if err != nil {
-			return err.Error()
-		}
-		return o + spew.Sdump(buf.Bytes())
-	})
+	// log.TRACEC(func() string {
+	// 	// Debug summary of message.
+	// 	summary := messageSummary(msg)
+	// 	if len(summary) > 0 {
+	// 		summary = " (" + summary + ")"
+	// 	}
+	// 	o := fmt.Sprintf("Sending %v%s to %s\n", msg.Command(),
+	// 		summary, p)
+	// 	o += spew.Sdump(msg)
+	// 	var buf bytes.Buffer
+	// 	_, err := wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(),
+	// 		p.cfg.ChainParams.Net, enc)
+	// 	if err != nil {
+	// 		return err.Error()
+	// 	}
+	// 	return o + spew.Sdump(buf.Bytes())
+	// })
 	// Write the message to the peer.
 	n, err := wire.WriteMessageWithEncodingN(p.conn, msg,
 		p.ProtocolVersion(), p.cfg.ChainParams.Net, enc)
@@ -1126,7 +1124,7 @@ cleanup:
 			break cleanup
 		}
 	}
-	log.TRACE("peer stall handler done for", p)
+	// log.TRACE("peer stall handler done for", p)
 }
 
 // inHandler handles all incoming messages for the peer.
@@ -1320,7 +1318,7 @@ out:
 	// Ensure connection is closed.
 	p.Disconnect()
 	close(p.inQuit)
-	log.TRACE("peer input handler done for", p)
+	// log.TRACE("peer input handler done for", p)
 }
 
 // queueHandler handles the queuing of outgoing data for the peer.
@@ -1448,7 +1446,7 @@ cleanup:
 		}
 	}
 	close(p.queueQuit)
-	log.TRACE("peer queue handler done for", p)
+	// log.TRACE("peer queue handler done for", p)
 }
 
 // shouldLogWriteError returns whether or not the passed error,
@@ -1533,7 +1531,7 @@ cleanup:
 		}
 	}
 	close(p.outQuit)
-	log.TRACE("peer output handler done for", p)
+	// log.TRACE("peer output handler done for", p)
 }
 
 // pingHandler periodically pings the peer.  It must be run as a goroutine.
@@ -1617,7 +1615,7 @@ func (p *Peer) Disconnect() {
 	if atomic.AddInt32(&p.disconnect, 1) != 1 {
 		return
 	}
-	log.TRACE("disconnecting", p)
+	// log.TRACE("disconnecting", p)
 	if atomic.LoadInt32(&p.connected) != 0 {
 		_ = p.conn.Close()
 	}
@@ -1655,8 +1653,8 @@ func (p *Peer) readRemoteVersionMsg() error {
 	p.versionKnown = true
 	p.services = msg.Services
 	p.flagsMtx.Unlock()
-	log.TRACEF("negotiated protocol version %d for peer %s",
-		p.protocolVersion, p)
+	// log.TRACEF("negotiated protocol version %d for peer %s",
+	// 	p.protocolVersion, p)
 	// Updating a bunch of stats including block based stats,
 	// and the peer's time offset.
 	p.statsMtx.Lock()
@@ -1794,7 +1792,7 @@ func (p *Peer) negotiateOutboundProtocol() error {
 
 // start begins processing input and output messages.
 func (p *Peer) start() error {
-	log.TRACE("starting peer", p)
+	// log.TRACE("starting peer", p)
 	negotiateErr := make(chan error, 1)
 	go func() {
 		if p.inbound {
@@ -1814,7 +1812,7 @@ func (p *Peer) start() error {
 		p.Disconnect()
 		return errors.New("protocol negotiation timeout")
 	}
-	log.TRACE("connected to", p)
+	// log.TRACE("connected to", p)
 	// The protocol has been negotiated successfully so start processing input
 	// and output messages.
 	go p.stallHandler()

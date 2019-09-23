@@ -10,13 +10,12 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/spv/cache/lru"
 	"github.com/parallelcointeam/parallelcoin/cmd/spv/filterdb"
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
 )
 
 var (
-	//nolint
+	// nolint
 	bigOne = big.NewInt(1)
 	// blockDataFile is the path to a file containing the first 256 blocks
 	// of the block chain.
@@ -43,18 +42,18 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
 	err := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
 	if err != nil {
-		log <- cl.Debug{err}
+		DEBUG(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	err = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
 	if err != nil {
-		log <- cl.Debug{err}
+		DEBUG(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
 	// Insert the big filter and check all previous filters are evicted.
 	err = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
 	if err != nil {
-		log <- cl.Debug{err}
+		DEBUG(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	assertEqual(t, getFilter(cs, b3, t), f3, "")
@@ -213,17 +212,17 @@ func TestCacheBigEnoughHoldsAllFilter(t *testing.T) {
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
 	err := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
 	if err != nil {
-		log <- cl.Debug{err}
+		DEBUG(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	err = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
 	if err != nil {
-		log <- cl.Debug{err}
+		DEBUG(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
 	err = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
 	if err != nil {
-		log <- cl.Debug{err}
+		DEBUG(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 3, "")
 	// Check that we can get those filters back independent of Get order.

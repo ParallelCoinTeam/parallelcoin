@@ -1,16 +1,15 @@
 package wire
 
 import (
-   "bytes"
-   "fmt"
-   "io"
-   "reflect"
-   "testing"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"fmt"
+	"io"
+	"reflect"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 )
 
 // TestInv tests the MsgInv API.
@@ -84,11 +83,11 @@ func TestInvWire(t *testing.T) {
 	MultiInv := NewMsgInv()
 	err = MultiInv.AddInvVect(iv)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	err = MultiInv.AddInvVect(iv2)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	MultiInvEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors

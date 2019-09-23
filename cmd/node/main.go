@@ -40,12 +40,12 @@ var winServiceMain func() (bool, error)
 func Main(cx *conte.Xt, shutdownChan chan struct{},
 	killswitch chan struct{}, nodechan chan *rpc.Server,
 	wg *sync.WaitGroup) (err error) {
-	log.TRACE("starting up node main")
+	// log.TRACE("starting up node main")
 	wg.Add(1)
 	shutdownChan = make(chan struct{})
 	interrupt.AddHandler(
 		func() {
-			log.TRACE("closing shutdown channel")
+			// log.TRACE("closing shutdown channel")
 			close(shutdownChan)
 		},
 	)
@@ -98,7 +98,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	}
 	defer func() {
 		// ensure the database is sync'd and closed on shutdown
-		log.TRACE("gracefully shutting down the database")
+		// log.TRACE("gracefully shutting down the database")
 		db.Close()
 		time.Sleep(time.Second / 4)
 	}()
@@ -159,10 +159,10 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	})
 	server.Start()
 	if len(server.RPCServers) > 0 {
-		log.TRACE("propagating rpc server handle")
+		// log.TRACE("propagating rpc server handle")
 		cx.RPCServer = server.RPCServers[0]
 		if nodechan != nil {
-			log.TRACE("sending back node")
+			// log.TRACE("sending back node")
 			nodechan <- server.RPCServers[0]
 		}
 	}
@@ -235,7 +235,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 			return nil, err
 		}
 	}
-	log.TRACE("block database loaded")
+	// log.TRACE("block database loaded")
 	return db, nil
 }
 

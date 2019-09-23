@@ -4,15 +4,11 @@ import (
 	"fmt"
 	"math"
 	"runtime"
-	"time"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/hardfork"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 type // txValidateItem holds a transaction along with which input to validate.
@@ -24,17 +20,17 @@ type // txValidateItem holds a transaction along with which input to validate.
 	}
 
 type // txValidator provides a type which asynchronously validates transaction
-// inputs.  It provides several channels for communication and a processing
-// function that is intended to be in run multiple goroutines.
-txValidator struct {
-	validateChan chan *txValidateItem
-	quitChan     chan struct{}
-	resultChan   chan error
-	utxoView     *UtxoViewpoint
-	flags        txscript.ScriptFlags
-	sigCache     *txscript.SigCache
-	hashCache    *txscript.HashCache
-}
+	// inputs.  It provides several channels for communication and a processing
+	// function that is intended to be in run multiple goroutines.
+	txValidator struct {
+		validateChan chan *txValidateItem
+		quitChan     chan struct{}
+		resultChan   chan error
+		utxoView     *UtxoViewpoint
+		flags        txscript.ScriptFlags
+		sigCache     *txscript.SigCache
+		hashCache    *txscript.HashCache
+	}
 
 func // sendResult sends the result of a script pair validation on the internal
 // result channel while respecting the quit channel.
@@ -199,7 +195,7 @@ ValidateTransactionScripts(b *BlockChain, tx *util.Tx, utxoView *UtxoViewpoint, 
 		cachedHashes, _ = hashCache.GetSigHashes(tx.Hash())
 	}
 	if ContainsBlacklisted(b, tx, hardfork.Blacklist) {
-		return ruleError(ErrBlacklisted, "transaction contains blacklisted address "+cl.Ine())
+		return ruleError(ErrBlacklisted, "transaction contains blacklisted address ")
 	}
 	// Collect all of the transaction inputs and required information for
 	// validation.
@@ -273,14 +269,14 @@ checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 	}
 	// Validate all of the inputs.
 	validator := newTxValidator(utxoView, scriptFlags, sigCache, hashCache)
-	start := time.Now()
+	// start := time.Now()
 	if err := validator.Validate(txValItems); err != nil {
 		return err
 	}
-	elapsed := time.Since(start)
-	log.TRACEC(func() string {
-		return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
-	})
+	// elapsed := time.Since(start)
+	// log.TRACEC(func() string {
+	// 	return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
+	// })
 	// If the HashCache is present, once we have validated the block,
 	// we no longer need the cached hashes for these transactions,
 	// so we purge them from the cache.

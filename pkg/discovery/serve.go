@@ -26,7 +26,7 @@ func GetParallelcoinServiceName(params *netparams.Params) string {
 
 func Serve(params *netparams.Params, lanInterface *net.Interface,
 	group string) (cancel context.CancelFunc, request RequestFunc, err error) {
-	log.TRACE("starting discovery server")
+	// log.TRACE("starting discovery server")
 	texts := []string{"group=" + group}
 	domain := "local."
 	requests := make(chan Request)
@@ -42,7 +42,7 @@ func Serve(params *netparams.Params, lanInterface *net.Interface,
 			log.ERROR("error registering ", err)
 			return
 		}
-		log.TRACE("registered")
+		// log.TRACE("registered")
 		for {
 			select {
 			case r := <-requests:
@@ -74,7 +74,7 @@ func Serve(params *netparams.Params, lanInterface *net.Interface,
 					log.DEBUG("appending", nt, "to texts:", texts)
 				}
 				server.Shutdown()
-				log.TRACE("shut down server")
+				// log.TRACE("shut down server")
 				server, err = zeroconf.Register(alias,
 					GetParallelcoinServiceName(
 						params), domain, 1, texts, []net.Interface{*lanInterface})
@@ -82,7 +82,7 @@ func Serve(params *netparams.Params, lanInterface *net.Interface,
 					log.ERROR("error registering ", err)
 					return
 				}
-				log.TRACE("restarted server")
+				// log.TRACE("restarted server")
 			case <-ctx.Done():
 				server.Shutdown()
 				break

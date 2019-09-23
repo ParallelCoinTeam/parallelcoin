@@ -12,7 +12,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
 	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 )
 
@@ -26,11 +25,11 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				cx.ActiveNet.Params.Name + slash +
 				wallet.WalletDbName
 		if !apputil.FileExists(dbFilename) {
-			cl.Register.SetAllLevels("off")
+			log.L.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				log.ERROR("failed to create wallet", err)
 			}
-			cl.Register.SetAllLevels(*cx.Config.LogLevel)
+			log.L.SetLevel(*cx.Config.LogLevel, false)
 		}
 		nodeChan := make(chan *rpc.Server)
 		walletChan := make(chan *wallet.Wallet)

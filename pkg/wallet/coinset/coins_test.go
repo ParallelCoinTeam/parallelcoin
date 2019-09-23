@@ -10,7 +10,6 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet/coinset"
 )
 
@@ -27,7 +26,7 @@ func (c *TestCoin) Value() util.Amount    { return c.TxValue }
 func (c *TestCoin) PkScript() []byte      { return nil }
 func (c *TestCoin) NumConfs() int64       { return c.TxNumConfs }
 func (c *TestCoin) ValueAge() int64       { return int64(c.TxValue) * c.TxNumConfs }
-func NewCoin(	index int64, value util.Amount, numConfs int64) coinset.Coin {
+func NewCoin(index int64, value util.Amount, numConfs int64) coinset.Coin {
 	h := sha256.New()
 	_, err := h.Write([]byte(fmt.Sprintf("%d", index)))
 	if err != nil {
@@ -51,7 +50,7 @@ type coinSelectTest struct {
 	expectedError error
 }
 
-func testCoinSelector(	tests []coinSelectTest, t *testing.T) {
+func testCoinSelector(tests []coinSelectTest, t *testing.T) {
 	for testIndex, test := range tests {
 		cs, err := test.selector.CoinSelect(test.targetValue, test.inputCoins)
 		if err != test.expectedError {
@@ -90,7 +89,7 @@ var coins = []coinset.Coin{
 	NewCoin(4, 25000000, 6),
 }
 
-func TestCoinSet(	t *testing.T) {
+func TestCoinSet(t *testing.T) {
 	cs := coinset.NewCoinSet(nil)
 	if cs.PopCoin() != nil {
 		t.Error("Expected popCoin of empty to be nil")
@@ -133,7 +132,7 @@ var minIndexTests = []coinSelectTest{
 	{minIndexSelectors[1], coins, 140000000, nil, coinset.ErrCoinsNoSelectionAvailable},
 }
 
-func TestMinIndexSelector(	t *testing.T) {
+func TestMinIndexSelector(t *testing.T) {
 	testCoinSelector(minIndexTests, t)
 }
 
@@ -155,7 +154,7 @@ var minNumberTests = []coinSelectTest{
 	{minNumberSelectors[1], coins, 140000000, []coinset.Coin{coins[0], coins[2]}, nil},
 }
 
-func TestMinNumberSelector(	t *testing.T) {
+func TestMinNumberSelector(t *testing.T) {
 	testCoinSelector(minNumberTests, t)
 }
 
@@ -176,7 +175,7 @@ var maxValueAgeTests = []coinSelectTest{
 	{maxValueAgeSelectors[1], coins, 34990001, nil, coinset.ErrCoinsNoSelectionAvailable},
 }
 
-func TestMaxValueAgeSelector(	t *testing.T) {
+func TestMaxValueAgeSelector(t *testing.T) {
 	testCoinSelector(maxValueAgeTests, t)
 }
 
@@ -208,7 +207,7 @@ var minPriorityTests = []coinSelectTest{
 	{minPrioritySelectors[6], connectedCoins, 25000000, []coinset.Coin{coins[3], coins[0]}, nil},
 }
 
-func TestMinPrioritySelector(	t *testing.T) {
+func TestMinPrioritySelector(t *testing.T) {
 	testCoinSelector(minPriorityTests, t)
 }
 
@@ -230,7 +229,7 @@ var (
 	}
 )
 
-func TestSimpleCoin(	t *testing.T) {
+func TestSimpleCoin(t *testing.T) {
 	if testSimpleCoin.Hash().String() != testSimpleCoinTxHash {
 		t.Error("Different value for tx hash than expected")
 	}

@@ -50,7 +50,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 	// Create and start HTTP server to serve wallet client connections.
 	// This will be updated with the wallet and chain server RPC client
 	// created below after each is created.
-	log.TRACE("starting RPC servers")
+	// log.TRACE("starting RPC servers")
 	rpcS, legacyServer, err := startRPCServers(config, stateCfg, activeNet,
 		loader)
 	if err != nil {
@@ -63,7 +63,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 		addresses.RefillMiningAddresses(w, config, stateCfg)
 	})
 	if !*config.NoInitialLoad {
-		log.TRACE("starting rpc client connection handler")
+		// log.TRACE("starting rpc client connection handler")
 		go rpcClientConnectLoop(config, activeNet, legacyServer, loader)
 		// Create and start chain RPC client so it's ready to connect to
 		// the wallet when loaded later.
@@ -73,16 +73,16 @@ func Main(config *pod.Config, stateCfg *state.Config,
 		var w *wallet.Wallet
 		w, err = loader.OpenExistingWallet([]byte(*config.WalletPass),
 			true)
-		log.TRACE("wallet", w)
+		// log.TRACE("wallet", w)
 		if err != nil {
 			log.ERROR(err)
 			return err
 		}
 		loader.Wallet = w
-		log.TRACE("sending back wallet")
+		// log.TRACE("sending back wallet")
 		walletChan <- w
 	}
-	log.TRACE("adding interrupt handler to unload wallet")
+	// log.TRACE("adding interrupt handler to unload wallet")
 	// Add interrupt handlers to shutdown the various process components
 	// before exiting.  Interrupt handlers run in LIFO order, so the wallet
 	// (which should be closed last) is added first.
@@ -104,10 +104,10 @@ func Main(config *pod.Config, stateCfg *state.Config,
 	}
 	if legacyServer != nil {
 		interrupt.AddHandler(func() {
-			log.TRACE("stopping wallet RPC server")
+			// log.TRACE("stopping wallet RPC server")
 			stateCfg.DiscoveryUpdate("walletrpc", "")
 			legacyServer.Stop()
-			log.TRACE("wallet RPC server shutdown")
+			// log.TRACE("wallet RPC server shutdown")
 		})
 		go func() {
 			<-legacyServer.RequestProcessShutdownChan()
@@ -269,10 +269,10 @@ func rpcClientConnectLoop(config *pod.Config, activeNet *netparams.Params,
 // there is no recovery in case the server is not available or if there is an
 // authentication error.  Instead, all requests to the client will simply error.
 func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, error) {
-	log.TRACEF(
-		"attempting RPC client connection to %v, TLS: %s, %s",
-		*config.RPCConnect, fmt.Sprint(*config.TLS),
-	)
+	// log.TRACEF(
+	// 	"attempting RPC client connection to %v, TLS: %s, %s",
+	// 	*config.RPCConnect, fmt.Sprint(*config.TLS),
+	// )
 	rpcC, err := chain.NewRPCClient(activeNet, *config.RPCConnect,
 		*config.Username, *config.Password, certs, !*config.TLS, 0)
 	if err != nil {

@@ -38,7 +38,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 // chain and the second indicates whether or not the block is an orphan.
 // This function is safe for concurrent access.
 (b *BlockChain) ProcessBlock(block *util.Block, flags BehaviorFlags, height int32) (bool, bool, error) {
-	log.WARN("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
+	// log.WARN("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
 	blockHeight := height
 	bb, _ := b.BlockByHash(&block.MsgBlock().Header.PrevBlock)
 	if bb != nil {
@@ -50,9 +50,9 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	blockHash := block.Hash()
 	hf := fork.GetCurrent(blockHeight)
 	blockHashWithAlgo := block.MsgBlock().BlockHashWithAlgos(blockHeight).String()
-	log.WARNC(func() string {
-			return "processing block " + blockHashWithAlgo
-		})
+	// log.WARNC(func() string {
+	// 		return "processing block " + blockHashWithAlgo
+	// 	})
 	var algo int32
 	switch hf {
 	case 0:
@@ -82,12 +82,12 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// Perform preliminary sanity checks on the block and its transactions.
 	var DoNotCheckPow bool
 	pl := fork.GetMinDiff(fork.GetAlgoName(algo, blockHeight), blockHeight)
-	log.WARNF("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo,
-		blockHeight), blockHeight, pl)
+	// log.WARNF("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo,
+	// 	blockHeight), blockHeight, pl)
 	ph := &block.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
 	if pn == nil {
-		log.WARN("found no previous node")
+		// log.WARN("found no previous node")
 		DoNotCheckPow = true
 	}
 	pb := pn.GetLastWithAlgo(algo)
@@ -95,14 +95,14 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		// pl = &chaincfg.AllOnes !!!!!!!!!!!!!!!!!!
 		DoNotCheckPow = true
 	}
-	log.WARNF("checkBlockSanity powLimit %d %s %d %064x", algo,
-		fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
+	// log.WARNF("checkBlockSanity powLimit %d %s %d %064x", algo,
+	// 	fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight)
 	if err != nil {
 		log.ERROR("block processing error: ", err)
 		return false, false, err
 	}
-	log.WARN("searching back to checkpoints")
+	// log.WARN("searching back to checkpoints")
 	// Find the previous checkpoint and perform some additional checks based
 	// on the checkpoint.  This provides a few
 	// nice properties such as preventing old side chain blocks before the
@@ -142,7 +142,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 			}
 		}
 	}
-	log.WARN("handling orphans")
+	// log.WARN("handling orphans")
 	// Handle orphan blocks.
 	prevHash := &blockHeader.PrevBlock
 	prevHashExists, err := b.blockExists(prevHash)
@@ -162,7 +162,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	}
 	// The block has passed all context independent checks and appears sane
 	// enough to potentially accept it into the block chain.
-	log.WARN("maybe accept block")
+	// log.WARN("maybe accept block")
 	isMainChain, err := b.maybeAcceptBlock(block, flags)
 	if err != nil {
 		return false, false, err
@@ -176,11 +176,11 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	if err != nil {
 		return false, false, err
 	}
-	log.DEBUGF("accepted block %d %v",
-		blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
-			Header.Version, blockHeight))
+	// log.DEBUGF("accepted block %d %v",
+	// 	blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
+	// 		Header.Version, blockHeight))
 
-	log.WARN("finished blockchain.ProcessBlock")
+	// log.WARN("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }
 
@@ -246,8 +246,8 @@ func // processOrphans determines if there are any orphans which depend on the
 		for i := 0; i < len(b.prevOrphans[*processHash]); i++ {
 			orphan := b.prevOrphans[*processHash][i]
 			if orphan == nil {
-				log.TRACEF("found a nil entry at index %d in the orphan"+
-					" dependency list for block %v", i, processHash)
+				// log.TRACEF("found a nil entry at index %d in the orphan"+
+				// 	" dependency list for block %v", i, processHash)
 				continue
 			}
 			// Remove the orphan from the orphan pool.

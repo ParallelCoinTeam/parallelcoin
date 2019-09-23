@@ -12,13 +12,12 @@ import (
 	"time"
 
 	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
+	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 

@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
@@ -24,7 +24,7 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 		if dbtx != nil {
 			err := dbtx.Rollback()
 			if err != nil {
-				log <- cl.Debug{err}
+				log.DEBUG(err)
 			}
 		}
 	}()

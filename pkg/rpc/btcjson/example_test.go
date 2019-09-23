@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	btcjson "github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 )
 
 // This example demonstrates how to create and marshal a command into a JSON-RPC request.

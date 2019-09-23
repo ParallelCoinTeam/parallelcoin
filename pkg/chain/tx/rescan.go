@@ -4,8 +4,8 @@ import (
 	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
 )
@@ -122,9 +122,8 @@ out:
 			switch n := n.(type) {
 			case *chain.RescanProgress:
 				if curBatch == nil {
-					log <- cl.Wrn(
-						"received rescan progress notification but no rescan currently running",
-					)
+					log.WARN("received rescan progress" +
+						" notification but no rescan currently running")
 					continue
 				}
 				w.rescanProgress <- &RescanProgressMsg{
@@ -133,8 +132,8 @@ out:
 				}
 			case *chain.RescanFinished:
 				if curBatch == nil {
-					log <- cl.Wrn(
-						"received rescan finished notification but no rescan currently running",
+					log.WARN("received rescan finished notification but no" +
+						" rescan currently running",
 					)
 					continue
 				}
@@ -169,28 +168,26 @@ out:
 		select {
 		case msg := <-w.rescanProgress:
 			n := msg.Notification
-			log <- cl.Infof{
+			log.INFOF(
 				"rescanned through block %v (height %d)",
 				n.Hash,
-				n.Height,
-			}
+				n.Height)
 		case msg := <-w.rescanFinished:
 			n := msg.Notification
 			addrs := msg.Addresses
-			noun := pickNoun(len(addrs), "address", "addresses")
-			log <- cl.Infof{
+			noun := log.PickNoun(len(addrs), "address", "addresses")
+			log.INFOF(
 				"finished rescan for %d %s (synced to block %s, height %d)",
 				len(addrs),
 				noun,
 				n.Hash,
-				n.Height,
-			}
-			go w.resendUnminedTxs()
-		case <-quit:
-			break out
-		}
-	}
-	w.wg.Done()
+				n.Height)
+		go w.resendUnminedTxs()
+case <-quit:
+break out
+}
+}
+w.wg.Done()
 }
 
 // rescanRPCHandler reads batch jobs sent by rescanBatchHandler and sends the
@@ -199,8 +196,7 @@ out:
 func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		log <- cl.Errorf{
-			"rescanRPCHandler called without an RPC client", err}
+		log.ERRORF("rescanRPCHandler called without an RPC client", err)
 		w.wg.Done()
 		return
 	}
@@ -211,22 +207,21 @@ out:
 		case batch := <-w.rescanBatch:
 			// Log the newly-started rescan.
 			numAddrs := len(batch.addrs)
-			noun := pickNoun(numAddrs, "address", "addresses")
-			log <- cl.Infof{
+			noun := log.PickNoun(numAddrs, "address", "addresses")
+			log.INFOF(
 				"started rescan from block %v (height %d) for %d %s",
 				batch.bs.Hash,
 				batch.bs.Height,
 				numAddrs,
-				noun,
-			}
+				noun)
 			err := chainClient.Rescan(&batch.bs.Hash, batch.addrs,
 				batch.outpoints)
 			if err != nil {
-				log <- cl.Errorf{
+				log.ERRORF(
 					"rescan for %d %s failed: %v %s",
 					numAddrs,
 					noun,
-					err}
+					err)
 			}
 			batch.done(err)
 		case <-quit:

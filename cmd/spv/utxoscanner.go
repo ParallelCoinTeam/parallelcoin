@@ -326,9 +326,9 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		log.TRACEF(
-			"fetching block height=%d hash=%s %s", height, hash,
-		)
+		// log.TRACEF(
+		// 	"fetching block height=%d hash=%s %s", height, hash,
+		// )
 		block, err := s.cfg.GetBlock(*hash)
 		if err != nil {
 			return reporter.FailRemaining(err)

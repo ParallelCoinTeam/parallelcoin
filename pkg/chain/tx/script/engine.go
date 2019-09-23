@@ -1,18 +1,16 @@
 package txscript
 
 import (
-   "bytes"
-   "crypto/sha256"
-   "fmt"
-   "math/big"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   
-   // "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-   
-   "go.uber.org/atomic"
-   
-   ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	"bytes"
+	"crypto/sha256"
+	"fmt"
+	"math/big"
+
+	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+
+	"go.uber.org/atomic"
+
+	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
 // ScriptFlags is a bitmask defining additional operations or tests that will be done when executing a script pair.

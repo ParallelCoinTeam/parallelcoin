@@ -6,7 +6,7 @@ import (
 
 	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
@@ -16,7 +16,7 @@ func (w *Wallet) handleChainNotifications() {
 	defer w.wg.Done()
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		log <- cl.Error{"handleChainNotifications called without RPC client", err}
+		log.ERROR("handleChainNotifications called without RPC client", err)
 		return
 	}
 	sync := func(w *Wallet) {
@@ -26,7 +26,7 @@ func (w *Wallet) handleChainNotifications() {
 		// to be out of date.
 		err := w.syncWithChain()
 		if err != nil && !w.ShuttingDown() {
-			log <- cl.Warn{"unable to synchronize wallet to chain:", err}
+			log.WARN("unable to synchronize wallet to chain:", err)
 		}
 	}
 	catchUpHashes := func(w *Wallet, client chain.Interface,
@@ -41,10 +41,8 @@ func (w *Wallet) handleChainNotifications() {
 		// if it doesn't match the original hash returned by
 		// the notification, to roll back and restart the
 		// rescan.
-		log <- cl.Infof{
-			"catching up block hashes to height %d, this might take a while, %s",
-			height,
-		}
+		log.INFOF("catching up block hashes to height %d, this might take a while, %s",
+			height)
 		err := walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
 			ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
 			startBlock := w.Manager.SyncedTo()
@@ -70,11 +68,10 @@ func (w *Wallet) handleChainNotifications() {
 			return nil
 		})
 		if err != nil {
-			log <- cl.Errorf{
-				"failed to update address manager sync state for height %d: %v",
-				height, err}
+			log.ERRORF("failed to update address manager sync state for height %d"+
+				": %v", height, err)
 		}
-		INFO("done catching up block hashes"}
+		log.INFO("done catching up block hashes")
 		return err
 	}
 	for {
@@ -91,8 +88,7 @@ func (w *Wallet) handleChainNotifications() {
 			case chain.BlockConnected:
 				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
 					err := w.connectBlock(tx, wtxmgr.BlockMeta(n))
-					log <- cl.Debug{
-						"connect block error ", err}
+					log.DEBUG("connect block error ", err)
 					return err
 				})
 				notificationName = "blockconnected"
@@ -123,8 +119,8 @@ func (w *Wallet) handleChainNotifications() {
 					})
 				}
 				notificationName = "filteredblockconnected"
-			// The following require some database maintenance, but also
-			// need to be reported to the wallet's rescan goroutine.
+				// The following require some database maintenance, but also
+				// need to be reported to the wallet's rescan goroutine.
 			case *chain.RescanProgress:
 				err = catchUpHashes(w, chainClient, n.Height)
 				notificationName = "rescanprogress"
@@ -151,10 +147,9 @@ func (w *Wallet) handleChainNotifications() {
 				if notificationName == "blockconnected" &&
 					strings.Contains(err.Error(),
 						"couldn't get hash from database") {
-					log <- cl.Debug{
-						errStr, notificationName, err}
+					log.DEBUG(errStr, notificationName, err)
 				} else {
-					log <- cl.Error{errStr, notificationName, err}
+					log.ERROR(errStr, notificationName, err)
 				}
 			}
 		case <-w.quit:
@@ -264,7 +259,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 				if err != nil {
 					return err
 				}
-				log <- cl.Debugf{"marked address %v used", addr}
+				// log.DEBUGF("marked address %v used", addr)
 				continue
 			}
 			// Missing addresses are skipped.  Other errors should
@@ -281,29 +276,27 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 	if block == nil {
 		details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, nil)
 		if err != nil {
-			log <- cl.Error{"cannot query transaction details for notification:",
-				err}
-		}
-		// It's possible that the transaction was not found within the
-		// wallet's set of unconfirmed transactions due to it already
-		// being confirmed, so we'll avoid notifying it.
-		//
-		// TODO(wilmer): ideally we should find the culprit to why we're
-		// receiving an additional unconfirmed chain.RelevantTx
-		// notification from the chain backend.
-		if details != nil {
-			w.NtfnServer.notifyUnminedTransaction(dbtx, details)
-		}
-	} else {
-		details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, &block.Block)
-		if err != nil {
-			log <- cl.Error{"cannot query transaction details for notification:",
-				err}
-		}
-		// We'll only notify the transaction if it was found within the
-		// wallet's set of confirmed transactions.
-		if details != nil {
-			w.NtfnServer.notifyMinedTransaction(dbtx, details, block)
+			// log.ERROR("cannot query transaction details for notification:",				err)
+			// It's possible that the transaction was not found within the
+			// wallet's set of unconfirmed transactions due to it already
+			// being confirmed, so we'll avoid notifying it.
+			//
+			// TODO(wilmer): ideally we should find the culprit to why we're
+			// receiving an additional unconfirmed chain.RelevantTx
+			// notification from the chain backend.
+			if details != nil {
+				w.NtfnServer.notifyUnminedTransaction(dbtx, details)
+			}
+		} else {
+			details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, &block.Block)
+			if err != nil {
+				// log.ERROR("cannot query transaction details for notification:", err)
+			}
+			// We'll only notify the transaction if it was found within the
+			// wallet's set of confirmed transactions.
+			if details != nil {
+				w.NtfnServer.notifyMinedTransaction(dbtx, details, block)
+			}
 		}
 	}
 	return nil

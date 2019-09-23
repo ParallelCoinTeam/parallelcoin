@@ -10,7 +10,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 type Schema struct {
@@ -36,7 +36,7 @@ type Field struct {
 func GetConfigSchema() Schema {
 	t := reflect.TypeOf(Config{})
 	var levelOptions, network, algos []string
-	for i := range cl.Levels {
+	for _, i := range log.Levels {
 		levelOptions = append(levelOptions, i)
 	}
 	algos = append(algos, "random")
