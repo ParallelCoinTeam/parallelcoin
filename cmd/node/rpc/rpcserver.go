@@ -25,26 +25,26 @@ import (
 	"github.com/btcsuite/websocket"
 	"github.com/urfave/cli"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/mempool"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/version"
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	indexers "github.com/parallelcointeam/parallelcoin/pkg/chain/index"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
-	cpuminer "github.com/parallelcointeam/parallelcoin/pkg/chain/mining/cpu"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	p "github.com/parallelcointeam/parallelcoin/pkg/peer"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	"github.com/p9c/pod/cmd/node/mempool"
+	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/cmd/node/version"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	indexers "github.com/p9c/pod/pkg/chain/index"
+	"github.com/p9c/pod/pkg/chain/mining"
+	cpuminer "github.com/p9c/pod/pkg/chain/mining/cpu"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
+	p "github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 const (
@@ -898,10 +898,10 @@ func (s *Server) Start() {
 			log.INFO("chain RPC server listening on ", listener.Addr())
 			err := httpServer.Serve(listener)
 			if err != nil {
-				// log.TRACE(err)
+				log.TRACE(err)
 
 			}
-			// log.TRACE("chain RPC listener done for", listener.Addr())
+			log.TRACE("chain RPC listener done for", listener.Addr())
 
 			s.WG.Done()
 		}(listener)
@@ -925,7 +925,7 @@ func (s *Server) Stop() error {
 
 		return nil
 	}
-	// log.TRACE("RPC server shutting down")
+	log.TRACE("RPC server shutting down")
 
 	for _, listener := range s.Cfg.Listeners {
 		err := listener.Close()
@@ -3293,10 +3293,10 @@ func HandleGetNetworkHashPS(s *Server, cmd interface{},
 	if startHeight < 0 {
 		startHeight = 0
 	}
-	// log.TRACEF(
-	// 	"calculating network hashes per second from %d to %d",
-	// 	startHeight,
-	// 	endHeight)
+	log.TRACEF(
+		"calculating network hashes per second from %d to %d",
+		startHeight,
+		endHeight)
 
 	// Find the min and max block timestamps as well as calculate the total
 	// amount of work that happened between the start and end blocks.

@@ -3,11 +3,11 @@ package indexers
 import (
 	"fmt"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
 )
 
 var (
@@ -242,11 +242,11 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	// but it can happen if the chain is reorganized while the index is
 	// disabled.  This has to be done in reverse order because later indexes
 	// can depend on earlier ones.
+	var height int32
+	var hash *chainhash.Hash
 	for i := len(m.enabledIndexes); i > 0; i-- {
 		indexer := m.enabledIndexes[i-1]
 		// Fetch the current tip for the index.
-		var height int32
-		var hash *chainhash.Hash
 		err := m.db.View(func(dbTx database.Tx) error {
 			idxKey := indexer.Key()
 			hash, height, err = dbFetchIndexerTip(dbTx, idxKey)
@@ -337,12 +337,12 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			if err != nil {
 				return err
 			}
-			// log.TRACEF(
-			// 	"current %s tip (height %d, hash %v)",
-			// 	indexer.Name(),
-			// 	height,
-			// 	hash,
-			// )
+			log.TRACEF(
+				"current %s tip (height %d, hash %v)",
+				indexer.Name(),
+				height,
+				hash,
+			)
 			indexerHeights[i] = height
 			if height < lowestHeight {
 				lowestHeight = height

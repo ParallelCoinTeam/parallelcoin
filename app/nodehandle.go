@@ -5,15 +5,15 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/log"
 )
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-		// log.TRACE("running node handler")
+		log.TRACE("running node handler")
 		var wg sync.WaitGroup
 		Configure(cx)
 		// serviceOptions defines the configuration options for the daemon as a service on Windows.

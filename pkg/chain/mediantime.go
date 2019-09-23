@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/pkg/log"
 )
 
 // TODO: tighten maxAllowedOffsetSecs for hf1 - also, consider changing to a
@@ -124,10 +124,10 @@ func // AddTimeSample adds a time sample that is used when determining the
 	sortedOffsets := make([]int64, numOffsets)
 	copy(sortedOffsets, m.offsets)
 	sort.Sort(int64Sorter(sortedOffsets))
-	// offsetDuration := time.Duration(offsetSecs) * time.Second
-	// log.TRACEF("Added time sample of %v (total: %v)", offsetDuration,
-	// 	numOffsets)
-	// log.TRACE("samples:", sortedOffsets)
+	offsetDuration := time.Duration(offsetSecs) * time.Second
+	log.TRACEF("Added time sample of %v (total: %v)", offsetDuration,
+		numOffsets)
+	log.TRACE("samples:", sortedOffsets)
 	// NOTE: The following code intentionally has a bug to mirror the buggy
 	// behavior in Bitcoin Core since the median time is used in the consensus
 	// rules. In particular, the offset is only updated when the number of

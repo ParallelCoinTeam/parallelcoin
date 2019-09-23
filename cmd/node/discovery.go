@@ -6,11 +6,11 @@ import (
 
 	"github.com/grandcat/zeroconf"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/discovery"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/peer/connmgr"
 )
 
 // DiscoverPeers connects lan peers in the same group.
@@ -68,6 +68,6 @@ func DiscoverPeers(cx *conte.Xt) (cancel func()) {
 			}
 		}
 	}()
-	// log.TRACE("started up discovery loop")
+	log.TRACE("started up discovery loop")
 	return cancel
 }

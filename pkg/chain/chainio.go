@@ -3,16 +3,17 @@ package blockchain
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"sync"
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (
@@ -894,10 +895,10 @@ func // createChainState initializes both the database and the chain state to
 (b *BlockChain) createChainState() error {
 	// Create a new node from the genesis block and set it as the best node.
 	genesisBlock := util.NewBlock(b.params.GenesisBlock)
-	// log.TRACEC(func() string {
-	// 	xx, _ := genesisBlock.Bytes()
-	// 	return hex.EncodeToString(xx)
-	// })
+	log.TRACEC(func() string {
+		xx, _ := genesisBlock.Bytes()
+		return hex.EncodeToString(xx)
+	})
 	genesisBlock.SetHeight(0)
 	header := &genesisBlock.MsgBlock().Header
 	node := newBlockNode(header, nil)
@@ -1012,7 +1013,7 @@ func // initChainState attempts to load and initialize the chain state from the
 		// yet, so break out now to allow that to happen under a writable
 		// database transaction.
 		serializedData := dbTx.Metadata().Get(chainStateKeyName)
-		// log.TRACEF("serialized chain state: %0x", serializedData)
+		log.TRACEF("serialized chain state: %0x", serializedData)
 		state, err := deserializeBestChainState(serializedData)
 		if err != nil {
 			return err
@@ -1022,7 +1023,7 @@ func // initChainState attempts to load and initialize the chain state from the
 		// Since the number of nodes are already known,
 		// perform a single alloc for them versus a whole bunch of little
 		// ones to reduce pressure on the GC.
-		// log.TRACE("loading block index...")
+		log.TRACE("loading block index...")
 		blockIndexBucket := dbTx.Metadata().Bucket(blockIndexBucketName)
 		// Determine how many blocks will be loaded into the index so we can
 		// allocate the right amount.

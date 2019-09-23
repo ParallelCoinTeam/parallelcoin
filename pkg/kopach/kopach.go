@@ -8,13 +8,13 @@ import (
 	"sync"
 	"time"
 
-	"git.parallelcoin.io/dev/rpcx/client"
+	"github.com/p9c/rpcx/client"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
-	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
-	"github.com/parallelcointeam/parallelcoin/pkg/kcpx"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/mining"
+	"github.com/p9c/pod/pkg/discovery"
+	"github.com/p9c/pod/pkg/kcpx"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // MineFunc is a function that stops on the semaphore closing and ostensibly

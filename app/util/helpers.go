@@ -1,4 +1,4 @@
-package apputil
+package util
 
 import (
 	"os"

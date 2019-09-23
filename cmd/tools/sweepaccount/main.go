@@ -10,16 +10,16 @@ import (
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/crypto/ssh/terminal"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txauthor "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/author"
-	txrules "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/rules"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	cfgutil "github.com/parallelcointeam/parallelcoin/pkg/util/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
+	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util"
+	cfgutil "github.com/p9c/pod/pkg/util/config"
 )
 
 var (

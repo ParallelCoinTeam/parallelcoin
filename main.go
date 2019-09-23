@@ -5,9 +5,11 @@
 package main
 
 import (
-	"github.com/parallelcointeam/parallelcoin/cmd"
+	"github.com/p9c/pod/cmd"
+	"github.com/p9c/pod/pkg/log"
 )
 
 func main() {
+	log.L.SetLevel("trace", true)
 	cmd.Main()
 }

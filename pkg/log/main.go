@@ -10,6 +10,7 @@ import (
 	"time"
 
 	gt "github.com/buger/goterm"
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -33,9 +34,10 @@ var (
 
 var StartupTime = time.Now()
 
-type PrintlnFunc func(a ...interface{})
-type PrintfFunc func(format string, a ...interface{})
-type Closure func(func() string)
+type PrintlnFunc *func(a ...interface{})
+type PrintfFunc *func(format string, a ...interface{})
+type PrintcFunc *func(func() string)
+type SpewFunc *func(interface{})
 
 const (
 	Off   = "off"
@@ -59,18 +61,19 @@ type Logger struct {
 	Info          PrintlnFunc
 	Debug         PrintlnFunc
 	Trace         PrintlnFunc
+	Traces        SpewFunc
 	Fatalf        PrintfFunc
 	Errorf        PrintfFunc
 	Warnf         PrintfFunc
 	Infof         PrintfFunc
 	Debugf        PrintfFunc
 	Tracef        PrintfFunc
-	Fatalc        Closure
-	Errorc        Closure
-	Warnc         Closure
-	Infoc         Closure
-	Debugc        Closure
-	Tracec        Closure
+	Fatalc        PrintcFunc
+	Errorc        PrintcFunc
+	Warnc         PrintcFunc
+	Infoc         PrintcFunc
+	Debugc        PrintcFunc
+	Tracec        PrintcFunc
 	LogFileHandle *os.File
 	Color         bool
 }
@@ -145,9 +148,9 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 }
 
 // SetLevel enables or disables the various print functions
-func (l *Logger) SetLevel(level string, color bool) {
+func (l *Logger) SetLevel(level string, color bool) *Logger {
 	_, loc, line, _ := runtime.Caller(1)
-	files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
+	files := strings.Split(loc, "github.com/p9c/pod/")
 	codeLoc := fmt.Sprint(files[1], ":", justifyLineNumber(line))
 	fmt.Println("setting level to", level, codeLoc)
 	*l = *Empty()
@@ -158,6 +161,7 @@ func (l *Logger) SetLevel(level string, color bool) {
 		l.Trace = Println("TRC", color, l.LogFileHandle)
 		l.Tracef = Printf("TRC", color, l.LogFileHandle)
 		l.Tracec = Printc("TRC", color, l.LogFileHandle)
+		l.Traces = Prints("TRC", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Debug || fallen:
@@ -169,7 +173,7 @@ func (l *Logger) SetLevel(level string, color bool) {
 		fallthrough
 	case level == Info || fallen:
 		// fmt.Println("loading Info printers")
-		l.Info = Println("INF", color, l.LogFileHandle)
+		l.Info = PrintlnFunc(Println("INF", color, l.LogFileHandle))
 		l.Infof = Printf("INF", color, l.LogFileHandle)
 		l.Infoc = Printc("INF", color, l.LogFileHandle)
 		fallen = true
@@ -195,19 +199,28 @@ func (l *Logger) SetLevel(level string, color bool) {
 		l.Fatalc = Printc("FTL", color, l.LogFileHandle)
 		fallen = true
 	}
+	return l
 }
 
-var NoPrintln = func() func(_ ...interface{}) {
-	return func(_ ...interface{}) {
+var NoPrintln = func() PrintlnFunc {
+	f := func(_ ...interface{}) {
 	}
+	return &f
 }
-var NoPrintf = func() func(_ string, _ ...interface{}) {
-	return func(_ string, _ ...interface{}) {
+var NoPrintf = func() PrintfFunc {
+	f := func(_ string, _ ...interface{}) {
 	}
+	return &f
 }
-var NoClosure = func() func(_ func() string) {
-	return func(_ func() string) {
+var NoClosure = func() PrintcFunc {
+	f := func(_ func() string) {
 	}
+	return &f
+}
+var NoSpew = func() SpewFunc {
+	f := func(_ interface{}) {
+	}
+	return &f
 }
 
 func trimReturn(s string) string {
@@ -248,7 +261,7 @@ func composit(text, level string, color bool) string {
 	terminalWidth := gt.Width()
 	_, loc, iline, _ := runtime.Caller(3)
 	line := fmt.Sprint(iline)
-	files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
+	files := strings.Split(loc, "github.com/p9c/pod/")
 	file := files[1]
 	since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
 		Second * time.Second)
@@ -260,6 +273,22 @@ func composit(text, level string, color bool) string {
 	textLen := len(text) + 1
 	fileLen := len(file) + 1
 	lineLen := len(line) + 1
+	if color {
+		switch level {
+		case "FTL":
+			level = colorPurpleB + level + colorOff
+		case "ERR":
+			level = colorRedB + level + colorOff
+		case "WRN":
+			level = colorOrange + level + colorOff
+		case "INF":
+			level = colorGray + level + colorOff
+		case "DBG":
+			level = colorGreen + level + colorOff
+		case "TRC":
+			level = colorBlue + level + colorOff
+		}
+	}
 	final := "" // fmt.Sprintf("%s %s %s %s:%s", level, since, text, file, line)
 	if levelLen+sinceLen+textLen+fileLen+lineLen > terminalWidth {
 		lines := strings.Split(text, "\n")
@@ -282,8 +311,8 @@ func composit(text, level string, color bool) string {
 					cs := strings.Split(ll, " ")
 					lenLast := len(cs[len(cs)-1])
 					if len(ll)-lenLast <= maxPreformatted {
-						final += ll[:len(ll)-lenLast]+"\n"
-						final += cs[len(cs)-1]+"\n"
+						final += ll[:len(ll)-lenLast] + "\n"
+						final += cs[len(cs)-1] + "\n"
 					} else {
 						slices = append(slices, ll[:maxPreformatted])
 						ll = ll[maxPreformatted:]
@@ -371,8 +400,8 @@ func composit(text, level string, color bool) string {
 }
 
 // Println prints a log entry like Println
-func Println(level string, color bool, fh *os.File) func(a ...interface{}) {
-	return func(a ...interface{}) {
+func Println(level string, color bool, fh *os.File) PrintlnFunc {
+	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
 		fmt.Println(composit(text, level, color))
 		if fh != nil {
@@ -385,12 +414,12 @@ func Println(level string, color bool, fh *os.File) func(a ...interface{}) {
 			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
 	}
+	return &f
 }
 
 // Printf prints a log entry with formatting
-func Printf(level string, color bool, fh *os.File) func(format string,
-	a ...interface{}) {
-	return func(format string, a ...interface{}) {
+func Printf(level string, color bool, fh *os.File) PrintfFunc {
+	f := func(format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
 		fmt.Println(composit(text, level, color))
 		if fh != nil {
@@ -403,11 +432,12 @@ func Printf(level string, color bool, fh *os.File) func(format string,
 			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
 	}
+	return &f
 }
 
 // Printc prints from a closure returning a string
-func Printc(level string, color bool, fh *os.File) func(fn func() string) {
-	return func(fn func() string) {
+func Printc(level string, color bool, fh *os.File) PrintcFunc {
+	f := func(fn func() string) {
 		// level = strings.ToUpper(string(level[0]))
 		t := fn()
 		text := trimReturn(t)
@@ -422,6 +452,26 @@ func Printc(level string, color bool, fh *os.File) func(fn func() string) {
 			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
 	}
+	return &f
+}
+
+
+// Prints spews a variable
+func Prints(level string, color bool, fh *os.File) SpewFunc {
+	f := func(a interface{}) {
+		text := trimReturn(spew.Sdump(a))
+		fmt.Println(composit(text, level, color))
+		if fh != nil {
+			_, loc, line, _ := runtime.Caller(2)
+			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
+			j, err := json.Marshal(out)
+			if err != nil {
+				fmt.Println("logging error:", err)
+			}
+			_, _ = fmt.Fprint(fh, string(j)+",")
+		}
+	}
+	return &f
 }
 
 // FileExists reports whether the named file or directory exists.

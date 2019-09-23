@@ -6,18 +6,18 @@ import (
 	"sync"
 	"time"
 
-	sac "github.com/parallelcointeam/parallelcoin/cmd/spv"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	sac "github.com/p9c/pod/cmd/spv"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // NeutrinoClient is an implementation of the btcwalet chain.Interface interface.
@@ -197,10 +197,10 @@ func (s *NeutrinoClient) FilterBlocks(
 		} else if !matched {
 			continue
 		}
-		// log.TRACEF(
-		// 	"fetching block height=%d hash=%v",
-		// 	blk.Height, blk.Hash,
-		// )
+		log.TRACEF(
+			"fetching block height=%d hash=%v",
+			blk.Height, blk.Hash,
+		)
 		// TODO(conner): can optimize bandwidth by only fetching
 		// stripped blocks
 		rawBlock, err := s.GetBlock(&blk.Hash)

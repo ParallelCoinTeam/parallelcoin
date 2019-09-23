@@ -9,8 +9,8 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/discovery"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 )
 
 func main() {

@@ -6,13 +6,13 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/cmd/node"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	"github.com/p9c/pod/app/util"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
@@ -24,12 +24,12 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			*cx.Config.DataDir + slash +
 				cx.ActiveNet.Params.Name + slash +
 				wallet.WalletDbName
-		if !apputil.FileExists(dbFilename) {
+		if !util.FileExists(dbFilename) {
 			log.L.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				log.ERROR("failed to create wallet", err)
 			}
-			log.L.SetLevel(*cx.Config.LogLevel, false)
+			log.L.SetLevel(*cx.Config.LogLevel, true)
 		}
 		nodeChan := make(chan *rpc.Server)
 		walletChan := make(chan *wallet.Wallet)

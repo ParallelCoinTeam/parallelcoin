@@ -5,12 +5,12 @@ import (
 	"sync"
 	"time"
 
-	"git.parallelcoin.io/dev/rpcx/client"
+	"github.com/p9c/rpcx/client"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
-	"github.com/parallelcointeam/parallelcoin/pkg/kcpx"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/chain/mining"
+	"github.com/p9c/pod/pkg/kcpx"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Subscriber is the information required to track a subscriber

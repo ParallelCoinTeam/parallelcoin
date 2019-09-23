@@ -6,10 +6,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	am "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
+	am "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 type (
@@ -326,9 +326,9 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		// log.TRACEF(
-		// 	"fetching block height=%d hash=%s %s", height, hash,
-		// )
+		log.TRACEF(
+			"fetching block height=%d hash=%s %s", height, hash,
+		)
 		block, err := s.cfg.GetBlock(*hash)
 		if err != nil {
 			return reporter.FailRemaining(err)

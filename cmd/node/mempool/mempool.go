@@ -9,18 +9,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hardfork"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	indexers "github.com/parallelcointeam/parallelcoin/pkg/chain/index"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/hardfork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	indexers "github.com/p9c/pod/pkg/chain/index"
+	"github.com/p9c/pod/pkg/chain/mining"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util"
 )
 
 type // Config is a descriptor containing the memory pool configuration.
@@ -298,7 +298,7 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 // This function is safe for concurrent access.
 (mp *TxPool) ProcessTransaction(b *blockchain.BlockChain, tx *util.Tx,
 	allowOrphan, rateLimit bool, tag Tag) ([]*TxDesc, error) {
-	// log.TRACE("processing transaction", tx.Hash())
+	log.TRACE("processing transaction", tx.Hash())
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	defer mp.mtx.Unlock()
@@ -897,14 +897,14 @@ func // maybeAcceptTransaction is the internal function which implements the
 				"by the rate limiter due to low fees", txHash)
 			return nil, nil, txRuleError(wire.RejectInsufficientFee, str)
 		}
-		// oldTotal := mp.pennyTotal
+		oldTotal := mp.pennyTotal
 		mp.pennyTotal += float64(serializedSize)
-		// log.TRACEF(
-		// 	"rate limit: curTotal %v, nextTotal: %v, limit %v",
-		// 	oldTotal,
-		// 	mp.pennyTotal,
-		// 	mp.cfg.Policy.FreeTxRelayLimit*10*1000,
-		// )
+		log.TRACEF(
+			"rate limit: curTotal %v, nextTotal: %v, limit %v",
+			oldTotal,
+			mp.pennyTotal,
+			mp.cfg.Policy.FreeTxRelayLimit*10*1000,
+		)
 	}
 	// Verify crypto signatures for each input and reject the transaction if
 	// any don't verify.

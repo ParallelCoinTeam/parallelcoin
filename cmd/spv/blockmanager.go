@@ -10,18 +10,18 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/headerfs"
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/headerlist"
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
+	"github.com/p9c/pod/cmd/spv/headerfs"
+	"github.com/p9c/pod/cmd/spv/headerlist"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
 )
 
 const (
@@ -746,10 +746,10 @@ func // getCheckpointedCFHeaders catches a filter header store up with the
 		endHeightRange := uint32(
 			(currentInterval + 1) * wire.CFCheckptInterval,
 		)
-		// log.TRACEF(
-		// 	"checkpointed cfheaders request start_range=%v, end_range=%v",
-		// 	startHeightRange, endHeightRange,
-		// )
+		log.TRACEF(
+			"checkpointed cfheaders request start_range=%v, end_range=%v",
+			startHeightRange, endHeightRange,
+		)
 		// In order to fetch the range, we'll need the block header for
 		// the end of the height range.
 		stopHeader, err := b.server.BlockHeaders.FetchHeaderByHeight(
@@ -1499,7 +1499,7 @@ out:
 		}
 	}
 	b.wg.Done()
-	// log.TRACE("block handler done")
+	log.TRACE("block handler done")
 }
 
 func // SyncPeer returns the current sync peer.
@@ -2008,12 +2008,12 @@ func // handleHeadersMsg handles headers messages from all peers.
 					Height: int32(backHeight+1) + int32(j),
 				})
 			}
-			// log.TRACE(
-			// 	"sane reorg attempted. Total work from reorg chain:", totalWork,
-			// )
-			// All the headers pass sanity checks. Now we calculate
-			// the total work for the known chain.
-			knownWork := big.NewInt(0)
+			log.TRACE(
+					"sane reorg attempted. Total work from reorg chain:", totalWork,
+				)
+				// All the headers pass sanity checks. Now we calculate
+				// the total work for the known chain.
+				knownWork := big.NewInt(0)
 			// This should NEVER be nil because the most recent
 			// block is always pushed back by resetHeaderState
 			knownEl := b.headerList.Back()
@@ -2039,7 +2039,7 @@ func // handleHeadersMsg handles headers messages from all peers.
 						knownHead.Version),
 				)
 			}
-			// log.TRACE("total work from known chain:", knownWork)
+			log.TRACE("total work from known chain:", knownWork)
 			// Compare the two work totals and reject the new chain
 			// if it doesn't have more work than the previously
 			// known chain. Disconnect if it's actually less than
@@ -2127,10 +2127,10 @@ func // handleHeadersMsg handles headers messages from all peers.
 			break
 		}
 	}
-	// log.TRACEF(
-	// 	"writing header batch of %v block headers",
-	// 	len(headerWriteBatch),
-	// )
+	log.TRACEF(
+		"writing header batch of %v block headers",
+		len(headerWriteBatch),
+	)
 	if len(headerWriteBatch) > 0 {
 		// With all the headers in this batch validated, we'll write
 		// them all in a single transaction such that this entire batch

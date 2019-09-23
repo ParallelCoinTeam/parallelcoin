@@ -18,15 +18,15 @@ import (
 	"github.com/btcsuite/websocket"
 	"golang.org/x/crypto/ripemd160"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Notification types
@@ -255,7 +255,7 @@ func (s *Server) WebsocketHandler(conn *websocket.Conn, remoteAddr string,
 		log.DEBUG(err)
 	}
 	// Limit max number of websocket clients.
-	// log.TRACE("new websocket client", remoteAddr)
+	log.TRACE("new websocket client", remoteAddr)
 	if s.NtfnMgr.GetNumClients()+1 > *s.Config.RPCMaxWebsockets {
 		log.INFOF("max websocket clients exceeded [%d] - disconnecting client"+
 			" %s",
@@ -277,7 +277,7 @@ func (s *Server) WebsocketHandler(conn *websocket.Conn, remoteAddr string,
 	client.Start()
 	client.WaitForShutdown()
 	s.NtfnMgr.RemoveClient(client)
-	// log.TRACE("disconnected websocket client", remoteAddr)
+	log.TRACE("disconnected websocket client", remoteAddr)
 }
 
 // Disconnect disconnects the websocket client.
@@ -288,7 +288,7 @@ func (c *WSClient) Disconnect() {
 	if c.Disconnected {
 		return
 	}
-	// log.TRACE("disconnecting websocket client", c.Addr)
+	log.TRACE("disconnecting websocket client", c.Addr)
 	close(c.Quit)
 	c.Conn.Close()
 	c.Disconnected = true
@@ -338,7 +338,7 @@ func (c *WSClient) SendMessage(marshalledJSON []byte, doneChan chan bool) {
 
 // Start begins processing input and output messages.
 func (c *WSClient) Start() {
-	// log.TRACE("starting websocket client", c.Addr)
+	log.TRACE("starting websocket client", c.Addr)
 	// Start processing input and output.
 	c.WG.Add(3)
 	go c.InHandler()
@@ -368,8 +368,8 @@ out:
 		if err != nil {
 			// Log the error if it's not due to disconnecting.
 			if err != io.EOF && err != io.ErrUnexpectedEOF {
-				// log.TRACEF("websocket receive error from %s: %v",
-				// 	c.Addr, err)
+				log.TRACEF("websocket receive error from %s: %v",
+					c.Addr, err)
 			}
 			break out
 		}
@@ -426,7 +426,7 @@ out:
 			c.SendMessage(reply, nil)
 			continue
 		}
-		// log.TRACEF("received command <%s> from %s", cmd.Method, c.Addr)
+		log.TRACEF("received command <%s> from %s", cmd.Method, c.Addr)
 		// Check auth.  The client is immediately disconnected if the first
 		// request of an unauthentiated websocket client is not the authenticate
 		// request, an authenticate request is received when the client is
@@ -505,7 +505,7 @@ out:
 	// Ensure the connection is closed.
 	c.Disconnect()
 	c.WG.Done()
-	// log.TRACE("websocket client input handler done for", c.Addr)
+	log.TRACE("websocket client input handler done for", c.Addr)
 }
 
 // NotificationQueueHandler handles the queuing of outgoing notifications for
@@ -570,7 +570,7 @@ cleanup:
 		}
 	}
 	c.WG.Done()
-	// log.TRACE("websocket client notification queue handler done for", c.Addr)
+	log.TRACE("websocket client notification queue handler done for", c.Addr)
 }
 
 // OutHandler handles all outgoing messages for the websocket connection.  It
@@ -609,7 +609,7 @@ cleanup:
 		}
 	}
 	c.WG.Done()
-	// log.TRACE("websocket client output handler done for", c.Addr)
+	log.TRACE("websocket client output handler done for", c.Addr)
 }
 
 // ServiceRequest services a parsed RPC request by looking up and executing the

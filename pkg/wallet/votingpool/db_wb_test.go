@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 func TestPutUsedAddrHash(t *testing.T) {

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/pkg/log"
 )
 
 func main() {

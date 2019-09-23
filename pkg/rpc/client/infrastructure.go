@@ -22,8 +22,8 @@ import (
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/btcsuite/websocket"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 var (
@@ -295,7 +295,7 @@ func // handleMessage is the main handler for incoming notifications and
 			return
 		}
 		// Deliver the notification.
-		// log.TRACE("received notification:", in.Method)
+		log.TRACE("received notification:", in.Method)
 		c.handleNotification(in.rawNotification)
 		return
 	}
@@ -310,7 +310,7 @@ func // handleMessage is the main handler for incoming notifications and
 		return
 	}
 	id := uint64(*in.ID)
-	// log.TRACEF("received response for id %d (result %s) %s", id, in.Result)
+	log.TRACEF("received response for id %d (result %s) %s", id, in.Result)
 	request := c.removeRequest(id)
 	// Nothing more to do if there is no request associated with this reply.
 	if request == nil || request.responseChan == nil {
@@ -363,8 +363,8 @@ out:
 		if err != nil && err != io.ErrUnexpectedEOF && err != io.EOF {
 			// Log the error if it's not due to disconnecting.
 			if c.shouldLogReadError(err) {
-				// log.TRACEF("websocket receive error from %s: %v %s",
-				// 	c.config.Host, err)
+				log.TRACEF("websocket receive error from %s: %v %s",
+					c.config.Host, err)
 			}
 			break out
 		}
@@ -374,7 +374,7 @@ out:
 	// Ensure the connection is closed.
 	c.Disconnect()
 	c.wg.Done()
-	// log.TRACE("RPC client input handler done for", c.config.Host)
+	log.TRACE("RPC client input handler done for", c.config.Host)
 }
 
 func // disconnectChan returns a copy of the current disconnect channel.
@@ -417,7 +417,7 @@ cleanup:
 		}
 	}
 	c.wg.Done()
-	// log.TRACE("RPC client output handler done for", c.config.Host)
+	log.TRACE("RPC client output handler done for", c.config.Host)
 }
 
 func // sendMessage sends the passed JSON to the connected server using the
@@ -538,7 +538,7 @@ func // resendRequests resends any requests that had not completed when the
 		if c.Disconnected() {
 			return
 		}
-		// log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
+		log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
 		c.sendMessage(jReq.marshalledJSON)
 	}
 }
@@ -568,7 +568,7 @@ out:
 			wsConn, err := dial(c.config)
 			if err != nil {
 				c.retryCount++
-				// log.TRACE("failed to connect to %s: %v %s", c.config.Host, err)
+				log.TRACE("failed to connect to %s: %v %s", c.config.Host, err)
 				// Scale the retry interval by the number of retries so there is
 				// a backoff up to a max of 1 minute.
 				scaledInterval := connectionRetryInterval.Nanoseconds() * c.
@@ -577,8 +577,8 @@ out:
 				if scaledDuration > time.Minute {
 					scaledDuration = time.Minute
 				}
-				// log.TRACE("retrying connection to %s in %s %s",
-				// 	c.config.Host, scaledDuration)
+				log.TRACE("retrying connection to %s in %s %s",
+					c.config.Host, scaledDuration)
 				time.Sleep(scaledDuration)
 				continue reconnect
 			}
@@ -600,7 +600,7 @@ out:
 		}
 	}
 	c.wg.Done()
-	// log.TRACE("RPC client reconnect handler done for", c.config.Host)
+	log.TRACE("RPC client reconnect handler done for", c.config.Host)
 }
 
 func // handleSendPostMessage handles performing the passed HTTP request,
@@ -608,7 +608,7 @@ func // handleSendPostMessage handles performing the passed HTTP request,
 // to the provided response channel.
 (c *Client) handleSendPostMessage(details *sendPostDetails) {
 	jReq := details.jsonRequest
-	// log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
+	log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
 	httpResponse, err := c.httpClient.Do(details.httpRequest)
 	if err != nil {
 		jReq.responseChan <- &response{err: err}
@@ -667,7 +667,7 @@ cleanup:
 		}
 	}
 	c.wg.Done()
-	// log.TRACE("RPC client send handler done for", c.config.Host)
+	log.TRACE("RPC client send handler done for", c.config.Host)
 }
 
 func // sendPostRequest sends the passed HTTP request to the RPC server using
@@ -728,7 +728,7 @@ func // sendPost sends the passed request to the server by issuing an HTTP POST
 	httpReq.Header.Set("Content-Type", "application/json")
 	// Configure basic access authorization.
 	httpReq.SetBasicAuth(c.config.User, c.config.Pass)
-	// log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
+	log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
 	c.sendPostRequest(httpReq, jReq)
 }
 
@@ -760,7 +760,7 @@ func // sendRequest sends the passed json request to the associated server
 		jReq.responseChan <- &response{err: err}
 		return
 	}
-	// log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
+	log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
 	c.sendMessage(jReq.marshalledJSON)
 }
 
@@ -829,7 +829,7 @@ func // doDisconnect disconnects the websocket associated with the client if it
 	if c.disconnected {
 		return false
 	}
-	// log.TRACE("disconnecting RPC client", c.config.Host)
+	log.TRACE("disconnecting RPC client", c.config.Host)
 	close(c.disconnect)
 	if c.wsConn != nil {
 		c.wsConn.Close()
@@ -850,7 +850,7 @@ func // doShutdown closes the shutdown channel and logs the shutdown unless
 		return false
 	default:
 	}
-	// log.TRACE("shutting down RPC client", c.config.Host)
+	log.TRACE("shutting down RPC client", c.config.Host)
 	close(c.shutdown)
 	return true
 }
@@ -909,7 +909,7 @@ func // Shutdown shuts down the client by disconnecting any connections
 
 func // start begins processing input and output messages.
 (c *Client) start() {
-	// log.TRACE("starting RPC client", c.config.Host)
+	log.TRACE("starting RPC client", c.config.Host)
 	// Start the I/O processing handlers depending on whether the client is in
 	// HTTP POST mode or the default websocket mode.
 	if c.config.HTTPPostMode {

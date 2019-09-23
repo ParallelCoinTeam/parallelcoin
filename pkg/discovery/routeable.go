@@ -7,7 +7,7 @@ import (
 	externalip "github.com/glendc/go-external-ip"
 	"github.com/jackpal/gateway"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/pkg/log"
 )
 
 // GetRouteableInterface returns the address and interface of the internet

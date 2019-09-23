@@ -1,21 +1,21 @@
 package fork
 
 import (
-   "crypto/sha256"
-   "math/big"
-   
-   "git.parallelcoin.io/dev/cryptonight"
-   "github.com/bitgoin/lyra2rev2"
-   "github.com/dchest/blake256"
-   skein "github.com/enceve/crypto/skein/skein256"
-   gost "github.com/programmer10110/gostreebog"
-   "golang.org/x/crypto/argon2"
-   "golang.org/x/crypto/blake2b"
-   "golang.org/x/crypto/blake2s"
-   "golang.org/x/crypto/scrypt"
-   "golang.org/x/crypto/sha3"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"crypto/sha256"
+	"math/big"
+
+	"git.parallelcoin.io/dev/cryptonight"
+	"github.com/bitgoin/lyra2rev2"
+	"github.com/dchest/blake256"
+	skein "github.com/enceve/crypto/skein/skein256"
+	gost "github.com/programmer10110/gostreebog"
+	"golang.org/x/crypto/argon2"
+	"golang.org/x/crypto/blake2b"
+	"golang.org/x/crypto/blake2s"
+	"golang.org/x/crypto/scrypt"
+	"golang.org/x/crypto/sha3"
+
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 const HashReps = 8

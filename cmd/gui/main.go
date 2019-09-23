@@ -8,11 +8,11 @@ import (
 
 	"github.com/zserge/webview"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
+	"github.com/p9c/pod/cmd/gui/vue"
+	"github.com/p9c/pod/cmd/gui/vue/comp"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 const (

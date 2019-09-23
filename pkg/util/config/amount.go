@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // AmountFlag embeds a util.Amount and implements the flags.Marshaler and

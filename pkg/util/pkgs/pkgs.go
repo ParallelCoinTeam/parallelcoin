@@ -9,7 +9,7 @@ func Name(dtype interface{}) string {
 	name := reflect.TypeOf(dtype).PkgPath()
 	name = strings.TrimPrefix(
 		name,
-		"github.com/parallelcointeam/parallelcoin/",
+		"github.com/p9c/pod/",
 	)
 	return name
 }

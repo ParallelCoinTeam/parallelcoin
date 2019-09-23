@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"sync"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
 )
 
 const (
@@ -490,10 +490,7 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		lastFile = i
 		fileLen = uint32(st.Size())
 	}
-	// log.TRACEF(
-	// 	"Scan found latest block file #%d with length %d",
-	// 	lastFile,
-	// 	fileLen)
+	log.TRACEF("Scan found latest block file #%d with length %d", lastFile, fileLen)
 	return lastFile, fileLen
 }
 

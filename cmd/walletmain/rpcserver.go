@@ -16,14 +16,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/legacy"
-	rpcserver "github.com/parallelcointeam/parallelcoin/pkg/rpc/server"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/legacy"
+	rpcserver "github.com/p9c/pod/pkg/rpc/server"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 type listenFunc func(net string, laddr string) (net.Listener, error)
@@ -168,7 +168,7 @@ func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 func startRPCServers(config *pod.Config, stateCfg *state.Config,
 	activeNet *netparams.Params, walletLoader *wallet.Loader) (*grpc.Server,
 	*legacy.Server, error) {
-	// log.TRACE("startRPCServers")
+	log.TRACE("startRPCServers")
 	var (
 		server       *grpc.Server
 		legacyServer *legacy.Server
@@ -217,7 +217,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config,
 				go func() {
 					log.INFO("experimental RPC server listening on", listener)
 					err = server.Serve(lis)
-					// log.TRACE("finished serving experimental RPC:", err)
+					log.TRACE("finished serving experimental RPC:", err)
 				}()
 			}
 		}

@@ -1,9 +1,9 @@
 package spv
 
 import (
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/headerfs"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/cmd/spv/headerfs"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // headers wraps the different headers and filters used throughout the tests.

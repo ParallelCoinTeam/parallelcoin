@@ -3,11 +3,11 @@ package blockchain
 import (
 	"fmt"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hardfork"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/pkg/chain/hardfork"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func // maybeAcceptBlock potentially accepts a block into the block chain

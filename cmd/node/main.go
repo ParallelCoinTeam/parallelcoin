@@ -10,15 +10,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/path"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/version"
-	indexers "github.com/parallelcointeam/parallelcoin/pkg/chain/index"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
+	"github.com/p9c/pod/app/util"
+	"github.com/p9c/pod/cmd/node/path"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/cmd/node/version"
+	indexers "github.com/p9c/pod/pkg/chain/index"
+	"github.com/p9c/pod/pkg/conte"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 // var StateCfg = new(state.Config)
@@ -40,12 +40,12 @@ var winServiceMain func() (bool, error)
 func Main(cx *conte.Xt, shutdownChan chan struct{},
 	killswitch chan struct{}, nodechan chan *rpc.Server,
 	wg *sync.WaitGroup) (err error) {
-	// log.TRACE("starting up node main")
+	log.TRACE("starting up node main")
 	wg.Add(1)
 	shutdownChan = make(chan struct{})
 	interrupt.AddHandler(
 		func() {
-			// log.TRACE("closing shutdown channel")
+			log.TRACE("closing shutdown channel")
 			close(shutdownChan)
 		},
 	)
@@ -98,7 +98,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	}
 	defer func() {
 		// ensure the database is sync'd and closed on shutdown
-		// log.TRACE("gracefully shutting down the database")
+		log.TRACE("gracefully shutting down the database")
 		db.Close()
 		time.Sleep(time.Second / 4)
 	}()
@@ -159,10 +159,10 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	})
 	server.Start()
 	if len(server.RPCServers) > 0 {
-		// log.TRACE("propagating rpc server handle")
+		log.TRACE("propagating rpc server handle")
 		cx.RPCServer = server.RPCServers[0]
 		if nodechan != nil {
-			// log.TRACE("sending back node")
+			log.TRACE("sending back node")
 			nodechan <- server.RPCServers[0]
 		}
 	}
@@ -235,7 +235,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 			return nil, err
 		}
 	}
-	// log.TRACE("block database loaded")
+	log.TRACE("block database loaded")
 	return db, nil
 }
 
@@ -278,7 +278,7 @@ func warnMultipleDBs(cx *conte.Xt) {
 		}
 		// store db path as a duplicate db if it exists
 		dbPath := path.BlockDb(cx, dbType)
-		if apputil.FileExists(dbPath) {
+		if util.FileExists(dbPath) {
 			duplicateDbPaths = append(duplicateDbPaths, dbPath)
 		}
 	}

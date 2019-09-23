@@ -20,29 +20,29 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/mempool"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/upnp"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/version"
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	indexers "github.com/parallelcointeam/parallelcoin/pkg/chain/index"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
-	cpuminer "github.com/parallelcointeam/parallelcoin/pkg/chain/mining/cpu"
-	netsync "github.com/parallelcointeam/parallelcoin/pkg/chain/sync"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/addrmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/bloom"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
+	"github.com/p9c/pod/cmd/node/mempool"
+	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/cmd/node/upnp"
+	"github.com/p9c/pod/cmd/node/version"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	indexers "github.com/p9c/pod/pkg/chain/index"
+	"github.com/p9c/pod/pkg/chain/mining"
+	cpuminer "github.com/p9c/pod/pkg/chain/mining/cpu"
+	netsync "github.com/p9c/pod/pkg/chain/sync"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/peer/addrmgr"
+	"github.com/p9c/pod/pkg/peer/connmgr"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/bloom"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 const DefaultMaxOrphanTxSize = 100000
@@ -423,7 +423,7 @@ func (s *Node) Start() {
 	if atomic.AddInt32(&s.Started, 1) != 1 {
 		return
 	}
-	// log.TRACE("starting server")
+	log.TRACE("starting server")
 	// Server startup time. Used for the uptime command for uptime calculation.
 	s.StartupTime = time.Now().Unix()
 	// Start the peer handler which in turn starts the address and block
@@ -457,7 +457,7 @@ func (s *Node) Stop() error {
 		log.DEBUG("server is already in the process of shutting down")
 		return nil
 	}
-	// log.TRACE("node shutting down")
+	log.TRACE("node shutting down")
 	s.StateCfg.DiscoveryUpdate("node", "")
 	// Stop the CPU miner if needed
 	s.CPUMiner.Stop()
@@ -562,7 +562,7 @@ func (s *Node) HandleAddPeerMsg(state *PeerState, sp *NodePeer) bool {
 		return false
 	}
 	// Add the new peer and start it.
-	// log.TRACE("new peer ", sp)
+	log.TRACE("new peer ", sp)
 	if sp.Inbound() {
 		state.InboundPeers[sp.ID()] = sp
 	} else {
@@ -625,7 +625,7 @@ func (s *Node) HandleDonePeerMsg(state *PeerState, sp *NodePeer) {
 			s.ConnManager.Disconnect(sp.ConnReq.ID())
 		}
 		delete(list, sp.ID())
-		// log.TRACE("removed peer ", sp)
+		log.TRACE("removed peer ", sp)
 		return
 	}
 	if sp.ConnReq != nil {
@@ -882,7 +882,7 @@ func (s *Node) PeerHandler() {
 	// easier and slightly faster to simply start and stop them in this handler.
 	s.AddrManager.Start()
 	s.SyncManager.Start()
-	// log.TRACE("starting peer handler")
+	log.TRACE("starting peer handler")
 	peerState := &PeerState{
 		InboundPeers:    make(map[int32]*NodePeer),
 		PersistentPeers: make(map[int32]*NodePeer),
@@ -891,7 +891,7 @@ func (s *Node) PeerHandler() {
 		OutboundGroups:  make(map[string]int),
 	}
 	if !*s.Config.DisableDNSSeed || len(*s.Config.ConnectPeers) > 0 {
-		// log.TRACE("seeding from DNS ", !*s.Config.DisableDNSSeed)
+		log.TRACE("seeding from DNS ", !*s.Config.DisableDNSSeed)
 		// Add peers discovered through DNS to the address manager.
 		connmgr.SeedFromDNS(s.ActiveNet, DefaultRequiredServices,
 			Lookup(s.StateCfg), func(addrs []*wire.NetAddress) {
@@ -903,7 +903,7 @@ func (s *Node) PeerHandler() {
 				s.AddrManager.AddAddresses(addrs, addrs[0])
 			})
 	}
-	// log.TRACE("starting connmgr")
+	log.TRACE("starting connmgr")
 	go s.ConnManager.Start()
 out:
 	for {
@@ -932,7 +932,7 @@ out:
 		case <-s.Quit:
 			// Disconnect all peers on server shutdown.
 			peerState.ForAllPeers(func(sp *NodePeer) {
-				// log.TRACEF("shutdown peer %s", sp)
+				log.TRACEF("shutdown peer %s", sp)
 				sp.Disconnect()
 			})
 			break out
@@ -962,7 +962,7 @@ cleanup:
 		}
 	}
 	s.WG.Done()
-	// log.TRACEF("peer handler done")
+	log.TRACEF("peer handler done")
 }
 
 // PushBlockMsg sends a block message for the provided block hash to the
@@ -978,8 +978,8 @@ func (s *Node) PushBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 		return err
 	})
 	if err != nil {
-		// log.TRACEF("unable to fetch requested block hash %v: %v",
-		// 	hash, err)
+		log.TRACEF("unable to fetch requested block hash %v: %v",
+			hash, err)
 		if doneChan != nil {
 			doneChan <- struct{}{}
 		}
@@ -989,8 +989,8 @@ func (s *Node) PushBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 	var msgBlock wire.MsgBlock
 	err = msgBlock.Deserialize(bytes.NewReader(blockBytes))
 	if err != nil {
-		// log.TRACEF("unable to deserialize requested block hash %v: %v",
-		// 	hash, err)
+		log.TRACEF("unable to deserialize requested block hash %v: %v",
+			hash, err)
 		if doneChan != nil {
 			doneChan <- struct{}{}
 		}
@@ -1044,8 +1044,8 @@ func (s *Node) PushMerkleBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 	// Fetch the raw block bytes from the database.
 	blk, err := sp.Server.Chain.BlockByHash(hash)
 	if err != nil {
-		// log.TRACEF("unable to fetch requested block hash %v: %v",
-		// 	hash, err)
+		log.TRACEF("unable to fetch requested block hash %v: %v",
+			hash, err)
 		if doneChan != nil {
 			doneChan <- struct{}{}
 		}
@@ -1091,7 +1091,7 @@ func (s *Node) PushTxMsg(sp *NodePeer, hash *chainhash.Hash,
 	// missing transaction results in the same behavior.
 	tx, err := s.TxMemPool.FetchTransaction(hash)
 	if err != nil {
-		// log.TRACEF("unable to fetch tx %v from transaction pool: %v", hash, err)
+		log.TRACEF("unable to fetch tx %v from transaction pool: %v", hash, err)
 		if doneChan != nil {
 			doneChan <- struct{}{}
 		}
@@ -1489,7 +1489,7 @@ func (sp *NodePeer) OnGetCFCheckpt(_ *peer.Peer,
 		// Otherwise, we'll hold onto the read lock for the remainder of this
 		// method.
 		defer sp.Server.CFCheckptCachesMtx.RUnlock()
-		// log.TRACEF("serving stale cache of size %v", len(checkptCache))
+		log.TRACEF("serving stale cache of size %v", len(checkptCache))
 	}
 	// Now that we know the cache is of an appropriate size, we'll iterate
 	// backwards until the find the block hash. We do this as it's possible a
@@ -1834,8 +1834,8 @@ func (sp *NodePeer) OnInv(
 	newInv := wire.NewMsgInvSizeHint(uint(len(msg.InvList)))
 	for _, invVect := range msg.InvList {
 		if invVect.Type == wire.InvTypeTx {
-			// log.TRACEF("ignoring tx %v in inv from %v -- blocksonly enabled",
-			// 	invVect.Hash, sp)
+			log.TRACEF("ignoring tx %v in inv from %v -- blocksonly enabled",
+				invVect.Hash, sp)
 			if sp.ProtocolVersion() >= wire.BIP0037Version {
 				log.INFOF("peer %v is announcing transactions"+
 					" -- disconnecting", sp)
@@ -1916,7 +1916,7 @@ func (sp *NodePeer) OnTx(
 	_ *peer.Peer,
 	msg *wire.MsgTx) {
 	if *sp.Server.Config.BlocksOnly {
-		// log.TRACEF("ignoring tx %v from %v - blocksonly enabled", msg.TxHash(), sp)
+		log.TRACEF("ignoring tx %v from %v - blocksonly enabled", msg.TxHash(), sp)
 		return
 	}
 	// Add the transaction to the known inventory for the peer. Convert the raw
@@ -2207,7 +2207,7 @@ AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Service
 			netAddr := wire.NewNetAddressIPPort(ifaceIP, uint16(port), services)
 			err = addrMgr.AddLocalAddress(netAddr, addrmgr.BoundPrio)
 			if err != nil {
-				// log.TRACE(err)
+				log.TRACE(err)
 			}
 		}
 	} else {
@@ -2217,7 +2217,7 @@ AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Service
 		}
 		err = addrMgr.AddLocalAddress(netAddr, addrmgr.BoundPrio)
 		if err != nil {
-			// log.TRACE(err)
+			log.TRACE(err)
 		}
 	}
 	return nil
@@ -2330,15 +2330,15 @@ func
 InitListeners(config *pod.Config, activeNet *netparams.Params,
 	aMgr *addrmgr.AddrManager, listenAddrs []string, services wire.ServiceFlag) ([]net.Listener, upnp.NAT, error) {
 	// Listen for TCP connections at the configured addresses
-	// log.TRACE("listenAddrs ", listenAddrs)
+	log.TRACE("listenAddrs ", listenAddrs)
 	netAddrs, err := ParseListeners(listenAddrs)
 	if err != nil {
 		return nil, nil, err
 	}
-	// log.TRACE("netAddrs ", netAddrs)
+	log.TRACE("netAddrs ", netAddrs)
 	listeners := make([]net.Listener, 0, len(netAddrs))
 	for _, addr := range netAddrs {
-		// log.TRACE("addr ", addr, " ", addr.Network(), " ", addr.String())
+		log.TRACE("addr ", addr, " ", addr.Network(), " ", addr.String())
 		listener, err := net.Listen(addr.Network(), addr.String())
 		if err != nil {
 			log.WARNF("can't listen on %s: %v %s", addr, err)
@@ -2506,7 +2506,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	activeNet *netparams.Params, listenAddrs []string, db database.DB,
 	chainParams *netparams.Params, interruptChan <-chan struct{},
 	algo string) (*Node, error) {
-	// log.TRACE("listenAddrs ", listenAddrs)
+	log.TRACE("listenAddrs ", listenAddrs)
 	services := DefaultServices
 	if *config.NoPeerBloomFilters {
 		services &^= wire.SFNodeBloom
@@ -2544,7 +2544,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	} else {
 		thr = *config.GenThreads
 	}
-	// log.TRACE("set genthreads to ", nThreads)
+	log.TRACE("set genthreads to ", nThreads)
 	s := Node{
 		ChainParams:          chainParams,
 		AddrManager:          aMgr,
@@ -2595,7 +2595,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 		indexes = append(indexes, s.AddrIndex)
 	}
 	if !*config.NoCFilters {
-		// log.TRACE("committed filter index is enabled")
+		log.TRACE("committed filter index is enabled")
 		s.CFIndex = indexers.NewCfIndex(db, chainParams)
 		indexes = append(indexes, s.CFIndex)
 	}

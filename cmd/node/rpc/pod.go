@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
+	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/pkg/log"
 )
 
 // DefaultConnectTimeout is a reasonable 30 seconds
@@ -23,11 +24,11 @@ var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, error) {
 			return stateCfg.Oniondial(addr.Network(), addr.String(),
 				DefaultConnectTimeout)
 		}
-		// // log.TRACE("StateCfg.Dial", addr.Network(), addr.String(),
-		// 	DefaultConnectTimeout)
+		log.TRACE("StateCfg.Dial", addr.Network(), addr.String(),
+			DefaultConnectTimeout)
 		conn, er := stateCfg.Dial(addr.Network(), addr.String(), DefaultConnectTimeout)
 		if er != nil {
-			// log.TRACE("connection error:", conn, er)
+			log.TRACE("connection error:", conn, er)
 		}
 		return conn, er
 	}

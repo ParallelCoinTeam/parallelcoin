@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"math"
 	"runtime"
+	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hardfork"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/chain/hardfork"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
 )
 
 type // txValidateItem holds a transaction along with which input to validate.
@@ -269,14 +271,14 @@ checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 	}
 	// Validate all of the inputs.
 	validator := newTxValidator(utxoView, scriptFlags, sigCache, hashCache)
-	// start := time.Now()
+	start := time.Now()
 	if err := validator.Validate(txValItems); err != nil {
 		return err
 	}
-	// elapsed := time.Since(start)
-	// log.TRACEC(func() string {
-	// 	return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
-	// })
+	elapsed := time.Since(start)
+	log.TRACEC(func() string {
+		return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
+	})
 	// If the HashCache is present, once we have validated the block,
 	// we no longer need the cached hashes for these transactions,
 	// so we purge them from the cache.

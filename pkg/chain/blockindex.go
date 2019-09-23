@@ -6,11 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/log"
 )
 
 // blockStatus is a bit field representing the validation state of the block.
@@ -257,48 +258,48 @@ func (node *blockNode) GetAlgo() int32 {
 // GetLastWithAlgo returns the newest block from node with specified algo
 func (node *blockNode) GetLastWithAlgo(algo int32) (prev *blockNode) {
 	if node == nil {
-		// log.TRACE("this node is nil")
+		log.TRACE("this node is nil")
 		return nil
 	}
 	prev = node.RelativeAncestor(1)
 	if prev == nil {
-		// log.TRACE("the previous node was nil")
+		log.TRACE("the previous node was nil")
 		return nil
 	}
 	prevFork := fork.GetCurrent(prev.height)
 	if prevFork == 0 {
 		if algo != 514 &&
 			algo != 2 {
-			// log.TRACE("bogus version halcyon", algo)
+			log.TRACE("bogus version halcyon", algo)
 			algo = 2
 		}
 	}
 	if prev.version == algo {
-		// log.TRACEF("found previous %d %d %08x", prev.height, prev.version,
-		// prev.bits)
+		log.TRACEF("found previous %d %d %08x", prev.height, prev.version,
+		prev.bits)
 		return prev
 	}
 	prev = prev.RelativeAncestor(1)
 	for {
 		if prev == nil {
-			// log.TRACE("passed through genesis")
+			log.TRACE("passed through genesis")
 			return nil
 		}
-		// // log.TRACE(prev.height)
+		log.TRACE(prev.height)
 		prevVersion := prev.version
 		if fork.GetCurrent(prev.height) == 0 {
 			if prevVersion != 514 &&
 				prevVersion != 2 {
-				// log.TRACE("bogus version", prevVersion)
+				log.TRACE("bogus version", prevVersion)
 				prevVersion = 2
 			}
 		}
 		if prevVersion == algo {
-			// log.TRACEF("found previous %d %d %08x", prev.height, prev.version,
-			// 	prev.bits)
+			log.TRACEF("found previous %d %d %08x", prev.height, prev.version,
+				prev.bits)
 			return prev
 		} else {
-			// log.TRACE(prev.height)
+			log.TRACE(prev.height)
 			prev = prev.RelativeAncestor(1)
 		}
 	}

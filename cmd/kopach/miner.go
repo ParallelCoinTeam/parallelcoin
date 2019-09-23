@@ -17,19 +17,19 @@ import (
 	"sync/atomic"
 	"time"
 
-	"git.parallelcoin.io/dev/rpcx/client"
-	"git.parallelcoin.io/dev/rpcx/server"
+	"github.com/p9c/rpcx/client"
+	"github.com/p9c/rpcx/server"
 	"github.com/dchest/blake256"
 	"golang.org/x/crypto/pbkdf2"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/cmd/node/state"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/chain/mining"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (

@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	btcjson "github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/chain/wire"
+	btcjson "github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // TestChainSvrCmds tests all of the chain server commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
