@@ -41,7 +41,6 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	killswitch chan struct{}, nodechan chan *rpc.Server,
 	wg *sync.WaitGroup) (err error) {
 	log.TRACE("starting up node main")
-	log.TRACE("wg+1")
 	wg.Add(1)
 	shutdownChan = make(chan struct{})
 	interrupt.AddHandler(
@@ -144,8 +143,6 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		*cx.Config.WalletRPCListeners = []string{":0"}
 	}
 	// create server and start it
-	log.TRACE("rpc.NewNode", *cx.Config.Listeners, db,
-		cx.ActiveNet, interrupt.ShutdownRequestChan, *cx.Config.Algo)
 	server, err := rpc.NewNode(cx.Config, cx.StateCfg, cx.ActiveNet,
 		*cx.Config.Listeners, db, cx.ActiveNet,
 		interrupt.ShutdownRequestChan, *cx.Config.Algo)

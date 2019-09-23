@@ -18,7 +18,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	peerpkg "github.com/parallelcointeam/parallelcoin/pkg/peer"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 type (
@@ -339,7 +338,7 @@ out:
 				// Wait until the sender unpauses the manager.
 				<-msg.unpause
 			default:
-				log.TRACEF("invalid message type in block handler: %T %s", msg)
+				log.TRACEF("invalid message type in block handler: %T", msg)
 			}
 		case <-sm.quit:
 			break out
@@ -524,7 +523,7 @@ func (sm *SyncManager) handleBlockMsg(bmsg *blockMsg) {
 		// as opposed to something actually going wrong, so log it as such.
 		// Otherwise, something really did go wrong, so log it as an actual error.
 		if _, ok := err.(blockchain.RuleError); ok {
-			log.INFOF(
+			log.ERRORF(
 				"rejected block %v from %s: %v",
 				blockHash, pp, err,
 			)
@@ -563,7 +562,7 @@ func (sm *SyncManager) handleBlockMsg(bmsg *blockMsg) {
 			if err != nil {
 				log.TRACEF("unable to extract height from coinbase tx: %v", err)
 			} else {
-				log.DEBUGF("extracted height of %v from orphan block %s",
+				log.DEBUGF("extracted height of %v from orphan block",
 					cbHeight)
 				heightUpdate = cbHeight
 				blkHashUpdate = blockHash
@@ -1083,7 +1082,7 @@ func (sm *SyncManager) handleNewPeerMsg(peer *peerpkg.Peer) {
 	if atomic.LoadInt32(&sm.shutdown) != 0 {
 		return
 	}
-	log.TRACEF("new valid peer %s (%s) %s", peer, peer.UserAgent())
+	log.TRACEF("new valid peer %s (%s)", peer, peer.UserAgent())
 	// Initialize the peer state
 	isSyncCandidate := sm.isSyncCandidate(peer)
 	sm.peerStates[peer] = &peerSyncState{
@@ -1333,10 +1332,9 @@ func (sm *SyncManager) startSync() {
 		}
 		log.TRACEC(func() string {
 			return fmt.Sprintf(
-				"syncing to block height %d from peer %v %s",
+				"syncing to block height %d from peer %v",
 				bestPeer.LastBlock(),
 				bestPeer.Addr(),
-				cl.Ine(),
 			)
 		})
 		// When the current height is less than a known checkpoint we can use

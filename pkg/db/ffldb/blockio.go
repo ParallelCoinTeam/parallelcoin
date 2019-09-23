@@ -425,11 +425,10 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		wc.curFileNum = oldBlockFileNum
 		wc.curOffset = oldBlockOffset
 	}()
-	log.DEBUG(
-		"ROLLBACK: Rolling back to file %d, offset %d %s",
+	log.DEBUGF(
+		"ROLLBACK: Rolling back to file %d, offset %d",
 		oldBlockFileNum,
-		oldBlockOffset,
-		cl.Ine())
+		oldBlockOffset)
 	// Close the current write file if it needs to be deleted.  Then delete all files that are newer than the provided rollback file while also moving the write cursor file backwards accordingly.
 	if wc.curFileNum > oldBlockFileNum {
 		wc.curFile.Lock()
@@ -494,7 +493,7 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		lastFile = i
 		fileLen = uint32(st.Size())
 	}
-	log.TRACE(
+	log.TRACEF(
 		"Scan found latest block file #%d with length %d",
 		lastFile,
 		fileLen)

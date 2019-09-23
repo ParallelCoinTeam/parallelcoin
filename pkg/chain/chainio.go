@@ -813,13 +813,13 @@ dbFetchHashByHeight(dbTx database.Tx, height int32) (*chainhash.Hash, error) {
 // -----------------------------------------------------------------------------
 
 type // bestChainState represents the data to be stored the database for the
-// current best chain state.
+	// current best chain state.
 	bestChainState struct {
-	hash      chainhash.Hash
-	height    uint32
-	totalTxns uint64
-	workSum   *big.Int
-}
+		hash      chainhash.Hash
+		height    uint32
+		totalTxns uint64
+		workSum   *big.Int
+	}
 
 // serializeBestChainState returns the serialization of the passed block best
 // chain state.  This is data to be stored in the chain state bucket.
@@ -845,7 +845,7 @@ func serializeBestChainState(state bestChainState) []byte {
 func // deserializeBestChainState deserializes the passed serialized best chain
 // state.  This is data stored in the chain state bucket and is updated after
 // every block is connected or disconnected form the main chain. block.
-	deserializeBestChainState(serializedData []byte) (bestChainState, error) {
+deserializeBestChainState(serializedData []byte) (bestChainState, error) {
 	// Ensure the serialized data has enough bytes to properly deserialize
 	// the hash, height, total transactions, and work sum length.
 	if len(serializedData) < chainhash.HashSize+16 {
@@ -877,7 +877,7 @@ func // deserializeBestChainState deserializes the passed serialized best chain
 
 func // dbPutBestState uses an existing database transaction to update the best
 // chain state with the given parameters.
-	dbPutBestState(dbTx database.Tx, snapshot *BestState, workSum *big.Int) error {
+dbPutBestState(dbTx database.Tx, snapshot *BestState, workSum *big.Int) error {
 	// Serialize the current best chain state.
 	serializedData := serializeBestChainState(bestChainState{
 		hash:      snapshot.Hash,
@@ -892,7 +892,7 @@ func // dbPutBestState uses an existing database transaction to update the best
 func // createChainState initializes both the database and the chain state to
 // the genesis block.  This includes creating the necessary buckets and
 // inserting the genesis block so it must only be called on an uninitialized database.
-	(b *BlockChain) createChainState() error {
+(b *BlockChain) createChainState() error {
 	// Create a new node from the genesis block and set it as the best node.
 	genesisBlock := util.NewBlock(b.params.GenesisBlock)
 	log.TRACEC(func() string {
@@ -981,7 +981,7 @@ func // createChainState initializes both the database and the chain state to
 func // initChainState attempts to load and initialize the chain state from the
 // database.  When the db does not yet contain any chain state,
 // both it and the chain state are initialized to the genesis block.
-	(b *BlockChain) initChainState() error {
+(b *BlockChain) initChainState() error {
 	// Determine the state of the chain database.
 	// We may need to initialize everything from scratch or upgrade certain
 	// buckets.
@@ -1106,7 +1106,7 @@ func // initChainState attempts to load and initialize the chain state from the
 			// then we'll mark it as valid now to ensure consistency once we
 			// 're up and running.
 			if !iterNode.status.KnownValid() {
-				log.INFOF("Block %v (height=%v) ancestor of chain tip not" +
+				log.INFOF("Block %v (height=%v) ancestor of chain tip not"+
 					" marked as valid, upgrading to valid for consistency",
 					iterNode.hash, iterNode.height)
 				b.Index.SetStatusFlags(iterNode, statusValid)
@@ -1132,7 +1132,7 @@ func // initChainState attempts to load and initialize the chain state from the
 
 func // deserializeBlockRow parses a value in the block index bucket into a
 // block header and block status bitfield.
-	deserializeBlockRow(blockRow []byte) (*wire.BlockHeader, blockStatus, error) {
+deserializeBlockRow(blockRow []byte) (*wire.BlockHeader, blockStatus, error) {
 	buffer := bytes.NewReader(blockRow)
 	var header wire.BlockHeader
 	err := header.Deserialize(buffer)
@@ -1148,7 +1148,7 @@ func // deserializeBlockRow parses a value in the block index bucket into a
 
 func // dbFetchHeaderByHash uses an existing database transaction to retrieve
 // the block header for the provided hash.
-	dbFetchHeaderByHash(dbTx database.Tx, hash *chainhash.Hash) (*wire.BlockHeader, error) {
+dbFetchHeaderByHash(dbTx database.Tx, hash *chainhash.Hash) (*wire.BlockHeader, error) {
 	headerBytes, err := dbTx.FetchBlockHeader(hash)
 	if err != nil {
 		return nil, err

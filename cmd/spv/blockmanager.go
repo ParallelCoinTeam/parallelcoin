@@ -469,7 +469,7 @@ waitForHeaders:
 				bestHash = *lastCp.Hash
 			}
 			log.DEBUGF(
-				"getting filter checkpoints up to height=%v, hash=%v %s",
+				"getting filter checkpoints up to height=%v, hash=%v",
 				bestHeight, bestHash)
 			allCFCheckpoints = b.getCheckpts(&bestHash, fType)
 			if len(allCFCheckpoints) == 0 {
@@ -505,7 +505,7 @@ waitForHeaders:
 		if err != nil {
 			log.DEBUGF(
 				"got error attempting to determine correct cfheader"+
-					" checkpoints: %v, trying again %s",
+					" checkpoints: %v, trying again",
 				err)
 		}
 		if len(goodCheckpoints) == 0 {
@@ -571,7 +571,7 @@ waitForHeaders:
 			store, fType,
 		); err != nil {
 			log.DEBUGF(
-				"couldn't get uncheckpointed headers for %v: %v %s", fType,
+				"couldn't get uncheckpointed headers for %v: %v", fType,
 				err,
 			)
 			select {
@@ -837,14 +837,14 @@ func // getCheckpointedCFHeaders catches a filter header store up with the
 			startHeight := checkPointIndex*wire.CFCheckptInterval + 1
 			lastHeight := (checkPointIndex + 1) * wire.CFCheckptInterval
 			log.DEBUGF(
-				"got cfheaders from height=%v to height=%v, prev_hash=%v %s",
+				"got cfheaders from height=%v to height=%v, prev_hash=%v",
 				startHeight, lastHeight, r.PrevFilterHeader,
 			)
 			// If this is out of order but not yet written,
 			// we can verify that the checkpoints match, and then store them.
 			if startHeight > curHeight+1 {
 				log.DEBUGF(
-					"got response for headers at height=%v, only at height=%v, stashing %s",
+					"got response for headers at height=%v, only at height=%v, stashing",
 					startHeight, curHeight,
 				)
 				queryResponses[checkPointIndex] = r
@@ -854,7 +854,7 @@ func // getCheckpointedCFHeaders catches a filter header store up with the
 			// written, we can ignore it.
 			if lastHeight <= curHeight {
 				log.DEBUGF(
-					"received out of order reply end_height=%v, already written %s",
+					"received out of order reply end_height=%v, already written",
 					lastHeight,
 				)
 				return true
@@ -874,14 +874,14 @@ func // getCheckpointedCFHeaders catches a filter header store up with the
 				offset := curHeight + 1 - startHeight
 				r.FilterHashes = r.FilterHashes[offset:]
 				log.DEBUGF(
-					"using offset %d for initial filter header range (new prev_hash=%v) %s",
+					"using offset %d for initial filter header range (new prev_hash=%v)",
 					offset, r.PrevFilterHeader,
 				)
 			}
 			curHeader, err = b.writeCFHeadersMsg(r, store)
 			if err != nil {
 				panic(
-					fmt.Sprintf("couldn't write cfheaders msg: %v %s", err),
+					fmt.Sprintf("couldn't write cfheaders msg: %v", err),
 				)
 			}
 			// Then, we cycle through any cached messages,
@@ -902,7 +902,7 @@ func // getCheckpointedCFHeaders catches a filter header store up with the
 				// so delete it from the cache and write it.
 				delete(queryResponses, checkPointIndex)
 				log.DEBUGF(
-					"writing cfheaders at height=%v to next checkpoint %s",
+					"writing cfheaders at height=%v to next checkpoint",
 					curHeight,
 				)
 				// As we write the set of headers to disk,
@@ -979,7 +979,7 @@ func // writeCFHeadersMsg writes a cfheaders message to the specified store.
 	headerBatch[numHeaders-1].HeaderHash = lastHash
 	headerBatch[numHeaders-1].Height = lastHeight
 	log.DEBUGF(
-		"writing filter headers up to height=%v, hash=%v, new_tip=%v %s",
+		"writing filter headers up to height=%v, hash=%v, new_tip=%v",
 		lastHeight, lastHash, lastHeader,
 	)
 
@@ -1625,7 +1625,7 @@ func // startSync will choose the best peer among the available candidate
 			return
 		}
 		log.INFOF(
-			"syncing to block height %d from peer %s %s",
+			"syncing to block height %d from peer %s",
 			bestPeer.LastBlock(), bestPeer.Addr(),
 		)
 		// Now that we know we have a new sync peer,
@@ -1973,7 +1973,7 @@ func // handleHeadersMsg handles headers messages from all peers.
 			if backHeight < uint32(prevCheckpoint.Height) {
 				log.ERRORF(
 					"attempt at a reorg earlier than a checkpoint past which"+
-						" we've already synchronized -- disconnecting peer %s %s",
+						" we've already synchronized -- disconnecting peer %s",
 					hmsg.peer,
 				)
 				hmsg.peer.Disconnect()

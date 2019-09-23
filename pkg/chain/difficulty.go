@@ -72,7 +72,8 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 (b *BlockChain) calcNextRequiredDifficulty(lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	err error) {
-	log.TRACE("algoname ", algoname)
+	log.WARN("algoname ", algoname, fork.GetAlgoName(lastNode.version,
+		lastNode.height))
 	nH := lastNode.height + 1
 	// INFO(nH)
 	switch fork.GetCurrent(nH) {

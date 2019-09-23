@@ -68,6 +68,6 @@ func DiscoverPeers(cx *conte.Xt) (cancel func()) {
 			}
 		}
 	}()
-	log.WARN("started up discovery loop")
-	return func() {}
+	log.TRACE("started up discovery loop")
+	return cancel
 }

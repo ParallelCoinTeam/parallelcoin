@@ -464,11 +464,12 @@ func // checkBlockContext peforms several validation checks on the block which
 // See its documentation for how the flags modify its behavior.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockContext(block *util.Block, prevNode *blockNode, flags BehaviorFlags, DoNotCheckPow bool) error {
-	log.TRACE("checkBlockContext")
+	log.WARN("checkBlockContext")
 	// Perform all block header related validation checks.
 	header := &block.MsgBlock().Header
 	err := b.checkBlockHeaderContext(header, prevNode, flags)
 	if err != nil {
+		log.ERROR(err)
 		return err
 	}
 	fastAdd := flags&BFFastAdd == BFFastAdd
@@ -478,6 +479,7 @@ func // checkBlockContext peforms several validation checks on the block which
 		// version bits state.
 		csvState, err := b.deploymentState(prevNode, chaincfg.DeploymentCSV)
 		if err != nil {
+			log.ERROR(err)
 			return err
 		}
 		// Once the CSV soft-fork is fully active, we'll switch to using the
@@ -496,6 +498,7 @@ func // checkBlockContext peforms several validation checks on the block which
 				blockTime) {
 				str := fmt.Sprintf("block contains unfinalized "+
 					"transaction %v", tx.Hash())
+				log.ERROR(str)
 				return ruleError(ErrUnfinalizedTx, str)
 			}
 		}
@@ -508,6 +511,7 @@ func // checkBlockContext peforms several validation checks on the block which
 			coinbaseTx := block.Transactions()[0]
 			err := checkSerializedHeight(coinbaseTx, blockHeight)
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
 		}
@@ -517,6 +521,7 @@ func // checkBlockContext peforms several validation checks on the block which
 		segwitState, err := b.deploymentState(prevNode,
 			chaincfg.DeploymentSegwit)
 		if err != nil {
+			log.ERROR(err)
 			return err
 		}
 		// If segwit is active,
@@ -531,6 +536,7 @@ func // checkBlockContext peforms several validation checks on the block which
 			// addition, various other checks against the coinbase's witness
 			// stack.
 			if err := ValidateWitnessCommitment(block); err != nil {
+				log.ERROR(err)
 				return err
 			}
 			// Once the witness commitment, witness nonce, and sig op cost have
@@ -541,6 +547,7 @@ func // checkBlockContext peforms several validation checks on the block which
 				str := fmt.Sprintf(
 					"block's weight metric is too high - got %v, max %v",
 					blockWeight, MaxBlockWeight)
+				log.ERROR(err)
 				return ruleError(ErrBlockWeightTooHigh, str)
 			}
 		}
@@ -555,6 +562,7 @@ func // checkBlockHeaderContext performs several validation checks on the block
 //  against the checkpoints are not performed.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockHeaderContext(header *wire.BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
+	log.WARN("checking block header context")
 	if prevNode == nil {
 		return nil
 	}
@@ -564,65 +572,71 @@ func // checkBlockHeaderContext performs several validation checks on the block
 		// calculated difficulty based on the previous block and difficulty
 		// retarget rules.
 		a := fork.GetAlgoName(header.Version, prevNode.height+1)
-		// log.TRACEF()
-		// {
-		// 	"algo %s %d %8x %d %s", a, header.Version, header.Bits,
-		// 	prevNode.height + 1}
-		expectedDifficulty, err := b.calcNextRequiredDifficulty(prevNode,
-			header.Timestamp, a, false)
-		if err != nil {
-			return err
-		}
-		blockDifficulty := header.Bits
-		if blockDifficulty != expectedDifficulty {
-			str := "block difficulty of %08x %064x is not the expected value of %08x %064x"
-			str = fmt.Sprintf(str, blockDifficulty, CompactToBig(blockDifficulty), expectedDifficulty, CompactToBig(expectedDifficulty))
-			return ruleError(ErrUnexpectedDifficulty, str)
-		}
-		// Ensure the timestamp for the block header is after the median time
-		// of the last several blocks (medianTimeBlocks).
-		medianTime := prevNode.CalcPastMedianTime()
-		if !header.Timestamp.After(medianTime) {
-			str := "block timestamp of %v is not after expected %v"
-			str = fmt.Sprintf(str, header.Timestamp, medianTime)
-			return ruleError(ErrTimeTooOld, str)
-		}
-	}
-	// The height of this block is one more than the referenced previous block.
-	blockHeight := prevNode.height + 1
-	// Ensure chain matches up to predetermined checkpoints.
-	blockHash := header.BlockHash()
-	if !b.verifyCheckpoint(blockHeight, &blockHash) {
-		str := fmt.Sprintf("block at height %d does not match "+
-			"checkpoint hash", blockHeight)
-		return ruleError(ErrBadCheckpoint, str)
-	}
-	// Find the previous checkpoint and prevent blocks which fork the main
-	// chain before it.  This prevents storage of new, otherwise valid,
-	// blocks which build off of old blocks that are likely at a much easier
-	// difficulty and therefore could be used to waste cache and disk space.
-	checkpointNode, err := b.findPreviousCheckpoint()
+		log.INFOF("algo %s %d %8x %d", a, header.Version, header.Bits,
+			prevNode.height+1)
+	expectedDifficulty, err := b.calcNextRequiredDifficulty(prevNode,
+		header.Timestamp, fork.GetAlgoName(header.Version, prevNode.height+1),
+		false)
 	if err != nil {
+		log.ERROR(err)
 		return err
 	}
-	if checkpointNode != nil && blockHeight < checkpointNode.height {
-		str := fmt.Sprintf("block at height %d forks the main chain "+
-			"before the previous checkpoint at height %d",
-			blockHeight, checkpointNode.height)
-		return ruleError(ErrForkTooOld, str)
+	blockDifficulty := header.Bits
+	if blockDifficulty != expectedDifficulty {
+		str := "block difficulty of %08x %064x is not the expected value of %08x %064x"
+		str = fmt.Sprintf(str, blockDifficulty, CompactToBig(blockDifficulty), expectedDifficulty, CompactToBig(expectedDifficulty))
+		log.ERROR(str)
+		return ruleError(ErrUnexpectedDifficulty, str)
 	}
-	// Reject outdated block versions once a majority of the network has
-	// upgraded.  These were originally voted on by BIP0034, BIP0065,
-	// and BIP0066.
-	// netparams := b.netparams
-	// if header.Version < 2 && blockHeight >= netparams.BIP0034Height ||
-	// 	header.Version < 3 && blockHeight >= netparams.BIP0066Height ||
-	// 	header.Version < 4 && blockHeight >= netparams.BIP0065Height {
-	// 	str := "new blocks with version %d are no longer valid"
-	// 	str = fmt.Sprintf(str, header.Version)
-	// 	return ruleError(ErrBlockVersionTooOld, str)
-	// }
-	return nil
+	// Ensure the timestamp for the block header is after the median time
+	// of the last several blocks (medianTimeBlocks).
+	medianTime := prevNode.CalcPastMedianTime()
+	if !header.Timestamp.After(medianTime) {
+		str := "block timestamp of %v is not after expected %v"
+		str = fmt.Sprintf(str, header.Timestamp, medianTime)
+		log.ERROR(str)
+		return ruleError(ErrTimeTooOld, str)
+	}
+}
+
+// The height of this block is one more than the referenced previous block.
+blockHeight := prevNode.height + 1
+// Ensure chain matches up to predetermined checkpoints.
+blockHash := header.BlockHash()
+if !b.verifyCheckpoint(blockHeight, &blockHash) {
+str := fmt.Sprintf("block at height %d does not match "+
+"checkpoint hash", blockHeight)
+log.ERROR(str)
+return ruleError(ErrBadCheckpoint, str)
+}
+// Find the previous checkpoint and prevent blocks which fork the main
+// chain before it.  This prevents storage of new, otherwise valid,
+// blocks which build off of old blocks that are likely at a much easier
+// difficulty and therefore could be used to waste cache and disk space.
+checkpointNode, err := b.findPreviousCheckpoint()
+if err != nil {
+log.ERROR(err)
+return err
+}
+if checkpointNode != nil && blockHeight < checkpointNode.height {
+str := fmt.Sprintf("block at height %d forks the main chain "+
+"before the previous checkpoint at height %d",
+blockHeight, checkpointNode.height)
+log.ERROR(str)
+return ruleError(ErrForkTooOld, str)
+}
+// Reject outdated block versions once a majority of the network has
+// upgraded.  These were originally voted on by BIP0034, BIP0065,
+// and BIP0066.
+// netparams := b.netparams
+// if header.Version < 2 && blockHeight >= netparams.BIP0034Height ||
+// 	header.Version < 3 && blockHeight >= netparams.BIP0066Height ||
+// 	header.Version < 4 && blockHeight >= netparams.BIP0065Height {
+// 	str := "new blocks with version %d are no longer valid"
+// 	str = fmt.Sprintf(str, header.Version)
+// 	return ruleError(ErrBlockVersionTooOld, str)
+// }
+return nil
 }
 
 func // CalcBlockSubsidy returns the subsidy amount a block at the provided
@@ -1222,13 +1236,13 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 		return errors.New("PoW limit was not set")
 	}
 	target := fork.CompactToBig(header.Bits)
-	log.TRACEF("target %064x %08x %s", target, header.Bits)
+	log.TRACEF("target %064x %08x", target, header.Bits)
 	if target.Sign() <= 0 {
 		str := fmt.Sprintf("block target difficulty of %064x is too low",
 			target)
 		return ruleError(ErrUnexpectedDifficulty, str)
 	}
-	log.TRACEF("checkProofOfWork powLimit %064x %064x %s", powLimit, target)
+	log.TRACEF("checkProofOfWork powLimit %064x %064x", powLimit, target)
 	// The target difficulty must be less than the maximum allowed.
 	if target.Cmp(powLimit) > 0 {
 		for i := 0; i < 7; i++ {

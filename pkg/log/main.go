@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/buger/goterm"
+	gt "github.com/buger/goterm"
 )
 
 var (
@@ -148,51 +148,51 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 func (l *Logger) SetLevel(level string, color bool) {
 	_, loc, line, _ := runtime.Caller(1)
 	files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
-	codeLoc := fmt.Sprint(files[1], ":", rightJustifyLineNumber(line))
+	codeLoc := fmt.Sprint(files[1], ":", justifyLineNumber(line))
 	fmt.Println("setting level to", level, codeLoc)
 	*l = *Empty()
 	var fallen bool
 	switch {
 	case level == Trace || fallen:
 		// fmt.Println("loading Trace printers")
-		l.Trace = Println("TRACE ", color, l.LogFileHandle)
-		l.Tracef = Printf("TRACE ", color, l.LogFileHandle)
-		l.Tracec = Printc("TRACE ", color, l.LogFileHandle)
+		l.Trace = Println("TRC", color, l.LogFileHandle)
+		l.Tracef = Printf("TRC", color, l.LogFileHandle)
+		l.Tracec = Printc("TRC", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Debug || fallen:
 		// fmt.Println("loading Debug printers")
-		l.Debug = Println("DEBUG ", color, l.LogFileHandle)
-		l.Debugf = Printf("DEBUG ", color, l.LogFileHandle)
-		l.Debugc = Printc("DEBUG ", color, l.LogFileHandle)
+		l.Debug = Println("DBG", color, l.LogFileHandle)
+		l.Debugf = Printf("DBG", color, l.LogFileHandle)
+		l.Debugc = Printc("DBG", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Info || fallen:
 		// fmt.Println("loading Info printers")
-		l.Info = Println(" INFO ", color, l.LogFileHandle)
-		l.Infof = Printf(" INFO ", color, l.LogFileHandle)
-		l.Infoc = Printc(" INFO ", color, l.LogFileHandle)
+		l.Info = Println("INF", color, l.LogFileHandle)
+		l.Infof = Printf("INF", color, l.LogFileHandle)
+		l.Infoc = Printc("INF", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Warn || fallen:
 		// fmt.Println("loading Warn printers")
-		l.Warn = Println(" WARN ", color, l.LogFileHandle)
-		l.Warnf = Printf(" WARN ", color, l.LogFileHandle)
-		l.Warnc = Printc(" WARN ", color, l.LogFileHandle)
+		l.Warn = Println("WRN", color, l.LogFileHandle)
+		l.Warnf = Printf("WRN", color, l.LogFileHandle)
+		l.Warnc = Printc("WRN", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Error || fallen:
 		// fmt.Println("loading Error printers")
-		l.Error = Println("ERROR ", color, l.LogFileHandle)
-		l.Errorf = Printf("ERROR ", color, l.LogFileHandle)
-		l.Errorc = Printc("ERROR ", color, l.LogFileHandle)
+		l.Error = Println("ERR", color, l.LogFileHandle)
+		l.Errorf = Printf("ERR", color, l.LogFileHandle)
+		l.Errorc = Printc("ERR", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Fatal:
 		// fmt.Println("loading Fatal printers")
-		l.Fatal = Println("FATAL ", color, l.LogFileHandle)
-		l.Fatalf = Printf("FATAL ", color, l.LogFileHandle)
-		l.Fatalc = Printc("FATAL ", color, l.LogFileHandle)
+		l.Fatal = Println("FTL", color, l.LogFileHandle)
+		l.Fatalf = Printf("FTL", color, l.LogFileHandle)
+		l.Fatalc = Printc("FTL", color, l.LogFileHandle)
 		fallen = true
 	}
 }
@@ -217,7 +217,7 @@ func trimReturn(s string) string {
 	return s
 }
 
-func rightJustifyLineNumber(n int) string {
+func justifyLineNumber(n int) string {
 	s := fmt.Sprint(n)
 	switch len(s) {
 	case 1:
@@ -244,82 +244,140 @@ func rightJustify(s string, w int) string {
 	return s
 }
 
+func composit(text, level string, color bool) string {
+	terminalWidth := gt.Width()
+	_, loc, iline, _ := runtime.Caller(3)
+	line := fmt.Sprint(iline)
+	files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
+	file := files[1]
+	since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
+		Second * time.Second)
+	if terminalWidth > 144 {
+		since = fmt.Sprint(time.Now())[:24]
+	}
+	levelLen := len(level) + 1
+	sinceLen := len(since) + 1
+	textLen := len(text) + 1
+	fileLen := len(file) + 1
+	lineLen := len(line) + 1
+	final := "" // fmt.Sprintf("%s %s %s %s:%s", level, since, text, file, line)
+	if levelLen+sinceLen+textLen+fileLen+lineLen > terminalWidth {
+		lines := strings.Split(text, "\n")
+		// log text is multiline
+		line1len := terminalWidth - levelLen - sinceLen - fileLen - lineLen
+		restLen := terminalWidth - levelLen - sinceLen
+		if len(lines) > 1 {
+			final = fmt.Sprintf("%s %s %s %s:%s", level, since,
+				strings.Repeat(" ",
+					terminalWidth-levelLen-sinceLen-fileLen-lineLen),
+				file, line)
+			for i := range lines {
+				maxPreformatted := 68 - levelLen - sinceLen
+				ll := lines[i]
+				var slices []string
+				for len(ll) > maxPreformatted {
+					// if lopping the last space-bound block drops the line
+					// under terminalWidth  do that instead of cutting for
+					// the hex dumps
+					cs := strings.Split(ll, " ")
+					lenLast := len(cs[len(cs)-1])
+					if len(ll)-lenLast <= maxPreformatted {
+						final += ll[:len(ll)-lenLast]+"\n"
+						final += cs[len(cs)-1]+"\n"
+					} else {
+						slices = append(slices, ll[:maxPreformatted])
+						ll = ll[maxPreformatted:]
+					}
+				}
+				slices = append(slices, ll)
+				for j := range slices {
+					if j > 0 {
+						final += "\n" + strings.Repeat(" ",
+							terminalWidth-len(slices[j])-2) + "->" + slices[j]
+					} else {
+						final += "\n" + strings.Repeat(" ", levelLen+sinceLen) + slices[j]
+					}
+				}
+				//
+				// final += "\n" + strings.Repeat(" ",
+				// 	levelLen+sinceLen) + lines[i]
+			}
+		} else {
+			// log text is a long line
+			spaced := strings.Split(text, " ")
+			var rest bool
+			curLineLen := 0
+			final += fmt.Sprintf("%s %s ", level, since)
+			var i int
+			for i = range spaced {
+				if i > 0 {
+					curLineLen += len(spaced[i-1]) + 1
+					if !rest {
+						if curLineLen >= line1len {
+							rest = true
+							spacers := terminalWidth - levelLen - sinceLen -
+								fileLen - lineLen - curLineLen + len(spaced[i-1]) + 1
+							final += strings.Repeat(".", spacers)
+							final += fmt.Sprintf(" %s:%s\n",
+								file, line)
+							final += strings.Repeat(" ", levelLen+sinceLen)
+							final += spaced[i-1] + " "
+							curLineLen = len(spaced[i-1]) + 1
+						} else {
+							final += spaced[i-1] + " "
+						}
+					} else {
+						if curLineLen >= restLen-1 {
+							final += "\n" + strings.Repeat(" ",
+								levelLen+sinceLen)
+							final += spaced[i-1] + "."
+							curLineLen = len(spaced[i-1]) + 1
+						} else {
+							final += spaced[i-1] + " "
+						}
+					}
+				}
+			}
+			curLineLen += len(spaced[i])
+			if !rest {
+				if curLineLen >= line1len {
+					final += fmt.Sprintf("%s %s:%s\n",
+						strings.Repeat(".",
+							len(spaced[i])+line1len-curLineLen),
+						file, line)
+					final += strings.Repeat(" ", levelLen+sinceLen)
+					final += spaced[i] // + "\n"
+				} else {
+					final += fmt.Sprintf("%s %s %s:%s\n",
+						spaced[i],
+						strings.Repeat(".",
+							terminalWidth-curLineLen-fileLen-lineLen),
+						file, line)
+				}
+			} else {
+				if curLineLen >= restLen {
+					final += "\n" + strings.Repeat(" ", levelLen+sinceLen)
+				}
+				final += spaced[i] // + "\n"
+			}
+		}
+	} else {
+		final = fmt.Sprintf("%s %s %s %s %s:%s", level, since, text,
+			strings.Repeat(".",
+				terminalWidth-levelLen-sinceLen-textLen-fileLen-lineLen),
+			file, line)
+	}
+	return final
+}
+
 // Println prints a log entry like Println
 func Println(level string, color bool, fh *os.File) func(a ...interface{}) {
 	return func(a ...interface{}) {
-		if color {
-			switch strings.Trim(level, " ") {
-			case "FATAL":
-				level = colorPurple + level + colorOff
-			case "ERROR":
-				level = colorRed + level + colorOff
-			case "WARN":
-				level = colorOrange + level + colorOff
-			case "INFO":
-				level = colorGray + level + colorOff
-			case "DEBUG":
-				level = colorBlue + level + colorOff
-			case "TRACE":
-				level = colorCyan + level + colorOff
-			}
-		}
-		terminalWidth := goterm.Width() - 3
-		_, loc, line, _ := runtime.Caller(2)
-		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
-		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
-			Second * time.Second)
-		var prefix string = level + " " + rightJustify(since, 9) + " "
-		codeLoc := fmt.Sprint(files[1], ":", rightJustifyLineNumber(line))
-		indent := strings.Repeat(" ", len(prefix))
-		ellipsis := " "
-		if terminalWidth > 160 {
-			prefix = level + " " + rightJustify(fmt.Sprint(time.Now()), 24) + " "
-			ellipsis = "."
-		}
-		if terminalWidth < 64 {
-			prefix = ""
-			indent = "  "
-			ellipsis = " "
-		}
-		if terminalWidth < 56 {
-			codeLoc = ""
-		}
 		text := trimReturn(fmt.Sprintln(a...))
-		// wordwrap :p
-		split := strings.Split(text, " ")
-		out := prefix + split[0] + " "
-		var final string
-		cod := false
-		for i := range split {
-			if i > 0 {
-				if len(out)+len(split[i])+1+len(
-					codeLoc) > terminalWidth && !cod {
-					cod = true
-					final += out + strings.Repeat(ellipsis,
-						terminalWidth-len(out)-len(codeLoc)) + " " +
-						codeLoc + "\n"
-					out = indent + split[i] + " "
-				} else if len(out)+len(split[i]) > terminalWidth {
-					final += out + "\n"
-					out = indent + split[i] + " "
-				} else {
-					out += split[i] + " "
-				}
-			}
-		}
-		final += out
-		if !cod {
-			rem := terminalWidth - len(out) - len(codeLoc)
-			if rem < 1 {
-				final += strings.Repeat(" ",
-					terminalWidth-len(codeLoc)) + codeLoc
-			} else {
-				final += strings.Repeat(ellipsis, rem) + " " + codeLoc
-			}
-		}
-		fmt.Println(final)
+		fmt.Println(composit(text, level, color))
 		if fh != nil {
-			out := Entry{time.Now(), level, loc, text}
+			_, loc, line, _ := runtime.Caller(2)
+			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
 			j, err := json.Marshal(out)
 			if err != nil {
 				fmt.Println("logging error:", err)
@@ -333,170 +391,35 @@ func Println(level string, color bool, fh *os.File) func(a ...interface{}) {
 func Printf(level string, color bool, fh *os.File) func(format string,
 	a ...interface{}) {
 	return func(format string, a ...interface{}) {
-		if color {
-			switch strings.Trim(level, " ") {
-			case "FATAL":
-				level = colorPurple + level + colorOff
-			case "ERROR":
-				level = colorRed + level + colorOff
-			case "WARN":
-				level = colorOrange + level + colorOff
-			case "INFO":
-				level = colorGray + level + colorOff
-			case "DEBUG":
-				level = colorBlue + level + colorOff
-			case "TRACE":
-				level = colorCyan + level + colorOff
-			}
-		}
-		terminalWidth := goterm.Width() - 3
-		_, loc, line, _ := runtime.Caller(2)
-		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
-		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
-			Second * time.Second)
-		var prefix string = level + " " + rightJustify(since, 9) + " "
-		codeLoc := fmt.Sprint(files[1], ":", rightJustifyLineNumber(line))
-		indent := strings.Repeat(" ", len(prefix))
-		ellipsis := " "
-		if terminalWidth > 160 {
-			prefix = level + " " + rightJustify(fmt.Sprint(time.Now()), 24) + " "
-			ellipsis = "."
-		}
-		if terminalWidth < 64 {
-			prefix = ""
-			indent = "  "
-			ellipsis = " "
-		}
-		if terminalWidth < 56 {
-			codeLoc = ""
-		}
-		text := trimReturn(fmt.Sprintf(format, a...))
-		// wordwrap :p
-		split := strings.Split(text, " ")
-		out := prefix + split[0] + " "
-		var final string
-		cod := false
-		for i := range split {
-			if i > 0 {
-				if len(out)+len(split[i])+1+len(
-					codeLoc) > terminalWidth && !cod {
-					cod = true
-					final += out + strings.Repeat(ellipsis,
-						terminalWidth-len(out)-len(codeLoc)) + " " +
-						codeLoc + "\n"
-					out = indent + split[i] + " "
-				} else if len(out)+len(split[i]) > terminalWidth {
-					final += out + "\n"
-					out = indent + split[i] + " "
-				} else {
-					out += split[i] + " "
-				}
-			}
-		}
-		final += out
-		if !cod {
-			rem := terminalWidth - len(out) - len(codeLoc)
-			if rem < 1 {
-				final += strings.Repeat(" ",
-					terminalWidth-len(codeLoc)) + codeLoc
-			} else {
-				final += strings.Repeat(ellipsis, rem) + " " + codeLoc
-			}
-		}
-		fmt.Println(final)
+		text := fmt.Sprintf(format, a...)
+		fmt.Println(composit(text, level, color))
 		if fh != nil {
-			out := Entry{time.Now(), level, loc, text}
+			_, loc, line, _ := runtime.Caller(2)
+			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
 			j, err := json.Marshal(out)
 			if err != nil {
 				fmt.Println("logging error:", err)
 			}
-			_, _ = fmt.Fprintln(fh, string(j)+",")
+			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
 	}
 }
 
 // Printc prints from a closure returning a string
 func Printc(level string, color bool, fh *os.File) func(fn func() string) {
-	// level = strings.ToUpper(string(level[0]))
 	return func(fn func() string) {
-		if color {
-			switch strings.Trim(level, " ") {
-			case "FATAL":
-				level = colorPurple + level + colorOff
-			case "ERROR":
-				level = colorRed + level + colorOff
-			case "WARN":
-				level = colorOrange + level + colorOff
-			case "INFO":
-				level = colorGray + level + colorOff
-			case "DEBUG":
-				level = colorBlue + level + colorOff
-			case "TRACE":
-				level = colorCyan + level + colorOff
-			}
-		}
-		terminalWidth := goterm.Width() - 3
-		_, loc, line, _ := runtime.Caller(2)
-		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
-		since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
-			Second * time.Second)
-		var prefix string = level + " " + (rightJustify(since, 9)) + " "
-		codeLoc := fmt.Sprint(files[1], ":", rightJustifyLineNumber(line))
-		indent := strings.Repeat(" ", len(prefix))
-		ellipsis := " "
-		if terminalWidth > 160 {
-			prefix = level + " " + rightJustify(fmt.Sprint(time.Now()), 24) + " "
-			ellipsis = "."
-		}
-		if terminalWidth < 64 {
-			prefix = ""
-			indent = "  "
-			ellipsis = " "
-		}
-		if terminalWidth < 56 {
-			codeLoc = ""
-		}
+		// level = strings.ToUpper(string(level[0]))
 		t := fn()
 		text := trimReturn(t)
-		split := strings.Split(text, " ")
-		out := prefix + split[0] + " "
-		var final string
-		cod := false
-		for i := range split {
-			if i > 0 {
-				if len(out)+len(split[i])+1+len(
-					codeLoc) > terminalWidth && !cod {
-					cod = true
-					final += out + strings.Repeat(ellipsis,
-						terminalWidth-len(out)-len(codeLoc)) + " " +
-						codeLoc + "\n"
-					out = indent + split[i] + " "
-				} else if len(out)+len(split[i]) > terminalWidth {
-					final += out + "\n"
-					out = indent + split[i] + " "
-				} else {
-					out += split[i] + " "
-				}
-			}
-		}
-		final += out
-		if !cod {
-			rem := terminalWidth - len(out) - len(codeLoc)
-			if rem < 1 {
-				final += strings.Repeat(" ",
-					terminalWidth-len(codeLoc)) + codeLoc
-			} else {
-				final += strings.Repeat(ellipsis, rem) + " " + codeLoc
-			}
-		}
-		fmt.Println(final)
+		fmt.Println(composit(text, level, color))
 		if fh != nil {
-			out := Entry{time.Now(), level, loc, text}
+			_, loc, line, _ := runtime.Caller(2)
+			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
 			j, err := json.Marshal(out)
 			if err != nil {
 				fmt.Println("logging error:", err)
 			}
-			_, _ = fmt.Fprintln(fh, string(j)+",")
+			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
 	}
 }
