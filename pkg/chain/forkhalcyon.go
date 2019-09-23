@@ -83,5 +83,4 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(lastNode *blockNode,
 	// })
 	// log.TRACEF("newtarget bits %8x %s", newTargetBits)
 	return BigToCompact(newTarget), nil
-
 }
