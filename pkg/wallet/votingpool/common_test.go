@@ -5,7 +5,6 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
@@ -13,12 +12,12 @@ import (
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	// Enable logging (Debug level) to aid debugging failing tests.
-	Log.SetLevel("debug")
+	// Log.SetLevel("debug")
 }
 
 // TstCheckError ensures the passed error is a votingpool.Error with an error
 // code that matches the passed error code.
-func TstCheckError(	t *testing.T, testName string, gotErr error, wantErrCode ErrorCode) {
+func TstCheckError(t *testing.T, testName string, gotErr error, wantErrCode ErrorCode) {
 	vpErr, ok := gotErr.(Error)
 	if !ok {
 		t.Errorf("%s: unexpected error type - got %T (%s), want %T",
@@ -32,14 +31,14 @@ func TstCheckError(	t *testing.T, testName string, gotErr error, wantErrCode Err
 
 // TstRunWithManagerUnlocked calls the given callback with the manager unlocked,
 // and locks it again before returning.
-func TstRunWithManagerUnlocked(	t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, callback func()) {
+func TstRunWithManagerUnlocked(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, callback func()) {
 	if err := mgr.Unlock(addrmgrNs, privPassphrase); err != nil {
 		t.Fatal(err)
 	}
 	defer func() {
 		err := mgr.Lock()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	callback()
@@ -47,7 +46,7 @@ func TstRunWithManagerUnlocked(	t *testing.T, mgr *waddrmgr.Manager, addrmgrNs w
 
 // TstCheckWithdrawalStatusMatches compares s1 and s2 using reflect.DeepEqual
 // and calls t.Fatal() if they're not identical.
-func TstCheckWithdrawalStatusMatches(	t *testing.T, s1, s2 WithdrawalStatus) {
+func TstCheckWithdrawalStatusMatches(t *testing.T, s1, s2 WithdrawalStatus) {
 	if s1.Fees() != s2.Fees() {
 		t.Fatalf("Wrong amount of network fees; want %d, got %d", s1.Fees(), s2.Fees())
 	}

@@ -21,7 +21,7 @@ import (
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	adjustment float64, err error) {
-	log.TRACE("algoname ", algoname)
+	// log.TRACE("algoname ", algoname)
 	const max float64 = 10000
 	const maxA, minA = max, 1 / max
 	const minAvSamples = 9
@@ -51,7 +51,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	}
 	algoVer := fork.GetAlgoVer(algoname, nH)
 	newTargetBits = fork.SecondPowLimitBits
-	log.TRACEF("newTarget %08x %s %d %s", newTargetBits, algoname, algoVer)
+	// log.TRACEF("newTarget %08x %s %d %s", newTargetBits, algoname, algoVer)
 	last := lastNode
 	// find the most recent block of the same algo
 	//
@@ -126,7 +126,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		}
 		if intervals > minAvSamples {
 			if l {
-				log.TRACE("algs", algIntervals)
+				// log.TRACE("algs", algIntervals)
 			}
 			// calculate exponential weighted moving average from intervals
 			awi := ewma.NewMovingAverage()
@@ -180,7 +180,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			}
 			if intervals > minAvSamples {
 				if l {
-					log.TRACE("da", dayIntervals)
+					// log.TRACE("da", dayIntervals)
 				}
 				// calculate exponential weighted moving average from intervals
 				dw := ewma.NewMovingAverage()
@@ -223,7 +223,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			}
 			if intervals > minAvSamples {
 				if l {
-					log.TRACE("hr", hourIntervals)
+					// log.TRACE("hr", hourIntervals)
 				}
 				// calculate exponential weighted moving average from intervals
 				hw := ewma.NewMovingAverage()
@@ -266,7 +266,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			}
 			if intervals > 1 {
 				if l {
-					log.TRACE("qh", qhourIntervals)
+					// log.TRACE("qh", qhourIntervals)
 				}
 				// calculate exponential weighted moving average from intervals
 				qhw := ewma.NewMovingAverage()
@@ -284,7 +284,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		}
 	}
 	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv + timeSinceAlgo) / 6
-	log.TRACE("adjustment %3.4f %08x %s", adjustment, last.bits)
+	// log.TRACE("adjustment %3.4f %08x %s", adjustment, last.bits)
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
@@ -295,7 +295,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
 		newTargetBits = BigToCompact(newTarget)
-		log.TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
+		// log.TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
 		an := fork.List[1].AlgoVers[algoVer]

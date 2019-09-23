@@ -1,19 +1,18 @@
 package wire
 
 import (
-   "bytes"
-   "io"
-   "reflect"
-   "testing"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"io"
+	"reflect"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 )
 
 // TestGetHeaders tests the MsgGetHeader API.
-func TestGetHeaders(	t *testing.T) {
+func TestGetHeaders(t *testing.T) {
 	pver := ProtocolVersion
 	// Block 99500 hash.
 	hashStr := "000000000002e7ad7b9eef9479e4aabc65cb831269cc20d2632c13684406dee0"
@@ -58,7 +57,7 @@ func TestGetHeaders(	t *testing.T) {
 }
 
 // TestGetHeadersWire tests the MsgGetHeaders wire encode and decode for various numbers of block locator hashes and protocol versions.
-func TestGetHeadersWire(	t *testing.T) {
+func TestGetHeadersWire(t *testing.T) {
 	// Set protocol inside getheaders message.  Use protocol version 60002 specifically here instead of the latest because the test data is using bytes encoded with that protocol version.
 	pver := uint32(60002)
 	// Block 99499 hash.
@@ -96,11 +95,11 @@ func TestGetHeadersWire(	t *testing.T) {
 	multiLocators.HashStop = *hashStop
 	err = multiLocators.AddBlockLocatorHash(hashLocator2)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	err = multiLocators.AddBlockLocatorHash(hashLocator)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	multiLocatorsEncoded := []byte{
 		0x62, 0xea, 0x00, 0x00, // Protocol version 60002
@@ -237,7 +236,7 @@ func TestGetHeadersWire(	t *testing.T) {
 }
 
 // TestGetHeadersWireErrors performs negative tests against wire encode and decode of MsgGetHeaders to confirm error paths work correctly.
-func TestGetHeadersWireErrors(	t *testing.T) {
+func TestGetHeadersWireErrors(t *testing.T) {
 	// Set protocol inside getheaders message.  Use protocol version 60002 specifically here instead of the latest because the test data is
 	// using bytes encoded with that protocol version.
 	pver := uint32(60002)
@@ -266,11 +265,11 @@ func TestGetHeadersWireErrors(	t *testing.T) {
 	baseGetHeaders.HashStop = *hashStop
 	err = baseGetHeaders.AddBlockLocatorHash(hashLocator2)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	err = baseGetHeaders.AddBlockLocatorHash(hashLocator)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	baseGetHeadersEncoded := []byte{
 		0x62, 0xea, 0x00, 0x00, // Protocol version 60002
@@ -294,7 +293,7 @@ func TestGetHeadersWireErrors(	t *testing.T) {
 	for i := 0; i < MaxBlockLocatorsPerMsg; i++ {
 		err = maxGetHeaders.AddBlockLocatorHash(&mainNetGenesisHash)
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}
 	maxGetHeaders.BlockLocatorHashes = append(maxGetHeaders.BlockLocatorHashes,

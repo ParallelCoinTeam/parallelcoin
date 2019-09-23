@@ -13,8 +13,8 @@ import (
 	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
@@ -352,28 +352,23 @@ func (tx *withdrawalTx) toMsgTx() *wire.MsgTx {
 
 // addOutput adds a new output to this transaction.
 func (tx *withdrawalTx) addOutput(request OutputRequest) {
-	log <- cl.Debugf{
-		"added tx output sending %s to %s %s",
-		request.Amount,
-		request.Address}
-	tx.outputs = append(tx.outputs, &withdrawalTxOut{request: request, amount: request.Amount})
+	log.DEBUGF(	"added tx output sending %s to %s %s",
+		request.Amount,		request.Address)
+tx.outputs = append(tx.outputs, &withdrawalTxOut{request: request, amount: request.Amount})
 }
 
 // removeOutput removes the last added output and returns it.
 func (tx *withdrawalTx) removeOutput() *withdrawalTxOut {
 	removed := tx.outputs[len(tx.outputs)-1]
 	tx.outputs = tx.outputs[:len(tx.outputs)-1]
-	log <- cl.Debugf{
-		"removed tx output sending %s to %s %s",
-		removed.amount,
-		removed.request.Address}
+	log.DEBUGF("removed tx output sending %s to %s %s",
+		removed.amount, removed.request.Address)
 	return removed
 }
 
 // addInput adds a new input to this transaction.
 func (tx *withdrawalTx) addInput(input Credit) {
-	log <- cl.Debug{
-		"added tx input with amount", input.Amount}
+	log.DEBUG("added tx input with amount", input.Amount)
 	tx.inputs = append(tx.inputs, input)
 }
 
@@ -381,8 +376,7 @@ func (tx *withdrawalTx) addInput(input Credit) {
 func (tx *withdrawalTx) removeInput() Credit {
 	removed := tx.inputs[len(tx.inputs)-1]
 	tx.inputs = tx.inputs[:len(tx.inputs)-1]
-	log <- cl.Debug{
-		"removed tx input with amount", removed.Amount}
+	log.DEBUG("removed tx input with amount", removed.Amount)
 	return removed
 }
 
@@ -396,15 +390,11 @@ func (tx *withdrawalTx) removeInput() Credit {
 func (tx *withdrawalTx) addChange(pkScript []byte) bool {
 	tx.fee = tx.calculateFee()
 	change := tx.inputTotal() - tx.outputTotal() - tx.fee
-	log <- cl.Debugf{
-		"addChange: input total %v, output total %v, fee %v %s",
-		tx.inputTotal(),
-		tx.outputTotal(),
-		tx.fee}
+	log.DEBUGF("addChange: input total %v, output total %v, fee %v %s",
+		tx.inputTotal(), tx.outputTotal(), tx.fee)
 	if change > 0 {
 		tx.changeOutput = wire.NewTxOut(int64(change), pkScript)
-		log <- cl.Debug{
-			"added change output with amount", change}
+		log.DEBUG("added change output with amount", change)
 	}
 	return tx.hasChange()
 }
@@ -542,7 +532,8 @@ func (w *withdrawal) fulfillNextRequest() error {
 	fee := w.current.calculateFee()
 	for w.current.inputTotal() < w.current.outputTotal()+fee {
 		if len(w.eligibleInputs) == 0 {
-			log <- cl.Debug{"splitting last output because we don't have enough inputs"}
+			log.DEBUG("splitting last output because we don't have enough" +
+				" inputs")
 			if err := w.splitLastOutput(); err != nil {
 				return err
 			}
@@ -561,7 +552,7 @@ func (w *withdrawal) fulfillNextRequest() error {
 // big by either rolling back an output or splitting it.
 func (w *withdrawal) handleOversizeTx() error {
 	if len(w.current.outputs) > 1 {
-		log <- cl.Debug{"rolling back last output because tx got too big"}
+		log.DEBUG("rolling back last output because tx got too big")
 		inputs, output, err := w.current.rollBackLastOutput()
 		if err != nil {
 			return newError(ErrWithdrawalProcessing, "failed to rollback last output", err)
@@ -571,7 +562,7 @@ func (w *withdrawal) handleOversizeTx() error {
 		}
 		w.pushRequest(output.request)
 	} else if len(w.current.outputs) == 1 {
-		log <- cl.Debug{"splitting last output because tx got too big..."}
+		log.DEBUG("splitting last output because tx got too big...")
 		w.pushInput(w.current.removeInput())
 		if err := w.splitLastOutput(); err != nil {
 			return err
@@ -586,10 +577,10 @@ func (w *withdrawal) handleOversizeTx() error {
 // list of finalized transactions and replaces w.current with a new empty
 // transaction.
 func (w *withdrawal) finalizeCurrentTx() error {
-	log <- cl.Debug{"finalizing current transaction"}
+	log.DEBUG("finalizing current transaction")
 	tx := w.current
 	if len(tx.outputs) == 0 {
-		log <- cl.Debug{"current transaction has no outputs, doing nothing"}
+		log.DEBUG("current transaction has no outputs, doing nothing")
 		return nil
 	}
 	pkScript, err := txscript.PayToAddrScript(w.status.nextChangeAddr.addr)
@@ -648,11 +639,8 @@ func (w *withdrawal) maybeDropRequests() {
 	sort.Sort(sort.Reverse(byAmount(w.pendingRequests)))
 	for inputAmount < outputAmount {
 		request := w.popRequest()
-		log <- cl.Infof{
-			"not fulfilling request to send %v to %v; not enough credits.",
-			request.Amount,
-			request.Address,
-		}
+		log.INFOF("not fulfilling request to send %v to %v; not enough credits.",
+			request.Amount, request.Address)
 		outputAmount -= request.Amount
 		w.status.outputs[request.outBailmentID()].status = statusPartial
 	}
@@ -706,7 +694,7 @@ func (w *withdrawal) splitLastOutput() error {
 	}
 	tx := w.current
 	output := tx.outputs[len(tx.outputs)-1]
-	log <- cl.Debug{"splitting tx output for", output.request}
+	log.DEBUG("splitting tx output for", output.request)
 	origAmount := output.amount
 	spentAmount := tx.outputTotal() + tx.calculateFee() - output.amount
 	// This is how much we have left after satisfying all outputs except the
@@ -714,7 +702,8 @@ func (w *withdrawal) splitLastOutput() error {
 	// the amount of the tx's last output.
 	unspentAmount := tx.inputTotal() - spentAmount
 	output.amount = unspentAmount
-	log <- cl.Debug{"updated output amount to", output.amount}
+	log.DEBUG("updated output amount to", output.amount)
+
 	// Create a new OutputRequest with the amount being the difference between
 	// the original amount and what was left in the tx output above.
 	request := output.request
@@ -725,7 +714,8 @@ func (w *withdrawal) splitLastOutput() error {
 		PkScript:    request.PkScript,
 		Amount:      origAmount - output.amount}
 	w.pushRequest(newRequest)
-	log <- cl.Debug{"created a new pending output request with amount", newRequest.Amount}
+	log.DEBUG("created a new pending output request with amount",
+		newRequest.Amount)
 	w.status.outputs[request.outBailmentID()].status = statusPartial
 	return nil
 }
@@ -749,31 +739,23 @@ func (wi *withdrawalInfo) match(requests []OutputRequest, startAddress Withdrawa
 	// structs that contain pointers and we want to compare their content and
 	// not their address.
 	if !reflect.DeepEqual(changeStart, wi.changeStart) {
-		log <- cl.Debugf{
-			"withdrawal changeStart does not match: %v != %v %s",
-			changeStart,
-			wi.changeStart}
+		log.DEBUGF("withdrawal changeStart does not match: %v != %v %s",
+			changeStart, wi.changeStart)
 		return false
 	}
 	if !reflect.DeepEqual(startAddress, wi.startAddress) {
-		log <- cl.Debugf{
-			"withdrawal startAddr does not match: %v != %v %s",
-			startAddress,
-			wi.startAddress}
+		log.DEBUGF("withdrawal startAddr does not match: %v != %v %s",
+			startAddress, wi.startAddress)
 		return false
 	}
 	if lastSeriesID != wi.lastSeriesID {
-		log <- cl.Debugf{
-			"withdrawal lastSeriesID does not match: %v != %v %s",
-			lastSeriesID,
-			wi.lastSeriesID}
+		log.DEBUGF("withdrawal lastSeriesID does not match: %v != %v %s",
+			lastSeriesID, wi.lastSeriesID)
 		return false
 	}
 	if dustThreshold != wi.dustThreshold {
-		log <- cl.Debugf{
-			"withdrawal dustThreshold does not match: %v != %v %s",
-			dustThreshold,
-			wi.dustThreshold}
+		log.DEBUGF("withdrawal dustThreshold does not match: %v != %v %s",
+			dustThreshold, wi.dustThreshold)
 		return false
 	}
 	r1 := make([]OutputRequest, len(requests))
@@ -783,10 +765,8 @@ func (wi *withdrawalInfo) match(requests []OutputRequest, startAddress Withdrawa
 	sort.Sort(byOutBailmentID(r1))
 	sort.Sort(byOutBailmentID(r2))
 	if !reflect.DeepEqual(r1, r2) {
-		log <- cl.Debugf{
-			"withdrawal requests does not match: %v != %v %s",
-			requests,
-			wi.requests}
+		log.DEBUGF("withdrawal requests does not match: %v != %v %s", requests,
+			wi.requests)
 		return false
 	}
 	return true
@@ -849,24 +829,19 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 					if err != nil {
 						return nil, newError(ErrKeyChain, "failed to obtain ECPrivKey", err)
 					}
-					log <- cl.Debugf{
-						"generating raw sig for input %d of tx %s with privkey of %s",
-						inputIdx,
-						ntxid,
-						pubKey.String()}
+					log.DEBUGF("generating raw sig for input %d of tx %s with privkey of %s",
+						inputIdx, ntxid,
+						pubKey.String())
 					sig, err = txscript.RawTxInSignature(
 						msgtx, inputIdx, redeemScript, txscript.SigHashAll, ecPrivKey)
 					if err != nil {
 						return nil, newError(ErrRawSigning, "failed to generate raw signature", err)
 					}
 				} else {
-					log <- cl.Debugf{
-						"not generating raw sig for input %d of %s because private" +
-							" key for %s is not available: %v %s",
-						inputIdx,
-						ntxid,
-						pubKey.String(),
-						err}
+					log.DEBUGF("not generating raw sig for input %d of %s because private"+
+						" key for %s is not available: %v %s",
+						inputIdx, ntxid,
+						pubKey.String(), err)
 					sig = []byte{}
 				}
 				txInSigs[i] = sig

@@ -214,10 +214,10 @@ func (c *RPCClient) FilterBlocks(
 		} else if !matched {
 			continue
 		}
-		log.TRACEF(
-			"fetching block height=%d hash=%v",
-			blk.Height, blk.Hash,
-		)
+		// log.TRACEF(
+		// 	"fetching block height=%d hash=%v",
+		// 	blk.Height, blk.Hash,
+		// )
 		rawBlock, err := c.GetBlock(&blk.Hash)
 		if err != nil {
 			return nil, err

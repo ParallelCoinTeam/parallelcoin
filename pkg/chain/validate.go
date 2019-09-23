@@ -78,7 +78,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 // This function MUST be called with the chain state lock held (
 // for writes).
 (b *BlockChain) checkConnectBlock(node *blockNode, block *util.Block, view *UtxoViewpoint, stxos *[]SpentTxOut) error {
-	log.TRACE("check can connect block")
+	// log.TRACE("check can connect block")
 	// If the side chain blocks end up in the database,
 	// a call to CheckBlockSanity should be done here in case a previous
 	// version allowed a block that is no longer valid.  However,
@@ -191,7 +191,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 			return err
 		}
 	}
-	log.TRACE("checking coinbase value")
+	// log.TRACE("checking coinbase value")
 	// The total output values of the coinbase transaction must not exceed
 	// the expected subsidy value plus total transaction fees gained from
 	// mining the block.  It is safe to ignore overflow and out of range
@@ -209,14 +209,14 @@ func // checkConnectBlock performs several checks to confirm connecting the
 			totalSatoshiOut, expectedSatoshiOut)
 		return ruleError(ErrBadCoinbaseValue, str)
 	}
-	log.TRACE("checking for hard fork block")
+	// log.TRACE("checking for hard fork block")
 	// if this is the hard fork activation height special disbursement coinbase
 	// must match the specifications in pkg/chain/hardfork/subsidy.go
 	if node.height == fork.List[1].ActivationHeight &&
 		b.params.Net == wire.MainNet ||
 		node.height == fork.List[1].TestnetStart &&
 			b.params.Net == wire.TestNet3 {
-		log.TRACE("checking contents of hardfork coinbase tx")
+		// log.TRACE("checking contents of hardfork coinbase tx")
 		btx, err := block.Tx(0)
 		if err != nil {
 			log.ERROR(err)
@@ -280,7 +280,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 		// coinbase value for this specific block.
 		// Under, of course, doesn't matter.
 	}
-	log.TRACE("checking for checkpoints")
+	// log.TRACE("checking for checkpoints")
 	// Don't run scripts if this node is before the latest known good
 	// checkpoint since the validity is verified via the checkpoints (
 	// all transactions are included in the merkle root hash and any changes
@@ -292,27 +292,27 @@ func // checkConnectBlock performs several checks to confirm connecting the
 	if checkpoint != nil && node.height <= checkpoint.Height {
 		runScripts = false
 	}
-	log.TRACE("BlockC created after the BIP0016 activation time")
+	// log.TRACE("BlockC created after the BIP0016 activation time")
 	// BlockC created after the BIP0016 activation time need to have the pay
 	// -to-script-hash checks enabled.
 	var scriptFlags txscript.ScriptFlags
 	if enforceBIP0016 {
 		scriptFlags |= txscript.ScriptBip16
 	}
-	log.TRACE("Enforce DER signatures")
+	// log.TRACE("Enforce DER signatures")
 	// Enforce DER signatures for block versions 3+ once the historical
 	// activation threshold has been reached.  This is part of BIP0066.
 	blockHeader := &block.MsgBlock().Header
 	if blockHeader.Version >= 3 && node.height >= b.params.BIP0066Height {
 		scriptFlags |= txscript.ScriptVerifyDERSignatures
 	}
-	log.TRACE("Enforce CHECKLOCKTIMEVERIFY")
+	// log.TRACE("Enforce CHECKLOCKTIMEVERIFY")
 	// Enforce CHECKLOCKTIMEVERIFY for block versions 4+ once the historical
 	// activation threshold has been reached.  This is part of BIP0065.
 	if blockHeader.Version >= 4 && node.height >= b.params.BIP0065Height {
 		scriptFlags |= txscript.ScriptVerifyCheckLockTimeVerify
 	}
-	log.TRACE("Enforce CHECKSEQUENCEVERIFY during all block validation checks")
+	// log.TRACE("Enforce CHECKSEQUENCEVERIFY during all block validation checks")
 	// Enforce CHECKSEQUENCEVERIFY during all block validation checks once
 	// the soft-fork deployment is fully active.
 	csvState, err := b.deploymentState(node.parent, chaincfg.DeploymentCSV)
@@ -359,18 +359,18 @@ func // checkConnectBlock performs several checks to confirm connecting the
 	// running the expensive ECDSA signature check scripts.
 	// Doing this last helps prevent CPU exhaustion attacks.
 	if runScripts {
-		log.TRACE("running scripts")
+		// log.TRACE("running scripts")
 		err := checkBlockScripts(block, view, scriptFlags, b.sigCache,
 			b.hashCache)
 		if err != nil {
 			return err
 		}
 	}
-	log.TRACE("connecting block")
+	// log.TRACE("connecting block")
 	// Update the best hash for view to include this block since all of its
 	// transactions have been connected.
 	view.SetBestHash(&node.hash)
-	log.TRACE("block connected")
+	// log.TRACE("block connected")
 	return nil
 }
 
@@ -382,13 +382,13 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) error {
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
 	algo := block.MsgBlock().Header.Version
-	log.TRACE("algo ", algo)
+	// log.TRACE("algo ", algo)
 	height := block.Height()
-	log.TRACE("height ", height)
+	// log.TRACE("height ", height)
 	algoname := fork.GetAlgoName(algo, height)
-	log.TRACE("algoname ", algoname)
+	// log.TRACE("algoname ", algoname)
 	powLimit := fork.GetMinDiff(algoname, height)
-	log.TRACEF("CheckConnectBlockTemplate powLimit %064x %s", powLimit)
+	// log.TRACEF("CheckConnectBlockTemplate powLimit %064x %s", powLimit)
 	// Skip the proof of work check as this is just a block template.
 	flags := BFNoPoWCheck
 	// This only checks whether the block can be connected to the tip of the
@@ -464,7 +464,7 @@ func // checkBlockContext peforms several validation checks on the block which
 // See its documentation for how the flags modify its behavior.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockContext(block *util.Block, prevNode *blockNode, flags BehaviorFlags, DoNotCheckPow bool) error {
-	log.WARN("checkBlockContext")
+	// log.WARN("checkBlockContext")
 	// Perform all block header related validation checks.
 	header := &block.MsgBlock().Header
 	err := b.checkBlockHeaderContext(header, prevNode, flags)
@@ -562,7 +562,7 @@ func // checkBlockHeaderContext performs several validation checks on the block
 //  against the checkpoints are not performed.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockHeaderContext(header *wire.BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
-	log.WARN("checking block header context")
+	// log.WARN("checking block header context")
 	if prevNode == nil {
 		return nil
 	}
@@ -571,9 +571,9 @@ func // checkBlockHeaderContext performs several validation checks on the block
 		// Ensure the difficulty specified in the block header matches the
 		// calculated difficulty based on the previous block and difficulty
 		// retarget rules.
-		a := fork.GetAlgoName(header.Version, prevNode.height+1)
-		log.INFOF("algo %s %d %8x %d", a, header.Version, header.Bits,
-			prevNode.height+1)
+		// a := fork.GetAlgoName(header.Version, prevNode.height+1)
+		// log.INFOF("algo %s %d %8x %d", a, header.Version, header.Bits,
+		// 	prevNode.height+1)
 	expectedDifficulty, err := b.calcNextRequiredDifficulty(prevNode,
 		header.Timestamp, fork.GetAlgoName(header.Version, prevNode.height+1),
 		false)
@@ -663,7 +663,7 @@ CalcBlockSubsidy(height int32, chainParams *netparams.Params) (r int64) {
 			(chainParams.Net == wire.TestNet3 &&
 				height == fork.List[1].TestnetStart) {
 
-			log.TRACE("hard fork activation")
+			// log.TRACE("hard fork activation")
 			payees := hardfork.Payees
 			if chainParams.Net == wire.TestNet3 {
 				payees = hardfork.TestnetPayees
@@ -688,7 +688,7 @@ func // CheckBlockSanity performs some preliminary checks on a block to
 // ensure it is sane before continuing with block processing.
 // These checks are context free.
 CheckBlockSanity(block *util.Block, powLimit *big.Int, timeSource MedianTimeSource, DoNotCheckPow bool, height int32) error {
-	log.TRACE("powlimit %64x", powLimit)
+	// log.TRACE("powlimit %64x", powLimit)
 	return checkBlockSanity(block, powLimit, timeSource, BFNone, DoNotCheckPow, height)
 }
 
@@ -1089,7 +1089,7 @@ func // checkBlockHeaderSanity performs some preliminary checks on a block
 // The flags do not modify the behavior of this function directly,
 // however they are needed to pass along to checkProofOfWork.
 checkBlockHeaderSanity(header *wire.BlockHeader, powLimit *big.Int, timeSource MedianTimeSource, flags BehaviorFlags, height int32) error {
-	log.TRACEF("checkBlockHeaderSanity %064x %s", powLimit)
+	// log.TRACEF("checkBlockHeaderSanity %064x %s", powLimit)
 	// Ensure the proof of work bits in the block header is in min/max range and
 	// the block hash is less than the target value described by the bits.
 	err := checkProofOfWork(header, powLimit, flags, height)
@@ -1123,7 +1123,7 @@ func // checkBlockSanity performs some preliminary checks on a block to
 // The flags do not modify the behavior of this function directly,
 // however they are needed to pass along to checkBlockHeaderSanity.
 checkBlockSanity(block *util.Block, powLimit *big.Int, timeSource MedianTimeSource, flags BehaviorFlags, DoNotCheckPow bool, height int32) error {
-	log.TRACEF("checkBlockSanity %064x %s", powLimit)
+	// log.TRACEF("checkBlockSanity %064x %s", powLimit)
 	msgBlock := block.MsgBlock()
 	header := &msgBlock.Header
 	err := checkBlockHeaderSanity(header, powLimit, timeSource, flags, height)
@@ -1236,13 +1236,13 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 		return errors.New("PoW limit was not set")
 	}
 	target := fork.CompactToBig(header.Bits)
-	log.TRACEF("target %064x %08x", target, header.Bits)
+	// log.TRACEF("target %064x %08x", target, header.Bits)
 	if target.Sign() <= 0 {
 		str := fmt.Sprintf("block target difficulty of %064x is too low",
 			target)
 		return ruleError(ErrUnexpectedDifficulty, str)
 	}
-	log.TRACEF("checkProofOfWork powLimit %064x %064x", powLimit, target)
+	// log.TRACEF("checkProofOfWork powLimit %064x %064x", powLimit, target)
 	// The target difficulty must be less than the maximum allowed.
 	if target.Cmp(powLimit) > 0 {
 		for i := 0; i < 7; i++ {

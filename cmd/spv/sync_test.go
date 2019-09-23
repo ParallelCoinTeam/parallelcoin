@@ -19,10 +19,9 @@ import (
 	txauthor "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/author"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/log"
@@ -420,7 +419,7 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 	// Ensure the ChainService instance stays caught up.
 	_, err = harness.h1.Node.Generate(124)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	err = waitForSync(t, harness.svc, harness.h1)
 	if err != nil {

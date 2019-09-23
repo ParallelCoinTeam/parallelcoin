@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/prompt"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
@@ -153,8 +153,8 @@ func (l *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool)
 	dbPath := filepath.Join(l.dbDirPath, WalletDbName)
 	db, err := walletdb.Open("bdb", dbPath)
 	if err != nil {
-		log <- cl.Error{
-			"failed to open database:", err}
+		log.ERROR(
+			"failed to open database:", err)
 		return nil, err
 	}
 	var cbs *waddrmgr.OpenCallbacks
@@ -176,9 +176,8 @@ func (l *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool)
 		// allow future calls to walletdb.Open().
 		e := db.Close()
 		if e != nil {
-			log <- cl.Warn{
-				"error closing database:", e,
-			}
+			log.WARN(
+				"error closing database:", e)
 		}
 		return nil, err
 	}

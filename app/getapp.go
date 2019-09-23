@@ -7,12 +7,10 @@ import (
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
-
 	"github.com/parallelcointeam/parallelcoin/app/apputil"
 	"github.com/parallelcointeam/parallelcoin/cmd/node"
 	"github.com/parallelcointeam/parallelcoin/cmd/node/mempool"
+	"github.com/parallelcointeam/parallelcoin/pkg/conte"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
 )
@@ -34,7 +32,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 		},
 		Before: beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			log.TRACE("subcommand completed")
+			// log.TRACE("subcommand completed")
 			return nil
 		},
 		Commands: []cli.Command{
@@ -188,7 +186,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.RPCKey),
 			apputil.String(
 				"cafile",
-				"File containing root certificates to authenticate a TLS" +
+				"File containing root certificates to authenticate a TLS"+
 					" connections with pod",
 				apputil.Join(*cx.Config.DataDir, "cafile"),
 				cx.Config.CAFile),
@@ -221,7 +219,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.Onion),
 			apputil.String(
 				"onionproxy",
-				"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0." +
+				"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0."+
 					"0.1:9050)",
 				"127.0.0.1:9050",
 				cx.Config.OnionProxy),
@@ -237,7 +235,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.OnionProxyPass),
 			apputil.Bool(
 				"torisolation",
-				"Enable Tor stream isolation by randomizing user credentials" +
+				"Enable Tor stream isolation by randomizing user credentials"+
 					" for each connection.",
 				cx.Config.TorIsolation),
 			apputil.String(
@@ -290,7 +288,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.BanThreshold),
 			apputil.StringSlice(
 				"whitelist",
-				"Add an IP network or IP that will not be banned. (eg. 192." +
+				"Add an IP network or IP that will not be banned. (eg. 192."+
 					"168.1.0/24 or ::1)",
 				cx.Config.Whitelists),
 			apputil.String(
@@ -499,7 +497,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 			),
 			apputil.Bool(
 				"relaynonstd",
-				"Relay non-standard transactions regardless of the default" +
+				"Relay non-standard transactions regardless of the default"+
 					" settings for the active network.",
 				cx.Config.RelayNonStd), apputil.Bool("rejectnonstd",
 				"Reject non-standard transactions regardless of"+

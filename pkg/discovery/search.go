@@ -17,7 +17,7 @@ func AsyncZeroConfSearch(service, group string) (cancel context.CancelFunc,
 	r = make(ResultsChan, 10)
 	myInstance := fmt.Sprint(os.Getppid())
 	domain := "local."
-	log.WARN("starting search")
+	log.DEBUG("starting search")
 	resolver, err := zeroconf.NewResolver(nil)
 	if err != nil {
 		log.ERROR("Failed to initialize resolver:", err)

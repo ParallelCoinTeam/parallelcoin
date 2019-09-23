@@ -12,7 +12,6 @@ import (
 	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
@@ -26,7 +25,7 @@ var (
 	fastScrypt     = &waddrmgr.ScryptOptions{N: 16, R: 8, P: 1}
 )
 
-func createWaddrmgr(	ns walletdb.ReadWriteBucket, params *netparams.Params) (*waddrmgr.Manager, error) {
+func createWaddrmgr(ns walletdb.ReadWriteBucket, params *netparams.Params) (*waddrmgr.Manager, error) {
 	err := waddrmgr.Create(ns, seed, pubPassphrase, privPassphrase, params,
 		fastScrypt, time.Now())
 	if err != nil {
@@ -250,13 +249,13 @@ var (
 	votingpoolNamespaceKey = []byte("votingpool")
 )
 
-func addrmgrNamespace(	dbtx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
+func addrmgrNamespace(dbtx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
 	return dbtx.ReadWriteBucket(addrmgrNamespaceKey)
 }
-func txmgrNamespace(	dbtx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
+func txmgrNamespace(dbtx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
 	return dbtx.ReadWriteBucket(txmgrNamespaceKey)
 }
-func votingpoolNamespace(	dbtx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
+func votingpoolNamespace(dbtx walletdb.ReadWriteTx) walletdb.ReadWriteBucket {
 	return dbtx.ReadWriteBucket(votingpoolNamespaceKey)
 }
 func exampleCreateDBAndMgr() (teardown func(), db walletdb.DB, mgr *waddrmgr.Manager) {
@@ -293,7 +292,7 @@ func exampleCreateDBAndMgr() (teardown func(), db walletdb.DB, mgr *waddrmgr.Man
 	}
 	return teardown, db, mgr
 }
-func exampleCreatePoolAndSeries(	db walletdb.DB, mgr *waddrmgr.Manager) (pool *votingpool.Pool, seriesID uint32) {
+func exampleCreatePoolAndSeries(db walletdb.DB, mgr *waddrmgr.Manager) (pool *votingpool.Pool, seriesID uint32) {
 	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
 		ns := votingpoolNamespace(tx)
 		var err error
@@ -320,7 +319,7 @@ func exampleCreatePoolAndSeries(	db walletdb.DB, mgr *waddrmgr.Manager) (pool *v
 	}
 	return pool, seriesID
 }
-func exampleCreateTxStore(	ns walletdb.ReadWriteBucket) *wtxmgr.Store {
+func exampleCreateTxStore(ns walletdb.ReadWriteBucket) *wtxmgr.Store {
 	err := wtxmgr.Create(ns)
 	if err != nil {
 		panic(err)

@@ -173,8 +173,8 @@ func (s *Server) Serve(lis net.Listener) {
 	s.WG.Add(1)
 	go func() {
 		log.INFO("wallet RPC server listening on ", lis.Addr())
-		err := s.HTTPServer.Serve(lis)
-		log.TRACE("finished serving wallet RPC:", err)
+		_ = s.HTTPServer.Serve(lis)
+		// log.TRACE("finished serving wallet RPC:", err)
 		s.WG.Done()
 	}()
 }

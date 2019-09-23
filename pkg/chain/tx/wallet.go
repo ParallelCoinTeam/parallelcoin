@@ -20,10 +20,10 @@ import (
 	txrules "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/rules"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
@@ -356,10 +356,8 @@ func (w *Wallet) syncWithChain() error {
 		if bestHeight > logHeight {
 			logHeight = bestHeight
 		}
-		log <- cl.Infof{
-			"syncWithChain: catching up block hashes to height %d, this will take a while...",
-			logHeight,
-		}
+		log.INFOF("syncWithChain: catching up block hashes to height %d, "+
+			"this will take a while...", logHeight)
 		// Initialize the first database transaction.
 		tx, err := w.db.BeginReadWriteTx()
 		if err != nil {
@@ -370,11 +368,9 @@ func (w *Wallet) syncWithChain() error {
 		// mode.
 		var recoveryMgr *RecoveryManager
 		if isRecovery {
-			log <- cl.Infof{
-				"RECOVERY MODE ENABLED -- rescanning for used addresses with recovery_window=%d %s",
-				w.recoveryWindow,
-				cl.Ine(),
-			}
+			log.INFOF("RECOVERY MODE ENABLED -- rescanning for used"+
+				" addresses with recovery_window=%d %s",
+				w.recoveryWindow)
 			// Initialize the recovery manager with a default batch size of 2000.
 			recoveryMgr = NewRecoveryManager(
 				w.recoveryWindow, recoveryBatchSize,
@@ -400,7 +396,7 @@ func (w *Wallet) syncWithChain() error {
 			if err != nil {
 				e := tx.Rollback()
 				if e != nil {
-					log <- cl.Debug{err}
+					log.DEBUG(err)
 				}
 				return err
 			}
@@ -427,7 +423,7 @@ func (w *Wallet) syncWithChain() error {
 				if err != nil {
 					e := tx.Rollback()
 					if e != nil {
-						log <- cl.Debug{err}
+						log.DEBUG(err)
 					}
 					return err
 				}
@@ -475,7 +471,7 @@ func (w *Wallet) syncWithChain() error {
 			if err != nil {
 				e := tx.Rollback()
 				if e != nil {
-					log <- cl.Debug{err}
+					log.DEBUG(err)
 				}
 				return err
 			}
@@ -492,7 +488,7 @@ func (w *Wallet) syncWithChain() error {
 				if err != nil {
 					e := tx.Rollback()
 					if e != nil {
-						log <- cl.Debug{err}
+						log.DEBUG(err)
 					}
 					return err
 				}
@@ -505,13 +501,12 @@ func (w *Wallet) syncWithChain() error {
 				if err != nil {
 					e := tx.Rollback()
 					if e != nil {
-						log <- cl.Debug{err}
+						log.DEBUG(err)
 					}
 					return err
 				}
-				INFO(
-					"Caught up to height", height,
-				}
+				log.INFO(
+					"Caught up to height", height)
 				tx, err = w.db.BeginReadWriteTx()
 				if err != nil {
 					return err
@@ -529,7 +524,7 @@ func (w *Wallet) syncWithChain() error {
 			if err != nil {
 				e := tx.Rollback()
 				if e != nil {
-					log <- cl.Debug{err}
+					log.DEBUG(err)
 				}
 				return err
 			}
@@ -539,11 +534,12 @@ func (w *Wallet) syncWithChain() error {
 		if err != nil {
 			e := tx.Rollback()
 			if e != nil {
-				log <- cl.Debug{err}
+				log.DEBUG(err)
 			}
 			return err
 		}
-		INFO("done catching up block hashes"}
+		log.INFO("done catching up block hashes")
+
 		// Since we've spent some time catching up block hashes, we
 		// might have new addresses waiting for us that were requested
 		// during initial sync. Make sure we have those before we
@@ -680,10 +676,8 @@ func (w *Wallet) recoverScopedAddresses(
 	if len(batch) == 0 {
 		return nil
 	}
-	log <- cl.Infof{
-		"scanning %d blocks for recoverable addresses",
-		len(batch),
-	}
+	log.INFOF("scanning %d blocks for recoverable addresses",
+		len(batch))
 expandHorizons:
 	for scope, scopedMgr := range scopedMgrs {
 		scopeState := recoveryState.StateForScope(scope)
@@ -964,35 +958,25 @@ func logFilterBlocksResp(block wtxmgr.BlockMeta,
 		nFoundExternal += len(indexes)
 	}
 	if nFoundExternal > 0 {
-		log <- cl.Infof{
-			"recovered %d external addrs at height=%d hash=%v",
-			nFoundExternal,
-			block.Height,
-			block.Hash,
-		}
+		log.INFOF("recovered %d external addrs at height=%d hash=%v", nFoundExternal,
+			block.Height, block.Hash)
 	}
+
 	// Log the number of internal addresses found in this block.
 	var nFoundInternal int
 	for _, indexes := range resp.FoundInternalAddrs {
 		nFoundInternal += len(indexes)
 	}
 	if nFoundInternal > 0 {
-		log <- cl.Infof{
-			"recovered %d internal addrs at height=%d hash=%v",
-			nFoundInternal,
-			block.Height,
-			block.Hash,
-		}
+		log.INFOF("recovered %d internal addrs at height=%d hash=%v",
+			nFoundInternal, block.Height, block.Hash)
 	}
+
 	// Log the number of outpoints found in this block.
 	nFoundOutPoints := len(resp.FoundOutPoints)
 	if nFoundOutPoints > 0 {
-		log <- cl.Infof{
-			"found %d spends from watched outpoints at height=%d hash=%v",
-			nFoundOutPoints,
-			block.Height,
-			block.Hash,
-		}
+		log.INFOF("found %d spends from watched outpoints at height=%d hash=%v",
+			nFoundOutPoints, block.Height, block.Hash)
 	}
 }
 
@@ -1105,9 +1089,9 @@ out:
 			}
 			timeout = req.lockAfter
 			if timeout == nil {
-				log <- cl.Inf("the wallet has been unlocked without a time limit")
+				log.INFO("the wallet has been unlocked without a time limit")
 			} else {
-				log <- cl.Inf("the wallet has been temporarily unlocked")
+				log.INFO("the wallet has been temporarily unlocked")
 			}
 			req.err <- nil
 			continue
@@ -1168,10 +1152,9 @@ out:
 		timeout = nil
 		err := w.Manager.Lock()
 		if err != nil && !waddrmgr.IsError(err, waddrmgr.ErrLocked) {
-			log <- cl.Error{
-				"could not lock wallet:", err}
+			log.ERROR("could not lock wallet:", err)
 		} else {
-			log <- cl.Inf("the wallet has been locked")
+			log.INFO("the wallet has been locked")
 		}
 	}
 	w.wg.Done()
@@ -1609,9 +1592,8 @@ func (w *Wallet) NextAccount(scope waddrmgr.KeyScope, name string) (uint32, erro
 		return err
 	})
 	if err != nil {
-		log <- cl.Error{
-			"cannot fetch new account properties for notification after account creation:",
-			err}
+		log.ERROR("cannot fetch new account properties for notification after"+
+			" account creation:", err)
 	} else {
 		w.NtfnServer.notifyAccountProperties(props)
 	}
@@ -2501,10 +2483,7 @@ func (w *Wallet) ImportPrivateKey(scope waddrmgr.KeyScope, wif *util.WIF,
 		}
 	}
 	addrStr := addr.EncodeAddress()
-	INFO(
-		"imported payment address",
-		addrStr,
-	}
+	log.INFO("imported payment address", addrStr)
 	w.NtfnServer.notifyAccountProperties(props)
 	// Return the payment address string of the imported private key.
 	return addrStr, nil
@@ -2557,10 +2536,11 @@ func (w *Wallet) LockedOutpoints() []btcjson.TransactionInput {
 func (w *Wallet) resendUnminedTxs() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		log <- cl.Error{
-			"no chain server available to resend unmined transactions", err}
+		log.ERROR(
+			"no chain server available to resend unmined transactions", err)
 		return
 	}
+
 	var txs []*wire.MsgTx
 	err = walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
@@ -2569,16 +2549,14 @@ func (w *Wallet) resendUnminedTxs() {
 		return err
 	})
 	if err != nil {
-		log <- cl.Error{
-			"cannot load unmined transactions for resending:", err}
+		log.ERROR("cannot load unmined transactions for resending:", err)
 		return
 	}
 	for _, tx := range txs {
 		resp, err := chainClient.SendRawTransaction(tx, false)
 		if err != nil {
-			log <- cl.Debugf{
-				"could not resend transaction %v: %v %s",
-				tx.TxHash(), err}
+			log.DEBUGF("could not resend transaction %v: %v %s",
+				tx.TxHash(), err)
 			// We'll only stop broadcasting transactions if we
 			// detect that the output has already been fully spent,
 			// is an orphan, or is conflicting with another
@@ -2594,8 +2572,8 @@ func (w *Wallet) resendUnminedTxs() {
 			case strings.Contains(err.Error(), "conflict"):
 			case strings.Contains(err.Error(), "already exists"):
 			case strings.Contains(err.Error(), "negative"):
-			// The following errors are returned from bitcoind's
-			// mempool.
+				// The following errors are returned from bitcoind's
+				// mempool.
 			case strings.Contains(err.Error(), "Missing inputs"):
 			case strings.Contains(err.Error(), "already in block chain"):
 			case strings.Contains(err.Error(), "fee not met"):
@@ -2618,19 +2596,18 @@ func (w *Wallet) resendUnminedTxs() {
 				return w.TxStore.RemoveUnminedTx(txmgrNs, txRec)
 			})
 			if err != nil {
-				log <- cl.Warnf{
-					"unable to remove conflicting tx %v: %v", tx.TxHash(), err,
-				}
+				log.WARNF("unable to remove conflicting tx %v: %v",
+					tx.TxHash(), err)
 				continue
 			}
-			Log.Infc(func() string {
+			log.INFOC(func() string {
 				return "Removed conflicting tx:" + spew.Sdump(tx)
 			})
 			continue
 		}
-		log <- cl.Debug{
-			"resent unmined transaction", resp}
-	}
+		log.DEBUG(
+		"resent unmined transaction", resp)
+}
 }
 
 // SortedActivePaymentAddresses returns a slice of all active payment
@@ -2692,8 +2669,9 @@ func (w *Wallet) newAddress(addrmgrNs walletdb.ReadWriteBucket, account uint32,
 	}
 	props, err := manager.AccountProperties(addrmgrNs, account)
 	if err != nil {
-		log <- cl.Errorf{
-			"cannot fetch account properties for notification after deriving next external address: %v %s", err}
+		log.ERRORF(
+			"cannot fetch account properties for notification after deriving"+
+				" next external address: %v %s", err)
 		return nil, nil, err
 	}
 	return addrs[0].Address(), props, nil
@@ -3196,7 +3174,8 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 	if err != nil {
 		return nil, err
 	}
-	INFO("opened wallet"} // TODO: log balance? last sync height?
+	log.INFO("opened wallet")
+	// TODO: log balance? last sync height?
 	w := &Wallet{
 		publicPassphrase:    pubPass,
 		db:                  db,

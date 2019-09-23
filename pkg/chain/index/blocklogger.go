@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // blockProgressLogger provides periodic logging for other services in order to show users progress of certain "actions" involving some or all current blocks. Ex: syncing to best chain, indexing all blocks, etc.
@@ -14,7 +14,7 @@ type blockProgressLogger struct {
 	receivedLogBlocks int64
 	receivedLogTx     int64
 	lastBlockLogTime  time.Time
-	subsystemLogger   *cl.SubSystem
+	subsystemLogger   *log.Logger
 	progressAction    string
 	sync.Mutex
 }
@@ -23,7 +23,8 @@ type blockProgressLogger struct {
 // The progress message is templated as follows:
 //  {progressAction} {numProcessed} {blocks|block} in the last {timePeriod}
 //  ({numTxs}, height {lastBlockHeight}, {lastBlockTimeStamp})
-func newBlockProgressLogger(	progressMessage string, logger *cl.SubSystem) *blockProgressLogger {
+func newBlockProgressLogger(progressMessage string,
+	logger *log.Logger) *blockProgressLogger {
 	return &blockProgressLogger{
 		lastBlockLogTime: time.Now(),
 		progressAction:   progressMessage,
@@ -54,9 +55,9 @@ func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
 	if b.receivedLogTx == 1 {
 		txStr = "transaction "
 	}
-	b.subsystemLogger.Ch <- cl.Infof{"%s %6d %s in the last %s (%6d %s, height %6d, %s)",
+	log.INFOF("%s %6d %s in the last %s (%6d %s, height %6d, %s)",
 		b.progressAction, b.receivedLogBlocks, blockStr, fmt.Sprintf("%0.1fs", tDuration.Seconds()), b.receivedLogTx,
-		txStr, block.Height(), block.MsgBlock().Header.Timestamp}
+		txStr, block.Height(), block.MsgBlock().Header.Timestamp)
 	b.receivedLogBlocks = 0
 	b.receivedLogTx = 0
 	b.lastBlockLogTime = now

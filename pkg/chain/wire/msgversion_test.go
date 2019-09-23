@@ -1,18 +1,16 @@
 package wire
 
 import (
-   "net"
-   "reflect"
-   "strings"
-   "testing"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"net"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // TestVersion tests the MsgVersion API.
-func TestVersion(	t *testing.T) {
+func TestVersion(t *testing.T) {
 	pver := ProtocolVersion
 	// Create version message data.
 	lastBlock := int32(234234)
@@ -56,7 +54,7 @@ func TestVersion(	t *testing.T) {
 	}
 	err = msg.AddUserAgent("myclient", "1.2.3", "optional", "comments")
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	customUserAgent := DefaultUserAgent + "myclient:1.2.3(optional; comments)/"
 	if msg.UserAgent != customUserAgent {
@@ -65,7 +63,7 @@ func TestVersion(	t *testing.T) {
 	}
 	err = msg.AddUserAgent("mygui", "3.4.5")
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	customUserAgent += "mygui:3.4.5/"
 	if msg.UserAgent != customUserAgent {

@@ -177,9 +177,9 @@ func // findInitialTransactions searches the given block for the creation of the
 				req.Input.OutPoint)
 			initialTxns[req.Input.OutPoint] = nil
 		case tx != nil:
-			log.TRACEF(
-				"block %d creates output %s", height, req.Input.OutPoint,
-			)
+			// log.TRACEF(
+			// 	"block %d creates output %s", height, req.Input.OutPoint,
+			// )
 		default:
 		}
 		b.initialTxns[req.Input.OutPoint] = tx

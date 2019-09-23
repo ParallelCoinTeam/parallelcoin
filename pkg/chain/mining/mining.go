@@ -15,7 +15,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 const (
@@ -314,10 +313,10 @@ logSkippedDeps(tx *util.Tx, deps map[chainhash.Hash]*txPrioItem) {
 	if deps == nil {
 		return
 	}
-	for _, item := range deps {
-		log.TRACEF("skipping tx %s since it depends on %s", item.tx.Hash(),
-			tx.Hash())
-	}
+	// for _, item := range deps {
+	// log.TRACEF("skipping tx %s since it depends on %s", item.tx.Hash(),
+	// 	tx.Hash())
+	// }
 }
 
 func // MinimumMedianTime returns the minimum allowed timestamp for a block building
@@ -430,9 +429,9 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 	h := g.BestSnapshot().Height + 1
 
 	vers := fork.GetAlgoVer(algo, h)
-	log.TRACE("vers", vers)
+	// log.TRACE("vers", vers)
 	algo = fork.GetAlgoName(vers, h)
-	log.TRACE("algo", algo)
+	// log.TRACE("algo", algo)
 	// DEBUG{algo}
 	// INFO{"selected algo", fork.GetAlgoName(vers, h)}
 	// Extend the most recently known best block.
@@ -487,24 +486,24 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 	txSigOpCosts := make([]int64, 0, len(sourceTxns))
 	txFees = append(txFees, -1) // Updated once known
 	txSigOpCosts = append(txSigOpCosts, coinbaseSigOpCost)
-	log.TRACEF("considering %d transactions for inclusion to new block",
-		len(sourceTxns))
+	// log.TRACEF("considering %d transactions for inclusion to new block",
+	// 	len(sourceTxns))
 mempoolLoop:
 	for _, txDesc := range sourceTxns {
 		// A block can't have more than one coinbase or contain non-finalized
 		// transactions.
 		tx := txDesc.Tx
 		if blockchain.IsCoinBase(tx) {
-			log.TRACEC(func() string {
-				return fmt.Sprintf("skipping coinbase tx %s", tx.Hash())
-			})
+			// log.TRACEC(func() string {
+			// 	return fmt.Sprintf("skipping coinbase tx %s", tx.Hash())
+			// })
 			continue
 		}
 		if !blockchain.IsFinalizedTransaction(tx, nextBlockHeight,
 			g.TimeSource.AdjustedTime()) {
-			log.TRACEC(func() string {
-				return "skipping non-finalized tx " + tx.Hash().String()
-			})
+			// log.TRACEC(func() string {
+			// 	return "skipping non-finalized tx " + tx.Hash().String()
+			// })
 			continue
 		}
 		// Fetch all of the utxos referenced by the this transaction. NOTE: This
@@ -526,11 +525,11 @@ mempoolLoop:
 			entry := utxos.LookupEntry(txIn.PreviousOutPoint)
 			if entry == nil || entry.IsSpent() {
 				if !g.TxSource.HaveTransaction(originHash) {
-					log.TRACEC(func() string {
-						return "skipping tx %s because it references unspent output %s which is not available" +
-							tx.Hash().String() +
-							txIn.PreviousOutPoint.String()
-					})
+					// log.TRACEC(func() string {
+					// 	return "skipping tx %s because it references unspent output %s which is not available" +
+					// 		tx.Hash().String() +
+					// 		txIn.PreviousOutPoint.String()
+					// })
 					continue mempoolLoop
 				}
 				// The transaction is referencing another transaction in the
@@ -571,13 +570,13 @@ mempoolLoop:
 		// avoid a second lookup.
 		mergeUtxoView(blockUtxos, utxos)
 	}
-	log.TRACEC(func() string {
-		return fmt.Sprintf(
-			"priority queue len %d, dependers len %d",
-			priorityQueue.Len(),
-			len(dependers),
-		)
-	})
+	// log.TRACEC(func() string {
+	// 	return fmt.Sprintf(
+	// 		"priority queue len %d, dependers len %d",
+	// 		priorityQueue.Len(),
+	// 		len(dependers),
+	// 	)
+	// })
 	// The starting block size is the size of the block header plus the max
 	// possible transaction count size, plus the size of the coinbase
 	// transaction.
@@ -642,8 +641,8 @@ mempoolLoop:
 		blockPlusTxWeight := blockWeight + txWeight
 		if blockPlusTxWeight < blockWeight ||
 			blockPlusTxWeight >= g.Policy.BlockMaxWeight {
-			log.TRACEF("skipping tx %s because it would exceed the max block" +
-				" weight", tx.Hash())
+			// log.TRACEF("skipping tx %s because it would exceed the max block" +
+			// 	" weight", tx.Hash())
 			logSkippedDeps(tx, deps)
 			continue
 		}
@@ -652,19 +651,19 @@ mempoolLoop:
 		sigOpCost, err := blockchain.GetSigOpCost(tx, false,
 			blockUtxos, true, segwitActive)
 		if err != nil {
-			log.TRACEC(func() string {
-				return "skipping tx " + tx.Hash().String() +
-					"due to error in GetSigOpCost: " + err.Error()
-			})
+			// log.TRACEC(func() string {
+			// 	return "skipping tx " + tx.Hash().String() +
+			// 		"due to error in GetSigOpCost: " + err.Error()
+			// })
 			logSkippedDeps(tx, deps)
 			continue
 		}
 		if blockSigOpCost+int64(sigOpCost) < blockSigOpCost ||
 			blockSigOpCost+int64(sigOpCost) > blockchain.MaxBlockSigOpsCost {
-			log.TRACEC(func() string {
-				return "skipping tx " + tx.Hash().String() +
-					" because it would exceed the maximum sigops per block"
-			})
+			// log.TRACEC(func() string {
+			// 	return "skipping tx " + tx.Hash().String() +
+			// 		" because it would exceed the maximum sigops per block"
+			// })
 			logSkippedDeps(tx, deps)
 			continue
 		}
@@ -673,15 +672,15 @@ mempoolLoop:
 		if sortedByFee &&
 			prioItem.feePerKB < int64(g.Policy.TxMinFreeFee) &&
 			blockPlusTxWeight >= g.Policy.BlockMinWeight {
-			log.TRACEC(func() string {
-				return fmt.Sprint(
-					"skipping tx ", tx.Hash(),
-					" with feePerKB ", prioItem.feePerKB,
-					" < TxMinFreeFee ", g.Policy.TxMinFreeFee,
-					" and block weight ", blockPlusTxWeight,
-					" >= minBlockWeight ", g.Policy.BlockMinWeight,
-				)
-			})
+			// log.TRACEC(func() string {
+			// 	return fmt.Sprint(
+			// 		"skipping tx ", tx.Hash(),
+			// 		" with feePerKB ", prioItem.feePerKB,
+			// 		" < TxMinFreeFee ", g.Policy.TxMinFreeFee,
+			// 		" and block weight ", blockPlusTxWeight,
+			// 		" >= minBlockWeight ", g.Policy.BlockMinWeight,
+			// 	)
+			// })
 			logSkippedDeps(tx, deps)
 			continue
 		}
@@ -689,12 +688,12 @@ mempoolLoop:
 		// priority size or there are no more high-priority transactions.
 		if !sortedByFee && (blockPlusTxWeight >= g.Policy.BlockPrioritySize ||
 			prioItem.priority <= MinHighPriority.ToDUO()) {
-			log.TRACEF("switching to sort by fees per kilobyte blockSize %d"+
-				" >= BlockPrioritySize %d || priority %.2f <= minHighPriority %.2f",
-				blockPlusTxWeight,
-				g.Policy.BlockPrioritySize,
-				prioItem.priority,
-				MinHighPriority)
+			// log.TRACEF("switching to sort by fees per kilobyte blockSize %d"+
+			// 	" >= BlockPrioritySize %d || priority %.2f <= minHighPriority %.2f",
+			// 	blockPlusTxWeight,
+			// 	g.Policy.BlockPrioritySize,
+			// 	prioItem.priority,
+			// 	MinHighPriority)
 			sortedByFee = true
 			priorityQueue.SetLessFunc(txPQByFee)
 		}
@@ -714,9 +713,9 @@ mempoolLoop:
 		_, err = blockchain.CheckTransactionInputs(tx, nextBlockHeight,
 			blockUtxos, g.ChainParams)
 		if err != nil {
-			log.TRACEF("skipping tx %s due to error in CheckTransactionInputs" +
-				": %v",
-				tx.Hash(), err)
+			// log.TRACEF("skipping tx %s due to error in CheckTransactionInputs" +
+			// 	": %v",
+			// 	tx.Hash(), err)
 			logSkippedDeps(tx, deps)
 			continue
 		}
@@ -724,9 +723,9 @@ mempoolLoop:
 			txscript.StandardVerifyFlags, g.SigCache,
 			g.HashCache)
 		if err != nil {
-			log.TRACEF("skipping tx %s due to error in" +
-				" ValidateTransactionScripts: %v",
-				tx.Hash(), err)
+			// log.TRACEF("skipping tx %s due to error in" +
+			// 	" ValidateTransactionScripts: %v",
+			// 	tx.Hash(), err)
 			logSkippedDeps(tx, deps)
 			continue
 		}
@@ -746,10 +745,10 @@ mempoolLoop:
 		totalFees += prioItem.fee
 		txFees = append(txFees, prioItem.fee)
 		txSigOpCosts = append(txSigOpCosts, int64(sigOpCost))
-		log.TRACEF("adding tx %s (priority %.2f, feePerKB %.2f)",
-			prioItem.tx.Hash(),
-			prioItem.priority,
-			prioItem.feePerKB)
+		// log.TRACEF("adding tx %s (priority %.2f, feePerKB %.2f)",
+		// 	prioItem.tx.Hash(),
+		// 	prioItem.priority,
+		// 	prioItem.feePerKB)
 		// Add transactions which depend on this one (and also do not have any
 		// other unsatisified dependencies) to the priority queue.
 		for _, item := range deps {
@@ -811,13 +810,13 @@ mempoolLoop:
 	// potentially adjusted to ensure it comes after the median time of the last
 	// several blocks per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
-	log.TRACE("algo ", ts, " ", algo)
+	// log.TRACE("algo ", ts, " ", algo)
 	reqDifficulty, err := g.Chain.CalcNextRequiredDifficulty(ts, algo)
 	if err != nil {
 		return nil, err
 	}
-	log.TRACEF("reqDifficulty %d %08x %064x %s", vers, reqDifficulty,
-		fork.CompactToBig(reqDifficulty))
+	// log.TRACEF("reqDifficulty %d %08x %064x %s", vers, reqDifficulty,
+	// 	fork.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
 	var msgBlock wire.MsgBlock
@@ -843,21 +842,21 @@ mempoolLoop:
 		log.DEBUG("checkconnectblocktemplate err:", err)
 		return nil, err
 	}
-	log.TRACE(func() string {
-		return fmt.Sprintf(
-			"created new block template "+
-				"(algo %s, %d transactions, %d in fees, "+
-				"%d signature operations cost, %d weight, "+
-				"target difficulty %064x) %s",
-			algo,
-			len(msgBlock.Transactions),
-			totalFees,
-			blockSigOpCost,
-			blockWeight,
-			fork.CompactToBig(msgBlock.Header.Bits),
-			cl.Ine(),
-		)
-	})
+	// log.TRACE(func() string {
+	// 	return fmt.Sprintf(
+	// 		"created new block template "+
+	// 			"(algo %s, %d transactions, %d in fees, "+
+	// 			"%d signature operations cost, %d weight, "+
+	// 			"target difficulty %064x) %s",
+	// 		algo,
+	// 		len(msgBlock.Transactions),
+	// 		totalFees,
+	// 		blockSigOpCost,
+	// 		blockWeight,
+	// 		fork.CompactToBig(msgBlock.Header.Bits),
+	// 		
+	// 	)
+	// })
 	return &BlockTemplate{
 		Block:             &msgBlock,
 		Fees:              txFees,

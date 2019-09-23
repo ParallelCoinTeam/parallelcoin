@@ -197,10 +197,10 @@ func (s *NeutrinoClient) FilterBlocks(
 		} else if !matched {
 			continue
 		}
-		log.TRACEF(
-			"fetching block height=%d hash=%v",
-			blk.Height, blk.Hash,
-		)
+		// log.TRACEF(
+		// 	"fetching block height=%d hash=%v",
+		// 	blk.Height, blk.Hash,
+		// )
 		// TODO(conner): can optimize bandwidth by only fetching
 		// stripped blocks
 		rawBlock, err := s.GetBlock(&blk.Hash)

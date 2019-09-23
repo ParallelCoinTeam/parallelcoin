@@ -14,7 +14,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
 	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 const (
@@ -463,8 +462,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		log.WARN(
 			"ROLLBACK: Failed to truncate file %d: %v %s",
 			wc.curFileNum,
-			err,
-			cl.Ine())
+			err)
 		return
 	}
 	// Sync the file to disk.
@@ -474,8 +472,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		log.WARN(
 			"ROLLBACK: Failed to sync file %d: %v %s",
 			wc.curFileNum,
-			err,
-			cl.Ine())
+			err)
 		return
 	}
 }
@@ -493,10 +490,10 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		lastFile = i
 		fileLen = uint32(st.Size())
 	}
-	log.TRACEF(
-		"Scan found latest block file #%d with length %d",
-		lastFile,
-		fileLen)
+	// log.TRACEF(
+	// 	"Scan found latest block file #%d with length %d",
+	// 	lastFile,
+	// 	fileLen)
 	return lastFile, fileLen
 }
 

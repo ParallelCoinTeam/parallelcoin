@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
 )

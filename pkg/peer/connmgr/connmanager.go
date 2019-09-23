@@ -185,18 +185,18 @@ func (cm *ConnManager) handleFailedConn(c *ConnReq) {
 		if d > maxRetryDuration {
 			d = maxRetryDuration
 		}
-		log.TRACE("retrying connection to %v in %v %s", c, d)
+		// // log.TRACE("retrying connection to %v in %v %s", c, d)
 		time.AfterFunc(d, func() {
 			cm.Connect(c)
 		})
 	} else if cm.Cfg.GetNewAddress != nil {
 		cm.failedAttempts++
 		if cm.failedAttempts >= maxFailedAttempts {
-			log.TRACEF("max failed connection attempts reached: [%d" +
-				"] -- retrying" +
-				" connection in: %v",
-				maxFailedAttempts,
-				cm.Cfg.RetryDuration)
+			// log.TRACEF("max failed connection attempts reached: [%d" +
+			// 	"] -- retrying" +
+			// 	" connection in: %v",
+			// 	maxFailedAttempts,
+			// 	cm.Cfg.RetryDuration)
 			time.AfterFunc(cm.Cfg.RetryDuration, func() {
 				cm.NewConnReq()
 			})
@@ -239,7 +239,7 @@ out:
 				connReq.updateState(ConnEstablished)
 				connReq.conn = msg.conn
 				conns[connReq.id] = connReq
-				log.TRACE("connected to ", connReq)
+				// log.TRACE("connected to ", connReq)
 				connReq.retryCount = 0
 				cm.failedAttempts = 0
 				delete(pending, connReq.id)
@@ -264,7 +264,7 @@ out:
 				}
 				// An existing connection was located,
 				// mark as disconnected and execute disconnection callback.
-				log.TRACE("disconnected from", connReq)
+				// log.TRACE("disconnected from", connReq)
 				delete(conns, msg.id)
 				if connReq.conn != nil {
 					connReq.conn.Close()
@@ -296,7 +296,7 @@ out:
 					continue
 				}
 				connReq.updateState(ConnFailing)
-				log.TRACEF("failed to connect to %v: %v", connReq, msg.err)
+				// log.TRACEF("failed to connect to %v: %v", connReq, msg.err)
 				cm.handleFailedConn(connReq)
 			}
 		case <-cm.quit:
@@ -357,14 +357,14 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 		// manager. By registering the id before the connection is even
 		// established, we'll be able to later cancel the connection via the
 		// Remove method.
-		log.TRACE("sending request to register connection")
+		// log.TRACE("sending request to register connection")
 		done := make(chan struct{})
 		select {
 		case cm.requests <- registerPending{c, done}:
 		case <-cm.quit:
 			return
 		}
-		log.TRACE("waiting for response")
+		// log.TRACE("waiting for response")
 		// Wait for the registration to successfully add the pending conn req to
 		// the conn manager's internal state.
 		select {
@@ -373,14 +373,14 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 			return
 		}
 	}
-	log.TRACE("response received", cm.Cfg.Listeners)
+	// log.TRACE("response received", cm.Cfg.Listeners)
 	if len(cm.Cfg.Listeners) > 0 {
-		log.TRACEF("%s attempting to connect to '%s'",
-			cm.Cfg.Listeners[0].Addr(), c.Addr)
+		// log.TRACEF("%s attempting to connect to '%s'",
+		// 	cm.Cfg.Listeners[0].Addr(), c.Addr)
 	}
-	// log.TRACE("Dial?", cm.Cfg.Dial)
+	// // log.TRACE("Dial?", cm.Cfg.Dial)
 	conn, err := cm.Cfg.Dial(c.Addr)
-	// log.TRACE(err, c.Addr)
+	// // log.TRACE(err, c.Addr)
 	if err != nil {
 		select {
 		case cm.requests <- handleFailed{c, err}:
@@ -438,9 +438,9 @@ func (cm *ConnManager) listenHandler(listener net.Listener) {
 		go cm.Cfg.OnAccept(conn)
 	}
 	cm.wg.Done()
-	log.TRACE(func() string {
-		return fmt.Sprint("listener handler done for ", listener.Addr())
-	})
+	// log.TRACE(func() string {
+	// 	return fmt.Sprint("listener handler done for ", listener.Addr())
+	// })
 }
 
 // Start launches the connection manager and begins connecting to the network.

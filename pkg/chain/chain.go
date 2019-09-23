@@ -540,7 +540,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// Warn if any unknown new rules are either about to activate or have
 		// already been activated.
 		if err := b.warnUnknownRuleActivations(node); err != nil {
-			log.TRACE("warnUnknownRuleActivations ", err)
+			// log.TRACE("warnUnknownRuleActivations ", err)
 			return err
 		}
 	}
@@ -565,14 +565,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
 		if err != nil {
-			log.TRACE("dbPutBestState", err)
+			// log.TRACE("dbPutBestState", err)
 			return err
 		}
 		// Add the block hash and height to the block index which tracks the
 		// main chain.
 		err = dbPutBlockIndex(dbTx, block.Hash(), node.height)
 		if err != nil {
-			log.TRACE("dbPutBlockIndex", err)
+			// log.TRACE("dbPutBlockIndex", err)
 			return err
 		}
 		// update the utxo set using the state of the utxo view.
@@ -580,7 +580,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// ones created by the block.
 		err = dbPutUtxoView(dbTx, view)
 		if err != nil {
-			log.TRACE("dbPutUtxoView", err)
+			// log.TRACE("dbPutUtxoView", err)
 			return err
 		}
 
@@ -588,7 +588,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// block that contains all txos spent by it.
 		err = dbPutSpendJournalEntry(dbTx, block.Hash(), stxos)
 		if err != nil {
-			log.TRACE("dbPutSpendJournalEntry", err)
+			// log.TRACE("dbPutSpendJournalEntry", err)
 			return err
 		}
 		// Allow the index manager to call each of the currently active
@@ -597,14 +597,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		if b.indexManager != nil {
 			err := b.indexManager.ConnectBlock(dbTx, block, stxos)
 			if err != nil {
-				log.TRACE("connectBlock ", err)
+				// log.TRACE("connectBlock ", err)
 				return err
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		log.TRACE("error updating database ", err)
+		// log.TRACE("error updating database ", err)
 		return err
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified
@@ -989,7 +989,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) connectBestChain(node *blockNode, block *util.Block,
 	flags BehaviorFlags) (bool, error) {
-	log.TRACE("connectBestChain")
+	// log.TRACE("connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
 		// Intentionally ignore errors writing updated node status to DB.
@@ -998,14 +998,14 @@ func // connectBestChain handles connecting the passed block to the chain while
 		// we flush in connectBlock and if the block is invalid,
 		// the worst that can happen is we revalidate the block after a restart.
 		if writeErr := b.Index.flushToDB(); writeErr != nil {
-			log.TRACE("Error flushing block index changes to disk:", writeErr)
+			// log.TRACE("Error flushing block index changes to disk:", writeErr)
 		}
 	}
 	// We are extending the main (best) chain with a new block.
 	// This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.bestChain.Tip().hash) {
-		log.TRACE("can attach to tip")
+		// log.TRACE("can attach to tip")
 	}
 	// Skip checks if node has already been fully validated.
 	fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
@@ -1015,7 +1015,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	view := NewUtxoViewpoint()
 	view.SetBestHash(parentHash)
 	stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
-	log.TRACE("fast adding:", fastAdd)
+	// log.TRACE("fast adding:", fastAdd)
 	err := b.checkConnectBlock(node, block, view, &stxos)
 	if err == nil {
 		b.Index.SetStatusFlags(node, statusValid)
@@ -1026,7 +1026,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	}
 	flushIndexState()
 	if err != nil {
-		log.TRACE("error", err)
+		// log.TRACE("error", err)
 		return false, err
 	}
 	// In the fast add case the code to check the block connection was
@@ -1045,7 +1045,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// Connect the block to the main chain.
 	err = b.connectBlock(node, block, view, stxos)
 	if err != nil {
-		log.TRACE("connect block error: ", err)
+		// log.TRACE("connect block error: ", err)
 	}
 	// If we got hit with a rule error,
 	// then we'll mark that status of the block as invalid and flush
@@ -1074,16 +1074,16 @@ func // connectBestChain handles connecting the passed block to the chain while
 		// Log information about how the block is forking the chain.
 		f := b.bestChain.FindFork(node)
 		if f.hash.IsEqual(parentHash) {
-			log.TRACEF("FORK: Block %v forks the chain at height %d/block %v, "+
-				"but does not cause a reorganize. workSum=%d",
-				node.hash, f.height, f.hash, f.workSum)
+			// log.TRACEF("FORK: Block %v forks the chain at height %d/block %v, "+
+			// 	"but does not cause a reorganize. workSum=%d",
+			// 	node.hash, f.height, f.hash, f.workSum)
 		} else {
-			log.TRACEF("EXTEND FORK: Block %v extends a side chain which" +
-				" forks" +
-				" the"+
-				" chain at height %d/block %v. workSum=%d",
-				node.hash, f.height, f.hash, f.workSum,
-			)
+			// log.TRACEF("EXTEND FORK: Block %v extends a side chain which" +
+			// 	" forks" +
+			// 	" the"+
+			// 	" chain at height %d/block %v. workSum=%d",
+			// 	node.hash, f.height, f.hash, f.workSum,
+			// )
 		}
 		return false, nil
 	}
@@ -1106,7 +1106,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// The index would only be dirty if the block failed to connect,
 	// so we can ignore any errors writing.
 	if writeErr := b.Index.flushToDB(); writeErr != nil {
-		log.TRACE("Error flushing block index changes to disk:", writeErr)
+		// log.TRACE("Error flushing block index changes to disk:", writeErr)
 	}
 	return err == nil, err
 }

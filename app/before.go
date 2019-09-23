@@ -17,7 +17,7 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		log.TRACE("running beforeFunc")
+		// log.TRACE("running beforeFunc")
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
@@ -28,7 +28,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				podConfigFilename
 		// we are going to assume the config is not manually misedited
 		if apputil.FileExists(*cx.Config.ConfigFile) {
-			log.TRACE("loading config")
+			// log.TRACE("loading config")
 			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
 			if err == nil {
 				err = toml.Unmarshal(b, cx.Config)
@@ -42,30 +42,30 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		} // if file didn't exist we save it in Configure after parsing CLI args
 		if c.String("loglevel") != "" {
-			log.TRACE("set loglevel", c.String("loglevel"))
+			// log.TRACE("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
 			log.L.SetLevel(*cx.Config.LogLevel, true)
 		}
 		if c.IsSet("network") {
-			log.TRACE("set network", c.String("network"))
+			// log.TRACE("set network", c.String("network"))
 			*cx.Config.Network = c.String("network")
-			log.TRACE("network is set to", *cx.Config.Network)
+			// log.TRACE("network is set to", *cx.Config.Network)
 			switch *cx.Config.Network {
 			case "testnet", "testnet3", "t":
-				log.TRACE("on testnet")
+				// log.TRACE("on testnet")
 				*cx.Config.TestNet3 = true
 				*cx.Config.SimNet = false
 				*cx.Config.RegressionTest = false
 				cx.ActiveNet = &netparams.TestNet3Params
 				fork.IsTestnet = true
 			case "regtestnet", "regressiontest", "r":
-				log.TRACE("on regression testnet")
+				// log.TRACE("on regression testnet")
 				*cx.Config.TestNet3 = false
 				*cx.Config.SimNet = false
 				*cx.Config.RegressionTest = true
 				cx.ActiveNet = &netparams.RegressionTestParams
 			case "simnet", "s":
-				log.TRACE("on simnet")
+				// log.TRACE("on simnet")
 				*cx.Config.TestNet3 = false
 				*cx.Config.SimNet = true
 				*cx.Config.RegressionTest = false
@@ -75,7 +75,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 					*cx.Config.Network != "m" {
 					log.WARN("using mainnet for node")
 				}
-				log.TRACE("on mainnet")
+				// log.TRACE("on mainnet")
 				*cx.Config.TestNet3 = false
 				*cx.Config.SimNet = false
 				*cx.Config.RegressionTest = false
@@ -83,344 +83,344 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}
 		if c.IsSet("username") {
-			log.TRACE("set username", c.String("username"))
+			// log.TRACE("set username", c.String("username"))
 			*cx.Config.Username = c.String("username")
 		}
 		if c.IsSet("password") {
-			log.TRACE("set password", c.String("password"))
+			// log.TRACE("set password", c.String("password"))
 			*cx.Config.Password = c.String("password")
 		}
 		if c.IsSet("serveruser") {
-			log.TRACE("set serveruser", c.String("serveruser"))
+			// log.TRACE("set serveruser", c.String("serveruser"))
 			*cx.Config.ServerUser = c.String("serveruser")
 		}
 		if c.IsSet("serverpass") {
-			log.TRACE("set serverpass", c.String("serverpass"))
+			// log.TRACE("set serverpass", c.String("serverpass"))
 			*cx.Config.ServerPass = c.String("serverpass")
 		}
 		if c.IsSet("limituser") {
-			log.TRACE("set limituser", c.String("limituser"))
+			// log.TRACE("set limituser", c.String("limituser"))
 			*cx.Config.LimitUser = c.String("limituser")
 		}
 		if c.IsSet("limitpass") {
-			log.TRACE("set limitpass", c.String("limitpass"))
+			// log.TRACE("set limitpass", c.String("limitpass"))
 			*cx.Config.LimitPass = c.String("limitpass")
 		}
 		if c.IsSet("rpccert") {
-			log.TRACE("set rpccert", c.String("rpccert"))
+			// log.TRACE("set rpccert", c.String("rpccert"))
 			*cx.Config.RPCCert = c.String("rpccert")
 		}
 		if c.IsSet("rpckey") {
-			log.TRACE("set rpckey", c.String("rpckey"))
+			// log.TRACE("set rpckey", c.String("rpckey"))
 			*cx.Config.RPCKey = c.String("rpckey")
 		}
 		if c.IsSet("cafile") {
-			log.TRACE("set cafile", c.String("cafile"))
+			// log.TRACE("set cafile", c.String("cafile"))
 			*cx.Config.CAFile = c.String("cafile")
 		}
 		if c.IsSet("clienttls") {
-			log.TRACE("set clienttls", c.Bool("clienttls"))
+			// log.TRACE("set clienttls", c.Bool("clienttls"))
 			*cx.Config.TLS = c.Bool("clienttls")
 		}
 		if c.IsSet("servertls") {
-			log.TRACE("set servertls", c.Bool("servertls"))
+			// log.TRACE("set servertls", c.Bool("servertls"))
 			*cx.Config.ServerTLS = c.Bool("servertls")
 		}
 		if c.IsSet("tlsskipverify") {
-			log.TRACE("set tlsskipverify ", c.Bool("tlsskipverify"))
+			// log.TRACE("set tlsskipverify ", c.Bool("tlsskipverify"))
 			*cx.Config.TLSSkipVerify = c.Bool("tlsskipverify")
 		}
 		if c.IsSet("proxy") {
-			log.TRACE("set proxy", c.String("proxy"))
+			// log.TRACE("set proxy", c.String("proxy"))
 			*cx.Config.Proxy = c.String("proxy")
 		}
 		if c.IsSet("proxyuser") {
-			log.TRACE("set proxyuser", c.String("proxyuser"))
+			// log.TRACE("set proxyuser", c.String("proxyuser"))
 			*cx.Config.ProxyUser = c.String("proxyuser")
 		}
 		if c.IsSet("proxypass") {
-			log.TRACE("set proxypass", c.String("proxypass"))
+			// log.TRACE("set proxypass", c.String("proxypass"))
 			*cx.Config.ProxyPass = c.String("proxypass")
 		}
 		if c.IsSet("onion") {
-			log.TRACE("set onion", c.Bool("onion"))
+			// log.TRACE("set onion", c.Bool("onion"))
 			*cx.Config.Onion = c.Bool("onion")
 		}
 		if c.IsSet("onionproxy") {
-			log.TRACE("set onionproxy", c.String("onionproxy"))
+			// log.TRACE("set onionproxy", c.String("onionproxy"))
 			*cx.Config.OnionProxy = c.String("onionproxy")
 		}
 		if c.IsSet("onionuser") {
-			log.TRACE("set onionuser", c.String("onionuser"))
+			// log.TRACE("set onionuser", c.String("onionuser"))
 			*cx.Config.OnionProxyUser = c.String("onionuser")
 		}
 		if c.IsSet("onionpass") {
-			log.TRACE("set onionpass", c.String("onionpass"))
+			// log.TRACE("set onionpass", c.String("onionpass"))
 			*cx.Config.OnionProxyPass = c.String("onionpass")
 		}
 		if c.IsSet("torisolation") {
-			log.TRACE("set torisolation", c.Bool("torisolation"))
+			// log.TRACE("set torisolation", c.Bool("torisolation"))
 			*cx.Config.TorIsolation = c.Bool("torisolation")
 		}
 		if c.IsSet("addpeer") {
-			log.TRACE("set addpeer", c.StringSlice("addpeer"))
+			// log.TRACE("set addpeer", c.StringSlice("addpeer"))
 			*cx.Config.AddPeers = c.StringSlice("addpeer")
 		}
 		if c.IsSet("connect") {
-			log.TRACE("set connect", c.StringSlice("connect"))
+			// log.TRACE("set connect", c.StringSlice("connect"))
 			*cx.Config.ConnectPeers = c.StringSlice("connect")
 		}
 		if c.IsSet("nolisten") {
-			log.TRACE("set nolisten", c.Bool("nolisten"))
+			// log.TRACE("set nolisten", c.Bool("nolisten"))
 			*cx.Config.DisableListen = c.Bool("nolisten")
 		}
 		if c.IsSet("listen") {
-			log.TRACE("set listen", c.StringSlice("listen"))
+			// log.TRACE("set listen", c.StringSlice("listen"))
 			*cx.Config.Listeners = c.StringSlice("listen")
 		}
 		if c.IsSet("maxpeers") {
-			log.TRACE("set maxpeers", c.Int("maxpeers"))
+			// log.TRACE("set maxpeers", c.Int("maxpeers"))
 			*cx.Config.MaxPeers = c.Int("maxpeers")
 		}
 		if c.IsSet("nobanning") {
-			log.TRACE("set nobanning", c.Bool("nobanning"))
+			// log.TRACE("set nobanning", c.Bool("nobanning"))
 			*cx.Config.DisableBanning = c.Bool("nobanning")
 		}
 		if c.IsSet("banduration") {
-			log.TRACE("set banduration", c.Duration("banduration"))
+			// log.TRACE("set banduration", c.Duration("banduration"))
 			*cx.Config.BanDuration = c.Duration("banduration")
 		}
 		if c.IsSet("banthreshold") {
-			log.TRACE("set banthreshold", c.Int("banthreshold"))
+			// log.TRACE("set banthreshold", c.Int("banthreshold"))
 			*cx.Config.BanThreshold = c.Int("banthreshold")
 		}
 		if c.IsSet("whitelist") {
-			log.TRACE("set whitelist", c.StringSlice("whitelist"))
+			// log.TRACE("set whitelist", c.StringSlice("whitelist"))
 			*cx.Config.Whitelists = c.StringSlice("whitelist")
 		}
 		if c.IsSet("rpcconnect") {
-			log.TRACE("set rpcconnect", c.String("rpcconnect"))
+			// log.TRACE("set rpcconnect", c.String("rpcconnect"))
 			*cx.Config.RPCConnect = c.String("rpcconnect")
 		}
 		if c.IsSet("rpclisten") {
-			log.TRACE("set rpclisten", c.StringSlice("rpclisten"))
+			// log.TRACE("set rpclisten", c.StringSlice("rpclisten"))
 			*cx.Config.RPCListeners = c.StringSlice("rpclisten")
 		}
 		if c.IsSet("rpcmaxclients") {
-			log.TRACE("set rpcmaxclients", c.Int("rpcmaxclients"))
+			// log.TRACE("set rpcmaxclients", c.Int("rpcmaxclients"))
 			*cx.Config.RPCMaxClients = c.Int("rpcmaxclients")
 		}
 		if c.IsSet("rpcmaxwebsockets") {
-			log.TRACE("set rpcmaxwebsockets", c.Int("rpcmaxwebsockets"))
+			// log.TRACE("set rpcmaxwebsockets", c.Int("rpcmaxwebsockets"))
 			*cx.Config.RPCMaxWebsockets = c.Int("rpcmaxwebsockets")
 		}
 		if c.IsSet("rpcmaxconcurrentreqs") {
-			log.TRACE("set rpcmaxconcurrentreqs",
-				c.Int("rpcmaxconcurrentreqs"))
+			// log.TRACE("set rpcmaxconcurrentreqs",
+			// 	c.Int("rpcmaxconcurrentreqs"))
 			*cx.Config.RPCMaxConcurrentReqs = c.Int("rpcmaxconcurrentreqs")
 		}
 		if c.IsSet("rpcquirks") {
-			log.TRACE("set rpcquirks", c.Bool("rpcquirks"))
+			// log.TRACE("set rpcquirks", c.Bool("rpcquirks"))
 			*cx.Config.RPCQuirks = c.Bool("rpcquirks")
 		}
 		if c.IsSet("norpc") {
-			log.TRACE("set norpc", c.Bool("norpc"))
+			// log.TRACE("set norpc", c.Bool("norpc"))
 			*cx.Config.DisableRPC = c.Bool("norpc")
 		}
 		if c.IsSet("nodnsseed") {
-			log.TRACE("set nodnsseed", c.Bool("nodnsseed"))
+			// log.TRACE("set nodnsseed", c.Bool("nodnsseed"))
 			*cx.Config.DisableDNSSeed = c.Bool("nodnsseed")
 		}
 		if c.IsSet("externalip") {
-			log.TRACE("set externalip", c.StringSlice("externalip"))
+			// log.TRACE("set externalip", c.StringSlice("externalip"))
 			*cx.Config.ExternalIPs = c.StringSlice("externalip")
 		}
 		if c.IsSet("addcheckpoint") {
-			log.TRACE("set addcheckpoint", c.StringSlice("addcheckpoint"))
+			// log.TRACE("set addcheckpoint", c.StringSlice("addcheckpoint"))
 			*cx.Config.AddCheckpoints = c.StringSlice("addcheckpoint")
 		}
 		if c.IsSet("nocheckpoints") {
-			log.TRACE("set nocheckpoints", c.Bool("nocheckpoints"))
+			// log.TRACE("set nocheckpoints", c.Bool("nocheckpoints"))
 			*cx.Config.DisableCheckpoints = c.Bool("nocheckpoints")
 		}
 		if c.IsSet("dbtype") {
-			log.TRACE("set dbtype", c.String("dbtype"))
+			// log.TRACE("set dbtype", c.String("dbtype"))
 			*cx.Config.DbType = c.String("dbtype")
 		}
 		if c.IsSet("profile") {
-			log.TRACE("set profile", c.String("profile"))
+			// log.TRACE("set profile", c.String("profile"))
 			*cx.Config.Profile = c.String("profile")
 		}
 		if c.IsSet("cpuprofile") {
-			log.TRACE("set cpuprofile", c.String("cpuprofile"))
+			// log.TRACE("set cpuprofile", c.String("cpuprofile"))
 			*cx.Config.CPUProfile = c.String("cpuprofile")
 		}
 		if c.IsSet("upnp") {
-			log.TRACE("set upnp", c.Bool("upnp"))
+			// log.TRACE("set upnp", c.Bool("upnp"))
 			*cx.Config.Upnp = c.Bool("upnp")
 		}
 		if c.IsSet("minrelaytxfee") {
-			log.TRACE("set minrelaytxfee", c.Float64("minrelaytxfee"))
+			// log.TRACE("set minrelaytxfee", c.Float64("minrelaytxfee"))
 			*cx.Config.MinRelayTxFee = c.Float64("minrelaytxfee")
 		}
 		if c.IsSet("limitfreerelay") {
-			log.TRACE("set limitfreerelay", c.Float64("limitfreerelay"))
+			// log.TRACE("set limitfreerelay", c.Float64("limitfreerelay"))
 			*cx.Config.FreeTxRelayLimit = c.Float64("limitfreerelay")
 		}
 		if c.IsSet("norelaypriority") {
-			log.TRACE("set norelaypriority", c.Bool("norelaypriority"))
+			// log.TRACE("set norelaypriority", c.Bool("norelaypriority"))
 			*cx.Config.NoRelayPriority = c.Bool("norelaypriority")
 		}
 		if c.IsSet("trickleinterval") {
-			log.TRACE("set trickleinterval", c.Duration("trickleinterval"))
+			// log.TRACE("set trickleinterval", c.Duration("trickleinterval"))
 			*cx.Config.TrickleInterval = c.Duration("trickleinterval")
 		}
 		if c.IsSet("maxorphantx") {
-			log.TRACE("set maxorphantx", c.Int("maxorphantx"))
+			// log.TRACE("set maxorphantx", c.Int("maxorphantx"))
 			*cx.Config.MaxOrphanTxs = c.Int("maxorphantx")
 		}
 		if c.IsSet("algo") {
-			log.TRACE("set algo", c.String("algo"))
+			// log.TRACE("set algo", c.String("algo"))
 			*cx.Config.Algo = c.String("algo")
 		}
 		if c.IsSet("generate") {
-			log.TRACE("set generate", c.Bool("generate"))
+			// log.TRACE("set generate", c.Bool("generate"))
 			*cx.Config.Generate = c.Bool("generate")
 		}
 		if c.IsSet("genthreads") {
-			log.TRACE("set genthreads", c.Int("genthreads"))
+			// log.TRACE("set genthreads", c.Int("genthreads"))
 			*cx.Config.GenThreads = c.Int("genthreads")
 		}
 		if c.IsSet("nocontroller") {
-			log.TRACE("set nocontroller",
-				c.String("nocontroller"))
+			// log.TRACE("set nocontroller",
+			// 	c.String("nocontroller"))
 			*cx.Config.NoController = c.Bool("nocontroller")
 		}
 		if c.IsSet("miningaddr") {
-			log.TRACE("set miningaddr", c.StringSlice("miningaddr"))
+			// log.TRACE("set miningaddr", c.StringSlice("miningaddr"))
 			*cx.Config.MiningAddrs = c.StringSlice("miningaddr")
 		}
 		if c.IsSet("minerpass") {
-			log.TRACE("set minerpass", c.String("minerpass"))
+			// log.TRACE("set minerpass", c.String("minerpass"))
 			*cx.Config.MinerPass = c.String("minerpass")
 		}
 		if c.IsSet("group") {
-			log.TRACE("set group", c.String("group"))
+			// log.TRACE("set group", c.String("group"))
 			*cx.Config.Group = c.String("group")
 		}
 		if c.IsSet("nodiscovery") {
-			log.TRACE("set nodiscovery",
-				c.String("nodiscovery"))
+			// log.TRACE("set nodiscovery",
+			// 	c.String("nodiscovery"))
 			*cx.Config.NoDiscovery = c.Bool("nodiscovery")
 		}
 		if c.IsSet("blockminsize") {
-			log.TRACE("set blockminsize", c.Int("blockminsize"))
+			// log.TRACE("set blockminsize", c.Int("blockminsize"))
 			*cx.Config.BlockMinSize = c.Int("blockminsize")
 		}
 		if c.IsSet("blockmaxsize") {
-			log.TRACE("set blockmaxsize", c.Int("blockmaxsize"))
+			// log.TRACE("set blockmaxsize", c.Int("blockmaxsize"))
 			*cx.Config.BlockMaxSize = c.Int("blockmaxsize")
 		}
 		if c.IsSet("blockminweight") {
-			log.TRACE("set blockminweight", c.Int("blockminweight"))
+			// log.TRACE("set blockminweight", c.Int("blockminweight"))
 			*cx.Config.BlockMinWeight = c.Int("blockminweight")
 		}
 		if c.IsSet("blockmaxweight") {
-			log.TRACE("set blockmaxweight", c.Int("blockmaxweight"))
+			// log.TRACE("set blockmaxweight", c.Int("blockmaxweight"))
 			*cx.Config.BlockMaxWeight = c.Int("blockmaxweight")
 		}
 		if c.IsSet("blockprioritysize") {
-			log.TRACE("set blockprioritysize", c.Int("blockprioritysize"))
+			// log.TRACE("set blockprioritysize", c.Int("blockprioritysize"))
 			*cx.Config.BlockPrioritySize = c.Int("blockprioritysize")
 		}
 		if c.IsSet("uacomment") {
-			log.TRACE("set uacomment", c.StringSlice("uacomment"))
+			// log.TRACE("set uacomment", c.StringSlice("uacomment"))
 			*cx.Config.UserAgentComments = c.StringSlice("uacomment")
 		}
 		if c.IsSet("nopeerbloomfilters") {
-			log.TRACE("set nopeerbloomfilters", c.Bool("nopeerbloomfilters"))
+			// log.TRACE("set nopeerbloomfilters", c.Bool("nopeerbloomfilters"))
 			*cx.Config.NoPeerBloomFilters = c.Bool("nopeerbloomfilters")
 		}
 		if c.IsSet("nocfilters") {
-			log.TRACE("set nocfilters", c.Bool("nocfilters"))
+			// log.TRACE("set nocfilters", c.Bool("nocfilters"))
 			*cx.Config.NoCFilters = c.Bool("nocfilters")
 		}
 		if c.IsSet("sigcachemaxsize") {
-			log.TRACE("set sigcachemaxsize", c.Int("sigcachemaxsize"))
+			// log.TRACE("set sigcachemaxsize", c.Int("sigcachemaxsize"))
 			*cx.Config.SigCacheMaxSize = c.Int("sigcachemaxsize")
 		}
 		if c.IsSet("blocksonly") {
-			log.TRACE("set blocksonly", c.Bool("blocksonly"))
+			// log.TRACE("set blocksonly", c.Bool("blocksonly"))
 			*cx.Config.BlocksOnly = c.Bool("blocksonly")
 		}
 		if c.IsSet("notxindex") {
-			log.TRACE("set notxindex", c.Bool("notxindex"))
+			// log.TRACE("set notxindex", c.Bool("notxindex"))
 			*cx.Config.TxIndex = c.Bool("notxindex")
 		}
 		if c.IsSet("noaddrindex") {
-			log.TRACE("set noaddrindex", c.Bool("noaddrindex"))
+			// log.TRACE("set noaddrindex", c.Bool("noaddrindex"))
 			*cx.Config.AddrIndex = c.Bool("noaddrindex")
 		}
 		if c.IsSet("relaynonstd") {
-			log.TRACE("set relaynonstd", c.Bool("relaynonstd"))
+			// log.TRACE("set relaynonstd", c.Bool("relaynonstd"))
 			*cx.Config.RelayNonStd = c.Bool("relaynonstd")
 		}
 		if c.IsSet("rejectnonstd") {
-			log.TRACE("set rejectnonstd", c.Bool("rejectnonstd"))
+			// log.TRACE("set rejectnonstd", c.Bool("rejectnonstd"))
 			*cx.Config.RejectNonStd = c.Bool("rejectnonstd")
 		}
 		if c.IsSet("noinitialload") {
-			log.TRACE("set noinitialload", c.Bool("noinitialload"))
+			// log.TRACE("set noinitialload", c.Bool("noinitialload"))
 			*cx.Config.NoInitialLoad = c.Bool("noinitialload")
 		}
 		if c.IsSet("walletconnect") {
-			log.TRACE("set walletconnect", c.Bool("walletconnect"))
+			// log.TRACE("set walletconnect", c.Bool("walletconnect"))
 			*cx.Config.Wallet = c.Bool("walletconnect")
 		}
 		if c.IsSet("walletserver") {
-			log.TRACE("set walletserver", c.String("walletserver"))
+			// log.TRACE("set walletserver", c.String("walletserver"))
 			*cx.Config.WalletServer = c.String("walletserver")
 		}
 		if c.IsSet("walletpass") {
-			log.TRACE("set walletpass", c.String("walletpass"))
+			// log.TRACE("set walletpass", c.String("walletpass"))
 			*cx.Config.WalletPass = c.String("walletpass")
 		}
 		if c.IsSet("onetimetlskey") {
-			log.TRACE("set onetimetlskey", c.Bool("onetimetlskey"))
+			// log.TRACE("set onetimetlskey", c.Bool("onetimetlskey"))
 			*cx.Config.OneTimeTLSKey = c.Bool("onetimetlskey")
 		}
 		if c.IsSet("walletrpclisten") {
-			log.TRACE("set walletrpclisten", c.StringSlice("walletrpclisten"))
+			// log.TRACE("set walletrpclisten", c.StringSlice("walletrpclisten"))
 			*cx.Config.WalletRPCListeners = c.StringSlice("walletrpclisten")
 		}
 		if c.IsSet("walletrpcmaxclients") {
-			log.TRACE("set walletrpcmaxclients", c.Int("walletrpcmaxclients"))
+			// log.TRACE("set walletrpcmaxclients", c.Int("walletrpcmaxclients"))
 			*cx.Config.WalletRPCMaxClients = c.Int("walletrpcmaxclients")
 		}
 		if c.IsSet("walletrpcmaxwebsockets") {
-			log.TRACE("set walletrpcmaxwebsockets",
-				c.Int("walletrpcmaxwebsockets"))
+			// log.TRACE("set walletrpcmaxwebsockets",
+			// 	c.Int("walletrpcmaxwebsockets"))
 			*cx.Config.WalletRPCMaxWebsockets = c.Int("walletrpcmaxwebsockets")
 		}
 		if c.IsSet("experimentalrpclisten") {
-			log.TRACE("set experimentalrpclisten",
-				c.StringSlice("experimentalrpclisten"))
+			// log.TRACE("set experimentalrpclisten",
+			// 	c.StringSlice("experimentalrpclisten"))
 			*cx.Config.ExperimentalRPCListeners = c.StringSlice("experimentalrpclisten")
 		}
 		if c.IsSet("nodeoff") {
-			log.TRACE("set nodeoff", c.Bool("nodeoff"))
+			// log.TRACE("set nodeoff", c.Bool("nodeoff"))
 			*cx.Config.NodeOff = c.Bool("nodeoff")
 		}
 		if c.IsSet("testnodeoff") {
-			log.TRACE("set testnodeoff", c.Bool("testnodeoff"))
+			// log.TRACE("set testnodeoff", c.Bool("testnodeoff"))
 			*cx.Config.TestNodeOff = c.Bool("testnodeoff")
 		}
 		if c.IsSet("walletoff") {
-			log.TRACE("set walletoff", c.Bool("walletoff"))
+			// log.TRACE("set walletoff", c.Bool("walletoff"))
 			*cx.Config.WalletOff = c.Bool("walletoff")
 		}
 		if c.IsSet("save") {
-			log.TRACE("set save", c.Bool("save"))
+			// log.TRACE("set save", c.Bool("save"))
 			cx.StateCfg.Save = true
 		}
 		return nil

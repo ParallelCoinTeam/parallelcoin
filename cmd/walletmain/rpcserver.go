@@ -168,7 +168,7 @@ func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 func startRPCServers(config *pod.Config, stateCfg *state.Config,
 	activeNet *netparams.Params, walletLoader *wallet.Loader) (*grpc.Server,
 	*legacy.Server, error) {
-	log.TRACE("startRPCServers")
+	// log.TRACE("startRPCServers")
 	var (
 		server       *grpc.Server
 		legacyServer *legacy.Server
@@ -217,7 +217,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config,
 				go func() {
 					log.INFO("experimental RPC server listening on", listener)
 					err = server.Serve(lis)
-					log.TRACE("finished serving experimental RPC:", err)
+					// log.TRACE("finished serving experimental RPC:", err)
 				}()
 			}
 		}

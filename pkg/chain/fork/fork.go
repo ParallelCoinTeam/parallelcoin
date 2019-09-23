@@ -6,8 +6,6 @@ import (
 	"math/big"
 	"math/rand"
 	"time"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/log"
 )
 
 // AlgoParams are the identifying block version number and their minimum target bits
@@ -175,7 +173,7 @@ func GetAlgoVer(name string, height int32) (version int32) {
 	if name == "random" {
 		rng := rand.New(rand.NewSource(time.Now().Unix()))
 		rn := rng.Intn(len(List[hf].AlgoVers)) + 5
-		log.TRACE("random!", rn)
+		// log.TRACE("random!", rn)
 		randomalgover := int32(rn)
 		switch hf {
 		case 0:
@@ -231,16 +229,16 @@ func GetCurrent(height int32) (curr int) {
 
 // GetMinBits returns the minimum diff bits based on height and testnet
 func GetMinBits(algoname string, height int32) (mb uint32) {
-	log.TRACE("GetMinBits", algoname)
+	// log.TRACE("GetMinBits", algoname)
 	curr := GetCurrent(height)
 	mb = List[curr].Algos[algoname].MinBits
-	log.TRACE("minbits", mb)
+	// log.TRACE("minbits", mb)
 	return
 }
 
 // GetMinDiff returns the minimum difficulty in uint256 form
 func GetMinDiff(algoname string, height int32) (md *big.Int) {
-	log.TRACE("GetMinDiff", algoname)
+	// log.TRACE("GetMinDiff", algoname)
 	return CompactToBig(GetMinBits(algoname, height))
 }
 

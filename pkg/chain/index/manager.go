@@ -8,7 +8,6 @@ import (
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
 	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 var (
@@ -334,16 +333,16 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	err = m.db.View(func(dbTx database.Tx) error {
 		for i, indexer := range m.enabledIndexes {
 			idxKey := indexer.Key()
-			hash, height, err := dbFetchIndexerTip(dbTx, idxKey)
+			_, height, err := dbFetchIndexerTip(dbTx, idxKey)
 			if err != nil {
 				return err
 			}
-			log.TRACEF(
-				"current %s tip (height %d, hash %v)",
-				indexer.Name(),
-				height,
-				hash,
-			)
+			// log.TRACEF(
+			// 	"current %s tip (height %d, hash %v)",
+			// 	indexer.Name(),
+			// 	height,
+			// 	hash,
+			// )
 			indexerHeights[i] = height
 			if height < lowestHeight {
 				lowestHeight = height
@@ -360,7 +359,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	}
 	// Create a progress logger for the indexing process below.
 	progressLogger := newBlockProgressLogger("Indexed",
-		cl.NewSubSystem("idx", "info"))
+		log.L)
 	// At this point,
 	// one or more indexes are behind the current best chain tip and need to
 	// be caught up,

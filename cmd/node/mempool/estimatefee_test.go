@@ -8,8 +8,8 @@ import (
 	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // estimateFeeTester interacts with the FeeEstimator to keep track of its
@@ -79,7 +79,7 @@ func (eft *estimateFeeTester) newBlock(txs []*wire.MsgTx) {
 	eft.last = &lastBlock{block.Hash(), eft.last}
 	e := eft.ef.RegisterBlock(block)
 	if e != nil {
-		log <- cl.Warn{"failed to register block:", e}
+		log.WARN("failed to register block:", e)
 	}
 }
 
@@ -182,7 +182,7 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf( "Estimate fee error: expected %f when estimator is" +
+			t.Errorf("Estimate fee error: expected %f when estimator is"+
 				" empty; got %f", expected, estimated)
 		}
 	}
@@ -194,7 +194,7 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf( "Estimate fee error: expected %f when estimator has one" +
+			t.Errorf("Estimate fee error: expected %f when estimator has one"+
 				" tx in mempool; got %f", expected, estimated)
 		}
 	}
@@ -205,7 +205,7 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf( "Estimate fee error: expected %f before any blocks have" +
+			t.Errorf("Estimate fee error: expected %f before any blocks have"+
 				" been registered; got %f", expected, estimated)
 		}
 	}
@@ -215,7 +215,7 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf( "Estimate fee error: expected %f when one tx is binned" +
+			t.Errorf("Estimate fee error: expected %f when one tx is binned"+
 				"; got %f", expected, estimated)
 		}
 	}
@@ -226,7 +226,7 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf( "Estimate fee error: expected %f after rolling back" +
+			t.Errorf("Estimate fee error: expected %f after rolling back"+
 				" block; got %f", expected, estimated)
 		}
 	}
@@ -239,7 +239,7 @@ func TestEstimateFee(t *testing.T) {
 	for i := uint32(1); i <= estimateFeeDepth; i++ {
 		estimated, _ := ef.EstimateFee(i)
 		if estimated != expected {
-			t.Errorf( "Estimate fee error: expected %f when one tx is binned" +
+			t.Errorf("Estimate fee error: expected %f when one tx is binned"+
 				"; got %f", expected, estimated)
 		}
 	}
@@ -266,7 +266,7 @@ func TestEstimateFee(t *testing.T) {
 			expected = expectedFeePerKilobyte(tx)
 		}
 		if estimated != expected {
-			t.Errorf( "Estimate fee error: expected %f on round %d; got %f",
+			t.Errorf("Estimate fee error: expected %f on round %d; got %f",
 				expected, i, estimated)
 		}
 	}
@@ -288,7 +288,7 @@ func TestEstimateFee(t *testing.T) {
 			expected = expectedFeePerKilobyte(txA)
 		}
 		if estimated != expected {
-			t.Errorf( "Estimate fee error: expected %f on round %d; got %f",
+			t.Errorf("Estimate fee error: expected %f on round %d; got %f",
 				expected, i, estimated)
 		}
 	}

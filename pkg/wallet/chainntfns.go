@@ -7,7 +7,6 @@ import (
 	tm "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	wm "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
@@ -16,7 +15,7 @@ import (
 func (w *Wallet) handleChainNotifications() {
 	defer w.wg.Done()
 	if w == nil {
-		panic("w should not be nil" + cl.Ine())
+		panic("w should not be nil")
 	}
 	chainClient, err := w.requireChainClient()
 	if err != nil {

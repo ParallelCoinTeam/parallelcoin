@@ -44,7 +44,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/pod"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 )
 
@@ -899,10 +898,10 @@ func (s *Server) Start() {
 			log.INFO("chain RPC server listening on ", listener.Addr())
 			err := httpServer.Serve(listener)
 			if err != nil {
-				log.TRACE(err)
+				// log.TRACE(err)
 
 			}
-			log.TRACE("chain RPC listener done for", listener.Addr())
+			// log.TRACE("chain RPC listener done for", listener.Addr())
 
 			s.WG.Done()
 		}(listener)
@@ -926,7 +925,7 @@ func (s *Server) Stop() error {
 
 		return nil
 	}
-	log.TRACE("RPC server shutting down")
+	// log.TRACE("RPC server shutting down")
 
 	for _, listener := range s.Cfg.Listeners {
 		err := listener.Close()
@@ -3294,10 +3293,10 @@ func HandleGetNetworkHashPS(s *Server, cmd interface{},
 	if startHeight < 0 {
 		startHeight = 0
 	}
-	log.TRACEF(
-		"calculating network hashes per second from %d to %d",
-		startHeight,
-		endHeight)
+	// log.TRACEF(
+	// 	"calculating network hashes per second from %d to %d",
+	// 	startHeight,
+	// 	endHeight)
 
 	// Find the min and max block timestamps as well as calculate the total
 	// amount of work that happened between the start and end blocks.
@@ -4417,7 +4416,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 				"verify is unable to fetch block at height %d: %v",
 				height,
 				err,
-				cl.Ine(),
+
 			)
 
 			return err

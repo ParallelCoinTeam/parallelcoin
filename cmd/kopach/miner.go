@@ -5,9 +5,7 @@ package kopach
 import (
 	"context"
 	"crypto/sha1"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 	"math/rand"
 	"net"
@@ -32,7 +30,6 @@ import (
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/pod"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 const (
@@ -98,7 +95,7 @@ type selection struct {
 
 // StartController starts up a kopach miner controller
 func StartController(c *Controller) {
-	log <- cl.Warn{"starting kopach miner controller"}
+	log.WARN("starting kopach miner controller")
 	address := *c.Cfg.Controller
 	password := *c.Cfg.MinerPass
 	if address == "" {
@@ -107,7 +104,7 @@ func StartController(c *Controller) {
 	s := NewKCPService(address, password)
 	s.DisableHTTPGateway = true
 	initialTemplates := Block{}
-	log <- cl.Warn{"creating initial blocks"}
+	log.WARN("creating initial blocks")
 	for i := range fork.List[fork.GetCurrent(c.BC.BestSnapshot().Height+1)].Algos {
 		// Choose a payment address at random.
 		//
@@ -119,27 +116,27 @@ func StartController(c *Controller) {
 	}
 	c.Blocks.Store(initialTemplates)
 	if err := s.RegisterName("Controller", c, ""); err != nil {
-		log <- cl.Error{"failed to register controller ", err}
+		log.ERROR("failed to register controller ", err)
 	}
 	c.BC.Subscribe(func(ntfn *blockchain.Notification) {
-		INFO("kopach controller new block"}
+		INFO("kopach controller new block")
 		if ntfn.Type == blockchain.NTBlockConnected {
 			if block, ok := ntfn.Data.(*util.Block); !ok {
-				log <- cl.Warn{"chain connected notification is not a block"}
+				log.WARN("chain connected notification is not a block")
 			} else {
-				log <- cl.Warn{"new block height ", block.Height()}
+				log.WARN("new block height ", block.Height())
 				tmpl := Block{}
 				for i := range fork.List[fork.GetCurrent(block.Height()+1)].Algos {
 					// Choose a payment address at random.
 					rand.Seed(time.Now().UnixNano())
 					payToAddr := c.StateCfg.ActiveMiningAddrs[rand.Intn(len(*c.Cfg.MiningAddrs))]
 					if bt, err := c.BlockTemplateGenerator.NewBlockTemplate(payToAddr, i); err == nil {
-						log <- cl.Trace{"created template for ", i}
+						log.TRACE("created template for ", i)
 						tmpl.Templates = append(tmpl.Templates, *bt)
 					}
 				}
 				// atomically store the block template set for first initial ping response
-				log <- cl.Trace{"storing templates in atomic"}
+				log.TRACE("storing templates in atomic")
 				c.Blocks.Store(tmpl)
 				// prune current subscribers list
 				var delKeys []string
@@ -151,7 +148,7 @@ func StartController(c *Controller) {
 					return true
 				})
 				// delete the stale keys
-				log <- cl.Trace{"deleting timed out subscribers ", len(delKeys)}
+				log.TRACE("deleting timed out subscribers ", len(delKeys))
 				for _, x := range delKeys {
 					c.Subscribers.Delete(x)
 				}
@@ -164,17 +161,17 @@ func StartController(c *Controller) {
 					})
 					for i, x := range sendXC {
 						go func() {
-							log <- cl.Warn{"sending to subscriber ", i}
+							log.WARN("sending to subscriber ", i)
 							done := make(chan *client.Call, 2)
 							pong := &Pong{}
 							_, err := x.XClient.Go(context.Background(), "Block", &tmpl, &pong, done)
 							if err != nil {
-								log <- cl.Error{"error calling Worker Block ", err}
-							}
-							select {
-							case <-c.Quit:
-							case <-time.After(time.Millisecond * 100):
-							case <-done:
+								log.ERROR("error calling Worker Block ", err)
+								select {
+								case <-c.Quit:
+								case <-time.After(time.Millisecond * 100):
+								case <-done:
+								}
 							}
 						}()
 					}
@@ -184,9 +181,9 @@ func StartController(c *Controller) {
 	})
 	// server goroutine
 	go func() {
-		log <- cl.Warn{"serving Controller"}
+		log.WARN("serving Controller")
 		if err := s.Serve("kcp", address); err != nil {
-			log <- cl.Debug{"error serving Controller ", err}
+			log.DEBUG("error serving Controller ", err)
 		}
 	}()
 }
@@ -209,23 +206,23 @@ func (c *Controller) Ping(ctx context.Context, args *Ping, reply *Pong) error {
 	block := c.Blocks.Load()
 	_, err := xc.Go(context.Background(), "Block", &block, &pong, done)
 	if err != nil {
-		log <- cl.Error{"error calling Worker Block ", err}
+		log.ERROR("error calling Worker Block ", err)
 		c.Subscribers.Delete(args.Sender)
 	}
 	select {
 	// case <-time.After(time.Millisecond * 100):
-	// 	log <- cl.Warn{"timeout"}
+	// 	log.WARN("timeout"}
 	case <-done:
-		log <- cl.Warn{"successfully sent block to worker"}
+		log.WARN("successfully sent block to worker")
 	}
-	log <- cl.Trace{"received ping ", args.Sender}
+	log.TRACE("received ping ", args.Sender)
 	*reply = Pong{Time: time.Now()}
 	return nil
 }
 
 func (c *Controller) Submit(ctx context.Context, args *wire.MsgBlock, reply *string) error {
 	fmt.Println(*args)
-	log <- cl.Warn{"submitting block"}
+	log.WARN("submitting block")
 	isOrphan, err := c.ProcessBlock(util.NewBlock(args), blockchain.BFNone)
 	if err != nil {
 		// Anything other than a rule violation is an unexpected error, so log
@@ -266,20 +263,20 @@ func NewWorker(controller, password, listener, dataDir string, bias, threads int
 	c := NewKCPConnection("Controller", controller, password)
 	w := &Worker{XClient: c, bias: bias, threads: threads, quit: quit}
 	conf := filepath.Join(dataDir, "bench.json")
-	log <- cl.Warn{"conf ", conf}
+	log.WARN("conf ", conf)
 	if !FileExists(conf) {
-		log <- cl.Warn{"run benchmark"}
+		log.WARN("run benchmark")
 		Benchmark(conf)
 	}
 	// load benchmark
 	//
 	w.benches = benches{}
 	if b, e := ioutil.ReadFile(conf); e != nil {
-		log <- cl.Error{"error reading benches ", e}
+		log.ERROR("error reading benches ", e)
 	} else {
 		e = json.Unmarshal(b, &w.benches)
 		if e != nil {
-			log <- cl.Error{"error unmarshaling ", e}
+			log.ERROR("error unmarshaling ", e)
 		}
 	}
 	var counter atomic.Value
@@ -290,7 +287,7 @@ func NewWorker(controller, password, listener, dataDir string, bias, threads int
 		for {
 			if counter.Load().(int) > 5 {
 				if err := c.Close(); err != nil {
-					log <- cl.Error{"error closing XClient ", err}
+					log.ERROR("error closing XClient ", err)
 				}
 				c = NewKCPConnection("Controller", controller, password)
 			}
@@ -299,7 +296,7 @@ func NewWorker(controller, password, listener, dataDir string, bias, threads int
 			done := make(chan *client.Call, 2)
 			_, err := c.Go(context.Background(), "Ping", &tn, &tnp, done)
 			if err != nil {
-				log <- cl.Error{"error calling Controller Ping ", err}
+				log.ERROR("error calling Controller Ping ", err)
 			}
 			select {
 			case <-quit:
@@ -308,24 +305,24 @@ func NewWorker(controller, password, listener, dataDir string, bias, threads int
 				counter.Store(counter.Load().(int) + 1)
 			case p := <-done:
 				counter.Store(0)
-				log <- cl.Trace{"pong ", time.Now().Sub(p.Reply.(*Pong).Time)}
+				log.TRACE("pong ", time.Now().Sub(p.Reply.(*Pong).Time))
 				time.Sleep(time.Second)
 			}
 		}
 		if err := c.Close(); err != nil {
-			log <- cl.Error{"error closing connection ", err}
+			log.ERROR("error closing connection ", err)
 		}
 	}()
 	// start up the worker rpc server
 	//
 	s := NewKCPService(listener, password)
 	if err := s.RegisterName("Worker", w, ""); err != nil {
-		log <- cl.Error{"failed to register controller ", err}
+		log.ERROR("failed to register controller ", err)
 	}
 	go func() {
-		log <- cl.Warn{"serving Controller"}
+		log.WARN("serving Controller")
 		if err := s.Serve("kcp", listener); err != nil {
-			log <- cl.Debug{"error serving Controller ", err}
+			log.DEBUG("error serving Controller ", err)
 		}
 	}()
 	<-quit
@@ -358,8 +355,9 @@ func (w *Worker) Block(ctx context.Context, args *Block, reply *Pong) error {
 	for i := range se {
 		coeff := big.NewInt(1).Div(se[i].ops, se[0].ops)
 		se[i].coeff = coeff.Uint64()
-		log <- cl.Debug{se[i].algo, " ", se[i].coeff}
+		log.DEBUG(se[i].algo, " ", se[i].coeff)
 	}
+
 	var out selections
 	switch {
 	case w.bias < 0:
@@ -370,55 +368,57 @@ func (w *Worker) Block(ctx context.Context, args *Block, reply *Pong) error {
 		out = se
 	}
 	choice := out[rand.Intn(len(out))]
-	log <- cl.Warn{"selection ", choice.algo, " ", choice.coeff, " threads ", w.threads}
+	log.WARN("selection ", choice.algo, " ", choice.coeff, " threads ",
+		w.threads)
 	// solve the block!
 	for i := 0; i < w.threads; i++ {
 		go func() {
 		outest:
 			for {
-				log <- cl.Warn{"solving block thread ", i}
-				sb := choice.block.Block
-				targetDifficulty := fork.CompactToBig(sb.Header.Bits)
-				en, _ := wire.RandomUint64()
-				if err := UpdateExtraNonce(sb, height, en); err != nil {
-					log <- cl.Error{"error updating extra nonce ", err}
-				}
-				rn, _ := wire.RandomUint64()
-				rNonce := uint32(rn)
-				mn := uint32(1 << 16) // typically the timestamp will update before one core exhausts this
-				for i := rNonce; i <= rNonce+mn; i++ {
-					sb.Header.Nonce = i
-					hash := sb.Header.BlockHashWithAlgos(height)
-					bigHash := blockchain.HashToBig(&hash)
-					if bigHash.Cmp(targetDifficulty) <= 0 {
-						// submit to controller
-						//
-						var result string
-						done := make(chan *client.Call, 2)
-						// solved := util.NewBlock(sb)
-						log <- cl.Error{"yay a block! ", sb.Header.BlockHashWithAlgos(height)}
-						submission := *sb
-						_, err := w.XClient.Go(context.Background(), "Submit", &submission, &result, done)
-						if err != nil {
-							log <- cl.Error{"error calling Submit ", err}
-						}
-						select {
-						case <-w.quit:
-							break outest
-						case p := <-done:
-							log <- cl.Warn{"result of submit: ", *p.Reply.(*string)}
-						}
-					}
-					select {
-					case <-w.newWork:
-						break outest
-					default:
-					}
-				}
-			}
-		}()
+				log.WARN("solving block thread ", i)
+			sb := choice.block.Block
+			targetDifficulty := fork.CompactToBig(sb.Header.Bits)
+			en, _ := wire.RandomUint64()
+			if err := UpdateExtraNonce(sb, height, en); err != nil {
+				log.ERROR("error updating extra nonce ", err)
+		}
+		rn, _ := wire.RandomUint64()
+		rNonce := uint32(rn)
+		mn := uint32(1 << 16) // typically the timestamp will update before one core exhausts this
+		for i := rNonce; i <= rNonce+mn; i++ {
+			sb.Header.Nonce = i
+			hash := sb.Header.BlockHashWithAlgos(height)
+			bigHash := blockchain.HashToBig(&hash)
+			if bigHash.Cmp(targetDifficulty) <= 0 {
+				// submit to controller
+				//
+				var result string
+				done := make(chan *client.Call, 2)
+				// solved := util.NewBlock(sb)
+				log.ERROR("yay a block! ", sb.Header.BlockHashWithAlgos(
+					height))
+			submission := *sb
+			_, err := w.XClient.Go(context.Background(), "Submit", &submission, &result, done)
+			if err != nil {
+				log.ERROR("error calling Submit ", err)
+		}
+		select {
+		case <-w.quit:
+			break outest
+		case p := <-done:
+			log.WARN("result of submit: ", *p.Reply.(*string))
 	}
-	return nil
+}
+select {
+case <-w.newWork:
+break outest
+default:
+}
+}
+}
+}()
+}
+return nil
 }
 
 // NewKCPService creates a new KCP service with an encryption salt/password

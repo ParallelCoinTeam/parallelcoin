@@ -21,10 +21,9 @@ import (
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
 	"github.com/parallelcointeam/parallelcoin/pkg/log"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/btcjson"
+	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
 	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
@@ -106,17 +105,17 @@ type Wallet struct {
 
 // Start starts the goroutines necessary to manage a wallet.
 func (w *Wallet) Start() {
-	log.TRACE("starting wallet")
+	// log.TRACE("starting wallet")
 	w.quitMu.Lock()
 	select {
 	case <-w.quit:
-		log.TRACE("waiting for wallet shutdown")
+		// log.TRACE("waiting for wallet shutdown")
 		// Restart the wallet goroutines after shutdown finishes.
 		w.WaitForShutdown()
 		w.quit = make(chan struct{})
 	default:
 		if w.started {
-		// Ignore when the wallet is still running.
+			// Ignore when the wallet is still running.
 			log.INFO("wallet already started")
 			w.quitMu.Unlock()
 			return
@@ -1604,7 +1603,7 @@ func (w *Wallet) NextAccount(scope waddrmgr.KeyScope, name string) (uint32, erro
 	})
 	if err != nil {
 		log.ERROR(
-			"cannot fetch new account properties for notification after" +
+			"cannot fetch new account properties for notification after"+
 				" account creation:", err)
 	}
 	w.NtfnServer.notifyAccountProperties(props)
@@ -2611,7 +2610,7 @@ func (w *Wallet) resendUnminedTxs() {
 				continue
 			}
 			log.INFOC(func() string {
-				return "removed conflicting tx:" + spew.Sdump(tt) + " " + cl.Ine()
+				return "removed conflicting tx:" + spew.Sdump(tt) + " "
 			})
 			continue
 		}
@@ -3189,7 +3188,7 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 	if err != nil {
 		return nil, err
 	}
-	log.TRACE("opened wallet")// TODO: log balance? last sync height?
+	// log.TRACE("opened wallet")// TODO: log balance? last sync height?
 	w := &Wallet{
 		publicPassphrase:    pubPass,
 		db:                  db,

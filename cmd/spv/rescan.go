@@ -413,10 +413,10 @@ rescanLoop:
 				// current. This is our way of doing a manual
 				// rescan.
 				if rewound {
-					log.TRACEF(
-						"rewound to block %d (%s), no longer current",
-						curStamp.Height, curStamp.Hash,
-					)
+					// log.TRACEF(
+					// 	"rewound to block %d (%s), no longer current",
+					// 	curStamp.Height, curStamp.Hash,
+					// )
 					current = false
 					s.unsubscribeBlockMsgs(subscription)
 					subscription = nil
@@ -467,10 +467,10 @@ rescanLoop:
 					curStamp.Hash = header.BlockHash()
 					curStamp.Height++
 				}
-				log.TRACEF(
-					"rescan got block %d (%s)",
-					curStamp.Height, curStamp.Hash,
-				)
+				// log.TRACEF(
+				// 	"rescan got block %d (%s)",
+				// 	curStamp.Height, curStamp.Hash,
+				// )
 				// We're only scanning if the header is beyond the horizon of
 				// our start time.
 				if !scanning {

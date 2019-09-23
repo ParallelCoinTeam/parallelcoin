@@ -9,8 +9,8 @@ import (
 
 	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
 	"github.com/parallelcointeam/parallelcoin/pkg/kcpx"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // Subscriber is the information required to track a subscriber
@@ -125,13 +125,12 @@ func (c *Controller) SendBlock(b []mining.BlockTemplate) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		err := subs[i].Call(ctx, "Block", &b, &receivedTime)
 		if err != nil {
-			log <- cl.Error{"error sending block ", err}
+			log.ERROR("error sending block ", err)
 			continue
 		}
 		go func() {
 			<-ctx.Done()
-			log <- cl.Warn{"worker ", i, " reported receiving ", receivedTime,
-				cl.Ine()}
+			log.WARN("worker ", i, " reported receiving ", receivedTime)
 			cancel()
 		}()
 	}

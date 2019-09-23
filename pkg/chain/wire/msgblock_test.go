@@ -1,20 +1,19 @@
 package wire
 
 import (
-   "bytes"
-   "io"
-   "reflect"
-   "testing"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"io"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
 )
 
 // TestBlock tests the MsgBlock API.
-func TestBlock(	t *testing.T) {
+func TestBlock(t *testing.T) {
 	pver := ProtocolVersion
 	// Block 1 header.
 	prevHash := &blockOne.Header.PrevBlock
@@ -46,7 +45,7 @@ func TestBlock(	t *testing.T) {
 	tx := blockOne.Transactions[0].Copy()
 	err := msg.AddTransaction(tx)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	if !reflect.DeepEqual(msg.Transactions, blockOne.Transactions) {
 		t.Errorf("AddTransaction: wrong transactions - got %v, want %v",
@@ -62,7 +61,7 @@ func TestBlock(	t *testing.T) {
 }
 
 // TestBlockTxHashes tests the ability to generate a slice of all transaction hashes from a block accurately.
-func TestBlockTxHashes(	t *testing.T) {
+func TestBlockTxHashes(t *testing.T) {
 	// Block 1, transaction 1 hash.
 	hashStr := "0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098"
 	wantHash, err := chainhash.NewHashFromStr(hashStr)
@@ -82,7 +81,7 @@ func TestBlockTxHashes(	t *testing.T) {
 }
 
 // TestBlockHash tests the ability to generate the hash of a block accurately.
-func TestBlockHash(	t *testing.T) {
+func TestBlockHash(t *testing.T) {
 	// Block 1 hash.
 	hashStr := "839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048"
 	wantHash, err := chainhash.NewHashFromStr(hashStr)
@@ -98,7 +97,7 @@ func TestBlockHash(	t *testing.T) {
 }
 
 // TestBlockWire tests the MsgBlock wire encode and decode for various numbers of transaction inputs and outputs and protocol versions.
-func TestBlockWire(	t *testing.T) {
+func TestBlockWire(t *testing.T) {
 	tests := []struct {
 		in     *MsgBlock       // Message to encode
 		out    *MsgBlock       // Expected decoded message
@@ -185,7 +184,7 @@ func TestBlockWire(	t *testing.T) {
 }
 
 // TestBlockWireErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths work correctly.
-func TestBlockWireErrors(	t *testing.T) {
+func TestBlockWireErrors(t *testing.T) {
 	// Use protocol version 60002 specifically here instead of the latest because the test data is using bytes encoded with that protocol version.
 	pver := uint32(60002)
 	tests := []struct {
@@ -237,7 +236,7 @@ func TestBlockWireErrors(	t *testing.T) {
 }
 
 // TestBlockSerialize tests MsgBlock serialize and deserialize.
-func TestBlockSerialize(	t *testing.T) {
+func TestBlockSerialize(t *testing.T) {
 	tests := []struct {
 		in     *MsgBlock // Message to encode
 		out    *MsgBlock // Expected decoded message
@@ -300,7 +299,7 @@ func TestBlockSerialize(	t *testing.T) {
 }
 
 // TestBlockSerializeErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths work correctly.
-func TestBlockSerializeErrors(	t *testing.T) {
+func TestBlockSerializeErrors(t *testing.T) {
 	tests := []struct {
 		in       *MsgBlock // Value to encode
 		buf      []byte    // Serialized data
@@ -356,7 +355,7 @@ func TestBlockSerializeErrors(	t *testing.T) {
 }
 
 // TestBlockOverflowErrors  performs tests to ensure deserializing blocks, which are intentionally crafted to use large values for the number of transactions are handled properly.  This could otherwise potentially be used as an attack vector.
-func TestBlockOverflowErrors(	t *testing.T) {
+func TestBlockOverflowErrors(t *testing.T) {
 	// Use protocol version 70001 specifically here instead of the latest protocol version because the test data is using bytes encoded with that version.
 	pver := uint32(70001)
 	tests := []struct {
@@ -416,7 +415,7 @@ func TestBlockOverflowErrors(	t *testing.T) {
 }
 
 // TestBlockSerializeSize performs tests to ensure the serialize size for various blocks is accurate.
-func TestBlockSerializeSize(	t *testing.T) {
+func TestBlockSerializeSize(t *testing.T) {
 	// Block with no transactions.
 	noTxBlock := NewMsgBlock(&blockOne.Header)
 	tests := []struct {

@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"sort"
-   
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
+
+	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
+	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
 	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
+	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
 )
 
@@ -102,7 +102,7 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 	var inputs []Credit
 	address := startAddress
 	for {
-		Log.Dbgc(func() string {
+		log.DEBUGC(func() string {
 			return "looking for eligible inputs at address" +
 				address.addrIdentifier()
 		})
@@ -120,7 +120,7 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 		if err != nil {
 			return nil, newError(ErrInputSelection, "failed to get next withdrawal address", err)
 		} else if nAddr == nil {
-			log <- cl.Debug{"getEligibleInputs: reached last addr, stopping"}
+			log.DEBUG("getEligibleInputs: reached last addr, stopping")
 			break
 		}
 		address = *nAddr
@@ -146,12 +146,8 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 		}
 		if index > highestIdx {
 			seriesID++
-			log <- cl.Debugf{
-				"nextAddr(): reached last branch (%d) and highest used index (%d), " +
-					"moving on to next series (%d) %s",
-				branch,
-				index,
-				seriesID}
+			log.DEBUGF("nextAddr(): reached last branch (%d) and highest used index (%d), "+"moving on to next series (%d) %s",
+				branch, index, seriesID)
 			index = 0
 		} else {
 			index++
@@ -166,15 +162,11 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 		// The used indices will vary between branches so sometimes we'll try to
 		// get a WithdrawalAddress that hasn't been used before, and in such
 		// cases we just need to move on to the next one.
-		log <- cl.Debugf{
-			"nextAddr(): skipping addr (series #%d, branch #%d, index #%d) " +
-				"as it hasn't been used before %s",
-			seriesID,
-			branch,
-			index}
-		return nextAddr(p, ns, addrmgrNs, seriesID, branch, index, stopSeriesID)
-	}
-	return addr, err
+		log.DEBUGF("nextAddr(): skipping addr (series #%d, branch #%d, index #%d) " +
+			"as it hasn't been used before %s",seriesID,branch,index)
+	return nextAddr(p, ns, addrmgrNs, seriesID, branch, index, stopSeriesID)
+}
+return addr, err
 }
 
 // highestUsedSeriesIndex returns the highest index among all of this Pool's
