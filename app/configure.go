@@ -151,7 +151,7 @@ func Configure(cx *conte.Xt) {
 	switch {
 	case *cfg.RelayNonStd && *cfg.RejectNonStd:
 		errf := "%s: rejectnonstd and relaynonstd cannot be used together" +
-			" -- choose only one %s"
+			" -- choose only one"
 		log.ERROR(errf, funcName)
 		// just leave both false
 		*cfg.RelayNonStd = false

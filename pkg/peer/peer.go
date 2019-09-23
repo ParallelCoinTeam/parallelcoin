@@ -1655,7 +1655,7 @@ func (p *Peer) readRemoteVersionMsg() error {
 	p.versionKnown = true
 	p.services = msg.Services
 	p.flagsMtx.Unlock()
-	log.TRACEF("negotiated protocol version %d for peer %s %s",
+	log.TRACEF("negotiated protocol version %d for peer %s",
 		p.protocolVersion, p)
 	// Updating a bunch of stats including block based stats,
 	// and the peer's time offset.

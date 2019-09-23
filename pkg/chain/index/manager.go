@@ -339,7 +339,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 				return err
 			}
 			log.TRACEF(
-				"current %s tip (height %d, hash %v) %s",
+				"current %s tip (height %d, hash %v)",
 				indexer.Name(),
 				height,
 				hash,
@@ -366,7 +366,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	// be caught up,
 	// so log the details and loop through each block that needs to be indexed.
 	log.INFOF(
-		"catching up indexes from height %d to %d %s",
+		"catching up indexes from height %d to %d",
 		lowestHeight,
 		bestHeight,
 	)

@@ -192,9 +192,9 @@ func (cm *ConnManager) handleFailedConn(c *ConnReq) {
 	} else if cm.Cfg.GetNewAddress != nil {
 		cm.failedAttempts++
 		if cm.failedAttempts >= maxFailedAttempts {
-			log.TRACE("max failed connection attempts reached: [%d" +
+			log.TRACEF("max failed connection attempts reached: [%d" +
 				"] -- retrying" +
-				" connection in: %v %s",
+				" connection in: %v",
 				maxFailedAttempts,
 				cm.Cfg.RetryDuration)
 			time.AfterFunc(cm.Cfg.RetryDuration, func() {
@@ -296,7 +296,7 @@ out:
 					continue
 				}
 				connReq.updateState(ConnFailing)
-				log.TRACE("failed to connect to %v: %v %s", connReq, msg.err)
+				log.TRACEF("failed to connect to %v: %v", connReq, msg.err)
 				cm.handleFailedConn(connReq)
 			}
 		case <-cm.quit:
@@ -375,12 +375,12 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 	}
 	log.TRACE("response received", cm.Cfg.Listeners)
 	if len(cm.Cfg.Listeners) > 0 {
-		log.TRACE("%s attempting to connect to '%s' %s",
+		log.TRACEF("%s attempting to connect to '%s'",
 			cm.Cfg.Listeners[0].Addr(), c.Addr)
 	}
-	log.TRACE("Dial?", cm.Cfg.Dial)
+	// log.TRACE("Dial?", cm.Cfg.Dial)
 	conn, err := cm.Cfg.Dial(c.Addr)
-	log.TRACE(err, c.Addr)
+	// log.TRACE(err, c.Addr)
 	if err != nil {
 		select {
 		case cm.requests <- handleFailed{c, err}:

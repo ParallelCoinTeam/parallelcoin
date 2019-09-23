@@ -69,9 +69,9 @@ reconcileDB(pdb *db, create bool) (database.DB, error) {
 	wc := pdb.store.writeCursor
 	if wc.curFileNum > curFileNum || (wc.curFileNum == curFileNum &&
 		wc.curOffset > curOffset) {
-		log.INFO("Detected unclean shutdown - Repairing...")
-		log.DEBUGF("Metadata claims file %d, " +
-			"offset %d. Block data is at file %d, offset %d %s",
+		log.WARN("detected unclean shutdown - repairing")
+		log.DEBUGF("metadata claims file %d, " +
+			"offset %d. block data is at file %d, offset %d",
 			curFileNum, curOffset, wc.curFileNum, wc.curOffset)
 		pdb.store.handleRollback(curFileNum, curOffset)
 		log.DEBUG("database sync complete")

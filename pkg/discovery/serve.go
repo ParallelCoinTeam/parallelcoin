@@ -26,7 +26,7 @@ func GetParallelcoinServiceName(params *netparams.Params) string {
 
 func Serve(params *netparams.Params, lanInterface *net.Interface,
 	group string) (cancel context.CancelFunc, request RequestFunc, err error) {
-	log.WARN("starting discovery server")
+	log.TRACE("starting discovery server")
 	texts := []string{"group=" + group}
 	domain := "local."
 	requests := make(chan Request)
@@ -71,7 +71,7 @@ func Serve(params *netparams.Params, lanInterface *net.Interface,
 				if !found && r.Address != "" {
 					nt := r.Key + "=" + r.Address
 					texts = append(texts, nt)
-					log.DEBUG("appending", nt, "to texts", texts)
+					log.DEBUG("appending", nt, "to texts:", texts)
 				}
 				server.Shutdown()
 				log.TRACE("shut down server")

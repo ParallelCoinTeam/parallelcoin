@@ -48,7 +48,7 @@ func // NotifyUnspentAndUnfound iterates through any requests for which no
 // If the original output could not be found, a nil spend report is returned.
 (b *batchSpendReporter) NotifyUnspentAndUnfound() {
 	log.DEBUGF(
-		"finished batch, %d unspent outpoints %s", len(b.requests),
+		"finished batch, %d unspent outpoints", len(b.requests),
 	)
 	for outpoint, requests := range b.requests {
 		// A nil SpendReport indicates the output was not found.
@@ -99,7 +99,7 @@ func // addNewRequests adds a set of new GetUtxoRequests to the spend reporter's
 	for _, req := range reqs {
 		outpoint := req.Input.OutPoint
 		log.DEBUGF(
-			"adding outpoint=%s height=%d to watchlist %s", outpoint,
+			"adding outpoint=%s height=%d to watchlist", outpoint,
 			req.BirthHeight,
 		)
 		b.requests[outpoint] = append(b.requests[outpoint], req)
@@ -221,7 +221,7 @@ func // notifySpends finds any transactions in the block that spend from our
 				continue
 			}
 			log.DEBUGF(
-				"UTXO %v spent by txn %v %s", outpoint, tx.TxHash(),
+				"UTXO %v spent by txn %v", outpoint, tx.TxHash(),
 			)
 			spend := &SpendReport{
 				SpendingTx:         tx,

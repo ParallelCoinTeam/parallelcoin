@@ -84,7 +84,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 			return nil
 		}
 		log.DEBUGF(
-			"delivering backlog block notifications from height=%v, to height=%v %s",
+			"delivering backlog block notifications from height=%v, to height=%v",
 			bestHeight, filterHeaderTip,
 		)
 		// Otherwise, we need to read block headers from disk to

@@ -1074,7 +1074,7 @@ func // StoreBlock stores the provided block into the database.
 		hash:  blockHash,
 		bytes: blockBytes,
 	})
-	log.TRACE("added block %s to pending blocks", blockHash)
+	log.TRACEF("added block %s to pending blocks", blockHash)
 	return nil
 }
 
@@ -1440,7 +1440,7 @@ func // writePendingAndCommit writes pending block data to the flat block
 	}
 	// Loop through all of the pending blocks to store and write them.
 	for _, blockData := range tx.pendingBlockData {
-		log.TRACE("storing block %s", blockData.hash)
+		log.TRACEF("storing block %s", blockData.hash)
 		location, err := tx.db.store.writeBlock(blockData.bytes)
 		if err != nil {
 			rollback()

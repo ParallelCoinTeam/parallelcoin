@@ -850,7 +850,7 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 						return nil, newError(ErrKeyChain, "failed to obtain ECPrivKey", err)
 					}
 					log <- cl.Debugf{
-						"generating raw sig for input %d of tx %s with privkey of %s %s",
+						"generating raw sig for input %d of tx %s with privkey of %s",
 						inputIdx,
 						ntxid,
 						pubKey.String()}

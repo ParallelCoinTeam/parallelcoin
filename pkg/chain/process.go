@@ -9,7 +9,6 @@ import (
 	database "github.com/parallelcointeam/parallelcoin/pkg/db"
 	"github.com/parallelcointeam/parallelcoin/pkg/log"
 	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 type // BehaviorFlags is a bitmask defining tweaks to the normal behavior when
@@ -39,7 +38,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 // chain and the second indicates whether or not the block is an orphan.
 // This function is safe for concurrent access.
 (b *BlockChain) ProcessBlock(block *util.Block, flags BehaviorFlags, height int32) (bool, bool, error) {
-	log.TRACE("blockchain.ProcessBlock ")
+	log.WARN("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
 	blockHeight := height
 	bb, _ := b.BlockByHash(&block.MsgBlock().Header.PrevBlock)
 	if bb != nil {
@@ -51,13 +50,9 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	blockHash := block.Hash()
 	hf := fork.GetCurrent(blockHeight)
 	blockHashWithAlgo := block.MsgBlock().BlockHashWithAlgos(blockHeight).String()
-	log.TRACE()
-	{
-		func() string {
-			return "processing block" + blockHashWithAlgo + cl.
-				Ine()
-		}()
-	}
+	log.WARNC(func() string {
+			return "processing block " + blockHashWithAlgo
+		})
 	var algo int32
 	switch hf {
 	case 0:
@@ -87,12 +82,12 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// Perform preliminary sanity checks on the block and its transactions.
 	var DoNotCheckPow bool
 	pl := fork.GetMinDiff(fork.GetAlgoName(algo, blockHeight), blockHeight)
-	log.TRACEF("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo,
+	log.WARNF("powLimit %d %s %d %064x", algo, fork.GetAlgoName(algo,
 		blockHeight), blockHeight, pl)
 	ph := &block.MsgBlock().Header.PrevBlock
 	pn := b.Index.LookupNode(ph)
 	if pn == nil {
-		log.DEBUG("found no previous node")
+		log.WARN("found no previous node")
 		DoNotCheckPow = true
 	}
 	pb := pn.GetLastWithAlgo(algo)
@@ -100,14 +95,14 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		// pl = &chaincfg.AllOnes !!!!!!!!!!!!!!!!!!
 		DoNotCheckPow = true
 	}
-	log.TRACEF("checkBlockSanity powLimit %d %s %d %064x %s", algo,
+	log.WARNF("checkBlockSanity powLimit %d %s %d %064x", algo,
 		fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight)
 	if err != nil {
 		log.ERROR("block processing error: ", err)
 		return false, false, err
 	}
-	log.TRACE("searching back to checkpoints")
+	log.WARN("searching back to checkpoints")
 	// Find the previous checkpoint and perform some additional checks based
 	// on the checkpoint.  This provides a few
 	// nice properties such as preventing old side chain blocks before the
@@ -141,12 +136,13 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 				checkpointNode.bits, duration))
 			currentTarget := fork.CompactToBig(blockHeader.Bits)
 			if currentTarget.Cmp(requiredTarget) > 0 {
-				str := fmt.Sprintf("processing: block target difficulty of %064x is too low when compared to the previous checkpoint", currentTarget)
+				str := fmt.Sprintf("processing: block target difficulty of"+
+					" %064x is too low when compared to the previous checkpoint", currentTarget)
 				return false, false, ruleError(ErrDifficultyTooLow, str)
 			}
 		}
 	}
-	log.TRACE("handling orphans")
+	log.WARN("handling orphans")
 	// Handle orphan blocks.
 	prevHash := &blockHeader.PrevBlock
 	prevHashExists, err := b.blockExists(prevHash)
@@ -154,7 +150,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		return false, false, err
 	}
 	if !prevHashExists {
-		log.DEBUGC(func() string {
+		log.WARNC(func() string {
 			return fmt.Sprintf(
 				"adding orphan block %v with parent %v",
 				blockHashWithAlgo,
@@ -166,7 +162,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	}
 	// The block has passed all context independent checks and appears sane
 	// enough to potentially accept it into the block chain.
-	log.TRACE("maybe accept block")
+	log.WARN("maybe accept block")
 	isMainChain, err := b.maybeAcceptBlock(block, flags)
 	if err != nil {
 		return false, false, err
@@ -174,19 +170,17 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// Accept any orphan blocks that depend on this block (they are no longer
 	// orphans) and repeat for those accepted blocks until there are no more.
 	if isMainChain {
-		log.TRACE("new block on main chain")
+		log.WARN("new block on main chain")
 	}
 	err = b.processOrphans(blockHash, flags)
 	if err != nil {
 		return false, false, err
 	}
-	// DEBUGF({
-	// 	"accepted block %d %v %s %s",
-	// 	blockHeight,
-	// 	blockHashWithAlgo,
-	// 	fork.GetAlgoName(block.MsgBlock().Header.Version, blockHeight),
-	//		cl.Ine()}
-	log.TRACE("finished blockchain.ProcessBlock")
+	log.DEBUGF("accepted block %d %v",
+		blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
+			Header.Version, blockHeight))
+
+	log.WARN("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }
 

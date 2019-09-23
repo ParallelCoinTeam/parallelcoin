@@ -21,15 +21,17 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 // See their documentation for how the flags modify their behavior.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) maybeAcceptBlock(block *util.Block, flags BehaviorFlags) (bool, error) {
-	log.TRACE("maybeAcceptBlock")
+	log.WARN("maybeAcceptBlock")
 	// The height of this block is one more than the referenced previous block.
 	prevHash := &block.MsgBlock().Header.PrevBlock
 	prevNode := b.Index.LookupNode(prevHash)
 	if prevNode == nil {
 		str := fmt.Sprintf("previous block %s is unknown", prevHash)
+		log.WARN(str)
 		return false, ruleError(ErrPreviousBlockUnknown, str)
 	} else if b.Index.NodeStatus(prevNode).KnownInvalid() {
 		str := fmt.Sprintf("previous block %s is known to be invalid", prevHash)
+		log.WARN(str)
 		return false, ruleError(ErrInvalidAncestorBlock, str)
 	}
 	blockHeight := prevNode.height + 1
@@ -58,20 +60,21 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 			}
 		}
 	}
-	log.TRACE("check for blacklisted addresses")
+	log.WARN("check for blacklisted addresses")
 	txs := block.Transactions()
 	for i := range txs {
 		if ContainsBlacklisted(b, txs[i], hardfork.Blacklist) {
 			return false, ruleError(ErrBlacklisted, "block contains a blacklisted address "+cl.Ine())
 		}
 	}
-	log.TRACE("found no blacklisted addresses")
+	log.WARN("found no blacklisted addresses")
 	var err error
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on
 		// the  position of the block within the block chain.
 		err = b.checkBlockContext(block, prevNode, flags, DoNotCheckPow)
 		if err != nil {
+			log.ERROR(err)
 			return false, err
 		}
 	}
@@ -89,9 +92,10 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 		return dbStoreBlock(dbTx, block)
 	})
 	if err != nil {
+		log.ERROR(err)
 		return false, err
 	}
-	log.TRACE("creating new block node for new block")
+	log.WARN("creating new block node for new block")
 	// Create a new block node for the block and add it to the node index.
 	// Even if the block ultimately gets connected to the main chain,
 	// it starts out on a side chain.
@@ -101,6 +105,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	b.Index.AddNode(newNode)
 	err = b.Index.flushToDB()
 	if err != nil {
+		log.ERROR(err)
 		return false, err
 	}
 	// Connect the passed block to the chain while respecting proper chain
@@ -108,6 +113,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	// This also handles validation of the transaction scripts.
 	isMainChain, err := b.connectBestChain(newNode, block, flags)
 	if err != nil {
+		log.ERROR(err)
 		return false, err
 	}
 	// Notify the caller that the new block was accepted into the block

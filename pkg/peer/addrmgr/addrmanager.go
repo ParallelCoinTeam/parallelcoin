@@ -370,7 +370,7 @@ func (a *AddrManager) loadPeers() {
 	defer a.mtx.Unlock()
 	err := a.deserializePeers(a.peersFile)
 	if err != nil {
-		log.ERRORF("failed to parse file %s: %v %s", a.peersFile, err)
+		log.ERRORF("failed to parse file %s: %v", a.peersFile, err)
 		// if it is invalid we nuke the old one unconditionally.
 		err = os.Remove(a.peersFile)
 		if err != nil {
@@ -382,7 +382,7 @@ func (a *AddrManager) loadPeers() {
 	}
 	log.TRACEC(func() string {
 		return fmt.Sprintf(
-			"loaded %d addresses from file '%s' %s",
+			"loaded %d addresses from file '%s'",
 			a.numAddresses(), a.peersFile,
 		)
 	})
@@ -971,10 +971,10 @@ func // GetBestLocalAddress returns the most appropriate local address to use
 		}
 	}
 	if bestAddress != nil {
-		log.TRACEF("suggesting address %s:%d for %s:%d %s", bestAddress.IP,
+		log.TRACEF("suggesting address %s:%d for %s:%d", bestAddress.IP,
 			bestAddress.Port, remoteAddr.IP, remoteAddr.Port)
 	} else {
-		log.TRACEF("no worthy address for %s:%d %s", remoteAddr.IP,
+		log.TRACEF("no worthy address for %s:%d", remoteAddr.IP,
 			remoteAddr.Port)
 		// Send something unroutable if nothing suitable.
 		var ip net.IP
