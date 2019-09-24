@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/p9c/pod/app/util"
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node/path"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
@@ -132,7 +132,7 @@ func upgradeDataPaths() error {
 		return nil
 	}
 	// Only migrate if the old path exists and the new one doesn't
-	if util.FileExists(oldHomePath) && !util.FileExists(newHomePath) {
+	if apputil.FileExists(oldHomePath) && !apputil.FileExists(newHomePath) {
 		// Create the new path
 		log.INFOF("migrating application home path from '%s' to '%s'",
 			oldHomePath, newHomePath)
@@ -143,7 +143,7 @@ func upgradeDataPaths() error {
 		// Move old pod.conf into new location if needed
 		oldConfPath := filepath.Join(oldHomePath, DefaultConfigFilename)
 		newConfPath := filepath.Join(newHomePath, DefaultConfigFilename)
-		if util.FileExists(oldConfPath) && !util.FileExists(newConfPath) {
+		if apputil.FileExists(oldConfPath) && !apputil.FileExists(newConfPath) {
 			err := os.Rename(oldConfPath, newConfPath)
 			if err != nil {
 				return err
@@ -152,7 +152,7 @@ func upgradeDataPaths() error {
 		// Move old data directory into new location if needed
 		oldDataPath := filepath.Join(oldHomePath, DefaultDataDirname)
 		newDataPath := filepath.Join(newHomePath, DefaultDataDirname)
-		if util.FileExists(oldDataPath) && !util.FileExists(newDataPath) {
+		if apputil.FileExists(oldDataPath) && !apputil.FileExists(newDataPath) {
 			err := os.Rename(oldDataPath, newDataPath)
 			if err != nil {
 				return err

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/chain/wire"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -24,7 +25,7 @@ func main() {
 		},
 	}
 	// Connect to local pod RPC server using websockets.
-	podHomeDir := util.AppDataDir("pod", false)
+	podHomeDir := appdata.Dir("pod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(podHomeDir, "rpc.cert"))
 	if err != nil {
 		log.Fatal(err)

@@ -9,8 +9,9 @@ import (
    "time"
    
    "github.com/jessevdk/go-flags"
-   
-   "github.com/p9c/pod/pkg/util"
+
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/util"
 )
 
 type config struct {
@@ -74,7 +75,7 @@ func cleanAndExpandPath(
 	path string) string {
 	// Expand initial ~ to OS specific home directory.
 	if strings.HasPrefix(path, "~") {
-		appHomeDir := util.AppDataDir("gencerts", false)
+		appHomeDir := appdata.Dir("gencerts", false)
 		homeDir := filepath.Dir(appHomeDir)
 		path = strings.Replace(path, "~", homeDir, 1)
 	}

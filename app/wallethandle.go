@@ -5,7 +5,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/app/util"
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
@@ -18,7 +18,7 @@ func walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		Configure(cx)
 		dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
 			Params.Name + slash + wallet.WalletDbName
-		if !util.FileExists(dbFilename) {
+		if !apputil.FileExists(dbFilename) {
 			log.L.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				log.ERROR("failed to create wallet", err)

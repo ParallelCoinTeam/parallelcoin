@@ -10,20 +10,21 @@ import (
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/crypto/ssh/terminal"
 
+	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
 	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
 	cfgutil "github.com/p9c/pod/pkg/util/config"
 )
 
 var (
-	walletDataDirectory = util.AppDataDir("mod", false)
+	walletDataDirectory = appdata.Dir("mod", false)
 	newlineBytes        = []byte{'\n'}
 )
 

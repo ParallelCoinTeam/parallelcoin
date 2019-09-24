@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/p9c/pod/app/util"
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node/path"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/version"
@@ -278,7 +278,7 @@ func warnMultipleDBs(cx *conte.Xt) {
 		}
 		// store db path as a duplicate db if it exists
 		dbPath := path.BlockDb(cx, dbType)
-		if util.FileExists(dbPath) {
+		if apputil.FileExists(dbPath) {
 			duplicateDbPaths = append(duplicateDbPaths, dbPath)
 		}
 	}

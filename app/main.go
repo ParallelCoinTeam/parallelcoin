@@ -17,7 +17,7 @@ import (
 
 const (
 	appName           = "pod"
-	confExt           = ".toml"
+	confExt           = ".json"
 	podConfigFilename = appName + confExt
 	// ctlAppName           = "ctl"
 	// ctlConfigFilename    = ctlAppName + confExt
