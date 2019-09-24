@@ -15,7 +15,7 @@ func Send() mod.DuoVUEcomp {
 			return {
 				sendAddress:'',
 				sendAmount:0.00000000,
-				target: '#container',
+				target: '#x',
 				header: 'Enter your passphrase',
 				content: "<input type='password' value='' class='e-outline fii bgfff' id='passPhrase' required />",
 				showCloseIcon: true,

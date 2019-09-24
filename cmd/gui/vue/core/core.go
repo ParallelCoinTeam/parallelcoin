@@ -38,7 +38,7 @@ const duoSystem = {
 		isDev:false,
 	},
 	isLoading:false,
-	activeLayout: 'overview',
+	isScreen: 'overview',
 	timer: '',
 };
 `

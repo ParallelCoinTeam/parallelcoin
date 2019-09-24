@@ -148,12 +148,12 @@ func injectCss(dV DuoVUE) {
 	// Core Css
 	dV.Web.InjectCSS(string(comp.GetCoreCss))
 
-	// comp
-	for _, c := range comp.Components(dV.db) {
-		dV.Web.InjectCSS(string(c.Css))
-	}
 
 	for _, alj := range comp.Apps(dV.db) {
 		dV.Web.InjectCSS(string(alj.Css))
+	}
+	// comp
+	for _, c := range comp.Components(dV.db) {
+		dV.Web.InjectCSS(string(c.Css))
 	}
 }

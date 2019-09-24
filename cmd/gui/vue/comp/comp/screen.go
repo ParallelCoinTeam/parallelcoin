@@ -14,18 +14,37 @@ func Screen() mod.DuoVUEcomp {
 	  data() {
     return {
 		duoSystem,
-		layout: duoSystem.config.display.screens[duoSystem.activeLayout],
 	}},
 `,
 		Template: `
 <template>
- <div class="dashboardParent">   
-            <ejs-dashboardlayout id='analysisLayout' :columns='layout.columns' ref='analysisLayout' :cellSpacing='layout.cellSpacing' :cellAspectRaito='layout.aspectRatio'>
-                <e-panels>
-                    <e-panel v-for="panel in layout.panels" :sizeX="panel.sizeX" :sizeY="panel.sizeY" :row="panel.row" :col="panel.col" :content="panel.content"></e-panel>
-                </e-panels>
-            </ejs-dashboardlayout>            
-          </div>
+ <div><div class="dashboardParent">
+              <ejs-dashboardlayout 
+			v-for="(screen, key) in system.data.conf.display.screens" 
+			v-show="duoSystem.isScreen === key" 
+			:ref="'DashbordInstance' + key" 
+			:columns="screen.columns" 
+			:id="'Layout' + key" 
+			:allowResizing="screen.allowResizing"
+			:allowDragging="screen.allowDragging"
+			:allowFloating="screen.allowFloating"
+			:cellAspectRatio="screen.cellAspectRatio"
+			:cellSpacing=[15,15]>
+			<e-panels>
+				<e-panel 
+					v-for="panel in screen.panels" 
+					:sizeX="panel.sizeX" 
+					:sizeY="panel.sizeY" 
+					:row="panel.row" 
+					:col="panel.col" 
+					:header="panel.header"
+					:cssClass="panel.cssClass" 
+					:content="panel.content">
+				</e-panel>
+            </e-panels>
+
+    </ejs-dashboardlayout>            
+          </div></div>
 </template>
 `,
 		Css: `

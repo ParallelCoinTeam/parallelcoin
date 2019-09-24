@@ -2,6 +2,7 @@ package comp
 
 import (
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/comp"
+	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/panel"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/sys"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/db"
 	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
@@ -13,10 +14,10 @@ func Apps(d db.DuoVUEdb) (c []mod.DuoVUEcomp) {
 	c = append(c, sys.Display())
 
 	//c = append(c, serv.Blocks())
-	//c = append(c, panel.Send())
-	//c = append(c, panel.AddressBook())
+	c = append(c, panel.Send())
+	c = append(c, panel.AddressBook())
 	//c = append(c, panel.Blocks())
-	//c = append(c, panel.Peers())
+	c = append(c, panel.Peers())
 	//c = append(c, panel.Settings())
 	//c = append(c, panel.Transactions())
 	//c = append(c, sys.Nav())
@@ -25,13 +26,14 @@ func Apps(d db.DuoVUEdb) (c []mod.DuoVUEcomp) {
 	//c = append(c, panel.Test())
 	//c = append(c, panel.ChartA())
 	//c = append(c, panel.ChartB())
-	//c = append(c, panel.WalletStatus())
-	//c = append(c, panel.Status())
-	//c = append(c, panel.NetworkHashRate())
+	c = append(c, panel.WalletStatus())
+	c = append(c, panel.Status())
+	c = append(c, panel.LocalHashRate())
+	c = append(c, panel.NetworkHashRate())
 	return c
 }
 func Components(d db.DuoVUEdb) (c []mod.DuoVUEcomp) {
-	//c = append(c, panel.Address())
+	c = append(c, panel.Address())
 	c = append(c, comp.Logo())
 	c = append(c, comp.Header())
 	c = append(c, comp.Sidebar())
@@ -42,7 +44,7 @@ func Components(d db.DuoVUEdb) (c []mod.DuoVUEcomp) {
 	return c
 }
 
-var GetAppHtml string = `<!DOCTYPE html><html lang="en" ><head><meta charset="UTF-8"><title>ParallelCoin Wallet - True Story</title></head><body><x is="x" id="x"><header is="boot" id="boot"></header><display :is="display" id="display" class="rwrap lightTheme"></display><footer is="dev" id="dev"></footer></x></body></html>`
+var GetAppHtml string = `<!DOCTYPE html><html lang="en" ><head><meta charset="UTF-8"><title>ParallelCoin Wallet - True Story</title></head><body><header is="boot" id="boot"></header><display :is="display" id="display" class=" lightTheme"></display><footer is="dev" id="dev"></footer></body></html>`
 
 
 
