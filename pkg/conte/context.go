@@ -8,12 +8,12 @@ import (
 	scribble "github.com/nanobox-io/golang-scribble"
 	"github.com/urfave/cli"
 
+	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"
 	`github.com/p9c/pod/pkg/chain/config/netparams`
 	"github.com/p9c/pod/pkg/discovery"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
@@ -71,6 +71,6 @@ func GetNewContext(appName string, subtext string) *Xt {
 		App:      cli.NewApp(),
 		Config:   pod.DefConfig(),
 		StateCfg: new(state.Config),
-		DataDir:  util.AppDataDir(appName, false),
+		DataDir:  appdata.Dir(appName, false),
 	}
 }

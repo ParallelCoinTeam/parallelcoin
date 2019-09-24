@@ -9,7 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/p9c/pod/app/util"
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/conte"
@@ -17,13 +18,13 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/normalize"
 	"github.com/p9c/pod/pkg/peer/connmgr"
+	"github.com/p9c/pod/pkg/util"
 
 	"github.com/btcsuite/go-socks/socks"
 
 	"github.com/p9c/pod/cmd/node"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // Configure loads and sanitises the configuration from urfave/cli
@@ -31,7 +32,7 @@ func Configure(cx *conte.Xt) {
 	log.TRACE("configuring pod")
 	var err error
 	if cx.Config.DataDir == nil || *cx.Config.DataDir == "" {
-		*cx.Config.DataDir = util.AppDataDir("pod", false)
+		*cx.Config.DataDir = appdata.Dir("pod", false)
 	}
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
@@ -335,13 +336,13 @@ func Configure(cx *conte.Xt) {
 	}
 	// Limit the block priority and minimum block sizes to max block size.
 	log.TRACE("validating block priority and minimum size/weight")
-	*cfg.BlockPrioritySize = int(util.MinUint32(
+	*cfg.BlockPrioritySize = int(apputil.MinUint32(
 		uint32(*cfg.BlockPrioritySize),
 		uint32(*cfg.BlockMaxSize)))
-	*cfg.BlockMinSize = int(util.MinUint32(
+	*cfg.BlockMinSize = int(apputil.MinUint32(
 		uint32(*cfg.BlockMinSize),
 		uint32(*cfg.BlockMaxSize)))
-	*cfg.BlockMinWeight = int(util.MinUint32(
+	*cfg.BlockMinWeight = int(apputil.MinUint32(
 		uint32(*cfg.BlockMinWeight),
 		uint32(*cfg.BlockMaxWeight)))
 	switch {
@@ -536,7 +537,7 @@ func Configure(cx *conte.Xt) {
 		}
 	}
 	// if the user set the save flag, or file doesn't exist save the file now
-	if state.Save || !util.FileExists(*cx.Config.ConfigFile) {
+	if state.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
 		log.TRACE("saving configuration")
 		save.Pod(cx.Config)
 	}

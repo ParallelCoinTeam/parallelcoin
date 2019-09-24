@@ -1,14 +1,14 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 
-	"github.com/pelletier/go-toml"
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/app/util"
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
@@ -31,12 +31,12 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				podConfigFilename
 		log.INFO("config file set to", *cx.Config.ConfigFile)
 		// we are going to assume the config is not manually misedited
-		if util.FileExists(*cx.Config.ConfigFile) {
+		if apputil.FileExists(*cx.Config.ConfigFile) {
 			log.INFO("loading config")
 			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
 			if err == nil {
 				log.TRACE(string(b))
-				err = toml.Unmarshal(b, cx.Config)
+				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
 					fmt.Println("error unmarshalling config", err)
 					os.Exit(1)

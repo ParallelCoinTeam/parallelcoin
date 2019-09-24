@@ -7,7 +7,7 @@ import (
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
 
-	"github.com/p9c/pod/app/util"
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/conte"
@@ -37,19 +37,19 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 			return nil
 		},
 		Commands: []cli.Command{
-			util.NewCommand("version",
+			apputil.NewCommand("version",
 				"print version and exit",
 				func(c *cli.Context) error {
 					fmt.Println(c.App.Name, c.App.Version)
 					return nil
 				},
-				util.SubCommands(),
+				apputil.SubCommands(),
 				"v"),
-			util.NewCommand("ctl",
+			apputil.NewCommand("ctl",
 				"send RPC commands to a node or wallet and print the result",
 				ctlHandle(cx),
-				util.SubCommands(
-					util.NewCommand(
+				apputil.SubCommands(
+					apputil.NewCommand(
 						"listcommands",
 						"list commands available at endpoint",
 						ctlHandleList,
@@ -58,59 +58,59 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					),
 				),
 				"c"),
-			util.NewCommand("node",
+			apputil.NewCommand("node",
 				"start parallelcoin full node",
 				nodeHandle(cx),
-				util.SubCommands(
-					util.NewCommand("dropaddrindex",
+				apputil.SubCommands(
+					apputil.NewCommand("dropaddrindex",
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropAddrIndex = true
 							return nodeHandle(cx)(c)
 						},
-						util.SubCommands(),
+						apputil.SubCommands(),
 					),
-					util.NewCommand("droptxindex",
+					apputil.NewCommand("droptxindex",
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropTxIndex = true
 							return nodeHandle(cx)(c)
 						},
-						util.SubCommands(),
+						apputil.SubCommands(),
 					),
-					util.NewCommand("dropcfindex",
+					apputil.NewCommand("dropcfindex",
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropCfIndex = true
 							return nodeHandle(cx)(c)
 						},
-						util.SubCommands(),
+						apputil.SubCommands(),
 					),
 				),
 				"n",
 			),
-			util.NewCommand("wallet",
+			apputil.NewCommand("wallet",
 				"start parallelcoin wallet server",
 				walletHandle(cx),
-				util.SubCommands(),
+				apputil.SubCommands(),
 				"w",
 			),
-			util.NewCommand("shell",
+			apputil.NewCommand("shell",
 				"start combined wallet/node shell",
 				shellHandle(cx),
-				util.SubCommands(),
+				apputil.SubCommands(),
 				"s",
 			),
-			util.NewCommand(
+			apputil.NewCommand(
 				"gui",
 				"start GUI",
 				guiHandle(cx),
-				util.SubCommands(),
+				apputil.SubCommands(),
 			),
-			util.NewCommand("kopach",
+			apputil.NewCommand("kopach",
 				"standalone miner for clusters",
 				kopachHandle(cx),
-				util.SubCommands(
+				apputil.SubCommands(
 					// apputil.NewCommand("bench",
 					// 	"generate a set of benchmarks of each algorithm",
 					// 	func(c *cli.Context) error {
@@ -129,7 +129,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				EnvVar:      "POD_DATADIR",
 				Destination: cx.Config.DataDir,
 			}),
-			util.BoolTrue("save, i",
+			apputil.BoolTrue("save, i",
 				"save settings as effective from invocation",
 				&cx.StateCfg.Save,
 			),
@@ -140,430 +140,430 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				EnvVar:      "POD_LOGLEVEL",
 				Destination: cx.Config.LogLevel,
 			}),
-			util.String(
+			apputil.String(
 				"network, n",
 				"connect to mainnet/testnet/regtest/simnet",
 				"mainnet",
 				cx.Config.Network),
-			util.String(
+			apputil.String(
 				"username",
 				"sets the username for services",
 				"server",
 				cx.Config.Username),
-			util.String(
+			apputil.String(
 				"password",
 				"sets the password for services",
 				genPassword(),
 				cx.Config.Password),
-			util.String(
+			apputil.String(
 				"serveruser",
 				"sets the username for clients of services",
 				"client",
 				cx.Config.ServerUser),
-			util.String(
+			apputil.String(
 				"serverpass",
 				"sets the password for clients of services",
 				genPassword(),
 				cx.Config.ServerPass),
-			util.String(
+			apputil.String(
 				"limituser",
 				"sets the limited rpc username",
 				"limit",
 				cx.Config.LimitUser),
-			util.String(
+			apputil.String(
 				"limitpass",
 				"sets the password for clients of services",
 				genPassword(),
 				cx.Config.LimitPass),
-			util.String(
+			apputil.String(
 				"rpccert",
 				"File containing the certificate file",
-				util.Join(*cx.Config.DataDir, "rpc.cert"),
+				apputil.Join(*cx.Config.DataDir, "rpc.cert"),
 				cx.Config.RPCCert),
-			util.String(
+			apputil.String(
 				"rpckey",
 				"File containing the certificate key",
-				util.Join(*cx.Config.DataDir, "rpc.key"),
+				apputil.Join(*cx.Config.DataDir, "rpc.key"),
 				cx.Config.RPCKey),
-			util.String(
+			apputil.String(
 				"cafile",
 				"File containing root certificates to authenticate a TLS"+
 					" connections with pod",
-				util.Join(*cx.Config.DataDir, "cafile"),
+				apputil.Join(*cx.Config.DataDir, "cafile"),
 				cx.Config.CAFile),
-			util.Bool(
+			apputil.Bool(
 				"clienttls",
 				"Enable TLS for client connections",
 				cx.Config.TLS),
-			util.Bool(
+			apputil.Bool(
 				"servertls",
 				"Enable TLS for server connections",
 				cx.Config.ServerTLS),
-			util.String(
+			apputil.String(
 				"proxy",
 				"Connect via SOCKS5 proxy",
 				"",
 				cx.Config.Proxy),
-			util.String(
+			apputil.String(
 				"proxyuser",
 				"Username for proxy server",
 				"user",
 				cx.Config.ProxyUser),
-			util.String(
+			apputil.String(
 				"proxypass",
 				"Password for proxy server",
 				"pa55word",
 				cx.Config.ProxyPass),
-			util.Bool(
+			apputil.Bool(
 				"onion",
 				"Enable connecting to tor hidden services",
 				cx.Config.Onion),
-			util.String(
+			apputil.String(
 				"onionproxy",
 				"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0."+
 					"0.1:9050)",
 				"127.0.0.1:9050",
 				cx.Config.OnionProxy),
-			util.String(
+			apputil.String(
 				"onionuser",
 				"Username for onion proxy server",
 				"user",
 				cx.Config.OnionProxyUser),
-			util.String(
+			apputil.String(
 				"onionpass",
 				"Password for onion proxy server",
 				genPassword(),
 				cx.Config.OnionProxyPass),
-			util.Bool(
+			apputil.Bool(
 				"torisolation",
 				"Enable Tor stream isolation by randomizing user credentials"+
 					" for each connection.",
 				cx.Config.TorIsolation),
-			util.String(
+			apputil.String(
 				"group",
 				"zeroconf testnet group identifier (whitelist connections)",
 				"",
 				cx.Config.Group),
-			util.Bool(
+			apputil.Bool(
 				"nodiscovery",
 				"disable zeroconf peer discovery",
 				cx.Config.NoDiscovery),
-			util.StringSlice(
+			apputil.StringSlice(
 				"addpeer",
 				"Add a peer to connect with at startup",
 				cx.Config.AddPeers),
-			util.StringSlice(
+			apputil.StringSlice(
 				"connect",
 				"Connect only to the specified peers at startup",
 				cx.Config.ConnectPeers),
-			util.Bool(
+			apputil.Bool(
 				"nolisten",
 				"Disable listening for incoming connections -- NOTE:"+
 					" Listening is automatically disabled if the --connect or"+
 					" --proxy options are used without also specifying listen"+
 					" interfaces via --listen",
 				cx.Config.DisableListen),
-			util.StringSlice(
+			apputil.StringSlice(
 				"listen",
 				"Add an interface/port to listen for connections",
 				cx.Config.Listeners),
-			util.Int(
+			apputil.Int(
 				"maxpeers",
 				"Max number of inbound and outbound peers",
 				node.DefaultMaxPeers,
 				cx.Config.MaxPeers),
-			util.Bool(
+			apputil.Bool(
 				"nobanning",
 				"Disable banning of misbehaving peers",
 				cx.Config.DisableBanning),
-			util.Duration(
+			apputil.Duration(
 				"banduration",
 				"How long to ban misbehaving peers",
 				time.Hour*24,
 				cx.Config.BanDuration),
-			util.Int(
+			apputil.Int(
 				"banthreshold",
 				"Maximum allowed ban score before disconnecting and"+
 					" banning misbehaving peers.",
 				node.DefaultBanThreshold,
 				cx.Config.BanThreshold),
-			util.StringSlice(
+			apputil.StringSlice(
 				"whitelist",
 				"Add an IP network or IP that will not be banned. (eg. 192."+
 					"168.1.0/24 or ::1)",
 				cx.Config.Whitelists),
-			util.String(
+			apputil.String(
 				"rpcconnect",
 				"Hostname/IP and port of pod RPC server to connect to",
 				"127.0.0.1:11048",
 				cx.Config.RPCConnect),
-			util.StringSlice(
+			apputil.StringSlice(
 				"rpclisten",
 				"Add an interface/port to listen for RPC connections",
 				cx.Config.RPCListeners),
-			util.Int(
+			apputil.Int(
 				"rpcmaxclients",
 				"Max number of RPC clients for standard connections",
 				node.DefaultMaxRPCClients,
 				cx.Config.RPCMaxClients),
-			util.Int(
+			apputil.Int(
 				"rpcmaxwebsockets",
 				"Max number of RPC websocket connections",
 				node.DefaultMaxRPCWebsockets,
 				cx.Config.RPCMaxWebsockets),
-			util.Int(
+			apputil.Int(
 				"rpcmaxconcurrentreqs",
 				"Max number of RPC requests that may be"+
 					" processed concurrently",
 				node.DefaultMaxRPCConcurrentReqs,
 				cx.Config.RPCMaxConcurrentReqs),
-			util.Bool(
+			apputil.Bool(
 				"rpcquirks",
 				"Mirror some JSON-RPC quirks of Bitcoin Core -- NOTE:"+
 					" Discouraged unless interoperability issues need to be worked"+
 					" around",
 				cx.Config.RPCQuirks),
-			util.Bool(
+			apputil.Bool(
 				"norpc",
 				"Disable built-in RPC server -- NOTE: The RPC server"+
 					" is disabled by default if no rpcuser/rpcpass or"+
 					" rpclimituser/rpclimitpass is specified",
 				cx.Config.DisableRPC),
-			util.Bool(
+			apputil.Bool(
 				"nodnsseed",
 				"Disable DNS seeding for peers",
 				cx.Config.DisableDNSSeed),
-			util.StringSlice(
+			apputil.StringSlice(
 				"externalip",
 				"Add an ip to the list of local addresses we claim to"+
 					" listen on to peers",
 				cx.Config.ExternalIPs),
-			util.StringSlice(
+			apputil.StringSlice(
 				"addcheckpoint",
 				"Add a custom checkpoint.  Format: '<height>:<hash>'",
 				cx.Config.AddCheckpoints),
-			util.Bool(
+			apputil.Bool(
 				"nocheckpoints",
 				"Disable built-in checkpoints.  Don't do this unless"+
 					" you know what you're doing.",
 				cx.Config.DisableCheckpoints),
-			util.String(
+			apputil.String(
 				"dbtype",
 				"Database backend to use for the Block Chain",
 				node.DefaultDbType,
 				cx.Config.DbType),
-			util.String(
+			apputil.String(
 				"profile",
 				"Enable HTTP profiling on given port -- NOTE port"+
 					" must be between 1024 and 65536",
 				"",
 				cx.Config.Profile),
-			util.String(
+			apputil.String(
 				"cpuprofile",
 				"Write CPU profile to the specified file",
 				"",
 				cx.Config.CPUProfile),
-			util.Bool(
+			apputil.Bool(
 				"upnp",
 				"Use UPnP to map our listening port outside of NAT",
 				cx.Config.Upnp),
-			util.Float64(
+			apputil.Float64(
 				"minrelaytxfee",
 				"The minimum transaction fee in DUO/kB to be"+
 					" considered a non-zero fee.",
 				mempool.DefaultMinRelayTxFee.ToDUO(),
 				cx.Config.MinRelayTxFee),
-			util.Float64(
+			apputil.Float64(
 				"limitfreerelay",
 				"Limit relay of transactions with no transaction"+
 					" fee to the given amount in thousands of bytes per minute",
 				node.DefaultFreeTxRelayLimit,
 				cx.Config.FreeTxRelayLimit),
-			util.Bool(
+			apputil.Bool(
 				"norelaypriority",
 				"Do not require free or low-fee transactions to have"+
 					" high priority for relaying",
 				cx.Config.NoRelayPriority),
-			util.Duration(
+			apputil.Duration(
 				"trickleinterval",
 				"Minimum time between attempts to send new"+
 					" inventory to a connected peer",
 				node.DefaultTrickleInterval,
 				cx.Config.TrickleInterval),
-			util.Int(
+			apputil.Int(
 				"maxorphantx",
 				"Max number of orphan transactions to keep in memory",
 				node.DefaultMaxOrphanTransactions,
 				cx.Config.MaxOrphanTxs),
-			util.String(
+			apputil.String(
 				"algo",
 				"Sets the algorithm for the CPU miner ( blake14lr,"+
 					" cryptonight7v2, keccak, lyra2rev2, scrypt, sha256d, stribog,"+
 					" skein, x11 default is 'random')",
 				"random",
 				cx.Config.Algo),
-			util.Bool(
+			apputil.Bool(
 				"generate",
 				"Generate (mine) DUO using the CPU",
 				cx.Config.Generate),
-			util.Int(
+			apputil.Int(
 				"genthreads",
 				"Number of CPU threads to use with CPU miner"+
 					" -1 = all cores",
 				-1,
 				cx.Config.GenThreads),
-			util.String(
+			apputil.String(
 				"controller",
 				"address to bind miner controller listener",
 				genPassword(),
 				cx.Config.Controller),
-			util.Bool(
+			apputil.Bool(
 				"nocontroller",
 				"disable zeroconf kcp miner controller",
 				cx.Config.NoController),
-			util.StringSlice(
+			apputil.StringSlice(
 				"miningaddr",
 				"Add the specified payment address to the list of"+
 					" addresses to use for generated blocks, at least one is "+
 					"required if generate or minerlistener are set",
 				cx.Config.MiningAddrs),
-			util.String(
+			apputil.String(
 				"minerpass",
 				"password to authorise sending work to a miner",
 				genPassword(),
 				cx.Config.MinerPass),
-			util.Int(
+			apputil.Int(
 				"blockminsize",
 				"Minimum block size in bytes to be used when"+
 					" creating a block",
 				node.BlockMaxSizeMin,
 				cx.Config.BlockMinSize),
-			util.Int(
+			apputil.Int(
 				"blockmaxsize",
 				"Maximum block size in bytes to be used when"+
 					" creating a block",
 				node.BlockMaxSizeMax,
 				cx.Config.BlockMaxSize),
-			util.Int(
+			apputil.Int(
 				"blockminweight",
 				"Minimum block weight to be used when creating"+
 					" a block",
 				node.BlockMaxWeightMin,
 				cx.Config.BlockMinWeight),
-			util.Int(
+			apputil.Int(
 				"blockmaxweight",
 				"Maximum block weight to be used when creating"+
 					" a block",
 				node.BlockMaxWeightMax,
 				cx.Config.BlockMaxWeight),
-			util.Int(
+			apputil.Int(
 				"blockprioritysize",
 				"Size in bytes for high-priority/low-fee"+
 					" transactions when creating a block",
 				mempool.DefaultBlockPrioritySize,
 				cx.Config.BlockPrioritySize),
-			util.StringSlice(
+			apputil.StringSlice(
 				"uacomment",
 				"Comment to add to the user agent -- See BIP 14 for"+
 					" more information.",
 				cx.Config.UserAgentComments),
-			util.Bool(
+			apputil.Bool(
 				"nopeerbloomfilters",
 				"Disable bloom filtering support",
 				cx.Config.NoPeerBloomFilters),
-			util.Bool(
+			apputil.Bool(
 				"nocfilters",
 				"Disable committed filtering (CF) support",
 				cx.Config.NoCFilters),
-			util.Int(
+			apputil.Int(
 				"sigcachemaxsize",
 				"The maximum number of entries in the"+
 					" signature verification cache",
 				node.DefaultSigCacheMaxSize,
 				cx.Config.SigCacheMaxSize),
-			util.Bool(
+			apputil.Bool(
 				"blocksonly",
 				"Do not accept transactions from remote peers.",
 				cx.Config.BlocksOnly),
-			util.BoolTrue(
+			apputil.BoolTrue(
 				"notxindex",
 				"Disable the transaction index which makes all transactions"+
 					" available via the getrawtransaction RPC",
 				cx.Config.TxIndex),
-			util.BoolTrue(
+			apputil.BoolTrue(
 				"noaddrindex",
 				"Disable address-based transaction index which"+
 					" makes the searchrawtransactions RPC available",
 				cx.Config.AddrIndex,
 			),
-			util.Bool(
+			apputil.Bool(
 				"relaynonstd",
 				"Relay non-standard transactions regardless of the default"+
 					" settings for the active network.",
-				cx.Config.RelayNonStd), util.Bool("rejectnonstd",
+				cx.Config.RelayNonStd), apputil.Bool("rejectnonstd",
 				"Reject non-standard transactions regardless of"+
 					" the default settings for the active network.",
 				cx.Config.RejectNonStd),
-			util.Bool(
+			apputil.Bool(
 				"noinitialload",
 				"Defer wallet creation/opening on startup and"+
 					" enable loading wallets over RPC",
 				cx.Config.NoInitialLoad),
-			util.Bool(
+			apputil.Bool(
 				"walletconnect, wc",
 				"connect to wallet instead of full node",
 				cx.Config.Wallet),
-			util.String(
+			apputil.String(
 				"walletserver, ws",
 				"set wallet server to connect to",
 				"127.0.0.1:11046",
 				cx.Config.WalletServer),
-			util.String(
+			apputil.String(
 				"walletpass",
 				"The public wallet password -- Only required if"+
 					" the wallet was created with one",
 				"",
 				cx.Config.WalletPass),
-			util.Bool(
+			apputil.Bool(
 				"onetimetlskey",
 				"Generate a new TLS certpair at startup, but"+
 					" only write the certificate to disk",
 				cx.Config.OneTimeTLSKey),
-			util.Bool(
+			apputil.Bool(
 				"tlsskipverify",
 				"skip verifying tls certificates",
 				cx.Config.TLSSkipVerify),
-			util.StringSlice(
+			apputil.StringSlice(
 				"walletrpclisten",
 				"Listen for wallet RPC connections on this"+
 					" interface/port (default port: 11046, testnet: 21046,"+
 					" simnet: 41046)",
 				cx.Config.WalletRPCListeners),
-			util.Int(
+			apputil.Int(
 				"walletrpcmaxclients",
 				"Max number of legacy RPC clients for"+
 					" standard connections",
 				8,
 				cx.Config.WalletRPCMaxClients),
-			util.Int(
+			apputil.Int(
 				"walletrpcmaxwebsockets",
 				"Max number of legacy RPC websocket connections",
 				8,
 				cx.Config.WalletRPCMaxWebsockets,
 			),
-			util.StringSlice(
+			apputil.StringSlice(
 				"experimentalrpclisten",
 				"Listen for RPC connections on this interface/port",
 				cx.Config.ExperimentalRPCListeners),
-			util.Bool(
+			apputil.Bool(
 				"nodeoff",
 				"Starts GUI with node turned off",
 				cx.Config.NodeOff),
-			util.Bool( // TODO remove this
+			apputil.Bool( // TODO remove this
 				"testnodeoff",
 				"Starts GUI with testnode turned off",
 				cx.Config.TestNodeOff),
-			util.Bool(
+			apputil.Bool(
 				"walletoff",
 				"Starts GUI with wallet turned off",
 				cx.Config.WalletOff,

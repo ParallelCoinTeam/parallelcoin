@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // unusableFlags are the command usage flags which this utility are not able to
@@ -26,11 +26,11 @@ var (
 	// DefaultWalletCertFile is
 	DefaultWalletCertFile = filepath.Join(SPVHomeDir, "rpc.cert")
 	// NodeHomeDir is
-	NodeHomeDir = util.AppDataDir("pod", false)
+	NodeHomeDir = appdata.Dir("pod", false)
 	// PodCtlHomeDir is
-	PodCtlHomeDir = util.AppDataDir("pod/ctl", false)
+	PodCtlHomeDir = appdata.Dir("pod/ctl", false)
 	// SPVHomeDir is
-	SPVHomeDir = util.AppDataDir("pod/spv", false)
+	SPVHomeDir = appdata.Dir("pod/spv", false)
 )
 
 // ListCommands categorizes and lists all of the usable commands along with

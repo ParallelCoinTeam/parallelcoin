@@ -2,23 +2,23 @@
 package main
 
 import (
-   "bufio"
-   "encoding/binary"
-   "fmt"
-   "os"
-   "path/filepath"
-   
-   "github.com/jessevdk/go-flags"
-   
-   wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-   "github.com/p9c/pod/pkg/util"
-   walletdb "github.com/p9c/pod/pkg/wallet/db"
-   _ "github.com/p9c/pod/pkg/wallet/db/bdb"
+	"bufio"
+	"encoding/binary"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/jessevdk/go-flags"
+
+	"github.com/p9c/pod/app/appdata"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 const defaultNet = "mainnet"
 
-var datadir = util.AppDataDir("mod", false)
+var datadir = appdata.Dir("mod", false)
 
 // Flags.
 var opts = struct {

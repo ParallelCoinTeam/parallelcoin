@@ -1,17 +1,17 @@
 package main
 
 import (
-   "fmt"
-   "os"
-   "path/filepath"
-   
-   "github.com/jessevdk/go-flags"
-   
-   `github.com/p9c/pod/pkg/chain/config/netparams`
-   "github.com/p9c/pod/pkg/chain/wire"
-   database "github.com/p9c/pod/pkg/db"
-   _ "github.com/p9c/pod/pkg/db/ffldb"
-   "github.com/p9c/pod/pkg/util"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/jessevdk/go-flags"
+
+	"github.com/p9c/pod/app/appdata"
+	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	podHomeDir      = util.AppDataDir("pod", false)
+	podHomeDir      = appdata.Dir("pod", false)
 	defaultDataDir  = filepath.Join(podHomeDir, "data")
 	knownDbTypes    = database.SupportedDrivers()
 	activeNetParams = &netparams.MainNetParams

@@ -7,8 +7,9 @@ import (
    "time"
    
    "github.com/davecgh/go-spew/spew"
-   
-   rpcclient "github.com/p9c/pod/pkg/rpc/client"
+
+	"github.com/p9c/pod/app/appdata"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
    "github.com/p9c/pod/pkg/util"
 )
 
@@ -21,7 +22,7 @@ func main() {
 		},
 	}
 	// Connect to local btcwallet RPC server using websockets.
-	certHomeDir := util.AppDataDir("mod", false)
+	certHomeDir := appdata.Dir("mod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(certHomeDir, "rpc.cert"))
 	if err != nil {
 		log.Fatal(err)

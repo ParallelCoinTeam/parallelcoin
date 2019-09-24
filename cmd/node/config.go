@@ -7,19 +7,19 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	
+
+	"github.com/p9c/pod/app/appdata"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	database "github.com/p9c/pod/pkg/db"
-	
+
 	"github.com/jessevdk/go-flags"
 	"github.com/urfave/cli"
-	
+
 	// This ensures the database drivers get registered
 	_ "github.com/p9c/pod/pkg/db/ffldb"
 	"github.com/p9c/pod/pkg/peer"
-	"github.com/p9c/pod/pkg/util"
 )
 
 // Config defines the configuration options for pod. See loadConfig for details on the configuration load process.
@@ -156,7 +156,7 @@ var (
 	// DefaultDataDir is
 	DefaultDataDir = filepath.Join(DefaultHomeDir, DefaultDataDirname)
 	// DefaultHomeDir is
-	DefaultHomeDir = util.AppDataDir("pod", false)
+	DefaultHomeDir = appdata.Dir("pod", false)
 	// DefaultLogDir is
 	DefaultLogDir = filepath.Join(DefaultHomeDir, DefaultLogDirname)
 	// DefaultRPCCertFile is
