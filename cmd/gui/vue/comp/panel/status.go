@@ -16,17 +16,46 @@ func WalletStatus() mod.DuoVUEcomp {
 		`,
 		Template: `<div class="rwrap">
 
-                           
-    <ul class="rf flx flc noPadding justifyEvenly">
-        <li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Balance: </span><strong class="rcx6"><span v-html="this.duoSystem.status.balance.balance"></span></strong></li>
-        <li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Unconfirmed: </span><strong class="rcx6"><span v-html="this.duoSystem.status.balance.unconfirmed"></span></strong></li>
-        <li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Transactions: </span><strong class="rcx6"><span v-html="this.duoSystem.status.txsnumber"></span></strong></li>
-    </ul>
+     <div tabindex="0" class="e-card flx flc justifyBetween duoCard">
+            <div class="e-card-header">
+                <div class="e-card-header-caption">
+                    <div class="e-card-header-title">Balance:</div>
+                    <div class="e-card-sub-title"><span v-html="this.duoSystem.status.balance.balance"></span> DUO</div>
+                </div>
+                <div class="e-card-header-image balance"></div>
+            </div>
+            <div class="flx flc e-card-content">
+				<small><span>Pending: </span><strong><span v-html="this.duoSystem.status.balance.unconfirmed"></span></strong></small>
+				<small><span>Transactions: </span><strong><span v-html="this.duoSystem.status.txsnumber"></span></strong></small>
+        </div>
 </div>`,
 		Css: `
 
+.e-card .e-card-header .e-card-header-image.balance {
+	position:absolute;
+	bottom:0;
+	left:0;
+    background-image: url('./football.png');
+}
 
+.e-card.duoCard {
+width: 100%;
+height:100%;
+background: linear-gradient(-135deg, #f4f4f4 0%, #d4d4d4) 100%;
+}
+.e-card.duoCard div.e-card-sub-title{
+text-align:right;
 
+}
+
+.e-card.duoCard  .e-card-sub-title span{
+	font-size:36px;
+	font-weight:100;
+	letter-spacing:-1px;
+}
+.e-card.duoCard .e-card-content{
+margin-left:auto;
+}
 		`,
 	}
 }
@@ -82,106 +111,89 @@ func LocalHashRate() mod.DuoVUEcomp {
    data:function(){
 			return { 
 			duoSystem,
-            minimum: 0,
-            maximum: 120000,
-            radius: '100%',
-            pointerRadius: '100%',
-            margin: { left: 0, right: 0, top: 0, bottom: 0 },
-            lineStyle: { width: 0 },
-            majorTicks: { width: 0, },
-            minorTicks: { width: 0 },
-            pointerWidth: 7,
-            labelStyle: { useRangeColor: false, position: 'Outside', autoAngle: true,
-            font: { size: '12px', fontFamily: 'Roboto' } },
-            startAngle: 270, 
-            endAngle: 90,
-            color: '#757575',
-            animation: { enable: true, duration: 900 },
-            cap: {
-                    radius: 8,
-                    color: '#757575',
-                    border: { width: 0 }
-                },
-            needleTail: {
-                    color: '#757575',
-                    length: '15%'
-            },
-
-            annotations: [
-                {
-                    content: '<div id="templateWrapLocal"><div class="des"><div id="pointerannotationLocal" style="width:90px;text-align:center;font-size:8px;font-family:Roboto">${pointers[0].value} Hash/second</div></div></div>',
-                    angle: 0, zIndex: '1',
-                    radius: '30%'
-                }
-            ],
-            ranges: [
-                {
-                    start: 0,
-                    end: 20000,
-                    startWidth: 5, endWidth: 10,
-                    radius: '100%',
-                    color: '#cf3030',
-                },
-                {
-                    start: 20000,
-                    end: 40000,
-                    startWidth: 10, endWidth: 15,
-                    radius: '100%',
-                    color: '#cf8030',
-                }, {
-                    start: 40000,
-                    end: 60000,
-                    startWidth: 15, endWidth: 20,
-                    radius: '100%',
-                    color: '#cfa880',
-                },
-                {
-                    start: 60000,
-                    end: 80000,
-                    startWidth: 20, endWidth: 25,
-                    radius: '100%',
-                    color: '#80cf30',
-                },
-                {
-                    start: 80000,
-                    end: 100000,
-                    startWidth: 25, endWidth: 30,
-                    radius: '100%',
-                    color: '#30CF30',
-                },
-                {
-                    start: 100000,
-                    end: 120000,
-                    startWidth: 30, endWidth: 35,
-                    radius: '100%',
-                    color: '#588030',
-                }
-            ]
+        height: '100%',
+        width: '100%',
+    	padding: { left: 0, right: 0, bottom: 0, top: 0},
+        axisSettings: {
+            minY: 0, maxY: 99999
+        },
+        containerArea: {
+            background: 'white',
+            border: {
+                color: '#dcdfe0',
+                width: 0
+            }
+        },
+        border: {
+            color: '#0358a0',
+            width: 1
+        },
+        fill: '#e8f2fc',
+        type: 'Area',
+        valueType: 'Numeric',
+        dataSource:[
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 }
+],
+		lineWidth: 1
     }
 },
+mounted(){
+    this.update();
+},
+methods:{
+    update: function() {
+        let spark = document.getElementById('localHashrate-container');
+        let gauge = this.$refs.localHashrate.ej2Instances;
+        let temp = gauge.dataSource.length - 1;
+        this.update = setInterval(function() {
+            if (gauge.element.className.indexOf('e-sparkline') > -1) {
+                let value = duoSystem.status.hashrate;
+                gauge.dataSource.push({ x: ++temp, yval: value });
+                gauge.dataSource.shift();
+                gauge.refresh();
+                let net = document.getElementById('lhr');
+                if (net) {
+                net.innerHTML = 'R: ' + value.toFixed(0) + 'H/s';
+                }
+            }
+        }, 500);
+    }
+}
 		`,
 		Template: `<div class='rwrap'>
-<ejs-circulargauge ref="localHashRate" style='display:block;height:100%;width:100%;' align='center' width='100%' height='100%' id='localHashRate-container' :margin='margin' moveToCenter='true'>
-<e-axes>
-    <e-axis class="chart-content" :startAngle='startAngle' :endAngle='endAngle' :lineStyle='lineStyle' :labelStyle='labelStyle' :majorTicks='majorTicks' :minorTicks='minorTicks' 
-    :radius='radius' :minimum='minimum' :maximum='maximum' :annotations='annotations' :ranges='ranges'>
-      <e-pointers>
-          <e-pointer :value='this.duoSystem.status.hashrate' :radius='pointerRadius' :color='color' :pointerWidth='pointerWidth' :animation='animation' :cap='cap' :needleTail="needleTail"></e-pointer>
-      </e-pointers>  
-    </e-axis>
-</e-axes>
-</ejs-circulargauge>
+                        <ejs-sparkline ref="localHashrate" class="spark" id='localHashrate-container' :height='this.height' :width='this.width' :padding='padding' :lineWidth='this.lineWidth' :type='this.type' :valueType='this.valueType' :fill='this.fill' :dataSource='this.dataSource' :axisSettings='this.axisSettings' :containerArea='this.containerArea' :border='this.border' xName='x' yName='yval'></ejs-sparkline>                        
+                      <div style="color: #000000; font-size: 12px; position: absolute; top:12px; left: 15px;">
+                        <b>Local hashrate</b>
+                    </div>
+                    <div id="lhr" style="color: #d1a990;position: absolute; top:25px; left: 15px;">R: 0H/s</div>
 </div>`,
 		Css: `
 
-  #localHashRate{
+  .spark{
     height: 100%;
     width:100%;
   }
 		`,
 	}
 }
-
 func NetworkHashRate() mod.DuoVUEcomp {
 	return mod.DuoVUEcomp{
 		IsApp:    true,
@@ -194,99 +206,81 @@ func NetworkHashRate() mod.DuoVUEcomp {
    data:function(){
 			return { 
 			duoSystem,
-            minimum: 0,
-            maximum: 12000000,
-            radius: '100%',
-            pointerRadius: '100%',
-            margin: { left: 0, right: 0, top: 0, bottom: 0 },
-            lineStyle: { width: 0 },
-            majorTicks: { width: 0, },
-            minorTicks: { width: 0 },
-            pointerWidth: 7,
-            labelStyle: { useRangeColor: false, position: 'Outside', autoAngle: true,
-            font: { size: '8px', fontFamily: 'Roboto' } },
-            startAngle: 270, 
-            endAngle: 90,
-            color: '#757575',
-            animation: { enable: true, duration: 900 },
-            cap: {
-                    radius: 8,
-                    color: '#757575',
-                    border: { width: 0 }
-                },
-            needleTail: {
-                    color: '#757575',
-                    length: '15%'
-            },
-
-            annotations: [
-                {
-                    content: '<div id="templateWrapNetwork"><div class="des"><div id="pointerannotationNetwork" style="width:90px;text-align:center;font-size:12px;font-family:Roboto">${pointers[0].value} Hash/second</div></div></div>',
-                    angle: 0, zIndex: '1',
-                    radius: '30%'
-                }
-            ],
-            ranges: [
-                {
-                    start: 0,
-                    end: 2000000,
-                    startWidth: 5, endWidth: 10,
-                    radius: '102%',
-                    color: '#cf3030',
-                },
-                {
-                    start: 2000000,
-                    end: 4000000,
-                    startWidth: 10, endWidth: 15,
-                    radius: '102%',
-                    color: '#cf8030',
-                }, {
-                    start: 4000000,
-                    end: 6000000,
-                    startWidth: 15, endWidth: 20,
-                    radius: '102%',
-                    color: '#cfa880',
-                },
-                {
-                    start: 6000000,
-                    end: 8000000,
-                    startWidth: 20, endWidth: 25,
-                    radius: '102%',
-                    color: '#80cf30',
-                },
-                {
-                    start: 8000000,
-                    end: 10000000,
-                    startWidth: 25, endWidth: 30,
-                    radius: '102%',
-                    color: '#30CF30',
-                },
-                {
-                    start: 10000000,
-                    end: 12000000,
-                    startWidth: 30, endWidth: 35,
-                    radius: '102%',
-                    color: '#588030',
-                }
-            ]
+        height: '100%',
+        width: '100%',
+    	padding: { left: 0, right: 0, bottom: 0, top: 0},
+        axisSettings: {
+            minY: 0, maxY: 9999999
+        },
+        containerArea: {
+            background: 'white',
+            border: {
+                color: '#dcdfe0',
+                width: 0
+            }
+        },
+        border: {
+            color: '#cf8030',
+            width: 1
+        },
+        fill: '#cfa880',
+        type: 'Area',
+        valueType: 'Numeric',
+        dataSource:[
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 }
+],
+		lineWidth: 1
     }
 },
+mounted(){
+    this.update();
+},
+methods:{
+    update: function() {
+        let spark = document.getElementById('networkHashrate-container');
+        let gauge = this.$refs.networkHashrate.ej2Instances;
+        let temp = gauge.dataSource.length - 1;
+        this.update = setInterval(function() {
+            if (gauge.element.className.indexOf('e-sparkline') > -1) {
+                let value = duoSystem.status.networkhashrate;
+                gauge.dataSource.push({ x: ++temp, yval: value });
+                gauge.dataSource.shift();
+                gauge.refresh();
+                let net = document.getElementById('nhr');
+                if (net) {
+                net.innerHTML = 'R: ' + value.toFixed(0) + 'H/s';
+                }
+            }
+        }, 500);
+    }
+}
 		`,
 		Template: `<div class='rwrap'>
-<ejs-circulargauge ref="networkHashRate" style='display:block;height:100%;width:100%;' align='center' width='100%' height='100%' id='networkHashRate-container' :margin='margin' moveToCenter='true'>
-<e-axes>
-    <e-axis class="chart-content" :startAngle='startAngle' :endAngle='endAngle' :lineStyle='lineStyle' :labelStyle='labelStyle' :majorTicks='majorTicks' :minorTicks='minorTicks' 
-    :radius='radius' :minimum='minimum' :maximum='maximum' :annotations='annotations' :ranges='ranges'>
-      <e-pointers>
-          <e-pointer :value='this.duoSystem.status.networkhashrate' :radius='pointerRadius' :color='color' :pointerWidth='pointerWidth' :animation='animation' :cap='cap' :needleTail="needleTail"></e-pointer>
-      </e-pointers>  
-    </e-axis>
-</e-axes>
-</ejs-circulargauge>
+                        <ejs-sparkline ref="networkHashrate" class="spark" id='networkHashrate-container' :height='this.height' :padding='padding' :width='this.width' :lineWidth='this.lineWidth' :type='this.type' :valueType='this.valueType' :fill='this.fill' :dataSource='this.dataSource' :axisSettings='this.axisSettings' :containerArea='this.containerArea' :border='this.border' xName='x' yName='yval'></ejs-sparkline>                        
+                      <div style="color: #303030; font-size: 12px; position: absolute; top:12px; left: 15px;">Network hashrate</div>
+                    <div id="nhr" style="color: #d1a990;position: absolute; top: 25px; left: 15px;">R: 0H/s</div>
 </div>`,
 		Css: `
 
-  #networkHashRate{
+  .spark{
     height: 100%;
     width:100%;
   }

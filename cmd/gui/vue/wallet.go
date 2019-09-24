@@ -18,6 +18,7 @@ import (
 	btcutil "github.com/parallelcointeam/parallelcoin/pkg/util"
 	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
 	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	"time"
 )
 
 func (dv *DuoVUE) GetBalance() mod.DuoVUEbalance {
@@ -25,7 +26,7 @@ func (dv *DuoVUE) GetBalance() mod.DuoVUEbalance {
 	minconf := 0
 	getBalance, err := legacy.GetBalance(&json.GetBalanceCmd{Account: &acct, MinConf: &minconf}, dv.cx.WalletServer)
 	if err != nil {
-		dv.PushDuoVUEalert("Error",err.Error(), "error")
+		dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
 	gb, ok := getBalance.(float64)
 	if ok {
@@ -35,7 +36,7 @@ func (dv *DuoVUE) GetBalance() mod.DuoVUEbalance {
 
 	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&json.GetUnconfirmedBalanceCmd{Account: &acct}, dv.cx.WalletServer)
 	if err != nil {
-		dv.PushDuoVUEalert("Error",err.Error(), "error")
+		dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
 	ub, ok := getUnconfirmedBalance.(float64)
 	if ok {
@@ -49,7 +50,7 @@ func (dv *DuoVUE) GetTransactions(from, count int, cat string) (txs mod.DuoVUEtr
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := dv.cx.WalletServer.ListTransactions(0, 10)
 	if err != nil {
-		dv.PushDuoVUEalert("Error",err.Error(), "error")
+		dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
 	txs.TxsNumber = len(lt)
 	// lt := listTransactions.([]json.ListTransactionsResult)
@@ -85,7 +86,35 @@ func (dv *DuoVUE) GetTransactions(from, count int, cat string) (txs mod.DuoVUEtr
 	return
 }
 
-func (dv *DuoVUE) GetAddressBook()  mod.DuoVUEaddressBook{
+func (dv *DuoVUE) GetTransactionsExcertps() (txse mod.DuoVUEtransactionsExcerpts) {
+	lt, err := dv.cx.WalletServer.ListTransactions(0, 999999999)
+	if err != nil {
+		dv.PushDuoVUEalert("Error", err.Error(), "error")
+	}
+	txse.TxsNumber = len(lt)
+	balance := 0.0
+	balanceHeight := 0.0
+	for _, txRaw := range lt {
+		balance = balance + txRaw.Amount
+		t := time.Unix(0, txRaw.Time)
+		txse.Txs = append(txse.Txs, mod.TransactionExcerpt{
+			Balance:       balance,
+			Comment:       txRaw.Comment,
+			Amount:        txRaw.Amount,
+			Category:      txRaw.Category,
+			Confirmations: txRaw.Confirmations,
+			Time:          t.Format("Nov 4, 2016, 1:03:04 PM"),
+			TxID:          txRaw.TxID,
+		})
+		if balance > balanceHeight{
+			balanceHeight = balance
+		}
+	}
+	txse.BalanceHeight = balanceHeight
+	return
+}
+
+func (dv *DuoVUE) GetAddressBook() mod.DuoVUEaddressBook {
 	addressbook := new(mod.DuoVUEaddressBook)
 	minConf := 1
 	// Intermediate data for each address.
@@ -171,7 +200,7 @@ func (dv *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 	if am > 0 {
 		getBlockChain, err := rpc.HandleGetBlockChainInfo(dv.cx.RPCServer, nil, nil)
 		if err != nil {
-			dv.PushDuoVUEalert("Error",err.Error(), "error")
+			dv.PushDuoVUEalert("Error", err.Error(), "error")
 
 		}
 		result, ok := getBlockChain.(*json.GetBlockChainInfoResult)
@@ -193,7 +222,7 @@ func (dv *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 		amount, _ := btcutil.NewAmount(am)
 		addr, err := btcutil.DecodeAddress(ad, defaultNet)
 		if err != nil {
-			dv.PushDuoVUEalert("Error",err.Error(), "error")
+			dv.PushDuoVUEalert("Error", err.Error(), "error")
 
 		}
 		var validateAddr *json.ValidateAddressWalletResult
@@ -201,7 +230,7 @@ func (dv *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 			var va interface{}
 			va, err = legacy.ValidateAddress(&json.ValidateAddressCmd{Address: addr.String()}, dv.cx.WalletServer)
 			if err != nil {
-				dv.PushDuoVUEalert("Error",err.Error(), "error")
+				dv.PushDuoVUEalert("Error", err.Error(), "error")
 
 			}
 			vva := va.(json.ValidateAddressWalletResult)
@@ -209,7 +238,7 @@ func (dv *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 			if validateAddr.IsValid {
 				legacy.WalletPassphrase(json.NewWalletPassphraseCmd(wp, 5), dv.cx.WalletServer)
 				if err != nil {
-					dv.PushDuoVUEalert("Error",err.Error(), "error")
+					dv.PushDuoVUEalert("Error", err.Error(), "error")
 				}
 				_, err = legacy.SendToAddress(
 					&json.SendToAddressCmd{
@@ -219,11 +248,11 @@ func (dv *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 					dv.PushDuoVUEalert("error sending to address:", err.Error(), "error")
 
 				} else {
-					dv.PushDuoVUEalert("Address OK", "OK","success")
+					dv.PushDuoVUEalert("Address OK", "OK", "success")
 				}
 			} else {
 				if err != nil {
-					dv.PushDuoVUEalert("Invalid address","INVALID", "error")
+					dv.PushDuoVUEalert("Invalid address", "INVALID", "error")
 				}
 			}
 			dv.PushDuoVUEalert("Payment sent", "PAYMENT", "success")
@@ -235,15 +264,16 @@ func (dv *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 	return "sent"
 }
 
-func (dv *DuoVUE) CreateNewAddress(acctName, label string) string {
+func (dv *DuoVUE) CreateNewAddress(acctName string) string {
 	account, err := dv.cx.WalletServer.AccountNumber(waddrmgr.KeyScopeBIP0044, acctName)
 	if err != nil {
 	}
 	addr, err := dv.cx.WalletServer.NewAddress(account,
-		waddrmgr.KeyScopeBIP0044, false)
+		waddrmgr.KeyScopeBIP0044, true)
 	if err != nil {
 	}
-	dv.PushDuoVUEalert("New address created:", addr.EncodeAddress() , "success")
+	dv.PushDuoVUEalert("New address created:", addr.EncodeAddress(), "success")
+	fmt.Println("low", addr.EncodeAddress())
 	return addr.EncodeAddress()
 }
 

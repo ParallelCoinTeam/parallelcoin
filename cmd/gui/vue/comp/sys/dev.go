@@ -14,7 +14,7 @@ func Dev() mod.DuoVUEcomp {
 		data () { return { 
 		duoSystem,
 			}}`,
-		Template: `<dev class="swrap dev" v-show="duoSystem.bios.isDev">
+		Template: `<dev class="swrap dev" v-show="this.duoSystem.bios.isDev">
 		<div class="dev"><h1>Layout</h1>
 		DADADAD
 		</div>

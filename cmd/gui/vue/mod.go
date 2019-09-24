@@ -15,7 +15,6 @@ import (
 	"time"
 )
 
-
 type DuoVUE struct {
 	cx         *conte.Xt
 	cr         *cron.Cron
@@ -30,13 +29,13 @@ type DuoVUE struct {
 }
 
 type DuoVUEdata struct {
-	Alert        DuoVUEalert               `json:"alert"`
-	Status       mod.DuoVUEstatus          `json:"status"`
-	Addressbook  mod.DuoVUEaddressBook     `json:"addressbook"`
-	Peers        []*json.GetPeerInfoResult `json:"peers"`
-	Transactions mod.DuoVUEtransactions    `json:"transactions"`
-	Blocks       mod.DuoVUEblocks          `json:"blocks"`
-	Send         mod.Send                  `json:"send"`
+	Alert                DuoVUEalert                    `json:"alert"`
+	Status               mod.DuoVUEstatus               `json:"status"`
+	Addressbook          mod.DuoVUEaddressBook          `json:"addressbook"`
+	Peers                []*json.GetPeerInfoResult      `json:"peers"`
+	TransactionsExcerpts mod.DuoVUEtransactionsExcerpts `json:"txsex"`
+	Blocks               mod.DuoVUEblocks               `json:"blocks"`
+	Send                 mod.Send                       `json:"send"`
 }
 
 type DuoVUEcore struct {

@@ -120,6 +120,9 @@ var GetCoreCss = `
 	background-color:var(--light-grayiii);
 }
 
+.bgfff{
+	background-color:#fff;
+}
 
 html, body{
 	width:100%;
@@ -153,17 +156,15 @@ x.x{
 
  .rwrap{
     position: relative;
-    display: flex;
+    display: block;
     width: 100%;
 	height:100%;
 	overflow:hidden;
-	overflow-y:auto;
   }
 
 
 .cwrap{
     position: relative;
-    display: block;
     width: 100%;
 	height:100%;
   }
@@ -184,7 +185,7 @@ x.x{
 }
 
 .bgfff{
-background-color:#fff;
+background-color:#fff!important;
 }
 
 .grayGrad{
@@ -220,7 +221,7 @@ justify-content: space-evenly;
 
 
 
-
+ 
 
 
 
@@ -244,9 +245,15 @@ height:48px;
 
 
 
+.noPanelFrame.e-panel{
+	background:transparent!important;
+	border:none!important;
+	box-shadow:0 0 0 #cfcfcf!important;
+}
 
-
-
+.noPanelFrame.e-panel-content{
+	display:flex;
+} 
 
 
 
