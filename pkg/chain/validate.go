@@ -388,7 +388,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) error {
 	algoname := fork.GetAlgoName(algo, height)
 	log.TRACE("algoname ", algoname)
 	powLimit := fork.GetMinDiff(algoname, height)
-	log.TRACEF("CheckConnectBlockTemplate powLimit %064x %s", powLimit)
+	log.TRACEF("CheckConnectBlockTemplate powLimit %064x", powLimit)
 	// Skip the proof of work check as this is just a block template.
 	flags := BFNoPoWCheck
 	// This only checks whether the block can be connected to the tip of the
@@ -1089,7 +1089,7 @@ func // checkBlockHeaderSanity performs some preliminary checks on a block
 // The flags do not modify the behavior of this function directly,
 // however they are needed to pass along to checkProofOfWork.
 checkBlockHeaderSanity(header *wire.BlockHeader, powLimit *big.Int, timeSource MedianTimeSource, flags BehaviorFlags, height int32) error {
-	log.TRACEF("checkBlockHeaderSanity %064x %s", powLimit)
+	log.TRACEF("checkBlockHeaderSanity %064x", powLimit)
 	// Ensure the proof of work bits in the block header is in min/max range and
 	// the block hash is less than the target value described by the bits.
 	err := checkProofOfWork(header, powLimit, flags, height)
@@ -1123,7 +1123,7 @@ func // checkBlockSanity performs some preliminary checks on a block to
 // The flags do not modify the behavior of this function directly,
 // however they are needed to pass along to checkBlockHeaderSanity.
 checkBlockSanity(block *util.Block, powLimit *big.Int, timeSource MedianTimeSource, flags BehaviorFlags, DoNotCheckPow bool, height int32) error {
-	log.TRACEF("checkBlockSanity %064x %s", powLimit)
+	log.TRACEF("checkBlockSanity %064x", powLimit)
 	msgBlock := block.MsgBlock()
 	header := &msgBlock.Header
 	err := checkBlockHeaderSanity(header, powLimit, timeSource, flags, height)

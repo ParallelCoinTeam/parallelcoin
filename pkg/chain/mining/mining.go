@@ -422,7 +422,7 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 //  |  <= policy.BlockMinSize)          |   |
 //   -----------------------------------  --
 (g *BlkTmplGenerator) NewBlockTemplate(payToAddress util.Address, algo string) (*BlockTemplate, error) {
-	log.DEBUG("NewBlockTemplate", algo)
+	log.TRACE("NewBlockTemplate", algo)
 	if algo == "" {
 		algo = "random"
 	}
@@ -809,7 +809,7 @@ mempoolLoop:
 	if err != nil {
 		return nil, err
 	}
-	log.TRACEF("reqDifficulty %d %08x %064x %s", vers, reqDifficulty,
+	log.TRACEF("reqDifficulty %d %08x %064x", vers, reqDifficulty,
 		fork.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)

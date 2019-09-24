@@ -362,7 +362,7 @@ func (w *Wallet) syncWithChain() error {
 			logHeight = bestHeight
 		}
 		log.INFOF(
-			"catching up block hashes to height %d, this will take a while... %s",
+			"catching up block hashes to height %d, this will take a while",
 			logHeight,
 		)
 		// Initialize the first database transaction.

@@ -51,7 +51,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	}
 	algoVer := fork.GetAlgoVer(algoname, nH)
 	newTargetBits = fork.SecondPowLimitBits
-	log.TRACEF("newTarget %08x %s %d %s", newTargetBits, algoname, algoVer)
+	log.TRACEF("newTarget %08x %s %d", newTargetBits, algoname, algoVer)
 	last := lastNode
 	// find the most recent block of the same algo
 	//
@@ -284,7 +284,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		}
 	}
 	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv + timeSinceAlgo) / 6
-	log.TRACE("adjustment %3.4f %08x %s", adjustment, last.bits)
+	log.TRACEF("adjustment %3.4f %08x", adjustment, last.bits)
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
@@ -304,8 +304,9 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			an += strings.Repeat(" ", pad)
 		}
 		log.INFOC(func() string {
-			return fmt.Sprintf("%d %s %s %s %s %s %s %s %s %s",
+			return fmt.Sprintf("%d %08x %s %s %s %s %s %s %s %s %s %08x",
 				lastNode.height+1,
+				last.bits,
 				an,
 				RightJustify(fmt.Sprintf("%3.2f", allTimeAv), 5),
 				RightJustify(fmt.Sprintf("%3.2fa", allTimeDiv*ttpb), 7),
@@ -315,7 +316,9 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 				RightJustify(fmt.Sprintf("%3.2fA", algDiv*ttpb), 7),
 				RightJustify(fmt.Sprintf("%3.0f %3.3fD",
 					since-ttpb*float64(len(fork.List[1].Algos)), timeSinceAlgo*ttpb), 13),
-				RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11))
+				RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11),
+				newTargetBits,
+			)
 		})
 	}
 	return newTargetBits, adjustment, nil
