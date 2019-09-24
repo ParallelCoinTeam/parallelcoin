@@ -14,6 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/pod"
 )
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
@@ -36,6 +37,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
 			if err == nil {
 				log.TRACE(string(b))
+				*cx.Config = *pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
 					fmt.Println("error unmarshalling config", err)

@@ -359,7 +359,7 @@ func Configure(cx *conte.Xt) {
 		*cfg.BlockMaxWeight = *cfg.BlockMaxSize * blockchain.WitnessScaleFactor
 	}
 	// Look for illegal characters in the user agent comments.
-	log.TRACE("checking user agent comments")
+	log.TRACE("checking user agent comments", cfg.UserAgentComments)
 	for _, uaComment := range *cfg.UserAgentComments {
 		if strings.ContainsAny(uaComment, "/:()") {
 			err := fmt.Errorf("%s: The following characters must not "+
