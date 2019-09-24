@@ -1,0 +1,13 @@
+[Unit]
+Description=Parallelcoin headless server
+After=network.target
+
+[Service]
+Type=simple
+User=####
+WorkingDirectory=/home/####
+ExecStart=/usr/local/bin/parallelcoind
+Restart=on-failure # or always, on-abort, etc
+
+[Install]
+WantedBy=multi-user.target

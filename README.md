@@ -1,24 +1,24 @@
-![ScreenShot](https://travis-ci.org/parallelcoin/parallelcoin.svg?branch=master)
+# ![Logo](https://git.parallelcoin.io/dev/legacy/raw/commit/f709194e16960103834b0d0e25aec06c3d84f85b/logo/logo48x48.png) Parallelcoin Pod 
 
-Parallelcoin integration/staging tree
-====================================
+[![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://doc.parallelcoin.io/pkg/github.com/parallelcointeam/parallelcoin) [![development branch](https://img.shields.io/badge/branch-master-gray.svg)](https://github.com/parallelcointeam/parallelcoin) [![development branch](https://img.shields.io/badge/branch-development-orange.svg)](https://github.com/parallelcointeam/parallelcoin/src/branch/dev)
+[![discordbot](https://img.shields.io/badge/discord-gitbot-green.svg)](https://discord.gg/YgBWNgK)
 
-Copyright (c) 2009-2014 Bitcoin Developers,
-Copyright (c) 2013-2015 Parallelcoin Developers
+Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for Parallelcoin
 
-Parallelcoin v1.2.0.0
+#### Binaries for legacy now available for linux amd64
 
-What is Parallelcoin?
---------------------
+Get them from here: [https://git.parallelcoin.io/dev/parallelcoin-binaries](https://git.parallelcoin.io/dev/parallelcoin-binaries)
 
-Parallelcoin is an experimental new digital currency that enables instant payments to
-anyone, anywhere in the world. Parallelcoin uses peer-to-peer technology to operate
-with no central authority: managing transactions and issuing money are carried
-out collectively by the network. Parallelcoin is also the name of the open source
-software which enables the use of this currency.
+Pod is a multi-application with multiple submodules for different functions. It is self-configuring and configurations can be changed from the commandline as well as editing the json files directly, so the binary itself is the complete distribution for the suite.
 
-License
--------
+It consists of 5 main modules:
 
-Parallelcoin is released under the terms of the MIT license. See `COPYING` for more
-information or see http://opensource.org/licenses/MIT.
+1. pod/ctl - command line interface to send queries to a node or wallet and prints the results to the stdout
+2. pod/node - full node for parallelcoin network, including optional indexes for address and transaction search, low latency miner controller
+3. pod/wallet - wallet server that runs separately from the full node but depends on a full node RPC for much of its functionality, and includes a GUI front end
+4. pod/shell - combined full node and wallet server 
+5. pod/gui - webview based desktop wallet GUI
+
+## Building
+
+You can just `go install` in the root directory and `pod` will be placed in your `GOBIN` directory.
