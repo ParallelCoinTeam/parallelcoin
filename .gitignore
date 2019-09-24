@@ -14,3 +14,4 @@ src/parallelcoind
 src/openssl-1.0.1u/**
 pod
 test**
+vendor/**

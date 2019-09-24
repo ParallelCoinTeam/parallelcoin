@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"runtime"
 	"time"
 
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
@@ -1245,10 +1244,6 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 	log.TRACEF("checkProofOfWork powLimit %064x %064x", powLimit, target)
 	// The target difficulty must be less than the maximum allowed.
 	if target.Cmp(powLimit) > 0 {
-		for i := 0; i < 7; i++ {
-			_, file, line, _ := runtime.Caller(i)
-			fmt.Printf("%s:%d\n", file, line)
-		}
 		str := fmt.Sprintf("height %d block target difficulty of %064x is higher than max of %064x", height, target, powLimit)
 		return ruleError(ErrUnexpectedDifficulty, str)
 	}

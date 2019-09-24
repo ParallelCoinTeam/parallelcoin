@@ -307,6 +307,14 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("nocontroller") {
 			*cx.Config.NoController = c.Bool("nocontroller")
 		}
+		log.TRACE("set broadcast", c.Bool("broadcast"))
+		if c.IsSet("broadcast") {
+			*cx.Config.Broadcast = c.Bool("broadcast")
+		}
+		log.TRACE("set workers", c.StringSlice("workers"))
+		if c.IsSet("workers") {
+			*cx.Config.Workers = c.StringSlice("workers")
+		}
 		log.TRACE("set miningaddr", c.StringSlice("miningaddr"))
 		if c.IsSet("miningaddr") {
 			*cx.Config.MiningAddrs = c.StringSlice("miningaddr")
@@ -314,14 +322,6 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		log.TRACE("set minerpass", c.String("minerpass"))
 		if c.IsSet("minerpass") {
 			*cx.Config.MinerPass = c.String("minerpass")
-		}
-		log.TRACE("set group", c.String("group"))
-		if c.IsSet("group") {
-			*cx.Config.Group = c.String("group")
-		}
-		log.TRACE("set nodiscovery", c.String("nodiscovery"))
-		if c.IsSet("nodiscovery") {
-			*cx.Config.NoDiscovery = c.Bool("nodiscovery")
 		}
 		log.TRACE("set blockminsize", c.Int("blockminsize"))
 		if c.IsSet("blockminsize") {

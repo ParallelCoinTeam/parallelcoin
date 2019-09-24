@@ -244,10 +244,6 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				"zeroconf testnet group identifier (whitelist connections)",
 				"",
 				cx.Config.Group),
-			apputil.Bool(
-				"nodiscovery",
-				"disable zeroconf peer discovery",
-				cx.Config.NoDiscovery),
 			apputil.StringSlice(
 				"addpeer",
 				"Add a peer to connect with at startup",
@@ -412,11 +408,14 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 					" -1 = all cores",
 				-1,
 				cx.Config.GenThreads),
-			apputil.String(
-				"controller",
-				"address to bind miner controller listener",
-				genPassword(),
-				cx.Config.Controller),
+			apputil.Bool(
+				"broadcast",
+				"enable broadcasting blocks for workers to mine on",
+				cx.Config.Broadcast),
+			apputil.StringSlice(
+				"workers",
+				"addresses to send out blocks to when broadcast is not enabled",
+				cx.Config.Workers),
 			apputil.Bool(
 				"nocontroller",
 				"disable zeroconf kcp miner controller",

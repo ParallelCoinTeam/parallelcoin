@@ -129,7 +129,8 @@ type Config struct {
 	LogLevel                 *string          `group:"config" name:"Log Level" description:"Verbosity of log printouts" type:"input" inputType:"text" model:"LogLevel" featured:"false"`
 	MaxOrphanTxs             *int             `group:"policy" name:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"input" inputType:"number" model:"MaxOrphanTxs" featured:"false"`
 	MaxPeers                 *int             `group:"node" name:"Max Peers" description:"Maximum number of peers to hold connections with" type:"input" inputType:"number" model:"MaxPeers" featured:"false"`
-	MinerListener            *string          `group:"mining" name:"Miner Listener" description:"address to listen on for standalone miners to connect to" type:"input" inputType:"text" model:"MinerListener" featured:"false"`
+	Broadcast                *bool            `group:"mining" name:"Broadcast" description:"enable broadcasting of blocks for workers to work on" type:"switch" model:"Broadcast" featured:"false"`
+	Workers                  *cli.StringSlice `group:"mining" name:"MinerWorkers" description:"a list of addresses where workers are listening for blocks when not using lan broadcast" type:"input" inputType:"text" model:"Workers" featured:"false"`
 	MinerPass                *string          `group:"mining" name:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"input" inputType:"text" model:"MinerPass" featured:"false"`
 	MiningAddrs              *cli.StringSlice `group:"mining" name:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"input" inputType:"text" model:"MiningAddrs" featured:"false"`
 	MinRelayTxFee            *float64         `group:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"text" model:"MinRelayTxFee" featured:"false"`
@@ -137,7 +138,6 @@ type Config struct {
 	NoCFilters               *bool            `group:"node" name:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" model:"NoCFilters" featured:"false"`
 	NoController             *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer discovery/miner controller system"`
 	NodeOff                  *bool            `group:"debug" name:"Node Off" description:"turn off the node backend" type:"switch" model:"NodeOff" featured:"false"`
-	NoDiscovery              *bool            `category:"node" name:"NoDiscovery" description:"disables zeroconf peer autodiscovery"`
 	NoInitialLoad            *bool
 	NoPeerBloomFilters       *bool   `group:"node" name:"No Peer Bloom Filters" description:"disable bloom filtering support" type:"switch" model:"NoPeerBloomFilters" featured:"false"`
 	NoRelayPriority          *bool   `group:"policy" name:"No Relay Priority" description:"do not require free or low-fee transactions to have high priority for relaying" type:"switch" model:"NoRelayPriority" featured:"false"`
@@ -202,6 +202,7 @@ func EmptyConfig() *Config {
 		BlockMinWeight:           newint(),
 		BlockPrioritySize:        newint(),
 		BlocksOnly:               newbool(),
+		Broadcast:                newBool(),
 		CAFile:                   newstring(),
 		ConfigFile:               newstring(),
 		ConnectPeers:             newStringSlice(),
@@ -283,6 +284,7 @@ func EmptyConfig() *Config {
 		WalletRPCMaxWebsockets:   newint(),
 		WalletServer:             newstring(),
 		Whitelists:               newStringSlice(),
+		Workers:                  newStringSlice(),
 	}
 }
 
@@ -295,7 +297,7 @@ func newStringSlice() *cli.StringSlice {
 	return &o
 }
 func newfloat64() *float64 {
-	o:=1.0
+	o := 1.0
 	return &o
 }
 func newint() *int {
@@ -303,7 +305,7 @@ func newint() *int {
 	return &o
 }
 func newstring() *string {
-	o:=""
+	o := ""
 	return &o
 }
 func newDuration() *time.Duration {
