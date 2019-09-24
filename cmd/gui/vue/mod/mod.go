@@ -2,7 +2,6 @@ package mod
 
 import (
 	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
@@ -84,7 +83,21 @@ type DuoVUEtransactions struct {
 	Txs       []json.ListTransactionsResult `json:"txs"`
 	TxsNumber int                           `json:"txsnumber"`
 }
+type DuoVUEtransactionsExcerpts struct {
+	Txs           []TransactionExcerpt `json:"txs"`
+	TxsNumber     int                  `json:"txsnumber"`
+	BalanceHeight float64              `json:"balanceheight"`
+}
 
+type TransactionExcerpt struct {
+	Balance       float64 `json:"balance"`
+	Amount        float64 `json:"amount"`
+	Category      string  `json:"category"`
+	Confirmations int64   `json:"confirmations"`
+	Time          string  `json:"time"`
+	TxID          string  `json:"txid"`
+	Comment       string  `json:"comment,omitempty"`
+}
 type DuoVUEaddressBook struct {
 	Num       int       `json:"num"`
 	Addresses []Address `json:"addresses"`

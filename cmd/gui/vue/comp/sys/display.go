@@ -27,25 +27,25 @@ func Display() mod.DuoVUEcomp {
 			`,
 		Template: `
 <template>
-<x id="container" v-show="!duoSystem.bios.isBoot" class="x lightTheme">
+<x id="container" v-show="!this.duoSystem.bios.isBoot" class="x lightTheme">
 <duoLogo></duoLogo>
 <duoHeader></duoHeader>
 <duoSidebar></duoSidebar>
 <duoMain class="flx flc grayGrad duoMain">
-<duoScreenX class="flx flc fii duoScreenX"></duoScreenX>
+<duoScreenX class="duoScreenX"></duoScreenX>
 </duoMain>
 </x></template>`,
 		Css: `
 
 
 .duoMain{
+	padding:15px;
 	overflow:hidden;
 	overflow-y:auto;
 }
 
 
 .duoScreenX{
-	padding:15px;
 }
 
 

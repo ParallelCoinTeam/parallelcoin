@@ -13,6 +13,7 @@ func AddressBook() mod.DuoVUEcomp {
 		Js: `
 	data () { return { 
 	duoSystem,
+	address:"",
 	account:"default",
 	label: "no label",
     pageSettings: { 
@@ -46,20 +47,32 @@ created: function(){
 },
 methods: {
         actionBegin: function(args) { 
-            if(args.requestType == "beginEdit") { 
-                this.goCreateAddress(); 
+        	if (args.requestType === 'add') {
+				this.goCreateAddress();
+				args.data.address = createAddress;
             }; 
             if(args.requestType == "save") { 
-                this.goCreateAddress(); 
+                this.goSaveAddressLabel(); 
             } 
+        },
+	    actionComplete(args) {
+			if (args.requestType === 'add') {
+            };
         },
 		goCreateAddress: function(){
 			const addrCmd = {
 			account: this.account,
-			label: this.label,
 			};
 			const addrCmdStr = JSON.stringify(addrCmd);
 			external.invoke('createAddress:'+addrCmdStr);
+		},
+		goSaveAddressLabel: function(){
+			const addrCmd = {
+			address: this.address,
+			label: this.label,
+			};
+			const addrCmdStr = JSON.stringify(addrCmd);
+			external.invoke('saveAddressLabel:'+addrCmdStr);
 		},
 },
 `,
@@ -74,6 +87,7 @@ height="100%"
 :pageSettings='pageSettings' 
 :editSettings='editSettings'
 :actionBegin='actionBegin'
+:actionComplete='actionComplete'
 :toolbar='toolbar'>
           <e-columns>
             <e-column field='num' headerText='Index' width='80' textAlign='Right' :allowAdding='false' :allowEditing='false'></e-column>

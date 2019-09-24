@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	windowWidth  = 1440
-	windowHeight = 900
+	windowWidth  = 960
+	windowHeight = 640
 )
 
 func GetDuoVUE(cx *conte.Xt, cr *cron.Cron) *DuoVUE {
@@ -50,9 +50,10 @@ func RunVue(dV DuoVUE) {
 		AlertType: "success",
 	}
 	d := DuoVUEdata{
-		Alert:       a,
-		Status:      dV.GetDuoVUEstatus(),
-		Addressbook: dV.GetAddressBook(),
+		Alert:                a,
+		Status:               dV.GetDuoVUEstatus(),
+		TransactionsExcerpts: dV.GetTransactionsExcertps(),
+		Addressbook:          dV.GetAddressBook(),
 	}
 	_, err = dV.Web.Bind("system", &DuoVUE{
 		cx:         dV.cx,
@@ -147,7 +148,6 @@ func injectCss(dV DuoVUE) {
 
 	// Core Css
 	dV.Web.InjectCSS(string(comp.GetCoreCss))
-
 
 	for _, alj := range comp.Apps(dV.db) {
 		dV.Web.InjectCSS(string(alj.Css))

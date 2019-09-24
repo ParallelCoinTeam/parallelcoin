@@ -51,17 +51,31 @@ func (dv *DuoVUE) HandleRPC(w webview.WebView, vc string) {
 			log.Println(err)
 		}
 
-		dv.Render("send", dv.DuoSend(cmd.Wp, cmd.Ad, cmd.Am))
+		//dv.Render("send", dv.DuoSend(cmd.Wp, cmd.Ad, cmd.Am))
 	case strings.HasPrefix(vc, "createAddress:"):
 		s := strings.TrimPrefix(vc, "createAddress:")
 		cmd := struct {
 			Account string `json:"account"`
+		}{}
+		if err := enjs.Unmarshal([]byte(s), &cmd); err != nil {
+			log.Println(err)
+		}
+		b, err := enjs.Marshal(dv.CreateNewAddress(cmd.Account))
+		if err == nil {
+			dv.Web.Eval("createAddress=" + string(b) + ";")
+		}
+		//dv.Render("createAddress", dv.CreateNewAddress(cmd.Account))
+	case strings.HasPrefix(vc, "saveAddressLabel:"):
+		s := strings.TrimPrefix(vc, "saveAddressLabel:")
+		cmd := struct {
+			Address string `json:"address"`
 			Label   string `json:"label"`
 		}{}
 		if err := enjs.Unmarshal([]byte(s), &cmd); err != nil {
 			log.Println(err)
 		}
-		dv.Render("send", dv.CreateNewAddress(cmd.Account, cmd.Label))
+		//dv.Render("saveAddressLabel", dv.SaveAddressLabel(cmd.Address, cmd.Label))
+		dv.SaveAddressLabel(cmd.Address, cmd.Label)
 
 	}
 

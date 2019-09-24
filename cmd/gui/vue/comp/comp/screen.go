@@ -14,6 +14,7 @@ func Screen() mod.DuoVUEcomp {
 	  data() {
     return {
 		duoSystem,
+		cellAspectRatio:100/69,
 	}},
 `,
 		Template: `
@@ -28,7 +29,7 @@ func Screen() mod.DuoVUEcomp {
 			:allowResizing="screen.allowResizing"
 			:allowDragging="screen.allowDragging"
 			:allowFloating="screen.allowFloating"
-			:cellAspectRatio="screen.cellAspectRatio"
+			:cellAspectRatio="cellAspectRatio"
 			:cellSpacing=[15,15]>
 			<e-panels>
 				<e-panel 
