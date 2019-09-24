@@ -9,6 +9,7 @@ import (
 	"github.com/dchest/blake256"
 	skein "github.com/enceve/crypto/skein/skein256"
 	gost "github.com/programmer10110/gostreebog"
+	"go.uber.org/atomic"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
@@ -18,7 +19,7 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
-const HashReps = 1
+const HashReps = 2
 
 // Argon2i takes bytes, generates a Lyra2REv2 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {
@@ -56,6 +57,8 @@ func reverse(b []byte) []byte {
 	}
 	return out
 }
+
+var vary atomic.Uint64
 
 // DivHash first runs an arbitrary big number calculation involving a very
 // large integer, and hashes the result. In this way, this hash requires
@@ -95,10 +98,10 @@ func DivHash(hf func([]byte) []byte, blockbytes []byte, howmany int) []byte {
 	copy(ddd, divdb)
 	// this allows us run this operation an arbitrary number of times
 	if howmany > 0 {
-		return DivHash(hf, ddd, howmany-1)
+		return DivHash(hf, append(ddd, reverse(ddd)...), howmany-1)
 	}
 	// fmt.Printf("%x\n", ddd)
-	return hf(ddd)
+	return Cryptonight7v2(hf(ddd))
 }
 
 // Hash computes the hash of bytes using the named hash

@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"go.uber.org/atomic"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	`github.com/p9c/pod/pkg/chain/config/netparams`
 	"github.com/p9c/pod/pkg/chain/fork"
@@ -39,6 +41,7 @@ type CPUMiner struct {
 	updateHashes      chan uint64
 	speedMonitorQuit  chan struct{}
 	quit              chan struct{}
+	rotator           atomic.Uint64
 }
 
 // Config is a descriptor containing the cpu miner configuration.
@@ -85,13 +88,13 @@ const (
 	// transaction can be.
 	maxExtraNonce = 2 ^ 64 - 1
 	// hpsUpdateSecs is the number of seconds to wait in between each update to the hashes per second monitor.
-	hpsUpdateSecs = 9
+	hpsUpdateSecs = 15
 	// hashUpdateSec is the number of seconds each worker waits in between
 	// notifying the speed monitor with how many hashes have been completed
 	// while they are actively searching for a solution.  This is done to reduce
 	// the amount of syncs between the workers that must be done to keep track
 	// of the hashes per second.
-	hashUpdateSecs = 1
+	hashUpdateSecs = 3
 )
 
 var (
@@ -286,7 +289,6 @@ func (m *CPUMiner) Stop() {
 // accordingly by generating a new block template.  When a block is solved, it
 // is submitted. It must be run as a goroutine.
 func (m *CPUMiner) generateBlocks(quit chan struct{}) {
-	counter := 0
 	// Start a ticker which is used to signal checks for stale work and updates
 	// to the speed monitor.
 	ticker := time.NewTicker(time.Second) // * hashUpdateSecs)
@@ -323,6 +325,7 @@ out:
 			continue
 		}
 		// choose the algorithm on a rolling cycle
+		counter := m.rotator.Load()
 		algo := "sha256d"
 		switch fork.GetCurrent(curHeight) {
 		case 0:
@@ -332,12 +335,12 @@ out:
 				algo = "scrypt"
 			}
 		case 1:
-			l9 := len(fork.P9AlgoVers)
+			l9 := uint64(len(fork.P9AlgoVers))
 			mod := counter % l9
 			algo = fork.P9AlgoVers[int32(mod+5)]
 			// log.WARN("algo", algo)
 		}
-		counter++
+		m.rotator.Add(1)
 		// Choose a payment address at random.
 		rand.Seed(time.Now().UnixNano())
 		payToAddr := m.cfg.MiningAddrs[rand.Intn(len(m.cfg.MiningAddrs))]
@@ -496,7 +499,7 @@ func (m *CPUMiner) solveBlock(
 		// 	mn = 1 << shifter
 		// }
 		// if fork.GetCurrent(blockHeight) == 0 {
-		mn = 1 << 6 * m.cfg.NumThreads
+		mn = 1 << 8
 		// }
 		log.TRACE("starting round from ", rNonce)
 		for i := rNonce; i <= rNonce+mn; i++ {

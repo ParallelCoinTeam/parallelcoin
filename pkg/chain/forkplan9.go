@@ -22,7 +22,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	adjustment float64, err error) {
 	log.TRACE("algoname ", algoname)
-	const max float64 = 10000
+	const max float64 = 65536
 	const maxA, minA = max, 1 / max
 	const minAvSamples = 9
 	// square := func(f float64) float64 {
@@ -30,7 +30,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	// }
 	nH := lastNode.height + 1
 	if lastNode == nil {
-		return fork.FirstPowLimitBits, 1, nil
+		return fork.SecondPowLimitBits, 1, nil
 	}
 	// At activation difficulty resets
 	if b.params.Net == wire.MainNet {
@@ -38,15 +38,15 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			if l {
 				log.DEBUG("on plan 9 hardfork")
 			}
-			return fork.FirstPowLimitBits, 1, nil
+			return fork.SecondPowLimitBits, 1, nil
 		}
 	}
 	if b.params.Net == wire.TestNet3 {
 		if fork.List[1].TestnetStart == nH {
 			if l {
-				log.DEBUG("on plan 9 hardfork")
+				log.DEBUG("on plan 9 hardfork", algoname)
 			}
-			return fork.FirstPowLimitBits, 1, nil
+			return fork.SecondPowLimitBits, 1, nil
 		}
 	}
 	algoVer := fork.GetAlgoVer(algoname, nH)
@@ -58,7 +58,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	if last.version != algoVer {
 		ln := last.RelativeAncestor(1)
 		if ln == nil {
-			return fork.FirstPowLimitBits, 1, nil
+			return fork.SecondPowLimitBits, 1, nil
 		}
 		if ln.version == algoVer {
 			last = ln
@@ -71,7 +71,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 					if l {
 						log.DEBUG("before first ", algoname)
 					}
-					return fork.FirstPowLimitBits, 1, nil
+					return fork.SecondPowLimitBits, 1, nil
 				}
 				// ignore the first block as its time is not a normal timestamp
 				//
@@ -284,6 +284,12 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 		}
 	}
 	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv + timeSinceAlgo) / 6
+	if adjustment > maxA {
+		adjustment=maxA
+	}
+	if adjustment < minA {
+		adjustment=minA
+	}
 	log.TRACEF("adjustment %3.4f %08x", adjustment, last.bits)
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))

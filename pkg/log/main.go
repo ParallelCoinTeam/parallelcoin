@@ -41,8 +41,8 @@ var (
 	colorGreen     = "\u001b[38;5;40m"
 	colorBlue      = "\u001b[38;5;33m"
 	colorPurple    = "\u001b[38;5;99m"
-	colorViolet    = "\u001b[38;5;201"
-	colorBrown     = "\u001b[38;5;130"
+	colorViolet    = "\u001b[38;5;201m"
+	colorBrown     = "\u001b[38;5;130m"
 	colorBold      = "\u001b[1m"
 	colorUnderline = "\u001b[4m"
 	colorItalic    = "\u001b[3m"
@@ -294,33 +294,33 @@ func composit(text, level string, color bool) string {
 	if color {
 		switch level {
 		case "FTL":
-			level = colorBold + colorViolet + level + colorOff
-			since = colorViolet + since + colorOff
-			file = colorItalic + colorBlue+ file + colorOff
-			line = colorItalic + colorBlue+ line + colorOff
-		case "ERR":
 			level = colorBold + colorRed + level + colorOff
 			since = colorRed + since + colorOff
 			file = colorItalic + colorBlue+ file + colorOff
 			line = colorItalic + colorBlue+ line + colorOff
-		case "WRN":
+		case "ERR":
 			level = colorBold + colorOrange + level + colorOff
 			since = colorOrange + since + colorOff
 			file = colorItalic + colorBlue+ file + colorOff
 			line = colorItalic + colorBlue+ line + colorOff
-		case "INF":
+		case "WRN":
 			level = colorBold + colorYellow + level + colorOff
 			since = colorYellow + since + colorOff
 			file = colorItalic + colorBlue+ file + colorOff
 			line = colorItalic + colorBlue+ line + colorOff
-		case "DBG":
+		case "INF":
 			level = colorBold + colorGreen + level + colorOff
 			since = colorGreen + since + colorOff
 			file = colorItalic + colorBlue+ file + colorOff
 			line = colorItalic + colorBlue+ line + colorOff
-		case "TRC":
+		case "DBG":
 			level = colorBold + colorBlue + level + colorOff
 			since = colorBlue + since + colorOff
+			file = colorItalic + colorBlue+ file + colorOff
+			line = colorItalic + colorBlue+ line + colorOff
+		case "TRC":
+			level = colorBold + colorViolet + level + colorOff
+			since = colorViolet + since + colorOff
 			file = colorItalic + colorBlue+ file + colorOff
 			line = colorItalic + colorBlue+ line + colorOff
 		}
