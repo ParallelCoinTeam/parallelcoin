@@ -135,13 +135,6 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 			}
 		}
 	}
-	// if we are using discovery we override the listeners with ":0" and
-	// the system takes care of interfaces and port allocation
-	if !*cx.Config.NoDiscovery {
-		*cx.Config.Listeners = []string{":0"}
-		*cx.Config.RPCListeners = []string{":0"}
-		*cx.Config.WalletRPCListeners = []string{":0"}
-	}
 	// create server and start it
 	server, err := rpc.NewNode(cx.Config, cx.StateCfg, cx.ActiveNet,
 		*cx.Config.Listeners, db, cx.ActiveNet,
@@ -166,8 +159,6 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 			nodechan <- server.RPCServers[0]
 		}
 	}
-	// run discovery to add new peers
-	cancelDiscovery := DiscoverPeers(cx)
 	// Wait until the interrupt signal is received from an OS signal or
 	// shutdown is requested through one of the subsystems such as the
 	// RPC server.
@@ -180,8 +171,6 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		}
 		server.WaitForShutdown()
 		log.INFO("server shutdown complete")
-		cancelDiscovery()
-		cx.StateCfg.DiscoveryUpdate("node", "")
 		wg.Done()
 		return nil
 	case <-interrupt.HandlersDone:

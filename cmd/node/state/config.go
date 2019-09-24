@@ -5,7 +5,6 @@ import (
 	"time"
 
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/discovery"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -19,8 +18,6 @@ type Config struct {
 	ActiveMinerKey      []byte
 	ActiveMinRelayTxFee util.Amount
 	ActiveWhitelists    []*net.IPNet
-	DiscoveryUpdate     discovery.RequestFunc
-	RouteableAddress    string
 	DropAddrIndex       bool
 	DropTxIndex         bool
 	DropCfIndex         bool

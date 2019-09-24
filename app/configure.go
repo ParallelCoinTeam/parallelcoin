@@ -17,8 +17,6 @@ func Configure(cx *conte.Xt) {
 	initConfigFile(cfg)
 	initLogDir(cfg)
 	initParams(cx)
-	getInterfaces(cx)
-	startDiscovery(cx)
 	initListeners(cx)
 	initTLSStuffs(cfg)
 	initLogLevel(cfg)
@@ -41,7 +39,6 @@ func Configure(cx *conte.Xt) {
 	validateOnions(cfg)
 	validateMiningStuff(cfg, cx.StateCfg, cx.ActiveNet)
 	setDiallers(cfg, cx.StateCfg)
-	setDiscoveryListeners(cfg)
 	// if the user set the save flag, or file doesn't exist save the file now
 	if state.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
 		log.TRACE("saving configuration")

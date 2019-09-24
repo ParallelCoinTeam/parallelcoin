@@ -20,20 +20,16 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dchest/blake256 v1.1.0
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
-	github.com/glendc/go-external-ip v0.0.0-20170425150139-139229dcdddd
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.3.2
-	github.com/grandcat/zeroconf v0.0.0-20190424104450-85eadb44205c
-	github.com/jackpal/gateway v1.0.5
 	github.com/jcelliott/lumber v0.0.0-20160324203708-dd349441af25 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/kkdai/bstream v1.0.0
 	github.com/lightninglabs/gozmq v0.0.0-20190710231225-cea2a031735d
 	github.com/minio/highwayhash v1.0.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
-	github.com/p9c/kcp v0.0.0-20190506100930-b7d5985a4fa3
+	github.com/p9c/kcp v1.0.9
 	github.com/p9c/rpcx v1.0.9
-	github.com/pelletier/go-toml v1.4.0
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/urfave/cli v1.22.1
@@ -42,5 +38,5 @@ require (
 	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392
 	golang.org/x/net v0.0.0-20190923162816-aa69164e4478
 	golang.org/x/text v0.3.2
-	google.golang.org/grpc v1.20.1
+	google.golang.org/grpc v1.23.1
 )

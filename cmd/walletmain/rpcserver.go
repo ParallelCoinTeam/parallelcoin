@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/urfave/cli"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -200,14 +199,6 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config,
 				return nil, nil, err
 			}
 
-			if !*config.NoDiscovery {
-				l := listeners[0].Addr().String()
-				ls := strings.Split(l, ":")
-				port := ls[len(ls)-1]
-				l = stateCfg.RouteableAddress + ":" + port
-				stateCfg.DiscoveryUpdate("experimentalrpc", l)
-				*config.ExperimentalRPCListeners = cli.StringSlice{l}
-			}
 			creds := credentials.NewServerTLSFromCert(&keyPair)
 			server = grpc.NewServer(grpc.Creds(creds))
 			rpcserver.StartVersionService(server)
@@ -229,14 +220,6 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config,
 		if len(listeners) == 0 {
 			err := errors.New("failed to create listeners for legacy RPC server")
 			return nil, nil, err
-		}
-		if !*config.NoDiscovery {
-			l := listeners[0].Addr().String()
-			ls := strings.Split(l, ":")
-			port := ls[len(ls)-1]
-			l = stateCfg.RouteableAddress + ":" + port
-			stateCfg.DiscoveryUpdate("walletrpc", l)
-			*config.WalletRPCListeners = cli.StringSlice{l}
 		}
 		opts := legacy.Options{
 			Username:            *config.Username,

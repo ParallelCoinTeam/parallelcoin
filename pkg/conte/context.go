@@ -1,8 +1,6 @@
 package conte
 
 import (
-	"context"
-	"net"
 	"sync/atomic"
 
 	scribble "github.com/nanobox-io/golang-scribble"
@@ -12,7 +10,6 @@ import (
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"
 	`github.com/p9c/pod/pkg/chain/config/netparams`
-	"github.com/p9c/pod/pkg/discovery"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -56,13 +53,6 @@ type Xt struct {
 	DB *scribble.Driver
 	// RealNode is the main node
 	RealNode *rpc.Node
-	// StopDiscovery turns off the discovery server
-	StopDiscovery context.CancelFunc
-	// RequestDiscoveryUpdate allows the addition or removal of text entries
-	// in the discovery advertisement
-	RequestDiscoveryUpdate discovery.RequestFunc
-	// RouteableInterface is the available routeable interface
-	RouteableInterface *net.Interface
 }
 
 // GetNewContext returns a fresh new context
