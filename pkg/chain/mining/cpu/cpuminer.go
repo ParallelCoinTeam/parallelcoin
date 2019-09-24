@@ -393,7 +393,7 @@ func (m *CPUMiner) miningWorkerController() {
 			go m.generateBlocks(quit)
 		}
 	}
-	log.TRACEF("spawning %d worker(s) %s", m.numWorkers)
+	log.TRACEF("spawning %d worker(s)", m.numWorkers)
 	// Launch the current number of workers by default.
 	runningWorkers = make([]chan struct{}, 0, m.numWorkers)
 	launchWorkers(m.numWorkers)
@@ -627,8 +627,9 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
 	since := block.MsgBlock().Header.Timestamp.Unix() - prevTime
 	bHash := block.MsgBlock().BlockHashWithAlgos(block.Height())
-	log.WARNF("new block height %d %s%10d %08x %v %s %ds since prev",
+	log.WARNF("new block height %d %08x %s%10d %08x %v %s %ds since prev",
 		block.Height(),
+		prevBlock.MsgBlock().Header.Bits,
 		bHash,
 		block.MsgBlock().Header.Timestamp.Unix(),
 		block.MsgBlock().Header.Bits,

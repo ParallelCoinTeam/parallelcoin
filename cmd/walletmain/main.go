@@ -270,7 +270,7 @@ func rpcClientConnectLoop(config *pod.Config, activeNet *netparams.Params,
 // authentication error.  Instead, all requests to the client will simply error.
 func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, error) {
 	log.TRACEF(
-		"attempting RPC client connection to %v, TLS: %s, %s",
+		"attempting RPC client connection to %v, TLS: %s",
 		*config.RPCConnect, fmt.Sprint(*config.TLS),
 	)
 	rpcC, err := chain.NewRPCClient(activeNet, *config.RPCConnect,

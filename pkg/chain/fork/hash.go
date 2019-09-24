@@ -18,7 +18,7 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
-const HashReps = 8
+const HashReps = 1
 
 // Argon2i takes bytes, generates a Lyra2REv2 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {

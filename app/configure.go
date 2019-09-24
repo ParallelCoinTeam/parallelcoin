@@ -13,7 +13,6 @@ func Configure(cx *conte.Xt) {
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
 	state := cx.StateCfg
-	cfg.Lock()
 	initDataDir(cfg)
 	initConfigFile(cfg)
 	initLogDir(cfg)
@@ -48,5 +47,4 @@ func Configure(cx *conte.Xt) {
 		log.TRACE("saving configuration")
 		save.Pod(cx.Config)
 	}
-	cfg.Unlock()
 }

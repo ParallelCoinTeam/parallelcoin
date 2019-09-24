@@ -310,7 +310,7 @@ func // handleMessage is the main handler for incoming notifications and
 		return
 	}
 	id := uint64(*in.ID)
-	log.TRACEF("received response for id %d (result %s) %s", id, in.Result)
+	log.TRACEF("received response for id %d (result %s)", id, in.Result)
 	request := c.removeRequest(id)
 	// Nothing more to do if there is no request associated with this reply.
 	if request == nil || request.responseChan == nil {
@@ -760,7 +760,7 @@ func // sendRequest sends the passed json request to the associated server
 		jReq.responseChan <- &response{err: err}
 		return
 	}
-	log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
+	log.TRACEF("sending command [%s] with id %d", jReq.method, jReq.id)
 	c.sendMessage(jReq.marshalledJSON)
 }
 
