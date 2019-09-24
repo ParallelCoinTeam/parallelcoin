@@ -129,9 +129,15 @@ html, body{
 }
 
 
-x#x{
+x.x{
 	position:fixed;
-	display: block;
+	display: grid;
+	grid-gap: 0;
+	grid-template-columns: 60px 1fr;
+	grid-template-rows: 60px 1fr;
+	grid-template-areas:
+	"Logo Header"
+	"Sidebar Main"
 	width:100%;
 	height:100vh;
 	margin:0;
@@ -144,15 +150,6 @@ x#x{
 	background-color:var(--dark);
 }
 
-.swrap{
-	position: relative;
-	display:flex;
-	width:100%;
-	height:100vh;
-	margin:0;
-	padding:0;
-	overflow:hidden;
-}
 
  .rwrap{
     position: relative;
@@ -161,6 +158,14 @@ x#x{
 	height:100%;
 	overflow:hidden;
 	overflow-y:auto;
+  }
+
+
+.cwrap{
+    position: relative;
+    display: block;
+    width: 100%;
+	height:100%;
   }
 
 
@@ -232,10 +237,6 @@ align-items:center;
 width:auto;
 height:48px;
 }
-
-
-
-
 
 
 

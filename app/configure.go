@@ -80,6 +80,7 @@ func Configure(cx *conte.Xt) {
 	routeable := discovery.GetRouteableInterface()
 	cx.RouteableInterface = routeable
 	addrs, _ := routeable.Addrs()
+	if len(addrs) > 0 {
 	routeableString := strings.Split(addrs[0].String(), "/")[0]
 	cx.StopDiscovery, cx.RequestDiscoveryUpdate, err = discovery.
 		Serve(cx.ActiveNet, cx.RouteableInterface, *cx.Config.Group)
@@ -88,6 +89,7 @@ func Configure(cx *conte.Xt) {
 	}
 	cx.StateCfg.DiscoveryUpdate = cx.RequestDiscoveryUpdate
 	cx.StateCfg.RouteableAddress = routeableString
+	}
 
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
 		len(*cfg.ConnectPeers) < 1 {

@@ -16,12 +16,13 @@ func Menu() mod.DuoVUEcomp {
 		duoSystem,
 		data: {}
 	}},
+
+
 `,
 		Template: `
 <template>
- <div class="listWrapper" style="width: inherit;height: inherit;">
+ <div class="flx justifyCenter itemsCenter listWrapper" style="width: inherit;height: inherit;">
         <span :class="[data.icon + ' list_svg']"></span>
-        <span class="list_text">{{data.text}} </span>
         <span :class="[data.badge]" v-if="data.messages !== ''" style="float: right;margin-top: 16px;font-size: 12px;margin-right: 5px;">{{data.messages}} New</span>
     </div>
 </template>
@@ -120,10 +121,7 @@ line-height: 1;
 
 #menulist {
     width: 100%;
-    /* margin: 0 auto; */
     position: relative;
-    /* top: 5vh; */
-    padding-left: 20px;
     font-weight: 600;
     margin-top: 15px;
 }
@@ -131,13 +129,11 @@ line-height: 1;
     width: 24px;
     height: 24px;
     display: inline-block;
-    margin-right: 8px;
     vertical-align: text-top !important;
 }
 .e-listview .e-list-icon {
     height: 16px !important;
     width: 16px !important;
-    margin-right: 8px !important;
 }
 .e-listview .e-list-icon:hover {
     color: #30CF30 !important;

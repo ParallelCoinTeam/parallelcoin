@@ -24,7 +24,7 @@ func Transactions() mod.DuoVUEcomp {
 		Template: `<div class="rwrap">
 
 <div class="select-wrap">
-            <ejs-dropdownlist id='ddlelement' :dataSource='ddldata' placeholder='Select category to filter' :change="onChange"></ejs-dropdownlist>
+            <ejs-dropdownlist id='ddlelement' :dataSource='ddldata' placeholder='Select category to filter'></ejs-dropdownlist>
         </div>
 
         <ejs-grid :dataSource="this.duoSystem.transactions.txs" height="100%" :allowPaging="true" :pageSettings='pageSettings'>
