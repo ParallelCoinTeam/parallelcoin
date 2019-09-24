@@ -18,8 +18,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/urfave/cli"
-
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/upnp"
@@ -458,7 +456,6 @@ func (s *Node) Stop() error {
 		return nil
 	}
 	log.TRACE("node shutting down")
-	s.StateCfg.DiscoveryUpdate("node", "")
 	// Stop the CPU miner if needed
 	s.CPUMiner.Stop()
 	// Shutdown the RPC server if it's not disabled.
@@ -2527,14 +2524,6 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 		}
 		if len(listeners) == 0 {
 			return nil, errors.New("no valid listen address")
-		}
-		if !*config.NoDiscovery {
-			l := listeners[0].Addr().String()
-			ls := strings.Split(l, ":")
-			port := ls[len(ls)-1]
-			l = stateCfg.RouteableAddress + ":" + port
-			stateCfg.DiscoveryUpdate("node", l)
-			*config.Listeners = cli.StringSlice{l}
 		}
 	}
 	nThreads := runtime.NumCPU()

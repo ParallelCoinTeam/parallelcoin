@@ -20,7 +20,6 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/discovery"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/normalize"
 	"github.com/p9c/pod/pkg/peer/connmgr"
@@ -83,34 +82,6 @@ func initParams(cx *conte.Xt) {
 		*cx.Config.SimNet = false
 		*cx.Config.RegressionTest = false
 		cx.ActiveNet = &netparams.MainNetParams
-	}
-}
-
-func getInterfaces(cx *conte.Xt) {
-	// setting up for zeroconf discovery advertisement
-	routeable := discovery.GetRouteableInterface()
-	if routeable == nil {
-		log.INFO("found no routeable network interfaces")
-		return
-	}
-	cx.RouteableInterface = routeable
-	addrs, _ := routeable.Addrs()
-	if len(addrs) < 1 {
-		log.INFO("not starting discovery with no network interfaces available")
-		return
-	}
-	routeableString := strings.Split(addrs[0].String(), "/")[0]
-	cx.StateCfg.RouteableAddress = routeableString
-}
-
-func startDiscovery(cx *conte.Xt) {
-	var err error
-	cx.StopDiscovery, cx.RequestDiscoveryUpdate, err = discovery.
-		Serve(cx.ActiveNet, cx.RouteableInterface, *cx.Config.Group)
-	if err != nil {
-		log.ERROR("error starting discovery server: ", err)
-	} else {
-		cx.StateCfg.DiscoveryUpdate = cx.RequestDiscoveryUpdate
 	}
 }
 
@@ -608,16 +579,4 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			return nil, errors.New("tor has been disabled")
 		}
 	}
-}
-
-func setDiscoveryListeners(cfg *pod.Config) {
-	// if we are using discovery we override the listeners with ":0" and
-	// the system takes care of interfaces and port allocation
-	if !*cfg.NoDiscovery {
-		*cfg.Listeners = []string{":0"}
-		*cfg.RPCListeners = []string{":0"}
-		*cfg.WalletRPCListeners = []string{":0"}
-		*cfg.ExperimentalRPCListeners = []string{":0"}
-	}
-
 }

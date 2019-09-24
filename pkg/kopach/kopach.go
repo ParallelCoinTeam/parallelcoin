@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"math/rand"
-	"strings"
 	"sync"
 	"time"
 
@@ -12,8 +11,8 @@ import (
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/mining"
-	"github.com/p9c/pod/pkg/discovery"
 	"github.com/p9c/pod/pkg/kcpx"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -37,40 +36,6 @@ type Kopach struct {
 	quit        chan struct{}
 }
 
-// discover starts a search and updates
-func (k *Kopach) discover() {
-	serviceName := discovery.GetParallelcoinServiceName(k.params)
-	cancelSearch, resultsChan, err := discovery.AsyncZeroConfSearch(
-		serviceName, k.group)
-	if err != nil {
-		ERROR("error running zeroconf search ", err)
-	}
-	go func() {
-		for {
-			select {
-			case r := <-resultsChan:
-			out:
-				for _, x := range r.Text {
-					split := strings.Split(x, "=")
-					if split[0] == "controller" {
-						for _, x := range *k.Controllers {
-							if split[1] == x {
-								// already have it
-								break out
-							}
-						}
-						k.Lock()
-						*k.Controllers = append(*k.Controllers, split[1])
-						k.Unlock()
-					}
-				}
-			case <-k.quit:
-				cancelSearch()
-			}
-		}
-	}()
-}
-
 // NewKopach returns a new worker loaded with a mining function.
 // - shutdown() stops the miner
 // - done unblocks and returns nil when shutdown is complete
@@ -92,10 +57,6 @@ func NewKopach(service, group, address, password string, controllers []string,
 	}
 	d := make(chan struct{})
 	ticker := time.NewTicker(time.Second)
-	// turn on discovery and populate the Controllers list
-	if !nodiscovery {
-		k.discover()
-	}
 	go func() {
 		_, stopServer := kcpx.Serve(address, "Kopach", password, k)
 		select {
@@ -121,7 +82,7 @@ func NewKopach(service, group, address, password string, controllers []string,
 				kc := (*k.Controllers)[rn]
 				err := k.X.Call(ctx, "Subscribe", kc, &deadline)
 				if err != nil {
-					ERROR("error sending block ", err)
+					log.ERROR("error sending block ", err)
 					if nodiscovery {
 						// in nodiscovery mode we roll to the next on failure
 						k.Lock()
@@ -146,7 +107,7 @@ func NewKopach(service, group, address, password string, controllers []string,
 				}
 				go func() {
 					<-ctx.Done()
-					WARN("subscription accepted, expires ", deadline, )
+					log.WARN("subscription accepted, expires ", deadline, )
 					cancel()
 				}()
 			}
@@ -166,7 +127,7 @@ func NewKopach(service, group, address, password string, controllers []string,
 func (k *Kopach) Block(ctx context.Context, args *[]mining.BlockTemplate,
 	reply *time.Time) (err error) {
 	if *args == nil {
-		WARN("empty block means don't work")
+		log.WARN("empty block means don't work")
 		return errors.New("empty block, not working :)")
 	}
 	defer func() {
@@ -211,12 +172,12 @@ func (k *Kopach) Submit(b *util.Block) (reply string) {
 	for try := 0; try < 3; try++ {
 		err := k.X.Call(ctx, "Submit", &b, &reply)
 		if err != nil {
-			ERROR("error sending block ", err)
+			log.ERROR("error sending block ", err)
 			return err.Error()
 		}
 	}
 	<-ctx.Done()
-	WARN("controller replied ", reply, " to block submit", )
+	log.WARN("controller replied ", reply, " to block submit", )
 	cancel()
 	return reply
 }

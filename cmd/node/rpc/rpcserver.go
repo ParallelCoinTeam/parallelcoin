@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/btcsuite/websocket"
-	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
@@ -906,14 +905,6 @@ func (s *Server) Start() {
 			s.WG.Done()
 		}(listener)
 	}
-	if !*s.Config.NoDiscovery {
-		ll := strings.Split(s.Cfg.Listeners[0].Addr().String(), ":")
-		port := ll[len(ll)-1]
-		l := s.StateCfg.RouteableAddress + ":" + port
-		s.StateCfg.DiscoveryUpdate("rpc", l)
-		*s.Config.RPCListeners = cli.StringSlice{l}
-		*s.Config.RPCConnect = l
-	}
 	s.NtfnMgr.WG.Add(2)
 	s.NtfnMgr.Start()
 }
@@ -935,7 +926,6 @@ func (s *Server) Stop() error {
 			return err
 		}
 	}
-	s.StateCfg.DiscoveryUpdate("rpc", "")
 	s.NtfnMgr.Shutdown()
 	s.NtfnMgr.WaitForShutdown()
 	close(s.Quit)

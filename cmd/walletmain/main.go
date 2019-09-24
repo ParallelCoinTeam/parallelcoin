@@ -98,14 +98,12 @@ func Main(config *pod.Config, stateCfg *state.Config,
 			// finish up any requests?
 			log.WARN("stopping RPC server")
 			rpcS.Stop()
-			stateCfg.DiscoveryUpdate("experimentalrpc", "")
 			log.INFO("RPC server shutdown")
 		})
 	}
 	if legacyServer != nil {
 		interrupt.AddHandler(func() {
 			log.TRACE("stopping wallet RPC server")
-			stateCfg.DiscoveryUpdate("walletrpc", "")
 			legacyServer.Stop()
 			log.TRACE("wallet RPC server shutdown")
 		})
@@ -119,13 +117,11 @@ func Main(config *pod.Config, stateCfg *state.Config,
 		log.WARN("wallet killswitch activated")
 		if legacyServer != nil {
 			log.WARN("stopping wallet RPC server")
-			stateCfg.DiscoveryUpdate("walletrpc", "")
 			legacyServer.Stop()
 			log.INFO("stopped wallet RPC server")
 		}
 		if rpcS != nil {
 			log.WARN("stopping RPC server")
-			stateCfg.DiscoveryUpdate("experimentalrpc", "")
 			rpcS.Stop()
 			log.INFO("RPC server shutdown")
 			log.INFO("unloading wallet")
