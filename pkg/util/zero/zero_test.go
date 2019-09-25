@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/parallelcointeam/parallelcoin/pkg/util/zero"
+	. "github.com/p9c/pod/pkg/util/zero"
 )
 
 func makeOneBytes(	n int) []byte {

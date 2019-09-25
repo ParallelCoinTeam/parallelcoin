@@ -5,7 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 //nolint

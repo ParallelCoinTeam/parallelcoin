@@ -4,7 +4,7 @@ import (
 	js "encoding/json"
 	"errors"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/json"
 )
 
 // FutureRawResult is a future promise to deliver the result of a RawRequest RPC invocation (or an applicable error).

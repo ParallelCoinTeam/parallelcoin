@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/snacl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/zero"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/snacl"
+	"github.com/p9c/pod/pkg/util/zero"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 const (

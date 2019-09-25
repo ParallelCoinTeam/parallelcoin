@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"sort"
 
-	txauthor "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/author"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/cl"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // byAmount defines the methods needed to satisify sort.Interface to

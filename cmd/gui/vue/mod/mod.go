@@ -1,7 +1,7 @@
 package mod
 
 import (
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/json"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"

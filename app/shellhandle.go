@@ -6,13 +6,13 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/cmd/node"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {

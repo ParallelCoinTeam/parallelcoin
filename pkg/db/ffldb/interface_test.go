@@ -15,11 +15,11 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 var (

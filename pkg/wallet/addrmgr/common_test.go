@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 var (

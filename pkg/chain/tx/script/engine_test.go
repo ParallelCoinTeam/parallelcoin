@@ -3,8 +3,8 @@ package txscript
 import (
 	"testing"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // // TestBadPC sets the pc to a deliberately bad result then confirms that Step() and Disasm fail correctly.

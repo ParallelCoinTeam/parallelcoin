@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"os"
 	
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 const (

@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // calcNextRequiredDifficultyHalcyon calculates the required difficulty for the

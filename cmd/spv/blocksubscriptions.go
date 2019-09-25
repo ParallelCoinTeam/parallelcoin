@@ -3,8 +3,8 @@ package spv
 import (
 	"fmt"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 type (

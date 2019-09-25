@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // headerProgressLogger provides periodic logging for other services in order

@@ -16,10 +16,10 @@ import (
 
 	"github.com/btcsuite/websocket"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/wallet"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 type WebsocketClient struct {

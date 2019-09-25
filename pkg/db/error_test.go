@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	database "github.com/p9c/pod/pkg/db"
 )
 
 // TestErrorCodeStringer tests the stringized output for the ErrorCode type.

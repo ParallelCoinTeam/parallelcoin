@@ -3,11 +3,11 @@ package bloom
 import (
 	"fmt"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // merkleBlock is used to house intermediate information needed to generate a wire.MsgMerkleBlock according to a filter.

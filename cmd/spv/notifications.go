@@ -3,8 +3,8 @@ package spv
 import (
 	"errors"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/addrmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
+	"github.com/p9c/pod/pkg/peer/addrmgr"
+	"github.com/p9c/pod/pkg/peer/connmgr"
 )
 
 type (

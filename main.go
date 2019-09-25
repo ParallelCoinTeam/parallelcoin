@@ -5,7 +5,7 @@
 package main
 
 import (
-	"github.com/parallelcointeam/parallelcoin/cmd"
+	"github.com/p9c/pod/cmd"
 )
 
 func main() {

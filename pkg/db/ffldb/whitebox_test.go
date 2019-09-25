@@ -14,10 +14,10 @@ import (
    "github.com/btcsuite/goleveldb/leveldb"
    ldberrors "github.com/btcsuite/goleveldb/leveldb/errors"
    
-   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   database "github.com/parallelcointeam/parallelcoin/pkg/db"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
+   chaincfg "github.com/p9c/pod/pkg/chain/config"
+   "github.com/p9c/pod/pkg/chain/wire"
+   database "github.com/p9c/pod/pkg/db"
+   "github.com/p9c/pod/pkg/util"
 )
 
 var (

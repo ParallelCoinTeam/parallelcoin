@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"sync"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/cl"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // TODO: It would be good to send errors during notification creation to the rpc

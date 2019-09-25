@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/json"
 )
 
 // TestHelpers tests the various helper functions which create pointers to primitive types.

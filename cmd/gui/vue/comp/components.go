@@ -1,11 +1,11 @@
 package comp
 
 import (
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/comp"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/panel"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/comp/sys"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/db"
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
+	"github.com/p9c/pod/cmd/gui/vue/comp/comp"
+	"github.com/p9c/pod/cmd/gui/vue/comp/panel"
+	"github.com/p9c/pod/cmd/gui/vue/comp/sys"
+	"github.com/p9c/pod/cmd/gui/vue/db"
+	"github.com/p9c/pod/cmd/gui/vue/mod"
 )
 
 func Apps(d db.DuoVUEdb) (c []mod.DuoVUEcomp) {

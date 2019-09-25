@@ -4,13 +4,13 @@ package txauthor
 import (
 	"errors"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	txrules "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/rules"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	txsizes "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/sizes"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	h "github.com/parallelcointeam/parallelcoin/pkg/util/helpers"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	txsizes "github.com/p9c/pod/pkg/chain/tx/sizes"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	h "github.com/p9c/pod/pkg/util/helpers"
 )
 
 type (

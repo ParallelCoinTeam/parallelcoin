@@ -5,17 +5,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // RPCClient represents a persistent client connection to a bitcoin RPC server

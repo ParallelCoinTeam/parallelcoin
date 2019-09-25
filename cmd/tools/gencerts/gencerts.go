@@ -10,7 +10,7 @@ import (
    
    "github.com/jessevdk/go-flags"
    
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
+   "github.com/p9c/pod/pkg/util"
 )
 
 type config struct {

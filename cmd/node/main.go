@@ -10,15 +10,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/path"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/version"
-	indexers "github.com/parallelcointeam/parallelcoin/pkg/chain/index"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/cmd/node/path"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/cmd/node/version"
+	indexers "github.com/p9c/pod/pkg/chain/index"
+	"github.com/p9c/pod/pkg/conte"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 // var StateCfg = new(state.Config)

@@ -1,9 +1,9 @@
 package shell
 
 import (
-	"github.com/parallelcointeam/parallelcoin/cmd/node"
-	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 )
 
 // Config is the combined app and logging configuration data

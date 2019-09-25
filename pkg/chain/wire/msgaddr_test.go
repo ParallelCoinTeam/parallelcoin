@@ -10,7 +10,7 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+   "github.com/p9c/pod/pkg/util/cl"
 )
 
 // TestAddr tests the MsgAddr API.

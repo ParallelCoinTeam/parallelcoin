@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/json"
 )
 
 // TestHelpReflectInternals ensures the various help functions which deal with reflect types work as expected for various Go types.

@@ -4,8 +4,8 @@
 package gui
 
 import (
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/pkgs"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/pkgs"
 )
 
 type _dtype int

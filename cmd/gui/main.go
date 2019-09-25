@@ -3,10 +3,10 @@
 package gui
 
 import (
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
+	"github.com/p9c/pod/cmd/gui/vue"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/robfig/cron"
 	"sync"
 	"sync/atomic"

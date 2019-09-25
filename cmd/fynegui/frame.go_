@@ -5,7 +5,7 @@ import (
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
-	"github.com/parallelcointeam/parallelcoin/pkg/logo"
+	"github.com/p9c/pod/pkg/logo"
 )
 
 var sp = func() fyne.CanvasObject {

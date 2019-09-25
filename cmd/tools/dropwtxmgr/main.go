@@ -10,10 +10,10 @@ import (
    
    "github.com/jessevdk/go-flags"
    
-   wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
-   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-   _ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+   wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+   "github.com/p9c/pod/pkg/util"
+   walletdb "github.com/p9c/pod/pkg/wallet/db"
+   _ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 const defaultNet = "mainnet"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // MaxBlockHeadersPerMsg is the maximum number of block headers that can be in a single bitcoin headers message.

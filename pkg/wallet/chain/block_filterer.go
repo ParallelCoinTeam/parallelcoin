@@ -1,12 +1,12 @@
 package chain
 
 import (
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+   `github.com/p9c/pod/pkg/chain/config/netparams`
+   txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/cl"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // BlockFilterer is used to iteratively scan blocks for a set of addresses of

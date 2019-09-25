@@ -1,14 +1,14 @@
 # coinset
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/parallelcointeam/parallelcoin/coinset)
+[![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/p9c/pod/coinset)
 
 Package coinset provides bitcoin-specific convenience functions for selecting from and managing sets of unspent transaction outpoints (UTXOs). A comprehensive suite of tests is provided to ensure proper functionality. See `test_coverage.txt` for the gocov coverage report. Alternatively, if you are running a POSIX OS, you can run the `cov_report.sh` script for a real-time report.
 
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/parallelcointeam/parallelcoin/coinset
+$ go get -u github.com/p9c/pod/coinset
 ```
 
 ## Usage

@@ -16,14 +16,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/legacy"
-	rpcserver "github.com/parallelcointeam/parallelcoin/pkg/rpc/server"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/legacy"
+	rpcserver "github.com/p9c/pod/pkg/rpc/server"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 type listenFunc func(net string, laddr string) (net.Listener, error)

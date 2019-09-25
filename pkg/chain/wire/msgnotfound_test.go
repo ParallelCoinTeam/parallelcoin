@@ -8,8 +8,8 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+   chainhash "github.com/p9c/pod/pkg/chain/hash"
+   "github.com/p9c/pod/pkg/util/cl"
 )
 
 // TestNotFound tests the MsgNotFound API.

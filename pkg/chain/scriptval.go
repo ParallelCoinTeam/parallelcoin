@@ -6,12 +6,12 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hardfork"
+	"github.com/p9c/pod/pkg/chain/hardfork"
 
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // txValidateItem holds a transaction along with which input to validate.

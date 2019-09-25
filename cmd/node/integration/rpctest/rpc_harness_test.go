@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func testSendOutputs(r *Harness, t *testing.T) {

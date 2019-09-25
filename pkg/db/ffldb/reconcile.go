@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"hash/crc32"
 
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // The serialized write cursor location format is:

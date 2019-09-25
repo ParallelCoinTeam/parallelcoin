@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/path"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/cmd/node/path"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // dirEmpty returns whether or not the specified directory path is empty

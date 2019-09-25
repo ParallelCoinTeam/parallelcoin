@@ -1,6 +1,6 @@
 package conf
 
-import "github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
+import "github.com/p9c/pod/cmd/gui/vue/mod"
 
 var GetParallelCoinRepo = []mod.DuoVUEcomp{
 	{

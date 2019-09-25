@@ -15,7 +15,7 @@ import (
    "golang.org/x/crypto/scrypt"
    "golang.org/x/crypto/sha3"
    
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+   chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 const HashReps = 0

@@ -18,12 +18,12 @@ import (
    "github.com/btcsuite/goleveldb/leveldb/opt"
    "github.com/btcsuite/goleveldb/leveldb/util"
    
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   database "github.com/parallelcointeam/parallelcoin/pkg/db"
-   u "github.com/parallelcointeam/parallelcoin/pkg/util"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/treap"
+   chainhash "github.com/p9c/pod/pkg/chain/hash"
+   "github.com/p9c/pod/pkg/chain/wire"
+   database "github.com/p9c/pod/pkg/db"
+   u "github.com/p9c/pod/pkg/util"
+   "github.com/p9c/pod/pkg/util/cl"
+   "github.com/p9c/pod/pkg/util/treap"
 )
 
 const (

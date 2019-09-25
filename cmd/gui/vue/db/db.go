@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"unicode"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/gui/vue/mod"
+	"github.com/p9c/pod/cmd/gui/vue/mod"
 
 	"golang.org/x/text/unicode/norm"
 )

@@ -7,12 +7,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
-	vp "github.com/parallelcointeam/parallelcoin/pkg/wallet/votingpool"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
+	vp "github.com/p9c/pod/pkg/wallet/votingpool"
 )
 
 func TestLoadPoolAndDepositScript(	t *testing.T) {

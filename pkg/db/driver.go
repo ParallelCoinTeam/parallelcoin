@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // Driver defines a structure for backend drivers to use when they registered themselves as a backend which implements the DB interface.

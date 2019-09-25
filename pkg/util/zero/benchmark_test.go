@@ -3,7 +3,7 @@ package zero_test
 import (
 	"testing"
 
-	. "github.com/parallelcointeam/parallelcoin/pkg/util/zero"
+	. "github.com/p9c/pod/pkg/util/zero"
 )
 
 var (

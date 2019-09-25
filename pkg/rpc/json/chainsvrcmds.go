@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // AddNodeSubCmd defines the type used in the addnode JSON-RPC command for the sub command field.

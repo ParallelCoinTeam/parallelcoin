@@ -8,7 +8,7 @@ import (
 	
 	"github.com/urfave/cli"
 	
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/p9c/pod/pkg/conte"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
