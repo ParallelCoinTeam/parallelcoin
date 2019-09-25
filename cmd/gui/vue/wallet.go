@@ -1,4 +1,4 @@
-//+build !nogui
+// +build !nogui
 // +build !headless
 
 package vue
@@ -6,25 +6,28 @@ package vue
 import (
 	"encoding/hex"
 	"fmt"
+	"time"
+
 	"github.com/minio/highwayhash"
+
 	"github.com/p9c/pod/cmd/gui/vue/mod"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
 	btcutil "github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	"time"
 )
 
 func (dv *DuoVUE) GetBalance() mod.DuoVUEbalance {
 	acct := "default"
 	minconf := 0
-	getBalance, err := legacy.GetBalance(&json.GetBalanceCmd{Account: &acct, MinConf: &minconf}, dv.cx.WalletServer)
+	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
+		MinConf: &minconf}, dv.cx.WalletServer)
 	if err != nil {
 		dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
@@ -34,7 +37,8 @@ func (dv *DuoVUE) GetBalance() mod.DuoVUEbalance {
 		dv.Data.Status.Balance.Balance = bb
 	}
 
-	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&json.GetUnconfirmedBalanceCmd{Account: &acct}, dv.cx.WalletServer)
+	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.
+	GetUnconfirmedBalanceCmd{Account: &acct}, dv.cx.WalletServer)
 	if err != nil {
 		dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
@@ -93,16 +97,16 @@ func (dv *DuoVUE) GetTransactionsExcertps() (txse mod.DuoVUEtransactionsExcerpts
 	}
 	txse.TxsNumber = len(lt)
 
-	//for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
+	// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
 	//	lt[i], lt[j] = lt[j], lt[i]
-	//}
+	// }
 
 	balanceHeight := 0.0
 	txseRaw := []mod.TransactionExcerpt{}
 	for _, txRaw := range lt {
-		unixTimeUTC := time.Unix(txRaw.Time, 0) //gives unix time stamp in utc
+		unixTimeUTC := time.Unix(txRaw.Time, 0) // gives unix time stamp in utc
 		txseRaw = append(txseRaw, mod.TransactionExcerpt{
-			//Balance:       txse.Balance + txRaw.Amount,
+			// Balance:       txse.Balance + txRaw.Amount,
 			Comment:       txRaw.Comment,
 			Amount:        txRaw.Amount,
 			Category:      txRaw.Category,
@@ -112,22 +116,22 @@ func (dv *DuoVUE) GetTransactionsExcertps() (txse mod.DuoVUEtransactionsExcerpts
 		})
 	}
 	var balance float64
-	for _, tx := range txseRaw{
-		balance =balance + tx.Amount
-		tx.Balance =  balance
+	for _, tx := range txseRaw {
+		balance = balance + tx.Amount
+		tx.Balance = balance
 		txse.Txs = append(txse.Txs, tx)
 		if txse.Balance > balanceHeight {
 			balanceHeight = txse.Balance
 		}
-		fmt.Println("btititititmt",tx.Time)
+		fmt.Println("btititititmt", tx.Time)
 		fmt.Println("bbbbbbbbb", tx.Amount)
 	}
-		fmt.Println("cccccccccccccccccccccccccccccccccccccccccccccc")
-		fmt.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+	fmt.Println("cccccccccccccccccccccccccccccccccccccccccccccc")
+	fmt.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
 
-		fmt.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
-		fmt.Println("balanceHeightbalanceHeight", balanceHeight)
-		fmt.Println("bbbbbbbbbbbbbbbbbbbbbbbbbbbb", txse.Balance)
+	fmt.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+	fmt.Println("balanceHeightbalanceHeight", balanceHeight)
+	fmt.Println("bbbbbbbbbbbbbbbbbbbbbbbbbbbb", txse.Balance)
 	txse.BalanceHeight = balanceHeight
 	return
 }
@@ -246,7 +250,8 @@ func (dv *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 		var validateAddr *btcjson.ValidateAddressWalletResult
 		if err == nil {
 			var va interface{}
-			va, err = legacy.ValidateAddress(&json.ValidateAddressCmd{Address: addr.String()}, dv.cx.WalletServer)
+			va, err = legacy.ValidateAddress(&btcjson.
+			ValidateAddressCmd{Address: addr.String()}, dv.cx.WalletServer)
 			if err != nil {
 				dv.PushDuoVUEalert("Error", err.Error(), "error")
 
@@ -254,7 +259,8 @@ func (dv *DuoVUE) DuoSend(wp string, ad string, am float64) string {
 			vva := va.(btcjson.ValidateAddressWalletResult)
 			validateAddr = &vva
 			if validateAddr.IsValid {
-				legacy.WalletPassphrase(json.NewWalletPassphraseCmd(wp, 5), dv.cx.WalletServer)
+				legacy.WalletPassphrase(btcjson.NewWalletPassphraseCmd(wp, 5),
+					dv.cx.WalletServer)
 				if err != nil {
 					dv.PushDuoVUEalert("Error", err.Error(), "error")
 				}

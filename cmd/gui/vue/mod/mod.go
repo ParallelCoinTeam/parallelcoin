@@ -1,10 +1,11 @@
 package mod
 
 import (
-	"github.com/p9c/pod/pkg/rpc/json"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
+
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 type DuoGuiTemplates struct {
@@ -80,7 +81,7 @@ type DuoVUEbalance struct {
 }
 
 type DuoVUEtransactions struct {
-	Txs       []json.ListTransactionsResult `json:"txs"`
+	Txs       []btcjson.ListTransactionsResult `json:"txs"`
 	TxsNumber int                           `json:"txsnumber"`
 }
 type DuoVUEtransactionsExcerpts struct {
@@ -123,7 +124,7 @@ type DuoVUEchain struct {
 // System Ststus
 type DuoVUEstatus struct {
 	Version          string                        `json:"ver"`
-	WalletVersion    map[string]json.VersionResult `json:"walletver"`
+	WalletVersion    map[string]btcjson.VersionResult `json:"walletver"`
 	UpTime           int64                         `json:"uptime"`
 	Cpu              []cpu.InfoStat                `json:"cpu"`
 	CpuPercent       []float64                     `json:"cpupercent"`

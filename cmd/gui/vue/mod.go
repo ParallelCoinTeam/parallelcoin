@@ -5,7 +5,8 @@ import (
 	"github.com/p9c/pod/cmd/gui/vue/mod"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+
 	"github.com/robfig/cron"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -32,7 +33,7 @@ type DuoVUEdata struct {
 	Alert                DuoVUEalert                    `json:"alert"`
 	Status               mod.DuoVUEstatus               `json:"status"`
 	Addressbook          mod.DuoVUEaddressBook          `json:"addressbook"`
-	Peers                []*json.GetPeerInfoResult      `json:"peers"`
+	Peers                []*btcjson.GetPeerInfoResult      `json:"peers"`
 	TransactionsExcerpts mod.DuoVUEtransactionsExcerpts `json:"txsex"`
 	Blocks               mod.DuoVUEblocks               `json:"blocks"`
 	Send                 mod.Send                       `json:"send"`
@@ -59,7 +60,7 @@ func (dv *DuoVUE) GetDuoVUEstatus() (mod.DuoVUEstatus) {
 	params := dv.cx.RPCServer.Cfg.ChainParams
 	chain := dv.cx.RPCServer.Cfg.Chain
 	chainSnapshot := chain.BestSnapshot()
-	gnhpsCmd := json.NewGetNetworkHashPSCmd(nil, nil)
+	gnhpsCmd := btcjson.NewGetNetworkHashPSCmd(nil, nil)
 	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(dv.cx.RPCServer, gnhpsCmd, nil)
 	if err != nil {
 	}
@@ -70,7 +71,7 @@ func (dv *DuoVUE) GetDuoVUEstatus() (mod.DuoVUEstatus) {
 	if err != nil {
 	}
 	status.Version = "0.0.1"
-	status.WalletVersion = v.(map[string]json.VersionResult)
+	status.WalletVersion = v.(map[string]btcjson.VersionResult)
 	status.UpTime = time.Now().Unix() - dv.cx.RPCServer.Cfg.StartupTime
 	status.CurrentNet = dv.cx.RPCServer.Cfg.ChainParams.Net.String()
 	status.NetworkHashPS = networkHashesPerSec

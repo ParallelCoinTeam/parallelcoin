@@ -3,38 +3,33 @@
 package gui
 
 import (
-	"github.com/p9c/pod/cmd/gui/vue"
-	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/util/cl"
-	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/robfig/cron"
 	"sync"
 	"sync/atomic"
 
-	"github.com/zserge/webview"
+	"github.com/robfig/cron"
 
 	"github.com/p9c/pod/cmd/gui/vue"
-	"github.com/p9c/pod/cmd/gui/vue/comp"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
+
+	"github.com/p9c/pod/pkg/log"
 )
 
 func Main(cx *conte.Xt, wg *sync.WaitGroup) {
 	cr := cron.New()
-	log <- cl.Warn{"starting gui", cl.Ine()}
+	log.WARN("starting gui")
 	dV := vue.GetDuoVUE(cx, cr)
 	cleaned := &atomic.Value{}
 	cleaned.Store(false)
 	cleanup := func() {
 		if !cleaned.Load().(bool) {
 			cleaned.Store(true)
-			log <- cl.Debug{"terminating webview", cl.Ine()}
+			log.DEBUG("terminating webview")
 			dV.Web.Terminate()
 			interrupt.Request()
 			log.DEBUG("waiting for waitgroup")
 			wg.Wait()
-			log <- cl.Debug{"exiting webview", cl.Ine()}
+			log.DEBUG("exiting webview")
 			dV.Web.Exit()
 		}
 	}
