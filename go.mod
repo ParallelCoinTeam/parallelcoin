@@ -27,6 +27,8 @@ require (
 	github.com/kkdai/bstream v1.0.0
 	github.com/lightninglabs/gozmq v0.0.0-20190710231225-cea2a031735d
 	github.com/minio/highwayhash v1.0.0
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
 	github.com/p9c/kcp v1.0.9
 	github.com/p9c/rpcx v1.0.9
