@@ -33,6 +33,7 @@ require (
 	github.com/p9c/kcp v1.0.9
 	github.com/p9c/rpcx v1.0.9
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
+	github.com/robfig/cron v1.2.0
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/urfave/cli v1.22.1
 	github.com/zserge/webview v0.0.0-20190123072648-16c93bcaeaeb

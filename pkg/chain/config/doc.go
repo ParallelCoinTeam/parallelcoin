@@ -6,7 +6,6 @@
 //  import (
 //          "flag"
 //          "fmt"
-//          "github.com/p9c/pod/pkg/util/cl"
 //          "github.com/p9c/pod/pkg/util"
 //          "github.com/p9c/pod/pkg/chain/config"
 //  )

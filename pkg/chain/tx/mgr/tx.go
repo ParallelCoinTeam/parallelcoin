@@ -399,7 +399,7 @@ func // addCredit is an AddCredit helper that runs in an update transaction.
 	}
 	txOutAmt := util.Amount(rec.MsgTx.TxOut[index].Value)
 	log.DEBUGF(
-		"marking transaction %v output %d (%v) spendable %s",
+		"marking transaction %v output %d (%v) spendable",
 		rec.Hash, index, txOutAmt)
 	cred := credit{
 		outPoint: wire.OutPoint{
