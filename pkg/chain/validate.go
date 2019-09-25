@@ -653,7 +653,7 @@ CalcBlockSubsidy(height int32, chainParams *netparams.Params) (r int64) {
 	// Equivalent to: baseSubsidy / 2^(height/subsidyHalvingInterval)
 	switch fork.GetCurrent(height) {
 	case 0:
-		return int64(baseSubsidy) >> int64(height/chainParams.
+		return int64(baseSubsidy) >> uint64(height/chainParams.
 			SubsidyReductionInterval)
 	case 1:
 		var total util.Amount
