@@ -6,11 +6,11 @@ import (
 	"encoding/gob"
 	"fmt"
 
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/snacl"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/snacl"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // These constants define the serialized length for a given encrypted extended

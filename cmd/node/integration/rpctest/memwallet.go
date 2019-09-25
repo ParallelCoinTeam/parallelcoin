@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"sync"
 	
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	`github.com/p9c/pod/pkg/chain/config/netparams`
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
 var (

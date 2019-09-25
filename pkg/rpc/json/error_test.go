@@ -3,7 +3,7 @@ package json_test
 import (
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/json"
 )
 
 // TestErrorCodeStringer tests the stringized output for the ErrorCode type.

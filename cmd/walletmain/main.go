@@ -9,16 +9,16 @@ import (
 	_ "net/http/pprof"
 	"sync"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining/addresses"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/legacy"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet/chain"
+	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/chain/mining/addresses"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/legacy"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/wallet"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 // Main is a work-around main function that is required since deferred

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"sync"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+   `github.com/p9c/pod/pkg/chain/config/netparams`
+   chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (

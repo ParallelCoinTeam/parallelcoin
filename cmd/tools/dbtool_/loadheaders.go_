@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/db"
 )
 
 // headersCmd defines the configuration options for the loadheaders command.

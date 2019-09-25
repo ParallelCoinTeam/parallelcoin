@@ -146,7 +146,7 @@ func NoClosure(_ func() string)           {}
 func Println(level string, fh *os.File) func(a ...interface{}) {
 	return func(a ...interface{}) {
 		_, loc, line, _ := runtime.Caller(1)
-		files := strings.Split(codeLoc, "github.com/parallelcointeam/parallelcoin/")
+		files := strings.Split(codeLoc, "github.com/p9c/pod/")
 		codeLoc := fmt.Sprint(files[1], ":", line)
 		text := fmt.Sprintln(a...)
 		fmt.Println(text, codeLoc)
@@ -164,7 +164,7 @@ func Println(level string, fh *os.File) func(a ...interface{}) {
 func Printf(level string, fh *os.File) func(format string, a ...interface{}) {
 	return func(format string, a ...interface{}) {
 		_, loc, line, _ := runtime.Caller(1)
-		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
+		files := strings.Split(loc, "github.com/p9c/pod/")
 		codeLoc := fmt.Sprint(files[1], ":", line)
 		text := fmt.Sprintf(format, a...)
 		fmt.Printf("%s %s", text, codeLoc)
@@ -183,7 +183,7 @@ func Printc(level string, fh *os.File) func(fn func() string) {
 	return func(fn func() string) {
 		text := fn()
 		_, loc, line, _ := runtime.Caller(1)
-		files := strings.Split(loc, "github.com/parallelcointeam/parallelcoin/")
+		files := strings.Split(loc, "github.com/p9c/pod/")
 		codeLoc := fmt.Sprint(files[1], ":", line)
 		fmt.Printf("%s %s", text, codeLoc)
 		if fh != nil {

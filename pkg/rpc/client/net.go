@@ -3,7 +3,7 @@ package rpcclient
 import (
 	js "encoding/json"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/json"
 )
 
 // AddNodeCommand enumerates the available commands that the AddNode function accepts.

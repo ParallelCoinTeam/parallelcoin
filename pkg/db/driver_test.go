@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 var (

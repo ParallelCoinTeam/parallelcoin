@@ -7,10 +7,10 @@ import (
 
 	"git.parallelcoin.io/dev/rpcx/client"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/mining"
-	"github.com/parallelcointeam/parallelcoin/pkg/kcpx"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/chain/mining"
+	"github.com/p9c/pod/pkg/kcpx"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // Subscriber is the information required to track a subscriber

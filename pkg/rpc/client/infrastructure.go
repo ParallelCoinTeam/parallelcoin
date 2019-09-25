@@ -22,8 +22,8 @@ import (
    "github.com/btcsuite/go-socks/socks"
    "github.com/btcsuite/websocket"
    
-   "github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+   "github.com/p9c/pod/pkg/rpc/json"
+   "github.com/p9c/pod/pkg/util/cl"
 )
 
 var (

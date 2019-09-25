@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func ExampleAmount() {

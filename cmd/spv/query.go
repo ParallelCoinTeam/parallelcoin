@@ -8,15 +8,15 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   "github.com/parallelcointeam/parallelcoin/cmd/spv/cache"
-   "github.com/parallelcointeam/parallelcoin/cmd/spv/filterdb"
-   blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
+   "github.com/p9c/pod/cmd/spv/cache"
+   "github.com/p9c/pod/cmd/spv/filterdb"
+   blockchain "github.com/p9c/pod/pkg/chain"
+   chainhash "github.com/p9c/pod/pkg/chain/hash"
+   "github.com/p9c/pod/pkg/chain/wire"
+   "github.com/p9c/pod/pkg/util"
+   "github.com/p9c/pod/pkg/util/cl"
+   "github.com/p9c/pod/pkg/util/gcs"
+   "github.com/p9c/pod/pkg/util/gcs/builder"
 )
 
 var (

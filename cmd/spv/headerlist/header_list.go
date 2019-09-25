@@ -1,6 +1,6 @@
 package headerlist
 
-import "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+import "github.com/p9c/pod/pkg/chain/wire"
 
 // Chain is an interface that stores a list of Nodes. Each node represents a
 // header in the main chain and also includes a height along with it. This is

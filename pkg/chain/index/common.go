@@ -5,9 +5,9 @@ import (
 	"encoding/binary"
 	"errors"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 var (

@@ -1,9 +1,9 @@
 package wallet
 
 import (
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // UnstableAPI exposes unstable api in the wallet

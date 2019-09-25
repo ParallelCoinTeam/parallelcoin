@@ -3,8 +3,8 @@ package hardfork
 import (
 	"encoding/hex"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Payee is an address and amount

@@ -8,18 +8,18 @@ import (
 	"strings"
 	"time"
 	
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	database "github.com/p9c/pod/pkg/db"
 	
 	"github.com/jessevdk/go-flags"
 	"github.com/urfave/cli"
 	
 	// This ensures the database drivers get registered
-	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
+	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Config defines the configuration options for pod. See loadConfig for details on the configuration load process.

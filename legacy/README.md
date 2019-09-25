@@ -1,4 +1,4 @@
-<!-- [![Release](https://img.shields.io/gitlab/release/parallelcoin/parallelcoin.svg?style=flat-square)](https://gitlab.com/parallelcointeam/parallelcoin/releases/latest) -->
+<!-- [![Release](https://img.shields.io/gitlab/release/parallelcoin/parallelcoin.svg?style=flat-square)](https://gitlab.com/p9c/pod/releases/latest) -->
 
 > ### Important update
 >
@@ -6,7 +6,7 @@
 >
 > ## Universal Binaries now available!
 >
-> Note that there is now available **AppImage universal binaries** of the [wallet and full node available](https://github.com/parallelcointeam/parallelcoin/releases)
+> Note that there is now available **AppImage universal binaries** of the [wallet and full node available](https://github.com/p9c/pod/releases)
 
 > ### Where is the [current development version](https://github.com/parallelcointeam/parallelcoin)?
 > The replacement, based on conformal's [btcd](https://github.com/btcsuite/btcd), is found at our **new** git host in the [pod](https://github.com/parallelcointeam/parallelcoin) repository.

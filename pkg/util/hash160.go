@@ -7,7 +7,7 @@ import (
    
    "golang.org/x/crypto/ripemd160"
    
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+   "github.com/p9c/pod/pkg/util/cl"
 )
 
 // Calculate the hash of hasher over buf.

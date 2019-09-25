@@ -11,7 +11,7 @@ import (
 	"git.parallelcoin.io/dev/rpcx/server"
 	"golang.org/x/crypto/pbkdf2"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // NewXClient returns a new XClient configured for parallelcoin rpcx service

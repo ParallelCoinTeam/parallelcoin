@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util/base58"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // ErrMalformedPrivateKey describes an error where a WIF-encoded private key cannot be decoded due to being improperly formatted.  This may occur if the byte length is incorrect or an unexpected magic number was encountered.

@@ -12,12 +12,12 @@ import (
    
    "github.com/davecgh/go-spew/spew"
    
-   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/snacl"
-   waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+   chaincfg "github.com/p9c/pod/pkg/chain/config"
+   chainhash "github.com/p9c/pod/pkg/chain/hash"
+   "github.com/p9c/pod/pkg/util"
+   "github.com/p9c/pod/pkg/util/snacl"
+   waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+   walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // // newHash converts the passed big-endian hex string into a chainhash.Hash.

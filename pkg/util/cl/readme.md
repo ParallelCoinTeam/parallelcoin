@@ -4,7 +4,7 @@ Clog is a logger that works by receiving values, including closures, on channels
 
 ## Documentation
 
-See here at our private [godoc](http://89.40.12.55:8008/pkg/github.com/parallelcointeam/parallelcoin/pkg/util/cl/) (or go get it and run your own :) )
+See here at our private [godoc](http://89.40.12.55:8008/pkg/github.com/p9c/pod/pkg/util/cl/) (or go get it and run your own :) )
 
 ## Automatic
 

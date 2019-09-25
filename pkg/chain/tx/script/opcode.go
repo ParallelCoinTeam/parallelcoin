@@ -10,10 +10,10 @@ import (
    
    "golang.org/x/crypto/ripemd160"
    
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-   ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+   chainhash "github.com/p9c/pod/pkg/chain/hash"
+   "github.com/p9c/pod/pkg/chain/wire"
+   "github.com/p9c/pod/pkg/util/cl"
+   ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // An opcode defines the information related to a txscript opcode.  opfunc, if present, is the function to call to perform the opcode on the script.  The current script is passed in as a slice with the first member being the opcode itself.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // MaxAddrPerMsg is the maximum number of addresses that can be in a single bitcoin addr message (MsgAddr).

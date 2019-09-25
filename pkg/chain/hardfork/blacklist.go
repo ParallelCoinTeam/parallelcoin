@@ -1,6 +1,6 @@
 package hardfork
 
-import "github.com/parallelcointeam/parallelcoin/pkg/util"
+import "github.com/p9c/pod/pkg/util"
 
 // Blacklist is a list of addresses that have been suspended
 var Blacklist = []util.Address{

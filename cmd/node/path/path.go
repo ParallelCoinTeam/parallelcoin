@@ -3,7 +3,7 @@ package path
 import (
 	"path/filepath"
 	
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+	"github.com/p9c/pod/pkg/conte"
 )
 
 // BlockDbNamePrefix is the prefix for the block database name.

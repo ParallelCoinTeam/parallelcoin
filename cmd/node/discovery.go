@@ -6,11 +6,11 @@ import (
 
 	"github.com/grandcat/zeroconf"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/discovery"
+	"github.com/p9c/pod/pkg/peer/connmgr"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 // DiscoverPeers connects lan peers in the same group.

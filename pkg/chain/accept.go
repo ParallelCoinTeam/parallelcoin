@@ -3,11 +3,11 @@ package blockchain
 import (
 	"fmt"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hardfork"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/chain/hardfork"
+	"github.com/p9c/pod/pkg/util/cl"
 
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // maybeAcceptBlock potentially accepts a block into the block chain and, if accepted, returns whether or not it is on the main chain.  It performs several validation checks which depend on its position within the block chain before adding it.  The block is expected to have already gone through ProcessBlock before calling this function with it. The flags are also passed to checkBlockContext and connectBestChain.  See their documentation for how the flags modify their behavior. This function MUST be called with the chain state lock held (for writes).

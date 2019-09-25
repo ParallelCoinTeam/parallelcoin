@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/json"
 )
 
 // TestCmdMethod tests the CmdMethod function to ensure it retunrs the expected methods and errors.

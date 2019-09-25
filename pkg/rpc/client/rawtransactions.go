@@ -5,10 +5,10 @@ import (
 	"encoding/hex"
 	js "encoding/json"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // SigHashType enumerates the available signature hashing types that the function accepts.

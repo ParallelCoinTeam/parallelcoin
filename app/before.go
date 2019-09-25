@@ -8,11 +8,11 @@ import (
 	"github.com/pelletier/go-toml"
 	"github.com/urfave/cli"
 
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/util/cl"
 )
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
