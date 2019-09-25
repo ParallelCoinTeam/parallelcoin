@@ -9,59 +9,79 @@ import (
 	"github.com/p9c/pod/cmd/gui/vue/db"
 )
 
-func CoreJs(d db.DuoVUEdb) string {
-	vueapp := `
-	{{define "vueapp"}}
+var CoreJs = `
+const core = new Vue({ 
+	el: '#x', 
+	data () { return { 
+	duoSystem }},
+});
+`
 
+var CoreHeadJs = `
 Vue.config.devtools = true;
 Vue.use(VueFormGenerator);
 
 Vue.prototype.$eventHub = new Vue(); 
 
- 
 const duoSystem = {
-	config:null,
-	node:null,
-	wallet:null,
-	status:null,
-	balance:null,
-	connectionCount:0,
-	addressBook:null,
-	transactions:null,
-	peerInfo:null,
+	alert:system.data.d.alert,
+	config:system.data.conf,
+	status: system.data.d.status,
+	addressbook:system.data.d.addressbook,
+	createAddress:'',
+	txsEx:system.data.d.txsex,
+	peers:system.data.d.peers,
 	blocks:[],
 	theme:false,
-	isBoot:false,
+	logo:system.data.ico,
+	bios:{
+		isBoot:true,
+		isDev:false,
+	},
 	isLoading:false,
-	isDev:true,
-	isScreen:'overview',
+	isScreen: 'overview',
 	timer: '',
 };
+`
 
 
-{{ range $key, $value := . }}
-var {{ .ID }} = {{ if .IsApp }}new Vue({{ end }}{
-{{ if .IsApp }}el: '#{{ .ID }}',{{ end }}
-  name: '{{ .Name }}',
-{{ if .Template }}template: ` + "`" + `{{ .Template }}` + "`" + `,{{end}}
-{{ if .Js }}{{ .Js }}{{ end }}
-}{{ if .IsApp }});{{ end }}
-{{ end }}
-
-
-const core = new Vue({ 
-	el: '#core', 
-	data () { return { 
-	duoSystem }},
-});
-
+func AppsLoopJs(d db.DuoVUEdb) string {
+	vueapp := `
+{{define "vueapp"}}
+	{{ range $key, $value := . }}
+		var {{ .ID }} = new Vue({
+		el: '#{{ .ID }}',
+		name: '{{ .Name }}',
+		{{ if .Template }}template: ` + "`" + `{{ .Template }}` + "`" + `,{{end}}
+		{{ if .Js }}{{ .Js }}{{ end }}
+		});
+	{{ end }}
 {{ end }}`
 	var js bytes.Buffer
 	jsRaw := template.Must(template.New("").Parse(string(vueapp)))
-	err := jsRaw.ExecuteTemplate(&js, "vueapp", comp.Components(d))
+	err := jsRaw.ExecuteTemplate(&js, "vueapp", comp.Apps(d))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
+	return js.String()
+}
 
+func CompLoopJs(d db.DuoVUEdb) string {
+	vuecomp := `
+{{define "vuecomp"}}
+	{{ range $key, $value := . }}
+		var {{ .ID }} = {
+		name: '{{ .Name }}',
+		{{ if .Template }}template: ` + "`" + `{{ .Template }}` + "`" + `,{{end}}
+		{{ if .Js }}{{ .Js }}{{ end }}
+		}
+	{{ end }}
+{{ end }}`
+	var js bytes.Buffer
+	jsRaw := template.Must(template.New("").Parse(string(vuecomp)))
+	err := jsRaw.ExecuteTemplate(&js, "vuecomp", comp.Components(d))
+	if err != nil {
+		fmt.Println("error binding to webview:", err)
+	}
 	return js.String()
 }

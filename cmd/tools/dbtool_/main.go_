@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/p9c/pod/pkg/db"
 	flags "github.com/jessevdk/go-flags"
 )
 

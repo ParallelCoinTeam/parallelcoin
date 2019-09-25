@@ -1,7 +1,10 @@
 package mod
 
 import (
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/json"
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/mem"
 )
 
 type DuoGuiTemplates struct {
@@ -71,9 +74,72 @@ type DuoVUEcomp struct {
 	Css         string `json:"css"`
 }
 
-// Vue.use(EasyBar);
-// Vue.use(moment);
-// Vue.use('vue-grid-layout');
-// Vue.use('vue-good-table');
-// Vue.use(VueFormGenerator);
-// Vue.use('vue-ace-editor');
+type DuoVUEbalance struct {
+	Balance     string `json:"balance"`
+	Unconfirmed string `json:"unconfirmed"`
+}
+
+type DuoVUEtransactions struct {
+	Txs       []json.ListTransactionsResult `json:"txs"`
+	TxsNumber int                           `json:"txsnumber"`
+}
+type DuoVUEtransactionsExcerpts struct {
+	Txs           []TransactionExcerpt `json:"txs"`
+	TxsNumber     int                  `json:"txsnumber"`
+	Balance       float64              `json:"balance"`
+	BalanceHeight float64              `json:"balanceheight"`
+}
+
+type TransactionExcerpt struct {
+	Balance       float64 `json:"balance"`
+	Amount        float64 `json:"amount"`
+	Category      string  `json:"category"`
+	Confirmations int64   `json:"confirmations"`
+	Time          string  `json:"time"`
+	TxID          string  `json:"txid"`
+	Comment       string  `json:"comment,omitempty"`
+}
+type DuoVUEaddressBook struct {
+	Num       int       `json:"num"`
+	Addresses []Address `json:"addresses"`
+}
+
+type DuoVUEblocks []DuoVUEblock
+
+type DuoVUEblock struct {
+	Height     int64   `json:"height"`
+	PowAlgoID  uint32  `json:"pow"`
+	Difficulty float64 `json:"diff"`
+	Amount     float64 `json:"amount"`
+	TxNum      int     `json:"txnum"`
+	Time       int64   `json:"time"`
+}
+
+type DuoVUEchain struct {
+	LastPushed int64         `json:"lastpushed"`
+	Blocks     []DuoVUEblock `json:"blocks"`
+}
+
+// System Ststus
+type DuoVUEstatus struct {
+	Version          string                        `json:"ver"`
+	WalletVersion    map[string]json.VersionResult `json:"walletver"`
+	UpTime           int64                         `json:"uptime"`
+	Cpu              []cpu.InfoStat                `json:"cpu"`
+	CpuPercent       []float64                     `json:"cpupercent"`
+	Memory           mem.VirtualMemoryStat         `json:"mem"`
+	Disk             disk.UsageStat                `json:"disk"`
+	CurrentNet       string                        `json:"net"`
+	Chain            string                        `json:"chain"`
+	HashesPerSec     int64                         `json:"hashrate"`
+	Height           int32                         `json:"height"`
+	BestBlockHash    string                        `json:"bestblockhash"`
+	NetworkHashPS    int64                         `json:"networkhashrate"`
+	Difficulty       float64                       `json:"diff"`
+	Balance          DuoVUEbalance                 `json:"balance"`
+	BlockCount       int64                         `json:"blockcount"`
+	ConnectionCount  int32                         `json:"connectioncount"`
+	NetworkLastBlock int32                         `json:"networklastblock"`
+	TxsNumber        int                           `json:"txsnumber"`
+	//MempoolInfo      string                        `json:"ver"`
+}

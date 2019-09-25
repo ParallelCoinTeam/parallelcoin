@@ -3,6 +3,11 @@
 package gui
 
 import (
+	"github.com/p9c/pod/cmd/gui/vue"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/robfig/cron"
 	"sync"
 	"sync/atomic"
 
@@ -15,56 +20,32 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const (
-	windowWidth  = 1440
-	windowHeight = 900
-)
-
-var getWebView = func(v vue.DuoVUE, t string) webview.WebView {
-	w := webview.New(webview.Settings{
-		Width:                  windowWidth,
-		Height:                 windowHeight,
-		Title:                  "ParallelCoin - DUO - True Story",
-		Resizable:              false,
-		Debug:                  true,
-		URL:                    `data:text/html,` + t,
-		ExternalInvokeCallback: v.HandleRPC,
-	})
-	return w
-}
-
 func Main(cx *conte.Xt, wg *sync.WaitGroup) {
-	log.WARN("starting gui")
-	v := vue.GetDuoVUE(cx)
-	w := getWebView(*v, comp.GetAppHtml)
+	cr := cron.New()
+	log <- cl.Warn{"starting gui", cl.Ine()}
+	dV := vue.GetDuoVUE(cx, cr)
 	cleaned := &atomic.Value{}
 	cleaned.Store(false)
 	cleanup := func() {
 		if !cleaned.Load().(bool) {
 			cleaned.Store(true)
-			log.DEBUG("terminating webview")
-			w.Terminate()
+			log <- cl.Debug{"terminating webview", cl.Ine()}
+			dV.Web.Terminate()
 			interrupt.Request()
 			log.DEBUG("waiting for waitgroup")
 			wg.Wait()
-			log.DEBUG("exiting webview")
-			w.Exit()
+			log <- cl.Debug{"exiting webview", cl.Ine()}
+			dV.Web.Exit()
 		}
 	}
 	interrupt.AddHandler(func() {
 		cleanup()
 	})
 	defer cleanup()
-	w.Dispatch(func() {
-
-		// dec, err := base64.StdEncoding.DecodeString(lib.GetLibVue)
-		// if err != nil {
-		// 	fmt.Printf("Error decoding string: %s ", err.Error())
-		// 	return
-		// }
-		// w.Eval(string(dec))
-		vue.RunVue(w, *v)
+	dV.Web.Dispatch(func() {
+		cr.Start()
+		vue.RunVue(*dV)
 
 	})
-	w.Run()
+	dV.Web.Run()
 }

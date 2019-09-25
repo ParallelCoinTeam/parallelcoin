@@ -12,79 +12,13 @@ func Dev() mod.DuoVUEcomp {
 		SubType:  "dev",
 		Js: `
 		data () { return { 
-			name:   '',
-			folder: '',
-			data:   '',
-			model:  { apps:  core.data.conf.display.layout.items},
-			layout: ` + "`" + `{
-				fields: [{
-					type: "checklist",
-					label: "apps",
-					model: "apps",
-					multi: true,
-					required: true,
-					multiSelect: true,
-					values: core.data.cfg.apps.layout,
-					checklistOptions: {
-						key: "name",
-							id: "i",
-							trackBy: "i",
-						},
-						selectOptions: {
-							multiple: true,
-							clearOnSelect: false,
-							closeOnSelect: false,
-						},
-					},	{
-				   type: "switch",
-				   label: "Status",
-					model: "status",
-					multi: true,
-					readonly: false,
-					featured: false,
-					disabled: false,
-					default: true,
-					textOn: "Active",
-					textOff: "Inactive"
-					}]
-					}` + "`" + `,
-				layoutItem: ` + "`" + `{
-					fields: [{
-					type: "input",
-					inputType: "Number",
-					label: "name",
-					model: "x",
-					min: 1,
-					max: 10,
-					required: true,
-				}]
-			}` + "`" + `,
-				"formOptions": { validateAfterLoad: true, validateAfterChanged: true },
+		duoSystem,
 			}}`,
-		Template: `<div class="dev" v-show="duoSystem.isDev">
-		<div class="rwrap">
+		Template: `<dev class="swrap dev" v-show="this.duoSystem.bios.isDev">
 		<div class="dev"><h1>Layout</h1>
-		<ul class="flx fcl">
-		
-
-		</ul>
-		<ul class="flx fcl">
-		<li><span v-html="model.apps"></span></li>
-		<li class="fii">
-		<VueFormGenerator :schema="layout" :model="model" :options="formOptions"></VueFormGenerator>
-		</li>
-
-			<li class="fii">
-				<ul class="flx fcl">
-					<li v-for="app in model.apps" class="fii">
-					<VueFormGenerator :schema="layoutItem" :model="app" :options="formOptions"></VueFormGenerator>
-					<span v-html="app"></span>
-					</li>
-				</ul>
-			</li>
-		</ul>
-		</div></div>
-		</div>`,
+		DADADAD
+		</div>
+		</dev>`,
 		Css: `
 		.dev{
 			background:blue;

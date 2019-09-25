@@ -21,7 +21,7 @@ func Nav() mod.DuoVUEcomp {
 			<div class="pie pie2" @click="document.body.classList.remove('active')">
 				<div class="pie-color pie-color2">2</div>
 			</div>
-			<div class="pie pie3" @click="duoSystem.isDev = !duoSystem.isDev; document.body.classList.remove('active');">
+			<div class="pie pie3" @click="this.duoSystem.isDev = !duoSystem.isDev; document.body.classList.remove('active');">
 				<div class="pie-color pie-color3">3</div>
 			</div>
 			<div class="menu" @click="document.body.classList.toggle('active');">
