@@ -87,28 +87,41 @@ func (dv *DuoVUE) GetTransactions(from, count int, cat string) (txs mod.DuoVUEtr
 }
 
 func (dv *DuoVUE) GetTransactionsExcertps() (txse mod.DuoVUEtransactionsExcerpts) {
-	lt, err := dv.cx.WalletServer.ListTransactions(0, 999999999)
+	lt, err := dv.cx.WalletServer.ListTransactions(0, 99999)
 	if err != nil {
 		dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
 	txse.TxsNumber = len(lt)
-	balance := 0.0
+
+	for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
+		lt[i], lt[j] = lt[j], lt[i]
+	}
+
 	balanceHeight := 0.0
-	for _, txRaw := range lt {
-		balance = balance + txRaw.Amount
-		t := time.Unix(0, txRaw.Time)
+
+	//var balance float64
+	for i, txRaw := range lt {
+		unixTimeUTC := time.Unix(txRaw.Time, 0) //gives unix time stamp in utc
 		txse.Txs = append(txse.Txs, mod.TransactionExcerpt{
-			Balance:       balance,
+			Balance:       txse.Balance + txRaw.Amount,
 			Comment:       txRaw.Comment,
 			Amount:        txRaw.Amount,
 			Category:      txRaw.Category,
 			Confirmations: txRaw.Confirmations,
-			Time:          t.Format("Nov 4, 2016, 1:03:04 PM"),
+			Time:          unixTimeUTC.Format(time.RFC3339),
 			TxID:          txRaw.TxID,
 		})
-		if balance > balanceHeight{
-			balanceHeight = balance
+		if txse.Balance > balanceHeight {
+			balanceHeight = txse.Balance
 		}
+		fmt.Println("bbbbbbbbb", txRaw.Amount)
+		fmt.Println("cccccccccccccccccccccccccccccccccccccccccccccc")
+		fmt.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+		fmt.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", i)
+		fmt.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+		fmt.Println("btititititmt", unixTimeUTC.Format(time.RFC3339))
+		fmt.Println("balanceHeightbalanceHeight", balanceHeight)
+		fmt.Println("bbbbbbbbbbbbbbbbbbbbbbbbbbbb", txse.Balance)
 	}
 	txse.BalanceHeight = balanceHeight
 	return

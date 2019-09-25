@@ -78,10 +78,14 @@ func RunVue(dV DuoVUE) {
 	//dV.GetPeerInfo()
 
 	evalJs(dV)
-
 	dV.cr.AddFunc("@every 1s", func() {
 		dV.Web.Dispatch(func() {
 			dV.Render("status", dV.GetDuoVUEstatus())
+		})
+	})
+	dV.cr.AddFunc("@every 10s", func() {
+		dV.Web.Dispatch(func() {
+			dV.Render("alert", dV.GetPeerInfo())
 		})
 	})
 

@@ -86,6 +86,7 @@ type DuoVUEtransactions struct {
 type DuoVUEtransactionsExcerpts struct {
 	Txs           []TransactionExcerpt `json:"txs"`
 	TxsNumber     int                  `json:"txsnumber"`
+	Balance       float64              `json:"balance"`
 	BalanceHeight float64              `json:"balanceheight"`
 }
 
