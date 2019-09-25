@@ -198,6 +198,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config,
 				err := errors.New("failed to create listeners for RPC server")
 				return nil, nil, err
 			}
+
 			creds := credentials.NewServerTLSFromCert(&keyPair)
 			server = grpc.NewServer(grpc.Creds(creds))
 			rpcserver.StartVersionService(server)
