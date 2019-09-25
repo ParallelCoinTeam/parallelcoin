@@ -17,7 +17,7 @@ import (
 
 const (
 	windowWidth  = 960
-	windowHeight = 640
+	windowHeight = 800
 )
 
 func GetDuoVUE(cx *conte.Xt, cr *cron.Cron) *DuoVUE {
