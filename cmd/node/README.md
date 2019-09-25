@@ -1,6 +1,6 @@
 ![](https://gitlab.com/parallelcoin/node/raw/master/assets/logo.png)
 
-# The Parallelcoin Node [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org) [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/parallelcointeam/parallelcoin/node)
+# The Parallelcoin Node [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org) [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/p9c/pod/node)
 
 Next generation full node for Parallelcoin, forked from [btcd](https://github.com/btcsuite/btcd)
 
@@ -36,7 +36,7 @@ After the upcoming hardfork, Parallelcoin will have the following features in it
 
 ### Wallet
 
-The pod has no RPC wallet functionality, only core chain functions. It is fully compliant with the original [parallelcoind](https://github.com/marcetin/parallelcoin) for these functions. For the wallet server, [mod](https://github.com/parallelcointeam/parallelcoin/walletmain), which works also with the CLI controller [podctl](https://github.com/parallelcointeam/parallelcoin/), it will be possible to send commands to both mod (wallet) and pod full node using the command line.
+The pod has no RPC wallet functionality, only core chain functions. It is fully compliant with the original [parallelcoind](https://github.com/marcetin/parallelcoin) for these functions. For the wallet server, [mod](https://github.com/p9c/pod/walletmain), which works also with the CLI controller [podctl](https://github.com/p9c/pod/), it will be possible to send commands to both mod (wallet) and pod full node using the command line.
 
 A Webview/Golang based GUI wallet will come a little later, following the release, and will be able to run on all platforms with with browser or supported built-in web application platforms, Blink and Webkit engines.
 
@@ -53,7 +53,7 @@ go get github.com/parallelcointeam/parallelcoin
 You probably will also want CLI client (can also speak to other bitcoin protocol RPC endpoints also):
 
 ```bash
-go get github.com/parallelcointeam/parallelcoin/cmd/podctl
+go get github.com/p9c/pod/cmd/podctl
 ```
 
 ## Requirements
@@ -66,7 +66,7 @@ go get github.com/parallelcointeam/parallelcoin/cmd/podctl
 
 When it is, it will be available here:
 
-https://github.com/parallelcointeam/parallelcoin/releases
+https://github.com/p9c/pod/releases
 
 #### Linux/BSD/MacOSX/POSIX - Build from Source
 
@@ -126,12 +126,12 @@ Come and chat at our (discord server](https://discord.gg/nJKts94)
 
 ## Issue Tracker
 
-The [integrated github issue tracker](https://github.com/parallelcointeam/parallelcoin/issues)
+The [integrated github issue tracker](https://github.com/p9c/pod/issues)
 is used for this project.
 
 ## Documentation
 
-The documentation is a work-in-progress. It is located in the [docs](https://github.com/parallelcointeam/parallelcoin/tree/master/docs) folder.
+The documentation is a work-in-progress. It is located in the [docs](https://github.com/p9c/pod/tree/master/docs) folder.
 
 ## License
 

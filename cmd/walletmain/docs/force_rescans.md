@@ -40,7 +40,7 @@ drop the wallet transaction manager (wtxmgr) history from a wallet database.
 The tool may already be installed in your PATH, but if not, installing it is easy:
 
 ```
-$ cd $GOPATH/src/github.com/parallelcointeam/parallelcoin/walletmain/cmd/dropwtxmgr
+$ cd $GOPATH/src/github.com/p9c/pod/walletmain/cmd/dropwtxmgr
 $ go get
 ```
 

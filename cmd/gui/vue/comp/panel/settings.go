@@ -14,13 +14,14 @@ func Settings() mod.DuoVUEcomp {
 	data () { return { 
 	duoSystem }},
 	created: function() {
-		this.getConfig();
+		
 		},
 	methods: { 
- 		getConfig: function(){ this.duoSystem.config = system.data.conf},
+ 		
 	}, 
 		`,
-		Template: `<div class="rwrap">
+		Template: `<div class="rwrap">asasasas
+<div v-html="this.duoSystem.config.daemon.schema"></div>
  <vue-form-generator class="flx flc fii" :schema="this.duoSystem.config.daemon.schema" :model="this.duoSystem.config.daemon.config"></vue-form-generator>
 		</div>`,
 		Css: `

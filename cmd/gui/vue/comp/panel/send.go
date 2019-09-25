@@ -15,7 +15,7 @@ func Send() mod.DuoVUEcomp {
 			return {
 				sendAddress:'',
 				sendAmount:0.00000000,
-				target: '#container',
+				target: '#x',
 				header: 'Enter your passphrase',
 				content: "<input type='password' value='' class='e-outline fii bgfff' id='passPhrase' required />",
 				showCloseIcon: true,
@@ -76,10 +76,10 @@ func Send() mod.DuoVUEcomp {
 		Template: `<div class="flx flc fii justifyBetween">
 
 
-                <ejs-textbox floatLabelType='Auto' cssClass='e-outline fii bgfff' v-model='sendAddress' id='sendAddress' placeholder='Enter DUO address'></ejs-textbox>
+                <ejs-textbox floatLabelType='Auto' cssClass='e-outline flx noMargin fii bgfff' v-model='sendAddress' id='sendAddress' placeholder='Enter DUO address'></ejs-textbox>
 
 <div class="flx fii marginTop">	
-	<ejs-numerictextbox cssClass="e-outline bgfff" v-model.number="sendAmount" format="c5" validateDecimalOnType=true decimals="8"></ejs-numerictextbox>
+	<ejs-numerictextbox cssClass="e-outline noMargin fii bgfff" v-model.number="sendAmount" format="c5" validateDecimalOnType=true decimals="8"></ejs-numerictextbox>
         
         <ejs-button id="dialogbtn" v-on:click.native="btnClick">Send</ejs-button>
         <ejs-dialog id="dialog" ref="Dialog" :header='header' :target='target' :width='width' :buttons='buttons' :visible='visible' :content='content' :animationSettings='animateSettings'  :showCloseIcon="showCloseIcon">
@@ -98,7 +98,9 @@ func Send() mod.DuoVUEcomp {
 		Css: `
 		
 
-
+#sendAddress{
+	height:100%;
+}
 
 
 		`,

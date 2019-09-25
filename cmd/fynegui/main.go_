@@ -6,14 +6,14 @@ import (
 	"sync/atomic"
 
 	"fyne.io/fyne"
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/pkg/util/cl"
+	"github.com/p9c/pod/pkg/wallet"
 
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/con"
+	"github.com/p9c/pod/cmd/node/con"
 )
 
 // Log log glorious log

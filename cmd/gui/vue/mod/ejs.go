@@ -5,7 +5,7 @@ type EJSlayout struct {
 	AllowDragging     bool       `json:"allowDragging"`
 	AllowFloating     bool       `json:"allowFloating"`
 	AllowResizing     bool       `json:"allowResizing"`
-	CellAspectRatio   int        `json:"cellAspectratio"`
+	CellAspectRatio   string        `json:"cellAspectratio"`
 	CellSpacing       []int      `json:"cellSpacing"`
 	Columns           int        `json:"columns"`
 	DraggableHandle   string     `json:"draggaBlehandle"`

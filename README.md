@@ -1,6 +1,6 @@
 # ![Logo](https://git.parallelcoin.io/dev/legacy/raw/commit/f709194e16960103834b0d0e25aec06c3d84f85b/logo/logo48x48.png) Parallelcoin Pod 
 
-[![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://doc.parallelcoin.io/pkg/github.com/parallelcointeam/parallelcoin) [![development branch](https://img.shields.io/badge/branch-master-gray.svg)](https://github.com/parallelcointeam/parallelcoin) [![development branch](https://img.shields.io/badge/branch-development-orange.svg)](https://github.com/parallelcointeam/parallelcoin/src/branch/dev)
+[![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://doc.parallelcoin.io/pkg/github.com/parallelcointeam/parallelcoin) [![development branch](https://img.shields.io/badge/branch-master-gray.svg)](https://github.com/parallelcointeam/parallelcoin) [![development branch](https://img.shields.io/badge/branch-development-orange.svg)](https://github.com/p9c/pod/src/branch/dev)
 [![discordbot](https://img.shields.io/badge/discord-gitbot-green.svg)](https://discord.gg/YgBWNgK)
 
 Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for Parallelcoin
