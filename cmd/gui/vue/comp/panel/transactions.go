@@ -97,20 +97,14 @@ func TimeBalance() mod.DuoVUEcomp {
     return {
 		duoSystem,
       	theme: "Material",
-      series: [{
-        dataSource: system.data.d.txsex.txs,
-       xName: 'time',
-       yName: 'balance',
-      }],
       primaryXAxis: {
-        valueType: "DateTime",
-        labelFormat: "y",
+		valueType: "DateTime",
         intervalType: "Auto",
         edgeLabelPlacement: "Shift",
         majorGridLines: { width: 0 }
       },
       primaryYAxis: {
-        labelFormat: "{value} DUO%",
+        labelFormat: "{value} DUO",
         rangePadding: "None",
         minimum: 0,
         maximum: system.data.d.txsex.balanceheight,

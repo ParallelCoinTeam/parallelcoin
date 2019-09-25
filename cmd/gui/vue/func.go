@@ -362,17 +362,11 @@ func (dv *DuoVUE) GetDifficulty() float64 {
 // 	return
 // }
 func (dV *DuoVUE) GetPeerInfo() []*json.GetPeerInfoResult {
-	dV.cr.AddFunc("@every 1s", func() {
-		dV.Web.Dispatch(func() {
 			getPeers, err := rpc.HandleGetPeerInfo(dV.cx.RPCServer, nil, nil)
 			if err != nil {
 				dV.PushDuoVUEalert("Error",err.Error(), "error")
 			}
 			dV.Data.Peers = getPeers.([]*json.GetPeerInfoResult)
-			fmt.Println("ssssssssssssssssss", dV.Data.Peers)
-			dV.Render("peers", dV.Data.Peers)
-		})
-	})
 	return dV.Data.Peers
 }
 

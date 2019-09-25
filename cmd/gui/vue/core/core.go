@@ -30,7 +30,7 @@ const duoSystem = {
 	addressbook:system.data.d.addressbook,
 	createAddress:'',
 	txsEx:system.data.d.txsex,
-	peers:null,
+	peers:system.data.d.peers,
 	blocks:[],
 	theme:false,
 	logo:system.data.ico,
