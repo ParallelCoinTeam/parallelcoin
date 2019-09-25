@@ -202,7 +202,7 @@ func EmptyConfig() *Config {
 		BlockMinWeight:           newint(),
 		BlockPrioritySize:        newint(),
 		BlocksOnly:               newbool(),
-		Broadcast:                newbool(),
+		Broadcast:                newBool(),
 		CAFile:                   newstring(),
 		ConfigFile:               newstring(),
 		ConnectPeers:             newStringSlice(),
