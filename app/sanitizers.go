@@ -56,31 +56,19 @@ func initParams(cx *conte.Xt) {
 	switch network {
 	case "testnet", "testnet3", "t":
 		log.TRACE("on testnet")
-		*cx.Config.TestNet3 = true
-		*cx.Config.SimNet = false
-		*cx.Config.RegressionTest = false
 		cx.ActiveNet = &netparams.TestNet3Params
 		fork.IsTestnet = true
 	case "regtestnet", "regressiontest", "r":
 		log.TRACE("on regression testnet")
-		*cx.Config.TestNet3 = false
-		*cx.Config.SimNet = false
-		*cx.Config.RegressionTest = true
 		cx.ActiveNet = &netparams.RegressionTestParams
 	case "simnet", "s":
 		log.TRACE("on simnet")
-		*cx.Config.TestNet3 = false
-		*cx.Config.SimNet = true
-		*cx.Config.RegressionTest = false
 		cx.ActiveNet = &netparams.SimNetParams
 	default:
 		if network != "mainnet" && network != "m" {
 			log.WARN("using mainnet for node")
 		}
 		log.TRACE("on mainnet")
-		*cx.Config.TestNet3 = false
-		*cx.Config.SimNet = false
-		*cx.Config.RegressionTest = false
 		cx.ActiveNet = &netparams.MainNetParams
 	}
 }

@@ -2607,7 +2607,8 @@ func HandleGetBlockTemplateRequest(s *Server, request *btcjson.TemplateRequest,
 	// Return an error if there are no peers connected since there is no way to
 	// relay a found block or receive transactions to work on. However, allow
 	// this workState when running in the regression test or simulation test mode.
-	if !(*s.Config.RegressionTest || *s.Config.SimNet) &&
+	netwk := (*s.Config.Network)[0]
+	if !(netwk == 'r' || netwk == 's') &&
 		s.Cfg.ConnMgr.ConnectedCount() == 0 {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCClientNotConnected,
@@ -2889,7 +2890,7 @@ func HandleGetInfo(s *Server, cmd interface{},
 			Difficulty:        Difficulty,
 			DifficultySHA256D: dSHA256D,
 			DifficultyScrypt:  dScrypt,
-			TestNet:           *s.Config.TestNet3,
+			TestNet:           (*s.Config.Network)[0] == 't',
 			RelayFee:          s.StateCfg.ActiveMinRelayTxFee.ToDUO(),
 		}
 	case 1:
@@ -3008,7 +3009,7 @@ func HandleGetInfo(s *Server, cmd interface{},
 			DifficultySkein:     dSkein,
 			DifficultyStribog:   dStribog,
 			DifficultyX11:       dX11,
-			TestNet:             *s.Config.TestNet3,
+			TestNet:             (*s.Config.Network)[0] == 't',
 			RelayFee:            s.StateCfg.ActiveMinRelayTxFee.ToDUO(),
 		}
 	}
@@ -3103,7 +3104,7 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 			HashesPerSec:       int64(s.Cfg.CPUMiner.HashesPerSecond()),
 			NetworkHashPS:      networkHashesPerSec,
 			PooledTx:           uint64(s.Cfg.TxMemPool.Count()),
-			TestNet:            *s.Config.TestNet3,
+			TestNet:            (*s.Config.Network)[0] == 't',
 		}
 	case 1:
 		foundcount, height := 0, best.Height
@@ -3221,7 +3222,7 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 			HashesPerSec:        int64(s.Cfg.CPUMiner.HashesPerSecond()),
 			NetworkHashPS:       networkHashesPerSec,
 			PooledTx:            uint64(s.Cfg.TxMemPool.Count()),
-			TestNet:             *s.Config.TestNet3,
+			TestNet:             (*s.Config.Network)[0] == 't',
 		}
 	}
 	return ret, nil

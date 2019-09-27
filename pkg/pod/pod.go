@@ -106,6 +106,7 @@ type Config struct {
 	BlockMinWeight           *int             `group:"mining" name:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"input" inputType:"number" model:"BlockMinWeight" featured:"false"`
 	BlockPrioritySize        *int             `group:"mining" name:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"input" inputType:"number" model:"BlockPrioritySize" featured:"false"`
 	BlocksOnly               *bool            `group:"node" name:"Blocks Only" description:"do not accept transactions from remote peers" type:"switch" model:"BlocksOnly" featured:"false"`
+	Broadcast                *bool            `group:"mining" name:"Broadcast" description:"enable broadcasting of blocks for workers to work on" type:"switch" model:"Broadcast" featured:"false"`
 	CAFile                   *string          `group:"tls" name:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
 	ConfigFile               *string
 	ConnectPeers             *cli.StringSlice `group:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"input" inputType:"text" model:"ConnectPeers" featured:"false"`
@@ -123,7 +124,6 @@ type Config struct {
 	FreeTxRelayLimit         *float64         `group:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"text" model:"FreeTxRelayLimit" featured:"false"`
 	Generate                 *bool            `group:"mining" name:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
 	GenThreads               *int             `group:"mining" name:"Gen Threads" description:"number of CPU threads to mine using" type:"input" inputType:"number" model:"GenThreads" featured:"false"`
-	Group                    *string          `category:"debug" name:"Zeroconf Group" description:"if set to non-empty zeroconf will set all found peers to connect peers (dns seeding can be on, this is mainly for testnets)"`
 	LimitPass                *string          `group:"rpc" name:"Limit Pass" type:"password" description:"limited user password" type:"input" inputType:"text" model:"LimitPass" featured:"false"`
 	LimitUser                *string          `group:"rpc" name:"Limit User" description:"limited user name" type:"input" inputType:"text" model:"LimitUser" featured:"false"`
 	Listeners                *cli.StringSlice `group:"node" name:"Listeners" description:"List of addresses to bind the node listener to" type:"input" inputType:"text" model:"Listeners" featured:"false"`
@@ -131,8 +131,6 @@ type Config struct {
 	LogLevel                 *string          `group:"config" name:"Log Level" description:"Verbosity of log printouts" type:"input" inputType:"text" model:"LogLevel" featured:"false"`
 	MaxOrphanTxs             *int             `group:"policy" name:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"input" inputType:"number" model:"MaxOrphanTxs" featured:"false"`
 	MaxPeers                 *int             `group:"node" name:"Max Peers" description:"Maximum number of peers to hold connections with" type:"input" inputType:"number" model:"MaxPeers" featured:"false"`
-	Broadcast                *bool            `group:"mining" name:"Broadcast" description:"enable broadcasting of blocks for workers to work on" type:"switch" model:"Broadcast" featured:"false"`
-	Workers                  *cli.StringSlice `group:"mining" name:"MinerWorkers" description:"a list of addresses where workers are listening for blocks when not using lan broadcast" type:"input" inputType:"text" model:"Workers" featured:"false"`
 	MinerPass                *string          `group:"mining" name:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"input" inputType:"text" model:"MinerPass" featured:"false"`
 	MiningAddrs              *cli.StringSlice `group:"mining" name:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"input" inputType:"text" model:"MiningAddrs" featured:"false"`
 	MinRelayTxFee            *float64         `group:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"text" model:"MinRelayTxFee" featured:"false"`
@@ -153,7 +151,6 @@ type Config struct {
 	Proxy                    *string `group:"proxy" name:"Proxy" description:"address of proxy to connect to for outbound connections" type:"input" inputType:"text" model:"Proxy" featured:"false"`
 	ProxyPass                *string `group:"proxy" name:"Proxy Pass" type:"password" description:"proxy password, if required" type:"input" inputType:"text" model:"ProxyPass" featured:"false"`
 	ProxyUser                *string `group:"proxy" name:"ProxyUser" description:"proxy username, if required" type:"input" inputType:"text" model:"ProxyUser" featured:"false"`
-	RegressionTest           *bool
 	RejectNonStd             *bool            `group:"node" name:"Reject Non Std" description:"reject non-standard transactions regardless of the default settings for the active network" type:"switch" model:"RejectNonStd" featured:"false"`
 	RelayNonStd              *bool            `group:"node" name:"Relay Non Std" description:"relay non-standard transactions regardless of the default settings for the active network" type:"switch" model:"RelayNonStd" featured:"false"`
 	RPCCert                  *string          `group:"rpc" name:"RPC Cert" description:"location of rpc TLS certificate" type:"input" inputType:"text" model:"RPCCert" featured:"false"`
@@ -168,9 +165,6 @@ type Config struct {
 	ServerTLS                *bool            `group:"wallet" name:"Server TLS" description:"Enable TLS for the wallet connection to node RPC server" type:"switch" model:"ServerTLS" featured:"false"`
 	ServerUser               *string          `group:"rpc" name:"Server User" description:"username for server connections" type:"input" inputType:"text" model:"ServerUser" featured:"false"`
 	SigCacheMaxSize          *int             `group:"node" name:"Sig Cache Max Size" description:"the maximum number of entries in the signature verification cache" type:"input" inputType:"number" model:"SigCacheMaxSize" featured:"false"`
-	SimNet                   *bool
-	Subsystems               *cli.StringSlice `group:"config" name:"Subsystems" description:"Specific systems' verbosity levels" type:"input" inputType:"text" model:"Subsystems" featured:"false"`
-	TestNet3                 *bool
 	TestNodeOff              *bool            `group:"debug" name:"Test Node Off" description:"turn off the testnode (testnet only)" type:"switch" model:"TestNodeOff" featured:"false"`
 	TLS                      *bool            `group:"tls" name:"TLS" description:"enable TLS for RPC connections" type:"switch" model:"TLS" featured:"false"`
 	TLSSkipVerify            *bool            `group:"tls" name:"TLS Skip Verify" description:"skip TLS certificate verification (ignore CA errors)" type:"switch" model:"TLSSkipVerify" featured:"false"`
@@ -188,6 +182,7 @@ type Config struct {
 	WalletRPCMaxWebsockets   *int             `group:"wallet" name:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"input" inputType:"number" model:"LegacyRPCMaxWebsockets" featured:"false"`
 	WalletServer             *string          `group:"wallet" name:"node address to connect wallet server to" type:"input" inputType:"text" model:"WalletServer" featured:"false"`
 	Whitelists               *cli.StringSlice `group:"debug" name:"Whitelists" description:"peers that you don't want to ever ban" type:"input" inputType:"text" model:"Whitelists" featured:"false"`
+	Workers                  *cli.StringSlice `group:"mining" name:"MinerWorkers" description:"a list of addresses where workers are listening for blocks when not using lan broadcast" type:"input" inputType:"text" model:"Workers" featured:"false"`
 }
 
 func EmptyConfig() *Config {
@@ -222,7 +217,6 @@ func EmptyConfig() *Config {
 		FreeTxRelayLimit:         new(float64),
 		Generate:                 newbool(),
 		GenThreads:               newint(),
-		Group:                    newstring(),
 		LimitPass:                newstring(),
 		LimitUser:                newstring(),
 		Listeners:                newStringSlice(),
@@ -250,7 +244,6 @@ func EmptyConfig() *Config {
 		Proxy:                    newstring(),
 		ProxyPass:                newstring(),
 		ProxyUser:                newstring(),
-		RegressionTest:           newbool(),
 		RejectNonStd:             newbool(),
 		RelayNonStd:              newbool(),
 		RPCCert:                  newstring(),
@@ -265,9 +258,6 @@ func EmptyConfig() *Config {
 		ServerTLS:                newbool(),
 		ServerUser:               newstring(),
 		SigCacheMaxSize:          newint(),
-		SimNet:                   newbool(),
-		Subsystems:               newStringSlice(),
-		TestNet3:                 newbool(),
 		TestNodeOff:              newbool(),
 		TLS:                      newbool(),
 		TLSSkipVerify:            newbool(),

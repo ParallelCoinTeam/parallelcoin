@@ -21,7 +21,7 @@ func Configure(cx *conte.Xt) {
 	initTLSStuffs(cfg)
 	initLogLevel(cfg)
 	// Don't add peers from the config file when in regression test mode.
-	if *cfg.RegressionTest && len(*cfg.AddPeers) > 0 {
+	if ((*cfg.Network)[0]=='r') && len(*cfg.AddPeers) > 0 {
 		*cfg.AddPeers = nil
 	}
 	normalizeAddresses(cfg)

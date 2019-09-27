@@ -232,7 +232,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 // running in regression test mode and it already exists.
 func removeRegressionDB(cx *conte.Xt, dbPath string) error {
 	// don't do anything if not in regression test mode
-	if !*cx.Config.RegressionTest {
+	if !((*cx.Config.Network)[0]=='r') {
 		return nil
 	}
 	// remove the old regression test database if it already exists

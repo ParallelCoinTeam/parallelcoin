@@ -239,11 +239,6 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				"Enable Tor stream isolation by randomizing user credentials"+
 					" for each connection.",
 				cx.Config.TorIsolation),
-			apputil.String(
-				"group",
-				"zeroconf testnet group identifier (whitelist connections)",
-				"",
-				cx.Config.Group),
 			apputil.StringSlice(
 				"addpeer",
 				"Add a peer to connect with at startup",
@@ -399,11 +394,11 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				"random",
 				cx.Config.Algo),
 			apputil.Bool(
-				"generate",
+				"generate, g",
 				"Generate (mine) DUO using the CPU",
 				cx.Config.Generate),
 			apputil.Int(
-				"genthreads",
+				"genthreads, G",
 				"Number of CPU threads to use with CPU miner"+
 					" -1 = all cores",
 				-1,
