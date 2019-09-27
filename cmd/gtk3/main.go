@@ -51,7 +51,7 @@ func main() {
 		// Verify that the object is a pointer to a gtk.ApplicationWindow.
 		win, err := isWindow(obj)
 		errorCheck(err)
-
+		win.SetSizeRequest(800,600)
 		// Show the Window and all of its components.
 		win.Show()
 		application.AddWindow(win)
