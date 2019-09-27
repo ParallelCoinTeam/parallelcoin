@@ -70,8 +70,9 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 			Message: "No payment addresses specified via --miningaddr",
 		}
 	}
-	if !(*s.Config.RegressionTest || *s.Config.SimNet) && s.Cfg.ConnMgr.
-		ConnectedCount() == 0 {
+	netwk := (*s.Config.Network)[0]
+	if !((netwk == 'r') || (netwk == 's')) &&
+		s.Cfg.ConnMgr.ConnectedCount() == 0 {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCClientNotConnected,
 			Message: "Pod is not connected to network",

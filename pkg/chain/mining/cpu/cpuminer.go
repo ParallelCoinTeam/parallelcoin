@@ -2,6 +2,7 @@ package cpuminer
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"runtime"
 	"sync"
@@ -88,13 +89,13 @@ const (
 	// transaction can be.
 	maxExtraNonce = 2 ^ 64 - 1
 	// hpsUpdateSecs is the number of seconds to wait in between each update to the hashes per second monitor.
-	hpsUpdateSecs = 15
+	hpsUpdateSecs = 1
 	// hashUpdateSec is the number of seconds each worker waits in between
 	// notifying the speed monitor with how many hashes have been completed
 	// while they are actively searching for a solution.  This is done to reduce
 	// the amount of syncs between the workers that must be done to keep track
 	// of the hashes per second.
-	hashUpdateSecs = 3
+	hashUpdateSecs = 10
 )
 
 var (
@@ -570,11 +571,8 @@ out:
 			hashesPerSec = (hashesPerSec + curHashesPerSec) / 2
 			totalHashes = 0
 			if hashesPerSec != 0 {
-				log.WARNF(
-					"Hash speed: %6.4f Kh/s %0.2f h/s",
-					hashesPerSec/1000,
-					hashesPerSec,
-				)
+				fmt.Printf("\rHash speed: %6.4f Kh/s %0.2f h/s\r",
+					hashesPerSec/1000, hashesPerSec)
 			}
 		// Request for the number of hashes per second.
 		case m.queryHashesPerSec <- hashesPerSec:

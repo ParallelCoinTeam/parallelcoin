@@ -1224,7 +1224,7 @@ func (sp *NodePeer) OnAddr(_ *peer.Peer,
 	// prevent the network from becoming another public test network since it
 	// will not be able to learn about other peers that have not specifically
 	// been provided.
-	if *sp.Server.Config.SimNet {
+	if (*sp.Server.Config.Network)[0] == 's' {
 		return
 	}
 	// Ignore old style addresses which don't include a timestamp.
@@ -1361,7 +1361,7 @@ func (sp *NodePeer) OnGetAddr(_ *peer.Peer,
 	// This helps prevent the network from becoming another public test network
 	// since it will not be able to learn about other peers that have not
 	// specifically been provided.
-	if *sp.Server.Config.SimNet {
+	if (*sp.Server.Config.Network)[0] == 's' {
 		return
 	}
 	// Do not accept getaddr requests from outbound peers.  This reduces
@@ -1948,7 +1948,7 @@ func (sp *NodePeer) OnVersion(
 	isInbound := sp.Inbound()
 	remoteAddr := sp.NA()
 	addrManager := sp.Server.AddrManager
-	if !*sp.Server.Config.SimNet && !isInbound {
+	if !((*sp.Server.Config.Network)[0] == 's') && !isInbound {
 		addrManager.SetServices(remoteAddr, msg.Services)
 	}
 	// Ignore peers that have a protcol version that is too old.  The peer
@@ -1970,7 +1970,7 @@ func (sp *NodePeer) OnVersion(
 	// peer for outbound connections.  This is skipped when running on the
 	// simulation test network since it is only intended to connect to specified
 	// peers and actively avoids advertising and connecting to discovered peers.
-	if !*sp.Server.Config.SimNet && !isInbound {
+	if !((*sp.Server.Config.Network)[0] == 't') && !isInbound {
 		// After soft-fork activation, only make outbound connection to peers if
 		// they flag that they're segwit enabled.
 		chain := sp.Server.Chain
@@ -2728,7 +2728,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	// discovered peers in order to prevent it from becoming a public test
 	// network.
 	var newAddressFunc func() (net.Addr, error)
-	if !*config.SimNet && len(*config.ConnectPeers) == 0 {
+	if !((*config.Network)[0]=='s') && len(*config.ConnectPeers) == 0 {
 		newAddressFunc = func() (net.Addr, error) {
 			for tries := 0; tries < 100; tries++ {
 				addr := s.AddrManager.GetAddress()

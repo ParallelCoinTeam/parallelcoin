@@ -12,7 +12,7 @@ import (
 )
 
 // TestAppDataDir tests the API for Dir to ensure it gives expected results for various operating systems.
-func TestAppDataDir(	t *testing.T) {
+func TestAppDataDir(t *testing.T) {
 	// App name plus upper and lowercase variants.
 	appName := "myapp"
 	appNameUpper := string(unicode.ToUpper(rune(appName[0]))) + appName[1:]
