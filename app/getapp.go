@@ -16,8 +16,8 @@ import (
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
-// getApp defines the pod app
-func getApp(cx *conte.Xt) (a *cli.App) {
+func // getApp defines the pod app
+getApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
 		Name:    "pod",
 		Version: "v0.0.1",
