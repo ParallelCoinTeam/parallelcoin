@@ -9,10 +9,9 @@ import (
 
 	"github.com/d2r2/gotk3/glib"
 	"github.com/d2r2/gotk3/gtk"
-	"github.com/davecgh/go-spew/spew"
 )
 
-const appId = "com.github.gotk3.gotk3-examples.glade"
+const appId = "com.github.p9c.pod.gtk3wallet"
 
 func main() {
 	// Create a new application.
@@ -31,10 +30,8 @@ func main() {
 		// Get the GtkBuilder UI definition in the glade file.
 		builder, err := gtk.BuilderNew()
 		errorCheck(err)
-		spew.Dump(builder)
 		err = builder.AddFromFile("pod.ui")
 		errorCheck(err)
-		spew.Dump(builder)
 
 		// Map the handlers to callback functions, and connect the signals
 		// to the Builder.
@@ -46,7 +43,6 @@ func main() {
 		// Get the object with the id of "main_window".
 		obj, err := builder.GetObject("mainwindow")
 		errorCheck(err)
-		spew.Dump(obj)
 		fmt.Println(reflect.TypeOf(obj))
 		// Verify that the object is a pointer to a gtk.ApplicationWindow.
 		win, err := isWindow(obj)

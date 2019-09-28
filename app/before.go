@@ -17,7 +17,8 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 )
 
-func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
+func
+beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		log.INFO("running beforeFunc")
 		// if user set datadir this is first thing to configure

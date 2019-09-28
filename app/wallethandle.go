@@ -12,7 +12,8 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
+func
+walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		var wg sync.WaitGroup
 		Configure(cx)

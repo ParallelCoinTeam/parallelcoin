@@ -42,13 +42,15 @@ func initConfigFile(cfg *pod.Config) {
 	}
 }
 
-func initLogDir(cfg *pod.Config) {
+func
+initLogDir(cfg *pod.Config) {
 	if *cfg.LogDir == "" {
 		*cfg.LogDir = *cfg.DataDir
 	}
 }
 
-func initParams(cx *conte.Xt) {
+func
+initParams(cx *conte.Xt) {
 	network := "mainnet"
 	if cx.Config.Network != nil {
 		network = *cx.Config.Network
