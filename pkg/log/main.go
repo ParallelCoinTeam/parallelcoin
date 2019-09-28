@@ -296,33 +296,33 @@ func composit(text, level string, color bool) string {
 		case "FTL":
 			level = colorBold + colorRed + level + colorOff
 			since = colorRed + since + colorOff
-			file = colorItalic + colorBlue+ file + colorOff
-			line = colorItalic + colorBlue+ line + colorOff
+			file = colorItalic + colorBlue + file + colorOff
+			line = colorItalic + colorBlue + line + colorOff
 		case "ERR":
 			level = colorBold + colorOrange + level + colorOff
 			since = colorOrange + since + colorOff
-			file = colorItalic + colorBlue+ file + colorOff
-			line = colorItalic + colorBlue+ line + colorOff
+			file = colorItalic + colorBlue + file + colorOff
+			line = colorItalic + colorBlue + line + colorOff
 		case "WRN":
 			level = colorBold + colorYellow + level + colorOff
 			since = colorYellow + since + colorOff
-			file = colorItalic + colorBlue+ file + colorOff
-			line = colorItalic + colorBlue+ line + colorOff
+			file = colorItalic + colorBlue + file + colorOff
+			line = colorItalic + colorBlue + line + colorOff
 		case "INF":
 			level = colorBold + colorGreen + level + colorOff
 			since = colorGreen + since + colorOff
-			file = colorItalic + colorBlue+ file + colorOff
-			line = colorItalic + colorBlue+ line + colorOff
+			file = colorItalic + colorBlue + file + colorOff
+			line = colorItalic + colorBlue + line + colorOff
 		case "DBG":
 			level = colorBold + colorBlue + level + colorOff
 			since = colorBlue + since + colorOff
-			file = colorItalic + colorBlue+ file + colorOff
-			line = colorItalic + colorBlue+ line + colorOff
+			file = colorItalic + colorBlue + file + colorOff
+			line = colorItalic + colorBlue + line + colorOff
 		case "TRC":
 			level = colorBold + colorViolet + level + colorOff
 			since = colorViolet + since + colorOff
-			file = colorItalic + colorBlue+ file + colorOff
-			line = colorItalic + colorBlue+ line + colorOff
+			file = colorItalic + colorBlue + file + colorOff
+			line = colorItalic + colorBlue + line + colorOff
 		}
 	}
 	final := "" // fmt.Sprintf("%s %s %s %s:%s", level, since, text, file, line)
@@ -396,7 +396,7 @@ func composit(text, level string, color bool) string {
 						if curLineLen >= restLen-1 {
 							final += "\n" + strings.Repeat(" ",
 								levelLen+sinceLen)
-							final += spaced[i-1] + colorFaint+"."+colorOff
+							final += spaced[i-1] + colorFaint + "." + colorOff
 							curLineLen = len(spaced[i-1]) + 1
 						} else {
 							final += spaced[i-1] + " "

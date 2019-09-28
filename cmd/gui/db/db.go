@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"unicode"
 
-	"github.com/p9c/pod/cmd/gui/vue/mod"
+	"github.com/p9c/pod/cmd/gui/mod"
 
 	"golang.org/x/text/unicode/norm"
 )
@@ -24,10 +24,10 @@ var safe = []*unicode.RangeTable{
 	unicode.Number,
 }
 
-var _ DVdb = &DuoVUEdb{}
+var _ Ddb = &DuOSdb{}
 
-func (d *DuoVUEdb) DbReadAllTypes() {
-	items := make(map[string]mod.DuoGuiItems)
+func (d *DuOSdb) DbReadAllTypes() {
+	items := make(map[string]mod.DuOSitems)
 	types := []string{"assets", "config", "apps"}
 	for _, t := range types {
 		items[t] = d.DbReadAll(t)
@@ -36,37 +36,37 @@ func (d *DuoVUEdb) DbReadAllTypes() {
 	fmt.Println("ooooooooooooooooooooooooooooodaaa", d.Data)
 
 }
-func (d *DuoVUEdb) DbReadTypeAll(f string) {
+func (d *DuOSdb) DbReadTypeAll(f string) {
 	d.Data = d.DbReadAll(f)
 }
 
-func (d *DuoVUEdb) DbReadAll(folder string) mod.DuoGuiItems {
+func (d *DuOSdb) DbReadAll(folder string) mod.DuOSitems {
 	itemsRaw, err := d.DB.ReadAll(folder)
 	if err != nil {
 		fmt.Println("Error", err)
 	}
-	items := make(map[string]mod.DuoGuiItem)
+	items := make(map[string]mod.DuOSitem)
 	for _, bt := range itemsRaw {
-		item := mod.DuoGuiItem{}
+		item := mod.DuOSitem{}
 		if err := json.Unmarshal([]byte(bt), &item); err != nil {
 			fmt.Println("Error", err)
 		}
 		items[item.Slug] = item
 	}
-	return mod.DuoGuiItems{
+	return mod.DuOSitems{
 		Slug:  folder,
 		Items: items,
 	}
 }
 
-func (d *DuoVUEdb) DbReadAllComponents() map[string]mod.DuoVUEcomp {
+func (d *DuOSdb) DbReadAllComponents() map[string]mod.DuOScomp {
 	componentsRaw, err := d.DB.ReadAll("components")
 	if err != nil {
 		fmt.Println("Error", err)
 	}
-	components := make(map[string]mod.DuoVUEcomp)
+	components := make(map[string]mod.DuOScomp)
 	for _, componentRaw := range componentsRaw {
-		component := mod.DuoVUEcomp{}
+		component := mod.DuOScomp{}
 		if err := json.Unmarshal([]byte(componentRaw), &component); err != nil {
 			fmt.Println("Error", err)
 		}
@@ -75,7 +75,7 @@ func (d *DuoVUEdb) DbReadAllComponents() map[string]mod.DuoVUEcomp {
 	return components
 }
 
-func (d *DuoVUEdb) DbReadAddressBook() map[string]string {
+func (d *DuOSdb) DbReadAddressBook() map[string]string {
 	addressbookRaw, err := d.DB.ReadAll("addressbook")
 	if err != nil {
 		fmt.Println("Error", err)
@@ -90,15 +90,15 @@ func (d *DuoVUEdb) DbReadAddressBook() map[string]string {
 	}
 	return addressbook
 }
-func (d *DuoVUEdb) DbRead(folder, name string) {
-	item := mod.DuoGuiItem{}
+func (d *DuOSdb) DbRead(folder, name string) {
+	item := mod.DuOSitem{}
 	if err := d.DB.Read(folder, name, &item); err != nil {
 		fmt.Println("Error", err)
 	}
 	d.Data = item
 	fmt.Println("Daasdddddddaaa", item)
 }
-func (d *DuoVUEdb) DbWrite(folder, name string, data interface{}) {
+func (d *DuOSdb) DbWrite(folder, name string, data interface{}) {
 	d.DB.Write(folder, name, data)
 }
 

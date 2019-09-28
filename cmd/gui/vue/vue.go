@@ -93,28 +93,28 @@ func RunVue(dV DuoVUE) {
 
 func evalJs(dV DuoVUE) {
 	// vue
-	vueLib, err := base64.StdEncoding.DecodeString(lib.GetLibVue)
-	if err != nil {
-		fmt.Printf("Error decoding string: %s ", err.Error())
-		return
-	}
-	err = dV.Web.Eval(string(vueLib))
+	//vueLib, err := base64.StdEncoding.DecodeString(lib.GetLibVue)
+	//if err != nil {
+	//	fmt.Printf("Error decoding string: %s ", err.Error())
+	//	return
+	//}
+	//err = dV.Web.Eval(string(vueLib))
 	// ej2
-	getEj2Vue, err := base64.StdEncoding.DecodeString(lib.GetEjs2Vue)
-	if err != nil {
-		fmt.Printf("Error decoding string: %s ", err.Error())
-		return
-	}
-	err = dV.Web.Eval(string(getEj2Vue))
-	// libs
-	for _, lib := range lib.GetLibs() {
-		lb, err := base64.StdEncoding.DecodeString(string(lib))
-		err = dV.Web.Eval(string(lb))
-		if err != nil {
-			fmt.Printf("Error decoding string: %s ", err.Error())
-			return
-		}
-	}
+	//getEj2Vue, err := base64.StdEncoding.DecodeString(lib.GetEjs2Vue)
+	//if err != nil {
+	//	fmt.Printf("Error decoding string: %s ", err.Error())
+	//	return
+	//}
+	//err = dV.Web.Eval(string(getEj2Vue))
+	//// libs
+	//for _, lib := range lib.GetLibs() {
+	//	lb, err := base64.StdEncoding.DecodeString(string(lib))
+	//	err = dV.Web.Eval(string(lb))
+	//	if err != nil {
+	//		fmt.Printf("Error decoding string: %s ", err.Error())
+	//		return
+	//	}
+	//}
 	// for _, js := range t.Data["js"] {
 	// 	err = w.Eval(string(js))
 	// }
