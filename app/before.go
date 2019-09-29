@@ -17,8 +17,7 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 )
 
-func
-beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
+func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		log.INFO("running beforeFunc")
 		// if user set datadir this is first thing to configure
@@ -38,7 +37,7 @@ beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
 			log.INFO("loaded config")
 			if err == nil {
-				*cx.Config = *pod.EmptyConfig()
+				cx.Config = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
 					fmt.Println("error unmarshalling config", err)
@@ -62,7 +61,6 @@ beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		log.TRACE("checking network")
 		if c.IsSet("network") {
 			log.TRACE("set network", c.String("network"))
-			log.TRACE("network is set to", *cx.Config.Network)
 			*cx.Config.Network = c.String("network")
 			switch *cx.Config.Network {
 			case "testnet", "testnet3", "t":

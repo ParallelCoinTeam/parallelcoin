@@ -297,7 +297,7 @@ out:
 	for {
 		select {
 		case <-dumpAddressTicker.C:
-			log.INFO("saving peers data")
+			log.TRACE("saving peers data")
 			a.savePeers()
 		case <-a.quit:
 			break out
