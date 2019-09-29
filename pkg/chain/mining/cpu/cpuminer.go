@@ -80,6 +80,8 @@ type Config struct {
 	// NumThreads is the number of threads set in the configuration for the
 	// CPUMiner
 	NumThreads uint32
+	// Solo sets whether the miner will run when not connected
+	Solo bool
 }
 
 const (
@@ -308,8 +310,9 @@ out:
 		// there is no way to relay a found block or receive transactions to work
 		// on when there are no connected peers.
 		if m.cfg.ConnectedCount() == 0 &&
-			m.cfg.ChainParams.Net == wire.MainNet {
-			log.TRACE("server has no peers, waiting")
+			(m.cfg.ChainParams.Net == wire.MainNet ||
+				!m.cfg.Solo) {
+			log.DEBUG("server has no peers, waiting")
 			time.Sleep(time.Second)
 			continue
 		}

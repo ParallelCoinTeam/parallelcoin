@@ -172,7 +172,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.LimitUser),
 			apputil.String(
 				"limitpass",
-				"sets the password for clients of services",
+				"sets the limited rpc password",
 				genPassword(),
 				cx.Config.LimitPass),
 			apputil.String(
@@ -404,6 +404,10 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				-1,
 				cx.Config.GenThreads),
 			apputil.Bool(
+				"solo",
+				"mine DUO even if not connected to the network",
+				cx.Config.Solo),
+			apputil.Bool(
 				"broadcast",
 				"enable broadcasting blocks for workers to mine on",
 				cx.Config.Broadcast),
@@ -413,7 +417,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.Workers),
 			apputil.Bool(
 				"nocontroller",
-				"disable zeroconf kcp miner controller",
+				"disable miner controller",
 				cx.Config.NoController),
 			apputil.StringSlice(
 				"miningaddr",

@@ -8,8 +8,8 @@ import (
 	"github.com/p9c/rpcx/client"
 
 	"github.com/p9c/pod/pkg/chain/mining"
-	"github.com/p9c/pod/pkg/kcpx"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/scratch/kcpx"
 	"github.com/p9c/pod/pkg/util"
 )
 
