@@ -383,6 +383,9 @@ func composit(text, level string, color bool) string {
 							rest = true
 							spacers := terminalWidth - levelLen - sinceLen -
 								fileLen - lineLen - curLineLen + len(spaced[i-1]) + 1
+							if spacers < 1 {
+								spacers = 1
+							}
 							final += strings.Repeat(colorFaint+"."+colorOff, spacers)
 							final += fmt.Sprintf(" %s:%s\n",
 								file, line)

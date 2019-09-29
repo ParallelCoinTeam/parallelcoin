@@ -85,7 +85,6 @@ func GetConfigSchema() Schema {
 		outGroups = append(outGroups, group)
 	}
 
-
 	return Schema{
 		Groups: outGroups,
 	}
@@ -124,6 +123,7 @@ type Config struct {
 	FreeTxRelayLimit         *float64         `group:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"text" model:"FreeTxRelayLimit" featured:"false"`
 	Generate                 *bool            `group:"mining" name:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
 	GenThreads               *int             `group:"mining" name:"Gen Threads" description:"number of CPU threads to mine using" type:"input" inputType:"number" model:"GenThreads" featured:"false"`
+	Solo                     *bool            `group:"mining" name:"Solo Generate" description:"mine even if not connected to a network" type:"switch" model:"Generate" featured:"false"`
 	LimitPass                *string          `group:"rpc" name:"Limit Pass" type:"password" description:"limited user password" type:"input" inputType:"text" model:"LimitPass" featured:"false"`
 	LimitUser                *string          `group:"rpc" name:"Limit User" description:"limited user name" type:"input" inputType:"text" model:"LimitUser" featured:"false"`
 	Listeners                *cli.StringSlice `group:"node" name:"Listeners" description:"List of addresses to bind the node listener to" type:"input" inputType:"text" model:"Listeners" featured:"false"`
@@ -139,18 +139,18 @@ type Config struct {
 	NoController             *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer discovery/miner controller system"`
 	NodeOff                  *bool            `group:"debug" name:"Node Off" description:"turn off the node backend" type:"switch" model:"NodeOff" featured:"false"`
 	NoInitialLoad            *bool
-	NoPeerBloomFilters       *bool   `group:"node" name:"No Peer Bloom Filters" description:"disable bloom filtering support" type:"switch" model:"NoPeerBloomFilters" featured:"false"`
-	NoRelayPriority          *bool   `group:"policy" name:"No Relay Priority" description:"do not require free or low-fee transactions to have high priority for relaying" type:"switch" model:"NoRelayPriority" featured:"false"`
-	OneTimeTLSKey            *bool   `group:"wallet" name:"One Time TLS Key" description:"generate a new TLS certpair at startup, but only write the certificate to disk" type:"switch" model:"OneTimeTLSKey" featured:"false"`
-	Onion                    *bool   `group:"proxy" name:"Onion" description:"enable tor proxy" type:"switch" model:"Onion" featured:"false"`
-	OnionProxy               *string `group:"proxy" name:"Onion Proxy" description:"address of tor proxy you want to connect to" type:"input" inputType:"text" model:"OnionProxy" featured:"false"`
-	OnionProxyPass           *string `group:"proxy" name:"Onion Proxy Pass" type:"password" description:"password for tor proxy" type:"input" inputType:"text" model:"OnionProxyPass" featured:"false"`
-	OnionProxyUser           *string `group:"proxy" name:"Onion Proxy User" description:"tor proxy username" type:"input" inputType:"text" model:"OnionProxyUser" featured:"false"`
-	Password                 *string `group:"rpc" name:"Password" type:"password" description:"password for client RPC connections" type:"input" inputType:"text" model:"Password" featured:"false"`
-	Profile                  *string `group:"debug" name:"Profile" description:"http profiling on given port (1024-40000)" type:"input" inputType:"text" model:"Profile" featured:"false"`
-	Proxy                    *string `group:"proxy" name:"Proxy" description:"address of proxy to connect to for outbound connections" type:"input" inputType:"text" model:"Proxy" featured:"false"`
-	ProxyPass                *string `group:"proxy" name:"Proxy Pass" type:"password" description:"proxy password, if required" type:"input" inputType:"text" model:"ProxyPass" featured:"false"`
-	ProxyUser                *string `group:"proxy" name:"ProxyUser" description:"proxy username, if required" type:"input" inputType:"text" model:"ProxyUser" featured:"false"`
+	NoPeerBloomFilters       *bool            `group:"node" name:"No Peer Bloom Filters" description:"disable bloom filtering support" type:"switch" model:"NoPeerBloomFilters" featured:"false"`
+	NoRelayPriority          *bool            `group:"policy" name:"No Relay Priority" description:"do not require free or low-fee transactions to have high priority for relaying" type:"switch" model:"NoRelayPriority" featured:"false"`
+	OneTimeTLSKey            *bool            `group:"wallet" name:"One Time TLS Key" description:"generate a new TLS certpair at startup, but only write the certificate to disk" type:"switch" model:"OneTimeTLSKey" featured:"false"`
+	Onion                    *bool            `group:"proxy" name:"Onion" description:"enable tor proxy" type:"switch" model:"Onion" featured:"false"`
+	OnionProxy               *string          `group:"proxy" name:"Onion Proxy" description:"address of tor proxy you want to connect to" type:"input" inputType:"text" model:"OnionProxy" featured:"false"`
+	OnionProxyPass           *string          `group:"proxy" name:"Onion Proxy Pass" type:"password" description:"password for tor proxy" type:"input" inputType:"text" model:"OnionProxyPass" featured:"false"`
+	OnionProxyUser           *string          `group:"proxy" name:"Onion Proxy User" description:"tor proxy username" type:"input" inputType:"text" model:"OnionProxyUser" featured:"false"`
+	Password                 *string          `group:"rpc" name:"Password" type:"password" description:"password for client RPC connections" type:"input" inputType:"text" model:"Password" featured:"false"`
+	Profile                  *string          `group:"debug" name:"Profile" description:"http profiling on given port (1024-40000)" type:"input" inputType:"text" model:"Profile" featured:"false"`
+	Proxy                    *string          `group:"proxy" name:"Proxy" description:"address of proxy to connect to for outbound connections" type:"input" inputType:"text" model:"Proxy" featured:"false"`
+	ProxyPass                *string          `group:"proxy" name:"Proxy Pass" type:"password" description:"proxy password, if required" type:"input" inputType:"text" model:"ProxyPass" featured:"false"`
+	ProxyUser                *string          `group:"proxy" name:"ProxyUser" description:"proxy username, if required" type:"input" inputType:"text" model:"ProxyUser" featured:"false"`
 	RejectNonStd             *bool            `group:"node" name:"Reject Non Std" description:"reject non-standard transactions regardless of the default settings for the active network" type:"switch" model:"RejectNonStd" featured:"false"`
 	RelayNonStd              *bool            `group:"node" name:"Relay Non Std" description:"relay non-standard transactions regardless of the default settings for the active network" type:"switch" model:"RelayNonStd" featured:"false"`
 	RPCCert                  *string          `group:"rpc" name:"RPC Cert" description:"location of rpc TLS certificate" type:"input" inputType:"text" model:"RPCCert" featured:"false"`
@@ -258,6 +258,7 @@ func EmptyConfig() *Config {
 		ServerTLS:                newbool(),
 		ServerUser:               newstring(),
 		SigCacheMaxSize:          newint(),
+		Solo:                     newbool(),
 		TestNodeOff:              newbool(),
 		TLS:                      newbool(),
 		TLSSkipVerify:            newbool(),

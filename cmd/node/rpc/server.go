@@ -2720,6 +2720,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 		IsCurrent:              s.SyncManager.IsCurrent,
 		NumThreads:             s.GenThreads,
 		Algo:                   s.Algo,
+		Solo:                   *config.Solo,
 	})
 	// Only setup a function to return new addresses to connect to when
 	// not running in connect-only mode.  The simulation network is always
@@ -2728,7 +2729,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	// discovered peers in order to prevent it from becoming a public test
 	// network.
 	var newAddressFunc func() (net.Addr, error)
-	if !((*config.Network)[0]=='s') && len(*config.ConnectPeers) == 0 {
+	if !((*config.Network)[0] == 's') && len(*config.ConnectPeers) == 0 {
 		newAddressFunc = func() (net.Addr, error) {
 			for tries := 0; tries < 100; tries++ {
 				addr := s.AddrManager.GetAddress()
