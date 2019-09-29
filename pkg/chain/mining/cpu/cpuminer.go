@@ -11,7 +11,7 @@ import (
 	"go.uber.org/atomic"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
@@ -506,7 +506,7 @@ func (m *CPUMiner) solveBlock(
 		// 	mn = 1 << shifter
 		// }
 		// if fork.GetCurrent(blockHeight) == 0 {
-		mn = 1 << 8
+		mn = 1 << 8 * m.cfg.NumThreads
 		// }
 		log.TRACE("starting round from ", rNonce)
 		for i := rNonce; i <= rNonce+mn; i++ {
@@ -654,7 +654,7 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	// 			block.Height()),
 	// 		block.MsgBlock().BlockHashWithAlgos(block.Height()),
 	// 		util.Amount(coinbaseTx.Value),
-	// 		
+	//
 	// 	)
 	// })
 	return true

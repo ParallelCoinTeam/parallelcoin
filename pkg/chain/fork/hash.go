@@ -9,7 +9,6 @@ import (
 	"github.com/dchest/blake256"
 	skein "github.com/enceve/crypto/skein/skein256"
 	gost "github.com/programmer10110/gostreebog"
-	"go.uber.org/atomic"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/blake2s"
@@ -62,8 +61,6 @@ func reverse(b []byte) []byte {
 	return out
 }
 
-var vary atomic.Uint64
-
 // DivHash first runs an arbitrary big number calculation involving a very
 // large integer, and hashes the result. In this way, this hash requires
 // both one of 9 arbitrary hash functions plus a big number long division
@@ -105,7 +102,8 @@ func DivHash(hf func([]byte) []byte, blockbytes []byte, howmany int) []byte {
 		return DivHash(hf, append(ddd, reverse(ddd)...), howmany-1)
 	}
 	// fmt.Printf("%x\n", ddd)
-	return Cryptonight7v2(hf(ddd))
+	// return Cryptonight7v2(hf(ddd))
+	return hf(ddd)
 }
 
 // Hash computes the hash of bytes using the named hash
