@@ -260,6 +260,9 @@ func (m *CPUMiner) Start() {
 	if m.started || m.discreteMining {
 		return
 	}
+	// randomize the starting point so all network is mining different
+	m.rotator.Store(uint64(rand.Intn(
+		len(fork.List[fork.GetCurrent(m.b.BestSnapshot().Height)].Algos))))
 	m.quit = make(chan struct{})
 	m.speedMonitorQuit = make(chan struct{})
 	m.wg.Add(2)
