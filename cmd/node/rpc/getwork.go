@@ -100,7 +100,8 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 	generator := s.Cfg.Generator
 	if state.Template == nil {
 		var err error
-		state.Template, err = generator.NewBlockTemplate(payToAddr, s.Cfg.Algo)
+		state.Template, err = generator.NewBlockTemplate(0, payToAddr,
+			s.Cfg.Algo)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +124,8 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		//	again.
 		state.prevHash = nil
 		var err error
-		state.Template, err = generator.NewBlockTemplate(payToAddr, s.Cfg.Algo)
+		state.Template, err = generator.NewBlockTemplate(0, payToAddr,
+			s.Cfg.Algo)
 		if err != nil {
 			errStr := fmt.Sprintf("Failed to create new block template: %v %s", err)
 			log.ERROR(errStr)
@@ -158,7 +160,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		// makes a submission against it. Update the time of the block template
 		// to the current time while accounting for the median time of the past
 		// several blocks per the chain consensus rules.
-		e := generator.UpdateBlockTime(msgBlock)
+		e := generator.UpdateBlockTime(0, msgBlock)
 		if e != nil {
 			log.WARN("failed to update block time", e)
 		}
@@ -328,7 +330,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	}
 	// Process this block using the same rules as blocks coming from other
 	// nodes.  This will in turn relay it to the network like normal.
-	_, isOrphan, err := s.Cfg.Chain.ProcessBlock(block, 0,
+	_, isOrphan, err := s.Cfg.Chain.ProcessBlock(0, block, 0,
 		s.Cfg.Chain.BestSnapshot().Height)
 	if err != nil || isOrphan {
 		// Anything other than a rule violation is an unexpected error, so return

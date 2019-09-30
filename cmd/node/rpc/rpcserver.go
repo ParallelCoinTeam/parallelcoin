@@ -65,10 +65,10 @@ type GBTWorkState struct {
 	MinTimestamp  time.Time
 	Template      *mining.BlockTemplate
 	NotifyMap     map[chainhash.Hash]map[int64]chan struct{}
-	TimeSource blockchain.MedianTimeSource
-	Algo       string
-	StateCfg   *state.Config
-	Config     *pod.Config
+	TimeSource    blockchain.MedianTimeSource
+	Algo          string
+	StateCfg      *state.Config
+	Config        *pod.Config
 }
 
 // ParsedRPCCmd represents a JSON-RPC request object that has been parsed
@@ -742,7 +742,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 		// redeem.  This is only acceptable because the returned block template
 		// doesn't include the coinbase, so the caller will ultimately create
 		// their own coinbase which pays to the appropriate address(es).
-		blkTemplate, err := generator.NewBlockTemplate(payAddr, state.Algo)
+		blkTemplate, err := generator.NewBlockTemplate(0, payAddr, state.Algo)
 		if err != nil {
 			return InternalRPCError("(rpcserver.go) Failed to create new block "+
 				"template: "+err.Error(), "")
@@ -805,7 +805,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 		// Update the time of the block template to the current time while
 		// accounting for the median time of the past several blocks per the
 		// chain consensus rules.
-		err := generator.UpdateBlockTime(msgBlock)
+		err := generator.UpdateBlockTime(0, msgBlock)
 		if err != nil {
 			log.DEBUG(err)
 
@@ -1995,7 +1995,8 @@ func HandleGenerate(s *Server, cmd interface{},
 	}
 	// Create a reply
 	reply := make([]string, c.NumBlocks)
-	blockHashes, err := s.Cfg.CPUMiner.GenerateNBlocks(c.NumBlocks, s.Cfg.Algo)
+	blockHashes, err := s.Cfg.CPUMiner.GenerateNBlocks(0, c.NumBlocks,
+		s.Cfg.Algo)
 	if err != nil {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInternal.Code,
@@ -2550,7 +2551,7 @@ func HandleGetBlockTemplateProposal(s *Server,
 	if !expectedPrevHash.IsEqual(prevHash) {
 		return "bad-prevblk", nil
 	}
-	if err := s.Cfg.Chain.CheckConnectBlockTemplate(block); err != nil {
+	if err := s.Cfg.Chain.CheckConnectBlockTemplate(0, block); err != nil {
 		if _, ok := err.(blockchain.RuleError); !ok {
 			errStr := fmt.Sprintf("failed to process block proposal: %v", err)
 			log.ERROR(errStr)
@@ -2835,10 +2836,10 @@ func HandleGetHeaders(s *Server, cmd interface{},
 func HandleGetInfo(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (ret interface{}, err error) {
 	var Difficulty, dBlake2b, dBlake14lr, dBlake2s, dKeccak, dScrypt, dSHA256D,
-	dSkein, dStribog, dX11 float64
+		dSkein, dStribog, dX11 float64
 	var lastbitsBlake2b, lastbitsBlake14lr, lastbitsBlake2s, lastbitsKeccak,
-	lastbitsScrypt, lastbitsSHA256D, lastbitsSkein, lastbitsStribog,
-	lastbitsX11 uint32
+		lastbitsScrypt, lastbitsSHA256D, lastbitsSkein, lastbitsStribog,
+		lastbitsX11 uint32
 	best := s.
 		Cfg.
 		Chain.
@@ -3052,10 +3053,10 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 		}
 	}
 	var Difficulty, dBlake2b, dBlake14lr, dBlake2s, dKeccak, dScrypt, dSHA256D,
-	dSkein, dStribog, dX11 float64
+		dSkein, dStribog, dX11 float64
 	var lastbitsBlake2b, lastbitsBlake14lr, lastbitsBlake2s, lastbitsKeccak,
-	lastbitsScrypt, lastbitsSHA256D, lastbitsSkein, lastbitsStribog,
-	lastbitsX11 uint32
+		lastbitsScrypt, lastbitsSHA256D, lastbitsSkein, lastbitsStribog,
+		lastbitsX11 uint32
 	best := s.Cfg.Chain.BestSnapshot()
 	v := s.Cfg.Chain.Index.LookupNode(&best.Hash)
 	foundCount, height := 0, best.Height
@@ -4277,7 +4278,7 @@ func MessageToHex(msg wire.Message) (string, error) {
 func NewGbtWorkState(timeSource blockchain.MedianTimeSource,
 	algoName string) *GBTWorkState {
 	return &GBTWorkState{
-		NotifyMap: make(map[chainhash.Hash]map[int64]chan struct{}),
+		NotifyMap:  make(map[chainhash.Hash]map[int64]chan struct{}),
 		TimeSource: timeSource,
 		Algo:       algoName,
 	}
@@ -4407,7 +4408,6 @@ func VerifyChain(s *Server, level, depth int32) error {
 				"verify is unable to fetch block at height %d: %v",
 				height,
 				err,
-
 			)
 
 			return err

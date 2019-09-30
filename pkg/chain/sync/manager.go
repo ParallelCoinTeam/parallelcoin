@@ -249,7 +249,7 @@ func (sm *SyncManager) Start() {
 	}
 	log.TRACE("starting sync manager")
 	sm.wg.Add(1)
-	go sm.blockHandler()
+	go sm.blockHandler(0)
 }
 
 // Stop gracefully shuts down the sync manager by stopping all asynchronous
@@ -278,7 +278,7 @@ func (sm *SyncManager) SyncPeerID() int32 {
 // thread without needing to lock memory data structures.  This is important
 // because the sync manager controls which blocks are needed and how the
 // fetching should proceed.
-func (sm *SyncManager) blockHandler() {
+func (sm *SyncManager) blockHandler(workerNumber uint32) {
 out:
 	for {
 		select {
@@ -291,7 +291,7 @@ out:
 				sm.handleTxMsg(msg)
 				msg.reply <- struct{}{}
 			case *blockMsg:
-				sm.handleBlockMsg(msg)
+				sm.handleBlockMsg(0, msg)
 				msg.reply <- struct{}{}
 			case *invMsg:
 				sm.handleInvMsg(msg)
@@ -319,7 +319,8 @@ out:
 					}
 				}
 				log.TRACE("passing to chain.ProcessBlock")
-				_, isOrphan, err := sm.chain.ProcessBlock(msg.block, msg.flags, heightUpdate)
+				_, isOrphan, err := sm.chain.ProcessBlock(workerNumber, msg.
+					block, msg.flags, heightUpdate)
 				if err != nil {
 					log.ERROR("error processing new block ", err)
 					msg.reply <- processBlockResponse{
@@ -444,7 +445,7 @@ func (sm *SyncManager) findNextHeaderCheckpoint(height int32) *chaincfg.Checkpoi
 }
 
 // handleBlockMsg handles block messages from all peers.
-func (sm *SyncManager) handleBlockMsg(bmsg *blockMsg) {
+func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 	pp := bmsg.peer
 	state, exists := sm.peerStates[pp]
 	if !exists {
@@ -517,7 +518,8 @@ func (sm *SyncManager) handleBlockMsg(bmsg *blockMsg) {
 	}
 	// Process the block to include validation, best chain selection, orphan
 	// handling, etc.
-	_, isOrphan, err := sm.chain.ProcessBlock(bmsg.block, behaviorFlags, heightUpdate)
+	_, isOrphan, err := sm.chain.ProcessBlock(workerNumber, bmsg.block,
+		behaviorFlags, heightUpdate)
 	if err != nil {
 		// When the error is a rule error, it means the block was simply rejected
 		// as opposed to something actually going wrong, so log it as such.
@@ -1381,33 +1383,32 @@ func (sm *SyncManager) startSync() {
 
 // New constructs a new SyncManager. Use Start to begin processing asynchronous
 // block, tx, and inv updates.
-func
-New(config *Config) (*SyncManager, error) {
-sm := SyncManager{
-peerNotifier:    config.PeerNotifier,
-chain:           config.Chain,
-txMemPool:       config.TxMemPool,
-chainParams:     config.ChainParams,
-rejectedTxns:    make(map[chainhash.Hash]struct{}),
-requestedTxns:   make(map[chainhash.Hash]struct{}),
-requestedBlocks: make(map[chainhash.Hash]struct{}),
-peerStates:      make(map[*peerpkg.Peer]*peerSyncState),
-progressLogger:  newBlockProgressLogger("processed"),
-msgChan:         make(chan interface{}, config.MaxPeers*3),
-headerList:      list.New(),
-quit:            make(chan struct{}),
-feeEstimator:    config.FeeEstimator,
-}
-best := sm.chain.BestSnapshot()
-if !config.DisableCheckpoints {
-// Initialize the next checkpoint based on the current height.
-sm.nextCheckpoint = sm.findNextHeaderCheckpoint(best.Height)
-if sm.nextCheckpoint != nil {
-sm.resetHeaderState(&best.Hash, best.Height)
-}
-} else {
-log.INFO("checkpoints are disabled")
-}
-sm.chain.Subscribe(sm.handleBlockchainNotification)
-return &sm, nil
+func New(config *Config) (*SyncManager, error) {
+	sm := SyncManager{
+		peerNotifier:    config.PeerNotifier,
+		chain:           config.Chain,
+		txMemPool:       config.TxMemPool,
+		chainParams:     config.ChainParams,
+		rejectedTxns:    make(map[chainhash.Hash]struct{}),
+		requestedTxns:   make(map[chainhash.Hash]struct{}),
+		requestedBlocks: make(map[chainhash.Hash]struct{}),
+		peerStates:      make(map[*peerpkg.Peer]*peerSyncState),
+		progressLogger:  newBlockProgressLogger("processed"),
+		msgChan:         make(chan interface{}, config.MaxPeers*3),
+		headerList:      list.New(),
+		quit:            make(chan struct{}),
+		feeEstimator:    config.FeeEstimator,
+	}
+	best := sm.chain.BestSnapshot()
+	if !config.DisableCheckpoints {
+		// Initialize the next checkpoint based on the current height.
+		sm.nextCheckpoint = sm.findNextHeaderCheckpoint(best.Height)
+		if sm.nextCheckpoint != nil {
+			sm.resetHeaderState(&best.Hash, best.Height)
+		}
+	} else {
+		log.INFO("checkpoints are disabled")
+	}
+	sm.chain.Subscribe(sm.handleBlockchainNotification)
+	return &sm, nil
 }
