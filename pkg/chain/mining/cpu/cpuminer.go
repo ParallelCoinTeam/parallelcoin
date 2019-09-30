@@ -515,7 +515,8 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		var i uint32
 		defer func() {
 			log.DEBUGF("wrkr %d finished %d rounds of %s", workerNumber,
-				i-rNonce, fork.GetAlgoName(msgBlock.Header.Version, blockHeight))
+				i-rNonce-1, fork.GetAlgoName(msgBlock.Header.Version,
+					blockHeight))
 		}()
 		log.TRACE("starting round from ", rNonce)
 		for i = rNonce; i <= rNonce+mn; i++ {

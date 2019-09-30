@@ -22,7 +22,7 @@ import (
 // repeated before the final hash,
 // on release for mainnet this is probably set to 9 or so to raise the
 // difficulty to a reasonable level for the hard fork
-const HashReps = 2
+const HashReps = 1
 
 // Argon2i takes bytes, generates a Lyra2REv2 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {
