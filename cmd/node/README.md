@@ -6,6 +6,8 @@ Next generation full node for Parallelcoin, forked from [btcd](https://github.co
 
 ## Hard Fork 1: Plan 9 from Crypto Space
 
+**TODO:** update this!
+
 9 algorithms can be used when mining:
 
 - Blake14lr (decred)
@@ -33,14 +35,6 @@ After the upcoming hardfork, Parallelcoin will have the following features in it
 - Rewards will be computed according to a much smoother, satoshi-precision exponential decay curve that will produce a flat annual 5% supply expansion. Increasing the precision of the denomination is planned for the next release cycle, at 0.00000001 as the minimum denomination, there may be issues as userbase increases.
 
 - Fair Hardfork - Rewards will slowly rise from the initial hard fork at an inverse exponential rate to bring the block reward from 0.02 up to 2 in 2000 blocks, as the adjustment to network capacity takes time, so rewards will closely match the time interval they relate to until it starts faster from the minimum target stabilises in response to what miners create.
-
-### Wallet
-
-The pod has no RPC wallet functionality, only core chain functions. It is fully compliant with the original [parallelcoind](https://github.com/marcetin/parallelcoin) for these functions. For the wallet server, [mod](https://github.com/p9c/pod/walletmain), which works also with the CLI controller [podctl](https://github.com/p9c/pod/), it will be possible to send commands to both mod (wallet) and pod full node using the command line.
-
-A Webview/Golang based GUI wallet will come a little later, following the release, and will be able to run on all platforms with with browser or supported built-in web application platforms, Blink and Webkit engines.
-
-\* At the time of release there will not be any GPU nor ASIC miners for the GOST Stribog (just stribog 256 bit hash, not combined) and Highwayhash.
 
 ## Installation
 
