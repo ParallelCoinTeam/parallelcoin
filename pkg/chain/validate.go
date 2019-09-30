@@ -9,7 +9,7 @@ import (
 	"time"
 
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/hardfork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -377,7 +377,8 @@ func // checkConnectBlock performs several checks to confirm connecting the
 // to the main chain does not violate any consensus rules, aside from the proof
 // of work requirement. The block must connect to the current tip of the main
 // chain. This function is safe for concurrent access.
-func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) error {
+func (b *BlockChain) CheckConnectBlockTemplate(workerNumber uint32, block *util.
+	Block) error {
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
 	algo := block.MsgBlock().Header.Version
@@ -403,7 +404,7 @@ func (b *BlockChain) CheckConnectBlockTemplate(block *util.Block) error {
 		log.ERROR("block processing error:", err)
 		return err
 	}
-	err = b.checkBlockContext(block, tip, flags, true)
+	err = b.checkBlockContext(workerNumber, block, tip, flags, true)
 	if err != nil {
 		return err
 	}
@@ -462,11 +463,12 @@ func // checkBlockContext peforms several validation checks on the block which
 // The flags are also passed to checkBlockHeaderContext.
 // See its documentation for how the flags modify its behavior.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) checkBlockContext(block *util.Block, prevNode *blockNode, flags BehaviorFlags, DoNotCheckPow bool) error {
+(b *BlockChain) checkBlockContext(workerNumber uint32, block *util.Block,
+	prevNode *blockNode, flags BehaviorFlags, DoNotCheckPow bool) error {
 	// log.WARN("checkBlockContext")
 	// Perform all block header related validation checks.
 	header := &block.MsgBlock().Header
-	err := b.checkBlockHeaderContext(header, prevNode, flags)
+	err := b.checkBlockHeaderContext(workerNumber, header, prevNode, flags)
 	if err != nil {
 		log.ERROR(err)
 		return err
@@ -560,7 +562,8 @@ func // checkBlockHeaderContext performs several validation checks on the block
 //  - BFFastAdd: All checks except those involving comparing the header
 //  against the checkpoints are not performed.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) checkBlockHeaderContext(header *wire.BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
+(b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
+	BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
 	// log.WARN("checking block header context")
 	if prevNode == nil {
 		return nil
@@ -573,69 +576,70 @@ func // checkBlockHeaderContext performs several validation checks on the block
 		// a := fork.GetAlgoName(header.Version, prevNode.height+1)
 		// log.INFOF("algo %s %d %8x %d", a, header.Version, header.Bits,
 		// 	prevNode.height+1)
-	expectedDifficulty, err := b.calcNextRequiredDifficulty(prevNode,
-		header.Timestamp, fork.GetAlgoName(header.Version, prevNode.height+1),
-		false)
+		expectedDifficulty, err := b.calcNextRequiredDifficulty(
+			workerNumber, prevNode, header.Timestamp,
+			fork.GetAlgoName(header.Version, prevNode.height+1),
+			false)
+		if err != nil {
+			log.ERROR(err)
+			return err
+		}
+		blockDifficulty := header.Bits
+		if blockDifficulty != expectedDifficulty {
+			str := "block difficulty of %08x %064x is not the expected value of %08x %064x"
+			str = fmt.Sprintf(str, blockDifficulty, CompactToBig(blockDifficulty), expectedDifficulty, CompactToBig(expectedDifficulty))
+			log.ERROR(str)
+			return ruleError(ErrUnexpectedDifficulty, str)
+		}
+		// Ensure the timestamp for the block header is after the median time
+		// of the last several blocks (medianTimeBlocks).
+		medianTime := prevNode.CalcPastMedianTime()
+		if !header.Timestamp.After(medianTime) {
+			str := "block timestamp of %v is not after expected %v"
+			str = fmt.Sprintf(str, header.Timestamp, medianTime)
+			log.ERROR(str)
+			return ruleError(ErrTimeTooOld, str)
+		}
+	}
+
+	// The height of this block is one more than the referenced previous block.
+	blockHeight := prevNode.height + 1
+	// Ensure chain matches up to predetermined checkpoints.
+	blockHash := header.BlockHash()
+	if !b.verifyCheckpoint(blockHeight, &blockHash) {
+		str := fmt.Sprintf("block at height %d does not match "+
+			"checkpoint hash", blockHeight)
+		log.ERROR(str)
+		return ruleError(ErrBadCheckpoint, str)
+	}
+	// Find the previous checkpoint and prevent blocks which fork the main
+	// chain before it.  This prevents storage of new, otherwise valid,
+	// blocks which build off of old blocks that are likely at a much easier
+	// difficulty and therefore could be used to waste cache and disk space.
+	checkpointNode, err := b.findPreviousCheckpoint()
 	if err != nil {
 		log.ERROR(err)
 		return err
 	}
-	blockDifficulty := header.Bits
-	if blockDifficulty != expectedDifficulty {
-		str := "block difficulty of %08x %064x is not the expected value of %08x %064x"
-		str = fmt.Sprintf(str, blockDifficulty, CompactToBig(blockDifficulty), expectedDifficulty, CompactToBig(expectedDifficulty))
+	if checkpointNode != nil && blockHeight < checkpointNode.height {
+		str := fmt.Sprintf("block at height %d forks the main chain "+
+			"before the previous checkpoint at height %d",
+			blockHeight, checkpointNode.height)
 		log.ERROR(str)
-		return ruleError(ErrUnexpectedDifficulty, str)
+		return ruleError(ErrForkTooOld, str)
 	}
-	// Ensure the timestamp for the block header is after the median time
-	// of the last several blocks (medianTimeBlocks).
-	medianTime := prevNode.CalcPastMedianTime()
-	if !header.Timestamp.After(medianTime) {
-		str := "block timestamp of %v is not after expected %v"
-		str = fmt.Sprintf(str, header.Timestamp, medianTime)
-		log.ERROR(str)
-		return ruleError(ErrTimeTooOld, str)
-	}
-}
-
-// The height of this block is one more than the referenced previous block.
-blockHeight := prevNode.height + 1
-// Ensure chain matches up to predetermined checkpoints.
-blockHash := header.BlockHash()
-if !b.verifyCheckpoint(blockHeight, &blockHash) {
-str := fmt.Sprintf("block at height %d does not match "+
-"checkpoint hash", blockHeight)
-log.ERROR(str)
-return ruleError(ErrBadCheckpoint, str)
-}
-// Find the previous checkpoint and prevent blocks which fork the main
-// chain before it.  This prevents storage of new, otherwise valid,
-// blocks which build off of old blocks that are likely at a much easier
-// difficulty and therefore could be used to waste cache and disk space.
-checkpointNode, err := b.findPreviousCheckpoint()
-if err != nil {
-log.ERROR(err)
-return err
-}
-if checkpointNode != nil && blockHeight < checkpointNode.height {
-str := fmt.Sprintf("block at height %d forks the main chain "+
-"before the previous checkpoint at height %d",
-blockHeight, checkpointNode.height)
-log.ERROR(str)
-return ruleError(ErrForkTooOld, str)
-}
-// Reject outdated block versions once a majority of the network has
-// upgraded.  These were originally voted on by BIP0034, BIP0065,
-// and BIP0066.
-// netparams := b.netparams
-// if header.Version < 2 && blockHeight >= netparams.BIP0034Height ||
-// 	header.Version < 3 && blockHeight >= netparams.BIP0066Height ||
-// 	header.Version < 4 && blockHeight >= netparams.BIP0065Height {
-// 	str := "new blocks with version %d are no longer valid"
-// 	str = fmt.Sprintf(str, header.Version)
-// 	return ruleError(ErrBlockVersionTooOld, str)
-// }
-return nil
+	// Reject outdated block versions once a majority of the network has
+	// upgraded.  These were originally voted on by BIP0034, BIP0065,
+	// and BIP0066.
+	// netparams := b.netparams
+	// if header.Version < 2 && blockHeight >= netparams.BIP0034Height ||
+	// 	header.Version < 3 && blockHeight >= netparams.BIP0066Height ||
+	// 	header.Version < 4 && blockHeight >= netparams.BIP0065Height {
+	// 	str := "new blocks with version %d are no longer valid"
+	// 	str = fmt.Sprintf(str, header.Version)
+	// 	return ruleError(ErrBlockVersionTooOld, str)
+	// }
+	return nil
 }
 
 func // CalcBlockSubsidy returns the subsidy amount a block at the provided

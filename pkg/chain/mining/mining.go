@@ -421,7 +421,8 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 //  |  transactions (while block size   |   |
 //  |  <= policy.BlockMinSize)          |   |
 //   -----------------------------------  --
-(g *BlkTmplGenerator) NewBlockTemplate(payToAddress util.Address, algo string) (*BlockTemplate, error) {
+(g *BlkTmplGenerator) NewBlockTemplate(workerNumber uint32, payToAddress util.
+	Address, algo string) (*BlockTemplate, error) {
 	log.TRACE("NewBlockTemplate", algo)
 	if algo == "" {
 		algo = "random"
@@ -805,7 +806,8 @@ mempoolLoop:
 	// several blocks per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
 	log.TRACE("algo ", ts, " ", algo)
-	reqDifficulty, err := g.Chain.CalcNextRequiredDifficulty(ts, algo)
+	reqDifficulty, err := g.Chain.CalcNextRequiredDifficulty(workerNumber, ts,
+		algo)
 	if err != nil {
 		return nil, err
 	}
@@ -831,15 +833,15 @@ mempoolLoop:
 	// with no issues.
 	block := util.NewBlock(&msgBlock)
 	block.SetHeight(nextBlockHeight)
-	err = g.Chain.CheckConnectBlockTemplate(block)
+	err = g.Chain.CheckConnectBlockTemplate(workerNumber, block)
 	if err != nil {
 		log.DEBUG("checkconnectblocktemplate err:", err)
 		return nil, err
 	}
 	log.TRACE(func() string {
 		return fmt.Sprintf(
-			"created new block template (algo %s, %d transactions, " +
-				"%d in fees, %d signature operations cost, %d weight, " +
+			"created new block template (algo %s, %d transactions, "+
+				"%d in fees, %d signature operations cost, %d weight, "+
 				"target difficulty %064x)",
 			algo,
 			len(msgBlock.Transactions),
@@ -847,7 +849,6 @@ mempoolLoop:
 			blockSigOpCost,
 			blockWeight,
 			fork.CompactToBig(msgBlock.Header.Bits),
-
 		)
 	})
 	return &BlockTemplate{
@@ -866,14 +867,16 @@ func // UpdateBlockTime updates the timestamp in the header of the passed
 // chain consensus rules.  Finally,
 // it will update the target difficulty if needed based on the new time for
 // the test networks since their target difficulty can change based upon time.
-(g *BlkTmplGenerator) UpdateBlockTime(msgBlock *wire.MsgBlock) error {
+(g *BlkTmplGenerator) UpdateBlockTime(workerNumber uint32, msgBlock *wire.
+	MsgBlock) error {
 	// The new timestamp is potentially adjusted to ensure it comes after the
 	// median time of the last several blocks per the chain consensus rules.
 	newTime := medianAdjustedTime(g.Chain.BestSnapshot(), g.TimeSource)
 	msgBlock.Header.Timestamp = newTime
 	// Recalculate the difficulty if running on a network that requires it.
 	if g.ChainParams.ReduceMinDifficulty {
-		difficulty, err := g.Chain.CalcNextRequiredDifficulty(newTime,
+		difficulty, err := g.Chain.CalcNextRequiredDifficulty(
+			workerNumber, newTime,
 			fork.GetAlgoName(msgBlock.Header.Version, g.BestSnapshot().Height))
 		if err != nil {
 			return err

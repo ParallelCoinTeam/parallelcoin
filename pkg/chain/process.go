@@ -12,8 +12,8 @@ import (
 )
 
 type // BehaviorFlags is a bitmask defining tweaks to the normal behavior when
-	// performing chain processing and consensus rules checks.
-	BehaviorFlags uint32
+// performing chain processing and consensus rules checks.
+BehaviorFlags uint32
 
 const (
 	// BFFastAdd may be set to indicate that several checks can be avoided
@@ -37,7 +37,8 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 // the first return value indicates whether or not the block is on the main
 // chain and the second indicates whether or not the block is an orphan.
 // This function is safe for concurrent access.
-(b *BlockChain) ProcessBlock(block *util.Block, flags BehaviorFlags, height int32) (bool, bool, error) {
+(b *BlockChain) ProcessBlock(workerNumber uint32, block *util.Block,
+	flags BehaviorFlags, height int32) (bool, bool, error) {
 	// log.WARN("blockchain.ProcessBlock NEW MAYBE BLOCK", height)
 	blockHeight := height
 	bb, _ := b.BlockByHash(&block.MsgBlock().Header.PrevBlock)
@@ -163,7 +164,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// The block has passed all context independent checks and appears sane
 	// enough to potentially accept it into the block chain.
 	// log.WARN("maybe accept block")
-	isMainChain, err := b.maybeAcceptBlock(block, flags)
+	isMainChain, err := b.maybeAcceptBlock(workerNumber, block, flags)
 	if err != nil {
 		return false, false, err
 	}
@@ -172,7 +173,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	if isMainChain {
 		log.WARN("new block on main chain")
 	}
-	err = b.processOrphans(blockHash, flags)
+	err = b.processOrphans(workerNumber, blockHash, flags)
 	if err != nil {
 		return false, false, err
 	}
@@ -224,7 +225,8 @@ func // processOrphans determines if there are any orphans which depend on the
 // no more. The flags do not modify the behavior of this function directly,
 // however they are needed to pass along to maybeAcceptBlock.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) processOrphans(hash *chainhash.Hash, flags BehaviorFlags) error {
+(b *BlockChain) processOrphans(workerNumber uint32, hash *chainhash.Hash,
+	flags BehaviorFlags) error {
 	// Start with processing at least the passed hash.
 	// Leave a little room for additional orphan blocks that need to be
 	// processed without needing to grow the array in the common case.
@@ -255,7 +257,7 @@ func // processOrphans determines if there are any orphans which depend on the
 			b.removeOrphanBlock(orphan)
 			i--
 			// Potentially accept the block into the block chain.
-			_, err := b.maybeAcceptBlock(orphan.block, flags)
+			_, err := b.maybeAcceptBlock(workerNumber, orphan.block, flags)
 			if err != nil {
 				return err
 			}

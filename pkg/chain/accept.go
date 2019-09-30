@@ -19,7 +19,8 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 // The flags are also passed to checkBlockContext and connectBestChain.
 // See their documentation for how the flags modify their behavior.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) maybeAcceptBlock(block *util.Block, flags BehaviorFlags) (bool, error) {
+(b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block,
+	flags BehaviorFlags) (bool, error) {
 	// log.WARN("maybeAcceptBlock")
 	// The height of this block is one more than the referenced previous block.
 	prevHash := &block.MsgBlock().Header.PrevBlock
@@ -71,7 +72,8 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on
 		// the  position of the block within the block chain.
-		err = b.checkBlockContext(block, prevNode, flags, DoNotCheckPow)
+		err = b.checkBlockContext(workerNumber, block, prevNode, flags,
+			DoNotCheckPow)
 		if err != nil {
 			log.ERROR(err)
 			return false, err

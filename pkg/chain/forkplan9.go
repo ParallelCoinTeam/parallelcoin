@@ -18,7 +18,8 @@ import (
 // rules. This function differs from the exported  CalcNextRequiredDifficulty
 // in that the exported version uses the current best chain as the previous
 // block node while this function accepts any block node.
-func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
+func (b *BlockChain) CalcNextRequiredDifficultyPlan9(
+	workerNumber uint32, lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	adjustment float64, err error) {
 	log.TRACE("algoname ", algoname)
@@ -44,7 +45,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	if b.params.Net == wire.TestNet3 {
 		if fork.List[1].TestnetStart == nH {
 			if l {
-				log.DEBUG("on plan 9 hardfork", algoname)
+				log.DEBUG("wrkr:", workerNumber, "on plan 9 hardfork", algoname)
 			}
 			return fork.SecondPowLimitBits, 1, nil
 		}
@@ -69,7 +70,8 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 				//
 				if ln == nil {
 					if l {
-						log.DEBUG("before first ", algoname)
+						log.DEBUG("wrkr:", workerNumber, "before first",
+							algoname)
 					}
 					return fork.SecondPowLimitBits, 1, nil
 				}
@@ -285,10 +287,10 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 	}
 	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv + timeSinceAlgo) / 6
 	if adjustment > maxA {
-		adjustment=maxA
+		adjustment = maxA
 	}
 	if adjustment < minA {
-		adjustment=minA
+		adjustment = minA
 	}
 	log.TRACEF("adjustment %3.4f %08x", adjustment, last.bits)
 	bigAdjustment := big.NewFloat(adjustment)
@@ -310,7 +312,9 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNode *blockNode,
 			an += strings.Repeat(" ", pad)
 		}
 		log.INFOC(func() string {
-			return fmt.Sprintf("%d %08x %s %s %s %s %s %s %s %s %s %08x",
+			return fmt.Sprintf("wrkr: %d hght: %d %08x %s %s %s %s %s %s %s"+
+				" %s %s %08x",
+				workerNumber,
 				lastNode.height+1,
 				last.bits,
 				an,

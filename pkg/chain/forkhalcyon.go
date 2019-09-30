@@ -14,7 +14,8 @@ import (
 // rules. This function differs from the exported  CalcNextRequiredDifficulty
 // in that the exported version uses the current best chain as the previous
 // block node while this function accepts any block node.
-func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(lastNode *blockNode,
+func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
+	workerNumber uint32, lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	err error) {
 	nH := lastNode.height + 1
@@ -64,7 +65,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(lastNode *blockNode,
 	newTargetBits = BigToCompact(newTarget)
 	log.DEBUGF(
 		"difficulty retarget at block height %d, old %08x new %08x",
-		lastNode.height + 1,
+		lastNode.height+1,
 		prevNode.bits,
 		newTargetBits,
 	)
