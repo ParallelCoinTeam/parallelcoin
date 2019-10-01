@@ -27,6 +27,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			case lb := <-blockChan:
 				lastBlock.Store(lb)
 				// send out block broadcast
+				log.WARN("sending out block broadcast")
 			case <-ctx.Done():
 				// cancel has been called
 				return
@@ -40,6 +41,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		switch n.Type {
 		case blockchain.NTBlockConnected:
 			lastBlock.Store(Blocks{})
+			var blocks Blocks
 			// generate Blocks
 			for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
 				BestSnapshot().Height+1)].Algos {
@@ -53,8 +55,9 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					log.ERROR("failed to create new block template:", err)
 					continue
 				}
-				lastBlock.Store(append(lastBlock.Load().(Blocks), template))
+				blocks = append(blocks, template)
 			}
+			lastBlock.Store(blocks)
 			blockChan <- lastBlock.Load().(Blocks)
 		}
 	})
@@ -64,6 +67,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			time.Sleep(time.Second)
 			connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
 			current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
+			// if out of sync or disconnected,
+			// once a second send out empty blocks
 			if connCount < 1 || !current {
 				lastBlock.Store(Blocks{})
 				blockChan <- lastBlock.Load().(Blocks)
