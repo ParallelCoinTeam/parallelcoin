@@ -38,3 +38,20 @@ You can just `go install` in the root directory and `pod` will be placed in your
 TODO: Initial release will include Linux, Mac and Windows binaries including the GUI, 
 binaries for all platform targets of Go 1.12.9+ without the GUI and standalone kopach
 miner also for all targets of Go v1.12.9+.
+
+## Developer Notes
+
+Goland's inbuilt terminal is a pain but Tilix requires custom hyperlinks to be defined to click and have the IDE open the source at the given location. The regexp that I use given my system base path is:
+
+```regexp
+([/]home[/]loki[/]src[/]github[.]com[/]p9c[/]pod[/]){0,1}(([a-zA-Z0-9_.-]+[/]?)+[:][0-9]+)
+```
+
+with the command:
+
+```
+goland /home/loki/src/github.com/p9c/pod/$2
+```
+
+which opens absolute paths that are in the repository root given complete or as a relative path with no prefix `/`.
+Better regex would be nice, but this works ok for now.
