@@ -119,7 +119,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 					// 	apputil.SubCommands(),
 					// ),
 				),
-			),
+				"k"),
 		},
 		Flags: []cli.Flag{
 			altsrc.NewStringFlag(cli.StringFlag{
