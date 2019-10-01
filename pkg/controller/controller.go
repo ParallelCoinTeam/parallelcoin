@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
+	chain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
@@ -36,10 +36,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		}
 	}()
 	// create subscriber for new block event
-	cx.RPCServer.Cfg.Chain.Subscribe(func(n *blockchain.
+	cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.
 	Notification) {
 		switch n.Type {
-		case blockchain.NTBlockConnected:
+		case chain.NTBlockConnected:
 			lastBlock.Store(Blocks{})
 			var blocks Blocks
 			// generate Blocks
