@@ -31,7 +31,7 @@ It consists of 6 main modules:
 
 ## Building
 
-You can just `go install` in the root directory and `pod` will be placed in your `GOBIN` directory.
+You can just `go install` in the repository root and `pod` will be placed in your `GOBIN` directory.
 
 ## Installation
 
@@ -41,17 +41,17 @@ miner also for all targets of Go v1.12.9+.
 
 ## Developer Notes
 
-Goland's inbuilt terminal is a pain but Tilix requires custom hyperlinks to be defined to click and have the IDE open the source at the given location. The regexp that I use given my system base path is:
-
-```regexp
-([/]home[/]loki[/]src[/]github[.]com[/]p9c[/]pod[/]){0,1}(([a-zA-Z0-9_.-]+[/]?)+[:][0-9]+)
+Goland's inbuilt terminal is a pain but Tilix requires custom hyperlinks to be defined to click and have the IDE open the source at the given location. The regexp that I use given my system base path is (exactly this with all newlines removed for dconf with using tilix at the dconf path `/com/gexperts/Tilix/custom-hyperlinks`)
+```
+[
+    '(\\./)([^:\\0\\s]+)(:[0-9]+),
+        goland /home/loki/src/github.com/p9c/pod/$1$2,false', 
+    '(/)([^:\\0\\s]+)(:[0-9]+),
+        goland $1$2,false'
+]
 ```
 
-with the command:
-
-```
-goland /home/loki/src/github.com/p9c/pod/$2
-```
+(the text fields in tilix's editor are very weird so it will be easier to just paste this in and gnome should remove the newlines automatically)
 
 which opens absolute paths that are in the repository root given complete or as a relative path with no prefix `/`.
 Better regex would be nice, but this works ok for now.
