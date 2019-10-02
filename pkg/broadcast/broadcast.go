@@ -33,10 +33,10 @@ func Send(conn *net.UDPConn, bytes []byte, ciph cipher.AEAD,
 		var n int
 		n, err = conn.Write(shards[i])
 		if err != nil {
-			log.ERROR(err)
+			log.ERROR(err, len(shards[i]))
 			return
 		}
-		log.TRACE("wrote", n, "bytes to multicast address",
+		log.DEBUG("wrote", n, "bytes to multicast address",
 			conn.RemoteAddr())
 	}
 	return

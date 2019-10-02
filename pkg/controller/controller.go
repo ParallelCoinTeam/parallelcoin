@@ -33,7 +33,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cancel()
 		return
 	}
-	bytes := make([]byte, broadcast.MaxDatagramSize)
+	bytes := make([]byte, 0, broadcast.MaxDatagramSize)
 	enc := codec.NewEncoderBytes(&bytes, &mh)
 
 	blockChan := make(chan Blocks)
@@ -55,6 +55,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				if err != nil {
 					log.ERROR(err)
 				}
+				// reset the bytes for next round
+				bytes = bytes[:0]
 			case <-ctx.Done():
 				// cancel has been called
 				return
@@ -79,8 +81,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		}
 	}
 	// load initial blocks and send them out
-	lastBlock.Store(Blocks{})
-	var blocks Blocks
+	blocks := Blocks{}
+	lastBlock.Store(blocks)
 	// generate Blocks
 	for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
 		BestSnapshot().Height+1)].Algos {
@@ -103,8 +105,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		switch n.Type {
 		case chain.NTBlockConnected:
 			log.WARN("new block found")
-			lastBlock.Store(Blocks{})
-			var blocks Blocks
+			blocks := Blocks{}
+			lastBlock.Store(blocks)
 			// generate Blocks
 			for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
 				BestSnapshot().Height+1)].Algos {
