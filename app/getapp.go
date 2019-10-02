@@ -286,7 +286,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 			apputil.String(
 				"rpcconnect",
 				"Hostname/IP and port of pod RPC server to connect to",
-				"127.0.0.1:11048",
+				"",
 				cx.Config.RPCConnect),
 			apputil.StringSlice(
 				"rpclisten",
@@ -514,7 +514,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 			apputil.String(
 				"walletserver, ws",
 				"set wallet server to connect to",
-				"127.0.0.1:11046",
+				"",
 				cx.Config.WalletServer),
 			apputil.String(
 				"walletpass",
