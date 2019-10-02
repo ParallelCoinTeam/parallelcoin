@@ -28,7 +28,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			case lb := <-blockChan:
 				lastBlock.Store(lb)
 				// send out block broadcast
-				log.WARN("sending out block broadcast")
+				log.DEBUG("sending out block broadcast")
 				// log.DEBUG(spew.Sdump(lb))
 			case <-ctx.Done():
 				// cancel has been called

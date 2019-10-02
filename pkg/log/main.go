@@ -280,7 +280,7 @@ func composit(text, level string, color bool) string {
 	_, loc, iline, _ := runtime.Caller(3)
 	line := fmt.Sprint(iline)
 	files := strings.Split(loc, "github.com/p9c/pod/")
-	file := files[1]
+	file := "./"+files[1]
 	since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
 		Second * time.Second)
 	if terminalWidth > 160 {
