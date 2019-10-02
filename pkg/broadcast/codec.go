@@ -12,8 +12,11 @@ import (
 )
 
 // Encode creates Reed Solomon shards and encrypts them using
-// the provided GCM cipher function (from pkg/gcm)
-func Encode(ciph cipher.AEAD, bytes []byte) (shards [][]byte, err error) {
+// the provided GCM cipher function (from pkg/gcm).
+// Message type is given in the first byte of each shard so nodes can quickly
+// eliminate erroneous or irrelevant messages
+func Encode(ciph cipher.AEAD, bytes []byte, typ []byte) (shards [][]byte,
+	err error) {
 	if len(bytes) > 1<<32 {
 		log.WARN("GCM ciphers should only encode a maximum of 4gb per nonce" +
 			" per key")
@@ -38,24 +41,27 @@ func Encode(ciph cipher.AEAD, bytes []byte) (shards [][]byte, err error) {
 		return
 	}
 	for i := range clearText {
-		shards = append(shards, ciph.Seal(nonce, nonce, clearText[i], nil))
+		shards = append(shards, append(typ, ciph.Seal(nonce, nonce,
+			clearText[i], nil)...))
 	}
+	log.SPEW(shards)
 	return
 }
 
 func Decode(ciph cipher.AEAD, shards [][]byte) (bytes []byte, err error) {
 	plainShards := make([][]byte, len(shards))
-	nonceSize := ciph.NonceSize()
+	// first byte is the message type identifier so nodes can filter
+	nonceSize := ciph.NonceSize()+1
 	for i := range shards {
 		if len(shards[i]) < nonceSize {
-			errMsg := []interface{}{"shard size incorrect, got",
+			errMsg := []interface{}{"shard size too small, got",
 				len(shards[i]), "expected minimum", nonceSize}
 			log.ERROR(errMsg...)
 			return nil, errors.New(fmt.Sprintln(errMsg...))
 		}
-		nonce, ciphertext := shards[i][:nonceSize], shards[i][nonceSize:]
+		nonce, cipherText := shards[i][1:nonceSize], shards[i][nonceSize:]
 		var plaintext []byte
-		plaintext, err = ciph.Open(nil, nonce, ciphertext, nil)
+		plaintext, err = ciph.Open(nil, nonce, cipherText, nil)
 		if err != nil {
 			log.ERROR(err)
 			return
