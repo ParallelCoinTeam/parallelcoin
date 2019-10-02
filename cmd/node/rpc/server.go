@@ -2377,7 +2377,7 @@ InitListeners(config *pod.Config, activeNet *netparams.Params,
 			}
 		}
 	} else {
-		if *config.Upnp {
+		if *config.UPNP {
 			var err error
 			nat, err = upnp.Discover()
 			if err != nil {

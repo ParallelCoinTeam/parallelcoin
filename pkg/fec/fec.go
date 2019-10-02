@@ -1,20 +1,21 @@
+// Package fec implements Reed Solomon 9/3 forward error correction,
+//  intended to be sent as 9 pieces where 3 uncorrupted parts allows assembly of the message
 package fec
 
-// Reed Solomon 9/3 forward error correction, intended to be sent as 9 pieces where 3 uncorrupted parts allows assembly of the message
 import (
 	"encoding/binary"
-	"github.com/p9c/pod/pkg/log"
 	"hash/crc32"
-	"time"
 
 	"github.com/vivint/infectious"
+
+	"github.com/p9c/pod/pkg/log"
 )
 
 var (
 	rsTotal    = 9
 	rsRequired = 3
 	rsFEC      = func() *infectious.FEC {
-		fec, err := infectious.NewFEC(3, 9)
+		fec, err := infectious.NewFEC(rsRequired, rsTotal)
 		if err != nil {
 			log.ERROR(err)
 		}
@@ -41,16 +42,17 @@ func padData(data []byte) (out []byte) {
 	return
 }
 
-func Encode(data []byte) (chunks [][]byte) {
+func Encode(data []byte) (chunks [][]byte, err error) {
 	// First we must pad the data
 	data = padData(data)
 	shares := make([]infectious.Share, rsTotal)
 	output := func(s infectious.Share) {
 		shares[s.Number] = s.DeepCopy()
 	}
-	err := rsFEC.Encode(data, output)
+	err = rsFEC.Encode(data, output)
 	if err != nil {
 		log.ERROR(err)
+		return
 	}
 	for i := range shares {
 		// Append the chunk number to the front of the chunk

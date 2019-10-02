@@ -1,6 +1,6 @@
 package upnp
 
-// Upnp code taken from Taipei Torrent license is below:
+// UPNP code taken from Taipei Torrent license is below:
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
