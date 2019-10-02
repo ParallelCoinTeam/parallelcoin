@@ -12,13 +12,13 @@ Configure(cx *conte.Xt) {
 	log.TRACE("configuring pod")
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
-	state := cx.StateCfg
+	st := cx.StateCfg
 	initDataDir(cfg)
 	initConfigFile(cfg)
 	initLogDir(cfg)
 	initParams(cx)
 	initListeners(cx)
-	initTLSStuffs(cfg)
+	initTLSStuffs(cfg, st)
 	initLogLevel(cfg)
 	// Don't add peers from the config file when in regression test mode.
 	if ((*cfg.Network)[0] == 'r') && len(*cfg.AddPeers) > 0 {
@@ -40,7 +40,7 @@ Configure(cx *conte.Xt) {
 	validateMiningStuff(cfg, cx.StateCfg, cx.ActiveNet)
 	setDiallers(cfg, cx.StateCfg)
 	// if the user set the save flag, or file doesn't exist save the file now
-	if state.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
+	if st.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
 		log.TRACE("saving configuration")
 		save.Pod(cx.Config)
 	}

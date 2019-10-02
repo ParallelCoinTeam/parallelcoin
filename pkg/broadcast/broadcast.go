@@ -2,6 +2,7 @@
 package broadcast
 
 import (
+	"context"
 	"net"
 
 	"github.com/p9c/pod/pkg/log"
@@ -9,6 +10,7 @@ import (
 
 const (
 	maxDatagramSize = 8192
+	DefaultAddress  = "239.0.0.0:11047"
 )
 
 // New creates a new UDP multicast connection on which to broadcast
@@ -28,14 +30,14 @@ func New(address string) (*net.UDPConn, error) {
 
 // Listen binds to the UDP address and port given and writes packets received
 // from that address to a buffer which is passed to a handler
-func Listen(address string, handler func(*net.UDPAddr, int, []byte)) {
-	// Parse the string address
+func Listen(address string, handler func(*net.UDPAddr, int,
+	[]byte)) (cancel context.CancelFunc) {
+	var ctx context.Context
+	ctx, cancel = context.WithCancel(context.Background())
 	addr, err := net.ResolveUDPAddr("udp", address)
 	if err != nil {
 		log.ERROR(err)
 	}
-
-	// Open up a connection
 	conn, err := net.ListenMulticastUDP("udp", nil, addr)
 	if err != nil {
 		log.ERROR(err)
@@ -45,15 +47,23 @@ func Listen(address string, handler func(*net.UDPAddr, int, []byte)) {
 	if err != nil {
 		log.ERROR(err)
 	}
-
-	// Loop forever reading from the socket
-	for {
-		buffer := make([]byte, maxDatagramSize)
-		numBytes, src, err := conn.ReadFromUDP(buffer)
-		if err != nil {
-			log.ERROR("ReadFromUDP failed:", err)
+	go func() {
+	out:
+		// read from socket until context is cancelled
+		for {
+			buffer := make([]byte, maxDatagramSize)
+			numBytes, src, err := conn.ReadFromUDP(buffer)
+			if err != nil {
+				log.ERROR("ReadFromUDP failed:", err)
+				continue
+			}
+			handler(src, numBytes, buffer)
+			select {
+			case <-ctx.Done():
+				break out
+			default:
+			}
 		}
-
-		handler(src, numBytes, buffer)
-	}
+	}()
+	return
 }

@@ -2,8 +2,6 @@ package node
 
 import (
 	"fmt"
-	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -14,91 +12,88 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	database "github.com/p9c/pod/pkg/db"
 
-	"github.com/jessevdk/go-flags"
-	"github.com/urfave/cli"
-
 	// This ensures the database drivers get registered
 	_ "github.com/p9c/pod/pkg/db/ffldb"
 	"github.com/p9c/pod/pkg/peer"
 )
-
-// Config defines the configuration options for pod. See loadConfig for details on the configuration load process.
-type Config struct {
-	ShowVersion          *bool            `short:"V" long:"version" description:"Display version information and exit"`
-	ConfigFile           *string          `short:"C" long:"configfile" description:"Path to configuration file"`
-	DataDir              *string          `short:"b" long:"datadir" description:"Directory to store data"`
-	LogDir               *string          `long:"logdir" description:"Directory to log output."`
-	DebugLevel           *string          `long:"debuglevel" description:"baseline debug level for all subsystems unless specified"`
-	AddPeers             *cli.StringSlice `short:"a" long:"addpeer" description:"Add a peer to connect with at startup"`
-	ConnectPeers         *cli.StringSlice `long:"connect" description:"Connect only to the specified peers at startup"`
-	DisableListen        *bool            `long:"nolisten" description:"Disable listening for incoming connections -- NOTE: Listening is automatically disabled if the --connect or --proxy options are used without also specifying listen interfaces via --listen"`
-	Listeners            *cli.StringSlice `long:"listen" description:"Add an interface/port to listen for connections (default all interfaces port: 11047, testnet: 21047)"`
-	MaxPeers             *int             `long:"maxpeers" description:"Max number of inbound and outbound peers"`
-	DisableBanning       *bool            `long:"nobanning" description:"Disable banning of misbehaving peers"`
-	BanDuration          *time.Duration   `long:"banduration" description:"How long to ban misbehaving peers.  Valid time units are {s, m, h, d}.  Minimum 1 second"`
-	BanThreshold         *int             `long:"banthreshold" description:"Maximum allowed ban score before disconnecting and banning misbehaving peers."`
-	Whitelists           *cli.StringSlice `long:"whitelist" description:"Add an IP network or IP that will not be banned. (eg. 192.168.1.0/24 or ::1)"`
-	RPCUser              *string          `short:"u" long:"rpcuser" description:"Username for RPC connections"`
-	RPCPass              *string          `short:"P" long:"rpcpass" default-mask:"-" description:"Password for RPC connections"`
-	RPCLimitUser         *string          `long:"rpclimituser" description:"Username for limited RPC connections"`
-	RPCLimitPass         *string          `long:"rpclimitpass" default-mask:"-" description:"Password for limited RPC connections"`
-	RPCListeners         *cli.StringSlice `long:"rpclisten" description:"Add an interface/port to listen for RPC connections (default port: 11048, testnet: 21048) gives sha256d block templates"`
-	RPCCert              *string          `long:"rpccert" description:"File containing the certificate file"`
-	RPCKey               *string          `long:"rpckey" description:"File containing the certificate key"`
-	RPCMaxClients        *int             `long:"rpcmaxclients" description:"Max number of RPC clients for standard connections"`
-	RPCMaxWebsockets     *int             `long:"rpcmaxwebsockets" description:"Max number of RPC websocket connections"`
-	RPCMaxConcurrentReqs *int             `long:"rpcmaxconcurrentreqs" description:"Max number of concurrent RPC requests that may be processed concurrently"`
-	RPCQuirks            *bool            `long:"rpcquirks" description:"Mirror some JSON-RPC quirks of Bitcoin Core -- NOTE: Discouraged unless interoperability issues need to be worked around"`
-	DisableRPC           *bool            `long:"norpc" description:"Disable built-in RPC server -- NOTE: The RPC server is disabled by default if no rpcuser/rpcpass or rpclimituser/rpclimitpass is specified"`
-	TLS                  *bool            `long:"tls" description:"Enable TLS for the RPC server"`
-	DisableDNSSeed       *bool            `long:"nodnsseed" description:"Disable DNS seeding for peers"`
-	ExternalIPs          *cli.StringSlice `long:"externalip" description:"Add an ip to the list of local addresses we claim to listen on to peers"`
-	Proxy                *string          `long:"proxy" description:"Connect via SOCKS5 proxy (eg. 127.0.0.1:9050)"`
-	ProxyUser            *string          `long:"proxyuser" description:"Username for proxy server"`
-	ProxyPass            *string          `long:"proxypass" default-mask:"-" description:"Password for proxy server"`
-	OnionProxy           *string          `long:"onion" description:"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0.0.1:9050)"`
-	OnionProxyUser       *string          `long:"onionuser" description:"Username for onion proxy server"`
-	OnionProxyPass       *string          `long:"onionpass" default-mask:"-" description:"Password for onion proxy server"`
-	Onion                *bool            `long:"noonion" description:"Disable connecting to tor hidden services"`
-	TorIsolation         *bool            `long:"torisolation" description:"Enable Tor stream isolation by randomizing user credentials for each connection."`
-	TestNet3             *bool            `long:"testnet" description:"Use the test network"`
-	RegressionTest       *bool            `long:"regtest" description:"Use the regression test network"`
-	SimNet               *bool            `long:"simnet" description:"Use the simulation test network"`
-	AddCheckpoints       *cli.StringSlice `long:"addcheckpoint" description:"Add a custom checkpoint.  Format: '<height>:<hash>'"`
-	DisableCheckpoints   *bool            `long:"nocheckpoints" description:"Disable built-in checkpoints.  Don't do this unless you know what you're doing."`
-	DbType               *string          `long:"dbtype" description:"Database backend to use for the Block Chain"`
-	Profile              *string          `long:"profile" description:"Enable HTTP profiling on given port -- NOTE port must be between 1024 and 65536"`
-	CPUProfile           *string          `long:"cpuprofile" description:"Write CPU profile to the specified file"`
-	Upnp                 *bool            `long:"upnp" description:"Use UPnP to map our listening port outside of NAT"`
-	MinRelayTxFee        *float64         `long:"minrelaytxfee" description:"The minimum transaction fee in DUO/kB to be considered a non-zero fee."`
-	FreeTxRelayLimit     *float64         `long:"limitfreerelay" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute"`
-	NoRelayPriority      *bool            `long:"norelaypriority" description:"Do not require free or low-fee transactions to have high priority for relaying"`
-	TrickleInterval      *time.Duration   `long:"trickleinterval" description:"Minimum time between attempts to send new inventory to a connected peer"`
-	MaxOrphanTxs         *int             `long:"maxorphantx" description:"Max number of orphan transactions to keep in memory"`
-	Algo                 *string          `long:"algo" description:"Sets the algorithm for the CPU miner ( blake14lr, cryptonight7v2, keccak, lyra2rev2, scrypt, sha256d, stribog, skein, x11 default is 'random')"`
-	Generate             *bool            `long:"generate" description:"Generate (mine) bitcoins using the CPU"`
-	GenThreads           *int             `long:"genthreads" description:"Number of CPU threads to use with CPU miner -1 = all cores"`
-	MiningAddrs          *cli.StringSlice `long:"miningaddr" description:"Add the specified payment address to the list of addresses to use for generated blocks, at least one is required if generate or minerport are set"`
-	MinerListener        *string          `long:"minerlistener" description:"listen address for miner controller"`
-	MinerPass            *string          `long:"minerpass" description:"Encryption password required for miner clients to subscribe to work updates, for use over insecure connections"`
-	BlockMinSize         *int             `long:"blockminsize" description:"Mininum block size in bytes to be used when creating a block"`
-	BlockMaxSize         *int             `long:"blockmaxsize" description:"Maximum block size in bytes to be used when creating a block"`
-	BlockMinWeight       *int             `long:"blockminweight" description:"Mininum block weight to be used when creating a block"`
-	BlockMaxWeight       *int             `long:"blockmaxweight" description:"Maximum block weight to be used when creating a block"`
-	BlockPrioritySize    *int             `long:"blockprioritysize" description:"Size in bytes for high-priority/low-fee transactions when creating a block"`
-	UserAgentComments    *cli.StringSlice `long:"uacomment" description:"Comment to add to the user agent -- See BIP 14 for more information."`
-	NoPeerBloomFilters   *bool            `long:"nopeerbloomfilters" description:"Disable bloom filtering support"`
-	NoCFilters           *bool            `long:"nocfilters" description:"Disable committed filtering (CF) support"`
-	DropCfIndex          *bool            `long:"dropcfindex" description:"Deletes the index used for committed filtering (CF) support from the database on start up and then exits."`
-	SigCacheMaxSize      *int             `long:"sigcachemaxsize" description:"The maximum number of entries in the signature verification cache"`
-	BlocksOnly           *bool            `long:"blocksonly" description:"Do not accept transactions from remote peers."`
-	TxIndex              *bool            `long:"txindex" description:"Maintain a full hash-based transaction index which makes all transactions available via the getrawtransaction RPC"`
-	DropTxIndex          *bool            `long:"droptxindex" description:"Deletes the hash-based transaction index from the database on start up and then exits."`
-	AddrIndex            *bool            `long:"addrindex" description:"Maintain a full address-based transaction index which makes the searchrawtransactions RPC available"`
-	DropAddrIndex        *bool            `long:"dropaddrindex" description:"Deletes the address-based transaction index from the database on start up and then exits."`
-	RelayNonStd          *bool            `long:"relaynonstd" description:"Relay non-standard transactions regardless of the default settings for the active network."`
-	RejectNonStd         *bool            `long:"rejectnonstd" description:"Reject non-standard transactions regardless of the default settings for the active network."`
-}
+//
+// // Config defines the configuration options for pod. See loadConfig for details on the configuration load process.
+// type Config struct {
+// 	ShowVersion          *bool            `short:"V" long:"version" description:"Display version information and exit"`
+// 	ConfigFile           *string          `short:"C" long:"configfile" description:"Path to configuration file"`
+// 	DataDir              *string          `short:"b" long:"datadir" description:"Directory to store data"`
+// 	LogDir               *string          `long:"logdir" description:"Directory to log output."`
+// 	DebugLevel           *string          `long:"debuglevel" description:"baseline debug level for all subsystems unless specified"`
+// 	AddPeers             *cli.StringSlice `short:"a" long:"addpeer" description:"Add a peer to connect with at startup"`
+// 	ConnectPeers         *cli.StringSlice `long:"connect" description:"Connect only to the specified peers at startup"`
+// 	DisableListen        *bool            `long:"nolisten" description:"Disable listening for incoming connections -- NOTE: Listening is automatically disabled if the --connect or --proxy options are used without also specifying listen interfaces via --listen"`
+// 	Listeners            *cli.StringSlice `long:"listen" description:"Add an interface/port to listen for connections (default all interfaces port: 11047, testnet: 21047)"`
+// 	MaxPeers             *int             `long:"maxpeers" description:"Max number of inbound and outbound peers"`
+// 	DisableBanning       *bool            `long:"nobanning" description:"Disable banning of misbehaving peers"`
+// 	BanDuration          *time.Duration   `long:"banduration" description:"How long to ban misbehaving peers.  Valid time units are {s, m, h, d}.  Minimum 1 second"`
+// 	BanThreshold         *int             `long:"banthreshold" description:"Maximum allowed ban score before disconnecting and banning misbehaving peers."`
+// 	Whitelists           *cli.StringSlice `long:"whitelist" description:"Add an IP network or IP that will not be banned. (eg. 192.168.1.0/24 or ::1)"`
+// 	RPCUser              *string          `short:"u" long:"rpcuser" description:"Username for RPC connections"`
+// 	RPCPass              *string          `short:"P" long:"rpcpass" default-mask:"-" description:"Password for RPC connections"`
+// 	RPCLimitUser         *string          `long:"rpclimituser" description:"Username for limited RPC connections"`
+// 	RPCLimitPass         *string          `long:"rpclimitpass" default-mask:"-" description:"Password for limited RPC connections"`
+// 	RPCListeners         *cli.StringSlice `long:"rpclisten" description:"Add an interface/port to listen for RPC connections (default port: 11048, testnet: 21048) gives sha256d block templates"`
+// 	RPCCert              *string          `long:"rpccert" description:"File containing the certificate file"`
+// 	RPCKey               *string          `long:"rpckey" description:"File containing the certificate key"`
+// 	RPCMaxClients        *int             `long:"rpcmaxclients" description:"Max number of RPC clients for standard connections"`
+// 	RPCMaxWebsockets     *int             `long:"rpcmaxwebsockets" description:"Max number of RPC websocket connections"`
+// 	RPCMaxConcurrentReqs *int             `long:"rpcmaxconcurrentreqs" description:"Max number of concurrent RPC requests that may be processed concurrently"`
+// 	RPCQuirks            *bool            `long:"rpcquirks" description:"Mirror some JSON-RPC quirks of Bitcoin Core -- NOTE: Discouraged unless interoperability issues need to be worked around"`
+// 	DisableRPC           *bool            `long:"norpc" description:"Disable built-in RPC server -- NOTE: The RPC server is disabled by default if no rpcuser/rpcpass or rpclimituser/rpclimitpass is specified"`
+// 	TLS                  *bool            `long:"tls" description:"Enable TLS for the RPC server"`
+// 	DisableDNSSeed       *bool            `long:"nodnsseed" description:"Disable DNS seeding for peers"`
+// 	ExternalIPs          *cli.StringSlice `long:"externalip" description:"Add an ip to the list of local addresses we claim to listen on to peers"`
+// 	Proxy                *string          `long:"proxy" description:"Connect via SOCKS5 proxy (eg. 127.0.0.1:9050)"`
+// 	ProxyUser            *string          `long:"proxyuser" description:"Username for proxy server"`
+// 	ProxyPass            *string          `long:"proxypass" default-mask:"-" description:"Password for proxy server"`
+// 	OnionProxy           *string          `long:"onion" description:"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0.0.1:9050)"`
+// 	OnionProxyUser       *string          `long:"onionuser" description:"Username for onion proxy server"`
+// 	OnionProxyPass       *string          `long:"onionpass" default-mask:"-" description:"Password for onion proxy server"`
+// 	Onion                *bool            `long:"noonion" description:"Disable connecting to tor hidden services"`
+// 	TorIsolation         *bool            `long:"torisolation" description:"Enable Tor stream isolation by randomizing user credentials for each connection."`
+// 	TestNet3             *bool            `long:"testnet" description:"Use the test network"`
+// 	RegressionTest       *bool            `long:"regtest" description:"Use the regression test network"`
+// 	SimNet               *bool            `long:"simnet" description:"Use the simulation test network"`
+// 	AddCheckpoints       *cli.StringSlice `long:"addcheckpoint" description:"Add a custom checkpoint.  Format: '<height>:<hash>'"`
+// 	DisableCheckpoints   *bool            `long:"nocheckpoints" description:"Disable built-in checkpoints.  Don't do this unless you know what you're doing."`
+// 	DbType               *string          `long:"dbtype" description:"Database backend to use for the Block Chain"`
+// 	Profile              *string          `long:"profile" description:"Enable HTTP profiling on given port -- NOTE port must be between 1024 and 65536"`
+// 	CPUProfile           *string          `long:"cpuprofile" description:"Write CPU profile to the specified file"`
+// 	Upnp                 *bool            `long:"upnp" description:"Use UPnP to map our listening port outside of NAT"`
+// 	MinRelayTxFee        *float64         `long:"minrelaytxfee" description:"The minimum transaction fee in DUO/kB to be considered a non-zero fee."`
+// 	FreeTxRelayLimit     *float64         `long:"limitfreerelay" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute"`
+// 	NoRelayPriority      *bool            `long:"norelaypriority" description:"Do not require free or low-fee transactions to have high priority for relaying"`
+// 	TrickleInterval      *time.Duration   `long:"trickleinterval" description:"Minimum time between attempts to send new inventory to a connected peer"`
+// 	MaxOrphanTxs         *int             `long:"maxorphantx" description:"Max number of orphan transactions to keep in memory"`
+// 	Algo                 *string          `long:"algo" description:"Sets the algorithm for the CPU miner ( blake14lr, cryptonight7v2, keccak, lyra2rev2, scrypt, sha256d, stribog, skein, x11 default is 'random')"`
+// 	Generate             *bool            `long:"generate" description:"Generate (mine) bitcoins using the CPU"`
+// 	GenThreads           *int             `long:"genthreads" description:"Number of CPU threads to use with CPU miner -1 = all cores"`
+// 	MiningAddrs          *cli.StringSlice `long:"miningaddrs" description:"Add the specified payment address to the list of addresses to use for generated blocks, at least one is required if generate or minerport are set"`
+// 	MinerListener        *string          `long:"minerlistener" description:"listen address for miner controller"`
+// 	MinerPass            *string          `long:"minerpass" description:"Encryption password required for miner clients to subscribe to work updates, for use over insecure connections"`
+// 	BlockMinSize         *int             `long:"blockminsize" description:"Mininum block size in bytes to be used when creating a block"`
+// 	BlockMaxSize         *int             `long:"blockmaxsize" description:"Maximum block size in bytes to be used when creating a block"`
+// 	BlockMinWeight       *int             `long:"blockminweight" description:"Mininum block weight to be used when creating a block"`
+// 	BlockMaxWeight       *int             `long:"blockmaxweight" description:"Maximum block weight to be used when creating a block"`
+// 	BlockPrioritySize    *int             `long:"blockprioritysize" description:"Size in bytes for high-priority/low-fee transactions when creating a block"`
+// 	UserAgentComments    *cli.StringSlice `long:"uacomment" description:"Comment to add to the user agent -- See BIP 14 for more information."`
+// 	NoPeerBloomFilters   *bool            `long:"nopeerbloomfilters" description:"Disable bloom filtering support"`
+// 	NoCFilters           *bool            `long:"nocfilters" description:"Disable committed filtering (CF) support"`
+// 	DropCfIndex          *bool            `long:"dropcfindex" description:"Deletes the index used for committed filtering (CF) support from the database on start up and then exits."`
+// 	SigCacheMaxSize      *int             `long:"sigcachemaxsize" description:"The maximum number of entries in the signature verification cache"`
+// 	BlocksOnly           *bool            `long:"blocksonly" description:"Do not accept transactions from remote peers."`
+// 	TxIndex              *bool            `long:"txindex" description:"Maintain a full hash-based transaction index which makes all transactions available via the getrawtransaction RPC"`
+// 	DropTxIndex          *bool            `long:"droptxindex" description:"Deletes the hash-based transaction index from the database on start up and then exits."`
+// 	AddrIndex            *bool            `long:"addrindex" description:"Maintain a full address-based transaction index which makes the searchrawtransactions RPC available"`
+// 	DropAddrIndex        *bool            `long:"dropaddrindex" description:"Deletes the address-based transaction index from the database on start up and then exits."`
+// 	RelayNonStd          *bool            `long:"relaynonstd" description:"Relay non-standard transactions regardless of the default settings for the active network."`
+// 	RejectNonStd         *bool            `long:"rejectnonstd" description:"Reject non-standard transactions regardless of the default settings for the active network."`
+// }
 
 // serviceOptions defines the configuration options for the daemon as a service on Windows.
 type serviceOptions struct {
@@ -109,61 +104,61 @@ type serviceOptions struct {
 const (
 	DefaultConfigFilename        = "conf.json"
 	DefaultDataDirname           = "node"
-	DefaultLogLevel              = "info"
+	// DefaultLogLevel              = "info"
 	DefaultLogDirname            = "node"
-	DefaultLogFilename           = "log"
-	DefaultAddress               = "127.0.0.1"
+	// DefaultLogFilename           = "log"
+	// DefaultAddress               = "127.0.0.1"
 	DefaultPort                  = "11047"
-	DefaultRPCPort               = "11048"
-	DefalutRPCAddr               = "127.0.0.1"
-	DefaultRPCServer             = "127.0.0.1:11048"
-	DefaultListener              = "127.0.0.1:11047"
+	// DefaultRPCPort               = "11048"
+	// DefalutRPCAddr               = "127.0.0.1"
+	// DefaultRPCServer             = "127.0.0.1:11048"
+	// DefaultListener              = "127.0.0.1:11047"
 	DefaultRPCListener           = "127.0.0.1"
 	DefaultMaxPeers              = 23
 	DefaultBanDuration           = time.Hour * 24
 	DefaultBanThreshold          = 100
-	DefaultConnectTimeout        = time.Second * 30
+	// DefaultConnectTimeout        = time.Second * 30
 	DefaultMaxRPCClients         = 10
 	DefaultMaxRPCWebsockets      = 25
 	DefaultMaxRPCConcurrentReqs  = 20
 	DefaultDbType                = "ffldb"
 	DefaultFreeTxRelayLimit      = 15.0
 	DefaultTrickleInterval       = peer.DefaultTrickleInterval
-	DefaultBlockMinSize          = 80
+	// DefaultBlockMinSize          = 80
 	DefaultBlockMaxSize          = 200000
-	DefaultBlockMinWeight        = 10
+	// DefaultBlockMinWeight        = 10
 	DefaultBlockMaxWeight        = 3000000
 	BlockMaxSizeMin              = 1000
 	BlockMaxSizeMax              = blockchain.MaxBlockBaseSize - 1000
 	BlockMaxWeightMin            = 4000
 	BlockMaxWeightMax            = blockchain.MaxBlockWeight - 4000
-	DefaultGenerate              = false
-	DefaultGenThreads            = 1
-	DefaultMinerListener         = "127.0.0.1:11011"
+	// DefaultGenerate              = false
+	// DefaultGenThreads            = 1
+	// DefaultMinerListener         = "127.0.0.1:11011"
 	DefaultMaxOrphanTransactions = 100
-	DefaultMaxOrphanTxSize       = 100000
+	// DefaultMaxOrphanTxSize       = 100000
 	DefaultSigCacheMaxSize       = 100000
 	// These are set to default on because more often one wants them than not
-	DefaultTxIndex   = true
-	DefaultAddrIndex = true
-	DefaultAlgo      = "random"
+	// DefaultTxIndex   = true
+	// DefaultAddrIndex = true
+	// DefaultAlgo      = "random"
 )
 
-//nolint
+// nolint
 var (
-	// DefaultConfigFile is
-	DefaultConfigFile = filepath.Join(DefaultHomeDir, DefaultConfigFilename)
-	// DefaultDataDir is
-	DefaultDataDir = filepath.Join(DefaultHomeDir, DefaultDataDirname)
+	// // DefaultConfigFile is
+	// DefaultConfigFile = filepath.Join(DefaultHomeDir, DefaultConfigFilename)
+	// // DefaultDataDir is
+	// DefaultDataDir = filepath.Join(DefaultHomeDir, DefaultDataDirname)
 	// DefaultHomeDir is
 	DefaultHomeDir = appdata.Dir("pod", false)
-	// DefaultLogDir is
-	DefaultLogDir = filepath.Join(DefaultHomeDir, DefaultLogDirname)
+	// // DefaultLogDir is
+	// DefaultLogDir = filepath.Join(DefaultHomeDir, DefaultLogDirname)
 	// DefaultRPCCertFile is
-	DefaultRPCCertFile = filepath.Join(DefaultHomeDir, "rpc.cert")
-	// DefaultRPCKeyFile is
-	DefaultRPCKeyFile = filepath.Join(DefaultHomeDir, "rpc.key")
-	// KnownDbTypes is
+	// DefaultRPCCertFile = filepath.Join(DefaultHomeDir, "rpc.cert")
+	// // DefaultRPCKeyFile is
+	// DefaultRPCKeyFile = filepath.Join(DefaultHomeDir, "rpc.key")
+	// // KnownDbTypes is
 	KnownDbTypes = database.SupportedDrivers()
 	// runServiceCommand is only set to a real function on Windows.
 	// It is used to parse and execute service commands specified via the -s flag.
@@ -198,18 +193,18 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 		},
 		nil
 }
-
-// NewConfigParser returns a new command line flags parser.
-func NewConfigParser(cfg *Config, so *serviceOptions, options flags.Options) *flags.Parser {
-	parser := flags.NewParser(cfg, options)
-	if runtime.GOOS == "windows" {
-		_, e := parser.AddGroup("Service Options", "Service Options", so)
-		if e != nil {
-			panic(e)
-		}
-	}
-	return parser
-}
+//
+// // NewConfigParser returns a new command line flags parser.
+// func NewConfigParser(cfg *Config, so *serviceOptions, options flags.Options) *flags.Parser {
+// 	parser := flags.NewParser(cfg, options)
+// 	if runtime.GOOS == "windows" {
+// 		_, e := parser.AddGroup("Service Options", "Service Options", so)
+// 		if e != nil {
+// 			panic(e)
+// 		}
+// 	}
+// 	return parser
+// }
 
 // ParseCheckpoints checks the checkpoint strings for valid syntax (
 // '<height>:<hash>') and parses them to chaincfg.Checkpoint instances.
