@@ -6,20 +6,36 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/ugorji/go/codec"
+
+	"github.com/p9c/pod/pkg/broadcast"
 	chain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
 )
 
 type Blocks []*mining.BlockTemplate
 
+// Run starts a controller instance
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	log.WARN("starting controller")
+	var mh codec.MsgpackHandle
 	var ctx context.Context
 	var lastBlock atomic.Value // Blocks
 	ctx, cancel = context.WithCancel(context.Background())
+	ciph := gcm.GetCipher(*cx.Config.MinerPass)
+	outConn, err := broadcast.New(*cx.Config.BroadcastAddress)
+	if err != nil {
+		log.ERROR(err)
+		cancel()
+		return
+	}
+	bytes := make([]byte, broadcast.MaxDatagramSize)
+	enc := codec.NewEncoderBytes(&bytes, &mh)
+
 	blockChan := make(chan Blocks)
 	go func() {
 		for {
@@ -29,11 +45,20 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				lastBlock.Store(lb)
 				// send out block broadcast
 				log.DEBUG("sending out block broadcast")
-
+				// serialize blocks
+				err := enc.Encode(lb)
+				if err != nil {
+					log.ERROR(err)
+					break
+				}
+				err = broadcast.Send(outConn, bytes, ciph, broadcast.Template)
+				if err != nil {
+					log.ERROR(err)
+				}
 			case <-ctx.Done():
 				// cancel has been called
 				return
-			// default:
+				// default:
 			}
 		}
 	}()
@@ -72,8 +97,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		blocks = append(blocks, template)
 	}
 	lastBlock.Store(blocks)
-	log.WARN("sending initial block broadcast")
-	blockChan <- lastBlock.Load().(Blocks)
 	// create subscriber for new block event
 	cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.
 	Notification) {
