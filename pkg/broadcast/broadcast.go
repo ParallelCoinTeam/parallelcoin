@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	MaxDatagramSize     = 8192
-	DefaultAddress      = "239.0.0.0:11042"
+	MaxDatagramSize = 8192
+	DefaultAddress  = "239.0.0.0:11042"
 )
 
 // for fast elimination of irrelevant messages a magic 64 bit word is used to
@@ -22,38 +22,38 @@ var (
 )
 
 // Send broadcasts bytes on the given multicast connection
-func Send(conn *net.UDPConn, bytes []byte, ciph cipher.AEAD,
+func Send(addr *net.UDPAddr, bytes []byte, ciph cipher.AEAD,
 	typ []byte) (err error) {
 	var shards [][]byte
 	shards, err = Encode(ciph, bytes, typ)
 	if err != nil {
 		return
 	}
+	conn, err := net.ListenUDP("udp", addr)
+	if err != nil {
+		return
+	}
 	for i := range shards {
 		var n int
-		n, err = conn.Write(shards[i])
+		n, err = conn.WriteToUDP(shards[i], addr)
 		if err != nil {
 			log.ERROR(err, len(shards[i]))
 			return
 		}
-		log.DEBUG("wrote", n, "bytes to multicast address",
-			conn.RemoteAddr())
+		log.DEBUG("wrote", n, "bytes to multicast address", addr.IP, "port",
+			addr.Port)
+	}
+	err = conn.Close()
+	if err != nil {
+		log.ERROR(err)
 	}
 	return
 }
 
-// New creates a new UDP multicast connection on which to broadcast
-func New(address string) (*net.UDPConn, error) {
-	addr, err := net.ResolveUDPAddr("udp", address)
-	if err != nil {
-		return nil, err
-	}
-	conn, err := net.DialUDP("udp", nil, addr)
-	if err != nil {
-		return nil, err
-	}
-
-	return conn, nil
+// New creates a new UDP multicast address on which to broadcast
+func New(address string) (addr *net.UDPAddr, err error) {
+	addr, err = net.ResolveUDPAddr("udp", address)
+	return
 }
 
 // Listen binds to the UDP address and port given and writes packets received
