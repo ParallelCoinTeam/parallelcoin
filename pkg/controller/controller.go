@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"math/rand"
-	"sync/atomic"
 	"time"
 
 	"github.com/ugorji/go/codec"
@@ -24,39 +23,38 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	log.WARN("starting controller")
 	var mh codec.MsgpackHandle
 	var ctx context.Context
-	var lastBlock atomic.Value // Blocks
 	ctx, cancel = context.WithCancel(context.Background())
 	ciph := gcm.GetCipher(*cx.Config.MinerPass)
-	outConn, err := broadcast.New(*cx.Config.BroadcastAddress)
+	outAddr, err := broadcast.New(*cx.Config.BroadcastAddress)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
 		return
 	}
+	blockChan := make(chan Blocks)
 	bytes := make([]byte, 0, broadcast.MaxDatagramSize)
 	enc := codec.NewEncoderBytes(&bytes, &mh)
-
-	blockChan := make(chan Blocks)
 	go func() {
 		for {
-			// work loop
+			// work dispatch loop
 			select {
 			case lb := <-blockChan:
-				lastBlock.Store(lb)
 				// send out block broadcast
 				log.DEBUG("sending out block broadcast")
 				// serialize blocks
+				log.SPEW(lb)
 				err := enc.Encode(lb)
 				if err != nil {
 					log.ERROR(err)
 					break
 				}
-				err = broadcast.Send(outConn, bytes, ciph, broadcast.Template)
+				err = broadcast.Send(outAddr, bytes, ciph, broadcast.Template)
 				if err != nil {
 					log.ERROR(err)
 				}
 				// reset the bytes for next round
 				bytes = bytes[:0]
+				enc.ResetBytes(&bytes)
 			case <-ctx.Done():
 				// cancel has been called
 				return
@@ -80,33 +78,14 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		default:
 		}
 	}
-	// load initial blocks and send them out
 	blocks := Blocks{}
-	lastBlock.Store(blocks)
-	// generate Blocks
-	for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
-		BestSnapshot().Height+1)].Algos {
-		// Choose a payment address at random.
-		rand.Seed(time.Now().UnixNano())
-		payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(cx.
-			StateCfg.ActiveMiningAddrs))]
-		template, err := cx.RPCServer.Cfg.Generator.NewBlockTemplate(0,
-			payToAddr, algo)
-		if err != nil {
-			log.ERROR("failed to create new block template:", err)
-			continue
-		}
-		blocks = append(blocks, template)
-	}
-	lastBlock.Store(blocks)
 	// create subscriber for new block event
 	cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.
 	Notification) {
 		switch n.Type {
 		case chain.NTBlockConnected:
 			log.WARN("new block found")
-			blocks := Blocks{}
-			lastBlock.Store(blocks)
+			blocks = Blocks{}
 			// generate Blocks
 			for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
 				BestSnapshot().Height+1)].Algos {
@@ -122,8 +101,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				}
 				blocks = append(blocks, template)
 			}
-			lastBlock.Store(blocks)
-			blockChan <- lastBlock.Load().(Blocks)
+			blockChan <- blocks
 		}
 	})
 	// goroutine loop checking for connection and sync status
@@ -135,8 +113,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			// if out of sync or disconnected,
 			// once a second send out empty blocks
 			if connCount < 1 || !current {
-				lastBlock.Store(Blocks{})
-				blockChan <- lastBlock.Load().(Blocks)
+				blockChan <- Blocks{}
 			}
 			select {
 			case <-ctx.Done():
