@@ -120,12 +120,10 @@ func initLogLevel(cfg *pod.Config) {
 	loglevel := *cfg.LogLevel
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
-		log.L.SetLevel(loglevel, true)
 		log.TRACE("log level", loglevel)
 	default:
 		log.INFO("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
-		log.L.SetLevel("info", true)
 	}
 	log.L.SetLevel(*cfg.LogLevel, true)
 	if !*cfg.Onion {

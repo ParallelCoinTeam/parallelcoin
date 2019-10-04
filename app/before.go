@@ -56,7 +56,6 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.String("loglevel") != "" {
 			log.TRACE("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
-			log.L.SetLevel(*cx.Config.LogLevel, true)
 		}
 		log.TRACE("checking network")
 		if c.IsSet("network") {
