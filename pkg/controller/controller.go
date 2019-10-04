@@ -42,12 +42,13 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				// send out block broadcast
 				log.DEBUG("sending out block broadcast")
 				// serialize blocks
-				log.SPEW(lb)
+				//log.SPEW(lb)
 				err := enc.Encode(lb)
 				if err != nil {
 					log.ERROR(err)
 					break
 				}
+				log.SPEW(bytes)
 				err = broadcast.Send(outAddr, bytes, ciph, broadcast.Template)
 				if err != nil {
 					log.ERROR(err)
@@ -62,23 +63,41 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			}
 		}
 	}()
-	connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
-	current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
-	// if out of sync or disconnected,
-	// once a second send out empty blocks
-	for (connCount < 1 && !*cx.Config.Solo) || !current {
-		time.Sleep(time.Second)
-		connCount = cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
-		current = cx.RPCServer.Cfg.SyncMgr.IsCurrent()
-		log.WARN("waiting for sync/peers", connCount, current)
-		select {
-		case <-ctx.Done():
-			log.WARN("cancelled before initial connection/sync")
-			return
-		default:
-		}
-	}
+	//connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+	//current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
+	//// if out of sync or disconnected,
+	//// once a second send out empty blocks
+	//time.Sleep(time.Second)
+	//for (connCount < 1 && !*cx.Config.Solo) || !current {
+	//	connCount = cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+	//	current = cx.RPCServer.Cfg.SyncMgr.IsCurrent()
+	//	log.WARN("waiting for sync/peers", connCount, current)
+	//	select {
+	//	case <-ctx.Done():
+	//		log.WARN("cancelled before initial connection/sync")
+	//		return
+	//	default:
+	//	}
+	//	time.Sleep(time.Second)
+	//	blockChan <- Blocks{}
+	//}
 	blocks := Blocks{}
+	// generate initial Blocks
+	for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
+		BestSnapshot().Height+1)].Algos {
+		// Choose a payment address at random.
+		rand.Seed(time.Now().UnixNano())
+		payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(cx.
+			StateCfg.ActiveMiningAddrs))]
+		template, err := cx.RPCServer.Cfg.Generator.NewBlockTemplate(0,
+			payToAddr, algo)
+		if err != nil {
+			log.ERROR("failed to create new block template:", err)
+			continue
+		}
+		blocks = append(blocks, template)
+	}
+	blockChan <- blocks
 	// create subscriber for new block event
 	cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.
 	Notification) {
@@ -106,13 +125,14 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	})
 	// goroutine loop checking for connection and sync status
 	go func() {
+		time.Sleep(time.Second*5)
 		for {
 			time.Sleep(time.Second)
 			connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
 			current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
 			// if out of sync or disconnected,
 			// once a second send out empty blocks
-			if connCount < 1 || !current {
+			if (connCount < 1 && !*cx.Config.Solo)|| !current {
 				blockChan <- Blocks{}
 			}
 			select {

@@ -2,9 +2,12 @@ package kopach
 
 import (
 	"crypto/cipher"
+	"encoding/hex"
 	"github.com/p9c/pod/pkg/broadcast"
+	"github.com/p9c/pod/pkg/controller"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/ugorji/go/codec"
 	"net"
 	"sync"
 	"time"
@@ -40,6 +43,8 @@ type msgBuffer struct {
 type msgHandle struct {
 	buffers map[string]*msgBuffer
 	ciph    *cipher.AEAD
+	dec     *codec.Decoder
+	decBuf  []byte
 }
 
 func newMsgHandle(password string) (out *msgHandle) {
@@ -47,6 +52,9 @@ func newMsgHandle(password string) (out *msgHandle) {
 	out.buffers = make(map[string]*msgBuffer)
 	ciph := gcm.GetCipher(password)
 	out.ciph = &ciph
+	var mh codec.MsgpackHandle
+	out.decBuf = make([]byte, 0, broadcast.MaxDatagramSize)
+	out.dec = codec.NewDecoderBytes(out.decBuf, &mh)
 	return
 }
 
@@ -59,7 +67,7 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 		}
 	}
 	for i := range deleters {
-		log.WARN("deleting old message buffer")
+		log.TRACE("deleting old message buffer")
 		delete(m.buffers, deleters[i])
 	}
 	b = b[:n]
@@ -71,18 +79,18 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 	// snip off message magic bytes
 	msgType := string(b[:8])
 	b = b[8:]
-	log.INFO(n, " bytes read from ", src, "message type", msgType == string(broadcast.Template))
+	log.TRACE(n, " bytes read from ", src, "message type", msgType)
 	if msgType == string(broadcast.Template) {
-		log.WARN("got block template shard")
+		log.TRACE("got block template shard")
 		buffer := b
 		nonce := string(b[:8])
 		if x, ok := m.buffers[nonce]; ok {
-			log.WARN("additional shard with nonce", nonce)
+			log.TRACE("additional shard with nonce", hex.EncodeToString([]byte(nonce)))
 			if !x.decoded {
-				log.WARN("adding shard")
+				log.TRACE("adding shard")
 				x.buffers = append(x.buffers, buffer)
 				lb := len(x.buffers)
-				log.WARN("have",lb, "buffers")
+				log.TRACE("have", lb, "buffers")
 				if lb > 2 {
 					// try to decode it
 					//spew.Dump(x.buffers)
@@ -92,17 +100,24 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 						log.ERROR(err)
 						return
 					}
-					log.WARN(bytes)
+					log.SPEW(bytes)
+					m.dec.ResetBytes(bytes)
+					blocks := controller.Blocks{}
+					err = m.dec.Decode(&blocks)
+					if err != nil {
+						log.ERROR(err)
+					}
+					log.INFO(len(blocks), "block templates received")
 					x.decoded = true
 				}
 			} else if x.buffers != nil {
-				log.WARN("nilling buffers")
+				log.TRACE("nilling buffers")
 				x.buffers = nil
 			} else {
-				log.WARN("ignoring already decoded message shard")
+				log.TRACE("ignoring already decoded message shard")
 			}
 		} else {
-			log.WARN("adding nonce", nonce)
+			log.TRACE("adding nonce", hex.EncodeToString([]byte(nonce)))
 			m.buffers[nonce] = &msgBuffer{[][]byte{}, time.Now(), false}
 			m.buffers[nonce].buffers = append(m.buffers[nonce].buffers, b)
 		}
