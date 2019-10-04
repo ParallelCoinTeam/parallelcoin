@@ -41,7 +41,7 @@ func Encode(ciph cipher.AEAD, bytes []byte, typ []byte) (shards [][]byte,
 		return
 	}
 	for i := range clearText {
-		shards = append(shards, append(typ, ciph.Seal(nonce, nonce,
+		shards = append(shards, append(append(typ, nonce...), ciph.Seal(nil, nonce,
 			clearText[i], nil)...))
 	}
 	log.SPEW(shards)
@@ -50,8 +50,7 @@ func Encode(ciph cipher.AEAD, bytes []byte, typ []byte) (shards [][]byte,
 
 func Decode(ciph cipher.AEAD, shards [][]byte) (bytes []byte, err error) {
 	plainShards := make([][]byte, len(shards))
-	// first byte is the message type identifier so nodes can filter
-	nonceSize := ciph.NonceSize()+1
+	nonceSize := ciph.NonceSize()
 	for i := range shards {
 		if len(shards[i]) < nonceSize {
 			errMsg := []interface{}{"shard size too small, got",
@@ -59,14 +58,14 @@ func Decode(ciph cipher.AEAD, shards [][]byte) (bytes []byte, err error) {
 			log.ERROR(errMsg...)
 			return nil, errors.New(fmt.Sprintln(errMsg...))
 		}
-		nonce, cipherText := shards[i][1:nonceSize], shards[i][nonceSize:]
+		nonce, cipherText := shards[i][:nonceSize], shards[i][nonceSize:]
 		var plaintext []byte
 		plaintext, err = ciph.Open(nil, nonce, cipherText, nil)
 		if err != nil {
 			log.ERROR(err)
 			return
 		}
-		plainShards = append(plainShards, plaintext)
+		plainShards[i] = plaintext
 	}
 	return fec.Decode(plainShards)
 }
