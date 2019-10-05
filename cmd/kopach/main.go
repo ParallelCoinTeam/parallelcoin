@@ -45,6 +45,7 @@ type msgHandle struct {
 	ciph    *cipher.AEAD
 	dec     *codec.Decoder
 	decBuf  []byte
+	blockChan chan controller.Blocks
 }
 
 func newMsgHandle(password string) (out *msgHandle) {
@@ -93,8 +94,6 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 				log.TRACE("have", lb, "buffers")
 				if lb > 2 {
 					// try to decode it
-					//spew.Dump(x.buffers)
-					//fmt.Println()
 					bytes, err := broadcast.Decode(*m.ciph, x.buffers)
 					if err != nil {
 						log.ERROR(err)

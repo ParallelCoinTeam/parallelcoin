@@ -21,7 +21,7 @@ var (
 	Template = []byte("tplblock")
 )
 
-// Send broadcasts bytes on the given multicast connection
+// Send broadcasts bytes on the given multicast address
 func Send(addr *net.UDPAddr, bytes []byte, ciph cipher.AEAD,
 	typ []byte) (err error) {
 	var shards [][]byte
@@ -40,7 +40,7 @@ func Send(addr *net.UDPAddr, bytes []byte, ciph cipher.AEAD,
 			log.ERROR(err, len(shards[i]))
 			return
 		}
-		log.DEBUG("wrote", n, "bytes to multicast address", addr.IP, "port",
+		log.TRACE("wrote", n, "bytes to multicast address", addr.IP, "port",
 			addr.Port)
 	}
 	err = conn.Close()
