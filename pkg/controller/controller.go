@@ -140,13 +140,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			// transactions are cleared immediately they appear if possible,
 			// while not disrupting mining progress excessively
 			time.Sleep(time.Second/10)
-			connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
-			current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
-			// if out of sync or disconnected,
-			// once a second send out empty blocks
-			if (connCount < 1 && !*cx.Config.Solo) || !current {
-				blockChan <- Blocks{}
-			}
 			// when new transactions are received the last updated timestamp
 			// changes, when this happens a new dispatch needs to be made
 			if lastTxUpdate != cx.RPCServer.Cfg.Generator.GetTxSource().LastUpdated() {
