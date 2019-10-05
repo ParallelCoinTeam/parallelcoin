@@ -10,6 +10,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
+	"github.com/p9c/pod/pkg/broadcast"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/base58"
@@ -119,7 +120,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 					// 	apputil.SubCommands(),
 					// ),
 				),
-			),
+				"k"),
 		},
 		Flags: []cli.Flag{
 			altsrc.NewStringFlag(cli.StringFlag{
@@ -286,7 +287,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 			apputil.String(
 				"rpcconnect",
 				"Hostname/IP and port of pod RPC server to connect to",
-				"127.0.0.1:11048",
+				"",
 				cx.Config.RPCConnect),
 			apputil.StringSlice(
 				"rpclisten",
@@ -357,7 +358,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 			apputil.Bool(
 				"upnp",
 				"Use UPnP to map our listening port outside of NAT",
-				cx.Config.Upnp),
+				cx.Config.UPNP),
 			apputil.Float64(
 				"minrelaytxfee",
 				"The minimum transaction fee in DUO/kB to be"+
@@ -387,6 +388,8 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				node.DefaultMaxOrphanTransactions,
 				cx.Config.MaxOrphanTxs),
 			apputil.String(
+				// TODO: remove this as mining only one algo is
+				//  not advisable
 				"algo",
 				"Sets the algorithm for the CPU miner ( blake14lr,"+
 					" cryptonight7v2, keccak, lyra2rev2, scrypt, sha256d, stribog,"+
@@ -407,6 +410,11 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				"solo",
 				"mine DUO even if not connected to the network",
 				cx.Config.Solo),
+			apputil.String(
+				"broadcastaddress, ba",
+				"sets broadcast listener address for mining controller",
+				broadcast.DefaultAddress,
+				cx.Config.BroadcastAddress),
 			apputil.Bool(
 				"broadcast",
 				"enable broadcasting blocks for workers to mine on",
@@ -420,7 +428,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				"disable miner controller",
 				cx.Config.NoController),
 			apputil.StringSlice(
-				"miningaddr",
+				"miningaddrs",
 				"Add the specified payment address to the list of"+
 					" addresses to use for generated blocks, at least one is "+
 					"required if generate or minerlistener are set",
@@ -514,7 +522,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 			apputil.String(
 				"walletserver, ws",
 				"set wallet server to connect to",
-				"127.0.0.1:11046",
+				"",
 				cx.Config.WalletServer),
 			apputil.String(
 				"walletpass",

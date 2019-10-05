@@ -29,7 +29,6 @@ const (
 
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
-	log.L.SetLevel("error", true)
 	cx := conte.GetNewContext(appName, "main")
 	cx.App = getApp(cx)
 	log.DEBUG("running App")

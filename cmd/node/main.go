@@ -16,6 +16,7 @@ import (
 	"github.com/p9c/pod/cmd/node/version"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/controller"
 	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -42,13 +43,15 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	wg *sync.WaitGroup) (err error) {
 	log.TRACE("starting up node main")
 	wg.Add(1)
-	shutdownChan = make(chan struct{})
-	interrupt.AddHandler(
-		func() {
-			log.TRACE("closing shutdown channel")
-			close(shutdownChan)
-		},
-	)
+	if shutdownChan != nil {
+		interrupt.AddHandler(
+			func() {
+				log.TRACE("closing shutdown channel")
+				close(shutdownChan)
+			},
+		)
+	}
+
 	// show version at startup
 	log.INFO("version", version.Version())
 	// enable http profiling server if requested
@@ -159,6 +162,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 			nodechan <- server.RPCServers[0]
 		}
 	}
+	controller.Run(cx)
 	// Wait until the interrupt signal is received from an OS signal or
 	// shutdown is requested through one of the subsystems such as the
 	// RPC server.
@@ -232,7 +236,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 // running in regression test mode and it already exists.
 func removeRegressionDB(cx *conte.Xt, dbPath string) error {
 	// don't do anything if not in regression test mode
-	if !((*cx.Config.Network)[0]=='r') {
+	if !((*cx.Config.Network)[0] == 'r') {
 		return nil
 	}
 	// remove the old regression test database if it already exists
