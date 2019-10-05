@@ -17,8 +17,10 @@ const (
 // for fast elimination of irrelevant messages a magic 64 bit word is used to
 // identify relevant types of messages and 64 bits so the buffer is aligned
 var (
-	Block    = []byte("solblock")
-	Template = []byte("tplblock")
+	SolBlock = "solblock"
+	TplBlock = "tplblock"
+	Solution = []byte(SolBlock)
+	Template = []byte(TplBlock)
 )
 
 // Send broadcasts bytes on the given multicast address
