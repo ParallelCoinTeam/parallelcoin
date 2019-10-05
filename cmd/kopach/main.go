@@ -53,7 +53,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 				// empty block templates means stop work and don't start
 				// new work
 				case len(bt) < 1:
-					if blockSemaphore == nil {
+					if blockSemaphore != nil {
 						close(blockSemaphore)
 						blockSemaphore = make(chan struct{})
 					}
