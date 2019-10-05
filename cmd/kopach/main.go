@@ -30,6 +30,15 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	m := newMsgHandle(*cx.Config.MinerPass)
 	m.blockChan = make(chan controller.Blocks)
 	blockSemaphore := make(chan struct{})
+	outAddr, err := broadcast.New(*cx.Config.BroadcastAddress)
+	if err != nil {
+		log.ERROR(err)
+		return
+	}
+	// create buffer and load into msgpack codec
+	var mh codec.MsgpackHandle
+	bytes := make([]byte, 0, broadcast.MaxDatagramSize)
+	enc := codec.NewEncoderBytes(&bytes, &mh)
 	var rotator atomic.Uint64
 	// mining work dispatch goroutine
 	go func() {
@@ -44,8 +53,10 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 				// empty block templates means stop work and don't start
 				// new work
 				case len(bt) < 1:
-					close(blockSemaphore)
-					blockSemaphore = make(chan struct{})
+					if blockSemaphore == nil {
+						close(blockSemaphore)
+						blockSemaphore = make(chan struct{})
+					}
 				// received a normal block template
 				default:
 					// if workers are working, stop them
@@ -107,25 +118,18 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 								// Initial state.
 								hashesCompleted := uint64(0)
 								eN, _ := wire.RandomUint64()
-								// now := time.Now()
-								// for extraNonce := eN; extraNonce < eN+maxExtraNonce; extraNonce++ {
 								did := false
 								extraNonce := eN
 								// we only do this once
 								for !did {
 									did = true
-									// Update the extra nonce in the block template with the new value by
-									// regenerating the coinbase script and setting the merkle root to the
-									// new value.
-									log.TRACE("updating extraNonce")
+									// use a random extra nonce to ensure no
+									// duplicated work
 									err := UpdateExtraNonce(msgBlock,
 										curHeight+1, extraNonce+enOffset)
 									if err != nil {
 										log.WARN(err)
 									}
-									// Search through the entire nonce range for a solution while
-									// periodically checking for early quit and stale block conditions along
-									// with updates to the speed monitor.
 									var shifter uint64 = 16
 									rn, _ := wire.RandomUint64()
 									if rn > 1<<63-1<<shifter {
@@ -146,12 +150,9 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 									}()
 									log.TRACE("starting round from ", rNonce)
 									for i = rNonce; i <= rNonce+mn; i++ {
-										// if time.Now().Sub(now) > time.Second*3 {
-										// 	return false
-										// }
 										select {
 										case <-quit:
-											return
+											break
 										default:
 										}
 										var incr uint64 = 1
@@ -159,17 +160,33 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 										hash := header.BlockHashWithAlgos(
 											curHeight + 1)
 										hashesCompleted += incr
-										// The block is solved when the new block hash is less than the target
+										// The block is solved when the new
+										// block hash is less than the target
 										// difficulty.  Yay!
 										bigHash := blockchain.HashToBig(&hash)
 										if bigHash.Cmp(targetDifficulty) <= 0 {
 											log.WARN("found block", )
-											// broadcast solved block
-											break
+											// broadcast solved block:
+											// first stop all work
+											if blockSemaphore == nil {
+												close(blockSemaphore)
+												blockSemaphore = nil
+											}
+											// serialize the block
+											err := enc.Encode(msgBlock)
+											if err != nil {
+												log.ERROR(err)
+												break
+											}
+											err = broadcast.Send(outAddr,
+												bytes, *m.ciph, broadcast.Solution)
+											break threadOut
 										}
 									}
 								}
 								select {
+								case <-quit:
+									break threadOut
 								case <-blockSemaphore:
 									break threadOut
 								default:
@@ -190,11 +207,6 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 		for {
 			cancel := broadcast.Listen(broadcast.DefaultAddress, m.msgHandler)
 			select {
-			//case bt := <-blockChan:
-			//	log.WARN("received block templates")
-			//	if bt == nil || len(bt) < 1 {
-			//		log.WARN("empty blocks, stopping work")
-			//	}
 			case <-quit:
 				log.DEBUG("quitting on quit channel close")
 				cancel()
@@ -251,9 +263,8 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 	// snip off message magic bytes
 	msgType := string(b[:8])
 	b = b[8:]
-	log.TRACE(n, " bytes read from ", src, "message type", msgType)
-	if msgType == string(broadcast.Template) {
-		log.TRACE("got block template shard")
+	if msgType == broadcast.TplBlock {
+		log.TRACE(n, " bytes read from ", src, "message type", msgType)
 		buffer := b
 		nonce := string(b[:8])
 		if x, ok := m.buffers[nonce]; ok {
@@ -313,7 +324,7 @@ func UpdateExtraNonce(msgBlock *wire.MsgBlock,
 			blockchain.MaxCoinbaseScriptLen)
 	}
 	msgBlock.Transactions[0].TxIn[0].SignatureScript = coinbaseScript
-	// TODO(davec): A util.Block should use saved in the state to avoid
+	// TODO(davec): A util.Solution should use saved in the state to avoid
 	// recalculating all of the other transaction hashes.
 	// block.Transactions[0].InvalidateCache() Recalculate the merkle root with
 	// the updated extra nonce.
