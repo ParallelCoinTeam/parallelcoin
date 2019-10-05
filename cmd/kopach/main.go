@@ -15,17 +15,70 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 )
 
+// Main is the entry point for the kopach miner
 func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	wg.Add(1)
+	log.WARN("starting kopach standalone miner worker")
+	m := newMsgHandle(*cx.Config.MinerPass)
+	m.blockChan = make(chan controller.Blocks)
+	blockSemaphore := make(chan struct{})
+	// mining work dispatch goroutine
 	go func() {
-		log.WARN("starting kopach standalone miner worker")
-		m := newMsgHandle(*cx.Config.MinerPass)
+	workOut:
+		for {
+			select {
+			case bt := <-m.blockChan:
+				switch {
+				// if the channel is returning nil it has been closed
+				case bt == nil:
+					break workOut
+				// empty block templates means stop work and don't start
+				// new work
+				case len(bt) < 1:
+					close(blockSemaphore)
+					blockSemaphore = make(chan struct{})
+				// received a normal block template
+				default:
+					// if workers are working, stop them
+					if blockSemaphore != nil {
+						close(blockSemaphore)
+						blockSemaphore = make(chan struct{})
+					}
+					for i := 0; i < *cx.Config.GenThreads; i++ {
+						// start up worker
+						go func() {
+							tn := time.Now()
+							log.WARN("starting worker", i, tn)
+							j := i
+						threadOut:
+							for {
+								select {
+								case <-blockSemaphore:
+									break threadOut
+								}
+							}
+							log.WARN("worker", j, tn, "stopped")
+						}()
+					}
+				}
+			case <-quit:
+				close(m.blockChan)
+				break workOut
+			}
+		}
+	}()
+	go func() {
 	out:
 		for {
 			cancel := broadcast.Listen(broadcast.DefaultAddress, m.msgHandler)
 			select {
+			//case bt := <-blockChan:
+			//	log.WARN("received block templates")
+			//	if bt == nil || len(bt) < 1 {
+			//		log.WARN("empty blocks, stopping work")
+			//	}
 			case <-quit:
-				log.DEBUG("quitting on killswitch")
+				log.DEBUG("quitting on quit channel close")
 				cancel()
 				break out
 			}
@@ -41,10 +94,10 @@ type msgBuffer struct {
 }
 
 type msgHandle struct {
-	buffers map[string]*msgBuffer
-	ciph    *cipher.AEAD
-	dec     *codec.Decoder
-	decBuf  []byte
+	buffers   map[string]*msgBuffer
+	ciph      *cipher.AEAD
+	dec       *codec.Decoder
+	decBuf    []byte
 	blockChan chan controller.Blocks
 }
 
@@ -108,6 +161,8 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 					}
 					log.INFO(len(blocks), "block templates received")
 					x.decoded = true
+					// mine on it
+					m.blockChan <- blocks
 				}
 			} else if x.buffers != nil {
 				log.TRACE("nilling buffers")
