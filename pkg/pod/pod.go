@@ -106,6 +106,7 @@ type Config struct {
 	BlockPrioritySize        *int             `group:"mining" name:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"input" inputType:"number" model:"BlockPrioritySize" featured:"false"`
 	BlocksOnly               *bool            `group:"node" name:"Blocks Only" description:"do not accept transactions from remote peers" type:"switch" model:"BlocksOnly" featured:"false"`
 	Broadcast                *bool            `group:"mining" name:"Broadcast" description:"enable broadcasting of blocks for workers to work on" type:"switch" model:"Broadcast" featured:"false"`
+	BroadcastAddress         *string          `group:"mining" name:"Miner Broadcast Address" description:"UDP multicast address for miner broadcast work dispatcher" type:"input" inputType:"text" model:"BroadcastAddress" featured:"false"`
 	CAFile                   *string          `group:"tls" name:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
 	ConfigFile               *string
 	ConnectPeers             *cli.StringSlice `group:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"input" inputType:"text" model:"ConnectPeers" featured:"false"`
@@ -171,7 +172,7 @@ type Config struct {
 	TorIsolation             *bool            `group:"proxy" name:"Tor Isolation" description:"makes a separate proxy connection for each connection" type:"switch" model:"TorIsolation" featured:"false"`
 	TrickleInterval          *time.Duration   `group:"policy" name:"Trickle Interval" description:"minimum time between attempts to send new inventory to a connected peer" type:"input" inputType:"text" model:"TrickleInterval" featured:"false"`
 	TxIndex                  *bool            `group:"node" name:"Tx Index" description:"maintain a full hash-based transaction index which makes all transactions available via the getrawtransaction RPC" type:"switch" model:"TxIndex" featured:"false"`
-	Upnp                     *bool            `group:"node" name:"Upnp" description:"enable UPNP for NAT traversal" type:"switch" model:"Upnp" featured:"false"`
+	UPNP                     *bool            `group:"node" name:"UPNP" description:"enable UPNP for NAT traversal" type:"switch" model:"UPNP" featured:"false"`
 	UserAgentComments        *cli.StringSlice `group:"node" name:"User Agent Comments" description:"Comment to add to the user agent -- See BIP 14 for more information" type:"input" inputType:"text" model:"UserAgentComments" featured:"false"`
 	Username                 *string          `group:"rpc" name:"Username" description:"password for client RPC connections" type:"input" inputType:"text" model:"Username" featured:"false"`
 	Wallet                   *bool
@@ -200,6 +201,7 @@ func EmptyConfig() *Config {
 		BlockPrioritySize:        newint(),
 		BlocksOnly:               newbool(),
 		Broadcast:                newbool(),
+		BroadcastAddress:         newstring(),
 		CAFile:                   newstring(),
 		ConfigFile:               newstring(),
 		ConnectPeers:             newStringSlice(),
@@ -265,7 +267,7 @@ func EmptyConfig() *Config {
 		TorIsolation:             newbool(),
 		TrickleInterval:          newDuration(),
 		TxIndex:                  newbool(),
-		Upnp:                     newbool(),
+		UPNP:                     newbool(),
 		UserAgentComments:        newStringSlice(),
 		Username:                 newstring(),
 		Wallet:                   newbool(),

@@ -1,11 +1,15 @@
 <component name="ProjectDictionaryState">
   <dictionary name="loki">
     <words>
+      <w>algo</w>
       <w>blockchain</w>
+      <w>broadcastaddress</w>
       <w>castagnoli</w>
       <w>chaincfg</w>
       <w>chainhash</w>
+      <w>ciph</w>
       <w>coinbase</w>
+      <w>datagram</w>
       <w>davec</w>
       <w>debugc</w>
       <w>debugf</w>
@@ -19,6 +23,7 @@
       <w>mainnet</w>
       <w>merkle</w>
       <w>merkles</w>
+      <w>msgpack</w>
       <w>parallelcoin</w>
       <w>regressiontest</w>
       <w>regtestnet</w>

@@ -13,26 +13,26 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-func r(start, end int) (out []int) {
-	for i := start; i < end; i++ {
-		out = append(out, i)
-	}
-	return
-}
-
-func init() {
-	for x := 0; x < 16; x++ {
-		for y := 0; y < 16; y++ {
-			n := x*16 + y
-			code := fmt.Sprint(n)
-			fmt.Print("\u001b[38;5;"+code+"m", code, " \u001b[0m ")
-			if n%8-3 == 0 {
-				fmt.Println()
-			}
-		}
-	}
-	fmt.Println()
-}
+//func r(start, end int) (out []int) {
+//	for i := start; i < end; i++ {
+//		out = append(out, i)
+//	}
+//	return
+//}
+//
+//func init() {
+//	for x := 0; x < 16; x++ {
+//		for y := 0; y < 16; y++ {
+//			n := x*16 + y
+//			code := fmt.Sprint(n)
+//			fmt.Print("\u001b[38;5;"+code+"m", code, " \u001b[0m ")
+//			if n%8-3 == 0 {
+//				fmt.Println()
+//			}
+//		}
+//	}
+//	fmt.Println()
+//}
 
 var (
 	colorRed       = "\u001b[38;5;196m"
@@ -167,10 +167,10 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 
 // SetLevel enables or disables the various print functions
 func (l *Logger) SetLevel(level string, color bool) *Logger {
-	_, loc, line, _ := runtime.Caller(1)
-	files := strings.Split(loc, "github.com/p9c/pod/")
-	codeLoc := fmt.Sprint(files[1], ":", justifyLineNumber(line))
-	fmt.Println("setting level to", level, codeLoc)
+	//_, loc, line, _ := runtime.Caller(1)
+	//files := strings.Split(loc, "github.com/p9c/pod/")
+	//codeLoc := "./"+fmt.Sprint(files[1], ":", justifyLineNumber(line))
+	//fmt.Println("setting level to", level, codeLoc)
 	*l = *Empty()
 	var fallen bool
 	switch {

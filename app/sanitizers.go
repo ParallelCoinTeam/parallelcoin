@@ -16,6 +16,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/pkg/broadcast"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
@@ -54,6 +55,7 @@ initParams(cx *conte.Xt) {
 	network := "mainnet"
 	if cx.Config.Network != nil {
 		network = *cx.Config.Network
+		cx.StateCfg.Save = true
 	}
 	switch network {
 	case "testnet", "testnet3", "t":
@@ -82,29 +84,35 @@ func initListeners(cx *conte.Xt) {
 		cfg.Listeners =
 			&cli.StringSlice{":" +
 				cx.ActiveNet.DefaultPort}
+		cx.StateCfg.Save = true
 	}
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
 		*cfg.WalletRPCListeners = append(*cfg.WalletRPCListeners,
 			":"+cx.ActiveNet.RPCServerPort)
+		cx.StateCfg.Save = true
 	}
 	if len(*cfg.RPCListeners) < 1 {
 		*cfg.RPCListeners = append(*cfg.RPCListeners,
 			":"+cx.ActiveNet.RPCClientPort)
+		cx.StateCfg.Save = true
 	}
 }
 
-func initTLSStuffs(cfg *pod.Config) {
+func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	if *cfg.RPCCert == "" {
 		*cfg.RPCCert =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.cert"
+		st.Save = true
 	}
 	if *cfg.RPCKey == "" {
 		*cfg.RPCKey =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.key"
+		st.Save = true
 	}
 	if *cfg.CAFile == "" {
 		*cfg.CAFile =
 			*cfg.DataDir + string(os.PathSeparator) + "cafile"
+		st.Save = true
 	}
 }
 
@@ -112,12 +120,10 @@ func initLogLevel(cfg *pod.Config) {
 	loglevel := *cfg.LogLevel
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
-		log.L.SetLevel(loglevel, true)
 		log.TRACE("log level", loglevel)
 	default:
 		log.INFO("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
-		log.L.SetLevel("info", true)
 	}
 	log.L.SetLevel(*cfg.LogLevel, true)
 	if !*cfg.Onion {
@@ -201,12 +207,12 @@ func validateBanDuration(cfg *pod.Config) {
 	}
 }
 
-func validateWhitelists(cfg *pod.Config, state *state.Config) {
+func validateWhitelists(cfg *pod.Config, st *state.Config) {
 	// Validate any given whitelisted IP addresses and networks.
 	log.TRACE("validating whitelists")
 	if len(*cfg.Whitelists) > 0 {
 		var ip net.IP
-		state.ActiveWhitelists = make([]*net.IPNet, 0, len(*cfg.Whitelists))
+		st.ActiveWhitelists = make([]*net.IPNet, 0, len(*cfg.Whitelists))
 		for _, addr := range *cfg.Whitelists {
 			_, ipnet, err := net.ParseCIDR(addr)
 			if err != nil {
@@ -231,7 +237,7 @@ func validateWhitelists(cfg *pod.Config, state *state.Config) {
 					Mask: net.CIDRMask(bits, bits),
 				}
 			}
-			state.ActiveWhitelists = append(state.ActiveWhitelists, ipnet)
+			st.ActiveWhitelists = append(st.ActiveWhitelists, ipnet)
 		}
 	}
 }
@@ -457,12 +463,21 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 		state.ActiveMiningAddrs = append(state.ActiveMiningAddrs, addr)
 	}
 	// Ensure there is at least one mining address when the generate flag is set.
-	if (*cfg.Generate) && len(*cfg.MiningAddrs) == 0 { // || *cfg.MinerListener != ""
+	if (*cfg.Generate) && len(*cfg.MiningAddrs) == 0 {
 		// str := "%s: the generate flag is set, but there are no mining addresses specified "
 		// err := fmt.Errorf(str, funcName)
 		// fmt.Fprintln(os.Stderr, err)
 		// os.Exit(1)
 		*cfg.Generate = false
+	}
+	// set default broadcast address if unset
+	if cfg.BroadcastAddress == nil {
+		cfg.BroadcastAddress = new(string)
+		state.Save = true
+	}
+	if *cfg.BroadcastAddress == "" {
+		*cfg.BroadcastAddress = broadcast.DefaultAddress
+		state.Save = true
 	}
 	if *cfg.MinerPass != "" {
 		state.ActiveMinerKey = fork.Argon2i([]byte(*cfg.MinerPass))

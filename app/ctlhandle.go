@@ -9,7 +9,6 @@ import (
 
 	"github.com/p9c/pod/cmd/ctl"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
 )
 
 const slash = string(os.PathSeparator)
@@ -37,19 +36,6 @@ ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}
 		ctl.Main(args, cx)
-		return nil
-	}
-}
-
-func
-kopachHandle(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
-		log.WARN("not implemented")
-		// Configure(cx)
-		// kopachQuit := make(chan struct{})
-		// interrupt.AddHandler(func() { close(kopachQuit) })
-		// kopach.NewWorker(*cx.Config.MinerListener, *cx.Config.MinerPass, *cx.Config.KopachListener, *cx.Config.DataDir,
-		// 	*cx.Config.KopachBias, *cx.Config.GenThreads, kopachQuit)
 		return nil
 	}
 }

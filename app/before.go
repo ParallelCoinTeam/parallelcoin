@@ -56,7 +56,6 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.String("loglevel") != "" {
 			log.TRACE("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
-			log.L.SetLevel(*cx.Config.LogLevel, true)
 		}
 		log.TRACE("checking network")
 		if c.IsSet("network") {
@@ -256,7 +255,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if c.IsSet("upnp") {
 			log.TRACE("set upnp", c.Bool("upnp"))
-			*cx.Config.Upnp = c.Bool("upnp")
+			*cx.Config.UPNP = c.Bool("upnp")
 		}
 		if c.IsSet("minrelaytxfee") {
 			log.TRACE("set minrelaytxfee", c.Float64("minrelaytxfee"))
@@ -302,13 +301,17 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.TRACE("set broadcast", c.Bool("broadcast"))
 			*cx.Config.Broadcast = c.Bool("broadcast")
 		}
+		if c.IsSet("broadcastaddress") {
+			log.TRACE("set broadcastaddress", c.Bool("broadcastaddress"))
+			*cx.Config.BroadcastAddress = c.String("broadcastaddress")
+		}
 		if c.IsSet("workers") {
 			log.TRACE("set workers", c.StringSlice("workers"))
 			*cx.Config.Workers = c.StringSlice("workers")
 		}
-		if c.IsSet("miningaddr") {
-			log.TRACE("set miningaddr", c.StringSlice("miningaddr"))
-			*cx.Config.MiningAddrs = c.StringSlice("miningaddr")
+		if c.IsSet("miningaddrs") {
+			log.TRACE("set miningaddrs", c.StringSlice("miningaddrs"))
+			*cx.Config.MiningAddrs = c.StringSlice("miningaddrs")
 		}
 		if c.IsSet("minerpass") {
 			log.TRACE("set minerpass", c.String("minerpass"))
