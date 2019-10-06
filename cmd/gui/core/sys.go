@@ -70,14 +70,14 @@ func RunDuOS(d DuOS) {
 	//injectCss(d)
 	evalJs(d)
 
-	//
-	//
-	//d.Cr.AddFunc("@every 1s", func() {
-	//	d.Wv.Dispatch(func() {
-	//		//d.Render("status", d.GetDuOSstatus())
-	//		d.Wv.Eval(`document.getElementById("balance").innerHTML = "` + d.GetDuOSstatus().Balance.Balance + `";`)
-	//	})
-	//})
+	d.Cr.AddFunc("@every 1s", func() {
+		d.Wv.Dispatch(func() {
+			//d.Render("status", d.GetDuOSstatus())
+			d.Wv.Eval(`document.getElementById("balanceValue").innerHTML = "` + d.GetDuOSstatus().Balance.Balance + `";`)
+			d.Wv.Eval(`document.getElementById("unconfirmedValue").innerHTML = "` + d.GetDuOSstatus().Balance.Unconfirmed + `";`)
+			d.Wv.Eval(`document.getElementById("txsnumberValue").innerHTML = "` + fmt.Sprint(d.GetDuOSstatus().TxsNumber) + `";`)
+		})
+	})
 	//// Css
 
 	// Js
