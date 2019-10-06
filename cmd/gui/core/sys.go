@@ -19,7 +19,7 @@ import (
 
 const (
 	windowWidth  = 960
-	windowHeight = 800
+	windowHeight = 780
 )
 
 func MountDuOS(cx *conte.Xt, cr *cron.Cron) (d *DuOS) {
@@ -36,7 +36,7 @@ func MountDuOS(cx *conte.Xt, cr *cron.Cron) (d *DuOS) {
 		Title:                  "ParallelCoin - DUO - True Story",
 		Resizable:              false,
 		Debug:                  true,
-		URL:                    `data:text/html,` + string(html.VUEHTML(html.VUEx(lib.VUElogo(), html.VUEheader(), html.VUEnav(lib.ICO()), html.VUEoverview()), css.CSS(css.ROOT(), css.GRID(), css.NAV()))),
+		URL:                    `data:text/html,` + string(html.VUEHTML(html.VUEx(lib.VUElogo(), html.VUEheader(), html.VUEnav(lib.ICO()), html.VUEoverview()), css.CSS(css.ROOT(), css.GRID(), css.COLORS(), css.HELPERS(), css.NAV()))),
 		ExternalInvokeCallback: d.HandleRPC,
 	})
 
@@ -50,9 +50,9 @@ func RunDuOS(d DuOS) {
 	var err error
 	// eval vue lib
 	evalB(&d, string(lib.VUE))
+	evalB(&d, string(lib.EJS))
 	// eval vfg lib
 	evalB(&d, string(lib.VFG))
-	evalB(&d, string(lib.VEJ))
 	// eval ejs lib
 
 	// init duOS variable
@@ -84,24 +84,20 @@ func RunDuOS(d DuOS) {
 		fmt.Println("error binding to webview:", err)
 	}
 	//injectCss(d)
+	d.Wv.InjectCSS(string(lib.GetMaterial))
 
 	evalD(&d, CoreJs(d.db))
 
 	evalD(&d, pnl.PanelsJs(pnl.Panels(d.db)))
 
+	for _, p := range pnl.Panels(d.db) {
+		d.Wv.InjectCSS(string(p.Css))
+	}
+
 	d.Cr.AddFunc("@every 1s", func() {
 		d.Wv.Dispatch(func() {
 			d.Render("status", d.GetDuOSstatus())
-			//d.Wv.Eval(`document.getElementById("balanceValue").innerHTML = "` + d.GetDuOSstatus().Balance.Balance + `";`)
-			//d.Wv.Eval(`document.getElementById("unconfirmedalue").innerHTML = "` + d.GetDuOSstatus().Balance.Unconfirmed + `";`)
-			//d.Wv.Eval(`document.getElementById("txsnumberValue").innerHTML = "` + fmt.Sprint(d.GetDuOSstatus().TxsNumber) + `";`)
-			//d.Wv.Eval(`document.getElementById("txsnumberValue").innerHTML = "` + fmt.Sprint(d.GetDuOSstatus().TxsNumber) + `";`)
-			//
-			//b, err := json.Marshal(tasks)
-			//if err == nil {
-			//	w.Eval(fmt.Sprintf("rpc.render(%s)", string(b)))
-			//}
-
+			d.Render("txsEx", d.GetTransactionsExcertps())
 		})
 	})
 	//// Css
@@ -121,27 +117,6 @@ func RunDuOS(d DuOS) {
 	//		})
 	//	})
 	//
-}
-
-func injectCss(d DuOS) {
-	// material
-	// getMaterial, err := base64.StdEncoding.DecodeString(lib.GetMaterial)
-	// if err != nil {
-	// 	fmt.Printf("Error decoding string: %s ", err.Error())
-	// 	return
-	// }
-	//d.Wv.InjectCSS(string(lib.GetMaterial))
-
-	// Core Css
-	//d.Wv.InjectCSS(string(css.CSS(css.ROOT(), css.GRID(), css.NAV())))
-	//
-	//for _, alj := range comp.Apps(d.db) {
-	//	d.Wv.InjectCSS(string(alj.Css))
-	//}
-	// comp
-	//for _, c := range comp.Components(d.db) {
-	//	d.Wv.InjectCSS(string(c.Css))
-	//}
 }
 
 func evalD(d *DuOS, l string) {

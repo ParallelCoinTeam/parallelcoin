@@ -3,88 +3,120 @@ package css
 func COLORS() string {
 	return `
 
- .bgwhite{
-        background: var(--light);
-        fill:var(--light);
-      }
-      .bgblack{
-        background: var(--dark);
-        fill:var(--dark);
-      }
-      .bgblue{
-        background: var(--blue);
-        fill:var(--blue);
-      }
-      .bglight-blue{
-        background: var(--light-blue);
-        fill:var(--light-blue);
-      }
-      .bggreen{
-        background: var(--green);
-        fill:var(--green);
-      }
-      .bgorange{
-        background: var(--orange);
-        fill:var(--orange);
-      }
-      .bgyellow{
-        background: var(--yellow);
-        fill:var(--yellow);
-      }
-      .bgred{
-        background:var(--red);
-        fill:var(--red);
-      }
-      .bgpurple{
-        background: var(--purple);
-        fill:var(--purple);
-      }
-      .bggray{
-        background: var(--gray);
-        fill:var(--gray);
-      }
-    
-    
-      .txwhite{
-        color: var(--light);
-      
-      }
-      .txblack{
-        color: var(--dark);
-      
-      }
-      .txblue{
-        color: var(--blue);
-        
-      }
-      .txlight-blue{
-        color: var(--light-blue);
-        
-      }
-      .txgreen{
-        color: var(--green);
-        
-      }
-      .txorange{
-        color: var(--orange);
-        
-      }
-      .txyellow{
-        color: var(--yellow);
-        
-      }
-      .txred{
-        color:var(--red);
-        
-      }
-      .txpurple{
-        color: var(--purple);
-       
-      }
-      .txgray{
-        color: var(--gray);
-       
-      }
+.bgMoreLight{
+background-color:var(--light-grayiii);
+}
+.bgLight {
+    background-color:var(--light);
+    fill: var(--light);
+}
+
+.bgDark {
+    background-color:var(--dark);
+    fill: var(--dark);
+}
+
+.bgBlue {
+    background-color:var(--blue);
+    fill: var(--blue);
+}
+
+.bgLightBlue {
+    background-color:var(--light-blue);
+    fill: var(--light-blue);
+}
+
+.bgGreen {
+    background-color:var(--green);
+    fill: var(--green);
+}
+
+.bgOrange {
+    background-color:var(--orange);
+    fill: var(--orange);
+}
+
+.bgYellow {
+    background-color:var(--yellow);
+    fill: var(--yellow);
+}
+
+.bgRed {
+    background-color:var(--red);
+    fill: var(--red);
+}
+
+.bgPurple {
+    background-color:var(--purple);
+    fill: var(--purple);
+}
+
+.bgGray {
+    background-color:var(--gray);
+    fill: var(--gray);
+}
+
+
+.txLight {
+    color: var(--light);
+
+}
+
+.txDark {
+    color: var(--dark);
+
+}
+
+.txBlue {
+    color: var(--blue);
+
+}
+
+.txLightBlue {
+    color: var(--light-blue);
+
+}
+
+.txGreen {
+    color: var(--green);
+
+}
+
+.txOrange {
+    color: var(--orange);
+
+}
+
+.txYellow {
+    color: var(--yellow);
+
+}
+
+.txRed {
+    color: var(--red);
+
+}
+
+.txPurple {
+    color: var(--purple);
+
+}
+
+.txGray {
+    color: var(--gray);
+
+}
+
+
+.bgfff{
+background-color:#fff!important;
+}
+
+.grayGrad{
+background:linear-gradient(#f4f4f4, #e4e4e4);
+}
+
+
 
 `
 }

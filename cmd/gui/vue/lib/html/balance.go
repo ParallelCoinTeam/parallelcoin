@@ -2,8 +2,8 @@ package html
 
 func VUEbalance() string {
 	return `
-<div class="rwrap">
-	<div tabindex="0" class="e-card flx flc justifyBetween duoCard">
+<div  id='panelwalletstatus' class="Wallet">
+	<div class="e-card flx flc justifyBetween duoCard">
 		<div class="e-card-header">
 			<div class="e-card-header-caption">
 				<div class="e-card-header-title">Balance:</div>

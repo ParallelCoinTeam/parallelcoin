@@ -33,6 +33,7 @@ const duOSys = {
 	node:null,
 	wallet:null,
 	status:null,
+	txsEx:null,
 	theme:false,
 	isBoot:false,
 	isLoading:false,
