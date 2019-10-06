@@ -97,7 +97,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.	Notification) {
 		switch n.Type {
 		case chain.NTBlockConnected:
-			log.WARN("new block found")
+			log.DEBUG("new block connected to chain")
 			blocks := Blocks{}
 			// generate Blocks
 			for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
