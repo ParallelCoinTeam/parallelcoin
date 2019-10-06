@@ -69,8 +69,7 @@ func LocalHashRate() mod.DuOScomp {
 		Version:  "0.0.1",
 		CompType: "panel",
 		SubType:  "status",
-		Js: `
-   data:function(){
+		Js: `data(){
 			return { 
 			duOSys,
         height: '100%',
@@ -138,15 +137,8 @@ methods:{
             }
         }, 500);
     }
-}
-		`,
-		Template: `<div class='rwrap'>
-                        <ejs-sparkline ref="localHashrate" class="spark" id='localHashrate-container' :height='this.height' :width='this.width' :padding='padding' :lineWidth='this.lineWidth' :type='this.type' :valueType='this.valueType' :fill='this.fill' :dataSource='this.dataSource' :axisSettings='this.axisSettings' :containerArea='this.containerArea' :border='this.border' xName='x' yName='yval'></ejs-sparkline>                        
-                      <div style="color: #000000; font-size: 12px; position: absolute; top:12px; left: 15px;">
-                        <b>Local hashrate</b>
-                    </div>
-                    <div id="lhr" style="color: #d1a990;position: absolute; top:25px; left: 15px;">R: 0H/s</div>
-</div>`,
+}`,
+		Template: `<div id="panellocalhashrate" class="LocalHR"><ejs-sparkline ref="localHashrate" class="spark" id='localHashrate-container' :height='this.height' :width='this.width' :padding='padding' :lineWidth='this.lineWidth' :type='this.type' :valueType='this.valueType' :fill='this.fill' :dataSource='this.dataSource' :axisSettings='this.axisSettings' :containerArea='this.containerArea' :border='this.border' xName='x' yName='yval'></ejs-sparkline><div style="color: #000000; font-size: 12px; position: absolute; top:12px; left: 15px;"><b>Local hashrate</b></div><div id="lhr" style="color: #d1a990;position: absolute; top:25px; left: 15px;">R: 0H/s</div></div>`,
 		Css: `
 
   .spark{

@@ -27,7 +27,7 @@ func Panels(d db.DuOSdb) (c []mod.DuOScomp) {
 	//c = append(c, panel.ChartB())
 	c = append(c, WalletStatus())
 	c = append(c, Status())
-	//c = append(c, LocalHashRate())
+	c = append(c, LocalHashRate())
 	//c = append(c, NetworkHashRate())
 
 	return c
