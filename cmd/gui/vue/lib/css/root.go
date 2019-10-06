@@ -13,7 +13,7 @@ func ROOT() string {
 --purple: #cf30cf;
 
 --dark: #303030;
---white: #fcfcfc;
+--light: #fcfcfc;
 
 --dark-gray:#4d4d4d;
 --gray:#808080;

@@ -11,7 +11,7 @@ func WalletStatus() mod.DuOScomp {
 		CompType: "panel",
 		SubType:  "status",
 		Js:       `data (){ return {duOSys }},`,
-		Template: `<div id="panelwalletstatus" class="Balance"><div class="flx flc justifyBetween duoCard"><div class="e-card-header"><div class="e-card-header-caption"><div class="e-card-header-title">Balance:</div><div class="e-card-sub-title"><span v-html="this.duOSys.status.balance.balance"></span> DUO</div></div><div class="e-card-header-image balance"></div></div><div class="flx flc e-card-content"><small><span>Pending: </span><strong><span v-html="this.duOSys.status.balance.unconfirmed"></span></strong></small><small><span>Transactions: </span><strong><span v-html="this.duOSys.status.txsnumber"></span></strong></small></div></div>`,
+		Template: `<div id="panelwalletstatus" class="Balance"><div class="e-card flx flc justifyBetween duoCard"><div class="e-card-header"><div class="e-card-header-caption"><div class="e-card-header-title">Balance:</div><div class="e-card-sub-title"><span v-html="this.duOSys.status.balance.balance"></span> DUO</div></div><div class="e-card-header-image balance"></div></div><div class="flx flc e-card-content"><small><span>Pending: </span><strong><span v-html="this.duOSys.status.balance.unconfirmed"></span></strong></small><small><span>Transactions: </span><strong><span v-html="this.duOSys.status.txsnumber"></span></strong></small></div></div>`,
 		Css: `
 
 .e-card .e-card-header .e-card-header-image.balance {
@@ -52,7 +52,7 @@ func Status() mod.DuOScomp {
 		CompType: "panel",
 		SubType:  "status",
 		Js:       `data (){ return {duOSys }}`,
-		Template: `<div  id="panelstatus" class="Status"><ul class="rf flx flc marZ padZ justifyEvenly"><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Version: </span><strong class="rcx6"><span v-html="this.duOSys.status.ver"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Wallet version: </span><strong class="rcx6"><span v-html="this.duOSys.status.walletver.podjsonrpcapi.versionstring"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Uptime: </span><strong class="rcx6"><span v-html="this.duOSys.status.uptime"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Chain: </span><strong class="rcx6"><span v-html="this.duOSys.status.net"></span></strong></li></ul></div>`,
+		Template: `<div  id="panelstatus" class="Info"><ul class="rf flx flc marZ padZ justifyEvenly"><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Version: </span><strong class="rcx6"><span v-html="this.duOSys.status.ver"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Wallet version: </span><strong class="rcx6"><span v-html="this.duOSys.status.walletver.podjsonrpcapi.versionstring"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Uptime: </span><strong class="rcx6"><span v-html="this.duOSys.status.uptime"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Chain: </span><strong class="rcx6"><span v-html="this.duOSys.status.net"></span></strong></li></ul></div>`,
 		Css: `
 
 
@@ -72,11 +72,9 @@ func LocalHashRate() mod.DuOScomp {
 		Js: `data(){
 			return { 
 			duOSys,
-        height: '100%',
-        width: '100%',
     	padding: { left: 0, right: 0, bottom: 0, top: 0},
         axisSettings: {
-            minY: 0, maxY: 99999
+            minY: 0, maxY: 99
         },
         containerArea: {
             background: 'white',
@@ -111,6 +109,9 @@ func LocalHashRate() mod.DuOScomp {
     { x: 0, yval: 0 },
     { x: 0, yval: 0 },
     { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
     { x: 0, yval: 0 }
 ],
 		lineWidth: 1
@@ -121,24 +122,24 @@ mounted(){
 },
 methods:{
     update: function() {
-        let spark = document.getElementById('localHashrate-container');
+        let spark = document.getElementById("localHashrate-container");
         let gauge = this.$refs.localHashrate.ej2Instances;
         let temp = gauge.dataSource.length - 1;
         this.update = setInterval(function() {
-            if (gauge.element.className.indexOf('e-sparkline') > -1) {
+            if (gauge.element.className.indexOf("e-sparkline") > -1) {
                 let value = duOSys.status.hashrate;
                 gauge.dataSource.push({ x: ++temp, yval: value });
                 gauge.dataSource.shift();
                 gauge.refresh();
-                let net = document.getElementById('lhr');
+                let net = document.getElementById("lhr");
                 if (net) {
-                net.innerHTML = 'R: ' + value.toFixed(0) + 'H/s';
+                net.innerHTML = "R: " + value.toFixed(0) + "H/s";
                 }
             }
         }, 500);
     }
 }`,
-		Template: `<div id="panellocalhashrate" class="LocalHR"><ejs-sparkline ref="localHashrate" class="spark" id='localHashrate-container' :height='this.height' :width='this.width' :padding='padding' :lineWidth='this.lineWidth' :type='this.type' :valueType='this.valueType' :fill='this.fill' :dataSource='this.dataSource' :axisSettings='this.axisSettings' :containerArea='this.containerArea' :border='this.border' xName='x' yName='yval'></ejs-sparkline><div style="color: #000000; font-size: 12px; position: absolute; top:12px; left: 15px;"><b>Local hashrate</b></div><div id="lhr" style="color: #d1a990;position: absolute; top:25px; left: 15px;">R: 0H/s</div></div>`,
+		Template: `<div id="panellocalhashrate" class="LocalHash"><div class="rwrap posAbs flx"><div class="e-card fii overHid"><ejs-sparkline ref="localHashrate" class="spark" id="localHashrate-container" height="100%" width="100%" :padding="padding" :lineWidth="this.lineWidth" :type="this.type" :valueType="this.valueType" :fill="this.fill" :dataSource="this.dataSource" :axisSettings="this.axisSettings" :containerArea="this.containerArea" :border="this.border" xName="x" yName="yval"></ejs-sparkline><div style="color: #000000; font-size: 12px; position: absolute; top:12px; left: 15px;"><b>Local hashrate</b></div><div id="lhr" style="color: #d1a990;position: absolute; top:25px; left: 15px;">R: 0H/s</div></div></div></div>`,
 		Css: `
 
   .spark{
@@ -160,11 +161,9 @@ func NetworkHashRate() mod.DuOScomp {
    data:function(){
 			return { 
 			duOSys,
-        height: '100%',
-        width: '100%',
     	padding: { left: 0, right: 0, bottom: 0, top: 0},
         axisSettings: {
-            minY: 0, maxY: 9999999
+            minY: 0, maxY: 99999
         },
         containerArea: {
             background: 'white',
@@ -199,6 +198,8 @@ func NetworkHashRate() mod.DuOScomp {
     { x: 0, yval: 0 },
     { x: 0, yval: 0 },
     { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
+    { x: 0, yval: 0 },
     { x: 0, yval: 0 }
 ],
 		lineWidth: 1
@@ -209,7 +210,7 @@ mounted(){
 },
 methods:{
     update: function() {
-        let spark = document.getElementById('networkHashrate-container');
+        let spark = document.getElementById("networkHashrate-container");
         let gauge = this.$refs.networkHashrate.ej2Instances;
         let temp = gauge.dataSource.length - 1;
         this.update = setInterval(function() {
@@ -218,20 +219,16 @@ methods:{
                 gauge.dataSource.push({ x: ++temp, yval: value });
                 gauge.dataSource.shift();
                 gauge.refresh();
-                let net = document.getElementById('nhr');
+                let net = document.getElementById("nhr");
                 if (net) {
-                net.innerHTML = 'R: ' + value.toFixed(0) + 'H/s';
+                net.innerHTML = "R: " + value.toFixed(0) + "H/s";
                 }
             }
         }, 500);
     }
 }
 		`,
-		Template: `<div class='rwrap'>
-                        <ejs-sparkline ref="networkHashrate" class="spark" id='networkHashrate-container' :height='this.height' :padding='padding' :width='this.width' :lineWidth='this.lineWidth' :type='this.type' :valueType='this.valueType' :fill='this.fill' :dataSource='this.dataSource' :axisSettings='this.axisSettings' :containerArea='this.containerArea' :border='this.border' xName='x' yName='yval'></ejs-sparkline>                        
-                      <div style="color: #303030; font-size: 12px; position: absolute; top:12px; left: 15px;">Network hashrate</div>
-                    <div id="nhr" style="color: #d1a990;position: absolute; top: 25px; left: 15px;">R: 0H/s</div>
-</div>`,
+		Template: `<div id="panelnetworkhashrate" class="NetHash"><div class="rwrap posAbs flx"><div class="e-card fii overHid"><ejs-sparkline ref="networkHashrate" class="spark" id="networkHashrate-container" height="100%" :padding="padding" width="100%" :lineWidth="this.lineWidth" :type="this.type" :valueType="this.valueType" :fill="this.fill" :dataSource="this.dataSource" :axisSettings="this.axisSettings" :containerArea="this.containerArea" :border="this.border" xName="x" yName="yval"></ejs-sparkline><div style="color: #303030; font-size: 12px; position: absolute; top:12px; left: 15px;">Network hashrate</div><div id="nhr" style="color: #d1a990;position: absolute; top: 25px; left: 15px;">R: 0H/s</div></div></div></div>`,
 		Css: `
 
   .spark{

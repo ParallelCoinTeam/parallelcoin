@@ -10,9 +10,7 @@ func Send() mod.DuOScomp {
 		Version:  "0.0.1",
 		CompType: "panel",
 		SubType:  "send",
-		Js: `
-	data (){
-			return {
+		Js: `data: function() { return {
 				sendAddress:'',
 				sendAmount:0.00000000,
 				target: '#x',
@@ -41,7 +39,7 @@ func Send() mod.DuOScomp {
 		}
 	},
 	methods: {
-     	 btnClick: function () {
+     	 btnClick: function() {
             this.$refs.Dialog.show();
         },
         createModalDialog: function() {
@@ -73,28 +71,7 @@ func Send() mod.DuOScomp {
 		}
 	},
 `,
-		Template: `<div class="flx flc fii justifyBetween">
-
-
-                <ejs-textbox floatLabelType='Auto' cssClass='e-outline flx noMargin fii bgfff' v-model='sendAddress' id='sendAddress' placeholder='Enter DUO address'></ejs-textbox>
-
-<div class="flx fii marginTop">	
-	<ejs-numerictextbox cssClass="e-outline noMargin fii bgfff" v-model.number="sendAmount" format="c5" validateDecimalOnType=true decimals="8"></ejs-numerictextbox>
-        
-        <ejs-button id="dialogbtn" v-on:click.native="btnClick">Send</ejs-button>
-        <ejs-dialog id="dialog" ref="Dialog" :header='header' :target='target' :width='width' :buttons='buttons' :visible='visible' :content='content' :animationSettings='animateSettings'  :showCloseIcon="showCloseIcon">
-        </ejs-dialog>
-
-        <ejs-dialog id="modalDialog" ref="ModalDialog" :header='model_header' :isModal='isModal' :target='target' :buttons='mbuttons' :animationSettings='animationSettings' :visible='visible' >
-        </ejs-dialog>
- 
-
-</div>
-
-
-
-
-</div>`,
+		Template: `<div id="panelsend" class="Send"><div class="flx flc fii justifyBetween"><ejs-textbox floatLabelType="Auto" cssClass="e-outline flx noMargin fii bgfff" v-model="sendAddress" id="sendAddress" placeholder="Enter DUO address"></ejs-textbox><div class="flx fii"><ejs-numerictextbox cssClass="e-outline noMargin fii bgfff" v-model.number="sendAmount" format="c5" validateDecimalOnType=true decimals="8"></ejs-numerictextbox><ejs-button id="dialogbtn" v-on:click.native="btnClick">Send</ejs-button><ejs-dialog id="dialog" ref="Dialog" :header="header" :target="target" :width="width" :buttons="buttons" :visible="visible" :content="content" :animationSettings="animateSettings"  :showCloseIcon="showCloseIcon"></ejs-dialog><ejs-dialog id="modalDialog" ref="ModalDialog" :header="model_header" :isModal="isModal" :target="target" :buttons="mbuttons" :animationSettings="animationSettings" :visible="visible" ></ejs-dialog></div></div></div>`,
 		Css: `
 		
 
