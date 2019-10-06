@@ -240,6 +240,7 @@ func (w *Wallet) rescanWithTarget(addrs []util.Address,
 			output.PkScript, w.chainParams,
 		)
 		if err != nil {
+			log.ERROR(err)
 			return err
 		}
 		outpoints[output.OutPoint] = outputAddrs[0]

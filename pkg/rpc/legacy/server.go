@@ -358,7 +358,7 @@ func (s *Server) WebsocketClientRead(wsc *WebsocketClient) {
 		_, request, err := wsc.conn.ReadMessage()
 		if err != nil {
 			if err != io.EOF && err != io.ErrUnexpectedEOF {
-				log.WARN(
+				log.WARNF(
 					"websocket receive failed from client %s: %v",
 					wsc.remoteAddr, err,
 				)
@@ -505,7 +505,7 @@ s.WG.Done()
 // websocket connection for a single client.
 func (s *Server) WebsocketClientRPC(wsc *WebsocketClient) {
 	log.INFOF(
-		"new websocket client %v %s", wsc.remoteAddr,
+		"new websocket client %v", wsc.remoteAddr,
 	)
 	// Clear the read deadline set before the websocket hijacked
 	// the connection.
