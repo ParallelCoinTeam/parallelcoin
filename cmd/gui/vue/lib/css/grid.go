@@ -4,7 +4,7 @@ func GRID() string {
 	return `
 .grid-container { height: 100%; margin: 0; }
 .grid-container * {
-border: 1px solid red;
+box-shadow: inset 0 0 0 1px #888;
 position: relative;
 }
 .grid-container *:after {

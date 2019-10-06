@@ -7,6 +7,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/vue/lib"
 	"github.com/p9c/pod/cmd/gui/vue/lib/css"
 	"github.com/p9c/pod/cmd/gui/vue/lib/html"
+	"github.com/p9c/pod/cmd/gui/vue/pnl"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/robfig/cron"
 
@@ -72,10 +73,17 @@ func RunDuOS(d DuOS) {
 
 	d.Cr.AddFunc("@every 1s", func() {
 		d.Wv.Dispatch(func() {
-			//d.Render("status", d.GetDuOSstatus())
-			d.Wv.Eval(`document.getElementById("balanceValue").innerHTML = "` + d.GetDuOSstatus().Balance.Balance + `";`)
-			d.Wv.Eval(`document.getElementById("unconfirmedValue").innerHTML = "` + d.GetDuOSstatus().Balance.Unconfirmed + `";`)
-			d.Wv.Eval(`document.getElementById("txsnumberValue").innerHTML = "` + fmt.Sprint(d.GetDuOSstatus().TxsNumber) + `";`)
+			d.Render("status", d.GetDuOSstatus())
+			//d.Wv.Eval(`document.getElementById("balanceValue").innerHTML = "` + d.GetDuOSstatus().Balance.Balance + `";`)
+			//d.Wv.Eval(`document.getElementById("unconfirmedValue").innerHTML = "` + d.GetDuOSstatus().Balance.Unconfirmed + `";`)
+			//d.Wv.Eval(`document.getElementById("txsnumberValue").innerHTML = "` + fmt.Sprint(d.GetDuOSstatus().TxsNumber) + `";`)
+			//d.Wv.Eval(`document.getElementById("txsnumberValue").innerHTML = "` + fmt.Sprint(d.GetDuOSstatus().TxsNumber) + `";`)
+			//
+			//b, err := json.Marshal(tasks)
+			//if err == nil {
+			//	w.Eval(fmt.Sprintf("rpc.render(%s)", string(b)))
+			//}
+
 		})
 	})
 	//// Css
@@ -106,6 +114,14 @@ func evalJs(dV DuOS) {
 	}
 	err = dV.Wv.Eval(string(vueLib))
 
+	// vfg
+	vfgLib, err := base64.StdEncoding.DecodeString(lib.VFG)
+	if err != nil {
+		fmt.Printf("Error decoding string: %s ", err.Error())
+		return
+	}
+	err = dV.Wv.Eval(string(vfgLib))
+
 	// ej2
 	//getAMP, err := base64.StdEncoding.DecodeString(lib.AMP)
 	//if err != nil {
@@ -124,16 +140,18 @@ func evalJs(dV DuOS) {
 	//	}
 	//}
 
-	//err = dV.Wv.Eval(core.CoreHeadJs)
-	//if err != nil {
-	//	fmt.Println("error binding to webview:", err)
-	//}
-	//
-	//err = dV.Wv.Eval(core.CompLoopJs(dV.db))
-	//if err != nil {
-	//	fmt.Println("error binding to webview:", err)
-	//}
-	//
+	err = dV.Wv.Eval(CoreJs(dV.db))
+	if err != nil {
+		fmt.Println("error binding to webview:", err)
+	}
+
+	//panels, err := json.Marshal(pnl.PanelsJs(dV.db))
+	err = dV.Wv.Eval(pnl.PanelsJs(pnl.Panels(dV.db)))
+	if err != nil {
+		fmt.Println("error binding to webview:", err)
+	}
+	fmt.Println("panels:", pnl.PanelsJs(pnl.Panels(dV.db)))
+
 	//err = dV.Wv.Eval(core.AppsLoopJs(dV.db))
 	//if err != nil {
 	//	fmt.Println("error binding to webview:", err)
