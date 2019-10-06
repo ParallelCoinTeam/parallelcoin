@@ -13,7 +13,7 @@ func Manager() mod.DuOScomp {
 		Js: `
 		data () {
 			return {
-				items: system.data.repo,
+				items: duos.data.repo,
 				translations: {
 					active: 'active',
 					activate: 'activate',

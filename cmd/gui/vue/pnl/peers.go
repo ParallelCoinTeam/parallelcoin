@@ -12,12 +12,12 @@ func Peers() mod.DuOScomp {
 		SubType:  "status",
 		Js: `
 	data () { return { 
-	duoSystem,
+	duOSys,
       pageSettings: { pageSize: 5 }
 	}},
 		`,
 		Template: `<div class="rwrap">
-        <ejs-grid :dataSource="this.duoSystem.peers" :allowPaging="true" :pageSettings='pageSettings'>
+        <ejs-grid :dataSource="this.duOSys.peers" :allowPaging="true" :pageSettings='pageSettings'>
           <e-columns>
             <e-column field='addr' headerText='Address' textAlign='Right' width=90></e-column>
             <e-column field='pingtime' headerText='Ping time' width=120></e-column>

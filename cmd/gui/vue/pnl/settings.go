@@ -12,7 +12,7 @@ func Settings() mod.DuOScomp {
 		SubType:  "panel",
 		Js: `
 	data () { return { 
-	duoSystem }},
+	duOSys }},
 	created: function() {
 		
 		},
@@ -21,8 +21,8 @@ func Settings() mod.DuOScomp {
 	}, 
 		`,
 		Template: `<div class="rwrap">asasasas
-<div v-html="this.duoSystem.config.daemon.schema"></div>
- <vue-form-generator class="flx flc fii" :schema="this.duoSystem.config.daemon.schema" :model="this.duoSystem.config.daemon.config"></vue-form-generator>
+<div v-html="this.duOSys.config.daemon.schema"></div>
+ <vue-form-generator class="flx flc fii" :schema="this.duOSys.config.daemon.schema" :model="this.duOSys.config.daemon.config"></vue-form-generator>
 		</div>`,
 		Css: `
 button {

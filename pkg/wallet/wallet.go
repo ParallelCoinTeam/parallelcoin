@@ -570,6 +570,9 @@ func (w *Wallet) syncWithChain() error {
 			if err != nil {
 				return err
 			}
+			if height-1 > 0 {
+				height--
+			}
 			chainHash, err := chainClient.GetBlockHash(int64(height))
 			if err != nil {
 				return err
@@ -3188,7 +3191,7 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 	if err != nil {
 		return nil, err
 	}
-	log.TRACE("opened wallet")// TODO: log balance? last sync height?
+	log.TRACE("opened wallet") // TODO: log balance? last sync height?
 	w := &Wallet{
 		publicPassphrase:    pubPass,
 		db:                  db,
