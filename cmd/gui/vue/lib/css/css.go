@@ -32,7 +32,7 @@ height:100vh;
 margin:0;
 padding:0;
 }
-x#x{
+#x{
 position:fixed;
 margin:0;
 padding:0;
