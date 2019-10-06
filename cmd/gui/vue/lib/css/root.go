@@ -1,6 +1,6 @@
 package css
 
-func AMProot() string {
+func ROOT() string {
 	return `
 :root {
 --blue: #3030cf;

@@ -1,6 +1,6 @@
 package html
 
-func AMPheader() string {
+func VUEheader() string {
 	return `
 <div class="h1"></div>
 <div class="h2"></div>
