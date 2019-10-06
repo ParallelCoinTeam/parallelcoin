@@ -14,12 +14,21 @@ import (
 
 func CoreJs(d db.DuOSdb) string {
 	return `
+
+const core = new Vue({ 
+	data () { return { 
+	duOSys }},
+});`
+}
+
+func duOSjs(d db.DuOSdb) string {
+	return `
 Vue.config.devtools = true;
 Vue.use(VueFormGenerator);
 
 Vue.prototype.$eventHub = new Vue();
  
-const duoSystem = {
+const duOSys = {
 	config:null,
 	node:null,
 	wallet:null,
@@ -30,12 +39,7 @@ const duoSystem = {
 	isDev:true,
 	isScreen:'overview',
 	timer: '',
-};
-
-const core = new Vue({ 
-	data () { return { 
-	duoSystem }},
-});`
+};`
 }
 
 // GetMsg loads the message variable

@@ -22,8 +22,13 @@ const (
 	windowHeight = 800
 )
 
-func MountDuOS(cx *conte.Xt, cr *cron.Cron) *DuOS {
-	d := &DuOS{Cx: cx, Cr: cr}
+func MountDuOS(cx *conte.Xt, cr *cron.Cron) (d *DuOS) {
+	d = &DuOS{Cx: cx, Cr: cr}
+	d.Data = mod.DuOSdata{
+		Status:               d.GetDuOSstatus(),
+		TransactionsExcerpts: d.GetTransactionsExcertps(),
+		Addressbook:          d.GetAddressBook(),
+	}
 	d.Config = GetCoreCofig(d.Cx)
 	d.Wv = webview.New(webview.Settings{
 		Width:                  windowWidth,
@@ -43,17 +48,24 @@ func MountDuOS(cx *conte.Xt, cr *cron.Cron) *DuOS {
 
 func RunDuOS(d DuOS) {
 	var err error
+	// eval vue lib
+	evalB(&d, string(lib.VUE))
+	// eval vfg lib
+	evalB(&d, string(lib.VFG))
+	// eval ej2 lib
+	//evalB(&d, string(lib.VFG))
+
+	// init duOS variable
+	evalD(&d, duOSjs(d.db))
+
+	// init alert variable
 	a := DuOSalert{
 		Time:      time.Now(),
 		Title:     "Welcome",
 		Message:   "to ParallelCoin",
 		AlertType: "success",
 	}
-	dD := mod.DuOSdata{
-		Status:               d.GetDuOSstatus(),
-		TransactionsExcerpts: d.GetTransactionsExcertps(),
-		Addressbook:          d.GetAddressBook(),
-	}
+
 	d.Alert = a
 	_, err = d.Wv.Bind("duos", &DuOS{
 		Cx: d.Cx,
@@ -61,21 +73,27 @@ func RunDuOS(d DuOS) {
 		//Components: d.Components,
 		Config: d.Config,
 		//Repo:       conf.GetParallelCoinRepo,
-		Data: dD,
+		Data: d.Data,
 	})
+	// init duOS status
+	d.Render("status", d.GetDuOSstatus())
+
 	// Db inteface
 	_, err = d.Wv.Bind("db", &db.DuOSdb{})
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 	//injectCss(d)
-	evalJs(d)
+
+	evalD(&d, CoreJs(d.db))
+
+	evalD(&d, pnl.PanelsJs(pnl.Panels(d.db)))
 
 	d.Cr.AddFunc("@every 1s", func() {
 		d.Wv.Dispatch(func() {
 			d.Render("status", d.GetDuOSstatus())
 			//d.Wv.Eval(`document.getElementById("balanceValue").innerHTML = "` + d.GetDuOSstatus().Balance.Balance + `";`)
-			//d.Wv.Eval(`document.getElementById("unconfirmedValue").innerHTML = "` + d.GetDuOSstatus().Balance.Unconfirmed + `";`)
+			//d.Wv.Eval(`document.getElementById("unconfirmedalue").innerHTML = "` + d.GetDuOSstatus().Balance.Unconfirmed + `";`)
 			//d.Wv.Eval(`document.getElementById("txsnumberValue").innerHTML = "` + fmt.Sprint(d.GetDuOSstatus().TxsNumber) + `";`)
 			//d.Wv.Eval(`document.getElementById("txsnumberValue").innerHTML = "` + fmt.Sprint(d.GetDuOSstatus().TxsNumber) + `";`)
 			//
@@ -105,82 +123,38 @@ func RunDuOS(d DuOS) {
 	//
 }
 
-func evalJs(dV DuOS) {
-	// vue
-	vueLib, err := base64.StdEncoding.DecodeString(lib.VUE)
-	if err != nil {
-		fmt.Printf("Error decoding string: %s ", err.Error())
-		return
-	}
-	err = dV.Wv.Eval(string(vueLib))
-
-	// vfg
-	vfgLib, err := base64.StdEncoding.DecodeString(lib.VFG)
-	if err != nil {
-		fmt.Printf("Error decoding string: %s ", err.Error())
-		return
-	}
-	err = dV.Wv.Eval(string(vfgLib))
-
-	// ej2
-	//getAMP, err := base64.StdEncoding.DecodeString(lib.AMP)
-	//if err != nil {
-	//	fmt.Printf("Error decoding string: %s ", err.Error())
-	//	return
-	//}
-	//err = d.Wv.Eval(string(getAMP))
-
-	// libs
-	//for _, lb := range lib.AMPLIBS {
-	//	l, err := base64.StdEncoding.DecodeString(string(lb))
-	//	err = d.Wv.Eval(string(l))
-	//	if err != nil {
-	//		fmt.Printf("Error decoding string: %s ", err.Error())
-	//		return
-	//	}
-	//}
-
-	err = dV.Wv.Eval(CoreJs(dV.db))
-	if err != nil {
-		fmt.Println("error binding to webview:", err)
-	}
-
-	//panels, err := json.Marshal(pnl.PanelsJs(dV.db))
-	err = dV.Wv.Eval(pnl.PanelsJs(pnl.Panels(dV.db)))
-	if err != nil {
-		fmt.Println("error binding to webview:", err)
-	}
-	fmt.Println("panels:", pnl.PanelsJs(pnl.Panels(dV.db)))
-
-	//err = dV.Wv.Eval(core.AppsLoopJs(dV.db))
-	//if err != nil {
-	//	fmt.Println("error binding to webview:", err)
-	//}
-	//
-	//err = dV.Wv.Eval(core.CoreJs)
-	//if err != nil {
-	//	fmt.Println("error binding to webview:", err)
-	//}
-	//fmt.Println("MIkaaaaaaaaaa:", core.CoreJs(d))
-}
-
-func injectCss(dV DuOS) {
+func injectCss(d DuOS) {
 	// material
 	// getMaterial, err := base64.StdEncoding.DecodeString(lib.GetMaterial)
 	// if err != nil {
 	// 	fmt.Printf("Error decoding string: %s ", err.Error())
 	// 	return
 	// }
-	//dV.Wv.InjectCSS(string(lib.GetMaterial))
+	//d.Wv.InjectCSS(string(lib.GetMaterial))
 
 	// Core Css
-	//dV.Wv.InjectCSS(string(css.CSS(css.ROOT(), css.GRID(), css.NAV())))
+	//d.Wv.InjectCSS(string(css.CSS(css.ROOT(), css.GRID(), css.NAV())))
 	//
-	//for _, alj := range comp.Apps(dV.db) {
-	//	dV.Wv.InjectCSS(string(alj.Css))
+	//for _, alj := range comp.Apps(d.db) {
+	//	d.Wv.InjectCSS(string(alj.Css))
 	//}
 	// comp
 	//for _, c := range comp.Components(d.db) {
-	//	dV.Wv.InjectCSS(string(c.Css))
+	//	d.Wv.InjectCSS(string(c.Css))
 	//}
+}
+
+func evalD(d *DuOS, l string) {
+	err := d.Wv.Eval(l)
+	if err != nil {
+		fmt.Println("error binding to webview:", err)
+	}
+}
+
+func evalB(d *DuOS, l string) {
+	lib, err := base64.StdEncoding.DecodeString(l)
+	if err != nil {
+		fmt.Printf("Error decoding string: %s ", err.Error())
+	}
+	evalD(d, string(lib))
 }

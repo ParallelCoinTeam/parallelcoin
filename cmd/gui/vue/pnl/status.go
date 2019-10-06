@@ -12,9 +12,9 @@ func WalletStatus() mod.DuOScomp {
 		SubType:  "status",
 		Js: `
 			data () { return { 
-			duoSystem }}, 
+			duOSys }}, 
 		`,
-		Template: `<div class="rwrap"><div tabindex="0" class="e-card flx flc justifyBetween duoCard"><span v-html="this.duoSystem.status"></span></div></div>`,
+		Template: `<div tabindex="0" class="e-card flx flc justifyBetween duoCard"><div class="e-card-header"><div class="e-card-header-caption"><div class="e-card-header-title">Balance:</div><div class="e-card-sub-title"><span v-html="this.duOSys.status.balance.balance"></span> DUO</div></div><div class="e-card-header-image balance"></div></div><div class="flx flc e-card-content"><small><span>Pending: </span><strong><span v-html="this.duOSys.status.balance.unconfirmed"></span></strong></small><small><span>Transactions: </span><strong><span v-html="this.duOSys.status.txsnumber"></span></strong></small></div></div>`,
 		Css: `
 
 .e-card .e-card-header .e-card-header-image.balance {
@@ -56,27 +56,9 @@ func Status() mod.DuOScomp {
 		SubType:  "status",
 		Js: `
 			data () { return { 
-			duoSystem }}, 
+			duOSys }}, 
 		`,
-		Template: `<div class="rwrap">
-
-
-    <ul class="rf flx flc noPadding justifyEvenly">
-        <li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Version: </span><strong class="rcx6"><span v-html="this.duoSystem.status.ver"></span></strong></li>
-		<li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Wallet version: </span><strong class="rcx6"><span v-html="this.duoSystem.status.walletver.podjsonrpcapi.versionstring"></span></strong></li>
-
-        <li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Uptime: </span><strong class="rcx6"><span v-html="this.duoSystem.status.uptime"></span></strong></li>
-
-
-		<li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Memory: </span><strong class="rcx6"><span v-html="this.duoSystem.status.mem.total"></span></strong></li>
-		<li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Disk: </span><strong class="rcx6"><span v-html="this.duoSystem.status.disk.total"></span></strong></li>
-
-		<li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Chain: </span><strong class="rcx6"><span v-html="this.duoSystem.status.net"></span></strong></li>
-		<li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Blocks: </span><strong class="rcx6"><span v-html="this.duoSystem.status.blockcount"></span></strong></li>
-        <li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Connections: </span><strong class="rcx6"><span v-html="this.duoSystem.status.connectioncount"></span></strong></li>
-    </ul>
-
-</div>`,
+		Template: `<div class="rwrap"><ul class="rf flx flc noPadding justifyEvenly"><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Version: </span><strong class="rcx6"><span v-html="this.duOSys.status.ver"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Wallet version: </span><strong class="rcx6"><span v-html="this.duOSys.status.walletver.podjsonrpcapi.versionstring"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Uptime: </span><strong class="rcx6"><span v-html="this.duOSys.status.uptime"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Memory: </span><strong class="rcx6"><span v-html="this.duOSys.status.mem.total"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Disk: </span><strong class="rcx6"><span v-html="this.duOSys.status.disk.total"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Chain: </span><strong class="rcx6"><span v-html="this.duOSys.status.net"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Blocks: </span><strong class="rcx6"><span v-html="this.duOSys.status.blockcount"></span></strong></li><li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Connections: </span><strong class="rcx6"><span v-html="this.duOSys.status.connectioncount"></span></strong></li> </ul></div>`,
 		Css: `
 
 
@@ -96,7 +78,7 @@ func LocalHashRate() mod.DuOScomp {
 		Js: `
    data:function(){
 			return { 
-			duoSystem,
+			duOSys,
         height: '100%',
         width: '100%',
     	padding: { left: 0, right: 0, bottom: 0, top: 0},
@@ -151,7 +133,7 @@ methods:{
         let temp = gauge.dataSource.length - 1;
         this.update = setInterval(function() {
             if (gauge.element.className.indexOf('e-sparkline') > -1) {
-                let value = duoSystem.status.hashrate;
+                let value = duOSys.status.hashrate;
                 gauge.dataSource.push({ x: ++temp, yval: value });
                 gauge.dataSource.shift();
                 gauge.refresh();
@@ -191,7 +173,7 @@ func NetworkHashRate() mod.DuOScomp {
 		Js: `
    data:function(){
 			return { 
-			duoSystem,
+			duOSys,
         height: '100%',
         width: '100%',
     	padding: { left: 0, right: 0, bottom: 0, top: 0},
@@ -246,7 +228,7 @@ methods:{
         let temp = gauge.dataSource.length - 1;
         this.update = setInterval(function() {
             if (gauge.element.className.indexOf('e-sparkline') > -1) {
-                let value = duoSystem.status.networkhashrate;
+                let value = duOSys.status.networkhashrate;
                 gauge.dataSource.push({ x: ++temp, yval: value });
                 gauge.dataSource.shift();
                 gauge.refresh();

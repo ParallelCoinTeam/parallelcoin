@@ -12,7 +12,7 @@ func ChartA() mod.DuOScomp {
 		SubType:  "chart",
 		Js: `
 	data () { return { 
-	duoSystem }},
+	duOSys }},
 		`,
 		Template: `<div class="rwrap">
 Chart A
@@ -33,7 +33,7 @@ func ChartB() mod.DuOScomp {
 		SubType:  "chart",
 		Js: `
 	data () { return { 
-	duoSystem }},
+	duOSys }},
 		`,
 		Template: `<div class="rwrap">
 Chart B

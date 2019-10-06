@@ -14,7 +14,7 @@ import (
 func (d *DuOS) Render(cmd string, data interface{}) {
 	b, err := enjs.Marshal(data)
 	if err == nil {
-		d.Wv.Eval("duoSystem." + cmd + "=" + string(b) + ";")
+		d.Wv.Eval("duOSys." + cmd + "=" + string(b) + ";")
 	}
 }
 

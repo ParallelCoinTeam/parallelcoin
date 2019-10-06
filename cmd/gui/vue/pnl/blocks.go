@@ -12,13 +12,13 @@ func Blocks() mod.DuOScomp {
 		SubType:  "blocks",
 		Js: `
 	data () { return { 
-	duoSystem,
+	duOSys,
        pageSettings: { pageSize: 10, pageSizes: [10,20,50,100], pageCount: 5 }
 
 	}},
 		`,
 		Template: `<div class="rwrap">
-        <ejs-grid :dataSource="this.duoSystem.blocks" height="100%" :allowPaging="true" :pageSettings='pageSettings'>
+        <ejs-grid :dataSource="this.duOSys.blocks" height="100%" :allowPaging="true" :pageSettings='pageSettings'>
 			<e-columns>
 				<e-column field='height' headerText='Height' textAlign='Left' width=60></e-column>
 				<e-column field='time' headerText='Time' textAlign='Center' width=90></e-column>

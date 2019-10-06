@@ -12,7 +12,7 @@ func AddressBook() mod.DuOScomp {
 		SubType:  "addressbook",
 		Js: `
 	data () { return { 
-	duoSystem,
+	duOSys,
 	address:"",
 	account:"default",
 	label: "no label",
@@ -80,7 +80,7 @@ methods: {
         <ejs-grid
 ref='grid'
 height="100%" 
-:dataSource='this.duoSystem.addressbook.addresses'
+:dataSource='this.duOSys.addressbook.addresses'
 :allowSorting='true' 
 :allowPaging='true'
 :sortSettings='sortOptions' 
@@ -112,7 +112,7 @@ func Address() mod.DuOScomp {
 		SubType:  "dialog",
 		Js: `
 	data () { return {
-		duoSystem,
+		duOSys,
  		width: "300px",
 		height: "300px",
 		mode: "SVG",
