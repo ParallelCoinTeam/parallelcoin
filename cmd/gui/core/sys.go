@@ -52,8 +52,8 @@ func RunDuOS(d DuOS) {
 	evalB(&d, string(lib.VUE))
 	// eval vfg lib
 	evalB(&d, string(lib.VFG))
-	// eval ej2 lib
-	//evalB(&d, string(lib.VFG))
+	evalB(&d, string(lib.VEJ))
+	// eval ejs lib
 
 	// init duOS variable
 	evalD(&d, duOSjs(d.db))
