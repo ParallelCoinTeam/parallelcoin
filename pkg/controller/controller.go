@@ -20,6 +20,10 @@ type Blocks []*mining.BlockTemplate
 
 // Run starts a controller instance
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
+	for len(cx.StateCfg.ActiveMiningAddrs) < 1 {
+		log.ERROR("no mining addresses configured, controller exiting")
+		return
+	}
 	log.WARN("starting controller")
 	// create context with canceller to cleanly shut down
 	var ctx context.Context
@@ -76,6 +80,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		BestSnapshot().Height+1)].Algos {
 		// Choose a payment address at random.
 		rand.Seed(time.Now().UnixNano())
+		log.TRACE("len active mining addrs", len(cx.StateCfg.ActiveMiningAddrs))
 		payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(cx.
 			StateCfg.ActiveMiningAddrs))]
 		template, err := cx.RPCServer.Cfg.Generator.NewBlockTemplate(0,

@@ -2,9 +2,8 @@ package app
 
 import (
 	"fmt"
-	"sync"
-
 	"github.com/urfave/cli"
+	"sync"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"

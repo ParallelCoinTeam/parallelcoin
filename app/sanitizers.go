@@ -88,7 +88,7 @@ func initListeners(cx *conte.Xt) {
 	}
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
 		*cfg.WalletRPCListeners = append(*cfg.WalletRPCListeners,
-			":"+cx.ActiveNet.RPCServerPort)
+			":"+cx.ActiveNet.WalletRPCServerPort)
 		cx.StateCfg.Save = true
 	}
 	if len(*cfg.RPCListeners) < 1 {
@@ -96,6 +96,15 @@ func initListeners(cx *conte.Xt) {
 			":"+cx.ActiveNet.RPCClientPort)
 		cx.StateCfg.Save = true
 	}
+	if *cfg.RPCConnect == "" {
+		*cfg.RPCConnect = "127.0.0.1:"+cx.ActiveNet.RPCClientPort
+		cx.StateCfg.Save = true
+	}
+	if *cfg.WalletServer == "" {
+		*cfg.WalletServer = "127.0.0.1:"+cx.ActiveNet.WalletRPCServerPort
+		cx.StateCfg.Save = true
+	}
+
 }
 
 func initTLSStuffs(cfg *pod.Config, st *state.Config) {

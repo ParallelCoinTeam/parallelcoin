@@ -303,6 +303,7 @@ func (w *Wallet) activeData(dbtx walletdb.ReadTx) ([]util.Address, []wtxmgr.Cred
 func (w *Wallet) syncWithChain() error {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
+		log.ERROR(err)
 		return err
 	}
 	// Request notifications for transactions sending to all wallet
@@ -333,14 +334,14 @@ func (w *Wallet) syncWithChain() error {
 	// the initial sync.
 	var birthdayStamp *waddrmgr.BlockStamp
 	// TODO(jrick): How should this handle a synced height earlier than
-	// the chain server best block?
+	//  the chain server best block?
 	// When no addresses have been generated for the wallet, the rescan can
 	// be skipped.
 	//
 	// TODO: This is only correct because activeData above returns all
-	// addresses ever created, including those that don't need to be watched
-	// anymore.  This code should be updated when this assumption is no
-	// longer true, but worst case would result in an unnecessary rescan.
+	//  addresses ever created, including those that don't need to be watched
+	//  anymore.  This code should be updated when this assumption is no
+	//  longer true, but worst case would result in an unnecessary rescan.
 	if isInitialSync || isRecovery {
 		// Find the latest checkpoint's height. This lets us catch up to
 		// at least that checkpoint, since we're synchronizing from
@@ -350,6 +351,7 @@ func (w *Wallet) syncWithChain() error {
 		// backend starts synchronizing at the same time as the wallet.
 		_, bestHeight, err := chainClient.GetBestBlock()
 		if err != nil {
+			log.ERROR(err)
 			return err
 		}
 		checkHeight := bestHeight
@@ -368,6 +370,7 @@ func (w *Wallet) syncWithChain() error {
 		// Initialize the first database transaction.
 		tx, err := w.db.BeginReadWriteTx()
 		if err != nil {
+			log.ERROR(err)
 			return err
 		}
 		ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
@@ -386,15 +389,18 @@ func (w *Wallet) syncWithChain() error {
 			// In the event that this recovery is being resumed, we will need to repopulate all found addresses from the database. For basic recovery, we will only do so for the default scopes.
 			scopedMgrs, err := w.defaultScopeManagers()
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
 			txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 			credits, err := w.TxStore.UnspentOutputs(txmgrNs)
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
 			err = recoveryMgr.Resurrect(ns, scopedMgrs, credits)
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
 		}
@@ -403,8 +409,10 @@ func (w *Wallet) syncWithChain() error {
 			if err != nil {
 				e := tx.Rollback()
 				if e != nil {
-					fmt.Println(err)
+					log.ERROR(err)
+					//fmt.Println(err)
 				}
+				log.ERROR(err)
 				return err
 			}
 			// If we're using the Neutrino backend, we can check if
@@ -428,15 +436,19 @@ func (w *Wallet) syncWithChain() error {
 				time.Sleep(100 * time.Millisecond)
 				_, bestHeight, err = chainClient.GetBestBlock()
 				if err != nil {
+					log.ERROR(err)
 					e := tx.Rollback()
 					if e != nil {
-						fmt.Println(err)
+						log.ERROR(err)
+						//fmt.Println(err)
 					}
+					log.ERROR(err)
 					return err
 				}
 			}
 			header, err := chainClient.GetBlockHeader(hash)
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
 			// Check to see if this header's timestamp has surpassed
@@ -476,10 +488,13 @@ func (w *Wallet) syncWithChain() error {
 				Timestamp: timestamp,
 			})
 			if err != nil {
+				log.ERROR(err)
 				e := tx.Rollback()
 				if e != nil {
-					fmt.Println(err)
+					log.ERROR(err)
+					//fmt.Println(err)
 				}
+				log.ERROR(err)
 				return err
 			}
 			// If we are in recovery mode, attempt a recovery on
@@ -493,10 +508,13 @@ func (w *Wallet) syncWithChain() error {
 					recoveryMgr.State(),
 				)
 				if err != nil {
+					log.ERROR(err)
 					e := tx.Rollback()
 					if e != nil {
-						fmt.Println(err)
+						log.ERROR(err)
+						//fmt.Println(err)
 					}
+					log.ERROR(err)
 					return err
 				}
 				// Clear the batch of all processed blocks.
@@ -508,8 +526,10 @@ func (w *Wallet) syncWithChain() error {
 				if err != nil {
 					e := tx.Rollback()
 					if e != nil {
-						fmt.Println(err)
+						log.ERROR(err)
+						//fmt.Println(err)
 					}
+					log.ERROR(err)
 					return err
 				}
 				log.INFO(
@@ -517,6 +537,7 @@ func (w *Wallet) syncWithChain() error {
 				)
 				tx, err = w.db.BeginReadWriteTx()
 				if err != nil {
+					log.ERROR(err)
 					return err
 				}
 				ns = tx.ReadWriteBucket(waddrmgrNamespaceKey)
@@ -530,9 +551,11 @@ func (w *Wallet) syncWithChain() error {
 				recoveryMgr.State(),
 			)
 			if err != nil {
+				log.ERROR(err)
 				e := tx.Rollback()
 				if e != nil {
-					fmt.Println(err)
+					log.ERROR(err)
+					//fmt.Println(err)
 				}
 				return err
 			}
@@ -540,9 +563,11 @@ func (w *Wallet) syncWithChain() error {
 		// Commit (or roll back) the final database transaction.
 		err = tx.Commit()
 		if err != nil {
+			log.ERROR(err)
 			e := tx.Rollback()
 			if e != nil {
-				fmt.Println(err)
+				log.ERROR(err)
+				//fmt.Println(err)
 			}
 			return err
 		}
@@ -554,6 +579,7 @@ func (w *Wallet) syncWithChain() error {
 			return err
 		})
 		if err != nil {
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -568,14 +594,21 @@ func (w *Wallet) syncWithChain() error {
 		for height := rollbackStamp.Height; true; height-- {
 			hash, err := w.Manager.BlockHash(addrmgrNs, height)
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
+			if height-1 > 0 {
+				height--
+			}
+			log.TRACE("height", height, int64(height))
 			chainHash, err := chainClient.GetBlockHash(int64(height))
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
 			header, err := chainClient.GetBlockHeader(chainHash)
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
 			rollbackStamp.Hash = *chainHash
@@ -589,6 +622,7 @@ func (w *Wallet) syncWithChain() error {
 		if rollback {
 			err := w.Manager.SetSyncedTo(addrmgrNs, &rollbackStamp)
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
 			// Rollback unconfirms transactions at and beyond the
@@ -596,12 +630,14 @@ func (w *Wallet) syncWithChain() error {
 			// to prevent unconfirming txs from the synced-to block.
 			err = w.TxStore.Rollback(txmgrNs, rollbackStamp.Height+1)
 			if err != nil {
+				log.ERROR(err)
 				return err
 			}
 		}
 		return nil
 	})
 	if err != nil {
+		log.ERROR(err)
 		return err
 	}
 	// If a birthday stamp was found during the initial sync and the
@@ -620,6 +656,7 @@ func (w *Wallet) syncWithChain() error {
 	// left as is.
 	err = chainClient.NotifyBlocks()
 	if err != nil {
+		log.ERROR(err)
 		return err
 	}
 	return w.rescanWithTarget(addrs, unspent, birthdayStamp)
@@ -3188,7 +3225,7 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 	if err != nil {
 		return nil, err
 	}
-	log.TRACE("opened wallet")// TODO: log balance? last sync height?
+	log.TRACE("opened wallet") // TODO: log balance? last sync height?
 	w := &Wallet{
 		publicPassphrase:    pubPass,
 		db:                  db,
