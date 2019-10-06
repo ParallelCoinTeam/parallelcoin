@@ -641,21 +641,21 @@ return nil, nil, err
 				}
 				cfg.WalletRPCListeners = make([]string, 0, len(addrs))
 				for _, addr := range addrs {
-addr = net.JoinHostPort(addr, activeNet.RPCServerPort)
+addr = net.JoinHostPort(addr, activeNet.WalletRPCServerPort)
 						cfg.WalletRPCListeners = append(cfg.WalletRPCListeners, addr)
 					}
 				}
 				// Add default port to all rpc listener addresses if needed and remove
 				// duplicate addresses.
 		cfg.WalletRPCListeners, err = cfgutil.NormalizeAddresses(
-				cfg.WalletRPCListeners, activeNet.RPCServerPort)
+				cfg.WalletRPCListeners, activeNet.WalletRPCServerPort)
 			if err != nil {
 fmt.Fprintf(os.Stderr,
 							"Invalid network address in legacy RPC listeners: %v\n", err)
 						return nil, nil, err
 					}
 					cfg.ExperimentalRPCListeners, err = cfgutil.NormalizeAddresses(
-			cfg.ExperimentalRPCListeners, activeNet.RPCServerPort)
+			cfg.ExperimentalRPCListeners, activeNet.WalletRPCServerPort)
 		if err != nil {
 fmt.Fprintf(os.Stderr,
 						"Invalid network address in RPC listeners: %v\n", err)

@@ -633,6 +633,7 @@ func StartWalletLoaderService(server *grpc.Server, loader *wallet.Loader,
 }
 func (s *loaderServer) CreateWallet(ctx context.Context, req *pb.CreateWalletRequest) (
 	*pb.CreateWalletResponse, error) {
+		log.WARN("loader creating wallet")
 	defer func() {
 		zero.Bytes(req.PrivatePassphrase)
 		zero.Bytes(req.Seed)
@@ -696,6 +697,7 @@ func (s *loaderServer) CloseWallet(ctx context.Context, req *pb.CloseWalletReque
 }
 func (s *loaderServer) StartConsensusRPC(ctx context.Context, req *pb.StartConsensusRPCRequest) (
 	*pb.StartConsensusRPCResponse, error) {
+		log.INFO("starting consensus RPC")
 	defer zero.Bytes(req.Password)
 	defer s.mu.Unlock()
 	s.mu.Lock()
@@ -714,11 +716,15 @@ func (s *loaderServer) StartConsensusRPC(ctx context.Context, req *pb.StartConse
 		return nil, status.Errorf(codes.FailedPrecondition,
 			"wallet is loaded and already synchronizing")
 	}
+	log.INFO("wallet is not loaded")
 	rpcClient, err := chain.NewRPCClient(s.activeNet, networkAddress, req.Username,
 		string(req.Password), req.Certificate, len(req.Certificate) == 0, 1)
+	fmt.Println("wtf")
+	log.WARN(err)
 	if err != nil {
 		return nil, translateError(err)
 	}
+	log.WARN("starting rpc client")
 	err = rpcClient.Start()
 	if err != nil {
 		if err == rpcclient.ErrInvalidAuth {
@@ -728,6 +734,7 @@ func (s *loaderServer) StartConsensusRPC(ctx context.Context, req *pb.StartConse
 		return nil, status.Errorf(codes.NotFound,
 			"Connection to RPC server failed: %v", err)
 	}
+	log.WARN("rpc client started")
 	s.rpcClient = rpcClient
 	if walletLoaded {
 		log.DEBUG("starting SynchroniseRPC")

@@ -1,17 +1,17 @@
 package prompt
 
 import (
-   "bufio"
-   "bytes"
-   "encoding/hex"
-   "fmt"
-   "os"
-   "strings"
-   
-   "github.com/btcsuite/golangcrypto/ssh/terminal"
-   
-   "github.com/p9c/pod/pkg/util/hdkeychain"
-   "github.com/p9c/pod/pkg/util/legacy/keystore"
+	"bufio"
+	"bytes"
+	"encoding/hex"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/btcsuite/golangcrypto/ssh/terminal"
+
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/legacy/keystore"
 )
 
 // ProvideSeed is used to prompt for the wallet seed which maybe required during
@@ -59,7 +59,7 @@ func ProvidePrivPassphrase() ([]byte, error) {
 // promptList prompts the user with the given prefix, list of valid responses,
 // and default list entry to use.  The function will repeat the prompt to the
 // user until they enter a valid response.
-func promptList(	reader *bufio.Reader, prefix string, validResponses []string, defaultEntry string) (string, error) {
+func promptList(reader *bufio.Reader, prefix string, validResponses []string, defaultEntry string) (string, error) {
 	// Setup the prompt according to the parameters.
 	validStrings := strings.Join(validResponses, "/")
 	var prompt string
@@ -91,7 +91,7 @@ func promptList(	reader *bufio.Reader, prefix string, validResponses []string, d
 // promptListBool prompts the user for a boolean (yes/no) with the given prefix.
 // The function will repeat the prompt to the user until they enter a valid
 // reponse.
-func promptListBool(	reader *bufio.Reader, prefix string, defaultEntry string) (bool, error) {
+func promptListBool(reader *bufio.Reader, prefix string, defaultEntry string) (bool, error) {
 	// Setup the valid responses.
 	valid := []string{"n", "no", "y", "yes"}
 	response, err := promptList(reader, prefix, valid, defaultEntry)
@@ -104,7 +104,7 @@ func promptListBool(	reader *bufio.Reader, prefix string, defaultEntry string) (
 // promptPass prompts the user for a passphrase with the given prefix.  The
 // function will ask the user to confirm the passphrase and will repeat the
 // prompts until they enter a matching response.
-func promptPass(	reader *bufio.Reader, prefix string, confirm bool) ([]byte, error) {
+func promptPass(reader *bufio.Reader, prefix string, confirm bool) ([]byte, error) {
 	// Prompt the user until they enter a passphrase.
 	prompt := fmt.Sprintf("%s: ", prefix)
 	for {
@@ -142,7 +142,7 @@ func promptPass(	reader *bufio.Reader, prefix string, confirm bool) ([]byte, err
 // On the other hand, when the legacy keystore is nil, the user is prompted for
 // a new private passphrase.  All prompts are repeated until the user enters a
 // valid response.
-func PrivatePass(	reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, error) {
+func PrivatePass(reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, error) {
 	// When there is not an existing legacy wallet, simply prompt the user
 	// for a new private passphase and return it.
 	if legacyKeyStore == nil {
@@ -177,7 +177,7 @@ func PrivatePass(	reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte,
 // passphrase is used for the private and public passphrase and prompt the user
 // if they are sure they want to use the same passphrase for both.  Finally, all
 // prompts are repeated until the user enters a valid response.
-func PublicPass(	reader *bufio.Reader, privPass []byte,
+func PublicPass(reader *bufio.Reader, privPass []byte,
 	defaultPubPassphrase, configPubPassphrase []byte) ([]byte, error) {
 	pubPass := defaultPubPassphrase
 	usePubPass, err := promptListBool(reader, "Do you want "+
@@ -230,7 +230,7 @@ func PublicPass(	reader *bufio.Reader, privPass []byte,
 // the user along with prompting them for confirmation.  When the user answers
 // yes, a the user is prompted for it.  All prompts are repeated until the user
 // enters a valid response.
-func Seed(	reader *bufio.Reader) ([]byte, error) {
+func Seed(reader *bufio.Reader) ([]byte, error) {
 	// Ascertain the wallet generation seed.
 	useUserSeed, err := promptListBool(reader, "Do you have an "+
 		"existing wallet seed you want to use?", "no")
