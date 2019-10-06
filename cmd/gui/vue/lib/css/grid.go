@@ -1,6 +1,6 @@
 package css
 
-func AMPgrid() string {
+func GRID() string {
 	return `
 .grid-container { height: 100%; margin: 0; }
 .grid-container * {
@@ -8,7 +8,6 @@ border: 1px solid red;
 position: relative;
 }
 .grid-container *:after {
-content:attr(class);
 position: absolute;
 top: 0;
 left: 0;

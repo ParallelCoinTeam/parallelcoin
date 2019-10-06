@@ -1,9 +1,9 @@
 package css
 
-func CSS(root, grid string) string {
+func CSS(root, grid, nav string) string {
 	return `<style amp-custom>
 ` + root +
-		grid + `
+		grid + nav + `
 .lineBottom{
 box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .13);
 }
@@ -77,6 +77,20 @@ flex-direction: column;
 .fii{
 flex:1;
 }
+
+
+.marZ{
+margin:0!important;
+}
+.padZ{
+padding:0!important;
+}
+
+
+.lsn{
+list-style:none!important;
+}
+
 
 
 .marginTop{
