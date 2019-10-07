@@ -5,6 +5,7 @@ package core
 
 import (
 	enjs "encoding/json"
+	"fmt"
 	"github.com/zserge/webview"
 	"log"
 	"strings"
@@ -13,7 +14,7 @@ import (
 func (d *DuOS) Render(cmd string, data interface{}) {
 	b, err := enjs.Marshal(data)
 	if err == nil {
-		d.Wv.Eval("duoSystem." + cmd + "=" + string(b) + ";")
+		d.Wv.Eval("duOSys." + cmd + "=" + string(b) + ";")
 	}
 }
 
@@ -39,7 +40,19 @@ func (d *DuOS) HandleRPC(w webview.WebView, vc string) {
 	//			//dV.Render("status", dV.GetPeerInfo())
 	//		})
 	//	})
+	case vc == "overview":
+		d.SetScreen("overview")
+		fmt.Println("laaaaa")
+	case vc == "history":
+		d.SetScreen("history")
 	case vc == "addressbook":
+		d.SetScreen("addressbook")
+	case vc == "settings":
+		d.SetScreen("settings")
+
+		/////////////////
+
+	case vc == "aaaaddressbook":
 		d.Render(vc, d.GetAddressBook())
 	case strings.HasPrefix(vc, "transactions:"):
 		t := strings.TrimPrefix(vc, "transactions:")
