@@ -18,6 +18,9 @@ func CoreJs(d db.DuOSdb) string {
 const core = new Vue({ 
 	data () { return { 
 	duOSys }},
+	components:{
+screenOverview
+}
 });`
 }
 

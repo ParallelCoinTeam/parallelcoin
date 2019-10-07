@@ -73,7 +73,7 @@ func GRID() string {
 .Sidebar {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 600px 1fr 60px;
+    grid-template-rows: 320px 1fr 60px;
     grid-template-areas: "Nav" "Side" "Open";
     grid-area: Sidebar;
 }
@@ -92,9 +92,11 @@ func GRID() string {
 
 .Main {
     padding: 15px;
+    grid-area: Main;
+}
+.Overview {
     display: grid;
     grid-gap: 15px;
-    grid-area: Main;
    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
   grid-template-areas: "Balance Balance Balance Balance Send Send Send Send Send" "Txs Txs Txs Txs Txs Log Log NetHash NetHash" "Txs Txs Txs Txs Txs Log Log LocalHash LocalHash" "Info Info Time Time Time Log Log Status Status";

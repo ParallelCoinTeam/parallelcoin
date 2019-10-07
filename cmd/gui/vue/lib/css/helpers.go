@@ -61,18 +61,15 @@ flex:1;
 }
 
 
-.marZ{
-margin:0!important;
-}
-.padZ{
-padding:0!important;
-}
 
 
 .lsn{
 list-style:none!important;
 }
 
+.noBorder{
+	border:none!important;
+}
 .overHid{
 overflow:hidden!important;
 }
@@ -110,7 +107,10 @@ margin:15!important;
 }
 
 
-
+.sXs{
+width:60px!important;
+height:60px!important;
+}
 
 
 

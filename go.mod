@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	git.parallelcoin.io/dev/cryptonight v0.3.1
+	github.com/KorokEngine/demo v0.0.0-20190510074451-43f17f32970a // indirect
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
@@ -20,10 +21,16 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dchest/blake256 v1.1.0
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
+	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7 // indirect
+	github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/golang/protobuf v1.3.2
+	github.com/hajimehoshi/ebiten v1.9.3
+	github.com/hajimehoshi/ebitenui v0.0.0-20190506135628-31837104ae49
 	github.com/jcelliott/lumber v0.0.0-20160324203708-dd349441af25 // indirect
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/jfreymuth/oggvorbis v1.0.1 // indirect
 	github.com/kkdai/bstream v1.0.0
 	github.com/lightninglabs/gozmq v0.0.0-20190710231225-cea2a031735d
 	github.com/minio/highwayhash v1.0.0
@@ -40,7 +47,10 @@ require (
 	github.com/zserge/webview v0.0.0-20190123072648-16c93bcaeaeb
 	go.uber.org/atomic v1.4.0
 	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392
+	golang.org/x/image v0.0.0-20190910094157-69e4b8554b2a
+	golang.org/x/mobile v0.0.0-20191002175909-6d0d39b2ca82 // indirect
 	golang.org/x/net v0.0.0-20190923162816-aa69164e4478
 	golang.org/x/text v0.3.2
 	google.golang.org/grpc v1.23.1
+	korok.io/korok v0.0.0-20190510074201-e1c21c90d257 // indirect
 )
