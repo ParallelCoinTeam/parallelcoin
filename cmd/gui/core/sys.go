@@ -36,7 +36,7 @@ func MountDuOS(cx *conte.Xt, cr *cron.Cron) (d *DuOS) {
 		Title:                  "ParallelCoin - DUO - True Story",
 		Resizable:              false,
 		Debug:                  true,
-		URL:                    `data:text/html,` + string(html.VUEHTML(html.VUEx(lib.VUElogo(), html.VUEheader(), html.VUEnav(lib.ICO()), html.VUEoverview()), css.CSS(css.ROOT(), css.GRID(), css.COLORS(), css.HELPERS(), css.NAV()))),
+		URL:                    `data:text/html,` + string(html.VUEHTML(html.VUEx(lib.VUElogo(), html.VUEheader(), html.VUEnav(lib.ICO())), css.CSS(css.ROOT(), css.GRID(), css.COLORS(), css.HELPERS(), css.NAV()))),
 		ExternalInvokeCallback: d.HandleRPC,
 	})
 

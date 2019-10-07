@@ -5,6 +5,7 @@ func COLORS() string {
 
 .bgMoreLight{
 background-color:var(--light-grayiii);
+fill: var(--light-grayiii);
 }
 .bgLight {
     background-color:var(--light);
@@ -116,7 +117,9 @@ background-color:#fff!important;
 background:linear-gradient(#f4f4f4, #e4e4e4);
 }
 
-
+.bgTrans{
+background:transparent;
+}
 
 `
 }
