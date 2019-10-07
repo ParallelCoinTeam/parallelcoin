@@ -18,7 +18,14 @@ func
 shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		var wg sync.WaitGroup
+		nodeChan := make(chan *rpc.Server)
+		walletChan := make(chan *wallet.Wallet)
+		kill := make(chan struct{})
 		Configure(cx)
+		if *cx.Config.TLS || *cx.Config.ServerTLS {
+			// generate the tls certificate if configured
+			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
+		}
 		shutdownChan := make(chan struct{})
 		dbFilename :=
 			*cx.Config.DataDir + slash +
@@ -29,19 +36,9 @@ shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				log.ERROR("failed to create wallet", err)
 			}
+			fmt.Println("restart to complete initial setup")
+			os.Exit(1)
 			log.L.SetLevel(*cx.Config.LogLevel, true)
-		}
-		nodeChan := make(chan *rpc.Server)
-		walletChan := make(chan *wallet.Wallet)
-		kill := make(chan struct{})
-		if !*cx.Config.NodeOff {
-			go func() {
-				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
-				if err != nil {
-					log.ERROR("error starting node ", err)
-				}
-			}()
-			cx.RPCServer = <-nodeChan
 		}
 		if !*cx.Config.WalletOff {
 			go func() {
@@ -52,6 +49,17 @@ shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				}
 			}()
 			cx.WalletServer = <-walletChan
+			save.Pod(cx.Config)
+		}
+		if !*cx.Config.NodeOff {
+			go func() {
+				Configure(cx)
+				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
+				if err != nil {
+					log.ERROR("error starting node ", err)
+				}
+			}()
+			cx.RPCServer = <-nodeChan
 		}
 		wg.Wait()
 		return nil

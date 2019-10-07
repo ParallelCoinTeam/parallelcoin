@@ -34,6 +34,7 @@ func initDataDir(cfg *pod.Config) {
 	if cfg.DataDir == nil || *cfg.DataDir == "" {
 		*cfg.DataDir = appdata.Dir("pod", false)
 	}
+	log.WARN("datadir set to", *cfg.DataDir)
 }
 
 func initConfigFile(cfg *pod.Config) {
@@ -108,20 +109,28 @@ func initListeners(cx *conte.Xt) {
 }
 
 func initTLSStuffs(cfg *pod.Config, st *state.Config) {
+	isNew := false
 	if *cfg.RPCCert == "" {
 		*cfg.RPCCert =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.cert"
 		st.Save = true
+		isNew=true
 	}
 	if *cfg.RPCKey == "" {
 		*cfg.RPCKey =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.key"
 		st.Save = true
+		isNew=true
 	}
 	if *cfg.CAFile == "" {
 		*cfg.CAFile =
 			*cfg.DataDir + string(os.PathSeparator) + "cafile"
 		st.Save = true
+		isNew=true
+	}
+	if isNew {
+		// Now is the best time to make the certs
+
 	}
 }
 

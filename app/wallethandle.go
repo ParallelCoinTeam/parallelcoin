@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+	"os"
 	"sync"
 
 	"github.com/urfave/cli"
@@ -25,7 +27,10 @@ walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				log.ERROR("failed to create wallet", err)
 				return err
 			}
-			log.L.SetLevel(*cx.Config.LogLevel, true)
+			log.INFO("quitting, restart to initialize")
+			fmt.Println("restart to complete initial setup")
+			os.Exit(0)
+			//log.L.SetLevel(*cx.Config.LogLevel, true)
 		}
 		walletChan := make(chan *wallet.Wallet)
 		cx.WalletKill = make(chan struct{})
