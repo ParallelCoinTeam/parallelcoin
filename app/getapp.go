@@ -192,11 +192,11 @@ getApp(cx *conte.Xt) (a *cli.App) {
 					" connections with pod",
 				"",
 				cx.Config.CAFile),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"clienttls",
 				"Enable TLS for client connections",
 				cx.Config.TLS),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"servertls",
 				"Enable TLS for server connections",
 				cx.Config.ServerTLS),

@@ -14,11 +14,11 @@ Configure(cx *conte.Xt) {
 	cfg := cx.Config
 	st := cx.StateCfg
 	initDataDir(cfg)
+	initTLSStuffs(cfg, st)
 	initConfigFile(cfg)
 	initLogDir(cfg)
 	initParams(cx)
 	initListeners(cx)
-	initTLSStuffs(cfg, st)
 	initLogLevel(cfg)
 	// Don't add peers from the config file when in regression test mode.
 	if ((*cfg.Network)[0] == 'r') && len(*cfg.AddPeers) > 0 {
