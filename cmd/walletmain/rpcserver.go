@@ -27,10 +27,10 @@ import (
 
 type listenFunc func(net string, laddr string) (net.Listener, error)
 
-// generateRPCKeyPair generates a new RPC TLS keypair and writes the cert and
+// GenerateRPCKeyPair generates a new RPC TLS keypair and writes the cert and
 // possibly also the key in PEM format to the paths specified by the config.  If
 // successful, the new keypair is returned.
-func generateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, error) {
+func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, error) {
 	log.INFO("generating TLS certificates")
 	// Create directories for cert and key files if they do not yet exist.
 	log.WARN("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
@@ -58,12 +58,28 @@ func generateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	// Write cert and (potentially) the key files.
 	err = ioutil.WriteFile(*config.RPCCert, cert, 0600)
 	if err != nil {
+		rmErr := os.Remove(*config.RPCCert)
+		if rmErr != nil {
+			log.WARN("cannot remove written certificates:", rmErr)
+		}
+		return tls.Certificate{}, err
+	}
+	err = ioutil.WriteFile(*config.CAFile, cert, 0600)
+	if err != nil {
+		rmErr := os.Remove(*config.RPCCert)
+		if rmErr != nil {
+			log.WARN("cannot remove written certificates:", rmErr)
+		}
 		return tls.Certificate{}, err
 	}
 	if writeKey {
 		err = ioutil.WriteFile(*config.RPCKey, key, 0600)
 		if err != nil {
 			rmErr := os.Remove(*config.RPCCert)
+			if rmErr != nil {
+				log.WARN("cannot remove written certificates:", rmErr)
+			}
+			rmErr = os.Remove(*config.CAFile)
 			if rmErr != nil {
 				log.WARN("cannot remove written certificates:", rmErr)
 			}
@@ -157,9 +173,9 @@ func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 			"but TLS key `%s` already exists", *config.RPCKey)
 		return tls.Certificate{}, err
 	case *config.OneTimeTLSKey:
-		return generateRPCKeyPair(config, false)
+		return GenerateRPCKeyPair(config, false)
 	case !keyExists:
-		return generateRPCKeyPair(config, true)
+		return GenerateRPCKeyPair(config, true)
 	default:
 		return tls.LoadX509KeyPair(*config.RPCCert, *config.RPCKey)
 	}

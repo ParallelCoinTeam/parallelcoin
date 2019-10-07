@@ -3142,7 +3142,9 @@ func Create(db walletdb.DB, pubPass, privPass, seed []byte, params *netparams.Pa
 }
 
 // Open loads an already-created wallet from the passed database and namespaces.
-func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *netparams.Params, recoveryWindow uint32) (*Wallet, error) {
+func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks,
+	params *netparams.Params, recoveryWindow uint32) (*Wallet, error) {
+		log.WARN("opening wallet")
 	err := walletdb.View(db, func(tx walletdb.ReadTx) error {
 		waddrmgrBucket := tx.ReadBucket(waddrmgrNamespaceKey)
 		if waddrmgrBucket == nil {
@@ -3155,6 +3157,7 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 		return nil
 	})
 	if err != nil {
+		log.ERROR(err)
 		return nil, err
 	}
 	// Perform upgrades as necessary.  Each upgrade is done under its own
@@ -3166,10 +3169,12 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 	// manager).
 	err = waddrmgr.DoUpgrades(db, waddrmgrNamespaceKey, pubPass, params, cbs)
 	if err != nil {
+		log.ERROR(err)
 		return nil, err
 	}
 	err = wtxmgr.DoUpgrades(db, wtxmgrNamespaceKey)
 	if err != nil {
+		log.ERROR(err)
 		return nil, err
 	}
 	// Open database abstraction instances
@@ -3189,6 +3194,7 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks, params *n
 		return err
 	})
 	if err != nil {
+		log.ERROR(err)
 		return nil, err
 	}
 	log.TRACE("opened wallet") // TODO: log balance? last sync height?

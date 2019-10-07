@@ -179,24 +179,24 @@ getApp(cx *conte.Xt) (a *cli.App) {
 			apputil.String(
 				"rpccert",
 				"File containing the certificate file",
-				apputil.Join(*cx.Config.DataDir, "rpc.cert"),
+				"",
 				cx.Config.RPCCert),
 			apputil.String(
 				"rpckey",
 				"File containing the certificate key",
-				apputil.Join(*cx.Config.DataDir, "rpc.key"),
+				"",
 				cx.Config.RPCKey),
 			apputil.String(
 				"cafile",
 				"File containing root certificates to authenticate a TLS"+
 					" connections with pod",
-				apputil.Join(*cx.Config.DataDir, "cafile"),
+				"",
 				cx.Config.CAFile),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"clienttls",
 				"Enable TLS for client connections",
 				cx.Config.TLS),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"servertls",
 				"Enable TLS for server connections",
 				cx.Config.ServerTLS),

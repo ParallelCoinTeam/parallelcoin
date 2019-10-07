@@ -113,15 +113,16 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 		log.ERROR("cannot create directory", ld.DDDirPath)
 		return nil, err
 	}
-	// INFO("directory exists"}
+	log.INFO("directory exists")
 	// Open the database using the boltdb backend.
 	dbPath := filepath.Join(ld.DDDirPath, WalletDbName)
-	// INFO("opening database", dbPath}
+	log.INFO("opening database", dbPath)
 	db, err := walletdb.Open("bdb", dbPath)
 	if err != nil {
 		log.ERROR("failed to open database '", ld.DDDirPath, "':", err)
 		return nil, err
 	}
+	log.INFO("opened wallet database")
 	var cbs *waddrmgr.OpenCallbacks
 	if canConsolePrompt {
 		cbs = &waddrmgr.OpenCallbacks{
