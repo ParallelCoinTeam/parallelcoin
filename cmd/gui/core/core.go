@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/p9c/pod/cmd/gui/db"
 	"github.com/p9c/pod/cmd/gui/mod"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -10,6 +11,36 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"time"
 )
+
+func CoreJs(d db.DuOSdb) string {
+	return `
+
+const core = new Vue({ 
+	data () { return { 
+	duOSys }},
+});`
+}
+
+func duOSjs(d db.DuOSdb) string {
+	return `
+Vue.config.devtools = true;
+Vue.use(VueFormGenerator);
+
+Vue.prototype.$eventHub = new Vue();
+ 
+const duOSys = {
+	config:null,
+	node:null,
+	wallet:null,
+	status:null,
+	theme:false,
+	isBoot:false,
+	isLoading:false,
+	isDev:true,
+	isScreen:'overview',
+	timer: '',
+};`
+}
 
 // GetMsg loads the message variable
 func (d *DuOS) PushDuOSalert(t string, m interface{}, at string) {

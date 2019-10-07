@@ -100,5 +100,6 @@ type DuOSdata struct {
 	TransactionsExcerpts DuOStransactionsExcerpts     `json:"txsex"`
 	Blocks               DuOSblocks                   `json:"blocks"`
 	Send                 Send                         `json:"send"`
+	Screens              map[string]string            `json:"screens"`
 	Icons                map[string]string            `json:"ico"`
 }
