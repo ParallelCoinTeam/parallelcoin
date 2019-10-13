@@ -42,17 +42,16 @@ func initConfigFile(cfg *pod.Config) {
 		*cfg.ConfigFile =
 			*cfg.DataDir + string(os.PathSeparator) + podConfigFilename
 	}
+	log.WARN(*cfg.ConfigFile)
 }
 
-func
-initLogDir(cfg *pod.Config) {
+func initLogDir(cfg *pod.Config) {
 	if *cfg.LogDir == "" {
 		*cfg.LogDir = *cfg.DataDir
 	}
 }
 
-func
-initParams(cx *conte.Xt) {
+func initParams(cx *conte.Xt) {
 	network := "mainnet"
 	if cx.Config.Network != nil {
 		network = *cx.Config.Network
@@ -98,7 +97,7 @@ func initListeners(cx *conte.Xt) {
 		cx.StateCfg.Save = true
 	}
 	if *cfg.RPCConnect == "" {
-		*cfg.RPCConnect = "127.0.0.1:"+cx.ActiveNet.RPCClientPort
+		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
 		cx.StateCfg.Save = true
 	}
 }
@@ -109,19 +108,19 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 		*cfg.RPCCert =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.cert"
 		st.Save = true
-		isNew=true
+		isNew = true
 	}
 	if *cfg.RPCKey == "" {
 		*cfg.RPCKey =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.key"
 		st.Save = true
-		isNew=true
+		isNew = true
 	}
 	if *cfg.CAFile == "" {
 		*cfg.CAFile =
 			*cfg.DataDir + string(os.PathSeparator) + "cafile"
 		st.Save = true
-		isNew=true
+		isNew = true
 	}
 	if isNew {
 		// Now is the best time to make the certs

@@ -10,10 +10,10 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/gui"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -70,7 +70,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 			close(cx.WalletKill)
 			close(cx.NodeKill)
 		})
-		gui.Main(cx, &wg)
+		gui.Main(cx)
 		if !cx.Node.Load().(bool) {
 			close(cx.WalletKill)
 		}
