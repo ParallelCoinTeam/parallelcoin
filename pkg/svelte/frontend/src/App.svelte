@@ -1,29 +1,77 @@
 <script>
-	import Button from "./Button.svelte";
-	import Logo from "./ico/Logo.svelte";
-	import Header from "./Header.svelte";
-	import Nav from "./Nav.svelte";
-	import Overview from "./Overview.svelte";
+    import { quintOut } from 'svelte/easing';
+	import { fade, draw, fly } from 'svelte/transition';
+	import { expand } from './components/intro/transitions.js';
+	import { inner, outer } from './components/intro/shape.js';
+
+	let visible = true;
 </script>
 
+
 <style>
-  main {
-    font-family: sans-serif;
-    text-align: center;
-  }
+	svg {
+		width: 62%;
+		height: 62%;
+	}
+
+	path {
+		fill: #303030;
+		opacity: 1;
+	}
+
+	label {
+		position: absolute;
+		top: 1em;
+		left: 1em;
+	}
+
+	.centered {
+		font-size: 10vw;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%,-50%);
+		font-family: 'Overpass';
+		letter-spacing: 0.12em;
+		color: #676778;
+		font-weight: 100;
+	}
+
+	.centered span {
+		will-change: filter;
+	}
 </style>
 
-<main>
-	<div id="x" v-show="!this.duOSys.bios.isBoot" class="bgDark lightTheme"><div id="display">
-    <div class="grid-container bgDark">
-    	<div class="flx fii Logo"><Logo /></div>
-    	<Header />
-    	<div class="Sidebar bgLight">
-    		<div class="Open"></div>
-    		<div class="Nav"><Nav /></div>
-    		<div class="Side"></div>
-    	</div>
-    	<div id="main" class="grayGrad Main"><Overview /></div>
-    </div>
-    </div></div>
-</main>
+{#if visible}
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 103 124">
+		<g out:fade="{{duration: 200}}" opacity=0.2>
+			<path
+				in:expand="{{duration: 400, delay: 1000, easing: quintOut}}"
+				style="stroke: #ff3e00; fill: #ff3e00; stroke-width: 50;"
+				d={outer}
+			/>
+			<path
+				in:draw="{{duration: 1000}}"
+				style="stroke:#ff3e00; stroke-width: 1.5"
+				d={inner}
+			/>
+		</g>
+	</svg>
+
+	<div class="centered" out:fly="{{y: -20, duration: 800}}">
+		{#each 'ParallelCoin' as char, i}
+			<span
+				in:fade="{{delay: 1000 + i * 150, duration: 800}}"
+			>{char}</span>
+		{/each}
+	</div>
+{/if}
+
+<label>
+	<input type="checkbox" bind:checked={visible}>
+	toggle me
+</label>
+
+<link href="https://fonts.googleapis.com/css?family=Overpass:100" rel="stylesheet">
+
+

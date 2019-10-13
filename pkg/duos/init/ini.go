@@ -6,9 +6,7 @@ import (
 	"github.com/p9c/pod/pkg/duos/core"
 	"github.com/p9c/pod/pkg/duos/srv"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/pod/pkg/svelte/__OLDvue/lib/html"
 	"github.com/robfig/cron"
-	"net/url"
 	"runtime"
 )
 
@@ -80,7 +78,7 @@ func InitDuOS() core.DuOS {
 }
 
 func initGUI() lorca.UI {
-	ui, err := lorca.New("data:text/html,"+url.PathEscape(html.HTML), "", 800, 600)
+	ui, err := lorca.New("", "", 800, 600)
 	if err != nil {
 		log.ERROR("running App", err)
 	}

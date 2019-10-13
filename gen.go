@@ -7,5 +7,5 @@ import "github.com/zserge/lorca"
 func main() {
 	// You can also run "npm build" or webpack here, or compress assets, or
 	// generate manifests, or do other preparations for your assets.
-	lorca.Embed("ini", "assets.go", "pkg/svelte/frontend/public")
+	lorca.Embed("ini", "pkg/duos/ini/assets.go", "pkg/svelte/frontend/public")
 }
