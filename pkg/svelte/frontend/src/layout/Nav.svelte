@@ -19,7 +19,7 @@
 
 </style>
 
-<nav>
+<nav class="Nav">
 <ul id="menu" class="lsn noPadding">
 	<li id='menuoverview' class='sidebar-item current'>
 		<button onclick="external.invoke('overview')" class="noMargin noPadding noBorder bgTrans sXs"><IcoOverview /></button>
