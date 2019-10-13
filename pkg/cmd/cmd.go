@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	core2 "github.com/p9c/pod/gui/____BEZI/test/pkg/duos/core"
-	mod2 "github.com/p9c/pod/gui/____BEZI/test/pkg/duos/mod"
+	core2 "github.com/p9c/pod/__OLDgui/____BEZI/test/pkg/duos/core"
+	mod2 "github.com/p9c/pod/__OLDgui/____BEZI/test/pkg/duos/mod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 

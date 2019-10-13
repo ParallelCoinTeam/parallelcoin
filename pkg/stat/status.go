@@ -2,8 +2,8 @@ package stat
 
 import (
 	"github.com/p9c/pod/cmd/node/rpc"
-	conte2 "github.com/p9c/pod/gui/____BEZI/test/pkg/conte"
-	mod2 "github.com/p9c/pod/gui/____BEZI/test/pkg/duos/mod"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/duos/mod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
@@ -27,7 +27,7 @@ type DuOSstatus struct {
 	BestBlockHash    string                           `json:"bestblockhash"`
 	NetworkHashPS    int64                            `json:"networkhashrate"`
 	Difficulty       float64                          `json:"diff"`
-	Balance          mod2.DuOSbalance                 `json:"balance"`
+	Balance          mod.DuOSbalance                  `json:"balance"`
 	BlockCount       int64                            `json:"blockcount"`
 	ConnectionCount  int32                            `json:"connectioncount"`
 	NetworkLastBlock int32                            `json:"networklastblock"`
@@ -35,7 +35,7 @@ type DuOSstatus struct {
 	//MempoolInfo      string                        `json:"ver"`
 }
 
-func (s *DuOSstatus) GetDuOSstatus(cx *conte2.Xt) *DuOSstatus {
+func (s *DuOSstatus) GetDuOSstatus(cx *conte.Xt) *DuOSstatus {
 	s = new(DuOSstatus)
 	sm, _ := mem.VirtualMemory()
 	sc, _ := cpu.Info()

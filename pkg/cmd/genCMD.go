@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
-	mod2 "github.com/p9c/pod/gui/____BEZI/test/pkg/duos/mod"
+	mod2 "github.com/p9c/pod/__OLDgui/____BEZI/test/pkg/duos/mod"
 	"time"
 
 	"github.com/minio/highwayhash"

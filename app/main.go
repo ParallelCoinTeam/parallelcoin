@@ -32,12 +32,13 @@ func Main() int {
 	d := ini.InitDuOS()
 	log.L.SetLevel("trace", false)
 
-	d.Cx.App = getApp(&d)
+	d.CtX.App = getApp(&d)
+
 	log.DEBUG("running App")
 	// Estergom
 
 	// EstergomEnd
-	e := d.Cx.App.Run(os.Args)
+	e := d.CtX.App.Run(os.Args)
 	if e != nil {
 		fmt.Println("Pod ERROR:", e)
 		return 1
