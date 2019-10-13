@@ -49,6 +49,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				os.Exit(1)
 			}
 		} else {
+			*cx.Config.ConfigFile = ""
 			log.INFO("will save config after configuration")
 			cx.StateCfg.Save = true
 		}

@@ -29,9 +29,13 @@ const (
 
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
+	log.L.SetLevel("trace", false)
 	cx := conte.GetNewContext(appName, "main")
 	cx.App = getApp(cx)
 	log.DEBUG("running App")
+	// Estergom
+
+	// EstergomEnd
 	e := cx.App.Run(os.Args)
 	if e != nil {
 		fmt.Println("Pod ERROR:", e)
