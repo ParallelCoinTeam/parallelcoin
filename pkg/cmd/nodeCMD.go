@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	mod2 "github.com/p9c/pod/__OLDgui/____BEZI/test/pkg/duos/mod"
 	"github.com/p9c/pod/cmd/node/rpc"
-	mod2 "github.com/p9c/pod/gui/____BEZI/test/pkg/duos/mod"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	database "github.com/p9c/pod/pkg/db"

@@ -20,7 +20,7 @@ type Config struct {
 	NoInitialLoad *bool   `long:"noinitialload" description:"Defer wallet creation/opening on startup and enable loading wallets over RPC"`
 	LogDir        *string `long:"logdir" description:"Directory to log output."`
 	Profile       *string `long:"profile" description:"Enable HTTP profiling on given port -- NOTE port must be between 1024 and 65536"`
-	// GUI           *bool   `long:"gui" description:"Launch GUI"`
+	// GUI           *bool   `long:"__OLDgui" description:"Launch GUI"`
 	// Wallet options
 	WalletPass *string `long:"walletpass" default-mask:"-" description:"The public wallet password -- Only required if the wallet was created with one"`
 	// RPC client options

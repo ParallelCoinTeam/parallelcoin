@@ -1,8 +1,8 @@
 package conf
 
 import (
-	conte2 "github.com/p9c/pod/gui/____BEZI/test/pkg/conte"
-	pod2 "github.com/p9c/pod/gui/____BEZI/test/pkg/pod"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/pod"
 )
 
 type DuOSconfig struct {
@@ -12,19 +12,19 @@ type DuOSconfig struct {
 }
 
 type PodConfig struct {
-	Config *pod2.Config `json:"config"`
-	Schema pod2.Schema  `json:"schema"`
+	Config *pod.Config `json:"config"`
+	Schema pod.Schema  `json:"schema"`
 }
 
-func (d *DuOSconfig) SaveDaemonCfg(c pod2.Config) {
+func (d *DuOSconfig) SaveDaemonCfg(c pod.Config) {
 	*d.Pod.Config = c
 	//save.Pod(d.Daemon.Config)
 }
 
-func (c *DuOSconfig) GetCoreCofig(cx *conte2.Xt) *DuOSconfig {
+func (c *DuOSconfig) GetCoreCofig(cx *conte.Xt) *DuOSconfig {
 	c.Pod = PodConfig{
 		Config: cx.Config,
-		Schema: pod2.GetConfigSchema(),
+		Schema: pod.GetConfigSchema(),
 	}
 	//c.Display = mod.DisplayConfig{
 	//	//Screens: conf.GetPanels(),
