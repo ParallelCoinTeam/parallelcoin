@@ -1,7 +1,8 @@
 package ini
 
 import (
-	"github.com/p9c/lorca"
+	"fmt"
+	"github.com/p9c/gui"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/duos/core"
 	"github.com/p9c/pod/pkg/duos/srv"
@@ -52,6 +53,23 @@ func InitDuOS() core.DuOS {
 
 	d.GuI = initGUI()
 
+	// A simple way to know when UI is ready (uses body.onload event in JS)
+	d.GuI.Bind("start", func() {
+		log.TRACE("UI is ready")
+	})
+
+	// Create and bind Go object to the UI
+
+	duos := &core.DuOS{}
+
+	d.GuI.Bind("duOS", duos.GetDuOS())
+
+	// Create and bind Go object to the UI
+
+	// Call JS that calls Go and so on and so on...
+	m := d.GuI.Eval(fmt.Sprint(duos.GetDuOS()))
+	fmt.Println(m)
+
 	d.SrV.Data = &srv.DuOSdata{
 		//Status: d.Services.Status.GetDuOSstatus(),
 		//TransactionsExcerpts: d.GetTransactionsExcertps(),
@@ -72,13 +90,14 @@ func InitDuOS() core.DuOS {
 	//defer ln.Close()
 	//go http.Serve(ln, http.FileServer(FS))
 	//d.GuI.Load(fmt.Sprintf("http://%s", ln.Addr()))
+
 	d.GuI.Load("http://127.0.0.1:5000")
 
 	return d
 }
 
-func initGUI() lorca.UI {
-	ui, err := lorca.New("", "", 800, 600)
+func initGUI() gui.UI {
+	ui, err := gui.New("", "", 800, 600)
 	if err != nil {
 		log.ERROR("running App", err)
 	}

@@ -2,13 +2,11 @@ package core
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/duos/db"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/stat"
-	"github.com/p9c/pod/pkg/svelte/__OLDvue/lib"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
@@ -16,53 +14,10 @@ import (
 	"time"
 )
 
-func (d *DuOS) EvalJs() {
-	//svelte
-	vueLib, err := base64.StdEncoding.DecodeString(lib.VUE)
-	if err != nil {
-		fmt.Printf("Error decoding string: %s ", err.Error())
-		return
-	}
-	vue := d.GuI.Eval(string(vueLib))
-	fmt.Println(vue)
-	//ej2
-	getEj2Vue, err := base64.StdEncoding.DecodeString(lib.EJS)
-	if err != nil {
-		fmt.Printf("Error decoding string: %s ", err.Error())
-		return
-	}
-	ejs := d.GuI.Eval(string(getEj2Vue))
-	fmt.Println(ejs)
-
-	// libs
-	//for _, lib := range lib.GetLibs() {
-	//		return
-	//	}
-	//}
-	//for _, js := range t.Data["js"] {
-	//	err = w.Eval(string(js))
-	//}
-	// for _, js := range t.Data["js"] {
-	// 	err = w.Eval(string(js))
-	// }
-
-	//err = d.GuI.Eval(CoreHeadJs)
-	//if err != nil {
-	//	fmt.Println("error binding to webview:", err)
-	//}
-	//
-	//err = d.GuI.Eval(CompLoopJs(d.DbS))
-	//if err != nil {
-	//	fmt.Println("error binding to webview:", err)
-	//}
-	//
-	//err = d.GuI.Eval(AppsLoopJs(d.DbS))
-	//if err != nil {
-	//	fmt.Println("error binding to webview:", err)
-	//}
-
-	d.GuI.Eval(CoreJs(d.DbS))
-	//fmt.Println("MIkaaaaaaaaaa:", CoreJs(d))
+func (d *DuOS) GetDuOS() int {
+	d.Lock()
+	defer d.Unlock()
+	return 345345
 }
 
 func CoreJs(d db.DuOSdb) string {
