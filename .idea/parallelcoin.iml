@@ -7,6 +7,7 @@
       <excludeFolder url="file://$MODULE_DIR$/cmd/guiOLD/OLDbkp" />
       <excludeFolder url="file://$MODULE_DIR$/gui/____BEZI" />
       <excludeFolder url="file://$MODULE_DIR$/legacy" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/svelte/__OLDvue" />
       <excludePattern pattern="legacy/*" />
     </content>
     <orderEntry type="inheritedJdk" />
