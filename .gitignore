@@ -16,3 +16,4 @@ pod
 test**
 vendor/**
 /pkg/svelte/__OLDvue/
+node_modules/**
