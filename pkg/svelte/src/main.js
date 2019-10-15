@@ -1,13 +1,14 @@
-import App from "./App.svelte";
+import DuOS from "./DuOS.svelte";
 
 
-const app = new App({
-  target: document.body,
+
+const duos = new DuOS({
+    target: document.body,
     data: {
         entities: {}
     }
 });
 
-export default app;
+export default duos;
 
 

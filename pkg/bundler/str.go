@@ -2,58 +2,44 @@ package bnd
 
 func Assets() DuOSassets {
 	assets := make(map[string]DuOSasset)
-	assets["indexhtml"] = DuOSasset{
+	assets["index.html"] = DuOSasset{
+		Sub:         "html",
 		Name:        "index.html",
 		ContentType: "text/html",
 	}
-	assets["sveltejs"] = DuOSasset{
-		Sub:         "svelte",
+	assets["svelte.js"] = DuOSasset{
+		Sub:         "sve",
 		Name:        "svelte.js",
 		ContentType: "application/javascript",
 	}
-	assets["sveltecss"] = DuOSasset{
-		Sub:         "svelte",
+	assets["svelte.css"] = DuOSasset{
+		Sub:         "sve",
 		Name:        "svelte.css",
 		ContentType: "text/css",
 	}
-	assets["cssroot"] = DuOSasset{
+	assets["root.css"] = DuOSasset{
 		Sub:         "css",
 		Name:        "root.css",
 		ContentType: "text/css",
 	}
-	assets["csscolors"] = DuOSasset{
+	assets["colors.css"] = DuOSasset{
 		Sub:         "css",
 		Name:        "colors.css",
 		ContentType: "text/css",
 	}
-	assets["csshelpers"] = DuOSasset{
+	assets["helpers.css"] = DuOSasset{
 		Sub:         "css",
 		Name:        "helpers.css",
 		ContentType: "text/css",
 	}
-	assets["cssgrid"] = DuOSasset{
+	assets["grid.css"] = DuOSasset{
 		Sub:         "css",
 		Name:        "grid.css",
 		ContentType: "text/css",
 	}
-	assets["bariolregular"] = DuOSasset{
-		Sub:         "font",
+	assets["bariolregular.ttf"] = DuOSasset{
+		Sub:         "fonts",
 		Name:        "bariolregular.ttf",
-		ContentType: "application/x-font-ttf",
-	}
-	assets["bariolthin"] = DuOSasset{
-		Sub:         "font",
-		Name:        "bariolthin.ttf",
-		ContentType: "application/x-font-ttf",
-	}
-	assets["bariolbold"] = DuOSasset{
-		Sub:         "font",
-		Name:        "bariolbold.ttf",
-		ContentType: "application/x-font-ttf",
-	}
-	assets["bariolitalic"] = DuOSasset{
-		Sub:         "font",
-		Name:        "bariolitalic.ttf",
 		ContentType: "application/x-font-ttf",
 	}
 	return assets

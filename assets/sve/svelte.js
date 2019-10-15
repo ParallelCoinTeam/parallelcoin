@@ -1,9 +1,10 @@
 
 (function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.head.appendChild(r) })(window.document);
-var app = (function () {
+var app = (function (transitions_js, shape_js) {
     'use strict';
 
     function noop() { }
+    const identity = x => x;
     function add_location(element, file, line, column, char) {
         element.__svelte_meta = {
             loc: { file, line, column, char }
@@ -24,11 +25,6 @@ var app = (function () {
     function safe_not_equal(a, b) {
         return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
     }
-    function validate_store(store, name) {
-        if (!store || typeof store.subscribe !== 'function') {
-            throw new Error(`'${name}' is not a store with a 'subscribe' method`);
-        }
-    }
     function subscribe(store, callback) {
         const unsub = store.subscribe(callback);
         return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
@@ -38,12 +34,40 @@ var app = (function () {
         subscribe(store, _ => value = _)();
         return value;
     }
-    function component_subscribe(component, store, callback) {
-        component.$$.on_destroy.push(subscribe(store, callback));
+
+    const is_client = typeof window !== 'undefined';
+    let now = is_client
+        ? () => window.performance.now()
+        : () => Date.now();
+    let raf = is_client ? cb => requestAnimationFrame(cb) : noop;
+
+    const tasks = new Set();
+    let running = false;
+    function run_tasks() {
+        tasks.forEach(task => {
+            if (!task[0](now())) {
+                tasks.delete(task);
+                task[1]();
+            }
+        });
+        running = tasks.size > 0;
+        if (running)
+            raf(run_tasks);
     }
-    function set_store_value(store, ret, value = ret) {
-        store.set(value);
-        return ret;
+    function loop(fn) {
+        let task;
+        if (!running) {
+            running = true;
+            raf(run_tasks);
+        }
+        return {
+            promise: new Promise(fulfil => {
+                tasks.add(task = [fn, fulfil]);
+            }),
+            abort() {
+                tasks.delete(task);
+            }
+        };
     }
 
     function append(target, node) {
@@ -55,8 +79,17 @@ var app = (function () {
     function detach(node) {
         node.parentNode.removeChild(node);
     }
+    function destroy_each(iterations, detaching) {
+        for (let i = 0; i < iterations.length; i += 1) {
+            if (iterations[i])
+                iterations[i].d(detaching);
+        }
+    }
     function element(name) {
         return document.createElement(name);
+    }
+    function svg_element(name) {
+        return document.createElementNS('http://www.w3.org/2000/svg', name);
     }
     function text(data) {
         return document.createTextNode(data);
@@ -77,10 +110,69 @@ var app = (function () {
     function children(element) {
         return Array.from(element.childNodes);
     }
+    function set_style(node, key, value, important) {
+        node.style.setProperty(key, value, important ? 'important' : '');
+    }
     function custom_event(type, detail) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, false, false, detail);
         return e;
+    }
+
+    let stylesheet;
+    let active = 0;
+    let current_rules = {};
+    // https://github.com/darkskyapp/string-hash/blob/master/index.js
+    function hash(str) {
+        let hash = 5381;
+        let i = str.length;
+        while (i--)
+            hash = ((hash << 5) - hash) ^ str.charCodeAt(i);
+        return hash >>> 0;
+    }
+    function create_rule(node, a, b, duration, delay, ease, fn, uid = 0) {
+        const step = 16.666 / duration;
+        let keyframes = '{\n';
+        for (let p = 0; p <= 1; p += step) {
+            const t = a + (b - a) * ease(p);
+            keyframes += p * 100 + `%{${fn(t, 1 - t)}}\n`;
+        }
+        const rule = keyframes + `100% {${fn(b, 1 - b)}}\n}`;
+        const name = `__svelte_${hash(rule)}_${uid}`;
+        if (!current_rules[name]) {
+            if (!stylesheet) {
+                const style = element('style');
+                document.head.appendChild(style);
+                stylesheet = style.sheet;
+            }
+            current_rules[name] = true;
+            stylesheet.insertRule(`@keyframes ${name} ${rule}`, stylesheet.cssRules.length);
+        }
+        const animation = node.style.animation || '';
+        node.style.animation = `${animation ? `${animation}, ` : ``}${name} ${duration}ms linear ${delay}ms 1 both`;
+        active += 1;
+        return name;
+    }
+    function delete_rule(node, name) {
+        node.style.animation = (node.style.animation || '')
+            .split(', ')
+            .filter(name
+            ? anim => anim.indexOf(name) < 0 // remove specific animation
+            : anim => anim.indexOf('__svelte') === -1 // remove all Svelte animations
+        )
+            .join(', ');
+        if (name && !--active)
+            clear_rules();
+    }
+    function clear_rules() {
+        raf(() => {
+            if (active)
+                return;
+            let i = stylesheet.cssRules.length;
+            while (i--)
+                stylesheet.deleteRule(i);
+            current_rules = {};
+        });
     }
 
     let current_component;
@@ -142,12 +234,175 @@ var app = (function () {
             $$.after_update.forEach(add_render_callback);
         }
     }
+
+    let promise;
+    function wait() {
+        if (!promise) {
+            promise = Promise.resolve();
+            promise.then(() => {
+                promise = null;
+            });
+        }
+        return promise;
+    }
+    function dispatch(node, direction, kind) {
+        node.dispatchEvent(custom_event(`${direction ? 'intro' : 'outro'}${kind}`));
+    }
     const outroing = new Set();
+    let outros;
+    function group_outros() {
+        outros = {
+            r: 0,
+            c: [],
+            p: outros // parent group
+        };
+    }
+    function check_outros() {
+        if (!outros.r) {
+            run_all(outros.c);
+        }
+        outros = outros.p;
+    }
     function transition_in(block, local) {
         if (block && block.i) {
             outroing.delete(block);
             block.i(local);
         }
+    }
+    function transition_out(block, local, detach, callback) {
+        if (block && block.o) {
+            if (outroing.has(block))
+                return;
+            outroing.add(block);
+            outros.c.push(() => {
+                outroing.delete(block);
+                if (callback) {
+                    if (detach)
+                        block.d(1);
+                    callback();
+                }
+            });
+            block.o(local);
+        }
+    }
+    const null_transition = { duration: 0 };
+    function create_in_transition(node, fn, params) {
+        let config = fn(node, params);
+        let running = false;
+        let animation_name;
+        let task;
+        let uid = 0;
+        function cleanup() {
+            if (animation_name)
+                delete_rule(node, animation_name);
+        }
+        function go() {
+            const { delay = 0, duration = 300, easing = identity, tick = noop, css } = config || null_transition;
+            if (css)
+                animation_name = create_rule(node, 0, 1, duration, delay, easing, css, uid++);
+            tick(0, 1);
+            const start_time = now() + delay;
+            const end_time = start_time + duration;
+            if (task)
+                task.abort();
+            running = true;
+            add_render_callback(() => dispatch(node, true, 'start'));
+            task = loop(now => {
+                if (running) {
+                    if (now >= end_time) {
+                        tick(1, 0);
+                        dispatch(node, true, 'end');
+                        cleanup();
+                        return running = false;
+                    }
+                    if (now >= start_time) {
+                        const t = easing((now - start_time) / duration);
+                        tick(t, 1 - t);
+                    }
+                }
+                return running;
+            });
+        }
+        let started = false;
+        return {
+            start() {
+                if (started)
+                    return;
+                delete_rule(node);
+                if (is_function(config)) {
+                    config = config();
+                    wait().then(go);
+                }
+                else {
+                    go();
+                }
+            },
+            invalidate() {
+                started = false;
+            },
+            end() {
+                if (running) {
+                    cleanup();
+                    running = false;
+                }
+            }
+        };
+    }
+    function create_out_transition(node, fn, params) {
+        let config = fn(node, params);
+        let running = true;
+        let animation_name;
+        const group = outros;
+        group.r += 1;
+        function go() {
+            const { delay = 0, duration = 300, easing = identity, tick = noop, css } = config || null_transition;
+            if (css)
+                animation_name = create_rule(node, 1, 0, duration, delay, easing, css);
+            const start_time = now() + delay;
+            const end_time = start_time + duration;
+            add_render_callback(() => dispatch(node, false, 'start'));
+            loop(now => {
+                if (running) {
+                    if (now >= end_time) {
+                        tick(0, 1);
+                        dispatch(node, false, 'end');
+                        if (!--group.r) {
+                            // this will result in `end()` being called,
+                            // so we don't need to clean up here
+                            run_all(group.c);
+                        }
+                        return false;
+                    }
+                    if (now >= start_time) {
+                        const t = easing((now - start_time) / duration);
+                        tick(1 - t, t);
+                    }
+                }
+                return running;
+            });
+        }
+        if (is_function(config)) {
+            wait().then(() => {
+                // @ts-ignore
+                config = config();
+                go();
+            });
+        }
+        else {
+            go();
+        }
+        return {
+            end(reset) {
+                if (reset && config.tick) {
+                    config.tick(1, 0);
+                }
+                if (running) {
+                    if (animation_name)
+                        delete_rule(node, animation_name);
+                    running = false;
+                }
+            }
+        };
     }
     function mount_component(component, target, anchor) {
         const { fragment, on_mount, on_destroy, after_update } = component.$$;
@@ -292,17 +547,6 @@ var app = (function () {
             dispatch_dev("SvelteDOMRemoveAttribute", { node, attribute });
         else
             dispatch_dev("SvelteDOMSetAttribute", { node, attribute, value });
-    }
-    function prop_dev(node, property, value) {
-        node[property] = value;
-        dispatch_dev("SvelteDOMSetProperty", { node, property, value });
-    }
-    function set_data_dev(text, data) {
-        data = '' + data;
-        if (text.data === data)
-            return;
-        dispatch_dev("SvelteDOMSetData", { node: text, data });
-        text.data = data;
     }
     class SvelteComponentDev extends SvelteComponent {
         constructor(options) {
@@ -8280,25 +8524,253 @@ var app = (function () {
     var svelteRealtimeStore = { getClient };  // TODO: Eventually change this to export once supported
     var svelteRealtimeStore_1 = svelteRealtimeStore.getClient;
 
-    /* src/App.svelte generated by Svelte v3.12.1 */
+    function cubicInOut(t) {
+        return t < 0.5 ? 4.0 * t * t * t : 0.5 * Math.pow(2.0 * t - 2.0, 3.0) + 1.0;
+    }
+    function cubicOut(t) {
+        const f = t - 1.0;
+        return f * f * f + 1.0;
+    }
+    function quintOut(t) {
+        return --t * t * t * t * t + 1;
+    }
 
-    const file = "src/App.svelte";
+    function fade(node, { delay = 0, duration = 400 }) {
+        const o = +getComputedStyle(node).opacity;
+        return {
+            delay,
+            duration,
+            css: t => `opacity: ${t * o}`
+        };
+    }
+    function fly(node, { delay = 0, duration = 400, easing = cubicOut, x = 0, y = 0, opacity = 0 }) {
+        const style = getComputedStyle(node);
+        const target_opacity = +style.opacity;
+        const transform = style.transform === 'none' ? '' : style.transform;
+        const od = target_opacity * (1 - opacity);
+        return {
+            delay,
+            duration,
+            easing,
+            css: (t, u) => `
+			transform: ${transform} translate(${(1 - t) * x}px, ${(1 - t) * y}px);
+			opacity: ${target_opacity - (od * u)}`
+        };
+    }
+    function draw(node, { delay = 0, speed, duration, easing = cubicInOut }) {
+        const len = node.getTotalLength();
+        if (duration === undefined) {
+            if (speed === undefined) {
+                duration = 800;
+            }
+            else {
+                duration = len / speed;
+            }
+        }
+        else if (typeof duration === 'function') {
+            duration = duration(len);
+        }
+        return {
+            delay,
+            duration,
+            easing,
+            css: (t, u) => `stroke-dasharray: ${t * len} ${u * len}`
+        };
+    }
 
-    function create_fragment(ctx) {
-    	var h1, t0, t1, button, t2, button_disabled_value, dispose;
+    /* src/boot/Boot.svelte generated by Svelte v3.12.1 */
+
+    const file = "src/boot/Boot.svelte";
+
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = Object.create(ctx);
+    	child_ctx.char = list[i];
+    	child_ctx.i = i;
+    	return child_ctx;
+    }
+
+    // (48:0) {#if visible}
+    function create_if_block(ctx) {
+    	var svg, g, path0, path0_intro, path1, path1_intro, g_outro, t, div, div_outro, current;
+
+    	let each_value = 'ParallelCoin';
+
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
 
     	const block = {
     		c: function create() {
-    			h1 = element("h1");
-    			t0 = text(ctx.$a);
+    			svg = svg_element("svg");
+    			g = svg_element("g");
+    			path0 = svg_element("path");
+    			path1 = svg_element("path");
+    			t = space();
+    			div = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+    			set_style(path0, "stroke", "#ff3e00");
+    			set_style(path0, "fill", "#ff3e00");
+    			set_style(path0, "stroke-width", "50");
+    			attr_dev(path0, "d", shape_js.outer);
+    			attr_dev(path0, "class", "svelte-ajd692");
+    			add_location(path0, file, 50, 3, 796);
+    			set_style(path1, "stroke", "#ff3e00");
+    			set_style(path1, "stroke-width", "1.5");
+    			attr_dev(path1, "d", shape_js.inner);
+    			attr_dev(path1, "class", "svelte-ajd692");
+    			add_location(path1, file, 55, 3, 952);
+    			attr_dev(g, "opacity", "0.2");
+    			add_location(g, file, 49, 2, 748);
+    			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
+    			attr_dev(svg, "viewBox", "0 0 103 124");
+    			attr_dev(svg, "class", "svelte-ajd692");
+    			add_location(svg, file, 48, 1, 683);
+    			attr_dev(div, "class", "centered svelte-ajd692");
+    			add_location(div, file, 63, 1, 1074);
+    		},
+
+    		m: function mount(target, anchor) {
+    			insert_dev(target, svg, anchor);
+    			append_dev(svg, g);
+    			append_dev(g, path0);
+    			append_dev(g, path1);
+    			insert_dev(target, t, anchor);
+    			insert_dev(target, div, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div, null);
+    			}
+
+    			current = true;
+    		},
+
+    		p: noop,
+
+    		i: function intro(local) {
+    			if (current) return;
+    			if (!path0_intro) {
+    				add_render_callback(() => {
+    					path0_intro = create_in_transition(path0, transitions_js.expand, {duration: 400, delay: 1000, easing: quintOut});
+    					path0_intro.start();
+    				});
+    			}
+
+    			if (!path1_intro) {
+    				add_render_callback(() => {
+    					path1_intro = create_in_transition(path1, draw, {duration: 1000});
+    					path1_intro.start();
+    				});
+    			}
+
+    			if (g_outro) g_outro.end(1);
+
+    			for (let i = 0; i < each_value.length; i += 1) {
+    				transition_in(each_blocks[i]);
+    			}
+
+    			if (div_outro) div_outro.end(1);
+
+    			current = true;
+    		},
+
+    		o: function outro(local) {
+    			g_outro = create_out_transition(g, fade, {duration: 200});
+
+    			div_outro = create_out_transition(div, fly, {y: -20, duration: 800});
+
+    			current = false;
+    		},
+
+    		d: function destroy(detaching) {
+    			if (detaching) {
+    				detach_dev(svg);
+    				if (g_outro) g_outro.end();
+    				detach_dev(t);
+    				detach_dev(div);
+    			}
+
+    			destroy_each(each_blocks, detaching);
+
+    			if (detaching) {
+    				if (div_outro) div_outro.end();
+    			}
+    		}
+    	};
+    	dispatch_dev("SvelteRegisterBlock", { block, id: create_if_block.name, type: "if", source: "(48:0) {#if visible}", ctx });
+    	return block;
+    }
+
+    // (65:2) {#each 'ParallelCoin' as char, i}
+    function create_each_block(ctx) {
+    	var span, t, span_intro;
+
+    	const block = {
+    		c: function create() {
+    			span = element("span");
+    			t = text(ctx.char);
+    			attr_dev(span, "class", "svelte-ajd692");
+    			add_location(span, file, 65, 3, 1172);
+    		},
+
+    		m: function mount(target, anchor) {
+    			insert_dev(target, span, anchor);
+    			append_dev(span, t);
+    		},
+
+    		p: noop,
+
+    		i: function intro(local) {
+    			if (!span_intro) {
+    				add_render_callback(() => {
+    					span_intro = create_in_transition(span, fade, {delay: 1000 + ctx.i * 150, duration: 800});
+    					span_intro.start();
+    				});
+    			}
+    		},
+
+    		o: noop,
+
+    		d: function destroy(detaching) {
+    			if (detaching) {
+    				detach_dev(span);
+    			}
+    		}
+    	};
+    	dispatch_dev("SvelteRegisterBlock", { block, id: create_each_block.name, type: "each", source: "(65:2) {#each 'ParallelCoin' as char, i}", ctx });
+    	return block;
+    }
+
+    function create_fragment(ctx) {
+    	var div, t0, t1, label, input, t2, t3, link, current, dispose;
+
+    	var if_block = (ctx.visible) && create_if_block(ctx);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			t0 = space();
+    			if (if_block) if_block.c();
     			t1 = space();
-    			button = element("button");
-    			t2 = text("a++");
-    			add_location(h1, file, 12, 0, 250);
-    			attr_dev(button, "class", "button");
-    			button.disabled = button_disabled_value = !ctx.$connected;
-    			add_location(button, file, 13, 0, 264);
-    			dispose = listen_dev(button, "click", ctx.handleA);
+    			label = element("label");
+    			input = element("input");
+    			t2 = text("\n\ttoggle me");
+    			t3 = space();
+    			link = element("link");
+    			attr_dev(div, "class", "boot");
+    			add_location(div, file, 46, 0, 643);
+    			attr_dev(input, "type", "checkbox");
+    			add_location(input, file, 73, 1, 1285);
+    			attr_dev(label, "class", "svelte-ajd692");
+    			add_location(label, file, 72, 0, 1276);
+    			attr_dev(link, "href", "https://fonts.googleapis.com/css?family=Overpass:100");
+    			attr_dev(link, "rel", "stylesheet");
+    			add_location(link, file, 77, 0, 1353);
+    			dispose = listen_dev(input, "change", ctx.input_change_handler);
     		},
 
     		l: function claim(nodes) {
@@ -8306,31 +8778,67 @@ var app = (function () {
     		},
 
     		m: function mount(target, anchor) {
-    			insert_dev(target, h1, anchor);
-    			append_dev(h1, t0);
+    			insert_dev(target, div, anchor);
+    			insert_dev(target, t0, anchor);
+    			if (if_block) if_block.m(target, anchor);
     			insert_dev(target, t1, anchor);
-    			insert_dev(target, button, anchor);
-    			append_dev(button, t2);
+    			insert_dev(target, label, anchor);
+    			append_dev(label, input);
+
+    			input.checked = ctx.visible;
+
+    			append_dev(label, t2);
+    			insert_dev(target, t3, anchor);
+    			insert_dev(target, link, anchor);
+    			current = true;
     		},
 
     		p: function update(changed, ctx) {
-    			if (changed.$a) {
-    				set_data_dev(t0, ctx.$a);
+    			if (ctx.visible) {
+    				if (if_block) {
+    					if_block.p(changed, ctx);
+    					transition_in(if_block, 1);
+    				} else {
+    					if_block = create_if_block(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(t1.parentNode, t1);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+    				check_outros();
     			}
 
-    			if ((changed.$connected) && button_disabled_value !== (button_disabled_value = !ctx.$connected)) {
-    				prop_dev(button, "disabled", button_disabled_value);
-    			}
+    			if (changed.visible) input.checked = ctx.visible;
     		},
 
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
 
     		d: function destroy(detaching) {
     			if (detaching) {
-    				detach_dev(h1);
+    				detach_dev(div);
+    				detach_dev(t0);
+    			}
+
+    			if (if_block) if_block.d(detaching);
+
+    			if (detaching) {
     				detach_dev(t1);
-    				detach_dev(button);
+    				detach_dev(label);
+    				detach_dev(t3);
+    				detach_dev(link);
     			}
 
     			dispose();
@@ -8341,14 +8849,13 @@ var app = (function () {
     }
 
     function instance($$self, $$props, $$invalidate) {
-    	let $a, $connected;
+    	
 
-    	const realtimeClient = svelteRealtimeStore_1();
-    	const a = realtimeClient.realtime('a', 1000); validate_store(a, 'a'); component_subscribe($$self, a, $$value => { $a = $$value; $$invalidate('$a', $a); });
-    	const connected = realtimeClient.connected; validate_store(connected, 'connected'); component_subscribe($$self, connected, $$value => { $connected = $$value; $$invalidate('$connected', $connected); });
+    	let visible = true;
 
-    	function handleA(event) {
-    		set_store_value(a, $a = $a + 1);
+    	function input_change_handler() {
+    		visible = this.checked;
+    		$$invalidate('visible', visible);
     	}
 
     	$$self.$capture_state = () => {
@@ -8356,29 +8863,95 @@ var app = (function () {
     	};
 
     	$$self.$inject_state = $$props => {
-    		if ('$a' in $$props) a.set($a);
-    		if ('$connected' in $$props) connected.set($connected);
+    		if ('visible' in $$props) $$invalidate('visible', visible = $$props.visible);
     	};
 
-    	return { a, connected, handleA, $a, $connected };
+    	return { visible, input_change_handler };
     }
 
-    class App extends SvelteComponentDev {
+    class Boot extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
     		init(this, options, instance, create_fragment, safe_not_equal, []);
-    		dispatch_dev("SvelteRegisterComponent", { component: this, tagName: "App", options, id: create_fragment.name });
+    		dispatch_dev("SvelteRegisterComponent", { component: this, tagName: "Boot", options, id: create_fragment.name });
     	}
     }
 
-    const app = new App({
-      target: document.body,
+    /* src/DuOS.svelte generated by Svelte v3.12.1 */
+
+    function create_fragment$1(ctx) {
+    	var current;
+
+    	var boot = new Boot({ $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			boot.$$.fragment.c();
+    		},
+
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+
+    		m: function mount(target, anchor) {
+    			mount_component(boot, target, anchor);
+    			current = true;
+    		},
+
+    		p: noop,
+
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(boot.$$.fragment, local);
+
+    			current = true;
+    		},
+
+    		o: function outro(local) {
+    			transition_out(boot.$$.fragment, local);
+    			current = false;
+    		},
+
+    		d: function destroy(detaching) {
+    			destroy_component(boot, detaching);
+    		}
+    	};
+    	dispatch_dev("SvelteRegisterBlock", { block, id: create_fragment$1.name, type: "component", source: "", ctx });
+    	return block;
+    }
+
+    function instance$1($$self) {
+    	
+
+    	const realtimeClient = svelteRealtimeStore_1();
+    	const a = realtimeClient.realtime('a', 1000);
+    	const connected = realtimeClient.connected;
+
+    	$$self.$capture_state = () => {
+    		return {};
+    	};
+
+    	$$self.$inject_state = $$props => {};
+
+    	return {};
+    }
+
+    class DuOS extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, []);
+    		dispatch_dev("SvelteRegisterComponent", { component: this, tagName: "DuOS", options, id: create_fragment$1.name });
+    	}
+    }
+
+    const duos = new DuOS({
+        target: document.body,
         data: {
             entities: {}
         }
     });
 
-    return app;
+    return duos;
 
-}());
+}(transitions_js, shape_js));
 //# sourceMappingURL=svelte.js.map

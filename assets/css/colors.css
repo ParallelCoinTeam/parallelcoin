@@ -115,3 +115,8 @@ background:linear-gradient(#f4f4f4, #e4e4e4);
 .bgTrans{
 background:transparent;
 }
+
+body{
+    background-color: var(--dark);
+    color: var(--light);
+}
