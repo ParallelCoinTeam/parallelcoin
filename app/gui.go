@@ -7,15 +7,15 @@ import (
 
 func gui(d *core.DuOS) {
 
-	defer d.GuI.Close()
+	//defer d.GuI.Close()
 
 	// Wait until UI window is closed
 	// Load HTML after Go functions are bound to JS
 
-	d.GuI.Eval(`
-		console.log("Hello, world!");
-		console.log('Multiple values:', [1, false, {"x":5}]);
-	`)
+	//d.GuI.Eval(`
+	//	console.log("Hello, world!");
+	//	console.log('Multiple values:', [1, false, {"x":5}]);
+	//`)
 
 	// Css
 	//injectCss(d)
@@ -44,7 +44,7 @@ func gui(d *core.DuOS) {
 	//
 
 	fmt.Println("teeeeeee")
-	<-d.GuI.Done()
+	//<-d.GuI.Done()
 
 	// Start ticker goroutine
 	//go func() {

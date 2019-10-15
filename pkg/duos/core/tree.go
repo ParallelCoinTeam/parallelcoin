@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/p9c/gui"
 	bnd "github.com/p9c/pod/pkg/bundler"
 	"github.com/p9c/pod/pkg/conf"
 	"github.com/p9c/pod/pkg/conte"
@@ -16,7 +15,7 @@ type DuOS struct {
 	sync.Mutex
 	CtX *conte.Xt        `json:"context"`
 	CrN *cron.Cron       `json:"cron"`
-	GuI gui.UI           `json:"gui"`
+	GuI *GuI             `json:"gui"`
 	DbS db.DuOSdb        `json:"database"`
 	CgG *conf.DuOSconfig `json:"configuration"`
 	SrV srv.DuOSservices `json:"services"`

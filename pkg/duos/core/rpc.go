@@ -12,10 +12,10 @@ import (
 )
 
 func (d *DuOS) Render(cmd string, data interface{}) {
-	b, err := enjs.Marshal(data)
-	if err == nil {
-		d.GuI.Eval("duOSys." + cmd + "=" + string(b) + ";")
-	}
+	//b, err := enjs.Marshal(data)
+	//if err == nil {
+	//	//d.GuI.Eval("duOSys." + cmd + "=" + string(b) + ";")
+	//}
 }
 
 func (d *DuOS) HandleRPC(w webview.WebView, vc string) {
@@ -85,10 +85,10 @@ func (d *DuOS) HandleRPC(w webview.WebView, vc string) {
 		if err := enjs.Unmarshal([]byte(s), &cmd); err != nil {
 			log.Println(err)
 		}
-		b, err := enjs.Marshal(d.CreateNewAddress(cmd.Account))
-		if err == nil {
-			d.GuI.Eval("createAddress=" + string(b) + ";")
-		}
+		//b, err := enjs.Marshal(d.CreateNewAddress(cmd.Account))
+		//if err == nil {
+		//	//d.GuI.Eval("createAddress=" + string(b) + ";")
+		//}
 		//dV.Render("createAddress", dV.CreateNewAddress(cmd.Account))
 	case strings.HasPrefix(vc, "saveAddressLabel:"):
 		s := strings.TrimPrefix(vc, "saveAddressLabel:")

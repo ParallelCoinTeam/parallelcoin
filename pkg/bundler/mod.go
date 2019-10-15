@@ -1,12 +1,9 @@
 package bnd
 
-type sveBundle map[string][]byte
-
 type DuOSasset struct {
 	Name        string `json:"name"`
 	Sub         string `json:"sub"`
-	DataRaw     []byte `json:"dataraw"`
-	DataZip     string `json:"datazip"`
+	Data        string `json:"data"`
 	ContentType string `json:"type"`
 }
 
