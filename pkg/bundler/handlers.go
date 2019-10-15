@@ -5,7 +5,23 @@ import (
 	"net/http"
 )
 
-func (b *DuOSsveBundle) DuOSassetsHandler(w http.ResponseWriter, r *http.Request) {
+func path(a DuOSasset) (path string) {
+	if a.Sub != "" {
+		path = a.Sub + "/" + a.Name
+	} else {
+		path = a.Name
+	}
+	return
+}
+
+func DuOSassetsHandler() {
+	for _, a := range Assets() {
+		http.HandleFunc(path(a), func(w http.ResponseWriter, r *http.Request) {
+			headers := w.Header()
+			headers["Content-Type"] = []string{a.ContentType}
+			fmt.Fprint(w, string(a.DataRaw))
+		})
+	}
 
 }
 

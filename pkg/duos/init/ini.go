@@ -21,7 +21,6 @@ const (
 	maxElementBuffer = 128 * 1024
 )
 
-
 const (
 	appName           = "pod"
 	confExt           = ".json"
@@ -65,8 +64,6 @@ func InitDuOS() core.DuOS {
 
 	// Create and bind Go object to the UI
 
-
-
 	// Call JS that calls Go and so on and so on...
 	m := d.GuI.Eval(fmt.Sprint(duos.GetDuOS()))
 	fmt.Println(m)
@@ -90,15 +87,12 @@ func InitDuOS() core.DuOS {
 	}
 	defer ln.Close()
 	go http.Serve(ln, http.FileServer(FS))
-	http.HandleFunc("pipe.js", bnd.PipeJsHandler)
-	http.HandleFunc("svelte.js", bnd.BndJsHandler)
-	http.HandleFunc("svelte.css", bnd.BndCssHandler)
 
+	go bnd.DuOSassetsHandler()
 
 	//fmt.Println("asdasasas", bnd.DuOSsveBundler())
 	//http.Handle("/", http.FileServer(bnd.DuOSsveBundler()))
 	//log.ERROR(http.ListenAndServe(":0", nil))
-
 
 	//http.ListenAndServe(":8080", nil)
 

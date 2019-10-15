@@ -10,9 +10,9 @@ import (
 	"os"
 )
 
-func filesLoop(b map[string]string) (fls string) {
+func filesLoop(b map[string]DuOSasset) (fls string) {
 	for f, bf := range b {
-		fl := `"` + f + `":"` + bf + `",
+		fl := `"` + f + `":"` + bf.DataZip + `",
 `
 		fls = fls + fl
 	}
@@ -48,29 +48,30 @@ func DecompressHexString(hexdata string) ([]byte, error) {
 	return ioutil.ReadAll(gzipReader)
 }
 
-func Bundle() map[string]string {
-	b := make(map[string]string)
-	for _, file := range files {
-		zip, err := CompressFile(file)
+func Bundle() DuOSassets {
+	a := DuOSassets{}
+	for k, t := range Assets() {
+		zip, err := CompressFile(path(t))
 		if err != nil {
 		}
-		b[file] = zip
+		t.DataZip = zip
+		a[k] = t
 	}
 	var code = `package bnd
 var FS = map[string]string{
-` + filesLoop(b) + `}`
+` + filesLoop(a) + `}`
 
 	file, _ := os.Create("./pkg/bnd/fs.go")
 	defer file.Close()
 	tmpl, _ := template.New("files").Parse(code)
 	tmpl.Execute(file, "fs")
-	return b
+	return a
 }
 
 func DuOSsveBundler() sveBundle {
 	fs := make(sveBundle)
 	for f, fn := range Bundle() {
-		unZip, err := DecompressHexString(fn)
+		unZip, err := DecompressHexString(fn.DataZip)
 		if err != nil {
 		}
 		fs[f] = unZip
