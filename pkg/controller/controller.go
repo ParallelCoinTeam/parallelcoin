@@ -20,34 +20,46 @@ type Blocks []*mining.BlockTemplate
 
 // Run starts a controller instance
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
+	for len(cx.StateCfg.ActiveMiningAddrs) < 1 {
+		log.ERROR("no mining addresses configured, controller exiting")
+		return
+	}
 	log.WARN("starting controller")
-	var mh codec.MsgpackHandle
+	// create context with canceller to cleanly shut down
 	var ctx context.Context
 	ctx, cancel = context.WithCancel(context.Background())
+	// create cipher for decoding relevant packets
 	ciph := gcm.GetCipher(*cx.Config.MinerPass)
+	// create new multicast address
 	outAddr, err := broadcast.New(*cx.Config.BroadcastAddress)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
 		return
 	}
-	blockChan := make(chan Blocks)
+	// create buffer and load into msgpack codec
+	var mh codec.MsgpackHandle
 	bytes := make([]byte, 0, broadcast.MaxDatagramSize)
 	enc := codec.NewEncoderBytes(&bytes, &mh)
+	// create channel to trigger a broadcast,
+	// unbuffered so the encoder buffer is not accessed concurrently - one
+	// cpu thread is enough to handle all the traffic so lower overhead if it
+	// is not multi-threaded
+	blockChan := make(chan Blocks)
+	// work dispatch loop
 	go func() {
 		for {
-			// work dispatch loop
 			select {
 			case lb := <-blockChan:
 				// send out block broadcast
 				log.DEBUG("sending out block broadcast")
-				// serialize blocks
-				log.SPEW(lb)
+				// serialize initialBlocks
 				err := enc.Encode(lb)
 				if err != nil {
 					log.ERROR(err)
 					break
 				}
+				log.SPEW(bytes)
 				err = broadcast.Send(outAddr, bytes, ciph, broadcast.Template)
 				if err != nil {
 					log.ERROR(err)
@@ -61,31 +73,32 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				// default:
 			}
 		}
-	}()
-	connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
-	current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
-	// if out of sync or disconnected,
-	// once a second send out empty blocks
-	for (connCount < 1 && !*cx.Config.Solo) || !current {
-		time.Sleep(time.Second)
-		connCount = cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
-		current = cx.RPCServer.Cfg.SyncMgr.IsCurrent()
-		log.WARN("waiting for sync/peers", connCount, current)
-		select {
-		case <-ctx.Done():
-			log.WARN("cancelled before initial connection/sync")
-			return
-		default:
+	}() //
+	// generate initial Blocks
+	initialBlocks := Blocks{}
+	for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
+		BestSnapshot().Height+1)].Algos {
+		// Choose a payment address at random.
+		rand.Seed(time.Now().UnixNano())
+		log.TRACE("len active mining addrs", len(cx.StateCfg.ActiveMiningAddrs))
+		payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(cx.
+			StateCfg.ActiveMiningAddrs))]
+		template, err := cx.RPCServer.Cfg.Generator.NewBlockTemplate(0,
+			payToAddr, algo)
+		if err != nil {
+			log.ERROR("failed to create new block template:", err)
+			continue
 		}
+		initialBlocks = append(initialBlocks, template)
 	}
-	blocks := Blocks{}
-	// create subscriber for new block event
-	cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.
-	Notification) {
+	// send out the block templates
+	blockChan <- initialBlocks
+	// create subscriber for new block
+	cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.	Notification) {
 		switch n.Type {
 		case chain.NTBlockConnected:
-			log.WARN("new block found")
-			blocks = Blocks{}
+			log.DEBUG("new block connected to chain")
+			blocks := Blocks{}
 			// generate Blocks
 			for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
 				BestSnapshot().Height+1)].Algos {
@@ -106,18 +119,59 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	})
 	// goroutine loop checking for connection and sync status
 	go func() {
+		time.Sleep(time.Second * 5)
 		for {
 			time.Sleep(time.Second)
 			connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
 			current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
 			// if out of sync or disconnected,
-			// once a second send out empty blocks
-			if connCount < 1 || !current {
+			// once a second send out empty initialBlocks
+			if (connCount < 1 && !*cx.Config.Solo) || !current {
 				blockChan <- Blocks{}
 			}
 			select {
 			case <-ctx.Done():
 				break
+			default:
+			}
+		}
+	}()
+	// goroutine loop checking for updates to block template consist
+	go func() {
+		lastTxUpdate := cx.RPCServer.Cfg.Generator.GetTxSource().LastUpdated()
+		time.Sleep(time.Second * 5)
+		for {
+			// this check is much more frequent as we want to ensure
+			// transactions are cleared immediately they appear if possible,
+			// while not disrupting mining progress excessively
+			time.Sleep(time.Second/10)
+			// when new transactions are received the last updated timestamp
+			// changes, when this happens a new dispatch needs to be made
+			if lastTxUpdate != cx.RPCServer.Cfg.Generator.GetTxSource().LastUpdated() {
+				log.WARN("new transactions added to block, " +
+					"dispatching new block templates")
+				blocks := Blocks{}
+				// generate Blocks
+				for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
+					BestSnapshot().Height+1)].Algos {
+					// Choose a payment address at random.
+					rand.Seed(time.Now().UnixNano())
+					payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(cx.
+						StateCfg.ActiveMiningAddrs))]
+					template, err := cx.RPCServer.Cfg.Generator.NewBlockTemplate(0,
+						payToAddr, algo)
+					if err != nil {
+						log.ERROR("failed to create new block template:", err)
+						continue
+					}
+					blocks = append(blocks, template)
+				}
+				blockChan <- blocks
+			}
+			select {
+			case <-ctx.Done():
+				break
+			default:
 			}
 		}
 	}()
