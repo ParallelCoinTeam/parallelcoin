@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	js "encoding/json"
+	"github.com/p9c/pod/pkg/log"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -223,12 +224,14 @@ type FutureGetBlockHashResult chan *response
 func (r FutureGetBlockHashResult) Receive() (*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		log.ERROR(err)
 		return nil, err
 	}
 	// Unmarshal the result as a string-encoded sha.
 	var txHashStr string
 	err = js.Unmarshal(res, &txHashStr)
 	if err != nil {
+		log.ERROR(err)
 		return nil, err
 	}
 	return chainhash.NewHashFromStr(txHashStr)

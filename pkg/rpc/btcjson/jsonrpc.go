@@ -3,6 +3,7 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 )
 
 type (
@@ -82,6 +83,7 @@ func NewRequest(id interface{}, method string, params []interface{}) (*Request, 
 	for _, param := range params {
 		marshalledParam, err := json.Marshal(param)
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		rawMessage := json.RawMessage(marshalledParam)

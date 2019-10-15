@@ -143,7 +143,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		*cx.Config.Listeners, db, cx.ActiveNet,
 		interrupt.ShutdownRequestChan, *cx.Config.Algo)
 	if err != nil {
-		log.ERRORF("unable to start server on %v: %v %s",
+		log.ERRORF("unable to start server on %v: %v",
 			*cx.Config.Listeners, err)
 		return err
 	}

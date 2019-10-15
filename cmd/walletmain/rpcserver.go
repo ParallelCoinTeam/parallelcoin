@@ -72,6 +72,10 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 		}
 		return tls.Certificate{}, err
 	}
+	err = ioutil.WriteFile(*config.CAFile, cert, 0600)
+	if err != nil {
+		return tls.Certificate{}, err
+	}
 	if writeKey {
 		err = ioutil.WriteFile(*config.RPCKey, key, 0600)
 		if err != nil {
