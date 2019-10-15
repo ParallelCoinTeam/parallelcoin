@@ -100,6 +100,11 @@ func initListeners(cx *conte.Xt) {
 		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
 		cx.StateCfg.Save = true
 	}
+	if *cfg.WalletServer == "" {
+		*cfg.WalletServer = "127.0.0.1:"+cx.ActiveNet.WalletRPCServerPort
+		cx.StateCfg.Save = true
+	}
+
 }
 
 func initTLSStuffs(cfg *pod.Config, st *state.Config) {

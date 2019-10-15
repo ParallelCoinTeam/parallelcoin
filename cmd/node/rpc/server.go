@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"net"
 	"os"
@@ -2934,9 +2935,20 @@ SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error) {
 	if *config.TLS {
 		// Generate the TLS cert and key file if both don't already exist.
 		if !FileExists(*config.RPCKey) && !FileExists(*config.RPCCert) {
-			err := GenCertPair(*config.RPCCert, *config.RPCKey)
+			err := GenCertPair(*config.RPCCert, *config.CAFile, *config.RPCKey)
 			if err != nil {
 				return nil, err
+			}
+		}
+		if !FileExists(*config.CAFile){
+			input, err := ioutil.ReadFile(*config.RPCCert)
+			if err != nil {
+				log.ERROR(err)
+			}
+
+			err = ioutil.WriteFile(*config.CAFile, input, 0644)
+			if err != nil {
+				log.ERROR("Error creating", *config.CAFile, err)
 			}
 		}
 		keyPair, err := tls.LoadX509KeyPair(*config.RPCCert, *config.RPCKey)

@@ -311,7 +311,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
-		log.INFOC(func() string {
+		log.DEBUGC(func() string {
 			return fmt.Sprintf("wrkr: %d hght: %d %08x %s %s %s %s %s %s %s"+
 				" %s %s %08x",
 				workerNumber,

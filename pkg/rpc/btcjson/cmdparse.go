@@ -3,6 +3,7 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -48,6 +49,7 @@ func MarshalCmd(id interface{}, cmd interface{}) ([]byte, error) {
 	// Generate and marshal the final JSON-RPC request.
 	rawCmd, err := NewRequest(id, method, params)
 	if err != nil {
+		log.ERROR(err)
 		return nil, err
 	}
 	return json.Marshal(rawCmd)

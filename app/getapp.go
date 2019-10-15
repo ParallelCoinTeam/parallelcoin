@@ -286,7 +286,7 @@ getApp(d *core.DuOS) (a *cli.App) {
 				d.CtX.Config.Whitelists),
 			apputil.String(
 				"rpcconnect",
-				"Hostname/IP and port of pod RPC server to connect to",
+				"Hostname/IP and port of chain RPC server to connect to",
 				"",
 				d.CtX.Config.RPCConnect),
 			apputil.StringSlice(
