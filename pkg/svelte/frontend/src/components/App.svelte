@@ -13,7 +13,7 @@
   }
 </style>
 
-	<x id="x" v-show="!this.duOSys.bios.isBoot" class="bgDark lightTheme"><div id="display">
+	<div id="x" v-show="!this.duOSys.bios.isBoot" class="bgDark lightTheme"><div id="display">
     <div class="grid-container bgDark">
     	<div class="flx fii Logo"><Logo /></div>
     	<Header />
@@ -25,7 +25,7 @@
     	<div id="main" class="grayGrad Main"><Overview /></div>
     </div>
     </div>
-</x>
+    </div>
 
 
 
