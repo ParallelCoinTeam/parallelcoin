@@ -9,6 +9,7 @@
     "rollup-plugin-svelte": "^5.1.0",
     "rollup-plugin-terser": "^5.1.2",
     "rollup-plugin-livereload": "^1.0.4",
+    "vudash": "^9.9.0",
     "golang": "^0.1.5-stable",
     "sirv-cli": "^0.4.4"
   },
@@ -20,7 +21,7 @@
     "build": "rollup -c",
     "autobuild": "rollup -c -w",
     "dev": "run-p start:dev autobuild",
-    "start": "sirv public",
-    "start:dev": "sirv public --dev"
+    "start": "sirv ../../assets/public",
+    "start:dev": "sirv ../../assets/public --dev"
   }
 }

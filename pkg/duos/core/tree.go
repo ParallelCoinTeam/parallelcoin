@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/p9c/gui"
+	bnd "github.com/p9c/pod/pkg/bundler"
 	"github.com/p9c/pod/pkg/conf"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/duos/db"
@@ -19,4 +20,5 @@ type DuOS struct {
 	DbS db.DuOSdb        `json:"database"`
 	CgG *conf.DuOSconfig `json:"configuration"`
 	SrV srv.DuOSservices `json:"services"`
+	BnD bnd.DuOSassets   `json:"assets"`
 }

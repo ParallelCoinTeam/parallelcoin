@@ -1,61 +1,79 @@
 package bnd
 
 import (
-	"fmt"
+	"bytes"
+	"compress/gzip"
+	"encoding/hex"
 	"io/ioutil"
-	"log"
-	"os"
-	"path/filepath"
+	"text/template"
 
-	"github.com/p9c/pod/pkg/bundler/lib"
+	"os"
 )
 
-func Bundler(files []string) {
-
-	var ignoreErrors = false
-
-	bndFiles := lib.GetBundlerFiles(files, ignoreErrors)
-
-	if len(bndFiles) == 0 {
-		fmt.Println("No files found to process.")
-		os.Exit(1)
+func filesLoop(b map[string]string) (fls string) {
+	for f, bf := range b {
+		fl := `"` + f + `":"` + bf + `",
+`
+		fls = fls + fl
 	}
-	referencedAssets, err := lib.GetReferencedAssets(bndFiles)
+	return
+}
+
+// CompressFile reads the given file and converts it to a
+// gzip compressed hex string
+func CompressFile(filename string) (string, error) {
+	data, err := ioutil.ReadFile("./assets/" + filename)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
+	var byteBuffer bytes.Buffer
+	writer := gzip.NewWriter(&byteBuffer)
+	writer.Write(data)
+	writer.Close()
+	return hex.EncodeToString(byteBuffer.Bytes()), nil
+}
 
-	targetFiles := []string{}
+// DecompressHexString decompresses the gzip/hex encoded data
+func DecompressHexString(hexdata string) ([]byte, error) {
+	data, err := hex.DecodeString(hexdata)
+	if err != nil {
+		panic(err)
+	}
+	datareader := bytes.NewReader(data)
+	gzipReader, err := gzip.NewReader(datareader)
+	if err != nil {
+		return nil, err
+	}
+	defer gzipReader.Close()
+	return ioutil.ReadAll(gzipReader)
+}
 
-	for _, referencedAsset := range referencedAssets {
-		packfileData, err := lib.GeneratePackFileString(referencedAsset, ignoreErrors)
+func Bundle() map[string]string {
+	b := make(map[string]string)
+	for _, file := range files {
+		zip, err := CompressFile(file)
 		if err != nil {
-			log.Fatal(err)
 		}
-		targetFile := filepath.Join(referencedAsset.BaseDir, referencedAsset.PackageName+"-bnd.go")
-		targetFiles = append(targetFiles, targetFile)
-		ioutil.WriteFile(targetFile, []byte(packfileData), 0644)
+		b[file] = zip
 	}
+	var code = `package bnd
+var FS = map[string]string{
+` + filesLoop(b) + `}`
 
-	//var cmdargs []string
+	file, _ := os.Create("./pkg/bnd/fs.go")
+	defer file.Close()
+	tmpl, _ := template.New("files").Parse(code)
+	tmpl.Execute(file, "fs")
+	return b
+}
 
-	//cmdargs = append(cmdargs, "build")
-	//cmdargs = append(cmdargs, "-ldflags")
-	//cmdargs = append(cmdargs, "-w -s")
-
-	//cmd := exec.Command("go", cmdargs...)
-	//stdoutStderr, err := cmd.CombinedOutput()
-	//if err != nil {
-	//	fmt.Printf("Error running command! %s\n", err.Error)
-	//	fmt.Printf("From program: %s\n", stdoutStderr)
-	//}
-
-	// Remove target Files
-	for _, filename := range targetFiles {
-		err := os.Remove(filename)
+func DuOSsveBundler() sveBundle {
+	fs := make(sveBundle)
+	for f, fn := range Bundle() {
+		unZip, err := DecompressHexString(fn)
 		if err != nil {
-			log.Fatal(err)
 		}
+		fs[f] = unZip
 	}
-
+	return fs
 }
