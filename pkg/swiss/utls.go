@@ -1,4 +1,4 @@
-package utl
+package sws
 
 import (
 	"bufio"

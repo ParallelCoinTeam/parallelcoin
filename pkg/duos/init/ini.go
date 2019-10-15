@@ -9,8 +9,7 @@ import (
 	"github.com/p9c/pod/pkg/duos/srv"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/robfig/cron"
-	"golang.org/x/net/websocket"
-	"io"
+	"net"
 	"net/http"
 )
 
@@ -22,10 +21,6 @@ const (
 	maxElementBuffer = 128 * 1024
 )
 
-// Echo the data received on the Web Socket.
-func EchoServer(ws *websocket.Conn) {
-	io.Copy(ws, ws)
-}
 
 const (
 	appName           = "pod"
@@ -54,11 +49,7 @@ func InitDuOS() core.DuOS {
 	log.DEBUG("running App")
 
 	//d.Config = d.Config.GetCoreCofig(d.Cx)
-	bundle := bnd.Group("pkg/svelte/frontend/public")
 
-	in := bundle.String("index.html")
-
-	fmt.Println("ssssssssssss", in)
 	d.GuI = initGUI()
 
 	// A simple way to know when UI is ready (uses body.onload event in JS)
@@ -74,6 +65,8 @@ func InitDuOS() core.DuOS {
 
 	// Create and bind Go object to the UI
 
+
+
 	// Call JS that calls Go and so on and so on...
 	m := d.GuI.Eval(fmt.Sprint(duos.GetDuOS()))
 	fmt.Println(m)
@@ -86,27 +79,39 @@ func InitDuOS() core.DuOS {
 
 	//d.Components = comp.Components(d.db)
 	d.DbS.DuOSdbInit(d.CtX.DataDir)
-
-	bnd.Bundler(bundle.Entries())
+	bnd.DuOSsveBundler()
 	// Load HTML.
 	// You may also use `data:text/html,<base64>` approach to load initial HTML,
 	// e.g: ui.Load("data:text/html," + url.PathEscape(html))
 
-	//ln, err := net.Listen("tcp", "127.0.0.1:0")
-	//if err != nil {
-	//	log.ERROR(err)
-	//}
-	//defer ln.Close()
-	//go http.Serve(ln, http.FileServer(FS))
-	//d.GuI.Load(fmt.Sprintf("http://%s", ln.Addr()))
-	d.GuI.Load("http://127.0.0.1:5000")
-
-	http.Handle("/echo", websocket.Handler(EchoServer))
-	err := http.ListenAndServe(":12345", nil)
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		panic("ListenAndServe: " + err.Error())
+		log.ERROR(err)
 	}
+	defer ln.Close()
+	go http.Serve(ln, http.FileServer(FS))
+	http.HandleFunc("pipe.js", bnd.PipeJsHandler)
+	http.HandleFunc("svelte.js", bnd.BndJsHandler)
+	http.HandleFunc("svelte.css", bnd.BndCssHandler)
 
+
+	//fmt.Println("asdasasas", bnd.DuOSsveBundler())
+	//http.Handle("/", http.FileServer(bnd.DuOSsveBundler()))
+	//log.ERROR(http.ListenAndServe(":0", nil))
+
+
+	//http.ListenAndServe(":8080", nil)
+
+	d.GuI.Load(fmt.Sprintf("http://%s", ln.Addr()))
+	//d.GuI.Load("http://127.0.0.1:0")
+
+	//http.Handle("/echo", websocket.Handler(EchoServer))
+	//err := http.ListenAndServe(":12345", nil)
+	//if err != nil {
+	//	panic("ListenAndServe: " + err.Error())
+	//}
+
+	//d.GuI.Eval(string(bnd.DuOSsveBundler()["svelte.js"]))
 	return d
 }
 
