@@ -3,12 +3,15 @@ package ini
 import (
 	"fmt"
 	"github.com/p9c/gui"
+	"github.com/p9c/pod/pkg/bundler"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/duos/core"
 	"github.com/p9c/pod/pkg/duos/srv"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/robfig/cron"
-	"runtime"
+	"golang.org/x/net/websocket"
+	"io"
+	"net/http"
 )
 
 const (
@@ -19,8 +22,9 @@ const (
 	maxElementBuffer = 128 * 1024
 )
 
-func init() {
-	runtime.LockOSThread()
+// Echo the data received on the Web Socket.
+func EchoServer(ws *websocket.Conn) {
+	io.Copy(ws, ws)
 }
 
 const (
@@ -50,7 +54,11 @@ func InitDuOS() core.DuOS {
 	log.DEBUG("running App")
 
 	//d.Config = d.Config.GetCoreCofig(d.Cx)
+	bundle := bnd.Group("pkg/svelte/frontend/public")
 
+	in := bundle.String("index.html")
+
+	fmt.Println("ssssssssssss", in)
 	d.GuI = initGUI()
 
 	// A simple way to know when UI is ready (uses body.onload event in JS)
@@ -79,6 +87,7 @@ func InitDuOS() core.DuOS {
 	//d.Components = comp.Components(d.db)
 	d.DbS.DuOSdbInit(d.CtX.DataDir)
 
+	bnd.Bundler(bundle.Entries())
 	// Load HTML.
 	// You may also use `data:text/html,<base64>` approach to load initial HTML,
 	// e.g: ui.Load("data:text/html," + url.PathEscape(html))
@@ -90,8 +99,13 @@ func InitDuOS() core.DuOS {
 	//defer ln.Close()
 	//go http.Serve(ln, http.FileServer(FS))
 	//d.GuI.Load(fmt.Sprintf("http://%s", ln.Addr()))
-
 	d.GuI.Load("http://127.0.0.1:5000")
+
+	http.Handle("/echo", websocket.Handler(EchoServer))
+	err := http.ListenAndServe(":12345", nil)
+	if err != nil {
+		panic("ListenAndServe: " + err.Error())
+	}
 
 	return d
 }
