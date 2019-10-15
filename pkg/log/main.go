@@ -280,11 +280,11 @@ func composit(text, level string, color bool) string {
 	_, loc, iline, _ := runtime.Caller(3)
 	line := fmt.Sprint(iline)
 	files := strings.Split(loc, "github.com/p9c/pod/")
-	file := "./"+files[1]
-	since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
-		Second * time.Second)
-	if terminalWidth > 160 {
-		since = fmt.Sprint(time.Now())[:24]
+	file := "./" + files[1]
+	since := rightJustify(fmt.Sprint(time.Now().Sub(StartupTime)/time.
+		Second*time.Second), 12)
+	if terminalWidth > 200 {
+		since = fmt.Sprint(time.Now())
 	}
 	levelLen := len(level) + 1
 	sinceLen := len(since) + 1
@@ -443,7 +443,7 @@ func composit(text, level string, color bool) string {
 func Println(level string, color bool, fh *os.File) PrintlnFunc {
 	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
-		fmt.Println("\r"+composit(text, level, color))
+		fmt.Println("\r" + composit(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -461,7 +461,7 @@ func Println(level string, color bool, fh *os.File) PrintlnFunc {
 func Printf(level string, color bool, fh *os.File) PrintfFunc {
 	f := func(format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
-		fmt.Println("\r"+composit(text, level, color))
+		fmt.Println("\r" + composit(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -481,7 +481,7 @@ func Printc(level string, color bool, fh *os.File) PrintcFunc {
 		// level = strings.ToUpper(string(level[0]))
 		t := fn()
 		text := trimReturn(t)
-		fmt.Println("\r"+composit(text, level, color))
+		fmt.Println("\r" + composit(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -500,7 +500,7 @@ func Prints(level string, color bool, fh *os.File) SpewFunc {
 	f := func(a interface{}) {
 		text := trimReturn(spew.Sdump(a))
 		fmt.Println(composit("spew:", level, color))
-		fmt.Println("\r"+text)
+		fmt.Println("\r" + text)
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}

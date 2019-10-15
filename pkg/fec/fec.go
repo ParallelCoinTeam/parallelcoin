@@ -24,12 +24,12 @@ var (
 )
 
 // padData appends a 2 byte length prefix, and pads to a multiple of rsTotal.
-// An empty slice will be returned if the total length is greater than
-// maxMessageSize.
+// Max message size is limited to 1<<32 but in our use will never get near
+// this size through higher level protocols breaking packets into sessions
 func padData(data []byte) (out []byte) {
 	dataLen := len(data)
-	prefixBytes := make([]byte, 2)
-	binary.LittleEndian.PutUint16(prefixBytes, uint16(dataLen))
+	prefixBytes := make([]byte, 4)
+	binary.LittleEndian.PutUint32(prefixBytes, uint32(dataLen))
 	data = append(prefixBytes, data...)
 	dataLen = len(data)
 	chunkLen := (dataLen) / rsTotal
@@ -69,11 +69,6 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 }
 
 func Decode(chunks [][]byte) (data []byte, err error) {
-	//defer func() {
-	//	if r := recover(); r != nil {
-	//		log.DEBUG("Recovered in f", r)
-	//	}
-	//}()
 	var shares []infectious.Share
 	for i := range chunks {
 		bodyLen := len(chunks[i])
@@ -86,5 +81,15 @@ func Decode(chunks [][]byte) (data []byte, err error) {
 		shares = append(shares, share)
 	}
 	data, err = rsFEC.Decode(nil, shares)
+	if len(data) > 4 {
+		prefix := data[:4]
+		data = data[4:]
+		dataLen := int(binary.LittleEndian.Uint32(prefix))
+		if len(data) == dataLen {
+			data = data[:dataLen]
+		} else {
+			data = data[0:]
+		}
+	}
 	return
 }

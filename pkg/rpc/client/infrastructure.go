@@ -568,7 +568,7 @@ out:
 			wsConn, err := dial(c.config)
 			if err != nil {
 				c.retryCount++
-				log.TRACE("failed to connect to %s: %v %s", c.config.Host, err)
+				log.TRACEF("failed to connect to %s: %v %s", c.config.Host, err)
 				// Scale the retry interval by the number of retries so there is
 				// a backoff up to a max of 1 minute.
 				scaledInterval := connectionRetryInterval.Nanoseconds() * c.
@@ -577,7 +577,7 @@ out:
 				if scaledDuration > time.Minute {
 					scaledDuration = time.Minute
 				}
-				log.TRACE("retrying connection to %s in %s %s",
+				log.TRACEF("retrying connection to %s in %s %s",
 					c.config.Host, scaledDuration)
 				time.Sleep(scaledDuration)
 				continue reconnect
@@ -758,6 +758,7 @@ func // sendRequest sends the passed json request to the associated server
 	// channel.  Then send the marshalled request via the websocket connection.
 	if err := c.addRequest(jReq); err != nil {
 		jReq.responseChan <- &response{err: err}
+		log.ERROR(err)
 		return
 	}
 	log.TRACEF("sending command [%s] with id %d", jReq.method, jReq.id)
@@ -772,12 +773,14 @@ func // sendCmd sends the passed command to the associated server and returns a
 	// Get the method associated with the command.
 	method, err := btcjson.CmdMethod(cmd)
 	if err != nil {
+		log.ERROR(err)
 		return newFutureError(err)
 	}
 	// Marshal the command.
 	id := c.NextID()
 	marshalledJSON, err := btcjson.MarshalCmd(id, cmd)
 	if err != nil {
+		log.ERROR(err)
 		return newFutureError(err)
 	}
 	// Generate the request and send it along with a channel to respond on.
