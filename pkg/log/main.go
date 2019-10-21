@@ -499,8 +499,9 @@ func Printc(level string, color bool, fh *os.File) PrintcFunc {
 func Prints(level string, color bool, fh *os.File) SpewFunc {
 	f := func(a interface{}) {
 		text := trimReturn(spew.Sdump(a))
-		fmt.Println(composit("spew:", level, color))
-		fmt.Println("\r" + text)
+		o := composit("spew:", level, color)
+		o += "\n" + text
+		fmt.Println(o)
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
