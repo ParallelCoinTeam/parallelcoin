@@ -1,7 +1,11 @@
+// Package controller implements the server side of a lan multicast mining work dispatcher that goes with the
+// `kopach` miner with automatic network topology based failover and redundancy for new block and solution broadcast
+//go:generate go run ../../cmd/tools/genmsghandle/main.go controller Solution broadcast.SolBlock . msghandle.go
 package controller
 
 import (
 	"context"
+	"github.com/p9c/pod/pkg/chain/wire"
 	"math/rand"
 	"time"
 
@@ -17,6 +21,7 @@ import (
 )
 
 type Blocks []*mining.BlockTemplate
+type Solution wire.MsgBlock
 
 // Run starts a controller instance
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
@@ -94,7 +99,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	// send out the block templates
 	blockChan <- initialBlocks
 	// create subscriber for new block
-	cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.	Notification) {
+	cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.Notification) {
 		switch n.Type {
 		case chain.NTBlockConnected:
 			log.DEBUG("new block connected to chain")
@@ -119,6 +124,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	})
 	// goroutine loop checking for connection and sync status
 	go func() {
+		// allow a little time for all goroutines to fire up
 		time.Sleep(time.Second * 5)
 		for {
 			time.Sleep(time.Second)
@@ -144,7 +150,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			// this check is much more frequent as we want to ensure
 			// transactions are cleared immediately they appear if possible,
 			// while not disrupting mining progress excessively
-			time.Sleep(time.Second/10)
+			time.Sleep(time.Second / 10)
 			// when new transactions are received the last updated timestamp
 			// changes, when this happens a new dispatch needs to be made
 			if lastTxUpdate != cx.RPCServer.Cfg.Generator.GetTxSource().LastUpdated() {
@@ -172,6 +178,24 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			case <-ctx.Done():
 				break
 			default:
+			}
+		}
+	}()
+	returnChan := make(chan *Solution)
+	m := newMsgHandle(*cx.Config.MinerPass, returnChan)
+	// goroutine loop listening for solutions sent out from workers on the LAN and then submitting them
+	// to the network
+	go func() {
+		cancel := broadcast.Listen(broadcast.DefaultAddress, m.msgHandler)
+	outReceive:
+		for {
+			select {
+			case sol := <-returnChan:
+				log.SPEW(sol)
+			case <-ctx.Done():
+				log.DEBUG("quitting on quit channel close")
+				cancel()
+				break outReceive
 			}
 		}
 	}()

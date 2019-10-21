@@ -1,8 +1,7 @@
+//go:generate go run ../tools/genmsghandle/main.go kopach controller.Blocks broadcast.TplBlock github.com/p9c/pod/pkg/controller msghandle.go
 package kopach
 
 import (
-	"crypto/cipher"
-	"encoding/hex"
 	"fmt"
 	"github.com/p9c/pod/pkg/broadcast"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -11,12 +10,10 @@ import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/controller"
-	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/ugorji/go/codec"
 	"go.uber.org/atomic"
-	"net"
 	"sync"
 	"time"
 
@@ -27,8 +24,8 @@ import (
 func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	wg.Add(1)
 	log.WARN("starting kopach standalone miner worker")
-	m := newMsgHandle(*cx.Config.MinerPass)
-	m.blockChan = make(chan controller.Blocks)
+	returnChan := make(chan *controller.Blocks)
+	m := newMsgHandle(*cx.Config.MinerPass, returnChan)
 	blockSemaphore := make(chan struct{})
 	outAddr, err := broadcast.New(*cx.Config.BroadcastAddress)
 	if err != nil {
@@ -45,14 +42,14 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	workOut:
 		for {
 			select {
-			case bt := <-m.blockChan:
+			case bt := <-m.returnChan:
 				switch {
 				// if the channel is returning nil it has been closed
 				case bt == nil:
 					break workOut
 				// empty block templates means stop work and don't start
 				// new work
-				case len(bt) < 1:
+				case len(*bt) < 1:
 					if blockSemaphore != nil {
 						close(blockSemaphore)
 						blockSemaphore = make(chan struct{})
@@ -64,7 +61,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 						close(blockSemaphore)
 						blockSemaphore = make(chan struct{})
 					}
-					curHeight := bt[0].Height
+					curHeight := (*bt)[0].Height
 					for i := 0; i < *cx.Config.GenThreads; i++ {
 						// start up worker
 						go func() {
@@ -93,9 +90,9 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 								algoVer := fork.GetAlgoVer(algo, curHeight+1)
 								var msgBlock *wire.MsgBlock
 								found := false
-								for j := range bt {
-									if bt[j].Block.Header.Version == algoVer {
-										msgBlock = bt[j].Block
+								for j := range *bt {
+									if (*bt)[j].Block.Header.Version == algoVer {
+										msgBlock = (*bt)[j].Block
 										found = true
 									}
 								}
@@ -165,7 +162,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 										// difficulty.  Yay!
 										bigHash := blockchain.HashToBig(&hash)
 										if bigHash.Cmp(targetDifficulty) <= 0 {
-											log.WARN("found block", )
+											log.WARN("found block")
 											// broadcast solved block:
 											// first stop all work
 											if blockSemaphore == nil {
@@ -197,15 +194,15 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 					}
 				}
 			case <-quit:
-				close(m.blockChan)
+				close(m.returnChan)
 				break workOut
 			}
 		}
 	}()
 	go func() {
+		cancel := broadcast.Listen(broadcast.DefaultAddress, m.msgHandler)
 	out:
 		for {
-			cancel := broadcast.Listen(broadcast.DefaultAddress, m.msgHandler)
 			select {
 			case <-quit:
 				log.DEBUG("quitting on quit channel close")
@@ -215,96 +212,6 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 		}
 		wg.Done()
 	}()
-}
-
-type msgBuffer struct {
-	buffers [][]byte
-	first   time.Time
-	decoded bool
-}
-
-type msgHandle struct {
-	buffers   map[string]*msgBuffer
-	ciph      *cipher.AEAD
-	dec       *codec.Decoder
-	decBuf    []byte
-	blockChan chan controller.Blocks
-}
-
-func newMsgHandle(password string) (out *msgHandle) {
-	out = &msgHandle{}
-	out.buffers = make(map[string]*msgBuffer)
-	ciph := gcm.GetCipher(password)
-	out.ciph = &ciph
-	var mh codec.MsgpackHandle
-	out.decBuf = make([]byte, 0, broadcast.MaxDatagramSize)
-	out.dec = codec.NewDecoderBytes(out.decBuf, &mh)
-	return
-}
-
-func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
-	// remove any expired message bundles in the cache
-	var deleters []string
-	for i := range m.buffers {
-		if time.Now().Sub(m.buffers[i].first) > time.Millisecond*50 {
-			deleters = append(deleters, i)
-		}
-	}
-	for i := range deleters {
-		log.TRACE("deleting old message buffer")
-		delete(m.buffers, deleters[i])
-	}
-	b = b[:n]
-	//log.SPEW(b)
-	if n < 16 {
-		log.ERROR("received short broadcast message")
-		return
-	}
-	// snip off message magic bytes
-	msgType := string(b[:8])
-	b = b[8:]
-	if msgType == broadcast.TplBlock {
-		log.TRACE(n, " bytes read from ", src, "message type", msgType)
-		buffer := b
-		nonce := string(b[:8])
-		if x, ok := m.buffers[nonce]; ok {
-			log.TRACE("additional shard with nonce", hex.EncodeToString([]byte(nonce)))
-			if !x.decoded {
-				log.TRACE("adding shard")
-				x.buffers = append(x.buffers, buffer)
-				lb := len(x.buffers)
-				log.TRACE("have", lb, "buffers")
-				if lb > 2 {
-					// try to decode it
-					bytes, err := broadcast.Decode(*m.ciph, x.buffers)
-					if err != nil {
-						log.ERROR(err)
-						return
-					}
-					//log.SPEW(bytes)
-					m.dec.ResetBytes(bytes)
-					blocks := controller.Blocks{}
-					err = m.dec.Decode(&blocks)
-					if err != nil {
-						log.ERROR(err)
-					}
-					log.INFO(len(blocks), "block templates received")
-					x.decoded = true
-					// mine on it
-					m.blockChan <- blocks
-				}
-			} else if x.buffers != nil {
-				log.TRACE("nilling buffers")
-				x.buffers = nil
-			} else {
-				log.TRACE("ignoring already decoded message shard")
-			}
-		} else {
-			log.TRACE("adding nonce", hex.EncodeToString([]byte(nonce)))
-			m.buffers[nonce] = &msgBuffer{[][]byte{}, time.Now(), false}
-			m.buffers[nonce].buffers = append(m.buffers[nonce].buffers, b)
-		}
-	}
 }
 
 // UpdateExtraNonce updates the extra nonce in the coinbase script of the

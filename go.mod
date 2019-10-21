@@ -33,7 +33,10 @@ require (
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/robfig/cron v1.2.0
 	github.com/shirou/gopsutil v2.18.12+incompatible
+	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect
+	github.com/ugorji/go/codec v1.1.7
 	github.com/urfave/cli v1.22.1
+	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
 	github.com/zserge/webview v0.0.0-20190123072648-16c93bcaeaeb
 	go.uber.org/atomic v1.4.0
 	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392
