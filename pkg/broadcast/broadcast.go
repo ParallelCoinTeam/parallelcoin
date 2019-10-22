@@ -35,16 +35,17 @@ func Send(addr *net.UDPAddr, bytes []byte, ciph cipher.AEAD,
 	if err != nil {
 		return
 	}
+	var n, cumulative int
 	for i := range shards {
-		var n int
 		n, err = conn.WriteToUDP(shards[i], addr)
 		if err != nil {
 			log.ERROR(err, len(shards[i]))
 			return
 		}
-		log.TRACE("wrote", n, "bytes to multicast address", addr.IP, "port",
-			addr.Port)
+		cumulative += n
 	}
+	log.TRACE("wrote", n, "bytes to multicast address", addr.IP, "port",
+		addr.Port)
 	err = conn.Close()
 	if err != nil {
 		log.ERROR(err)

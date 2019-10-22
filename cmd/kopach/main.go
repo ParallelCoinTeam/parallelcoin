@@ -37,6 +37,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	bytes := make([]byte, 0, broadcast.MaxDatagramSize)
 	enc := codec.NewEncoderBytes(&bytes, &mh)
 	var rotator atomic.Uint64
+	var started bool
 	// mining work dispatch goroutine
 	go func() {
 	workOut:
@@ -47,26 +48,29 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 				// if the channel is returning nil it has been closed
 				case bt == nil:
 					break workOut
-				// empty block templates means stop work and don't start
-				// new work
-				case len(*bt) < 1:
-					if blockSemaphore != nil {
-						close(blockSemaphore)
-						blockSemaphore = make(chan struct{})
-					}
 				// received a normal block template
 				default:
+					// If a worker is running and the block templates are not marked new, ignore
+					if started {
+						if !bt.New && blockSemaphore != nil {
+							log.TRACE("already started, block is not new, ignoring")
+							break
+						}
+					} else {
+						log.WARN("starting mining")
+						started = true
+					}
 					// if workers are working, stop them
 					if blockSemaphore != nil {
 						close(blockSemaphore)
 						blockSemaphore = make(chan struct{})
 					}
-					curHeight := (*bt)[0].Height
+					curHeight := bt.Templates[0].Height
 					for i := 0; i < *cx.Config.GenThreads; i++ {
 						// start up worker
 						go func() {
 							tn := time.Now()
-							log.WARN("starting worker", i, tn)
+							log.DEBUG("starting worker", i, tn)
 							j := i
 						threadOut:
 							for {
@@ -90,9 +94,9 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 								algoVer := fork.GetAlgoVer(algo, curHeight+1)
 								var msgBlock *wire.MsgBlock
 								found := false
-								for j := range *bt {
-									if (*bt)[j].Block.Header.Version == algoVer {
-										msgBlock = (*bt)[j].Block
+								for j := range bt.Templates {
+									if bt.Templates[j].Block.Header.Version == algoVer {
+										msgBlock = bt.Templates[j].Block
 										found = true
 									}
 								}
@@ -100,8 +104,6 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 									break threadOut
 								}
 								// start attempting to solve block
-								// Choose a random extra nonce offset for
-								// this block template and worker.
 								enOffset, err := wire.RandomUint64()
 								if err != nil {
 									log.WARNF(
@@ -137,14 +139,6 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 									mn := uint32(27)
 									mn = 1 << 8 * uint32(*cx.Config.GenThreads)
 									var i uint32
-									defer func() {
-										log.DEBUGF(
-											"wrkr: %d finished %d rounds of"+
-												" %s", j, i-rNonce-1,
-											fork.GetAlgoName(
-												msgBlock.Header.Version,
-												curHeight+1))
-									}()
 									log.TRACE("starting round from ", rNonce)
 									for i = rNonce; i <= rNonce+mn; i++ {
 										select {
@@ -170,6 +164,8 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 												blockSemaphore = nil
 											}
 											// serialize the block
+											bytes = bytes[:0]
+											enc.ResetBytes(&bytes)
 											err := enc.Encode(msgBlock)
 											if err != nil {
 												log.ERROR(err)
@@ -189,7 +185,8 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 								default:
 								}
 							}
-							log.WARN("worker", j, tn, "stopped")
+							log.DEBUG("worker", j, tn, "stopped")
+							started = false
 						}()
 					}
 				}
@@ -232,9 +229,9 @@ func UpdateExtraNonce(msgBlock *wire.MsgBlock,
 	}
 	msgBlock.Transactions[0].TxIn[0].SignatureScript = coinbaseScript
 	// TODO(davec): A util.Solution should use saved in the state to avoid
-	// recalculating all of the other transaction hashes.
-	// block.Transactions[0].InvalidateCache() Recalculate the merkle root with
-	// the updated extra nonce.
+	//  recalculating all of the other transaction hashes.
+	//  block.Transactions[0].InvalidateCache() Recalculate the merkle root with
+	//  the updated extra nonce.
 	block := util.NewBlock(msgBlock)
 	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
 	msgBlock.Header.MerkleRoot = *merkles[len(merkles)-1]

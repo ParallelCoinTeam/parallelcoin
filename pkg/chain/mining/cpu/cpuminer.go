@@ -90,7 +90,8 @@ const (
 	// maxExtraNonce is the maximum value an extra nonce used in a coinbase
 	// transaction can be.
 	maxExtraNonce = 2 ^ 64 - 1
-	// hpsUpdateSecs is the number of seconds to wait in between each update to the hashes per second monitor.
+	// hpsUpdateSecs is the number of seconds to wait in between each update to
+	// the hashes per second monitor.
 	hpsUpdateSecs = 1
 	// hashUpdateSec is the number of seconds each worker waits in between
 	// notifying the speed monitor with how many hashes have been completed
