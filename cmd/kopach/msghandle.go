@@ -4,7 +4,6 @@ package kopach
 
 import (
 	"crypto/cipher"
-	"encoding/hex"
 	"github.com/p9c/pod/pkg/broadcast"
 	"github.com/p9c/pod/pkg/controller"
 	"github.com/p9c/pod/pkg/gcm"
@@ -49,7 +48,7 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 		}
 	}
 	for i := range deleters {
-		log.TRACE("deleting old message buffer")
+		//log.TRACE("deleting old message buffer")
 		delete(m.buffers, deleters[i])
 	}
 	b = b[:n]
@@ -61,16 +60,16 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 	msgType := string(b[:8])
 	b = b[8:]
 	if msgType == broadcast.TplBlock {
-		log.TRACE(n, " bytes read from ", src, "message type", msgType)
+		//log.TRACE(n, " bytes read from ", src, "message type", msgType)
 		buffer := b
 		nonce := string(b[:8])
 		if x, ok := m.buffers[nonce]; ok {
-			log.TRACE("additional shard with nonce", hex.EncodeToString([]byte(nonce)))
+			//log.TRACE("additional shard with nonce", hex.EncodeToString([]byte(nonce)))
 			if !x.decoded {
-				log.TRACE("appending shard")
+				//log.TRACE("appending shard")
 				x.buffers = append(x.buffers, buffer)
 				lb := len(x.buffers)
-				log.TRACE("have", lb, "buffers")
+				//log.TRACE("have", lb, "buffers")
 				if lb > 2 {
 					// try to decode it
 					bytes, err := broadcast.Decode(*m.ciph, x.buffers)
@@ -89,13 +88,13 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 					m.returnChan <- message
 				}
 			} else if x.buffers != nil {
-				log.TRACE("nilling buffers")
+				//log.TRACE("nilling buffers")
 				x.buffers = nil
 			} else {
-				log.TRACE("ignoring already decoded message shard")
+				//log.TRACE("ignoring already decoded message shard")
 			}
 		} else {
-			log.TRACE("adding nonce", hex.EncodeToString([]byte(nonce)))
+			//log.TRACE("adding nonce", hex.EncodeToString([]byte(nonce)))
 			m.buffers[nonce] = &msgBuffer{[][]byte{}, time.Now(), false}
 			m.buffers[nonce].buffers = append(m.buffers[nonce].buffers, b)
 		}
