@@ -53,7 +53,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 					// If a worker is running and the block templates are not marked new, ignore
 					if started {
 						if !bt.New && blockSemaphore != nil {
-							log.TRACE("already started, block is not new, ignoring")
+							//log.TRACE("already started, block is not new, ignoring")
 							break
 						}
 					} else {
@@ -139,7 +139,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 									mn := uint32(27)
 									mn = 1 << 8 * uint32(*cx.Config.GenThreads)
 									var i uint32
-									log.TRACE("starting round from ", rNonce)
+									//log.TRACE("starting round from ", rNonce)
 									for i = rNonce; i <= rNonce+mn; i++ {
 										select {
 										case <-quit:

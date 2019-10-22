@@ -83,13 +83,13 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				bytes = bytes[:0]
 				enc.ResetBytes(&bytes)
 			case <-ticker.C:
-				fmt.Print("\rsending out old block broadcast ", time.Now())
+				fmt.Print("\rsending out old block broadcast ", time.Now(), oldBlocks.New)
 				err := enc.Encode(oldBlocks)
 				if err != nil {
 					log.ERROR(err)
 					break
 				}
-				log.SPEW(bytes)
+				//log.SPEW(bytes)
 				err = broadcast.Send(outAddr, bytes, ciph, broadcast.Template)
 				if err != nil {
 					log.ERROR(err)
@@ -203,6 +203,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					}
 					blocks.Templates = append(blocks.Templates, template)
 				}
+				oldBlocks.Templates = blocks.Templates
 				blockChan <- blocks
 			}
 			select {
@@ -236,6 +237,25 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					log.WARNF(
 						"Block submitted via kopach miner with previous block %s is stale",
 						msgBlock.Header.PrevBlock)
+					log.WARN("updating block templates")
+					blocks := Blocks{New: true}
+					// generate Blocks
+					for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
+						BestSnapshot().Height+1)].Algos {
+						// Choose a payment address at random.
+						rand.Seed(time.Now().UnixNano())
+						payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(cx.
+							StateCfg.ActiveMiningAddrs))]
+						template, err := cx.RPCServer.Cfg.Generator.NewBlockTemplate(0,
+							payToAddr, algo)
+						if err != nil {
+							log.ERROR("failed to create new block template:", err)
+							continue
+						}
+						blocks.Templates = append(blocks.Templates, template)
+					}
+					oldBlocks.Templates = blocks.Templates
+					blockChan <- blocks
 					continue
 				}
 				// Process this block using the same rules as blocks coming from other
