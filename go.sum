@@ -1,6 +1,7 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 git.parallelcoin.io/dev/cryptonight v0.3.1 h1:KOYA3re83Sg6pzKSByrmMT1WOeQk/AR9zzw44y6xma0=
 git.parallelcoin.io/dev/cryptonight v0.3.1/go.mod h1:n1SWthC+JOElqDnUkMYQrkdxuc6Z62QXw+21fZ1JdzE=
+git.parallelcoin.io/dev/pod v0.0.1 h1:jO1ZHSkx4sBR2y7GpbGtRjirdkLEvdDl2n/fHFLxihk=
 git.parallelcoin.io/dev/rudp v0.0.0-20190815191130-4a16da245887 h1:0anFc4CQPtvvN9qppl50lr05/mfNHk7F8gfkuGWHOLE=
 git.parallelcoin.io/dev/rudp v0.0.0-20190815191130-4a16da245887/go.mod h1:ktYqy1IKwSq0vAXy8QzPVIV2pJ5Rc1YiOOfzMpVlwRQ=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=

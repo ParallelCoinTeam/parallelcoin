@@ -5,8 +5,12 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/ugorji/go/codec"
@@ -20,7 +24,11 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
-type Blocks []*mining.BlockTemplate
+type Templates []*mining.BlockTemplate
+type Blocks struct {
+	Templates
+	New bool
+}
 type Solution wire.MsgBlock
 
 // Run starts a controller instance
@@ -51,15 +59,32 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	// cpu thread is enough to handle all the traffic so lower overhead if it
 	// is not multi-threaded
 	blockChan := make(chan Blocks)
+	ticker := time.NewTicker(time.Second)
+	oldBlocks := Blocks{New: false}
 	// work dispatch loop
 	go func() {
 		for {
 			select {
 			case lb := <-blockChan:
-				// send out block broadcast
+				log.WARN("saving old Blocks for old block rebroadcast")
+				oldBlocks.Templates = lb.Templates
 				log.DEBUG("sending out block broadcast")
-				// serialize initialBlocks
 				err := enc.Encode(lb)
+				if err != nil {
+					log.ERROR(err)
+					break
+				}
+				log.SPEW(bytes)
+				err = broadcast.Send(outAddr, bytes, ciph, broadcast.Template)
+				if err != nil {
+					log.ERROR(err)
+				}
+				// reset the bytes for next round
+				bytes = bytes[:0]
+				enc.ResetBytes(&bytes)
+			case <-ticker.C:
+				fmt.Print("\rsending out old block broadcast ", time.Now())
+				err := enc.Encode(oldBlocks)
 				if err != nil {
 					log.ERROR(err)
 					break
@@ -78,9 +103,9 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				// default:
 			}
 		}
-	}() //
+	}()
 	// generate initial Blocks
-	initialBlocks := Blocks{}
+	initialBlocks := Blocks{New: true}
 	for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
 		BestSnapshot().Height+1)].Algos {
 		// Choose a payment address at random.
@@ -94,7 +119,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			log.ERROR("failed to create new block template:", err)
 			continue
 		}
-		initialBlocks = append(initialBlocks, template)
+		initialBlocks.Templates = append(initialBlocks.Templates, template)
 	}
 	// send out the block templates
 	blockChan <- initialBlocks
@@ -103,7 +128,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		switch n.Type {
 		case chain.NTBlockConnected:
 			log.DEBUG("new block connected to chain")
-			blocks := Blocks{}
+			blocks := Blocks{New: true}
 			// generate Blocks
 			for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
 				BestSnapshot().Height+1)].Algos {
@@ -117,31 +142,38 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					log.ERROR("failed to create new block template:", err)
 					continue
 				}
-				blocks = append(blocks, template)
+				blocks.Templates = append(blocks.Templates, template)
 			}
 			blockChan <- blocks
 		}
 	})
 	// goroutine loop checking for connection and sync status
-	go func() {
-		// allow a little time for all goroutines to fire up
-		time.Sleep(time.Second * 5)
-		for {
-			time.Sleep(time.Second)
-			connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
-			current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
-			// if out of sync or disconnected,
-			// once a second send out empty initialBlocks
-			if (connCount < 1 && !*cx.Config.Solo) || !current {
-				blockChan <- Blocks{}
+	if !*cx.Config.Solo {
+		go func() {
+			// allow a little time for all goroutines to fire up
+			time.Sleep(time.Second * 5)
+			for {
+				time.Sleep(time.Second)
+				connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+				current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
+				// if out of sync or disconnected,
+				// once a second send out empty initialBlocks
+				if connCount < 1 {
+					log.DEBUG("node is offline", current)
+					blockChan <- Blocks{New: false}
+				}
+				if !current {
+					log.DEBUG("node is not current", current)
+					blockChan <- Blocks{New: false}
+				}
+				select {
+				case <-ctx.Done():
+					break
+				default:
+				}
 			}
-			select {
-			case <-ctx.Done():
-				break
-			default:
-			}
-		}
-	}()
+		}()
+	}
 	// goroutine loop checking for updates to block template consist
 	go func() {
 		lastTxUpdate := cx.RPCServer.Cfg.Generator.GetTxSource().LastUpdated()
@@ -154,9 +186,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			// when new transactions are received the last updated timestamp
 			// changes, when this happens a new dispatch needs to be made
 			if lastTxUpdate != cx.RPCServer.Cfg.Generator.GetTxSource().LastUpdated() {
-				log.WARN("new transactions added to block, " +
-					"dispatching new block templates")
-				blocks := Blocks{}
+				log.WARN("new transactions added to block, dispatching new block templates")
+				blocks := Blocks{New: true}
 				// generate Blocks
 				for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
 					BestSnapshot().Height+1)].Algos {
@@ -170,7 +201,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 						log.ERROR("failed to create new block template:", err)
 						continue
 					}
-					blocks = append(blocks, template)
+					blocks.Templates = append(blocks.Templates, template)
 				}
 				blockChan <- blocks
 			}
@@ -183,15 +214,66 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	}()
 	returnChan := make(chan *Solution)
 	m := newMsgHandle(*cx.Config.MinerPass, returnChan)
-	// goroutine loop listening for solutions sent out from workers on the LAN and then submitting them
-	// to the network
+	// goroutine loop listening for solutions sent out from workers on the LAN and
+	// then submitting them to the network
 	go func() {
 		cancel := broadcast.Listen(broadcast.DefaultAddress, m.msgHandler)
+		var submitLock sync.Mutex
 	outReceive:
 		for {
 			select {
 			case sol := <-returnChan:
 				log.SPEW(sol)
+				msgBlock := wire.MsgBlock(*sol)
+				block := util.NewBlock(&msgBlock)
+				submitLock.Lock()
+				// Ensure the block is not stale since a new block could have shown up while
+				// the solution was being found.  Typically that condition is detected and
+				// all work on the stale block is halted to start work on a new block, but
+				// the check only happens periodically, so it is possible a block was found
+				// and submitted in between.
+				if !msgBlock.Header.PrevBlock.IsEqual(&cx.RPCServer.Cfg.Chain.BestSnapshot().Hash) {
+					log.WARNF(
+						"Block submitted via kopach miner with previous block %s is stale",
+						msgBlock.Header.PrevBlock)
+					continue
+				}
+				// Process this block using the same rules as blocks coming from other
+				// nodes.  This will in turn relay it to the network like normal.
+				isOrphan, err := cx.RealNode.SyncManager.ProcessBlock(block, blockchain.BFNone)
+				if err != nil {
+					// Anything other than a rule violation is an unexpected error, so log
+					// that error as an internal error.
+					if _, ok := err.(blockchain.RuleError); !ok {
+						log.WARNF(
+							"Unexpected error while processing block submitted via CPU miner:", err,
+						)
+						continue
+					}
+					log.WARNF("block submitted via kopach miner rejected:", err)
+					continue
+				}
+				if isOrphan {
+					log.WARN("block is an orphan")
+					continue
+				}
+				log.TRACE("the block was accepted")
+				coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
+				prevHeight := block.Height() - 1
+				prevBlock, _ := cx.RealNode.Chain.BlockByHeight(prevHeight)
+				prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
+				since := block.MsgBlock().Header.Timestamp.Unix() - prevTime
+				bHash := block.MsgBlock().BlockHashWithAlgos(block.Height())
+				log.WARNF("new block height %d %08x %s%10d %08x %v %s %ds since prev",
+					block.Height(),
+					prevBlock.MsgBlock().Header.Bits,
+					bHash,
+					block.MsgBlock().Header.Timestamp.Unix(),
+					block.MsgBlock().Header.Bits,
+					util.Amount(coinbaseTx.Value),
+					fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()),
+					since)
+				submitLock.Unlock()
 			case <-ctx.Done():
 				log.DEBUG("quitting on quit channel close")
 				cancel()

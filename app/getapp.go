@@ -21,7 +21,7 @@ func // getApp defines the pod app
 getApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
 		Name:    "pod",
-		Version: "v0.0.1",
+		Version: "v0.1.0",
 		Description: "Parallelcoin Pod Suite -- All-in-one everything" +
 			" for Parallelcoin!",
 		Copyright: "Legacy portions derived from btcsuite/btcd under" +
