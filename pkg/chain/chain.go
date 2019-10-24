@@ -988,7 +988,8 @@ func // connectBestChain handles connecting the passed block to the chain while
 //  - BFFastAdd: Avoids several expensive transaction validation operations.
 //    This is useful when using checkpoints.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) connectBestChain(node *blockNode, block *util.Block, flags BehaviorFlags) (bool, error) {
+(b *BlockChain) connectBestChain(node *blockNode, block *util.Block,
+	flags BehaviorFlags) (bool, error) {
 	log.WARN("connectBestChain")
 	if node.height == block.Height() {
 		log.WARN("connectBestChain has been called on the new block")

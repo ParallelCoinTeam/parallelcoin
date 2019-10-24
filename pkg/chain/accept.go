@@ -71,7 +71,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	var err error
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on
-		// the  position of the block within the block chain.
+		// the position of the block within the block chain.
 		err = b.checkBlockContext(workerNumber, block, prevNode, flags,
 			DoNotCheckPow)
 		if err != nil {

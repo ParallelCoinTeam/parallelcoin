@@ -300,7 +300,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 						pauseRebroadcast.Toggle()
 						continue
 					}
-					log.WARNF("block submitted via kopach miner rejected:", err)
+					log.WARN("block submitted via kopach miner rejected:", err)
 					oldBlocks.Unlock()
 					pauseRebroadcast.Toggle()
 					continue
