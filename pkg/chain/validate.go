@@ -378,7 +378,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 // of work requirement. The block must connect to the current tip of the main
 // chain. This function is safe for concurrent access.
 func (b *BlockChain) CheckConnectBlockTemplate(workerNumber uint32, block *util.
-	Block) error {
+Block) error {
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
 	algo := block.MsgBlock().Header.Version
@@ -497,8 +497,7 @@ func // checkBlockContext peforms several validation checks on the block which
 		for _, tx := range block.Transactions() {
 			if !IsFinalizedTransaction(tx, blockHeight,
 				blockTime) {
-				str := fmt.Sprintf("block contains unfinalized "+
-					"transaction %v", tx.Hash())
+				str := fmt.Sprintf("block contains unfinalized transaction %v", tx.Hash())
 				log.ERROR(str)
 				return ruleError(ErrUnfinalizedTx, str)
 			}
@@ -563,7 +562,7 @@ func // checkBlockHeaderContext performs several validation checks on the block
 //  against the checkpoints are not performed.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
-	BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
+BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
 	// log.WARN("checking block header context")
 	if prevNode == nil {
 		return nil
@@ -1257,8 +1256,7 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 		// The block hash must be less than the claimed target.
 		// Unless there is less than 10 previous with the same version (algo)...
 		hash := header.BlockHashWithAlgos(height)
-		// log.DEBUG()
-		// {"blockhashwithalgos", hash}
+		log.DEBUG("blockhashwithalgos", hash)
 		hashNum := HashToBig(&hash)
 		if hashNum.Cmp(target) > 0 {
 			str := fmt.Sprintf("block hash of %064x is higher than expected max of %064x", hashNum, target)
