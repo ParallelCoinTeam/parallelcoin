@@ -43,7 +43,7 @@ nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		nodeChan := make(chan *rpc.Server)
 		killswitch := make(chan struct{})
 		go func() {
-			err = node.Main(cx, shutdownChan, killswitch, nodeChan, &wg)
+			err := node.Main(cx, shutdownChan, killswitch, nodeChan, &wg)
 			if err != nil {
 				log.ERROR("error starting node ", err)
 			}

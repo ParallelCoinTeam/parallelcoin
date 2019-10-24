@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+	"runtime/debug"
 	"time"
 
 	"github.com/p9c/pod/pkg/chain/fork"
@@ -12,8 +13,8 @@ import (
 )
 
 type // BehaviorFlags is a bitmask defining tweaks to the normal behavior when
-// performing chain processing and consensus rules checks.
-BehaviorFlags uint32
+	// performing chain processing and consensus rules checks.
+	BehaviorFlags uint32
 
 const (
 	// BFFastAdd may be set to indicate that several checks can be avoided
@@ -177,10 +178,10 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	if err != nil {
 		return false, false, err
 	}
-	// log.DEBUGF("accepted block %d %v",
-	// 	blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
-	// 		Header.Version, blockHeight))
-
+	log.DEBUGF("accepted block %d %v %s",
+		blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
+			Header.Version, blockHeight))
+	debug.PrintStack()
 	// log.WARN("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }

@@ -71,7 +71,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			select {
 			case lb := <-blockChan:
 				pauseRebroadcast.Store(true)
-				log.WARN("saving old Blocks for old block rebroadcast")
+				log.TRACE("saving new templates for old block rebroadcast")
 				oldBlocks.Lock()
 				oldBlocks.Templates = lb.Templates
 				oldBlocks.Unlock()
@@ -166,32 +166,32 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		}
 	})
 	// goroutine loop checking for connection and sync status
-	//if !*cx.Config.Solo {
-	go func() {
-		// allow a little time for all goroutines to fire up
-		time.Sleep(time.Second * 5)
-		for {
-			time.Sleep(time.Second)
-			connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
-			current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
-			// if out of sync or disconnected,
-			// once a second send out empty initialBlocks
-			if connCount < 1 {
-				log.DEBUG("node is offline", current)
-				blockChan <- Blocks{New: false}
+	if !*cx.Config.Solo {
+		go func() {
+			// allow a little time for all goroutines to fire up
+			time.Sleep(time.Second * 5)
+			for {
+				time.Sleep(time.Second)
+				connCount := cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+				current := cx.RPCServer.Cfg.SyncMgr.IsCurrent()
+				// if out of sync or disconnected,
+				// once a second send out empty initialBlocks
+				if connCount < 1 {
+					log.DEBUG("node is offline", current)
+					blockChan <- Blocks{New: false}
+				}
+				if !current {
+					log.DEBUG("node is not current", current)
+					blockChan <- Blocks{New: false}
+				}
+				select {
+				case <-ctx.Done():
+					break
+				default:
+				}
 			}
-			if !current {
-				log.DEBUG("node is not current", current)
-				blockChan <- Blocks{New: false}
-			}
-			select {
-			case <-ctx.Done():
-				break
-			default:
-			}
-		}
-	}()
-	//}
+		}()
+	}
 	// goroutine loop checking for updates to block template consist
 	go func() {
 		lastTxUpdate := cx.RPCServer.Cfg.Generator.GetTxSource().LastUpdated()
@@ -325,8 +325,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					block.MsgBlock().Header.Timestamp.Unix(),
 					block.MsgBlock().Header.Bits,
 					util.Amount(coinbaseTx.Value),
-					fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()),
-					since)
+					fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
 				submitLock.Unlock()
 				oldBlocks.Unlock()
 				pauseRebroadcast.Toggle()

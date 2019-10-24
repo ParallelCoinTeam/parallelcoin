@@ -37,7 +37,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	bytes := make([]byte, 0, broadcast.MaxDatagramSize)
 	enc := codec.NewEncoderBytes(&bytes, &mh)
 	var rotator atomic.Uint64
-	var started bool
+	var started atomic.Bool
 	// mining work dispatch goroutine
 	go func() {
 	workOut:
@@ -51,14 +51,14 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 				// received a normal block template
 				default:
 					// If a worker is running and the block templates are not marked new, ignore
-					if started {
+					if started.Load() {
 						if !bt.New && blockSemaphore != nil {
 							//log.TRACE("already started, block is not new, ignoring")
 							break
 						}
 					} else {
 						log.WARN("starting mining")
-						started = true
+						started.Store(true)
 					}
 					// if workers are working, stop them
 					if blockSemaphore != nil {
@@ -67,11 +67,12 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 					}
 					curHeight := bt.Templates[0].Height
 					for i := 0; i < *cx.Config.GenThreads; i++ {
+						curr :=i
 						// start up worker
 						go func() {
 							tn := time.Now()
-							log.DEBUG("starting worker", i, tn)
-							j := i
+							log.DEBUG("starting worker", curr, tn)
+							j := curr
 						threadOut:
 							for {
 								// choose the algorithm on a rolling cycle
@@ -186,7 +187,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 								}
 							}
 							log.DEBUG("worker", j, tn, "stopped")
-							started = false
+							started.Store(false)
 						}()
 					}
 				}
