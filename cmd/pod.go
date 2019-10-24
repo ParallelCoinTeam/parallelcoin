@@ -15,7 +15,7 @@ import (
 // Main is the main entry point for pod
 func Main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	debug.SetGCPercent(10)
+	debug.SetGCPercent(50)
 	if err := limits.SetLimits(); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
 		os.Exit(1)

@@ -34,10 +34,9 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	}
 	// create buffer and load into msgpack codec
 	var mh codec.MsgpackHandle
-	bytes := make([]byte, 0, broadcast.MaxDatagramSize)
-	enc := codec.NewEncoderBytes(&bytes, &mh)
 	var rotator atomic.Uint64
 	var started atomic.Bool
+	var headerMx sync.Mutex
 	// mining work dispatch goroutine
 	go func() {
 	workOut:
@@ -67,7 +66,9 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 					}
 					curHeight := bt.Templates[0].Height
 					for i := 0; i < *cx.Config.GenThreads; i++ {
-						curr :=i
+						bytes := make([]byte, 0, broadcast.MaxDatagramSize)
+						enc := codec.NewEncoderBytes(&bytes, &mh)
+						curr := i
 						// start up worker
 						go func() {
 							tn := time.Now()
@@ -125,8 +126,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 									did = true
 									// use a random extra nonce to ensure no
 									// duplicated work
-									err := UpdateExtraNonce(msgBlock,
-										curHeight+1, extraNonce+enOffset)
+									err := UpdateExtraNonce(msgBlock, curHeight+1, extraNonce+enOffset)
 									if err != nil {
 										log.WARN(err)
 									}
@@ -139,18 +139,19 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 									rNonce := uint32(rn)
 									mn := uint32(27)
 									mn = 1 << 8 * uint32(*cx.Config.GenThreads)
-									var i uint32
+									var nonce uint32
 									//log.TRACE("starting round from ", rNonce)
-									for i = rNonce; i <= rNonce+mn; i++ {
+									for nonce = rNonce; nonce <= rNonce+mn; nonce++ {
 										select {
 										case <-quit:
 											break
 										default:
 										}
 										var incr uint64 = 1
-										header.Nonce = i
-										hash := header.BlockHashWithAlgos(
-											curHeight + 1)
+										headerMx.Lock()
+										header.Nonce = nonce
+										hash := header.BlockHashWithAlgos(curHeight + 1)
+										headerMx.Unlock()
 										hashesCompleted += incr
 										// The block is solved when the new
 										// block hash is less than the target
@@ -172,8 +173,9 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 												log.ERROR(err)
 												break
 											}
-											err = broadcast.Send(outAddr,
-												bytes, *m.ciph, broadcast.Solution)
+											log.SPEW(header)
+											err = broadcast.Send(outAddr, bytes, *m.ciph,
+												broadcast.Solution)
 											break threadOut
 										}
 									}
