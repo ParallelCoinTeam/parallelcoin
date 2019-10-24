@@ -3,6 +3,7 @@ package blockchain
 import (
 	"container/list"
 	"fmt"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -987,9 +988,14 @@ func // connectBestChain handles connecting the passed block to the chain while
 //  - BFFastAdd: Avoids several expensive transaction validation operations.
 //    This is useful when using checkpoints.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) connectBestChain(node *blockNode, block *util.Block,
-	flags BehaviorFlags) (bool, error) {
-	log.TRACE("connectBestChain")
+(b *BlockChain) connectBestChain(node *blockNode, block *util.Block, flags BehaviorFlags) (bool, error) {
+	log.WARN("connectBestChain")
+	if node.height == block.Height() {
+		log.WARN("connectBestChain has been called on the new block")
+		debug.PrintStack()
+		return false, nil
+	}
+	log.WARN("connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
 		// Intentionally ignore errors writing updated node status to DB.
@@ -1005,7 +1011,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.bestChain.Tip().hash) {
-		log.TRACE("can attach to tip")
+		log.INFO("can attach to tip")
 	}
 	// Skip checks if node has already been fully validated.
 	fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
@@ -1074,15 +1080,13 @@ func // connectBestChain handles connecting the passed block to the chain while
 		// Log information about how the block is forking the chain.
 		f := b.bestChain.FindFork(node)
 		if f.hash.IsEqual(parentHash) {
-			log.TRACEF("FORK: Block %v forks the chain at height %d/block %v, "+
+			log.INFOF("FORK: Block %v forks the chain at height %d/block %v, "+
 				"but does not cause a reorganize. workSum=%d",
 				node.hash, f.height, f.hash, f.workSum)
 		} else {
-			log.TRACEF("EXTEND FORK: Block %v extends a side chain which" +
-				" forks" +
-				" the"+
-				" chain at height %d/block %v. workSum=%d",
-				node.hash, f.height, f.hash, f.workSum,
+			log.INFOF("EXTEND FORK: Block %d %v extends a side chain which"+
+				" forks the chain at height %d/block %v. workSum=%d",
+				node.height, node.hash, f.height, f.hash, f.workSum,
 			)
 		}
 		return false, nil
