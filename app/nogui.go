@@ -1,5 +1,3 @@
-// +build !GUI
-
 package app
 
 import (
