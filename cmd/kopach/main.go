@@ -126,8 +126,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 									did = true
 									// use a random extra nonce to ensure no
 									// duplicated work
-									err := UpdateExtraNonce(msgBlock,
-										curHeight+1, extraNonce+enOffset)
+									err := UpdateExtraNonce(msgBlock, curHeight+1, extraNonce+enOffset)
 									if err != nil {
 										log.WARN(err)
 									}
@@ -150,9 +149,8 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 										}
 										var incr uint64 = 1
 										headerMx.Lock()
-										header.Nonce =											nonce
-										hash := header.BlockHashWithAlgos(
-											curHeight + 1)
+										header.Nonce = nonce
+										hash := header.BlockHashWithAlgos(curHeight + 1)
 										headerMx.Unlock()
 										hashesCompleted += incr
 										// The block is solved when the new
@@ -175,8 +173,9 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 												log.ERROR(err)
 												break
 											}
-											err = broadcast.Send(outAddr,
-												bytes, *m.ciph, broadcast.Solution)
+											log.SPEW(header)
+											err = broadcast.Send(outAddr, bytes, *m.ciph,
+												broadcast.Solution)
 											break threadOut
 										}
 									}
