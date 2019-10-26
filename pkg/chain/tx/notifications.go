@@ -84,7 +84,7 @@ func lookupOutputChain(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetail
 	}
 	if err != nil {
 		log.ERROR(
-			"cannot fetch account for wallet output:", err
+			"cannot fetch account for wallet output:", err)
 	} else {
 		account = ma.Account()
 		internal = ma.Internal()
