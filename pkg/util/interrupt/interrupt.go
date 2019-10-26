@@ -3,6 +3,7 @@ package interrupt
 import (
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/p9c/pod/pkg/log"
@@ -22,6 +23,8 @@ var (
 	// HandlersDone is closed after all interrupt handlers run the first time
 	// an interrupt is signaled.
 	HandlersDone = make(chan struct{})
+	// mutex to lock for adding handlers
+	mx sync.Mutex
 )
 
 // Listener listens for interrupt signals, registers interrupt callbacks, and
@@ -59,11 +62,13 @@ func Listener() {
 func AddHandler(handler func()) {
 	// Create the channel and start the main interrupt handler which invokes all
 	// other callbacks and exits if not already done.
+	mx.Lock()
 	if Chan == nil {
 		Chan = make(chan os.Signal, 1)
 		signal.Notify(Chan, Signals...)
 		go Listener()
 	}
+	mx.Unlock()
 	AddHandlerChan <- handler
 }
 
