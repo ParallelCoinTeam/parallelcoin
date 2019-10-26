@@ -44,7 +44,7 @@ shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		}
 		if !*cx.Config.WalletOff {
 			go func() {
-				err = walletmain.Main(cx.Config, cx.StateCfg,
+				err := walletmain.Main(cx.Config, cx.StateCfg,
 					cx.ActiveNet, walletChan, kill, &wg)
 				if err != nil {
 					fmt.Println("error running wallet:", err)
@@ -56,12 +56,15 @@ shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if !*cx.Config.NodeOff {
 			go func() {
 				Configure(cx)
-				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
+				err := node.Main(cx, shutdownChan, kill, nodeChan, &wg)
 				if err != nil {
 					log.ERROR("error starting node ", err)
 				}
 			}()
-			cx.RPCServer = <-nodeChan
+			tmp := <-nodeChan
+			cx.Lock()
+			cx.RPCServer = tmp
+			cx.Unlock()
 		}
 		wg.Wait()
 		return nil

@@ -118,6 +118,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	}()
 	// generate initial Blocks
 	initialBlocks := Blocks{New: true}
+	cx.Lock()
 	for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.
 		BestSnapshot().Height+1)].Algos {
 		// Choose a payment address at random.
@@ -133,6 +134,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		}
 		initialBlocks.Templates = append(initialBlocks.Templates, template)
 	}
+	cx.Unlock()
 	pauseRebroadcast.Store(true)
 	// send out the block templates
 	blockChan <- initialBlocks
