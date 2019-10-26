@@ -1,4 +1,4 @@
-// +build !headless
+// +build GUI
 
 package app
 
