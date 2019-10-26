@@ -1,8 +1,9 @@
-// +build headless
+// +build !GUI
 
 package app
 
 import (
+	"github.com/p9c/pod/pkg/log"
 	"os"
 
 	"github.com/urfave/cli"
@@ -12,7 +13,7 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		L.Info("GUI was disabled for this build (server only version)")
+		log.INFO("GUI was disabled for this build (server only version)")
 		os.Exit(1)
 		return nil
 	}
