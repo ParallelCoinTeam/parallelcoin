@@ -6,7 +6,7 @@ import (
 	"crypto/sha1"
 	"net"
 
-	kcp "github.com/p9c/kcp"
+	"github.com/p9c/kcp"
 	"github.com/p9c/rpcx/client"
 	"github.com/p9c/rpcx/server"
 	"golang.org/x/crypto/pbkdf2"

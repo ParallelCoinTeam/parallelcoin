@@ -19,8 +19,8 @@ import (
 
 
 
-"github.com/p9c/pod/pkg/chain/config"
 "git.parallelcoin.io/util"
+"github.com/p9c/pod/pkg/chain/config"
 )
 var testnet = flag.Bool("testnet", false, "operate on the testnet Bitcoin network")
 // By default (without -testnet), use mainnet.
