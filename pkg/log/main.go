@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	gt "github.com/buger/goterm"
@@ -73,6 +74,7 @@ var Levels = []string{
 
 // Logger is a struct containing all the functions with nice handy names
 type Logger struct {
+	sync.Mutex
 	Fatal         PrintlnFunc
 	Error         PrintlnFunc
 	Warn          PrintlnFunc
@@ -171,7 +173,7 @@ func (l *Logger) SetLevel(level string, color bool) *Logger {
 	//files := strings.Split(loc, "github.com/p9c/pod/")
 	//codeLoc := "./"+fmt.Sprint(files[1], ":", justifyLineNumber(line))
 	//fmt.Println("setting level to", level, codeLoc)
-	*l = *Empty()
+	//*l = *Empty()
 	var fallen bool
 	switch {
 	case level == Trace || fallen:

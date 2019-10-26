@@ -328,7 +328,7 @@ out:
 		// block template on a block that is in the process of becoming stale.
 		m.submitBlockLock.Lock()
 		curHeight := m.g.BestSnapshot().Height
-		if curHeight != 0 && !m.cfg.IsCurrent() {
+		if curHeight != 0 && !m.cfg.IsCurrent() &&  !m.cfg.Solo {
 			m.submitBlockLock.Unlock()
 			log.WARNF("server is not current yet, waiting")
 			time.Sleep(time.Second)
