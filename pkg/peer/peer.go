@@ -47,7 +47,7 @@ const (
 	// peer that hasn't completed the initial version negotiation.
 	negotiateTimeout = 27 * time.Second
 	// idleTimeout is the duration of inactivity before we time out a peer.
-	idleTimeout = 9 * time.Minute
+	idleTimeout = time.Minute
 	// stallTickInterval is the interval of time between each check for
 	// stalled peers.
 	stallTickInterval = 60 * time.Second

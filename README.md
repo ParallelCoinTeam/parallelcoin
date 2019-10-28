@@ -38,3 +38,25 @@ You can just `go install` in the root directory and `pod` will be placed in your
 TODO: Initial release will include Linux, Mac and Windows binaries including the GUI, 
 binaries for all platform targets of Go 1.12.9+ without the GUI and standalone kopach
 miner also for all targets of Go v1.12.9+.
+
+## Tilix custom hyperlinks
+
+The documentation of Tilix is not the best neither is the hyperlinks
+ interface, but after much frustration I was able to find both the regexp and
+  the right command to use with it to allow Tilix (my preferred terminal
+   because of its sweet gtk+-3 interface and fast VTE backend) to open
+    relative path links that are printed in the logs:
+    
+    #### regexp:
+    
+```
+(([a-zA-Z0-9-_.]+/)+([a-zA-Z0-9-_.]+)):([0-9]+)
+```
+
+#### goland launch command:
+
+```
+goland --line $4 $GOPATH/src/github.com/p9c/pod/$1
+```
+
+Change the $GOPATH as required for the absolute path of your copy of this repo.

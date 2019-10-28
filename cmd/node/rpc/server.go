@@ -887,8 +887,7 @@ func (s *Node) PeerHandler() {
 		Banned:          make(map[string]time.Time),
 		OutboundGroups:  make(map[string]int),
 	}
-	if !*s.Config.DisableDNSSeed || len(*s.Config.ConnectPeers) > 0 {
-		log.TRACE("seeding from DNS ", !*s.Config.DisableDNSSeed)
+	if !*s.Config.DisableDNSSeed || len(*s.Config.ConnectPeers) < 0 {
 		// Add peers discovered through DNS to the address manager.
 		connmgr.SeedFromDNS(s.ActiveNet, DefaultRequiredServices,
 			Lookup(s.StateCfg), func(addrs []*wire.NetAddress) {
