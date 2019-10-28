@@ -284,7 +284,7 @@ func composit(text, level string, color bool) string {
 	since := fmt.Sprint(time.Now().Sub(StartupTime) / time.
 		Second * time.Second)
 	if terminalWidth > 160 {
-		since = fmt.Sprint(time.Now())[:24]
+		since = fmt.Sprint(time.Now())[:25]
 	}
 	levelLen := len(level) + 1
 	sinceLen := len(since) + 1
