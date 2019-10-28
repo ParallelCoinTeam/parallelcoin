@@ -79,9 +79,7 @@ func initListeners(cx *conte.Xt) {
 	cfg := cx.Config
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
 		len(*cfg.ConnectPeers) < 1 {
-		cfg.Listeners =
-			&cli.StringSlice{":" +
-				cx.ActiveNet.DefaultPort}
+		cfg.Listeners = &cli.StringSlice{":" + cx.ActiveNet.DefaultPort}
 	}
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
 		*cfg.WalletRPCListeners = append(*cfg.WalletRPCListeners,
@@ -324,8 +322,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 	// *cfg.Listeners = nrms(*cfg.Listeners, cx.ActiveNet.DefaultPort)
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
 	*cfg.AddPeers = nrms(*cfg.AddPeers, params.DefaultPort)
-	*cfg.ConnectPeers = nrms(*cfg.ConnectPeers,
-		params.DefaultPort)
+	*cfg.ConnectPeers = nrms(*cfg.ConnectPeers, params.DefaultPort)
 }
 
 func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
