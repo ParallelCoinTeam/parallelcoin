@@ -1,0 +1,12 @@
+{
+  "version": 3,
+  "file": "svelte.css",
+  "sources": [
+    "../../pkg/svelte/src/boot/Boot.svelte"
+  ],
+  "sourcesContent": [
+    "<script>\n    import { quintOut } from 'svelte/easing';\n\timport { fade, draw, fly } from 'svelte/transition';\n\timport { expand } from 'transitions.js';\n\timport { inner, outer } from 'shape.js';\n\n\tlet visible = true;\n\n\n</script>\n\n\n<style>\n\tsvg {\n\t\twidth: 62%;\n\t\theight: 62%;\n\t}\n\n\tpath {\n\t\tfill: #303030;\n\t\topacity: 1;\n\t}\n\n\tlabel {\n\t\tposition: absolute;\n\t\ttop: 1em;\n\t\tleft: 1em;\n\t}\n\n\t.centered {\n\t\tfont-size: 10vw;\n\t\tposition: absolute;\n\t\tleft: 50%;\n\t\ttop: 50%;\n\t\ttransform: translate(-50%,-50%);\n\t\tfont-family: 'Overpass';\n\t\tletter-spacing: 0.12em;\n\t\tcolor: #676778;\n\t\tfont-weight: 100;\n\t}\n\n\t.centered span {\n\t\twill-change: filter;\n\t}\n</style>\n\n<div class=\"boot\"></div>\n{#if visible}\n\t<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 103 124\">\n\t\t<g out:fade=\"{{duration: 200}}\" opacity=0.2>\n\t\t\t<path\n\t\t\t\tin:expand=\"{{duration: 400, delay: 1000, easing: quintOut}}\"\n\t\t\t\tstyle=\"stroke: #ff3e00; fill: #ff3e00; stroke-width: 50;\"\n\t\t\t\td={outer}\n\t\t\t/>\n\t\t\t<path\n\t\t\t\tin:draw=\"{{duration: 1000}}\"\n\t\t\t\tstyle=\"stroke:#ff3e00; stroke-width: 1.5\"\n\t\t\t\td={inner}\n\t\t\t/>\n\t\t</g>\n\t</svg>\n\n\t<div class=\"centered\" out:fly=\"{{y: -20, duration: 800}}\">\n\t\t{#each 'ParallelCoin' as char, i}\n\t\t\t<span\n\t\t\t\tin:fade=\"{{delay: 1000 + i * 150, duration: 800}}\"\n\t\t\t>{char}</span>\n\t\t{/each}\n\t</div>\n{/if}\n\n<label>\n\t<input type=\"checkbox\" bind:checked={visible}>\n\ttoggle me\n</label>\n\n<link href=\"https://fonts.googleapis.com/css?family=Overpass:100\" rel=\"stylesheet\">\n\n\n"
+  ],
+  "names": [],
+  "mappings": "AAaC,GAAG,cAAC,CAAC,AACJ,KAAK,CAAE,GAAG,CACV,MAAM,CAAE,GAAG,AACZ,CAAC,AAED,IAAI,cAAC,CAAC,AACL,IAAI,CAAE,OAAO,CACb,OAAO,CAAE,CAAC,AACX,CAAC,AAED,KAAK,cAAC,CAAC,AACN,QAAQ,CAAE,QAAQ,CAClB,GAAG,CAAE,GAAG,CACR,IAAI,CAAE,GAAG,AACV,CAAC,AAED,SAAS,cAAC,CAAC,AACV,SAAS,CAAE,IAAI,CACf,QAAQ,CAAE,QAAQ,CAClB,IAAI,CAAE,GAAG,CACT,GAAG,CAAE,GAAG,CACR,SAAS,CAAE,UAAU,IAAI,CAAC,IAAI,CAAC,CAC/B,WAAW,CAAE,UAAU,CACvB,cAAc,CAAE,MAAM,CACtB,KAAK,CAAE,OAAO,CACd,WAAW,CAAE,GAAG,AACjB,CAAC,AAED,uBAAS,CAAC,IAAI,cAAC,CAAC,AACf,WAAW,CAAE,MAAM,AACpB,CAAC"
+}

@@ -944,7 +944,6 @@ log.ERROR("problem shutting down RPC:", err)
 	close(s.Quit)
 	s.WG.Wait()
 	log.DEBUG("RPC server shutdown complete")
-
 	return nil
 }
 

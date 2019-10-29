@@ -192,11 +192,11 @@ func (cm *ConnManager) handleFailedConn(c *ConnReq) {
 	} else if cm.Cfg.GetNewAddress != nil {
 		cm.failedAttempts++
 		if cm.failedAttempts >= maxFailedAttempts {
-			log.TRACEF("max failed connection attempts reached: [%d" +
-				"] -- retrying" +
-				" connection in: %v",
-				maxFailedAttempts,
-				cm.Cfg.RetryDuration)
+			// log.TRACEF("max failed connection attempts reached: [%d" +
+			// 	"] -- retrying" +
+			// 	" connection in: %v",
+			// 	maxFailedAttempts,
+			// 	cm.Cfg.RetryDuration)
 			time.AfterFunc(cm.Cfg.RetryDuration, func() {
 				cm.NewConnReq()
 			})
@@ -296,7 +296,7 @@ out:
 					continue
 				}
 				connReq.updateState(ConnFailing)
-				log.TRACEF("failed to connect to %v: %v", connReq, msg.err)
+				// log.TRACEF("failed to connect to %v: %v", connReq, msg.err)
 				cm.handleFailedConn(connReq)
 			}
 		case <-cm.quit:

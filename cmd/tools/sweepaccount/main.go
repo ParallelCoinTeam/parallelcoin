@@ -93,7 +93,7 @@ log.ERROR(err)
 	if opts.RPCConnect == "" {
 		fatalf("RPC hostname[:port] is required")
 	}
-	rpcConnect, err := cfgutil.NormalizeAddress(opts.RPCConnect, activeNet.RPCServerPort)
+	rpcConnect, err := cfgutil.NormalizeAddress(opts.RPCConnect, activeNet.WalletRPCServerPort)
 	if err != nil {
 		log.ERROR(err)
 fatalf("Invalid RPC network address `%v`: %v", opts.RPCConnect, err)

@@ -42,6 +42,7 @@ type RPCClient struct {
 // parameters, the connection will be disconnected.
 func NewRPCClient(chainParams *netparams.Params, connect, user, pass string, certs []byte,
 	disableTLS bool, reconnectAttempts int) (*RPCClient, error) {
+		log.WARN("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
 	}
@@ -72,11 +73,13 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string, cer
 		OnRescanFinished:    client.onRescanFinished,
 		OnRescanProgress:    client.onRescanProgress,
 	}
+	log.WARN("*actually* creating rpc client")
 	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks)
 	if err != nil {
 		log.ERROR(err)
 return nil, err
 	}
+	defer log.WARN("*succeeded* in making rpc client")
 	client.Client = rpcClient
 	return client, nil
 }
