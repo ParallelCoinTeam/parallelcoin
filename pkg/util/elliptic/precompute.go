@@ -4,6 +4,7 @@ import (
 	"compress/zlib"
 	"encoding/base64"
 	"encoding/binary"
+	"github.com/p9c/pod/pkg/log"
 	"io/ioutil"
 	"strings"
 )
@@ -27,11 +28,13 @@ func loadS256BytePoints() error {
 	decoder := base64.NewDecoder(base64.StdEncoding, strings.NewReader(bp))
 	r, err := zlib.NewReader(decoder)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	serialized, err := ioutil.ReadAll(r)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	// Deserialize the precomputed byte points and set the curve to them.
 	offset := 0

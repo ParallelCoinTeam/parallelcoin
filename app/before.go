@@ -40,7 +40,8 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				cx.Config = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
-					fmt.Println("error unmarshalling config", err)
+		log.ERROR(err)
+fmt.Println("error unmarshalling config", err)
 					os.Exit(1)
 				}
 				log.INFO("unmarshalled config")

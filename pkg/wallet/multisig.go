@@ -3,6 +3,7 @@ package wallet
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/util"
@@ -24,7 +25,8 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 		if dbtx != nil {
 			err := dbtx.Rollback()
 			if err != nil {
-				fmt.Println(err)
+		log.ERROR(err)
+fmt.Println(err)
 			}
 		}
 	}()
@@ -43,20 +45,23 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 				var err error
 				dbtx, err = w.db.BeginReadTx()
 				if err != nil {
-					return nil, err
+		log.ERROR(err)
+return nil, err
 				}
 				addrmgrNs = dbtx.ReadBucket(waddrmgrNamespaceKey)
 			}
 			addrInfo, err := w.Manager.Address(addrmgrNs, addr)
 			if err != nil {
-				return nil, err
+		log.ERROR(err)
+return nil, err
 			}
 			serializedPubKey := addrInfo.(waddrmgr.ManagedPubKeyAddress).
 				PubKey().SerializeCompressed()
 			pubKeyAddr, err := util.NewAddressPubKey(
 				serializedPubKey, w.chainParams)
 			if err != nil {
-				return nil, err
+		log.ERROR(err)
+return nil, err
 			}
 			pubKeys[i] = pubKeyAddr
 		}
@@ -80,11 +85,13 @@ func (w *Wallet) ImportP2SHRedeemScript(script []byte) (*util.AddressScriptHash,
 			waddrmgr.KeyScopeBIP0084,
 		)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 		addrInfo, err := bip44Mgr.ImportScript(addrmgrNs, script, bs)
 		if err != nil {
-			// Don't care if it's already there, but still have to
+		log.ERROR(err)
+// Don't care if it's already there, but still have to
 			// set the p2shAddr since the address manager didn't
 			// return anything useful.
 			if waddrmgr.IsError(err, waddrmgr.ErrDuplicateAddress) {

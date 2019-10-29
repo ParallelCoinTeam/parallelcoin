@@ -2,7 +2,10 @@ package walletdb
 
 // This interface was inspired heavily by the excellent boltdb project at
 // https://github.com/boltdb/bolt by Ben B. Johnson.
-import "io"
+import (
+	"github.com/p9c/pod/pkg/log"
+	"io"
+)
 
 // ReadTx represents a database transaction that can only be used for reads.  If
 // a database update must occur, use a ReadWriteTx.
@@ -163,12 +166,14 @@ type DB interface {
 func View(db DB, f func(tx ReadTx) error) error {
 	tx, err := db.BeginReadTx()
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	err = f(tx)
 	rollbackErr := tx.Rollback()
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	if rollbackErr != nil {
 		return rollbackErr
@@ -185,11 +190,13 @@ func View(db DB, f func(tx ReadTx) error) error {
 func Update(db DB, f func(tx ReadWriteTx) error) error {
 	tx, err := db.BeginReadWriteTx()
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	err = f(tx)
 	if err != nil {
-		// Want to return the original error, not a rollback error if
+		log.ERROR(err)
+// Want to return the original error, not a rollback error if
 		// any occur.
 		_ = tx.Rollback()
 		return err

@@ -75,6 +75,8 @@ out:
 				txVI.txInIndex, v.flags, v.sigCache, txVI.sigHashes,
 				inputAmount)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				str := fmt.Sprintf("failed to parse input "+
 					"%s:%d which references output %v - "+
 					"%v (input witness %x, input script "+
@@ -150,6 +152,8 @@ func // Validate validates the scripts for all of the passed transaction inputs
 		case err := <-v.resultChan:
 			processedItems++
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				close(v.quitChan)
 				return err
 			}

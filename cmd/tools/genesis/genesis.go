@@ -77,7 +77,8 @@ func main() {
 		pubkey = make([]byte, 65)
 		n, err := rand.Read(pubkey)
 		if err != nil {
-			fmt.Println("error: ", err)
+		log.ERROR(err)
+fmt.Println("error: ", err)
 			os.Exit(1)
 		}
 		if n != 65 {
@@ -93,7 +94,8 @@ func main() {
 		var err error
 		pubkey, err = hex.DecodeString(args[1])
 		if err != nil {
-			fmt.Println("Public key had invalid characters")
+		log.ERROR(err)
+fmt.Println("Public key had invalid characters")
 		}
 	}
 	timestamp := args[2]
@@ -104,7 +106,8 @@ func main() {
 	tx := initTransaction()
 	nbits, err := strconv.ParseInt(args[3], 10, 32)
 	if err != nil {
-		fmt.Println("nBits was not a decimal number or exceeded the precision of 32 bits")
+		log.ERROR(err)
+fmt.Println("nBits was not a decimal number or exceeded the precision of 32 bits")
 		os.Exit(0)
 	}
 	nBits := uint32(nbits)

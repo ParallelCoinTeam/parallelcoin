@@ -2,6 +2,7 @@ package rpcclient
 
 import (
 	js "encoding/json"
+	"github.com/p9c/pod/pkg/log"
 	"strconv"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
@@ -24,13 +25,15 @@ type FutureGetTransactionResult chan *response
 func (r FutureGetTransactionResult) Receive() (*btcjson.GetTransactionResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a gettransaction result object
 	var getTx btcjson.GetTransactionResult
 	err = js.Unmarshal(res, &getTx)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return &getTx, nil
 }
@@ -64,13 +67,15 @@ type FutureListTransactionsResult chan *response
 func (r FutureListTransactionsResult) Receive() ([]btcjson.ListTransactionsResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as an array of listtransaction result objects.
 	var transactions []btcjson.ListTransactionsResult
 	err = js.Unmarshal(res, &transactions)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return transactions, nil
 }
@@ -137,13 +142,15 @@ type FutureListUnspentResult chan *response
 func (r FutureListUnspentResult) Receive() ([]btcjson.ListUnspentResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as an array of listunspent results.
 	var unspent []btcjson.ListUnspentResult
 	err = js.Unmarshal(res, &unspent)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return unspent, nil
 }
@@ -227,13 +234,15 @@ type FutureListSinceBlockResult chan *response
 func (r FutureListSinceBlockResult) Receive() (*btcjson.ListSinceBlockResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a listsinceblock result object.
 	var listResult btcjson.ListSinceBlockResult
 	err = js.Unmarshal(res, &listResult)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return &listResult, nil
 }
@@ -338,20 +347,23 @@ type FutureListLockUnspentResult chan *response
 func (r FutureListLockUnspentResult) Receive() ([]*wire.OutPoint, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal as an array of transaction inputs.
 	var inputs []btcjson.TransactionInput
 	err = js.Unmarshal(res, &inputs)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Create a slice of outpoints from the transaction input structs.
 	ops := make([]*wire.OutPoint, len(inputs))
 	for i, input := range inputs {
 		sha, err := chainhash.NewHashFromStr(input.Txid)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		ops[i] = wire.NewOutPoint(sha, input.Vout)
 	}
@@ -410,13 +422,15 @@ type FutureSendToAddressResult chan *response
 func (r FutureSendToAddressResult) Receive() (*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a string.
 	var txHash string
 	err = js.Unmarshal(res, &txHash)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return chainhash.NewHashFromStr(txHash)
 }
@@ -479,13 +493,15 @@ type FutureSendFromResult chan *response
 func (r FutureSendFromResult) Receive() (*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a string.
 	var txHash string
 	err = js.Unmarshal(res, &txHash)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return chainhash.NewHashFromStr(txHash)
 }
@@ -574,13 +590,15 @@ type FutureSendManyResult chan *response
 func (r FutureSendManyResult) Receive() (*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmashal result as a string.
 	var txHash string
 	err = js.Unmarshal(res, &txHash)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return chainhash.NewHashFromStr(txHash)
 }
@@ -682,13 +700,15 @@ type FutureAddMultisigAddressResult chan *response
 func (r FutureAddMultisigAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
 }
@@ -722,13 +742,15 @@ type FutureCreateMultisigResult chan *response
 func (r FutureCreateMultisigResult) Receive() (*btcjson.CreateMultiSigResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a createmultisig result object.
 	var multisigRes btcjson.CreateMultiSigResult
 	err = js.Unmarshal(res, &multisigRes)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return &multisigRes, nil
 }
@@ -787,13 +809,15 @@ type FutureGetNewAddressResult chan *response
 func (r FutureGetNewAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
 }
@@ -822,13 +846,15 @@ type FutureGetRawChangeAddressResult chan *response
 func (r FutureGetRawChangeAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
 }
@@ -858,13 +884,15 @@ type FutureAddWitnessAddressResult chan *response
 func (r FutureAddWitnessAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
 }
@@ -893,13 +921,15 @@ type FutureGetAccountAddressResult chan *response
 func (r FutureGetAccountAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
 }
@@ -928,13 +958,15 @@ type FutureGetAccountResult chan *response
 func (r FutureGetAccountResult) Receive() (string, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return "", err
+		log.ERROR(err)
+return "", err
 	}
 	// Unmarshal result as a string.
 	var account string
 	err = js.Unmarshal(res, &account)
 	if err != nil {
-		return "", err
+		log.ERROR(err)
+return "", err
 	}
 	return account, nil
 }
@@ -989,20 +1021,23 @@ type FutureGetAddressesByAccountResult chan *response
 func (r FutureGetAddressesByAccountResult) Receive() ([]util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmashal result as an array of string.
 	var addrStrings []string
 	err = js.Unmarshal(res, &addrStrings)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	addrs := make([]util.Address, 0, len(addrStrings))
 	for _, addrStr := range addrStrings {
 		addr, err := util.DecodeAddress(addrStr,
 			&netparams.MainNetParams)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		addrs = append(addrs, addr)
 	}
@@ -1034,13 +1069,15 @@ type FutureMoveResult chan *response
 func (r FutureMoveResult) Receive() (bool, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	// Unmarshal result as a boolean.
 	var moveResult bool
 	err = js.Unmarshal(res, &moveResult)
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	return moveResult, nil
 }
@@ -1138,13 +1175,15 @@ type FutureValidateAddressResult chan *response
 func (r FutureValidateAddressResult) Receive() (*btcjson.ValidateAddressWalletResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a validateaddress result object.
 	var addrResult btcjson.ValidateAddressWalletResult
 	err = js.Unmarshal(res, &addrResult)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return &addrResult, nil
 }
@@ -1219,19 +1258,22 @@ type FutureListAccountsResult chan *response
 func (r FutureListAccountsResult) Receive() (map[string]util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a json object.
 	var accounts map[string]float64
 	err = js.Unmarshal(res, &accounts)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	accountsMap := make(map[string]util.Amount)
 	for k, v := range accounts {
 		amount, err := util.NewAmount(v)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		accountsMap[k] = amount
 	}
@@ -1280,17 +1322,20 @@ type FutureGetBalanceResult chan *response
 func (r FutureGetBalanceResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	// Unmarshal result as a floating point number.
 	var balance float64
 	err = js.Unmarshal(res, &balance)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	return amount, nil
 }
@@ -1306,21 +1351,25 @@ type FutureGetBalanceParseResult chan *response
 func (r FutureGetBalanceParseResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	// Unmarshal result as a string
 	var balanceString string
 	err = js.Unmarshal(res, &balanceString)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	balance, err := strconv.ParseFloat(balanceString, 64)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	return amount, nil
 }
@@ -1373,17 +1422,20 @@ type FutureGetReceivedByAccountResult chan *response
 func (r FutureGetReceivedByAccountResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	// Unmarshal result as a floating point number.
 	var balance float64
 	err = js.Unmarshal(res, &balance)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	return amount, nil
 }
@@ -1431,17 +1483,20 @@ type FutureGetUnconfirmedBalanceResult chan *response
 func (r FutureGetUnconfirmedBalanceResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	// Unmarshal result as a floating point number.
 	var balance float64
 	err = js.Unmarshal(res, &balance)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	return amount, nil
 }
@@ -1471,17 +1526,20 @@ type FutureGetReceivedByAddressResult chan *response
 func (r FutureGetReceivedByAddressResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	// Unmarshal result as a floating point number.
 	var balance float64
 	err = js.Unmarshal(res, &balance)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	return amount, nil
 }
@@ -1532,13 +1590,15 @@ type FutureListReceivedByAccountResult chan *response
 func (r FutureListReceivedByAccountResult) Receive() ([]btcjson.ListReceivedByAccountResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal as an array of listreceivedbyaccount result objects.
 	var received []btcjson.ListReceivedByAccountResult
 	err = js.Unmarshal(res, &received)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return received, nil
 }
@@ -1611,13 +1671,15 @@ type FutureListReceivedByAddressResult chan *response
 func (r FutureListReceivedByAddressResult) Receive() ([]btcjson.ListReceivedByAddressResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal as an array of listreceivedbyaddress result objects.
 	var received []btcjson.ListReceivedByAddressResult
 	err = js.Unmarshal(res, &received)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return received, nil
 }
@@ -1759,13 +1821,15 @@ type FutureSignMessageResult chan *response
 func (r FutureSignMessageResult) Receive() (string, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return "", err
+		log.ERROR(err)
+return "", err
 	}
 	// Unmarshal result as a string.
 	var b64 string
 	err = js.Unmarshal(res, &b64)
 	if err != nil {
-		return "", err
+		log.ERROR(err)
+return "", err
 	}
 	return b64, nil
 }
@@ -1796,13 +1860,15 @@ type FutureVerifyMessageResult chan *response
 func (r FutureVerifyMessageResult) Receive() (bool, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	// Unmarshal result as a boolean.
 	var verified bool
 	err = js.Unmarshal(res, &verified)
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	return verified, nil
 }
@@ -1838,13 +1904,15 @@ type FutureDumpPrivKeyResult chan *response
 func (r FutureDumpPrivKeyResult) Receive() (*util.WIF, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a string.
 	var privKeyWIF string
 	err = js.Unmarshal(res, &privKeyWIF)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return util.DecodeWIF(privKeyWIF)
 }
@@ -2033,13 +2101,15 @@ type FutureGetInfoResult chan *response
 func (r FutureGetInfoResult) Receive() (*btcjson.InfoWalletResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a getinfo result object.
 	var infoRes btcjson.InfoWalletResult
 	err = js.Unmarshal(res, &infoRes)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return &infoRes, nil
 }

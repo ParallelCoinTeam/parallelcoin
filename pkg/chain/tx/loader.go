@@ -98,6 +98,8 @@ func (l *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bda
 	dbPath := filepath.Join(l.dbDirPath, WalletDbName)
 	exists, err := fileExists(dbPath)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	if exists {
@@ -106,10 +108,14 @@ func (l *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bda
 	// Create the wallet database backed by bolt db.
 	err = os.MkdirAll(l.dbDirPath, 0700)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	// Initialize the newly created database for the wallet before opening.
@@ -117,11 +123,15 @@ func (l *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bda
 		db, pubPassphrase, privPassphrase, seed, l.chainParams, bday,
 	)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	// Open the newly-created wallet.
 	w, err := Open(db, pubPassphrase, nil, l.chainParams, l.recoveryWindow)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	w.Start()
@@ -153,7 +163,8 @@ func (l *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool)
 	dbPath := filepath.Join(l.dbDirPath, WalletDbName)
 	db, err := walletdb.Open("bdb", dbPath)
 	if err != nil {
-		log.ERROR(
+		log.ERROR(err)
+log.ERROR(
 			"failed to open database:", err)
 		return nil, err
 	}
@@ -171,6 +182,8 @@ func (l *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool)
 	}
 	w, err := Open(db, pubPassphrase, cbs, l.chainParams, l.recoveryWindow)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		// If opening the wallet fails (e.g. because of wrong
 		// passphrase), we must close the backing database to
 		// allow future calls to walletdb.Open().
@@ -217,6 +230,8 @@ func (l *Loader) UnloadWallet() error {
 	l.wallet.WaitForShutdown()
 	err := l.db.Close()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	l.wallet = nil
@@ -226,6 +241,8 @@ func (l *Loader) UnloadWallet() error {
 func fileExists(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if os.IsNotExist(err) {
 			return false, nil
 		}

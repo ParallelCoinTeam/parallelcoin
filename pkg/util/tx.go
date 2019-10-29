@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/log"
 	"io"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -90,7 +91,8 @@ func NewTxFromReader(	r io.Reader) (*Tx, error) {
 	var msgTx wire.MsgTx
 	err := msgTx.Deserialize(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	t := Tx{
 		msgTx:   &msgTx,

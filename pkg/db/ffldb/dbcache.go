@@ -292,7 +292,8 @@ func (snap *dbCacheSnapshot) Get(key []byte) []byte {
 	// Consult the database.
 	value, err := snap.dbSnapshot.Get(key, nil)
 	if err != nil {
-		return nil
+		log.ERROR(err)
+return nil
 	}
 	return value
 }
@@ -363,7 +364,8 @@ type dbCache struct {
 func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
 	dbSnapshot, err := c.ldb.GetSnapshot()
 	if err != nil {
-		str := "failed to open transaction"
+		log.ERROR(err)
+str := "failed to open transaction"
 		return nil, convertErr(str, err)
 	}
 	// Since the cached keys to be added and removed use an immutable treap,
@@ -389,7 +391,8 @@ func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) error {
 	// Start a leveldb transaction.
 	ldbTx, err := c.ldb.OpenTransaction()
 	if err != nil {
-		return convertErr("failed to open ldb transaction", err)
+		log.ERROR(err)
+return convertErr("failed to open ldb transaction", err)
 	}
 	if err := fn(ldbTx); err != nil {
 		ldbTx.Discard()
@@ -525,7 +528,8 @@ func (c *dbCache) commitTx(tx *transaction) error {
 		// Perform all leveldb updates using an atomic transaction.
 		err := c.commitTreaps(tx.pendingKeys, tx.pendingRemove)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 		// Clear the transaction entries since they have been committed.
 		tx.pendingKeys = nil

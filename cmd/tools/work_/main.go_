@@ -103,6 +103,7 @@ func (n *node) send(b []byte) {
 func check(	err error) {
 
 	if err != nil {
-		*le <- err.Error()
+		log.ERROR(err)
+*le <- err.Error()
 	}
 }

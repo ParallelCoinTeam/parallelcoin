@@ -2,6 +2,7 @@ package fork
 
 import (
 	"crypto/sha256"
+	"github.com/p9c/pod/pkg/log"
 	"math/big"
 
 	"git.parallelcoin.io/dev/cryptonight"
@@ -170,6 +171,8 @@ func Scrypt(bytes []byte) []byte {
 	copy(c, b)
 	dk, err := scrypt.Key(c, c, 1024, 1, 1, 32)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return make([]byte, 32)
 	}
 	o := make([]byte, 32)

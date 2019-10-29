@@ -112,7 +112,8 @@ func putUsedAddrHash(	ns walletdb.ReadWriteBucket, poolID []byte, seriesID uint3
 	usedAddrs := ns.NestedReadWriteBucket(poolID).NestedReadWriteBucket(usedAddrsBucketName)
 	bucket, err := usedAddrs.CreateBucketIfNotExists(getUsedAddrBucketID(seriesID, branch))
 	if err != nil {
-		return newError(ErrDatabase, "failed to store used address hash", err)
+		log.ERROR(err)
+return newError(ErrDatabase, "failed to store used address hash", err)
 	}
 	return bucket.Put(uint32ToBytes(uint32(index)), encryptedHash)
 }
@@ -153,7 +154,8 @@ func getMaxUsedIdx(	ns walletdb.ReadBucket, poolID []byte, seriesID uint32, bran
 			return nil
 		})
 	if err != nil {
-		return Index(0), newError(ErrDatabase, "failed to get highest idx of used addresses", err)
+		log.ERROR(err)
+return Index(0), newError(ErrDatabase, "failed to get highest idx of used addresses", err)
 	}
 	return maxIdx, nil
 }
@@ -164,21 +166,25 @@ func getMaxUsedIdx(	ns walletdb.ReadBucket, poolID []byte, seriesID uint32, bran
 func putPool(	ns walletdb.ReadWriteBucket, poolID []byte) error {
 	poolBucket, err := ns.CreateBucket(poolID)
 	if err != nil {
-		return newError(ErrDatabase, fmt.Sprintf("cannot create pool %v", poolID), err)
+		log.ERROR(err)
+return newError(ErrDatabase, fmt.Sprintf("cannot create pool %v", poolID), err)
 	}
 	_, err = poolBucket.CreateBucket(seriesBucketName)
 	if err != nil {
-		return newError(ErrDatabase, fmt.Sprintf("cannot create series bucket for pool %v",
+		log.ERROR(err)
+return newError(ErrDatabase, fmt.Sprintf("cannot create series bucket for pool %v",
 			poolID), err)
 	}
 	_, err = poolBucket.CreateBucket(usedAddrsBucketName)
 	if err != nil {
-		return newError(ErrDatabase, fmt.Sprintf("cannot create used addrs bucket for pool %v",
+		log.ERROR(err)
+return newError(ErrDatabase, fmt.Sprintf("cannot create used addrs bucket for pool %v",
 			poolID), err)
 	}
 	_, err = poolBucket.CreateBucket(withdrawalsBucketName)
 	if err != nil {
-		return newError(
+		log.ERROR(err)
+return newError(
 			ErrDatabase, fmt.Sprintf("cannot create withdrawals bucket for pool %v", poolID), err)
 	}
 	return nil
@@ -194,13 +200,15 @@ func loadAllSeries(	ns walletdb.ReadBucket, poolID []byte) (map[uint32]*dbSeries
 			seriesID := bytesToUint32(k)
 			series, err := deserializeSeriesRow(v)
 			if err != nil {
-				return err
+		log.ERROR(err)
+return err
 			}
 			allSeries[seriesID] = series
 			return nil
 		})
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return allSeries, nil
 }
@@ -231,20 +239,24 @@ func putSeries(	ns walletdb.ReadWriteBucket, poolID []byte, version, ID uint32, 
 func putSeriesRow(	ns walletdb.ReadWriteBucket, poolID []byte, ID uint32, row *dbSeriesRow) error {
 	bucket, err := ns.CreateBucketIfNotExists(poolID)
 	if err != nil {
-		str := fmt.Sprintf("cannot create bucket %v", poolID)
+		log.ERROR(err)
+str := fmt.Sprintf("cannot create bucket %v", poolID)
 		return newError(ErrDatabase, str, err)
 	}
 	bucket, err = bucket.CreateBucketIfNotExists(seriesBucketName)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	serialized, err := serializeSeriesRow(row)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	err = bucket.Put(uint32ToBytes(ID), serialized)
 	if err != nil {
-		str := fmt.Sprintf("cannot put series %v into bucket %v", serialized, poolID)
+		log.ERROR(err)
+str := fmt.Sprintf("cannot put series %v into bucket %v", serialized, poolID)
 		return newError(ErrDatabase, str, err)
 	}
 	return nil
@@ -465,12 +477,14 @@ func deserializeWithdrawal(	p *Pool, ns, addrmgrNs walletdb.ReadBucket, serializ
 	for i, req := range row.Requests {
 		addr, err := util.DecodeAddress(req.Addr, chainParams)
 		if err != nil {
-			return nil, newError(ErrWithdrawalStorage,
+		log.ERROR(err)
+return nil, newError(ErrWithdrawalStorage,
 				"cannot deserialize addr for requested output", err)
 		}
 		pkScript, err := txscript.PayToAddrScript(addr)
 		if err != nil {
-			return nil, newError(ErrWithdrawalStorage, "invalid addr for requested output", err)
+		log.ERROR(err)
+return nil, newError(ErrWithdrawalStorage, "invalid addr for requested output", err)
 		}
 		request := OutputRequest{
 			Address:     addr,
@@ -485,12 +499,14 @@ func deserializeWithdrawal(	p *Pool, ns, addrmgrNs walletdb.ReadBucket, serializ
 	startAddr := row.StartAddress
 	wAddr, err := p.WithdrawalAddress(ns, addrmgrNs, startAddr.SeriesID, startAddr.Branch, startAddr.Index)
 	if err != nil {
-		return nil, newError(ErrWithdrawalStorage, "cannot deserialize startAddress", err)
+		log.ERROR(err)
+return nil, newError(ErrWithdrawalStorage, "cannot deserialize startAddress", err)
 	}
 	wInfo.startAddress = *wAddr
 	cAddr, err := p.ChangeAddress(row.ChangeStart.SeriesID, row.ChangeStart.Index)
 	if err != nil {
-		return nil, newError(ErrWithdrawalStorage, "cannot deserialize changeStart", err)
+		log.ERROR(err)
+return nil, newError(ErrWithdrawalStorage, "cannot deserialize changeStart", err)
 	}
 	wInfo.changeStart = *cAddr
 	// TODO: Copy over row.Status.nextInputAddr. Not done because StartWithdrawal
@@ -498,7 +514,8 @@ func deserializeWithdrawal(	p *Pool, ns, addrmgrNs walletdb.ReadBucket, serializ
 	nextChangeAddr := row.Status.NextChangeAddr
 	cAddr, err = p.ChangeAddress(nextChangeAddr.SeriesID, nextChangeAddr.Index)
 	if err != nil {
-		return nil, newError(ErrWithdrawalStorage,
+		log.ERROR(err)
+return nil, newError(ErrWithdrawalStorage,
 			"cannot deserialize nextChangeAddress for withdrawal", err)
 	}
 	wInfo.status = WithdrawalStatus{

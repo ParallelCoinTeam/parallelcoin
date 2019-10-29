@@ -103,6 +103,8 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		state.Template, err = generator.NewBlockTemplate(0, payToAddr,
 			s.Cfg.Algo)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 	}
@@ -127,6 +129,8 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		state.Template, err = generator.NewBlockTemplate(0, payToAddr,
 			s.Cfg.Algo)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			errStr := fmt.Sprintf("Failed to create new block template: %v %s", err)
 			log.ERROR(errStr)
 			return nil, &btcjson.RPCError{
@@ -193,6 +197,8 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 	buf := bytes.NewBuffer(data)
 	err := msgBlock.Header.Serialize(buf)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		errStr := fmt.Sprintf("Failed to serialize data: %v", err)
 		log.WARN(errStr)
 		return nil, &btcjson.RPCError{
@@ -255,6 +261,8 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	}
 	data, err := hex.DecodeString(hexData)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code: btcjson.ErrRPCInvalidParameter,
 			Message: fmt.Sprintf("argument must be "+
@@ -279,6 +287,8 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	bhBuf := bytes.NewBuffer(data[0:wire.MaxBlockHeaderPayload])
 	err = submittedHeader.Deserialize(bhBuf)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return false, &btcjson.RPCError{
 			Code: btcjson.ErrRPCInvalidParameter,
 			Message: fmt.Sprintf("argument does not "+
@@ -308,6 +318,8 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	pl := fork.GetMinDiff(s.Cfg.Algo, s.Cfg.Chain.BestSnapshot().Height)
 	err = blockchain.CheckProofOfWork(block, pl, s.Cfg.Chain.BestSnapshot().Height)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		// Anything other than a rule violation is an unexpected error, so return
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
@@ -333,6 +345,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	_, isOrphan, err := s.Cfg.Chain.ProcessBlock(0, block, 0,
 		s.Cfg.Chain.BestSnapshot().Height)
 	if err != nil || isOrphan {
+		log.ERROR(err)
 		// Anything other than a rule violation is an unexpected error, so return
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {

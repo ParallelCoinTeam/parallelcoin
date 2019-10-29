@@ -163,14 +163,16 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 		return func() (interface{}, *btcjson.RPCError) {
 			cmd, err := btcjson.UnmarshalCmd(request)
 			if err != nil {
-				return nil, btcjson.ErrRPCInvalidRequest
+		log.ERROR(err)
+return nil, btcjson.ErrRPCInvalidRequest
 			}
 			switch client := chainClient.(type) {
 			case *chain.RPCClient:
 				resp, err := handlerData.HandlerWithChain(cmd,
 					w, client)
 				if err != nil {
-					return nil, JSONError(err)
+		log.ERROR(err)
+return nil, JSONError(err)
 				}
 				return resp, nil
 			default:
@@ -187,11 +189,13 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 		return func() (interface{}, *btcjson.RPCError) {
 			cmd, err := btcjson.UnmarshalCmd(request)
 			if err != nil {
-				return nil, btcjson.ErrRPCInvalidRequest
+		log.ERROR(err)
+return nil, btcjson.ErrRPCInvalidRequest
 			}
 			resp, err := handlerData.Handler(cmd, w)
 			if err != nil {
-				return nil, JSONError(err)
+		log.ERROR(err)
+return nil, JSONError(err)
 			}
 			return resp, nil
 		}
@@ -210,7 +214,8 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			resp, err := client.RawRequest(request.Method,
 				request.Params)
 			if err != nil {
-				return nil, JSONError(err)
+		log.ERROR(err)
+return nil, JSONError(err)
 			}
 			return &resp, nil
 		default:
@@ -228,14 +233,16 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 func MakeResponse(id, result interface{}, err error) btcjson.Response {
 	idPtr := IDPointer(id)
 	if err != nil {
-		return btcjson.Response{
+		log.ERROR(err)
+return btcjson.Response{
 			ID:    idPtr,
 			Error: JSONError(err),
 		}
 	}
 	resultBytes, err := js.Marshal(result)
 	if err != nil {
-		return btcjson.Response{
+		log.ERROR(err)
+return btcjson.Response{
 			ID: idPtr,
 			Error: &btcjson.RPCError{
 				Code:    btcjson.ErrRPCInternal.Code,
@@ -289,7 +296,8 @@ func MakeMultiSigScript(w *wallet.Wallet, keys []string, nRequired int) ([]byte,
 		// try to parse as pubkey address
 		a, err := DecodeAddress(a, w.ChainParams())
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		switch addr := a.(type) {
 		case *util.AddressPubKey:
@@ -297,12 +305,14 @@ func MakeMultiSigScript(w *wallet.Wallet, keys []string, nRequired int) ([]byte,
 		default:
 			pubKey, err := w.PubKeyForAddress(addr)
 			if err != nil {
-				return nil, err
+		log.ERROR(err)
+return nil, err
 			}
 			pubKeyAddr, err := util.NewAddressPubKey(
 				pubKey.SerializeCompressed(), w.ChainParams())
 			if err != nil {
-				return nil, err
+		log.ERROR(err)
+return nil, err
 			}
 			keysesPrecious[i] = pubKeyAddr
 		}
@@ -322,17 +332,20 @@ func AddMultiSigAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error)
 	for i, k := range cmd.Keys {
 		addr, err := DecodeAddress(k, w.ChainParams())
 		if err != nil {
-			return nil, ParseError{err}
+		log.ERROR(err)
+return nil, ParseError{err}
 		}
 		secp256k1Addrs[i] = addr
 	}
 	script, err := w.MakeMultiSigScript(secp256k1Addrs, cmd.NRequired)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	p2shAddr, err := w.ImportP2SHRedeemScript(script)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return p2shAddr.EncodeAddress(), nil
 }
@@ -343,11 +356,13 @@ func CreateMultiSig(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	cmd := icmd.(*btcjson.CreateMultisigCmd)
 	script, err := MakeMultiSigScript(w, cmd.Keys, cmd.NRequired)
 	if err != nil {
-		return nil, ParseError{err}
+		log.ERROR(err)
+return nil, ParseError{err}
 	}
 	address, err := util.NewAddressScriptHash(script, w.ChainParams())
 	if err != nil {
-		// above is a valid script, shouldn't happen.
+		log.ERROR(err)
+// above is a valid script, shouldn't happen.
 		return nil, err
 	}
 	return btcjson.CreateMultiSigResult{
@@ -363,7 +378,8 @@ func DumpPrivKey(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	cmd := icmd.(*btcjson.DumpPrivKeyCmd)
 	addr, err := DecodeAddress(cmd.Address, w.ChainParams())
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	key, err := w.DumpWIFPrivateKey(addr)
 	if waddrmgr.IsError(err, waddrmgr.ErrLocked) {
@@ -392,11 +408,13 @@ func GetAddressesByAccount(icmd interface{}, w *wallet.Wallet) (interface{}, err
 	cmd := icmd.(*btcjson.GetAddressesByAccountCmd)
 	account, err := w.AccountNumber(waddrmgr.KeyScopeBIP0044, cmd.Account)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	addrs, err := w.AccountAddresses(account)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	addrStrs := make([]string, len(addrs))
 	for i, a := range addrs {
@@ -419,17 +437,20 @@ func GetBalance(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	if accountName == "*" {
 		balance, err = w.CalculateBalance(int32(*cmd.MinConf))
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	} else {
 		var account uint32
 		account, err = w.AccountNumber(waddrmgr.KeyScopeBIP0044, accountName)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		bals, err := w.CalculateAccountBalances(account, int32(*cmd.MinConf))
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		balance = bals.Spendable
 	}
@@ -469,11 +490,13 @@ func GetInfo(icmd interface{}, w *wallet.Wallet, chainClient *chain.RPCClient) (
 	// by them.
 	info, err := chainClient.GetInfo()
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	bal, err := w.CalculateBalance(1)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// TODO(davec): This should probably have a database version as opposed
 	// to using the manager version.
@@ -490,7 +513,8 @@ func GetInfo(icmd interface{}, w *wallet.Wallet, chainClient *chain.RPCClient) (
 func DecodeAddress(s string, params *netparams.Params) (util.Address, error) {
 	addr, err := util.DecodeAddress(s, params)
 	if err != nil {
-		msg := fmt.Sprintf("Invalid address %q: decode failed with %#q", s, err)
+		log.ERROR(err)
+msg := fmt.Sprintf("Invalid address %q: decode failed with %#q", s, err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidAddressOrKey,
 			Message: msg,
@@ -513,16 +537,19 @@ func GetAccount(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	cmd := icmd.(*btcjson.GetAccountCmd)
 	addr, err := DecodeAddress(cmd.Address, w.ChainParams())
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Fetch the associated account
 	account, err := w.AccountOfAddress(addr)
 	if err != nil {
-		return nil, &ErrAddressNotInWallet
+		log.ERROR(err)
+return nil, &ErrAddressNotInWallet
 	}
 	acctName, err := w.AccountName(waddrmgr.KeyScopeBIP0044, account)
 	if err != nil {
-		return nil, &ErrAccountNameNotFound
+		log.ERROR(err)
+return nil, &ErrAccountNameNotFound
 	}
 	return acctName, nil
 }
@@ -537,11 +564,13 @@ func GetAccountAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error) 
 	cmd := icmd.(*btcjson.GetAccountAddressCmd)
 	account, err := w.AccountNumber(waddrmgr.KeyScopeBIP0044, cmd.Account)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	addr, err := w.CurrentAddress(account, waddrmgr.KeyScopeBIP0044)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return addr.EncodeAddress(), err
 }
@@ -556,11 +585,13 @@ func GetUnconfirmedBalance(icmd interface{}, w *wallet.Wallet) (interface{}, err
 	}
 	account, err := w.AccountNumber(waddrmgr.KeyScopeBIP0044, acctName)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	bals, err := w.CalculateAccountBalances(account, 1)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return (bals.Total - bals.Spendable).ToDUO(), nil
 }
@@ -577,7 +608,8 @@ func ImportPrivKey(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	}
 	wif, err := util.DecodeWIF(cmd.PrivKey)
 	if err != nil {
-		return nil, &btcjson.RPCError{
+		log.ERROR(err)
+return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidAddressOrKey,
 			Message: "WIF decode failed: " + err.Error(),
 		}
@@ -639,7 +671,8 @@ func RenameAccount(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	// Check that given account exists
 	account, err := w.AccountNumber(waddrmgr.KeyScopeBIP0044, cmd.OldAccount)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return nil, w.RenameAccount(waddrmgr.KeyScopeBIP0044, account, cmd.NewAccount)
 }
@@ -657,11 +690,13 @@ func GetNewAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	}
 	account, err := w.AccountNumber(waddrmgr.KeyScopeBIP0044, acctName)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	addr, err := w.NewAddress(account, waddrmgr.KeyScopeBIP0044, false)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Return the new payment address string.
 	return addr.EncodeAddress(), nil
@@ -680,11 +715,13 @@ func GetRawChangeAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error
 	}
 	account, err := w.AccountNumber(waddrmgr.KeyScopeBIP0044, acctName)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	addr, err := w.NewChangeAddress(account, waddrmgr.KeyScopeBIP0044)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Return the new payment address string.
 	return addr.EncodeAddress(), nil
@@ -696,7 +733,8 @@ func GetReceivedByAccount(icmd interface{}, w *wallet.Wallet) (interface{}, erro
 	cmd := icmd.(*btcjson.GetReceivedByAccountCmd)
 	account, err := w.AccountNumber(waddrmgr.KeyScopeBIP0044, cmd.Account)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// TODO: This is more inefficient that it could be, but the entire
 	// algorithm is already dominated by reading every transaction in the
@@ -705,7 +743,8 @@ func GetReceivedByAccount(icmd interface{}, w *wallet.Wallet) (interface{}, erro
 		waddrmgr.KeyScopeBIP0044, int32(*cmd.MinConf),
 	)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	acctIndex := int(account)
 	if account == waddrmgr.ImportedAddrAccount {
@@ -720,11 +759,13 @@ func GetReceivedByAddress(icmd interface{}, w *wallet.Wallet) (interface{}, erro
 	cmd := icmd.(*btcjson.GetReceivedByAddressCmd)
 	addr, err := DecodeAddress(cmd.Address, w.ChainParams())
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	total, err := w.TotalReceivedForAddr(addr, int32(*cmd.MinConf))
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return total.ToDUO(), nil
 }
@@ -735,14 +776,16 @@ func GetTransaction(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	cmd := icmd.(*btcjson.GetTransactionCmd)
 	txHash, err := chainhash.NewHashFromStr(cmd.Txid)
 	if err != nil {
-		return nil, &btcjson.RPCError{
+		log.ERROR(err)
+return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDecodeHexString,
 			Message: "Transaction hash string decode failed: " + err.Error(),
 		}
 	}
 	details, err := wallet.ExposeUnstableAPI(w).TxDetails(txHash)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	if details == nil {
 		return nil, &ErrNoTransactionInfo
@@ -754,7 +797,8 @@ func GetTransaction(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	txBuf.Grow(details.MsgTx.SerializeSize())
 	err = details.MsgTx.Serialize(&txBuf)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// TODO: Add a "generated" field to this result type.  "generated":true
 	// is only added if the transaction is a coinbase.
@@ -912,7 +956,8 @@ func Help(icmd interface{}, w *wallet.Wallet, chainClient *chain.RPCClient) (int
 		}
 		c, err := chainClient.POSTClient()
 		if err != nil {
-			return nil
+		log.ERROR(err)
+return nil
 		}
 		return c
 	}
@@ -975,7 +1020,8 @@ func ListAccounts(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	accountBalances := map[string]float64{}
 	results, err := w.AccountBalances(waddrmgr.KeyScopeBIP0044, int32(*cmd.MinConf))
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	for _, result := range results {
 		accountBalances[result.AccountName] = result.AccountBalance.ToDUO()
@@ -1006,7 +1052,8 @@ func ListReceivedByAccount(icmd interface{}, w *wallet.Wallet) (interface{}, err
 		waddrmgr.KeyScopeBIP0044, int32(*cmd.MinConf),
 	)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	jsonResults := make([]btcjson.ListReceivedByAccountResult, 0, len(results))
 	for _, result := range results {
@@ -1050,7 +1097,8 @@ func ListReceivedByAddress(icmd interface{}, w *wallet.Wallet) (interface{}, err
 	// Otherwise we'll just get addresses from transactions later.
 	sortedAddrs, err := w.SortedActivePaymentAddresses()
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	for _, address := range sortedAddrs {
 		// There might be duplicates, just overwrite them.
@@ -1071,7 +1119,8 @@ func ListReceivedByAddress(icmd interface{}, w *wallet.Wallet) (interface{}, err
 				_, addrs, _, err := txscript.ExtractPkScriptAddrs(
 					pkScript, w.ChainParams())
 				if err != nil {
-					// Non standard script, skip.
+		log.ERROR(err)
+// Non standard script, skip.
 					continue
 				}
 				for _, addr := range addrs {
@@ -1095,7 +1144,8 @@ func ListReceivedByAddress(icmd interface{}, w *wallet.Wallet) (interface{}, err
 		return false, nil
 	})
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Massage address data into output format.
 	numAddresses := len(allAddrData)
@@ -1127,22 +1177,26 @@ func ListSinceBlock(icmd interface{}, w *wallet.Wallet, chainClient *chain.RPCCl
 	if cmd.BlockHash != nil {
 		hash, err := chainhash.NewHashFromStr(*cmd.BlockHash)
 		if err != nil {
-			return nil, DeserializationError{err}
+		log.ERROR(err)
+return nil, DeserializationError{err}
 		}
 		block, err := chainClient.GetBlockVerboseTx(hash)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		start = int32(block.Height) + 1
 	}
 	txInfoList, err := w.ListSinceBlock(start, -1, syncBlock.Height)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Done with work, get the response.
 	blockHash, err := gbh.Receive()
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	res := btcjson.ListSinceBlockResult{
 		Transactions: txInfoList,
@@ -1188,7 +1242,8 @@ func ListAddressTransactions(icmd interface{}, w *wallet.Wallet) (interface{}, e
 	for _, addrStr := range cmd.Addresses {
 		addr, err := DecodeAddress(addrStr, w.ChainParams())
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		hash160Map[string(addr.ScriptAddress())] = struct{}{}
 	}
@@ -1220,7 +1275,8 @@ func ListUnspent(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 		for _, as := range *cmd.Addresses {
 			a, err := DecodeAddress(as, w.ChainParams())
 			if err != nil {
-				return nil, err
+		log.ERROR(err)
+return nil, err
 			}
 			addresses[a.EncodeAddress()] = struct{}{}
 		}
@@ -1238,7 +1294,8 @@ func LockUnspent(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 		for _, input := range cmd.Transactions {
 			txHash, err := chainhash.NewHashFromStr(input.Txid)
 			if err != nil {
-				return nil, ParseError{err}
+		log.ERROR(err)
+return nil, ParseError{err}
 			}
 			op := wire.OutPoint{Hash: *txHash, Index: input.Vout}
 			if cmd.Unlock {
@@ -1260,11 +1317,13 @@ func MakeOutputs(pairs map[string]util.Amount, chainParams *netparams.Params) ([
 	for addrStr, amt := range pairs {
 		addr, err := util.DecodeAddress(addrStr, chainParams)
 		if err != nil {
-			return nil, fmt.Errorf("cannot decode address: %s", err)
+		log.ERROR(err)
+return nil, fmt.Errorf("cannot decode address: %s", err)
 		}
 		pkScript, err := txscript.PayToAddrScript(addr)
 		if err != nil {
-			return nil, fmt.Errorf("cannot create txout script: %s", err)
+		log.ERROR(err)
+return nil, fmt.Errorf("cannot create txout script: %s", err)
 		}
 		outputs = append(outputs, wire.NewTxOut(int64(amt), pkScript))
 	}
@@ -1278,11 +1337,13 @@ func SendPairs(w *wallet.Wallet, amounts map[string]util.Amount,
 	account uint32, minconf int32, feeSatPerKb util.Amount) (string, error) {
 	outputs, err := MakeOutputs(amounts, w.ChainParams())
 	if err != nil {
-		return "", err
+		log.ERROR(err)
+return "", err
 	}
 	txHash, err := w.SendOutputs(outputs, account, minconf, feeSatPerKb)
 	if err != nil {
-		if err == txrules.ErrAmountNegative {
+		log.ERROR(err)
+if err == txrules.ErrAmountNegative {
 			return "", ErrNeedPositiveAmount
 		}
 		if waddrmgr.IsError(err, waddrmgr.ErrLocked) {
@@ -1324,7 +1385,8 @@ func SendFrom(icmd interface{}, w *wallet.Wallet, chainClient *chain.RPCClient) 
 		waddrmgr.KeyScopeBIP0044, cmd.FromAccount,
 	)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Check that signed integer parameters are positive.
 	if cmd.Amount < 0 {
@@ -1337,7 +1399,8 @@ func SendFrom(icmd interface{}, w *wallet.Wallet, chainClient *chain.RPCClient) 
 	// Create map of address and amount pairs.
 	amt, err := util.NewAmount(cmd.Amount)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	pairs := map[string]util.Amount{
 		cmd.ToAddress: amt,
@@ -1363,7 +1426,8 @@ func SendMany(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	}
 	account, err := w.AccountNumber(waddrmgr.KeyScopeBIP0044, cmd.FromAccount)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Check that minconf is positive.
 	minConf := int32(*cmd.MinConf)
@@ -1375,7 +1439,8 @@ func SendMany(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	for k, v := range cmd.Amounts {
 		amt, err := util.NewAmount(v)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		pairs[k] = amt
 	}
@@ -1399,7 +1464,8 @@ func SendToAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	}
 	amt, err := util.NewAmount(cmd.Amount)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Check that signed integer parameters are positive.
 	if amt < 0 {
@@ -1431,26 +1497,31 @@ func SignMessage(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	cmd := icmd.(*btcjson.SignMessageCmd)
 	addr, err := DecodeAddress(cmd.Address, w.ChainParams())
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	privKey, err := w.PrivKeyForAddress(addr)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	var buf bytes.Buffer
 	err = wire.WriteVarString(&buf, 0, "Bitcoin Signed Message:\n")
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 	}
 	err = wire.WriteVarString(&buf, 0, cmd.Message)
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 	}
 	messageHash := chainhash.DoubleHashB(buf.Bytes())
 	sigbytes, err := ec.SignCompact(ec.S256(), privKey,
 		messageHash, true)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return base64.StdEncoding.EncodeToString(sigbytes), nil
 }
@@ -1460,12 +1531,14 @@ func SignRawTransaction(icmd interface{}, w *wallet.Wallet, chainClient *chain.R
 	cmd := icmd.(*btcjson.SignRawTransactionCmd)
 	serializedTx, err := DecodeHexStr(cmd.RawTx)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	var tx wire.MsgTx
 	err = tx.Deserialize(bytes.NewBuffer(serializedTx))
 	if err != nil {
-		e := errors.New("TX decode failed")
+		log.ERROR(err)
+e := errors.New("TX decode failed")
 		return nil, DeserializationError{e}
 	}
 	var hashType txscript.SigHashType
@@ -1497,11 +1570,13 @@ func SignRawTransaction(icmd interface{}, w *wallet.Wallet, chainClient *chain.R
 	for _, rti := range cmdInputs {
 		inputHash, err := chainhash.NewHashFromStr(rti.Txid)
 		if err != nil {
-			return nil, DeserializationError{err}
+		log.ERROR(err)
+return nil, DeserializationError{err}
 		}
 		script, err := DecodeHexStr(rti.ScriptPubKey)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		// redeemScript is only actually used iff the user provided
 		// private keys. In which case, it is used to get the scripts
@@ -1512,12 +1587,14 @@ func SignRawTransaction(icmd interface{}, w *wallet.Wallet, chainClient *chain.R
 		if cmd.PrivKeys != nil && len(*cmd.PrivKeys) != 0 {
 			redeemScript, err := DecodeHexStr(rti.RedeemScript)
 			if err != nil {
-				return nil, err
+		log.ERROR(err)
+return nil, err
 			}
 			addr, err := util.NewAddressScriptHash(redeemScript,
 				w.ChainParams())
 			if err != nil {
-				return nil, DeserializationError{err}
+		log.ERROR(err)
+return nil, DeserializationError{err}
 			}
 			scripts[addr.String()] = redeemScript
 		}
@@ -1550,7 +1627,8 @@ func SignRawTransaction(icmd interface{}, w *wallet.Wallet, chainClient *chain.R
 		for _, key := range *cmd.PrivKeys {
 			wif, err := util.DecodeWIF(key)
 			if err != nil {
-				return nil, DeserializationError{err}
+		log.ERROR(err)
+return nil, DeserializationError{err}
 			}
 			if !wif.IsForNet(w.ChainParams()) {
 				s := "key network doesn't match wallet's"
@@ -1559,7 +1637,8 @@ func SignRawTransaction(icmd interface{}, w *wallet.Wallet, chainClient *chain.R
 			addr, err := util.NewAddressPubKey(wif.SerializePubKey(),
 				w.ChainParams())
 			if err != nil {
-				return nil, DeserializationError{err}
+		log.ERROR(err)
+return nil, DeserializationError{err}
 			}
 			keys[addr.EncodeAddress()] = wif
 		}
@@ -1570,11 +1649,13 @@ func SignRawTransaction(icmd interface{}, w *wallet.Wallet, chainClient *chain.R
 	for outPoint, resp := range requested {
 		result, err := resp.Receive()
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		script, err := hex.DecodeString(result.ScriptPubKey.Hex)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		inputs[outPoint] = script
 	}
@@ -1584,7 +1665,8 @@ func SignRawTransaction(icmd interface{}, w *wallet.Wallet, chainClient *chain.R
 	// reply.
 	signErrs, err := w.SignTransaction(&tx, hashType, inputs, keys, scripts)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	var buf bytes.Buffer
 	buf.Grow(tx.SerializeSize())
@@ -1617,7 +1699,8 @@ func ValidateAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	result := btcjson.ValidateAddressWalletResult{}
 	addr, err := DecodeAddress(cmd.Address, w.ChainParams())
 	if err != nil {
-		// Use result zero value (IsValid=false).
+		log.ERROR(err)
+// Use result zero value (IsValid=false).
 		return result, nil
 	}
 	// We could put whether or not the address is a script here,
@@ -1628,7 +1711,8 @@ func ValidateAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	result.IsValid = true
 	ainfo, err := w.AddressInfo(addr)
 	if err != nil {
-		if waddrmgr.IsError(err, waddrmgr.ErrAddressNotFound) {
+		log.ERROR(err)
+if waddrmgr.IsError(err, waddrmgr.ErrAddressNotFound) {
 			// No additional information available about the address.
 			return result, nil
 		}
@@ -1639,7 +1723,8 @@ func ValidateAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	result.IsMine = true
 	acctName, err := w.AccountName(waddrmgr.KeyScopeBIP0044, ainfo.Account())
 	if err != nil {
-		return nil, &ErrAccountNameNotFound
+		log.ERROR(err)
+return nil, &ErrAccountNameNotFound
 	}
 	result.Account = acctName
 	switch ma := ainfo.(type) {
@@ -1652,7 +1737,8 @@ func ValidateAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 		// just break out now if there is an error.
 		script, err := ma.Script()
 		if err != nil {
-			break
+		log.ERROR(err)
+break
 		}
 		result.Hex = hex.EncodeToString(script)
 		// This typically shouldn't fail unless an invalid script was
@@ -1662,7 +1748,8 @@ func ValidateAddress(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 		class, addrs, reqSigs, err := txscript.ExtractPkScriptAddrs(
 			script, w.ChainParams())
 		if err != nil {
-			result.Script = txscript.NonStandardTy.String()
+		log.ERROR(err)
+result.Script = txscript.NonStandardTy.String()
 			break
 		}
 		addrStrings := make([]string, len(addrs))
@@ -1686,29 +1773,34 @@ func VerifyMessage(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	cmd := icmd.(*btcjson.VerifyMessageCmd)
 	addr, err := DecodeAddress(cmd.Address, w.ChainParams())
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// decode base64 signature
 	sig, err := base64.StdEncoding.DecodeString(cmd.Signature)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Validate the signature - this just shows that it was valid at all.
 	// we will compare it with the key next.
 	var buf bytes.Buffer
 	err = wire.WriteVarString(&buf, 0, "Parallelcoin Signed Message:\n")
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 	}
 	err = wire.WriteVarString(&buf, 0, cmd.Message)
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 	}
 	expectedMessageHash := chainhash.DoubleHashB(buf.Bytes())
 	pk, wasCompressed, err := ec.RecoverCompact(ec.S256(), sig,
 		expectedMessageHash)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	var serializedPubKey []byte
 	if wasCompressed {
@@ -1786,7 +1878,8 @@ func DecodeHexStr(hexStr string) ([]byte, error) {
 	}
 	decoded, err := hex.DecodeString(hexStr)
 	if err != nil {
-		return nil, &btcjson.RPCError{
+		log.ERROR(err)
+return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDecodeHexString,
 			Message: "Hex string decode failed: " + err.Error(),
 		}

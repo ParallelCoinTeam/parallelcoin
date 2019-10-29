@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 
 	"github.com/p9c/pod/cmd/gui/mod"
 	"github.com/p9c/pod/cmd/node/rpc"
@@ -35,6 +36,7 @@ func (d *DuOS) GetNetworkLastBlock() int32 {
 //	blks := []btcjson.GetBlockVerboseResult{}
 //	getBlockChain, err := rpc.HandleGetBlockChainInfo(n.rpc, nil, nil)
 //	if err != nil {
+//		log.ERROR(err)
 //		alert.Alert.Time = time.Now()
 //		alert.Alert.Alert = err.Error()
 //		alert.Alert.AlertType = "error"
@@ -50,6 +52,7 @@ func (d *DuOS) GetNetworkLastBlock() int32 {
 //		}
 //		hash, err := rpc.HandleGetBlockHash(n.rpc, &hcmd, nil)
 //		if err != nil {
+//		log.ERROR(err)
 //			alert.Alert.Time = time.Now()
 //			alert.Alert.Alert = err.Error()
 //			alert.Alert.AlertType = "error"
@@ -63,6 +66,7 @@ func (d *DuOS) GetNetworkLastBlock() int32 {
 //			}
 //			bl, err := rpc.HandleGetBlock(n.rpc, &bcmd, nil)
 //			if err != nil {
+//		log.ERROR(err)
 //				alert.Alert.Time = time.Now()
 //				alert.Alert.Alert = err.Error()
 //				alert.Alert.AlertType = "error"
@@ -82,11 +86,13 @@ func (d DuOS) GetBlockExcerpt(height int) (b mod.DuOSblock) {
 	b = *new(mod.DuOSblock)
 	hashHeight, err := d.Cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	// Load the raw block bytes from the database.
 	hash, err := chainhash.NewHashFromStr(hashHeight.String())
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	var blkBytes []byte
 	err = d.Cx.RPCServer.Cfg.DB.View(func(dbTx database.Tx) error {
 		var err error
@@ -94,16 +100,19 @@ func (d DuOS) GetBlockExcerpt(height int) (b mod.DuOSblock) {
 		return err
 	})
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	// The verbose flag is set, so generate the JSON object and return it.
 	// Deserialize the block.
 	blk, err := util.NewBlockFromBytes(blkBytes)
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	// Get the block height from chain.
 	blockHeight, err := d.Cx.RPCServer.Cfg.Chain.BlockHeightByHash(hash)
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	blk.SetHeight(blockHeight)
 	params := d.Cx.RPCServer.Cfg.ChainParams
 	blockHeader := &blk.MsgBlock().Header
@@ -127,7 +136,8 @@ func (d DuOS) GetBlockExcerpt(height int) (b mod.DuOSblock) {
 	//	// Look up the location of the transaction.
 	//	blockRegion, err := b.rpc.Cfg.TxIndex.TxBlockRegion(tx.Hash())
 	//	if err != nil {
-	//	}
+		log.ERROR(err)
+//	}
 	//	if blockRegion == nil {
 	//	}
 	//	// Load the raw transaction bytes from the database.
@@ -138,12 +148,14 @@ func (d DuOS) GetBlockExcerpt(height int) (b mod.DuOSblock) {
 	//		return err
 	//	})
 	//	if err != nil {
-	//	}
+		log.ERROR(err)
+//	}
 	//	// Deserialize the transaction
 	//	var msgTx wire.MsgTx
 	//	err = msgTx.Deserialize(bytes.NewReader(txBytes))
 	//	if err != nil {
-	//	}
+		log.ERROR(err)
+//	}
 	//	mtx = &msgTx
 	//
 	//	for _, vout := range rpc.CreateVoutList(mtx, b.rpc.Cfg.ChainParams, nil) {
@@ -220,6 +232,7 @@ func (d *DuOS) GetBlocksExcerpts(startBlock, blockHeight int) mod.DuOSblocks {
 // func (d *DuOS) GetBlockChainInfo() {
 //	getBlockChainInfo, err := rpc.HandleGetBlockChainInfo(d.Cx.RPCServer, nil, nil)
 //	if err != nil {
+//		log.ERROR(err)
 //		d.PushDuOSalert("Error",err.Error(), "error")
 //	}
 //	var ok bool
@@ -234,7 +247,8 @@ func (d *DuOS) GetBlocksExcerpts(startBlock, blockHeight int) mod.DuOSblocks {
 func (d *DuOS) GetBlockCount() int64 {
 	getBlockCount, err := rpc.HandleGetBlockCount(d.Cx.RPCServer, nil, nil)
 	if err != nil {
-		d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 	}
 	d.Data.Status.BlockCount = getBlockCount.(int64)
 	return d.Data.Status.BlockCount
@@ -245,7 +259,8 @@ func (d *DuOS) GetBlockHash(blockHeight int) string {
 	}
 	hash, err := rpc.HandleGetBlockHash(d.Cx.RPCServer, &hcmd, nil)
 	if err != nil {
-		d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 	}
 	return hash.(string)
 }
@@ -258,7 +273,8 @@ func (d *DuOS) GetBlock(hash string) btcjson.GetBlockVerboseResult {
 	}
 	bl, err := rpc.HandleGetBlock(d.Cx.RPCServer, &bcmd, nil)
 	if err != nil {
-		d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 	}
 	return bl.(btcjson.GetBlockVerboseResult)
 }
@@ -278,7 +294,8 @@ func (d *DuOS) GetDifficulty() float64 {
 	c := btcjson.GetDifficultyCmd{}
 	r, err := rpc.HandleGetDifficulty(d.Cx.RPCServer, c, nil)
 	if err != nil {
-		d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 	}
 	d.Data.Status.Difficulty = r.(float64)
 	return d.Data.Status.Difficulty
@@ -322,7 +339,8 @@ func (d *DuOS) GetDifficulty() float64 {
 func (dV *DuOS) GetPeerInfo() []*btcjson.GetPeerInfoResult {
 	getPeers, err := rpc.HandleGetPeerInfo(dV.Cx.RPCServer, nil, nil)
 	if err != nil {
-		dV.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+dV.PushDuOSalert("Error", err.Error(), "error")
 	}
 	dV.Data.Peers = getPeers.([]*btcjson.GetPeerInfoResult)
 	return dV.Data.Peers
@@ -336,7 +354,8 @@ func (dV *DuOS) GetPeerInfo() []*btcjson.GetPeerInfoResult {
 func (d *DuOS) Uptime() (r int64) {
 	rRaw, err := rpc.HandleUptime(d.Cx.RPCServer, nil, nil)
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	// rRaw = int64(0)
 	d.Data.Status.UpTime = rRaw.(int64)
 	return d.Data.Status.UpTime
@@ -358,6 +377,7 @@ func (d *DuOS) Uptime() (r int64) {
 func (d *DuOS) GetWalletVersion() map[string]btcjson.VersionResult {
 	v, err := rpc.HandleVersion(d.Cx.RPCServer, nil, nil)
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	return v.(map[string]btcjson.VersionResult)
 }

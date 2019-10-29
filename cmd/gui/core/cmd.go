@@ -6,6 +6,7 @@ package core
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"time"
 
 	"github.com/minio/highwayhash"
@@ -29,7 +30,8 @@ func (d *DuOS) GetBalance() mod.DuOSbalance {
 	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
 		MinConf: &minconf}, d.Cx.WalletServer)
 	if err != nil {
-		d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 	}
 	gb, ok := getBalance.(float64)
 	if ok {
@@ -40,7 +42,8 @@ func (d *DuOS) GetBalance() mod.DuOSbalance {
 	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.
 		GetUnconfirmedBalanceCmd{Account: &acct}, d.Cx.WalletServer)
 	if err != nil {
-		d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 	}
 	ub, ok := getUnconfirmedBalance.(float64)
 	if ok {
@@ -54,7 +57,8 @@ func (d *DuOS) GetTransactions(from, count int, cat string) (txs mod.DuOStransac
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := d.Cx.WalletServer.ListTransactions(0, 10)
 	if err != nil {
-		d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 	}
 	txs.TxsNumber = len(lt)
 	// lt := listTransactions.([]json.ListTransactionsResult)
@@ -93,7 +97,8 @@ func (d *DuOS) GetTransactions(from, count int, cat string) (txs mod.DuOStransac
 func (d *DuOS) GetTransactionsExcertps() (txse mod.DuOStransactionsExcerpts) {
 	lt, err := d.Cx.WalletServer.ListTransactions(0, 99999)
 	if err != nil {
-		d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 	}
 	txse.TxsNumber = len(lt)
 
@@ -156,7 +161,8 @@ func (d *DuOS) GetAddressBook() mod.DuOSaddressBook {
 	// Otherwise we'll just get addresses from transactions later.
 	sortedAddrs, err := d.Cx.WalletServer.SortedActivePaymentAddresses()
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	idx := 0
 	for _, address := range sortedAddrs {
 		// There might be duplicates, just overwrite them.
@@ -178,7 +184,8 @@ func (d *DuOS) GetAddressBook() mod.DuOSaddressBook {
 				_, addrs, _, err := txscript.ExtractPkScriptAddrs(
 					pkScript, d.Cx.WalletServer.ChainParams())
 				if err != nil {
-					// Non standard script, skip.
+		log.ERROR(err)
+// Non standard script, skip.
 					continue
 				}
 				for _, addr := range addrs {
@@ -198,7 +205,8 @@ func (d *DuOS) GetAddressBook() mod.DuOSaddressBook {
 		return false, nil
 	})
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	var addrs []mod.Address
 	// Massage address data into output format.
 	addressbook.Num = len(allAddrData)
@@ -222,7 +230,8 @@ func (d *DuOS) DuoSend(wp string, ad string, am float64) string {
 	if am > 0 {
 		getBlockChain, err := rpc.HandleGetBlockChainInfo(d.Cx.RPCServer, nil, nil)
 		if err != nil {
-			d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 
 		}
 		result, ok := getBlockChain.(*btcjson.GetBlockChainInfoResult)
@@ -244,7 +253,8 @@ func (d *DuOS) DuoSend(wp string, ad string, am float64) string {
 		amount, _ := btcutil.NewAmount(am)
 		addr, err := btcutil.DecodeAddress(ad, defaultNet)
 		if err != nil {
-			d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 
 		}
 		var validateAddr *btcjson.ValidateAddressWalletResult
@@ -253,7 +263,8 @@ func (d *DuOS) DuoSend(wp string, ad string, am float64) string {
 			va, err = legacy.ValidateAddress(&btcjson.
 				ValidateAddressCmd{Address: addr.String()}, d.Cx.WalletServer)
 			if err != nil {
-				d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 
 			}
 			vva := va.(btcjson.ValidateAddressWalletResult)
@@ -262,21 +273,24 @@ func (d *DuOS) DuoSend(wp string, ad string, am float64) string {
 				legacy.WalletPassphrase(btcjson.NewWalletPassphraseCmd(wp, 5),
 					d.Cx.WalletServer)
 				if err != nil {
-					d.PushDuOSalert("Error", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("Error", err.Error(), "error")
 				}
 				_, err = legacy.SendToAddress(
 					&btcjson.SendToAddressCmd{
 						Address: addr.EncodeAddress(), Amount: amount.ToDUO(),
 					}, d.Cx.WalletServer)
 				if err != nil {
-					d.PushDuOSalert("error sending to address:", err.Error(), "error")
+		log.ERROR(err)
+d.PushDuOSalert("error sending to address:", err.Error(), "error")
 
 				} else {
 					d.PushDuOSalert("Address OK", "OK", "success")
 				}
 			} else {
 				if err != nil {
-					d.PushDuOSalert("Invalid address", "INVALID", "error")
+		log.ERROR(err)
+d.PushDuOSalert("Invalid address", "INVALID", "error")
 				}
 			}
 			d.PushDuOSalert("Payment sent", "PAYMENT", "success")
@@ -291,11 +305,13 @@ func (d *DuOS) DuoSend(wp string, ad string, am float64) string {
 func (d *DuOS) CreateNewAddress(acctName string) string {
 	account, err := d.Cx.WalletServer.AccountNumber(waddrmgr.KeyScopeBIP0044, acctName)
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	addr, err := d.Cx.WalletServer.NewAddress(account,
 		waddrmgr.KeyScopeBIP0044, true)
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	d.PushDuOSalert("New address created:", addr.EncodeAddress(), "success")
 	fmt.Println("low", addr.EncodeAddress())
 	return addr.EncodeAddress()
@@ -304,7 +320,8 @@ func (d *DuOS) CreateNewAddress(acctName string) string {
 func (d *DuOS) SaveAddressLabel(address, label string) {
 	hf, err := highwayhash.New64(make([]byte, 32))
 	if err != nil {
-		panic(err)
+		log.ERROR(err)
+panic(err)
 	}
 	addressHash := hex.EncodeToString(hf.Sum([]byte(address)))
 	d.db.DbWrite("addressbook", addressHash, mod.AddBook{

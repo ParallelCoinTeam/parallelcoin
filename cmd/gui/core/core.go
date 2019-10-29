@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/p9c/pod/cmd/gui/mod"
 	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -37,13 +38,15 @@ func (d *DuOS) GetDuOSstatus() mod.DuOSstatus {
 	gnhpsCmd := btcjson.NewGetNetworkHashPSCmd(nil, nil)
 	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(d.Cx.RPCServer, gnhpsCmd, nil)
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	networkHashesPerSec, ok := networkHashesPerSecIface.(int64)
 	if !ok {
 	}
 	v, err := rpc.HandleVersion(d.Cx.RPCServer, nil, nil)
 	if err != nil {
-	}
+		log.ERROR(err)
+}
 	status.Version = "0.0.1"
 	status.WalletVersion = v.(map[string]btcjson.VersionResult)
 	status.UpTime = time.Now().Unix() - d.Cx.RPCServer.Cfg.StartupTime

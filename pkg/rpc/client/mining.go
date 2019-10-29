@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	js "encoding/json"
 	"errors"
+	"github.com/p9c/pod/pkg/log"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -17,20 +18,23 @@ type FutureGenerateResult chan *response
 func (r FutureGenerateResult) Receive() ([]*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a list of strings.
 	var result []string
 	err = js.Unmarshal(res, &result)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Convert each block hash to a chainhash.Hash and store a pointer to each.
 	convertedResult := make([]*chainhash.Hash, len(result))
 	for i, hashString := range result {
 		convertedResult[i], err = chainhash.NewHashFromStr(hashString)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	}
 	return convertedResult, nil
@@ -54,13 +58,15 @@ type FutureGetGenerateResult chan *response
 func (r FutureGetGenerateResult) Receive() (bool, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	// Unmarshal result as a boolean.
 	var result bool
 	err = js.Unmarshal(res, &result)
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	return result, nil
 }
@@ -103,13 +109,15 @@ type FutureGetHashesPerSecResult chan *response
 func (r FutureGetHashesPerSecResult) Receive() (int64, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return -1, err
+		log.ERROR(err)
+return -1, err
 	}
 	// Unmarshal result as an int64.
 	var result int64
 	err = js.Unmarshal(res, &result)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	return result, nil
 }
@@ -132,13 +140,15 @@ type FutureGetMiningInfoResult chan *response
 func (r FutureGetMiningInfoResult) Receive() (*btcjson.GetMiningInfoResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a getmininginfo result object.
 	var infoResult btcjson.GetMiningInfoResult
 	err = js.Unmarshal(res, &infoResult)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return &infoResult, nil
 }
@@ -161,13 +171,15 @@ type FutureGetNetworkHashPS chan *response
 func (r FutureGetNetworkHashPS) Receive() (int64, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return -1, err
+		log.ERROR(err)
+return -1, err
 	}
 	// Unmarshal result as an int64.
 	var result int64
 	err = js.Unmarshal(res, &result)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	return result, nil
 }
@@ -212,13 +224,15 @@ type FutureGetWork chan *response
 func (r FutureGetWork) Receive() (*btcjson.GetWorkResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Unmarshal result as a getwork result object.
 	var result btcjson.GetWorkResult
 	err = js.Unmarshal(res, &result)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return &result, nil
 }
@@ -241,13 +255,15 @@ type FutureGetWorkSubmit chan *response
 func (r FutureGetWorkSubmit) Receive() (bool, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	// Unmarshal result as a boolean.
 	var accepted bool
 	err = js.Unmarshal(res, &accepted)
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	return accepted, nil
 }
@@ -270,13 +286,15 @@ type FutureSubmitBlockResult chan *response
 func (r FutureSubmitBlockResult) Receive() error {
 	res, err := receiveFuture(r)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	if string(res) != "null" {
 		var result string
 		err = js.Unmarshal(res, &result)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 		return errors.New(result)
 	}
@@ -289,7 +307,8 @@ func (c *Client) SubmitBlockAsync(block *util.Block, options *btcjson.SubmitBloc
 	if block != nil {
 		blockBytes, err := block.Bytes()
 		if err != nil {
-			return newFutureError(err)
+		log.ERROR(err)
+return newFutureError(err)
 		}
 		blockHex = hex.EncodeToString(blockBytes)
 	}

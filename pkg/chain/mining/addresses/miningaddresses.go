@@ -22,7 +22,8 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 		account, err := w.AccountNumber(wm.KeyScopeBIP0044,
 			"default")
 		if err != nil {
-			log.ERROR("error getting account number ", err,
+		log.ERROR(err)
+log.ERROR("error getting account number ", err,
 			)
 		}
 		for i := 0; i < toMake; i++ {

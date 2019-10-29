@@ -233,7 +233,8 @@ func // batchManager is responsible for scheduling batches of UTXOs to scan. Any
 		// least-height request currently in the queue.
 		err := s.scanFromHeight(req.BirthHeight)
 		if err != nil {
-			log.ERRORF(
+		log.ERROR(err)
+log.ERRORF(
 				"UXTO scan failed: %v", err,
 			)
 		}
@@ -268,6 +269,8 @@ func // scanFromHeight runs a single batch,
 	// scan.
 	bestStamp, err := s.cfg.BestSnapshot()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	var (
@@ -292,6 +295,8 @@ scanToEnd:
 		}
 		hash, err := s.cfg.GetBlockHash(int64(height))
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return reporter.FailRemaining(err)
 		}
 		// If there are any new requests that can safely be added to this batch,
@@ -307,6 +312,8 @@ scanToEnd:
 			}
 			match, err := s.cfg.BlockFilterMatches(&options, hash)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return reporter.FailRemaining(err)
 			}
 			// If still no match is found, we have no reason to
@@ -331,6 +338,8 @@ scanToEnd:
 		)
 		block, err := s.cfg.GetBlock(*hash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return reporter.FailRemaining(err)
 		}
 		// Check again to see if the utxoscanner has been signaled to exit.
@@ -348,6 +357,8 @@ scanToEnd:
 	// scan started.
 	currStamp, err := s.cfg.BestSnapshot()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return reporter.FailRemaining(err)
 	}
 	// If the returned height is higher, we still have more blocks to go.

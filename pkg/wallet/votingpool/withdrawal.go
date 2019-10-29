@@ -138,7 +138,8 @@ func (s outputStatus) String() string {
 func (tx *changeAwareTx) addSelfToStore(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket) error {
 	rec, err := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx, time.Now())
 	if err != nil {
-		return newError(ErrWithdrawalTxStorage, "error constructing TxRecord for storing", err)
+		log.ERROR(err)
+return newError(ErrWithdrawalTxStorage, "error constructing TxRecord for storing", err)
 	}
 	if err := store.InsertTx(txmgrNs, rec, nil); err != nil {
 		return newError(ErrWithdrawalTxStorage, "error adding tx to store", err)
@@ -460,7 +461,8 @@ func (p *Pool) StartWithdrawal(ns walletdb.ReadWriteBucket,
 	status, err := getWithdrawalStatus(p, ns, addrmgrNs, roundID, requests, startAddress, lastSeriesID,
 		changeStart, dustThreshold)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	if status != nil {
 		return status, nil
@@ -468,7 +470,8 @@ func (p *Pool) StartWithdrawal(ns walletdb.ReadWriteBucket,
 	eligible, err := p.getEligibleInputs(ns, addrmgrNs, txStore, txmgrNs, startAddress, lastSeriesID, dustThreshold,
 		chainHeight, eligibleInputMinConfirmations)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	w := newWithdrawal(roundID, requests, eligible, changeStart)
 	if err := w.fulfillRequests(); err != nil {
@@ -476,16 +479,19 @@ func (p *Pool) StartWithdrawal(ns walletdb.ReadWriteBucket,
 	}
 	w.status.sigs, err = getRawSigs(w.transactions)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	serialized, err := serializeWithdrawal(requests, startAddress, lastSeriesID, changeStart,
 		dustThreshold, *w.status)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	err = putWithdrawal(ns, p.ID, roundID, serialized)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return w.status, nil
 }
@@ -555,7 +561,8 @@ func (w *withdrawal) handleOversizeTx() error {
 		log.DEBUG("rolling back last output because tx got too big")
 		inputs, output, err := w.current.rollBackLastOutput()
 		if err != nil {
-			return newError(ErrWithdrawalProcessing, "failed to rollback last output", err)
+		log.ERROR(err)
+return newError(ErrWithdrawalProcessing, "failed to rollback last output", err)
 		}
 		for _, input := range inputs {
 			w.pushInput(input)
@@ -585,13 +592,15 @@ func (w *withdrawal) finalizeCurrentTx() error {
 	}
 	pkScript, err := txscript.PayToAddrScript(w.status.nextChangeAddr.addr)
 	if err != nil {
-		return newError(ErrWithdrawalProcessing, "failed to generate pkScript for change address", err)
+		log.ERROR(err)
+return newError(ErrWithdrawalProcessing, "failed to generate pkScript for change address", err)
 	}
 	if tx.addChange(pkScript) {
 		var err error
 		w.status.nextChangeAddr, err = nextChangeAddress(w.status.nextChangeAddr)
 		if err != nil {
-			return newError(ErrWithdrawalProcessing, "failed to get next change address", err)
+		log.ERROR(err)
+return newError(ErrWithdrawalProcessing, "failed to get next change address", err)
 		}
 	}
 	ntxid := tx.ntxid()
@@ -784,7 +793,8 @@ func getWithdrawalStatus(p *Pool, ns, addrmgrNs walletdb.ReadBucket, roundID uin
 	}
 	wInfo, err := deserializeWithdrawal(p, ns, addrmgrNs, serialized)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	if wInfo.match(requests, startAddress, lastSeriesID, changeStart, dustThreshold) {
 		return &wInfo.status, nil
@@ -811,23 +821,27 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 			// series.getPrivKeyFor() to lookup the corresponding private keys.
 			pubKeys, err := branchOrder(series.publicKeys, creditAddr.Branch())
 			if err != nil {
-				return nil, err
+		log.ERROR(err)
+return nil, err
 			}
 			txInSigs := make([]RawSig, len(pubKeys))
 			for i, pubKey := range pubKeys {
 				var sig RawSig
 				privKey, err := series.getPrivKeyFor(pubKey)
 				if err != nil {
-					return nil, err
+		log.ERROR(err)
+return nil, err
 				}
 				if privKey != nil {
 					childKey, err := privKey.Child(uint32(creditAddr.Index()))
 					if err != nil {
-						return nil, newError(ErrKeyChain, "failed to derive private key", err)
+		log.ERROR(err)
+return nil, newError(ErrKeyChain, "failed to derive private key", err)
 					}
 					ecPrivKey, err := childKey.ECPrivKey()
 					if err != nil {
-						return nil, newError(ErrKeyChain, "failed to obtain ECPrivKey", err)
+		log.ERROR(err)
+return nil, newError(ErrKeyChain, "failed to obtain ECPrivKey", err)
 					}
 					log.DEBUGF("generating raw sig for input %d of tx %s with privkey of %s",
 						inputIdx, ntxid,
@@ -835,7 +849,8 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 					sig, err = txscript.RawTxInSignature(
 						msgtx, inputIdx, redeemScript, txscript.SigHashAll, ecPrivKey)
 					if err != nil {
-						return nil, newError(ErrRawSigning, "failed to generate raw signature", err)
+		log.ERROR(err)
+return nil, newError(ErrRawSigning, "failed to generate raw signature", err)
 					}
 				} else {
 					log.DEBUGF("not generating raw sig for input %d of %s because private"+
@@ -862,11 +877,13 @@ func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs wal
 	// anywhere -- we just need it to pass to store.PreviousPkScripts().
 	rec, err := wtxmgr.NewTxRecordFromMsgTx(msgtx, time.Now())
 	if err != nil {
-		return newError(ErrTxSigning, "failed to construct TxRecord for signing", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "failed to construct TxRecord for signing", err)
 	}
 	pkScripts, err := store.PreviousPkScripts(txmgrNs, rec, nil)
 	if err != nil {
-		return newError(ErrTxSigning, "failed to obtain pkScripts for signing", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "failed to obtain pkScripts for signing", err)
 	}
 	for i, pkScript := range pkScripts {
 		if err = signMultiSigUTXO(mgr, addrmgrNs, msgtx, i, pkScript, sigs[i]); err != nil {
@@ -881,7 +898,8 @@ func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs wal
 func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr *util.AddressScriptHash) ([]byte, error) {
 	address, err := mgr.Address(addrmgrNs, addr)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return address.(waddrmgr.ManagedScriptAddress).Script()
 }
@@ -896,18 +914,21 @@ func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr 
 func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, idx int, pkScript []byte, sigs []RawSig) error {
 	class, addresses, _, err := txscript.ExtractPkScriptAddrs(pkScript, mgr.ChainParams())
 	if err != nil {
-		return newError(ErrTxSigning, "unparseable pkScript", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "unparseable pkScript", err)
 	}
 	if class != txscript.ScriptHashTy {
 		return newError(ErrTxSigning, fmt.Sprintf("pkScript is not P2SH: %s", class), nil)
 	}
 	redeemScript, err := getRedeemScript(mgr, addrmgrNs, addresses[0].(*util.AddressScriptHash))
 	if err != nil {
-		return newError(ErrTxSigning, "unable to retrieve redeem script", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "unable to retrieve redeem script", err)
 	}
 	class, _, nRequired, err := txscript.ExtractPkScriptAddrs(redeemScript, mgr.ChainParams())
 	if err != nil {
-		return newError(ErrTxSigning, "unparseable redeem script", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "unparseable redeem script", err)
 	}
 	if class != txscript.MultiSigTy {
 		return newError(ErrTxSigning, fmt.Sprintf("redeem script is not multi-sig: %v", class), nil)
@@ -927,7 +948,8 @@ func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *
 	sigScript := unlockingScript.AddData(redeemScript)
 	script, err := sigScript.Script()
 	if err != nil {
-		return newError(ErrTxSigning, "error building sigscript", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "error building sigscript", err)
 	}
 	tx.TxIn[idx].SignatureScript = script
 	if err := validateSigScript(tx, idx, pkScript); err != nil {
@@ -942,7 +964,8 @@ func validateSigScript(msgtx *wire.MsgTx, idx int, pkScript []byte) error {
 	vm, err := txscript.NewEngine(pkScript, msgtx, idx,
 		txscript.StandardVerifyFlags, nil, nil, 0)
 	if err != nil {
-		return newError(ErrTxSigning, "cannot create script engine", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "cannot create script engine", err)
 	}
 	if err = vm.Execute(); err != nil {
 		return newError(ErrTxSigning, "cannot validate tx signature", err)

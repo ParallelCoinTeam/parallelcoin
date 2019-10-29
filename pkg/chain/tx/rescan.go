@@ -196,7 +196,8 @@ w.wg.Done()
 func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		log.ERRORF("rescanRPCHandler called without an RPC client", err)
+		log.ERROR(err)
+log.ERRORF("rescanRPCHandler called without an RPC client", err)
 		w.wg.Done()
 		return
 	}
@@ -217,7 +218,8 @@ out:
 			err := chainClient.Rescan(&batch.bs.Hash, batch.addrs,
 				batch.outpoints)
 			if err != nil {
-				log.ERRORF(
+		log.ERROR(err)
+log.ERRORF(
 					"rescan for %d %s failed: %v %s",
 					numAddrs,
 					noun,
@@ -249,6 +251,8 @@ func (w *Wallet) rescanWithTarget(addrs []util.Address,
 			output.PkScript, w.chainParams,
 		)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		outpoints[output.OutPoint] = outputAddrs[0]

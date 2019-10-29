@@ -156,7 +156,8 @@ func (m *CPUMiner) GenerateNBlocks(workerNumber uint32, n uint32,
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
 		m.submitBlockLock.Unlock()
 		if err != nil {
-			log.WARNF("failed to create new block template:", err)
+		log.ERROR(err)
+log.WARNF("failed to create new block template:", err)
 			continue
 		}
 		// Attempt to solve the block.  The function will exit early with false
@@ -364,7 +365,8 @@ out:
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
 		m.submitBlockLock.Unlock()
 		if err != nil {
-			log.WARNF("failed to create new block template:", err)
+		log.ERROR(err)
+log.WARNF("failed to create new block template:", err)
 			continue
 		}
 		// Attempt to solve the block.  The function will exit early with false
@@ -461,7 +463,8 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 	// Choose a random extra nonce offset for this block template and worker.
 	enOffset, err := wire.RandomUint64()
 	if err != nil {
-		log.WARNF("unexpected error while generating random extra nonce"+
+		log.ERROR(err)
+log.WARNF("unexpected error while generating random extra nonce"+
 			" offset:",
 			err)
 		enOffset = 0
@@ -490,7 +493,8 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		log.TRACE("updating extraNonce")
 		err := m.g.UpdateExtraNonce(msgBlock, blockHeight, extraNonce+enOffset)
 		if err != nil {
-			log.WARN(err)
+		log.ERROR(err)
+log.WARN(err)
 		}
 		// Search through the entire nonce range for a solution while
 		// periodically checking for early quit and stale block conditions along
@@ -543,7 +547,8 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 				}
 				err := m.g.UpdateBlockTime(workerNumber, msgBlock)
 				if err != nil {
-					log.WARN(err)
+		log.ERROR(err)
+log.WARN(err)
 				}
 			default:
 			}
@@ -625,6 +630,8 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	// nodes.  This will in turn relay it to the network like normal.
 	isOrphan, err := m.cfg.ProcessBlock(block, blockchain.BFNone)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		// Anything other than a rule violation is an unexpected error, so log
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {

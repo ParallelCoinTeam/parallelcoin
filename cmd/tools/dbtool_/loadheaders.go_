@@ -28,7 +28,8 @@ func (cmd *headersCmd) Execute(args []string) error {
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	defer db.Close()
 	// NOTE: This code will only work for ffldb.  Ideally the package using the database would keep a metadata index of its own.
@@ -49,7 +50,8 @@ func (cmd *headersCmd) Execute(args []string) error {
 				copy(hash[:], k)
 				_, err := tx.FetchBlockHeader(&hash)
 				if err != nil {
-					return err
+		log.ERROR(err)
+return err
 				}
 				numLoaded++
 				return nil
@@ -74,7 +76,8 @@ func (cmd *headersCmd) Execute(args []string) error {
 		startTime := time.Now()
 		hdrs, err := tx.FetchBlockHeaders(hashes)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 		log.Infof("Loaded %d headers in %v", len(hdrs),
 			time.Since(startTime))

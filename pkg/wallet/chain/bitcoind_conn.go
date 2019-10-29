@@ -68,7 +68,8 @@ func NewBitcoindConn(chainParams *netparams.Params,
 	}
 	client, err := rpcclient.New(clientCfg, nil)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	conn := &BitcoindConn{
 		chainParams:     chainParams,
@@ -94,7 +95,8 @@ func (c *BitcoindConn) Start() error {
 	// Verify that the node is running on the expected network.
 	net, err := c.getCurrentNet()
 	if err != nil {
-		c.client.Disconnect()
+		log.ERROR(err)
+c.client.Disconnect()
 		return err
 	}
 	if net != c.chainParams.Net {
@@ -110,7 +112,8 @@ func (c *BitcoindConn) Start() error {
 		c.zmqBlockHost, []string{"rawblock"}, c.zmqPollInterval,
 	)
 	if err != nil {
-		c.client.Disconnect()
+		log.ERROR(err)
+c.client.Disconnect()
 		return fmt.Errorf("unable to subscribe for zmq block events: "+
 			"%v", err)
 	}
@@ -118,7 +121,8 @@ func (c *BitcoindConn) Start() error {
 		c.zmqTxHost, []string{"rawtx"}, c.zmqPollInterval,
 	)
 	if err != nil {
-		c.client.Disconnect()
+		log.ERROR(err)
+c.client.Disconnect()
 		return fmt.Errorf("unable to subscribe for zmq tx events: %v",
 			err)
 	}
@@ -164,7 +168,8 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 		// Poll an event from the ZMQ socket.
 		msgBytes, err := conn.Receive()
 		if err != nil {
-			// It's possible that the connection to the socket
+		log.ERROR(err)
+// It's possible that the connection to the socket
 			// continuously times out, so we'll prevent logging this
 			// error to prevent spamming the logs.
 			netErr, ok := err.(net.Error)
@@ -239,7 +244,8 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 		// Poll an event from the ZMQ socket.
 		msgBytes, err := conn.Receive()
 		if err != nil {
-			// It's possible that the connection to the socket
+		log.ERROR(err)
+// It's possible that the connection to the socket
 			// continuously times out, so we'll prevent logging this
 			// error to prevent spamming the logs.
 			netErr, ok := err.(net.Error)
@@ -296,7 +302,8 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 func (c *BitcoindConn) getCurrentNet() (wire.BitcoinNet, error) {
 	hash, err := c.client.GetBlockHash(0)
 	if err != nil {
-		return 0, err
+		log.ERROR(err)
+return 0, err
 	}
 	switch *hash {
 	case *chaincfg.TestNet3Params.GenesisHash:

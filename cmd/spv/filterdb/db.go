@@ -2,8 +2,9 @@ package filterdb
 
 import (
 	"fmt"
-   
-   `github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/log"
+
+	`github.com/p9c/pod/pkg/chain/config/netparams`
    chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/util/gcs"
 	"github.com/p9c/pod/pkg/util/gcs/builder"
@@ -71,6 +72,8 @@ func New(	db walletdb.DB, params netparams.Params) (*FilterStore, error) {
 		// exit early.
 		filters, err := tx.CreateTopLevelBucket(filterBucket)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		// If the main bucket doesn't already exist, then we'll need to
@@ -81,12 +84,16 @@ func New(	db walletdb.DB, params netparams.Params) (*FilterStore, error) {
 		// First we'll create the bucket for the regular filters.
 		regFilters, err := filters.CreateBucketIfNotExists(regBucket)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		// With the bucket created, we'll now construct the initial
 		// basic genesis filter and store it within the database.
 		basicFilter, err := builder.BuildBasicFilter(genesisBlock, nil)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		return putFilter(regFilters, genesisHash, basicFilter)
@@ -110,6 +117,8 @@ func putFilter(	bucket walletdb.ReadWriteBucket, hash *chainhash.Hash,
 	}
 	bytes, err := filter.NBytes()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	return bucket.Put(hash[:], bytes)
@@ -135,6 +144,8 @@ func (f *FilterStore) PutFilter(hash *chainhash.Hash,
 		}
 		bytes, err := filter.NBytes()
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		return targetBucket.Put(hash[:], bytes)
@@ -168,12 +179,16 @@ func (f *FilterStore) FetchFilter(blockHash *chainhash.Hash,
 			builder.DefaultP, builder.DefaultM, filterBytes,
 		)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		filter = dbFilter
 		return nil
 	})
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	return filter, nil
