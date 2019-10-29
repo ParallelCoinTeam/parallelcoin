@@ -156,8 +156,8 @@ func (m *CPUMiner) GenerateNBlocks(workerNumber uint32, n uint32,
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
 		m.submitBlockLock.Unlock()
 		if err != nil {
-		log.ERROR(err)
-log.WARNF("failed to create new block template:", err)
+			log.ERROR(err)
+			log.WARNF("failed to create new block template:", err)
 			continue
 		}
 		// Attempt to solve the block.  The function will exit early with false
@@ -315,9 +315,8 @@ out:
 		// Wait until there is a connection to at least one other peer since
 		// there is no way to relay a found block or receive transactions to work
 		// on when there are no connected peers.
-		if m.cfg.ConnectedCount() == 0 &&
-			(m.cfg.ChainParams.Net == wire.MainNet ||
-				!m.cfg.Solo) {
+		if m.cfg.ConnectedCount() == 0 || m.cfg.ChainParams.Net == wire.
+			MainNet && !m.cfg.Solo {
 			log.DEBUG("server has no peers, waiting")
 			time.Sleep(time.Second)
 			continue
@@ -365,8 +364,8 @@ out:
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
 		m.submitBlockLock.Unlock()
 		if err != nil {
-		log.ERROR(err)
-log.WARNF("failed to create new block template:", err)
+			log.ERROR(err)
+			log.WARNF("failed to create new block template:", err)
 			continue
 		}
 		// Attempt to solve the block.  The function will exit early with false
@@ -464,7 +463,7 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 	enOffset, err := wire.RandomUint64()
 	if err != nil {
 		log.ERROR(err)
-log.WARNF("unexpected error while generating random extra nonce"+
+		log.WARNF("unexpected error while generating random extra nonce"+
 			" offset:",
 			err)
 		enOffset = 0
@@ -493,8 +492,8 @@ log.WARNF("unexpected error while generating random extra nonce"+
 		log.TRACE("updating extraNonce")
 		err := m.g.UpdateExtraNonce(msgBlock, blockHeight, extraNonce+enOffset)
 		if err != nil {
-		log.ERROR(err)
-log.WARN(err)
+			log.ERROR(err)
+			log.WARN(err)
 		}
 		// Search through the entire nonce range for a solution while
 		// periodically checking for early quit and stale block conditions along
@@ -547,8 +546,8 @@ log.WARN(err)
 				}
 				err := m.g.UpdateBlockTime(workerNumber, msgBlock)
 				if err != nil {
-		log.ERROR(err)
-log.WARN(err)
+					log.ERROR(err)
+					log.WARN(err)
 				}
 			default:
 			}
@@ -631,7 +630,7 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	isOrphan, err := m.cfg.ProcessBlock(block, blockchain.BFNone)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		// Anything other than a rule violation is an unexpected error, so log
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
