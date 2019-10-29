@@ -32,9 +32,9 @@ package {{ .PkgName }}
 import (
 	"crypto/cipher"
 	"encoding/hex"
-	"github.com/p9c/pod/pkg/broadcast"
+	"github.com/p9c/pod/pkg/controller/broadcast"
 	{{ .MsgPackage }}
-	"github.com/p9c/pod/pkg/gcm"
+	"github.com/p9c/pod/pkg/controller/gcm"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/ugorji/go/codec"
 	"net"

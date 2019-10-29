@@ -1,28 +1,211 @@
+//go:generate go run ../tools/genmsghandle/main.go kopach controller.Blocks broadcast.TplBlock github.com/p9c/pod/pkg/controller msghandle.go
 package kopach
 
 import (
-	"crypto/cipher"
+	"fmt"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/chain/mining"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/controller"
 	"github.com/p9c/pod/pkg/controller/broadcast"
-	"github.com/p9c/pod/pkg/controller/gcm"
 	"github.com/p9c/pod/pkg/log"
-	"net"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/ugorji/go/codec"
+	"go.uber.org/atomic"
 	"sync"
 	"time"
 
 	"github.com/p9c/pod/pkg/conte"
 )
 
+// Main is the entry point for the kopach miner
 func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	wg.Add(1)
+	log.WARN("starting kopach standalone miner worker")
+	returnChan := make(chan *controller.Blocks)
+	m := newMsgHandle(*cx.Config.MinerPass, returnChan)
+	blockSemaphore := make(chan struct{})
+	outAddr, err := broadcast.New(*cx.Config.BroadcastAddress)
+	if err != nil {
+		log.ERROR(err)
+		return
+	}
+	// create buffer and load into msgpack codec
+	var mh codec.MsgpackHandle
+	var rotator atomic.Uint64
+	var started atomic.Bool
+	var headerMx sync.Mutex
+	// mining work dispatch goroutine
 	go func() {
-		log.WARN("starting kopach standalone miner worker")
-		m := newMsgHandle(*cx.Config.MinerPass)
+	workOut:
+		for {
+			select {
+			case bt := <-m.returnChan:
+				switch {
+				// if the channel is returning nil it has been closed
+				case bt == nil:
+					break workOut
+				// received a normal block template
+				default:
+					// If a worker is running and the block templates are not marked new, ignore
+					if started.Load() {
+						if !bt.New && blockSemaphore != nil {
+							//log.TRACE("already started, block is not new, ignoring")
+							break
+						}
+					} else {
+						log.WARN("starting mining")
+						started.Store(true)
+					}
+					// if workers are working, stop them
+					if blockSemaphore != nil {
+						close(blockSemaphore)
+						blockSemaphore = make(chan struct{})
+					}
+					curHeight := bt.Templates[0].Height
+					for i := 0; i < *cx.Config.GenThreads; i++ {
+						bytes := make([]byte, 0, broadcast.MaxDatagramSize)
+						enc := codec.NewEncoderBytes(&bytes, &mh)
+						curr := i
+						// start up worker
+						go func() {
+							tn := time.Now()
+							log.DEBUG("starting worker", curr, tn)
+							j := curr
+						threadOut:
+							for {
+								// choose the algorithm on a rolling cycle
+								counter := rotator.Load()
+								algo := "sha256d"
+								switch fork.GetCurrent(curHeight + 1) {
+								case 0:
+									if counter&1 == 1 {
+										algo = "sha256d"
+									} else {
+										algo = "scrypt"
+									}
+								case 1:
+									l9 := uint64(len(fork.P9AlgoVers))
+									mod := counter % l9
+									algo = fork.P9AlgoVers[int32(mod+5)]
+								}
+								rotator.Add(1)
+								log.WARN("worker", j, "algo", algo)
+								algoVer := fork.GetAlgoVer(algo, curHeight+1)
+								var msgBlock *wire.MsgBlock
+								found := false
+								for j := range bt.Templates {
+									if bt.Templates[j].Block.Header.Version == algoVer {
+										msgBlock = bt.Templates[j].Block
+										found = true
+									}
+								}
+								if !found { // this really shouldn't happen
+									break threadOut
+								}
+								// start attempting to solve block
+								enOffset, err := wire.RandomUint64()
+								if err != nil {
+									log.WARNF(
+										"unexpected error while generating"+
+											" random extra nonce offset:", err)
+									enOffset = 0
+								}
+								// Create some convenience variables.
+								header := &msgBlock.Header
+								targetDifficulty := fork.CompactToBig(header.Bits)
+								// Initial state.
+								hashesCompleted := uint64(0)
+								eN, _ := wire.RandomUint64()
+								did := false
+								extraNonce := eN
+								// we only do this once
+								for !did {
+									did = true
+									// use a random extra nonce to ensure no
+									// duplicated work
+									err := UpdateExtraNonce(msgBlock, curHeight+1, extraNonce+enOffset)
+									if err != nil {
+										log.WARN(err)
+									}
+									var shifter uint64 = 16
+									rn, _ := wire.RandomUint64()
+									if rn > 1<<63-1<<shifter {
+										rn -= 1 << shifter
+									}
+									rn += 1 << shifter
+									rNonce := uint32(rn)
+									mn := uint32(27)
+									mn = 1 << 8 * uint32(*cx.Config.GenThreads)
+									var nonce uint32
+									//log.TRACE("starting round from ", rNonce)
+									for nonce = rNonce; nonce <= rNonce+mn; nonce++ {
+										select {
+										case <-quit:
+											break
+										default:
+										}
+										var incr uint64 = 1
+										headerMx.Lock()
+										header.Nonce = nonce
+										hash := header.BlockHashWithAlgos(curHeight + 1)
+										headerMx.Unlock()
+										hashesCompleted += incr
+										// The block is solved when the new
+										// block hash is less than the target
+										// difficulty.  Yay!
+										bigHash := blockchain.HashToBig(&hash)
+										if bigHash.Cmp(targetDifficulty) <= 0 {
+											log.WARN("found block")
+											// broadcast solved block:
+											// first stop all work
+											if blockSemaphore == nil {
+												close(blockSemaphore)
+												blockSemaphore = nil
+											}
+											// serialize the block
+											bytes = bytes[:0]
+											enc.ResetBytes(&bytes)
+											err := enc.Encode(msgBlock)
+											if err != nil {
+												log.ERROR(err)
+												break
+											}
+											log.SPEW(header)
+											err = broadcast.Send(outAddr, bytes, *m.ciph,
+												broadcast.Solution)
+											break threadOut
+										}
+									}
+								}
+								select {
+								case <-quit:
+									break threadOut
+								case <-blockSemaphore:
+									break threadOut
+								default:
+								}
+							}
+							log.DEBUG("worker", j, tn, "stopped")
+							started.Store(false)
+						}()
+					}
+				}
+			case <-quit:
+				close(m.returnChan)
+				break workOut
+			}
+		}
+	}()
+	go func() {
+		cancel := broadcast.Listen(broadcast.DefaultAddress, m.msgHandler)
 	out:
 		for {
-			cancel := broadcast.Listen(broadcast.DefaultAddress, m.msgHandler)
 			select {
 			case <-quit:
-				log.DEBUG("quitting on killswitch")
+				log.DEBUG("quitting on quit channel close")
 				cancel()
 				break out
 			}
@@ -31,80 +214,39 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	}()
 }
 
-type msgBuffer struct {
-	buffers [][]byte
-	first   time.Time
-	decoded bool
+// UpdateExtraNonce updates the extra nonce in the coinbase script of the
+// passed block by regenerating the coinbase script with the passed value and
+// block height.  It also recalculates and updates the new merkle root that
+// results from changing the coinbase script.
+func UpdateExtraNonce(msgBlock *wire.MsgBlock,
+	blockHeight int32, extraNonce uint64) error {
+	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
+	if err != nil {
+		return err
+	}
+	if len(coinbaseScript) > blockchain.MaxCoinbaseScriptLen {
+		return fmt.Errorf(
+			"coinbase transaction script length of %d is out of range (min: %d, max: %d)",
+			len(coinbaseScript), blockchain.MinCoinbaseScriptLen,
+			blockchain.MaxCoinbaseScriptLen)
+	}
+	msgBlock.Transactions[0].TxIn[0].SignatureScript = coinbaseScript
+	// TODO(davec): A util.Solution should use saved in the state to avoid
+	//  recalculating all of the other transaction hashes.
+	//  block.Transactions[0].InvalidateCache() Recalculate the merkle root with
+	//  the updated extra nonce.
+	block := util.NewBlock(msgBlock)
+	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
+	msgBlock.Header.MerkleRoot = *merkles[len(merkles)-1]
+	return nil
 }
 
-type msgHandle struct {
-	buffers map[string]*msgBuffer
-	ciph    *cipher.AEAD
-}
-
-func newMsgHandle(password string) (out *msgHandle) {
-	out = &msgHandle{}
-	out.buffers = make(map[string]*msgBuffer)
-	ciph := gcm.GetCipher(password)
-	out.ciph = &ciph
-	return
-}
-
-func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
-	// remove any expired message bundles in the cache
-	var deleters []string
-	for i := range m.buffers {
-		if time.Now().Sub(m.buffers[i].first) > time.Millisecond*50 {
-			deleters = append(deleters, i)
-		}
-	}
-	for i := range deleters {
-		log.WARN("deleting old message buffer")
-		delete(m.buffers, deleters[i])
-	}
-	b = b[:n]
-	//log.SPEW(b)
-	if n < 16 {
-		log.ERROR("received short broadcast message")
-		return
-	}
-	// snip off message magic bytes
-	msgType := string(b[:8])
-	b = b[8:]
-	log.INFO(n, " bytes read from ", src, "message type", msgType == string(broadcast.Template))
-	if msgType == string(broadcast.Template) {
-		log.WARN("got block template shard")
-		buffer := b
-		nonce := string(b[:8])
-		if x, ok := m.buffers[nonce]; ok {
-			log.WARN("additional shard with nonce", nonce)
-			if !x.decoded {
-				log.WARN("adding shard")
-				x.buffers = append(x.buffers, buffer)
-				lb := len(x.buffers)
-				log.WARN("have",lb, "buffers")
-				if lb > 2 {
-					// try to decode it
-					//spew.Dump(x.buffers)
-					//fmt.Println()
-					bytes, err := broadcast.Decode(*m.ciph, x.buffers)
-					if err != nil {
-						log.ERROR(err)
-						return
-					}
-					log.WARN(bytes)
-					x.decoded = true
-				}
-			} else if x.buffers != nil {
-				log.WARN("nilling buffers")
-				x.buffers = nil
-			} else {
-				log.WARN("ignoring already decoded message shard")
-			}
-		} else {
-			log.WARN("adding nonce", nonce)
-			m.buffers[nonce] = &msgBuffer{[][]byte{}, time.Now(), false}
-			m.buffers[nonce].buffers = append(m.buffers[nonce].buffers, b)
-		}
-	}
+// standardCoinbaseScript returns a standard script suitable for use as the
+// signature script of the coinbase transaction of a new block.  In particular,
+// it starts with the block height that is required by version 2 blocks and
+// adds the extra nonce as well as additional coinbase flags.
+func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, error) {
+	return txscript.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
+		AddInt64(int64(extraNonce)).AddData([]byte(mining.CoinbaseFlags)).
+		Script()
 }

@@ -1,7 +1,7 @@
 // Package controller implements the server side of a lan multicast mining work dispatcher that goes with the
 // `kopach` miner with automatic network topology based failover and redundancy for new block and solution broadcast
 
-//go:generate go run ../../cmd/tools/genmsghandle/main.go controller Solution broadcast.SolBlock . msghandle.go
+//go:generate go run genmsghandle/main.go controller Solution broadcast.SolBlock . msghandle.go
 
 package controller
 
