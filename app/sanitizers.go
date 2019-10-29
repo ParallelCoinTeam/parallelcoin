@@ -20,6 +20,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/controller/broadcast"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/normalize"
 	"github.com/p9c/pod/pkg/peer/connmgr"

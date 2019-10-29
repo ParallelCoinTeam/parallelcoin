@@ -16,3 +16,5 @@ pod
 test**
 vendor/**
 .idea/**
+
+.idea/
