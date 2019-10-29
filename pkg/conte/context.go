@@ -1,9 +1,9 @@
 package conte
 
 import (
+	"sync"
 	"sync/atomic"
 
-	scribble "github.com/nanobox-io/golang-scribble"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/appdata"
@@ -20,6 +20,7 @@ var _d _dtype
 
 // Xt as in conte.Xt stores all the common state data used in pod
 type Xt struct {
+	sync.Mutex
 	// App is the heart of the application system,
 	// this creates and initialises it.
 	App *cli.App
@@ -35,10 +36,6 @@ type Xt struct {
 	Node *atomic.Value
 	// NodeKill is the killswitch for the Node
 	NodeKill chan struct{}
-	// TestNode is the run state of the TestNode
-	TestNode *atomic.Value
-	// TestNodeKill is the killswitch for the TestNode
-	TestNodeKill chan struct{}
 	// Wallet is the run state of the wallet
 	Wallet *atomic.Value
 	// WalletKill is the killswitch for the Wallet
@@ -49,8 +46,6 @@ type Xt struct {
 	RPCServer *rpc.Server
 	// WalletServer is needed to query the wallet
 	WalletServer *wallet.Wallet
-	// Scribble DB
-	DB *scribble.Driver
 	// RealNode is the main node
 	RealNode *rpc.Node
 }

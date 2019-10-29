@@ -178,7 +178,6 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	height, err := strconv.ParseInt(parts[0], 10, 32)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed height", checkpoint)
 	}
@@ -188,7 +187,6 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	}
 	hash, err := chainhash.NewHashFromStr(parts[1])
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed hash", checkpoint)
@@ -223,7 +221,6 @@ func ParseCheckpoints(checkpointStrings []string) ([]chaincfg.Checkpoint, error)
 	for i, cpString := range checkpointStrings {
 		checkpoint, err := NewCheckpointFromStr(cpString)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return nil, err
 		}

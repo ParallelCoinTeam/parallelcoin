@@ -34,8 +34,7 @@ nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
 			err := runServiceCommand(serviceOpts.ServiceCommand)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			return nil
@@ -44,10 +43,9 @@ log.ERROR(err)
 		nodeChan := make(chan *rpc.Server)
 		killswitch := make(chan struct{})
 		go func() {
-			err = node.Main(cx, shutdownChan, killswitch, nodeChan, &wg)
+			err := node.Main(cx, shutdownChan, killswitch, nodeChan, &wg)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR("error starting node ", err)
+				log.ERROR("error starting node ", err)
 			}
 		}()
 		cx.RPCServer = <-nodeChan
