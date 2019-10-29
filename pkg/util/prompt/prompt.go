@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"os"
 	"strings"
 
@@ -22,8 +23,8 @@ func ProvideSeed() ([]byte, error) {
 		fmt.Print("Enter existing wallet seed: ")
 		seedStr, err := reader.ReadString('\n')
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		seedStr = strings.TrimSpace(strings.ToLower(seedStr))
 		seed, err := hex.DecodeString(seedStr)
@@ -46,8 +47,8 @@ func ProvidePrivPassphrase() ([]byte, error) {
 		fmt.Print(prompt)
 		pass, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		fmt.Print("\n")
 		pass = bytes.TrimSpace(pass)
@@ -76,8 +77,8 @@ func promptList(reader *bufio.Reader, prefix string, validResponses []string, de
 		fmt.Print(prompt)
 		reply, err := reader.ReadString('\n')
 		if err != nil {
-		log.ERROR(err)
-return "", err
+			log.ERROR(err)
+			return "", err
 		}
 		reply = strings.TrimSpace(strings.ToLower(reply))
 		if reply == "" {
@@ -100,7 +101,7 @@ func promptListBool(reader *bufio.Reader, prefix string, defaultEntry string) (b
 	response, err := promptList(reader, prefix, valid, defaultEntry)
 	if err != nil {
 		log.ERROR(err)
-return false, err
+		return false, err
 	}
 	return response == "yes" || response == "y", nil
 }
@@ -115,8 +116,8 @@ func promptPass(reader *bufio.Reader, prefix string, confirm bool) ([]byte, erro
 		fmt.Print(prompt)
 		pass, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		fmt.Print("\n")
 		pass = bytes.TrimSpace(pass)
@@ -129,8 +130,8 @@ return nil, err
 		fmt.Print("Confirm passphrase: ")
 		confirm, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		fmt.Print("\n")
 		confirm = bytes.TrimSpace(confirm)
@@ -162,8 +163,8 @@ func PrivatePass(reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, 
 	for {
 		privPass, err := promptPass(reader, "Enter the private passphrase for your existing wallet", false)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		// Keep prompting the user until the passphrase is correct.
 		if err := legacyKeyStore.Unlock([]byte(privPass)); err != nil {
@@ -192,7 +193,7 @@ func PublicPass(reader *bufio.Reader, privPass []byte,
 		"data?", "no")
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if !usePubPass {
 		return pubPass, nil
@@ -202,8 +203,8 @@ return nil, err
 			"existing configured public passphrase for encryption "+
 			"of public data?", "no")
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		if useExisting {
 			return configPubPassphrase, nil
@@ -213,16 +214,16 @@ return nil, err
 		pubPass, err = promptPass(reader, "Enter the public "+
 			"passphrase for your new wallet", true)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		if bytes.Equal(pubPass, privPass) {
 			useSamePass, err := promptListBool(reader,
 				"Are you sure want to use the same passphrase "+
 					"for public and private data?", "no")
 			if err != nil {
-		log.ERROR(err)
-return nil, err
+				log.ERROR(err)
+				return nil, err
 			}
 			if useSamePass {
 				break
@@ -247,13 +248,13 @@ func Seed(reader *bufio.Reader) ([]byte, error) {
 		"existing wallet seed you want to use?", "no")
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if !useUserSeed {
 		seed, err := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		fmt.Println("\nYour wallet generation seed is:")
 		fmt.Printf("\n%x\n\n", seed)
@@ -264,8 +265,8 @@ return nil, err
 				`and secure location, enter "OK" to continue: `)
 			confirmSeed, err := reader.ReadString('\n')
 			if err != nil {
-		log.ERROR(err)
-return nil, err
+				log.ERROR(err)
+				return nil, err
 			}
 			confirmSeed = strings.TrimSpace(confirmSeed)
 			confirmSeed = strings.Trim(confirmSeed, `"`)
@@ -279,8 +280,8 @@ return nil, err
 		fmt.Print("Enter existing wallet seed: ")
 		seedStr, err := reader.ReadString('\n')
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		seedStr = strings.TrimSpace(strings.ToLower(seedStr))
 		seed, err := hex.DecodeString(seedStr)

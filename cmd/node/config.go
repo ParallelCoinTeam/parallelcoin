@@ -3,8 +3,6 @@ package node
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/log"
-	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -19,6 +17,7 @@ import (
 	_ "github.com/p9c/pod/pkg/db/ffldb"
 	"github.com/p9c/pod/pkg/peer"
 )
+
 //
 // // Config defines the configuration options for pod. See loadConfig for details on the configuration load process.
 // type Config struct {
@@ -105,42 +104,42 @@ type serviceOptions struct {
 
 // A lotta constants that probably aren't being used
 const (
-	DefaultConfigFilename        = "conf.json"
-	DefaultDataDirname           = "node"
+	DefaultConfigFilename = "conf.json"
+	DefaultDataDirname    = "node"
 	// DefaultLogLevel              = "info"
-	DefaultLogDirname            = "node"
+	DefaultLogDirname = "node"
 	// DefaultLogFilename           = "log"
 	// DefaultAddress               = "127.0.0.1"
-	DefaultPort                  = "11047"
+	DefaultPort = "11047"
 	// DefaultRPCPort               = "11048"
 	// DefalutRPCAddr               = "127.0.0.1"
 	// DefaultRPCServer             = "127.0.0.1:11048"
 	// DefaultListener              = "127.0.0.1:11047"
-	DefaultRPCListener           = "127.0.0.1"
-	DefaultMaxPeers              = 23
-	DefaultBanDuration           = time.Hour * 24
-	DefaultBanThreshold          = 100
+	DefaultRPCListener  = "127.0.0.1"
+	DefaultMaxPeers     = 23
+	DefaultBanDuration  = time.Hour * 24
+	DefaultBanThreshold = 100
 	// DefaultConnectTimeout        = time.Second * 30
-	DefaultMaxRPCClients         = 10
-	DefaultMaxRPCWebsockets      = 25
-	DefaultMaxRPCConcurrentReqs  = 20
-	DefaultDbType                = "ffldb"
-	DefaultFreeTxRelayLimit      = 15.0
-	DefaultTrickleInterval       = peer.DefaultTrickleInterval
+	DefaultMaxRPCClients        = 10
+	DefaultMaxRPCWebsockets     = 25
+	DefaultMaxRPCConcurrentReqs = 20
+	DefaultDbType               = "ffldb"
+	DefaultFreeTxRelayLimit     = 15.0
+	DefaultTrickleInterval      = peer.DefaultTrickleInterval
 	// DefaultBlockMinSize          = 80
-	DefaultBlockMaxSize          = 200000
+	DefaultBlockMaxSize = 200000
 	// DefaultBlockMinWeight        = 10
-	DefaultBlockMaxWeight        = 3000000
-	BlockMaxSizeMin              = 1000
-	BlockMaxSizeMax              = blockchain.MaxBlockBaseSize - 1000
-	BlockMaxWeightMin            = 4000
-	BlockMaxWeightMax            = blockchain.MaxBlockWeight - 4000
+	DefaultBlockMaxWeight = 3000000
+	BlockMaxSizeMin       = 1000
+	BlockMaxSizeMax       = blockchain.MaxBlockBaseSize - 1000
+	BlockMaxWeightMin     = 4000
+	BlockMaxWeightMax     = blockchain.MaxBlockWeight - 4000
 	// DefaultGenerate              = false
 	// DefaultGenThreads            = 1
 	// DefaultMinerListener         = "127.0.0.1:11011"
 	DefaultMaxOrphanTransactions = 100
 	// DefaultMaxOrphanTxSize       = 100000
-	DefaultSigCacheMaxSize       = 100000
+	DefaultSigCacheMaxSize = 100000
 	// These are set to default on because more often one wants them than not
 	// DefaultTxIndex   = true
 	// DefaultAddrIndex = true
@@ -179,7 +178,7 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	height, err := strconv.ParseInt(parts[0], 10, 32)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed height", checkpoint)
 	}
@@ -190,7 +189,7 @@ log.ERROR(err)
 	hash, err := chainhash.NewHashFromStr(parts[1])
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed hash", checkpoint)
 	}
@@ -200,6 +199,7 @@ log.ERROR(err)
 		},
 		nil
 }
+
 //
 // // NewConfigParser returns a new command line flags parser.
 // func NewConfigParser(cfg *Config, so *serviceOptions, options flags.Options) *flags.Parser {
@@ -223,8 +223,8 @@ func ParseCheckpoints(checkpointStrings []string) ([]chaincfg.Checkpoint, error)
 	for i, cpString := range checkpointStrings {
 		checkpoint, err := NewCheckpointFromStr(cpString)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		checkpoints[i] = checkpoint
