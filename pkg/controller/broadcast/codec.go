@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/p9c/pod/pkg/fec"
+	"github.com/p9c/pod/pkg/controller/fec"
 	"github.com/p9c/pod/pkg/log"
 )
 

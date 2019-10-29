@@ -11,7 +11,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
-	"github.com/p9c/pod/pkg/broadcast"
+	"github.com/p9c/pod/pkg/controller/broadcast"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/base58"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
