@@ -1,6 +1,6 @@
 package log
 
-var L = Empty().SetLevel("trace", true)
+var L = Empty().SetLevel("off", true)
 
 func FATAL(a ...interface{}) {
 	if L.Fatal != nil {

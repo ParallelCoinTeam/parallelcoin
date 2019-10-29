@@ -2445,7 +2445,7 @@ log.ERRORF("skipping specified external IP: %v", err)
 			}
 		}
 	} else {
-		if *config.Upnp {
+		if *config.UPNP {
 			var err error
 			nat, err = upnp.Discover()
 			if err != nil {

@@ -61,11 +61,9 @@ log.ERROR("unable to create RPC servers:", err)
 	loader.RunAfterLoad(func(w *wallet.Wallet) {
 		log.WARN("starting wallet RPC services", w != nil)
 		startWalletRPCServices(w, rpcS, legacyServer)
-		addresses.RefillMiningAddresses(w, config, stateCfg)
 	})
 	if !*config.NoInitialLoad {
 		log.TRACE("starting rpc client connection handler")
-		go rpcClientConnectLoop(config, activeNet, legacyServer, loader)
 		// Create and start chain RPC client so it's ready to connect to
 		// the wallet when loaded later.
 		log.WARN("loading database")
@@ -74,12 +72,14 @@ log.ERROR("unable to create RPC servers:", err)
 		var w *wallet.Wallet
 		w, err = loader.OpenExistingWallet([]byte(*config.WalletPass),
 			true)
-		log.TRACE("wallet", w)
+		//log.WARN("wallet", w)
 		if err != nil {
 		log.ERROR(err)
 log.ERROR(err)
 			return err
 		}
+		addresses.RefillMiningAddresses(w, config, stateCfg)
+		go rpcClientConnectLoop(config, activeNet, legacyServer, loader)
 		loader.Wallet = w
 		log.TRACE("sending back wallet")
 		walletChan <- w

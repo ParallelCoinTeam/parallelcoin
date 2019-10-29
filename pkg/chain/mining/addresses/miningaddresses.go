@@ -1,12 +1,14 @@
 package addresses
 
 import (
+	"fmt"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"os"
 )
 
 func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Config) {
@@ -44,7 +46,16 @@ log.ERROR("error getting account number ", err,
 		if save.Pod(cfg) {
 			log.WARN("saved config with new addresses")
 		} else {
-			log.ERROR("failed to save config")
+			log.ERROR("error adding new address ", err)
 		}
-	}()
+	}
+	log.WARN("saving config with new addresses")
+	if save.Pod(cfg) {
+		log.WARN("saved config with new addresses")
+	} else {
+		log.ERROR("failed to save config")
+	}
+	fmt.Println("mining addresses refilled, restart to mine")
+	os.Exit(0)
+	//}()
 }

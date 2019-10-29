@@ -9,9 +9,9 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/duos/init"
 	"os"
 
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 )
 
@@ -29,11 +29,16 @@ const (
 
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
-	log.L.SetLevel("error", true)
-	cx := conte.GetNewContext(appName, "main")
-	cx.App = getApp(cx)
+	d := ini.InitDuOS()
+	log.L.SetLevel("trace", false)
+
+	d.CtX.App = getApp(&d)
+
 	log.DEBUG("running App")
-	e := cx.App.Run(os.Args)
+	// Estergom
+
+	// EstergomEnd
+	e := d.CtX.App.Run(os.Args)
 	if e != nil {
 		fmt.Println("Pod ERROR:", e)
 		return 1

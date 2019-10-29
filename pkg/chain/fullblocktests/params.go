@@ -111,6 +111,6 @@ var regressionNetParams = &netparams.Params{
 		// BIP44 coin type used in the hierarchical deterministic path for address generation.
 		HDCoinType: 1,
 	},
-	RPCClientPort: "31048",
-	RPCServerPort: "31046",
+	RPCClientPort:       "31048",
+	WalletRPCServerPort: "31046",
 }

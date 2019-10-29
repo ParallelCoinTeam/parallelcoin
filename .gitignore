@@ -15,6 +15,6 @@ src/openssl-1.0.1u/**
 pod
 test**
 vendor/**
-.idea/**
+/pkg/svelte/__OLDvue/
 
 .idea/

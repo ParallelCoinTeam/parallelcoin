@@ -4,41 +4,40 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/duos/core"
 	"os"
 	"sync"
 	"sync/atomic"
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/walletmain"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
+var guiHandle = func(d *core.DuOS) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		log.WARN("starting gui")
-		Configure(cx)
+		log.WARN("starting __OLDgui")
+		Configure(d.CtX)
 		shutdownChan := make(chan struct{})
 		walletChan := make(chan *wallet.Wallet)
 		nodeChan := make(chan *rpc.Server)
-		cx.WalletKill = make(chan struct{})
-		cx.NodeKill = make(chan struct{})
-		cx.Wallet = &atomic.Value{}
-		cx.Wallet.Store(false)
-		cx.Node = &atomic.Value{}
-		cx.Node.Store(false)
+		d.CtX.WalletKill = make(chan struct{})
+		d.CtX.NodeKill = make(chan struct{})
+		d.CtX.Wallet = &atomic.Value{}
+		d.CtX.Wallet.Store(false)
+		d.CtX.Node = &atomic.Value{}
+		d.CtX.Node.Store(false)
 		var err error
 		var wg sync.WaitGroup
-		if !*cx.Config.NodeOff {
+		if !*d.CtX.Config.NodeOff {
 			go func() {
 				log.INFO("starting node")
-				err = node.Main(cx, shutdownChan, cx.NodeKill, nodeChan, &wg)
+				err = node.Main(d.CtX, shutdownChan, d.CtX.NodeKill, nodeChan, &wg)
 				if err != nil {
 		log.ERROR(err)
 fmt.Println("error running node:", err)
@@ -46,15 +45,15 @@ fmt.Println("error running node:", err)
 				}
 			}()
 			log.DEBUG("waiting for nodeChan")
-			cx.RPCServer = <-nodeChan
+			d.CtX.RPCServer = <-nodeChan
 			log.DEBUG("nodeChan sent")
-			cx.Node.Store(true)
+			d.CtX.Node.Store(true)
 		}
-		if !*cx.Config.WalletOff {
+		if !*d.CtX.Config.WalletOff {
 			go func() {
 				log.INFO("starting wallet")
-				err = walletmain.Main(cx.Config, cx.StateCfg,
-					cx.ActiveNet, walletChan, cx.WalletKill, &wg)
+				err = walletmain.Main(d.CtX.Config, d.CtX.StateCfg,
+					d.CtX.ActiveNet, walletChan, d.CtX.WalletKill, &wg)
 				if err != nil {
 		log.ERROR(err)
 fmt.Println("error running wallet:", err)
@@ -62,22 +61,22 @@ fmt.Println("error running wallet:", err)
 				}
 			}()
 			log.DEBUG("waiting for walletChan")
-			cx.WalletServer = <-walletChan
+			d.CtX.WalletServer = <-walletChan
 			log.DEBUG("walletChan sent")
-			cx.Wallet.Store(true)
+			d.CtX.Wallet.Store(true)
 		}
 		interrupt.AddHandler(func() {
 			log.WARN("interrupt received, " +
 				"shutting down shell modules")
-			close(cx.WalletKill)
-			close(cx.NodeKill)
+			close(d.CtX.WalletKill)
+			close(d.CtX.NodeKill)
 		})
-		gui.Main(cx, &wg)
-		if !cx.Node.Load().(bool) {
-			close(cx.WalletKill)
+		gui(d)
+		if !d.CtX.Node.Load().(bool) {
+			close(d.CtX.WalletKill)
 		}
-		if !cx.Wallet.Load().(bool) {
-			close(cx.NodeKill)
+		if !d.CtX.Wallet.Load().(bool) {
+			close(d.CtX.NodeKill)
 		}
 		return err
 	}
