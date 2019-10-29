@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"net"
 	"net/http"
 	// This enables pprof
@@ -72,8 +73,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		var f *os.File
 		f, err = os.Create(*cx.Config.CPUProfile)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR("unable to create cpu profile:", err)
+			log.ERROR("unable to create cpu profile:", err)
 			return
 		}
 		e := pprof.StartCPUProfile(f)
@@ -98,7 +98,6 @@ log.ERROR("unable to create cpu profile:", err)
 	db, err = loadBlockDB(cx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return
 	}
 	defer func() {
@@ -136,8 +135,7 @@ log.ERROR(err)
 			interrupt.ShutdownRequestChan); err != nil {
 			log.ERROR(err)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return
 			}
 		}
@@ -147,8 +145,7 @@ log.ERROR(err)
 		*cx.Config.Listeners, db, cx.ActiveNet,
 		interrupt.ShutdownRequestChan, *cx.Config.Algo)
 	if err != nil {
-		log.ERROR(err)
-log.ERRORF("unable to start server on %v: %v %s",
+		log.ERRORF("unable to start server on %v: %v",
 			*cx.Config.Listeners, err)
 		return err
 	}
@@ -167,7 +164,10 @@ log.ERRORF("unable to start server on %v: %v %s",
 			nodechan <- server.RPCServers[0]
 		}
 	}
-	controller.Run(cx)
+	var stopController context.CancelFunc
+	if !*cx.Config.NoController {
+		stopController = controller.Run(cx)
+	}
 	// Wait until the interrupt signal is received from an OS signal or
 	// shutdown is requested through one of the subsystems such as the
 	// RPC server.
@@ -177,6 +177,9 @@ log.ERRORF("unable to start server on %v: %v %s",
 		e := server.Stop()
 		if e != nil {
 			log.WARN("failed to stop server", e)
+		}
+		if stopController != nil {
+			stopController()
 		}
 		server.WaitForShutdown()
 		log.INFO("server shutdown complete")
@@ -202,8 +205,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 		log.INFO("creating block database in memory")
 		db, err := database.Create(*cx.Config.DbType)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		return db, nil
@@ -220,9 +222,7 @@ log.ERROR(err)
 	log.INFOF("loading block database from '%s'", dbPath)
 	db, err := database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
 	if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
-		// return the error if it's not because the database doesn't exist
+		log.ERROR(err) // return the error if it's not because the database doesn't exist
 		if dbErr, ok := err.(database.Error); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
 			return nil, err
@@ -230,14 +230,12 @@ log.ERROR(err)
 		// create the db if it does not exist
 		err = os.MkdirAll(*cx.Config.DataDir, 0700)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		db, err = database.Create(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 	}
