@@ -93,11 +93,13 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 	}
 	unspents, err := store.UnspentOutputs(txmgrNs)
 	if err != nil {
-		return nil, newError(ErrInputSelection, "failed to get unspent outputs", err)
+		log.ERROR(err)
+return nil, newError(ErrInputSelection, "failed to get unspent outputs", err)
 	}
 	addrMap, err := groupCreditsByAddr(unspents, p.manager.ChainParams())
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	var inputs []Credit
 	address := startAddress
@@ -118,7 +120,8 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 		}
 		nAddr, err := nextAddr(p, ns, addrmgrNs, address.seriesID, address.branch, address.index, lastSeriesID+1)
 		if err != nil {
-			return nil, newError(ErrInputSelection, "failed to get next withdrawal address", err)
+		log.ERROR(err)
+return nil, newError(ErrInputSelection, "failed to get next withdrawal address", err)
 		} else if nAddr == nil {
 			log.DEBUG("getEligibleInputs: reached last addr, stopping")
 			break
@@ -142,7 +145,8 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 	if int(branch) > len(series.publicKeys) {
 		highestIdx, err := p.highestUsedSeriesIndex(ns, seriesID)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		if index > highestIdx {
 			seriesID++
@@ -182,7 +186,8 @@ func (p *Pool) highestUsedSeriesIndex(ns walletdb.ReadBucket, seriesID uint32) (
 	for i := range series.publicKeys {
 		idx, err := p.highestUsedIndexFor(ns, seriesID, Branch(i))
 		if err != nil {
-			return Index(0), err
+		log.ERROR(err)
+return Index(0), err
 		}
 		if idx > maxIdx {
 			maxIdx = idx
@@ -200,7 +205,8 @@ func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *netparams.Params) 
 	for _, c := range credits {
 		_, addrs, _, err := txscript.ExtractPkScriptAddrs(c.PkScript, chainParams)
 		if err != nil {
-			return nil, newError(ErrInputSelection, "failed to obtain input address", err)
+		log.ERROR(err)
+return nil, newError(ErrInputSelection, "failed to obtain input address", err)
 		}
 		// As our credits are all P2SH we should never have more than one
 		// address per credit, so let's error out if that assumption is

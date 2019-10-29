@@ -3,6 +3,7 @@ package txauthor
 import (
 	"crypto/rand"
 	"encoding/binary"
+	"github.com/p9c/pod/pkg/log"
 	mrand "math/rand"
 	"sync"
 )
@@ -21,7 +22,8 @@ func init() {
 	buf := make([]byte, 8)
 	_, err := rand.Read(buf)
 	if err != nil {
-		panic("Failed to seed prng: " + err.Error())
+		log.ERROR(err)
+panic("Failed to seed prng: " + err.Error())
 	}
 	seed := int64(binary.LittleEndian.Uint64(buf))
 	cprng.r = mrand.New(mrand.NewSource(seed))

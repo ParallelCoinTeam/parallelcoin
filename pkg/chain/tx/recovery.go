@@ -67,6 +67,8 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 			ns, waddrmgr.DefaultAccountNum,
 		)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		// Fetch the external key count, which bounds the indexes we
@@ -121,6 +123,8 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 			credit.PkScript, rm.chainParams,
 		)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		rm.state.AddWatchedOutPoint(&credit.OutPoint, addrs[0])

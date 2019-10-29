@@ -83,7 +83,8 @@ func sorter(	bb []byte) []byte {
 imported:
 	file, err := decorator.ParseFile(fset, os.Args[1], nil, parser.ParseComments)
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	constcounter := 0
 	unsortedDecls := make(map[string]dst.Decl)

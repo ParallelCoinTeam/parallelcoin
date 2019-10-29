@@ -2,7 +2,8 @@ package main
 
 import (
    "fmt"
-   "io/ioutil"
+	"github.com/p9c/pod/pkg/log"
+	"io/ioutil"
    "os"
    "path/filepath"
    "strings"
@@ -30,6 +31,8 @@ func main() {
 	parser := flags.NewParser(&cfg, flags.Default)
 	_, err := parser.Parse()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
@@ -39,7 +42,8 @@ func main() {
 		var err error
 		cfg.Directory, err = os.Getwd()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
+		log.ERROR(err)
+fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
 			os.Exit(1)
 		}
 	}
@@ -55,7 +59,8 @@ func main() {
 	validUntil := time.Now().Add(time.Duration(cfg.Years) * 365 * 24 * time.Hour)
 	cert, key, err := util.NewTLSCertPair(cfg.Organization, validUntil, cfg.ExtraHosts)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
+		log.ERROR(err)
+fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
 		os.Exit(1)
 	}
 	// Write cert and key files.

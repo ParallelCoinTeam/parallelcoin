@@ -3,6 +3,7 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"reflect"
 	"sort"
 	"strconv"
@@ -172,7 +173,8 @@ func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
 			rvf := reflect.New(rtf.Type.Elem())
 			err := json.Unmarshal([]byte(tag), rvf.Interface())
 			if err != nil {
-				str := fmt.Sprintf("default value of %q is "+
+		log.ERROR(err)
+str := fmt.Sprintf("default value of %q is "+
 					"the wrong type (field name %q)", tag,
 					rtf.Name)
 				return makeError(ErrMismatchedDefault, str)

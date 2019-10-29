@@ -6,6 +6,7 @@ package db
 import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/mod"
+	"github.com/p9c/pod/pkg/log"
 
 	scribble "github.com/nanobox-io/golang-scribble"
 )
@@ -27,7 +28,8 @@ type Ddb interface {
 func (d *DuOSdb) DuoVueDbInit(dataDir string) {
 	db, err := scribble.New(dataDir+"/gui", nil)
 	if err != nil {
-		fmt.Println("Error", err)
+		log.ERROR(err)
+fmt.Println("Error", err)
 	}
 	d.DB = db
 }

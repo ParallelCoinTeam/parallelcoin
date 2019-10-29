@@ -335,7 +335,8 @@ func (cm *ConnManager) NewConnReq() {
 	}
 	addr, err := cm.Cfg.GetNewAddress()
 	if err != nil {
-		select {
+		log.ERROR(err)
+select {
 		case cm.requests <- handleFailed{c, err}:
 		case <-cm.quit:
 		}
@@ -382,7 +383,8 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 	conn, err := cm.Cfg.Dial(c.Addr)
 	log.TRACE(err, c.Addr)
 	if err != nil {
-		select {
+		log.ERROR(err)
+select {
 		case cm.requests <- handleFailed{c, err}:
 		case <-cm.quit:
 		}
@@ -429,7 +431,8 @@ func (cm *ConnManager) listenHandler(listener net.Listener) {
 	for atomic.LoadInt32(&cm.stop) == 0 {
 		conn, err := listener.Accept()
 		if err != nil {
-			// Only log the error if not forcibly shutting down.
+		log.ERROR(err)
+// Only log the error if not forcibly shutting down.
 			if atomic.LoadInt32(&cm.stop) == 0 {
 				log.ERROR("can't accept connection:", err)
 			}

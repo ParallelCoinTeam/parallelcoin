@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/log"
 	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
@@ -201,6 +202,8 @@ func decompressScript(	compressedPkScript []byte) []byte {
 		copy(compressedKey[1:], compressedPkScript[1:])
 		key, err := ec.ParsePubKey(compressedKey, ec.S256())
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil
 		}
 		pkScript := make([]byte, 67)

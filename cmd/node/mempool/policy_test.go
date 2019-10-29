@@ -2,6 +2,7 @@ package mempool
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/log"
 	"testing"
 	"time"
 
@@ -96,6 +97,7 @@ func TestCheckPkScriptStandard(	t *testing.T) {
 	for i := 0; i < 4; i++ {
 		pk, err := ec.NewPrivateKey(ec.S256())
 		if err != nil {
+			log.ERROR(err)
 			t.Fatalf("TestCheckPkScriptStandard NewPrivateKey failed: %v",
 				err)
 			return

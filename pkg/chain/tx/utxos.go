@@ -3,6 +3,7 @@ package wallettx
 import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
@@ -29,6 +30,8 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 		// all of them at once.
 		outputs, err := w.TxStore.UnspentOutputs(txmgrNs)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		for _, output := range outputs {
@@ -49,6 +52,8 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 			}
 			_, outputAcct, err := w.Manager.AddrAccount(addrmgrNs, addrs[0])
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 			if outputAcct != policy.Account {

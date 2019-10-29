@@ -39,7 +39,8 @@ shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			go func() {
 				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
 				if err != nil {
-					log.ERROR("error starting node ", err)
+		log.ERROR(err)
+log.ERROR("error starting node ", err)
 				}
 			}()
 			cx.RPCServer = <-nodeChan
@@ -49,7 +50,8 @@ shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				err = walletmain.Main(cx.Config, cx.StateCfg,
 					cx.ActiveNet, walletChan, kill, &wg)
 				if err != nil {
-					fmt.Println("error running wallet:", err)
+		log.ERROR(err)
+fmt.Println("error running wallet:", err)
 				}
 			}()
 			cx.WalletServer = <-walletChan

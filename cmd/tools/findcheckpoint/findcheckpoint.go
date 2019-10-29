@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"os"
 	"path/filepath"
 
@@ -25,6 +26,8 @@ func loadBlockDB() (database.DB, error) {
 	fmt.Printf("Loading block database from '%s'\n", dbPath)
 	db, err := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	return db, nil
@@ -36,6 +39,8 @@ func findCandidates(
 	// Start with the latest block of the main chain.
 	block, err := chain.BlockByHash(latestHash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	// Get the latest known checkpoint.
@@ -77,6 +82,8 @@ func findCandidates(
 		// Determine if this block is a checkpoint candidate.
 		isCandidate, err := chain.IsCheckpointCandidate(block)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 		// All checks passed, so this node seems like a reasonable checkpoint candidate.
@@ -90,6 +97,8 @@ func findCandidates(
 		prevHash := &block.MsgBlock().Header.PrevBlock
 		block, err = chain.BlockByHash(prevHash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 		numTested++
@@ -112,13 +121,16 @@ func main() {
 	// Load configuration and parse command line.
 	tcfg, _, err := loadConfig()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return
 	}
 	cfg = tcfg
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "failed to load database:", err)
+		log.ERROR(err)
+fmt.Fprintln(os.Stderr, "failed to load database:", err)
 		return
 	}
 	defer db.Close()
@@ -129,7 +141,8 @@ func main() {
 		TimeSource:  blockchain.NewMedianTime(),
 	})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to initialize chain: %v\n", err)
+		log.ERROR(err)
+fmt.Fprintf(os.Stderr, "failed to initialize chain: %v\n", err)
 		return
 	}
 	// Get the latest block hash and height from the database and report status.
@@ -138,7 +151,8 @@ func main() {
 	// Find checkpoint candidates.
 	candidates, err := findCandidates(chain, &best.Hash)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Unable to identify candidates:", err)
+		log.ERROR(err)
+fmt.Fprintln(os.Stderr, "Unable to identify candidates:", err)
 		return
 	}
 	// No candidates.

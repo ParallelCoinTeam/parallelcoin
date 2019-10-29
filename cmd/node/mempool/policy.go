@@ -2,6 +2,7 @@ package mempool
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"time"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -121,6 +122,8 @@ checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) error {
 	case txscript.MultiSigTy:
 		numPubKeys, numSigs, err := txscript.CalcMultiSigStats(pkScript)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			str := fmt.Sprintf("multi-signature script parse "+
 				"failure: %v", err)
 			return txRuleError(wire.RejectNonstandard, str)
@@ -298,6 +301,8 @@ checkTransactionStandard(tx *util.Tx, height int32,
 		scriptClass := txscript.GetScriptClass(txOut.PkScript)
 		err := checkPkScriptStandard(txOut.PkScript, scriptClass)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.  When not possible, fall back to a non standard error.
 			rejectCode := wire.RejectNonstandard

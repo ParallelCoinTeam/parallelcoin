@@ -18,8 +18,8 @@ func main() {
 	fi, err := os.Create("secp256k1.go")
 
 	if err != nil {
-
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	defer fi.Close()
 

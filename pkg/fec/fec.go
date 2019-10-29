@@ -16,7 +16,8 @@ var (
 	rsFEC      = func() *infectious.FEC {
 		fec, err := infectious.NewFEC(3, 9)
 		if err != nil {
-			log.ERROR(err)
+		log.ERROR(err)
+log.ERROR(err)
 		}
 		return fec
 	}()
@@ -51,6 +52,7 @@ func Encode(data []byte) (chunks [][]byte) {
 	err := rsFEC.Encode(data, output)
 	if err != nil {
 		log.ERROR(err)
+log.ERROR(err)
 	}
 	for i := range shares {
 		// Append the chunk number to the front of the chunk

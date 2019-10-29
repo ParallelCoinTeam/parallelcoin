@@ -42,7 +42,7 @@ chainParams = &chaincfg.TestNet3ParamsRPC
 	pubKeyHash := make([]byte, 20)
 	addr, err := btcutil.NewAddressPubKeyHash(pubKeyHash, chainParams)
 	if err != nil {
-		
+		log.ERROR(err)
 log.Fatal(err)
 	}
 	fmt.Println(addr)

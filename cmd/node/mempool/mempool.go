@@ -306,6 +306,8 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 	missingParents, txD, err := mp.maybeAcceptTransaction(b, tx, true,
 		rateLimit, true)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	if len(missingParents) == 0 {
@@ -558,6 +560,8 @@ func // fetchInputUtxos loads utxo details about the input transactions
 (mp *TxPool) fetchInputUtxos(tx *util.Tx) (*blockchain.UtxoViewpoint, error) {
 	utxoView, err := mp.cfg.FetchUtxoView(tx)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	// Attempt to populate any missing inputs from the transaction pool.
@@ -666,6 +670,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 	if tx.MsgTx().HasWitness() {
 		segwitActive, err := mp.cfg.IsDeploymentActive(chaincfg.DeploymentSegwit)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, nil, err
 		}
 		if !segwitActive {
@@ -691,6 +697,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// what transactions are allowed into blocks.
 	err := blockchain.CheckTransactionSanity(tx)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -715,6 +723,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 			medianTimePast, mp.cfg.Policy.MinRelayTxFee,
 			mp.cfg.Policy.MaxTxVersion)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.
 			// When not possible, fall back to a non standard error.
@@ -739,6 +749,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// actual spend data and prevents double spends.
 	err = mp.checkPoolDoubleSpend(tx)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, nil, err
 	}
 	// Fetch all of the unspent transaction outputs referenced by the inputs
@@ -748,6 +760,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// lookup.
 	utxoView, err := mp.fetchInputUtxos(tx)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -788,6 +802,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// respect to its defined relative lock times.
 	sequenceLock, err := mp.cfg.CalcSequenceLock(tx, utxoView)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -805,6 +821,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 	txFee, err := blockchain.CheckTransactionInputs(tx, nextBlockHeight,
 		utxoView, mp.cfg.ChainParams)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -815,6 +833,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 	if !mp.cfg.Policy.AcceptNonStd {
 		err := checkInputsStandard(tx, utxoView)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.  When not possible, fall back to a non standard error.
 			rejectCode, found := extractRejectCode(err)
@@ -837,6 +857,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// TODO(roasbeef): last bool should be conditional on segwit activation
 	sigOpCost, err := blockchain.GetSigOpCost(tx, false, utxoView, true, true)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -912,6 +934,8 @@ func // maybeAcceptTransaction is the internal function which implements the
 		txscript.StandardVerifyFlags, mp.cfg.SigCache,
 		mp.cfg.HashCache)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -988,6 +1012,8 @@ func // processOrphans is the internal function which implements the public
 				missing, txD, err := mp.maybeAcceptTransaction(
 					b, tx, true, true, false)
 				if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 					// The orphan is now invalid so there is no way any other
 					// orphans which redeem any of its outputs can be
 					// accepted.  Remove them.

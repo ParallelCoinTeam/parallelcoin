@@ -573,7 +573,8 @@ getApp(cx *conte.Xt) (a *cli.App) {
 func genPassword() string {
 	s, err := hdkeychain.GenerateSeed(16)
 	if err != nil {
-		panic("can't do nothing without entropy! " + err.Error())
+		log.ERROR(err)
+panic("can't do nothing without entropy! " + err.Error())
 	}
 	return base58.Encode(s)
 }

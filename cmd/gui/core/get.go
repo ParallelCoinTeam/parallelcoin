@@ -7,6 +7,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/amp/lib/html"
 	"github.com/p9c/pod/cmd/gui/mod"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/robfig/cron"
 
 	"github.com/zserge/webview"
@@ -65,7 +66,8 @@ func RunDuOS(d DuOS) {
 	// Db inteface
 	_, err = d.Wv.Bind("db", &db.DuOSdb{})
 	if err != nil {
-		fmt.Println("error binding to webview:", err)
+		log.ERROR(err)
+fmt.Println("error binding to webview:", err)
 	}
 }
 
@@ -95,6 +97,7 @@ func RunDuOS(d DuOS) {
 //	// vue
 //	vueLib, err := base64.StdEncoding.DecodeString(lib.AMP)
 //	if err != nil {
+//		log.ERROR(err)
 //		fmt.Printf("Error decoding string: %s ", err.Error())
 //		return
 //	}
@@ -102,6 +105,7 @@ func RunDuOS(d DuOS) {
 //	// ej2
 //	getAMP, err := base64.StdEncoding.DecodeString(lib.AMP)
 //	if err != nil {
+//		log.ERROR(err)
 //		fmt.Printf("Error decoding string: %s ", err.Error())
 //		return
 //	}
@@ -111,6 +115,7 @@ func RunDuOS(d DuOS) {
 //		l, err := base64.StdEncoding.DecodeString(string(lb))
 //		err = d.Wv.Eval(string(l))
 //		if err != nil {
+//		log.ERROR(err)
 //			fmt.Printf("Error decoding string: %s ", err.Error())
 //			return
 //		}

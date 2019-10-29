@@ -6,6 +6,7 @@ package db
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"unicode"
 
 	"github.com/p9c/pod/cmd/gui/mod"
@@ -43,7 +44,8 @@ func (d *DuOSdb) DbReadTypeAll(f string) {
 func (d *DuOSdb) DbReadAll(folder string) mod.DuOSitems {
 	itemsRaw, err := d.DB.ReadAll(folder)
 	if err != nil {
-		fmt.Println("Error", err)
+		log.ERROR(err)
+fmt.Println("Error", err)
 	}
 	items := make(map[string]mod.DuOSitem)
 	for _, bt := range itemsRaw {
@@ -62,7 +64,8 @@ func (d *DuOSdb) DbReadAll(folder string) mod.DuOSitems {
 func (d *DuOSdb) DbReadAllComponents() map[string]mod.DuOScomp {
 	componentsRaw, err := d.DB.ReadAll("components")
 	if err != nil {
-		fmt.Println("Error", err)
+		log.ERROR(err)
+fmt.Println("Error", err)
 	}
 	components := make(map[string]mod.DuOScomp)
 	for _, componentRaw := range componentsRaw {
@@ -78,7 +81,8 @@ func (d *DuOSdb) DbReadAllComponents() map[string]mod.DuOScomp {
 func (d *DuOSdb) DbReadAddressBook() map[string]string {
 	addressbookRaw, err := d.DB.ReadAll("addressbook")
 	if err != nil {
-		fmt.Println("Error", err)
+		log.ERROR(err)
+fmt.Println("Error", err)
 	}
 	addressbook := make(map[string]string)
 	for _, addressRaw := range addressbookRaw {

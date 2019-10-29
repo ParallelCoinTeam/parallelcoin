@@ -134,7 +134,8 @@ func NewServer(opts *Options, walletLoader *wallet.Loader, listeners []net.Liste
 			}
 			conn, err := server.Upgrader.Upgrade(w, r, nil)
 			if err != nil {
-				log.WARNF(
+		log.ERROR(err)
+log.WARNF(
 					"cannot websocket upgrade client %s: %v",
 					r.RemoteAddr, err,
 				)
@@ -211,7 +212,8 @@ func (s *Server) Stop() {
 	for _, listener := range s.Listeners {
 		err := listener.Close()
 		if err != nil {
-			log.ERRORF(
+		log.ERROR(err)
+log.ERRORF(
 				"cannot close listener `%s`: %v %s",
 				listener.Addr(), err)
 		}
@@ -341,7 +343,8 @@ func IDPointer(id interface{}) (p *interface{}) {
 func (s *Server) InvalidAuth(req *btcjson.Request) bool {
 	cmd, err := btcjson.UnmarshalCmd(req)
 	if err != nil {
-		return false
+		log.ERROR(err)
+return false
 	}
 	authCmd, ok := cmd.(*btcjson.AuthenticateCmd)
 	if !ok {
@@ -357,7 +360,8 @@ func (s *Server) WebsocketClientRead(wsc *WebsocketClient) {
 	for {
 		_, request, err := wsc.conn.ReadMessage()
 		if err != nil {
-			if err != io.EOF && err != io.ErrUnexpectedEOF {
+		log.ERROR(err)
+if err != io.EOF && err != io.ErrUnexpectedEOF {
 				log.WARN(
 					"websocket receive failed from client %s: %v",
 					wsc.remoteAddr, err,
@@ -386,7 +390,8 @@ out:
 			var req btcjson.Request
 			err := js.Unmarshal(reqBytes, &req)
 			if err != nil {
-				if !wsc.authenticated {
+		log.ERROR(err)
+if !wsc.authenticated {
 					// Disconnect immediately.
 					break out
 				}
@@ -397,11 +402,13 @@ out:
 				// doesn't, it indicates some non-marshalable
 				// type in the response.
 				if err != nil {
-					panic(err)
+		log.ERROR(err)
+panic(err)
 				}
 				err = wsc.Send(mResp)
 				if err != nil {
-					break out
+		log.ERROR(err)
+break out
 				}
 				continue
 			}
@@ -415,11 +422,13 @@ out:
 				// Expected to never fail.
 				mResp, err := js.Marshal(resp)
 				if err != nil {
-					panic(err)
+		log.ERROR(err)
+panic(err)
 				}
 				err = wsc.Send(mResp)
 				if err != nil {
-					break out
+		log.ERROR(err)
+break out
 				}
 				continue
 			}
@@ -434,11 +443,13 @@ out:
 				mResp, err := js.Marshal(resp)
 				// Expected to never fail.
 				if err != nil {
-					panic(err)
+		log.ERROR(err)
+panic(err)
 				}
 				err = wsc.Send(mResp)
 				if err != nil {
-					break out
+		log.ERROR(err)
+break out
 				}
 				s.RequestProcessShutdown()
 				// break
@@ -450,7 +461,8 @@ out:
 					resp, jsonErr := f()
 					mResp, err := btcjson.MarshalResponse(req.ID, resp, jsonErr)
 					if err != nil {
-						log.ERROR(
+		log.ERROR(err)
+log.ERROR(
 							"unable to marshal response:", err)
 					} else {
 						_ = wsc.Send(mResp)
@@ -479,7 +491,8 @@ out:
 			}
 			err := wsc.conn.SetWriteDeadline(time.Now().Add(deadline))
 			if err != nil {
-				log.WARNF(
+		log.ERROR(err)
+log.WARNF(
 					"cannot set write deadline on client %s: %v",
 					wsc.remoteAddr, err,
 				)
@@ -487,7 +500,8 @@ out:
 			err = wsc.conn.WriteMessage(websocket.TextMessage,
 				response)
 			if err != nil {
-				log.WARNF(
+		log.ERROR(err)
+log.WARNF(
 					"failed websocket send to client %s: %v", wsc.remoteAddr, err,
 				)
 				break out
@@ -534,7 +548,8 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 	body := http.MaxBytesReader(w, r.Body, MaxRequestSize)
 	rpcRequest, err := ioutil.ReadAll(body)
 	if err != nil {
-		// TODO: what if the underlying reader errored?
+		log.ERROR(err)
+// TODO: what if the underlying reader errored?
 		http.Error(w, "413 Request Too Large.",
 			http.StatusRequestEntityTooLarge)
 		return
@@ -546,9 +561,11 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 	var req btcjson.Request
 	err = js.Unmarshal(rpcRequest, &req)
 	if err != nil {
-		resp, err := btcjson.MarshalResponse(req.ID, nil, btcjson.ErrRPCInvalidRequest)
+		log.ERROR(err)
+resp, err := btcjson.MarshalResponse(req.ID, nil, btcjson.ErrRPCInvalidRequest)
 		if err != nil {
-			log.ERROR(
+		log.ERROR(err)
+log.ERROR(
 				"Unable to marshal response:", err)
 			http.Error(w, "500 Internal Server Error",
 				http.StatusInternalServerError)
@@ -556,7 +573,8 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err = w.Write(resp)
 		if err != nil {
-			log.WARN(
+		log.ERROR(err)
+log.WARN(
 				"cannot write invalid request request to client:", err,
 			)
 		}
@@ -580,14 +598,16 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 	// Marshal and send.
 	mResp, err := btcjson.MarshalResponse(req.ID, res, jsonErr)
 	if err != nil {
-		log.ERROR(
+		log.ERROR(err)
+log.ERROR(
 			"unable to marshal response:", err)
 		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	_, err = w.Write(mResp)
 	if err != nil {
-		log.WARN(
+		log.ERROR(err)
+log.WARN(
 			"unable to respond to client:", err,
 		)
 	}

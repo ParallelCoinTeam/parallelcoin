@@ -33,7 +33,8 @@ walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			err = walletmain.Main(cx.Config, cx.StateCfg,
 				cx.ActiveNet, walletChan, cx.WalletKill, &wg)
 			if err != nil {
-				log.ERROR("failed to start up wallet", err)
+		log.ERROR(err)
+log.ERROR("failed to start up wallet", err)
 			}
 		}()
 		cx.WalletServer = <-walletChan
