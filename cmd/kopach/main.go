@@ -2,8 +2,8 @@ package kopach
 
 import (
 	"crypto/cipher"
-	"github.com/p9c/pod/pkg/broadcast"
-	"github.com/p9c/pod/pkg/gcm"
+	"github.com/p9c/pod/pkg/controller/broadcast"
+	"github.com/p9c/pod/pkg/controller/gcm"
 	"github.com/p9c/pod/pkg/log"
 	"net"
 	"sync"

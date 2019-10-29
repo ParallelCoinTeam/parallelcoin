@@ -7,12 +7,12 @@ import (
 
 	"github.com/ugorji/go/codec"
 
-	"github.com/p9c/pod/pkg/broadcast"
 	chain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gcm"
+	"github.com/p9c/pod/pkg/controller/broadcast"
+	"github.com/p9c/pod/pkg/controller/gcm"
 	"github.com/p9c/pod/pkg/log"
 )
 
