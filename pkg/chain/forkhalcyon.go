@@ -26,8 +26,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
 	algo := fork.GetAlgoVer(algoname, nH)
 	algoName := fork.GetAlgoName(algo, nH)
 	newTargetBits = fork.GetMinBits(algoName, nH)
-	log.DEBUGF("last %d %d %8x",
-		lastNode.height, lastNode.version, lastNode.bits)
+	log.DEBUGF("last %d %d %8x", lastNode.height, lastNode.version, lastNode.bits)
 	prevNode := lastNode.GetLastWithAlgo(algo)
 	if prevNode == nil {
 		return newTargetBits, nil

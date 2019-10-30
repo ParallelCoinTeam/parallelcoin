@@ -49,6 +49,12 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 					break workOut
 				// received a normal block template
 				default:
+					if len(bt.Templates) < 1 {
+						log.WARN("received empty templates, halting work")
+						close(blockSemaphore)
+						blockSemaphore = make(chan struct{})
+						break
+					}
 					// If a worker is running and the block templates are not marked new, ignore
 					if started.Load() {
 						if !bt.New && blockSemaphore != nil {
@@ -61,6 +67,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 					}
 					// if workers are working, stop them
 					if blockSemaphore != nil {
+						log.WARN("stopping currently running miners")
 						close(blockSemaphore)
 						blockSemaphore = make(chan struct{})
 					}

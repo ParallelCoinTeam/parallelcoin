@@ -323,7 +323,6 @@ log.TRACE("unable to extract height from coinbase tx:",
 				_, isOrphan, err := sm.chain.ProcessBlock(workerNumber, msg.
 					block, msg.flags, heightUpdate)
 				if err != nil {
-		log.ERROR(err)
 log.ERROR("error processing new block ", err)
 					msg.reply <- processBlockResponse{
 						isOrphan: false,
