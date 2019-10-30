@@ -82,7 +82,8 @@ func NewKopach(service, group, address, password string, controllers []string,
 				kc := (*k.Controllers)[rn]
 				err := k.X.Call(ctx, "Subscribe", kc, &deadline)
 				if err != nil {
-					log.ERROR("error sending block ", err)
+		log.ERROR(err)
+log.ERROR("error sending block ", err)
 					if nodiscovery {
 						// in nodiscovery mode we roll to the next on failure
 						k.Lock()
@@ -172,7 +173,8 @@ func (k *Kopach) Submit(b *util.Block) (reply string) {
 	for try := 0; try < 3; try++ {
 		err := k.X.Call(ctx, "Submit", &b, &reply)
 		if err != nil {
-			log.ERROR("error sending block ", err)
+		log.ERROR(err)
+log.ERROR("error sending block ", err)
 			return err.Error()
 		}
 	}

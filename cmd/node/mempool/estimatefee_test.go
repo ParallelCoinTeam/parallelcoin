@@ -37,6 +37,7 @@ func (eft *estimateFeeTester) checkSaveAndRestore(
 	var err error
 	eft.ef, err = RestoreFeeEstimator(save)
 	if err != nil {
+		log.ERROR(err)
 		eft.t.Fatalf("Could not restore database: %s", err)
 	}
 	// Save again and check that it matches the previous one.
@@ -89,6 +90,7 @@ func (eft *estimateFeeTester) rollback() {
 	}
 	err := eft.ef.Rollback(eft.last.hash)
 	if err != nil {
+		log.ERROR(err)
 		eft.t.Errorf("Could not rollback: %v", err)
 	}
 	eft.height--

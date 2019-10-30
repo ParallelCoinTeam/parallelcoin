@@ -179,6 +179,8 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 	for _, addr := range ro.watchAddrs {
 		script, err := txscript.PayToAddrScript(addr)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		ro.watchList = append(ro.watchList, script)
@@ -195,6 +197,8 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 				&ro.endBlock.Hash,
 			)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				ro.endBlock.Hash = chainhash.Hash{}
 			} else {
 				ro.endBlock.Height = int32(height)
@@ -233,6 +237,8 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 	if ro.startBlock == nil {
 		bs, err := s.BestBlock()
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		ro.startBlock = bs
@@ -317,6 +323,8 @@ filterHeaderWaitLoop:
 	for _, upd := range updates {
 		_, err := ro.updateFilter(upd, &curStamp, &curHeader)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}
@@ -405,6 +413,8 @@ rescanLoop:
 					update, &curStamp, &curHeader,
 				)
 				if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 					return err
 				}
 				// If we have to rewind our state, then we'll
@@ -515,6 +525,8 @@ rescanLoop:
 					ro, &curHeader, &curStamp, blockFilter,
 				)
 				if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 					return err
 				}
 				// We'll successfully fetched this current
@@ -572,6 +584,8 @@ rescanLoop:
 						update, &curStamp, &curHeader,
 					)
 					if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 						return err
 					}
 				default:
@@ -580,6 +594,8 @@ rescanLoop:
 			}
 			bestBlock, err := s.BestBlock()
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 			// Since we're not current, we try to manually advance
@@ -605,6 +621,8 @@ rescanLoop:
 					blockDisconnected, nil,
 				)
 				if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 					return fmt.Errorf(
 						"unable to register block subscription: %v", err,
 					)
@@ -625,6 +643,8 @@ rescanLoop:
 				uint32(nextHeight),
 			)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 			curHeader = *header
@@ -635,6 +655,8 @@ rescanLoop:
 			}
 			err = s.notifyBlock(ro, curHeader, curStamp, scanning)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 		}
@@ -654,11 +676,15 @@ func (s *ChainService) notifyBlock(ro *rescanOptions,
 		// from the DB or network.
 		matched, err := s.blockFilterMatches(ro, &curStamp.Hash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		if matched {
 			relevantTxs, err = s.extractBlockMatches(ro, &curStamp)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 		}
@@ -682,7 +708,8 @@ func (s *ChainService) extractBlockMatches(ro *rescanOptions,
 	// transactions to see which ones are relevant.
 	block, err := s.GetBlock(curStamp.Hash, ro.queryOptions...)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	if block == nil {
 		return nil, fmt.Errorf("Couldn't get block %d (%s) from "+
@@ -711,6 +738,8 @@ func (s *ChainService) extractBlockMatches(ro *rescanOptions,
 		// options.
 		pays, err := ro.paysWatchedAddr(tx)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 		if pays {
@@ -742,11 +771,15 @@ func (s *ChainService) notifyBlockWithFilter(ro *rescanOptions,
 	if filter != nil {
 		matched, err := s.matchBlockFilter(ro, filter, &curStamp.Hash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		if matched {
 			relevantTxs, err = s.extractBlockMatches(ro, curStamp)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 		}
@@ -775,6 +808,8 @@ func (s *ChainService) matchBlockFilter(ro *rescanOptions, filter *gcs.Filter,
 	key := builder.DeriveKey(blockHash)
 	matched, err := filter.MatchAny(key, ro.watchList)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return false, err
 	}
 	return matched, nil
@@ -789,6 +824,8 @@ func (s *ChainService) blockFilterMatches(ro *rescanOptions,
 	key := builder.DeriveKey(blockHash)
 	bFilter, err := s.GetCFilter(*blockHash, wire.GCSFilterRegular)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if err == headerfs.ErrHashNotFound {
 			// Block has been reorged out from under us.
 			return false, nil
@@ -830,6 +867,8 @@ func (ro *rescanOptions) updateFilter(update *updateOptions,
 	for _, addr := range update.addrs {
 		script, err := txscript.PayToAddrScript(addr)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return false, err
 		}
 		ro.watchList = append(ro.watchList, script)
@@ -872,6 +911,8 @@ func (ro *rescanOptions) updateFilter(update *updateOptions,
 			&curHeader.PrevBlock,
 		)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return rewound, err
 		}
 		*curHeader = *header
@@ -907,6 +948,8 @@ txOutLoop:
 			// to in order to check for a match.
 			addrScript, err := txscript.PayToAddrScript(addr)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return false, err
 			}
 			// If the script doesn't match, we'll move onto the
@@ -1125,13 +1168,16 @@ func // GetUtxo gets the appropriate TxOut or errors if it's spent. The option
 		&ro.watchInputs[0], uint32(ro.startBlock.Height),
 	)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	// Wait for the result to be delivered by the rescan or until a shutdown
 	// is signaled.
 	report, err := req.Result(ro.quit)
 	if err != nil {
-		log.DEBUGF(
+		log.ERROR(err)
+log.DEBUGF(
 			"error finding spends for %s: %v %s",
 			ro.watchInputs[0].OutPoint.String(),
 			err,

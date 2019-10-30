@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	btcjson "github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // TestChainSvrWsResults ensures any results that have custom marshalling work as inteded.

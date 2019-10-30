@@ -744,6 +744,8 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 		// their own coinbase which pays to the appropriate address(es).
 		blkTemplate, err := generator.NewBlockTemplate(0, payAddr, state.Algo)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return InternalRPCError("(rpcserver.go) Failed to create new block "+
 				"template: "+err.Error(), "")
 		}
@@ -788,6 +790,8 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 			// randomly selected payment address.
 			pkScript, err := txscript.PayToAddrScript(payToAddr)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				context := "Failed to create pay-to-addr script"
 				return InternalRPCError(err.Error(), context)
 			}
@@ -807,7 +811,8 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 		// chain consensus rules.
 		err := generator.UpdateBlockTime(0, msgBlock)
 		if err != nil {
-			log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 
 		}
 		msgBlock.Header.Nonce = 0
@@ -865,6 +870,8 @@ func (s *Server) Start() {
 		defer s.DecrementClients()
 		_, isAdmin, err := s.CheckAuth(r, true)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			JSONAuthFail(w)
 			return
 		}
@@ -875,6 +882,8 @@ func (s *Server) Start() {
 	rpcServeMux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		authenticated, isAdmin, err := s.CheckAuth(r, false)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			JSONAuthFail(w)
 			return
 		}
@@ -882,6 +891,8 @@ func (s *Server) Start() {
 		// default size for read/write buffers.
 		ws, err := websocket.Upgrade(w, r, nil, 0, 0)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			if _, ok := err.(websocket.HandshakeError); !ok {
 				log.ERROR("unexpected websocket error:", err)
 
@@ -897,7 +908,8 @@ func (s *Server) Start() {
 			log.INFO("chain RPC server listening on ", listener.Addr())
 			err := httpServer.Serve(listener)
 			if err != nil {
-				log.TRACE(err)
+		log.ERROR(err)
+log.ERROR(err)
 
 			}
 			log.TRACE("chain RPC listener done for", listener.Addr())
@@ -921,7 +933,8 @@ func (s *Server) Stop() error {
 	for _, listener := range s.Cfg.Listeners {
 		err := listener.Close()
 		if err != nil {
-			log.ERROR("problem shutting down RPC:", err)
+		log.ERROR(err)
+log.ERROR("problem shutting down RPC:", err)
 
 			return err
 		}
@@ -1062,6 +1075,8 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	body, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		errCode := http.StatusBadRequest
 		http.Error(w, fmt.Sprintf("%d error reading JSON message: %v",
 			errCode, err), errCode)
@@ -1084,7 +1099,8 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	}
 	conn, buf, err := hj.Hijack()
 	if err != nil {
-		log.WARN("failed to hijack HTTP connection:", err)
+		log.ERROR(err)
+log.WARN("failed to hijack HTTP connection:", err)
 
 		errCode := http.StatusInternalServerError
 		http.Error(w, strconv.Itoa(errCode)+" "+err.Error(), errCode)
@@ -1094,7 +1110,8 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	defer buf.Flush()
 	err = conn.SetReadDeadline(TimeZeroVal)
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 
 	}
 	// Attempt to parse the raw body into a JSON-RPC request.
@@ -1136,6 +1153,8 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		go func() {
 			_, err := conn.Read(make([]byte, 1))
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				close(closeChan)
 			}
 		}()
@@ -1161,14 +1180,16 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	// Marshal the response.
 	msg, err := CreateMarshalledReply(responseID, result, jsonErr)
 	if err != nil {
-		log.ERROR("failed to marshal reply:", err)
+		log.ERROR(err)
+log.ERROR("failed to marshal reply:", err)
 
 		return
 	}
 	// Write the response.
 	err = s.WriteHTTPResponseHeaders(r, w.Header(), http.StatusOK, buf)
 	if err != nil {
-		log.ERROR(err.Error())
+		log.ERROR(err)
+log.ERROR(err.Error())
 
 		return
 	}
@@ -1231,10 +1252,14 @@ func (s *Server) WriteHTTPResponseHeaders(req *http.Request,
 	headers http.Header, code int, w io.Writer) error {
 	_, err := io.WriteString(w, s.HTTPStatusLine(req, code))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = headers.Write(w)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	_, err = io.WriteString(w, "\r\n")
@@ -1248,7 +1273,8 @@ func (s *Server) WriteHTTPResponseHeaders(req *http.Request,
 func BuilderScript(builder *txscript.ScriptBuilder) []byte {
 	script, err := builder.Script()
 	if err != nil {
-		panic(err)
+		log.ERROR(err)
+panic(err)
 	}
 	return script
 }
@@ -1377,6 +1403,8 @@ func CreateTxRawResult(chainParams *netparams.Params, mtx *wire.MsgTx,
 	chainHeight int32) (*btcjson.TxRawResult, error) {
 	mtxHex, err := MessageToHex(mtx)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	txReply := &btcjson.TxRawResult{
@@ -1459,6 +1487,8 @@ func CreateVinListPrevOut(s *Server, mtx *wire.MsgTx,
 		var err error
 		originOutputs, err = FetchInputTxos(s, mtx)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 	}
@@ -1587,10 +1617,14 @@ func DecodeTemplateID(templateID string) (*chainhash.Hash, int64, error) {
 	}
 	prevHash, err := chainhash.NewHashFromStr(fields[0])
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, 0, errors.New("invalid longpollid format")
 	}
 	lastGenerated, err := strconv.ParseInt(fields[1], 10, 64)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, 0, errors.New("invalid longpollid format")
 	}
 	return prevHash, lastGenerated, nil
@@ -1626,6 +1660,8 @@ func FetchInputTxos(s *Server, tx *wire.MsgTx) (map[wire.OutPoint]wire.TxOut, er
 		// Look up the location of the transaction.
 		blockRegion, err := s.Cfg.TxIndex.TxBlockRegion(&origin.Hash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to retrieve transaction location"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -1640,12 +1676,16 @@ func FetchInputTxos(s *Server, tx *wire.MsgTx) (map[wire.OutPoint]wire.TxOut, er
 			return err
 		})
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, NoTxInfoError(&origin.Hash)
 		}
 		// Deserialize the transaction
 		var msgTx wire.MsgTx
 		err = msgTx.Deserialize(bytes.NewReader(txBytes))
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := deserialfail
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -1683,25 +1723,22 @@ func FetchMempoolTxnsForAddress(s *Server, addr util.Address, numToSkip,
 }
 
 // GenCertPair generates a key/cert pair to the paths provided.
-func GenCertPair(certFile, caFile, keyFile string) error {
+func GenCertPair(certFile, keyFile string) error {
 	log.INFO("generating TLS certificates...")
 	org := "pod autogenerated cert"
 	validUntil := time.Now().Add(10 * 365 * 24 * time.Hour)
 	cert, key, err := util.NewTLSCertPair(org, validUntil, nil)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	// Write cert and key files.
 	if err = ioutil.WriteFile(certFile, cert, 0666); err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(caFile, cert, 0666); err != nil {
-		os.Remove(certFile)
-		return err
-	}
 	if err = ioutil.WriteFile(keyFile, key, 0600); err != nil {
 		os.Remove(certFile)
-		os.Remove(caFile)
 		return err
 	}
 	log.INFO("Done generating TLS certificates")
@@ -1722,7 +1759,8 @@ func GetDifficultyRatio(bits uint32, params *netparams.Params,
 	outString := difficulty.FloatString(8)
 	diff, err := strconv.ParseFloat(outString, 64)
 	if err != nil {
-		log.ERROR("cannot get difficulty:", err)
+		log.ERROR(err)
+log.ERROR("cannot get difficulty:", err)
 
 		return 0
 	}
@@ -1734,6 +1772,8 @@ func GetDifficultyRatio(bits uint32, params *netparams.Params,
 func NormalizeAddress(addr, defaultPort string) string {
 	_, _, err := net.SplitHostPort(addr)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return net.JoinHostPort(addr, defaultPort)
 	}
 	return addr
@@ -1759,6 +1799,8 @@ func HandleAddNode(s *Server, cmd interface{},
 		}
 	}
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidParameter,
 			Message: err.Error(),
@@ -1794,6 +1836,8 @@ func HandleCreateRawTransaction(s *Server, cmd interface{},
 	for _, input := range c.Inputs {
 		txHash, err := chainhash.NewHashFromStr(input.Txid)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, DecodeHexError(input.Txid)
 		}
 		prevOut := wire.NewOutPoint(txHash, input.Vout)
@@ -1817,6 +1861,8 @@ func HandleCreateRawTransaction(s *Server, cmd interface{},
 		// Decode the provided address.
 		addr, err := util.DecodeAddress(encodedAddr, params)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCInvalidAddressOrKey,
 				Message: "Invalid address or key: " + err.Error(),
@@ -1844,12 +1890,16 @@ func HandleCreateRawTransaction(s *Server, cmd interface{},
 		// Create a new script which pays to the provided address.
 		pkScript, err := txscript.PayToAddrScript(addr)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to generate pay-to-address script"
 			return nil, InternalRPCError(err.Error(), context)
 		}
 		// Convert the amount to satoshi.
 		satoshi, err := util.NewAmount(amount)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to convert amount"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -1866,6 +1916,8 @@ func HandleCreateRawTransaction(s *Server, cmd interface{},
 	// instead of nothing (nil) in the case of an error.
 	mtxHex, err := MessageToHex(mtx)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	return mtxHex, nil
@@ -1882,11 +1934,15 @@ func HandleDecodeRawTransaction(s *Server, cmd interface{},
 	}
 	serializedTx, err := hex.DecodeString(hexStr)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(hexStr)
 	}
 	var mtx wire.MsgTx
 	err = mtx.Deserialize(bytes.NewReader(serializedTx))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
 			Message: "TX decode failed: " + err.Error(),
@@ -1914,6 +1970,8 @@ func HandleDecodeScript(s *Server, cmd interface{},
 	}
 	script, err := hex.DecodeString(hexStr)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(hexStr)
 	}
 	// The disassembled string will contain [error] inline if the script doesn't
@@ -1931,6 +1989,8 @@ func HandleDecodeScript(s *Server, cmd interface{},
 	// Convert the script itself to a pay-to-script-hash address.
 	p2sh, err := util.NewAddressScriptHash(script, s.Cfg.ChainParams)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		context := "Failed to convert script to pay-to-script-hash"
 		return nil, InternalRPCError(err.Error(), context)
 	}
@@ -1959,6 +2019,8 @@ func HandleEstimateFee(s *Server, cmd interface{},
 	}
 	feeRate, err := s.Cfg.FeeEstimator.EstimateFee(uint32(c.NumBlocks))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return -1.0, err
 	}
 	// Convert to satoshis per kb.
@@ -2002,6 +2064,8 @@ func HandleGenerate(s *Server, cmd interface{},
 	blockHashes, err := s.Cfg.CPUMiner.GenerateNBlocks(0, c.NumBlocks,
 		s.Cfg.Algo)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInternal.Code,
 			Message: err.Error(),
@@ -2061,6 +2125,8 @@ func HandleGetAddedNodeInfo(s *Server, cmd interface{},
 		// just use the address as the host.
 		host, _, err := net.SplitHostPort(peer.Addr())
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			host = peer.Addr()
 		}
 		var ipList []string
@@ -2073,6 +2139,8 @@ func HandleGetAddedNodeInfo(s *Server, cmd interface{},
 			// host.
 			ips, err := Lookup(s.StateCfg)(host)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				ipList = make([]string, 1)
 				ipList[0] = host
 				break
@@ -2126,6 +2194,8 @@ func HandleGetBlock(s *Server, cmd interface{},
 	// Load the raw block bytes from the database.
 	hash, err := chainhash.NewHashFromStr(c.Hash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(c.Hash)
 	}
 	var blkBytes []byte
@@ -2135,6 +2205,8 @@ func HandleGetBlock(s *Server, cmd interface{},
 		return err
 	})
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCBlockNotFound,
 			Message: "Block not found",
@@ -2149,12 +2221,16 @@ func HandleGetBlock(s *Server, cmd interface{},
 	// Deserialize the block.
 	blk, err := util.NewBlockFromBytes(blkBytes)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		context := "Failed to deserialize block"
 		return nil, InternalRPCError(err.Error(), context)
 	}
 	// Get the block height from chain.
 	blockHeight, err := s.Cfg.Chain.BlockHeightByHash(hash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		context := blockheightfail
 		return nil, InternalRPCError(err.Error(), context)
 	}
@@ -2165,6 +2241,8 @@ func HandleGetBlock(s *Server, cmd interface{},
 	if blockHeight < best.Height {
 		nextHash, err := s.Cfg.Chain.BlockHashByHeight(blockHeight + 1)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "No next block"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -2211,6 +2289,8 @@ func HandleGetBlock(s *Server, cmd interface{},
 				tx.Hash().String(), blockHeader, hash.String(),
 				blockHeight, best.Height)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return nil, err
 			}
 			rawTxns[i] = *rawTxn
@@ -2294,6 +2374,8 @@ func HandleGetBlockChainInfo(s *Server, cmd interface{},
 		// by its deployment ID.
 		deploymentStatus, err := chain.ThresholdState(uint32(deployment))
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to obtain deployment status"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -2302,6 +2384,8 @@ func HandleGetBlockChainInfo(s *Server, cmd interface{},
 		// returned.
 		statusString, err := SoftForkStatus(deploymentStatus)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, &btcjson.RPCError{
 				Code: btcjson.ErrRPCInternal.Code,
 				Message: fmt.Sprintf("unknown deployment status: %v",
@@ -2333,6 +2417,8 @@ func HandleGetBlockHash(s *Server, cmd interface{},
 	c := cmd.(*btcjson.GetBlockHashCmd)
 	hash, err := s.Cfg.Chain.BlockHashByHeight(int32(c.Index))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCOutOfRange,
 			Message: "Block number out of range",
@@ -2348,10 +2434,14 @@ func HandleGetBlockHeader(s *Server, cmd interface{},
 	// Fetch the header from chain.
 	hash, err := chainhash.NewHashFromStr(c.Hash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(c.Hash)
 	}
 	blockHeader, err := s.Cfg.Chain.HeaderByHash(hash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCBlockNotFound,
 			Message: "Block not found",
@@ -2363,6 +2453,8 @@ func HandleGetBlockHeader(s *Server, cmd interface{},
 		var headerBuf bytes.Buffer
 		err := blockHeader.Serialize(&headerBuf)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to serialize block header"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -2372,6 +2464,8 @@ func HandleGetBlockHeader(s *Server, cmd interface{},
 	// the block height from chain.
 	blockHeight, err := s.Cfg.Chain.BlockHeightByHash(hash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		context := blockheightfail
 		return nil, InternalRPCError(err.Error(), context)
 	}
@@ -2381,6 +2475,8 @@ func HandleGetBlockHeader(s *Server, cmd interface{},
 	if blockHeight < best.Height {
 		nextHash, err := s.Cfg.Chain.BlockHashByHeight(blockHeight + 1)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "No next block"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -2456,8 +2552,12 @@ func HandleGetBlockTemplateLongPoll(s *Server, longPollID string,
 	// the caller is invalid.
 	prevHash, lastGenerated, err := DecodeTemplateID(longPollID)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		result, err := state.BlockTemplateResult(useCoinbaseValue, nil)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			state.Unlock()
 			return nil, err
 		}
@@ -2477,6 +2577,8 @@ func HandleGetBlockTemplateLongPoll(s *Server, longPollID string,
 		result, err := state.BlockTemplateResult(useCoinbaseValue,
 			&submitOld)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			state.Unlock()
 			return nil, err
 		}
@@ -2510,6 +2612,8 @@ func HandleGetBlockTemplateLongPoll(s *Server, longPollID string,
 	submitOld := prevHash.IsEqual(&state.Template.Block.Header.PrevBlock)
 	result, err := state.BlockTemplateResult(useCoinbaseValue, &submitOld)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	return result, nil
@@ -2535,6 +2639,8 @@ func HandleGetBlockTemplateProposal(s *Server,
 	}
 	dataBytes, err := hex.DecodeString(hexData)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return false, &btcjson.RPCError{
 			Code: btcjson.ErrRPCDeserialization,
 			Message: fmt.Sprintf("data must be hexadecimal string (not %q)",
@@ -2663,11 +2769,14 @@ func HandleGetCFilter(s *Server, cmd interface{},
 	c := cmd.(*btcjson.GetCFilterCmd)
 	hash, err := chainhash.NewHashFromStr(c.Hash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(c.Hash)
 	}
 	filterBytes, err := s.Cfg.CfIndex.FilterByBlockHash(hash, c.FilterType)
 	if err != nil {
-		log.DEBUGF(
+		log.ERROR(err)
+log.DEBUGF(
 			"could not find committed filter for %v: %v",
 			hash,
 			err)
@@ -2694,6 +2803,8 @@ func HandleGetCFilterHeader(s *Server, cmd interface{},
 	c := cmd.(*btcjson.GetCFilterHeaderCmd)
 	hash, err := chainhash.NewHashFromStr(c.Hash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(c.Hash)
 	}
 	headerBytes, err := s.Cfg.CfIndex.FilterHeaderByBlockHash(hash, c.FilterType)
@@ -2714,7 +2825,8 @@ func HandleGetCFilterHeader(s *Server, cmd interface{},
 
 	err = hash.SetBytes(headerBytes)
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 
 	}
 	return hash.String(), nil
@@ -2741,7 +2853,8 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 	best := s.Cfg.Chain.BestSnapshot()
 	prev, err := s.Cfg.Chain.BlockByHash(&best.Hash)
 	if err != nil {
-		log.ERROR("ERROR", err)
+		log.ERROR(err)
+log.ERROR("ERROR", err)
 
 	}
 	var algo = prev.MsgBlock().Header.Version
@@ -2756,7 +2869,8 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 				ph := prev.MsgBlock().Header.PrevBlock
 				prev, err = s.Cfg.Chain.BlockByHash(&ph)
 				if err != nil {
-					log.ERROR("ERROR", err)
+		log.ERROR(err)
+log.ERROR("ERROR", err)
 
 				}
 				continue
@@ -2772,7 +2886,8 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 				ph := prev.MsgBlock().Header.PrevBlock
 				prev, err = s.Cfg.Chain.BlockByHash(&ph)
 				if err != nil {
-					log.ERROR("ERROR", err)
+		log.ERROR(err)
+log.ERROR("ERROR", err)
 
 				}
 				continue
@@ -2807,6 +2922,8 @@ func HandleGetHeaders(s *Server, cmd interface{},
 	for i := range c.BlockLocators {
 		blockLocator, err := chainhash.NewHashFromStr(c.BlockLocators[i])
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, DecodeHexError(c.BlockLocators[i])
 		}
 		blockLocators[i] = blockLocator
@@ -2815,6 +2932,8 @@ func HandleGetHeaders(s *Server, cmd interface{},
 	if c.HashStop != "" {
 		err := chainhash.Decode(&hashStop, c.HashStop)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, DecodeHexError(c.HashStop)
 		}
 	}
@@ -2825,6 +2944,8 @@ func HandleGetHeaders(s *Server, cmd interface{},
 	for i, h := range headers {
 		err := h.Serialize(&buf)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, InternalRPCError(err.Error(),
 				"Failed to serialize block header")
 		}
@@ -3047,6 +3168,8 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 	gnhpsCmd := btcjson.NewGetNetworkHashPSCmd(nil, nil)
 	networkHashesPerSecIface, err := HandleGetNetworkHashPS(s, gnhpsCmd, closeChan)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	networkHashesPerSec, ok := networkHashesPerSecIface.(int64)
@@ -3301,12 +3424,16 @@ func HandleGetNetworkHashPS(s *Server, cmd interface{},
 	for curHeight := startHeight; curHeight <= endHeight; curHeight++ {
 		hash, err := s.Cfg.Chain.BlockHashByHeight(curHeight)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to fetch block hash"
 			return nil, InternalRPCError(err.Error(), context)
 		}
 		// Fetch the header from chain.
 		header, err := s.Cfg.Chain.HeaderByHash(hash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to fetch block header"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -3400,6 +3527,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{},
 	// Convert the provided transaction hash hex to a Hash.
 	txHash, err := chainhash.NewHashFromStr(c.Txid)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(c.Txid)
 	}
 	verbose := false
@@ -3413,6 +3542,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{},
 	var blkHeight int32
 	tx, err := s.Cfg.TxMemPool.FetchTransaction(txHash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		if s.Cfg.TxIndex == nil {
 			return nil, &btcjson.RPCError{
 				Code: btcjson.ErrRPCNoTxInfo,
@@ -3424,6 +3555,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{},
 		// Look up the location of the transaction.
 		blockRegion, err := s.Cfg.TxIndex.TxBlockRegion(txHash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to retrieve transaction location"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -3438,6 +3571,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{},
 			return err
 		})
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, NoTxInfoError(txHash)
 		}
 		// When the verbose flag isn't set, simply return the serialized
@@ -3450,6 +3585,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{},
 		blkHash = blockRegion.Hash
 		blkHeight, err = s.Cfg.Chain.BlockHeightByHash(blkHash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to retrieve block height"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -3457,6 +3594,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{},
 		var msgTx wire.MsgTx
 		err = msgTx.Deserialize(bytes.NewReader(txBytes))
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := deserialfail
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -3471,6 +3610,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{},
 			// an error.
 			mtxHex, err := MessageToHex(tx.MsgTx())
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return nil, err
 			}
 			return mtxHex, nil
@@ -3485,6 +3626,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{},
 		// Fetch the header from chain.
 		header, err := s.Cfg.Chain.HeaderByHash(blkHash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to fetch block header"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -3495,6 +3638,8 @@ func HandleGetRawTransaction(s *Server, cmd interface{},
 	rawTxn, err := CreateTxRawResult(s.Cfg.ChainParams, mtx, txHash.String(),
 		blkHeader, blkHashStr, blkHeight, chainHeight)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	return *rawTxn, nil
@@ -3507,6 +3652,8 @@ func HandleGetTxOut(s *Server, cmd interface{},
 	// Convert the provided transaction hash hex to a Hash.
 	txHash, err := chainhash.NewHashFromStr(c.Txid)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(c.Txid)
 	}
 	// If requested and the tx is available in the mempool try to fetch it from
@@ -3525,6 +3672,8 @@ func HandleGetTxOut(s *Server, cmd interface{},
 	if includeMempool && s.Cfg.TxMemPool.HaveTransaction(txHash) {
 		tx, err := s.Cfg.TxMemPool.FetchTransaction(txHash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, NoTxInfoError(txHash)
 		}
 		mtx := tx.MsgTx()
@@ -3551,6 +3700,8 @@ func HandleGetTxOut(s *Server, cmd interface{},
 		out := wire.OutPoint{Hash: *txHash, Index: c.Vout}
 		entry, err := s.Cfg.Chain.FetchUtxoEntry(out)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, NoTxInfoError(txHash)
 		}
 		// To match the behavior of the reference client, return nil (JSON null)
@@ -3608,6 +3759,8 @@ func HandleHelp(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	if command == "" {
 		usage, err := s.HelpCacher.RPCUsage(false)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to generate RPC usage"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -3625,7 +3778,8 @@ func HandleHelp(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	// Get the help for the command.
 	help, err := s.HelpCacher.RPCMethodHelp(command)
 	if err != nil {
-		context := "Failed to generate help"
+		log.ERROR(err)
+context := "Failed to generate help"
 		return nil, InternalRPCError(err.Error(), context)
 	}
 	return help, nil
@@ -3709,6 +3863,8 @@ func HandleNode(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 		}
 	}
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidParameter,
 			Message: err.Error(),
@@ -3724,6 +3880,8 @@ func HandlePing(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	// Ask server to ping \o_
 	nonce, err := wire.RandomUint64()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, InternalRPCError(
 			"Not sending ping - failed to generate nonce: "+err.Error(), "")
 	}
@@ -3764,6 +3922,8 @@ func HandleSearchRawTransactions(s *Server, cmd interface{},
 	params := s.Cfg.ChainParams
 	addr, err := util.DecodeAddress(c.Address, params)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidAddressOrKey,
 			Message: "Invalid address or key: " + err.Error(),
@@ -3819,11 +3979,15 @@ func HandleSearchRawTransactions(s *Server, cmd interface{},
 				uint32(numToSkip)-numSkipped, uint32(numRequested-len(addressTxns)),
 				reverse)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 			// Load the raw transaction bytes from the database.
 			serializedTxns, err := dbTx.FetchBlockRegions(regions)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 			// Add the transaction and the hash of the block it is contained in to
@@ -3840,6 +4004,8 @@ func HandleSearchRawTransactions(s *Server, cmd interface{},
 			return nil
 		})
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			context := "Failed to load address index entries"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -3877,6 +4043,8 @@ func HandleSearchRawTransactions(s *Server, cmd interface{},
 		// transaction is the deserialized structure.
 		hexTxns[i], err = MessageToHex(rtx.Tx.MsgTx())
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 	}
@@ -3907,6 +4075,8 @@ func HandleSearchRawTransactions(s *Server, cmd interface{},
 			mtx = new(wire.MsgTx)
 			err := mtx.Deserialize(bytes.NewReader(rtx.TxBytes))
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				context := deserialfail
 				return nil, InternalRPCError(err.Error(), context)
 			}
@@ -3919,6 +4089,8 @@ func HandleSearchRawTransactions(s *Server, cmd interface{},
 		result.Vin, err = CreateVinListPrevOut(s, mtx, params, vinExtra,
 			filterAddrMap)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 		result.Vout = CreateVoutList(mtx, params, filterAddrMap)
@@ -3935,6 +4107,8 @@ func HandleSearchRawTransactions(s *Server, cmd interface{},
 			// Fetch the header from chain.
 			header, err := s.Cfg.Chain.HeaderByHash(blkHash)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return nil, &btcjson.RPCError{
 					Code:    btcjson.ErrRPCBlockNotFound,
 					Message: "Block not found",
@@ -3943,6 +4117,8 @@ func HandleSearchRawTransactions(s *Server, cmd interface{},
 			// Get the block height from chain.
 			height, err := s.Cfg.Chain.BlockHeightByHash(blkHash)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				context := blockheightfail
 				return nil, InternalRPCError(err.Error(), context)
 			}
@@ -3973,11 +4149,15 @@ func HandleSendRawTransaction(s *Server, cmd interface{},
 	}
 	serializedTx, err := hex.DecodeString(hexStr)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(hexStr)
 	}
 	var msgTx wire.MsgTx
 	err = msgTx.Deserialize(bytes.NewReader(serializedTx))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
 			Message: "TX decode failed: " + err.Error(),
@@ -3987,6 +4167,8 @@ func HandleSendRawTransaction(s *Server, cmd interface{},
 	tx := util.NewTx(&msgTx)
 	acceptedTxs, err := s.Cfg.TxMemPool.ProcessTransaction(s.Cfg.Chain, tx, false, false, 0)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		// When the error is a rule error, it means the transaction was simply
 		// rejected as opposed to something actually going wrong, so log
 		// such.  Otherwise, something really did go wrong, so log an
@@ -4093,10 +4275,14 @@ func HandleSubmitBlock(s *Server, cmd interface{},
 	}
 	serializedBlock, err := hex.DecodeString(hexStr)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, DecodeHexError(hexStr)
 	}
 	block, err := util.NewBlockFromBytes(serializedBlock)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
 			Message: "Block decode failed: " + err.Error(),
@@ -4106,6 +4292,8 @@ func HandleSubmitBlock(s *Server, cmd interface{},
 	// nodes.  This will in turn relay it to the network like normal.
 	_, err = s.Cfg.SyncMgr.SubmitBlock(block, blockchain.BFNone)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return fmt.Sprintf("rejected: %s", err.Error()), nil
 	}
 	log.INFOF(
@@ -4135,6 +4323,8 @@ func HandleValidateAddress(s *Server, cmd interface{},
 	result := btcjson.ValidateAddressChainResult{}
 	addr, err := util.DecodeAddress(c.Address, s.Cfg.ChainParams)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		// Return the default value (false) for IsValid.
 		return result, nil
 	}
@@ -4166,6 +4356,8 @@ func HandleVerifyMessage(s *Server, cmd interface{},
 	params := s.Cfg.ChainParams
 	addr, err := util.DecodeAddress(c.Address, params)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidAddressOrKey,
 			Message: "Invalid address or key: " + err.Error(),
@@ -4181,6 +4373,8 @@ func HandleVerifyMessage(s *Server, cmd interface{},
 	// Decode base64 signature.
 	sig, err := base64.StdEncoding.DecodeString(c.Signature)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCParse.Code,
 			Message: "Malformed base64 encoding: " + err.Error(),
@@ -4191,18 +4385,22 @@ func HandleVerifyMessage(s *Server, cmd interface{},
 	var buf bytes.Buffer
 	err = wire.WriteVarString(&buf, 0, "Bitcoin Signed Message:\n")
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 
 	}
 	err = wire.WriteVarString(&buf, 0, c.Message)
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 
 	}
 	expectedMessageHash := chainhash.DoubleHashB(buf.Bytes())
 	pk, wasCompressed, err := ec.RecoverCompact(ec.S256(), sig,
 		expectedMessageHash)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		// Mirror Bitcoin Core behavior, which treats error in RecoverCompact as
 		// invalid signature.
 		return false, nil
@@ -4216,6 +4414,8 @@ func HandleVerifyMessage(s *Server, cmd interface{},
 	}
 	address, err := util.NewAddressPubKey(serializedPK, params)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		// Again mirror Bitcoin Core behavior, which treats error in public key
 		// reconstruction as invalid signature.
 		return false, nil
@@ -4326,6 +4526,8 @@ func ParseCmd(request *btcjson.Request) *ParsedRPCCmd {
 	parsedCmd.Method = request.Method
 	cmd, err := btcjson.UnmarshalCmd(request)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		// When the error is because the method is not registered,
 		// produce a method not found RPC error.
 		if jerr, ok := err.(btcjson.Error); ok &&
@@ -4408,7 +4610,8 @@ func VerifyChain(s *Server, level, depth int32) error {
 		// Level 0 just looks up the block.
 		block, err := s.Cfg.Chain.BlockByHeight(height)
 		if err != nil {
-			log.ERRORF(
+		log.ERROR(err)
+log.ERRORF(
 				"verify is unable to fetch block at height %d: %v",
 				height,
 				err,
@@ -4423,7 +4626,8 @@ func VerifyChain(s *Server, level, depth int32) error {
 			err := blockchain.CheckBlockSanity(block, powLimit, s.Cfg.TimeSource,
 				true, block.Height())
 			if err != nil {
-				log.ERRORF(
+		log.ERROR(err)
+log.ERRORF(
 					"verify is unable to validate block at hash %v height %d: %v %s",
 					block.Hash(), height, err)
 

@@ -60,7 +60,8 @@ func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bd
 	dbPath := filepath.Join(ld.DDDirPath, WalletDbName)
 	exists, err := fileExists(dbPath)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	if exists {
 		return nil, errors.New("Wallet ERROR: " + dbPath + " already exists")
@@ -68,21 +69,25 @@ func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bd
 	// Create the wallet database backed by bolt db.
 	err = os.MkdirAll(ld.DDDirPath, 0700)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Initialize the newly created database for the wallet before opening.
 	err = Create(db, pubPassphrase, privPassphrase, seed, ld.ChainParams, bday)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Open the newly-created wallet.
 	w, err := Open(db, pubPassphrase, nil, ld.ChainParams, ld.RecoveryWindow)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	w.Start()
 	ld.onLoaded(db)
@@ -119,7 +124,8 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 	log.INFO("opening database", dbPath)
 	db, err := walletdb.Open("bdb", dbPath)
 	if err != nil {
-		log.ERROR("failed to open database '", ld.DDDirPath, "':", err)
+		log.ERROR(err)
+log.ERROR("failed to open database '", ld.DDDirPath, "':", err)
 		return nil, err
 	}
 	log.INFO("opened wallet database")
@@ -138,7 +144,8 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 	log.TRACE("opening wallet")
 	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow)
 	if err != nil {
-		log.INFO("failed to open wallet", err)
+		log.ERROR(err)
+log.INFO("failed to open wallet", err)
 		// If opening the wallet fails (e.g. because of wrong
 		// passphrase), we must close the backing database to
 		// allow future calls to walletdb.Open().
@@ -195,7 +202,8 @@ func (ld *Loader) UnloadWallet() error {
 	log.TRACE("wallet stopped")
 	err := ld.DB.Close()
 	if err != nil {
-		log.DEBUG("error closing database", err)
+		log.ERROR(err)
+log.DEBUG("error closing database", err)
 		return err
 	}
 	log.TRACE("database closed")
@@ -239,7 +247,8 @@ func NewLoader(chainParams *netparams.Params, dbDirPath string, recoveryWindow u
 func fileExists(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
-		if os.IsNotExist(err) {
+		log.ERROR(err)
+if os.IsNotExist(err) {
 			return false, nil
 		}
 		return false, err

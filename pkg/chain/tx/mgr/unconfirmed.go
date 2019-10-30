@@ -30,10 +30,14 @@ func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) erro
 	log.INFO("inserting unconfirmed transaction", rec.Hash)
 	v, err := valueTxRecord(rec)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = putRawUnmined(ns, rec.Hash[:], v)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	for _, input := range rec.MsgTx.TxIn {
@@ -41,6 +45,8 @@ func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) erro
 		k := canonicalOutPoint(&prevOut.Hash, prevOut.Index)
 		err = putRawUnminedInput(ns, k, rec.Hash[:])
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}
@@ -74,6 +80,8 @@ func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) e
 				&doubleSpend.Hash, doubleSpendVal, &doubleSpend,
 			)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 			log.DEBUG(
@@ -112,6 +120,8 @@ RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
 			spender.Hash = spenderHash
 			err := readRawTxRecord(&spender.Hash, spenderVal, &spender)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 			log.DEBUGF(
@@ -144,6 +154,8 @@ func // UnminedTxs returns the underlying transactions for all unmined
 (s *Store) UnminedTxs(ns walletdb.ReadBucket) ([]*wire.MsgTx, error) {
 	recSet, err := s.unminedTxRecords(ns)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	recs := dependencySort(recSet)
@@ -160,11 +172,15 @@ func
 		var txHash chainhash.Hash
 		err := readRawUnminedHash(k, &txHash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		rec := new(TxRecord)
 		err = readRawTxRecord(&txHash, v, rec)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		unmined[rec.Hash] = rec

@@ -5,8 +5,8 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/cmd/kopach"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/controller/kopach"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 

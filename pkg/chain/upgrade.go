@@ -66,12 +66,16 @@ migrateBlockIndex(db database.DB) error {
 		v2BlockIdxBucket, err :=
 			dbTx.Metadata().CreateBucketIfNotExists(v2BucketName)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		// Get tip of the main chain.
 		serializedData := dbTx.Metadata().Get(chainStateKeyName)
 		state, err := deserializeBestChainState(serializedData)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		tip := &state.hash
@@ -79,11 +83,15 @@ migrateBlockIndex(db database.DB) error {
 		// to parent block and all child blocks.
 		blocksMap, err := readBlockTree(v1BlockIdxBucket)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		// Use the block graph to calculate the height of each block.
 		err = determineBlockHeights(blocksMap)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		// Find blocks on the main chain with the block graph and current tip.
@@ -112,6 +120,8 @@ migrateBlockIndex(db database.DB) error {
 			key := blockIndexKey(&hash, uint32(chainContext.height))
 			err := v2BlockIdxBucket.Put(key, value)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 			// Delete header from v1 bucket
@@ -120,6 +130,8 @@ migrateBlockIndex(db database.DB) error {
 		})
 	})
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	log.INFO("Block database migration complete")
@@ -139,6 +151,8 @@ readBlockTree(v1BlockIdxBucket database.Bucket) (map[chainhash.Hash]*blockChainC
 		headerBytes := blockRow[blockHdrOffset:endOffset:endOffset]
 		err := header.Deserialize(bytes.NewReader(headerBytes))
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		blockHash := header.BlockHash()
@@ -370,6 +384,8 @@ deserializeUtxoEntryV0(serialized []byte) (map[uint32]*UtxoEntry, error) {
 		amount, pkScript, bytesRead, err := decodeCompressedTxOut(
 			serialized[offset:])
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, errDeserialize(fmt.Sprintf("unable to "+
 				"decode utxo at index %d: %v", i, err))
 		}
@@ -402,6 +418,8 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 		return err
 	})
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	// doBatch contains the primary logic for upgrading the utxo set from
@@ -428,6 +446,8 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 			// for the given transaction.
 			utxos, err := deserializeUtxoEntryV0(v1Cursor.Value())
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return 0, err
 			}
 			// Add an entry for each utxo into the new bucket using
@@ -435,6 +455,8 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 			for txOutIdx, utxo := range utxos {
 				reserialized, err := serializeUtxoEntry(utxo)
 				if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 					return 0, err
 				}
 				key := outpointKey(wire.OutPoint{
@@ -448,12 +470,15 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 				// collected normally when the database is done
 				// with it.
 				if err != nil {
-					return 0, err
+		log.ERROR(err)
+return 0, err
 				}
 			}
 			// Remove old entry.
 			err = v1Bucket.Delete(oldKey)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return 0, err
 			}
 			numUtxos += uint32(len(utxos))
@@ -476,6 +501,8 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 			return err
 		})
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		if interruptRequested(interrupt) {
@@ -492,11 +519,15 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 	err = db.Update(func(dbTx database.Tx) error {
 		err := dbTx.Metadata().DeleteBucket(v1BucketName)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		return dbPutVersion(dbTx, utxoSetVersionKeyName, 2)
 	})
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	seconds := int64(time.Since(start) / time.Second)
@@ -521,6 +552,8 @@ func // maybeUpgradeDbBuckets checks the database version of the buckets used
 		return err
 	})
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	// Update the utxo set to v2 if needed.

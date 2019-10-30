@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -23,6 +24,8 @@ func (c *JSONRPC) Call(method string, params interface{}) (interface{}, error) {
 	client := new(http.Client)
 	req, err := http.NewRequest("POST", baseURL, nil)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return "", err
 	}
 	req.SetBasicAuth(c.User, c.Password)
@@ -34,13 +37,16 @@ func (c *JSONRPC) Call(method string, params interface{}) (interface{}, error) {
 	args["netparams"] = params
 	j, err := json.Marshal(args)
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
+fmt.Println(err)
 		return nil, err
 	}
 	req.Body = ioutil.NopCloser(strings.NewReader(string(j)))
 	req.ContentLength = int64(len(string(j)))
 	resp, err := client.Do(req)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return "", err
 	}
 	defer resp.Body.Close()
@@ -48,7 +54,8 @@ func (c *JSONRPC) Call(method string, params interface{}) (interface{}, error) {
 	var data map[string]interface{}
 	err = json.Unmarshal(bytes, &data)
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
+fmt.Println(err)
 	}
 	if err, found := data["error"]; found && err != nil {
 		str, _ := json.Marshal(err)

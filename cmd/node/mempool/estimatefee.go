@@ -601,6 +601,8 @@ RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 	var version uint32
 	err := binary.Read(r, binary.BigEndian, &version)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	if version != estimateFeeSaveVersion {
@@ -645,6 +647,8 @@ RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 	for i := uint32(0); i < numObserved; i++ {
 		ot, err := deserializeObservedTransaction(r)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 		observed[i] = ot
@@ -684,6 +688,8 @@ RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 		var err error
 		ef.dropped[int(i)], err = deserializeRegisteredBlock(r, observed)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 	}

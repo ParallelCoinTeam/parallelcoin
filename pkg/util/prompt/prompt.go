@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"os"
 	"strings"
 
@@ -22,6 +23,7 @@ func ProvideSeed() ([]byte, error) {
 		fmt.Print("Enter existing wallet seed: ")
 		seedStr, err := reader.ReadString('\n')
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		seedStr = strings.TrimSpace(strings.ToLower(seedStr))
@@ -45,6 +47,7 @@ func ProvidePrivPassphrase() ([]byte, error) {
 		fmt.Print(prompt)
 		pass, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		fmt.Print("\n")
@@ -74,6 +77,7 @@ func promptList(reader *bufio.Reader, prefix string, validResponses []string, de
 		fmt.Print(prompt)
 		reply, err := reader.ReadString('\n')
 		if err != nil {
+			log.ERROR(err)
 			return "", err
 		}
 		reply = strings.TrimSpace(strings.ToLower(reply))
@@ -96,6 +100,7 @@ func promptListBool(reader *bufio.Reader, prefix string, defaultEntry string) (b
 	valid := []string{"n", "no", "y", "yes"}
 	response, err := promptList(reader, prefix, valid, defaultEntry)
 	if err != nil {
+		log.ERROR(err)
 		return false, err
 	}
 	return response == "yes" || response == "y", nil
@@ -111,6 +116,7 @@ func promptPass(reader *bufio.Reader, prefix string, confirm bool) ([]byte, erro
 		fmt.Print(prompt)
 		pass, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		fmt.Print("\n")
@@ -124,6 +130,7 @@ func promptPass(reader *bufio.Reader, prefix string, confirm bool) ([]byte, erro
 		fmt.Print("Confirm passphrase: ")
 		confirm, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		fmt.Print("\n")
@@ -156,6 +163,7 @@ func PrivatePass(reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, 
 	for {
 		privPass, err := promptPass(reader, "Enter the private passphrase for your existing wallet", false)
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		// Keep prompting the user until the passphrase is correct.
@@ -184,6 +192,7 @@ func PublicPass(reader *bufio.Reader, privPass []byte,
 		"to add an additional layer of encryption for public "+
 		"data?", "no")
 	if err != nil {
+		log.ERROR(err)
 		return nil, err
 	}
 	if !usePubPass {
@@ -194,6 +203,7 @@ func PublicPass(reader *bufio.Reader, privPass []byte,
 			"existing configured public passphrase for encryption "+
 			"of public data?", "no")
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		if useExisting {
@@ -204,6 +214,7 @@ func PublicPass(reader *bufio.Reader, privPass []byte,
 		pubPass, err = promptPass(reader, "Enter the public "+
 			"passphrase for your new wallet", true)
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		if bytes.Equal(pubPass, privPass) {
@@ -211,6 +222,7 @@ func PublicPass(reader *bufio.Reader, privPass []byte,
 				"Are you sure want to use the same passphrase "+
 					"for public and private data?", "no")
 			if err != nil {
+				log.ERROR(err)
 				return nil, err
 			}
 			if useSamePass {
@@ -235,11 +247,13 @@ func Seed(reader *bufio.Reader) ([]byte, error) {
 	useUserSeed, err := promptListBool(reader, "Do you have an "+
 		"existing wallet seed you want to use?", "no")
 	if err != nil {
+		log.ERROR(err)
 		return nil, err
 	}
 	if !useUserSeed {
 		seed, err := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		fmt.Println("\nYour wallet generation seed is:")
@@ -251,6 +265,7 @@ func Seed(reader *bufio.Reader) ([]byte, error) {
 				`and secure location, enter "OK" to continue: `)
 			confirmSeed, err := reader.ReadString('\n')
 			if err != nil {
+				log.ERROR(err)
 				return nil, err
 			}
 			confirmSeed = strings.TrimSpace(confirmSeed)
@@ -265,6 +280,7 @@ func Seed(reader *bufio.Reader) ([]byte, error) {
 		fmt.Print("Enter existing wallet seed: ")
 		seedStr, err := reader.ReadString('\n')
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		seedStr = strings.TrimSpace(strings.ToLower(seedStr))

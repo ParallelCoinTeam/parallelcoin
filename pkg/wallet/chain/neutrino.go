@@ -103,7 +103,8 @@ func (s *NeutrinoClient) GetBlock(hash *chainhash.Hash) (*wire.MsgBlock, error) 
 	//  Should the block cache be INSIDE neutrino instead of in btcwallet?
 	block, err := s.CS.GetBlock(*hash)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return block.MsgBlock(), nil
 }
@@ -120,7 +121,8 @@ func (s *NeutrinoClient) GetBlockHeight(hash *chainhash.Hash) (int32, error) {
 func (s *NeutrinoClient) GetBestBlock() (*chainhash.Hash, int32, error) {
 	chainTip, err := s.CS.BestBlock()
 	if err != nil {
-		return nil, 0, err
+		log.ERROR(err)
+return nil, 0, err
 	}
 	return &chainTip.Hash, chainTip.Height, nil
 }
@@ -155,7 +157,8 @@ func (s *NeutrinoClient) SendRawTransaction(tx *wire.MsgTx, allowHighFees bool) 
 	*chainhash.Hash, error) {
 	err := s.CS.SendTransaction(tx)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	hash := tx.TxHash()
 	return &hash, nil
@@ -175,7 +178,8 @@ func (s *NeutrinoClient) FilterBlocks(
 	// in the filter blocks request.
 	watchList, err := buildFilterBlocksWatchList(req)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Iterate over the requested blocks, fetching the compact filter for
 	// each one, and matching it against the watchlist generated above. If
@@ -184,7 +188,8 @@ func (s *NeutrinoClient) FilterBlocks(
 	for i, blk := range req.Blocks {
 		filter, err := s.pollCFilter(&blk.Hash)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		// Skip any empty filters.
 		if filter == nil || filter.N() == 0 {
@@ -193,7 +198,8 @@ func (s *NeutrinoClient) FilterBlocks(
 		key := builder.DeriveKey(&blk.Hash)
 		matched, err := filter.MatchAny(key, watchList)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		} else if !matched {
 			continue
 		}
@@ -205,7 +211,8 @@ func (s *NeutrinoClient) FilterBlocks(
 		// stripped blocks
 		rawBlock, err := s.GetBlock(&blk.Hash)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		if !blockFilterer.FilterBlock(rawBlock) {
 			continue
@@ -244,21 +251,24 @@ func buildFilterBlocksWatchList(req *FilterBlocksRequest) ([][]byte, error) {
 	for _, addr := range req.ExternalAddrs {
 		p2shAddr, err := txscript.PayToAddrScript(addr)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		watchList = append(watchList, p2shAddr)
 	}
 	for _, addr := range req.InternalAddrs {
 		p2shAddr, err := txscript.PayToAddrScript(addr)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		watchList = append(watchList, p2shAddr)
 	}
 	for _, addr := range req.WatchedOutPoints {
 		addr, err := txscript.PayToAddrScript(addr)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		watchList = append(watchList, addr)
 	}
@@ -281,7 +291,8 @@ func (s *NeutrinoClient) pollCFilter(hash *chainhash.Hash) (*gcs.Filter, error) 
 		}
 		filter, err = s.CS.GetCFilter(*hash, wire.GCSFilterRegular)
 		if err != nil {
-			count++
+		log.ERROR(err)
+count++
 			continue
 		}
 		return filter, nil
@@ -314,11 +325,13 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 	s.isRescan = true
 	bestBlock, err := s.CS.BestBlock()
 	if err != nil {
-		return fmt.Errorf("Can't get chain service's best block: %s", err)
+		log.ERROR(err)
+return fmt.Errorf("Can't get chain service's best block: %s", err)
 	}
 	header, err := s.CS.GetBlockHeader(&bestBlock.Hash)
 	if err != nil {
-		return fmt.Errorf("Can't get block header for hash %v: %s",
+		log.ERROR(err)
+return fmt.Errorf("Can't get block header for hash %v: %s",
 			bestBlock.Hash, err)
 	}
 	// If the wallet is already fully caught up, or the rescan has started
@@ -342,7 +355,8 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 	for op, addr := range outPoints {
 		addrScript, err := txscript.PayToAddrScript(addr)
 		if err != nil {
-			fmt.Println(err)
+		log.ERROR(err)
+fmt.Println(err)
 		}
 		inputsToWatch = append(inputsToWatch, sac.InputWithScript{
 			OutPoint: op,
@@ -444,7 +458,8 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 		rec, err := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx(),
 			header.Timestamp)
 		if err != nil {
-			log.ERROR(
+		log.ERROR(err)
+log.ERROR(
 				"cannot create transaction record for relevant tx:", err,
 			)
 			// TODO(aakselrod): Return?
@@ -462,7 +477,8 @@ func (s *NeutrinoClient) onFilteredBlockConnected(height int32,
 	// Handle RescanFinished notification if required.
 	bs, err := s.CS.BestBlock()
 	if err != nil {
-		log.ERROR("can't get chain service's best block:", err)
+		log.ERROR(err)
+log.ERROR("can't get chain service's best block:", err)
 		return
 	}
 	if bs.Hash == header.BlockHash() {
@@ -574,7 +590,8 @@ func (s *NeutrinoClient) onBlockConnected(hash *chainhash.Hash, height int32,
 func (s *NeutrinoClient) notificationHandler() {
 	hash, height, err := s.GetBestBlock()
 	if err != nil {
-		log.ERRORF("failed to get best block from chain service:", err)
+		log.ERROR(err)
+log.ERRORF("failed to get best block from chain service:", err)
 		s.Stop()
 		s.wg.Done()
 		return
@@ -633,7 +650,8 @@ out:
 			}
 		case err := <-rescanErr:
 			if err != nil {
-				log.ERROR("neutrino rescan ended with error:", err)
+		log.ERROR(err)
+log.ERROR("neutrino rescan ended with error:", err)
 			}
 		case s.currentBlock <- bs:
 		case <-s.quit:
