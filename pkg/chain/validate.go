@@ -106,8 +106,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 	if !isBIP0030Node(node) && (node.height < b.params.BIP0034Height) {
 		err := b.checkBIP0030(node, block, view)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -118,7 +117,6 @@ log.ERROR(err)
 	err := view.fetchInputUtxos(b.db, block)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// BIP0016 describes a pay-to-script-hash type that is considered a
@@ -131,7 +129,6 @@ log.ERROR(err)
 	segwitState, err := b.deploymentState(node.parent, chaincfg.DeploymentSegwit)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	enforceSegWit := segwitState == ThresholdActive
@@ -152,8 +149,7 @@ log.ERROR(err)
 		sigOpCost, err := GetSigOpCost(tx, i == 0, view, enforceBIP0016,
 			enforceSegWit)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Check for overflow or going over the limits.
@@ -180,8 +176,7 @@ log.ERROR(err)
 		txFee, err := CheckTransactionInputs(tx, node.height, view,
 			b.params)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Sum the total fees and ensure we don't overflow the accumulator.
@@ -197,8 +192,7 @@ log.ERROR(err)
 		// each spent txout in the order each transaction spends them.
 		err = view.connectTransaction(tx, node.height, stxos)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -230,8 +224,7 @@ log.ERROR(err)
 		log.TRACE("checking contents of hardfork coinbase tx")
 		btx, err := block.Tx(0)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 		}
 		payees := hardfork.Payees
 		if b.params.Net == wire.TestNet3 {
@@ -330,7 +323,6 @@ log.ERROR(err)
 	csvState, err := b.deploymentState(node.parent, chaincfg.DeploymentCSV)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if csvState == ThresholdActive {
@@ -351,8 +343,7 @@ log.ERROR(err)
 			sequenceLock, err := b.calcSequenceLock(node, tx, view,
 				false)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			if !SequenceLockActive(sequenceLock, node.height,
@@ -379,8 +370,7 @@ log.ERROR(err)
 		err := checkBlockScripts(block, view, scriptFlags, b.sigCache,
 			b.hashCache)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -397,7 +387,7 @@ log.ERROR(err)
 // of work requirement. The block must connect to the current tip of the main
 // chain. This function is safe for concurrent access.
 func (b *BlockChain) CheckConnectBlockTemplate(workerNumber uint32, block *util.
-	Block) error {
+Block) error {
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
 	algo := block.MsgBlock().Header.Version
@@ -420,14 +410,12 @@ func (b *BlockChain) CheckConnectBlockTemplate(workerNumber uint32, block *util.
 	}
 	err := checkBlockSanity(block, powLimit, b.timeSource, flags, true, block.Height())
 	if err != nil {
-		log.ERROR(err)
-log.ERROR("block processing error:", err)
+		log.ERROR("block processing error:", err)
 		return err
 	}
 	err = b.checkBlockContext(workerNumber, block, tip, flags, true)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Leave the spent txouts entry nil in the state since the information is
@@ -462,7 +450,6 @@ func // checkBIP0030 ensures blocks do not contain duplicate transactions which
 	err := view.fetchUtxos(b.db, fetchSet)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Duplicate transactions are only allowed if the previous transaction is
@@ -495,7 +482,6 @@ func // checkBlockContext peforms several validation checks on the block which
 	err := b.checkBlockHeaderContext(workerNumber, header, prevNode, flags)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	fastAdd := flags&BFFastAdd == BFFastAdd
@@ -505,8 +491,7 @@ log.ERROR(err)
 		// version bits state.
 		csvState, err := b.deploymentState(prevNode, chaincfg.DeploymentCSV)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Once the CSV soft-fork is fully active, we'll switch to using the
@@ -538,8 +523,7 @@ log.ERROR(err)
 			coinbaseTx := block.Transactions()[0]
 			err := checkSerializedHeight(coinbaseTx, blockHeight)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		}
@@ -549,8 +533,7 @@ log.ERROR(err)
 		segwitState, err := b.deploymentState(prevNode,
 			chaincfg.DeploymentSegwit)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// If segwit is active,
@@ -591,7 +574,7 @@ func // checkBlockHeaderContext performs several validation checks on the block
 //  against the checkpoints are not performed.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
-	BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
+BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
 	// log.WARN("checking block header context")
 	if prevNode == nil {
 		return nil
@@ -609,8 +592,7 @@ func // checkBlockHeaderContext performs several validation checks on the block
 			fork.GetAlgoName(header.Version, prevNode.height+1),
 			false)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		blockDifficulty := header.Bits
@@ -648,7 +630,6 @@ log.ERROR(err)
 	checkpointNode, err := b.findPreviousCheckpoint()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if checkpointNode != nil && blockHeight < checkpointNode.height {
@@ -1128,7 +1109,6 @@ checkBlockHeaderSanity(header *wire.BlockHeader, powLimit *big.Int, timeSource M
 	err := checkProofOfWork(header, powLimit, flags, height)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// A block timestamp must not have a greater precision than one second. This
@@ -1163,8 +1143,7 @@ checkBlockSanity(block *util.Block, powLimit *big.Int, timeSource MedianTimeSour
 	header := &msgBlock.Header
 	err := checkBlockHeaderSanity(header, powLimit, timeSource, flags, height)
 	if err != nil {
-		log.ERROR(err)
-log.DEBUG("block processing error: ", block.MsgBlock().Header.Version, err)
+		log.DEBUG("block processing error: ", block.MsgBlock().Header.Version, err)
 		return err
 	}
 	// A block must have at least one transaction.
@@ -1210,8 +1189,7 @@ log.DEBUG("block processing error: ", block.MsgBlock().Header.Version, err)
 	for _, tx := range transactions {
 		err := CheckTransactionSanity(tx)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -1265,25 +1243,23 @@ func // checkProofOfWork ensures the block header bits which indicate the target
 //  - BFNoPoWCheck: The check to ensure the block hash is less than the
 //  target difficulty is not performed.
 checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlags, height int32) error {
-	// WARNF()
-	// {"checkProofOfWork %064x %s", powLimit}
-	// WARNF()
-	// {"hash   %s", header.BlockHashWithAlgos(height)}
+	log.WARNF("hash %s", header.BlockHashWithAlgos(height))
 	// The target difficulty must be larger than zero.
 	if powLimit == nil {
 		return errors.New("PoW limit was not set")
 	}
 	target := fork.CompactToBig(header.Bits)
-	log.TRACEF("target %064x %08x", target, header.Bits)
+	log.WARNF("target %064x %08x", target, header.Bits)
 	if target.Sign() <= 0 {
 		str := fmt.Sprintf("block target difficulty of %064x is too low",
 			target)
 		return ruleError(ErrUnexpectedDifficulty, str)
 	}
-	log.TRACEF("checkProofOfWork powLimit %064x %064x", powLimit, target)
+	log.WARNF("checkProofOfWork powLimit %064x %064x", powLimit, target)
 	// The target difficulty must be less than the maximum allowed.
 	if target.Cmp(powLimit) > 0 {
 		str := fmt.Sprintf("height %d block target difficulty of %064x is higher than max of %064x", height, target, powLimit)
+		log.WARN(str)
 		return ruleError(ErrUnexpectedDifficulty, str)
 	}
 	// The block hash must be less than the claimed target unless the flag to
@@ -1297,6 +1273,7 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 		hashNum := HashToBig(&hash)
 		if hashNum.Cmp(target) > 0 {
 			str := fmt.Sprintf("block hash of %064x is higher than expected max of %064x", hashNum, target)
+			log.WARN(str)
 			return ruleError(ErrHighHash, str)
 		}
 	}
@@ -1309,7 +1286,6 @@ checkSerializedHeight(coinbaseTx *util.Tx, wantHeight int32) error {
 	serializedHeight, err := ExtractCoinbaseHeight(coinbaseTx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if serializedHeight != wantHeight {

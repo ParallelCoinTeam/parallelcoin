@@ -18,11 +18,11 @@ import (
 
 	"github.com/ugorji/go/codec"
 
-	"github.com/p9c/pod/pkg/controller/broadcast"
 	chain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/controller/broadcast"
 	"github.com/p9c/pod/pkg/controller/gcm"
 	"github.com/p9c/pod/pkg/log"
 )
@@ -34,6 +34,19 @@ type Blocks struct {
 	New bool
 }
 type Solution wire.MsgBlock
+
+func (tpl Templates) Copy(count int) (out []Templates) {
+	out=make([]Templates, count)
+	for i := range out {
+		out[i] = make(Templates, len(tpl))
+		for j := range tpl {
+			temp := *(tpl[j])
+			out[i][j]=&temp
+		}
+	}
+	log.SPEW(out)
+	return
+}
 
 // Run starts a controller instance
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {

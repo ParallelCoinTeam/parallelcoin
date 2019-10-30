@@ -12,8 +12,8 @@ import (
 )
 
 type // BehaviorFlags is a bitmask defining tweaks to the normal behavior when
-// performing chain processing and consensus rules checks.
-BehaviorFlags uint32
+	// performing chain processing and consensus rules checks.
+	BehaviorFlags uint32
 
 const (
 	// BFFastAdd may be set to indicate that several checks can be avoided
@@ -69,7 +69,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	exists, err := b.blockExists(blockHash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return false, false, err
 	}
 	if exists {
@@ -102,8 +102,7 @@ log.ERROR(err)
 	// 	fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight)
 	if err != nil {
-		log.ERROR(err)
-log.ERROR("block processing error: ", err)
+		log.ERROR("block processing error: ", err)
 		return false, false, err
 	}
 	// log.WARN("searching back to checkpoints")
@@ -118,7 +117,7 @@ log.ERROR("block processing error: ", err)
 	checkpointNode, err := b.findPreviousCheckpoint()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return false, false, err
 	}
 	if checkpointNode != nil {
@@ -154,7 +153,7 @@ log.ERROR(err)
 	prevHashExists, err := b.blockExists(prevHash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return false, false, err
 	}
 	if !prevHashExists {
@@ -174,7 +173,7 @@ log.ERROR(err)
 	isMainChain, err := b.maybeAcceptBlock(workerNumber, block, flags)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return false, false, err
 	}
 	// Accept any orphan blocks that depend on this block (they are no longer
@@ -185,7 +184,7 @@ log.ERROR(err)
 	err = b.processOrphans(workerNumber, blockHash, flags)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return false, false, err
 	}
 	// log.DEBUGF("accepted block %d %v",
@@ -270,8 +269,8 @@ func // processOrphans determines if there are any orphans which depend on the
 			// Potentially accept the block into the block chain.
 			_, err := b.maybeAcceptBlock(workerNumber, orphan.block, flags)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			// Add this block to the list of blocks to process so any orphan
