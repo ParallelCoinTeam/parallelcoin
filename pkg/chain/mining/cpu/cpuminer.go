@@ -315,8 +315,9 @@ out:
 		// Wait until there is a connection to at least one other peer since
 		// there is no way to relay a found block or receive transactions to work
 		// on when there are no connected peers.
-		if m.cfg.ConnectedCount() == 0 || m.cfg.ChainParams.Net == wire.
-			MainNet && !m.cfg.Solo {
+		if (m.cfg.ConnectedCount() == 0 ||
+			m.cfg.ChainParams.Net == wire.MainNet) &&
+				!m.cfg.Solo {
 			log.DEBUG("server has no peers, waiting")
 			time.Sleep(time.Second)
 			continue
@@ -327,7 +328,7 @@ out:
 		// block template on a block that is in the process of becoming stale.
 		m.submitBlockLock.Lock()
 		curHeight := m.g.BestSnapshot().Height
-		if curHeight != 0 && !m.cfg.IsCurrent() {
+		if curHeight != 0 && !m.cfg.IsCurrent() && !m.cfg.Solo {
 			m.submitBlockLock.Unlock()
 			log.WARNF("server is not current yet, waiting")
 			time.Sleep(time.Second)

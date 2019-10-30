@@ -292,7 +292,7 @@ fmt.Println("error unmarshalling config", err)
 			*cx.Config.GenThreads = c.Int("genthreads")
 		}
 		if c.IsSet("solo") {
-			log.TRACE("set solo", c.Bool("solo"))
+			log.WARN("set solo", c.Bool("solo"))
 			*cx.Config.Solo = c.Bool("solo")
 		}
 		if c.IsSet("nocontroller") {

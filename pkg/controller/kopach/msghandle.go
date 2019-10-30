@@ -79,7 +79,7 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 					}
 					m.dec.ResetBytes(bytes)
 					message := &controller.Blocks{}
-					err = m.dec.Decode(&message)
+					err = m.dec.Decode(message)
 					if err != nil {
 						log.ERROR(err)
 					}
