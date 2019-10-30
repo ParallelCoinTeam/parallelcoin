@@ -444,7 +444,7 @@ log.ERROR(err)
 		// 	var o string
 		// 	dis, err := vm.DisasmPC()
 		// 	if err != nil {
-		log.ERROR(err)
+		//log.ERROR(err)
 // 		o += "c stepping (" + err.Error() + ")"
 		// 	}
 		// 	o += "oo stepping " + dis
