@@ -41,17 +41,23 @@ miner also for all targets of Go v1.12.9+.
 
 ## Developer Notes
 
-Goland's inbuilt terminal is a pain but Tilix requires custom hyperlinks to be defined to click and have the IDE open the source at the given location. The regexp that I use given my system base path is (exactly this with all newlines removed for dconf with using tilix at the dconf path `/com/gexperts/Tilix/custom-hyperlinks`)
+Goland's inbuilt terminal is very slow and has several bugs that my workflow
+ exposes and I find very irritating, and out of the paned terminal apps I find
+  Tilix the most usable, but it requires writing a regular expression to
+   match and so the logger is written to output relative paths to the
+    repository root.
+. The regexp that I use given my system base path is (exactly this with all newlines removed for dconf with using tilix at the dconf path `/com/gexperts/Tilix/custom-hyperlinks`)
 ```
 [
-    '(\\./)([^:\\0\\s]+)(:[0-9]+),
-        goland /home/loki/src/github.com/p9c/pod/$1$2,false', 
-    '(/)([^:\\0\\s]+)(:[0-9]+),
-        goland $1$2,false'
+    '(([a-zA-Z0-9-_.]+/)+([a-zA-Z0-9-_.]+)):([0-9]+),
+        goland --line $4 $GOPATH/src/github.com/p9c/pod/$1,false', 
 ]
 ```
 
-(the text fields in tilix's editor are very weird so it will be easier to just paste this in and gnome should remove the newlines automatically)
-
-which opens absolute paths that are in the repository root given complete or as a relative path with no prefix `/`.
-Better regex would be nice, but this works ok for now.
+(the text fields in tilix's editor are very weird so it will be easier to
+ just paste this in and gnome dconf editor should remove the newlines
+  automatically)
+  
+Adding a slash to the front after the first bracket could be used to match
+ absolute source paths also, but the above will allow you to control click in
+  Tilix and open the line of the print.
