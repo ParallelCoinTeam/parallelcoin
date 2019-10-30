@@ -631,8 +631,7 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	isOrphan, err := m.cfg.ProcessBlock(block, blockchain.BFNone)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
-		// Anything other than a rule violation is an unexpected error, so log
+// Anything other than a rule violation is an unexpected error, so log
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
 			log.WARNF(

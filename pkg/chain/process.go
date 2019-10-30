@@ -69,8 +69,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	exists, err := b.blockExists(blockHash)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
-		return false, false, err
+return false, false, err
 	}
 	if exists {
 		str := fmt.Sprintf("already have block %v", blockHashWithAlgo)
@@ -117,8 +116,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	checkpointNode, err := b.findPreviousCheckpoint()
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
-		return false, false, err
+return false, false, err
 	}
 	if checkpointNode != nil {
 		// Ensure the block timestamp is after the checkpoint timestamp.
@@ -153,8 +151,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	prevHashExists, err := b.blockExists(prevHash)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
-		return false, false, err
+return false, false, err
 	}
 	if !prevHashExists {
 		log.WARNC(func() string {
@@ -173,8 +170,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	isMainChain, err := b.maybeAcceptBlock(workerNumber, block, flags)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
-		return false, false, err
+return false, false, err
 	}
 	// Accept any orphan blocks that depend on this block (they are no longer
 	// orphans) and repeat for those accepted blocks until there are no more.
@@ -184,8 +180,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	err = b.processOrphans(workerNumber, blockHash, flags)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
-		return false, false, err
+return false, false, err
 	}
 	// log.DEBUGF("accepted block %d %v",
 	// 	blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
@@ -270,8 +265,7 @@ func // processOrphans determines if there are any orphans which depend on the
 			_, err := b.maybeAcceptBlock(workerNumber, orphan.block, flags)
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
-				return err
+return err
 			}
 			// Add this block to the list of blocks to process so any orphan
 			// blocks that depend on this block are handled too.
