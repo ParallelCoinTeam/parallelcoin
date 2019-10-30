@@ -292,7 +292,7 @@ func (snap *dbCacheSnapshot) Get(key []byte) []byte {
 	// Consult the database.
 	value, err := snap.dbSnapshot.Get(key, nil)
 	if err != nil {
-		log.ERROR(err)
+		log.TRACE(err)
 return nil
 	}
 	return value
