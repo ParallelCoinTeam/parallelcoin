@@ -16,11 +16,11 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/broadcast"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/controller/broadcast"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/normalize"
 	"github.com/p9c/pod/pkg/peer/connmgr"
@@ -42,17 +42,16 @@ func initConfigFile(cfg *pod.Config) {
 		*cfg.ConfigFile =
 			*cfg.DataDir + string(os.PathSeparator) + podConfigFilename
 	}
+	log.WARN(*cfg.ConfigFile)
 }
 
-func
-initLogDir(cfg *pod.Config) {
+func initLogDir(cfg *pod.Config) {
 	if *cfg.LogDir == "" {
 		*cfg.LogDir = *cfg.DataDir
 	}
 }
 
-func
-initParams(cx *conte.Xt) {
+func initParams(cx *conte.Xt) {
 	network := "mainnet"
 	if cx.Config.Network != nil {
 		network = *cx.Config.Network
@@ -82,10 +81,7 @@ func initListeners(cx *conte.Xt) {
 	cfg := cx.Config
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
 		len(*cfg.ConnectPeers) < 1 {
-		cfg.Listeners =
-			&cli.StringSlice{":" +
-				cx.ActiveNet.DefaultPort}
-		cx.StateCfg.Save = true
+		cfg.Listeners = &cli.StringSlice{":" + cx.ActiveNet.DefaultPort}
 	}
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
 		*cfg.WalletRPCListeners = append(*cfg.WalletRPCListeners,
@@ -98,14 +94,9 @@ func initListeners(cx *conte.Xt) {
 		cx.StateCfg.Save = true
 	}
 	if *cfg.RPCConnect == "" {
-		*cfg.RPCConnect = "127.0.0.1:"+cx.ActiveNet.RPCClientPort
+		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
 		cx.StateCfg.Save = true
 	}
-	if *cfg.WalletServer == "" {
-		*cfg.WalletServer = "127.0.0.1:"+cx.ActiveNet.WalletRPCServerPort
-		cx.StateCfg.Save = true
-	}
-
 }
 
 func initTLSStuffs(cfg *pod.Config, st *state.Config) {
@@ -114,19 +105,19 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 		*cfg.RPCCert =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.cert"
 		st.Save = true
-		isNew=true
+		isNew = true
 	}
 	if *cfg.RPCKey == "" {
 		*cfg.RPCKey =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.key"
 		st.Save = true
-		isNew=true
+		isNew = true
 	}
 	if *cfg.CAFile == "" {
 		*cfg.CAFile =
 			*cfg.DataDir + string(os.PathSeparator) + "cafile"
 		st.Save = true
-		isNew=true
+		isNew = true
 	}
 	if isNew {
 		// Now is the best time to make the certs
@@ -234,6 +225,8 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 		for _, addr := range *cfg.Whitelists {
 			_, ipnet, err := net.ParseCIDR(addr)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				err = fmt.Errorf("%s '%s'", err.Error())
 				ip = net.ParseIP(addr)
 				if ip == nil {
@@ -322,7 +315,8 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		log.DEBUG("looking up default listener")
 		addrs, err := net.LookupHost(node.DefaultRPCListener)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+		log.ERROR(err)
+log.ERROR(err)
 			os.Exit(1)
 		}
 		*cfg.RPCListeners = make([]string, 0, len(addrs))
@@ -348,8 +342,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 	// *cfg.Listeners = nrms(*cfg.Listeners, cx.ActiveNet.DefaultPort)
 	// Add default port to all added peer addresses if needed and remove duplicate addresses.
 	*cfg.AddPeers = nrms(*cfg.AddPeers, params.DefaultPort)
-	*cfg.ConnectPeers = nrms(*cfg.ConnectPeers,
-		params.DefaultPort)
+	*cfg.ConnectPeers = nrms(*cfg.ConnectPeers, params.DefaultPort)
 }
 
 func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
@@ -358,7 +351,8 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	log.TRACE("checking min relay tx fee")
 	stateConfig.ActiveMinRelayTxFee, err = util.NewAmount(*cfg.MinRelayTxFee)
 	if err != nil {
-		str := "%s: invalid minrelaytxfee: %v"
+		log.ERROR(err)
+str := "%s: invalid minrelaytxfee: %v"
 		err := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -431,7 +425,8 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	stateConfig.AddedCheckpoints, err = node.ParseCheckpoints(*cfg.
 		AddCheckpoints)
 	if err != nil {
-		str := "%s: Error parsing checkpoints: %v"
+		log.ERROR(err)
+str := "%s: Error parsing checkpoints: %v"
 		err := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -465,7 +460,8 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 	for _, strAddr := range *cfg.MiningAddrs {
 		addr, err := util.DecodeAddress(strAddr, params)
 		if err != nil {
-			str := "%s: mining address '%s' failed to decode: %v"
+		log.ERROR(err)
+str := "%s: mining address '%s' failed to decode: %v"
 			err := fmt.Errorf(str, funcName, strAddr, err)
 			fmt.Fprintln(os.Stderr, err)
 			// os.Exit(1)
@@ -516,7 +512,8 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 		log.TRACE("we are loading a proxy!")
 		_, _, err := net.SplitHostPort(*cfg.Proxy)
 		if err != nil {
-			str := "%s: Proxy address '%s' is invalid: %v"
+		log.ERROR(err)
+str := "%s: Proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.Proxy, err)
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -560,7 +557,8 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	if *cfg.OnionProxy != "" {
 		_, _, err := net.SplitHostPort(*cfg.OnionProxy)
 		if err != nil {
-			str := "%s: Onion proxy address '%s' is invalid: %v"
+		log.ERROR(err)
+str := "%s: Onion proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.OnionProxy, err)
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)

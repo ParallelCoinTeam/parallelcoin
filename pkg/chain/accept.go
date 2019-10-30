@@ -71,11 +71,12 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	var err error
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on
-		// the position of the block within the block chain.
+		// the  position of the block within the block chain.
 		err = b.checkBlockContext(workerNumber, block, prevNode, flags,
 			DoNotCheckPow)
 		if err != nil {
-			log.ERROR(err)
+		log.ERROR(err)
+log.ERROR(err)
 			return false, err
 		}
 	}
@@ -94,6 +95,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	})
 	if err != nil {
 		log.ERROR(err)
+log.ERROR(err)
 		return false, err
 	}
 	// log.WARN("creating new block node for new block")
@@ -107,6 +109,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	err = b.Index.flushToDB()
 	if err != nil {
 		log.ERROR(err)
+log.ERROR(err)
 		return false, err
 	}
 	// Connect the passed block to the chain while respecting proper chain
@@ -115,6 +118,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	isMainChain, err := b.connectBestChain(newNode, block, flags)
 	if err != nil {
 		log.ERROR(err)
+log.ERROR(err)
 		return false, err
 	}
 	// Notify the caller that the new block was accepted into the block

@@ -132,7 +132,8 @@ func testReadWriteBucketInterface(
 		return nil
 	})
 	if err != nil {
-		tc.t.Errorf("%v", err)
+		log.ERROR(err)
+tc.t.Errorf("%v", err)
 		return false
 	}
 	// Ensure all keys were iterated.
@@ -154,7 +155,8 @@ func testReadWriteBucketInterface(
 	testBucketName := []byte("testbucket")
 	testBucket, err := bucket.CreateBucket(testBucketName)
 	if err != nil {
-		tc.t.Errorf("CreateBucket: unexpected error: %v", err)
+		log.ERROR(err)
+tc.t.Errorf("CreateBucket: unexpected error: %v", err)
 		return false
 	}
 	if !testNestedReadWriteBucket(tc, testBucket) {
@@ -171,7 +173,8 @@ func testReadWriteBucketInterface(
 	// Ensure CreateBucketIfNotExists returns an existing bucket.
 	testBucket, err = bucket.CreateBucketIfNotExists(testBucketName)
 	if err != nil {
-		tc.t.Errorf("CreateBucketIfNotExists: unexpected "+
+		log.ERROR(err)
+tc.t.Errorf("CreateBucketIfNotExists: unexpected "+
 			"error: %v", err)
 		return false
 	}
@@ -205,7 +208,8 @@ func testReadWriteBucketInterface(
 	// it doesn't already exist.
 	testBucket, err = bucket.CreateBucketIfNotExists(testBucketName)
 	if err != nil {
-		tc.t.Errorf("CreateBucketIfNotExists: unexpected "+
+		log.ERROR(err)
+tc.t.Errorf("CreateBucketIfNotExists: unexpected "+
 			"error: %v", err)
 		return false
 	}
@@ -247,14 +251,16 @@ func testManualTxInterface(
 		if writable {
 			dbtx, err = db.BeginReadWriteTx()
 			if err != nil {
-				tc.t.Errorf("BeginReadWriteTx: unexpected error %v", err)
+		log.ERROR(err)
+tc.t.Errorf("BeginReadWriteTx: unexpected error %v", err)
 				return false
 			}
 			rootBucket = dbtx.(walletdb.ReadWriteTx).ReadWriteBucket(bucketKey)
 		} else {
 			dbtx, err = db.BeginReadTx()
 			if err != nil {
-				tc.t.Errorf("BeginReadTx: unexpected error %v", err)
+		log.ERROR(err)
+tc.t.Errorf("BeginReadTx: unexpected error %v", err)
 				return false
 			}
 			rootBucket = dbtx.ReadBucket(bucketKey)
@@ -307,7 +313,8 @@ func testManualTxInterface(
 		// Begin another read-only transaction to ensure...
 		dbtx, err := db.BeginReadTx()
 		if err != nil {
-			tc.t.Errorf("BeginReadTx: unexpected error %v", err)
+		log.ERROR(err)
+tc.t.Errorf("BeginReadTx: unexpected error %v", err)
 			return false
 		}
 		rootBucket := dbtx.ReadBucket(bucketKey)
@@ -332,7 +339,8 @@ func testManualTxInterface(
 	deleteValues := func(values map[string]string) bool {
 		dbtx, err := db.BeginReadWriteTx()
 		if err != nil {
-			tc.t.Errorf("BeginReadWriteTx: unexpected error %v", err)
+		log.ERROR(err)
+tc.t.Errorf("BeginReadWriteTx: unexpected error %v", err)
 			_ = dbtx.Rollback()
 			return false
 		}
@@ -407,7 +415,8 @@ func testNamespaceAndTxInterfaces(
 		return err
 	})
 	if err != nil {
-		tc.t.Errorf("CreateTopLevelBucket: unexpected error: %v", err)
+		log.ERROR(err)
+tc.t.Errorf("CreateTopLevelBucket: unexpected error: %v", err)
 		return false
 	}
 	defer func() {
@@ -416,7 +425,8 @@ func testNamespaceAndTxInterfaces(
 			return tx.DeleteTopLevelBucket(namespaceKeyBytes)
 		})
 		if err != nil {
-			tc.t.Errorf("DeleteTopLevelBucket: unexpected error: %v", err)
+		log.ERROR(err)
+tc.t.Errorf("DeleteTopLevelBucket: unexpected error: %v", err)
 			return
 		}
 	}()
@@ -439,7 +449,8 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		if err != errSubTestFail {
+		log.ERROR(err)
+if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
@@ -484,7 +495,8 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		if err != errSubTestFail {
+		log.ERROR(err)
+if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
@@ -501,7 +513,8 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		if err != errSubTestFail {
+		log.ERROR(err)
+if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
@@ -518,7 +531,8 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		if err != errSubTestFail {
+		log.ERROR(err)
+if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
@@ -535,7 +549,8 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		if err != errSubTestFail {
+		log.ERROR(err)
+if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
@@ -552,7 +567,8 @@ func testAdditionalErrors(
 		// Create a new namespace
 		rootBucket, err := tx.CreateTopLevelBucket(ns3Key)
 		if err != nil {
-			return fmt.Errorf("CreateTopLevelBucket: unexpected error: %v", err)
+		log.ERROR(err)
+return fmt.Errorf("CreateTopLevelBucket: unexpected error: %v", err)
 		}
 		// Ensure CreateBucket returns the expected error when no bucket
 		// key is specified.
@@ -578,7 +594,8 @@ func testAdditionalErrors(
 		return nil
 	})
 	if err != nil {
-		if err != errSubTestFail {
+		log.ERROR(err)
+if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
 		return false
@@ -587,7 +604,8 @@ func testAdditionalErrors(
 	// already closed returns the expected error.
 	tx, err := tc.db.BeginReadWriteTx()
 	if err != nil {
-		tc.t.Errorf("Begin: unexpected error: %v", err)
+		log.ERROR(err)
+tc.t.Errorf("Begin: unexpected error: %v", err)
 		return false
 	}
 	if err := tx.Rollback(); err != nil {
@@ -613,7 +631,8 @@ func TestInterface(
 	t Tester, dbType, dbPath string) {
 	db, err := walletdb.Create(dbType, dbPath)
 	if err != nil {
-		t.Errorf("Failed to create test database (%s) %v", dbType, err)
+		log.ERROR(err)
+t.Errorf("Failed to create test database (%s) %v", dbType, err)
 		return
 	}
 	defer os.Remove(dbPath)

@@ -274,7 +274,8 @@ func // handleMessage is the main handler for incoming notifications and
 	in.rawNotification = new(rawNotification)
 	err := js.Unmarshal(msg, &in)
 	if err != nil {
-		log.WARN("remote server sent invalid message:", err)
+		log.ERROR(err)
+log.WARN("remote server sent invalid message:", err)
 		return
 	}
 
@@ -400,7 +401,8 @@ out:
 		case msg := <-c.sendChan:
 			err := c.wsConn.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {
-				c.Disconnect()
+		log.ERROR(err)
+c.Disconnect()
 				break out
 			}
 		case <-c.disconnectChan():
@@ -463,7 +465,8 @@ func // reregisterNtfns creates and sends commands needed to re-establish the
 			stateCopy.notifyNewTxVerbose)
 		err := c.NotifyNewTransactions(stateCopy.notifyNewTxVerbose)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 	}
 	// Reregister the combination of all previously registered notifyspent
@@ -567,8 +570,9 @@ out:
 			}
 			wsConn, err := dial(c.config)
 			if err != nil {
-				c.retryCount++
-				log.TRACEF("failed to connect to %s: %v %s", c.config.Host, err)
+		log.ERROR(err)
+c.retryCount++
+				log.TRACE("failed to connect to %s: %v %s", c.config.Host, err)
 				// Scale the retry interval by the number of retries so there is
 				// a backoff up to a max of 1 minute.
 				scaledInterval := connectionRetryInterval.Nanoseconds() * c.
@@ -577,7 +581,7 @@ out:
 				if scaledDuration > time.Minute {
 					scaledDuration = time.Minute
 				}
-				log.TRACEF("retrying connection to %s in %s %s",
+				log.TRACE("retrying connection to %s in %s %s",
 					c.config.Host, scaledDuration)
 				time.Sleep(scaledDuration)
 				continue reconnect
@@ -611,14 +615,16 @@ func // handleSendPostMessage handles performing the passed HTTP request,
 	log.TRACEF("sending command [%s] with id %d %s", jReq.method, jReq.id)
 	httpResponse, err := c.httpClient.Do(details.httpRequest)
 	if err != nil {
-		jReq.responseChan <- &response{err: err}
+		log.ERROR(err)
+jReq.responseChan <- &response{err: err}
 		return
 	}
 	// Read the raw bytes and close the response.
 	respBytes, err := ioutil.ReadAll(httpResponse.Body)
 	httpResponse.Body.Close()
 	if err != nil {
-		err = fmt.Errorf("error reading json reply: %v", err)
+		log.ERROR(err)
+err = fmt.Errorf("error reading json reply: %v", err)
 		jReq.responseChan <- &response{err: err}
 		return
 	}
@@ -626,7 +632,8 @@ func // handleSendPostMessage handles performing the passed HTTP request,
 	var resp rawResponse
 	err = js.Unmarshal(respBytes, &resp)
 	if err != nil {
-		// When the response itself isn't a valid JSON-RPC response return an
+		log.ERROR(err)
+// When the response itself isn't a valid JSON-RPC response return an
 		// error which includes the HTTP status code and raw response bytes.
 		err = fmt.Errorf("status code: %d, response: %q",
 			httpResponse.StatusCode, string(respBytes))
@@ -721,7 +728,8 @@ func // sendPost sends the passed request to the server by issuing an HTTP POST
 	bodyReader := bytes.NewReader(jReq.marshalledJSON)
 	httpReq, err := http.NewRequest("POST", address, bodyReader)
 	if err != nil {
-		jReq.responseChan <- &response{result: nil, err: err}
+		log.ERROR(err)
+jReq.responseChan <- &response{result: nil, err: err}
 		return
 	}
 	httpReq.Close = true
@@ -758,7 +766,6 @@ func // sendRequest sends the passed json request to the associated server
 	// channel.  Then send the marshalled request via the websocket connection.
 	if err := c.addRequest(jReq); err != nil {
 		jReq.responseChan <- &response{err: err}
-		log.ERROR(err)
 		return
 	}
 	log.TRACEF("sending command [%s] with id %d", jReq.method, jReq.id)
@@ -774,14 +781,14 @@ func // sendCmd sends the passed command to the associated server and returns a
 	method, err := btcjson.CmdMethod(cmd)
 	if err != nil {
 		log.ERROR(err)
-		return newFutureError(err)
+return newFutureError(err)
 	}
 	// Marshal the command.
 	id := c.NextID()
 	marshalledJSON, err := btcjson.MarshalCmd(id, cmd)
 	if err != nil {
 		log.ERROR(err)
-		return newFutureError(err)
+return newFutureError(err)
 	}
 	// Generate the request and send it along with a channel to respond on.
 	responseChan := make(chan *response, 1)
@@ -996,7 +1003,8 @@ newHTTPClient(config *ConnConfig) (*http.Client, error) {
 	if config.Proxy != "" {
 		proxyURL, err := url.Parse(config.Proxy)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		proxyFunc = http.ProxyURL(proxyURL)
 	}
@@ -1059,7 +1067,8 @@ dial(config *ConnConfig) (*websocket.Conn, error) {
 	address := fmt.Sprintf("%s://%s/%s", scheme, config.Host, config.Endpoint)
 	wsConn, resp, err := dialer.Dial(address, requestHeader)
 	if err != nil {
-		if err != websocket.ErrBadHandshake || resp == nil {
+		log.ERROR(err)
+if err != websocket.ErrBadHandshake || resp == nil {
 			return nil, err
 		}
 		// Detect HTTP authentication error status codes.
@@ -1098,14 +1107,16 @@ New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error) {
 		var err error
 		httpClient, err = newHTTPClient(config)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	} else {
 		if !config.DisableConnectOnNew {
 			var err error
 			wsConn, err = dial(config)
 			if err != nil {
-				return nil, err
+		log.ERROR(err)
+return nil, err
 			}
 			start = true
 		}
@@ -1161,7 +1172,8 @@ func // Connect establishes the initial websocket connection.  This is necessary
 		var wsConn *websocket.Conn
 		wsConn, err = dial(c.config)
 		if err != nil {
-			backoff = connectionRetryInterval * time.Duration(i+1)
+		log.ERROR(err)
+backoff = connectionRetryInterval * time.Duration(i+1)
 			if backoff > time.Minute {
 				backoff = time.Minute
 			}

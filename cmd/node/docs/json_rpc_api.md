@@ -1167,7 +1167,8 @@ func main(	) {
 	podHomeDir := btcutil.AppDataDir("pod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(podHomeDir, "rpc.cert"))
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	// Create a new RPC client using websockets.  Since this example is
 	// not long-lived, the connection will be closed as soon as the program
@@ -1186,7 +1187,8 @@ func main(	) {
 	// Query the RPC server for the current block count and display it.
 	blockCount, err := client.GetBlockCount()
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	log.Printf("Block count: %d", blockCount)
 }
@@ -1223,7 +1225,8 @@ func main(	) {
 	podHomeDir := btcutil.AppDataDir("pod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(podHomeDir, "rpc.cert"))
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	// Create a new RPC client using websockets.  Since this example is
 	// not long-lived, the connection will be closed as soon as the program
@@ -1245,11 +1248,13 @@ func main(	) {
 	genesisHashStr := "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
 	blockHash, err := chainhash.NewHashFromStr(genesisHashStr)
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	block, err := client.GetBlockVerbose(blockHash, false)
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	// Display some details about the returned block.
 	log.Printf("Hash: %v\n", block.Hash)
@@ -1316,7 +1321,8 @@ func main(	) {
 	podHomeDir := btcutil.AppDataDir("pod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(podHomeDir, "rpc.cert"))
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	// Create a new RPC client using  eb ckets.
 	connCfg := &rpcclient.ConnConfig{ 		Host:         "localhost:11048",

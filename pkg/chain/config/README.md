@@ -19,8 +19,8 @@ import (
 
 
 
-"git.parallelcoin.io/util"
 "github.com/p9c/pod/pkg/chain/config"
+"git.parallelcoin.io/util"
 )
 var testnet = flag.Bool("testnet", false, "operate on the testnet Bitcoin network")
 // By default (without -testnet), use mainnet.
@@ -42,7 +42,7 @@ chainParams = &chaincfg.TestNet3ParamsRPC
 	pubKeyHash := make([]byte, 20)
 	addr, err := btcutil.NewAddressPubKeyHash(pubKeyHash, chainParams)
 	if err != nil {
-		
+		log.ERROR(err)
 log.Fatal(err)
 	}
 	fmt.Println(addr)

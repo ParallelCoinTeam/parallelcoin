@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"net"
 	"net/http"
 	// This enables pprof
@@ -134,6 +135,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 			interrupt.ShutdownRequestChan); err != nil {
 			log.ERROR(err)
 			if err != nil {
+				log.ERROR(err)
 				return
 			}
 		}
@@ -162,7 +164,10 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 			nodechan <- server.RPCServers[0]
 		}
 	}
-	controller.Run(cx)
+	var stopController context.CancelFunc
+	if !*cx.Config.NoController {
+		stopController = controller.Run(cx)
+	}
 	// Wait until the interrupt signal is received from an OS signal or
 	// shutdown is requested through one of the subsystems such as the
 	// RPC server.
@@ -172,6 +177,9 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		e := server.Stop()
 		if e != nil {
 			log.WARN("failed to stop server", e)
+		}
+		if stopController != nil {
+			stopController()
 		}
 		server.WaitForShutdown()
 		log.INFO("server shutdown complete")
@@ -197,6 +205,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 		log.INFO("creating block database in memory")
 		db, err := database.Create(*cx.Config.DbType)
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		return db, nil
@@ -213,7 +222,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 	log.INFOF("loading block database from '%s'", dbPath)
 	db, err := database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
 	if err != nil {
-		// return the error if it's not because the database doesn't exist
+		log.ERROR(err) // return the error if it's not because the database doesn't exist
 		if dbErr, ok := err.(database.Error); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
 			return nil, err
@@ -221,10 +230,12 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 		// create the db if it does not exist
 		err = os.MkdirAll(*cx.Config.DataDir, 0700)
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 		db, err = database.Create(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
 		if err != nil {
+			log.ERROR(err)
 			return nil, err
 		}
 	}

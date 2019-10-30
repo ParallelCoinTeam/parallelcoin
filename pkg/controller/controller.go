@@ -1,6 +1,8 @@
 // Package controller implements the server side of a lan multicast mining work dispatcher that goes with the
 // `kopach` miner with automatic network topology based failover and redundancy for new block and solution broadcast
-//go:generate go run ../../cmd/tools/genmsghandle/main.go controller Solution broadcast.SolBlock . msghandle.go
+
+//go:generate go run genmsghandle/main.go controller Solution broadcast.SolBlock . msghandle.go
+
 package controller
 
 import (
@@ -16,12 +18,12 @@ import (
 
 	"github.com/ugorji/go/codec"
 
-	"github.com/p9c/pod/pkg/broadcast"
+	"github.com/p9c/pod/pkg/controller/broadcast"
 	chain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gcm"
+	"github.com/p9c/pod/pkg/controller/gcm"
 	"github.com/p9c/pod/pkg/log"
 )
 

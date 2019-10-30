@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/controller/broadcast"
 	"time"
 
 	"github.com/urfave/cli"
@@ -10,7 +11,6 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
-	"github.com/p9c/pod/pkg/broadcast"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/base58"
@@ -21,7 +21,7 @@ func // getApp defines the pod app
 getApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
 		Name:    "pod",
-		Version: "v0.1.0",
+		Version: "v0.0.1",
 		Description: "Parallelcoin Pod Suite -- All-in-one everything" +
 			" for Parallelcoin!",
 		Copyright: "Legacy portions derived from btcsuite/btcd under" +
@@ -102,12 +102,12 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				apputil.SubCommands(),
 				"s",
 			),
-			apputil.NewCommand(
-				"gui",
-				"start GUI",
-				guiHandle(cx),
-				apputil.SubCommands(),
-			),
+			//apputil.NewCommand(
+			//	"gui",
+			//	"start GUI",
+			//	guiHandle(cx),
+			//	apputil.SubCommands(),
+			//),
 			apputil.NewCommand("kopach",
 				"standalone miner for clusters",
 				kopachHandle(cx),
@@ -286,7 +286,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.Whitelists),
 			apputil.String(
 				"rpcconnect",
-				"Hostname/IP and port of chain RPC server to connect to",
+				"Hostname/IP and port of pod RPC server to connect to",
 				"",
 				cx.Config.RPCConnect),
 			apputil.StringSlice(
@@ -428,7 +428,7 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				"disable miner controller",
 				cx.Config.NoController),
 			apputil.StringSlice(
-				"miningaddrs",
+				"miningaddr",
 				"Add the specified payment address to the list of"+
 					" addresses to use for generated blocks, at least one is "+
 					"required if generate or minerlistener are set",
@@ -581,7 +581,8 @@ getApp(cx *conte.Xt) (a *cli.App) {
 func genPassword() string {
 	s, err := hdkeychain.GenerateSeed(16)
 	if err != nil {
-		panic("can't do nothing without entropy! " + err.Error())
+		log.ERROR(err)
+panic("can't do nothing without entropy! " + err.Error())
 	}
 	return base58.Encode(s)
 }

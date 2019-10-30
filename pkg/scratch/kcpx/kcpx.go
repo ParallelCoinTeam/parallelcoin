@@ -6,7 +6,7 @@ import (
 	"crypto/sha1"
 	"net"
 
-	"github.com/p9c/kcp"
+	kcp "github.com/p9c/kcp"
 	"github.com/p9c/rpcx/client"
 	"github.com/p9c/rpcx/server"
 	"golang.org/x/crypto/pbkdf2"
@@ -44,7 +44,8 @@ func Serve(address, serviceName, password string,
 	srv = server.NewServer(server.WithBlockCrypt(bc))
 	err := srv.RegisterName(serviceName, service, "")
 	if err != nil {
-		log.ERROR("error registering interface ", serviceName, " ", err)
+		log.ERROR(err)
+log.ERROR("error registering interface ", serviceName, " ", err)
 		return
 	}
 	cs := &ConfigUDPSession{}
@@ -53,13 +54,15 @@ func Serve(address, serviceName, password string,
 	shutdown = func() <-chan struct{} {
 		err := srv.Shutdown(ctx)
 		if err != nil {
-			log.ERROR("error shutting down server ", err)
+		log.ERROR(err)
+log.ERROR("error shutting down server ", err)
 		}
 		return ctx.Done()
 	}
 	err = srv.Serve("kcp", address)
 	if err != nil {
-		log.ERROR("error serving ", serviceName, " ", err)
+		log.ERROR(err)
+log.ERROR("error serving ", serviceName, " ", err)
 	}
 	return
 }

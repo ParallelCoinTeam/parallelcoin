@@ -67,13 +67,13 @@ func main(	) {
 
 	creds, err := credentials.NewClientTLSFromFile(certificateFile, "localhost")
 	if err != nil {
-		
+		log.ERROR(err)
 fmt.Println(err)
 		return
 	}
 	conn, err := grpc.Dial("localhost:18332", grpc.WithTransportCredentials(creds))
 	if err != nil {
-		
+		log.ERROR(err)
 fmt.Println(err)
 		return
 	}
@@ -86,7 +86,7 @@ fmt.Println(err)
 	}
 	balanceResponse, err := c.Balance(context.Background(), balanceRequest)
 	if err != nil {
-		
+		log.ERROR(err)
 fmt.Println(err)
 		return
 	}

@@ -40,7 +40,8 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				cx.Config = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
-					fmt.Println("error unmarshalling config", err)
+		log.ERROR(err)
+fmt.Println("error unmarshalling config", err)
 					os.Exit(1)
 				}
 				log.INFO("unmarshalled config")
@@ -49,6 +50,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				os.Exit(1)
 			}
 		} else {
+			*cx.Config.ConfigFile = ""
 			log.INFO("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
@@ -290,7 +292,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.GenThreads = c.Int("genthreads")
 		}
 		if c.IsSet("solo") {
-			log.TRACE("set solo", c.Bool("solo"))
+			log.WARN("set solo", c.Bool("solo"))
 			*cx.Config.Solo = c.Bool("solo")
 		}
 		if c.IsSet("nocontroller") {

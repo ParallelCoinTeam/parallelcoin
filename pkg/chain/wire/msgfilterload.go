@@ -2,6 +2,7 @@ package wire
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io"
 )
 
@@ -42,10 +43,14 @@ func (msg *MsgFilterLoad) BtcDecode(r io.Reader, pver uint32, enc MessageEncodin
 	msg.Filter, err = ReadVarBytes(r, pver, MaxFilterLoadFilterSize,
 		"filterload filter size")
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = readElements(r, &msg.HashFuncs, &msg.Tweak, &msg.Flags)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	if msg.HashFuncs > MaxFilterLoadHashFuncs {
@@ -76,6 +81,8 @@ func (msg *MsgFilterLoad) BtcEncode(w io.Writer, pver uint32, enc MessageEncodin
 	}
 	err := WriteVarBytes(w, pver, msg.Filter)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	return writeElements(w, msg.HashFuncs, msg.Tweak, msg.Flags)

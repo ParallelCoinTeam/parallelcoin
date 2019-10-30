@@ -90,8 +90,7 @@ const (
 	// maxExtraNonce is the maximum value an extra nonce used in a coinbase
 	// transaction can be.
 	maxExtraNonce = 2 ^ 64 - 1
-	// hpsUpdateSecs is the number of seconds to wait in between each update to
-	// the hashes per second monitor.
+	// hpsUpdateSecs is the number of seconds to wait in between each update to the hashes per second monitor.
 	hpsUpdateSecs = 1
 	// hashUpdateSec is the number of seconds each worker waits in between
 	// notifying the speed monitor with how many hashes have been completed
@@ -157,6 +156,7 @@ func (m *CPUMiner) GenerateNBlocks(workerNumber uint32, n uint32,
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
 		m.submitBlockLock.Unlock()
 		if err != nil {
+			log.ERROR(err)
 			log.WARNF("failed to create new block template:", err)
 			continue
 		}
@@ -315,9 +315,9 @@ out:
 		// Wait until there is a connection to at least one other peer since
 		// there is no way to relay a found block or receive transactions to work
 		// on when there are no connected peers.
-		if m.cfg.ConnectedCount() == 0 &&
-			(m.cfg.ChainParams.Net == wire.MainNet ||
-				!m.cfg.Solo) {
+		if (m.cfg.ConnectedCount() == 0 ||
+			m.cfg.ChainParams.Net == wire.MainNet) &&
+				!m.cfg.Solo {
 			log.DEBUG("server has no peers, waiting")
 			time.Sleep(time.Second)
 			continue
@@ -328,7 +328,7 @@ out:
 		// block template on a block that is in the process of becoming stale.
 		m.submitBlockLock.Lock()
 		curHeight := m.g.BestSnapshot().Height
-		if curHeight != 0 && !m.cfg.IsCurrent() &&  !m.cfg.Solo {
+		if curHeight != 0 && !m.cfg.IsCurrent() && !m.cfg.Solo {
 			m.submitBlockLock.Unlock()
 			log.WARNF("server is not current yet, waiting")
 			time.Sleep(time.Second)
@@ -365,6 +365,7 @@ out:
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
 		m.submitBlockLock.Unlock()
 		if err != nil {
+			log.ERROR(err)
 			log.WARNF("failed to create new block template:", err)
 			continue
 		}
@@ -462,6 +463,7 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 	// Choose a random extra nonce offset for this block template and worker.
 	enOffset, err := wire.RandomUint64()
 	if err != nil {
+		log.ERROR(err)
 		log.WARNF("unexpected error while generating random extra nonce"+
 			" offset:",
 			err)
@@ -491,6 +493,7 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		log.TRACE("updating extraNonce")
 		err := m.g.UpdateExtraNonce(msgBlock, blockHeight, extraNonce+enOffset)
 		if err != nil {
+			log.ERROR(err)
 			log.WARN(err)
 		}
 		// Search through the entire nonce range for a solution while
@@ -515,7 +518,7 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		// }
 		var i uint32
 		defer func() {
-			log.DEBUGF("wrkr: %d finished %d rounds of %s", workerNumber,
+			log.DEBUGF("wrkr %d finished %d rounds of %s", workerNumber,
 				i-rNonce-1, fork.GetAlgoName(msgBlock.Header.Version,
 					blockHeight))
 		}()
@@ -544,6 +547,7 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 				}
 				err := m.g.UpdateBlockTime(workerNumber, msgBlock)
 				if err != nil {
+					log.ERROR(err)
 					log.WARN(err)
 				}
 			default:
@@ -626,6 +630,8 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	// nodes.  This will in turn relay it to the network like normal.
 	isOrphan, err := m.cfg.ProcessBlock(block, blockchain.BFNone)
 	if err != nil {
+		log.ERROR(err)
+		log.ERROR(err)
 		// Anything other than a rule violation is an unexpected error, so log
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {

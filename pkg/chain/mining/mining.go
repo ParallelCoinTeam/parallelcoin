@@ -267,6 +267,8 @@ func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte,
 		var err error
 		pkScript, err = txscript.PayToAddrScript(addr)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 	} else {
@@ -274,6 +276,8 @@ func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte,
 		scriptBuilder := txscript.NewScriptBuilder()
 		pkScript, err = scriptBuilder.AddOp(txscript.OP_TRUE).Script()
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 	}
@@ -443,11 +447,15 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 	extraNonce := uint64(0)
 	coinbaseScript, err := standardCoinbaseScript(nextBlockHeight, extraNonce)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	coinbaseTx, err := createCoinbaseTx(g.ChainParams, coinbaseScript,
 		nextBlockHeight, payToAddress)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	coinbaseSigOpCost := int64(blockchain.CountSigOps(coinbaseTx)) * blockchain.WitnessScaleFactor
@@ -508,7 +516,8 @@ mempoolLoop:
 		// come after those dependencies in the final generated block.
 		utxos, err := g.Chain.FetchUtxoView(tx)
 		if err != nil {
-			log.WARNC(func() string {
+		log.ERROR(err)
+log.WARNC(func() string {
 				return "unable to fetch utxo view for tx " + tx.Hash().String() + ": " + err.Error()
 			})
 			continue
@@ -586,6 +595,8 @@ mempoolLoop:
 	// in the coinbase transaction.
 	segwitState, err := g.Chain.ThresholdState(chaincfg.DeploymentSegwit)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	segwitActive := segwitState == blockchain.ThresholdActive
@@ -647,7 +658,8 @@ mempoolLoop:
 		sigOpCost, err := blockchain.GetSigOpCost(tx, false,
 			blockUtxos, true, segwitActive)
 		if err != nil {
-			log.TRACEC(func() string {
+		log.ERROR(err)
+log.TRACEC(func() string {
 				return "skipping tx " + tx.Hash().String() +
 					"due to error in GetSigOpCost: " + err.Error()
 			})
@@ -709,7 +721,8 @@ mempoolLoop:
 		_, err = blockchain.CheckTransactionInputs(tx, nextBlockHeight,
 			blockUtxos, g.ChainParams)
 		if err != nil {
-			log.TRACEF("skipping tx %s due to error in CheckTransactionInputs"+
+		log.ERROR(err)
+log.TRACEF("skipping tx %s due to error in CheckTransactionInputs"+
 				": %v",
 				tx.Hash(), err)
 			logSkippedDeps(tx, deps)
@@ -719,7 +732,8 @@ mempoolLoop:
 			txscript.StandardVerifyFlags, g.SigCache,
 			g.HashCache)
 		if err != nil {
-			log.TRACEF("skipping tx %s due to error in"+
+		log.ERROR(err)
+log.TRACEF("skipping tx %s due to error in"+
 				" ValidateTransactionScripts: %v",
 				tx.Hash(), err)
 			logSkippedDeps(tx, deps)
@@ -731,7 +745,8 @@ mempoolLoop:
 		// available as an input and can ensure they aren't double spending.
 		err = spendTransaction(blockUtxos, tx, nextBlockHeight)
 		if err != nil {
-			log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 		}
 		// Add the transaction to the block, increment counters, and save the
 		// fees and signature operation counts to the block template.
@@ -809,6 +824,8 @@ mempoolLoop:
 	reqDifficulty, err := g.Chain.CalcNextRequiredDifficulty(workerNumber, ts,
 		algo)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	log.TRACEF("reqDifficulty %d %08x %064x", vers, reqDifficulty,
@@ -835,7 +852,8 @@ mempoolLoop:
 	block.SetHeight(nextBlockHeight)
 	err = g.Chain.CheckConnectBlockTemplate(workerNumber, block)
 	if err != nil {
-		log.DEBUG("checkconnectblocktemplate err:", err)
+		log.ERROR(err)
+log.DEBUG("checkconnectblocktemplate err:", err)
 		return nil, err
 	}
 	log.TRACE(func() string {
@@ -879,6 +897,8 @@ func // UpdateBlockTime updates the timestamp in the header of the passed
 			workerNumber, newTime,
 			fork.GetAlgoName(msgBlock.Header.Version, g.BestSnapshot().Height))
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		msgBlock.Header.Bits = difficulty
@@ -894,6 +914,8 @@ func (g *BlkTmplGenerator) UpdateExtraNonce(msgBlock *wire.MsgBlock,
 	blockHeight int32, extraNonce uint64) error {
 	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	if len(coinbaseScript) > blockchain.MaxCoinbaseScriptLen {

@@ -3,6 +3,7 @@ package util
 import (
 	"crypto/sha256"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"hash"
 
 	"golang.org/x/crypto/ripemd160"
@@ -12,7 +13,8 @@ import (
 func calcHash(buf []byte, hasher hash.Hash) []byte {
 	_, err := hasher.Write(buf)
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
+fmt.Println(err)
 	}
 	return hasher.Sum(nil)
 }

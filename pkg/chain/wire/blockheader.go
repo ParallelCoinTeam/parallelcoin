@@ -3,6 +3,7 @@ package wire
 import (
 	"bytes"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io"
 	"time"
 
@@ -47,6 +48,7 @@ func (h *BlockHeader) BlockHashWithAlgos(height int32) (out chainhash.Hash) {
 	buf := bytes.NewBuffer(make([]byte, 0, MaxBlockHeaderPayload))
 	err := writeBlockHeader(buf, 0, h)
 	if err != nil {
+		log.ERROR(err)
 		fmt.Println("error writing block header to buffer", err)
 	}
 	vers := h.Version

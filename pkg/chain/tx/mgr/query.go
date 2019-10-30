@@ -2,6 +2,7 @@ package wtxmgr
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/util"
@@ -44,14 +45,20 @@ func (s *Store) minedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, r
 	// block time, and read all matching credits, debits.
 	err := readRawTxRecord(txHash, recVal, &details.TxRecord)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	err = readRawTxRecordBlock(recKey, &details.Block.Block)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	details.Block.Time, err = fetchBlockTime(ns, details.Block.Height)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	credIter := makeReadCreditIterator(ns, recKey)
@@ -91,6 +98,8 @@ func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 	}
 	err := readRawTxRecord(txHash, v, &details.TxRecord)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	it := makeReadUnminedCreditIterator(ns, txHash)
@@ -120,6 +129,8 @@ func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 			v := existsRawCredit(ns, credKey)
 			amount, err := fetchRawCreditAmount(v)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return nil, err
 			}
 			details.Debits = append(details.Debits, DebitRecord{
@@ -134,6 +145,8 @@ func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 		}
 		amount, err := fetchRawCreditAmount(v)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 		details.Debits = append(details.Debits, DebitRecord{
@@ -205,6 +218,8 @@ func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket, f func([]TxDeta
 		copy(txHash[:], k)
 		detail, err := s.unminedTxDetails(ns, &txHash, v)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		// Because the key was created while foreach-ing over the
@@ -277,6 +292,8 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 			}
 			err := readRawTxRecord(&txHash, v, &detail.TxRecord)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return false, err
 			}
 			credIter := makeReadCreditIterator(ns, k)
@@ -373,6 +390,8 @@ func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *
 				pkScript, err := fetchRawTxRecordPkScript(
 					prevOut.Hash[:], v, prevOut.Index)
 				if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 					return nil, err
 				}
 				pkScripts = append(pkScripts, pkScript)
@@ -385,7 +404,8 @@ func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *
 				pkScript, err := fetchRawTxRecordPkScript(k, v,
 					prevOut.Index)
 				if err != nil {
-					return nil, err
+		log.ERROR(err)
+return nil, err
 				}
 				pkScripts = append(pkScripts, pkScript)
 				continue
@@ -402,6 +422,8 @@ func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *
 		v := existsRawTxRecord(ns, k)
 		pkScript, err := fetchRawTxRecordPkScript(k, v, index)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 		pkScripts = append(pkScripts, pkScript)
