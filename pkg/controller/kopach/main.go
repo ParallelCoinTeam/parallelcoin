@@ -64,9 +64,6 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 						close(blockSemaphore)
 						blockSemaphore = make(chan struct{})
 					}
-					if len(bt.Templates) < 1 {
-						break
-					}
 					curHeight := bt.Templates[0].Height
 					for i := 0; i < *cx.Config.GenThreads; i++ {
 						bytes := make([]byte, 0, broadcast.MaxDatagramSize)
