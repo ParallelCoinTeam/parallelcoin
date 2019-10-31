@@ -1,3 +1,5 @@
+// +build ignore
+
 //go:generate go run ../tools/genmsghandle/main.go kopach controller.Blocks broadcast.TplBlock github.com/p9c/pod/pkg/controller msghandle.go
 package kopach
 

@@ -48,6 +48,8 @@ func (tpl Templates) Copy(count int) (out []Templates) {
 	return
 }
 
+// TODO: defer on quit an empty template send to stop workers
+
 // Run starts a controller instance
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	for len(cx.StateCfg.ActiveMiningAddrs) < 1 {
