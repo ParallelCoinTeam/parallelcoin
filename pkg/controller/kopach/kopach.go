@@ -5,6 +5,7 @@ import (
 	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -50,11 +51,28 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	var started atomic.Bool
 	var rotator atomic.Uint64
 	var submitLock sync.Mutex
+	var oldBlocks controller.Blocks
 	go func() {
 	workOut:
 		for {
 			select {
 			case bt := <-m.returnChan:
+				// to handle receiving multiple new identical blocks from 2 or more servers in a LAN, if the hash of
+				// the raw template is the same then we have already seen it and drop the message
+				if len(oldBlocks.Templates) > 0 {
+					var newPrev chainhash.Hash
+					oldPrev := oldBlocks.Templates[0].Block.BlockHash()
+					for tp := range bt.Templates {
+						// maps are not linear so we have to search for the match in the second
+						if bt.Templates[tp].Block.Header.Version == oldBlocks.Templates[0].Block.Header.Version {
+							newPrev = bt.Templates[tp].Block.BlockHash()
+						}
+					}
+					if oldPrev.IsEqual(&newPrev) {
+						// ignore the message
+						continue
+					}
+				}
 				switch {
 				// if the channel is returning nil it has been closed
 				case bt == nil:
@@ -127,6 +145,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 			case <-quit:
 				log.DEBUG("quitting on quit channel close")
 				cancel()
+				fmt.Println("test")
 				break out
 			}
 		}
@@ -135,146 +154,151 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 }
 
 func mine(cfg workerConfig) {
-	// TODO: set a maximum time to run
-out:
-	for {
-		for i := 0; i < cfg.threads; i++ {
-			bytes := make([]byte, 0, broadcast.MaxDatagramSize)
-			var mh codec.MsgpackHandle
-			enc := codec.NewEncoderBytes(&bytes, &mh)
-			curr := i
-			// start up worker
-			go func() {
-				tn := time.Now()
-				log.DEBUG("starting worker", curr, tn)
-				j := curr
-			threadOut:
-				for {
-					// choose the algorithm on a rolling cycle
-					counter := cfg.rotator.Load()
-					algo := "sha256d"
-					switch fork.GetCurrent(cfg.curHeight) {
-					case 0:
-						if counter&1 == 1 {
-							algo = "sha256d"
-						} else {
-							algo = "scrypt"
-						}
-					case 1:
-						l9 := uint64(len(fork.P9AlgoVers))
-						mod := counter % l9
-						algo = fork.P9AlgoVers[int32(mod+5)]
+	for i := 0; i < cfg.threads; i++ {
+		bytes := make([]byte, 0, broadcast.MaxDatagramSize)
+		var mh codec.MsgpackHandle
+		enc := codec.NewEncoderBytes(&bytes, &mh)
+		curr := i
+		// start up worker
+		go func() {
+			tn := time.Now()
+			log.DEBUG("starting worker", curr, tn)
+			j := curr
+		threadOut:
+			for {
+				// choose the algorithm on a rolling cycle
+				counter := cfg.rotator.Load()
+				algo := "sha256d"
+				switch fork.GetCurrent(cfg.curHeight) {
+				case 0:
+					if counter&1 == 1 {
+						algo = "sha256d"
+					} else {
+						algo = "scrypt"
 					}
-					cfg.rotator.Add(1)
-					log.WARN("worker", j, "algo", algo)
-					algoVer := fork.GetAlgoVer(algo, cfg.curHeight)
-					var msgBlock *wire.MsgBlock
-					found := false
-					for j := range cfg.templates {
-						if cfg.templates[j].Block.Header.Version == algoVer {
-							msgBlock = cfg.templates[j].Block
-							found = true
-						}
-					}
-					if !found { // this really shouldn't happen
-						break threadOut
-					}
-					// start attempting to solve block
-					enOffset, err := wire.RandomUint64()
-					if err != nil {
-						log.WARNF(
-							"unexpected error while generating"+
-								" random extra nonce offset:", err)
-						enOffset = 0
-					}
-					// Create some convenience variables.
-					header := &msgBlock.Header
-					targetDifficulty := fork.CompactToBig(header.Bits)
-					// Initial state.
-					hashesCompleted := uint64(0)
-					eN, _ := wire.RandomUint64()
-					extraNonce := eN
-					// use a random extra nonce to ensure no
-					// duplicated work
-					err2 := UpdateExtraNonce(msgBlock, cfg.curHeight,
-						extraNonce+enOffset)
-					if err2 != nil {
-						log.WARN(err2)
-					}
-					var shifter uint64 = 16
-					rn, _ := wire.RandomUint64()
-					if rn > 1<<63-1<<shifter {
-						rn -= 1 << shifter
-					}
-					rn += 1 << shifter
-					rNonce := uint32(rn)
-					mn := uint32(27)
-					mn = 1 << 8 * uint32(cfg.threads)
-					var nonce uint32
-					//log.TRACE("starting round from ", rNonce)
-					for nonce = rNonce; nonce <= rNonce+mn; nonce++ {
-						select {
-						case <-cfg.quit:
-							break
-						default:
-						}
-						var incr uint64 = 1
-						header.Nonce = nonce
-						hash := header.BlockHashWithAlgos(cfg.curHeight)
-						hashesCompleted += incr
-						// The block is solved when the new
-						// block hash is less than the target
-						// difficulty.  Yay!
-						bigHash := blockchain.HashToBig(&hash)
-						if bigHash.Cmp(targetDifficulty) <= 0 {
-							// broadcast solved block:
-							// first stop all competing later submissions
-							cfg.submitLock.Lock()
-							// all other threads will terminate when the semaphore is
-							// closed and they finish a work cycle
-							if *cfg.blockSemaphore == nil {
-								close(*cfg.blockSemaphore)
-								*cfg.blockSemaphore = nil
-							}
-							log.WARN("found block")
-							// serialize the block
-							bytes = bytes[:0]
-							enc.ResetBytes(&bytes)
-							err := enc.Encode(msgBlock)
-							if err != nil {
-								log.ERROR(err)
-								break
-							}
-							log.SPEW(header)
-							err = broadcast.Send(cfg.outAddr, bytes, *cfg.msgHandle.ciph,
-								broadcast.Solution)
-							if err != nil {
-								log.ERROR(err)
-							}
-							cfg.submitLock.Unlock()
-							break threadOut
-						}
-					}
-					select {
-					case <-cfg.quit:
-						break threadOut
-					case <-*cfg.blockSemaphore:
-						break threadOut
-					default:
+				case 1:
+					l9 := uint64(len(fork.P9AlgoVers))
+					mod := counter % l9
+					algo = fork.P9AlgoVers[int32(mod+5)]
+				}
+				cfg.rotator.Add(1)
+				log.WARN("worker", j, "algo", algo)
+				algoVer := fork.GetAlgoVer(algo, cfg.curHeight)
+				var msgBlock *wire.MsgBlock
+				found := false
+				for j := range cfg.templates {
+					if cfg.templates[j].Block.Header.Version == algoVer {
+						msgBlock = cfg.templates[j].Block
+						found = true
 					}
 				}
-				log.DEBUG("worker", j, tn, "stopped")
-			}()
-		}
-		// if quit or semaphore close, end miner thread
-		select {
-		case <-cfg.quit:
-			break out
-		case <-*cfg.blockSemaphore:
-			break out
-		default:
-			// otherwise, repeat work cycle
-		}
+				if !found { // this really shouldn't happen
+					break threadOut
+				}
+				// start attempting to solve block
+				enOffset, err := wire.RandomUint64()
+				if err != nil {
+					log.WARNF(
+						"unexpected error while generating"+
+							" random extra nonce offset:", err)
+					enOffset = 0
+				}
+				// Create some convenience variables.
+				header := &msgBlock.Header
+				targetDifficulty := fork.CompactToBig(header.Bits)
+				// Initial state.
+				hashesCompleted := uint64(0)
+				eN, _ := wire.RandomUint64()
+				extraNonce := eN
+				// use a random extra nonce to ensure no
+				// duplicated work
+				err2 := UpdateExtraNonce(msgBlock, cfg.curHeight,
+					extraNonce+enOffset)
+				if err2 != nil {
+					log.WARN(err2)
+				}
+				var shifter uint64 = 16
+				rn, _ := wire.RandomUint64()
+				if rn > 1<<63-1<<shifter {
+					rn -= 1 << shifter
+				}
+				rn += 1 << shifter
+				rNonce := uint32(rn)
+				mn := uint32(27)
+				mn = 1 << 16 // * uint32(cfg.threads)
+				var nonce uint32
+				log.INFO("starting round from ", rNonce, algo)
+				for nonce = rNonce; nonce <= rNonce+mn; nonce++ {
+					select {
+					case <-cfg.quit:
+						log.INFO("quitting after", nonce-rNonce, "rounds of", algo)
+						break
+					default:
+					}
+					var incr uint64 = 1
+					header.Nonce = nonce
+					hash := header.BlockHashWithAlgos(cfg.curHeight)
+					hashesCompleted += incr
+					// The block is solved when the new
+					// block hash is less than the target
+					// difficulty.  Yay!
+					bigHash := blockchain.HashToBig(&hash)
+					if bigHash.Cmp(targetDifficulty) <= 0 {
+						// broadcast solved block:
+						// first stop all competing later submissions
+						cfg.submitLock.Lock()
+						// all other threads will terminate when the semaphore is
+						// closed and they finish a work cycle
+						if *cfg.blockSemaphore == nil {
+							close(*cfg.blockSemaphore)
+							*cfg.blockSemaphore = nil
+						}
+						log.WARN("found block", hash)
+						// serialize the block
+						bytes = bytes[:0]
+						enc.ResetBytes(&bytes)
+						err := enc.Encode(msgBlock)
+						if err != nil {
+							log.ERROR(err)
+							break
+						}
+						log.SPEW(header)
+						err = broadcast.Send(cfg.outAddr, bytes, *cfg.msgHandle.ciph,
+							broadcast.Solution)
+						if err != nil {
+							log.ERROR(err)
+						}
+						log.INFO("submitted block")
+						cfg.submitLock.Unlock()
+						break threadOut
+					}
+				}
+				log.INFO("finished", nonce-rNonce, "rounds of", algo)
+				select {
+				// Job times out after 6 minutes (10 blocks)
+				case <-time.After(6 * time.Minute):
+					log.INFO("stopping due to no new blocks in 6 minutes")
+					break threadOut
+				case <-cfg.quit:
+					log.INFO("stopping on quit signal")
+					break threadOut
+				case <-*cfg.blockSemaphore:
+					log.INFO("stopping on close of semaphore")
+					break threadOut
+				default:
+				}
+			}
+			log.DEBUG("worker", j, tn, "stopped")
+		}()
+	}
+	// if quit or semaphore close, end miner thread
+	select {
+	case <-cfg.quit:
+		break
+	case <-*cfg.blockSemaphore:
+		break
+	default:
+		// otherwise, repeat work cycle
 	}
 }
 

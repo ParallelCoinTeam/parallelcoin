@@ -13,6 +13,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	"go.uber.org/atomic"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -48,8 +49,6 @@ func (tpl Templates) Copy(count int) (out []Templates) {
 	return
 }
 
-// TODO: defer on quit an empty template send to stop workers
-
 // Run starts a controller instance
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	for len(cx.StateCfg.ActiveMiningAddrs) < 1 {
@@ -84,6 +83,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	pauseRebroadcast.Store(true)
 	// work dispatch loop
 	go func() {
+		workLoop:
 		for {
 			select {
 			case lb := <-blockChan:
@@ -92,7 +92,14 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				oldBlocks.Lock()
 				oldBlocks.Templates = lb.Templates
 				oldBlocks.Unlock()
-				log.DEBUG("sending out block broadcast")
+				var height int32
+				if len(lb.Templates) < 1 {
+					height = -1
+				} else {
+					height=lb.Templates[0].Height
+				}
+				fmt.Print("\rsending out new block templates ", height, " ", strings.Repeat(" ", 20))
+				//log.DEBUG("sending out block broadcast")
 				err := enc.Encode(lb)
 				if err != nil {
 					log.ERROR(err)
@@ -110,7 +117,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			case <-ticker.C:
 				if !pauseRebroadcast.Load() {
 					oldBlocks.Lock()
-					fmt.Print("\rsending out old block broadcast ", time.Now(), oldBlocks.New)
+					fmt.Print("\u001b[2K\rsending out old block broadcast ", time.Now(), oldBlocks.New, "\r")
 					err := enc.Encode(oldBlocks)
 					if err != nil {
 						log.ERROR(err)
@@ -127,9 +134,19 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					oldBlocks.Unlock()
 				}
 			case <-ctx.Done():
-				// cancel has been called
-				return
-				// default:
+				// cancel has been called, send out stop work message
+				err := enc.Encode(Blocks{New: true})
+				if err != nil {
+					log.ERROR(err)
+					break workLoop
+				}
+				log.SPEW(bytes)
+				err = broadcast.Send(outAddr, bytes, ciph, broadcast.Template)
+				if err != nil {
+					log.ERROR(err)
+					break workLoop
+				}
+				break workLoop
 			}
 		}
 	}()
@@ -260,6 +277,12 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	// then submitting them to the network
 	go func() {
 		cancel := broadcast.Listen(broadcast.DefaultAddress, m.msgHandler)
+		// ensure it runs last when goroutine exits
+		defer cancel()
+		// send out empty block stop message when goroutine exits
+		defer func(){
+
+		}()
 		var submitLock sync.Mutex
 	outReceive:
 		for {
@@ -350,7 +373,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				pauseRebroadcast.Toggle()
 			case <-ctx.Done():
 				log.DEBUG("quitting on quit channel close")
-				cancel()
 				break outReceive
 			}
 		}
