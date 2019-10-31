@@ -1,0 +1,55 @@
+{
+  "name": "duo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@syncfusion/ej2": "^17.3.21",
+    "@syncfusion/ej2-layouts": "^17.3.21",
+    "@syncfusion/ej2-vue-buttons": "^17.3.19",
+    "@syncfusion/ej2-vue-charts": "^17.3.21",
+    "@syncfusion/ej2-vue-grids": "^17.3.21",
+    "@syncfusion/ej2-vue-inputs": "^17.3.21",
+    "@syncfusion/ej2-vue-notifications": "^17.3.19",
+    "@syncfusion/ej2-vue-popups": "^17.3.19",
+    "core-js": "^3.3.2",
+    "vue": "^2.6.10",
+    "vue-form-generator": "^2.3.4"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^4.0.0",
+    "@vue/cli-plugin-eslint": "^4.0.0",
+    "@vue/cli-service": "^4.0.0",
+    "babel-eslint": "^10.0.3",
+    "eslint": "^5.16.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "vue-template-compiler": "^2.6.10"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "rules": {},
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ]
+}

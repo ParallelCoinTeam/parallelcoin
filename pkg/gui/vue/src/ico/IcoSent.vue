@@ -1,0 +1,1 @@
+<template><svg version="1" xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 48 48" enable-background="new 0 0 48 48"><path class="bgGray" d="M7,40V8c0-2.2,1.8-4,4-4h24c2.2,0,4,1.8,4,4v32c0,2.2-1.8,4-4,4H11C8.8,44,7,42.2,7,40z"/><g class="red"><polygon points="42.7,24 32,33 32,15"/><rect x="14" y="21" width="23" height="6"/></g></svg></template>
