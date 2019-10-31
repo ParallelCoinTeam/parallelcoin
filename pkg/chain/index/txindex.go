@@ -303,7 +303,6 @@ log.ERROR(err)
 			_, err := dbFetchBlockHashByID(dbTx, testBlockID)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				nextUnknown = testBlockID
 			} else {
 				highestKnown = testBlockID
@@ -322,7 +321,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	log.TRACE("current internal block ID:", idx.curBlockID)
