@@ -1,0 +1,18 @@
+export const duoSystem = {
+	config:null,
+	node:null,
+	wallet:null,
+	status:null,
+	balance:null,
+	connectionCount:0,
+	addressBook:null,
+	transactions:null,
+	peerInfo:null,
+	blocks:[],
+	theme:false,
+	isBoot:false,
+	isLoading:false,
+	isDev:true,
+	isScreen:'overview',
+	timer: '',
+};
