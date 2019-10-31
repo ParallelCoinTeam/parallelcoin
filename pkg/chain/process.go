@@ -101,7 +101,8 @@ return false, false, err
 	// 	fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight)
 	if err != nil {
-		log.ERROR("block processing error: ", err)
+		log.ERROR(err)
+log.ERROR("block processing error: ", err)
 		return false, false, err
 	}
 	// log.WARN("searching back to checkpoints")
