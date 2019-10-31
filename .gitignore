@@ -17,4 +17,4 @@ test**
 vendor/**
 /pkg/svelte/__OLDvue/
 
-.idea/
+.idea/**
