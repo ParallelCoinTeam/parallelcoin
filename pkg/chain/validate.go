@@ -224,7 +224,8 @@ func // checkConnectBlock performs several checks to confirm connecting the
 		log.TRACE("checking contents of hardfork coinbase tx")
 		btx, err := block.Tx(0)
 		if err != nil {
-			log.ERROR(err)
+		log.ERROR(err)
+log.ERROR(err)
 		}
 		payees := hardfork.Payees
 		if b.params.Net == wire.TestNet3 {
@@ -410,7 +411,8 @@ Block) error {
 	}
 	err := checkBlockSanity(block, powLimit, b.timeSource, flags, true, block.Height())
 	if err != nil {
-		log.ERROR("block processing error:", err)
+		log.ERROR(err)
+log.ERROR("block processing error:", err)
 		return err
 	}
 	err = b.checkBlockContext(workerNumber, block, tip, flags, true)
@@ -482,6 +484,7 @@ func // checkBlockContext peforms several validation checks on the block which
 	err := b.checkBlockHeaderContext(workerNumber, header, prevNode, flags)
 	if err != nil {
 		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	fastAdd := flags&BFFastAdd == BFFastAdd
@@ -491,7 +494,8 @@ func // checkBlockContext peforms several validation checks on the block which
 		// version bits state.
 		csvState, err := b.deploymentState(prevNode, chaincfg.DeploymentCSV)
 		if err != nil {
-			log.ERROR(err)
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		// Once the CSV soft-fork is fully active, we'll switch to using the
@@ -523,7 +527,8 @@ func // checkBlockContext peforms several validation checks on the block which
 			coinbaseTx := block.Transactions()[0]
 			err := checkSerializedHeight(coinbaseTx, blockHeight)
 			if err != nil {
-				log.ERROR(err)
+		log.ERROR(err)
+log.ERROR(err)
 				return err
 			}
 		}
@@ -533,7 +538,8 @@ func // checkBlockContext peforms several validation checks on the block which
 		segwitState, err := b.deploymentState(prevNode,
 			chaincfg.DeploymentSegwit)
 		if err != nil {
-			log.ERROR(err)
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		// If segwit is active,
@@ -592,7 +598,8 @@ BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
 			fork.GetAlgoName(header.Version, prevNode.height+1),
 			false)
 		if err != nil {
-			log.ERROR(err)
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		blockDifficulty := header.Bits
@@ -630,6 +637,7 @@ BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
 	checkpointNode, err := b.findPreviousCheckpoint()
 	if err != nil {
 		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	if checkpointNode != nil && blockHeight < checkpointNode.height {
@@ -1143,7 +1151,8 @@ checkBlockSanity(block *util.Block, powLimit *big.Int, timeSource MedianTimeSour
 	header := &msgBlock.Header
 	err := checkBlockHeaderSanity(header, powLimit, timeSource, flags, height)
 	if err != nil {
-		log.DEBUG("block processing error: ", block.MsgBlock().Header.Version, err)
+		log.ERROR(err)
+log.DEBUG("block processing error: ", block.MsgBlock().Header.Version, err)
 		return err
 	}
 	// A block must have at least one transaction.

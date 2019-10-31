@@ -102,12 +102,12 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				apputil.SubCommands(),
 				"s",
 			),
-			apputil.NewCommand(
-				"gui",
-				"start GUI",
-				guiHandle(cx),
-				apputil.SubCommands(),
-			),
+			//apputil.NewCommand(
+			//	"gui",
+			//	"start GUI",
+			//	guiHandle(cx),
+			//	apputil.SubCommands(),
+			//),
 			apputil.NewCommand("kopach",
 				"standalone miner for clusters",
 				kopachHandle(cx),
@@ -581,7 +581,6 @@ getApp(cx *conte.Xt) (a *cli.App) {
 func genPassword() string {
 	s, err := hdkeychain.GenerateSeed(16)
 	if err != nil {
-		log.ERROR(err)
 		panic("can't do nothing without entropy! " + err.Error())
 	}
 	return base58.Encode(s)

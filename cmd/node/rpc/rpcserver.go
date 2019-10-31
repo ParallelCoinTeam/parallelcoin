@@ -925,7 +925,8 @@ func (s *Server) Stop() error {
 	for _, listener := range s.Cfg.Listeners {
 		err := listener.Close()
 		if err != nil {
-			log.ERROR("problem shutting down RPC:", err)
+		log.ERROR(err)
+log.ERROR("problem shutting down RPC:", err)
 
 			return err
 		}
@@ -1089,7 +1090,8 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	}
 	conn, buf, err := hj.Hijack()
 	if err != nil {
-		log.WARN("failed to hijack HTTP connection:", err)
+		log.ERROR(err)
+log.WARN("failed to hijack HTTP connection:", err)
 
 		errCode := http.StatusInternalServerError
 		http.Error(w, strconv.Itoa(errCode)+" "+err.Error(), errCode)
@@ -1099,7 +1101,8 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	defer buf.Flush()
 	err = conn.SetReadDeadline(TimeZeroVal)
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 
 	}
 	// Attempt to parse the raw body into a JSON-RPC request.
@@ -1167,14 +1170,16 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	// Marshal the response.
 	msg, err := CreateMarshalledReply(responseID, result, jsonErr)
 	if err != nil {
-		log.ERROR("failed to marshal reply:", err)
+		log.ERROR(err)
+log.ERROR("failed to marshal reply:", err)
 
 		return
 	}
 	// Write the response.
 	err = s.WriteHTTPResponseHeaders(r, w.Header(), http.StatusOK, buf)
 	if err != nil {
-		log.ERROR(err.Error())
+		log.ERROR(err)
+log.ERROR(err.Error())
 
 		return
 	}
@@ -1256,7 +1261,8 @@ func (s *Server) WriteHTTPResponseHeaders(req *http.Request,
 func BuilderScript(builder *txscript.ScriptBuilder) []byte {
 	script, err := builder.Script()
 	if err != nil {
-		panic(err)
+		log.ERROR(err)
+panic(err)
 	}
 	return script
 }
@@ -1733,7 +1739,8 @@ func GetDifficultyRatio(bits uint32, params *netparams.Params,
 	outString := difficulty.FloatString(8)
 	diff, err := strconv.ParseFloat(outString, 64)
 	if err != nil {
-		log.ERROR("cannot get difficulty:", err)
+		log.ERROR(err)
+log.ERROR("cannot get difficulty:", err)
 
 		return 0
 	}
@@ -2762,7 +2769,8 @@ func HandleGetCFilterHeader(s *Server, cmd interface{},
 
 	err = hash.SetBytes(headerBytes)
 	if err != nil {
-		log.DEBUG(err)
+		log.ERROR(err)
+log.DEBUG(err)
 
 	}
 	return hash.String(), nil
@@ -2789,7 +2797,8 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 	best := s.Cfg.Chain.BestSnapshot()
 	prev, err := s.Cfg.Chain.BlockByHash(&best.Hash)
 	if err != nil {
-		log.ERROR("ERROR", err)
+		log.ERROR(err)
+log.ERROR("ERROR", err)
 
 	}
 	var algo = prev.MsgBlock().Header.Version
@@ -2804,7 +2813,8 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 				ph := prev.MsgBlock().Header.PrevBlock
 				prev, err = s.Cfg.Chain.BlockByHash(&ph)
 				if err != nil {
-					log.ERROR("ERROR", err)
+		log.ERROR(err)
+log.ERROR("ERROR", err)
 
 				}
 				continue
@@ -2820,7 +2830,8 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 				ph := prev.MsgBlock().Header.PrevBlock
 				prev, err = s.Cfg.Chain.BlockByHash(&ph)
 				if err != nil {
-					log.ERROR("ERROR", err)
+		log.ERROR(err)
+log.ERROR("ERROR", err)
 
 				}
 				continue
