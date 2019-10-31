@@ -102,23 +102,23 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				apputil.SubCommands(),
 				"s",
 			),
-			//apputil.NewCommand(
-			//	"gui",
-			//	"start GUI",
-			//	guiHandle(cx),
-			//	apputil.SubCommands(),
-			//),
+			apputil.NewCommand(
+				"gui",
+				"start GUI",
+				guiHandle(cx),
+				apputil.SubCommands(),
+			),
 			apputil.NewCommand("kopach",
 				"standalone miner for clusters",
 				kopachHandle(cx),
 				apputil.SubCommands(
-					// apputil.NewCommand("bench",
-					// 	"generate a set of benchmarks of each algorithm",
-					// 	func(c *cli.Context) error {
-					// 		return bench.Benchmark(cx)(c)
-					// 	},
-					// 	apputil.SubCommands(),
-					// ),
+				// apputil.NewCommand("bench",
+				// 	"generate a set of benchmarks of each algorithm",
+				// 	func(c *cli.Context) error {
+				// 		return bench.Benchmark(cx)(c)
+				// 	},
+				// 	apputil.SubCommands(),
+				// ),
 				),
 				"k"),
 		},
@@ -582,7 +582,7 @@ func genPassword() string {
 	s, err := hdkeychain.GenerateSeed(16)
 	if err != nil {
 		log.ERROR(err)
-panic("can't do nothing without entropy! " + err.Error())
+		panic("can't do nothing without entropy! " + err.Error())
 	}
 	return base58.Encode(s)
 }
