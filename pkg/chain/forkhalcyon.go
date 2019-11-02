@@ -18,9 +18,11 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
 	workerNumber uint32, lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	err error) {
+	log.DEBUG("CalcNextRequiredDifficultyHalcyon", workerNumber, algoname, lastNode.height)
 	nH := lastNode.height + 1
 	log.TRACE("on pre-hardfork")
 	if lastNode == nil {
+		log.DEBUG("lastNode is nil")
 		return newTargetBits, nil
 	}
 	algo := fork.GetAlgoVer(algoname, nH)
@@ -29,8 +31,10 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
 	log.TRACEF("last %d %d %8x", lastNode.height, lastNode.version, lastNode.bits)
 	prevNode := lastNode.GetLastWithAlgo(algo)
 	if prevNode == nil {
+		log.DEBUG("prevNode is nil")
 		return newTargetBits, nil
 	}
+	log.DEBUG("prev with algo", prevNode.height, prevNode.hash)
 	firstNode := prevNode
 	for i := int64(0); firstNode != nil &&
 		i < fork.GetAveragingInterval(nH)-1; i++ {
