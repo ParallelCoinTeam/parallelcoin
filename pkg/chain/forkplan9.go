@@ -312,10 +312,10 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(
 			an += strings.Repeat(" ", pad)
 		}
 		log.DEBUGC(func() string {
-			return fmt.Sprintf("wrkr: %d hght: %d %08x %s %s %s %s %s %s %s"+
+			return fmt.Sprintf("wrkr: %s hght: %s %08x %s %s %s %s %s %s %s"+
 				" %s %s %08x",
-				workerNumber,
-				lastNode.height+1,
+				RightJustify(fmt.Sprint(workerNumber),3),
+				RightJustify(fmt.Sprint(lastNode.height+1),8),
 				last.bits,
 				an,
 				RightJustify(fmt.Sprintf("%3.2f", allTimeAv), 5),
