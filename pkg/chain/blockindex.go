@@ -259,14 +259,14 @@ func (node *blockNode) GetAlgo() int32 {
 
 // GetLastWithAlgo returns the newest block from node with specified algo
 func (node *blockNode) GetLastWithAlgo(algo int32) (prev *blockNode) {
-	if node==nil {
+	if node == nil {
 		return
 	}
 	if fork.GetCurrent(node.height) == 0 {
-		log.DEBUG("checking pre-hardfork algo versions")
+		log.TRACE("checking pre-hardfork algo versions")
 		if algo != 514 &&
 			algo != 2 {
-			log.DEBUG("irregular version block, assuming 2 (sha256d)")
+			log.DEBUG("irregular version", algo, "block, assuming 2 (sha256d)")
 			algo = 2
 		}
 	}
@@ -275,19 +275,19 @@ func (node *blockNode) GetLastWithAlgo(algo int32) (prev *blockNode) {
 		if prev == nil {
 			return nil
 		}
-		log.DEBUGF("node %d %d %8x", prev.height, prev.version, prev.bits)
+		log.TRACEF("node %d %d %8x", prev.height, prev.version, prev.bits)
 		prevversion := prev.version
 		if fork.GetCurrent(prev.height) == 0 {
-			log.DEBUG("checking pre-hardfork algo versions")
+			log.TRACE("checking pre-hardfork algo versions")
 			if prev.version != 514 &&
 				prev.version != 2 {
-				log.DEBUG("irregular version block, assuming 2 (sha256d)")
+				log.DEBUG("irregular version block", prev.version, ", assuming 2 (sha256d)")
 				prevversion = 2
 			}
 		}
 		if prevversion == algo {
-			log.DEBUGF(
-				"found %d %d %d %8x",
+			log.TRACEF(
+				"found height %d version %d prev version %d prev bits %8x",
 				prev.height, prev.version, prevversion, prev.bits)
 			return
 		}

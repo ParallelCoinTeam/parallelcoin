@@ -181,7 +181,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		switch n.Type {
 		case chain.NTBlockConnected:
 			pauseRebroadcast.Store(true)
-			log.DEBUG("new block connected to chain")
+			log.TRACE("new block connected to chain")
 			bh := chainHandle.BestSnapshot().Height
 			hf := fork.GetCurrent(bh + 1)
 			blocks := Blocks{New: true}
