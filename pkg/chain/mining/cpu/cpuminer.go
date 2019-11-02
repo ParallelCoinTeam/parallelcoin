@@ -520,10 +520,10 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		algo := fork.GetAlgoName(msgBlock.Header.Version,
 			blockHeight)
 		defer func() {
-			log.DEBUGF("wrkr %d finished %d rounds of %s", workerNumber,
+			log.TRACEF("wrkr %d finished %d rounds of %s", workerNumber,
 				i-rNonce-1, algo)
 		}()
-		log.INFO("starting round from ", rNonce, algo)
+		log.TRACE("starting round from ", rNonce, algo)
 		for i = rNonce; i <= rNonce+mn; i++ {
 			// if time.Now().Sub(now) > time.Second*3 {
 			// 	return false

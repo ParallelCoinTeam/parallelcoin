@@ -434,6 +434,7 @@ Address, algo string) (*BlockTemplate, error) {
 	nextBlockHeight := best.Height + 1
 	vers := fork.GetAlgoVer(algo, nextBlockHeight)
 	algo = fork.GetAlgoName(vers, nextBlockHeight)
+	log.TRACE("parsed block version", algo, vers)
 	// Create a standard coinbase transaction paying to the provided address.
 	// NOTE: The coinbase value will be updated to include the fees from the
 	// selected transactions later after they have actually been selected.  It
