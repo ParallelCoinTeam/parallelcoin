@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	_ "github.com/gohouse/i18n/parser_json"
 	"github.com/p9c/pod/pkg/controller/broadcast"
 	"time"
 
@@ -20,15 +21,12 @@ import (
 func // getApp defines the pod app
 getApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
-		Name:    "pod",
-		Version: "v0.0.1",
-		Description: "Parallelcoin Pod Suite -- All-in-one everything" +
-			" for Parallelcoin!",
-		Copyright: "Legacy portions derived from btcsuite/btcd under" +
-			" ISC licence. The remainder is already in your" +
-			" possession. Use it wisely.",
+		Name:        "pod",
+		Version:     "v0.0.1",
+		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
+		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
 		Action: func(c *cli.Context) error {
-			fmt.Println("no subcommand requested")
+			fmt.Println(cx.Language.RenderText("goApp_NOSUBCMDREQ"))
 			cli.ShowAppHelpAndExit(c, 1)
 			return nil
 		},
@@ -123,6 +121,13 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				"k"),
 		},
 		Flags: []cli.Flag{
+			altsrc.NewStringFlag(cli.StringFlag{
+				Name:        "lang, L",
+				Value:       *cx.Config.Language,
+				Usage:       "sets the data directory base for a pod instance",
+				EnvVar:      "POD_LANGUAGE",
+				Destination: cx.Config.Language,
+			}),
 			altsrc.NewStringFlag(cli.StringFlag{
 				Name:        "datadir, D",
 				Value:       *cx.Config.DataDir,

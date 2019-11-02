@@ -1,1 +1,0 @@
-<template><svg version="1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" enable-background="new 0 0 48 48"><circle class="bgBlue" cx="24" cy="24" r="21"/><rect x="22" y="22" class="bgMoreLight" width="4" height="11"/><circle class="bgMoreLight"  cx="24" cy="16.5" r="2.5"/></svg></template>

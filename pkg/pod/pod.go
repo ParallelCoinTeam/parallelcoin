@@ -125,6 +125,7 @@ type Config struct {
 	Generate                 *bool            `group:"mining" name:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
 	GenThreads               *int             `group:"mining" name:"Gen Threads" description:"number of CPU threads to mine using" type:"input" inputType:"number" model:"GenThreads" featured:"false"`
 	Solo                     *bool            `group:"mining" name:"Solo Generate" description:"mine even if not connected to a network" type:"switch" model:"Generate" featured:"false"`
+	Language                 *string          `group:"config" name:"Language" description:"User interface language i18 localization" type:"input" inputType:"text" model:"Language" featured:"false"`
 	LimitPass                *string          `group:"rpc" name:"Limit Pass" type:"password" description:"limited user password" type:"input" inputType:"text" model:"LimitPass" featured:"false"`
 	LimitUser                *string          `group:"rpc" name:"Limit User" description:"limited user name" type:"input" inputType:"text" model:"LimitUser" featured:"false"`
 	Listeners                *cli.StringSlice `group:"node" name:"Listeners" description:"List of addresses to bind the node listener to" type:"input" inputType:"text" model:"Listeners" featured:"false"`
@@ -219,6 +220,7 @@ func EmptyConfig() *Config {
 		FreeTxRelayLimit:         new(float64),
 		Generate:                 newbool(),
 		GenThreads:               newint(),
+		Language:                 newstring(),
 		LimitPass:                newstring(),
 		LimitUser:                newstring(),
 		Listeners:                newStringSlice(),
