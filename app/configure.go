@@ -13,6 +13,7 @@ Configure(cx *conte.Xt) {
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
 	st := cx.StateCfg
+	initDictionary(cfg)
 	initDataDir(cfg)
 	initTLSStuffs(cfg, st)
 	initConfigFile(cfg)

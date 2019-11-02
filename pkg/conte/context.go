@@ -9,7 +9,8 @@ import (
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/lang"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -30,6 +31,8 @@ type Xt struct {
 	StateCfg *state.Config
 	// ActiveNet is the active net parameters
 	ActiveNet *netparams.Params
+	// Language libraries
+	Language *lang.Lexicon
 	// DataDir is the default data dir
 	DataDir string
 	// Node is the run state of the node
@@ -51,11 +54,12 @@ type Xt struct {
 }
 
 // GetNewContext returns a fresh new context
-func GetNewContext(appName string, subtext string) *Xt {
+func GetNewContext(appName, appLang, subtext string) *Xt {
 	return &Xt{
 		App:      cli.NewApp(),
 		Config:   pod.EmptyConfig(),
 		StateCfg: new(state.Config),
+		Language: lang.ExportLanguage(appLang),
 		DataDir:  appdata.Dir(appName, false),
 	}
 }

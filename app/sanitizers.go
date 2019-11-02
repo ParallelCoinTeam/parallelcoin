@@ -30,6 +30,13 @@ import (
 
 var funcName = "loadConfig"
 
+func initDictionary(cfg *pod.Config) {
+	if cfg.Language == nil || *cfg.Language == "" {
+		*cfg.Language = Lang("en")
+	}
+	log.WARN("lang set to", *cfg.Language)
+}
+
 func initDataDir(cfg *pod.Config) {
 	if cfg.DataDir == nil || *cfg.DataDir == "" {
 		*cfg.DataDir = appdata.Dir("pod", false)
@@ -225,8 +232,8 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 		for _, addr := range *cfg.Whitelists {
 			_, ipnet, err := net.ParseCIDR(addr)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
+				log.ERROR(err)
 				err = fmt.Errorf("%s '%s'", err.Error())
 				ip = net.ParseIP(addr)
 				if ip == nil {
@@ -315,8 +322,8 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		log.DEBUG("looking up default listener")
 		addrs, err := net.LookupHost(node.DefaultRPCListener)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
+			log.ERROR(err)
 			os.Exit(1)
 		}
 		*cfg.RPCListeners = make([]string, 0, len(addrs))
@@ -352,7 +359,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	stateConfig.ActiveMinRelayTxFee, err = util.NewAmount(*cfg.MinRelayTxFee)
 	if err != nil {
 		log.ERROR(err)
-str := "%s: invalid minrelaytxfee: %v"
+		str := "%s: invalid minrelaytxfee: %v"
 		err := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -426,7 +433,7 @@ str := "%s: invalid minrelaytxfee: %v"
 		AddCheckpoints)
 	if err != nil {
 		log.ERROR(err)
-str := "%s: Error parsing checkpoints: %v"
+		str := "%s: Error parsing checkpoints: %v"
 		err := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -460,8 +467,8 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 	for _, strAddr := range *cfg.MiningAddrs {
 		addr, err := util.DecodeAddress(strAddr, params)
 		if err != nil {
-		log.ERROR(err)
-str := "%s: mining address '%s' failed to decode: %v"
+			log.ERROR(err)
+			str := "%s: mining address '%s' failed to decode: %v"
 			err := fmt.Errorf(str, funcName, strAddr, err)
 			fmt.Fprintln(os.Stderr, err)
 			// os.Exit(1)
@@ -512,8 +519,8 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 		log.TRACE("we are loading a proxy!")
 		_, _, err := net.SplitHostPort(*cfg.Proxy)
 		if err != nil {
-		log.ERROR(err)
-str := "%s: Proxy address '%s' is invalid: %v"
+			log.ERROR(err)
+			str := "%s: Proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.Proxy, err)
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -557,8 +564,8 @@ str := "%s: Proxy address '%s' is invalid: %v"
 	if *cfg.OnionProxy != "" {
 		_, _, err := net.SplitHostPort(*cfg.OnionProxy)
 		if err != nil {
-		log.ERROR(err)
-str := "%s: Onion proxy address '%s' is invalid: %v"
+			log.ERROR(err)
+			str := "%s: Onion proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.OnionProxy, err)
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)

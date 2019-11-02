@@ -19,7 +19,7 @@ vendor/**
 .DS_Store
 node_modules
 /dist
-
+__sapper__
 .env.local
 .env.*.local
 

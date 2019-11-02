@@ -30,6 +30,16 @@ func SubCommands(sc ...cli.Command) []cli.Command {
 	return append([]cli.Command{}, sc...)
 }
 
+// Lang returns an altsrc.StringFlag
+func Lang(name, usage, value string, dest *string) *altsrc.StringFlag {
+	return altsrc.NewStringFlag(cli.StringFlag{
+		Name:        name,
+		Usage:       usage,
+		Value:       value,
+		Destination: dest,
+	})
+}
+
 // String returns an altsrc.StringFlag
 func String(name, usage, value string, dest *string) *altsrc.StringFlag {
 	return altsrc.NewStringFlag(cli.StringFlag{

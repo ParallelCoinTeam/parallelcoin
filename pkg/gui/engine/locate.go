@@ -36,6 +36,7 @@ func LocateChrome() string {
 	case "freebsd":
 		paths = []string{
 			"/usr/local/bin/chrome",
+			//"./pkg/gui/engine/webengine/webengine",
 		}
 	default:
 		paths = []string{
