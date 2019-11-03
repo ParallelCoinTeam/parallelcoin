@@ -1031,23 +1031,39 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.bestChain.Tip().hash) {
+		log.TRACE("can attach to tip")
 		// Skip checks if node has already been fully validated.
 		fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
-		// Perform several checks to verify the block can be connected to the main chain without violating any rules and without actually connecting the block.
+		// Perform several checks to verify the block can be connected to the main
+		// chain without violating any rules and without actually connecting the block.
 		view := NewUtxoViewpoint()
 		view.SetBestHash(parentHash)
 		stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
 		if !fastAdd {
+			log.TRACE("not fast adding")
 			err := b.checkConnectBlock(node, block, view, &stxos)
 			if err == nil {
 				b.Index.SetStatusFlags(node, statusValid)
 			} else if _, ok := err.(RuleError); ok {
 				b.Index.SetStatusFlags(node, statusValidateFailed)
+				log.ERROR(err)
 			} else {
+				log.ERROR(err)
 				return false, err
 			}
 			flushIndexState()
 			if err != nil {
+				log.ERROR(err)
+				return false, err
+			}
+		}
+		// In the fast add case the code to check the block connection was skipped,
+		// so the utxo view needs to load the referenced utxos, spend them, and add
+		// the new utxos being created by this block.
+		if fastAdd {
+			err := view.fetchInputUtxos(b.db, block)
+			if err != nil {
+				log.ERROR(err)
 				return false, err
 			}
 			err = view.connectTransactions(block, &stxos)
@@ -1056,29 +1072,29 @@ func // connectBestChain handles connecting the passed block to the chain while
 				return false, err
 			}
 		}
-	// Connect the block to the main chain.
-	err := b.connectBlock(node, block, view, stxos)
-	if err != nil {
-		log.TRACE("connect block error: ", err)
-	}
-	// If we got hit with a rule error,
-	// then we'll mark that status of the block as invalid and flush
-	// the index state to disk before returning with the error.
-	if _, ok := err.(RuleError); ok {
-		b.Index.SetStatusFlags(node, statusValidateFailed)
-		flushIndexState()
-		return false, err
-	}
-
-	// If this is fast add, or this block node isn't yet marked as valid,
-	// then we'll update its status and flush the state to disk again.
-	if fastAdd || !b.Index.NodeStatus(node).KnownValid() {
-		b.Index.SetStatusFlags(node, statusValid)
-		flushIndexState()
+		// Connect the block to the main chain.
+		err := b.connectBlock(node, block, view, stxos)
+		if err != nil {
+			log.TRACE("connect block error: ", err)
+			// If we got hit with a rule error,
+			// then we'll mark that status of the block as invalid and flush
+			// the index state to disk before returning with the error.
+			if _, ok := err.(RuleError); ok {
+				b.Index.SetStatusFlags(node, statusValidateFailed)
+			}
+			flushIndexState()
+			return false, err
+		}
+		// If this is fast add, or this block node isn't yet marked as valid,
+		// then we'll update its status and flush the state to disk again.
+		if fastAdd || !b.Index.NodeStatus(node).KnownValid() {
+			b.Index.SetStatusFlags(node, statusValid)
+			flushIndexState()
+		}
 		return true, nil
-	}
-	if fastAdd {
-		log.WARNF("fastAdd set in the side chain case? %v\n", block.Hash())
+		if fastAdd {
+			log.WARNF("fastAdd set in the side chain case? %v\n", block.Hash())
+		}
 	}
 	node.workSum = CalcWork(node.bits, node.height, node.version)
 	// We're extending (or creating) a side chain,
@@ -1111,7 +1127,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	detachNodes, attachNodes := b.getReorganizeNodes(node)
 	// Reorganize the chain.
 	log.INFOF("REORGANIZE: block %v is causing a reorganize", node.hash)
-	err = b.reorganizeChain(detachNodes, attachNodes)
+	err := b.reorganizeChain(detachNodes, attachNodes)
 	// Either getReorganizeNodes or reorganizeChain could have made unsaved
 	// changes to the block index,
 	// so flush regardless of whether there was an error.

@@ -182,7 +182,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		log.ERROR(err)
 		return false, false, err
 	}
-	log.DEBUGF("accepted block %d %v",
+	log.DEBUGF("accepted block %d %v %s",
 		blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
 			Header.Version, blockHeight))
 
