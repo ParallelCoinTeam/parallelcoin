@@ -829,7 +829,7 @@ mempoolLoop:
 		log <- cl.Debug{"checkconnectblocktemplate err:", err, cl.Ine()}
 		return nil, err
 	}
-	Log.Trcc(func() string {
+	log.TRACEC(func() string {
 		return fmt.Sprintf(
 			"created new block template "+
 				"(algo %s, %d transactions, %d in fees, "+
