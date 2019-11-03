@@ -178,7 +178,6 @@ func // HaveBlock returns whether or not the chain instance has the block
 	exists, err := b.blockExists(hash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	return exists || b.IsKnownOrphan(hash), nil
@@ -352,8 +351,7 @@ func // calcSequenceLock computes the relative lock-times for the passed
 		// current soft-fork state.
 		csvState, err := b.deploymentState(node.parent, chaincfg.DeploymentCSV)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		csvSoftforkActive = csvState == ThresholdActive
@@ -553,7 +551,6 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	err := b.Index.flushToDB()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Generate a new best state snapshot that will be used to update the
@@ -571,16 +568,14 @@ log.ERROR(err)
 		// update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
 		if err != nil {
-		log.ERROR(err)
-log.TRACE("dbPutBestState", err)
+			log.TRACE("dbPutBestState", err)
 			return err
 		}
 		// Add the block hash and height to the block index which tracks the
 		// main chain.
 		err = dbPutBlockIndex(dbTx, block.Hash(), node.height)
 		if err != nil {
-		log.ERROR(err)
-log.TRACE("dbPutBlockIndex", err)
+			log.TRACE("dbPutBlockIndex", err)
 			return err
 		}
 		// update the utxo set using the state of the utxo view.
@@ -588,8 +583,7 @@ log.TRACE("dbPutBlockIndex", err)
 		// ones created by the block.
 		err = dbPutUtxoView(dbTx, view)
 		if err != nil {
-		log.ERROR(err)
-log.TRACE("dbPutUtxoView", err)
+			log.TRACE("dbPutUtxoView", err)
 			return err
 		}
 
@@ -597,8 +591,7 @@ log.TRACE("dbPutUtxoView", err)
 		// block that contains all txos spent by it.
 		err = dbPutSpendJournalEntry(dbTx, block.Hash(), stxos)
 		if err != nil {
-		log.ERROR(err)
-log.TRACE("dbPutSpendJournalEntry", err)
+			log.TRACE("dbPutSpendJournalEntry", err)
 			return err
 		}
 		// Allow the index manager to call each of the currently active
@@ -607,16 +600,14 @@ log.TRACE("dbPutSpendJournalEntry", err)
 		if b.indexManager != nil {
 			err := b.indexManager.ConnectBlock(dbTx, block, stxos)
 			if err != nil {
-		log.ERROR(err)
-log.TRACE("connectBlock ", err)
+				log.TRACE("connectBlock ", err)
 				return err
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		log.ERROR(err)
-log.TRACE("error updating database ", err)
+		log.TRACE("error updating database ", err)
 		return err
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified
@@ -661,14 +652,12 @@ func // disconnectBlock handles disconnecting the passed node/block from the end
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Write any block status changes to DB before updating best state.
 	err = b.Index.flushToDB()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Generate a new best state snapshot that will be used to update the
@@ -686,16 +675,14 @@ log.ERROR(err)
 		// Update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Remove the block hash and height from the block index which tracks
 		// the main chain.
 		err = dbRemoveBlockIndex(dbTx, block.Hash(), node.height)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Update the utxo set using the state of the utxo view.
@@ -703,24 +690,21 @@ log.ERROR(err)
 		// ones created by the block.
 		err = dbPutUtxoView(dbTx, view)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Before we delete the spend journal entry for this back,
 		// we'll fetch it as is so the indexers can utilize if needed.
 		stxos, err := dbFetchSpendJournalEntry(dbTx, block)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Update the transaction spend journal by removing the record that
 		// contains all txos spent by the block.
 		err = dbRemoveSpendJournalEntry(dbTx, block.Hash())
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Allow the index manager to call each of the currently active
@@ -729,8 +713,7 @@ log.ERROR(err)
 		if b.indexManager != nil {
 			err := b.indexManager.DisconnectBlock(dbTx, block, stxos)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		}
@@ -738,7 +721,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified
@@ -837,8 +819,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 			return err
 		})
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		if n.hash != *block.Hash() {
@@ -852,8 +833,7 @@ log.ERROR(err)
 		// in the view.
 		err = view.fetchInputUtxos(b.db, block)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Load all of the spent txos for the block from the spend journal.
@@ -863,8 +843,7 @@ log.ERROR(err)
 			return err
 		})
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Store the loaded block and spend journal entry for later.
@@ -872,8 +851,7 @@ log.ERROR(err)
 		detachSpentTxOuts = append(detachSpentTxOuts, stxos)
 		err = view.disconnectTransactions(b.db, block, stxos)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		newBest = n.parent
@@ -904,8 +882,7 @@ log.ERROR(err)
 			return err
 		})
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Store the loaded block for later.
@@ -916,14 +893,12 @@ log.ERROR(err)
 		if b.Index.NodeStatus(n).KnownValid() {
 			err = view.fetchInputUtxos(b.db, block)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			err = view.connectTransactions(block, nil)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			newBest = n
@@ -938,8 +913,7 @@ log.ERROR(err)
 		// having an invalid ancestor.
 		err = b.checkConnectBlock(n, block, view, nil)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			if _, ok := err.(RuleError); ok {
 				b.Index.SetStatusFlags(n, statusValidateFailed)
 				for de := e.Next(); de != nil; de = de.Next() {
@@ -967,8 +941,7 @@ log.ERROR(err)
 		// in the view.
 		err := view.fetchInputUtxos(b.db, block)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Update the view to unspend all of the spent txos and remove the
@@ -976,15 +949,13 @@ log.ERROR(err)
 		err = view.disconnectTransactions(b.db, block,
 			detachSpentTxOuts[i])
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Update the database and chain state.
 		err = b.disconnectBlock(n, block, view)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -996,8 +967,7 @@ log.ERROR(err)
 		// in the view.
 		err := view.fetchInputUtxos(b.db, block)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Update the view to mark all utxos referenced by the block as spent
@@ -1006,15 +976,13 @@ log.ERROR(err)
 		stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
 		err = view.connectTransactions(block, &stxos)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Update the database and chain state.
 		err = b.connectBlock(n, block, view, stxos)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -1063,53 +1031,35 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.bestChain.Tip().hash) {
-		log.TRACE("can attach to tip")
-	}
-	// Skip checks if node has already been fully validated.
-	fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
-	// Perform several checks to verify the block can be connected to the
-	// main chain without violating any rules and without actually
-	// connecting the block.
-	view := NewUtxoViewpoint()
-	view.SetBestHash(parentHash)
-	stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
-	log.TRACE("fast adding:", fastAdd)
-	err := b.checkConnectBlock(node, block, view, &stxos)
-	if err == nil {
-		b.Index.SetStatusFlags(node, statusValid)
-	} else if _, ok := err.(RuleError); ok {
-		b.Index.SetStatusFlags(node, statusValidateFailed)
-	} else {
-		return false, err
-	}
-	flushIndexState()
-	if err != nil {
-		log.ERROR(err)
-log.TRACE("error", err)
-		return false, err
-	}
-	// In the fast add case the code to check the block connection was
-	// skipped, so the utxo view needs to load the referenced utxos,
-	// spend them, and add the new utxos being created by this block.
-	if fastAdd {
-		err := view.fetchInputUtxos(b.db, block)
-		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
-			return false, err
+		// Skip checks if node has already been fully validated.
+		fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
+		// Perform several checks to verify the block can be connected to the main chain without violating any rules and without actually connecting the block.
+		view := NewUtxoViewpoint()
+		view.SetBestHash(parentHash)
+		stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
+		if !fastAdd {
+			err := b.checkConnectBlock(node, block, view, &stxos)
+			if err == nil {
+				b.Index.SetStatusFlags(node, statusValid)
+			} else if _, ok := err.(RuleError); ok {
+				b.Index.SetStatusFlags(node, statusValidateFailed)
+			} else {
+				return false, err
+			}
+			flushIndexState()
+			if err != nil {
+				return false, err
+			}
 		}
 		err = view.connectTransactions(block, &stxos)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return false, err
 		}
-	}
 	// Connect the block to the main chain.
 	err = b.connectBlock(node, block, view, stxos)
 	if err != nil {
-		log.ERROR(err)
-log.TRACE("connect block error: ", err)
+		log.TRACE("connect block error: ", err)
 	}
 	// If we got hit with a rule error,
 	// then we'll mark that status of the block as invalid and flush
@@ -1142,11 +1092,9 @@ log.TRACE("connect block error: ", err)
 				"but does not cause a reorganize. workSum=%d",
 				node.hash, f.height, f.hash, f.workSum)
 		} else {
-			log.TRACEF("EXTEND FORK: Block %v extends a side chain which" +
-				" forks" +
-				" the"+
-				" chain at height %d/block %v. workSum=%d",
-				node.hash, f.height, f.hash, f.workSum,
+			log.TRACEF("EXTEND FORK: Height %7d Block %v extends a side chain which"+
+				" forks the chain at height %d/block %v. workSum=%d",
+				node.height, node.hash, f.height, f.hash, f.workSum,
 			)
 		}
 		return false, nil
@@ -1674,8 +1622,7 @@ New(config *Config) (*BlockChain, error) {
 	if config.IndexManager != nil {
 		err := config.IndexManager.Init(&b, config.Interrupt)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 	}
