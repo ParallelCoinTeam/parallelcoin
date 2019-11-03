@@ -7,9 +7,10 @@ import (
 )
 
 func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
+	log.DEBUG("kopach miner starting")
 	select {
 	case <-quit:
-		log.DEBUG("quit channel closed, quitting miner")
+		log.DEBUG("kopach miner shutting down")
 		break
 	}
 }
