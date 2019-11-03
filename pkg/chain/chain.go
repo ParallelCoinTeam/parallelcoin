@@ -3,6 +3,7 @@ package blockchain
 import (
 	"container/list"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"sync"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
-	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -1050,14 +1050,14 @@ func // connectBestChain handles connecting the passed block to the chain while
 			if err != nil {
 				return false, err
 			}
-		}
-		err = view.connectTransactions(block, &stxos)
-		if err != nil {
-			log.ERROR(err)
-			return false, err
+			err = view.connectTransactions(block, &stxos)
+			if err != nil {
+				log.ERROR(err)
+				return false, err
+			}
 		}
 	// Connect the block to the main chain.
-	err = b.connectBlock(node, block, view, stxos)
+	err := b.connectBlock(node, block, view, stxos)
 	if err != nil {
 		log.TRACE("connect block error: ", err)
 	}
