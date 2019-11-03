@@ -222,7 +222,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 	log.INFOF("loading block database from '%s'", dbPath)
 	db, err := database.Open(*cx.Config.DbType, dbPath, cx.ActiveNet.Net)
 	if err != nil {
-		log.ERROR(err) // return the error if it's not because the database doesn't exist
+		log.TRACE(err) // return the error if it's not because the database doesn't exist
 		if dbErr, ok := err.(database.Error); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
 			return nil, err

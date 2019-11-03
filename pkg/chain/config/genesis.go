@@ -119,7 +119,7 @@ var testNet3GenesisMerkleRoot = genesisMerkleRoot
 // serves as the public transaction ledger for the test network (version 3).
 var testNet3GenesisBlock = wire.MsgBlock{
 	Header: wire.BlockHeader{
-		Version:    5,
+		Version:    2,
 		PrevBlock:  chainhash.Hash{}, // 0000000000000000000000000000000000000000000000000000000000000000
 		MerkleRoot: testNet3GenesisMerkleRoot,
 		Timestamp:  time.Unix(0x53c9ea84, 0),

@@ -27,11 +27,11 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	prevNode := b.Index.LookupNode(prevHash)
 	if prevNode == nil {
 		str := fmt.Sprintf("previous block %s is unknown", prevHash)
-		log.WARN(str)
+		log.ERROR(str)
 		return false, ruleError(ErrPreviousBlockUnknown, str)
 	} else if b.Index.NodeStatus(prevNode).KnownInvalid() {
 		str := fmt.Sprintf("previous block %s is known to be invalid", prevHash)
-		log.WARN(str)
+		log.ERROR(str)
 		return false, ruleError(ErrInvalidAncestorBlock, str)
 	}
 	blockHeight := prevNode.height + 1
@@ -75,8 +75,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 		err = b.checkBlockContext(workerNumber, block, prevNode, flags,
 			DoNotCheckPow)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return false, err
 		}
 	}
@@ -95,7 +94,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	// log.WARN("creating new block node for new block")
@@ -109,7 +107,6 @@ log.ERROR(err)
 	err = b.Index.flushToDB()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	// Connect the passed block to the chain while respecting proper chain
@@ -118,7 +115,6 @@ log.ERROR(err)
 	isMainChain, err := b.connectBestChain(newNode, block, flags)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	// Notify the caller that the new block was accepted into the block

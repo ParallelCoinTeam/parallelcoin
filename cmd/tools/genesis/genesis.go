@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"os"
 	"runtime"
 	"strconv"

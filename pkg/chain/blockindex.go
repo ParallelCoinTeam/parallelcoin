@@ -236,8 +236,8 @@ func (bi *blockIndex) flushToDB() error {
 				for node := range bi.dirty {
 					err := dbStoreBlockNode(dbTx, node)
 					if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+						log.ERROR(err)
+						log.ERROR(err)
 						return err
 					}
 				}
@@ -259,13 +259,14 @@ func (node *blockNode) GetAlgo() int32 {
 
 // GetLastWithAlgo returns the newest block from node with specified algo
 func (node *blockNode) GetLastWithAlgo(algo int32) (prev *blockNode) {
-		if prev == nil {
-		return nil
+	if node == nil {
+		return
 	}
-	if fork.GetCurrent(prev.height) == 0 {
+	if fork.GetCurrent(node.height) == 0 {
+		log.TRACE("checking pre-hardfork algo versions")
 		if algo != 514 &&
 			algo != 2 {
-			log.DEBUG("irregular version block, assuming 2 (sha256d)")
+			log.DEBUG("irregular version", algo, "block, assuming 2 (sha256d)")
 			algo = 2
 		}
 	}
@@ -274,69 +275,70 @@ func (node *blockNode) GetLastWithAlgo(algo int32) (prev *blockNode) {
 		if prev == nil {
 			return nil
 		}
-		log.DEBUGF("node %d %d %8x",prev.height, prev.version, prev.bits)
+		log.TRACEF("node %d %d %8x", prev.height, prev.version, prev.bits)
 		prevversion := prev.version
 		if fork.GetCurrent(prev.height) == 0 {
+			log.TRACE("checking pre-hardfork algo versions")
 			if prev.version != 514 &&
 				prev.version != 2 {
-				log.DEBUG("irregular version block, assuming 2 (sha256d)")
+				log.DEBUG("irregular version block", prev.version, ", assuming 2 (sha256d)")
 				prevversion = 2
 			}
 		}
 		if prevversion == algo {
-			log.DEBUGF(
-				"found %d %d %d %8x",
+			log.TRACEF(
+				"found height %d version %d prev version %d prev bits %8x",
 				prev.height, prev.version, prevversion, prev.bits)
 			return
 		}
 		prev = prev.RelativeAncestor(1)
 	}
 }
-	
-	// if node == nil {
-	// 	log.TRACE("this node is nil")
-	// 	return nil
-	// }
-	// prev = node.RelativeAncestor(1)
-	// if prev == nil {
-	// 	log.TRACE("the previous node was nil")
-	// 	return nil
-	// }
-	// prevFork := fork.GetCurrent(prev.height)
-	// if prevFork == 0 {
-	// 	if algo != 514 &&
-	// 		algo != 2 {
-	// 		log.TRACE("bogus version halcyon", algo)
-	// 		algo = 2
-	// 	}
-	// }
-	// if prev.version == algo {
-	// 	log.TRACEF("found previous %d %d %08x", prev.height, prev.version,
-	// 	prev.bits)
-	// 	return prev
-	// }
-	// prev = prev.RelativeAncestor(1)
-	// for {
-	// 	if prev == nil {
-	// 		log.TRACE("passed through genesis")
-	// 		return nil
-	// 	}
-	// 	log.TRACE(prev.height)
-	// 	prevVersion := prev.version
-	// 	if fork.GetCurrent(prev.height) == 0 {
-	// 		if prevVersion != 514 &&
-	// 			prevVersion != 2 {
-	// 			log.TRACE("bogus version", prevVersion)
-	// 			prevVersion = 2
-	// 		}
-	// 	}
-	// 	if prevVersion == algo {
-	// 		log.TRACEF("found previous %d %d %08x", prev.height, prev.version,
-	// 			prev.bits)
-	// 		return prev
-	// 	} else {
-	// 		log.TRACE(prev.height)
-	// 		prev = prev.RelativeAncestor(1)
-	// 	}
-	// }
+
+// if node == nil {
+// 	log.TRACE("this node is nil")
+// 	return nil
+// }
+// prev = node.RelativeAncestor(1)
+// if prev == nil {
+// 	log.TRACE("the previous node was nil")
+// 	return nil
+// }
+// prevFork := fork.GetCurrent(prev.height)
+// if prevFork == 0 {
+// 	if algo != 514 &&
+// 		algo != 2 {
+// 		log.TRACE("bogus version halcyon", algo)
+// 		algo = 2
+// 	}
+// }
+// if prev.version == algo {
+// 	log.TRACEF("found previous %d %d %08x", prev.height, prev.version,
+// 	prev.bits)
+// 	return prev
+// }
+// prev = prev.RelativeAncestor(1)
+// for {
+// 	if prev == nil {
+// 		log.TRACE("passed through genesis")
+// 		return nil
+// 	}
+// 	log.TRACE(prev.height)
+// 	prevVersion := prev.version
+// 	if fork.GetCurrent(prev.height) == 0 {
+// 		if prevVersion != 514 &&
+// 			prevVersion != 2 {
+// 			log.TRACE("bogus version", prevVersion)
+// 			prevVersion = 2
+// 		}
+// 	}
+// 	if prevVersion == algo {
+// 		log.TRACEF("found previous %d %d %08x", prev.height, prev.version,
+// 			prev.bits)
+// 		return prev
+// 	} else {
+// 		log.TRACE(prev.height)
+// 		prev = prev.RelativeAncestor(1)
+// 	}
+// }
 // }
