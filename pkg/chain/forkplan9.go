@@ -267,9 +267,6 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(
 				}
 			}
 			if intervals > 1 {
-				if l {
-					log.TRACE("qh", qhourIntervals)
-				}
 				// calculate exponential weighted moving average from intervals
 				qhw := ewma.NewMovingAverage()
 				for _, x := range qhourIntervals {

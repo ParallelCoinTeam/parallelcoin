@@ -383,12 +383,12 @@ log.WARNF("failed to remove corrupt peers file %s: %v", a.peersFile,
 		a.reset()
 		return
 	}
-	log.TRACEC(func() string {
-		return fmt.Sprintf(
-			"loaded %d addresses from file '%s'",
-			a.numAddresses(), a.peersFile,
-		)
-	})
+	//log.TRACEC(func() string {
+	//	return fmt.Sprintf(
+	//		"loaded %d addresses from file '%s'",
+	//		a.numAddresses(), a.peersFile,
+	//	)
+	//})
 }
 func (a *AddrManager) deserializePeers(filePath string) error {
 	_, err := os.Stat(filePath)
