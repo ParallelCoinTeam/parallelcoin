@@ -157,7 +157,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	})
 	server.Start()
 	if len(server.RPCServers) > 0 {
-		log.TRACE("propagating rpc server handle")
+		log.TRACE("propagating rpc server handle (node has started)")
 		cx.RPCServer = server.RPCServers[0]
 		if nodechan != nil {
 			log.TRACE("sending back node")
