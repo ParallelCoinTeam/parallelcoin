@@ -335,7 +335,7 @@ func (cm *ConnManager) NewConnReq() {
 	}
 	addr, err := cm.Cfg.GetNewAddress()
 	if err != nil {
-		log.TRACE(err)
+		//log.TRACE(err)
 		select {
 		case cm.requests <- handleFailed{c, err}:
 		case <-cm.quit:
