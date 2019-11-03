@@ -20,7 +20,7 @@ type BlockHeader struct {
 	Version int32
 	// Hash of the previous block header in the block chain.
 	PrevBlock chainhash.Hash
-	// Merkle tree reference to hash of all transactions for the block.
+	// MerkleRoot is the Merkle tree reference to hash of all transactions for the block.
 	MerkleRoot chainhash.Hash
 	// Time the block was created.  This is, unfortunately, encoded as a uint32 on the wire and therefore is limited to 2106.
 	Timestamp time.Time

@@ -844,7 +844,7 @@ mempoolLoop:
 		log.DEBUG("checkconnectblocktemplate err:", err)
 		return nil, err
 	}
-	log.TRACE(func() string {
+	log.TRACEC(func() string {
 		return fmt.Sprintf(
 			"created new block template (algo %s, %d transactions, "+
 				"%d in fees, %d signature operations cost, %d weight, "+
