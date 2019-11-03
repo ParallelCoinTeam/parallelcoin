@@ -10,9 +10,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	var ctx context.Context
 	ctx, cancel = context.WithCancel(context.Background())
 	go func() {
+		log.DEBUG("miner controller starting")
 		select {
 		case <-ctx.Done():
-			log.DEBUG("context cancelled, killing controller")
+			log.DEBUG("miner controller shutting down")
 			break
 		}
 	}()
