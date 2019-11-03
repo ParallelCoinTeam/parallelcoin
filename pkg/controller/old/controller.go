@@ -3,7 +3,7 @@
 
 //go:generate go run genmsghandle/main.go controller Solution broadcast.SolBlock . msghandle.go
 
-package controller
+package old
 
 import (
 	"context"
