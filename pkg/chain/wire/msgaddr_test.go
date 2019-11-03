@@ -1,20 +1,18 @@
 package wire
 
 import (
-   "bytes"
-   "io"
-   "net"
-   "reflect"
-   "testing"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"io"
+	"net"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // TestAddr tests the MsgAddr API.
-func TestAddr(	t *testing.T) {
+func TestAddr(t *testing.T) {
 	pver := ProtocolVersion
 	// Ensure the command is expected value.
 	wantCmd := "addr"
@@ -83,7 +81,7 @@ func TestAddr(	t *testing.T) {
 }
 
 // TestAddrWire tests the MsgAddr wire encode and decode for various numbers of addresses and protocol versions.
-func TestAddrWire(	t *testing.T) {
+func TestAddrWire(t *testing.T) {
 	// A couple of NetAddresses to use for testing.
 	na := &NetAddress{
 		Timestamp: time.Unix(0x495fab29, 0), // 2009-01-03 12:15:05 -0600 CST
@@ -181,7 +179,7 @@ func TestAddrWire(	t *testing.T) {
 }
 
 // TestAddrWireErrors performs negative tests against wire encode and decode of MsgAddr to confirm error paths work correctly.
-func TestAddrWireErrors(	t *testing.T) {
+func TestAddrWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverMA := MultipleAddressVersion
 	wireErr := &MessageError{}
@@ -202,7 +200,7 @@ func TestAddrWireErrors(	t *testing.T) {
 	baseAddr := NewMsgAddr()
 	err := baseAddr.AddAddresses(na, na2)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	baseAddrEncoded := []byte{
 		0x02,                   // Varint for number of addresses
@@ -222,7 +220,7 @@ func TestAddrWireErrors(	t *testing.T) {
 	for i := 0; i < MaxAddrPerMsg; i++ {
 		err := maxAddr.AddAddress(na)
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}
 	maxAddr.AddrList = append(maxAddr.AddrList, na)

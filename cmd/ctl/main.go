@@ -5,12 +5,13 @@ import (
 	"bytes"
 	js "encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io"
 	"os"
 	"strings"
 	
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // HelpPrint is the uninitialized help print function
@@ -23,9 +24,10 @@ func Main(args []string, cx *conte.Xt) {
 	// Ensure the specified method identifies a valid registered command and is one of the usable types.
 	//
 	method := args[0]
-	usageFlags, err := json.MethodUsageFlags(method)
+	usageFlags, err := btcjson.MethodUsageFlags(method)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
+		log.ERROR(err)
+fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 		HelpPrint()
 		os.Exit(1)
 	}
@@ -65,12 +67,14 @@ func Main(args []string, cx *conte.Xt) {
 	}
 	// Attempt to create the appropriate command using the arguments provided
 	// by the user.
-	cmd, err := json.NewCmd(method, params...)
+	cmd, err := btcjson.NewCmd(method, params...)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		// Show the error along with its error code when it's a json.
 		// Error as it realistically will always be since the NewCmd function
 		// is only supposed to return errors of that type.
-		if jerr, ok := err.(json.Error); ok {
+		if jerr, ok := err.(btcjson.Error); ok {
 			fmt.Fprintf(os.Stderr, "%s command: %v (code: %s)\n",
 				method, err, jerr.ErrorCode)
 			commandUsage(method)
@@ -85,16 +89,18 @@ func Main(args []string, cx *conte.Xt) {
 	}
 	// Marshal the command into a JSON-RPC byte slice in preparation for sending
 	// it to the RPC server.
-	marshalledJSON, err := json.MarshalCmd(1, cmd)
+	marshalledJSON, err := btcjson.MarshalCmd(1, cmd)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		log.ERROR(err)
+fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	// Send the JSON-RPC request to the server using the user-specified
 	// connection configuration.
 	result, err := sendPostRequest(marshalledJSON, cx)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		log.ERROR(err)
+fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	// Choose how to display the result based on its type.
@@ -123,9 +129,10 @@ func Main(args []string, cx *conte.Xt) {
 
 // commandUsage display the usage for a specific command.
 func commandUsage(method string) {
-	usage, err := json.MethodUsageText(method)
+	usage, err := btcjson.MethodUsageText(method)
 	if err != nil {
-		// This should never happen since the method was already checked
+		log.ERROR(err)
+// This should never happen since the method was already checked
 		// before calling this function, but be safe.
 		fmt.Fprintln(os.Stderr, "Failed to obtain command usage:", err)
 		return

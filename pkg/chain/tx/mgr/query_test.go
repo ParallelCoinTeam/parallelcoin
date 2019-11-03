@@ -9,12 +9,11 @@ import (
 	"testing"
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	. "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	. "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 type queryState struct {
@@ -47,7 +46,7 @@ func (q *queryState) deepCopy() *queryState {
 	}
 	return cpy
 }
-func deepCopyTxDetails(	d *TxDetails) *TxDetails {
+func deepCopyTxDetails(d *TxDetails) *TxDetails {
 	cpy := *d
 	cpy.MsgTx = *d.MsgTx.Copy()
 	if cpy.SerializedTx != nil {
@@ -138,7 +137,7 @@ func (q *queryState) compare(s *Store, ns walletdb.ReadBucket,
 	}
 	return nil
 }
-func equalTxDetails(	got, exp *TxDetails) error {
+func equalTxDetails(got, exp *TxDetails) error {
 	// Need to avoid using reflect.DeepEqual against slices, since it
 	// returns false for nil vs non-nil zero length slices.
 	if err := equalTxs(&got.MsgTx, &exp.MsgTx); err != nil {
@@ -182,7 +181,7 @@ func equalTxDetails(	got, exp *TxDetails) error {
 	}
 	return nil
 }
-func equalTxs(	got, exp *wire.MsgTx) error {
+func equalTxs(got, exp *wire.MsgTx) error {
 	var bufGot, bufExp bytes.Buffer
 	err := got.Serialize(&bufGot)
 	if err != nil {
@@ -205,12 +204,12 @@ func timeNow() time.Time {
 }
 
 // Returns a copy of a TxRecord without the serialized tx.
-func stripSerializedTx(	rec *TxRecord) *TxRecord {
+func stripSerializedTx(rec *TxRecord) *TxRecord {
 	ret := *rec
 	ret.SerializedTx = nil
 	return &ret
 }
-func makeBlockMeta(	height int32) BlockMeta {
+func makeBlockMeta(height int32) BlockMeta {
 	if height == -1 {
 		return BlockMeta{Block: Block{Height: -1}}
 	}
@@ -223,7 +222,7 @@ func makeBlockMeta(	height int32) BlockMeta {
 	binary.LittleEndian.PutUint64(b.Hash[4:12], uint64(b.Time.Unix()))
 	return b
 }
-func TestStoreQueries(	t *testing.T) {
+func TestStoreQueries(t *testing.T) {
 	t.Parallel()
 	type queryTest struct {
 		desc    string
@@ -424,7 +423,7 @@ func TestStoreQueries(	t *testing.T) {
 			return true, nil
 		})
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 		if iterations != 1 {
 			t.Errorf("RangeTransactions (forwards) ran func %d times", iterations)
@@ -435,7 +434,7 @@ func TestStoreQueries(	t *testing.T) {
 			return true, nil
 		})
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 		if iterations != 1 {
 			t.Errorf("RangeTransactions (reverse) ran func %d times", iterations)
@@ -450,7 +449,7 @@ func TestStoreQueries(	t *testing.T) {
 			return true, nil
 		})
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 		if iterations != 1 {
 			t.Errorf("RangeTransactions (reverse) ran func %d times", iterations)
@@ -503,7 +502,7 @@ func TestStoreQueries(	t *testing.T) {
 		}
 	}
 }
-func TestPreviousPkScripts(	t *testing.T) {
+func TestPreviousPkScripts(t *testing.T) {
 	t.Parallel()
 	s, db, teardown, err := testStore()
 	defer teardown()
@@ -602,7 +601,7 @@ func TestPreviousPkScripts(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns := dbtx.ReadWriteBucket(namespaceKey)

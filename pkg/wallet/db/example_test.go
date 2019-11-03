@@ -6,9 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 // This example demonstrates creating a new database.
@@ -16,8 +15,8 @@ func ExampleCreate() {
 	// This example assumes the bdb (bolt db) driver is imported.
 	//
 	// import (
-	// 	"github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-	// 	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	// 	"github.com/p9c/pod/pkg/wallet/db"
+	// 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 	// )
 	// Create a database and schedule it to be closed and removed on exit.
 	// Typically you wouldn't want to remove the database right away like
@@ -73,7 +72,7 @@ func ExampleDB_createTopLevelBucket() {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 	}()
 	// Get or create a bucket in the database as needed.  This bucket
@@ -97,8 +96,8 @@ func Example_basicUsage() {
 	// This example assumes the bdb (bolt db) driver is imported.
 	//
 	// import (
-	// 	"github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-	// 	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	// 	"github.com/p9c/pod/pkg/wallet/db"
+	// 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 	// )
 	// Create a database and schedule it to be closed and removed on exit.
 	// Typically you wouldn't want to remove the database right away like

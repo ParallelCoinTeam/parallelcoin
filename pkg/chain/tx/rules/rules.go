@@ -5,9 +5,9 @@ package txrules
 import (
 	"errors"
 
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // DefaultRelayFeePerKb is the default minimum relay fee policy for a mempool.
@@ -46,7 +46,7 @@ func IsDustAmount(amount util.Amount, scriptSize int, relayFeePerKb util.Amount)
 // IsDustOutput determines whether a transaction output is considered dust.
 // Transactions with dust outputs are not standard and are rejected by mempools
 // with default policies.
-func IsDustOutput(	output *wire.TxOut, relayFeePerKb util.Amount) bool {
+func IsDustOutput(output *wire.TxOut, relayFeePerKb util.Amount) bool {
 	// Unspendable outputs which solely carry data are not checked for dust.
 	if txscript.GetScriptClass(output.PkScript) == txscript.NullDataTy {
 		return false
@@ -65,7 +65,7 @@ func CheckOutput(output *wire.TxOut, relayFeePerKb util.Amount) error {
 	if output.Value < 0 {
 		return ErrAmountNegative
 	}
-	if output.Value > util.MaxSatoshi {
+	if output.Value > int64(util.MaxSatoshi) {
 		return ErrAmountExceedsMax
 	}
 	if IsDustOutput(output, relayFeePerKb) {

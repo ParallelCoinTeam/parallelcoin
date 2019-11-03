@@ -10,15 +10,17 @@ package app
 import (
 	"fmt"
 	"os"
-	
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/log"
 )
 
 const (
 	appName           = "pod"
-	confExt           = ".toml"
+	confExt           = ".json"
+	appLanguage       = "en"
 	podConfigFilename = appName + confExt
+	PARSER            = "json"
 	// ctlAppName           = "ctl"
 	// ctlConfigFilename    = ctlAppName + confExt
 	// nodeAppName          = "node"
@@ -29,9 +31,10 @@ const (
 
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
-	cx := conte.GetNewContext(appName, "main")
+	log.L.SetLevel("error", true)
+	cx := conte.GetNewContext(appName, appLanguage, "main")
 	cx.App = getApp(cx)
-	cx.Log <- cl.Debug{"running App"}
+	log.DEBUG("running App")
 	e := cx.App.Run(os.Args)
 	if e != nil {
 		fmt.Println("Pod ERROR:", e)

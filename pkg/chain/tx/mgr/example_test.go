@@ -4,12 +4,11 @@ package wtxmgr_test
 import (
 	"fmt"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 var (
@@ -58,7 +57,7 @@ func ExampleStore_Balance() {
 		defer func() {
 			err := dbtx.Rollback()
 			if err != nil {
-				fmt.Println(err, cl.Ine())
+				fmt.Println(err)
 			}
 		}()
 		ns := dbtx.ReadBucket(namespaceKey)
@@ -165,7 +164,7 @@ func Example_basicUsage() {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			fmt.Println(err)
 		}
 	}()
 	// Create a bucket for the transaction store.

@@ -3,14 +3,15 @@ package waddrmgr
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"sync"
 
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/zero"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/zero"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // AddressType represents the various address types waddrmgr is currently able
@@ -132,7 +133,8 @@ func (a *managedAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
 	if len(a.privKeyCT) == 0 {
 		privKey, err := key.Decrypt(a.privKeyEncrypted)
 		if err != nil {
-			str := fmt.Sprintf("failed to decrypt private key for "+
+		log.ERROR(err)
+str := fmt.Sprintf("failed to decrypt private key for "+
 				"%s", a.address)
 			return nil, managerError(ErrCrypto, str, err)
 		}
@@ -266,7 +268,8 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 	// the returned private key could be invalidated from under the caller.
 	privKeyCopy, err := a.unlock(a.manager.rootManager.cryptoKeyPriv)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), privKeyCopy)
 	zero.Bytes(privKeyCopy)
@@ -280,7 +283,8 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 func (a *managedAddress) ExportPrivKey() (*util.WIF, error) {
 	pk, err := a.PrivKey()
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return util.NewWIF(pk, a.manager.rootManager.chainParams, a.compressed)
 }
@@ -330,13 +334,15 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 			pubKeyHash, m.rootManager.chainParams,
 		)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		// Next we'll generate the witness program which can be used as a
 		// pkScript to pay to this generated address.
 		witnessProgram, err := txscript.PayToAddrScript(witAddr)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		// Finally, we'll use the witness program itself as the pre-image
 		// to a p2sh address. In order to spend, we first use the
@@ -346,21 +352,24 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 			witnessProgram, m.rootManager.chainParams,
 		)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	case PubKeyHash:
 		address, err = util.NewAddressPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
 		)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	case WitnessPubKey:
 		address, err = util.NewAddressWitnessPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
 		)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	}
 	return &managedAddress{
@@ -390,7 +399,8 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 	privKeyBytes := privKey.Serialize()
 	privKeyEncrypted, err := s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes)
 	if err != nil {
-		str := "failed to encrypt private key"
+		log.ERROR(err)
+str := "failed to encrypt private key"
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	// Leverage the code to create a managed address without a private key
@@ -400,7 +410,8 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 		s, derivationPath, ecPubKey, compressed, addrType,
 	)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	managedAddr.privKeyEncrypted = privKeyEncrypted
 	managedAddr.privKeyCT = privKeyBytes
@@ -420,7 +431,8 @@ func newManagedAddressFromExtKey(s *ScopedKeyManager,
 	if key.IsPrivate() {
 		privKey, err := key.ECPrivKey()
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		// Ensure the temp private key big integer is cleared after
 		// use.
@@ -428,19 +440,22 @@ func newManagedAddressFromExtKey(s *ScopedKeyManager,
 			s, derivationPath, privKey, true, addrType,
 		)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	} else {
 		pubKey, err := key.ECPubKey()
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		managedAddr, err = newManagedAddressWithoutPrivKey(
 			s, derivationPath, pubKey, true,
 			addrType,
 		)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	}
 	return managedAddr, nil
@@ -471,7 +486,8 @@ func (a *scriptAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
 	if len(a.scriptCT) == 0 {
 		script, err := key.Decrypt(a.scriptEncrypted)
 		if err != nil {
-			str := fmt.Sprintf("failed to decrypt script for %s",
+		log.ERROR(err)
+str := fmt.Sprintf("failed to decrypt script for %s",
 				a.address)
 			return nil, managerError(ErrCrypto, str, err)
 		}
@@ -579,7 +595,8 @@ func newScriptAddress(m *ScopedKeyManager, account uint32, scriptHash,
 		scriptHash, m.rootManager.chainParams,
 	)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return &scriptAddress{
 		manager:         m,

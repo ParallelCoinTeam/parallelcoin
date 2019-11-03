@@ -2,39 +2,37 @@ package app
 
 import (
 	"fmt"
+	_ "github.com/gohouse/i18n/parser_json"
+	"github.com/p9c/pod/pkg/controller/broadcast"
 	"time"
 
 	"github.com/urfave/cli"
 	"github.com/urfave/cli/altsrc"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/cmd/node"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/mempool"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/node/mempool"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/base58"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
-// getApp defines the pod app
-func getApp(cx *conte.Xt) (a *cli.App) {
+func // getApp defines the pod app
+getApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
-		Name:    "pod",
-		Version: "v0.0.1",
-		Description: "Parallelcoin Pod Suite -- All-in-one everything" +
-			" for Parallelcoin!",
-		Copyright: "Legacy portions derived from btcsuite/btcd under" +
-			" ISC licence. The remainder is already in your" +
-			" possession. Use it wisely.",
+		Name:        "pod",
+		Version:     "v0.0.1",
+		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
+		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
 		Action: func(c *cli.Context) error {
-			fmt.Println("no subcommand requested")
+			fmt.Println(cx.Language.RenderText("goApp_NOSUBCMDREQ"))
 			cli.ShowAppHelpAndExit(c, 1)
 			return nil
 		},
 		Before: beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			log <- cl.Trace{"subcommand completed", cl.Ine()}
+			log.TRACE("subcommand completed")
 			return nil
 		},
 		Commands: []cli.Command{
@@ -102,27 +100,34 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				apputil.SubCommands(),
 				"s",
 			),
-			apputil.NewCommand(
-				"gui",
-				"start GUI",
-				guiHandle(cx),
-				apputil.SubCommands(),
-			),
+			//apputil.NewCommand(
+			//	"gui",
+			//	"start GUI",
+			//	guiHandle(cx),
+			//	apputil.SubCommands(),
+			//),
 			apputil.NewCommand("kopach",
 				"standalone miner for clusters",
 				kopachHandle(cx),
 				apputil.SubCommands(
-					// apputil.NewCommand("bench",
-					// 	"generate a set of benchmarks of each algorithm",
-					// 	func(c *cli.Context) error {
-					// 		return bench.Benchmark(cx)(c)
-					// 	},
-					// 	apputil.SubCommands(),
-					// ),
+				// apputil.NewCommand("bench",
+				// 	"generate a set of benchmarks of each algorithm",
+				// 	func(c *cli.Context) error {
+				// 		return bench.Benchmark(cx)(c)
+				// 	},
+				// 	apputil.SubCommands(),
+				// ),
 				),
-			),
+				"k"),
 		},
 		Flags: []cli.Flag{
+			altsrc.NewStringFlag(cli.StringFlag{
+				Name:        "lang, L",
+				Value:       *cx.Config.Language,
+				Usage:       "sets the data directory base for a pod instance",
+				EnvVar:      "POD_LANGUAGE",
+				Destination: cx.Config.Language,
+			}),
 			altsrc.NewStringFlag(cli.StringFlag{
 				Name:        "datadir, D",
 				Value:       *cx.Config.DataDir,
@@ -173,30 +178,30 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.LimitUser),
 			apputil.String(
 				"limitpass",
-				"sets the password for clients of services",
+				"sets the limited rpc password",
 				genPassword(),
 				cx.Config.LimitPass),
 			apputil.String(
 				"rpccert",
 				"File containing the certificate file",
-				apputil.Join(*cx.Config.DataDir, "rpc.cert"),
+				"",
 				cx.Config.RPCCert),
 			apputil.String(
 				"rpckey",
 				"File containing the certificate key",
-				apputil.Join(*cx.Config.DataDir, "rpc.key"),
+				"",
 				cx.Config.RPCKey),
 			apputil.String(
 				"cafile",
-				"File containing root certificates to authenticate a TLS" +
+				"File containing root certificates to authenticate a TLS"+
 					" connections with pod",
-				apputil.Join(*cx.Config.DataDir, "cafile"),
+				"",
 				cx.Config.CAFile),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"clienttls",
 				"Enable TLS for client connections",
 				cx.Config.TLS),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"servertls",
 				"Enable TLS for server connections",
 				cx.Config.ServerTLS),
@@ -221,7 +226,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.Onion),
 			apputil.String(
 				"onionproxy",
-				"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0." +
+				"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0."+
 					"0.1:9050)",
 				"127.0.0.1:9050",
 				cx.Config.OnionProxy),
@@ -237,18 +242,9 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.OnionProxyPass),
 			apputil.Bool(
 				"torisolation",
-				"Enable Tor stream isolation by randomizing user credentials" +
+				"Enable Tor stream isolation by randomizing user credentials"+
 					" for each connection.",
 				cx.Config.TorIsolation),
-			apputil.String(
-				"group",
-				"zeroconf testnet group identifier (whitelist connections)",
-				"",
-				cx.Config.Group),
-			apputil.Bool(
-				"nodiscovery",
-				"disable zeroconf peer discovery",
-				cx.Config.NoDiscovery),
 			apputil.StringSlice(
 				"addpeer",
 				"Add a peer to connect with at startup",
@@ -290,13 +286,13 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.BanThreshold),
 			apputil.StringSlice(
 				"whitelist",
-				"Add an IP network or IP that will not be banned. (eg. 192." +
+				"Add an IP network or IP that will not be banned. (eg. 192."+
 					"168.1.0/24 or ::1)",
 				cx.Config.Whitelists),
 			apputil.String(
 				"rpcconnect",
 				"Hostname/IP and port of pod RPC server to connect to",
-				"127.0.0.1:11048",
+				"",
 				cx.Config.RPCConnect),
 			apputil.StringSlice(
 				"rpclisten",
@@ -367,7 +363,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 			apputil.Bool(
 				"upnp",
 				"Use UPnP to map our listening port outside of NAT",
-				cx.Config.Upnp),
+				cx.Config.UPNP),
 			apputil.Float64(
 				"minrelaytxfee",
 				"The minimum transaction fee in DUO/kB to be"+
@@ -397,6 +393,8 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				node.DefaultMaxOrphanTransactions,
 				cx.Config.MaxOrphanTxs),
 			apputil.String(
+				// TODO: remove this as mining only one algo is
+				//  not advisable
 				"algo",
 				"Sets the algorithm for the CPU miner ( blake14lr,"+
 					" cryptonight7v2, keccak, lyra2rev2, scrypt, sha256d, stribog,"+
@@ -404,23 +402,35 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				"random",
 				cx.Config.Algo),
 			apputil.Bool(
-				"generate",
+				"generate, g",
 				"Generate (mine) DUO using the CPU",
 				cx.Config.Generate),
 			apputil.Int(
-				"genthreads",
+				"genthreads, G",
 				"Number of CPU threads to use with CPU miner"+
 					" -1 = all cores",
 				-1,
 				cx.Config.GenThreads),
+			apputil.Bool(
+				"solo",
+				"mine DUO even if not connected to the network",
+				cx.Config.Solo),
 			apputil.String(
-				"controller",
-				"address to bind miner controller listener",
-				genPassword(),
-				cx.Config.Controller),
+				"broadcastaddress, ba",
+				"sets broadcast listener address for mining controller",
+				broadcast.DefaultAddress,
+				cx.Config.BroadcastAddress),
+			apputil.Bool(
+				"broadcast",
+				"enable broadcasting blocks for workers to mine on",
+				cx.Config.Broadcast),
+			apputil.StringSlice(
+				"workers",
+				"addresses to send out blocks to when broadcast is not enabled",
+				cx.Config.Workers),
 			apputil.Bool(
 				"nocontroller",
-				"disable zeroconf kcp miner controller",
+				"disable miner controller",
 				cx.Config.NoController),
 			apputil.StringSlice(
 				"miningaddr",
@@ -499,7 +509,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 			),
 			apputil.Bool(
 				"relaynonstd",
-				"Relay non-standard transactions regardless of the default" +
+				"Relay non-standard transactions regardless of the default"+
 					" settings for the active network.",
 				cx.Config.RelayNonStd), apputil.Bool("rejectnonstd",
 				"Reject non-standard transactions regardless of"+
@@ -517,7 +527,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 			apputil.String(
 				"walletserver, ws",
 				"set wallet server to connect to",
-				"127.0.0.1:11046",
+				"",
 				cx.Config.WalletServer),
 			apputil.String(
 				"walletpass",

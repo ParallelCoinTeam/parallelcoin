@@ -7,12 +7,11 @@ import (
 	"testing"
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/gcs"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 type MockChainClient struct {
@@ -72,7 +71,7 @@ func makeTestInputWithScript() *InputWithScript {
 }
 
 // TestFindSpends tests that findSpends properly returns spend reports.
-func TestFindSpends(	t *testing.T) {
+func TestFindSpends(t *testing.T) {
 	height := uint32(100000)
 	reqs := []*GetUtxoRequest{
 		{
@@ -101,7 +100,7 @@ func TestFindSpends(	t *testing.T) {
 // TestFindInitialTransactions tests that findInitialTransactions properly
 // returns the transaction corresponding to an output if it is found in the
 // given block.
-func TestFindInitialTransactions(	t *testing.T) {
+func TestFindInitialTransactions(t *testing.T) {
 	hash, _ := chainhash.NewHashFromStr(
 		"e9a66845e05d5abc0ad04ec80f774a7e585c6e8db975962d069a522137b80c1d")
 	outpoint := &wire.OutPoint{Hash: *hash, Index: 0}
@@ -166,7 +165,7 @@ func TestFindInitialTransactions(	t *testing.T) {
 // ensures that dequeueing heights lower than what has already been dequeued
 // will not return requests, as they should be moved internally to the nextBatch
 // slice.
-func TestDequeueAtHeight(	t *testing.T) {
+func TestDequeueAtHeight(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	scanner := NewUtxoScanner(&UtxoScannerConfig{
 		GetBlock:           mockChainClient.GetBlockFromNetwork,
@@ -289,7 +288,7 @@ func TestDequeueAtHeight(	t *testing.T) {
 
 // TestUtxoScannerScanBasic tests that enqueueing a spend request at the height
 // of the spend returns a correct spend report.
-func TestUtxoScannerScanBasic(	t *testing.T) {
+func TestUtxoScannerScanBasic(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	block100000Hash := Block100000.BlockHash()
 	mockChainClient.SetBlockHash(100000, &block100000Hash)
@@ -303,11 +302,11 @@ func TestUtxoScannerScanBasic(	t *testing.T) {
 	})
 	err := scanner.Start()
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	defer func() {
 		err := scanner.Stop()
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}()
 	var (
 		spendReport *SpendReport
@@ -331,7 +330,7 @@ func TestUtxoScannerScanBasic(	t *testing.T) {
 // of the best snapshot properly dispatches spend reports. Internally, this
 // tests that the rescan detects a difference in the original best height and
 // the best height after a rescan, and then continues scans up to the new tip.
-func TestUtxoScannerScanAddBlocks(	t *testing.T) {
+func TestUtxoScannerScanAddBlocks(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	block99999Hash := Block99999.BlockHash()
 	mockChainClient.SetBlockHash(99999, &block99999Hash)
@@ -355,11 +354,11 @@ func TestUtxoScannerScanAddBlocks(	t *testing.T) {
 	})
 	err := scanner.Start()
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	defer func() {
 		err := scanner.Stop()
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}()
 	var (
 		spendReport *SpendReport
@@ -396,7 +395,7 @@ func TestUtxoScannerScanAddBlocks(	t *testing.T) {
 // TestUtxoScannerCancelRequest tests the ability to cancel pending GetUtxo
 // requests, as well as the scanners ability to exit and cancel request when
 // stopped during a batch scan.
-func TestUtxoScannerCancelRequest(	t *testing.T) {
+func TestUtxoScannerCancelRequest(t *testing.T) {
 	mockChainClient := NewMockChainClient()
 	block100000Hash := Block100000.BlockHash()
 	mockChainClient.SetBlockHash(100000, &block100000Hash)
@@ -419,11 +418,11 @@ func TestUtxoScannerCancelRequest(	t *testing.T) {
 	})
 	err := scanner.Start()
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	defer func() {
 		err := scanner.Stop()
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}()
 	// Add the requests in order of their block heights.
 	req100000, err := scanner.Enqueue(makeTestInputWithScript(), 100000)
@@ -488,7 +487,7 @@ func TestUtxoScannerCancelRequest(	t *testing.T) {
 		defer wg.Done()
 		err := scanner.Stop()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	// The second request should be cancelled as soon as the utxoscanner

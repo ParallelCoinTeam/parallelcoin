@@ -2,10 +2,11 @@ package util
 
 import (
 	"bytes"
+	"github.com/p9c/pod/pkg/log"
 	"io"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // TxIndexUnknown is the value returned for a transaction index that is unknown. This is typically because the transaction has not been inserted into a block yet.
@@ -90,7 +91,8 @@ func NewTxFromReader(	r io.Reader) (*Tx, error) {
 	var msgTx wire.MsgTx
 	err := msgTx.Deserialize(r)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	t := Tx{
 		msgTx:   &msgTx,

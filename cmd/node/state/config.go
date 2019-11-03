@@ -4,9 +4,8 @@ import (
 	"net"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Config stores current state of the node
@@ -19,8 +18,6 @@ type Config struct {
 	ActiveMinerKey      []byte
 	ActiveMinRelayTxFee util.Amount
 	ActiveWhitelists    []*net.IPNet
-	DiscoveryUpdate     discovery.RequestFunc
-	RouteableAddress    string
 	DropAddrIndex       bool
 	DropTxIndex         bool
 	DropCfIndex         bool

@@ -4,10 +4,10 @@ import (
 	"os"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 const (
@@ -84,7 +84,7 @@ func isSupportedDbType(	dbType string) bool {
 // 		// read block
 // 		_, err = dr.Read(rbytes)
 // 		if err != nil {
-// 			fmt.Println(err, cl.Ine())
+// 			fmt.Println(err)
 // 		}
 // 		block, err = util.NewBlockFromBytes(rbytes)
 // 		if err != nil {

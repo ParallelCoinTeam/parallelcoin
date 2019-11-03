@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs"
 )
 
 func genRandFilterElements(	numElements uint) ([][]byte, error) {

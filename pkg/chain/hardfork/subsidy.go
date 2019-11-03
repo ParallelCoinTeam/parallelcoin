@@ -2,9 +2,10 @@ package hardfork
 
 import (
 	"encoding/hex"
+	"github.com/p9c/pod/pkg/log"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Payee is an address and amount
@@ -73,7 +74,8 @@ var (
 func Amt(f float64) (amt util.Amount) {
 	amt, err := util.NewAmount(f)
 	if err != nil {
-		panic(err)
+		log.ERROR(err)
+panic(err)
 	}
 	return
 }
@@ -81,7 +83,8 @@ func Amt(f float64) (amt util.Amount) {
 func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
 	out, err := util.DecodeAddress(addr, defaultNet)
 	if err != nil {
-		panic(err)
+		log.ERROR(err)
+panic(err)
 	}
 	return
 }
@@ -89,7 +92,8 @@ func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
 func Key(key string) (out []byte) {
 	out, err := hex.DecodeString(key)
 	if err != nil {
-		panic(err)
+		log.ERROR(err)
+panic(err)
 	}
 	return
 }

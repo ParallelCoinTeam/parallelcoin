@@ -6,15 +6,14 @@ import (
 	"sort"
 	"testing"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // TestOutputSplittingNotEnoughInputs checks that an output will get split if we
@@ -29,7 +28,7 @@ func TestOutputSplittingNotEnoughInputs(t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	net := pool.Manager().ChainParams()
@@ -80,7 +79,7 @@ func TestOutputSplittingOversizeTx(t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	requestAmount := util.Amount(5)
@@ -141,7 +140,7 @@ func TestSplitLastOutputNoOutputs(t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	w := newWithdrawal(0, []OutputRequest{}, []Credit{}, ChangeAddress{})
@@ -162,7 +161,7 @@ func TestWithdrawalTxOutputs(t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	net := pool.Manager().ChainParams()
@@ -203,7 +202,7 @@ func TestFulfillRequestsNoSatisfiableOutputs(t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	seriesID, eligible := TstCreateCreditsOnNewSeries(t, dbtx, pool, []int64{1e6})
@@ -230,7 +229,7 @@ func TestFulfillRequestsNoSatisfiableOutputs(t *testing.T) {
 
 // Check that some requested outputs are not fulfilled when we don't have credits for all
 // of them.
-func TestFulfillRequestsNotEnoughCreditsForAllRequests(	t *testing.T) {
+func TestFulfillRequestsNotEnoughCreditsForAllRequests(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -240,7 +239,7 @@ func TestFulfillRequestsNotEnoughCreditsForAllRequests(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	net := pool.Manager().ChainParams()
@@ -287,7 +286,7 @@ func TestFulfillRequestsNotEnoughCreditsForAllRequests(	t *testing.T) {
 
 // TestRollbackLastOutput tests the case where we rollback one output
 // and one input, such that sum(in) >= sum(out) + fee.
-func TestRollbackLastOutput(	t *testing.T) {
+func TestRollbackLastOutput(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -297,7 +296,7 @@ func TestRollbackLastOutput(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{3, 3, 2, 1, 3}, []int64{3, 3, 2, 2})
@@ -326,7 +325,7 @@ func TestRollbackLastOutput(	t *testing.T) {
 	checkTxOutputs(t, tx, initialOutputs[:len(initialOutputs)-1])
 	checkTxInputs(t, tx, initialInputs[:len(initialInputs)-1])
 }
-func TestRollbackLastOutputMultipleInputsRolledBack(	t *testing.T) {
+func TestRollbackLastOutputMultipleInputsRolledBack(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -336,7 +335,7 @@ func TestRollbackLastOutputMultipleInputsRolledBack(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	// This tx will need the 3 last inputs to fulfill the second output, so they
@@ -365,7 +364,7 @@ func TestRollbackLastOutputMultipleInputsRolledBack(	t *testing.T) {
 
 // TestRollbackLastOutputNoInputsRolledBack tests the case where we roll back
 // one output but don't need to roll back any inputs.
-func TestRollbackLastOutputNoInputsRolledBack(	t *testing.T) {
+func TestRollbackLastOutputNoInputsRolledBack(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -375,7 +374,7 @@ func TestRollbackLastOutputNoInputsRolledBack(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{4}, []int64{2, 3})
@@ -404,7 +403,7 @@ func TestRollbackLastOutputNoInputsRolledBack(	t *testing.T) {
 // TestRollBackLastOutputInsufficientOutputs checks that
 // rollBackLastOutput returns an error if there are less than two
 // outputs in the transaction.
-func TestRollBackLastOutputInsufficientOutputs(	t *testing.T) {
+func TestRollBackLastOutputInsufficientOutputs(t *testing.T) {
 	tx := newWithdrawalTx(defaultTxOptions)
 	_, _, err := tx.rollBackLastOutput()
 	TstCheckError(t, "", err, ErrPreconditionNotMet)
@@ -417,7 +416,7 @@ func TestRollBackLastOutputInsufficientOutputs(	t *testing.T) {
 
 // TestRollbackLastOutputWhenNewOutputAdded checks that we roll back the last
 // output if a tx becomes too big right after we add a new output to it.
-func TestRollbackLastOutputWhenNewOutputAdded(	t *testing.T) {
+func TestRollbackLastOutputWhenNewOutputAdded(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -427,7 +426,7 @@ func TestRollbackLastOutputWhenNewOutputAdded(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	net := pool.Manager().ChainParams()
@@ -473,7 +472,7 @@ func TestRollbackLastOutputWhenNewOutputAdded(	t *testing.T) {
 
 // TestRollbackLastOutputWhenNewInputAdded checks that we roll back the last
 // output if a tx becomes too big right after we add a new input to it.
-func TestRollbackLastOutputWhenNewInputAdded(	t *testing.T) {
+func TestRollbackLastOutputWhenNewInputAdded(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -483,7 +482,7 @@ func TestRollbackLastOutputWhenNewInputAdded(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	net := pool.Manager().ChainParams()
@@ -535,7 +534,7 @@ func TestRollbackLastOutputWhenNewInputAdded(	t *testing.T) {
 	wantInputs := []Credit{eligible[4], eligible[3], eligible[2]}
 	checkTxInputs(t, secondTx, wantInputs)
 }
-func TestWithdrawalTxRemoveOutput(	t *testing.T) {
+func TestWithdrawalTxRemoveOutput(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -545,7 +544,7 @@ func TestWithdrawalTxRemoveOutput(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{}, []int64{1, 2})
@@ -567,7 +566,7 @@ func TestWithdrawalTxRemoveOutput(	t *testing.T) {
 		t.Fatalf("Wrong output: got %v, want %v", tx.outputs[0], remainingOutput)
 	}
 }
-func TestWithdrawalTxRemoveInput(	t *testing.T) {
+func TestWithdrawalTxRemoveInput(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -577,7 +576,7 @@ func TestWithdrawalTxRemoveInput(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{1, 2}, []int64{})
@@ -597,7 +596,7 @@ func TestWithdrawalTxRemoveInput(	t *testing.T) {
 		t.Fatalf("Wrong input: got %v, want %v", tx.inputs[0], remainingInput)
 	}
 }
-func TestWithdrawalTxAddChange(	t *testing.T) {
+func TestWithdrawalTxAddChange(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -607,7 +606,7 @@ func TestWithdrawalTxAddChange(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	input, output, fee := int64(4e6), int64(3e6), int64(10)
@@ -630,7 +629,7 @@ func TestWithdrawalTxAddChange(	t *testing.T) {
 // TestWithdrawalTxAddChangeNoChange checks that withdrawalTx.addChange() does not
 // add a change output when there's no satoshis left after paying all
 // outputs+fees.
-func TestWithdrawalTxAddChangeNoChange(	t *testing.T) {
+func TestWithdrawalTxAddChangeNoChange(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -640,7 +639,7 @@ func TestWithdrawalTxAddChangeNoChange(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	input, output, fee := int64(4e6), int64(4e6), int64(0)
@@ -654,7 +653,7 @@ func TestWithdrawalTxAddChangeNoChange(	t *testing.T) {
 		t.Fatalf("Unexpected number of txouts; got %d, want 1", len(msgtx.TxOut))
 	}
 }
-func TestWithdrawalTxToMsgTxNoInputsOrOutputsOrChange(	t *testing.T) {
+func TestWithdrawalTxToMsgTxNoInputsOrOutputsOrChange(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -664,7 +663,7 @@ func TestWithdrawalTxToMsgTxNoInputsOrOutputsOrChange(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{}, []int64{})
@@ -672,7 +671,7 @@ func TestWithdrawalTxToMsgTxNoInputsOrOutputsOrChange(	t *testing.T) {
 	compareMsgTxAndWithdrawalTxOutputs(t, msgtx, tx)
 	compareMsgTxAndWithdrawalTxInputs(t, msgtx, tx)
 }
-func TestWithdrawalTxToMsgTxNoInputsOrOutputsWithChange(	t *testing.T) {
+func TestWithdrawalTxToMsgTxNoInputsOrOutputsWithChange(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -682,7 +681,7 @@ func TestWithdrawalTxToMsgTxNoInputsOrOutputsWithChange(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{}, []int64{})
@@ -691,7 +690,7 @@ func TestWithdrawalTxToMsgTxNoInputsOrOutputsWithChange(	t *testing.T) {
 	compareMsgTxAndWithdrawalTxOutputs(t, msgtx, tx)
 	compareMsgTxAndWithdrawalTxInputs(t, msgtx, tx)
 }
-func TestWithdrawalTxToMsgTxWithInputButNoOutputsWithChange(	t *testing.T) {
+func TestWithdrawalTxToMsgTxWithInputButNoOutputsWithChange(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -701,7 +700,7 @@ func TestWithdrawalTxToMsgTxWithInputButNoOutputsWithChange(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{1}, []int64{})
@@ -710,7 +709,7 @@ func TestWithdrawalTxToMsgTxWithInputButNoOutputsWithChange(	t *testing.T) {
 	compareMsgTxAndWithdrawalTxOutputs(t, msgtx, tx)
 	compareMsgTxAndWithdrawalTxInputs(t, msgtx, tx)
 }
-func TestWithdrawalTxToMsgTxWithInputOutputsAndChange(	t *testing.T) {
+func TestWithdrawalTxToMsgTxWithInputOutputsAndChange(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -720,7 +719,7 @@ func TestWithdrawalTxToMsgTxWithInputOutputsAndChange(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{1, 2, 3}, []int64{4, 5, 6})
@@ -729,7 +728,7 @@ func TestWithdrawalTxToMsgTxWithInputOutputsAndChange(	t *testing.T) {
 	compareMsgTxAndWithdrawalTxOutputs(t, msgtx, tx)
 	compareMsgTxAndWithdrawalTxInputs(t, msgtx, tx)
 }
-func TestWithdrawalTxInputTotal(	t *testing.T) {
+func TestWithdrawalTxInputTotal(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -739,7 +738,7 @@ func TestWithdrawalTxInputTotal(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{5}, []int64{})
@@ -747,7 +746,7 @@ func TestWithdrawalTxInputTotal(	t *testing.T) {
 		t.Fatalf("Wrong total output; got %v, want %v", tx.outputTotal(), util.Amount(5))
 	}
 }
-func TestWithdrawalTxOutputTotal(	t *testing.T) {
+func TestWithdrawalTxOutputTotal(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -757,7 +756,7 @@ func TestWithdrawalTxOutputTotal(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{}, []int64{4})
@@ -766,7 +765,7 @@ func TestWithdrawalTxOutputTotal(	t *testing.T) {
 		t.Fatalf("Wrong total output; got %v, want %v", tx.outputTotal(), util.Amount(4))
 	}
 }
-func TestWithdrawalInfoMatch(	t *testing.T) {
+func TestWithdrawalInfoMatch(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -776,7 +775,7 @@ func TestWithdrawalInfoMatch(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	roundID := uint32(0)
@@ -836,7 +835,7 @@ func TestWithdrawalInfoMatch(	t *testing.T) {
 		t.Fatal("Should not match as changeStart is not equal.")
 	}
 }
-func TestGetWithdrawalStatus(	t *testing.T) {
+func TestGetWithdrawalStatus(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -846,7 +845,7 @@ func TestGetWithdrawalStatus(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -885,7 +884,7 @@ func TestGetWithdrawalStatus(	t *testing.T) {
 		t.Fatalf("Expected a nil status, got %v", status)
 	}
 }
-func TestSignMultiSigUTXO(	t *testing.T) {
+func TestSignMultiSigUTXO(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -895,7 +894,7 @@ func TestSignMultiSigUTXO(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -916,7 +915,7 @@ func TestSignMultiSigUTXO(	t *testing.T) {
 		}
 	})
 }
-func TestSignMultiSigUTXOUnparseablePkScript(	t *testing.T) {
+func TestSignMultiSigUTXOUnparseablePkScript(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -926,7 +925,7 @@ func TestSignMultiSigUTXOUnparseablePkScript(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -937,7 +936,7 @@ func TestSignMultiSigUTXOUnparseablePkScript(	t *testing.T) {
 	err = signMultiSigUTXO(mgr, addrmgrNs, msgtx, 0, unparseablePkScript, []RawSig{{}})
 	TstCheckError(t, "", err, ErrTxSigning)
 }
-func TestSignMultiSigUTXOPkScriptNotP2SH(	t *testing.T) {
+func TestSignMultiSigUTXOPkScriptNotP2SH(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -947,7 +946,7 @@ func TestSignMultiSigUTXOPkScriptNotP2SH(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -959,7 +958,7 @@ func TestSignMultiSigUTXOPkScriptNotP2SH(	t *testing.T) {
 	err = signMultiSigUTXO(mgr, addrmgrNs, msgtx, 0, pubKeyHashPkScript, []RawSig{{}})
 	TstCheckError(t, "", err, ErrTxSigning)
 }
-func TestSignMultiSigUTXORedeemScriptNotFound(	t *testing.T) {
+func TestSignMultiSigUTXORedeemScriptNotFound(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -969,7 +968,7 @@ func TestSignMultiSigUTXORedeemScriptNotFound(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -986,7 +985,7 @@ func TestSignMultiSigUTXORedeemScriptNotFound(	t *testing.T) {
 	err = signMultiSigUTXO(mgr, addrmgrNs, msgtx, 0, pkScript, []RawSig{{}})
 	TstCheckError(t, "", err, ErrTxSigning)
 }
-func TestSignMultiSigUTXONotEnoughSigs(	t *testing.T) {
+func TestSignMultiSigUTXONotEnoughSigs(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -996,7 +995,7 @@ func TestSignMultiSigUTXONotEnoughSigs(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -1018,7 +1017,7 @@ func TestSignMultiSigUTXONotEnoughSigs(	t *testing.T) {
 	})
 	TstCheckError(t, "", err, ErrTxSigning)
 }
-func TestSignMultiSigUTXOWrongRawSigs(	t *testing.T) {
+func TestSignMultiSigUTXOWrongRawSigs(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -1028,7 +1027,7 @@ func TestSignMultiSigUTXOWrongRawSigs(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -1042,7 +1041,7 @@ func TestSignMultiSigUTXOWrongRawSigs(	t *testing.T) {
 	})
 	TstCheckError(t, "", err, ErrTxSigning)
 }
-func TestGetRawSigs(	t *testing.T) {
+func TestGetRawSigs(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -1052,7 +1051,7 @@ func TestGetRawSigs(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -1072,7 +1071,7 @@ func TestGetRawSigs(	t *testing.T) {
 	// valid.
 	signTxAndValidate(t, pool.Manager(), addrmgrNs, msgtx, txSigs, tx.inputs)
 }
-func TestGetRawSigsOnlyOnePrivKeyAvailable(	t *testing.T) {
+func TestGetRawSigsOnlyOnePrivKeyAvailable(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -1082,7 +1081,7 @@ func TestGetRawSigsOnlyOnePrivKeyAvailable(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{5e6, 4e6}, []int64{})
@@ -1101,7 +1100,7 @@ func TestGetRawSigsOnlyOnePrivKeyAvailable(	t *testing.T) {
 	}
 	checkNonEmptySigsForPrivKeys(t, txSigs, series.privateKeys)
 }
-func TestGetRawSigsUnparseableRedeemScript(	t *testing.T) {
+func TestGetRawSigsUnparseableRedeemScript(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -1111,7 +1110,7 @@ func TestGetRawSigsUnparseableRedeemScript(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{5e6, 4e6}, []int64{})
@@ -1121,7 +1120,7 @@ func TestGetRawSigsUnparseableRedeemScript(	t *testing.T) {
 	_, err = getRawSigs([]*withdrawalTx{tx})
 	TstCheckError(t, "", err, ErrRawSigning)
 }
-func TestGetRawSigsInvalidAddrBranch(	t *testing.T) {
+func TestGetRawSigsInvalidAddrBranch(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -1131,7 +1130,7 @@ func TestGetRawSigsInvalidAddrBranch(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{5e6, 4e6}, []int64{})
@@ -1144,7 +1143,7 @@ func TestGetRawSigsInvalidAddrBranch(	t *testing.T) {
 
 // TestOutBailmentIDSort tests that we can correctly sort a slice
 // of output requests by the hash of the outbailmentID.
-func TestOutBailmentIDSort(	t *testing.T) {
+func TestOutBailmentIDSort(t *testing.T) {
 	or00 := OutputRequest{cachedHash: []byte{0, 0}}
 	or01 := OutputRequest{cachedHash: []byte{0, 1}}
 	or10 := OutputRequest{cachedHash: []byte{1, 0}}
@@ -1156,7 +1155,7 @@ func TestOutBailmentIDSort(	t *testing.T) {
 		t.Fatalf("Sort failed; got %v, want %v", random, want)
 	}
 }
-func TestTxTooBig(	t *testing.T) {
+func TestTxTooBig(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -1166,7 +1165,7 @@ func TestTxTooBig(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	tx := createWithdrawalTx(t, dbtx, pool, []int64{5}, []int64{1})
@@ -1187,7 +1186,7 @@ func TestTxTooBig(	t *testing.T) {
 			tx.calculateSize(), txMaxSize)
 	}
 }
-func TestTxSizeCalculation(	t *testing.T) {
+func TestTxSizeCalculation(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -1197,7 +1196,7 @@ func TestTxSizeCalculation(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -1237,7 +1236,7 @@ func TestTxSizeCalculation(	t *testing.T) {
 		t.Fatalf("Tx size (%d) bigger than estimated size (%d)", msgtx.SerializeSize(), size)
 	}
 }
-func TestTxFeeEstimationForSmallTx(	t *testing.T) {
+func TestTxFeeEstimationForSmallTx(t *testing.T) {
 	tx := newWithdrawalTx(defaultTxOptions)
 	// A tx that is smaller than 1000 bytes in size should have a fee of 10000
 	// satoshis.
@@ -1248,7 +1247,7 @@ func TestTxFeeEstimationForSmallTx(	t *testing.T) {
 		t.Fatalf("Unexpected tx fee; got %v, want %v", fee, wantFee)
 	}
 }
-func TestTxFeeEstimationForLargeTx(	t *testing.T) {
+func TestTxFeeEstimationForLargeTx(t *testing.T) {
 	tx := newWithdrawalTx(defaultTxOptions)
 	// A tx that is larger than 1000 bytes in size should have a fee of 1e3
 	// satoshis plus 1e3 for every 1000 bytes.
@@ -1259,7 +1258,7 @@ func TestTxFeeEstimationForLargeTx(	t *testing.T) {
 		t.Fatalf("Unexpected tx fee; got %v, want %v", fee, wantFee)
 	}
 }
-func TestStoreTransactionsWithoutChangeOutput(	t *testing.T) {
+func TestStoreTransactionsWithoutChangeOutput(t *testing.T) {
 	tearDown, db, pool, store := TstCreatePoolAndTxStore(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -1269,7 +1268,7 @@ func TestStoreTransactionsWithoutChangeOutput(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	txmgrNs := dbtx.ReadWriteBucket(txmgrNamespaceKey)
@@ -1286,7 +1285,7 @@ func TestStoreTransactionsWithoutChangeOutput(	t *testing.T) {
 		t.Fatalf("Unexpected number of credits in txstore; got %d, want 0", len(credits))
 	}
 }
-func TestStoreTransactionsWithChangeOutput(	t *testing.T) {
+func TestStoreTransactionsWithChangeOutput(t *testing.T) {
 	tearDown, db, pool, store := TstCreatePoolAndTxStore(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -1296,7 +1295,7 @@ func TestStoreTransactionsWithChangeOutput(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	txmgrNs := dbtx.ReadWriteBucket(txmgrNamespaceKey)
@@ -1349,7 +1348,7 @@ func TestStoreTransactionsWithChangeOutput(	t *testing.T) {
 // createWithdrawalTxWithStoreCredits creates a new Credit in the given store
 // for each entry in inputAmounts, and uses them to construct a withdrawalTx
 // with one output for every entry in outputAmounts.
-func createWithdrawalTxWithStoreCredits(	t *testing.T, dbtx walletdb.ReadWriteTx, store *wtxmgr.Store, pool *Pool,
+func createWithdrawalTxWithStoreCredits(t *testing.T, dbtx walletdb.ReadWriteTx, store *wtxmgr.Store, pool *Pool,
 	inputAmounts []int64, outputAmounts []int64) *withdrawalTx {
 	masters := []*hdkeychain.ExtendedKey{
 		TstCreateMasterKey(t, bytes.Repeat(uint32ToBytes(getUniqueID()), 4)),
@@ -1375,7 +1374,7 @@ func createWithdrawalTxWithStoreCredits(	t *testing.T, dbtx walletdb.ReadWriteTx
 // one non-empty signature for every non-nil private key in the given list. This
 // is to make sure every signature list matches the specification at
 // http://opentransactions.org/wiki/index.php/Siglist.
-func checkNonEmptySigsForPrivKeys(	t *testing.T, txSigs TxSigs, privKeys []*hdkeychain.ExtendedKey) {
+func checkNonEmptySigsForPrivKeys(t *testing.T, txSigs TxSigs, privKeys []*hdkeychain.ExtendedKey) {
 	for _, txInSigs := range txSigs {
 		if len(txInSigs) != len(privKeys) {
 			t.Fatalf("Number of items in sig list (%d) does not match number of privkeys (%d)",
@@ -1395,7 +1394,7 @@ func checkNonEmptySigsForPrivKeys(	t *testing.T, txSigs TxSigs, privKeys []*hdke
 
 // checkTxOutputs uses reflect.DeepEqual() to ensure that the tx outputs match
 // the given slice of withdrawalTxOuts.
-func checkTxOutputs(	t *testing.T, tx *withdrawalTx, outputs []*withdrawalTxOut) {
+func checkTxOutputs(t *testing.T, tx *withdrawalTx, outputs []*withdrawalTxOut) {
 	nOutputs := len(outputs)
 	if len(tx.outputs) != nOutputs {
 		t.Fatalf("Wrong number of outputs in tx; got %d, want %d", len(tx.outputs), nOutputs)
@@ -1410,7 +1409,7 @@ func checkTxOutputs(	t *testing.T, tx *withdrawalTx, outputs []*withdrawalTxOut)
 // checkMsgTxOutputs checks that the pkScript and amount of every output in the
 // given msgtx match the pkScript and amount of every item in the slice of
 // OutputRequests.
-func checkMsgTxOutputs(	t *testing.T, msgtx *wire.MsgTx, requests []OutputRequest) {
+func checkMsgTxOutputs(t *testing.T, msgtx *wire.MsgTx, requests []OutputRequest) {
 	nRequests := len(requests)
 	if len(msgtx.TxOut) != nRequests {
 		t.Fatalf("Unexpected number of TxOuts; got %d, want %d", len(msgtx.TxOut), nRequests)
@@ -1431,7 +1430,7 @@ func checkMsgTxOutputs(	t *testing.T, msgtx *wire.MsgTx, requests []OutputReques
 }
 
 // checkTxInputs ensures that the tx.inputs match the given inputs.
-func checkTxInputs(	t *testing.T, tx *withdrawalTx, inputs []Credit) {
+func checkTxInputs(t *testing.T, tx *withdrawalTx, inputs []Credit) {
 	if len(tx.inputs) != len(inputs) {
 		t.Fatalf("Wrong number of inputs in tx; got %d, want %d", len(tx.inputs), len(inputs))
 	}
@@ -1445,7 +1444,7 @@ func checkTxInputs(	t *testing.T, tx *withdrawalTx, inputs []Credit) {
 // signTxAndValidate will construct the signature script for each input of the given
 // transaction (using the given raw signatures and the pkScripts from credits) and execute
 // those scripts to validate them.
-func signTxAndValidate(	t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, txSigs TxSigs,
+func signTxAndValidate(t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, txSigs TxSigs,
 	credits []Credit) {
 	for i := range tx.TxIn {
 		pkScript := credits[i].PkScript
@@ -1456,7 +1455,7 @@ func signTxAndValidate(	t *testing.T, mgr *waddrmgr.Manager, addrmgrNs walletdb.
 		})
 	}
 }
-func compareMsgTxAndWithdrawalTxInputs(	t *testing.T, msgtx *wire.MsgTx, tx *withdrawalTx) {
+func compareMsgTxAndWithdrawalTxInputs(t *testing.T, msgtx *wire.MsgTx, tx *withdrawalTx) {
 	if len(msgtx.TxIn) != len(tx.inputs) {
 		t.Fatalf("Wrong number of inputs; got %d, want %d", len(msgtx.TxIn), len(tx.inputs))
 	}
@@ -1467,7 +1466,7 @@ func compareMsgTxAndWithdrawalTxInputs(	t *testing.T, msgtx *wire.MsgTx, tx *wit
 		}
 	}
 }
-func compareMsgTxAndWithdrawalTxOutputs(	t *testing.T, msgtx *wire.MsgTx, tx *withdrawalTx) {
+func compareMsgTxAndWithdrawalTxOutputs(t *testing.T, msgtx *wire.MsgTx, tx *withdrawalTx) {
 	nOutputs := len(tx.outputs)
 	if tx.changeOutput != nil {
 		nOutputs++
@@ -1498,7 +1497,7 @@ func compareMsgTxAndWithdrawalTxOutputs(	t *testing.T, msgtx *wire.MsgTx, tx *wi
 		}
 	}
 }
-func checkTxChangeAmount(	t *testing.T, tx *withdrawalTx, amount util.Amount) {
+func checkTxChangeAmount(t *testing.T, tx *withdrawalTx, amount util.Amount) {
 	if !tx.hasChange() {
 		t.Fatalf("Transaction has no change.")
 	}
@@ -1512,7 +1511,7 @@ func checkTxChangeAmount(	t *testing.T, tx *withdrawalTx, amount util.Amount) {
 // given tx matches newAmount and that the splitRequest amount is equal to
 // origAmount - newAmount. It also checks that splitRequest is identical (except
 // for its amount) to the request of the last output in the tx.
-func checkLastOutputWasSplit(	t *testing.T, w *withdrawal, tx *withdrawalTx,
+func checkLastOutputWasSplit(t *testing.T, w *withdrawal, tx *withdrawalTx,
 	origAmount, newAmount util.Amount) {
 	splitRequest := w.pendingRequests[0]
 	lastOutput := tx.outputs[len(tx.outputs)-1]

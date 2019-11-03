@@ -5,11 +5,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
-func TestPutUsedAddrHash(	t *testing.T) {
+func TestPutUsedAddrHash(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dummyHash := bytes.Repeat([]byte{0x09}, 10)
@@ -33,7 +32,7 @@ func TestPutUsedAddrHash(	t *testing.T) {
 		t.Fatalf("Wrong stored hash; got %x, want %x", storedHash, dummyHash)
 	}
 }
-func TestGetMaxUsedIdx(	t *testing.T) {
+func TestGetMaxUsedIdx(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
@@ -64,7 +63,7 @@ func TestGetMaxUsedIdx(	t *testing.T) {
 		t.Fatalf("Wrong max idx; got %d, want %d", maxIdx, Index(3001))
 	}
 }
-func TestWithdrawalSerialization(	t *testing.T) {
+func TestWithdrawalSerialization(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -74,7 +73,7 @@ func TestWithdrawalSerialization(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -109,7 +108,7 @@ func TestWithdrawalSerialization(	t *testing.T) {
 	}
 	TstCheckWithdrawalStatusMatches(t, wInfo.status, wi.status)
 }
-func TestPutAndGetWithdrawal(	t *testing.T) {
+func TestPutAndGetWithdrawal(t *testing.T) {
 	tearDown, db, _ := TstCreatePool(t)
 	defer tearDown()
 	serialized := bytes.Repeat([]byte{1}, 10)

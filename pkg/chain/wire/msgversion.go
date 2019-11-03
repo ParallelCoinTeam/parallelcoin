@@ -3,11 +3,10 @@ package wire
 import (
 	"bytes"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io"
 	"strings"
 	"time"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MaxUserAgentLen is the maximum allowed length for the user agent field in a version message (MsgVersion).
@@ -58,32 +57,44 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 	err := readElements(buf, &msg.ProtocolVersion, &msg.Services,
 		(*int64Time)(&msg.Timestamp))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = readNetAddress(buf, pver, &msg.AddrYou, false)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	// Protocol versions >= 106 added a from address, nonce, and user agent field and they are only considered present if there are bytes remaining in the message.
 	if buf.Len() > 0 {
 		err = readNetAddress(buf, pver, &msg.AddrMe, false)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}
 	if buf.Len() > 0 {
 		err = readElement(buf, &msg.Nonce)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}
 	if buf.Len() > 0 {
 		userAgent, err := ReadVarString(buf, pver)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		err = validateUserAgent(userAgent)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		msg.UserAgent = userAgent
@@ -92,6 +103,8 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 	if buf.Len() > 0 {
 		err = readElement(buf, &msg.LastBlock)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}
@@ -101,7 +114,8 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		var relayTx bool
 		err = readElement(r, &relayTx)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+		log.ERROR(err)
+fmt.Println(err)
 		}
 		msg.DisableRelayTx = !relayTx
 	}
@@ -112,37 +126,53 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 func (msg *MsgVersion) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
 	err := validateUserAgent(msg.UserAgent)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = writeElements(w, msg.ProtocolVersion, msg.Services,
 		msg.Timestamp.Unix())
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = writeNetAddress(w, pver, &msg.AddrYou, false)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = writeNetAddress(w, pver, &msg.AddrMe, false)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = writeElement(w, msg.Nonce)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = WriteVarString(w, pver, msg.UserAgent)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = writeElement(w, msg.LastBlock)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	// There was no relay transactions field before BIP0037Version.  Also, the wire encoding for the field is true when transactions should be relayed, so reverse it from the DisableRelayTx field.
 	if pver >= BIP0037Version {
 		err = writeElement(w, !msg.DisableRelayTx)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}
@@ -203,6 +233,8 @@ func (msg *MsgVersion) AddUserAgent(name string, version string,
 	newUserAgent = fmt.Sprintf("%s%s/", msg.UserAgent, newUserAgent)
 	err := validateUserAgent(newUserAgent)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	msg.UserAgent = newUserAgent

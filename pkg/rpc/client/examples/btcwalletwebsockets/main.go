@@ -7,9 +7,10 @@ import (
    "time"
    
    "github.com/davecgh/go-spew/spew"
-   
-   rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
+
+	"github.com/p9c/pod/app/appdata"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+   "github.com/p9c/pod/pkg/util"
 )
 
 func main() {
@@ -21,10 +22,11 @@ func main() {
 		},
 	}
 	// Connect to local btcwallet RPC server using websockets.
-	certHomeDir := util.AppDataDir("mod", false)
+	certHomeDir := appdata.Dir("mod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(certHomeDir, "rpc.cert"))
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	connCfg := &rpcclient.ConnConfig{
 		Host:         "localhost:11046",
@@ -35,12 +37,14 @@ func main() {
 	}
 	client, err := rpcclient.New(connCfg, &ntfnHandlers)
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	// Get the list of unspent transaction outputs (utxos) that the connected wallet has at least one private key for.
 	unspent, err := client.ListUnspent()
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	log.Printf("Num unspent outputs (utxos): %d", len(unspent))
 	if len(unspent) > 0 {

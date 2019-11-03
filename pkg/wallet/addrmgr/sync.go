@@ -1,10 +1,11 @@
 package waddrmgr
 
 import (
+	"github.com/p9c/pod/pkg/log"
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // BlockStamp defines a block (by height and a unique hash) and is used to mark
@@ -53,7 +54,8 @@ func (m *Manager) SetSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) error
 	// Update the database.
 	err := putSyncedTo(ns, bs)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	// Update memory now that the database is updated.
 	m.syncState.syncedTo = *bs

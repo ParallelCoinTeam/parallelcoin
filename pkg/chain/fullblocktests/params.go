@@ -5,17 +5,18 @@ import (
 	"math/big"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // newHashFromStr converts the passed big-endian hex string into a wire.Hash.  It only differs from the one available in chainhash in that it panics on an error since it will only (and must only) be called with hard-coded, and therefore known good, hashes.
 func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
 	if err != nil {
-		panic(err)
+		log.ERROR(err)
+panic(err)
 	}
 	return hash
 }
@@ -24,7 +25,8 @@ func newHashFromStr(hexStr string) *chainhash.Hash {
 func fromHex(s string) []byte {
 	r, err := hex.DecodeString(s)
 	if err != nil {
-		panic("invalid hex in source file: " + s)
+		log.ERROR(err)
+panic("invalid hex in source file: " + s)
 	}
 	return r
 }
@@ -109,6 +111,6 @@ var regressionNetParams = &netparams.Params{
 		// BIP44 coin type used in the hierarchical deterministic path for address generation.
 		HDCoinType: 1,
 	},
-	RPCClientPort: "31048",
-	RPCServerPort: "31046",
+	RPCClientPort:       "31048",
+	WalletRPCServerPort: "31046",
 }

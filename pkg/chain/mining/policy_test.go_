@@ -4,17 +4,18 @@ import (
 	"encoding/hex"
 	"testing"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // newHashFromStr converts the passed big-endian hex string into a chainhash.Hash.  It only differs from the one available in chainhash in that it panics on an error since it will only (and must only) be called with hard-coded, and therefore known good, hashes.
 func newHashFromStr(	hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
 	if err != nil {
-		panic("invalid hash in source file: " + hexStr)
+		log.ERROR(err)
+panic("invalid hash in source file: " + hexStr)
 	}
 	return hash
 }
@@ -23,7 +24,8 @@ func newHashFromStr(	hexStr string) *chainhash.Hash {
 func hexToBytes(	s string) []byte {
 	b, err := hex.DecodeString(s)
 	if err != nil {
-		panic("invalid hex in source file: " + s)
+		log.ERROR(err)
+panic("invalid hex in source file: " + s)
 	}
 	return b
 }

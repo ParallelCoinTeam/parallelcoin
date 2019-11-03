@@ -4,9 +4,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // This example demonstrates decrypting a message using a private key that is
@@ -26,7 +25,7 @@ func Example_decryptMessage() {
 		"a44166dc61ea1c419d47077b748a9c06b8d57af72deb2819d98a9d503efc59fc8307" +
 		"d14174f8b83354fac3ff56075162")
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		fmt.Println(err)
 	}
 	// Try decrypting the message.
 	plaintext, err := ec.Decrypt(privKey, ciphertext)

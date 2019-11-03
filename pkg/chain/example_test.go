@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"math/big"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 // // This example demonstrates how to create a new chain instance and use ProcessBlock to attempt to add a block to the chain.  As the package overview documentation describes, this includes all of the Bitcoin consensus rules.  This example intentionally attempts to insert a duplicate genesis block to illustrate how an invalid block is handled.

@@ -2,16 +2,16 @@ package rpctest
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"time"
 
-	rpc "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	rpc "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // nodeConfig contains all the args and data required to launch a pod process
@@ -39,7 +39,8 @@ type nodeConfig struct {
 func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, error) {
 	podPath, err := podExecutablePath()
 	if err != nil {
-		podPath = "pod"
+		log.ERROR(err)
+podPath = "pod"
 	}
 	a := &nodeConfig{
 		listen:    "127.0.0.1:41047",
@@ -65,16 +66,22 @@ func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, e
 func (n *nodeConfig) setDefaults() error {
 	datadir, err := ioutil.TempDir("", n.prefix+"-data")
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	n.dataDir = datadir
 	logdir, err := ioutil.TempDir("", n.prefix+"-logs")
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	n.logDir = logdir
 	cert, err := ioutil.ReadFile(n.certFile)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	n.certificates = cert
@@ -199,6 +206,8 @@ func (n *node) start() error {
 	pid, err := os.Create(filepath.Join(n.dataDir,
 		fmt.Sprintf("%s.pid", n.config)))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	n.pidFile = pid.Name()
@@ -222,7 +231,8 @@ func (n *node) stop() error {
 	defer func() {
 		err := n.cmd.Wait()
 		if err != nil {
-			fmt.Println(err)
+		log.ERROR(err)
+fmt.Println(err)
 		}
 	}()
 	if runtime.GOOS == "windows" {
@@ -262,6 +272,8 @@ func genCertPair(certFile, keyFile string) error {
 	validUntil := time.Now().Add(10 * 365 * 24 * time.Hour)
 	cert, key, err := util.NewTLSCertPair(org, validUntil, nil)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	// Write cert and key files.
