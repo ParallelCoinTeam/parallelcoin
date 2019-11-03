@@ -425,7 +425,7 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 //   -----------------------------------  --
 (g *BlkTmplGenerator) NewBlockTemplate(workerNumber uint32, payToAddress util.
 Address, algo string) (*BlockTemplate, error) {
-	log.TRACE("NewBlockTemplate", algo)
+	//log.TRACE("NewBlockTemplate", algo)
 	if algo == "" {
 		algo = "random"
 	}
@@ -434,7 +434,7 @@ Address, algo string) (*BlockTemplate, error) {
 	nextBlockHeight := best.Height + 1
 	vers := fork.GetAlgoVer(algo, nextBlockHeight)
 	algo = fork.GetAlgoName(vers, nextBlockHeight)
-	log.TRACE("parsed block version", algo, vers)
+	//log.TRACE("parsed block version", algo, vers)
 	// Create a standard coinbase transaction paying to the provided address.
 	// NOTE: The coinbase value will be updated to include the fees from the
 	// selected transactions later after they have actually been selected.  It
@@ -486,8 +486,7 @@ Address, algo string) (*BlockTemplate, error) {
 	txSigOpCosts := make([]int64, 0, len(sourceTxns))
 	txFees = append(txFees, -1) // Updated once known
 	txSigOpCosts = append(txSigOpCosts, coinbaseSigOpCost)
-	log.TRACEF("considering %d transactions for inclusion to new block",
-		len(sourceTxns))
+	//log.TRACEF("considering %d transactions for inclusion to new block", len(sourceTxns))
 mempoolLoop:
 	for _, txDesc := range sourceTxns {
 		// A block can't have more than one coinbase or contain non-finalized
@@ -570,13 +569,13 @@ mempoolLoop:
 		// avoid a second lookup.
 		mergeUtxoView(blockUtxos, utxos)
 	}
-	log.TRACEC(func() string {
-		return fmt.Sprintf(
-			"priority queue len %d, dependers len %d",
-			priorityQueue.Len(),
-			len(dependers),
-		)
-	})
+	//log.TRACEC(func() string {
+	//	return fmt.Sprintf(
+	//		"priority queue len %d, dependers len %d",
+	//		priorityQueue.Len(),
+	//		len(dependers),
+	//	)
+	//})
 	// The starting block size is the size of the block header plus the max
 	// possible transaction count size, plus the size of the coinbase
 	// transaction.
@@ -810,15 +809,14 @@ mempoolLoop:
 	// potentially adjusted to ensure it comes after the median time of the last
 	// several blocks per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
-	log.TRACE("algo ", ts, " ", algo)
+	//log.TRACE("algo ", ts, " ", algo)
 	reqDifficulty, err := g.Chain.CalcNextRequiredDifficulty(workerNumber, ts,
 		algo)
 	if err != nil {
 		log.ERROR(err)
 		return nil, err
 	}
-	log.TRACEF("reqDifficulty %d %08x %064x", vers, reqDifficulty,
-		fork.CompactToBig(reqDifficulty))
+	//log.TRACEF("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
 	var msgBlock wire.MsgBlock

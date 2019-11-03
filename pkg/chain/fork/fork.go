@@ -232,16 +232,16 @@ func GetCurrent(height int32) (curr int) {
 
 // GetMinBits returns the minimum diff bits based on height and testnet
 func GetMinBits(algoname string, height int32) (mb uint32) {
-	log.TRACE("GetMinBits", algoname)
+	//log.TRACE("GetMinBits", algoname)
 	curr := GetCurrent(height)
 	mb = List[curr].Algos[algoname].MinBits
-	log.TRACE("minbits", mb)
+	//log.TRACE("minbits", mb)
 	return
 }
 
 // GetMinDiff returns the minimum difficulty in uint256 form
 func GetMinDiff(algoname string, height int32) (md *big.Int) {
-	log.TRACE("GetMinDiff", algoname)
+	//log.TRACE("GetMinDiff", algoname)
 	return CompactToBig(GetMinBits(algoname, height))
 }
 

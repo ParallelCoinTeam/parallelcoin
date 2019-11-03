@@ -283,7 +283,7 @@ func // Init initializes the hash-based transaction index.  In particular,
 		for {
 			_, err := dbFetchBlockHashByID(dbTx, testBlockID)
 			if err != nil {
-				log.TRACE(err)
+				//log.TRACE(err)
 				nextUnknown = testBlockID
 				break
 			}
@@ -301,7 +301,7 @@ func // Init initializes the hash-based transaction index.  In particular,
 			testBlockID = (highestKnown + nextUnknown) / 2
 			_, err := dbFetchBlockHashByID(dbTx, testBlockID)
 			if err != nil {
-				log.TRACE(err)
+				//log.TRACE(err)
 				nextUnknown = testBlockID
 			} else {
 				highestKnown = testBlockID
