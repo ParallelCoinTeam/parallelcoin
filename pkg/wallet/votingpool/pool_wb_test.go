@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
-func TestPoolEnsureUsedAddr(	t *testing.T) {
+func TestPoolEnsureUsedAddr(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -20,7 +19,7 @@ func TestPoolEnsureUsedAddr(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -72,7 +71,7 @@ func TestPoolEnsureUsedAddr(	t *testing.T) {
 		}
 	}
 }
-func TestPoolGetUsedAddr(	t *testing.T) {
+func TestPoolGetUsedAddr(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -82,7 +81,7 @@ func TestPoolGetUsedAddr(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -120,7 +119,7 @@ func TestPoolGetUsedAddr(	t *testing.T) {
 		t.Fatalf("Script from looked up addr is not what we expect")
 	}
 }
-func TestSerializationErrors(	t *testing.T) {
+func TestSerializationErrors(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -130,7 +129,7 @@ func TestSerializationErrors(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -187,7 +186,7 @@ func TestSerializationErrors(	t *testing.T) {
 		TstCheckError(t, fmt.Sprintf("Test #%d", testNum), err, test.err)
 	}
 }
-func TestSerialization(	t *testing.T) {
+func TestSerialization(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -197,7 +196,7 @@ func TestSerialization(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -299,7 +298,7 @@ func TestSerialization(	t *testing.T) {
 		}
 	}
 }
-func TestDeserializationErrors(	t *testing.T) {
+func TestDeserializationErrors(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		serialized []byte
@@ -336,7 +335,7 @@ func TestDeserializationErrors(	t *testing.T) {
 		TstCheckError(t, fmt.Sprintf("Test #%d", testNum), err, test.err)
 	}
 }
-func TestValidateAndDecryptKeys(	t *testing.T) {
+func TestValidateAndDecryptKeys(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -346,7 +345,7 @@ func TestValidateAndDecryptKeys(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -389,7 +388,7 @@ func TestValidateAndDecryptKeys(	t *testing.T) {
 			pubKeys[0].String(), neuteredKey.String())
 	}
 }
-func TestValidateAndDecryptKeysErrors(	t *testing.T) {
+func TestValidateAndDecryptKeysErrors(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -399,7 +398,7 @@ func TestValidateAndDecryptKeysErrors(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	_, addrmgrNs := TstRWNamespaces(dbtx)
@@ -451,7 +450,7 @@ func TestValidateAndDecryptKeysErrors(	t *testing.T) {
 		TstCheckError(t, fmt.Sprintf("Test #%d", i), err, test.err)
 	}
 }
-func encryptKeys(	keys []string, mgr *waddrmgr.Manager, keyType waddrmgr.CryptoKeyType) ([][]byte, error) {
+func encryptKeys(keys []string, mgr *waddrmgr.Manager, keyType waddrmgr.CryptoKeyType) ([][]byte, error) {
 	encryptedKeys := make([][]byte, len(keys))
 	var err error
 	for i, key := range keys {

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	txsort "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/sort"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	txsort "github.com/p9c/pod/pkg/chain/tx/sort"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // TestSort ensures the transaction sorting works according to the BIP.

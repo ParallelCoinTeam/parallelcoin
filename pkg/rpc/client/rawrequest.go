@@ -3,8 +3,9 @@ package rpcclient
 import (
 	js "encoding/json"
 	"errors"
+	"github.com/p9c/pod/pkg/log"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // FutureRawResult is a future promise to deliver the result of a RawRequest RPC invocation (or an applicable error).
@@ -27,7 +28,7 @@ func (c *Client) RawRequestAsync(method string, params []js.RawMessage) FutureRa
 	}
 	// Create a raw JSON-RPC request using the provided method and netparams and marshal it.  This is done rather than using the sendCmd function since that relies on marshalling registered json commands rather than custom commands.
 	id := c.NextID()
-	rawRequest := &json.Request{
+	rawRequest := &btcjson.Request{
 		Jsonrpc: "1.0",
 		ID:      id,
 		Method:  method,
@@ -35,7 +36,8 @@ func (c *Client) RawRequestAsync(method string, params []js.RawMessage) FutureRa
 	}
 	marshalledJSON, err := js.Marshal(rawRequest)
 	if err != nil {
-		return newFutureError(err)
+		log.ERROR(err)
+return newFutureError(err)
 	}
 	// Generate the request and send it along with a channel to respond on.
 	responseChan := make(chan *response, 1)

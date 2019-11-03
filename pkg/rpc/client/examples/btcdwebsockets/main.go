@@ -6,9 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/chain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func main() {
@@ -24,10 +25,11 @@ func main() {
 		},
 	}
 	// Connect to local pod RPC server using websockets.
-	podHomeDir := util.AppDataDir("pod", false)
+	podHomeDir := appdata.Dir("pod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(podHomeDir, "rpc.cert"))
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	connCfg := &rpcclient.ConnConfig{
 		Host:         "localhost:11048",
@@ -38,7 +40,8 @@ func main() {
 	}
 	client, err := rpcclient.New(connCfg, &ntfnHandlers)
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	// Register for block connect and disconnect notifications.
 	if err := client.NotifyBlocks(); err != nil {
@@ -48,7 +51,8 @@ func main() {
 	// Get the current block count.
 	blockCount, err := client.GetBlockCount()
 	if err != nil {
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	log.Printf("Block count: %d", blockCount)
 	// For this example gracefully shutdown the client after 10 seconds. Ordinarily when to shutdown the client is highly application specific.

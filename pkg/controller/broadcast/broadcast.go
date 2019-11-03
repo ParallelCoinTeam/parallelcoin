@@ -66,7 +66,8 @@ func New(address string) (addr *net.UDPAddr, err error) {
 
 // Listen binds to the UDP address and port given and writes packets received
 // from that address to a buffer which is passed to a handler
-func Listen(address string, handler func(*net.UDPAddr, int, []byte)) (cancel context.CancelFunc) {
+func Listen(address string, handler func(*net.UDPAddr, int,
+	[]byte)) (cancel context.CancelFunc) {
 	var ctx context.Context
 	ctx, cancel = context.WithCancel(context.Background())
 	addr, err := net.ResolveUDPAddr("udp", address)
@@ -121,7 +122,7 @@ func Encode(ciph cipher.AEAD, bytes []byte, typ []byte) (shards [][]byte,
 	}
 	// the nonce groups a broadcast's pieces,
 	// the listener will gather them by this criteria.
-	// The decoder assumes this but a message can be identified by
+	// The decoder does not enforce this but a message can be identified by
 	// its' nonce due to using the same for each piece of the message
 	nonce := make([]byte, ciph.NonceSize())
 	// creates a new byte array the size of the nonce

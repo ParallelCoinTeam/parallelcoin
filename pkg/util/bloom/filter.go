@@ -2,13 +2,14 @@ package bloom
 
 import (
 	"encoding/binary"
+	"github.com/p9c/pod/pkg/log"
 	"math"
 	"sync"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // ln2Squared is simply the square of the natural log of 2.
@@ -202,7 +203,8 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 	for i, txOut := range tx.MsgTx().TxOut {
 		pushedData, err := txscript.PushedData(txOut.PkScript)
 		if err != nil {
-			continue
+		log.ERROR(err)
+continue
 		}
 		for _, data := range pushedData {
 			if !bf.matches(data) {
@@ -224,7 +226,8 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 		}
 		pushedData, err := txscript.PushedData(txin.SignatureScript)
 		if err != nil {
-			continue
+		log.ERROR(err)
+continue
 		}
 		for _, data := range pushedData {
 			if bf.matches(data) {

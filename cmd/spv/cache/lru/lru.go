@@ -3,9 +3,10 @@ package lru
 import (
    "container/list"
    "fmt"
-   "sync"
+	"github.com/p9c/pod/pkg/log"
+	"sync"
    
-   "github.com/parallelcointeam/parallelcoin/cmd/spv/cache"
+   "github.com/p9c/pod/cmd/spv/cache"
 )
 
 // elementMap is an alias for a map from a generic interface to a list.Element.
@@ -68,6 +69,8 @@ func (c *Cache) evict(needed uint64) error {
 			ce := elr.Value.(*entry)
 			es, err := ce.value.Size()
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return fmt.Errorf("couldn't determine size of "+
 					"existing cache value %v", err)
 			}
@@ -87,6 +90,8 @@ func (c *Cache) evict(needed uint64) error {
 func (c *Cache) Put(key interface{}, value cache.Value) error {
 	vs, err := value.Size()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return fmt.Errorf("couldn't determine size of cache value: %v",
 			err)
 	}
@@ -101,6 +106,8 @@ func (c *Cache) Put(key interface{}, value cache.Value) error {
 	if ok {
 		es, err := el.Value.(*entry).value.Size()
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return fmt.Errorf("couldn't determine size of existing"+
 				"cache value %v", err)
 		}

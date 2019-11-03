@@ -6,15 +6,16 @@ import (
 	"crypto/x509"
 	js "encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io/ioutil"
 	"net"
 	"net/http"
 	
 	"github.com/btcsuite/go-socks/socks"
 	
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // newHTTPClient returns a new HTTP client that is configured according to the
@@ -31,6 +32,8 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
 		dial = func(network, addr string) (net.Conn, error) {
 			c, err := proxy.Dial(network, addr)
 			if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 				return nil, err
 			}
 			return c, nil
@@ -41,6 +44,8 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
 	if *cfg.TLS && *cfg.RPCCert != "" {
 		pem, err := ioutil.ReadFile(*cfg.RPCCert)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil, err
 		}
 		pool := x509.NewCertPool()
@@ -81,6 +86,8 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	bodyReader := bytes.NewReader(marshalledJSON)
 	httpRequest, err := http.NewRequest("POST", url, bodyReader)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	httpRequest.Close = true
@@ -91,17 +98,23 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	// - specified options and submit the request.
 	httpClient, err := newHTTPClient(cx.Config)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	// Read the raw bytes and close the response.
 	respBytes, err := ioutil.ReadAll(httpResponse.Body)
 	httpResponse.Body.Close()
 	if err != nil {
-		err = fmt.Errorf("error reading json reply: %v", err)
+		log.ERROR(err)
+err = fmt.Errorf("error reading json reply: %v", err)
+		log.ERROR(err)
 		return nil, err
 	}
 	// Handle unsuccessful HTTP responses
@@ -117,7 +130,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 		return nil, fmt.Errorf("%s", respBytes)
 	}
 	// Unmarshal the response.
-	var resp json.Response
+	var resp btcjson.Response
 	if err := js.Unmarshal(respBytes, &resp); err != nil {
 		return nil, err
 	}

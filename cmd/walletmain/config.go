@@ -20,7 +20,7 @@ type Config struct {
 	NoInitialLoad *bool   `long:"noinitialload" description:"Defer wallet creation/opening on startup and enable loading wallets over RPC"`
 	LogDir        *string `long:"logdir" description:"Directory to log output."`
 	Profile       *string `long:"profile" description:"Enable HTTP profiling on given port -- NOTE port must be between 1024 and 65536"`
-	// GUI           *bool   `long:"gui" description:"Launch GUI"`
+	// GUI           *bool   `long:"__OLDgui" description:"Launch GUI"`
 	// Wallet options
 	WalletPass *string `long:"walletpass" default-mask:"-" description:"The public wallet password -- Only required if the wallet was created with one"`
 	// RPC client options
@@ -493,7 +493,7 @@ err := fmt.Errorf("The flags --create and --createtemp can not " +
 			}
 			dbFileExists, err := cfgutil.FileExists(dbPath)
 			if err != nil {
-log <- cl.Error{err, cl.Ine()}
+log <- cl.Error{err}
 					return nil, nil, err
 				}
 				if cfg.CreateTemp {
@@ -641,21 +641,21 @@ return nil, nil, err
 				}
 				cfg.WalletRPCListeners = make([]string, 0, len(addrs))
 				for _, addr := range addrs {
-addr = net.JoinHostPort(addr, activeNet.RPCServerPort)
+addr = net.JoinHostPort(addr, activeNet.WalletRPCServerPort)
 						cfg.WalletRPCListeners = append(cfg.WalletRPCListeners, addr)
 					}
 				}
 				// Add default port to all rpc listener addresses if needed and remove
 				// duplicate addresses.
 		cfg.WalletRPCListeners, err = cfgutil.NormalizeAddresses(
-				cfg.WalletRPCListeners, activeNet.RPCServerPort)
+				cfg.WalletRPCListeners, activeNet.WalletRPCServerPort)
 			if err != nil {
 fmt.Fprintf(os.Stderr,
 							"Invalid network address in legacy RPC listeners: %v\n", err)
 						return nil, nil, err
 					}
 					cfg.ExperimentalRPCListeners, err = cfgutil.NormalizeAddresses(
-			cfg.ExperimentalRPCListeners, activeNet.RPCServerPort)
+			cfg.ExperimentalRPCListeners, activeNet.WalletRPCServerPort)
 		if err != nil {
 fmt.Fprintf(os.Stderr,
 						"Invalid network address in RPC listeners: %v\n", err)

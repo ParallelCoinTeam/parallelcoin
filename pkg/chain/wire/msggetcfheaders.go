@@ -1,9 +1,10 @@
 package wire
 
 import (
+	"github.com/p9c/pod/pkg/log"
 	"io"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // MsgGetCFHeaders is a message similar to MsgGetHeaders, but for committed filter headers. It allows to set the FilterType field to get headers in the chain of basic (0x00) or extended (0x01) headers.
@@ -17,10 +18,14 @@ type MsgGetCFHeaders struct {
 func (msg *MsgGetCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) error {
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = readElement(r, &msg.StartHeight)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	return readElement(r, &msg.StopHash)
@@ -30,10 +35,14 @@ func (msg *MsgGetCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncodin
 func (msg *MsgGetCFHeaders) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) error {
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = writeElement(w, &msg.StartHeight)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	return writeElement(w, &msg.StopHash)

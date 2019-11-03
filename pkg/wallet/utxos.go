@@ -1,9 +1,10 @@
 package wallet
 
 import (
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // OutputSelectionPolicy describes the rules for selecting an output from the
@@ -29,7 +30,8 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 		// all of them at once.
 		outputs, err := w.TxStore.UnspentOutputs(txmgrNs)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 		for _, output := range outputs {
 			// Ignore outputs that haven't reached the required
@@ -49,7 +51,8 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 			}
 			_, outputAcct, err := w.Manager.AddrAccount(addrmgrNs, addrs[0])
 			if err != nil {
-				return err
+		log.ERROR(err)
+return err
 			}
 			if outputAcct != policy.Account {
 				continue

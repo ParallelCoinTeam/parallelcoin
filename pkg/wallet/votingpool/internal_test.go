@@ -1,10 +1,10 @@
 package votingpool
 
 import (
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 var TstLastErr = lastErr
@@ -12,16 +12,16 @@ var TstLastErr = lastErr
 // const TstEligibleInputMinConfirmations = eligibleInputMinConfirmations
 
 // TstPutSeries transparently wraps the voting pool putSeries method.
-func (vp *Pool) TstPutSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs uint32, inRawPubKeys []string) error {
-	return vp.putSeries(ns, version, seriesID, reqSigs, inRawPubKeys)
+func (p *Pool) TstPutSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs uint32, inRawPubKeys []string) error {
+	return p.putSeries(ns, version, seriesID, reqSigs, inRawPubKeys)
 }
 
 var TstBranchOrder = branchOrder
 
 // TstExistsSeries checks whether a series is stored in the database.
-func (vp *Pool) TstExistsSeries(dbtx walletdb.ReadTx, seriesID uint32) (bool, error) {
+func (p *Pool) TstExistsSeries(dbtx walletdb.ReadTx, seriesID uint32) (bool, error) {
 	ns, _ := TstRNamespaces(dbtx)
-	poolBucket := ns.NestedReadBucket(vp.ID)
+	poolBucket := ns.NestedReadBucket(p.ID)
 	if poolBucket == nil {
 		return false, nil
 	}
@@ -58,13 +58,13 @@ func (s *SeriesData) TstGetReqSigs() uint32 {
 }
 
 // TstEmptySeriesLookup empties the voting pool seriesLookup attribute.
-func (vp *Pool) TstEmptySeriesLookup() {
-	vp.seriesLookup = make(map[uint32]*SeriesData)
+func (p *Pool) TstEmptySeriesLookup() {
+	p.seriesLookup = make(map[uint32]*SeriesData)
 }
 
 // TstDecryptExtendedKey expose the decryptExtendedKey method.
-func (vp *Pool) TstDecryptExtendedKey(keyType waddrmgr.CryptoKeyType, encrypted []byte) (*hdkeychain.ExtendedKey, error) {
-	return vp.decryptExtendedKey(keyType, encrypted)
+func (p *Pool) TstDecryptExtendedKey(keyType waddrmgr.CryptoKeyType, encrypted []byte) (*hdkeychain.ExtendedKey, error) {
+	return p.decryptExtendedKey(keyType, encrypted)
 }
 
 // TstGetMsgTx returns a copy of the withdrawal transaction with the given

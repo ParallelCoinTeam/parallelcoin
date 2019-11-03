@@ -10,7 +10,7 @@ import (
 	"log"
 	"os"
 
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 func main() {
@@ -18,8 +18,8 @@ func main() {
 	fi, err := os.Create("secp256k1.go")
 
 	if err != nil {
-
-		log.Fatal(err)
+		log.ERROR(err)
+log.Fatal(err)
 	}
 	defer fi.Close()
 

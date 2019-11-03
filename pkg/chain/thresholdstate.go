@@ -2,8 +2,9 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // ThresholdState define the various threshold states used when voting on consensus changes.
@@ -151,6 +152,8 @@ func (b *BlockChain) thresholdState(prevNode *blockNode, checker thresholdCondit
 			for i := int32(0); i < confirmationWindow; i++ {
 				condition, err := checker.Condition(countNode)
 				if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 					return ThresholdFailed, err
 				}
 				if condition {
@@ -190,6 +193,8 @@ func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (bool, error) {
 	state, err := b.deploymentState(b.bestChain.Tip(), deploymentID)
 	b.chainLock.Unlock()
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return false, err
 	}
 	return state == ThresholdActive, nil
@@ -221,6 +226,8 @@ func (b *BlockChain) initThresholdCaches() error {
 		cache := &b.warningCaches[bit]
 		_, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}
@@ -230,6 +237,8 @@ func (b *BlockChain) initThresholdCaches() error {
 		checker := deploymentChecker{deployment: deployment, chain: b}
 		_, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}

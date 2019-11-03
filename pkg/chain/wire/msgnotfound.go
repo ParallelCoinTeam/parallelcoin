@@ -2,9 +2,8 @@ package wire
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MsgNotFound defines a bitcoin notfound message which is sent in response to a getdata message if any of the requested data in not available on the peer. Each message is limited to a maximum number of inventory vectors, which is currently 50,000. Use the AddInvVect function to build up the list of inventory vectors when sending a notfound message to another peer.
@@ -27,6 +26,8 @@ func (msg *MsgNotFound) AddInvVect(iv *InvVect) error {
 func (msg *MsgNotFound) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	// Limit to max inventory vectors per message.
@@ -41,11 +42,14 @@ func (msg *MsgNotFound) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding)
 		iv := &invList[i]
 		err := readInvVect(r, pver, iv)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		err = msg.AddInvVect(iv)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+		log.ERROR(err)
+fmt.Println(err)
 		}
 	}
 	return nil
@@ -61,11 +65,15 @@ func (msg *MsgNotFound) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding)
 	}
 	err := WriteVarInt(w, pver, uint64(count))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	for _, iv := range msg.InvList {
 		err := writeInvVect(w, pver, iv)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}

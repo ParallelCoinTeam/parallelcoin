@@ -1,6 +1,6 @@
 package util_test
 
-// . "github.com/parallelcointeam/parallelcoin/pkg/util"
+// . "github.com/p9c/pod/pkg/util"
 
 // func TestEncodeDecodeWIF(// 	t *testing.T) {
 // 	priv1, _ := ec.PrivKeyFromBytes(ec.S256(), []byte{

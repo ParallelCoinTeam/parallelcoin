@@ -10,13 +10,13 @@ import (
 	"strconv"
 	"time"
 
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // Maximum tx size (in bytes). This should be the same as bitcoind's
@@ -138,7 +138,8 @@ func (s outputStatus) String() string {
 func (tx *changeAwareTx) addSelfToStore(store *wtxmgr.Store, txmgrNs walletdb.ReadWriteBucket) error {
 	rec, err := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx, time.Now())
 	if err != nil {
-		return newError(ErrWithdrawalTxStorage, "error constructing TxRecord for storing", err)
+		log.ERROR(err)
+return newError(ErrWithdrawalTxStorage, "error constructing TxRecord for storing", err)
 	}
 	if err := store.InsertTx(txmgrNs, rec, nil); err != nil {
 		return newError(ErrWithdrawalTxStorage, "error adding tx to store", err)
@@ -352,28 +353,23 @@ func (tx *withdrawalTx) toMsgTx() *wire.MsgTx {
 
 // addOutput adds a new output to this transaction.
 func (tx *withdrawalTx) addOutput(request OutputRequest) {
-	log <- cl.Debugf{
-		"added tx output sending %s to %s %s",
-		request.Amount,
-		request.Address, cl.Ine()}
-	tx.outputs = append(tx.outputs, &withdrawalTxOut{request: request, amount: request.Amount})
+	log.DEBUGF(	"added tx output sending %s to %s %s",
+		request.Amount,		request.Address)
+tx.outputs = append(tx.outputs, &withdrawalTxOut{request: request, amount: request.Amount})
 }
 
 // removeOutput removes the last added output and returns it.
 func (tx *withdrawalTx) removeOutput() *withdrawalTxOut {
 	removed := tx.outputs[len(tx.outputs)-1]
 	tx.outputs = tx.outputs[:len(tx.outputs)-1]
-	log <- cl.Debugf{
-		"removed tx output sending %s to %s %s",
-		removed.amount,
-		removed.request.Address, cl.Ine()}
+	log.DEBUGF("removed tx output sending %s to %s %s",
+		removed.amount, removed.request.Address)
 	return removed
 }
 
 // addInput adds a new input to this transaction.
 func (tx *withdrawalTx) addInput(input Credit) {
-	log <- cl.Debug{
-		"added tx input with amount", input.Amount, cl.Ine()}
+	log.DEBUG("added tx input with amount", input.Amount)
 	tx.inputs = append(tx.inputs, input)
 }
 
@@ -381,8 +377,7 @@ func (tx *withdrawalTx) addInput(input Credit) {
 func (tx *withdrawalTx) removeInput() Credit {
 	removed := tx.inputs[len(tx.inputs)-1]
 	tx.inputs = tx.inputs[:len(tx.inputs)-1]
-	log <- cl.Debug{
-		"removed tx input with amount", removed.Amount, cl.Ine()}
+	log.DEBUG("removed tx input with amount", removed.Amount)
 	return removed
 }
 
@@ -396,15 +391,11 @@ func (tx *withdrawalTx) removeInput() Credit {
 func (tx *withdrawalTx) addChange(pkScript []byte) bool {
 	tx.fee = tx.calculateFee()
 	change := tx.inputTotal() - tx.outputTotal() - tx.fee
-	log <- cl.Debugf{
-		"addChange: input total %v, output total %v, fee %v %s",
-		tx.inputTotal(),
-		tx.outputTotal(),
-		tx.fee, cl.Ine()}
+	log.DEBUGF("addChange: input total %v, output total %v, fee %v %s",
+		tx.inputTotal(), tx.outputTotal(), tx.fee)
 	if change > 0 {
 		tx.changeOutput = wire.NewTxOut(int64(change), pkScript)
-		log <- cl.Debug{
-			"added change output with amount", change, cl.Ine()}
+		log.DEBUG("added change output with amount", change)
 	}
 	return tx.hasChange()
 }
@@ -470,7 +461,8 @@ func (p *Pool) StartWithdrawal(ns walletdb.ReadWriteBucket,
 	status, err := getWithdrawalStatus(p, ns, addrmgrNs, roundID, requests, startAddress, lastSeriesID,
 		changeStart, dustThreshold)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	if status != nil {
 		return status, nil
@@ -478,7 +470,8 @@ func (p *Pool) StartWithdrawal(ns walletdb.ReadWriteBucket,
 	eligible, err := p.getEligibleInputs(ns, addrmgrNs, txStore, txmgrNs, startAddress, lastSeriesID, dustThreshold,
 		chainHeight, eligibleInputMinConfirmations)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	w := newWithdrawal(roundID, requests, eligible, changeStart)
 	if err := w.fulfillRequests(); err != nil {
@@ -486,16 +479,19 @@ func (p *Pool) StartWithdrawal(ns walletdb.ReadWriteBucket,
 	}
 	w.status.sigs, err = getRawSigs(w.transactions)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	serialized, err := serializeWithdrawal(requests, startAddress, lastSeriesID, changeStart,
 		dustThreshold, *w.status)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	err = putWithdrawal(ns, p.ID, roundID, serialized)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return w.status, nil
 }
@@ -542,7 +538,8 @@ func (w *withdrawal) fulfillNextRequest() error {
 	fee := w.current.calculateFee()
 	for w.current.inputTotal() < w.current.outputTotal()+fee {
 		if len(w.eligibleInputs) == 0 {
-			log <- cl.Debug{"splitting last output because we don't have enough inputs", cl.Ine()}
+			log.DEBUG("splitting last output because we don't have enough" +
+				" inputs")
 			if err := w.splitLastOutput(); err != nil {
 				return err
 			}
@@ -561,17 +558,18 @@ func (w *withdrawal) fulfillNextRequest() error {
 // big by either rolling back an output or splitting it.
 func (w *withdrawal) handleOversizeTx() error {
 	if len(w.current.outputs) > 1 {
-		log <- cl.Debug{"rolling back last output because tx got too big", cl.Ine()}
+		log.DEBUG("rolling back last output because tx got too big")
 		inputs, output, err := w.current.rollBackLastOutput()
 		if err != nil {
-			return newError(ErrWithdrawalProcessing, "failed to rollback last output", err)
+		log.ERROR(err)
+return newError(ErrWithdrawalProcessing, "failed to rollback last output", err)
 		}
 		for _, input := range inputs {
 			w.pushInput(input)
 		}
 		w.pushRequest(output.request)
 	} else if len(w.current.outputs) == 1 {
-		log <- cl.Debug{"splitting last output because tx got too big...", cl.Ine()}
+		log.DEBUG("splitting last output because tx got too big...")
 		w.pushInput(w.current.removeInput())
 		if err := w.splitLastOutput(); err != nil {
 			return err
@@ -586,21 +584,23 @@ func (w *withdrawal) handleOversizeTx() error {
 // list of finalized transactions and replaces w.current with a new empty
 // transaction.
 func (w *withdrawal) finalizeCurrentTx() error {
-	log <- cl.Debug{"finalizing current transaction", cl.Ine()}
+	log.DEBUG("finalizing current transaction")
 	tx := w.current
 	if len(tx.outputs) == 0 {
-		log <- cl.Debug{"current transaction has no outputs, doing nothing", cl.Ine()}
+		log.DEBUG("current transaction has no outputs, doing nothing")
 		return nil
 	}
 	pkScript, err := txscript.PayToAddrScript(w.status.nextChangeAddr.addr)
 	if err != nil {
-		return newError(ErrWithdrawalProcessing, "failed to generate pkScript for change address", err)
+		log.ERROR(err)
+return newError(ErrWithdrawalProcessing, "failed to generate pkScript for change address", err)
 	}
 	if tx.addChange(pkScript) {
 		var err error
 		w.status.nextChangeAddr, err = nextChangeAddress(w.status.nextChangeAddr)
 		if err != nil {
-			return newError(ErrWithdrawalProcessing, "failed to get next change address", err)
+		log.ERROR(err)
+return newError(ErrWithdrawalProcessing, "failed to get next change address", err)
 		}
 	}
 	ntxid := tx.ntxid()
@@ -648,11 +648,8 @@ func (w *withdrawal) maybeDropRequests() {
 	sort.Sort(sort.Reverse(byAmount(w.pendingRequests)))
 	for inputAmount < outputAmount {
 		request := w.popRequest()
-		log <- cl.Infof{
-			"not fulfilling request to send %v to %v; not enough credits.",
-			request.Amount,
-			request.Address,
-		}
+		log.INFOF("not fulfilling request to send %v to %v; not enough credits.",
+			request.Amount, request.Address)
 		outputAmount -= request.Amount
 		w.status.outputs[request.outBailmentID()].status = statusPartial
 	}
@@ -706,7 +703,7 @@ func (w *withdrawal) splitLastOutput() error {
 	}
 	tx := w.current
 	output := tx.outputs[len(tx.outputs)-1]
-	log <- cl.Debug{"splitting tx output for", output.request, cl.Ine()}
+	log.DEBUG("splitting tx output for", output.request)
 	origAmount := output.amount
 	spentAmount := tx.outputTotal() + tx.calculateFee() - output.amount
 	// This is how much we have left after satisfying all outputs except the
@@ -714,7 +711,8 @@ func (w *withdrawal) splitLastOutput() error {
 	// the amount of the tx's last output.
 	unspentAmount := tx.inputTotal() - spentAmount
 	output.amount = unspentAmount
-	log <- cl.Debug{"updated output amount to", output.amount, cl.Ine()}
+	log.DEBUG("updated output amount to", output.amount)
+
 	// Create a new OutputRequest with the amount being the difference between
 	// the original amount and what was left in the tx output above.
 	request := output.request
@@ -725,7 +723,8 @@ func (w *withdrawal) splitLastOutput() error {
 		PkScript:    request.PkScript,
 		Amount:      origAmount - output.amount}
 	w.pushRequest(newRequest)
-	log <- cl.Debug{"created a new pending output request with amount", newRequest.Amount, cl.Ine()}
+	log.DEBUG("created a new pending output request with amount",
+		newRequest.Amount)
 	w.status.outputs[request.outBailmentID()].status = statusPartial
 	return nil
 }
@@ -749,31 +748,23 @@ func (wi *withdrawalInfo) match(requests []OutputRequest, startAddress Withdrawa
 	// structs that contain pointers and we want to compare their content and
 	// not their address.
 	if !reflect.DeepEqual(changeStart, wi.changeStart) {
-		log <- cl.Debugf{
-			"withdrawal changeStart does not match: %v != %v %s",
-			changeStart,
-			wi.changeStart, cl.Ine()}
+		log.DEBUGF("withdrawal changeStart does not match: %v != %v %s",
+			changeStart, wi.changeStart)
 		return false
 	}
 	if !reflect.DeepEqual(startAddress, wi.startAddress) {
-		log <- cl.Debugf{
-			"withdrawal startAddr does not match: %v != %v %s",
-			startAddress,
-			wi.startAddress, cl.Ine()}
+		log.DEBUGF("withdrawal startAddr does not match: %v != %v %s",
+			startAddress, wi.startAddress)
 		return false
 	}
 	if lastSeriesID != wi.lastSeriesID {
-		log <- cl.Debugf{
-			"withdrawal lastSeriesID does not match: %v != %v %s",
-			lastSeriesID,
-			wi.lastSeriesID, cl.Ine()}
+		log.DEBUGF("withdrawal lastSeriesID does not match: %v != %v %s",
+			lastSeriesID, wi.lastSeriesID)
 		return false
 	}
 	if dustThreshold != wi.dustThreshold {
-		log <- cl.Debugf{
-			"withdrawal dustThreshold does not match: %v != %v %s",
-			dustThreshold,
-			wi.dustThreshold, cl.Ine()}
+		log.DEBUGF("withdrawal dustThreshold does not match: %v != %v %s",
+			dustThreshold, wi.dustThreshold)
 		return false
 	}
 	r1 := make([]OutputRequest, len(requests))
@@ -783,10 +774,8 @@ func (wi *withdrawalInfo) match(requests []OutputRequest, startAddress Withdrawa
 	sort.Sort(byOutBailmentID(r1))
 	sort.Sort(byOutBailmentID(r2))
 	if !reflect.DeepEqual(r1, r2) {
-		log <- cl.Debugf{
-			"withdrawal requests does not match: %v != %v %s",
-			requests,
-			wi.requests, cl.Ine()}
+		log.DEBUGF("withdrawal requests does not match: %v != %v %s", requests,
+			wi.requests)
 		return false
 	}
 	return true
@@ -804,7 +793,8 @@ func getWithdrawalStatus(p *Pool, ns, addrmgrNs walletdb.ReadBucket, roundID uin
 	}
 	wInfo, err := deserializeWithdrawal(p, ns, addrmgrNs, serialized)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	if wInfo.match(requests, startAddress, lastSeriesID, changeStart, dustThreshold) {
 		return &wInfo.status, nil
@@ -831,42 +821,42 @@ func getRawSigs(transactions []*withdrawalTx) (map[Ntxid]TxSigs, error) {
 			// series.getPrivKeyFor() to lookup the corresponding private keys.
 			pubKeys, err := branchOrder(series.publicKeys, creditAddr.Branch())
 			if err != nil {
-				return nil, err
+		log.ERROR(err)
+return nil, err
 			}
 			txInSigs := make([]RawSig, len(pubKeys))
 			for i, pubKey := range pubKeys {
 				var sig RawSig
 				privKey, err := series.getPrivKeyFor(pubKey)
 				if err != nil {
-					return nil, err
+		log.ERROR(err)
+return nil, err
 				}
 				if privKey != nil {
 					childKey, err := privKey.Child(uint32(creditAddr.Index()))
 					if err != nil {
-						return nil, newError(ErrKeyChain, "failed to derive private key", err)
+		log.ERROR(err)
+return nil, newError(ErrKeyChain, "failed to derive private key", err)
 					}
 					ecPrivKey, err := childKey.ECPrivKey()
 					if err != nil {
-						return nil, newError(ErrKeyChain, "failed to obtain ECPrivKey", err)
+		log.ERROR(err)
+return nil, newError(ErrKeyChain, "failed to obtain ECPrivKey", err)
 					}
-					log <- cl.Debugf{
-						"generating raw sig for input %d of tx %s with privkey of %s %s",
-						inputIdx,
-						ntxid,
-						pubKey.String(), cl.Ine()}
+					log.DEBUGF("generating raw sig for input %d of tx %s with privkey of %s",
+						inputIdx, ntxid,
+						pubKey.String())
 					sig, err = txscript.RawTxInSignature(
 						msgtx, inputIdx, redeemScript, txscript.SigHashAll, ecPrivKey)
 					if err != nil {
-						return nil, newError(ErrRawSigning, "failed to generate raw signature", err)
+		log.ERROR(err)
+return nil, newError(ErrRawSigning, "failed to generate raw signature", err)
 					}
 				} else {
-					log <- cl.Debugf{
-						"not generating raw sig for input %d of %s because private" +
-							" key for %s is not available: %v %s",
-						inputIdx,
-						ntxid,
-						pubKey.String(),
-						err, cl.Ine()}
+					log.DEBUGF("not generating raw sig for input %d of %s because private"+
+						" key for %s is not available: %v %s",
+						inputIdx, ntxid,
+						pubKey.String(), err)
 					sig = []byte{}
 				}
 				txInSigs[i] = sig
@@ -887,11 +877,13 @@ func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs wal
 	// anywhere -- we just need it to pass to store.PreviousPkScripts().
 	rec, err := wtxmgr.NewTxRecordFromMsgTx(msgtx, time.Now())
 	if err != nil {
-		return newError(ErrTxSigning, "failed to construct TxRecord for signing", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "failed to construct TxRecord for signing", err)
 	}
 	pkScripts, err := store.PreviousPkScripts(txmgrNs, rec, nil)
 	if err != nil {
-		return newError(ErrTxSigning, "failed to obtain pkScripts for signing", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "failed to obtain pkScripts for signing", err)
 	}
 	for i, pkScript := range pkScripts {
 		if err = signMultiSigUTXO(mgr, addrmgrNs, msgtx, i, pkScript, sigs[i]); err != nil {
@@ -906,7 +898,8 @@ func SignTx(msgtx *wire.MsgTx, sigs TxSigs, mgr *waddrmgr.Manager, addrmgrNs wal
 func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr *util.AddressScriptHash) ([]byte, error) {
 	address, err := mgr.Address(addrmgrNs, addr)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return address.(waddrmgr.ManagedScriptAddress).Script()
 }
@@ -921,18 +914,21 @@ func getRedeemScript(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, addr 
 func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *wire.MsgTx, idx int, pkScript []byte, sigs []RawSig) error {
 	class, addresses, _, err := txscript.ExtractPkScriptAddrs(pkScript, mgr.ChainParams())
 	if err != nil {
-		return newError(ErrTxSigning, "unparseable pkScript", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "unparseable pkScript", err)
 	}
 	if class != txscript.ScriptHashTy {
 		return newError(ErrTxSigning, fmt.Sprintf("pkScript is not P2SH: %s", class), nil)
 	}
 	redeemScript, err := getRedeemScript(mgr, addrmgrNs, addresses[0].(*util.AddressScriptHash))
 	if err != nil {
-		return newError(ErrTxSigning, "unable to retrieve redeem script", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "unable to retrieve redeem script", err)
 	}
 	class, _, nRequired, err := txscript.ExtractPkScriptAddrs(redeemScript, mgr.ChainParams())
 	if err != nil {
-		return newError(ErrTxSigning, "unparseable redeem script", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "unparseable redeem script", err)
 	}
 	if class != txscript.MultiSigTy {
 		return newError(ErrTxSigning, fmt.Sprintf("redeem script is not multi-sig: %v", class), nil)
@@ -952,7 +948,8 @@ func signMultiSigUTXO(mgr *waddrmgr.Manager, addrmgrNs walletdb.ReadBucket, tx *
 	sigScript := unlockingScript.AddData(redeemScript)
 	script, err := sigScript.Script()
 	if err != nil {
-		return newError(ErrTxSigning, "error building sigscript", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "error building sigscript", err)
 	}
 	tx.TxIn[idx].SignatureScript = script
 	if err := validateSigScript(tx, idx, pkScript); err != nil {
@@ -967,7 +964,8 @@ func validateSigScript(msgtx *wire.MsgTx, idx int, pkScript []byte) error {
 	vm, err := txscript.NewEngine(pkScript, msgtx, idx,
 		txscript.StandardVerifyFlags, nil, nil, 0)
 	if err != nil {
-		return newError(ErrTxSigning, "cannot create script engine", err)
+		log.ERROR(err)
+return newError(ErrTxSigning, "cannot create script engine", err)
 	}
 	if err = vm.Execute(); err != nil {
 		return newError(ErrTxSigning, "cannot validate tx signature", err)

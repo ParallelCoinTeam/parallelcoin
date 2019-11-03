@@ -1,22 +1,18 @@
 package conte
 
 import (
-	"context"
-	"net"
+	"sync"
 	"sync/atomic"
 
-	scribble "github.com/nanobox-io/golang-scribble"
 	"github.com/urfave/cli"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/state"
-	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-	"github.com/parallelcointeam/parallelcoin/pkg/discovery"
-	"github.com/parallelcointeam/parallelcoin/pkg/pod"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/pkgs"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/lang"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 type _dtype int
@@ -25,6 +21,7 @@ var _d _dtype
 
 // Xt as in conte.Xt stores all the common state data used in pod
 type Xt struct {
+	sync.Mutex
 	// App is the heart of the application system,
 	// this creates and initialises it.
 	App *cli.App
@@ -34,18 +31,14 @@ type Xt struct {
 	StateCfg *state.Config
 	// ActiveNet is the active net parameters
 	ActiveNet *netparams.Params
+	// Language libraries
+	Language *lang.Lexicon
 	// DataDir is the default data dir
 	DataDir string
-	// Log is the logger for node
-	Log chan interface{}
 	// Node is the run state of the node
 	Node *atomic.Value
 	// NodeKill is the killswitch for the Node
 	NodeKill chan struct{}
-	// TestNode is the run state of the TestNode
-	TestNode *atomic.Value
-	// TestNodeKill is the killswitch for the TestNode
-	TestNodeKill chan struct{}
 	// Wallet is the run state of the wallet
 	Wallet *atomic.Value
 	// WalletKill is the killswitch for the Wallet
@@ -56,26 +49,17 @@ type Xt struct {
 	RPCServer *rpc.Server
 	// WalletServer is needed to query the wallet
 	WalletServer *wallet.Wallet
-	// Scribble DB
-	DB *scribble.Driver
 	// RealNode is the main node
 	RealNode *rpc.Node
-	// StopDiscovery turns off the discovery server
-	StopDiscovery context.CancelFunc
-	// RequestDiscoveryUpdate allows the addition or removal of text entries
-	// in the discovery advertisement
-	RequestDiscoveryUpdate discovery.RequestFunc
-	// RouteableInterface is the available routeable interface
-	RouteableInterface *net.Interface
 }
 
 // GetNewContext returns a fresh new context
-func GetNewContext(appName string, subtext string) *Xt {
+func GetNewContext(appName, appLang, subtext string) *Xt {
 	return &Xt{
 		App:      cli.NewApp(),
-		Config:   pod.PodDefConfig(),
+		Config:   pod.EmptyConfig(),
 		StateCfg: new(state.Config),
-		DataDir:  util.AppDataDir(appName, false),
-		Log:      cl.NewSubSystem(pkgs.Name(_d)+"/"+subtext, "info").Ch,
+		Language: lang.ExportLanguage(appLang),
+		DataDir:  appdata.Dir(appName, false),
 	}
 }

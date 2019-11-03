@@ -2,10 +2,11 @@ package util
 
 import (
    "golang.org/x/crypto/ripemd160"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util/base58"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/bech32"
-   ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/util/base58"
+   "github.com/p9c/pod/pkg/util/bech32"
+   ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // SetBlockBytes sets the internal serialized block byte buffer to the passed buffer.  It is used to inject errors and is only available to the test package.
@@ -16,7 +17,7 @@ func (b *Block) SetBlockBytes(buf []byte) {
 // TstAppDataDir makes the internal appDataDir function available to the test package.
 //nolint
 func TstAppDataDir(	goos, appName string, roaming bool) string {
-	return appDataDir(goos, appName, roaming)
+	return appdata.appDataDir(goos, appName, roaming)
 }
 
 // TstAddressPubKeyHash makes an AddressPubKeyHash, setting the unexported fields with the parameters hash and netID.

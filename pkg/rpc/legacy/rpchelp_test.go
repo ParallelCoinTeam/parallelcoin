@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	rpchelp "github.com/parallelcointeam/parallelcoin/pkg/rpc/help"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
+	rpchelp "github.com/p9c/pod/pkg/rpc/help"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 func serverMethods() map[string]struct{} {
@@ -36,7 +36,7 @@ func TestRPCMethodHelpGeneration(t *testing.T) {
 		generatedDescs := LocaleHelpDescs[locale]()
 		for _, m := range rpchelp.Methods {
 			delete(svrMethods, m.Method)
-			helpText, err := json.GenerateHelp(m.Method, rpchelp.HelpDescs[i].Descs, m.ResultTypes...)
+			helpText, err := btcjson.GenerateHelp(m.Method, rpchelp.HelpDescs[i].Descs, m.ResultTypes...)
 			if err != nil {
 				t.Errorf("Cannot generate '%s' help for method '%s': missing description for '%s'",
 					locale, m.Method, err)
@@ -69,7 +69,7 @@ func TestRPCMethodUsageGeneration(t *testing.T) {
 	usageStrs := make([]string, 0, len(rpchelp.Methods))
 	for _, m := range rpchelp.Methods {
 		delete(svrMethods, m.Method)
-		usage, err := json.MethodUsageText(m.Method)
+		usage, err := btcjson.MethodUsageText(m.Method)
 		if err != nil {
 			t.Errorf("Cannot generate single line usage for method '%s': %v",
 				m.Method, err)

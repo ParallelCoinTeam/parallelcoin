@@ -2,10 +2,10 @@ package wire
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // MsgGetHeaders implements the Message interface and represents a bitcoin getheaders message.  It is used to request a list of block headers for blocks starting after the last known hash in the slice of block locator hashes.  The list is returned via a headers message (MsgHeaders) and is limited by a specific hash to stop at or the maximum number of block headers per message, which is currently 2000. Set the HashStop field to the hash at which to stop and use AddBlockLocatorHash to build up the list of block locator hashes. The algorithm for building the block locator hashes should be to add the hashes in reverse order until you reach the genesis block.  In order to keep the list of locator hashes to a resonable number of entries, first add the most recent 10 block hashes, then double the step each loop iteration to exponentially decrease the number of hashes the further away from head and closer to the genesis block you get.
@@ -30,11 +30,15 @@ func (msg *MsgGetHeaders) AddBlockLocatorHash(hash *chainhash.Hash) error {
 func (msg *MsgGetHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
 	err := readElement(r, &msg.ProtocolVersion)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	// Read num block locator hashes and limit to max.
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	if count > MaxBlockLocatorsPerMsg {
@@ -49,11 +53,14 @@ func (msg *MsgGetHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncodin
 		hash := &locatorHashes[i]
 		err := readElement(r, hash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		err = msg.AddBlockLocatorHash(hash)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+		log.ERROR(err)
+fmt.Println(err)
 		}
 	}
 	return readElement(r, &msg.HashStop)
@@ -70,15 +77,21 @@ func (msg *MsgGetHeaders) BtcEncode(w io.Writer, pver uint32, enc MessageEncodin
 	}
 	err := writeElement(w, msg.ProtocolVersion)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	err = WriteVarInt(w, pver, uint64(count))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	for _, hash := range msg.BlockLocatorHashes {
 		err := writeElement(w, hash)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}

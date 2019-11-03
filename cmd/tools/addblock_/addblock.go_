@@ -5,11 +5,11 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/indexers"
-	"github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/limits"
-	l "github.com/parallelcointeam/parallelcoin/pkg/log"
+	"github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/indexers"
+	"github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/limits"
+	l "github.com/p9c/pod/pkg/log"
 )
 
 const (
@@ -31,7 +31,8 @@ func loadBlockDB(	) (database.DB, error) {
 	log.Infof("Loading block database from '%s'", dbPath)
 	db, err := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
 	if err != nil {
-		// Return the error if it's not because the database doesn't exist.
+		log.ERROR(err)
+// Return the error if it's not because the database doesn't exist.
 		if dbErr, ok := err.(database.Error); !ok || dbErr.ErrorCode !=
 			database.ErrDbDoesNotExist {
 			return nil, err
@@ -39,11 +40,13 @@ func loadBlockDB(	) (database.DB, error) {
 		// Create the db if it does not exist.
 		err = os.MkdirAll(cfg.DataDir, 0700)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		db, err = database.Create(cfg.DbType, dbPath, activeNetParams.Net)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	}
 	log.Info("Block database loaded")
@@ -55,7 +58,8 @@ func realMain(	) error {
 	// Load configuration and parse command line.
 	tcfg, _, err := loadConfig()
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	cfg = tcfg
 	// Setup logging.
@@ -68,20 +72,23 @@ func realMain(	) error {
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		log.Errorf("Failed to load database: %v", err)
+		log.ERROR(err)
+log.Errorf("Failed to load database: %v", err)
 		return err
 	}
 	defer db.Close()
 	fi, err := os.Open(cfg.InFile)
 	if err != nil {
-		log.Errorf("Failed to open file %v: %v", cfg.InFile, err)
+		log.ERROR(err)
+log.Errorf("Failed to open file %v: %v", cfg.InFile, err)
 		return err
 	}
 	defer fi.Close()
 	// Create a block importer for the database and input file and start it. The done channel returned from start will contain an error if anything went wrong.
 	importer, err := newBlockImporter(db, fi)
 	if err != nil {
-		log.Errorf("Failed create block importer: %v", err)
+		log.ERROR(err)
+log.Errorf("Failed create block importer: %v", err)
 		return err
 	}
 	// Perform the import asynchronously.  This allows blocks to be processed and read in parallel.  The results channel returned from Import contains the statistics about the import including an error if something went wrong.

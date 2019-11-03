@@ -2,17 +2,18 @@ package rpctest
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/log"
 	"math"
 	"math/big"
 	"runtime"
 	"time"
 	
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	`github.com/p9c/pod/pkg/chain/config/netparams`
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // solveBlock attempts to find a nonce which makes the passed block header
@@ -96,6 +97,8 @@ func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32,
 	// Create the script to pay to the provided payment address.
 	pkScript, err := txscript.PayToAddrScript(addr)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -159,11 +162,15 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	extraNonce := uint64(0)
 	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	coinbaseTx, err := createCoinbaseTx(
 		coinbaseScript, blockHeight, miningAddr, mineTo, net)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 	// Create a new block ready to be solved.

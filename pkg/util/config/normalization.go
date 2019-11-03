@@ -1,6 +1,9 @@
 package cfgutil
 
-import "net"
+import (
+	"github.com/p9c/pod/pkg/log"
+	"net"
+)
 
 // NormalizeAddress returns the normalized form of the address, adding a default
 // port if necessary.  An error is returned if the address, even without a port,
@@ -17,7 +20,8 @@ func NormalizeAddress(	addr string, defaultPort string) (hostport string, err er
 	addr = net.JoinHostPort(addr, defaultPort)
 	_, _, err = net.SplitHostPort(addr)
 	if err != nil {
-		return "", origErr
+		log.ERROR(err)
+return "", origErr
 	}
 	return addr, nil
 }
@@ -32,7 +36,8 @@ func NormalizeAddresses(	addrs []string, defaultPort string) ([]string, error) {
 	for _, addr := range addrs {
 		normalizedAddr, err := NormalizeAddress(addr, defaultPort)
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		_, seen := seenSet[normalizedAddr]
 		if !seen {

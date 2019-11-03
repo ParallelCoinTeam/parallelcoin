@@ -3,9 +3,10 @@ package headerfs
 import (
 	"bytes"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // appendRaw appends a new raw header to the end of the flat file.
@@ -91,6 +92,8 @@ func (h *blockHeaderStore) readHeaderRange(startHeight uint32,
 	_, err := h.file.ReadAt(rawHeaderBytes, int64(seekDistance))
 
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 
@@ -128,6 +131,8 @@ func (h *blockHeaderStore) readHeader(height uint32) (wire.BlockHeader, error) {
 	rawHeader, err := h.readRaw(seekDistance)
 
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return header, err
 	}
 
@@ -151,6 +156,8 @@ func (f *FilterHeaderStore) readHeader(height uint32) (*chainhash.Hash, error) {
 	rawHeader, err := f.readRaw(seekDistance)
 
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return nil, err
 	}
 

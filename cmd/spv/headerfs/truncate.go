@@ -2,7 +2,10 @@
 
 package headerfs
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/p9c/pod/pkg/log"
+)
 
 // singleTruncate truncates a single header from the end of the header file.
 // This can be used in the case of a re-org to remove the last header from the
@@ -18,6 +21,8 @@ func (h *headerStore) singleTruncate() error {
 	fileInfo, err := h.file.Stat()
 
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 

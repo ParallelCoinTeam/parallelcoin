@@ -1,0 +1,15 @@
+    <div id="panelnetworkhashrate" class="NetHash"><div class="rwrap posAbs flx"><div class="e-card fii overHid">
+    <sparkline ref="networkHashrate" class="spark" id="networkHashrate-container" height="100%" :padding="padding" width="100%" 
+    :lineWidth="this.lineWidth" :type="this.type" :valueType="this.valueType" :fill="this.fill" 
+    :dataSource="this.dataSource" :axisSettings="this.axisSettings" :containerArea="this.containerArea" :border="this.border" xName="x" yName="yval"></sparkline>
+    <div style="color: #303030; font-size: 12px; position: absolute; top:12px; left: 15px;">Network hashrate</div>
+    <div id="nhr" style="color: #d1a990;position: absolute; top: 25px; left: 15px;">R: 0H/s</div></div></div></div>
+    
+
+
+<style>
+  .spark{
+    height: 100%;
+    width:100%;
+  }
+</style>

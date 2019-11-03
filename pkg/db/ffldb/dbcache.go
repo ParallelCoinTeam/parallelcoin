@@ -1,16 +1,17 @@
 package ffldb
 
 import (
-   "bytes"
-   "fmt"
-   "sync"
-   "time"
-   
-   "github.com/btcsuite/goleveldb/leveldb"
-   "github.com/btcsuite/goleveldb/leveldb/iterator"
-   "github.com/btcsuite/goleveldb/leveldb/util"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util/treap"
+	"bytes"
+	"fmt"
+	"sync"
+	"time"
+
+	"github.com/btcsuite/goleveldb/leveldb"
+	"github.com/btcsuite/goleveldb/leveldb/iterator"
+	"github.com/btcsuite/goleveldb/leveldb/util"
+
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/treap"
 )
 
 const (
@@ -19,15 +20,21 @@ const (
 	// defaultFlushSecs is the default number of seconds to use as a threshold
 	// in between database cache flushes when the cache size has not been
 	// exceeded.
-	defaultFlushSecs = 30
-	// // ldbBatchHeaderSize is the size of a leveldb batch header which includes the sequence header and record counter.
+	defaultFlushSecs = 9
+	// // ldbBatchHeaderSize is the size of a leveldb batch header which
+	// includes the sequence header and record counter.
 	// ldbBatchHeaderSize = 12
-	// // ldbRecordIKeySize is the size of the ikey used internally by leveldb when appending a record to a batch.
+	// // ldbRecordIKeySize is the size of the ikey used internally by leveldb
+	// when appending a record to a batch.
 	// ldbRecordIKeySize = 8
-	// These are used to help preallocate space needed for a batch in one allocation instead of letting leveldb itself constantly grow it. This results in far less pressure on the GC and consequently helps prevent the GC from allocating a lot of extra unneeded space.
+	// These are used to help preallocate space needed for a batch in one
+	// allocation instead of letting leveldb itself constantly grow it.
+	// This results in far less pressure on the GC and consequently helps
+	// prevent the GC from allocating a lot of extra unneeded space.
 )
 
-// ldbCacheIter wraps a treap iterator to provide the additional functionality needed to satisfy the leveldb iterator.Iterator interface.
+// ldbCacheIter wraps a treap iterator to provide the additional
+// functionality needed to satisfy the leveldb iterator.Iterator interface.
 type ldbCacheIter struct {
 	*treap.Iterator
 }
@@ -35,26 +42,34 @@ type ldbCacheIter struct {
 // Enforce ldbCacheIterator implements the leveldb iterator.Iterator interface.
 var _ iterator.Iterator = (*ldbCacheIter)(nil)
 
-// Error is only provided to satisfy the iterator interface as there are no errors for this memory-only structure. This is part of the leveldb iterator.Iterator interface implementation.
+// Error is only provided to satisfy the iterator interface as there are no
+// errors for this memory-only structure.
+// This is part of the leveldb iterator.Iterator interface implementation.
 func (iter *ldbCacheIter) Error() error {
 	return nil
 }
 
-// SetReleaser is only provided to satisfy the iterator interface as there is no need to override it. This is part of the leveldb iterator.Iterator interface implementation.
+// SetReleaser is only provided to satisfy the iterator interface as there is
+// no need to override it. This is part of the leveldb iterator.
+// Iterator interface implementation.
 func (iter *ldbCacheIter) SetReleaser(releaser util.Releaser) {
 }
 
-// Release is only provided to satisfy the iterator interface. This is part of the leveldb iterator.Iterator interface implementation.
+// Release is only provided to satisfy the iterator interface.
+// This is part of the leveldb iterator.Iterator interface implementation.
 func (iter *ldbCacheIter) Release() {
 }
 
-// newLdbCacheIter creates a new treap iterator for the given slice against the pending keys for the passed cache snapshot and returns it wrapped in an ldbCacheIter so it can be used as a leveldb iterator.
+// newLdbCacheIter creates a new treap iterator for the given slice against
+// the pending keys for the passed cache snapshot and returns it wrapped in
+// an ldbCacheIter so it can be used as a leveldb iterator.
 func newLdbCacheIter(snap *dbCacheSnapshot, slice *util.Range) *ldbCacheIter {
 	iter := snap.pendingKeys.Iterator(slice.Start, slice.Limit)
 	return &ldbCacheIter{Iterator: iter}
 }
 
-// dbCacheIterator defines an iterator over the key/value pairs in the database cache and underlying database.
+// dbCacheIterator defines an iterator over the key/value pairs in the
+// database cache and underlying database.
 type dbCacheIterator struct {
 	cacheSnapshot *dbCacheSnapshot
 	dbIter        iterator.Iterator
@@ -66,7 +81,9 @@ type dbCacheIterator struct {
 // Enforce dbCacheIterator implements the leveldb iterator.Iterator interface.
 var _ iterator.Iterator = (*dbCacheIterator)(nil)
 
-// skipPendingUpdates skips any keys at the current database iterator position that are being updated by the cache.  The forwards flag indicates the direction the iterator is moving.
+// skipPendingUpdates skips any keys at the current database iterator
+// position that are being updated by the cache.
+// The forwards flag indicates the direction the iterator is moving.
 func (iter *dbCacheIterator) skipPendingUpdates(forwards bool) {
 	for iter.dbIter.Valid() {
 		var skip bool
@@ -87,9 +104,16 @@ func (iter *dbCacheIterator) skipPendingUpdates(forwards bool) {
 	}
 }
 
-// chooseIterator first skips any entries in the database iterator that are being updated by the cache and sets the current iterator to the appropriate iterator depending on their validity and the order they compare in while taking into account the direction flag.  When the iterator is being moved forwards and both iterators are valid, the iterator with the smaller key is chosen and vice versa when the iterator is being moved backwards.
+// chooseIterator first skips any entries in the database iterator that are
+// being updated by the cache and sets the current iterator to the
+// appropriate iterator depending on their validity and the order they
+// compare in while taking into account the direction flag.
+// When the iterator is being moved forwards and both iterators are valid,
+// the iterator with the smaller key is chosen and vice versa when the
+// iterator is being moved backwards.
 func (iter *dbCacheIterator) chooseIterator(forwards bool) bool {
-	// Skip any keys at the current database iterator position that are being updated by the cache.
+	// Skip any keys at the current database iterator position that are being
+	// updated by the cache.
 	iter.skipPendingUpdates(forwards)
 	// When both iterators are exhausted, the iterator is exhausted too.
 	if !iter.dbIter.Valid() && !iter.cacheIter.Valid() {
@@ -106,7 +130,9 @@ func (iter *dbCacheIterator) chooseIterator(forwards bool) bool {
 		iter.currentIter = iter.cacheIter
 		return true
 	}
-	// Both iterators are valid, so choose the iterator with either the smaller or larger key depending on the forwards flag.
+	// Both iterators are valid,
+	// so choose the iterator with either the smaller or larger key depending
+	// on the forwards flag.
 	compare := bytes.Compare(iter.dbIter.Key(), iter.cacheIter.Key())
 	if (forwards && compare > 0) || (!forwards && compare < 0) {
 		iter.currentIter = iter.cacheIter
@@ -116,58 +142,78 @@ func (iter *dbCacheIterator) chooseIterator(forwards bool) bool {
 	return true
 }
 
-// First positions the iterator at the first key/value pair and returns whether or not the pair exists. This is part of the leveldb iterator.Iterator interface implementation.
+// First positions the iterator at the first key/value pair and returns
+// whether or not the pair exists. This is part of the leveldb iterator.
+// Iterator interface implementation.
 func (iter *dbCacheIterator) First() bool {
-	// Seek to the first key in both the database and cache iterators and choose the iterator that is both valid and has the smaller key.
+	// Seek to the first key in both the database and cache iterators and
+	// choose the iterator that is both valid and has the smaller key.
 	iter.dbIter.First()
 	iter.cacheIter.First()
 	return iter.chooseIterator(true)
 }
 
-// Last positions the iterator at the last key/value pair and returns whether or not the pair exists. This is part of the leveldb iterator.Iterator interface implementation.
+// Last positions the iterator at the last key/value pair and returns whether
+// or not the pair exists. This is part of the leveldb iterator.
+// Iterator interface implementation.
 func (iter *dbCacheIterator) Last() bool {
-	// Seek to the last key in both the database and cache iterators and choose the iterator that is both valid and has the larger key.
+	// Seek to the last key in both the database and cache iterators and
+	// choose the iterator that is both valid and has the larger key.
 	iter.dbIter.Last()
 	iter.cacheIter.Last()
 	return iter.chooseIterator(false)
 }
 
-// Next moves the iterator one key/value pair forward and returns whether or not the pair exists. This is part of the leveldb iterator.Iterator interface implementation.
+// Next moves the iterator one key/value pair forward and returns whether or
+// not the pair exists. This is part of the leveldb iterator.
+// Iterator interface implementation.
 func (iter *dbCacheIterator) Next() bool {
 	// Nothing to return if cursor is exhausted.
 	if iter.currentIter == nil {
 		return false
 	}
-	// Move the current iterator to the next entry and choose the iterator that is both valid and has the smaller key.
+	// Move the current iterator to the next entry and choose the iterator
+	// that is both valid and has the smaller key.
 	iter.currentIter.Next()
 	return iter.chooseIterator(true)
 }
 
-// Prev moves the iterator one key/value pair backward and returns whether or not the pair exists. This is part of the leveldb iterator.Iterator interface implementation.
+// Prev moves the iterator one key/value pair backward and returns whether or
+// not the pair exists. This is part of the leveldb iterator.
+// Iterator interface implementation.
 func (iter *dbCacheIterator) Prev() bool {
 	// Nothing to return if cursor is exhausted.
 	if iter.currentIter == nil {
 		return false
 	}
-	// Move the current iterator to the previous entry and choose the iterator that is both valid and has the larger key.
+	// Move the current iterator to the previous entry and choose the
+	// iterator that is both valid and has the larger key.
 	iter.currentIter.Prev()
 	return iter.chooseIterator(false)
 }
 
-// Seek positions the iterator at the first key/value pair that is greater than or equal to the passed seek key.  Returns false if no suitable key was found. This is part of the leveldb iterator.Iterator interface implementation.
+// Seek positions the iterator at the first key/value pair that is greater
+// than or equal to the passed seek key.
+// Returns false if no suitable key was found.
+// This is part of the leveldb iterator.Iterator interface implementation.
 func (iter *dbCacheIterator) Seek(key []byte) bool {
-	// Seek to the provided key in both the database and cache iterators then choose the iterator that is both valid and has the larger key.
+	// Seek to the provided key in both the database and cache iterators then
+	// choose the iterator that is both valid and has the larger key.
 	iter.dbIter.Seek(key)
 	iter.cacheIter.Seek(key)
 	return iter.chooseIterator(true)
 }
 
-// Valid indicates whether the iterator is positioned at a valid key/value pair. It will be considered invalid when the iterator is newly created or exhausted. This is part of the leveldb iterator.Iterator interface implementation.
+// Valid indicates whether the iterator is positioned at a valid key/value
+// pair. It will be considered invalid when the iterator is newly created or
+// exhausted. This is part of the leveldb iterator.
+// Iterator interface implementation.
 func (iter *dbCacheIterator) Valid() bool {
 	return iter.currentIter != nil
 }
 
-// Key returns the current key the iterator is pointing to. This is part of the leveldb iterator.Iterator interface implementation.
+// Key returns the current key the iterator is pointing to.
+// This is part of the leveldb iterator.Iterator interface implementation.
 func (iter *dbCacheIterator) Key() []byte {
 	// Nothing to return if iterator is exhausted.
 	if iter.currentIter == nil {
@@ -176,7 +222,8 @@ func (iter *dbCacheIterator) Key() []byte {
 	return iter.currentIter.Key()
 }
 
-// Value returns the current value the iterator is pointing to. This is part of the leveldb iterator.Iterator interface implementation.
+// Value returns the current value the iterator is pointing to.
+// This is part of the leveldb iterator.Iterator interface implementation.
 func (iter *dbCacheIterator) Value() []byte {
 	// Nothing to return if iterator is exhausted.
 	if iter.currentIter == nil {
@@ -185,11 +232,15 @@ func (iter *dbCacheIterator) Value() []byte {
 	return iter.currentIter.Value()
 }
 
-// SetReleaser is only provided to satisfy the iterator interface as there is no need to override it. This is part of the leveldb iterator.Iterator interface implementation.
+// SetReleaser is only provided to satisfy the iterator interface as there is
+// no need to override it. This is part of the leveldb iterator.
+// Iterator interface implementation.
 func (iter *dbCacheIterator) SetReleaser(releaser util.Releaser) {
 }
 
-// Release releases the iterator by removing the underlying treap iterator from the list of active iterators against the pending keys treap. This is part of the leveldb iterator.Iterator interface implementation.
+// Release releases the iterator by removing the underlying treap iterator
+// from the list of active iterators against the pending keys treap.
+// This is part of the leveldb iterator.Iterator interface implementation.
 func (iter *dbCacheIterator) Release() {
 	if !iter.released {
 		iter.dbIter.Release()
@@ -199,12 +250,15 @@ func (iter *dbCacheIterator) Release() {
 	}
 }
 
-// Error is only provided to satisfy the iterator interface as there are no errors for this memory-only structure. This is part of the leveldb iterator.Iterator interface implementation.
+// Error is only provided to satisfy the iterator interface as there are no
+// errors for this memory-only structure.
+// This is part of the leveldb iterator.Iterator interface implementation.
 func (iter *dbCacheIterator) Error() error {
 	return nil
 }
 
-// dbCacheSnapshot defines a snapshot of the database cache and underlying database at a particular point in time.
+// dbCacheSnapshot defines a snapshot of the database cache and underlying
+// database at a particular point in time.
 type dbCacheSnapshot struct {
 	dbSnapshot    *leveldb.Snapshot
 	pendingKeys   *treap.Immutable
@@ -225,7 +279,8 @@ func (snap *dbCacheSnapshot) Has(key []byte) bool {
 	return hasKey
 }
 
-// Get returns the value for the passed key.  The function will return nil when the key does not exist.
+// Get returns the value for the passed key.
+// The function will return nil when the key does not exist.
 func (snap *dbCacheSnapshot) Get(key []byte) []byte {
 	// Check the cached entries first.
 	if snap.pendingRemove.Has(key) {
@@ -237,7 +292,8 @@ func (snap *dbCacheSnapshot) Get(key []byte) []byte {
 	// Consult the database.
 	value, err := snap.dbSnapshot.Get(key, nil)
 	if err != nil {
-		return nil
+		log.TRACE(err)
+return nil
 	}
 	return value
 }
@@ -285,24 +341,36 @@ type dbCache struct {
 	// before the cache is flushed.
 	// lastFlush is the time the cache was last flushed.  It is used in
 	// conjunction with the current time and the flush interval.
-	// NOTE: These flush related fields are protected by the database write lock.
+	// NOTE: These flush related fields are protected by the database write
+	// lock.
 	maxSize       uint64
 	flushInterval time.Duration
 	lastFlush     time.Time
-	// The following fields hold the keys that need to be stored or deleted from the underlying database once the cache is full, enough time has passed, or when the database is shutting down.  Note that these are stored using immutable treaps to support O(1) MVCC snapshots against the cached data.  The cacheLock is used to protect concurrent access for cache updates and snapshots.
+	// The following fields hold the keys that need to be stored or deleted
+	// from the underlying database once the cache is full,
+	// enough time has passed, or when the database is shutting down.
+	// Note that these are stored using immutable treaps to support O(
+	// 1) MVCC snapshots against the cached data.
+	// The cacheLock is used to protect concurrent access for cache updates
+	// and snapshots.
 	cacheLock    sync.RWMutex
 	cachedKeys   *treap.Immutable
 	cachedRemove *treap.Immutable
 }
 
-// Snapshot returns a snapshot of the database cache and underlying database at a particular point in time. The snapshot must be released after use by calling Release.
+// Snapshot returns a snapshot of the database cache and underlying database
+// at a particular point in time.
+// The snapshot must be released after use by calling Release.
 func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
 	dbSnapshot, err := c.ldb.GetSnapshot()
 	if err != nil {
-		str := "failed to open transaction"
+		log.ERROR(err)
+str := "failed to open transaction"
 		return nil, convertErr(str, err)
 	}
-	// Since the cached keys to be added and removed use an immutable treap, a snapshot is simply obtaining the root of the tree under the lock which is used to atomically swap the root.
+	// Since the cached keys to be added and removed use an immutable treap,
+	// a snapshot is simply obtaining the root of the tree under the lock
+	// which is used to atomically swap the root.
 	c.cacheLock.RLock()
 	cacheSnapshot := &dbCacheSnapshot{
 		dbSnapshot:    dbSnapshot,
@@ -313,12 +381,18 @@ func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
 	return cacheSnapshot, nil
 }
 
-// updateDB invokes the passed function in the context of a managed leveldb transaction.  Any errors returned from the user-supplied function will cause the transaction to be rolled back and are returned from this function. Otherwise, the transaction is committed when the user-supplied function returns a nil error.
+// updateDB invokes the passed function in the context of a managed leveldb
+// transaction.  Any errors returned from the user-supplied function will
+// cause the transaction to be rolled back and are returned from this
+// function. Otherwise,
+// the transaction is committed when the user-supplied function returns a nil
+// error.
 func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) error {
 	// Start a leveldb transaction.
 	ldbTx, err := c.ldb.OpenTransaction()
 	if err != nil {
-		return convertErr("failed to open ldb transaction", err)
+		log.ERROR(err)
+return convertErr("failed to open ldb transaction", err)
 	}
 	if err := fn(ldbTx); err != nil {
 		ldbTx.Discard()
@@ -331,12 +405,16 @@ func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) error {
 	return nil
 }
 
-// TreapForEacher is an interface which allows iteration of a treap in ascending order using a user-supplied callback for each key/value pair.  It mainly exists so both mutable and immutable treaps can be atomically committed to the database with the same function.
+// TreapForEacher is an interface which allows iteration of a treap in
+// ascending order using a user-supplied callback for each key/value pair.
+// It mainly exists so both mutable and immutable treaps can be atomically
+// committed to the database with the same function.
 type TreapForEacher interface {
 	ForEach(func(k, v []byte) bool)
 }
 
-// commitTreaps atomically commits all of the passed pending add/update/remove updates to the underlying database.
+// commitTreaps atomically commits all of the passed pending add/update
+// /remove updates to the underlying database.
 func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) error {
 	// Perform all leveldb updates using an atomic transaction.
 	return c.updateDB(func(ldbTx *leveldb.Transaction) error {
@@ -367,14 +445,23 @@ func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) error 
 	})
 }
 
-// flush flushes the database cache to persistent storage.  This involes syncing the block store and replaying all transactions that have been applied to the cache to the underlying database. This function MUST be called with the database write lock held.
+// flush flushes the database cache to persistent storage.
+// This involes syncing the block store and replaying all transactions that
+// have been applied to the cache to the underlying database.
+// This function MUST be called with the database write lock held.
 func (c *dbCache) flush() error {
+	log.INFO("syncing database to disk")
 	c.lastFlush = time.Now()
-	// Sync the current write file associated with the block store.  This is necessary before writing the metadata to prevent the case where the metadata contains information about a block which actually hasn't been written yet in unexpected shutdown scenarios.
+	// Sync the current write file associated with the block store.
+	// This is necessary before writing the metadata to prevent the case
+	// where the metadata contains information about a block which actually
+	// hasn't been written yet in unexpected shutdown scenarios.
 	if err := c.store.syncBlocks(); err != nil {
 		return err
 	}
-	// Since the cached keys to be added and removed use an immutable treap, a snapshot is simply obtaining the root of the tree under the lock which is used to atomically swap the root.
+	// Since the cached keys to be added and removed use an immutable treap,
+	// a snapshot is simply obtaining the root of the tree under the lock
+	// which is used to atomically swap the root.
 	c.cacheLock.RLock()
 	cachedKeys := c.cachedKeys
 	cachedRemove := c.cachedRemove
@@ -395,23 +482,45 @@ func (c *dbCache) flush() error {
 	return nil
 }
 
-// needsFlush returns whether or not the database cache needs to be flushed to persistent storage based on its current size, whether or not adding all of the entries in the passed database transaction would cause it to exceed the configured limit, and how much time has elapsed since the last time the cache was flushed. This function MUST be called with the database write lock held.
+// needsFlush returns whether or not the database cache needs to be flushed
+// to persistent storage based on its current size,
+// whether or not adding all of the entries in the passed database
+// transaction would cause it to exceed the configured limit,
+// and how much time has elapsed since the last time the cache was flushed.
+// This function MUST be called with the database write lock held.
 func (c *dbCache) needsFlush(tx *transaction) bool {
-	// A flush is needed when more time has elapsed than the configured flush interval.
+	// A flush is needed when more time has elapsed than the configured flush
+	// interval.
 	if time.Since(c.lastFlush) > c.flushInterval {
 		return true
 	}
-	// A flush is needed when the size of the database cache exceeds the specified max cache size.  The total calculated size is multiplied by 1.5 here to account for additional memory consumption that will be needed during the flush as well as old nodes in the cache that are referenced by the snapshot used by the transaction.
+	// A flush is needed when the size of the database cache exceeds the
+	// specified max cache size.
+	// The total calculated size is multiplied by 1.
+	// 5 here to account for additional memory consumption that will be
+	// needed during the flush as well as old nodes in the cache that are
+	// referenced by the snapshot used by the transaction.
 	snap := tx.snapshot
 	totalSize := snap.pendingKeys.Size() + snap.pendingRemove.Size()
 	totalSize = uint64(float64(totalSize) * 1.5)
 	return totalSize > c.maxSize
 }
 
-// commitTx atomically adds all of the pending keys to add and remove into the database cache.  When adding the pending keys would cause the size of the cache to exceed the max cache size, or the time since the last flush exceeds the configured flush interval, the cache will be flushed to the underlying persistent database.
-// This is an atomic operation with respect to the cache in that either all of the pending keys to add and remove in the transaction will be applied or none of them will. The database cache itself might be flushed to the underlying persistent database even if the transaction fails to apply, but it will only be the state of the cache without the transaction applied. This function MUST be called during a database write transaction which in turn implies the database write lock will be held.
+// commitTx atomically adds all of the pending keys to add and remove into
+// the database cache.  When adding the pending keys would cause the size of
+// the cache to exceed the max cache size,
+// or the time since the last flush exceeds the configured flush interval,
+// the cache will be flushed to the underlying persistent database.
+// This is an atomic operation with respect to the cache in that either all
+// of the pending keys to add and remove in the transaction will be applied
+// or none of them will. The database cache itself might be flushed to the
+// underlying persistent database even if the transaction fails to apply,
+// but it will only be the state of the cache without the transaction
+// applied. This function MUST be called during a database write transaction
+// which in turn implies the database write lock will be held.
 func (c *dbCache) commitTx(tx *transaction) error {
-	// Flush the cache and write the current transaction directly to the database if a flush is needed.
+	// Flush the cache and write the current transaction directly to the
+	// database if a flush is needed.
 	if c.needsFlush(tx) {
 		if err := c.flush(); err != nil {
 			return err
@@ -419,15 +528,19 @@ func (c *dbCache) commitTx(tx *transaction) error {
 		// Perform all leveldb updates using an atomic transaction.
 		err := c.commitTreaps(tx.pendingKeys, tx.pendingRemove)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 		// Clear the transaction entries since they have been committed.
 		tx.pendingKeys = nil
 		tx.pendingRemove = nil
 		return nil
 	}
-	// At this point a database flush is not needed, so atomically commit the transaction to the cache.
-	// Since the cached keys to be added and removed use an immutable treap, a snapshot is simply obtaining the root of the tree under the lock which is used to atomically swap the root.
+	// At this point a database flush is not needed,
+	// so atomically commit the transaction to the cache.
+	// Since the cached keys to be added and removed use an immutable treap,
+	// a snapshot is simply obtaining the root of the tree under the lock
+	// which is used to atomically swap the root.
 	c.cacheLock.RLock()
 	newCachedKeys := c.cachedKeys
 	newCachedRemove := c.cachedRemove
@@ -446,7 +559,8 @@ func (c *dbCache) commitTx(tx *transaction) error {
 		return true
 	})
 	tx.pendingRemove = nil
-	// Atomically replace the immutable treaps which hold the cached keys to add and delete.
+	// Atomically replace the immutable treaps which hold the cached keys to
+	// add and delete.
 	c.cacheLock.Lock()
 	c.cachedKeys = newCachedKeys
 	c.cachedRemove = newCachedRemove
@@ -454,11 +568,15 @@ func (c *dbCache) commitTx(tx *transaction) error {
 	return nil
 }
 
-// Close cleanly shuts down the database cache by syncing all data and closing the underlying leveldb database. This function MUST be called with the database write lock held.
+// Close cleanly shuts down the database cache by syncing all data and
+// closing the underlying leveldb database.
+// This function MUST be called with the database write lock held.
 func (c *dbCache) Close() error {
 	// Flush any outstanding cached entries to disk.
 	if err := c.flush(); err != nil {
-		// Even if there is an error while flushing, attempt to close the underlying database.  The error is ignored since it would mask the flush error.
+		// Even if there is an error while flushing,
+		// attempt to close the underlying database.
+		// The error is ignored since it would mask the flush error.
 		_ = c.ldb.Close()
 		return err
 	}
@@ -470,7 +588,10 @@ func (c *dbCache) Close() error {
 	return nil
 }
 
-// newDbCache returns a new database cache instance backed by the provided leveldb instance.  The cache will be flushed to leveldb when the max size exceeds the provided value or it has been longer than the provided interval since the last flush.
+// newDbCache returns a new database cache instance backed by the provided
+// leveldb instance.  The cache will be flushed to leveldb when the max size
+// exceeds the provided value or it has been longer than the provided
+// interval since the last flush.
 func newDbCache(ldb *leveldb.DB, store *blockStore, maxSize uint64, flushIntervalSecs uint32) *dbCache {
 	return &dbCache{
 		ldb:           ldb,

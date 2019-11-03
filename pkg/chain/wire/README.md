@@ -1,7 +1,7 @@
 # wire
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/parallelcointeam/parallelcoin/wire)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/p9c/pod/wire)
 
 Package wire implements the bitcoin wire protocol. A comprehensive suite of tests with 100% test coverage is provided to ensure proper functionality.
 
@@ -10,7 +10,7 @@ This package has intentionally been designed so it can be used as a standalone p
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/parallelcointeam/parallelcoin/wire
+$ go get -u github.com/p9c/pod/wire
 ```
 
 ## Bitcoin Message Overview
@@ -40,9 +40,8 @@ In order to unmarshal bitcoin messages from the wire, use the `ReadMessage` func
 	// raw payload, and a possible error.
 	msg, rawPayload, err := wire.ReadMessage(conn, pver, btcnet)
 	if err != nil {
-
-
-		// Log and handle the error
+		log.ERROR(err)
+// Log and handle the error
 	}
 ```
 
@@ -70,9 +69,8 @@ In order to marshal bitcoin messages to the wire, use the `WriteMessage` functio
 	// error.
 	err := wire.WriteMessage(conn, msg, pver, btcnet)
 	if err != nil {
-
-
-		// Log and handle the error
+		log.ERROR(err)
+// Log and handle the error
 	}
 ```
 

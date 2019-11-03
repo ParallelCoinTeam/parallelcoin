@@ -1,12 +1,16 @@
 package cfgutil
 
-import "os"
+import (
+	"github.com/p9c/pod/pkg/log"
+	"os"
+)
 
 // FileExists reports whether the named file or directory exists.
 func FileExists(	filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
-		if os.IsNotExist(err) {
+		log.ERROR(err)
+if os.IsNotExist(err) {
 			return false, nil
 		}
 		return false, err

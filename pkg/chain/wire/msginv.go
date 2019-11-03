@@ -2,9 +2,8 @@ package wire
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"io"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // defaultInvListAlloc is the default size used for the backing array for an inventory list.  The array will dynamically grow as needed, but this figure is intended to provide enough space for the max number of inventory vectors in a *typical* inventory message without needing to grow the backing array multiple times.  Technically, the list can grow to MaxInvPerMsg, but rather than using that large figure, this figure more accurately reflects the typical case.
@@ -30,6 +29,8 @@ func (msg *MsgInv) AddInvVect(iv *InvVect) error {
 func (msg *MsgInv) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	// Limit to max inventory vectors per message.
@@ -44,11 +45,14 @@ func (msg *MsgInv) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) erro
 		iv := &invList[i]
 		err := readInvVect(r, pver, iv)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		err = msg.AddInvVect(iv)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+		log.ERROR(err)
+fmt.Println(err)
 		}
 	}
 	return nil
@@ -64,11 +68,15 @@ func (msg *MsgInv) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) erro
 	}
 	err := WriteVarInt(w, pver, uint64(count))
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return err
 	}
 	for _, iv := range msg.InvList {
 		err := writeInvVect(w, pver, iv)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 	}

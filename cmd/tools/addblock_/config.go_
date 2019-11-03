@@ -5,11 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chain/wire"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -84,7 +84,8 @@ func loadConfig(	) (*config, []string, error) {
 	parser := flags.NewParser(&cfg, flags.Default)
 	remainingArgs, err := parser.Parse()
 	if err != nil {
-		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+		log.ERROR(err)
+if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
 		return nil, nil, err

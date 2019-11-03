@@ -2,16 +2,17 @@ package ctl
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"path/filepath"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // unusableFlags are the command usage flags which this utility are not able to
 // use.  In particular it doesn't support websockets and consequently
 // notifications.
-const unusableFlags = json.UFWebsocketOnly | json.UFNotification
+const unusableFlags = btcjson.UFWebsocketOnly | btcjson.UFNotification
 
 //nolint
 var (
@@ -26,11 +27,11 @@ var (
 	// DefaultWalletCertFile is
 	DefaultWalletCertFile = filepath.Join(SPVHomeDir, "rpc.cert")
 	// NodeHomeDir is
-	NodeHomeDir = util.AppDataDir("pod", false)
+	NodeHomeDir = appdata.Dir("pod", false)
 	// PodCtlHomeDir is
-	PodCtlHomeDir = util.AppDataDir("pod/ctl", false)
+	PodCtlHomeDir = appdata.Dir("pod/ctl", false)
 	// SPVHomeDir is
-	SPVHomeDir = util.AppDataDir("pod/spv", false)
+	SPVHomeDir = appdata.Dir("pod/spv", false)
 )
 
 // ListCommands categorizes and lists all of the usable commands along with
@@ -42,11 +43,13 @@ func ListCommands() {
 		numCategories
 	)
 	// Get a list of registered commands and categorize and filter them.
-	cmdMethods := json.RegisteredCmdMethods()
+	cmdMethods := btcjson.RegisteredCmdMethods()
 	categorized := make([][]string, numCategories)
 	for _, method := range cmdMethods {
-		flags, err := json.MethodUsageFlags(method)
+		flags, err := btcjson.MethodUsageFlags(method)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue
@@ -55,15 +58,17 @@ func ListCommands() {
 		if flags&unusableFlags != 0 {
 			continue
 		}
-		usage, err := json.MethodUsageText(method)
+		usage, err := btcjson.MethodUsageText(method)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue
 		}
 		// Categorize the command based on the usage flags.
 		category := categoryChain
-		if flags&json.UFWalletOnly != 0 {
+		if flags&btcjson.UFWalletOnly != 0 {
 			category = categoryWallet
 		}
 		categorized[category] = append(categorized[category], usage)

@@ -1,8 +1,9 @@
 package blockchain
 
 import (
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/log"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // In order to reduce the size of stored scripts, a domain specific compression algorithm is used which recognizes standard scripts and stores them using less bytes than the original script.  The compression algorithm used here was obtained from Bitcoin Core, so all credits for the algorithm go to it.
@@ -201,6 +202,8 @@ func decompressScript(	compressedPkScript []byte) []byte {
 		copy(compressedKey[1:], compressedPkScript[1:])
 		key, err := ec.ParsePubKey(compressedKey, ec.S256())
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return nil
 		}
 		pkScript := make([]byte, 67)

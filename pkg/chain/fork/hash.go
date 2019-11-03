@@ -1,28 +1,33 @@
 package fork
 
 import (
-   "crypto/sha256"
-   "math/big"
-   
-   "git.parallelcoin.io/dev/cryptonight"
-   "github.com/bitgoin/lyra2rev2"
-   "github.com/dchest/blake256"
-   skein "github.com/enceve/crypto/skein/skein256"
-   gost "github.com/programmer10110/gostreebog"
-   "golang.org/x/crypto/argon2"
-   "golang.org/x/crypto/blake2b"
-   "golang.org/x/crypto/blake2s"
-   "golang.org/x/crypto/scrypt"
-   "golang.org/x/crypto/sha3"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"crypto/sha256"
+	"github.com/p9c/pod/pkg/log"
+	"math/big"
+
+	"git.parallelcoin.io/dev/cryptonight"
+	"github.com/bitgoin/lyra2rev2"
+	"github.com/dchest/blake256"
+	skein "github.com/enceve/crypto/skein/skein256"
+	gost "github.com/programmer10110/gostreebog"
+	"golang.org/x/crypto/argon2"
+	"golang.org/x/crypto/blake2b"
+	"golang.org/x/crypto/blake2s"
+	"golang.org/x/crypto/scrypt"
+	"golang.org/x/crypto/sha3"
+
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
-const HashReps = 0
+// HashReps allows the number of multiplication/division cycles to be
+// repeated before the final hash,
+// on release for mainnet this is probably set to 9 or so to raise the
+// difficulty to a reasonable level for the hard fork
+const HashReps = 1
 
 // Argon2i takes bytes, generates a Lyra2REv2 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {
-	return argon2.IDKey(bytes, bytes, 1, 64*1024, 1, 32)
+	return argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 1, 32)
 }
 
 // Blake14lr takes bytes and returns a blake14lr 256 bit hash
@@ -95,19 +100,20 @@ func DivHash(hf func([]byte) []byte, blockbytes []byte, howmany int) []byte {
 	copy(ddd, divdb)
 	// this allows us run this operation an arbitrary number of times
 	if howmany > 0 {
-		return DivHash(hf, ddd, howmany-1)
+		return DivHash(hf, append(ddd, reverse(ddd)...), howmany-1)
 	}
 	// fmt.Printf("%x\n", ddd)
+	// return Cryptonight7v2(hf(ddd))
 	return hf(ddd)
 }
 
 // Hash computes the hash of bytes using the named hash
 func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
 	// if IsTestnet && height < 10 {
-	// 	// log <- cl.Warn{"hash", name, height, cl.Ine()}
+	// 	// log <- cl.Warn{"hash", name, height}
 	// 	time.Sleep(time.Second / 20)
 	// }
-	// log <- cl.Info{"hash", name, height, cl.Ine()}
+	// INFO("hash", name, height}
 	switch name {
 	case "blake2b":
 		_ = out.SetBytes(DivHash(Blake2b, bytes, HashReps))
@@ -165,6 +171,8 @@ func Scrypt(bytes []byte) []byte {
 	copy(c, b)
 	dk, err := scrypt.Key(c, c, 1024, 1, 1, 32)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		return make([]byte, 32)
 	}
 	o := make([]byte, 32)

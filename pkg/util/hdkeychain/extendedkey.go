@@ -10,15 +10,15 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"math/big"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/base58"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 const (
@@ -160,7 +160,8 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 	hmac512 := hmac.New(sha512.New, k.chainCode)
 	_, err := hmac512.Write(data)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		log.ERROR(err)
+fmt.Println(err)
 	}
 	ilr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -199,7 +200,8 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 		// Convert the serialized compressed parent public key into X and Y coordinates so it can be added to the intermediate public key.
 		pubKey, err := ec.ParsePubKey(k.key, ec.S256())
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 		// Add the intermediate public key to the parent public key to derive the final child key.
 		// childKey = serP(point(parse256(Il)) + parentKey)
@@ -223,7 +225,8 @@ func (k *ExtendedKey) Neuter() (*ExtendedKey, error) {
 	// Get the associated public extended key version bytes.
 	version, err := chaincfg.HDPrivateKeyToPublicKeyID(k.version)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Convert it to an extended public key.  The key for the new extended key will simply be the pubkey of the current extended private key.
 	// This is the function N((k,c)) -> (K, c) from [BIP32].
@@ -335,7 +338,8 @@ func NewMaster(seed []byte, net *netparams.Params) (*ExtendedKey, error) {
 	hmac512 := hmac.New(sha512.New, masterKey)
 	_, err := hmac512.Write(seed)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		log.ERROR(err)
+fmt.Println(err)
 	}
 	lr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -390,7 +394,8 @@ func NewKeyFromString(key string) (*ExtendedKey, error) {
 		// Ensure the public key parses correctly and is actually on the secp256k1 curve.
 		_, err := ec.ParsePubKey(keyData, ec.S256())
 		if err != nil {
-			return nil, err
+		log.ERROR(err)
+return nil, err
 		}
 	}
 	return NewExtendedKey(version, keyData, chainCode, parentFP, depth,
@@ -406,7 +411,8 @@ func GenerateSeed(length uint8) ([]byte, error) {
 	buf := make([]byte, length)
 	_, err := rand.Read(buf)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return buf, nil
 }

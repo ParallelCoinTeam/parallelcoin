@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/db"
 )
 
 // blockRegionCmd defines the configuration options for the fetchblockregion command.
@@ -39,20 +39,24 @@ func (cmd *blockRegionCmd) Execute(args []string) error {
 	// Parse arguments.
 	blockHash, err := chainhash.NewHashFromStr(args[0])
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	startOffset, err := strconv.ParseUint(args[1], 10, 32)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	regionLen, err := strconv.ParseUint(args[2], 10, 32)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	defer db.Close()
 	return db.View(func(tx database.Tx) error {
@@ -66,7 +70,8 @@ func (cmd *blockRegionCmd) Execute(args []string) error {
 		startTime := time.Now()
 		regionBytes, err := tx.FetchBlockRegion(&region)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 		log.Infof("Loaded block region in %v", time.Since(startTime))
 		log.Infof("Double Hash: %s", chainhash.DoubleHashH(regionBytes))

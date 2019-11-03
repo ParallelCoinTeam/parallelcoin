@@ -4,15 +4,16 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/snacl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/zero"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/snacl"
+	"github.com/p9c/pod/pkg/util/zero"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 const (
@@ -226,7 +227,8 @@ func (ck *cryptoKey) CopyBytes(from []byte) {
 func defaultNewCryptoKey() (EncryptorDecryptor, error) {
 	key, err := snacl.GenerateCryptoKey()
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return &cryptoKey{*key}, nil
 }
@@ -401,7 +403,8 @@ func (m *Manager) NewScopedKeyManager(ns walletdb.ReadWriteBucket, scope KeyScop
 	// neutered.
 	masterRootPrivEnc, _, err := fetchMasterHDKeys(ns)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// If the master root private key isn't found within the database, but
 	// we need to bail here as we can't create the cointype key without the
@@ -413,7 +416,8 @@ func (m *Manager) NewScopedKeyManager(ns walletdb.ReadWriteBucket, scope KeyScop
 	// need to fully decrypt it.
 	serializedMasterRootPriv, err := m.cryptoKeyPriv.Decrypt(masterRootPrivEnc)
 	if err != nil {
-		str := fmt.Sprintf("failed to decrypt master root serialized private key")
+		log.ERROR(err)
+str := fmt.Sprintf("failed to decrypt master root serialized private key")
 		return nil, managerError(ErrLocked, str, err)
 	}
 	// Now that we know the root priv is within the database, we'll decode
@@ -423,7 +427,8 @@ func (m *Manager) NewScopedKeyManager(ns walletdb.ReadWriteBucket, scope KeyScop
 	)
 	zero.Bytes(serializedMasterRootPriv)
 	if err != nil {
-		str := fmt.Sprintf("failed to create master extended private key")
+		log.ERROR(err)
+str := fmt.Sprintf("failed to create master extended private key")
 		return nil, managerError(ErrKeyChain, str, err)
 	}
 	// Now that we have the root private key, we'll fetch the scope bucket
@@ -445,7 +450,8 @@ func (m *Manager) NewScopedKeyManager(ns walletdb.ReadWriteBucket, scope KeyScop
 	schemaBytes := scopeSchemaToBytes(&addrSchema)
 	err = scopeSchemas.Put(scopeKey[:], schemaBytes)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// With the database state created, we'll now derive the cointype key
 	// using the master HD private key, then encrypt it along with the
@@ -454,7 +460,8 @@ func (m *Manager) NewScopedKeyManager(ns walletdb.ReadWriteBucket, scope KeyScop
 		ns, scope, rootPriv, m.cryptoKeyPub, m.cryptoKeyPriv,
 	)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Finally, we'll register this new scoped manager with the root
 	// manager.
@@ -526,7 +533,8 @@ func (m *Manager) NeuterRootKey(ns walletdb.ReadWriteBucket) error {
 	// First, we'll fetch the current master HD keys from the database.
 	masterRootPrivEnc, _, err := fetchMasterHDKeys(ns)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	// If the root master private key is already nil, then we'll return a
 	// nil error here as the root key has already been permanently
@@ -555,7 +563,8 @@ func (m *Manager) Address(ns walletdb.ReadBucket,
 	for _, scopedMgr := range m.scopedManagers {
 		addr, err := scopedMgr.Address(ns, address)
 		if err != nil {
-			continue
+		log.ERROR(err)
+continue
 		}
 		return addr, nil
 	}
@@ -601,7 +610,8 @@ func (m *Manager) AddrAccount(ns walletdb.ReadBucket,
 		// that the addr belongs to.
 		accNo, err := scopedMgr.AddrAccount(ns, address)
 		if err != nil {
-			return nil, 0, err
+		log.ERROR(err)
+return nil, 0, err
 		}
 		return scopedMgr, accNo, err
 	}
@@ -623,7 +633,8 @@ func (m *Manager) ForEachActiveAccountAddress(ns walletdb.ReadBucket,
 	for _, scopedMgr := range m.scopedManagers {
 		err := scopedMgr.ForEachActiveAccountAddress(ns, account, fn)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 	}
 	return nil
@@ -637,7 +648,8 @@ func (m *Manager) ForEachActiveAddress(ns walletdb.ReadBucket, fn func(addr util
 	for _, scopedMgr := range m.scopedManagers {
 		err := scopedMgr.ForEachActiveAddress(ns, fn)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 	}
 	return nil
@@ -652,7 +664,8 @@ func (m *Manager) ForEachAccountAddress(ns walletdb.ReadBucket, account uint32,
 	for _, scopedMgr := range m.scopedManagers {
 		err := scopedMgr.ForEachAccountAddress(ns, account, fn)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 	}
 	return nil
@@ -706,7 +719,8 @@ func (m *Manager) ChangePassphrase(ns walletdb.ReadWriteBucket, oldPassphrase,
 	// the actual secret keys.
 	newMasterKey, err := newSecretKey(&newPassphrase, config)
 	if err != nil {
-		str := "failed to create new master private key"
+		log.ERROR(err)
+str := "failed to create new master private key"
 		return managerError(ErrCrypto, str, err)
 	}
 	newKeyParams := newMasterKey.Marshal()
@@ -722,33 +736,38 @@ func (m *Manager) ChangePassphrase(ns walletdb.ReadWriteBucket, oldPassphrase,
 		var passphraseSalt [saltSize]byte
 		_, err := rand.Read(passphraseSalt[:])
 		if err != nil {
-			str := "failed to read random source for passhprase salt"
+		log.ERROR(err)
+str := "failed to read random source for passhprase salt"
 			return managerError(ErrCrypto, str, err)
 		}
 		// Re-encrypt the crypto private key using the new master
 		// private key.
 		decPriv, err := secretKey.Decrypt(m.cryptoKeyPrivEncrypted)
 		if err != nil {
-			str := "failed to decrypt crypto private key"
+		log.ERROR(err)
+str := "failed to decrypt crypto private key"
 			return managerError(ErrCrypto, str, err)
 		}
 		encPriv, err := newMasterKey.Encrypt(decPriv)
 		zero.Bytes(decPriv)
 		if err != nil {
-			str := "failed to encrypt crypto private key"
+		log.ERROR(err)
+str := "failed to encrypt crypto private key"
 			return managerError(ErrCrypto, str, err)
 		}
 		// Re-encrypt the crypto script key using the new master
 		// private key.
 		decScript, err := secretKey.Decrypt(m.cryptoKeyScriptEncrypted)
 		if err != nil {
-			str := "failed to decrypt crypto script key"
+		log.ERROR(err)
+str := "failed to decrypt crypto script key"
 			return managerError(ErrCrypto, str, err)
 		}
 		encScript, err := newMasterKey.Encrypt(decScript)
 		zero.Bytes(decScript)
 		if err != nil {
-			str := "failed to encrypt crypto script key"
+		log.ERROR(err)
+str := "failed to encrypt crypto script key"
 			return managerError(ErrCrypto, str, err)
 		}
 		// When the manager is locked, ensure the new clear text master
@@ -768,11 +787,13 @@ func (m *Manager) ChangePassphrase(ns walletdb.ReadWriteBucket, oldPassphrase,
 		// transaction.
 		err = putCryptoKeys(ns, nil, encPriv, encScript)
 		if err != nil {
-			return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 		}
 		err = putMasterKeyParams(ns, nil, newKeyParams)
 		if err != nil {
-			return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 		}
 		// Now that the db has been successfully updated, clear the old
 		// key and set the new one.
@@ -787,18 +808,21 @@ func (m *Manager) ChangePassphrase(ns walletdb.ReadWriteBucket, oldPassphrase,
 		// key.
 		encryptedPub, err := newMasterKey.Encrypt(m.cryptoKeyPub.Bytes())
 		if err != nil {
-			str := "failed to encrypt crypto public key"
+		log.ERROR(err)
+str := "failed to encrypt crypto public key"
 			return managerError(ErrCrypto, str, err)
 		}
 		// Save the new keys and netparams to the the db in a single
 		// transaction.
 		err = putCryptoKeys(ns, encryptedPub, nil, nil)
 		if err != nil {
-			return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 		}
 		err = putMasterKeyParams(ns, newKeyParams, nil)
 		if err != nil {
-			return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 		}
 		// Now that the db has been successfully updated, clear the old
 		// key and set the new one.
@@ -833,7 +857,8 @@ func (m *Manager) ConvertToWatchingOnly(ns walletdb.ReadWriteBucket) error {
 	}
 	err = putWatchingOnly(ns, true)
 	if err != nil {
-		return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 	}
 	// Lock the manager to remove all clear text private key material from
 	// memory if needed.
@@ -961,7 +986,8 @@ func (m *Manager) Unlock(ns walletdb.ReadBucket, passphrase []byte) error {
 	// Use the master private key to decrypt the crypto private key.
 	decryptedKey, err := m.masterKeyPriv.Decrypt(m.cryptoKeyPrivEncrypted)
 	if err != nil {
-		m.lock()
+		log.ERROR(err)
+m.lock()
 		str := "failed to decrypt crypto private key"
 		return managerError(ErrCrypto, str, err)
 	}
@@ -973,7 +999,8 @@ func (m *Manager) Unlock(ns walletdb.ReadBucket, passphrase []byte) error {
 		for account, acctInfo := range manager.acctInfo {
 			decrypted, err := m.cryptoKeyPriv.Decrypt(acctInfo.acctKeyEncrypted)
 			if err != nil {
-				m.lock()
+		log.ERROR(err)
+m.lock()
 				str := fmt.Sprintf("failed to decrypt account %d "+
 					"private key", account)
 				return managerError(ErrCrypto, str, err)
@@ -981,7 +1008,8 @@ func (m *Manager) Unlock(ns walletdb.ReadBucket, passphrase []byte) error {
 			acctKeyPriv, err := hdkeychain.NewKeyFromString(string(decrypted))
 			zero.Bytes(decrypted)
 			if err != nil {
-				m.lock()
+		log.ERROR(err)
+m.lock()
 				str := fmt.Sprintf("failed to regenerate account %d "+
 					"extended key", account)
 				return managerError(ErrKeyChain, str, err)
@@ -996,7 +1024,8 @@ func (m *Manager) Unlock(ns walletdb.ReadBucket, passphrase []byte) error {
 				info.index, true,
 			)
 			if err != nil {
-				m.lock()
+		log.ERROR(err)
+m.lock()
 				return err
 			}
 			// It's ok to ignore the error here since it can only
@@ -1008,7 +1037,8 @@ func (m *Manager) Unlock(ns walletdb.ReadBucket, passphrase []byte) error {
 			privKeyEncrypted, err := m.cryptoKeyPriv.Encrypt(privKeyBytes)
 			zero.BigInt(privKey.D)
 			if err != nil {
-				m.lock()
+		log.ERROR(err)
+m.lock()
 				str := fmt.Sprintf("failed to encrypt private key for "+
 					"address %s", info.managedAddr.Address())
 				return managerError(ErrCrypto, str, err)
@@ -1079,11 +1109,13 @@ func (m *Manager) Encrypt(keyType CryptoKeyType, in []byte) ([]byte, error) {
 	defer m.mtx.Unlock()
 	cryptoKey, err := m.selectCryptoKey(keyType)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	encrypted, err := cryptoKey.Encrypt(in)
 	if err != nil {
-		return nil, managerError(ErrCrypto, "failed to encrypt", err)
+		log.ERROR(err)
+return nil, managerError(ErrCrypto, "failed to encrypt", err)
 	}
 	return encrypted, nil
 }
@@ -1096,11 +1128,13 @@ func (m *Manager) Decrypt(keyType CryptoKeyType, in []byte) ([]byte, error) {
 	defer m.mtx.Unlock()
 	cryptoKey, err := m.selectCryptoKey(keyType)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	decrypted, err := cryptoKey.Decrypt(in)
 	if err != nil {
-		return nil, managerError(ErrCrypto, "failed to decrypt", err)
+		log.ERROR(err)
+return nil, managerError(ErrCrypto, "failed to decrypt", err)
 	}
 	return decrypted, nil
 }
@@ -1168,12 +1202,14 @@ func deriveCoinTypeKey(masterNode *hdkeychain.ExtendedKey,
 	// Derive the purpose key as a child of the master node.
 	purpose, err := masterNode.Child(scope.Purpose + hdkeychain.HardenedKeyStart)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Derive the coin type key as a child of the purpose key.
 	coinTypeKey, err := purpose.Child(scope.Coin + hdkeychain.HardenedKeyStart)
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	return coinTypeKey, nil
 }
@@ -1222,7 +1258,8 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	// Verify the version is neither too old or too new.
 	version, err := fetchManagerVersion(ns)
 	if err != nil {
-		str := "failed to fetch version for update"
+		log.ERROR(err)
+str := "failed to fetch version for update"
 		return nil, managerError(ErrDatabase, str, err)
 	}
 	if version < latestMgrVersion {
@@ -1235,31 +1272,37 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	// Load whether or not the manager is watching-only from the db.
 	watchingOnly, err := fetchWatchingOnly(ns)
 	if err != nil {
-		return nil, maybeConvertDbError(err)
+		log.ERROR(err)
+return nil, maybeConvertDbError(err)
 	}
 	// Load the master key netparams from the db.
 	masterKeyPubParams, masterKeyPrivParams, err := fetchMasterKeyParams(ns)
 	if err != nil {
-		return nil, maybeConvertDbError(err)
+		log.ERROR(err)
+return nil, maybeConvertDbError(err)
 	}
 	// Load the crypto keys from the db.
 	cryptoKeyPubEnc, cryptoKeyPrivEnc, cryptoKeyScriptEnc, err :=
 		fetchCryptoKeys(ns)
 	if err != nil {
-		return nil, maybeConvertDbError(err)
+		log.ERROR(err)
+return nil, maybeConvertDbError(err)
 	}
 	// Load the sync state from the db.
 	syncedTo, err := fetchSyncedTo(ns)
 	if err != nil {
-		return nil, maybeConvertDbError(err)
+		log.ERROR(err)
+return nil, maybeConvertDbError(err)
 	}
 	startBlock, err := fetchStartBlock(ns)
 	if err != nil {
-		return nil, maybeConvertDbError(err)
+		log.ERROR(err)
+return nil, maybeConvertDbError(err)
 	}
 	birthday, err := fetchBirthday(ns)
 	if err != nil {
-		return nil, maybeConvertDbError(err)
+		log.ERROR(err)
+return nil, maybeConvertDbError(err)
 	}
 	// When not a watching-only manager, set the master private key netparams,
 	// but don't derive it now since the manager starts off locked.
@@ -1267,7 +1310,8 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	if !watchingOnly {
 		err := masterKeyPriv.Unmarshal(masterKeyPrivParams)
 		if err != nil {
-			str := "failed to unmarshal master private key"
+		log.ERROR(err)
+str := "failed to unmarshal master private key"
 			return nil, managerError(ErrCrypto, str, err)
 		}
 	}
@@ -1286,7 +1330,8 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	cryptoKeyPub := &cryptoKey{snacl.CryptoKey{}}
 	cryptoKeyPubCT, err := masterKeyPub.Decrypt(cryptoKeyPubEnc)
 	if err != nil {
-		str := "failed to decrypt crypto public key"
+		log.ERROR(err)
+str := "failed to decrypt crypto public key"
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	cryptoKeyPub.CopyBytes(cryptoKeyPubCT)
@@ -1297,7 +1342,8 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	var privPassphraseSalt [saltSize]byte
 	_, err = rand.Read(privPassphraseSalt[:])
 	if err != nil {
-		str := "failed to read random source for passphrase salt"
+		log.ERROR(err)
+str := "failed to read random source for passphrase salt"
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	// Next, we'll need to load all known manager scopes from disk. Each
@@ -1306,7 +1352,8 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 	err = forEachKeyScope(ns, func(scope KeyScope) error {
 		scopeSchema, err := fetchScopeAddrSchema(ns, &scope)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 		scopedManagers[scope] = &ScopedKeyManager{
 			scope:      scope,
@@ -1317,7 +1364,8 @@ func loadManager(ns walletdb.ReadBucket, pubPassphrase []byte,
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// Create new address manager with the given parameters.  Also,
 	// override the defaults for the additional fields which are not
@@ -1373,7 +1421,8 @@ func createManagerKeyScope(ns walletdb.ReadWriteBucket,
 	// Derive the cointype key according to the passed scope.
 	coinTypeKeyPriv, err := deriveCoinTypeKey(root, scope)
 	if err != nil {
-		str := "failed to derive cointype extended key"
+		log.ERROR(err)
+str := "failed to derive cointype extended key"
 		return managerError(ErrKeyChain, str, err)
 	}
 	defer coinTypeKeyPriv.Zero()
@@ -1381,7 +1430,8 @@ func createManagerKeyScope(ns walletdb.ReadWriteBucket,
 	// BIP0044-like derivation.
 	acctKeyPriv, err := deriveAccountKey(coinTypeKeyPriv, 0)
 	if err != nil {
-		// The seed is unusable if the any of the children in the
+		log.ERROR(err)
+// The seed is unusable if the any of the children in the
 		// required hierarchy can't be derived due to invalid child.
 		if err == hdkeychain.ErrInvalidChild {
 			str := "the provided seed is unusable"
@@ -1405,40 +1455,47 @@ func createManagerKeyScope(ns walletdb.ReadWriteBucket,
 	// The address manager needs the public extended key for the account.
 	acctKeyPub, err := acctKeyPriv.Neuter()
 	if err != nil {
-		str := "failed to convert private key for account 0"
+		log.ERROR(err)
+str := "failed to convert private key for account 0"
 		return managerError(ErrKeyChain, str, err)
 	}
 	// Encrypt the cointype keys with the associated crypto keys.
 	coinTypeKeyPub, err := coinTypeKeyPriv.Neuter()
 	if err != nil {
-		str := "failed to convert cointype private key"
+		log.ERROR(err)
+str := "failed to convert cointype private key"
 		return managerError(ErrKeyChain, str, err)
 	}
 	coinTypePubEnc, err := cryptoKeyPub.Encrypt([]byte(coinTypeKeyPub.String()))
 	if err != nil {
-		str := "failed to encrypt cointype public key"
+		log.ERROR(err)
+str := "failed to encrypt cointype public key"
 		return managerError(ErrCrypto, str, err)
 	}
 	coinTypePrivEnc, err := cryptoKeyPriv.Encrypt([]byte(coinTypeKeyPriv.String()))
 	if err != nil {
-		str := "failed to encrypt cointype private key"
+		log.ERROR(err)
+str := "failed to encrypt cointype private key"
 		return managerError(ErrCrypto, str, err)
 	}
 	// Encrypt the default account keys with the associated crypto keys.
 	acctPubEnc, err := cryptoKeyPub.Encrypt([]byte(acctKeyPub.String()))
 	if err != nil {
-		str := "failed to  encrypt public key for account 0"
+		log.ERROR(err)
+str := "failed to  encrypt public key for account 0"
 		return managerError(ErrCrypto, str, err)
 	}
 	acctPrivEnc, err := cryptoKeyPriv.Encrypt([]byte(acctKeyPriv.String()))
 	if err != nil {
-		str := "failed to encrypt private key for account 0"
+		log.ERROR(err)
+str := "failed to encrypt private key for account 0"
 		return managerError(ErrCrypto, str, err)
 	}
 	// Save the encrypted cointype keys to the database.
 	err = putCoinTypeKeys(ns, &scope, coinTypePubEnc, coinTypePrivEnc)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	// Save the information for the default account to the database.
 	err = putAccountInfo(
@@ -1446,7 +1503,8 @@ func createManagerKeyScope(ns walletdb.ReadWriteBucket,
 		defaultAccountName,
 	)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	return putAccountInfo(
 		ns, &scope, ImportedAddrAccount, nil, nil, 0, 0,
@@ -1496,12 +1554,14 @@ func Create(ns walletdb.ReadWriteBucket, seed, pubPassphrase, privPassphrase []b
 	// crypto keys that will be generated next.
 	masterKeyPub, err := newSecretKey(&pubPassphrase, config)
 	if err != nil {
-		str := "failed to master public key"
+		log.ERROR(err)
+str := "failed to master public key"
 		return managerError(ErrCrypto, str, err)
 	}
 	masterKeyPriv, err := newSecretKey(&privPassphrase, config)
 	if err != nil {
-		str := "failed to master private key"
+		log.ERROR(err)
+str := "failed to master private key"
 		return managerError(ErrCrypto, str, err)
 	}
 	defer masterKeyPriv.Zero()
@@ -1511,7 +1571,8 @@ func Create(ns walletdb.ReadWriteBucket, seed, pubPassphrase, privPassphrase []b
 	var privPassphraseSalt [saltSize]byte
 	_, err = rand.Read(privPassphraseSalt[:])
 	if err != nil {
-		str := "failed to read random source for passphrase salt"
+		log.ERROR(err)
+str := "failed to read random source for passphrase salt"
 		return managerError(ErrCrypto, str, err)
 	}
 	// Generate new crypto public, private, and script keys.  These keys are
@@ -1519,35 +1580,41 @@ func Create(ns walletdb.ReadWriteBucket, seed, pubPassphrase, privPassphrase []b
 	// extended keys, and scripts.
 	cryptoKeyPub, err := newCryptoKey()
 	if err != nil {
-		str := "failed to generate crypto public key"
+		log.ERROR(err)
+str := "failed to generate crypto public key"
 		return managerError(ErrCrypto, str, err)
 	}
 	cryptoKeyPriv, err := newCryptoKey()
 	if err != nil {
-		str := "failed to generate crypto private key"
+		log.ERROR(err)
+str := "failed to generate crypto private key"
 		return managerError(ErrCrypto, str, err)
 	}
 	defer cryptoKeyPriv.Zero()
 	cryptoKeyScript, err := newCryptoKey()
 	if err != nil {
-		str := "failed to generate crypto script key"
+		log.ERROR(err)
+str := "failed to generate crypto script key"
 		return managerError(ErrCrypto, str, err)
 	}
 	defer cryptoKeyScript.Zero()
 	// Encrypt the crypto keys with the associated master keys.
 	cryptoKeyPubEnc, err := masterKeyPub.Encrypt(cryptoKeyPub.Bytes())
 	if err != nil {
-		str := "failed to encrypt crypto public key"
+		log.ERROR(err)
+str := "failed to encrypt crypto public key"
 		return managerError(ErrCrypto, str, err)
 	}
 	cryptoKeyPrivEnc, err := masterKeyPriv.Encrypt(cryptoKeyPriv.Bytes())
 	if err != nil {
-		str := "failed to encrypt crypto private key"
+		log.ERROR(err)
+str := "failed to encrypt crypto private key"
 		return managerError(ErrCrypto, str, err)
 	}
 	cryptoKeyScriptEnc, err := masterKeyPriv.Encrypt(cryptoKeyScript.Bytes())
 	if err != nil {
-		str := "failed to encrypt crypto script key"
+		log.ERROR(err)
+str := "failed to encrypt crypto script key"
 		return managerError(ErrCrypto, str, err)
 	}
 	// Use the genesis block for the passed chain as the created at block
@@ -1560,19 +1627,22 @@ func Create(ns walletdb.ReadWriteBucket, seed, pubPassphrase, privPassphrase []b
 	privParams := masterKeyPriv.Marshal()
 	err = putMasterKeyParams(ns, pubParams, privParams)
 	if err != nil {
-		return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 	}
 	// Generate the BIP0044 HD key structure to ensure the provided seed
 	// can generate the required structure with no issues.
 	// Derive the master extended key from the seed.
 	rootKey, err := hdkeychain.NewMaster(seed, chainParams)
 	if err != nil {
-		str := "failed to derive master extended key"
+		log.ERROR(err)
+str := "failed to derive master extended key"
 		return managerError(ErrKeyChain, str, err)
 	}
 	rootPubKey, err := rootKey.Neuter()
 	if err != nil {
-		str := "failed to neuter master extended key"
+		log.ERROR(err)
+str := "failed to neuter master extended key"
 		return managerError(ErrKeyChain, str, err)
 	}
 	// Next, for each registers default manager scope, we'll create the
@@ -1582,7 +1652,8 @@ func Create(ns walletdb.ReadWriteBucket, seed, pubPassphrase, privPassphrase []b
 			ns, defaultScope, rootKey, cryptoKeyPub, cryptoKeyPriv,
 		)
 		if err != nil {
-			return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 		}
 	}
 	// Before we proceed, we'll also store the root master private key
@@ -1590,36 +1661,43 @@ func Create(ns walletdb.ReadWriteBucket, seed, pubPassphrase, privPassphrase []b
 	// the future, we may need to create additional scoped key managers.
 	masterHDPrivKeyEnc, err := cryptoKeyPriv.Encrypt([]byte(rootKey.String()))
 	if err != nil {
-		return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 	}
 	masterHDPubKeyEnc, err := cryptoKeyPub.Encrypt([]byte(rootPubKey.String()))
 	if err != nil {
-		return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 	}
 	err = putMasterHDKeys(ns, masterHDPrivKeyEnc, masterHDPubKeyEnc)
 	if err != nil {
-		return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 	}
 	// Save the encrypted crypto keys to the database.
 	err = putCryptoKeys(ns, cryptoKeyPubEnc, cryptoKeyPrivEnc,
 		cryptoKeyScriptEnc)
 	if err != nil {
-		return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 	}
 	// Save the fact this is not a watching-only address manager to the
 	// database.
 	err = putWatchingOnly(ns, false)
 	if err != nil {
-		return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 	}
 	// Save the initial synced to state.
 	err = putSyncedTo(ns, &syncInfo.syncedTo)
 	if err != nil {
-		return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 	}
 	err = putStartBlock(ns, &syncInfo.startBlock)
 	if err != nil {
-		return maybeConvertDbError(err)
+		log.ERROR(err)
+return maybeConvertDbError(err)
 	}
 	// Use 48 hours as margin of safety for wallet birthday.
 	return putBirthday(ns, birthday.Add(-48*time.Hour))

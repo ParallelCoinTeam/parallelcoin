@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // importCmd defines the configuration options for the insecureimport command.
@@ -63,7 +63,8 @@ func (bi *blockImporter) readBlock() ([]byte, error) {
 	var net uint32
 	err := binary.Read(bi.r, binary.LittleEndian, &net)
 	if err != nil {
-		if err != io.EOF {
+		log.ERROR(err)
+if err != io.EOF {
 			return nil, err
 		}
 		// No block and no error means there are no more blocks to read.
@@ -97,7 +98,8 @@ func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 	// Deserialize the block which includes checks for malformed blocks.
 	block, err := util.NewBlockFromBytes(serializedBlock)
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	// update progress statistics
 	bi.lastBlockTime = block.MsgBlock().Header.Timestamp
@@ -109,7 +111,8 @@ func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 		return err
 	})
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	if exists {
 		return false, nil
@@ -124,7 +127,8 @@ func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 			return err
 		})
 		if err != nil {
-			return false, err
+		log.ERROR(err)
+return false, err
 		}
 		if !exists {
 			return false, fmt.Errorf("import file contains block "+
@@ -137,7 +141,8 @@ func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 		return tx.StoreBlock(block)
 	})
 	if err != nil {
-		return false, err
+		log.ERROR(err)
+return false, err
 	}
 	return true, nil
 }
@@ -150,7 +155,8 @@ out:
 		// Read the next block from the file and if anything goes wrong notify the status handler with the error and bail.
 		serializedBlock, err := bi.readBlock()
 		if err != nil {
-			bi.errChan <- fmt.Errorf("Error reading from input "+
+		log.ERROR(err)
+bi.errChan <- fmt.Errorf("Error reading from input "+
 				"file: %v", err.Error())
 			break out
 		}
@@ -215,7 +221,8 @@ out:
 			bi.lastHeight++
 			imported, err := bi.processBlock(serializedBlock)
 			if err != nil {
-				bi.errChan <- err
+		log.ERROR(err)
+bi.errChan <- err
 				break out
 			}
 			if imported {
@@ -297,7 +304,8 @@ func (cmd *importCmd) Execute(args []string) error {
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	defer db.Close()
 	// Ensure the database is sync'd and closed on Ctrl+C.
@@ -308,7 +316,8 @@ func (cmd *importCmd) Execute(args []string) error {
 	})
 	fi, err := os.Open(importCfg.InFile)
 	if err != nil {
-		return err
+		log.ERROR(err)
+return err
 	}
 	defer fi.Close()
 	// Create a block importer for the database and input file and start it. The results channel returned from start will contain an error if anything went wrong.

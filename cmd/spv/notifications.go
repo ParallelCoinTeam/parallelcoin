@@ -2,9 +2,10 @@ package spv
 
 import (
 	"errors"
+	"github.com/p9c/pod/pkg/log"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/addrmgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/peer/connmgr"
+	"github.com/p9c/pod/pkg/peer/addrmgr"
+	"github.com/p9c/pod/pkg/peer/connmgr"
 )
 
 type (
@@ -82,6 +83,8 @@ func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 		}
 		netAddr, err := s.addrStringToNetAddr(msg.addr)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			msg.reply <- err
 			return
 		}

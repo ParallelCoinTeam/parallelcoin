@@ -3,12 +3,13 @@ package builder
 import (
 	"crypto/rand"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"math"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util/gcs"
 )
 
 const (
@@ -36,7 +37,8 @@ func RandomKey() ([gcs.KeySize]byte, error) {
 	_, err := rand.Read(randKey)
 	// This shouldn't happen unless the user is on a system that doesn't have a system CSPRNG. OK to panic in this case.
 	if err != nil {
-		return key, err
+		log.ERROR(err)
+return key, err
 	}
 	// Copy the byte slice to a [gcs.KeySize]byte array and return it.
 	copy(key[:], randKey[:])
@@ -216,7 +218,8 @@ func WithKeyHash(	keyHash *chainhash.Hash) *GCSBuilder {
 func WithRandomKeyPNM(	p uint8, n uint32, m uint64) *GCSBuilder {
 	key, err := RandomKey()
 	if err != nil {
-		b := GCSBuilder{err: err}
+		log.ERROR(err)
+b := GCSBuilder{err: err}
 		return &b
 	}
 	return WithKeyPNM(key, p, n, m)
@@ -239,7 +242,8 @@ func BuildBasicFilter(	block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filt
 	// If the filter had an issue with the specified key, then we force it to bubble up here by calling the Key() function.
 	_, err := b.Key()
 	if err != nil {
-		return nil, err
+		log.ERROR(err)
+return nil, err
 	}
 	// In order to build a basic filter, we'll range over the entire block, adding each whole script itself.
 	for _, tx := range block.Transactions {
@@ -270,7 +274,8 @@ func BuildBasicFilter(	block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filt
 func GetFilterHash(	filter *gcs.Filter) (chainhash.Hash, error) {
 	filterData, err := filter.NBytes()
 	if err != nil {
-		return chainhash.Hash{}, err
+		log.ERROR(err)
+return chainhash.Hash{}, err
 	}
 	return chainhash.DoubleHashH(filterData), nil
 }
@@ -280,7 +285,8 @@ func MakeHeaderForFilter(	filter *gcs.Filter, prevHeader chainhash.Hash) (chainh
 	filterTip := make([]byte, 2*chainhash.HashSize)
 	filterHash, err := GetFilterHash(filter)
 	if err != nil {
-		return chainhash.Hash{}, err
+		log.ERROR(err)
+return chainhash.Hash{}, err
 	}
 	// In the buffer we created above we'll compute hash || prevHash as an intermediate value.
 	copy(filterTip, filterHash[:])

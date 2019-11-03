@@ -1,22 +1,22 @@
 package chain
 
 import (
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	`github.com/p9c/pod/pkg/chain/config/netparams`
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
+	am "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // BlockFilterer is used to iteratively scan blocks for a set of addresses of
 // interest. This is done by constructing reverse indexes mapping the
 // addresses to a ScopedIndex, which permits the reconstruction of the exact
-// child deriviation paths that reported matches.
+// child derivation paths that reported matches.
 //
 // Once initialized, a BlockFilterer can be used to scan any number of blocks
 // until a invocation of `FilterBlock` returns true. This allows the reverse
-// indexes to be resused in the event that the set of addresses does not need to
+// indexes to be reused in the event that the set of addresses does not need to
 // be altered. After a match is reported, a new BlockFilterer should be
 // initialized with the updated set of addresses that include any new keys that
 // are now within our look-ahead.
@@ -33,20 +33,20 @@ type BlockFilterer struct {
 	Params *netparams.Params
 	// ExReverseFilter holds a reverse index mapping an external address to
 	// the scoped index from which it was derived.
-	ExReverseFilter map[string]waddrmgr.ScopedIndex
+	ExReverseFilter map[string]am.ScopedIndex
 	// InReverseFilter holds a reverse index mapping an internal address to
 	// the scoped index from which it was derived.
-	InReverseFilter map[string]waddrmgr.ScopedIndex
-	// WathcedOutPoints is a global set of outpoints being tracked by the
+	InReverseFilter map[string]am.ScopedIndex
+	// WatchedOutPoints is a global set of outpoints being tracked by the
 	// wallet. This allows the block filterer to check for spends from an
 	// outpoint we own.
 	WatchedOutPoints map[wire.OutPoint]util.Address
 	// FoundExternal is a two-layer map recording the scope and index of
 	// external addresses found in a single block.
-	FoundExternal map[waddrmgr.KeyScope]map[uint32]struct{}
+	FoundExternal map[am.KeyScope]map[uint32]struct{}
 	// FoundInternal is a two-layer map recording the scope and index of
 	// internal addresses found in a single block.
-	FoundInternal map[waddrmgr.KeyScope]map[uint32]struct{}
+	FoundInternal map[am.KeyScope]map[uint32]struct{}
 	// FoundOutPoints is a set of outpoints found in a single block whose
 	// address belongs to the wallet.
 	FoundOutPoints map[wire.OutPoint]util.Address
@@ -59,25 +59,25 @@ type BlockFilterer struct {
 // NewBlockFilterer constructs the reverse indexes for the current set of
 // external and internal addresses that we are searching for, and is used to
 // scan successive blocks for addresses of interest. A particular block filter
-// can be reused until the first call from `FitlerBlock` returns true.
+// can be reused until the first call from `FilterBlock` returns true.
 func NewBlockFilterer(	params *netparams.Params,
 	req *FilterBlocksRequest) *BlockFilterer {
 	// Construct a reverse index by address string for the requested
 	// external addresses.
 	nExAddrs := len(req.ExternalAddrs)
-	exReverseFilter := make(map[string]waddrmgr.ScopedIndex, nExAddrs)
+	exReverseFilter := make(map[string]am.ScopedIndex, nExAddrs)
 	for scopedIndex, addr := range req.ExternalAddrs {
 		exReverseFilter[addr.EncodeAddress()] = scopedIndex
 	}
 	// Construct a reverse index by address string for the requested
 	// internal addresses.
 	nInAddrs := len(req.InternalAddrs)
-	inReverseFilter := make(map[string]waddrmgr.ScopedIndex, nInAddrs)
+	inReverseFilter := make(map[string]am.ScopedIndex, nInAddrs)
 	for scopedIndex, addr := range req.InternalAddrs {
 		inReverseFilter[addr.EncodeAddress()] = scopedIndex
 	}
-	foundExternal := make(map[waddrmgr.KeyScope]map[uint32]struct{})
-	foundInternal := make(map[waddrmgr.KeyScope]map[uint32]struct{})
+	foundExternal := make(map[am.KeyScope]map[uint32]struct{})
+	foundInternal := make(map[am.KeyScope]map[uint32]struct{})
 	foundOutPoints := make(map[wire.OutPoint]util.Address)
 	return &BlockFilterer{
 		Params:           params,
@@ -134,10 +134,11 @@ func (bf *BlockFilterer) FilterTx(tx *wire.MsgTx) bool {
 			out.PkScript, bf.Params,
 		)
 		if err != nil {
-			log <- cl.Warnf{
+		log.ERROR(err)
+log.WARNF(
 				"could not parse output script in %s:%d: %v",
 				tx.TxHash(), i, err,
-			}
+			)
 			continue
 		}
 		if !bf.FilterOutputAddrs(addrs) {
@@ -182,7 +183,7 @@ func (bf *BlockFilterer) FilterOutputAddrs(addrs []util.Address) bool {
 // foundExternal marks the scoped index as found within the block filterer's
 // FoundExternal map. If this the first index found for a particular scope, the
 // scope's second layer map will be initialized before marking the index.
-func (bf *BlockFilterer) foundExternal(scopedIndex waddrmgr.ScopedIndex) {
+func (bf *BlockFilterer) foundExternal(scopedIndex am.ScopedIndex) {
 	if _, ok := bf.FoundExternal[scopedIndex.Scope]; !ok {
 		bf.FoundExternal[scopedIndex.Scope] = make(map[uint32]struct{})
 	}
@@ -192,7 +193,7 @@ func (bf *BlockFilterer) foundExternal(scopedIndex waddrmgr.ScopedIndex) {
 // foundInternal marks the scoped index as found within the block filterer's
 // FoundInternal map. If this the first index found for a particular scope, the
 // scope's second layer map will be initialized before marking the index.
-func (bf *BlockFilterer) foundInternal(scopedIndex waddrmgr.ScopedIndex) {
+func (bf *BlockFilterer) foundInternal(scopedIndex am.ScopedIndex) {
 	if _, ok := bf.FoundInternal[scopedIndex.Scope]; !ok {
 		bf.FoundInternal[scopedIndex.Scope] = make(map[uint32]struct{})
 	}

@@ -2,23 +2,24 @@
 package main
 
 import (
-   "bufio"
-   "encoding/binary"
-   "fmt"
-   "os"
-   "path/filepath"
-   
-   "github.com/jessevdk/go-flags"
-   
-   wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
-   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-   _ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	"bufio"
+	"encoding/binary"
+	"fmt"
+	"github.com/p9c/pod/pkg/log"
+	"os"
+	"path/filepath"
+
+	"github.com/jessevdk/go-flags"
+
+	"github.com/p9c/pod/app/appdata"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 const defaultNet = "mainnet"
 
-var datadir = util.AppDataDir("mod", false)
+var datadir = appdata.Dir("mod", false)
 
 // Flags.
 var opts = struct {
@@ -32,6 +33,8 @@ var opts = struct {
 func init() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 		os.Exit(1)
 	}
 }
@@ -84,8 +87,8 @@ func mainInt() int {
 		}
 		err := scanner.Err()
 		if err != nil {
-			fmt.Println()
-			fmt.Println(err)
+		log.ERROR(err)
+fmt.Println(err)
 			return 1
 		}
 		resp := scanner.Text()
@@ -99,7 +102,8 @@ func mainInt() int {
 	}
 	db, err := walletdb.Open("bdb", opts.DbPath)
 	if err != nil {
-		fmt.Println("failed to open database:", err)
+		log.ERROR(err)
+fmt.Println("failed to open database:", err)
 		return 1
 	}
 	defer db.Close()
@@ -111,16 +115,21 @@ func mainInt() int {
 		}
 		ns, err := tx.CreateTopLevelBucket(wtxmgrNamespace)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		err = wtxmgr.Create(ns)
 		if err != nil {
-			return err
+		log.ERROR(err)
+return err
 		}
 		ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 		startBlock := ns.Get(startBlockName)
 		err = ns.Put(syncedToName, startBlock)
 		if err != nil {
+		log.ERROR(err)
+log.ERROR(err)
 			return err
 		}
 		recentBlocks := make([]byte, 40)
@@ -130,7 +139,8 @@ func mainInt() int {
 		return ns.Put(recentBlocksName, recentBlocks)
 	})
 	if err != nil {
-		fmt.Println("Failed to drop and re-create namespace:", err)
+		log.ERROR(err)
+fmt.Println("Failed to drop and re-create namespace:", err)
 		return 1
 	}
 	return 0
