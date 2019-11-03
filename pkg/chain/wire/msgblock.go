@@ -51,13 +51,11 @@ func (msg *MsgBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) er
 	err := readBlockHeader(r, pver, &msg.Header)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	txCount, err := ReadVarInt(r, pver)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Prevent more transactions than could possibly fit into a block. It would be possible to cause memory exhaustion and panics without a sane upper bound on this count.
@@ -71,8 +69,7 @@ log.ERROR(err)
 		tx := MsgTx{}
 		err := tx.BtcDecode(r, pver, enc)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		msg.Transactions = append(msg.Transactions, &tx)
@@ -98,13 +95,11 @@ func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) ([]TxLoc, error) {
 	err := readBlockHeader(r, 0, &msg.Header)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	txCount, err := ReadVarInt(r, 0)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Prevent more transactions than could possibly fit into a block. It would be possible to cause memory exhaustion and panics without a sane upper bound on this count.
@@ -121,8 +116,7 @@ log.ERROR(err)
 		tx := MsgTx{}
 		err := tx.Deserialize(r)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		msg.Transactions = append(msg.Transactions, &tx)
@@ -131,25 +125,24 @@ log.ERROR(err)
 	return txLocs, nil
 }
 
-// BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message interface implementation. See Serialize for encoding blocks to be stored to disk, such as in a database, as opposed to encoding blocks for the wire.
+// BtcEncode encodes the receiver to w using the bitcoin protocol encoding. This is part of the Message
+// interface implementation. See Serialize for encoding blocks to be stored to disk, such as in a
+// database, as opposed to encoding blocks for the wire.
 func (msg *MsgBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
 	err := writeBlockHeader(w, pver, &msg.Header)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	err = WriteVarInt(w, pver, uint64(len(msg.Transactions)))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	for _, tx := range msg.Transactions {
 		err = tx.BtcEncode(w, pver, enc)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

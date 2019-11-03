@@ -304,7 +304,7 @@ func (m *CPUMiner) generateBlocks(workerNumber uint32, quit chan struct{}) {
 	defer ticker.Stop()
 out:
 	for {
-		log.TRACE(workerNumber, "generateBlocksLoop start")
+		//log.TRACE(workerNumber, "generateBlocksLoop start")
 		// Quit when the miner is stopped.
 		select {
 		case <-quit:
@@ -317,7 +317,7 @@ out:
 		// on when there are no connected peers.
 		if (m.cfg.ConnectedCount() == 0 ||
 			m.cfg.ChainParams.Net == wire.MainNet) &&
-				!m.cfg.Solo {
+			!m.cfg.Solo {
 			log.DEBUG("server has no peers, waiting")
 			time.Sleep(time.Second)
 			continue
@@ -336,6 +336,7 @@ out:
 		}
 		// choose the algorithm on a rolling cycle
 		counter := m.rotator.Load()
+		//counter /= uint64(len(fork.List[fork.GetCurrent(curHeight+1)].Algos))*2
 		m.rotator.Add(1)
 		algo := "sha256d"
 		switch fork.GetCurrent(curHeight + 1) {
@@ -361,11 +362,10 @@ out:
 		// WARNF{"before gbt1", m.cfg.Algo, algo}
 		// algoname := fork.GetAlgoName(algo, m.b.BestSnapshot().Height)
 		// WARNF{"before gbt2", algoname}
-		log.TRACE("getting new block template")
+		//log.TRACE("getting new block template")
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
 		m.submitBlockLock.Unlock()
 		if err != nil {
-			log.ERROR(err)
 			log.WARNF("failed to create new block template:", err)
 			continue
 		}
@@ -373,7 +373,7 @@ out:
 		// when conditions that trigger a stale block, so a new block template
 		// can be generated.  When the return is true a solution was found, so
 		// submit the solved block.
-		log.TRACE("attempting to solve block")
+		//log.TRACE("attempting to solve block")
 		if m.solveBlock(workerNumber, template.Block, curHeight+1,
 			m.cfg.ChainParams.Name == "testnet", ticker, quit) {
 			block := util.NewBlock(template.Block)
@@ -457,7 +457,7 @@ out:
 func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 	blockHeight int32, testnet bool, ticker *time.Ticker,
 	quit chan struct{}) bool {
-	log.TRACE("running solveBlock")
+	//log.TRACE("running solveBlock")
 	// algoName := fork.GetAlgoName(
 	// 	msgBlock.Header.Version, m.b.BestSnapshot().Height)
 	// Choose a random extra nonce offset for this block template and worker.
@@ -490,11 +490,10 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		// Update the extra nonce in the block template with the new value by
 		// regenerating the coinbase script and setting the merkle root to the
 		// new value.
-		log.TRACE("updating extraNonce")
+		//log.TRACE("updating extraNonce")
 		err := m.g.UpdateExtraNonce(msgBlock, blockHeight, extraNonce+enOffset)
 		if err != nil {
 			log.ERROR(err)
-			log.WARN(err)
 		}
 		// Search through the entire nonce range for a solution while
 		// periodically checking for early quit and stale block conditions along
@@ -509,12 +508,12 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		}
 		rn += 1 << shifter
 		rNonce := uint32(rn)
-		mn := uint32(1<<10)
+		mn := uint32(1 << 10)
 		// if testnet {
 		// 	mn = 1 << shifter
 		// }
 		if fork.GetCurrent(blockHeight) == 0 {
-		mn = 1 << 16 * m.cfg.NumThreads
+			mn = 1 << 16 * m.cfg.NumThreads
 		}
 		var i uint32
 		algo := fork.GetAlgoName(msgBlock.Header.Version,
@@ -632,7 +631,7 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	isOrphan, err := m.cfg.ProcessBlock(block, blockchain.BFNone)
 	if err != nil {
 		log.ERROR(err)
-// Anything other than a rule violation is an unexpected error, so log
+		// Anything other than a rule violation is an unexpected error, so log
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
 			log.WARNF(
@@ -647,7 +646,7 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 		log.WARN("block is an orphan")
 		return false
 	}
-	log.TRACE("the block was accepted")
+	//log.TRACE("the block was accepted")
 	coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
 	prevHeight := block.Height() - 1
 	prevBlock, _ := m.b.BlockByHeight(prevHeight)
