@@ -336,6 +336,7 @@ out:
 		}
 		// choose the algorithm on a rolling cycle
 		counter := m.rotator.Load()
+		m.rotator.Add(1)
 		algo := "sha256d"
 		switch fork.GetCurrent(curHeight + 1) {
 		case 0:
@@ -350,7 +351,6 @@ out:
 			algo = fork.P9AlgoVers[int32(mod+5)]
 			// log.WARN("algo", algo)
 		}
-		m.rotator.Add(1)
 		// Choose a payment address at random.
 		rand.Seed(time.Now().UnixNano())
 		payToAddr := m.cfg.MiningAddrs[rand.Intn(len(m.cfg.MiningAddrs))]
@@ -509,7 +509,7 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		}
 		rn += 1 << shifter
 		rNonce := uint32(rn)
-		mn := uint32(256)
+		mn := uint32(1<<10)
 		// if testnet {
 		// 	mn = 1 << shifter
 		// }

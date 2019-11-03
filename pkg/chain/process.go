@@ -175,7 +175,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// Accept any orphan blocks that depend on this block (they are no longer
 	// orphans) and repeat for those accepted blocks until there are no more.
 	if isMainChain {
-		log.WARN("new block on main chain")
+		log.DEBUG("new block on main chain")
 	}
 	err = b.processOrphans(workerNumber, blockHash, flags)
 	if err != nil {
