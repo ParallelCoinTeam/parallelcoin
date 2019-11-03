@@ -69,7 +69,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	exists, err := b.blockExists(blockHash)
 	if err != nil {
 		log.ERROR(err)
-return false, false, err
+		return false, false, err
 	}
 	if exists {
 		str := fmt.Sprintf("already have block %v", blockHashWithAlgo)
@@ -101,8 +101,7 @@ return false, false, err
 	// 	fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight)
 	if err != nil {
-		log.ERROR(err)
-log.ERROR("block processing error: ", err)
+		log.ERROR("block processing error: ", err)
 		return false, false, err
 	}
 	// log.WARN("searching back to checkpoints")
@@ -117,7 +116,7 @@ log.ERROR("block processing error: ", err)
 	checkpointNode, err := b.findPreviousCheckpoint()
 	if err != nil {
 		log.ERROR(err)
-return false, false, err
+		return false, false, err
 	}
 	if checkpointNode != nil {
 		// Ensure the block timestamp is after the checkpoint timestamp.
@@ -152,7 +151,7 @@ return false, false, err
 	prevHashExists, err := b.blockExists(prevHash)
 	if err != nil {
 		log.ERROR(err)
-return false, false, err
+		return false, false, err
 	}
 	if !prevHashExists {
 		log.WARNC(func() string {
@@ -171,7 +170,7 @@ return false, false, err
 	isMainChain, err := b.maybeAcceptBlock(workerNumber, block, flags)
 	if err != nil {
 		log.ERROR(err)
-return false, false, err
+		return false, false, err
 	}
 	// Accept any orphan blocks that depend on this block (they are no longer
 	// orphans) and repeat for those accepted blocks until there are no more.
@@ -181,11 +180,11 @@ return false, false, err
 	err = b.processOrphans(workerNumber, blockHash, flags)
 	if err != nil {
 		log.ERROR(err)
-return false, false, err
+		return false, false, err
 	}
-	// log.DEBUGF("accepted block %d %v",
-	// 	blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
-	// 		Header.Version, blockHeight))
+	log.DEBUGF("accepted block %d %v",
+		blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
+			Header.Version, blockHeight))
 
 	// log.WARN("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
@@ -266,7 +265,7 @@ func // processOrphans determines if there are any orphans which depend on the
 			_, err := b.maybeAcceptBlock(workerNumber, orphan.block, flags)
 			if err != nil {
 				log.ERROR(err)
-return err
+				return err
 			}
 			// Add this block to the list of blocks to process so any orphan
 			// blocks that depend on this block are handled too.
