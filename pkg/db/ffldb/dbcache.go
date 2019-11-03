@@ -450,7 +450,7 @@ func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) error 
 // have been applied to the cache to the underlying database.
 // This function MUST be called with the database write lock held.
 func (c *dbCache) flush() error {
-	log.INFO("syncing database to disk")
+	log.DEBUG("syncing database to disk")
 	c.lastFlush = time.Now()
 	// Sync the current write file associated with the block store.
 	// This is necessary before writing the metadata to prevent the case
