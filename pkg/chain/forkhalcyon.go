@@ -18,41 +18,65 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
 	workerNumber uint32, lastNode *blockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	err error) {
+	if workerNumber != 0 {
+		l = false
+	}
+	if l {
+		log.TRACE("CalcNextRequiredDifficultyHalcyon", workerNumber, algoname, lastNode.height)
+	}
 	nH := lastNode.height + 1
-	log.DEBUG("on pre-hardfork")
+	if l {
+		log.TRACE("on pre-hardfork")
+	}
 	if lastNode == nil {
+		if l {
+			log.DEBUG("lastNode is nil")
+		}
 		return newTargetBits, nil
 	}
 	algo := fork.GetAlgoVer(algoname, nH)
 	algoName := fork.GetAlgoName(algo, nH)
 	newTargetBits = fork.GetMinBits(algoName, nH)
-	log.DEBUGF("last %d %d %8x", lastNode.height, lastNode.version, lastNode.bits)
+	if l {
+		log.TRACEF("last %d %d %8x", lastNode.height, lastNode.version, lastNode.bits)
+	}
 	prevNode := lastNode.GetLastWithAlgo(algo)
 	if prevNode == nil {
+		if l {
+			log.DEBUG("prevNode is nil")
+		}
 		return newTargetBits, nil
+	}
+	if l {
+		log.DEBUG("prev with algo", algoname, prevNode.height, prevNode.hash)
 	}
 	firstNode := prevNode
 	for i := int64(0); firstNode != nil &&
 		i < fork.GetAveragingInterval(nH)-1; i++ {
-		log.DEBUGF("%d: prev %d %d %8x",
-			i, firstNode.height, firstNode.version, firstNode.bits)
+		if l {
+			log.TRACEF("%d: prev %d %d %8x",
+				i, firstNode.height, firstNode.version, firstNode.bits)
+		}
 		firstNode = firstNode.RelativeAncestor(1)
 		firstNode = firstNode.GetLastWithAlgo(algo)
 	}
 	if firstNode == nil {
 		return newTargetBits, nil
 	}
-	log.DEBUGF("9: first %d %d %8x",
-		firstNode.height, firstNode.version, firstNode.bits)
+	//log.DEBUGF("9: first %d %d %8x",		firstNode.height, firstNode.version, firstNode.bits)
 	actualTimespan := prevNode.timestamp - firstNode.timestamp
 	adjustedTimespan := actualTimespan
-	log.DEBUG("actual %d", actualTimespan)
+	if l {
+		log.TRACEF("actual %d", actualTimespan)
+	}
 	if actualTimespan < b.params.MinActualTimespan {
 		adjustedTimespan = b.params.MinActualTimespan
 	} else if actualTimespan > b.params.MaxActualTimespan {
 		adjustedTimespan = b.params.MaxActualTimespan
 	}
-	log.DEBUG("adjusted %d", adjustedTimespan)
+	if l {
+		log.TRACEF("adjusted %d", adjustedTimespan)
+	}
 	oldTarget := CompactToBig(prevNode.bits)
 	newTarget := new(big.Int).
 		Mul(oldTarget, big.NewInt(adjustedTimespan))
@@ -62,23 +86,27 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
 		newTarget.Set(CompactToBig(newTargetBits))
 	}
 	newTargetBits = BigToCompact(newTarget)
-	log.DEBUGF(
-		"difficulty retarget at block height %d, old %08x new %08x",
-		lastNode.height+1,
-		prevNode.bits,
-		newTargetBits,
-	)
-	log.TRACEC(func() string {
-		return fmt.Sprintf(
-			"actual timespan %v, adjusted timespan %v, target timespan %v"+
-				"\nOld %064x\nNew %064x",
-			actualTimespan,
-			adjustedTimespan,
-			b.params.AveragingTargetTimespan,
-			oldTarget,
-			CompactToBig(newTargetBits),
+	if l {
+		log.DEBUGF(
+			"difficulty retarget at block height %d, old %08x new %08x",
+			lastNode.height+1,
+			prevNode.bits,
+			newTargetBits,
 		)
-	})
+	}
+	if l {
+		log.TRACEC(func() string {
+			return fmt.Sprintf(
+				"actual timespan %v, adjusted timespan %v, target timespan %v"+
+					"\nOld %064x\nNew %064x",
+				actualTimespan,
+				adjustedTimespan,
+				b.params.AveragingTargetTimespan,
+				oldTarget,
+				CompactToBig(newTargetBits),
+			)
+		})
+	}
 	return newTargetBits, nil
 }
 

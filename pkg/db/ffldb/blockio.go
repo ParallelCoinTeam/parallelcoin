@@ -508,8 +508,7 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		filePath := blockFilePath(dbPath, uint32(i))
 		st, err := os.Stat(filePath)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.TRACE(err)
 			break
 		}
 		lastFile = i

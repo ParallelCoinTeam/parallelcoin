@@ -509,20 +509,21 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		}
 		rn += 1 << shifter
 		rNonce := uint32(rn)
-		mn := uint32(27)
+		mn := uint32(256)
 		// if testnet {
 		// 	mn = 1 << shifter
 		// }
-		// if fork.GetCurrent(blockHeight) == 0 {
-		mn = 1 << 8 * m.cfg.NumThreads
-		// }
+		if fork.GetCurrent(blockHeight) == 0 {
+		mn = 1 << 16 * m.cfg.NumThreads
+		}
 		var i uint32
+		algo := fork.GetAlgoName(msgBlock.Header.Version,
+			blockHeight)
 		defer func() {
-			log.DEBUGF("wrkr %d finished %d rounds of %s", workerNumber,
-				i-rNonce-1, fork.GetAlgoName(msgBlock.Header.Version,
-					blockHeight))
+			log.TRACEF("wrkr %d finished %d rounds of %s", workerNumber,
+				i-rNonce-1, algo)
 		}()
-		log.TRACE("starting round from ", rNonce)
+		log.TRACE("starting round from ", rNonce, algo)
 		for i = rNonce; i <= rNonce+mn; i++ {
 			// if time.Now().Sub(now) > time.Second*3 {
 			// 	return false
@@ -594,7 +595,7 @@ out:
 			if hashesPerSec != 0 {
 				since := fmt.Sprint(time.Now().Sub(log.StartupTime) / time.
 					Second * time.Second)
-				fmt.Printf("\r%v Hash speed: %6.4f Kh/s %0.2f h/s\r",
+				fmt.Printf("\u001b[2K\r%v Hash speed: %6.4f Kh/s %0.2f h/\r",
 					since, hashesPerSec/1000, hashesPerSec)
 			}
 		// Request for the number of hashes per second.

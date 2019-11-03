@@ -13,8 +13,7 @@ import (
 func main() {
 	gomod, err := ioutil.ReadFile("go.mod")
 	if err != nil {
-		log.ERROR(err)
-log.Fatal(err)
+		log.Fatal(err)
 	}
 	s := string(gomod)
 	S := strings.Split(s, "\n")
@@ -26,8 +25,7 @@ log.Fatal(err)
 	var dir string
 	dir, err = os.Getwd()
 	if err != nil {
-		log.ERROR(err)
-log.Fatal(err)
+		log.Fatal(err)
 	}
 	dir += "/bin/pod"
 	verbose := ""
@@ -58,7 +56,6 @@ usage: 	bld [-v] [-h]
 	}
 	err = cmd.Run()
 	if err != nil {
-		log.ERROR(err)
-fmt.Println("ERR", err)
+		fmt.Println("ERR", err)
 	}
 }

@@ -255,13 +255,13 @@ func newNetAddress(addr net.Addr, services wire.ServiceFlag) (*wire.NetAddress, 
 	host, portStr, err := net.SplitHostPort(addr.String())
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	ip := net.ParseIP(host)
 	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	na := wire.NewNetAddressIPPort(ip, uint16(port), services)
 	return na, nil
@@ -737,8 +737,8 @@ func (p *Peer) PushGetBlocksMsg(locator blockchain.BlockLocator, stopHash *chain
 	for _, hash := range locator {
 		err := msg.AddBlockLocatorHash(hash)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 	}
 	p.QueueMessage(msg, nil)
@@ -779,8 +779,8 @@ func (p *Peer) PushGetHeadersMsg(locator blockchain.BlockLocator, stopHash *chai
 	for _, hash := range locator {
 		err := msg.AddBlockLocatorHash(hash)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 	}
 	p.QueueMessage(msg, nil)
@@ -869,8 +869,8 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 		p.cfg.Listeners.OnRead(p, n, msg, err)
 	}
 	if err != nil {
-		log.ERROR(err)
-return nil, nil, err
+		log.TRACE(err)
+		return nil, nil, err
 	}
 	// Use closures to log expensive operations so they are only run when the
 	// logging level requires it.
@@ -911,8 +911,8 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) error {
 		_, err := wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(),
 			p.cfg.ChainParams.Net, enc)
 		if err != nil {
-		log.ERROR(err)
-return err.Error()
+			log.ERROR(err)
+			return err.Error()
 		}
 		return o + spew.Sdump(buf.Bytes())
 	})
@@ -944,7 +944,7 @@ func (p *Peer) isAllowedReadError(err error) bool {
 	host, _, err := net.SplitHostPort(p.addr)
 	if err != nil {
 		log.ERROR(err)
-return false
+		return false
 	}
 	if host != "127.0.0.1" && host != "localhost" {
 		return false
@@ -1154,8 +1154,8 @@ out:
 		rMsg, buf, err := p.readMessage(p.wireEncoding)
 		idleTimer.Stop()
 		if err != nil {
-		log.ERROR(err)
-// In order to allow regression tests with malformed messages,
+			log.TRACE(err)
+			// In order to allow regression tests with malformed messages,
 			// don't disconnect the peer when we're in regression test mode
 			// and the error is one of the allowed errors.
 			if p.isAllowedReadError(err) {
@@ -1388,8 +1388,8 @@ out:
 					invMsg := wire.NewMsgInvSizeHint(1)
 					err := invMsg.AddInvVect(iv)
 					if err != nil {
-		log.ERROR(err)
-log.DEBUG(err)
+						log.ERROR(err)
+						log.DEBUG(err)
 					}
 					waiting = queuePacket(outMsg{msg: invMsg},
 						pendingMsgs, waiting)
@@ -1416,8 +1416,8 @@ log.DEBUG(err)
 				}
 				err := invMsg.AddInvVect(iv)
 				if err != nil {
-		log.ERROR(err)
-log.DEBUG(err)
+					log.ERROR(err)
+					log.DEBUG(err)
 				}
 				if len(invMsg.InvList) >= maxInvTrickleSize {
 					waiting = queuePacket(
@@ -1506,8 +1506,8 @@ out:
 			p.stallControl <- stallControlMsg{sccSendMessage, msg.msg}
 			err := p.writeMessage(msg.msg, msg.encoding)
 			if err != nil {
-		log.ERROR(err)
-p.Disconnect()
+				log.ERROR(err)
+				p.Disconnect()
 				if p.shouldLogWriteError(err) {
 					log.ERRORF("failed to send message to %s: %v", p, err)
 				}
@@ -1562,8 +1562,8 @@ out:
 		case <-pingTicker.C:
 			nonce, err := wire.RandomUint64()
 			if err != nil {
-		log.ERROR(err)
-log.ERRORF("not sending ping to %s: %v", p, err)
+				log.ERROR(err)
+				log.ERRORF("not sending ping to %s: %v", p, err)
 				continue
 			}
 			p.QueueMessage(wire.NewMsgPing(nonce), nil)
@@ -1649,7 +1649,7 @@ func (p *Peer) readRemoteVersionMsg() error {
 	remoteMsg, _, err := p.readMessage(wire.LatestEncoding)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Notify and disconnect clients if the first message is not a version
 	// message.
@@ -1735,8 +1735,8 @@ func (p *Peer) localVersionMsg() (*wire.MsgVersion, error) {
 		var err error
 		_, blockNum, err = p.cfg.NewestBlock()
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 	}
 	theirNA := p.na
@@ -1772,7 +1772,7 @@ return nil, err
 		p.cfg.UserAgentComments...)
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 	// Advertise local services.
 	msg.Services = p.cfg.Services
@@ -1788,7 +1788,7 @@ func (p *Peer) writeLocalVersionMsg() error {
 	localVerMsg, err := p.localVersionMsg()
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	return p.writeMessage(localVerMsg, wire.LatestEncoding)
 }
@@ -1828,8 +1828,8 @@ func (p *Peer) start() error {
 	select {
 	case err := <-negotiateErr:
 		if err != nil {
-		log.ERROR(err)
-p.Disconnect()
+			log.ERROR(err)
+			p.Disconnect()
 			return err
 		}
 	case <-time.After(negotiateTimeout):
@@ -1865,8 +1865,8 @@ func (p *Peer) AssociateConnection(conn net.Conn) {
 		// time and no point recomputing.
 		na, err := newNetAddress(p.conn.RemoteAddr(), p.services)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR("cannot create remote net address:", err)
+			log.ERROR(err)
+			log.ERROR("cannot create remote net address:", err)
 			p.Disconnect()
 			return
 		}
@@ -1939,18 +1939,18 @@ func NewOutboundPeer(cfg *Config, addr string) (*Peer, error) {
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if cfg.HostToNetAddress != nil {
 		na, err := cfg.HostToNetAddress(host, uint16(port), 0)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		p.na = na
 	} else {
