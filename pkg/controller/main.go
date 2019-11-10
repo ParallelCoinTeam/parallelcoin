@@ -11,6 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
 	"go.uber.org/atomic"
+	"sync"
 )
 
 type Blocks struct {
@@ -34,7 +35,7 @@ type Blocks struct {
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	var ctx context.Context
-	var busy, active atomic.Bool
+	var active atomic.Bool
 	ctx, cancel = context.WithCancel(context.Background())
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		log.WARN("not running controller without RPC enabled")
@@ -53,13 +54,15 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		// function instead - this also ensures that new work doesn't start
 		// once the context is cancelled below
 		active.Store(true)
+		var subMx sync.Mutex
 		log.DEBUG("miner controller starting")
 		cx.RealNode.Chain.Subscribe(func(n *chain.Notification) {
-			if !busy.Load() && active.Load() {
+			if active.Load() {
 				// first to arrive locks out any others while processing
-				busy.Store(true)
 				switch n.Type {
 				case chain.NTBlockAccepted:
+					subMx.Lock()
+					defer subMx.Unlock()
 					log.DEBUG("received new chain notification")
 					// construct work message
 					//log.SPEW(n)
@@ -71,11 +74,18 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					msg := Serializers{}
 					msg = append(msg, messageBase...)
 					h := NewHash()
-					h.PutHash(mB.MsgBlock().Header.PrevBlock)
+					h.PutHash(mB.MsgBlock().Header.BlockHash())
 					msg = append(msg, h)
-					bits := NewBits()
-					bits.PutBits(mB.MsgBlock().Header.Bits)
-					msg = append(msg, bits)
+					bitsMap, err := cx.RealNode.Chain.
+						CalcNextRequiredDifficultyPlan9Controller(cx.
+							RealNode.Chain.BestChain.Tip())
+					if err != nil {
+						log.ERROR(err)
+						return
+					}
+					bitses := NewBitses()
+					bitses.PutBitses(*bitsMap)
+					msg = append(msg, bitses)
 					txs := mB.MsgBlock().Transactions
 					for i := range txs {
 						t := &Transaction{}
@@ -100,17 +110,13 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					prevH := NewHash()
 					prevH.Decode(srs.Get(4))
 					log.DEBUG(prevH.GetHash())
-					bt := NewBits()
+					bt := NewBitses()
 					bt.Decode(srs.Get(5))
-					log.DEBUG(bt.GetBits())
+					log.DEBUG(bt.GetBitses())
 					txn := NewTransaction()
 					txn.Decode(srs.Get(6))
 					log.SPEW(txn.GetTx())
 				}
-				busy.Store(false)
-			} else {
-				// drop the job
-				log.DEBUG("busy processing prior notification")
 			}
 		})
 		select {

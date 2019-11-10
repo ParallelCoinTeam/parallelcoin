@@ -77,7 +77,7 @@ func // findPreviousCheckpoint finds the most recent checkpoint that is already
 // associated block node.  It returns nil if a checkpoint can't be found (
 // this should really only happen for blocks before the first checkpoint).
 // This function MUST be called with the chain lock held (for reads).
-(b *BlockChain) findPreviousCheckpoint() (*blockNode, error) {
+(b *BlockChain) findPreviousCheckpoint() (*BlockNode, error) {
 	if !b.HasCheckpoints() {
 		return nil, nil
 	}
@@ -91,7 +91,7 @@ func // findPreviousCheckpoint finds the most recent checkpoint that is already
 		// is already available.
 		for i := numCheckpoints - 1; i >= 0; i-- {
 			node := b.Index.LookupNode(checkpoints[i].Hash)
-			if node == nil || !b.bestChain.Contains(node) {
+			if node == nil || !b.BestChain.Contains(node) {
 				continue
 			}
 			// Checkpoint found.  Cache it for future lookups and set the
@@ -119,7 +119,7 @@ func // findPreviousCheckpoint finds the most recent checkpoint that is already
 	// When there is a next checkpoint and the height of the current best
 	// chain does not exceed it,
 	// the current checkpoint lockin is still the latest known checkpoint.
-	if b.bestChain.Tip().height < b.nextCheckpoint.Height {
+	if b.BestChain.Tip().height < b.nextCheckpoint.Height {
 		return b.checkpointNode, nil
 	}
 	// We've reached or exceeded the next checkpoint height.
@@ -185,7 +185,7 @@ func // IsCheckpointCandidate returns whether or not the passed block is a good
 	defer b.chainLock.RUnlock()
 	// A checkpoint must be in the main chain.
 	node := b.Index.LookupNode(block.Hash())
-	if node == nil || !b.bestChain.Contains(node) {
+	if node == nil || !b.BestChain.Contains(node) {
 		return false, nil
 	}
 	// Ensure the height of the passed block and the entry for the block in
@@ -198,7 +198,7 @@ func // IsCheckpointCandidate returns whether or not the passed block is a good
 	}
 	// A checkpoint must be at least CheckpointConfirmations blocks before
 	// the end of the main chain.
-	mainChainHeight := b.bestChain.Tip().height
+	mainChainHeight := b.BestChain.Tip().height
 	if node.height > (mainChainHeight - CheckpointConfirmations) {
 		return false, nil
 	}
@@ -206,7 +206,7 @@ func // IsCheckpointCandidate returns whether or not the passed block is a good
 	// This should always succeed since the check above already made sure it
 	// is CheckpointConfirmations back,
 	// but be safe in case the constant changes.
-	nextNode := b.bestChain.Next(node)
+	nextNode := b.BestChain.Next(node)
 	if nextNode == nil {
 		return false, nil
 	}

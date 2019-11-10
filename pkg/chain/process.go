@@ -140,7 +140,8 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 			currentTarget := fork.CompactToBig(blockHeader.Bits)
 			if currentTarget.Cmp(requiredTarget) > 0 {
 				str := fmt.Sprintf("processing: block target difficulty of"+
-					" %064x is too low when compared to the previous checkpoint", currentTarget)
+					" %064x is too low when compared to the previous" +
+					" checkpoint", currentTarget)
 				return false, false, ruleError(ErrDifficultyTooLow, str)
 			}
 		}
@@ -176,6 +177,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// orphans) and repeat for those accepted blocks until there are no more.
 	if isMainChain {
 		log.DEBUG("new block on main chain")
+		//log.SPEW(block)
 	}
 	err = b.processOrphans(workerNumber, blockHash, flags)
 	if err != nil {

@@ -76,7 +76,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 // that node.
 // This function MUST be called with the chain state lock held (
 // for writes).
-(b *BlockChain) checkConnectBlock(node *blockNode, block *util.Block, view *UtxoViewpoint, stxos *[]SpentTxOut) error {
+(b *BlockChain) checkConnectBlock(node *BlockNode, block *util.Block, view *UtxoViewpoint, stxos *[]SpentTxOut) error {
 	//log.TRACE("check can connect block")
 	// If the side chain blocks end up in the database,
 	// a call to CheckBlockSanity should be done here in case a previous
@@ -403,7 +403,7 @@ Block) error {
 	flags := BFNoPoWCheck
 	// This only checks whether the block can be connected to the tip of the
 	// current chain.
-	tip := b.bestChain.Tip()
+	tip := b.BestChain.Tip()
 	header := block.MsgBlock().Header
 	if tip.hash != header.PrevBlock {
 		str := fmt.Sprintf("previous block must be the current chain tip %v, instead got %v", tip.hash, header.PrevBlock)
@@ -437,7 +437,7 @@ func // checkBIP0030 ensures blocks do not contain duplicate transactions which
 // com/bitcoin/bips/blob/master/bip-0030.mediawiki and http://r6.
 // ca/blog/20120206T005236Z.html.
 // This function MUST be called with the chain state lock held (for reads).
-(b *BlockChain) checkBIP0030(node *blockNode, block *util.Block, view *UtxoViewpoint) error {
+(b *BlockChain) checkBIP0030(node *BlockNode, block *util.Block, view *UtxoViewpoint) error {
 	// Fetch utxos for all of the transaction ouputs in this block.
 	// Typically, there will not be any utxos for any of the outputs.
 	fetchSet := make(map[wire.OutPoint]struct{})
@@ -476,7 +476,7 @@ func // checkBlockContext peforms several validation checks on the block which
 // See its documentation for how the flags modify its behavior.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockContext(workerNumber uint32, block *util.Block,
-	prevNode *blockNode, flags BehaviorFlags, DoNotCheckPow bool) error {
+	prevNode *BlockNode, flags BehaviorFlags, DoNotCheckPow bool) error {
 	// log.WARN("checkBlockContext")
 	// Perform all block header related validation checks.
 	header := &block.MsgBlock().Header
@@ -579,7 +579,7 @@ func // checkBlockHeaderContext performs several validation checks on the block
 //  against the checkpoints are not performed.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
-BlockHeader, prevNode *blockNode, flags BehaviorFlags) error {
+BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 	// log.WARN("checking block header context")
 	if prevNode == nil {
 		return nil
@@ -1308,7 +1308,7 @@ checkSerializedHeight(coinbaseTx *util.Tx, wantHeight int32) error {
 func // isBIP0030Node returns whether or not the passed node represents one
 // of the two blocks that violate the BIP0030 rule which prevents
 // transactions from overwriting old ones.
-isBIP0030Node(node *blockNode) bool {
+isBIP0030Node(node *BlockNode) bool {
 	if node.height == 91842 && node.hash.IsEqual(block91842Hash) {
 		return true
 	}

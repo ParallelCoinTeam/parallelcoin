@@ -31,14 +31,14 @@ var (
 	TestnetPayees = []Payee{
 		{Addr("8K73LTaMHZmwwqe4vTHu7wm7QtwusvRCwC", tn), Amt(100)},
 		// {Addr("8JEEhaMxJf4dZh5rvVCVSA7JKeYBvy8fir", tn), Amt(15500)},
-		// {Addr("8bec3m8qpMePrBPHDAyCrkSm7TanGX8yWW", tn), Amt(1223)},
-		// {Addr("8MCLEWq8pjXikrpb9rF9M5DpnpaoWPUD2W", tn), Amt(4000)},
-		// {Addr("8cYGvT7km339nVukTj3ztfyQDFEHFivBNk", tn), Amt(2440)},
-		// {Addr("8YUAAfUeS2mqUnsfiwDwQcEbMfM3tazKr7", tn), Amt(100)},
-		// {Addr("8MMam6gxH1ns5LqASfhkHfRV2vsQaoM9VC", tn), Amt(8800)},
-		// {Addr("8JABYpdqqyRD5FbACtMJ3XF5HJ38jaytrk", tn), Amt(422)},
-		// {Addr("8MUnJMYi5Fo7Bm5Pmpr7JjdL3ZDJ7wqmXJ", tn), Amt(5000)},
-		// {Addr("8d2RLbCBE8CiF4DetVuRfFFLEJJaXYjhdH", tn), Amt(30000)},
+		{Addr("8bec3m8qpMePrBPHDAyCrkSm7TanGX8yWW", tn), Amt(1223)},
+		{Addr("8MCLEWq8pjXikrpb9rF9M5DpnpaoWPUD2W", tn), Amt(4000)},
+		{Addr("8cYGvT7km339nVukTj3ztfyQDFEHFivBNk", tn), Amt(2440)},
+		{Addr("8YUAAfUeS2mqUnsfiwDwQcEbMfM3tazKr7", tn), Amt(100)},
+		{Addr("8MMam6gxH1ns5LqASfhkHfRV2vsQaoM9VC", tn), Amt(8800)},
+		{Addr("8JABYpdqqyRD5FbACtMJ3XF5HJ38jaytrk", tn), Amt(422)},
+		{Addr("8MUnJMYi5Fo7Bm5Pmpr7JjdL3ZDJ7wqmXJ", tn), Amt(5000)},
+		{Addr("8d2RLbCBE8CiF4DetVuRfFFLEJJaXYjhdH", tn), Amt(30000)},
 	}
 	// CorePubkeyBytes is the address and public keys for the core dev
 	// disbursement

@@ -4,32 +4,41 @@ import (
 	"github.com/VividCortex/ewma"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
 )
 
-func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
+func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 	nH int32) (allTimeAv, allTimeDiv, qhourDiv, hourDiv, dayDiv float64) {
 	const minAvSamples = 9
+	allTimeAv, allTimeDiv, qhourDiv, hourDiv, dayDiv = 1.0, 1.0, 1.0, 1.0, 1.0
 	ttpb := float64(fork.List[1].TargetTimePerBlock)
 	startHeight := fork.List[1].ActivationHeight
 	if b.params.Net == wire.TestNet3 {
 		startHeight = fork.List[1].TestnetStart
 	}
+	if nH == startHeight {
+		log.DEBUG("on hard fork", nH, startHeight)
+		return
+	}
+	//log.DEBUG("startHeight", startHeight)
 	f, _ := b.BlockByHeight(startHeight)
-	fh := f.MsgBlock().Header.BlockHash()
-	first := b.Index.LookupNode(&fh)
-	// time from lastNode timestamp until start
-	allTime := float64(lastNode.timestamp - first.timestamp)
-	allBlocks := float64(lastNode.height - first.height)
-	if allBlocks == 0 {
-		allBlocks = 1
+	if f != nil {
+		fh := f.MsgBlock().Header.BlockHash()
+		first := b.Index.LookupNode(&fh)
+		allTime := float64(lastNode.timestamp - first.timestamp)
+		allBlocks := float64(lastNode.height - first.height)
+		// time from lastNode timestamp until start
+		if allBlocks == 0 {
+			allBlocks = 1
+		}
+		allTimeAv = allTime / allBlocks
+		allTimeDiv = float64(1)
+		if allTimeAv > 0 {
+			allTimeDiv = allTimeAv / ttpb
+		}
+		allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv *
+			allTimeDiv * allTimeDiv
 	}
-	allTimeAv = allTime / allBlocks
-	allTimeDiv = float64(1)
-	if allTimeAv > 0 {
-		allTimeDiv = allTimeAv / ttpb
-	}
-	allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv *
-		allTimeDiv * allTimeDiv
 
 	oneHour := 60 * 60 / fork.List[1].TargetTimePerBlock
 	oneDay := oneHour * 24
@@ -39,7 +48,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
 	if dayBlock != nil {
 		// collect timestamps within averaging interval
 		dayStamps := []int64{lastNode.timestamp}
-		for ln := lastNode; ln != nil && ln.height > startHeight &&
+		for ln := lastNode; ln != nil && ln.height > startHeight+1 &&
 			len(dayStamps) <= int(fork.List[1].AveragingInterval); {
 			ln = ln.RelativeAncestor(oneDay)
 			if ln == nil {
@@ -73,7 +82,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
 	if hourBlock != nil {
 		// collect timestamps within averaging interval
 		hourStamps := []int64{lastNode.timestamp}
-		for ln := lastNode; ln.height > startHeight &&
+		for ln := lastNode; ln.height > startHeight+1 &&
 			len(hourStamps) <= int(fork.List[1].AveragingInterval); {
 			ln = ln.RelativeAncestor(oneHour)
 			if ln == nil {
@@ -107,7 +116,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
 	if qhourBlock != nil {
 		// collect timestamps within averaging interval
 		qhourStamps := []int64{lastNode.timestamp}
-		for ln := lastNode; ln != nil && ln.height > startHeight &&
+		for ln := lastNode; ln != nil && ln.height > startHeight+1 &&
 			len(qhourStamps) <= int(fork.List[1].AveragingInterval); {
 			ln = ln.RelativeAncestor(qHour)
 			if ln == nil {
@@ -139,13 +148,13 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
 	return
 }
 
-func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *blockNode,
+func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *BlockNode,
 	startHeight int32, algoVer int32, ttpb float64) (algDiv float64) {
 	const minAvSamples = 9
 	// collect timestamps of same algo of equal number as avinterval
 	algDiv = allTimeDiv
 	algStamps := []int64{last.timestamp}
-	for ln := last; ln != nil && ln.height > startHeight &&
+	for ln := last; ln != nil && ln.height > startHeight+1 &&
 		len(algStamps) <= int(fork.List[1].AveragingInterval); {
 		ln = ln.RelativeAncestor(1)
 		if ln.version == algoVer {
@@ -176,8 +185,8 @@ func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *blockNode,
 	return
 }
 
-func (b *BlockChain) GetP9Since(lastNode *blockNode, algoVer int32) (since,
-	ttpb, timeSinceAlgo float64, startHeight int32, last *blockNode) {
+func (b *BlockChain) GetP9Since(lastNode *BlockNode, algoVer int32) (since,
+	ttpb, timeSinceAlgo float64, startHeight int32, last *BlockNode) {
 	last = lastNode
 	// find the most recent block of the same algo
 	ln := last

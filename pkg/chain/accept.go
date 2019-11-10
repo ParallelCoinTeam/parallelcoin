@@ -41,7 +41,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	// Rather than pass the direct previous by height,
 	// we look for the previous of the same algorithm and pass that.
 	var DoNotCheckPow bool
-	var pn *blockNode
+	var pn *BlockNode
 	var a int32 = 2
 	if block.MsgBlock().Header.Version == 514 {
 		a = 514

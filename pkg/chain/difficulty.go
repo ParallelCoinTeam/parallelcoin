@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"encoding/hex"
+	"github.com/p9c/pod/pkg/log"
 	"math/big"
 	"strings"
 	"time"
@@ -32,9 +33,9 @@ func // CalcNextRequiredDifficulty calculates the required difficulty for the
 // block after the end of the current best chain based on the difficulty
 // retarget rules. This function is safe for concurrent access.
 (b *BlockChain) CalcNextRequiredDifficulty(workerNumber uint32, timestamp time.
-	Time, algo string) (difficulty uint32, err error) {
+Time, algo string) (difficulty uint32, err error) {
 	b.chainLock.Lock()
-	difficulty, err = b.calcNextRequiredDifficulty(workerNumber, b.bestChain.
+	difficulty, err = b.calcNextRequiredDifficulty(workerNumber, b.BestChain.
 		Tip(), timestamp, algo, true)
 	b.chainLock.Unlock()
 	return
@@ -71,26 +72,46 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 // the exported version uses the current best chain as the previous block node
 // while this function accepts any block node.
 (b *BlockChain) calcNextRequiredDifficulty(
-	workerNumber uint32, lastNode *blockNode, newBlockTime time.Time,
-	algoname string, l bool) (newTargetBits uint32,
-	err error) {
-	// log.WARN("algoname ", algoname, fork.GetAlgoName(lastNode.version,
-	// 	lastNode.height))
+	workerNumber uint32, lastNode *BlockNode, newBlockTime time.Time,
+	algoname string, l bool) (newTargetBits uint32, err error) {
 	nH := lastNode.height + 1
-	// INFO(nH)
+	newTargetBits = fork.GetMinBits(algoname, nH)
 	switch fork.GetCurrent(nH) {
 	// Legacy difficulty adjustment
 	case 0:
 		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode,
-			newBlockTime,
-			algoname, l)
-	case 1: // Plan 9 from Crypto Space
-		bits, _, err := b.CalcNextRequiredDifficultyPlan9(workerNumber,
-			lastNode,
 			newBlockTime, algoname, l)
+	case 1: // Plan 9 from Crypto Space
+		if lastNode.diffs == nil {
+			lNd := make(map[int32]uint32)
+			lastNode.diffs = &lNd
+		}
+		bits, ok := (*lastNode.diffs)[fork.List[1].Algos[algoname].
+			Version]
+		if ok {
+			//log.DEBUG("used precomputed difficulty", algoname, newTargetBits)
+		} else {
+			//log.DEBUG("calculating difficulty for the first time")
+			bits, _, err = b.CalcNextRequiredDifficultyPlan9(
+				workerNumber, lastNode, newBlockTime, algoname, l)
+			//bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(
+			//	lastNode)
+			if err != nil {
+				log.ERROR(err)
+				return
+			}
+			//bits = bitsMap[fork.List[1].Algos[algoname].Version]
+			// save it for next time
+			//log.TRACE("saving difficulty for next query")
+			if lastNode.diffs == nil {
+				lastNode.diffs = new(map[int32]uint32)
+			}
+			(*lastNode.diffs)[fork.List[1].Algos[algoname].
+				Version] = bits
+		}
 		return bits, err
 	}
-	return fork.GetMinBits(algoname, nH), nil
+	return
 }
 
 func // RightJustify takes a string and right justifies it by a width or

@@ -30,13 +30,15 @@ const Uint256Size = 32
 // by enough zeros to pad the message out to 56 bytes followed by length of
 // the message in bits encoded as a big-endian uint64 (8 bytes).  Thus,
 // the resulting length is a multiple of the sha256 block size (64 bytes).
-var GetworkDataLen = (1 + ((wire.MaxBlockHeaderPayload + 8) / fastsha256.BlockSize)) * fastsha256.BlockSize
+var GetworkDataLen = (1 + ((wire.MaxBlockHeaderPayload + 8) / fastsha256.
+	BlockSize)) * fastsha256.BlockSize
 
 // Hash1Len is the length of the hash1 field of the getwork RPC.
 // It consists of a zero hash plus the internal sha256 padding.
 // See the getworkDataLen comment for details about the internal sha256
 // padding format.
-var Hash1Len = (1 + ((chainhash.HashSize + 8) / fastsha256.BlockSize)) * fastsha256.BlockSize
+var Hash1Len = (1 + ((chainhash.HashSize + 8) / fastsha256.
+	BlockSize)) * fastsha256.BlockSize
 
 // BigToLEUint256 returns the passed big integer as an unsigned 256-bit
 // integer encoded as little-endian bytes.
@@ -103,8 +105,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		state.Template, err = generator.NewBlockTemplate(0, payToAddr,
 			s.Cfg.Algo)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 	}
@@ -129,9 +130,7 @@ log.ERROR(err)
 		state.Template, err = generator.NewBlockTemplate(0, payToAddr,
 			s.Cfg.Algo)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
-			errStr := fmt.Sprintf("Failed to create new block template: %v %s", err)
+			errStr := fmt.Sprintf("Failed to create new block template: %v", err)
 			log.ERROR(errStr)
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCInternal.Code,
@@ -198,7 +197,6 @@ log.ERROR(err)
 	err := msgBlock.Header.Serialize(buf)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		errStr := fmt.Sprintf("Failed to serialize data: %v", err)
 		log.WARN(errStr)
 		return nil, &btcjson.RPCError{
@@ -262,7 +260,6 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	data, err := hex.DecodeString(hexData)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, &btcjson.RPCError{
 			Code: btcjson.ErrRPCInvalidParameter,
 			Message: fmt.Sprintf("argument must be "+
@@ -288,7 +285,6 @@ log.ERROR(err)
 	err = submittedHeader.Deserialize(bhBuf)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, &btcjson.RPCError{
 			Code: btcjson.ErrRPCInvalidParameter,
 			Message: fmt.Sprintf("argument does not "+
@@ -319,7 +315,6 @@ log.ERROR(err)
 	err = blockchain.CheckProofOfWork(block, pl, s.Cfg.Chain.BestSnapshot().Height)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		// Anything other than a rule violation is an unexpected error, so return
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {

@@ -396,7 +396,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				//  not advisable
 				"algo",
 				"Sets the algorithm for the CPU miner ( blake14lr,"+
-					" cryptonight7v2, keccak, lyra2rev2, scrypt, sha256d, stribog,"+
+					" cn7v2, keccak, lyra2rev2, scrypt, sha256d, stribog,"+
 					" skein, x11 default is 'random')",
 				"random",
 				cx.Config.Algo),
