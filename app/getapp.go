@@ -100,12 +100,12 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				apputil.SubCommands(),
 				"s",
 			),
-			//apputil.NewCommand(
-			//	"gui",
-			//	"start GUI",
-			//	guiHandle(cx),
-			//	apputil.SubCommands(),
-			//),
+			apputil.NewCommand(
+				"gui",
+				"start GUI",
+				guiHandle(cx),
+				apputil.SubCommands(),
+			),
 			apputil.NewCommand("kopach",
 				"standalone miner for clusters",
 				kopachHandle(cx),

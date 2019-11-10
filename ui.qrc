@@ -1,0 +1,11 @@
+<RCC>
+	<qresource>
+		<file alias="index.html">pkg/gui/svelte/assets/index.html</file>
+		<file alias="dui.js">pkg/gui/svelte/assets/dui.js</file>
+		<file alias="dui.css">pkg/gui/svelte/assets/dui.css</file>
+		<file alias="css/theme/root.css">pkg/gui/svelte/assets/css/theme/root.css</file>
+		<file alias="css/theme/colors.css">pkg/gui/svelte/assets/css/theme/colors.css</file>
+		<file alias="css/theme/grid.css">pkg/gui/svelte/assets/css/theme/grid.css</file>
+		<file alias="css/theme/helpers.css">pkg/gui/svelte/assets/css/theme/helpers.css</file>
+	</qresource>
+</RCC>

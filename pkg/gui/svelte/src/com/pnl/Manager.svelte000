@@ -3,7 +3,7 @@
 
 
 		// 	return {
-		// 		items: duos.data.repo,
+		// 		items: dui.data.repo,
 		// 		translations: {
 		// 			active: 'active',
 		// 			activate: 'activate',

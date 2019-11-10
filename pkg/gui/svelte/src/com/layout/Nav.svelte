@@ -1,14 +1,11 @@
 <script>
-	import { duoSystem } from "../../stores.js";
+	import { duoSystem } from '../../firmware.js'
 	import IcoOverview from "../ico/IcoOverview.svelte";
 	import IcoHistory from "../ico/IcoHistory.svelte";
 	import IcoAddressBook from "../ico/IcoAddressBook.svelte";
 	import IcoSettings from "../ico/IcoSettings.svelte";
 
 
-	function handleClick() {
-		count += 1;
-	}
 </script>
 
 
