@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
 )
 
@@ -16,73 +15,27 @@ import (
 // rules. This function differs from the exported  CalcNextRequiredDifficulty
 // in that the exported version uses the current best chain as the previous
 // block node while this function accepts any block node.
-func (b *BlockChain) CalcNextRequiredDifficultyPlan9(
-	workerNumber uint32, lastNode *blockNode,
-	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
-	adjustment float64, err error) {
+func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
+	lastNode *blockNode, newBlockTime time.Time, algoname string,
+	l bool) (newTargetBits uint32, adjustment float64, err error) {
 	log.TRACE("algoname ", algoname)
-	const max float64 = 65536
-	const maxA, minA = max, 1 / max
-	const minAvSamples = 9
 	nH := lastNode.height + 1
-	if lastNode == nil {
-		return fork.SecondPowLimitBits, 1, nil
-	}
-	// At activation difficulty resets
-	if b.params.Net == wire.MainNet {
-		if fork.List[1].ActivationHeight == nH {
-			if l {
-				log.DEBUG("on plan 9 hardfork")
-			}
-			return fork.SecondPowLimitBits, 1, nil
-		}
-	}
-	if b.params.Net == wire.TestNet3 {
-		if fork.List[1].TestnetStart == nH {
-			if l {
-				log.DEBUG("wrkr:", workerNumber, "on plan 9 hardfork", algoname)
-			}
-			return fork.SecondPowLimitBits, 1, nil
-		}
-	}
-	algoVer := fork.GetAlgoVer(algoname, nH)
 	newTargetBits = fork.SecondPowLimitBits
-	log.TRACEF("newTarget %08x %s %d", newTargetBits, algoname, algoVer)
-	last := lastNode
-	// find the most recent block of the same algo
-	ln := last
-	for ln.version != algoVer {
-		ln = ln.RelativeAncestor(1)
-		// if it found nothing, return baseline
-		if ln == nil {
-			return fork.SecondPowLimitBits, 1, nil
-		}
-		last = ln
-	}
-	since := float64(lastNode.timestamp - last.timestamp)
-	ttpb := float64(fork.List[1].TargetTimePerBlock)
-	tspb := ttpb * float64(len(fork.List[1].Algos))
-	timeSinceAlgo := (since / tspb) / 5
-	startHeight := fork.List[1].ActivationHeight
-	if b.params.Net == wire.TestNet3 {
-		startHeight = fork.List[1].TestnetStart
+	adjustment = 1.0
+	if lastNode == nil || b.IsP9HardFork(nH) {
+		return
 	}
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
-	dayDiv := b.GetCommonP9Averages(lastNode, newBlockTime, nH, algoname)
-
-	// ratio of seconds since to target seconds per block times the
-	// all time divergence ensures the change scales with the divergence
-	// from the target, and favours algos that are later
-
+	dayDiv := b.GetCommonP9Averages(lastNode, nH)
+	algoVer := fork.GetAlgoVer(algoname, nH)
+	since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode,
+		algoVer)
+	if last == nil {
+		return
+	}
 	algDiv := b.GetP9AlgoDiv(allTimeDiv, last, startHeight, algoVer, ttpb)
-
-	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv + timeSinceAlgo) / 6
-	if adjustment > maxA {
-		adjustment = maxA
-	}
-	if adjustment < minA {
-		adjustment = minA
-	}
+	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv +
+		timeSinceAlgo) / 6
 	log.TRACEF("adjustment %3.4f %08x", adjustment, last.bits)
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
@@ -90,7 +43,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
 		log.INFO("newTarget is nil ")
-		return newTargetBits, 1, nil
+		return
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
 		newTargetBits = BigToCompact(newTarget)
@@ -122,5 +75,5 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(
 			)
 		})
 	}
-	return newTargetBits, adjustment, nil
+	return
 }
