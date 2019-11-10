@@ -68,7 +68,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				log.TRACE("on testnet")
 				cx.ActiveNet = &netparams.TestNet3Params
 				fork.IsTestnet = true
-				fork.HashReps = 1
+				fork.HashReps = 3
 			case "regtestnet", "regressiontest", "r":
 				log.TRACE("on regression testnet")
 				cx.ActiveNet = &netparams.RegressionTestParams

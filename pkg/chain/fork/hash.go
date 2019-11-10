@@ -23,11 +23,11 @@ import (
 // repeated before the final hash,
 // on release for mainnet this is probably set to 9 or so to raise the
 // difficulty to a reasonable level for the hard fork
-var HashReps = 5
+var HashReps = 8
 
 // Argon2i takes bytes, generates a Lyra2REv2 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {
-	return argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 1, 32)
+	return argon2.IDKey(reverse(bytes), bytes, 1, 4*1024, 1, 32)
 }
 
 // Blake14lr takes bytes and returns a blake14lr 256 bit hash
@@ -109,33 +109,43 @@ func DivHash(hf func([]byte) []byte, blockbytes []byte, howmany int) []byte {
 
 // Hash computes the hash of bytes using the named hash
 func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
+	hR := HashReps
+	if IsTestnet {
+		switch {
+		case height == 1:
+			hR = 0
+		//case height < 10:
+		//	hR = 6
+		}
+	}
 	switch name {
 	case "blake2b":
-		_ = out.SetBytes(DivHash(Blake2b, bytes, HashReps))
+		_ = out.SetBytes(DivHash(Blake2b, bytes, hR))
 	case "argon2i":
-		_ = out.SetBytes(DivHash(Argon2i, bytes, HashReps))
-	case "cryptonight7v2":
-		_ = out.SetBytes(DivHash(Cryptonight7v2, bytes, HashReps))
+		_ = out.SetBytes(DivHash(Argon2i, bytes, hR))
+	case "cn7v2":
+		_ = out.SetBytes(DivHash(Cryptonight7v2, bytes, hR))
 	case "lyra2rev2":
-		_ = out.SetBytes(DivHash(Lyra2REv2, bytes, HashReps))
+		_ = out.SetBytes(DivHash(Lyra2REv2, bytes, hR))
 	case "scrypt":
 		if GetCurrent(height) > 0 {
-			_ = out.SetBytes(DivHash(Scrypt, bytes, HashReps))
+			_ = out.SetBytes(DivHash(Scrypt, bytes, hR))
 		} else {
 			_ = out.SetBytes(Scrypt(bytes))
 		}
 	case "sha256d": // sha256d
 		if GetCurrent(height) > 0 {
-			_ = out.SetBytes(DivHash(chainhash.DoubleHashB, bytes, HashReps))
+			_ = out.SetBytes(DivHash(chainhash.DoubleHashB, bytes, hR))
 		} else {
-			_ = out.SetBytes(chainhash.DoubleHashB(bytes))
+			_ = out.SetBytes(chainhash.DoubleHashB(
+				bytes))
 		}
 	case "stribog":
-		_ = out.SetBytes(DivHash(Stribog, bytes, HashReps))
+		_ = out.SetBytes(DivHash(Stribog, bytes, hR))
 	case "skein":
-		_ = out.SetBytes(DivHash(Skein, bytes, HashReps))
+		_ = out.SetBytes(DivHash(Skein, bytes, hR))
 	case "keccak":
-		_ = out.SetBytes(DivHash(Keccak, bytes, HashReps))
+		_ = out.SetBytes(DivHash(Keccak, bytes, hR))
 	}
 	return
 }
@@ -167,7 +177,7 @@ func Scrypt(bytes []byte) []byte {
 	dk, err := scrypt.Key(c, c, 1024, 1, 1, 32)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return make([]byte, 32)
 	}
 	o := make([]byte, 32)

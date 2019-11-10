@@ -77,7 +77,7 @@ func // Condition returns true when the specific bit associated with the checker
 // on the known deployments and the current state of the chain.
 // This function MUST be called with the chain state lock held (for writes).
 // This is part of the thresholdConditionChecker interface implementation.
-(c bitConditionChecker) Condition(node *blockNode) (bool, error) {
+(c bitConditionChecker) Condition(node *BlockNode) (bool, error) {
 	conditionMask := uint32(1) << c.bit
 	version := uint32(node.version)
 	if version&vbTopMask != vbTopBits {
@@ -146,7 +146,7 @@ func // MinerConfirmationWindow is the number of blocks in each threshold state
 func // Condition returns true when the specific bit defined by the deployment
 // associated with the checker is set.
 // This is part of the thresholdConditionChecker interface implementation.
-(c deploymentChecker) Condition(node *blockNode) (bool, error) {
+(c deploymentChecker) Condition(node *BlockNode) (bool, error) {
 	conditionMask := uint32(1) << c.deployment.BitNumber
 	version := uint32(node.version)
 	return (version&vbTopMask == vbTopBits) && (version&conditionMask != 0),
@@ -160,7 +160,7 @@ func // calcNextBlockVersion calculates the expected version of the block after
 // exported version uses the current best chain as the previous block node
 // while this function accepts any block node.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) calcNextBlockVersion(prevNode *blockNode) (uint32, error) {
+(b *BlockChain) calcNextBlockVersion(prevNode *BlockNode) (uint32, error) {
 	// Set the appropriate bits for each actively defined rule deployment
 	// that is either in the process of being voted on,
 	// or locked in for the/ activation at the next threshold window change.
@@ -187,7 +187,7 @@ func // CalcNextBlockVersion calculates the expected version of the block after
 // in rule change deployments. This function is safe for concurrent access.
 (b *BlockChain) CalcNextBlockVersion() (uint32, error) {
 	b.chainLock.Lock()
-	version, err := b.calcNextBlockVersion(b.bestChain.Tip())
+	version, err := b.calcNextBlockVersion(b.BestChain.Tip())
 	b.chainLock.Unlock()
 	return version, err
 }
@@ -197,7 +197,7 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 // This will only happen once when new rules have been activated and every
 // block for those about to be activated.
 // This function MUST be called with the chain state lock held (for writes)
-(b *BlockChain) warnUnknownRuleActivations(node *blockNode) error {
+(b *BlockChain) warnUnknownRuleActivations(node *BlockNode) error {
 	// Warn if any unknown new rules are either about to activate or have already been activated.
 	for bit := uint32(0); bit < vbNumBits; bit++ {
 		checker := bitConditionChecker{bit: bit, chain: b}
@@ -227,7 +227,7 @@ log.ERROR(err)
 // warnUnknownVersions logs a warning if a high enough percentage of the last
 // blocks have unexpected versions.
 // This function MUST be called with the chain state lock held (for writes)
-// func (b *BlockChain) warnUnknownVersions(node *blockNode) error {
+// func (b *BlockChain) warnUnknownVersions(node *BlockNode) error {
 // 	// Nothing to do if already warned.
 // 	if b.unknownVersionsWarned {
 // 		return nil

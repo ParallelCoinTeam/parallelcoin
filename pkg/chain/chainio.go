@@ -130,8 +130,7 @@ dbFetchOrCreateVersion(dbTx database.Tx, key []byte, defaultVersion uint32) (uin
 		version = defaultVersion
 		err := dbPutVersion(dbTx, key, version)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return 0, err
 		}
 	}
@@ -230,7 +229,6 @@ func // FetchSpendJournal attempts to retrieve the spend journal,
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return spendEntries, nil
@@ -317,7 +315,6 @@ decodeSpentTxOut(serialized []byte, stxo *SpentTxOut) (int, error) {
 	offset += bytesRead
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return offset, errDeserialize(fmt.Sprint(
 			"unable to decode txout: ", err,
 		))
@@ -367,8 +364,7 @@ deserializeSpendJournalEntry(serialized []byte, txns []*wire.MsgTx) ([]SpentTxOu
 			n, err := decodeSpentTxOut(serialized[offset:], stxo)
 			offset += n
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return nil, errDeserialize(fmt.Sprintf(
 					"unable to decode stxo for %v: %v",
 					txIn.PreviousOutPoint, err,
@@ -414,7 +410,6 @@ dbFetchSpendJournalEntry(dbTx database.Tx, block *util.Block) ([]SpentTxOut, err
 	stxos, err := deserializeSpendJournalEntry(serialized, blockTxns)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		// Ensure any deserialization errors are returned as database
 		// corruption errors.
 		if isDeserializeErr(err) {
@@ -575,7 +570,6 @@ func serializeUtxoEntry(entry *UtxoEntry) ([]byte, error) {
 	headerCode, err := utxoEntryHeaderCode(entry)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Calculate the size needed to serialize the entry.
@@ -608,7 +602,6 @@ deserializeUtxoEntry(serialized []byte) (*UtxoEntry, error) {
 	amount, pkScript, _, err := decodeCompressedTxOut(serialized[offset:])
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, errDeserialize(fmt.Sprint(
 			"unable to decode utxo:", err,
 		))
@@ -678,7 +671,6 @@ func dbFetchUtxoEntry(dbTx database.Tx, outpoint wire.OutPoint) (*UtxoEntry, err
 	entry, err := deserializeUtxoEntry(serializedUtxo)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		// Ensure any deserialization errors are returned as database
 		// corruption errors.
 		if isDeserializeErr(err) {
@@ -713,8 +705,7 @@ dbPutUtxoView(dbTx database.Tx, view *UtxoViewpoint) error {
 			err := utxoBucket.Delete(*key)
 			recycleOutpointKey(key)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			continue
@@ -722,8 +713,7 @@ log.ERROR(err)
 		// Serialize and store the utxo entry.
 		serialized, err := serializeUtxoEntry(entry)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		key := outpointKey(outpoint)
@@ -733,8 +723,7 @@ log.ERROR(err)
 		// It will be garbage collected normally when the database is done
 		// with it.
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -925,7 +914,12 @@ func // createChainState initializes both the database and the chain state to
 	header := &genesisBlock.MsgBlock().Header
 	node := newBlockNode(header, nil)
 	node.status = statusDataStored | statusValid
-	b.bestChain.SetTip(node)
+	var err error
+	node.diffs, err = b.CalcNextRequiredDifficultyPlan9Controller(node)
+	if err != nil {
+		log.ERROR(err)
+	}
+	b.BestChain.SetTip(node)
 	// Add the new node to the index which is used for faster lookups.
 	b.Index.addNode(node)
 	// Initialize the state related to the best block.
@@ -937,42 +931,37 @@ func // createChainState initializes both the database and the chain state to
 		numTxns, time.Unix(node.timestamp, 0))
 	// Create the initial the database chain state including creating the
 	// necessary index buckets and inserting the genesis block.
-	err := b.db.Update(func(dbTx database.Tx) error {
+	err = b.db.Update(func(dbTx database.Tx) error {
 		meta := dbTx.Metadata()
 		// Create the bucket that houses the block index data.
 		_, err := meta.CreateBucket(blockIndexBucketName)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Create the bucket that houses the chain block hash to height index.
 		_, err = meta.CreateBucket(hashIndexBucketName)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Create the bucket that houses the chain block height to hash index.
 		_, err = meta.CreateBucket(heightIndexBucketName)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Create the bucket that houses the spend journal data and store its
 		// version.
 		_, err = meta.CreateBucket(spendJournalBucketName)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = dbPutVersion(dbTx, utxoSetVersionKeyName,
 			latestUtxoSetBucketVersion)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Create the bucket that houses the utxo set and store its version.
@@ -980,38 +969,33 @@ log.ERROR(err)
 		// not inserted here since it is not spendable by consensus rules.
 		_, err = meta.CreateBucket(utxoSetBucketName)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = dbPutVersion(dbTx, spendJournalVersionKeyName,
 			latestSpendJournalBucketVersion)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Save the genesis block to the block index database.
 		err = dbStoreBlockNode(dbTx, node)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Add the genesis block hash to height and height to hash mappings
 		// to the index.
 		err = dbPutBlockIndex(dbTx, &node.hash, node.height)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Store the current best chain state into the database.
 		node.workSum = CalcWork(node.bits, node.height, node.version)
 		err = dbPutBestState(dbTx, b.stateSnapshot, node.workSum)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Store the genesis block into the database.
@@ -1035,7 +1019,6 @@ func // initChainState attempts to load and initialize the chain state from the
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if !initialized {
@@ -1046,8 +1029,7 @@ log.ERROR(err)
 	if !hasBlockIndex {
 		err := migrateBlockIndex(b.db)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil
 		}
 	}
@@ -1062,8 +1044,7 @@ log.ERROR(err)
 		log.TRACEF("serialized chain state: %0x", serializedData)
 		state, err := deserializeBestChainState(serializedData)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Load all of the headers from the data for the known best chain and
@@ -1080,27 +1061,27 @@ log.ERROR(err)
 		for ok := cursor.First(); ok; ok = cursor.Next() {
 			blockCount++
 		}
-		blockNodes := make([]blockNode, blockCount)
+		blockNodes := make([]BlockNode, blockCount)
 		var i int32
-		var lastNode *blockNode
+		var lastNode *BlockNode
 		cursor = blockIndexBucket.Cursor()
 		for ok := cursor.First(); ok; ok = cursor.Next() {
 			header, status, err := deserializeBlockRow(cursor.Value())
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			// Determine the parent block node.
 			// Since we iterate block headers in order of height,
 			// if the blocks are mostly linear there is a very good chance
 			// the previous header processed is the parent.
-			var parent *blockNode
+			var parent *BlockNode
 			if lastNode == nil {
 				blockHash := header.BlockHash()
 				if !blockHash.IsEqual(b.params.GenesisHash) {
 					return AssertError(fmt.Sprintf(
-						"initChainState: expected first entry in block index to be genesis block, found %s",
+						"initChainState: expected first entry in block index"+
+							" to be genesis block, found %s",
 						blockHash,
 					))
 				}
@@ -1135,19 +1116,17 @@ log.ERROR(err)
 				state.hash,
 			))
 		}
-		b.bestChain.SetTip(tip)
+		b.BestChain.SetTip(tip)
 		// Load the raw block bytes for the best block.
 		blockBytes, err := dbTx.FetchBlock(&state.hash)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		var block wire.MsgBlock
 		err = block.Deserialize(bytes.NewReader(blockBytes))
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// As a final consistency check,
@@ -1176,7 +1155,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// As we might have updated the index after it was loaded,
@@ -1194,13 +1172,11 @@ deserializeBlockRow(blockRow []byte) (*wire.BlockHeader, blockStatus, error) {
 	err := header.Deserialize(buffer)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, statusNone, err
 	}
 	statusByte, err := buffer.ReadByte()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, statusNone, err
 	}
 	return &header, blockStatus(statusByte), nil
@@ -1212,14 +1188,12 @@ dbFetchHeaderByHash(dbTx database.Tx, hash *chainhash.Hash) (*wire.BlockHeader, 
 	headerBytes, err := dbTx.FetchBlockHeader(hash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	var header wire.BlockHeader
 	err = header.Deserialize(bytes.NewReader(headerBytes))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return &header, nil
@@ -1239,19 +1213,17 @@ height int32) (*wire.BlockHeader, error) {
 func // dbFetchBlockByNode uses an existing database transaction to retrieve the
 // raw block for the provided node, deserialize it,
 // and return a util.Block with the height set.
-dbFetchBlockByNode(dbTx database.Tx, node *blockNode) (*util.Block, error) {
+dbFetchBlockByNode(dbTx database.Tx, node *BlockNode) (*util.Block, error) {
 	// Load the raw block bytes from the database.
 	blockBytes, err := dbTx.FetchBlock(&node.hash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Create the encapsulated block and set the height appropriately.
 	block, err := util.NewBlockFromBytes(blockBytes)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	block.SetHeight(node.height)
@@ -1260,20 +1232,18 @@ log.ERROR(err)
 
 func // dbStoreBlockNode stores the block header and validation status to the
 // block index bucket. This overwrites the current entry if there exists one.
-dbStoreBlockNode(dbTx database.Tx, node *blockNode) error {
+dbStoreBlockNode(dbTx database.Tx, node *BlockNode) error {
 	// Serialize block data to be stored.
 	w := bytes.NewBuffer(make([]byte, 0, blockHdrSize+1))
 	header := node.Header()
 	err := header.Serialize(w)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	err = w.WriteByte(byte(node.status))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	value := w.Bytes()
@@ -1289,7 +1259,6 @@ dbStoreBlock(dbTx database.Tx, block *util.Block) error {
 	hasBlock, err := dbTx.HasBlock(block.Hash())
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if hasBlock {
@@ -1312,7 +1281,7 @@ func // BlockByHeight returns the block at the given height in the main chain.
 // This function is safe for concurrent access.
 (b *BlockChain) BlockByHeight(blockHeight int32) (*util.Block, error) {
 	// Lookup the block height in the best chain.
-	node := b.bestChain.NodeByHeight(blockHeight)
+	node := b.BestChain.NodeByHeight(blockHeight)
 	if node == nil {
 		str := fmt.Sprintf("no block at height %d exists", blockHeight)
 		return nil, errNotInMainChain(str)
@@ -1333,7 +1302,7 @@ func // BlockByHash returns the block from the main chain with the given hash
 (b *BlockChain) BlockByHash(hash *chainhash.Hash) (*util.Block, error) {
 	// Lookup the block hash in block index and ensure it is in the best chain.
 	node := b.Index.LookupNode(hash)
-	if node == nil || !b.bestChain.Contains(node) {
+	if node == nil || !b.BestChain.Contains(node) {
 		str := fmt.Sprintf("blockByHash: block %s is not in the main chain", hash)
 		return nil, errNotInMainChain(str)
 	}

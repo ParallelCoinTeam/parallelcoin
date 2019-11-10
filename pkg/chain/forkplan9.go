@@ -16,9 +16,9 @@ import (
 // in that the exported version uses the current best chain as the previous
 // block node while this function accepts any block node.
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
-	lastNode *blockNode, newBlockTime time.Time, algoname string,
+	lastNode *BlockNode, newBlockTime time.Time, algoname string,
 	l bool) (newTargetBits uint32, adjustment float64, err error) {
-	log.TRACE("algoname ", algoname)
+	//log.TRACE("algoname ", algoname)
 	nH := lastNode.height + 1
 	newTargetBits = fork.SecondPowLimitBits
 	adjustment = 1.0
@@ -36,7 +36,6 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 	algDiv := b.GetP9AlgoDiv(allTimeDiv, last, startHeight, algoVer, ttpb)
 	adjustment = (allTimeDiv + algDiv + dayDiv + hourDiv + qhourDiv +
 		timeSinceAlgo) / 6
-	log.TRACEF("adjustment %3.4f %08x", adjustment, last.bits)
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
@@ -51,15 +50,15 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 	}
 	if l {
 		an := fork.List[1].AlgoVers[algoVer]
-		pad := 14 - len(an)
+		pad := 9 - len(an)
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
 		log.DEBUGC(func() string {
-			return fmt.Sprintf("wrkr: %s hght: %s %08x %s %s %s %s %s %s %s"+
+			return fmt.Sprintf("wrkr: %s hght: %d %08x %s %s %s %s %s %s %s"+
 				" %s %s %08x",
 				RightJustify(fmt.Sprint(workerNumber), 3),
-				RightJustify(fmt.Sprint(lastNode.height+1), 8),
+				lastNode.height+1,
 				last.bits,
 				an,
 				RightJustify(fmt.Sprintf("%3.2f", allTimeAv), 5),

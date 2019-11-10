@@ -2,39 +2,43 @@ package blockchain
 
 import (
 	"fmt"
-	"math/big"
-	"strings"
-	"time"
-
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
+	"math/big"
+	"strings"
 )
 
-func secondPowLimitBits(nH int32) (out map[int32]uint32) {
+func secondPowLimitBits(nH int32) (out *map[int32]uint32) {
 	aV := fork.List[fork.GetCurrent(nH)].AlgoVers
-	out = make(map[int32]uint32, len(aV))
+	o := make(map[int32]uint32, len(aV))
 	for i := range aV {
-		out[i] = fork.SecondPowLimitBits
+		o[i] = fork.SecondPowLimitBits
 	}
-	return
+	return &o
 }
 
 // CalcNextRequiredDifficultyPlan9Controller returns all of the algorithm
 // difficulty targets for sending out with the other pieces required to
 // construct a block, as these numbers are generated from block timestamps
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
-	lastNode *blockNode, newBlockTime time.Time) (
-	newTargetBits map[int32]uint32, err error) {
+	lastNode *BlockNode) (newTargetBits *map[int32]uint32, err error) {
 	nH := lastNode.height + 1
+	nTB :=	make(map[int32]uint32, len(fork.List[fork.GetCurrent(
+		nH)].AlgoVers))
+	newTargetBits = &nTB
+	lnh := lastNode.Header()
+	hD := &lnh
 	newTargetBits = secondPowLimitBits(nH)
 	if lastNode == nil || b.IsP9HardFork(nH) {
 		return
 	}
+	log.DEBUG("calculating difficulty targets to attach to block",
+		hD.BlockHashWithAlgos(lastNode.height), lastNode.height)
 	// here we only need to do this once
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
 	dayDiv := b.GetCommonP9Averages(lastNode, nH)
 	for aV := range fork.List[fork.GetCurrent(nH)].AlgoVers {
-	// TODO: merge this with the single algorithm one
+		// TODO: merge this with the single algorithm one
 		since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode,
 			aV)
 		if last == nil {
@@ -52,17 +56,17 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 			return
 		}
 		if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
-			newTargetBits[aV] = BigToCompact(newTarget)
+			(*newTargetBits)[aV] = BigToCompact(newTarget)
 		}
 		an := fork.List[1].AlgoVers[aV]
-		pad := 14 - len(an)
+		pad := 9 - len(an)
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
 		log.DEBUGC(func() string {
-			return fmt.Sprintf("hght: %s %08x %s %s %s %s %s %s %s"+
+			return fmt.Sprintf("hght: %d %08x %s %s %s %s %s %s %s"+
 				" %s %s %08x",
-				RightJustify(fmt.Sprint(lastNode.height+1), 8),
+				nH,
 				last.bits,
 				an,
 				RightJustify(fmt.Sprintf("%3.2f", allTimeAv), 5),
@@ -74,7 +78,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 				RightJustify(fmt.Sprintf("%3.0f %3.3fD",
 					since-ttpb*float64(len(fork.List[1].Algos)), timeSinceAlgo*ttpb), 13),
 				RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11),
-				newTargetBits[aV],
+				(*newTargetBits)[aV],
 			)
 		})
 	}

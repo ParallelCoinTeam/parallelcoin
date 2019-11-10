@@ -25,7 +25,6 @@ type Serializer interface {
 type Serializers []Serializer
 
 type Container struct {
-	sync.RWMutex
 	Data []byte
 }
 
@@ -259,26 +258,28 @@ func (b *Bits) PutBits(bits uint32) {
 }
 
 type Bitses struct {
+	sync.Mutex
 	Length  byte
-	Byteses [][][]byte
+	Byteses map[int32][]byte
 }
 
 func NewBitses() *Bitses {
-	return &Bitses{}
+	return &Bitses{Byteses: make(map[int32][]byte)}
 }
 
 func (b *Bitses) Decode(by []byte) (out []byte) {
+	b.Lock()
+	defer b.Unlock()
 	if len(by) >= 7 {
 		nB := by[0]
-		if len(by) >= int(nB)*8+1 {
+		if len(by) >= int(nB)*8 {
 			for i := 0; i < int(nB); i++ {
-				b.Byteses = append(b.Byteses, [][]byte{
-					by[1+i*8 : 1+i*8+4],
-					by[1+i*8+4 : 1+i*8+8],
-				})
+				algoVer := int32(binary.BigEndian.Uint32(by[1+i*8 : 1+i*8+4]))
+				//log.DEBUG("algoVer", algoVer, by[1+i*8+4 : 1+i*8+8], b.Byteses)
+				b.Byteses[algoVer] = by[1+i*8+4 : 1+i*8+8]
 			}
 		}
-		bL := int(nB) * 8 + 1
+		bL := int(nB)*8 + 1
 		if len(by) > bL {
 			out = by[bL:]
 		}
@@ -287,31 +288,36 @@ func (b *Bitses) Decode(by []byte) (out []byte) {
 }
 
 func (b *Bitses) Encode() (out []byte) {
+	b.Lock()
+	defer b.Unlock()
 	out = []byte{b.Length}
-	for i := range b.Byteses {
-		out = append(out, append(b.Byteses[i][0], b.Byteses[i][1]...)...)
+	for algoVer := range b.Byteses {
+		by := make([]byte, 4)
+		binary.BigEndian.PutUint32(by, uint32(algoVer))
+		out = append(out, append(by, b.Byteses[algoVer]...)...)
 	}
 	return
 }
 
-func (b *Bitses) GetBitses() (out [][]uint32) {
-	for i := range b.Byteses {
-		outs := make([]uint32, b.Length)
-		outs[0] = binary.BigEndian.Uint32(b.Byteses[i][0])
-		outs[1] = binary.BigEndian.Uint32(b.Byteses[i][1])
-		out = append(out, outs)
+func (b *Bitses) GetBitses() (out map[int32]uint32) {
+	b.Lock()
+	defer b.Unlock()
+	out = make(map[int32]uint32)
+	for algoVer := range b.Byteses {
+		out[algoVer] = binary.BigEndian.Uint32(b.Byteses[algoVer])
 	}
 	return
 }
 
-func (b *Bitses) PutBitses(in [][]uint32) {
+func (b *Bitses) PutBitses(in map[int32]uint32) {
+	b.Lock()
+	defer b.Unlock()
 	b.Length = byte(len(in))
-	b.Byteses = make([][][]byte, b.Length)
-	for i := range in {
-		ver, bits := make([]byte, 4), make([]byte, 4)
-		binary.BigEndian.PutUint32(ver, in[i][0])
-		binary.BigEndian.PutUint32(bits, in[i][1])
-		b.Byteses[i] = [][]byte{ver, bits}
+	b.Byteses = make(map[int32][]byte, b.Length)
+	for algoVer := range in {
+		bits := make([]byte, 4)
+		binary.BigEndian.PutUint32(bits, in[algoVer])
+		b.Byteses[algoVer] = bits
 	}
 }
 
