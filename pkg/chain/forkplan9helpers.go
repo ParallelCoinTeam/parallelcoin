@@ -4,14 +4,10 @@ import (
 	"github.com/VividCortex/ewma"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"time"
 )
 
 func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
-	newBlockTime time.Time, nH int32, algoname string) (allTimeAv,
-	allTimeDiv, qhourDiv, hourDiv, dayDiv float64) {
-	const max float64 = 65536
-	const maxA, minA = max, 1 / max
+	nH int32) (allTimeAv, allTimeDiv, qhourDiv, hourDiv, dayDiv float64) {
 	const minAvSamples = 9
 	ttpb := float64(fork.List[1].TargetTimePerBlock)
 	startHeight := fork.List[1].ActivationHeight
@@ -32,7 +28,8 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
 	if allTimeAv > 0 {
 		allTimeDiv = allTimeAv / ttpb
 	}
-	allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv
+	allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv *
+		allTimeDiv * allTimeDiv
 
 	oneHour := 60 * 60 / fork.List[1].TargetTimePerBlock
 	oneDay := oneHour * 24
@@ -67,13 +64,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
 				for _, x := range dayIntervals {
 					dw.Add(float64(x))
 				}
-				dayDiv = dw.Value() / ttpb / float64(oneDay)
-				if dayDiv < minA {
-					dayDiv = minA
-				}
-				if dayDiv > maxA {
-					dayDiv = maxA
-				}
+				dayDiv = capP9Adjustment(dw.Value() / ttpb / float64(oneDay))
 			}
 		}
 	}
@@ -107,13 +98,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
 				for _, x := range hourIntervals {
 					hw.Add(float64(x))
 				}
-				hourDiv = hw.Value() / ttpb / float64(oneHour)
-				if hourDiv < minA {
-					hourDiv = minA
-				}
-				if hourDiv > maxA {
-					hourDiv = maxA
-				}
+				hourDiv = capP9Adjustment(hw.Value() / ttpb / float64(oneHour))
 			}
 		}
 	}
@@ -147,13 +132,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
 				for _, x := range qhourIntervals {
 					qhw.Add(float64(x))
 				}
-				qhourDiv = qhw.Value() / ttpb / float64(qHour)
-				if qhourDiv < minA {
-					qhourDiv = minA
-				}
-				if qhourDiv > maxA {
-					qhourDiv = maxA
-				}
+				qhourDiv = capP9Adjustment(qhw.Value() / ttpb / float64(qHour))
 			}
 		}
 	}
@@ -162,8 +141,6 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *blockNode,
 
 func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *blockNode,
 	startHeight int32, algoVer int32, ttpb float64) (algDiv float64) {
-	const max float64 = 65536
-	const maxA, minA = max, 1 / max
 	const minAvSamples = 9
 	// collect timestamps of same algo of equal number as avinterval
 	algDiv = allTimeDiv
@@ -192,14 +169,64 @@ func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *blockNode,
 			for _, x := range algIntervals {
 				awi.Add(float64(x))
 			}
-			algDiv = awi.Value() / ttpb / float64(len(fork.P9Algos))
-			if algDiv < minA {
-				algDiv = minA
-			}
-			if algDiv > maxA {
-				algDiv = maxA
-			}
+			algDiv = capP9Adjustment(awi.Value() / ttpb / float64(len(fork.
+				P9Algos)))
 		}
 	}
 	return
+}
+
+func (b *BlockChain) GetP9Since(lastNode *blockNode, algoVer int32) (since,
+	ttpb, timeSinceAlgo float64, startHeight int32, last *blockNode) {
+	last = lastNode
+	// find the most recent block of the same algo
+	ln := last
+	for ln.version != algoVer {
+		ln = ln.RelativeAncestor(1)
+		// if it found nothing, return baseline
+		if ln == nil {
+			last = nil
+			return
+		}
+		last = ln
+	}
+	since = float64(lastNode.timestamp - last.timestamp)
+	ttpb = float64(fork.List[1].TargetTimePerBlock)
+	tspb := ttpb * float64(len(fork.List[1].Algos))
+	// ratio of seconds since to target seconds per block times the
+	// all time divergence ensures the change scales with the divergence
+	// from the target, and favours algos that are later
+	timeSinceAlgo = (since / tspb) / 5
+	startHeight = fork.List[1].ActivationHeight
+	if b.params.Net == wire.TestNet3 {
+		startHeight = fork.List[1].TestnetStart
+	}
+	return
+}
+
+func (b *BlockChain) IsP9HardFork(nH int32) bool {
+	// At activation difficulty resets
+	if b.params.Net == wire.MainNet {
+		if fork.List[1].ActivationHeight == nH {
+			return true
+		}
+	}
+	if b.params.Net == wire.TestNet3 {
+		if fork.List[1].TestnetStart == nH {
+			return true
+		}
+	}
+	return false
+}
+
+func capP9Adjustment(adjustment float64) float64 {
+	const max float64 = 65536
+	const maxA, minA = max, 1 / max
+	if adjustment > maxA {
+		adjustment = maxA
+	}
+	if adjustment < minA {
+		adjustment = minA
+	}
+	return adjustment
 }
