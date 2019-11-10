@@ -1,3 +1,7 @@
+//+build ignore
+
+
+
 //go:generate go run ../tools/genmsghandle/main.go kopach controller.Blocks broadcast.TplBlock github.com/p9c/pod/pkg/controller msghandle.go
 package kopach
 
@@ -10,7 +14,6 @@ import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/controller"
 	"github.com/p9c/pod/pkg/controller/broadcast"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
@@ -23,7 +26,7 @@ import (
 
 type workerConfig struct {
 	bytes          []byte
-	templates      controller.Templates
+	templates      controllerold.Templates
 	enc            *codec.Encoder
 	rotator        *atomic.Uint64
 	outAddr        *net.UDPAddr
@@ -40,7 +43,7 @@ type workerConfig struct {
 func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	wg.Add(1)
 	log.WARN("starting kopach standalone miner worker")
-	returnChan := make(chan *controller.Blocks)
+	returnChan := make(chan *controllerold.Blocks)
 	m := newMsgHandle(*cx.Config.MinerPass, returnChan)
 	blockSemaphore := make(chan struct{})
 	outAddr, err := broadcast.New(*cx.Config.BroadcastAddress)
@@ -52,7 +55,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	var started atomic.Bool
 	var rotator atomic.Uint64
 	var submitLock sync.Mutex
-	var oldBlocks controller.Blocks
+	var oldBlocks controllerold.Blocks
 	go func() {
 	workOut:
 		for {
@@ -301,7 +304,7 @@ func UpdateExtraNonce(msgBlock *wire.MsgBlock,
 	msgBlock.Transactions[0].TxIn[0].SignatureScript = coinbaseScript
 	// TODO(davec): A util.Solution should use saved in the state to avoid
 	//  recalculating all of the other transaction hashes.
-	//  block.Transactions[0].InvalidateCache() Recalculate the merkle root with
+	//  block.Transaction[0].InvalidateCache() Recalculate the merkle root with
 	//  the updated extra nonce.
 	block := util.NewBlock(msgBlock)
 	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)

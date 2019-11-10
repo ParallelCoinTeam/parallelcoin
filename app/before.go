@@ -299,18 +299,6 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.TRACE("set nocontroller", c.String("nocontroller"))
 			*cx.Config.NoController = c.Bool("nocontroller")
 		}
-		if c.IsSet("broadcast") {
-			log.TRACE("set broadcast", c.Bool("broadcast"))
-			*cx.Config.Broadcast = c.Bool("broadcast")
-		}
-		if c.IsSet("broadcastaddress") {
-			log.TRACE("set broadcastaddress", c.Bool("broadcastaddress"))
-			*cx.Config.BroadcastAddress = c.String("broadcastaddress")
-		}
-		if c.IsSet("workers") {
-			log.TRACE("set workers", c.StringSlice("workers"))
-			*cx.Config.Workers = c.StringSlice("workers")
-		}
 		if c.IsSet("miningaddrs") {
 			log.TRACE("set miningaddrs", c.StringSlice("miningaddrs"))
 			*cx.Config.MiningAddrs = c.StringSlice("miningaddrs")

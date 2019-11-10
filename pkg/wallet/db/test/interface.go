@@ -2,6 +2,7 @@ package walletdbtest
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"os"
 	"reflect"
 

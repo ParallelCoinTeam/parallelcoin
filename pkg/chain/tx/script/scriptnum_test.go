@@ -66,7 +66,7 @@ func TestScriptNumBytes(	t *testing.T) {
 	for _, test := range tests {
 		gotBytes := test.num.Bytes()
 		if !bytes.Equal(gotBytes, test.serialized) {
-			t.Errorf("Bytes: did not get expected bytes for %d - "+
+			t.Errorf("Hash: did not get expected bytes for %d - "+
 				"got %x, want %x", test.num, gotBytes,
 				test.serialized)
 			continue

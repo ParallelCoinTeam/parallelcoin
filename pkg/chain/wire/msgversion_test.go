@@ -192,9 +192,9 @@ func TestVersion(t *testing.T) {
 // 			t.Errorf("BtcEncode #%d error %v", i, err)
 // 			continue
 // 		}
-// 		if !bytes.Equal(buf.Bytes(), test.buf) {
+// 		if !bytes.Equal(buf.Hash(), test.buf) {
 // 			t.Errorf("BtcEncode #%d\n got: %s want: %s", i,
-// 				spew.Sdump(buf.Bytes()), spew.Sdump(test.buf))
+// 				spew.Sdump(buf.Hash()), spew.Sdump(test.buf))
 // 			continue
 // 		}
 // 		// Decode the message from wire format.
@@ -238,10 +238,10 @@ func TestVersion(t *testing.T) {
 // 	}
 // 	// Make a new buffer big enough to hold the base version plus the new bytes for the bigger varint to hold the new size of the user agent and the new user agent string.  Then stich it all together.
 // 	newLen := len(baseVersionEncoded) - len(baseVersion.UserAgent)
-// 	newLen = newLen + len(newUAVarIntBuf.Bytes()) - 1 + len(newUA)
+// 	newLen = newLen + len(newUAVarIntBuf.Hash()) - 1 + len(newUA)
 // 	exceedUAVerEncoded := make([]byte, newLen)
 // 	copy(exceedUAVerEncoded, baseVersionEncoded[0:80])
-// 	copy(exceedUAVerEncoded[80:], newUAVarIntBuf.Bytes())
+// 	copy(exceedUAVerEncoded[80:], newUAVarIntBuf.Hash())
 // 	copy(exceedUAVerEncoded[83:], []byte(newUA))
 // 	copy(exceedUAVerEncoded[83+len(newUA):], baseVersionEncoded[97:100])
 // 	tests := []struct {

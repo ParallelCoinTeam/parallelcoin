@@ -4,12 +4,12 @@ package zero
 // optimized using a Duff's device.
 import "math/big"
 
-// Bytes sets all bytes in the passed slice to zero.  This is used to
+// Hash sets all bytes in the passed slice to zero.  This is used to
 // explicitly clear private key material from memory.
 //
 // In general, prefer to use the fixed-sized zeroing functions (Bytea*)
 // when zeroing bytes as they are much more efficient than the variable
-// sized zeroing func Bytes.
+// sized zeroing func Hash.
 func Bytes(b []byte) {
 	for i := range b {
 		b[i] = 0

@@ -111,11 +111,11 @@ func TestBlock(	t *testing.T) {
 	for i := 0; i < 2; i++ {
 		serializedBytes, err := b.Bytes()
 		if err != nil {
-			t.Errorf("Bytes: %v", err)
+			t.Errorf("Hash: %v", err)
 			continue
 		}
 		if !bytes.Equal(serializedBytes, block100000Bytes) {
-			t.Errorf("Bytes #%d wrong bytes - got %v, want %v", i,
+			t.Errorf("Hash #%d wrong bytes - got %v, want %v", i,
 				spew.Sdump(serializedBytes),
 				spew.Sdump(block100000Bytes))
 			continue
@@ -159,11 +159,11 @@ func TestNewBlockFromBytes(	t *testing.T) {
 	// Ensure we get the same data back out.
 	serializedBytes, err := b.Bytes()
 	if err != nil {
-		t.Errorf("Bytes: %v", err)
+		t.Errorf("Hash: %v", err)
 		return
 	}
 	if !bytes.Equal(serializedBytes, block100000Bytes) {
-		t.Errorf("Bytes: wrong bytes - got %v, want %v",
+		t.Errorf("Hash: wrong bytes - got %v, want %v",
 			spew.Sdump(serializedBytes),
 			spew.Sdump(block100000Bytes))
 	}
@@ -188,11 +188,11 @@ func TestNewBlockFromBlockAndBytes(	t *testing.T) {
 	// Ensure we get the same data back out.
 	serializedBytes, err := b.Bytes()
 	if err != nil {
-		t.Errorf("Bytes: %v", err)
+		t.Errorf("Hash: %v", err)
 		return
 	}
 	if !bytes.Equal(serializedBytes, block100000Bytes) {
-		t.Errorf("Bytes: wrong bytes - got %v, want %v",
+		t.Errorf("Hash: wrong bytes - got %v, want %v",
 			spew.Sdump(serializedBytes),
 			spew.Sdump(block100000Bytes))
 	}

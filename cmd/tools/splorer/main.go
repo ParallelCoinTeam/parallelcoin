@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"github.com/p9c/pod/pkg/log"
 	"net/http"
 )
 
@@ -14,7 +14,7 @@ func main() {
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/getinfo", getinfoHandler)
 	http.HandleFunc("/getallblocks", getallblocksHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.FATAL(http.ListenAndServe(":8080", nil))
 }
 func getinfoHandler(	w http.ResponseWriter, r *http.Request) {
 	response, err := jsonrpc.Call("getinfo", nil)

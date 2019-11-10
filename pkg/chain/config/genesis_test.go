@@ -9,9 +9,9 @@ package chaincfg
 // 		t.Fatalf("TestGenesisBlock: %v", err)
 // 	}
 // 	// Ensure the encoded block matches the expected bytes.
-// 	if !bytes.Equal(buf.Bytes(), genesisBlockBytes) {
+// 	if !bytes.Equal(buf.Hash(), genesisBlockBytes) {
 // 		t.Fatalf("TestGenesisBlock: Genesis block does not appear valid - "+
-// 			"got %v, want %v", spew.Sdump(buf.Bytes()),
+// 			"got %v, want %v", spew.Sdump(buf.Hash()),
 // 			spew.Sdump(genesisBlockBytes))
 // 	}
 // 	// Check hash of the block against expected hash.
@@ -32,10 +32,10 @@ package chaincfg
 // 		t.Fatalf("TestRegTestGenesisBlock: %v", err)
 // 	}
 // 	// Ensure the encoded block matches the expected bytes.
-// 	if !bytes.Equal(buf.Bytes(), regTestGenesisBlockBytes) {
+// 	if !bytes.Equal(buf.Hash(), regTestGenesisBlockBytes) {
 // 		t.Fatalf("TestRegTestGenesisBlock: Genesis block does not "+
 // 			"appear valid - got %v, want %v",
-// 			spew.Sdump(buf.Bytes()),
+// 			spew.Sdump(buf.Hash()),
 // 			spew.Sdump(regTestGenesisBlockBytes))
 // 	}
 // 	// Check hash of the block against expected hash.
@@ -56,10 +56,10 @@ package chaincfg
 // 		t.Fatalf("TestTestNet3GenesisBlock: %v", err)
 // 	}
 // 	// Ensure the encoded block matches the expected bytes.
-// 	if !bytes.Equal(buf.Bytes(), testNet3GenesisBlockBytes) {
+// 	if !bytes.Equal(buf.Hash(), testNet3GenesisBlockBytes) {
 // 		t.Fatalf("TestTestNet3GenesisBlock: Genesis block does not "+
 // 			"appear valid - got %v, want %v",
-// 			spew.Sdump(buf.Bytes()),
+// 			spew.Sdump(buf.Hash()),
 // 			spew.Sdump(testNet3GenesisBlockBytes))
 // 	}
 // 	// Check hash of the block against expected hash.
@@ -80,10 +80,10 @@ package chaincfg
 // 		t.Fatalf("TestSimNetGenesisBlock: %v", err)
 // 	}
 // 	// Ensure the encoded block matches the expected bytes.
-// 	if !bytes.Equal(buf.Bytes(), simNetGenesisBlockBytes) {
+// 	if !bytes.Equal(buf.Hash(), simNetGenesisBlockBytes) {
 // 		t.Fatalf("TestSimNetGenesisBlock: Genesis block does not "+
 // 			"appear valid - got %v, want %v",
-// 			spew.Sdump(buf.Bytes()),
+// 			spew.Sdump(buf.Hash()),
 // 			spew.Sdump(simNetGenesisBlockBytes))
 // 	}
 // 	// Check hash of the block against expected hash.

@@ -34,7 +34,7 @@ func Main() int {
 
 	log.L.SetLevel("error", true)
 	cx := conte.GetNewContext(appName, appLanguage, "main")
-	cx.App = getApp(cx)
+	cx.App = GetApp(cx)
 	log.DEBUG("running App")
 
 	e := cx.App.Run(os.Args)

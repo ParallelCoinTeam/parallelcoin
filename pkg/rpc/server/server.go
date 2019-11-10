@@ -435,7 +435,7 @@ func (s *walletServer) SignTransaction(ctx context.Context, req *pb.SignTransact
 	if err != nil {
 		log.ERROR(err)
 return nil, status.Errorf(codes.InvalidArgument,
-			"Bytes do not represent a valid raw transaction: %v", err)
+			"Hash do not represent a valid raw transaction: %v", err)
 	}
 	lock := make(chan time.Time, 1)
 	defer func() {
@@ -483,7 +483,7 @@ func (s *walletServer) PublishTransaction(ctx context.Context, req *pb.PublishTr
 	if err != nil {
 		log.ERROR(err)
 return nil, status.Errorf(codes.InvalidArgument,
-			"Bytes do not represent a valid raw transaction: %v", err)
+			"Hash do not represent a valid raw transaction: %v", err)
 	}
 	err = s.wallet.PublishTransaction(&msgTx)
 	if err != nil {

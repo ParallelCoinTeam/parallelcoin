@@ -13,7 +13,7 @@ const (
 
 // scriptNum represents a numeric value used in the scripting engine with special handling to deal with the subtle semantics required by consensus. All numbers are stored on the data and alternate stacks encoded as little endian with a sign bit.  All numeric opcodes such as OP_ADD, OP_SUB, and OP_MUL, are only allowed to operate on 4-byte integers in the range [-2^31 + 1, 2^31 - 1], however the results of numeric operations may overflow and remain valid so long as they are not used as inputs to other numeric operations or otherwise interpreted as an integer.
 // For example, it is possible for OP_ADD to have 2^31 - 1 for its two operands resulting 2^32 - 2, which overflows, but is still pushed to the stack as the result of the addition.  That value can then be used as input to OP_VERIFY which will succeed because the data is being interpreted as a boolean. However, if that same value were to be used as input to another numeric opcode, such as OP_SUB, it must fail.
-// This type handles the aforementioned requirements by storing all numeric operation results as an int64 to handle overflow and provides the Bytes method to get the serialized representation (including values that overflow).
+// This type handles the aforementioned requirements by storing all numeric operation results as an int64 to handle overflow and provides the Hash method to get the serialized representation (including values that overflow).
 // Then, whenever data is interpreted as an integer, it is converted to this type by using the makeScriptNum function which will return an error if the number is out of range or not minimally encoded depending on parameters. Since all numeric opcodes involve pulling data from the stack and interpreting it as an integer, it provides the required behavior.
 type scriptNum int64
 
@@ -35,7 +35,7 @@ func checkMinimalDataEncoding(	v []byte) error {
 	return nil
 }
 
-// Bytes returns the number serialized as a little endian with a sign bit.
+// Hash returns the number serialized as a little endian with a sign bit.
 // Example encodings:
 //       127 -> [0x7f]
 //      -127 -> [0xff]
@@ -94,7 +94,7 @@ func (n scriptNum) Int32() int32 {
 // makeScriptNum interprets the passed serialized bytes as an encoded integer and returns the result as a script number.
 // Since the consensus rules dictate that serialized bytes interpreted as ints are only allowed to be in the range determined by a maximum number of bytes, on a per opcode basis, an error will be returned when the provided bytes would result in a number outside of that range.  In particular, the range for the vast majority of opcodes dealing with numeric values are limited to 4 bytes and therefore will pass that value to this function resulting in an allowed range of [-2^31 + 1, 2^31 - 1].
 // The requireMinimal flag causes an error to be returned if additional checks on the encoding determine it is not represented with the smallest possible number of bytes or is the negative 0 encoding, [0x80].  For example, consider the number 127.  It could be encoded as [0x7f], [0x7f 0x00], [0x7f 0x00 0x00 ...], etc.  All forms except [0x7f] will return an error with requireMinimal enabled.
-// The scriptNumLen is the maximum number of bytes the encoded value can be before an ErrStackNumberTooBig is returned.  This effectively limits the range of allowed values. WARNING:  Great care should be taken if passing a value larger than defaultScriptNumLen, which could lead to addition and multiplication overflows. See the Bytes function documentation for example encodings.
+// The scriptNumLen is the maximum number of bytes the encoded value can be before an ErrStackNumberTooBig is returned.  This effectively limits the range of allowed values. WARNING:  Great care should be taken if passing a value larger than defaultScriptNumLen, which could lead to addition and multiplication overflows. See the Hash function documentation for example encodings.
 func makeScriptNum(	v []byte, requireMinimal bool, scriptNumLen int) (scriptNum, error) {
 	// Interpreting data requires that it is not larger than the the passed scriptNumLen value.
 	if len(v) > scriptNumLen {

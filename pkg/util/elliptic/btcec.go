@@ -605,7 +605,7 @@ func (curve *KoblitzCurve) splitK(k []byte) ([]byte, []byte, int, int) {
 	tmp1.Mul(c1, curve.b1)
 	tmp2.Mul(c2, curve.b2)
 	k2.Sub(tmp2, tmp1)
-	// Note Bytes() throws out the sign of k1 and k2. This matters
+	// Note Hash() throws out the sign of k1 and k2. This matters
 	// since k1 and/or k2 can be negative. Hence, we pass that
 	// back separately.
 	return k1.Bytes(), k2.Bytes(), k1.Sign(), k2.Sign()

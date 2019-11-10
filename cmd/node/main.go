@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"github.com/p9c/pod/pkg/controller"
 	"net"
 	"net/http"
 	// This enables pprof
@@ -17,7 +18,6 @@ import (
 	"github.com/p9c/pod/cmd/node/version"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/controller"
 	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"

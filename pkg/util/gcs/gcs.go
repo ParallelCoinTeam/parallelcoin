@@ -113,7 +113,7 @@ func BuildGCSFilter(	P uint8, M uint64, key [KeySize]byte, data [][]byte) (*Filt
 	return &f, nil
 }
 
-// FromBytes deserializes a GCS filter from a known N, P, and serialized filter as returned by Bytes().
+// FromBytes deserializes a GCS filter from a known N, P, and serialized filter as returned by Hash().
 func FromBytes(	N uint32, P uint8, M uint64, d []byte) (*Filter, error) {
 	// Basic sanity check.
 	if P > 32 {
@@ -146,7 +146,7 @@ return nil, err
 	return FromBytes(uint32(N), P, M, buffer.Bytes())
 }
 
-// Bytes returns the serialized format of the GCS filter, which does not include N or P (returned by separate methods) or the key used by SipHash.
+// Hash returns the serialized format of the GCS filter, which does not include N or P (returned by separate methods) or the key used by SipHash.
 func (f *Filter) Bytes() ([]byte, error) {
 	filterData := make([]byte, len(f.filterData))
 	copy(filterData, f.filterData)
