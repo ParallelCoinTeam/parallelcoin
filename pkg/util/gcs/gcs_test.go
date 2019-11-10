@@ -77,7 +77,7 @@ func TestGCSFilterBuild(	t *testing.T) {
 func TestGCSFilterCopy(	t *testing.T) {
 	serialized2, err := filter.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	filter2, err = gcs.FromBytes(filter.N(), P, M, serialized2)
 	if err != nil {
@@ -115,28 +115,28 @@ func TestGCSFilterMetadata(	t *testing.T) {
 	}
 	serialized, err := filter.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	serialized2, err := filter2.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	if !bytes.Equal(serialized, serialized2) {
-		t.Fatal("Bytes don't match between copied filters")
+		t.Fatal("Hash don't match between copied filters")
 	}
 	serialized3, err := filter3.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	if !bytes.Equal(serialized, serialized3) {
-		t.Fatal("Bytes don't match between copied filters")
+		t.Fatal("Hash don't match between copied filters")
 	}
 	serialized4, err := filter3.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	if !bytes.Equal(serialized, serialized4) {
-		t.Fatal("Bytes don't match between copied filters")
+		t.Fatal("Hash don't match between copied filters")
 	}
 }
 

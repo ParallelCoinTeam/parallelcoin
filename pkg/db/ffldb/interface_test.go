@@ -1050,7 +1050,7 @@ func testFetchBlockIO(	tc *testContext, tx database.Tx) bool {
 		allBlockHashes[i] = *blockHash
 		blockBytes, err := block.Bytes()
 		if err != nil {
-			tc.t.Errorf("block.Bytes(%d): unexpected error: %v", i,
+			tc.t.Errorf("block.Hash(%d): unexpected error: %v", i,
 				err)
 			return false
 		}

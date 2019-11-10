@@ -340,7 +340,7 @@ func (f *fieldVal) Normalize() *fieldVal {
 }
 
 // PutBytes unpacks the field value to a 32-byte big-endian value using the
-// passed byte array.  There is a similar function, Bytes, which unpacks the
+// passed byte array.  There is a similar function, Hash, which unpacks the
 // field value into a new array and returns that.  This version is provided
 // since it can be useful to cut down on the number of allocations by allowing
 // the caller to reuse a buffer.
@@ -385,7 +385,7 @@ func (f *fieldVal) PutBytes(b *[32]byte) {
 	b[0] = byte((f.n[9] >> 14) & eightBitsMask)
 }
 
-// Bytes unpacks the field value to a 32-byte big-endian value.  See PutBytes
+// Hash unpacks the field value to a 32-byte big-endian value.  See PutBytes
 // for a variant that allows the a buffer to be passed which can be useful to
 // to cut down on the number of allocations by allowing the caller to reuse a
 // buffer.

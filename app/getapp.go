@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	_ "github.com/gohouse/i18n/parser_json"
-	"github.com/p9c/pod/pkg/controller/broadcast"
 	"time"
 
 	"github.com/urfave/cli"
@@ -18,8 +17,8 @@ import (
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
-func // getApp defines the pod app
-getApp(cx *conte.Xt) (a *cli.App) {
+func // GetApp defines the pod app
+GetApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
 		Name:        "pod",
 		Version:     "v0.0.1",
@@ -110,13 +109,13 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				"standalone miner for clusters",
 				kopachHandle(cx),
 				apputil.SubCommands(
-				// apputil.NewCommand("bench",
-				// 	"generate a set of benchmarks of each algorithm",
-				// 	func(c *cli.Context) error {
-				// 		return bench.Benchmark(cx)(c)
-				// 	},
-				// 	apputil.SubCommands(),
-				// ),
+					// apputil.NewCommand("bench",
+					// 	"generate a set of benchmarks of each algorithm",
+					// 	func(c *cli.Context) error {
+					// 		return bench.Benchmark(cx)(c)
+					// 	},
+					// 	apputil.SubCommands(),
+					// ),
 				),
 				"k"),
 		},
@@ -416,18 +415,11 @@ getApp(cx *conte.Xt) (a *cli.App) {
 				"mine DUO even if not connected to the network",
 				cx.Config.Solo),
 			apputil.String(
-				"broadcastaddress, ba",
-				"sets broadcast listener address for mining controller",
-				broadcast.DefaultAddress,
-				cx.Config.BroadcastAddress),
-			apputil.Bool(
-				"broadcast",
-				"enable broadcasting blocks for workers to mine on",
-				cx.Config.Broadcast),
-			apputil.StringSlice(
-				"workers",
-				"addresses to send out blocks to when broadcast is not enabled",
-				cx.Config.Workers),
+				"controller",
+				"port controller listens on for solutions from workers"+
+					" and other node peers",
+				":11049",
+				cx.Config.Controller),
 			apputil.Bool(
 				"nocontroller",
 				"disable miner controller",

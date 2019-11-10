@@ -41,7 +41,7 @@ func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
 			seedpeers, err := lookupFn(host)
 			if err != nil {
 		log.ERROR(err)
-log.INFO("DNS discovery failed on seed %s: %v", host, err)
+log.INFO("DNS routeable failed on seed %s: %v", host, err)
 				return
 			}
 			numPeers := len(seedpeers)

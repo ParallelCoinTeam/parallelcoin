@@ -40,7 +40,7 @@ func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, e
 	podPath, err := podExecutablePath()
 	if err != nil {
 		log.ERROR(err)
-podPath = "pod"
+		podPath = "pod"
 	}
 	a := &nodeConfig{
 		listen:    "127.0.0.1:41047",
@@ -67,21 +67,21 @@ func (n *nodeConfig) setDefaults() error {
 	datadir, err := ioutil.TempDir("", n.prefix+"-data")
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return err
 	}
 	n.dataDir = datadir
 	logdir, err := ioutil.TempDir("", n.prefix+"-logs")
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return err
 	}
 	n.logDir = logdir
 	cert, err := ioutil.ReadFile(n.certFile)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return err
 	}
 	n.certificates = cert
@@ -168,7 +168,7 @@ func (n *nodeConfig) cleanup() error {
 	var err error
 	for _, dir := range dirs {
 		if err = os.RemoveAll(dir); err != nil {
-			log.Printf("Cannot remove dir %s: %v", dir, err)
+			log.ERRORF("Cannot remove dir %s: %v", dir, err)
 		}
 	}
 	return err
@@ -207,7 +207,7 @@ func (n *node) start() error {
 		fmt.Sprintf("%s.pid", n.config)))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return err
 	}
 	n.pidFile = pid.Name()
@@ -231,8 +231,8 @@ func (n *node) stop() error {
 	defer func() {
 		err := n.cmd.Wait()
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
+			fmt.Println(err)
 		}
 	}()
 	if runtime.GOOS == "windows" {
@@ -247,8 +247,7 @@ fmt.Println(err)
 func (n *node) cleanup() error {
 	if n.pidFile != "" {
 		if err := os.Remove(n.pidFile); err != nil {
-			log.Printf("unable to remove file %s: %v", n.pidFile,
-				err)
+			log.ERRORF("unable to remove file %s: %v", n.pidFile, err)
 		}
 	}
 	return n.config.cleanup()
@@ -273,7 +272,7 @@ func genCertPair(certFile, keyFile string) error {
 	cert, key, err := util.NewTLSCertPair(org, validUntil, nil)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
+		log.ERROR(err)
 		return err
 	}
 	// Write cert and key files.

@@ -582,7 +582,7 @@ func (s *Store) ReadFrom(r io.Reader) (n int64, err error) {
 		&s.vers,
 		s.net,
 		&s.flags,
-		make([]byte, 6), // Bytes for Armory unique ID
+		make([]byte, 6), // Hash for Armory unique ID
 		&s.createDate,
 		&s.name,
 		&s.desc,
@@ -699,7 +699,7 @@ func (s *Store) writeTo(w io.Writer) (n int64, err error) {
 		&VersCurrent,
 		s.net,
 		&s.flags,
-		make([]byte, 6), // Bytes for Armory unique ID
+		make([]byte, 6), // Hash for Armory unique ID
 		&s.createDate,
 		&s.name,
 		&s.desc,

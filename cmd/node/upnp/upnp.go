@@ -139,7 +139,7 @@ log.ERROR(err)
 		nat = &upnpNAT{serviceURL: serviceURL, ourIP: ourIP}
 		return
 	}
-	err = errors.New("UPnP port discovery failed")
+	err = errors.New("UPnP port routeable failed")
 	return
 }
 

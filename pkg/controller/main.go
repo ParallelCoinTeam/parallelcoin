@@ -1,20 +1,27 @@
 package controller
 
 import (
-	"bytes"
 	"context"
-	"encoding/binary"
-	"github.com/p9c/pod/cmd/node/rpc"
 	chain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller/broadcast"
 	"github.com/p9c/pod/pkg/controller/gcm"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util"
 	"go.uber.org/atomic"
-	"math/rand"
-	"time"
+)
+
+type Blocks struct {
+	PrevBlock    *chainhash.Hash
+	Bits         uint32
+	Transactions []*wire.MsgTx
+	Listeners    []string
+}
+
+var (
+	WorkMagic = [4]byte{'w', 'o', 'r', 'k'}
 )
 
 // Blocks is a block broadcast message for miners to mine from
@@ -29,27 +36,76 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	var ctx context.Context
 	var busy, active atomic.Bool
 	ctx, cancel = context.WithCancel(context.Background())
+	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
+		log.WARN("not running controller without RPC enabled")
+		cancel()
+		return
+	}
+	if len(*cx.Config.Listeners) < 1 || *cx.Config.DisableListen {
+		log.WARN("not running controller without p2p listener enabled")
+		cancel()
+		return
+	}
+	messageBase := GetMessageBase(cx)
+	//log.SPEW(messageBase.CreateContainer(WorkMagic))
 	go func() {
-		// send out initial block broadcast
-		blks := getBlocks(cx, true)
-		log.SPEW(blks)
-		//log.SPEW(blks.Serialize())
-		log.SPEW(DeserializeBlocks(blks.Serialize()))
-		// There is no unsubscribe but we can use an atomic to disable the function instead
-		// This also ensures that new work doesn't start once the context is cancelled below
+		// There is no unsubscribe but we can use an atomic to disable the
+		// function instead - this also ensures that new work doesn't start
+		// once the context is cancelled below
 		active.Store(true)
 		log.DEBUG("miner controller starting")
-		cx.RPCServer.Cfg.Chain.Subscribe(func(n *chain.Notification) {
+		cx.RealNode.Chain.Subscribe(func(n *chain.Notification) {
 			if !busy.Load() && active.Load() {
 				// first to arrive locks out any others while processing
 				busy.Store(true)
-				log.DEBUG("received new chain notification")
 				switch n.Type {
 				case chain.NTBlockAccepted:
-					blocks := getBlocks(cx, true)
-					log.SPEW(blocks)
-					//log.SPEW(blocks.Serialize())
-					log.SPEW(DeserializeBlocks(blocks.Serialize()))
+					log.DEBUG("received new chain notification")
+					// construct work message
+					//log.SPEW(n)
+					mB, ok := n.Data.(*util.Block)
+					if !ok {
+						log.WARN("chain accepted notification is not a block")
+						break
+					}
+					msg := Serializers{}
+					msg = append(msg, messageBase...)
+					h := NewHash()
+					h.PutHash(mB.MsgBlock().Header.PrevBlock)
+					msg = append(msg, h)
+					bits := NewBits()
+					bits.PutBits(mB.MsgBlock().Header.Bits)
+					msg = append(msg, bits)
+					txs := mB.MsgBlock().Transactions
+					for i := range txs {
+						t := &Transaction{}
+						t.PutTx(txs[i])
+						msg = append(msg, t)
+					}
+					srs := msg.CreateContainer(WorkMagic)
+					// send out srs.Data
+
+					ip := NewIPs()
+					ip.Decode(srs.Get(0))
+					log.DEBUG(ip.GetIPs())
+					listener := NewPort()
+					listener.Decode(srs.Get(1))
+					log.DEBUG(listener.GetUint16())
+					rpcListener := NewPort()
+					rpcListener.Decode(srs.Get(2))
+					log.DEBUG(rpcListener.GetUint16())
+					ctrlrListener := NewPort()
+					ctrlrListener.Decode(srs.Get(3))
+					log.DEBUG(ctrlrListener.GetUint16())
+					prevH := NewHash()
+					prevH.Decode(srs.Get(4))
+					log.DEBUG(prevH.GetHash())
+					bt := NewBits()
+					bt.Decode(srs.Get(5))
+					log.DEBUG(bt.GetBits())
+					txn := NewTransaction()
+					txn.Decode(srs.Get(6))
+					log.SPEW(txn.GetTx())
 				}
 				busy.Store(false)
 			} else {
@@ -65,81 +121,4 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		}
 	}()
 	return
-}
-
-type Blocks struct {
-	New       uint16
-	Count     uint16
-	Lengths   []uint32
-	Templates [][]byte
-}
-
-// Serialize efficiently converts the structure into bytes for sending on a HMAC and FEC protected transport
-// thus no checks here, it might go boom!
-func (b *Blocks) Serialize() (out []byte) {
-	buffer := make([]byte, 8)
-	binary.BigEndian.PutUint16(buffer, b.New)
-	out = append(out, buffer[:2]...)
-	binary.BigEndian.PutUint16(buffer, b.Count)
-	out = append(out, buffer[:2]...)
-	for i := range b.Lengths {
-		binary.BigEndian.PutUint32(buffer, b.Lengths[i])
-		out = append(out, buffer[:4]...)
-	}
-	for i := range b.Templates {
-		out = append(out, b.Templates[i]...)
-	}
-	return out
-}
-
-// DeserializeBlocks takes a byte slice assumed to be a blocks message and decodes it into a Blocks struct
-func DeserializeBlocks(blockBytes []byte) (b *Blocks) {
-	b = &Blocks{Templates: [][]byte{}}
-	b.New = binary.BigEndian.Uint16(blockBytes[:2])
-	b.Count = binary.BigEndian.Uint16(blockBytes[2:4])
-	counts := blockBytes[4 : b.Count*4+4]
-	var totalLength uint32
-	for i := uint16(0); i < b.Count; i++ {
-		length := binary.BigEndian.Uint32(counts[i*4 : i*4+4])
-		b.Lengths = append(b.Lengths, length)
-		totalLength += length
-	}
-	blocks := blockBytes[b.Count*4+4 : (uint32(b.Count)*4+4)+totalLength]
-	for i := range b.Lengths {
-		b.Templates = append(b.Templates, blocks[:b.Lengths[i]])
-		blocks = blocks[b.Lengths[i]:]
-	}
-	return
-}
-
-func getBlocks(cx *conte.Xt, isNew bool) *Blocks {
-	var newi uint16
-	if isNew {
-		newi = ^newi
-	}
-	blocks := Blocks{New: newi, Templates: [][]byte{}}
-	for algo := range fork.List[fork.GetCurrent(cx.RPCServer.Cfg.Chain.BestSnapshot().Height+1)].Algos {
-		// Choose a payment address at random.
-		rand.Seed(time.Now().UnixNano())
-		log.TRACE("len active mining addrs", len(cx.StateCfg.ActiveMiningAddrs))
-		payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(cx.StateCfg.ActiveMiningAddrs))]
-		template, err := cx.RPCServer.Cfg.Generator.NewBlockTemplate(0, payToAddr, algo)
-		if err != nil {
-			log.ERROR("failed to create new block template:", err)
-			continue
-		}
-		//log.SPEW(template.Block)
-		var blkBuf bytes.Buffer
-		err = template.Block.BtcEncode(&blkBuf, rpc.MaxProtocolVersion, wire.BaseEncoding)
-		if err != nil {
-			log.ERROR(err)
-			return nil
-		} else {
-			blkBytes := blkBuf.Bytes()
-			blocks.Templates = append(blocks.Templates, blkBytes)
-			blocks.Lengths = append(blocks.Lengths, uint32(len(blkBytes)))
-			blocks.Count++
-		}
-	}
-	return &blocks
 }

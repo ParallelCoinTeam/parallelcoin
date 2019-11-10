@@ -105,8 +105,6 @@ type Config struct {
 	BlockMinWeight           *int             `group:"mining" name:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"input" inputType:"number" model:"BlockMinWeight" featured:"false"`
 	BlockPrioritySize        *int             `group:"mining" name:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"input" inputType:"number" model:"BlockPrioritySize" featured:"false"`
 	BlocksOnly               *bool            `group:"node" name:"Blocks Only" description:"do not accept transactions from remote peers" type:"switch" model:"BlocksOnly" featured:"false"`
-	Broadcast                *bool            `group:"mining" name:"Broadcast" description:"enable broadcasting of blocks for workers to work on" type:"switch" model:"Broadcast" featured:"false"`
-	BroadcastAddress         *string          `group:"mining" name:"Miner Broadcast Address" description:"UDP multicast address for miner broadcast work dispatcher" type:"input" inputType:"text" model:"BroadcastAddress" featured:"false"`
 	CAFile                   *string          `group:"tls" name:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
 	ConfigFile               *string
 	ConnectPeers             *cli.StringSlice `group:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"input" inputType:"text" model:"ConnectPeers" featured:"false"`
@@ -138,7 +136,7 @@ type Config struct {
 	MinRelayTxFee            *float64         `group:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"text" model:"MinRelayTxFee" featured:"false"`
 	Network                  *string          `group:"node" name:"Network" description:"Which network are you connected to (eg.: mainnet, testnet)" type:"input" inputType:"text" model:"Network" featured:"false"`
 	NoCFilters               *bool            `group:"node" name:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" model:"NoCFilters" featured:"false"`
-	NoController             *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer discovery/miner controller system"`
+	NoController             *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
 	NodeOff                  *bool            `group:"debug" name:"Node Off" description:"turn off the node backend" type:"switch" model:"NodeOff" featured:"false"`
 	NoInitialLoad            *bool
 	NoPeerBloomFilters       *bool            `group:"node" name:"No Peer Bloom Filters" description:"disable bloom filtering support" type:"switch" model:"NoPeerBloomFilters" featured:"false"`
@@ -184,7 +182,6 @@ type Config struct {
 	WalletRPCMaxWebsockets   *int             `group:"wallet" name:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"input" inputType:"number" model:"LegacyRPCMaxWebsockets" featured:"false"`
 	WalletServer             *string          `group:"wallet" name:"node address to connect wallet server to" type:"input" inputType:"text" model:"WalletServer" featured:"false"`
 	Whitelists               *cli.StringSlice `group:"debug" name:"Whitelists" description:"peers that you don't want to ever ban" type:"input" inputType:"text" model:"Whitelists" featured:"false"`
-	Workers                  *cli.StringSlice `group:"mining" name:"MinerWorkers" description:"a list of addresses where workers are listening for blocks when not using lan broadcast" type:"input" inputType:"text" model:"Workers" featured:"false"`
 }
 
 func EmptyConfig() *Config {
@@ -201,8 +198,6 @@ func EmptyConfig() *Config {
 		BlockMinWeight:           newint(),
 		BlockPrioritySize:        newint(),
 		BlocksOnly:               newbool(),
-		Broadcast:                newbool(),
-		BroadcastAddress:         newstring(),
 		CAFile:                   newstring(),
 		ConfigFile:               newstring(),
 		ConnectPeers:             newStringSlice(),
@@ -280,7 +275,6 @@ func EmptyConfig() *Config {
 		WalletRPCMaxWebsockets:   newint(),
 		WalletServer:             newstring(),
 		Whitelists:               newStringSlice(),
-		Workers:                  newStringSlice(),
 	}
 }
 

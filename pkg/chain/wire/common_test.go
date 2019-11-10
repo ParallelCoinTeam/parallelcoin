@@ -134,9 +134,9 @@ func (r *fakeRandReader) Read(p []byte) (int, error) {
 // 			t.Errorf("writeElement #%d error %v", i, err)
 // 			continue
 // 		}
-// 		if !bytes.Equal(buf.Bytes(), test.buf) {
+// 		if !bytes.Equal(buf.Hash(), test.buf) {
 // 			t.Errorf("writeElement #%d\n got: %s want: %s", i,
-// 				spew.Sdump(buf.Bytes()), spew.Sdump(test.buf))
+// 				spew.Sdump(buf.Hash()), spew.Sdump(test.buf))
 // 			continue
 // 		}
 // 		// Read from wire format.

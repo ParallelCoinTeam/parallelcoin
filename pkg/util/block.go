@@ -41,7 +41,7 @@ func (b *Block) MsgBlock() *wire.MsgBlock {
 	return b.msgBlock
 }
 
-// Bytes returns the serialized bytes for the Block.  This is equivalent to calling Serialize on the underlying wire.MsgBlock, however it caches the result so subsequent calls are more efficient.
+// Hash returns the serialized bytes for the Block.  This is equivalent to calling Serialize on the underlying wire.MsgBlock, however it caches the result so subsequent calls are more efficient.
 func (b *Block) Bytes() ([]byte, error) {
 	// Return the cached serialized bytes if it has already been generated.
 	if len(b.serializedBlock) != 0 {

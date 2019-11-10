@@ -65,7 +65,7 @@ type localAddress struct {
 }
 
 // AddressPriority type is used to describe the hierarchy of local address
-// discovery methods.
+// routeable methods.
 type AddressPriority int
 
 const (
