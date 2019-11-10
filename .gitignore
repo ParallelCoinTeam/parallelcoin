@@ -16,6 +16,7 @@ pod
 test**
 vendor/**
 
+deploy/*
 .DS_Store
 node_modules
 /dist

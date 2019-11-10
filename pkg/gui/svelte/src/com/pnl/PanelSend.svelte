@@ -1,6 +1,5 @@
 <script>
-	import { TextField } from "smelte";
-	import { Button } from "smelte";
+
 </script>
 
 <div id="panelsend" class="rwrap flx Send">

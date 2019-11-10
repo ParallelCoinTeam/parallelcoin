@@ -5,4 +5,16 @@
 width:60px!important;
 height:60px!important;
 }
+.Logo{
+justify-content:center;
+align-items:center;
+background:var(--dark);
+}
+.Logo svg{
+width:auto;
+height:48px;
+}
+
+
 </style>
+

@@ -1,5 +1,3 @@
-import { locale, dictionary, getClientLocale } from 'svelte-i18n'
-
 // defining a locale dictionary
 dictionary.set({
   
