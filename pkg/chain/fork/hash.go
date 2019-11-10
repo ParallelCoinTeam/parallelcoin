@@ -23,7 +23,7 @@ import (
 // repeated before the final hash,
 // on release for mainnet this is probably set to 9 or so to raise the
 // difficulty to a reasonable level for the hard fork
-const HashReps = 5
+var HashReps = 5
 
 // Argon2i takes bytes, generates a Lyra2REv2 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {
@@ -109,11 +109,6 @@ func DivHash(hf func([]byte) []byte, blockbytes []byte, howmany int) []byte {
 
 // Hash computes the hash of bytes using the named hash
 func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
-	// if IsTestnet && height < 10 {
-	// 	// log <- cl.Warn{"hash", name, height}
-	// 	time.Sleep(time.Second / 20)
-	// }
-	// INFO("hash", name, height}
 	switch name {
 	case "blake2b":
 		_ = out.SetBytes(DivHash(Blake2b, bytes, HashReps))
