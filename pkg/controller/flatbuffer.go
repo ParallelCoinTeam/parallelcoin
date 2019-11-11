@@ -115,6 +115,11 @@ func NewPort() *Port {
 	return &Port{}
 }
 
+func (p *Port) DecodeOne(b []byte) *Port {
+ 	p.Decode(b)
+	return p
+}
+
 func (p *Port) Decode(b []byte) (out []byte) {
 	if len(b) >= 2 {
 		p.Bytes = [2]byte{b[0], b[1]}
@@ -144,6 +149,11 @@ type IP struct {
 
 func NewIP() *IP {
 	return &IP{}
+}
+
+func (i *IP) DecodeOne(b []byte) *IP {
+	i.Decode(b)
+	return i
 }
 
 func (i *IP) Decode(b []byte) (out []byte) {
@@ -183,6 +193,11 @@ type IPs struct {
 
 func NewIPs() *IPs {
 	return &IPs{}
+}
+
+func (ips *IPs) DecodeOne(b []byte) *IPs {
+	ips.Decode(b)
+	return ips
 }
 
 func (ips *IPs) Decode(b []byte) (out []byte) {
@@ -235,6 +250,11 @@ func NewBits() *Bits {
 	return &Bits{}
 }
 
+func (b *Bits) DecodeOne(by []byte) *Bits {
+	b.Decode(by)
+	return b
+}
+
 func (b *Bits) Decode(by []byte) (out []byte) {
 	if len(by) >= 4 {
 		b.Bytes = [4]byte{by[0], by[1], by[2], by[3]}
@@ -265,6 +285,12 @@ type Bitses struct {
 
 func NewBitses() *Bitses {
 	return &Bitses{Byteses: make(map[int32][]byte)}
+}
+
+
+func (b *Bitses) DecodeOne(by []byte) *Bitses {
+	b.Decode(by)
+	return b
 }
 
 func (b *Bitses) Decode(by []byte) (out []byte) {
@@ -329,6 +355,11 @@ func NewHash() *Hash {
 	return &Hash{Hash: new(chainhash.Hash)}
 }
 
+func (h *Hash) DecodeOne(b []byte) *Hash {
+	h.Decode(b)
+	return h
+}
+
 func (h *Hash) Decode(b []byte) (out []byte) {
 	if len(b) >= 32 {
 		err := h.Hash.SetBytes(b[:32])
@@ -363,6 +394,12 @@ type Transaction struct {
 
 func NewTransaction() *Transaction {
 	return &Transaction{}
+}
+
+
+func (t *Transaction) DecodeOne(b []byte) *Transaction {
+	t.Decode(b)
+	return t
 }
 
 func (t *Transaction) Decode(b []byte) (out []byte) {
