@@ -89,9 +89,10 @@ type BlockNode struct {
 	// -safe NodeStatus method on blockIndex once the node has been added to
 	// the global index.
 	status blockStatus
-	// diffs is the computed difficulty targets for a block to be connected
+	// Diffs is the computed difficulty targets for a block to be connected
 	// to this one
-	diffs *map[int32]uint32
+	Diffs   *map[int32]uint32
+	DiffMx sync.Mutex
 }
 
 // initBlockNode initializes a block node from the given header and parent

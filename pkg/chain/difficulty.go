@@ -82,12 +82,14 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode,
 			newBlockTime, algoname, l)
 	case 1: // Plan 9 from Crypto Space
-		if lastNode.diffs == nil {
+		lastNode.DiffMx.Lock()
+		if lastNode.Diffs == nil {
 			lNd := make(map[int32]uint32)
-			lastNode.diffs = &lNd
+			lastNode.Diffs = &lNd
 		}
-		bits, ok := (*lastNode.diffs)[fork.List[1].Algos[algoname].
+		bits, ok := (*lastNode.Diffs)[fork.List[1].Algos[algoname].
 			Version]
+		lastNode.DiffMx.Unlock()
 		if ok {
 			//log.DEBUG("used precomputed difficulty", algoname, newTargetBits)
 		} else {
@@ -103,11 +105,13 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 			//bits = bitsMap[fork.List[1].Algos[algoname].Version]
 			// save it for next time
 			//log.TRACE("saving difficulty for next query")
-			if lastNode.diffs == nil {
-				lastNode.diffs = new(map[int32]uint32)
+			lastNode.DiffMx.Lock()
+			if lastNode.Diffs == nil {
+				lastNode.Diffs = new(map[int32]uint32)
 			}
-			(*lastNode.diffs)[fork.List[1].Algos[algoname].
+			(*lastNode.Diffs)[fork.List[1].Algos[algoname].
 				Version] = bits
+			lastNode.DiffMx.Unlock()
 		}
 		return bits, err
 	}

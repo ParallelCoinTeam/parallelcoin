@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	chain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
@@ -76,12 +77,23 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					h := NewHash()
 					h.PutHash(mB.MsgBlock().Header.BlockHash())
 					msg = append(msg, h)
-					bitsMap, err := cx.RealNode.Chain.
-						CalcNextRequiredDifficultyPlan9Controller(cx.
-							RealNode.Chain.BestChain.Tip())
-					if err != nil {
-						log.ERROR(err)
-						return
+					tip := cx.RealNode.Chain.BestChain.Tip()
+					bM := map[int32]uint32{}
+					bitsMap := &bM
+					var err error
+					tip.DiffMx.Lock()
+					if tip.Diffs == nil ||
+						len(*tip.Diffs) != len(fork.List[1].AlgoVers) {
+						tip.DiffMx.Unlock()
+						bitsMap, err = cx.RealNode.Chain.
+							CalcNextRequiredDifficultyPlan9Controller(tip)
+						if err != nil {
+							log.ERROR(err)
+							return
+						}
+					} else {
+						bitsMap = tip.Diffs
+						tip.DiffMx.Unlock()
 					}
 					bitses := NewBitses()
 					bitses.PutBitses(*bitsMap)

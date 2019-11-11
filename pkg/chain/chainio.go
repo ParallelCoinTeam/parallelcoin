@@ -915,7 +915,7 @@ func // createChainState initializes both the database and the chain state to
 	node := newBlockNode(header, nil)
 	node.status = statusDataStored | statusValid
 	var err error
-	node.diffs, err = b.CalcNextRequiredDifficultyPlan9Controller(node)
+	node.Diffs, err = b.CalcNextRequiredDifficultyPlan9Controller(node)
 	if err != nil {
 		log.ERROR(err)
 	}
