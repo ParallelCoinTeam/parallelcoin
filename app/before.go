@@ -296,6 +296,14 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.WARN("set solo", c.Bool("solo"))
 			*cx.Config.Solo = c.Bool("solo")
 		}
+		if c.IsSet("controller") {
+			log.TRACE("set controller listener address", c.String("controller"))
+			*cx.Config.Controller = c.String("controller")
+		}
+		if c.IsSet("autoports") {
+			log.TRACE("set autoports", c.String("autoports"))
+			*cx.Config.AutoPorts = c.Bool("autoports")
+		}
 		if c.IsSet("nocontroller") {
 			log.TRACE("set nocontroller", c.String("nocontroller"))
 			*cx.Config.NoController = c.Bool("nocontroller")
@@ -403,10 +411,6 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("nodeoff") {
 			log.TRACE("set nodeoff", c.Bool("nodeoff"))
 			*cx.Config.NodeOff = c.Bool("nodeoff")
-		}
-		if c.IsSet("testnodeoff") {
-			log.TRACE("set testnodeoff", c.Bool("testnodeoff"))
-			*cx.Config.TestNodeOff = c.Bool("testnodeoff")
 		}
 		if c.IsSet("walletoff") {
 			log.TRACE("set walletoff", c.Bool("walletoff"))

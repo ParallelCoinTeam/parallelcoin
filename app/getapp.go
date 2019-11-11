@@ -421,6 +421,10 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				":11049",
 				cx.Config.Controller),
 			apputil.Bool(
+				"autoports",
+				"uses random automatic ports for p2p, rpc and controller",
+				cx.Config.AutoPorts),
+			apputil.Bool(
 				"nocontroller",
 				"disable miner controller",
 				cx.Config.NoController),
@@ -562,10 +566,6 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				"nodeoff",
 				"Starts GUI with node turned off",
 				cx.Config.NodeOff),
-			apputil.Bool( // TODO remove this
-				"testnodeoff",
-				"Starts GUI with testnode turned off",
-				cx.Config.TestNodeOff),
 			apputil.Bool(
 				"walletoff",
 				"Starts GUI with wallet turned off",

@@ -78,6 +78,15 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					h.PutHash(mB.MsgBlock().Header.BlockHash())
 					msg = append(msg, h)
 					tip := cx.RealNode.Chain.BestChain.Tip()
+					//// this should be the same as the block in the notification
+					//tth := tip.Header()
+					//tH := &tth
+					//tbh := tH.BlockHash()
+					//if tbh.IsEqual(mB.Hash()) {
+					//	log.DEBUG("notification block is tip block")
+					//} else {
+					//	log.DEBUG("notification block is not tip block")
+					//}
 					bM := map[int32]uint32{}
 					bitsMap := &bM
 					var err error
@@ -106,28 +115,16 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					}
 					srs := msg.CreateContainer(WorkMagic)
 					// send out srs.Data
+					log.SPEW(srs.Data)
 
-					ip := NewIPs()
-					ip.Decode(srs.Get(0))
-					log.DEBUG(ip.GetIPs())
-					listener := NewPort()
-					listener.Decode(srs.Get(1))
-					log.DEBUG(listener.GetUint16())
-					rpcListener := NewPort()
-					rpcListener.Decode(srs.Get(2))
-					log.DEBUG(rpcListener.GetUint16())
-					ctrlrListener := NewPort()
-					ctrlrListener.Decode(srs.Get(3))
-					log.DEBUG(ctrlrListener.GetUint16())
-					prevH := NewHash()
-					prevH.Decode(srs.Get(4))
-					log.DEBUG(prevH.GetHash())
-					bt := NewBitses()
-					bt.Decode(srs.Get(5))
-					log.DEBUG(bt.GetBitses())
-					txn := NewTransaction()
-					txn.Decode(srs.Get(6))
-					log.SPEW(txn.GetTx())
+					// the following decodes each element
+					log.DEBUG(NewIPs().DecodeOne(srs.Get(0)).GetIPs())
+					log.DEBUG(NewPort().DecodeOne(srs.Get(1)).GetUint16())
+					log.DEBUG(NewPort().DecodeOne(srs.Get(2)).GetUint16())
+					log.DEBUG(NewPort().DecodeOne(srs.Get(3)).GetUint16())
+					log.DEBUG(NewHash().DecodeOne(srs.Get(4)).GetHash())
+					log.DEBUG(NewBitses().DecodeOne(srs.Get(5)).GetBitses())
+					log.SPEW(NewTransaction().DecodeOne(srs.Get(6)).GetTx())
 				}
 			}
 		})

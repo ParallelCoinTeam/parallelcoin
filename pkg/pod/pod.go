@@ -97,6 +97,7 @@ type Config struct {
 	AddPeers                 *cli.StringSlice `group:"node" name:"Add Peers" description:"Manually adds addresses to try to connect to" type:"input" inputType:"text" model:"AddPeers" featured:"false"`
 	AddrIndex                *bool            `group:"node" name:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"switch" model:"AddrIndex" featured:"false"`
 	Algo                     *string          `group:"mining" name:"Algo" description:"algorithm to mine, random is best" type:"input" inputType:"text" model:"Algo" featured:"false"`
+	AutoPorts                *bool            `group:"node" name:"Automatic	Ports" description:"with controller enabled p2p, rpc and controller ports are randomized" type:"switch" model:"AutoPorts" featured:"false"`
 	BanDuration              *time.Duration   `group:"debug" name:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"input" inputType:"text" model:"BanDuration" featured:"false"`
 	BanThreshold             *int             `group:"debug" name:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"input" inputType:"number" model:"BanThreshold" featured:"false"`
 	BlockMaxSize             *int             `group:"mining" name:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"input" inputType:"number" model:"BlockMaxSize" featured:"false"`
@@ -165,7 +166,6 @@ type Config struct {
 	ServerTLS                *bool            `group:"wallet" name:"Server TLS" description:"Enable TLS for the wallet connection to node RPC server" type:"switch" model:"ServerTLS" featured:"false"`
 	ServerUser               *string          `group:"rpc" name:"Server User" description:"username for server connections" type:"input" inputType:"text" model:"ServerUser" featured:"false"`
 	SigCacheMaxSize          *int             `group:"node" name:"Sig Cache Max Size" description:"the maximum number of entries in the signature verification cache" type:"input" inputType:"number" model:"SigCacheMaxSize" featured:"false"`
-	TestNodeOff              *bool            `group:"debug" name:"Test Node Off" description:"turn off the testnode (testnet only)" type:"switch" model:"TestNodeOff" featured:"false"`
 	TLS                      *bool            `group:"tls" name:"TLS" description:"enable TLS for RPC connections" type:"switch" model:"TLS" featured:"false"`
 	TLSSkipVerify            *bool            `group:"tls" name:"TLS Skip Verify" description:"skip TLS certificate verification (ignore CA errors)" type:"switch" model:"TLSSkipVerify" featured:"false"`
 	TorIsolation             *bool            `group:"proxy" name:"Tor Isolation" description:"makes a separate proxy connection for each connection" type:"switch" model:"TorIsolation" featured:"false"`
@@ -190,6 +190,7 @@ func EmptyConfig() *Config {
 		AddPeers:                 newStringSlice(),
 		AddrIndex:                newbool(),
 		Algo:                     newstring(),
+		AutoPorts:                newbool(),
 		BanDuration:              newDuration(),
 		BanThreshold:             newint(),
 		BlockMaxSize:             newint(),
@@ -258,7 +259,6 @@ func EmptyConfig() *Config {
 		ServerUser:               newstring(),
 		SigCacheMaxSize:          newint(),
 		Solo:                     newbool(),
-		TestNodeOff:              newbool(),
 		TLS:                      newbool(),
 		TLSSkipVerify:            newbool(),
 		TorIsolation:             newbool(),
