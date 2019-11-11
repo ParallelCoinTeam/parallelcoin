@@ -553,7 +553,6 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		log.ERROR(err)
 		return err
 	}
-	log.WARN("calculating block difficulties for new node")
 	tN := time.Now()
 	tB, err := b.CalcNextRequiredDifficultyPlan9Controller(node)
 	log.WARN(time.Now().Sub(tN), "to compute all block difficulties")
