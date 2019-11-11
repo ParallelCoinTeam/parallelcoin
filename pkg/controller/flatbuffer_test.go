@@ -14,10 +14,10 @@ import (
 func TestPort(t *testing.T) {
 	var portNumber uint16 = 11047
 	port := controller.NewPort()
-	port.PutUint16(portNumber)
+	port.Put(portNumber)
 	port2 := controller.NewPort()
 	port2.Decode(port.Encode())
-	if port2.GetUint16() != port.GetUint16() {
+	if port2.Get() != port.Get() {
 		t.Fail()
 	}
 }
@@ -25,11 +25,11 @@ func TestPort(t *testing.T) {
 func TestIP(t *testing.T) {
 	var ipa = net.ParseIP("127.0.0.1")
 	ip := controller.NewIP()
-	ip.PutIP(&ipa)
-	t.Log(ip.GetIP().MarshalText())
+	ip.Put(&ipa)
+	t.Log(ip.Get().MarshalText())
 	ip2 := controller.NewIP()
 	ip2.Decode(ip.Encode())
-	if ip.GetIP().Equal(*ip2.GetIP()) {
+	if ip.Get().Equal(*ip2.Get()) {
 		t.Fail()
 	}
 }
@@ -38,11 +38,11 @@ func TestIPs(t *testing.T) {
 	var ipa1 = net.ParseIP("127.0.0.1")
 	var ipa2 = net.ParseIP("fe80::6382:2df5:7014:e156")
 	ips := controller.NewIPs()
-	ips.PutIPs([]*net.IP{&ipa1, &ipa2})
+	ips.Put([]*net.IP{&ipa1, &ipa2})
 	ips2 := controller.NewIPs()
 	ips2.Decode(ips.Encode())
-	dec := ips.GetIPs()
-	dec2 := ips2.GetIPs()
+	dec := ips.Get()
+	dec2 := ips2.Get()
 	for i := range dec {
 		if !dec[i].Equal(*dec2[i]) {
 			t.Fail()
@@ -57,10 +57,10 @@ func TestBits(t *testing.T) {
 	}
 	bits := binary.BigEndian.Uint32(by)
 	bt := controller.NewBits()
-	bt.PutBits(bits)
+	bt.Put(bits)
 	bt2 := controller.NewBits()
 	bt2.Decode(bt.Encode())
-	if bt.GetBits() != bt2.GetBits() {
+	if bt.Get() != bt2.Get() {
 		t.Fail()
 	}
 }
@@ -74,10 +74,10 @@ func TestHash(t *testing.T) {
 		panic(err)
 	}
 	h := controller.NewHash()
-	h.PutHash(bhash)
+	h.Put(bhash)
 	h2 := controller.NewHash()
 	h2.Decode(h.Encode())
-	if !h.GetHash().IsEqual(h2.GetHash()) {
+	if !h.Get().IsEqual(h2.Get()) {
 		t.Fail()
 	}
 }

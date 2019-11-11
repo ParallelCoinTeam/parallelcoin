@@ -2,8 +2,8 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	chain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
@@ -12,6 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
 	"go.uber.org/atomic"
+	"net"
 	"sync"
 )
 
@@ -48,7 +49,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cancel()
 		return
 	}
-	messageBase := GetMessageBase(cx)
 	//log.SPEW(messageBase.CreateContainer(WorkMagic))
 	go func() {
 		// There is no unsubscribe but we can use an atomic to disable the
@@ -72,59 +72,33 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 						log.WARN("chain accepted notification is not a block")
 						break
 					}
-					msg := Serializers{}
-					msg = append(msg, messageBase...)
-					h := NewHash()
-					h.PutHash(mB.MsgBlock().Header.BlockHash())
-					msg = append(msg, h)
-					tip := cx.RealNode.Chain.BestChain.Tip()
-					//// this should be the same as the block in the notification
-					//tth := tip.Header()
-					//tH := &tth
-					//tbh := tH.BlockHash()
-					//if tbh.IsEqual(mB.Hash()) {
-					//	log.DEBUG("notification block is tip block")
-					//} else {
-					//	log.DEBUG("notification block is not tip block")
-					//}
-					bM := map[int32]uint32{}
-					bitsMap := &bM
-					var err error
-					tip.DiffMx.Lock()
-					if tip.Diffs == nil ||
-						len(*tip.Diffs) != len(fork.List[1].AlgoVers) {
-						tip.DiffMx.Unlock()
-						bitsMap, err = cx.RealNode.Chain.
-							CalcNextRequiredDifficultyPlan9Controller(tip)
+					mC := GetMinerContainer(cx, mB)
+					for _, i := range []string{
+						UDP4MulticastAddress,
+						UDP6MulticastAddress,
+					} {
+						err := Send(net.JoinHostPort(i,
+							fmt.Sprint(mC.GetControllerListenerPort())),
+							mC.Data)
 						if err != nil {
 							log.ERROR(err)
-							return
 						}
-					} else {
-						bitsMap = tip.Diffs
-						tip.DiffMx.Unlock()
 					}
-					bitses := NewBitses()
-					bitses.PutBitses(*bitsMap)
-					msg = append(msg, bitses)
-					txs := mB.MsgBlock().Transactions
-					for i := range txs {
-						t := &Transaction{}
-						t.PutTx(txs[i])
-						msg = append(msg, t)
-					}
-					srs := msg.CreateContainer(WorkMagic)
+					//mW := LoadMinerContainer(mC.Data)
 					// send out srs.Data
-					log.SPEW(srs.Data)
-
+					//log.SPEW(srs.Data)
 					// the following decodes each element
-					log.DEBUG(NewIPs().DecodeOne(srs.Get(0)).GetIPs())
-					log.DEBUG(NewPort().DecodeOne(srs.Get(1)).GetUint16())
-					log.DEBUG(NewPort().DecodeOne(srs.Get(2)).GetUint16())
-					log.DEBUG(NewPort().DecodeOne(srs.Get(3)).GetUint16())
-					log.DEBUG(NewHash().DecodeOne(srs.Get(4)).GetHash())
-					log.DEBUG(NewBitses().DecodeOne(srs.Get(5)).GetBitses())
-					log.SPEW(NewTransaction().DecodeOne(srs.Get(6)).GetTx())
+					//mC := LoadMinerContainer(srs)
+					//out := []interface{}{
+					//	mW.GetIPs(),
+					//	mW.GetP2PListenersPort(),
+					//	mW.GetRPCListenersPort(),
+					//	mW.GetControllerListenerPort(),
+					//	mW.GetPrevBlockHash(),
+					//	mW.GetBitses(),
+					//	mW.GetTxs(),
+					//}
+					//log.SPEW(out)
 				}
 			}
 		})

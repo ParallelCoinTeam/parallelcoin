@@ -74,6 +74,11 @@ func (c *Container) Count() uint16 {
 	return 0
 }
 
+func (c *Container) GetMagic() (out [4]byte) {
+	copy(out[:], c.Data[:4])
+	return
+}
+
 // Get returns the bytes that can be imported into an interface assuming the
 // types are correct - field ordering is hard coded by the creation and
 // identified by the magic. This is all read only and subslices so it should
@@ -116,7 +121,7 @@ func NewPort() *Port {
 }
 
 func (p *Port) DecodeOne(b []byte) *Port {
- 	p.Decode(b)
+	p.Decode(b)
 	return p
 }
 
@@ -134,12 +139,13 @@ func (p *Port) Encode() []byte {
 	return p.Bytes[:]
 }
 
-func (p *Port) GetUint16() uint16 {
+func (p *Port) Get() uint16 {
 	return binary.BigEndian.Uint16(p.Bytes[:2])
 }
 
-func (p *Port) PutUint16(i uint16) {
+func (p *Port) Put(i uint16) *Port {
 	binary.BigEndian.PutUint16(p.Bytes[:], i)
+	return p
 }
 
 type IP struct {
@@ -174,16 +180,17 @@ func (i *IP) Encode() []byte {
 	return append([]byte{i.Length}, i.Bytes...)
 }
 
-func (i *IP) GetIP() *net.IP {
+func (i *IP) Get() *net.IP {
 	ip := make(net.IP, len(i.Bytes))
 	copy(ip, i.Bytes)
 	return &ip
 }
 
-func (i *IP) PutIP(ip *net.IP) {
+func (i *IP) Put(ip *net.IP) *IP {
 	i.Bytes = make([]byte, len(*ip))
 	copy(i.Bytes, *ip)
 	i.Length = byte(len(i.Bytes))
+	return i
 }
 
 type IPs struct {
@@ -227,17 +234,18 @@ func (ips *IPs) Encode() (out []byte) {
 	return
 }
 
-func (ips *IPs) PutIPs(in []*net.IP) {
+func (ips *IPs) Put(in []*net.IP) *IPs {
 	ips.Length = byte(len(in))
 	ips.IPs = make([]IP, len(in))
 	for i := range in {
-		ips.IPs[i].PutIP(in[i])
+		ips.IPs[i].Put(in[i])
 	}
+	return ips
 }
 
-func (ips *IPs) GetIPs() (out []*net.IP) {
+func (ips *IPs) Get() (out []*net.IP) {
 	for i := range ips.IPs {
-		out = append(out, ips.IPs[i].GetIP())
+		out = append(out, ips.IPs[i].Get())
 	}
 	return
 }
@@ -269,12 +277,13 @@ func (b *Bits) Encode() []byte {
 	return b.Bytes[:]
 }
 
-func (b *Bits) GetBits() uint32 {
+func (b *Bits) Get() uint32 {
 	return binary.BigEndian.Uint32(b.Bytes[:])
 }
 
-func (b *Bits) PutBits(bits uint32) {
+func (b *Bits) Put(bits uint32) *Bits {
 	binary.BigEndian.PutUint32(b.Bytes[:], bits)
+	return b
 }
 
 type Bitses struct {
@@ -287,7 +296,6 @@ func NewBitses() *Bitses {
 	return &Bitses{Byteses: make(map[int32][]byte)}
 }
 
-
 func (b *Bitses) DecodeOne(by []byte) *Bitses {
 	b.Decode(by)
 	return b
@@ -296,12 +304,13 @@ func (b *Bitses) DecodeOne(by []byte) *Bitses {
 func (b *Bitses) Decode(by []byte) (out []byte) {
 	b.Lock()
 	defer b.Unlock()
+	//log.SPEW(by)
 	if len(by) >= 7 {
 		nB := by[0]
 		if len(by) >= int(nB)*8 {
 			for i := 0; i < int(nB); i++ {
 				algoVer := int32(binary.BigEndian.Uint32(by[1+i*8 : 1+i*8+4]))
-				//log.DEBUG("algoVer", algoVer, by[1+i*8+4 : 1+i*8+8], b.Byteses)
+				//log.DEBUG("algoVer", algoVer, by[1+i*8+4:1+i*8+8], b.Byteses)
 				b.Byteses[algoVer] = by[1+i*8+4 : 1+i*8+8]
 			}
 		}
@@ -310,6 +319,7 @@ func (b *Bitses) Decode(by []byte) (out []byte) {
 			out = by[bL:]
 		}
 	}
+	//log.SPEW(b.Byteses)
 	return
 }
 
@@ -322,20 +332,23 @@ func (b *Bitses) Encode() (out []byte) {
 		binary.BigEndian.PutUint32(by, uint32(algoVer))
 		out = append(out, append(by, b.Byteses[algoVer]...)...)
 	}
+	//log.SPEW(out)
 	return
 }
 
-func (b *Bitses) GetBitses() (out map[int32]uint32) {
+func (b *Bitses) Get() (out map[int32]uint32) {
 	b.Lock()
 	defer b.Unlock()
 	out = make(map[int32]uint32)
 	for algoVer := range b.Byteses {
-		out[algoVer] = binary.BigEndian.Uint32(b.Byteses[algoVer])
+		oB := binary.BigEndian.Uint32(b.Byteses[algoVer])
+		out[algoVer] = oB
 	}
+	log.SPEW(out)
 	return
 }
 
-func (b *Bitses) PutBitses(in map[int32]uint32) {
+func (b *Bitses) Put(in map[int32]uint32) *Bitses {
 	b.Lock()
 	defer b.Unlock()
 	b.Length = byte(len(in))
@@ -345,6 +358,8 @@ func (b *Bitses) PutBitses(in map[int32]uint32) {
 		binary.BigEndian.PutUint32(bits, in[algoVer])
 		b.Byteses[algoVer] = bits
 	}
+	//log.SPEW(b.Byteses)
+	return b
 }
 
 type Hash struct {
@@ -378,13 +393,14 @@ func (h *Hash) Encode() []byte {
 	return h.Hash.CloneBytes()
 }
 
-func (h *Hash) GetHash() *chainhash.Hash {
+func (h *Hash) Get() *chainhash.Hash {
 	return h.Hash
 }
 
-func (h *Hash) PutHash(pH chainhash.Hash) {
+func (h *Hash) Put(pH chainhash.Hash) *Hash {
 	// this should avoid a copy
 	h.Hash = &pH
+	return h
 }
 
 type Transaction struct {
@@ -395,7 +411,6 @@ type Transaction struct {
 func NewTransaction() *Transaction {
 	return &Transaction{}
 }
-
 
 func (t *Transaction) DecodeOne(b []byte) *Transaction {
 	t.Decode(b)
@@ -422,7 +437,7 @@ func (t *Transaction) Encode() (out []byte) {
 	return
 }
 
-func (t *Transaction) GetTx() (txs *wire.MsgTx) {
+func (t *Transaction) Get() (txs *wire.MsgTx) {
 	txs = new(wire.MsgTx)
 	buffer := bytes.NewBuffer(t.Bytes)
 	err := txs.Deserialize(buffer)
@@ -432,15 +447,16 @@ func (t *Transaction) GetTx() (txs *wire.MsgTx) {
 	return
 }
 
-func (t *Transaction) PutTx(txs *wire.MsgTx) {
+func (t *Transaction) Put(txs *wire.MsgTx) *Transaction {
 	var buffer bytes.Buffer
 	err := txs.Serialize(&buffer)
 	if err != nil {
 		log.ERROR(err)
-		return
+		return t
 	}
 	t.Bytes = buffer.Bytes()
 	t.Length = uint32(len(t.Bytes))
+	return t
 }
 
 func GetRouteableIPs() Serializer {
@@ -460,10 +476,10 @@ func GetRouteableIPs() Serializer {
 		addIP := net.ParseIP(strings.Split(lA[i].String(), "/")[0])
 		ipslice = append(ipslice, &addIP)
 	}
-	ips.PutIPs(ipslice)
+	ips.Put(ipslice)
 	//log.SPEW(ipslice)
 	//log.SPEW(ips)
-	//log.SPEW(ips.GetIPs())
+	//log.SPEW(ips.Get())
 	return ips
 }
 
@@ -480,6 +496,6 @@ func GetPort(listener string) Serializer {
 		return nil
 	}
 	port := &Port{}
-	port.PutUint16(uint16(oI))
+	port.Put(uint16(oI))
 	return port
 }
