@@ -112,20 +112,20 @@ func (c *Container) Get(idx uint16) (out []byte) {
 	return
 }
 
-type Port struct {
+type Uint16 struct {
 	Bytes [2]byte
 }
 
-func NewPort() *Port {
-	return &Port{}
+func NewPort() *Uint16 {
+	return &Uint16{}
 }
 
-func (p *Port) DecodeOne(b []byte) *Port {
+func (p *Uint16) DecodeOne(b []byte) *Uint16 {
 	p.Decode(b)
 	return p
 }
 
-func (p *Port) Decode(b []byte) (out []byte) {
+func (p *Uint16) Decode(b []byte) (out []byte) {
 	if len(b) >= 2 {
 		p.Bytes = [2]byte{b[0], b[1]}
 		if len(b) > 2 {
@@ -135,15 +135,15 @@ func (p *Port) Decode(b []byte) (out []byte) {
 	return
 }
 
-func (p *Port) Encode() []byte {
+func (p *Uint16) Encode() []byte {
 	return p.Bytes[:]
 }
 
-func (p *Port) Get() uint16 {
+func (p *Uint16) Get() uint16 {
 	return binary.BigEndian.Uint16(p.Bytes[:2])
 }
 
-func (p *Port) Put(i uint16) *Port {
+func (p *Uint16) Put(i uint16) *Uint16 {
 	binary.BigEndian.PutUint16(p.Bytes[:], i)
 	return p
 }
@@ -250,20 +250,23 @@ func (ips *IPs) Get() (out []*net.IP) {
 	return
 }
 
-type Bits struct {
+// Int32 is a 32 bit value that stores an int32 (used for block height).
+// I don't think the sign is preserved but block heights are never negative
+// except with special semantics
+type Int32 struct {
 	Bytes [4]byte
 }
 
-func NewBits() *Bits {
-	return &Bits{}
+func NewInt32() *Int32 {
+	return &Int32{}
 }
 
-func (b *Bits) DecodeOne(by []byte) *Bits {
+func (b *Int32) DecodeOne(by []byte) *Int32 {
 	b.Decode(by)
 	return b
 }
 
-func (b *Bits) Decode(by []byte) (out []byte) {
+func (b *Int32) Decode(by []byte) (out []byte) {
 	if len(by) >= 4 {
 		b.Bytes = [4]byte{by[0], by[1], by[2], by[3]}
 		if len(by) > 4 {
@@ -273,16 +276,16 @@ func (b *Bits) Decode(by []byte) (out []byte) {
 	return
 }
 
-func (b *Bits) Encode() []byte {
+func (b *Int32) Encode() []byte {
 	return b.Bytes[:]
 }
 
-func (b *Bits) Get() uint32 {
-	return binary.BigEndian.Uint32(b.Bytes[:])
+func (b *Int32) Get() int32 {
+	return int32(binary.BigEndian.Uint32(b.Bytes[:]))
 }
 
-func (b *Bits) Put(bits uint32) *Bits {
-	binary.BigEndian.PutUint32(b.Bytes[:], bits)
+func (b *Int32) Put(bits int32) *Int32 {
+	binary.BigEndian.PutUint32(b.Bytes[:], uint32(bits))
 	return b
 }
 
@@ -499,7 +502,7 @@ func GetPort(listener string) Serializer {
 		log.ERROR(err)
 		return nil
 	}
-	port := &Port{}
+	port := &Uint16{}
 	port.Put(uint16(oI))
 	return port
 }

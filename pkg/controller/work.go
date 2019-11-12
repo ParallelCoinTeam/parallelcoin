@@ -26,6 +26,9 @@ type MinerContainer struct {
 func GetMinerContainer(cx *conte.Xt, mB *util.Block,
 	msg Serializers) (out MinerContainer) {
 	//msg := append(Serializers{}, GetMessageBase(cx)...)
+	bH := cx.RealNode.Chain.BestSnapshot().Height+1
+	nBH := NewInt32().Put(bH)
+	msg = append(msg, nBH)
 	mH := NewHash().Put(*mB.Hash())
 	msg = append(msg, mH)
 	tip := cx.RealNode.Chain.BestChain.Tip()
@@ -86,19 +89,24 @@ func (mC *MinerContainer) GetControllerListenerPort() uint16 {
 	return NewPort().DecodeOne(mC.Get(3)).Get()
 }
 
+func (mC *MinerContainer) GetNewHeight() (out int32) {
+	return NewInt32().DecodeOne(mC.Get(4)).Get()
+	return
+}
+
 func (mC *MinerContainer) GetPrevBlockHash() (out *chainhash.Hash) {
-	return NewHash().DecodeOne(mC.Get(4)).Get()
+	return NewHash().DecodeOne(mC.Get(5)).Get()
 }
 
 func (mC *MinerContainer) GetBitses() map[int32]uint32 {
-	return NewBitses().DecodeOne(mC.Get(5)).Get()
+	return NewBitses().DecodeOne(mC.Get(6)).Get()
 }
 
 func (mC *MinerContainer) GetTxs() (out []*wire.MsgTx) {
 	count := mC.Count()
 	i := count
 	// there has to be at least one transaction so we won't check if there is
-	for i = 6; i < count; i++ {
+	for i = 7; i < count; i++ {
 		out = append(out, NewTransaction().DecodeOne(mC.Get(i)).Get())
 	}
 	return

@@ -85,6 +85,7 @@ out:
 							log.DEBUG("P2PListenersPort", mC.GetP2PListenersPort())
 							log.DEBUG("RPCListenersPort", mC.GetRPCListenersPort())
 							log.DEBUG("ControllerListenerPort", mC.GetControllerListenerPort())
+							log.DEBUG("NewHeight", mC.GetNewHeight())
 							log.DEBUG(mC.GetPrevBlockHash())
 							log.DEBUG(mC.GetBitses())
 							log.SPEW(mC.GetTxs())
