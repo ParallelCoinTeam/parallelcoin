@@ -56,9 +56,9 @@ func TestBits(t *testing.T) {
 		panic(err)
 	}
 	bits := binary.BigEndian.Uint32(by)
-	bt := controller.NewBits()
+	bt := controller.NewUint32()
 	bt.Put(bits)
-	bt2 := controller.NewBits()
+	bt2 := controller.NewUint32()
 	bt2.Decode(bt.Encode())
 	if bt.Get() != bt2.Get() {
 		t.Fail()

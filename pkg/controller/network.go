@@ -89,7 +89,7 @@ func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
 	//	cancel()
 	//	return
 	//}
-	//log.DEBUG("resolved", addr.IP, addr.Port, addr.String())
+	//log.DEBUG("resolved", addr.IP, addr.Uint16, addr.String())
 	var conn *net.UDPConn
 	conn, err = net.ListenUDP("udp", address)
 	if err != nil {

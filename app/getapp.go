@@ -1,8 +1,12 @@
 package app
 
 import (
+	"encoding/binary"
 	"fmt"
 	_ "github.com/gohouse/i18n/parser_json"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	"path/filepath"
 	"time"
 
 	"github.com/urfave/cli"
@@ -90,7 +94,70 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			apputil.NewCommand("wallet",
 				"start parallelcoin wallet server",
 				walletHandle(cx),
-				apputil.SubCommands(),
+				apputil.SubCommands(
+					apputil.NewCommand("drophistory",
+						"drop the transaction history in the wallet ("+
+							"for development and testing as well as clearing up"+
+							" transaction mess)",
+						func(c *cli.Context) error {
+
+							var (
+								// Namespace keys.
+								syncBucketName    = []byte("sync")
+								waddrmgrNamespace = []byte("waddrmgr")
+								wtxmgrNamespace   = []byte("wtxmgr")
+								// Sync related key names (sync bucket).
+								syncedToName     = []byte("syncedto")
+								startBlockName   = []byte("startblock")
+								recentBlocksName = []byte("recentblocks")
+							)
+
+							db, err := walletdb.Open("bdb",
+								filepath.Join(*cx.Config.DataDir,
+									*cx.Config.Network, "wallet.db"))
+							if err != nil {
+								fmt.Println("failed to open database:", err)
+								return err
+							}
+							defer db.Close()
+							fmt.Println("dropping wtxmgr namespace")
+							err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
+								err := tx.DeleteTopLevelBucket(wtxmgrNamespace)
+								if err != nil && err != walletdb.ErrBucketNotFound {
+									return err
+								}
+								ns, err := tx.CreateTopLevelBucket(wtxmgrNamespace)
+								if err != nil {
+									log.ERROR(err)
+									return err
+								}
+								err = wtxmgr.Create(ns)
+								if err != nil {
+									log.ERROR(err)
+									return err
+								}
+								ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
+								startBlock := ns.Get(startBlockName)
+								err = ns.Put(syncedToName, startBlock)
+								if err != nil {
+									log.ERROR(err)
+									return err
+								}
+								recentBlocks := make([]byte, 40)
+								copy(recentBlocks[0:4], startBlock[0:4])
+								copy(recentBlocks[8:], startBlock[4:])
+								binary.LittleEndian.PutUint32(recentBlocks[4:8], uint32(1))
+								return ns.Put(recentBlocksName, recentBlocks)
+							})
+							if err != nil {
+								log.ERROR(err)
+								return err
+							}
+							return nil
+						},
+						apputil.SubCommands(),
+					),
+				),
 				"w",
 			),
 			apputil.NewCommand("shell",
