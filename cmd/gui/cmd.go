@@ -8,4 +8,6 @@ type rcvar struct {
 	cx     *conte.Xt
 	alert  DuOSalert
 	status DuOStatus
+	txs    DuOStransactionsExcerpts
+	lastxs DuOStransactions
 }

@@ -1,11 +1,23 @@
 <RCC>
-	<qresource>
-		<file alias="index.html">pkg/gui/svelte/assets/index.html</file>
-		<file alias="dui.js">pkg/gui/svelte/assets/dui.js</file>
-		<file alias="dui.css">pkg/gui/svelte/assets/dui.css</file>
-		<file alias="css/theme/root.css">pkg/gui/svelte/assets/css/theme/root.css</file>
-		<file alias="css/theme/colors.css">pkg/gui/svelte/assets/css/theme/colors.css</file>
-		<file alias="css/theme/grid.css">pkg/gui/svelte/assets/css/theme/grid.css</file>
-		<file alias="css/theme/helpers.css">pkg/gui/svelte/assets/css/theme/helpers.css</file>
+    <qresource prefix="/">
+		<file alias="index.html">pkg/gui/smelte/assets/index.html</file>
 	</qresource>
+    <qresource prefix="/css">
+    		<file alias="dui.css">pkg/gui/smelte/assets/css/dui.css</file>
+    		<file alias="theme/root.css">pkg/gui/smelte/assets/css/theme/root.css</file>
+    		<file alias="theme/colors.css">pkg/gui/smelte/assets/css/theme/colors.css</file>
+    		<file alias="theme/grid.css">pkg/gui/smelte/assets/css/theme/grid.css</file>
+    		<file alias="theme/helpers.css">pkg/gui/smelte/assets/css/theme/helpers.css</file>
+    		<file alias="theme/style.css">pkg/gui/smelte/assets/css/theme/style.css</file>
+    		<file alias="utils.css">pkg/gui/smelte/assets/css/utils.css</file>
+    	</qresource>
+   	    <qresource prefix="/js">
+            <file alias="dui.js">pkg/gui/smelte/assets/js/dui.js</file>
+        </qresource>
+        <qresource prefix="/logo">
+                    <file alias="logo.svg">pkg/gui/smelte/assets/logo/logo.svg</file>
+        </qresource>
+        <qresource prefix="/brands">
+            <file alias="qt.svg">pkg/gui/smelte/assets/brands/qt.svg</file>
+        </qresource>
 </RCC>

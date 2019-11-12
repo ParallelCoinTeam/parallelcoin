@@ -51,6 +51,8 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// RealNode is the main node
 	RealNode *rpc.Node
+	// Bios
+
 }
 
 // GetNewContext returns a fresh new context
