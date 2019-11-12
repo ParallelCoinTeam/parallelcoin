@@ -18,7 +18,7 @@ func
 walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		var wg sync.WaitGroup
-		Configure(cx)
+		Configure(cx, c)
 		dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
 			Params.Name + slash + wallet.WalletDbName
 		if !apputil.FileExists(dbFilename) {
@@ -38,8 +38,7 @@ walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			err = walletmain.Main(cx.Config, cx.StateCfg,
 				cx.ActiveNet, walletChan, cx.WalletKill, &wg)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR("failed to start up wallet", err)
+				log.ERROR("failed to start up wallet", err)
 			}
 		}()
 		cx.WalletServer = <-walletChan

@@ -42,7 +42,7 @@ type RPCClient struct {
 // parameters, the connection will be disconnected.
 func NewRPCClient(chainParams *netparams.Params, connect, user, pass string, certs []byte,
 	disableTLS bool, reconnectAttempts int) (*RPCClient, error) {
-		log.WARN("creating new RPC client")
+	log.WARN("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
 	}
@@ -77,7 +77,7 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string, cer
 	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	defer log.WARN("*succeeded* in making rpc client")
 	client.Client = rpcClient
@@ -95,16 +95,17 @@ func (c *RPCClient) BackEnd() string {
 // function gives up, and therefore will not block forever waiting for the
 // connection to be established to a server that may not exist.
 func (c *RPCClient) Start() error {
+	//log.DEBUG(c.connConfig)
 	err := c.Connect(c.reconnectAttempts)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Verify that the server is running on the expected network.
 	net, err := c.GetCurrentNet()
 	if err != nil {
 		log.ERROR(err)
-c.Disconnect()
+		c.Disconnect()
 		return err
 	}
 	if net != c.chainParams.Net {
@@ -189,7 +190,7 @@ func (c *RPCClient) FilterBlocks(
 	watchList, err := buildFilterBlocksWatchList(req)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Iterate over the requested blocks, fetching the compact filter for
 	// each one, and matching it against the watchlist generated above. If
@@ -198,8 +199,8 @@ return nil, err
 	for i, blk := range req.Blocks {
 		rawFilter, err := c.GetCFilter(&blk.Hash, wire.GCSFilterRegular)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		// Ensure the filter is large enough to be deserialized.
 		if len(rawFilter.Data) < 4 {
@@ -209,8 +210,8 @@ return nil, err
 			builder.DefaultP, builder.DefaultM, rawFilter.Data,
 		)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		// Skip any empty filters.
 		if filter.N() == 0 {
@@ -219,8 +220,8 @@ return nil, err
 		key := builder.DeriveKey(&blk.Hash)
 		matched, err := filter.MatchAny(key, watchList)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		} else if !matched {
 			continue
 		}
@@ -230,8 +231,8 @@ return nil, err
 		)
 		rawBlock, err := c.GetBlock(&blk.Hash)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		if !blockFilterer.FilterBlock(rawBlock) {
 			continue
@@ -265,7 +266,7 @@ func parseBlock(block *btcjson.BlockDetails) (*tm.BlockMeta, error) {
 	blkHash, err := chainhash.NewHashFromStr(block.Hash)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	blk := &tm.BlockMeta{
 		Block: tm.Block{
@@ -310,16 +311,16 @@ func (c *RPCClient) onRecvTx(tx *util.Tx, block *btcjson.BlockDetails) {
 	blk, err := parseBlock(block)
 	if err != nil {
 		log.ERROR(err)
-// Log and drop improper notification.
+		// Log and drop improper notification.
 		log.ERROR(
 			"recvtx notification bad block:", err,
-			)
+		)
 		return
 	}
 	rec, err := tm.NewTxRecordFromMsgTx(tx.MsgTx(), time.Now())
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(
+		log.ERROR(
 			"cannot create transaction record for relevant tx:", err,
 		)
 		return
@@ -352,7 +353,7 @@ func (c *RPCClient) handler() {
 	hash, height, err := c.GetBestBlock()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(
+		log.ERROR(
 			"failed to receive best block from chain server:", err,
 		)
 		c.Stop()

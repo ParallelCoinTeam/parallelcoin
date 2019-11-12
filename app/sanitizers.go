@@ -83,7 +83,7 @@ func initParams(cx *conte.Xt) {
 	}
 }
 
-func initListeners(cx *conte.Xt) {
+func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	cfg := cx.Config
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
 		len(*cfg.ConnectPeers) < 1 {
@@ -99,10 +99,81 @@ func initListeners(cx *conte.Xt) {
 			":"+cx.ActiveNet.RPCClientPort)
 		cx.StateCfg.Save = true
 	}
+
+	if !*cx.Config.NoController {
+		switch ctx.Command.Name {
+		// only the wallet listener is important with shell as it proxies for
+		// node, the rest better they are automatic
+		case "shell":
+			*cfg.Listeners = cli.StringSlice{":0"}
+			*cfg.RPCListeners = cli.StringSlice{":0"}
+			*cfg.Controller = ":0"
+		// user might be depending on which port is set for node so only
+		// controller is auto
+		case "node":
+			*cfg.Controller = ":0"
+		case "wallet":
+			*cfg.Controller = ":0"
+		}
+	}
 	if *cfg.RPCConnect == "" {
 		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
 		cx.StateCfg.Save = true
 	}
+	// all of these can be autodiscovered/set but to do that and know what
+	// they are we have to reserve them
+	listeners := []*cli.StringSlice{
+		&(*cfg.WalletRPCListeners),
+		&(*cfg.Listeners),
+		&(*cfg.RPCListeners),
+	}
+	for i := range listeners {
+		if h, p, err := net.SplitHostPort((*listeners[i])[0]); p == "0" {
+			if err != nil {
+				log.ERROR(err)
+			} else {
+				fP, err := GetFreePort()
+				if err != nil {
+					log.ERROR(err)
+				}
+				(*listeners[i]) = cli.
+				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
+			}
+		}
+	}
+	*cfg.RPCConnect = (*cfg.RPCListeners)[0]
+	h, p, _ := net.SplitHostPort(*cfg.RPCConnect)
+	if h == "" {
+		*cfg.RPCConnect = net.JoinHostPort("127.0.0.1", p)
+	}
+	if h, p, err := net.SplitHostPort(*cfg.Controller); p == "0" {
+		if err != nil {
+			log.ERROR(err)
+		} else {
+			fP, err := GetFreePort()
+			if err != nil {
+				log.ERROR(err)
+			}
+			*cfg.Controller = net.JoinHostPort(h, fmt.Sprint(fP))
+		}
+	}
+}
+
+// GetFreePort asks the kernel for free open ports that are ready to use.
+func GetFreePort() (int, error) {
+	var port int
+	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	if err != nil {
+		return 0, err
+	}
+
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	port = l.Addr().(*net.TCPAddr).Port
+	return port, nil
 }
 
 func initTLSStuffs(cfg *pod.Config, st *state.Config) {

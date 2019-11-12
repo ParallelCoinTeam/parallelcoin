@@ -109,7 +109,6 @@ func NewTxRecord(serializedTx []byte, received time.Time) (*TxRecord, error) {
 	err := rec.MsgTx.Deserialize(bytes.NewReader(serializedTx))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		str := "failed to deserialize transaction"
 		return nil, storeError(ErrInput, str, err)
 	}
@@ -124,7 +123,6 @@ func NewTxRecordFromMsgTx(msgTx *wire.MsgTx, received time.Time) (*TxRecord, err
 	err := msgTx.Serialize(buf)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		str := "failed to serialize transaction"
 		return nil, storeError(ErrInput, str, err)
 	}
@@ -152,7 +150,6 @@ Open(ns walletdb.ReadBucket, chainParams *netparams.Params) (*Store, error) {
 	err := openStore(ns)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	s := &Store{chainParams, nil} // TODO: set callbacks
@@ -175,7 +172,6 @@ func // updateMinedBalance updates the mined balance within the store,
 	minedBalance, err := fetchMinedBalance(ns)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Add a debit record for each unspent credit spent by this transaction.
@@ -213,16 +209,14 @@ log.ERROR(err)
 		spender.index = uint32(i)
 		amt, err := spendCredit(ns, credKey, &spender)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = putDebit(
 			ns, &rec.Hash, uint32(i), amt, &block.Block, credKey,
 		)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		if err := deleteRawUnspent(ns, unspentKey); err != nil {
@@ -249,14 +243,12 @@ log.ERROR(err)
 		// height/hash.
 		index, err := fetchRawUnminedCreditIndex(it.ck)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		amount, change, err := fetchRawUnminedCreditAmountChange(it.cv)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		cred.outPoint.Index = index
@@ -267,8 +259,7 @@ log.ERROR(err)
 		}
 		err = putUnspent(ns, &cred.outPoint, &block.Block)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		newMinedBalance += amount
@@ -340,15 +331,13 @@ func // insertMinedTx inserts a new transaction record for a mined
 	} else {
 		blockValue, err = appendRawBlockRecord(blockValue, &rec.Hash)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = putRawBlockRecord(ns, blockKey, blockValue)
 	}
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if err := putTxRecord(ns, rec, &block.Block); err != nil {
@@ -437,19 +426,16 @@ func // addCredit is an AddCredit helper that runs in an update transaction.
 	err := putRawCredit(ns, k, v)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	minedBalance, err := fetchMinedBalance(ns)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	err = putMinedBalance(ns, minedBalance+txOutAmt)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	return true, putUnspent(ns, &cred.outPoint, &block.Block)
@@ -465,7 +451,6 @@ func
 	minedBalance, err := fetchMinedBalance(ns)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Keep track of all credits that were removed from coinbase
@@ -495,14 +480,12 @@ log.ERROR(err)
 			var rec TxRecord
 			err = readRawTxRecord(txHash, recVal, &rec)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			err = deleteTxRecord(ns, txHash, &b.Block)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			// Handle coinbase transactions specially since they are
@@ -524,15 +507,13 @@ log.ERROR(err)
 						minedBalance -= util.Amount(output.Value)
 						err = deleteRawUnspent(ns, unspentKey)
 						if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+							log.ERROR(err)
 							return err
 						}
 					}
 					err = deleteRawCredit(ns, k)
 					if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+						log.ERROR(err)
 						return err
 					}
 				}
@@ -540,8 +521,7 @@ log.ERROR(err)
 			}
 			err = putRawUnmined(ns, txHash[:], recVal)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			// For each debit recorded for this transaction, mark
@@ -555,8 +535,7 @@ log.ERROR(err)
 					prevOut.Index)
 				err = putRawUnminedInput(ns, prevOutKey, rec.Hash[:])
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 				// If this input is a debit, remove the debit
@@ -565,8 +544,7 @@ log.ERROR(err)
 				debKey, credKey, err := existsDebit(ns,
 					&rec.Hash, uint32(i), &b.Block)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 				if debKey == nil {
@@ -582,14 +560,12 @@ log.ERROR(err)
 				var amt util.Amount
 				amt, err = unspendRawCredit(ns, credKey)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 				err = deleteRawDebit(ns, debKey)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 				// If the credit was previously removed in the
@@ -601,15 +577,13 @@ log.ERROR(err)
 				}
 				unspentVal, err := fetchRawCreditUnspentValue(credKey)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 				minedBalance += amt
 				err = putRawUnspent(ns, prevOutKey, unspentVal)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 			}
@@ -627,22 +601,19 @@ log.ERROR(err)
 				}
 				amt, change, err := fetchRawCreditAmountChange(v)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 				outPointKey := canonicalOutPoint(&rec.Hash, uint32(i))
 				unminedCredVal := valueUnminedCredit(amt, change)
 				err = putRawUnminedCredit(ns, outPointKey, unminedCredVal)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 				err = deleteRawCredit(ns, k)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 				credKey := existsRawUnspent(ns, outPointKey)
@@ -650,8 +621,7 @@ log.ERROR(err)
 					minedBalance -= util.Amount(output.Value)
 					err = deleteRawUnspent(ns, outPointKey)
 					if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+						log.ERROR(err)
 						return err
 					}
 				}
@@ -674,8 +644,7 @@ log.ERROR(err)
 	for _, h := range heightsToRemove {
 		err = deleteBlockRecord(ns, h)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -696,8 +665,7 @@ log.ERROR(err)
 			unminedRec.Hash = unminedSpendTxHashKey
 			err = readRawTxRecord(&unminedRec.Hash, unminedVal, &unminedRec)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			log.DEBUGF(
@@ -705,8 +673,7 @@ log.ERROR(err)
 				unminedRec.Hash)
 			err = RemoveConflict(ns, &unminedRec)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		}
@@ -723,8 +690,7 @@ func // UnspentOutputs returns all unspent received transaction outputs.
 	err := ns.NestedReadBucket(bucketUnspent).ForEach(func(k, v []byte) error {
 		err := readCanonicalOutPoint(k, &op)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		if existsRawUnminedInput(ns, k) != nil {
@@ -734,14 +700,12 @@ log.ERROR(err)
 		}
 		err = readUnspentBlock(v, &block)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		blockTime, err := fetchBlockTime(ns, block.Height)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// TODO(jrick): reading the entire transaction should
@@ -749,8 +713,7 @@ log.ERROR(err)
 		// output amount and pkScript.
 		rec, err := fetchTxRecord(ns, &op.Hash, &block)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		txOut := rec.MsgTx.TxOut[op.Index]
@@ -770,7 +733,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if _, ok := err.(Error); ok {
 			return nil, err
 		}
@@ -785,8 +747,7 @@ log.ERROR(err)
 		}
 		err := readCanonicalOutPoint(k, &op)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// TODO(jrick): Reading/parsing the entire transaction record
@@ -795,8 +756,7 @@ log.ERROR(err)
 		var rec TxRecord
 		err = readRawTxRecord(&op.Hash, recVal, &rec)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		txOut := rec.MsgTx.TxOut[op.Index]
@@ -815,7 +775,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if _, ok := err.(Error); ok {
 			return nil, err
 		}
@@ -836,7 +795,6 @@ func // Balance returns the spendable wallet balance (total value of all unspent
 	bal, err := fetchMinedBalance(ns)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	// Subtract the balance for each credit that is spent by an unmined
@@ -846,22 +804,19 @@ log.ERROR(err)
 	err = ns.NestedReadBucket(bucketUnspent).ForEach(func(k, v []byte) error {
 		err := readCanonicalOutPoint(k, &op)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = readUnspentBlock(v, &block)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		if existsRawUnminedInput(ns, k) != nil {
 			_, v := existsCredit(ns, &op.Hash, op.Index, &block)
 			amt, err := fetchRawCreditAmount(v)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			bal -= amt
@@ -870,7 +825,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if _, ok := err.(Error); ok {
 			return 0, err
 		}
@@ -895,8 +849,7 @@ log.ERROR(err)
 			txHash := &block.transactions[i]
 			rec, err := fetchTxRecord(ns, txHash, &block.Block)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return 0, err
 			}
 			numOuts := uint32(len(rec.MsgTx.TxOut))
@@ -914,8 +867,7 @@ log.ERROR(err)
 				}
 				amt, spent, err := fetchRawCreditAmountSpent(v)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					return 0, err
 				}
 				if spent {
@@ -943,16 +895,14 @@ log.ERROR(err)
 			}
 			amount, err := fetchRawUnminedCreditAmount(v)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			bal += amount
 			return nil
 		})
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			if _, ok := err.(Error); ok {
 				return 0, err
 			}

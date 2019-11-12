@@ -54,8 +54,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 	rpcS, legacyServer, err := startRPCServers(config, stateCfg, activeNet,
 		loader)
 	if err != nil {
-		log.ERROR(err)
-log.ERROR("unable to create RPC servers:", err)
+		log.ERROR("unable to create RPC servers:", err)
 		return err
 	}
 	loader.RunAfterLoad(func(w *wallet.Wallet) {
@@ -74,8 +73,7 @@ log.ERROR("unable to create RPC servers:", err)
 			true)
 		//log.WARN("wallet", w)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		addresses.RefillMiningAddresses(w, config, stateCfg)
@@ -150,8 +148,7 @@ func ReadCAFile(config *pod.Config) []byte {
 		var err error
 		certs, err = ioutil.ReadFile(*config.CAFile)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR("cannot open CA file:", err)
+			log.ERROR("cannot open CA file:", err)
 			// If there's an error reading the CA file, continue
 			// with nil certs and without the client connection.
 			certs = nil
@@ -192,8 +189,7 @@ func rpcClientConnectLoop(config *pod.Config, activeNet *netparams.Params,
 		// 		filepath.Join(netDir, "neutrino.db"))
 		// 	defer spvdb.Close()
 		// 	if err != nil {
-		log.ERROR(err)
-// 		log<-cl.Errorf{"unable to create Neutrino DB: %s", err)
+		// 		log<-cl.Errorf{"unable to create Neutrino DB: %s", err)
 		// 		continue
 		// 	}
 		// 	chainService, err = neutrino.NewChainService(
@@ -205,21 +201,18 @@ func rpcClientConnectLoop(config *pod.Config, activeNet *netparams.Params,
 		// 			AddPeers:     cx.PodConfig.AddPeers,
 		// 		})
 		// 	if err != nil {
-		log.ERROR(err)
-// 		log<-cl.Errorf{"couldn't create Neutrino ChainService: %s", err)
+		// 		log<-cl.Errorf{"couldn't create Neutrino ChainService: %s", err)
 		// 		continue
 		// 	}
 		// 	chainClient = chain.NewNeutrinoClient(ActiveNet.Params, chainService)
 		// 	err = chainClient.Start()
 		// 	if err != nil {
-		log.ERROR(err)
-// 		log<-cl.Errorf{"couldn't start Neutrino client: %s", err)
+		// 		log<-cl.Errorf{"couldn't start Neutrino client: %s", err)
 		// 	}
 		// } else {
 		chainClient, err = startChainRPC(config, activeNet, certs)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(
+			log.ERROR(
 				"unable to open connection to consensus RPC server:", err)
 			continue
 		}
@@ -280,7 +273,6 @@ func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte
 		*config.Username, *config.Password, certs, !*config.TLS, 0)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	err = rpcC.Start()

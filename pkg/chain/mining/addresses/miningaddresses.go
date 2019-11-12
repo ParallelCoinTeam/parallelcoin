@@ -44,10 +44,4 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	} else {
 		log.ERROR("error adding new address ", err)
 	}
-	log.WARN("saving config with new addresses")
-	if save.Pod(cfg) {
-		log.WARN("saved config with new addresses")
-	} else {
-		log.ERROR("failed to save config")
-	}
 }

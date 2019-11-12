@@ -275,7 +275,7 @@ func // handleMessage is the main handler for incoming notifications and
 	err := js.Unmarshal(msg, &in)
 	if err != nil {
 		log.ERROR(err)
-log.WARN("remote server sent invalid message:", err)
+		log.WARN("remote server sent invalid message:", err)
 		return
 	}
 
@@ -401,8 +401,8 @@ out:
 		case msg := <-c.sendChan:
 			err := c.wsConn.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {
-		log.ERROR(err)
-c.Disconnect()
+				log.ERROR(err)
+				c.Disconnect()
 				break out
 			}
 		case <-c.disconnectChan():
@@ -465,8 +465,8 @@ func // reregisterNtfns creates and sends commands needed to re-establish the
 			stateCopy.notifyNewTxVerbose)
 		err := c.NotifyNewTransactions(stateCopy.notifyNewTxVerbose)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 	}
 	// Reregister the combination of all previously registered notifyspent
@@ -570,8 +570,8 @@ out:
 			}
 			wsConn, err := dial(c.config)
 			if err != nil {
-		log.ERROR(err)
-c.retryCount++
+				log.ERROR(err)
+				c.retryCount++
 				log.TRACE("failed to connect to %s: %v %s", c.config.Host, err)
 				// Scale the retry interval by the number of retries so there is
 				// a backoff up to a max of 1 minute.
@@ -616,7 +616,7 @@ func // handleSendPostMessage handles performing the passed HTTP request,
 	httpResponse, err := c.httpClient.Do(details.httpRequest)
 	if err != nil {
 		log.ERROR(err)
-jReq.responseChan <- &response{err: err}
+		jReq.responseChan <- &response{err: err}
 		return
 	}
 	// Read the raw bytes and close the response.
@@ -624,7 +624,7 @@ jReq.responseChan <- &response{err: err}
 	httpResponse.Body.Close()
 	if err != nil {
 		log.ERROR(err)
-err = fmt.Errorf("error reading json reply: %v", err)
+		err = fmt.Errorf("error reading json reply: %v", err)
 		jReq.responseChan <- &response{err: err}
 		return
 	}
@@ -633,7 +633,7 @@ err = fmt.Errorf("error reading json reply: %v", err)
 	err = js.Unmarshal(respBytes, &resp)
 	if err != nil {
 		log.ERROR(err)
-// When the response itself isn't a valid JSON-RPC response return an
+		// When the response itself isn't a valid JSON-RPC response return an
 		// error which includes the HTTP status code and raw response bytes.
 		err = fmt.Errorf("status code: %d, response: %q",
 			httpResponse.StatusCode, string(respBytes))
@@ -729,7 +729,7 @@ func // sendPost sends the passed request to the server by issuing an HTTP POST
 	httpReq, err := http.NewRequest("POST", address, bodyReader)
 	if err != nil {
 		log.ERROR(err)
-jReq.responseChan <- &response{result: nil, err: err}
+		jReq.responseChan <- &response{result: nil, err: err}
 		return
 	}
 	httpReq.Close = true
@@ -781,14 +781,14 @@ func // sendCmd sends the passed command to the associated server and returns a
 	method, err := btcjson.CmdMethod(cmd)
 	if err != nil {
 		log.ERROR(err)
-return newFutureError(err)
+		return newFutureError(err)
 	}
 	// Marshal the command.
 	id := c.NextID()
 	marshalledJSON, err := btcjson.MarshalCmd(id, cmd)
 	if err != nil {
 		log.ERROR(err)
-return newFutureError(err)
+		return newFutureError(err)
 	}
 	// Generate the request and send it along with a channel to respond on.
 	responseChan := make(chan *response, 1)
@@ -1003,8 +1003,8 @@ newHTTPClient(config *ConnConfig) (*http.Client, error) {
 	if config.Proxy != "" {
 		proxyURL, err := url.Parse(config.Proxy)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		proxyFunc = http.ProxyURL(proxyURL)
 	}
@@ -1068,7 +1068,7 @@ dial(config *ConnConfig) (*websocket.Conn, error) {
 	wsConn, resp, err := dialer.Dial(address, requestHeader)
 	if err != nil {
 		log.ERROR(err)
-if err != websocket.ErrBadHandshake || resp == nil {
+		if err != websocket.ErrBadHandshake || resp == nil {
 			return nil, err
 		}
 		// Detect HTTP authentication error status codes.
@@ -1107,16 +1107,16 @@ New(config *ConnConfig, ntfnHandlers *NotificationHandlers) (*Client, error) {
 		var err error
 		httpClient, err = newHTTPClient(config)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 	} else {
 		if !config.DisableConnectOnNew {
 			var err error
 			wsConn, err = dial(config)
 			if err != nil {
-		log.ERROR(err)
-return nil, err
+				log.ERROR(err)
+				return nil, err
 			}
 			start = true
 		}
@@ -1172,8 +1172,8 @@ func // Connect establishes the initial websocket connection.  This is necessary
 		var wsConn *websocket.Conn
 		wsConn, err = dial(c.config)
 		if err != nil {
-		log.ERROR(err)
-backoff = connectionRetryInterval * time.Duration(i+1)
+			log.ERROR(err)
+			backoff = connectionRetryInterval * time.Duration(i+1)
 			if backoff > time.Minute {
 				backoff = time.Minute
 			}

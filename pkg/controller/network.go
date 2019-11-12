@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"crypto/cipher"
 	"crypto/rand"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/fec"
@@ -34,22 +35,29 @@ var (
 // Send broadcasts bytes on the given multicast address with each shard
 // labeled with a random 32 bit nonce to identify its group to the listener's
 // handler function
-func Send(addr *net.UDPAddr, bytes []byte, magic [4]byte) (err error) {
+func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
+	ciph cipher.AEAD, conn *net.UDPConn) (err error) {
+	nonce := make([]byte, ciph.NonceSize())
+	//log.DEBUG(len(nonce))
+	var bb []byte
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		log.ERROR(err)
+		return
+	}
+	if ciph != nil {
+		bb = ciph.Seal(nil, nonce, by, nil)
+	}
+	//log.SPEW(bb)
+	//bb = by
 	var shards [][]byte
-	shards, err = fec.Encode(bytes)
+	shards, err = fec.Encode(bb)
 	if err != nil {
 		return
 	}
 	//log.SPEW(shards)
 	// nonce is a batch identifier for the FEC encoded shards which are sent
 	// out as individual packets
-	nonce := make([]byte, 4)
-	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		log.ERROR(err)
-		return
-	}
 	prefix := append(nonce, magic[:]...)
-	conn, err := net.ListenUDP("udp", addr)
 	if err != nil {
 		return
 	}
@@ -62,13 +70,9 @@ func Send(addr *net.UDPAddr, bytes []byte, magic [4]byte) (err error) {
 		}
 		cumulative += n
 	}
-	log.TRACE("wrote", cumulative, "bytes to multicast address", addr.IP,
+	log.TRACE("wrote", cumulative, "by to multicast address", addr.IP,
 		"port",
 		addr.Port)
-	err = conn.Close()
-	if err != nil {
-		log.ERROR(err)
-	}
 	return
 }
 
