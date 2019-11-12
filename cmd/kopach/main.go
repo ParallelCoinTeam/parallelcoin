@@ -3,11 +3,14 @@ package kopach
 import "C"
 import (
 	"context"
+	"fmt"
+	"github.com/minio/highwayhash"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller"
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
+	"go.uber.org/atomic"
 	"net"
 	"sync"
 	"time"
@@ -19,6 +22,8 @@ type msgBuffer struct {
 	decoded bool
 }
 
+var nilKey = make([]byte, 32)
+
 func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	log.DEBUG("kopach miner starting")
 	wg.Add(1)
@@ -26,6 +31,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	var cancel context.CancelFunc
 	var err error
 	buffers := make(map[string]*msgBuffer)
+	var lastHash atomic.Uint64
 out:
 	for _, j := range controller.MCAddresses {
 		i := j
@@ -36,7 +42,10 @@ out:
 			defer mx.Unlock()
 			var deleters []string
 			for i := range buffers {
-				if time.Now().Sub(buffers[i].first) > time.Second {
+				// for most of the time this won't lead to a large buildup
+				// since usually all 9 will get through if not all intact all
+				// will be deleted below when the buffer gets to 9 shards
+				if time.Now().Sub(buffers[i].first) > time.Second*36 {
 					deleters = append(deleters, i)
 				}
 			}
@@ -81,6 +90,15 @@ out:
 							//log.SPEW(msg)
 							bn.decoded = true
 							mC := controller.LoadMinerContainer(msg)
+
+							//log.SPEW(mC.Data)
+							h64 := highwayhash.Sum64(mC.Data, nilKey)
+							if h64 == lastHash.Load() {
+								fmt.Printf("received rebroadcast of block %d" +
+									" %v\r",mC.GetNewHeight(), time.Now())
+								return
+							}
+							lastHash.Store(h64)
 							log.DEBUG(mC.GetIPs())
 							log.DEBUG("P2PListenersPort", mC.GetP2PListenersPort())
 							log.DEBUG("RPCListenersPort", mC.GetRPCListenersPort())
@@ -89,7 +107,6 @@ out:
 							log.DEBUG(mC.GetPrevBlockHash())
 							log.DEBUG(mC.GetBitses())
 							log.SPEW(mC.GetTxs())
-							//log.SPEW(mC.Data)
 						}
 					}
 				} else {

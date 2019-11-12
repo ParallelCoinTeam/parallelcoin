@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/cipher"
 	"crypto/rand"
+	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/log"
@@ -36,7 +37,7 @@ var (
 // labeled with a random 32 bit nonce to identify its group to the listener's
 // handler function
 func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
-	ciph cipher.AEAD, conn *net.UDPConn) (err error) {
+	ciph cipher.AEAD, conn *net.UDPConn) (shards [][]byte, err error) {
 	nonce := make([]byte, ciph.NonceSize())
 	//log.DEBUG(len(nonce))
 	var bb []byte
@@ -49,7 +50,6 @@ func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 	}
 	//log.SPEW(bb)
 	//bb = by
-	var shards [][]byte
 	shards, err = fec.Encode(bb)
 	if err != nil {
 		return
@@ -63,7 +63,8 @@ func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 	}
 	var n, cumulative int
 	for i := range shards {
-		n, err = conn.WriteToUDP(append(prefix, shards[i]...), addr)
+		shards[i] = append(prefix, shards[i]...)
+		n, err = conn.WriteToUDP(shards[i], addr)
 		if err != nil {
 			log.ERROR(err, len(shards[i]))
 			return
@@ -73,6 +74,21 @@ func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 	log.TRACE("wrote", cumulative, "by to multicast address", addr.IP,
 		"port",
 		addr.Port)
+	return
+}
+
+func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err error) {
+	var n, cumulative int
+	for i := range shards {
+		n, err = conn.WriteToUDP(shards[i], addr)
+		if err != nil {
+			log.ERROR(err, len(shards[i]))
+			return
+		}
+		cumulative += n
+	}
+	fmt.Printf("rewrote %v bytes to multicast address %v port %v\r",
+		cumulative, addr.IP, addr.Port)
 	return
 }
 

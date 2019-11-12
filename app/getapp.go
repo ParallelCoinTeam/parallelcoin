@@ -100,7 +100,6 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 							"for development and testing as well as clearing up"+
 							" transaction mess)",
 						func(c *cli.Context) error {
-
 							var (
 								// Namespace keys.
 								syncBucketName    = []byte("sync")
@@ -111,7 +110,6 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 								startBlockName   = []byte("startblock")
 								recentBlocksName = []byte("recentblocks")
 							)
-
 							db, err := walletdb.Open("bdb",
 								filepath.Join(*cx.Config.DataDir,
 									*cx.Config.Network, "wallet.db"))
@@ -153,7 +151,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 								log.ERROR(err)
 								return err
 							}
-							return nil
+							return walletHandle(cx)(c)
 						},
 						apputil.SubCommands(),
 					),
