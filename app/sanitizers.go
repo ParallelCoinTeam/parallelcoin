@@ -116,6 +116,11 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 			*cfg.Controller = ":0"
 		}
 	}
+	if *cx.Config.AutoPorts {
+		*cfg.Listeners = cli.StringSlice{":0"}
+		*cfg.RPCListeners = cli.StringSlice{":0"}
+		*cfg.Controller = ":0"
+	}
 	if *cfg.RPCConnect == "" {
 		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
 		cx.StateCfg.Save = true

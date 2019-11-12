@@ -39,6 +39,7 @@ type Blocks struct {
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	var ctx context.Context
 	var active atomic.Bool
+	var oldBlocks atomic.Value
 	ctx, cancel = context.WithCancel(context.Background())
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		log.WARN("not running controller without RPC enabled")
@@ -103,9 +104,12 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	//log.SPEW(fMC.GetTxs())
 	//log.SPEW(fMC.Data)
 	for i := range sendAddresses {
-		err := Send(sendAddresses[i], fMC.Data, WorkMagic, ciph, conns[i])
+		shards, err := Send(sendAddresses[i], fMC.Data, WorkMagic, ciph,
+			conns[i])
 		if err != nil {
 			log.ERROR(err)
+		} else {
+			oldBlocks.Store(shards)
 		}
 	}
 	//log.SPEW(messageBase.CreateContainer(WorkMagic))
@@ -152,24 +156,38 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					//log.SPEW(mC.GetTxs())
 					//log.SPEW(mC.Data)
 					for i := range sendAddresses {
-						err := Send(sendAddresses[i], mC.Data, WorkMagic,
-							ciph, conns[i])
+						shards, err := Send(sendAddresses[i], mC.Data,
+							WorkMagic, ciph, conns[i])
 						if err != nil {
 							log.TRACE(err)
 						}
+						oldBlocks.Store(shards)
 					}
 				}
 			}
 		})
-		select {
-		case <-ctx.Done():
-			log.DEBUG("miner controller shutting down")
-			for i := range conns {
-				log.DEBUG("stopping listener on", conns[i].LocalAddr())
-				conns[i].Close()
+		rebroadcastTicker := time.NewTicker(time.Second)
+	out:
+		for {
+			select {
+			case <-rebroadcastTicker.C:
+				//log.DEBUG("TICK TOCK")
+				for i := range sendAddresses {
+					oB := oldBlocks.Load().([][]byte)
+					err = SendShards(sendAddresses[i], oB, conns[i])
+					if err != nil {
+						log.TRACE(err)
+					}
+				}
+			case <-ctx.Done():
+				log.DEBUG("miner controller shutting down")
+				for i := range conns {
+					log.DEBUG("stopping listener on", conns[i].LocalAddr())
+					conns[i].Close()
+				}
+				active.Store(false)
+				break out
 			}
-			active.Store(false)
-			break
 		}
 	}()
 	return
