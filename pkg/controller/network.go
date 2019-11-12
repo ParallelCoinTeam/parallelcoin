@@ -10,6 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"io"
 	"net"
+	"time"
 )
 
 const (
@@ -87,8 +88,8 @@ func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err erro
 		}
 		cumulative += n
 	}
-	fmt.Printf("rewrote %v bytes to multicast address %v port %v\r",
-		cumulative, addr.IP, addr.Port)
+	fmt.Printf("resent %v bytes to multicast address %v port %v %v\r",
+		cumulative, addr.IP, addr.Port, time.Now())
 	return
 }
 

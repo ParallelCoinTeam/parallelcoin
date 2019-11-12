@@ -3,6 +3,7 @@ package kopach
 import "C"
 import (
 	"context"
+	"fmt"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller"
 	"github.com/p9c/pod/pkg/fec"
@@ -77,6 +78,11 @@ out:
 											log.DEBUGF("deleting buffer %x", i)
 											delete(buffers, i)
 										}()
+										// it will be deleted once this
+										// function completes,
+										// so make sure it isn't seen again
+										// by this loop
+										buffers[i].superseded = false
 									}
 								}
 							}
@@ -107,6 +113,7 @@ out:
 								buffers[i].superseded = true
 							}
 						}
+						fmt.Printf("received rebroadcast of %x %v\r", nonce,time.Now())
 					}
 				} else {
 					buffers[nonce] = &msgBuffer{[][]byte{}, time.Now(),
