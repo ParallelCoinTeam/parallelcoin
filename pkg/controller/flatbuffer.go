@@ -344,7 +344,7 @@ func (b *Bitses) Get() (out map[int32]uint32) {
 		oB := binary.BigEndian.Uint32(b.Byteses[algoVer])
 		out[algoVer] = oB
 	}
-	log.SPEW(out)
+	//log.SPEW(out)
 	return
 }
 
@@ -463,11 +463,15 @@ func GetRouteableIPs() Serializer {
 	// first add the interface addresses
 	rI := routeable.GetInterface()
 	//log.SPEW(rI)
-	lA, err := rI.Addrs()
-	//log.SPEW(lA)
-	if err != nil {
-		log.ERROR(err)
-		return nil
+	var lA []net.Addr
+	for i := range rI {
+		l, err := rI[i].Addrs()
+		//log.SPEW(lA)
+		if err != nil {
+			log.ERROR(err)
+			return nil
+		}
+		lA = append(lA, l...)
 	}
 	ips := NewIPs()
 	var ipslice []*net.IP

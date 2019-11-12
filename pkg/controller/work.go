@@ -23,8 +23,9 @@ type MinerContainer struct {
 // and a set of methods that extracts the individual requested field without
 // copying memory, or deserialize their contents which will be concurrent safe
 // All of the fields are in the same order that they will be serialized to
-func GetMinerContainer(cx *conte.Xt, mB *util.Block) (out MinerContainer) {
-	msg := append(Serializers{}, GetMessageBase(cx)...)
+func GetMinerContainer(cx *conte.Xt, mB *util.Block,
+	msg Serializers) (out MinerContainer) {
+	//msg := append(Serializers{}, GetMessageBase(cx)...)
 	mH := NewHash().Put(*mB.Hash())
 	msg = append(msg, mH)
 	tip := cx.RealNode.Chain.BestChain.Tip()
@@ -41,20 +42,20 @@ func GetMinerContainer(cx *conte.Xt, mB *util.Block) (out MinerContainer) {
 	bitsMap := &bM
 	var err error
 	tip.DiffMx.Lock()
+	defer tip.DiffMx.Unlock()
 	if tip.Diffs == nil ||
 		len(*tip.Diffs) != len(fork.List[1].AlgoVers) {
-		tip.DiffMx.Unlock()
 		bitsMap, err = cx.RealNode.Chain.
 			CalcNextRequiredDifficultyPlan9Controller(tip)
 		if err != nil {
 			log.ERROR(err)
 			return
 		}
+	} else {
+		bitsMap = tip.Diffs
 	}
-	bitsMap = tip.Diffs
 	bitses := NewBitses()
 	bitses.Put(*bitsMap)
-	tip.DiffMx.Unlock()
 	msg = append(msg, bitses)
 	txs := mB.MsgBlock().Transactions
 	for i := range txs {

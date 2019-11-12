@@ -912,7 +912,7 @@ func // createChainState initializes both the database and the chain state to
 	})
 	genesisBlock.SetHeight(0)
 	header := &genesisBlock.MsgBlock().Header
-	node := newBlockNode(header, nil)
+	node := NewBlockNode(header, nil)
 	node.status = statusDataStored | statusValid
 	var err error
 	node.Diffs, err = b.CalcNextRequiredDifficultyPlan9Controller(node)

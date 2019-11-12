@@ -117,10 +117,10 @@ func initBlockNode(node *BlockNode, blockHeader *wire.BlockHeader, parent *Block
 	}
 }
 
-// newBlockNode returns a new block node for the given block header and
+// NewBlockNode returns a new block node for the given block header and
 // parent node, calculating the height and workSum from the respective fields
 // on the parent. This function is NOT safe for concurrent access.
-func newBlockNode(blockHeader *wire.BlockHeader, parent *BlockNode) *BlockNode {
+func NewBlockNode(blockHeader *wire.BlockHeader, parent *BlockNode) *BlockNode {
 	var node BlockNode
 	initBlockNode(&node, blockHeader, parent)
 	return &node
