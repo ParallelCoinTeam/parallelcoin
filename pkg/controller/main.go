@@ -2,9 +2,9 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	chain "github.com/p9c/pod/pkg/chain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller/broadcast"
@@ -12,8 +12,10 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
 	"go.uber.org/atomic"
+	"math/rand"
 	"net"
 	"sync"
+	"time"
 )
 
 type Blocks struct {
@@ -49,6 +51,55 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cancel()
 		return
 	}
+
+	var sendAddresses []*net.UDPAddr
+	for i := range MCAddresses {
+		_, err := net.ListenUDP("udp", MCAddresses[i])
+		if err == nil {
+			sendAddresses = append(sendAddresses, MCAddresses[i])
+		}
+	}
+	//log.SPEW(sendAddresses)
+	log.DEBUG("sending broadcasts from:", sendAddresses)
+	policy := mining.Policy{
+		BlockMinWeight:    uint32(*cx.Config.BlockMinWeight),
+		BlockMaxWeight:    uint32(*cx.Config.BlockMaxWeight),
+		BlockMinSize:      uint32(*cx.Config.BlockMinSize),
+		BlockMaxSize:      uint32(*cx.Config.BlockMaxSize),
+		BlockPrioritySize: uint32(*cx.Config.BlockPrioritySize),
+		TxMinFreeFee:      cx.StateCfg.ActiveMinRelayTxFee,
+	}
+	s := cx.RealNode
+	bTG := mining.NewBlkTmplGenerator(&policy,
+		s.ChainParams, s.TxMemPool, s.Chain, s.TimeSource,
+		s.SigCache, s.HashCache, s.Algo)
+	// Choose a payment address at random.
+	rand.Seed(time.Now().UnixNano())
+	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
+		MiningAddrs))]
+	algo := "sha256d"
+	template, err := bTG.NewBlockTemplate(0, payToAddr,
+		algo)
+	if err != nil {
+		log.ERROR(err)
+	}
+	msgB := template.Block
+	msgBase := GetMessageBase(cx)
+	fMC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
+	//log.DEBUG(fMC.GetIPs())
+	//log.DEBUG(fMC.GetP2PListenersPort())
+	//log.DEBUG(fMC.GetRPCListenersPort())
+	//log.DEBUG(fMC.GetControllerListenerPort())
+	//log.DEBUG(fMC.GetPrevBlockHash())
+	//log.DEBUG(fMC.GetBitses())
+	//log.SPEW(fMC.GetTxs())
+	//log.SPEW(fMC.Data)
+	for i := range sendAddresses {
+		err := Send(sendAddresses[i], fMC.Data, WorkMagic)
+		if err != nil {
+			log.ERROR(err)
+		}
+	}
 	//log.SPEW(messageBase.CreateContainer(WorkMagic))
 	go func() {
 		// There is no unsubscribe but we can use an atomic to disable the
@@ -67,38 +118,37 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					log.DEBUG("received new chain notification")
 					// construct work message
 					//log.SPEW(n)
-					mB, ok := n.Data.(*util.Block)
+					_, ok := n.Data.(*util.Block)
 					if !ok {
 						log.WARN("chain accepted notification is not a block")
 						break
 					}
-					mC := GetMinerContainer(cx, mB)
-					for _, i := range []string{
-						UDP4MulticastAddress,
-						UDP6MulticastAddress,
-					} {
-						err := Send(net.JoinHostPort(i,
-							fmt.Sprint(mC.GetControllerListenerPort())),
-							mC.Data)
+					// Choose a payment address at random.
+					rand.Seed(time.Now().UnixNano())
+					payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
+						MiningAddrs))]
+					algo := "sha256d"
+					template, err := bTG.NewBlockTemplate(0, payToAddr,
+						algo)
+					if err != nil {
+						log.ERROR(err)
+					}
+					msgB := template.Block
+					mC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
+					//log.DEBUG(mC.GetIPs())
+					//log.DEBUG(mC.GetP2PListenersPort())
+					//log.DEBUG(mC.GetRPCListenersPort())
+					//log.DEBUG(mC.GetControllerListenerPort())
+					//log.DEBUG(mC.GetPrevBlockHash())
+					//log.DEBUG(mC.GetBitses())
+					//log.SPEW(mC.GetTxs())
+					//log.SPEW(mC.Data)
+					for i := range sendAddresses {
+						err := Send(sendAddresses[i], mC.Data, WorkMagic)
 						if err != nil {
-							log.ERROR(err)
+							log.TRACE(err)
 						}
 					}
-					//mW := LoadMinerContainer(mC.Data)
-					// send out srs.Data
-					//log.SPEW(srs.Data)
-					// the following decodes each element
-					//mC := LoadMinerContainer(srs)
-					//out := []interface{}{
-					//	mW.GetIPs(),
-					//	mW.GetP2PListenersPort(),
-					//	mW.GetRPCListenersPort(),
-					//	mW.GetControllerListenerPort(),
-					//	mW.GetPrevBlockHash(),
-					//	mW.GetBitses(),
-					//	mW.GetTxs(),
-					//}
-					//log.SPEW(out)
 				}
 			}
 		})

@@ -423,7 +423,7 @@ Block) error {
 	// not needed and thus extra work can be avoided.
 	view := NewUtxoViewpoint()
 	view.SetBestHash(&tip.hash)
-	newNode := newBlockNode(&header, tip)
+	newNode := NewBlockNode(&header, tip)
 	return b.checkConnectBlock(newNode, block, view, nil)
 }
 

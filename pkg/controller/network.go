@@ -19,22 +19,28 @@ const (
 	// has to puncture 6 of the 9.
 	// This protocol is connectionless and stateless so if one misses,
 	// the next one probably won't, usually a second or 3 later
-	MaxDatagramSize = blockchain.MaxBlockBaseSize / 3
+	MaxDatagramSize      = blockchain.MaxBlockBaseSize / 3
+	UDP6MulticastAddress = "ff02::1"
 	UDP4MulticastAddress = "224.0.0.1"
-	UDP6MulticastAddress = "ff02::9c"
+)
+
+var (
+	MCAddresses = []*net.UDPAddr{
+		{IP: net.ParseIP(UDP6MulticastAddress), Port: 11049},
+		{IP: net.ParseIP(UDP4MulticastAddress), Port: 11049},
+	}
 )
 
 // Send broadcasts bytes on the given multicast address with each shard
 // labeled with a random 32 bit nonce to identify its group to the listener's
 // handler function
-func Send(addrS string, bytes []byte) (err error) {
-	var addr *net.UDPAddr
-	addr, err = net.ResolveUDPAddr("udp", addrS)
+func Send(addr *net.UDPAddr, bytes []byte, magic [4]byte) (err error) {
 	var shards [][]byte
 	shards, err = fec.Encode(bytes)
 	if err != nil {
 		return
 	}
+	//log.SPEW(shards)
 	// nonce is a batch identifier for the FEC encoded shards which are sent
 	// out as individual packets
 	nonce := make([]byte, 4)
@@ -42,13 +48,14 @@ func Send(addrS string, bytes []byte) (err error) {
 		log.ERROR(err)
 		return
 	}
+	prefix := append(nonce, magic[:]...)
 	conn, err := net.ListenUDP("udp", addr)
 	if err != nil {
 		return
 	}
 	var n, cumulative int
 	for i := range shards {
-		n, err = conn.WriteToUDP(append(nonce, shards[i]...), addr)
+		n, err = conn.WriteToUDP(append(prefix, shards[i]...), addr)
 		if err != nil {
 			log.ERROR(err, len(shards[i]))
 			return
@@ -67,17 +74,24 @@ func Send(addrS string, bytes []byte) (err error) {
 
 // Listen binds to the UDP address and port given and writes packets received
 // from that address to a buffer which is passed to a handler
-func Listen(address string, ifi *net.Interface, handler func(*net.UDPAddr, int,
-	[]byte)) (cancel context.CancelFunc) {
+func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
+	[]byte)) (cancel context.CancelFunc, err error) {
 	var ctx context.Context
 	ctx, cancel = context.WithCancel(context.Background())
-	addr, err := net.ResolveUDPAddr("udp", address)
+	log.DEBUG("resolving", address)
+	//addr, err := net.ResolveUDPAddr("udp", address)
+	//if err != nil {
+	//	log.ERROR(err)
+	//	cancel()
+	//	return
+	//}
+	//log.DEBUG("resolved", addr.IP, addr.Port, addr.String())
+	var conn *net.UDPConn
+	conn, err = net.ListenUDP("udp", address)
 	if err != nil {
 		log.ERROR(err)
-	}
-	conn, err := net.ListenMulticastUDP("udp", ifi, addr)
-	if err != nil {
-		log.ERROR(err)
+		cancel()
+		return
 	}
 
 	err = conn.SetReadBuffer(MaxDatagramSize)

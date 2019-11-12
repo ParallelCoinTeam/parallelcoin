@@ -101,7 +101,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	// Even if the block ultimately gets connected to the main chain,
 	// it starts out on a side chain.
 	blockHeader := &block.MsgBlock().Header
-	newNode := newBlockNode(blockHeader, prevNode)
+	newNode := NewBlockNode(blockHeader, prevNode)
 	newNode.status = statusDataStored
 	b.Index.AddNode(newNode)
 	err = b.Index.flushToDB()

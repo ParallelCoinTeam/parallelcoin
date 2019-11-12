@@ -22,7 +22,7 @@ func chainedNodes(	parent *BlockNode, numNodes int) []*BlockNode {
 		if tip != nil {
 			header.PrevBlock = tip.hash
 		}
-		nodes[i] = newBlockNode(&header, tip)
+		nodes[i] = NewBlockNode(&header, tip)
 		tip = nodes[i]
 	}
 	return nodes
