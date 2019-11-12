@@ -31,14 +31,17 @@ const (
 
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
+
 	log.L.SetLevel("error", true)
 	cx := conte.GetNewContext(appName, appLanguage, "main")
 	cx.App = getApp(cx)
 	log.DEBUG("running App")
+
 	e := cx.App.Run(os.Args)
 	if e != nil {
 		fmt.Println("Pod ERROR:", e)
 		return 1
 	}
+
 	return 0
 }

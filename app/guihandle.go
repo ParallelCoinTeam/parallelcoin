@@ -1,79 +1,68 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/p9c/pod/cmd/gui"
-	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/urfave/cli"
-	"os"
-	"sync"
-	"sync/atomic"
-
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/gui/utils"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
+	"github.com/therecipe/qt/core"
+	"github.com/therecipe/qt/webengine"
+	"github.com/therecipe/qt/widgets"
+	"github.com/urfave/cli"
+	"net/http"
+	"os"
+	"sync"
+	"sync/atomic"
 )
 
-//func
-//guiHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
-//	return func(c *cli.Context) (err error) {
-//		var wg sync.WaitGroup
-//		nodeChan := make(chan *rpc.Server)
-//		walletChan := make(chan *wallet.Wallet)
-//		kill := make(chan struct{})
-//		Configure(cx)
-//		if *cx.Config.TLS || *cx.Config.ServerTLS {
-//			// generate the tls certificate if configured
-//			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
-//		}
-//		shutdownChan := make(chan struct{})
-//		dbFilename :=
-//			*cx.Config.DataDir + slash +
-//				cx.ActiveNet.Params.Name + slash +
-//				wallet.WalletDbName
-//		if !apputil.FileExists(dbFilename) {
-//			log.L.SetLevel("off", false)
-//			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-//				log.ERROR("failed to create wallet", err)
-//			}
-//			fmt.Println("restart to complete initial setup")
-//			os.Exit(1)
-//			log.L.SetLevel(*cx.Config.LogLevel, true)
-//		}
-//		if !*cx.Config.WalletOff {
-//			go func() {
-//				err = walletmain.Main(cx.Config, cx.StateCfg,
-//					cx.ActiveNet, walletChan, kill, &wg)
-//				if err != nil {
-//					log.ERROR(err)
-//					fmt.Println("error running wallet:", err)
-//				}
-//			}()
-//			save.Pod(cx.Config)
-//		}
-//		if !*cx.Config.NodeOff {
-//			go func() {
-//				Configure(cx)
-//				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
-//				if err != nil {
-//					log.ERROR("error starting node ", err)
-//				}
-//			}()
-//			cx.RPCServer = <-nodeChan
-//		}
-//		cx.WalletServer = <-walletChan
-//		gui.GUI(cx)
-//		wg.Wait()
-//		return nil
-//	}
-//}
+type Bios struct {
+	Theme      bool   `json:"theme"`
+	IsBoot     bool   `json:"boot"`
+	IsBootMenu bool   `json:"menu"`
+	IsBootLogo bool   `json:"logo"`
+	IsLoading  bool   `json:"loading"`
+	IsDev      bool   `json:"dev"`
+	IsScreen   string `json:"screen"`
+}
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		log.WARN("starting GUI")
+		widgets.NewQApplication(len(os.Args), os.Args)
+
+		b := Bios{
+			Theme:      false,
+			IsBoot:     true,
+			IsBootMenu: true,
+			IsBootLogo: true,
+			IsLoading:  false,
+			IsDev:      true,
+			IsScreen:   "overview",
+		}
+		http.HandleFunc("/bios", func(w http.ResponseWriter, r *http.Request) {
+			js, err := json.Marshal(&b)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Write(js)
+		})
+		b.IsBootLogo = true
+		log.INFO("starting GUI")
+		var view = webengine.NewQWebEngineView(nil)
+		//view.SetUrl(QUrl("qrc:/index.html"))
+		view.Load(core.NewQUrl3("qrc:/index.html", 0))
+		view.Show()
+		utils.GetBiosMessage(view, "starting GUI")
+
 		Configure(cx)
 		shutdownChan := make(chan struct{})
 		walletChan := make(chan *wallet.Wallet)
@@ -89,6 +78,8 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		if !*cx.Config.NodeOff {
 			go func() {
 				log.INFO(cx.Language.RenderText("goApp_STARTINGNODE"))
+				utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
+
 				err = node.Main(cx, shutdownChan, cx.NodeKill, nodeChan, &wg)
 				if err != nil {
 					fmt.Println("error running node:", err)
@@ -103,6 +94,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		if !*cx.Config.WalletOff {
 			go func() {
 				log.INFO("starting wallet")
+				utils.GetBiosMessage(view, "starting wallet")
 				err = walletmain.Main(cx.Config, cx.StateCfg,
 					cx.ActiveNet, walletChan, cx.WalletKill, &wg)
 				if err != nil {
@@ -122,12 +114,16 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 			close(cx.NodeKill)
 		})
 		gui.GUI(cx)
+		b.IsBootLogo = false
+		b.IsBoot = false
+
 		if !cx.Node.Load().(bool) {
 			close(cx.WalletKill)
 		}
 		if !cx.Wallet.Load().(bool) {
 			close(cx.NodeKill)
 		}
+		widgets.QApplication_Exec()
 		return err
 	}
 }

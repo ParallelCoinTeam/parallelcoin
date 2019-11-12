@@ -41,7 +41,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
 		log.ERROR(err)
-fmt.Println("error unmarshalling config", err)
+		fmt.Println("error unmarshalling config", err)
 					os.Exit(1)
 				}
 				log.INFO("unmarshalled config")
