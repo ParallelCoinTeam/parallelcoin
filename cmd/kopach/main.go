@@ -74,15 +74,15 @@ out:
 							for i := range buffers {
 								if i!=nonce {
 									if buffers[i].superseded {
-										defer func(){
+										//defer func(){
 											log.DEBUGF("deleting buffer %x", i)
 											delete(buffers, i)
-										}()
+										//}()
 										// it will be deleted once this
 										// function completes,
 										// so make sure it isn't seen again
 										// by this loop
-										buffers[i].superseded = false
+										//buffers[i].superseded = false
 									}
 								}
 							}
