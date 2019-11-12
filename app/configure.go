@@ -5,10 +5,11 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/urfave/cli"
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli
-Configure(cx *conte.Xt) {
+Configure(cx *conte.Xt, ctx *cli.Context) {
 	log.TRACE("configuring pod")
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
@@ -19,7 +20,7 @@ Configure(cx *conte.Xt) {
 	initConfigFile(cfg)
 	initLogDir(cfg)
 	initParams(cx)
-	initListeners(cx)
+	initListeners(cx, ctx)
 	initLogLevel(cfg)
 	// Don't add peers from the config file when in regression test mode.
 	if ((*cfg.Network)[0] == 'r') && len(*cfg.AddPeers) > 0 {

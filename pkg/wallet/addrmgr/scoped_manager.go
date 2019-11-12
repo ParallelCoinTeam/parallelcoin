@@ -5,8 +5,8 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"sync"
 
-   `github.com/p9c/pod/pkg/chain/config/netparams`
-   "github.com/p9c/pod/pkg/util"
+	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/util"
 	ec "github.com/p9c/pod/pkg/util/elliptic"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/zero"
@@ -219,7 +219,7 @@ func (s *ScopedKeyManager) keyToManaged(derivedKey *hdkeychain.ExtendedKey,
 	defer derivedKey.Zero()
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if !derivedKey.IsPrivate() {
 		// Add the managed address to the list of addresses that need
@@ -253,7 +253,7 @@ func (s *ScopedKeyManager) deriveKey(acctInfo *accountInfo, branch,
 	branchKey, err := acctKey.Child(branch)
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to derive extended key branch %d",
+		str := fmt.Sprintf("failed to derive extended key branch %d",
 			branch)
 		return nil, managerError(ErrKeyChain, str, err)
 	}
@@ -261,7 +261,7 @@ str := fmt.Sprintf("failed to derive extended key branch %d",
 	branchKey.Zero() // Zero branch key after it's used.
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to derive child extended key -- "+
+		str := fmt.Sprintf("failed to derive child extended key -- "+
 			"branch %d, child %d",
 			branch, index)
 		return nil, managerError(ErrKeyChain, str, err)
@@ -285,7 +285,7 @@ func (s *ScopedKeyManager) loadAccountInfo(ns walletdb.ReadBucket,
 	rowInterface, err := fetchAccountInfo(ns, &s.scope, account)
 	if err != nil {
 		log.ERROR(err)
-return nil, maybeConvertDbError(err)
+		return nil, maybeConvertDbError(err)
 	}
 	// Ensure the account type is a default account.
 	row, ok := rowInterface.(*dbDefaultAccountRow)
@@ -298,14 +298,14 @@ return nil, maybeConvertDbError(err)
 	serializedKeyPub, err := s.rootManager.cryptoKeyPub.Decrypt(row.pubKeyEncrypted)
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to decrypt public key for account %d",
+		str := fmt.Sprintf("failed to decrypt public key for account %d",
 			account)
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	acctKeyPub, err := hdkeychain.NewKeyFromString(string(serializedKeyPub))
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to create extended public key for "+
+		str := fmt.Sprintf("failed to create extended public key for "+
 			"account %d", account)
 		return nil, managerError(ErrKeyChain, str, err)
 	}
@@ -323,15 +323,15 @@ str := fmt.Sprintf("failed to create extended public key for "+
 		// extended keys.
 		decrypted, err := s.rootManager.cryptoKeyPriv.Decrypt(acctInfo.acctKeyEncrypted)
 		if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("failed to decrypt private key for "+
+			log.ERROR(err)
+			str := fmt.Sprintf("failed to decrypt private key for "+
 				"account %d", account)
 			return nil, managerError(ErrCrypto, str, err)
 		}
 		acctKeyPriv, err := hdkeychain.NewKeyFromString(string(decrypted))
 		if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("failed to create extended private "+
+			log.ERROR(err)
+			str := fmt.Sprintf("failed to create extended private "+
 				"key for account %d", account)
 			return nil, managerError(ErrKeyChain, str, err)
 		}
@@ -347,12 +347,12 @@ str := fmt.Sprintf("failed to create extended private "+
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	lastExtAddr, err := s.keyToManaged(lastExtKey, account, branch, index)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	acctInfo.lastExternalAddr = lastExtAddr
 	// Derive and cache the managed address for the last internal address.
@@ -365,12 +365,12 @@ return nil, err
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	lastIntAddr, err := s.keyToManaged(lastIntKey, account, branch, index)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	acctInfo.lastInternalAddr = lastIntAddr
 	// Add it to the cache and return it when everything is successful.
@@ -399,8 +399,8 @@ func (s *ScopedKeyManager) AccountProperties(ns walletdb.ReadBucket,
 	if account != ImportedAddrAccount {
 		acctInfo, err := s.loadAccountInfo(ns, account)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		props.AccountName = acctInfo.acctName
 		props.ExternalKeyCount = acctInfo.nextExternalIndex
@@ -415,8 +415,8 @@ return nil, err
 		}
 		err := forEachAccountAddress(ns, &s.scope, ImportedAddrAccount, count)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		props.ImportedKeyCount = importedKeyCount
 	}
@@ -435,7 +435,7 @@ func (s *ScopedKeyManager) DeriveFromKeyPath(ns walletdb.ReadBucket,
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return s.keyToManaged(extKey, kp.Account, kp.Branch, kp.Index)
 }
@@ -450,7 +450,7 @@ func (s *ScopedKeyManager) deriveKeyFromPath(ns walletdb.ReadBucket, account, br
 	acctInfo, err := s.loadAccountInfo(ns, account)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return s.deriveKey(acctInfo, branch, index, private)
 }
@@ -469,7 +469,7 @@ func (s *ScopedKeyManager) chainAddressRowToManaged(ns walletdb.ReadBucket,
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return s.keyToManaged(addressKey, row.account, row.branch, row.index)
 }
@@ -481,13 +481,13 @@ func (s *ScopedKeyManager) importedAddressRowToManaged(row *dbImportedAddressRow
 	pubBytes, err := s.rootManager.cryptoKeyPub.Decrypt(row.encryptedPubKey)
 	if err != nil {
 		log.ERROR(err)
-str := "failed to decrypt public key for imported address"
+		str := "failed to decrypt public key for imported address"
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	pubKey, err := ec.ParsePubKey(pubBytes, ec.S256())
 	if err != nil {
 		log.ERROR(err)
-str := "invalid public key for imported address"
+		str := "invalid public key for imported address"
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	// Since this is an imported address, we won't populate the full
@@ -502,7 +502,7 @@ str := "invalid public key for imported address"
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	ma.privKeyEncrypted = row.encryptedPrivKey
 	ma.imported = true
@@ -516,7 +516,7 @@ func (s *ScopedKeyManager) scriptAddressRowToManaged(row *dbScriptAddressRow) (M
 	scriptHash, err := s.rootManager.cryptoKeyPub.Decrypt(row.encryptedHash)
 	if err != nil {
 		log.ERROR(err)
-str := "failed to decrypt imported script hash"
+		str := "failed to decrypt imported script hash"
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	return newScriptAddress(s, row.account, scriptHash, row.encryptedScript)
@@ -550,8 +550,7 @@ func (s *ScopedKeyManager) loadAndCacheAddress(ns walletdb.ReadBucket,
 	// Attempt to load the raw address information from the database.
 	rowInterface, err := fetchAddress(ns, &s.scope, address.ScriptAddress())
 	if err != nil {
-		log.ERROR(err)
-if merr, ok := err.(*ManagerError); ok {
+		if merr, ok := err.(*ManagerError); ok {
 			desc := fmt.Sprintf("failed to fetch address '%s': %v",
 				address.ScriptAddress(), merr.Description)
 			merr.Description = desc
@@ -564,7 +563,7 @@ if merr, ok := err.(*ManagerError); ok {
 	managedAddr, err := s.rowInterfaceToManaged(ns, rowInterface)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Cache and return the new managed address.
 	s.addrs[addrKey(managedAddr.Address().ScriptAddress())] = managedAddr
@@ -621,7 +620,7 @@ func (s *ScopedKeyManager) AddrAccount(ns walletdb.ReadBucket,
 	account, err := fetchAddrAccount(ns, &s.scope, address.ScriptAddress())
 	if err != nil {
 		log.ERROR(err)
-return 0, maybeConvertDbError(err)
+		return 0, maybeConvertDbError(err)
 	}
 	return account, nil
 }
@@ -637,7 +636,7 @@ func (s *ScopedKeyManager) nextAddresses(ns walletdb.ReadWriteBucket,
 	acctInfo, err := s.loadAccountInfo(ns, account)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Choose the account key to used based on whether the address manager
 	// is locked.
@@ -669,7 +668,7 @@ return nil, err
 	branchKey, err := acctKey.Child(branchNum)
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to derive extended key branch %d",
+		str := fmt.Sprintf("failed to derive extended key branch %d",
 			branchNum)
 		return nil, managerError(ErrKeyChain, str, err)
 	}
@@ -685,8 +684,8 @@ str := fmt.Sprintf("failed to derive extended key branch %d",
 			// Derive the next child in the external chain branch.
 			key, err := branchKey.Child(nextIndex)
 			if err != nil {
-		log.ERROR(err)
-// When this particular child is invalid, skip to the
+				log.ERROR(err)
+				// When this particular child is invalid, skip to the
 				// next index.
 				if err == hdkeychain.ErrInvalidChild {
 					nextIndex++
@@ -717,8 +716,8 @@ str := fmt.Sprintf("failed to derive extended key branch %d",
 			s, derivationPath, nextKey, addrType,
 		)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		if internal {
 			addr.internal = true
@@ -744,14 +743,14 @@ return nil, err
 				info.branch, info.index, adtChain,
 			)
 			if err != nil {
-		log.ERROR(err)
-return nil, maybeConvertDbError(err)
+				log.ERROR(err)
+				return nil, maybeConvertDbError(err)
 			}
 		case *scriptAddress:
 			encryptedHash, err := s.rootManager.cryptoKeyPub.Encrypt(a.AddrHash())
 			if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("failed to encrypt script hash %x",
+				log.ERROR(err)
+				str := fmt.Sprintf("failed to encrypt script hash %x",
 					a.AddrHash())
 				return nil, managerError(ErrCrypto, str, err)
 			}
@@ -760,8 +759,8 @@ str := fmt.Sprintf("failed to encrypt script hash %x",
 				ssNone, encryptedHash, a.scriptEncrypted,
 			)
 			if err != nil {
-		log.ERROR(err)
-return nil, maybeConvertDbError(err)
+				log.ERROR(err)
+				return nil, maybeConvertDbError(err)
 			}
 		}
 	}
@@ -806,7 +805,7 @@ func (s *ScopedKeyManager) extendAddresses(ns walletdb.ReadWriteBucket,
 	acctInfo, err := s.loadAccountInfo(ns, account)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Choose the account key to used based on whether the address manager
 	// is locked.
@@ -842,7 +841,7 @@ return err
 	branchKey, err := acctKey.Child(branchNum)
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to derive extended key branch %d",
+		str := fmt.Sprintf("failed to derive extended key branch %d",
 			branchNum)
 		return managerError(ErrKeyChain, str, err)
 	}
@@ -860,8 +859,8 @@ str := fmt.Sprintf("failed to derive extended key branch %d",
 			// Derive the next child in the external chain branch.
 			key, err := branchKey.Child(nextIndex)
 			if err != nil {
-		log.ERROR(err)
-// When this particular child is invalid, skip to the
+				log.ERROR(err)
+				// When this particular child is invalid, skip to the
 				// next index.
 				if err == hdkeychain.ErrInvalidChild {
 					nextIndex++
@@ -892,8 +891,8 @@ str := fmt.Sprintf("failed to derive extended key branch %d",
 			s, derivationPath, nextKey, addrType,
 		)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		if internal {
 			addr.internal = true
@@ -919,14 +918,14 @@ return err
 				info.branch, info.index, adtChain,
 			)
 			if err != nil {
-		log.ERROR(err)
-return maybeConvertDbError(err)
+				log.ERROR(err)
+				return maybeConvertDbError(err)
 			}
 		case *scriptAddress:
 			encryptedHash, err := s.rootManager.cryptoKeyPub.Encrypt(a.AddrHash())
 			if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("failed to encrypt script hash %x",
+				log.ERROR(err)
+				str := fmt.Sprintf("failed to encrypt script hash %x",
 					a.AddrHash())
 				return managerError(ErrCrypto, str, err)
 			}
@@ -935,8 +934,8 @@ str := fmt.Sprintf("failed to encrypt script hash %x",
 				ssNone, encryptedHash, a.scriptEncrypted,
 			)
 			if err != nil {
-		log.ERROR(err)
-return maybeConvertDbError(err)
+				log.ERROR(err)
+				return maybeConvertDbError(err)
 			}
 		}
 	}
@@ -1045,7 +1044,7 @@ func (s *ScopedKeyManager) LastExternalAddress(ns walletdb.ReadBucket,
 	acctInfo, err := s.loadAccountInfo(ns, account)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if acctInfo.nextExternalIndex > 0 {
 		return acctInfo.lastExternalAddr, nil
@@ -1075,7 +1074,7 @@ func (s *ScopedKeyManager) LastInternalAddress(ns walletdb.ReadBucket,
 	acctInfo, err := s.loadAccountInfo(ns, account)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if acctInfo.nextInternalIndex > 0 {
 		return acctInfo.lastInternalAddr, nil
@@ -1123,7 +1122,7 @@ func (s *ScopedKeyManager) NewAccount(ns walletdb.ReadWriteBucket, name string) 
 	account, err := fetchLastAccount(ns, &s.scope)
 	if err != nil {
 		log.ERROR(err)
-return 0, err
+		return 0, err
 	}
 	account++
 	// With the name validated, we'll create a new account for the new
@@ -1156,20 +1155,20 @@ func (s *ScopedKeyManager) newAccount(ns walletdb.ReadWriteBucket,
 	_, coinTypePrivEnc, err := fetchCoinTypeKeys(ns, &s.scope)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Decrypt the cointype key.
 	serializedKeyPriv, err := s.rootManager.cryptoKeyPriv.Decrypt(coinTypePrivEnc)
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to decrypt cointype serialized private key")
+		str := fmt.Sprintf("failed to decrypt cointype serialized private key")
 		return managerError(ErrLocked, str, err)
 	}
 	coinTypeKeyPriv, err := hdkeychain.NewKeyFromString(string(serializedKeyPriv))
 	zero.Bytes(serializedKeyPriv)
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to create cointype extended private key")
+		str := fmt.Sprintf("failed to create cointype extended private key")
 		return managerError(ErrKeyChain, str, err)
 	}
 	// Derive the account key using the cointype key
@@ -1177,13 +1176,13 @@ str := fmt.Sprintf("failed to create cointype extended private key")
 	coinTypeKeyPriv.Zero()
 	if err != nil {
 		log.ERROR(err)
-str := "failed to convert private key for account"
+		str := "failed to convert private key for account"
 		return managerError(ErrKeyChain, str, err)
 	}
 	acctKeyPub, err := acctKeyPriv.Neuter()
 	if err != nil {
 		log.ERROR(err)
-str := "failed to convert public key for account"
+		str := "failed to convert public key for account"
 		return managerError(ErrKeyChain, str, err)
 	}
 	// Encrypt the default account keys with the associated crypto keys.
@@ -1192,7 +1191,7 @@ str := "failed to convert public key for account"
 	)
 	if err != nil {
 		log.ERROR(err)
-str := "failed to  encrypt public key for account"
+		str := "failed to  encrypt public key for account"
 		return managerError(ErrCrypto, str, err)
 	}
 	acctPrivEnc, err := s.rootManager.cryptoKeyPriv.Encrypt(
@@ -1200,7 +1199,7 @@ str := "failed to  encrypt public key for account"
 	)
 	if err != nil {
 		log.ERROR(err)
-str := "failed to encrypt private key for account"
+		str := "failed to encrypt private key for account"
 		return managerError(ErrCrypto, str, err)
 	}
 	// We have the encrypted account extended keys, so save them to the
@@ -1210,7 +1209,7 @@ str := "failed to encrypt private key for account"
 	)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Save last account metadata
 	return putLastAccount(ns, &s.scope, account)
@@ -1241,7 +1240,7 @@ func (s *ScopedKeyManager) RenameAccount(ns walletdb.ReadWriteBucket,
 	rowInterface, err := fetchAccountInfo(ns, &s.scope, account)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Ensure the account type is a default account.
 	row, ok := rowInterface.(*dbDefaultAccountRow)
@@ -1264,7 +1263,7 @@ return err
 	)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Update in-memory account info with new name if cached and the db
 	// write was successful.
@@ -1322,7 +1321,7 @@ func (s *ScopedKeyManager) ImportPrivateKey(ns walletdb.ReadWriteBucket,
 	)
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to encrypt public key for %x",
+		str := fmt.Sprintf("failed to encrypt public key for %x",
 			serializedPubKey)
 		return nil, managerError(ErrCrypto, str, err)
 	}
@@ -1333,8 +1332,8 @@ str := fmt.Sprintf("failed to encrypt public key for %x",
 		encryptedPrivKey, err = s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes)
 		zero.Bytes(privKeyBytes)
 		if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("failed to encrypt private key for %x",
+			log.ERROR(err)
+			str := fmt.Sprintf("failed to encrypt private key for %x",
 				serializedPubKey)
 			return nil, managerError(ErrCrypto, str, err)
 		}
@@ -1352,13 +1351,13 @@ str := fmt.Sprintf("failed to encrypt private key for %x",
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if updateStartBlock {
 		err := putStartBlock(ns, bs)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 	}
 	// Now that the database has been updated, update the start block in
@@ -1389,7 +1388,7 @@ return nil, err
 	}
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	managedAddr.imported = true
 	// Add the new managed address to the cache of recent addresses and
@@ -1431,7 +1430,7 @@ func (s *ScopedKeyManager) ImportScript(ns walletdb.ReadWriteBucket,
 	encryptedHash, err := s.rootManager.cryptoKeyPub.Encrypt(scriptHash)
 	if err != nil {
 		log.ERROR(err)
-str := fmt.Sprintf("failed to encrypt script hash %x",
+		str := fmt.Sprintf("failed to encrypt script hash %x",
 			scriptHash)
 		return nil, managerError(ErrCrypto, str, err)
 	}
@@ -1443,8 +1442,8 @@ str := fmt.Sprintf("failed to encrypt script hash %x",
 			script,
 		)
 		if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("failed to encrypt script for %x",
+			log.ERROR(err)
+			str := fmt.Sprintf("failed to encrypt script for %x",
 				scriptHash)
 			return nil, managerError(ErrCrypto, str, err)
 		}
@@ -1465,13 +1464,13 @@ str := fmt.Sprintf("failed to encrypt script for %x",
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, maybeConvertDbError(err)
+		return nil, maybeConvertDbError(err)
 	}
 	if updateStartBlock {
 		err := putStartBlock(ns, bs)
 		if err != nil {
-		log.ERROR(err)
-return nil, maybeConvertDbError(err)
+			log.ERROR(err)
+			return nil, maybeConvertDbError(err)
 		}
 	}
 	// Now that the database has been updated, update the start block in
@@ -1490,7 +1489,7 @@ return nil, maybeConvertDbError(err)
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if !s.rootManager.WatchOnly() {
 		scriptAddr.scriptCT = make([]byte, len(script))
@@ -1531,7 +1530,7 @@ func (s *ScopedKeyManager) MarkUsed(ns walletdb.ReadWriteBucket,
 	err := markAddressUsed(ns, &s.scope, addressID)
 	if err != nil {
 		log.ERROR(err)
-return maybeConvertDbError(err)
+		return maybeConvertDbError(err)
 	}
 	// Clear caches which might have stale entries for used addresses
 	s.mtx.Lock()
@@ -1574,15 +1573,15 @@ func (s *ScopedKeyManager) ForEachAccountAddress(ns walletdb.ReadBucket,
 	addrFn := func(rowInterface interface{}) error {
 		managedAddr, err := s.rowInterfaceToManaged(ns, rowInterface)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		return fn(managedAddr)
 	}
 	err := forEachAccountAddress(ns, &s.scope, account, addrFn)
 	if err != nil {
 		log.ERROR(err)
-return maybeConvertDbError(err)
+		return maybeConvertDbError(err)
 	}
 	return nil
 }
@@ -1605,15 +1604,15 @@ func (s *ScopedKeyManager) ForEachActiveAddress(ns walletdb.ReadBucket,
 	addrFn := func(rowInterface interface{}) error {
 		managedAddr, err := s.rowInterfaceToManaged(ns, rowInterface)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		return fn(managedAddr.Address())
 	}
 	err := forEachActiveAddress(ns, &s.scope, addrFn)
 	if err != nil {
 		log.ERROR(err)
-return maybeConvertDbError(err)
+		return maybeConvertDbError(err)
 	}
 	return nil
 }

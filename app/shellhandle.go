@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/p9c/pod/app/save"
 	"github.com/urfave/cli"
 	"os"
 	"sync"
@@ -23,7 +22,7 @@ shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		nodeChan := make(chan *rpc.Server)
 		walletChan := make(chan *wallet.Wallet)
 		kill := make(chan struct{})
-		Configure(cx)
+		Configure(cx, c)
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
@@ -40,29 +39,28 @@ shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}
 			fmt.Println("restart to complete initial setup")
 			os.Exit(1)
-			log.L.SetLevel(*cx.Config.LogLevel, true)
-		}
-		if !*cx.Config.WalletOff {
-			go func() {
-				err = walletmain.Main(cx.Config, cx.StateCfg,
-					cx.ActiveNet, walletChan, kill, &wg)
-				if err != nil {
-		log.ERROR(err)
-fmt.Println("error running wallet:", err)
-				}
-			}()
-			cx.WalletServer = <-walletChan
-			save.Pod(cx.Config)
+			//log.L.SetLevel(*cx.Config.LogLevel, true)
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
-				Configure(cx)
+				Configure(cx, c)
 				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
 				if err != nil {
 					log.ERROR("error starting node ", err)
 				}
 			}()
 			cx.RPCServer = <-nodeChan
+		}
+		if !*cx.Config.WalletOff {
+			go func() {
+				err = walletmain.Main(cx.Config, cx.StateCfg,
+					cx.ActiveNet, walletChan, kill, &wg)
+				if err != nil {
+					fmt.Println("error running wallet:", err)
+				}
+			}()
+			cx.WalletServer = <-walletChan
+			//save.Pod(cx.Config)
 		}
 		wg.Wait()
 		return nil

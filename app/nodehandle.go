@@ -16,7 +16,7 @@ nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		log.TRACE("running node handler")
 		var wg sync.WaitGroup
-		Configure(cx)
+		Configure(cx, c)
 		// serviceOptions defines the configuration options for the daemon as a service on Windows.
 		type serviceOptions struct {
 			ServiceCommand string `short:"s" long:"service" description:"Service command {install, remove, start, stop}"`

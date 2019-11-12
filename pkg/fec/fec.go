@@ -85,11 +85,7 @@ func Decode(chunks [][]byte) (data []byte, err error) {
 		prefix := data[:4]
 		data = data[4:]
 		dataLen := int(binary.LittleEndian.Uint32(prefix))
-		if len(data) == dataLen {
-			data = data[:dataLen]
-		} else {
-			data = data[0:]
-		}
+		data = data[:dataLen]
 	}
 	return
 }

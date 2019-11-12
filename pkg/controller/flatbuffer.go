@@ -494,7 +494,7 @@ func GetPort(listener string) Serializer {
 		log.ERROR(err)
 		return nil
 	}
-	oI, err := strconv.ParseInt(p, 10, 16)
+	oI, err := strconv.ParseInt(p, 10, 32)
 	if err != nil {
 		log.ERROR(err)
 		return nil

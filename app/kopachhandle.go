@@ -13,7 +13,7 @@ import (
 func kopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		var wg sync.WaitGroup
-		Configure(cx)
+		Configure(cx, c)
 		quit := make(chan struct{})
 		interrupt.AddHandler(func(){
 			close(quit)

@@ -7,8 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/controller/broadcast"
-	"github.com/p9c/pod/pkg/controller/gcm"
+	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
 	"go.uber.org/atomic"
@@ -51,7 +50,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cancel()
 		return
 	}
-
+	ciph := gcm.GetCipher(*cx.Config.MinerPass)
 	var sendAddresses []*net.UDPAddr
 	for i := range MCAddresses {
 		_, err := net.ListenUDP("udp", MCAddresses[i])
@@ -86,6 +85,15 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	msgB := template.Block
 	msgBase := GetMessageBase(cx)
 	fMC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
+	var conns []*net.UDPConn
+	for i := range sendAddresses {
+		conn, err := net.ListenUDP("udp", sendAddresses[i])
+		if err != nil {
+			log.ERROR(err)
+		} else {
+			conns = append(conns, conn)
+		}
+	}
 	//log.DEBUG(fMC.GetIPs())
 	//log.DEBUG(fMC.GetP2PListenersPort())
 	//log.DEBUG(fMC.GetRPCListenersPort())
@@ -95,7 +103,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	//log.SPEW(fMC.GetTxs())
 	//log.SPEW(fMC.Data)
 	for i := range sendAddresses {
-		err := Send(sendAddresses[i], fMC.Data, WorkMagic)
+		err := Send(sendAddresses[i], fMC.Data, WorkMagic, ciph, conns[i])
 		if err != nil {
 			log.ERROR(err)
 		}
@@ -144,7 +152,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					//log.SPEW(mC.GetTxs())
 					//log.SPEW(mC.Data)
 					for i := range sendAddresses {
-						err := Send(sendAddresses[i], mC.Data, WorkMagic)
+						err := Send(sendAddresses[i], mC.Data, WorkMagic,
+							ciph, conns[i])
 						if err != nil {
 							log.TRACE(err)
 						}
@@ -155,6 +164,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		select {
 		case <-ctx.Done():
 			log.DEBUG("miner controller shutting down")
+			for i := range conns {
+				log.DEBUG("stopping listener on", conns[i].LocalAddr())
+				conns[i].Close()
+			}
 			active.Store(false)
 			break
 		}
