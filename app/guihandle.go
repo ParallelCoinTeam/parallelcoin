@@ -32,6 +32,7 @@ type Bios struct {
 	IsScreen   string `json:"screen"`
 }
 
+
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		widgets.NewQApplication(len(os.Args), os.Args)

@@ -14,11 +14,12 @@ type DuOSalert struct {
 }
 
 // GetMsg loads the message variable
-func (d *DuOSalert) PushDuOSalert(t string, m interface{}, at string) {
+func (r *rcvar) PushDuOSalert(t string, m interface{}, at string) (d *DuOSalert) {
 	a := new(DuOSalert)
 	a.Time = time.Now()
 	a.Title = t
 	a.Message = m
 	a.AlertType = at
 	//d.Render("alert", a)
+	return
 }
