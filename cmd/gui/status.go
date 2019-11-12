@@ -33,8 +33,8 @@ type DuOStatus struct {
 	//MempoolInfo      string                        `json:"ver"`
 }
 
-func (r *rcvar) GetDuOStatus() (s *DuOStatus) {
-	s = new(DuOStatus)
+func (r *rcvar) GetDuOStatus() (s DuOStatus) {
+	s = *new(DuOStatus)
 	sm, _ := mem.VirtualMemory()
 	sc, _ := cpu.Info()
 	sp, _ := cpu.Percent(0, true)
@@ -72,5 +72,6 @@ func (r *rcvar) GetDuOStatus() (s *DuOStatus) {
 	s.BlockCount = r.GetBlockCount()
 	s.ConnectionCount = r.GetConnectionCount()
 	s.NetworkLastBlock = r.GetNetworkLastBlock()
+	r.status = s
 	return s
 }

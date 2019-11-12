@@ -15,7 +15,7 @@ func (r *rcvar) GetNetworkLastBlock() int32 {
 func (r *rcvar) GetBlockCount() int64 {
 	getBlockCount, err := rpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
 	if err != nil {
-		r.alert.PushDuOSalert("Error", err.Error(), "error")
+		r.PushDuOSalert("Error", err.Error(), "error")
 	}
 	r.status.BlockCount = getBlockCount.(int64)
 	return r.status.BlockCount
