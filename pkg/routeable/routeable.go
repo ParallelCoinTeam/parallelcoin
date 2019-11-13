@@ -16,8 +16,14 @@ func GetInterface() (lanInterface []*net.Interface) {
 	}
 	//log.SPEW(interfaces)
 	for ifi := range interfaces {
-		if interfaces[ifi].Flags&net.FlagMulticast != 0 {
-			lanInterface=append(lanInterface, &interfaces[ifi])
+		if interfaces[ifi].Flags&net.FlagLoopback == 0 && interfaces[ifi].
+			HardwareAddr != nil {
+			//iads, _ := interfaces[ifi].Addrs()
+			//for i := range iads {
+			//	//log.SPEW(iads[i].Network())
+			//}
+			//log.DEBUG(interfaces[ifi].MulticastAddrs())
+			lanInterface = append(lanInterface, &interfaces[ifi])
 		}
 	}
 	//log.SPEW(lanInterface)

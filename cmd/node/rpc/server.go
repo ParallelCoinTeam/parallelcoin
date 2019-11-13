@@ -395,7 +395,7 @@ func (s *Node) ScheduleShutdown(duration time.Duration) {
 				err := s.Stop()
 				if err != nil {
 					log.ERROR(err)
-}
+				}
 				break out
 			case <-ticker.C:
 				remaining -= -tickDuration
@@ -464,7 +464,7 @@ func (s *Node) Stop() error {
 			err := s.RPCServers[i].Stop()
 			if err != nil {
 				log.ERROR(err)
-}
+			}
 		}
 	}
 	// Save fee estimator state in the database.
@@ -473,12 +473,10 @@ func (s *Node) Stop() error {
 		err := metadata.Put(mempool.EstimateFeeDatabaseKey, s.FeeEstimator.Save())
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 		}
 		return nil
 	})
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 	}
 	// Signal the remaining goroutines to quit.
@@ -537,7 +535,6 @@ func (s *Node) HandleAddPeerMsg(state *PeerState, sp *NodePeer) bool {
 	// Disconnect banned peers.
 	host, _, err := net.SplitHostPort(sp.Addr())
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR("can't split host/port", err)
 		sp.Disconnect()
 		return false
@@ -581,7 +578,6 @@ func (s *Node) HandleAddPeerMsg(state *PeerState, sp *NodePeer) bool {
 func (s *Node) HandleBanPeerMsg(state *PeerState, sp *NodePeer) {
 	host, _, err := net.SplitHostPort(sp.Addr())
 	if err != nil {
-		log.ERROR(err)
 		log.ERRORF("can't split ban peer %s %v %s", sp.Addr(), err)
 		return
 	}
@@ -680,7 +676,6 @@ func (s *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 		}
 		netAddr, err := AddrStringToNetAddr(s.Config, s.StateCfg, msg.Addr)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			msg.Reply <- err
 			return
@@ -845,7 +840,6 @@ func (s *Node) OutboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) {
 	sp := NewServerPeer(s, c.Permanent)
 	p, err := peer.NewOutboundPeer(NewPeerConfig(sp), c.Addr.String())
 	if err != nil {
-		log.ERROR(err)
 		log.ERRORF("cannot create outbound peer %s: %v %s", c.Addr, err)
 		s.ConnManager.Disconnect(c.ID())
 	}
@@ -983,7 +977,6 @@ func (s *Node) PushBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 		return err
 	})
 	if err != nil {
-		log.ERROR(err)
 		log.ERRORF("unable to fetch requested block hash %v: %v",
 			hash, err)
 		if doneChan != nil {
@@ -995,7 +988,6 @@ func (s *Node) PushBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 	var msgBlock wire.MsgBlock
 	err = msgBlock.Deserialize(bytes.NewReader(blockBytes))
 	if err != nil {
-		log.ERROR(err)
 		log.ERRORF("unable to deserialize requested block hash %v: %v",
 			hash, err)
 		if doneChan != nil {
@@ -1027,7 +1019,6 @@ func (s *Node) PushBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 		err := invMsg.AddInvVect(iv)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 		}
 		sp.QueueMessage(invMsg, doneChan)
 		sp.ContinueHash = nil
@@ -1052,7 +1043,6 @@ func (s *Node) PushMerkleBlockMsg(sp *NodePeer, hash *chainhash.Hash,
 	// Fetch the raw block bytes from the database.
 	blk, err := sp.Server.Chain.BlockByHash(hash)
 	if err != nil {
-		log.ERROR(err)
 		log.ERRORF("unable to fetch requested block hash %v: %v",
 			hash, err)
 		if doneChan != nil {
@@ -1100,7 +1090,6 @@ func (s *Node) PushTxMsg(sp *NodePeer, hash *chainhash.Hash,
 	// missing transaction results in the same behavior.
 	tx, err := s.TxMemPool.FetchTransaction(hash)
 	if err != nil {
-		log.ERROR(err)
 		log.ERRORF("unable to fetch tx %v from transaction pool: %v", hash, err)
 		if doneChan != nil {
 			doneChan <- struct{}{}
@@ -1193,7 +1182,6 @@ out:
 				int(lport),
 				"pod listen port", 20*60)
 			if err != nil {
-				log.ERROR(err)
 				log.ERRORF("can't add UPnP port mapping: %v %s", err)
 			}
 			if first && err == nil {
@@ -1210,7 +1198,7 @@ out:
 				err = s.AddrManager.AddLocalAddress(na, addrmgr.UpnpPrio)
 				if err != nil {
 					log.ERROR(err)
-_ = err
+					_ = err
 					// XXX DeletePortMapping?
 				}
 				log.WARNF("successfully bound via UPnP to %s",
@@ -1419,7 +1407,6 @@ func (sp *NodePeer) OnGetBlocks(_ *peer.Peer,
 		err := invMsg.AddInvVect(iv)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 		}
 	}
 	// Send the inventory message if there is anything to send.
@@ -1461,7 +1448,6 @@ func (sp *NodePeer) OnGetCFCheckpt(_ *peer.Peer,
 		&msg.StopHash, wire.CFCheckptInterval,
 	)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR("invalid getcfilters request:", err)
 		return
 	}
@@ -1523,7 +1509,6 @@ func (sp *NodePeer) OnGetCFCheckpt(_ *peer.Peer,
 		err := checkptMsg.AddCFHeader(&checkptCache[i].FilterHeader)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 		}
 	}
 	// We'll now collect the set of hashes that are beyond our cache so we can
@@ -1538,7 +1523,6 @@ func (sp *NodePeer) OnGetCFCheckpt(_ *peer.Peer,
 	log.ERROR("error retrieving cfilter headers:", err)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return
 	}
 	// Now that we have the full set of filter headers, we'll add them to the
@@ -1550,13 +1534,11 @@ func (sp *NodePeer) OnGetCFCheckpt(_ *peer.Peer,
 		}
 		filterHeader, err := chainhash.NewHash(filterHeaderBytes)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR("committed filter header deserialize failed:", err)
 			return
 		}
 		err = checkptMsg.AddCFHeader(filterHeader)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 		}
 		// If the new main chain is longer than what's in the cache, then we'll
@@ -1607,7 +1589,6 @@ func (sp *NodePeer) OnGetCFHeaders(_ *peer.Peer,
 		startHeight, &msg.StopHash, maxResults,
 	)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR("invalid getcfheaders request:", err)
 	}
 	// This is possible if StartHeight is one greater that the height of
@@ -1628,7 +1609,6 @@ func (sp *NodePeer) OnGetCFHeaders(_ *peer.Peer,
 		hashPtrs, msg.FilterType,
 	)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR("error retrieving cfilter hashes:", err)
 		return
 	}
@@ -1641,7 +1621,6 @@ func (sp *NodePeer) OnGetCFHeaders(_ *peer.Peer,
 		headerBytes, err := sp.Server.CFIndex.FilterHeaderByBlockHash(
 			prevBlockHash, msg.FilterType)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR("error retrieving CF header:", err)
 			return
 		}
@@ -1652,7 +1631,6 @@ func (sp *NodePeer) OnGetCFHeaders(_ *peer.Peer,
 		// Deserialize the hash into PrevFilterHeader.
 		err = headersMsg.PrevFilterHeader.SetBytes(headerBytes)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR("committed filter header deserialize failed:", err)
 			return
 		}
@@ -1668,13 +1646,11 @@ func (sp *NodePeer) OnGetCFHeaders(_ *peer.Peer,
 		// Deserialize the hash.
 		filterHash, err := chainhash.NewHash(hashBytes)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR("committed filter hash deserialize failed:", err)
 			return
 		}
 		err = headersMsg.AddCFHash(filterHash)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 		}
 	}
@@ -1788,11 +1764,10 @@ func (sp *NodePeer) OnGetData(_ *peer.Peer,
 		}
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 			err := notFound.AddInvVect(iv)
 			if err != nil {
 				log.ERROR(err)
-}
+			}
 			// When there is a failure fetching the final entry and the done
 			// channel was sent in due to there being no outstanding not found
 			// inventory, consume it here because there is now not found inventory
@@ -1876,7 +1851,6 @@ func (sp *NodePeer) OnInv(
 		}
 		err := newInv.AddInvVect(invVect)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR("failed to add inventory vector:", err)
 			break
 		}
@@ -1920,7 +1894,7 @@ func (sp *NodePeer) OnMemPool(_ *peer.Peer,
 			err := invMsg.AddInvVect(iv)
 			if err != nil {
 				log.ERROR(err)
-}
+			}
 			if len(invMsg.InvList)+1 > wire.MaxInvPerMsg {
 				break
 			}
@@ -2157,7 +2131,6 @@ func (sp *NodePeer) PreparePushAddrMsg(addresses []*wire.NetAddress) {
 	}
 	known, err := sp.PushAddrMsg(addrs)
 	if err != nil {
-		log.ERROR(err)
 		log.ERRORF("can't push address message to %s: %v", sp.Peer, err)
 		sp.Disconnect()
 		return
@@ -2216,12 +2189,10 @@ AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Service
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return err
 	}
@@ -2229,7 +2200,6 @@ AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Service
 		// If bound to unspecified address, advertise all local interfaces
 		addrs, err := net.InterfaceAddrs()
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}
@@ -2273,12 +2243,10 @@ AddrStringToNetAddr(config *pod.Config, stateCfg *state.Config, addr string) (ne
 	host, strPort, err := net.SplitHostPort(addr)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return nil, err
 	}
 	port, err := strconv.Atoi(strPort)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return nil, err
 	}
@@ -2301,7 +2269,6 @@ AddrStringToNetAddr(config *pod.Config, stateCfg *state.Config, addr string) (ne
 	// Attempt to look up an IP address associated with the parsed host.
 	ips, err := Lookup(stateCfg)(host)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return nil, err
 	}
@@ -2381,7 +2348,6 @@ InitListeners(config *pod.Config, activeNet *netparams.Params,
 	netAddrs, err := ParseListeners(listenAddrs)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return nil, nil, err
 	}
 	log.TRACE("netAddrs ", netAddrs)
@@ -2390,7 +2356,6 @@ InitListeners(config *pod.Config, activeNet *netparams.Params,
 		log.TRACE("addr ", addr, " ", addr.Network(), " ", addr.String())
 		listener, err := net.Listen(addr.Network(), addr.String())
 		if err != nil {
-			log.ERROR(err)
 			log.WARNF("can't listen on %s: %v %s", addr, err)
 			continue
 		}
@@ -2400,7 +2365,6 @@ InitListeners(config *pod.Config, activeNet *netparams.Params,
 	if len(*config.ExternalIPs) != 0 {
 		defaultPort, err := strconv.ParseUint(activeNet.DefaultPort, 10, 16)
 		if err != nil {
-			log.ERROR(err)
 			log.ERRORF("can not parse default port %s for active chain: %v",
 				activeNet.DefaultPort, err)
 			return nil, nil, err
@@ -2409,13 +2373,11 @@ InitListeners(config *pod.Config, activeNet *netparams.Params,
 			eport := uint16(defaultPort)
 			host, portstr, err := net.SplitHostPort(sip)
 			if err != nil {
-				log.ERROR(err)
-// no port, use default.
+				// no port, use default.
 				host = sip
 			} else {
 				port, err := strconv.ParseUint(portstr, 10, 16)
 				if err != nil {
-					log.ERROR(err)
 					log.ERRORF("can not parse port from %s for externalip: %v",
 						sip, err)
 					continue
@@ -2424,13 +2386,11 @@ InitListeners(config *pod.Config, activeNet *netparams.Params,
 			}
 			na, err := aMgr.HostToNetAddress(host, eport, services)
 			if err != nil {
-				log.ERROR(err)
 				log.ERRORF("not adding %s as externalip: %v", sip, err)
 				continue
 			}
 			err = aMgr.AddLocalAddress(na, addrmgr.ManualPrio)
 			if err != nil {
-				log.ERROR(err)
 				log.ERRORF("skipping specified external IP: %v", err)
 			}
 		}
@@ -2439,7 +2399,6 @@ InitListeners(config *pod.Config, activeNet *netparams.Params,
 			var err error
 			nat, err = upnp.Discover()
 			if err != nil {
-				log.ERROR(err)
 				log.ERRORF("can't discover upnp: %v", err)
 			}
 			// nil upnp.nat here is fine, just means no upnp on network.
@@ -2449,7 +2408,6 @@ InitListeners(config *pod.Config, activeNet *netparams.Params,
 			addr := listener.Addr().String()
 			err := AddLocalAddress(aMgr, addr, services)
 			if err != nil {
-				log.ERROR(err)
 				log.ERRORF("skipping bound address %s: %v", addr, err)
 			}
 		}
@@ -2699,7 +2657,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 			s.FeeEstimator, err = mempool.RestoreFeeEstimator(feeEstimationData)
 			if err != nil {
 				log.ERROR(err)
-return fmt.Errorf("failed to restore fee estimator %v", err)
+				return fmt.Errorf("failed to restore fee estimator %v", err)
 			}
 		}
 		return nil
@@ -2881,7 +2839,7 @@ return fmt.Errorf("failed to restore fee estimator %v", err)
 			rpcListeners, err := SetupRPCListeners(config, listeners[l])
 			if err != nil {
 				log.ERROR(err)
-return nil, err
+				return nil, err
 			}
 			if len(rpcListeners) == 0 {
 				return nil, errors.New("RPCS: No valid listen address")
@@ -2907,7 +2865,7 @@ return nil, err
 			}, stateCfg, config)
 			if err != nil {
 				log.ERROR(err)
-return nil, err
+				return nil, err
 			}
 			s.RPCServers = append(s.RPCServers, rp)
 		}
@@ -3014,7 +2972,7 @@ SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error) {
 			err := GenCertPair(*config.RPCCert, *config.RPCKey)
 			if err != nil {
 				log.ERROR(err)
-return nil, err
+				return nil, err
 			}
 		}
 		keyPair, err := tls.LoadX509KeyPair(*config.RPCCert, *config.RPCKey)

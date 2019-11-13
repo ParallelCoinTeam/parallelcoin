@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/cipher"
 	"crypto/rand"
-	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/log"
@@ -29,8 +28,8 @@ const (
 
 var (
 	MCAddresses = []*net.UDPAddr{
-		{IP: net.ParseIP(UDP6MulticastAddress), Port: 11049},
 		{IP: net.ParseIP(UDP4MulticastAddress), Port: 11049},
+		{IP: net.ParseIP(UDP6MulticastAddress), Port: 11049},
 	}
 )
 
@@ -116,12 +115,12 @@ func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err erro
 	for i := range shards {
 		n, err = conn.WriteToUDP(shards[i], addr)
 		if err != nil {
-			log.ERROR(err, len(shards[i]))
+			log.ERROR(err)
 			return
 		}
 		cumulative += n
 	}
-	fmt.Printf("resent %v bytes to multicast address %v port %v %v\r",
+	log.DEBUGF("sent %v bytes to %v port %v %v",
 		cumulative, addr.IP, addr.Port, time.Now())
 	return
 }

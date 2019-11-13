@@ -463,24 +463,40 @@ func (t *Transaction) Put(txs *wire.MsgTx) *Transaction {
 
 func GetRouteableIPs() Serializer {
 	// first add the interface addresses
+	//iad, _ := net.InterfaceAddrs()
+	//log.SPEW(iad)
 	rI := routeable.GetInterface()
 	//log.SPEW(rI)
 	var lA []net.Addr
 	for i := range rI {
 		l, err := rI[i].Addrs()
-		//log.SPEW(lA)
+		//log.DEBUG("routeable")
+		//log.SPEW(l)
 		if err != nil {
 			log.ERROR(err)
 			return nil
 		}
 		lA = append(lA, l...)
+		//m, err := rI[i].MulticastAddrs()
+		////log.DEBUG("multirouteable")
+		////log.SPEW(l)
+		//if err != nil {
+		//	log.ERROR(err)
+		//	return nil
+		//}
+		//lA = append(lA, m...)
 	}
+	//log.SPEW(lA)
 	ips := NewIPs()
 	var ipslice []*net.IP
 	for i := range lA {
 		//log.DEBUG(lA[i])
 		addIP := net.ParseIP(strings.Split(lA[i].String(), "/")[0])
-		ipslice = append(ipslice, &addIP)
+		if addIP.To4() != nil {
+			// we only want ipv4 addresses because even ipv6 on lans is still
+			// rare
+			ipslice = append(ipslice, &addIP)
+		}
 	}
 	ips.Put(ipslice)
 	//log.SPEW(ipslice)

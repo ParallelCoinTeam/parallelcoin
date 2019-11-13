@@ -276,31 +276,41 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 								if err != nil {
 									log.ERROR(err)
 								}
-								log.SPEW(buffer.Bytes())
-								log.SPEW(blk)
+								//log.SPEW(buffer.Bytes())
+								//log.SPEW(blk)
 								ips := mC.GetIPs()
 								shards, err := controller.Shards(buffer.
 									Bytes(), controller.SolutionMagic, ciph)
 								if err != nil {
 									log.ERROR(err)
 								} else {
+									//log.SPEW(ips)
+									port := mC.GetControllerListenerPort()
 									for k := range ips {
 										host := ips[k].String()
-										port := mC.GetControllerListenerPort()
-										ipA := &net.UDPAddr{
-											IP:   net.ParseIP(host),
-											Port: int(port)}
-										//ipA, err := net.ResolveUDPAddr("udp", ad)
-										//if err != nil {
-										//	log.ERROR(err)
-										//} else {
-										conn, err := net.DialUDP("udp",
-											nil, ipA)
-										if err != nil {
-											log.ERROR(err)
-											continue
+										ipA := &net.UDPAddr{IP:net.ParseIP(
+											host), Port: int(port)}
+										//log.SPEW(ipA)
+										// ipv6
+										var conn *net.UDPConn
+										if ips[k].To4() != nil {
+											//log.DEBUG("ipv4", ips[k])
+											conn, err = net.ListenUDP("udp",
+												ipA)
+											if err != nil {
+												log.ERROR(err)
+												continue
+											}
+										} else {
+											log.DEBUG("ipv6", ips[k])
+											conn, err = net.ListenUDP("udp",
+												ipA)
+											if err != nil {
+												log.ERROR(err)
+												continue
+											}
 										}
-										log.SPEW(shards)
+										//log.SPEW(shards)
 										err = controller.SendShards(ipA,
 											shards, conn)
 										if err != nil {
@@ -325,6 +335,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 							// when it sends a pause job it can be removed
 							// from the serverCounter map
 							srvr := mC.GetIPs()
+							//log.SPEW(srvr)
 							var signature string
 							for i := range srvr {
 								signature += srvr[i].String()
@@ -436,8 +447,8 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 // passed block by regenerating the coinbase script with the passed value and
 // block height.  It also recalculates and updates the new merkle root that
 // results from changing the coinbase script.
-func UpdateExtraNonce(msgBlock *wire.MsgBlock,
-	blockHeight int32, extraNonce uint64) error {
+func UpdateExtraNonce(msgBlock *wire.MsgBlock, blockHeight int32,
+	extraNonce uint64) error {
 	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
 	if err != nil {
 		return err
