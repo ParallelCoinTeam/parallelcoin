@@ -50,15 +50,15 @@ func TestIPs(t *testing.T) {
 	}
 }
 
-func TestBits(t *testing.T) {
+func TestInt32(t *testing.T) {
 	by, err := hex.DecodeString("deadbeef")
 	if err != nil {
 		panic(err)
 	}
 	bits := binary.BigEndian.Uint32(by)
-	bt := controller.NewUint32()
-	bt.Put(bits)
-	bt2 := controller.NewUint32()
+	bt := controller.NewInt32()
+	bt.Put(int32(bits))
+	bt2 := controller.NewInt32()
 	bt2.Decode(bt.Encode())
 	if bt.Get() != bt2.Get() {
 		t.Fail()

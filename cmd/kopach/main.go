@@ -2,6 +2,7 @@ package kopach
 
 import "C"
 import (
+	"bytes"
 	"context"
 	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -190,7 +191,6 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 				rotator.Store(uint64(rand.Intn(len(fork.List[fork.GetCurrent(
 					int32(latestHeight.Load()))].AlgoVers))))
 				go func(wrkr int, startup time.Time) {
-					log.DEBUG("starting worker", wrkr)
 					// each worker has its own copy so there is no races when
 					// it is updated
 					var mC controller.MinerContainer
@@ -201,10 +201,13 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 					rNonce = uint32(rn)
 					aVs := fork.List[currFork].AlgoVers
 					aVL := len(aVs)
+					log.DEBUG("starting worker", wrkr)
 				out:
 					for {
+						//log.DEBUG("top of main work loop")
 						var targetDifficulty = &fork.SecondPowLimit
-						if working.Load() {
+						if working.Load() && header != nil {
+							//log.DEBUG("working and header is not nil")
 							if int32(latestHeight.Load()) >= hf1Height {
 								currFork = 1
 								aVs = fork.List[currFork].AlgoVers
@@ -259,12 +262,59 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 							if bigHash.Cmp(targetDifficulty) <= 0 {
 								log.WARN("worker", wrkr, "solution found",
 									latestHeight.Load(), hash, header.Version)
-								for i := range hashesPerAlgo {
-									log.DEBUG(i, fork.List[fork.GetCurrent(
-										int32(latestHeight.Load()))].
-										AlgoVers[i], hashesPerAlgo[i].Load())
+								//for i := range hashesPerAlgo {
+								//log.DEBUG(i, fork.List[fork.GetCurrent(
+								//	int32(latestHeight.Load()))].
+								//	AlgoVers[i], hashesPerAlgo[i].Load())
+								//}
+								// now we should stop mining
+								working.Store(false)
+								// construct a message to submit the solution
+								var buffer bytes.Buffer
+								err = blk.MsgBlock().Serialize(&buffer)
+								//err = header.Serialize(&buffer)
+								if err != nil {
+									log.ERROR(err)
 								}
-								log.SPEW(header)
+								log.SPEW(buffer.Bytes())
+								log.SPEW(blk)
+								ips := mC.GetIPs()
+								shards, err := controller.Shards(buffer.
+									Bytes(), controller.SolutionMagic, ciph)
+								if err != nil {
+									log.ERROR(err)
+								} else {
+									for k := range ips {
+										host := ips[k].String()
+										port := mC.GetControllerListenerPort()
+										ipA := &net.UDPAddr{
+											IP:   net.ParseIP(host),
+											Port: int(port)}
+										//ipA, err := net.ResolveUDPAddr("udp", ad)
+										//if err != nil {
+										//	log.ERROR(err)
+										//} else {
+										conn, err := net.DialUDP("udp",
+											nil, ipA)
+										if err != nil {
+											log.ERROR(err)
+											continue
+										}
+										log.SPEW(shards)
+										err = controller.SendShards(ipA,
+											shards, conn)
+										if err != nil {
+											log.ERROR(err)
+											continue
+										}
+										err = conn.Close()
+										if err != nil {
+											log.ERROR(err)
+											continue
+										}
+										//}
+									}
+								}
 							}
 						}
 						select {
@@ -284,18 +334,18 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 								break
 							}
 							serverCounterMx.Unlock()
-							if wrkr == 0 {
-								//log.DEBUG("P2PListenersPort",
-								//	mC.GetP2PListenersPort())
-								//log.DEBUG("RPCListenersPort",
-								//	mC.GetRPCListenersPort())
-								//log.DEBUG("ControllerListenerPort",
-								//	mC.GetControllerListenerPort())
-								//log.DEBUGF("h %d %v",
-								//	mC.GetNewHeight(), mC.GetPrevBlockHash())
-								//log.DEBUG(mC.GetBitses())
-								//log.SPEW(mC.GetTxs())
-							}
+							//if wrkr == 0 {
+							//	//log.DEBUG("P2PListenersPort",
+							//	//	mC.GetP2PListenersPort())
+							//	//log.DEBUG("RPCListenersPort",
+							//	//	mC.GetRPCListenersPort())
+							//	//log.DEBUG("ControllerListenerPort",
+							//	//	mC.GetControllerListenerPort())
+							//	//log.DEBUGF("h %d %v",
+							//	//	mC.GetNewHeight(), mC.GetPrevBlockHash())
+							//	//log.DEBUG(mC.GetBitses())
+							//	//log.SPEW(mC.GetTxs())
+							//}
 							// generate the msgblock for hashing
 							txs := mC.GetTxs()
 							rn, _ := wire.RandomUint64()
@@ -352,6 +402,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 							if err != nil {
 								log.WARN(err)
 							}
+							working.Store(true)
 							//if wrkr == 0 {
 							//log.SPEW(blk)
 							//}
