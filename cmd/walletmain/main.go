@@ -12,7 +12,6 @@ import (
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
@@ -76,7 +75,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 			log.ERROR(err)
 			return err
 		}
-		addresses.RefillMiningAddresses(w, config, stateCfg)
+		//addresses.RefillMiningAddresses(w, config, stateCfg)
 		go rpcClientConnectLoop(config, activeNet, legacyServer, loader)
 		loader.Wallet = w
 		log.TRACE("sending back wallet")
