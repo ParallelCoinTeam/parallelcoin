@@ -3,6 +3,7 @@ package coinset
 import (
 	"container/list"
 	"errors"
+	"github.com/p9c/pod/pkg/log"
 	"sort"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -36,7 +37,7 @@ type CoinSet struct {
 var _ Coins = NewCoinSet(nil)
 
 // NewCoinSet creates a CoinSet containing the coins provided. To create an empty CoinSet, you may pass null as the coins input parameter.
-func NewCoinSet(	coins []Coin) *CoinSet {
+func NewCoinSet(coins []Coin) *CoinSet {
 	newCoinSet := &CoinSet{
 		coinList:      list.New(),
 		totalValue:    0,
@@ -107,7 +108,7 @@ func (cs *CoinSet) removeElement(e *list.Element) Coin {
 }
 
 // NewMsgTxWithInputCoins takes the coins in the CoinSet and makes them the inputs to a new wire.MsgTx which is returned.
-func NewMsgTxWithInputCoins(	txVersion int32, inputCoins Coins) *wire.MsgTx {
+func NewMsgTxWithInputCoins(txVersion int32, inputCoins Coins) *wire.MsgTx {
 	msgTx := wire.NewMsgTx(txVersion)
 	coins := inputCoins.Coins()
 	msgTx.TxIn = make([]*wire.TxIn, len(coins))
@@ -130,7 +131,7 @@ var (
 )
 
 // satisfiesTargetValue checks that the totalValue is either exactly the targetValue or is greater than the targetValue by at least the minChange amount.
-func satisfiesTargetValue(	targetValue, minChange, totalValue util.Amount) bool {
+func satisfiesTargetValue(targetValue, minChange, totalValue util.Amount) bool {
 	return totalValue == targetValue || totalValue >= targetValue+minChange
 }
 
@@ -218,8 +219,8 @@ func (s MinPriorityCoinSelector) CoinSelect(targetValue util.Amount, coins []Coi
 			MinChangeAmount: s.MinChangeAmount,
 		}).CoinSelect(targetValue, possibleHighCoins)
 		if err != nil {
-		log.ERROR(err)
-// attempt to add available low priority to make a solution
+			log.ERROR(err)
+			// attempt to add available low priority to make a solution
 			for numLow := 1; numLow <= cutoffIndex && numLow+(i-cutoffIndex) <= s.MaxInputs; numLow++ {
 				allHigh := NewCoinSet(possibleCoins[cutoffIndex : i+1])
 				newTargetValue := targetValue - allHigh.TotalValue()
@@ -235,8 +236,8 @@ func (s MinPriorityCoinSelector) CoinSelect(targetValue util.Amount, coins []Coi
 					MinAvgValueAgePerInput: newMinAvgValueAge,
 				}).CoinSelect(newTargetValue, possibleCoins[0:cutoffIndex])
 				if err != nil {
-		log.ERROR(err)
-continue
+					log.ERROR(err)
+					continue
 				}
 				for _, coin := range lowSelect.Coins() {
 					allHigh.PushCoin(coin)
