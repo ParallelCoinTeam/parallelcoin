@@ -1,16 +1,16 @@
 package main
 
 import (
-   "io/ioutil"
-   "log"
-   "path/filepath"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
+	"io/ioutil"
+	"log"
+	"path/filepath"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/p9c/pod/app/appdata"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
-   "github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func main() {
@@ -25,8 +25,7 @@ func main() {
 	certHomeDir := appdata.Dir("mod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(certHomeDir, "rpc.cert"))
 	if err != nil {
-		log.ERROR(err)
-log.Fatal(err)
+		log.Fatal(err)
 	}
 	connCfg := &rpcclient.ConnConfig{
 		Host:         "localhost:11046",
@@ -37,14 +36,12 @@ log.Fatal(err)
 	}
 	client, err := rpcclient.New(connCfg, &ntfnHandlers)
 	if err != nil {
-		log.ERROR(err)
-log.Fatal(err)
+		log.Fatal(err)
 	}
 	// Get the list of unspent transaction outputs (utxos) that the connected wallet has at least one private key for.
 	unspent, err := client.ListUnspent()
 	if err != nil {
-		log.ERROR(err)
-log.Fatal(err)
+		log.Fatal(err)
 	}
 	log.Printf("Num unspent outputs (utxos): %d", len(unspent))
 	if len(unspent) > 0 {
