@@ -34,7 +34,7 @@ type msgBuffer struct {
 
 type Miner struct {
 	buffers         map[string]*msgBuffer
-	ciph            *cipher.AEAD
+	ciph            cipher.AEAD
 	currFork        int
 	cx              *conte.Xt
 	hashesPerAlgo   map[int32]*atomic.Uint64
@@ -48,7 +48,6 @@ type Miner struct {
 	rotator         *atomic.Uint64
 	serverCounter   map[string]struct{}
 	serverCounterMx *sync.Mutex
-	starter         chan struct{}
 	ticker          *time.Ticker
 	working         *atomic.Bool
 }
@@ -75,9 +74,9 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 		rotator:         &atomic.Uint64{},
 		serverCounter:   make(map[string]struct{}),
 		serverCounterMx: &sync.Mutex{},
-		starter:         make(chan struct{}),
-		ticker:          time.NewTicker(time.Millisecond * 10),
-		working:         &atomic.Bool{},
+		// 100 times per second we check whether to stop or start new work
+		ticker:  time.NewTicker(time.Millisecond * 10),
+		working: &atomic.Bool{},
 	}
 	//var lastHash atomic.Uint64
 	for _, j := range controller.MCAddresses {
@@ -86,8 +85,6 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 		if err != nil {
 			continue
 		}
-		<-m.starter
-		// 100 times per second we check whether to stop or start new work
 		m.working.Store(false)
 		// this atomic stores a list of ip addresss unique to each server
 		// on the lan in order to make a threshold to listen to a work
@@ -99,13 +96,13 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 			m.hf1Height = fork.List[1].TestnetStart
 		}
 		m.currFork = fork.GetCurrent(int32(m.latestHeight.Load()))
+		rand.Seed(time.Now().UnixNano())
+		m.rotator.Store(uint64(rand.Intn(len(fork.List[fork.GetCurrent(
+			int32(m.latestHeight.Load()))].AlgoVers))))
 		for i := 0; i < *cx.Config.GenThreads; i++ {
 			m.loopCounter = 1
 			// start the rolling algorithm cycle on a random starting point
-			rand.Seed(time.Now().UnixNano())
-			m.rotator.Store(uint64(rand.Intn(len(fork.List[fork.GetCurrent(
-				int32(m.latestHeight.Load()))].AlgoVers))))
-			go getWorker(m)(i, time.Now())
+			go mine(m)(i, time.Now())
 		}
 	}
 	select {
@@ -116,7 +113,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	wg.Done()
 }
 
-func getListener(m *Miner, ) func(a *net.UDPAddr, n int, b []byte) {
+func getListener(m *Miner) func(a *net.UDPAddr, n int, b []byte) {
 	return func(a *net.UDPAddr, n int, b []byte) {
 		var err error
 		m.mx.Lock()
@@ -145,7 +142,7 @@ func getListener(m *Miner, ) func(a *net.UDPAddr, n int, b []byte) {
 							return
 						}
 						//log.SPEW(cipherText)
-						msg, err := (*m.ciph).Open(nil, []byte(nonce),
+						msg, err := (m.ciph).Open(nil, []byte(nonce),
 							cipherText, nil)
 						if err != nil {
 							log.ERROR(err)
@@ -164,9 +161,7 @@ func getListener(m *Miner, ) func(a *net.UDPAddr, n int, b []byte) {
 									}
 								}
 							}
-							if m.latestHeight.Load() == 0 {
-								close(m.starter)
-							}
+
 							m.latestHeight.Store(uint32(mC.GetNewHeight()))
 							for i := 0; i < *m.cx.Config.GenThreads; i++ {
 								m.jobChan <- mC
@@ -224,7 +219,7 @@ func getListener(m *Miner, ) func(a *net.UDPAddr, n int, b []byte) {
 	}
 }
 
-func getWorker(m *Miner) func(wrkr int, startup time.Time) {
+func mine(m *Miner) func(wrkr int, startup time.Time) {
 	return func(wrkr int, startup time.Time) {
 		// each worker has its own copy so there is no races when
 		// it is updated
@@ -240,10 +235,8 @@ func getWorker(m *Miner) func(wrkr int, startup time.Time) {
 		log.DEBUG("starting worker", wrkr)
 	out:
 		for {
-			//log.DEBUG("top of main work loop")
 			if m.working.Load() && header != nil {
 				targetDifficulty = &fork.SecondPowLimit
-				//log.DEBUG("working and header is not nil")
 				if int32(m.latestHeight.Load()) >= m.hf1Height {
 					m.currFork = 1
 					aVs = fork.List[m.currFork].AlgoVers
@@ -275,16 +268,12 @@ func getWorker(m *Miner) func(wrkr int, startup time.Time) {
 					header.Bits = mC.GetBitses()[ver]
 					targetDifficulty = fork.CompactToBig(header.Bits)
 				}
-				//header = &blk.MsgBlock().Header
 				// run a round of hashing
-				//log.DEBUG("working")
 				header.Nonce = rNonce
 				// we just keep incrementing this number and let
 				// it roll over
 				rNonce++
-				//log.SPEW(header)
 				hash := header.BlockHashWithAlgos(int32(m.latestHeight.Load()))
-				//log.DEBUG(hash[:32])
 				if _, ok := m.hashesPerAlgo[header.Version]; !ok {
 					if header.Version == 0 {
 						panic("wtf")
@@ -294,73 +283,70 @@ func getWorker(m *Miner) func(wrkr int, startup time.Time) {
 				}
 				m.hashesPerAlgo[header.Version].Inc()
 				bigHash := blockchain.HashToBig(&hash)
-				//log.DEBUGF("%064x", targetDifficulty)
 				if bigHash.Cmp(targetDifficulty) <= 0 {
 					log.WARN("worker", wrkr, "solution found",
 						m.latestHeight.Load(), hash, header.Version)
-					//for i := range hashesPerAlgo {
-					//log.DEBUG(i, fork.List[fork.GetCurrent(
-					//	int32(latestHeight.Load()))].
-					//	AlgoVers[i], hashesPerAlgo[i].Load())
-					//}
 					// now we should stop mining
 					m.working.Store(false)
 					// construct a message to submit the solution
 					var buffer bytes.Buffer
 					err := blk.MsgBlock().Serialize(&buffer)
-					//err = header.Serialize(&buffer)
 					if err != nil {
 						log.ERROR(err)
 					}
-					//log.SPEW(buffer.Bytes())
-					//log.SPEW(blk)
 					ips := mC.GetIPs()
 					shards, err := controller.Shards(buffer.
-						Bytes(), controller.SolutionMagic, *m.ciph)
+						Bytes(), controller.SolutionMagic, m.ciph)
 					if err != nil {
 						log.ERROR(err)
 						break out
 					}
-					//log.SPEW(ips)
+					log.DEBUG(ips)
 					port := mC.GetControllerListenerPort()
-					var conn *net.UDPConn
 					var ipA *net.UDPAddr
 					for k := range ips {
 						host := ips[k].String()
 						ipA = &net.UDPAddr{IP: net.ParseIP(host),
 							Port: int(port)}
-						//log.SPEW(ipA)
-						// ipv6
-						conn, err = net.ListenUDP("udp",
-							ipA)
-						if err != nil {
-							log.ERROR(err)
-							continue
+						log.SPEW(ipA)
+						//conn, err = net.ListenUDP("udp",
+						//	ipA)
+						//if err != nil {
+						//	log.ERROR(err)
+						//	continue
+						//}
+						var n, cumulative int
+						for i := range shards {
+							conn, err := net.DialUDP("udp", nil, ipA)
+							n, err = conn.Write(shards[i])
+							if err != nil {
+								log.ERROR(err)
+								return
+							}
+							cumulative += n
+							err = conn.Close()
+							if err != nil {
+								log.ERROR(err)
+								continue
+							}
 						}
+						log.DEBUGF("sent %v bytes to %v port %v %v",
+							cumulative, ipA.IP, ipA.Port, time.Now())
+						//err = controller.SendShards(ipA, shards, conn)
+						//if err != nil {
+						//	log.ERROR(err)
+						//	continue
+						//}
 					}
-					//log.SPEW(shards)
-					err = controller.SendShards(ipA, shards, conn)
-					if err != nil {
-						log.ERROR(err)
-						continue
-					}
-					err = conn.Close()
-					if err != nil {
-						log.ERROR(err)
-						continue
-					}
-					//}
 				}
 			}
 			select {
 			case mC = <-m.jobChan:
-				//close(starter)
 				log.WARN("new job")
 				// get the signature of the sender of the job so
 				// when it sends a pause job it can be removed
 				// from the serverCounter map
 				srvr := mC.GetIPs()
-				//log.SPEW(srvr)
 				var signature string
 				for i := range srvr {
 					signature += srvr[i].String()
@@ -370,18 +356,6 @@ func getWorker(m *Miner) func(wrkr int, startup time.Time) {
 					break
 				}
 				m.serverCounterMx.Unlock()
-				//if wrkr == 0 {
-				//	//log.DEBUG("P2PListenersPort",
-				//	//	mC.GetP2PListenersPort())
-				//	//log.DEBUG("RPCListenersPort",
-				//	//	mC.GetRPCListenersPort())
-				//	//log.DEBUG("ControllerListenerPort",
-				//	//	mC.GetControllerListenerPort())
-				//	//log.DEBUGF("h %d %v",
-				//	//	mC.GetNewHeight(), mC.GetPrevBlockHash())
-				//	//log.DEBUG(mC.GetBitses())
-				//	//log.SPEW(mC.GetTxs())
-				//}
 				// generate the msgblock for hashing
 				txs := mC.GetTxs()
 				rn, _ := wire.RandomUint64()
@@ -394,11 +368,8 @@ func getWorker(m *Miner) func(wrkr int, startup time.Time) {
 					}
 					cnt++
 				}
-				//log.DEBUG("choice", choice, ver)
 				targetBits := mC.GetBitses()[ver]
 				targetDifficulty = fork.CompactToBig(targetBits)
-				//rotator.Inc()
-				//log.SPEW(txs)
 				blk = util.NewBlock(&wire.MsgBlock{
 					Header: wire.BlockHeader{
 						Version:   ver,
@@ -410,7 +381,6 @@ func getWorker(m *Miner) func(wrkr int, startup time.Time) {
 					Transactions: txs,
 				})
 				header = &blk.MsgBlock().Header
-
 				header.Version = ver
 				header.Bits = targetBits
 				targetDifficulty = fork.CompactToBig(targetBits)
@@ -439,9 +409,6 @@ func getWorker(m *Miner) func(wrkr int, startup time.Time) {
 					log.WARN(err)
 				}
 				m.working.Store(true)
-				//if wrkr == 0 {
-				//log.SPEW(blk)
-				//}
 			case <-m.ticker.C:
 				// only check whether to quit on the ticker
 				select {
@@ -451,7 +418,6 @@ func getWorker(m *Miner) func(wrkr int, startup time.Time) {
 				default:
 				}
 			default:
-				//log.DEBUG("spinning")
 			}
 		}
 	}
