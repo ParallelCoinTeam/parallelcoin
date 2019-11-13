@@ -68,7 +68,8 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropAddrIndex = true
-							return nodeHandle(cx)(c)
+							//return nodeHandle(cx)(c)
+							return nil
 						},
 						apputil.SubCommands(),
 					),
@@ -76,7 +77,19 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropTxIndex = true
-							return nodeHandle(cx)(c)
+							//return nodeHandle(cx)(c)
+							return nil
+						},
+						apputil.SubCommands(),
+					),
+					apputil.NewCommand("dropindexes",
+						"drop all of the indexes",
+						func(c *cli.Context) error {
+							cx.StateCfg.DropAddrIndex = true
+							cx.StateCfg.DropTxIndex = true
+							cx.StateCfg.DropCfIndex = true
+							//return nodeHandle(cx)(c)
+							return nil
 						},
 						apputil.SubCommands(),
 					),
@@ -84,7 +97,8 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropCfIndex = true
-							return nodeHandle(cx)(c)
+							//return nodeHandle(cx)(c)
+							return nil
 						},
 						apputil.SubCommands(),
 					),

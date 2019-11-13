@@ -553,7 +553,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		log.ERROR(err)
 		return err
 	}
-	if b.IsCurrent() {
+	if b.isCurrent() {
 		tN := time.Now()
 		tB, err := b.CalcNextRequiredDifficultyPlan9Controller(node)
 		if err != nil {
