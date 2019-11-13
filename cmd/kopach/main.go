@@ -369,7 +369,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 								}
 								cnt++
 							}
-							log.DEBUG("choice", choice, ver)
+							//log.DEBUG("choice", choice, ver)
 							targetBits := mC.GetBitses()[ver]
 							targetDifficulty = fork.CompactToBig(targetBits)
 							//rotator.Inc()

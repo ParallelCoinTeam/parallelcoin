@@ -22,14 +22,14 @@ const (
 	// This protocol is connectionless and stateless so if one misses,
 	// the next one probably won't, usually a second or 3 later
 	MaxDatagramSize      = blockchain.MaxBlockBaseSize / 3
-	UDP6MulticastAddress = "ff02::1"
+	//UDP6MulticastAddress = "ff02::1"
 	UDP4MulticastAddress = "224.0.0.1"
 )
 
 var (
 	MCAddresses = []*net.UDPAddr{
 		{IP: net.ParseIP(UDP4MulticastAddress), Port: 11049},
-		{IP: net.ParseIP(UDP6MulticastAddress), Port: 11049},
+		//{IP: net.ParseIP(UDP6MulticastAddress), Port: 11049},
 	}
 )
 
