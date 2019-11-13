@@ -353,7 +353,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 								log.WARN(err)
 							}
 							//if wrkr == 0 {
-							log.SPEW(blk)
+							//log.SPEW(blk)
 							//}
 						case <-ticker.C:
 							// only check whether to quit on the ticker
