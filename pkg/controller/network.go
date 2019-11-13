@@ -78,12 +78,10 @@ func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 	return
 }
 
-
 // Send broadcasts bytes on the given multicast address with each shard
 // labeled with a random 32 bit nonce to identify its group to the listener's
 // handler function
-func Shards(addr *net.UDPAddr, by []byte, magic [4]byte,
-	ciph cipher.AEAD, conn *net.UDPConn) (shards [][]byte, err error) {
+func Shards(by []byte, magic [4]byte, ciph cipher.AEAD) (shards [][]byte, err error) {
 	nonce := make([]byte, ciph.NonceSize())
 	//log.DEBUG(len(nonce))
 	var bb []byte
@@ -149,13 +147,14 @@ func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
 		cancel()
 		return
 	}
-
+	log.DEBUG("setting read buffer")
 	err = conn.SetReadBuffer(MaxDatagramSize)
 	if err != nil {
 		log.ERROR(err)
 	}
 	buffer := make([]byte, MaxDatagramSize)
 	go func() {
+		log.DEBUG("starting connection handler")
 	out:
 		// read from socket until context is cancelled
 		for {
