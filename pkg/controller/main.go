@@ -30,14 +30,6 @@ var (
 	PauseMagic = [4]byte{'p', 'a', 'u', 's'}
 )
 
-// Blocks is a block broadcast message for miners to mine from
-type Blocks struct {
-	// New is a flag that distinguishes a newly accepted/connected block from a rebroadcast
-	New bool
-	// Payload is a map of bytes indexed by block version number
-	Payload map[int32][]byte
-}
-
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	var ctx context.Context
 	var active atomic.Bool
