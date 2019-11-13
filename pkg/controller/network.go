@@ -78,6 +78,41 @@ func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 	return
 }
 
+
+// Send broadcasts bytes on the given multicast address with each shard
+// labeled with a random 32 bit nonce to identify its group to the listener's
+// handler function
+func Shards(addr *net.UDPAddr, by []byte, magic [4]byte,
+	ciph cipher.AEAD, conn *net.UDPConn) (shards [][]byte, err error) {
+	nonce := make([]byte, ciph.NonceSize())
+	//log.DEBUG(len(nonce))
+	var bb []byte
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		log.ERROR(err)
+		return
+	}
+	if ciph != nil {
+		bb = ciph.Seal(nil, nonce, by, nil)
+	}
+	//log.SPEW(bb)
+	//bb = by
+	shards, err = fec.Encode(bb)
+	if err != nil {
+		return
+	}
+	//log.SPEW(shards)
+	// nonce is a batch identifier for the FEC encoded shards which are sent
+	// out as individual packets
+	prefix := append(nonce, magic[:]...)
+	if err != nil {
+		return
+	}
+	for i := range shards {
+		shards[i] = append(prefix, shards[i]...)
+	}
+	return
+}
+
 func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err error) {
 	var n, cumulative int
 	for i := range shards {

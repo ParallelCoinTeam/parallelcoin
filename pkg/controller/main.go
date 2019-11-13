@@ -10,6 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"go.uber.org/atomic"
 	"math/rand"
 	"net"
@@ -25,7 +26,8 @@ type Blocks struct {
 }
 
 var (
-	WorkMagic = [4]byte{'w', 'o', 'r', 'k'}
+	WorkMagic  = [4]byte{'w', 'o', 'r', 'k'}
+	PauseMagic = [4]byte{'p', 'a', 'u', 's'}
 )
 
 // Blocks is a block broadcast message for miners to mine from
@@ -59,6 +61,38 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			sendAddresses = append(sendAddresses, MCAddresses[i])
 		}
 	}
+	var conns []*net.UDPConn
+	for i := range sendAddresses {
+		conn, err := net.ListenUDP("udp", sendAddresses[i])
+		if err != nil {
+			log.ERROR(err)
+		} else {
+			conns = append(conns, conn)
+		}
+	}
+	var pauseShards [][]byte
+	pM := GetMessageBase(cx).CreateContainer(PauseMagic)
+	for i := range sendAddresses {
+		shards, err := Shards(sendAddresses[i], pM.Data,
+			PauseMagic, ciph, conns[i])
+		if err != nil {
+			log.TRACE(err)
+		}
+		pauseShards = shards
+	}
+	defer func() {
+		log.DEBUG("miner controller shutting down")
+		for i := range sendAddresses {
+			err := SendShards(sendAddresses[i], pauseShards, conns[i])
+			if err != nil {
+				log.ERROR(err)
+			}
+		}
+		for i := range conns {
+			log.DEBUG("stopping listener on", conns[i].LocalAddr())
+			conns[i].Close()
+		}
+	}()
 	//log.SPEW(sendAddresses)
 	log.DEBUG("sending broadcasts from:", sendAddresses)
 	policy := mining.Policy{
@@ -86,23 +120,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	msgB := template.Block
 	msgBase := GetMessageBase(cx)
 	fMC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
-	var conns []*net.UDPConn
-	for i := range sendAddresses {
-		conn, err := net.ListenUDP("udp", sendAddresses[i])
-		if err != nil {
-			log.ERROR(err)
-		} else {
-			conns = append(conns, conn)
-		}
-	}
-	//log.DEBUG(fMC.GetIPs())
-	//log.DEBUG(fMC.GetP2PListenersPort())
-	//log.DEBUG(fMC.GetRPCListenersPort())
-	//log.DEBUG(fMC.GetControllerListenerPort())
-	//log.DEBUG(fMC.GetPrevBlockHash())
-	//log.DEBUG(fMC.GetBitses())
-	//log.SPEW(fMC.GetTxs())
-	//log.SPEW(fMC.Data)
+	active.Store(true)
 	for i := range sendAddresses {
 		shards, err := Send(sendAddresses[i], fMC.Data, WorkMagic, ciph,
 			conns[i])
@@ -117,7 +135,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		// There is no unsubscribe but we can use an atomic to disable the
 		// function instead - this also ensures that new work doesn't start
 		// once the context is cancelled below
-		active.Store(true)
 		var subMx sync.Mutex
 		log.DEBUG("miner controller starting")
 		cx.RealNode.Chain.Subscribe(func(n *chain.Notification) {
@@ -147,14 +164,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					}
 					msgB := template.Block
 					mC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
-					//log.DEBUG(mC.GetIPs())
-					//log.DEBUG(mC.GetP2PListenersPort())
-					//log.DEBUG(mC.GetRPCListenersPort())
-					//log.DEBUG(mC.GetControllerListenerPort())
-					//log.DEBUG(mC.GetPrevBlockHash())
-					//log.DEBUG(mC.GetBitses())
-					//log.SPEW(mC.GetTxs())
-					//log.SPEW(mC.Data)
 					for i := range sendAddresses {
 						shards, err := Send(sendAddresses[i], mC.Data,
 							WorkMagic, ciph, conns[i])
@@ -171,7 +180,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		for {
 			select {
 			case <-rebroadcastTicker.C:
-				//log.DEBUG("TICK TOCK")
 				for i := range sendAddresses {
 					oB := oldBlocks.Load().([][]byte)
 					err = SendShards(sendAddresses[i], oB, conns[i])
@@ -180,15 +188,17 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					}
 				}
 			case <-ctx.Done():
-				log.DEBUG("miner controller shutting down")
-				for i := range conns {
-					log.DEBUG("stopping listener on", conns[i].LocalAddr())
-					conns[i].Close()
-				}
 				active.Store(false)
 				break out
+			default:
 			}
 		}
 	}()
+	select {
+	case <-ctx.Done():
+	case <-interrupt.HandlersDone:
+	}
+	log.DEBUG("controller exiting")
+	active.Store(false)
 	return
 }

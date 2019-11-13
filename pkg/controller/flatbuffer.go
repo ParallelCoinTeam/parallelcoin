@@ -3,7 +3,6 @@ package controller
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
@@ -107,7 +106,7 @@ func (c *Container) Get(idx uint16) (out []byte) {
 			}
 		}
 	} else {
-		panic(fmt.Sprintln("size mismatch", len(c.Data), size))
+		log.ERROR("size mismatch", length, size)
 	}
 	return
 }

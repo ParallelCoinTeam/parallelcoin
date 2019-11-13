@@ -26,7 +26,7 @@ type MinerContainer struct {
 func GetMinerContainer(cx *conte.Xt, mB *util.Block,
 	msg Serializers) (out MinerContainer) {
 	//msg := append(Serializers{}, GetMessageBase(cx)...)
-	bH := cx.RealNode.Chain.BestSnapshot().Height+1
+	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := NewInt32().Put(bH)
 	msg = append(msg, nBH)
 	mH := NewHash().Put(*mB.Hash())
@@ -119,4 +119,17 @@ func GetMessageBase(cx *conte.Xt) Serializers {
 		GetPort((*cx.Config.RPCListeners)[0]),
 		GetPort(*cx.Config.Controller),
 	}
+}
+
+type PauseContainer struct {
+	Container
+}
+
+func LoadPauseContainer(b []byte) (out PauseContainer) {
+	out.Data = b
+	return
+}
+
+func (mC *PauseContainer) GetIPs() []*net.IP {
+	return NewIPs().DecodeOne(mC.Get(0)).Get()
 }
