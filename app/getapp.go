@@ -489,7 +489,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				"autoports",
 				"uses random automatic ports for p2p, rpc and controller",
 				cx.Config.AutoPorts),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"nocontroller",
 				"disable miner controller",
 				cx.Config.NoController),
