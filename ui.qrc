@@ -18,6 +18,6 @@
                     <file alias="logo.svg">pkg/gui/smelte/assets/logo/logo.svg</file>
         </qresource>
         <qresource prefix="/brands">
-                    <file alias="qt.svg">pkg/gui/smelte/assets/brands/qt.svg</file>
+            <file alias="qt.svg">pkg/gui/smelte/assets/brands/qt.svg</file>
         </qresource>
 </RCC>
