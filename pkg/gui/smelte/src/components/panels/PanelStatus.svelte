@@ -29,7 +29,7 @@
                 		<li class="flx fwd spb htg rr">
                 			<span class="rcx2"></span>
                 			<span class="rcx4">Chain: </span>
-                			<strong class="rcx6">{status.walletver}.podjsonrpcapi.versionstring"></span></strong>
+                			<strong class="rcx6">{status.walletver.podjsonrpcapi.versionstring}</strong>
                 		</li>
                 		<li class="flx fwd spb htg rr">
                 			<span class="rcx2"></span>
