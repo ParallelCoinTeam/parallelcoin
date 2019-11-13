@@ -553,10 +553,15 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		log.ERROR(err)
 		return err
 	}
-	tN := time.Now()
-	tB, err := b.CalcNextRequiredDifficultyPlan9Controller(node)
-	log.WARN(time.Now().Sub(tN), "to compute all block difficulties")
-	node.Diffs = tB
+	if b.IsCurrent() {
+		tN := time.Now()
+		tB, err := b.CalcNextRequiredDifficultyPlan9Controller(node)
+		if err != nil {
+			log.ERROR(err)
+		}
+		log.WARN(time.Now().Sub(tN), "to compute all block difficulties")
+		node.Diffs = tB
+	}
 	//log.SPEW(node.Diffs)
 	// Generate a new best state snapshot that will be used to update the
 	// database and later memory if all database updates are successful.
