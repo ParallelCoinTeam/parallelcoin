@@ -65,7 +65,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	}
 	var pauseShards [][]byte
 	pM := GetMessageBase(cx).CreateContainer(PauseMagic)
-	shards, err := Shards(pM.Data, PauseMagic, ciph)
+	shards, err := Shards(pM.Data, PauseMagic, *ciph)
 	if err != nil {
 		log.TRACE(err)
 	}
@@ -80,7 +80,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		}
 		for i := range conns {
 			log.DEBUG("stopping listener on", conns[i].LocalAddr())
-			conns[i].Close()
+			err := conns[i].Close()
+			if err != nil {
+				log.ERROR(err)
+			}
 		}
 	}()
 	//log.SPEW(sendAddresses)
@@ -112,7 +115,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	fMC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
 	active.Store(true)
 	for i := range sendAddresses {
-		shards, err := Send(sendAddresses[i], fMC.Data, WorkMagic, ciph,
+		shards, err := Send(sendAddresses[i], fMC.Data, WorkMagic, *ciph,
 			conns[i])
 		if err != nil {
 			log.ERROR(err)
@@ -121,50 +124,50 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		}
 	}
 	//log.SPEW(messageBase.CreateContainer(WorkMagic))
-	go func() {
-		// There is no unsubscribe but we can use an atomic to disable the
-		// function instead - this also ensures that new work doesn't start
-		// once the context is cancelled below
-		var subMx sync.Mutex
-		log.DEBUG("miner controller starting")
-		cx.RealNode.Chain.Subscribe(func(n *chain.Notification) {
-			if active.Load() {
-				// first to arrive locks out any others while processing
-				switch n.Type {
-				case chain.NTBlockAccepted:
-					subMx.Lock()
-					defer subMx.Unlock()
-					log.DEBUG("received new chain notification")
-					// construct work message
-					//log.SPEW(n)
-					_, ok := n.Data.(*util.Block)
-					if !ok {
-						log.WARN("chain accepted notification is not a block")
-						break
-					}
-					// Choose a payment address at random.
-					rand.Seed(time.Now().UnixNano())
-					payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
-						MiningAddrs))]
-					algo := "sha256d"
-					template, err := bTG.NewBlockTemplate(0, payToAddr,
-						algo)
+	// There is no unsubscribe but we can use an atomic to disable the
+	// function instead - this also ensures that new work doesn't start
+	// once the context is cancelled below
+	var subMx sync.Mutex
+	log.DEBUG("miner controller starting")
+	cx.RealNode.Chain.Subscribe(func(n *chain.Notification) {
+		if active.Load() {
+			// first to arrive locks out any others while processing
+			switch n.Type {
+			case chain.NTBlockAccepted:
+				subMx.Lock()
+				defer subMx.Unlock()
+				log.DEBUG("received new chain notification")
+				// construct work message
+				//log.SPEW(n)
+				_, ok := n.Data.(*util.Block)
+				if !ok {
+					log.WARN("chain accepted notification is not a block")
+					break
+				}
+				// Choose a payment address at random.
+				rand.Seed(time.Now().UnixNano())
+				payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
+					MiningAddrs))]
+				algo := "sha256d"
+				template, err := bTG.NewBlockTemplate(0, payToAddr,
+					algo)
+				if err != nil {
+					log.ERROR(err)
+				}
+				msgB := template.Block
+				mC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
+				for i := range sendAddresses {
+					shards, err := Send(sendAddresses[i], mC.Data,
+						WorkMagic, *ciph, conns[i])
 					if err != nil {
-						log.ERROR(err)
+						log.TRACE(err)
 					}
-					msgB := template.Block
-					mC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
-					for i := range sendAddresses {
-						shards, err := Send(sendAddresses[i], mC.Data,
-							WorkMagic, ciph, conns[i])
-						if err != nil {
-							log.TRACE(err)
-						}
-						oldBlocks.Store(shards)
-					}
+					oldBlocks.Store(shards)
 				}
 			}
-		})
+		}
+	})
+	go func() {
 		rebroadcastTicker := time.NewTicker(time.Second)
 	out:
 		for {

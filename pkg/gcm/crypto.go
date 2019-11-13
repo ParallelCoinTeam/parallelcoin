@@ -12,7 +12,7 @@ import (
 
 // GetCipher returns a GCM cipher given a password string. Note that this cipher
 // must be renewed every 4gb of encrypted data
-func GetCipher(password string) cipher.AEAD {
+func GetCipher(password string) *cipher.AEAD {
 	key := pbkdf2.Key(reverse([]byte(password)), []byte(password),
 		4096, 32,
 		sha1.New)
@@ -24,7 +24,7 @@ func GetCipher(password string) cipher.AEAD {
 	if err != nil {
 		log.ERROR(err)
 	}
-	return gcm
+	return &gcm
 }
 
 func reverse(b []byte) []byte {
