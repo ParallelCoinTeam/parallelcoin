@@ -26,8 +26,9 @@ type Blocks struct {
 }
 
 var (
-	WorkMagic  = [4]byte{'w', 'o', 'r', 'k'}
-	PauseMagic = [4]byte{'p', 'a', 'u', 's'}
+	WorkMagic     = [4]byte{'w', 'o', 'r', 'k'}
+	PauseMagic    = [4]byte{'p', 'a', 'u', 's'}
+	SolutionMagic = [4]byte{'s', 'o', 'l', 'v'}
 )
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
@@ -64,14 +65,11 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	}
 	var pauseShards [][]byte
 	pM := GetMessageBase(cx).CreateContainer(PauseMagic)
-	for i := range sendAddresses {
-		shards, err := Shards(sendAddresses[i], pM.Data,
-			PauseMagic, ciph, conns[i])
-		if err != nil {
-			log.TRACE(err)
-		}
-		pauseShards = shards
+	shards, err := Shards(pM.Data, PauseMagic, ciph)
+	if err != nil {
+		log.TRACE(err)
 	}
+	pauseShards = shards
 	defer func() {
 		log.DEBUG("miner controller shutting down")
 		for i := range sendAddresses {
@@ -172,7 +170,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		for {
 			select {
 			case <-rebroadcastTicker.C:
-				for i := range sendAddresses {
+				for i := range conns {
 					oB := oldBlocks.Load().([][]byte)
 					err = SendShards(sendAddresses[i], oB, conns[i])
 					if err != nil {
