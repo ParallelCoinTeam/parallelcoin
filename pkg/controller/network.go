@@ -132,13 +132,6 @@ func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
 	var ctx context.Context
 	ctx, cancel = context.WithCancel(context.Background())
 	log.DEBUG("resolving", address)
-	//addr, err := net.ResolveUDPAddr("udp", address)
-	//if err != nil {
-	//	log.ERROR(err)
-	//	cancel()
-	//	return
-	//}
-	//log.DEBUG("resolved", addr.IP, addr.Uint16, addr.String())
 	var conn *net.UDPConn
 	conn, err = net.ListenUDP("udp", address)
 	if err != nil {

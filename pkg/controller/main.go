@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"crypto/cipher"
+	"fmt"
 	chain "github.com/p9c/pod/pkg/chain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
@@ -35,6 +37,12 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	var ctx context.Context
 	var active atomic.Bool
 	var oldBlocks atomic.Value
+	var sendAddresses []*net.UDPAddr
+	var conns []*net.UDPConn
+	var pauseShards [][]byte
+	var subMx sync.Mutex
+	ciph := gcm.GetCipher(*cx.Config.MinerPass)
+	msgBase := GetMessageBase(cx)
 	ctx, cancel = context.WithCancel(context.Background())
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		log.WARN("not running controller without RPC enabled")
@@ -46,30 +54,27 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cancel()
 		return
 	}
-	ciph := gcm.GetCipher(*cx.Config.MinerPass)
-	var sendAddresses []*net.UDPAddr
+	// test the addresses and collate the ones that work
 	for i := range MCAddresses {
 		_, err := net.ListenUDP("udp", MCAddresses[i])
 		if err == nil {
 			sendAddresses = append(sendAddresses, MCAddresses[i])
+			conn, err := net.ListenUDP("udp", MCAddresses[i])
+			if err != nil {
+				log.ERROR(err)
+			} else {
+				conns = append(conns, conn)
+			}
 		}
 	}
-	var conns []*net.UDPConn
-	for i := range sendAddresses {
-		conn, err := net.ListenUDP("udp", sendAddresses[i])
-		if err != nil {
-			log.ERROR(err)
-		} else {
-			conns = append(conns, conn)
-		}
-	}
-	var pauseShards [][]byte
+	// create pause message ready for shutdown handler next
 	pM := GetMessageBase(cx).CreateContainer(PauseMagic)
-	shards, err := Shards(pM.Data, PauseMagic, *ciph)
+
+	pauseShards, err := Shards(pM.Data, PauseMagic, ciph)
 	if err != nil {
 		log.TRACE(err)
 	}
-	pauseShards = shards
+	oldBlocks.Store(pauseShards)
 	defer func() {
 		log.DEBUG("miner controller shutting down")
 		for i := range sendAddresses {
@@ -86,8 +91,126 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			}
 		}
 	}()
-	//log.SPEW(sendAddresses)
 	log.DEBUG("sending broadcasts from:", sendAddresses)
+	// send out the first broadcast
+	bTG := getBlkTemplateGenerator(cx)
+	tpl, err := bTG.NewBlockTemplate(0, cx.StateCfg.ActiveMiningAddrs[0],
+		"sha256d")
+	if err != nil {
+		log.ERROR(err)
+		return
+	}
+	mC := GetMinerContainer(cx, util.NewBlock(tpl.Block), msgBase)
+	lisP := mC.GetControllerListenerPort()
+	listenAddress, err := net.ResolveUDPAddr("udp", fmt.Sprintf(":%d", lisP))
+	if err != nil {
+		log.ERROR(err)
+		return
+	}
+	pauseShards, err = sendNewBlockTemplate(cx, bTG, msgBase, sendAddresses,
+		conns, &oldBlocks, ciph)
+	if err != nil {
+		log.ERROR(err)
+	}
+	active.Store(true)
+	log.DEBUG("miner controller starting")
+	cx.RealNode.Chain.Subscribe(getNotifier(&active, bTG, ciph, conns, cx,
+		msgBase, &oldBlocks, sendAddresses, &subMx))
+	go rebroadcaster(conns, &oldBlocks, sendAddresses, ctx)
+	cancel, err = Listen(listenAddress, getListener())
+	if err != nil {
+		log.DEBUG(err)
+		return
+	}
+	select {
+	case <-ctx.Done():
+		active.Store(false)
+	case <-interrupt.HandlersDone:
+	}
+	log.DEBUG("controller exiting")
+	cancel()
+	active.Store(false)
+	return
+}
+
+func getListener() func(a *net.UDPAddr, n int, b []byte) {
+	return func(a *net.UDPAddr, n int, b []byte) {
+		log.DEBUG(a)
+		received := b[:n]
+		_ = received
+
+	}
+}
+
+func sendNewBlockTemplate(
+	cx *conte.Xt,
+	bTG *mining.BlkTmplGenerator,
+	msgBase Serializers,
+	sendAddresses []*net.UDPAddr,
+	conns []*net.UDPConn,
+	oldBlocks *atomic.Value,
+	ciph cipher.AEAD,
+) (shards [][]byte, err error) {
+	template := getNewBlockTemplate(cx, bTG)
+	msgB := template.Block
+	fMC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
+	for i := range sendAddresses {
+		shards, err = Send(sendAddresses[i], fMC.Data, WorkMagic, ciph,
+			conns[i])
+		if err != nil {
+			log.ERROR(err)
+		}
+		oldBlocks.Store(shards)
+	}
+	return
+}
+
+func getNewBlockTemplate(
+	cx *conte.Xt,
+	bTG *mining.BlkTmplGenerator,
+) (
+	template *mining.BlockTemplate) {
+	// Choose a payment address at random.
+	rand.Seed(time.Now().UnixNano())
+	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
+		MiningAddrs))]
+	template, err := bTG.NewBlockTemplate(0, payToAddr,
+		"sha256d")
+	if err != nil {
+		log.ERROR(err)
+	}
+	return
+}
+
+func rebroadcaster(
+	conns []*net.UDPConn,
+	oldBlocks *atomic.Value,
+	sendAddresses []*net.UDPAddr,
+	ctx context.Context,
+) {
+	rebroadcastTicker := time.NewTicker(time.Second)
+out:
+	for {
+		select {
+		case <-rebroadcastTicker.C:
+			for i := range conns {
+				oB := oldBlocks.Load().([][]byte)
+				err := SendShards(
+					sendAddresses[i],
+					oB,
+					conns[i])
+				if err != nil {
+					log.TRACE(err)
+				}
+			}
+		case <-ctx.Done():
+			break out
+		default:
+		}
+	}
+}
+
+func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 	policy := mining.Policy{
 		BlockMinWeight:    uint32(*cx.Config.BlockMinWeight),
 		BlockMaxWeight:    uint32(*cx.Config.BlockMaxWeight),
@@ -97,39 +220,23 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		TxMinFreeFee:      cx.StateCfg.ActiveMinRelayTxFee,
 	}
 	s := cx.RealNode
-	bTG := mining.NewBlkTmplGenerator(&policy,
+	return mining.NewBlkTmplGenerator(&policy,
 		s.ChainParams, s.TxMemPool, s.Chain, s.TimeSource,
 		s.SigCache, s.HashCache, s.Algo)
-	// Choose a payment address at random.
-	rand.Seed(time.Now().UnixNano())
-	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
-		MiningAddrs))]
-	algo := "sha256d"
-	template, err := bTG.NewBlockTemplate(0, payToAddr,
-		algo)
-	if err != nil {
-		log.ERROR(err)
-	}
-	msgB := template.Block
-	msgBase := GetMessageBase(cx)
-	fMC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
-	active.Store(true)
-	for i := range sendAddresses {
-		shards, err := Send(sendAddresses[i], fMC.Data, WorkMagic, *ciph,
-			conns[i])
-		if err != nil {
-			log.ERROR(err)
-		} else {
-			oldBlocks.Store(shards)
-		}
-	}
-	//log.SPEW(messageBase.CreateContainer(WorkMagic))
-	// There is no unsubscribe but we can use an atomic to disable the
-	// function instead - this also ensures that new work doesn't start
-	// once the context is cancelled below
-	var subMx sync.Mutex
-	log.DEBUG("miner controller starting")
-	cx.RealNode.Chain.Subscribe(func(n *chain.Notification) {
+}
+
+func getNotifier(
+	active *atomic.Bool,
+	bTG *mining.BlkTmplGenerator,
+	ciph cipher.AEAD,
+	conns []*net.UDPConn,
+	cx *conte.Xt,
+	msgBase Serializers,
+	oldBlocks *atomic.Value,
+	sendAddresses []*net.UDPAddr,
+	subMx *sync.Mutex,
+) func(n *chain.Notification) {
+	return func(n *chain.Notification) {
 		if active.Load() {
 			// first to arrive locks out any others while processing
 			switch n.Type {
@@ -144,21 +251,12 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 					log.WARN("chain accepted notification is not a block")
 					break
 				}
-				// Choose a payment address at random.
-				rand.Seed(time.Now().UnixNano())
-				payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
-					MiningAddrs))]
-				algo := "sha256d"
-				template, err := bTG.NewBlockTemplate(0, payToAddr,
-					algo)
-				if err != nil {
-					log.ERROR(err)
-				}
+				template := getNewBlockTemplate(cx, bTG)
 				msgB := template.Block
 				mC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
 				for i := range sendAddresses {
 					shards, err := Send(sendAddresses[i], mC.Data,
-						WorkMagic, *ciph, conns[i])
+						WorkMagic, ciph, conns[i])
 					if err != nil {
 						log.TRACE(err)
 					}
@@ -166,32 +264,5 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				}
 			}
 		}
-	})
-	go func() {
-		rebroadcastTicker := time.NewTicker(time.Second)
-	out:
-		for {
-			select {
-			case <-rebroadcastTicker.C:
-				for i := range conns {
-					oB := oldBlocks.Load().([][]byte)
-					err = SendShards(sendAddresses[i], oB, conns[i])
-					if err != nil {
-						log.TRACE(err)
-					}
-				}
-			case <-ctx.Done():
-				active.Store(false)
-				break out
-			default:
-			}
-		}
-	}()
-	select {
-	case <-ctx.Done():
-	case <-interrupt.HandlersDone:
 	}
-	log.DEBUG("controller exiting")
-	active.Store(false)
-	return
 }
