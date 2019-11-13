@@ -72,6 +72,6 @@ func (r *rcvar) GetDuOStatus() (s DuOStatus) {
 	s.BlockCount = r.GetBlockCount()
 	s.ConnectionCount = r.GetConnectionCount()
 	s.NetworkLastBlock = r.GetNetworkLastBlock()
-	r.status = s
+	r.status = &s
 	return s
 }
