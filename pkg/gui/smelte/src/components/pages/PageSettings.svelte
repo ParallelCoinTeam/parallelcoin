@@ -1,3 +1,6 @@
+<script>
+    import PanelSettings from "../panels/PanelSettings.svelte";
+</script>
 <style>
 
 </style>
@@ -7,9 +10,5 @@
 	<title>Settings</title>
 </svelte:head>
 
- <main class="pageSettings">
+<PanelSettings />
 
-
-
-
-</main>
