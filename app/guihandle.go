@@ -117,6 +117,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		gui.GUI(cx)
 		b.IsBootLogo = false
 		b.IsBoot = false
+		widgets.QApplication_Exec()
 
 		if !cx.Node.Load().(bool) {
 			close(cx.WalletKill)
@@ -124,7 +125,6 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		if !cx.Wallet.Load().(bool) {
 			close(cx.NodeKill)
 		}
-		widgets.QApplication_Exec()
 		return err
 	}
 }
