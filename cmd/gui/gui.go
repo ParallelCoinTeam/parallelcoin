@@ -11,10 +11,10 @@ func GUI(cx *conte.Xt) {
 
 	rc := rcvar{
 		cx:     cx,
-		alert:  &DuOSalert{},
-		status: &DuOStatus{},
-		txs:    &DuOStransactionsExcerpts{},
-		lastxs: &DuOStransactions{},
+		alert:  DuOSalert{},
+		status: DuOStatus{},
+		txs:    DuOStransactionsExcerpts{},
+		lastxs: DuOStransactions{},
 	}
 
 	go func() {
