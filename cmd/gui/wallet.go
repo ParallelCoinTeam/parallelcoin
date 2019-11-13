@@ -100,6 +100,7 @@ func (r *rcvar) GetTransactions(sfrom, count int, cat string) (txs DuOStransacti
 	default:
 		txs.Txs = lt
 	}
+	r.lastxs = txs
 	return
 }
 
