@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/p9c/pod/app/save"
 	"github.com/urfave/cli"
 	"os"
 	"sync"
@@ -47,12 +46,12 @@ shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				err = walletmain.Main(cx.Config, cx.StateCfg,
 					cx.ActiveNet, walletChan, kill, &wg)
 				if err != nil {
-		log.ERROR(err)
-fmt.Println("error running wallet:", err)
+					log.ERROR(err)
+					fmt.Println("error running wallet:", err)
 				}
 			}()
 			cx.WalletServer = <-walletChan
-			save.Pod(cx.Config)
+			//save.Pod(cx.Config)
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
