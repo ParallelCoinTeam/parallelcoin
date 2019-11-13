@@ -2,7 +2,6 @@ package kopach
 
 import "C"
 import (
-	"bytes"
 	"context"
 	"crypto/cipher"
 	"fmt"
@@ -35,7 +34,7 @@ type msgBuffer struct {
 type Miner struct {
 	buffers         map[string]*msgBuffer
 	ciph            cipher.AEAD
-	currFork        int
+	currFork        *atomic.Uint32
 	cx              *conte.Xt
 	hashesPerAlgo   map[int32]*atomic.Uint64
 	hf1Height       int32
@@ -61,7 +60,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 	m := &Miner{
 		buffers:         make(map[string]*msgBuffer),
 		ciph:            gcm.GetCipher(*cx.Config.MinerPass),
-		currFork:        0,
+		currFork:        &atomic.Uint32{},
 		cx:              cx,
 		hashesPerAlgo:   make(map[int32]*atomic.Uint64),
 		hf1Height:       0,
@@ -95,7 +94,7 @@ func Main(cx *conte.Xt, quit chan struct{}, wg *sync.WaitGroup) {
 		if fork.IsTestnet {
 			m.hf1Height = fork.List[1].TestnetStart
 		}
-		m.currFork = fork.GetCurrent(int32(m.latestHeight.Load()))
+		m.currFork.Store(uint32(fork.GetCurrent(int32(m.latestHeight.Load()))))
 		rand.Seed(time.Now().UnixNano())
 		m.rotator.Store(uint64(rand.Intn(len(fork.List[fork.GetCurrent(
 			int32(m.latestHeight.Load()))].AlgoVers))))
@@ -230,7 +229,7 @@ func mine(m *Miner) func(wrkr int, startup time.Time) {
 		var targetDifficulty *big.Int
 		rn, _ := wire.RandomUint64()
 		rNonce = uint32(rn)
-		aVs := fork.List[m.currFork].AlgoVers
+		aVs := fork.List[m.currFork.Load()].AlgoVers
 		aVL := len(aVs)
 		log.DEBUG("starting worker", wrkr)
 	out:
@@ -238,8 +237,8 @@ func mine(m *Miner) func(wrkr int, startup time.Time) {
 			if m.working.Load() && header != nil {
 				targetDifficulty = &fork.SecondPowLimit
 				if int32(m.latestHeight.Load()) >= m.hf1Height {
-					m.currFork = 1
-					aVs = fork.List[m.currFork].AlgoVers
+					m.currFork.Store(1)
+					aVs = fork.List[m.currFork.Load()].AlgoVers
 					aVL = len(aVs)
 				}
 				if m.loopCounter%50 == 0 {
@@ -255,13 +254,13 @@ func mine(m *Miner) func(wrkr int, startup time.Time) {
 					m.rotator.Inc()
 					var ver int32
 					choice := int(m.rotator.Load()) % aVL
-					if m.currFork == 0 {
+					if m.currFork.Load() == 0 {
 						if choice == 0 {
 							ver = 2
 						} else {
 							ver = 514
 						}
-					} else if m.currFork == 1 {
+					} else if m.currFork.Load() == 1 {
 						ver = int32(choice + 5)
 					}
 					header.Version = ver
@@ -289,59 +288,54 @@ func mine(m *Miner) func(wrkr int, startup time.Time) {
 					// now we should stop mining
 					m.working.Store(false)
 					// construct a message to submit the solution
-					var buffer bytes.Buffer
-					err := blk.MsgBlock().Serialize(&buffer)
+					buffer, err := blk.Bytes()
 					if err != nil {
+						// very sad :(
 						log.ERROR(err)
+						return
 					}
 					ips := mC.GetIPs()
-					shards, err := controller.Shards(buffer.
-						Bytes(), controller.SolutionMagic, m.ciph)
+					shards, err := controller.Shards(buffer,
+						controller.SolutionMagic, m.ciph)
 					if err != nil {
+						// even sadder
 						log.ERROR(err)
 						break out
 					}
-					log.DEBUG(ips)
+					//log.DEBUG(ips)
 					port := mC.GetControllerListenerPort()
 					var ipA *net.UDPAddr
 					for k := range ips {
 						host := ips[k].String()
 						ipA = &net.UDPAddr{IP: net.ParseIP(host),
 							Port: int(port)}
-						log.SPEW(ipA)
-						//conn, err = net.ListenUDP("udp",
-						//	ipA)
-						//if err != nil {
-						//	log.ERROR(err)
-						//	continue
-						//}
+						//log.SPEW(ipA)
 						var n, cumulative int
+						conn, err := net.DialUDP("udp", nil, ipA)
+						if err != nil {
+							// ok, now go kill yourself
+							log.ERROR(err)
+							return
+						}
 						for i := range shards {
-							conn, err := net.DialUDP("udp", nil, ipA)
 							n, err = conn.Write(shards[i])
-							if err != nil {
-								log.ERROR(err)
-								return
-							}
 							cumulative += n
-							err = conn.Close()
-							if err != nil {
-								log.ERROR(err)
-								continue
-							}
+						}
+						err = conn.Close()
+						if err != nil {
+							// meh, silly go programmer
+							log.ERROR(err)
+							continue
 						}
 						log.DEBUGF("sent %v bytes to %v port %v %v",
 							cumulative, ipA.IP, ipA.Port, time.Now())
-						//err = controller.SendShards(ipA, shards, conn)
-						//if err != nil {
-						//	log.ERROR(err)
-						//	continue
-						//}
 					}
 				}
 			}
 			select {
 			case mC = <-m.jobChan:
+				m.currFork.Store(uint32(fork.GetCurrent(int32(m.latestHeight.
+					Load()))))
 				log.WARN("new job")
 				// get the signature of the sender of the job so
 				// when it sends a pause job it can be removed
@@ -368,6 +362,7 @@ func mine(m *Miner) func(wrkr int, startup time.Time) {
 					}
 					cnt++
 				}
+				log.DEBUG(ver)
 				targetBits := mC.GetBitses()[ver]
 				targetDifficulty = fork.CompactToBig(targetBits)
 				blk = util.NewBlock(&wire.MsgBlock{
