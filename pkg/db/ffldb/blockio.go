@@ -149,7 +149,6 @@ func (s *blockStore) openWriteFile(fileNum uint32) (filer, error) {
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		str := fmt.Sprintf("failed to open file %q: %v", filePath, err)
 		return nil, makeDbErr(database.ErrDriverSpecific, str, err)
 	}
@@ -164,7 +163,6 @@ func (s *blockStore) openFile(fileNum uint32) (*lockableFile, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, makeDbErr(database.ErrDriverSpecific, err.Error(),
 			err)
 	}
@@ -235,7 +233,6 @@ func (s *blockStore) blockFile(fileNum uint32) (*lockableFile, error) {
 	obf, err := s.openFileFunc(fileNum)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		s.obfMutex.Unlock()
 		return nil, err
 	}
@@ -253,7 +250,6 @@ func (s *blockStore) writeData(data []byte, fieldName string) error {
 	wc.curOffset += uint32(n)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		str := fmt.Sprintf("failed to write %s to file %d at "+
 			"offset %d: %v", fieldName, wc.curFileNum,
 			wc.curOffset-uint32(n), err)
@@ -297,7 +293,6 @@ func (s *blockStore) writeBlock(rawBlock []byte) (blockLocation, error) {
 		file, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return blockLocation{}, err
 		}
 		wc.curFile.file = file
@@ -341,7 +336,6 @@ func (s *blockStore) readBlock(hash *chainhash.Hash, loc blockLocation) ([]byte,
 	blockFile, err := s.blockFile(loc.blockFileNum)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	serializedData := make([]byte, loc.blockLen)
@@ -349,7 +343,6 @@ log.ERROR(err)
 	blockFile.RUnlock()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		str := fmt.Sprintf("failed to read block %s from file %d, "+
 			"offset %d: %v", hash, loc.blockFileNum, loc.fileOffset,
 			err)
@@ -382,7 +375,6 @@ func (s *blockStore) readBlockRegion(loc blockLocation, offset, numBytes uint32)
 	blockFile, err := s.blockFile(loc.blockFileNum)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Regions are offsets into the actual block, however the serialized data for a block includes an initial 4 bytes for network + 4 bytes for block length.  Thus, add 8 bytes to adjust.
@@ -392,7 +384,6 @@ log.ERROR(err)
 	blockFile.RUnlock()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		str := fmt.Sprintf("failed to read region from block file %d, "+
 			"offset %d, len %d: %v", loc.blockFileNum, readOffset,
 			numBytes, err)
@@ -471,7 +462,6 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		obf, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			wc.curFile.Unlock()
 			log.WARN("ROLLBACK:", err)
 			return

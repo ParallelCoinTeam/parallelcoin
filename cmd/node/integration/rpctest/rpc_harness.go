@@ -106,14 +106,12 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 	testDir, err := baseDir()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	harnessID := strconv.Itoa(numTestInstances)
 	nodeTestData, err := ioutil.TempDir(testDir, "harness-"+harnessID)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	certFile := filepath.Join(nodeTestData, "rpc.cert")
@@ -124,7 +122,6 @@ log.ERROR(err)
 	wallet, err := newMemWallet(activeNet, uint32(numTestInstances))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	miningAddr := fmt.Sprintf("--miningaddr=%s", wallet.coinbaseAddr)
@@ -132,7 +129,6 @@ log.ERROR(err)
 	config, err := newConfig("rpctest", certFile, keyFile, extraArgs)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Generate p2p+rpc listening addresses.
@@ -141,7 +137,6 @@ log.ERROR(err)
 	node, err := newNode(config, nodeTestData)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	nodeNum := numTestInstances
@@ -220,7 +215,6 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
 		_, err := h.Node.Generate(numToGenerate)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -228,7 +222,6 @@ log.ERROR(err)
 	_, height, err := h.Node.GetBestBlock()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	ticker := time.NewTicker(time.Millisecond * 100)
@@ -409,13 +402,11 @@ func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	prevBlockHash, prevBlockHeight, err := h.Node.GetBestBlock()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	mBlock, err := h.Node.GetBlock(prevBlockHash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	prevBlock := util.NewBlock(mBlock)
@@ -425,7 +416,6 @@ log.ERROR(err)
 		blockTime, h.wallet.coinbaseAddr, mineTo, h.ActiveNet)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Submit the block to the simnet node.

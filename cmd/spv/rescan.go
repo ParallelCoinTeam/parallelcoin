@@ -180,7 +180,6 @@ func (s *ChainService) rescan(options ...RescanOption) error {
 		script, err := txscript.PayToAddrScript(addr)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		ro.watchList = append(ro.watchList, script)
@@ -198,7 +197,6 @@ log.ERROR(err)
 			)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				ro.endBlock.Hash = chainhash.Hash{}
 			} else {
 				ro.endBlock.Height = int32(height)
@@ -238,7 +236,6 @@ log.ERROR(err)
 		bs, err := s.BestBlock()
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		ro.startBlock = bs
@@ -324,7 +321,6 @@ filterHeaderWaitLoop:
 		_, err := ro.updateFilter(upd, &curStamp, &curHeader)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -414,7 +410,6 @@ rescanLoop:
 				)
 				if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 					return err
 				}
 				// If we have to rewind our state, then we'll
@@ -526,7 +521,6 @@ log.ERROR(err)
 				)
 				if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 					return err
 				}
 				// We'll successfully fetched this current
@@ -585,7 +579,6 @@ log.ERROR(err)
 					)
 					if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 						return err
 					}
 				default:
@@ -595,7 +588,6 @@ log.ERROR(err)
 			bestBlock, err := s.BestBlock()
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 			// Since we're not current, we try to manually advance
@@ -622,7 +614,6 @@ log.ERROR(err)
 				)
 				if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 					return fmt.Errorf(
 						"unable to register block subscription: %v", err,
 					)
@@ -644,7 +635,6 @@ log.ERROR(err)
 			)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 			curHeader = *header
@@ -656,7 +646,6 @@ log.ERROR(err)
 			err = s.notifyBlock(ro, curHeader, curStamp, scanning)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 		}
@@ -677,14 +666,12 @@ func (s *ChainService) notifyBlock(ro *rescanOptions,
 		matched, err := s.blockFilterMatches(ro, &curStamp.Hash)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		if matched {
 			relevantTxs, err = s.extractBlockMatches(ro, &curStamp)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 		}
@@ -739,7 +726,6 @@ return nil, err
 		pays, err := ro.paysWatchedAddr(tx)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 		if pays {
@@ -772,14 +758,12 @@ func (s *ChainService) notifyBlockWithFilter(ro *rescanOptions,
 		matched, err := s.matchBlockFilter(ro, filter, &curStamp.Hash)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		if matched {
 			relevantTxs, err = s.extractBlockMatches(ro, curStamp)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 		}
@@ -809,7 +793,6 @@ func (s *ChainService) matchBlockFilter(ro *rescanOptions, filter *gcs.Filter,
 	matched, err := filter.MatchAny(key, ro.watchList)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	return matched, nil
@@ -825,7 +808,6 @@ func (s *ChainService) blockFilterMatches(ro *rescanOptions,
 	bFilter, err := s.GetCFilter(*blockHash, wire.GCSFilterRegular)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if err == headerfs.ErrHashNotFound {
 			// Block has been reorged out from under us.
 			return false, nil
@@ -868,7 +850,6 @@ func (ro *rescanOptions) updateFilter(update *updateOptions,
 		script, err := txscript.PayToAddrScript(addr)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return false, err
 		}
 		ro.watchList = append(ro.watchList, script)
@@ -912,7 +893,6 @@ log.ERROR(err)
 		)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return rewound, err
 		}
 		*curHeader = *header
@@ -949,7 +929,6 @@ txOutLoop:
 			addrScript, err := txscript.PayToAddrScript(addr)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return false, err
 			}
 			// If the script doesn't match, we'll move onto the
@@ -1169,7 +1148,6 @@ func // GetUtxo gets the appropriate TxOut or errors if it's spent. The option
 	)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Wait for the result to be delivered by the rescan or until a shutdown

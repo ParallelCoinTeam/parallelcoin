@@ -175,7 +175,6 @@ func readElement(r io.Reader, element interface{}) error {
 		rv, err := binarySerializer.Uint32(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = int32(rv)
@@ -184,7 +183,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint32(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = rv
@@ -193,7 +191,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint64(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = int64(rv)
@@ -202,7 +199,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint64(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = rv
@@ -211,7 +207,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint8(r)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		if rv == 0x00 {
@@ -225,7 +220,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint32(r, binary.LittleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = uint32Time(time.Unix(int64(rv), 0))
@@ -235,7 +229,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint64(r, binary.LittleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = int64Time(time.Unix(int64(rv), 0))
@@ -245,7 +238,6 @@ log.ERROR(err)
 		_, err := io.ReadFull(r, e[:])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -254,7 +246,6 @@ log.ERROR(err)
 		_, err := io.ReadFull(r, e[:])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -263,7 +254,6 @@ log.ERROR(err)
 		_, err := io.ReadFull(r, e[:])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -271,7 +261,6 @@ log.ERROR(err)
 		_, err := io.ReadFull(r, e[:])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -279,7 +268,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint64(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = ServiceFlag(rv)
@@ -288,7 +276,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint32(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = InvType(rv)
@@ -297,7 +284,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint32(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = BitcoinNet(rv)
@@ -306,7 +292,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint8(r)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = BloomUpdateType(rv)
@@ -315,7 +300,6 @@ log.ERROR(err)
 		rv, err := binarySerializer.Uint8(r)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		*e = RejectCode(rv)
@@ -332,7 +316,6 @@ func readElements(r io.Reader, elements ...interface{}) error {
 		err := readElement(r, element)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -355,7 +338,6 @@ return err
 		err := binarySerializer.PutUint32(w, littleEndian, e)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -363,7 +345,6 @@ log.ERROR(err)
 		err := binarySerializer.PutUint64(w, littleEndian, uint64(e))
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -371,7 +352,6 @@ log.ERROR(err)
 		err := binarySerializer.PutUint64(w, littleEndian, e)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -384,7 +364,6 @@ log.ERROR(err)
 		}
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -393,7 +372,6 @@ log.ERROR(err)
 		_, err := w.Write(e[:])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -402,7 +380,6 @@ log.ERROR(err)
 		_, err := w.Write(e[:])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -411,7 +388,6 @@ log.ERROR(err)
 		_, err := w.Write(e[:])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -419,7 +395,6 @@ log.ERROR(err)
 		_, err := w.Write(e[:])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -427,7 +402,6 @@ log.ERROR(err)
 		err := binarySerializer.PutUint64(w, littleEndian, uint64(e))
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -435,7 +409,6 @@ log.ERROR(err)
 		err := binarySerializer.PutUint32(w, littleEndian, uint32(e))
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -443,7 +416,6 @@ log.ERROR(err)
 		err := binarySerializer.PutUint32(w, littleEndian, uint32(e))
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -451,7 +423,6 @@ log.ERROR(err)
 		err := binarySerializer.PutUint8(w, uint8(e))
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -459,7 +430,6 @@ log.ERROR(err)
 		err := binarySerializer.PutUint8(w, uint8(e))
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return nil
@@ -475,7 +445,6 @@ func writeElements(w io.Writer, elements ...interface{}) error {
 		err := writeElement(w, element)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -487,7 +456,6 @@ func ReadVarInt(r io.Reader, pver uint32) (uint64, error) {
 	discriminant, err := binarySerializer.Uint8(r)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	var rv uint64
@@ -496,7 +464,6 @@ log.ERROR(err)
 		sv, err := binarySerializer.Uint64(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return 0, err
 		}
 		rv = sv
@@ -511,7 +478,6 @@ log.ERROR(err)
 		sv, err := binarySerializer.Uint32(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return 0, err
 		}
 		rv = uint64(sv)
@@ -526,7 +492,6 @@ log.ERROR(err)
 		sv, err := binarySerializer.Uint16(r, littleEndian)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return 0, err
 		}
 		rv = uint64(sv)
@@ -552,7 +517,6 @@ func WriteVarInt(w io.Writer, pver uint32, val uint64) error {
 		err := binarySerializer.PutUint8(w, 0xfd)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return binarySerializer.PutUint16(w, littleEndian, uint16(val))
@@ -561,7 +525,6 @@ log.ERROR(err)
 		err := binarySerializer.PutUint8(w, 0xfe)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return binarySerializer.PutUint32(w, littleEndian, uint32(val))
@@ -569,7 +532,6 @@ log.ERROR(err)
 	err := binarySerializer.PutUint8(w, 0xff)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return binarySerializer.PutUint64(w, littleEndian, val)
@@ -599,7 +561,6 @@ func ReadVarString(r io.Reader, pver uint32) (string, error) {
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return "", err
 	}
 	// Prevent variable length strings that are larger than the maximum
@@ -614,7 +575,6 @@ log.ERROR(err)
 	_, err = io.ReadFull(r, buf)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return "", err
 	}
 	return string(buf), nil
@@ -625,7 +585,6 @@ func WriteVarString(w io.Writer, pver uint32, str string) error {
 	err := WriteVarInt(w, pver, uint64(len(str)))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	_, err = w.Write([]byte(str))
@@ -638,7 +597,6 @@ func ReadVarBytes(r io.Reader, pver uint32, maxAllowed uint32,
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Prevent byte array larger than the max message size.  It would
@@ -653,7 +611,6 @@ log.ERROR(err)
 	_, err = io.ReadFull(r, b)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return b, nil
@@ -665,7 +622,6 @@ func WriteVarBytes(w io.Writer, pver uint32, bytes []byte) error {
 	err := WriteVarInt(w, pver, slen)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	_, err = w.Write(bytes)
@@ -678,7 +634,6 @@ func randomUint64(r io.Reader) (uint64, error) {
 	rv, err := binarySerializer.Uint64(r, bigEndian)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	return rv, nil

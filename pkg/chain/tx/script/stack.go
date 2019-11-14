@@ -75,7 +75,6 @@ func (s *stack) PopInt() (scriptNum, error) {
 	so, err := s.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	return makeScriptNum(so, s.verifyMinimalData, defaultScriptNumLen)
@@ -87,7 +86,6 @@ func (s *stack) PopBool() (bool, error) {
 	so, err := s.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	return asBool(so), nil
@@ -109,7 +107,6 @@ func (s *stack) PeekInt(idx int32) (scriptNum, error) {
 	so, err := s.PeekByteArray(idx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	return makeScriptNum(so, s.verifyMinimalData, defaultScriptNumLen)
@@ -120,7 +117,6 @@ func (s *stack) PeekBool(idx int32) (bool, error) {
 	so, err := s.PeekByteArray(idx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	return asBool(so), nil
@@ -173,13 +169,11 @@ func (s *stack) Tuck() error {
 	so2, err := s.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	so1, err := s.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	s.PushByteArray(so2) // stack [... x2]
@@ -201,7 +195,6 @@ func (s *stack) DropN(n int32) error {
 		_, err := s.PopByteArray()
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -222,7 +215,6 @@ func (s *stack) DupN(n int32) error {
 		so, err := s.PeekByteArray(n - 1)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		s.PushByteArray(so)
@@ -245,7 +237,6 @@ func (s *stack) RotN(n int32) error {
 		so, err := s.nipN(entry)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		s.PushByteArray(so)
@@ -268,7 +259,6 @@ func (s *stack) SwapN(n int32) error {
 		so, err := s.nipN(entry)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		s.PushByteArray(so)
@@ -292,7 +282,6 @@ func (s *stack) OverN(n int32) error {
 		so, err := s.PeekByteArray(entry)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		s.PushByteArray(so)
@@ -309,7 +298,6 @@ func (s *stack) PickN(n int32) error {
 	so, err := s.PeekByteArray(n)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	s.PushByteArray(so)
@@ -325,7 +313,6 @@ func (s *stack) RollN(n int32) error {
 	so, err := s.nipN(n)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	s.PushByteArray(so)

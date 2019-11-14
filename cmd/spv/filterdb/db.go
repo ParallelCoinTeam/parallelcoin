@@ -73,7 +73,6 @@ func New(	db walletdb.DB, params netparams.Params) (*FilterStore, error) {
 		filters, err := tx.CreateTopLevelBucket(filterBucket)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		// If the main bucket doesn't already exist, then we'll need to
@@ -85,7 +84,6 @@ log.ERROR(err)
 		regFilters, err := filters.CreateBucketIfNotExists(regBucket)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		// With the bucket created, we'll now construct the initial
@@ -93,7 +91,6 @@ log.ERROR(err)
 		basicFilter, err := builder.BuildBasicFilter(genesisBlock, nil)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return putFilter(regFilters, genesisHash, basicFilter)
@@ -118,7 +115,6 @@ func putFilter(	bucket walletdb.ReadWriteBucket, hash *chainhash.Hash,
 	bytes, err := filter.NBytes()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return bucket.Put(hash[:], bytes)
@@ -145,7 +141,6 @@ func (f *FilterStore) PutFilter(hash *chainhash.Hash,
 		bytes, err := filter.NBytes()
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		return targetBucket.Put(hash[:], bytes)
@@ -180,7 +175,6 @@ func (f *FilterStore) FetchFilter(blockHash *chainhash.Hash,
 		)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		filter = dbFilter
@@ -188,7 +182,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return filter, nil

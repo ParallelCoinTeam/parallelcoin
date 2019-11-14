@@ -591,7 +591,6 @@ out:
 			err := c.Conn.WriteMessage(websocket.TextMessage, r.Msg)
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
 				c.Disconnect()
 				break out
 			}
@@ -684,7 +683,6 @@ func (f *WSClientFilter) AddAddressStr(s string, params *netparams.Params) {
 	// script.
 	a, err := util.DecodeAddress(s, params)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return
 	}
@@ -1106,7 +1104,6 @@ func (*WSNtfnMgr) NotifyBlockConnected(clients map[chan struct{}]*WSClient, bloc
 		err := wsc.QueueNotification(marshalledJSON)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 		}
 	}
 }
@@ -1134,7 +1131,6 @@ func (*WSNtfnMgr) NotifyBlockDisconnected(
 	for _, wsc := range clients {
 		err := wsc.QueueNotification(marshalledJSON)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 		}
 	}
@@ -1550,7 +1546,6 @@ CheckAddressValidity(addrs []string, params *netparams.Params) error {
 	for _, addr := range addrs {
 		_, err := util.DecodeAddress(addr, params)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return &btcjson.RPCError{
 				Code: btcjson.ErrRPCInvalidAddressOrKey,
@@ -2197,7 +2192,6 @@ func NewWebsocketClient(server *Server, conn *websocket.Conn,
 	remoteAddr string, authenticated bool, isAdmin bool) (*WSClient, error) {
 	sessionID, err := wire.RandomUint64()
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return nil, err
 	}

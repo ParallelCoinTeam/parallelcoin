@@ -939,11 +939,9 @@ out:
 	err := s.SyncManager.Stop()
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 	}
 	err = s.AddrManager.Stop()
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 	}
 	// Drain channels before exiting so nothing is left waiting around to send.
@@ -2540,7 +2538,6 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 			listenAddrs, services)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 			return nil, err
 		}
 		if len(listeners) == 0 {
@@ -2636,7 +2633,6 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return nil, err
 	}
 	s.Chain.DifficultyAdjustments = make(map[string]float64)
@@ -2717,7 +2713,6 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 			},
 		)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return nil, err
 	}
@@ -2806,7 +2801,6 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 		)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return nil, err
 	}
 	s.ConnManager = cMgr
@@ -2818,7 +2812,6 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	for _, addr := range permanentPeers {
 		netAddr, err := AddrStringToNetAddr(config, stateCfg, addr)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return nil, err
 		}
@@ -2906,7 +2899,6 @@ ParseListeners(addrs []string) ([]net.Addr, error) {
 		host, _, err := net.SplitHostPort(addr)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 			// Shouldn't happen due to already being normalized.
 			return nil, err
 		}
@@ -2951,7 +2943,6 @@ RandomUint16Number(max uint16) uint16 {
 		err := binary.Read(rand.Reader, binary.LittleEndian, &randomNumber)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 		}
 		if randomNumber < limitRange {
 			return randomNumber % max
@@ -2978,7 +2969,6 @@ SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error) {
 		keyPair, err := tls.LoadX509KeyPair(*config.RPCCert, *config.RPCKey)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 			return nil, err
 		}
 		tlsConfig := tls.Config{
@@ -2993,7 +2983,6 @@ SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error) {
 	}
 	netAddrs, err := ParseListeners(urls)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return nil, err
 	}

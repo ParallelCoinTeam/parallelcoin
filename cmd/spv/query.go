@@ -645,7 +645,6 @@ func // getFilterFromCache returns a filter from ChainService's FilterCache
 	filterValue, err := s.FilterCache.Get(cacheKey)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return filterValue.(*cache.CacheableFilter).Filter, nil
@@ -703,7 +702,6 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 	block, height, err := s.BlockHeaders.FetchHeader(&blockHash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	if block.BlockHash() != blockHash {
@@ -721,14 +719,12 @@ log.ERROR(err)
 	curHeader, err := getHeader(&blockHash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, fmt.Errorf("Couldn't get cfheader for block %s "+
 			"from database", blockHash)
 	}
 	prevHeader, err := getHeader(&block.PrevBlock)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, fmt.Errorf("Couldn't get cfheader for block %s "+
 			"from database", blockHash)
 	}
@@ -761,7 +757,6 @@ log.ERROR(err)
 				)
 				if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 					// Malformed filter data. We can ignore
 					// this message.
 					return
@@ -794,7 +789,6 @@ log.ERROR(err)
 		err := s.putFilterToCache(&blockHash, dbFilterType, filter)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			log.WARN(
 				"couldn't write filter to cache:", err,
 			)
@@ -805,7 +799,6 @@ log.ERROR(err)
 			err := s.FilterDB.PutFilter(&blockHash, filter, dbFilterType)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return nil, err
 			}
 			log.TRACEF(
@@ -854,7 +847,6 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 	err = getData.AddInvVect(inv)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 	}
 	// The block is only updated from the checkResponse function argument,
 	// which is always called single-threadedly. We don't check the block
@@ -955,7 +947,6 @@ func // SendTransaction sends a transaction to all peers.
 	err = inv.AddInvVect(wire.NewInvVect(invType, &txHash))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 	}
 	// Send the peer query and listen for getdata.
 	s.queryAllPeers(

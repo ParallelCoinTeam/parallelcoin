@@ -355,7 +355,7 @@ func (w *Wallet) syncWithChain() error {
 			log.ERROR(err)
 			return err
 		}
-		log.DEBUG("bestHeight", bestHeight)
+		//log.DEBUG("bestHeight", bestHeight)
 		checkHeight := bestHeight
 		if len(w.chainParams.Checkpoints) > 0 {
 			checkHeight = w.chainParams.Checkpoints[len(

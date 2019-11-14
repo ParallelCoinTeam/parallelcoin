@@ -57,7 +57,6 @@ IsPayToScriptHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false
 	}
 	return isScriptHash(pops)
@@ -77,7 +76,6 @@ IsPayToWitnessScriptHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false
 	}
 	return isWitnessScriptHash(pops)
@@ -89,7 +87,6 @@ IsPayToWitnessPubKeyHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false
 	}
 	return isWitnessPubKeyHash(pops)
@@ -115,7 +112,6 @@ IsWitnessProgram(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false
 	}
 	return isWitnessProgram(pops)
@@ -141,7 +137,6 @@ ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, nil, err
 	}
 	// If at this point, the scripts doesn't resemble a witness program,
@@ -179,7 +174,6 @@ IsPushOnlyScript(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false
 	}
 	return isPushOnly(pops)
@@ -274,7 +268,6 @@ unparseScript(pops []parsedOpcode) ([]byte, error) {
 		b, err := pop.bytes()
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 		script = append(script, b...)
@@ -300,7 +293,6 @@ DisasmString(buf []byte) (string, error) {
 	}
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		disbuf.WriteString("[error]")
 	}
 	return disbuf.String(), err
@@ -406,7 +398,6 @@ calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
 		err := wire.WriteTxOut(&b, 0, 0, out)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		}
 	}
 	return chainhash.DoubleHashH(b.Bytes())
@@ -481,7 +472,6 @@ calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashT
 		err := wire.WriteVarBytes(&sigHash, 0, rawScript)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		}
 	}
 	// Next, add the input amount,
@@ -504,7 +494,6 @@ log.ERROR(err)
 		err := wire.WriteTxOut(&b, 0, 0, tx.TxOut[idx])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		}
 		sigHash.Write(chainhash.DoubleHashB(b.Bytes()))
 	} else {
@@ -526,7 +515,6 @@ CalcWitnessSigHash(script []byte, sigHashes *TxSigHashes, hType SigHashType, tx 
 	parsedScript, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, fmt.Errorf("cannot parse output script: %v", err)
 	}
 	return calcWitnessSignatureHash(parsedScript, sigHashes, hType, tx, idx,
@@ -566,7 +554,6 @@ CalcSignatureHash(script []byte, hashType SigHashType, tx *wire.MsgTx, idx int) 
 	parsedScript, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, fmt.Errorf("cannot parse output script: %v", err)
 	}
 	return calcSignatureHash(parsedScript, hashType, tx, idx), nil
@@ -657,12 +644,10 @@ calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.MsgTx, i
 	err := txCopy.SerializeNoWitness(wbuf)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 	}
 	err = binary.Write(wbuf, binary.LittleEndian, hashType)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 	}
 	return chainhash.DoubleHashB(wbuf.Bytes())
 }
@@ -738,7 +723,6 @@ GetPreciseSigOpCount(scriptSig, scriptPubKey []byte, bip16 bool) int {
 	sigPops, err := parseScript(scriptSig)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0
 	}
 	// The signature script must only push data to the stack for P2SH to be a
@@ -780,7 +764,6 @@ GetWitnessSigOpCount(sigScript, pkScript []byte, witness wire.TxWitness) int {
 	sigPops, err := parseScript(sigScript)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0
 	}
 	if IsPayToScriptHash(pkScript) && isPushOnly(sigPops) &&
@@ -802,7 +785,6 @@ func // getWitnessSigOps returns the number of signature operations generated
 	)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0
 	}
 	switch witnessVersion {
@@ -827,7 +809,6 @@ func IsUnspendable(pkScript []byte) bool {
 	pops, err := parseScript(pkScript)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return true
 	}
 	return len(pops) > 0 && pops[0].opcode.value == OP_RETURN

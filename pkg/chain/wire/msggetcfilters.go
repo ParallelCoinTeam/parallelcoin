@@ -22,13 +22,11 @@ func (msg *MsgGetCFilters) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	err = readElement(r, &msg.StartHeight)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return readElement(r, &msg.StopHash)
@@ -39,7 +37,6 @@ func (msg *MsgGetCFilters) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	err = writeElement(w, &msg.StartHeight)

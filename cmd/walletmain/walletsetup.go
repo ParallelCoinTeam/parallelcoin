@@ -40,7 +40,6 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	defer db.Close()
@@ -48,7 +47,6 @@ log.ERROR(err)
 	err = wallet.Create(db, pubPass, privPass, nil, activenet, time.Now())
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	log.INFO("The wallet has been created successfully.")
@@ -77,7 +75,6 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 		legacyKeyStore, err = keystore.OpenDir(netDir)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -98,7 +95,6 @@ log.DEBUG(err)
 		err = legacyKeyStore.Unlock(privPass)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		// Import the addresses in the legacy keystore to the new wallet if any

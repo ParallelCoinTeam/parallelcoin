@@ -170,7 +170,6 @@ out:
 			log.SPEW(decodedB)
 		case <-ctrl.ctx.Done():
 			break out
-		default:
 		}
 	}
 }
@@ -223,7 +222,6 @@ func getListener(ctrl *Controller) func(a *net.UDPAddr, n int, b []byte) {
 							ctrl.buffers[i].superseded = true
 						}
 					}
-					fmt.Printf("received rebroadcast of %x %v\r", nonce, time.Now())
 				}
 			} else {
 				ctrl.buffers[nonce] = &msgBuffer{[][]byte{}, time.Now(),
@@ -289,7 +287,7 @@ out:
 			}
 		case <-ctrl.ctx.Done():
 			break out
-		default:
+		//default:
 		}
 	}
 }

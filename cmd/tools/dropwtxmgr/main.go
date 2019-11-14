@@ -34,7 +34,6 @@ func init() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		os.Exit(1)
 	}
 }
@@ -125,7 +124,6 @@ func mainInt() int {
 		startBlock := ns.Get(startBlockName)
 		err = ns.Put(syncedToName, startBlock)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}

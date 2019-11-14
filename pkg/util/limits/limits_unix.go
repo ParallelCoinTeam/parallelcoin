@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	fileLimitWant = 8192
+	fileLimitWant = 32768
 	fileLimitMin  = 1024
 )
 

@@ -33,7 +33,11 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			cli.ShowAppHelpAndExit(c, 1)
 			return nil
 		},
-		Before: beforeFunc(cx),
+		Before: func(c *cli.Context) error {
+			log.WARN("running beforeFunc")
+			beforeFunc(cx)(c)
+			return nil
+		},
 		After: func(c *cli.Context) error {
 			log.TRACE("subcommand completed")
 			return nil

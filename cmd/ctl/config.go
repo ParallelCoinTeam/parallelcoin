@@ -49,7 +49,6 @@ func ListCommands() {
 		flags, err := btcjson.MethodUsageFlags(method)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue
@@ -61,7 +60,6 @@ log.ERROR(err)
 		usage, err := btcjson.MethodUsageText(method)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue

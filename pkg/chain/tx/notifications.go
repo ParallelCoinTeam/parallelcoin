@@ -154,7 +154,6 @@ func totalBalances(dbtx walletdb.ReadTx, w *Wallet, m map[uint32]util.Amount) er
 	unspent, err := w.TxStore.UnspentOutputs(dbtx.ReadBucket(wtxmgrNamespaceKey))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	for i := range unspent {

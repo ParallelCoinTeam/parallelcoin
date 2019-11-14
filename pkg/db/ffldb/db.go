@@ -588,7 +588,6 @@ func // CreateBucket creates and returns a new nested bucket with the given key.
 		childID, err = b.tx.nextBucketID()
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 	}
@@ -727,7 +726,6 @@ func // ForEach invokes the passed function with every key/value pair in the
 		err := fn(c.Key(), c.Value())
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -762,7 +760,6 @@ func // ForEachBucket invokes the passed function with the key of every
 		err := fn(c.Key())
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -1065,7 +1062,6 @@ func // StoreBlock stores the provided block into the database.
 	blockBytes, err := block.Bytes()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		str := fmt.Sprintf("failed to get serialized bytes for block %s",
 			blockHash)
 		return makeDbErr(database.ErrDriverSpecific, str, err)
@@ -1200,7 +1196,6 @@ func // FetchBlock returns the raw serialized bytes for the block identified
 	blockRow, err := tx.fetchBlockRow(hash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	location := deserializeBlockLoc(blockRow)
@@ -1210,7 +1205,6 @@ log.ERROR(err)
 	blockBytes, err := tx.db.store.readBlock(hash, location)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return blockBytes, nil
@@ -1242,7 +1236,6 @@ func // FetchBlocks returns the raw serialized bytes for the blocks
 		blocks[i], err = tx.FetchBlock(&hashes[i])
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 	}
@@ -1296,7 +1289,6 @@ func // FetchBlockRegion returns the raw serialized bytes for the given block
 		regionBytes, err := tx.fetchPendingRegion(region)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 		if regionBytes != nil {
@@ -1307,7 +1299,6 @@ log.ERROR(err)
 	blockRow, err := tx.fetchBlockRow(region.Hash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	location := deserializeBlockLoc(blockRow)
@@ -1324,7 +1315,6 @@ log.ERROR(err)
 		region.Len)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return regionBytes, nil

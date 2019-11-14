@@ -177,7 +177,6 @@ func (vm *Engine) curPC() (script int, off int, err error) {
 	err = vm.validPC()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, 0, err
 	}
 	return int(vm.scriptIdx.Load()), int(vm.scriptOff.Load()), nil
@@ -203,13 +202,11 @@ func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
 			pkScript, err := payToPubKeyHashScript(vm.witnessProgram)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 			pops, err := parseScript(pkScript)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 			// Set the stack to the provided witness stack, then append the pkScript generated above as the next script to execute.
@@ -239,7 +236,6 @@ log.ERROR(err)
 			pops, err := parseScript(witnessScript)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 			// The hash matched successfully, so use the witness as the stack, and set the witnessScript to be the next script executed.
@@ -280,7 +276,6 @@ func (vm *Engine) DisasmPC() (string, error) {
 	scriptIdx, scriptOff, err := vm.curPC()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return "", err
 	}
 	return vm.disasm(scriptIdx, scriptOff), nil
@@ -324,7 +319,6 @@ func (vm *Engine) CheckErrorCondition(finalScript bool) error {
 	v, err := vm.dstack.PopBool()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if !v {
@@ -389,7 +383,6 @@ func (vm *Engine) Step() (done bool, e error) {
 			err := vm.CheckErrorCondition(false)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				done, e = false, err
 				return
 			}
@@ -397,7 +390,6 @@ log.ERROR(err)
 			pops, err := parseScript(script)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				done, e = false, err
 				return
 			}
@@ -437,7 +429,6 @@ func (vm *Engine) Execute() (err error) {
 		done, err = vm.Step()
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		// log <- cl.Tracec(func() string {
@@ -724,7 +715,6 @@ func NewEngine(scriptPubKey []byte, tx *wire.MsgTx, txIdx int, flags ScriptFlags
 		vm.scripts[i], err = parseScript(scr)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 	}
@@ -778,7 +768,6 @@ log.ERROR(err)
 			vm.witnessVersion, vm.witnessProgram, err = ExtractWitnessProgramInfo(witProgram)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return nil, err
 			}
 		} else {

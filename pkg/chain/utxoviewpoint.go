@@ -252,7 +252,6 @@ func (view *UtxoViewpoint) connectTransactions(block *util.Block, stxos *[]Spent
 		err := view.connectTransaction(tx, block.Height(), stxos)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -383,7 +382,6 @@ func (view *UtxoViewpoint) disconnectTransactions(db database.DB, block *util.Bl
 				utxo, err := view.fetchEntryByHash(db, txHash)
 				if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 					return err
 				}
 				if utxo == nil {
@@ -458,7 +456,6 @@ func (view *UtxoViewpoint) fetchUtxosMain(db database.DB, outpoints map[wire.Out
 			entry, err := dbFetchUtxoEntry(dbTx, outpoint)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 			view.entries[outpoint] = entry
@@ -593,7 +590,6 @@ func (b *BlockChain) FetchUtxoEntry(outpoint wire.OutPoint) (*UtxoEntry, error) 
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return entry, nil

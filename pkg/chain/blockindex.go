@@ -269,7 +269,6 @@ func (bi *blockIndex) flushToDB() error {
 					err := dbStoreBlockNode(dbTx, node)
 					if err != nil {
 						log.ERROR(err)
-						log.ERROR(err)
 						return err
 					}
 				}
