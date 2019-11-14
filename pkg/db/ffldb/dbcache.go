@@ -20,7 +20,7 @@ const (
 	// defaultFlushSecs is the default number of seconds to use as a threshold
 	// in between database cache flushes when the cache size has not been
 	// exceeded.
-	defaultFlushSecs = 5
+	defaultFlushSecs = 9
 	// // ldbBatchHeaderSize is the size of a leveldb batch header which
 	// includes the sequence header and record counter.
 	// ldbBatchHeaderSize = 12

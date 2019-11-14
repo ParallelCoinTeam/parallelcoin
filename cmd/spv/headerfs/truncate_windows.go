@@ -21,7 +21,6 @@ func (h *headerStore) singleTruncate() error {
 
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 

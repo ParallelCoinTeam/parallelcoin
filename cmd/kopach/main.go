@@ -200,7 +200,9 @@ func getListener(m *Miner) func(a *net.UDPAddr, n int, b []byte) {
 							m.buffers[i].superseded = true
 						}
 					}
-					fmt.Printf("received rebroadcast of %x %v\r", nonce, time.Now())
+					fmt.Print(log.Composit(
+						fmt.Sprintf("received rebroadcast of %x", nonce),
+						"STATUS", true), "\r")
 				}
 			} else {
 				m.buffers[nonce] = &msgBuffer{[][]byte{}, time.Now(),
@@ -362,7 +364,7 @@ func mine(m *Miner) func(wrkr int, startup time.Time) {
 					}
 					cnt++
 				}
-				log.DEBUG(ver)
+				log.DEBUG(ver, m.currFork.Load())
 				targetBits := mC.GetBitses()[ver]
 				targetDifficulty = fork.CompactToBig(targetBits)
 				blk = util.NewBlock(&wire.MsgBlock{

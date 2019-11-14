@@ -100,7 +100,6 @@ func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
 		inputAmount, inputs, inputValues, scripts, err := fetchInputs(targetAmount + targetFee)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 		if inputAmount < targetAmount+targetFee {
@@ -142,7 +141,6 @@ log.ERROR(err)
 			changeScript, err := fetchChange()
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return nil, err
 			}
 			if len(changeScript) > txsizes.P2WPKHPkScriptSize {
@@ -206,7 +204,6 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 				tx, hashCache, i)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 		case txscript.IsPayToWitnessPubKeyHash(pkScript):
@@ -215,7 +212,6 @@ log.ERROR(err)
 				tx, hashCache, i)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 		default:
@@ -225,7 +221,6 @@ log.ERROR(err)
 				sigScript)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 			inputs[i].SignatureScript = script
@@ -247,13 +242,11 @@ func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
 		chainParams)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	privKey, compressed, err := secrets.GetKey(addrs[0])
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	pubKey := privKey.PubKey()
@@ -268,7 +261,6 @@ log.ERROR(err)
 	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// With the concrete address type, we can now generate the
@@ -277,14 +269,12 @@ log.ERROR(err)
 	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	witnessScript, err := txscript.WitnessSignature(tx, hashCache, idx,
 		inputValue, witnessProgram, txscript.SigHashAll, privKey, true)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	txIn.Witness = witnessScript
@@ -306,13 +296,11 @@ func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
 		chainParams)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	privKey, compressed, err := secrets.GetKey(addrs[0])
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	pubKey := privKey.PubKey()
@@ -329,13 +317,11 @@ log.ERROR(err)
 	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	bldr := txscript.NewScriptBuilder()
@@ -343,7 +329,6 @@ log.ERROR(err)
 	sigScript, err := bldr.Script()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	txIn.SignatureScript = sigScript
@@ -353,7 +338,6 @@ log.ERROR(err)
 		inputValue, witnessProgram, txscript.SigHashAll, privKey, compressed)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	txIn.Witness = witnessScript

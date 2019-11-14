@@ -203,7 +203,6 @@ func decompressScript(	compressedPkScript []byte) []byte {
 		key, err := ec.ParsePubKey(compressedKey, ec.S256())
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil
 		}
 		pkScript := make([]byte, 67)

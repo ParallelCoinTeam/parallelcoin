@@ -16,7 +16,6 @@ func dirEmpty(dirPath string) (bool, error) {
 	f, err := os.Open(dirPath)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	defer f.Close()
@@ -36,7 +35,6 @@ func doUpgrades(cx *conte.Xt) error {
 	err := upgradeDBPaths(cx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return upgradeDataPaths()
@@ -88,7 +86,6 @@ func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) error {
 		err = os.MkdirAll(newDbRoot, 0700)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		// Move and rename the old database
@@ -96,7 +93,6 @@ log.ERROR(err)
 		err := os.Rename(oldDbPath, newDbPath)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}
@@ -151,7 +147,6 @@ func upgradeDataPaths() error {
 		err := os.MkdirAll(newHomePath, 0700)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		// Move old pod.conf into new location if needed
@@ -161,7 +156,6 @@ log.ERROR(err)
 			err := os.Rename(oldConfPath, newConfPath)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 		}
@@ -172,7 +166,6 @@ log.ERROR(err)
 			err := os.Rename(oldDataPath, newDataPath)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 		}
@@ -180,14 +173,12 @@ log.ERROR(err)
 		ohpEmpty, err := dirEmpty(oldHomePath)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		if ohpEmpty {
 			err := os.Remove(oldHomePath)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 		} else {

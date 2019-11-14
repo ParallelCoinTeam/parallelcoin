@@ -559,7 +559,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		if err != nil {
 			log.ERROR(err)
 		}
-		log.WARN(time.Now().Sub(tN), "to compute all block difficulties")
+		log.TRACE(time.Now().Sub(tN), "to compute all block difficulties")
 		node.Diffs = tB
 	}
 	//log.SPEW(node.Diffs)

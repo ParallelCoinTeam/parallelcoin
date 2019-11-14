@@ -225,7 +225,6 @@ func // checkConnectBlock performs several checks to confirm connecting the
 		btx, err := block.Tx(0)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 		}
 		payees := hardfork.Payees
 		if b.params.Net == wire.TestNet3 {
@@ -483,7 +482,6 @@ func // checkBlockContext peforms several validation checks on the block which
 	err := b.checkBlockHeaderContext(workerNumber, header, prevNode, flags)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	fastAdd := flags&BFFastAdd == BFFastAdd
@@ -493,7 +491,6 @@ func // checkBlockContext peforms several validation checks on the block which
 		// version bits state.
 		csvState, err := b.deploymentState(prevNode, chaincfg.DeploymentCSV)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}
@@ -527,7 +524,6 @@ func // checkBlockContext peforms several validation checks on the block which
 			err := checkSerializedHeight(coinbaseTx, blockHeight)
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
 				return err
 			}
 		}
@@ -537,7 +533,6 @@ func // checkBlockContext peforms several validation checks on the block which
 		segwitState, err := b.deploymentState(prevNode,
 			chaincfg.DeploymentSegwit)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}
@@ -598,7 +593,6 @@ BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 			false)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 			return err
 		}
 		blockDifficulty := header.Bits
@@ -635,7 +629,6 @@ BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 	// difficulty and therefore could be used to waste cache and disk space.
 	checkpointNode, err := b.findPreviousCheckpoint()
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return err
 	}

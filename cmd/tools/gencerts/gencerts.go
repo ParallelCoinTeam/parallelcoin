@@ -32,7 +32,6 @@ func main() {
 	_, err := parser.Parse()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}

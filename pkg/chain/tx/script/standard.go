@@ -152,7 +152,6 @@ func GetScriptClass(	script []byte) ScriptClass {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return NonStandardTy
 	}
 	return typeOfScript(pops)
@@ -201,13 +200,11 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 	sigPops, err := parseScript(sigScript)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	pkPops, err := parseScript(pkScript)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Push only sigScript makes little sense.
@@ -227,7 +224,6 @@ log.ERROR(err)
 		shPops, err := parseScript(script)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 		shInputs := expectedInputs(shPops, typeOfScript(shPops))
@@ -283,7 +279,6 @@ func CalcMultiSigStats(	script []byte) (int, int, error) {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, 0, err
 	}
 	// A multi-signature script is of the pattern:  NUM_SIGS PUBKEY PUBKEY PUBKEY... NUM_PUBKEYS OP_CHECKMULTISIG Therefore the number of signatures is the oldest item on the stack and the number of pubkeys is the 2nd to last.  Also, the absolute minimum for a multi-signature script is 1 pubkey, so at least 4 items must be on the stack per:  OP_1 PUBKEY OP_1 OP_CHECKMULTISIG
@@ -397,7 +392,6 @@ func PushedData(	script []byte) ([][]byte, error) {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	var data [][]byte
@@ -419,7 +413,6 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (Scrip
 	pops, err := parseScript(pkScript)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return NonStandardTy, nil, 0, err
 	}
 	scriptClass := typeOfScript(pops)
@@ -500,7 +493,6 @@ func ExtractAtomicSwapDataPushes(	version uint16, pkScript []byte) (*AtomicSwapD
 	pops, err := parseScript(pkScript)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	if len(pops) != 20 {
@@ -537,7 +529,6 @@ log.ERROR(err)
 		locktime, err := makeScriptNum(pops[2].data, true, 5)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, nil
 		}
 		pushes.SecretSize = int64(locktime)
@@ -550,7 +541,6 @@ log.ERROR(err)
 		locktime, err := makeScriptNum(pops[11].data, true, 5)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, nil
 		}
 		pushes.LockTime = int64(locktime)

@@ -33,7 +33,6 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
 			c, err := proxy.Dial(network, addr)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return nil, err
 			}
 			return c, nil
@@ -45,7 +44,6 @@ log.ERROR(err)
 		pem, err := ioutil.ReadFile(*cfg.RPCCert)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 		pool := x509.NewCertPool()
@@ -87,7 +85,6 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	httpRequest, err := http.NewRequest("POST", url, bodyReader)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	httpRequest.Close = true
@@ -99,13 +96,11 @@ log.ERROR(err)
 	httpClient, err := newHTTPClient(cx.Config)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Read the raw bytes and close the response.

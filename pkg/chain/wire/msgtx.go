@@ -411,7 +411,6 @@ func (msg *MsgTx) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error
 	msg.LockTime, err = binarySerializer.Uint32(r, littleEndian)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		returnScriptBuffers()
 		return err
 	}
@@ -473,7 +472,6 @@ func (msg *MsgTx) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error
 	err := binarySerializer.PutUint32(w, littleEndian, uint32(msg.Version))
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	// If the encoding version is set to WitnessEncoding, and the Flags field for the MsgTx aren't 0x00, then this indicates the transaction is to be encoded using the new witness inclusionary structure defined in BIP0144.
@@ -488,13 +486,11 @@ func (msg *MsgTx) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error
 	err = WriteVarInt(w, pver, count)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	for _, ti := range msg.TxIn {
 		err = writeTxIn(w, pver, msg.Version, ti)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}
@@ -503,13 +499,11 @@ func (msg *MsgTx) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error
 	err = WriteVarInt(w, pver, count)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	for _, to := range msg.TxOut {
 		err = WriteTxOut(w, pver, msg.Version, to)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}
@@ -519,7 +513,6 @@ func (msg *MsgTx) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error
 		for _, ti := range msg.TxIn {
 			err = writeTxWitness(w, pver, msg.Version, ti.Witness)
 			if err != nil {
-				log.ERROR(err)
 				log.ERROR(err)
 				return err
 			}
@@ -635,7 +628,6 @@ func readOutPoint(r io.Reader, pver uint32, version int32, op *OutPoint) error {
 	_, err := io.ReadFull(r, op.Hash[:])
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	op.Index, err = binarySerializer.Uint32(r, littleEndian)
@@ -647,7 +639,6 @@ func writeOutPoint(w io.Writer, pver uint32, version int32, op *OutPoint) error 
 	_, err := w.Write(op.Hash[:])
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	return binarySerializer.PutUint32(w, littleEndian, op.Index)
@@ -657,7 +648,6 @@ func writeOutPoint(w io.Writer, pver uint32, version int32, op *OutPoint) error 
 func readScript(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) ([]byte, error) {
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return nil, err
 	}
@@ -671,7 +661,6 @@ func readScript(r io.Reader, pver uint32, maxAllowed uint32, fieldName string) (
 	_, err = io.ReadFull(r, b)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		scriptPool.Return(b)
 		return nil, err
 	}
@@ -683,13 +672,11 @@ func readTxIn(r io.Reader, pver uint32, version int32, ti *TxIn) error {
 	err := readOutPoint(r, pver, version, &ti.PreviousOutPoint)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	ti.SignatureScript, err = readScript(r, pver, MaxMessagePayload,
 		"transaction input signature script")
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return err
 	}
@@ -701,12 +688,10 @@ func writeTxIn(w io.Writer, pver uint32, version int32, ti *TxIn) error {
 	err := writeOutPoint(w, pver, version, &ti.PreviousOutPoint)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	err = WriteVarBytes(w, pver, ti.SignatureScript)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return err
 	}
@@ -717,7 +702,6 @@ func writeTxIn(w io.Writer, pver uint32, version int32, ti *TxIn) error {
 func readTxOut(r io.Reader, pver uint32, version int32, to *TxOut) error {
 	err := readElement(r, &to.Value)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return err
 	}
@@ -731,7 +715,6 @@ func WriteTxOut(w io.Writer, pver uint32, version int32, to *TxOut) error {
 	err := binarySerializer.PutUint64(w, littleEndian, uint64(to.Value))
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	return WriteVarBytes(w, pver, to.PkScript)
@@ -742,13 +725,11 @@ func writeTxWitness(w io.Writer, pver uint32, version int32, wit [][]byte) error
 	err := WriteVarInt(w, pver, uint64(len(wit)))
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	for _, item := range wit {
 		err = WriteVarBytes(w, pver, item)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}

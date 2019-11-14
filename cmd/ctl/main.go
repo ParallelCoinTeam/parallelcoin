@@ -70,7 +70,6 @@ fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 	cmd, err := btcjson.NewCmd(method, params...)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		// Show the error along with its error code when it's a json.
 		// Error as it realistically will always be since the NewCmd function
 		// is only supposed to return errors of that type.

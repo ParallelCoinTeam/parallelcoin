@@ -27,7 +27,6 @@ func (msg *MsgNotFound) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding)
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Limit to max inventory vectors per message.
@@ -43,7 +42,6 @@ log.ERROR(err)
 		err := readInvVect(r, pver, iv)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		err = msg.AddInvVect(iv)
@@ -66,14 +64,12 @@ func (msg *MsgNotFound) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding)
 	err := WriteVarInt(w, pver, uint64(count))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	for _, iv := range msg.InvList {
 		err := writeInvVect(w, pver, iv)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	}

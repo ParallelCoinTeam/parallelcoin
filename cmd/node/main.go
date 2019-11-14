@@ -5,8 +5,8 @@ import (
 	"github.com/p9c/pod/pkg/controller"
 	"net"
 	"net/http"
-	// This enables pprof
-	_ "net/http/pprof"
+	//// This enables pprof
+	//_ "net/http/pprof"
 	"os"
 	"runtime/pprof"
 	"sync"
@@ -70,18 +70,29 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	}
 	// write cpu profile if requested
 	if *cx.Config.CPUProfile != "" {
+		log.WARN("cpu profiling enabled")
 		var f *os.File
 		f, err = os.Create(*cx.Config.CPUProfile)
 		if err != nil {
 			log.ERROR("unable to create cpu profile:", err)
 			return
 		}
-		e := pprof.StartCPUProfile(f)
+        e := pprof.StartCPUProfile(f)
 		if e != nil {
 			log.WARN("failed to start up cpu profiler:", e)
 		} else {
-			defer f.Close()
-			defer pprof.StopCPUProfile()
+			//go func() {
+			//	log.ERROR(http.ListenAndServe(":6060", nil))
+			//}()
+			interrupt.AddHandler(func() {
+				log.WARN("stopping CPU profiler")
+				err := f.Close()
+				if err != nil {
+					log.ERROR(err)
+				}
+				pprof.StopCPUProfile()
+				log.WARN("finished cpu profiling", *cx.Config.CPUProfile)
+			})
 		}
 	}
 	// perform upgrades to pod as new versions require it

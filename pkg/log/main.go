@@ -48,6 +48,7 @@ var (
 	colorItalic    = "\u001b[3m"
 	colorFaint     = "\u001b[2m"
 	colorOff       = "\u001b[0m"
+	backgroundGrey = "\u001b[48;5;240m"
 )
 
 var StartupTime = time.Now()
@@ -275,14 +276,28 @@ func rightJustify(s string, w int) string {
 	return s
 }
 
-func composit(text, level string, color bool) string {
+func Composit(text, level string, color bool) string {
 	terminalWidth := gt.Width()
-	_, loc, iline, _ := runtime.Caller(3)
+	skip := 3
+	if level == "STATUS" {
+		skip = 1
+		//for i := 0; i < 10; i++ {
+		//	fmt.Print(runtime.Caller(skip))
+		//}
+	}
+	_, loc, iline, _ := runtime.Caller(skip)
 	line := fmt.Sprint(iline)
 	files := strings.Split(loc, "github.com/p9c/pod/")
-	file := files[1]
-	since := rightJustify(fmt.Sprint(time.Now().Sub(StartupTime)/time.
-		Second*time.Second), 12)
+	var file string
+	if len(files) > 1 {
+		file = files[1]
+	}
+	sinceS := fmt.Sprint(time.Now().Sub(StartupTime) / time.Second * time.Second)
+	sinceW := 12
+	if level == "STATUS" {
+		sinceW = 9
+	}
+	since := rightJustify(sinceS, sinceW)
 	if terminalWidth > 200 {
 		since = fmt.Sprint(time.Now())[:25]
 	}
@@ -322,6 +337,11 @@ func composit(text, level string, color bool) string {
 			level = colorBold + colorViolet + level + colorOff
 			since = colorViolet + since + colorOff
 			file = colorItalic + colorBlue + file
+			line = line + colorOff
+		case "STATUS":
+			level = backgroundGrey + colorBold + level + colorOff + backgroundGrey
+			since = since
+			file = colorItalic  + file
 			line = line + colorOff
 		}
 	}
@@ -386,7 +406,7 @@ func composit(text, level string, color bool) string {
 							if spacers < 1 {
 								spacers = 1
 							}
-							final += strings.Repeat(colorFaint+"."+colorOff, spacers)
+							final += strings.Repeat(".", spacers)
 							final += fmt.Sprintf(" %s:%s\n",
 								file, line)
 							final += strings.Repeat(" ", levelLen+sinceLen)
@@ -399,7 +419,7 @@ func composit(text, level string, color bool) string {
 						if curLineLen >= restLen-1 {
 							final += "\n" + strings.Repeat(" ",
 								levelLen+sinceLen)
-							final += spaced[i-1] + colorFaint + "." + colorOff
+							final += spaced[i-1] + "."
 							curLineLen = len(spaced[i-1]) + 1
 						} else {
 							final += spaced[i-1] + " "
@@ -411,7 +431,7 @@ func composit(text, level string, color bool) string {
 			if !rest {
 				if curLineLen >= line1len {
 					final += fmt.Sprintf("%s %s:%s\n",
-						strings.Repeat(colorFaint+"."+colorOff,
+						strings.Repeat(".",
 							len(spaced[i])+line1len-curLineLen),
 						file, line)
 					final += strings.Repeat(" ", levelLen+sinceLen)
@@ -419,7 +439,7 @@ func composit(text, level string, color bool) string {
 				} else {
 					final += fmt.Sprintf("%s %s %s:%s\n",
 						spaced[i],
-						strings.Repeat(colorFaint+"."+colorOff,
+						strings.Repeat(".",
 							terminalWidth-curLineLen-fileLen-lineLen),
 						file, line)
 				}
@@ -432,7 +452,7 @@ func composit(text, level string, color bool) string {
 		}
 	} else {
 		final = fmt.Sprintf("%s %s %s %s %s:%s", level, since, text,
-			strings.Repeat(colorFaint+"."+colorOff,
+			strings.Repeat(".",
 				terminalWidth-levelLen-sinceLen-textLen-fileLen-lineLen),
 			file, line)
 	}
@@ -443,7 +463,7 @@ func composit(text, level string, color bool) string {
 func Println(level string, color bool, fh *os.File) PrintlnFunc {
 	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
-		fmt.Println("\r" + composit(text, level, color))
+		fmt.Println("\r" + Composit(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -461,7 +481,7 @@ func Println(level string, color bool, fh *os.File) PrintlnFunc {
 func Printf(level string, color bool, fh *os.File) PrintfFunc {
 	f := func(format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
-		fmt.Println("\r" + composit(text, level, color))
+		fmt.Println("\r" + Composit(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -481,7 +501,7 @@ func Printc(level string, color bool, fh *os.File) PrintcFunc {
 		// level = strings.ToUpper(string(level[0]))
 		t := fn()
 		text := trimReturn(t)
-		fmt.Println("\r" + composit(text, level, color))
+		fmt.Println("\r" + Composit(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -499,7 +519,7 @@ func Printc(level string, color bool, fh *os.File) PrintcFunc {
 func Prints(level string, color bool, fh *os.File) SpewFunc {
 	f := func(a interface{}) {
 		text := trimReturn(spew.Sdump(a))
-		o := composit("spew:", level, color)
+		o := Composit("spew:", level, color)
 		o += "\n" + text
 		fmt.Println(o)
 		if fh != nil {

@@ -70,7 +70,6 @@ func (c *Cache) evict(needed uint64) error {
 			es, err := ce.value.Size()
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return fmt.Errorf("couldn't determine size of "+
 					"existing cache value %v", err)
 			}
@@ -91,7 +90,6 @@ func (c *Cache) Put(key interface{}, value cache.Value) error {
 	vs, err := value.Size()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return fmt.Errorf("couldn't determine size of cache value: %v",
 			err)
 	}
@@ -107,7 +105,6 @@ log.ERROR(err)
 		es, err := el.Value.(*entry).value.Size()
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return fmt.Errorf("couldn't determine size of existing"+
 				"cache value %v", err)
 		}

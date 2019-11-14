@@ -510,7 +510,6 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 		coinbaseTx := bmsg.block.Transactions()[0]
 		cbHeight, err := blockchain.ExtractCoinbaseHeight(coinbaseTx)
 		if err != nil {
-			log.ERROR(err)
 			log.TRACEF(
 				"unable to extract height from coinbase tx: %v",
 				err,
@@ -525,7 +524,6 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 	_, isOrphan, err := sm.chain.ProcessBlock(workerNumber, bmsg.block,
 		behaviorFlags, heightUpdate)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		// When the error is a rule error, it means the block was simply rejected
 		// as opposed to something actually going wrong, so log it as such.
@@ -568,7 +566,6 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 			coinbaseTx := bmsg.block.Transactions()[0]
 			cbHeight, err := blockchain.ExtractCoinbaseHeight(coinbaseTx)
 			if err != nil {
-				log.ERROR(err)
 				log.ERRORF("unable to extract height from coinbase tx: %v", err)
 			} else {
 				log.DEBUGF("extracted height of %v from orphan block",
@@ -580,13 +577,11 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 		orphanRoot := sm.chain.GetOrphanRoot(blockHash)
 		locator, err := sm.chain.LatestBlockLocator()
 		if err != nil {
-			log.ERROR(err)
 			log.ERRORF("failed to get block locator for the latest block: %v",
 				err)
 		} else {
 			err := pp.PushGetBlocksMsg(locator, orphanRoot)
 			if err != nil {
-				log.ERROR(err)
 				log.ERROR(err)
 			}
 		}
@@ -660,7 +655,6 @@ func (sm *SyncManager) handleBlockMsg(workerNumber uint32, bmsg *blockMsg) {
 	locator := blockchain.BlockLocator([]*chainhash.Hash{blockHash})
 	err = pp.PushGetBlocksMsg(locator, &zeroHash)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(
 			"failed to send getblocks message to peer", pp, ":", err,
 		)
@@ -728,7 +722,6 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 			// new one.
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
 				sm.feeEstimator = mempool.NewFeeEstimator(
 					mempool.DefaultEstimateFeeMaxRollback,
 					mempool.DefaultEstimateFeeMinRegisteredBlocks)
@@ -749,7 +742,6 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 				false, false)
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
 				// Remove the transaction and all transactions that depend on it if
 				// it wasn't accepted into the transaction pool.
 				sm.txMemPool.RemoveTransaction(tx, true)
@@ -759,7 +751,6 @@ func (sm *SyncManager) handleBlockchainNotification(notification *blockchain.Not
 		if sm.feeEstimator != nil {
 			err := sm.feeEstimator.Rollback(block.Hash())
 			if err != nil {
-				log.ERROR(err)
 				log.ERROR(err)
 			}
 		}
@@ -1020,7 +1011,6 @@ func (sm *SyncManager) handleInvMsg(imsg *invMsg) {
 				err = peer.PushGetBlocksMsg(locator, orphanRoot)
 				if err != nil {
 					log.ERROR(err)
-					log.ERROR(err)
 				}
 				continue
 			}
@@ -1033,7 +1023,6 @@ func (sm *SyncManager) handleInvMsg(imsg *invMsg) {
 				locator := sm.chain.BlockLocatorFromHash(&iv.Hash)
 				err := peer.PushGetBlocksMsg(locator, &zeroHash)
 				if err != nil {
-					log.ERROR(err)
 					log.ERROR(err)
 				}
 			}
@@ -1063,7 +1052,6 @@ func (sm *SyncManager) handleInvMsg(imsg *invMsg) {
 				err := gdmsg.AddInvVect(iv)
 				if err != nil {
 					log.ERROR(err)
-					log.ERROR(err)
 				}
 				numRequested++
 			}
@@ -1082,7 +1070,6 @@ func (sm *SyncManager) handleInvMsg(imsg *invMsg) {
 				}
 				err := gdmsg.AddInvVect(iv)
 				if err != nil {
-					log.ERROR(err)
 					log.ERROR(err)
 				}
 				numRequested++
@@ -1162,7 +1149,6 @@ func (sm *SyncManager) handleTxMsg(tmsg *txMsg) {
 	delete(sm.requestedTxns, *txHash)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		// Do not request this transaction again until a new block has been
 		// processed.
 		sm.rejectedTxns[*txHash] = struct{}{}
@@ -1224,7 +1210,6 @@ func (sm *SyncManager) haveInventory(invVect *wire.InvVect) (bool, error) {
 			entry, err := sm.chain.FetchUtxoEntry(prevOut)
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
 				return false, err
 			}
 			if entry != nil && !entry.IsSpent() {
@@ -1249,7 +1234,6 @@ func (sm *SyncManager) isSyncCandidate(peer *peerpkg.Peer) bool {
 		// hostname can't be determined for some reason.
 		host, _, err := net.SplitHostPort(peer.Addr())
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return false
 		}
@@ -1322,7 +1306,6 @@ func (sm *SyncManager) startSync() {
 	// blockchain data.
 	segwitActive, err := sm.chain.IsDeploymentActive(chaincfg.DeploymentSegwit)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR("unable to query for segwit soft-fork state:", err)
 		return
 	}
@@ -1392,7 +1375,6 @@ func (sm *SyncManager) startSync() {
 			err := bestPeer.PushGetHeadersMsg(locator, sm.nextCheckpoint.Hash)
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
 			}
 			sm.headersFirstMode = true
 			log.INFOF(
@@ -1404,7 +1386,6 @@ func (sm *SyncManager) startSync() {
 		} else {
 			err := bestPeer.PushGetBlocksMsg(locator, &zeroHash)
 			if err != nil {
-				log.ERROR(err)
 				log.ERROR(err)
 			}
 		}

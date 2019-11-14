@@ -1,16 +1,16 @@
 package gcs
 
 import (
-   "bytes"
-   "fmt"
+	"bytes"
+	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"io"
-   "sort"
-   
-   "github.com/aead/siphash"
-   "github.com/kkdai/bstream"
-   
-   "github.com/p9c/pod/pkg/chain/wire"
+	"sort"
+
+	"github.com/aead/siphash"
+	"github.com/kkdai/bstream"
+
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // Inspired by https://github.com/rasky/gcs
@@ -32,7 +32,7 @@ const (
 // https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
 //  * v * N  >> log_2(N)
 // In our case, using 64-bit integers, log_2 is 64. As most processors don't support 128-bit arithmetic natively, we'll be super portable and unfold the operation into several operations with 64-bit arithmetic. As inputs, we the number to reduce, and our modulus N divided into its high 32-bits and lower 32-bits.
-func fastReduction(	v, nHi, nLo uint64) uint64 {
+func fastReduction(v, nHi, nLo uint64) uint64 {
 	// First, we'll spit the item we need to reduce into its higher and lower bits.
 	vhi := v >> 32
 	vlo := uint64(uint32(v))
@@ -58,7 +58,7 @@ type Filter struct {
 }
 
 // BuildGCSFilter builds a new GCS filter with the collision probability of `1/(2**P)`, key `key`, and including every `[]byte` in `data` as a member of the set.
-func BuildGCSFilter(	P uint8, M uint64, key [KeySize]byte, data [][]byte) (*Filter, error) {
+func BuildGCSFilter(P uint8, M uint64, key [KeySize]byte, data [][]byte) (*Filter, error) {
 	// Some initial parameter checks: make sure we have data from which to build the filter, and make sure our parameters will fit the hash function we're using.
 	if uint64(len(data)) >= (1 << 32) {
 		return nil, ErrNTooBig
@@ -114,7 +114,7 @@ func BuildGCSFilter(	P uint8, M uint64, key [KeySize]byte, data [][]byte) (*Filt
 }
 
 // FromBytes deserializes a GCS filter from a known N, P, and serialized filter as returned by Hash().
-func FromBytes(	N uint32, P uint8, M uint64, d []byte) (*Filter, error) {
+func FromBytes(N uint32, P uint8, M uint64, d []byte) (*Filter, error) {
 	// Basic sanity check.
 	if P > 32 {
 		return nil, ErrPTooBig
@@ -133,12 +133,12 @@ func FromBytes(	N uint32, P uint8, M uint64, d []byte) (*Filter, error) {
 }
 
 // FromNBytes deserializes a GCS filter from a known P, and serialized N and filter as returned by NBytes().
-func FromNBytes(	P uint8, M uint64, d []byte) (*Filter, error) {
+func FromNBytes(P uint8, M uint64, d []byte) (*Filter, error) {
 	buffer := bytes.NewBuffer(d)
 	N, err := wire.ReadVarInt(buffer, varIntProtoVer)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if N >= (1 << 32) {
 		return nil, ErrNTooBig
@@ -160,12 +160,12 @@ func (f *Filter) NBytes() ([]byte, error) {
 	err := wire.WriteVarInt(&buffer, varIntProtoVer, uint64(f.n))
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	_, err = buffer.Write(f.filterData)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return buffer.Bytes(), nil
 }
@@ -185,17 +185,17 @@ func (f *Filter) NPBytes() ([]byte, error) {
 	err := wire.WriteVarInt(&buffer, varIntProtoVer, uint64(f.n))
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	err = buffer.WriteByte(f.p)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	_, err = buffer.Write(f.filterData)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return buffer.Bytes(), nil
 }
@@ -216,7 +216,7 @@ func (f *Filter) Match(key [KeySize]byte, data []byte) (bool, error) {
 	filterData, err := f.Bytes()
 	if err != nil {
 		log.ERROR(err)
-return false, err
+		return false, err
 	}
 	b := bstream.NewBStreamReader(filterData)
 	// We take the high and low bits of modulusNP for the multiplication of 2 64-bit integers into a 128-bit integer.
@@ -231,8 +231,8 @@ return false, err
 		// Read the difference between previous and new value from bitstream.
 		value, err := f.readFullUint64(b)
 		if err != nil {
-		log.ERROR(err)
-if err == io.EOF {
+			log.ERROR(err)
+			if err == io.EOF {
 				return false, nil
 			}
 			return false, err
@@ -257,7 +257,7 @@ func (f *Filter) MatchAny(key [KeySize]byte, data [][]byte) (bool, error) {
 	filterData, err := f.Bytes()
 	if err != nil {
 		log.ERROR(err)
-return false, err
+		return false, err
 	}
 	b := bstream.NewBStreamReader(filterData)
 	// Create an uncompressed filter of the search values.
@@ -292,8 +292,8 @@ return false, err
 			// Advance filter we're searching or return false if we're at the end because nothing matched.
 			value, err := f.readFullUint64(b)
 			if err != nil {
-		log.ERROR(err)
-if err == io.EOF {
+				//log.ERROR(err)
+				if err == io.EOF {
 					return false, nil
 				}
 				return false, err
@@ -312,21 +312,21 @@ func (f *Filter) readFullUint64(b *bstream.BStream) (uint64, error) {
 	c, err := b.ReadBit()
 	if err != nil {
 		log.ERROR(err)
-return 0, err
+		return 0, err
 	}
 	for c {
 		quotient++
 		c, err = b.ReadBit()
 		if err != nil {
-		log.ERROR(err)
-return 0, err
+			log.TRACE(err)
+			return 0, err
 		}
 	}
 	// Read P bits.
 	remainder, err := b.ReadBits(int(f.p))
 	if err != nil {
-		log.ERROR(err)
-return 0, err
+		log.TRACE(err)
+		return 0, err
 	}
 	// Add the multiple and the remainder.
 	v := (quotient << f.p) + remainder

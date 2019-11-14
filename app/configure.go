@@ -11,6 +11,7 @@ import (
 func // Configure loads and sanitises the configuration from urfave/cli
 Configure(cx *conte.Xt, ctx *cli.Context) {
 	log.TRACE("configuring pod")
+	log.SPEW(cx.Config)
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
 	st := cx.StateCfg

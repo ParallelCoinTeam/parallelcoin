@@ -619,7 +619,6 @@ func // reset resets the address manager by reinitialising the random source and
 	_, err := io.ReadFull(crand.Reader, a.key[:])
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 	}
 	for i := range a.addrNew {
 		a.addrNew[i] = make(map[string]*KnownAddress)

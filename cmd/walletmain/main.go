@@ -2,11 +2,10 @@ package walletmain
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"io/ioutil"
-	"net"
-	"net/http"
 	// This enables pprof
-	_ "net/http/pprof"
+	//_ "net/http/pprof"
 	"sync"
 
 	"github.com/p9c/pod/cmd/node/state"
@@ -34,16 +33,16 @@ func Main(config *pod.Config, stateCfg *state.Config,
 	if activeNet.Name == "testnet" {
 		fork.IsTestnet = true
 	}
-	if *config.Profile != "" {
-		go func() {
-			listenAddr := net.JoinHostPort("127.0.0.1", *config.Profile)
-			log.INFO("profile server listening on", listenAddr)
-			profileRedirect := http.RedirectHandler("/debug/pprof",
-				http.StatusSeeOther)
-			http.Handle("/", profileRedirect)
-			fmt.Println(http.ListenAndServe(listenAddr, nil))
-		}()
-	}
+	//if *config.Profile != "" {
+	//	go func() {
+	//		listenAddr := net.JoinHostPort("127.0.0.1", *config.Profile)
+	//		log.INFO("profile server listening on", listenAddr)
+	//		profileRedirect := http.RedirectHandler("/debug/pprof",
+	//			http.StatusSeeOther)
+	//		http.Handle("/", profileRedirect)
+	//		fmt.Println(http.ListenAndServe(listenAddr, nil))
+	//	}()
+	//}
 	dbPath := *config.DataDir + slash + activeNet.Params.Name
 	loader := wallet.NewLoader(activeNet, dbPath, 250)
 	// Create and start HTTP server to serve wallet client connections.
@@ -57,14 +56,14 @@ func Main(config *pod.Config, stateCfg *state.Config,
 		return err
 	}
 	loader.RunAfterLoad(func(w *wallet.Wallet) {
-		log.WARN("starting wallet RPC services", w != nil)
+		log.TRACE("starting wallet RPC services", w != nil)
 		startWalletRPCServices(w, rpcS, legacyServer)
 	})
 	if !*config.NoInitialLoad {
 		log.TRACE("starting rpc client connection handler")
 		// Create and start chain RPC client so it's ready to connect to
 		// the wallet when loaded later.
-		log.WARN("loading database")
+		log.TRACE("loading database")
 		// Load the wallet database.  It must have been created already
 		// or this will return an appropriate error.
 		var w *wallet.Wallet
@@ -75,7 +74,10 @@ func Main(config *pod.Config, stateCfg *state.Config,
 			log.ERROR(err)
 			return err
 		}
-		//addresses.RefillMiningAddresses(w, config, stateCfg)
+		go func() {
+			addresses.RefillMiningAddresses(w, config, stateCfg)
+
+		}()
 		go rpcClientConnectLoop(config, activeNet, legacyServer, loader)
 		loader.Wallet = w
 		log.TRACE("sending back wallet")

@@ -689,7 +689,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 	g, err := makeTestGenerator(regressionNetParams)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Define some convenience helper functions to return an individual test instance that has the described characteristics.

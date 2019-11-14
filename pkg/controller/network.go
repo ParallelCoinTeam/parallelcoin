@@ -9,7 +9,6 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"io"
 	"net"
-	"time"
 )
 
 const (
@@ -21,7 +20,7 @@ const (
 	// has to puncture 6 of the 9.
 	// This protocol is connectionless and stateless so if one misses,
 	// the next one probably won't, usually a second or 3 later
-	MaxDatagramSize      = blockchain.MaxBlockBaseSize / 3
+	MaxDatagramSize = blockchain.MaxBlockBaseSize / 3
 	//UDP6MulticastAddress = "ff02::1"
 	UDP4MulticastAddress = "224.0.0.1"
 )
@@ -111,17 +110,17 @@ func Shards(by []byte, magic [4]byte, ciph cipher.AEAD) (shards [][]byte, err er
 }
 
 func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err error) {
-	var n, cumulative int
+	//var n, cumulative int
 	for i := range shards {
-		n, err = conn.WriteToUDP(shards[i], addr)
+		_, err = conn.WriteToUDP(shards[i], addr)
 		if err != nil {
 			log.ERROR(err)
 			return
 		}
-		cumulative += n
+		//cumulative += n
 	}
-	log.DEBUGF("sent %v bytes to %v port %v %v",
-		cumulative, addr.IP, addr.Port, time.Now())
+	//fmt.Print(log.Composit(fmt.Sprintf("sent %v bytes to %v port %v %v",
+	//	cumulative, addr.IP, addr.Port, time.Now()), "STATUS", true), "\r")
 	return
 }
 

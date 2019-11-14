@@ -75,8 +75,7 @@ out:
 				txVI.txInIndex, v.flags, v.sigCache, txVI.sigHashes,
 				inputAmount)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				str := fmt.Sprintf("failed to parse input "+
 					"%s:%d which references output %v - "+
 					"%v (input witness %x, input script "+
@@ -119,15 +118,18 @@ func // Validate validates the scripts for all of the passed transaction inputs
 	// number of processor cores.
 	// This helps ensure the system stays reasonably responsive under heavy
 	// load.
-	maxGoRoutines := runtime.NumCPU() * 3
+	maxGoRoutines := runtime.NumCPU()
 	if maxGoRoutines <= 0 {
 		maxGoRoutines = 1
 	}
 	if maxGoRoutines > len(items) {
 		maxGoRoutines = len(items)
 	}
+	maxGoRoutines = 1
 	// Start up validation handlers that are used to asynchronously validate
 	// each transaction input.
+	// TODO: this creates an insane amount of goroutines that run for tens of
+	//  milliseconds each and... well... parallelize...
 	for i := 0; i < maxGoRoutines; i++ {
 		go v.validateHandler()
 	}
@@ -152,8 +154,7 @@ func // Validate validates the scripts for all of the passed transaction inputs
 		case err := <-v.resultChan:
 			processedItems++
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				close(v.quitChan)
 				return err
 			}

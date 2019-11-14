@@ -197,7 +197,7 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	}
 	if *cfg.CAFile == "" {
 		*cfg.CAFile =
-			*cfg.DataDir + string(os.PathSeparator) + "cafile"
+			*cfg.DataDir + string(os.PathSeparator) + "ca.cert"
 		st.Save = true
 		isNew = true
 	}
@@ -308,7 +308,6 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 			_, ipnet, err := net.ParseCIDR(addr)
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
 				err = fmt.Errorf("%s '%s'", err.Error())
 				ip = net.ParseIP(addr)
 				if ip == nil {
@@ -397,7 +396,6 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		log.DEBUG("looking up default listener")
 		addrs, err := net.LookupHost(node.DefaultRPCListener)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			os.Exit(1)
 		}
@@ -559,12 +557,12 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 		state.ActiveMiningAddrs = append(state.ActiveMiningAddrs, addr)
 	}
 	// Ensure there is at least one mining address when the generate flag is set.
-	if (*cfg.Generate) && len(*cfg.MiningAddrs) == 0 {
-		// str := "%s: the generate flag is set, but there are no mining addresses specified "
-		// err := fmt.Errorf(str, funcName)
-		// fmt.Fprintln(os.Stderr, err)
-		// os.Exit(1)
+	if (*cfg.Generate) && len(state.ActiveMiningAddrs) == 0 {
+		log.ERROR("the generate flag is set," +
+			"	but there are no mining addresses specified ")
+		log.SPEW(cfg)
 		*cfg.Generate = false
+		os.Exit(1)
 	}
 	if *cfg.MinerPass != "" {
 		state.ActiveMinerKey = fork.Argon2i([]byte(*cfg.MinerPass))

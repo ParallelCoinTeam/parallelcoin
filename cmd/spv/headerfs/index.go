@@ -154,7 +154,6 @@ func (h *headerIndex) addHeaders(batch headerBatch) error {
 			err := rootBucket.Put(header.hash[:], heightBytes[:])
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 			// TODO(roasbeef): need to remedy if side-chain
@@ -186,7 +185,6 @@ func (h *headerIndex) heightFromHash(hash *chainhash.Hash) (uint32, error) {
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	return height, nil
@@ -225,7 +223,6 @@ func (h *headerIndex) chainTip() (*chainhash.Hash, uint32, error) {
 		h, err := chainhash.NewHash(tipHashBytes)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		tipHash = h
@@ -234,7 +231,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, 0, err
 	}
 	return tipHash, tipHeight, nil

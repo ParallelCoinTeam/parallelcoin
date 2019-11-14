@@ -99,7 +99,6 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 			)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return fmt.Errorf(
 					"unable to read header at height: %v: %v",
 					currentHeight, err,
@@ -114,7 +113,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return &subscription, nil

@@ -908,7 +908,6 @@ popIfBool(vm *Engine) (bool, error) {
 	so, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	// The top element MUST have a length of at least one.
@@ -938,7 +937,6 @@ opcodeIf(op *parsedOpcode, vm *Engine) error {
 		ok, err := popIfBool(vm)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		if ok {
@@ -961,7 +959,6 @@ func opcodeNotIf(op *parsedOpcode, vm *Engine) error {
 		ok, err := popIfBool(vm)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		if !ok {
@@ -1021,7 +1018,6 @@ abstractVerify(op *parsedOpcode, vm *Engine, c ErrorCode) error {
 	verified, err := vm.dstack.PopBool()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if !verified {
@@ -1079,13 +1075,11 @@ opcodeCheckLockTimeVerify(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.dstack.PeekByteArray(0)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	lockTime, err := makeScriptNum(so, vm.dstack.verifyMinimalData, 5)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// In the rare event that the argument needs to be < 0 due to some arithmetic being done first, you can always use 0 OP_MAX OP_CHECKLOCKTIMEVERIFY.
@@ -1098,7 +1092,6 @@ log.ERROR(err)
 		int64(lockTime))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// The lock time feature can also be disabled, thereby bypassing OP_CHECKLOCKTIMEVERIFY, if every transaction input has been finalized by setting its sequence to the maximum value (wire.MaxTxInSequenceNum).  This condition would result in the transaction being allowed into the blockchain making the opcode ineffective.
@@ -1130,13 +1123,11 @@ opcodeCheckSequenceVerify(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.dstack.PeekByteArray(0)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	stackSequence, err := makeScriptNum(so, vm.dstack.verifyMinimalData, 5)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// In the rare event that the argument needs to be < 0 due to some arithmetic being done first, you can always use 0 OP_MAX OP_CHECKSEQUENCEVERIFY.
@@ -1177,7 +1168,6 @@ opcodeToAltStack(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.astack.PushByteArray(so)
@@ -1192,7 +1182,6 @@ opcodeFromAltStack(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.astack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushByteArray(so)
@@ -1243,7 +1232,6 @@ opcodeIfDup(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.dstack.PeekByteArray(0)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Push copy of data iff it isn't zero
@@ -1296,7 +1284,6 @@ opcodePick(op *parsedOpcode, vm *Engine) error {
 	val, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return vm.dstack.PickN(val.Int32())
@@ -1311,7 +1298,6 @@ opcodeRoll(op *parsedOpcode, vm *Engine) error {
 	val, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return vm.dstack.RollN(val.Int32())
@@ -1343,7 +1329,6 @@ opcodeSize(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.dstack.PeekByteArray(0)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushInt(scriptNum(len(so)))
@@ -1358,13 +1343,11 @@ opcodeEqual(op *parsedOpcode, vm *Engine) error {
 	a, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	b, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushBool(bytes.Equal(a, b))
@@ -1392,7 +1375,6 @@ opcode1Add(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushInt(m + 1)
@@ -1406,7 +1388,6 @@ opcode1Sub(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushInt(m - 1)
@@ -1420,7 +1401,6 @@ opcodeNegate(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushInt(-m)
@@ -1434,7 +1414,6 @@ opcodeAbs(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if m < 0 {
@@ -1453,7 +1432,6 @@ opcodeNot(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if m == 0 {
@@ -1473,7 +1451,6 @@ opcode0NotEqual(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if m != 0 {
@@ -1490,13 +1467,11 @@ opcodeAdd(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushInt(v0 + v1)
@@ -1511,13 +1486,11 @@ opcodeSub(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushInt(v1 - v0)
@@ -1534,13 +1507,11 @@ opcodeBoolAnd(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v0 != 0 && v1 != 0 {
@@ -1561,13 +1532,11 @@ opcodeBoolOr(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v0 != 0 || v1 != 0 {
@@ -1586,13 +1555,11 @@ opcodeNumEqual(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v0 == v1 {
@@ -1626,13 +1593,11 @@ opcodeNumNotEqual(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v0 != v1 {
@@ -1651,13 +1616,11 @@ opcodeLessThan(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v1 < v0 {
@@ -1675,13 +1638,11 @@ opcodeGreaterThan(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v1 > v0 {
@@ -1700,13 +1661,11 @@ opcodeLessThanOrEqual(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v1 <= v0 {
@@ -1725,13 +1684,11 @@ opcodeGreaterThanOrEqual(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v1 >= v0 {
@@ -1749,13 +1706,11 @@ opcodeMin(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v1 < v0 {
@@ -1773,13 +1728,11 @@ opcodeMax(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if v1 > v0 {
@@ -1800,19 +1753,16 @@ opcodeWithin(op *parsedOpcode, vm *Engine) error {
 	maxVal, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	minVal, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	x, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if x >= minVal && x < maxVal {
@@ -1840,7 +1790,6 @@ opcodeRipeMD160(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushByteArray(calcHash(buf, ripemd160.New()))
@@ -1854,7 +1803,6 @@ opcodeSHA1(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	hash := sha1.Sum(buf)
@@ -1869,7 +1817,6 @@ opcodeSHA256(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	hash := sha256.Sum256(buf)
@@ -1884,7 +1831,6 @@ opcodeHash160(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	hash := sha256.Sum256(buf)
@@ -1899,7 +1845,6 @@ opcodeHash256(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	vm.dstack.PushByteArray(chainhash.DoubleHashB(buf))
@@ -1932,13 +1877,11 @@ opcodeCheckSig(op *parsedOpcode, vm *Engine) error {
 	pkBytes, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	fullSigBytes, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// The signature actually needs needs to be longer than this,
@@ -1987,7 +1930,6 @@ log.ERROR(err)
 			&vm.tx, vm.txIdx, vm.inputAmount)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 	} else {
@@ -1998,7 +1940,6 @@ log.ERROR(err)
 	pubKey, err := ec.ParsePubKey(pkBytes, ec.S256())
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		vm.dstack.PushBool(false)
 		return nil
 	}
@@ -2011,7 +1952,6 @@ log.ERROR(err)
 	}
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		vm.dstack.PushBool(false)
 		return nil
 	}
@@ -2078,7 +2018,6 @@ opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) error {
 	numKeys, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	numPubKeys := int(numKeys.Int32())
@@ -2103,7 +2042,6 @@ log.ERROR(err)
 		pubKey, err := vm.dstack.PopByteArray()
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		pubKeys = append(pubKeys, pubKey)
@@ -2111,7 +2049,6 @@ log.ERROR(err)
 	numSigs, err := vm.dstack.PopInt()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	numSignatures := int(numSigs.Int32())
@@ -2130,7 +2067,6 @@ log.ERROR(err)
 		signature, err := vm.dstack.PopByteArray()
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		sigInfo := &parsedSigInfo{signature: signature}
@@ -2143,7 +2079,6 @@ log.ERROR(err)
 	dummy, err := vm.dstack.PopByteArray()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Since the dummy argument is otherwise not checked,
@@ -2213,7 +2148,6 @@ log.ERROR(err)
 			sigInfo.parsed = true
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				continue
 			}
 			sigInfo.parsedSignature = parsedSig
@@ -2232,7 +2166,6 @@ log.ERROR(err)
 		parsedPubKey, err := ec.ParsePubKey(pubKey, ec.S256())
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			continue
 		}
 		// Generate the signature hash based on the signature hash type.
@@ -2248,7 +2181,6 @@ log.ERROR(err)
 				&vm.tx, vm.txIdx, vm.inputAmount)
 			if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 				return err
 			}
 		} else {

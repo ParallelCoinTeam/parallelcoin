@@ -27,7 +27,6 @@ func loadBlockDB() (database.DB, error) {
 	db, err := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return db, nil
@@ -40,7 +39,6 @@ func findCandidates(
 	block, err := chain.BlockByHash(latestHash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Get the latest known checkpoint.
@@ -83,7 +81,6 @@ log.ERROR(err)
 		isCandidate, err := chain.IsCheckpointCandidate(block)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 		// All checks passed, so this node seems like a reasonable checkpoint candidate.
@@ -98,7 +95,6 @@ log.ERROR(err)
 		block, err = chain.BlockByHash(prevHash)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, err
 		}
 		numTested++
@@ -122,7 +118,6 @@ func main() {
 	tcfg, _, err := loadConfig()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return
 	}
 	cfg = tcfg

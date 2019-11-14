@@ -252,7 +252,6 @@ func (w *Wallet) rescanWithTarget(addrs []util.Address,
 		)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		outpoints[output.OutPoint] = outputAddrs[0]

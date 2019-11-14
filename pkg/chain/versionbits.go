@@ -89,7 +89,6 @@ func // Condition returns true when the specific bit associated with the checker
 	expectedVersion, err := c.chain.calcNextBlockVersion(node.parent)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	return expectedVersion&conditionMask == 0, nil
@@ -172,7 +171,6 @@ func // calcNextBlockVersion calculates the expected version of the block after
 		state, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return 0, err
 		}
 		if state == ThresholdStarted || state == ThresholdLockedIn {
@@ -205,7 +203,6 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 		state, err := b.thresholdState(node.parent, checker, cache)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return err
 		}
 		switch state {

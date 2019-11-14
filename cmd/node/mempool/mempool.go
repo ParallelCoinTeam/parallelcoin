@@ -307,7 +307,6 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 		rateLimit, true)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	if len(missingParents) == 0 {
@@ -561,7 +560,6 @@ func // fetchInputUtxos loads utxo details about the input transactions
 	utxoView, err := mp.cfg.FetchUtxoView(tx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Attempt to populate any missing inputs from the transaction pool.
@@ -671,7 +669,6 @@ func // maybeAcceptTransaction is the internal function which implements the
 		segwitActive, err := mp.cfg.IsDeploymentActive(chaincfg.DeploymentSegwit)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			return nil, nil, err
 		}
 		if !segwitActive {
@@ -698,7 +695,6 @@ log.ERROR(err)
 	err := blockchain.CheckTransactionSanity(tx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -724,7 +720,6 @@ log.ERROR(err)
 			mp.cfg.Policy.MaxTxVersion)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.
 			// When not possible, fall back to a non standard error.
@@ -750,7 +745,6 @@ log.ERROR(err)
 	err = mp.checkPoolDoubleSpend(tx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, nil, err
 	}
 	// Fetch all of the unspent transaction outputs referenced by the inputs
@@ -761,7 +755,6 @@ log.ERROR(err)
 	utxoView, err := mp.fetchInputUtxos(tx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -803,7 +796,6 @@ log.ERROR(err)
 	sequenceLock, err := mp.cfg.CalcSequenceLock(tx, utxoView)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -822,7 +814,6 @@ log.ERROR(err)
 		utxoView, mp.cfg.ChainParams)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -834,7 +825,6 @@ log.ERROR(err)
 		err := checkInputsStandard(tx, utxoView)
 		if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.  When not possible, fall back to a non standard error.
 			rejectCode, found := extractRejectCode(err)
@@ -858,7 +848,6 @@ log.ERROR(err)
 	sigOpCost, err := blockchain.GetSigOpCost(tx, false, utxoView, true, true)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -935,7 +924,6 @@ log.ERROR(err)
 		mp.cfg.HashCache)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -1013,7 +1001,6 @@ func // processOrphans is the internal function which implements the public
 					b, tx, true, true, false)
 				if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 					// The orphan is now invalid so there is no way any other
 					// orphans which redeem any of its outputs can be
 					// accepted.  Remove them.
