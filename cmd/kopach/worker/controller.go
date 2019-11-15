@@ -1,3 +1,5 @@
+//+build ignore
+
 package main
 
 import (
@@ -5,38 +7,12 @@ import (
 	"fmt"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/ipc"
 	"github.com/p9c/pod/pkg/util"
-	"io"
-	"os"
-	"os/exec"
 )
 
-var Q = []byte{255, 255, 255, 255}
-
-type ControllerIPC struct {
-	*exec.Cmd
-	Stdin  io.Writer
-	Stdout io.Reader
-}
-
-func NewControllerIPC() (out *ControllerIPC, err error) {
-	out = &ControllerIPC{
-		Cmd: exec.Command("go", "run", "worker.go"),
-	}
-	out.Stdin, err = out.StdinPipe()
-	if err != nil {
-		panic(err)
-	}
-	out.Stderr = os.Stdout
-	out.Stdout, err = out.StdoutPipe()
-	if err != nil {
-		panic(err)
-	}
-	return
-}
-
 func main() {
-	ctrl, err := NewControllerIPC()
+	ctrl, err := ipc.NewController()
 	if err != nil {
 		panic(err)
 	}
@@ -59,8 +35,8 @@ func main() {
 	prefix := make([]byte, 4)
 	binary.BigEndian.PutUint32(prefix, uint32(len(b)))
 	b = append(prefix, b...)
-	//ctrl.Stdout.Write(b)
-	ctrl.Stdin.Write(b)
-	ctrl.Stdin.Write(Q)
+	//ctrl.Out.Write(b)
+	ctrl.In.Write(b)
+	ctrl.In.Write(ipc.QuitCommand)
 	err = ctrl.Wait()
 }

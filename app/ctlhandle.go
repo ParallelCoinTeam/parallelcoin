@@ -23,7 +23,7 @@ func ctlHandleList(c *cli.Context) error {
 
 func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		Configure(cx, c)
+		Configure(cx, c, "")
 		args := c.Args()
 		if len(args) < 1 {
 			return cli.ShowSubcommandHelp(c)
