@@ -12,7 +12,7 @@ import (
 )
 
 // TestSort ensures the transaction sorting works according to the BIP.
-func TestSort(	t *testing.T) {
+func TestSort(t *testing.T) {
 	tests := []struct {
 		name         string
 		hexFile      string

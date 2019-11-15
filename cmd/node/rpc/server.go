@@ -2182,8 +2182,7 @@ func (a SimpleAddr) String() string {
 
 //	AddLocalAddress adds an address that this node is listening on to the
 // address manager so that it may be relayed to peers.
-func
-AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.ServiceFlag) error {
+func AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.ServiceFlag) error {
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
 		log.ERROR(err)
@@ -2236,8 +2235,7 @@ AddLocalAddress(addrMgr *addrmgr.AddrManager, addr string, services wire.Service
 // a net.Addr which maps to the original address with any host names resolved
 // to IP addresses.  It also handles tor addresses properly by returning a
 // net.Addr that encapsulates the address.
-func
-AddrStringToNetAddr(config *pod.Config, stateCfg *state.Config, addr string) (net.Addr, error) {
+func AddrStringToNetAddr(config *pod.Config, stateCfg *state.Config, addr string) (net.Addr, error) {
 	host, strPort, err := net.SplitHostPort(addr)
 	if err != nil {
 		log.ERROR(err)
@@ -2287,8 +2285,7 @@ AddrStringToNetAddr(config *pod.Config, stateCfg *state.Config, addr string) (ne
 // to be located. If the peer is found, and the passed callback: `whenFound'
 // isn't nil, we call it with the peer as the argument before it is removed
 // from the peerList, and is disconnected from the server.
-func
-DisconnectPeer(peerList map[int32]*NodePeer,
+func DisconnectPeer(peerList map[int32]*NodePeer,
 	compareFunc func(*NodePeer) bool, whenFound func(*NodePeer)) bool {
 	for addr, nodePeer := range peerList {
 		if compareFunc(nodePeer) {
@@ -2309,8 +2306,7 @@ DisconnectPeer(peerList map[int32]*NodePeer,
 // tick duration based on remaining time.  It is primarily used during
 // server shutdown to make shutdown warnings more frequent as the shutdown time
 // approaches.
-func
-DynamicTickDuration(remaining time.Duration) time.Duration {
+func DynamicTickDuration(remaining time.Duration) time.Duration {
 	switch {
 	case remaining <= time.Second*5:
 		return time.Second
@@ -2330,16 +2326,14 @@ DynamicTickDuration(remaining time.Duration) time.Duration {
 
 // GetHasServices returns whether or not the provided advertised service flags
 // have all of the provided desired service flags set.
-func
-GetHasServices(advertised, desired wire.ServiceFlag) bool {
+func GetHasServices(advertised, desired wire.ServiceFlag) bool {
 	return advertised&desired == desired
 }
 
 // InitListeners initializes the configured net listeners and adds any bound
 // addresses to the address manager. Returns the listeners and a upnp.NAT
 // interface, which is non-nil if UPnP is in use.
-func
-InitListeners(config *pod.Config, activeNet *netparams.Params,
+func InitListeners(config *pod.Config, activeNet *netparams.Params,
 	aMgr *addrmgr.AddrManager, listenAddrs []string, services wire.ServiceFlag) ([]net.Listener, upnp.NAT, error) {
 	// Listen for TCP connections at the configured addresses
 	log.TRACE("listenAddrs ", listenAddrs)
@@ -2415,8 +2409,7 @@ InitListeners(config *pod.Config, activeNet *netparams.Params,
 
 // GetIsWhitelisted returns whether the IP address is included in the
 // whitelisted networks and IPs.
-func
-GetIsWhitelisted(statecfg *state.Config, addr net.Addr) bool {
+func GetIsWhitelisted(statecfg *state.Config, addr net.Addr) bool {
 	if len(statecfg.ActiveWhitelists) == 0 {
 		return false
 	}
@@ -2875,8 +2868,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 
 // NewServerPeer returns a new ServerPeer instance. The peer needs to be set by
 // the caller.
-func
-NewServerPeer(s *Node, isPersistent bool) *NodePeer {
+func NewServerPeer(s *Node, isPersistent bool) *NodePeer {
 	return &NodePeer{
 		Server:         s,
 		Persistent:     isPersistent,
@@ -2892,8 +2884,7 @@ NewServerPeer(s *Node, isPersistent bool) *NodePeer {
 // returns a slice of appropriate net.Addrs to listen on with TCP. It also
 // properly detects addresses which apply to "all interfaces" and adds the
 // address as both IPv4 and IPv6.
-func
-ParseListeners(addrs []string) ([]net.Addr, error) {
+func ParseListeners(addrs []string) ([]net.Addr, error) {
 	netAddrs := make([]net.Addr, 0, len(addrs)*2)
 	for _, addr := range addrs {
 		host, _, err := net.SplitHostPort(addr)
@@ -2932,8 +2923,7 @@ ParseListeners(addrs []string) ([]net.Addr, error) {
 // RandomUint16Number returns a random uint16 in a specified input range.  Note
 // that the range is in zeroth ordering; if you pass it 1800, you will get
 // values from 0 to 1800.
-func
-RandomUint16Number(max uint16) uint16 {
+func RandomUint16Number(max uint16) uint16 {
 	// In order to avoid modulo bias and ensure every possible outcome in [0,
 	// max) has equal probability, the random number must be sampled from a
 	// random source that has a range limited to a multiple of the modulus.
@@ -2953,8 +2943,7 @@ RandomUint16Number(max uint16) uint16 {
 // SetupRPCListeners returns a slice of listeners that are configured for use
 // with the RPC server depending on the configuration settings for listen
 // addresses and TLS.
-func
-SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error) {
+func SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error) {
 	// Setup TLS if not disabled.
 	listenFunc := net.Listen
 	if *config.TLS {
@@ -3000,8 +2989,7 @@ SetupRPCListeners(config *pod.Config, urls []string) ([]net.Listener, error) {
 }
 
 // FileExists reports whether the named file or directory exists.
-func
-FileExists(name string) bool {
+func FileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
 			return false

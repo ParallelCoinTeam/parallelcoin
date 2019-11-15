@@ -11,7 +11,7 @@ const charset = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 var gen = []int{0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3}
 
 // Decode decodes a bech32 encoded string, returning the human-readable part and the data part excluding the checksum.
-func Decode(	bech string) (string, []byte, error) {
+func Decode(bech string) (string, []byte, error) {
 	// The maximum allowed length for a bech32 string is 90. It must also be at least 8 characters, since it needs a non-empty HRP, a separator, and a 6 character checksum.
 	if len(bech) < 8 || len(bech) > 90 {
 		return "", nil, fmt.Errorf("invalid bech32 string length %d",
@@ -45,7 +45,7 @@ func Decode(	bech string) (string, []byte, error) {
 	decoded, err := toBytes(data)
 	if err != nil {
 		log.ERROR(err)
-return "", nil, fmt.Errorf("failed converting data to bytes: "+
+		return "", nil, fmt.Errorf("failed converting data to bytes: "+
 			"%v", err)
 	}
 	if !bech32VerifyChecksum(hrp, decoded) {
@@ -64,7 +64,7 @@ return "", nil, fmt.Errorf("failed converting data to bytes: "+
 }
 
 // Encode encodes a byte slice into a bech32 string with the human-readable part hrb. Note that the bytes must each encode 5 bits (base32).
-func Encode(	hrp string, data []byte) (string, error) {
+func Encode(hrp string, data []byte) (string, error) {
 	// Calculate the checksum of the data and append it at the end.
 	checksum := bech32Checksum(hrp, data)
 	combined := append(data, checksum...)
@@ -72,14 +72,14 @@ func Encode(	hrp string, data []byte) (string, error) {
 	dataChars, err := toChars(combined)
 	if err != nil {
 		log.ERROR(err)
-return "", fmt.Errorf("unable to convert data bytes to chars: "+
+		return "", fmt.Errorf("unable to convert data bytes to chars: "+
 			"%v", err)
 	}
 	return hrp + "1" + dataChars, nil
 }
 
 // toBytes converts each character in the string 'chars' to the value of the index of the correspoding character in 'charset'.
-func toBytes(	chars string) ([]byte, error) {
+func toBytes(chars string) ([]byte, error) {
 	decoded := make([]byte, 0, len(chars))
 	for i := 0; i < len(chars); i++ {
 		index := strings.IndexByte(charset, chars[i])
@@ -93,7 +93,7 @@ func toBytes(	chars string) ([]byte, error) {
 }
 
 // toChars converts the byte slice 'data' to a string where each byte in 'data' encodes the index of a character in 'charset'.
-func toChars(	data []byte) (string, error) {
+func toChars(data []byte) (string, error) {
 	result := make([]byte, 0, len(data))
 	for _, b := range data {
 		if int(b) >= len(charset) {
@@ -105,7 +105,7 @@ func toChars(	data []byte) (string, error) {
 }
 
 // ConvertBits converts a byte slice where each byte is encoding fromBits bits, to a byte slice where each byte is encoding toBits bits.
-func ConvertBits(	data []byte, fromBits, toBits uint8, pad bool) ([]byte, error) {
+func ConvertBits(data []byte, fromBits, toBits uint8, pad bool) ([]byte, error) {
 	if fromBits < 1 || fromBits > 8 || toBits < 1 || toBits > 8 {
 		return nil, fmt.Errorf("only bit groups between 1 and 8 allowed")
 	}
@@ -156,7 +156,7 @@ func ConvertBits(	data []byte, fromBits, toBits uint8, pad bool) ([]byte, error)
 }
 
 // For more details on the checksum calculation, please refer to BIP 173.
-func bech32Checksum(	hrp string, data []byte) []byte {
+func bech32Checksum(hrp string, data []byte) []byte {
 	// Convert the bytes to list of integers, as this is needed for the checksum calculation.
 	integers := make([]int, len(data))
 	for i, b := range data {
@@ -173,7 +173,7 @@ func bech32Checksum(	hrp string, data []byte) []byte {
 }
 
 // For more details on the polymod calculation, please refer to BIP 173.
-func bech32Polymod(	values []int) int {
+func bech32Polymod(values []int) int {
 	chk := 1
 	for _, v := range values {
 		b := chk >> 25
@@ -188,7 +188,7 @@ func bech32Polymod(	values []int) int {
 }
 
 // For more details on HRP expansion, please refer to BIP 173.
-func bech32HrpExpand(	hrp string) []int {
+func bech32HrpExpand(hrp string) []int {
 	v := make([]int, 0, len(hrp)*2+1)
 	for i := 0; i < len(hrp); i++ {
 		v = append(v, int(hrp[i]>>5))
@@ -201,7 +201,7 @@ func bech32HrpExpand(	hrp string) []int {
 }
 
 // For more details on the checksum verification, please refer to BIP 173.
-func bech32VerifyChecksum(	hrp string, data []byte) bool {
+func bech32VerifyChecksum(hrp string, data []byte) bool {
 	integers := make([]int, len(data))
 	for i, b := range data {
 		integers[i] = int(b)

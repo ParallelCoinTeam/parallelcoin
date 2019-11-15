@@ -11,8 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
-func
-nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
+func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		log.TRACE("running node handler")
 		var wg sync.WaitGroup

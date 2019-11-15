@@ -8,7 +8,7 @@ import (
 )
 
 // TestErrorCodeStringer tests the stringized output for the ErrorCode type.
-func TestErrorCodeStringer(	t *testing.T) {
+func TestErrorCodeStringer(t *testing.T) {
 	tests := []struct {
 		in   database.ErrorCode
 		want string
@@ -53,7 +53,7 @@ func TestErrorCodeStringer(	t *testing.T) {
 }
 
 // TestError tests the error output for the Error type.
-func TestError(	t *testing.T) {
+func TestError(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		in   database.Error

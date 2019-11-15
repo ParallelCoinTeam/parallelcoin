@@ -8,7 +8,7 @@ import (
 )
 
 // isJacobianOnS256Curve returns boolean if the point (x,y,z) is on the secp256k1 curve.
-func isJacobianOnS256Curve(	x, y, z *fieldVal) bool {
+func isJacobianOnS256Curve(x, y, z *fieldVal) bool {
 	// Elliptic curve equation for secp256k1 is: y^2 = x^3 + 7
 	// In Jacobian coordinates, Y = y/z^3 and X = x/z^2
 	// Thus:
@@ -24,7 +24,7 @@ func isJacobianOnS256Curve(	x, y, z *fieldVal) bool {
 }
 
 // TestAddJacobian tests addition of points projected in Jacobian coordinates.
-func TestAddJacobian(	t *testing.T) {
+func TestAddJacobian(t *testing.T) {
 	tests := []struct {
 		x1, y1, z1 string // Coordinates (in hex) of first point to add
 		x2, y2, z2 string // Coordinates (in hex) of second point to add
@@ -250,7 +250,7 @@ func TestAddJacobian(	t *testing.T) {
 }
 
 // TestAddAffine tests addition of points in affine coordinates.
-func TestAddAffine(	t *testing.T) {
+func TestAddAffine(t *testing.T) {
 	tests := []struct {
 		x1, y1 string // Coordinates (in hex) of first point to add
 		x2, y2 string // Coordinates (in hex) of second point to add
@@ -340,7 +340,7 @@ func TestAddAffine(	t *testing.T) {
 }
 
 // TestDoubleJacobian tests doubling of points projected in Jacobian coordinates.
-func TestDoubleJacobian(	t *testing.T) {
+func TestDoubleJacobian(t *testing.T) {
 	tests := []struct {
 		x1, y1, z1 string // Coordinates (in hex) of point to double
 		x3, y3, z3 string // Coordinates (in hex) of expected point
@@ -415,7 +415,7 @@ func TestDoubleJacobian(	t *testing.T) {
 }
 
 // TestDoubleAffine tests doubling of points in affine coordinates.
-func TestDoubleAffine(	t *testing.T) {
+func TestDoubleAffine(t *testing.T) {
 	tests := []struct {
 		x1, y1 string // Coordinates (in hex) of point to double
 		x3, y3 string // Coordinates (in hex) of expected point
@@ -480,7 +480,7 @@ func TestDoubleAffine(	t *testing.T) {
 		}
 	}
 }
-func TestOnCurve(	t *testing.T) {
+func TestOnCurve(t *testing.T) {
 	s256 := S256()
 	if !s256.IsOnCurve(s256.Params().Gx, s256.Params().Gy) {
 		t.Errorf("FAIL S256")
@@ -522,7 +522,7 @@ var s256BaseMultTests = []baseMultTest{
 }
 
 //TODO: test different curves as well?
-func TestBaseMult(	t *testing.T) {
+func TestBaseMult(t *testing.T) {
 	s256 := S256()
 	for i, e := range s256BaseMultTests {
 		k, ok := new(big.Int).SetString(e.k, 16)
@@ -538,7 +538,7 @@ func TestBaseMult(	t *testing.T) {
 		}
 	}
 }
-func TestBaseMultVerify(	t *testing.T) {
+func TestBaseMultVerify(t *testing.T) {
 	s256 := S256()
 	for bytes := 1; bytes < 40; bytes++ {
 		for i := 0; i < 30; i++ {
@@ -559,7 +559,7 @@ func TestBaseMultVerify(	t *testing.T) {
 		}
 	}
 }
-func TestScalarMult(	t *testing.T) {
+func TestScalarMult(t *testing.T) {
 	tests := []struct {
 		x  string
 		y  string
@@ -597,7 +597,7 @@ func TestScalarMult(	t *testing.T) {
 		}
 	}
 }
-func TestScalarMultRand(	t *testing.T) {
+func TestScalarMultRand(t *testing.T) {
 	// Strategy for this test:
 	// Get a random exponent from the generator point at first This creates a new point which is used in the next iteration Use another random exponent on the new point. We use BaseMult to verify by multiplying the previous exponent and the new random exponent together (mod N)
 	s256 := S256()
@@ -619,7 +619,7 @@ func TestScalarMultRand(	t *testing.T) {
 		}
 	}
 }
-func TestSplitK(	t *testing.T) {
+func TestSplitK(t *testing.T) {
 	tests := []struct {
 		k      string
 		k1, k2 string
@@ -703,7 +703,7 @@ func TestSplitK(	t *testing.T) {
 		}
 	}
 }
-func TestSplitKRand(	t *testing.T) {
+func TestSplitKRand(t *testing.T) {
 	s256 := S256()
 	for i := 0; i < 1024; i++ {
 		bytesK := make([]byte, 32)
@@ -730,7 +730,7 @@ func TestSplitKRand(	t *testing.T) {
 }
 
 // Test this curve's usage with the ecdsa package.
-func testKeyGeneration(	t *testing.T, c *KoblitzCurve, tag string) {
+func testKeyGeneration(t *testing.T, c *KoblitzCurve, tag string) {
 	priv, err := NewPrivateKey(c)
 	if err != nil {
 		t.Errorf("%s: error: %s", tag, err)
@@ -740,10 +740,10 @@ func testKeyGeneration(	t *testing.T, c *KoblitzCurve, tag string) {
 		t.Errorf("%s: public key invalid: %s", tag, err)
 	}
 }
-func TestKeyGeneration(	t *testing.T) {
+func TestKeyGeneration(t *testing.T) {
 	testKeyGeneration(t, S256(), "S256")
 }
-func testSignAndVerify(	t *testing.T, c *KoblitzCurve, tag string) {
+func testSignAndVerify(t *testing.T, c *KoblitzCurve, tag string) {
 	priv, _ := NewPrivateKey(c)
 	pub := priv.PubKey()
 	hashed := []byte("testing")
@@ -760,10 +760,10 @@ func testSignAndVerify(	t *testing.T, c *KoblitzCurve, tag string) {
 		t.Errorf("%s: Verify always works!", tag)
 	}
 }
-func TestSignAndVerify(	t *testing.T) {
+func TestSignAndVerify(t *testing.T) {
 	testSignAndVerify(t, S256(), "S256")
 }
-func TestNAF(	t *testing.T) {
+func TestNAF(t *testing.T) {
 	tests := []string{
 		"6df2b5d30854069ccdec40ae022f5c948936324a4e9ebed8eb82cfd5a6b6d766",
 		"b776e53fb55f6b006a270d42d64ec2b1",
@@ -798,7 +798,7 @@ func TestNAF(	t *testing.T) {
 		}
 	}
 }
-func TestNAFRand(	t *testing.T) {
+func TestNAFRand(t *testing.T) {
 	negOne := big.NewInt(-1)
 	one := big.NewInt(1)
 	two := big.NewInt(2)

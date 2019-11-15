@@ -50,7 +50,7 @@ func MarshalCmd(id interface{}, cmd interface{}) ([]byte, error) {
 	rawCmd, err := NewRequest(id, method, params)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return json.Marshal(rawCmd)
 }
@@ -318,8 +318,8 @@ func assignField(paramNum int, fieldName string, dest reflect.Value, src reflect
 		case reflect.Bool:
 			b, err := strconv.ParseBool(src.String())
 			if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("parameter #%d '%s' must "+
+				log.ERROR(err)
+				str := fmt.Sprintf("parameter #%d '%s' must "+
 					"parse to a %v", paramNum, fieldName,
 					destBaseType)
 				return makeError(ErrInvalidType, str)
@@ -330,8 +330,8 @@ str := fmt.Sprintf("parameter #%d '%s' must "+
 			reflect.Int64:
 			srcInt, err := strconv.ParseInt(src.String(), 0, 0)
 			if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("parameter #%d '%s' must "+
+				log.ERROR(err)
+				str := fmt.Sprintf("parameter #%d '%s' must "+
 					"parse to a %v", paramNum, fieldName,
 					destBaseType)
 				return makeError(ErrInvalidType, str)
@@ -348,8 +348,8 @@ str := fmt.Sprintf("parameter #%d '%s' must "+
 			reflect.Uint32, reflect.Uint64:
 			srcUint, err := strconv.ParseUint(src.String(), 0, 0)
 			if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("parameter #%d '%s' must "+
+				log.ERROR(err)
+				str := fmt.Sprintf("parameter #%d '%s' must "+
 					"parse to a %v", paramNum, fieldName,
 					destBaseType)
 				return makeError(ErrInvalidType, str)
@@ -365,8 +365,8 @@ str := fmt.Sprintf("parameter #%d '%s' must "+
 		case reflect.Float32, reflect.Float64:
 			srcFloat, err := strconv.ParseFloat(src.String(), 0)
 			if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("parameter #%d '%s' must "+
+				log.ERROR(err)
+				str := fmt.Sprintf("parameter #%d '%s' must "+
 					"parse to a %v", paramNum, fieldName,
 					destBaseType)
 				return makeError(ErrInvalidType, str)
@@ -387,8 +387,8 @@ str := fmt.Sprintf("parameter #%d '%s' must "+
 			concreteVal := dest.Addr().Interface()
 			err := json.Unmarshal([]byte(src.String()), &concreteVal)
 			if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("parameter #%d '%s' must "+
+				log.ERROR(err)
+				str := fmt.Sprintf("parameter #%d '%s' must "+
 					"be valid JSON which unsmarshals to a %v",
 					paramNum, fieldName, destBaseType)
 				return makeError(ErrInvalidType, str)
@@ -432,8 +432,8 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 		fieldName := strings.ToLower(rt.Field(i).Name)
 		err := assignField(i+1, fieldName, rvf, reflect.ValueOf(args[i]))
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 	}
 	return rvp.Interface(), nil

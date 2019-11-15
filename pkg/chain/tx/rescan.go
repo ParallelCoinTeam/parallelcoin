@@ -182,12 +182,12 @@ out:
 				noun,
 				n.Hash,
 				n.Height)
-		go w.resendUnminedTxs()
-case <-quit:
-break out
-}
-}
-w.wg.Done()
+			go w.resendUnminedTxs()
+		case <-quit:
+			break out
+		}
+	}
+	w.wg.Done()
 }
 
 // rescanRPCHandler reads batch jobs sent by rescanBatchHandler and sends the
@@ -197,7 +197,7 @@ func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
 		log.ERROR(err)
-log.ERRORF("rescanRPCHandler called without an RPC client", err)
+		log.ERRORF("rescanRPCHandler called without an RPC client", err)
 		w.wg.Done()
 		return
 	}
@@ -218,8 +218,8 @@ out:
 			err := chainClient.Rescan(&batch.bs.Hash, batch.addrs,
 				batch.outpoints)
 			if err != nil {
-		log.ERROR(err)
-log.ERRORF(
+				log.ERROR(err)
+				log.ERRORF(
 					"rescan for %d %s failed: %v %s",
 					numAddrs,
 					noun,
@@ -251,7 +251,7 @@ func (w *Wallet) rescanWithTarget(addrs []util.Address,
 			output.PkScript, w.chainParams,
 		)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		outpoints[output.OutPoint] = outputAddrs[0]

@@ -10,16 +10,16 @@ import (
 )
 
 type // blockProgressLogger provides periodic logging for other services in
-	// order to show users progress of certain "actions" involving some or all
-	// current blocks. Ex: syncing to best chain, indexing all blocks, etc.
-	blockProgressLogger struct {
-		receivedLogBlocks int64
-		receivedLogTx     int64
-		lastBlockLogTime  time.Time
-		subsystemLogger   *log.Logger
-		progressAction    string
-		sync.Mutex
-	}
+// order to show users progress of certain "actions" involving some or all
+// current blocks. Ex: syncing to best chain, indexing all blocks, etc.
+blockProgressLogger struct {
+	receivedLogBlocks int64
+	receivedLogTx     int64
+	lastBlockLogTime  time.Time
+	subsystemLogger   *log.Logger
+	progressAction    string
+	sync.Mutex
+}
 
 func // newBlockProgressLogger returns a new block progress logger.
 // The progress message is templated as follows:  {progressAction }
@@ -72,7 +72,6 @@ func // LogBlockHeight logs a new block height as an information message to
 	b.receivedLogTx = 0
 	b.lastBlockLogTime = now
 }
-func
-(b *blockProgressLogger) SetLastLogTime(time time.Time) {
+func (b *blockProgressLogger) SetLastLogTime(time time.Time) {
 	b.lastBlockLogTime = time
 }

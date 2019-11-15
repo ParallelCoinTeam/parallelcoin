@@ -19,7 +19,7 @@ func main() {
 
 	if err != nil {
 		log.ERROR(err)
-log.Fatal(err)
+		log.Fatal(err)
 	}
 	defer fi.Close()
 

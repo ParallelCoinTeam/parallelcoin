@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/log"
 
-	`github.com/p9c/pod/pkg/chain/config/netparams`
-   "github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -66,7 +66,7 @@ func (t ScriptClass) String() string {
 }
 
 // isPubkey returns true if the script passed is a pay-to-pubkey transaction, false otherwise.
-func isPubkey(	pops []parsedOpcode) bool {
+func isPubkey(pops []parsedOpcode) bool {
 	// Valid pubkeys are either 33 or 65 bytes.
 	return len(pops) == 2 &&
 		(len(pops[0].data) == 33 || len(pops[0].data) == 65) &&
@@ -74,7 +74,7 @@ func isPubkey(	pops []parsedOpcode) bool {
 }
 
 // isPubkeyHash returns true if the script passed is a pay-to-pubkey-hash transaction, false otherwise.
-func isPubkeyHash(	pops []parsedOpcode) bool {
+func isPubkeyHash(pops []parsedOpcode) bool {
 	return len(pops) == 5 &&
 		pops[0].opcode.value == OP_DUP &&
 		pops[1].opcode.value == OP_HASH160 &&
@@ -84,7 +84,7 @@ func isPubkeyHash(	pops []parsedOpcode) bool {
 }
 
 // isMultiSig returns true if the passed script is a multisig transaction, false otherwise.
-func isMultiSig(	pops []parsedOpcode) bool {
+func isMultiSig(pops []parsedOpcode) bool {
 	// The absolute minimum is 1 pubkey:
 	// OP_0/OP_1-16 <pubkey> OP_1 OP_CHECKMULTISIG
 	l := len(pops)
@@ -114,7 +114,7 @@ func isMultiSig(	pops []parsedOpcode) bool {
 }
 
 // isNullData returns true if the passed script is a null data transaction, false otherwise.
-func isNullData(	pops []parsedOpcode) bool {
+func isNullData(pops []parsedOpcode) bool {
 	// A nulldata transaction is either a single OP_RETURN or an OP_RETURN SMALLDATA (where SMALLDATA is a data push up to MaxDataCarrierSize bytes).
 	l := len(pops)
 	if l == 1 && pops[0].opcode.value == OP_RETURN {
@@ -128,7 +128,7 @@ func isNullData(	pops []parsedOpcode) bool {
 }
 
 // scriptType returns the type of the script being inspected from the known standard types.
-func typeOfScript(	pops []parsedOpcode) ScriptClass {
+func typeOfScript(pops []parsedOpcode) ScriptClass {
 	if isPubkey(pops) {
 		return PubKeyTy
 	} else if isPubkeyHash(pops) {
@@ -148,7 +148,7 @@ func typeOfScript(	pops []parsedOpcode) ScriptClass {
 }
 
 // GetScriptClass returns the class of the script passed. NonStandardTy will be returned when the script does not parse.
-func GetScriptClass(	script []byte) ScriptClass {
+func GetScriptClass(script []byte) ScriptClass {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -158,7 +158,7 @@ func GetScriptClass(	script []byte) ScriptClass {
 }
 
 // expectedInputs returns the number of arguments required by a script. If the script is of unknown type such that the number can not be determined then -1 is returned. We are an internal function and thus assume that class is the real class of pops (and we can thus assume things that were determined while finding out the type).
-func expectedInputs(	pops []parsedOpcode, class ScriptClass) int {
+func expectedInputs(pops []parsedOpcode, class ScriptClass) int {
 	switch class {
 	case PubKeyTy:
 		return 1
@@ -223,7 +223,7 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 		script := sigPops[len(sigPops)-1].data
 		shPops, err := parseScript(script)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		shInputs := expectedInputs(shPops, typeOfScript(shPops))
@@ -275,7 +275,7 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 }
 
 // CalcMultiSigStats returns the number of public keys and signatures from a multi-signature transaction script.  The passed script MUST already be known to be a multi-signature script.
-func CalcMultiSigStats(	script []byte) (int, int, error) {
+func CalcMultiSigStats(script []byte) (int, int, error) {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -292,30 +292,30 @@ func CalcMultiSigStats(	script []byte) (int, int, error) {
 }
 
 // payToPubKeyHashScript creates a new script to pay a transaction output to a 20-byte pubkey hash. It is expected that the input is a valid hash.
-func payToPubKeyHashScript(	pubKeyHash []byte) ([]byte, error) {
+func payToPubKeyHashScript(pubKeyHash []byte) ([]byte, error) {
 	return NewScriptBuilder().AddOp(OP_DUP).AddOp(OP_HASH160).
 		AddData(pubKeyHash).AddOp(OP_EQUALVERIFY).AddOp(OP_CHECKSIG).
 		Script()
 }
 
 // payToWitnessPubKeyHashScript creates a new script to pay to a version 0 pubkey hash witness program. The passed hash is expected to be valid.
-func payToWitnessPubKeyHashScript(	pubKeyHash []byte) ([]byte, error) {
+func payToWitnessPubKeyHashScript(pubKeyHash []byte) ([]byte, error) {
 	return NewScriptBuilder().AddOp(OP_0).AddData(pubKeyHash).Script()
 }
 
 // payToScriptHashScript creates a new script to pay a transaction output to a script hash. It is expected that the input is a valid hash.
-func payToScriptHashScript(	scriptHash []byte) ([]byte, error) {
+func payToScriptHashScript(scriptHash []byte) ([]byte, error) {
 	return NewScriptBuilder().AddOp(OP_HASH160).AddData(scriptHash).
 		AddOp(OP_EQUAL).Script()
 }
 
 // payToWitnessPubKeyHashScript creates a new script to pay to a version 0 script hash witness program. The passed hash is expected to be valid.
-func payToWitnessScriptHashScript(	scriptHash []byte) ([]byte, error) {
+func payToWitnessScriptHashScript(scriptHash []byte) ([]byte, error) {
 	return NewScriptBuilder().AddOp(OP_0).AddData(scriptHash).Script()
 }
 
 // payToPubkeyScript creates a new script to pay a transaction output to a public key. It is expected that the input is a valid pubkey.
-func payToPubKeyScript(	serializedPubKey []byte) ([]byte, error) {
+func payToPubKeyScript(serializedPubKey []byte) ([]byte, error) {
 	return NewScriptBuilder().AddData(serializedPubKey).
 		AddOp(OP_CHECKSIG).Script()
 }
@@ -361,7 +361,7 @@ func PayToAddrScript(addr util.Address) ([]byte, error) {
 }
 
 // NullDataScript creates a provably-prunable script containing OP_RETURN followed by the passed data.  An Error with the error code ErrTooMuchNullData will be returned if the length of the passed data exceeds MaxDataCarrierSize.
-func NullDataScript(	data []byte) ([]byte, error) {
+func NullDataScript(data []byte) ([]byte, error) {
 	if len(data) > MaxDataCarrierSize {
 		str := fmt.Sprintf("data size %d is larger than max "+
 			"allowed size %d", len(data), MaxDataCarrierSize)
@@ -371,7 +371,7 @@ func NullDataScript(	data []byte) ([]byte, error) {
 }
 
 // MultiSigScript returns a valid script for a multisignature redemption where nrequired of the keys in pubkeys are required to have signed the transaction for success.  An Error with the error code ErrTooManyRequiredSigs will be returned if nrequired is larger than the number of keys provided.
-func MultiSigScript(	pubkeys []*util.AddressPubKey, nrequired int) ([]byte, error) {
+func MultiSigScript(pubkeys []*util.AddressPubKey, nrequired int) ([]byte, error) {
 	if len(pubkeys) < nrequired {
 		str := fmt.Sprintf("unable to generate multisig script with "+
 			"%d required signatures when there are only %d public "+
@@ -388,7 +388,7 @@ func MultiSigScript(	pubkeys []*util.AddressPubKey, nrequired int) ([]byte, erro
 }
 
 // PushedData returns an array of byte slices containing any pushed data found in the passed script.  This includes OP_0, but not OP_1 - OP_16.
-func PushedData(	script []byte) ([][]byte, error) {
+func PushedData(script []byte) ([][]byte, error) {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -489,7 +489,7 @@ type AtomicSwapDataPushes struct {
 // ExtractAtomicSwapDataPushes returns the data pushes from an atomic swap contract.  If the script is not an atomic swap contract,
 // ExtractAtomicSwapDataPushes returns (nil, nil).  Non-nil errors are returned for unparsable scripts.
 // NOTE: Atomic swaps are not considered standard script types by the dcrd mempool policy and should be used with P2SH.  The atomic swap format is also expected to change to use a more secure hash function in the future. This function is only defined in the txscript package due to API limitations which prevent callers using txscript to parse nonstandard scripts.
-func ExtractAtomicSwapDataPushes(	version uint16, pkScript []byte) (*AtomicSwapDataPushes, error) {
+func ExtractAtomicSwapDataPushes(version uint16, pkScript []byte) (*AtomicSwapDataPushes, error) {
 	pops, err := parseScript(pkScript)
 	if err != nil {
 		log.ERROR(err)
@@ -528,7 +528,7 @@ func ExtractAtomicSwapDataPushes(	version uint16, pkScript []byte) (*AtomicSwapD
 	if pops[2].data != nil {
 		locktime, err := makeScriptNum(pops[2].data, true, 5)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, nil
 		}
 		pushes.SecretSize = int64(locktime)
@@ -540,7 +540,7 @@ func ExtractAtomicSwapDataPushes(	version uint16, pkScript []byte) (*AtomicSwapD
 	if pops[11].data != nil {
 		locktime, err := makeScriptNum(pops[11].data, true, 5)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, nil
 		}
 		pushes.LockTime = int64(locktime)

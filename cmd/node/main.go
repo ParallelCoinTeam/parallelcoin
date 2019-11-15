@@ -77,7 +77,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 			log.ERROR("unable to create cpu profile:", err)
 			return
 		}
-        e := pprof.StartCPUProfile(f)
+		e := pprof.StartCPUProfile(f)
 		if e != nil {
 			log.WARN("failed to start up cpu profiler:", e)
 		} else {

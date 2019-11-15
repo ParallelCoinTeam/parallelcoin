@@ -23,7 +23,7 @@ func secondPowLimitBits(nH int32) (out *map[int32]uint32) {
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 	lastNode *BlockNode) (newTargetBits *map[int32]uint32, err error) {
 	nH := lastNode.height + 1
-	nTB :=	make(map[int32]uint32, len(fork.List[fork.GetCurrent(
+	nTB := make(map[int32]uint32, len(fork.List[fork.GetCurrent(
 		nH)].AlgoVers))
 	newTargetBits = &nTB
 	lnh := lastNode.Header()
@@ -36,7 +36,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 		hD.BlockHashWithAlgos(lastNode.height), lastNode.height)
 	// here we only need to do this once
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
-	dayDiv := b.GetCommonP9Averages(lastNode, nH)
+		dayDiv := b.GetCommonP9Averages(lastNode, nH)
 	for aV := range fork.List[fork.GetCurrent(nH)].AlgoVers {
 		// TODO: merge this with the single algorithm one
 		since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode,

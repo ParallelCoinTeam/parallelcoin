@@ -1,7 +1,7 @@
 package chain
 
 import (
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
@@ -60,7 +60,7 @@ type BlockFilterer struct {
 // external and internal addresses that we are searching for, and is used to
 // scan successive blocks for addresses of interest. A particular block filter
 // can be reused until the first call from `FilterBlock` returns true.
-func NewBlockFilterer(	params *netparams.Params,
+func NewBlockFilterer(params *netparams.Params,
 	req *FilterBlocksRequest) *BlockFilterer {
 	// Construct a reverse index by address string for the requested
 	// external addresses.
@@ -134,8 +134,8 @@ func (bf *BlockFilterer) FilterTx(tx *wire.MsgTx) bool {
 			out.PkScript, bf.Params,
 		)
 		if err != nil {
-		log.ERROR(err)
-log.WARNF(
+			log.ERROR(err)
+			log.WARNF(
 				"could not parse output script in %s:%d: %v",
 				tx.TxHash(), i, err,
 			)

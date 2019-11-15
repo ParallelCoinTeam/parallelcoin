@@ -73,13 +73,13 @@ func (msg *MsgCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) 
 		var cfh chainhash.Hash
 		err := readElement(r, &cfh)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = msg.AddCFHash(&cfh)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
+			fmt.Println(err)
 		}
 	}
 	return nil
@@ -121,7 +121,7 @@ func (msg *MsgCFHeaders) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) 
 	for _, cfh := range msg.FilterHashes {
 		err := writeElement(w, cfh)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

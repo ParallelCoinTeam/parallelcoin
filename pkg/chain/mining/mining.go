@@ -424,7 +424,7 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 //  |  <= policy.BlockMinSize)          |   |
 //   -----------------------------------  --
 (g *BlkTmplGenerator) NewBlockTemplate(workerNumber uint32, payToAddress util.
-Address, algo string) (*BlockTemplate, error) {
+	Address, algo string) (*BlockTemplate, error) {
 	//log.TRACE("NewBlockTemplate", algo)
 	if algo == "" {
 		algo = "random"
@@ -872,7 +872,7 @@ func // UpdateBlockTime updates the timestamp in the header of the passed
 // it will update the target difficulty if needed based on the new time for
 // the test networks since their target difficulty can change based upon time.
 (g *BlkTmplGenerator) UpdateBlockTime(workerNumber uint32, msgBlock *wire.
-MsgBlock) error {
+	MsgBlock) error {
 	// The new timestamp is potentially adjusted to ensure it comes after the
 	// median time of the last several blocks per the chain consensus rules.
 	newTime := medianAdjustedTime(g.Chain.BestSnapshot(), g.TimeSource)

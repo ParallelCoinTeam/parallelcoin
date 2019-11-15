@@ -243,12 +243,12 @@ func (e Error) Error() string {
 }
 
 // scriptError creates an Error given a set of arguments.
-func scriptError(	c ErrorCode, desc string) Error {
+func scriptError(c ErrorCode, desc string) Error {
 	return Error{ErrorCode: c, Description: desc}
 }
 
 // IsErrorCode returns whether or not the provided error is a script error with the provided error code.
-func IsErrorCode(	err error, c ErrorCode) bool {
+func IsErrorCode(err error, c ErrorCode) bool {
 	serr, ok := err.(Error)
 	return ok && serr.ErrorCode == c
 }

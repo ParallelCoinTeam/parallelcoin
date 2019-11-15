@@ -6,7 +6,7 @@ import (
 )
 
 // TestNetAddress tests the NetAddress API.
-func TestNetAddress(	t *testing.T) {
+func TestNetAddress(t *testing.T) {
 	ip := net.ParseIP("127.0.0.1")
 	port := 11047
 	// Test NewNetAddress.

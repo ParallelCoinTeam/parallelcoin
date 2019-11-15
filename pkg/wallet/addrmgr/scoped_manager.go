@@ -5,7 +5,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"sync"
 
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/util"
 	ec "github.com/p9c/pod/pkg/util/elliptic"
 	"github.com/p9c/pod/pkg/util/hdkeychain"

@@ -341,7 +341,7 @@ func Composit(text, level string, color bool) string {
 		case "STATUS":
 			level = backgroundGrey + colorBold + level + colorOff + backgroundGrey
 			since = since
-			file = colorItalic  + file
+			file = colorItalic + file
 			line = line + colorOff
 		}
 	}

@@ -45,7 +45,7 @@ func (msg *MsgGetCFCheckpt) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgGetCFCheckpt returns a new bitcoin getcfcheckpt message that conforms to the Message interface using the passed parameters and defaults for the remaining fields.
-func NewMsgGetCFCheckpt(	filterType FilterType, stopHash *chainhash.Hash) *MsgGetCFCheckpt {
+func NewMsgGetCFCheckpt(filterType FilterType, stopHash *chainhash.Hash) *MsgGetCFCheckpt {
 	return &MsgGetCFCheckpt{
 		FilterType: filterType,
 		StopHash:   *stopHash,

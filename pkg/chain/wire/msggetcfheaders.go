@@ -56,7 +56,7 @@ func (msg *MsgGetCFHeaders) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgGetCFHeaders returns a new bitcoin getcfheader message that conforms to the Message interface using the passed parameters and defaults for the remaining fields.
-func NewMsgGetCFHeaders(	filterType FilterType, startHeight uint32,
+func NewMsgGetCFHeaders(filterType FilterType, startHeight uint32,
 	stopHash *chainhash.Hash) *MsgGetCFHeaders {
 	return &MsgGetCFHeaders{
 		FilterType:  filterType,

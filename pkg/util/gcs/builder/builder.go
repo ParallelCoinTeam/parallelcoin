@@ -38,7 +38,7 @@ func RandomKey() ([gcs.KeySize]byte, error) {
 	// This shouldn't happen unless the user is on a system that doesn't have a system CSPRNG. OK to panic in this case.
 	if err != nil {
 		log.ERROR(err)
-return key, err
+		return key, err
 	}
 	// Copy the byte slice to a [gcs.KeySize]byte array and return it.
 	copy(key[:], randKey[:])
@@ -46,7 +46,7 @@ return key, err
 }
 
 // DeriveKey is a utility function that derives a key from a chainhash.Hash by truncating the bytes of the hash to the appopriate key size.
-func DeriveKey(	keyHash *chainhash.Hash) [gcs.KeySize]byte {
+func DeriveKey(keyHash *chainhash.Hash) [gcs.KeySize]byte {
 	var key [gcs.KeySize]byte
 	copy(key[:], keyHash.CloneBytes()[:])
 	return key
@@ -183,50 +183,50 @@ func (b *GCSBuilder) Build() (*gcs.Filter, error) {
 }
 
 // WithKeyPNM creates a GCSBuilder with specified key and the passed probability, modulus and estimated filter size.
-func WithKeyPNM(	key [gcs.KeySize]byte, p uint8, n uint32, m uint64) *GCSBuilder {
+func WithKeyPNM(key [gcs.KeySize]byte, p uint8, n uint32, m uint64) *GCSBuilder {
 	b := GCSBuilder{}
 	return b.SetKey(key).SetP(p).SetM(m).Preallocate(n)
 }
 
 // WithKeyPM creates a GCSBuilder with specified key and the passed probability.  Estimated filter size is set to zero, which means more reallocations are done when building the filter.
-func WithKeyPM(	key [gcs.KeySize]byte, p uint8, m uint64) *GCSBuilder {
+func WithKeyPM(key [gcs.KeySize]byte, p uint8, m uint64) *GCSBuilder {
 	return WithKeyPNM(key, p, 0, m)
 }
 
 // WithKey creates a GCSBuilder with specified key. Probability is set to 19 (2^-19 collision probability). Estimated filter size is set to zero, which means more reallocations are done when building the filter.
-func WithKey(	key [gcs.KeySize]byte) *GCSBuilder {
+func WithKey(key [gcs.KeySize]byte) *GCSBuilder {
 	return WithKeyPNM(key, DefaultP, 0, DefaultM)
 }
 
 // WithKeyHashPNM creates a GCSBuilder with key derived from the specified chainhash.Hash and the passed probability and estimated filter size.
-func WithKeyHashPNM(	keyHash *chainhash.Hash, p uint8, n uint32,
+func WithKeyHashPNM(keyHash *chainhash.Hash, p uint8, n uint32,
 	m uint64) *GCSBuilder {
 	return WithKeyPNM(DeriveKey(keyHash), p, n, m)
 }
 
 // WithKeyHashPM creates a GCSBuilder with key derived from the specified chainhash.Hash and the passed probability. Estimated filter size is set to zero, which means more reallocations are done when building the filter.
-func WithKeyHashPM(	keyHash *chainhash.Hash, p uint8, m uint64) *GCSBuilder {
+func WithKeyHashPM(keyHash *chainhash.Hash, p uint8, m uint64) *GCSBuilder {
 	return WithKeyHashPNM(keyHash, p, 0, m)
 }
 
 // WithKeyHash creates a GCSBuilder with key derived from the specified chainhash.Hash. Probability is set to 20 (2^-20 collision probability). Estimated filter size is set to zero, which means more reallocations are done when building the filter.
-func WithKeyHash(	keyHash *chainhash.Hash) *GCSBuilder {
+func WithKeyHash(keyHash *chainhash.Hash) *GCSBuilder {
 	return WithKeyHashPNM(keyHash, DefaultP, 0, DefaultM)
 }
 
 // WithRandomKeyPNM creates a GCSBuilder with a cryptographically random key and the passed probability and estimated filter size.
-func WithRandomKeyPNM(	p uint8, n uint32, m uint64) *GCSBuilder {
+func WithRandomKeyPNM(p uint8, n uint32, m uint64) *GCSBuilder {
 	key, err := RandomKey()
 	if err != nil {
 		log.ERROR(err)
-b := GCSBuilder{err: err}
+		b := GCSBuilder{err: err}
 		return &b
 	}
 	return WithKeyPNM(key, p, n, m)
 }
 
 // WithRandomKeyPM creates a GCSBuilder with a cryptographically random key and the passed probability. Estimated filter size is set to zero, which means more reallocations are done when building the filter.
-func WithRandomKeyPM(	p uint8, m uint64) *GCSBuilder {
+func WithRandomKeyPM(p uint8, m uint64) *GCSBuilder {
 	return WithRandomKeyPNM(p, 0, m)
 }
 
@@ -236,14 +236,14 @@ func WithRandomKey() *GCSBuilder {
 }
 
 // BuildBasicFilter builds a basic GCS filter from a block. A basic GCS filter will contain all the previous output scripts spent by inputs within a block, as well as the data pushes within all the outputs created within a block.
-func BuildBasicFilter(	block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filter, error) {
+func BuildBasicFilter(block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filter, error) {
 	blockHash := block.BlockHash()
 	b := WithKeyHash(&blockHash)
 	// If the filter had an issue with the specified key, then we force it to bubble up here by calling the Key() function.
 	_, err := b.Key()
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// In order to build a basic filter, we'll range over the entire block, adding each whole script itself.
 	for _, tx := range block.Transactions {
@@ -271,22 +271,22 @@ return nil, err
 }
 
 // GetFilterHash returns the double-SHA256 of the filter.
-func GetFilterHash(	filter *gcs.Filter) (chainhash.Hash, error) {
+func GetFilterHash(filter *gcs.Filter) (chainhash.Hash, error) {
 	filterData, err := filter.NBytes()
 	if err != nil {
 		log.ERROR(err)
-return chainhash.Hash{}, err
+		return chainhash.Hash{}, err
 	}
 	return chainhash.DoubleHashH(filterData), nil
 }
 
 // MakeHeaderForFilter makes a filter chain header for a filter, given the filter and the previous filter chain header.
-func MakeHeaderForFilter(	filter *gcs.Filter, prevHeader chainhash.Hash) (chainhash.Hash, error) {
+func MakeHeaderForFilter(filter *gcs.Filter, prevHeader chainhash.Hash) (chainhash.Hash, error) {
 	filterTip := make([]byte, 2*chainhash.HashSize)
 	filterHash, err := GetFilterHash(filter)
 	if err != nil {
 		log.ERROR(err)
-return chainhash.Hash{}, err
+		return chainhash.Hash{}, err
 	}
 	// In the buffer we created above we'll compute hash || prevHash as an intermediate value.
 	copy(filterTip, filterHash[:])

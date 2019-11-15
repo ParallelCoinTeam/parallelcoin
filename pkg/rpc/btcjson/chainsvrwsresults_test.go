@@ -8,7 +8,7 @@ import (
 )
 
 // TestChainSvrWsResults ensures any results that have custom marshalling work as inteded.
-func TestChainSvrWsResults(	t *testing.T) {
+func TestChainSvrWsResults(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name     string

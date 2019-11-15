@@ -12,12 +12,12 @@ import (
 )
 
 var // Bip16Activation is the timestamp where BIP0016 is valid to use in the
-	// blockchain.  To be used to determine if BIP0016 should be called for or
-	// not. This timestamp corresponds to Sun Apr 1 00:00:00 UTC 2012.
-	Bip16Activation = time.Unix(1333238400, 0)
+// blockchain.  To be used to determine if BIP0016 should be called for or
+// not. This timestamp corresponds to Sun Apr 1 00:00:00 UTC 2012.
+Bip16Activation = time.Unix(1333238400, 0)
 
 type // SigHashType represents hash type bits at the end of a signature.
-	SigHashType uint32
+SigHashType uint32
 
 const ( // Hash type bits from the end of a signature.
 	SigHashOld          SigHashType = 0x0
@@ -267,7 +267,7 @@ unparseScript(pops []parsedOpcode) ([]byte, error) {
 	for _, pop := range pops {
 		b, err := pop.bytes()
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		script = append(script, b...)
@@ -397,7 +397,7 @@ calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
 	for _, out := range tx.TxOut {
 		err := wire.WriteTxOut(&b, 0, 0, out)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 		}
 	}
 	return chainhash.DoubleHashH(b.Bytes())
@@ -471,7 +471,7 @@ calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashT
 		rawScript, _ := unparseScript(subScript)
 		err := wire.WriteVarBytes(&sigHash, 0, rawScript)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 		}
 	}
 	// Next, add the input amount,
@@ -493,7 +493,7 @@ calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashT
 		var b bytes.Buffer
 		err := wire.WriteTxOut(&b, 0, 0, tx.TxOut[idx])
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 		}
 		sigHash.Write(chainhash.DoubleHashB(b.Bytes()))
 	} else {
@@ -778,7 +778,7 @@ func // getWitnessSigOps returns the number of signature operations generated
 // The exact signature counting heuristic is modified by the version of the
 // passed witness program. If the version of the witness program is unable to
 // be extracted, then 0 is returned for the sig op count.
-	getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
+getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
 	// Attempt to extract the witness program version.
 	witnessVersion, witnessProgram, err := ExtractWitnessProgramInfo(
 		pkScript,

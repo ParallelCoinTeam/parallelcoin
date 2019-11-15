@@ -125,7 +125,7 @@ var testNet3GenesisBlock = wire.MsgBlock{
 		Timestamp:  time.Unix(0x53c9ea84, 0),
 		Bits:       fork.SecondPowLimitBits, //0x1e00f1ea, //testnetBits, // 0x1e0fffff,
 		// 486604799 [00000000ffff0000000000000000000000000000000000000000000000000000]
-		Nonce:      0x001adf18,                      // 417274368
+		Nonce: 0x001adf18, // 417274368
 	},
 	Transactions: []*wire.MsgTx{&genesisCoinbaseTx},
 }

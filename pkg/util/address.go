@@ -1,20 +1,20 @@
 package util
 
 import (
-   "bytes"
-   "encoding/hex"
-   "errors"
-   "fmt"
+	"bytes"
+	"encoding/hex"
+	"errors"
+	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"strings"
-   
-   "golang.org/x/crypto/ripemd160"
-   
-   chaincfg "github.com/p9c/pod/pkg/chain/config"
-   `github.com/p9c/pod/pkg/chain/config/netparams`
-   "github.com/p9c/pod/pkg/util/base58"
-   "github.com/p9c/pod/pkg/util/bech32"
-   ec "github.com/p9c/pod/pkg/util/elliptic"
+
+	"golang.org/x/crypto/ripemd160"
+
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/util/base58"
+	"github.com/p9c/pod/pkg/util/bech32"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // UnsupportedWitnessVerError describes an error where a segwit address being decoded has an unsupported witness version.
@@ -52,7 +52,7 @@ func encodeSegWitAddress(hrp string, witnessVersion byte, witnessProgram []byte)
 	converted, err := bech32.ConvertBits(witnessProgram, 8, 5, true)
 	if err != nil {
 		log.ERROR(err)
-return "", err
+		return "", err
 	}
 	// Concatenate the witness version and program, and encode the resulting bytes using bech32 encoding.
 	combined := make([]byte, len(converted)+1)
@@ -61,13 +61,13 @@ return "", err
 	bech, err := bech32.Encode(hrp, combined)
 	if err != nil {
 		log.ERROR(err)
-return "", err
+		return "", err
 	}
 	// Check validity by decoding the created address.
 	version, program, err := decodeSegWitAddress(bech)
 	if err != nil {
 		log.ERROR(err)
-return "", fmt.Errorf("invalid segwit address: %v", err)
+		return "", fmt.Errorf("invalid segwit address: %v", err)
 	}
 	if version != witnessVersion || !bytes.Equal(program, witnessProgram) {
 		return "", fmt.Errorf("invalid segwit address")
@@ -107,8 +107,8 @@ func DecodeAddress(addr string, defaultNet *netparams.Params) (Address, error) {
 		if chaincfg.IsBech32SegwitPrefix(prefix) {
 			witnessVer, witnessProg, err := decodeSegWitAddress(addr)
 			if err != nil {
-		log.ERROR(err)
-return nil, err
+				log.ERROR(err)
+				return nil, err
 			}
 			// We currently only support P2WPKH and P2WSH, which is witness version 0.
 			if witnessVer != 0 {
@@ -130,8 +130,8 @@ return nil, err
 	if len(addr) == 130 || len(addr) == 66 {
 		serializedPubKey, err := hex.DecodeString(addr)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		return NewAddressPubKey(serializedPubKey, defaultNet)
 	}
@@ -139,7 +139,7 @@ return nil, err
 	decoded, netID, err := base58.CheckDecode(addr)
 	if err != nil {
 		log.ERROR(err)
-if err == base58.ErrChecksum {
+		if err == base58.ErrChecksum {
 			return nil, ErrChecksumMismatch
 		}
 		return nil, errors.New("decoded address is of unknown format")
@@ -169,7 +169,7 @@ func decodeSegWitAddress(address string) (byte, []byte, error) {
 	_, data, err := bech32.Decode(address)
 	if err != nil {
 		log.ERROR(err)
-return 0, nil, err
+		return 0, nil, err
 	}
 	// The first byte of the decoded address is the witness version, it must exist.
 	if len(data) < 1 {
@@ -184,7 +184,7 @@ return 0, nil, err
 	regrouped, err := bech32.ConvertBits(data[1:], 5, 8, false)
 	if err != nil {
 		log.ERROR(err)
-return 0, nil, err
+		return 0, nil, err
 	}
 	// The regrouped data must be between 2 and 40 bytes.
 	if len(regrouped) < 2 || len(regrouped) > 40 {
@@ -322,7 +322,7 @@ func NewAddressPubKey(serializedPubKey []byte, net *netparams.Params) (*AddressP
 	pubKey, err := ec.ParsePubKey(serializedPubKey, ec.S256())
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Set the format of the pubkey.  This probably should be returned from ec, but do it here to avoid API churn.  We already know the pubkey is valid since it parsed above, so it's safe to simply examine the leading byte to get the format.
 	pkFormat := PKFUncompressed
@@ -429,7 +429,7 @@ func (a *AddressWitnessPubKeyHash) EncodeAddress() string {
 		a.witnessProgram[:])
 	if err != nil {
 		log.ERROR(err)
-return ""
+		return ""
 	}
 	return str
 }
@@ -502,7 +502,7 @@ func (a *AddressWitnessScriptHash) EncodeAddress() string {
 		a.witnessProgram[:])
 	if err != nil {
 		log.ERROR(err)
-return ""
+		return ""
 	}
 	return str
 }

@@ -229,7 +229,7 @@ func recoverKeyFromSignature(curve *KoblitzCurve, sig *Signature, msg []byte,
 	Ry, err := decompressPoint(curve, Rx, iter%2 == 1)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// 1.4 Check n*R is point at infinity
 	if doChecks {
@@ -271,7 +271,7 @@ func SignCompact(curve *KoblitzCurve, key *PrivateKey,
 	sig, err := key.Sign(hash)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// bitcoind checks the bit length of R and S here. The ecdsa signature algorithm returns R and S mod N therefore they will be the bitsize of the curve, and thus correctly sized.
 	for i := 0; i < (curve.H+1)*2; i++ {
@@ -320,7 +320,7 @@ func RecoverCompact(curve *KoblitzCurve, signature,
 	key, err := recoverKeyFromSignature(curve, sig, hash, iteration, false)
 	if err != nil {
 		log.ERROR(err)
-return nil, false, err
+		return nil, false, err
 	}
 	return key, ((signature[0] - 27) & 4) == 4, nil
 }
@@ -400,7 +400,7 @@ func mac(alg func() hash.Hash, k, m []byte) []byte {
 	_, err := h.Write(m)
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
+		fmt.Println(err)
 	}
 	return h.Sum(nil)
 }

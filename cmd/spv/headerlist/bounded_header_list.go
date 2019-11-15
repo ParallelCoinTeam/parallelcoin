@@ -28,7 +28,7 @@ type BoundedMemoryChain struct {
 
 // NewBoundedMemoryChain returns a new instance of the BoundedMemoryChain with
 // a target max number of nodes.
-func NewBoundedMemoryChain(	maxNodes uint32) *BoundedMemoryChain {
+func NewBoundedMemoryChain(maxNodes uint32) *BoundedMemoryChain {
 	return &BoundedMemoryChain{
 		headPtr: -1,
 		tailPtr: -1,

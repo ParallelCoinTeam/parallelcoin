@@ -69,26 +69,26 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 	if buf.Len() > 0 {
 		err = readNetAddress(buf, pver, &msg.AddrMe, false)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
 	if buf.Len() > 0 {
 		err = readElement(buf, &msg.Nonce)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
 	if buf.Len() > 0 {
 		userAgent, err := ReadVarString(buf, pver)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = validateUserAgent(userAgent)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		msg.UserAgent = userAgent
@@ -97,7 +97,7 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 	if buf.Len() > 0 {
 		err = readElement(buf, &msg.LastBlock)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -107,8 +107,8 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		var relayTx bool
 		err = readElement(r, &relayTx)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
+			fmt.Println(err)
 		}
 		msg.DisableRelayTx = !relayTx
 	}
@@ -157,7 +157,7 @@ func (msg *MsgVersion) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) 
 	if pver >= BIP0037Version {
 		err = writeElement(w, !msg.DisableRelayTx)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

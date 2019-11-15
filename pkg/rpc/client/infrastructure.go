@@ -246,11 +246,11 @@ type (
 )
 
 type // response is the raw bytes of a JSON-RPC result,
-	// or the error if the response error object was non-null.
-	response struct {
-		result []byte
-		err    error
-	}
+// or the error if the response error object was non-null.
+response struct {
+	result []byte
+	err    error
+}
 
 func // result checks whether the unmarshaled response contains a non-nil
 // error, returning an unmarshaled json.RPCError (
@@ -499,10 +499,10 @@ func // reregisterNtfns creates and sends commands needed to re-establish the
 }
 
 var // ignoreResends is a set of all methods for requests that are "long running"
-	// are not be reissued by the client on reconnect.
-	ignoreResends = map[string]struct{}{
-		"rescan": {},
-	}
+// are not be reissued by the client on reconnect.
+ignoreResends = map[string]struct{}{
+	"rescan": {},
+}
 
 func // resendRequests resends any requests that had not completed when the
 // client disconnected.  It is intended to be called once the client has
@@ -947,53 +947,53 @@ func (c *Client) WaitForShutdown() {
 }
 
 type // ConnConfig describes the connection configuration parameters for the client.
-	ConnConfig struct {
-		// Host is the IP address and port of the RPC server you want to connect to.
-		Host string
-		// Endpoint is the websocket endpoint on the RPC server.  This is typically
-		// "ws".
-		Endpoint string
-		// User is the username to use to authenticate to the RPC server.
-		User string
-		// Pass is the passphrase to use to authenticate to the RPC server.
-		Pass string
-		// TLS enables transport layer security encryption. It is recommended to
-		// always use TLS if the RPC server supports it as otherwise your username
-		// and password is sent across the wire in cleartext.
-		TLS bool
-		// Certificates are the bytes for a PEM-encoded certificate chain used for
-		// the TLS connection.  It has no effect if the DisableTLS parameter
-		// is true.
-		Certificates []byte
-		// Proxy specifies to connect through a SOCKS 5 proxy server.  It may be an
-		// empty string if a proxy is not required.
-		Proxy string
-		// ProxyUser is an optional username to use for the proxy server if it
-		// requires authentication.  It has no effect if the Proxy parameter is not
-		// set.
-		ProxyUser string
-		// ProxyPass is an optional password to use for the proxy server if it
-		// requires authentication.  It has no effect if the Proxy parameter is not
-		// set.
-		ProxyPass string
-		// DisableAutoReconnect specifies the client should not automatically try to
-		// reconnect to the server when it has been disconnected.
-		DisableAutoReconnect bool
-		// DisableConnectOnNew specifies that a websocket client connection should
-		// not be tried when creating the client with New.  Instead, the client is
-		// created and returned unconnected, and Connect must be called manually.
-		DisableConnectOnNew bool
-		// HTTPPostMode instructs the client to run using multiple independent
-		// connections issuing HTTP POST requests instead of using the default of
-		// websockets.  Websockets are generally preferred as some of the features
-		// of the client such notifications only work with websockets, however, not
-		// all servers support the websocket extensions, so this flag can be set to
-		// true to use basic HTTP POST requests instead.
-		HTTPPostMode bool
-		// EnableBCInfoHacks is an option provided to enable compatibility hacks
-		// when connecting to blockchain.info RPC server
-		EnableBCInfoHacks bool
-	}
+ConnConfig struct {
+	// Host is the IP address and port of the RPC server you want to connect to.
+	Host string
+	// Endpoint is the websocket endpoint on the RPC server.  This is typically
+	// "ws".
+	Endpoint string
+	// User is the username to use to authenticate to the RPC server.
+	User string
+	// Pass is the passphrase to use to authenticate to the RPC server.
+	Pass string
+	// TLS enables transport layer security encryption. It is recommended to
+	// always use TLS if the RPC server supports it as otherwise your username
+	// and password is sent across the wire in cleartext.
+	TLS bool
+	// Certificates are the bytes for a PEM-encoded certificate chain used for
+	// the TLS connection.  It has no effect if the DisableTLS parameter
+	// is true.
+	Certificates []byte
+	// Proxy specifies to connect through a SOCKS 5 proxy server.  It may be an
+	// empty string if a proxy is not required.
+	Proxy string
+	// ProxyUser is an optional username to use for the proxy server if it
+	// requires authentication.  It has no effect if the Proxy parameter is not
+	// set.
+	ProxyUser string
+	// ProxyPass is an optional password to use for the proxy server if it
+	// requires authentication.  It has no effect if the Proxy parameter is not
+	// set.
+	ProxyPass string
+	// DisableAutoReconnect specifies the client should not automatically try to
+	// reconnect to the server when it has been disconnected.
+	DisableAutoReconnect bool
+	// DisableConnectOnNew specifies that a websocket client connection should
+	// not be tried when creating the client with New.  Instead, the client is
+	// created and returned unconnected, and Connect must be called manually.
+	DisableConnectOnNew bool
+	// HTTPPostMode instructs the client to run using multiple independent
+	// connections issuing HTTP POST requests instead of using the default of
+	// websockets.  Websockets are generally preferred as some of the features
+	// of the client such notifications only work with websockets, however, not
+	// all servers support the websocket extensions, so this flag can be set to
+	// true to use basic HTTP POST requests instead.
+	HTTPPostMode bool
+	// EnableBCInfoHacks is an option provided to enable compatibility hacks
+	// when connecting to blockchain.info RPC server
+	EnableBCInfoHacks bool
+}
 
 func // newHTTPClient returns a new http client that is configured according
 // to the proxy and TLS settings in the associated connection configuration.

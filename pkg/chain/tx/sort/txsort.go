@@ -14,13 +14,13 @@ import (
 // InPlaceSort modifies the passed transaction inputs and outputs to be sorted based on BIP 69.
 // WARNING: This function must NOT be called with published transactions since it will mutate the transaction if it's not already sorted.  This can cause issues if you mutate a tx in a block, for example, which would invalidate the block.  It could also cause cached hashes, such as in a util.Tx to become invalidated.
 // The function should only be used if the caller is creating the transaction or is otherwise 100% positive mutating will not cause adverse affects due to other dependencies.
-func InPlaceSort(	tx *wire.MsgTx) {
+func InPlaceSort(tx *wire.MsgTx) {
 	sort.Sort(sortableInputSlice(tx.TxIn))
 	sort.Sort(sortableOutputSlice(tx.TxOut))
 }
 
 // Sort returns a new transaction with the inputs and outputs sorted based on BIP 69.  The passed transaction is not modified and the new transaction might have a different hash if any sorting was done.
-func Sort(	tx *wire.MsgTx) *wire.MsgTx {
+func Sort(tx *wire.MsgTx) *wire.MsgTx {
 	txCopy := tx.Copy()
 	sort.Sort(sortableInputSlice(txCopy.TxIn))
 	sort.Sort(sortableOutputSlice(txCopy.TxOut))
@@ -28,7 +28,7 @@ func Sort(	tx *wire.MsgTx) *wire.MsgTx {
 }
 
 // IsSorted checks whether tx has inputs and outputs sorted according to BIP 69.
-func IsSorted(	tx *wire.MsgTx) bool {
+func IsSorted(tx *wire.MsgTx) bool {
 	if !sort.IsSorted(sortableInputSlice(tx.TxIn)) {
 		return false
 	}

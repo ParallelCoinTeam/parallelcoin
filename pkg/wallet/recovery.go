@@ -3,7 +3,7 @@ package wallet
 import (
 	"time"
 
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -67,8 +67,8 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 			ns, waddrmgr.DefaultAccountNum,
 		)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		// Fetch the external key count, which bounds the indexes we
 		// will need to rederive.
@@ -122,8 +122,8 @@ return err
 			credit.PkScript, rm.chainParams,
 		)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		rm.state.AddWatchedOutPoint(&credit.OutPoint, addrs[0])
 	}

@@ -65,10 +65,10 @@ type GBTWorkState struct {
 	MinTimestamp  time.Time
 	Template      *mining.BlockTemplate
 	NotifyMap     map[chainhash.Hash]map[int64]chan struct{}
-	TimeSource blockchain.MedianTimeSource
-	Algo       string
-	StateCfg   *state.Config
-	Config     *pod.Config
+	TimeSource    blockchain.MedianTimeSource
+	Algo          string
+	StateCfg      *state.Config
+	Config        *pod.Config
 }
 
 // ParsedRPCCmd represents a JSON-RPC request object that has been parsed
@@ -2903,10 +2903,10 @@ func HandleGetHeaders(s *Server, cmd interface{},
 func HandleGetInfo(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (ret interface{}, err error) {
 	var Difficulty, dBlake2b, dBlake14lr, dBlake2s, dKeccak, dScrypt, dSHA256D,
-	dSkein, dStribog, dX11 float64
+		dSkein, dStribog, dX11 float64
 	var lastbitsBlake2b, lastbitsBlake14lr, lastbitsBlake2s, lastbitsKeccak,
-	lastbitsScrypt, lastbitsSHA256D, lastbitsSkein, lastbitsStribog,
-	lastbitsX11 uint32
+		lastbitsScrypt, lastbitsSHA256D, lastbitsSkein, lastbitsStribog,
+		lastbitsX11 uint32
 	best := s.
 		Cfg.
 		Chain.
@@ -3121,10 +3121,10 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 		}
 	}
 	var Difficulty, dBlake2b, dBlake14lr, dBlake2s, dKeccak, dScrypt, dSHA256D,
-	dSkein, dStribog, dX11 float64
+		dSkein, dStribog, dX11 float64
 	var lastbitsBlake2b, lastbitsBlake14lr, lastbitsBlake2s, lastbitsKeccak,
-	lastbitsScrypt, lastbitsSHA256D, lastbitsSkein, lastbitsStribog,
-	lastbitsX11 uint32
+		lastbitsScrypt, lastbitsSHA256D, lastbitsSkein, lastbitsStribog,
+		lastbitsX11 uint32
 	best := s.Cfg.Chain.BestSnapshot()
 	v := s.Cfg.Chain.Index.LookupNode(&best.Hash)
 	foundCount, height := 0, best.Height
@@ -4386,7 +4386,7 @@ func MessageToHex(msg wire.Message) (string, error) {
 func NewGbtWorkState(timeSource blockchain.MedianTimeSource,
 	algoName string) *GBTWorkState {
 	return &GBTWorkState{
-		NotifyMap: make(map[chainhash.Hash]map[int64]chan struct{}),
+		NotifyMap:  make(map[chainhash.Hash]map[int64]chan struct{}),
 		TimeSource: timeSource,
 		Algo:       algoName,
 	}

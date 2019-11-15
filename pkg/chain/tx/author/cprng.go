@@ -23,7 +23,7 @@ func init() {
 	_, err := rand.Read(buf)
 	if err != nil {
 		log.ERROR(err)
-panic("Failed to seed prng: " + err.Error())
+		panic("Failed to seed prng: " + err.Error())
 	}
 	seed := int64(binary.LittleEndian.Uint64(buf))
 	cprng.r = mrand.New(mrand.NewSource(seed))

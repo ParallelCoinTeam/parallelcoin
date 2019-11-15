@@ -54,13 +54,13 @@ func (msg *MsgGetBlocks) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding
 		hash := &locatorHashes[i]
 		err := readElement(r, hash)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = msg.AddBlockLocatorHash(hash)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
+			fmt.Println(err)
 		}
 	}
 	return readElement(r, &msg.HashStop)
@@ -87,7 +87,7 @@ func (msg *MsgGetBlocks) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding
 	for _, hash := range msg.BlockLocatorHashes {
 		err = writeElement(w, hash)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

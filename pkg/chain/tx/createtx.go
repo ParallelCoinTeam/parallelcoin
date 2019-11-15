@@ -105,12 +105,12 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 		// Get current block's height and hash.
 		bs, err := chainClient.BlockStamp()
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		eligible, err := w.findEligibleOutputs(dbtx, account, minconf, bs)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		inputSource := makeInputSource(eligible)
@@ -126,7 +126,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 				changeAddr, err = w.newChangeAddress(addrmgrNs, account)
 			}
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return nil, err
 			}
 			return txscript.PayToAddrScript(changeAddr)
@@ -134,7 +134,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 		tx, err = txauthor.NewUnsignedTransaction(outputs, feeSatPerKb,
 			inputSource, changeSource)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Randomize change position, if change exists, before signing.
@@ -223,12 +223,12 @@ func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amou
 		vm, err := txscript.NewEngine(prevScript, tx, i,
 			txscript.StandardVerifyFlags, nil, hashCache, int64(inputValues[i]))
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return fmt.Errorf("cannot create script engine: %s", err)
 		}
 		err = vm.Execute()
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return fmt.Errorf("cannot validate transaction: %s", err)
 		}
 	}

@@ -22,7 +22,7 @@ const (
 
 // filesExists returns whether or not the named file or directory exists.
 //nolint
-func fileExists(	name string) bool {
+func fileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
 			return false
@@ -33,7 +33,7 @@ func fileExists(	name string) bool {
 
 // isSupportedDbType returns whether or not the passed database type is currently supported.
 //nolint
-func isSupportedDbType(	dbType string) bool {
+func isSupportedDbType(dbType string) bool {
 	supportedDrivers := database.SupportedDrivers()
 	for _, driver := range supportedDrivers {
 		if dbType == driver {

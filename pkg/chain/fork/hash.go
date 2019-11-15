@@ -114,8 +114,8 @@ func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
 		switch {
 		case height == 1:
 			hR = 0
-		//case height < 10:
-		//	hR = 6
+			//case height < 10:
+			//	hR = 6
 		}
 	}
 	switch name {
