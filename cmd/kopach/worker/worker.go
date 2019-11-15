@@ -37,10 +37,13 @@ func printErr(err error, fn func()) {
 		}
 	}
 }
+
 // Main the main thread of the kopach miner
 func Main(cx *conte.Xt, quit chan struct{}) {
 	printlnE("[worker] starting up")
-	interrupt.AddHandler(func(){
+	interrupt.AddHandler(func() {
+		// interrupt will receive a sigquit signal (
+		// ctrl-c) when the close method is invoked on the controller IPC
 		close(quit)
 	})
 	// we only want one thread
@@ -56,16 +59,14 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 			if err != nil {
 				printlnE("[worker] could not start tracing", err)
 			} else {
-				interrupt.AddHandler(
-					func() {
-						printlnE("[worker] stopping trace")
-						trace.Stop()
-						err := f.Close()
-						if err != nil {
-							log.ERROR(err)
-						}
-					},
-				)
+				interrupt.AddHandler(func() {
+					printlnE("[worker] stopping trace")
+					trace.Stop()
+					err := f.Close()
+					if err != nil {
+						log.ERROR(err)
+					}
+				})
 			}
 		}
 	}
@@ -93,7 +94,7 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 			if err != nil {
 				printlnE(err)
 			}
-			printlnE("[worker] message decoded\n",spew.Sdump(blk))
+			printlnE("[worker] message decoded\n", spew.Sdump(blk))
 		}
 	}()
 out:
@@ -104,5 +105,6 @@ out:
 			break out
 		}
 	}
+	// don't jump the gun!
 	<-interrupt.HandlersDone
 }
