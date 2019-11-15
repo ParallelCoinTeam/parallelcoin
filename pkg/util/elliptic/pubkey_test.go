@@ -210,7 +210,7 @@ var pubKeyTests = []pubKeyTest{
 	},
 }
 
-func TestPubKeys(	t *testing.T) {
+func TestPubKeys(t *testing.T) {
 	for _, test := range pubKeyTests {
 		pk, err := ParsePubKey(test.key, S256())
 		if err != nil {
@@ -242,7 +242,7 @@ func TestPubKeys(	t *testing.T) {
 		}
 	}
 }
-func TestPublicKeyIsEqual(	t *testing.T) {
+func TestPublicKeyIsEqual(t *testing.T) {
 	pubKey1, err := ParsePubKey(
 		[]byte{0x03, 0x26, 0x89, 0xc7, 0xc2, 0xda, 0xb1, 0x33,
 			0x09, 0xfb, 0x14, 0x3e, 0x0e, 0x8f, 0xe3, 0x96, 0x34,
@@ -274,7 +274,7 @@ func TestPublicKeyIsEqual(	t *testing.T) {
 			"equal to %v", pubKey1, pubKey2)
 	}
 }
-func TestIsCompressed(	t *testing.T) {
+func TestIsCompressed(t *testing.T) {
 	for _, test := range pubKeyTests {
 		isCompressed := IsCompressedPubKey(test.key)
 		wantCompressed := test.format == pubkeyCompressed

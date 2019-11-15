@@ -29,12 +29,12 @@ func loadS256BytePoints() error {
 	r, err := zlib.NewReader(decoder)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	serialized, err := ioutil.ReadAll(r)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Deserialize the precomputed byte points and set the curve to them.
 	offset := 0

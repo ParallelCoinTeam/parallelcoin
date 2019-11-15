@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/log"
 
-	`github.com/p9c/pod/pkg/chain/config/netparams`
-   chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/util/gcs"
 	"github.com/p9c/pod/pkg/util/gcs/builder"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
@@ -65,14 +65,14 @@ var _ FilterDatabase = (*FilterStore)(nil)
 
 // New creates a new instance of the FilterStore given an already open
 // database, and the target chain parameters.
-func New(	db walletdb.DB, params netparams.Params) (*FilterStore, error) {
+func New(db walletdb.DB, params netparams.Params) (*FilterStore, error) {
 	err := walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
 		// As part of our initial setup, we'll try to create the top
 		// level filter bucket. If this already exists, then we can
 		// exit early.
 		filters, err := tx.CreateTopLevelBucket(filterBucket)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// If the main bucket doesn't already exist, then we'll need to
@@ -83,14 +83,14 @@ func New(	db walletdb.DB, params netparams.Params) (*FilterStore, error) {
 		// First we'll create the bucket for the regular filters.
 		regFilters, err := filters.CreateBucketIfNotExists(regBucket)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// With the bucket created, we'll now construct the initial
 		// basic genesis filter and store it within the database.
 		basicFilter, err := builder.BuildBasicFilter(genesisBlock, nil)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		return putFilter(regFilters, genesisHash, basicFilter)
@@ -107,7 +107,7 @@ func New(	db walletdb.DB, params netparams.Params) (*FilterStore, error) {
 // putFilter stores a filter in the database according to the corresponding
 // block hash. The passed bucket is expected to be the proper bucket for the
 // passed filter type.
-func putFilter(	bucket walletdb.ReadWriteBucket, hash *chainhash.Hash,
+func putFilter(bucket walletdb.ReadWriteBucket, hash *chainhash.Hash,
 	filter *gcs.Filter) error {
 	if filter == nil {
 		return bucket.Put(hash[:], nil)
@@ -140,7 +140,7 @@ func (f *FilterStore) PutFilter(hash *chainhash.Hash,
 		}
 		bytes, err := filter.NBytes()
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		return targetBucket.Put(hash[:], bytes)
@@ -174,7 +174,7 @@ func (f *FilterStore) FetchFilter(blockHash *chainhash.Hash,
 			builder.DefaultP, builder.DefaultM, filterBytes,
 		)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		filter = dbFilter

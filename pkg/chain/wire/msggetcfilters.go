@@ -42,7 +42,7 @@ func (msg *MsgGetCFilters) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding
 	err = writeElement(w, &msg.StartHeight)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	return writeElement(w, &msg.StopHash)
 }
@@ -59,7 +59,7 @@ func (msg *MsgGetCFilters) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgGetCFilters returns a new bitcoin getcfilters message that conforms to the Message interface using the passed parameters and defaults for the remaining fields.
-func NewMsgGetCFilters(	filterType FilterType, startHeight uint32,
+func NewMsgGetCFilters(filterType FilterType, startHeight uint32,
 	stopHash *chainhash.Hash) *MsgGetCFilters {
 	return &MsgGetCFilters{
 		FilterType:  filterType,

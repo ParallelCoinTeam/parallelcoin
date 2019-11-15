@@ -130,7 +130,7 @@ func (alert *Alert) Serialize(w io.Writer, pver uint32) error {
 	for i := 0; i < count; i++ {
 		err = writeElement(w, alert.SetCancel[i])
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -153,7 +153,7 @@ func (alert *Alert) Serialize(w io.Writer, pver uint32) error {
 	for i := 0; i < count; i++ {
 		err = WriteVarString(w, pver, alert.SetSubVer[i])
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -199,7 +199,7 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
 	for i := 0; i < int(count); i++ {
 		err := readElement(r, &alert.SetCancel[i])
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -223,7 +223,7 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
 	for i := 0; i < int(count); i++ {
 		alert.SetSubVer[i], err = ReadVarString(r, pver)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -247,7 +247,7 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
 }
 
 // NewAlert returns an new Alert with values provided.
-func NewAlert(	version int32, relayUntil int64, expiration int64,
+func NewAlert(version int32, relayUntil int64, expiration int64,
 	id int32, cancel int32, setCancel []int32, minVer int32,
 	maxVer int32, setSubVer []string, priority int32, comment string,
 	statusBar string) *Alert {
@@ -269,7 +269,7 @@ func NewAlert(	version int32, relayUntil int64, expiration int64,
 }
 
 // NewAlertFromPayload returns an Alert with values deserialized from the serialized payload.
-func NewAlertFromPayload(	serializedPayload []byte, pver uint32) (*Alert, error) {
+func NewAlertFromPayload(serializedPayload []byte, pver uint32) (*Alert, error) {
 	var alert Alert
 	r := bytes.NewReader(serializedPayload)
 	err := alert.Deserialize(r, pver)
@@ -318,7 +318,7 @@ func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) er
 		r := new(bytes.Buffer)
 		err = msg.Payload.Serialize(r, pver)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			// Serialize failed - ignore & fallback to SerializedPayload
 			serializedpayload = msg.SerializedPayload
 		} else {
@@ -351,7 +351,7 @@ func (msg *MsgAlert) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgAlert returns a new bitcoin alert message that conforms to the Message interface.  See MsgAlert for details.
-func NewMsgAlert(	serializedPayload []byte, signature []byte) *MsgAlert {
+func NewMsgAlert(serializedPayload []byte, signature []byte) *MsgAlert {
 	return &MsgAlert{
 		SerializedPayload: serializedPayload,
 		Signature:         signature,

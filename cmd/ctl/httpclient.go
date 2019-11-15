@@ -10,9 +10,9 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	
+
 	"github.com/btcsuite/go-socks/socks"
-	
+
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -32,7 +32,7 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
 		dial = func(network, addr string) (net.Conn, error) {
 			c, err := proxy.Dial(network, addr)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return nil, err
 			}
 			return c, nil
@@ -43,7 +43,7 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
 	if *cfg.TLS && *cfg.RPCCert != "" {
 		pem, err := ioutil.ReadFile(*cfg.RPCCert)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		pool := x509.NewCertPool()
@@ -108,7 +108,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	httpResponse.Body.Close()
 	if err != nil {
 		log.ERROR(err)
-err = fmt.Errorf("error reading json reply: %v", err)
+		err = fmt.Errorf("error reading json reply: %v", err)
 		log.ERROR(err)
 		return nil, err
 	}

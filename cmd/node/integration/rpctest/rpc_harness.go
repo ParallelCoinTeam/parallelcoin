@@ -11,8 +11,8 @@ import (
 	"sync"
 	"testing"
 	"time"
-	
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
@@ -214,7 +214,7 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
 			numMatureOutputs
 		_, err := h.Node.Generate(numToGenerate)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

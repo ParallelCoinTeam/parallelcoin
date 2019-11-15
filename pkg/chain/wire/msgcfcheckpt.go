@@ -68,7 +68,7 @@ func (msg *MsgCFCheckpt) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) 
 		var cfh chainhash.Hash
 		err := readElement(r, &cfh)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		msg.FilterHeaders[i] = &cfh
@@ -100,7 +100,7 @@ func (msg *MsgCFCheckpt) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) 
 	for _, cfh := range msg.FilterHeaders {
 		err := writeElement(w, cfh)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -125,7 +125,7 @@ func (msg *MsgCFCheckpt) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgCFCheckpt returns a new bitcoin cfheaders message that conforms to the Message interface. See MsgCFCheckpt for details.
-func NewMsgCFCheckpt(	filterType FilterType, stopHash *chainhash.Hash,
+func NewMsgCFCheckpt(filterType FilterType, stopHash *chainhash.Hash,
 	headersCount int) *MsgCFCheckpt {
 	return &MsgCFCheckpt{
 		FilterType:    filterType,

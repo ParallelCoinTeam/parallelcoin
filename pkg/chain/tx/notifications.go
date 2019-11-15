@@ -50,7 +50,7 @@ func lookupInputAccount(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetai
 	prev, err := w.TxStore.TxDetails(txmgrNs, &prevOP.Hash)
 	if err != nil {
 		log.ERROR(err)
-log.ERRORF(
+		log.ERRORF(
 			"cannot query previous transaction details for %v: %v %s",
 			prevOP.Hash,
 			err)
@@ -69,7 +69,7 @@ log.ERRORF(
 	}
 	if err != nil {
 		log.ERROR(err)
-log.ERRORF(
+		log.ERRORF(
 			"cannot fetch account for previous output %v: %v", prevOP, err)
 		inputAcct = 0
 	}
@@ -86,7 +86,7 @@ func lookupOutputChain(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetail
 	}
 	if err != nil {
 		log.ERROR(err)
-log.ERROR("cannot fetch account for wallet output:", err)
+		log.ERROR("cannot fetch account for wallet output:", err)
 	} else {
 		account = ma.Account()
 		internal = ma.Internal()
@@ -99,8 +99,8 @@ func makeTxSummary(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetails) T
 		var buf bytes.Buffer
 		err := details.MsgTx.Serialize(&buf)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(
+			log.ERROR(err)
+			log.ERROR(
 				"transaction serialization:", err)
 		}
 		serializedTx = buf.Bytes()
@@ -208,7 +208,7 @@ func (s *NotificationServer) notifyUnminedTransaction(dbtx walletdb.ReadTx, deta
 	unminedHashes, err := s.wallet.TxStore.UnminedTxHashes(dbtx.ReadBucket(wtxmgrNamespaceKey))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(
+		log.ERROR(
 			"cannot fetch unmined transaction hashes:", err)
 		return
 	}
@@ -217,7 +217,7 @@ log.ERROR(
 	err = totalBalances(dbtx, s.wallet, bals)
 	if err != nil {
 		log.ERROR(err)
-log.ERRORF(
+		log.ERRORF(
 			"cannot determine balances for relevant accounts:", err)
 		return
 	}
@@ -291,7 +291,7 @@ func (s *NotificationServer) notifyAttachedBlock(dbtx walletdb.ReadTx, block *wt
 	unminedHashes, err := s.wallet.TxStore.UnminedTxHashes(txmgrNs)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(
+		log.ERROR(
 			"cannot fetch unmined transaction hashes:", err)
 		return
 	}
@@ -303,7 +303,7 @@ log.ERROR(
 	err = totalBalances(dbtx, s.wallet, bals)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(
+		log.ERROR(
 			"cannot determine balances for relevant accounts:", err)
 		return
 	}

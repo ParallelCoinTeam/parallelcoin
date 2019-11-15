@@ -43,6 +43,7 @@ Configure(cx *conte.Xt, ctx *cli.Context) {
 	validateMiningStuff(cfg, cx.StateCfg, cx.ActiveNet)
 	setDiallers(cfg, cx.StateCfg)
 	// if the user set the save flag, or file doesn't exist save the file now
+	log.DEBUG(*cx.Config.ConfigFile)
 	if st.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
 		log.TRACE("saving configuration")
 		save.Pod(cx.Config)

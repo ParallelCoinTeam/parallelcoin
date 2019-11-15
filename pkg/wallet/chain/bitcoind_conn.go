@@ -11,7 +11,7 @@ import (
 	"github.com/lightninglabs/gozmq"
 
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
@@ -69,7 +69,7 @@ func NewBitcoindConn(chainParams *netparams.Params,
 	client, err := rpcclient.New(clientCfg, nil)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	conn := &BitcoindConn{
 		chainParams:     chainParams,
@@ -96,7 +96,7 @@ func (c *BitcoindConn) Start() error {
 	net, err := c.getCurrentNet()
 	if err != nil {
 		log.ERROR(err)
-c.client.Disconnect()
+		c.client.Disconnect()
 		return err
 	}
 	if net != c.chainParams.Net {
@@ -113,7 +113,7 @@ c.client.Disconnect()
 	)
 	if err != nil {
 		log.ERROR(err)
-c.client.Disconnect()
+		c.client.Disconnect()
 		return fmt.Errorf("unable to subscribe for zmq block events: "+
 			"%v", err)
 	}
@@ -122,7 +122,7 @@ c.client.Disconnect()
 	)
 	if err != nil {
 		log.ERROR(err)
-c.client.Disconnect()
+		c.client.Disconnect()
 		return fmt.Errorf("unable to subscribe for zmq tx events: %v",
 			err)
 	}
@@ -168,8 +168,8 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 		// Poll an event from the ZMQ socket.
 		msgBytes, err := conn.Receive()
 		if err != nil {
-		log.ERROR(err)
-// It's possible that the connection to the socket
+			log.ERROR(err)
+			// It's possible that the connection to the socket
 			// continuously times out, so we'll prevent logging this
 			// error to prevent spamming the logs.
 			netErr, ok := err.(net.Error)
@@ -244,8 +244,8 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 		// Poll an event from the ZMQ socket.
 		msgBytes, err := conn.Receive()
 		if err != nil {
-		log.ERROR(err)
-// It's possible that the connection to the socket
+			log.ERROR(err)
+			// It's possible that the connection to the socket
 			// continuously times out, so we'll prevent logging this
 			// error to prevent spamming the logs.
 			netErr, ok := err.(net.Error)
@@ -303,7 +303,7 @@ func (c *BitcoindConn) getCurrentNet() (wire.BitcoinNet, error) {
 	hash, err := c.client.GetBlockHash(0)
 	if err != nil {
 		log.ERROR(err)
-return 0, err
+		return 0, err
 	}
 	switch *hash {
 	case *chaincfg.TestNet3Params.GenesisHash:

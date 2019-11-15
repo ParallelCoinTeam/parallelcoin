@@ -152,7 +152,7 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 			for i := int32(0); i < confirmationWindow; i++ {
 				condition, err := checker.Condition(countNode)
 				if err != nil {
-		log.ERROR(err)
+					log.ERROR(err)
 					return ThresholdFailed, err
 				}
 				if condition {
@@ -224,7 +224,7 @@ func (b *BlockChain) initThresholdCaches() error {
 		cache := &b.warningCaches[bit]
 		_, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -234,7 +234,7 @@ func (b *BlockChain) initThresholdCaches() error {
 		checker := deploymentChecker{deployment: deployment, chain: b}
 		_, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

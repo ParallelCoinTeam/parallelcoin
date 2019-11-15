@@ -5,8 +5,8 @@ import (
 	"github.com/p9c/pod/pkg/log"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
-   `github.com/p9c/pod/pkg/chain/config/netparams`
-   chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/util"
@@ -41,19 +41,19 @@ var (
 )
 
 // dbFetchFilterIdxEntry retrieves a data blob from the filter index database. An entry's absence is not considered an error.
-func dbFetchFilterIdxEntry(	dbTx database.Tx, key []byte, h *chainhash.Hash) ([]byte, error) {
+func dbFetchFilterIdxEntry(dbTx database.Tx, key []byte, h *chainhash.Hash) ([]byte, error) {
 	idx := dbTx.Metadata().Bucket(cfIndexParentBucketKey).Bucket(key)
 	return idx.Get(h[:]), nil
 }
 
 // dbStoreFilterIdxEntry stores a data blob in the filter index database.
-func dbStoreFilterIdxEntry(	dbTx database.Tx, key []byte, h *chainhash.Hash, f []byte) error {
+func dbStoreFilterIdxEntry(dbTx database.Tx, key []byte, h *chainhash.Hash, f []byte) error {
 	idx := dbTx.Metadata().Bucket(cfIndexParentBucketKey).Bucket(key)
 	return idx.Put(h[:], f)
 }
 
 // dbDeleteFilterIdxEntry deletes a data blob from the filter index database.
-func dbDeleteFilterIdxEntry(	dbTx database.Tx, key []byte, h *chainhash.Hash) error {
+func dbDeleteFilterIdxEntry(dbTx database.Tx, key []byte, h *chainhash.Hash) error {
 	idx := dbTx.Metadata().Bucket(cfIndexParentBucketKey).Bucket(key)
 	return idx.Delete(h[:])
 }
@@ -101,21 +101,21 @@ func (idx *CFIndex) Create(dbTx database.Tx) error {
 	for _, bucketName := range cfIndexKeys {
 		_, err = cfIndexParentBucket.CreateBucket(bucketName)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
 	for _, bucketName := range cfHeaderKeys {
 		_, err = cfIndexParentBucket.CreateBucket(bucketName)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
 	for _, bucketName := range cfHashKeys {
 		_, err = cfIndexParentBucket.CreateBucket(bucketName)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -123,7 +123,7 @@ func (idx *CFIndex) Create(dbTx database.Tx) error {
 }
 
 // storeFilter stores a given filter, and performs the steps needed to generate the filter's header.
-func storeFilter(	dbTx database.Tx, block *util.Block, f *gcs.Filter,
+func storeFilter(dbTx database.Tx, block *util.Block, f *gcs.Filter,
 	filterType wire.FilterType) error {
 	if uint8(filterType) > maxFilterType {
 		return errors.New("unsupported filter type")
@@ -163,13 +163,13 @@ func storeFilter(	dbTx database.Tx, block *util.Block, f *gcs.Filter,
 	} else {
 		pfh, err := dbFetchFilterIdxEntry(dbTx, hkey, ph)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Construct the new block's filter header, and store it.
 		prevHeader, err = chainhash.NewHash(pfh)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -202,21 +202,21 @@ func (idx *CFIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
 	for _, key := range cfIndexKeys {
 		err := dbDeleteFilterIdxEntry(dbTx, key, block.Hash())
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
 	for _, key := range cfHeaderKeys {
 		err := dbDeleteFilterIdxEntry(dbTx, key, block.Hash())
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
 	for _, key := range cfHashKeys {
 		err := dbDeleteFilterIdxEntry(dbTx, key, block.Hash())
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -251,7 +251,7 @@ func (idx *CFIndex) entriesByBlockHashes(filterTypeKeys [][]byte,
 		for _, blockHash := range blockHashes {
 			entry, err := dbFetchFilterIdxEntry(dbTx, key, blockHash)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			entries = append(entries, entry)
@@ -299,11 +299,11 @@ func (idx *CFIndex) FilterHashesByBlockHashes(blockHashes []*chainhash.Hash,
 
 // NewCfIndex returns a new instance of an indexer that is used to create a mapping of the hashes of all blocks in the blockchain to their respective committed filters.
 // It implements the Indexer interface which plugs into the IndexManager that in turn is used by the blockchain package. This allows the index to be seamlessly maintained along with the chain.
-func NewCfIndex(	db database.DB, chainParams *netparams.Params) *CFIndex {
+func NewCfIndex(db database.DB, chainParams *netparams.Params) *CFIndex {
 	return &CFIndex{db: db, chainParams: chainParams}
 }
 
 // DropCfIndex drops the CF index from the provided database if exists.
-func DropCfIndex(	db database.DB, interrupt <-chan struct{}) error {
+func DropCfIndex(db database.DB, interrupt <-chan struct{}) error {
 	return dropIndex(db, cfIndexParentBucketKey, cfIndexName, interrupt)
 }

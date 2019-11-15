@@ -174,6 +174,6 @@ func (e Error) Error() string {
 }
 
 // newError creates a new Error.
-func newError(	c ErrorCode, desc string, err error) Error {
+func newError(c ErrorCode, desc string, err error) Error {
 	return Error{ErrorCode: c, Description: desc, Err: err}
 }

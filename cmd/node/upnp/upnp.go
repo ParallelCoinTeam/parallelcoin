@@ -90,13 +90,13 @@ func Discover() (nat NAT, err error) {
 	for i := 0; i < 3; i++ {
 		_, err = socket.WriteToUDP(message, ssdp)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return
 		}
 		var n int
 		n, _, err = socket.ReadFromUDP(answerBytes)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			continue
 			// socket.Close()
 			// return
@@ -120,13 +120,13 @@ func Discover() (nat NAT, err error) {
 		var serviceURL string
 		serviceURL, err = getServiceURL(locURL)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return
 		}
 		var ourIP string
 		ourIP, err = getOurIP()
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return
 		}
 		nat = &upnpNAT{serviceURL: serviceURL, ourIP: ourIP}
@@ -190,7 +190,7 @@ type root struct {
 
 // getChildDevice searches the children of device for a device with the given
 // type.
-func getChildDevice(	d *device, deviceType string) *device {
+func getChildDevice(d *device, deviceType string) *device {
 	for i := range d.DeviceList.Device {
 		if d.DeviceList.Device[i].DeviceType == deviceType {
 			return &d.DeviceList.Device[i]
@@ -201,7 +201,7 @@ func getChildDevice(	d *device, deviceType string) *device {
 
 // getChildDevice searches the service list of device for a service with the
 // given type.
-func getChildService(	d *device, serviceType string) *service {
+func getChildService(d *device, serviceType string) *service {
 	for i := range d.ServiceList.Service {
 		if d.ServiceList.Service[i].ServiceType == serviceType {
 			return &d.ServiceList.Service[i]
@@ -222,7 +222,7 @@ func getOurIP() (ip string, err error) {
 
 // getServiceURL parses the xml description at the given root url to find the
 // url for the WANIPConnection service to be used for port forwarding.
-func getServiceURL(	rootURL string) (url string, err error) {
+func getServiceURL(rootURL string) (url string, err error) {
 	r, err := http.Get(rootURL)
 	if err != nil {
 		log.ERROR(err)
@@ -264,7 +264,7 @@ func getServiceURL(	rootURL string) (url string, err error) {
 }
 
 // combineURL appends subURL onto rootURL.
-func combineURL(	rootURL, subURL string) string {
+func combineURL(rootURL, subURL string) string {
 	protocolEnd := "://"
 	protoEndIndex := strings.Index(rootURL, protocolEnd)
 	a := rootURL[protoEndIndex+len(protocolEnd):]
@@ -289,7 +289,7 @@ type soapEnvelope struct {
 // soapRequests performs a soap request with the given parameters and returns
 // the xml replied stripped of the soap headers.
 // in the case that the request is unsuccessful the an error is returned.
-func soapRequest(	url, function, message string) (replyXML []byte, err error) {
+func soapRequest(url, function, message string) (replyXML []byte, err error) {
 	fullMessage := "<?xml version=\"1.0\" ?>" +
 		"<s:Envelope xmlns:s=\"http://schemas.xmlsoap." +
 		"org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap." +

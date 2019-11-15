@@ -17,7 +17,7 @@ type addressToKey struct {
 	compressed bool
 }
 
-func mkGetKey(	keys map[string]addressToKey) KeyDB {
+func mkGetKey(keys map[string]addressToKey) KeyDB {
 	if keys == nil {
 		return KeyClosure(func(addr util.Address) (*ec.PrivateKey,
 			bool, error) {
@@ -33,7 +33,7 @@ func mkGetKey(	keys map[string]addressToKey) KeyDB {
 		return a2k.key, a2k.compressed, nil
 	})
 }
-func mkGetScript(	scripts map[string][]byte) ScriptDB {
+func mkGetScript(scripts map[string][]byte) ScriptDB {
 	if scripts == nil {
 		return ScriptClosure(func(addr util.Address) ([]byte, error) {
 			return nil, errors.New("nope")
@@ -47,7 +47,7 @@ func mkGetScript(	scripts map[string][]byte) ScriptDB {
 		return script, nil
 	})
 }
-func checkScripts(	msg string, tx *wire.MsgTx, idx int, inputAmt int64, sigScript, pkScript []byte) error {
+func checkScripts(msg string, tx *wire.MsgTx, idx int, inputAmt int64, sigScript, pkScript []byte) error {
 	tx.TxIn[idx].SignatureScript = sigScript
 	vm, err := NewEngine(pkScript, tx, idx,
 		ScriptBip16|ScriptVerifyDERSignatures, nil, nil, inputAmt)
@@ -62,7 +62,7 @@ func checkScripts(	msg string, tx *wire.MsgTx, idx int, inputAmt int64, sigScrip
 	}
 	return nil
 }
-func signAndCheck(	msg string, tx *wire.MsgTx, idx int, inputAmt int64, pkScript []byte,
+func signAndCheck(msg string, tx *wire.MsgTx, idx int, inputAmt int64, pkScript []byte,
 	hashType SigHashType, kdb KeyDB, sdb ScriptDB,
 	previousScript []byte) error {
 	sigScript, err := SignTxOutput(&chaincfg.TestNet3Params, tx, idx,
@@ -72,7 +72,7 @@ func signAndCheck(	msg string, tx *wire.MsgTx, idx int, inputAmt int64, pkScript
 	}
 	return checkScripts(msg, tx, idx, inputAmt, sigScript, pkScript)
 }
-func TestSignTxOutput(	t *testing.T) {
+func TestSignTxOutput(t *testing.T) {
 	t.Parallel()
 	// make key
 	// make script based on key.
@@ -1466,7 +1466,7 @@ var sigScriptTests = []tstSigScript{
 }
 
 // Test the sigscript generation for valid and invalid inputs, all hashTypes, and with and without compression.  This test creates sigscripts to spend fake coinbase inputs, as sigscripts cannot be created for the MsgTxs in txTests, since they come from the blockchain and we don't have the private keys.
-func TestSignatureScript(	t *testing.T) {
+func TestSignatureScript(t *testing.T) {
 	t.Parallel()
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), privKeyD)
 nexttest:

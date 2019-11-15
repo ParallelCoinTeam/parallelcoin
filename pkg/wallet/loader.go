@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/prompt"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
@@ -61,7 +61,7 @@ func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bd
 	exists, err := fileExists(dbPath)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if exists {
 		return nil, errors.New("Wallet ERROR: " + dbPath + " already exists")
@@ -70,24 +70,24 @@ return nil, err
 	err = os.MkdirAll(ld.DDDirPath, 0700)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Initialize the newly created database for the wallet before opening.
 	err = Create(db, pubPassphrase, privPassphrase, seed, ld.ChainParams, bday)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Open the newly-created wallet.
 	w, err := Open(db, pubPassphrase, nil, ld.ChainParams, ld.RecoveryWindow)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	w.Start()
 	ld.onLoaded(db)
@@ -125,7 +125,7 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 	db, err := walletdb.Open("bdb", dbPath)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR("failed to open database '", ld.DDDirPath, "':", err)
+		log.ERROR("failed to open database '", ld.DDDirPath, "':", err)
 		return nil, err
 	}
 	log.INFO("opened wallet database")
@@ -145,7 +145,7 @@ log.ERROR("failed to open database '", ld.DDDirPath, "':", err)
 	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow)
 	if err != nil {
 		log.ERROR(err)
-log.INFO("failed to open wallet", err)
+		log.INFO("failed to open wallet", err)
 		// If opening the wallet fails (e.g. because of wrong
 		// passphrase), we must close the backing database to
 		// allow future calls to walletdb.Open().
@@ -203,7 +203,7 @@ func (ld *Loader) UnloadWallet() error {
 	err := ld.DB.Close()
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG("error closing database", err)
+		log.DEBUG("error closing database", err)
 		return err
 	}
 	log.TRACE("database closed")
@@ -248,7 +248,7 @@ func fileExists(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
 		log.ERROR(err)
-if os.IsNotExist(err) {
+		if os.IsNotExist(err) {
 			return false, nil
 		}
 		return false, err

@@ -37,7 +37,7 @@ func (c *Client) RawRequestAsync(method string, params []js.RawMessage) FutureRa
 	marshalledJSON, err := js.Marshal(rawRequest)
 	if err != nil {
 		log.ERROR(err)
-return newFutureError(err)
+		return newFutureError(err)
 	}
 	// Generate the request and send it along with a channel to respond on.
 	responseChan := make(chan *response, 1)

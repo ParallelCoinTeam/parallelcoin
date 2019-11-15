@@ -19,74 +19,74 @@ import (
 )
 
 type // DUOPerKilobyte is number with units of parallelcoins per kilobyte.
-	DUOPerKilobyte float64
+DUOPerKilobyte float64
 
 type // FeeEstimator manages the data necessary to create fee estimations.
-	// It is safe for concurrent access.
-	FeeEstimator struct {
-		maxRollback uint32
-		binSize     int32
-		// The maximum number of replacements that can be made in a single bin
-		// per block. Default is estimateFeeMaxReplacements
-		maxReplacements int32
-		// The minimum number of blocks that can be registered with the fee
-		// estimator before it will provide answers.
-		minRegisteredBlocks uint32
-		// The last known height.
-		lastKnownHeight int32
-		// The number of blocks that have been registered.
-		numBlocksRegistered uint32
-		mtx                 sync.RWMutex
-		observed            map[chainhash.Hash]*observedTransaction
-		bin                 [estimateFeeDepth][]*observedTransaction
-		// The cached estimates.
-		cached []SatoshiPerByte
-		// Transactions that have been removed from the bins.
-		// This allows us to revert in case of an orphaned block.
-		dropped []*registeredBlock
-	}
+// It is safe for concurrent access.
+FeeEstimator struct {
+	maxRollback uint32
+	binSize     int32
+	// The maximum number of replacements that can be made in a single bin
+	// per block. Default is estimateFeeMaxReplacements
+	maxReplacements int32
+	// The minimum number of blocks that can be registered with the fee
+	// estimator before it will provide answers.
+	minRegisteredBlocks uint32
+	// The last known height.
+	lastKnownHeight int32
+	// The number of blocks that have been registered.
+	numBlocksRegistered uint32
+	mtx                 sync.RWMutex
+	observed            map[chainhash.Hash]*observedTransaction
+	bin                 [estimateFeeDepth][]*observedTransaction
+	// The cached estimates.
+	cached []SatoshiPerByte
+	// Transactions that have been removed from the bins.
+	// This allows us to revert in case of an orphaned block.
+	dropped []*registeredBlock
+}
 
 type // FeeEstimatorState represents a saved FeeEstimator that can be restored
-	// with data from an earlier session of the program.
-	FeeEstimatorState []byte
+// with data from an earlier session of the program.
+FeeEstimatorState []byte
 
 type // SatoshiPerByte is number with units of satoshis per byte.
-	SatoshiPerByte float64
+SatoshiPerByte float64
 
 type // estimateFeeSet is a set of txs that can that is sorted by the fee per kb
-	// rate.
-	estimateFeeSet struct {
-		feeRate []SatoshiPerByte
-		bin     [estimateFeeDepth]uint32
-	}
+// rate.
+estimateFeeSet struct {
+	feeRate []SatoshiPerByte
+	bin     [estimateFeeDepth]uint32
+}
 
 type // observedTransaction represents an observed transaction and some additional
-	// data required for the fee estimation algorithm.
-	observedTransaction struct {
-		// A transaction hash.
-		hash chainhash.Hash
-		// The fee per byte of the transaction in satoshis.
-		feeRate SatoshiPerByte
-		// The block height when it was observed.
-		observed int32
-		// The height of the block in which it was mined.
-		// If the transaction has not yet been mined, it is zero.
-		mined int32
-	}
+// data required for the fee estimation algorithm.
+observedTransaction struct {
+	// A transaction hash.
+	hash chainhash.Hash
+	// The fee per byte of the transaction in satoshis.
+	feeRate SatoshiPerByte
+	// The block height when it was observed.
+	observed int32
+	// The height of the block in which it was mined.
+	// If the transaction has not yet been mined, it is zero.
+	mined int32
+}
 
 type // observedTxSet is a set of txs that can that is sorted by hash.
-	// It exists for serialization purposes so that a serialized state always
-	// comes out the same.
-	observedTxSet []*observedTransaction
+// It exists for serialization purposes so that a serialized state always
+// comes out the same.
+observedTxSet []*observedTransaction
 
 type // registeredBlock has the hash of a block and the list of transactions it
-	// mined which had been previously observed by the FeeEstimator.
-	// It is used if Rollback is called to reverse the effect of registering a
-	// block.
-	registeredBlock struct {
-		hash         chainhash.Hash
-		transactions []*observedTransaction
-	}
+// mined which had been previously observed by the FeeEstimator.
+// It is used if Rollback is called to reverse the effect of registering a
+// block.
+registeredBlock struct {
+	hash         chainhash.Hash
+	transactions []*observedTransaction
+}
 
 // TODO incorporate Alex Morcos' modifications to Gavin's initial model
 // https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2014-October/006824.html
@@ -507,8 +507,7 @@ func // estimateFee returns the estimated fee for a transaction to confirm in
 	}
 	return b.feeRate[feeIndex]
 }
-func
-(o *observedTransaction) Serialize(w io.Writer) {
+func (o *observedTransaction) Serialize(w io.Writer) {
 	e := binary.Write(w, binary.BigEndian, o.hash)
 	if e != nil {
 		log.TRACE("failed to serialize observed transaction:", e)
@@ -527,8 +526,7 @@ func
 	}
 }
 
-func
-(rb *registeredBlock) serialize(w io.Writer,
+func (rb *registeredBlock) serialize(w io.Writer,
 	txs map[*observedTransaction]uint32) {
 	e := binary.Write(w, binary.BigEndian, rb.hash)
 	if e != nil {
@@ -646,7 +644,7 @@ RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 	for i := uint32(0); i < numObserved; i++ {
 		ot, err := deserializeObservedTransaction(r)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		observed[i] = ot
@@ -686,14 +684,13 @@ RestoreFeeEstimator(data FeeEstimatorState) (*FeeEstimator, error) {
 		var err error
 		ef.dropped[int(i)], err = deserializeRegisteredBlock(r, observed)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 	}
 	return ef, nil
 }
-func
-deserializeObservedTransaction(r io.Reader) (*observedTransaction, error) {
+func deserializeObservedTransaction(r io.Reader) (*observedTransaction, error) {
 	ot := observedTransaction{}
 	// The first 32 bytes should be a hash.
 	e := binary.Read(r, binary.BigEndian, &ot.hash)
@@ -716,8 +713,7 @@ deserializeObservedTransaction(r io.Reader) (*observedTransaction, error) {
 	}
 	return &ot, nil
 }
-func
-deserializeRegisteredBlock(r io.Reader,
+func deserializeRegisteredBlock(r io.Reader,
 	txs map[uint32]*observedTransaction) (*registeredBlock, error) {
 	var lenTransactions uint32
 	rb := &registeredBlock{}

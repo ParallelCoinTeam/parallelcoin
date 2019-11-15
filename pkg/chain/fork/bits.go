@@ -15,7 +15,7 @@ import "math/big"
 // The formula to calculate N is:
 // 	N = (-1^sign) * mantissa * 256^(exponent-3)
 // This compact form is only used in bitcoin to encode unsigned 256-bit numbers which represent difficulty targets, thus there really is not a need for a sign bit, but it is implemented here to stay consistent with bitcoind.
-func CompactToBig(	compact uint32) *big.Int {
+func CompactToBig(compact uint32) *big.Int {
 	// Extract the mantissa, sign bit, and exponent.
 	mantissa := compact & 0x007fffff
 	isNegative := compact&0x00800000 != 0
@@ -37,7 +37,7 @@ func CompactToBig(	compact uint32) *big.Int {
 }
 
 // BigToCompact converts a whole number N to a compact representation using an unsigned 32-bit number.  The compact representation only provides 23 bits of precision, so values larger than (2^23 - 1) only encode the most significant digits of the number.  See CompactToBig for details.
-func BigToCompact(	n *big.Int) uint32 {
+func BigToCompact(n *big.Int) uint32 {
 	// No need to do any work if it's zero.
 	if n.Sign() == 0 {
 		return 0

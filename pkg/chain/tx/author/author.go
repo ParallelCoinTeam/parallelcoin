@@ -99,7 +99,7 @@ func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
 	for {
 		inputAmount, inputs, inputValues, scripts, err := fetchInputs(targetAmount + targetFee)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		if inputAmount < targetAmount+targetFee {
@@ -140,7 +140,7 @@ func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
 			txsizes.P2WPKHPkScriptSize, relayFeePerKb) {
 			changeScript, err := fetchChange()
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return nil, err
 			}
 			if len(changeScript) > txsizes.P2WPKHPkScriptSize {
@@ -203,7 +203,7 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 				int64(inputValues[i]), chainParams, secrets,
 				tx, hashCache, i)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		case txscript.IsPayToWitnessPubKeyHash(pkScript):
@@ -211,7 +211,7 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 				int64(inputValues[i]), chainParams, secrets,
 				tx, hashCache, i)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		default:
@@ -220,7 +220,7 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 				pkScript, txscript.SigHashAll, secrets, secrets,
 				sigScript)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			inputs[i].SignatureScript = script

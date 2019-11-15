@@ -12,8 +12,8 @@ import (
 )
 
 type // BehaviorFlags is a bitmask defining tweaks to the normal behavior when
-	// performing chain processing and consensus rules checks.
-	BehaviorFlags uint32
+// performing chain processing and consensus rules checks.
+BehaviorFlags uint32
 
 const (
 	// BFFastAdd may be set to indicate that several checks can be avoided
@@ -140,7 +140,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 			currentTarget := fork.CompactToBig(blockHeader.Bits)
 			if currentTarget.Cmp(requiredTarget) > 0 {
 				str := fmt.Sprintf("processing: block target difficulty of"+
-					" %064x is too low when compared to the previous" +
+					" %064x is too low when compared to the previous"+
 					" checkpoint", currentTarget)
 				return false, false, ruleError(ErrDifficultyTooLow, str)
 			}

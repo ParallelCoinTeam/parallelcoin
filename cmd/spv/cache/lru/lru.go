@@ -1,12 +1,12 @@
 package lru
 
 import (
-   "container/list"
-   "fmt"
+	"container/list"
+	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"sync"
-   
-   "github.com/p9c/pod/cmd/spv/cache"
+
+	"github.com/p9c/pod/cmd/spv/cache"
 )
 
 // elementMap is an alias for a map from a generic interface to a list.Element.
@@ -39,7 +39,7 @@ type Cache struct {
 
 // NewCache return a cache with specified capacity, the cache's size can't
 // exceed that given capacity.
-func NewCache(	capacity uint64) *Cache {
+func NewCache(capacity uint64) *Cache {
 	return &Cache{
 		capacity: capacity,
 		ll:       list.New(),
@@ -69,7 +69,7 @@ func (c *Cache) evict(needed uint64) error {
 			ce := elr.Value.(*entry)
 			es, err := ce.value.Size()
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return fmt.Errorf("couldn't determine size of "+
 					"existing cache value %v", err)
 			}
@@ -104,7 +104,7 @@ func (c *Cache) Put(key interface{}, value cache.Value) error {
 	if ok {
 		es, err := el.Value.(*entry).value.Size()
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return fmt.Errorf("couldn't determine size of existing"+
 				"cache value %v", err)
 		}

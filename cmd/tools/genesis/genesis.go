@@ -40,7 +40,7 @@ var (
 )
 
 // This function reverses the bytes in a byte array
-func byteswap(	buf []byte) {
+func byteswap(buf []byte) {
 	length := len(buf)
 	for i := 0; i < length/2; i++ {
 		buf[i], buf[length-i-1] = buf[length-i-1], buf[i]
@@ -78,8 +78,8 @@ func main() {
 		pubkey = make([]byte, 65)
 		n, err := rand.Read(pubkey)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println("error: ", err)
+			log.ERROR(err)
+			fmt.Println("error: ", err)
 			os.Exit(1)
 		}
 		if n != 65 {
@@ -95,8 +95,8 @@ fmt.Println("error: ", err)
 		var err error
 		pubkey, err = hex.DecodeString(args[1])
 		if err != nil {
-		log.ERROR(err)
-fmt.Println("Public key had invalid characters")
+			log.ERROR(err)
+			fmt.Println("Public key had invalid characters")
 		}
 	}
 	timestamp := args[2]
@@ -108,7 +108,7 @@ fmt.Println("Public key had invalid characters")
 	nbits, err := strconv.ParseInt(args[3], 10, 32)
 	if err != nil {
 		log.ERROR(err)
-fmt.Println("nBits was not a decimal number or exceeded the precision of 32 bits")
+		fmt.Println("nBits was not a decimal number or exceeded the precision of 32 bits")
 		os.Exit(0)
 	}
 	nBits := uint32(nbits)
@@ -184,7 +184,7 @@ fmt.Println("nBits was not a decimal number or exceeded the precision of 32 bits
 	}
 	time.Sleep(time.Hour)
 }
-func findNonce(	b []byte, bytes, bits uint32, start time.Time) []byte {
+func findNonce(b []byte, bytes, bits uint32, start time.Time) []byte {
 	blockHeader := append([]byte(nil), b...)
 	unixtime = uint32(time.Now().Unix())
 	blockHeader[68] = byte(unixtime)
@@ -217,14 +217,14 @@ func findNonce(	b []byte, bytes, bits uint32, start time.Time) []byte {
 		}
 	}
 }
-func joinBytes(	segment ...[]byte) (joined []byte) {
+func joinBytes(segment ...[]byte) (joined []byte) {
 	joined = make([]byte, 0)
 	for i := range segment {
 		joined = append(joined, segment[i]...)
 	}
 	return
 }
-func undertarget(	hash []byte, bits uint32) bool {
+func undertarget(hash []byte, bits uint32) bool {
 	// for i:=len(hash)-1; i>0; i-- { hash[i]=0 }
 	// fmt.Println(hash)
 	for i := len(hash) - 1; i > 0; i-- {
@@ -241,7 +241,7 @@ func undertarget(	hash []byte, bits uint32) bool {
 	}
 	return true
 }
-func uint32tobytes(	u uint32) []byte {
+func uint32tobytes(u uint32) []byte {
 	b := make([]byte, 4)
 	b[0] = byte(u)
 	for i := uint(1); i < 4; i++ {
@@ -260,7 +260,7 @@ func uint32tobytes(	u uint32) []byte {
 // 	}
 // 	return u
 // }
-func uint64tobytes(	u uint64) []byte {
+func uint64tobytes(u uint64) []byte {
 	b := make([]byte, 8)
 	b[0] = byte(u)
 	for i := uint(1); i < 8; i++ {

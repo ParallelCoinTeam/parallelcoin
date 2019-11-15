@@ -43,7 +43,7 @@ func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) erro
 		k := canonicalOutPoint(&prevOut.Hash, prevOut.Index)
 		err = putRawUnminedInput(ns, k, rec.Hash[:])
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -77,7 +77,7 @@ func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) e
 				&doubleSpend.Hash, doubleSpendVal, &doubleSpend,
 			)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			log.DEBUG(
@@ -116,7 +116,7 @@ RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
 			spender.Hash = spenderHash
 			err := readRawTxRecord(&spender.Hash, spenderVal, &spender)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			log.DEBUGF(
@@ -159,20 +159,19 @@ func // UnminedTxs returns the underlying transactions for all unmined
 	}
 	return txs, nil
 }
-func
-(s *Store) unminedTxRecords(ns walletdb.ReadBucket) (map[chainhash.Hash]*TxRecord, error) {
+func (s *Store) unminedTxRecords(ns walletdb.ReadBucket) (map[chainhash.Hash]*TxRecord, error) {
 	unmined := make(map[chainhash.Hash]*TxRecord)
 	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) error {
 		var txHash chainhash.Hash
 		err := readRawUnminedHash(k, &txHash)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		rec := new(TxRecord)
 		err = readRawTxRecord(&txHash, v, rec)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		unmined[rec.Hash] = rec

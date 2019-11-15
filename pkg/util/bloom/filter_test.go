@@ -12,7 +12,7 @@ import (
 )
 
 // TestFilterLarge ensures a maximum sized filter can be created.
-func TestFilterLarge(	t *testing.T) {
+func TestFilterLarge(t *testing.T) {
 	f := bloom.NewFilter(100000000, 0, 0.01, wire.BloomUpdateNone)
 	if len(f.MsgFilterLoad().Filter) > wire.MaxFilterLoadFilterSize {
 		t.Errorf("TestFilterLarge test failed: %d > %d",
@@ -21,7 +21,7 @@ func TestFilterLarge(	t *testing.T) {
 }
 
 // TestFilterLoad ensures loading and unloading of a filter pass.
-func TestFilterLoad(	t *testing.T) {
+func TestFilterLoad(t *testing.T) {
 	merkle := wire.MsgFilterLoad{}
 	f := bloom.LoadFilter(&merkle)
 	if !f.IsLoaded() {
@@ -38,7 +38,7 @@ func TestFilterLoad(	t *testing.T) {
 }
 
 // TestFilterInsert ensures inserting data into the filter causes that data to be matched and the resulting serialized MsgFilterLoad is the expected value.
-func TestFilterInsert(	t *testing.T) {
+func TestFilterInsert(t *testing.T) {
 	var tests = []struct {
 		hex    string
 		insert bool
@@ -84,7 +84,7 @@ func TestFilterInsert(	t *testing.T) {
 }
 
 // TestFilterFPRange checks that new filters made with out of range false positive targets result in either max or min false positive rates.
-func TestFilterFPRange(	t *testing.T) {
+func TestFilterFPRange(t *testing.T) {
 	tests := []struct {
 		name   string
 		hash   string
@@ -141,7 +141,7 @@ func TestFilterFPRange(	t *testing.T) {
 }
 
 // TestFilterInsert ensures inserting data into the filter with a tweak causes that data to be matched and the resulting serialized MsgFilterLoad is the expected value.
-func TestFilterInsertWithTweak(	t *testing.T) {
+func TestFilterInsertWithTweak(t *testing.T) {
 	var tests = []struct {
 		hex    string
 		insert bool
@@ -187,7 +187,7 @@ func TestFilterInsertWithTweak(	t *testing.T) {
 }
 
 // TestFilterInsertKey ensures inserting public keys and addresses works as expected.
-func TestFilterInsertKey(	t *testing.T) {
+func TestFilterInsertKey(t *testing.T) {
 	secret := "5Kg1gnAjaLfKiwhhPpGS3QfRg2m6awQvaj98JCZBZQ5SuS2F15C"
 	wif, err := util.DecodeWIF(secret)
 	if err != nil {
@@ -214,7 +214,7 @@ func TestFilterInsertKey(	t *testing.T) {
 		return
 	}
 }
-func TestFilterBloomMatch(	t *testing.T) {
+func TestFilterBloomMatch(t *testing.T) {
 	str := "01000000010b26e9b7735eb6aabdf358bab62f9816a21ba9ebdb719d5299e" +
 		"88607d722c190000000008b4830450220070aca44506c5cef3a16ed519d7" +
 		"c3c39f8aab192c4e1c90d065f37b8a4af6141022100a8e160b856c2d43d2" +
@@ -400,7 +400,7 @@ func TestFilterBloomMatch(	t *testing.T) {
 		t.Errorf("TestFilterBloomMatch matched outpoint %s", inputStr)
 	}
 }
-func TestFilterInsertUpdateNone(	t *testing.T) {
+func TestFilterInsertUpdateNone(t *testing.T) {
 	f := bloom.NewFilter(10, 0, 0.000001, wire.BloomUpdateNone)
 	// Add the generation pubkey
 	inputStr := "04eaafc2314def4ca98ac970241bcab022b9c1e1f4ea423a20f134c" +
@@ -443,7 +443,7 @@ func TestFilterInsertUpdateNone(	t *testing.T) {
 		return
 	}
 }
-func TestFilterInsertP2PubKeyOnly(	t *testing.T) {
+func TestFilterInsertP2PubKeyOnly(t *testing.T) {
 	blockStr := "0100000082bb869cf3a793432a66e826e05a6fc37469f8efb7421dc" +
 		"880670100000000007f16c5962e8bd963659c793ce370d95f093bc7e367" +
 		"117b3c30c1f8fdd0d9728776381b4d4c86041b554b85290701000000010" +
@@ -588,7 +588,7 @@ func TestFilterInsertP2PubKeyOnly(	t *testing.T) {
 		return
 	}
 }
-func TestFilterReload(	t *testing.T) {
+func TestFilterReload(t *testing.T) {
 	f := bloom.NewFilter(10, 0, 0.000001, wire.BloomUpdateAll)
 	bFilter := bloom.LoadFilter(f.MsgFilterLoad())
 	if bFilter.MsgFilterLoad() == nil {

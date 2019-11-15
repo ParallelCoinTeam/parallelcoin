@@ -56,7 +56,7 @@ func (msg *MsgFilterAdd) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgFilterAdd returns a new bitcoin filteradd message that conforms to the Message interface.  See MsgFilterAdd for details.
-func NewMsgFilterAdd(	data []byte) *MsgFilterAdd {
+func NewMsgFilterAdd(data []byte) *MsgFilterAdd {
 	return &MsgFilterAdd{
 		Data: data,
 	}

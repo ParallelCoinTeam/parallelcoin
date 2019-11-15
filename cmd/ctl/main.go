@@ -9,7 +9,7 @@ import (
 	"io"
 	"os"
 	"strings"
-	
+
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -27,7 +27,7 @@ func Main(args []string, cx *conte.Xt) {
 	usageFlags, err := btcjson.MethodUsageFlags(method)
 	if err != nil {
 		log.ERROR(err)
-fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
+		fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 		HelpPrint()
 		os.Exit(1)
 	}
@@ -91,7 +91,7 @@ fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 	marshalledJSON, err := btcjson.MarshalCmd(1, cmd)
 	if err != nil {
 		log.ERROR(err)
-fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	// Send the JSON-RPC request to the server using the user-specified
@@ -99,7 +99,7 @@ fmt.Fprintln(os.Stderr, err)
 	result, err := sendPostRequest(marshalledJSON, cx)
 	if err != nil {
 		log.ERROR(err)
-fmt.Fprintln(os.Stderr, err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	// Choose how to display the result based on its type.
@@ -131,7 +131,7 @@ func commandUsage(method string) {
 	usage, err := btcjson.MethodUsageText(method)
 	if err != nil {
 		log.ERROR(err)
-// This should never happen since the method was already checked
+		// This should never happen since the method was already checked
 		// before calling this function, but be safe.
 		fmt.Fprintln(os.Stderr, "Failed to obtain command usage:", err)
 		return

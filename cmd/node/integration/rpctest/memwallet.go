@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"sync"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -393,12 +393,12 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 		if changeVal > 0 && change {
 			addr, err := m.newAddress()
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			pkScript, err := txscript.PayToAddrScript(addr)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			changeOutput := &wire.TxOut{
@@ -472,18 +472,18 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 		utxo := m.utxos[outPoint]
 		extendedKey, err := m.hdRoot.Child(utxo.keyIndex)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		privKey, err := extendedKey.ECPrivKey()
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		sigScript, err := txscript.SignatureScript(tx, i, utxo.pkScript,
 			txscript.SigHashAll, privKey, true)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		txIn.SignatureScript = sigScript

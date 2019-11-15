@@ -13,7 +13,7 @@ var (
 	blob     []byte
 )
 
-func TestNewSecretKey(	t *testing.T) {
+func TestNewSecretKey(t *testing.T) {
 	var err error
 	key, err = NewSecretKey(&password, DefaultN, DefaultR, DefaultP)
 	if err != nil {
@@ -21,10 +21,10 @@ func TestNewSecretKey(	t *testing.T) {
 		return
 	}
 }
-func TestMarshalSecretKey(	t *testing.T) {
+func TestMarshalSecretKey(t *testing.T) {
 	params = key.Marshal()
 }
-func TestUnmarshalSecretKey(	t *testing.T) {
+func TestUnmarshalSecretKey(t *testing.T) {
 	var sk SecretKey
 	if err := sk.Unmarshal(params); err != nil {
 		t.Errorf("unexpected unmarshal error: %v", err)
@@ -38,7 +38,7 @@ func TestUnmarshalSecretKey(	t *testing.T) {
 		t.Errorf("keys not equal")
 	}
 }
-func TestUnmarshalSecretKeyInvalid(	t *testing.T) {
+func TestUnmarshalSecretKeyInvalid(t *testing.T) {
 	var sk SecretKey
 	if err := sk.Unmarshal(params); err != nil {
 		t.Errorf("unexpected unmarshal error: %v", err)
@@ -50,7 +50,7 @@ func TestUnmarshalSecretKeyInvalid(	t *testing.T) {
 		return
 	}
 }
-func TestEncrypt(	t *testing.T) {
+func TestEncrypt(t *testing.T) {
 	var err error
 	blob, err = key.Encrypt(message)
 	if err != nil {
@@ -58,7 +58,7 @@ func TestEncrypt(	t *testing.T) {
 		return
 	}
 }
-func TestDecrypt(	t *testing.T) {
+func TestDecrypt(t *testing.T) {
 	decryptedMessage, err := key.Decrypt(blob)
 	if err != nil {
 		t.Error(err)
@@ -69,7 +69,7 @@ func TestDecrypt(	t *testing.T) {
 		return
 	}
 }
-func TestDecryptCorrupt(	t *testing.T) {
+func TestDecryptCorrupt(t *testing.T) {
 	blob[len(blob)-15] = blob[len(blob)-15] + 1
 	_, err := key.Decrypt(blob)
 	if err == nil {
@@ -77,19 +77,19 @@ func TestDecryptCorrupt(	t *testing.T) {
 		return
 	}
 }
-func TestZero(	t *testing.T) {
+func TestZero(t *testing.T) {
 	var zeroKey [32]byte
 	key.Zero()
 	if !bytes.Equal(key.Key[:], zeroKey[:]) {
 		t.Errorf("zero key failed")
 	}
 }
-func TestDeriveKey(	t *testing.T) {
+func TestDeriveKey(t *testing.T) {
 	if err := key.DeriveKey(&password); err != nil {
 		t.Errorf("unexpected DeriveKey key failure: %v", err)
 	}
 }
-func TestDeriveKeyInvalid(	t *testing.T) {
+func TestDeriveKeyInvalid(t *testing.T) {
 	bogusPass := []byte("bogus")
 	if err := key.DeriveKey(&bogusPass); err != ErrInvalidPassword {
 		t.Errorf("unexpected DeriveKey key failure: %v", err)

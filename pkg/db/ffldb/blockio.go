@@ -292,7 +292,7 @@ func (s *blockStore) writeBlock(rawBlock []byte) (blockLocation, error) {
 	if wc.curFile.file == nil {
 		file, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return blockLocation{}, err
 		}
 		wc.curFile.file = file
@@ -461,7 +461,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	if wc.curFile.file == nil {
 		obf, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			wc.curFile.Unlock()
 			log.WARN("ROLLBACK:", err)
 			return
@@ -482,7 +482,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	wc.curFile.Unlock()
 	if err != nil {
 		log.ERROR(err)
-log.WARN(
+		log.WARN(
 			"ROLLBACK: Failed to sync file %d: %v %s",
 			wc.curFileNum,
 			err)

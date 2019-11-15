@@ -52,7 +52,7 @@ func (b *Block) Bytes() ([]byte, error) {
 	err := b.msgBlock.Serialize(w)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	serializedBlock := w.Bytes()
 	// Cache the serialized bytes and return them.
@@ -71,7 +71,7 @@ func (b *Block) BytesNoWitness() ([]byte, error) {
 	err := b.msgBlock.SerializeNoWitness(&w)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	serializedBlock := w.Bytes()
 	// Cache the serialized bytes and return them.
@@ -143,7 +143,7 @@ func (b *Block) TxHash(txNum int) (*chainhash.Hash, error) {
 	tx, err := b.Tx(txNum)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Defer to the wrapped transaction which will return the cached hash if it has already been generated.
 	return tx.Hash(), nil
@@ -154,14 +154,14 @@ func (b *Block) TxLoc() ([]wire.TxLoc, error) {
 	rawMsg, err := b.Bytes()
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	rbuf := bytes.NewBuffer(rawMsg)
 	var mblock wire.MsgBlock
 	txLocs, err := mblock.DeserializeTxLoc(rbuf)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return txLocs, err
 }
@@ -190,7 +190,7 @@ func NewBlockFromBytes(serializedBlock []byte) (*Block, error) {
 	b, err := NewBlockFromReader(br)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	b.serializedBlock = serializedBlock
 	return b, nil
@@ -203,7 +203,7 @@ func NewBlockFromReader(r io.Reader) (*Block, error) {
 	err := msgBlock.Deserialize(r)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	b := Block{
 		msgBlock:    &msgBlock,

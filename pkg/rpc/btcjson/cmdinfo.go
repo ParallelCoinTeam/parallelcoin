@@ -7,7 +7,7 @@ import (
 )
 
 // CmdMethod returns the method for the passed command.  The provided command type must be a registered type.  All commands provided by this package are registered by default.
-func CmdMethod(	cmd interface{}) (string, error) {
+func CmdMethod(cmd interface{}) (string, error) {
 	// Look up the cmd type and error out if not registered.
 	rt := reflect.TypeOf(cmd)
 	registerLock.RLock()
@@ -21,7 +21,7 @@ func CmdMethod(	cmd interface{}) (string, error) {
 }
 
 // MethodUsageFlags returns the usage flags for the passed command method.  The provided method must be associated with a registered type.  All commands provided by this package are registered by default.
-func MethodUsageFlags(	method string) (UsageFlag, error) {
+func MethodUsageFlags(method string) (UsageFlag, error) {
 	// Look up details about the provided method and error out if not registered.
 	registerLock.RLock()
 	info, ok := methodToInfo[method]
@@ -34,7 +34,7 @@ func MethodUsageFlags(	method string) (UsageFlag, error) {
 }
 
 // subStructUsage returns a string for use in the one-line usage for the given sub struct.  Note that this is specifically for fields which consist of structs (or an array/slice of structs) as opposed to the top-level command struct. Any fields that include a jsonrpcusage struct tag will use that instead of being automatically generated.
-func subStructUsage(	structType reflect.Type) string {
+func subStructUsage(structType reflect.Type) string {
 	numFields := structType.NumField()
 	fieldUsages := make([]string, 0, numFields)
 	for i := 0; i < structType.NumField(); i++ {
@@ -69,7 +69,7 @@ func subStructUsage(	structType reflect.Type) string {
 }
 
 // subArrayUsage returns a string for use in the one-line usage for the given array or slice.  It also contains logic to convert plural field names to singular so the generated usage string reads better.
-func subArrayUsage(	arrayType reflect.Type, fieldName string) string {
+func subArrayUsage(arrayType reflect.Type, fieldName string) string {
 	// Convert plural field names to singular.  Only works for English.
 	singularFieldName := fieldName
 	if strings.HasSuffix(fieldName, "ies") {
@@ -92,7 +92,7 @@ func subArrayUsage(	arrayType reflect.Type, fieldName string) string {
 }
 
 // fieldUsage returns a string for use in the one-line usage for the struct field of a command. Any fields that include a jsonrpcusage struct tag will use that instead of being automatically generated.
-func fieldUsage(	structField reflect.StructField, defaultVal *reflect.Value) string {
+func fieldUsage(structField reflect.StructField, defaultVal *reflect.Value) string {
 	// When the field has a jsonrpcusage struct tag specified use that instead of automatically generating it.
 	if tag := structField.Tag.Get("jsonrpcusage"); tag != "" {
 		return tag
@@ -129,7 +129,7 @@ func fieldUsage(	structField reflect.StructField, defaultVal *reflect.Value) str
 }
 
 // methodUsageText returns a one-line usage string for the provided command and method info.  This is the main work horse for the exported MethodUsageText function.
-func methodUsageText(	rtp reflect.Type, defaults map[int]reflect.Value, method string) string {
+func methodUsageText(rtp reflect.Type, defaults map[int]reflect.Value, method string) string {
 	// Generate the individual usage for each field in the command.  Several simplifying assumptions are made here because the RegisterCmd function has already rigorously enforced the layout.
 	rt := rtp.Elem()
 	numFields := rt.NumField()
@@ -165,7 +165,7 @@ func methodUsageText(	rtp reflect.Type, defaults map[int]reflect.Value, method s
 }
 
 // MethodUsageText returns a one-line usage string for the provided method.  The provided method must be associated with a registered type.  All commands provided by this package are registered by default.
-func MethodUsageText(	method string) (string, error) {
+func MethodUsageText(method string) (string, error) {
 	// Look up details about the provided method and error out if not registered.
 	registerLock.RLock()
 	rtp, ok := methodToConcreteType[method]

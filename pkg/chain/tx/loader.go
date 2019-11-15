@@ -159,7 +159,7 @@ func (l *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool)
 	db, err := walletdb.Open("bdb", dbPath)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(
+		log.ERROR(
 			"failed to open database:", err)
 		return nil, err
 	}

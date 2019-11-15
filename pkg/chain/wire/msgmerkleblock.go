@@ -65,13 +65,13 @@ func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncodi
 		hash := &hashes[i]
 		err := readElement(r, hash)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = msg.AddTxHash(hash)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
+			fmt.Println(err)
 		}
 	}
 	msg.Flags, err = ReadVarBytes(r, pver, maxFlagsPerMerkleBlock,
@@ -117,7 +117,7 @@ func (msg *MsgMerkleBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncodi
 	for _, hash := range msg.Hashes {
 		err = writeElement(w, hash)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

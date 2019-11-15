@@ -79,7 +79,7 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	if writeKey {
 		err = ioutil.WriteFile(*config.RPCKey, key, 0600)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			rmErr := os.Remove(*config.RPCCert)
 			if rmErr != nil {
 				log.WARN("cannot remove written certificates:", rmErr)
@@ -104,7 +104,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range normalizedListenAddrs {
 		host, _, err := net.SplitHostPort(addr)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			// Shouldn't happen due to already being normalized.
 			log.ERRORF(
 				"`%s` is not a normalized listener address", addr)
@@ -139,8 +139,8 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range ipv4Addrs {
 		listener, err := listen("tcp4", addr)
 		if err != nil {
-		log.ERROR(err)
-log.WARNF(
+			log.ERROR(err)
+			log.WARNF(
 				"Can't listen on %s: %v", addr, err,
 			)
 			continue
@@ -150,8 +150,8 @@ log.WARNF(
 	for _, addr := range ipv6Addrs {
 		listener, err := listen("tcp6", addr)
 		if err != nil {
-		log.ERROR(err)
-log.WARNF(
+			log.ERROR(err)
+			log.WARNF(
 				"Can't listen on %s: %v", addr, err,
 			)
 			continue
@@ -204,7 +204,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config,
 	} else {
 		keyPair, err = openRPCKeyPair(config)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, nil, err
 		}
 		// Change the standard net.Listen function to the tls one.

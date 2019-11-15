@@ -12,8 +12,7 @@ type rcvar struct {
 	lastxs DuOStransactions
 }
 
-
-type RcVar interface{
+type RcVar interface {
 	GetTransactions(sfrom, count int, cat string) (txs DuOStransactions)
 	GetBalance() (b DuOSbalance)
 	GetTransactionsExcertps() (txse DuOStransactionsExcerpts)

@@ -9,7 +9,7 @@ import (
 )
 
 // tstCheckScriptError ensures the type of the two passed errors are of the same type (either both nil or both of type Error) and their error codes match when not nil.
-func tstCheckScriptError(	gotErr, wantErr error) error {
+func tstCheckScriptError(gotErr, wantErr error) error {
 	// Ensure the error code is of the expected type and the error code matches the value specified in the test instance.
 	if reflect.TypeOf(gotErr) != reflect.TypeOf(wantErr) {
 		return fmt.Errorf("wrong error - got %T (%[1]v), want %T",
@@ -33,7 +33,7 @@ func tstCheckScriptError(	gotErr, wantErr error) error {
 }
 
 // TestStack tests that all of the stack operations work as expected.
-func TestStack(	t *testing.T) {
+func TestStack(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name      string

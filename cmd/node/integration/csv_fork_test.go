@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-	
+
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"

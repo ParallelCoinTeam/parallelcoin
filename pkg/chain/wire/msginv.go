@@ -44,13 +44,13 @@ func (msg *MsgInv) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) erro
 		iv := &invList[i]
 		err := readInvVect(r, pver, iv)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = msg.AddInvVect(iv)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
+			fmt.Println(err)
 		}
 	}
 	return nil
@@ -72,7 +72,7 @@ func (msg *MsgInv) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) erro
 	for _, iv := range msg.InvList {
 		err := writeInvVect(w, pver, iv)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

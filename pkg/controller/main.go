@@ -7,9 +7,13 @@ import (
 	chain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/controller/advertisment"
+	"github.com/p9c/pod/pkg/controller/job"
+	"github.com/p9c/pod/pkg/controller/pause"
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"go.uber.org/atomic"
@@ -42,8 +46,6 @@ type Controller struct {
 }
 
 var (
-	WorkMagic     = [4]byte{'w', 'o', 'r', 'k'}
-	PauseMagic    = [4]byte{'p', 'a', 'u', 's'}
 	SolutionMagic = [4]byte{'s', 'o', 'l', 'v'}
 )
 
@@ -64,7 +66,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		submitChan:    make(chan []byte),
 	}
 
-	msgBase := GetMessageBase(cx)
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		log.WARN("not running controller without RPC enabled")
 		cancel()
@@ -89,9 +90,9 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		}
 	}
 	// create pause message ready for shutdown handler next
-	pM := GetMessageBase(cx).CreateContainer(PauseMagic)
+	pM := pause.GetPauseContainer(cx)
 
-	pauseShards, err := Shards(pM.Data, PauseMagic, ctrl.ciph)
+	pauseShards, err := Shards(pM.Data, pause.PauseMagic, ctrl.ciph)
 	if err != nil {
 		log.TRACE(err)
 	}
@@ -122,7 +123,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		log.ERROR(err)
 		return
 	}
-	mC := GetMinerContainer(cx, util.NewBlock(tpl.Block), msgBase)
+	msgBase := advertisment.Get(cx)
+	mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
 	lisP := mC.GetControllerListenerPort()
 	listenAddress, err := net.ResolveUDPAddr("udp", fmt.Sprintf(":%d", lisP))
 	if err != nil {
@@ -239,13 +241,13 @@ func getListener(ctrl *Controller) func(a *net.UDPAddr, n int, b []byte) {
 }
 
 func sendNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
-	msgBase Serializers, sendAddresses []*net.UDPAddr, conns []*net.UDPConn,
+	msgBase simplebuffer.Serializers, sendAddresses []*net.UDPAddr, conns []*net.UDPConn,
 	oldBlocks *atomic.Value, ciph cipher.AEAD, ) (shards [][]byte, err error) {
 	template := getNewBlockTemplate(cx, bTG)
 	msgB := template.Block
-	fMC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
+	fMC := job.Get(cx, util.NewBlock(msgB), msgBase)
 	for i := range sendAddresses {
-		shards, err = Send(sendAddresses[i], fMC.Data, WorkMagic, ciph,
+		shards, err = Send(sendAddresses[i], fMC.Data, job.WorkMagic, ciph,
 			conns[i])
 		if err != nil {
 			log.ERROR(err)
@@ -292,8 +294,7 @@ out:
 	}
 }
 
-func
-getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
+func  getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 	policy := mining.Policy{
 		BlockMinWeight:    uint32(*cx.Config.BlockMinWeight),
 		BlockMaxWeight:    uint32(*cx.Config.BlockMaxWeight),
@@ -310,7 +311,7 @@ getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 
 func getNotifier(active *atomic.Bool, bTG *mining.BlkTmplGenerator,
 	ciph cipher.AEAD, conns []*net.UDPConn, cx *conte.Xt,
-	msgBase Serializers, oldBlocks *atomic.Value, sendAddresses []*net.UDPAddr,
+	msgBase simplebuffer.Serializers, oldBlocks *atomic.Value, sendAddresses []*net.UDPAddr,
 	subMx *sync.Mutex,
 ) func(n *chain.Notification) {
 	return func(n *chain.Notification) {
@@ -330,10 +331,10 @@ func getNotifier(active *atomic.Bool, bTG *mining.BlkTmplGenerator,
 				}
 				template := getNewBlockTemplate(cx, bTG)
 				msgB := template.Block
-				mC := GetMinerContainer(cx, util.NewBlock(msgB), msgBase)
+				mC := job.Get(cx, util.NewBlock(msgB), msgBase)
 				for i := range sendAddresses {
 					shards, err := Send(sendAddresses[i], mC.Data,
-						WorkMagic, ciph, conns[i])
+						job.WorkMagic, ciph, conns[i])
 					if err != nil {
 						log.TRACE(err)
 					}

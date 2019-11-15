@@ -24,7 +24,7 @@ var checkEncodingStringTests = []struct {
 	{20, "00000000000000000000000000000000000000000000000000000000000000", "bi1EWXwJay2udZVxLJozuTb8Meg4W9c6xnmJaRDjg6pri5MBAxb9XwrpQXbtnqEoRV5U2pixnFfwyXC8tRAVC8XxnjK"},
 }
 
-func TestBase58Check(	t *testing.T) {
+func TestBase58Check(t *testing.T) {
 	for x, test := range checkEncodingStringTests {
 		// test encoding
 		if res := base58.CheckEncode([]byte(test.in), test.version); res != test.out {

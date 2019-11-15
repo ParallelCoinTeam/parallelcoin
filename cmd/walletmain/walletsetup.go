@@ -74,7 +74,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 		// Keystore file exists.
 		legacyKeyStore, err = keystore.OpenDir(netDir)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -85,7 +85,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	privPass, err := prompt.PrivatePass(reader, legacyKeyStore)
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 		time.Sleep(time.Second * 3)
 		return err
 	}
@@ -94,7 +94,7 @@ log.DEBUG(err)
 	if legacyKeyStore != nil {
 		err = legacyKeyStore.Unlock(privPass)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Import the addresses in the legacy keystore to the new wallet if any
@@ -103,8 +103,8 @@ log.DEBUG(err)
 			defer func() {
 				err := legacyKeyStore.Lock()
 				if err != nil {
-		log.ERROR(err)
-log.DEBUG(err)
+					log.ERROR(err)
+					log.DEBUG(err)
 				}
 			}()
 			log.INFO("Importing addresses from existing wallet...")
@@ -114,23 +114,23 @@ log.DEBUG(err)
 			}()
 			err := w.Unlock(privPass, lockChan)
 			if err != nil {
-		log.ERROR(err)
-fmt.Printf("ERR: Failed to unlock new wallet "+
+				log.ERROR(err)
+				fmt.Printf("ERR: Failed to unlock new wallet "+
 					"during old wallet key import: %v %s", err)
 				return
 			}
 			err = convertLegacyKeystore(legacyKeyStore, w)
 			if err != nil {
-		log.ERROR(err)
-fmt.Printf("ERR: Failed to import keys from old "+
+				log.ERROR(err)
+				fmt.Printf("ERR: Failed to import keys from old "+
 					"wallet format: %v %s", err)
 				return
 			}
 			// Remove the legacy key store.
 			err = os.Remove(keystorePath)
 			if err != nil {
-		log.ERROR(err)
-fmt.Printf("WARN: Failed to remove legacy wallet "+
+				log.ERROR(err)
+				fmt.Printf("WARN: Failed to remove legacy wallet "+
 					"from'%s'\n", keystorePath)
 			}
 		})
@@ -142,7 +142,7 @@ fmt.Printf("WARN: Failed to remove legacy wallet "+
 		[]byte(*config.WalletPass))
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
@@ -152,7 +152,7 @@ log.DEBUG(err)
 	seed, err := prompt.Seed(reader)
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
@@ -160,7 +160,7 @@ log.DEBUG(err)
 	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now())
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
@@ -217,8 +217,8 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) err
 		case keystore.PubKeyAddress:
 			privKey, err := addr.PrivKey()
 			if err != nil {
-		log.ERROR(err)
-fmt.Printf("WARN: Failed to obtain private key "+
+				log.ERROR(err)
+				fmt.Printf("WARN: Failed to obtain private key "+
 					"for address %v: %v\n", addr.Address(),
 					err)
 				continue
@@ -226,8 +226,8 @@ fmt.Printf("WARN: Failed to obtain private key "+
 			wif, err := util.NewWIF((*ec.PrivateKey)(privKey),
 				netParams, addr.Compressed())
 			if err != nil {
-		log.ERROR(err)
-fmt.Printf("WARN: Failed to create wallet "+
+				log.ERROR(err)
+				fmt.Printf("WARN: Failed to create wallet "+
 					"import format for address %v: %v\n",
 					addr.Address(), err)
 				continue
@@ -235,8 +235,8 @@ fmt.Printf("WARN: Failed to create wallet "+
 			_, err = w.ImportPrivateKey(waddrmgr.KeyScopeBIP0044,
 				wif, &blockStamp, false)
 			if err != nil {
-		log.ERROR(err)
-fmt.Printf("WARN: Failed to import private "+
+				log.ERROR(err)
+				fmt.Printf("WARN: Failed to import private "+
 					"key for address %v: %v\n",
 					addr.Address(), err)
 				continue
@@ -244,8 +244,8 @@ fmt.Printf("WARN: Failed to import private "+
 		case keystore.ScriptAddress:
 			_, err := w.ImportP2SHRedeemScript(addr.Script())
 			if err != nil {
-		log.ERROR(err)
-fmt.Printf("WARN: Failed to import "+
+				log.ERROR(err)
+				fmt.Printf("WARN: Failed to import "+
 					"pay-to-script-hash script for "+
 					"address %v: %v\n", addr.Address(), err)
 				continue

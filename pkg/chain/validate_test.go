@@ -14,7 +14,7 @@ import (
 
 // TestSequenceLocksActive tests the SequenceLockActive function to ensure it
 // works as expected in all possible combinations/scenarios.
-func TestSequenceLocksActive(	t *testing.T) {
+func TestSequenceLocksActive(t *testing.T) {
 	seqLock := func(h int32, s int64) *SequenceLock {
 		return &SequenceLock{
 			Seconds:     s,
@@ -129,7 +129,7 @@ func TestSequenceLocksActive(	t *testing.T) {
 // }
 
 // TestCheckBlockSanity tests the CheckBlockSanity function to ensure it works as expected.
-func TestCheckBlockSanity(	t *testing.T) {
+func TestCheckBlockSanity(t *testing.T) {
 	powLimit := chaincfg.MainNetParams.PowLimit
 	block := util.NewBlock(&Block100000)
 	timeSource := NewMedianTime()
@@ -150,7 +150,7 @@ func TestCheckBlockSanity(	t *testing.T) {
 // TestCheckSerializedHeight tests the checkSerializedHeight function with
 // various serialized heights and also does negative tests to ensure errors
 // and handled properly.
-func TestCheckSerializedHeight(	t *testing.T) {
+func TestCheckSerializedHeight(t *testing.T) {
 	// Create an empty coinbase template to be used in the tests below.
 	coinbaseOutpoint := wire.NewOutPoint(&chainhash.Hash{}, math.MaxUint32)
 	coinbaseTx := wire.NewMsgTx(1)

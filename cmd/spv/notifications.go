@@ -83,7 +83,7 @@ func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 		}
 		netAddr, err := s.addrStringToNetAddr(msg.addr)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			msg.reply <- err
 			return
 		}

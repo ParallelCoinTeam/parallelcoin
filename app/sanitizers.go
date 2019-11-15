@@ -48,7 +48,7 @@ func initConfigFile(cfg *pod.Config) {
 		*cfg.ConfigFile =
 			*cfg.DataDir + string(os.PathSeparator) + podConfigFilename
 	}
-	log.WARN(*cfg.ConfigFile)
+	log.DEBUG("using config file:",*cfg.ConfigFile)
 }
 
 func initLogDir(cfg *pod.Config) {
@@ -142,7 +142,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 					log.ERROR(err)
 				}
 				(*listeners[i]) = cli.
-				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
+					StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
 			}
 		}
 	}
@@ -558,11 +558,11 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 	}
 	// Ensure there is at least one mining address when the generate flag is set.
 	if (*cfg.Generate) && len(state.ActiveMiningAddrs) == 0 {
-		log.ERROR("the generate flag is set," +
-			"	but there are no mining addresses specified ")
+		log.ERROR("the generate flag is set, " +
+			"but there are no mining addresses specified ")
 		log.SPEW(cfg)
 		*cfg.Generate = false
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	if *cfg.MinerPass != "" {
 		state.ActiveMinerKey = fork.Argon2i([]byte(*cfg.MinerPass))

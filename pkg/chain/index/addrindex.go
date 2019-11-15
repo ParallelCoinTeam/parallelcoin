@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
-   `github.com/p9c/pod/pkg/chain/config/netparams`
-   chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
@@ -146,7 +146,7 @@ func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, block
 		}
 		err := bucket.Put(curLevelKey[:], mergedData)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Move all of the levels before the previous one up a level.
@@ -156,7 +156,7 @@ func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, block
 			prevData := bucket.Get(prevLevelKey[:])
 			err := bucket.Put(mergeLevelKey[:], prevData)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		}
@@ -213,7 +213,7 @@ func dbFetchAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, n
 		err := deserializeAddrIndexEntry(serialized[offset:],
 			&results[i], fetchBlockHash)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			// Ensure any deserialization errors are returned as database corruption errors.
 			if isDeserializeErr(err) {
 				err = database.Error{
@@ -263,14 +263,14 @@ func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, 
 			if len(data) == 0 {
 				err := bucket.Delete(curLevelKey[:])
 				if err != nil {
-		log.ERROR(err)
+					log.ERROR(err)
 					return err
 				}
 				continue
 			}
 			err := bucket.Put(curLevelKey[:], data)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		}
@@ -465,7 +465,7 @@ func (idx *AddrIndex) indexPkScript(data writeIndexData, pkScript []byte, txIdx 
 	for _, addr := range addrs {
 		addrKey, err := addrToKey(addr)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			// Ignore unsupported address types.
 			continue
 		}
@@ -526,7 +526,7 @@ func (idx *AddrIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 			err := dbPutAddrIndexEntry(addrIdxBucket, addrKey,
 				blockID, txLocs[txIdx])
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		}
@@ -545,7 +545,7 @@ func (idx *AddrIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
 	for addrKey, txIdxs := range addrsToTxns {
 		err := dbRemoveAddrIndexEntries(bucket, addrKey, len(txIdxs))
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -586,7 +586,7 @@ func (idx *AddrIndex) indexUnconfirmedAddresses(pkScript []byte, tx *util.Tx) {
 		// Ignore unsupported address types.
 		addrKey, err := addrToKey(addr)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			continue
 		}
 		// Add a mapping from the address to the transaction.

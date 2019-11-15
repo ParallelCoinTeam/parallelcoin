@@ -9,7 +9,7 @@ import (
 )
 
 // TestSendHeaders tests the MsgSendHeaders API against the latest protocol version.
-func TestSendHeaders(	t *testing.T) {
+func TestSendHeaders(t *testing.T) {
 
 	pver := ProtocolVersion
 	enc := BaseEncoding
@@ -78,7 +78,7 @@ func TestSendHeaders(	t *testing.T) {
 }
 
 // TestSendHeadersBIP0130 tests the MsgSendHeaders API against the protocol prior to version SendHeadersVersion.
-func TestSendHeadersBIP0130(	t *testing.T) {
+func TestSendHeadersBIP0130(t *testing.T) {
 
 	// Use the protocol version just prior to SendHeadersVersion changes.
 	pver := SendHeadersVersion - 1
@@ -107,7 +107,7 @@ func TestSendHeadersBIP0130(	t *testing.T) {
 }
 
 // TestSendHeadersCrossProtocol tests the MsgSendHeaders API when encoding with the latest protocol version and decoding with SendHeadersVersion.
-func TestSendHeadersCrossProtocol(	t *testing.T) {
+func TestSendHeadersCrossProtocol(t *testing.T) {
 
 	enc := BaseEncoding
 	msg := NewMsgSendHeaders()
@@ -134,7 +134,7 @@ func TestSendHeadersCrossProtocol(	t *testing.T) {
 }
 
 // TestSendHeadersWire tests the MsgSendHeaders wire encode and decode for various protocol versions.
-func TestSendHeadersWire(	t *testing.T) {
+func TestSendHeadersWire(t *testing.T) {
 
 	msgSendHeaders := NewMsgSendHeaders()
 	msgSendHeadersEncoded := []byte{}

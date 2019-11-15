@@ -11,7 +11,7 @@ import (
 )
 
 // TestFeeFilterLatest tests the MsgFeeFilter API against the latest protocol version.
-func TestFeeFilterLatest(	t *testing.T) {
+func TestFeeFilterLatest(t *testing.T) {
 	pver := ProtocolVersion
 	minfee := rand.Int63()
 	msg := NewMsgFeeFilter(minfee)
@@ -52,7 +52,7 @@ func TestFeeFilterLatest(	t *testing.T) {
 }
 
 // TestFeeFilterWire tests the MsgFeeFilter wire encode and decode for various protocol versions.
-func TestFeeFilterWire(	t *testing.T) {
+func TestFeeFilterWire(t *testing.T) {
 	tests := []struct {
 		in   MsgFeeFilter // Message to encode
 		out  MsgFeeFilter // Expected decoded message
@@ -105,7 +105,7 @@ func TestFeeFilterWire(	t *testing.T) {
 }
 
 // TestFeeFilterWireErrors performs negative tests against wire encode and decode of MsgFeeFilter to confirm error paths work correctly.
-func TestFeeFilterWireErrors(	t *testing.T) {
+func TestFeeFilterWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverNoFeeFilter := FeeFilterVersion - 1
 	wireErr := &MessageError{}

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/log"
@@ -94,12 +94,12 @@ func (p *Pool) getEligibleInputs(ns, addrmgrNs walletdb.ReadBucket, store *wtxmg
 	unspents, err := store.UnspentOutputs(txmgrNs)
 	if err != nil {
 		log.ERROR(err)
-return nil, newError(ErrInputSelection, "failed to get unspent outputs", err)
+		return nil, newError(ErrInputSelection, "failed to get unspent outputs", err)
 	}
 	addrMap, err := groupCreditsByAddr(unspents, p.manager.ChainParams())
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	var inputs []Credit
 	address := startAddress
@@ -120,8 +120,8 @@ return nil, err
 		}
 		nAddr, err := nextAddr(p, ns, addrmgrNs, address.seriesID, address.branch, address.index, lastSeriesID+1)
 		if err != nil {
-		log.ERROR(err)
-return nil, newError(ErrInputSelection, "failed to get next withdrawal address", err)
+			log.ERROR(err)
+			return nil, newError(ErrInputSelection, "failed to get next withdrawal address", err)
 		} else if nAddr == nil {
 			log.DEBUG("getEligibleInputs: reached last addr, stopping")
 			break
@@ -145,8 +145,8 @@ func nextAddr(p *Pool, ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, branc
 	if int(branch) > len(series.publicKeys) {
 		highestIdx, err := p.highestUsedSeriesIndex(ns, seriesID)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		if index > highestIdx {
 			seriesID++
@@ -166,11 +166,11 @@ return nil, err
 		// The used indices will vary between branches so sometimes we'll try to
 		// get a WithdrawalAddress that hasn't been used before, and in such
 		// cases we just need to move on to the next one.
-		log.DEBUGF("nextAddr(): skipping addr (series #%d, branch #%d, index #%d) " +
-			"as it hasn't been used before %s",seriesID,branch,index)
-	return nextAddr(p, ns, addrmgrNs, seriesID, branch, index, stopSeriesID)
-}
-return addr, err
+		log.DEBUGF("nextAddr(): skipping addr (series #%d, branch #%d, index #%d) "+
+			"as it hasn't been used before %s", seriesID, branch, index)
+		return nextAddr(p, ns, addrmgrNs, seriesID, branch, index, stopSeriesID)
+	}
+	return addr, err
 }
 
 // highestUsedSeriesIndex returns the highest index among all of this Pool's
@@ -186,8 +186,8 @@ func (p *Pool) highestUsedSeriesIndex(ns walletdb.ReadBucket, seriesID uint32) (
 	for i := range series.publicKeys {
 		idx, err := p.highestUsedIndexFor(ns, seriesID, Branch(i))
 		if err != nil {
-		log.ERROR(err)
-return Index(0), err
+			log.ERROR(err)
+			return Index(0), err
 		}
 		if idx > maxIdx {
 			maxIdx = idx
@@ -205,8 +205,8 @@ func groupCreditsByAddr(credits []wtxmgr.Credit, chainParams *netparams.Params) 
 	for _, c := range credits {
 		_, addrs, _, err := txscript.ExtractPkScriptAddrs(c.PkScript, chainParams)
 		if err != nil {
-		log.ERROR(err)
-return nil, newError(ErrInputSelection, "failed to obtain input address", err)
+			log.ERROR(err)
+			return nil, newError(ErrInputSelection, "failed to obtain input address", err)
 		}
 		// As our credits are all P2SH we should never have more than one
 		// address per credit, so let's error out if that assumption is

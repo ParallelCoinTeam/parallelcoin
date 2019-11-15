@@ -86,7 +86,7 @@ func (msg *MsgReject) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) e
 	if msg.Cmd == CmdBlock || msg.Cmd == CmdTx {
 		err := readElement(r, &msg.Hash)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -122,7 +122,7 @@ func (msg *MsgReject) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) e
 	if msg.Cmd == CmdBlock || msg.Cmd == CmdTx {
 		err := writeElement(w, &msg.Hash)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -146,7 +146,7 @@ func (msg *MsgReject) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgReject returns a new bitcoin reject message that conforms to the Message interface.  See MsgReject for details.
-func NewMsgReject(	command string, code RejectCode, reason string) *MsgReject {
+func NewMsgReject(command string, code RejectCode, reason string) *MsgReject {
 	return &MsgReject{
 		Cmd:    command,
 		Code:   code,

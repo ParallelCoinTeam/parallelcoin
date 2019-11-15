@@ -55,7 +55,7 @@ func (m *Manager) SetSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) error
 	err := putSyncedTo(ns, bs)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Update memory now that the database is updated.
 	m.syncState.syncedTo = *bs

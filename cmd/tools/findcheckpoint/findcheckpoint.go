@@ -80,7 +80,7 @@ func findCandidates(
 		// Determine if this block is a checkpoint candidate.
 		isCandidate, err := chain.IsCheckpointCandidate(block)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		// All checks passed, so this node seems like a reasonable checkpoint candidate.
@@ -94,7 +94,7 @@ func findCandidates(
 		prevHash := &block.MsgBlock().Header.PrevBlock
 		block, err = chain.BlockByHash(prevHash)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		numTested++
@@ -125,7 +125,7 @@ func main() {
 	db, err := loadBlockDB()
 	if err != nil {
 		log.ERROR(err)
-fmt.Fprintln(os.Stderr, "failed to load database:", err)
+		fmt.Fprintln(os.Stderr, "failed to load database:", err)
 		return
 	}
 	defer db.Close()
@@ -137,7 +137,7 @@ fmt.Fprintln(os.Stderr, "failed to load database:", err)
 	})
 	if err != nil {
 		log.ERROR(err)
-fmt.Fprintf(os.Stderr, "failed to initialize chain: %v\n", err)
+		fmt.Fprintf(os.Stderr, "failed to initialize chain: %v\n", err)
 		return
 	}
 	// Get the latest block hash and height from the database and report status.
@@ -147,7 +147,7 @@ fmt.Fprintf(os.Stderr, "failed to initialize chain: %v\n", err)
 	candidates, err := findCandidates(chain, &best.Hash)
 	if err != nil {
 		log.ERROR(err)
-fmt.Fprintln(os.Stderr, "Unable to identify candidates:", err)
+		fmt.Fprintln(os.Stderr, "Unable to identify candidates:", err)
 		return
 	}
 	// No candidates.

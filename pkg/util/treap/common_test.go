@@ -17,14 +17,14 @@ import (
 // }
 
 // serializeUint32 returns the big-endian encoding of the passed uint32.
-func serializeUint32(	ui uint32) []byte {
+func serializeUint32(ui uint32) []byte {
 	var ret [4]byte
 	binary.BigEndian.PutUint32(ret[:], ui)
 	return ret[:]
 }
 
 // TestParentStack ensures the treapParentStack functionality works as intended.
-func TestParentStack(	t *testing.T) {
+func TestParentStack(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		numNodes int

@@ -82,7 +82,7 @@ func (m *mruNonceMap) Delete(nonce uint64) {
 }
 
 // newMruNonceMap returns a new nonce map that is limited to the number of entries specified by limit.  When the number of entries exceeds the limit, the oldest (least recently used) entry will be removed to make room for the new entry.
-func newMruNonceMap(	limit uint) *mruNonceMap {
+func newMruNonceMap(limit uint) *mruNonceMap {
 	m := mruNonceMap{
 		nonceMap:  make(map[uint64]*list.Element),
 		nonceList: list.New(),

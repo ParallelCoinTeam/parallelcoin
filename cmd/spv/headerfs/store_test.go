@@ -1,24 +1,24 @@
 package headerfs
 
 import (
-   "bytes"
-   "crypto/sha256"
-   "encoding/binary"
-   "io/ioutil"
-   "math/rand"
-   "os"
-   "path/filepath"
-   "reflect"
-   "testing"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"bytes"
+	"crypto/sha256"
+	"encoding/binary"
+	"io/ioutil"
+	"math/rand"
+	"os"
+	"path/filepath"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-   "github.com/p9c/pod/pkg/chain/wire"
-   walletdb "github.com/p9c/pod/pkg/wallet/db"
+	"github.com/p9c/pod/pkg/chain/wire"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 func createTestBlockHeaderStore() (func(), walletdb.DB, string,

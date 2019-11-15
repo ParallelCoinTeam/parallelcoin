@@ -15,7 +15,7 @@ const (
 )
 
 // MurmurHash3 implements a non-cryptographic hash function using the MurmurHash3 algorithm.  This implementation yields a 32-bit hash value which is suitable for general hash-based lookups.  The seed can be used to effectively randomize the hash function.  This makes it ideal for use in bloom filters which need multiple independent hash functions.
-func MurmurHash3(	seed uint32, data []byte) uint32 {
+func MurmurHash3(seed uint32, data []byte) uint32 {
 	dataLen := uint32(len(data))
 	hash := seed
 	k := uint32(0)

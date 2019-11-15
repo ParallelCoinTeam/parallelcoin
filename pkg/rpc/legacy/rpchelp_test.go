@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	rpchelp "github.com/p9c/pod/pkg/rpc/help"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	rpchelp "github.com/p9c/pod/pkg/rpc/help"
 )
 
 func serverMethods() map[string]struct{} {

@@ -852,7 +852,7 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 	for k := range RPCHandlers {
 		usage, err := btcjson.MethodUsageText(k)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return "", err
 		}
 		usageTexts = append(usageTexts, usage)
@@ -862,7 +862,7 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 		for k := range WSHandlers {
 			usage, err := btcjson.MethodUsageText(k)
 			if err != nil {
-		log.ERROR(err)
+				log.ERROR(err)
 				return "", err
 			}
 			usageTexts = append(usageTexts, usage)

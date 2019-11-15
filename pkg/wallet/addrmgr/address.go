@@ -133,8 +133,8 @@ func (a *managedAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
 	if len(a.privKeyCT) == 0 {
 		privKey, err := key.Decrypt(a.privKeyEncrypted)
 		if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("failed to decrypt private key for "+
+			log.ERROR(err)
+			str := fmt.Sprintf("failed to decrypt private key for "+
 				"%s", a.address)
 			return nil, managerError(ErrCrypto, str, err)
 		}
@@ -269,7 +269,7 @@ func (a *managedAddress) PrivKey() (*ec.PrivateKey, error) {
 	privKeyCopy, err := a.unlock(a.manager.rootManager.cryptoKeyPriv)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), privKeyCopy)
 	zero.Bytes(privKeyCopy)
@@ -284,7 +284,7 @@ func (a *managedAddress) ExportPrivKey() (*util.WIF, error) {
 	pk, err := a.PrivKey()
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return util.NewWIF(pk, a.manager.rootManager.chainParams, a.compressed)
 }
@@ -334,15 +334,15 @@ func newManagedAddressWithoutPrivKey(m *ScopedKeyManager,
 			pubKeyHash, m.rootManager.chainParams,
 		)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		// Next we'll generate the witness program which can be used as a
 		// pkScript to pay to this generated address.
 		witnessProgram, err := txscript.PayToAddrScript(witAddr)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		// Finally, we'll use the witness program itself as the pre-image
 		// to a p2sh address. In order to spend, we first use the
@@ -352,24 +352,24 @@ return nil, err
 			witnessProgram, m.rootManager.chainParams,
 		)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 	case PubKeyHash:
 		address, err = util.NewAddressPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
 		)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 	case WitnessPubKey:
 		address, err = util.NewAddressWitnessPubKeyHash(
 			pubKeyHash, m.rootManager.chainParams,
 		)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 	}
 	return &managedAddress{
@@ -400,7 +400,7 @@ func newManagedAddress(s *ScopedKeyManager, derivationPath DerivationPath,
 	privKeyEncrypted, err := s.rootManager.cryptoKeyPriv.Encrypt(privKeyBytes)
 	if err != nil {
 		log.ERROR(err)
-str := "failed to encrypt private key"
+		str := "failed to encrypt private key"
 		return nil, managerError(ErrCrypto, str, err)
 	}
 	// Leverage the code to create a managed address without a private key
@@ -411,7 +411,7 @@ str := "failed to encrypt private key"
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	managedAddr.privKeyEncrypted = privKeyEncrypted
 	managedAddr.privKeyCT = privKeyBytes
@@ -431,8 +431,8 @@ func newManagedAddressFromExtKey(s *ScopedKeyManager,
 	if key.IsPrivate() {
 		privKey, err := key.ECPrivKey()
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		// Ensure the temp private key big integer is cleared after
 		// use.
@@ -440,22 +440,22 @@ return nil, err
 			s, derivationPath, privKey, true, addrType,
 		)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 	} else {
 		pubKey, err := key.ECPubKey()
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		managedAddr, err = newManagedAddressWithoutPrivKey(
 			s, derivationPath, pubKey, true,
 			addrType,
 		)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 	}
 	return managedAddr, nil
@@ -486,8 +486,8 @@ func (a *scriptAddress) unlock(key EncryptorDecryptor) ([]byte, error) {
 	if len(a.scriptCT) == 0 {
 		script, err := key.Decrypt(a.scriptEncrypted)
 		if err != nil {
-		log.ERROR(err)
-str := fmt.Sprintf("failed to decrypt script for %s",
+			log.ERROR(err)
+			str := fmt.Sprintf("failed to decrypt script for %s",
 				a.address)
 			return nil, managerError(ErrCrypto, str, err)
 		}
@@ -596,7 +596,7 @@ func newScriptAddress(m *ScopedKeyManager, account uint32, scriptHash,
 	)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return &scriptAddress{
 		manager:         m,

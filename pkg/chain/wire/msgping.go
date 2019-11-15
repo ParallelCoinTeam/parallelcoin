@@ -17,7 +17,7 @@ func (msg *MsgPing) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) err
 	if pver > BIP0031Version {
 		err := readElement(r, &msg.Nonce)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -30,7 +30,7 @@ func (msg *MsgPing) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) err
 	if pver > BIP0031Version {
 		err := writeElement(w, msg.Nonce)
 		if err != nil {
-		log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -54,7 +54,7 @@ func (msg *MsgPing) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgPing returns a new bitcoin ping message that conforms to the Message interface.  See MsgPing for details.
-func NewMsgPing(	nonce uint64) *MsgPing {
+func NewMsgPing(nonce uint64) *MsgPing {
 	return &MsgPing{
 		Nonce: nonce,
 	}
