@@ -48,7 +48,7 @@ func initConfigFile(cfg *pod.Config) {
 		*cfg.ConfigFile =
 			*cfg.DataDir + string(os.PathSeparator) + podConfigFilename
 	}
-	log.DEBUG("using config file:",*cfg.ConfigFile)
+	log.DEBUG("using config file:", *cfg.ConfigFile)
 }
 
 func initLogDir(cfg *pod.Config) {
@@ -142,7 +142,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 					log.ERROR(err)
 				}
 				(*listeners[i]) = cli.
-					StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
+				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
 			}
 		}
 	}
@@ -207,7 +207,7 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	}
 }
 
-func initLogLevel(cfg *pod.Config) {
+func initLogLevel(cfg *pod.Config, subcommand string) {
 	loglevel := *cfg.LogLevel
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
@@ -216,7 +216,9 @@ func initLogLevel(cfg *pod.Config) {
 		log.INFO("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
 	}
-	log.L.SetLevel(*cfg.LogLevel, true)
+	if subcommand != "worker" {
+		log.L.SetLevel(*cfg.LogLevel, true)
+	}
 	if !*cfg.Onion {
 		*cfg.OnionProxy = ""
 	}

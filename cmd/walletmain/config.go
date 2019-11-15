@@ -501,7 +501,7 @@ tempWalletExists := false
 						if dbFileExists {
 str := fmt.Sprintf("The wallet already exists. Loading this " +
 									"wallet instead.")
-								fmt.Fprintln(os.Stdout, str)
+								fmt.Fprintln(os.Out, str)
 								tempWalletExists = true
 							}
 							// Ensure the data directory for the network exists.

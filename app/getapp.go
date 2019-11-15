@@ -35,8 +35,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 		},
 		Before: func(c *cli.Context) error {
 			log.WARN("running beforeFunc")
-			beforeFunc(cx)(c)
-			return nil
+			return beforeFunc(cx)(c)
 		},
 		After: func(c *cli.Context) error {
 			log.TRACE("subcommand completed")
@@ -192,16 +191,23 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				"standalone miner for clusters",
 				kopachHandle(cx),
 				apputil.SubCommands(
-				// apputil.NewCommand("bench",
-				// 	"generate a set of benchmarks of each algorithm",
-				// 	func(c *cli.Context) error {
-				// 		return bench.Benchmark(cx)(c)
-				// 	},
-				// 	apputil.SubCommands(),
-				// ),
+					// apputil.NewCommand("bench",
+					// 	"generate a set of benchmarks of each algorithm",
+					// 	func(c *cli.Context) error {
+					// 		return bench.Benchmark(cx)(c)
+					// 	},
+					// 	apputil.SubCommands(),
+					// ),
 				),
 				"k"),
+			apputil.NewCommand("worker",
+				"single thread parallelcoin miner controlled with binary IPC" +
+				" interface on stdin/stdout",
+				workerHandle(cx),
+				apputil.SubCommands(),
+				"k"),
 		},
+
 		Flags: []cli.Flag{
 			altsrc.NewStringFlag(cli.StringFlag{
 				Name:        "lang, L",

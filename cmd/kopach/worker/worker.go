@@ -1,14 +1,17 @@
-package main
+package worker
 
 import (
 	"encoding/binary"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/p9c/pod/pkg/sem"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"os"
 	"runtime"
 	"runtime/debug"
+	"runtime/trace"
 )
 
 var quitMessage = string([]byte{255, 255, 255, 255})
@@ -34,43 +37,45 @@ func printErr(err error, fn func()) {
 		}
 	}
 }
-
-func main() {
-	//printlnE("starting up")
-	quit := make(sem.T)
+// Main the main thread of the kopach miner
+func Main(cx *conte.Xt, quit chan struct{}) {
+	printlnE("[worker] starting up")
+	interrupt.AddHandler(func(){
+		close(quit)
+	})
 	// we only want one thread
 	runtime.GOMAXPROCS(1)
 	debug.SetGCPercent(0)
-	//if err := limits.SetLimits(); err != nil {
-	//	printfE("failed to set limits: %v\n", err)
-	//	os.Exit(1)
-	//}
-	////
-	//f, err := os.Create("kopachtrace.out")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//err = trace.Start(f)
-	//printlnE("tracing started")
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//oldState, err := terminal.MakeRaw(0)
-	//printErr(err, func() { os.Exit(1) })
-	//defer func() {
-	//	err := terminal.Restore(0, oldState)
-	//	if err != nil {
-	//		printlnE(err)
-	//	}
-	//}()
+	if os.Getenv("POD_TRACE") == "on" {
+		if f, err := os.Create("testtrace.out"); err != nil {
+			printlnE("[worker] tracing env POD_TRACE=on but we can't write to it",
+				err)
+		} else {
+			log.DEBUG("[worker] tracing started")
+			err = trace.Start(f)
+			if err != nil {
+				printlnE("[worker] could not start tracing", err)
+			} else {
+				interrupt.AddHandler(
+					func() {
+						printlnE("[worker] stopping trace")
+						trace.Stop()
+						err := f.Close()
+						if err != nil {
+							log.ERROR(err)
+						}
+					},
+				)
+			}
+		}
+	}
 	// listen to stdin
 	go func() {
 		// allocate 2mb for max block size
 		b := make([]byte, 1<<21)
 	out:
 		for {
-			printlnE("OK")
+			printlnE("[worker] OK")
 			_, err := os.Stdin.Read(b[:4])
 			if err != nil {
 				printlnE(err)
@@ -88,16 +93,16 @@ func main() {
 			if err != nil {
 				printlnE(err)
 			}
-			printlnE(spew.Sdump(blk))
+			printlnE("[worker] message decoded\n",spew.Sdump(blk))
 		}
-		close(quit)
 	}()
 out:
 	for {
 		select {
 		case <-quit:
-			printE("\n\rshutting down\n\r")
+			printE("[worker] shutting down\n\r")
 			break out
 		}
 	}
+	<-interrupt.HandlersDone
 }
