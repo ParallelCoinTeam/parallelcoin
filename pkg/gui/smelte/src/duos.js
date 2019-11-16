@@ -1,5 +1,4 @@
 import DuOS from './DuOS.svelte';
-import './tailwind.css';
 
 
 

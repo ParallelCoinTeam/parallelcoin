@@ -1,3 +1,7 @@
+<script>
+	export let status;
+</script>
+
 <div  id="panelstatus" class="Info">
 	<ul class="rf flx flc noMargin noPadding justifyEvenly">
 		<li class="flx fwd spb htg rr">

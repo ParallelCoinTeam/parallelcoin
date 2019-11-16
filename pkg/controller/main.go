@@ -64,9 +64,9 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	}
 	var pauseShards [][]byte
 	pM := GetMessageBase(cx).CreateContainer(PauseMagic)
-	for i := range sendAddresses {
-		shards, err := Shards(sendAddresses[i], pM.Data,
-			PauseMagic, ciph, conns[i])
+	for _ = range sendAddresses {
+		shards, err := Shards(pM.Data,
+			PauseMagic, ciph, )
 		if err != nil {
 			log.TRACE(err)
 		}

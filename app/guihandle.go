@@ -8,13 +8,9 @@ import (
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gui/utils"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
-	"github.com/therecipe/qt/core"
-	"github.com/therecipe/qt/webengine"
-	"github.com/therecipe/qt/widgets"
 	"github.com/urfave/cli"
 	"net/http"
 	"os"
@@ -34,7 +30,7 @@ type Bios struct {
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		widgets.NewQApplication(len(os.Args), os.Args)
+		//```````````//widgets.NewQApplication(len(os.Args), os.Args)
 
 		b := Bios{
 			Theme:      false,
@@ -57,11 +53,11 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		})
 		b.IsBootLogo = true
 		log.INFO("starting GUI")
-		var view = webengine.NewQWebEngineView(nil)
+		//var view = webengine.NewQWebEngineView(nil)
 		//view.SetUrl(QUrl("qrc:/index.html"))
-		view.Load(core.NewQUrl3("qrc:/index.html", 0))
-		view.Show()
-		utils.GetBiosMessage(view, "starting GUI")
+		//```````````//view.Load(core.NewQUrl3("qrc:/index.html", 0))
+		//```````````//view.Show()
+		//utils.GetBiosMessage(view, "starting GUI")
 
 		Configure(cx, c)
 		shutdownChan := make(chan struct{})
@@ -78,7 +74,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		if !*cx.Config.NodeOff {
 			go func() {
 				log.INFO(cx.Language.RenderText("goApp_STARTINGNODE"))
-				utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
+				//utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
 
 				err = node.Main(cx, shutdownChan, cx.NodeKill, nodeChan, &wg)
 				if err != nil {
@@ -94,7 +90,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		if !*cx.Config.WalletOff {
 			go func() {
 				log.INFO("starting wallet")
-				utils.GetBiosMessage(view, "starting wallet")
+				//utils.GetBiosMessage(view, "starting wallet")
 				err = walletmain.Main(cx.Config, cx.StateCfg,
 					cx.ActiveNet, walletChan, cx.WalletKill, &wg)
 				if err != nil {
@@ -123,7 +119,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		if !cx.Wallet.Load().(bool) {
 			close(cx.NodeKill)
 		}
-		widgets.QApplication_Exec()
+		//```````````//widgets.QApplication_Exec()
 		return err
 	}
 }
