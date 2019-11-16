@@ -1,6 +1,6 @@
 //+build ignore
 
-package main
+package worker
 
 import (
 	"encoding/binary"
