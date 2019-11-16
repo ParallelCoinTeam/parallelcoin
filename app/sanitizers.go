@@ -216,6 +216,7 @@ func initLogLevel(cfg *pod.Config, subcommand string) {
 		log.INFO("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
 	}
+	//fmt.Fprintln(os.Stderr, "subcommand",subcommand, os.Args)
 	if subcommand != "worker" {
 		log.L.SetLevel(*cfg.LogLevel, true)
 	}

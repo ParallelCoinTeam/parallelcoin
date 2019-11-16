@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/cipher"
 	"crypto/rand"
-	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/log"
@@ -120,8 +119,8 @@ func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err erro
 		}
 		cumulative += n
 	}
-	fmt.Print(log.Composit(fmt.Sprintf("sent %v bytes to %v port %v",
-		cumulative, addr.IP, addr.Port), "STATUS", true), "\r")
+	//fmt.Print(log.Composit(fmt.Sprintf("sent %v bytes to %v port %v",
+	//	cumulative, addr.IP, addr.Port), "STATUS", true), "\r")
 	return
 }
 

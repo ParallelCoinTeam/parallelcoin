@@ -48,5 +48,4 @@ func Main() {
 		}
 	}
 	app.Main()
-	<-interrupt.HandlersDone
 }
