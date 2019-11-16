@@ -190,24 +190,15 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			apputil.NewCommand("kopach",
 				"standalone miner for clusters",
 				kopachHandle(cx),
-				apputil.SubCommands(
-					// apputil.NewCommand("bench",
-					// 	"generate a set of benchmarks of each algorithm",
-					// 	func(c *cli.Context) error {
-					// 		return bench.Benchmark(cx)(c)
-					// 	},
-					// 	apputil.SubCommands(),
-					// ),
-				),
-				"k"),
-			apputil.NewCommand("worker",
-				"single thread parallelcoin miner controlled with binary IPC" +
-				" interface on stdin/stdout",
-				workerHandle(cx),
 				apputil.SubCommands(),
 				"k"),
+			apputil.NewCommand("worker",
+				"single thread parallelcoin miner controlled with binary IPC"+
+					" interface on stdin/stdout",
+				workerHandle(cx),
+				apputil.SubCommands(),
+			),
 		},
-
 		Flags: []cli.Flag{
 			altsrc.NewStringFlag(cli.StringFlag{
 				Name:        "lang, L",

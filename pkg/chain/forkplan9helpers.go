@@ -9,7 +9,7 @@ import (
 
 func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 	nH int32) (allTimeAv, allTimeDiv, qhourDiv, hourDiv, dayDiv float64) {
-	const minAvSamples = 9
+	const minAvSamples = 2
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv, dayDiv = 1.0, 1.0, 1.0, 1.0, 1.0
 	ttpb := float64(fork.List[1].TargetTimePerBlock)
 	startHeight := fork.List[1].ActivationHeight
@@ -36,8 +36,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 		if allTimeAv > 0 {
 			allTimeDiv = allTimeAv / ttpb
 		}
-		allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv *
-			allTimeDiv * allTimeDiv
+		allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv
 	}
 
 	oneHour := 60 * 60 / fork.List[1].TargetTimePerBlock
@@ -67,7 +66,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 					dayIntervals = append(dayIntervals, r)
 				}
 			}
-			if intervals > minAvSamples {
+			if intervals >= minAvSamples {
 				// calculate exponential weighted moving average from intervals
 				dw := ewma.NewMovingAverage()
 				for _, x := range dayIntervals {
@@ -101,7 +100,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 					hourIntervals = append(hourIntervals, r)
 				}
 			}
-			if intervals > minAvSamples {
+			if intervals >= minAvSamples {
 				// calculate exponential weighted moving average from intervals
 				hw := ewma.NewMovingAverage()
 				for _, x := range hourIntervals {
@@ -124,7 +123,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 			}
 			qhourStamps = append(qhourStamps, ln.timestamp)
 		}
-		if len(qhourStamps) > 2 {
+		if len(qhourStamps) > minAvSamples {
 			intervals := float64(0)
 			// calculate intervals
 			qhourIntervals := []int64{}
@@ -135,7 +134,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 					qhourIntervals = append(qhourIntervals, r)
 				}
 			}
-			if intervals > 1 {
+			if intervals >= minAvSamples {
 				// calculate exponential weighted moving average from intervals
 				qhw := ewma.NewMovingAverage()
 				for _, x := range qhourIntervals {
@@ -172,7 +171,7 @@ func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *BlockNode,
 				algIntervals = append(algIntervals, r)
 			}
 		}
-		if intervals > minAvSamples {
+		if intervals >= minAvSamples {
 			// calculate exponential weighted moving average from intervals
 			awi := ewma.NewMovingAverage()
 			for _, x := range algIntervals {

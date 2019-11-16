@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/p9c/pod/cmd/kopach/worker"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/urfave/cli"
 	"os"
 
@@ -19,6 +20,7 @@ func kopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			os.Exit(0)
 		})
 		kopach.Main(cx, quit)
+		log.DEBUG("kopach main finished")
 		//<-quit
 		return
 	}
@@ -29,6 +31,7 @@ func workerHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		Configure(cx, c, "worker")
 		quit := make(chan struct{})
 		worker.Main(cx, quit)
+		log.DEBUG("worker handle finished")
 		return
 	}
 }

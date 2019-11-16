@@ -36,7 +36,7 @@ func main() {
 	binary.BigEndian.PutUint32(prefix, uint32(len(b)))
 	b = append(prefix, b...)
 	//ctrl.Out.Write(b)
-	ctrl.In.Write(b)
-	ctrl.In.Write(ipc.QuitCommand)
+	ctrl.Out.Write(b)
+	ctrl.Out.Write(ipc.QuitCommand)
 	err = ctrl.Wait()
 }
