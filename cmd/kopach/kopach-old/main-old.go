@@ -1,6 +1,6 @@
 //+build ignore
 
-package kopach
+package kopach_old
 
 import "C"
 import (

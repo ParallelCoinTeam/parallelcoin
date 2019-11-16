@@ -19,7 +19,7 @@ func kopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			close(quit)
 			os.Exit(0)
 		})
-		kopach.Main(cx, quit)
+		kopach_old.Main(cx, quit)
 		log.DEBUG("kopach main finished")
 		//<-quit
 		return
