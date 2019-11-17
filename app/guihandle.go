@@ -63,7 +63,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		view.Show()
 		utils.GetBiosMessage(view, "starting GUI")
 
-		Configure(cx, c, "")
+		Configure(cx, c)
 		shutdownChan := make(chan struct{})
 		walletChan := make(chan *wallet.Wallet)
 		nodeChan := make(chan *rpc.Server)

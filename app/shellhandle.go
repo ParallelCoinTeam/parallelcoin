@@ -21,7 +21,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		nodeChan := make(chan *rpc.Server)
 		walletChan := make(chan *wallet.Wallet)
 		kill := make(chan struct{})
-		Configure(cx, c, "")
+		Configure(cx, c)
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
@@ -42,7 +42,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		}
 		if !*cx.Config.NodeOff {
 			go func() {
-				Configure(cx, c, "")
+				Configure(cx, c)
 				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
 				if err != nil {
 					log.ERROR("error starting node ", err)
