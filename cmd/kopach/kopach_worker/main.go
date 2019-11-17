@@ -25,11 +25,11 @@ func main() {
 func mine(blk *wire.MsgBlock, sem sem.T) {
 out:
 	for {
-		printlnE("new job\n", spew.Sdump(blk))
+		printlnE("mining on new block\n", spew.Sdump(blk))
 		select {
 		case <-sem.Release():
 			break out
-		default:
+		//default:
 		}
 	}
 }

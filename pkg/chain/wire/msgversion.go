@@ -108,7 +108,6 @@ func (msg *MsgVersion) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		err = readElement(r, &relayTx)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 		msg.DisableRelayTx = !relayTx
 	}

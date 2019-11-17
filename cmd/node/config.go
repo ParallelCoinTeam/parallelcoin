@@ -358,7 +358,7 @@ func loadConfig() (
 	_, err := preParser.Parse()
 	if err != nil {
 		if e, ok := err.(*flags.Error); ok && e.Type == flags.ErrHelp {
-			fmt.Fprintln(os.Stderr, err)
+			log.ERROR(err)
 			return nil, nil, err
 		}
 	}
@@ -367,7 +367,7 @@ func loadConfig() (
 	appName = strings.TrimSuffix(appName, filepath.Ext(appName))
 	usageMessage := fmt.Sprintf("Use %s -h to show usage", appName)
 	if preCfg.ShowVersion {
-		fmt.Println(appName, "version", Version())
+		log.Println(appName, "version", Version())
 		os.Exit(0)
 	}
 	// Perform service command and exit if specified.  Invalid service commands show an appropriate error.  Only runs on Windows since the runServiceCommand function will be nil when not on Windows.

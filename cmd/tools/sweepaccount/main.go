@@ -304,14 +304,14 @@ func sweep() error {
 			continue
 		}
 		outputAmount := util.Amount(tx.Tx.TxOut[0].Value)
-		fmt.Printf("Swept %v to destination account with transaction %v\n",
+		log.INFOF("Swept %v to destination account with transaction %v\n",
 			outputAmount, txHash)
 		totalSwept += outputAmount
 	}
 	numPublished := len(sourceOutputs) - numErrors
 	transactionNoun := pickNoun(numErrors, "transaction", "transactions")
 	if numPublished != 0 {
-		fmt.Printf("Swept %v to destination account across %d %s\n",
+		log.INFOF("Swept %v to destination account across %d %s\n",
 			totalSwept, numPublished, transactionNoun)
 	}
 	if numErrors > 0 {
@@ -319,22 +319,23 @@ func sweep() error {
 	}
 	return nil
 }
-func promptSecret(
-	what string) (string, error) {
-	fmt.Printf("%s: ", what)
+func promptSecret(what string) (string, error) {
+	log.Printf("%s: ", what)
 	fd := int(os.Stdin.Fd())
 	input, err := terminal.ReadPassword(fd)
-	fmt.Println()
+	log.Println()
 	if err != nil {
 		log.ERROR(err)
 		return "", err
 	}
 	return string(input), nil
 }
+
 func saneOutputValue(
 	amount util.Amount) bool {
 	return amount >= 0 && amount <= util.MaxSatoshi
 }
+
 func parseOutPoint(
 	input *btcjson.ListUnspentResult) (wire.OutPoint, error) {
 	txHash, err := chainhash.NewHashFromStr(input.TxID)
@@ -344,6 +345,7 @@ func parseOutPoint(
 	}
 	return wire.OutPoint{Hash: *txHash, Index: input.Vout}, nil
 }
+
 func pickNoun(
 	n int, singularForm, pluralForm string) string {
 	if n == 1 {

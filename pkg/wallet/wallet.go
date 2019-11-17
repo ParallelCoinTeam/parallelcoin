@@ -412,7 +412,7 @@ func (w *Wallet) syncWithChain() error {
 				log.ERROR(err)
 				e := tx.Rollback()
 				if e != nil {
-					fmt.Println(err)
+					log.ERROR(err)
 				}
 				return err
 			}
@@ -440,7 +440,7 @@ func (w *Wallet) syncWithChain() error {
 					log.ERROR(err)
 					e := tx.Rollback()
 					if e != nil {
-						fmt.Println(err)
+						log.ERROR(err)
 					}
 					return err
 				}
@@ -490,7 +490,7 @@ func (w *Wallet) syncWithChain() error {
 				log.ERROR(err)
 				e := tx.Rollback()
 				if e != nil {
-					fmt.Println(err)
+					log.ERROR(err)
 				}
 				return err
 			}
@@ -508,7 +508,7 @@ func (w *Wallet) syncWithChain() error {
 					log.ERROR(err)
 					e := tx.Rollback()
 					if e != nil {
-						fmt.Println(err)
+						log.ERROR(err)
 					}
 					return err
 				}
@@ -522,7 +522,7 @@ func (w *Wallet) syncWithChain() error {
 					log.ERROR(err)
 					e := tx.Rollback()
 					if e != nil {
-						fmt.Println(err)
+						log.ERROR(err)
 					}
 					return err
 				}
@@ -548,7 +548,7 @@ func (w *Wallet) syncWithChain() error {
 				log.ERROR(err)
 				e := tx.Rollback()
 				if e != nil {
-					fmt.Println(err)
+					log.ERROR(err)
 				}
 				return err
 			}
@@ -559,7 +559,7 @@ func (w *Wallet) syncWithChain() error {
 			log.ERROR(err)
 			e := tx.Rollback()
 			if e != nil {
-				fmt.Println(err)
+				log.ERROR(err)
 			}
 			return err
 		}

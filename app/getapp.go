@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/binary"
-	"fmt"
 	_ "github.com/gohouse/i18n/parser_json"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
@@ -29,12 +28,12 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
 		Action: func(c *cli.Context) error {
-			fmt.Println(cx.Language.RenderText("goApp_NOSUBCMDREQ"))
+			log.Println(cx.Language.RenderText("goApp_NOSUBCMDREQ"))
 			cli.ShowAppHelpAndExit(c, 1)
 			return nil
 		},
 		Before: func(c *cli.Context) error {
-			log.WARN("running beforeFunc")
+			log.TRACE("running beforeFunc")
 			return beforeFunc(cx)(c)
 		},
 		After: func(c *cli.Context) error {
@@ -45,7 +44,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			apputil.NewCommand("version",
 				"print version and exit",
 				func(c *cli.Context) error {
-					fmt.Println(c.App.Name, c.App.Version)
+					log.Println(c.App.Name, c.App.Version)
 					return nil
 				},
 				apputil.SubCommands(),
@@ -131,11 +130,11 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 								filepath.Join(*cx.Config.DataDir,
 									*cx.Config.Network, "wallet.db"))
 							if err != nil {
-								fmt.Println("failed to open database:", err)
+								log.Println("failed to open database:", err)
 								return err
 							}
 							defer db.Close()
-							fmt.Println("dropping wtxmgr namespace")
+							log.Println("dropping wtxmgr namespace")
 							err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
 								err := tx.DeleteTopLevelBucket(wtxmgrNamespace)
 								if err != nil && err != walletdb.ErrBucketNotFound {
@@ -192,12 +191,12 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				kopachHandle(cx),
 				apputil.SubCommands(),
 				"k"),
-			apputil.NewCommand("worker",
-				"single thread parallelcoin miner controlled with binary IPC"+
-					" interface on stdin/stdout",
-				workerHandle(cx),
-				apputil.SubCommands(),
-			),
+			//apputil.NewCommand("worker",
+			//	"single thread parallelcoin miner controlled with binary IPC"+
+			//		" interface on stdin/stdout",
+			//	workerHandle(cx),
+			//	apputil.SubCommands(),
+			//),
 		},
 		Flags: []cli.Flag{
 			altsrc.NewStringFlag(cli.StringFlag{

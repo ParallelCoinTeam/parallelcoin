@@ -3,6 +3,8 @@ package votingpool_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/log"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -38,43 +40,43 @@ func ExampleCreate() {
 	// to do that.
 	db, dbTearDown, err := createWalletDB()
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	defer dbTearDown()
 	dbtx, err := db.BeginReadWriteTx()
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			fmt.Println(err)
+			log.ERROR(err)
 		}
 	}()
 	// Create a new walletdb namespace for the address manager.
 	mgrNamespace, err := dbtx.CreateTopLevelBucket([]byte("waddrmgr"))
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Create the address manager.
 	mgr, err := createWaddrmgr(mgrNamespace, &chaincfg.MainNetParams)
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Create a walletdb namespace for votingpools.
 	vpNamespace, err := dbtx.CreateTopLevelBucket([]byte("votingpool"))
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Create a voting pool.
 	_, err = votingpool.Create(vpNamespace, mgr, []byte{0x00})
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Output:
@@ -112,11 +114,11 @@ func Example_depositAddress() {
 		if err != nil {
 			return err
 		}
-		fmt.Println("Generated deposit address:", addr.EncodeAddress())
+		log.INFO("Generated deposit address:", addr.EncodeAddress())
 		return nil
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Output:
@@ -145,14 +147,14 @@ func Example_empowerSeries() {
 		defer func() {
 			err := mgr.Lock()
 			if err != nil {
-				fmt.Println(err)
+				log.ERROR(err)
 			}
 		}()
 		privKey := "xprv9s21ZrQH143K2j9PK4CXkCu8sgxkpUxCF7p1KVwiV5tdnkeYzJXReUkxz5iB2FUzTXC1L15abCDG4RMxSYT5zhm67uvsnLYxuDhZfoFcB6a"
 		return pool.EmpowerSeries(ns, seriesID, privKey)
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Output:
@@ -182,7 +184,7 @@ func Example_startWithdrawal() {
 		defer func() {
 			err := mgr.Lock()
 			if err != nil {
-				fmt.Println(err)
+				log.ERROR(err)
 			}
 		}()
 		addr, _ := util.DecodeAddress("1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX", mgr.ChainParams())
@@ -221,7 +223,7 @@ func Example_startWithdrawal() {
 		return err
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Output:

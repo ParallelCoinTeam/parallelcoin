@@ -79,7 +79,6 @@ func (msg *MsgCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) 
 		err = msg.AddCFHash(&cfh)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}
 	return nil

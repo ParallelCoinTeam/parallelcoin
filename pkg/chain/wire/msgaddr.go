@@ -67,7 +67,6 @@ func (msg *MsgAddr) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) err
 		err = msg.AddAddress(na)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}
 	return nil

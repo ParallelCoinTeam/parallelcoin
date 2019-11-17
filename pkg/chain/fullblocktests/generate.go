@@ -366,7 +366,6 @@ func additionalTx(tx *wire.MsgTx) func(*wire.MsgBlock) {
 		err := b.AddTransaction(tx)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}
 }
@@ -529,14 +528,12 @@ func encodeNonCanonicalBlock(b *wire.MsgBlock) []byte {
 	err := b.Header.BtcEncode(&buf, 0, wire.BaseEncoding)
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println(err)
 	}
 	buf.Write(nonCanonicalVarInt(uint32(len(b.Transactions))))
 	for _, tx := range b.Transactions {
 		err := tx.BtcEncode(&buf, 0, wire.BaseEncoding)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}
 	return buf.Bytes()
@@ -550,7 +547,6 @@ func cloneBlock(b *wire.MsgBlock) wire.MsgBlock {
 		err := blockCopy.AddTransaction(tx.Copy())
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}
 	return blockCopy
@@ -1096,7 +1092,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 			err := b.AddTransaction(prevTx)
 			if err != nil {
 				log.ERROR(err)
-				fmt.Println(err)
 			}
 		}
 	})
@@ -1124,7 +1119,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 			err = b.AddTransaction(tx)
 			if err != nil {
 				log.ERROR(err)
-				fmt.Println(err)
 			}
 		}
 		// Create a final tx that includes a non-pay-to-script-hash output with the number of signature operations needed to push the block one over the max allowed.
@@ -1135,7 +1129,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		err := b.AddTransaction(tx)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	})
 	rejected(blockchain.ErrTooManySigOps)
@@ -1159,7 +1152,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 			err = b.AddTransaction(tx)
 			if err != nil {
 				log.ERROR(err)
-				fmt.Println(err)
 			}
 		}
 		// Create a final tx that includes a non-pay-to-script-hash output with the number of signature operations needed to push the block to exactly the max allowed.
@@ -1173,7 +1165,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		err := b.AddTransaction(tx)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	})
 	accepted()
@@ -1292,7 +1283,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		err := b.AddTransaction(b.Transactions[1])
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	})
 	g.assertTipBlockNumTxns(3)
@@ -1385,7 +1375,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		err := b.AddTransaction(tx3)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	})
 	g.assertTipBlockNumTxns(3)
@@ -1395,7 +1384,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		err := b.AddTransaction(b.Transactions[2])
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	})
 	g.assertTipBlockNumTxns(4)
@@ -1431,19 +1419,16 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 			err := b.AddTransaction(spendTx)
 			if err != nil {
 				log.ERROR(err)
-				fmt.Println(err)
 			}
 		}
 		// Add the duplicate transactions (3rd and 4th).
 		err := b.AddTransaction(b.Transactions[2])
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 		err = b.AddTransaction(b.Transactions[3])
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	})
 	g.assertTipBlockNumTxns(8)
@@ -1552,7 +1537,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		err := b.AddTransaction(tx3)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	})
 	accepted()
@@ -1566,12 +1550,10 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		err := b.AddTransaction(tx3)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 		err = b.AddTransaction(tx2)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	})
 	rejected(blockchain.ErrMissingTxOut)
@@ -1588,12 +1570,12 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		err := b.AddTransaction(tx3)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
+			log.Println(err)
 		}
 		err = b.AddTransaction(tx4)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
+			log.Println(err)
 		}
 	})
 	rejected(blockchain.ErrMissingTxOut)
@@ -1691,7 +1673,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 		err := b.AddTransaction(tx3)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	})
 	accepted()
@@ -1720,7 +1701,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 			err := b.AddTransaction(tx)
 			if err != nil {
 				log.ERROR(err)
-				fmt.Println(err)
 			}
 		}
 	})

@@ -191,7 +191,6 @@ func (c *BitcoindClient) NotifyReceived(addrs []util.Address) error {
 	err := c.NotifyBlocks()
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println(err)
 	}
 	select {
 	case c.rescanUpdate <- addrs:
@@ -207,7 +206,6 @@ func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) error {
 	err := c.NotifyBlocks()
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println(err)
 	}
 	select {
 	case c.rescanUpdate <- outPoints:
@@ -223,7 +221,6 @@ func (c *BitcoindClient) NotifyTx(txids []chainhash.Hash) error {
 	err := c.NotifyBlocks()
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println(err)
 	}
 	select {
 	case c.rescanUpdate <- txids:
@@ -304,8 +301,7 @@ func (c *BitcoindClient) RescanBlocks(
 	for _, hash := range blockHashes {
 		header, err := c.GetBlockHeaderVerbose(&hash)
 		if err != nil {
-			log.ERROR(err)
-			log.WARNF(
+			log.ERRORF(
 				"unable to get header %s from bitcoind: %s",
 				hash, err,
 			)
@@ -313,8 +309,7 @@ func (c *BitcoindClient) RescanBlocks(
 		}
 		block, err := c.GetBlock(&hash)
 		if err != nil {
-			log.ERROR(err)
-			log.WARNF(
+			log.ERRORF(
 				"unable to get block %s from bitcoind: %s",
 				hash, err,
 			)
@@ -323,7 +318,6 @@ func (c *BitcoindClient) RescanBlocks(
 		relevantTxs, err := c.filterBlock(block, header.Height, false)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 		if len(relevantTxs) > 0 {
 			rescannedBlock := btcjson.RescannedBlock{

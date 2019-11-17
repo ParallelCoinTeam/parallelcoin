@@ -71,7 +71,6 @@ func (msg *MsgMerkleBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncodi
 		err = msg.AddTxHash(hash)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}
 	msg.Flags, err = ReadVarBytes(r, pver, maxFlagsPerMerkleBlock,

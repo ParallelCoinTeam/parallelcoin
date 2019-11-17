@@ -153,7 +153,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		ctrl.active.Store(false)
 	case <-interrupt.HandlersDone:
 	}
-	log.DEBUG("controller exiting")
+	log.TRACE("controller exiting")
 	ctrl.active.Store(false)
 	return
 }

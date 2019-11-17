@@ -8,7 +8,6 @@
 package app
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/p9c/pod/pkg/conte"
@@ -32,14 +31,14 @@ const (
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
 
-	log.L.SetLevel("off", true)
+	//log.L.SetLevel("info", true)
 	cx := conte.GetNewContext(appName, appLanguage, "main")
 	cx.App = GetApp(cx)
 	log.DEBUG("running App")
 
 	e := cx.App.Run(os.Args)
 	if e != nil {
-		fmt.Println("Pod ERROR:", e)
+		log.Println("Pod ERROR:", e)
 		return 1
 	}
 

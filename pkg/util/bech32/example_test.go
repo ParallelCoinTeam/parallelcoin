@@ -2,7 +2,7 @@ package bech32_test
 
 import (
 	"encoding/hex"
-	"fmt"
+	"github.com/p9c/pod/pkg/log"
 
 	"github.com/p9c/pod/pkg/util/bech32"
 )
@@ -12,11 +12,11 @@ func ExampleDecode() {
 	encoded := "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx"
 	hrp, decoded, err := bech32.Decode(encoded)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.ERROR("Error:", err)
 	}
 	// Show the decoded data.
-	fmt.Println("Decoded human-readable part:", hrp)
-	fmt.Println("Decoded Data:", hex.EncodeToString(decoded))
+	log.Println("Decoded human-readable part:", hrp)
+	log.Println("Decoded Data:", hex.EncodeToString(decoded))
 	// Output:
 	// Decoded human-readable part: bc
 	// Decoded Data: 010e140f070d1a001912060b0d081504140311021d030c1d03040f1814060e1e160e140f070d1a001912060b0d081504140311021d030c1d03040f1814060e1e16
@@ -28,14 +28,14 @@ func ExampleEncode() {
 	// Convert test data to base32:
 	conv, err := bech32.ConvertBits(data, 8, 5, true)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.ERROR("Error:", err)
 	}
 	encoded, err := bech32.Encode("customHrp!11111q", conv)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.ERROR("Error:", err)
 	}
 	// Show the encoded data.
-	fmt.Println("Encoded Data:", encoded)
+	log.Println("Encoded Data:", encoded)
 	// Output:
 	// Encoded Data: customHrp!11111q123jhxapqv3shgcgumastr
 }

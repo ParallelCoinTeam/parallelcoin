@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"errors"
-	"fmt"
 	"github.com/p9c/pod/pkg/log"
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -26,7 +25,6 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 			err := dbtx.Rollback()
 			if err != nil {
 				log.ERROR(err)
-				fmt.Println(err)
 			}
 		}
 	}()

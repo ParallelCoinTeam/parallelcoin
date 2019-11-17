@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"github.com/urfave/cli"
 	"os"
 	"sync"
@@ -32,11 +31,11 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				cx.ActiveNet.Params.Name + slash +
 				wallet.WalletDbName
 		if !apputil.FileExists(dbFilename) {
-			log.L.SetLevel("off", false)
+			//log.L.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				log.ERROR("failed to create wallet", err)
 			}
-			fmt.Println("restart to complete initial setup")
+			log.Println("restart to complete initial setup")
 			os.Exit(1)
 			//log.L.SetLevel(*cx.Config.LogLevel, true)
 		}
@@ -55,7 +54,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				err = walletmain.Main(cx.Config, cx.StateCfg,
 					cx.ActiveNet, walletChan, kill, &wg)
 				if err != nil {
-					fmt.Println("error running wallet:", err)
+					log.Println("error running wallet:", err)
 				}
 			}()
 			cx.WalletServer = <-walletChan

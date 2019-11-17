@@ -40,7 +40,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 	//		profileRedirect := http.RedirectHandler("/debug/pprof",
 	//			http.StatusSeeOther)
 	//		http.Handle("/", profileRedirect)
-	//		fmt.Println(http.ListenAndServe(listenAddr, nil))
+	//		log.Println(http.ListenAndServe(listenAddr, nil))
 	//	}()
 	//}
 	dbPath := *config.DataDir + slash + activeNet.Params.Name

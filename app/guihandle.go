@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/rpc"
@@ -79,10 +78,9 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 			go func() {
 				log.INFO(cx.Language.RenderText("goApp_STARTINGNODE"))
 				utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
-
 				err = node.Main(cx, shutdownChan, cx.NodeKill, nodeChan, &wg)
 				if err != nil {
-					fmt.Println("error running node:", err)
+					log.Println("error running node:", err)
 					os.Exit(1)
 				}
 			}()
@@ -98,7 +96,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 				err = walletmain.Main(cx.Config, cx.StateCfg,
 					cx.ActiveNet, walletChan, cx.WalletKill, &wg)
 				if err != nil {
-					fmt.Println("error running wallet:", err)
+					log.Println("error running wallet:", err)
 					os.Exit(1)
 				}
 			}()

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"reflect"
 	"testing"
 )
@@ -226,7 +227,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != 1 {
-					fmt.Printf("%v != %v\n", v, 1)
+					log.Printf("%v != %v\n", v, 1)
 					return errors.New("1 != 1 on popInt")
 				}
 				return nil
@@ -259,7 +260,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != -1 {
-					fmt.Printf("%v != %v\n", v, -1)
+					log.Printf("%v != %v\n", v, -1)
 					return errors.New("-1 != -1 on popInt")
 				}
 				return nil
@@ -277,7 +278,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != -513 {
-					fmt.Printf("%v != %v\n", v, -513)
+					log.Printf("%v != %v\n", v, -513)
 					return errors.New("1 != 1 on popInt")
 				}
 				return nil
@@ -295,7 +296,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != -1 {
-					fmt.Printf("%v != %v\n", v, -1)
+					log.Printf("%v != %v\n", v, -1)
 					return errors.New("-1 != -1 on popInt")
 				}
 				return nil

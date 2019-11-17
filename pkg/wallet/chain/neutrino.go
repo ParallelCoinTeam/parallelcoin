@@ -356,7 +356,6 @@ func (s *NeutrinoClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
 		addrScript, err := txscript.PayToAddrScript(addr)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 		inputsToWatch = append(inputsToWatch, sac.InputWithScript{
 			OutPoint: op,
