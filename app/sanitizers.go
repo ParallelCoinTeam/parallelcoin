@@ -207,7 +207,7 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	}
 }
 
-func initLogLevel(cfg *pod.Config, subcommand string) {
+func initLogLevel(cfg *pod.Config) {
 	loglevel := *cfg.LogLevel
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
@@ -217,9 +217,6 @@ func initLogLevel(cfg *pod.Config, subcommand string) {
 		*cfg.LogLevel = "info"
 	}
 	//fmt.Fprintln(os.Stderr, "subcommand",subcommand, os.Args)
-	if subcommand != "worker" {
-		log.L.SetLevel(*cfg.LogLevel, true)
-	}
 	if !*cfg.Onion {
 		*cfg.OnionProxy = ""
 	}
