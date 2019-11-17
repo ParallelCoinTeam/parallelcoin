@@ -102,7 +102,7 @@ func DivHash(hf func([]byte) []byte, blockbytes []byte, howmany int) []byte {
 	if howmany > 0 {
 		return DivHash(hf, append(ddd, reverse(ddd)...), howmany-1)
 	}
-	// fmt.Printf("%x\n", ddd)
+	// log.Printf("%x\n", ddd)
 	// return Cryptonight7v2(hf(ddd))
 	return hf(ddd)
 }

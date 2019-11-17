@@ -2,7 +2,6 @@ package walletmain
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -114,23 +113,20 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 			}()
 			err := w.Unlock(privPass, lockChan)
 			if err != nil {
-				log.ERROR(err)
-				fmt.Printf("ERR: Failed to unlock new wallet "+
-					"during old wallet key import: %v %s", err)
+				log.ERRORF("ERR: Failed to unlock new wallet "+
+					"during old wallet key import: %v", err)
 				return
 			}
 			err = convertLegacyKeystore(legacyKeyStore, w)
 			if err != nil {
-				log.ERROR(err)
-				fmt.Printf("ERR: Failed to import keys from old "+
+				log.ERRORF("ERR: Failed to import keys from old "+
 					"wallet format: %v %s", err)
 				return
 			}
 			// Remove the legacy key store.
 			err = os.Remove(keystorePath)
 			if err != nil {
-				log.ERROR(err)
-				fmt.Printf("WARN: Failed to remove legacy wallet "+
+				log.ERROR("WARN: Failed to remove legacy wallet "+
 					"from'%s'\n", keystorePath)
 			}
 		})
@@ -217,41 +213,37 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) err
 		case keystore.PubKeyAddress:
 			privKey, err := addr.PrivKey()
 			if err != nil {
-				log.ERROR(err)
-				fmt.Printf("WARN: Failed to obtain private key "+
-					"for address %v: %v\n", addr.Address(),
+				log.WARNF("Failed to obtain private key "+
+					"for address %v: %v", addr.Address(),
 					err)
 				continue
 			}
 			wif, err := util.NewWIF((*ec.PrivateKey)(privKey),
 				netParams, addr.Compressed())
 			if err != nil {
-				log.ERROR(err)
-				fmt.Printf("WARN: Failed to create wallet "+
-					"import format for address %v: %v\n",
+				log.WARN("Failed to create wallet "+
+					"import format for address %v: %v",
 					addr.Address(), err)
 				continue
 			}
 			_, err = w.ImportPrivateKey(waddrmgr.KeyScopeBIP0044,
 				wif, &blockStamp, false)
 			if err != nil {
-				log.ERROR(err)
-				fmt.Printf("WARN: Failed to import private "+
-					"key for address %v: %v\n",
+				log.WARNF("WARN: Failed to import private "+
+					"key for address %v: %v",
 					addr.Address(), err)
 				continue
 			}
 		case keystore.ScriptAddress:
 			_, err := w.ImportP2SHRedeemScript(addr.Script())
 			if err != nil {
-				log.ERROR(err)
-				fmt.Printf("WARN: Failed to import "+
+				log.WARNF("WARN: Failed to import "+
 					"pay-to-script-hash script for "+
 					"address %v: %v\n", addr.Address(), err)
 				continue
 			}
 		default:
-			fmt.Printf("WARN: Skipping unrecognized legacy "+
+			log.WARNF("WARN: Skipping unrecognized legacy "+
 				"keystore type: %T\n", addr)
 			continue
 		}

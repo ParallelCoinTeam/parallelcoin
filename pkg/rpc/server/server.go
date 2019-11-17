@@ -14,7 +14,6 @@ package rpcserver
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -130,9 +129,9 @@ func (*versionServer) Version(ctx context.Context, req *pb.VersionRequest) (*pb.
 // registers it with the gRPC server.
 func StartWalletService(server *grpc.Server, wallet *wallet.Wallet) {
 	service := &walletServer{wallet}
-	fmt.Println("registering wallet service grpc")
+	log.DEBUG("registering wallet service grpc")
 	pb.RegisterWalletServiceServer(server, service)
-	fmt.Println("registered wallet service grpc")
+	log.DEBUG("registered wallet service grpc")
 }
 func (s *walletServer) Ping(ctx context.Context, req *pb.PingRequest) (*pb.PingResponse, error) {
 	return &pb.PingResponse{}, nil
@@ -750,7 +749,6 @@ func (s *loaderServer) StartConsensusRPC(ctx context.Context, req *pb.StartConse
 	log.INFO("wallet is not loaded")
 	rpcClient, err := chain.NewRPCClient(s.activeNet, networkAddress, req.Username,
 		string(req.Password), req.Certificate, len(req.Certificate) == 0, 1)
-	fmt.Println("wtf")
 	log.WARN(err)
 	if err != nil {
 		log.ERROR(err)

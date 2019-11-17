@@ -27,10 +27,10 @@ pay-to-script-hash address types. To decode/encode an address:
 	if err != nil {
 
 
-fmt.Println(err)
+log.Println(err)
 		return
 	}
 
-	fmt.Println(addr.EncodeAddress())
+	log.Println(addr.EncodeAddress())
 */
 package util

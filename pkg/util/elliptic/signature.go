@@ -400,7 +400,6 @@ func mac(alg func() hash.Hash, k, m []byte) []byte {
 	_, err := h.Write(m)
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println(err)
 	}
 	return h.Sum(nil)
 }

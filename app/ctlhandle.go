@@ -32,7 +32,6 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 			err := cli.ShowSubcommandHelp(c)
 			if err != nil {
 				log.ERROR(err)
-				fmt.Println(err)
 			}
 		}
 		ctl.Main(args, cx)

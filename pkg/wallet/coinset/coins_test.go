@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"testing"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -30,7 +31,7 @@ func NewCoin(index int64, value util.Amount, numConfs int64) coinset.Coin {
 	h := sha256.New()
 	_, err := h.Write([]byte(fmt.Sprintf("%d", index)))
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 	}
 	hash, _ := chainhash.NewHash(h.Sum(nil))
 	c := &TestCoin{

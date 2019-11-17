@@ -2,7 +2,7 @@ package parameters
 
 import (
 	"encoding/hex"
-	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"testing"
 )
 
@@ -24,19 +24,19 @@ func TestGenesisToHex(t *testing.T) {
 	printByteAssignments("regtestnetGenesisBlock", regtestnetGenesisBlock)
 }
 func printByteAssignments(name string, in []byte) {
-	fmt.Print(name, "=[]byte{\n")
+	log.Print(name, "=[]byte{\n")
 	printGoHexes(in)
-	fmt.Print("}\n")
+	log.Print("}\n")
 }
 func printGoHexes(in []byte) {
-	fmt.Print("\t")
+	log.Print("\t")
 	for i := range in {
 		if i%8 == 0 && i != 0 {
-			fmt.Print("\n\t")
+			log.Print("\n\t")
 		}
-		fmt.Printf("0x%02x, ", in[i])
+		log.Printf("0x%02x, ", in[i])
 	}
-	fmt.Println()
+	log.Println()
 }
 func rev(in []byte) (out *[]byte) {
 	o := make([]byte, len(in))

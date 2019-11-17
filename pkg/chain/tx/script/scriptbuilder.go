@@ -30,7 +30,7 @@ func (e ErrScriptNotCanonical) Error() string {
 // 		// Handle the error.
 // 		return
 // 	}
-// 	fmt.Printf("Final multi-sig script: %x\n", script)
+// 	log.Printf("Final multi-sig script: %x\n", script)
 type ScriptBuilder struct {
 	script []byte
 	err    error

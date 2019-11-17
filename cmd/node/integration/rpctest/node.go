@@ -228,7 +228,6 @@ func (n *node) stop() error {
 		err := n.cmd.Wait()
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}()
 	if runtime.GOOS == "windows" {

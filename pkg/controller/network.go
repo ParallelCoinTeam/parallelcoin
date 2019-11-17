@@ -119,7 +119,7 @@ func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err erro
 		}
 		cumulative += n
 	}
-	//fmt.Print(log.Composit(fmt.Sprintf("sent %v bytes to %v port %v",
+	// log.DEBUG(log.Composite(fmt.Sprintf("sent %v bytes to %v port %v",
 	//	cumulative, addr.IP, addr.Port), "STATUS", true), "\r")
 	return
 }
@@ -130,7 +130,7 @@ func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
 	[]byte)) (cancel context.CancelFunc, err error) {
 	var ctx context.Context
 	ctx, cancel = context.WithCancel(context.Background())
-	log.DEBUG("resolving", address)
+	log.TRACE("resolving", address)
 	var conn *net.UDPConn
 	conn, err = net.ListenUDP("udp", address)
 	if err != nil {
@@ -138,14 +138,14 @@ func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
 		cancel()
 		return
 	}
-	log.DEBUG("setting read buffer")
+	log.TRACE("setting read buffer")
 	err = conn.SetReadBuffer(MaxDatagramSize)
 	if err != nil {
 		log.ERROR(err)
 	}
 	buffer := make([]byte, MaxDatagramSize)
 	go func() {
-		log.DEBUG("starting connection handler")
+		log.TRACE("starting connection handler")
 	out:
 		// read from socket until context is cancelled
 		for {

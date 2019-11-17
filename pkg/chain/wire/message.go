@@ -185,7 +185,7 @@ func discardInput(r io.Reader, n uint32) {
 		for i := uint32(0); i < numReads; i++ {
 			_, err := io.ReadFull(r, buf)
 			if err != nil {
-				fmt.Println(err)
+				log.ERROR(err)
 			}
 		}
 	}
@@ -193,7 +193,7 @@ func discardInput(r io.Reader, n uint32) {
 		buf := make([]byte, bytesRemaining)
 		_, err := io.ReadFull(r, buf)
 		if err != nil {
-			fmt.Println(err)
+			log.ERROR(err)
 		}
 	}
 }

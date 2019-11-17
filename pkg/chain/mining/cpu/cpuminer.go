@@ -317,7 +317,7 @@ out:
 		// on when there are no connected peers.
 		if (m.cfg.ConnectedCount() == 0 || !m.cfg.IsCurrent()) &&
 			(m.cfg.ChainParams.Net == wire.MainNet && !m.cfg.Solo) {
-			fmt.Print(log.Composit("server has no peers, waiting...",
+			log.Print(log.Composite("server has no peers, waiting...",
 				"STATUS", true), "\r")
 			time.Sleep(time.Second)
 			continue
@@ -380,7 +380,8 @@ out:
 			// if m.cfg.ChainParams.Name == "testnet" {
 			// 	rand.Seed(time.Now().UnixNano())
 			// 	delay := uint16(rand.Int()) >> 6
-			// fmt.Printf("%s testnet delay %dms algo %s\n", time.Now().Format("2006-01-02 15:04:05.000000"),
+			// log.Printf("%s testnet delay %dms algo %s\n",
+			// time.Now().Format("2006-01-02 15:04:05.000000"),
 			// delay, fork.List[fork.GetCurrent(curHeight+1)].AlgoVers[block.MsgBlock().Header.Version])
 			// time.Sleep(time.Millisecond * time.Duration(delay))
 			// }
@@ -594,7 +595,7 @@ out:
 			if hashesPerSec != 0 {
 				//since := fmt.Sprint(time.Now().Sub(log.StartupTime) / time.
 				//	Second * time.Second)
-				fmt.Print(log.Composit(fmt.Sprintf(
+				log.Print(log.Composite(fmt.Sprintf(
 					"--> Hash speed: %6.4f Kh/s %0.2f h/s", hashesPerSec/1000,
 					hashesPerSec), "STATUS", true), "\r")
 			}

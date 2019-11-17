@@ -1,13 +1,12 @@
 package main
 
 import (
-	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/simplebuffer/IPs"
 	"net"
 )
 
 func main() {
-	log.L.SetLevel("trace", true)
+	//log.L.SetLevel("trace", true)
 	var ipa1 = net.ParseIP("127.0.0.1")
 	var ipa2 = net.ParseIP("fe80::6382:2df5:7014:e156")
 	ips := IPs.New()

@@ -57,7 +57,6 @@ func (msg *MsgGetHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncodin
 		err = msg.AddBlockLocatorHash(hash)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}
 	return readElement(r, &msg.HashStop)

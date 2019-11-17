@@ -9,7 +9,6 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"errors"
-	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"io"
 )
@@ -104,7 +103,6 @@ func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	_, err = hm.Write(out[:len(out)-sha256.Size]) // everything is hashed
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println(err)
 	}
 	copy(out[len(out)-sha256.Size:], hm.Sum(nil)) // write checksum
 	return out, nil
@@ -162,7 +160,6 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	_, err = hm.Write(in[:len(in)-sha256.Size]) // everything is hashed
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println(err)
 	}
 	expectedMAC := hm.Sum(nil)
 	if !hmac.Equal(messageMAC, expectedMAC) {

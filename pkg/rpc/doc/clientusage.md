@@ -50,7 +50,8 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
+	"github.com/p9c/pod/pkg/log"
+"path/filepath"
 
 	pb "git.parallelcoin.io/mod/rpc/walletrpc"
 	"golang.org/x/net/context"
@@ -68,13 +69,11 @@ func main(	) {
 	creds, err := credentials.NewClientTLSFromFile(certificateFile, "localhost")
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 		return
 	}
 	conn, err := grpc.Dial("localhost:18332", grpc.WithTransportCredentials(creds))
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 		return
 	}
 	defer conn.Close()
@@ -87,11 +86,11 @@ fmt.Println(err)
 	balanceResponse, err := c.Balance(context.Background(), balanceRequest)
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 		return
 	}
 
-	fmt.Println("Spendable balance: ", btcutil.Amount(balanceResponse.Spendable))
+	log.Println("Spendable balance: ", btcutil.Amount(balanceResponse
+.Spendable))
 }
 ```
 

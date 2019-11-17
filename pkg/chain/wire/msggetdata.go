@@ -47,7 +47,6 @@ func (msg *MsgGetData) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		err = msg.AddInvVect(iv)
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}
 	return nil

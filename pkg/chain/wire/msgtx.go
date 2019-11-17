@@ -220,7 +220,7 @@ func (msg *MsgTx) Copy() *MsgTx {
 		newOutPoint := OutPoint{}
 		err := newOutPoint.Hash.SetBytes(oldOutPoint.Hash[:])
 		if err != nil {
-			fmt.Println(err)
+			log.ERROR(err)
 		}
 		newOutPoint.Index = oldOutPoint.Index
 		// Deep copy the old signature script.

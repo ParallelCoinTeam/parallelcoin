@@ -23,16 +23,16 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
 			cx.DataDir = c.String("datadir")
-			log.INFO("setting datadir", *cx.Config.DataDir)
+			log.TRACE("setting datadir", *cx.Config.DataDir)
 		}
 		*cx.Config.ConfigFile =
 			*cx.Config.DataDir + string(os.PathSeparator) + podConfigFilename
-		log.INFO("config file set to", *cx.Config.ConfigFile)
+		log.TRACE("config file set to", *cx.Config.ConfigFile)
 		// we are going to assume the config is not manually misedited
 		if apputil.FileExists(*cx.Config.ConfigFile) {
-			log.WARN("loading config")
+			log.TRACE("loading config")
 			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
-			log.INFO("loaded config")
+			log.TRACE("loaded config")
 			if err == nil {
 				cx.Config = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
@@ -40,14 +40,14 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 					log.ERROR("error unmarshalling config", err)
 					os.Exit(1)
 				}
-				log.INFO("unmarshalled config")
+				log.TRACE("unmarshalled config")
 			} else {
 				log.FATAL("unexpected error reading configuration file:", err)
 				os.Exit(1)
 			}
 		} else {
 			*cx.Config.ConfigFile = ""
-			log.INFO("will save config after configuration")
+			log.TRACE("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
 		log.TRACE("checking log level")

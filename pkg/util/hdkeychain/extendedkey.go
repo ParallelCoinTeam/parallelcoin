@@ -161,7 +161,6 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 	_, err := hmac512.Write(data)
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println(err)
 	}
 	ilr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -339,7 +338,6 @@ func NewMaster(seed []byte, net *netparams.Params) (*ExtendedKey, error) {
 	_, err := hmac512.Write(seed)
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println(err)
 	}
 	lr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:

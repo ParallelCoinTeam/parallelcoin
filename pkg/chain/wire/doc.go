@@ -64,11 +64,11 @@ As discussed in the bitcoin message overview section, this package reads and wri
 	case *wire.MsgVersion:
 
 		// The message is a pointer to a MsgVersion struct.
-		fmt.Printf("Protocol version: %v", msg.ProtocolVersion)
+		log.Printf("Protocol version: %v", msg.ProtocolVersion)
 	case *wire.MsgBlock:
 
 		// The message is a pointer to a MsgBlock struct.
-		fmt.Printf("Number of tx in block: %v", msg.Header.TxnCount)
+		log.Printf("Number of tx in block: %v", msg.Header.TxnCount)
 	}
 
 Reading Messages

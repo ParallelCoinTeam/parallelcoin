@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -216,10 +217,11 @@ func initLogLevel(cfg *pod.Config) {
 		log.INFO("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
 	}
-	//fmt.Fprintln(os.Stderr, "subcommand",subcommand, os.Args)
-	if !*cfg.Onion {
-		*cfg.OnionProxy = ""
+	color := true
+	if runtime.GOOS == "windows" {
+		color = false
 	}
+	log.L.SetLevel(*cfg.LogLevel, color)
 }
 
 func normalizeAddresses(cfg *pod.Config) {
@@ -530,6 +532,10 @@ func validateOnions(cfg *pod.Config) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	if !*cfg.Onion {
+		*cfg.OnionProxy = ""
+	}
+
 }
 
 func validateMiningStuff(cfg *pod.Config, state *state.Config,
