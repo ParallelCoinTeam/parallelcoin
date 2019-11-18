@@ -2,12 +2,13 @@ package gui
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/p9c/pod/pkg/conte"
-	"net/http"
+	"github.com/therecipe/qt/webengine"
 	"time"
 )
 
-func GUI(cx *conte.Xt) {
+func GUI(cx *conte.Xt, view webengine.QWebEngineView) {
 
 	rc := rcvar{
 		cx:     cx,
@@ -19,48 +20,39 @@ func GUI(cx *conte.Xt) {
 
 	go func() {
 		for _ = range time.NewTicker(time.Second * 1).C {
-			rc.GetDuOStatus()
-			rc.GetTransactions(0, 5, "")
+
+
+
+			//runJs("status", rc.GetDuOStatus(), view)
+			//
+			//runJs("txs", rc.GetTransactionsExcertps(), view)
+			//
+			//runJs("lastxs", rc.GetTransactions(0, 5, ""), view)
+
+			view.Page().RunJavaScript(`
+window.duoSystem = {
+`+ evalVal("status", rc.GetDuOStatus()) +`
+};
+
+
+`)
+
+			fmt.Println("Istos---->>>>>",rc.GetTransactionsExcertps())
+
+			fmt.Println("Drugost---->>>>>", evalVal("txs", rc.GetTransactionsExcertps()))
+
+			fmt.Println("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+			fmt.Println("aaaaaIstos---->>>>>", rc.GetTransactions(0, 5, ""))
+
+			fmt.Println("aaaaaDrugost---->>>>>", evalVal("txs", rc.GetTransactions(0, 5, "")))
 		}
 	}()
 
-	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
-		js, err := json.Marshal(rc.status)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Write(js)
-	})
+}
 
-	http.HandleFunc("/lastxs", func(w http.ResponseWriter, r *http.Request) {
-		js, err := json.Marshal(rc.lastxs)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Write(js)
-	})
-
-	go http.ListenAndServe(":3999", nil)
-
-	//var fs http.FileSystem = http.Dir("./pkg/gui/svelte/assets")
-	//err := vfsgen.Generate(fs, vfsgen.Options{})
-	//if err != nil {
-	//	log.FATAL("Shuttingdown GUI", err)
-	//	os.Exit(1)
-	//}
-	//
-	//ln, err := net.Listen("tcp", "127.0.0.1:0")
-	//if err != nil {
-	//	log.FATAL("Shuttingdown GUI", err)
-	//	os.Exit(1)
-	//}
-	//defer ln.Close()
-	//go http.Serve(ln, http.FileServer(fs))
-
+func evalVal(n string, v interface{})string {
+	vm, err := json.Marshal(v)
+	if err != nil {
+	}
+	return n + `:` + string(vm) + `,`
 }
