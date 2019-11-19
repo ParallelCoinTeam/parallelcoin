@@ -53,8 +53,6 @@ func Get(cx *conte.Xt, mB *util.Block,
 	bM := map[int32]uint32{}
 	bitsMap := &bM
 	var err error
-	tip.DiffMx.Lock()
-	defer tip.DiffMx.Unlock()
 	if tip.Diffs == nil ||
 		len(*tip.Diffs) != len(fork.List[1].AlgoVers) {
 		bitsMap, err = cx.RealNode.Chain.
@@ -63,6 +61,9 @@ func Get(cx *conte.Xt, mB *util.Block,
 			log.ERROR(err)
 			return
 		}
+		tip.DiffMx.Lock()
+		tip.Diffs = bitsMap
+		tip.DiffMx.Unlock()
 	} else {
 		bitsMap = tip.Diffs
 	}
