@@ -116,7 +116,7 @@ func // Validate validates the scripts for all of the passed transaction inputs
 	// number of processor cores.
 	// This helps ensure the system stays reasonably responsive under heavy
 	// load.
-	maxGoRoutines := runtime.NumCPU()
+	maxGoRoutines := runtime.NumCPU() * 3
 	if maxGoRoutines <= 0 {
 		maxGoRoutines = 1
 	}

@@ -301,9 +301,9 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.TRACE("set autoports", c.String("autoports"))
 			*cx.Config.AutoPorts = c.Bool("autoports")
 		}
-		if c.IsSet("nocontroller") {
-			log.TRACE("set nocontroller", c.String("nocontroller"))
-			*cx.Config.EnableController = c.Bool("nocontroller")
+		if c.IsSet("enablecontroller") {
+			log.TRACE("set enablecontroller", c.String("enablecontroller"))
+			*cx.Config.EnableController = c.Bool("enablecontroller")
 		}
 		if c.IsSet("miningaddrs") {
 			log.TRACE("set miningaddrs", c.StringSlice("miningaddrs"))
