@@ -3,6 +3,7 @@ package blockchain
 import (
 	"container/list"
 	"fmt"
+	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
 	"sync"
 	"time"
@@ -17,51 +18,51 @@ import (
 )
 
 const // maxOrphanBlocks is the maximum number of orphan blocks that can be
-// queued.
-maxOrphanBlocks = 100
+	// queued.
+	maxOrphanBlocks = 100
 
 type // BlockLocator is used to help locate a specific block.
-// The algorithm for building the block locator is to add the hashes in
-// reverse order until the genesis block is reached.
-// In order to keep the list of locator hashes to a reasonable number of
-// entries, first the most recent previous 12 block hashes are added,
-// then the step is doubled each loop iteration to exponentially decrease the
-// number of hashes as a function of the distance from the block being
-// located. For example: assume a block chain with a side chain as
-// depicted below:
-// genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
-//                               \-> 16a -> 17a
-// The block locator for block 17a would be the hashes of blocks:
-// [ 17a 16a 15 14 13 12 11 10 9 8 7 6 4... ]
-BlockLocator []*chainhash.Hash
+	// The algorithm for building the block locator is to add the hashes in
+	// reverse order until the genesis block is reached.
+	// In order to keep the list of locator hashes to a reasonable number of
+	// entries, first the most recent previous 12 block hashes are added,
+	// then the step is doubled each loop iteration to exponentially decrease the
+	// number of hashes as a function of the distance from the block being
+	// located. For example: assume a block chain with a side chain as
+	// depicted below:
+	// genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
+	//                               \-> 16a -> 17a
+	// The block locator for block 17a would be the hashes of blocks:
+	// [ 17a 16a 15 14 13 12 11 10 9 8 7 6 4... ]
+	BlockLocator []*chainhash.Hash
 
 type // orphanBlock represents a block that we don't yet have the parent for.
-// It is a normal block plus an expiration time to prevent caching the orphan
-// forever.
-orphanBlock struct {
-	block      *util.Block
-	expiration time.Time
-}
+	// It is a normal block plus an expiration time to prevent caching the orphan
+	// forever.
+	orphanBlock struct {
+		block      *util.Block
+		expiration time.Time
+	}
 
 type // BestState houses information about the current best block and other info
-// related to the state of the main chain as it exists from the point of view
-// of the current best block. The BestSnapshot method can be used to obtain
-// access to this information in a concurrent safe manner and the data will
-// not be changed out from under the caller when chain state changes occur as
-// the function name implies. However,
-// the returned snapshot must be treated as immutable since it is shared by
-// all callers.
-BestState struct {
-	Hash        chainhash.Hash // The hash of the block.
-	Height      int32          // The height of the block.
-	Version     int32
-	Bits        uint32    // The difficulty bits of the block.
-	BlockSize   uint64    // The size of the block.
-	BlockWeight uint64    // The weight of the block.
-	NumTxns     uint64    // The number of txns in the block.
-	TotalTxns   uint64    // The total number of txns in the chain.
-	MedianTime  time.Time // Median time as per CalcPastMedianTime.
-}
+	// related to the state of the main chain as it exists from the point of view
+	// of the current best block. The BestSnapshot method can be used to obtain
+	// access to this information in a concurrent safe manner and the data will
+	// not be changed out from under the caller when chain state changes occur as
+	// the function name implies. However,
+	// the returned snapshot must be treated as immutable since it is shared by
+	// all callers.
+	BestState struct {
+		Hash        chainhash.Hash // The hash of the block.
+		Height      int32          // The height of the block.
+		Version     int32
+		Bits        uint32    // The difficulty bits of the block.
+		BlockSize   uint64    // The size of the block.
+		BlockWeight uint64    // The weight of the block.
+		NumTxns     uint64    // The number of txns in the block.
+		TotalTxns   uint64    // The total number of txns in the chain.
+		MedianTime  time.Time // Median time as per CalcPastMedianTime.
+	}
 
 func // newBestState returns a new best stats instance for the given parameters.
 newBestState(node *BlockNode, blockSize, blockWeight, numTxns,
@@ -80,94 +81,94 @@ newBestState(node *BlockNode, blockSize, blockWeight, numTxns,
 }
 
 type // BlockChain provides functions for working with the bitcoin block chain.
-// It includes functionality such as rejecting duplicate blocks,
-// ensuring blocks follow all rules, orphan handling, checkpoint handling,
-// and best chain selection with reorganization.
-BlockChain struct {
-	// The following fields are set when the instance is created and can't be
-	// changed afterwards so there is no need to protect them with a separate
-	// mutex.
-	checkpoints         []chaincfg.Checkpoint
-	checkpointsByHeight map[int32]*chaincfg.Checkpoint
-	db                  database.DB
-	params              *netparams.Params
-	timeSource          MedianTimeSource
-	sigCache            *txscript.SigCache
-	indexManager        IndexManager
-	hashCache           *txscript.HashCache
-	// The following fields are calculated based upon the provided chain
-	// parameters.  They are also set when the instance is created and can't
-	// be changed afterwards, so there is no need to protect them with
-	// a separate mutex.
-	minRetargetTimespan int64 // target timespan / adjustment factor
-	maxRetargetTimespan int64 // target timespan * adjustment factor
-	blocksPerRetarget   int32 // target timespan / target time per block
-	// chainLock protects concurrent access to the vast majority of the
-	// fields in this struct below this point.
-	chainLock sync.RWMutex
-	// These fields are related to the memory block index.
-	// They both have their own locks,
-	// however they are often also protected by the chain lock to help
-	// prevent logic races when blocks are being processed.
-	// index houses the entire block index in memory.
-	// The block index is a tree-shaped structure.
-	// BestChain tracks the current active chain by making use of an
-	// efficient chain view into the block index.
-	Index     *blockIndex
-	BestChain *chainView
-	// These fields are related to handling of orphan blocks.
-	// They are protected by a combination of the chain lock and the orphan
-	// lock.
-	orphanLock   sync.RWMutex
-	orphans      map[chainhash.Hash]*orphanBlock
-	prevOrphans  map[chainhash.Hash][]*orphanBlock
-	oldestOrphan *orphanBlock
-	// These fields are related to checkpoint handling.
-	// They are protected by the chain lock.
-	nextCheckpoint *chaincfg.Checkpoint
-	checkpointNode *BlockNode
-	// The state is used as a fairly efficient way to cache information about
-	// the current best chain state that is returned to callers when
-	// requested.  It operates on the principle of MVCC such that any time a
-	// new block becomes the best block,
-	// the state pointer is replaced with a new struct and the old state is
-	// left untouched.  In this way,
-	// multiple callers can be pointing to different best chain states.
-	// This is acceptable for most callers because the state is only being
-	// queried at a specific point in time. In addition,
-	// some of the fields are stored in the database so the chain state can
-	// be quickly reconstructed on load.
-	stateLock     sync.RWMutex
-	stateSnapshot *BestState
-	// The following caches are used to efficiently keep track of the current
-	// deployment threshold state of each rule change deployment.
-	// This information is stored in the database so it can be quickly
-	// reconstructed on load.
-	// warningCaches caches the current deployment threshold state for blocks
-	// in each of the **possible** deployments.
-	// This is used in order to detect when new unrecognized rule changes are
-	// being voted on and/or have been activated such as will be the case
-	// when older versions of the software are being used
-	// deploymentCaches caches the current deployment threshold state for
-	// blocks in each of the actively defined deployments.
-	warningCaches    []thresholdStateCache
-	deploymentCaches []thresholdStateCache
-	// The following fields are used to determine if certain warnings have
-	// already been shown.
-	// unknownRulesWarned refers to warnings due to unknown rules being
-	// activated.
-	// unknownVersionsWarned refers to warnings due to unknown versions being
-	// mined.
-	unknownRulesWarned bool
-	// unknownVersionsWarned bool
-	// The notifications field stores a slice of callbacks to be executed on
-	// certain blockchain events.
-	notificationsLock sync.RWMutex
-	notifications     []NotificationCallback
-	// DifficultyAdjustments keeps track of the latest difficulty adjustment
-	// for each algorithm
-	DifficultyAdjustments map[string]float64
-}
+	// It includes functionality such as rejecting duplicate blocks,
+	// ensuring blocks follow all rules, orphan handling, checkpoint handling,
+	// and best chain selection with reorganization.
+	BlockChain struct {
+		// The following fields are set when the instance is created and can't be
+		// changed afterwards so there is no need to protect them with a separate
+		// mutex.
+		checkpoints         []chaincfg.Checkpoint
+		checkpointsByHeight map[int32]*chaincfg.Checkpoint
+		db                  database.DB
+		params              *netparams.Params
+		timeSource          MedianTimeSource
+		sigCache            *txscript.SigCache
+		indexManager        IndexManager
+		hashCache           *txscript.HashCache
+		// The following fields are calculated based upon the provided chain
+		// parameters.  They are also set when the instance is created and can't
+		// be changed afterwards, so there is no need to protect them with
+		// a separate mutex.
+		minRetargetTimespan int64 // target timespan / adjustment factor
+		maxRetargetTimespan int64 // target timespan * adjustment factor
+		blocksPerRetarget   int32 // target timespan / target time per block
+		// chainLock protects concurrent access to the vast majority of the
+		// fields in this struct below this point.
+		chainLock sync.RWMutex
+		// These fields are related to the memory block index.
+		// They both have their own locks,
+		// however they are often also protected by the chain lock to help
+		// prevent logic races when blocks are being processed.
+		// index houses the entire block index in memory.
+		// The block index is a tree-shaped structure.
+		// BestChain tracks the current active chain by making use of an
+		// efficient chain view into the block index.
+		Index     *blockIndex
+		BestChain *chainView
+		// These fields are related to handling of orphan blocks.
+		// They are protected by a combination of the chain lock and the orphan
+		// lock.
+		orphanLock   sync.RWMutex
+		orphans      map[chainhash.Hash]*orphanBlock
+		prevOrphans  map[chainhash.Hash][]*orphanBlock
+		oldestOrphan *orphanBlock
+		// These fields are related to checkpoint handling.
+		// They are protected by the chain lock.
+		nextCheckpoint *chaincfg.Checkpoint
+		checkpointNode *BlockNode
+		// The state is used as a fairly efficient way to cache information about
+		// the current best chain state that is returned to callers when
+		// requested.  It operates on the principle of MVCC such that any time a
+		// new block becomes the best block,
+		// the state pointer is replaced with a new struct and the old state is
+		// left untouched.  In this way,
+		// multiple callers can be pointing to different best chain states.
+		// This is acceptable for most callers because the state is only being
+		// queried at a specific point in time. In addition,
+		// some of the fields are stored in the database so the chain state can
+		// be quickly reconstructed on load.
+		stateLock     sync.RWMutex
+		stateSnapshot *BestState
+		// The following caches are used to efficiently keep track of the current
+		// deployment threshold state of each rule change deployment.
+		// This information is stored in the database so it can be quickly
+		// reconstructed on load.
+		// warningCaches caches the current deployment threshold state for blocks
+		// in each of the **possible** deployments.
+		// This is used in order to detect when new unrecognized rule changes are
+		// being voted on and/or have been activated such as will be the case
+		// when older versions of the software are being used
+		// deploymentCaches caches the current deployment threshold state for
+		// blocks in each of the actively defined deployments.
+		warningCaches    []thresholdStateCache
+		deploymentCaches []thresholdStateCache
+		// The following fields are used to determine if certain warnings have
+		// already been shown.
+		// unknownRulesWarned refers to warnings due to unknown rules being
+		// activated.
+		// unknownVersionsWarned refers to warnings due to unknown versions being
+		// mined.
+		unknownRulesWarned bool
+		// unknownVersionsWarned bool
+		// The notifications field stores a slice of callbacks to be executed on
+		// certain blockchain events.
+		notificationsLock sync.RWMutex
+		notifications     []NotificationCallback
+		// DifficultyAdjustments keeps track of the latest difficulty adjustment
+		// for each algorithm
+		DifficultyAdjustments map[string]float64
+	}
 
 func // HaveBlock returns whether or not the chain instance has the block
 // represented by the passed hash.
@@ -305,15 +306,15 @@ func // addOrphanBlock adds the passed block (which is already determined to be
 }
 
 type // SequenceLock represents the converted relative lock-time in seconds,
-// and absolute block-height for a transaction input's relative lock-times.
-// According to SequenceLock after the referenced input has been confirmed
-// within a block a transaction spending that input can be included into a
-// block either after 'seconds' (according to past median time) or once the
-// 'BlockHeight' has been reached.
-SequenceLock struct {
-	Seconds     int64
-	BlockHeight int32
-}
+	// and absolute block-height for a transaction input's relative lock-times.
+	// According to SequenceLock after the referenced input has been confirmed
+	// within a block a transaction spending that input can be included into a
+	// block either after 'seconds' (according to past median time) or once the
+	// 'BlockHeight' has been reached.
+	SequenceLock struct {
+		Seconds     int64
+		BlockHeight int32
+	}
 
 func // CalcSequenceLock computes a relative lock-time SequenceLock for the
 // passed transaction using the passed UtxoViewpoint to obtain the past
@@ -1027,7 +1028,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,
 	flags BehaviorFlags) (bool, error) {
-	log.TRACE("connectBestChain")
+	//log.TRACE("connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
 		// Intentionally ignore errors writing updated node status to DB.
@@ -1043,7 +1044,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.BestChain.Tip().hash) {
-		log.TRACE("can attach to tip")
+		//log.TRACE("can attach to tip")
 		// Skip checks if node has already been fully validated.
 		fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
 		// Perform several checks to verify the block can be connected to the
@@ -1053,7 +1054,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 		view.SetBestHash(parentHash)
 		stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
 		if !fastAdd {
-			log.TRACE("not fast adding")
+			//log.TRACE("not fast adding")
 			err := b.checkConnectBlock(node, block, view, &stxos)
 			if err == nil {
 				b.Index.SetStatusFlags(node, statusValid)
@@ -1267,7 +1268,7 @@ func // HeightRange returns a range of block hashes for the given start and end
 // height.  The end height will be limited to the current main chain height.
 // This function is safe for concurrent access.
 (b *BlockChain) HeightRange(startHeight, endHeight int32) ([]chainhash.
-	Hash, error) {
+Hash, error) {
 	// Ensure requested heights are sane.
 	if startHeight < 0 {
 		return nil, fmt.Errorf("start height of fetch range must not be less"+
@@ -1535,52 +1536,52 @@ type IndexManager interface {
 }
 
 type // Config is a descriptor which specifies the blockchain instance configuration.
-Config struct {
-	// DB defines the database which houses the blocks and will be used to
-	// store all metadata created by this package such as the utxo set.
-	// This field is required.
-	DB database.DB
-	// Interrupt specifies a channel the caller can close to signal that long
-	// running operations,
-	// such as catching up indexes or performing database migrations,
-	// should be interrupted. This field can be nil if the caller does not
-	// desire the behavior.
-	Interrupt <-chan struct{}
-	// ChainParams identifies which chain parameters the chain is associated
-	// with. This field is required.
-	ChainParams *netparams.Params
-	// Checkpoints hold caller-defined checkpoints that should be added to
-	// the default checkpoints in ChainParams.
-	// Checkpoints must be sorted by height.
-	// This field can be nil if the caller does not wish to specify any
-	// checkpoints.
-	Checkpoints []chaincfg.Checkpoint
-	// TimeSource defines the median time source to use for things such as
-	// block processing and determining whether or not the chain is current.
-	// The caller is expected to keep a reference to the time source as well
-	// and add time samples from other peers on the network so the local time
-	// is adjusted to be in agreement with other peers.
-	TimeSource MedianTimeSource
-	// SigCache defines a signature cache to use when when validating
-	// signatures.  This is typically most useful when individual
-	// transactions are already being validated prior to their inclusion in a
-	// block such as what is usually done via a transaction memory pool.
-	// This field can be nil if the caller is not interested in using a
-	// signature cache.
-	SigCache *txscript.SigCache
-	// IndexManager defines an index manager to use when initializing the
-	// chain and connecting and disconnecting blocks.
-	// This field can be nil if the caller does not wish to make use of an
-	// index manager.
-	IndexManager IndexManager
-	// HashCache defines a transaction hash mid-state cache to use when
-	// validating transactions. This cache has the potential to greatly speed
-	// up transaction validation as re-using the pre-calculated mid-state
-	// eliminates the O(N^2) validation complexity due to the SigHashAll
-	// flag. This field can be nil if the caller is not interested in using a
-	// signature cache.
-	HashCache *txscript.HashCache
-}
+	Config struct {
+		// DB defines the database which houses the blocks and will be used to
+		// store all metadata created by this package such as the utxo set.
+		// This field is required.
+		DB database.DB
+		// Interrupt specifies a channel the caller can close to signal that long
+		// running operations,
+		// such as catching up indexes or performing database migrations,
+		// should be interrupted. This field can be nil if the caller does not
+		// desire the behavior.
+		Interrupt <-chan struct{}
+		// ChainParams identifies which chain parameters the chain is associated
+		// with. This field is required.
+		ChainParams *netparams.Params
+		// Checkpoints hold caller-defined checkpoints that should be added to
+		// the default checkpoints in ChainParams.
+		// Checkpoints must be sorted by height.
+		// This field can be nil if the caller does not wish to specify any
+		// checkpoints.
+		Checkpoints []chaincfg.Checkpoint
+		// TimeSource defines the median time source to use for things such as
+		// block processing and determining whether or not the chain is current.
+		// The caller is expected to keep a reference to the time source as well
+		// and add time samples from other peers on the network so the local time
+		// is adjusted to be in agreement with other peers.
+		TimeSource MedianTimeSource
+		// SigCache defines a signature cache to use when when validating
+		// signatures.  This is typically most useful when individual
+		// transactions are already being validated prior to their inclusion in a
+		// block such as what is usually done via a transaction memory pool.
+		// This field can be nil if the caller is not interested in using a
+		// signature cache.
+		SigCache *txscript.SigCache
+		// IndexManager defines an index manager to use when initializing the
+		// chain and connecting and disconnecting blocks.
+		// This field can be nil if the caller does not wish to make use of an
+		// index manager.
+		IndexManager IndexManager
+		// HashCache defines a transaction hash mid-state cache to use when
+		// validating transactions. This cache has the potential to greatly speed
+		// up transaction validation as re-using the pre-calculated mid-state
+		// eliminates the O(N^2) validation complexity due to the SigHashAll
+		// flag. This field can be nil if the caller is not interested in using a
+		// signature cache.
+		HashCache *txscript.HashCache
+	}
 
 func // New returns a BlockChain instance using the provided configuration
 // details.
@@ -1660,6 +1661,17 @@ New(config *Config) (*BlockChain, error) {
 		return nil, err
 	}
 	bestNode := b.BestChain.Tip()
+	bestNode.DiffMx.Lock()
+	defer bestNode.DiffMx.Unlock()
+	if bestNode.Diffs == nil ||
+		len(*bestNode.Diffs) != len(fork.List[1].AlgoVers) {
+		bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(bestNode)
+		if err != nil {
+			log.ERROR(err)
+		}
+		bestNode.Diffs = bitsMap
+	}
+
 	log.INFOF("chain state (height %d, hash %v, totaltx %d, work %v)",
 		bestNode.height, bestNode.hash, b.stateSnapshot.TotalTxns,
 		bestNode.workSum)

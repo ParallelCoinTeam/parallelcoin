@@ -70,7 +70,7 @@ func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 		}
 		cumulative += n
 	}
-	log.TRACE("wrote", cumulative, "by to multicast address", addr.IP,
+	log.TRACE("wrote", cumulative, "bytes to multicast address", addr.IP,
 		"port",
 		addr.Port)
 	return
