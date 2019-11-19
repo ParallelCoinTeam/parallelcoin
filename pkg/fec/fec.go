@@ -4,8 +4,6 @@ package fec
 
 import (
 	"encoding/binary"
-	"hash/crc32"
-
 	"github.com/vivint/infectious"
 
 	"github.com/p9c/pod/pkg/log"
@@ -42,6 +40,10 @@ func padData(data []byte) (out []byte) {
 	return
 }
 
+// Encode turns a byte slice into a set of shards with first byte containing
+// the shard number. Previously this code included a CRC32 but this is
+// unnecessary since the shards will be sent wrapped in HMAC protected
+// encryption
 func Encode(data []byte) (chunks [][]byte, err error) {
 	// First we must pad the data
 	data = padData(data)
@@ -59,10 +61,10 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 		chunk := append([]byte{byte(shares[i].Number)}, shares[i].Data...)
 		// Checksum includes chunk number byte so we know if its checksum is
 		// incorrect so could the chunk number be
-		checksum := crc32.Checksum(chunk, crc32.MakeTable(crc32.Castagnoli))
-		checkBytes := make([]byte, 4)
-		binary.LittleEndian.PutUint32(checkBytes, checksum)
-		chunk = append(chunk, checkBytes...)
+		//checksum := crc32.Checksum(chunk, crc32.MakeTable(crc32.Castagnoli))
+		//checkBytes := make([]byte, 4)
+		//binary.LittleEndian.PutUint32(checkBytes, checksum)
+		//chunk = append(chunk, checkBytes...)
 		chunks = append(chunks, chunk)
 	}
 	return
