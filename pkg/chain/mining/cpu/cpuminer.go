@@ -517,7 +517,10 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		}
 		rn += 1 << shifter
 		rNonce := uint32(rn)
-		mn := uint32(1 << 9)
+		mn := uint32(1 << 16)
+		if m.cfg.NumThreads < 2 {
+			mn = uint32(1 << 4)
+		}
 		// if testnet {
 		// 	mn = 1 << shifter
 		// }
