@@ -516,11 +516,11 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 }
 func validateOnions(cfg *pod.Config) {
 	// --onionproxy and not --onion are contradictory (TODO: this is kinda
-	// stupid hm? switch *and* toggle by presence of flag value, one should be
-	// enough)
-	if !*cfg.Onion && *cfg.OnionProxy != "" {
-		err := fmt.Errorf("%s: the --onionproxy and --onion options may not be activated at the same time", funcName)
-		fmt.Fprintln(os.Stderr, err)
+	//  stupid hm? switch *and* toggle by presence of flag value, one should be
+	//  enough)
+	if *cfg.Onion && *cfg.OnionProxy != "" {
+		log.ERROR("onion enabled but no onionproxy has been configured")
+		log.FATAL("halting to avoid exposing IP address")
 		os.Exit(1)
 	}
 	// Tor stream isolation requires either proxy or onion proxy to be set.

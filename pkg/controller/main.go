@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"crypto/cipher"
+	"errors"
 	"fmt"
 	chain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/mining"
@@ -50,6 +51,7 @@ var (
 )
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
+	log.DEBUG("miner controller starting")
 	ctx, cancel := context.WithCancel(context.Background())
 	ctrl := &Controller{
 		active:        &atomic.Bool{},
@@ -117,29 +119,30 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	log.DEBUG("sending broadcasts from:", ctrl.sendAddresses)
 	// send out the first broadcast
 	bTG := getBlkTemplateGenerator(cx)
-	tpl, err := bTG.NewBlockTemplate(0, cx.StateCfg.ActiveMiningAddrs[0],
-		"sha256d")
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
-	msgBase := advertisment.Get(cx)
-	mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
-	lisP := mC.GetControllerListenerPort()
+	//tpl, err := bTG.NewBlockTemplate(0, cx.StateCfg.ActiveMiningAddrs[0],
+	//	"sha256d")
+	//if err != nil {
+	//	log.ERROR(err)
+	//	return
+	//}
+	//msgBase := advertisment.Get(cx)
+	msgBase := pause.GetPauseContainer(cx)
+	//mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
+	lisP := msgBase.GetControllerListenerPort()
 	listenAddress, err := net.ResolveUDPAddr("udp", fmt.Sprintf(":%d", lisP))
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
-	pauseShards, err = sendNewBlockTemplate(cx, bTG, msgBase,
+	//if err != nil {
+	//	log.ERROR(err)
+	//	return
+	//}
+	adv := advertisment.Get(cx)
+	pauseShards, err = sendNewBlockTemplate(cx, bTG, adv,
 		ctrl.sendAddresses, ctrl.conns, ctrl.oldBlocks, ctrl.ciph)
 	if err != nil {
 		log.ERROR(err)
 	}
 	ctrl.active.Store(true)
-	log.DEBUG("miner controller starting")
 	cx.RealNode.Chain.Subscribe(getNotifier(ctrl.active, bTG, ctrl.ciph,
-		ctrl.conns, cx, msgBase, ctrl.oldBlocks, ctrl.sendAddresses,
+		ctrl.conns, cx, adv, ctrl.oldBlocks, ctrl.sendAddresses,
 		ctrl.subMx))
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
@@ -244,6 +247,9 @@ func sendNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 	msgBase simplebuffer.Serializers, sendAddresses []*net.UDPAddr, conns []*net.UDPConn,
 	oldBlocks *atomic.Value, ciph cipher.AEAD, ) (shards [][]byte, err error) {
 	template := getNewBlockTemplate(cx, bTG)
+	if template == nil {
+		return nil, errors.New("could not get template")
+	}
 	msgB := template.Block
 	fMC := job.Get(cx, util.NewBlock(msgB), msgBase)
 	for i := range sendAddresses {

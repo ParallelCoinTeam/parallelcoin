@@ -272,7 +272,7 @@ func (m *CPUMiner) Start() {
 	go m.speedMonitor()
 	go m.miningWorkerController()
 	m.started = true
-	log.TRACE("CPU miner started mining", m.cfg.Algo)
+	log.TRACE("CPU miner started mining", m.cfg.Algo, m.cfg.NumThreads)
 }
 
 // Stop gracefully stops the mining process by signalling all workers, and the
@@ -615,6 +615,25 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	log.TRACE("submitting block")
 	m.submitBlockLock.Lock()
 	defer m.submitBlockLock.Unlock()
+	// TODO: This nonsense and the workgroup are the entirely wrong way to
+	//  write a cryptocurrency miner.
+	//  It is not critical work so it should not use a workgroup but rather,
+	//  a semaphore, which can yank all the threads to stop as soon as they
+	//  select on the semaphore,
+	//  whereas this stops 'when all the jobs are finished' for what purpose?
+	//  This miner will be eliminated once the replacement is complete.
+	//  End result of this is node waits for miners to stop,
+	//  which sometimes takes 5 seconds and almost every other height it has
+	//  two submissions processing on one mutex and second and others are
+	//  always stale. So also, the submitlock needs to be revised,
+	//  I think submitlock and waitgroup together are far better replaced by
+	//  a semaphore. Miner should STOP DEAD when a solution is found and wait
+	//  for more work. The kopach controller will stop all miners in the
+	//  network when it receives submissions prejudicially because it is
+	//  better to save power than catch one block in a thousand from an
+	//  economics poinnt of view.
+	//  Every cycle degrades the value and brings closer the hardware failure
+	//  so don't work unless there is a very good reason to.
 	// Ensure the block is not stale since a new block could have shown up while
 	// the solution was being found.  Typically that condition is detected and
 	// all work on the stale block is halted to start work on a new block, but
@@ -622,12 +641,13 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	// and submitted in between.
 	msgBlock := block.MsgBlock()
 	if !msgBlock.Header.PrevBlock.IsEqual(&m.g.BestSnapshot().Hash) {
-		log.WARNF(
-			"Block submitted via CPU miner with previous block %s is stale",
-			msgBlock.Header.PrevBlock)
+		log.WARN(
+			"Block submitted via CPU miner with previous block",msgBlock.Header.PrevBlock,
+			"is stale", msgBlock.Header.Version,
+			msgBlock.BlockHashWithAlgos(block.Height()))
 		return false
 	}
-	log.TRACE("found block is fresh ", m.cfg.ProcessBlock)
+	//log.TRACE("found block is fresh ", m.cfg.ProcessBlock)
 	// Process this block using the same rules as blocks coming from other
 	// nodes.  This will in turn relay it to the network like normal.
 	isOrphan, err := m.cfg.ProcessBlock(block, blockchain.BFNone)
