@@ -1660,17 +1660,16 @@ New(config *Config) (*BlockChain, error) {
 		return nil, err
 	}
 	bestNode := b.BestChain.Tip()
-	bestNode.DiffMx.Lock()
-	defer bestNode.DiffMx.Unlock()
 	if bestNode.Diffs == nil ||
 		len(*bestNode.Diffs) != len(fork.List[1].AlgoVers) {
 		bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(bestNode)
 		if err != nil {
 			log.ERROR(err)
 		}
+		bestNode.DiffMx.Lock()
 		bestNode.Diffs = bitsMap
+		bestNode.DiffMx.Unlock()
 	}
-
 	log.INFOF("chain state (height %d, hash %v, totaltx %d, work %v)",
 		bestNode.height, bestNode.hash, b.stateSnapshot.TotalTxns,
 		bestNode.workSum)

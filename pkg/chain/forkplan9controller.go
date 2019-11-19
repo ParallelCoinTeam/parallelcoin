@@ -6,6 +6,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"math/big"
 	"strings"
+	"time"
 )
 
 func secondPowLimitBits(currFork int) (out *map[int32]uint32) {
@@ -35,6 +36,10 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 	log.TRACEC(func() string {
 		return fmt.Sprint("calculating difficulty targets to attach to"+
 			" block ", hD.BlockHashWithAlgos(lastNode.height), lastNode.height)
+	})
+	tn := time.Now()
+	defer log.TRACEC(func() string{
+		return fmt.Sprint(time.Now().Sub(tn), " to calculate all diffs")
 	})
 	// here we only need to do this once
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv, dayDiv := b.
