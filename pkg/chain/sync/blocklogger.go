@@ -58,15 +58,17 @@ func // LogBlockHeight logs a new block height as an information message to
 	if b.receivedLogTx == 1 {
 		txStr = "transaction "
 	}
+	tD := tDuration.Seconds()
 	log.INFOF(
-		"%s %6d %s in the last %s (%6d %s, height %8d, %s)",
+		"%s %6d %s in the last %s (%6d %s, height %8d, %s) %0.2f tx/s",
 		b.progressAction,
 		b.receivedLogBlocks,
 		blockStr,
-		fmt.Sprintf("%0.1fs", tDuration.Seconds()),
+		fmt.Sprintf("%0.1fs", tD),
 		b.receivedLogTx,
 		txStr, block.Height(),
 		block.MsgBlock().Header.Timestamp,
+		float64(b.receivedLogTx)/tD,
 	)
 	b.receivedLogBlocks = 0
 	b.receivedLogTx = 0

@@ -300,7 +300,7 @@ func (m *CPUMiner) Stop() {
 func (m *CPUMiner) generateBlocks(workerNumber uint32, quit chan struct{}) {
 	// Start a ticker which is used to signal checks for stale work and updates
 	// to the speed monitor.
-	ticker := time.NewTicker(time.Second) // * hashUpdateSecs)
+	ticker := time.NewTicker(time.Second/3) // * hashUpdateSecs)
 	defer ticker.Stop()
 out:
 	for i := 0; ; i++ {
@@ -376,7 +376,7 @@ out:
 		// block.
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
 		if err != nil {
-			log.WARNF("failed to create new block template:", err)
+			log.WARN("failed to create new block template:", err)
 			continue
 		}
 		// Attempt to solve the block.  The function will exit early with false
@@ -517,9 +517,16 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		}
 		rn += 1 << shifter
 		rNonce := uint32(rn)
-		mn := uint32(1 << 16)
-		if m.cfg.NumThreads < 2 {
+		mn := uint32(1 << 8)
+		switch {
+		case m.cfg.NumThreads < 2:
 			mn = uint32(1 << 4)
+		case m.cfg.NumThreads < 4:
+			mn = uint32(1 << 5)
+		case m.cfg.NumThreads < 6:
+			mn = uint32(1 << 6)
+		case m.cfg.NumThreads < 8:
+			mn = uint32(1 << 7)
 		}
 		// if testnet {
 		// 	mn = 1 << shifter
@@ -607,8 +614,11 @@ out:
 				//since := fmt.Sprint(time.Now().Sub(log.StartupTime) / time.
 				//	Second * time.Second)
 				log.Print(log.Composite(fmt.Sprintf(
-					"--> Hash speed: %6.4f Kh/s %0.2f h/s", hashesPerSec/1000,
-					hashesPerSec), "STATUS", true), "\r")
+					"--> Hash speed: %6.4f Kh/s %0.2f h/s %0.4f h/s/thread",
+					hashesPerSec/1000,
+					hashesPerSec, hashesPerSec/float64(m.cfg.NumThreads)),
+					"STATUS", true),
+					"\r")
 			}
 		// Request for the number of hashes per second.
 		case m.queryHashesPerSec <- hashesPerSec:

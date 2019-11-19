@@ -145,8 +145,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		ctrl.sendAddresses, ctrl.conns, ctrl.oldBlocks, ctrl.ciph)
 	if err != nil {
 		log.ERROR(err)
+		ctrl.active.Store(false)
+	} else {
+		ctrl.active.Store(true)
 	}
-	ctrl.active.Store(true)
 	cx.RealNode.Chain.Subscribe(getNotifier(ctrl.active, bTG, ctrl.ciph,
 		ctrl.conns, cx, adv, ctrl.oldBlocks, ctrl.sendAddresses,
 		ctrl.subMx))
@@ -273,6 +275,9 @@ func sendNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 
 func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 ) (template *mining.BlockTemplate) {
+	if len(*cx.Config.MiningAddrs) < 1 {
+		return
+	}
 	// Choose a payment address at random.
 	rand.Seed(time.Now().UnixNano())
 	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
@@ -286,13 +291,17 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 }
 
 func rebroadcaster(ctrl *Controller) {
-	rebroadcastTicker := time.NewTicker(time.Second*2)
+	rebroadcastTicker := time.NewTicker(time.Second * 2)
 out:
 	for {
 		select {
 		case <-rebroadcastTicker.C:
 			for i := range ctrl.conns {
 				oB := ctrl.oldBlocks.Load().([][]byte)
+				if len(oB) == 0 {
+					log.DEBUG("template is empty")
+					break
+				}
 				err := SendShards(
 					ctrl.sendAddresses[i],
 					oB,
@@ -335,7 +344,7 @@ func getNotifier(active *atomic.Bool, bTG *mining.BlkTmplGenerator,
 			case chain.NTBlockAccepted:
 				subMx.Lock()
 				defer subMx.Unlock()
-				log.DEBUG("received new chain notification")
+				log.TRACE("received new chain notification")
 				// construct work message
 				//log.SPEW(n)
 				_, ok := n.Data.(*util.Block)
@@ -344,15 +353,17 @@ func getNotifier(active *atomic.Bool, bTG *mining.BlkTmplGenerator,
 					break
 				}
 				template := getNewBlockTemplate(cx, bTG)
-				msgB := template.Block
-				mC := job.Get(cx, util.NewBlock(msgB), msgBase)
-				for i := range sendAddresses {
-					shards, err := Send(sendAddresses[i], mC.Data,
-						job.WorkMagic, ciph, conns[i])
-					if err != nil {
-						log.TRACE(err)
+				if template != nil {
+					msgB := template.Block
+					mC := job.Get(cx, util.NewBlock(msgB), msgBase)
+					for i := range sendAddresses {
+						shards, err := Send(sendAddresses[i], mC.Data,
+							job.WorkMagic, ciph, conns[i])
+						if err != nil {
+							log.TRACE(err)
+						}
+						oldBlocks.Store(shards)
 					}
-					oldBlocks.Store(shards)
 				}
 			}
 		}
