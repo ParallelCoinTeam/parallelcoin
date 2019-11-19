@@ -126,18 +126,10 @@ func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err erro
 
 // Listen binds to the UDP address and port given and writes packets received
 // from that address to a buffer which is passed to a handler
-func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
+func Listen(conn *net.UDPConn, handler func(*net.UDPAddr, int,
 	[]byte)) (cancel context.CancelFunc, err error) {
 	var ctx context.Context
 	ctx, cancel = context.WithCancel(context.Background())
-	log.TRACE("resolving", address)
-	var conn *net.UDPConn
-	conn, err = net.ListenUDP("udp", address)
-	if err != nil {
-		log.ERROR(err)
-		cancel()
-		return
-	}
 	log.TRACE("setting read buffer")
 	err = conn.SetReadBuffer(MaxDatagramSize)
 	if err != nil {

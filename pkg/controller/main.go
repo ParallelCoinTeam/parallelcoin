@@ -51,6 +51,7 @@ var (
 )
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
+	cancel = func() {}
 	log.DEBUG("miner controller starting")
 	ctx, cancel := context.WithCancel(context.Background())
 	ctrl := &Controller{
@@ -129,11 +130,13 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	msgBase := pause.GetPauseContainer(cx)
 	//mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
 	lisP := msgBase.GetControllerListenerPort()
-	listenAddress, err := net.ResolveUDPAddr("udp", fmt.Sprintf(":%d", lisP))
-	//if err != nil {
-	//	log.ERROR(err)
-	//	return
-	//}
+	listenAddress, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d",
+		msgBase.GetIPs()[0], lisP))
+	submitListenConn, err := net.ListenUDP("udp", listenAddress)
+	if err != nil {
+		log.ERROR(err)
+		return
+	}
 	adv := advertisment.Get(cx)
 	pauseShards, err = sendNewBlockTemplate(cx, bTG, adv,
 		ctrl.sendAddresses, ctrl.conns, ctrl.oldBlocks, ctrl.ciph)
@@ -146,11 +149,21 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		ctrl.subMx))
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
-	cancel, err = Listen(listenAddress, getListener(ctrl))
+	log.DEBUG("miner controller submit port listening on",
+		submitListenConn.LocalAddr())
+	cancel, err = Listen(submitListenConn, getListener(ctrl))
 	if err != nil {
 		log.DEBUG(err)
 		return
 	}
+
+	var listenerAddresses []string
+	for i := range ctrl.conns {
+		listenerAddresses = append(listenerAddresses,
+			ctrl.conns[i].LocalAddr().String())
+	}
+	log.DEBUG("miner controller listening on", listenerAddresses,
+		"for worker block solution submissions")
 	select {
 	case <-ctx.Done():
 		ctrl.active.Store(false)
@@ -295,12 +308,12 @@ out:
 			}
 		case <-ctrl.ctx.Done():
 			break out
-		//default:
+			//default:
 		}
 	}
 }
 
-func  getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
+func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 	policy := mining.Policy{
 		BlockMinWeight:    uint32(*cx.Config.BlockMinWeight),
 		BlockMaxWeight:    uint32(*cx.Config.BlockMaxWeight),

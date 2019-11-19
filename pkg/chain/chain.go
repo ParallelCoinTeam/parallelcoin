@@ -554,15 +554,6 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		log.ERROR(err)
 		return err
 	}
-	if b.isCurrent() {
-		tN := time.Now()
-		tB, err := b.CalcNextRequiredDifficultyPlan9Controller(node)
-		if err != nil {
-			log.ERROR(err)
-		}
-		log.TRACE(time.Now().Sub(tN), "to compute all block difficulties")
-		node.Diffs = tB
-	}
 	//log.SPEW(node.Diffs)
 	// Generate a new best state snapshot that will be used to update the
 	// database and later memory if all database updates are successful.
@@ -636,7 +627,15 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	b.stateLock.Lock()
 	b.stateSnapshot = state
 	b.stateLock.Unlock()
-
+	//
+	//// TODO: this should not run if the chain is syncing
+	//tN := time.Now()
+	//tB, err := b.CalcNextRequiredDifficultyPlan9Controller(node)
+	//if err != nil {
+	//	log.ERROR(err)
+	//}
+	//log.TRACE(time.Now().Sub(tN), "to compute all block difficulties")
+	//node.Diffs = tB
 	// Notify the caller that the block was connected to the main chain.
 	// The caller would typically want to react with actions such as updating wallets.
 	b.chainLock.Unlock()
