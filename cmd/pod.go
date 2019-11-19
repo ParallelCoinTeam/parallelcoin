@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
+	"runtime"
 	"runtime/trace"
 
 	// This enables pprof
 	_ "net/http/pprof"
 	"os"
-	"runtime"
 	"runtime/debug"
 
 	"github.com/p9c/pod/app"

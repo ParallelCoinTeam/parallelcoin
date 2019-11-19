@@ -79,19 +79,21 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cancel()
 		return
 	}
-	// test the addresses and collate the ones that work
-	for i := range MCAddresses {
-		_, err := net.ListenUDP("udp", MCAddresses[i])
-		if err == nil {
-			ctrl.sendAddresses = append(ctrl.sendAddresses, MCAddresses[i])
-			conn, err := net.ListenUDP("udp", MCAddresses[i])
-			if err != nil {
-				log.ERROR(err)
-			} else {
-				ctrl.conns = append(ctrl.conns, conn)
-			}
-		}
+	//// test the addresses and collate the ones that work
+	//for i := range MCAddresses {
+	//	conn, err := net.ListenUDP("udp", MCAddresses[i])
+	//	if err == nil {
+	//		log.DEBUG("MC listeners", MCAddresses[i].String())
+	//		ctrl.sendAddresses = append(ctrl.sendAddresses, MCAddresses[i])
+	//		ctrl.conns = append(ctrl.conns, conn)
+	//	}
+	//}
+	uc, err := net.DialUDP("udp", nil, MCAddress)
+	if err != nil {
+		log.ERROR(err)
 	}
+	ctrl.conns = []*net.UDPConn{uc}
+	ctrl.sendAddresses = []*net.UDPAddr{MCAddress}
 	// create pause message ready for shutdown handler next
 	pM := pause.GetPauseContainer(cx)
 
@@ -130,13 +132,14 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	msgBase := pause.GetPauseContainer(cx)
 	//mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
 	lisP := msgBase.GetControllerListenerPort()
-	listenAddress, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d",
-		msgBase.GetIPs()[0], lisP))
+	addy := fmt.Sprintf("%s:%d", msgBase.GetIPs()[0], lisP)
+	listenAddress, err := net.ResolveUDPAddr("udp", addy)
 	submitListenConn, err := net.ListenUDP("udp", listenAddress)
 	if err != nil {
 		log.ERROR(err)
 		return
 	}
+	//log.DEBUG("miner controller listening on", listenAddress.String(), addy)
 	adv := advertisment.Get(cx)
 	pauseShards, err = sendNewBlockTemplate(cx, bTG, adv,
 		ctrl.sendAddresses, ctrl.conns, ctrl.oldBlocks, ctrl.ciph)
@@ -156,14 +159,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		log.DEBUG(err)
 		return
 	}
-
-	var listenerAddresses []string
-	for i := range ctrl.conns {
-		listenerAddresses = append(listenerAddresses,
-			ctrl.conns[i].LocalAddr().String())
-	}
-	log.DEBUG("miner controller listening on", listenerAddresses,
-		"for worker block solution submissions")
 	select {
 	case <-ctx.Done():
 		ctrl.active.Store(false)
@@ -291,7 +286,7 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 }
 
 func rebroadcaster(ctrl *Controller) {
-	rebroadcastTicker := time.NewTicker(time.Second)
+	rebroadcastTicker := time.NewTicker(time.Second*2)
 out:
 	for {
 		select {

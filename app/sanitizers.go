@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/controller/pause"
 	"net"
 	"os"
 	"runtime"
@@ -102,24 +103,27 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	}
 
 	if *cx.Config.EnableController {
+		msgBase := pause.GetPauseContainer(cx)
+		//mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
+		listenHost := msgBase.GetIPs()[0].String()+":0"
 		switch ctx.Command.Name {
 		// only the wallet listener is important with shell as it proxies for
 		// node, the rest better they are automatic
 		case "shell":
-			*cfg.Listeners = cli.StringSlice{":0"}
-			*cfg.RPCListeners = cli.StringSlice{":0"}
-			*cfg.Controller = ":0"
+			*cfg.Listeners = cli.StringSlice{listenHost}
+			*cfg.RPCListeners = cli.StringSlice{listenHost}
+			*cfg.Controller = listenHost
 		// user might be depending on which port is set for node so only
 		// controller is auto
 		case "node":
-			*cfg.Controller = ":0"
+			*cfg.Controller = listenHost
 		case "wallet":
-			*cfg.Controller = ":0"
+			*cfg.Controller = listenHost
 		}
 	}
 	if *cx.Config.AutoPorts {
-		*cfg.Listeners = cli.StringSlice{":0"}
-		*cfg.RPCListeners = cli.StringSlice{":0"}
+		*cfg.Listeners = cli.StringSlice{}
+		*cfg.RPCListeners = cli.StringSlice{}
 		*cfg.Controller = ":0"
 	}
 	if *cfg.RPCConnect == "" {
