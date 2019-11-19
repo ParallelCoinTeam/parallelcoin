@@ -187,7 +187,6 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	log.DEBUGF("accepted block %d %v %s",
 		blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
 			Header.Version, blockHeight))
-
 	// log.WARN("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil
 }

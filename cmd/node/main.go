@@ -176,7 +176,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		}
 	}
 	var stopController context.CancelFunc
-	if !*cx.Config.NoController {
+	if *cx.Config.EnableController {
 		stopController = controller.Run(cx)
 	}
 	// Wait until the interrupt signal is received from an OS signal or

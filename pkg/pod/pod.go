@@ -140,7 +140,7 @@ type Config struct {
 	MinRelayTxFee            *float64         `group:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"text" model:"MinRelayTxFee" featured:"false"`
 	Network                  *string          `group:"node" name:"Network" description:"Which network are you connected to (eg.: mainnet, testnet)" type:"input" inputType:"text" model:"Network" featured:"false"`
 	NoCFilters               *bool            `group:"node" name:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" model:"NoCFilters" featured:"false"`
-	NoController             *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
+	EnableController         *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
 	NodeOff                  *bool            `group:"debug" name:"Node Off" description:"turn off the node backend" type:"switch" model:"NodeOff" featured:"false"`
 	NoInitialLoad            *bool
 	NoPeerBloomFilters       *bool            `group:"node" name:"No Peer Bloom Filters" description:"disable bloom filtering support" type:"switch" model:"NoPeerBloomFilters" featured:"false"`
@@ -233,7 +233,7 @@ func EmptyConfig() *Config {
 		MinRelayTxFee:            new(float64),
 		Network:                  newstring(),
 		NoCFilters:               newbool(),
-		NoController:             newbool(),
+		EnableController:         newbool(),
 		NodeOff:                  newbool(),
 		NoInitialLoad:            newbool(),
 		NoPeerBloomFilters:       newbool(),

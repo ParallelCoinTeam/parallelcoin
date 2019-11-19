@@ -303,7 +303,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if c.IsSet("nocontroller") {
 			log.TRACE("set nocontroller", c.String("nocontroller"))
-			*cx.Config.NoController = c.Bool("nocontroller")
+			*cx.Config.EnableController = c.Bool("nocontroller")
 		}
 		if c.IsSet("miningaddrs") {
 			log.TRACE("set miningaddrs", c.StringSlice("miningaddrs"))

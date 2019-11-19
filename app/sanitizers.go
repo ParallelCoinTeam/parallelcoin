@@ -101,7 +101,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 		cx.StateCfg.Save = true
 	}
 
-	if !*cx.Config.NoController {
+	if *cx.Config.EnableController {
 		switch ctx.Command.Name {
 		// only the wallet listener is important with shell as it proxies for
 		// node, the rest better they are automatic

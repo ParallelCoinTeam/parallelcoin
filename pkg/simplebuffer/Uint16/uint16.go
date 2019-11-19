@@ -55,7 +55,7 @@ func GetPort(listener string) simplebuffer.Serializer {
 		log.ERROR(err)
 		return nil
 	}
-	oI, err := strconv.ParseInt(p, 10, 32)
+	oI, err := strconv.ParseUint(p, 10, 16)
 	if err != nil {
 		log.ERROR(err)
 		return nil

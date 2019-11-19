@@ -322,17 +322,27 @@ out:
 			time.Sleep(time.Second)
 			continue
 		}
+		select {
+		case <-quit:
+			break out
+		default:
+			// Non-blocking select to fall through
+		}
 		// No point in searching for a solution before the chain is synced.  Also,
 		// grab the same lock as used for block submission, since the current
 		// block will be changing and this would otherwise end up building a new
 		// block template on a block that is in the process of becoming stale.
-		m.submitBlockLock.Lock()
 		curHeight := m.g.BestSnapshot().Height
 		if curHeight != 0 && !m.cfg.IsCurrent() && !m.cfg.Solo {
-			m.submitBlockLock.Unlock()
 			log.WARNF("server is not current yet, waiting")
 			time.Sleep(time.Second)
 			continue
+		}
+		select {
+		case <-quit:
+			break out
+		default:
+			// Non-blocking select to fall through
 		}
 		// choose the algorithm on a rolling cycle
 		counter := m.rotator.Load()
@@ -352,19 +362,19 @@ out:
 			algo = fork.P9AlgoVers[int32(mod+5)]
 			// log.WARN("algo", algo)
 		}
+		select {
+		case <-quit:
+			break out
+		default:
+			// Non-blocking select to fall through
+		}
 		// Choose a payment address at random.
 		rand.Seed(time.Now().UnixNano())
 		payToAddr := m.cfg.MiningAddrs[rand.Intn(len(m.cfg.MiningAddrs))]
 		// Create a new block template using the available transactions in the
 		// memory pool as a source of transactions to potentially include in the
 		// block.
-		// algo := fork.GetAlgoVer(m.cfg.Algo, m.b.BestSnapshot().Height)
-		// WARNF{"before gbt1", m.cfg.Algo, algo}
-		// algoname := fork.GetAlgoName(algo, m.b.BestSnapshot().Height)
-		// WARNF{"before gbt2", algoname}
-		//log.TRACE("getting new block template")
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
-		m.submitBlockLock.Unlock()
 		if err != nil {
 			log.WARNF("failed to create new block template:", err)
 			continue
@@ -374,17 +384,15 @@ out:
 		// can be generated.  When the return is true a solution was found, so
 		// submit the solved block.
 		//log.TRACE("attempting to solve block")
+		select {
+		case <-quit:
+			break out
+		default:
+			// Non-blocking select to fall through
+		}
 		if m.solveBlock(workerNumber, template.Block, curHeight+1,
 			m.cfg.ChainParams.Name == "testnet", ticker, quit) {
 			block := util.NewBlock(template.Block)
-			// if m.cfg.ChainParams.Name == "testnet" {
-			// 	rand.Seed(time.Now().UnixNano())
-			// 	delay := uint16(rand.Int()) >> 6
-			// log.Printf("%s testnet delay %dms algo %s\n",
-			// time.Now().Format("2006-01-02 15:04:05.000000"),
-			// delay, fork.List[fork.GetCurrent(curHeight+1)].AlgoVers[block.MsgBlock().Header.Version])
-			// time.Sleep(time.Millisecond * time.Duration(delay))
-			// }
 			m.submitBlock(block)
 		}
 	}
