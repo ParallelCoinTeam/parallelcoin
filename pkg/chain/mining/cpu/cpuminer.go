@@ -662,7 +662,7 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	// and submitted in between.
 	msgBlock := block.MsgBlock()
 	if !msgBlock.Header.PrevBlock.IsEqual(&m.g.BestSnapshot().Hash) {
-		log.WARN(
+		log.TRACE(
 			"Block submitted via CPU miner with previous block",msgBlock.Header.PrevBlock,
 			"is stale", msgBlock.Header.Version,
 			msgBlock.BlockHashWithAlgos(block.Height()))
