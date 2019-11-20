@@ -16,7 +16,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 	if b.params.Net == wire.TestNet3 {
 		startHeight = fork.List[1].TestnetStart
 	}
-	if nH == startHeight {
+	if nH <= startHeight {
 		log.DEBUG("on hard fork", nH, startHeight)
 		return
 	}
@@ -33,9 +33,10 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 			allBlocks = 1
 		}
 		allTimeAv = allTime / allBlocks
-		allTimeDiv = float64(1)
 		if allTimeAv > 0 {
 			allTimeDiv = allTimeAv / ttpb
+		} else {
+			allTimeDiv = float64(1)
 		}
 		allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv
 		oldestStamp = f.MsgBlock().Header.Timestamp.Unix()
@@ -165,7 +166,7 @@ func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *BlockNode,
 	algStamps := []uint64{uint64(last.timestamp)}
 	for ln := last; ln != nil && ln.height > startHeight &&
 		len(algStamps) <= int(fork.List[1].AveragingInterval); ln = ln.
-			RelativeAncestor(1) {
+		RelativeAncestor(1) {
 		if ln.version == algoVer && ln.height > startHeight {
 			algStamps = append(algStamps, uint64(ln.timestamp))
 		}
