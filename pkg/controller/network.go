@@ -4,13 +4,11 @@ import (
 	"context"
 	"crypto/cipher"
 	"crypto/rand"
-	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/log"
 	"io"
 	"net"
-	"time"
 )
 
 const (
@@ -22,15 +20,15 @@ const (
 	// has to puncture 6 of the 9.
 	// This protocol is connectionless and stateless so if one misses,
 	// the next one probably won't, usually a second or 3 later
-	MaxDatagramSize      = blockchain.MaxBlockBaseSize / 3
-	UDP6MulticastAddress = "ff02::1"
+	MaxDatagramSize = blockchain.MaxBlockBaseSize / 3
+	//UDP6MulticastAddress = "ff02::1"
 	UDP4MulticastAddress = "224.0.0.1"
 )
 
 var (
 	MCAddresses = []*net.UDPAddr{
-		{IP: net.ParseIP(UDP6MulticastAddress), Port: 11049},
 		{IP: net.ParseIP(UDP4MulticastAddress), Port: 11049},
+		//{IP: net.ParseIP(UDP6MulticastAddress), Port: 11049},
 	}
 )
 
@@ -116,13 +114,13 @@ func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err erro
 	for i := range shards {
 		n, err = conn.WriteToUDP(shards[i], addr)
 		if err != nil {
-			log.ERROR(err, len(shards[i]))
+			log.ERROR(err)
 			return
 		}
 		cumulative += n
 	}
-	fmt.Printf("resent %v bytes to multicast address %v port %v %v\r",
-		cumulative, addr.IP, addr.Port, time.Now())
+	// log.DEBUG(log.Composite(fmt.Sprintf("sent %v bytes to %v port %v",
+	//	cumulative, addr.IP, addr.Port), "STATUS", true), "\r")
 	return
 }
 
@@ -132,14 +130,7 @@ func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
 	[]byte)) (cancel context.CancelFunc, err error) {
 	var ctx context.Context
 	ctx, cancel = context.WithCancel(context.Background())
-	log.DEBUG("resolving", address)
-	//addr, err := net.ResolveUDPAddr("udp", address)
-	//if err != nil {
-	//	log.ERROR(err)
-	//	cancel()
-	//	return
-	//}
-	//log.DEBUG("resolved", addr.IP, addr.Uint16, addr.String())
+	log.TRACE("resolving", address)
 	var conn *net.UDPConn
 	conn, err = net.ListenUDP("udp", address)
 	if err != nil {
@@ -147,14 +138,14 @@ func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
 		cancel()
 		return
 	}
-	log.DEBUG("setting read buffer")
+	log.TRACE("setting read buffer")
 	err = conn.SetReadBuffer(MaxDatagramSize)
 	if err != nil {
 		log.ERROR(err)
 	}
 	buffer := make([]byte, MaxDatagramSize)
 	go func() {
-		log.DEBUG("starting connection handler")
+		log.TRACE("starting connection handler")
 	out:
 		// read from socket until context is cancelled
 		for {

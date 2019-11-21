@@ -8,7 +8,7 @@ import (
 )
 
 // TestHelpReflectInternals ensures the various help functions which deal with reflect types work as expected for various Go types.
-func TestHelpReflectInternals(	t *testing.T) {
+func TestHelpReflectInternals(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name        string
@@ -277,7 +277,7 @@ func TestHelpReflectInternals(	t *testing.T) {
 }
 
 // TestResultStructHelp ensures the expected help text format is returned for various Go struct types.
-func TestResultStructHelp(	t *testing.T) {
+func TestResultStructHelp(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name        string
@@ -411,7 +411,7 @@ func TestResultStructHelp(	t *testing.T) {
 }
 
 // TestHelpArgInternals ensures the various help functions which deal with arguments work as expected for various argument types.
-func TestHelpArgInternals(	t *testing.T) {
+func TestHelpArgInternals(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name        string

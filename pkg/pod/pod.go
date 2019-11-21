@@ -1,6 +1,7 @@
 package pod
 
 import (
+	"github.com/p9c/pod/app/appdata"
 	"reflect"
 	"sync"
 	"time"
@@ -12,6 +13,8 @@ import (
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
 )
+
+const AppName = "pod"
 
 type Schema struct {
 	Groups []Group `json:"groups"`
@@ -185,6 +188,7 @@ type Config struct {
 }
 
 func EmptyConfig() *Config {
+	datadir := appdata.Dir(AppName, false)
 	return &Config{
 		AddCheckpoints:           newStringSlice(),
 		AddPeers:                 newStringSlice(),
@@ -204,7 +208,7 @@ func EmptyConfig() *Config {
 		ConnectPeers:             newStringSlice(),
 		Controller:               newstring(),
 		CPUProfile:               newstring(),
-		DataDir:                  newstring(),
+		DataDir:                  &datadir,
 		DbType:                   newstring(),
 		DisableBanning:           newbool(),
 		DisableCheckpoints:       newbool(),

@@ -4,8 +4,6 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/urfave/cli"
-
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"
@@ -13,6 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/lang"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
+	"github.com/urfave/cli"
 )
 
 type _dtype int
@@ -51,8 +50,6 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// RealNode is the main node
 	RealNode *rpc.Node
-	// Bios
-
 }
 
 // GetNewContext returns a fresh new context

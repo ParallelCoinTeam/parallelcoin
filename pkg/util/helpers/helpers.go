@@ -8,7 +8,7 @@ import (
 )
 
 // SumOutputValues sums up the list of TxOuts and returns an Amount.
-func SumOutputValues(	outputs []*wire.TxOut) (totalOutput util.Amount) {
+func SumOutputValues(outputs []*wire.TxOut) (totalOutput util.Amount) {
 	for _, txOut := range outputs {
 		totalOutput += util.Amount(txOut.Value)
 	}
@@ -16,7 +16,7 @@ func SumOutputValues(	outputs []*wire.TxOut) (totalOutput util.Amount) {
 }
 
 // SumOutputSerializeSizes sums up the serialized size of the supplied outputs.
-func SumOutputSerializeSizes(	outputs []*wire.TxOut) (serializeSize int) {
+func SumOutputSerializeSizes(outputs []*wire.TxOut) (serializeSize int) {
 	for _, txOut := range outputs {
 		serializeSize += txOut.SerializeSize()
 	}

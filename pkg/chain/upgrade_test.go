@@ -7,7 +7,7 @@ import (
 
 // TestDeserializeUtxoEntryV0 ensures deserializing unspent trasaction output
 // entries from the legacy version 0 format works as expected.
-func TestDeserializeUtxoEntryV0(	t *testing.T) {
+func TestDeserializeUtxoEntryV0(t *testing.T) {
 	tests := []struct {
 		name       string
 		entries    map[uint32]*UtxoEntry

@@ -4,7 +4,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"reflect"
 	"time"
-	
+
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
@@ -45,8 +45,7 @@ retry:
 	for !poolsMatch {
 		firstPool, err := nodes[0].Node.GetRawMempool()
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// If all nodes have an identical mempool with respect to the first
@@ -55,8 +54,7 @@ log.ERROR(err)
 		for _, node := range nodes[1:] {
 			nodePool, err := node.Node.GetRawMempool()
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			if !reflect.DeepEqual(firstPool, nodePool) {
@@ -76,12 +74,11 @@ retry:
 	for !blocksMatch {
 		var prevHash *chainhash.Hash
 		var prevHeight int32
-		
+
 		for _, node := range nodes {
 			blockHash, blockHeight, err := node.Node.GetBestBlock()
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			if prevHash != nil && (*blockHash != *prevHash ||
@@ -105,7 +102,6 @@ func ConnectNode(from *Harness, to *Harness) error {
 	peerInfo, err := from.Node.GetPeerInfo()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	numPeers := len(peerInfo)
@@ -117,14 +113,12 @@ log.ERROR(err)
 	peerInfo, err = from.Node.GetPeerInfo()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	for len(peerInfo) <= numPeers {
 		peerInfo, err = from.Node.GetPeerInfo()
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

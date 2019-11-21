@@ -10,9 +10,9 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	
+
 	"github.com/btcsuite/go-socks/socks"
-	
+
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -32,8 +32,7 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
 		dial = func(network, addr string) (net.Conn, error) {
 			c, err := proxy.Dial(network, addr)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return nil, err
 			}
 			return c, nil
@@ -44,8 +43,7 @@ log.ERROR(err)
 	if *cfg.TLS && *cfg.RPCCert != "" {
 		pem, err := ioutil.ReadFile(*cfg.RPCCert)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		pool := x509.NewCertPool()
@@ -80,14 +78,13 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	serverAddr := *cx.Config.RPCConnect
 	if *cx.Config.Wallet {
 		serverAddr = *cx.Config.WalletServer
-		fmt.Println("using wallet server", serverAddr)
+		log.Println("using wallet server", serverAddr)
 	}
 	url := protocol + "://" + serverAddr
 	bodyReader := bytes.NewReader(marshalledJSON)
 	httpRequest, err := http.NewRequest("POST", url, bodyReader)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	httpRequest.Close = true
@@ -99,13 +96,11 @@ log.ERROR(err)
 	httpClient, err := newHTTPClient(cx.Config)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Read the raw bytes and close the response.
@@ -113,7 +108,7 @@ log.ERROR(err)
 	httpResponse.Body.Close()
 	if err != nil {
 		log.ERROR(err)
-err = fmt.Errorf("error reading json reply: %v", err)
+		err = fmt.Errorf("error reading json reply: %v", err)
 		log.ERROR(err)
 		return nil, err
 	}

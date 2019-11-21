@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	fileLimitWant = 8192
+	fileLimitWant = 32768
 	fileLimitMin  = 1024
 )
 
@@ -19,7 +19,7 @@ func SetLimits() error {
 	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	if rLimit.Cur > fileLimitWant {
 		return nil
@@ -37,12 +37,12 @@ return err
 	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
 	if err != nil {
 		log.ERROR(err)
-// try min value
+		// try min value
 		rLimit.Cur = fileLimitMin
 		err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 	}
 	return nil

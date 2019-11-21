@@ -18,7 +18,7 @@ const (
 type scriptNum int64
 
 // checkMinimalDataEncoding returns whether or not the passed byte array adheres to the minimal encoding requirements.
-func checkMinimalDataEncoding(	v []byte) error {
+func checkMinimalDataEncoding(v []byte) error {
 	if len(v) == 0 {
 		return nil
 	}
@@ -95,7 +95,7 @@ func (n scriptNum) Int32() int32 {
 // Since the consensus rules dictate that serialized bytes interpreted as ints are only allowed to be in the range determined by a maximum number of bytes, on a per opcode basis, an error will be returned when the provided bytes would result in a number outside of that range.  In particular, the range for the vast majority of opcodes dealing with numeric values are limited to 4 bytes and therefore will pass that value to this function resulting in an allowed range of [-2^31 + 1, 2^31 - 1].
 // The requireMinimal flag causes an error to be returned if additional checks on the encoding determine it is not represented with the smallest possible number of bytes or is the negative 0 encoding, [0x80].  For example, consider the number 127.  It could be encoded as [0x7f], [0x7f 0x00], [0x7f 0x00 0x00 ...], etc.  All forms except [0x7f] will return an error with requireMinimal enabled.
 // The scriptNumLen is the maximum number of bytes the encoded value can be before an ErrStackNumberTooBig is returned.  This effectively limits the range of allowed values. WARNING:  Great care should be taken if passing a value larger than defaultScriptNumLen, which could lead to addition and multiplication overflows. See the Hash function documentation for example encodings.
-func makeScriptNum(	v []byte, requireMinimal bool, scriptNumLen int) (scriptNum, error) {
+func makeScriptNum(v []byte, requireMinimal bool, scriptNumLen int) (scriptNum, error) {
 	// Interpreting data requires that it is not larger than the the passed scriptNumLen value.
 	if len(v) > scriptNumLen {
 		str := fmt.Sprintf("numeric value encoded as %x is %d bytes "+

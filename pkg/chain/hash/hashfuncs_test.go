@@ -6,7 +6,7 @@ import (
 )
 
 // TestHashFuncs ensures the hash functions which perform hash(b) work as expected.
-func TestHashFuncs(	t *testing.T) {
+func TestHashFuncs(t *testing.T) {
 
 	tests := []struct {
 		out string
@@ -74,7 +74,7 @@ func TestHashFuncs(	t *testing.T) {
 }
 
 // TestDoubleHashFuncs ensures the hash functions which perform hash(hash(b)) work as expected.
-func TestDoubleHashFuncs(	t *testing.T) {
+func TestDoubleHashFuncs(t *testing.T) {
 
 	tests := []struct {
 		out string

@@ -93,7 +93,6 @@ func (h *blockHeaderStore) readHeaderRange(startHeight uint32,
 
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 
@@ -132,7 +131,6 @@ func (h *blockHeaderStore) readHeader(height uint32) (wire.BlockHeader, error) {
 
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return header, err
 	}
 
@@ -157,7 +155,6 @@ func (f *FilterHeaderStore) readHeader(height uint32) (*chainhash.Hash, error) {
 
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 

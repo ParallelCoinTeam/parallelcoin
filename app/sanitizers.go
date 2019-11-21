@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -48,7 +49,7 @@ func initConfigFile(cfg *pod.Config) {
 		*cfg.ConfigFile =
 			*cfg.DataDir + string(os.PathSeparator) + podConfigFilename
 	}
-	log.WARN(*cfg.ConfigFile)
+	log.DEBUG("using config file:", *cfg.ConfigFile)
 }
 
 func initLogDir(cfg *pod.Config) {
@@ -197,7 +198,7 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	}
 	if *cfg.CAFile == "" {
 		*cfg.CAFile =
-			*cfg.DataDir + string(os.PathSeparator) + "cafile"
+			*cfg.DataDir + string(os.PathSeparator) + "ca.cert"
 		st.Save = true
 		isNew = true
 	}
@@ -216,10 +217,11 @@ func initLogLevel(cfg *pod.Config) {
 		log.INFO("unrecognised loglevel", loglevel, "setting default info")
 		*cfg.LogLevel = "info"
 	}
-	log.L.SetLevel(*cfg.LogLevel, true)
-	if !*cfg.Onion {
-		*cfg.OnionProxy = ""
+	color := true
+	if runtime.GOOS == "windows" {
+		color = false
 	}
+	log.L.SetLevel(*cfg.LogLevel, color)
 }
 
 func normalizeAddresses(cfg *pod.Config) {
@@ -307,7 +309,6 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 		for _, addr := range *cfg.Whitelists {
 			_, ipnet, err := net.ParseCIDR(addr)
 			if err != nil {
-				log.ERROR(err)
 				log.ERROR(err)
 				err = fmt.Errorf("%s '%s'", err.Error())
 				ip = net.ParseIP(addr)
@@ -397,7 +398,6 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		log.DEBUG("looking up default listener")
 		addrs, err := net.LookupHost(node.DefaultRPCListener)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			os.Exit(1)
 		}
@@ -532,6 +532,10 @@ func validateOnions(cfg *pod.Config) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	if !*cfg.Onion {
+		*cfg.OnionProxy = ""
+	}
+
 }
 
 func validateMiningStuff(cfg *pod.Config, state *state.Config,
@@ -559,12 +563,12 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 		state.ActiveMiningAddrs = append(state.ActiveMiningAddrs, addr)
 	}
 	// Ensure there is at least one mining address when the generate flag is set.
-	if (*cfg.Generate) && len(*cfg.MiningAddrs) == 0 {
-		// str := "%s: the generate flag is set, but there are no mining addresses specified "
-		// err := fmt.Errorf(str, funcName)
-		// fmt.Fprintln(os.Stderr, err)
-		// os.Exit(1)
+	if (*cfg.Generate) && len(state.ActiveMiningAddrs) == 0 {
+		log.ERROR("the generate flag is set, " +
+			"but there are no mining addresses specified ")
+		log.SPEW(cfg)
 		*cfg.Generate = false
+		//os.Exit(1)
 	}
 	if *cfg.MinerPass != "" {
 		state.ActiveMinerKey = fork.Argon2i([]byte(*cfg.MinerPass))

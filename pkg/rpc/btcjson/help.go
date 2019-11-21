@@ -33,10 +33,10 @@ var baseHelpDescs = map[string]string{
 }
 
 // descLookupFunc is a function which is used to lookup a description given a key.
-type descLookupFunc func(	string) string
+type descLookupFunc func(string) string
 
 // reflectTypeToJSONType returns a string that represents the JSON type associated with the provided Go type.
-func reflectTypeToJSONType(	xT descLookupFunc, rt reflect.Type) string {
+func reflectTypeToJSONType(xT descLookupFunc, rt reflect.Type) string {
 	kind := rt.Kind()
 	if isNumeric(kind) {
 		return xT("json-type-numeric")
@@ -58,7 +58,7 @@ func reflectTypeToJSONType(	xT descLookupFunc, rt reflect.Type) string {
 }
 
 // resultStructHelp returns a slice of strings containing the result help output for a struct.  Each line makes use of tabs to separate the relevant pieces so a tabwriter can be used later to line everything up.  The descriptions are pulled from the active help descriptions map based on the lowercase version of the provided reflect type and json name (or the lowercase version of the field name if no json tag was specified).
-func resultStructHelp(	xT descLookupFunc, rt reflect.Type, indentLevel int) []string {
+func resultStructHelp(xT descLookupFunc, rt reflect.Type, indentLevel int) []string {
 	indent := strings.Repeat(" ", indentLevel)
 	typeName := strings.ToLower(rt.Name())
 	// Generate the help for each of the fields in the result struct.
@@ -106,7 +106,7 @@ func resultStructHelp(	xT descLookupFunc, rt reflect.Type, indentLevel int) []st
 }
 
 // reflectTypeToJSONExample generates example usage in the format used by the help output.  It handles arrays, slices and structs recursively.  The output is returned as a slice of lines so the final help can be nicely aligned via a tab writer.  A bool is also returned which specifies whether or not the type results in a complex JSON object since they need to be handled differently.
-func reflectTypeToJSONExample(	xT descLookupFunc, rt reflect.Type, indentLevel int, fieldDescKey string) ([]string, bool) {
+func reflectTypeToJSONExample(xT descLookupFunc, rt reflect.Type, indentLevel int, fieldDescKey string) ([]string, bool) {
 	// Indirect pointer if needed.
 	if rt.Kind() == reflect.Ptr {
 		rt = rt.Elem()
@@ -177,7 +177,7 @@ func reflectTypeToJSONExample(	xT descLookupFunc, rt reflect.Type, indentLevel i
 }
 
 // resultTypeHelp generates and returns formatted help for the provided result type.
-func resultTypeHelp(	xT descLookupFunc, rt reflect.Type, fieldDescKey string) string {
+func resultTypeHelp(xT descLookupFunc, rt reflect.Type, fieldDescKey string) string {
 	// Generate the JSON example for the result type.
 	results, isComplex := reflectTypeToJSONExample(xT, rt, 0, fieldDescKey)
 	// When this is a primitive type, add the associated JSON type and result description into the final string, format it accordingly, and return it.
@@ -200,7 +200,7 @@ func resultTypeHelp(	xT descLookupFunc, rt reflect.Type, fieldDescKey string) st
 }
 
 // argTypeHelp returns the type of provided command argument as a string in the format used by the help output.  In particular, it includes the JSON type (boolean, numeric, string, array, object) along with optional and the default value if applicable.
-func argTypeHelp(	xT descLookupFunc, structField reflect.StructField, defaultVal *reflect.Value) string {
+func argTypeHelp(xT descLookupFunc, structField reflect.StructField, defaultVal *reflect.Value) string {
 	// Indirect the pointer if needed and track if it's an optional field.
 	fieldType := structField.Type
 	var isOptional bool
@@ -235,7 +235,7 @@ func argTypeHelp(	xT descLookupFunc, structField reflect.StructField, defaultVal
 }
 
 // argHelp generates and returns formatted help for the provided command.
-func argHelp(	xT descLookupFunc, rtp reflect.Type, defaults map[int]reflect.Value, method string) string {
+func argHelp(xT descLookupFunc, rtp reflect.Type, defaults map[int]reflect.Value, method string) string {
 	// Return now if the command has no arguments.
 	rt := rtp.Elem()
 	numFields := rt.NumField()
@@ -291,7 +291,7 @@ func argHelp(	xT descLookupFunc, rtp reflect.Type, defaults map[int]reflect.Valu
 }
 
 // methodHelp generates and returns the help output for the provided command and method info.  This is the main work horse for the exported MethodHelp function.
-func methodHelp(	xT descLookupFunc, rtp reflect.Type, defaults map[int]reflect.Value, method string, resultTypes []interface{}) string {
+func methodHelp(xT descLookupFunc, rtp reflect.Type, defaults map[int]reflect.Value, method string, resultTypes []interface{}) string {
 	// Start off with the method usage and help synopsis.
 	help := fmt.Sprintf("%s\n\n%s\n", methodUsageText(rtp, defaults, method),
 		xT(method+"--synopsis"))
@@ -335,7 +335,7 @@ func methodHelp(	xT descLookupFunc, rtp reflect.Type, defaults map[int]reflect.V
 
 // isValidResultType returns whether the passed reflect kind is one of the
 // acceptable types for results.
-func isValidResultType(	kind reflect.Kind) bool {
+func isValidResultType(kind reflect.Kind) bool {
 	if isNumeric(kind) {
 		return true
 	}
@@ -365,7 +365,7 @@ func isValidResultType(	kind reflect.Kind) bool {
 //   "help--condition1": "command specified"
 //   "help--result0":    "List of commands"
 //   "help--result1":    "Help for specified command"
-func GenerateHelp(	method string, descs map[string]string, resultTypes ...interface{}) (string, error) {
+func GenerateHelp(method string, descs map[string]string, resultTypes ...interface{}) (string, error) {
 	// Look up details about the provided method and error out if not registered.
 	registerLock.RLock()
 	rtp, ok := methodToConcreteType[method]

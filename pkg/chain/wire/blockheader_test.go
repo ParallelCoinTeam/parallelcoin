@@ -10,7 +10,7 @@ import (
 )
 
 // TestBlockHeader tests the BlockHeader API.
-func TestBlockHeader(	t *testing.T) {
+func TestBlockHeader(t *testing.T) {
 	nonce64, err := RandomUint64()
 	if err != nil {
 		t.Errorf("RandomUint64: Error generating nonce: %v", err)
@@ -40,7 +40,7 @@ func TestBlockHeader(	t *testing.T) {
 }
 
 // TestBlockHeaderWire tests the BlockHeader wire encode and decode for various protocol versions.
-func TestBlockHeaderWire(	t *testing.T) {
+func TestBlockHeaderWire(t *testing.T) {
 	nonce := uint32(123123) // 0x1e0f3
 	pver := uint32(70001)
 	// baseBlockHdr is used in the various tests as a baseline BlockHeader.
@@ -169,7 +169,7 @@ func TestBlockHeaderWire(	t *testing.T) {
 }
 
 // TestBlockHeaderSerialize tests BlockHeader serialize and deserialize.
-func TestBlockHeaderSerialize(	t *testing.T) {
+func TestBlockHeaderSerialize(t *testing.T) {
 	nonce := uint32(123123) // 0x1e0f3
 	// baseBlockHdr is used in the various tests as a baseline BlockHeader.
 	bits := uint32(0x1d00ffff)

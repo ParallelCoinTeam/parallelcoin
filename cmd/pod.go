@@ -2,6 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"runtime/trace"
+
 	// This enables pprof
 	_ "net/http/pprof"
 	"os"
@@ -20,47 +24,28 @@ func Main() {
 		_, _ = fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
 		os.Exit(1)
 	}
-	os.Exit(app.Main())
-	/*
-		_=func() {
-			f, err := os.Create("trace.out")
-			if err != nil {
-				panic(err)
-			}
+	if os.Getenv("POD_TRACE") == "on" {
+		if f, err := os.Create("testtrace.out"); err != nil {
+			log.ERROR("tracing env POD_TRACE=on but we can't write to it",
+				err)
+		} else {
+			log.DEBUG("tracing started")
 			err = trace.Start(f)
 			if err != nil {
-				panic(err)
-			}
-			mf, err := os.Create("mem.prof")
-			if err != nil {
-				log.Fatal("could not create memory profile: ", err)
+				log.ERROR("could not start tracing", err)
+			} else {
+				interrupt.AddHandler(
+					func() {
+						log.DEBUG("stopping trace")
+						trace.Stop()
+						err := f.Close()
+						if err != nil {
+							log.ERROR(err)
+						}
+					},
+				)
 			}
 		}
-		go func() {
-			time.Sleep(time.Minute)
-			runtime.GC() // get up-to-date statistics
-			if err := pprof.WriteHeapProfile(mf); err != nil {
-				log.Fatal("could not write memory profile: ", err)
-			}
-		}()
-		cf, err := os.Create("cpu.prof")
-		if err != nil {
-			log.Fatal("could not create CPU profile: ", err)
-		}
-		if err := pprof.StartCPUProfile(cf); err != nil {
-			log.Fatal("could not start CPU profile: ", err)
-		}
-		go func() {
-			log.Println(http.ListenAndServe("localhost:6060", nil))
-		}()
-		interrupt.AddHandler(
-			func() {
-				fmt.Println("stopping trace")
-				trace.Stop()
-				pprof.StopCPUProfile()
-				f.Close()
-				mf.Close()
-			},
-		)
-	*/
+	}
+	app.Main()
 }

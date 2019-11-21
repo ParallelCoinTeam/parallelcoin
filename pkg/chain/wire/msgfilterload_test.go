@@ -8,7 +8,7 @@ import (
 )
 
 // TestFilterCLearLatest tests the MsgFilterLoad API against the latest protocol version.
-func TestFilterLoadLatest(	t *testing.T) {
+func TestFilterLoadLatest(t *testing.T) {
 	pver := ProtocolVersion
 	enc := BaseEncoding
 	data := []byte{0x01, 0x02}
@@ -42,7 +42,7 @@ func TestFilterLoadLatest(	t *testing.T) {
 }
 
 // TestFilterLoadCrossProtocol tests the MsgFilterLoad API when encoding with the latest protocol version and decoding with BIP0031Version.
-func TestFilterLoadCrossProtocol(	t *testing.T) {
+func TestFilterLoadCrossProtocol(t *testing.T) {
 	data := []byte{0x01, 0x02}
 	msg := NewMsgFilterLoad(data, 10, 0, 0)
 	// Encode with latest protocol version.
@@ -62,7 +62,7 @@ func TestFilterLoadCrossProtocol(	t *testing.T) {
 }
 
 // TestFilterLoadMaxFilterSize tests the MsgFilterLoad API maximum filter size.
-func TestFilterLoadMaxFilterSize(	t *testing.T) {
+func TestFilterLoadMaxFilterSize(t *testing.T) {
 	data := bytes.Repeat([]byte{0xff}, 36001)
 	msg := NewMsgFilterLoad(data, 10, 0, 0)
 	// Encode with latest protocol version.
@@ -82,7 +82,7 @@ func TestFilterLoadMaxFilterSize(	t *testing.T) {
 }
 
 // TestFilterLoadMaxHashFuncsSize tests the MsgFilterLoad API maximum hash functions.
-func TestFilterLoadMaxHashFuncsSize(	t *testing.T) {
+func TestFilterLoadMaxHashFuncsSize(t *testing.T) {
 	data := bytes.Repeat([]byte{0xff}, 10)
 	msg := NewMsgFilterLoad(data, 61, 0, 0)
 	// Encode with latest protocol version.
@@ -109,7 +109,7 @@ func TestFilterLoadMaxHashFuncsSize(	t *testing.T) {
 }
 
 // TestFilterLoadWireErrors performs negative tests against wire encode and decode of MsgFilterLoad to confirm error paths work correctly.
-func TestFilterLoadWireErrors(	t *testing.T) {
+func TestFilterLoadWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverNoFilterLoad := BIP0037Version - 1
 	wireErr := &MessageError{}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
@@ -135,14 +136,14 @@ func (r *rcvar) GetTransactionsExcertps() (txse DuOStransactionsExcerpts) {
 		if txse.Balance > balanceHeight {
 			balanceHeight = txse.Balance
 		}
-		fmt.Println("btititititmt", tx.Time)
-		fmt.Println("bbbbbbbbb", tx.Amount)
+		log.Println("btititititmt", tx.Time)
+		log.Println("bbbbbbbbb", tx.Amount)
 	}
-	fmt.Println("cccccccccccccccccccccccccccccccccccccccccccccc")
-	fmt.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
-	fmt.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
-	fmt.Println("balanceHeightbalanceHeight", balanceHeight)
-	fmt.Println("bbbbbbbbbbbbbbbbbbbbbbbbbbbb", txse.Balance)
+	log.Println("cccccccccccccccccccccccccccccccccccccccccccccc")
+	log.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+	log.Println("bbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+	log.Println("balanceHeightbalanceHeight", balanceHeight)
+	log.Println("bbbbbbbbbbbbbbbbbbbbbbbbbbbb", txse.Balance)
 	txse.BalanceHeight = balanceHeight
 	return
 }
@@ -208,7 +209,7 @@ func (r *rcvar) DuoSend(wp string, ad string, am float64) string {
 			r.PushDuOSalert("Payment sent", "PAYMENT", "success")
 		}
 	} else {
-		// fmt.Println("low")
+		log.Println(am)
 	}
 	return "sent"
 }

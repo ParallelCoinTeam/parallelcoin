@@ -2,6 +2,7 @@ package bloom_test
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 	"math/rand"
 	"time"
 
@@ -20,13 +21,13 @@ func ExampleNewFilter() {
 	txHashStr := "fd611c56ca0d378cdcd16244b45c2ba9588da3adac367c4ef43e808b280b8a45"
 	txHash, err := chainhash.NewHashFromStr(txHashStr)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	filter.AddHash(txHash)
 	// Show that the filter matches.
 	matches := filter.Matches(txHash[:])
-	fmt.Println("Filter Matches?:", matches)
+	log.Println("Filter Matches?:", matches)
 	// Output:
 	// Filter Matches?: true
 }

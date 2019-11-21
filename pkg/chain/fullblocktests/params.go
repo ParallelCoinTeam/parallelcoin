@@ -17,7 +17,7 @@ func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
 	if err != nil {
 		log.ERROR(err)
-panic(err)
+		panic(err)
 	}
 	return hash
 }
@@ -27,7 +27,7 @@ func fromHex(s string) []byte {
 	r, err := hex.DecodeString(s)
 	if err != nil {
 		log.ERROR(err)
-panic("invalid hex in source file: " + s)
+		panic("invalid hex in source file: " + s)
 	}
 	return r
 }

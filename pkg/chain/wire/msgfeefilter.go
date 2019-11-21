@@ -41,7 +41,7 @@ func (msg *MsgFeeFilter) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgFeeFilter returns a new bitcoin feefilter message that conforms to the Message interface.  See MsgFeeFilter for details.
-func NewMsgFeeFilter(	minfee int64) *MsgFeeFilter {
+func NewMsgFeeFilter(minfee int64) *MsgFeeFilter {
 	return &MsgFeeFilter{
 		MinFee: minfee,
 	}

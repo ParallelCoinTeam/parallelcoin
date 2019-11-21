@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/binary"
-	"fmt"
 	_ "github.com/gohouse/i18n/parser_json"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
@@ -29,11 +28,14 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
 		Action: func(c *cli.Context) error {
-			fmt.Println(cx.Language.RenderText("goApp_NOSUBCMDREQ"))
+			log.Println(cx.Language.RenderText("goApp_NOSUBCMDREQ"))
 			cli.ShowAppHelpAndExit(c, 1)
 			return nil
 		},
-		Before: beforeFunc(cx),
+		Before: func(c *cli.Context) error {
+			log.TRACE("running beforeFunc")
+			return beforeFunc(cx)(c)
+		},
 		After: func(c *cli.Context) error {
 			log.TRACE("subcommand completed")
 			return nil
@@ -42,7 +44,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			apputil.NewCommand("version",
 				"print version and exit",
 				func(c *cli.Context) error {
-					fmt.Println(c.App.Name, c.App.Version)
+					log.Println(c.App.Name, c.App.Version)
 					return nil
 				},
 				apputil.SubCommands(),
@@ -68,7 +70,8 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropAddrIndex = true
-							return nodeHandle(cx)(c)
+							//return nodeHandle(cx)(c)
+							return nil
 						},
 						apputil.SubCommands(),
 					),
@@ -76,7 +79,19 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropTxIndex = true
-							return nodeHandle(cx)(c)
+							//return nodeHandle(cx)(c)
+							return nil
+						},
+						apputil.SubCommands(),
+					),
+					apputil.NewCommand("dropindexes",
+						"drop all of the indexes",
+						func(c *cli.Context) error {
+							cx.StateCfg.DropAddrIndex = true
+							cx.StateCfg.DropTxIndex = true
+							cx.StateCfg.DropCfIndex = true
+							//return nodeHandle(cx)(c)
+							return nil
 						},
 						apputil.SubCommands(),
 					),
@@ -84,7 +99,8 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropCfIndex = true
-							return nodeHandle(cx)(c)
+							//return nodeHandle(cx)(c)
+							return nil
 						},
 						apputil.SubCommands(),
 					),
@@ -114,11 +130,11 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 								filepath.Join(*cx.Config.DataDir,
 									*cx.Config.Network, "wallet.db"))
 							if err != nil {
-								fmt.Println("failed to open database:", err)
+								log.Println("failed to open database:", err)
 								return err
 							}
 							defer db.Close()
-							fmt.Println("dropping wtxmgr namespace")
+							log.Println("dropping wtxmgr namespace")
 							err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
 								err := tx.DeleteTopLevelBucket(wtxmgrNamespace)
 								if err != nil && err != walletdb.ErrBucketNotFound {
@@ -173,16 +189,14 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			apputil.NewCommand("kopach",
 				"standalone miner for clusters",
 				kopachHandle(cx),
-				apputil.SubCommands(
-					// apputil.NewCommand("bench",
-					// 	"generate a set of benchmarks of each algorithm",
-					// 	func(c *cli.Context) error {
-					// 		return bench.Benchmark(cx)(c)
-					// 	},
-					// 	apputil.SubCommands(),
-					// ),
-				),
+				apputil.SubCommands(),
 				"k"),
+			//apputil.NewCommand("worker",
+			//	"single thread parallelcoin miner controlled with binary IPC"+
+			//		" interface on stdin/stdout",
+			//	workerHandle(cx),
+			//	apputil.SubCommands(),
+			//),
 		},
 		Flags: []cli.Flag{
 			altsrc.NewStringFlag(cli.StringFlag{

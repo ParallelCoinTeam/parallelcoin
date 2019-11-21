@@ -632,7 +632,7 @@ func (curve *KoblitzCurve) moduloReduce(k []byte) []byte {
 // non-zero.  This is algorithm 3.30 from [GECC].
 // Essentially, this makes it possible to minimize the number of operations
 // since the resulting ints returned will be at least 50% 0s.
-func NAF(	k []byte) ([]byte, []byte) {
+func NAF(k []byte) ([]byte, []byte) {
 	// The essence of this algorithm is that whenever we have consecutive 1s
 	// in the binary, we want to put a -1 in the lowest bit and get a bunch
 	// of 0s up to the highest bit of consecutive 1s.  This is due to this
@@ -832,7 +832,7 @@ func initAll() {
 // panic is there is an error.  This is only provided for the hard-coded
 // constants so errors in the source code can bet detected. It will only (and
 // must only) be called for initialization purposes.
-func fromHex(	s string) *big.Int {
+func fromHex(s string) *big.Int {
 	r, ok := new(big.Int).SetString(s, 16)
 	if !ok {
 		panic("invalid hex in source file: " + s)

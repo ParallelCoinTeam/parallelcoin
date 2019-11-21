@@ -19,6 +19,6 @@ func (e *MessageError) Error() string {
 }
 
 // messageError creates an error for the given function and description.
-func messageError(	f string, desc string) *MessageError {
+func messageError(f string, desc string) *MessageError {
 	return &MessageError{Func: f, Description: desc}
 }

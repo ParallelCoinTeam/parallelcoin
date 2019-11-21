@@ -14,16 +14,14 @@ import (
 
 const slash = string(os.PathSeparator)
 
-func
-ctlHandleList(c *cli.Context) error {
+func ctlHandleList(c *cli.Context) error {
 	fmt.Println("Here are the available commands. Pausing a moment as it is a long list...")
 	time.Sleep(2 * time.Second)
 	ctl.ListCommands()
 	return nil
 }
 
-func
-ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
+func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		Configure(cx, c)
 		args := c.Args()
@@ -34,7 +32,6 @@ ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 			err := cli.ShowSubcommandHelp(c)
 			if err != nil {
 				log.ERROR(err)
-				fmt.Println(err)
 			}
 		}
 		ctl.Main(args, cx)

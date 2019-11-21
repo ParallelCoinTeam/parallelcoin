@@ -75,14 +75,14 @@ func (r FutureGetAddedNodeInfoResult) Receive() ([]btcjson.GetAddedNodeInfoResul
 	res, err := receiveFuture(r)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Unmarshal as an array of getaddednodeinfo result objects.
 	var nodeInfo []btcjson.GetAddedNodeInfoResult
 	err = js.Unmarshal(res, &nodeInfo)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return nodeInfo, nil
 }
@@ -106,14 +106,14 @@ func (r FutureGetAddedNodeInfoNoDNSResult) Receive() ([]string, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Unmarshal result as an array of strings.
 	var nodes []string
 	err = js.Unmarshal(res, &nodes)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return nodes, nil
 }
@@ -137,14 +137,14 @@ func (r FutureGetConnectionCountResult) Receive() (int64, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
 		log.ERROR(err)
-return 0, err
+		return 0, err
 	}
 	// Unmarshal result as an int64.
 	var count int64
 	err = js.Unmarshal(res, &count)
 	if err != nil {
 		log.ERROR(err)
-return 0, err
+		return 0, err
 	}
 	return count, nil
 }
@@ -188,14 +188,14 @@ func (r FutureGetPeerInfoResult) Receive() ([]btcjson.GetPeerInfoResult, error) 
 	res, err := receiveFuture(r)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Unmarshal result as an array of getpeerinfo result objects.
 	var peerInfo []btcjson.GetPeerInfoResult
 	err = js.Unmarshal(res, &peerInfo)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return peerInfo, nil
 }
@@ -219,14 +219,14 @@ func (r FutureGetNetTotalsResult) Receive() (*btcjson.GetNetTotalsResult, error)
 	res, err := receiveFuture(r)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// Unmarshal result as a getnettotals result object.
 	var totals btcjson.GetNetTotalsResult
 	err = js.Unmarshal(res, &totals)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return &totals, nil
 }

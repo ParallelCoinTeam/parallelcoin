@@ -238,13 +238,11 @@ func (s *ChainService) BestBlock() (*waddrmgr.BlockStamp, error) {
 	bestHeader, bestHeight, err := s.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	_, filterHeight, err := s.RegFilterHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Filter headers might lag behind block headers, so we can can fetch a
@@ -255,8 +253,7 @@ log.ERROR(err)
 			bestHeight,
 		)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 	}
@@ -277,7 +274,6 @@ func (s *ChainService) GetBlockHash(height int64) (*chainhash.Hash, error) {
 	header, err := s.BlockHeaders.FetchHeaderByHeight(uint32(height))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	hash := header.BlockHash()
@@ -298,7 +294,6 @@ func (s *ChainService) GetBlockHeight(hash *chainhash.Hash) (int32, error) {
 	_, height, err := s.BlockHeaders.FetchHeader(hash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	return int32(height), nil
@@ -382,7 +377,6 @@ func (s *ChainService) addrStringToNetAddr(addr string) (net.Addr, error) {
 	host, strPort, err := net.SplitHostPort(addr)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		switch err.(type) {
 		case *net.AddrError:
 			host = addr
@@ -395,7 +389,6 @@ log.ERROR(err)
 	ips, err := s.nameResolver(host)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	if len(ips) == 0 {
@@ -404,7 +397,6 @@ log.ERROR(err)
 	port, err := strconv.Atoi(strPort)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return &net.TCPAddr{
@@ -430,7 +422,7 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 	host, _, err := net.SplitHostPort(sp.Addr())
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG("can't split host/port:", err)
+		log.DEBUG("can't split host/port:", err)
 		sp.Disconnect()
 		return false
 	}
@@ -477,7 +469,7 @@ func (s *ChainService) handleBanPeerMsg(state *peerState, sp *ServerPeer) {
 	host, _, err := net.SplitHostPort(sp.Addr())
 	if err != nil {
 		log.ERROR(err)
-log.DEBUGF(
+		log.DEBUGF(
 			"can't split ban peer %s: %s %s",
 			sp.Addr(), err,
 		)
@@ -554,9 +546,9 @@ func (s *ChainService) outboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) 
 	p, err := peer.NewOutboundPeer(newPeerConfig(sp), c.Addr.String())
 	if err != nil {
 		log.ERROR(err)
-log.DEBUGF(
+		log.DEBUGF(
 			"cannot create outbound peer %s: %s %s", c.Addr, err,
-			)
+		)
 		s.connManager.Disconnect(c.ID())
 	}
 	sp.Peer = p
@@ -592,7 +584,7 @@ func (s *ChainService) peerHandler() {
 	err := s.utxoScanner.Start()
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 	state := &peerState{
 		persistentPeers: make(map[int32]*ServerPeer),
@@ -644,17 +636,17 @@ out:
 	err = s.utxoScanner.Stop()
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 	err = s.blockManager.Stop()
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 	err = s.addrManager.Stop()
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 	// Drain channels before exiting so nothing is left waiting around
 	// to send.
@@ -679,7 +671,6 @@ func (s *ChainService) rollBackToHeight(height uint32) (*waddrmgr.BlockStamp, er
 	header, headerHeight, err := s.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	bs := &waddrmgr.BlockStamp{
@@ -689,14 +680,12 @@ log.ERROR(err)
 	_, regHeight, err := s.RegFilterHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	for uint32(bs.Height) > height {
 		header, _, err := s.BlockHeaders.FetchHeader(&bs.Hash)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		newTip := &header.PrevBlock
@@ -704,16 +693,14 @@ log.ERROR(err)
 		if uint32(bs.Height) <= regHeight {
 			newFilterTip, err := s.RegFilterHeaders.RollbackLastBlock(newTip)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return nil, err
 			}
 			regHeight = uint32(newFilterTip.Height)
 		}
 		bs, err = s.BlockHeaders.RollbackLastBlock()
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		// Notifications are asynchronous, so we include the previous
@@ -725,8 +712,7 @@ log.ERROR(err)
 		// factored out into their own package.
 		lastHeader, _, err := s.BlockHeaders.FetchHeader(newTip)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		s.mtxReorgHeader.Lock()
@@ -840,8 +826,8 @@ func (sp *ServerPeer) OnInv(p *peer.Peer, msg *wire.MsgInv) {
 		}
 		err := newInv.AddInvVect(invVect)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR("failed to add inventory vector:", err)
+			log.ERROR(err)
+			log.ERROR("failed to add inventory vector:", err)
 			break
 		}
 	}
@@ -886,7 +872,7 @@ func (sp *ServerPeer) OnVerAck(_ *peer.Peer, msg *wire.MsgVerAck) {
 	err := sp.pushSendHeadersMsg()
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 }
 
@@ -997,7 +983,6 @@ func (sp *ServerPeer) newestBlock() (*chainhash.Hash, int32, error) {
 	bestHeader, bestHeight, err := sp.server.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, 0, err
 	}
 	bestHash := bestHeader.BlockHash()
@@ -1117,7 +1102,6 @@ func NewChainService(cfg Config) (*ChainService, error) {
 	s.FilterDB, err = filterdb.New(cfg.Database, cfg.ChainParams)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	filterCacheSize := DefaultFilterCacheSize
@@ -1135,7 +1119,6 @@ log.ERROR(err)
 	)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	s.RegFilterHeaders, err = headerfs.NewFilterHeaderStore(
@@ -1143,13 +1126,11 @@ log.ERROR(err)
 	)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	bm, err := newBlockManager(&s)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	s.blockManager = bm
@@ -1208,7 +1189,6 @@ log.ERROR(err)
 	cmgr, err := connmgr.New(cmgrCfg)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	s.connManager = cmgr
@@ -1220,8 +1200,7 @@ log.ERROR(err)
 	for _, addr := range permanentPeers {
 		tcpAddr, err := s.addrStringToNetAddr(addr)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		go s.connManager.Connect(&connmgr.ConnReq{

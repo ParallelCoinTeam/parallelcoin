@@ -1,19 +1,19 @@
 package snacl
 
 import (
-   "crypto/rand"
-   "crypto/sha256"
-   "crypto/subtle"
-   "encoding/binary"
-   "errors"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/binary"
+	"errors"
 	"github.com/p9c/pod/pkg/log"
 	"io"
-   "runtime/debug"
-   
-   "github.com/btcsuite/golangcrypto/nacl/secretbox"
-   "github.com/btcsuite/golangcrypto/scrypt"
-   
-   "github.com/p9c/pod/pkg/util/zero"
+	"runtime/debug"
+
+	"github.com/btcsuite/golangcrypto/nacl/secretbox"
+	"github.com/btcsuite/golangcrypto/scrypt"
+
+	"github.com/p9c/pod/pkg/util/zero"
 )
 
 var (
@@ -45,7 +45,7 @@ func (ck *CryptoKey) Encrypt(in []byte) ([]byte, error) {
 	_, err := io.ReadFull(prng, nonce[:])
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	blob := secretbox.Seal(nil, in, &nonce, (*[KeySize]byte)(ck))
 	return append(nonce[:], blob...), nil
@@ -81,7 +81,7 @@ func GenerateCryptoKey() (*CryptoKey, error) {
 	_, err := io.ReadFull(prng, key[:])
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return &key, nil
 }
@@ -111,7 +111,7 @@ func (sk *SecretKey) deriveKey(password *[]byte) error {
 		len(sk.Key))
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	copy(sk.Key[:], key)
 	zero.Bytes(key)
@@ -206,7 +206,7 @@ func (sk *SecretKey) Decrypt(in []byte) ([]byte, error) {
 }
 
 // NewSecretKey returns a SecretKey structure based on the passed parameters.
-func NewSecretKey(	password *[]byte, N, r, p int) (*SecretKey, error) {
+func NewSecretKey(password *[]byte, N, r, p int) (*SecretKey, error) {
 	sk := SecretKey{
 		Key: (*CryptoKey)(&[KeySize]byte{}),
 	}
@@ -217,13 +217,13 @@ func NewSecretKey(	password *[]byte, N, r, p int) (*SecretKey, error) {
 	_, err := io.ReadFull(prng, sk.Parameters.Salt[:])
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// derive key
 	err = sk.deriveKey(password)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// store digest
 	sk.Parameters.Digest = sha256.Sum256(sk.Key[:])

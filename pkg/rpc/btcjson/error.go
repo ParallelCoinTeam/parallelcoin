@@ -74,6 +74,6 @@ func (e Error) Error() string {
 }
 
 // makeError creates an Error given a set of arguments.
-func makeError(	c ErrorCode, desc string) Error {
+func makeError(c ErrorCode, desc string) Error {
 	return Error{ErrorCode: c, Description: desc}
 }

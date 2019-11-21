@@ -34,7 +34,6 @@ func init() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		os.Exit(1)
 	}
 }
@@ -72,14 +71,14 @@ func main() {
 	os.Exit(mainInt())
 }
 func mainInt() int {
-	fmt.Println("Database path:", opts.DbPath)
+	log.Println("Database path:", opts.DbPath)
 	_, err := os.Stat(opts.DbPath)
 	if os.IsNotExist(err) {
-		fmt.Println("Database file does not exist")
+		log.Println("Database file does not exist")
 		return 1
 	}
 	for !opts.Force {
-		fmt.Print("Drop all mod transaction history? [y/N] ")
+		log.Print("Drop all mod transaction history? [y/N] ")
 		scanner := bufio.NewScanner(bufio.NewReader(os.Stdin))
 		if !scanner.Scan() {
 			// Exit on EOF.
@@ -97,15 +96,15 @@ func mainInt() int {
 		if no(resp) || resp == "" {
 			return 0
 		}
-		fmt.Println("Enter yes or no.")
+		log.Println("Enter yes or no.")
 	}
 	db, err := walletdb.Open("bdb", opts.DbPath)
 	if err != nil {
-		fmt.Println("failed to open database:", err)
+		log.Println("failed to open database:", err)
 		return 1
 	}
 	defer db.Close()
-	fmt.Println("dropping wtxmgr namespace")
+	log.Println("dropping wtxmgr namespace")
 	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
 		err := tx.DeleteTopLevelBucket(wtxmgrNamespace)
 		if err != nil && err != walletdb.ErrBucketNotFound {
@@ -126,7 +125,6 @@ func mainInt() int {
 		err = ns.Put(syncedToName, startBlock)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 			return err
 		}
 		recentBlocks := make([]byte, 40)
@@ -137,7 +135,7 @@ func mainInt() int {
 	})
 	if err != nil {
 		log.ERROR(err)
-		fmt.Println("Failed to drop and re-create namespace:", err)
+		log.Println("Failed to drop and re-create namespace:", err)
 		return 1
 	}
 	return 0

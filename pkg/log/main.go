@@ -3,6 +3,7 @@ package log
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -13,41 +14,23 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-//func r(start, end int) (out []int) {
-//	for i := start; i < end; i++ {
-//		out = append(out, i)
-//	}
-//	return
-//}
-//
-//func init() {
-//	for x := 0; x < 16; x++ {
-//		for y := 0; y < 16; y++ {
-//			n := x*16 + y
-//			code := fmt.Sprint(n)
-//			fmt.Print("\u001b[38;5;"+code+"m", code, " \u001b[0m ")
-//			if n%8-3 == 0 {
-//				fmt.Println()
-//			}
-//		}
-//	}
-//	fmt.Println()
-//}
+var L =Empty()
 
 var (
-	colorRed       = "\u001b[38;5;196m"
-	colorOrange    = "\u001b[38;5;208m"
-	colorYellow    = "\u001b[38;5;226m"
-	colorGreen     = "\u001b[38;5;40m"
-	colorBlue      = "\u001b[38;5;33m"
-	colorPurple    = "\u001b[38;5;99m"
-	colorViolet    = "\u001b[38;5;201m"
-	colorBrown     = "\u001b[38;5;130m"
-	colorBold      = "\u001b[1m"
-	colorUnderline = "\u001b[4m"
-	colorItalic    = "\u001b[3m"
-	colorFaint     = "\u001b[2m"
+	colorRed    = "\u001b[38;5;196m"
+	colorOrange = "\u001b[38;5;208m"
+	colorYellow = "\u001b[38;5;226m"
+	colorGreen  = "\u001b[38;5;40m"
+	colorBlue   = "\u001b[38;5;33m"
+	//colorPurple    = "\u001b[38;5;99m"
+	colorViolet = "\u001b[38;5;201m"
+	//colorBrown     = "\u001b[38;5;130m"
+	colorBold = "\u001b[1m"
+	//colorUnderline = "\u001b[4m"
+	colorItalic = "\u001b[3m"
+	//colorFaint     = "\u001b[2m"
 	colorOff       = "\u001b[0m"
+	backgroundGrey = "\u001b[48;5;240m"
 )
 
 var StartupTime = time.Now()
@@ -69,6 +52,31 @@ const (
 
 var Levels = []string{
 	Off, Fatal, Error, Warn, Info, Debug, Trace,
+}
+
+type LogWriter struct {
+	io.Writer
+}
+
+var wr LogWriter
+
+func init() {
+	SetLogWriter(os.Stderr)
+	L.SetLevel("info", true)
+	TRACE("starting up logger")
+}
+
+
+func Print(a ...interface{}) {
+	wr.Print(a...)
+}
+
+func Println(a ...interface{}) {
+	wr.Println(a...)
+}
+
+func Printf(format string, a ...interface{}) {
+	wr.Printf(format, a...)
 }
 
 // Logger is a struct containing all the functions with nice handy names
@@ -93,6 +101,7 @@ type Logger struct {
 	Debugc        PrintcFunc
 	Tracec        PrintcFunc
 	LogFileHandle *os.File
+	Writer        LogWriter
 	Color         bool
 }
 
@@ -112,6 +121,7 @@ func Empty() *Logger {
 		Info:   NoPrintln(),
 		Debug:  NoPrintln(),
 		Trace:  NoPrintln(),
+		Traces: NoSpew(),
 		Fatalf: NoPrintf(),
 		Errorf: NoPrintf(),
 		Warnf:  NoPrintf(),
@@ -124,6 +134,7 @@ func Empty() *Logger {
 		Infoc:  NoClosure(),
 		Debugc: NoClosure(),
 		Tracec: NoClosure(),
+		Writer: wr,
 	}
 
 }
@@ -144,6 +155,22 @@ func sanitizeLoglevel(level string) string {
 	return level
 }
 
+func SetLogWriter(w io.Writer) {
+	wr.Writer = w
+}
+
+func (w *LogWriter) Print(a ...interface{}) {
+	_, _ = fmt.Fprint(wr, a...)
+}
+
+func (w *LogWriter) Println(a ...interface{}) {
+	_, _ = fmt.Fprintln(wr, a...)
+}
+
+func (w *LogWriter) Printf(format string, a ...interface{}) {
+	_, _ = fmt.Fprintf(wr, format, a...)
+}
+
 // SetLogPaths sets a file path to write logs
 func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	const timeFormat = "2006-01-02_15-04-05"
@@ -153,13 +180,13 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 		err := os.Rename(path, filepath.Join(logPath,
 			time.Now().Format(timeFormat)+".json"))
 		if err != nil {
-			fmt.Println("error rotating log", err)
+			wr.Println("error rotating log", err)
 			return
 		}
 	}
 	logFileHandle, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
-		fmt.Println("error opening log file", logFileName)
+		wr.Println("error opening log file", logFileName)
 	}
 	l.LogFileHandle = logFileHandle
 	_, _ = fmt.Fprintln(logFileHandle, "{")
@@ -167,98 +194,71 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 
 // SetLevel enables or disables the various print functions
 func (l *Logger) SetLevel(level string, color bool) *Logger {
-	//_, loc, line, _ := runtime.Caller(1)
-	//files := strings.Split(loc, "github.com/p9c/pod/")
-	//codeLoc := "./"+fmt.Sprint(files[1], ":", justifyLineNumber(line))
-	//fmt.Println("setting level to", level, codeLoc)
-	*l = *Empty()
+	//*l = *Empty()
+	level = sanitizeLoglevel(level)
 	var fallen bool
 	switch {
 	case level == Trace || fallen:
-		// fmt.Println("loading Trace printers")
-		l.Trace = Println("TRC", color, l.LogFileHandle)
-		l.Tracef = Printf("TRC", color, l.LogFileHandle)
-		l.Tracec = Printc("TRC", color, l.LogFileHandle)
-		l.Traces = Prints("TRC", color, l.LogFileHandle)
+		TRACE("trace testing")
+		l.Trace = printlnFunc("TRC", color, l.LogFileHandle)
+		l.Tracef = printfFunc("TRC", color, l.LogFileHandle)
+		l.Tracec = printcFunc("TRC", color, l.LogFileHandle)
+		l.Traces = ps("TRC", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Debug || fallen:
-		// fmt.Println("loading Debug printers")
-		l.Debug = Println("DBG", color, l.LogFileHandle)
-		l.Debugf = Printf("DBG", color, l.LogFileHandle)
-		l.Debugc = Printc("DBG", color, l.LogFileHandle)
+		l.Debug = printlnFunc("DBG", color, l.LogFileHandle)
+		l.Debugf = printfFunc("DBG", color, l.LogFileHandle)
+		l.Debugc = printcFunc("DBG", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Info || fallen:
-		// fmt.Println("loading Info printers")
-		l.Info = PrintlnFunc(Println("INF", color, l.LogFileHandle))
-		l.Infof = Printf("INF", color, l.LogFileHandle)
-		l.Infoc = Printc("INF", color, l.LogFileHandle)
+		l.Info = printlnFunc("INF", color, l.LogFileHandle)
+		l.Infof = printfFunc("INF", color, l.LogFileHandle)
+		l.Infoc = printcFunc("INF", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Warn || fallen:
-		// fmt.Println("loading Warn printers")
-		l.Warn = Println("WRN", color, l.LogFileHandle)
-		l.Warnf = Printf("WRN", color, l.LogFileHandle)
-		l.Warnc = Printc("WRN", color, l.LogFileHandle)
+		l.Warn = printlnFunc("WRN", color, l.LogFileHandle)
+		l.Warnf = printfFunc("WRN", color, l.LogFileHandle)
+		l.Warnc = printcFunc("WRN", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Error || fallen:
-		// fmt.Println("loading Error printers")
-		l.Error = Println("ERR", color, l.LogFileHandle)
-		l.Errorf = Printf("ERR", color, l.LogFileHandle)
-		l.Errorc = Printc("ERR", color, l.LogFileHandle)
+		l.Error = printlnFunc("ERR", color, l.LogFileHandle)
+		l.Errorf = printfFunc("ERR", color, l.LogFileHandle)
+		l.Errorc = printcFunc("ERR", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Fatal:
-		// fmt.Println("loading Fatal printers")
-		l.Fatal = Println("FTL", color, l.LogFileHandle)
-		l.Fatalf = Printf("FTL", color, l.LogFileHandle)
-		l.Fatalc = Printc("FTL", color, l.LogFileHandle)
+		l.Fatal = printlnFunc("FTL", color, l.LogFileHandle)
+		l.Fatalf = printfFunc("FTL", color, l.LogFileHandle)
+		l.Fatalc = printcFunc("FTL", color, l.LogFileHandle)
 		fallen = true
 	}
 	return l
 }
 
 var NoPrintln = func() PrintlnFunc {
-	f := func(_ ...interface{}) {
-	}
+	f := func(_ ...interface{}) {}
 	return &f
 }
 var NoPrintf = func() PrintfFunc {
-	f := func(_ string, _ ...interface{}) {
-	}
+	f := func(_ string, _ ...interface{}) {}
 	return &f
 }
 var NoClosure = func() PrintcFunc {
-	f := func(_ func() string) {
-	}
+	f := func(_ func() string) {}
 	return &f
 }
 var NoSpew = func() SpewFunc {
-	f := func(_ interface{}) {
-	}
+	f := func(_ interface{}) {}
 	return &f
 }
 
 func trimReturn(s string) string {
 	if s[len(s)-1] == '\n' {
 		return s[:len(s)-1]
-	}
-	return s
-}
-
-func justifyLineNumber(n int) string {
-	s := fmt.Sprint(n)
-	switch len(s) {
-	case 1:
-		s += "    "
-	case 2:
-		s += "   "
-	case 3:
-		s += "  "
-	case 4:
-		s += " "
 	}
 	return s
 }
@@ -275,14 +275,25 @@ func rightJustify(s string, w int) string {
 	return s
 }
 
-func composit(text, level string, color bool) string {
+func Composite(text, level string, color bool) string {
 	terminalWidth := gt.Width()
-	_, loc, iline, _ := runtime.Caller(3)
+	skip := 3
+	if level == "STATUS" {
+		skip = 1
+	}
+	_, loc, iline, _ := runtime.Caller(skip)
 	line := fmt.Sprint(iline)
 	files := strings.Split(loc, "github.com/p9c/pod/")
-	file := files[1]
-	since := rightJustify(fmt.Sprint(time.Now().Sub(StartupTime)/time.
-		Second*time.Second), 12)
+	var file string
+	if len(files) > 1 {
+		file = files[1]
+	}
+	sinceS := fmt.Sprint(time.Now().Sub(StartupTime) / time.Second * time.Second)
+	sinceW := 12
+	if level == "STATUS" {
+		sinceW = 9
+	}
+	since := rightJustify(sinceS, sinceW)
 	if terminalWidth > 200 {
 		since = fmt.Sprint(time.Now())[:25]
 	}
@@ -323,9 +334,14 @@ func composit(text, level string, color bool) string {
 			since = colorViolet + since + colorOff
 			file = colorItalic + colorBlue + file
 			line = line + colorOff
+		case "STATUS":
+			level = backgroundGrey + colorBold + level + colorOff + backgroundGrey
+			//since = since
+			file = colorItalic + file
+			line = line + colorOff
 		}
 	}
-	final := "" // fmt.Sprintf("%s %s %s %s:%s", level, since, text, file, line)
+	final := ""
 	if levelLen+sinceLen+textLen+fileLen+lineLen > terminalWidth {
 		lines := strings.Split(text, "\n")
 		// log text is multiline
@@ -364,9 +380,6 @@ func composit(text, level string, color bool) string {
 						final += "\n" + strings.Repeat(" ", levelLen+sinceLen) + slices[j]
 					}
 				}
-				//
-				// final += "\n" + strings.Repeat(" ",
-				// 	levelLen+sinceLen) + lines[i]
 			}
 		} else {
 			// log text is a long line
@@ -386,7 +399,7 @@ func composit(text, level string, color bool) string {
 							if spacers < 1 {
 								spacers = 1
 							}
-							final += strings.Repeat(colorFaint+"."+colorOff, spacers)
+							final += strings.Repeat(".", spacers)
 							final += fmt.Sprintf(" %s:%s\n",
 								file, line)
 							final += strings.Repeat(" ", levelLen+sinceLen)
@@ -399,7 +412,7 @@ func composit(text, level string, color bool) string {
 						if curLineLen >= restLen-1 {
 							final += "\n" + strings.Repeat(" ",
 								levelLen+sinceLen)
-							final += spaced[i-1] + colorFaint + "." + colorOff
+							final += spaced[i-1] + "."
 							curLineLen = len(spaced[i-1]) + 1
 						} else {
 							final += spaced[i-1] + " "
@@ -411,7 +424,7 @@ func composit(text, level string, color bool) string {
 			if !rest {
 				if curLineLen >= line1len {
 					final += fmt.Sprintf("%s %s:%s\n",
-						strings.Repeat(colorFaint+"."+colorOff,
+						strings.Repeat(".",
 							len(spaced[i])+line1len-curLineLen),
 						file, line)
 					final += strings.Repeat(" ", levelLen+sinceLen)
@@ -419,7 +432,7 @@ func composit(text, level string, color bool) string {
 				} else {
 					final += fmt.Sprintf("%s %s %s:%s\n",
 						spaced[i],
-						strings.Repeat(colorFaint+"."+colorOff,
+						strings.Repeat(".",
 							terminalWidth-curLineLen-fileLen-lineLen),
 						file, line)
 				}
@@ -427,29 +440,29 @@ func composit(text, level string, color bool) string {
 				if curLineLen >= restLen {
 					final += "\n" + strings.Repeat(" ", levelLen+sinceLen)
 				}
-				final += spaced[i] // + "\n"
+				final += spaced[i]
 			}
 		}
 	} else {
 		final = fmt.Sprintf("%s %s %s %s %s:%s", level, since, text,
-			strings.Repeat(colorFaint+"."+colorOff,
+			strings.Repeat(".",
 				terminalWidth-levelLen-sinceLen-textLen-fileLen-lineLen),
 			file, line)
 	}
 	return final
 }
 
-// Println prints a log entry like Println
-func Println(level string, color bool, fh *os.File) PrintlnFunc {
+// printlnFunc prints a log entry like Println
+func printlnFunc(level string, color bool, fh *os.File) PrintlnFunc {
 	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
-		fmt.Println("\r" + composit(text, level, color))
+		wr.Println("\r" + Composite(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
 			j, err := json.Marshal(out)
 			if err != nil {
-				fmt.Println("logging error:", err)
+				wr.Println("logging error:", err)
 			}
 			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
@@ -457,17 +470,17 @@ func Println(level string, color bool, fh *os.File) PrintlnFunc {
 	return &f
 }
 
-// Printf prints a log entry with formatting
-func Printf(level string, color bool, fh *os.File) PrintfFunc {
+// printfFunc prints a log entry with formatting
+func printfFunc(level string, color bool, fh *os.File) PrintfFunc {
 	f := func(format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
-		fmt.Println("\r" + composit(text, level, color))
+		wr.Println("\r" + Composite(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
 			j, err := json.Marshal(out)
 			if err != nil {
-				fmt.Println("logging error:", err)
+				wr.Println("logging error:", err)
 			}
 			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
@@ -475,19 +488,18 @@ func Printf(level string, color bool, fh *os.File) PrintfFunc {
 	return &f
 }
 
-// Printc prints from a closure returning a string
-func Printc(level string, color bool, fh *os.File) PrintcFunc {
+// printcFunc prints from a closure returning a string
+func printcFunc(level string, color bool, fh *os.File) PrintcFunc {
 	f := func(fn func() string) {
-		// level = strings.ToUpper(string(level[0]))
 		t := fn()
 		text := trimReturn(t)
-		fmt.Println("\r" + composit(text, level, color))
+		wr.Println("\r" + Composite(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
 			j, err := json.Marshal(out)
 			if err != nil {
-				fmt.Println("logging error:", err)
+				wr.Println("logging error:", err)
 			}
 			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
@@ -495,19 +507,19 @@ func Printc(level string, color bool, fh *os.File) PrintcFunc {
 	return &f
 }
 
-// Prints spews a variable
-func Prints(level string, color bool, fh *os.File) SpewFunc {
+// ps spews a variable
+func ps(level string, color bool, fh *os.File) SpewFunc {
 	f := func(a interface{}) {
 		text := trimReturn(spew.Sdump(a))
-		o := composit("spew:", level, color)
+		o := Composite("spew:", level, color)
 		o += "\n" + text
-		fmt.Println(o)
+		wr.Println(o)
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
 			j, err := json.Marshal(out)
 			if err != nil {
-				fmt.Println("logging error:", err)
+				wr.Println("logging error:", err)
 			}
 			_, _ = fmt.Fprint(fh, string(j)+",")
 		}

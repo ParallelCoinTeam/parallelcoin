@@ -40,24 +40,24 @@ var (
 )
 
 // TorLookupIP uses Tor to resolve DNS via the SOCKS extension they provide for resolution over the Tor network. Tor itself doesn't support ipv6 so this doesn't either.
-func TorLookupIP(	host, proxy string) ([]net.IP, error) {
+func TorLookupIP(host, proxy string) ([]net.IP, error) {
 	conn, err := net.Dial("tcp", proxy)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	defer conn.Close()
 	buf := []byte{'\x05', '\x01', '\x00'}
 	_, err = conn.Write(buf)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	buf = make([]byte, 2)
 	_, err = conn.Read(buf)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if buf[0] != '\x05' {
 		return nil, ErrTorInvalidProxyResponse
@@ -76,13 +76,13 @@ return nil, err
 	_, err = conn.Write(buf)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	buf = make([]byte, 4)
 	_, err = conn.Read(buf)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if buf[0] != 5 {
 		return nil, ErrTorInvalidProxyResponse
@@ -103,7 +103,7 @@ return nil, err
 	bytes, err := conn.Read(buf)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	if bytes != 4 {
 		return nil, ErrTorInvalidAddressResponse

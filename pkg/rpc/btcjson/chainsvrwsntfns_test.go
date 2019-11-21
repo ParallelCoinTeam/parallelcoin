@@ -11,7 +11,7 @@ import (
 )
 
 // TestChainSvrWsNtfns tests all of the chain server websocket-specific notifications marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
-func TestChainSvrWsNtfns(	t *testing.T) {
+func TestChainSvrWsNtfns(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name         string

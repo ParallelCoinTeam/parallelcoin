@@ -948,7 +948,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 
 // func TestNeutrinoSync(// 	t *testing.T) {
 // 	// Set up logging.
-// 	logger := log.NewBackend(os.Stdout)
+// 	logger := log.NewBackend(os.Out)
 // 	chainLogger := logger.Logger("CHAIN")
 // 	chainLogger.SetLevel(logLevel)
 // 	// spv.UseLogger(chainLogger)

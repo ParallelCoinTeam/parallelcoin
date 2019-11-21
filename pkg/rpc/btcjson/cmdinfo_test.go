@@ -8,7 +8,7 @@ import (
 )
 
 // TestCmdMethod tests the CmdMethod function to ensure it retunrs the expected methods and errors.
-func TestCmdMethod(	t *testing.T) {
+func TestCmdMethod(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name   string
@@ -61,7 +61,7 @@ func TestCmdMethod(	t *testing.T) {
 }
 
 // TestMethodUsageFlags tests the MethodUsage function ensure it returns the expected flags and errors.
-func TestMethodUsageFlags(	t *testing.T) {
+func TestMethodUsageFlags(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name   string
@@ -114,7 +114,7 @@ func TestMethodUsageFlags(	t *testing.T) {
 }
 
 // TestMethodUsageText tests the MethodUsageText function ensure it returns the expected text.
-func TestMethodUsageText(	t *testing.T) {
+func TestMethodUsageText(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name     string
@@ -180,7 +180,7 @@ func TestMethodUsageText(	t *testing.T) {
 }
 
 // TestFieldUsage tests the internal fieldUsage function ensure it returns the expected text.
-func TestFieldUsage(	t *testing.T) {
+func TestFieldUsage(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name     string

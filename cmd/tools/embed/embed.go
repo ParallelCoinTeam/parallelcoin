@@ -1,3 +1,5 @@
+//+build ignore
+
 package main
 
 import (
@@ -38,7 +40,7 @@ func main() {
 				s, _ := base64.StdEncoding.DecodeString("`, base64.StdEncoding.EncodeToString(b)))
 			fmt.Fprint(fh, "\")\n")
 		}
-		fmt.Println("writing file", files[i]+".go")
+		log.Println("writing file", files[i]+".go")
 		fh.Close()
 	}
 }

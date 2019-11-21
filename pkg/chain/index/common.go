@@ -55,7 +55,7 @@ func (e errDeserialize) Error() string {
 }
 
 // isDeserializeErr returns whether or not the passed error is an errDeserialize error.
-func isDeserializeErr(	err error) bool {
+func isDeserializeErr(err error) bool {
 	_, ok := err.(errDeserialize)
 	return ok
 }
@@ -68,7 +68,7 @@ type internalBucket interface {
 }
 
 // interruptRequested returns true when the provided channel has been closed. This simplifies early shutdown slightly since the caller can just use an if statement instead of a select.
-func interruptRequested(	interrupted <-chan struct{}) bool {
+func interruptRequested(interrupted <-chan struct{}) bool {
 	select {
 	case <-interrupted:
 		return true

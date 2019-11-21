@@ -15,7 +15,7 @@ import (
 // 	_ = os.RemoveAll(dbPath)
 // 	db, err := database.Create("ffldb", dbPath, chaincfg.MainNetParams.Net)
 // 	if err != nil {
-// 		fmt.Printf("Failed to create database: %v\n", err)
+// 		loog.Printf("Failed to create database: %v\n", err)
 // 		return
 // 	}
 // 	defer os.RemoveAll(dbPath)
@@ -27,7 +27,7 @@ import (
 // 		TimeSource:  blockchain.NewMedianTime(),
 // 	})
 // 	if err != nil {
-// 		fmt.Printf("Failed to create chain instance: %v\n", err)
+// 		log.Printf("Failed to create chain instance: %v\n", err)
 // 		return
 // 	}
 // 	// Process a block.  For this example, we are going to intentionally cause an error by trying to process the genesis block which already exists.
@@ -35,11 +35,11 @@ import (
 // 	isMainChain, isOrphan, err := chain.ProcessBlock(genesisBlock,
 // 		blockchain.BFNone, 0)
 // 	if err != nil {
-// 		fmt.Printf("Failed to process block: %v\n", err)
+// 		log.Printf("Failed to process block: %v\n", err)
 // 		return
 // 	}
-// 	fmt.Printf("Block accepted. Is it on the main chain?: %v", isMainChain)
-// 	fmt.Printf("Block accepted. Is it an orphan?: %v", isOrphan)
+// 	log.Printf("Block accepted. Is it on the main chain?: %v", isMainChain)
+// 	log.Printf("Block accepted. Is it an orphan?: %v", isOrphan)
 // 	// Output:
 // 	// Failed to process block: already have block 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
 // }

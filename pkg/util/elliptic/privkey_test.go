@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPrivKeys(	t *testing.T) {
+func TestPrivKeys(t *testing.T) {
 	tests := []struct {
 		name string
 		key  []byte

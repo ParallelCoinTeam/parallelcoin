@@ -9,7 +9,7 @@ import (
 )
 
 // TestOpcodeDisabled tests the opcodeDisabled function manually because all disabled opcodes result in a script execution failure when executed normally, so the function is not called under normal circumstances.
-func TestOpcodeDisabled(	t *testing.T) {
+func TestOpcodeDisabled(t *testing.T) {
 	t.Parallel()
 	tests := []byte{OP_CAT, OP_SUBSTR, OP_LEFT, OP_RIGHT, OP_INVERT,
 		OP_AND, OP_OR, OP_2MUL, OP_2DIV, OP_MUL, OP_DIV, OP_MOD,
@@ -27,7 +27,7 @@ func TestOpcodeDisabled(	t *testing.T) {
 }
 
 // TestOpcodeDisasm tests the print function for all opcodes in both the oneline and full modes to ensure it provides the expected disassembly.
-func TestOpcodeDisasm(	t *testing.T) {
+func TestOpcodeDisasm(t *testing.T) {
 	t.Parallel()
 	// First, test the oneline disassembly. The expected strings for the data push opcodes are replaced in the test loops below since they involve repeating bytes.  Also, the OP_NOP# and OP_UNKNOWN# are replaced below too, since it's easier than manually listing them here.
 	oneBytes := []byte{0x01}

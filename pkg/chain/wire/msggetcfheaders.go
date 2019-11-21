@@ -19,13 +19,11 @@ func (msg *MsgGetCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncodin
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	err = readElement(r, &msg.StartHeight)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return readElement(r, &msg.StopHash)
@@ -36,13 +34,11 @@ func (msg *MsgGetCFHeaders) BtcEncode(w io.Writer, pver uint32, _ MessageEncodin
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	err = writeElement(w, &msg.StartHeight)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return writeElement(w, &msg.StopHash)
@@ -60,7 +56,7 @@ func (msg *MsgGetCFHeaders) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgGetCFHeaders returns a new bitcoin getcfheader message that conforms to the Message interface using the passed parameters and defaults for the remaining fields.
-func NewMsgGetCFHeaders(	filterType FilterType, startHeight uint32,
+func NewMsgGetCFHeaders(filterType FilterType, startHeight uint32,
 	stopHash *chainhash.Hash) *MsgGetCFHeaders {
 	return &MsgGetCFHeaders{
 		FilterType:  filterType,

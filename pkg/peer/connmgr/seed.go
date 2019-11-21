@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
 )
@@ -40,8 +40,8 @@ func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
 			randSource := mrand.New(mrand.NewSource(time.Now().UnixNano()))
 			seedpeers, err := lookupFn(host)
 			if err != nil {
-		log.ERROR(err)
-log.INFO("DNS routeable failed on seed %s: %v", host, err)
+				log.ERROR(err)
+				log.INFO("DNS routeable failed on seed %s: %v", host, err)
 				return
 			}
 			numPeers := len(seedpeers)

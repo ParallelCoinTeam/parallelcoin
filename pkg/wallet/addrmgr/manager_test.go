@@ -2,22 +2,22 @@
 package waddrmgr_test
 
 import (
-   "bytes"
-   "encoding/hex"
-   "fmt"
-   "os"
-   "reflect"
-   "testing"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chaincfg "github.com/p9c/pod/pkg/chain/config"
-   chainhash "github.com/p9c/pod/pkg/chain/hash"
-   "github.com/p9c/pod/pkg/util"
-   "github.com/p9c/pod/pkg/util/snacl"
-   waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-   walletdb "github.com/p9c/pod/pkg/wallet/db"
+	"bytes"
+	"encoding/hex"
+	"fmt"
+	"os"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/snacl"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // // newHash converts the passed big-endian hex string into a chainhash.Hash.

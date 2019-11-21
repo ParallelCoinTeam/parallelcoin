@@ -3,6 +3,7 @@ package ec_test
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/p9c/pod/pkg/log"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	ec "github.com/p9c/pod/pkg/util/elliptic"
@@ -15,7 +16,7 @@ func Example_decryptMessage() {
 	pkBytes, err := hex.DecodeString("a11b0a4e1a132305652ee7a8eb7848f6ad" +
 		"5ea381e3ce20a2c086a2e388230811")
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	privKey, _ := ec.PrivKeyFromBytes(ec.S256(), pkBytes)
@@ -25,15 +26,15 @@ func Example_decryptMessage() {
 		"a44166dc61ea1c419d47077b748a9c06b8d57af72deb2819d98a9d503efc59fc8307" +
 		"d14174f8b83354fac3ff56075162")
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 	}
 	// Try decrypting the message.
 	plaintext, err := ec.Decrypt(privKey, ciphertext)
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
-	fmt.Println(string(plaintext))
+	log.Println(string(plaintext))
 	// Output:
 	// test message
 }
@@ -46,26 +47,26 @@ func Example_encryptMessage() {
 		"359381e6a71127a9d37c486fd30dae57e76dc58f693bd7e7010358ce6b165e483a29" +
 		"21010db67ac11b1b51b651953d2") // uncompressed pubkey
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	pubKey, err := ec.ParsePubKey(pubKeyBytes, ec.S256())
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Encrypt a message decryptable by the private key corresponding to pubKey
 	message := "test message"
 	ciphertext, err := ec.Encrypt(pubKey, []byte(message))
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Decode the hex-encoded private key.
 	pkBytes, err := hex.DecodeString("a11b0a4e1a132305652ee7a8eb7848f6ad" +
 		"5ea381e3ce20a2c086a2e388230811")
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// note that we already have corresponding pubKey
@@ -73,10 +74,10 @@ func Example_encryptMessage() {
 	// Try decrypting and verify if it's the same message.
 	plaintext, err := ec.Decrypt(privKey, ciphertext)
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
-	fmt.Println(string(plaintext))
+	log.Println(string(plaintext))
 	// Output:
 	// test message
 }
@@ -88,7 +89,7 @@ func Example_signMessage() {
 	pkBytes, err := hex.DecodeString("22a47fa09a223f2aa079edf85a7c2d4f87" +
 		"20ee63e502ee2869afab7de234b80c")
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	privKey, pubKey := ec.PrivKeyFromBytes(ec.S256(), pkBytes)
@@ -97,14 +98,14 @@ func Example_signMessage() {
 	messageHash := chainhash.DoubleHashB([]byte(message))
 	signature, err := privKey.Sign(messageHash)
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Serialize and display the signature.
-	fmt.Printf("Serialized Signature: %x\n", signature.Serialize())
+	log.Printf("Serialized Signature: %x\n", signature.Serialize())
 	// Verify the signature for the message using the public key.
 	verified := signature.Verify(messageHash, pubKey)
-	fmt.Printf("Signature Verified? %v\n", verified)
+	log.Printf("Signature Verified? %v\n", verified)
 	// Output:
 	// Serialized Signature: 304402201008e236fa8cd0f25df4482dddbb622e8a8b26ef0ba731719458de3ccd93805b022032f8ebe514ba5f672466eba334639282616bb3c2f0ab09998037513d1f9e3d6d
 	// Signature Verified? true
@@ -118,12 +119,12 @@ func Example_verifySignature() {
 	pubKeyBytes, err := hex.DecodeString("02a673638cb9587cb68ea08dbef685c" +
 		"6f2d2a751a8b3c6f2a7e9a4999e6e4bfaf5")
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	pubKey, err := ec.ParsePubKey(pubKeyBytes, ec.S256())
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Decode hex-encoded serialized signature.
@@ -131,19 +132,19 @@ func Example_verifySignature() {
 		"8b323a667b7653454f1bccb06d4bbdca42c2079022100ec95778b51e707" +
 		"1cb1205f8bde9af6592fc978b0452dafe599481c46d6b2e479")
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	signature, err := ec.ParseSignature(sigBytes, ec.S256())
 	if err != nil {
-		fmt.Println(err)
+		log.ERROR(err)
 		return
 	}
 	// Verify the signature for the message using the public key.
 	message := "test message"
 	messageHash := chainhash.DoubleHashB([]byte(message))
 	verified := signature.Verify(messageHash, pubKey)
-	fmt.Println("Signature Verified?", verified)
+	log.Println("Signature Verified?", verified)
 	// Output:
 	// Signature Verified? true
 }

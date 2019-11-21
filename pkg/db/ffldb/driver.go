@@ -13,7 +13,7 @@ const (
 )
 
 // parseArgs parses the arguments from the database Open/Create methods.
-func parseArgs(	funcName string, args ...interface{}) (string, wire.BitcoinNet, error) {
+func parseArgs(funcName string, args ...interface{}) (string, wire.BitcoinNet, error) {
 	if len(args) != 2 {
 		return "", 0, fmt.Errorf("invalid arguments to %s.%s -- "+
 			"expected database path and block network", dbType,
@@ -33,21 +33,21 @@ func parseArgs(	funcName string, args ...interface{}) (string, wire.BitcoinNet, 
 }
 
 // openDBDriver is the callback provided during driver registration that opens an existing database for use.
-func openDBDriver(	args ...interface{}) (database.DB, error) {
+func openDBDriver(args ...interface{}) (database.DB, error) {
 	dbPath, network, err := parseArgs("Open", args...)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return openDB(dbPath, network, false)
 }
 
 // createDBDriver is the callback provided during driver registration that creates, initializes, and opens a database for use.
-func createDBDriver(	args ...interface{}) (database.DB, error) {
+func createDBDriver(args ...interface{}) (database.DB, error) {
 	dbPath, network, err := parseArgs("Create", args...)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return openDB(dbPath, network, true)
 }

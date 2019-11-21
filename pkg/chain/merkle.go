@@ -30,7 +30,7 @@ var (
 )
 
 // nextPowerOfTwo returns the next highest power of two from a given number if it is not already a power of two.  This is a helper function used during the calculation of a merkle tree.
-func nextPowerOfTwo(	n int) int {
+func nextPowerOfTwo(n int) int {
 	// Return the number if it's already a power of 2.
 	if n&(n-1) == 0 {
 		return n
@@ -41,7 +41,7 @@ func nextPowerOfTwo(	n int) int {
 }
 
 // HashMerkleBranches takes two hashes, treated as the left and right tree nodes, and returns the hash of their concatenation.  This is a helper function used to aid in the generation of a merkle tree.
-func HashMerkleBranches(	left *chainhash.Hash, right *chainhash.Hash) *chainhash.Hash {
+func HashMerkleBranches(left *chainhash.Hash, right *chainhash.Hash) *chainhash.Hash {
 	// Concatenate the left and right nodes.
 	var hash [chainhash.HashSize * 2]byte
 	copy(hash[:chainhash.HashSize], left[:])
@@ -62,7 +62,7 @@ func HashMerkleBranches(	left *chainhash.Hash, right *chainhash.Hash) *chainhash
 // As the above shows, the merkle root is always the last element in the array. The number of inputs is not always a power of two which results in a balanced tree structure as above.  In that case, parent nodes with no children are also zero and parent nodes with only a single left node are calculated by concatenating the left node with itself before hashing.
 // Since this function uses nodes that are pointers to the hashes, empty nodes will be nil.
 // The additional bool parameter indicates if we are generating the merkle tree using witness transaction id's rather than regular transaction id's. This also presents an additional case wherein the wtxid of the coinbase transaction is the zeroHash.
-func BuildMerkleTreeStore(	transactions []*util.Tx, witness bool) []*chainhash.Hash {
+func BuildMerkleTreeStore(transactions []*util.Tx, witness bool) []*chainhash.Hash {
 	// Calculate how many entries are required to hold the binary merkle tree as a linear array and create an array of that size.
 	nextPoT := nextPowerOfTwo(len(transactions))
 	arraySize := nextPoT*2 - 1
@@ -103,7 +103,7 @@ func BuildMerkleTreeStore(	transactions []*util.Tx, witness bool) []*chainhash.H
 }
 
 // ExtractWitnessCommitment attempts to locate, and return the witness commitment for a block. The witness commitment is of the form: SHA256(witness root || witness nonce). The function additionally returns a boolean indicating if the witness root was located within any of the txOut's in the passed transaction. The witness commitment is stored as the data push for an OP_RETURN with special magic bytes to aide in location.
-func ExtractWitnessCommitment(	tx *util.Tx) ([]byte, bool) {
+func ExtractWitnessCommitment(tx *util.Tx) ([]byte, bool) {
 	// The witness commitment *must* be located within one of the coinbase transaction's outputs.
 	if !IsCoinBase(tx) {
 		return nil, false
@@ -124,7 +124,7 @@ func ExtractWitnessCommitment(	tx *util.Tx) ([]byte, bool) {
 }
 
 // ValidateWitnessCommitment validates the witness commitment (if any) found within the coinbase transaction of the passed block.
-func ValidateWitnessCommitment(	blk *util.Block) error {
+func ValidateWitnessCommitment(blk *util.Block) error {
 	// If the block doesn't have any transactions at all, then we won't be able to extract a commitment from the non-existent coinbase transaction. So we exit early here.
 	if len(blk.Transactions()) == 0 {
 		str := "cannot validate witness commitment of block without " +

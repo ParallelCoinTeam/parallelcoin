@@ -65,7 +65,7 @@ type headerIndex struct {
 
 // newHeaderIndex creates a new headerIndex given an already open database, and
 // a particular header type.
-func newHeaderIndex(	db walletdb.DB, indexType HeaderType) (*headerIndex, error) {
+func newHeaderIndex(db walletdb.DB, indexType HeaderType) (*headerIndex, error) {
 	// As an initially step, we'll attempt to create all the buckets
 	// necessary for functioning of the index. If these buckets has already
 	// been created, then we can exit early.
@@ -153,8 +153,7 @@ func (h *headerIndex) addHeaders(batch headerBatch) error {
 			binary.BigEndian.PutUint32(heightBytes[:], header.height)
 			err := rootBucket.Put(header.hash[:], heightBytes[:])
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			// TODO(roasbeef): need to remedy if side-chain
@@ -186,7 +185,6 @@ func (h *headerIndex) heightFromHash(hash *chainhash.Hash) (uint32, error) {
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	return height, nil
@@ -224,8 +222,7 @@ func (h *headerIndex) chainTip() (*chainhash.Hash, uint32, error) {
 		// parameters.
 		h, err := chainhash.NewHash(tipHashBytes)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		tipHash = h
@@ -234,7 +231,6 @@ log.ERROR(err)
 	})
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, 0, err
 	}
 	return tipHash, tipHeight, nil

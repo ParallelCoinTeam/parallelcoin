@@ -5,7 +5,7 @@ import (
 	"time"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
@@ -446,8 +446,7 @@ func // Rollback removes all blocks at height onwards,
 (s *Store) Rollback(ns walletdb.ReadWriteBucket, height int32) error {
 	return s.rollback(ns, height)
 }
-func
-(s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
+func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
 	minedBalance, err := fetchMinedBalance(ns)
 	if err != nil {
 		log.ERROR(err)

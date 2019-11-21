@@ -91,7 +91,7 @@ type BlockNode struct {
 	status blockStatus
 	// Diffs is the computed difficulty targets for a block to be connected
 	// to this one
-	Diffs   *map[int32]uint32
+	Diffs  *map[int32]uint32
 	DiffMx sync.Mutex
 }
 
@@ -268,7 +268,6 @@ func (bi *blockIndex) flushToDB() error {
 				for node := range bi.dirty {
 					err := dbStoreBlockNode(dbTx, node)
 					if err != nil {
-						log.ERROR(err)
 						log.ERROR(err)
 						return err
 					}

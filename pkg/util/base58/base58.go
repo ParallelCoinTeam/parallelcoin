@@ -9,7 +9,7 @@ var bigRadix = big.NewInt(58)
 var bigZero = big.NewInt(0)
 
 // Decode decodes a modified base58 string to a byte slice.
-func Decode(	b string) []byte {
+func Decode(b string) []byte {
 	answer := big.NewInt(0)
 	j := big.NewInt(1)
 	scratch := new(big.Int)
@@ -37,7 +37,7 @@ func Decode(	b string) []byte {
 }
 
 // Encode encodes a byte slice to a modified base58 string.
-func Encode(	b []byte) string {
+func Encode(b []byte) string {
 	x := new(big.Int)
 	x.SetBytes(b)
 	answer := make([]byte, 0, len(b)*136/100)

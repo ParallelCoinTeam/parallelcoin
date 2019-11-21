@@ -11,7 +11,7 @@ import (
 )
 
 // TestWalletSvrWsCmds tests all of the wallet server websocket-specific commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.
-func TestWalletSvrWsCmds(	t *testing.T) {
+func TestWalletSvrWsCmds(t *testing.T) {
 	t.Parallel()
 	testID := int(1)
 	tests := []struct {

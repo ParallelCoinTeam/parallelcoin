@@ -50,7 +50,7 @@ func (msg *MsgPong) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgPong returns a new bitcoin pong message that conforms to the Message interface.  See MsgPong for details.
-func NewMsgPong(	nonce uint64) *MsgPong {
+func NewMsgPong(nonce uint64) *MsgPong {
 	return &MsgPong{
 		Nonce: nonce,
 	}

@@ -19,7 +19,7 @@ type AccountBalanceNtfn struct {
 }
 
 // NewAccountBalanceNtfn returns a new instance which can be used to issue an accountbalance JSON-RPC notification.
-func NewAccountBalanceNtfn(	account string, balance float64, confirmed bool) *AccountBalanceNtfn {
+func NewAccountBalanceNtfn(account string, balance float64, confirmed bool) *AccountBalanceNtfn {
 	return &AccountBalanceNtfn{
 		Account:   account,
 		Balance:   balance,
@@ -33,7 +33,7 @@ type PodConnectedNtfn struct {
 }
 
 // NewPodConnectedNtfn returns a new instance which can be used to issue a podconnected JSON-RPC notification.
-func NewPodConnectedNtfn(	connected bool) *PodConnectedNtfn {
+func NewPodConnectedNtfn(connected bool) *PodConnectedNtfn {
 	return &PodConnectedNtfn{
 		Connected: connected,
 	}
@@ -45,7 +45,7 @@ type WalletLockStateNtfn struct {
 }
 
 // NewWalletLockStateNtfn returns a new instance which can be used to issue a walletlockstate JSON-RPC notification.
-func NewWalletLockStateNtfn(	locked bool) *WalletLockStateNtfn {
+func NewWalletLockStateNtfn(locked bool) *WalletLockStateNtfn {
 	return &WalletLockStateNtfn{
 		Locked: locked,
 	}
@@ -58,7 +58,7 @@ type NewTxNtfn struct {
 }
 
 // NewNewTxNtfn returns a new instance which can be used to issue a newtx JSON-RPC notification.
-func NewNewTxNtfn(	account string, details ListTransactionsResult) *NewTxNtfn {
+func NewNewTxNtfn(account string, details ListTransactionsResult) *NewTxNtfn {
 	return &NewTxNtfn{
 		Account: account,
 		Details: details,

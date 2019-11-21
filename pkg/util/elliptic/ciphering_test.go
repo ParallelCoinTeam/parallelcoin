@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestGenerateSharedSecret(	t *testing.T) {
+func TestGenerateSharedSecret(t *testing.T) {
 	privKey1, err := NewPrivateKey(S256())
 	if err != nil {
 		t.Errorf("private key generation error: %s", err)
@@ -26,7 +26,7 @@ func TestGenerateSharedSecret(	t *testing.T) {
 }
 
 // Test 1: Encryption and decryption
-func TestCipheringBasic(	t *testing.T) {
+func TestCipheringBasic(t *testing.T) {
 	privkey, err := NewPrivateKey(S256())
 	if err != nil {
 		t.Fatal("failed to generate private key")
@@ -46,7 +46,7 @@ func TestCipheringBasic(	t *testing.T) {
 }
 
 // Test 2: Byte compatibility with Pyelliptic
-func TestCiphering(	t *testing.T) {
+func TestCiphering(t *testing.T) {
 	pb, _ := hex.DecodeString("fe38240982f313ae5afb3e904fb8215fb11af1200592b" +
 		"fca26c96c4738e4bf8f")
 	privkey, _ := PrivKeyFromBytes(S256(), pb)
@@ -64,7 +64,7 @@ func TestCiphering(	t *testing.T) {
 		t.Error("decrypted data doesn't match original")
 	}
 }
-func TestCipheringErrors(	t *testing.T) {
+func TestCipheringErrors(t *testing.T) {
 	privkey, err := NewPrivateKey(S256())
 	if err != nil {
 		t.Fatal("failed to generate private key")

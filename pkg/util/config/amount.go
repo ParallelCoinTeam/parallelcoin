@@ -15,7 +15,7 @@ type AmountFlag struct {
 }
 
 // NewAmountFlag creates an AmountFlag with a default util.Amount.
-func NewAmountFlag(	defaultValue util.Amount) *AmountFlag {
+func NewAmountFlag(defaultValue util.Amount) *AmountFlag {
 	return &AmountFlag{defaultValue}
 }
 
@@ -30,12 +30,12 @@ func (a *AmountFlag) UnmarshalFlag(value string) error {
 	valueF64, err := strconv.ParseFloat(value, 64)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	amount, err := util.NewAmount(valueF64)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	a.Amount = amount
 	return nil

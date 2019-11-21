@@ -9,7 +9,7 @@ import (
 	"github.com/p9c/pod/pkg/peer/addrmgr"
 )
 
-func TestChance(	t *testing.T) {
+func TestChance(t *testing.T) {
 	now := time.Unix(time.Now().Unix(), 0)
 	var tests = []struct {
 		addr     *addrmgr.KnownAddress
@@ -50,7 +50,7 @@ func TestChance(	t *testing.T) {
 		}
 	}
 }
-func TestIsBad(	t *testing.T) {
+func TestIsBad(t *testing.T) {
 	now := time.Unix(time.Now().Unix(), 0)
 	future := now.Add(35 * time.Minute)
 	monthOld := now.Add(-43 * time.Hour * 24)

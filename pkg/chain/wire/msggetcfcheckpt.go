@@ -18,7 +18,6 @@ func (msg *MsgGetCFCheckpt) BtcDecode(r io.Reader, pver uint32, _ MessageEncodin
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return readElement(r, &msg.StopHash)
@@ -29,7 +28,6 @@ func (msg *MsgGetCFCheckpt) BtcEncode(w io.Writer, pver uint32, _ MessageEncodin
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return writeElement(w, &msg.StopHash)
@@ -47,7 +45,7 @@ func (msg *MsgGetCFCheckpt) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgGetCFCheckpt returns a new bitcoin getcfcheckpt message that conforms to the Message interface using the passed parameters and defaults for the remaining fields.
-func NewMsgGetCFCheckpt(	filterType FilterType, stopHash *chainhash.Hash) *MsgGetCFCheckpt {
+func NewMsgGetCFCheckpt(filterType FilterType, stopHash *chainhash.Hash) *MsgGetCFCheckpt {
 	return &MsgGetCFCheckpt{
 		FilterType: filterType,
 		StopHash:   *stopHash,

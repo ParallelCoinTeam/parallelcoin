@@ -109,12 +109,12 @@ func (c *BitcoindClient) GetBestBlock() (*chainhash.Hash, int32, error) {
 	bcInfo, err := c.chainConn.client.GetBlockChainInfo()
 	if err != nil {
 		log.ERROR(err)
-return nil, 0, err
+		return nil, 0, err
 	}
 	hash, err := chainhash.NewHashFromStr(bcInfo.BestBlockHash)
 	if err != nil {
 		log.ERROR(err)
-return nil, 0, err
+		return nil, 0, err
 	}
 	return hash, bcInfo.Blocks, nil
 }
@@ -125,7 +125,7 @@ func (c *BitcoindClient) GetBlockHeight(hash *chainhash.Hash) (int32, error) {
 	header, err := c.chainConn.client.GetBlockHeaderVerbose(hash)
 	if err != nil {
 		log.ERROR(err)
-return 0, err
+		return 0, err
 	}
 	return header.Height, nil
 }
@@ -191,7 +191,6 @@ func (c *BitcoindClient) NotifyReceived(addrs []util.Address) error {
 	err := c.NotifyBlocks()
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 	}
 	select {
 	case c.rescanUpdate <- addrs:
@@ -207,7 +206,6 @@ func (c *BitcoindClient) NotifySpent(outPoints []*wire.OutPoint) error {
 	err := c.NotifyBlocks()
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 	}
 	select {
 	case c.rescanUpdate <- outPoints:
@@ -223,7 +221,6 @@ func (c *BitcoindClient) NotifyTx(txids []chainhash.Hash) error {
 	err := c.NotifyBlocks()
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 	}
 	select {
 	case c.rescanUpdate <- txids:
@@ -304,8 +301,7 @@ func (c *BitcoindClient) RescanBlocks(
 	for _, hash := range blockHashes {
 		header, err := c.GetBlockHeaderVerbose(&hash)
 		if err != nil {
-		log.ERROR(err)
-log.WARNF(
+			log.ERRORF(
 				"unable to get header %s from bitcoind: %s",
 				hash, err,
 			)
@@ -313,8 +309,7 @@ log.WARNF(
 		}
 		block, err := c.GetBlock(&hash)
 		if err != nil {
-		log.ERROR(err)
-log.WARNF(
+			log.ERRORF(
 				"unable to get block %s from bitcoind: %s",
 				hash, err,
 			)
@@ -322,8 +317,7 @@ log.WARNF(
 		}
 		relevantTxs, err := c.filterBlock(block, header.Height, false)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 		if len(relevantTxs) > 0 {
 			rescannedBlock := btcjson.RescannedBlock{
@@ -387,12 +381,12 @@ func (c *BitcoindClient) Start() error {
 	bestHash, bestHeight, err := c.GetBestBlock()
 	if err != nil {
 		log.ERROR(err)
-return fmt.Errorf("unable to retrieve best block: %v", err)
+		return fmt.Errorf("unable to retrieve best block: %v", err)
 	}
 	bestHeader, err := c.GetBlockHeaderVerbose(bestHash)
 	if err != nil {
 		log.ERROR(err)
-return fmt.Errorf("unable to retrieve header for best block: "+
+		return fmt.Errorf("unable to retrieve header for best block: "+
 			"%v", err)
 	}
 	c.bestBlockMtx.Lock()
@@ -541,8 +535,8 @@ func (c *BitcoindClient) ntfnHandler() {
 					newBlock, newBlockHeight, true,
 				)
 				if err != nil {
-		log.ERROR(err)
-log.ERRORF(
+					log.ERROR(err)
+					log.ERRORF(
 						"unable to filter block %v: %v",
 						newBlock.BlockHash(), err,
 					)
@@ -657,7 +651,7 @@ func (c *BitcoindClient) onRelevantTx(tx *tm.TxRecord,
 	block, err := parseBlock(blockDetails)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(
+		log.ERROR(
 			"unable to send onRelevantTx notification, failed parse block:",
 			err,
 		)
@@ -719,7 +713,7 @@ func (c *BitcoindClient) reorg(currentBlock am.BlockStamp,
 	bestHeight, err := c.GetBlockHeight(&bestHash)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	if bestHeight < currentBlock.Height {
 		log.DEBUG("detected multiple reorgs")
@@ -734,8 +728,8 @@ return err
 	for i := bestHeight - 1; i >= currentBlock.Height; i-- {
 		block, err := c.GetBlock(&previousBlock)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		blocksToNotify.PushFront(block)
 		previousBlock = block.Header.PrevBlock
@@ -748,7 +742,7 @@ return err
 	currentHeader, err := c.GetBlockHeader(&currentBlock.Hash)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Then, we'll walk backwards in the chain until we find our common
 	// ancestor.
@@ -769,8 +763,8 @@ return err
 		// continue the common ancestor search.
 		currentHeader, err = c.GetBlockHeader(&currentHeader.PrevBlock)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		currentBlock.Height--
 		currentBlock.Hash = currentHeader.PrevBlock
@@ -779,8 +773,8 @@ return err
 		// once we've found our common ancestor.
 		block, err := c.GetBlock(&previousBlock)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		blocksToNotify.PushFront(block)
 		previousBlock = block.Header.PrevBlock
@@ -803,13 +797,13 @@ return err
 		nextHash := nextBlock.BlockHash()
 		nextHeader, err := c.GetBlockHeader(&nextHash)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		_, err = c.filterBlock(nextBlock, nextHeight, true)
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		currentBlock.Height = nextHeight
 		currentBlock.Hash = nextHash
@@ -840,8 +834,8 @@ func (c *BitcoindClient) FilterBlocks(
 		// fetching *every* block
 		rawBlock, err := c.GetBlock(&block.Hash)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		if !blockFilterer.FilterBlock(rawBlock) {
 			continue
@@ -879,12 +873,12 @@ func (c *BitcoindClient) rescan(start chainhash.Hash) error {
 	bestHash, bestHeight, err := c.GetBestBlock()
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	bestHeader, err := c.GetBlockHeaderVerbose(bestHash)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	bestBlock := am.BlockStamp{
 		Hash:      *bestHash,
@@ -897,12 +891,12 @@ return err
 	previousHeader, err := c.GetBlockHeaderVerbose(&start)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	previousHash, err := chainhash.NewHashFromStr(previousHeader.Hash)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	headers.PushBack(previousHeader)
 	// Queue a RescanFinished notification to the caller with the last block
@@ -916,8 +910,8 @@ return err
 	for i := previousHeader.Height + 1; i <= bestBlock.Height; i++ {
 		hash, err := c.GetBlockHash(int64(i))
 		if err != nil {
-		log.ERROR(err)
-return err
+			log.ERROR(err)
+			return err
 		}
 		// If the previous header is before the wallet birthday, fetch
 		// the current header and construct a dummy block, rather than
@@ -929,8 +923,8 @@ return err
 		if !afterBirthday {
 			header, err := c.GetBlockHeader(hash)
 			if err != nil {
-		log.ERROR(err)
-return err
+				log.ERROR(err)
+				return err
 			}
 			block = &wire.MsgBlock{
 				Header: *header,
@@ -946,8 +940,8 @@ return err
 		if afterBirthday {
 			block, err = c.GetBlock(hash)
 			if err != nil {
-		log.ERROR(err)
-return err
+				log.ERROR(err)
+				return err
 			}
 		}
 		for block.Header.PrevBlock.String() != previousHeader.Hash {
@@ -964,13 +958,13 @@ return err
 			// Get the previous block of the best chain.
 			hash, err := c.GetBlockHash(int64(i - 1))
 			if err != nil {
-		log.ERROR(err)
-return err
+				log.ERROR(err)
+				return err
 			}
 			block, err = c.GetBlock(hash)
 			if err != nil {
-		log.ERROR(err)
-return err
+				log.ERROR(err)
+				return err
 			}
 			// Then, we'll the get the header of this previous
 			// block.
@@ -986,8 +980,8 @@ return err
 						previousHeader.Hash,
 					)
 					if err != nil {
-		log.ERROR(err)
-return err
+						log.ERROR(err)
+						return err
 					}
 				}
 			} else {
@@ -996,15 +990,15 @@ return err
 					previousHeader.PreviousHash,
 				)
 				if err != nil {
-		log.ERROR(err)
-return err
+					log.ERROR(err)
+					return err
 				}
 				previousHeader, err = c.GetBlockHeaderVerbose(
 					previousHash,
 				)
 				if err != nil {
-		log.ERROR(err)
-return err
+					log.ERROR(err)
+					return err
 				}
 			}
 		}
@@ -1035,13 +1029,13 @@ return err
 		if i == bestBlock.Height {
 			bestHash, bestHeight, err = c.GetBestBlock()
 			if err != nil {
-		log.ERROR(err)
-return err
+				log.ERROR(err)
+				return err
 			}
 			bestHeader, err = c.GetBlockHeaderVerbose(bestHash)
 			if err != nil {
-		log.ERROR(err)
-return err
+				log.ERROR(err)
+				return err
 			}
 			bestBlock.Hash = *bestHash
 			bestBlock.Height = bestHeight
@@ -1080,8 +1074,8 @@ func (c *BitcoindClient) filterBlock(block *wire.MsgBlock, height int32,
 		blockDetails.Index = i
 		isRelevant, rec, err := c.filterTx(tx, blockDetails, notify)
 		if err != nil {
-		log.ERROR(err)
-log.WARNF(
+			log.ERROR(err)
+			log.WARNF(
 				"Unable to filter transaction %v: %v",
 				tx.TxHash(), err,
 			)
@@ -1123,7 +1117,7 @@ func (c *BitcoindClient) filterTx(tx *wire.MsgTx,
 	rec, err := tm.NewTxRecordFromMsgTx(txDetails.MsgTx(), time.Now())
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(
+		log.ERROR(
 			"Cannot create transaction record for relevant tx:", err,
 		)
 		return false, nil, err
@@ -1155,8 +1149,8 @@ log.ERROR(
 			out.PkScript, c.chainParams,
 		)
 		if err != nil {
-		log.ERROR(err)
-log.DEBUGF(
+			log.ERROR(err)
+			log.DEBUGF(
 				"Unable to parse output script in %s:%d: %v %s",
 				tx.TxHash(), i, err,
 			)

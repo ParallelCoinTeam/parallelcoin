@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -24,34 +23,31 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
 			cx.DataDir = c.String("datadir")
-			log.INFO("setting datadir", *cx.Config.DataDir)
+			log.TRACE("setting datadir", *cx.Config.DataDir)
 		}
 		*cx.Config.ConfigFile =
-			*cx.Config.DataDir + string(
-				os.PathSeparator) +
-				podConfigFilename
-		log.INFO("config file set to", *cx.Config.ConfigFile)
+			*cx.Config.DataDir + string(os.PathSeparator) + podConfigFilename
+		log.TRACE("config file set to", *cx.Config.ConfigFile)
 		// we are going to assume the config is not manually misedited
 		if apputil.FileExists(*cx.Config.ConfigFile) {
 			log.TRACE("loading config")
 			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
-			log.INFO("loaded config")
+			log.TRACE("loaded config")
 			if err == nil {
 				cx.Config = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
-		log.ERROR(err)
-		fmt.Println("error unmarshalling config", err)
+					log.ERROR("error unmarshalling config", err)
 					os.Exit(1)
 				}
-				log.INFO("unmarshalled config")
+				log.TRACE("unmarshalled config")
 			} else {
-				fmt.Println("unexpected error reading configuration file:", err)
+				log.FATAL("unexpected error reading configuration file:", err)
 				os.Exit(1)
 			}
 		} else {
 			*cx.Config.ConfigFile = ""
-			log.INFO("will save config after configuration")
+			log.TRACE("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
 		log.TRACE("checking log level")
@@ -71,15 +67,16 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				fork.HashReps = 3
 			case "regtestnet", "regressiontest", "r":
 				log.TRACE("on regression testnet")
+				fork.IsTestnet = true
 				cx.ActiveNet = &netparams.RegressionTestParams
 			case "simnet", "s":
 				log.TRACE("on simnet")
+				fork.IsTestnet = true
 				cx.ActiveNet = &netparams.SimNetParams
 			default:
 				if *cx.Config.Network != "mainnet" &&
 					*cx.Config.Network != "m" {
 					log.WARN("using mainnet for node")
-					log.TRACE("on mainnet")
 				}
 				cx.ActiveNet = &netparams.MainNetParams
 			}

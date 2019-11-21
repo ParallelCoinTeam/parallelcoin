@@ -9,7 +9,6 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"errors"
-	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"io"
 )
@@ -63,7 +62,7 @@ func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	ephemeral, err := NewPrivateKey(S256())
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	ecdhKey := GenerateSharedSecret(ephemeral, pubkey)
 	derivedKey := sha512.Sum512(ecdhKey)
@@ -95,7 +94,7 @@ return nil, err
 	block, err := aes.NewCipher(keyE)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(out[offset:len(out)-sha256.Size], paddedIn)
@@ -104,7 +103,6 @@ return nil, err
 	_, err = hm.Write(out[:len(out)-sha256.Size]) // everything is hashed
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 	}
 	copy(out[len(out)-sha256.Size:], hm.Sum(nil)) // write checksum
 	return out, nil
@@ -144,7 +142,7 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	pubkey, err := ParsePubKey(pb, S256())
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	// check for cipher text length
 	if (len(in)-aes.BlockSize-offset-sha256.Size)%aes.BlockSize != 0 {
@@ -162,7 +160,6 @@ return nil, err
 	_, err = hm.Write(in[:len(in)-sha256.Size]) // everything is hashed
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 	}
 	expectedMAC := hm.Sum(nil)
 	if !hmac.Equal(messageMAC, expectedMAC) {
@@ -172,7 +169,7 @@ fmt.Println(err)
 	block, err := aes.NewCipher(keyE)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	mode := cipher.NewCBCDecrypter(block, iv)
 	// same length as ciphertext

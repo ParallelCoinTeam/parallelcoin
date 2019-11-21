@@ -13,16 +13,15 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	// we make the list up to 1000 so the user does not have to attend to
 	// this too often
 	miningAddressLen := len(*cfg.MiningAddrs)
-	toMake := 1000 - miningAddressLen
-	if toMake < 1 {
+	toMake := 100 - miningAddressLen
+	if toMake < 3 {
 		return
 	}
 	log.WARN("refilling mining addresses")
 	account, err := w.AccountNumber(wm.KeyScopeBIP0044,
 		"default")
 	if err != nil {
-		log.ERROR("error getting account number ", err,
-		)
+		log.ERROR("error getting account number ", err)
 	}
 	for i := 0; i < toMake; i++ {
 		addr, err := w.NewAddress(account, wm.KeyScopeBIP0044,
@@ -42,6 +41,6 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	if save.Pod(cfg) {
 		log.WARN("saved config with new addresses")
 	} else {
-		log.ERROR("error adding new address ", err)
+		log.ERROR("error adding new addresses", err)
 	}
 }

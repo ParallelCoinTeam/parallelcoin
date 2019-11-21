@@ -181,7 +181,6 @@ dbFetchTxIndexEntry(dbTx database.Tx, txHash *chainhash.Hash) (*database.BlockRe
 	hash, err := dbFetchBlockHashBySerializedID(dbTx, serializedData[0:4])
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return nil, database.Error{
 			ErrorCode: database.ErrCorruption,
 			Description: fmt.Sprintf("corrupt transaction index "+
@@ -203,7 +202,6 @@ dbAddTxIndexEntries(dbTx database.Tx, block *util.Block, blockID uint32) error {
 	txLocs, err := block.TxLoc()
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	// As an optimization,
@@ -220,7 +218,6 @@ dbAddTxIndexEntries(dbTx database.Tx, block *util.Block, blockID uint32) error {
 		err := dbPutTxIndexEntry(dbTx, tx.Hash(),
 			serializedValues[offset:endOffset:endOffset])
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}
@@ -249,7 +246,6 @@ dbRemoveTxIndexEntries(dbTx database.Tx, block *util.Block) error {
 		err := dbRemoveTxIndexEntry(dbTx, tx.Hash())
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 			return err
 		}
 	}
@@ -257,14 +253,14 @@ dbRemoveTxIndexEntries(dbTx database.Tx, block *util.Block) error {
 }
 
 type // TxIndex implements a transaction by hash index.  That is to say,
-	// it supports querying all transactions by their hash.
-	TxIndex struct {
-		db         database.DB
-		curBlockID uint32
-	}
+// it supports querying all transactions by their hash.
+TxIndex struct {
+	db         database.DB
+	curBlockID uint32
+}
 
 var // Ensure the TxIndex type implements the Indexer interface.
-	_ Indexer = (*TxIndex)(nil)
+_ Indexer = (*TxIndex)(nil)
 
 func // Init initializes the hash-based transaction index.  In particular,
 // it finds the highest used block ID and stores it for later use when
@@ -290,7 +286,7 @@ func // Init initializes the hash-based transaction index.  In particular,
 			highestKnown = testBlockID
 			testBlockID += increment
 		}
-		log.TRACEF("forward scan (highest known %d, next unknown %d)", highestKnown, nextUnknown, )
+		log.TRACEF("forward scan (highest known %d, next unknown %d)", highestKnown, nextUnknown)
 		// No used block IDs due to new database.
 		if nextUnknown == 1 {
 			return nil
@@ -371,7 +367,6 @@ func // ConnectBlock is invoked by the index manager when a new block has been
 	err := dbPutBlockIDIndexEntry(dbTx, block.Hash(), newBlockID)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	idx.curBlockID = newBlockID
@@ -430,7 +425,6 @@ dropBlockIDIndex(db database.DB) error {
 		err := meta.DeleteBucket(idByHashIndexBucketName)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 			return err
 		}
 		return meta.DeleteBucket(hashByIDIndexBucketName)
@@ -443,7 +437,6 @@ func // DropTxIndex drops the transaction index from the provided database if it
 DropTxIndex(db database.DB, interrupt <-chan struct{}) error {
 	err := dropIndex(db, addrIndexKey, addrIndexName, interrupt)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return err
 	}

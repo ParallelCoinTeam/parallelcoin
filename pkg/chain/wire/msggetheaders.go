@@ -31,14 +31,12 @@ func (msg *MsgGetHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncodin
 	err := readElement(r, &msg.ProtocolVersion)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Read num block locator hashes and limit to max.
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	if count > MaxBlockLocatorsPerMsg {
@@ -53,14 +51,12 @@ log.ERROR(err)
 		hash := &locatorHashes[i]
 		err := readElement(r, hash)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = msg.AddBlockLocatorHash(hash)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	}
 	return readElement(r, &msg.HashStop)
@@ -78,20 +74,17 @@ func (msg *MsgGetHeaders) BtcEncode(w io.Writer, pver uint32, enc MessageEncodin
 	err := writeElement(w, msg.ProtocolVersion)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	err = WriteVarInt(w, pver, uint64(count))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	for _, hash := range msg.BlockLocatorHashes {
 		err := writeElement(w, hash)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

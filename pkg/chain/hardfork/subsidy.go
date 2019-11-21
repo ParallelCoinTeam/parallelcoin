@@ -75,7 +75,7 @@ func Amt(f float64) (amt util.Amount) {
 	amt, err := util.NewAmount(f)
 	if err != nil {
 		log.ERROR(err)
-panic(err)
+		panic(err)
 	}
 	return
 }
@@ -84,7 +84,7 @@ func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
 	out, err := util.DecodeAddress(addr, defaultNet)
 	if err != nil {
 		log.ERROR(err)
-panic(err)
+		panic(err)
 	}
 	return
 }
@@ -93,7 +93,7 @@ func Key(key string) (out []byte) {
 	out, err := hex.DecodeString(key)
 	if err != nil {
 		log.ERROR(err)
-panic(err)
+		panic(err)
 	}
 	return
 }

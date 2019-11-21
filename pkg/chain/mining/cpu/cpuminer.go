@@ -303,7 +303,7 @@ func (m *CPUMiner) generateBlocks(workerNumber uint32, quit chan struct{}) {
 	ticker := time.NewTicker(time.Second) // * hashUpdateSecs)
 	defer ticker.Stop()
 out:
-	for {
+	for i := 0; ; i++ {
 		//log.TRACE(workerNumber, "generateBlocksLoop start")
 		// Quit when the miner is stopped.
 		select {
@@ -315,10 +315,10 @@ out:
 		// Wait until there is a connection to at least one other peer since
 		// there is no way to relay a found block or receive transactions to work
 		// on when there are no connected peers.
-		if (m.cfg.ConnectedCount() == 0 ||
-			m.cfg.ChainParams.Net == wire.MainNet) &&
-			!m.cfg.Solo {
-			log.DEBUG("server has no peers, waiting")
+		if (m.cfg.ConnectedCount() == 0 || !m.cfg.IsCurrent()) &&
+			(m.cfg.ChainParams.Net == wire.MainNet && !m.cfg.Solo) {
+			log.Print(log.Composite("server has no peers, waiting...",
+				"STATUS", true), "\r")
 			time.Sleep(time.Second)
 			continue
 		}
@@ -380,7 +380,8 @@ out:
 			// if m.cfg.ChainParams.Name == "testnet" {
 			// 	rand.Seed(time.Now().UnixNano())
 			// 	delay := uint16(rand.Int()) >> 6
-			// fmt.Printf("%s testnet delay %dms algo %s\n", time.Now().Format("2006-01-02 15:04:05.000000"),
+			// log.Printf("%s testnet delay %dms algo %s\n",
+			// time.Now().Format("2006-01-02 15:04:05.000000"),
 			// delay, fork.List[fork.GetCurrent(curHeight+1)].AlgoVers[block.MsgBlock().Header.Version])
 			// time.Sleep(time.Millisecond * time.Duration(delay))
 			// }
@@ -577,7 +578,7 @@ func (m *CPUMiner) speedMonitor() {
 	ticker := time.NewTicker(time.Second * hpsUpdateSecs)
 	defer ticker.Stop()
 out:
-	for {
+	for i := 0; ; i++ {
 		select {
 		// Periodic updates from the workers with how many hashes they have
 		// performed.
@@ -592,10 +593,11 @@ out:
 			hashesPerSec = (hashesPerSec + curHashesPerSec) / 2
 			totalHashes = 0
 			if hashesPerSec != 0 {
-				since := fmt.Sprint(time.Now().Sub(log.StartupTime) / time.
-					Second * time.Second)
-				fmt.Printf("\u001b[2K\r%v Hash speed: %6.4f Kh/s %0.2f h/\r",
-					since, hashesPerSec/1000, hashesPerSec)
+				//since := fmt.Sprint(time.Now().Sub(log.StartupTime) / time.
+				//	Second * time.Second)
+				log.Print(log.Composite(fmt.Sprintf(
+					"--> Hash speed: %6.4f Kh/s %0.2f h/s", hashesPerSec/1000,
+					hashesPerSec), "STATUS", true), "\r")
 			}
 		// Request for the number of hashes per second.
 		case m.queryHashesPerSec <- hashesPerSec:

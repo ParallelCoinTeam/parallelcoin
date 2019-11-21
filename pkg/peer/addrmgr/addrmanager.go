@@ -351,7 +351,7 @@ func (a *AddrManager) savePeers() {
 	w, err := os.Create(a.peersFile)
 	if err != nil {
 		log.ERROR(err)
-log.ERRORF("error opening file %s: %v", a.peersFile, err)
+		log.ERRORF("error opening file %s: %v", a.peersFile, err)
 		return
 	}
 	enc := json.NewEncoder(w)
@@ -372,12 +372,12 @@ func (a *AddrManager) loadPeers() {
 	err := a.deserializePeers(a.peersFile)
 	if err != nil {
 		log.ERROR(err)
-log.ERRORF("failed to parse file %s: %v", a.peersFile, err)
+		log.ERRORF("failed to parse file %s: %v", a.peersFile, err)
 		// if it is invalid we nuke the old one unconditionally.
 		err = os.Remove(a.peersFile)
 		if err != nil {
-		log.ERROR(err)
-log.WARNF("failed to remove corrupt peers file %s: %v", a.peersFile,
+			log.ERROR(err)
+			log.WARNF("failed to remove corrupt peers file %s: %v", a.peersFile,
 				err)
 		}
 		a.reset()
@@ -398,7 +398,7 @@ func (a *AddrManager) deserializePeers(filePath string) error {
 	r, err := os.Open(filePath)
 	if err != nil {
 		log.ERROR(err)
-return fmt.Errorf("%s error opening file: %v", filePath, err)
+		return fmt.Errorf("%s error opening file: %v", filePath, err)
 	}
 	defer r.Close()
 	var sam serializedAddrManager
@@ -406,7 +406,7 @@ return fmt.Errorf("%s error opening file: %v", filePath, err)
 	err = dec.Decode(&sam)
 	if err != nil {
 		log.ERROR(err)
-return fmt.Errorf("error reading %s: %v", filePath, err)
+		return fmt.Errorf("error reading %s: %v", filePath, err)
 	}
 	if sam.Version != serialisationVersion {
 		return fmt.Errorf(
@@ -419,14 +419,14 @@ return fmt.Errorf("error reading %s: %v", filePath, err)
 		ka := new(KnownAddress)
 		ka.na, err = a.DeserializeNetAddress(v.Addr)
 		if err != nil {
-		log.ERROR(err)
-return fmt.Errorf("failed to deserialize netaddress "+
+			log.ERROR(err)
+			return fmt.Errorf("failed to deserialize netaddress "+
 				"%s: %v", v.Addr, err)
 		}
 		ka.srcAddr, err = a.DeserializeNetAddress(v.Src)
 		if err != nil {
-		log.ERROR(err)
-return fmt.Errorf("failed to deserialize netaddress "+
+			log.ERROR(err)
+			return fmt.Errorf("failed to deserialize netaddress "+
 				"%s: %v", v.Src, err)
 		}
 		ka.attempts = v.Attempts
@@ -481,12 +481,12 @@ func // DeserializeNetAddress converts a given address string to a *wire.NetAddr
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
 		log.ERROR(err)
-return nil, err
+		return nil, err
 	}
 	return a.HostToNetAddress(host, uint16(port), wire.SFNodeNetwork)
 }
@@ -545,7 +545,7 @@ func // AddAddressByIP adds an address where we are given an ip:port and not a
 	addr, portStr, err := net.SplitHostPort(addrIP)
 	if err != nil {
 		log.ERROR(err)
-return err
+		return err
 	}
 	// Put it in wire.Netaddress
 	ip := net.ParseIP(addr)
@@ -555,7 +555,7 @@ return err
 	port, err := strconv.ParseUint(portStr, 10, 0)
 	if err != nil {
 		log.ERROR(err)
-return fmt.Errorf("invalid port %s: %v", portStr, err)
+		return fmt.Errorf("invalid port %s: %v", portStr, err)
 	}
 	na := wire.NewNetAddressIPPort(ip, uint16(port), 0)
 	a.AddAddress(na, na) // XXX use correct src address
@@ -619,7 +619,6 @@ func // reset resets the address manager by reinitialising the random source and
 	_, err := io.ReadFull(crand.Reader, a.key[:])
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 	}
 	for i := range a.addrNew {
 		a.addrNew[i] = make(map[string]*KnownAddress)
@@ -642,16 +641,16 @@ func // HostToNetAddress returns a netaddress given a host address.
 		data, err := base32.StdEncoding.DecodeString(
 			strings.ToUpper(host[:16]))
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		prefix := []byte{0xfd, 0x87, 0xd8, 0x7e, 0xeb, 0x43}
 		ip = net.IP(append(prefix, data...))
 	} else if ip = net.ParseIP(host); ip == nil {
 		ips, err := a.lookupFunc(host)
 		if err != nil {
-		log.ERROR(err)
-return nil, err
+			log.ERROR(err)
+			return nil, err
 		}
 		if len(ips) == 0 {
 			return nil, fmt.Errorf("no addresses found for %s", host)
