@@ -4,7 +4,8 @@ import (
 	"context"
 	"crypto/cipher"
 	"crypto/rand"
-	"github.com/p9c/pod/pkg/controller/controllerold/fec"
+	"errors"
+	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
 	"io"
@@ -15,10 +16,10 @@ import (
 )
 
 type MsgBuffer struct {
-	Buffers    [][]byte
-	First      time.Time
-	Decoded    bool
-	Superseded bool
+	Buffers [][]byte
+	First   time.Time
+	Decoded bool
+	Source  *net.UDPAddr
 }
 
 // Connection is the state and working memory references for a simple
@@ -46,13 +47,13 @@ type Connection struct {
 func NewConnection(send, listen, preSharedKey string,
 	maxDatagramSize int) (c *Connection, cancel context.CancelFunc, err error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	sendAddr := getUDPAddr(send)
+	sendAddr := GetUDPAddr(send)
 	sendConn, err := net.DialUDP("udp", nil, sendAddr)
 	if err != nil {
 		log.ERROR(err)
 		return
 	}
-	listenAddr := getUDPAddr(listen)
+	listenAddr := GetUDPAddr(listen)
 	listenConn, err := net.DialUDP("udp", nil, listenAddr)
 	if err != nil {
 		log.ERROR(err)
@@ -73,9 +74,9 @@ func NewConnection(send, listen, preSharedKey string,
 	}, cancel, err
 }
 
-func (c *Connection) createShards(b, magic []byte) (shards [][]byte,
+func (c *Connection) CreateShards(b, magic []byte) (shards [][]byte,
 	err error) {
-	magicLen := len(magic)
+	magicLen := 4
 	// get a nonce for the packet, it is both message ID and salt
 	nonceLen := c.ciph.NonceSize()
 	nonce := make([]byte, nonceLen)
@@ -90,7 +91,7 @@ func (c *Connection) createShards(b, magic []byte) (shards [][]byte,
 		shardLen := len(encryptedShard)
 		// assemble the packet: magic, nonce, and encrypted shard
 		outBytes := make([]byte, shardLen+magicLen+nonceLen)
-		copy(outBytes, magic)
+		copy(outBytes, magic[:magicLen])
 		copy(outBytes[magicLen:], nonce)
 		copy(outBytes[magicLen+nonceLen:], encryptedShard)
 		shards[i] = outBytes
@@ -98,11 +99,9 @@ func (c *Connection) createShards(b, magic []byte) (shards [][]byte,
 	return
 }
 
-func (c *Connection) Send(b, magic []byte) (err error) {
-	var shards [][]byte
-	shards, err = c.createShards(b, magic)
+func send(shards [][]byte, sendConn *net.UDPConn) (err error) {
 	for i := range shards {
-		_, err = c.sendConn.Write(shards[i])
+		_, err = sendConn.Write(shards[i])
 		if err != nil {
 			log.ERROR(err)
 		}
@@ -110,8 +109,63 @@ func (c *Connection) Send(b, magic []byte) (err error) {
 	return
 }
 
-func (c *Connection) Listen(handlers map[string]func(b []byte) (cancel context.
-CancelFunc, err error)) (b []byte, err error) {
+func (c *Connection) Send(b, magic []byte) (err error) {
+	if len(magic) != 4 {
+		err = errors.New("magic must be 4 bytes long")
+		log.ERROR(err)
+		return
+	}
+	var shards [][]byte
+	shards, err = c.CreateShards(b, magic)
+	err = send(shards, c.sendConn)
+	if err != nil {
+		log.ERROR(err)
+	}
+	return
+}
+
+func (c *Connection) SendTo(addr *net.UDPAddr, b, magic []byte) (err error) {
+	if len(magic) != 4 {
+		err = errors.New("magic must be 4 bytes long")
+		log.ERROR(err)
+		return
+	}
+	sendConn, err := net.DialUDP("udp", nil, addr)
+	if err != nil {
+		log.ERROR(err)
+		return
+	}
+	shards, err := c.CreateShards(b, magic)
+	err = send(shards, sendConn)
+	if err != nil {
+		log.ERROR(err)
+	}
+	return
+}
+
+func (c *Connection) SendShards(shards [][]byte) (err error) {
+	err = send(shards, c.sendConn)
+	if err != nil {
+		log.ERROR(err)
+	}
+	return
+}
+
+func (c *Connection) SendShardsTo(shards [][]byte, addr *net.UDPAddr) (err error) {
+	sendConn, err := net.DialUDP("udp", nil, addr)
+	if err != nil {
+		log.ERROR(err)
+		return
+	}
+	err = send(shards, sendConn)
+	if err != nil {
+		log.ERROR(err)
+	}
+	return
+}
+
+func (c *Connection) Listen(handlers map[string]func(b []byte) (err error),
+) (b []byte, err error) {
 	log.TRACE("setting read buffer")
 	err = c.listenConn.SetReadBuffer(c.maxDatagramSize)
 	if err != nil {
@@ -125,22 +179,25 @@ CancelFunc, err error)) (b []byte, err error) {
 		// read from socket until context is cancelled
 		for {
 			n, src, err := c.listenConn.ReadFromUDP(buffer)
-			// TODO: decrypt shards when they arrive and store the cleartext
-			//  in the buffers
-			_ = src
+			buf := buffer[:n]
 			if err != nil {
 				log.ERROR("ReadFromUDP failed:", err)
 				continue
 			}
-			magic := string(buffer[:])
+			magic := string(buf[:4])
 			if _, ok := handlers[magic]; ok {
-				nonce := string(buffer[:12])
+				nonceBytes := buf[4:16]
+				nonce := string(nonceBytes)
+				// decipher
+				shard, err := c.ciph.Open(nil, nonceBytes,
+					buf[16:], nil)
+				if err != nil {
+					log.ERROR(err)
+					continue
+				}
 				if bn, ok := c.buffers[nonce]; ok {
 					if !bn.Decoded {
-						payload := buffer[16:n]
-						newP := make([]byte, len(payload))
-						copy(newP, payload)
-						bn.Buffers = append(bn.Buffers, newP)
+						bn.Buffers = append(bn.Buffers, shard)
 						if len(bn.Buffers) >= 3 {
 							// try to decode it
 							var cipherText []byte
@@ -148,38 +205,28 @@ CancelFunc, err error)) (b []byte, err error) {
 							cipherText, err = fec.Decode(bn.Buffers)
 							if err != nil {
 								log.ERROR(err)
-								return
+								continue
 							}
 							log.SPEW(cipherText)
-							msg, err := c.ciph.Open(nil, []byte(nonce),
-								cipherText, nil)
-							if err != nil {
-								log.ERROR(err)
-								return
-							}
 							bn.Decoded = true
-							c.receiveChan <- msg
+							c.receiveChan <- cipherText
 						}
 					} else {
 						for i := range c.buffers {
 							if i != nonce {
-								// superseded blocks can be deleted from the
+								// superseded messages can be deleted from the
 								// buffers,
 								// we don't add more data for the already
-								// decoded
-								c.buffers[i].Superseded = true
+								// decoded.
+								delete(c.buffers, i)
 							}
 						}
 					}
 				} else {
 					c.buffers[nonce] = &MsgBuffer{[][]byte{},
-						time.Now(), false, false}
-					payload := buffer[16:n]
-					newP := make([]byte, len(payload))
-					copy(newP, payload)
+						time.Now(), false, src}
 					c.buffers[nonce].Buffers = append(c.buffers[nonce].
-						Buffers, newP)
-					//log.DEBUGF("%x", payload)
+						Buffers, shard)
 				}
 			}
 			select {
@@ -193,7 +240,7 @@ CancelFunc, err error)) (b []byte, err error) {
 	return
 }
 
-func getUDPAddr(address string) (sendAddr *net.UDPAddr) {
+func GetUDPAddr(address string) (sendAddr *net.UDPAddr) {
 	sendHost, sendPort, err := net.SplitHostPort(address)
 	if err != nil {
 		log.ERROR(err)

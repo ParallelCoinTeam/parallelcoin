@@ -9,9 +9,9 @@ import (
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller/advertisment"
-	"github.com/p9c/pod/pkg/controller/controllerold/fec"
 	"github.com/p9c/pod/pkg/controller/job"
 	"github.com/p9c/pod/pkg/controller/pause"
+	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/simplebuffer"
@@ -48,7 +48,6 @@ type Controller struct {
 
 var (
 	SolutionMagic = [4]byte{'s', 'o', 'l', 'v'}
-
 )
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {

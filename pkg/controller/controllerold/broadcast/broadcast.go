@@ -7,7 +7,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/controller/controllerold/fec"
+	"github.com/p9c/pod/pkg/fec"
 	"io"
 	"net"
 
