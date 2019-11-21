@@ -10,7 +10,7 @@ import (
 // representation and that text representation is still correct,
 // ie. that a refactoring and renaming of the error code has not
 // drifted from the textual representation.
-func TestErrorCodeStringer(	t *testing.T) {
+func TestErrorCodeStringer(t *testing.T) {
 	// All the errors in ths
 	tests := []struct {
 		in   vp.ErrorCode

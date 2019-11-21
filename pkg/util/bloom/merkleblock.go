@@ -1,7 +1,6 @@
 package bloom
 
 import (
-	"fmt"
 	"github.com/p9c/pod/pkg/log"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -96,8 +95,7 @@ func NewMerkleBlock(block *util.Block, filter *Filter) (*wire.MsgMerkleBlock, []
 	for _, hash := range mBlock.finalHashes {
 		err := msgMerkleBlock.AddTxHash(hash)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	}
 	for i := uint32(0); i < uint32(len(mBlock.bits)); i++ {

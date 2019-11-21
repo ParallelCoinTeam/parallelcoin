@@ -19,7 +19,7 @@ type signatureTest struct {
 }
 
 // decodeHex decodes the passed hex string and returns the resulting bytes.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
-func decodeHex(	hexStr string) []byte {
+func decodeHex(hexStr string) []byte {
 	b, err := hex.DecodeString(hexStr)
 	if err != nil {
 		panic("invalid hex string in test source: err " + err.Error() +
@@ -313,7 +313,7 @@ var signatureTests = []signatureTest{
 	},
 }
 
-func TestSignatures(	t *testing.T) {
+func TestSignatures(t *testing.T) {
 	for _, test := range signatureTests {
 		var err error
 		if test.der {
@@ -338,7 +338,7 @@ func TestSignatures(	t *testing.T) {
 }
 
 // TestSignatureSerialize ensures that serializing signatures works as expected.
-func TestSignatureSerialize(	t *testing.T) {
+func TestSignatureSerialize(t *testing.T) {
 	tests := []struct {
 		name     string
 		ecsig    *Signature
@@ -437,7 +437,7 @@ func TestSignatureSerialize(	t *testing.T) {
 		}
 	}
 }
-func testSignCompact(	t *testing.T, tag string, curve *KoblitzCurve,
+func testSignCompact(t *testing.T, tag string, curve *KoblitzCurve,
 	data []byte, isCompressed bool) {
 	tmp, _ := NewPrivateKey(curve)
 	priv := (*PrivateKey)(tmp)
@@ -485,7 +485,7 @@ func testSignCompact(	t *testing.T, tag string, curve *KoblitzCurve,
 		return
 	}
 }
-func TestSignCompact(	t *testing.T) {
+func TestSignCompact(t *testing.T) {
 	for i := 0; i < 256; i++ {
 		name := fmt.Sprintf("test %d", i)
 		data := make([]byte, 32)
@@ -526,7 +526,7 @@ var recoveryTests = []struct {
 	},
 }
 
-func TestRecoverCompact(	t *testing.T) {
+func TestRecoverCompact(t *testing.T) {
 	for i, test := range recoveryTests {
 		msg := decodeHex(test.msg)
 		sig := decodeHex(test.sig)
@@ -553,7 +553,7 @@ func TestRecoverCompact(	t *testing.T) {
 		}
 	}
 }
-func TestRFC6979(	t *testing.T) {
+func TestRFC6979(t *testing.T) {
 	// Test vectors matching Trezor and CoreBitcoin implementations.
 	// - https://github.com/trezor/trezor-crypto/blob/9fea8f8ab377dc514e40c6fd1f7c89a74c1d8dc6/tests.c#L432-L453
 	// - https://github.com/oleganza/CoreBitcoin/blob/e93dd71207861b5bf044415db5fa72405e7d8fbc/CoreBitcoin/BTCKey%2BTests.m#L23-L49
@@ -630,7 +630,7 @@ func TestRFC6979(	t *testing.T) {
 		}
 	}
 }
-func TestSignatureIsEqual(	t *testing.T) {
+func TestSignatureIsEqual(t *testing.T) {
 	sig1 := &Signature{
 		R: fromHex("0082235e21a2300022738dabb8e1bbd9d19cfb1e7ab8c30a23b0afbb8d178abcf3"),
 		S: fromHex("24bf68e256c534ddfaf966bf908deb944305596f7bdcc38d69acad7f9c868724"),

@@ -9,7 +9,7 @@ import (
 )
 
 // TestVerAck tests the MsgVerAck API.
-func TestVerAck(	t *testing.T) {
+func TestVerAck(t *testing.T) {
 	pver := ProtocolVersion
 	// Ensure the command is expected value.
 	wantCmd := "verack"
@@ -29,7 +29,7 @@ func TestVerAck(	t *testing.T) {
 }
 
 // TestVerAckWire tests the MsgVerAck wire encode and decode for various protocol versions.
-func TestVerAckWire(	t *testing.T) {
+func TestVerAckWire(t *testing.T) {
 	msgVerAck := NewMsgVerAck()
 	msgVerAckEncoded := []byte{}
 	tests := []struct {

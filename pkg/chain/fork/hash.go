@@ -102,7 +102,7 @@ func DivHash(hf func([]byte) []byte, blockbytes []byte, howmany int) []byte {
 	if howmany > 0 {
 		return DivHash(hf, append(ddd, reverse(ddd)...), howmany-1)
 	}
-	// fmt.Printf("%x\n", ddd)
+	// log.Printf("%x\n", ddd)
 	// return Cryptonight7v2(hf(ddd))
 	return hf(ddd)
 }
@@ -114,8 +114,8 @@ func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
 		switch {
 		case height == 1:
 			hR = 0
-		//case height < 10:
-		//	hR = 6
+			//case height < 10:
+			//	hR = 6
 		}
 	}
 	switch name {
@@ -176,7 +176,6 @@ func Scrypt(bytes []byte) []byte {
 	copy(c, b)
 	dk, err := scrypt.Key(c, c, 1024, 1, 1, 32)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return make([]byte, 32)
 	}

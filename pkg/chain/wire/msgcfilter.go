@@ -33,14 +33,12 @@ func (msg *MsgCFilter) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) er
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Read the hash of the filter's block
 	err = readElement(r, &msg.BlockHash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Read filter data
@@ -60,13 +58,11 @@ func (msg *MsgCFilter) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) er
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	err = writeElement(w, msg.BlockHash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return WriteVarBytes(w, pver, msg.Data)
@@ -90,7 +86,7 @@ func (msg *MsgCFilter) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgCFilter returns a new bitcoin cfilter message that conforms to the Message interface. See MsgCFilter for details.
-func NewMsgCFilter(	filterType FilterType, blockHash *chainhash.Hash,
+func NewMsgCFilter(filterType FilterType, blockHash *chainhash.Hash,
 	data []byte) *MsgCFilter {
 	return &MsgCFilter{
 		FilterType: filterType,

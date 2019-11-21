@@ -591,7 +591,6 @@ out:
 			err := c.Conn.WriteMessage(websocket.TextMessage, r.Msg)
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
 				c.Disconnect()
 				break out
 			}
@@ -684,7 +683,6 @@ func (f *WSClientFilter) AddAddressStr(s string, params *netparams.Params) {
 	// script.
 	a, err := util.DecodeAddress(s, params)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return
 	}
@@ -954,7 +952,7 @@ func (*WSNtfnMgr) AddAddrRequests(
 // clients to add a new request watch all of the outpoints in ops and create
 // and send a notification when spent to the websocket client wsc.
 func (m *WSNtfnMgr) AddSpentRequests(opMap map[wire.
-OutPoint]map[chan struct{}]*WSClient, wsc *WSClient, ops []*wire.OutPoint) {
+	OutPoint]map[chan struct{}]*WSClient, wsc *WSClient, ops []*wire.OutPoint) {
 	for _, op := range ops {
 		// Track the request in the client as well so it can be quickly be
 		// removed on disconnect.
@@ -1106,7 +1104,6 @@ func (*WSNtfnMgr) NotifyBlockConnected(clients map[chan struct{}]*WSClient, bloc
 		err := wsc.QueueNotification(marshalledJSON)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 		}
 	}
 }
@@ -1134,7 +1131,6 @@ func (*WSNtfnMgr) NotifyBlockDisconnected(
 	for _, wsc := range clients {
 		err := wsc.QueueNotification(marshalledJSON)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 		}
 	}
@@ -1300,7 +1296,7 @@ func (m *WSNtfnMgr) NotifyForTx(ops map[wire.OutPoint]map[chan struct{}]*WSClien
 // a watched output.  If block is non-nil, any matching spent requests are
 // removed.
 func (m *WSNtfnMgr) NotifyForTxIns(ops map[wire.
-OutPoint]map[chan struct{}]*WSClient, tx *util.Tx, block *util.Block) {
+	OutPoint]map[chan struct{}]*WSClient, tx *util.Tx, block *util.Block) {
 	// Nothing to do if nobody is watching outpoints.
 	if len(ops) == 0 {
 		return
@@ -1443,7 +1439,7 @@ func (*WSNtfnMgr) RemoveAddrRequest(
 // outpoint is spent.  If wsc is the last client, the outpoint key is removed
 // from the map.
 func (*WSNtfnMgr) RemoveSpentRequest(ops map[wire.
-OutPoint]map[chan struct{}]*WSClient, wsc *WSClient, op *wire.OutPoint) {
+	OutPoint]map[chan struct{}]*WSClient, wsc *WSClient, op *wire.OutPoint) {
 	// Remove the request tracking from the client.
 	delete(wsc.SpentRequests, *op)
 	// Remove the client from the list to notify.
@@ -1528,8 +1524,7 @@ func (s Semaphore) Release() {
 
 // BlockDetails creates a BlockDetails struct to include in btcws notifications
 // from a block and a transaction's block index.
-func
-BlockDetails(block *util.Block, txIndex int) *btcjson.BlockDetails {
+func BlockDetails(block *util.Block, txIndex int) *btcjson.BlockDetails {
 	if block == nil {
 		return nil
 	}
@@ -1545,12 +1540,10 @@ BlockDetails(block *util.Block, txIndex int) *btcjson.BlockDetails {
 // string slice. It does this by attempting to decode each address using the
 // current active network parameters. If any single address fails to decode
 // properly, the function returns an error. Otherwise, nil is returned.
-func
-CheckAddressValidity(addrs []string, params *netparams.Params) error {
+func CheckAddressValidity(addrs []string, params *netparams.Params) error {
 	for _, addr := range addrs {
 		_, err := util.DecodeAddress(addr, params)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return &btcjson.RPCError{
 				Code: btcjson.ErrRPCInvalidAddressOrKey,
@@ -1564,8 +1557,7 @@ CheckAddressValidity(addrs []string, params *netparams.Params) error {
 
 // DescendantBlock returns the appropriate JSON-RPC error if a current block
 // fetched during a reorganize is not a direct child of the parent block hash.
-func
-DescendantBlock(prevHash *chainhash.Hash, curBlock *util.Block) error {
+func DescendantBlock(prevHash *chainhash.Hash, curBlock *util.Block) error {
 	curHash := &curBlock.MsgBlock().Header.PrevBlock
 	if !prevHash.IsEqual(curHash) {
 		log.ERRORF(
@@ -1577,8 +1569,7 @@ DescendantBlock(prevHash *chainhash.Hash, curBlock *util.Block) error {
 }
 
 // DeserializeOutpoints deserializes each serialized outpoint.
-func
-DeserializeOutpoints(serializedOuts []btcjson.OutPoint) ([]*wire.OutPoint,
+func DeserializeOutpoints(serializedOuts []btcjson.OutPoint) ([]*wire.OutPoint,
 	error) {
 	outpoints := make([]*wire.OutPoint, 0, len(serializedOuts))
 	for i := range serializedOuts {
@@ -1596,8 +1587,7 @@ DeserializeOutpoints(serializedOuts []btcjson.OutPoint) ([]*wire.OutPoint,
 // HandleLoadTxFilter implements the loadtxfilter command extension for
 // websocket connections. NOTE: This extension is ported from
 // github.com/decred/dcrd
-func
-HandleLoadTxFilter(wsc *WSClient, icmd interface{}) (interface{}, error) {
+func HandleLoadTxFilter(wsc *WSClient, icmd interface{}) (interface{}, error) {
 	cmd := icmd.(*btcjson.LoadTxFilterCmd)
 	outPoints := make([]wire.OutPoint, len(cmd.OutPoints))
 	for i := range cmd.OutPoints {
@@ -1981,8 +1971,7 @@ fetchRange:
 // HandleRescanBlocks implements the rescanblocks command extension for
 // websocket connections. NOTE: This extension is ported from
 // github.com/decred/dcrd
-func
-HandleRescanBlocks(wsc *WSClient, icmd interface{}) (interface{}, error) {
+func HandleRescanBlocks(wsc *WSClient, icmd interface{}) (interface{}, error) {
 	cmd, ok := icmd.(*btcjson.RescanBlocksCmd)
 	if !ok {
 		return nil, btcjson.ErrRPCInternal
@@ -2198,7 +2187,6 @@ func NewWebsocketClient(server *Server, conn *websocket.Conn,
 	sessionID, err := wire.RandomUint64()
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return nil, err
 	}
 	client := &WSClient{
@@ -2310,8 +2298,7 @@ func RecoverFromReorg(chain *blockchain.BlockChain, minBlock, maxBlock int32,
 
 // RescanBlock rescans all transactions in a single block.  This is a helper
 // function for handleRescan.
-func
-RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
+func RescanBlock(wsc *WSClient, lookups *RescanKeys, blk *util.Block) {
 	for _, tx := range blk.Transactions() {
 		// Hexadecimal representation of this tx.  Only created if needed,
 		// and reused for later notifications if already made.

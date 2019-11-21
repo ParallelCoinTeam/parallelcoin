@@ -18,20 +18,17 @@ func RawTxInWitnessSignature(tx *wire.MsgTx, sigHashes *TxSigHashes, idx int,
 	parsedScript, err := parseScript(subScript)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, fmt.Errorf("cannot parse output script: %v", err)
 	}
 	hash, err := calcWitnessSignatureHash(parsedScript, sigHashes, hashType, tx,
 		idx, amt)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	signature, err := key.Sign(hash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, fmt.Errorf("cannot sign tx input: %s", err)
 	}
 	return append(signature.Serialize(), byte(hashType)), nil
@@ -45,7 +42,6 @@ func WitnessSignature(tx *wire.MsgTx, sigHashes *TxSigHashes, idx int, amt int64
 		hashType, privKey)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	pk := (*ec.PublicKey)(&privKey.PublicKey)
@@ -65,13 +61,11 @@ func RawTxInSignature(tx *wire.MsgTx, idx int, subScript []byte,
 	hash, err := CalcSignatureHash(subScript, hashType, tx, idx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	signature, err := key.Sign(hash)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, fmt.Errorf("cannot sign tx input: %s", err)
 	}
 	return append(signature.Serialize(), byte(hashType)), nil
@@ -82,7 +76,6 @@ func SignatureScript(tx *wire.MsgTx, idx int, subscript []byte, hashType SigHash
 	sig, err := RawTxInSignature(tx, idx, subscript, hashType, privKey)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	pk := (*ec.PublicKey)(&privKey.PublicKey)
@@ -98,7 +91,6 @@ func p2pkSignatureScript(tx *wire.MsgTx, idx int, subScript []byte, hashType Sig
 	sig, err := RawTxInSignature(tx, idx, subScript, hashType, privKey)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return NewScriptBuilder().AddData(sig).Script()
@@ -113,14 +105,12 @@ func signMultiSig(tx *wire.MsgTx, idx int, subScript []byte, hashType SigHashTyp
 	for _, addr := range addresses {
 		key, _, err := kdb.GetKey(addr)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			continue
 		}
 		sig, err := RawTxInSignature(tx, idx, subScript, hashType, key)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			continue
 		}
 		builder.AddData(sig)
@@ -139,7 +129,6 @@ func sign(chainParams *netparams.Params, tx *wire.MsgTx, idx int,
 		chainParams)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, NonStandardTy, nil, 0, err
 	}
 	switch class {
@@ -147,15 +136,13 @@ log.ERROR(err)
 		// look up key for address
 		key, _, err := kdb.GetKey(addresses[0])
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, class, nil, 0, err
 		}
 		script, err := p2pkSignatureScript(tx, idx, subScript, hashType,
 			key)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, class, nil, 0, err
 		}
 		return script, class, addresses, nrequired, nil
@@ -163,23 +150,20 @@ log.ERROR(err)
 		// look up key for address
 		key, compressed, err := kdb.GetKey(addresses[0])
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, class, nil, 0, err
 		}
 		script, err := SignatureScript(tx, idx, subScript, hashType,
 			key, compressed)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, class, nil, 0, err
 		}
 		return script, class, addresses, nrequired, nil
 	case ScriptHashTy:
 		script, err := sdb.GetScript(addresses[0])
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, class, nil, 0, err
 		}
 		return script, class, addresses, nrequired, nil
@@ -278,8 +262,7 @@ sigLoop:
 		hashType := SigHashType(sig[len(sig)-1])
 		pSig, err := ec.ParseDERSignature(tSig, ec.S256())
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			continue
 		}
 		// We have to do this each round since hash types may vary between signatures and so the hash will vary. We can, however, assume no sigs etc are in the script since that would make the transaction nonstandard and thus not MultiSigTy, so we just need to hash the full thing.
@@ -356,7 +339,6 @@ func SignTxOutput(chainParams *netparams.Params, tx *wire.MsgTx, idx int,
 		idx, pkScript, hashType, kdb, sdb)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	if class == ScriptHashTy {
@@ -364,8 +346,7 @@ log.ERROR(err)
 		realSigScript, _, _, _, err := sign(chainParams, tx, idx,
 			sigScript, hashType, kdb, sdb)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		// Append the p2sh script as the last push in the script.

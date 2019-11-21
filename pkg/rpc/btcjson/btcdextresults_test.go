@@ -8,7 +8,7 @@ import (
 )
 
 // TestPodExtCustomResults ensures any results that have custom marshalling work as intedned and unmarshal code of results are as expected.
-func TestPodExtCustomResults(	t *testing.T) {
+func TestPodExtCustomResults(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name     string

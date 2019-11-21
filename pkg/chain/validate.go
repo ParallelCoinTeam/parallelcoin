@@ -225,7 +225,6 @@ func // checkConnectBlock performs several checks to confirm connecting the
 		btx, err := block.Tx(0)
 		if err != nil {
 			log.ERROR(err)
-			log.ERROR(err)
 		}
 		payees := hardfork.Payees
 		if b.params.Net == wire.TestNet3 {
@@ -388,7 +387,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 // of work requirement. The block must connect to the current tip of the main
 // chain. This function is safe for concurrent access.
 func (b *BlockChain) CheckConnectBlockTemplate(workerNumber uint32, block *util.
-Block) error {
+	Block) error {
 	b.chainLock.Lock()
 	defer b.chainLock.Unlock()
 	algo := block.MsgBlock().Header.Version
@@ -483,7 +482,6 @@ func // checkBlockContext peforms several validation checks on the block which
 	err := b.checkBlockHeaderContext(workerNumber, header, prevNode, flags)
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	fastAdd := flags&BFFastAdd == BFFastAdd
@@ -493,7 +491,6 @@ func // checkBlockContext peforms several validation checks on the block which
 		// version bits state.
 		csvState, err := b.deploymentState(prevNode, chaincfg.DeploymentCSV)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}
@@ -527,7 +524,6 @@ func // checkBlockContext peforms several validation checks on the block which
 			err := checkSerializedHeight(coinbaseTx, blockHeight)
 			if err != nil {
 				log.ERROR(err)
-				log.ERROR(err)
 				return err
 			}
 		}
@@ -537,7 +533,6 @@ func // checkBlockContext peforms several validation checks on the block which
 		segwitState, err := b.deploymentState(prevNode,
 			chaincfg.DeploymentSegwit)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}
@@ -579,7 +574,7 @@ func // checkBlockHeaderContext performs several validation checks on the block
 //  against the checkpoints are not performed.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
-BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
+	BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 	// log.WARN("checking block header context")
 	if prevNode == nil {
 		return nil
@@ -597,7 +592,6 @@ BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 			fork.GetAlgoName(header.Version, prevNode.height+1),
 			false)
 		if err != nil {
-			log.ERROR(err)
 			log.ERROR(err)
 			return err
 		}
@@ -635,7 +629,6 @@ BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 	// difficulty and therefore could be used to waste cache and disk space.
 	checkpointNode, err := b.findPreviousCheckpoint()
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return err
 	}

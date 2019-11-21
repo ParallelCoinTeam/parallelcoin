@@ -265,7 +265,7 @@ var Block100000 = wire.MsgBlock{
 // TestBlockFiltererOneInOneOut tests the correctness of the BlockFilterer in
 // finding outpoints that spend from a "watched outpoint", even if they do not
 // send to an address controlled by the wallet.
-func TestBlockFiltererOneInOneOut(	t *testing.T) {
+func TestBlockFiltererOneInOneOut(t *testing.T) {
 	// Watch for spend from prev in in first and last tx, both of which are
 	// single input/single output.
 	firstTx := Block100000.Transactions[1]
@@ -298,7 +298,7 @@ func TestBlockFiltererOneInOneOut(	t *testing.T) {
 
 // assertNumRelevantTxns checks that the set of relevant txns found in a block
 // filterer is of a specific size.
-func assertNumRelevantTxns(	t *testing.T, bf *chain.BlockFilterer, size int) {
+func assertNumRelevantTxns(t *testing.T, bf *chain.BlockFilterer, size int) {
 	count := len(bf.RelevantTxns)
 	if count != size {
 		t.Fatalf("unexpected number of relevant txns: "+
@@ -308,7 +308,7 @@ func assertNumRelevantTxns(	t *testing.T, bf *chain.BlockFilterer, size int) {
 
 // assertRelevantTxnsContains checks that the wantTx is found in the block
 // filterers set of relevant txns.
-func assertRelevantTxnsContains(	t *testing.T, bf *chain.BlockFilterer, wantTx *wire.MsgTx) {
+func assertRelevantTxnsContains(t *testing.T, bf *chain.BlockFilterer, wantTx *wire.MsgTx) {
 	for _, relevantTx := range bf.RelevantTxns {
 		if reflect.DeepEqual(relevantTx, wantTx) {
 			return

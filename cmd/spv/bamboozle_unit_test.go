@@ -16,7 +16,7 @@ import (
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
-func decodeHashNoError(	str string) *chainhash.Hash {
+func decodeHashNoError(str string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(str)
 	if err != nil {
 		panic("Got error decoding hash: " + err.Error())
@@ -401,11 +401,11 @@ var (
 	}
 )
 
-func heightToHeader(	height uint32) *wire.BlockHeader {
+func heightToHeader(height uint32) *wire.BlockHeader {
 	header := &wire.BlockHeader{Nonce: height}
 	return header
 }
-func runCheckCFCheckptSanityTestCase(	t *testing.T, testCase *cfCheckptTestCase) {
+func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) {
 	tempDir, err := ioutil.TempDir("", "neutrino")
 	if err != nil {
 		t.Fatalf("Failed to create temporary directory: %s", err)
@@ -493,7 +493,7 @@ func runCheckCFCheckptSanityTestCase(	t *testing.T, testCase *cfCheckptTestCase)
 			testCase.heightDiff, heightDiff)
 	}
 }
-func TestCheckCFCheckptSanity(	t *testing.T) {
+func TestCheckCFCheckptSanity(t *testing.T) {
 	t.Parallel()
 	for _, testCase := range cfCheckptTestCases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -501,7 +501,7 @@ func TestCheckCFCheckptSanity(	t *testing.T) {
 		})
 	}
 }
-func TestCheckForCFHeadersMismatch(	t *testing.T) {
+func TestCheckForCFHeadersMismatch(t *testing.T) {
 	t.Parallel()
 	for _, testCase := range checkCFHTestCases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -516,7 +516,7 @@ func TestCheckForCFHeadersMismatch(	t *testing.T) {
 		})
 	}
 }
-func TestResolveCFHeadersMismatch(	t *testing.T) {
+func TestResolveCFHeadersMismatch(t *testing.T) {
 	t.Parallel()
 	for _, testCase := range resolveCFHTestCases {
 		t.Run(testCase.name, func(t *testing.T) {

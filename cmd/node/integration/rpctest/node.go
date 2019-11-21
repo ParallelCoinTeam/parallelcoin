@@ -67,20 +67,17 @@ func (n *nodeConfig) setDefaults() error {
 	datadir, err := ioutil.TempDir("", n.prefix+"-data")
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	n.dataDir = datadir
 	logdir, err := ioutil.TempDir("", n.prefix+"-logs")
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	n.logDir = logdir
 	cert, err := ioutil.ReadFile(n.certFile)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return err
 	}
@@ -207,7 +204,6 @@ func (n *node) start() error {
 		fmt.Sprintf("%s.pid", n.config)))
 	if err != nil {
 		log.ERROR(err)
-		log.ERROR(err)
 		return err
 	}
 	n.pidFile = pid.Name()
@@ -232,7 +228,6 @@ func (n *node) stop() error {
 		err := n.cmd.Wait()
 		if err != nil {
 			log.ERROR(err)
-			fmt.Println(err)
 		}
 	}()
 	if runtime.GOOS == "windows" {
@@ -271,7 +266,6 @@ func genCertPair(certFile, keyFile string) error {
 	validUntil := time.Now().Add(10 * 365 * 24 * time.Hour)
 	cert, key, err := util.NewTLSCertPair(org, validUntil, nil)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR(err)
 		return err
 	}

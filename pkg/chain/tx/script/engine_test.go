@@ -67,7 +67,7 @@ import (
 // }
 
 // TestCheckErrorCondition tests the execute early test in CheckErrorCondition() since most code paths are tested elsewhere.
-func TestCheckErrorCondition(	t *testing.T) {
+func TestCheckErrorCondition(t *testing.T) {
 	t.Parallel()
 	// tx with almost empty scripts.
 	tx := &wire.MsgTx{
@@ -129,7 +129,7 @@ func TestCheckErrorCondition(	t *testing.T) {
 }
 
 // TestInvalidFlagCombinations ensures the script engine returns the expected error when disallowed flag combinations are specified.
-func TestInvalidFlagCombinations(	t *testing.T) {
+func TestInvalidFlagCombinations(t *testing.T) {
 	t.Parallel()
 	tests := []ScriptFlags{
 		ScriptVerifyCleanStack,
@@ -175,7 +175,7 @@ func TestInvalidFlagCombinations(	t *testing.T) {
 }
 
 // TestCheckPubKeyEncoding ensures the internal checkPubKeyEncoding function works as expected.
-func TestCheckPubKeyEncoding(	t *testing.T) {
+func TestCheckPubKeyEncoding(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name    string
@@ -231,7 +231,7 @@ func TestCheckPubKeyEncoding(	t *testing.T) {
 }
 
 // TestCheckSignatureEncoding ensures the internal checkSignatureEncoding function works as expected.
-func TestCheckSignatureEncoding(	t *testing.T) {
+func TestCheckSignatureEncoding(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name    string

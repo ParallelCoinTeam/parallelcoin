@@ -7,9 +7,9 @@ import (
 	"math/big"
 	"runtime"
 	"time"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -98,7 +98,6 @@ func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32,
 	pkScript, err := txscript.PayToAddrScript(addr)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -163,14 +162,12 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	coinbaseTx, err := createCoinbaseTx(
 		coinbaseScript, blockHeight, miningAddr, mineTo, net)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Create a new block ready to be solved.

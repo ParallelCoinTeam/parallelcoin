@@ -1,7 +1,5 @@
 //+build ignore
 
-
-
 //go:generate go run ../tools/genmsghandle/main.go kopach controller.Blocks broadcast.TplBlock github.com/p9c/pod/pkg/controller msghandle.go
 package kopach
 
@@ -297,8 +295,10 @@ func UpdateExtraNonce(msgBlock *wire.MsgBlock,
 	}
 	if len(coinbaseScript) > blockchain.MaxCoinbaseScriptLen {
 		return fmt.Errorf(
-			"coinbase transaction script length of %d is out of range (min: %d, max: %d)",
-			len(coinbaseScript), blockchain.MinCoinbaseScriptLen,
+			"coinbase transaction script length of %d is out of range ("+
+				"min: %d, max: %d)",
+			len(coinbaseScript),
+			blockchain.MinCoinbaseScriptLen,
 			blockchain.MaxCoinbaseScriptLen)
 	}
 	msgBlock.Transactions[0].TxIn[0].SignatureScript = coinbaseScript

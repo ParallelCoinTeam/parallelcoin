@@ -2,18 +2,21 @@ package gui
 
 import (
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/gui/webview"
+	"net/http"
 )
 
 type rcvar struct {
 	cx     *conte.Xt
+	w      webview.WebView
+	fs     http.FileSystem
 	alert  DuOSalert
 	status DuOStatus
 	txs    DuOStransactionsExcerpts
 	lastxs DuOStransactions
 }
 
-
-type RcVar interface{
+type RcVar interface {
 	GetTransactions(sfrom, count int, cat string) (txs DuOStransactions)
 	GetBalance() (b DuOSbalance)
 	GetTransactionsExcertps() (txse DuOStransactionsExcerpts)

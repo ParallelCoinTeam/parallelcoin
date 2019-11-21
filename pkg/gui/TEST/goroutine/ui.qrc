@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-		<file alias="index.html">index.html</file>
-        <file alias="vue.js">vue.js</file>
-        <file alias="dui.js">dui.js</file>
-    </qresource>
-</RCC>

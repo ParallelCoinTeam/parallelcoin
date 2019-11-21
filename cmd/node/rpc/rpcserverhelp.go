@@ -833,7 +833,6 @@ func (c *HelpCacher) RPCMethodHelp(method string) (string, error) {
 	help, err := btcjson.GenerateHelp(method, HelpDescsEnUS, resultTypes...)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return "", err
 	}
 	c.methodHelp[method] = help
@@ -853,8 +852,7 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 	for k := range RPCHandlers {
 		usage, err := btcjson.MethodUsageText(k)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return "", err
 		}
 		usageTexts = append(usageTexts, usage)
@@ -864,8 +862,7 @@ log.ERROR(err)
 		for k := range WSHandlers {
 			usage, err := btcjson.MethodUsageText(k)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return "", err
 			}
 			usageTexts = append(usageTexts, usage)

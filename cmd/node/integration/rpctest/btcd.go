@@ -37,7 +37,6 @@ func podExecutablePath() (string, error) {
 	testDir, err := baseDir()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return "", err
 	}
 	// Determine import path of this package.
@@ -50,7 +49,6 @@ log.ERROR(err)
 	podPkg, err := build.ImportDir(podPkgPath, build.FindOnly)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return "", fmt.Errorf("Failed to build pod: %v", err)
 	}
 	// Build pod and output an executable in a static temp path.
@@ -62,7 +60,6 @@ log.ERROR(err)
 	err = cmd.Run()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return "", fmt.Errorf("Failed to build pod: %v", err)
 	}
 	// Save executable path so future calls do not recompile.

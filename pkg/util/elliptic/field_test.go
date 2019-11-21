@@ -7,7 +7,7 @@ import (
 
 // TestSetInt ensures that setting a field value to various native integers
 // works as expected.
-func TestSetInt(	t *testing.T) {
+func TestSetInt(t *testing.T) {
 	tests := []struct {
 		in  uint
 		raw [10]uint32
@@ -32,7 +32,7 @@ func TestSetInt(	t *testing.T) {
 }
 
 // TestZero ensures that zeroing a field value zero works as expected.
-func TestZero(	t *testing.T) {
+func TestZero(t *testing.T) {
 	f := new(fieldVal).SetInt(2)
 	f.Zero()
 	for idx, rawInt := range f.n {
@@ -44,7 +44,7 @@ func TestZero(	t *testing.T) {
 }
 
 // TestIsZero ensures that checking if a field IsZero works as expected.
-func TestIsZero(	t *testing.T) {
+func TestIsZero(t *testing.T) {
 	f := new(fieldVal)
 	if !f.IsZero() {
 		t.Errorf("new field value is not zero - got %v (rawints %x)", f,
@@ -63,7 +63,7 @@ func TestIsZero(	t *testing.T) {
 }
 
 // TestStringer ensures the stringer returns the appropriate hex string.
-func TestStringer(	t *testing.T) {
+func TestStringer(t *testing.T) {
 	tests := []struct {
 		in       string
 		expected string
@@ -146,7 +146,7 @@ func TestStringer(	t *testing.T) {
 
 // TestNormalize ensures that normalizing the internal field words works as
 // expected.
-func TestNormalize(	t *testing.T) {
+func TestNormalize(t *testing.T) {
 	tests := []struct {
 		raw        [10]uint32 // Intentionally denormalized value
 		normalized [10]uint32 // Normalized form of the raw value
@@ -312,7 +312,7 @@ func TestNormalize(	t *testing.T) {
 }
 
 // TestIsOdd ensures that checking if a field value IsOdd works as expected.
-func TestIsOdd(	t *testing.T) {
+func TestIsOdd(t *testing.T) {
 	tests := []struct {
 		in       string // hex encoded value
 		expected bool   // expected oddness
@@ -341,7 +341,7 @@ func TestIsOdd(	t *testing.T) {
 
 // TestEquals ensures that checking two field values for equality via Equals
 // works as expected.
-func TestEquals(	t *testing.T) {
+func TestEquals(t *testing.T) {
 	tests := []struct {
 		in1      string // hex encoded value
 		in2      string // hex encoded value
@@ -373,7 +373,7 @@ func TestEquals(	t *testing.T) {
 }
 
 // TestNegate ensures that negating field values via Negate works as expected.
-func TestNegate(	t *testing.T) {
+func TestNegate(t *testing.T) {
 	tests := []struct {
 		in       string // hex encoded value
 		expected string // expected hex encoded value
@@ -421,7 +421,7 @@ func TestNegate(	t *testing.T) {
 
 // TestAddInt ensures that adding an integer to field values via AddInt works as
 // expected.
-func TestAddInt(	t *testing.T) {
+func TestAddInt(t *testing.T) {
 	tests := []struct {
 		in1      string // hex encoded value
 		in2      uint   // unsigned integer to add to the value above
@@ -471,7 +471,7 @@ func TestAddInt(	t *testing.T) {
 
 // TestAdd ensures that adding two field values together via Add works as
 // expected.
-func TestAdd(	t *testing.T) {
+func TestAdd(t *testing.T) {
 	tests := []struct {
 		in1      string // first hex encoded value
 		in2      string // second hex encoded value to add
@@ -522,7 +522,7 @@ func TestAdd(	t *testing.T) {
 
 // TestAdd2 ensures that adding two field values together via Add2 works as
 // expected.
-func TestAdd2(	t *testing.T) {
+func TestAdd2(t *testing.T) {
 	tests := []struct {
 		in1      string // first hex encoded value
 		in2      string // second hex encoded value to add
@@ -575,7 +575,7 @@ func TestAdd2(	t *testing.T) {
 
 // TestMulInt ensures that adding an integer to field values via MulInt works as
 // expected.
-func TestMulInt(	t *testing.T) {
+func TestMulInt(t *testing.T) {
 	tests := []struct {
 		in1      string // hex encoded value
 		in2      uint   // unsigned integer to multiply with value above
@@ -637,7 +637,7 @@ func TestMulInt(	t *testing.T) {
 }
 
 // TestMul ensures that multiplying two field valuess via Mul works as expected.
-func TestMul(	t *testing.T) {
+func TestMul(t *testing.T) {
 	tests := []struct {
 		in1      string // first hex encoded value
 		in2      string // second hex encoded value to multiply with
@@ -704,7 +704,7 @@ func TestMul(	t *testing.T) {
 }
 
 // TestSquare ensures that squaring field values via Square works as expected.
-func TestSquare(	t *testing.T) {
+func TestSquare(t *testing.T) {
 	tests := []struct {
 		in       string // hex encoded value
 		expected string // expected hex encoded value
@@ -750,7 +750,7 @@ func TestSquare(	t *testing.T) {
 
 // TestInverse ensures that finding the multiplicative inverse via Inverse works
 // as expected.
-func TestInverse(	t *testing.T) {
+func TestInverse(t *testing.T) {
 	tests := []struct {
 		in       string // hex encoded value
 		expected string // expected hex encoded value

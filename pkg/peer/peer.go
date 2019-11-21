@@ -28,18 +28,18 @@ const (
 	MaxProtocolVersion = wire.FeeFilterVersion
 	// DefaultTrickleInterval is the min time between attempts to send an inv
 	// message to a peer.
-	DefaultTrickleInterval = time.Second * 9
+	DefaultTrickleInterval = time.Second
 	// MinAcceptableProtocolVersion is the lowest protocol version that a
 	// connected peer may support.
 	MinAcceptableProtocolVersion = 1
 	// outputBufferSize is the number of elements the output channels use.
-	outputBufferSize = 100
+	outputBufferSize = 1000
 	// invTrickleSize is the maximum amount of inventory to send in a single
 	// message when trickling inventory to remote peers.
-	maxInvTrickleSize = 3000
+	maxInvTrickleSize = 5000
 	// maxKnownInventory is the maximum number of items to keep in the known
 	// inventory cache.
-	maxKnownInventory = 3000
+	maxKnownInventory = 30000
 	// pingInterval is the interval of time to wait in between sending ping
 	// messages.
 	pingInterval = 1 * time.Second

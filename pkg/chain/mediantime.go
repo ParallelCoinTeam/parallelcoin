@@ -30,24 +30,24 @@ var (
 )
 
 type // MedianTimeSource provides a mechanism to add several time samples
-	// which are used to determine a median time which is then used as an offset
-	// to the local clock.
-	MedianTimeSource interface {
-		// AdjustedTime returns the current time adjusted by the median time offset
-		// as calculated from the time samples added by AddTimeSample.
-		AdjustedTime() time.Time
-		// AddTimeSample adds a time sample that is used when determining the median
-		// time of the added samples.
-		AddTimeSample(id string, timeVal time.Time)
-		// Offset returns the number of seconds to adjust the local clock based upon
-		// the median of the time samples added by AddTimeData.
-		Offset() time.Duration
-	}
+// which are used to determine a median time which is then used as an offset
+// to the local clock.
+MedianTimeSource interface {
+	// AdjustedTime returns the current time adjusted by the median time offset
+	// as calculated from the time samples added by AddTimeSample.
+	AdjustedTime() time.Time
+	// AddTimeSample adds a time sample that is used when determining the median
+	// time of the added samples.
+	AddTimeSample(id string, timeVal time.Time)
+	// Offset returns the number of seconds to adjust the local clock based upon
+	// the median of the time samples added by AddTimeData.
+	Offset() time.Duration
+}
 
 type // int64Sorter implements sort.
-	// Interface to allow a slice of 64-bit integers to
-	// be sorted.
-	int64Sorter []int64
+// Interface to allow a slice of 64-bit integers to
+// be sorted.
+int64Sorter []int64
 
 func // Len returns the number of 64-bit integers in the slice.
 // It is part of the sort.Interface implementation.
@@ -69,19 +69,19 @@ func // Less returns whether the 64-bit integer with index i should sort
 }
 
 type // medianTime provides an implementation of the MedianTimeSource
-	// interface. It is limited to maxMedianTimeEntries includes the same buggy
-	// behavior as the time offset mechanism in Bitcoin Core.
-	// This is necessary because it is used in the consensus code.
-	medianTime struct {
-		mtx                sync.Mutex
-		knownIDs           map[string]struct{}
-		offsets            []int64
-		offsetSecs         int64
-		invalidTimeChecked bool
-	}
+// interface. It is limited to maxMedianTimeEntries includes the same buggy
+// behavior as the time offset mechanism in Bitcoin Core.
+// This is necessary because it is used in the consensus code.
+medianTime struct {
+	mtx                sync.Mutex
+	knownIDs           map[string]struct{}
+	offsets            []int64
+	offsetSecs         int64
+	invalidTimeChecked bool
+}
 
 var // Ensure the medianTime type implements the MedianTimeSource interface.
-	_ MedianTimeSource = (*medianTime)(nil)
+_ MedianTimeSource = (*medianTime)(nil)
 
 func // AdjustedTime returns the current time adjusted by the median time
 // offset as calculated from the time samples added by AddTimeSample.

@@ -1,7 +1,6 @@
 package ctl
 
 import (
-	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"path/filepath"
 
@@ -48,8 +47,7 @@ func ListCommands() {
 	for _, method := range cmdMethods {
 		flags, err := btcjson.MethodUsageFlags(method)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue
@@ -60,8 +58,7 @@ log.ERROR(err)
 		}
 		usage, err := btcjson.MethodUsageText(method)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue
@@ -78,11 +75,11 @@ log.ERROR(err)
 	categoryTitles[categoryChain] = "Chain Server Commands:"
 	categoryTitles[categoryWallet] = "Wallet Server Commands (--wallet):"
 	for category := uint8(0); category < numCategories; category++ {
-		fmt.Println(categoryTitles[category])
-		fmt.Println()
+		log.Println(categoryTitles[category])
+		log.Println()
 		for _, usage := range categorized[category] {
-			fmt.Println("  ", usage)
+			log.Println("  ", usage)
 		}
-		fmt.Println()
+		log.Println()
 	}
 }

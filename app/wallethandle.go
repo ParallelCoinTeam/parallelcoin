@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"os"
 	"sync"
 
@@ -14,21 +13,19 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func
-walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
+func walletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		var wg sync.WaitGroup
 		Configure(cx, c)
 		dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
 			Params.Name + slash + wallet.WalletDbName
 		if !apputil.FileExists(dbFilename) {
-			log.L.SetLevel("off", false)
+			//log.L.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
 				log.ERROR("failed to create wallet", err)
 				return err
 			}
-			log.INFO("quitting, restart to initialize")
-			fmt.Println("restart to complete initial setup")
+			log.Println("restart to complete initial setup")
 			os.Exit(0)
 			//log.L.SetLevel(*cx.Config.LogLevel, true)
 		}

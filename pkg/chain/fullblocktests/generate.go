@@ -13,7 +13,7 @@ import (
 	"time"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -187,7 +187,7 @@ func payToScriptHashScript(redeemScript []byte) []byte {
 		AddOp(txscript.OP_EQUAL).Script()
 	if err != nil {
 		log.ERROR(err)
-panic(err)
+		panic(err)
 	}
 	return script
 }
@@ -201,7 +201,7 @@ func pushDataScript(items ...[]byte) []byte {
 	script, err := builder.Script()
 	if err != nil {
 		log.ERROR(err)
-panic(err)
+		panic(err)
 	}
 	return script
 }
@@ -218,7 +218,7 @@ func opReturnScript(data []byte) []byte {
 	script, err := builder.AddOp(txscript.OP_RETURN).AddData(data).Script()
 	if err != nil {
 		log.ERROR(err)
-panic(err)
+		panic(err)
 	}
 	return script
 }
@@ -228,7 +228,7 @@ func uniqueOpReturnScript() []byte {
 	rand, err := wire.RandomUint64()
 	if err != nil {
 		log.ERROR(err)
-panic(err)
+		panic(err)
 	}
 	data := make([]byte, 8)
 	binary.LittleEndian.PutUint64(data[0:8], rand)
@@ -241,7 +241,7 @@ func (g *testGenerator) createCoinbaseTx(blockHeight int32) *wire.MsgTx {
 	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
 	if err != nil {
 		log.ERROR(err)
-panic(err)
+		panic(err)
 	}
 	tx := wire.NewMsgTx(1)
 	tx.AddTxIn(&wire.TxIn{
@@ -365,8 +365,7 @@ func additionalTx(tx *wire.MsgTx) func(*wire.MsgBlock) {
 	return func(b *wire.MsgBlock) {
 		err := b.AddTransaction(tx)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	}
 }
@@ -529,14 +528,12 @@ func encodeNonCanonicalBlock(b *wire.MsgBlock) []byte {
 	err := b.Header.BtcEncode(&buf, 0, wire.BaseEncoding)
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 	}
 	buf.Write(nonCanonicalVarInt(uint32(len(b.Transactions))))
 	for _, tx := range b.Transactions {
 		err := tx.BtcEncode(&buf, 0, wire.BaseEncoding)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	}
 	return buf.Bytes()
@@ -549,8 +546,7 @@ func cloneBlock(b *wire.MsgBlock) wire.MsgBlock {
 	for _, tx := range b.Transactions {
 		err := blockCopy.AddTransaction(tx.Copy())
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	}
 	return blockCopy
@@ -689,7 +685,6 @@ func Generate(includeLargeReorg bool) (tests [][]TestInstance, err error) {
 	g, err := makeTestGenerator(regressionNetParams)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Define some convenience helper functions to return an individual test instance that has the described characteristics.
@@ -1096,8 +1091,7 @@ log.ERROR(err)
 			prevTx.AddTxOut(wire.NewTxOut(2, p2shScript))
 			err := b.AddTransaction(prevTx)
 			if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+				log.ERROR(err)
 			}
 		}
 	})
@@ -1117,15 +1111,14 @@ fmt.Println(err)
 			sig, err := txscript.RawTxInSignature(tx, 0,
 				redeemScript, txscript.SigHashAll, g.privKey)
 			if err != nil {
-		log.ERROR(err)
-panic(err)
+				log.ERROR(err)
+				panic(err)
 			}
 			tx.TxIn[0].SignatureScript = pushDataScript(sig,
 				redeemScript)
 			err = b.AddTransaction(tx)
 			if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+				log.ERROR(err)
 			}
 		}
 		// Create a final tx that includes a non-pay-to-script-hash output with the number of signature operations needed to push the block one over the max allowed.
@@ -1135,8 +1128,7 @@ fmt.Println(err)
 		tx.TxOut[0].PkScript = repeatOpcode(txscript.OP_CHECKSIG, fill)
 		err := b.AddTransaction(tx)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	})
 	rejected(blockchain.ErrTooManySigOps)
@@ -1152,15 +1144,14 @@ fmt.Println(err)
 			sig, err := txscript.RawTxInSignature(tx, 0,
 				redeemScript, txscript.SigHashAll, g.privKey)
 			if err != nil {
-		log.ERROR(err)
-panic(err)
+				log.ERROR(err)
+				panic(err)
 			}
 			tx.TxIn[0].SignatureScript = pushDataScript(sig,
 				redeemScript)
 			err = b.AddTransaction(tx)
 			if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+				log.ERROR(err)
 			}
 		}
 		// Create a final tx that includes a non-pay-to-script-hash output with the number of signature operations needed to push the block to exactly the max allowed.
@@ -1173,8 +1164,7 @@ fmt.Println(err)
 		tx.TxOut[0].PkScript = repeatOpcode(txscript.OP_CHECKSIG, fill)
 		err := b.AddTransaction(tx)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	})
 	accepted()
@@ -1292,8 +1282,7 @@ fmt.Println(err)
 	g.nextBlock("b51", outs[14], func(b *wire.MsgBlock) {
 		err := b.AddTransaction(b.Transactions[1])
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	})
 	g.assertTipBlockNumTxns(3)
@@ -1385,8 +1374,7 @@ fmt.Println(err)
 		tx3 := createSpendTxForTx(tx2, lowFee)
 		err := b.AddTransaction(tx3)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	})
 	g.assertTipBlockNumTxns(3)
@@ -1395,8 +1383,7 @@ fmt.Println(err)
 		*b = cloneBlock(b57)
 		err := b.AddTransaction(b.Transactions[2])
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	})
 	g.assertTipBlockNumTxns(4)
@@ -1431,20 +1418,17 @@ fmt.Println(err)
 			spendTx = createSpendTxForTx(spendTx, lowFee)
 			err := b.AddTransaction(spendTx)
 			if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+				log.ERROR(err)
 			}
 		}
 		// Add the duplicate transactions (3rd and 4th).
 		err := b.AddTransaction(b.Transactions[2])
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 		err = b.AddTransaction(b.Transactions[3])
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	})
 	g.assertTipBlockNumTxns(8)
@@ -1552,8 +1536,7 @@ fmt.Println(err)
 		tx3 := createSpendTxForTx(b.Transactions[1], lowFee)
 		err := b.AddTransaction(tx3)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	})
 	accepted()
@@ -1566,13 +1549,11 @@ fmt.Println(err)
 		tx3 := createSpendTxForTx(tx2, lowFee)
 		err := b.AddTransaction(tx3)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 		err = b.AddTransaction(tx2)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	})
 	rejected(blockchain.ErrMissingTxOut)
@@ -1588,13 +1569,13 @@ fmt.Println(err)
 		tx4 := createSpendTxForTx(tx2, lowFee)
 		err := b.AddTransaction(tx3)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
+			log.Println(err)
 		}
 		err = b.AddTransaction(tx4)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
+			log.Println(err)
 		}
 	})
 	rejected(blockchain.ErrMissingTxOut)
@@ -1691,8 +1672,7 @@ fmt.Println(err)
 		tx3.TxIn[0].SignatureScript = []byte{txscript.OP_FALSE}
 		err := b.AddTransaction(tx3)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	})
 	accepted()
@@ -1720,8 +1700,7 @@ fmt.Println(err)
 			tx := createSpendTx(&spend, zeroFee)
 			err := b.AddTransaction(tx)
 			if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+				log.ERROR(err)
 			}
 		}
 	})

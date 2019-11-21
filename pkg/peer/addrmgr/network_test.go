@@ -10,7 +10,7 @@ import (
 
 // TestIPTypes ensures the various functions which determine the type of an IP
 // address based on RFCs work as intended.
-func TestIPTypes(	t *testing.T) {
+func TestIPTypes(t *testing.T) {
 	type ipTest struct {
 		in       wire.NetAddress
 		rfc1918  bool
@@ -124,7 +124,7 @@ func TestIPTypes(	t *testing.T) {
 }
 
 // TestGroupKey tests the GroupKey function to ensure it properly groups various IP addresses.
-func TestGroupKey(	t *testing.T) {
+func TestGroupKey(t *testing.T) {
 	tests := []struct {
 		name     string
 		ip       string

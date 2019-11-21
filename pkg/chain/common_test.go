@@ -25,7 +25,7 @@ const (
 
 // filesExists returns whether or not the named file or directory exists.
 //nolint
-func fileExists(	name string) bool {
+func fileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
 			return false
@@ -36,7 +36,7 @@ func fileExists(	name string) bool {
 
 // isSupportedDbType returns whether or not the passed database type is currently supported.
 //nolint
-func isSupportedDbType(	dbType string) bool {
+func isSupportedDbType(dbType string) bool {
 	supportedDrivers := database.SupportedDrivers()
 	for _, driver := range supportedDrivers {
 		if dbType == driver {
@@ -85,7 +85,7 @@ func isSupportedDbType(	dbType string) bool {
 // 		// read block
 // 		_, err = dr.Read(rbytes)
 // 		if err != nil {
-// 			fmt.Println(err)
+// 			log.Println(err)
 // 		}
 // 		block, err = util.NewBlockFromBytes(rbytes)
 // 		if err != nil {
@@ -288,7 +288,7 @@ func (b *BlockChain) TstSetCoinbaseMaturity(maturity uint16) {
 }
 
 // newFakeChain returns a chain that is usable for syntetic tests.  It is important to note that this chain has no database associated with it, so it is not usable with all functions and the tests must take care when making use of it.
-func newFakeChain(	params *netparams.Params) *BlockChain {
+func newFakeChain(params *netparams.Params) *BlockChain {
 	// Create a genesis block node and block index index populated with it for use when creating the fake chain below.
 	node := NewBlockNode(&params.GenesisBlock.Header, nil)
 	index := newBlockIndex(nil, params)
@@ -310,7 +310,7 @@ func newFakeChain(	params *netparams.Params) *BlockChain {
 }
 
 // newFakeNode creates a block node connected to the passed parent with the provided fields populated and fake values for the other fields.
-func newFakeNode(	parent *BlockNode, blockVersion int32, bits uint32, timestamp time.Time) *BlockNode {
+func newFakeNode(parent *BlockNode, blockVersion int32, bits uint32, timestamp time.Time) *BlockNode {
 	// Make up a header and create a block node from it.
 	header := &wire.BlockHeader{
 		Version:   blockVersion,

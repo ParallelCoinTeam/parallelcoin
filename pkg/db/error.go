@@ -109,6 +109,6 @@ func (e Error) Error() string {
 }
 
 // makeError creates an Error given a set of arguments.  The error code must be one of the error codes provided by this package.
-func makeError(	c ErrorCode, desc string, err error) Error {
+func makeError(c ErrorCode, desc string, err error) Error {
 	return Error{ErrorCode: c, Description: desc, Err: err}
 }

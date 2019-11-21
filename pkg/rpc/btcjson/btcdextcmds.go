@@ -21,7 +21,7 @@ type NodeCmd struct {
 
 // NewNodeCmd returns a new instance which can be used to issue a `node` JSON-RPC command.
 // The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
-func NewNodeCmd(	subCmd NodeSubCmd, target string, connectSubCmd *string) *NodeCmd {
+func NewNodeCmd(subCmd NodeSubCmd, target string, connectSubCmd *string) *NodeCmd {
 	return &NodeCmd{
 		SubCmd:        subCmd,
 		Target:        target,
@@ -35,7 +35,7 @@ type DebugLevelCmd struct {
 }
 
 // NewDebugLevelCmd returns a new DebugLevelCmd which can be used to issue a debuglevel JSON-RPC command.  This command is not a standard Bitcoin command. It is an extension for pod.
-func NewDebugLevelCmd(	levelSpec string) *DebugLevelCmd {
+func NewDebugLevelCmd(levelSpec string) *DebugLevelCmd {
 	return &DebugLevelCmd{
 		LevelSpec: levelSpec,
 	}
@@ -47,7 +47,7 @@ type GenerateCmd struct {
 }
 
 // NewGenerateCmd returns a new instance which can be used to issue a generate JSON-RPC command.
-func NewGenerateCmd(	numBlocks uint32) *GenerateCmd {
+func NewGenerateCmd(numBlocks uint32) *GenerateCmd {
 	return &GenerateCmd{
 		NumBlocks: numBlocks,
 	}
@@ -77,7 +77,7 @@ type GetHeadersCmd struct {
 
 // NewGetHeadersCmd returns a new instance which can be used to issue a getheaders JSON-RPC command. NOTE: This is a btcsuite extension ported from
 // github.com/decred/dcrd/dcrjson.
-func NewGetHeadersCmd(	blockLocators []string, hashStop string) *GetHeadersCmd {
+func NewGetHeadersCmd(blockLocators []string, hashStop string) *GetHeadersCmd {
 	return &GetHeadersCmd{
 		BlockLocators: blockLocators,
 		HashStop:      hashStop,

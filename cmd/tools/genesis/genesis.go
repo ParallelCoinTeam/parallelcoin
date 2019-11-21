@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"os"
 	"runtime"
@@ -40,7 +39,7 @@ var (
 )
 
 // This function reverses the bytes in a byte array
-func byteswap(	buf []byte) {
+func byteswap(buf []byte) {
 	length := len(buf)
 	for i := 0; i < length/2; i++ {
 		buf[i], buf[length-i-1] = buf[length-i-1], buf[i]
@@ -60,12 +59,14 @@ func initTransaction() (t transaction) {
 func main() {
 	args := os.Args
 	if len(args) != 4 {
-		fmt.Println("Bitcoin fork genesis block generator")
-		fmt.Println("Usage:")
-		fmt.Println("    ", args[0], "<pubkey> <timestamp> <nBits>")
-		fmt.Println("Example:")
-		fmt.Println("    ", args[0], "04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f \"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks\" 486604799")
-		fmt.Println("\nIf you execute this without parameters another one in the source code will be generated, using a random public key")
+		log.Println("Bitcoin fork genesis block generator")
+		log.Println("Usage:")
+		log.Println("    ", args[0], "<pubkey> <timestamp> <nBits>")
+		log.Println("Example:")
+		log.Println("    ", args[0], 
+			"04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f \"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks\" 486604799")
+		log.Println("\nIf you execute this without parameters another one in" +
+			" the source code will be generated, using a random public key")
 		args = []string{
 			os.Args[0],
 			"04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f",
@@ -78,37 +79,36 @@ func main() {
 		pubkey = make([]byte, 65)
 		n, err := rand.Read(pubkey)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println("error: ", err)
+			log.ERROR(err)
 			os.Exit(1)
 		}
 		if n != 65 {
-			fmt.Println("For some reason did not get 65 random bytes")
+			log.ERROR("For some reason did not get 65 random bytes")
 			os.Exit(1)
 		}
-		fmt.Printf("\nGenerated random public key:\n0x%x\n", pubkey)
+		log.Printf("\nGenerated random public key:\n0x%x\n", pubkey)
 	} else {
 		if len(args[1]) != 130 {
-			fmt.Println("Invalid public key length. Should be 130 hex digits,")
+			log.ERROR("Invalid public key length. Should be 130 hex digits,")
 			os.Exit(1)
 		}
 		var err error
 		pubkey, err = hex.DecodeString(args[1])
 		if err != nil {
-		log.ERROR(err)
-fmt.Println("Public key had invalid characters")
+			log.ERROR(err)
+			log.Println("Public key had invalid characters")
 		}
 	}
 	timestamp := args[2]
 	if len(timestamp) > 254 || len(timestamp) < 1 {
-		fmt.Println("Timestamp was either longer than 254 characters or zero length")
+		log.ERROR("Timestamp was either longer than 254 characters or zero" +
+			" length")
 		os.Exit(1)
 	}
 	tx := initTransaction()
 	nbits, err := strconv.ParseInt(args[3], 10, 32)
 	if err != nil {
-		log.ERROR(err)
-fmt.Println("nBits was not a decimal number or exceeded the precision of 32 bits")
+		log.ERROR("nBits was not a decimal number or exceeded the precision of 32 bits")
 		os.Exit(0)
 	}
 	nBits := uint32(nbits)
@@ -154,7 +154,7 @@ fmt.Println("nBits was not a decimal number or exceeded the precision of 32 bits
 	byteswap(tx.merkleHash)
 	txScriptSig := hex.EncodeToString(tx.scriptSig)
 	pubScriptSig := hex.EncodeToString(tx.pubkeyScript)
-	fmt.Printf("\nCoinbase:\n0x%s\n\nPubKeyScript:\n0x%s\n\nMerkle Hash:\n0x%s\n\nByteswapped:\n0x%s\n", txScriptSig, pubScriptSig, merkleHash, merkleHashSwapped)
+	log.Printf("\nCoinbase:\n0x%s\n\nPubKeyScript:\n0x%s\n\nMerkle Hash:\n0x%s\n\nByteswapped:\n0x%s\n", txScriptSig, pubScriptSig, merkleHash, merkleHashSwapped)
 	unixtime := uint32(time.Now().Unix())
 	var blockversion uint32 = 4
 	blockHeader := joinBytes(uint32tobytes(blockversion), make([]byte, 32), tx.merkleHash,
@@ -176,7 +176,9 @@ fmt.Println("nBits was not a decimal number or exceeded the precision of 32 bits
 		bytes = bytes - bits/8
 		bits = bits % 8
 	}
-	fmt.Printf("\nSearching for nonce/unixtime combination that satisfies minimum target %d with %d threads on %d cores...\nPlease wait... ", nBits, runtime.GOMAXPROCS(-1), runtime.NumCPU())
+	log.INFO("\nSearching for nonce/unixtime combination that satisfies " +
+		"minimum target %d with %d threads on %d cores...\nPlease wait... ",
+		nBits, runtime.GOMAXPROCS(-1), runtime.NumCPU())
 	start := time.Now()
 	for i := 0; i < runtime.NumCPU(); i++ {
 		go findNonce(blockHeader, bytes, bits, start)
@@ -184,7 +186,7 @@ fmt.Println("nBits was not a decimal number or exceeded the precision of 32 bits
 	}
 	time.Sleep(time.Hour)
 }
-func findNonce(	b []byte, bytes, bits uint32, start time.Time) []byte {
+func findNonce(b []byte, bytes, bits uint32, start time.Time) []byte {
 	blockHeader := append([]byte(nil), b...)
 	unixtime = uint32(time.Now().Unix())
 	blockHeader[68] = byte(unixtime)
@@ -196,9 +198,9 @@ func findNonce(	b []byte, bytes, bits uint32, start time.Time) []byte {
 		blockhash2 := sha256.Sum256(blockhash1[:])
 		if undertarget(blockhash2[bytes:], bits) {
 			byteswap(blockhash2[:])
-			fmt.Printf("Block found!\n\nHash:\n0x%x\n\nNonce:\n%d\n\nUnix time:\n%d\n", blockhash2, startNonce, unixtime)
-			fmt.Printf("\nBlock header encoded in hex:\n0x%x\n", blockHeader)
-			fmt.Println("\nTime for nonce search:", time.Since(start))
+			log.Printf("Block found!\n\nHash:\n0x%x\n\nNonce:\n%d\n\nUnix time:\n%d\n", blockhash2, startNonce, unixtime)
+			log.Printf("\nBlock header encoded in hex:\n0x%x\n", blockHeader)
+			log.Println("\nTime for nonce search:", time.Since(start))
 			os.Exit(1)
 		}
 		startNonce++
@@ -217,18 +219,18 @@ func findNonce(	b []byte, bytes, bits uint32, start time.Time) []byte {
 		}
 	}
 }
-func joinBytes(	segment ...[]byte) (joined []byte) {
+func joinBytes(segment ...[]byte) (joined []byte) {
 	joined = make([]byte, 0)
 	for i := range segment {
 		joined = append(joined, segment[i]...)
 	}
 	return
 }
-func undertarget(	hash []byte, bits uint32) bool {
+func undertarget(hash []byte, bits uint32) bool {
 	// for i:=len(hash)-1; i>0; i-- { hash[i]=0 }
-	// fmt.Println(hash)
+	// log.Println(hash)
 	for i := len(hash) - 1; i > 0; i-- {
-		// fmt.Println(hash[i])
+		// log.Println(hash[i])
 		if hash[i] != 0 {
 			return false
 		}
@@ -241,7 +243,7 @@ func undertarget(	hash []byte, bits uint32) bool {
 	}
 	return true
 }
-func uint32tobytes(	u uint32) []byte {
+func uint32tobytes(u uint32) []byte {
 	b := make([]byte, 4)
 	b[0] = byte(u)
 	for i := uint(1); i < 4; i++ {
@@ -260,7 +262,7 @@ func uint32tobytes(	u uint32) []byte {
 // 	}
 // 	return u
 // }
-func uint64tobytes(	u uint64) []byte {
+func uint64tobytes(u uint64) []byte {
 	b := make([]byte, 8)
 	b[0] = byte(u)
 	for i := uint(1); i < 8; i++ {

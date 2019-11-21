@@ -30,8 +30,7 @@ func (msg *MsgAddr) AddAddresses(netAddrs ...*NetAddress) error {
 	for _, na := range netAddrs {
 		err := msg.AddAddress(na)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -48,7 +47,6 @@ func (msg *MsgAddr) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) err
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Limit to max addresses per message.
@@ -63,14 +61,12 @@ log.ERROR(err)
 		na := &addrList[i]
 		err := readNetAddress(r, pver, na, true)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		err = msg.AddAddress(na)
 		if err != nil {
-		log.ERROR(err)
-fmt.Println(err)
+			log.ERROR(err)
 		}
 	}
 	return nil
@@ -93,14 +89,12 @@ func (msg *MsgAddr) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) err
 	err := WriteVarInt(w, pver, uint64(count))
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	for _, na := range msg.AddrList {
 		err = writeNetAddress(w, pver, na, true)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}

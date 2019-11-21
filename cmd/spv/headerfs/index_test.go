@@ -31,7 +31,7 @@ func createTestIndex() (func(), *headerIndex, error) {
 	return cleanUp, filterDB, nil
 }
 
-func TestAddHeadersIndexRetrieve(	t *testing.T) {
+func TestAddHeadersIndexRetrieve(t *testing.T) {
 	cleanUp, hIndex, err := createTestIndex()
 	defer cleanUp()
 	if err != nil {
@@ -55,7 +55,7 @@ func TestAddHeadersIndexRetrieve(	t *testing.T) {
 	// batch.
 	if err := hIndex.addHeaders(headerEntries); err != nil {
 		t.Fatalf("unable to add headers: %v", err)
-}
+	}
 	// Next, verify that the database tip matches the _final_ header
 	// inserted.
 	dbTip, dbHeight, err := hIndex.chainTip()

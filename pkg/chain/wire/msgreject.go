@@ -66,7 +66,6 @@ func (msg *MsgReject) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) e
 	cmd, err := ReadVarString(r, pver)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	msg.Cmd = cmd
@@ -74,14 +73,12 @@ log.ERROR(err)
 	err = readElement(r, &msg.Code)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Human readable string with specific details (over and above the reject code above) about why the command was rejected.
 	reason, err := ReadVarString(r, pver)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	msg.Reason = reason
@@ -89,8 +86,7 @@ log.ERROR(err)
 	if msg.Cmd == CmdBlock || msg.Cmd == CmdTx {
 		err := readElement(r, &msg.Hash)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -108,29 +104,25 @@ func (msg *MsgReject) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) e
 	err := WriteVarString(w, pver, msg.Cmd)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Code indicating why the command was rejected.
 	err = writeElement(w, msg.Code)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Human readable string with specific details (over and above the reject code above) about why the command was rejected.
 	err = WriteVarString(w, pver, msg.Reason)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// CmdBlock and CmdTx messages have an additional hash field that identifies the specific block or transaction.
 	if msg.Cmd == CmdBlock || msg.Cmd == CmdTx {
 		err := writeElement(w, &msg.Hash)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -154,7 +146,7 @@ func (msg *MsgReject) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgReject returns a new bitcoin reject message that conforms to the Message interface.  See MsgReject for details.
-func NewMsgReject(	command string, code RejectCode, reason string) *MsgReject {
+func NewMsgReject(command string, code RejectCode, reason string) *MsgReject {
 	return &MsgReject{
 		Cmd:    command,
 		Code:   code,

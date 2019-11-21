@@ -48,8 +48,8 @@ const (
 // }
 
 var // zeroHash is the zero value hash (all zeros).
-	// It is defined as a convenience.
-	zeroHash chainhash.Hash
+// It is defined as a convenience.
+zeroHash chainhash.Hash
 
 type (
 	// filterStoreLookup
@@ -187,7 +187,6 @@ newBlockManager(s *ChainService) (*blockManager, error) {
 	genesisHeader, err := s.RegFilterHeaders.FetchHeaderByHeight(0)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	bm.genesisHeader = *genesisHeader
@@ -195,7 +194,6 @@ log.ERROR(err)
 	header, height, err := s.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	bm.nextCheckpoint = bm.findNextHeaderCheckpoint(int32(height))
@@ -210,7 +208,6 @@ log.ERROR(err)
 	_, bm.filterHeaderTip, err = s.RegFilterHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// We must also ensure the the filter header tip hash is set to the
@@ -218,7 +215,6 @@ log.ERROR(err)
 	fh, err := s.BlockHeaders.FetchHeaderByHeight(bm.filterHeaderTip)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	bm.filterHeaderTipHash = fh.BlockHash()
@@ -304,7 +300,7 @@ func // handleNewPeerMsg deals with new peers that have signalled they may be
 	_, height, err := b.server.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.FATALF(
+		log.FATALF(
 			"couldn't retrieve block header chain tip: %s", err,
 		)
 		return
@@ -312,8 +308,8 @@ log.FATALF(
 	if height < uint32(sp.StartingHeight()) && b.BlockHeadersSynced() {
 		locator, err := b.server.BlockHeaders.LatestBlockLocator()
 		if err != nil {
-		log.ERROR(err)
-log.FATALF(
+			log.ERROR(err)
+			log.FATALF(
 				"couldn't retrieve latest block locator: %s", err,
 			)
 			return
@@ -321,8 +317,7 @@ log.FATALF(
 		stopHash := &zeroHash
 		err = sp.PushGetHeadersMsg(locator, stopHash)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 		}
 	}
 	// Start syncing by choosing the best candidate if needed.
@@ -364,8 +359,7 @@ func // handleDonePeerMsg deals with peers that have signalled they are done.
 		b.syncPeerMutex.Unlock()
 		header, height, err := b.server.BlockHeaders.ChainTip()
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return
 		}
 		b.headerList.ResetHeaderState(headerlist.Node{
@@ -440,7 +434,7 @@ waitForHeaders:
 	lastHeader, lastHeight, err := b.server.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.FATAL(err)
+		log.FATAL(err)
 		return
 	}
 	lastHash := lastHeader.BlockHash()
@@ -517,8 +511,8 @@ log.FATAL(err)
 			checkpoints, store, fType,
 		)
 		if err != nil {
-		log.ERROR(err)
-log.DEBUGF(
+			log.ERROR(err)
+			log.DEBUGF(
 				"got error attempting to determine correct cfheader"+
 					" checkpoints: %v, trying again",
 				err)
@@ -613,13 +607,11 @@ func // getUncheckpointedCFHeaders gets the next batch of cfheaders from the
 	_, filtHeight, err := store.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return fmt.Errorf("error getting filter chain tip: %v", err)
 	}
 	blockHeader, blockHeight, err := b.server.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return fmt.Errorf("error getting block chain tip: %v", err)
 	}
 	// If the block height is somehow before the filter height, then this
@@ -661,14 +653,12 @@ log.ERROR(err)
 				targetHeight,
 			)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			block, err := b.server.GetBlock(header.BlockHash())
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			log.WARNF(
@@ -685,8 +675,7 @@ log.ERROR(err)
 				block.MsgBlock(), fType, filtersFromPeers,
 			)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			log.WARNF(
@@ -736,7 +725,7 @@ func // getCheckpointedCFHeaders catches a filter header store up with the
 	curHeader, curHeight, err := store.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-panic(fmt.Sprintf("failed getting chaintip from filter "+
+		panic(fmt.Sprintf("failed getting chaintip from filter "+
 			"store: %v", err))
 	}
 	initialFilterHeader := curHeader
@@ -782,8 +771,8 @@ panic(fmt.Sprintf("failed getting chaintip from filter "+
 			endHeightRange,
 		)
 		if err != nil {
-		log.ERROR(err)
-panic(fmt.Sprintf(
+			log.ERROR(err)
+			panic(fmt.Sprintf(
 				"failed getting block header at height %v: %v",
 				endHeightRange, err),
 			)
@@ -907,8 +896,8 @@ panic(fmt.Sprintf(
 			}
 			curHeader, err = b.writeCFHeadersMsg(r, store)
 			if err != nil {
-		log.ERROR(err)
-panic(
+				log.ERROR(err)
+				panic(
 					fmt.Sprintf("couldn't write cfheaders msg: %v", err),
 				)
 			}
@@ -939,8 +928,8 @@ panic(
 				// PrevFilterHeader field of the next message.
 				curHeader, err = b.writeCFHeadersMsg(r, store)
 				if err != nil {
-		log.ERROR(err)
-panic(fmt.Sprintf("couldn't write "+
+					log.ERROR(err)
+					panic(fmt.Sprintf("couldn't write "+
 						"cfheaders msg: %v", err))
 				}
 			}
@@ -966,7 +955,6 @@ func // writeCFHeadersMsg writes a cfheaders message to the specified store.
 	tip, tipHeight, err := store.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	if *tip != msg.PrevFilterHeader {
@@ -998,7 +986,6 @@ log.ERROR(err)
 	)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// The final height in our range will be offset to the end of this
@@ -1020,7 +1007,6 @@ log.ERROR(err)
 	err = store.WriteHeaders(headerBatch...)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Notify subscribers, and also update the filter header progress
@@ -1093,7 +1079,6 @@ func // resolveConflict finds the correct checkpoint information,
 	heightDiff, err := checkCFCheckptSanity(checkpoints, store)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// If we got -1, we have full agreement between all peers and the store.
@@ -1148,14 +1133,12 @@ log.ERROR(err)
 				targetHeight,
 			)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return nil, err
 			}
 			block, err := b.server.GetBlock(header.BlockHash())
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return nil, err
 			}
 			log.INFOF(
@@ -1172,8 +1155,7 @@ log.ERROR(err)
 				block.MsgBlock(), fType, filtersFromPeers,
 			)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return nil, err
 			}
 			log.WARNF(
@@ -1214,7 +1196,6 @@ log.ERROR(err)
 	heightDiff, err = checkCFCheckptSanity(checkpoints, store)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// If we got -1, we have full agreement between all peers and the store.
@@ -1302,8 +1283,7 @@ resolveCFHeaderMismatch(block *wire.MsgBlock, fType wire.FilterType,
 						filterKey, txOut.PkScript,
 					)
 					if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+						log.ERROR(err)
 						// If we're unable to query
 						// this filter, then we'll skip
 						// this peer all together.
@@ -1348,15 +1328,14 @@ func // getCFHeadersForAllPeers runs a query for cfheaders at a specific
 	stopHeader, stopHeight, err := b.server.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 	if stopHeight-height >= wire.MaxCFHeadersPerMsg {
 		stopHeader, err = b.server.BlockHeaders.FetchHeaderByHeight(
 			height + wire.MaxCFHeadersPerMsg - 1,
 		)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return headers
 		}
 	}
@@ -1417,8 +1396,7 @@ func // fetchFilterFromAllPeers attempts to fetch a filter for the target filter
 					response.Data,
 				)
 				if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+					log.ERROR(err)
 					// Malformed filter data. We can ignore
 					// this message.
 					return
@@ -1469,7 +1447,6 @@ checkCFCheckptSanity(cp map[string][]*chainhash.Hash,
 	_, storeTip, err := headerStore.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	// Determine the maximum length of each peer's checkpoint list. If they
@@ -1506,8 +1483,8 @@ log.ERROR(err)
 				ckptHeight,
 			)
 			if err != nil {
-		log.ERROR(err)
-return i, err
+				log.ERROR(err)
+				return i, err
 			}
 			if *header != checkpoint {
 				log.WARNF(
@@ -1605,7 +1582,7 @@ func // findPreviousHeaderCheckpoint returns the last checkpoint before the
 // for the current network. This is used for resetting state when a malicious
 // peer sends us headers that don't lead up to a known checkpoint.
 (b *blockManager) findPreviousHeaderCheckpoint(height int32) *chaincfg.
-Checkpoint {
+	Checkpoint {
 	// Start with the genesis block - earliest checkpoint to which our code
 	// will want to reset
 	prevCheckpoint := &chaincfg.Checkpoint{
@@ -1637,7 +1614,7 @@ func // startSync will choose the best peer among the available candidate
 	_, bestHeight, err := b.server.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(
+		log.ERROR(
 			"failed to get hash and height for the latest block:", err,
 		)
 		return
@@ -1675,8 +1652,8 @@ log.ERROR(
 	if bestPeer != nil {
 		locator, err := b.server.BlockHeaders.LatestBlockLocator()
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(
+			log.ERROR(err)
+			log.ERROR(
 				"failed to get block locator for the latest block:", err,
 			)
 			return
@@ -1714,8 +1691,8 @@ log.ERROR(
 		// this peer with an initial GetHeaders message.
 		err = b.SyncPeer().PushGetHeadersMsg(locator, stopHash)
 		if err != nil {
-		log.ERROR(err)
-log.DEBUG(err)
+			log.ERROR(err)
+			log.DEBUG(err)
 		}
 	} else {
 		log.WARN("no sync peer candidates available")
@@ -1729,13 +1706,11 @@ func // IsFullySynced returns whether or not the block manager believed it is
 	_, blockHeaderHeight, err := b.server.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false
 	}
 	_, filterHeaderHeight, err := b.server.RegFilterHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false
 	}
 	// If the block headers and filter headers are not at the same height,
@@ -1757,7 +1732,6 @@ func // BlockHeadersSynced returns whether or not the block manager believes its
 	header, height, err := b.server.BlockHeaders.ChainTip()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false
 	}
 	// There is no last checkpoint if checkpoints are disabled or there are
@@ -1886,8 +1860,8 @@ func // handleInvMsg handles inv messages from all peers.
 			err = imsg.peer.PushGetHeadersMsg(locator,
 				&invVects[lastBlock].Hash)
 			if err != nil {
-		log.ERROR(err)
-log.WARNF(
+				log.ERROR(err)
+				log.WARNF(
 					"failed to send getheaders message to peer %s: %s",
 					imsg.peer.Addr(), err,
 				)
@@ -1959,8 +1933,8 @@ func // handleHeadersMsg handles headers messages from all peers.
 			err := b.checkHeaderSanity(blockHeader, maxTimestamp, false,
 				prevNode.Height+1)
 			if err != nil {
-		log.ERROR(err)
-log.WARNF(
+				log.ERROR(err)
+				log.WARNF(
 					"header doesn't pass sanity check: %s -- disconnecting"+
 						" peer", err,
 				)
@@ -2022,8 +1996,8 @@ log.WARNF(
 				&blockHeader.PrevBlock,
 			)
 			if err != nil {
-		log.ERROR(err)
-log.WARNF(
+				log.ERROR(err)
+				log.WARNF(
 					"received block header that does not properly connect to the chain from peer %s (%s) -- disconnecting",
 					hmsg.peer.Addr(), err,
 				)
@@ -2060,8 +2034,8 @@ log.WARNF(
 				err = b.checkHeaderSanity(reorgHeader, maxTimestamp, true,
 					prevNode.Height+1)
 				if err != nil {
-		log.ERROR(err)
-log.WARNF(
+					log.ERROR(err)
+					log.WARNF(
 						"header doesn't pass sanity check: %s -- disconnecting peer",
 						err,
 					)
@@ -2077,11 +2051,11 @@ log.WARNF(
 				})
 			}
 			log.TRACE(
-					"sane reorg attempted. Total work from reorg chain:", totalWork,
-				)
-				// All the headers pass sanity checks. Now we calculate
-				// the total work for the known chain.
-				knownWork := big.NewInt(0)
+				"sane reorg attempted. Total work from reorg chain:", totalWork,
+			)
+			// All the headers pass sanity checks. Now we calculate
+			// the total work for the known chain.
+			knownWork := big.NewInt(0)
 			// This should NEVER be nil because the most recent
 			// block is always pushed back by resetHeaderState
 			knownEl := b.headerList.Back()
@@ -2094,8 +2068,8 @@ log.WARNF(
 					knownHead, _, err = b.server.BlockHeaders.FetchHeader(
 						&knownHead.PrevBlock)
 					if err != nil {
-		log.ERROR(err)
-log.FATALF(
+						log.ERROR(err)
+						log.FATALF(
 							"can't get block header for hash %s: %v",
 							knownHead.PrevBlock, err,
 						)
@@ -2136,8 +2110,8 @@ log.FATALF(
 			b.syncPeerMutex.Unlock()
 			_, err = b.server.rollBackToHeight(backHeight)
 			if err != nil {
-		log.ERROR(err)
-panic(fmt.Sprintf("Rollback failed: %s", err))
+				log.ERROR(err)
+				panic(fmt.Sprintf("Rollback failed: %s", err))
 				// Should we panic here?
 			}
 			hdrs := headerfs.BlockHeader{
@@ -2146,8 +2120,8 @@ panic(fmt.Sprintf("Rollback failed: %s", err))
 			}
 			err = b.server.BlockHeaders.WriteHeaders(hdrs)
 			if err != nil {
-		log.ERROR(err)
-log.FATAL(
+				log.ERROR(err)
+				log.FATAL(
 					"Couldn't write block to database:", err,
 				)
 				// Should we panic here?
@@ -2189,8 +2163,8 @@ log.FATAL(
 					prevCheckpoint.Height),
 				)
 				if err != nil {
-		log.ERROR(err)
-log.FATAL("rollback failed:", err)
+					log.ERROR(err)
+					log.FATAL("rollback failed:", err)
 					// Should we panic here?
 				}
 				hmsg.peer.Disconnect()
@@ -2209,8 +2183,8 @@ log.FATAL("rollback failed:", err)
 		// is atomic.
 		err := b.server.BlockHeaders.WriteHeaders(headerWriteBatch...)
 		if err != nil {
-		log.ERROR(err)
-panic(
+			log.ERROR(err)
+			panic(
 				fmt.Sprintf(
 					"unable to write block header: %v",
 					err,
@@ -2233,8 +2207,8 @@ panic(
 		}
 		err := hmsg.peer.PushGetHeadersMsg(locator, &nextHash)
 		if err != nil {
-		log.ERROR(err)
-log.ERRORF(
+			log.ERROR(err)
+			log.ERRORF(
 				"failed to send getheaders message to peer %s: %s",
 				hmsg.peer.Addr(), err,
 			)
@@ -2258,7 +2232,6 @@ func // checkHeaderSanity checks the PoW, and timestamp of a block header.
 		blockHeader.Timestamp, reorgAttempt)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	stubBlock := util.NewBlock(&wire.MsgBlock{
@@ -2267,7 +2240,6 @@ log.ERROR(err)
 	err = blockchain.CheckProofOfWork(stubBlock, fork.CompactToBig(diff), height)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	// Ensure the block time is not too far in the future.
@@ -2314,8 +2286,7 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 			// not have the special minimum difficulty rule applied.
 			prevBits, err := b.findPrevTestNetDifficulty(hList)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return 0, err
 			}
 			return prevBits, nil
@@ -2331,7 +2302,6 @@ log.ERROR(err)
 	)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return 0, err
 	}
 	// Limit the amount of adjustment that can occur to the previous difficulty.
@@ -2408,8 +2378,8 @@ func // findPrevTestNetDifficulty returns the difficulty of the previous block
 				uint32(iterHeight),
 			)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR("getBlockByHeight:", err)
+				log.ERROR(err)
+				log.ERROR("getBlockByHeight:", err)
 				return 0, err
 			}
 			iterNode = node

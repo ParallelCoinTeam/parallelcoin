@@ -16,7 +16,6 @@ func dirEmpty(dirPath string) (bool, error) {
 	f, err := os.Open(dirPath)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return false, err
 	}
 	defer f.Close()
@@ -36,7 +35,6 @@ func doUpgrades(cx *conte.Xt) error {
 	err := upgradeDBPaths(cx)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return err
 	}
 	return upgradeDataPaths()
@@ -87,16 +85,14 @@ func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) error {
 		//
 		err = os.MkdirAll(newDbRoot, 0700)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Move and rename the old database
 		//
 		err := os.Rename(oldDbPath, newDbPath)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 	}
@@ -115,19 +111,19 @@ func upgradeDBPaths(cx *conte.Xt) error {
 	err := upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet")
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_testnet.db"),
 		"testnet")
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_regtest.db"),
 		"regtest")
 	if err != nil {
 		log.ERROR(err)
-log.DEBUG(err)
+		log.DEBUG(err)
 	}
 	// Remove the old db directory
 	//
@@ -150,8 +146,7 @@ func upgradeDataPaths() error {
 			oldHomePath, newHomePath)
 		err := os.MkdirAll(newHomePath, 0700)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		// Move old pod.conf into new location if needed
@@ -160,8 +155,7 @@ log.ERROR(err)
 		if apputil.FileExists(oldConfPath) && !apputil.FileExists(newConfPath) {
 			err := os.Rename(oldConfPath, newConfPath)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		}
@@ -171,23 +165,20 @@ log.ERROR(err)
 		if apputil.FileExists(oldDataPath) && !apputil.FileExists(newDataPath) {
 			err := os.Rename(oldDataPath, newDataPath)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		}
 		// Remove the old home if it is empty or show a warning if not
 		ohpEmpty, err := dirEmpty(oldHomePath)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return err
 		}
 		if ohpEmpty {
 			err := os.Remove(oldHomePath)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 		} else {

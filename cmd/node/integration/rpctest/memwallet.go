@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"sync"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -108,7 +108,6 @@ func newMemWallet(net *netparams.Params, harnessID uint32) (*memWallet, error) {
 	hdRoot, err := hdkeychain.NewMaster(harnessHDSeed[:], net)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, nil
 	}
 	// The first child key from the hd root is reserved as the coinbase
@@ -116,19 +115,16 @@ log.ERROR(err)
 	coinbaseChild, err := hdRoot.Child(0)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	coinbaseKey, err := coinbaseChild.ECPrivKey()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	coinbaseAddr, err := keyToAddr(coinbaseKey, net)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	// Track the coinbase generation address to ensure we properly track
@@ -322,25 +318,21 @@ func (m *memWallet) newAddress() (util.Address, error) {
 	childKey, err := m.hdRoot.Child(index)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	privKey, err := childKey.ECPrivKey()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	addr, err := keyToAddr(privKey, m.net)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	err = m.rpc.LoadTxFilter(false, []util.Address{addr}, nil)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	m.addrs[index] = addr
@@ -401,14 +393,12 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 		if changeVal > 0 && change {
 			addr, err := m.newAddress()
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			pkScript, err := txscript.PayToAddrScript(addr)
 			if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+				log.ERROR(err)
 				return err
 			}
 			changeOutput := &wire.TxOut{
@@ -432,7 +422,6 @@ func (m *memWallet) SendOutputs(outputs []*wire.TxOut,
 	tx, err := m.CreateTransaction(outputs, feeRate, true)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return m.rpc.SendRawTransaction(tx, true)
@@ -447,7 +436,6 @@ func (m *memWallet) SendOutputsWithoutChange(outputs []*wire.TxOut,
 	tx, err := m.CreateTransaction(outputs, feeRate, false)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return m.rpc.SendRawTransaction(tx, true)
@@ -484,21 +472,18 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 		utxo := m.utxos[outPoint]
 		extendedKey, err := m.hdRoot.Child(utxo.keyIndex)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		privKey, err := extendedKey.ECPrivKey()
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		sigScript, err := txscript.SignatureScript(tx, i, utxo.pkScript,
 			txscript.SigHashAll, privKey, true)
 		if err != nil {
-		log.ERROR(err)
-log.ERROR(err)
+			log.ERROR(err)
 			return nil, err
 		}
 		txIn.SignatureScript = sigScript
@@ -553,7 +538,6 @@ func keyToAddr(key *ec.PrivateKey, net *netparams.Params) (util.Address, error) 
 	pubKeyAddr, err := util.NewAddressPubKey(serializedKey, net)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		return nil, err
 	}
 	return pubKeyAddr.AddressPubKeyHash(), nil

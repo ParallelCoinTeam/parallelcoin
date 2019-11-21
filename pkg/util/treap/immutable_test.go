@@ -7,7 +7,7 @@ import (
 )
 
 // TestImmutableEmpty ensures calling functions on an empty immutable treap works as expected.
-func TestImmutableEmpty(	t *testing.T) {
+func TestImmutableEmpty(t *testing.T) {
 	t.Parallel()
 	// Ensure the treap length is the expected value.
 	testTreap := NewImmutable()
@@ -43,7 +43,7 @@ func TestImmutableEmpty(	t *testing.T) {
 }
 
 // TestImmutableSequential ensures that putting keys into an immutable treap in sequential order works as expected.
-func TestImmutableSequential(	t *testing.T) {
+func TestImmutableSequential(t *testing.T) {
 	t.Parallel()
 	// Insert a bunch of sequential keys while checking several of the treap functions work as expected.
 	expectedSize := uint64(0)
@@ -123,7 +123,7 @@ func TestImmutableSequential(	t *testing.T) {
 }
 
 // TestImmutableReverseSequential ensures that putting keys into an immutable treap in reverse sequential order works as expected.
-func TestImmutableReverseSequential(	t *testing.T) {
+func TestImmutableReverseSequential(t *testing.T) {
 	t.Parallel()
 	// Insert a bunch of sequential keys while checking several of the treap functions work as expected.
 	expectedSize := uint64(0)
@@ -206,7 +206,7 @@ func TestImmutableReverseSequential(	t *testing.T) {
 }
 
 // TestImmutableUnordered ensures that putting keys into an immutable treap in no paritcular order works as expected.
-func TestImmutableUnordered(	t *testing.T) {
+func TestImmutableUnordered(t *testing.T) {
 	t.Parallel()
 	// Insert a bunch of out-of-order keys while checking several of the treap functions work as expected.
 	expectedSize := uint64(0)
@@ -270,7 +270,7 @@ func TestImmutableUnordered(	t *testing.T) {
 }
 
 // TestImmutableDuplicatePut ensures that putting a duplicate key into an immutable treap works as expected.
-func TestImmutableDuplicatePut(	t *testing.T) {
+func TestImmutableDuplicatePut(t *testing.T) {
 	t.Parallel()
 	expectedVal := []byte("testval")
 	expectedSize := uint64(0)
@@ -302,7 +302,7 @@ func TestImmutableDuplicatePut(	t *testing.T) {
 }
 
 // TestImmutableNilValue ensures that putting a nil value into an immutable treap results in a key being added with an empty byte slice.
-func TestImmutableNilValue(	t *testing.T) {
+func TestImmutableNilValue(t *testing.T) {
 	t.Parallel()
 	key := serializeUint32(0)
 	// Put the key with a nil value.
@@ -322,7 +322,7 @@ func TestImmutableNilValue(	t *testing.T) {
 }
 
 // TestImmutableForEachStopIterator ensures that returning false from the ForEach callback on an immutable treap stops iteration early.
-func TestImmutableForEachStopIterator(	t *testing.T) {
+func TestImmutableForEachStopIterator(t *testing.T) {
 	t.Parallel()
 	// Insert a few keys.
 	numItems := 10
@@ -344,7 +344,7 @@ func TestImmutableForEachStopIterator(	t *testing.T) {
 }
 
 // TestImmutableSnapshot ensures that immutable treaps are actually immutable by keeping a reference to the previous treap, performing a mutation, and then ensuring the referenced treap does not have the mutation applied.
-func TestImmutableSnapshot(	t *testing.T) {
+func TestImmutableSnapshot(t *testing.T) {
 	t.Parallel()
 	// Insert a bunch of sequential keys while checking several of the treap functions work as expected.
 	expectedSize := uint64(0)

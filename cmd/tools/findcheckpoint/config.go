@@ -9,7 +9,7 @@ import (
 	"github.com/jessevdk/go-flags"
 
 	"github.com/p9c/pod/app/appdata"
-	`github.com/p9c/pod/pkg/chain/config/netparams`
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
 	_ "github.com/p9c/pod/pkg/db/ffldb"
@@ -75,7 +75,6 @@ func loadConfig() (*config, []string, error) {
 	remainingArgs, err := parser.Parse()
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}

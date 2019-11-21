@@ -9,7 +9,6 @@ package old
 
 import (
 	"context"
-	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util"
@@ -100,7 +99,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				} else {
 					height=lb.Templates[0].Height
 				}
-				fmt.Print("\rsending out new block templates ", height, " ", strings.Repeat(" ", 20))
+				log.ERRORF("\rsending out new block templates ", height, " ",
+					strings.Repeat(" ", 20))
 				//log.DEBUG("sending out block broadcast")
 				err := enc.Encode(lb)
 				if err != nil {
@@ -119,7 +119,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			case <-ticker.C:
 				if !pauseRebroadcast.Load() {
 					oldBlocks.Lock()
-					fmt.Print("\u001b[2K\rsending out old block broadcast ", time.Now(), oldBlocks.New, "\r")
+					log.Print("\u001b[2K\rsending out old block broadcast ",
+						time.Now(), oldBlocks.New, "\r")
 					err := enc.Encode(oldBlocks)
 					if err != nil {
 						log.ERROR(err)

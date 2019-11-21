@@ -2,7 +2,6 @@ package util
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"github.com/p9c/pod/pkg/log"
 	"hash"
 
@@ -14,7 +13,6 @@ func calcHash(buf []byte, hasher hash.Hash) []byte {
 	_, err := hasher.Write(buf)
 	if err != nil {
 		log.ERROR(err)
-fmt.Println(err)
 	}
 	return hasher.Sum(nil)
 }

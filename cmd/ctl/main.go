@@ -9,14 +9,14 @@ import (
 	"io"
 	"os"
 	"strings"
-	
+
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // HelpPrint is the uninitialized help print function
 var HelpPrint = func() {
-	fmt.Println("help has not been overridden")
+	log.Println("help has not been overridden")
 }
 
 // Main is the entry point for the pod.Ctl component
@@ -27,7 +27,7 @@ func Main(args []string, cx *conte.Xt) {
 	usageFlags, err := btcjson.MethodUsageFlags(method)
 	if err != nil {
 		log.ERROR(err)
-fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
+		fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 		HelpPrint()
 		os.Exit(1)
 	}
@@ -70,7 +70,6 @@ fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 	cmd, err := btcjson.NewCmd(method, params...)
 	if err != nil {
 		log.ERROR(err)
-log.ERROR(err)
 		// Show the error along with its error code when it's a json.
 		// Error as it realistically will always be since the NewCmd function
 		// is only supposed to return errors of that type.
@@ -92,7 +91,7 @@ log.ERROR(err)
 	marshalledJSON, err := btcjson.MarshalCmd(1, cmd)
 	if err != nil {
 		log.ERROR(err)
-fmt.Fprintln(os.Stderr, err)
+		log.Println(err)
 		os.Exit(1)
 	}
 	// Send the JSON-RPC request to the server using the user-specified
@@ -100,7 +99,7 @@ fmt.Fprintln(os.Stderr, err)
 	result, err := sendPostRequest(marshalledJSON, cx)
 	if err != nil {
 		log.ERROR(err)
-fmt.Fprintln(os.Stderr, err)
+		log.Println(err)
 		os.Exit(1)
 	}
 	// Choose how to display the result based on its type.
@@ -109,11 +108,10 @@ fmt.Fprintln(os.Stderr, err)
 	case strings.HasPrefix(strResult, "{") || strings.HasPrefix(strResult, "["):
 		var dst bytes.Buffer
 		if err := js.Indent(&dst, result, "", "  "); err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to format result: %v",
-				err)
+			log.Printf("Failed to format result: %v", err)
 			os.Exit(1)
 		}
-		fmt.Println(dst.String())
+		log.Println(dst.String())
 	case strings.HasPrefix(strResult, `"`):
 		var str string
 		if err := js.Unmarshal(result, &str); err != nil {
@@ -121,9 +119,9 @@ fmt.Fprintln(os.Stderr, err)
 				err)
 			os.Exit(1)
 		}
-		fmt.Println(str)
+		log.Println(str)
 	case strResult != "null":
-		fmt.Println(strResult)
+		log.Println(strResult)
 	}
 }
 
@@ -132,11 +130,11 @@ func commandUsage(method string) {
 	usage, err := btcjson.MethodUsageText(method)
 	if err != nil {
 		log.ERROR(err)
-// This should never happen since the method was already checked
+		// This should never happen since the method was already checked
 		// before calling this function, but be safe.
-		fmt.Fprintln(os.Stderr, "Failed to obtain command usage:", err)
+		log.Println("Failed to obtain command usage:", err)
 		return
 	}
-	fmt.Fprintln(os.Stderr, "Usage:")
-	fmt.Fprintf(os.Stderr, "  %s\n", usage)
+	log.Println("Usage:")
+	log.Printf("  %s\n", usage)
 }

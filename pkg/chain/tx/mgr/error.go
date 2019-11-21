@@ -73,13 +73,13 @@ func (e Error) Error() string {
 	}
 	return e.Desc
 }
-func storeError(	c ErrorCode, desc string, err error) Error {
+func storeError(c ErrorCode, desc string, err error) Error {
 	return Error{Code: c, Desc: desc, Err: err}
 }
 
 // IsNoExists returns whether an error is a Error with the ErrNoExists error
 // code.
-func IsNoExists(	err error) bool {
+func IsNoExists(err error) bool {
 	serr, ok := err.(Error)
 	return ok && serr.Code == ErrNoExists
 }
