@@ -4,9 +4,8 @@ package fec
 
 import (
 	"encoding/binary"
-	"github.com/vivint/infectious"
-
 	"github.com/p9c/pod/pkg/log"
+	"github.com/vivint/infectious"
 )
 
 var (
@@ -67,15 +66,16 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 		//chunk = append(chunk, checkBytes...)
 		chunks = append(chunks, chunk)
 	}
+	//log.SPEW(chunks)
 	return
 }
 
 func Decode(chunks [][]byte) (data []byte, err error) {
 	var shares []infectious.Share
 	for i := range chunks {
-		bodyLen := len(chunks[i])
+		//bodyLen := len(chunks[i])
 		//log.SPEW(chunks[i])
-		body := chunks[i][:bodyLen-4]
+		body := chunks[i] // [:bodyLen]
 		share := infectious.Share{
 			Number: int(body[0]),
 			Data:   body[1:],
