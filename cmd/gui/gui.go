@@ -1,14 +1,16 @@
 package gui
 
 import (
-	"encoding/json"
+	"fmt"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/gui/webview"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/shurcooL/vfsgen"
 	"net/http"
-	"time"
+	"net/url"
 )
 
 func GUI(cx *conte.Xt) {
-
 	rc := rcvar{
 		cx:     cx,
 		alert:  DuOSalert{},
@@ -16,51 +18,54 @@ func GUI(cx *conte.Xt) {
 		txs:    DuOStransactionsExcerpts{},
 		lastxs: DuOStransactions{},
 	}
+	var fs http.FileSystem = http.Dir("./pkg/gui/widgets/CDNSTATIC")
+	err := vfsgen.Generate(fs, vfsgen.Options{})
+	if err != nil {
+		log.FATAL(err)
+	}
+	rc.fs = fs
 
-	go func() {
-		for _ = range time.NewTicker(time.Second * 1).C {
-			rc.GetDuOStatus()
-			rc.GetTransactions(0, 5, "")
-		}
-	}()
-
-	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
-		js, err := json.Marshal(rc.status)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Write(js)
+	rc.w = webview.New(webview.Settings{
+		Width:  1024,
+		Height: 760,
+		Title:  "ParallelCoin - DUO - True Story",
+		URL:    "data:text/html," + url.PathEscape(getFile("/index.html", fs)),
 	})
 
-	http.HandleFunc("/lastxs", func(w http.ResponseWriter, r *http.Request) {
-		js, err := json.Marshal(rc.lastxs)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Write(js)
-	})
-
-	go http.ListenAndServe(":3999", nil)
-
-	//var fs http.FileSystem = http.Dir("./pkg/gui/svelte/assets")
-	//err := vfsgen.Generate(fs, vfsgen.Options{})
-	//if err != nil {
-	//	log.FATAL("Shuttingdown GUI", err)
-	//	os.Exit(1)
+	fmt.Println("dadada", getFile("/index.html", fs))
+	//b := Bios{
+	//	Theme:      false,
+	//	IsBoot:     true,
+	//	IsBootMenu: true,
+	//	IsBootLogo: true,
+	//	IsLoading:  false,
+	//	IsDev:      true,
+	//	IsScreen:   "overview",
 	//}
+	log.INFO("starting GUI")
+
+	defer rc.w.Exit()
+	rc.w.Dispatch(func() {
+		// Load JavaScript Files
+		evalJs(&rc)
+
+		// Load CSS files
+		injectCss(&rc)
+	})
+	rc.w.Run()
+
 	//
-	//ln, err := net.Listen("tcp", "127.0.0.1:0")
-	//if err != nil {
-	//	log.FATAL("Shuttingdown GUI", err)
-	//	os.Exit(1)
+	//go func() {
+	//	for _ = range time.NewTicker(time.Second * 1).C {
+	//
+	//
+	//		//status, err := json.Marshal(rc.GetDuOStatus())
+	//		//if err != nil {
+	//		//}
+	//		//transactions, err := json.Marshal(rc.GetTransactions(0, 555, ""))
+	//		//if err != nil {
+	//		//}
 	//}
-	//defer ln.Close()
-	//go http.Serve(ln, http.FileServer(fs))
+	//}()
 
 }

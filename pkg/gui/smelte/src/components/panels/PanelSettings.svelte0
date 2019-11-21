@@ -1,5 +1,0 @@
-<div class="rwrap">
-	<div v-html="this.duOSys.config.daemon.schema"></div>
-	<svelte-form-generator class="flx flc fii" :schema="this.duOSys.config.daemon.schema" :model="this.duOSys.config.daemon.config"></svelte-form-generator>
-</div>
-		
