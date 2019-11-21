@@ -9,7 +9,7 @@ import (
 	"net"
 )
 
-var PauseMagic = [4]byte{'p', 'a', 'u', 's'}
+var PauseMagic = []byte{'p', 'a', 'u', 's'}
 
 type PauseContainer struct {
 	simplebuffer.Container

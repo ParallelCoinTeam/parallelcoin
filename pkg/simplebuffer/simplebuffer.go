@@ -21,7 +21,10 @@ type Container struct {
 
 // CreateContainer takes an array of serializer interface objects and renders
 // the data into bytes
-func (srs Serializers) CreateContainer(magic [4]byte) (out *Container) {
+func (srs Serializers) CreateContainer(magic []byte) (out *Container) {
+	if len(magic) != 4 {
+		return
+	}
 	out = &Container{}
 	var offset uint32
 	var length uint16

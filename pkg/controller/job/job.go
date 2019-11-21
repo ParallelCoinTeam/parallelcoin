@@ -17,7 +17,7 @@ import (
 	"net"
 )
 
-var WorkMagic = [4]byte{'w', 'o', 'r', 'k'}
+var WorkMagic = []byte{'w', 'o', 'r', 'k'}
 
 type Job struct {
 	simplebuffer.Container

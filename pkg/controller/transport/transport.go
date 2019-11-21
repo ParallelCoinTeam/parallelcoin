@@ -45,8 +45,7 @@ type Connection struct {
 // connection and listener and pre shared key password for encryption on the
 // local network
 func NewConnection(send, listen, preSharedKey string,
-	maxDatagramSize int) (c *Connection, cancel context.CancelFunc, err error) {
-	ctx, cancel := context.WithCancel(context.Background())
+	maxDatagramSize int, ctx context.Context) (c *Connection, err error) {
 	sendAddr := GetUDPAddr(send)
 	sendConn, err := net.DialUDP("udp", nil, sendAddr)
 	if err != nil {
@@ -71,7 +70,7 @@ func NewConnection(send, listen, preSharedKey string,
 		ctx:             ctx,
 		mx:              &sync.Mutex{},
 		receiveChan:     make(chan []byte),
-	}, cancel, err
+	}, err
 }
 
 func (c *Connection) CreateShards(b, magic []byte) (shards [][]byte,
@@ -165,7 +164,7 @@ func (c *Connection) SendShardsTo(shards [][]byte, addr *net.UDPAddr) (err error
 }
 
 func (c *Connection) Listen(handlers map[string]func(b []byte) (err error),
-) (b []byte, err error) {
+) (err error) {
 	log.TRACE("setting read buffer")
 	err = c.listenConn.SetReadBuffer(c.maxDatagramSize)
 	if err != nil {
