@@ -38,12 +38,12 @@ type Blocks struct {
 type Solution wire.MsgBlock
 
 func (tpl Templates) Copy(count int) (out []Templates) {
-	out=make([]Templates, count)
+	out = make([]Templates, count)
 	for i := range out {
 		out[i] = make(Templates, len(tpl))
 		for j := range tpl {
 			temp := *(tpl[j])
-			out[i][j]=&temp
+			out[i][j] = &temp
 		}
 	}
 	log.SPEW(out)
@@ -84,7 +84,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	pauseRebroadcast.Store(true)
 	// work dispatch loop
 	go func() {
-		workLoop:
+	workLoop:
 		for {
 			select {
 			case lb := <-blockChan:
@@ -97,7 +97,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 				if len(lb.Templates) < 1 {
 					height = -1
 				} else {
-					height=lb.Templates[0].Height
+					height = lb.Templates[0].Height
 				}
 				log.ERRORF("\rsending out new block templates ", height, " ",
 					strings.Repeat(" ", 20))
@@ -283,7 +283,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		// ensure it runs last when goroutine exits
 		defer cancel()
 		// send out empty block stop message when goroutine exits
-		defer func(){
+		defer func() {
 
 		}()
 		var submitLock sync.Mutex

@@ -300,7 +300,7 @@ func (m *CPUMiner) Stop() {
 func (m *CPUMiner) generateBlocks(workerNumber uint32, quit chan struct{}) {
 	// Start a ticker which is used to signal checks for stale work and updates
 	// to the speed monitor.
-	ticker := time.NewTicker(time.Second/3) // * hashUpdateSecs)
+	ticker := time.NewTicker(time.Second / 3) // * hashUpdateSecs)
 	defer ticker.Stop()
 out:
 	for i := 0; ; i++ {
@@ -663,7 +663,7 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	msgBlock := block.MsgBlock()
 	if !msgBlock.Header.PrevBlock.IsEqual(&m.g.BestSnapshot().Hash) {
 		log.TRACE(
-			"Block submitted via CPU miner with previous block",msgBlock.Header.PrevBlock,
+			"Block submitted via CPU miner with previous block", msgBlock.Header.PrevBlock,
 			"is stale", msgBlock.Header.Version,
 			msgBlock.BlockHashWithAlgos(block.Height()))
 		return false

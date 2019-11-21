@@ -21,10 +21,10 @@ type msgBuffer struct {
 }
 
 type msgHandle struct {
-	buffers   map[string]*msgBuffer
-	ciph      *cipher.AEAD
-	dec       *codec.Decoder
-	decBuf    []byte
+	buffers    map[string]*msgBuffer
+	ciph       *cipher.AEAD
+	dec        *codec.Decoder
+	decBuf     []byte
 	returnChan chan *controllerold.Blocks
 }
 
@@ -36,7 +36,7 @@ func newMsgHandle(password string, returnChan chan *controllerold.Blocks) (out *
 	var mh codec.MsgpackHandle
 	out.decBuf = make([]byte, 0, broadcast.MaxDatagramSize)
 	out.dec = codec.NewDecoderBytes(out.decBuf, &mh)
-    out.returnChan = returnChan
+	out.returnChan = returnChan
 	return
 }
 
@@ -101,4 +101,3 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 		}
 	}
 }
-

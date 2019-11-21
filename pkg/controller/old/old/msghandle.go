@@ -8,7 +8,7 @@ import (
 	"crypto/cipher"
 	"encoding/hex"
 	"github.com/p9c/pod/pkg/controller/broadcast"
-	
+
 	"github.com/p9c/pod/pkg/controller/gcm"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/ugorji/go/codec"
@@ -23,10 +23,10 @@ type msgBuffer struct {
 }
 
 type msgHandle struct {
-	buffers   map[string]*msgBuffer
-	ciph      *cipher.AEAD
-	dec       *codec.Decoder
-	decBuf    []byte
+	buffers    map[string]*msgBuffer
+	ciph       *cipher.AEAD
+	dec        *codec.Decoder
+	decBuf     []byte
 	returnChan chan *Solution
 }
 
@@ -38,7 +38,7 @@ func newMsgHandle(password string, returnChan chan *Solution) (out *msgHandle) {
 	var mh codec.MsgpackHandle
 	out.decBuf = make([]byte, 0, broadcast.MaxDatagramSize)
 	out.dec = codec.NewDecoderBytes(out.decBuf, &mh)
-    out.returnChan = returnChan
+	out.returnChan = returnChan
 	return
 }
 
@@ -103,4 +103,3 @@ func (m *msgHandle) msgHandler(src *net.UDPAddr, n int, b []byte) {
 		}
 	}
 }
-
