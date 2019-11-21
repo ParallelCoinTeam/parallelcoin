@@ -75,6 +75,7 @@ func Get(cx *conte.Xt, mB *util.Block,
 		t := (&Transaction.Transaction{}).Put(txs[i])
 		msg = append(msg, t)
 	}
+	//log.SPEW(msg)
 	return Job{*msg.CreateContainer(WorkMagic)}
 }
 

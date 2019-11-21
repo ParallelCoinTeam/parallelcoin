@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
@@ -38,7 +39,7 @@ type Connection struct {
 	ciph            cipher.AEAD
 	ctx             context.Context
 	mx              *sync.Mutex
-	receiveChan     chan []byte
+	ReceiveChan     chan []byte
 }
 
 // NewConnection creates a new connection with a defined default send
@@ -46,14 +47,18 @@ type Connection struct {
 // local network
 func NewConnection(send, listen, preSharedKey string,
 	maxDatagramSize int, ctx context.Context) (c *Connection, err error) {
-	sendAddr := GetUDPAddr(send)
-	sendConn, err := net.DialUDP("udp", nil, sendAddr)
-	if err != nil {
-		log.ERROR(err)
-		return
+	var sendAddr *net.UDPAddr
+	var sendConn *net.UDPConn
+	if send != "" {
+		sendAddr = GetUDPAddr(send)
+		sendConn, err = net.DialUDP("udp", nil, sendAddr)
+		if err != nil {
+			log.ERROR(err)
+			return
+		}
 	}
 	listenAddr := GetUDPAddr(listen)
-	listenConn, err := net.DialUDP("udp", nil, listenAddr)
+	listenConn, err := net.ListenUDP("udp", listenAddr)
 	if err != nil {
 		log.ERROR(err)
 		return
@@ -69,7 +74,7 @@ func NewConnection(send, listen, preSharedKey string,
 		ciph:            ciph, // gcm.GetCipher(*cx.Config.MinerPass),
 		ctx:             ctx,
 		mx:              &sync.Mutex{},
-		receiveChan:     make(chan []byte),
+		ReceiveChan:     make(chan []byte),
 	}, err
 }
 
@@ -185,6 +190,7 @@ func (c *Connection) Listen(handlers map[string]func(b []byte) (err error),
 			}
 			magic := string(buf[:4])
 			if _, ok := handlers[magic]; ok {
+				//log.DEBUG("received packet with magic:", magic)
 				nonceBytes := buf[4:16]
 				nonce := string(nonceBytes)
 				// decipher
@@ -195,20 +201,22 @@ func (c *Connection) Listen(handlers map[string]func(b []byte) (err error),
 					continue
 				}
 				if bn, ok := c.buffers[nonce]; ok {
+					//log.DEBUG("new shard for",
+					//	hex.EncodeToString([]byte(nonce)))
 					if !bn.Decoded {
 						bn.Buffers = append(bn.Buffers, shard)
 						if len(bn.Buffers) >= 3 {
 							// try to decode it
 							var cipherText []byte
-							log.SPEW(bn.Buffers)
+							//log.SPEW(bn.Buffers)
 							cipherText, err = fec.Decode(bn.Buffers)
 							if err != nil {
 								log.ERROR(err)
 								continue
 							}
-							log.SPEW(cipherText)
+							//log.SPEW(cipherText)
 							bn.Decoded = true
-							c.receiveChan <- cipherText
+							c.ReceiveChan <- cipherText
 						}
 					} else {
 						for i := range c.buffers {
@@ -217,11 +225,15 @@ func (c *Connection) Listen(handlers map[string]func(b []byte) (err error),
 								// buffers,
 								// we don't add more data for the already
 								// decoded.
+								log.DEBUG("deleting superseded buffer",
+									hex.EncodeToString([]byte(nonce)))
 								delete(c.buffers, i)
 							}
 						}
 					}
 				} else {
+					log.DEBUG("new message arriving",
+						hex.EncodeToString([]byte(nonce)))
 					c.buffers[nonce] = &MsgBuffer{[][]byte{},
 						time.Now(), false, src}
 					c.buffers[nonce].Buffers = append(c.buffers[nonce].
