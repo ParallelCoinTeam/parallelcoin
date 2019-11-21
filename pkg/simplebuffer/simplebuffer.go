@@ -23,6 +23,7 @@ type Container struct {
 // the data into bytes
 func (srs Serializers) CreateContainer(magic []byte) (out *Container) {
 	if len(magic) != 4 {
+		log.ERROR("magic must be 4 bytes")
 		return
 	}
 	out = &Container{}
@@ -68,9 +69,8 @@ func (c *Container) Count() uint16 {
 	return 0
 }
 
-func (c *Container) GetMagic() (out [4]byte) {
-	copy(out[:], c.Data[:4])
-	return
+func (c *Container) GetMagic() (out []byte) {
+	return c.Data[:4]
 }
 
 // Get returns the bytes that can be imported into an interface assuming the

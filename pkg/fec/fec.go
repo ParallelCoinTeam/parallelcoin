@@ -66,7 +66,7 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 		//chunk = append(chunk, checkBytes...)
 		chunks = append(chunks, chunk)
 	}
-	log.SPEW(chunks)
+	//log.SPEW(chunks)
 	return
 }
 
@@ -83,11 +83,11 @@ func Decode(chunks [][]byte) (data []byte, err error) {
 		shares = append(shares, share)
 	}
 	data, err = rsFEC.Decode(nil, shares)
-	//if len(data) > 4 {
-	//	prefix := data[:4]
-	//	data = data[4:]
-	//	dataLen := int(binary.LittleEndian.Uint32(prefix))
-	//	data = data[:dataLen]
-	//}
+	if len(data) > 4 {
+		prefix := data[:4]
+		data = data[4:]
+		dataLen := int(binary.LittleEndian.Uint32(prefix))
+		data = data[:dataLen]
+	}
 	return
 }

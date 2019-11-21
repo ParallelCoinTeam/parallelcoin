@@ -114,6 +114,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cancel()
 		return
 	}
+	cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
 	select {
@@ -233,7 +234,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 			case blockchain.NTBlockAccepted:
 				c.subMx.Lock()
 				defer c.subMx.Unlock()
-				log.TRACE("received new chain notification")
+				log.DEBUG("received new chain notification")
 				// construct work message
 				//log.SPEW(n)
 				_, ok := n.Data.(*util.Block)
@@ -243,13 +244,19 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 				}
 				template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 				if template != nil {
+					log.DEBUG("got new template")
 					msgB := template.Block
 					mC := job.Get(c.cx, util.NewBlock(msgB), c.adv)
+					//log.SPEW(mC.Data)
 					shards, err := c.conn.CreateShards(mC.Data, job.WorkMagic)
 					if err != nil {
 						log.TRACE(err)
 					}
 					c.oldBlocks.Store(shards)
+					err = c.conn.SendShards(shards)
+					if err != nil {
+						log.ERROR(err)
+					}
 				}
 			}
 		}
