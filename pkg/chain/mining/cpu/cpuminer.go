@@ -97,7 +97,7 @@ const (
 	// while they are actively searching for a solution.  This is done to reduce
 	// the amount of syncs between the workers that must be done to keep track
 	// of the hashes per second.
-	hashUpdateSecs = 10
+	hashUpdateSecs = 9
 )
 
 var (
@@ -272,7 +272,7 @@ func (m *CPUMiner) Start() {
 	go m.speedMonitor()
 	go m.miningWorkerController()
 	m.started = true
-	log.TRACE("CPU miner started mining", m.cfg.Algo)
+	log.TRACE("CPU miner started mining", m.cfg.Algo, m.cfg.NumThreads)
 }
 
 // Stop gracefully stops the mining process by signalling all workers, and the
@@ -300,7 +300,7 @@ func (m *CPUMiner) Stop() {
 func (m *CPUMiner) generateBlocks(workerNumber uint32, quit chan struct{}) {
 	// Start a ticker which is used to signal checks for stale work and updates
 	// to the speed monitor.
-	ticker := time.NewTicker(time.Second) // * hashUpdateSecs)
+	ticker := time.NewTicker(time.Second/3) // * hashUpdateSecs)
 	defer ticker.Stop()
 out:
 	for i := 0; ; i++ {
@@ -322,17 +322,27 @@ out:
 			time.Sleep(time.Second)
 			continue
 		}
+		select {
+		case <-quit:
+			break out
+		default:
+			// Non-blocking select to fall through
+		}
 		// No point in searching for a solution before the chain is synced.  Also,
 		// grab the same lock as used for block submission, since the current
 		// block will be changing and this would otherwise end up building a new
 		// block template on a block that is in the process of becoming stale.
-		m.submitBlockLock.Lock()
 		curHeight := m.g.BestSnapshot().Height
 		if curHeight != 0 && !m.cfg.IsCurrent() && !m.cfg.Solo {
-			m.submitBlockLock.Unlock()
 			log.WARNF("server is not current yet, waiting")
 			time.Sleep(time.Second)
 			continue
+		}
+		select {
+		case <-quit:
+			break out
+		default:
+			// Non-blocking select to fall through
 		}
 		// choose the algorithm on a rolling cycle
 		counter := m.rotator.Load()
@@ -352,21 +362,21 @@ out:
 			algo = fork.P9AlgoVers[int32(mod+5)]
 			// log.WARN("algo", algo)
 		}
+		select {
+		case <-quit:
+			break out
+		default:
+			// Non-blocking select to fall through
+		}
 		// Choose a payment address at random.
 		rand.Seed(time.Now().UnixNano())
 		payToAddr := m.cfg.MiningAddrs[rand.Intn(len(m.cfg.MiningAddrs))]
 		// Create a new block template using the available transactions in the
 		// memory pool as a source of transactions to potentially include in the
 		// block.
-		// algo := fork.GetAlgoVer(m.cfg.Algo, m.b.BestSnapshot().Height)
-		// WARNF{"before gbt1", m.cfg.Algo, algo}
-		// algoname := fork.GetAlgoName(algo, m.b.BestSnapshot().Height)
-		// WARNF{"before gbt2", algoname}
-		//log.TRACE("getting new block template")
 		template, err := m.g.NewBlockTemplate(workerNumber, payToAddr, algo)
-		m.submitBlockLock.Unlock()
 		if err != nil {
-			log.WARNF("failed to create new block template:", err)
+			log.WARN("failed to create new block template:", err)
 			continue
 		}
 		// Attempt to solve the block.  The function will exit early with false
@@ -374,17 +384,15 @@ out:
 		// can be generated.  When the return is true a solution was found, so
 		// submit the solved block.
 		//log.TRACE("attempting to solve block")
+		select {
+		case <-quit:
+			break out
+		default:
+			// Non-blocking select to fall through
+		}
 		if m.solveBlock(workerNumber, template.Block, curHeight+1,
 			m.cfg.ChainParams.Name == "testnet", ticker, quit) {
 			block := util.NewBlock(template.Block)
-			// if m.cfg.ChainParams.Name == "testnet" {
-			// 	rand.Seed(time.Now().UnixNano())
-			// 	delay := uint16(rand.Int()) >> 6
-			// log.Printf("%s testnet delay %dms algo %s\n",
-			// time.Now().Format("2006-01-02 15:04:05.000000"),
-			// delay, fork.List[fork.GetCurrent(curHeight+1)].AlgoVers[block.MsgBlock().Header.Version])
-			// time.Sleep(time.Millisecond * time.Duration(delay))
-			// }
 			m.submitBlock(block)
 		}
 	}
@@ -509,7 +517,17 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		}
 		rn += 1 << shifter
 		rNonce := uint32(rn)
-		mn := uint32(1 << 9)
+		mn := uint32(1 << 8)
+		switch {
+		case m.cfg.NumThreads < 2:
+			mn = uint32(1 << 4)
+		case m.cfg.NumThreads < 4:
+			mn = uint32(1 << 5)
+		case m.cfg.NumThreads < 6:
+			mn = uint32(1 << 6)
+		case m.cfg.NumThreads < 8:
+			mn = uint32(1 << 7)
+		}
 		// if testnet {
 		// 	mn = 1 << shifter
 		// }
@@ -596,8 +614,11 @@ out:
 				//since := fmt.Sprint(time.Now().Sub(log.StartupTime) / time.
 				//	Second * time.Second)
 				log.Print(log.Composite(fmt.Sprintf(
-					"--> Hash speed: %6.4f Kh/s %0.2f h/s", hashesPerSec/1000,
-					hashesPerSec), "STATUS", true), "\r")
+					"--> Hash speed: %6.4f Kh/s %0.2f h/s %0.4f h/s/thread",
+					hashesPerSec/1000,
+					hashesPerSec, hashesPerSec/float64(m.cfg.NumThreads)),
+					"STATUS", true),
+					"\r")
 			}
 		// Request for the number of hashes per second.
 		case m.queryHashesPerSec <- hashesPerSec:
@@ -615,6 +636,25 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	log.TRACE("submitting block")
 	m.submitBlockLock.Lock()
 	defer m.submitBlockLock.Unlock()
+	// TODO: This nonsense and the workgroup are the entirely wrong way to
+	//  write a cryptocurrency miner.
+	//  It is not critical work so it should not use a workgroup but rather,
+	//  a semaphore, which can yank all the threads to stop as soon as they
+	//  select on the semaphore,
+	//  whereas this stops 'when all the jobs are finished' for what purpose?
+	//  This miner will be eliminated once the replacement is complete.
+	//  End result of this is node waits for miners to stop,
+	//  which sometimes takes 5 seconds and almost every other height it has
+	//  two submissions processing on one mutex and second and others are
+	//  always stale. So also, the submitlock needs to be revised,
+	//  I think submitlock and waitgroup together are far better replaced by
+	//  a semaphore. Miner should STOP DEAD when a solution is found and wait
+	//  for more work. The kopach controller will stop all miners in the
+	//  network when it receives submissions prejudicially because it is
+	//  better to save power than catch one block in a thousand from an
+	//  economics poinnt of view.
+	//  Every cycle degrades the value and brings closer the hardware failure
+	//  so don't work unless there is a very good reason to.
 	// Ensure the block is not stale since a new block could have shown up while
 	// the solution was being found.  Typically that condition is detected and
 	// all work on the stale block is halted to start work on a new block, but
@@ -622,12 +662,13 @@ func (m *CPUMiner) submitBlock(block *util.Block) bool {
 	// and submitted in between.
 	msgBlock := block.MsgBlock()
 	if !msgBlock.Header.PrevBlock.IsEqual(&m.g.BestSnapshot().Hash) {
-		log.WARNF(
-			"Block submitted via CPU miner with previous block %s is stale",
-			msgBlock.Header.PrevBlock)
+		log.WARN(
+			"Block submitted via CPU miner with previous block",msgBlock.Header.PrevBlock,
+			"is stale", msgBlock.Header.Version,
+			msgBlock.BlockHashWithAlgos(block.Height()))
 		return false
 	}
-	log.TRACE("found block is fresh ", m.cfg.ProcessBlock)
+	//log.TRACE("found block is fresh ", m.cfg.ProcessBlock)
 	// Process this block using the same rules as blocks coming from other
 	// nodes.  This will in turn relay it to the network like normal.
 	isOrphan, err := m.cfg.ProcessBlock(block, blockchain.BFNone)

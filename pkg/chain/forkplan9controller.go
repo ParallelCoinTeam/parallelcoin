@@ -6,10 +6,11 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"math/big"
 	"strings"
+	"time"
 )
 
-func secondPowLimitBits(nH int32) (out *map[int32]uint32) {
-	aV := fork.List[fork.GetCurrent(nH)].AlgoVers
+func secondPowLimitBits(currFork int) (out *map[int32]uint32) {
+	aV := fork.List[currFork].AlgoVers
 	o := make(map[int32]uint32, len(aV))
 	for i := range aV {
 		o[i] = fork.SecondPowLimitBits
@@ -23,21 +24,27 @@ func secondPowLimitBits(nH int32) (out *map[int32]uint32) {
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 	lastNode *BlockNode) (newTargetBits *map[int32]uint32, err error) {
 	nH := lastNode.height + 1
-	nTB := make(map[int32]uint32, len(fork.List[fork.GetCurrent(
-		nH)].AlgoVers))
+	currFork := fork.GetCurrent(nH)
+	nTB := make(map[int32]uint32, len(fork.List[currFork].AlgoVers))
 	newTargetBits = &nTB
 	lnh := lastNode.Header()
 	hD := &lnh
-	newTargetBits = secondPowLimitBits(nH)
+	newTargetBits = secondPowLimitBits(currFork)
 	if lastNode == nil || b.IsP9HardFork(nH) {
 		return
 	}
-	log.DEBUG("calculating difficulty targets to attach to block",
-		hD.BlockHashWithAlgos(lastNode.height), lastNode.height)
+	log.TRACEC(func() string {
+		return fmt.Sprint("calculating difficulty targets to attach to"+
+			" block ", hD.BlockHashWithAlgos(lastNode.height), lastNode.height)
+	})
+	tn := time.Now()
+	defer log.TRACEC(func() string{
+		return fmt.Sprint(time.Now().Sub(tn), " to calculate all diffs")
+	})
 	// here we only need to do this once
-	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
-		dayDiv := b.GetCommonP9Averages(lastNode, nH)
-	for aV := range fork.List[fork.GetCurrent(nH)].AlgoVers {
+	allTimeAv, allTimeDiv, qhourDiv, hourDiv, dayDiv := b.
+		GetCommonP9Averages(lastNode, nH)
+	for aV := range fork.List[currFork].AlgoVers {
 		// TODO: merge this with the single algorithm one
 		since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode,
 			aV)

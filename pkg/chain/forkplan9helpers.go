@@ -37,8 +37,10 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 			allTimeDiv = allTimeAv / ttpb
 		}
 		allTimeDiv *= allTimeDiv * allTimeDiv * allTimeDiv * allTimeDiv
+	} else {
+		// the previous if should prevent this occurring
 	}
-
+	allTimeDiv = capP9Adjustment(allTimeDiv)
 	oneHour := 60 * 60 / fork.List[1].TargetTimePerBlock
 	oneDay := oneHour * 24
 	qHour := 60 * 60 / fork.List[1].TargetTimePerBlock / 4
@@ -47,7 +49,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 	if dayBlock != nil {
 		// collect timestamps within averaging interval
 		dayStamps := []int64{lastNode.timestamp}
-		for ln := lastNode; ln != nil && ln.height > startHeight+1 &&
+		for ln := lastNode; ln != nil && ln.height > startHeight+2 &&
 			len(dayStamps) <= int(fork.List[1].AveragingInterval); {
 			ln = ln.RelativeAncestor(oneDay)
 			if ln == nil {
@@ -81,7 +83,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 	if hourBlock != nil {
 		// collect timestamps within averaging interval
 		hourStamps := []int64{lastNode.timestamp}
-		for ln := lastNode; ln.height > startHeight+1 &&
+		for ln := lastNode; ln.height > startHeight+2 &&
 			len(hourStamps) <= int(fork.List[1].AveragingInterval); {
 			ln = ln.RelativeAncestor(oneHour)
 			if ln == nil {
@@ -115,7 +117,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 	if qhourBlock != nil {
 		// collect timestamps within averaging interval
 		qhourStamps := []int64{lastNode.timestamp}
-		for ln := lastNode; ln != nil && ln.height > startHeight+1 &&
+		for ln := lastNode; ln != nil && ln.height > startHeight+2 &&
 			len(qhourStamps) <= int(fork.List[1].AveragingInterval); {
 			ln = ln.RelativeAncestor(qHour)
 			if ln == nil {
@@ -153,7 +155,7 @@ func (b *BlockChain) GetP9AlgoDiv(allTimeDiv float64, last *BlockNode,
 	// collect timestamps of same algo of equal number as avinterval
 	algDiv = allTimeDiv
 	algStamps := []int64{last.timestamp}
-	for ln := last; ln != nil && ln.height > startHeight+1 &&
+	for ln := last; ln != nil && ln.height > startHeight+2 &&
 		len(algStamps) <= int(fork.List[1].AveragingInterval); {
 		ln = ln.RelativeAncestor(1)
 		if ln.version == algoVer {
@@ -204,11 +206,8 @@ func (b *BlockChain) GetP9Since(lastNode *BlockNode, algoVer int32) (since,
 	// ratio of seconds since to target seconds per block times the
 	// all time divergence ensures the change scales with the divergence
 	// from the target, and favours algos that are later
-	timeSinceAlgo = (since / tspb) / 5
-	startHeight = fork.List[1].ActivationHeight
-	if b.params.Net == wire.TestNet3 {
-		startHeight = fork.List[1].TestnetStart
-	}
+	timeSinceAlgo = capP9Adjustment((since / tspb) / 5)
+
 	return
 }
 
