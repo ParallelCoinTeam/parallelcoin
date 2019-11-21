@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/urfave/cli"
 	"os"
 	"sync"
@@ -60,6 +61,12 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			cx.WalletServer = <-walletChan
 			//save.Pod(cx.Config)
 		}
+		interrupt.AddHandler(func() {
+			log.WARN("interrupt received, " +
+				"shutting down shell modules")
+			close(cx.WalletKill)
+			close(cx.NodeKill)
+		})
 		wg.Wait()
 		return nil
 	}

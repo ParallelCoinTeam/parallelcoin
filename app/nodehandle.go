@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"sync"
 
 	"github.com/urfave/cli"
@@ -48,6 +49,10 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}()
 		cx.RPCServer = <-nodeChan
+		interrupt.AddHandler(func() {
+			log.WARN("interrupt received, starting shutdown")
+			close(killswitch)
+		})
 		wg.Wait()
 		return nil
 	}

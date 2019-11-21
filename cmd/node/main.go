@@ -160,32 +160,14 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 			*cx.Config.Listeners, err)
 		return err
 	}
-	cx.RealNode = server
-	// set up interrupt shutdown handlers to stop servers
-	interrupt.AddHandler(func() {
-		log.WARN("shutting down node from interrupt")
-		close(killswitch)
-	})
-	server.Start()
-	if len(server.RPCServers) > 0 {
-		log.TRACE("propagating rpc server handle (node has started)")
-		cx.RPCServer = server.RPCServers[0]
-		if nodechan != nil {
-			log.TRACE("sending back node")
-			nodechan <- server.RPCServers[0]
-		}
-	}
 	var stopController context.CancelFunc
-	if *cx.Config.EnableController {
-		stopController = controller.Run(cx)
-	}
-	// Wait until the interrupt signal is received from an OS signal or
-	// shutdown is requested through one of the subsystems such as the
-	// RPC server.
-	select {
-	case <-killswitch:
+	gracefulShutdown := func() {
+		log.DEBUG("shutting down node from interrupt")
 		log.INFO("gracefully shutting down the server...")
+		log.DEBUG("stopping miner")
+		server.CPUMiner.Stop()
 		if stopController != nil {
+			log.DEBUG("stopping controller")
 			stopController()
 		}
 		e := server.Stop()
@@ -195,9 +177,34 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		server.WaitForShutdown()
 		log.INFO("server shutdown complete")
 		wg.Done()
+
+		close(killswitch)
+	}
+	server.Start()
+	cx.RealNode = server
+	if len(server.RPCServers) > 0 {
+		log.TRACE("propagating rpc server handle (node has started)")
+		cx.RPCServer = server.RPCServers[0]
+		if nodechan != nil {
+			log.TRACE("sending back node")
+			nodechan <- server.RPCServers[0]
+		}
+	}
+	// set up interrupt shutdown handlers to stop servers
+	if *cx.Config.EnableController {
+		stopController = controller.Run(cx)
+	}
+	//interrupt.AddHandler(gracefulShutdown)
+
+	// Wait until the interrupt signal is received from an OS signal or
+	// shutdown is requested through one of the subsystems such as the
+	// RPC server.
+	select {
+	case <-killswitch:
+		gracefulShutdown()
 		return nil
-	case <-interrupt.HandlersDone:
-		wg.Done()
+		//case <-interrupt.HandlersDone:
+		//	wg.Done()
 	}
 	return nil
 }
