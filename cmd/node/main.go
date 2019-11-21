@@ -185,12 +185,12 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	select {
 	case <-killswitch:
 		log.INFO("gracefully shutting down the server...")
+		if stopController != nil {
+			stopController()
+		}
 		e := server.Stop()
 		if e != nil {
 			log.WARN("failed to stop server", e)
-		}
-		if stopController != nil {
-			stopController()
 		}
 		server.WaitForShutdown()
 		log.INFO("server shutdown complete")

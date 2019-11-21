@@ -52,31 +52,21 @@ out:
 	for {
 		select {
 		case nB := <-w.conn.ReceiveChan:
-			log.SPEW(nB)
+			//log.SPEW(nB)
 			magicB := nB[:4]
 			magic := string(magicB)
-			switch magic {
-			case string(job.WorkMagic):
-				log.DEBUG("work message")
-				j := job.LoadMinerContainer(nB)
-				log.DEBUG(j.Count())
-				log.DEBUG(j.GetIPs())
-				log.DEBUG(j.GetP2PListenersPort())
-				log.DEBUG(j.GetRPCListenersPort())
-				log.DEBUG(j.GetControllerListenerPort())
-				log.DEBUG(j.GetNewHeight())
-				log.DEBUG(j.GetPrevBlockHash())
-				log.DEBUG(j.GetBitses())
-				log.SPEW(j.GetTxs())
-			case string(pause.PauseMagic):
-				log.DEBUG("pause message")
-				j := pause.LoadPauseContainer(nB)
-				log.DEBUG(j.Count())
-				log.DEBUG(j.GetIPs())
-				log.DEBUG(j.GetP2PListenersPort())
-				log.DEBUG(j.GetRPCListenersPort())
-				log.DEBUG(j.GetControllerListenerPort())
+			if hnd, ok := handlers[magic]; ok {
+				err = hnd(nB)
+				if err != nil {
+					log.ERROR(err)
+				}
 			}
+			//switch magic {
+			//case string(job.WorkMagic):
+			//	log.DEBUG("work message")
+			//case string(pause.PauseMagic):
+			//	log.DEBUG("pause message")
+			//}
 		case <-quit:
 			cancel()
 			break out
@@ -90,11 +80,27 @@ var handlers = map[string]func(b []byte) (err error){
 	string(job.WorkMagic): func(b []byte) (err error) {
 		log.DEBUG("received job")
 		log.SPEW(b)
+		j := job.LoadMinerContainer(b)
+		log.DEBUG(j.Count())
+		log.DEBUG(j.GetIPs())
+		log.DEBUG(j.GetP2PListenersPort())
+		log.DEBUG(j.GetRPCListenersPort())
+		log.DEBUG(j.GetControllerListenerPort())
+		log.DEBUG(j.GetNewHeight())
+		log.DEBUG(j.GetPrevBlockHash())
+		log.DEBUG(j.GetBitses())
+		log.SPEW(j.GetTxs())
 		return
 	},
 	string(pause.PauseMagic): func(b []byte) (err error) {
 		log.DEBUG("received pause")
 		log.SPEW(b)
+		j := pause.LoadPauseContainer(b)
+		log.DEBUG(j.Count())
+		log.DEBUG(j.GetIPs())
+		log.DEBUG(j.GetP2PListenersPort())
+		log.DEBUG(j.GetRPCListenersPort())
+		log.DEBUG(j.GetControllerListenerPort())
 		return
 	},
 }
