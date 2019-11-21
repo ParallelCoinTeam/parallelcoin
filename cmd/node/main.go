@@ -1,6 +1,8 @@
 package node
 
 import (
+	"context"
+	"github.com/p9c/pod/pkg/controller"
 	"net"
 	"net/http"
 	//// This enables pprof
@@ -174,7 +176,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		}
 	}
 	var stopController context.CancelFunc
-	if *cx.Config.EnableController {
+	if !*cx.Config.NoController {
 		stopController = controller.Run(cx)
 	}
 	// Wait until the interrupt signal is received from an OS signal or
@@ -187,9 +189,9 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		if e != nil {
 			log.WARN("failed to stop server", e)
 		}
-		//if stopController != nil {
-		//	stopController()
-		//}
+		if stopController != nil {
+			stopController()
+		}
 		server.WaitForShutdown()
 		log.INFO("server shutdown complete")
 		wg.Done()
