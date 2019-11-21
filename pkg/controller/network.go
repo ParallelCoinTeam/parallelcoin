@@ -6,7 +6,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/fec"
+	"github.com/p9c/pod/pkg/controller/controllerold/fec"
 	"github.com/p9c/pod/pkg/log"
 	"io"
 	"net"
@@ -37,7 +37,6 @@ var (
 func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 	ciph cipher.AEAD, conn *net.UDPConn) (shards [][]byte, err error) {
 	nonce := make([]byte, ciph.NonceSize())
-	//log.DEBUG(len(nonce))
 	var bb []byte
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
 		log.ERROR(err)
@@ -46,13 +45,10 @@ func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 	if ciph != nil {
 		bb = ciph.Seal(nil, nonce, by, nil)
 	}
-	//log.SPEW(bb)
-	//bb = by
 	shards, err = fec.Encode(bb)
 	if err != nil {
 		return
 	}
-	//log.SPEW(shards)
 	// nonce is a batch identifier for the FEC encoded shards which are sent
 	// out as individual packets
 	prefix := append(nonce, magic[:]...)
@@ -80,7 +76,6 @@ func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 // handler function
 func Shards(by []byte, magic [4]byte, ciph cipher.AEAD) (shards [][]byte, err error) {
 	nonce := make([]byte, ciph.NonceSize())
-	//log.DEBUG(len(nonce))
 	var bb []byte
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
 		log.ERROR(err)
@@ -89,13 +84,10 @@ func Shards(by []byte, magic [4]byte, ciph cipher.AEAD) (shards [][]byte, err er
 	if ciph != nil {
 		bb = ciph.Seal(nil, nonce, by, nil)
 	}
-	//log.SPEW(bb)
-	//bb = by
 	shards, err = fec.Encode(bb)
 	if err != nil {
 		return
 	}
-	//log.SPEW(shards)
 	// nonce is a batch identifier for the FEC encoded shards which are sent
 	// out as individual packets
 	prefix := append(nonce, magic[:]...)

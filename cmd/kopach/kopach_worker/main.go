@@ -29,7 +29,6 @@ out:
 		select {
 		case <-sem.Release():
 			break out
-		//default:
 		}
 	}
 }

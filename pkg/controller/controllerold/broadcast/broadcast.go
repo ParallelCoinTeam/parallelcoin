@@ -7,7 +7,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/fec"
+	"github.com/p9c/pod/pkg/controller/controllerold/fec"
 	"io"
 	"net"
 
@@ -136,7 +136,7 @@ func Encode(ciph cipher.AEAD, bytes []byte, typ []byte) (shards [][]byte,
 		shards = append(shards, append(append(typ, nonce...), ciph.Seal(nil, nonce,
 			clearText[i], nil)...))
 	}
-	//log.SPEW(shards)
+	log.SPEW(shards)
 	return
 }
 

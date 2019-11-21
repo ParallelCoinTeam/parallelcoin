@@ -9,9 +9,9 @@ import (
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller/advertisment"
+	"github.com/p9c/pod/pkg/controller/controllerold/fec"
 	"github.com/p9c/pod/pkg/controller/job"
 	"github.com/p9c/pod/pkg/controller/pause"
-	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/simplebuffer"
@@ -24,16 +24,16 @@ import (
 	"time"
 )
 
-type msgBuffer struct {
-	buffers    [][]byte
-	first      time.Time
-	decoded    bool
-	superseded bool
+type MsgBuffer struct {
+	Buffers    [][]byte
+	First      time.Time
+	Decoded    bool
+	Superseded bool
 }
 
 type Controller struct {
 	active        *atomic.Bool
-	buffers       map[string]*msgBuffer
+	buffers       map[string]*MsgBuffer
 	ciph          cipher.AEAD
 	conns         []*net.UDPConn
 	ctx           context.Context
@@ -48,6 +48,7 @@ type Controller struct {
 
 var (
 	SolutionMagic = [4]byte{'s', 'o', 'l', 'v'}
+
 )
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
@@ -56,7 +57,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	ctx, cancel := context.WithCancel(context.Background())
 	ctrl := &Controller{
 		active:        &atomic.Bool{},
-		buffers:       make(map[string]*msgBuffer),
+		buffers:       make(map[string]*MsgBuffer),
 		ciph:          gcm.GetCipher(*cx.Config.MinerPass),
 		conns:         []*net.UDPConn{},
 		ctx:           ctx,
@@ -79,15 +80,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cancel()
 		return
 	}
-	//// test the addresses and collate the ones that work
-	//for i := range MCAddresses {
-	//	conn, err := net.ListenUDP("udp", MCAddresses[i])
-	//	if err == nil {
-	//		log.DEBUG("MC listeners", MCAddresses[i].String())
-	//		ctrl.sendAddresses = append(ctrl.sendAddresses, MCAddresses[i])
-	//		ctrl.conns = append(ctrl.conns, conn)
-	//	}
-	//}
 	uc, err := net.DialUDP("udp", nil, MCAddress)
 	if err != nil {
 		log.ERROR(err)
@@ -96,7 +88,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	ctrl.sendAddresses = []*net.UDPAddr{MCAddress}
 	// create pause message ready for shutdown handler next
 	pM := pause.GetPauseContainer(cx)
-
 	pauseShards, err := Shards(pM.Data, pause.PauseMagic, ctrl.ciph)
 	if err != nil {
 		log.TRACE(err)
@@ -120,17 +111,9 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		}
 	}()
 	log.DEBUG("sending broadcasts from:", ctrl.sendAddresses)
-	// send out the first broadcast
+	// send out the First broadcast
 	bTG := getBlkTemplateGenerator(cx)
-	//tpl, err := bTG.NewBlockTemplate(0, cx.StateCfg.ActiveMiningAddrs[0],
-	//	"sha256d")
-	//if err != nil {
-	//	log.ERROR(err)
-	//	return
-	//}
-	//msgBase := advertisment.Get(cx)
 	msgBase := pause.GetPauseContainer(cx)
-	//mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
 	lisP := msgBase.GetControllerListenerPort()
 	addy := fmt.Sprintf("%s:%d", msgBase.GetIPs()[0], lisP)
 	listenAddress, err := net.ResolveUDPAddr("udp", addy)
@@ -139,7 +122,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		log.ERROR(err)
 		return
 	}
-	//log.DEBUG("miner controller listening on", listenAddress.String(), addy)
 	adv := advertisment.Get(cx)
 	pauseShards, err = sendNewBlockTemplate(cx, bTG, adv,
 		ctrl.sendAddresses, ctrl.conns, ctrl.oldBlocks, ctrl.ciph)
@@ -152,15 +134,15 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	cx.RealNode.Chain.Subscribe(getNotifier(ctrl.active, bTG, ctrl.ciph,
 		ctrl.conns, cx, adv, ctrl.oldBlocks, ctrl.sendAddresses,
 		ctrl.subMx))
-	go rebroadcaster(ctrl)
-	go submitter(ctrl)
 	log.DEBUG("miner controller submit port listening on",
 		submitListenConn.LocalAddr())
-	cancel, err = Listen(submitListenConn, getListener(ctrl))
+	cancel, err = Listen(submitListenConn, getMsgHandler(ctrl))
 	if err != nil {
 		log.DEBUG(err)
 		return
 	}
+	go rebroadcaster(ctrl)
+	go submitter(ctrl)
 	select {
 	case <-ctx.Done():
 		ctrl.active.Store(false)
@@ -183,13 +165,14 @@ out:
 				return
 			}
 			log.SPEW(decodedB)
+			//
 		case <-ctrl.ctx.Done():
 			break out
 		}
 	}
 }
 
-func getListener(ctrl *Controller) func(a *net.UDPAddr, n int, b []byte) {
+func getMsgHandler(ctrl *Controller) func(a *net.UDPAddr, n int, b []byte) {
 	return func(a *net.UDPAddr, n int, b []byte) {
 		var err error
 		ctrl.mx.Lock()
@@ -203,16 +186,16 @@ func getListener(ctrl *Controller) func(a *net.UDPAddr, n int, b []byte) {
 			nonce := string(b[:12])
 			if bn, ok := ctrl.buffers[nonce]; ok {
 
-				if !bn.decoded {
+				if !bn.Decoded {
 					payload := b[16:n]
 					newP := make([]byte, len(payload))
 					copy(newP, payload)
-					bn.buffers = append(bn.buffers, newP)
-					if len(bn.buffers) >= 3 {
+					bn.Buffers = append(bn.Buffers, newP)
+					if len(bn.Buffers) >= 3 {
 						// try to decode it
 						var cipherText []byte
-						//log.SPEW(bn.buffers)
-						cipherText, err = fec.Decode(bn.buffers)
+						//log.SPEW(bn.Buffers)
+						cipherText, err = fec.Decode(bn.Buffers)
 						if err != nil {
 							log.ERROR(err)
 							return
@@ -224,27 +207,27 @@ func getListener(ctrl *Controller) func(a *net.UDPAddr, n int, b []byte) {
 							log.ERROR(err)
 							return
 						}
-						bn.decoded = true
+						bn.Decoded = true
 						ctrl.submitChan <- msg
 					}
 				} else {
 					for i := range ctrl.buffers {
 						if i != nonce {
-							// superseded blocks can be deleted from the
-							// buffers,
+							// Superseded blocks can be deleted from the
+							// Buffers,
 							// we don't add more data for the already
-							// decoded
-							ctrl.buffers[i].superseded = true
+							// Decoded
+							ctrl.buffers[i].Superseded = true
 						}
 					}
 				}
 			} else {
-				ctrl.buffers[nonce] = &msgBuffer{[][]byte{}, time.Now(),
+				ctrl.buffers[nonce] = &MsgBuffer{[][]byte{}, time.Now(),
 					false, false}
 				payload := b[16:n]
 				newP := make([]byte, len(payload))
 				copy(newP, payload)
-				ctrl.buffers[nonce].buffers = append(ctrl.buffers[nonce].buffers,
+				ctrl.buffers[nonce].Buffers = append(ctrl.buffers[nonce].Buffers,
 					newP)
 				//log.DEBUGF("%x", payload)
 			}
@@ -307,7 +290,7 @@ out:
 					oB,
 					ctrl.conns[i])
 				if err != nil {
-					log.TRACE(err)
+					log.ERROR(err)
 				}
 			}
 		case <-ctrl.ctx.Done():
@@ -339,7 +322,7 @@ func getNotifier(active *atomic.Bool, bTG *mining.BlkTmplGenerator,
 ) func(n *chain.Notification) {
 	return func(n *chain.Notification) {
 		if active.Load() {
-			// first to arrive locks out any others while processing
+			// First to arrive locks out any others while processing
 			switch n.Type {
 			case chain.NTBlockAccepted:
 				subMx.Lock()
