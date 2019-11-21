@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 	"fmt"
+	"github.com/p9c/pod/pkg/controller/pause"
 	"net"
 	"os"
 	"runtime"
@@ -101,25 +102,28 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 		cx.StateCfg.Save = true
 	}
 
-	if !*cx.Config.NoController {
+	if *cx.Config.EnableController {
+		msgBase := pause.GetPauseContainer(cx)
+		//mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
+		listenHost := msgBase.GetIPs()[0].String()+":0"
 		switch ctx.Command.Name {
 		// only the wallet listener is important with shell as it proxies for
 		// node, the rest better they are automatic
 		case "shell":
-			*cfg.Listeners = cli.StringSlice{":0"}
-			*cfg.RPCListeners = cli.StringSlice{":0"}
-			*cfg.Controller = ":0"
+			*cfg.Listeners = cli.StringSlice{listenHost}
+			*cfg.RPCListeners = cli.StringSlice{listenHost}
+			*cfg.Controller = listenHost
 		// user might be depending on which port is set for node so only
 		// controller is auto
 		case "node":
-			*cfg.Controller = ":0"
+			*cfg.Controller = listenHost
 		case "wallet":
-			*cfg.Controller = ":0"
+			*cfg.Controller = listenHost
 		}
 	}
 	if *cx.Config.AutoPorts {
-		*cfg.Listeners = cli.StringSlice{":0"}
-		*cfg.RPCListeners = cli.StringSlice{":0"}
+		*cfg.Listeners = cli.StringSlice{}
+		*cfg.RPCListeners = cli.StringSlice{}
 		*cfg.Controller = ":0"
 	}
 	if *cfg.RPCConnect == "" {
@@ -516,11 +520,11 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 }
 func validateOnions(cfg *pod.Config) {
 	// --onionproxy and not --onion are contradictory (TODO: this is kinda
-	// stupid hm? switch *and* toggle by presence of flag value, one should be
-	// enough)
-	if !*cfg.Onion && *cfg.OnionProxy != "" {
-		err := fmt.Errorf("%s: the --onionproxy and --onion options may not be activated at the same time", funcName)
-		fmt.Fprintln(os.Stderr, err)
+	//  stupid hm? switch *and* toggle by presence of flag value, one should be
+	//  enough)
+	if *cfg.Onion && *cfg.OnionProxy != "" {
+		log.ERROR("onion enabled but no onionproxy has been configured")
+		log.FATAL("halting to avoid exposing IP address")
 		os.Exit(1)
 	}
 	// Tor stream isolation requires either proxy or onion proxy to be set.

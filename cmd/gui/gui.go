@@ -46,11 +46,11 @@ func GUI(cx *conte.Xt) {
 
 	defer rc.w.Exit()
 	rc.w.Dispatch(func() {
-		// Load JavaScript Files
-		evalJs(&rc)
 
 		// Load CSS files
 		injectCss(&rc)
+		// Load JavaScript Files
+		evalJs(&rc)
 	})
 	rc.w.Run()
 

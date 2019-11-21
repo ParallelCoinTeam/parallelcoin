@@ -97,7 +97,7 @@ var (
 			}(),
 			TargetTimePerBlock: 36,
 			AveragingInterval:  3600,
-			TestnetStart:       1,
+			TestnetStart:       2,
 		},
 	}
 	// P9AlgoVers is the lookup for after 1st hardfork
@@ -132,7 +132,7 @@ var (
 	// SecondPowLimit is
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
-			"0099999999999999999999999999999999999999999999999999999999999999")
+			"0999999999999999999999999999999999999999999999999999999999999999")
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	SecondPowLimitBits = BigToCompact(&SecondPowLimit)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/cipher"
 	"crypto/rand"
+	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/log"
@@ -26,10 +27,8 @@ const (
 )
 
 var (
-	MCAddresses = []*net.UDPAddr{
-		{IP: net.ParseIP(UDP4MulticastAddress), Port: 11049},
-		//{IP: net.ParseIP(UDP6MulticastAddress), Port: 11049},
-	}
+	MCAddress = &net.UDPAddr{IP: net.ParseIP(UDP4MulticastAddress),
+		Port: 11049}
 )
 
 // Send broadcasts bytes on the given multicast address with each shard
@@ -63,14 +62,14 @@ func Send(addr *net.UDPAddr, by []byte, magic [4]byte,
 	var n, cumulative int
 	for i := range shards {
 		shards[i] = append(prefix, shards[i]...)
-		n, err = conn.WriteToUDP(shards[i], addr)
+		n, err = conn.Write(shards[i])
 		if err != nil {
 			log.ERROR(err, len(shards[i]))
 			return
 		}
 		cumulative += n
 	}
-	log.TRACE("wrote", cumulative, "by to multicast address", addr.IP,
+	log.TRACE("wrote", cumulative, "bytes to multicast address", addr.IP,
 		"port",
 		addr.Port)
 	return
@@ -112,32 +111,24 @@ func Shards(by []byte, magic [4]byte, ciph cipher.AEAD) (shards [][]byte, err er
 func SendShards(addr *net.UDPAddr, shards [][]byte, conn *net.UDPConn) (err error) {
 	var n, cumulative int
 	for i := range shards {
-		n, err = conn.WriteToUDP(shards[i], addr)
+		n, err = conn.Write(shards[i])
 		if err != nil {
 			log.ERROR(err)
 			return
 		}
 		cumulative += n
 	}
-	// log.DEBUG(log.Composite(fmt.Sprintf("sent %v bytes to %v port %v",
-	//	cumulative, addr.IP, addr.Port), "STATUS", true), "\r")
+	log.Print(log.Composite(fmt.Sprintf("sent %v bytes to %v port %v",
+		cumulative, addr.IP, addr.Port), "STATUS", true), "\r")
 	return
 }
 
 // Listen binds to the UDP address and port given and writes packets received
 // from that address to a buffer which is passed to a handler
-func Listen(address *net.UDPAddr, handler func(*net.UDPAddr, int,
+func Listen(conn *net.UDPConn, handler func(*net.UDPAddr, int,
 	[]byte)) (cancel context.CancelFunc, err error) {
 	var ctx context.Context
 	ctx, cancel = context.WithCancel(context.Background())
-	log.TRACE("resolving", address)
-	var conn *net.UDPConn
-	conn, err = net.ListenUDP("udp", address)
-	if err != nil {
-		log.ERROR(err)
-		cancel()
-		return
-	}
 	log.TRACE("setting read buffer")
 	err = conn.SetReadBuffer(MaxDatagramSize)
 	if err != nil {

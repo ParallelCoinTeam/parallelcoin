@@ -89,24 +89,12 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 			}
 		}
 	}
-<<<<<<< HEAD
-	var pauseShards [][]byte
-	pM := GetMessageBase(cx).CreateContainer(PauseMagic)
-	for _ = range sendAddresses {
-		shards, err := Shards(pM.Data,
-			PauseMagic, ciph, )
-		if err != nil {
-			log.TRACE(err)
-		}
-		pauseShards = shards
-=======
 	// create pause message ready for shutdown handler next
 	pM := pause.GetPauseContainer(cx)
 
 	pauseShards, err := Shards(pM.Data, pause.PauseMagic, ctrl.ciph)
 	if err != nil {
 		log.TRACE(err)
->>>>>>> ce4708e3e9b9184b5126b59695f990696f924bcc
 	}
 	ctrl.oldBlocks.Store(pauseShards)
 	defer func() {
