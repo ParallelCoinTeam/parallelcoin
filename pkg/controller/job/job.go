@@ -17,7 +17,7 @@ import (
 	"net"
 )
 
-var WorkMagic = [4]byte{'w', 'o', 'r', 'k'}
+var WorkMagic = []byte{'w', 'o', 'r', 'k'}
 
 type Job struct {
 	simplebuffer.Container
@@ -75,6 +75,7 @@ func Get(cx *conte.Xt, mB *util.Block,
 		t := (&Transaction.Transaction{}).Put(txs[i])
 		msg = append(msg, t)
 	}
+	//log.SPEW(msg)
 	return Job{*msg.CreateContainer(WorkMagic)}
 }
 

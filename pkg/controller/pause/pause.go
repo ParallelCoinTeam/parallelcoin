@@ -9,7 +9,7 @@ import (
 	"net"
 )
 
-var PauseMagic = [4]byte{'p', 'a', 'u', 's'}
+var PauseMagic = []byte{'p', 'a', 'u', 's'}
 
 type PauseContainer struct {
 	simplebuffer.Container
@@ -30,7 +30,7 @@ func (mC *PauseContainer) GetIPs() []*net.IP {
 	return IPs.New().DecodeOne(mC.Get(0)).Get()
 }
 
-func (mC *PauseContainer) GetP2PListenerPort() uint16 {
+func (mC *PauseContainer) GetP2PListenersPort() uint16 {
 	return Uint16.New().DecodeOne(mC.Get(1)).Get()
 }
 
@@ -43,11 +43,11 @@ func (mC *PauseContainer) GetP2PListeners() (out []string) {
 	return
 }
 
-func (mC *PauseContainer) GetRPCListenerPort() uint16 {
+func (mC *PauseContainer) GetRPCListenersPort() uint16 {
 	return Uint16.New().DecodeOne(mC.Get(2)).Get()
 }
 
-func (mC *PauseContainer) GetRPCListener() (out []string) {
+func (mC *PauseContainer) GetRPCListeners() (out []string) {
 	p := Uint16.New().DecodeOne(mC.Get(2)).String()
 	ips := mC.GetIPs()
 	for i := range ips {
