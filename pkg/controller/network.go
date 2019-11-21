@@ -6,7 +6,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/controller/controllerold/fec"
+	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/log"
 	"io"
 	"net"
