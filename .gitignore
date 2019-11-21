@@ -39,4 +39,4 @@ yarn-error.log*
 *.sw?
 
 rcc.cpp
-/assets_vfsdata.go
+assets_vfsdata.go
