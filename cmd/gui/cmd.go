@@ -2,14 +2,10 @@ package gui
 
 import (
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gui/webview"
-	"net/http"
 )
 
 type rcvar struct {
 	*conte.Xt
-	w      webview.WebView
-	fs     http.FileSystem
 	alert  DuOSalert
 	status DuOStatus
 	txs    DuOStransactionsExcerpts

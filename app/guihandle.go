@@ -5,7 +5,9 @@ import (
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/shurcooL/vfsgen"
 	"github.com/urfave/cli"
+	"net/http"
 )
 
 type Bios struct {
@@ -26,10 +28,20 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error{
 		Configure(cx, c)
 		//err := gui.Services(cx)
 
+		var fs http.FileSystem = http.Dir("./pkg/gui/assets")
+		err = vfsgen.Generate(fs, vfsgen.Options{
+			PackageName:  "guiLibs",
+			BuildTags:    "!dev",
+			VariableName: "WalletGUI",
+		})
+		if err != nil {
+			log.FATAL(err)
+		}
+		cx.FileSystem = &fs
 
 		if !apputil.FileExists(*cx.Config.WalletFile){
 			// We can open wallet directly
-			gui.FirstRun(cx)
+			gui.Loader(cx)
 		}
 
 		err = gui.Services(cx)

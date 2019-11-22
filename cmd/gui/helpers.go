@@ -20,147 +20,147 @@ getFile(f string, fs http.FileSystem) string {
 
 func evalJs(rc *rcvar) {
 	var err error
-	err = rc.w.Eval(getFile("libs/vue/vue.js",rc.fs))
+	err = rc.WebView.Eval(getFile("libs/vue/vue.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("libs/vue/ej2-vue.min.js",rc.fs))
+	err = rc.WebView.Eval(getFile("libs/vue/ej2-vue.min.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("libs/vue/vfg.js",rc.fs))
+	err = rc.WebView.Eval(getFile("libs/vue/vfg.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/duos.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/duos.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/ico/logo.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/ico/logo.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/ico/overview.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/ico/overview.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/ico/history.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/ico/history.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/ico/addressbook.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/ico/addressbook.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/ico/explorer.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/ico/explorer.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/ico/settings.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/ico/settings.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/balance.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/balance.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/send.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/send.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/peers.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/peers.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/status.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/status.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/networkhashrate.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/networkhashrate.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/localhashrate.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/localhashrate.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/history.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/history.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/latestxs.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/latestxs.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/addressbook.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/addressbook.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/panels/settings.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/panels/settings.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/pages/overview.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/pages/overview.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/pages/history.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/pages/history.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/pages/addressbook.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/pages/addressbook.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/pages/explorer.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/pages/explorer.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/pages/settings.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/pages/settings.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/layout/header.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/layout/header.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/layout/nav.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/layout/nav.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/layout/xorg.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/layout/xorg.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
 
-	err = rc.w.Eval(getFile("js/dui.js",rc.fs))
+	err = rc.WebView.Eval(getFile("w/js/dui.js",*rc.FileSystem))
 	if err != nil {
 		fmt.Println("error binding to webview:", err)
 	}
@@ -176,12 +176,12 @@ func injectCss(rc *rcvar) {
 	// 	fmt.Printf("Error decoding string: %s ", err.Error())
 	// 	return
 	// }
-	rc.w.InjectCSS(getFile("css/material.css",rc.fs))
-	rc.w.InjectCSS(getFile("css/theme/root.css",rc.fs))
-	rc.w.InjectCSS(getFile("css/theme/colors.css",rc.fs))
-	rc.w.InjectCSS(getFile("css/theme/grid.css",rc.fs))
-	rc.w.InjectCSS(getFile("css/theme/helpers.css",rc.fs))
-	rc.w.InjectCSS(getFile("css/theme/style.css",rc.fs))
-	rc.w.InjectCSS(getFile("css/dui.css",rc.fs))
+	rc.WebView.InjectCSS(getFile("w/css/material.css",*rc.FileSystem))
+	rc.WebView.InjectCSS(getFile("w/css/theme/root.css",*rc.FileSystem))
+	rc.WebView.InjectCSS(getFile("w/css/theme/colors.css",*rc.FileSystem))
+	rc.WebView.InjectCSS(getFile("w/css/theme/grid.css",*rc.FileSystem))
+	rc.WebView.InjectCSS(getFile("w/css/theme/helpers.css",*rc.FileSystem))
+	rc.WebView.InjectCSS(getFile("w/css/theme/style.css",*rc.FileSystem))
+	rc.WebView.InjectCSS(getFile("w/css/dui.css",*rc.FileSystem))
 
 }
