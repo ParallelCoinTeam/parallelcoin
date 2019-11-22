@@ -43,25 +43,25 @@ func (r *rcvar) GetDuOStatus() (s DuOStatus) {
 	s.CpuPercent = sp
 	s.Memory = *sm
 	s.Disk = *sd
-	params := r.cx.RPCServer.Cfg.ChainParams
-	chain := r.cx.RPCServer.Cfg.Chain
+	params := r.RPCServer.Cfg.ChainParams
+	chain := r.RPCServer.Cfg.Chain
 	chainSnapshot := chain.BestSnapshot()
 	gnhpsCmd := btcjson.NewGetNetworkHashPSCmd(nil, nil)
-	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(r.cx.RPCServer, gnhpsCmd, nil)
+	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(r.RPCServer, gnhpsCmd, nil)
 	if err != nil {
 	}
 	networkHashesPerSec, ok := networkHashesPerSecIface.(int64)
 	if !ok {
 	}
-	v, err := rpc.HandleVersion(r.cx.RPCServer, nil, nil)
+	v, err := rpc.HandleVersion(r.RPCServer, nil, nil)
 	if err != nil {
 	}
 	s.Version = "0.0.1"
 	s.WalletVersion = v.(map[string]btcjson.VersionResult)
-	s.UpTime = time.Now().Unix() - r.cx.RPCServer.Cfg.StartupTime
-	s.CurrentNet = r.cx.RPCServer.Cfg.ChainParams.Net.String()
+	s.UpTime = time.Now().Unix() - r.RPCServer.Cfg.StartupTime
+	s.CurrentNet = r.RPCServer.Cfg.ChainParams.Net.String()
 	s.NetworkHashPS = networkHashesPerSec
-	s.HashesPerSec = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
+	s.HashesPerSec = int64(r.RPCServer.Cfg.CPUMiner.HashesPerSecond())
 	s.Chain = params.Name
 	s.Height = chainSnapshot.Height
 	//s.Headers = chainSnapshot.Height
