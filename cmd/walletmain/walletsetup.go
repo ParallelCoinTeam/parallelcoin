@@ -56,7 +56,7 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 // wallet and generates the wallet accordingly.
 // The new wallet will reside at the provided path.
 func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
-	dbDir := *config.DataDir + slash + activenet.Name
+	dbDir := *config.WalletFile
 	loader := wallet.NewLoader(activenet, dbDir, 250)
 	// When there is a legacy keystore, open it now to ensure any errors
 	// don't end up exiting the process after the user has spent time
@@ -153,7 +153,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 		return err
 	}
 	log.DEBUG("Creating the wallet")
-	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now())
+	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now(), false)
 	if err != nil {
 		log.ERROR(err)
 		log.DEBUG(err)

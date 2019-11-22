@@ -42,7 +42,7 @@ func (r *rcvar) GetBalance() (b DuOSbalance) {
 	acct := "default"
 	minconf := 0
 	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
-		MinConf: &minconf}, r.cx.WalletServer)
+		MinConf: &minconf}, r.WalletServer)
 	if err != nil {
 		r.PushDuOSalert("Error", err.Error(), "error")
 	}
@@ -52,7 +52,7 @@ func (r *rcvar) GetBalance() (b DuOSbalance) {
 		b.Balance = bb
 	}
 	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.
-		GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
+		GetUnconfirmedBalanceCmd{Account: &acct}, r.WalletServer)
 	if err != nil {
 		r.PushDuOSalert("Error", err.Error(), "error")
 	}
@@ -67,7 +67,7 @@ func (r *rcvar) GetBalance() (b DuOSbalance) {
 func (r *rcvar) GetTransactions(sfrom, count int, cat string) (txs DuOStransactions) {
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
-	lt, err := r.cx.WalletServer.ListTransactions(0, 10)
+	lt, err := r.WalletServer.ListTransactions(0, 10)
 	if err != nil {
 		r.PushDuOSalert("Error", err.Error(), "error")
 	}
@@ -106,7 +106,7 @@ func (r *rcvar) GetTransactions(sfrom, count int, cat string) (txs DuOStransacti
 }
 
 func (r *rcvar) GetTransactionsExcertps() (txse DuOStransactionsExcerpts) {
-	lt, err := r.cx.WalletServer.ListTransactions(0, 99999)
+	lt, err := r.WalletServer.ListTransactions(0, 99999)
 	if err != nil {
 		r.PushDuOSalert("Error", err.Error(), "error")
 	}
@@ -150,7 +150,7 @@ func (r *rcvar) GetTransactionsExcertps() (txse DuOStransactionsExcerpts) {
 
 func (r *rcvar) DuoSend(wp string, ad string, am float64) string {
 	if am > 0 {
-		getBlockChain, err := rpc.HandleGetBlockChainInfo(r.cx.RPCServer, nil, nil)
+		getBlockChain, err := rpc.HandleGetBlockChainInfo(r.RPCServer, nil, nil)
 		if err != nil {
 			r.PushDuOSalert("Error", err.Error(), "error")
 
@@ -179,7 +179,7 @@ func (r *rcvar) DuoSend(wp string, ad string, am float64) string {
 		if err == nil {
 			var va interface{}
 			va, err = legacy.ValidateAddress(&btcjson.
-				ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
+				ValidateAddressCmd{Address: addr.String()}, r.WalletServer)
 			if err != nil {
 				r.PushDuOSalert("Error", err.Error(), "error")
 			}
@@ -187,14 +187,14 @@ func (r *rcvar) DuoSend(wp string, ad string, am float64) string {
 			validateAddr = &vva
 			if validateAddr.IsValid {
 				legacy.WalletPassphrase(btcjson.NewWalletPassphraseCmd(wp, 5),
-					r.cx.WalletServer)
+					r.WalletServer)
 				if err != nil {
 					r.PushDuOSalert("Error", err.Error(), "error")
 				}
 				_, err = legacy.SendToAddress(
 					&btcjson.SendToAddressCmd{
 						Address: addr.EncodeAddress(), Amount: amount.ToDUO(),
-					}, r.cx.WalletServer)
+					}, r.WalletServer)
 				if err != nil {
 					r.PushDuOSalert("error sending to address:", err.Error(), "error")
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/p9c/pod/pkg/controller/pause"
+	"github.com/p9c/pod/pkg/wallet"
 	"net"
 	"os"
 	"runtime"
@@ -43,6 +44,13 @@ func initDataDir(cfg *pod.Config) {
 		*cfg.DataDir = appdata.Dir("pod", false)
 	}
 	log.WARN("datadir set to", *cfg.DataDir)
+}
+
+func initWalletFile(cx *conte.Xt) {
+	if cx.Config.WalletFile == nil || *cx.Config.WalletFile == "" {
+		*cx.Config.WalletFile = *cx.Config.DataDir + slash + cx.ActiveNet.Name + slash + wallet.WalletDbName
+	}
+	log.WARN("datadir set to", *cx.Config.DataDir)
 }
 
 func initConfigFile(cfg *pod.Config) {

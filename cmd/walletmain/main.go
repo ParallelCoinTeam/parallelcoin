@@ -43,7 +43,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 	//		log.Println(http.ListenAndServe(listenAddr, nil))
 	//	}()
 	//}
-	dbPath := *config.DataDir + slash + activeNet.Params.Name
+	dbPath :=  *config.WalletFile
 	loader := wallet.NewLoader(activeNet, dbPath, 250)
 	// Create and start HTTP server to serve wallet client connections.
 	// This will be updated with the wallet and chain server RPC client
