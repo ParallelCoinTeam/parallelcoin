@@ -1,18 +1,21 @@
 package gui
 
 import (
-	"fmt"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/webview"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/shurcooL/vfsgen"
 	"net/http"
 	"net/url"
+	"os"
 )
+
+const slash = string(os.PathSeparator)
+
 
 func GUI(cx *conte.Xt) {
 	rc := rcvar{
-		cx:     cx,
+		Xt:     cx,
 		alert:  DuOSalert{},
 		status: DuOStatus{},
 		txs:    DuOStransactionsExcerpts{},
@@ -28,11 +31,12 @@ func GUI(cx *conte.Xt) {
 	rc.w = webview.New(webview.Settings{
 		Width:  1024,
 		Height: 760,
+		Debug:  true,
 		Title:  "ParallelCoin - DUO - True Story",
 		URL:    "data:text/html," + url.PathEscape(getFile("/index.html", fs)),
 	})
 
-	fmt.Println("dadada", getFile("/index.html", fs))
+
 	//b := Bios{
 	//	Theme:      false,
 	//	IsBoot:     true,
@@ -42,6 +46,7 @@ func GUI(cx *conte.Xt) {
 	//	IsDev:      true,
 	//	IsScreen:   "overview",
 	//}
+
 	log.INFO("starting GUI")
 
 	defer rc.w.Exit()

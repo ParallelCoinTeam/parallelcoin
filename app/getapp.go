@@ -27,11 +27,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 		Version:     "v0.0.1",
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
-		Action: func(c *cli.Context) error {
-			log.Println(cx.Language.RenderText("goApp_NOSUBCMDREQ"))
-			cli.ShowAppHelpAndExit(c, 1)
-			return nil
-		},
+		Action:      guiHandle(cx),
 		Before: func(c *cli.Context) error {
 			log.TRACE("running beforeFunc")
 			return beforeFunc(cx)(c)
@@ -212,6 +208,13 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				Usage:       "sets the data directory base for a pod instance",
 				EnvVar:      "POD_DATADIR",
 				Destination: cx.Config.DataDir,
+			}),
+			altsrc.NewStringFlag(cli.StringFlag{
+				Name:        "walletfile, WF",
+				Value:       *cx.Config.WalletFile,
+				Usage:       "sets the data directory base for a pod instance",
+				EnvVar:      "POD_WALLETFILE",
+				Destination: cx.Config.WalletFile,
 			}),
 			apputil.BoolTrue("save, i",
 				"save settings as effective from invocation",

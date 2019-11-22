@@ -17,6 +17,7 @@ Configure(cx *conte.Xt, ctx *cli.Context) {
 	st := cx.StateCfg
 	initDictionary(cfg)
 	initDataDir(cfg)
+	initWalletFile(cx)
 	initTLSStuffs(cfg, st)
 	initConfigFile(cfg)
 	initLogDir(cfg)
