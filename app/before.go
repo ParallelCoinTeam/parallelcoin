@@ -25,6 +25,10 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			cx.DataDir = c.String("datadir")
 			log.TRACE("setting datadir", *cx.Config.DataDir)
 		}
+		if c.IsSet("walletfile") {
+			*cx.Config.WalletFile = c.String("walletfile")
+			log.TRACE("setting walletfile", *cx.Config.WalletFile)
+		}
 		*cx.Config.ConfigFile =
 			*cx.Config.DataDir + string(os.PathSeparator) + podConfigFilename
 		log.TRACE("config file set to", *cx.Config.ConfigFile)

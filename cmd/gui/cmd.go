@@ -7,7 +7,7 @@ import (
 )
 
 type rcvar struct {
-	cx     *conte.Xt
+	*conte.Xt
 	w      webview.WebView
 	fs     http.FileSystem
 	alert  DuOSalert

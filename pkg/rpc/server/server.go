@@ -668,9 +668,7 @@ func (s *loaderServer) CreateWallet(ctx context.Context, req *pb.CreateWalletReq
 	if len(pubPassphrase) == 0 {
 		pubPassphrase = []byte(wallet.InsecurePubPassphrase)
 	}
-	wallet, err := s.loader.CreateNewWallet(
-		pubPassphrase, req.PrivatePassphrase, req.Seed, time.Now(),
-	)
+	wallet, err := s.loader.CreateNewWallet(pubPassphrase, req.PrivatePassphrase, req.Seed, time.Now(), false, )
 	if err != nil {
 		log.ERROR(err)
 		return nil, translateError(err)
