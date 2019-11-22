@@ -14,7 +14,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-var L =Empty()
+var L = Empty()
 
 var (
 	colorRed    = "\u001b[38;5;196m"
@@ -65,7 +65,6 @@ func init() {
 	L.SetLevel("info", true)
 	TRACE("starting up logger")
 }
-
 
 func Print(a ...interface{}) {
 	wr.Print(a...)
@@ -277,6 +276,9 @@ func rightJustify(s string, w int) string {
 
 func Composite(text, level string, color bool) string {
 	terminalWidth := gt.Width()
+	if terminalWidth < 120 {
+		terminalWidth = 120
+	}
 	skip := 3
 	if level == "STATUS" {
 		skip = 1
@@ -352,35 +354,7 @@ func Composite(text, level string, color bool) string {
 				strings.Repeat(" ",
 					terminalWidth-levelLen-sinceLen-fileLen-lineLen),
 				file, line)
-			for i := range lines {
-				maxPreformatted := 68 - levelLen - sinceLen
-				ll := lines[i]
-				var slices []string
-				for len(ll) > maxPreformatted {
-					// if lopping the last space-bound block drops the line
-					// under terminalWidth  do that instead of cutting for
-					// the hex dumps
-					cs := strings.Split(ll, " ")
-					lenLast := len(cs[len(cs)-1])
-					if len(ll)-lenLast <= maxPreformatted {
-						final += ll[:len(ll)-lenLast] + "\n"
-						final += cs[len(cs)-1] + "\n"
-						break
-					} else {
-						slices = append(slices, ll[:maxPreformatted])
-						ll = ll[maxPreformatted:]
-					}
-				}
-				slices = append(slices, ll)
-				for j := range slices {
-					if j > 0 {
-						final += "\n" + strings.Repeat(" ",
-							terminalWidth-len(slices[j])-2) + "->" + slices[j]
-					} else {
-						final += "\n" + strings.Repeat(" ", levelLen+sinceLen) + slices[j]
-					}
-				}
-			}
+			final += trimReturn(text)
 		} else {
 			// log text is a long line
 			spaced := strings.Split(text, " ")
@@ -456,7 +430,7 @@ func Composite(text, level string, color bool) string {
 func printlnFunc(level string, color bool, fh *os.File) PrintlnFunc {
 	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
-		wr.Println("\r" + Composite(text, level, color))
+		wr.Print("\r", Composite(text, level, color), "\n")
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -474,7 +448,7 @@ func printlnFunc(level string, color bool, fh *os.File) PrintlnFunc {
 func printfFunc(level string, color bool, fh *os.File) PrintfFunc {
 	f := func(format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
-		wr.Println("\r" + Composite(text, level, color))
+		wr.Print("\r", Composite(text, level, color), "\n")
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -493,7 +467,7 @@ func printcFunc(level string, color bool, fh *os.File) PrintcFunc {
 	f := func(fn func() string) {
 		t := fn()
 		text := trimReturn(t)
-		wr.Println("\r" + Composite(text, level, color))
+		wr.Print("\r", Composite(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -511,9 +485,9 @@ func printcFunc(level string, color bool, fh *os.File) PrintcFunc {
 func ps(level string, color bool, fh *os.File) SpewFunc {
 	f := func(a interface{}) {
 		text := trimReturn(spew.Sdump(a))
-		o := Composite("spew:", level, color)
+		o := "\r" + Composite("spew:", level, color)
 		o += "\n" + text
-		wr.Println(o)
+		wr.Print(o)
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}

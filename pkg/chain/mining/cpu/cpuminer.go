@@ -539,7 +539,7 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 			blockHeight)
 		defer func() {
 			log.TRACEF("wrkr %d finished %d rounds of %s", workerNumber,
-				i-rNonce-1, algo)
+				i-rNonce, algo)
 		}()
 		log.TRACE("starting round from ", rNonce, algo)
 		for i = rNonce; i <= rNonce+mn; i++ {

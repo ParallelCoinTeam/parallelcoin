@@ -3,6 +3,13 @@ package controller
 import (
 	"context"
 	"errors"
+	"math/rand"
+	"net"
+	"sync"
+	"time"
+
+	"go.uber.org/atomic"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
@@ -14,11 +21,6 @@ import (
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"go.uber.org/atomic"
-	"math/rand"
-	"net"
-	"sync"
-	"time"
 )
 
 const (
@@ -33,9 +35,9 @@ const (
 	MaxDatagramSize = blockchain.MaxBlockBaseSize / 3
 	//UDP6MulticastAddress = "ff02::1"
 	UDP4MulticastAddress = "224.0.0.1:11049"
-	// SolutionMagic is the marker for packets containing a solution
 )
 
+// SolutionMagic is the marker for packets containing a solution
 var SolutionMagic = []byte{'s', 'o', 'l', 'v'}
 
 type Controller struct {
@@ -128,10 +130,14 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 
 // these are the handlers for specific message types.
 // Controller only listens for submissions (currently)
-var handlers = map[string]func(b []byte) (err error){
-	string(SolutionMagic): func(b []byte) (err error) {
-		// insert handler here
-		return
+var handlers = transport.HandleFunc{
+	string(SolutionMagic): func(ctx interface{}) func(b []byte) (err error) {
+		return func(b []byte) (err error) {
+			c := ctx.(*Controller)
+			_ = c
+			// insert handler here
+			return
+		}
 	},
 }
 
