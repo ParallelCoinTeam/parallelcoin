@@ -24,7 +24,7 @@ func Loader(cx *conte.Xt) {
 	var fs http.FileSystem = http.Dir("./pkg/gui/assets/f/assets")
 	err := vfsgen.Generate(fs, vfsgen.Options{
 		PackageName:  "guiLibsFirstRun",
-		BuildTags:    "!dev",
+		BuildTags:    "dev",
 		VariableName: "FirstRun",
 	})
 	if err != nil {

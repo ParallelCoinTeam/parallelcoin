@@ -31,7 +31,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error{
 		var fs http.FileSystem = http.Dir("./pkg/gui/assets")
 		err = vfsgen.Generate(fs, vfsgen.Options{
 			PackageName:  "guiLibs",
-			BuildTags:    "!dev",
+			BuildTags:    "dev",
 			VariableName: "WalletGUI",
 		})
 		if err != nil {
