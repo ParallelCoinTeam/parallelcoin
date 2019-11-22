@@ -41,7 +41,7 @@ func (w *Client) NewJob(blk *wire.MsgBlock) (err error) {
 }
 
 func (w *Client) Pause() (err error) {
-	log.DEBUG("sending new job")
+	log.DEBUG("sending pause")
 	var reply bool
 	err = w.Call("Worker.Pause", 1, &reply)
 	if err != nil {
@@ -55,7 +55,7 @@ func (w *Client) Pause() (err error) {
 }
 
 func (w *Client) Stop() (err error) {
-	log.DEBUG("sending new job")
+	log.DEBUG("stop working (exit)")
 	var reply bool
 	err = w.Call("Worker.Stop", 1, &reply)
 	if err != nil {

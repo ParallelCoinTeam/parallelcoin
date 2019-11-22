@@ -1,39 +1,41 @@
 package main
 
 import (
-	"fmt"
+	"net/rpc"
+
 	"github.com/davecgh/go-spew/spew"
+
 	"github.com/p9c/pod/cmd/kopach/worker"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/sem"
-	"net/rpc"
-	"os"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func main() {
-	w := worker.New(mine, sem.NewSemaphore(1))
+	log.L.SetLevel("trace", true)
+	log.DEBUG("miner worker starting")
+	w, conn := worker.New(mine, sem.NewSemaphore(1))
+	interrupt.AddHandler(func(){
+		close(w.Quit)
+	})
 	err := rpc.Register(w)
 	if err != nil {
-		printlnE(err)
+		log.DEBUG(err)
 		return
 	}
-	go rpc.ServeConn(w)
+	go rpc.ServeConn(conn)
 	<-w.Quit
-	printlnE("finished")
+	log.DEBUG("finished")
 }
 
 func mine(blk *wire.MsgBlock, sem sem.T) {
 out:
 	for {
-		printlnE("mining on new block\n", spew.Sdump(blk))
+		log.DEBUG("mining on new block\n", spew.Sdump(blk))
 		select {
 		case <-sem.Release():
 			break out
 		}
 	}
-}
-
-func printlnE(a ...interface{}) {
-	out := append([]interface{}{"[Worker]"}, a...)
-	_, _ = fmt.Fprintln(os.Stderr, out...)
 }

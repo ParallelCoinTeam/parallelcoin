@@ -6,15 +6,18 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
-	"github.com/p9c/pod/pkg/fec"
-	"github.com/p9c/pod/pkg/gcm"
-	"github.com/p9c/pod/pkg/log"
 	"io"
 	"net"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/p9c/pod/pkg/fec"
+	"github.com/p9c/pod/pkg/gcm"
+	"github.com/p9c/pod/pkg/log"
 )
+
+type HandleFunc map[string]func(ctx interface{}) func(b []byte) (err error)
 
 type MsgBuffer struct {
 	Buffers [][]byte
@@ -168,7 +171,7 @@ func (c *Connection) SendShardsTo(shards [][]byte, addr *net.UDPAddr) (err error
 	return
 }
 
-func (c *Connection) Listen(handlers map[string]func(b []byte) (err error),
+func (c *Connection) Listen(handlers HandleFunc,
 ) (err error) {
 	log.TRACE("setting read buffer")
 	err = c.listenConn.SetReadBuffer(c.maxDatagramSize)
@@ -226,7 +229,7 @@ func (c *Connection) Listen(handlers map[string]func(b []byte) (err error),
 								// we don't add more data for the already
 								// decoded.
 								log.DEBUG("deleting superseded buffer",
-									hex.EncodeToString([]byte(nonce)))
+									hex.EncodeToString([]byte(i)))
 								delete(c.buffers, i)
 							}
 						}
