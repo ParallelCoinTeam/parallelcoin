@@ -63,30 +63,8 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 		return
 	}
 	log.DEBUG("listening on", controller.UDP4MulticastAddress)
-out:
-	for {
-		select {
-		//case nB := <-w.conn.ReceiveChan:
-		//	//log.SPEW(nB)
-		//	magicB := nB[:4]
-		//	magic := string(magicB)
-		//	if hnd, ok := handlers[magic]; ok {
-		//		err = hnd(w)(nB)
-		//		if err != nil {
-		//			log.ERROR(err)
-		//		}
-		//	}
-		//	//switch magic {
-		//	//case string(job.WorkMagic):
-		//	//	log.DEBUG("work message")
-		//	//case string(pause.PauseMagic):
-		//	//	log.DEBUG("pause message")
-		//	//}
-		case <-quit:
-			cancel()
-			break out
-		}
-	}
+	<-quit
+	log.INFO("kopach shutting down")
 }
 
 // these are the handlers for specific message types.
@@ -98,8 +76,8 @@ var handlers = transport.HandleFunc{
 			_ = w
 			//log.SPEW(b)
 			j := job.LoadMinerContainer(b)
-			log.DEBUG(j.String())
-			log.DEBUG("workers", len(w.workers))
+			//log.DEBUG(j.String())
+			//log.DEBUG("workers", len(w.workers))
 			for i := range w.workers {
 				log.DEBUG("sending job to worker", i)
 				err := w.workers[i].NewJob(&j)

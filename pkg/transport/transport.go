@@ -215,15 +215,15 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 								log.ERROR(err)
 								continue
 							}
-							log.DEBUG("magic", magic, handlers[magic])
-							log.SPEW(cipherText)
+							//log.DEBUG("magic", magic, handlers[magic])
+							//log.SPEW(cipherText)
 							bn.Decoded = true
 							err = handlers[magic](ifc)(cipherText)
 							if err != nil {
 								log.ERROR(err)
 								continue
 							}
-							log.DEBUG("called handler", magic)
+							//log.DEBUG("called handler", magic)
 						}
 					} else {
 						for i := range c.buffers {
