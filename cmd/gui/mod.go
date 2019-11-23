@@ -12,7 +12,7 @@ type Bios struct {
 	Wv         webview.WebView  `json:"wv"`
 	Theme      bool             `json:"theme"`
 	IsBoot     bool             `json:"boot"`
-	IsFirstRun *bool             `json:"firstrun"`
+	IsFirstRun bool             `json:"firstrun"`
 	IsBootMenu bool             `json:"menu"`
 	IsBootLogo bool             `json:"logo"`
 	IsLoading  bool             `json:"loading"`

@@ -4,6 +4,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/legacy" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/gui/assets/OLD" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

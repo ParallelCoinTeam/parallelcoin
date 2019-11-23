@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
@@ -11,15 +12,18 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-
+		var firstRun bool
+		if !apputil.FileExists(*cx.Config.WalletFile) {
+			firstRun = true
+		}
 		//utils.GetBiosMessage(view, "starting GUI")
 
 		//err := gui.Services(cx)
 		Configure(cx, c)
 
-		var fs http.FileSystem = http.Dir("./pkg/gui/assets")
+		var fs http.FileSystem = http.Dir("./pkg/gui/assets/filesystem")
 		err = vfsgen.Generate(fs, vfsgen.Options{
-			PackageName:  "guiLibs",
+			PackageName:  "guiFileSystem",
 			BuildTags:    "dev",
 			VariableName: "WalletGUI",
 		})
@@ -29,17 +33,17 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 
 		bios := &gui.Bios{
 			Fs: &fs,
-			IsFirstRun: &cx.FirstRun,
+			IsFirstRun: firstRun,
 		}
 
 
-		gui.Loader(bios, cx)
+		//gui.Loader(bios, cx)
 		err = gui.Services(cx)
 		if err != nil {
 			log.ERROR(err)
 		}
 		// We open up wallet creation
-		gui.GUI(bios)
+		gui.GUI(bios, cx)
 
 		//b.IsBootLogo = false
 		//b.IsBoot = false

@@ -8,11 +8,9 @@
 package app
 
 import (
-	"os"
-	"github.com/p9c/pod/app/apputil"
-
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
+	"os"
 )
 
 const (
@@ -33,9 +31,6 @@ const (
 func Main() int {
 	//log.L.SetLevel("info", true)
 	cx := conte.GetNewContext(appName, appLanguage, "main")
-	if !apputil.FileExists(*cx.Config.WalletFile) {
-		cx.FirstRun = true
-	}
 	cx.App = GetApp(cx)
 	log.DEBUG("running App")
 
