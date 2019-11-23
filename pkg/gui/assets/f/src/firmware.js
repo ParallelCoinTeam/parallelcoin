@@ -1,5 +1,6 @@
 import { writable } from "svelte/store";
 
+
 export const right = writable(false);
 export const persistent = writable(true);
 export const elevation = writable(false);
@@ -7,10 +8,14 @@ export const showNav = writable(true);
 export const showNavMobile = writable(false);
 export const breakpoint = writable("");
 
-export const duoSystem = {
+
+export const isFirstRun = writable(duos.data.firstrun);
+
+export const bios = {
 	theme:false,
 	isBoot:false,
 	isBootMenu:true,
+	isFirstRun: false,
 	isBootLogo:true,
 	isLoading:false,
 	isDev:true,

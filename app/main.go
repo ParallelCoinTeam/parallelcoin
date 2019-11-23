@@ -9,6 +9,7 @@ package app
 
 import (
 	"os"
+	"github.com/p9c/pod/app/apputil"
 
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
@@ -30,9 +31,11 @@ const (
 
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
-
 	//log.L.SetLevel("info", true)
 	cx := conte.GetNewContext(appName, appLanguage, "main")
+	if !apputil.FileExists(*cx.Config.WalletFile) {
+		cx.FirstRun = true
+	}
 	cx.App = GetApp(cx)
 	log.DEBUG("running App")
 
