@@ -11,58 +11,60 @@ import (
 	"github.com/shurcooL/vfsgen"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 )
 
-type CreateForm struct {
-	cx *conte.Xt
-}
-
-func Loader(cx *conte.Xt) {
+func Loader(b *Bios, cx *conte.Xt) {
+	b.cx = cx
 	log.INFO("FFFFFstarting GUI")
 	var fs http.FileSystem = http.Dir("./pkg/gui/assets/f/assets")
 	err := vfsgen.Generate(fs, vfsgen.Options{
-		PackageName:  "guiLibsFirstRun",
-		BuildTags:    "!dev",
-		VariableName: "FirstRun",
+		PackageName:  "guiLibsLoader",
+		BuildTags:    "dev",
+		VariableName: "Loader",
 	})
 	if err != nil {
 		log.FATAL(err)
 	}
-	cx.FileSystem = &fs
+	b.Fs = &fs
 
-	cx.WebView = webview.New(webview.Settings{
+	b.Wv = webview.New(webview.Settings{
 		Width:                  600,
 		Height:                 800,
 		Debug:                  true,
 		Resizable:              false,
 		Title:                  "ParallelCoin - DUO - True Story",
-		URL:                    "data:text/html," + url.PathEscape(getFile("index.html", *cx.FileSystem)),
-		ExternalInvokeCallback: handleRPCfirstrun,
+		URL:                    "data:text/html," + url.PathEscape(getFile("index.html", *b.Fs)),
+		//ExternalInvokeCallback: handleRPCfirstrun,
 	})
 
 	log.INFO("starting GUI")
 
-	defer cx.WebView.Exit()
-	cx.WebView.Dispatch(func() {
+	defer b.Wv.Exit()
+	b.Wv.Dispatch(func() {
 
-		err = cx.WebView.Eval(getFile("dui.js", fs))
+		_, err = b.Wv.Bind("duos", &Bios{
+			cx:         b.cx,
+			IsFirstRun: b.IsFirstRun,
+		})
+
+
+		err = b.Wv.Eval(getFile("js/dui.js", fs))
 		if err != nil {
 			log.DEBUG("error binding to webview:", err)
 		}
 
-		cx.WebView.InjectCSS(getFile("css/theme/root.css", fs))
-		cx.WebView.InjectCSS(getFile("css/theme/colors.css", fs))
-		cx.WebView.InjectCSS(getFile("css/theme/helpers.css", fs))
-		cx.WebView.InjectCSS(getFile("css/style.css", fs))
-		cx.WebView.InjectCSS(getFile("dui.css", fs))
 
-		cx.WebView.Bind("cw", &CreateForm{cx: cx})
+
+		b.Wv.InjectCSS(getFile("css/theme/root.css", fs))
+		b.Wv.InjectCSS(getFile("css/theme/colors.css", fs))
+		b.Wv.InjectCSS(getFile("css/theme/helpers.css", fs))
+		b.Wv.InjectCSS(getFile("css/style.css", fs))
+		b.Wv.InjectCSS(getFile("css/dui.css", fs))
 
 		// Load CSS
 	})
-	cx.WebView.Run()
+	b.Wv.Run()
 
 	//
 	//go func() {
@@ -84,54 +86,48 @@ func handleRPCfirstrun(w webview.WebView, data string) {
 	switch {
 	case data == "close":
 		w.Terminate()
-	case data == "fullscreen":
-		w.SetFullscreen(true)
-	case data == "unfullscreen":
-		w.SetFullscreen(false)
 	case data == "open":
 		log.Println("open", w.Dialog(webview.DialogTypeOpen, 0, "Open file", ""))
-	case strings.HasPrefix(data, "changeTitle:"):
-		w.SetTitle(strings.TrimPrefix(data, "changeTitle:"))
 	}
 }
 
-func (c *CreateForm) CreateWallet(p, s, b, f string) {
+func (b *Bios) CreateWallet(pr, sd, pb, fl string) {
 	var err error
 	var seed []byte
-	if f == "" {
-		f = *c.cx.Config.WalletFile
+	if fl == "" {
+		fl = *b.cx.Config.WalletFile
 	}
-	l := wallet.NewLoader(c.cx.ActiveNet, *c.cx.Config.WalletFile, 250)
+	l := wallet.NewLoader(b.cx.ActiveNet, *b.cx.Config.WalletFile, 250)
 
-	if s == "" {
+	if sd == "" {
 		seed, err = hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
 		if err != nil {
 			log.ERROR(err)
 			panic(err)
 		}
 	} else {
-		seed, err = hex.DecodeString(s)
+		seed, err = hex.DecodeString(sd)
 		if err != nil {
 			// Need to make JS invocation to embed
 			log.ERROR(err)
 		}
 	}
 
-	_, err = l.CreateNewWallet([]byte(b), []byte(p), seed, time.Now(), true)
+	_, err = l.CreateNewWallet([]byte(pb), []byte(pr), seed, time.Now(), true)
 	if err != nil {
 		log.ERROR(err)
 		panic(err)
 	}
 
-	log.INFO("ratattaa", b, p, seed)
-	*c.cx.Config.WalletPass = b
-	*c.cx.Config.WalletFile = f
+	*b.IsFirstRun = false
+	log.INFO("ratattaa", b, pr, seed)
+	*b.cx.Config.WalletPass = pb
+	*b.cx.Config.WalletFile = fl
 
-	save.Pod(c.cx.Config)
-
-	log.INFO(c)
+	save.Pod(b.cx.Config)
+	log.INFO(b)
 }
 
-func (c *CreateForm) CloseFirstRun() {
-	c.cx.WebView.Terminate()
+func (c *Bios) CloseFirstRun() {
+	c.Wv.Terminate()
 }

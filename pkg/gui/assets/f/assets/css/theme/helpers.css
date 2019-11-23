@@ -49,9 +49,12 @@ list-style:none!important;
 .overHid{
 overflow:hidden!important;
 }
+.marginTopSm{
+	margin-top:15px;
+}
 .marginTop{
 	margin-top:30px;
-	}
+}
 .marginBottom{
 	margin-bottom:30px;
 	}

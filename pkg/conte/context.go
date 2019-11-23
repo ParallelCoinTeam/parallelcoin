@@ -1,8 +1,6 @@
 package conte
 
 import (
-	"github.com/p9c/pod/pkg/gui/webview"
-	"net/http"
 	"sync"
 	"sync/atomic"
 
@@ -52,10 +50,8 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// RealNode is the main node
 	RealNode *rpc.Node
-	// WebView
-	WebView webview.WebView
-	// File System For GUI
-	FileSystem *http.FileSystem
+	// Is first time wallet app run
+	FirstRun bool
 }
 
 // GetNewContext returns a fresh new context

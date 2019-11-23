@@ -6,6 +6,7 @@
   
 
   let progress = 0;
+	let visible = true;
 
   function next() {
     setTimeout(() => {
@@ -23,31 +24,39 @@
 
 </script>
 
-<div class="flx centered baseMargin plan eightWidth justifyBetween" out:fly="{{y: -40, duration: 999}}">
+<label>
+	<input type="checkbox" bind:checked={visible}>
+	toggle me
+</label>
+
+{#if visible}
+
+<div class="flx centered baseMargin plan eightWidth justifyBetween" out:fly="{{y: -20, duration: 999}}">
 		{#each 'PLAN 9 FROM CRYPTO SPACE' as char, i}
 			<span class="font9"
-					in:fade="{{delay: 33 + i * 150, duration: 3333}}"
+					in:fade="{{delay: 999 + i * 150, duration: 999}}"
 			>{char}</span>
 		{/each}
 	</div>
 
-	<svg id ="bootlogo" class="marginTopBig" viewBox="0 0 108 128">
-		<g out:fade="{{duration: 999}}" opacity=0.2>
+	<svg id ="bootlogo" class="center" viewBox="0 0 108 128">
+		<g out:fade="{{ duration: 999}}" opacity=0.2>
 			<path
-				in:draw="{{duration: 3333}}"
+				in:draw="{{delay: 999 , duration: 9999}}"
 				style="stroke:#cfcfcf; stroke-width: 1.5"
 				d={inner}
 			/>
 		</g>
 	</svg>
-	<div class="centered name" out:fly="{{y: -20, duration: 9999}}">
+	<div class="centered name" out:fly="{{y: -20, duration: 999}}">
 		{#each 'ParallelCoin' as char, i}
 			<span
-				in:fade="{{delay: 3333 + i * 150, duration: 999}}"
+				in:fade="{{delay: 999 + i * 150, duration: 999}}"
 			>{char}</span>
 		{/each}
 	</div>
 
+{/if}
 
 
 <div class="progress justifyCenter textCenter txDark">

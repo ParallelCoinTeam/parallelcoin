@@ -178,7 +178,7 @@ type Config struct {
 	UserAgentComments        *cli.StringSlice `group:"node" name:"User Agent Comments" description:"Comment to add to the user agent -- See BIP 14 for more information" type:"input" inputType:"text" model:"UserAgentComments" featured:"false"`
 	Username                 *string          `group:"rpc" name:"Username" description:"password for client RPC connections" type:"input" inputType:"text" model:"Username" featured:"false"`
 	Wallet                   *bool
-	WalletFile               *string          `group:"config" name:"Wallet File" description:"Wallet database file" type:"input" inputType:"text" model:"WalletFile" featured:"false"`
+	WalletFile               *string          `group:"config" name:"Wallet File" description:"Wallet database file" type:"input" inputType:"text" model:"WalletFile" featured:"true"`
 	WalletOff                *bool            `group:"debug" name:"Wallet Off" description:"turn off the wallet backend" type:"switch" model:"WalletOff" featured:"false"`
 	WalletPass               *string          `group:"wallet" name:"Wallet Pass" description:"password encrypting public data in wallet" type:"input" inputType:"text" model:"WalletPass" featured:"false"`
 	WalletRPCListeners       *cli.StringSlice `group:"wallet" name:"Legacy RPC Listeners" description:"addresses for wallet RPC server to listen on" type:"input" inputType:"text" model:"LegacyRPCListeners" featured:"false"`

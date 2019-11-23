@@ -13,7 +13,7 @@ export default {
 		sourcemap: true,
 		format: 'iife',
 		name: 'dui',
-		file: 'assets/dui.js'
+		file: 'assets/js/dui.js'
 	},
 	plugins: [
 		svelte({
@@ -22,7 +22,7 @@ export default {
 			// we'll extract any component CSS out into
 			// a separate file — better for performance
 			css: css => {
-				css.write('assets/dui.css');
+				css.write('assets/css/dui.css');
 			}
 		}),
 
