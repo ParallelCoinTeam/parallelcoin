@@ -8,6 +8,7 @@ import (
 	"time"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -29,7 +30,7 @@ type Worker struct {
 	msgBlock   *wire.MsgBlock
 	bitses     map[int32]uint32
 	roller     *Counter
-	startNonce int
+	startNonce uint32
 	startChan  chan struct{}
 	stopChan   chan struct{}
 	//running    uint32
@@ -93,7 +94,7 @@ func NewWithConnAndSemaphore(
 	}
 	// with this we can report cumulative hash counts as well as using it to
 	// distribute algorithms evenly
-	w.startNonce = w.roller.C
+	w.startNonce = uint32(w.roller.C)
 	go func() {
 		log.DEBUG("main work loop starting")
 	pausing:
@@ -114,7 +115,6 @@ func NewWithConnAndSemaphore(
 			// in both states all channels are listening
 		running:
 			for {
-				// here do a round of hashing
 				select {
 				case <-w.startChan:
 					// drain start channel in run mode
@@ -124,9 +124,21 @@ func NewWithConnAndSemaphore(
 				case <-w.Quit:
 					log.DEBUG("worker stopping on pausing message")
 					break pausing
+				default:
+					// work
+					hash := w.msgBlock.Header.BlockHashWithAlgos(w.block.Height())
+					bigHash := blockchain.HashToBig(&hash)
+					if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
+						log.DEBUG("solution found", hash.String(), "after",
+							w.msgBlock.Header.Nonce-w.startNonce)
+						//w.stopChan <- struct{}{}
+						
+						break running
+					}
+					w.msgBlock.Header.Version = w.roller.GetAlgoVer()
+					w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
+					w.msgBlock.Header.Nonce++
 				}
-				// work
-
 			}
 			log.DEBUG("worker pausing")
 		}
@@ -147,9 +159,13 @@ func New(s sem.T) (w *Worker, conn net.Conn) {
 		quit), conn
 }
 
-// NewJob is a delivery of a new job for the worker, this starts a miner thread
+// NewJob is a delivery of a new job for the worker,
+// this makes the miner start mining from pause or pause,
+// prepare the work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	log.DEBUG("running NewJob RPC method")
+	// halting current work
+	w.stopChan <- struct{}{}
 	*reply = true
 	w.bitses = job.GetBitses()
 	newHeight := job.GetNewHeight()
@@ -179,7 +195,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		log.ERROR(err)
 		return
 	}
-	log.SPEW(w.msgBlock)
+	//log.SPEW(w.msgBlock)
 	// make the work select block start running
 	w.startChan <- struct{}{}
 	return
@@ -225,7 +241,7 @@ func UpdateExtraNonce(msgBlock *wire.MsgBlock, blockHeight int32,
 			blockchain.MinCoinbaseScriptLen,
 			blockchain.MaxCoinbaseScriptLen)
 	}
-	log.SPEW(msgBlock.Transactions)
+	//log.SPEW(msgBlock.Transactions)
 	msgBlock.Transactions[0].TxIn[0].SignatureScript = coinbaseScript
 	// TODO(davec): A util.Solution should use saved in the state to avoid
 	//  recalculating all of the other transaction hashes.
