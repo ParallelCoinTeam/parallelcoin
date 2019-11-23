@@ -3,6 +3,8 @@ package job
 import (
 	"fmt"
 	"net"
+	"sort"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 
@@ -23,8 +25,19 @@ import (
 
 var WorkMagic = []byte{'w', 'o', 'r', 'k'}
 
-type Job struct {
+type Container struct {
 	simplebuffer.Container
+}
+
+type Job struct {
+	IPs             []*net.IP
+	P2PListenerPort uint16
+	RPCListenerPort uint16
+	SubmitPort      uint16
+	Height          int32
+	PrevBlockHash   *chainhash.Hash
+	Bitses          map[int32]uint32
+	Txs             []*wire.MsgTx
 }
 
 // Get returns a message broadcast by a node and each field is decoded
@@ -37,7 +50,7 @@ type Job struct {
 // copying memory, or deserialize their contents which will be concurrent safe
 // All of the fields are in the same order that they will be serialized to
 func Get(cx *conte.Xt, mB *util.Block,
-	msg simplebuffer.Serializers) (out Job) {
+	msg simplebuffer.Serializers) (out Container) {
 	//msg := append(Serializers{}, GetMessageBase(cx)...)
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
@@ -80,43 +93,43 @@ func Get(cx *conte.Xt, mB *util.Block,
 		msg = append(msg, t)
 	}
 	//log.SPEW(msg)
-	return Job{*msg.CreateContainer(WorkMagic)}
+	return Container{*msg.CreateContainer(WorkMagic)}
 }
 
-func LoadMinerContainer(b []byte) (out Job) {
+func LoadMinerContainer(b []byte) (out Container) {
 	out.Data = b
 	return
 }
 
-func (j *Job) GetIPs() []*net.IP {
+func (j *Container) GetIPs() []*net.IP {
 	return IPs.New().DecodeOne(j.Get(0)).Get()
 }
 
-func (j *Job) GetP2PListenersPort() uint16 {
+func (j *Container) GetP2PListenersPort() uint16 {
 	return Uint16.New().DecodeOne(j.Get(1)).Get()
 }
 
-func (j *Job) GetRPCListenersPort() uint16 {
+func (j *Container) GetRPCListenersPort() uint16 {
 	return Uint16.New().DecodeOne(j.Get(2)).Get()
 }
 
-func (j *Job) GetControllerListenerPort() uint16 {
+func (j *Container) GetControllerListenerPort() uint16 {
 	return Uint16.New().DecodeOne(j.Get(3)).Get()
 }
 
-func (j *Job) GetNewHeight() (out int32) {
+func (j *Container) GetNewHeight() (out int32) {
 	return Int32.New().DecodeOne(j.Get(4)).Get()
 }
 
-func (j *Job) GetPrevBlockHash() (out *chainhash.Hash) {
+func (j *Container) GetPrevBlockHash() (out *chainhash.Hash) {
 	return Hash.New().DecodeOne(j.Get(5)).Get()
 }
 
-func (j *Job) GetBitses() map[int32]uint32 {
+func (j *Container) GetBitses() map[int32]uint32 {
 	return Bitses.NewBitses().DecodeOne(j.Get(6)).Get()
 }
 
-func (j *Job) GetTxs() (out []*wire.MsgTx) {
+func (j *Container) GetTxs() (out []*wire.MsgTx) {
 	count := j.Count()
 	i := count
 	// there has to be at least one transaction so we won't check if there is
@@ -126,7 +139,7 @@ func (j *Job) GetTxs() (out []*wire.MsgTx) {
 	return
 }
 
-func (j *Job) String() (s string) {
+func (j *Container) String() (s string) {
 	s += fmt.Sprint("type '"+string(WorkMagic)+"' elements:", j.Count())
 	s += "\n"
 	ips := j.GetIPs()
@@ -149,13 +162,66 @@ func (j *Job) String() (s string) {
 	s += "\n"
 	bitses := j.GetBitses()
 	s += fmt.Sprint("7 Difficulty targets:\n")
+	var sortedBitses []int
 	for i := range bitses {
-		s += fmt.Sprintf("  version: %3d %-10v %64x", i,
+		sortedBitses = append(sortedBitses, int(i))
+	}
+	sort.Ints(sortedBitses)
+	for i := range sortedBitses {
+		s += fmt.Sprintf("  version: %3d %-10v %64x", sortedBitses[i],
 			fork.List[fork.GetCurrent(h)].
-			AlgoVers[i],  fork.CompactToBig(bitses[i]).Bytes())
+				AlgoVers[int32(sortedBitses[i])],
+			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes())
 		s += "\n"
 	}
-	s+="8 Transactions:\n"
+	s += "8 Transactions:\n"
 	s += spew.Sdump(j.GetTxs())
+	return
+}
+
+// Struct returns a handy Go struct version
+// This can be used at the start of a new block to get a handy struct,
+// the first work received triggers startup and locks the worker into sending
+// solutions there, until there is a new PrevBlockHash,
+// the work controller (kopach) only responds to updates from this first one
+// (or if it stops sending) - the controller keeps track of individual
+// controller servers multicasting and when it deletes a newly gone dark
+// controller when it comes to send if it isn't found it falls back to the
+// next available to submit
+func (j *Container) Struct() (out Job) {
+	out = Job{
+		IPs:             j.GetIPs(),
+		P2PListenerPort: j.GetP2PListenersPort(),
+		RPCListenerPort: j.GetRPCListenersPort(),
+		SubmitPort:      j.GetControllerListenerPort(),
+		Height:          j.GetNewHeight(),
+		PrevBlockHash:   j.GetPrevBlockHash(),
+		Bitses:          j.GetBitses(),
+		Txs:             j.GetTxs(),
+	}
+	return
+}
+
+// GetMsgBlock takes the handy go struct version and returns a wire.MsgBlock
+// ready for giving nonce extranonce and computing the merkel root based on
+// the extranonce in the coinbase as needs to be done when mining,
+// so this would be called for each round for each algorithm to start.
+func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
+	found := false
+	for i := range j.Bitses {
+		if i == version {
+			found = true
+		}
+	}
+	if found {
+		out = &wire.MsgBlock{
+			Header: wire.BlockHeader{
+				Version: version,
+				PrevBlock: *j.PrevBlockHash,
+				Timestamp: time.Now(),
+			},
+			Transactions: j.Txs,
+		}
+	}
 	return
 }

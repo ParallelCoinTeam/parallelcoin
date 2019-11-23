@@ -49,6 +49,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 		since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode,
 			aV)
 		if last == nil {
+			log.DEBUG("last is nil")
 			return
 		}
 		algDiv := b.GetP9AlgoDiv(allTimeDiv, last, startHeight, aV, ttpb)

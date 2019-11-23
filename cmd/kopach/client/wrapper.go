@@ -2,10 +2,11 @@ package client
 
 import (
 	"errors"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
 	"io"
 	"net/rpc"
+
+	"github.com/p9c/pod/pkg/controller/job"
+	"github.com/p9c/pod/pkg/log"
 )
 
 type Client struct {
@@ -26,10 +27,10 @@ func New(conn io.ReadWriteCloser) *Client {
 // or alternatively as with the Controller just spew messages over UDP
 
 // NewJob is a delivery of a new job for the worker, this starts a miner
-func (w *Client) NewJob(blk *wire.MsgBlock) (err error) {
+func (w *Client) NewJob(job *job.Container) (err error) {
 	log.DEBUG("sending new job")
 	var reply bool
-	err = w.Call("Worker.NewJob", blk, &reply)
+	err = w.Call("Worker.NewJob", job, &reply)
 	if err != nil {
 		log.ERROR(err)
 		return
