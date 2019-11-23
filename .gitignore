@@ -46,3 +46,4 @@ node_modules/
 .cache/
 yarn.lock
 npm.lock
+walletgui_vfsdata.go
