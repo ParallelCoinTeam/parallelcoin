@@ -40,3 +40,9 @@ yarn-error.log*
 
 rcc.cpp
 assets_vfsdata.go
+
+dist/
+node_modules/
+.cache/
+yarn.lock
+npm.lock

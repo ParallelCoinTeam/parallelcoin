@@ -50,8 +50,6 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// RealNode is the main node
 	RealNode *rpc.Node
-	// Is first time wallet app run
-	FirstRun bool
 }
 
 // GetNewContext returns a fresh new context

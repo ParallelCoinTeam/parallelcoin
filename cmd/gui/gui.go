@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/webview"
 	"github.com/p9c/pod/pkg/log"
 	"net/url"
@@ -9,25 +10,24 @@ import (
 
 const slash = string(os.PathSeparator)
 
-
-func GUI(b *Bios) {
+func GUI(b *Bios, cx *conte.Xt) {
 	rc := rcvar{
-		w:     b.Wv,
+		Xt:     cx,
+		w:      b.Wv,
+		fs:		b.Fs,
 		alert:  DuOSalert{},
 		status: DuOStatus{},
 		txs:    DuOStransactionsExcerpts{},
 		lastxs: DuOStransactions{},
 	}
 
-
 	rc.w = webview.New(webview.Settings{
 		Width:  1024,
 		Height: 760,
 		Debug:  true,
 		Title:  "ParallelCoin - DUO - True Story",
-		URL:    "data:text/html," + url.PathEscape(getFile("/w/index.html", *b.Fs)),
+		URL:    "data:text/html," + url.PathEscape(getFile("vue.html", *b.Fs)),
 	})
-
 
 	//b := Bios{
 	//	Theme:      false,
