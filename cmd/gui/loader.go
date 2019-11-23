@@ -39,7 +39,7 @@ func Loader(b *Bios, cx *conte.Xt) {
 
 	log.INFO("starting GUI")
 
-	//defer b.Wv.Exit()
+	defer b.Wv.Exit()
 	b.Wv.Dispatch(func() {
 
 		_, err = b.Wv.Bind("duos", &Bios{

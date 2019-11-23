@@ -37,7 +37,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		}
 
 
-		gui.Loader(bios, cx)
+		//gui.Loader(bios, cx)
 		err = gui.Services(cx)
 		if err != nil {
 			log.ERROR(err)
