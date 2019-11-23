@@ -27,8 +27,6 @@ type Worker struct {
 	workers       []*client.Client
 }
 
-type handleFunc map[string]func(c *Worker) func(b []byte) (err error)
-
 func Main(cx *conte.Xt, quit chan struct{}) {
 	log.DEBUG("miner controller starting")
 	ctx, cancel := context.WithCancel(context.Background())
@@ -43,7 +41,9 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 	// start up the workers
 	for i := 0; i < *cx.Config.GenThreads; i++ {
 		// TODO: this needs to be made into a subcommand
-		cmd := worker.Spawn("go", "run", "cmd/kopach/kopach_worker/main.go")
+		log.DEBUG("starting worker", i)
+		cmd := worker.Spawn("go", "run", "cmd/kopach/kopach_worker/main.go",
+			cx.ActiveNet.Name)
 		workers = append(workers, client.New(cmd.StdConn))
 	}
 	w := &Worker{
@@ -53,6 +53,7 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 		cx:            cx,
 		mx:            &sync.Mutex{},
 		sendAddresses: []*net.UDPAddr{},
+		workers:       workers,
 	}
 	w.active.Store(false)
 	err = w.conn.Listen(handlers)
@@ -98,6 +99,14 @@ var handlers = transport.HandleFunc{
 			//log.SPEW(b)
 			j := job.LoadMinerContainer(b)
 			log.DEBUG(j.String())
+			//log.DEBUG("workers", len(w.workers))
+			for i := range w.workers {
+				log.DEBUG("sending job to worker", i)
+				err := w.workers[i].NewJob(&j)
+				if err != nil {
+					log.ERROR(err)
+				}
+			}
 			return
 		}
 	},
@@ -113,6 +122,14 @@ var handlers = transport.HandleFunc{
 			log.DEBUG(j.GetP2PListenersPort())
 			log.DEBUG(j.GetRPCListenersPort())
 			log.DEBUG(j.GetControllerListenerPort())
+			for i := range w.workers {
+				log.DEBUG("sending pause to worker", i)
+				err := w.workers[i].Pause()
+				if err != nil {
+					log.ERROR(err)
+				}
+			}
+
 			return
 		}
 	},

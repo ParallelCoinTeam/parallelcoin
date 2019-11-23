@@ -4,8 +4,8 @@ type semaphore struct{}
 
 type T chan semaphore
 
-// NewSemaphore creates a new semaphore of a given capacity.
-func NewSemaphore(limit int) T {
+// New creates a new semaphore of a given capacity.
+func New(limit int) T {
 	if limit < 1 {
 		panic("a semaphore requires at least one buffer per worker")
 	}
@@ -18,6 +18,7 @@ func NewSemaphore(limit int) T {
 // this can execute as many times as number of buffers,
 // thus blocking subsequent callers until one of the buffers is released
 func (t T) Acquire() {
+	//log.DEBUG("acquiring semaphore")
 	t <- semaphore{}
 }
 
@@ -25,5 +26,6 @@ func (t T) Acquire() {
 // This essentially empties a slot in the semaphore which allows another
 // thread to acquire it
 func (t T) Release() T {
+	//log.DEBUG("releasing semaphore")
 	return t
 }

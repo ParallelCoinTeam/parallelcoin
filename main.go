@@ -4,8 +4,6 @@
 //
 package main
 
-//go:generate go run -tags generate gen.go
-
 import (
 	"github.com/p9c/pod/cmd"
 	_ "net/http/pprof"

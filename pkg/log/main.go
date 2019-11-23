@@ -354,7 +354,7 @@ func Composite(text, level string, color bool) string {
 				strings.Repeat(" ",
 					terminalWidth-levelLen-sinceLen-fileLen-lineLen),
 				file, line)
-			final += trimReturn(text)
+			final += text[:len(text)-1]
 		} else {
 			// log text is a long line
 			spaced := strings.Split(text, " ")
@@ -430,7 +430,7 @@ func Composite(text, level string, color bool) string {
 func printlnFunc(level string, color bool, fh *os.File) PrintlnFunc {
 	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
-		wr.Print("\r", Composite(text, level, color), "\n")
+		wr.Println(Composite(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -448,7 +448,7 @@ func printlnFunc(level string, color bool, fh *os.File) PrintlnFunc {
 func printfFunc(level string, color bool, fh *os.File) PrintfFunc {
 	f := func(format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
-		wr.Print("\r", Composite(text, level, color), "\n")
+		wr.Println(Composite(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -467,7 +467,7 @@ func printcFunc(level string, color bool, fh *os.File) PrintcFunc {
 	f := func(fn func() string) {
 		t := fn()
 		text := trimReturn(t)
-		wr.Print("\r", Composite(text, level, color))
+		wr.Println(Composite(text, level, color))
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
@@ -485,7 +485,7 @@ func printcFunc(level string, color bool, fh *os.File) PrintcFunc {
 func ps(level string, color bool, fh *os.File) SpewFunc {
 	f := func(a interface{}) {
 		text := trimReturn(spew.Sdump(a))
-		o := "\r" + Composite("spew:", level, color)
+		o := "" + Composite("spew:", level, color)
 		o += "\n" + text
 		wr.Print(o)
 		if fh != nil {

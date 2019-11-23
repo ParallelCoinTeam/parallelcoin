@@ -232,6 +232,12 @@ out:
 	}
 }
 
+func updater(ctrl *Controller) {
+	// check if new transactions have arrived
+
+	// send out new work
+}
+
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
 		if c.active.Load() {
