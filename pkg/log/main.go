@@ -486,7 +486,7 @@ func ps(level string, color bool, fh *os.File) SpewFunc {
 	f := func(a interface{}) {
 		text := trimReturn(spew.Sdump(a))
 		o := "" + Composite("spew:", level, color)
-		o += "\n" + text
+		o += "\n" + text + "\n"
 		wr.Print(o)
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)

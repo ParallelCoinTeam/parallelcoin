@@ -42,7 +42,6 @@ type Connection struct {
 	ciph            cipher.AEAD
 	ctx             context.Context
 	mx              *sync.Mutex
-	ReceiveChan     chan []byte
 }
 
 // NewConnection creates a new connection with a defined default send
@@ -77,7 +76,6 @@ func NewConnection(send, listen, preSharedKey string,
 		ciph:            ciph, // gcm.GetCipher(*cx.Config.MinerPass),
 		ctx:             ctx,
 		mx:              &sync.Mutex{},
-		ReceiveChan:     make(chan []byte),
 	}, err
 }
 
@@ -171,7 +169,7 @@ func (c *Connection) SendShardsTo(shards [][]byte, addr *net.UDPAddr) (err error
 	return
 }
 
-func (c *Connection) Listen(handlers HandleFunc,
+func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 ) (err error) {
 	log.TRACE("setting read buffer")
 	err = c.listenConn.SetReadBuffer(c.maxDatagramSize)
@@ -217,9 +215,15 @@ func (c *Connection) Listen(handlers HandleFunc,
 								log.ERROR(err)
 								continue
 							}
-							//log.SPEW(cipherText)
+							log.DEBUG("magic", magic, handlers[magic])
+							log.SPEW(cipherText)
 							bn.Decoded = true
-							c.ReceiveChan <- cipherText
+							err = handlers[magic](ifc)(cipherText)
+							if err != nil {
+								log.ERROR(err)
+								continue
+							}
+							log.DEBUG("called handler", magic)
 						}
 					} else {
 						for i := range c.buffers {

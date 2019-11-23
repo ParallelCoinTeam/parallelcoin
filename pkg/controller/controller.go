@@ -110,7 +110,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	} else {
 		ctrl.active.Store(true)
 	}
-	err = ctrl.conn.Listen(handlers)
+	err = ctrl.conn.Listen(handlers, ctrl)
 	if err != nil {
 		log.ERROR(err)
 		cancel()

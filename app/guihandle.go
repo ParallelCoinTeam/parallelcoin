@@ -10,46 +10,40 @@ import (
 	"net/http"
 )
 
-type Bios struct {
-	Theme      bool   `json:"theme"`
-	IsBoot     bool   `json:"boot"`
-	IsBootMenu bool   `json:"menu"`
-	IsBootLogo bool   `json:"logo"`
-	IsLoading  bool   `json:"loading"`
-	IsDev      bool   `json:"dev"`
-	IsScreen   string `json:"screen"`
-}
-
-var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error{
+var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-
+		var firstRun bool
+		if !apputil.FileExists(*cx.Config.WalletFile) {
+			firstRun = true
+		}
 		//utils.GetBiosMessage(view, "starting GUI")
 
-		Configure(cx, c)
 		//err := gui.Services(cx)
+		Configure(cx, c)
 
-		var fs http.FileSystem = http.Dir("./pkg/gui/assets")
+		var fs http.FileSystem = http.Dir("./pkg/gui/assets/filesystem")
 		err = vfsgen.Generate(fs, vfsgen.Options{
-			PackageName:  "guiLibs",
+			PackageName:  "guiFileSystem",
 			BuildTags:    "dev",
 			VariableName: "WalletGUI",
 		})
 		if err != nil {
 			log.FATAL(err)
 		}
-		cx.FileSystem = &fs
 
-		if !apputil.FileExists(*cx.Config.WalletFile){
-			// We can open wallet directly
-			gui.Loader(cx)
+		bios := &gui.Bios{
+			Fs: &fs,
+			IsFirstRun: firstRun,
 		}
 
+
+		gui.Loader(bios, cx)
 		err = gui.Services(cx)
-			if err != nil{
-				log.ERROR(err)
-			}
-			// We open up wallet creation
-			gui.GUI(cx)
+		if err != nil {
+			log.ERROR(err)
+		}
+		// We open up wallet creation
+		gui.GUI(bios, cx)
 
 		//b.IsBootLogo = false
 		//b.IsBoot = false
