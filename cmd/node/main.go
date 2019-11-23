@@ -177,8 +177,6 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 		server.WaitForShutdown()
 		log.INFO("server shutdown complete")
 		wg.Done()
-
-		close(killswitch)
 	}
 	server.Start()
 	cx.RealNode = server

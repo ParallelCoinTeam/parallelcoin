@@ -8,7 +8,6 @@ import (
 	"time"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -31,7 +30,15 @@ type Worker struct {
 	bitses     map[int32]uint32
 	roller     *Counter
 	startNonce int
+	startChan  chan struct{}
+	stopChan   chan struct{}
+	//running    uint32
 }
+
+const (
+	OFF uint32 = iota
+	ON
+)
 
 type Counter struct {
 	C             int
@@ -74,72 +81,54 @@ func NewWithConnAndSemaphore(
 	log.DEBUG("creating new worker")
 	msgBlock := &wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
-		sem:      s,
-		conn:     conn,
-		Quit:     quit,
-		run:      sem.New(1),
-		block:    util.NewBlock(msgBlock),
-		msgBlock: msgBlock,
-		roller:   NewCounter(RoundsPerAlgo),
+		sem:       s,
+		conn:      conn,
+		Quit:      quit,
+		run:       sem.New(1),
+		block:     util.NewBlock(msgBlock),
+		msgBlock:  msgBlock,
+		roller:    NewCounter(RoundsPerAlgo),
+		startChan: make(chan struct{}),
+		stopChan:  make(chan struct{}),
 	}
 	// with this we can report cumulative hash counts as well as using it to
 	// distribute algorithms evenly
 	w.startNonce = w.roller.C
-	ticker := time.NewTicker(time.Second)
-	//w.sem.Acquire()
 	go func() {
 		log.DEBUG("main work loop starting")
-	out:
+	pausing:
 		for {
+			// Pause state
 			select {
-			case <-w.sem.Release():
-				log.DEBUG("pausing work")
-				// release runner semaphore so worker won't run until it's
-				// reacquired by NewJob.
-				// This select will block here until the run semaphore is
-				// acquired, ie, no cpu cycles in this goroutine (
-				// which is main really)
-				select {
-				case <-w.sem.Release():
-					log.DEBUG("semaphore released from pause")
-				case <-w.run.Release():
-					log.DEBUG("run semaphore released from pause")
-					w.run.Acquire()
-					break
-				case <-w.Quit:
-					log.DEBUG("quitting from pause")
-					break out
-				}
-				log.DEBUG("pause acquiring run semaphore")
-				w.run.Acquire()
+			case <-w.stopChan:
+				// drain stop channel in pause
+				continue
+			case <-w.startChan:
+				break
 			case <-w.Quit:
-				// quit when w.Stop() is called
-				log.DEBUG("worker stopping on quit message")
-				break out
-			case <-w.run.Release():
-				log.DEBUG("run semaphore released")
-				// do a round
-				hash := w.msgBlock.BlockHashWithAlgos(w.block.Height())
-				bigHash := blockchain.HashToBig(&hash)
-				if bigHash.Cmp(
-					fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
-					// yay we win!
-					log.DEBUG("found a block")
-					log.SPEW(w.block.MsgBlock())
-					w.sem.Acquire()
-					log.DEBUG("found block acquired semaphore")
-					break
-				}
-				log.DEBUGF("%065x",bigHash.Bytes())
-				// prepare for next round
-				w.msgBlock.Header.Nonce++
-				// trigger another to follow, this can be stopped by releasing
-				w.run.Acquire()
-				log.DEBUG("runner reacquired semaphore")
-			case <-ticker.C:
-				log.DEBUG("timestamp update ticker")
-				w.msgBlock.Header.Timestamp = time.Now()
+				log.DEBUG("worker stopping on pausing message")
+				break pausing
 			}
+			log.DEBUG("worker running")
+			// Run state
+			// in both states all channels are listening
+		running:
+			for {
+				// here do a round of hashing
+				select {
+				case <-w.startChan:
+					// drain start channel in run mode
+					continue
+				case <-w.stopChan:
+					break running
+				case <-w.Quit:
+					log.DEBUG("worker stopping on pausing message")
+					break pausing
+				}
+				// work
+
+			}
+			log.DEBUG("worker pausing")
 		}
 		log.DEBUG("worker finished")
 	}()
@@ -160,18 +149,8 @@ func New(s sem.T) (w *Worker, conn net.Conn) {
 
 // NewJob is a delivery of a new job for the worker, this starts a miner thread
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
+	log.DEBUG("running NewJob RPC method")
 	*reply = true
-	// previous thread loses its semaphore when a new job arrives,
-	// this acts as a mutex because this worker is single thread with RPC
-	// handler calls changing main thread's activity mode,
-	// this semaphore ensures the worker is not accessing what we are about
-	// to update
-	// This is concurrent code but only single thread,
-	// so a semaphore acts here as a mutex between listener and miner
-	log.DEBUG("new job acquiring pause semaphore")
-	w.sem.Acquire()
-	log.DEBUG("new job acquired pause semaphore")
-	// load the new value in the bitses and MsgBlock
 	w.bitses = job.GetBitses()
 	newHeight := job.GetNewHeight()
 	w.roller.Algos = []int32{}
@@ -200,11 +179,9 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		log.ERROR(err)
 		return
 	}
+	log.SPEW(w.msgBlock)
 	// make the work select block start running
-	//log.DEBUG("releasing pause semaphore")
-	//<-w.sem.Release()
-	log.DEBUG("acquiring run semaphore to start new work")
-	w.run.Acquire()
+	w.startChan <- struct{}{}
 	return
 }
 
@@ -212,10 +189,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 // releases its semaphore and the worker is then idle
 func (w *Worker) Pause(_ int, reply *bool) (err error) {
 	log.DEBUG("pausing from IPC")
-	w.sem.Acquire()
-	log.DEBUG("pause from IPC acquired semaphore")
-	//w.run.Acquire()
-	//<-w.run.Release()
+	w.stopChan <- struct{}{}
 	*reply = true
 	return
 }
@@ -223,7 +197,7 @@ func (w *Worker) Pause(_ int, reply *bool) (err error) {
 // Stop signals the worker to quit
 func (w *Worker) Stop(_ int, reply *bool) (err error) {
 	log.DEBUG("stopping from IPC")
-	w.sem.Acquire()
+	w.stopChan <- struct{}{}
 	defer close(w.Quit)
 	*reply = true
 	return
@@ -235,9 +209,9 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 // results from changing the coinbase script.
 func UpdateExtraNonce(msgBlock *wire.MsgBlock, blockHeight int32,
 	extraNonce uint64) error {
-		if msgBlock == nil {
-			log.ERROR("cannot update a nil MsgBlock")
-		}
+	if msgBlock == nil {
+		log.ERROR("cannot update a nil MsgBlock")
+	}
 	log.DEBUG("UpdateExtraNonce")
 	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
 	if err != nil {

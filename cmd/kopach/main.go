@@ -56,7 +56,7 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 		workers:       workers,
 	}
 	w.active.Store(false)
-	err = w.conn.Listen(handlers)
+	err = w.conn.Listen(handlers, w)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
@@ -66,22 +66,22 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 out:
 	for {
 		select {
-		case nB := <-w.conn.ReceiveChan:
-			//log.SPEW(nB)
-			magicB := nB[:4]
-			magic := string(magicB)
-			if hnd, ok := handlers[magic]; ok {
-				err = hnd(w)(nB)
-				if err != nil {
-					log.ERROR(err)
-				}
-			}
-			//switch magic {
-			//case string(job.WorkMagic):
-			//	log.DEBUG("work message")
-			//case string(pause.PauseMagic):
-			//	log.DEBUG("pause message")
-			//}
+		//case nB := <-w.conn.ReceiveChan:
+		//	//log.SPEW(nB)
+		//	magicB := nB[:4]
+		//	magic := string(magicB)
+		//	if hnd, ok := handlers[magic]; ok {
+		//		err = hnd(w)(nB)
+		//		if err != nil {
+		//			log.ERROR(err)
+		//		}
+		//	}
+		//	//switch magic {
+		//	//case string(job.WorkMagic):
+		//	//	log.DEBUG("work message")
+		//	//case string(pause.PauseMagic):
+		//	//	log.DEBUG("pause message")
+		//	//}
 		case <-quit:
 			cancel()
 			break out
@@ -93,13 +93,13 @@ out:
 var handlers = transport.HandleFunc{
 	string(job.WorkMagic): func(ctx interface{}) func(b []byte) (err error) {
 		return func(b []byte) (err error) {
+			log.DEBUG("received job")
 			w := ctx.(*Worker)
 			_ = w
-			log.DEBUG("received job")
 			//log.SPEW(b)
 			j := job.LoadMinerContainer(b)
 			log.DEBUG(j.String())
-			//log.DEBUG("workers", len(w.workers))
+			log.DEBUG("workers", len(w.workers))
 			for i := range w.workers {
 				log.DEBUG("sending job to worker", i)
 				err := w.workers[i].NewJob(&j)
@@ -112,9 +112,9 @@ var handlers = transport.HandleFunc{
 	},
 	string(pause.PauseMagic): func(ctx interface{}) func(b []byte) (err error) {
 		return func(b []byte) (err error) {
+			log.DEBUG("received pause")
 			w := ctx.(*Worker)
 			_ = w
-			log.DEBUG("received pause")
 			//log.SPEW(b)
 			j := pause.LoadPauseContainer(b)
 			log.DEBUG(j.Count())

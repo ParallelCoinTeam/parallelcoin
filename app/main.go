@@ -8,10 +8,9 @@
 package app
 
 import (
-	"os"
-
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
+	"os"
 )
 
 const (
@@ -30,7 +29,6 @@ const (
 
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
-
 	//log.L.SetLevel("info", true)
 	cx := conte.GetNewContext(appName, appLanguage, "main")
 	cx.App = GetApp(cx)
