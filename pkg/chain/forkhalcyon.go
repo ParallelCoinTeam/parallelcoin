@@ -18,6 +18,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
 	workerNumber uint32, lastNode *BlockNode,
 	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
 	err error) {
+		log.DEBUG("halcyon")
 	if workerNumber != 0 {
 		l = false
 	}

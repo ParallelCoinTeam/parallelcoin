@@ -36,7 +36,7 @@ type Connection struct {
 	maxDatagramSize int
 	buffers         map[string]*MsgBuffer
 	sendAddress     *net.UDPAddr
-	sendConn        *net.UDPConn
+	SendConn        []*net.UDPConn
 	listenAddress   *net.UDPAddr
 	listenConn      *net.UDPConn
 	ciph            cipher.AEAD
@@ -50,33 +50,53 @@ type Connection struct {
 func NewConnection(send, listen, preSharedKey string,
 	maxDatagramSize int, ctx context.Context) (c *Connection, err error) {
 	var sendAddr *net.UDPAddr
-	var sendConn *net.UDPConn
+	sendConn := []*net.UDPConn{}
+	var sC *net.UDPConn
+	var listenAddr *net.UDPAddr
+	var listenConn *net.UDPConn
 	if send != "" {
 		sendAddr = GetUDPAddr(send)
-		sendConn, err = net.DialUDP("udp", nil, sendAddr)
+		sC, err = net.DialUDP("udp", nil, sendAddr)
 		if err != nil {
 			log.ERROR(err)
 			return
 		}
+		sendConn = append(sendConn, sC)
 	}
-	listenAddr := GetUDPAddr(listen)
-	listenConn, err := net.ListenUDP("udp", listenAddr)
-	if err != nil {
-		log.ERROR(err)
-		return
+	if listen != "" {
+		listenAddr = GetUDPAddr(listen)
+		listenConn, err = net.ListenUDP("udp", listenAddr)
+		if err != nil {
+			log.ERROR(err)
+			return
+		}
 	}
 	ciph := gcm.GetCipher(preSharedKey)
 	return &Connection{
 		maxDatagramSize: maxDatagramSize,
 		buffers:         make(map[string]*MsgBuffer),
 		sendAddress:     sendAddr,
-		sendConn:        sendConn,
+		SendConn:        sendConn,
 		listenAddress:   listenAddr,
 		listenConn:      listenConn,
 		ciph:            ciph, // gcm.GetCipher(*cx.Config.MinerPass),
 		ctx:             ctx,
 		mx:              &sync.Mutex{},
 	}, err
+}
+
+func (c *Connection) SetSendConn(ad ...string) (err error) {
+	c.SendConn = []*net.UDPConn{}
+	var sC *net.UDPConn
+	for i := range ad {
+		sC, err = net.DialUDP("udp", nil, GetUDPAddr(ad[i]))
+		if err != nil {
+			log.ERROR(err)
+			return
+		}
+		c.SendConn = append(c.SendConn, sC)
+	}
+	return
 }
 
 func (c *Connection) CreateShards(b, magic []byte) (shards [][]byte,
@@ -122,9 +142,11 @@ func (c *Connection) Send(b, magic []byte) (err error) {
 	}
 	var shards [][]byte
 	shards, err = c.CreateShards(b, magic)
-	err = send(shards, c.sendConn)
-	if err != nil {
-		log.ERROR(err)
+	for _, sC := range c.SendConn {
+		err = send(shards, sC)
+		if err != nil {
+			log.ERROR(err)
+		}
 	}
 	return
 }
@@ -149,9 +171,11 @@ func (c *Connection) SendTo(addr *net.UDPAddr, b, magic []byte) (err error) {
 }
 
 func (c *Connection) SendShards(shards [][]byte) (err error) {
-	err = send(shards, c.sendConn)
-	if err != nil {
-		log.ERROR(err)
+	for _, sC := range c.SendConn {
+		err = send(shards, sC)
+		if err != nil {
+			log.ERROR(err)
+		}
 	}
 	return
 }

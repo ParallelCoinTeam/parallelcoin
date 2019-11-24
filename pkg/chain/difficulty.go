@@ -75,8 +75,10 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 	workerNumber uint32, lastNode *BlockNode, newBlockTime time.Time,
 	algoname string, l bool) (newTargetBits uint32, err error) {
 	nH := lastNode.height + 1
+	cF := fork.GetCurrent(nH)
+	log.DEBUG(nH, cF, fork.IsTestnet)
 	newTargetBits = fork.GetMinBits(algoname, nH)
-	switch fork.GetCurrent(nH) {
+	switch cF {
 	// Legacy difficulty adjustment
 	case 0:
 		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode,

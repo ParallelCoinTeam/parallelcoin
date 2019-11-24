@@ -3,7 +3,6 @@ package blockchain
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"math/big"
 	"sync"
@@ -906,10 +905,10 @@ func // createChainState initializes both the database and the chain state to
 (b *BlockChain) createChainState() error {
 	// Create a new node from the genesis block and set it as the best node.
 	genesisBlock := util.NewBlock(b.params.GenesisBlock)
-	log.TRACEC(func() string {
-		xx, _ := genesisBlock.Bytes()
-		return hex.EncodeToString(xx)
-	})
+	//log.TRACEC(func() string {
+	//	xx, _ := genesisBlock.Bytes()
+	//	return hex.EncodeToString(xx)
+	//})
 	genesisBlock.SetHeight(0)
 	header := &genesisBlock.MsgBlock().Header
 	node := NewBlockNode(header, nil)

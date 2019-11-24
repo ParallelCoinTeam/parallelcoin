@@ -56,6 +56,13 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 		workers:       workers,
 	}
 	w.active.Store(false)
+	for i := range w.workers {
+		log.DEBUG("sending pass to worker", i)
+		err := w.workers[i].SendPass(*cx.Config.MinerPass)
+		if err != nil {
+			log.ERROR(err)
+		}
+	}
 	err = w.conn.Listen(handlers, w)
 	if err != nil {
 		log.ERROR(err)
@@ -76,7 +83,7 @@ var handlers = transport.HandleFunc{
 			_ = w
 			//log.SPEW(b)
 			j := job.LoadMinerContainer(b)
-			//log.DEBUG(j.String())
+			log.DEBUG(j.String())
 			//log.DEBUG("workers", len(w.workers))
 			for i := range w.workers {
 				log.DEBUG("sending job to worker", i)

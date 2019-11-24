@@ -2,11 +2,12 @@ package blockchain
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/log"
 	"math/big"
 	"strings"
 	"time"
+
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/log"
 )
 
 func secondPowLimitBits(currFork int) (out *map[int32]uint32) {
@@ -25,8 +26,16 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 	lastNode *BlockNode) (newTargetBits *map[int32]uint32, err error) {
 	nH := lastNode.height + 1
 	currFork := fork.GetCurrent(nH)
-	nTB := make(map[int32]uint32, len(fork.List[currFork].AlgoVers))
+	nTB := make(map[int32]uint32)
 	newTargetBits = &nTB
+	if currFork == 0 {
+		for i := range fork.List[0].Algos {
+			v := fork.List[0].Algos[i].Version
+			nTB[v], err = b.CalcNextRequiredDifficultyHalcyon(0,
+				lastNode, time.Now(), i, true)
+		}
+		return
+	}
 	lnh := lastNode.Header()
 	hD := &lnh
 	newTargetBits = secondPowLimitBits(currFork)
@@ -38,7 +47,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 			" block ", hD.BlockHashWithAlgos(lastNode.height), lastNode.height)
 	})
 	tn := time.Now()
-	defer log.TRACEC(func() string{
+	defer log.TRACEC(func() string {
 		return fmt.Sprint(time.Now().Sub(tn), " to calculate all diffs")
 	})
 	// here we only need to do this once
