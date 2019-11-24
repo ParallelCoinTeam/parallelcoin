@@ -10,7 +10,7 @@ import (
 )
 
 func Pod(c *pod.Config) (success bool) {
-	log.INFO("saving configuration to", *c.ConfigFile)
+	log.TRACE("saving configuration to", *c.ConfigFile)
 	if yp, e := json.MarshalIndent(c, "", "  "); e == nil {
 		apputil.EnsureDir(*c.ConfigFile)
 		if e := ioutil.WriteFile(*c.ConfigFile, yp, 0600); e != nil {

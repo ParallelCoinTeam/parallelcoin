@@ -12,6 +12,7 @@ import (
 
 func kopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
+		log.INFO("starting up kopach standalone miner for parallelcoin")
 		Configure(cx, c)
 		quit := make(chan struct{})
 		interrupt.AddHandler(func() {
