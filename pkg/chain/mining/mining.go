@@ -816,7 +816,8 @@ mempoolLoop:
 		log.ERROR(err)
 		return nil, err
 	}
-	//log.TRACEF("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
+	log.TRACEF("reqDifficulty %d %08x %064x", vers, reqDifficulty,
+		fork.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
 	var msgBlock wire.MsgBlock

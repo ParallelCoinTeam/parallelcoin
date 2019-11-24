@@ -49,8 +49,7 @@ type Job struct {
 // and a set of methods that extracts the individual requested field without
 // copying memory, or deserialize their contents which will be concurrent safe
 // All of the fields are in the same order that they will be serialized to
-func Get(cx *conte.Xt, mB *util.Block,
-	msg simplebuffer.Serializers) (out Container) {
+func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Container) {
 	//msg := append(Serializers{}, GetMessageBase(cx)...)
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
@@ -158,7 +157,8 @@ func (j *Container) String() (s string) {
 	h := j.GetNewHeight()
 	s += fmt.Sprint("5 Block height: ", h)
 	s += "\n"
-	s += fmt.Sprint("6 Previous Block Hash (sha256d): ", j.GetPrevBlockHash())
+	s += fmt.Sprintf("6 Previous Block Hash (sha256d): %064x",
+		j.GetPrevBlockHash().CloneBytes())
 	s += "\n"
 	bitses := j.GetBitses()
 	s += fmt.Sprint("7 Difficulty targets:\n")
@@ -168,7 +168,7 @@ func (j *Container) String() (s string) {
 	}
 	sort.Ints(sortedBitses)
 	for i := range sortedBitses {
-		s += fmt.Sprintf("  version: %3d %-10v %64x", sortedBitses[i],
+		s += fmt.Sprintf("  version: %3d %-10v %064x", sortedBitses[i],
 			fork.List[fork.GetCurrent(h)].
 				AlgoVers[int32(sortedBitses[i])],
 			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes())
@@ -216,7 +216,7 @@ func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
 	if found {
 		out = &wire.MsgBlock{
 			Header: wire.BlockHeader{
-				Version: version,
+				Version:   version,
 				PrevBlock: *j.PrevBlockHash,
 				Timestamp: time.Now(),
 			},

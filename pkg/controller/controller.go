@@ -16,8 +16,8 @@ import (
 	"github.com/p9c/pod/pkg/controller/advertisment"
 	"github.com/p9c/pod/pkg/controller/job"
 	"github.com/p9c/pod/pkg/controller/pause"
+	"github.com/p9c/pod/pkg/controller/sol"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -37,9 +37,6 @@ const (
 	UDP4MulticastAddress = "224.0.0.1:11049"
 )
 
-// SolutionMagic is the marker for packets containing a solution
-var SolutionMagic = []byte{'s', 'o', 'l', 'v'}
-
 type Controller struct {
 	conn                   *transport.Connection
 	active                 *atomic.Bool
@@ -52,7 +49,6 @@ type Controller struct {
 	sendAddresses          []*net.UDPAddr
 	subMx                  *sync.Mutex
 	submitChan             chan []byte
-	adv                    simplebuffer.Serializers
 }
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
@@ -65,8 +61,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		return
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	conn, err := transport.NewConnection(UDP4MulticastAddress, ":0",
-		*cx.Config.MinerPass, MaxDatagramSize, ctx)
+	conn, err := transport.NewConnection(UDP4MulticastAddress,
+		*cx.Config.Controller, *cx.Config.MinerPass, MaxDatagramSize, ctx)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
@@ -84,7 +80,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		subMx:                  &sync.Mutex{},
 		submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
-		adv: advertisment.Get(cx),
 	}
 	ctrl.active.Store(false)
 	pM := pause.GetPauseContainer(cx)
@@ -131,11 +126,14 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 // these are the handlers for specific message types.
 // Controller only listens for submissions (currently)
 var handlers = transport.HandleFunc{
-	string(SolutionMagic): func(ctx interface{}) func(b []byte) (err error) {
+	string(sol.SolutionMagic): func(ctx interface{}) func(b []byte) (
+		err error) {
 		return func(b []byte) (err error) {
 			c := ctx.(*Controller)
 			_ = c
 			// insert handler here
+			j := sol.LoadSolContainer(b)
+			log.SPEW(j.GetMsgBlock())
 			return
 		}
 	},
@@ -258,7 +256,9 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 				if template != nil {
 					log.DEBUG("got new template")
 					msgB := template.Block
-					mC := job.Get(c.cx, util.NewBlock(msgB), c.adv)
+					log.DEBUG(c.cx.Config.Controller)
+					mC := job.Get(c.cx, util.NewBlock(msgB),
+						advertisment.Get(c.cx))
 					//log.SPEW(mC.Data)
 					shards, err := c.conn.CreateShards(mC.Data, job.WorkMagic)
 					if err != nil {

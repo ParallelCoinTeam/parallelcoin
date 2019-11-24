@@ -3,14 +3,15 @@ package app
 import (
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/controller/pause"
-	"github.com/p9c/pod/pkg/wallet"
 	"net"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/p9c/pod/pkg/controller/pause"
+	"github.com/p9c/pod/pkg/wallet"
 
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/urfave/cli"
@@ -95,6 +96,12 @@ func initParams(cx *conte.Xt) {
 
 func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	cfg := cx.Config
+	fP, err := GetFreePort()
+	if err != nil {
+		log.ERROR(err)
+	}
+	*cfg.Controller = net.JoinHostPort("0.0.0.0", fmt.Sprint(fP))
+	log.DEBUG()
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
 		len(*cfg.ConnectPeers) < 1 {
 		cfg.Listeners = &cli.StringSlice{":" + cx.ActiveNet.DefaultPort}
@@ -109,30 +116,21 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 			":"+cx.ActiveNet.RPCClientPort)
 		cx.StateCfg.Save = true
 	}
-
 	if *cx.Config.EnableController {
 		msgBase := pause.GetPauseContainer(cx)
 		//mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
-		listenHost := msgBase.GetIPs()[0].String()+":0"
+		listenHost := msgBase.GetIPs()[0].String() + ":0"
 		switch ctx.Command.Name {
 		// only the wallet listener is important with shell as it proxies for
 		// node, the rest better they are automatic
 		case "shell":
 			*cfg.Listeners = cli.StringSlice{listenHost}
 			*cfg.RPCListeners = cli.StringSlice{listenHost}
-			*cfg.Controller = listenHost
-		// user might be depending on which port is set for node so only
-		// controller is auto
-		case "node":
-			*cfg.Controller = listenHost
-		case "wallet":
-			*cfg.Controller = listenHost
 		}
 	}
 	if *cx.Config.AutoPorts {
 		*cfg.Listeners = cli.StringSlice{}
 		*cfg.RPCListeners = cli.StringSlice{}
-		*cfg.Controller = ":0"
 	}
 	if *cfg.RPCConnect == "" {
 		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
@@ -141,9 +139,9 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	// all of these can be autodiscovered/set but to do that and know what
 	// they are we have to reserve them
 	listeners := []*cli.StringSlice{
-		&(*cfg.WalletRPCListeners),
-		&(*cfg.Listeners),
-		&(*cfg.RPCListeners),
+		cfg.WalletRPCListeners,
+		cfg.Listeners,
+		cfg.RPCListeners,
 	}
 	for i := range listeners {
 		if h, p, err := net.SplitHostPort((*listeners[i])[0]); p == "0" {
@@ -154,7 +152,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 				if err != nil {
 					log.ERROR(err)
 				}
-				(*listeners[i]) = cli.
+				*listeners[i] = cli.
 				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
 			}
 		}
@@ -163,17 +161,6 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	h, p, _ := net.SplitHostPort(*cfg.RPCConnect)
 	if h == "" {
 		*cfg.RPCConnect = net.JoinHostPort("127.0.0.1", p)
-	}
-	if h, p, err := net.SplitHostPort(*cfg.Controller); p == "0" {
-		if err != nil {
-			log.ERROR(err)
-		} else {
-			fP, err := GetFreePort()
-			if err != nil {
-				log.ERROR(err)
-			}
-			*cfg.Controller = net.JoinHostPort(h, fmt.Sprint(fP))
-		}
 	}
 }
 

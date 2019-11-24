@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"crypto/cipher"
 	"fmt"
 	"math/rand"
 	"net"
@@ -12,27 +13,32 @@ import (
 	"github.com/p9c/pod/pkg/chain/mining"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/controller"
 	"github.com/p9c/pod/pkg/controller/job"
+	"github.com/p9c/pod/pkg/controller/sol"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/sem"
 	"github.com/p9c/pod/pkg/stdconn"
+	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
 )
 
 const RoundsPerAlgo = 1 << 8
 
 type Worker struct {
-	sem        sem.T
-	conn       net.Conn
-	Quit       chan struct{}
-	run        sem.T
-	block      *util.Block
-	msgBlock   *wire.MsgBlock
-	bitses     map[int32]uint32
-	roller     *Counter
-	startNonce uint32
-	startChan  chan struct{}
-	stopChan   chan struct{}
+	sem          sem.T
+	conn         net.Conn
+	dispatchConn *transport.Connection
+	ciph         cipher.AEAD
+	Quit         chan struct{}
+	run          sem.T
+	block        *util.Block
+	msgBlock     *wire.MsgBlock
+	bitses       map[int32]uint32
+	roller       *Counter
+	startNonce   uint32
+	startChan    chan struct{}
+	stopChan     chan struct{}
 	//running    uint32
 }
 
@@ -110,9 +116,10 @@ func NewWithConnAndSemaphore(
 				log.DEBUG("worker stopping on pausing message")
 				break pausing
 			}
-			log.DEBUG("worker running")
+			log.INFO("worker running")
 			// Run state
 			// in both states all channels are listening
+			var announceRate int
 		running:
 			for {
 				select {
@@ -126,21 +133,49 @@ func NewWithConnAndSemaphore(
 					break pausing
 				default:
 					// work
-					hash := w.msgBlock.Header.BlockHashWithAlgos(w.block.Height())
+					nH := w.block.Height()
+					if len(w.bitses) == 2 { // pre-hardfork
+						w.roller.RoundsPerAlgo = 1 << 15
+						announceRate = 1 << 17
+					} else {
+						w.roller.RoundsPerAlgo = 1 << 8
+						announceRate = 1 << 11
+					}
+					hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
-						log.DEBUG("solution found", hash.String(), "after",
-							w.msgBlock.Header.Nonce-w.startNonce)
-						//w.stopChan <- struct{}{}
-						
+						log.WARN("solution found", hash.String(),
+							fork.List[fork.GetCurrent(w.block.Height())].
+								AlgoVers[w.msgBlock.Header.Version],
+							"total hashes since startup",
+							w.roller.C-int(w.startNonce),
+						)
+						log.SPEW(w.msgBlock)
+						srs := sol.GetSolContainer(w.msgBlock)
+						_ = srs
+						err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
+						if err != nil {
+							log.ERROR(err)
+						}
+						log.DEBUG("sent solution")
 						break running
 					}
-					w.msgBlock.Header.Version = w.roller.GetAlgoVer()
+					nextAlgo := w.roller.GetAlgoVer()
+					if w.msgBlock.Header.Version != nextAlgo {
+						log.DEBUG("now mining: ", w.roller.RoundsPerAlgo,
+							"rounds of",
+							fork.List[fork.GetCurrent(w.block.Height())].
+								AlgoVers[w.msgBlock.Header.Version])
+					}
+					if w.roller.C%announceRate == 0 {
+						log.TRACE(w.roller.C, "hashes completed since startup")
+					}
+					w.msgBlock.Header.Version = nextAlgo
 					w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
 					w.msgBlock.Header.Nonce++
 				}
 			}
-			log.DEBUG("worker pausing")
+			log.INFO("worker pausing")
 		}
 		log.DEBUG("worker finished")
 	}()
@@ -164,6 +199,27 @@ func New(s sem.T) (w *Worker, conn net.Conn) {
 // prepare the work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	log.DEBUG("running NewJob RPC method")
+	if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
+		log.DEBUG("loading dispatch connection from job message")
+		// if there is no dispatch connection, make one.
+		// If there is one but the server died or was disconnected the
+		// connection the existing dispatch connection is nilled and this
+		// will run. If there is no controllers on the network,
+		// the worker pauses
+		ips := job.GetIPs()
+		var addresses []string
+		for i := range ips {
+			// generally there is only one but if a server had two interfaces
+			// to different lans it would send both
+			addresses = append(addresses, ips[i].String()+":"+
+				fmt.Sprint(job.GetControllerListenerPort()))
+		}
+		err = w.dispatchConn.SetSendConn(addresses...)
+		if err != nil {
+			log.ERROR(err)
+		}
+	}
+	log.SPEW(w.dispatchConn)
 	// halting current work
 	w.stopChan <- struct{}{}
 	*reply = true
@@ -215,6 +271,20 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 	log.DEBUG("stopping from IPC")
 	w.stopChan <- struct{}{}
 	defer close(w.Quit)
+	*reply = true
+	return
+}
+
+// SendPass gives the encryption key configured in the kopach controller (
+// pod) configuration to allow workers to dispatch their solutions
+func (w *Worker) SendPass(pass string, reply *bool) (err error) {
+	log.DEBUG("receiving dispatch password")
+	conn, err := transport.NewConnection("", "",
+		pass, controller.MaxDatagramSize, nil)
+	if err != nil {
+		log.ERROR(err)
+	}
+	w.dispatchConn = conn
 	*reply = true
 	return
 }

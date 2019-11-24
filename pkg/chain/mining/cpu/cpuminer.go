@@ -520,13 +520,13 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 		mn := uint32(1 << 8)
 		switch {
 		case m.cfg.NumThreads < 2:
-			mn = uint32(1 << 4)
-		case m.cfg.NumThreads < 4:
-			mn = uint32(1 << 5)
-		case m.cfg.NumThreads < 6:
-			mn = uint32(1 << 6)
-		case m.cfg.NumThreads < 8:
 			mn = uint32(1 << 7)
+		case m.cfg.NumThreads < 4:
+			mn = uint32(1 << 8)
+		case m.cfg.NumThreads < 6:
+			mn = uint32(1 << 9)
+		case m.cfg.NumThreads < 8:
+			mn = uint32(1 << 10)
 		}
 		// if testnet {
 		// 	mn = 1 << shifter
@@ -541,7 +541,7 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 			log.TRACEF("wrkr %d finished %d rounds of %s", workerNumber,
 				i-rNonce, algo)
 		}()
-		log.TRACE("starting round from ", rNonce, algo)
+		log.TRACE("starting round from ", rNonce, algo, mn)
 		for i = rNonce; i <= rNonce+mn; i++ {
 			// if time.Now().Sub(now) > time.Second*3 {
 			// 	return false
@@ -567,7 +567,6 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 				err := m.g.UpdateBlockTime(workerNumber, msgBlock)
 				if err != nil {
 					log.ERROR(err)
-					log.WARN(err)
 				}
 			default:
 			}
