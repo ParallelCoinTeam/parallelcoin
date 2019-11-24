@@ -12,55 +12,42 @@ import (
 	"time"
 )
 
-func Loader(b *Bios, cx *conte.Xt) {
-	var err error
-	b.cx = cx
-	log.INFO("FFFFFstarting GUI")
-	//var fs http.FileSystem = http.Dir("./pkg/gui/assets/f/assets")
-	//err := vfsgen.Generate(fs, vfsgen.Options{
-	//	PackageName:  "guiLibsLoader",
-	//	BuildTags:    "dev",
-	//	VariableName: "Loader",
-	//})
-	//if err != nil {
-	//	log.FATAL(err)
-	//}
-	//b.Fs = &fs
+func DuOSloader(cx *conte.Xt, firstRun bool) (err error) {
 
-	b.Wv = webview.New(webview.Settings{
+	// create loader window
+	cx.Gui.Wv = webview.New(webview.Settings{
 		Width:     600,
 		Height:    800,
 		Debug:     true,
 		Resizable: false,
 		Title:     "ParallelCoin - DUO - True Story",
-		URL:       "data:text/html," + url.PathEscape(getFile("loader.html", *b.Fs)),
+		URL:       "data:text/html," + url.PathEscape(getFile("loader.html", *cx.Gui.Fs)),
 		//ExternalInvokeCallback: handleRPCfirstrun,
 	})
+	cx.Gui.Wv.SetColor(68, 68, 68, 255)
 
-	log.INFO("starting GUI")
+	defer cx.Gui.Wv.Exit()
+	cx.Gui.Wv.Dispatch(func() {
 
-	defer b.Wv.Exit()
-	b.Wv.Dispatch(func() {
-
-		_, err = b.Wv.Bind("duos", &Bios{
-			cx:         b.cx,
-			IsFirstRun: b.IsFirstRun,
+		_, err = cx.Gui.Wv.Bind("duos", &rcvar{
+			cx:         cx,
+			IsFirstRun: firstRun,
 		})
 
-		err = b.Wv.Eval(getFile("js/svelte.js", *b.Fs))
+		err = cx.Gui.Wv.Eval(getFile("js/svelte.js", *cx.Gui.Fs))
 		if err != nil {
 			log.DEBUG("error binding to webview:", err)
 		}
 
-		b.Wv.InjectCSS(getFile("css/theme/root.css", *b.Fs))
-		b.Wv.InjectCSS(getFile("css/theme/colors.css", *b.Fs))
-		b.Wv.InjectCSS(getFile("css/theme/helpers.css", *b.Fs))
-		b.Wv.InjectCSS(getFile("css/loader.css", *b.Fs))
-		b.Wv.InjectCSS(getFile("css/svelte.css", *b.Fs))
+		cx.Gui.Wv.InjectCSS(getFile("css/theme/root.css", *cx.Gui.Fs))
+		cx.Gui.Wv.InjectCSS(getFile("css/theme/colors.css", *cx.Gui.Fs))
+		cx.Gui.Wv.InjectCSS(getFile("css/theme/helpers.css", *cx.Gui.Fs))
+		cx.Gui.Wv.InjectCSS(getFile("css/loader.css", *cx.Gui.Fs))
+		cx.Gui.Wv.InjectCSS(getFile("css/svelte.css", *cx.Gui.Fs))
 
 		// Load CSS
 	})
-	b.Wv.Run()
+	cx.Gui.Wv.Run()
 
 	//
 	//go func() {
@@ -75,7 +62,7 @@ func Loader(b *Bios, cx *conte.Xt) {
 	//		//}
 	//}
 	//}()
-
+	return
 }
 
 func handleRPCfirstrun(w webview.WebView, data string) {
@@ -87,13 +74,13 @@ func handleRPCfirstrun(w webview.WebView, data string) {
 	}
 }
 
-func (b *Bios) CreateWallet(pr, sd, pb, fl string) {
+func (rc *rcvar) CreateWallet(pr, sd, pb, fl string) {
 	var err error
 	var seed []byte
 	if fl == "" {
-		fl = *b.cx.Config.WalletFile
+		fl = *rc.cx.Config.WalletFile
 	}
-	l := wallet.NewLoader(b.cx.ActiveNet, *b.cx.Config.WalletFile, 250)
+	l := wallet.NewLoader(rc.cx.ActiveNet, *rc.cx.Config.WalletFile, 250)
 
 	if sd == "" {
 		seed, err = hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
@@ -115,14 +102,14 @@ func (b *Bios) CreateWallet(pr, sd, pb, fl string) {
 		panic(err)
 	}
 
-	b.IsFirstRun = false
-	*b.cx.Config.WalletPass = pb
-	*b.cx.Config.WalletFile = fl
+	rc.cx.Gui.Boot.IsFirstRun = false
+	*rc.cx.Config.WalletPass = pb
+	*rc.cx.Config.WalletFile = fl
 
-	save.Pod(b.cx.Config)
-	log.INFO(b)
+	save.Pod(rc.cx.Config)
+	//log.INFO(rc)
 }
 
-func (c *Bios) CloseLoader() {
-	c.Wv.Exit()
+func (r *rcvar) CloseDuOSloader() {
+	r.cx.Gui.Wv.Exit()
 }

@@ -1,27 +1,46 @@
 package gui
 
-import "github.com/p9c/pod/cmd/node/rpc"
+import (
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"os"
+	"sync"
+	"sync/atomic"
 
-func (r *rcvar) GetNetworkLastBlock() int32 {
-	for _, g := range r.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
-		l := g.ToPeer().StatsSnapshot().LastBlock
-		if l > r.status.NetworkLastBlock {
-			r.status.NetworkLastBlock = l
-		}
+)
+
+func DuOSnode(cx *conte.Xt) error {
+	nodeChan := make(chan *rpc.Server)
+	cx.NodeKill = make(chan struct{})
+	cx.Node = &atomic.Value{}
+	cx.Node.Store(false)
+	var err error
+	var wg sync.WaitGroup
+	if !*cx.Config.NodeOff {
+		go func() {
+			log.INFO(cx.Language.RenderText("goApp_STARTINGNODE"))
+			//utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
+			err = node.Main(cx, nil, cx.NodeKill, nodeChan, &wg)
+			if err != nil {
+				log.INFO("error running node:", err)
+				os.Exit(1)
+			}
+		}()
+		log.DEBUG("waiting for nodeChan")
+		cx.RPCServer = <-nodeChan
+		log.DEBUG("nodeChan sent")
+		cx.Node.Store(true)
 	}
-	return r.status.NetworkLastBlock
+	interrupt.AddHandler(func() {
+		log.WARN("interrupt received, " +
+			"shutting down shell modules")
+		close(cx.NodeKill)
+	})
+	return err
 }
 
-func (r *rcvar) GetBlockCount() int64 {
-	getBlockCount, err := rpc.HandleGetBlockCount(r.RPCServer, nil, nil)
-	if err != nil {
-		r.PushDuOSalert("Error", err.Error(), "error")
-	}
-	r.status.BlockCount = getBlockCount.(int64)
-	return r.status.BlockCount
-}
 
-func (r *rcvar) GetConnectionCount() int32 {
-	r.status.ConnectionCount = r.RPCServer.Cfg.ConnMgr.ConnectedCount()
-	return r.status.ConnectionCount
-}
+
