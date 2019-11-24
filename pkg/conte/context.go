@@ -1,6 +1,7 @@
 package conte
 
 import (
+	"github.com/p9c/pod/cmd/gui/gcx"
 	"sync"
 	"sync/atomic"
 
@@ -50,6 +51,8 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// RealNode is the main node
 	RealNode *rpc.Node
+	// Wallet graphical user interface
+	Gui *gcx.GUI
 }
 
 // GetNewContext returns a fresh new context

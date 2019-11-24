@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"encoding/json"
 	"github.com/p9c/pod/pkg/log"
 	"io/ioutil"
 	"net/http"
@@ -16,171 +17,37 @@ getFile(f string, fs http.FileSystem) string {
 	body, err := ioutil.ReadAll(file)
 	return string(body)
 }
-
-func evalJs(rc *rcvar) {
-	var err error
-	err = rc.w.Eval(getFile("libs/js/vue.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("libs/js/ej2-vue.min.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("libs/js/vfg.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/duos.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/ico/logo.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/ico/overview.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/ico/history.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/ico/addressbook.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/ico/explorer.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/ico/settings.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/balance.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/send.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/peers.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/status.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/networkhashrate.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/localhashrate.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/history.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/latestxs.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/addressbook.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/panels/settings.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/pages/overview.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/pages/history.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/pages/addressbook.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/pages/explorer.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/pages/settings.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/layout/header.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/layout/nav.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/layout/xorg.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-	err = rc.w.Eval(getFile("js/vue/dui.js",*rc.fs))
-	if err != nil {
-		log.ERROR("error binding to webview:", err)
-	}
-
-
-
+func
+evalJs(r *rcvar) (err error) {
+	err = r.evalJsFile([]string{"libs/js/vue.js", "libs/js/ej2-vue.min.js", "libs/js/vfg.js", "js/vue/duos.js", "js/vue/ico/logo.js", "js/vue/ico/overview.js", "js/vue/ico/history.js", "js/vue/ico/addressbook.js", "js/vue/ico/explorer.js", "js/vue/ico/settings.js", "js/vue/panels/balance.js", "js/vue/panels/send.js", "js/vue/panels/peers.js", "js/vue/panels/status.js", "js/vue/panels/networkhashrate.js", "js/vue/panels/localhashrate.js", "js/vue/panels/history.js", "js/vue/panels/latestxs.js", "js/vue/panels/addressbook.js", "js/vue/panels/settings.js", "js/vue/pages/overview.js", "js/vue/pages/history.js", "js/vue/pages/addressbook.js", "js/vue/pages/explorer.js", "js/vue/pages/settings.js", "js/vue/layout/header.js", "js/vue/layout/nav.js", "js/vue/layout/xorg.js", "js/vue/dui.js"})
+	return
 }
-
-func injectCss(rc *rcvar) {
-	// material
-	// getMaterial, err := base64.StdEncoding.DecodeString(lib.GetMaterial)
-	// if err != nil {
-	// 	fmt.Printf("Error decoding string: %s ", err.Error())
-	// 	return
-	// }
-	rc.w.InjectCSS(getFile("libs/css/material.css",*rc.fs))
-	rc.w.InjectCSS(getFile("css/theme/root.css",*rc.fs))
-	rc.w.InjectCSS(getFile("css/theme/colors.css",*rc.fs))
-	rc.w.InjectCSS(getFile("css/theme/grid.css",*rc.fs))
-	rc.w.InjectCSS(getFile("css/theme/helpers.css",*rc.fs))
-	rc.w.InjectCSS(getFile("css/duistyle.css",*rc.fs))
-	rc.w.InjectCSS(getFile("css/dui.css",*rc.fs))
-
+func
+injectCss(r *rcvar) {
+	r.injectCssFile([]string{"libs/css/material.css", "css/theme/root.css", "css/theme/colors.css", "css/theme/grid.css", "css/theme/helpers.css", "css/duistyle.css", "css/dui.css"})
+}
+func
+(r *rcvar) evalJsFile(fls []string) (err error) {
+	for _, f := range fls {
+		err = r.cx.Gui.Wv.Eval(getFile(f, *r.cx.Gui.Fs))
+		if err != nil {
+			log.ERROR("error binding to webview:", err)
+		}
+	}
+	return
+}
+func
+(r *rcvar) injectCssFile(fls []string) {
+	for _, f := range fls {
+		r.cx.Gui.Wv.InjectCSS(getFile(f, *r.cx.Gui.Fs))
+	}
+}
+func
+(r *rcvar) Render(cmd string, data interface{}) (err error) {
+	var b []byte
+	b, err = json.Marshal(data)
+	if err == nil {
+		r.cx.Gui.Wv.Eval("duoSystem." + cmd + "=" + string(b) + ";")
+	}
+	return
 }
