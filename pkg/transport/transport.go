@@ -256,14 +256,14 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 								// buffers,
 								// we don't add more data for the already
 								// decoded.
-								log.DEBUG("deleting superseded buffer",
+								log.TRACE("deleting superseded buffer",
 									hex.EncodeToString([]byte(i)))
 								delete(c.buffers, i)
 							}
 						}
 					}
 				} else {
-					log.DEBUG("new message arriving",
+					log.TRACE("new message arriving",
 						hex.EncodeToString([]byte(nonce)))
 					c.buffers[nonce] = &MsgBuffer{[][]byte{},
 						time.Now(), false, src}

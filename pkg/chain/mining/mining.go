@@ -843,19 +843,23 @@ mempoolLoop:
 		log.DEBUG("checkconnectblocktemplate err:", err)
 		return nil, err
 	}
+	bh := msgBlock.Header.BlockHash()
 	log.TRACEC(func() string {
 		return fmt.Sprintf(
 			"created new block template (algo %s, %d transactions, "+
 				"%d in fees, %d signature operations cost, %d weight, "+
-				"target difficulty %064x)",
+				"target difficulty %064x prevblockhash %064x  %064x)",
 			algo,
 			len(msgBlock.Transactions),
 			totalFees,
 			blockSigOpCost,
 			blockWeight,
 			fork.CompactToBig(msgBlock.Header.Bits),
+			msgBlock.Header.PrevBlock.CloneBytes(),
+			bh.CloneBytes(),
 		)
 	})
+	//log.SPEW(msgBlock)
 	return &BlockTemplate{
 		Block:             &msgBlock,
 		Fees:              txFees,

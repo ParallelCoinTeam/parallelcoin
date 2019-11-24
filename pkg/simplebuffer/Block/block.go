@@ -26,7 +26,7 @@ func (B *Block) Decode(b []byte) (out []byte) {
 	log.SPEW(b)
 	if len(b) >= 4 {
 		B.Length = binary.BigEndian.Uint32(b[:4])
-		log.DEBUG("length", B.Length)
+		//log.DEBUG("length", B.Length)
 		if len(b) >= 4+int(B.Length) {
 			B.Bytes = b[4 : 4+B.Length]
 			if len(b) > 4+int(B.Length) {
@@ -34,7 +34,7 @@ func (B *Block) Decode(b []byte) (out []byte) {
 			}
 		}
 	}
-	log.SPEW(out)
+	//log.SPEW(out)
 	return
 }
 

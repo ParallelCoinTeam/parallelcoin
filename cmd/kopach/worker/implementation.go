@@ -23,7 +23,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-const RoundsPerAlgo = 1 << 8
+const RoundsPerAlgo = 1
 
 type Worker struct {
 	sem          sem.T
@@ -101,6 +101,7 @@ func NewWithConnAndSemaphore(
 	// with this we can report cumulative hash counts as well as using it to
 	// distribute algorithms evenly
 	w.startNonce = uint32(w.roller.C)
+	tn := time.Now()
 	go func() {
 		log.DEBUG("main work loop starting")
 	pausing:
@@ -116,10 +117,10 @@ func NewWithConnAndSemaphore(
 				log.DEBUG("worker stopping on pausing message")
 				break pausing
 			}
-			log.INFO("worker running")
+			//log.INFO("worker running")
 			// Run state
 			// in both states all channels are listening
-			var announceRate int
+			//var announceRate = 1000
 		running:
 			for {
 				select {
@@ -134,13 +135,13 @@ func NewWithConnAndSemaphore(
 				default:
 					// work
 					nH := w.block.Height()
-					if len(w.bitses) == 2 { // pre-hardfork
-						w.roller.RoundsPerAlgo = 1 << 15
-						announceRate = 1 << 17
-					} else {
-						w.roller.RoundsPerAlgo = 1 << 8
-						announceRate = 1 << 11
-					}
+					//if len(w.bitses) == 2 { // pre-hardfork
+					//	w.roller.RoundsPerAlgo = 1 << 15
+					//	announceRate = 1 << 17
+					//} else {
+					//	w.roller.RoundsPerAlgo = 1 << 8
+					//	announceRate = 1 << 8
+					//}
 					hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
@@ -150,7 +151,7 @@ func NewWithConnAndSemaphore(
 							"total hashes since startup",
 							w.roller.C-int(w.startNonce),
 						)
-						log.SPEW(w.msgBlock)
+						//log.SPEW(w.msgBlock)
 						srs := sol.GetSolContainer(w.msgBlock)
 						_ = srs
 						err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
@@ -160,22 +161,26 @@ func NewWithConnAndSemaphore(
 						log.DEBUG("sent solution")
 						break running
 					}
+					since := int(time.Now().Sub(tn)/time.Second)+1
+					total := w.roller.C - int(w.startNonce)
+					_, _ = fmt.Fprintf(os.Stderr, "\r %9d hash/s        \r",
+						total/since)
 					nextAlgo := w.roller.GetAlgoVer()
-					if w.msgBlock.Header.Version != nextAlgo {
-						log.DEBUG("now mining: ", w.roller.RoundsPerAlgo,
-							"rounds of",
-							fork.List[fork.GetCurrent(w.block.Height())].
-								AlgoVers[w.msgBlock.Header.Version])
-					}
-					if w.roller.C%announceRate == 0 {
-						log.TRACE(w.roller.C, "hashes completed since startup")
-					}
+					//if w.msgBlock.Header.Version != nextAlgo {
+					//	log.DEBUG("now mining: ", w.roller.RoundsPerAlgo,
+					//		"rounds of",
+					//		fork.List[fork.GetCurrent(w.block.Height())].
+					//			AlgoVers[w.msgBlock.Header.Version])
+					//}
+					//if w.roller.C%announceRate == 0 {
+					//	log.TRACE(w.roller.C, "hashes completed since startup")
+					//}
 					w.msgBlock.Header.Version = nextAlgo
 					w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
 					w.msgBlock.Header.Nonce++
 				}
 			}
-			log.INFO("worker pausing")
+			//log.INFO("worker pausing")
 		}
 		log.DEBUG("worker finished")
 	}()
@@ -198,28 +203,28 @@ func New(s sem.T) (w *Worker, conn net.Conn) {
 // this makes the miner start mining from pause or pause,
 // prepare the work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
-	log.DEBUG("running NewJob RPC method")
-	if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
-		log.DEBUG("loading dispatch connection from job message")
-		// if there is no dispatch connection, make one.
-		// If there is one but the server died or was disconnected the
-		// connection the existing dispatch connection is nilled and this
-		// will run. If there is no controllers on the network,
-		// the worker pauses
-		ips := job.GetIPs()
-		var addresses []string
-		for i := range ips {
-			// generally there is only one but if a server had two interfaces
-			// to different lans it would send both
-			addresses = append(addresses, ips[i].String()+":"+
-				fmt.Sprint(job.GetControllerListenerPort()))
-		}
-		err = w.dispatchConn.SetSendConn(addresses...)
-		if err != nil {
-			log.ERROR(err)
-		}
+	//log.DEBUG("running NewJob RPC method")
+	//if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
+	log.TRACE("loading dispatch connection from job message")
+	// if there is no dispatch connection, make one.
+	// If there is one but the server died or was disconnected the
+	// connection the existing dispatch connection is nilled and this
+	// will run. If there is no controllers on the network,
+	// the worker pauses
+	ips := job.GetIPs()
+	var addresses []string
+	for i := range ips {
+		// generally there is only one but if a server had two interfaces
+		// to different lans it would send both
+		addresses = append(addresses, ips[i].String()+":"+
+			fmt.Sprint(job.GetControllerListenerPort()))
 	}
-	log.SPEW(w.dispatchConn)
+	err = w.dispatchConn.SetSendConn(addresses...)
+	if err != nil {
+		log.ERROR(err)
+	}
+	//}
+	//log.SPEW(w.dispatchConn)
 	// halting current work
 	w.stopChan <- struct{}{}
 	*reply = true
@@ -238,6 +243,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	rand.Seed(time.Now().UnixNano())
 	w.msgBlock.Header.Nonce = rand.Uint32()
 	w.msgBlock.Transactions = job.GetTxs()
+	w.msgBlock.Header.Timestamp = time.Now()
 	// create the unique extra nonce for this worker,
 	// which creates a different merkel root
 	extraNonce, err := wire.RandomUint64()
@@ -245,7 +251,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		log.ERROR(err)
 		return
 	}
-	log.DEBUG("updating extra nonce")
+	log.TRACE("updating extra nonce")
 	err = UpdateExtraNonce(w.msgBlock, newHeight, extraNonce)
 	if err != nil {
 		log.ERROR(err)

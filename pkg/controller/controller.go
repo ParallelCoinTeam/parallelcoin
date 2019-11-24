@@ -11,6 +11,7 @@ import (
 	"go.uber.org/atomic"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller/advertisment"
@@ -129,11 +130,63 @@ var handlers = transport.HandleFunc{
 	string(sol.SolutionMagic): func(ctx interface{}) func(b []byte) (
 		err error) {
 		return func(b []byte) (err error) {
+			log.DEBUG("received solution")
 			c := ctx.(*Controller)
-			_ = c
-			// insert handler here
 			j := sol.LoadSolContainer(b)
-			log.SPEW(j.GetMsgBlock())
+			msgBlock := j.GetMsgBlock()
+			log.SPEW(msgBlock)
+			if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
+				BestSnapshot().Hash) {
+				log.WARN("block submitted by kopach miner worker is stale")
+				return
+			}
+			// set old blocks to pause and send pause directly as block is
+			// probably a solution
+			c.oldBlocks.Store(c.pauseShards)
+			err = c.conn.SendShards(c.pauseShards)
+			if err != nil {
+				log.ERROR(err)
+			}
+			block := util.NewBlock(msgBlock)
+			isOrphan, err := c.cx.RealNode.SyncManager.ProcessBlock(block,
+				blockchain.BFNone)
+			if err != nil {
+				// Anything other than a rule violation is an unexpected error, so log
+				// that error as an internal error.
+				if _, ok := err.(blockchain.RuleError); !ok {
+					log.WARNF(
+						"Unexpected error while processing block submitted" +
+							" via CPU miner:", err,
+					)
+				} else {
+					log.WARN("block submitted via kopach miner rejected:", err)
+				}
+				if isOrphan {
+					log.WARN("block is an orphan")
+				}
+				// maybe something wrong with the network,
+				// send current work again
+				err = c.sendNewBlockTemplate()
+				if err != nil {
+					log.DEBUG(err)
+				}
+				return
+			}
+			log.DEBUG("the block was accepted")
+			coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
+			prevHeight := block.Height() - 1
+			prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
+			prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
+			since := block.MsgBlock().Header.Timestamp.Unix() - prevTime
+			bHash := block.MsgBlock().BlockHashWithAlgos(block.Height())
+			log.WARNF("new block height %d %08x %s%10d %08x %v %s %ds since prev",
+				block.Height(),
+				prevBlock.MsgBlock().Header.Bits,
+				bHash,
+				block.MsgBlock().Header.Timestamp.Unix(),
+				block.MsgBlock().Header.Bits,
+				util.Amount(coinbaseTx.Value),
+				fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
 			return
 		}
 	},
@@ -149,11 +202,11 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	msgB := template.Block
 	fMC := job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx))
 	shards, err := c.conn.CreateShards(fMC.Data, job.WorkMagic)
-	c.oldBlocks.Store(shards)
 	err = c.conn.SendShards(shards)
 	if err != nil {
 		log.ERROR(err)
 	}
+	c.oldBlocks.Store(shards)
 	return
 }
 
@@ -204,6 +257,7 @@ out:
 			if err != nil {
 				log.ERROR(err)
 			}
+			ctrl.oldBlocks.Store(oB)
 		case <-ctrl.ctx.Done():
 			break out
 			//default:
@@ -244,7 +298,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 			case blockchain.NTBlockAccepted:
 				c.subMx.Lock()
 				defer c.subMx.Unlock()
-				log.DEBUG("received new chain notification")
+				//log.DEBUG("received new chain notification")
 				// construct work message
 				//log.SPEW(n)
 				_, ok := n.Data.(*util.Block)
@@ -254,9 +308,9 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 				}
 				template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 				if template != nil {
-					log.DEBUG("got new template")
+					//log.DEBUG("got new template")
 					msgB := template.Block
-					log.DEBUG(c.cx.Config.Controller)
+					//log.DEBUG(*c.cx.Config.Controller)
 					mC := job.Get(c.cx, util.NewBlock(msgB),
 						advertisment.Get(c.cx))
 					//log.SPEW(mC.Data)

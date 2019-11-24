@@ -36,7 +36,7 @@ func // CalcNextRequiredDifficulty calculates the required difficulty for the
 	Time, algo string) (difficulty uint32, err error) {
 	b.chainLock.Lock()
 	difficulty, err = b.calcNextRequiredDifficulty(workerNumber, b.BestChain.
-		Tip(), timestamp, algo, true)
+		Tip(), timestamp, algo, false)
 	b.chainLock.Unlock()
 	return
 }
@@ -76,7 +76,6 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 	algoname string, l bool) (newTargetBits uint32, err error) {
 	nH := lastNode.height + 1
 	cF := fork.GetCurrent(nH)
-	log.DEBUG(nH, cF, fork.IsTestnet)
 	newTargetBits = fork.GetMinBits(algoname, nH)
 	switch cF {
 	// Legacy difficulty adjustment

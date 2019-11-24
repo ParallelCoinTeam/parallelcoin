@@ -54,7 +54,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Contai
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
 	msg = append(msg, nBH)
-	mH := Hash.New().Put(*mB.Hash())
+	mH := Hash.New().Put(mB.MsgBlock().Header.PrevBlock)
 	msg = append(msg, mH)
 	tip := cx.RealNode.Chain.BestChain.Tip()
 	//// this should be the same as the block in the notification
