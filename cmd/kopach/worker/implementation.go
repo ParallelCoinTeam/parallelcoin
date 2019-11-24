@@ -135,13 +135,6 @@ func NewWithConnAndSemaphore(
 				default:
 					// work
 					nH := w.block.Height()
-					//if len(w.bitses) == 2 { // pre-hardfork
-					//	w.roller.RoundsPerAlgo = 1 << 15
-					//	announceRate = 1 << 17
-					//} else {
-					//	w.roller.RoundsPerAlgo = 1 << 8
-					//	announceRate = 1 << 8
-					//}
 					hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
@@ -161,23 +154,17 @@ func NewWithConnAndSemaphore(
 						log.DEBUG("sent solution")
 						break running
 					}
-					since := int(time.Now().Sub(tn)/time.Second)+1
-					total := w.roller.C - int(w.startNonce)
-					_, _ = fmt.Fprintf(os.Stderr, "\r %9d hash/s        \r",
-						total/since)
 					nextAlgo := w.roller.GetAlgoVer()
-					//if w.msgBlock.Header.Version != nextAlgo {
-					//	log.DEBUG("now mining: ", w.roller.RoundsPerAlgo,
-					//		"rounds of",
-					//		fork.List[fork.GetCurrent(w.block.Height())].
-					//			AlgoVers[w.msgBlock.Header.Version])
-					//}
-					//if w.roller.C%announceRate == 0 {
-					//	log.TRACE(w.roller.C, "hashes completed since startup")
-					//}
 					w.msgBlock.Header.Version = nextAlgo
 					w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
 					w.msgBlock.Header.Nonce++
+					if w.roller.C%len(w.roller.Algos) == 0 {
+						since := int(time.Now().Sub(tn)/time.Second) + 1
+						total := w.roller.C - int(w.startNonce)
+						_, _ = fmt.Fprintf(os.Stderr,
+							"\r %9d hash/s        \r", total/since)
+
+					}
 				}
 			}
 			//log.INFO("worker pausing")

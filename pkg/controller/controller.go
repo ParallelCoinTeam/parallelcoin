@@ -12,6 +12,7 @@ import (
 
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller/advertisment"
@@ -46,6 +47,9 @@ type Controller struct {
 	mx                     *sync.Mutex
 	blockTemplateGenerator *mining.BlkTmplGenerator
 	oldBlocks              *atomic.Value
+	prevHash               *chainhash.Hash
+	lastTxUpdate           time.Time
+	lastGenerated          time.Time
 	pauseShards            [][]byte
 	sendAddresses          []*net.UDPAddr
 	subMx                  *sync.Mutex
@@ -76,6 +80,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cx:                     cx,
 		mx:                     &sync.Mutex{},
 		oldBlocks:              &atomic.Value{},
+		lastTxUpdate:           time.Now(),
+		lastGenerated:          time.Now(),
 		pauseShards:            [][]byte{},
 		sendAddresses:          []*net.UDPAddr{},
 		subMx:                  &sync.Mutex{},
@@ -155,7 +161,7 @@ var handlers = transport.HandleFunc{
 				// that error as an internal error.
 				if _, ok := err.(blockchain.RuleError); !ok {
 					log.WARNF(
-						"Unexpected error while processing block submitted" +
+						"Unexpected error while processing block submitted"+
 							" via CPU miner:", err,
 					)
 				} else {
@@ -206,7 +212,10 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	if err != nil {
 		log.ERROR(err)
 	}
+	c.prevHash = &template.Block.Header.PrevBlock
 	c.oldBlocks.Store(shards)
+	c.lastGenerated = time.Now()
+	c.lastTxUpdate = time.Now()
 	return
 }
 
@@ -248,6 +257,29 @@ out:
 	for {
 		select {
 		case <-rebroadcastTicker.C:
+			// The current block is stale if the best block has changed.
+			best := ctrl.blockTemplateGenerator.BestSnapshot()
+			prevblock := ctrl.oldBlocks.Load().(job.Container)
+			_ = prevblock
+			if !ctrl.prevHash.IsEqual(&best.Hash) {
+				err := ctrl.sendNewBlockTemplate()
+				if err != nil {
+					log.ERROR(err)
+				}
+				break
+			}
+			// The current block is stale if the memory pool has been updated
+			// since the block template was generated and it has been at least
+			// one minute.
+			if ctrl.lastTxUpdate != ctrl.blockTemplateGenerator.GetTxSource().
+				LastUpdated() && time.Now().After(
+				ctrl.lastGenerated.Add(time.Minute)) {
+				err := ctrl.sendNewBlockTemplate()
+				if err != nil {
+					log.ERROR(err)
+				}
+				break
+			}
 			oB, ok := ctrl.oldBlocks.Load().([][]byte)
 			if len(oB) == 0 || !ok {
 				log.DEBUG("template is empty")

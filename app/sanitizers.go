@@ -37,21 +37,21 @@ func initDictionary(cfg *pod.Config) {
 	if cfg.Language == nil || *cfg.Language == "" {
 		*cfg.Language = Lang("en")
 	}
-	log.WARN("lang set to", *cfg.Language)
+	log.DEBUG("lang set to", *cfg.Language)
 }
 
 func initDataDir(cfg *pod.Config) {
 	if cfg.DataDir == nil || *cfg.DataDir == "" {
 		*cfg.DataDir = appdata.Dir("pod", false)
 	}
-	log.WARN("datadir set to", *cfg.DataDir)
+	log.DEBUG("datadir set to", *cfg.DataDir)
 }
 
 func initWalletFile(cx *conte.Xt) {
 	if cx.Config.WalletFile == nil || *cx.Config.WalletFile == "" {
 		*cx.Config.WalletFile = *cx.Config.DataDir + slash + cx.ActiveNet.Name + slash + wallet.WalletDbName
 	}
-	log.WARN("walletfile set to", *cx.Config.WalletFile)
+	log.DEBUG("walletfile set to", *cx.Config.WalletFile)
 }
 
 func initConfigFile(cfg *pod.Config) {
