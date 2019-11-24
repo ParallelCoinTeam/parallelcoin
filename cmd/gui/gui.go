@@ -3,66 +3,50 @@ package gui
 import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/webview"
-	"github.com/p9c/pod/pkg/log"
 	"net/url"
-	"os"
 )
 
-const slash = string(os.PathSeparator)
+func WalletGUI(cx *conte.Xt) (err error) {
 
-func GUI(b *Bios, cx *conte.Xt) {
-	rc := rcvar{
-		Xt:     cx,
-		w:      b.Wv,
-		fs:		b.Fs,
-		alert:  DuOSalert{},
-		status: DuOStatus{},
-		txs:    DuOStransactionsExcerpts{},
-		lastxs: DuOStransactions{},
-	}
-
-	rc.w = webview.New(webview.Settings{
+	cx.Gui.Wv = webview.New(webview.Settings{
 		Width:  1024,
 		Height: 760,
 		Debug:  true,
+		Resizable: false,
 		Title:  "ParallelCoin - DUO - True Story",
-		URL:    "data:text/html," + url.PathEscape(getFile("vue.html", *b.Fs)),
+		URL:    "data:text/html," + url.PathEscape(getFile("vue.html", *cx.Gui.Fs)),
 	})
+	cx.Gui.Wv.SetColor(68, 68, 68, 255)
 
-	//b := Bios{
-	//	Theme:      false,
-	//	IsBoot:     true,
-	//	IsBootMenu: true,
-	//	IsBootLogo: true,
-	//	IsLoading:  false,
-	//	IsDev:      true,
-	//	IsScreen:   "overview",
-	//}
+	_, err = cx.Gui.Wv.Bind("alert", &DuOSalert{})
 
-	log.INFO("starting GUI")
+	_, err = cx.Gui.Wv.Bind("status", &DuOStatus{})
 
-	defer rc.w.Exit()
-	rc.w.Dispatch(func() {
+	_, err = cx.Gui.Wv.Bind("hashes", &DuOShashes{})
+	_, err = cx.Gui.Wv.Bind("nethash", &DuOSnetworkHash{})
+	_, err = cx.Gui.Wv.Bind("height", &DuOSheight{})
+	_, err = cx.Gui.Wv.Bind("bestblock", &DuOSbestBlockHash{})
 
+	_, err = cx.Gui.Wv.Bind("blockcount", &DuOSblockCount{})
+	_, err = cx.Gui.Wv.Bind("netlastblock", &DuOSnetLastBlock{})
+	_, err = cx.Gui.Wv.Bind("connections", &DuOSconnections{})
+
+	_, err = cx.Gui.Wv.Bind("balance", &DuOSbalance{})
+	_, err = cx.Gui.Wv.Bind("transactions", &DuOStransactions{})
+	_, err = cx.Gui.Wv.Bind("txs", &DuOStransactionsExcerpts{})
+	_, err = cx.Gui.Wv.Bind("lastxs", &DuOStransactions{})
+
+	_, err = cx.Gui.Wv.Bind("localhost", &DuOSlocalHost{})
+
+
+	defer cx.Gui.Wv.Exit()
+	cx.Gui.Wv.Dispatch(func() {
 		// Load CSS files
-		injectCss(&rc)
+		injectCss(rcv)
 		// Load JavaScript Files
-		evalJs(&rc)
+		err = evalJs(rcv)
 	})
-	rc.w.Run()
+	cx.Gui.Wv.Run()
 
-	//
-	//go func() {
-	//	for _ = range time.NewTicker(time.Second * 1).C {
-	//
-	//
-	//		//status, err := json.Marshal(rc.GetDuOStatus())
-	//		//if err != nil {
-	//		//}
-	//		//transactions, err := json.Marshal(rc.GetTransactions(0, 555, ""))
-	//		//if err != nil {
-	//		//}
-	//}
-	//}()
-
+	return
 }

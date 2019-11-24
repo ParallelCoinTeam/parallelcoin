@@ -10,68 +10,115 @@ import (
 )
 
 // System Ststus
-type DuOStatus struct {
-	Version          string                           `json:"ver"`
-	WalletVersion    map[string]btcjson.VersionResult `json:"walletver"`
-	UpTime           int64                            `json:"uptime"`
-	Cpu              []cpu.InfoStat                   `json:"cpu"`
-	CpuPercent       []float64                        `json:"cpupercent"`
-	Memory           mem.VirtualMemoryStat            `json:"mem"`
-	Disk             disk.UsageStat                   `json:"disk"`
-	CurrentNet       string                           `json:"net"`
-	Chain            string                           `json:"chain"`
-	HashesPerSec     int64                            `json:"hashrate"`
-	Height           int32                            `json:"height"`
-	BestBlockHash    string                           `json:"bestblockhash"`
-	NetworkHashPS    int64                            `json:"networkhashrate"`
-	Difficulty       float64                          `json:"diff"`
-	Balance          DuOSbalance                      `json:"balance"`
-	BlockCount       int64                            `json:"blockcount"`
-	ConnectionCount  int32                            `json:"connectioncount"`
-	NetworkLastBlock int32                            `json:"networklastblock"`
-	TxsNumber        int                              `json:"txsnumber"`
-	//MempoolInfo      string                        `json:"ver"`
+type
+	DuOStatus struct {
+		Version       string                           `json:"ver"`
+		WalletVersion map[string]btcjson.VersionResult `json:"walletver"`
+		UpTime        int64                            `json:"uptime"`
+		CurrentNet    string                           `json:"net"`
+		Chain         string                           `json:"chain"`
+	}
+type
+	DuOShashes struct{ int64 }
+type
+	DuOSnetworkHash struct{ int64 }
+type
+	DuOSheight struct{ int32 }
+type
+	DuOSbestBlockHash struct{ string }
+type
+	DuOSdifficulty struct{ float64 }
+
+//type
+// MempoolInfo      struct { string}
+type
+	DuOSblockCount struct{ int64 }
+type
+	DuOSnetLastBlock struct{ int32 }
+type
+	DuOSconnections struct{ int32 }
+type
+	DuOSlocalHost struct {
+		Cpu        []cpu.InfoStat        `json:"cpu"`
+		CpuPercent []float64             `json:"cpupercent"`
+		Memory     mem.VirtualMemoryStat `json:"mem"`
+		Disk       disk.UsageStat        `json:"disk"`
 }
 
-func (r *rcvar) GetDuOStatus() (s DuOStatus) {
-	s = *new(DuOStatus)
-	sm, _ := mem.VirtualMemory()
-	sc, _ := cpu.Info()
-	sp, _ := cpu.Percent(0, true)
-	sd, _ := disk.Usage("/")
-	s.Cpu = sc
-	s.CpuPercent = sp
-	s.Memory = *sm
-	s.Disk = *sd
-	params := r.RPCServer.Cfg.ChainParams
-	chain := r.RPCServer.Cfg.Chain
-	chainSnapshot := chain.BestSnapshot()
-	gnhpsCmd := btcjson.NewGetNetworkHashPSCmd(nil, nil)
-	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(r.RPCServer, gnhpsCmd, nil)
+func
+(r *rcvar) GetDuOStatus() {
+	r.status = *new(DuOStatus)
+	v, err := rpc.HandleVersion(r.cx.RPCServer, nil, nil)
+	if err != nil {
+	}
+	r.status.Version = "0.0.1"
+	r.status.WalletVersion = v.(map[string]btcjson.VersionResult)
+	r.status.UpTime = time.Now().Unix() - r.cx.RPCServer.Cfg.StartupTime
+	r.status.CurrentNet = r.cx.RPCServer.Cfg.ChainParams.Net.String()
+	r.status.Chain = r.cx.RPCServer.Cfg.ChainParams.Name
+
+}
+func
+(r *rcvar) GetDuOShashesPerSec() {
+	r.hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
+}
+func
+(r *rcvar) GetDuOSnetworkHashesPerSec() {
+	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(r.cx.RPCServer, btcjson.NewGetNetworkHashPSCmd(nil, nil), nil)
 	if err != nil {
 	}
 	networkHashesPerSec, ok := networkHashesPerSecIface.(int64)
 	if !ok {
 	}
-	v, err := rpc.HandleVersion(r.RPCServer, nil, nil)
+	r.nethash = networkHashesPerSec
+}
+func
+(r *rcvar) GetDuOSheight() {
+	r.height = r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height
+}
+func
+(r *rcvar) GetDuOSbestBlockHash() {
+	r.bestblock = r.cx.RPCServer.Cfg.Chain.BestSnapshot().Hash.String()
+}
+func
+(r *rcvar) GetDuOSdifficulty() {
+	r.difficulty = rpc.GetDifficultyRatio(r.cx.RPCServer.Cfg.Chain.BestSnapshot().Bits, r.cx.RPCServer.Cfg.ChainParams, 2)
+	return
+}
+func
+(r *rcvar) GetDuOSblockCount() {
+	getBlockCount, err := rpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
 	if err != nil {
+		r.PushDuOSalert("Error", err.Error(), "error")
 	}
-	s.Version = "0.0.1"
-	s.WalletVersion = v.(map[string]btcjson.VersionResult)
-	s.UpTime = time.Now().Unix() - r.RPCServer.Cfg.StartupTime
-	s.CurrentNet = r.RPCServer.Cfg.ChainParams.Net.String()
-	s.NetworkHashPS = networkHashesPerSec
-	s.HashesPerSec = int64(r.RPCServer.Cfg.CPUMiner.HashesPerSecond())
-	s.Chain = params.Name
-	s.Height = chainSnapshot.Height
-	//s.Headers = chainSnapshot.Height
-	s.BestBlockHash = chainSnapshot.Hash.String()
-	s.Difficulty = rpc.GetDifficultyRatio(chainSnapshot.Bits, params, 2)
-	s.Balance.Balance = r.GetBalance().Balance
-	s.Balance.Unconfirmed = r.GetBalance().Unconfirmed
-	s.BlockCount = r.GetBlockCount()
-	s.ConnectionCount = r.GetConnectionCount()
-	s.NetworkLastBlock = r.GetNetworkLastBlock()
-	r.status = s
-	return s
+	r.blockcount = getBlockCount.(int64)
+	return
+}
+func
+(r *rcvar) GetDuOSnetworkLastBlock() {
+	for _, g := range rcv.cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
+		l := g.ToPeer().StatsSnapshot().LastBlock
+		if l > r.netlastblock {
+			r.netlastblock = l
+		}
+	}
+	return
+}
+func
+(r *rcvar) GetDuOSconnectionCount() {
+	r.connections = rcv.cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+	return
+}
+func
+(r *rcvar) GetDuOSlocalLost() {
+	r.localhost = *new(DuOSlocalHost)
+	sm, _ := mem.VirtualMemory()
+	sc, _ := cpu.Info()
+	sp, _ := cpu.Percent(0, true)
+	sd, _ := disk.Usage("/")
+	r.localhost.Cpu = sc
+	r.localhost.CpuPercent = sp
+	r.localhost.Memory = *sm
+	r.localhost.Disk = *sd
+	return
 }
