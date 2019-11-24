@@ -19,13 +19,25 @@ func WalletGUI(cx *conte.Xt) (err error) {
 	cx.Gui.Wv.SetColor(68, 68, 68, 255)
 
 	_, err = cx.Gui.Wv.Bind("alert", &DuOSalert{})
-	_, err = cx.Gui.Wv.Bind("balance", &DuOSbalance{})
-	_, err = cx.Gui.Wv.Bind("lastxs", &DuOStransactions{})
-	_, err = cx.Gui.Wv.Bind("blockcount", &DuOSblockCount{})
-	_, err = cx.Gui.Wv.Bind("connections", &DuOSconnections{})
-	_, err = cx.Gui.Wv.Bind("netlastblock", &DuOSnetLastBlock{})
+
 	_, err = cx.Gui.Wv.Bind("status", &DuOStatus{})
+
+	_, err = cx.Gui.Wv.Bind("hashes", &DuOShashes{})
+	_, err = cx.Gui.Wv.Bind("nethash", &DuOSnetworkHash{})
+	_, err = cx.Gui.Wv.Bind("height", &DuOSheight{})
+	_, err = cx.Gui.Wv.Bind("bestblock", &DuOSbestBlockHash{})
+
+	_, err = cx.Gui.Wv.Bind("blockcount", &DuOSblockCount{})
+	_, err = cx.Gui.Wv.Bind("netlastblock", &DuOSnetLastBlock{})
+	_, err = cx.Gui.Wv.Bind("connections", &DuOSconnections{})
+
+	_, err = cx.Gui.Wv.Bind("balance", &DuOSbalance{})
+	_, err = cx.Gui.Wv.Bind("transactions", &DuOStransactions{})
 	_, err = cx.Gui.Wv.Bind("txs", &DuOStransactionsExcerpts{})
+	_, err = cx.Gui.Wv.Bind("lastxs", &DuOStransactions{})
+
+	_, err = cx.Gui.Wv.Bind("localhost", &DuOSlocalHost{})
+
 
 	defer cx.Gui.Wv.Exit()
 	cx.Gui.Wv.Dispatch(func() {

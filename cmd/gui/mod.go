@@ -14,21 +14,27 @@ var rcv = &rcvar{
 }
 
 type rcvar struct {
-	cx           *conte.Xt
-	alert        DuOSalert
+	cx    *conte.Xt
+	alert DuOSalert
+
 	status       DuOStatus
-	nethash      int64
 	hashes       int64
+	nethash      int64
+	height       int32
+	bestblock    string
+	difficulty   float64
+	blockcount   int64
+	netlastblock int32
+	connections  int32
+
 	balance      DuOSbalance
 	transactions DuOStransactions
 	txs          DuOStransactionsExcerpts
 	lastxs       DuOStransactions
-	blockcount   int64
-	netlastblock int32
-	connections  int32
-	sent         bool
-	IsFirstRun   bool
-	localhost    LocalDuOShost
+
+	sent       bool
+	IsFirstRun bool
+	localhost  DuOSlocalHost
 }
 
 type RcVar interface {

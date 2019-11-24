@@ -9,12 +9,20 @@ func DuOSgatherer(cx *conte.Xt) {
 	rcv.cx = cx
 	go func() {
 		for _ = range time.NewTicker(time.Second * 1).C {
-			rcv.GetDuOSbalance()
-			rcv.GetDuOStransactions(0, 10, "all")
+			rcv.GetDuOStatus()
+
+			rcv.GetDuOShashesPerSec()
+			rcv.GetDuOSnetworkHashesPerSec()
+			rcv.GetDuOSheight()
+			rcv.GetDuOSbestBlockHash()
+
 			rcv.GetDuOSblockCount()
 			rcv.GetDuOSnetworkLastBlock()
 			rcv.GetDuOSconnectionCount()
-			rcv.GetDuOStatus()
+
+			rcv.GetDuOSbalance()
+			rcv.GetDuOStransactions(0, 10, "all")
+			rcv.GetDuOSlocalLost()
 
 		}
 	}()
