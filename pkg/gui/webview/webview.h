@@ -366,7 +366,7 @@ WEBVIEW_API void webview_set_fullscreen(struct webview *w, int fullscreen) {
 
 WEBVIEW_API void webview_set_color(struct webview *w, uint8_t r, uint8_t g,
                                    uint8_t b, uint8_t a) {
-  GdkRGBA color = {r / 255.0, g / 255.0, b / 255.0, a / 255.0};
+  GdkRGBA color = {r / 48.0, g / 48.0, b / 48.0, a / 255.0};
   webkit_web_view_set_background_color(WEBKIT_WEB_VIEW(w->priv.webview),
                                        &color);
 }
@@ -2125,12 +2125,12 @@ WEBVIEW_API void webview_set_color(struct webview *w, uint8_t r, uint8_t g,
 
   id color = objc_msgSend((id)objc_getClass("NSColor"),
                           sel_registerName("colorWithRed:green:blue:alpha:"),
-                          (float)r / 255.0, (float)g / 255.0, (float)b / 255.0,
+                          (float)r / 48.0, (float)g / 48.0, (float)b / 48.0,
                           (float)a / 255.0);
 
   objc_msgSend(w->priv.window, sel_registerName("setBackgroundColor:"), color);
 
-  if (0.5 >= ((r / 255.0 * 299.0) + (g / 255.0 * 587.0) + (b / 255.0 * 114.0)) /
+  if (0.5 >= ((r / 48.0 * 299.0) + (g / 48.0 * 587.0) + (b / 48.0 * 114.0)) /
                  1000.0) {
     objc_msgSend(w->priv.window, sel_registerName("setAppearance:"),
                  objc_msgSend((id)objc_getClass("NSAppearance"),
