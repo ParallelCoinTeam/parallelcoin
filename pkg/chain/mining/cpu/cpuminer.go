@@ -20,6 +20,8 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
+var tn = time.Now()
+
 // CPUMiner provides facilities for solving blocks (mining) using the CPU in a
 // concurrency-safe manner.  It consists of two main goroutines -- a speed
 // monitor and a controller for worker goroutines which generate and solve
@@ -591,7 +593,7 @@ func (m *CPUMiner) solveBlock(workerNumber uint32, msgBlock *wire.MsgBlock,
 // process is performing.  It must be run as a goroutine.
 func (m *CPUMiner) speedMonitor() {
 	var hashesPerSec float64
-	var totalHashes uint64
+	var totalHashes uint64 = 1
 	ticker := time.NewTicker(time.Second * hpsUpdateSecs)
 	defer ticker.Stop()
 out:
@@ -603,22 +605,22 @@ out:
 			totalHashes += numHashes
 		// Time to update the hashes per second.
 		case <-ticker.C:
-			curHashesPerSec := float64(totalHashes) / hpsUpdateSecs
-			if hashesPerSec == 0 {
-				hashesPerSec = curHashesPerSec
-			}
-			hashesPerSec = (hashesPerSec + curHashesPerSec) / 2
-			totalHashes = 0
-			if hashesPerSec != 0 {
-				//since := fmt.Sprint(time.Now().Sub(log.StartupTime) / time.
-				//	Second * time.Second)
-				log.Print(log.Composite(fmt.Sprintf(
-					"--> Hash speed: %6.4f Kh/s %0.2f h/s %0.4f h/s/thread",
-					hashesPerSec/1000,
-					hashesPerSec, hashesPerSec/float64(m.cfg.NumThreads)),
-					"STATUS", true),
-					"\r")
-			}
+			//curHashesPerSec := float64(totalHashes) / hpsUpdateSecs
+			//if hashesPerSec == 0 {
+			//	hashesPerSec = curHashesPerSec
+			//}
+			//hashesPerSec = (hashesPerSec + curHashesPerSec) / 2
+			////totalHashes = 0
+			//if hashesPerSec != 0 {
+			//since := fmt.Sprint(time.Now().Sub(log.StartupTime) / time.
+			//	Second * time.Second)
+			since := uint64(time.Now().Sub(tn)/time.Second) + 1
+			log.Print(log.Composite(fmt.Sprintf(
+				"--> Hash speed: %d hash/s av since start",
+				totalHashes/since),
+				"STATUS", true),
+				"\r")
+			//}
 		// Request for the number of hashes per second.
 		case m.queryHashesPerSec <- hashesPerSec:
 			// Nothing to do.
