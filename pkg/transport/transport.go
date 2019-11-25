@@ -47,8 +47,7 @@ type Connection struct {
 // NewConnection creates a new connection with a defined default send
 // connection and listener and pre shared key password for encryption on the
 // local network
-func NewConnection(send, listen, preSharedKey string,
-	maxDatagramSize int, ctx context.Context) (c *Connection, err error) {
+func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx context.Context, multicast bool) (c *Connection, err error) {
 	var sendAddr *net.UDPAddr
 	sendConn := []*net.UDPConn{}
 	var sC *net.UDPConn
@@ -64,11 +63,20 @@ func NewConnection(send, listen, preSharedKey string,
 		sendConn = append(sendConn, sC)
 	}
 	if listen != "" {
-		listenAddr = GetUDPAddr(listen)
-		listenConn, err = net.ListenUDP("udp", listenAddr)
-		if err != nil {
-			log.ERROR(err)
-			return
+		if multicast {
+			listenAddr = GetUDPAddr(listen)
+			listenConn, err = net.ListenMulticastUDP("udp", nil, listenAddr)
+			if err != nil {
+				log.ERROR(err)
+				return
+			}
+		} else {
+			listenAddr = GetUDPAddr(listen)
+			listenConn, err = net.ListenUDP("udp", listenAddr)
+			if err != nil {
+				log.ERROR(err)
+				return
+			}
 		}
 	}
 	ciph := gcm.GetCipher(preSharedKey)

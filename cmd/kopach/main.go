@@ -35,7 +35,7 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 	log.DEBUG("miner controller starting")
 	ctx, cancel := context.WithCancel(context.Background())
 	conn, err := transport.NewConnection("", controller.UDP4MulticastAddress,
-		*cx.Config.MinerPass, controller.MaxDatagramSize, ctx)
+		*cx.Config.MinerPass, controller.MaxDatagramSize, ctx, true)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
