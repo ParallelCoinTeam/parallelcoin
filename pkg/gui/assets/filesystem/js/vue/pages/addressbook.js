@@ -66,7 +66,7 @@ Vue.component('PageAddressBook', {
 	<ejs-grid
 ref='grid'
 height="100%" 
-:dataSource='this.addressbook.addresses'
+:dataSource='duOSaddressbook.addresses'
 :allowSorting='true' 
 :allowPaging='true'
 :sortSettings='sortOptions' 
