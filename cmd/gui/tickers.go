@@ -10,11 +10,11 @@ func (r *rcvar) DuOSgatherer() {
 		for _ = range time.NewTicker(time.Second * 1).C {
 			var err error
 			// Status
-			r.GetDuOStatus()
-			err = r.Render("osStatus", r.status)
-			if err != nil {
-				log.ERROR("error binding to webview:", err)
-			}
+			//r.GetDuOStatus()
+			//err = r.Render("osStatus", r.status)
+			//if err != nil {
+			//	log.ERROR("error binding to webview:", err)
+			//}
 			// Hashes
 			r.GetDuOShashesPerSec()
 			err = r.Render("osHashes", r.hashes)

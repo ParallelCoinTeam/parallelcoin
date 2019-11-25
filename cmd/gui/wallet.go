@@ -65,8 +65,7 @@ func
 func
 (r *rcvar) GetDuOSunconfirmedBalance() {
 	acct := "default"
-	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.
-	GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
+	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
 	if err != nil {
 		r.PushDuOSalert("Error", err.Error(), "error")
 	}

@@ -3,6 +3,7 @@ package gui
 import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/webview"
+	"github.com/p9c/pod/pkg/log"
 	"net/url"
 )
 
@@ -18,7 +19,11 @@ func WalletGUI(cx *conte.Xt) (err error) {
 	})
 	cx.Gui.Wv.SetColor(68, 68, 68, 255)
 
-	_, err = cx.Gui.Wv.Bind("rcvar", &rcvar{})
+	rc.cx = cx
+
+	//_, err = cx.Gui.Wv.Bind("rcvar", &rcvar{})
+
+
 
 	//_, err = cx.Gui.Wv.Bind("alert", &DuOSalert{})
 	//
@@ -44,20 +49,28 @@ func WalletGUI(cx *conte.Xt) (err error) {
 	//_, err = cx.Gui.Wv.Bind("localhost", &DuOSlocalHost{})
 
 	defer cx.Gui.Wv.Exit()
-	rc.cx = cx
 
 
 	cx.Gui.Wv.Dispatch(func() {
 		// Load CSS files
-		injectCss(rc)
+		rc.injectCss()
 		// Load JavaScript Files
-		err = evalJs(rc)
+		err = rc.evalJs()
+		if err != nil {
+			log.ERROR("error binding to webview:", err)
+		}
+
+		// Bind navigation
+		_, err = cx.Gui.Wv.Bind("nav", &DuOSnav{rc: rc})
+		if err != nil {
+			log.ERROR("error binding to webview:", err)
+		}
 	})
 
 
+		rc.DuOSgatherer()
 	//cx.Gui.Wv.Dispatch(func() {
 
-		rc.DuOSgatherer()
 
 		//log.INFO("ssasasass", rc)
 	//})

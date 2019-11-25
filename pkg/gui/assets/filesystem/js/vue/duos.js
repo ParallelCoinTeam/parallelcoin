@@ -6,7 +6,7 @@ Vue.prototype.$eventHub = new Vue();
 
 var rcvar = {
 	osStatus:{},
-	osBalance:11,
+	osBalance:0,
 	osUnconfirmed:0,
 	osTxsNumber:0,
 	osHashes:0,
@@ -58,7 +58,7 @@ var rcvar = {
 		"txsnumber":0
 	},
 	osLocalHost:[],
-	isScreen:'page-overview',
+	isScreen:'PageOverview',
 }
 
 var duOStransactions = {
