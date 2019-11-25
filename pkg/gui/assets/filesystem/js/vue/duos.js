@@ -2,6 +2,105 @@ Vue.config.devtools = true;
 Vue.use(VueFormGenerator);
 Vue.prototype.$eventHub = new Vue(); 
  
+
+
+var rcvar = {
+	osStatus:[],
+	osBalance:11,
+	osUnconfirmed:0,
+	osTxsNumber:0,
+	osHashes:0,
+	osNetHash:0,
+	osHeight:0,
+	osBestBlock:0,
+	osBlockCount:0,
+	osNetlastBlock:0,
+	osConnections:0,
+	osTransactions:[],
+	osTxs:[],
+	osLastTxs:{
+		"txs":[
+			{
+				"abandoned": false,
+				"account": "default",
+				"address": "8dKZQqzdcgxcAxpB86vUHN2oRtoL4cQaQr",
+				"amount": 0.03444004,
+				"blockhash": "9aed6d7ff84a362bdacabe0fd49b84c368354404205ce5de2e2d62c1abb70381",
+				"blocktime": 1574262671,
+				"category": "generate",
+				"confirmations": 1,
+				"generated": true,
+				"time": 1574262672,
+				"timereceived": 1574262672,
+				"trusted": false,
+				"txid": "33e3da64ef6d2ef7315683b5a0fa5fe7d4f4d77d564f6cad3214508f70d32d23",
+				"vout": 0,
+				"walletconflicts": []
+			  },
+			  {
+				"abandoned": false,
+				"account": "default",
+				"address": "8czZuVuBS13zbZsPKXvGGHx34VnauxHREs",
+				"amount": 0.03445372,
+				"blockhash": "2f1894d67c5010deefb4cd423c4faf4d37e5b70eceac09f49450df3b5ee32a44",
+				"blocktime": 1574262662,
+				"category": "generate",
+				"confirmations": 3,
+				"generated": true,
+				"time": 1574262662,
+				"timereceived": 1574262662,
+				"trusted": false,
+				"txid": "85764f758baabbde69a267154b2663d39a311eb5a4205fd59797fc5cc010a314",
+				"vout": 0,
+				"walletconflicts": []
+			  }			
+		],
+		"txsnumber":0
+	},
+	osLocalHost:[],
+	isScreen:'PageOverview',
+}
+
+var transactions = {
+	"txs":[
+		{
+			"abandoned": false,
+			"account": "default",
+			"address": "8dKZQqzdcgxcAxpB86vUHN2oRtoL4cQaQr",
+			"amount": 0.03444004,
+			"blockhash": "9aed6d7ff84a362bdacabe0fd49b84c368354404205ce5de2e2d62c1abb70381",
+			"blocktime": 1574262671,
+			"category": "generate",
+			"confirmations": 1,
+			"generated": true,
+			"time": 1574262672,
+			"timereceived": 1574262672,
+			"trusted": false,
+			"txid": "33e3da64ef6d2ef7315683b5a0fa5fe7d4f4d77d564f6cad3214508f70d32d23",
+			"vout": 0,
+			"walletconflicts": []
+		  },
+		  {
+			"abandoned": false,
+			"account": "default",
+			"address": "8czZuVuBS13zbZsPKXvGGHx34VnauxHREs",
+			"amount": 0.03445372,
+			"blockhash": "2f1894d67c5010deefb4cd423c4faf4d37e5b70eceac09f49450df3b5ee32a44",
+			"blocktime": 1574262662,
+			"category": "generate",
+			"confirmations": 3,
+			"generated": true,
+			"time": 1574262662,
+			"timereceived": 1574262662,
+			"trusted": false,
+			"txid": "85764f758baabbde69a267154b2663d39a311eb5a4205fd59797fc5cc010a314",
+			"vout": 0,
+			"walletconflicts": []
+		  }			
+	],
+	"txsnumber":0
+}
+
 var duoSystem = {
 	theme:false,
 	isBoot:false,
