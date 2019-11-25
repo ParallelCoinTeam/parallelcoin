@@ -109,8 +109,7 @@ func (c *BitcoindConn) Start() error {
 	// concern to ensure one type of event isn't dropped from the connection
 	// queue due to another type of event filling it up.
 	zmqBlockConn, err := gozmq.Subscribe(
-		c.zmqBlockHost, []string{"rawblock"}, c.zmqPollInterval,
-	)
+		c.zmqBlockHost, []string{"rawblock"})
 	if err != nil {
 		log.ERROR(err)
 		c.client.Disconnect()
@@ -118,8 +117,7 @@ func (c *BitcoindConn) Start() error {
 			"%v", err)
 	}
 	zmqTxConn, err := gozmq.Subscribe(
-		c.zmqTxHost, []string{"rawtx"}, c.zmqPollInterval,
-	)
+		c.zmqTxHost, []string{"rawtx"})
 	if err != nil {
 		log.ERROR(err)
 		c.client.Disconnect()
