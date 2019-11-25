@@ -1,4 +1,4 @@
-const PanelPeers = {
+Vue.component('PanelPeers', {
 	name: 'PanelPeers',
 	data () { return { 
 		pageSettings: { pageSize: 5 }
@@ -15,4 +15,4 @@ const PanelPeers = {
 			</e-columns>
 		</ejs-grid>
 	</div>`,
-}
+});

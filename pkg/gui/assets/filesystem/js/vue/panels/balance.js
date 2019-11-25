@@ -1,4 +1,4 @@
-const PanelBalance = {
+Vue.component('PanelBalance', {
 		name: 'PanelBalance',
 		template: `<div id="panelwalletstatus" class="rwrap flx Balance">
 			<div class="e-card flx flc justifyBetween duoCard">
@@ -15,4 +15,4 @@ const PanelBalance = {
 				</div>
 			</div>
 		</div>`,
-}
+});

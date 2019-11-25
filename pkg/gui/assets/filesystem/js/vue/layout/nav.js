@@ -12,7 +12,7 @@ var Nav = {
 			</button>
 		</li>
 		<li id='menutransactions' class='sidebar-item'>  
-		  <button @click="rcvar.isScreen = 'PageTransactions'" class="noMargin noPadding noBorder bgTrans sXs cursorPointer">
+		  <button @click="rcvar.isScreen = 'PageHistory'" class="noMargin noPadding noBorder bgTrans sXs cursorPointer">
 			<IcoHistory />
 		  </button>
 		</li>
