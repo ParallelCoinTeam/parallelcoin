@@ -1,6 +1,6 @@
 var PageHistory = {
 	data () { return { 
-	  duoSystem }},
+	  rcvar }},
 	name: 'History',
   	template: `<main class="pageTransaction">
 	  <PanelHistory :transactions="duoSystem.transactions"/>

@@ -33,7 +33,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 			log.ERROR(err)
 		}
 
-		gui.DuOSgatherer(cx)
+		//gui.DuOSgatherer(cx)
 		// We open up wallet creation
 		gui.WalletGUI(cx)
 

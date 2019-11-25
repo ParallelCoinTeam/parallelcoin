@@ -13,7 +13,7 @@ const PanelHistory = {
 		<div class="select-wrap">
 			<ejs-dropdownlist id='ddlelement' :dataSource='ddldata' placeholder='Select category to filter'></ejs-dropdownlist>
 		</div>
-		<ejs-grid :dataSource="this.transactions.txsEx.txs" height="100%" :allowPaging="true" :pageSettings='pageSettings'>
+		<ejs-grid :dataSource="transactions.txs" height="100%" :allowPaging="true" :pageSettings='pageSettings'>
 			<e-columns>
 				<e-column field='category' headerText='Category' textAlign='Right' width=90></e-column>
 				<e-column field='time' headerText='Time' format='unix'  textAlign='Right' width=90></e-column>

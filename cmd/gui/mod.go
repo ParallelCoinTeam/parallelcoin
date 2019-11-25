@@ -4,14 +4,7 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 )
 
-var rcv = &rcvar{
-	alert:       DuOSalert{},
-	status:      DuOStatus{},
-	balance:     DuOSbalance{},
-	lastxs:      DuOStransactions{},
-	blockcount:  0,
-	connections: 0,
-}
+
 
 type rcvar struct {
 	cx    *conte.Xt
@@ -27,10 +20,12 @@ type rcvar struct {
 	netlastblock int32
 	connections  int32
 
-	balance      DuOSbalance
+	balance      string
+	unconfirmed  string
+	txsnumber    int
 	transactions DuOStransactions
 	txs          DuOStransactionsExcerpts
-	lastxs       DuOStransactions
+	lasttxs       DuOStransactions
 
 	sent       bool
 	IsFirstRun bool

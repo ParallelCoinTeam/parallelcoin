@@ -1,6 +1,6 @@
 const PanelSend = {
 	data () { return { 
-	duoSystem }},
+        rcvar }},
     name: 'PanelSend',
     data (){
         return {

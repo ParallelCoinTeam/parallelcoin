@@ -2,7 +2,7 @@ var Xorg = new Vue({
 	el: '#xorg', 
 	name: 'Xorg',
 	data () { return { 
-	  duoSystem }},
+	  rcvar }},
 	  components: {
 		Logo,
 		Header,
@@ -25,7 +25,7 @@ var Xorg = new Vue({
           <div class="Side"></div>
         </div>
         <div id="main" class="grayGrad Main">
-          <component :is="duoSystem.isScreen"></component>
+        <keep-alive><component :is="rcvar.isScreen"></component></keep-alive>
         </div>
       </div>
     </div>
