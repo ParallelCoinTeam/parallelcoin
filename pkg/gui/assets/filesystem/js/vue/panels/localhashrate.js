@@ -1,10 +1,6 @@
 const PanelLocalHashrate = {
-	name: 'PanelLocalHashrate',
-	props:{
-		hashrate:Object,
-	},
-	data:function(){
-			return { 
+    name: 'PanelLocalHashrate',
+    data () { return { 
         height: '100%',
         width: '100%',
     	padding: { left: 0, right: 0, bottom: 0, top: 0},
@@ -59,7 +55,7 @@ methods:{
         let temp = gauge.dataSource.length - 1;
         this.update = setInterval(function() {
             if (gauge.element.className.indexOf('e-sparkline') > -1) {
-                let value = this.hashrate;
+                let value = rcvar.osHashes;
                 gauge.dataSource.push({ x: ++temp, yval: value });
                 gauge.dataSource.shift();
                 gauge.refresh();

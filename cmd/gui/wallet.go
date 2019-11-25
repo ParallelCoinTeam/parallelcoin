@@ -12,32 +12,39 @@ import (
 )
 
 type
-DuOSbalance struct {
-	Balance     string `json:"balance"`
-	Unconfirmed string `json:"unconfirmed"`
-}
+	DuOSbalance struct {
+		Balance string `json:"balance"`
+	}
 type
-DuOStransactions struct {
-	Txs       []btcjson.ListTransactionsResult `json:"txs"`
-	TxsNumber int                              `json:"txsnumber"`
-}
+	DuOSunconfirmed struct {
+		Unconfirmed string `json:"unconfirmed"`
+	}
 type
-DuOStransactionsExcerpts struct {
-	Txs           []DuOStransactionExcerpt `json:"txs"`
-	TxsNumber     int                  `json:"txsnumber"`
-	Balance       float64              `json:"balance"`
-	BalanceHeight float64              `json:"balanceheight"`
-}
+	DuOStransactions struct {
+		Txs []btcjson.ListTransactionsResult `json:"txs"`
+		TxsNumber int `json:"txsnumber"`
+	}
 type
-DuOStransactionExcerpt struct {
-	Balance       float64 `json:"balance"`
-	Amount        float64 `json:"amount"`
-	Category      string  `json:"category"`
-	Confirmations int64   `json:"confirmations"`
-	Time          string  `json:"time"`
-	TxID          string  `json:"txid"`
-	Comment       string  `json:"comment,omitempty"`
-}
+	DuOStransactionsNumber struct {
+		TxsNumber int `json:"txsnumber"`
+	}
+type
+	DuOStransactionsExcerpts struct {
+		Txs           []DuOStransactionExcerpt `json:"txs"`
+		TxsNumber     int                      `json:"txsnumber"`
+		Balance       float64                  `json:"balance"`
+		BalanceHeight float64                  `json:"balanceheight"`
+	}
+type
+	DuOStransactionExcerpt struct {
+		Balance       float64 `json:"balance"`
+		Amount        float64 `json:"amount"`
+		Category      string  `json:"category"`
+		Confirmations int64   `json:"confirmations"`
+		Time          string  `json:"time"`
+		TxID          string  `json:"txid"`
+		Comment       string  `json:"comment,omitempty"`
+	}
 
 func
 (r *rcvar) GetDuOSbalance() {
@@ -51,26 +58,42 @@ func
 	gb, ok := getBalance.(float64)
 	if ok {
 		bb := fmt.Sprintf("%0.8f", gb)
-		r.balance.Balance = bb
+		r.balance = bb
 	}
+	return
+}
+func
+(r *rcvar) GetDuOSunconfirmedBalance() {
+	acct := "default"
 	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.
-		GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
+	GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
 	if err != nil {
 		r.PushDuOSalert("Error", err.Error(), "error")
 	}
 	ub, ok := getUnconfirmedBalance.(float64)
 	if ok {
 		ubb := fmt.Sprintf("%0.8f", ub)
-		r.balance.Unconfirmed = ubb
+		r.unconfirmed = ubb
 	}
 	return
 }
 
 func
-(r *rcvar) GetDuOStransactions(sfrom, count int, cat string)  {
+(r *rcvar) GetDuOStransactionsNumber() {
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
-	lt, err := r.cx.WalletServer.ListTransactions(0, 10)
+	lt, err := r.cx.WalletServer.ListTransactions(0, 999999999)
+	if err != nil {
+		r.PushDuOSalert("Error", err.Error(), "error")
+	}
+	r.txsnumber = len(lt)
+}
+
+func
+(r *rcvar) GetDuOStransactions(sfrom, count int, cat string) DuOStransactions{
+	// account, txcount, startnum, watchonly := "*", n, f, false
+	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
+	lt, err := r.cx.WalletServer.ListTransactions(sfrom, count)
 	if err != nil {
 		r.PushDuOSalert("Error", err.Error(), "error")
 	}
@@ -104,9 +127,13 @@ func
 	default:
 		r.transactions.Txs = lt
 	}
+	return r.transactions
+}
+func
+(r *rcvar) GetDuOSlastTxs() {
+	r.lasttxs = r.GetDuOStransactions(0, 10,"")
 	return
 }
-
 func
 (r *rcvar) GetDuOSTransactionsExcertps() {
 	lt, err := r.cx.WalletServer.ListTransactions(0, 99999)
@@ -145,7 +172,7 @@ func
 }
 
 func
-(r *rcvar) DuoSend(wp string, ad string, am float64)  {
+(r *rcvar) DuoSend(wp string, ad string, am float64) {
 	if am > 0 {
 		getBlockChain, err := rpc.HandleGetBlockChainInfo(r.cx.RPCServer, nil, nil)
 		if err != nil {
@@ -176,7 +203,7 @@ func
 		if err == nil {
 			var va interface{}
 			va, err = legacy.ValidateAddress(&btcjson.
-				ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
+			ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
 			if err != nil {
 				r.PushDuOSalert("Error", err.Error(), "error")
 			}

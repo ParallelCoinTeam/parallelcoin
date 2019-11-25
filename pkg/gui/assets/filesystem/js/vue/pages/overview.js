@@ -3,28 +3,31 @@ var PageOverview = {
   	name: "Overview",
   	template: `<main class="pageOverview">
 	  <div id="panelwalletstatus" class="Balance">
-		  <PanelBalance :balance="duoSystem.status.balance" :txsnumber="duoSystem.status.txsnumber"/>
+	  <PanelBalance />
 	  </div>
 	  <div id="panelsend" class="Send">
-		  <PanelSend />
+	  <PanelSend />
 	  </div>
 	  <div id="panelnetworkhashrate" class="NetHash">
-	<PanelNetworkHashrate :hashrate="duoSystem.status.networkhashrate"/>
+	  <PanelNetworkHashrate />
 	  </div>
 	  <div id="panellocalhashrate" class="LocalHash">
-	  <PanelLocalHashrate :hashrate="duoSystem.status.hashrate"/> 
+	  <PanelLocalHashrate />
 	  </div>
 	  <div id="panelstatus" class="Status">
-		  <PanelStatus :status="duoSystem.status"/>
+		<PanelStatus />
 	  </div>
 	  <div id="paneltxsex" class="Txs">
-	  <PanelLatestTx :transactions="duoSystem.transactions"/>
+	  <PanelLatestTx />
 	  </div>
 	  <div class="Log">
+	  7
 	  </div>
 	  <div class="Info">
+	  8
 	  </div>
 	  <div class="Time">
+	  9
 	  </div>
   </main>`,
   	components: {

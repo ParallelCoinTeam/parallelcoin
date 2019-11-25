@@ -1,11 +1,10 @@
 const PanelPeers = {
 	name: 'PanelPeers',
 	data () { return { 
-	duoSystem,
 		pageSettings: { pageSize: 5 }
 	}},
 		template: `<div class="rwrap">
-		<ejs-grid :dataSource="this.duoSystem.peers" :allowPaging="true" :pageSettings='pageSettings'>
+		<ejs-grid :dataSource="rcvar.peers" :allowPaging="true" :pageSettings='pageSettings'>
 			<e-columns>
 				<e-column field='addr' headerText='Address' textAlign='Right' width=90></e-column>
 				<e-column field='pingtime' headerText='Ping time' width=120></e-column>
