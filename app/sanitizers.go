@@ -49,7 +49,9 @@ func initDataDir(cfg *pod.Config) {
 
 func initWalletFile(cx *conte.Xt) {
 	if cx.Config.WalletFile == nil || *cx.Config.WalletFile == "" {
-		*cx.Config.WalletFile = *cx.Config.DataDir + slash + cx.ActiveNet.Name + slash + wallet.WalletDbName
+		*cx.
+			Config.
+			WalletFile = *cx.Config.DataDir + slash + cx.ActiveNet.Name + slash + wallet.WalletDbName
 	}
 	log.DEBUG("walletfile set to", *cx.Config.WalletFile)
 }

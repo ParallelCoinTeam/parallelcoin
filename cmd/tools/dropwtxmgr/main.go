@@ -4,10 +4,10 @@ package main
 import (
 	"bufio"
 	"encoding/binary"
-	"fmt"
-	"github.com/p9c/pod/pkg/log"
 	"os"
 	"path/filepath"
+
+	"github.com/p9c/pod/pkg/log"
 
 	"github.com/jessevdk/go-flags"
 
