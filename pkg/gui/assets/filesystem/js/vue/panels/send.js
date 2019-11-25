@@ -1,4 +1,4 @@
-const PanelSend = {
+Vue.component('PanelSend', {
 	data () { return { 
         rcvar }},
     name: 'PanelSend',
@@ -78,4 +78,4 @@ const PanelSend = {
 </ejs-dialog>
 </div>
 </div>`,
-}
+});

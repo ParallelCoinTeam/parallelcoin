@@ -10,6 +10,9 @@ import (
 
 func DuOSfileSystem(cx *conte.Xt) (err error) {
 	// create filesystem
+
+	//pkger.Pkger(cx.Gui.Cf.Assets)
+
 	var fs http.FileSystem = http.Dir("./pkg/gui/assets/filesystem")
 	err = vfsgen.Generate(fs, vfsgen.Options{
 		PackageName:  "guiFileSystem",
