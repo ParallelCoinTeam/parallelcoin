@@ -21,10 +21,6 @@ func WalletGUI(cx *conte.Xt) (err error) {
 
 	rc.cx = cx
 
-	//_, err = cx.Gui.Wv.Bind("rcvar", &rcvar{})
-
-
-
 	//_, err = cx.Gui.Wv.Bind("alert", &DuOSalert{})
 	//
 	//_, err = cx.Gui.Wv.Bind("status", &DuOStatus{})
@@ -50,8 +46,15 @@ func WalletGUI(cx *conte.Xt) (err error) {
 
 	defer cx.Gui.Wv.Exit()
 
-
 	cx.Gui.Wv.Dispatch(func() {
+
+		_, err = cx.Gui.Wv.Bind("rcvar", &rcvar{})
+		// Bind navigation
+		_, err = cx.Gui.Wv.Bind("duOSnav", &DuOSnav{rc: rc})
+		if err != nil {
+			log.ERROR("error binding to webview:", err)
+		}
+
 		// Load CSS files
 		rc.injectCss()
 		// Load JavaScript Files
@@ -59,20 +62,12 @@ func WalletGUI(cx *conte.Xt) (err error) {
 		if err != nil {
 			log.ERROR("error binding to webview:", err)
 		}
-
-		// Bind navigation
-		_, err = cx.Gui.Wv.Bind("nav", &DuOSnav{rc: rc})
-		if err != nil {
-			log.ERROR("error binding to webview:", err)
-		}
 	})
 
-
-		rc.DuOSgatherer()
+	rc.DuOSgatherer()
 	//cx.Gui.Wv.Dispatch(func() {
 
-
-		//log.INFO("ssasasass", rc)
+	//log.INFO("ssasasass", rc)
 	//})
 
 	cx.Gui.Wv.Run()
