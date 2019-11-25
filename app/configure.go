@@ -17,11 +17,11 @@ Configure(cx *conte.Xt, ctx *cli.Context) {
 	st := cx.StateCfg
 	initDictionary(cfg)
 	initDataDir(cfg)
-	initWalletFile(cx)
 	initTLSStuffs(cfg, st)
 	initConfigFile(cfg)
 	initLogDir(cfg)
 	initParams(cx)
+	initWalletFile(cx)
 	initListeners(cx, ctx)
 	initLogLevel(cfg)
 	// Don't add peers from the config file when in regression test mode.
