@@ -2,14 +2,15 @@ package app
 
 import (
 	"encoding/binary"
-	_ "github.com/gohouse/i18n/parser_json"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 	"path/filepath"
 	"time"
 
+	_ "github.com/gohouse/i18n/parser_json"
+
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+
 	"github.com/urfave/cli"
-	"github.com/urfave/cli/altsrc"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
@@ -195,38 +196,38 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			//),
 		},
 		Flags: []cli.Flag{
-			altsrc.NewStringFlag(cli.StringFlag{
+			cli.StringFlag{
 				Name:        "lang, L",
 				Value:       *cx.Config.Language,
 				Usage:       "sets the data directory base for a pod instance",
 				EnvVar:      "POD_LANGUAGE",
 				Destination: cx.Config.Language,
-			}),
-			altsrc.NewStringFlag(cli.StringFlag{
+			},
+			cli.StringFlag{
 				Name:        "datadir, D",
 				Value:       *cx.Config.DataDir,
 				Usage:       "sets the data directory base for a pod instance",
 				EnvVar:      "POD_DATADIR",
 				Destination: cx.Config.DataDir,
-			}),
-			altsrc.NewStringFlag(cli.StringFlag{
+			},
+			cli.StringFlag{
 				Name:        "walletfile, WF",
 				Value:       *cx.Config.WalletFile,
 				Usage:       "sets the data directory base for a pod instance",
 				EnvVar:      "POD_WALLETFILE",
 				Destination: cx.Config.WalletFile,
-			}),
+			},
 			apputil.BoolTrue("save, i",
 				"save settings as effective from invocation",
 				&cx.StateCfg.Save,
 			),
-			altsrc.NewStringFlag(cli.StringFlag{
+			cli.StringFlag{
 				Name:        "loglevel, l",
 				Value:       *cx.Config.LogLevel,
 				Usage:       "sets the base for all subsystem logging",
 				EnvVar:      "POD_LOGLEVEL",
 				Destination: cx.Config.LogLevel,
-			}),
+			},
 			apputil.String(
 				"network, n",
 				"connect to mainnet/testnet/regtest/simnet",
