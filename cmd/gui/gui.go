@@ -7,45 +7,61 @@ import (
 )
 
 func WalletGUI(cx *conte.Xt) (err error) {
-
+	rc := &rcvar{}
 	cx.Gui.Wv = webview.New(webview.Settings{
-		Width:  1024,
-		Height: 760,
-		Debug:  true,
+		Width:     1024,
+		Height:    760,
+		Debug:     true,
 		Resizable: false,
-		Title:  "ParallelCoin - DUO - True Story",
-		URL:    "data:text/html," + url.PathEscape(getFile("vue.html", *cx.Gui.Fs)),
+		Title:     "ParallelCoin - DUO - True Story",
+		URL:       "data:text/html," + url.PathEscape(getFile("vue.html", *cx.Gui.Fs)),
 	})
 	cx.Gui.Wv.SetColor(68, 68, 68, 255)
 
-	_, err = cx.Gui.Wv.Bind("alert", &DuOSalert{})
+	_, err = cx.Gui.Wv.Bind("rcvar", &rcvar{})
 
-	_, err = cx.Gui.Wv.Bind("status", &DuOStatus{})
-
-	_, err = cx.Gui.Wv.Bind("hashes", &DuOShashes{})
-	_, err = cx.Gui.Wv.Bind("nethash", &DuOSnetworkHash{})
-	_, err = cx.Gui.Wv.Bind("height", &DuOSheight{})
-	_, err = cx.Gui.Wv.Bind("bestblock", &DuOSbestBlockHash{})
-
-	_, err = cx.Gui.Wv.Bind("blockcount", &DuOSblockCount{})
-	_, err = cx.Gui.Wv.Bind("netlastblock", &DuOSnetLastBlock{})
-	_, err = cx.Gui.Wv.Bind("connections", &DuOSconnections{})
-
-	_, err = cx.Gui.Wv.Bind("balance", &DuOSbalance{})
-	_, err = cx.Gui.Wv.Bind("transactions", &DuOStransactions{})
-	_, err = cx.Gui.Wv.Bind("txs", &DuOStransactionsExcerpts{})
-	_, err = cx.Gui.Wv.Bind("lastxs", &DuOStransactions{})
-
-	_, err = cx.Gui.Wv.Bind("localhost", &DuOSlocalHost{})
-
+	//_, err = cx.Gui.Wv.Bind("alert", &DuOSalert{})
+	//
+	//_, err = cx.Gui.Wv.Bind("status", &DuOStatus{})
+	//
+	//_, err = cx.Gui.Wv.Bind("hashes", &DuOShashes{})
+	//_, err = cx.Gui.Wv.Bind("nethash", &DuOSnetworkHash{})
+	//_, err = cx.Gui.Wv.Bind("height", &DuOSheight{})
+	//_, err = cx.Gui.Wv.Bind("bestblock", &DuOSbestBlockHash{})
+	//
+	//_, err = cx.Gui.Wv.Bind("blockcount", &DuOSblockCount{})
+	//_, err = cx.Gui.Wv.Bind("netlastblock", &DuOSnetLastBlock{})
+	//_, err = cx.Gui.Wv.Bind("connections", &DuOSconnections{})
+	//
+	//_, err = cx.Gui.Wv.Bind("balance", &DuOSbalance{})
+	//_, err = cx.Gui.Wv.Bind("unconfirmed", &DuOSunconfirmed{})
+	//_, err = cx.Gui.Wv.Bind("txsnumber", &DuOStransactionsNumber{})
+	//
+	//_, err = cx.Gui.Wv.Bind("transactions", &DuOStransactions{})
+	//_, err = cx.Gui.Wv.Bind("txs", &DuOStransactionsExcerpts{})
+	//_, err = cx.Gui.Wv.Bind("lastxs", &DuOStransactions{})
+	//
+	//_, err = cx.Gui.Wv.Bind("localhost", &DuOSlocalHost{})
 
 	defer cx.Gui.Wv.Exit()
+	rc.cx = cx
+
+
 	cx.Gui.Wv.Dispatch(func() {
 		// Load CSS files
-		injectCss(rcv)
+		injectCss(rc)
 		// Load JavaScript Files
-		err = evalJs(rcv)
+		err = evalJs(rc)
 	})
+
+
+	//cx.Gui.Wv.Dispatch(func() {
+
+		rc.DuOSgatherer()
+
+		//log.INFO("ssasasass", rc)
+	//})
+
 	cx.Gui.Wv.Run()
 
 	return

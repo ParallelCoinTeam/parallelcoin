@@ -43,7 +43,7 @@ type
 		CpuPercent []float64             `json:"cpupercent"`
 		Memory     mem.VirtualMemoryStat `json:"mem"`
 		Disk       disk.UsageStat        `json:"disk"`
-}
+	}
 
 func
 (r *rcvar) GetDuOStatus() {
@@ -56,11 +56,12 @@ func
 	r.status.UpTime = time.Now().Unix() - r.cx.RPCServer.Cfg.StartupTime
 	r.status.CurrentNet = r.cx.RPCServer.Cfg.ChainParams.Net.String()
 	r.status.Chain = r.cx.RPCServer.Cfg.ChainParams.Name
-
+	return
 }
 func
 (r *rcvar) GetDuOShashesPerSec() {
 	r.hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
+	return
 }
 func
 (r *rcvar) GetDuOSnetworkHashesPerSec() {
@@ -71,14 +72,17 @@ func
 	if !ok {
 	}
 	r.nethash = networkHashesPerSec
+	return
 }
 func
 (r *rcvar) GetDuOSheight() {
 	r.height = r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height
+	return
 }
 func
 (r *rcvar) GetDuOSbestBlockHash() {
 	r.bestblock = r.cx.RPCServer.Cfg.Chain.BestSnapshot().Hash.String()
+	return
 }
 func
 (r *rcvar) GetDuOSdifficulty() {
@@ -96,7 +100,7 @@ func
 }
 func
 (r *rcvar) GetDuOSnetworkLastBlock() {
-	for _, g := range rcv.cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
+	for _, g := range r.cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
 		l := g.ToPeer().StatsSnapshot().LastBlock
 		if l > r.netlastblock {
 			r.netlastblock = l
@@ -106,7 +110,7 @@ func
 }
 func
 (r *rcvar) GetDuOSconnectionCount() {
-	r.connections = rcv.cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+	r.connections = r.cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
 	return
 }
 func
