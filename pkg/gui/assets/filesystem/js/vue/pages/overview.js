@@ -1,4 +1,4 @@
-var PageOverview = {
+Vue.component('PageOverview', {
 	el: "#overview",
   	name: "Overview",
   	template: `<main class="pageOverview">
@@ -30,12 +30,4 @@ var PageOverview = {
 	  9
 	  </div>
   </main>`,
-  	components: {
-		PanelBalance,
-		PanelSend,
-		PanelLatestTx,
-		PanelLocalHashrate,
-		PanelNetworkHashrate,
-		PanelStatus
-	}
-}
+});

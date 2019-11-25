@@ -5,7 +5,7 @@ Vue.prototype.$eventHub = new Vue();
 
 
 var rcvar = {
-	osStatus:[],
+	osStatus:{},
 	osBalance:11,
 	osUnconfirmed:0,
 	osTxsNumber:0,
@@ -58,10 +58,10 @@ var rcvar = {
 		"txsnumber":0
 	},
 	osLocalHost:[],
-	isScreen:'PageOverview',
+	isScreen:'page-overview',
 }
 
-var transactions = {
+var duOStransactions = {
 	"txs":[
 		{
 			"abandoned": false,
@@ -100,6 +100,21 @@ var transactions = {
 	],
 	"txsnumber":0
 }
+
+var duOSsettings = {
+	theme:false,
+}
+
+
+var duOSaddressbook = {
+	theme:false,
+}
+
+var duOSblocks = {
+	theme:false,
+}
+
+
 
 var duoSystem = {
 	theme:false,
