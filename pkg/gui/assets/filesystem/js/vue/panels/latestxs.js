@@ -1,4 +1,4 @@
-const PanelLatestTx = {
+Vue.component('PanelLatestTx', {
 		name: 'PanelLatestTx',
 		data () { return { 
 			pageSettings: { pageSize: 10, pageCount: 1 }
@@ -13,4 +13,4 @@ const PanelLatestTx = {
 				</e-columns>
 			</ejs-grid>
 	</div>`,
-}
+});

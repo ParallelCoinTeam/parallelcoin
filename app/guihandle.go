@@ -23,8 +23,13 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if err != nil {
 			log.ERROR(err)
 		}
-		cx.Gui = &gcx.GUI{}
+		cx.Gui = &gcx.GUI{
+			Cf: &gcx.Configuration{
+				Assets:"./pkg/gui/assets/filesystem",
+			},
+		}
 		err = gui.DuOSfileSystem(cx)
+
 
 		//gui.DuOSloader(cx, firstRun)
 

@@ -1,9 +1,9 @@
-const PageExplorer = {
+Vue.component('PageExplorer', {
 	data () { return { 
-		duoSystem }},
+		rcvar }},
 		name: 'Explorer',
 		components: {},
 		template: `<main class="pageExplorer">
         pageExplorer
     	</main>`
-}
+});

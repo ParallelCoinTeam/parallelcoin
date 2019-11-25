@@ -1,4 +1,4 @@
-const PanelLocalHashrate = {
+Vue.component('PanelLocalHashrate', {
     name: 'PanelLocalHashrate',
     data () { return { 
         height: '100%',
@@ -74,4 +74,4 @@ methods:{
 	</div>
 	<div id="lhr" style="color: #d1a990;position: absolute; top:25px; left: 15px;">R: 0H/s</div>
 </div>`,
-}
+});

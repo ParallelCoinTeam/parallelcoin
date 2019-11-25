@@ -1,4 +1,4 @@
-var Header = {
+Vue.component('Header', {
   	name: "Header",
   	template: `<header class="Header bgLight">
 	  <div class="h1"></div>
@@ -18,4 +18,4 @@ var Header = {
 		<button id="toggle" ref="toggleBoardbtn" class="e-btn e-info"  cssClass="e-flat" iconCss="e-icons burg-icon" isToggle="true">Open</button>
 	  </div>
 	</header>`,
-}
+});
