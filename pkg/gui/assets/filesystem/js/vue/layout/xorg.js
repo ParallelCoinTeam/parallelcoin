@@ -3,15 +3,6 @@ var Xorg = new Vue({
 	name: 'Xorg',
 	data () { return { 
 	  rcvar }},
-	  components: {
-		Logo,
-		Header,
-		Nav,
-		PageOverview,
-		PageHistory,
-		PageAddressBook,
-		PageSettings
-	  },
 	template: `<div id="app" class="fullScreen bgDark flx lightTheme">
     <div id="display" class="fii">
       <div class="grid-container rwrap bgDark">
@@ -25,7 +16,7 @@ var Xorg = new Vue({
           <div class="Side"></div>
         </div>
         <div id="main" class="grayGrad Main">
-        <keep-alive><component :is="rcvar.isScreen"></component></keep-alive>
+        <keep-alive><component v-bind:is="rcvar.isScreen"></component></keep-alive>
         </div>
       </div>
     </div>
