@@ -1,4 +1,4 @@
-const PanelStatus = {
+Vue.component('PanelStatus', {
 		name: 'PanelStatus',
 		template: `<div class="rwrap">
 		<ul class="rf flx flc noPadding justifyEvenly">
@@ -11,4 +11,4 @@ const PanelStatus = {
 			<li class="flx fwd spb htg rr"><span class="rcx2"></span><span class="rcx4">Connections: </span><strong class="rcx6"><span v-html="rcvar.osStatus.connectioncount"></span></strong></li>
 		</ul>
 	</div>`,
-}
+});
