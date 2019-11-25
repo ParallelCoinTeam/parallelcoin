@@ -2,8 +2,10 @@ package kopach
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"sync"
+	"time"
 
 	"go.uber.org/atomic"
 
@@ -25,6 +27,8 @@ type Worker struct {
 	mx            *sync.Mutex
 	sendAddresses []*net.UDPAddr
 	workers       []*client.Client
+	firstSender   string
+	lastSent      time.Time
 }
 
 func Main(cx *conte.Xt, quit chan struct{}) {
@@ -54,6 +58,7 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 		mx:            &sync.Mutex{},
 		sendAddresses: []*net.UDPAddr{},
 		workers:       workers,
+		lastSent:      time.Now(),
 	}
 	w.active.Store(false)
 	for i := range w.workers {
@@ -63,12 +68,46 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 			log.ERROR(err)
 		}
 	}
-	err = w.conn.Listen(handlers, w)
+	err = w.conn.Listen(handlers, w, &w.lastSent, &w.firstSender)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
 		return
 	}
+	// controller watcher thread
+	go func() {
+		ticker := time.NewTicker(time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				//log.DEBUG("tick", w.lastSent, w.firstSender)
+				// if the last message sent was 3 seconds ago the server is
+				// almost certainly disconnected or crashed so clear firstSender
+				w.mx.Lock()
+				since := time.Now().Sub(w.lastSent)
+				wasSending := since > time.Second*3 && w.firstSender != ""
+				w.mx.Unlock()
+				if wasSending {
+					log.DEBUG("previous current controller has stopped" +
+						" broadcasting")
+					// when this string is clear other broadcasts will be
+					// listened to
+					w.mx.Lock()
+					w.firstSender = ""
+					w.mx.Unlock()
+					// pause the workers
+					for i := range w.workers {
+						log.DEBUG("sending pause to worker", i)
+						err := w.workers[i].Pause()
+						if err != nil {
+							log.ERROR(err)
+						}
+					}
+				}
+			case <-quit:
+			}
+		}
+	}()
 	log.DEBUG("listening on", controller.UDP4MulticastAddress)
 	<-quit
 	log.INFO("kopach shutting down")
@@ -80,11 +119,24 @@ var handlers = transport.HandleFunc{
 		return func(b []byte) (err error) {
 			log.DEBUG("received job")
 			w := ctx.(*Worker)
-			_ = w
-			//log.SPEW(b)
 			j := job.LoadMinerContainer(b)
-			log.DEBUG(j.String())
-			//log.DEBUG("workers", len(w.workers))
+			ips := j.GetIPs()
+			cP := j.GetControllerListenerPort()
+			addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
+			w.mx.Lock()
+			otherSent := w.firstSender != addr && w.firstSender != ""
+			w.mx.Unlock()
+			if otherSent {
+				// ignore other controllers while one is active and received
+				// first
+				log.DEBUG("ignoring other controller", addr)
+				return
+			} else {
+				w.mx.Lock()
+				w.firstSender = addr
+				w.lastSent = time.Now()
+				w.mx.Unlock()
+			}
 			for i := range w.workers {
 				log.DEBUG("sending job to worker", i)
 				err := w.workers[i].NewJob(&j)
@@ -99,14 +151,6 @@ var handlers = transport.HandleFunc{
 		return func(b []byte) (err error) {
 			log.DEBUG("received pause")
 			w := ctx.(*Worker)
-			_ = w
-			//log.SPEW(b)
-			j := pause.LoadPauseContainer(b)
-			log.DEBUG(j.Count())
-			log.DEBUG(j.GetIPs())
-			log.DEBUG(j.GetP2PListenersPort())
-			log.DEBUG(j.GetRPCListenersPort())
-			log.DEBUG(j.GetControllerListenerPort())
 			for i := range w.workers {
 				log.DEBUG("sending pause to worker", i)
 				err := w.workers[i].Pause()
@@ -114,7 +158,10 @@ var handlers = transport.HandleFunc{
 					log.ERROR(err)
 				}
 			}
-
+			w.mx.Lock()
+			// clear the firstSender
+			w.firstSender = ""
+			w.mx.Unlock()
 			return
 		}
 	},

@@ -117,10 +117,8 @@ func NewWithConnAndSemaphore(
 				log.DEBUG("worker stopping on pausing message")
 				break pausing
 			}
-			//log.INFO("worker running")
+			log.INFO("worker running")
 			// Run state
-			// in both states all channels are listening
-			//var announceRate = 1000
 		running:
 			for {
 				select {
@@ -167,7 +165,7 @@ func NewWithConnAndSemaphore(
 					}
 				}
 			}
-			//log.INFO("worker pausing")
+			log.INFO("worker pausing")
 		}
 		log.DEBUG("worker finished")
 	}()

@@ -194,7 +194,7 @@ func (c *Connection) SendShardsTo(shards [][]byte, addr *net.UDPAddr) (err error
 }
 
 func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
-) (err error) {
+	lastSent *time.Time, firstSender *string) (err error) {
 	log.TRACE("setting read buffer")
 	err = c.listenConn.SetReadBuffer(c.maxDatagramSize)
 	if err != nil {
@@ -215,6 +215,12 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 			}
 			magic := string(buf[:4])
 			if _, ok := handlers[magic]; ok {
+				// if caller needs to know the liveness status of the
+				// controller it is working on, the code below
+				if lastSent != nil && firstSender != nil {
+					//log.DEBUG("src", src.String(), "last", *firstSender)
+					*lastSent = time.Now()
+				}
 				//log.DEBUG("received packet with magic:", magic)
 				nonceBytes := buf[4:16]
 				nonce := string(nonceBytes)

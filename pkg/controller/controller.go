@@ -112,7 +112,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	} else {
 		ctrl.active.Store(true)
 	}
-	err = ctrl.conn.Listen(handlers, ctrl)
+	err = ctrl.conn.Listen(handlers, ctrl, nil, nil)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
@@ -252,15 +252,13 @@ func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 }
 
 func rebroadcaster(ctrl *Controller) {
-	rebroadcastTicker := time.NewTicker(time.Second * 2)
+	rebroadcastTicker := time.NewTicker(time.Second)
 out:
 	for {
 		select {
 		case <-rebroadcastTicker.C:
 			// The current block is stale if the best block has changed.
 			best := ctrl.blockTemplateGenerator.BestSnapshot()
-			prevblock := ctrl.oldBlocks.Load().(job.Container)
-			_ = prevblock
 			if !ctrl.prevHash.IsEqual(&best.Hash) {
 				err := ctrl.sendNewBlockTemplate()
 				if err != nil {
