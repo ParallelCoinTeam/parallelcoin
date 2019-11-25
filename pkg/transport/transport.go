@@ -65,6 +65,7 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 	if listen != "" {
 		if multicast {
 			listenAddr = GetUDPAddr(listen)
+			log.DEBUG(listen, listenAddr)
 			listenConn, err = net.ListenMulticastUDP("udp", nil, listenAddr)
 			if err != nil {
 				log.ERROR(err)
@@ -309,5 +310,7 @@ func GetUDPAddr(address string) (sendAddr *net.UDPAddr) {
 	}
 	sendAddr = &net.UDPAddr{IP: net.ParseIP(sendHost),
 		Port: int(sendPortI)}
+	log.DEBUG("multicast", address)
+	log.SPEW(sendAddr)
 	return
 }
