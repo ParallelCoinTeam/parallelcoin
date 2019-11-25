@@ -24,5 +24,4 @@ type Configuration struct {
 	Assets   string `json:"assets"`
 	Theme    bool   `json:"theme"`
 	IsDev    bool   `json:"dev"`
-	IsScreen string `json:"screen"`
 }
