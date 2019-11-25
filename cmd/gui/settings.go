@@ -2,20 +2,14 @@ package gui
 
 import (
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/cmd/gui/vue/comp/conf"
-	"github.com/p9c/pod/cmd/gui/vue/db"
-	"github.com/p9c/pod/cmd/gui/vue/mod"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/parallelcointeam11/parallelcoin/cmd/gui/vue/comp/conf"
-	"github.com/parallelcointeam11/parallelcoin/cmd/gui/vue/db"
-	"github.com/parallelcointeam11/parallelcoin/cmd/gui/vue/mod"
 )
 
-type DuoVUEConfig struct {
-	db      db.DuoVUEdb
-	Display mod.DisplayConfig `json:"display"`
-	Daemon  DaemonConfig      `json:"daemon"`
+type DuOSConfig struct {
+	db DuOSdb
+	//Display mod.DisplayConfig `json:"display"`
+	Daemon DaemonConfig `json:"daemon"`
 }
 
 type DaemonConfig struct {
@@ -23,18 +17,18 @@ type DaemonConfig struct {
 	Schema pod.Schema  `json:"schema"`
 }
 
-func (d *DuoVUEConfig) SaveDaemonCfg(c pod.Config) {
+func (d *DuOSConfig) SaveDaemonCfg(c pod.Config) {
 	*d.Daemon.Config = c
 	save.Pod(d.Daemon.Config)
 }
 
-func GetCoreCofig(cx *conte.Xt) (c DuoVUEConfig) {
+func GetCoreCofig(cx *conte.Xt) (c DuOSConfig) {
 	c.Daemon = DaemonConfig{
 		Config: cx.Config,
 		Schema: pod.GetConfigSchema(),
 	}
-	c.Display = mod.DisplayConfig{
-		Screens: conf.GetPanels(),
-	}
+	//c.Display = mod.DisplayConfig{
+	//	Screens: conf.GetPanels(),
+	//}
 	return c
 }

@@ -4,8 +4,6 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 )
 
-
-
 type rcvar struct {
 	cx    *conte.Xt
 	alert DuOSalert
@@ -25,11 +23,13 @@ type rcvar struct {
 	txsnumber    int
 	transactions DuOStransactions
 	txs          DuOStransactionsExcerpts
-	lasttxs       DuOStransactions
+	lasttxs      DuOStransactions
 
 	sent       bool
 	IsFirstRun bool
 	localhost  DuOSlocalHost
+
+	screen string `json:"screen"`
 }
 
 type RcVar interface {
