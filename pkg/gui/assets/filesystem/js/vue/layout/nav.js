@@ -1,4 +1,4 @@
-var Nav = {
+Vue.component('Nav', {
 	name: 'Nav',
 	data() {
 	 return {
@@ -33,11 +33,4 @@ var Nav = {
 		</li>
 	  </ul>
 	</nav>`,
-  	components: {
-		IcoOverview,
-		IcoHistory,
-		IcoExplorer,
-		IcoAddressBook,
-		IcoSettings,
-	}
-}
+});

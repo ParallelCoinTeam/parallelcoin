@@ -3,11 +3,6 @@ var Xorg = new Vue({
 	name: 'Xorg',
 	data () { return { 
 	  rcvar }},
-	  components: {
-		Logo,
-		Header,
-		Nav
-	  },
 	template: `<div id="app" class="fullScreen bgDark flx lightTheme">
     <div id="display" class="fii">
       <div class="grid-container rwrap bgDark">
