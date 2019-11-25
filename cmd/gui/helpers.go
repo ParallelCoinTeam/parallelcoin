@@ -18,7 +18,7 @@ getFile(f string, fs http.FileSystem) string {
 	return string(body)
 }
 func
-evalJs(r *rcvar) (err error) {
+(r *rcvar)evalJs() (err error) {
 	err = r.evalJsFile([]string{
 		"libs/js/vue.js",
 		"libs/js/ej2-vue.min.js",
@@ -49,7 +49,7 @@ evalJs(r *rcvar) (err error) {
 	return
 }
 func
-injectCss(r *rcvar) {
+(r *rcvar)injectCss() {
 	r.injectCssFile([]string{
 		"libs/css/material.css",
 		"css/theme/root.css",
@@ -75,9 +75,6 @@ func
 		r.cx.Gui.Wv.InjectCSS(getFile(f, *r.cx.Gui.Fs))
 	}
 }
-
-
-
 func
 (r *rcvar) Render(cmd string, data interface{}) (err error) {
 	var b []byte

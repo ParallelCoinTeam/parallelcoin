@@ -58,7 +58,7 @@ type Ddb interface {
 	DbWrite(folder, name string, data interface{})
 }
 
-func (d *DuOSdb) DuoVueDbInit(dataDir string) {
+func (d *DuOSdb) DuOSdbInit(dataDir string) {
 	db, err := scribble.New(dataDir+"/gui", nil)
 	if err != nil {
 		fmt.Println("Error", err)
