@@ -575,12 +575,12 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				"blocksonly",
 				"Do not accept transactions from remote peers.",
 				cx.Config.BlocksOnly),
-			apputil.BoolTrue(
+			apputil.Bool(
 				"notxindex",
 				"Disable the transaction index which makes all transactions"+
 					" available via the getrawtransaction RPC",
 				cx.Config.TxIndex),
-			apputil.BoolTrue(
+			apputil.Bool(
 				"noaddrindex",
 				"Disable address-based transaction index which"+
 					" makes the searchrawtransactions RPC available",
