@@ -74,12 +74,15 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 			log.SPEW(ifi)
 			var mcInterface net.Interface
 			for i := range ifi {
-				if ifi[i].Flags&net.FlagMulticast != 0 ||
-					ifi[i].HardwareAddr != nil {
+				ad, _ :=ifi[i].Addrs()
+				if ifi[i].Flags&net.FlagMulticast != 0 &&
+					ifi[i].HardwareAddr != nil &&
+					ad != nil{
 					mcInterface = ifi[i]
 					break
 				}
 			}
+			log.SPEW(mcInterface)
 			listenConn, err = net.ListenMulticastUDP("udp",
 				&mcInterface, listenAddr)
 			if err != nil {
