@@ -55,38 +55,29 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 	sendConn := []*net.UDPConn{}
 	var sC *net.UDPConn
 	var listenAddr *net.UDPAddr
-	//var listenPacketAddr *net.Addr
 	var listenConn net.PacketConn
 	var mcInterface net.Interface
-	log.DEBUG("send", send, "listen", listen)
+	var ifi []net.Interface
+	ifi, err = net.Interfaces()
+	if err != nil {
+		log.ERROR(err)
+	}
+	for i := range ifi {
+		ad, _ := ifi[i].Addrs()
+		if ifi[i].Flags&net.FlagMulticast != 0 &&
+			ifi[i].HardwareAddr != nil &&
+			ad != nil {
+			mcInterface = ifi[i]
+			break
+		}
+	}
 	if listen != "" {
 		if multicast {
-			//listenAddr = GetUDPAddr(listen)
-			//log.DEBUG(listen, listenAddr)
-			var ifi []net.Interface
-			ifi, err = net.Interfaces()
-			if err != nil {
-				log.ERROR(err)
-			}
-			log.SPEW(ifi)
-			for i := range ifi {
-				ad, _ := ifi[i].Addrs()
-				if ifi[i].Flags&net.FlagMulticast != 0 &&
-					ifi[i].HardwareAddr != nil &&
-					ad != nil {
-					mcInterface = ifi[i]
-					break
-				}
-			}
-			log.SPEW(mcInterface)
-			// open socket (connection)
 			var conn net.PacketConn
 			conn, err = net.ListenPacket("udp", listen)
 			if err != nil {
 				log.ERROR(err)
 			}
-
-			// join multicast address
 			pc := ipv4.NewPacketConn(conn)
 			err = pc.JoinGroup(&mcInterface, &net.UDPAddr{IP: net.IPv4(
 				224, 0, 0, 1)})
@@ -95,28 +86,10 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 				err = conn.Close()
 				if err != nil {
 					log.ERROR(err)
+					return
 				}
 			}
-			log.SPEW(conn)
-			log.DEBUG(conn.LocalAddr())
 			listenConn = conn
-			//listenAddr, err = net.ResolveUDPAddr("udp",
-			//	//&mcInterface,
-			//	//listenAddr)
-			//	listen)
-			//if err != nil {
-			//	log.ERROR(err)
-			//	return
-			//}
-			//log.DEBUG("listenADDR")
-			//log.SPEW(listenAddr)
-			//listenConn, err = net.ListenMulticastUDP("udp",
-			//	&mcInterface, listenAddr)
-			//if err != nil {
-			//	log.DEBUG(err)
-			//	panic(err)
-			//}
-			//log.DEBUG(listenConn.LocalAddr())
 		} else {
 			listenAddr = GetUDPAddr(listen)
 			listenConn, err = net.ListenUDP("udp", listenAddr)
@@ -136,11 +109,6 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 			log.DEBUG("ADDRESSS", mI[i])
 			a := strings.Split(mI[i].String(), "/")[0]
 			if strings.Count(a, ":") == 0 {
-				//_, p, err := net.SplitHostPort(listen)
-				//if err != nil {
-				//	log.ERROR(err)
-				//	panic(err)
-				//}
 				listenWithoutEveryInterface = net.JoinHostPort(a, "0")
 			}
 		}
