@@ -66,7 +66,22 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 		if multicast {
 			listenAddr = GetUDPAddr(listen)
 			log.DEBUG(listen, listenAddr)
-			listenConn, err = net.ListenMulticastUDP("udp", nil, listenAddr)
+			var ifi []net.Interface
+			ifi, err = net.Interfaces()
+			if err != nil {
+				log.ERROR(err)
+			}
+			log.SPEW(ifi)
+			var mcInterface net.Interface
+			for i := range ifi {
+				if ifi[i].Flags&net.FlagMulticast != 0 ||
+					ifi[i].HardwareAddr != nil {
+					mcInterface = ifi[i]
+					break
+				}
+			}
+			listenConn, err = net.ListenMulticastUDP("udp",
+				&mcInterface, listenAddr)
 			if err != nil {
 				log.ERROR(err)
 				return
