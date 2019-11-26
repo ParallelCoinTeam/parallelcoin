@@ -66,7 +66,9 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		return
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	conn, err := transport.NewConnection(UDP4MulticastAddress, *cx.Config.Controller, *cx.Config.MinerPass, MaxDatagramSize, ctx, false)
+	conn, err := transport.NewConnection(UDP4MulticastAddress,
+		*cx.Config.Controller, *cx.Config.MinerPass, MaxDatagramSize,
+		ctx, true)
 	if err != nil {
 		log.ERROR(err)
 		cancel()

@@ -85,6 +85,7 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 			if err != nil {
 				log.ERROR(err)
 			}
+
 			// join multicast address
 			pc := ipv4.NewPacketConn(conn)
 			err = pc.JoinGroup(&mcInterface, &net.UDPAddr{IP: net.IPv4(
@@ -135,12 +136,12 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 			log.DEBUG("ADDRESSS", mI[i])
 			a := strings.Split(mI[i].String(), "/")[0]
 			if strings.Count(a, ":") == 0 {
-				_, p, err := net.SplitHostPort(listen)
-				if err != nil {
-					log.ERROR(err)
-					panic(err)
-				}
-				listenWithoutEveryInterface = net.JoinHostPort(a, p)
+				//_, p, err := net.SplitHostPort(listen)
+				//if err != nil {
+				//	log.ERROR(err)
+				//	panic(err)
+				//}
+				listenWithoutEveryInterface = net.JoinHostPort(a, "0")
 			}
 		}
 		log.DEBUG(listenWithoutEveryInterface)
