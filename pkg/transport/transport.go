@@ -53,6 +53,7 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 	var sC *net.UDPConn
 	var listenAddr *net.UDPAddr
 	var listenConn *net.UDPConn
+	log.DEBUG("send", send, "listen", listen)
 	if send != "" {
 		sendAddr = GetUDPAddr(send)
 		sC, err = net.DialUDP("udp", nil, sendAddr)
@@ -64,7 +65,7 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 	}
 	if listen != "" {
 		if multicast {
-			listenAddr = GetUDPAddr(listen)
+			//listenAddr = GetUDPAddr(listen)
 			log.DEBUG(listen, listenAddr)
 			var ifi []net.Interface
 			ifi, err = net.Interfaces()
@@ -74,21 +75,32 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 			log.SPEW(ifi)
 			var mcInterface net.Interface
 			for i := range ifi {
-				ad, _ :=ifi[i].Addrs()
+				ad, _ := ifi[i].Addrs()
 				if ifi[i].Flags&net.FlagMulticast != 0 &&
 					ifi[i].HardwareAddr != nil &&
-					ad != nil{
+					ad != nil {
 					mcInterface = ifi[i]
 					break
 				}
 			}
 			log.SPEW(mcInterface)
-			listenConn, err = net.ListenMulticastUDP("udp",
-				&mcInterface, listenAddr)
+			mI, _ := mcInterface.Addrs()
+			log.SPEW(mI)
+			listenAddr, err = net.ResolveUDPAddr("udp",
+				//&mcInterface,
+				//listenAddr)
+				listen)
 			if err != nil {
 				log.ERROR(err)
 				return
 			}
+			log.SPEW(listenAddr)
+			listenConn, err = net.ListenUDP("udp", listenAddr)
+			if err != nil {
+				log.DEBUG(err)
+				panic(err)
+			}
+			log.DEBUG(listenConn.LocalAddr())
 		} else {
 			listenAddr = GetUDPAddr(listen)
 			listenConn, err = net.ListenUDP("udp", listenAddr)
