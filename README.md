@@ -29,6 +29,10 @@ It consists of 6 main modules:
 5. pod/gui - webview based desktop wallet GUI
 6. pod/kopach - standalone miner with LAN UDP broadcast work delivery system
 
+#### 26 November 2019 update
+
+The full set of features aside from the GUI have now been implemented and last details before the beta are in process and the GUI will be finished within a week or two. Watch this space.
+
 ## Building
 
 You can just `go install` in the repository root and `pod` will be placed in your `GOBIN` directory.
