@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/urfave/cli"
+	"github.com/p9c/cli"
 
 	"github.com/p9c/pod/cmd/ctl"
 	"github.com/p9c/pod/pkg/conte"
