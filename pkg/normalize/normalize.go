@@ -4,7 +4,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"net"
 
-	"github.com/urfave/cli"
+	"github.com/p9c/cli"
 )
 
 // Address returns addr with the passed default port appended if there is not already a port specified.

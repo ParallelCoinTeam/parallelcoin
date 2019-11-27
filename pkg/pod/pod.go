@@ -8,7 +8,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	"github.com/urfave/cli"
+	"github.com/p9c/cli"
 
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"

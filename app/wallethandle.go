@@ -4,7 +4,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/urfave/cli"
+	"github.com/p9c/cli"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/walletmain"

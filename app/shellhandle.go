@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/urfave/cli"
+	"github.com/p9c/cli"
 	"os"
 	"sync"
 

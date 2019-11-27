@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/lang"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
-	"github.com/urfave/cli"
+	"github.com/p9c/cli"
 )
 
 type _dtype int

@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/p9c/pod/cmd/kopach"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/urfave/cli"
+	"github.com/p9c/cli"
 	"os"
 
 	"github.com/p9c/pod/pkg/conte"
