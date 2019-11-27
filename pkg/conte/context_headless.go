@@ -1,11 +1,12 @@
-//+build !headless
+//+build headless
 
 package conte
 
 import (
-	"github.com/p9c/pod/cmd/gui/gcx"
 	"sync"
 	"sync/atomic"
+
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
@@ -14,7 +15,6 @@ import (
 	"github.com/p9c/pod/pkg/lang"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
-	"github.com/urfave/cli"
 )
 
 type _dtype int
@@ -53,8 +53,6 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// RealNode is the main node
 	RealNode *rpc.Node
-	// Wallet graphical user interface
-	Gui *gcx.GUI
 }
 
 // GetNewContext returns a fresh new context
