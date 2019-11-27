@@ -46,7 +46,8 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 	for i := 0; i < *cx.Config.GenThreads; i++ {
 		// TODO: this needs to be made into a subcommand
 		log.DEBUG("starting worker", i)
-		cmd := worker.Spawn("go", "run", "cmd/kopach/kopach_worker/main.go",
+		cmd := worker.Spawn("go", "run", "-tags", "headless",
+			"cmd/kopach/kopach_worker/main.go",
 			cx.ActiveNet.Name)
 		workers = append(workers, client.New(cmd.StdConn))
 	}
