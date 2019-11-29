@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"github.com/p9c/pod/cmd/gui/bind"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/webview"
 	"github.com/p9c/pod/pkg/log"
@@ -50,7 +51,7 @@ func WalletGUI(cx *conte.Xt) (err error) {
 
 		_, err = cx.Gui.Wv.Bind("rcvar", &rcvar{})
 		// Bind navigation
-		_, err = cx.Gui.Wv.Bind("duOSnav", &DuOSnav{rc: rc})
+		_, err = cx.Gui.Wv.Bind("duOSnav", &bind.DuOSnav{})
 		if err != nil {
 			log.ERROR("error binding to webview:", err)
 		}
