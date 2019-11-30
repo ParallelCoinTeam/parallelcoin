@@ -1,5 +1,4 @@
 Vue.config.devtools = true;
-Vue.use(VueFormGenerator);
 Vue.prototype.$eventHub = new Vue(); 
  
 
