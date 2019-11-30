@@ -16,7 +16,7 @@ var Xorg = new Vue({
           <Nav />
           <div class="Side"></div>
         </div>
-        <div id="main" class="grayGrad Main">
+        <div id="main" class="grayGrad Main overYscroll">
         <keep-alive><component v-bind:is="duOSnav.data.screen"></component></keep-alive>
         </div>
       </div>

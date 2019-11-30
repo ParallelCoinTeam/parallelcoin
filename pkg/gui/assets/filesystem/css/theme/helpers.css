@@ -49,6 +49,9 @@ html, body{
 .overHid{
 	overflow:hidden!important;
 }
+.overYscroll{
+	overflow-y:auto!important;
+}
 .marginTopSm{
 	margin-top:15px;
 }
