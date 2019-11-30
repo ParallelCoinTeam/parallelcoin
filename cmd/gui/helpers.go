@@ -56,8 +56,7 @@ func
 		"css/theme/colors.css",
 		"css/theme/grid.css",
 		"css/theme/helpers.css",
-		"css/duistyle.css",
-		"css/dui.css"})
+		"css/duistyle.css"})
 }
 func
 (r *rcvar) evalJsFile(fls []string) (err error) {

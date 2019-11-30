@@ -1,9 +1,9 @@
 package gui
 
 import (
-	"github.com/p9c/pod/cmd/gui/bind"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/webview"
+	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/log"
 	"net/url"
 )
@@ -20,6 +20,9 @@ func WalletGUI(cx *conte.Xt) (err error) {
 	})
 	cx.Gui.Wv.SetColor(68, 68, 68, 255)
 
+	//conf := pod.Config{}
+
+	//log.INFO(cx.Config)
 	rc.cx = cx
 
 	//_, err = cx.Gui.Wv.Bind("alert", &DuOSalert{})
@@ -50,8 +53,21 @@ func WalletGUI(cx *conte.Xt) (err error) {
 	cx.Gui.Wv.Dispatch(func() {
 
 		_, err = cx.Gui.Wv.Bind("rcvar", &rcvar{})
+
+		daemon := DaemonConfig{
+			Config: cx.Config,
+			Schema: pod.GetConfigSchema(),
+		}
+		// Bind configuration
+		_, err = cx.Gui.Wv.Bind("duOSsettings", &DuOSsettings{
+			Daemon: daemon,
+		})
+
 		// Bind navigation
-		_, err = cx.Gui.Wv.Bind("duOSnav", &bind.DuOSnav{})
+		_, err = cx.Gui.Wv.Bind("duOSnav", &DuOSnav{
+			cx:     cx,
+			Screen: "PageOverview",
+		})
 		if err != nil {
 			log.ERROR("error binding to webview:", err)
 		}
