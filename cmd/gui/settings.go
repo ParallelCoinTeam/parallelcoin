@@ -6,7 +6,8 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 )
 
-type DuOSConfig struct {
+type DuOSsettings struct {
+	cx *conte.Xt
 	db DuOSdb
 	//Display mod.DisplayConfig `json:"display"`
 	Daemon DaemonConfig `json:"daemon"`
@@ -17,18 +18,18 @@ type DaemonConfig struct {
 	Schema pod.Schema  `json:"schema"`
 }
 
-func (d *DuOSConfig) SaveDaemonCfg(c pod.Config) {
+func (d *DuOSsettings) SaveDaemonCfg(c pod.Config) {
 	*d.Daemon.Config = c
 	save.Pod(d.Daemon.Config)
 }
 
-func GetCoreCofig(cx *conte.Xt) (c DuOSConfig) {
-	c.Daemon = DaemonConfig{
-		Config: cx.Config,
+func (d *DuOSsettings)GetCoreSettings() {
+	d.Daemon = DaemonConfig{
+		Config: d.cx.Config,
 		Schema: pod.GetConfigSchema(),
 	}
 	//c.Display = mod.DisplayConfig{
 	//	Screens: conf.GetPanels(),
 	//}
-	return c
+	return
 }
