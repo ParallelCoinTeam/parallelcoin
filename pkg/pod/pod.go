@@ -96,8 +96,8 @@ func GetConfigSchema() Schema {
 // Config is
 type Config struct {
 	sync.Mutex
-	AddCheckpoints           *cli.StringSlice `group:"debug" name:"AddCheckpoints" description:"add custom checkpoints" type:"input" inputType:"text" model:"AddCheckpoints" featured:"false"`
-	AddPeers                 *cli.StringSlice `group:"node" name:"Add Peers" description:"Manually adds addresses to try to connect to" type:"input" inputType:"text" model:"AddPeers" featured:"false"`
+	AddCheckpoints           *cli.StringSlice `group:"debug" name:"AddCheckpoints" description:"add custom checkpoints" type:"array" inputType:"text" model:"array" featured:"false"`
+	AddPeers                 *cli.StringSlice `group:"node" name:"Add Peers" description:"Manually adds addresses to try to connect to" type:"array" inputType:"text" model:"array" featured:"false"`
 	AddrIndex                *bool            `group:"node" name:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"switch" model:"AddrIndex" featured:"false"`
 	Algo                     *string          `group:"mining" name:"Algo" description:"algorithm to mine, random is best" type:"input" inputType:"text" model:"Algo" featured:"false"`
 	AutoPorts                *bool            `group:"node" name:"Automatic	Ports" description:"with controller enabled p2p, rpc and controller ports are randomized" type:"switch" model:"AutoPorts" featured:"false"`
@@ -111,7 +111,7 @@ type Config struct {
 	BlocksOnly               *bool            `group:"node" name:"Blocks Only" description:"do not accept transactions from remote peers" type:"switch" model:"BlocksOnly" featured:"false"`
 	CAFile                   *string          `group:"tls" name:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
 	ConfigFile               *string
-	ConnectPeers             *cli.StringSlice `group:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"input" inputType:"text" model:"ConnectPeers" featured:"false"`
+	ConnectPeers             *cli.StringSlice `group:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"array" inputType:"text" model:"array" featured:"false"`
 	Controller               *string          `category:"mining" name:"Controller Listener" description:"address to bind miner controller to"`
 	CPUProfile               *string          `group:"debug" name:"CPU Profile" description:"write cpu profile to this file" type:"input" inputType:"text" model:"CPUProfile" featured:"false"`
 	DataDir                  *string          `group:"config" name:"Data Dir" description:"Root folder where application data is stored" type:"input" inputType:"text" model:"DataDir" featured:"false"`
@@ -122,21 +122,21 @@ type Config struct {
 	DisableListen            *bool            `group:"node" name:"Disable Listen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
 	DisableRPC               *bool            `group:"rpc" name:"Disable RPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
 	EnableController         *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
-	ExperimentalRPCListeners *cli.StringSlice `group:"wallet" name:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"input" inputType:"text" model:"ExperimentalRPCListeners" featured:"false"`
-	ExternalIPs              *cli.StringSlice `group:"node" name:"External IPs" description:"extra addresses to tell peers they can connect to" type:"input" inputType:"text" model:"ExternalIPs" featured:"false"`
+	ExperimentalRPCListeners *cli.StringSlice `group:"wallet" name:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"array" inputType:"text" model:"array" featured:"false"`
+	ExternalIPs              *cli.StringSlice `group:"node" name:"External IPs" description:"extra addresses to tell peers they can connect to" type:"array" inputType:"text" model:"ExternalIPs" featured:"false"`
 	FreeTxRelayLimit         *float64         `group:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"text" model:"FreeTxRelayLimit" featured:"false"`
 	Generate                 *bool            `group:"mining" name:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
 	GenThreads               *int             `group:"mining" name:"Gen Threads" description:"number of CPU threads to mine using" type:"input" inputType:"number" model:"GenThreads" featured:"false"`
 	Language                 *string          `group:"config" name:"Language" description:"User interface language i18 localization" type:"input" inputType:"text" model:"Language" featured:"false"`
 	LimitPass                *string          `group:"rpc" name:"Limit Pass" type:"password" description:"limited user password" type:"input" inputType:"text" model:"LimitPass" featured:"false"`
 	LimitUser                *string          `group:"rpc" name:"Limit User" description:"limited user name" type:"input" inputType:"text" model:"LimitUser" featured:"false"`
-	Listeners                *cli.StringSlice `group:"node" name:"Listeners" description:"List of addresses to bind the node listener to" type:"input" inputType:"text" model:"Listeners" featured:"false"`
+	Listeners                *cli.StringSlice `group:"node" name:"Listeners" description:"List of addresses to bind the node listener to" type:"array" inputType:"text" model:"array" featured:"false"`
 	LogDir                   *string          `group:"config" name:"Log Dir" description:"Folder where log files are written" type:"input" inputType:"text" model:"LogDir" featured:"false"`
 	LogLevel                 *string          `group:"config" name:"Log Level" description:"Verbosity of log printouts" type:"input" inputType:"text" model:"LogLevel" featured:"false"`
 	MaxOrphanTxs             *int             `group:"policy" name:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"input" inputType:"number" model:"MaxOrphanTxs" featured:"false"`
 	MaxPeers                 *int             `group:"node" name:"Max Peers" description:"Maximum number of peers to hold connections with" type:"input" inputType:"number" model:"MaxPeers" featured:"false"`
 	MinerPass                *string          `group:"mining" name:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"input" inputType:"text" model:"MinerPass" featured:"false"`
-	MiningAddrs              *cli.StringSlice `group:"mining" name:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"input" inputType:"text" model:"MiningAddrs" featured:"false"`
+	MiningAddrs              *cli.StringSlice `group:"mining" name:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"array" inputType:"text" model:"array" featured:"false"`
 	MinRelayTxFee            *float64         `group:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"text" model:"MinRelayTxFee" featured:"false"`
 	Network                  *string          `group:"node" name:"Network" description:"Which network are you connected to (eg.: mainnet, testnet)" type:"input" inputType:"text" model:"Network" featured:"false"`
 	NoCFilters               *bool            `group:"node" name:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" model:"NoCFilters" featured:"false"`
@@ -159,7 +159,7 @@ type Config struct {
 	RPCCert                  *string          `group:"rpc" name:"RPC Cert" description:"location of rpc TLS certificate" type:"input" inputType:"text" model:"RPCCert" featured:"false"`
 	RPCConnect               *string          `group:"wallet" name:"RPC Connect" description:"full node RPC for wallet" type:"input" inputType:"text" model:"RPCConnect" featured:"false"`
 	RPCKey                   *string          `group:"rpc" name:"RPC Key" description:"location of rpc TLS key" type:"input" inputType:"text" model:"RPCKey" featured:"false"`
-	RPCListeners             *cli.StringSlice `group:"rpc" name:"RPC Listeners" description:"addresses to listen for RPC connections" type:"input" inputType:"text" model:"RPCListeners" featured:"false"`
+	RPCListeners             *cli.StringSlice `group:"rpc" name:"RPC Listeners" description:"addresses to listen for RPC connections" type:"array" inputType:"text" model:"array" featured:"false"`
 	RPCMaxClients            *int             `group:"rpc" name:"RPC Max Clients" description:"maximum number of clients for regular RPC" type:"input" inputType:"number" model:"RPCMaxClients" featured:"false"`
 	RPCMaxConcurrentReqs     *int             `group:"rpc" name:"RPC Max Concurrent Reqs" description:"maximum number of requests to process concurrently" type:"input" inputType:"number" model:"RPCMaxConcurrentReqs" featured:"false"`
 	RPCMaxWebsockets         *int             `group:"rpc" name:"RPC Max Websockets" description:"maximum number of websocket clients to allow" type:"input" inputType:"number" model:"RPCMaxWebsockets" featured:"false"`
@@ -175,17 +175,17 @@ type Config struct {
 	TrickleInterval          *time.Duration   `group:"policy" name:"Trickle Interval" description:"minimum time between attempts to send new inventory to a connected peer" type:"input" inputType:"text" model:"TrickleInterval" featured:"false"`
 	TxIndex                  *bool            `group:"node" name:"Tx Index" description:"maintain a full hash-based transaction index which makes all transactions available via the getrawtransaction RPC" type:"switch" model:"TxIndex" featured:"false"`
 	UPNP                     *bool            `group:"node" name:"UPNP" description:"enable UPNP for NAT traversal" type:"switch" model:"UPNP" featured:"false"`
-	UserAgentComments        *cli.StringSlice `group:"node" name:"User Agent Comments" description:"Comment to add to the user agent -- See BIP 14 for more information" type:"input" inputType:"text" model:"UserAgentComments" featured:"false"`
+	UserAgentComments        *cli.StringSlice `group:"node" name:"User Agent Comments" description:"Comment to add to the user agent -- See BIP 14 for more information" type:"array" inputType:"text" model:"array" featured:"false"`
 	Username                 *string          `group:"rpc" name:"Username" description:"password for client RPC connections" type:"input" inputType:"text" model:"Username" featured:"false"`
 	Wallet                   *bool
 	WalletFile               *string          `group:"config" name:"Wallet File" description:"Wallet database file" type:"input" inputType:"text" model:"WalletFile" featured:"true"`
 	WalletOff                *bool            `group:"debug" name:"Wallet Off" description:"turn off the wallet backend" type:"switch" model:"WalletOff" featured:"false"`
 	WalletPass               *string          `group:"wallet" name:"Wallet Pass" description:"password encrypting public data in wallet" type:"input" inputType:"text" model:"WalletPass" featured:"false"`
-	WalletRPCListeners       *cli.StringSlice `group:"wallet" name:"Legacy RPC Listeners" description:"addresses for wallet RPC server to listen on" type:"input" inputType:"text" model:"LegacyRPCListeners" featured:"false"`
+	WalletRPCListeners       *cli.StringSlice `group:"wallet" name:"Legacy RPC Listeners" description:"addresses for wallet RPC server to listen on" type:"array" inputType:"text" model:"array" featured:"false"`
 	WalletRPCMaxClients      *int             `group:"wallet" name:"Legacy RPC Max Clients" description:"maximum number of RPC clients allowed for wallet RPC" type:"input" inputType:"number" model:"LegacyRPCMaxClients" featured:"false"`
 	WalletRPCMaxWebsockets   *int             `group:"wallet" name:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"input" inputType:"number" model:"LegacyRPCMaxWebsockets" featured:"false"`
 	WalletServer             *string          `group:"wallet" name:"node address to connect wallet server to" type:"input" inputType:"text" model:"WalletServer" featured:"false"`
-	Whitelists               *cli.StringSlice `group:"debug" name:"Whitelists" description:"peers that you don't want to ever ban" type:"input" inputType:"text" model:"Whitelists" featured:"false"`
+	Whitelists               *cli.StringSlice `group:"debug" name:"Whitelists" description:"peers that you don't want to ever ban" type:"array" inputType:"text" model:"array" featured:"false"`
 }
 
 func EmptyConfig() *Config {

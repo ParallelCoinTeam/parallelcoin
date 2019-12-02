@@ -58,7 +58,7 @@ var rcvar = {
 	},
 	osLocalHost:[],
 	isScreen:'PageOverview',
-}
+};
 
 var duOStransactions = {
 	"txs":[
@@ -98,16 +98,16 @@ var duOStransactions = {
 		  }			
 	],
 	"txsnumber":0
-}
+};
 
 
 var duOSaddressbook = {
 	theme:false,
-}
+};
 
 var duOSblocks = {
 	theme:false,
-}
+};
 
 
 
@@ -241,5 +241,3 @@ var	duoTransactions = [
 ];
 var	duoBlocks = {};
 var	duoAaddressBook = {};
-
-
