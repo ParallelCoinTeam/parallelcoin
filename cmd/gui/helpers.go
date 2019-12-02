@@ -23,6 +23,7 @@ func
 		"libs/js/vue.js",
 		"libs/js/ej2-vue.min.js",
 		"libs/js/vfg.js",
+		"libs/js/vfg-field-array.min.js",
 		"js/vue/duos.js",
 		"js/vue/ico/logo.js",
 		"js/vue/ico/overview.js",
