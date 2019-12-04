@@ -53,6 +53,7 @@ func
 (r *rcvar)injectCss() {
 	r.injectCssFile([]string{
 		"libs/css/material.css",
+		"libs/css/vfg.css",
 		"css/theme/root.css",
 		"css/theme/colors.css",
 		"css/theme/grid.css",
