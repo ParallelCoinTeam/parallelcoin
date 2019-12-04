@@ -3,8 +3,8 @@ package gui
 import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/webview"
-	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/pod"
 	"net/url"
 )
 
@@ -12,7 +12,7 @@ func WalletGUI(cx *conte.Xt) (err error) {
 	rc := &rcvar{}
 	cx.Gui.Wv = webview.New(webview.Settings{
 		Width:     1024,
-		Height:    760,
+		Height:    600,
 		Debug:     true,
 		Resizable: false,
 		Title:     "ParallelCoin - DUO - True Story",
@@ -54,6 +54,7 @@ func WalletGUI(cx *conte.Xt) (err error) {
 
 		_, err = cx.Gui.Wv.Bind("rcvar", &rcvar{})
 
+		// Perpare daemon config for bind
 		daemon := DaemonConfig{
 			Config: cx.Config,
 			Schema: pod.GetConfigSchema(),
@@ -61,6 +62,11 @@ func WalletGUI(cx *conte.Xt) (err error) {
 		// Bind configuration
 		_, err = cx.Gui.Wv.Bind("duOSsettings", &DuOSsettings{
 			Daemon: daemon,
+		})
+
+		// Bind transactions history
+		_, err = cx.Gui.Wv.Bind("duOShistory", &DuOShistory{
+			cx: cx,
 		})
 
 		// Bind navigation

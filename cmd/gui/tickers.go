@@ -106,7 +106,7 @@ func (r *rcvar) DuOSgatherer() {
 			if err != nil {
 				log.ERROR("error binding to webview:", err)
 			}
-//log.INFO("Compler rcvar -->>>>>", r)
+log.INFO("Compler rcvar -->>>>>", r.txs)
 
 		}
 	}()
