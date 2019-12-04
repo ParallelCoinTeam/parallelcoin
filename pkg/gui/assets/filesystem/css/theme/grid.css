@@ -94,24 +94,15 @@
 	height:100%;
     display: grid;
     grid-gap: 15px;
-   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
-  grid-template-areas: "Balance Balance Balance Balance Send Send Send Send Send" "Txs Txs Txs Txs Txs Txs NetHash NetHash NetHash" "Txs Txs Txs Txs Txs Txs LocalHash LocalHash LocalHash" "Info Info Time Time Time Time Status Status Status";
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 180px 1fr;
+    grid-template-areas: "Balance Balance Balance SendReceive SendReceive SendReceive SendReceive SendReceive" "LastTx LastTx LastTx LastTx LastTx LastTx Status Status";
 }
 
 .Balance { grid-area: Balance; }
 
-.Send { grid-area: Send; }
+.SendReceive { grid-area: SendReceive; }
 
-.NetHash { grid-area: NetHash; }
-
-.LocalHash { grid-area: LocalHash; }
+.LastTx { grid-area: LastTx; }
 
 .Status { grid-area: Status; }
-
-.Txs { grid-area: Txs; }
-
-
-.Info { grid-area: Info; }
-
-.Time { grid-area: Time; }
