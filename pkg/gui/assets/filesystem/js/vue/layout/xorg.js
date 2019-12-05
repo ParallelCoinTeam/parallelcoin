@@ -4,7 +4,7 @@ var Xorg = new Vue({
 	data () { return { 
     screen: duOSnav,
      }},
-	template: `<div id="app" class="fullScreen bgDark flx lightTheme">
+	template: `<div id="x" class="fullScreen bgDark flx lightTheme">
     <div id="display" class="fii">
       <div class="grid-container rwrap bgDark">
         <div class="flx fii Logo">
