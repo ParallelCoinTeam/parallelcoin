@@ -32,7 +32,7 @@ func
 		"js/vue/ico/explorer.js",
 		"js/vue/ico/settings.js",
 		"js/vue/panels/balance.js",
-		//"js/vue/panels/send.js",
+		"js/vue/panels/send.js",
 		//"js/vue/panels/peers.js",
 		"js/vue/panels/status.js",
 		//"js/vue/panels/networkhashrate.js",

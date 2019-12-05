@@ -1,6 +1,6 @@
 Vue.component('PanelSend', {
 	data () { return { 
-        rcvar }},
+       rc: rcvar }},
     name: 'PanelSend',
     data (){
         return {
