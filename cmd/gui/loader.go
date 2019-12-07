@@ -8,46 +8,45 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet"
-	"net/url"
 	"time"
 )
 
 func DuOSloader(cx *conte.Xt, firstRun bool) (err error) {
 
 	// create loader window
-	cx.Gui.Wv = webview.New(webview.Settings{
-		Width:     600,
-		Height:    800,
-		Debug:     true,
-		Resizable: false,
-		Title:     "ParallelCoin - DUO - True Story",
-		URL:       "data:text/html," + url.PathEscape(getFile("loader.html", *cx.Gui.Fs)),
-		//ExternalInvokeCallback: handleRPCfirstrun,
-	})
-	cx.Gui.Wv.SetColor(68, 68, 68, 255)
+	//cx.Gui.Wv = webview.New(webview.Settings{
+	//	Width:     600,
+	//	Height:    800,
+	//	Debug:     true,
+	//	Resizable: false,
+	//	Title:     "ParallelCoin - DUO - True Story",
+	//	URL:       "data:text/html," + url.PathEscape(getFile("loader.html", *cx.Gui.Fs)),
+	//	//ExternalInvokeCallback: handleRPCfirstrun,
+	//})
+	//cx.Gui.Wv.SetColor(68, 68, 68, 255)
 
-	defer cx.Gui.Wv.Exit()
-	cx.Gui.Wv.Dispatch(func() {
+	//defer cx.Gui.Wv.Exit()
+	//cx.Gui.Wv.Dispatch(func() {
+	//
+	//	_, err = cx.Gui.Wv.Bind("duos", &rcvar{
+	//		cx:         cx,
+	//		IsFirstRun: firstRun,
+	//	})
+	//
+	//	err = cx.Gui.Wv.Eval(getFile("js/svelte.js", *cx.Gui.Fs))
+	//	if err != nil {
+	//		log.DEBUG("error binding to webview:", err)
+	//	}
+	//
+	//	cx.Gui.Wv.InjectCSS(getFile("css/theme/root.css", *cx.Gui.Fs))
+	//	cx.Gui.Wv.InjectCSS(getFile("css/theme/colors.css", *cx.Gui.Fs))
+	//	cx.Gui.Wv.InjectCSS(getFile("css/theme/helpers.css", *cx.Gui.Fs))
+	//	cx.Gui.Wv.InjectCSS(getFile("css/loader.css", *cx.Gui.Fs))
+	//	cx.Gui.Wv.InjectCSS(getFile("css/svelte.css", *cx.Gui.Fs))
 
-		_, err = cx.Gui.Wv.Bind("duos", &rcvar{
-			cx:         cx,
-			IsFirstRun: firstRun,
-		})
-
-		err = cx.Gui.Wv.Eval(getFile("js/svelte.js", *cx.Gui.Fs))
-		if err != nil {
-			log.DEBUG("error binding to webview:", err)
-		}
-
-		cx.Gui.Wv.InjectCSS(getFile("css/theme/root.css", *cx.Gui.Fs))
-		cx.Gui.Wv.InjectCSS(getFile("css/theme/colors.css", *cx.Gui.Fs))
-		cx.Gui.Wv.InjectCSS(getFile("css/theme/helpers.css", *cx.Gui.Fs))
-		cx.Gui.Wv.InjectCSS(getFile("css/loader.css", *cx.Gui.Fs))
-		cx.Gui.Wv.InjectCSS(getFile("css/svelte.css", *cx.Gui.Fs))
-
-		// Load CSS
-	})
-	cx.Gui.Wv.Run()
+	// Load CSS
+	//})
+	//cx.Gui.Wv.Run()
 
 	//
 	//go func() {
@@ -70,7 +69,7 @@ func handleRPCfirstrun(w webview.WebView, data string) {
 	case data == "close":
 		w.Terminate()
 	case data == "open":
-		log.Println("open", w.Dialog(webview.DialogTypeOpen, 0, "Open file", ""))
+		//log.Println("open", w.Dialog(webview.DialogTypeOpen, 0, "Open file", ""))
 	}
 }
 
@@ -111,5 +110,5 @@ func (rc *rcvar) CreateWallet(pr, sd, pb, fl string) {
 }
 
 func (r *rcvar) CloseDuOSloader() {
-	r.cx.Gui.Wv.Exit()
+	//r.cx.Gui.Wv.Exit()
 }

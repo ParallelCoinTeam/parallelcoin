@@ -96,7 +96,7 @@
     grid-gap: 15px;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     grid-template-rows: 180px 1fr;
-    grid-template-areas: "Balance Balance Balance SendReceive SendReceive SendReceive SendReceive SendReceive" "LastTx LastTx LastTx LastTx LastTx LastTx Status Status";
+    grid-template-areas: "Balance Balance Balance Balance SendReceive SendReceive SendReceive SendReceive" "LastTx LastTx LastTx LastTx LastTx LastTx Status Status";
 }
 
 .Balance { grid-area: Balance; }

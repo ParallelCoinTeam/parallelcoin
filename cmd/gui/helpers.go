@@ -64,10 +64,7 @@ func
 func
 (r *rcvar) evalJsFile(fls []string) (err error) {
 	for _, f := range fls {
-		err = r.cx.Gui.Wv.Eval(getFile(f, *r.cx.Gui.Fs))
-		if err != nil {
-			log.ERROR("error binding to webview:", err)
-		}
+		r.cx.Gui.Wv.Eval(getFile(f, *r.cx.Gui.Fs))
 	}
 	return
 }

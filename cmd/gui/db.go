@@ -24,26 +24,6 @@ type DuOSitems struct {
 	Items map[string]DuOSitem `json:"items"`
 }
 
-//  Vue App Model
-
-type DuOScomp struct {
-	IsApp       bool   `json:"isapp"`
-	Name        string `json:"name"`
-	ID          string `json:"id"`
-	Version     string `json:"ver"`
-	Description string `json:"desc"`
-	State       string `json:"state"`
-	Image       string `json:"img"`
-	URL         string `json:"url"`
-	CompType    string `json:"comtype"`
-	SubType     string `json:"subtype"`
-	Js          string `json:"js"`
-	Template    string `json:"template"`
-	Css         string `json:"css"`
-}
-
-type DuOScomps []DuOScomp
-
 type DuOSdb struct {
 	DB     *scribble.Driver
 	Folder string      `json:"folder"`

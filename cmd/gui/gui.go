@@ -3,8 +3,8 @@ package gui
 import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/webview"
-	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/log"
 	"net/url"
 )
 
@@ -64,9 +64,11 @@ func WalletGUI(cx *conte.Xt) (err error) {
 			Daemon: daemon,
 		})
 
+
 		// Bind transactions history
 		_, err = cx.Gui.Wv.Bind("duOShistory", &DuOShistory{
-			cx: cx,
+
+
 		})
 
 		// Bind navigation
