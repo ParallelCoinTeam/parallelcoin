@@ -1,7 +1,6 @@
 package gcx
 
 import (
-	"github.com/p9c/pod/pkg/gui/webview"
 	"net/http"
 )
 
@@ -9,7 +8,6 @@ type GUI struct {
 	Boot *Boot            `json:"boot"`
 	Cf   *Configuration   `json:"cf"`
 	Fs   *http.FileSystem `json:"fs"`
-	Wv   webview.WebView  `json:"wv"`
 }
 
 type Boot struct {
