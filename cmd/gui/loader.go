@@ -100,7 +100,7 @@ func (rc *rcvar) CreateWallet(pr, sd, pb, fl string) {
 		panic(err)
 	}
 
-	rc.cx.Gui.Boot.IsFirstRun = false
+	rc.cx.DuoUI.Boot.IsFirstRun = false
 	*rc.cx.Config.WalletPass = pb
 	*rc.cx.Config.WalletFile = fl
 

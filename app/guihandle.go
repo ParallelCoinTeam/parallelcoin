@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/p9c/pod/cmd/gui"
-	"github.com/p9c/pod/cmd/gui/gcx"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/urfave/cli"
@@ -23,11 +22,11 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if err != nil {
 			log.ERROR(err)
 		}
-		cx.Gui = &gcx.GUI{
-			Cf: &gcx.Configuration{
-				Assets: "./pkg/gui/assets/filesystem",
-			},
-		}
+		//cx.Gui = &mod.GUI{
+		//	Cf: &mod.Configuration{
+		//		Assets: "./pkg/gui/assets/filesystem",
+		//	},
+		//}
 		err = gui.DuOSfileSystem(cx)
 
 		//gui.DuOSloader(cx, firstRun)
@@ -39,6 +38,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 
 		//gui.DuOSgatherer(cx)
 		// We open up wallet creation
+
 		gui.WalletGUI(cx)
 
 		//b.IsBootLogo = false

@@ -2,68 +2,20 @@ package gui
 
 import (
 	"gioui.org/app"
-	"gioui.org/f32"
 	"gioui.org/font/gofont"
-	"gioui.org/io/profile"
 	"gioui.org/io/system"
 	"gioui.org/layout"
-	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
+	"github.com/p9c/pod/cmd/gui/assets/ico"
+	"github.com/p9c/pod/cmd/gui/helpers"
+	"github.com/p9c/pod/cmd/gui/mod"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"golang.org/x/exp/shiny/materialdesign/icons"
-	"image"
 	"image/color"
 )
-
-var Duo = []byte{
-	0x89, 0x49, 0x56, 0x47, 0x02, 0x16, 0x00, 0x3b, 0x8e, 0xe3, 0xc1, 0x50, 0x3b, 0x8e, 0xe3, 0x41,
-	0xb0, 0x80, 0x80, 0xc0, 0xe9, 0x84, 0xf5, 0x68, 0xb6, 0x75, 0x81, 0x65, 0x80, 0x9d, 0x82, 0xf9,
-	0x80, 0xe1, 0x83, 0xbd, 0x81, 0x39, 0x82, 0x75, 0x81, 0xf9, 0x83, 0x31, 0x83, 0x55, 0x85, 0x85,
-	0x85, 0x75, 0x81, 0x55, 0x82, 0x09, 0x82, 0xf1, 0x84, 0x09, 0x82, 0xbd, 0x87, 0x80, 0xb5, 0x82,
-	0x55, 0x7f, 0x51, 0x85, 0xf9, 0x7d, 0xa5, 0x87, 0xa5, 0x7e, 0x6d, 0x82, 0xe9, 0x7c, 0x41, 0x84,
-	0xad, 0x7a, 0x9d, 0x85, 0xc1, 0x7e, 0xc5, 0x80, 0x65, 0x7d, 0x75, 0x81, 0x21, 0x7c, 0xd9, 0x81,
-	0x8d, 0x7e, 0x65, 0x80, 0x19, 0x7d, 0x95, 0x80, 0xa5, 0x7b, 0x95, 0x80, 0xe9, 0x95, 0x7a, 0xb5,
-	0x9d, 0x82, 0xe9, 0x7f, 0x09, 0x85, 0x09, 0x7f, 0x29, 0x87, 0x7a, 0x21, 0x82, 0xf9, 0x7d, 0x31,
-	0x83, 0x8d, 0x7b, 0x31, 0x83, 0xa5, 0x78, 0x80, 0x19, 0x7d, 0x09, 0x7f, 0xad, 0x7a, 0x7a, 0xa9,
-	0x78, 0xf9, 0x7d, 0xf9, 0x7d, 0x8d, 0x7b, 0x7a, 0xa9, 0x78, 0x7a, 0x19, 0x7d, 0x80, 0x95, 0x7a,
-	0xf9, 0x80, 0xa9, 0x78, 0x86, 0xf9, 0x7d, 0x09, 0x82, 0x7a, 0x75, 0x84, 0x7a, 0x59, 0x87, 0x20,
-	0x80, 0x39, 0xa0, 0xb0, 0xd9, 0x7e, 0xd9, 0x7e, 0x7a, 0x19, 0x7d, 0xc9, 0x7a, 0xe1, 0x7a, 0xe9,
-	0xe9, 0x64, 0xb4, 0x80, 0x8d, 0x7e, 0x31, 0x80, 0x19, 0x7d, 0x95, 0x80, 0xc1, 0x7b, 0x65, 0x80,
-	0x8d, 0x7e, 0xf9, 0x80, 0x4d, 0x7d, 0xbd, 0x81, 0x21, 0x7c, 0x75, 0x81, 0xc9, 0x7d, 0x31, 0x83,
-	0x09, 0x7c, 0x85, 0x85, 0x95, 0x7a, 0x55, 0x82, 0xa5, 0x7e, 0xf1, 0x84, 0x11, 0x7e, 0xbd, 0x87,
-	0x11, 0x7e, 0x75, 0x81, 0x80, 0x86, 0x31, 0x80, 0x5d, 0x84, 0x95, 0x80, 0xe2, 0x65, 0x85, 0xdd,
-	0x77, 0xb3, 0x80, 0xb5, 0x82, 0xc9, 0x7d, 0xf1, 0x84, 0x11, 0x7b, 0xf1, 0x84, 0x31, 0x7d, 0x19,
-	0x80, 0x11, 0x7b, 0xe1, 0x7d, 0x11, 0x7b, 0x11, 0x7b, 0x80, 0x4d, 0x7d, 0x3d, 0x82, 0x11, 0x7b,
-	0xf1, 0x84, 0x11, 0x7b, 0xb5, 0x82, 0x80, 0xf1, 0x84, 0x39, 0x82, 0xf1, 0x84, 0xf1, 0x84, 0xe2,
-	0x1d, 0x6d, 0xed, 0x75, 0x20, 0x80, 0x05, 0x9a, 0xb0, 0xad, 0x7d, 0xad, 0x7d, 0xd9, 0x7b, 0xf1,
-	0x7b, 0xc9, 0x7a, 0xc9, 0x7a, 0x20, 0x80, 0x35, 0x6b, 0xe1,
-}
-
-type duOSicons struct {
-	logo     *material.Icon
-	overview *material.Icon
-	history  *material.Icon
-	network  *material.Icon
-	settings *material.Icon
-}
-type UI struct {
-	ico       duOSicons
-	fab       *widget.Button
-	usersList *layout.List
-	//users        []*user
-	//userClicks   []gesture.Click
-	//selectedUser *userPage
-	//edit, edit2  *widget.Editor
-	//fetchCommits func(u string)
-
-	// Profiling.
-	profiling   bool
-	profile     profile.Event
-	lastMallocs uint64
-}
 
 func WalletGUI(cx *conte.Xt) (err error) {
 	r := &rcvar{
@@ -71,8 +23,8 @@ func WalletGUI(cx *conte.Xt) (err error) {
 		blockcount: 0,
 	}
 	go func() {
-		w := app.NewWindow()
-		if err := loop(w, r); err != nil {
+		cx.Window = app.NewWindow()
+		if err := loop(cx, r); err != nil {
 			log.FATAL(err)
 		}
 		//runUI()
@@ -81,94 +33,95 @@ func WalletGUI(cx *conte.Xt) (err error) {
 	return
 }
 
-func loop(w *app.Window, r *rcvar) error {
+func loop(cx *conte.Xt, r *rcvar) error {
 	gofont.Register()
-	th := material.NewTheme()
-	gtx := layout.NewContext(w.Queue())
+	cx.DuoUI.Theme = material.NewTheme()
+	cx.Gtx = layout.NewContext(cx.Window.Queue())
 	for {
-		e := <-w.Events()
+		e := <-cx.Window.Events()
 		switch e := e.(type) {
 		case system.DestroyEvent:
 			return e.Err
 		case system.FrameEvent:
-			gtx.Reset(e.Config, e.Size)
+			cx.Gtx.Reset(e.Config, e.Size)
 			r.GetDuOSbalance()
 			r.GetDuOSheight()
 			r.GetDuOStatus()
 			r.GetDuOSlocalLost()
 			r.GetDuOSdifficulty()
-			u := &UI{}
-			i := &duOSicons{}
+			u := &mod.DuoUI{}
+			i := &mod.DuoUIicons{}
 			var err error
-			i.logo, err = material.NewIcon(Duo)
+			i.Logo, err = material.NewIcon(ico.ParalleCoin)
 			if err != nil {
 				log.FATAL(err)
 			}
 
-			i.overview, err = material.NewIcon(icons.ActionHome)
+			i.Overview, err = material.NewIcon(icons.ActionHome)
 			if err != nil {
 				log.FATAL(err)
 			}
-			i.history, err = material.NewIcon(icons.ActionHistory)
+			i.History, err = material.NewIcon(icons.ActionHistory)
 			if err != nil {
 				log.FATAL(err)
 			}
-			i.network, err = material.NewIcon(icons.DeviceNetworkCell)
+			i.Network, err = material.NewIcon(icons.DeviceNetworkCell)
 			if err != nil {
 				log.FATAL(err)
 			}
-			i.settings, err = material.NewIcon(icons.ActionSettings)
+			i.Settings, err = material.NewIcon(icons.ActionSettings)
 			if err != nil {
 				log.FATAL(err)
 			}
 
-			u.ico = *i
-			u.fab = new(widget.Button)
+			u.Ico = *i
+			u.Buttons.Logo = new(widget.Button)
 
-			cs := gtx.Constraints
-			flv := layout.Flex{Axis: layout.Vertical}
-			flh := layout.Flex{Axis: layout.Horizontal}
-			flm := layout.Flex{Axis: layout.Vertical}
+			cs := cx.Gtx.Constraints
+			cx.DuoUI.Layouts.View = &layout.Flex{Axis: layout.Vertical}
+			cx.DuoUI.Layouts.Main = &layout.Flex{Axis: layout.Horizontal}
 			in := layout.UniformInset(unit.Dp(30))
-			header := flv.Rigid(gtx, func() {
-				drawRect(gtx, cs.Width.Max, 64, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
-				drawRect(gtx, 64, 64, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30})
-				th.IconButton(u.ico.logo).Layout(gtx, u.fab)
+			header := cx.DuoUI.Layouts.View.Rigid(cx.Gtx , func() {
+				helpers.DuoUIdrawRect(cx.Gtx , cs.Width.Max, 64, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
+				helpers.DuoUIdrawRect(cx.Gtx , 64, 64, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30})
+				cx.DuoUI.Theme.IconButton(u.Ico.Logo).Layout(cx.Gtx , u.Buttons.Logo)
 				//th.Image(Duo)
 
 			})
-			main := flv.Rigid(gtx, func() {
+			main := cx.DuoUI.Layouts.View.Rigid(cx.Gtx , func() {
 				//balance := flh.Rigid(gtx, func() {
 				//	in.Layout(gtx, func() {
 				//		th.H3("balance :" + r.balance).Layout(gtx)
 				//	})
 				//})
-				sidebar := flh.Rigid(gtx, func() {
-					drawRect(gtx, 64, cs.Height.Max, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
+				sidebar := cx.DuoUI.Layouts.Main.Rigid(cx.Gtx , func() {
 
-					overview := flm.Rigid(gtx, func() {
-						th.IconButton(u.ico.overview).Layout(gtx, u.fab)
+					helpers.DuoUIdrawRect(cx.Gtx , 64, cs.Height.Max, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
+
+					flm := layout.Flex{Axis: layout.Vertical}
+					overview := flm.Rigid(cx.Gtx , func() {
+						cx.DuoUI.Theme.IconButton(u.Ico.Overview).Layout(cx.Gtx , u.Buttons.Logo)
 					})
-					history := flm.Rigid(gtx, func() {
-						th.IconButton(u.ico.history).Layout(gtx, u.fab)
+					history := flm.Rigid(cx.Gtx , func() {
+						cx.DuoUI.Theme.IconButton(u.Ico.History).Layout(cx.Gtx , u.Buttons.Logo)
 					})
-					network := flm.Rigid(gtx, func() {
-						th.IconButton(u.ico.network).Layout(gtx, u.fab)
+					network := flm.Rigid(cx.Gtx , func() {
+						cx.DuoUI.Theme.IconButton(u.Ico.Network).Layout(cx.Gtx , u.Buttons.Logo)
 					})
-					settings := flm.Rigid(gtx, func() {
-						th.IconButton(u.ico.settings).Layout(gtx, u.fab)
+					settings := flm.Rigid(cx.Gtx , func() {
+						cx.DuoUI.Theme.IconButton(u.Ico.Settings).Layout(cx.Gtx , u.Buttons.Logo)
 					})
-					flm.Layout(gtx, overview, history, network, settings)
+					flm.Layout(cx.Gtx , overview, history, network, settings)
 
 				})
-				content := flh.Rigid(gtx, func() {
-					in.Layout(gtx, func() {
-						drawRect(gtx, cs.Width.Max, cs.Height.Max, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
-						th.H3("balance :" + r.balance).Layout(gtx)
+				content := cx.DuoUI.Layouts.Main.Rigid(cx.Gtx , func() {
+					in.Layout(cx.Gtx , func() {
+						helpers.DuoUIdrawRect(cx.Gtx , cs.Width.Max, cs.Height.Max, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
+						cx.DuoUI.Theme.H3("balance :" + r.balance).Layout(cx.Gtx )
 					})
 				})
 
-				flh.Layout(gtx, sidebar, content)
+				cx.DuoUI.Layouts.Main.Layout(cx.Gtx , sidebar, content)
 			})
 			//block := fl.Rigid(gtx, func() {
 			//	th.H3("Block height :" + fmt.Sprint(r.height)).Layout(gtx)
@@ -185,20 +138,8 @@ func loop(w *app.Window, r *rcvar) error {
 			//})
 			//
 
-			flv.Layout(gtx, header, main)
-			e.Frame(gtx.Ops)
+			cx.DuoUI.Layouts.View.Layout(cx.Gtx , header, main)
+			e.Frame(cx.Gtx .Ops)
 		}
 	}
-}
-
-func drawRect(gtx *layout.Context, w, h int, color color.RGBA) {
-	square := f32.Rectangle{
-		Max: f32.Point{
-			X: float32(w),
-			Y: float32(h),
-		},
-	}
-	paint.ColorOp{Color: color}.Add(gtx.Ops)
-	paint.PaintOp{Rect: square}.Add(gtx.Ops)
-	gtx.Dimensions = layout.Dimensions{Size: image.Point{X: w, Y: h}}
 }

@@ -23,7 +23,7 @@ func DuOSfileSystem(cx *conte.Xt) (err error) {
 		log.FATAL(err)
 	}
 	// add filesystem to bios struct
-	cx.Gui.Fs = &fs
+	cx.DuoUI.Fs = &fs
 	// add bios struct to rcvar
 	return
 }
