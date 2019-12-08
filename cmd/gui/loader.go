@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gui/webview"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet"
@@ -64,14 +63,14 @@ func DuOSloader(cx *conte.Xt, firstRun bool) (err error) {
 	return
 }
 
-func handleRPCfirstrun(w webview.WebView, data string) {
-	switch {
-	case data == "close":
-		w.Terminate()
-	case data == "open":
-		//log.Println("open", w.Dialog(webview.DialogTypeOpen, 0, "Open file", ""))
-	}
-}
+//func handleRPCfirstrun(w webview.WebView, data string) {
+//	switch {
+//	case data == "close":
+//		w.Terminate()
+//	case data == "open":
+//		//log.Println("open", w.Dialog(webview.DialogTypeOpen, 0, "Open file", ""))
+//	}
+//}
 
 func (rc *rcvar) CreateWallet(pr, sd, pb, fl string) {
 	var err error

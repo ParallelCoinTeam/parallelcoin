@@ -2,7 +2,6 @@ package gui
 
 import (
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gui/webview"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/log"
 	"net/url"
