@@ -1,4 +1,4 @@
-package gui
+package rcd
 
 import (
 	"time"
@@ -14,7 +14,7 @@ type DuOSalert struct {
 }
 
 // GetMsg loads the message variable
-func (r *rcvar) PushDuOSalert(t string, m interface{}, at string) (d *DuOSalert) {
+func (r *RcVar) PushDuOSalert(t string, m interface{}, at string) (d *DuOSalert) {
 	a := new(DuOSalert)
 	a.Time = time.Now()
 	a.Title = t

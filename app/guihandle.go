@@ -2,6 +2,8 @@ package app
 
 import (
 	"github.com/p9c/pod/cmd/gui"
+	"github.com/p9c/pod/cmd/gui/mod"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/urfave/cli"
@@ -9,6 +11,9 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
+		cx.DuoUI = &mod.DuoUI{}
+
+		rc := &rcd.RcVar{}
 		//		//var firstRun bool
 		//		//if !apputil.FileExists(*cx.Config.WalletFile) {
 		//		//	firstRun = true
@@ -27,7 +32,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		//		Assets: "./pkg/gui/assets/filesystem",
 		//	},
 		//}
-		err = gui.DuOSfileSystem(cx)
+		//err = gui.DuOSfileSystem(cx)
 
 		//gui.DuOSloader(cx, firstRun)
 
@@ -39,7 +44,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		//gui.DuOSgatherer(cx)
 		// We open up wallet creation
 
-		gui.WalletGUI(cx)
+		gui.WalletGUI(rc, cx)
 
 		//b.IsBootLogo = false
 		//b.IsBoot = false

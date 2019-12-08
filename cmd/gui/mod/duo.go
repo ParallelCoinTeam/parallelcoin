@@ -1,6 +1,7 @@
 package mod
 
 import (
+	"gioui.org/app"
 	"gioui.org/io/profile"
 	"gioui.org/layout"
 	"gioui.org/widget/material"
@@ -8,11 +9,13 @@ import (
 )
 
 type DuoUI struct {
-	Theme     *material.Theme
+	Window    *app.Window
+	Gtx       layout.Context
+	Theme     material.Theme
 	Layouts   DuoUIlayouts
 	Ico       DuoUIicons
 	Buttons   DuoUIbuttons
-	usersList *layout.List
+	usersList layout.List
 	//users        []*user
 	//userClicks   []gesture.Click
 	//selectedUser *userPage

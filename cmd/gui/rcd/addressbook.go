@@ -1,4 +1,4 @@
-package gui
+package rcd
 
 type DuOStemplates struct {
 	App  map[string][]byte            `json:"app"`

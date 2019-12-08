@@ -1,4 +1,4 @@
-package gui
+package rcd
 
 import (
 	"github.com/p9c/pod/pkg/conte"
@@ -9,7 +9,7 @@ import (
 type
 DuOShistory struct {
 	cx *conte.Xt
-	db DuOSdb
+	db DuoUIdb
 	txs DuOStransactionsExcerpts
 }
 

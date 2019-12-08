@@ -1,4 +1,4 @@
-package gui
+package rcd
 
 import (
 	"github.com/p9c/pod/app/save"
@@ -8,7 +8,7 @@ import (
 
 type DuOSsettings struct {
 	cx *conte.Xt
-	db DuOSdb
+	db DuoUIdb
 	//Display mod.DisplayConfig `json:"display"`
 	Daemon DaemonConfig `json:"daemon"`
 }
