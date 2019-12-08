@@ -11,20 +11,17 @@ import (
 	"github.com/p9c/pod/cmd/gui/assets/ico"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/mod"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"image/color"
 )
 
-func WalletGUI(cx *conte.Xt) (err error) {
-	r := &rcvar{
-		cx:         cx,
-		blockcount: 0,
-	}
+func WalletGUI(rc *rcd.RcVar, cx *conte.Xt) (err error) {
 	go func() {
-		cx.Window = app.NewWindow()
-		if err := loop(cx, r); err != nil {
+		cx.DuoUI.Window = app.NewWindow()
+		if err := loop(rc, cx); err != nil {
 			log.FATAL(err)
 		}
 		//runUI()
@@ -33,22 +30,22 @@ func WalletGUI(cx *conte.Xt) (err error) {
 	return
 }
 
-func loop(cx *conte.Xt, r *rcvar) error {
+func loop(rc *rcd.RcVar, cx *conte.Xt) error {
 	gofont.Register()
-	cx.DuoUI.Theme = material.NewTheme()
-	cx.Gtx = layout.NewContext(cx.Window.Queue())
+	cx.DuoUI.Theme = *material.NewTheme()
+	cx.DuoUI.Gtx = *layout.NewContext(cx.DuoUI.Window.Queue())
 	for {
-		e := <-cx.Window.Events()
+		e := <-cx.DuoUI.Window.Events()
 		switch e := e.(type) {
 		case system.DestroyEvent:
 			return e.Err
 		case system.FrameEvent:
-			cx.Gtx.Reset(e.Config, e.Size)
-			r.GetDuOSbalance()
-			r.GetDuOSheight()
-			r.GetDuOStatus()
-			r.GetDuOSlocalLost()
-			r.GetDuOSdifficulty()
+			cx.DuoUI.Gtx.Reset(e.Config, e.Size)
+			rc.GetDuOSbalance(cx)
+			rc.GetDuOSheight(cx)
+			rc.GetDuOStatus(cx)
+			rc.GetDuOSlocalLost(cx)
+			rc.GetDuOSdifficulty(cx)
 			u := &mod.DuoUI{}
 			i := &mod.DuoUIicons{}
 			var err error
@@ -77,51 +74,56 @@ func loop(cx *conte.Xt, r *rcvar) error {
 			u.Ico = *i
 			u.Buttons.Logo = new(widget.Button)
 
-			cs := cx.Gtx.Constraints
+			cs := cx.DuoUI.Gtx.Constraints
 			cx.DuoUI.Layouts.View = &layout.Flex{Axis: layout.Vertical}
 			cx.DuoUI.Layouts.Main = &layout.Flex{Axis: layout.Horizontal}
 			in := layout.UniformInset(unit.Dp(30))
-			header := cx.DuoUI.Layouts.View.Rigid(cx.Gtx , func() {
-				helpers.DuoUIdrawRect(cx.Gtx , cs.Width.Max, 64, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
-				helpers.DuoUIdrawRect(cx.Gtx , 64, 64, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30})
-				cx.DuoUI.Theme.IconButton(u.Ico.Logo).Layout(cx.Gtx , u.Buttons.Logo)
-				//th.Image(Duo)
 
+			header := cx.DuoUI.Layouts.View.Rigid(&cx.DuoUI.Gtx , func() {
+				helpers.DuoUIdrawRect(&cx.DuoUI.Gtx , cs.Width.Max, 64, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
+				helpers.DuoUIdrawRect(&cx.DuoUI.Gtx , 64, 64, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30})
+				cx.DuoUI.Theme.IconButton(u.Ico.Logo).Layout(&cx.DuoUI.Gtx , u.Buttons.Logo)
 			})
-			main := cx.DuoUI.Layouts.View.Rigid(cx.Gtx , func() {
+
+			//header := cx.DuoUI.Layouts.View.Rigid(&cx.DuoUI.Gtx, func(){ elem.DuoUIheader(cx.DuoUI)})
+
+			main := cx.DuoUI.Layouts.View.Rigid(&cx.DuoUI.Gtx , func() {
 				//balance := flh.Rigid(gtx, func() {
 				//	in.Layout(gtx, func() {
 				//		th.H3("balance :" + r.balance).Layout(gtx)
 				//	})
 				//})
-				sidebar := cx.DuoUI.Layouts.Main.Rigid(cx.Gtx , func() {
 
-					helpers.DuoUIdrawRect(cx.Gtx , 64, cs.Height.Max, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
-
+				sidebar := cx.DuoUI.Layouts.Main.Rigid(&cx.DuoUI.Gtx , func() {
+				
+					helpers.DuoUIdrawRect(&cx.DuoUI.Gtx , 64, cs.Height.Max, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
+				
 					flm := layout.Flex{Axis: layout.Vertical}
-					overview := flm.Rigid(cx.Gtx , func() {
-						cx.DuoUI.Theme.IconButton(u.Ico.Overview).Layout(cx.Gtx , u.Buttons.Logo)
+					overview := flm.Rigid(&cx.DuoUI.Gtx , func() {
+						cx.DuoUI.Theme.IconButton(u.Ico.Overview).Layout(&cx.DuoUI.Gtx , u.Buttons.Logo)
 					})
-					history := flm.Rigid(cx.Gtx , func() {
-						cx.DuoUI.Theme.IconButton(u.Ico.History).Layout(cx.Gtx , u.Buttons.Logo)
+					history := flm.Rigid(&cx.DuoUI.Gtx , func() {
+						cx.DuoUI.Theme.IconButton(u.Ico.History).Layout(&cx.DuoUI.Gtx , u.Buttons.Logo)
 					})
-					network := flm.Rigid(cx.Gtx , func() {
-						cx.DuoUI.Theme.IconButton(u.Ico.Network).Layout(cx.Gtx , u.Buttons.Logo)
+					network := flm.Rigid(&cx.DuoUI.Gtx , func() {
+						cx.DuoUI.Theme.IconButton(u.Ico.Network).Layout(&cx.DuoUI.Gtx , u.Buttons.Logo)
 					})
-					settings := flm.Rigid(cx.Gtx , func() {
-						cx.DuoUI.Theme.IconButton(u.Ico.Settings).Layout(cx.Gtx , u.Buttons.Logo)
+					settings := flm.Rigid(&cx.DuoUI.Gtx , func() {
+						cx.DuoUI.Theme.IconButton(u.Ico.Settings).Layout(&cx.DuoUI.Gtx , u.Buttons.Logo)
 					})
-					flm.Layout(cx.Gtx , overview, history, network, settings)
-
-				})
-				content := cx.DuoUI.Layouts.Main.Rigid(cx.Gtx , func() {
-					in.Layout(cx.Gtx , func() {
-						helpers.DuoUIdrawRect(cx.Gtx , cs.Width.Max, cs.Height.Max, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
-						cx.DuoUI.Theme.H3("balance :" + r.balance).Layout(cx.Gtx )
-					})
+					flm.Layout(&cx.DuoUI.Gtx , overview, history, network, settings)
+				
 				})
 
-				cx.DuoUI.Layouts.Main.Layout(cx.Gtx , sidebar, content)
+
+				content := cx.DuoUI.Layouts.Main.Rigid(&cx.DuoUI.Gtx , func() {
+					in.Layout(&cx.DuoUI.Gtx , func() {
+						helpers.DuoUIdrawRect(&cx.DuoUI.Gtx , cs.Width.Max, cs.Height.Max, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf})
+						cx.DuoUI.Theme.H3("balance :" + rc.Balance).Layout(&cx.DuoUI.Gtx )
+					})
+				})
+
+				cx.DuoUI.Layouts.Main.Layout(&cx.DuoUI.Gtx , sidebar, content)
 			})
 			//block := fl.Rigid(gtx, func() {
 			//	th.H3("Block height :" + fmt.Sprint(r.height)).Layout(gtx)
@@ -138,8 +140,9 @@ func loop(cx *conte.Xt, r *rcvar) error {
 			//})
 			//
 
-			cx.DuoUI.Layouts.View.Layout(cx.Gtx , header, main)
-			e.Frame(cx.Gtx .Ops)
+			cx.DuoUI.Layouts.View.Layout(&cx.DuoUI.Gtx , header, main)
+			//cx.DuoUI.Layouts.View.Layout(&cx.DuoUI.Gtx , header, main)
+			e.Frame(cx.DuoUI.Gtx .Ops)
 		}
 	}
 }

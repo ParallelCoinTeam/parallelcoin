@@ -1,4 +1,4 @@
-package gui
+package rcd
 
 import (
 	"encoding/hex"
@@ -72,13 +72,13 @@ func DuOSloader(cx *conte.Xt, firstRun bool) (err error) {
 //	}
 //}
 
-func (rc *rcvar) CreateWallet(pr, sd, pb, fl string) {
+func (rc *RcVar) CreateWallet(cx *conte.Xt, pr, sd, pb, fl string) {
 	var err error
 	var seed []byte
 	if fl == "" {
-		fl = *rc.cx.Config.WalletFile
+		fl = *cx.Config.WalletFile
 	}
-	l := wallet.NewLoader(rc.cx.ActiveNet, *rc.cx.Config.WalletFile, 250)
+	l := wallet.NewLoader(cx.ActiveNet, *cx.Config.WalletFile, 250)
 
 	if sd == "" {
 		seed, err = hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
@@ -100,14 +100,14 @@ func (rc *rcvar) CreateWallet(pr, sd, pb, fl string) {
 		panic(err)
 	}
 
-	rc.cx.DuoUI.Boot.IsFirstRun = false
-	*rc.cx.Config.WalletPass = pb
-	*rc.cx.Config.WalletFile = fl
+	cx.DuoUI.Boot.IsFirstRun = false
+	*cx.Config.WalletPass = pb
+	*cx.Config.WalletFile = fl
 
-	save.Pod(rc.cx.Config)
+	save.Pod(cx.Config)
 	//log.INFO(rc)
 }
 
-func (r *rcvar) CloseDuOSloader() {
+func (r *RcVar) CloseDuOSloader() {
 	//r.cx.Gui.Wv.Exit()
 }
