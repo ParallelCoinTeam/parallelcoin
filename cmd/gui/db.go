@@ -92,14 +92,14 @@ func (d *DuOSdb) DbReadAll(folder string) DuOSitems {
 	}
 }
 
-func (d *DuOSdb) DbReadAllComponents() map[string]DuOScomp {
+func (d *DuOSdb) DbReadAllComponents() map[string]DuOScomP {
 	componentsRaw, err := d.DB.ReadAll("components")
 	if err != nil {
 		fmt.Println("Error", err)
 	}
-	components := make(map[string]DuOScomp)
+	components := make(map[string]DuOScomP)
 	for _, componentRaw := range componentsRaw {
-		component := DuOScomp{}
+		component := DuOScomP{}
 		if err := json.Unmarshal([]byte(componentRaw), &component); err != nil {
 			fmt.Println("Error", err)
 		}
