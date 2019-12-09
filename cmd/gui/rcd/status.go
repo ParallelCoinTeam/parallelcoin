@@ -76,8 +76,8 @@ func
 	return
 }
 func
-(r *RcVar) GetDuOSheight(cx *conte.Xt) {
-	r.Height = cx.RPCServer.Cfg.Chain.BestSnapshot().Height
+(r *RcVar) GetDuOSblockHeight(cx *conte.Xt) {
+	r.BlockHeight = cx.RPCServer.Cfg.Chain.BestSnapshot().Height
 	return
 }
 func

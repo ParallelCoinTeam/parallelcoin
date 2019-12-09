@@ -1,24 +1,10 @@
 package mod
 
 import (
-	"gioui.org/layout"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
 )
 
-type DuoUIlayouts struct {
-	View *layout.Flex
-	Main *layout.Flex
-	Menu *layout.Flex
-}
 
-type DuoUIicons struct {
-	Logo     *material.Icon
-	Overview *material.Icon
-	History  *material.Icon
-	Network  *material.Icon
-	Settings *material.Icon
-}
 
 type DuoUIbuttons struct {
 	Logo *widget.Button

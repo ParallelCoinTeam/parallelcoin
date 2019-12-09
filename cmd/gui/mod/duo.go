@@ -5,6 +5,8 @@ import (
 	"gioui.org/io/profile"
 	"gioui.org/layout"
 	"gioui.org/widget/material"
+	"github.com/p9c/pod/cmd/gui/ast/ico"
+	"github.com/p9c/pod/cmd/gui/lyt"
 	"net/http"
 )
 
@@ -12,8 +14,8 @@ type DuoUI struct {
 	Window    *app.Window
 	Gtx       layout.Context
 	Theme     material.Theme
-	Layouts   DuoUIlayouts
-	Ico       DuoUIicons
+	Layouts   lyt.DuoUIlayouts
+	Ico       ico.DuoUIicons
 	Buttons   DuoUIbuttons
 	usersList layout.List
 	//users        []*user

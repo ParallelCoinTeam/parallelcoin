@@ -65,28 +65,28 @@ func
 }
 func
 (r *RcVar) GetDuOSunconfirmedBalance(cx *conte.Xt) {
-acct := "default"
-getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, cx.WalletServer)
-if err != nil {
-r.PushDuOSalert("Error", err.Error(), "error")
-}
-ub, ok := getUnconfirmedBalance.(float64)
-if ok {
-ubb := fmt.Sprintf("%0.8f", ub)
-r.Unconfirmed = ubb
-}
-return
+	acct := "default"
+	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, cx.WalletServer)
+	if err != nil {
+		r.PushDuOSalert("Error", err.Error(), "error")
+	}
+	ub, ok := getUnconfirmedBalance.(float64)
+	if ok {
+		ubb := fmt.Sprintf("%0.8f", ub)
+		r.Unconfirmed = ubb
+	}
+	return
 }
 
 func
 (r *RcVar) GetDuOStransactionsNumber(cx *conte.Xt) {
-// account, txcount, startnum, watchonly := "*", n, f, false
-// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
-lt, err := cx.WalletServer.ListTransactions(0, 999999999)
-if err != nil {
-r.PushDuOSalert("Error", err.Error(), "error")
-}
-r.TxsNumber = len(lt)
+	// account, txcount, startnum, watchonly := "*", n, f, false
+	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
+	lt, err := cx.WalletServer.ListTransactions(0, 999999999)
+	if err != nil {
+		r.PushDuOSalert("Error", err.Error(), "error")
+	}
+	r.TxsNumber = len(lt)
 }
 
 func
@@ -136,39 +136,39 @@ func
 }
 func
 (r *RcVar) GetDuOSTransactionsExcertps(cx *conte.Xt) {
-lt, err := cx.WalletServer.ListTransactions(0, 99999)
-if err != nil {
-r.PushDuOSalert("Error", err.Error(), "error")
-}
-r.Txs.TxsNumber = len(lt)
-// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
-//	lt[i], lt[j] = lt[j], lt[i]
-// }
-balanceHeight := 0.0
-txseRaw := []DuOStransactionExcerpt{}
-for _, txRaw := range lt {
-unixTimeUTC := time.Unix(txRaw.Time, 0) // gives unix time stamp in utc
-txseRaw = append(txseRaw, DuOStransactionExcerpt{
-// Balance:       txse.Balance + txRaw.Amount,
-Comment:       txRaw.Comment,
-Amount:        txRaw.Amount,
-Category:      txRaw.Category,
-Confirmations: txRaw.Confirmations,
-Time:          unixTimeUTC.Format(time.RFC3339),
-TxID:          txRaw.TxID,
-})
-}
-var balance float64
-for _, tx := range txseRaw {
-balance = balance + tx.Amount
-tx.Balance = balance
-r.Txs.Txs = append(r.Txs.Txs, tx)
-if r.Txs.Balance > balanceHeight {
-balanceHeight = r.Txs.Balance
-}
-}
-r.Txs.BalanceHeight = balanceHeight
-return
+	lt, err := cx.WalletServer.ListTransactions(0, 99999)
+	if err != nil {
+		r.PushDuOSalert("Error", err.Error(), "error")
+	}
+	r.Txs.TxsNumber = len(lt)
+	// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
+	//	lt[i], lt[j] = lt[j], lt[i]
+	// }
+	balanceHeight := 0.0
+	txseRaw := []DuOStransactionExcerpt{}
+	for _, txRaw := range lt {
+		unixTimeUTC := time.Unix(txRaw.Time, 0) // gives unix time stamp in utc
+		txseRaw = append(txseRaw, DuOStransactionExcerpt{
+			// Balance:       txse.Balance + txRaw.Amount,
+			Comment:       txRaw.Comment,
+			Amount:        txRaw.Amount,
+			Category:      txRaw.Category,
+			Confirmations: txRaw.Confirmations,
+			Time:          unixTimeUTC.Format(time.RFC3339),
+			TxID:          txRaw.TxID,
+		})
+	}
+	var balance float64
+	for _, tx := range txseRaw {
+		balance = balance + tx.Amount
+		tx.Balance = balance
+		r.Txs.Txs = append(r.Txs.Txs, tx)
+		if r.Txs.Balance > balanceHeight {
+			balanceHeight = r.Txs.Balance
+		}
+	}
+	r.Txs.BalanceHeight = balanceHeight
+	return
 }
 
 func

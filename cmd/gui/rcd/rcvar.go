@@ -1,11 +1,11 @@
 package rcd
 
 type RcVar struct {
-	Alert DuOSalert
+	Alert        DuOSalert
 	Status       DuOStatus
 	Hashes       int64
 	NetHash      int64
-	Height       int32
+	BlockHeight  int32
 	BestBlock    string
 	Difficulty   float64
 	BlockCount   int64
@@ -33,6 +33,7 @@ type rcVar interface {
 	DuoSend(wp string, ad string, am float64)
 	GetDuOStatus()
 	PushDuOSalert(t string, m interface{}, at string)
+	GetDuOSblockHeight()
 	GetDuOSblockCount()
 	GetDuOSconnectionCount()
 }
