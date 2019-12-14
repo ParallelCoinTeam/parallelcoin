@@ -3,9 +3,7 @@
 package conte
 
 import (
-	"github.com/p9c/pod/cmd/gui/gcx"
-	"sync"
-	"sync/atomic"
+	"github.com/p9c/pod/cmd/gui/mod"
 
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
@@ -15,6 +13,8 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 	"github.com/urfave/cli"
+	"sync"
+	"sync/atomic"
 )
 
 type _dtype int
@@ -53,8 +53,8 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// RealNode is the main node
 	RealNode *rpc.Node
-	// Wallet graphical user interface
-	Gui *gcx.GUI
+	// Duo UI
+	DuoUI *mod.DuoUI
 }
 
 // GetNewContext returns a fresh new context
