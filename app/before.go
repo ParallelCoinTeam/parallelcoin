@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/p9c/cli"
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"

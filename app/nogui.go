@@ -5,7 +5,7 @@ package app
 import (
 	"os"
 
-	"github.com/p9c/cli"
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"

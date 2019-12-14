@@ -7,7 +7,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/gcx"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/cli"
+	"github.com/urfave/cli"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {

@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/p9c/cli"
+	"github.com/urfave/cli"
 )
 
 // NewCommand returns a cli.Command
