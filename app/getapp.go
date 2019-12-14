@@ -10,7 +10,7 @@ import (
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 
-	"github.com/p9c/cli"
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"

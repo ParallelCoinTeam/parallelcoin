@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 
 	"github.com/btcsuite/go-socks/socks"
-	"github.com/p9c/cli"
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/app/apputil"

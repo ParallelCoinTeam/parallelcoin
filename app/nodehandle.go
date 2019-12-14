@@ -4,7 +4,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"sync"
 
-	"github.com/p9c/cli"
+	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/rpc"

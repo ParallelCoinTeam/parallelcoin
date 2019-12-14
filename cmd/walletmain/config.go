@@ -3,7 +3,7 @@ package walletmain
 import (
 	"time"
 
-	"github.com/p9c/cli"
+	"github.com/urfave/cli"
 )
 
 // Config is the main configuration for wallet
