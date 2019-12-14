@@ -2,8 +2,9 @@ var Xorg = new Vue({
 	el: '#xorg', 
 	name: 'Xorg',
 	data () { return { 
-	  rcvar }},
-	template: `<div id="app" class="fullScreen bgDark flx lightTheme">
+    screen: duOSnav,
+     }},
+	template: `<div id="x" class="fullScreen bgDark flx lightTheme">
     <div id="display" class="fii">
       <div class="grid-container rwrap bgDark">
         <div class="flx fii Logo">
@@ -15,8 +16,8 @@ var Xorg = new Vue({
           <Nav />
           <div class="Side"></div>
         </div>
-        <div id="main" class="grayGrad Main">
-        <keep-alive><component v-bind:is="rcvar.isScreen"></component></keep-alive>
+        <div id="main" class="grayGrad Main overYscroll">
+        <keep-alive><component v-bind:is="duOSnav.data.screen"></component></keep-alive>
         </div>
       </div>
     </div>

@@ -1,5 +1,4 @@
 Vue.config.devtools = true;
-Vue.use(VueFormGenerator);
 Vue.prototype.$eventHub = new Vue(); 
  
 
@@ -59,7 +58,7 @@ var rcvar = {
 	},
 	osLocalHost:[],
 	isScreen:'PageOverview',
-}
+};
 
 var duOStransactions = {
 	"txs":[
@@ -99,20 +98,16 @@ var duOStransactions = {
 		  }			
 	],
 	"txsnumber":0
-}
-
-var duOSsettings = {
-	theme:false,
-}
+};
 
 
 var duOSaddressbook = {
 	theme:false,
-}
+};
 
 var duOSblocks = {
 	theme:false,
-}
+};
 
 
 
@@ -203,8 +198,8 @@ var duoSystem = {
 			  },
 			  {
 				"abandoned": false,
-				"account": "default",
-				"address": "8dw3dFzvd54WHdtqwQF13hEHBm29XzpJxA",
+				"account": "default",			
+				"address": "8dw3dFzvd",		
 				"amount": 0.03444688,
 				"blockhash": "77f710efcb0969c8109cc08dc2531ddc73c2ab1adf26e650c9afc4c4daf88823",
 				"blocktime": 1574262662,
@@ -240,10 +235,5 @@ var duoSystem = {
 	},
 };
 
-
-var	duoTransactions = [
-	
-];
 var	duoBlocks = {};
 var	duoAaddressBook = {};
-var	duoConfig = {};
