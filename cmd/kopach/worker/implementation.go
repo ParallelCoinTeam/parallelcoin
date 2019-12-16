@@ -136,8 +136,9 @@ func NewWithConnAndSemaphore(
 					hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
-						log.WARN("solution found", hash.String(),
-							fork.List[fork.GetCurrent(w.block.Height())].
+						log.WARN("solution found h:", nH,
+							hash.String(),
+							fork.List[fork.GetCurrent(nH)].
 								AlgoVers[w.msgBlock.Header.Version],
 							"total hashes since startup",
 							w.roller.C-int(w.startNonce),
