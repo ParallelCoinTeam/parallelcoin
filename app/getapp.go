@@ -188,12 +188,12 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				kopachHandle(cx),
 				apputil.SubCommands(),
 				"k"),
-			//apputil.NewCommand("worker",
-			//	"single thread parallelcoin miner controlled with binary IPC"+
-			//		" interface on stdin/stdout",
-			//	workerHandle(cx),
-			//	apputil.SubCommands(),
-			//),
+			apputil.NewCommand("worker",
+				"single thread parallelcoin miner controlled with binary IPC"+
+					" interface on stdin/stdout",
+				workerHandle(cx),
+				apputil.SubCommands(),
+			),
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
