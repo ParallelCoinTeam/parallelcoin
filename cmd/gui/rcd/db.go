@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	scribble "github.com/nanobox-io/golang-scribble"
-	"github.com/p9c/pod/cmd/gui/mod"
 	"golang.org/x/text/unicode/norm"
 	"unicode"
 )
@@ -21,7 +20,7 @@ type DuoUIitem struct {
 	Data     interface{} `json:"data"`
 }
 type DuoUIitems struct {
-	Slug  string              `json:"slug"`
+	Slug  string               `json:"slug"`
 	Items map[string]DuoUIitem `json:"items"`
 }
 
@@ -91,22 +90,6 @@ func (d *DuoUIdb) DbReadAll(folder string) DuoUIitems {
 		Slug:  folder,
 		Items: items,
 	}
-}
-
-func (d *DuoUIdb) DbReadAllComponents() map[string]mod.DuoUIcom {
-	componentsRaw, err := d.DB.ReadAll("components")
-	if err != nil {
-		fmt.Println("Error", err)
-	}
-	components := make(map[string]mod.DuoUIcom)
-	for _, componentRaw := range componentsRaw {
-		component := mod.DuoUIcom{}
-		if err := json.Unmarshal([]byte(componentRaw), &component); err != nil {
-			fmt.Println("Error", err)
-		}
-		components[component.ID] = component
-	}
-	return components
 }
 
 func (d *DuoUIdb) DbReadAddressBook() map[string]string {
