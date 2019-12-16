@@ -2,6 +2,7 @@ package sol
 
 import (
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/Block"
 )
@@ -27,12 +28,12 @@ func LoadSolContainer(b []byte) (out *SolContainer) {
 }
 
 func (sC *SolContainer) GetMsgBlock() *wire.MsgBlock {
-	//log.SPEW(sC.Data)
+	log.SPEW(sC.Data)
 	buff := sC.Get(0)
-	//log.SPEW(buff)
+	log.SPEW(buff)
 	decoded := Block.New().DecodeOne(buff)
-	//log.SPEW(decoded)
+	log.SPEW(decoded)
 	got := decoded.Get()
-	//log.SPEW(got)
+	log.SPEW(got)
 	return got
 }

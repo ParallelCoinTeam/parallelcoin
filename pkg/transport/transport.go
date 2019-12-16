@@ -97,7 +97,7 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 				log.ERROR(err)
 				return
 			}
-			log.SPEW(listenConn)
+			// log.SPEW(listenConn)
 		}
 	}
 	if send != "" {
@@ -270,7 +270,7 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 				continue
 			}
 			log.DEBUG("received message on UDP connection")
-			log.SPEW(handlers)
+			// log.SPEW(handlers)
 			magic := string(buf[:4])
 			if _, ok := handlers[magic]; ok {
 				// if caller needs to know the liveness status of the
