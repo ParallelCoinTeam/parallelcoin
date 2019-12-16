@@ -1,9 +1,9 @@
 package app
 
 import (
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui"
-	"github.com/p9c/pod/cmd/gui/mod"
-	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/urfave/cli"
@@ -11,40 +11,34 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		cx.DuoUI = &mod.DuoUI{}
+		//duo := duoui.DuOuI(*cx)
+		duo := duoui.DuOuI(cx)
 
-		rc := &rcd.RcVar{}
-		//		//var firstRun bool
-		//		//if !apputil.FileExists(*cx.Config.WalletFile) {
-		//		//	firstRun = true
-		//		//}
-		//		//utils.GetBiosMessage(view, "starting GUI")
+		var firstRun bool
+		if !apputil.FileExists(*cx.Config.WalletFile) {
+			firstRun = true
+		}
+		//utils.GetBiosMessage(view, "starting GUI")
 
-		//err := gui.Services(cx)
+		log.INFO("ima", firstRun)
+
 		Configure(cx, c)
 		// Start Node
 		err = gui.DuOSnode(cx)
 		if err != nil {
 			log.ERROR(err)
 		}
-		//cx.Gui = &mod.GUI{
-		//	Cf: &mod.Configuration{
-		//		Assets: "./pkg/gui/assets/filesystem",
-		//	},
-		//}
-		//err = gui.DuOSfileSystem(cx)
 
-		//gui.DuOSloader(cx, firstRun)
+		duo.DuoUIloader(firstRun)
 
 		err = gui.Services(cx)
 		if err != nil {
 			log.ERROR(err)
 		}
 
-		//gui.DuOSgatherer(cx)
 		// We open up wallet creation
 
-		gui.WalletGUI(rc, cx)
+		gui.WalletGUI(duo)
 
 		//b.IsBootLogo = false
 		//b.IsBoot = false
