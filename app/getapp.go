@@ -4,14 +4,15 @@ import (
 	"encoding/binary"
 	"path/filepath"
 	"time"
-
-	_ "github.com/gohouse/i18n/parser_json"
-
+	
+	// _ "github.com/gohouse/i18n/parser_json"
+	
+	"github.com/p9c/pod/cmd/kopach/kopach_worker"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
-
+	
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
@@ -67,7 +68,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropAddrIndex = true
-							//return nodeHandle(cx)(c)
+							// return nodeHandle(cx)(c)
 							return nil
 						},
 						apputil.SubCommands(),
@@ -76,7 +77,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropTxIndex = true
-							//return nodeHandle(cx)(c)
+							// return nodeHandle(cx)(c)
 							return nil
 						},
 						apputil.SubCommands(),
@@ -87,7 +88,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 							cx.StateCfg.DropAddrIndex = true
 							cx.StateCfg.DropTxIndex = true
 							cx.StateCfg.DropCfIndex = true
-							//return nodeHandle(cx)(c)
+							// return nodeHandle(cx)(c)
 							return nil
 						},
 						apputil.SubCommands(),
@@ -96,7 +97,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropCfIndex = true
-							//return nodeHandle(cx)(c)
+							// return nodeHandle(cx)(c)
 							return nil
 						},
 						apputil.SubCommands(),
@@ -190,8 +191,9 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				"k"),
 			apputil.NewCommand("worker",
 				"single thread parallelcoin miner controlled with binary IPC"+
-					" interface on stdin/stdout",
-				workerHandle(cx),
+					" interface on stdin/stdout; internal use, must have network name string as second arg after worker and"+
+					"nothing before; communicates via net/rpc encoding/gob as default over stdio",
+				kopach_worker.Main(cx),
 				apputil.SubCommands(),
 			),
 		},

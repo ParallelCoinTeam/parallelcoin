@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 	"sync"
 	"time"
-
+	
 	"go.uber.org/atomic"
-
+	
 	"github.com/p9c/pod/cmd/kopach/client"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller"
@@ -44,11 +45,8 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 	var workers []*client.Client
 	// start up the workers
 	for i := 0; i < *cx.Config.GenThreads; i++ {
-		// TODO: this needs to be made into a subcommand
 		log.DEBUG("starting worker", i)
-		cmd := worker.Spawn("go", "run", "-tags", "headless",
-			"cmd/kopach/kopach_worker/main.go",
-			cx.ActiveNet.Name)
+		cmd := worker.Spawn(os.Args[0], "worker", cx.ActiveNet.Name, cx.ActiveNet.Name)
 		workers = append(workers, client.New(cmd.StdConn))
 	}
 	w := &Worker{
@@ -81,7 +79,7 @@ func Main(cx *conte.Xt, quit chan struct{}) {
 		for {
 			select {
 			case <-ticker.C:
-				//log.DEBUG("tick", w.lastSent, w.firstSender)
+				// log.DEBUG("tick", w.lastSent, w.firstSender)
 				// if the last message sent was 3 seconds ago the server is
 				// almost certainly disconnected or crashed so clear firstSender
 				w.mx.Lock()
