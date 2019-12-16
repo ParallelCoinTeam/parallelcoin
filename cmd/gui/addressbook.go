@@ -1,3 +1,5 @@
+//+build !headless
+
 package gui
 
 type DuOStemplates struct {
