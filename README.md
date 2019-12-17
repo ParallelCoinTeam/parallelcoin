@@ -24,6 +24,15 @@ go install -v
 You should use modules for this project, as everyone else is and many
 forgot to protect their master from version 2 on the same URL.
 
+*Please note:* Currently GUI branch is not integrated onto the 
+master - as such, use the 'headless' tag like so:
+
+```
+go install -v -tags headless
+```
+
+This will be corrected as soon as possible. Thanks for your patience.
+
 ## Running
 
 If you just want to use it as an RPC for only node services at localhost:11047 (no wallet)
