@@ -269,7 +269,7 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 				log.ERROR("ReadFromUDP failed:", err)
 				continue
 			}
-			log.DEBUG("received message on UDP connection")
+			// log.DEBUG("received message on UDP connection")
 			// log.SPEW(handlers)
 			magic := string(buf[:4])
 			if _, ok := handlers[magic]; ok {
