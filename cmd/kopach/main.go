@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 	"sync"
 	"time"
-
+	
+	"github.com/urfave/cli"
 	"go.uber.org/atomic"
-
+	
 	"github.com/p9c/pod/cmd/kopach/client"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller"
@@ -31,86 +33,89 @@ type Worker struct {
 	lastSent      time.Time
 }
 
-func Main(cx *conte.Xt, quit chan struct{}) {
-	log.DEBUG("miner controller starting")
-	ctx, cancel := context.WithCancel(context.Background())
-	conn, err := transport.NewConnection("", controller.UDP4MulticastAddress,
-		*cx.Config.MinerPass, controller.MaxDatagramSize, ctx)
-	if err != nil {
-		log.ERROR(err)
-		cancel()
-		return
-	}
-	var workers []*client.Client
-	// start up the workers
-	for i := 0; i < *cx.Config.GenThreads; i++ {
-		// TODO: this needs to be made into a subcommand
-		log.DEBUG("starting worker", i)
-		cmd := worker.Spawn("go", "run", "cmd/kopach/kopach_worker/main.go",
-			cx.ActiveNet.Name)
-		workers = append(workers, client.New(cmd.StdConn))
-	}
-	w := &Worker{
-		conn:          conn,
-		active:        &atomic.Bool{},
-		ctx:           ctx,
-		cx:            cx,
-		mx:            &sync.Mutex{},
-		sendAddresses: []*net.UDPAddr{},
-		workers:       workers,
-		lastSent:      time.Now(),
-	}
-	w.active.Store(false)
-	for i := range w.workers {
-		log.DEBUG("sending pass to worker", i)
-		err := w.workers[i].SendPass(*cx.Config.MinerPass)
+func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
+	return func(c *cli.Context) (err error) {
+		log.DEBUG("miner controller starting")
+		quit := make(chan struct{})
+		ctx, cancel := context.WithCancel(context.Background())
+		conn, err := transport.NewConnection("", controller.UDP4MulticastAddress,
+			*cx.Config.MinerPass, controller.MaxDatagramSize, ctx, true)
 		if err != nil {
 			log.ERROR(err)
+			cancel()
+			return
 		}
-	}
-	err = w.conn.Listen(handlers, w, &w.lastSent, &w.firstSender)
-	if err != nil {
-		log.ERROR(err)
-		cancel()
-		return
-	}
-	// controller watcher thread
-	go func() {
-		ticker := time.NewTicker(time.Second)
-		for {
-			select {
-			case <-ticker.C:
-				//log.DEBUG("tick", w.lastSent, w.firstSender)
-				// if the last message sent was 3 seconds ago the server is
-				// almost certainly disconnected or crashed so clear firstSender
-				w.mx.Lock()
-				since := time.Now().Sub(w.lastSent)
-				wasSending := since > time.Second*3 && w.firstSender != ""
-				w.mx.Unlock()
-				if wasSending {
-					log.DEBUG("previous current controller has stopped" +
-						" broadcasting")
-					// when this string is clear other broadcasts will be
-					// listened to
-					w.mx.Lock()
-					w.firstSender = ""
-					w.mx.Unlock()
-					// pause the workers
-					for i := range w.workers {
-						log.DEBUG("sending pause to worker", i)
-						err := w.workers[i].Pause()
-						if err != nil {
-							log.ERROR(err)
-						}
-					}
-				}
-			case <-quit:
+		var workers []*client.Client
+		// start up the workers
+		for i := 0; i < *cx.Config.GenThreads; i++ {
+			log.DEBUG("starting worker", i)
+			cmd := worker.Spawn(os.Args[0], "worker",
+				cx.ActiveNet.Name)
+			workers = append(workers, client.New(cmd.StdConn))
+		}
+		w := &Worker{
+			conn:          conn,
+			active:        &atomic.Bool{},
+			ctx:           ctx,
+			cx:            cx,
+			mx:            &sync.Mutex{},
+			sendAddresses: []*net.UDPAddr{},
+			workers:       workers,
+			lastSent:      time.Now(),
+		}
+		w.active.Store(false)
+		for i := range w.workers {
+			log.DEBUG("sending pass to worker", i)
+			err := w.workers[i].SendPass(*cx.Config.MinerPass)
+			if err != nil {
+				log.ERROR(err)
 			}
 		}
-	}()
-	log.DEBUG("listening on", controller.UDP4MulticastAddress)
-	<-quit
-	log.INFO("kopach shutting down")
+		err = w.conn.Listen(handlers, w, &w.lastSent, &w.firstSender)
+		if err != nil {
+			log.ERROR(err)
+			cancel()
+			return
+		}
+		// controller watcher thread
+		go func() {
+			ticker := time.NewTicker(time.Second)
+			for {
+				select {
+				case <-ticker.C:
+					// log.DEBUG("tick", w.lastSent, w.firstSender)
+					// if the last message sent was 3 seconds ago the server is
+					// almost certainly disconnected or crashed so clear firstSender
+					w.mx.Lock()
+					since := time.Now().Sub(w.lastSent)
+					wasSending := since > time.Second*3 && w.firstSender != ""
+					w.mx.Unlock()
+					if wasSending {
+						log.DEBUG("previous current controller has stopped" +
+							" broadcasting")
+						// when this string is clear other broadcasts will be
+						// listened to
+						w.mx.Lock()
+						w.firstSender = ""
+						w.mx.Unlock()
+						// pause the workers
+						for i := range w.workers {
+							log.DEBUG("sending pause to worker", i)
+							err := w.workers[i].Pause()
+							if err != nil {
+								log.ERROR(err)
+							}
+						}
+					}
+				case <-quit:
+				}
+			}
+		}()
+		log.DEBUG("listening on", controller.UDP4MulticastAddress)
+		<-quit
+		log.INFO("kopach shutting down")
+		return
+	}
 }
 
 // these are the handlers for specific message types.
