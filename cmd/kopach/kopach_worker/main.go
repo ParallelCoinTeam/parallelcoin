@@ -15,7 +15,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-func Main(cx *conte.Xt) func(c *cli.Context) error {
+func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		// we take one parameter, name of the network,
 		// as this does not change during the lifecycle of the miner worker and

@@ -33,7 +33,7 @@ type Worker struct {
 	lastSent      time.Time
 }
 
-func Main(cx *conte.Xt) func(c *cli.Context) error {
+func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		log.DEBUG("miner controller starting")
 		quit := make(chan struct{})
