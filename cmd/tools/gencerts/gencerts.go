@@ -48,6 +48,7 @@ func main() {
 	}
 	cfg.Directory = cleanAndExpandPath(cfg.Directory)
 	certFile := filepath.Join(cfg.Directory, "rpc.cert")
+	caFile := filepath.Join(cfg.Directory, "ca.cert")
 	keyFile := filepath.Join(cfg.Directory, "rpc.key")
 	if !cfg.Force {
 		if fileExists(certFile) || fileExists(keyFile) {
@@ -65,6 +66,11 @@ func main() {
 	// Write cert and key files.
 	if err = ioutil.WriteFile(certFile, cert, 0666); err != nil {
 		fmt.Fprintf(os.Stderr, "cannot write cert: %v\n", err)
+		os.Exit(1)
+	}
+	// Write cert and key files.
+	if err = ioutil.WriteFile(caFile, cert, 0666); err != nil {
+		fmt.Fprintf(os.Stderr, "cannot write ca cert: %v\n", err)
 		os.Exit(1)
 	}
 	if err = ioutil.WriteFile(keyFile, key, 0600); err != nil {

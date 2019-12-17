@@ -1,3 +1,5 @@
+//+build ignore
+
 package spv_test
 
 import (
@@ -24,7 +26,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	ec "github.com/p9c/pod/pkg/util/elliptic"
 	"github.com/p9c/pod/pkg/util/gcs/builder"
-	"github.com/p9c/pod/pkg/util/log"
+	"github.com/p9c/pod/pkg/log"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )

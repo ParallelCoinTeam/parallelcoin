@@ -2576,6 +2576,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	// If the addrindex is run first,
 	// it may not have the transactions from the current block indexed.
 	var indexes []indexers.Indexer
+	log.DEBUG("txindex", *config.TxIndex, "addrindex", *config.AddrIndex)
 	if *config.TxIndex || *config.AddrIndex {
 		// Enable transaction index if address index is enabled since it
 		// requires it.

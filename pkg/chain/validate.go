@@ -1265,15 +1265,17 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 	}
 	// The block hash must be less than the claimed target unless the flag to
 	// avoid proof of work checks is set.
-	if flags&BFNoPoWCheck != BFNoPoWCheck {
+	if flags&BFNoPoWCheck == 0 {
 		// The block hash must be less than the claimed target.
 		// Unless there is less than 10 previous with the same version (algo)...
+		log.DEBUG("height", height, fork.IsTestnet)
 		hash := header.BlockHashWithAlgos(height)
-		// log.DEBUG()
-		// {"blockhashwithalgos", hash}
-		hashNum := HashToBig(&hash)
-		if hashNum.Cmp(target) > 0 {
-			str := fmt.Sprintf("block hash of %064x is higher than expected max of %064x", hashNum, target)
+		log.DEBUG("blockhashwithalgos", hash, fork.IsTestnet)
+		bigHash := HashToBig(&hash)
+		if bigHash.Cmp(target) > 0 {
+			str := fmt.Sprintf("block hash of " +
+				"%064x is higher than expected max of " +
+				"%064x", bigHash, target)
 			log.WARN(str)
 			return ruleError(ErrHighHash, str)
 		}
