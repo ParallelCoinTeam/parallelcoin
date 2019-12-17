@@ -121,6 +121,28 @@ For now it is advisable to isolate wallet services strongly and the main attack
 vector is covered. Easier to use GUI interface for offline transaction signing
 and similar features also are planned for later implementation.
 
+### GUI build info
+
+The GUI subsystem can be disabled in the build using
+
+```
+go install -tags headless
+```
+
+To build it, there are some GL and X prerequisites for the
+Linux build
+
+```
+sudo apt-get install libgles2-mesa-dev \
+     libxkbcommon-dev \
+     libxkbcommon-x11-dev
+```
+
+More info about building for other platforms to follow. 
+There should be a build for Android and iOS eventually, they
+have extra build environment requirements (android sdk and 
+xcode/mac respectively). Specifics for Windows builds also to come.
+
 ## Binaries for legacy (pre hardfork) now available for linux amd64
 
 Get them from here: [https://git.parallelcoin.io/dev/parallelcoin-binaries](https://git.parallelcoin.io/dev/parallelcoin-binaries)
