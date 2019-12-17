@@ -35,6 +35,32 @@ This will be corrected as soon as possible. Thanks for your patience.
 
 ## Running
 
+### Initial configuration:
+
+For initial configuration, use the `-D` and `-n` flags combined with
+the `init` subcommand like so:
+
+```
+pod -D <data directory> -n <mainnet/testnet> init
+```
+
+This in one step creates a fresh new configuration file, all of the
+TLS certificates and default Certificate Authority to use the
+web sockets interface for especially the wallet async functionality,
+and prompts you on the CLI to enter a new wallet passphrase, gives
+seed you need to restore the wallet later, and fills the configuration
+with a set of starting mining addresses based on the wallet seed,
+for the defined network type.
+
+**TODO:**s yes, we want to move these keys into the directory subfolder
+so it can be done without the node running and on demand with a new
+subcommand for exactly this purpose. New addresses require a wallet 
+but should be kept away from a public RPC or other remote protocol
+endpoint. Only nodes need them while mining to use for creating
+coinbase payment outpoints.
+
+### Run Modes
+
 If you just want to use it as an RPC for only node services at localhost:11047 (no wallet)
 
 ```
