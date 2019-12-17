@@ -39,11 +39,10 @@ yarn-error.log*
 *.sw?
 
 rcc.cpp
-assets_vfsdata.go
+*_vfsdata**
 
 dist/
 node_modules/
 .cache/
 yarn.lock
 npm.lock
-walletgui_vfsdata.go
