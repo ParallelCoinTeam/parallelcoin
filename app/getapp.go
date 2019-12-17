@@ -196,6 +196,11 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				kopach_worker.KopachWorkerHandle(cx),
 				apputil.SubCommands(),
 			),
+			apputil.NewCommand("init",
+				"steps through creation of new wallet and initialization for a network with these specified in the main",
+				initHandle(cx),
+				apputil.SubCommands(),
+				"I"),
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{

@@ -1,6 +1,8 @@
 package addresses
 
 import (
+	"os"
+	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/log"
@@ -40,6 +42,8 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	}
 	if save.Pod(cfg) {
 		log.WARN("saved config with new addresses")
+		log.INFO("you can now start up a node in the same config folder with fresh addresses ready to mine with")
+		os.Exit(0)
 	} else {
 		log.ERROR("error adding new addresses", err)
 	}
