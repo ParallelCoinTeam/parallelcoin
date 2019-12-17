@@ -29,7 +29,7 @@ func Main(cx *conte.Xt) func(c *cli.Context) error {
 		// testnet probably never as high as this and hard fork activates early
 		// for testing as pre-hardfork doesn't need testing or CPU mining.
 		if len(os.Args) > 1 {
-			if os.Args[1] == netparams.TestNet3Params.Name {
+			if os.Args[2] == netparams.TestNet3Params.Name {
 				fork.IsTestnet = true
 			}
 		}

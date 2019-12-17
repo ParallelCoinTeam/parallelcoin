@@ -7,7 +7,7 @@ import (
 	"net"
 	"os"
 	"time"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/mining"
@@ -39,7 +39,7 @@ type Worker struct {
 	startNonce   uint32
 	startChan    chan struct{}
 	stopChan     chan struct{}
-	//running    uint32
+	// running    uint32
 }
 
 const (
@@ -142,8 +142,9 @@ func NewWithConnAndSemaphore(
 								AlgoVers[w.msgBlock.Header.Version],
 							"total hashes since startup",
 							w.roller.C-int(w.startNonce),
+							fork.IsTestnet,
 						)
-						//log.SPEW(w.msgBlock)
+						// log.SPEW(w.msgBlock)
 						srs := sol.GetSolContainer(w.msgBlock)
 						_ = srs
 						err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
@@ -162,7 +163,7 @@ func NewWithConnAndSemaphore(
 						total := w.roller.C - int(w.startNonce)
 						_, _ = fmt.Fprintf(os.Stderr,
 							"\r %9d hash/s        \r", total/since)
-
+						
 					}
 				}
 			}
@@ -189,8 +190,8 @@ func New(s sem.T) (w *Worker, conn net.Conn) {
 // this makes the miner start mining from pause or pause,
 // prepare the work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
-	//log.DEBUG("running NewJob RPC method")
-	//if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
+	// log.DEBUG("running NewJob RPC method")
+	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
 	log.TRACE("loading dispatch connection from job message")
 	// if there is no dispatch connection, make one.
 	// If there is one but the server died or was disconnected the
@@ -209,8 +210,8 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	if err != nil {
 		log.ERROR(err)
 	}
-	//}
-	//log.SPEW(w.dispatchConn)
+	// }
+	// log.SPEW(w.dispatchConn)
 	// halting current work
 	w.stopChan <- struct{}{}
 	*reply = true
@@ -243,7 +244,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		log.ERROR(err)
 		return
 	}
-	//log.SPEW(w.msgBlock)
+	// log.SPEW(w.msgBlock)
 	// make the work select block start running
 	w.startChan <- struct{}{}
 	return
@@ -302,7 +303,7 @@ func UpdateExtraNonce(msgBlock *wire.MsgBlock, blockHeight int32,
 			blockchain.MinCoinbaseScriptLen,
 			blockchain.MaxCoinbaseScriptLen)
 	}
-	//log.SPEW(msgBlock.Transactions)
+	// log.SPEW(msgBlock.Transactions)
 	msgBlock.Transactions[0].TxIn[0].SignatureScript = coinbaseScript
 	// TODO(davec): A util.Solution should use saved in the state to avoid
 	//  recalculating all of the other transaction hashes.

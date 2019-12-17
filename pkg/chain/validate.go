@@ -1268,9 +1268,9 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 	if flags&BFNoPoWCheck == 0 {
 		// The block hash must be less than the claimed target.
 		// Unless there is less than 10 previous with the same version (algo)...
-		log.DEBUG("height", height)
+		log.DEBUG("height", height, fork.IsTestnet)
 		hash := header.BlockHashWithAlgos(height)
-		log.DEBUG("blockhashwithalgos", hash)
+		log.DEBUG("blockhashwithalgos", hash, fork.IsTestnet)
 		bigHash := HashToBig(&hash)
 		if bigHash.Cmp(target) > 0 {
 			str := fmt.Sprintf("block hash of " +
