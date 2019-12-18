@@ -1,8 +1,8 @@
 package duoui
 
 import (
-	"gioui.org/layout"
-	"gioui.org/unit"
+	"github.com/p9c/gio-parallel/layout"
+	"github.com/p9c/gio-parallel/unit"
 
 	"image/color"
 )
