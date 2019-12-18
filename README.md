@@ -17,21 +17,40 @@ team (github account and a registered SSH public key on it is required):
 ```
 cd /where/you/keep/your/things
 git clone git@github.com:p9c/pod.git
+```
+
+Before you can build it, though, see [gioui.org install instructions](https://gioui.org/doc/install)
+
+Several important libraries are required to build on each platform.
+Linux needs some input related X libraries, wayland and their GL
+libraries, and similar but different for Mac, Windows, iOS and Android.
+
+More detailed instructions will follow as we work through each 
+platform build. For now we develop on FreeBSD and Ubuntu so for now,
+at this early stage with the GUI, please bear with us.
+
+Next, go to the repo root and get Go to build it.
+
+```
 cd pod
 go install -v
 ```
 
-You should use modules for this project, as everyone else is and many
-forgot to protect their master from version 2 on the same URL.
+Any version of Go from 1.11 should build, this is really the current
+minimal production version for Go anyway with the chaos that 
+modules have unleashed on Git repository branch keeping hygiene.
 
-*Please note:* Currently GUI branch is not integrated onto the 
-master - as such, use the 'headless' tag like so:
+**GO111MODULE should be set to "on".**
+
+*Please note:* Currently GUI branch is not building, 
+use the 'headless' tag like so to mask it from the build:
 
 ```
 go install -v -tags headless
 ```
 
-This will be corrected as soon as possible. Thanks for your patience.
+This will be corrected as soon as possible. 
+Thanks for your patience.
 
 ## Running
 
