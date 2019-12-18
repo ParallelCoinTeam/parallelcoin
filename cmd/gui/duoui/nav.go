@@ -1,8 +1,8 @@
 package duoui
 
 import (
-	"gioui.org/layout"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/unit"
 )
 
 func DuoUImenu(duo *DuoUI) layout.FlexChild {

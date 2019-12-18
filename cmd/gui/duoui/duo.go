@@ -1,11 +1,11 @@
 package duoui
 
 import (
-	"gioui.org/app"
-	"gioui.org/layout"
-	"gioui.org/unit"
-	"gioui.org/widget"
-	"gioui.org/widget/material"
+	"github.com/p9c/pod/pkg/gio/app"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/pkg/gio/widget/material"
 	"github.com/p9c/pod/cmd/gui/ico"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/pkg/conte"

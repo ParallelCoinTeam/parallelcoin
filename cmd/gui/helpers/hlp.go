@@ -5,10 +5,10 @@ import (
 	"image"
 	"image/color"
 
-	"gioui.org/f32"
-	"gioui.org/layout"
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op/clip"
+	"github.com/p9c/pod/pkg/gio/op/paint"
 )
 
 func drawRect(gtx *layout.Context, color color.RGBA) {
