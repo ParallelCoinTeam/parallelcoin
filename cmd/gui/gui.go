@@ -3,7 +3,7 @@
 package gui
 
 import (
-	"gioui.org/app"
+	"github.com/p9c/gio-parallel/app"
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/pkg/log"
 )

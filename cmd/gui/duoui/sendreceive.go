@@ -1,10 +1,10 @@
 package duoui
 
 import (
-	"gioui.org/layout"
-	"gioui.org/text"
-	"gioui.org/unit"
-	"gioui.org/widget"
+	"github.com/p9c/gio-parallel/layout"
+	"github.com/p9c/gio-parallel/text"
+	"github.com/p9c/gio-parallel/unit"
+	"github.com/p9c/gio-parallel/widget"
 	"image/color"
 )
 

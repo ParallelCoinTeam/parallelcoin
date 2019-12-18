@@ -2,9 +2,9 @@ package fonts
 
 import (
 	"fmt"
-	"gioui.org/font"
-	"gioui.org/font/opentype"
-	"gioui.org/text"
+	"github.com/p9c/gio-parallel/font"
+	"github.com/p9c/gio-parallel/font/opentype"
+	"github.com/p9c/gio-parallel/text"
 	"github.com/p9c/pod/pkg/fonts/bariolbold"
 	"github.com/p9c/pod/pkg/fonts/bariolbolditalic"
 	"github.com/p9c/pod/pkg/fonts/bariollightitalic"
