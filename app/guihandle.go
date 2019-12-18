@@ -4,6 +4,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/gui/duoui"
+	"github.com/p9c/pod/cmd/gui/loader"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/urfave/cli"
@@ -29,7 +30,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 			log.ERROR(err)
 		}
 
-		duo.DuoUIloader(firstRun)
+		loader.DuoUIloader(duo, cx, firstRun)
 
 		err = gui.Services(cx)
 		if err != nil {

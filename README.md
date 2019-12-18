@@ -26,7 +26,7 @@ It consists of 6 main modules:
     have a full accounts implementation (TODO: fixme!)
 4. pod/shell - combined full node and wallet server of 2. and 3. running 
     concurrently
-5. pod/gui - webview based desktop wallet GUI
+5. pod/gui - Gio based desktop wallet GUI
 6. pod/kopach - standalone miner with LAN UDP broadcast work delivery system
 
 ## Building

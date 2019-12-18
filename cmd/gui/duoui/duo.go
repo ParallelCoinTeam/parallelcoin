@@ -7,6 +7,7 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/p9c/pod/cmd/gui/ico"
+	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/fonts"
@@ -15,95 +16,103 @@ import (
 )
 
 func DuOuI(cx *conte.Xt) (duo *DuoUI) {
+	//opts := &app.Options{
+	//	Width:  unit.Dp(800),
+	//	Height: unit.Dp(600),
+	//	Title:  "Gio",
+	//}
 	duo = &DuoUI{
 		cx: cx,
 		rc: RcInit(),
 		ww: app.NewWindow(),
 	}
 	fonts.Register()
+//duo.ww.Width =  unit.Dp(800)
+//	duo.ww.Height=  unit.Dp(600)
+//		duo.ww.Title =  "ParallelCoin - True Story"
 
 	duo.gc = layout.NewContext(duo.ww.Queue())
 	duo.cs = &duo.gc.Constraints
 
 	// Layouts
-	view := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Vertical},
+	view := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
 	}
-	header := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween},
+	header := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween},
 	}
-	logo := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Vertical},
+	logo := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
 	}
-	body := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Horizontal},
+	body := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal},
 	}
-	sidebar := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Vertical},
-		i: layout.UniformInset(unit.Dp(8)),
+	sidebar := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
+		Inset: layout.UniformInset(unit.Dp(8)),
 	}
-	content := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Vertical},
-		i: layout.UniformInset(unit.Dp(30)),
+	content := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
+		Inset: layout.UniformInset(unit.Dp(30)),
 	}
-	overview := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Vertical},
+	overview := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
 	}
-	overviewTop := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Horizontal},
+	overviewTop := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal},
 	}
-	sendReceive := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Vertical},
-		i: layout.UniformInset(unit.Dp(15)),
+	sendReceive := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
+		Inset: layout.UniformInset(unit.Dp(15)),
 	}
-	sendReceiveButtons := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Horizontal},
+	sendReceiveButtons := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal},
 	}
-	overviewBottom := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Horizontal},
+	overviewBottom := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal},
 	}
-	status := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Vertical},
-		i: layout.UniformInset(unit.Dp(15)),
+	status := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
+		Inset: layout.UniformInset(unit.Dp(15)),
 	}
-	menu := DuoUIcomponent{
-		l: layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle},
+	menu := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle},
 	}
 
-	duo.comp = &DuoUIcomponents{
-		view:               view,
-		header:             header,
-		logo:               logo,
-		body:               body,
-		sidebar:            sidebar,
-		content:            content,
-		overview:           overview,
-		overviewTop:        overviewTop,
-		sendReceive:        sendReceive,
-		sendReceiveButtons: sendReceiveButtons,
-		overviewBottom:     overviewBottom,
-		status:             status,
-		menu:               menu,
+	duo.comp = &models.DuoUIcomponents{
+		View:               view,
+		Header:             header,
+		Logo:               logo,
+		Body:               body,
+		Sidebar:            sidebar,
+		Content:            content,
+		Overview:           overview,
+		OverviewTop:        overviewTop,
+		SendReceive:        sendReceive,
+		SendReceiveButtons: sendReceiveButtons,
+		OverviewBottom:     overviewBottom,
+		Status:             status,
+		Menu:               menu,
 	}
 
 	// Navigation
-	duo.menu = &DuoUInav{
-		current: "overview",
+	duo.menu = &models.DuoUInav{
+		Current: "overview",
 		//icoBackground: color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
-		icoColor:    color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30},
-		icoPadding:  unit.Dp(8),
-		icoSize:     unit.Dp(64),
-		overview:    *new(widget.Button),
-		history:     *new(widget.Button),
-		addressbook: *new(widget.Button),
-		explorer:    *new(widget.Button),
-		settings:    *new(widget.Button),
+		IcoColor:    color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30},
+		IcoPadding:  unit.Dp(8),
+		IcoSize:     unit.Dp(64),
+		Overview:    *new(widget.Button),
+		History:     *new(widget.Button),
+		AddressBook: *new(widget.Button),
+		Explorer:    *new(widget.Button),
+		Settings:    *new(widget.Button),
 	}
 
 	// Icons
 
 	var err error
-	ics := &DuoUIicons{}
+	ics := &models.DuoUIicons{}
 
 	ics.Logo, err = material.NewIcon(ico.ParallelCoin)
 	if err != nil {

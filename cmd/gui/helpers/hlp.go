@@ -1,4 +1,4 @@
-package duoui
+package helpers
 
 
 import (
