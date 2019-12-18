@@ -2,17 +2,17 @@ package duoui
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/pod/cmd/gui/helpers"
 	"image/color"
 )
 
 func DuoUIcontent(duo *DuoUI) layout.FlexChild {
-	return duo.comp.body.l.Flex(duo.gc, 1, func() {
-		duo.comp.content.i.Layout(duo.gc, func() {
-			drawRect(duo.gc, color.RGBA{A: 0xff, R: 0xf4, B: 0xf4, G: 0xf4})
+	return duo.comp.Body.Layout.Flex(duo.gc, 1, func() {
+		duo.comp.Content.Inset.Layout(duo.gc, func() {
+			helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0xf4, B: 0xf4, G: 0xf4}, 0, 0, 0, 0)
 			// Content <<<
-
 			var content layout.FlexChild
-			switch duo.menu.current {
+			switch duo.menu.Current {
 			case "overview":
 				content = DuoUIoverview(duo)
 			case "history":
@@ -29,7 +29,7 @@ func DuoUIcontent(duo *DuoUI) layout.FlexChild {
 				content = DuoUIoverview(duo)
 			}
 
-			duo.comp.content.l.Layout(duo.gc, content)
+			duo.comp.Content.Layout.Layout(duo.gc, content)
 			// Content >>>
 		})
 	})

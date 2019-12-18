@@ -4,7 +4,7 @@ import (
 	"gioui.org/io/system"
 )
 
-func DuoUIloop(duo *DuoUI) error {
+func DuoUImainLoop(duo *DuoUI) error {
 
 	for {
 		e := <-duo.ww.Events()
@@ -22,7 +22,7 @@ func DuoUIloop(duo *DuoUI) error {
 // START OMIT
 func DuoUIgrid(duo *DuoUI) {
 	// START View <<<
-	duo.comp.view.l.Layout(duo.gc, DuoUIheader(duo), DuoUIbody(duo))
+	duo.comp.View.Layout.Layout(duo.gc, DuoUIheader(duo), DuoUIbody(duo))
 	// END View >>>
 }
 

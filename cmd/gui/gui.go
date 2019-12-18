@@ -8,7 +8,7 @@ import (
 
 func WalletGUI(duo *duoui.DuoUI) (err error) {
 	go func() {
-		if err := duoui.DuoUIloop(duo); err != nil {
+		if err := duoui.DuoUImainLoop(duo); err != nil {
 			log.FATAL(err)
 		}
 	}()
