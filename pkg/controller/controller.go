@@ -57,6 +57,10 @@ type Controller struct {
 }
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc) {
+	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
+		log.WARN("no mining addresses, not starting controller")
+		return
+	}
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
 		log.WARN("not running controller without RPC enabled")
 		return
@@ -67,7 +71,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	conn, err := transport.NewConnection(UDP4MulticastAddress,
-		*cx.Config.Controller, *cx.Config.MinerPass, MaxDatagramSize, ctx)
+		*cx.Config.Controller, *cx.Config.MinerPass, MaxDatagramSize,
+		ctx, true)
 	if err != nil {
 		log.ERROR(err)
 		cancel()

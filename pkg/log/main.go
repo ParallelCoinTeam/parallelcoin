@@ -285,7 +285,7 @@ func Composite(text, level string, color bool) string {
 	}
 	_, loc, iline, _ := runtime.Caller(skip)
 	line := fmt.Sprint(iline)
-	files := strings.Split(loc, "github.com/p9c/pod/")
+	files := strings.Split(loc, "pod/")
 	var file string
 	if len(files) > 1 {
 		file = files[1]
