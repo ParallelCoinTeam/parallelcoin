@@ -6,8 +6,8 @@ import (
 	"golang.org/x/image/font"
 	"unicode/utf8"
 
-	"gioui.org/op"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/unit"
 	"golang.org/x/image/math/fixed"
 )
 

@@ -10,7 +10,7 @@ import "C"
 import (
 	"unsafe"
 
-	"gioui.org/app/internal/egl"
+	"github.com/p9c/pod/pkg/gio/app/internal/egl"
 )
 
 type context struct {

@@ -5,8 +5,8 @@ package ops
 import (
 	"encoding/binary"
 
-	"gioui.org/internal/opconst"
-	"gioui.org/op"
+	"github.com/p9c/pod/pkg/gio/internal/opconst"
+	"github.com/p9c/pod/pkg/gio/op"
 )
 
 // Reader parses an ops list.

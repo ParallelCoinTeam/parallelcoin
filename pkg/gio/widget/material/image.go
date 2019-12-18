@@ -5,12 +5,12 @@ package material
 import (
 	"image"
 
-	"gioui.org/f32"
-	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/op/clip"
+	"github.com/p9c/pod/pkg/gio/op/paint"
+	"github.com/p9c/pod/pkg/gio/unit"
 )
 
 // Image is a widget that displays an image.

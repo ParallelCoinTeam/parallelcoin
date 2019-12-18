@@ -9,12 +9,12 @@ import (
 	"image/color"
 	"log"
 
-	"gioui.org/app"
-	"gioui.org/f32"
-	"gioui.org/io/pointer"
-	"gioui.org/io/system"
-	"gioui.org/layout"
-	"gioui.org/op/paint"
+	"github.com/p9c/pod/pkg/gio/app"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/io/pointer"
+	"github.com/p9c/pod/pkg/gio/io/system"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op/paint"
 )
 
 func main() {

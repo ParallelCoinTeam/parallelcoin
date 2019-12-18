@@ -5,7 +5,7 @@
 package headless
 
 import (
-	"gioui.org/app/internal/egl"
+	"github.com/p9c/pod/pkg/gio/app/internal/egl"
 )
 
 func newContext() (context, error) {

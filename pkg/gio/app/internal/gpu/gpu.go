@@ -12,13 +12,13 @@ import (
 	"time"
 	"unsafe"
 
-	"gioui.org/app/internal/gl"
-	"gioui.org/f32"
-	"gioui.org/internal/opconst"
-	"gioui.org/internal/ops"
-	"gioui.org/internal/path"
-	"gioui.org/op"
-	"gioui.org/op/paint"
+	"github.com/p9c/pod/pkg/gio/app/internal/gl"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/internal/opconst"
+	"github.com/p9c/pod/pkg/gio/internal/ops"
+	"github.com/p9c/pod/pkg/gio/internal/path"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/op/paint"
 )
 
 type GPU struct {

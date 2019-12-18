@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"gioui.org/app/internal/gl"
+	"github.com/p9c/pod/pkg/gio/app/internal/gl"
 )
 
 type Context struct {

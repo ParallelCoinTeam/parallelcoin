@@ -7,10 +7,10 @@ import (
 	"image"
 	"math"
 
-	"gioui.org/f32"
-	"gioui.org/internal/opconst"
-	"gioui.org/internal/path"
-	"gioui.org/op"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/internal/opconst"
+	"github.com/p9c/pod/pkg/gio/internal/path"
+	"github.com/p9c/pod/pkg/gio/op"
 )
 
 // Path constructs a Op clip path described by lines and

@@ -1,10 +1,10 @@
 package models
 
 import (
-	"gioui.org/layout"
-	"gioui.org/unit"
-	"gioui.org/widget"
-	"gioui.org/widget/material"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/pkg/gio/widget/material"
 	"image/color"
 )
 

@@ -9,7 +9,7 @@ import "C"
 import (
 	"sync"
 
-	"gioui.org/app/internal/window"
+	"github.com/p9c/pod/pkg/gio/app/internal/window"
 )
 
 var (

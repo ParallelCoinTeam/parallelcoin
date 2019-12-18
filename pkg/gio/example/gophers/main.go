@@ -15,12 +15,12 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"gioui.org/app"
-	"gioui.org/gesture"
-	"gioui.org/io/key"
-	"gioui.org/io/system"
-	"gioui.org/layout"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/app"
+	"github.com/p9c/pod/pkg/gio/gesture"
+	"github.com/p9c/pod/pkg/gio/io/key"
+	"github.com/p9c/pod/pkg/gio/io/system"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/unit"
 
 	"github.com/google/go-github/v24/github"
 

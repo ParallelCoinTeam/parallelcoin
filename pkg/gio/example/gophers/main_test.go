@@ -6,7 +6,7 @@ import (
 	"image"
 	"testing"
 
-	"gioui.org/layout"
+	"github.com/p9c/pod/pkg/gio/layout"
 )
 
 func BenchmarkUI(b *testing.B) {

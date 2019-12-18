@@ -7,11 +7,11 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"gioui.org/f32"
-	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/op/paint"
-	"gioui.org/text"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/op/paint"
+	"github.com/p9c/pod/pkg/gio/text"
 
 	"golang.org/x/image/math/fixed"
 )

@@ -1,7 +1,7 @@
 package loader
 
 import (
-	"gioui.org/app"
+	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"

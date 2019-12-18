@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"gioui.org/app/internal/window"
+	"github.com/p9c/pod/pkg/gio/app/internal/window"
 )
 
 // extraArgs contains extra arguments to append to

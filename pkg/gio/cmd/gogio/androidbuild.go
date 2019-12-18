@@ -81,7 +81,7 @@ func buildAndroid(tmpDir string, bi *buildInfo) error {
 	}
 
 	perms := []string{"default"}
-	const permPref = "gioui.org/app/permission/"
+	const permPref = "github.com/p9c/pod/pkg/gio/app/permission/"
 	cfg := &packages.Config{
 		Mode: packages.NeedName +
 			packages.NeedFiles +
@@ -200,7 +200,7 @@ func compileAndroid(tmpDir string, tools *androidTools, bi *buildInfo) (err erro
 			return err
 		})
 	}
-	appDir, err := runCmd(exec.Command("go", "list", "-f", "{{.Dir}}", "gioui.org/app/internal/window"))
+	appDir, err := runCmd(exec.Command("go", "list", "-f", "{{.Dir}}", "github.com/p9c/pod/pkg/gio/app/internal/window"))
 	if err != nil {
 		return err
 	}

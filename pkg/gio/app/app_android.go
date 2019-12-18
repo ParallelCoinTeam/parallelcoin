@@ -1,7 +1,7 @@
 package app
 
 import (
-	"gioui.org/app/internal/window"
+	"github.com/p9c/pod/pkg/gio/app/internal/window"
 )
 
 type Handle window.Handle

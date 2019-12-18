@@ -5,7 +5,7 @@
 package window
 
 import (
-	"gioui.org/app/internal/gl"
+	"github.com/p9c/pod/pkg/gio/app/internal/gl"
 )
 
 /*

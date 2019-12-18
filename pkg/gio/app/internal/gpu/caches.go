@@ -5,7 +5,7 @@ package gpu
 import (
 	"fmt"
 
-	"gioui.org/internal/ops"
+	"github.com/p9c/pod/pkg/gio/internal/ops"
 )
 
 type resourceCache struct {

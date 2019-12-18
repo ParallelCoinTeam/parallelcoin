@@ -8,8 +8,8 @@ import (
 	"image"
 	"time"
 
-	"gioui.org/op"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/unit"
 )
 
 // A FrameEvent asks for a new frame in the form of a list of

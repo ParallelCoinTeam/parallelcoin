@@ -15,9 +15,9 @@ to a ui/app.Window's Update method.
 
 Drawing a colored square:
 
-	import "gioui.org/unit"
-	import "gioui.org/app"
-	import "gioui.org/op/paint"
+	import "github.com/p9c/pod/pkg/gio/unit"
+	import "github.com/p9c/pod/pkg/gio/app"
+	import "github.com/p9c/pod/pkg/gio/op/paint"
 
 	var w app.Window
 	var e system.FrameEvent
@@ -73,8 +73,8 @@ import (
 	"math"
 	"time"
 
-	"gioui.org/f32"
-	"gioui.org/internal/opconst"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/internal/opconst"
 )
 
 // Ops holds a list of operations. Operations are stored in

@@ -1,7 +1,7 @@
 package duoui
 
 import (
-	"github.com/p9c/gio-parallel/io/system"
+	"github.com/p9c/pod/pkg/gio/io/system"
 )
 
 func DuoUImainLoop(duo *DuoUI) error {

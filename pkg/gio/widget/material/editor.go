@@ -5,11 +5,11 @@ package material
 import (
 	"image/color"
 
-	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/op/paint"
-	"gioui.org/text"
-	"gioui.org/widget"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/op/paint"
+	"github.com/p9c/pod/pkg/gio/text"
+	"github.com/p9c/pod/pkg/gio/widget"
 )
 
 type Editor struct {

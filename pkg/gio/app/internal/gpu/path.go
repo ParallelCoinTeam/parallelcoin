@@ -9,9 +9,9 @@ import (
 	"image"
 	"unsafe"
 
-	"gioui.org/app/internal/gl"
-	"gioui.org/f32"
-	"gioui.org/internal/path"
+	"github.com/p9c/pod/pkg/gio/app/internal/gl"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/internal/path"
 )
 
 type pather struct {

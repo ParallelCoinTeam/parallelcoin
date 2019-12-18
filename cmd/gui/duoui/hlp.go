@@ -5,10 +5,10 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/p9c/gio-parallel/f32"
-	"github.com/p9c/gio-parallel/layout"
-	"github.com/p9c/gio-parallel/op/clip"
-	"github.com/p9c/gio-parallel/op/paint"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op/clip"
+	"github.com/p9c/pod/pkg/gio/op/paint"
 )
 
 func drawRect(gtx *layout.Context, color color.RGBA) {

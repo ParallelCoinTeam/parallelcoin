@@ -7,10 +7,10 @@ import (
 	"math"
 	"time"
 
-	"gioui.org/io/event"
-	"gioui.org/io/system"
-	"gioui.org/op"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/io/event"
+	"github.com/p9c/pod/pkg/gio/io/system"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/unit"
 )
 
 // Context carries the state needed by almost all layouts and widgets.

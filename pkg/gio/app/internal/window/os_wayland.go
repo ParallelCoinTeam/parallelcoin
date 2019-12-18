@@ -16,12 +16,12 @@ import (
 	"time"
 	"unsafe"
 
-	"gioui.org/app/internal/xkb"
-	"gioui.org/f32"
-	"gioui.org/internal/fling"
-	"gioui.org/io/key"
-	"gioui.org/io/pointer"
-	"gioui.org/io/system"
+	"github.com/p9c/pod/pkg/gio/app/internal/xkb"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/internal/fling"
+	"github.com/p9c/pod/pkg/gio/io/key"
+	"github.com/p9c/pod/pkg/gio/io/pointer"
+	"github.com/p9c/pod/pkg/gio/io/system"
 	syscall "golang.org/x/sys/unix"
 )
 

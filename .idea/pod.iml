@@ -10,7 +10,6 @@
     </buildTags>
   </component>
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$/../gio-parallel" />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/cmd/gui/OLD" />
       <excludeFolder url="file://$MODULE_DIR$/legacy" />

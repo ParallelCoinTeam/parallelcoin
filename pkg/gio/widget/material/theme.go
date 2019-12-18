@@ -6,12 +6,12 @@ import (
 	"image"
 	"image/color"
 
-	"gioui.org/f32"
-	"gioui.org/font"
-	"gioui.org/layout"
-	"gioui.org/op/paint"
-	"gioui.org/text"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/font"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op/paint"
+	"github.com/p9c/pod/pkg/gio/text"
+	"github.com/p9c/pod/pkg/gio/unit"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 

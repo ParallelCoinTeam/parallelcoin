@@ -3,7 +3,7 @@
 package text
 
 import (
-	"gioui.org/op"
+	"github.com/p9c/pod/pkg/gio/op"
 	"golang.org/x/image/math/fixed"
 )
 

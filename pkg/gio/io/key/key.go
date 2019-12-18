@@ -12,9 +12,9 @@ package key
 import (
 	"strings"
 
-	"gioui.org/internal/opconst"
-	"gioui.org/io/event"
-	"gioui.org/op"
+	"github.com/p9c/pod/pkg/gio/internal/opconst"
+	"github.com/p9c/pod/pkg/gio/io/event"
+	"github.com/p9c/pod/pkg/gio/op"
 )
 
 // InputOp declares a handler ready for key events.

@@ -1,10 +1,10 @@
 package duoui
 
 import (
-	"gioui.org/layout"
-	"gioui.org/text"
-	"gioui.org/unit"
-	"gioui.org/widget"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/text"
+	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"image/color"
 )

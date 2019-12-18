@@ -8,13 +8,13 @@ import (
 	"image/color"
 	"log"
 	
-	app "github.com/p9c/gio-parallel/app"
-	system "github.com/p9c/gio-parallel/io/system"
-	layout "github.com/p9c/gio-parallel/layout"
-	text "github.com/p9c/gio-parallel/text"
-	material "github.com/p9c/gio-parallel/widget/material"
+	app "github.com/p9c/pod/pkg/gio/app"
+	system "github.com/p9c/pod/pkg/gio/io/system"
+	layout "github.com/p9c/pod/pkg/gio/layout"
+	text "github.com/p9c/pod/pkg/gio/text"
+	material "github.com/p9c/pod/pkg/gio/widget/material"
 	
-	gofont "github.com/p9c/gio-parallel/font/gofont"
+	gofont "github.com/p9c/pod/pkg/gio/font/gofont"
 )
 
 func main() {

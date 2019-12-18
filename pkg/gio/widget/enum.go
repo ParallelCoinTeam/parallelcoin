@@ -1,8 +1,8 @@
 package widget
 
 import (
-	"gioui.org/gesture"
-	"gioui.org/layout"
+	"github.com/p9c/pod/pkg/gio/gesture"
+	"github.com/p9c/pod/pkg/gio/layout"
 )
 
 type Enum struct {

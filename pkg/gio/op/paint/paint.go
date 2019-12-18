@@ -9,9 +9,9 @@ import (
 	"image/draw"
 	"math"
 
-	"gioui.org/f32"
-	"gioui.org/internal/opconst"
-	"gioui.org/op"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/internal/opconst"
+	"github.com/p9c/pod/pkg/gio/op"
 )
 
 // ImageOp sets the material to an image.

@@ -13,13 +13,13 @@ import (
 	"math"
 	"time"
 
-	"gioui.org/f32"
-	"gioui.org/internal/fling"
-	"gioui.org/io/event"
-	"gioui.org/io/key"
-	"gioui.org/io/pointer"
-	"gioui.org/op"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/internal/fling"
+	"github.com/p9c/pod/pkg/gio/io/event"
+	"github.com/p9c/pod/pkg/gio/io/key"
+	"github.com/p9c/pod/pkg/gio/io/pointer"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/unit"
 )
 
 // Click detects click gestures in the form

@@ -9,10 +9,10 @@ import (
 	"math"
 	"time"
 
-	"gioui.org/app/internal/gl"
-	"gioui.org/io/event"
-	"gioui.org/io/system"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/app/internal/gl"
+	"github.com/p9c/pod/pkg/gio/io/event"
+	"github.com/p9c/pod/pkg/gio/io/system"
+	"github.com/p9c/pod/pkg/gio/unit"
 )
 
 type Options struct {

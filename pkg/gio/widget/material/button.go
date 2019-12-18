@@ -6,15 +6,15 @@ import (
 	"image"
 	"image/color"
 
-	"gioui.org/f32"
-	"gioui.org/io/pointer"
-	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
-	"gioui.org/text"
-	"gioui.org/unit"
-	"gioui.org/widget"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/io/pointer"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/op/clip"
+	"github.com/p9c/pod/pkg/gio/op/paint"
+	"github.com/p9c/pod/pkg/gio/text"
+	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gio/widget"
 )
 
 type Button struct {

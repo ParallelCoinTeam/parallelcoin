@@ -14,8 +14,8 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	"gioui.org/io/event"
-	"gioui.org/io/key"
+	"github.com/p9c/pod/pkg/gio/io/event"
+	"github.com/p9c/pod/pkg/gio/io/key"
 )
 
 /*

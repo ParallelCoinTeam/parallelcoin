@@ -6,9 +6,9 @@ import (
 	"image"
 	"runtime"
 
-	"gioui.org/app/internal/gpu"
-	"gioui.org/app/internal/window"
-	"gioui.org/op"
+	"github.com/p9c/pod/pkg/gio/app/internal/gpu"
+	"github.com/p9c/pod/pkg/gio/app/internal/window"
+	"github.com/p9c/pod/pkg/gio/op"
 )
 
 type renderLoop struct {

@@ -7,9 +7,9 @@ import (
 	"image/color"
 	"testing"
 
-	"gioui.org/f32"
-	"gioui.org/op"
-	"gioui.org/op/paint"
+	"github.com/p9c/pod/pkg/gio/f32"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/op/paint"
 )
 
 func TestHeadless(t *testing.T) {

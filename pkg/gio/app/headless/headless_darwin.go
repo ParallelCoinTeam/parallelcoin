@@ -2,7 +2,7 @@
 
 package headless
 
-import "gioui.org/app/internal/gl"
+import "github.com/p9c/pod/pkg/gio/app/internal/gl"
 
 /*
 #cgo CFLAGS: -DGL_SILENCE_DEPRECATION -Werror -Wno-deprecated-declarations -fmodules -fobjc-arc -x objective-c

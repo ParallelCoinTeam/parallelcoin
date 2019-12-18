@@ -8,13 +8,13 @@ import (
 	"image/color"
 	"log"
 
-	"gioui.org/app"
-	"gioui.org/io/system"
-	"gioui.org/layout"
-	"gioui.org/text"
-	"gioui.org/widget/material"
+	"github.com/p9c/pod/pkg/gio/app"
+	"github.com/p9c/pod/pkg/gio/io/system"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/text"
+	"github.com/p9c/pod/pkg/gio/widget/material"
 
-	"gioui.org/font/gofont"
+	"github.com/p9c/pod/pkg/gio/font/gofont"
 )
 
 func main() {

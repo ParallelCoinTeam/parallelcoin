@@ -9,9 +9,9 @@ import (
 	"image"
 	"runtime"
 
-	"gioui.org/app/internal/gl"
-	"gioui.org/app/internal/gpu"
-	"gioui.org/op"
+	"github.com/p9c/pod/pkg/gio/app/internal/gl"
+	"github.com/p9c/pod/pkg/gio/app/internal/gpu"
+	"github.com/p9c/pod/pkg/gio/op"
 )
 
 // Window is a headless window.

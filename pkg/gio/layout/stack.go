@@ -5,7 +5,7 @@ package layout
 import (
 	"image"
 
-	"gioui.org/op"
+	"github.com/p9c/pod/pkg/gio/op"
 )
 
 // Stack lays out child elements on top of each other,

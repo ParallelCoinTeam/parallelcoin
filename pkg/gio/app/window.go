@@ -8,15 +8,15 @@ import (
 	"image"
 	"time"
 
-	"gioui.org/app/internal/input"
-	"gioui.org/app/internal/window"
-	"gioui.org/io/event"
-	"gioui.org/io/profile"
-	"gioui.org/io/system"
-	"gioui.org/op"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/app/internal/input"
+	"github.com/p9c/pod/pkg/gio/app/internal/window"
+	"github.com/p9c/pod/pkg/gio/io/event"
+	"github.com/p9c/pod/pkg/gio/io/profile"
+	"github.com/p9c/pod/pkg/gio/io/system"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/unit"
 
-	_ "gioui.org/app/internal/log"
+	_ "github.com/p9c/pod/pkg/gio/app/internal/log"
 )
 
 // WindowOption configures a Window.

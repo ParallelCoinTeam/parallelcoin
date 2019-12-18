@@ -17,18 +17,18 @@ import (
 	"os"
 	"time"
 
-	"gioui.org/app"
-	"gioui.org/app/headless"
-	"gioui.org/io/system"
-	"gioui.org/layout"
-	"gioui.org/text"
-	"gioui.org/unit"
-	"gioui.org/widget"
-	"gioui.org/widget/material"
+	"github.com/p9c/pod/pkg/gio/app"
+	"github.com/p9c/pod/pkg/gio/app/headless"
+	"github.com/p9c/pod/pkg/gio/io/system"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/text"
+	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/pkg/gio/widget/material"
 
 	"golang.org/x/exp/shiny/materialdesign/icons"
 
-	"gioui.org/font/gofont"
+	"github.com/p9c/pod/pkg/gio/font/gofont"
 )
 
 var screenshot = flag.String("screenshot", "", "save a screenshot to a file and exit")

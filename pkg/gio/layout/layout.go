@@ -5,8 +5,8 @@ package layout
 import (
 	"image"
 
-	"gioui.org/op"
-	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/unit"
 )
 
 // Constraints represent a set of acceptable ranges for

@@ -18,7 +18,7 @@ contents and state.
 
 For example:
 
-	import "gioui.org/unit"
+	import "github.com/p9c/pod/pkg/gio/unit"
 
 	w := app.NewWindow()
 	for e := range w.Events() {
@@ -45,7 +45,7 @@ For example, to display a blank but otherwise functional window:
 
 	package main
 
-	import "gioui.org/app"
+	import "github.com/p9c/pod/pkg/gio/app"
 
 	func main() {
 		go func() {

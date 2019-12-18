@@ -6,7 +6,7 @@ package font
 import (
 	"sync"
 
-	"gioui.org/text"
+	"github.com/p9c/pod/pkg/gio/text"
 )
 
 var (

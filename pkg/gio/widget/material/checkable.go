@@ -6,12 +6,12 @@ import (
 	"image"
 	"image/color"
 
-	"gioui.org/io/pointer"
-	"gioui.org/layout"
-	"gioui.org/op/paint"
-	"gioui.org/text"
-	"gioui.org/unit"
-	"gioui.org/widget"
+	"github.com/p9c/pod/pkg/gio/io/pointer"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op/paint"
+	"github.com/p9c/pod/pkg/gio/text"
+	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gio/widget"
 )
 
 type checkable struct {
