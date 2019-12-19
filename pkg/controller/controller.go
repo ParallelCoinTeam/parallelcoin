@@ -78,6 +78,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		cancel()
 		return
 	}
+	for !cx.RealNode.SyncManager.IsCurrent() {
+		log.DEBUG("node is not synced, waiting 5 seconds to start controller")
+		time.Sleep(time.Second*5)
+	}
 	ctrl := &Controller{
 		conn:                   conn,
 		active:                 &atomic.Bool{},

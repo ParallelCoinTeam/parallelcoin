@@ -1,7 +1,7 @@
 package duoui
 
 type RcVar struct {
-	Alert DuOSalert
+	Alert        DuOSalert
 	Status       DuOStatus
 	Hashes       int64
 	NetHash      int64
@@ -11,22 +11,22 @@ type RcVar struct {
 	BlockCount   int64
 	NetLastBlock int32
 	Connections  int32
-
-	Balance     string
-	Unconfirmed string
-	TxsNumber   int
+	
+	Balance      string
+	Unconfirmed  string
+	TxsNumber    int
 	Transactions DuOStransactions
 	Txs          DuOStransactionsExcerpts
 	LastTxs      DuOStransactions
-
+	
 	Sent       bool
 	IsFirstRun bool
 	Localhost  DuOSlocalHost
-
+	
 	screen string `json:"screen"`
 }
 
-//type rcVar interface {
+// type rcVar interface {
 //	GetDuOStransactions(sfrom, count int, cat string)
 //	GetDuOSbalance()
 //	GetDuOStransactionsExcerpts()
@@ -36,10 +36,9 @@ type RcVar struct {
 //	GetDuOSblockHeight()
 //	GetDuOSblockCount()
 //	GetDuOSconnectionCount()
-//}
+// }
 
-
-func RcInit() *RcVar{
+func RcInit() *RcVar {
 	return &RcVar{
 		Alert:        DuOSalert{},
 		Status:       DuOStatus{},
