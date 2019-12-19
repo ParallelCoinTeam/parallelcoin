@@ -9,6 +9,7 @@ import (
 	"image/color"
 )
 
+
 func DuoUIhistory(duo *DuoUI) layout.FlexChild {
 	return duo.comp.Content.Layout.Flex(duo.gc, 1, func() {
 		duo.comp.History.Inset.Layout(duo.gc, func() {

@@ -3,10 +3,9 @@
 package text
 
 import (
-	"golang.org/x/image/font"
 	"unicode/utf8"
 
-	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/op/clip"
 	"github.com/p9c/pod/pkg/gio/unit"
 	"golang.org/x/image/math/fixed"
 )
@@ -47,14 +46,9 @@ func (s *Shaper) Layout(c unit.Converter, font Font, str string, opts LayoutOpti
 	return tf.layout(fixed.I(c.Px(font.Size)), str, opts)
 }
 
-func (s *Shaper) Shape(c unit.Converter, font Font, str String) op.CallOp {
+func (s *Shaper) Shape(c unit.Converter, font Font, str String) clip.Op {
 	tf := s.faceForFont(font)
 	return tf.shape(fixed.I(c.Px(font.Size)), str)
-}
-
-func (s *Shaper) Metrics(c unit.Converter, font Font) font.Metrics {
-	tf := s.faceForFont(font)
-	return tf.metrics(fixed.I(c.Px(font.Size)))
 }
 
 func (s *Shaper) faceForStyle(font Font) *face {
@@ -105,9 +99,9 @@ func (t *face) layout(ppem fixed.Int26_6, str string, opts LayoutOptions) *Layou
 	return l
 }
 
-func (t *face) shape(ppem fixed.Int26_6, str String) op.CallOp {
+func (t *face) shape(ppem fixed.Int26_6, str String) clip.Op {
 	if t == nil {
-		return op.CallOp{}
+		return clip.Op{}
 	}
 	pk := pathKey{
 		ppem: ppem,
@@ -119,10 +113,6 @@ func (t *face) shape(ppem fixed.Int26_6, str String) op.CallOp {
 	clip := t.face.Shape(ppem, str)
 	t.pathCache.Put(pk, clip)
 	return clip
-}
-
-func (t *face) metrics(ppem fixed.Int26_6) font.Metrics {
-	return t.face.Metrics(ppem)
 }
 
 func fallbackLayout(str string) *Layout {

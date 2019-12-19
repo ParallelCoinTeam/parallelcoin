@@ -173,7 +173,7 @@ func (a Align) Layout(gtx *Context, w Widget) {
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	op.TransformOp{}.Offset(toPointF(p)).Add(gtx.Ops)
-	macro.Add()
+	macro.Add(gtx.Ops)
 	stack.Pop()
 	gtx.Dimensions = Dimensions{
 		Size:     sz,

@@ -40,7 +40,7 @@ type Op struct {
 }
 
 func (p Op) Add(o *op.Ops) {
-	p.macro.Add()
+	p.macro.Add(o)
 	data := o.Write(opconst.TypeClipLen)
 	data[0] = byte(opconst.TypeClip)
 	bo := binary.LittleEndian

@@ -17,7 +17,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-// Font implements text.Face.
+// Font implementats text.Face.
 type Font struct {
 	font *sfnt.Font
 	buf  sfnt.Buffer
@@ -42,7 +42,7 @@ func (f *Font) Layout(ppem fixed.Int26_6, str string, opts text.LayoutOptions) *
 	return layoutText(&f.buf, ppem, str, &opentype{Font: f.font, Hinting: font.HintingFull}, opts)
 }
 
-func (f *Font) Shape(ppem fixed.Int26_6, str text.String) op.CallOp {
+func (f *Font) Shape(ppem fixed.Int26_6, str text.String) clip.Op {
 	return textPath(&f.buf, ppem, &opentype{Font: f.font, Hinting: font.HintingFull}, str)
 }
 
@@ -130,7 +130,7 @@ func layoutText(buf *sfnt.Buffer, ppem fixed.Int26_6, str string, f *opentype, o
 	return &text.Layout{Lines: lines}
 }
 
-func textPath(buf *sfnt.Buffer, ppem fixed.Int26_6, f *opentype, str text.String) op.CallOp {
+func textPath(buf *sfnt.Buffer, ppem fixed.Int26_6, f *opentype, str text.String) clip.Op {
 	var lastPos f32.Point
 	var builder clip.Path
 	ops := new(op.Ops)
@@ -188,8 +188,7 @@ func textPath(buf *sfnt.Buffer, ppem fixed.Int26_6, f *opentype, str text.String
 		x += str.Advances[advIdx]
 		advIdx++
 	}
-	builder.End().Add(ops)
-	return op.CallOp{Ops: ops}
+	return builder.End()
 }
 
 func (f *opentype) GlyphAdvance(buf *sfnt.Buffer, ppem fixed.Int26_6, r rune) (advance fixed.Int26_6, ok bool) {

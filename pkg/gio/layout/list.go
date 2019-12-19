@@ -262,7 +262,7 @@ func (l *List) layout() Dimensions {
 		stack.Push(ops)
 		clip.Rect{Rect: toRectF(r)}.Op(ops).Add(ops)
 		op.TransformOp{}.Offset(toPointF(axisPoint(l.Axis, pos, cross))).Add(ops)
-		child.macro.Add()
+		child.macro.Add(ops)
 		stack.Pop()
 		pos += childSize
 	}
@@ -276,7 +276,7 @@ func (l *List) layout() Dimensions {
 	l.macro.Stop()
 	pointer.Rect(image.Rectangle{Max: dims}).Add(ops)
 	l.scroll.Add(ops)
-	l.macro.Add()
+	l.macro.Add(ops)
 	return Dimensions{Size: dims}
 }
 
