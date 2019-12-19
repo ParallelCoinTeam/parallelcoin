@@ -38,3 +38,11 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 		return nil
 	}
 }
+
+func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) error {
+	return func(c *cli.Context) error {
+		Configure(cx, c)
+		
+		return nil
+	}
+}

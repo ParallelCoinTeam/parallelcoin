@@ -35,9 +35,6 @@ func kopachGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		log.INFO("starting up kopach standalone miner with GUI for parallelcoin")
 		Configure(cx, c)
-		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
-			fork.IsTestnet = true
-		}
 		quit := make(chan struct{})
 		interrupt.AddHandler(func() {
 			close(quit)

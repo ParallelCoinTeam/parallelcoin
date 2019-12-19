@@ -58,7 +58,7 @@ func init() {
 	prevArgs = os.Args
 }
 
-func Reset(newArgs []string) {
+func Reset(newArgs []string, quit chan struct{}) {
 	var cmd *exec.Cmd
 	if newArgs != nil {
 		if prevArgs != nil {
@@ -68,6 +68,10 @@ func Reset(newArgs []string) {
 		}
 	}
 	cmd = exec.Command(prevArgs[0], prevArgs[1:]...)
-	log.FATAL(cmd.Start())
-	os.Exit(0)
+	cmd.Start()
+	if quit != nil {
+		close(quit)
+	}
+	// wait until everything has stopped
+	<-interrupt.HandlersDone
 }
