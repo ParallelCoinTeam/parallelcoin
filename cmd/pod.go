@@ -2,11 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
-	
 	// This enables pprof
 	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"runtime"
 	"runtime/debug"
 	"runtime/trace"
@@ -22,6 +21,7 @@ var prevArgs []string
 
 // Main is the main entry point for pod
 func Main() {
+	prevArgs = os.Args
 	runtime.GOMAXPROCS(runtime.NumCPU() * 3)
 	debug.SetGCPercent(10)
 	if err := limits.SetLimits(); err != nil {
@@ -58,7 +58,7 @@ func init() {
 	prevArgs = os.Args
 }
 
-func Reset(newArgs []string, quit chan struct{}) {
+func Reset(newArgs []string) {
 	var cmd *exec.Cmd
 	if newArgs != nil {
 		if prevArgs != nil {
@@ -68,10 +68,6 @@ func Reset(newArgs []string, quit chan struct{}) {
 		}
 	}
 	cmd = exec.Command(prevArgs[0], prevArgs[1:]...)
-	cmd.Start()
-	if quit != nil {
-		close(quit)
-	}
-	// wait until everything has stopped
-	<-interrupt.HandlersDone
+	log.FATAL(cmd.Start())
+	os.Exit(0)
 }
