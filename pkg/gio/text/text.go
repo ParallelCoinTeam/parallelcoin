@@ -3,7 +3,7 @@
 package text
 
 import (
-	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/op/clip"
 	"github.com/p9c/pod/pkg/gio/unit"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
@@ -60,7 +60,7 @@ type Font struct {
 // Face implements text layout and shaping for a particular font.
 type Face interface {
 	Layout(ppem fixed.Int26_6, str string, opts LayoutOptions) *Layout
-	Shape(ppem fixed.Int26_6, str String) op.CallOp
+	Shape(ppem fixed.Int26_6, str String) clip.Op
 	Metrics(ppem fixed.Int26_6) font.Metrics
 }
 

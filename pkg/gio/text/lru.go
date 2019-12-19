@@ -3,7 +3,7 @@
 package text
 
 import (
-	"github.com/p9c/pod/pkg/gio/op"
+	"github.com/p9c/pod/pkg/gio/op/clip"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -26,7 +26,7 @@ type layoutElem struct {
 type path struct {
 	next, prev *path
 	key        pathKey
-	val        op.CallOp
+	val        clip.Op
 }
 
 type layoutKey struct {
@@ -81,16 +81,16 @@ func (l *layoutCache) insert(lt *layoutElem) {
 	lt.next.prev = lt
 }
 
-func (c *pathCache) Get(k pathKey) (op.CallOp, bool) {
+func (c *pathCache) Get(k pathKey) (clip.Op, bool) {
 	if v, ok := c.m[k]; ok {
 		c.remove(v)
 		c.insert(v)
 		return v.val, true
 	}
-	return op.CallOp{}, false
+	return clip.Op{}, false
 }
 
-func (c *pathCache) Put(k pathKey, v op.CallOp) {
+func (c *pathCache) Put(k pathKey, v clip.Op) {
 	if c.m == nil {
 		c.m = make(map[pathKey]*path)
 		c.head = new(path)

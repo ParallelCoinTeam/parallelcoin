@@ -33,12 +33,9 @@ type Key struct {
 
 // Shadow of op.MacroOp.
 type macroOp struct {
-	pc pc
-}
-
-// Shadow of op.CallOp.
-type callOp struct {
-	ops *op.Ops
+	ops     *op.Ops
+	version int
+	pc      pc
 }
 
 type pc struct {
@@ -97,30 +94,17 @@ func (r *Reader) Decode() (EncodedOp, bool) {
 			block := r.stack[len(r.stack)-1]
 			n += block.endPC.data - r.pc.data - opconst.TypeAuxLen
 			data = data[:n]
-		case opconst.TypeCall:
-			var op callOp
-			op.decode(data, refs)
-			endPC := pc{
-				data: len(op.ops.Data()),
-				refs: len(op.ops.Refs()),
-			}
-			retPC := r.pc
-			retPC.data += n
-			retPC.refs += nrefs
-			r.stack = append(r.stack, macro{
-				ops:   r.ops,
-				retPC: retPC,
-				endPC: endPC,
-			})
-			r.pc = pc{}
-			r.ops = op.ops
-			continue
 		case opconst.TypeMacro:
 			var op macroOp
-			op.decode(data)
-			macroData := r.ops.Data()[op.pc.data:]
+			op.decode(data, refs)
+			macroOps := op.ops
+			macroData := macroOps.Data()
+			macroData = macroData[op.pc.data:]
 			if opconst.OpType(macroData[0]) != opconst.TypeMacroDef {
 				panic("invalid macro reference")
+			}
+			if op.version != op.ops.Version() {
+				panic("invalid MacroOp reference to reset Ops")
 			}
 			var opDef opMacroDef
 			opDef.decode(macroData[:opconst.TypeMacroDef.Size()])
@@ -132,6 +116,7 @@ func (r *Reader) Decode() (EncodedOp, bool) {
 				retPC: retPC,
 				endPC: opDef.endpc,
 			})
+			r.ops = macroOps
 			r.pc = op.pc
 			r.pc.data += opconst.TypeMacroDef.Size()
 			r.pc.refs += opconst.TypeMacroDef.NumRefs()
@@ -163,26 +148,20 @@ func (op *opMacroDef) decode(data []byte) {
 	}
 }
 
-func (m *callOp) decode(data []byte, refs []interface{}) {
-	if opconst.OpType(data[0]) != opconst.TypeCall {
-		panic("invalid op")
-	}
-	*m = callOp{
-		ops: refs[0].(*op.Ops),
-	}
-}
-
-func (m *macroOp) decode(data []byte) {
+func (m *macroOp) decode(data []byte, refs []interface{}) {
 	if opconst.OpType(data[0]) != opconst.TypeMacro {
 		panic("invalid op")
 	}
 	bo := binary.LittleEndian
 	dataIdx := int(int32(bo.Uint32(data[1:])))
 	refsIdx := int(int32(bo.Uint32(data[5:])))
+	version := int(int32(bo.Uint32(data[9:])))
 	*m = macroOp{
+		ops: refs[0].(*op.Ops),
 		pc: pc{
 			data: dataIdx,
 			refs: refsIdx,
 		},
+		version: version,
 	}
 }
