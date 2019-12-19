@@ -252,11 +252,6 @@ func (c *Connection) SendShardsTo(shards [][]byte, addr *net.UDPAddr) (err error
 func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 	lastSent *time.Time, firstSender *string) (err error) {
 	log.TRACE("setting read buffer")
-	//err = c.listenConn.SetReadBuffer(c.maxDatagramSize)
-	//if err != nil {
-	//	log.ERROR(err)
-	//	return
-	//}
 	buffer := make([]byte, c.maxDatagramSize)
 	go func() {
 		log.TRACE("starting connection handler")
@@ -269,17 +264,13 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 				log.ERROR("ReadFromUDP failed:", err)
 				continue
 			}
-			// log.DEBUG("received message on UDP connection")
-			// log.SPEW(handlers)
 			magic := string(buf[:4])
 			if _, ok := handlers[magic]; ok {
 				// if caller needs to know the liveness status of the
 				// controller it is working on, the code below
 				if lastSent != nil && firstSender != nil {
-					//log.DEBUG("src", src.String(), "last", *firstSender)
 					*lastSent = time.Now()
 				}
-				//log.DEBUG("received packet with magic:", magic)
 				nonceBytes := buf[4:16]
 				nonce := string(nonceBytes)
 				// decipher
@@ -290,28 +281,22 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 					continue
 				}
 				if bn, ok := c.buffers[nonce]; ok {
-					//log.DEBUG("new shard for",
-					//	hex.EncodeToString([]byte(nonce)))
 					if !bn.Decoded {
 						bn.Buffers = append(bn.Buffers, shard)
 						if len(bn.Buffers) >= 3 {
 							// try to decode it
 							var cipherText []byte
-							//log.SPEW(bn.Buffers)
 							cipherText, err = fec.Decode(bn.Buffers)
 							if err != nil {
 								log.ERROR(err)
 								continue
 							}
-							//log.DEBUG("magic", magic, handlers[magic])
-							//log.SPEW(cipherText)
 							bn.Decoded = true
 							err = handlers[magic](ifc)(cipherText)
 							if err != nil {
 								log.ERROR(err)
 								continue
 							}
-							//log.DEBUG("called handler", magic)
 						}
 					} else {
 						for i := range c.buffers {
@@ -342,7 +327,6 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 			}
 		}
 	}()
-
 	return
 }
 

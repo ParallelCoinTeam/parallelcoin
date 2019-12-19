@@ -21,6 +21,11 @@ import (
 	"github.com/p9c/pod/pkg/transport"
 )
 
+type HashCount struct {
+	uint64
+	Time time.Time
+}
+
 type Worker struct {
 	active        *atomic.Bool
 	conn          *transport.Connection
@@ -29,8 +34,10 @@ type Worker struct {
 	mx            *sync.Mutex
 	sendAddresses []*net.UDPAddr
 	workers       []*client.Client
-	firstSender   string
+	FirstSender   string
 	lastSent      time.Time
+	Status        atomic.String
+	HashTick      chan HashCount
 }
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
@@ -71,7 +78,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 				log.ERROR(err)
 			}
 		}
-		err = w.conn.Listen(handlers, w, &w.lastSent, &w.firstSender)
+		err = w.conn.Listen(handlers, w, &w.lastSent, &w.FirstSender)
 		if err != nil {
 			log.ERROR(err)
 			cancel()
@@ -83,12 +90,12 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			for {
 				select {
 				case <-ticker.C:
-					// log.DEBUG("tick", w.lastSent, w.firstSender)
+					// log.DEBUG("tick", w.lastSent, w.FirstSender)
 					// if the last message sent was 3 seconds ago the server is
-					// almost certainly disconnected or crashed so clear firstSender
+					// almost certainly disconnected or crashed so clear FirstSender
 					w.mx.Lock()
 					since := time.Now().Sub(w.lastSent)
-					wasSending := since > time.Second*3 && w.firstSender != ""
+					wasSending := since > time.Second*3 && w.FirstSender != ""
 					w.mx.Unlock()
 					if wasSending {
 						log.DEBUG("previous current controller has stopped" +
@@ -96,7 +103,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 						// when this string is clear other broadcasts will be
 						// listened to
 						w.mx.Lock()
-						w.firstSender = ""
+						w.FirstSender = ""
 						w.mx.Unlock()
 						// pause the workers
 						for i := range w.workers {
@@ -129,7 +136,7 @@ var handlers = transport.HandleFunc{
 			cP := j.GetControllerListenerPort()
 			addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
 			w.mx.Lock()
-			otherSent := w.firstSender != addr && w.firstSender != ""
+			otherSent := w.FirstSender != addr && w.FirstSender != ""
 			w.mx.Unlock()
 			if otherSent {
 				// ignore other controllers while one is active and received
@@ -138,7 +145,7 @@ var handlers = transport.HandleFunc{
 				return
 			} else {
 				w.mx.Lock()
-				w.firstSender = addr
+				w.FirstSender = addr
 				w.lastSent = time.Now()
 				w.mx.Unlock()
 			}
@@ -164,8 +171,8 @@ var handlers = transport.HandleFunc{
 				}
 			}
 			w.mx.Lock()
-			// clear the firstSender
-			w.firstSender = ""
+			// clear the FirstSender
+			w.FirstSender = ""
 			w.mx.Unlock()
 			return
 		}
