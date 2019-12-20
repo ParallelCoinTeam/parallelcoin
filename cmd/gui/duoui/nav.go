@@ -62,6 +62,19 @@ func DuoUImenu(duo *DuoUI) layout.FlexChild {
 				b.Layout(duo.gc, &duo.menu.Explorer)
 			})
 		})
+		console := duo.comp.Menu.Layout.Rigid(duo.gc, func() {
+			in.Layout(duo.gc, func() {
+				for duo.menu.Console.Clicked(duo.gc) {
+					duo.menu.Current = "console"
+				}
+				b := duo.th.IconButton(duo.ico.Console)
+				b.Background = duo.menu.IcoBackground
+				b.Color = duo.menu.IcoColor
+				b.Padding = duo.menu.IcoPadding
+				b.Size = duo.menu.IcoSize
+				b.Layout(duo.gc, &duo.menu.Console)
+			})
+		})
 		settings := duo.comp.Menu.Layout.Rigid(duo.gc, func() {
 			in.Layout(duo.gc, func() {
 				for duo.menu.Settings.Clicked(duo.gc) {
@@ -75,6 +88,6 @@ func DuoUImenu(duo *DuoUI) layout.FlexChild {
 				b.Layout(duo.gc, &duo.menu.Settings)
 			})
 		})
-		duo.comp.Menu.Layout.Layout(duo.gc, overview, history, addressbook, explorer, settings, )
+		duo.comp.Menu.Layout.Layout(duo.gc, overview, history, addressbook, explorer, console, settings )
 	})
 }

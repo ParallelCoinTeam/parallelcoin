@@ -1,16 +1,16 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/ico"
+	"github.com/p9c/pod/cmd/gui/models"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/fonts"
 	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/unit"
 	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/gio/widget/material"
-	"github.com/p9c/pod/cmd/gui/ico"
-	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/pod/pkg/fonts"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"image/color"
 )
@@ -27,9 +27,9 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		ww: app.NewWindow(),
 	}
 	fonts.Register()
-//duo.ww.Width =  unit.Dp(800)
-//	duo.ww.Height=  unit.Dp(600)
-//		duo.ww.Title =  "ParallelCoin - True Story"
+	//duo.ww.Width =  unit.Dp(800)
+	//	duo.ww.Height=  unit.Dp(600)
+	//		duo.ww.Title =  "ParallelCoin - True Story"
 
 	duo.gc = layout.NewContext(duo.ww.Queue())
 	duo.cs = &duo.gc.Constraints
@@ -49,11 +49,11 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	}
 	sidebar := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
-		Inset: layout.UniformInset(unit.Dp(8)),
+		Inset:  layout.UniformInset(unit.Dp(8)),
 	}
 	content := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
-		Inset: layout.UniformInset(unit.Dp(30)),
+		Inset:  layout.UniformInset(unit.Dp(30)),
 	}
 	overview := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
@@ -63,7 +63,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	}
 	sendReceive := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
-		Inset: layout.UniformInset(unit.Dp(15)),
+		Inset:  layout.UniformInset(unit.Dp(15)),
 	}
 	sendReceiveButtons := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Horizontal},
@@ -73,10 +73,21 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	}
 	status := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
-		Inset: layout.UniformInset(unit.Dp(15)),
+		Inset:  layout.UniformInset(unit.Dp(15)),
 	}
 	menu := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle},
+	}
+
+	console := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
+		Inset:  layout.UniformInset(unit.Dp(15)),
+	}
+	consoleInput := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal},
+	}
+	consoleOutput := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal},
 	}
 
 	duo.comp = &models.DuoUIcomponents{
@@ -93,6 +104,9 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		OverviewBottom:     overviewBottom,
 		Status:             status,
 		Menu:               menu,
+		Console:            console,
+		ConsoleInput:       consoleInput,
+		ConsoleOutput:      consoleOutput,
 	}
 
 	// Navigation
@@ -106,6 +120,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		History:     *new(widget.Button),
 		AddressBook: *new(widget.Button),
 		Explorer:    *new(widget.Button),
+		Console:     *new(widget.Button),
 		Settings:    *new(widget.Button),
 	}
 
@@ -135,6 +150,10 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		log.FATAL(err)
 	}
 	ics.Network, err = material.NewIcon(icons.ActionFingerprint)
+	if err != nil {
+		log.FATAL(err)
+	}
+	ics.Console, err = material.NewIcon(icons.ActionInput)
 	if err != nil {
 		log.FATAL(err)
 	}

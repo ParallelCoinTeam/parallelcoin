@@ -1,8 +1,8 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/cmd/gui/helpers"
+	"github.com/p9c/pod/pkg/gio/layout"
 	"image/color"
 )
 
@@ -23,6 +23,8 @@ func DuoUIcontent(duo *DuoUI) layout.FlexChild {
 				content = DuoUIexplorer(duo)
 			case "network":
 				content = DuoUInetwork(duo)
+			case "console":
+				content = DuoUIconsole(duo)
 			case "settings":
 				content = DuoUIsettings(duo)
 			default:
