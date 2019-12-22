@@ -5,7 +5,6 @@ import (
 	// This enables pprof
 	_ "net/http/pprof"
 	"os"
-	"os/exec"
 	"runtime"
 	"runtime/debug"
 	"runtime/trace"
@@ -16,8 +15,6 @@ import (
 	"github.com/p9c/pod/app"
 	"github.com/p9c/pod/pkg/util/limits"
 )
-
-var prevArgs []string
 
 // Main is the main entry point for pod
 func Main() {
@@ -50,25 +47,5 @@ func Main() {
 			}
 		}
 	}
-	interrupt.Reset = Reset(os.Args)
 	app.Main()
-}
-func init() {
-	prevArgs = os.Args
-}
-
-func Reset(newArgs []string) func() {
-	return func() {
-		var cmd *exec.Cmd
-		if newArgs != nil {
-			if prevArgs != nil {
-				prevArgs = newArgs
-			} else {
-				prevArgs = os.Args
-			}
-		}
-		cmd = exec.Command(prevArgs[0], prevArgs[1:]...)
-		log.FATAL(cmd.Start())
-		os.Exit(0)
-	}
 }

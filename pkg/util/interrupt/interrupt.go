@@ -27,10 +27,6 @@ var (
 	// HandlersDone is closed after all interrupt handlers run the first time
 	// an interrupt is signaled.
 	HandlersDone = make(chan struct{})
-	// Reset is a function that is by default run for a SIGHUP signal, if not loaded nothing happens
-	Reset = func() {
-		log.DEBUG("reset was not overloaded")
-	}
 )
 
 // Listener listens for interrupt signals, registers interrupt callbacks, and
