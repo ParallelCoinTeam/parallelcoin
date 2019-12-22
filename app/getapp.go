@@ -9,6 +9,7 @@ import (
 	
 	"github.com/p9c/pod/cmd/kopach/kopach_worker"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 	
 	"github.com/urfave/cli"
@@ -36,6 +37,8 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 		},
 		After: func(c *cli.Context) error {
 			log.TRACE("subcommand completed")
+			if interrupt.Restart {
+			}
 			return nil
 		},
 		Commands: []cli.Command{

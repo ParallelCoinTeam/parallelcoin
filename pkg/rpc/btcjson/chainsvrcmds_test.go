@@ -949,6 +949,17 @@ func TestChainSvrCmds(t *testing.T) {
 			unmarshalled: &btcjson.StopCmd{},
 		},
 		{
+			name: "restart",
+			newCmd: func() (interface{}, error) {
+				return btcjson.NewCmd("restart")
+			},
+			staticCmd: func() interface{} {
+				return btcjson.NewRestartCmd()
+			},
+			marshalled:   `{"jsonrpc":"1.0","method":"stop","netparams":[],"id":1}`,
+			unmarshalled: &btcjson.RestartCmd{},
+		},
+		{
 			name: "submitblock",
 			newCmd: func() (interface{}, error) {
 				return btcjson.NewCmd("submitblock", "112233")

@@ -8,11 +8,12 @@ import (
 	"image/color"
 )
 
-
 type DuoUIcomponents struct {
 	View               DuoUIcomponent
 	Header             DuoUIcomponent
+	Intro              DuoUIcomponent
 	Logo               DuoUIcomponent
+	Log                DuoUIcomponent
 	Body               DuoUIcomponent
 	Sidebar            DuoUIcomponent
 	Menu               DuoUIcomponent
@@ -27,11 +28,14 @@ type DuoUIcomponents struct {
 	AddressBook        DuoUIcomponent
 	Explorer           DuoUIcomponent
 	Network            DuoUIcomponent
+	Console            DuoUIcomponent
+	ConsoleOutput      DuoUIcomponent
+	ConsoleInput       DuoUIcomponent
 	Settings           DuoUIcomponent
 }
 type DuoUIcomponent struct {
 	Layout layout.Flex
-	Inset layout.Inset
+	Inset  layout.Inset
 }
 
 type DuoUInav struct {
@@ -44,6 +48,7 @@ type DuoUInav struct {
 	History       widget.Button
 	AddressBook   widget.Button
 	Explorer      widget.Button
+	Console       widget.Button
 	Settings      widget.Button
 }
 
@@ -54,6 +59,7 @@ type DuoUIicons struct {
 	AddressBook *material.Icon
 	Network     *material.Icon
 	Explorer    *material.Icon
+	Console     *material.Icon
 	Settings    *material.Icon
 }
 

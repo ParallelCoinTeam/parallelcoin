@@ -22,7 +22,8 @@ func DuoUImainLoop(duo *DuoUI) error {
 // START OMIT
 func DuoUIgrid(duo *DuoUI) {
 	// START View <<<
-	duo.comp.View.Layout.Layout(duo.gc, DuoUIheader(duo), DuoUIbody(duo))
+	DuoUIheader(duo)
+	DuoUIbody(duo)
 	// END View >>>
 }
 

@@ -5,7 +5,6 @@ import (
 	// This enables pprof
 	_ "net/http/pprof"
 	"os"
-	"os/exec"
 	"runtime"
 	"runtime/debug"
 	"runtime/trace"
@@ -21,7 +20,6 @@ var prevArgs []string
 
 // Main is the main entry point for pod
 func Main() {
-	prevArgs = os.Args
 	runtime.GOMAXPROCS(runtime.NumCPU() * 3)
 	debug.SetGCPercent(10)
 	if err := limits.SetLimits(); err != nil {

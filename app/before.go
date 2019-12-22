@@ -34,9 +34,9 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		log.TRACE("config file set to", *cx.Config.ConfigFile)
 		// we are going to assume the config is not manually misedited
 		if apputil.FileExists(*cx.Config.ConfigFile) {
-			log.TRACE("loading config")
+			log.DEBUG("loading config")
 			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
-			log.TRACE("loaded config")
+			log.DEBUG("loaded config from disk")
 			if err == nil {
 				cx.Config = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
@@ -44,14 +44,14 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 					log.ERROR("error unmarshalling config", err)
 					os.Exit(1)
 				}
-				log.TRACE("unmarshalled config")
+				log.DEBUG("unmarshalled config")
 			} else {
 				log.FATAL("unexpected error reading configuration file:", err)
 				os.Exit(1)
 			}
 		} else {
 			*cx.Config.ConfigFile = ""
-			log.TRACE("will save config after configuration")
+			log.DEBUG("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
 		log.TRACE("checking log level")

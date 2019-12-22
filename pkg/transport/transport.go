@@ -261,7 +261,7 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 			n, src, err := c.listenConn.ReadFrom(buffer)
 			buf := buffer[:n]
 			if err != nil {
-				log.ERROR("ReadFromUDP failed:", err)
+				//log.ERROR("ReadFromUDP failed:", err)
 				continue
 			}
 			magic := string(buf[:4])

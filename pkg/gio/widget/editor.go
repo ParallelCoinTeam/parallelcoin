@@ -15,7 +15,6 @@ import (
 	"github.com/p9c/pod/pkg/gio/io/pointer"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/op"
-	"github.com/p9c/pod/pkg/gio/op/clip"
 	"github.com/p9c/pod/pkg/gio/op/paint"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
@@ -81,7 +80,7 @@ type SubmitEvent struct {
 
 type line struct {
 	offset f32.Point
-	clip   clip.Op
+	clip   op.CallOp
 }
 
 const (
@@ -174,6 +173,38 @@ func (e *Editor) processKey(gtx *layout.Context) {
 			e.events = append(e.events, ChangeEvent{})
 		}
 	}
+}
+
+func (e *Editor) command(k key.Event) bool {
+	switch k.Name {
+	case key.NameReturn, key.NameEnter:
+		e.append("\n")
+	case key.NameDeleteBackward:
+		e.Delete(-1)
+	case key.NameDeleteForward:
+		e.Delete(1)
+	case key.NameUpArrow:
+		line, _, carX, _ := e.layoutCaret()
+		e.carXOff = e.moveToLine(carX+e.carXOff, line-1)
+	case key.NameDownArrow:
+		line, _, carX, _ := e.layoutCaret()
+		e.carXOff = e.moveToLine(carX+e.carXOff, line+1)
+	case key.NameLeftArrow:
+		e.Move(-1)
+	case key.NameRightArrow:
+		e.Move(1)
+	case key.NamePageUp:
+		e.movePages(-1)
+	case key.NamePageDown:
+		e.movePages(+1)
+	case key.NameHome:
+		e.moveStart()
+	case key.NameEnd:
+		e.moveEnd()
+	default:
+		return false
+	}
+	return true
 }
 
 // Focus requests the input focus for the Editor.
@@ -452,15 +483,18 @@ func (e *Editor) invalidate() {
 	e.valid = false
 }
 
-func (e *Editor) deleteRune() {
-	e.rr.deleteRune()
+// Delete runes from the caret position. The sign of runes specifies the
+// direction to delete: positive is forward, negative is backward.
+func (e *Editor) Delete(runes int) {
+	e.rr.deleteRunes(runes)
 	e.carXOff = 0
 	e.invalidate()
 }
 
-func (e *Editor) deleteRuneForward() {
-	e.rr.deleteRuneForward()
-	e.carXOff = 0
+// Insert inserts text at the caret, moving the caret forward.
+func (e *Editor) Insert(s string) {
+	e.append(s)
+	e.caretScroll = true
 	e.invalidate()
 }
 
@@ -550,13 +584,10 @@ func (e *Editor) moveToLine(carX fixed.Int26_6, carLine2 int) fixed.Int26_6 {
 	return carX - carX2
 }
 
-func (e *Editor) moveLeft() {
-	e.rr.moveLeft()
-	e.carXOff = 0
-}
-
-func (e *Editor) moveRight() {
-	e.rr.moveRight()
+// Move the caret: positive distance moves forward, negative distance moves
+// backward.
+func (e *Editor) Move(distance int) {
+	e.rr.move(distance)
 	e.carXOff = 0
 }
 
@@ -611,38 +642,6 @@ func (e *Editor) scrollToCaret() {
 		}
 		e.scrollRel(0, dist)
 	}
-}
-
-func (e *Editor) command(k key.Event) bool {
-	switch k.Name {
-	case key.NameReturn, key.NameEnter:
-		e.append("\n")
-	case key.NameDeleteBackward:
-		e.deleteRune()
-	case key.NameDeleteForward:
-		e.deleteRuneForward()
-	case key.NameUpArrow:
-		line, _, carX, _ := e.layoutCaret()
-		e.carXOff = e.moveToLine(carX+e.carXOff, line-1)
-	case key.NameDownArrow:
-		line, _, carX, _ := e.layoutCaret()
-		e.carXOff = e.moveToLine(carX+e.carXOff, line+1)
-	case key.NameLeftArrow:
-		e.moveLeft()
-	case key.NameRightArrow:
-		e.moveRight()
-	case key.NamePageUp:
-		e.movePages(-1)
-	case key.NamePageDown:
-		e.movePages(+1)
-	case key.NameHome:
-		e.moveStart()
-	case key.NameEnd:
-		e.moveEnd()
-	default:
-		return false
-	}
-	return true
 }
 
 func (s ChangeEvent) isEditorEvent() {}

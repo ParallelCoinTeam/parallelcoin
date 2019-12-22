@@ -2,16 +2,17 @@ package rpc
 
 import (
 	"errors"
-	"github.com/p9c/pod/pkg/log"
 	"sort"
 	"strings"
 	"sync"
-
+	
+	"github.com/p9c/pod/pkg/log"
+	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // HelpDescsEnUS defines the English descriptions used for the help strings.
-//nolint
+// nolint
 var HelpDescsEnUS = map[string]string{
 	// DebugLevelCmd help.
 	"debuglevel--synopsis": "Dynamically changes the debug logging level.\n" +
@@ -744,7 +745,7 @@ var HelpDescsEnUS = map[string]string{
 // ResultTypes specifies the result types that each RPC command can return.
 // This information is used to generate the help.  Each result type must be a
 // pointer to the type (or nil to indicate no return value).
-//nolint
+// nolint
 var ResultTypes = map[string][]interface{}{
 	"addnode":               nil,
 	"createrawtransaction":  {(*string)(nil)},
@@ -786,6 +787,7 @@ var ResultTypes = map[string][]interface{}{
 	"sendrawtransaction":    {(*string)(nil)},
 	"setgenerate":           nil,
 	"stop":                  {(*string)(nil)},
+	"restart":               {(*string)(nil)},
 	"submitblock":           {nil, (*string)(nil)},
 	"uptime":                {(*int64)(nil)},
 	"validateaddress":       {(*btcjson.ValidateAddressChainResult)(nil)},
