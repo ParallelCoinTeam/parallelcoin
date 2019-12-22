@@ -1,29 +1,29 @@
 package app
 
 import (
+	"github.com/urfave/cli"
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/urfave/cli"
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli
 Configure(cx *conte.Xt, ctx *cli.Context) {
 	log.TRACE("configuring pod")
-	log.SPEW(cx.Config)
+	cx.StateCfg.Save = false
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
-	st := cx.StateCfg
+	initLogLevel(cfg)
 	initDictionary(cfg)
 	initDataDir(cfg)
-	initTLSStuffs(cfg, st)
+	initTLSStuffs(cfg, cx.StateCfg)
 	initConfigFile(cfg)
 	initLogDir(cfg)
 	initParams(cx)
 	initWalletFile(cx)
 	initListeners(cx, ctx)
-	initLogLevel(cfg)
 	// Don't add peers from the config file when in regression test mode.
 	if ((*cfg.Network)[0] == 'r') && len(*cfg.AddPeers) > 0 {
 		*cfg.AddPeers = nil
@@ -44,8 +44,7 @@ Configure(cx *conte.Xt, ctx *cli.Context) {
 	validateMiningStuff(cfg, cx.StateCfg, cx.ActiveNet)
 	setDiallers(cfg, cx.StateCfg)
 	// if the user set the save flag, or file doesn't exist save the file now
-	log.DEBUG(*cx.Config.ConfigFile)
-	if st.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
+	if cx.StateCfg.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
 		log.TRACE("saving configuration")
 		save.Pod(cx.Config)
 	}

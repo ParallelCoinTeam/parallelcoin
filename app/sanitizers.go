@@ -77,7 +77,6 @@ func initParams(cx *conte.Xt) {
 	network := "mainnet"
 	if cx.Config.Network != nil {
 		network = *cx.Config.Network
-		cx.StateCfg.Save = true
 	}
 	switch network {
 	case "testnet", "testnet3", "t":
@@ -106,7 +105,6 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 		log.ERROR(err)
 	}
 	*cfg.Controller = net.JoinHostPort("0.0.0.0", fmt.Sprint(fP))
-	log.DEBUG()
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
 		len(*cfg.ConnectPeers) < 1 {
 		cfg.Listeners = &cli.StringSlice{":" + cx.ActiveNet.DefaultPort}
@@ -114,11 +112,13 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
 		*cfg.WalletRPCListeners = append(*cfg.WalletRPCListeners,
 			":"+cx.ActiveNet.WalletRPCServerPort)
+		log.DEBUG("setting save flag because wallet rpc listeners is empty and rpc is not disabled")
 		cx.StateCfg.Save = true
 	}
 	if len(*cfg.RPCListeners) < 1 {
 		*cfg.RPCListeners = append(*cfg.RPCListeners,
 			":"+cx.ActiveNet.RPCClientPort)
+		log.DEBUG("setting save flag because rpc listeners is empty and rpc is not disabled")
 		cx.StateCfg.Save = true
 	}
 	if *cx.Config.EnableController {
@@ -139,6 +139,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	}
 	if *cfg.RPCConnect == "" {
 		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
+		log.DEBUG("setting save flag because rpcconnect was not configured")
 		cx.StateCfg.Save = true
 	}
 	// all of these can be autodiscovered/set but to do that and know what
@@ -191,18 +192,21 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	if *cfg.RPCCert == "" {
 		*cfg.RPCCert =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.cert"
+		log.DEBUG("setting save flag because rpc cert path was not set")
 		st.Save = true
 		isNew = true
 	}
 	if *cfg.RPCKey == "" {
 		*cfg.RPCKey =
 			*cfg.DataDir + string(os.PathSeparator) + "rpc.key"
+		log.DEBUG("setting save flag because rpc key path was not set")
 		st.Save = true
 		isNew = true
 	}
 	if *cfg.CAFile == "" {
 		*cfg.CAFile =
 			*cfg.DataDir + string(os.PathSeparator) + "ca.cert"
+		log.DEBUG("setting save flag because CA cert path was not set")
 		st.Save = true
 		isNew = true
 	}

@@ -162,9 +162,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	}
 	var stopController context.CancelFunc
 	gracefulShutdown := func() {
-		log.DEBUG("shutting down node from interrupt")
 		log.INFO("gracefully shutting down the server...")
-		log.DEBUG("stopping miner")
 		server.CPUMiner.Stop()
 		if stopController != nil {
 			log.DEBUG("stopping controller")

@@ -1146,7 +1146,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 		go func() {
 			_, err := conn.Read(make([]byte, 1))
 			if err != nil {
-				log.ERROR(err)
+				// log.ERROR(err)
 				close(closeChan)
 			}
 		}()

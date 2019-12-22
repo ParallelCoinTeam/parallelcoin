@@ -3,8 +3,7 @@ package interrupt
 import (
 	"os"
 	"os/signal"
-	"syscall"
-
+	
 	"github.com/p9c/pod/pkg/log"
 )
 
@@ -13,7 +12,7 @@ var (
 	// Chan is used to receive SIGINT (Ctrl+C) signals.
 	Chan chan os.Signal
 	// Signals is the list of signals that cause the interrupt
-	Signals = []os.Signal{os.Interrupt, syscall.SIGTERM}
+	Signals = []os.Signal{os.Interrupt}
 	// ShutdownRequestChan is a channel that can receive shutdown requests
 	ShutdownRequestChan = make(chan struct{})
 	// AddHandlerChan is used to add an interrupt handler to the list of
@@ -22,6 +21,10 @@ var (
 	// HandlersDone is closed after all interrupt handlers run the first time
 	// an interrupt is signaled.
 	HandlersDone = make(chan struct{})
+	// Reset is a function that is by default run for a SIGHUP signal, if not loaded nothing happens
+	Reset = func() {
+		log.DEBUG("reset was not overloaded")
+	}
 )
 
 // Listener listens for interrupt signals, registers interrupt callbacks, and
@@ -35,12 +38,14 @@ func Listener() {
 			interruptCallbacks[idx]()
 		}
 		close(HandlersDone)
+		log.DEBUG("interrupt handlers finished")
+		os.Exit(0)
 	}
 	for {
 		select {
 		case sig := <-Chan:
-			log.WARNF("received signal (%s) - shutting down", sig)
-			_ = sig
+			log.Printf(">>> received signal (%s)\n", sig)
+			log.DEBUG("received interrupt signal")
 			requested = true
 			invokeCallbacks()
 			return
@@ -50,6 +55,7 @@ func Listener() {
 			invokeCallbacks()
 			return
 		case handler := <-AddHandlerChan:
+			log.DEBUG("adding handler")
 			interruptCallbacks = append(interruptCallbacks, handler)
 		}
 	}

@@ -99,7 +99,6 @@ func Main(args []string, cx *conte.Xt) {
 	result, err := sendPostRequest(marshalledJSON, cx)
 	if err != nil {
 		log.ERROR(err)
-		log.Println(err)
 		os.Exit(1)
 	}
 	// Choose how to display the result based on its type.
