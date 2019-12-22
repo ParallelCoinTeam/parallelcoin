@@ -91,6 +91,12 @@ func Request() {
 	close(ShutdownRequestChan)
 }
 
+// RequestRestart sets the reset flag and requests a restart
+func RequestRestart() {
+	Restart = true
+	Request()
+}
+
 // Requested returns true if an interrupt has been requested
 func Requested() bool {
 	return requested

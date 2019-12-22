@@ -4181,11 +4181,12 @@ func HandleStop(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 // HandleRestart implements the restart command.
 func HandleRestart(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	interface{}, error) {
-	interrupt.Restart = true
+	interrupt.RequestRestart()
 	select {
 	case s.RequestProcessShutdown <- struct{}{}:
 	default:
 	}
+	defer interrupt.RequestRestart()
 	return "node restarting", nil
 }
 
