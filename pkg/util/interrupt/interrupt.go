@@ -3,11 +3,17 @@ package interrupt
 import (
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
+	"syscall"
 	
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/pkg/log"
 )
 
 var (
+	Restart   bool // = true
 	requested bool
 	// Chan is used to receive SIGINT (Ctrl+C) signals.
 	Chan chan os.Signal
@@ -21,10 +27,6 @@ var (
 	// HandlersDone is closed after all interrupt handlers run the first time
 	// an interrupt is signaled.
 	HandlersDone = make(chan struct{})
-	// Reset is a function that is by default run for a SIGHUP signal, if not loaded nothing happens
-	Reset = func() {
-		log.DEBUG("reset was not overloaded")
-	}
 )
 
 // Listener listens for interrupt signals, registers interrupt callbacks, and
@@ -39,7 +41,18 @@ func Listener() {
 		}
 		close(HandlersDone)
 		log.DEBUG("interrupt handlers finished")
-		os.Exit(0)
+		if Restart {
+			log.DEBUG("restarting")
+			// time.Sleep(time.Second * 3)
+			log.DEBUG(cleanAndExpandPath(os.Args[0]), os.Args, os.Environ())
+			err := syscall.Exec(cleanAndExpandPath(os.Args[0]), os.Args, os.Environ())
+			if err != nil {
+				log.ERROR(err)
+				os.Exit(1)
+			}
+		} else {
+			os.Exit(0)
+		}
 	}
 	for {
 		select {
@@ -81,4 +94,23 @@ func Request() {
 // Requested returns true if an interrupt has been requested
 func Requested() bool {
 	return requested
+}
+
+// cleanAndExpandPath expands environement variables and leading ~ in the passed path, cleans the result, and returns it.
+func cleanAndExpandPath(path string) string {
+	// Expand initial ~ to OS specific home directory.
+	if strings.HasPrefix(path, "~") {
+		appHomeDir := appdata.Dir("gencerts", false)
+		homeDir := filepath.Dir(appHomeDir)
+		path = strings.Replace(path, "~", homeDir, 1)
+	}
+	if !apputil.FileExists(path) {
+		wd, err := os.Getwd()
+		if err != nil {
+			log.ERROR("can't get working dir:", err)
+		}
+		path = filepath.Join(wd, path)
+	}
+	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
+	return filepath.Clean(os.ExpandEnv(path))
 }

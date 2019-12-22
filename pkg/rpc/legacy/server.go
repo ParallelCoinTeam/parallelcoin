@@ -13,11 +13,12 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
 	"github.com/btcsuite/websocket"
-
+	
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
 	"github.com/p9c/pod/pkg/wallet/chain"
 )
@@ -453,6 +454,23 @@ out:
 				}
 				s.RequestProcessShutdown()
 				// break
+			case "restart":
+				resp := MakeResponse(req.ID,
+					"wallet restarting.", nil)
+				mResp, err := js.Marshal(resp)
+				// Expected to never fail.
+				if err != nil {
+					log.ERROR(err)
+					panic(err)
+				}
+				err = wsc.Send(mResp)
+				if err != nil {
+					log.ERROR(err)
+					break out
+				}
+				interrupt.Restart = true
+				s.RequestProcessShutdown()
+			// break
 			default:
 				req := req // Copy for the closure
 				f := s.HandlerClosure(&req)
@@ -592,6 +610,9 @@ func (s *Server) POSTClientRPC(w http.ResponseWriter, r *http.Request) {
 	case "stop":
 		stop = true
 		res = "pod/wallet stopping"
+	case "restart":
+		stop = true
+		res = "pod/wallet restarting"
 	default:
 		res, jsonErr = s.HandlerClosure(&req)()
 	}
