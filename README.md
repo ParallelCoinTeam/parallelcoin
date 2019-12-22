@@ -42,15 +42,12 @@ modules have unleashed on Git repository branch keeping hygiene.
 
 **GO111MODULE should be set to "on".**
 
-*Please note:* Currently GUI branch is not building, 
-use the 'headless' tag like so to mask it from the build:
+If you want to build a version without any GUI, for servers or if support is
+lacking:
 
 ```
 go install -v -tags headless
 ```
-
-This will be corrected as soon as possible. 
-Thanks for your patience.
 
 ## Running
 
