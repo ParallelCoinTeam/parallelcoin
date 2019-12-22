@@ -45,6 +45,12 @@ The StackOp saves the current state to the state stack and restores it later:
 	// Restore the previous transform.
 	stack.Pop()
 
+The CallOp invokes another operation list:
+
+	ops := new(op.Ops)
+	ops2 := new(op.Ops)
+	op.CallOp{Ops: ops2}.Add(ops)
+
 The MacroOp records a list of operations to be executed later:
 
 	ops := new(op.Ops)
@@ -57,7 +63,7 @@ The MacroOp records a list of operations to be executed later:
 	macro.Stop()
 
 	// replay the recorded operations by calling Add:
-	macro.Add(ops)
+	macro.Add()
 
 */
 package op
@@ -100,9 +106,15 @@ type StackOp struct {
 type MacroOp struct {
 	recording bool
 	ops       *Ops
-	version   int
 	id        stackID
 	pc        pc
+}
+
+// CallOp invokes all the operations from a separate
+// operations list.
+type CallOp struct {
+	// Ops is the list of operations to invoke.
+	Ops *Ops
 }
 
 // InvalidateOp requests a redraw at the given time. Use
@@ -132,6 +144,15 @@ type stackID struct {
 type pc struct {
 	data int
 	refs int
+}
+
+// Add the call to the operation list.
+func (c CallOp) Add(o *Ops) {
+	if c.Ops == nil {
+		return
+	}
+	data := o.Write(opconst.TypeCallLen, c.Ops)
+	data[0] = byte(opconst.TypeCall)
 }
 
 // Push (save) the current operations state.
@@ -233,25 +254,21 @@ func (m *MacroOp) fill() {
 	bo := binary.LittleEndian
 	bo.PutUint32(data[1:], uint32(pc.data))
 	bo.PutUint32(data[5:], uint32(pc.refs))
-	m.version = m.ops.version
 }
 
-// Add the recorded list of operations. The Ops
-// argument may be different than the Ops argument
-// passed to Record.
-func (m MacroOp) Add(o *Ops) {
+// Add the recorded list of operations.
+func (m *MacroOp) Add() {
 	if m.recording {
 		panic("a recording is in progress")
 	}
 	if m.ops == nil {
 		return
 	}
-	data := o.Write(opconst.TypeMacroLen, m.ops)
+	data := m.ops.Write(opconst.TypeMacroLen)
 	data[0] = byte(opconst.TypeMacro)
 	bo := binary.LittleEndian
 	bo.PutUint32(data[1:], uint32(m.pc.data))
 	bo.PutUint32(data[5:], uint32(m.pc.refs))
-	bo.PutUint32(data[9:], uint32(m.version))
 }
 
 func (r InvalidateOp) Add(o *Ops) {

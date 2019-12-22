@@ -13,16 +13,16 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		//duo := duoui.DuOuI(*cx)
 		duo := duoui.DuOuI(cx)
 
 		var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			firstRun = true
 		}
-		//utils.GetBiosMessage(view, "starting GUI")
 
 		log.INFO("ima", firstRun)
+
+		//loader.DuoUIloader(duo, cx, firstRun)
 
 		Configure(cx, c)
 		// Start Node
@@ -31,7 +31,6 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 			log.ERROR(err)
 		}
 
-		//loader.DuoUIloader(duo, cx, firstRun)
 
 		err = gui.Services(cx)
 		if err != nil {

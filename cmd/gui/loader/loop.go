@@ -123,9 +123,9 @@ func DuoUIloaderLoop(firstRun bool, cx *conte.Xt) error {
 func DuoUIloaderGrid(ldr *DuoUIload) {
 	// START View <<<
 	if ldr.fr != false {
-		ldr.comp.View.Layout.Layout(ldr.gc, DuoUIloaderCreateWallet(ldr))
+		DuoUIloaderCreateWallet(ldr)
 	} else {
-		ldr.comp.View.Layout.Layout(ldr.gc, DuoUIloaderIntro(ldr))
+		DuoUIloaderIntro(ldr)
 	}
 	// END View >>>
 }

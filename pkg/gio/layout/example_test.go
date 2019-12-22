@@ -53,21 +53,18 @@ func ExampleFlex() {
 	gtx := new(layout.Context)
 	gtx.Reset(nil, image.Point{X: 100, Y: 100})
 
-	flex := layout.Flex{}
-
-	// Rigid 10x10 widget.
-	child1 := flex.Rigid(gtx, func() {
-		fmt.Printf("Rigid: %v\n", gtx.Constraints.Width)
-		layoutWidget(gtx, 10, 10)
-	})
-
-	// Child with 50% space allowance.
-	child2 := flex.Flex(gtx, 0.5, func() {
-		fmt.Printf("50%%: %v\n", gtx.Constraints.Width)
-		layoutWidget(gtx, 10, 10)
-	})
-
-	flex.Layout(gtx, child1, child2)
+	layout.Flex{}.Layout(gtx,
+		// Rigid 10x10 widget.
+		layout.Rigid(func() {
+			fmt.Printf("Rigid: %v\n", gtx.Constraints.Width)
+			layoutWidget(gtx, 10, 10)
+		}),
+		// Child with 50% space allowance.
+		layout.Flexed(0.5, func() {
+			fmt.Printf("50%%: %v\n", gtx.Constraints.Width)
+			layoutWidget(gtx, 10, 10)
+		}),
+	)
 
 	// Output:
 	// Rigid: {0 100}
@@ -77,21 +74,20 @@ func ExampleFlex() {
 func ExampleStack() {
 	gtx := new(layout.Context)
 	gtx.Reset(nil, image.Point{X: 100, Y: 100})
+	gtx.Constraints.Width.Min = 0
+	gtx.Constraints.Height.Min = 0
 
-	stack := layout.Stack{}
-
-	// Rigid 50x50 widget.
-	child1 := stack.Rigid(gtx, func() {
-		layoutWidget(gtx, 50, 50)
-	})
-
-	// Force widget to the same size as the first.
-	child2 := stack.Expand(gtx, func() {
-		fmt.Printf("Expand: %v\n", gtx.Constraints)
-		layoutWidget(gtx, 10, 10)
-	})
-
-	stack.Layout(gtx, child1, child2)
+	layout.Stack{}.Layout(gtx,
+		// Force widget to the same size as the second.
+		layout.Expanded(func() {
+			fmt.Printf("Expand: %v\n", gtx.Constraints)
+			layoutWidget(gtx, 10, 10)
+		}),
+		// Rigid 50x50 widget.
+		layout.Stacked(func() {
+			layoutWidget(gtx, 50, 50)
+		}),
+	)
 
 	// Output:
 	// Expand: {{50 100} {50 100}}
