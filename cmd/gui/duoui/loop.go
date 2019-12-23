@@ -1,10 +1,16 @@
 package duoui
 
 import (
+	"errors"
+	
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/pkg/gio/io/system"
 	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op"
 	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	
 	"image/color"
 )
 
@@ -35,12 +41,15 @@ ready:
 				return e.Err
 			case system.FrameEvent:
 				duo.gc.Reset(e.Config, e.Size)
+				e.Frame(&op.Ops{})
 			}
 		}
 	}
+	log.DEBUG("main loop starting")
 	for {
 		select {
 		case <-duo.Quit:
+			log.DEBUG("quit signal received")
 			interrupt.Request()
 			// This case is for handling when some external application is controlling the GUI and to gracefully
 			// handle the back-end servers being shut down by the interrupt library receiving an interrupt signal
@@ -51,6 +60,7 @@ ready:
 		case e := <-duo.ww.Events():
 			switch e := e.(type) {
 			case system.DestroyEvent:
+				log.DEBUG("destroy event received")
 				interrupt.Request()
 				// Here do cleanup like are you sure (optional) modal or shutting down indefinite spinner
 				<-interrupt.HandlersDone
