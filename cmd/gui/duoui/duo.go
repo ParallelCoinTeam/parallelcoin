@@ -25,7 +25,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	// }
 	duo = &DuoUI{
 		Quit:  make(chan struct{}),
-		Ready: make(chan struct{}),
+		Ready: make(chan struct{}, 1),
 		cx:    cx,
 		rc:    RcInit(),
 		ww:    app.NewWindow(),

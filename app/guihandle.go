@@ -30,11 +30,6 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 
 		Configure(cx, c)
 		
-		// Start up GUI
-		go func() {
-			gui.WalletGUI(duo)
-			log.DEBUG("wallet GUI finished")
-		}()
 		
 		// Start node
 		err = gui.DuOSnode(cx)
@@ -47,9 +42,16 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if err != nil {
 			log.ERROR(err)
 		}
-	
+		
 		// signal the GUI that the back end is ready
+		log.DEBUG("sending ready signal")
+		// we can do this without blocking because the channel has 1 buffer this way it falls immediately the GUI starts
 		duo.Ready <-struct{}{}
+		// Start up GUI
+		go func() {
+			gui.WalletGUI(duo)
+			log.DEBUG("wallet GUI finished")
+		}()
 		// wait for stop signal
 		<-duo.Quit
 		//b.IsBootLogo = false

@@ -9,19 +9,20 @@ import (
 )
 
 type DuoUI struct {
-	Boot *Boot
-	rc   *RcVar
-	cx   *conte.Xt
-	ww   *app.Window
-	gc   *layout.Context
-	th   *material.Theme
-	cs   *layout.Constraints
-	ico  *models.DuoUIicons
-	comp *models.DuoUIcomponents
-	menu *models.DuoUInav
-	Quit chan struct{}
-	Ready chan struct{}
-	conf *models.DuoUIconf
+	Boot    *Boot
+	rc      *RcVar
+	cx      *conte.Xt
+	ww      *app.Window
+	gc      *layout.Context
+	th      *material.Theme
+	cs      *layout.Constraints
+	ico     *models.DuoUIicons
+	comp    *models.DuoUIcomponents
+	menu    *models.DuoUInav
+	Quit    chan struct{}
+	Ready   chan struct{}
+	IsReady bool
+	conf    *models.DuoUIconf
 }
 
 type Boot struct {
