@@ -21,6 +21,7 @@ type DuoUI struct {
 	menu *models.DuoUInav
 	Quit chan struct{}
 	Ready chan struct{}
+	conf *models.DuoUIconf
 }
 
 type Boot struct {

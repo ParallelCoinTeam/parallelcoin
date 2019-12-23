@@ -14,7 +14,7 @@ import (
 func DuoUIloaderCreateWallet(ldr *DuoUIload) {
 	layout.Flex{}.Layout(ldr.gc,
 		layout.Flexed(1, func() {
-			helpers.DuoUIdrawRect(ldr.gc, ldr.cs.Width.Max, ldr.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 0, 0, 0, 0)
+			helpers.DuoUIdrawRect(ldr.gc, ldr.cs.Width.Max, ldr.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 0, 0, 0, 0, unit.Dp(0))
 			// START View <<<
 			widgets := []func(){
 				func() {

@@ -37,7 +37,11 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	
 	duo.gc = layout.NewContext(duo.ww.Queue())
 	duo.cs = &duo.gc.Constraints
-	
+
+	duo.conf = &models.DuoUIconf{
+		Abbrevation:     "DUO",
+		StatusTextColor: color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
+	}
 	// Layouts
 	view := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
@@ -45,9 +49,9 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	header := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceBetween},
 	}
-	logo := models.DuoUIcomponent{
-		Layout: layout.Flex{Axis: layout.Vertical},
-	}
+	//logo := models.DuoUIcomponent{
+	//	Layout: layout.Flex{Axis: layout.Vertical},
+	//}
 	body := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Horizontal},
 	}
@@ -65,52 +69,62 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	overviewTop := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Horizontal},
 	}
-	sendReceive := models.DuoUIcomponent{
-		Layout: layout.Flex{Axis: layout.Vertical},
-		Inset:  layout.UniformInset(unit.Dp(15)),
-	}
-	sendReceiveButtons := models.DuoUIcomponent{
-		Layout: layout.Flex{Axis: layout.Horizontal},
-	}
+	//sendReceive := models.DuoUIcomponent{
+	//	Layout: layout.Flex{Axis: layout.Vertical},
+	//	Inset:  layout.UniformInset(unit.Dp(15)),
+	//}
+	//sendReceiveButtons := models.DuoUIcomponent{
+	//	Layout: layout.Flex{Axis: layout.Horizontal},
+	//}
 	overviewBottom := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Horizontal},
+		Inset: layout.Inset{
+			Top: unit.Dp(30),
+		},
 	}
 	status := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
 		Inset:  layout.UniformInset(unit.Dp(15)),
 	}
+	statusItem := models.DuoUIcomponent{
+		Layout: layout.Flex{Spacing:layout.SpaceBetween},
+	}
 	menu := models.DuoUIcomponent{
-		Layout: layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle},
+		Layout: layout.Flex{
+			Axis:      layout.Vertical,
+			Alignment: layout.Middle,
+			Spacing:   layout.SpaceEvenly},
 	}
-	
-	console := models.DuoUIcomponent{
-		Layout: layout.Flex{Axis: layout.Vertical},
-		Inset:  layout.UniformInset(unit.Dp(15)),
-	}
-	consoleInput := models.DuoUIcomponent{
-		Layout: layout.Flex{Axis: layout.Horizontal},
-	}
-	consoleOutput := models.DuoUIcomponent{
-		Layout: layout.Flex{Axis: layout.Horizontal},
-	}
-	
+	//
+	//console := models.DuoUIcomponent{
+	//	Layout: layout.Flex{Axis: layout.Vertical},
+	//	Inset:  layout.UniformInset(unit.Dp(15)),
+	//}
+	//consoleInput := models.DuoUIcomponent{
+	//	Layout: layout.Flex{Axis: layout.Horizontal},
+	//}
+	//consoleOutput := models.DuoUIcomponent{
+	//	Layout: layout.Flex{Axis: layout.Horizontal},
+	//}
+
 	duo.comp = &models.DuoUIcomponents{
-		View:               view,
-		Header:             header,
-		Logo:               logo,
-		Body:               body,
-		Sidebar:            sidebar,
-		Content:            content,
-		Overview:           overview,
-		OverviewTop:        overviewTop,
-		SendReceive:        sendReceive,
-		SendReceiveButtons: sendReceiveButtons,
-		OverviewBottom:     overviewBottom,
-		Status:             status,
-		Menu:               menu,
-		Console:            console,
-		ConsoleInput:       consoleInput,
-		ConsoleOutput:      consoleOutput,
+		View:   view,
+		Header: header,
+		//Logo:               logo,
+		Body:        body,
+		Sidebar:     sidebar,
+		Content:     content,
+		Overview:    overview,
+		OverviewTop: overviewTop,
+		//SendReceive:        sendReceive,
+		//SendReceiveButtons: sendReceiveButtons,
+		OverviewBottom: overviewBottom,
+		Status:         status,
+		StatusItem:         statusItem,
+		Menu:           menu,
+		//Console:            console,
+		//ConsoleInput:       consoleInput,
+		//ConsoleOutput:      consoleOutput,
 	}
 	
 	// Navigation
@@ -119,7 +133,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		// icoBackground: color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
 		IcoColor:    color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30},
 		IcoPadding:  unit.Dp(8),
-		IcoSize:     unit.Dp(64),
+		IcoSize:     unit.Dp(48),
 		Overview:    *new(widget.Button),
 		History:     *new(widget.Button),
 		AddressBook: *new(widget.Button),

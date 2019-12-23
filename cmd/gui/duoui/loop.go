@@ -1,11 +1,11 @@
 package duoui
 
 import (
-	"errors"
-	
+	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/pkg/gio/io/system"
-	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/unit"
+	"image/color"
 )
 
 func DuoUImainLoop(duo *DuoUI) error {
@@ -67,9 +67,17 @@ ready:
 // START OMIT
 func DuoUIgrid(duo *DuoUI) {
 	// START View <<<
-	DuoUIheader(duo)
-	DuoUIbody(duo)
+	duo.comp.View.Layout.Layout(duo.gc,
+		layout.Rigid(func() {
+			cs := duo.gc.Constraints
+			helpers.DuoUIdrawRectangle(duo.gc, cs.Width.Max, 64, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}, 0, 0, 0, 0, unit.Dp(0))
+			DuoUIheader(duo)
+		}),
+		layout.Flexed(1, func() {
+			cs := duo.gc.Constraints
+			helpers.DuoUIdrawRectangle(duo.gc, cs.Width.Max, cs.Height.Max, color.RGBA{A: 0xff, R: 0xf4, G: 0xf4, B: 0xf4}, 0, 0, 0, 0, unit.Dp(0))
+			DuoUIbody(duo)
+		}),
+	)
 	// END View >>>
 }
-
-// END OMIT

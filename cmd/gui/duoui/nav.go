@@ -2,15 +2,11 @@ package duoui
 
 import (
 	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/unit"
 )
 
 func DuoUImenu(duo *DuoUI) {
-	layout.Flex{}.Layout(duo.gc,
+	duo.comp.Menu.Layout.Layout(duo.gc,
 		layout.Rigid(func() {
-
-			in := layout.UniformInset(unit.Dp(0))
-
 			layout.Flex{}.Layout(duo.gc,
 				layout.Rigid(func() {
 					in.Layout(duo.gc, func() {
@@ -26,6 +22,8 @@ func DuoUImenu(duo *DuoUI) {
 					})
 				}),
 			)
+		}),
+		layout.Rigid(func() {
 			layout.Flex{}.Layout(duo.gc,
 				layout.Rigid(func() {
 					in.Layout(duo.gc, func() {
@@ -40,7 +38,10 @@ func DuoUImenu(duo *DuoUI) {
 						b.Layout(duo.gc, &duo.menu.History)
 					})
 				}),
+
 			)
+		}),
+		layout.Rigid(func() {
 			layout.Flex{}.Layout(duo.gc,
 				layout.Rigid(func() {
 					in.Layout(duo.gc, func() {
@@ -56,6 +57,8 @@ func DuoUImenu(duo *DuoUI) {
 					})
 				}),
 			)
+		}),
+		layout.Rigid(func() {
 			layout.Flex{}.Layout(duo.gc,
 				layout.Rigid(func() {
 					in.Layout(duo.gc, func() {
@@ -71,6 +74,8 @@ func DuoUImenu(duo *DuoUI) {
 					})
 				}),
 			)
+		}),
+		layout.Rigid(func() {
 			layout.Flex{}.Layout(duo.gc,
 				layout.Rigid(func() {
 					in.Layout(duo.gc, func() {
@@ -86,6 +91,8 @@ func DuoUImenu(duo *DuoUI) {
 					})
 				}),
 			)
+		}),
+		layout.Rigid(func() {
 			layout.Flex{}.Layout(duo.gc,
 				layout.Rigid(func() {
 					in.Layout(duo.gc, func() {
@@ -104,3 +111,63 @@ func DuoUImenu(duo *DuoUI) {
 		}),
 	)
 }
+
+//func DuoUImenu(duo *DuoUI) {
+//	duo.comp.Menu.Layout.Layout(duo.gc,
+//		layout.Rigid(func() {
+//			layout.Rigid(func() {
+//				menuItem(duo, "overview")
+//				menuItem(duo, "history")
+//				menuItem(duo, "addressbook")
+//				menuItem(duo, "explorer")
+//				menuItem(duo, "network")
+//				menuItem(duo, "console")
+//				menuItem(duo, "settings")
+//			})
+//		}))
+//}
+//
+//func menuItem(duo *DuoUI, icoName string) {
+//	layout.Flex{}.Layout(duo.gc,
+//		layout.Rigid(func() {
+//			in.Layout(duo.gc, func() {
+//				var menuIco *material.Icon
+//				var menuItem *widget.Button
+//				switch icoName {
+//				case "overview":
+//					menuIco = duo.ico.Overview
+//					menuItem = &duo.menu.Overview
+//				case "history":
+//					menuIco = duo.ico.History
+//					menuItem = &duo.menu.History
+//				case "addressbook":
+//					menuIco = duo.ico.AddressBook
+//					menuItem = &duo.menu.AddressBook
+//				case "explorer":
+//					menuIco = duo.ico.Explorer
+//					menuItem = &duo.menu.Explorer
+//				case "network":
+//					menuIco = duo.ico.Network
+//					//menuItem = duo.menu.Network
+//				case "console":
+//					menuIco = duo.ico.Console
+//					menuItem = &duo.menu.Console
+//				case "settings":
+//					menuIco = duo.ico.Settings
+//					menuItem = &duo.menu.Settings
+//				}
+//
+//				for menuItem.Clicked(duo.gc) {
+//					duo.menu.Current = icoName
+//				}
+//
+//				b := duo.th.IconButton(menuIco)
+//				b.Background = duo.menu.IcoBackground
+//				b.Color = duo.menu.IcoColor
+//				b.Padding = duo.menu.IcoPadding
+//				b.Size = duo.menu.IcoSize
+//				b.Layout(duo.gc, menuItem)
+//			})
+//		}),
+//	)
+//}
