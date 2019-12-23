@@ -2,7 +2,6 @@ package duoui
 
 import (
 	"errors"
-	"image/color"
 	
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
@@ -10,9 +9,12 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/io/system"
 	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/op"
 	"github.com/p9c/pod/pkg/gio/unit"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
+	
+	"image/color"
 )
 
 func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
@@ -28,9 +30,11 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 			e.Frame(duo.Gc.Ops)
 		}
 	}
+	log.DEBUG("main loop starting")
 	for {
 		select {
 		case <-duo.Quit:
+			log.DEBUG("quit signal received")
 			interrupt.Request()
 			// This case is for handling when some external application is controlling the GUI and to gracefully
 			// handle the back-end servers being shut down by the interrupt library receiving an interrupt signal
@@ -41,6 +45,7 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 		case e := <-duo.ww.Events():
 			switch e := e.(type) {
 			case system.DestroyEvent:
+				log.DEBUG("destroy event received")
 				interrupt.Request()
 				// Here do cleanup like are you sure (optional) modal or shutting down indefinite spinner
 				<-interrupt.HandlersDone
