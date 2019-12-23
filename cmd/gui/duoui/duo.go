@@ -34,7 +34,10 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	duo.gc = layout.NewContext(duo.ww.Queue())
 	duo.cs = &duo.gc.Constraints
 
-	duo.conf = &models.DuoUIconf{Abbrevation: "DUO"}
+	duo.conf = &models.DuoUIconf{
+		Abbrevation:     "DUO",
+		StatusTextColor: color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
+	}
 	// Layouts
 	view := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
@@ -52,16 +55,16 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		Layout: layout.Flex{Axis: layout.Vertical},
 		Inset:  layout.UniformInset(unit.Dp(8)),
 	}
-	//content := models.DuoUIcomponent{
-	//	Layout: layout.Flex{Axis: layout.Vertical},
-	//	Inset:  layout.UniformInset(unit.Dp(30)),
-	//}
-	//overview := models.DuoUIcomponent{
-	//	Layout: layout.Flex{Axis: layout.Vertical},
-	//}
-	//overviewTop := models.DuoUIcomponent{
-	//	Layout: layout.Flex{Axis: layout.Horizontal},
-	//}
+	content := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
+		Inset:  layout.UniformInset(unit.Dp(30)),
+	}
+	overview := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
+	}
+	overviewTop := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal},
+	}
 	//sendReceive := models.DuoUIcomponent{
 	//	Layout: layout.Flex{Axis: layout.Vertical},
 	//	Inset:  layout.UniformInset(unit.Dp(15)),
@@ -69,13 +72,19 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	//sendReceiveButtons := models.DuoUIcomponent{
 	//	Layout: layout.Flex{Axis: layout.Horizontal},
 	//}
-	//overviewBottom := models.DuoUIcomponent{
-	//	Layout: layout.Flex{Axis: layout.Horizontal},
-	//}
-	//status := models.DuoUIcomponent{
-	//	Layout: layout.Flex{Axis: layout.Vertical},
-	//	Inset:  layout.UniformInset(unit.Dp(15)),
-	//}
+	overviewBottom := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal},
+		Inset: layout.Inset{
+			Top: unit.Dp(30),
+		},
+	}
+	status := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
+		Inset:  layout.UniformInset(unit.Dp(15)),
+	}
+	statusItem := models.DuoUIcomponent{
+		Layout: layout.Flex{Spacing:layout.SpaceBetween},
+	}
 	menu := models.DuoUIcomponent{
 		Layout: layout.Flex{
 			Axis:      layout.Vertical,
@@ -98,16 +107,17 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		View:   view,
 		Header: header,
 		//Logo:               logo,
-		Body:    body,
-		Sidebar: sidebar,
-		//Content:            content,
-		//Overview:           overview,
-		//OverviewTop:        overviewTop,
+		Body:        body,
+		Sidebar:     sidebar,
+		Content:     content,
+		Overview:    overview,
+		OverviewTop: overviewTop,
 		//SendReceive:        sendReceive,
 		//SendReceiveButtons: sendReceiveButtons,
-		//OverviewBottom:     overviewBottom,
-		//Status:             status,
-		Menu: menu,
+		OverviewBottom: overviewBottom,
+		Status:         status,
+		StatusItem:         statusItem,
+		Menu:           menu,
 		//Console:            console,
 		//ConsoleInput:       consoleInput,
 		//ConsoleOutput:      consoleOutput,

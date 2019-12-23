@@ -9,29 +9,30 @@ import (
 )
 
 type DuoUIcomponents struct {
-	View               DuoUIcomponent
-	Header             DuoUIcomponent
+	View   DuoUIcomponent
+	Header DuoUIcomponent
 	//Intro              DuoUIcomponent
-	Logo               DuoUIcomponent
+	Logo DuoUIcomponent
 	//Log                DuoUIcomponent
-	Body               DuoUIcomponent
-	Sidebar            DuoUIcomponent
-	Menu               DuoUIcomponent
-	Content            DuoUIcomponent
-	Overview           DuoUIcomponent
-	//OverviewTop        DuoUIcomponent
+	Body        DuoUIcomponent
+	Sidebar     DuoUIcomponent
+	Menu        DuoUIcomponent
+	Content     DuoUIcomponent
+	Overview    DuoUIcomponent
+	OverviewTop DuoUIcomponent
 	//SendReceive        DuoUIcomponent
 	//SendReceiveButtons DuoUIcomponent
-	//OverviewBottom     DuoUIcomponent
-	//Status             DuoUIcomponent
-	History            DuoUIcomponent
-	AddressBook        DuoUIcomponent
-	Explorer           DuoUIcomponent
-	Network            DuoUIcomponent
-	Console            DuoUIcomponent
+	OverviewBottom DuoUIcomponent
+	Status         DuoUIcomponent
+	StatusItem     DuoUIcomponent
+	History        DuoUIcomponent
+	AddressBook    DuoUIcomponent
+	Explorer       DuoUIcomponent
+	Network        DuoUIcomponent
+	Console        DuoUIcomponent
 	//ConsoleOutput      DuoUIcomponent
 	//ConsoleInput       DuoUIcomponent
-	Settings           DuoUIcomponent
+	Settings DuoUIcomponent
 }
 
 type DuoUIcomponent struct {
@@ -72,6 +73,7 @@ type Boot struct {
 	IsLoading  bool `json:"loading"`
 }
 
-type DuoUIconf struct{
-	Abbrevation string
+type DuoUIconf struct {
+	Abbrevation     string
+	StatusTextColor color.RGBA
 }
