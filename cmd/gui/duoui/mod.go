@@ -19,6 +19,7 @@ type DuoUI struct {
 	ico  *models.DuoUIicons
 	comp *models.DuoUIcomponents
 	menu *models.DuoUInav
+	conf *models.DuoUIconf
 }
 type Boot struct {
 	IsBoot     bool `json:"boot"`

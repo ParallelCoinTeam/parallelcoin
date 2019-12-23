@@ -25,14 +25,14 @@ var (
 func DuoUIsendreceive(duo *DuoUI){
 	layout.Flex{}.Layout(duo.gc,
 		layout.Flexed(1, func() {
-			helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, 180, color.RGBA{A: 0xff, R: 0x30, G: 0xcf, B: 0x30}, 0, 0, 0, 0)
+			helpers.DuoUIdrawRectangle(duo.gc, duo.cs.Width.Max, 180, color.RGBA{A: 0xff, R: 0x30, G: 0xcf, B: 0x30}, 0, 0, 0, 0, unit.Dp(0))
 
 			widgets := []func(){
 				func() {
 
-					helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 9.9, 9.9, 9.9, 9.9)
+					helpers.DuoUIdrawRectangle(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 9.9, 9.9, 9.9, 9.9, unit.Dp(0))
 					ln.Layout(duo.gc, func() {
-						helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0xf4, G: 0xf4, B: 0xf4}, 9.9, 9.9, 9.9, 9.9)
+						helpers.DuoUIdrawRectangle(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0xf4, G: 0xf4, B: 0xf4}, 9.9, 9.9, 9.9, 9.9, unit.Dp(0))
 						in.Layout(duo.gc, func() {
 							e := duo.th.Editor("Hint")
 							e.Font.Style = text.Italic
@@ -49,9 +49,9 @@ func DuoUIsendreceive(duo *DuoUI){
 				},
 				func() {
 
-					helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 9.9, 9.9, 9.9, 9.9)
+					helpers.DuoUIdrawRectangle(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 9.9, 9.9, 9.9, 9.9, unit.Dp(0))
 					ln.Layout(duo.gc, func() {
-						helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0xf4, G: 0xf4, B: 0xf4}, 9.9, 9.9, 9.9, 9.9)
+						helpers.DuoUIdrawRectangle(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0xf4, G: 0xf4, B: 0xf4}, 9.9, 9.9, 9.9, 9.9, unit.Dp(0))
 						in.Layout(duo.gc, func() {
 							e := duo.th.Editor("Hint")
 							e.Font.Style = text.Italic
@@ -109,7 +109,7 @@ func DuoUIsendreceive(duo *DuoUI){
 			//
 			//})
 			//buttons := duo.comp.sendReceive.l.Flex(duo.gc, 0.4, func() {
-			//	DuoUIdrawRect(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0xcf, B: 0x30}, 0, 0, 0, 0)
+			//	DuoUIdrawRect(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0xcf, B: 0x30}, 0, 0, 0, 0, unit.Dp(0))
 			//})
 			//duo.comp.sendReceive.l.Layout(duo.gc, address)
 

@@ -27,13 +27,13 @@ func DuoUIconsole(duo *DuoUI) {
 		layout.Flexed(0.9, func() {
 
 			duo.comp.Console.Inset.Layout(duo.gc, func() {
-				//helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0xcf, B: 0xcf}, 0, 0, 0, 0)
+				//helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, duo.cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0xcf, B: 0xcf}, 0, 0, 0, 0, unit.Dp(0))
 				// Overview <<<
 				layout.Flex{}.Layout(duo.gc,
 					layout.Flexed(1, func() {
 
 						//duo.comp.content.i.Layout(duo.gc, func() {
-						//helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, 180, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}, 0, 0, 0, 0)
+						//helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, 180, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}, 0, 0, 0, 0, unit.Dp(0))
 						// OverviewTop <<<
 						//balance := duo.comp.OverviewTop.Layout.Flex(duo.gc, 0.4, func() {
 						//	helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max-30, 180, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 9.9, 9.9, 9.9, 9.9)
@@ -57,9 +57,9 @@ func DuoUIconsole(duo *DuoUI) {
 				layout.Flex{}.Layout(duo.gc,
 					layout.Rigid(func() {
 
-						helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, 60, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 9.9, 9.9, 9.9, 9.9)
+						helpers.DuoUIdrawRectangle(duo.gc, duo.cs.Width.Max, 60, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 9.9, 9.9, 9.9, 9.9, unit.Dp(0))
 						ln.Layout(duo.gc, func() {
-							helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, 50, color.RGBA{A: 0xff, R: 0xf4, G: 0xf4, B: 0xf4}, 9.9, 9.9, 9.9, 9.9)
+							helpers.DuoUIdrawRectangle(duo.gc, duo.cs.Width.Max, 50, color.RGBA{A: 0xff, R: 0xf4, G: 0xf4, B: 0xf4}, 9.9, 9.9, 9.9, 9.9, unit.Dp(0))
 							in.Layout(duo.gc, func() {
 								e := duo.th.Editor("Run command")
 								e.Font.Style = text.Regular
@@ -85,10 +85,10 @@ func DuoUIconsole(duo *DuoUI) {
 		}),
 	)
 	//return duo.comp.Content.Layout.Rigid(duo.gc, func() {
-	//	//helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, 64, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}, 0, 0, 0, 0)
+	//	//helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, 64, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}, 0, 0, 0, 0, unit.Dp(0))
 	//	// Header <<<
 	//	consoleOut := duo.comp.ConsoleOutput.Layout.Rigid(duo.gc, func() {
-	//		//helpers.DuoUIdrawRect(duo.gc, 64, 64, color.RGBA{A: 0xff, R: 0x30, B: 0x30, G: 0x30}, 0, 0, 0, 0)
+	//		//helpers.DuoUIdrawRect(duo.gc, 64, 64, color.RGBA{A: 0xff, R: 0x30, B: 0x30, G: 0x30}, 0, 0, 0, 0, unit.Dp(0))
 	//
 	//
 	//

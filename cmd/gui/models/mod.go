@@ -11,28 +11,29 @@ import (
 type DuoUIcomponents struct {
 	View               DuoUIcomponent
 	Header             DuoUIcomponent
-	Intro              DuoUIcomponent
+	//Intro              DuoUIcomponent
 	Logo               DuoUIcomponent
-	Log                DuoUIcomponent
+	//Log                DuoUIcomponent
 	Body               DuoUIcomponent
 	Sidebar            DuoUIcomponent
 	Menu               DuoUIcomponent
 	Content            DuoUIcomponent
 	Overview           DuoUIcomponent
-	OverviewTop        DuoUIcomponent
-	SendReceive        DuoUIcomponent
-	SendReceiveButtons DuoUIcomponent
-	OverviewBottom     DuoUIcomponent
-	Status             DuoUIcomponent
+	//OverviewTop        DuoUIcomponent
+	//SendReceive        DuoUIcomponent
+	//SendReceiveButtons DuoUIcomponent
+	//OverviewBottom     DuoUIcomponent
+	//Status             DuoUIcomponent
 	History            DuoUIcomponent
 	AddressBook        DuoUIcomponent
 	Explorer           DuoUIcomponent
 	Network            DuoUIcomponent
 	Console            DuoUIcomponent
-	ConsoleOutput      DuoUIcomponent
-	ConsoleInput       DuoUIcomponent
+	//ConsoleOutput      DuoUIcomponent
+	//ConsoleInput       DuoUIcomponent
 	Settings           DuoUIcomponent
 }
+
 type DuoUIcomponent struct {
 	Layout layout.Flex
 	Inset  layout.Inset
@@ -69,4 +70,8 @@ type Boot struct {
 	IsBootMenu bool `json:"menu"`
 	IsBootLogo bool `json:"logo"`
 	IsLoading  bool `json:"loading"`
+}
+
+type DuoUIconf struct{
+	Abbrevation string
 }

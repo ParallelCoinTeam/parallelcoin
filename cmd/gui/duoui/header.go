@@ -8,31 +8,31 @@ import (
 )
 
 var (
-	inLogo = layout.UniformInset(unit.Dp(4))
+	inLogo = layout.Stack{Alignment: layout.Center}
 )
 
 func DuoUIheader(duo *DuoUI) {
-	layout.Flex{}.Layout(duo.gc,
+	// Header <<<
+	duo.comp.Header.Layout.Layout(duo.gc,
 		layout.Rigid(func() {
-			helpers.DuoUIdrawRect(duo.gc, duo.cs.Width.Max, 64, color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}, 0, 0, 0, 0)
-			// Header <<<
-			layout.Flex{}.Layout(duo.gc,
-				layout.Rigid(func() {
-					helpers.DuoUIdrawRect(duo.gc, 64, 64, color.RGBA{A: 0xff, R: 0x30, B: 0x30, G: 0x30}, 0, 0, 0, 0)
-					//inLogo.Layout(duo.gc, func() {
+			helpers.DuoUIdrawRectangle(duo.gc, 64, 64, color.RGBA{A: 0xff, R: 0x30, B: 0x30, G: 0x30}, 0, 0, 0, 0, unit.Dp(0))
+			layout.Align(layout.Center).Layout(duo.gc, func() {
+				layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(4), Left: unit.Dp(5), Right: unit.Dp(4)}.Layout(duo.gc, func() {
 
 					duo.ico.Logo.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 					duo.ico.Logo.Layout(duo.gc, unit.Dp(64))
-					//})
-				}),
-			)
-			layout.Flex{}.Layout(duo.gc,
-				layout.Rigid(func() {
-					duo.th.H5(duo.rc.Balance + " DUO").Layout(duo.gc)
-				}),
-			)
+				})
+			})
 
-			// Header >>>
 		}),
-	)
+		layout.Rigid(func() {
+			layout.Align(layout.Center).Layout(duo.gc, func() {
+				layout.Inset{Top: unit.Dp(16), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(16)}.Layout(duo.gc, func() {
+					duo.th.H5(duo.rc.Balance + " " + duo.conf.Abbrevation).Layout(duo.gc)
+				})
+			})
+		}))
+
+	// Header >>>
+
 }
