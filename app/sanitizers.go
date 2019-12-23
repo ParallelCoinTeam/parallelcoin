@@ -14,6 +14,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/controller/pause"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
 	
 	"github.com/btcsuite/go-socks/socks"
@@ -68,8 +69,11 @@ func initConfigFile(cfg *pod.Config) {
 }
 
 func initLogDir(cfg *pod.Config) {
-	if *cfg.LogDir == "" {
-		*cfg.LogDir = *cfg.DataDir
+	if *cfg.LogDir != "" {
+		log.L.SetLogPaths(*cfg.LogDir, "pod")
+		interrupt.AddHandler(func() {
+			_ = log.L.LogFileHandle.Close()
+		})
 	}
 }
 
@@ -261,19 +265,19 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 			}
 			return
 		}
-			err = ioutil.WriteFile(*cfg.RPCKey, key, 0600)
-			if err != nil {
-				log.ERROR(err)
-				rmErr := os.Remove(*cfg.RPCCert)
-				if rmErr != nil {
-					log.WARN("cannot remove written certificates:", rmErr)
-				}
-				rmErr = os.Remove(*cfg.CAFile)
-				if rmErr != nil {
-					log.WARN("cannot remove written certificates:", rmErr)
-				}
-				return
+		err = ioutil.WriteFile(*cfg.RPCKey, key, 0600)
+		if err != nil {
+			log.ERROR(err)
+			rmErr := os.Remove(*cfg.RPCCert)
+			if rmErr != nil {
+				log.WARN("cannot remove written certificates:", rmErr)
 			}
+			rmErr = os.Remove(*cfg.CAFile)
+			if rmErr != nil {
+				log.WARN("cannot remove written certificates:", rmErr)
+			}
+			return
+		}
 		log.INFO("done generating TLS certificates")
 		return
 	}

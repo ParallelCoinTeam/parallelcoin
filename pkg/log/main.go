@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
+	
 	gt "github.com/buger/goterm"
 	"github.com/davecgh/go-spew/spew"
 )
@@ -22,13 +22,13 @@ var (
 	colorYellow = "\u001b[38;5;226m"
 	colorGreen  = "\u001b[38;5;40m"
 	colorBlue   = "\u001b[38;5;33m"
-	//colorPurple    = "\u001b[38;5;99m"
+	// colorPurple    = "\u001b[38;5;99m"
 	colorViolet = "\u001b[38;5;201m"
-	//colorBrown     = "\u001b[38;5;130m"
+	// colorBrown     = "\u001b[38;5;130m"
 	colorBold = "\u001b[1m"
-	//colorUnderline = "\u001b[4m"
+	// colorUnderline = "\u001b[4m"
 	colorItalic = "\u001b[3m"
-	//colorFaint     = "\u001b[2m"
+	// colorFaint     = "\u001b[2m"
 	colorOff       = "\u001b[0m"
 	backgroundGrey = "\u001b[48;5;240m"
 )
@@ -102,6 +102,8 @@ type Logger struct {
 	LogFileHandle *os.File
 	Writer        LogWriter
 	Color         bool
+	// If this channel is loaded log entries are composed and sent to it
+	LogChan chan Entry
 }
 
 // Entry is a log entry to be printed as json to the log file
@@ -135,7 +137,7 @@ func Empty() *Logger {
 		Tracec: NoClosure(),
 		Writer: wr,
 	}
-
+	
 }
 
 // sanitizeLoglevel accepts a string and returns a
@@ -193,46 +195,46 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 
 // SetLevel enables or disables the various print functions
 func (l *Logger) SetLevel(level string, color bool) *Logger {
-	//*l = *Empty()
+	// *l = *Empty()
 	level = sanitizeLoglevel(level)
 	var fallen bool
 	switch {
 	case level == Trace || fallen:
 		TRACE("trace testing")
-		l.Trace = printlnFunc("TRC", color, l.LogFileHandle)
-		l.Tracef = printfFunc("TRC", color, l.LogFileHandle)
-		l.Tracec = printcFunc("TRC", color, l.LogFileHandle)
+		l.Trace = printlnFunc("TRC", color, l.LogFileHandle, nil)
+		l.Tracef = printfFunc("TRC", color, l.LogFileHandle, nil)
+		l.Tracec = printcFunc("TRC", color, l.LogFileHandle, nil)
 		l.Traces = ps("TRC", color, l.LogFileHandle)
 		fallen = true
 		fallthrough
 	case level == Debug || fallen:
-		l.Debug = printlnFunc("DBG", color, l.LogFileHandle)
-		l.Debugf = printfFunc("DBG", color, l.LogFileHandle)
-		l.Debugc = printcFunc("DBG", color, l.LogFileHandle)
+		l.Debug = printlnFunc("DBG", color, l.LogFileHandle, l.LogChan)
+		l.Debugf = printfFunc("DBG", color, l.LogFileHandle, l.LogChan)
+		l.Debugc = printcFunc("DBG", color, l.LogFileHandle, l.LogChan)
 		fallen = true
 		fallthrough
 	case level == Info || fallen:
-		l.Info = printlnFunc("INF", color, l.LogFileHandle)
-		l.Infof = printfFunc("INF", color, l.LogFileHandle)
-		l.Infoc = printcFunc("INF", color, l.LogFileHandle)
+		l.Info = printlnFunc("INF", color, l.LogFileHandle, l.LogChan)
+		l.Infof = printfFunc("INF", color, l.LogFileHandle, l.LogChan)
+		l.Infoc = printcFunc("INF", color, l.LogFileHandle, l.LogChan)
 		fallen = true
 		fallthrough
 	case level == Warn || fallen:
-		l.Warn = printlnFunc("WRN", color, l.LogFileHandle)
-		l.Warnf = printfFunc("WRN", color, l.LogFileHandle)
-		l.Warnc = printcFunc("WRN", color, l.LogFileHandle)
+		l.Warn = printlnFunc("WRN", color, l.LogFileHandle, l.LogChan)
+		l.Warnf = printfFunc("WRN", color, l.LogFileHandle, l.LogChan)
+		l.Warnc = printcFunc("WRN", color, l.LogFileHandle, l.LogChan)
 		fallen = true
 		fallthrough
 	case level == Error || fallen:
-		l.Error = printlnFunc("ERR", color, l.LogFileHandle)
-		l.Errorf = printfFunc("ERR", color, l.LogFileHandle)
-		l.Errorc = printcFunc("ERR", color, l.LogFileHandle)
+		l.Error = printlnFunc("ERR", color, l.LogFileHandle, l.LogChan)
+		l.Errorf = printfFunc("ERR", color, l.LogFileHandle, l.LogChan)
+		l.Errorc = printcFunc("ERR", color, l.LogFileHandle, l.LogChan)
 		fallen = true
 		fallthrough
 	case level == Fatal:
-		l.Fatal = printlnFunc("FTL", color, l.LogFileHandle)
-		l.Fatalf = printfFunc("FTL", color, l.LogFileHandle)
-		l.Fatalc = printcFunc("FTL", color, l.LogFileHandle)
+		l.Fatal = printlnFunc("FTL", color, l.LogFileHandle, l.LogChan)
+		l.Fatalf = printfFunc("FTL", color, l.LogFileHandle, l.LogChan)
+		l.Fatalc = printcFunc("FTL", color, l.LogFileHandle, l.LogChan)
 		fallen = true
 	}
 	return l
@@ -338,7 +340,7 @@ func Composite(text, level string, color bool) string {
 			line = line + colorOff
 		case "STATUS":
 			level = backgroundGrey + colorBold + level + colorOff + backgroundGrey
-			//since = since
+			// since = since
 			file = colorItalic + file
 			line = line + colorOff
 		}
@@ -427,55 +429,70 @@ func Composite(text, level string, color bool) string {
 }
 
 // printlnFunc prints a log entry like Println
-func printlnFunc(level string, color bool, fh *os.File) PrintlnFunc {
+func printlnFunc(level string, color bool, fh *os.File, ch chan Entry) PrintlnFunc {
 	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
 		wr.Println(Composite(text, level, color))
-		if fh != nil {
+		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
-			j, err := json.Marshal(out)
-			if err != nil {
-				wr.Println("logging error:", err)
+			if fh != nil {
+				j, err := json.Marshal(out)
+				if err != nil {
+					wr.Println("logging error:", err)
+				}
+				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
-			_, _ = fmt.Fprint(fh, string(j)+",")
+			if ch != nil {
+				ch <- out
+			}
 		}
 	}
 	return &f
 }
 
 // printfFunc prints a log entry with formatting
-func printfFunc(level string, color bool, fh *os.File) PrintfFunc {
+func printfFunc(level string, color bool, fh *os.File, ch chan Entry) PrintfFunc {
 	f := func(format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
 		wr.Println(Composite(text, level, color))
-		if fh != nil {
+		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
-			j, err := json.Marshal(out)
-			if err != nil {
-				wr.Println("logging error:", err)
+			if fh != nil {
+				j, err := json.Marshal(out)
+				if err != nil {
+					wr.Println("logging error:", err)
+				}
+				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
-			_, _ = fmt.Fprint(fh, string(j)+",")
+			if ch != nil {
+				ch <- out
+			}
 		}
 	}
 	return &f
 }
 
 // printcFunc prints from a closure returning a string
-func printcFunc(level string, color bool, fh *os.File) PrintcFunc {
+func printcFunc(level string, color bool, fh *os.File, ch chan Entry) PrintcFunc {
 	f := func(fn func() string) {
 		t := fn()
 		text := trimReturn(t)
 		wr.Println(Composite(text, level, color))
-		if fh != nil {
+		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
-			j, err := json.Marshal(out)
-			if err != nil {
-				wr.Println("logging error:", err)
+			if fh != nil {
+				j, err := json.Marshal(out)
+				if err != nil {
+					wr.Println("logging error:", err)
+				}
+				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
-			_, _ = fmt.Fprint(fh, string(j)+",")
+			if ch != nil {
+				ch <- out
+			}
 		}
 	}
 	return &f
