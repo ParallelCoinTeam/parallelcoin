@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"errors"
+	"image/color"
 	
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
@@ -9,12 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/io/system"
 	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/op"
 	"github.com/p9c/pod/pkg/gio/unit"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	
-	"image/color"
 )
 
 func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
@@ -51,9 +49,11 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
-				duo.gc.Reset(e.Config, e.Size)
-				DuoUIgrid(duo)
-				e.Frame(duo.gc.Ops)
+				if duo.IsReady {
+					duo.gc.Reset(e.Config, e.Size)
+					DuoUIgrid(duo)
+					e.Frame(duo.gc.Ops)
+				}
 			}
 		}
 	}
