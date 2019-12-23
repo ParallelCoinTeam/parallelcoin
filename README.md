@@ -48,7 +48,7 @@ lacking:
 ```
 go install -v -tags headless
 ```
-
+~~~~
 ## Running
 
 ### Initial configuration:

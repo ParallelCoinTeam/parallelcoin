@@ -7,11 +7,13 @@ import (
 )
 
 func WalletGUI(duo *duoui.DuoUI) (err error) {
+	log.DEBUG("starting Wallet GUI")
 	go func() {
 		if err := duoui.DuoUImainLoop(duo); err != nil {
-			log.FATAL(err)
+			log.FATAL(err.Error(), "- shutting down")
 		}
 	}()
 	app.Main()
+	log.DEBUG("GUI shut down")
 	return
 }

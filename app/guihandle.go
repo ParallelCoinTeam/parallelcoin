@@ -8,13 +8,17 @@ import (
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	
 	"github.com/urfave/cli"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		duo := duoui.DuOuI(cx)
-
+		interrupt.AddHandler(func(){
+			close(duo.Quit)
+		})
 		var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			firstRun = true
@@ -25,22 +29,29 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		//loader.DuoUIloader(duo, cx, firstRun)
 
 		Configure(cx, c)
-		// Start Node
+		
+		// Start up GUI
+		go func() {
+			gui.WalletGUI(duo)
+			log.DEBUG("wallet GUI finished")
+		}()
+		
+		// Start node
 		err = gui.DuOSnode(cx)
 		if err != nil {
 			log.ERROR(err)
 		}
 
-
+		// Start wallet
 		err = gui.Services(cx)
 		if err != nil {
 			log.ERROR(err)
 		}
-
-		// We open up wallet creation
-
-		gui.WalletGUI(duo)
-
+	
+		// signal the GUI that the back end is ready
+		duo.Ready <-struct{}{}
+		// wait for stop signal
+		<-duo.Quit
 		//b.IsBootLogo = false
 		//b.IsBoot = false
 

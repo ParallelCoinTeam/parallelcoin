@@ -1,6 +1,10 @@
 package duoui
 
 import (
+	"image/color"
+	
+	"golang.org/x/exp/shiny/materialdesign/icons"
+	
 	"github.com/p9c/pod/cmd/gui/ico"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/pkg/conte"
@@ -11,29 +15,29 @@ import (
 	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/gio/widget/material"
 	"github.com/p9c/pod/pkg/log"
-	"golang.org/x/exp/shiny/materialdesign/icons"
-	"image/color"
 )
 
 func DuOuI(cx *conte.Xt) (duo *DuoUI) {
-	//opts := &app.Options{
+	// opts := &app.Options{
 	//	Width:  unit.Dp(800),
 	//	Height: unit.Dp(600),
 	//	Title:  "Gio",
-	//}
+	// }
 	duo = &DuoUI{
-		cx: cx,
-		rc: RcInit(),
-		ww: app.NewWindow(),
+		Quit:  make(chan struct{}),
+		Ready: make(chan struct{}),
+		cx:    cx,
+		rc:    RcInit(),
+		ww:    app.NewWindow(),
 	}
 	fonts.Register()
-	//duo.ww.Width =  unit.Dp(800)
+	// duo.ww.Width =  unit.Dp(800)
 	//	duo.ww.Height=  unit.Dp(600)
 	//		duo.ww.Title =  "ParallelCoin - True Story"
-
+	
 	duo.gc = layout.NewContext(duo.ww.Queue())
 	duo.cs = &duo.gc.Constraints
-
+	
 	// Layouts
 	view := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
@@ -78,7 +82,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	menu := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle},
 	}
-
+	
 	console := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},
 		Inset:  layout.UniformInset(unit.Dp(15)),
@@ -89,7 +93,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	consoleOutput := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Horizontal},
 	}
-
+	
 	duo.comp = &models.DuoUIcomponents{
 		View:               view,
 		Header:             header,
@@ -108,11 +112,11 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		ConsoleInput:       consoleInput,
 		ConsoleOutput:      consoleOutput,
 	}
-
+	
 	// Navigation
 	duo.menu = &models.DuoUInav{
 		Current: "overview",
-		//icoBackground: color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
+		// icoBackground: color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
 		IcoColor:    color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30},
 		IcoPadding:  unit.Dp(8),
 		IcoSize:     unit.Dp(64),
@@ -123,12 +127,12 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		Console:     *new(widget.Button),
 		Settings:    *new(widget.Button),
 	}
-
+	
 	// Icons
-
+	
 	var err error
 	ics := &models.DuoUIicons{}
-
+	
 	ics.Logo, err = material.NewIcon(ico.ParallelCoin)
 	if err != nil {
 		log.FATAL(err)
@@ -162,7 +166,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 		log.FATAL(err)
 	}
 	duo.ico = ics
-
+	
 	duo.th = material.NewTheme()
 	return
 }
