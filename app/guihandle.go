@@ -9,16 +9,17 @@ import (
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	
 	"github.com/urfave/cli"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		interrupt.AddHandler(func(){
+		duo := duoui.DuOuI()
+		interrupt.AddHandler(func() {
 			close(duo.Quit)
 		})
-		duo := duoui.DuOuI()
 		rc := rcd.RcInit()
 		var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
@@ -44,7 +45,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// signal the GUI that the back end is ready
 		log.DEBUG("sending ready signal")
 		// we can do this without blocking because the channel has 1 buffer this way it falls immediately the GUI starts
-		duo.Ready <-struct{}{}
+		duo.Ready <- struct{}{}
 		// Start up GUI
 		go func() {
 			log.DEBUG("wallet GUI finished")
@@ -52,9 +53,9 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// wait for stop signal
 		<-duo.Quit
 		gui.WalletGUI(duo, cx, rc)
-		//b.IsBootLogo = false
-		//b.IsBoot = false
-
+		// b.IsBootLogo = false
+		// b.IsBoot = false
+		
 		if !cx.Node.Load().(bool) {
 			close(cx.WalletKill)
 		}
