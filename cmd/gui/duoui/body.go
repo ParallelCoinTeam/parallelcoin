@@ -1,16 +1,19 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/models"
+	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/layout"
 )
 
-func DuoUIbody(duo *DuoUI) {
-	duo.comp.Body.Layout.Layout(duo.gc,
+func DuoUIbody(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
+	duo.Comp.Body.Layout.Layout(duo.Gc,
 		layout.Rigid(func() {
-			DuoUIsidebar(duo)
+			DuoUIsidebar(duo, cx, rc)
 		}),
 		layout.Flexed(1, func() {
-			DuoUIcontent(duo)
+			DuoUIcontent(duo,cx,rc)
 		}),
 	)
 }
