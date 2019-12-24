@@ -43,12 +43,10 @@ modules have unleashed on Git repository branch keeping hygiene.
 **GO111MODULE should be set to "on".**
 
 If you want to build a version without any GUI, for servers or if support is
-lacking:
+lacking on the given platform:
 
-```
-go install -v -tags headless
-```
-~~~~
+`go install -v -tags headless`
+
 ## Running
 
 ### Initial configuration:
@@ -56,9 +54,7 @@ go install -v -tags headless
 For initial configuration, use the `-D` and `-n` flags combined with
 the `init` subcommand like so:
 
-```
-pod -D <data directory> -n <mainnet/testnet> init
-```
+`pod -D <data directory> -n <mainnet/testnet> init`
 
 This in one step creates a fresh new configuration file, all of the
 TLS certificates and default Certificate Authority to use the
@@ -68,12 +64,12 @@ seed you need to restore the wallet later, and fills the configuration
 with a set of starting mining addresses based on the wallet seed,
 for the defined network type.
 
-**TODO:**s yes, we want to move these keys into the directory subfolder
+~~**TODO:**s yes, we want to move these keys into the directory subfolder
 so it can be done without the node running and on demand with a new
 subcommand for exactly this purpose. New addresses require a wallet 
 but should be kept away from a public RPC or other remote protocol
 endpoint. Only nodes need them while mining to use for creating
-coinbase payment outpoints.
+coinbase payment outpoints.~~
 
 ### Run Modes
 
