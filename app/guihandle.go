@@ -48,22 +48,24 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// immediately the GUI starts
 		duo.Ready <- struct{}{}
 		// Start up GUI
+		log.DEBUG("starting up GUI")
 		// go func() {
 		err = gui.WalletGUI(duo, cx, rc)
 		if err != nil {
 			log.ERROR(err)
 		}
 		
-		// log.DEBUG("wallet GUI finished")
+		log.DEBUG("wallet GUI finished")
 		// }()
 		// wait for stop signal
 		<-duo.Quit
 		// b.IsBootLogo = false
 		// b.IsBoot = false
-		
+		log.DEBUG("shutting down node")
 		if !cx.Node.Load().(bool) {
 			close(cx.WalletKill)
 		}
+		log.DEBUG("shutting down wallet")
 		if !cx.Wallet.Load().(bool) {
 			close(cx.NodeKill)
 		}

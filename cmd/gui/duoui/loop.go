@@ -16,9 +16,10 @@ import (
 )
 
 func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
-
 	for {
 		select {
+		case <- duo.Ready:
+			duo.IsReady = true
 		case <-duo.Quit:
 			log.DEBUG("quit signal received")
 			interrupt.Request()
