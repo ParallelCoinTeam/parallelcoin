@@ -16,11 +16,11 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		interrupt.AddHandler(func() {
-		})
-			close(duo.Quit)
-		rc := rcd.RcInit()
 		duo := duoui.DuOuI()
+		interrupt.AddHandler(func() {
+			close(duo.Quit)
+		})
+		rc := rcd.RcInit()
 		var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			firstRun = true
@@ -44,11 +44,16 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		
 		// signal the GUI that the back end is ready
 		log.DEBUG("sending ready signal")
-		// we can do this without blocking because the channel has 1 buffer this way it falls immediately the GUI starts
+		// we can do this without blocking because the channel has 1 buffer this way it falls
+		// immediately the GUI starts
 		duo.Ready <- struct{}{}
 		// Start up GUI
 		// go func() {
-		gui.WalletGUI(duo)
+		err = gui.WalletGUI(duo, cx, rc)
+		if err != nil {
+			log.ERROR(err)
+		}
+		
 		// log.DEBUG("wallet GUI finished")
 		// }()
 		// wait for stop signal
