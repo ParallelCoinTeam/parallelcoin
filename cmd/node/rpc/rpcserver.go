@@ -4181,7 +4181,6 @@ func HandleStop(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 // HandleRestart implements the restart command.
 func HandleRestart(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	interface{}, error) {
-	interrupt.RequestRestart()
 	select {
 	case s.RequestProcessShutdown <- struct{}{}:
 	default:

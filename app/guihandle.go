@@ -6,6 +6,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/gui/duoui"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -19,6 +20,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		interrupt.AddHandler(func() {
 			close(duo.Quit)
 		})
+		rc := rcd.RcInit()
 		var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			firstRun = true

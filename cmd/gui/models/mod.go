@@ -1,27 +1,46 @@
 package models
 
 import (
+	"image/color"
+	"time"
+	
+	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/unit"
 	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/gio/widget/material"
-	"image/color"
+	"github.com/p9c/pod/pkg/pod"
 )
+
+type DuoUI struct {
+	Boot    *Boot
+	Ww      *app.Window
+	Gc      *layout.Context
+	Th      *material.Theme
+	Cs      *layout.Constraints
+	Ico     *DuoUIicons
+	Comp    *DuoUIcomponents
+	Menu    *DuoUInav
+	Conf    *DuoUIconf
+	Quit    chan struct{}
+	Ready   chan struct{}
+	IsReady bool
+}
 
 type DuoUIcomponents struct {
 	View   DuoUIcomponent
 	Header DuoUIcomponent
-	//Intro              DuoUIcomponent
+	// Intro              DuoUIcomponent
 	Logo DuoUIcomponent
-	//Log                DuoUIcomponent
+	// Log                DuoUIcomponent
 	Body        DuoUIcomponent
 	Sidebar     DuoUIcomponent
 	Menu        DuoUIcomponent
 	Content     DuoUIcomponent
 	Overview    DuoUIcomponent
 	OverviewTop DuoUIcomponent
-	//SendReceive        DuoUIcomponent
-	//SendReceiveButtons DuoUIcomponent
+	// SendReceive        DuoUIcomponent
+	// SendReceiveButtons DuoUIcomponent
 	OverviewBottom DuoUIcomponent
 	Status         DuoUIcomponent
 	StatusItem     DuoUIcomponent
@@ -30,8 +49,8 @@ type DuoUIcomponents struct {
 	Explorer       DuoUIcomponent
 	Network        DuoUIcomponent
 	Console        DuoUIcomponent
-	//ConsoleOutput      DuoUIcomponent
-	//ConsoleInput       DuoUIcomponent
+	// ConsoleOutput      DuoUIcomponent
+	// ConsoleInput       DuoUIcomponent
 	Settings DuoUIcomponent
 }
 
@@ -76,4 +95,23 @@ type Boot struct {
 type DuoUIconf struct {
 	Abbrevation     string
 	StatusTextColor color.RGBA
+	Settings        DuoUIsettings
+}
+
+type DuoUIalert struct {
+	Time      time.Time   `json:"time"`
+	Title     string      `json:"title"`
+	Message   interface{} `json:"message"`
+	AlertType string      `json:"type"`
+}
+
+type DuoUIsettings struct {
+	// db DuoUIdb
+	// Display mod.DisplayConfig `json:"display"`
+	Daemon DaemonConfig `json:"daemon"`
+}
+
+type DaemonConfig struct {
+	Config *pod.Config `json:"config"`
+	Schema pod.Schema  `json:"schema"`
 }

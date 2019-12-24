@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
-	
 	// This enables pprof
 	_ "net/http/pprof"
 	"os"
@@ -17,8 +15,6 @@ import (
 	"github.com/p9c/pod/app"
 	"github.com/p9c/pod/pkg/util/limits"
 )
-
-var prevArgs []string
 
 // Main is the main entry point for pod
 func Main() {
@@ -52,26 +48,4 @@ func Main() {
 		}
 	}
 	app.Main()
-}
-
-func init() {
-	prevArgs = os.Args
-}
-
-func Reset(newArgs []string, quit chan struct{}) {
-	var cmd *exec.Cmd
-	if newArgs != nil {
-		if prevArgs != nil {
-			prevArgs = newArgs
-		} else {
-			prevArgs = os.Args
-		}
-	}
-	cmd = exec.Command(prevArgs[0], prevArgs[1:]...)
-	cmd.Start()
-	if quit != nil {
-		close(quit)
-	}
-	// wait until everything has stopped
-	<-interrupt.HandlersDone
 }
