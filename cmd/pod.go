@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
-	
 	// This enables pprof
 	_ "net/http/pprof"
 	"os"

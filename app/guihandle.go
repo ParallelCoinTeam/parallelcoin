@@ -9,7 +9,6 @@ import (
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/pod/pkg/util/interrupt"
 	
 	"github.com/urfave/cli"
 )
@@ -25,18 +24,18 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			firstRun = true
 		}
-
+		
 		log.INFO("ima", firstRun)
-
-		//loader.DuoUIloader(duo, cx, firstRun)
-
+		
+		// loader.DuoUIloader(duo, cx, firstRun)
+		
 		Configure(cx, c)
 		// Start Node
 		err = gui.DuoUInode(cx)
 		if err != nil {
 			log.ERROR(err)
 		}
-
+		
 		err = gui.Services(cx)
 		if err != nil {
 			log.ERROR(err)

@@ -1,42 +1,46 @@
 package models
 
 import (
+	"image/color"
+	"time"
+	
 	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/unit"
 	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/gio/widget/material"
 	"github.com/p9c/pod/pkg/pod"
-	"image/color"
-	"time"
 )
 
 type DuoUI struct {
-	Boot *Boot
-	Ww   *app.Window
-	Gc   *layout.Context
-	Th   *material.Theme
-	Cs   *layout.Constraints
-	Ico  *DuoUIicons
-	Comp *DuoUIcomponents
-	Menu *DuoUInav
-	Conf *DuoUIconf
+	Boot    *Boot
+	Ww      *app.Window
+	Gc      *layout.Context
+	Th      *material.Theme
+	Cs      *layout.Constraints
+	Ico     *DuoUIicons
+	Comp    *DuoUIcomponents
+	Menu    *DuoUInav
+	Conf    *DuoUIconf
+	Quit    chan struct{}
+	Ready   chan struct{}
+	IsReady bool
 }
 
 type DuoUIcomponents struct {
 	View   DuoUIcomponent
 	Header DuoUIcomponent
-	//Intro              DuoUIcomponent
+	// Intro              DuoUIcomponent
 	Logo DuoUIcomponent
-	//Log                DuoUIcomponent
+	// Log                DuoUIcomponent
 	Body        DuoUIcomponent
 	Sidebar     DuoUIcomponent
 	Menu        DuoUIcomponent
 	Content     DuoUIcomponent
 	Overview    DuoUIcomponent
 	OverviewTop DuoUIcomponent
-	//SendReceive        DuoUIcomponent
-	//SendReceiveButtons DuoUIcomponent
+	// SendReceive        DuoUIcomponent
+	// SendReceiveButtons DuoUIcomponent
 	OverviewBottom DuoUIcomponent
 	Status         DuoUIcomponent
 	StatusItem     DuoUIcomponent
@@ -45,8 +49,8 @@ type DuoUIcomponents struct {
 	Explorer       DuoUIcomponent
 	Network        DuoUIcomponent
 	Console        DuoUIcomponent
-	//ConsoleOutput      DuoUIcomponent
-	//ConsoleInput       DuoUIcomponent
+	// ConsoleOutput      DuoUIcomponent
+	// ConsoleInput       DuoUIcomponent
 	Settings DuoUIcomponent
 }
 
@@ -102,8 +106,8 @@ type DuoUIalert struct {
 }
 
 type DuoUIsettings struct {
-	//db DuoUIdb
-	//Display mod.DisplayConfig `json:"display"`
+	// db DuoUIdb
+	// Display mod.DisplayConfig `json:"display"`
 	Daemon DaemonConfig `json:"daemon"`
 }
 
