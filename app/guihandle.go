@@ -16,11 +16,11 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		duo := duoui.DuOuI(cx)
 		interrupt.AddHandler(func() {
-			close(duo.Quit)
 		})
+			close(duo.Quit)
 		rc := rcd.RcInit()
+		duo := duoui.DuOuI()
 		var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			firstRun = true
@@ -31,13 +31,11 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// loader.DuoUIloader(duo, cx, firstRun)
 		
 		Configure(cx, c)
-		
-		// Start node
-		err = gui.DuOSnode(cx)
+		// Start Node
+		err = gui.DuoUInode(cx)
 		if err != nil {
 			log.ERROR(err)
 		}
-		
 		// Start wallet
 		err = gui.Services(cx)
 		if err != nil {

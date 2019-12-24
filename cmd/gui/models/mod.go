@@ -1,15 +1,14 @@
 package models
 
 import (
-	"image/color"
-	"time"
-	
 	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/unit"
 	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/gio/widget/material"
 	"github.com/p9c/pod/pkg/pod"
+	"image/color"
+	"time"
 )
 
 type DuoUI struct {
@@ -106,8 +105,8 @@ type DuoUIalert struct {
 }
 
 type DuoUIsettings struct {
-	// db DuoUIdb
-	// Display mod.DisplayConfig `json:"display"`
+	//db DuoUIdb
+	//Display mod.DisplayConfig `json:"display"`
 	Daemon DaemonConfig `json:"daemon"`
 }
 
