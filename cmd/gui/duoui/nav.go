@@ -1,110 +1,118 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/models"
+	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/unit"
 )
 
-func DuoUImenu(duo *DuoUI) {
-	duo.comp.Menu.Layout.Layout(duo.gc,
+func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
+
+	in := layout.UniformInset(unit.Dp(8))
+
+	duo.Comp.Menu.Layout.Layout(duo.Gc,
 		layout.Rigid(func() {
-			layout.Flex{}.Layout(duo.gc,
+			layout.Flex{}.Layout(duo.Gc,
 				layout.Rigid(func() {
-					in.Layout(duo.gc, func() {
-						for duo.menu.Overview.Clicked(duo.gc) {
-							duo.menu.Current = "overview"
+					in.Layout(duo.Gc, func() {
+						for duo.Menu.Overview.Clicked(duo.Gc) {
+							duo.Menu.Current = "overview"
 						}
-						b := duo.th.IconButton(duo.ico.Overview)
-						b.Background = duo.menu.IcoBackground
-						b.Color = duo.menu.IcoColor
-						b.Padding = duo.menu.IcoPadding
-						b.Size = duo.menu.IcoSize
-						b.Layout(duo.gc, &duo.menu.Overview)
+						b := duo.Th.IconButton(duo.Ico.Overview)
+						b.Background = duo.Menu.IcoBackground
+						b.Color = duo.Menu.IcoColor
+						b.Padding = duo.Menu.IcoPadding
+						b.Size = duo.Menu.IcoSize
+						b.Layout(duo.Gc, &duo.Menu.Overview)
 					})
 				}),
 			)
 		}),
 		layout.Rigid(func() {
-			layout.Flex{}.Layout(duo.gc,
+			layout.Flex{}.Layout(duo.Gc,
 				layout.Rigid(func() {
-					in.Layout(duo.gc, func() {
-						for duo.menu.History.Clicked(duo.gc) {
-							duo.menu.Current = "history"
+					in.Layout(duo.Gc, func() {
+						for duo.Menu.History.Clicked(duo.Gc) {
+							duo.Menu.Current = "history"
 						}
-						b := duo.th.IconButton(duo.ico.History)
-						b.Background = duo.menu.IcoBackground
-						b.Color = duo.menu.IcoColor
-						b.Padding = duo.menu.IcoPadding
-						b.Size = duo.menu.IcoSize
-						b.Layout(duo.gc, &duo.menu.History)
+						b := duo.Th.IconButton(duo.Ico.History)
+						b.Background = duo.Menu.IcoBackground
+						b.Color = duo.Menu.IcoColor
+						b.Padding = duo.Menu.IcoPadding
+						b.Size = duo.Menu.IcoSize
+						b.Layout(duo.Gc, &duo.Menu.History)
 					})
 				}),
 
 			)
 		}),
 		layout.Rigid(func() {
-			layout.Flex{}.Layout(duo.gc,
+			layout.Flex{}.Layout(duo.Gc,
 				layout.Rigid(func() {
-					in.Layout(duo.gc, func() {
-						for duo.menu.AddressBook.Clicked(duo.gc) {
-							duo.menu.Current = "addressbook"
+					in.Layout(duo.Gc, func() {
+						for duo.Menu.AddressBook.Clicked(duo.Gc) {
+							duo.Menu.Current = "addressbook"
 						}
-						b := duo.th.IconButton(duo.ico.AddressBook)
-						b.Background = duo.menu.IcoBackground
-						b.Color = duo.menu.IcoColor
-						b.Padding = duo.menu.IcoPadding
-						b.Size = duo.menu.IcoSize
-						b.Layout(duo.gc, &duo.menu.AddressBook)
+						b := duo.Th.IconButton(duo.Ico.AddressBook)
+						b.Background = duo.Menu.IcoBackground
+						b.Color = duo.Menu.IcoColor
+						b.Padding = duo.Menu.IcoPadding
+						b.Size = duo.Menu.IcoSize
+						b.Layout(duo.Gc, &duo.Menu.AddressBook)
 					})
 				}),
 			)
 		}),
 		layout.Rigid(func() {
-			layout.Flex{}.Layout(duo.gc,
+			layout.Flex{}.Layout(duo.Gc,
 				layout.Rigid(func() {
-					in.Layout(duo.gc, func() {
-						for duo.menu.Explorer.Clicked(duo.gc) {
-							duo.menu.Current = "explorer"
+					in.Layout(duo.Gc, func() {
+						for duo.Menu.Explorer.Clicked(duo.Gc) {
+							duo.Menu.Current = "explorer"
 						}
-						b := duo.th.IconButton(duo.ico.Explorer)
-						b.Background = duo.menu.IcoBackground
-						b.Color = duo.menu.IcoColor
-						b.Padding = duo.menu.IcoPadding
-						b.Size = duo.menu.IcoSize
-						b.Layout(duo.gc, &duo.menu.Explorer)
+						b := duo.Th.IconButton(duo.Ico.Explorer)
+						b.Background = duo.Menu.IcoBackground
+						b.Color = duo.Menu.IcoColor
+						b.Padding = duo.Menu.IcoPadding
+						b.Size = duo.Menu.IcoSize
+						b.Layout(duo.Gc, &duo.Menu.Explorer)
 					})
 				}),
 			)
 		}),
 		layout.Rigid(func() {
-			layout.Flex{}.Layout(duo.gc,
+			layout.Flex{}.Layout(duo.Gc,
 				layout.Rigid(func() {
-					in.Layout(duo.gc, func() {
-						for duo.menu.Console.Clicked(duo.gc) {
-							duo.menu.Current = "console"
+					in.Layout(duo.Gc, func() {
+						for duo.Menu.Console.Clicked(duo.Gc) {
+							duo.Menu.Current = "console"
 						}
-						b := duo.th.IconButton(duo.ico.Console)
-						b.Background = duo.menu.IcoBackground
-						b.Color = duo.menu.IcoColor
-						b.Padding = duo.menu.IcoPadding
-						b.Size = duo.menu.IcoSize
-						b.Layout(duo.gc, &duo.menu.Console)
+						b := duo.Th.IconButton(duo.Ico.Console)
+						b.Background = duo.Menu.IcoBackground
+						b.Color = duo.Menu.IcoColor
+						b.Padding = duo.Menu.IcoPadding
+						b.Size = duo.Menu.IcoSize
+						b.Layout(duo.Gc, &duo.Menu.Console)
 					})
 				}),
 			)
 		}),
 		layout.Rigid(func() {
-			layout.Flex{}.Layout(duo.gc,
+			layout.Flex{}.Layout(duo.Gc,
 				layout.Rigid(func() {
-					in.Layout(duo.gc, func() {
-						for duo.menu.Settings.Clicked(duo.gc) {
-							duo.menu.Current = "settings"
+					in.Layout(duo.Gc, func() {
+						for duo.Menu.Settings.Clicked(duo.Gc) {
+							duo.Menu.Current = "settings"
+							rc.Settings.Daemon = rcd.GetCoreSettings(cx)
 						}
-						b := duo.th.IconButton(duo.ico.Settings)
-						b.Background = duo.menu.IcoBackground
-						b.Color = duo.menu.IcoColor
-						b.Padding = duo.menu.IcoPadding
-						b.Size = duo.menu.IcoSize
-						b.Layout(duo.gc, &duo.menu.Settings)
+						b := duo.Th.IconButton(duo.Ico.Settings)
+						b.Background = duo.Menu.IcoBackground
+						b.Color = duo.Menu.IcoColor
+						b.Padding = duo.Menu.IcoPadding
+						b.Size = duo.Menu.IcoSize
+						b.Layout(duo.Gc, &duo.Menu.Settings)
 					})
 				}),
 			)
@@ -113,7 +121,7 @@ func DuoUImenu(duo *DuoUI) {
 }
 
 //func DuoUImenu(duo *DuoUI) {
-//	duo.comp.Menu.Layout.Layout(duo.gc,
+//	duo.comp.Menu.Layout.Layout(duo.Gc,
 //		layout.Rigid(func() {
 //			layout.Rigid(func() {
 //				menuItem(duo, "overview")
@@ -128,45 +136,45 @@ func DuoUImenu(duo *DuoUI) {
 //}
 //
 //func menuItem(duo *DuoUI, icoName string) {
-//	layout.Flex{}.Layout(duo.gc,
+//	layout.Flex{}.Layout(duo.Gc,
 //		layout.Rigid(func() {
-//			in.Layout(duo.gc, func() {
+//			in.Layout(duo.Gc, func() {
 //				var menuIco *material.Icon
 //				var menuItem *widget.Button
 //				switch icoName {
 //				case "overview":
-//					menuIco = duo.ico.Overview
-//					menuItem = &duo.menu.Overview
+//					menuIco = duo.Ico.Overview
+//					menuItem = &duo.Menu.Overview
 //				case "history":
-//					menuIco = duo.ico.History
-//					menuItem = &duo.menu.History
+//					menuIco = duo.Ico.History
+//					menuItem = &duo.Menu.History
 //				case "addressbook":
-//					menuIco = duo.ico.AddressBook
-//					menuItem = &duo.menu.AddressBook
+//					menuIco = duo.Ico.AddressBook
+//					menuItem = &duo.Menu.AddressBook
 //				case "explorer":
-//					menuIco = duo.ico.Explorer
-//					menuItem = &duo.menu.Explorer
+//					menuIco = duo.Ico.Explorer
+//					menuItem = &duo.Menu.Explorer
 //				case "network":
-//					menuIco = duo.ico.Network
-//					//menuItem = duo.menu.Network
+//					menuIco = duo.Ico.Network
+//					//menuItem = duo.Menu.Network
 //				case "console":
-//					menuIco = duo.ico.Console
-//					menuItem = &duo.menu.Console
+//					menuIco = duo.Ico.Console
+//					menuItem = &duo.Menu.Console
 //				case "settings":
-//					menuIco = duo.ico.Settings
-//					menuItem = &duo.menu.Settings
+//					menuIco = duo.Ico.Settings
+//					menuItem = &duo.Menu.Settings
 //				}
 //
-//				for menuItem.Clicked(duo.gc) {
-//					duo.menu.Current = icoName
+//				for menuItem.Clicked(duo.Gc) {
+//					duo.Menu.Current = icoName
 //				}
 //
-//				b := duo.th.IconButton(menuIco)
-//				b.Background = duo.menu.IcoBackground
-//				b.Color = duo.menu.IcoColor
-//				b.Padding = duo.menu.IcoPadding
-//				b.Size = duo.menu.IcoSize
-//				b.Layout(duo.gc, menuItem)
+//				b := duo.Th.IconButton(menuIco)
+//				b.Background = duo.Menu.IcoBackground
+//				b.Color = duo.Menu.IcoColor
+//				b.Padding = duo.Menu.IcoPadding
+//				b.Size = duo.Menu.IcoSize
+//				b.Layout(duo.Gc, menuItem)
 //			})
 //		}),
 //	)

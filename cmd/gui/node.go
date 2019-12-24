@@ -12,7 +12,7 @@ import (
 
 )
 
-func DuOSnode(cx *conte.Xt) error {
+func DuoUInode(cx *conte.Xt) error {
 	nodeChan := make(chan *rpc.Server)
 	cx.NodeKill = make(chan struct{})
 	cx.Node = &atomic.Value{}

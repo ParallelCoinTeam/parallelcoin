@@ -1,31 +1,34 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/models"
+	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/layout"
 )
 
-func DuoUIcontent(duo *DuoUI) {
-	layout.Flex{}.Layout(duo.gc,
+func DuoUIcontent(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
+	layout.Flex{}.Layout(duo.Gc,
 		layout.Flexed(1, func() {
-			duo.comp.Content.Inset.Layout(duo.gc, func() {
+			duo.Comp.Content.Inset.Layout(duo.Gc, func() {
 				// Content <<<
-				switch duo.menu.Current {
+				switch duo.Menu.Current {
 				case "overview":
-					DuoUIoverview(duo)
+					DuoUIoverview(duo,cx,rc)
 				case "history":
-					DuoUIhistory(duo)
+					DuoUIhistory(duo,cx,rc)
 				case "addressbook":
-					DuoUIaddressbook(duo)
+					DuoUIaddressbook(duo,cx,rc)
 				case "explorer":
-					DuoUIexplorer(duo)
+					DuoUIexplorer(duo,cx,rc)
 				case "network":
-					DuoUInetwork(duo)
+					DuoUInetwork(duo,cx,rc)
 				case "console":
-					DuoUIconsole(duo)
+					DuoUIconsole(duo,cx,rc)
 				case "settings":
-					DuoUIsettings(duo)
+					DuoUIsettings(duo,cx,rc)
 				default:
-					DuoUIoverview(duo)
+					DuoUIoverview(duo,cx,rc)
 				}
 				// Content >>>
 			})

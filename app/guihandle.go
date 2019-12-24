@@ -6,6 +6,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/gui/duoui"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/urfave/cli"
@@ -13,8 +14,8 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		duo := duoui.DuOuI(cx)
-
+		duo := duoui.DuOuI()
+		rc := rcd.RcInit()
 		var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			firstRun = true
@@ -26,11 +27,10 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 
 		Configure(cx, c)
 		// Start Node
-		err = gui.DuOSnode(cx)
+		err = gui.DuoUInode(cx)
 		if err != nil {
 			log.ERROR(err)
 		}
-
 
 		err = gui.Services(cx)
 		if err != nil {
@@ -39,7 +39,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 
 		// We open up wallet creation
 
-		gui.WalletGUI(duo)
+		gui.WalletGUI(duo, cx, rc)
 
 		//b.IsBootLogo = false
 		//b.IsBoot = false

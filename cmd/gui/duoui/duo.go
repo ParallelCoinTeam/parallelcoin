@@ -3,7 +3,6 @@ package duoui
 import (
 	"github.com/p9c/pod/cmd/gui/ico"
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/fonts"
 	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/pkg/gio/layout"
@@ -15,26 +14,26 @@ import (
 	"image/color"
 )
 
-func DuOuI(cx *conte.Xt) (duo *DuoUI) {
+func DuOuI() (duo *models.DuoUI) {
 	//opts := &app.Options{
 	//	Width:  unit.Dp(800),
 	//	Height: unit.Dp(600),
 	//	Title:  "Gio",
 	//}
-	duo = &DuoUI{
-		cx: cx,
-		rc: RcInit(),
-		ww: app.NewWindow(),
+	duo = &models.DuoUI{
+		//cx: cx,
+		//rc: RcInit(),
+		Ww: app.NewWindow(),
 	}
 	fonts.Register()
 	//duo.ww.Width =  unit.Dp(800)
 	//	duo.ww.Height=  unit.Dp(600)
 	//		duo.ww.Title =  "ParallelCoin - True Story"
 
-	duo.gc = layout.NewContext(duo.ww.Queue())
-	duo.cs = &duo.gc.Constraints
+	duo.Gc = layout.NewContext(duo.Ww.Queue())
+	duo.Cs = &duo.Gc.Constraints
 
-	duo.conf = &models.DuoUIconf{
+	duo.Conf = &models.DuoUIconf{
 		Abbrevation:     "DUO",
 		StatusTextColor: color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
 	}
@@ -75,7 +74,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	overviewBottom := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Horizontal},
 		Inset: layout.Inset{
-			Top: unit.Dp(30),
+			Top: unit.Dp(20),
 		},
 	}
 	status := models.DuoUIcomponent{
@@ -103,7 +102,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	//	Layout: layout.Flex{Axis: layout.Horizontal},
 	//}
 
-	duo.comp = &models.DuoUIcomponents{
+	duo.Comp = &models.DuoUIcomponents{
 		View:   view,
 		Header: header,
 		//Logo:               logo,
@@ -124,7 +123,7 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	}
 
 	// Navigation
-	duo.menu = &models.DuoUInav{
+	duo.Menu = &models.DuoUInav{
 		Current: "overview",
 		//icoBackground: color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
 		IcoColor:    color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30},
@@ -175,8 +174,8 @@ func DuOuI(cx *conte.Xt) (duo *DuoUI) {
 	if err != nil {
 		log.FATAL(err)
 	}
-	duo.ico = ics
+	duo.Ico = ics
 
-	duo.th = material.NewTheme()
+	duo.Th = material.NewTheme()
 	return
 }

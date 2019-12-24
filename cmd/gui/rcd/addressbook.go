@@ -1,6 +1,6 @@
 package rcd
 
-type DuOStemplates struct {
+type DuoUItemplates struct {
 	App  map[string][]byte            `json:"app"`
 	Data map[string]map[string][]byte `json:"data"`
 }
