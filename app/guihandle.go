@@ -16,27 +16,26 @@ import (
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		duo := duoui.DuOuI(cx)
-		interrupt.AddHandler(func(){
+		interrupt.AddHandler(func() {
 			close(duo.Quit)
 		})
 		var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			firstRun = true
 		}
-
-		log.INFO("ima", firstRun)
-
-		//loader.DuoUIloader(duo, cx, firstRun)
-
-		Configure(cx, c)
 		
+		log.INFO("ima", firstRun)
+		
+		// loader.DuoUIloader(duo, cx, firstRun)
+		
+		Configure(cx, c)
 		
 		// Start node
 		err = gui.DuOSnode(cx)
 		if err != nil {
 			log.ERROR(err)
 		}
-
+		
 		// Start wallet
 		err = gui.Services(cx)
 		if err != nil {
@@ -46,17 +45,17 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// signal the GUI that the back end is ready
 		log.DEBUG("sending ready signal")
 		// we can do this without blocking because the channel has 1 buffer this way it falls immediately the GUI starts
-		duo.Ready <-struct{}{}
+		duo.Ready <- struct{}{}
 		// Start up GUI
-		go func() {
-			gui.WalletGUI(duo)
-			log.DEBUG("wallet GUI finished")
-		}()
+		// go func() {
+		gui.WalletGUI(duo)
+		// log.DEBUG("wallet GUI finished")
+		// }()
 		// wait for stop signal
 		<-duo.Quit
-		//b.IsBootLogo = false
-		//b.IsBoot = false
-
+		// b.IsBootLogo = false
+		// b.IsBoot = false
+		
 		if !cx.Node.Load().(bool) {
 			close(cx.WalletKill)
 		}
