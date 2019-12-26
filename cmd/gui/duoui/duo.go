@@ -2,9 +2,9 @@ package duoui
 
 import (
 	"image/color"
-	
+
 	"golang.org/x/exp/shiny/materialdesign/icons"
-	
+
 	"github.com/p9c/pod/cmd/gui/ico"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/pkg/fonts"
@@ -17,15 +17,13 @@ import (
 )
 
 func DuOuI() (duo *models.DuoUI) {
-	//opts := &app.Options{
-	//	Width:  unit.Dp(800),
-	//	Height: unit.Dp(600),
-	//	Title:  "Gio",
-	//}
 	duo = &models.DuoUI{
 		//cx: cx,
 		//rc: RcInit(),
-		Ww: app.NewWindow(),
+		Ww: app.NewWindow(
+			app.Size(unit.Dp(900), unit.Dp(556)),
+			app.Title("ParallelCoin"),
+		),
 		Quit:  make(chan struct{}),
 		Ready: make(chan struct{}, 1),
 	}
@@ -86,7 +84,7 @@ func DuOuI() (duo *models.DuoUI) {
 		Inset:  layout.UniformInset(unit.Dp(15)),
 	}
 	statusItem := models.DuoUIcomponent{
-		Layout: layout.Flex{Spacing:layout.SpaceBetween},
+		Layout: layout.Flex{Spacing: layout.SpaceBetween},
 	}
 	menu := models.DuoUIcomponent{
 		Layout: layout.Flex{
@@ -119,13 +117,13 @@ func DuOuI() (duo *models.DuoUI) {
 		//SendReceiveButtons: sendReceiveButtons,
 		OverviewBottom: overviewBottom,
 		Status:         status,
-		StatusItem:         statusItem,
+		StatusItem:     statusItem,
 		Menu:           menu,
 		//Console:            console,
 		//ConsoleInput:       consoleInput,
 		//ConsoleOutput:      consoleOutput,
 	}
-	
+
 	// Navigation
 	duo.Menu = &models.DuoUInav{
 		Current: "overview",
@@ -140,12 +138,12 @@ func DuOuI() (duo *models.DuoUI) {
 		Console:     *new(widget.Button),
 		Settings:    *new(widget.Button),
 	}
-	
+
 	// Icons
-	
+
 	var err error
 	ics := &models.DuoUIicons{}
-	
+
 	ics.Logo, err = material.NewIcon(ico.ParallelCoin)
 	if err != nil {
 		log.FATAL(err)
