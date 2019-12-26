@@ -1,6 +1,8 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/conte"
 	"image/color"
 
 	"golang.org/x/exp/shiny/materialdesign/icons"
@@ -16,7 +18,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
-func DuOuI() (duo *models.DuoUI) {
+func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI) {
 	duo = &models.DuoUI{
 		//cx: cx,
 		//rc: RcInit(),
@@ -178,26 +180,36 @@ func DuOuI() (duo *models.DuoUI) {
 	}
 	duo.Ico = ics
 
-	// Navigation
-	confTabs := map[string]*widget.Button{
-		"settings": new(widget.Button),
-		"config":   new(widget.Button),
-		"node":     new(widget.Button),
-		"debug":    new(widget.Button),
-		"rpc":      new(widget.Button),
-		"wallet":   new(widget.Button),
-		"proxy":    new(widget.Button),
-		"policy":   new(widget.Button),
-		"mining":   new(widget.Button),
-		"tls":      new(widget.Button),
-	}
+	// Settings tabs
+	confTabs := make(map[string]*widget.Button)
+	settingsFields := make(map[string]interface{})
+	for _, group := range rcd.GetCoreSettings(cx).Schema.Groups {
+		confTabs[group.Legend] = new(widget.Button)
+		for _, field := range group.Fields {
+			switch field.Type {
+			case "array":
+				settingsFields[field.Name] = new(widget.Button)
+			case "input":
+				settingsFields[field.Name] = &widget.Editor{
+					SingleLine: true,
+					Submit:     true,
+				}
+			case "switch":
+				settingsFields[field.Name] = new(widget.CheckBox)
+			case "radio":
+				settingsFields[field.Name] = new(widget.Enum)
+			default:
+				settingsFields[field.Name] = new(widget.Button)
 
+			}
+
+		}
+	}
 	duo.Conf.Tabs = models.DuoUIconfTabs{
 		Current:  "wallet",
 		TabsList: confTabs,
 	}
-
-
+	duo.Conf.Settings.Daemon.Widgets = settingsFields
 	duo.Th = material.NewTheme()
 	return
 }

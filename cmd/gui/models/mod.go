@@ -118,6 +118,7 @@ type DuoUIsettings struct {
 }
 
 type DaemonConfig struct {
-	Config *pod.Config `json:"config"`
-	Schema pod.Schema  `json:"schema"`
+	Config  *pod.Config `json:"config"`
+	Schema  pod.Schema  `json:"schema"`
+	Widgets map[string]interface{}
 }

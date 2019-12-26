@@ -28,6 +28,7 @@ type Field struct {
 	Group       string   `json:"group"`
 	Type        string   `json:"type"`
 	Name        string   `json:"label"`
+	Slug        string   `json:"slug"`
 	Description string   `json:"help"`
 	InputType   string   `json:"inputType"`
 	Featured    string   `json:"featured"`

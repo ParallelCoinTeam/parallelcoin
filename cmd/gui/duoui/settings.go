@@ -49,7 +49,7 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								txt := fmt.Sprint(t.Legend)
 								for duo.Conf.Tabs.TabsList[txt].Clicked(duo.Gc) {
 									duo.Conf.Tabs.Current = txt
-									log.INFO(txt)
+									log.INFO("unutra: ",txt)
 								}
 								duo.Th.Button(txt).Layout(duo.Gc, duo.Conf.Tabs.TabsList[txt])
 							})
@@ -64,18 +64,25 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 				if fmt.Sprint(fields.Legend) == duo.Conf.Tabs.Current {
 					fieldsList.Layout(duo.Gc, len(fields.Fields), func(il int) {
 						il = len(fields.Fields) - 1 - il
-						tl := fields.Fields[il]
+						tl := Field{
+							field: &fields.Fields[il],
+						}
 						layout.Flex{
 							Axis: layout.Vertical,
 						}.Layout(duo.Gc,
 							layout.Rigid(func() {
 								in.Layout(duo.Gc, func() {
-									duo.Th.H6(fmt.Sprint(tl.Name)).Layout(duo.Gc)
+									duo.Th.H6(fmt.Sprint(tl.field.Name)).Layout(duo.Gc)
 								})
 							}),
 							layout.Rigid(func() {
 								in.Layout(duo.Gc, func() {
-									duo.Th.Body2(fmt.Sprint(tl.Description)).Layout(duo.Gc)
+									duo.Th.Body2(fmt.Sprint(tl.field.Description)).Layout(duo.Gc)
+								})
+							}),
+							layout.Rigid(func() {
+								in.Layout(duo.Gc, func() {
+									tl.inputFields(duo)
 								})
 							}),
 						)
