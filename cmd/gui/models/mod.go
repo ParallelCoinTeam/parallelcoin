@@ -95,7 +95,13 @@ type Boot struct {
 type DuoUIconf struct {
 	Abbrevation     string
 	StatusTextColor color.RGBA
+	Tabs            DuoUIconfTabs
 	Settings        DuoUIsettings
+}
+
+type DuoUIconfTabs struct {
+	Current  string
+	TabsList map[string]*widget.Button
 }
 
 type DuoUIalert struct {

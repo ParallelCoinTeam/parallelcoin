@@ -178,6 +178,26 @@ func DuOuI() (duo *models.DuoUI) {
 	}
 	duo.Ico = ics
 
+	// Navigation
+	confTabs := map[string]*widget.Button{
+		"settings": new(widget.Button),
+		"config":   new(widget.Button),
+		"node":     new(widget.Button),
+		"debug":    new(widget.Button),
+		"rpc":      new(widget.Button),
+		"wallet":   new(widget.Button),
+		"proxy":    new(widget.Button),
+		"policy":   new(widget.Button),
+		"mining":   new(widget.Button),
+		"tls":      new(widget.Button),
+	}
+
+	duo.Conf.Tabs = models.DuoUIconfTabs{
+		Current:  "wallet",
+		TabsList: confTabs,
+	}
+
+
 	duo.Th = material.NewTheme()
 	return
 }

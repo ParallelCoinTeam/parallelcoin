@@ -8,8 +8,6 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/pkg/gio/widget"
-	"github.com/p9c/pod/pkg/gio/widget/material"
 	"github.com/p9c/pod/pkg/log"
 )
 
@@ -18,12 +16,9 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 		Axis:      layout.Horizontal,
 		Alignment: layout.Middle,
 	}
-	//fieldsList := &layout.List{
-	//	Axis: layout.Vertical,
-	//}
-	selectedTab := "wallet"
-
-	tabsList := make(map[int]*widget.Button)
+	fieldsList := &layout.List{
+		Axis: layout.Vertical,
+	}
 
 	layout.Flex{
 		Axis: layout.Vertical,
@@ -38,27 +33,30 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 				}.Layout(duo.Gc,
 					layout.Rigid(func() {
 
-						duo.Th.H3(selectedTab).Layout(duo.Gc)
+						duo.Th.H3(duo.Conf.Tabs.Current).Layout(duo.Gc)
 					}),
 
 					layout.Rigid(func() {
 						cs := duo.Gc.Constraints
 						helpers.DuoUIdrawRectangle(duo.Gc, cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
-						groupsList.Layout(duo.Gc, len(rc.Settings.Daemon.Schema.Groups), func(i int) {
+
+						groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
+
+						groupsList.Layout(duo.Gc, groupsNumber, func(i int) {
+
 							in.Layout(duo.Gc, func() {
-								i = len(rc.Settings.Daemon.Schema.Groups) - 1 - i
+								i = groupsNumber - 1 - i
 								t := rc.Settings.Daemon.Schema.Groups[i]
 								txt := fmt.Sprint(t.Legend)
-								tabsList[i] = new(widget.Button)
 
-								for tabsList[i].Clicked(duo.Gc) {
-									selectedTab = txt
+								for duo.Conf.Tabs.TabsList[txt].Clicked(duo.Gc) {
+									duo.Conf.Tabs.Current = txt
 									log.INFO(txt)
 								}
 								//th.Button("Click me!").Layout(gtx, button)
-								var btn material.Button
-								btn = duo.Th.Button(txt)
-								btn.Layout(duo.Gc, tabsList[i])
+
+								duo.Th.Button(txt).Layout(duo.Gc, duo.Conf.Tabs.TabsList[txt])
+
 							})
 
 						})
@@ -66,22 +64,22 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 
 			})
 		}),
-		//layout.Flexed(1, func() {
-		//	//cs := duo.Gc.Constraints
-		//
-		//	for _, fields := range rc.Settings.Daemon.Schema.Groups {
-		//
-		//		if fmt.Sprint(fields.Legend) == selectedTab {
-		//
-		//			fieldsList.Layout(duo.Gc, len(fields.Fields), func(il int) {
-		//				il = len(fields.Fields) - 1 - il
-		//				tl := fields.Fields[il]
-		//				txtc := fmt.Sprint(tl.Name)
-		//				duo.Th.H6(txtc).Layout(duo.Gc)
-		//			})
-		//		}
-		//	}
-		//}),
+		layout.Flexed(1, func() {
+			//cs := duo.Gc.Constraints
+
+			for _, fields := range rc.Settings.Daemon.Schema.Groups {
+
+				if fmt.Sprint(fields.Legend) == duo.Conf.Tabs.Current {
+
+					fieldsList.Layout(duo.Gc, len(fields.Fields), func(il int) {
+						il = len(fields.Fields) - 1 - il
+						tl := fields.Fields[il]
+						txtc := fmt.Sprint(tl.Name)
+						duo.Th.H6(txtc).Layout(duo.Gc)
+					})
+				}
+			}
+		}),
 	)
 
 	// Overview >>>
