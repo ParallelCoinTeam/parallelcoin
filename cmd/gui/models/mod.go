@@ -84,11 +84,12 @@ type DuoUIicons struct {
 }
 
 type Boot struct {
-	IsBoot     bool `json:"boot"`
-	IsFirstRun bool `json:"firstrun"`
-	IsBootMenu bool `json:"menu"`
-	IsBootLogo bool `json:"logo"`
-	IsLoading  bool `json:"loading"`
+	IsBoot     bool   `json:"boot"`
+	IsFirstRun bool   `json:"firstrun"`
+	IsBootMenu bool   `json:"menu"`
+	IsBootLogo bool   `json:"logo"`
+	IsLoading  bool   `json:"loading"`
+	IsScreen   string `json:"screen"`
 }
 
 type DuoUIconf struct {

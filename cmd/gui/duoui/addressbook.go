@@ -7,19 +7,17 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/unit"
-
-	"image/color"
 )
 
 func DuoUIaddressbook(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	layout.Flex{}.Layout(duo.Gc,
 		layout.Flexed(1, func() {
 			duo.Comp.AddressBook.Inset.Layout(duo.Gc, func() {
-				helpers.DuoUIdrawRectangle(duo.Gc, duo.Cs.Width.Max, duo.Cs.Height.Max, color.RGBA{A: 0xff, R: 0x30, G: 0xcf, B: 0xcf}, 0, 0, 0, 0, unit.Dp(0))
+				helpers.DuoUIdrawRectangle(duo.Gc, duo.Cs.Width.Max, duo.Cs.Height.Max, helpers.HexARGB("ff30cfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 				// Overview <<<
 				in := layout.UniformInset(unit.Dp(60))
 				in.Layout(duo.Gc, func() {
-					helpers.DuoUIdrawRectangle(duo.Gc, duo.Cs.Width.Max, duo.Cs.Height.Max, color.RGBA{A: 0xff, R: 0xcf, G: 0x30, B: 0xcf}, 0, 0, 0, 0, unit.Dp(0))
+					helpers.DuoUIdrawRectangle(duo.Gc, duo.Cs.Width.Max, duo.Cs.Height.Max, helpers.HexARGB("ffcf30cf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 
 					duo.Th.H5("addressbook :").Layout(duo.Gc)
 				})

@@ -8,7 +8,6 @@ import (
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/unit"
 	"github.com/p9c/pod/pkg/gio/widget"
-	"image/color"
 )
 
 var (
@@ -27,7 +26,7 @@ var (
 func DuoUIsendreceive(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar){
 	layout.Flex{}.Layout(duo.Gc,
 		layout.Flexed(1, func() {
-			helpers.DuoUIdrawRectangle(duo.Gc, duo.Cs.Width.Max, 180, color.RGBA{A: 0xff, R: 0x30, G: 0xcf, B: 0x30}, 0, 0, 0, 0, unit.Dp(0))
+			helpers.DuoUIdrawRectangle(duo.Gc, duo.Cs.Width.Max, 180, helpers.HexARGB("ff30cf30"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 
 			layout.Flex{
 				Axis:layout.Vertical,
