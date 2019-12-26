@@ -190,6 +190,14 @@ There should be a build for Android and iOS eventually, they
 have extra build environment requirements (android sdk and 
 xcode/mac respectively). Specifics for Windows builds also to come.
 
+#### Windows GUI build needs files: 
+
+Files are included in Pod's root folder
+- d3dcompiler_47.dll
+- libEGL.dll
+- libGLESv2.dll
+
+
 ## Binaries for legacy (pre hardfork) now available for linux amd64
 
 Get them from here: [https://git.parallelcoin.io/dev/parallelcoin-binaries](https://git.parallelcoin.io/dev/parallelcoin-binaries)
