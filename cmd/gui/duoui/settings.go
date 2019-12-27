@@ -35,7 +35,6 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					Axis: layout.Vertical,
 				}.Layout(duo.Gc,
 					layout.Rigid(func() {
-
 						duo.Th.H3(duo.Conf.Tabs.Current).Layout(duo.Gc)
 					}),
 					layout.Rigid(func() {
@@ -49,7 +48,7 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								txt := fmt.Sprint(t.Legend)
 								for duo.Conf.Tabs.TabsList[txt].Clicked(duo.Gc) {
 									duo.Conf.Tabs.Current = txt
-									log.INFO("unutra: ",txt)
+									log.INFO("unutra: ", txt)
 								}
 								duo.Th.Button(txt).Layout(duo.Gc, duo.Conf.Tabs.TabsList[txt])
 							})
@@ -71,21 +70,36 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 							Axis: layout.Vertical,
 						}.Layout(duo.Gc,
 							layout.Rigid(func() {
-								in.Layout(duo.Gc, func() {
-									duo.Th.H6(fmt.Sprint(tl.field.Name)).Layout(duo.Gc)
-								})
+								layout.Flex{}.Layout(duo.Gc,
+									layout.Flexed(0.62, func() {
+										layout.Flex{
+											Axis: layout.Vertical,
+										}.Layout(duo.Gc,
+											layout.Rigid(func() {
+												in.Layout(duo.Gc, func() {
+													duo.Th.H6(fmt.Sprint(tl.field.Name)).Layout(duo.Gc)
+												})
+											}),
+											layout.Rigid(func() {
+												in.Layout(duo.Gc, func() {
+													duo.Th.Body2(fmt.Sprint(tl.field.Description)).Layout(duo.Gc)
+												})
+											}),
+										)
+									}),
+									layout.Flexed(0.38, func() {
+										layout.Align(layout.Start).Layout(duo.Gc, func() {
+											layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(duo.Gc, func() {
+												tl.inputFields(duo)
+											})
+										})
+									}),
+								)
 							}),
 							layout.Rigid(func() {
-								in.Layout(duo.Gc, func() {
-									duo.Th.Body2(fmt.Sprint(tl.field.Description)).Layout(duo.Gc)
-								})
-							}),
-							layout.Rigid(func() {
-								in.Layout(duo.Gc, func() {
-									tl.inputFields(duo)
-								})
-							}),
-						)
+								cs := duo.Gc.Constraints
+								helpers.DuoUIdrawRectangle(duo.Gc, cs.Width.Max, 1, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+							}))
 					})
 				}
 			}

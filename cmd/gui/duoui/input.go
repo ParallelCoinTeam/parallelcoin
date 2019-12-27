@@ -2,6 +2,7 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/widget"
@@ -44,16 +45,7 @@ func (f *Field)inputFields(duo *models.DuoUI) {
 	case "input":
 		switch f.field.InputType {
 		case "text":
-			e := duo.Th.Editor(f.field.Name)
-			e.Font.Style = text.Italic
-			lineEditor := (duo.Conf.Settings.Daemon.Widgets[f.field.Name]).(*widget.Editor)
-			e.Layout(duo.Gc, lineEditor)
-			for _, e := range lineEditor.Events(duo.Gc) {
-				if _, ok := e.(widget.SubmitEvent); ok {
-					//topLabel = e.Text
-					lineEditor.SetText("")
-				}
-			}
+			helpers.DuoUIinputField(duo, f.field.Name, (duo.Conf.Settings.Daemon.Widgets[f.field.Name]).(*widget.Editor) )
 		case "number":
 			e := duo.Th.Editor(f.field.Name)
 			e.Font.Style = text.Italic
