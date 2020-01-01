@@ -15,21 +15,21 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 
 	rc.GetDuoUIlastTxs(duo, cx)
 	in := layout.UniformInset(unit.Dp(30))
-	in.Layout(duo.Gc, func() {
-		duo.Comp.Status.Layout.Layout(duo.Gc,
+	in.Layout(duo.DuoUIcontext, func() {
+		duo.DuoUIcomponents.Status.Layout.Layout(duo.DuoUIcontext,
 			// Balance status item
 			layout.Rigid(func() {
 
 				//const n = 5
-				//list.Layout(duo.Gc, n, func(i int) {
+				//list.Layout(duo.DuoUIcontext, n, func(i int) {
 				//	txt := fmt.Sprintf("List element #%d", i)
 				//
-				//	duo.Th.H3(txt).Layout(duo.Gc)
+				//	duo.DuoUItheme.H3(txt).Layout(duo.DuoUIcontext)
 				//})
 				transList := &layout.List{
 					Axis: layout.Vertical,
 				}
-				transList.Layout(duo.Gc, len(rc.Transactions.Txs), func(i int) {
+				transList.Layout(duo.DuoUIcontext, len(rc.Transactions.Txs), func(i int) {
 					// Invert list
 					//i = len(txs.Txs) - 1 - i
 					t := rc.Transactions.Txs[i]
@@ -37,37 +37,37 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					//const duration = 5
 
 					layout.Flex{
-						Spacing:layout.SpaceBetween,
-					}.Layout(duo.Gc,
+						Spacing: layout.SpaceBetween,
+					}.Layout(duo.DuoUIcontext,
 						layout.Rigid(func() {
-							tim := duo.Th.Body1(t.TxID)
+							tim := duo.DuoUItheme.Body1(t.TxID)
 							tim.Color = helpers.Alpha(a, tim.Color)
-							tim.Layout(duo.Gc)
+							tim.Layout(duo.DuoUIcontext)
 						}),
 						layout.Rigid(func() {
-							amount := duo.Th.H5(fmt.Sprintf("%0.8f", t.Amount))
+							amount := duo.DuoUItheme.H5(fmt.Sprintf("%0.8f", t.Amount))
 							amount.Color = helpers.RGB(0x003300)
 							amount.Color = helpers.Alpha(a, amount.Color)
 							amount.Alignment = text.End
 							amount.Font.Variant = "Mono"
 							amount.Font.Weight = text.Bold
-							amount.Layout(duo.Gc)
+							amount.Layout(duo.DuoUIcontext)
 						}),
 						layout.Rigid(func() {
-							sat := duo.Th.Body1(t.Category)
+							sat := duo.DuoUItheme.Body1(t.Category)
 							sat.Color = helpers.Alpha(a, sat.Color)
-							sat.Layout(duo.Gc)
+							sat.Layout(duo.DuoUIcontext)
 						}),
 						layout.Rigid(func() {
-							sat := duo.Th.Body1(fmt.Sprintf("%0.8f", t.Amount))
+							sat := duo.DuoUItheme.Body1(fmt.Sprintf("%0.8f", t.Amount))
 							sat.Color = helpers.Alpha(a, sat.Color)
-							sat.Layout(duo.Gc)
+							sat.Layout(duo.DuoUIcontext)
 						}),
 						layout.Rigid(func() {
-							l := duo.Th.Body2(helpers.FormatTime(t.Time))
-							l.Color = duo.Th.Color.Hint
+							l := duo.DuoUItheme.Body2(helpers.FormatTime(t.Time))
+							l.Color = duo.DuoUItheme.Color.Hint
 							l.Color = helpers.Alpha(a, l.Color)
-							l.Layout(duo.Gc)
+							l.Layout(duo.DuoUIcontext)
 						}),
 					)
 				})
@@ -75,69 +75,104 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 			}))
 	})
 }
-
 
 func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 
 	rc.GetDuoUITransactionsExcertps(duo, cx)
-	in := layout.UniformInset(unit.Dp(30))
-	in.Layout(duo.Gc, func() {
-		duo.Comp.Status.Layout.Layout(duo.Gc,
-			// Balance status item
-			layout.Rigid(func() {
 
-				//const n = 5
-				//list.Layout(duo.Gc, n, func(i int) {
-				//	txt := fmt.Sprintf("List element #%d", i)
-				//
-				//	duo.Th.H3(txt).Layout(duo.Gc)
-				//})
-				transList := &layout.List{
-					Axis: layout.Vertical,
-				}
-				transList.Layout(duo.Gc, len(rc.Transactions.Txs), func(i int) {
-					// Invert list
-					//i = len(txs.Txs) - 1 - i
-					t := rc.Transactions.Txs[i]
-					a := 1.0
-					//const duration = 5
-
-					layout.Flex{
-						Spacing:layout.SpaceBetween,
-					}.Layout(duo.Gc,
-						layout.Rigid(func() {
-							tim := duo.Th.Body1(t.TxID)
-							tim.Color = helpers.Alpha(a, tim.Color)
-							tim.Layout(duo.Gc)
-						}),
-						layout.Rigid(func() {
-							amount := duo.Th.H5(fmt.Sprintf("%0.8f", t.Amount))
-							amount.Color = helpers.RGB(0x003300)
-							amount.Color = helpers.Alpha(a, amount.Color)
-							amount.Alignment = text.End
-							amount.Font.Variant = "Mono"
-							amount.Font.Weight = text.Bold
-							amount.Layout(duo.Gc)
-						}),
-						layout.Rigid(func() {
-							sat := duo.Th.Body1(t.Category)
-							sat.Color = helpers.Alpha(a, sat.Color)
-							sat.Layout(duo.Gc)
-						}),
-						layout.Rigid(func() {
-							sat := duo.Th.Body1(fmt.Sprintf("%0.8f", t.Amount))
-							sat.Color = helpers.Alpha(a, sat.Color)
-							sat.Layout(duo.Gc)
-						}),
-						layout.Rigid(func() {
-							l := duo.Th.Body2(helpers.FormatTime(t.Time))
-							l.Color = duo.Th.Color.Hint
-							l.Color = helpers.Alpha(a, l.Color)
-							l.Layout(duo.Gc)
-						}),
-					)
-				})
-
-			}))
-	})
 }
+//
+//func DuoUItable(duo *models.DuoUI, table map[int]layout.FlexChild) {
+//	in := layout.UniformInset(unit.Dp(30))
+//	in.Layout(duo.DuoUIcontext, func() {
+//		duo.DuoUIcomponents.Status.Layout.Layout(duo.DuoUIcontext,
+//			// Balance status item
+//			layout.Rigid(func() {
+//
+//				//const n = 5
+//				//list.Layout(duo.DuoUIcontext, n, func(i int) {
+//				//	txt := fmt.Sprintf("List element #%d", i)
+//				//
+//				//	duo.DuoUItheme.H3(txt).Layout(duo.DuoUIcontext)
+//				//})
+//				transList := &layout.List{
+//					Axis: layout.Vertical,
+//				}
+//				transList.Layout(duo.DuoUIcontext, len(table), func(i int) {
+//					// Invert list
+//					//i = len(txs.Txs) - 1 - i
+//					t := table[i]
+//					a := 1.0
+//					//const duration = 5
+//
+//
+//				widgets := []func(){
+//					func() {
+//						layout.Rigid(func() {
+//							tim := duo.DuoUItheme.Body1(t.TxID)
+//							tim.Color = helpers.Alpha(a, tim.Color)
+//							tim.Layout(duo.DuoUIcontext)
+//						})
+//					},
+//					func() {
+//						layout.Rigid(func() {
+//							amount := duo.DuoUItheme.H5(fmt.Sprintf("%0.8f", t.Amount))
+//							amount.Color = helpers.RGB(0x003300)
+//							amount.Alignment = text.End
+//							amount.Font.Variant = "Mono"
+//							amount.Font.Weight = text.Bold
+//							amount.Layout(duo.DuoUIcontext)
+//						}),
+//					},
+//					func() {
+//						layout.Rigid(func() {
+//							sat := duo.DuoUItheme.Body1(t.Category)
+//							sat.Color = helpers.Alpha(a, sat.Color)
+//							sat.Layout(duo.DuoUIcontext)
+//						}),
+//					},
+//					func() {
+//						layout.Rigid(func() {
+//							sat := duo.DuoUItheme.Body1(fmt.Sprintf("%0.8f", t.Amount))
+//							sat.Color = helpers.Alpha(a, sat.Color)
+//							sat.Layout(duo.DuoUIcontext)
+//						}),
+//					},
+//					func() {
+//							layout.Rigid(func() {
+//							l := duo.DuoUItheme.Body2(helpers.FormatTime(t.Time))
+//							l.Color = duo.DuoUItheme.Color.Hint
+//							l.Color = helpers.Alpha(a, l.Color)
+//							l.Layout(duo.DuoUIcontext)
+//						})
+//					},
+//					func() {
+//
+//					},
+//				}
+//				list.Layout(gtx, len(widgets), func(i int) {
+//					layout.UniformInset(unit.Dp(16)).Layout(gtx, widgets[i])
+//				})
+//
+//
+//
+//
+//				transList := &layout.List{
+//					Axis: layout.Vertical,
+//				}
+//				transList.Layout(duo.DuoUIcontext, len(table), func(i int) {
+//					// Invert list
+//					//i = len(txs.Txs) - 1 - i
+//					t := table[i]
+//					a := 1.0
+//					//const duration = 5
+//
+//					layout.Flex{
+//						Spacing: layout.SpaceBetween,
+//					}.Layout(duo.DuoUIcontext, table
+//					)
+//				})
+//
+//			}))
+//	})
+//}

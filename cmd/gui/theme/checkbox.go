@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package material
+package theme
 
 import (
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/cmd/gui/widget"
 )
 
-type CheckBox struct {
+type DuoUIcheckBox struct {
 	checkable
 }
 
-func (t *Theme) CheckBox(label string) CheckBox {
-	return CheckBox{
+func (t *DuoUItheme) DuoUIcheckBox(label string) DuoUIcheckBox {
+	return DuoUIcheckBox{
 		checkable{
 			Label:     label,
 			Color:     t.Color.Text,
@@ -30,7 +30,7 @@ func (t *Theme) CheckBox(label string) CheckBox {
 	}
 }
 
-func (c CheckBox) Layout(gtx *layout.Context, checkBox *widget.CheckBox) {
+func (c DuoUIcheckBox) Layout(gtx *layout.Context, checkBox *widget.CheckBox) {
 	c.layout(gtx, checkBox.Checked(gtx))
 	checkBox.Layout(gtx)
 }

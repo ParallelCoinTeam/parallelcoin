@@ -9,12 +9,14 @@ import (
 )
 
 func DuoUIhistory(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-	layout.Flex{}.Layout(duo.Gc,
+	layout.Flex{}.Layout(duo.DuoUIcontext,
 		layout.Flexed(1, func() {
 
-			widgets.DuoUItransactionsWidget(duo, cx, rc)
-				// Overview >>>
 
+			DuoUIframe(duo,cx,rc,"ff558866", [4]float32{20, 50, 40, 100},[4]float32{0, 0, 0, 0} ,func(){
+			widgets.DuoUItransactionsWidget(duo, cx, rc)
+
+			})
 		}),
 	)
 }

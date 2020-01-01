@@ -1,53 +1,53 @@
 package models
 
 import (
+	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/cmd/gui/widget"
 	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/pkg/gio/widget"
-	"github.com/p9c/pod/pkg/gio/widget/material"
 	"github.com/p9c/pod/pkg/pod"
 	"image/color"
 	"time"
 )
 
 type DuoUI struct {
-	Boot    *Boot
-	Ww      *app.Window
-	Gc      *layout.Context
-	Th      *material.Theme
-	Cs      *layout.Constraints
-	Ico     *DuoUIicons
-	Comp    *DuoUIcomponents
-	Menu    *DuoUInav
-	Conf    *DuoUIconf
-	Quit    chan struct{}
-	Ready   chan struct{}
-	IsReady bool
+	DuoUIboot          *Boot
+	DuoUIwindow        *app.Window
+	DuoUIcontext       *layout.Context
+	DuoUItheme         *theme.DuoUItheme
+	DuoUIconstraints   *layout.Constraints
+	DuoUIico           map[string]*theme.DuoUIicon
+	DuoUIcomponents    *DuoUIcomponents
+	DuoUIconfiguration *DuoUIconfiguration
+	Quit               chan struct{}
+	Ready              chan struct{}
+	IsReady            bool
+	DuoUIready         chan struct{}
+	DuoUIisReady       bool
+	CurrentPage        string
 }
 
 type DuoUIcomponents struct {
 	View   DuoUIcomponent
 	Header DuoUIcomponent
+	Footer DuoUIcomponent
 	// Intro              DuoUIcomponent
 	Logo DuoUIcomponent
 	// Log                DuoUIcomponent
-	Body        DuoUIcomponent
-	Sidebar     DuoUIcomponent
-	Menu        DuoUIcomponent
-	Content     DuoUIcomponent
-	Overview    DuoUIcomponent
-	OverviewTop DuoUIcomponent
+	Body     DuoUIcomponent
+	Sidebar  DuoUIcomponent
+	Menu     DuoUIcomponent
+	Content  DuoUIcomponent
+	Overview DuoUIcomponent
 	// SendReceive        DuoUIcomponent
 	// SendReceiveButtons DuoUIcomponent
-	OverviewBottom DuoUIcomponent
-	Status         DuoUIcomponent
-	StatusItem     DuoUIcomponent
-	History        DuoUIcomponent
-	AddressBook    DuoUIcomponent
-	Explorer       DuoUIcomponent
-	Network        DuoUIcomponent
-	Console        DuoUIcomponent
+	Status      DuoUIcomponent
+	StatusItem  DuoUIcomponent
+	History     DuoUIcomponent
+	AddressBook DuoUIcomponent
+	Explorer    DuoUIcomponent
+	Network     DuoUIcomponent
+	Console     DuoUIcomponent
 	// ConsoleOutput      DuoUIcomponent
 	// ConsoleInput       DuoUIcomponent
 	Settings DuoUIcomponent
@@ -56,31 +56,6 @@ type DuoUIcomponents struct {
 type DuoUIcomponent struct {
 	Layout layout.Flex
 	Inset  layout.Inset
-}
-
-type DuoUInav struct {
-	Current       string
-	IcoBackground color.RGBA
-	IcoColor      color.RGBA
-	IcoPadding    unit.Value
-	IcoSize       unit.Value
-	Overview      widget.Button
-	History       widget.Button
-	AddressBook   widget.Button
-	Explorer      widget.Button
-	Console       widget.Button
-	Settings      widget.Button
-}
-
-type DuoUIicons struct {
-	Logo        *material.Icon
-	Overview    *material.Icon
-	History     *material.Icon
-	AddressBook *material.Icon
-	Network     *material.Icon
-	Explorer    *material.Icon
-	Console     *material.Icon
-	Settings    *material.Icon
 }
 
 type Boot struct {
@@ -92,11 +67,15 @@ type Boot struct {
 	IsScreen   string `json:"screen"`
 }
 
-type DuoUIconf struct {
-	Abbrevation     string
-	StatusTextColor color.RGBA
-	Tabs            DuoUIconfTabs
-	Settings        DuoUIsettings
+type DuoUIconfiguration struct {
+	Abbrevation        string
+	PrimaryTextColor   color.RGBA
+	SecondaryTextColor color.RGBA
+	PrimaryBgColor     color.RGBA
+	SecondaryBgColor   color.RGBA
+	Navigations        map[string]*theme.DuoUIthemeNav
+	Tabs               DuoUIconfTabs
+	Settings           DuoUIsettings
 }
 
 type DuoUIconfTabs struct {

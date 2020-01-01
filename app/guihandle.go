@@ -23,7 +23,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 			firstRun = true
 		}
 
-		duo := duoui.DuOuI(rc, cx)
+		duo, err := duoui.DuOuI(rc, cx)
 		interrupt.AddHandler(func() {
 			close(duo.Quit)
 		})
@@ -32,6 +32,11 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 
 		// loader.DuoUIloader(duo, cx, firstRun)
 
+		// signal the GUI that the back end is ready
+		log.DEBUG("sending ready signal")
+		// we can do this without blocking because the channel has 1 buffer this way it falls
+		// immediately the GUI starts
+		duo.Ready <- struct{}{}
 		// Start Node
 		err = gui.DuoUInode(cx)
 		if err != nil {
@@ -42,12 +47,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if err != nil {
 			log.ERROR(err)
 		}
-		
-		// signal the GUI that the back end is ready
-		log.DEBUG("sending ready signal")
-		// we can do this without blocking because the channel has 1 buffer this way it falls
-		// immediately the GUI starts
-		duo.Ready <- struct{}{}
+
 		// Start up GUI
 		log.DEBUG("starting up GUI")
 		// go func() {
@@ -55,7 +55,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if err != nil {
 			log.ERROR(err)
 		}
-		
+
 		log.DEBUG("wallet GUI finished")
 		// }()
 		// wait for stop signal

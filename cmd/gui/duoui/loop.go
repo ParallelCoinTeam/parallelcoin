@@ -28,7 +28,7 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 			<-interrupt.HandlersDone
 			log.DEBUG("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
-		case e := <-duo.Ww.Events():
+		case e := <-duo.DuoUIwindow.Events():
 			switch e := e.(type) {
 			case system.DestroyEvent:
 				log.DEBUG("destroy event received")
@@ -38,11 +38,13 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 				return e.Err
 			case system.FrameEvent:
 				if duo.IsReady {
-					duo.Gc.Reset(e.Config, e.Size)
-
-					//DuoUImainMenu(duo, cx, rc)
+					duo.DuoUIcontext.Reset(e.Config, e.Size)
 					DuoUIgrid(duo, cx, rc)
-					e.Frame(duo.Gc.Ops)
+					e.Frame(duo.DuoUIcontext.Ops)
+				}else {
+					duo.DuoUIcontext.Reset(e.Config, e.Size)
+					DuoUImainMenu(duo, cx, rc)
+					e.Frame(duo.DuoUIcontext.Ops)
 				}
 			}
 		}
@@ -52,15 +54,15 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 // Main wallet screen
 func DuoUImainMenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	// START View <<<
-	duo.Comp.View.Layout.Layout(duo.Gc,
+	duo.DuoUIcomponents.View.Layout.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
-			cs := duo.Gc.Constraints
-			helpers.DuoUIdrawRectangle(duo.Gc, cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+			cs := duo.DuoUIcontext.Constraints
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 			//DuoUIheader(duo,rc)
 		}),
 		layout.Flexed(1, func() {
-			cs := duo.Gc.Constraints
-			helpers.DuoUIdrawRectangle(duo.Gc, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+			cs := duo.DuoUIcontext.Constraints
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 			//DuoUIbody(duo,cx,rc)
 		}),
 	)
@@ -69,16 +71,18 @@ func DuoUImainMenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 // Main wallet screen
 func DuoUIgrid(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	// START View <<<
-	duo.Comp.View.Layout.Layout(duo.Gc,
+	cs := duo.DuoUIcontext.Constraints
+	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+
+	duo.DuoUIcomponents.View.Layout.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
-			cs := duo.Gc.Constraints
-			helpers.DuoUIdrawRectangle(duo.Gc, cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 			DuoUIheader(duo,rc)
 		}),
 		layout.Flexed(1, func() {
-			cs := duo.Gc.Constraints
-			helpers.DuoUIdrawRectangle(duo.Gc, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 			DuoUIbody(duo,cx,rc)
+		}),
+		layout.Rigid(func() {
+			DuoUIfooter(duo,rc)
 		}),
 	)
 }

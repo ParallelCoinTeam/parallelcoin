@@ -10,16 +10,16 @@ import (
 )
 
 func DuoUIexplorer(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-	layout.Flex{}.Layout(duo.Gc,
+	layout.Flex{}.Layout(duo.DuoUIcontext,
 		layout.Flexed(1, func() {
-			duo.Comp.Explorer.Inset.Layout(duo.Gc, func() {
-				helpers.DuoUIdrawRectangle(duo.Gc, duo.Cs.Width.Max, duo.Cs.Height.Max, helpers.HexARGB("ff30cfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+			duo.DuoUIcomponents.Explorer.Inset.Layout(duo.DuoUIcontext, func() {
+				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIconstraints.Width.Max, duo.DuoUIconstraints.Height.Max, helpers.HexARGB("ff30cfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 				// Overview <<<
 				in := layout.UniformInset(unit.Dp(60))
-				in.Layout(duo.Gc, func() {
-					helpers.DuoUIdrawRectangle(duo.Gc, duo.Cs.Width.Max, duo.Cs.Height.Max, helpers.HexARGB("ffcf30cf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+				in.Layout(duo.DuoUIcontext, func() {
+					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIconstraints.Width.Max, duo.DuoUIconstraints.Height.Max, helpers.HexARGB("ffcf30cf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 
-					duo.Th.H5("explorer :").Layout(duo.Gc)
+					duo.DuoUItheme.H5("explorer :").Layout(duo.DuoUIcontext)
 				})
 				// Overview >>>
 			})

@@ -16,34 +16,32 @@ func DuoUIbalanceWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 		Bottom: unit.Dp(15),
 		Left:   unit.Dp(30),
 	}
-	in.Layout(duo.Gc, func() {
+	in.Layout(duo.DuoUIcontext, func() {
 		layout.Flex{
 			Axis: layout.Vertical,
-		}.Layout(duo.Gc,
+		}.Layout(duo.DuoUIcontext,
 			layout.Rigid(func() {
-				balanceTxt := duo.Th.H6("Balance :")
-				balanceTxt.Color = duo.Conf.StatusTextColor
-				balanceTxt.Layout(duo.Gc)
+				balanceTxt := duo.DuoUItheme.H6("Balance :")
+				balanceTxt.Color = duo.DuoUIconfiguration.SecondaryTextColor
+				balanceTxt.Layout(duo.DuoUIcontext)
 			}),
 			layout.Rigid(func() {
-
-				balanceVal := duo.Th.H4(rc.Balance + " " + duo.Conf.Abbrevation)
-				balanceVal.Color = duo.Conf.StatusTextColor
+				balanceVal := duo.DuoUItheme.H4(rc.Balance + " " + duo.DuoUIconfiguration.Abbrevation)
+				balanceVal.Color = duo.DuoUIconfiguration.PrimaryTextColor
 				balanceVal.Alignment = text.End
-				balanceVal.Layout(duo.Gc)
-
+				balanceVal.Layout(duo.DuoUIcontext)
 			}),
 			layout.Rigid(func() {
-				balanceUnconfirmed := duo.Th.H6("Unconfirmed :" + rc.Unconfirmed)
-				balanceUnconfirmed.Color = duo.Conf.StatusTextColor
+				balanceUnconfirmed := duo.DuoUItheme.H6("Unconfirmed :" + rc.Unconfirmed)
+				balanceUnconfirmed.Color = duo.DuoUIconfiguration.SecondaryTextColor
 				balanceUnconfirmed.Alignment = text.End
-				balanceUnconfirmed.Layout(duo.Gc)
+				balanceUnconfirmed.Layout(duo.DuoUIcontext)
 			}),
 			layout.Rigid(func() {
-				txsNumber := duo.Th.H6("Transactions :" + fmt.Sprint(rc.Transactions.TxsNumber))
-				txsNumber.Color = duo.Conf.StatusTextColor
+				txsNumber := duo.DuoUItheme.H6("Transactions :" + fmt.Sprint(rc.Transactions.TxsNumber))
+				txsNumber.Color = duo.DuoUIconfiguration.SecondaryTextColor
 				txsNumber.Alignment = text.End
-				txsNumber.Layout(duo.Gc)
+				txsNumber.Layout(duo.DuoUIcontext)
 			}),
 
 		)

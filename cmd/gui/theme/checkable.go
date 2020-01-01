@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package material
+package theme
 
 import (
 	"image"
@@ -11,7 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/gio/op/paint"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/cmd/gui/widget"
 )
 
 type checkable struct {
@@ -21,13 +21,13 @@ type checkable struct {
 	IconColor          color.RGBA
 	Size               unit.Value
 	shaper             *text.Shaper
-	checkedStateIcon   *Icon
-	uncheckedStateIcon *Icon
+	checkedStateIcon   *DuoUIicon
+	uncheckedStateIcon *DuoUIicon
 }
 
 func (c *checkable) layout(gtx *layout.Context, checked bool) {
 
-	var icon *Icon
+	var icon *DuoUIicon
 	if checked {
 		icon = c.checkedStateIcon
 	} else {

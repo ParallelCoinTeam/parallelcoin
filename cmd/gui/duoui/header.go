@@ -1,36 +1,62 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/gui/theme"
 	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/cmd/gui/widget"
 	"image/color"
 )
 
 var (
 	inLogo = layout.Stack{Alignment: layout.Center}
+	logoButton = new(widget.Button)
 )
 
 func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) {
 	// Header <<<
-	duo.Comp.Header.Layout.Layout(duo.Gc,
-		layout.Rigid(func() {
-			helpers.DuoUIdrawRectangle(duo.Gc, 64, 64, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
-			layout.Align(layout.Center).Layout(duo.Gc, func() {
-				layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(4), Left: unit.Dp(5), Right: unit.Dp(4)}.Layout(duo.Gc, func() {
 
-					duo.Ico.Logo.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
-					duo.Ico.Logo.Layout(duo.Gc, unit.Dp(64))
+	duo.DuoUIcomponents.Header.Layout.Layout(duo.DuoUIcontext,
+		layout.Rigid(func() {
+			layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
+				layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(duo.DuoUIcontext, func() {
+
+					logo := theme.DuoUIlogo{
+						Background: color.RGBA{},
+						Color:      color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
+						Icon:       duo.DuoUIico["Logo"],
+						Size:       unit.Dp(72),
+						Padding:    unit.Dp(16),
+					}
+					logo.Layout(duo.DuoUIcontext, logoButton)
+					//
+					//duo.Ico.Logo.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+					//duo.Ico.Logo.Layout(duo.DuoUIcontext, unit.Dp(48))
+				})
+			})
+
+		}),
+		layout.Flexed(1, func() {
+			layout.Align(layout.Start).Layout(duo.DuoUIcontext, func() {
+				layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
+					currentPage := duo.DuoUItheme.H4(duo.CurrentPage)
+					currentPage.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+					currentPage.Alignment = text.Start
+					currentPage.Layout(duo.DuoUIcontext)
 				})
 			})
 
 		}),
 		layout.Rigid(func() {
-			layout.Align(layout.Center).Layout(duo.Gc, func() {
-				layout.Inset{Top: unit.Dp(16), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(16)}.Layout(duo.Gc, func() {
-					duo.Th.H5(rc.Balance + " " + duo.Conf.Abbrevation).Layout(duo.Gc)
+			layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
+				layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
+					balance := duo.DuoUItheme.Body2(rc.Balance + " " + duo.DuoUIconfiguration.Abbrevation)
+					balance.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+					balance.Alignment = text.End
+					balance.Layout(duo.DuoUIcontext)
 				})
 			})
 		}))

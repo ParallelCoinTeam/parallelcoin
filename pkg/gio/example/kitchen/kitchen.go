@@ -174,7 +174,7 @@ func kitchen(gtx *layout.Context, th *material.Theme) {
 		func() {
 			group := layout.Flex{}
 			r1 := group.Rigid(gtx, func() {
-				th.RadioButton("r1", "RadioButton1").Layout(gtx, radioButtonsGroup)
+				th.DuoUIradioButton("r1", "RadioButton1").Layout(gtx, radioButtonsGroup)
 			})
 			r2 := group.Rigid(gtx, func() {
 				th.RadioButton("r2", "RadioButton2").Layout(gtx, radioButtonsGroup)

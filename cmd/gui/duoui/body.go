@@ -8,7 +8,7 @@ import (
 )
 
 func DuoUIbody(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-	duo.Comp.Body.Layout.Layout(duo.Gc,
+	duo.DuoUIcomponents.Body.Layout.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			DuoUIsidebar(duo, cx, rc)
 		}),

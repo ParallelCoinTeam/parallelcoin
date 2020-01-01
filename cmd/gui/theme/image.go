@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package material
+package theme
 
 import (
 	"image"
@@ -14,7 +14,7 @@ import (
 )
 
 // Image is a widget that displays an image.
-type Image struct {
+type DuoUIimage struct {
 	// Src is the image to display.
 	Src paint.ImageOp
 	// Scale is the ratio of image pixels to
@@ -22,14 +22,14 @@ type Image struct {
 	Scale float32
 }
 
-func (t *Theme) Image(img paint.ImageOp) Image {
-	return Image{
+func (t *DuoUItheme) Image(img paint.ImageOp) DuoUIimage {
+	return DuoUIimage{
 		Src:   img,
 		Scale: 160 / 72, // About 72 DPI.
 	}
 }
 
-func (im Image) Layout(gtx *layout.Context) {
+func (im DuoUIimage) Layout(gtx *layout.Context) {
 	size := im.Src.Size()
 	wf, hf := float32(size.X), float32(size.Y)
 	w, h := gtx.Px(unit.Dp(wf*im.Scale)), gtx.Px(unit.Dp(hf*im.Scale))

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package material
+package theme
 
 import (
 	"image"
@@ -14,7 +14,7 @@ import (
 	"golang.org/x/exp/shiny/iconvg"
 )
 
-type Icon struct {
+type DuoUIicon struct {
 	Color color.RGBA
 	src   []byte
 	size  unit.Value
@@ -24,16 +24,16 @@ type Icon struct {
 	imgColor color.RGBA
 }
 
-// NewIcon returns a new Icon from IconVG data.
-func NewIcon(data []byte) (*Icon, error) {
+// NewDuoUIicon returns a new DuoUIicon from DuoUIiconVG data.
+func NewDuoUIicon(data []byte) (*DuoUIicon, error) {
 	_, err := iconvg.DecodeMetadata(data)
 	if err != nil {
 		return nil, err
 	}
-	return &Icon{src: data, Color: rgb(0x000000)}, nil
+	return &DuoUIicon{src: data, Color: rgb(0x000000)}, nil
 }
 
-func (ic *Icon) Layout(gtx *layout.Context, sz unit.Value) {
+func (ic *DuoUIicon) Layout(gtx *layout.Context, sz unit.Value) {
 	ico := ic.image(gtx.Px(sz))
 	ico.Add(gtx.Ops)
 	paint.PaintOp{
@@ -43,7 +43,7 @@ func (ic *Icon) Layout(gtx *layout.Context, sz unit.Value) {
 	}.Add(gtx.Ops)
 }
 
-func (ic *Icon) image(sz int) paint.ImageOp {
+func (ic *DuoUIicon) image(sz int) paint.ImageOp {
 	if sz == ic.imgSize && ic.Color == ic.imgColor {
 		return ic.op
 	}

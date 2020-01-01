@@ -10,36 +10,36 @@ import (
 
 func DuoUIstatusWidget(duo *models.DuoUI, rc *rcd.RcVar){
 	in := layout.UniformInset(unit.Dp(30))
-	in.Layout(duo.Gc, func() {
-		duo.Comp.Status.Layout.Layout(duo.Gc,
+	in.Layout(duo.DuoUIcontext, func() {
+		duo.DuoUIcomponents.Status.Layout.Layout(duo.DuoUIcontext,
 			// Balance status item
 			layout.Rigid(func() {
-				duo.Comp.StatusItem.Layout.Layout(duo.Gc,
+				duo.DuoUIcomponents.StatusItem.Layout.Layout(duo.DuoUIcontext,
 					layout.Rigid(func() {
-						balanceTxt := duo.Th.H5("Balance :")
-						balanceTxt.Color = duo.Conf.StatusTextColor
-						balanceTxt.Layout(duo.Gc)
+						balanceTxt := duo.DuoUItheme.H5("Balance :")
+						balanceTxt.Color = duo.DuoUIconfiguration.PrimaryTextColor
+						balanceTxt.Layout(duo.DuoUIcontext)
 					}),
 					layout.Rigid(func() {
-						balance := duo.Th.H5(rc.Balance + " " + duo.Conf.Abbrevation)
-						balance.Color = duo.Conf.StatusTextColor
-						balance.Layout(duo.Gc)
+						balance := duo.DuoUItheme.H5(rc.Balance + " " + duo.DuoUIconfiguration.Abbrevation)
+						balance.Color = duo.DuoUIconfiguration.PrimaryTextColor
+						balance.Layout(duo.DuoUIcontext)
 					}),
 
 				)
 			}),
 			// Block height status item
 			layout.Rigid(func() {
-				duo.Comp.StatusItem.Layout.Layout(duo.Gc,
+				duo.DuoUIcomponents.StatusItem.Layout.Layout(duo.DuoUIcontext,
 					layout.Rigid(func() {
-						blockheightTxt := duo.Th.H5("Block Height :")
-						blockheightTxt.Color = duo.Conf.StatusTextColor
-						blockheightTxt.Layout(duo.Gc)
+						blockheightTxt := duo.DuoUItheme.H5("Block Height :")
+						blockheightTxt.Color = duo.DuoUIconfiguration.PrimaryTextColor
+						blockheightTxt.Layout(duo.DuoUIcontext)
 					}),
 					layout.Rigid(func() {
-						blockheightVal := duo.Th.H5(fmt.Sprint(rc.BlockHeight))
-						blockheightVal.Color = duo.Conf.StatusTextColor
-						blockheightVal.Layout(duo.Gc)
+						blockheightVal := duo.DuoUItheme.H5(fmt.Sprint(rc.BlockHeight))
+						blockheightVal.Color = duo.DuoUIconfiguration.PrimaryTextColor
+						blockheightVal.Layout(duo.DuoUIcontext)
 					}),
 
 				)
@@ -47,16 +47,16 @@ func DuoUIstatusWidget(duo *models.DuoUI, rc *rcd.RcVar){
 
 			// Difficulty height status item
 			layout.Rigid(func() {
-				duo.Comp.StatusItem.Layout.Layout(duo.Gc,
+				duo.DuoUIcomponents.StatusItem.Layout.Layout(duo.DuoUIcontext,
 					layout.Rigid(func() {
-						difficulty := duo.Th.H5("Difficulty :")
-						difficulty.Color = duo.Conf.StatusTextColor
-						difficulty.Layout(duo.Gc)
+						difficulty := duo.DuoUItheme.H5("Difficulty :")
+						difficulty.Color = duo.DuoUIconfiguration.PrimaryTextColor
+						difficulty.Layout(duo.DuoUIcontext)
 					}),
 					layout.Rigid(func() {
-						difficulty := duo.Th.H5(fmt.Sprintf("%f", rc.Difficulty))
-						difficulty.Color = duo.Conf.StatusTextColor
-						difficulty.Layout(duo.Gc)
+						difficulty := duo.DuoUItheme.H5(fmt.Sprintf("%f", rc.Difficulty))
+						difficulty.Color = duo.DuoUIconfiguration.PrimaryTextColor
+						difficulty.Layout(duo.DuoUIcontext)
 					}),
 
 				)
@@ -64,16 +64,16 @@ func DuoUIstatusWidget(duo *models.DuoUI, rc *rcd.RcVar){
 
 			// Connections status item
 			layout.Rigid(func() {
-				duo.Comp.StatusItem.Layout.Layout(duo.Gc,
+				duo.DuoUIcomponents.StatusItem.Layout.Layout(duo.DuoUIcontext,
 					layout.Rigid(func() {
-						connections := duo.Th.H5("Connections :")
-						connections.Color = duo.Conf.StatusTextColor
-						connections.Layout(duo.Gc)
+						connections := duo.DuoUItheme.H5("Connections :")
+						connections.Color = duo.DuoUIconfiguration.PrimaryTextColor
+						connections.Layout(duo.DuoUIcontext)
 					}),
 					layout.Rigid(func() {
-						connections := duo.Th.H5(fmt.Sprint(rc.Connections))
-						connections.Color = duo.Conf.StatusTextColor
-						connections.Layout(duo.Gc)
+						connections := duo.DuoUItheme.H5(fmt.Sprint(rc.Connections))
+						connections.Color = duo.DuoUIconfiguration.PrimaryTextColor
+						connections.Layout(duo.DuoUIcontext)
 					}),
 
 				)
