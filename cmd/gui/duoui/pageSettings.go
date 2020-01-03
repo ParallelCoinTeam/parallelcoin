@@ -14,7 +14,7 @@ import (
 var (
 	groupsList = &layout.List{
 		Axis:      layout.Horizontal,
-		Alignment: layout.Middle,
+		Alignment: layout.Start,
 	}
 	fieldsList = &layout.List{
 		Axis: layout.Vertical,
@@ -23,16 +23,15 @@ var (
 
 func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 
-	DuoUIframe(duo,cx,rc, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}, func(){
 
 	layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			duo.DuoUIcomponents.Settings.Inset.Layout(duo.DuoUIcontext, func() {
+				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIconstraints.Width.Max, duo.DuoUIconstraints.Height.Max, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 
 				// Settings  <<<
-				duo.DuoUItheme.H5("settings :").Layout(duo.DuoUIcontext)
 				layout.Flex{
 					Axis: layout.Vertical,
 				}.Layout(duo.DuoUIcontext,
@@ -52,7 +51,7 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 									duo.DuoUIconfiguration.Tabs.Current = txt
 									log.INFO("unutra: ", txt)
 								}
-								//duo.DuoUItheme.DuoUIbutton(txt, nil).Layout(duo.DuoUIcontext, duo.DuoUIconfiguration.Tabs.TabsList[txt])
+								duo.DuoUItheme.DuoUIbutton(txt, "ff303030",  "ff989898", "ff303030", 0, 125, 32, 4, 4, nil).Layout(duo.DuoUIcontext, duo.DuoUIconfiguration.Tabs.TabsList[txt])
 							})
 						})
 					}))
@@ -109,5 +108,4 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	)
 
 	// Overview >>>
-	})
 }

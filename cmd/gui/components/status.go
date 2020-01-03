@@ -1,4 +1,4 @@
-package widgets
+package components
 
 import (
 	"fmt"

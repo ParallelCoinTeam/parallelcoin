@@ -20,7 +20,7 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 		CurrentPage: "overview",
 		//rc: RcInit(),
 		DuoUIwindow: app.NewWindow(
-			app.Size(unit.Dp(900), unit.Dp(556)),
+			app.Size(unit.Dp(1024), unit.Dp(640)),
 			app.Title("ParallelCoin"),
 		),
 		Quit:  make(chan struct{}),
@@ -117,11 +117,18 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 	overview := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Horizontal},
 	}
-	//sendReceive := models.DuoUIcomponent{
+	send := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Vertical},
+		Inset:  layout.UniformInset(unit.Dp(15)),
+	}
+	sendButtons := models.DuoUIcomponent{
+		Layout: layout.Flex{Axis: layout.Horizontal},
+	}
+	//receive := models.DuoUIcomponent{
 	//	Layout: layout.Flex{Axis: layout.Vertical},
 	//	Inset:  layout.UniformInset(unit.Dp(15)),
 	//}
-	//sendReceiveButtons := models.DuoUIcomponent{
+	//receiveButtons := models.DuoUIcomponent{
 	//	Layout: layout.Flex{Axis: layout.Horizontal},
 	//}
 	status := models.DuoUIcomponent{
@@ -158,8 +165,8 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 		Sidebar:  sidebar,
 		Content:  content,
 		Overview: overview,
-		//SendReceive:        sendReceive,
-		//SendReceiveButtons: sendReceiveButtons,
+		Send:        send,
+		SendButtons: sendButtons,
 		Status:     status,
 		StatusItem: statusItem,
 		Menu:       menu,

@@ -34,20 +34,22 @@ type DuoUIcomponents struct {
 	// Intro              DuoUIcomponent
 	Logo DuoUIcomponent
 	// Log                DuoUIcomponent
-	Body     DuoUIcomponent
-	Sidebar  DuoUIcomponent
-	Menu     DuoUIcomponent
-	Content  DuoUIcomponent
-	Overview DuoUIcomponent
-	// SendReceive        DuoUIcomponent
-	// SendReceiveButtons DuoUIcomponent
-	Status      DuoUIcomponent
-	StatusItem  DuoUIcomponent
-	History     DuoUIcomponent
-	AddressBook DuoUIcomponent
-	Explorer    DuoUIcomponent
-	Network     DuoUIcomponent
-	Console     DuoUIcomponent
+	Body           DuoUIcomponent
+	Sidebar        DuoUIcomponent
+	Menu           DuoUIcomponent
+	Content        DuoUIcomponent
+	Overview       DuoUIcomponent
+	Send           DuoUIcomponent
+	SendButtons    DuoUIcomponent
+	Receive        DuoUIcomponent
+	ReceiveButtons DuoUIcomponent
+	Status         DuoUIcomponent
+	StatusItem     DuoUIcomponent
+	History        DuoUIcomponent
+	AddressBook    DuoUIcomponent
+	Explorer       DuoUIcomponent
+	Network        DuoUIcomponent
+	Console        DuoUIcomponent
 	// ConsoleOutput      DuoUIcomponent
 	// ConsoleInput       DuoUIcomponent
 	Settings DuoUIcomponent
