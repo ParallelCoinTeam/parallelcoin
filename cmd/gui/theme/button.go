@@ -3,6 +3,7 @@
 package theme
 
 import (
+	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/pkg/gio/io/pointer"
 	"image"
 	"image/color"
@@ -17,120 +18,103 @@ import (
 	"github.com/p9c/pod/pkg/gio/unit"
 )
 
+var (
+	buttonLayoutList = &layout.List{
+		Axis: layout.Vertical,
+	}
+)
+
 type DuoUIbutton struct {
 	Text string
 	// Color is the text color.
-	TxColor      color.RGBA
-	Font         text.Font
-	Width        float32
-	Height       float32
-	BgColor      color.RGBA
-	CornerRadius unit.Value
-	Icon         *DuoUIicon
-	IconSize     unit.Value
-	IconColor    color.RGBA
-	Padding      unit.Value
-	shaper       *text.Shaper
-	hover        bool
+	TxColor           color.RGBA
+	Font              text.Font
+	Width             float32
+	Height            float32
+	BgColor           color.RGBA
+	CornerRadius      unit.Value
+	Icon              *DuoUIicon
+	IconSize          int
+	IconColor         color.RGBA
+	PaddingVertical   unit.Value
+	PaddingHorizontal unit.Value
+	shaper            *text.Shaper
+	hover             bool
 }
 
-func (t *DuoUItheme) DuoUIbutton(txt, txcolor, bgcolor string, width, height, iconSize, padding float32, icon *DuoUIicon) DuoUIbutton {
+func (t *DuoUItheme) DuoUIbutton(txt, txtColor, bgColor, iconColor string, iconSize int, width, height, paddingVertical, paddingHorizontal float32, icon *DuoUIicon) DuoUIbutton {
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
 			Size: t.TextSize.Scale(14.0 / 16.0),
 		},
-		Width:    width,
-		Height:   height,
-		TxColor:  t.Color.Primary,
-		BgColor:  t.Color.InvText,
-		Icon:     icon,
-		IconSize: unit.Dp(iconSize),
-		Padding:  unit.Dp(padding),
-		shaper:   t.Shaper,
+		Width:             width,
+		Height:            height,
+		TxColor:           helpers.HexARGB(txtColor),
+		BgColor:           helpers.HexARGB(bgColor),
+		Icon:              icon,
+		IconSize:          iconSize,
+		IconColor:             helpers.HexARGB(iconColor),
+		PaddingVertical:   unit.Dp(paddingVertical),
+		PaddingHorizontal: unit.Dp(paddingHorizontal),
+		shaper:            t.Shaper,
 	}
 }
 
-//
-//func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
-//	layout.Stack{Alignment: layout.Center}.Layout(gtx,
-//		layout.Expanded(func() {
-//			rr := float32(gtx.Px(unit.Dp(0)))
-//			clip.Rect{
-//				Rect: f32.Rectangle{Max: f32.Point{
-//					X: float32(b.Width),
-//					Y: float32(b.Height),
-//				}},
-//				NE: rr, NW: rr, SE: rr, SW: rr,
-//			}.Op(gtx.Ops).Add(gtx.Ops)
-//			fill(gtx, b.BgColor)
-//			for _, c := range button.History() {
-//				drawInk(gtx, c)
-//			}
-//		}),
-//		layout.Stacked(func() {
-//			layout.Flex{
-//				Axis:      layout.Vertical,
-//				Alignment: layout.Middle,
-//			}.Layout(gtx,
-//				layout.Rigid(func() {
-//					layout.UniformInset(b.Padding).Layout(gtx, func() {
-//						size := gtx.Px(b.IconSize) - 2*gtx.Px(b.Padding)
-//						if b.Icon != nil {
-//							b.Icon.Color = b.TxColor
-//							b.Icon.Layout(gtx, unit.Px(float32(size)))
-//						}
-//						gtx.Dimensions = layout.Dimensions{
-//							Size: image.Point{X: size, Y: size},
-//						}
-//					})
-//				}),
-//				layout.Rigid(func() {
-//					layout.Align(layout.Center).Layout(gtx, func() {
-//						layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(gtx, func() {
-//							paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
-//							widget.Label{}.Layout(gtx, b.shaper, b.Font, b.Text)
-//						})
-//					})
-//				}),
-//			)
-//			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
-//			button.Layout(gtx)
-//		}))
-//}
-
 func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
-	st := layout.Stack{Alignment: layout.Center}
-	ico := layout.Stacked(func() {
+	col := b.TxColor
+	bgcol := b.BgColor
+	layout.Stack{Alignment: layout.Center}.Layout(gtx,
+		layout.Expanded(func() {
+			rr := float32(gtx.Px(unit.Dp(0)))
+			clip.Rect{
+				Rect: f32.Rectangle{Max: f32.Point{
+					X: float32(b.Width),
+					Y: float32(b.Height),
+				}},
+				NE: rr, NW: rr, SE: rr, SW: rr,
+			}.Op(gtx.Ops).Add(gtx.Ops)
+			fill(gtx, bgcol)
+			for _, c := range button.History() {
+				drawInk(gtx, c)
+			}
+		}),
+		layout.Stacked(func() {
+			gtx.Constraints.Width.Min = int(b.Width)
+			gtx.Constraints.Height.Min = int(b.Height)
+			layout.Align(layout.Center).Layout(gtx, func() {
+				buttonLayout := []func(){
+					func() {
+						if b.Icon != nil {
+							layout.Inset{Top: b.PaddingVertical, Bottom: b.PaddingVertical, Left: b.PaddingHorizontal, Right: b.PaddingHorizontal}.Layout(gtx, func() {
+								if b.Icon != nil {
+									b.Icon.Color = b.IconColor
+									b.Icon.Layout(gtx, unit.Px(float32(b.IconSize)))
+								}
+								gtx.Dimensions = layout.Dimensions{
+									Size: image.Point{X: b.IconSize, Y: b.IconSize},
+								}
+							})
+						}
+					},
+					func() {
+						if b.Text != "" {
+							layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(gtx, func() {
+								paint.ColorOp{Color: col}.Add(gtx.Ops)
+								widget.Label{}.Layout(gtx, b.shaper, b.Font, b.Text)
+							})
+						}
+					},
+				}
+				buttonLayoutList.Layout(gtx, len(buttonLayout), func(i int) {
+					layout.UniformInset(unit.Dp(0)).Layout(gtx, buttonLayout[i])
+				})
 
-		layout.UniformInset(b.Padding).Layout(gtx, func() {
-			size := gtx.Px(b.IconSize) - 2*gtx.Px(b.Padding)
-
-			layout.Flex{
-				Axis:      layout.Vertical,
-				Alignment: layout.Middle,
-			}.Layout(gtx,
-				layout.Rigid(func() {
-					if b.Icon != nil {
-						b.Icon.Color = b.IconColor
-						b.Icon.Layout(gtx, unit.Px(float32(size)))
-					}
-					gtx.Dimensions = layout.Dimensions{
-						Size: image.Point{X: size, Y: size},
-					}
-				}),
-				layout.Rigid(func() {
-
-				}),
-			)
-			pointer.Ellipse(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
+			})
+			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
 			button.Layout(gtx)
-		})
-	})
-	bg := layout.Expanded(func() {
-
-	})
-	st.Layout(gtx, bg, ico)
+		}),
+	)
 }
 
 func toPointF(p image.Point) f32.Point {

@@ -28,8 +28,8 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) {
 						Background: color.RGBA{},
 						Color:      color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
 						Icon:       duo.DuoUIico["Logo"],
-						Size:       unit.Dp(72),
-						Padding:    unit.Dp(16),
+						Size:       unit.Dp(96),
+						Padding:    unit.Dp(12),
 					}
 					logo.Layout(duo.DuoUIcontext, logoButton)
 					//
