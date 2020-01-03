@@ -29,7 +29,7 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) {
 						Color:      color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
 						Icon:       duo.DuoUIico["Logo"],
 						Size:       unit.Dp(96),
-						Padding:    unit.Dp(12),
+						Padding:    unit.Dp(8),
 					}
 					logo.Layout(duo.DuoUIcontext, logoButton)
 					//
@@ -41,7 +41,7 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) {
 		}),
 		layout.Flexed(1, func() {
 			layout.Align(layout.Start).Layout(duo.DuoUIcontext, func() {
-				layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
+				layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
 					currentPage := duo.DuoUItheme.H4(duo.CurrentPage)
 					currentPage.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 					currentPage.Alignment = text.Start

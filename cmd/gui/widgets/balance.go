@@ -2,11 +2,15 @@ package widgets
 
 import (
 	"fmt"
+	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/gui/theme"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
+	"golang.org/x/exp/shiny/materialdesign/icons"
+	"image"
 	"image/color"
 )
 
@@ -18,70 +22,62 @@ var (
 		Axis:layout.Horizontal,
 		Spacing:layout.SpaceBetween,
 	}
-
+	Icon, _ = theme.NewDuoUIicon(icons.ActionBook)
 )
+func listItem(duo *models.DuoUI, name, value string){
+	layout.Flex{
+		Axis:layout.Horizontal,
+		Spacing:layout.SpaceBetween,
+	}.Layout(duo.DuoUIcontext,
+		layout.Rigid(func() {
+			layout.Flex{}.Layout(duo.DuoUIcontext,
+				layout.Rigid(func() {
+					layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right:unit.Dp(0)}.Layout(duo.DuoUIcontext, func() {
+						if Icon != nil {
+							Icon.Color = helpers.HexARGB("ff303030")
+							Icon.Layout(duo.DuoUIcontext, unit.Px(float32(32)))
+						}
+						duo.DuoUIcontext.Dimensions = layout.Dimensions{
+							Size: image.Point{X: 32, Y: 32},
+						}
+					})
+				}),
+				layout.Rigid(func() {
+					txt := duo.DuoUItheme.H6(name)
+					txt.Color = duo.DuoUIconfiguration.SecondaryTextColor
+					txt.Layout(duo.DuoUIcontext)
+				}),
 
+			)
+
+		}),
+		layout.Rigid(func() {
+			value := duo.DuoUItheme.Body2(value)
+			value.Color = color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}
+			value.Alignment = text.End
+			value.Layout(duo.DuoUIcontext)
+		}),
+	)
+}
 func DuoUIbalanceWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 
-	navButtons := []func(){
-		func() {
-			singleItem.Layout(duo.DuoUIcontext,
-				layout.Rigid(func() {
-									balanceTxt := duo.DuoUItheme.H6("Balance :")
-									balanceTxt.Color = duo.DuoUIconfiguration.SecondaryTextColor
-									balanceTxt.Layout(duo.DuoUIcontext)
-				}),
-				layout.Rigid(func() {
-					balance := duo.DuoUItheme.Body2(rc.Balance + " " + duo.DuoUIconfiguration.Abbrevation)
-					balance.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
-					balance.Alignment = text.End
-					balance.Layout(duo.DuoUIcontext)
-				}),
-			)
-		},
-		func() {
-
-			singleItem.Layout(duo.DuoUIcontext,
-				layout.Rigid(func() {
-					balanceUnconfirmedTxt := duo.DuoUItheme.H6("Unconfirmed:")
-					balanceUnconfirmedTxt.Color = duo.DuoUIconfiguration.SecondaryTextColor
-					balanceUnconfirmedTxt.Alignment = text.End
-					balanceUnconfirmedTxt.Layout(duo.DuoUIcontext)
-				}),
-				layout.Rigid(func() {
-					balanceUnconfirmed := duo.DuoUItheme.H6(rc.Unconfirmed)
-					balanceUnconfirmed.Color = duo.DuoUIconfiguration.SecondaryTextColor
-					balanceUnconfirmed.Alignment = text.End
-					balanceUnconfirmed.Layout(duo.DuoUIcontext)
-				}),
-			)
-
-
-
-		},
-		func() {
-
-			singleItem.Layout(duo.DuoUIcontext,
-				layout.Rigid(func() {
-					txsNumberTxt := duo.DuoUItheme.H6("Transactions :")
-					txsNumberTxt.Color = duo.DuoUIconfiguration.SecondaryTextColor
-					txsNumberTxt.Alignment = text.End
-					txsNumberTxt.Layout(duo.DuoUIcontext)
-				}),
-				layout.Rigid(func() {
-					txsNumber := duo.DuoUItheme.H6(fmt.Sprint(rc.Transactions.TxsNumber))
-					txsNumber.Color = duo.DuoUIconfiguration.SecondaryTextColor
-					txsNumber.Alignment = text.End
-					txsNumber.Layout(duo.DuoUIcontext)
-				}),
-			)
-
-		},
-	}
-	itemsList.Layout(duo.DuoUIcontext, len(navButtons), func(i int) {
-		layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, navButtons[i])
+	in := layout.UniformInset(unit.Dp(16))
+	in.Layout(duo.DuoUIcontext, func() {
+		navButtons := []func(){
+			func() {
+				listItem(duo, "Balance :", rc.Balance + " " + duo.DuoUIconfiguration.Abbrevation)
+			},
+			func() {
+				listItem(duo, "Unconfirmed :", rc.Unconfirmed)
+			},
+			func() {
+				listItem(duo, "Transactions :", fmt.Sprint(rc.Transactions.TxsNumber))
+			},
+		}
+		itemsList.Layout(duo.DuoUIcontext, len(navButtons), func(i int) {
+			layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, navButtons[i])
+		})
 	})
-
 	//
 	//in := layout.Inset{
 	//	Top:    unit.Dp(15),

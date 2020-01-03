@@ -89,7 +89,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 							func() {
 								var addressBookMenuItem theme.DuoUIbutton
 								addressBookMenuItem = duo.DuoUItheme.DuoUIbutton("Address Book", "ff303030",  "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, addressBookIcon)
-								for buttonHistory.Clicked(duo.DuoUIcontext) {
+								for buttonAddressBook.Clicked(duo.DuoUIcontext) {
 									duo.CurrentPage = "AddressBook"
 								}
 								addressBookMenuItem.Layout(duo.DuoUIcontext, buttonAddressBook)
