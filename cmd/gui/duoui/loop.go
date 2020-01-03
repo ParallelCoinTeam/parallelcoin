@@ -74,7 +74,7 @@ func DuoUIgrid(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	cs := duo.DuoUIcontext.Constraints
 	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 
-	duo.DuoUIcomponents.View.Layout.Layout(duo.DuoUIcontext,
+	layout.Flex{Axis:layout.Vertical}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			DuoUIheader(duo,rc)
 		}),

@@ -2,7 +2,7 @@ package duoui
 
 import (
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/cmd/gui/components"
 	"github.com/p9c/pod/pkg/conte"
 	"image/color"
 
@@ -36,7 +36,7 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 	duo.DuoUIcontext = layout.NewContext(duo.DuoUIwindow.Queue())
 	duo.DuoUIconstraints = &duo.DuoUIcontext.Constraints
 
-	navigations := make(map[string]*theme.DuoUIthemeNav)
+	navigations := make(map[string]*components.DuoUIthemeNav)
 
 	//	NavList: *new(widget.Enum),
 	//
@@ -217,11 +217,11 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 		TabsList: confTabs,
 	}
 	duo.DuoUIconfiguration.Settings.Daemon.Widgets = settingsFields
-	duo.DuoUItheme = theme.NewDuoUItheme()
+	duo.DuoUItheme = components.NewDuoUItheme()
 	return
 }
 
-func mainMenu() *theme.DuoUIthemeNav {
+func mainMenu() *components.DuoUIthemeNav {
 	//mainNavButtons := make(map[string]*theme.DuoUIbutton)
 	//
 	//overviewIcon, _ := theme.NewDuoUIicon(icons.ActionHome)
@@ -274,7 +274,7 @@ func mainMenu() *theme.DuoUIthemeNav {
 	//}
 	//mainNavButtons["Network"] = &network
 
-	return &theme.DuoUIthemeNav{
+	return &components.DuoUIthemeNav{
 		Title:         "mainMenu",
 		IcoBackground: color.RGBA{A: 0xff, R: 0x38, G: 0x11, B: 0x88},
 		IcoColor:      color.RGBA{A: 0xff, R: 0x38, G: 0x11, B: 0x88},

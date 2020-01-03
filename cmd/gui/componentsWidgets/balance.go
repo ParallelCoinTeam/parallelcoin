@@ -1,11 +1,11 @@
-package components
+package componentsWidgets
 
 import (
 	"fmt"
+	"github.com/p9c/pod/cmd/gui/components"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
@@ -22,7 +22,7 @@ var (
 		Axis:layout.Horizontal,
 		Spacing:layout.SpaceBetween,
 	}
-	Icon, _ = theme.NewDuoUIicon(icons.EditorMonetizationOn)
+	Icon, _ = components.NewDuoUIicon(icons.EditorMonetizationOn)
 )
 func listItem(duo *models.DuoUI, name, value string){
 	layout.Flex{

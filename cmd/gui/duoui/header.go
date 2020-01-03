@@ -3,7 +3,7 @@ package duoui
 import (
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/cmd/gui/components"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
@@ -24,7 +24,7 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) {
 			layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
 				layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(duo.DuoUIcontext, func() {
 
-					logo := theme.DuoUIlogo{
+					logo := components.DuoUIlogo{
 						Background: color.RGBA{},
 						Color:      color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
 						Icon:       duo.DuoUIico["Logo"],

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package theme
+package components
 
 import (
 	"github.com/p9c/pod/pkg/gio/layout"

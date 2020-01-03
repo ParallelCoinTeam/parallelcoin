@@ -4,14 +4,14 @@ import (
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/cmd/gui/components"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/unit"
 )
 
 func DuoUIcontent(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	// Content <<<
-	var page = theme.DuoUIpage{
+	var page = components.DuoUIpage{
 		TxColor:      helpers.HexARGB("ff303030"),
 		Width:        0,
 		Height:       0,

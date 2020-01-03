@@ -40,11 +40,11 @@ type
 	}
 type
 	DuoUItransactionExcerpt struct {
-		Balance       float64 `json:"balance"`
-		Amount        float64 `json:"amount"`
-		Category      string  `json:"category"`
-		Confirmations int64   `json:"confirmations"`
-		Time          string  `json:"time"`
-		TxID          string  `json:"txid"`
-		Comment       string  `json:"comment,omitempty"`
+		Balance       float64   `json:"balance"`
+		Amount        float64   `json:"amount"`
+		Category      string    `json:"category"`
+		Confirmations int64     `json:"confirmations"`
+		Time          string `json:"time"`
+		TxID          string    `json:"txid"`
+		Comment       string    `json:"comment,omitempty"`
 	}

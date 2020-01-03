@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/cmd/gui/components"
 	"github.com/p9c/pod/cmd/gui/widget"
 	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/pkg/gio/layout"
@@ -14,9 +14,9 @@ type DuoUI struct {
 	DuoUIboot          *Boot
 	DuoUIwindow        *app.Window
 	DuoUIcontext       *layout.Context
-	DuoUItheme         *theme.DuoUItheme
+	DuoUItheme         *components.DuoUItheme
 	DuoUIconstraints   *layout.Constraints
-	DuoUIico           map[string]*theme.DuoUIicon
+	DuoUIico           map[string]*components.DuoUIicon
 	DuoUIcomponents    *DuoUIcomponents
 	DuoUIconfiguration *DuoUIconfiguration
 	Quit               chan struct{}
@@ -75,7 +75,7 @@ type DuoUIconfiguration struct {
 	SecondaryTextColor color.RGBA
 	PrimaryBgColor     color.RGBA
 	SecondaryBgColor   color.RGBA
-	Navigations        map[string]*theme.DuoUIthemeNav
+	Navigations        map[string]*components.DuoUIthemeNav
 	Tabs               DuoUIconfTabs
 	Settings           DuoUIsettings
 }

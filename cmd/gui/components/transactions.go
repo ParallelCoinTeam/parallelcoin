@@ -1,318 +1,132 @@
+// SPDX-License-Identifier: Unlicense OR MIT
+
 package components
 
 import (
-	"fmt"
 	"github.com/p9c/pod/cmd/gui/helpers"
-	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/conte"
+	"image/color"
+
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
 )
 
-func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-
-	rc.GetDuoUIlastTxs(duo, cx)
-
-	layout.Flex{
+var (
+	list = &layout.List{
 		Axis: layout.Vertical,
-	}.Layout(duo.DuoUIcontext,
-		layout.Rigid(func() {
-			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, helpers.HexARGB("ff3030cf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+	}
+)
 
-			in := layout.UniformInset(unit.Dp(8))
-			in.Layout(duo.DuoUIcontext, func() {
-
-				latestx := duo.DuoUItheme.H5("Latest Transactions")
-				latestx.Color = helpers.HexARGB("ffcfcfcf")
-				latestx.Alignment = text.Start
-				latestx.Layout(duo.DuoUIcontext)
-			})
-		}),
-		layout.Flexed(1, func() {
-
-			in := layout.UniformInset(unit.Dp(16))
-			in.Layout(duo.DuoUIcontext, func() {
-				duo.DuoUIcomponents.Status.Layout.Layout(duo.DuoUIcontext,
-					// Balance status item
-					layout.Rigid(func() {
-						cs := duo.DuoUIcontext.Constraints
-						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff424242"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
-
-						//const n = 5
-						//list.Layout(duo.DuoUIcontext, n, func(i int) {
-						//	txt := fmt.Sprintf("List element #%d", i)
-						//
-						//	duo.DuoUItheme.H3(txt).Layout(duo.DuoUIcontext)
-						//})
-						transList := &layout.List{
-							Axis: layout.Vertical,
-						}
-						transList.Layout(duo.DuoUIcontext, len(rc.Transactions.Txs), func(i int) {
-							// Invert list
-							//i = len(txs.Txs) - 1 - i
-							t := rc.Transactions.Txs[i]
-							a := 1.0
-							//const duration = 5
-							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
-
-							layout.Flex{
-								Spacing: layout.SpaceBetween,
-							}.Layout(duo.DuoUIcontext,
-								layout.Rigid(func() {
-
-
-									layout.Flex{
-										Axis:layout.Vertical,
-									}.Layout(duo.DuoUIcontext,
-										layout.Rigid(func() {
-
-											tim := duo.DuoUItheme.Body1(t.TxID)
-											tim.Color = helpers.Alpha(a, tim.Color)
-											tim.Layout(duo.DuoUIcontext)
-										}),
-										layout.Rigid(func() {
-											amount := duo.DuoUItheme.H5(fmt.Sprintf("%0.8f", t.Amount))
-											amount.Color = helpers.RGB(0x003300)
-											amount.Color = helpers.Alpha(a, amount.Color)
-											amount.Alignment = text.End
-											amount.Font.Variant = "Mono"
-											amount.Font.Weight = text.Bold
-											amount.Layout(duo.DuoUIcontext)
-										}),
-										layout.Rigid(func() {
-											sat := duo.DuoUItheme.Body1(t.Category)
-											sat.Color = helpers.Alpha(a, sat.Color)
-											sat.Layout(duo.DuoUIcontext)
-										}),
-										layout.Rigid(func() {
-
-											l := duo.DuoUItheme.Body2(helpers.FormatTime(t.Time))
-											l.Color = duo.DuoUItheme.Color.Hint
-											l.Color = helpers.Alpha(a, l.Color)
-											l.Layout(duo.DuoUIcontext)
-
-										}),
-									)
-
-								}),
-								layout.Rigid(func() {
-
-									sat := duo.DuoUItheme.Body1(fmt.Sprintf("%0.8f", t.Amount))
-									sat.Color = helpers.Alpha(a, sat.Color)
-									sat.Layout(duo.DuoUIcontext)
-
-
-
-								}),
-							)
-						})
-
-					}))
-			})
-		}),
-	)
+type DuoUItransactions struct {
+	Text string
+	// Color is the text color.
+	TxColor      color.RGBA
+	Font         text.Font
+	Width        float32
+	Height       float32
+	BgColor      color.RGBA
+	CornerRadius unit.Value
+	//Icon              *DuoUIicon
+	//IconSize          int
+	//IconColor         color.RGBA
+	//PaddingVertical   unit.Value
+	//PaddingHorizontal unit.Value
+	shaper *text.Shaper
+	//transactions models.DuoUItransactionsExcerpts
 }
 
-func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-
-	rc.GetDuoUITransactionsExcertps(duo, cx)
-
-	layout.Flex{
-		Axis: layout.Vertical,
-	}.Layout(duo.DuoUIcontext,
-		layout.Rigid(func() {
-			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, helpers.HexARGB("ff3030cf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
-
-			in := layout.UniformInset(unit.Dp(8))
-			in.Layout(duo.DuoUIcontext, func() {
-
-				latestx := duo.DuoUItheme.H5("Transactions")
-				latestx.Color = helpers.HexARGB("ffcfcfcf")
-				latestx.Alignment = text.Start
-				latestx.Layout(duo.DuoUIcontext)
-			})
-		}),
-		layout.Flexed(1, func() {
-
-			in := layout.UniformInset(unit.Dp(16))
-			in.Layout(duo.DuoUIcontext, func() {
-				duo.DuoUIcomponents.Status.Layout.Layout(duo.DuoUIcontext,
-					// Balance status item
-					layout.Rigid(func() {
-						cs := duo.DuoUIcontext.Constraints
-						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff424242"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
-
-						//const n = 5
-						//list.Layout(duo.DuoUIcontext, n, func(i int) {
-						//	txt := fmt.Sprintf("List element #%d", i)
-						//
-						//	duo.DuoUItheme.H3(txt).Layout(duo.DuoUIcontext)
-						//})
-						transList := &layout.List{
-							Axis: layout.Vertical,
-						}
-						transList.Layout(duo.DuoUIcontext, len(rc.Transactions.Txs), func(i int) {
-							// Invert list
-							//i = len(txs.Txs) - 1 - i
-							t := rc.Transactions.Txs[i]
-							a := 1.0
-							//const duration = 5
-							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
-
-							layout.Flex{
-								Spacing: layout.SpaceBetween,
-							}.Layout(duo.DuoUIcontext,
-								layout.Rigid(func() {
-
-
-									layout.Flex{
-										Axis:layout.Vertical,
-									}.Layout(duo.DuoUIcontext,
-										layout.Rigid(func() {
-
-											tim := duo.DuoUItheme.Body1(t.TxID)
-											tim.Color = helpers.Alpha(a, tim.Color)
-											tim.Layout(duo.DuoUIcontext)
-										}),
-										layout.Rigid(func() {
-											amount := duo.DuoUItheme.H5(fmt.Sprintf("%0.8f", t.Amount))
-											amount.Color = helpers.RGB(0x003300)
-											amount.Color = helpers.Alpha(a, amount.Color)
-											amount.Alignment = text.End
-											amount.Font.Variant = "Mono"
-											amount.Font.Weight = text.Bold
-											amount.Layout(duo.DuoUIcontext)
-										}),
-										layout.Rigid(func() {
-											sat := duo.DuoUItheme.Body1(t.Category)
-											sat.Color = helpers.Alpha(a, sat.Color)
-											sat.Layout(duo.DuoUIcontext)
-										}),
-										layout.Rigid(func() {
-
-											l := duo.DuoUItheme.Body2(helpers.FormatTime(t.Time))
-											l.Color = duo.DuoUItheme.Color.Hint
-											l.Color = helpers.Alpha(a, l.Color)
-											l.Layout(duo.DuoUIcontext)
-
-										}),
-									)
-
-								}),
-								layout.Rigid(func() {
-
-									sat := duo.DuoUItheme.Body1(fmt.Sprintf("%0.8f", t.Amount))
-									sat.Color = helpers.Alpha(a, sat.Color)
-									sat.Layout(duo.DuoUIcontext)
-
-
-
-								}),
-							)
-						})
-
-					}))
-			})
-		}),
-	)
+func (t *DuoUItheme) DuoUItransactions(bgColor string, width, height, paddingVertical, paddingHorizontal float32) DuoUItransactions {
+	return DuoUItransactions{
+		Font: text.Font{
+			Size: t.TextSize.Scale(14.0 / 16.0),
+		},
+		Width:  width,
+		Height: height,
+		//TxColor: helpers.HexARGB(txtColor),
+		BgColor: helpers.HexARGB(bgColor),
+		//PaddingVertical:   unit.Dp(paddingVertical),
+		//PaddingHorizontal: unit.Dp(paddingHorizontal),
+		shaper: t.Shaper,
+		//transactions: transactions,
+	}
 }
 
-//
-//func DuoUItable(duo *models.DuoUI, table map[int]layout.FlexChild) {
-//	in := layout.UniformInset(unit.Dp(30))
-//	in.Layout(duo.DuoUIcontext, func() {
-//		duo.DuoUIcomponents.Status.Layout.Layout(duo.DuoUIcontext,
-//			// Balance status item
-//			layout.Rigid(func() {
-//
-//				//const n = 5
-//				//list.Layout(duo.DuoUIcontext, n, func(i int) {
-//				//	txt := fmt.Sprintf("List element #%d", i)
-//				//
-//				//	duo.DuoUItheme.H3(txt).Layout(duo.DuoUIcontext)
-//				//})
-//				transList := &layout.List{
-//					Axis: layout.Vertical,
-//				}
-//				transList.Layout(duo.DuoUIcontext, len(table), func(i int) {
-//					// Invert list
-//					//i = len(txs.Txs) - 1 - i
-//					t := table[i]
-//					a := 1.0
-//					//const duration = 5
-//
-//
-//				widgets := []func(){
-//					func() {
-//						layout.Rigid(func() {
-//							tim := duo.DuoUItheme.Body1(t.TxID)
-//							tim.Color = helpers.Alpha(a, tim.Color)
-//							tim.Layout(duo.DuoUIcontext)
-//						})
-//					},
-//					func() {
-//						layout.Rigid(func() {
-//							amount := duo.DuoUItheme.H5(fmt.Sprintf("%0.8f", t.Amount))
-//							amount.Color = helpers.RGB(0x003300)
-//							amount.Alignment = text.End
-//							amount.Font.Variant = "Mono"
-//							amount.Font.Weight = text.Bold
-//							amount.Layout(duo.DuoUIcontext)
-//						}),
-//					},
-//					func() {
-//						layout.Rigid(func() {
-//							sat := duo.DuoUItheme.Body1(t.Category)
-//							sat.Color = helpers.Alpha(a, sat.Color)
-//							sat.Layout(duo.DuoUIcontext)
-//						}),
-//					},
-//					func() {
-//						layout.Rigid(func() {
-//							sat := duo.DuoUItheme.Body1(fmt.Sprintf("%0.8f", t.Amount))
-//							sat.Color = helpers.Alpha(a, sat.Color)
-//							sat.Layout(duo.DuoUIcontext)
-//						}),
-//					},
-//					func() {
-//							layout.Rigid(func() {
-//							l := duo.DuoUItheme.Body2(helpers.FormatTime(t.Time))
-//							l.Color = duo.DuoUItheme.Color.Hint
-//							l.Color = helpers.Alpha(a, l.Color)
-//							l.Layout(duo.DuoUIcontext)
-//						})
-//					},
-//					func() {
-//
-//					},
-//				}
-//				list.Layout(gtx, len(widgets), func(i int) {
-//					layout.UniformInset(unit.Dp(16)).Layout(gtx, widgets[i])
-//				})
-//
-//
-//
-//
-//				transList := &layout.List{
-//					Axis: layout.Vertical,
-//				}
-//				transList.Layout(duo.DuoUIcontext, len(table), func(i int) {
-//					// Invert list
-//					//i = len(txs.Txs) - 1 - i
-//					t := table[i]
-//					a := 1.0
-//					//const duration = 5
-//
-//					layout.Flex{
-//						Spacing: layout.SpaceBetween,
-//					}.Layout(duo.DuoUIcontext, table
-//					)
-//				})
-//
-//			}))
-//	})
-//}
+func (txs DuoUItransactions) Layout(gtx *layout.Context, content func()) {
+
+	in := layout.UniformInset(unit.Dp(30))
+	in.Layout(gtx, func() {
+		layout.Flex{
+			//Axis:      0,
+			//Spacing:   0,
+			//Alignment: 0,
+		}.Layout(gtx,
+			// Balance status item
+			layout.Rigid(func() {
+
+				//const n = 5
+				//list.Layout(gtx, n, func(i int) {
+				//	txt := fmt.Sprintf("List element #%d", i)
+				//
+				//	duo.DuoUItheme.H3(txt).Layout(gtx)
+				//})
+				//transList := &layout.List{
+				//	Axis: layout.Vertical,
+				//}
+				//transList.Layout(gtx, len(txs.transactions.Txs), func(i int) {
+				//	// Invert list
+				//	//i = len(txs.Txs) - 1 - i
+				//	//t := table[i]
+				//	//a := 1.0
+				//	//const duration = 5
+				//
+				//	widgets := []func(){
+				//		func() {
+				//			//layout.Rigid(func() {
+				//			//	tim := duo.DuoUItheme.Body1(t.TxID)
+				//			//	tim.Color = helpers.Alpha(a, tim.Color)
+				//			//	tim.Layout(gtx)
+				//			//})
+				//		},
+				//		func() {
+				//			//layout.Rigid(func() {
+				//			//amount := duo.DuoUItheme.H5(fmt.Sprintf("%0.8f", t.Amount))
+				//			//amount.Color = helpers.RGB(0x003300)
+				//			//amount.Alignment = text.End
+				//			//amount.Font.Variant = "Mono"
+				//			//amount.Font.Weight = text.Bold
+				//			//amount.Layout(gtx)
+				//			//}),
+				//		},
+				//		func() {
+				//			//layout.Rigid(func() {
+				//			//sat := duo.DuoUItheme.Body1(t.Category)
+				//			//sat.Color = helpers.Alpha(a, sat.Color)
+				//			//sat.Layout(gtx)
+				//			//}),
+				//		},
+				//		func() {
+				//			//layout.Rigid(func() {
+				//			//sat := duo.DuoUItheme.Body1(fmt.Sprintf("%0.8f", t.Amount))
+				//			//sat.Color = helpers.Alpha(a, sat.Color)
+				//			//sat.Layout(gtx)
+				//			//}),
+				//		},
+				//		func() {
+				//			//layout.Rigid(func() {
+				//			//l := duo.DuoUItheme.Body2(helpers.FormatTime(t.Time))
+				//			//l.Color = duo.DuoUItheme.Color.Hint
+				//			//l.Color = helpers.Alpha(a, l.Color)
+				//			//l.Layout(gtx)
+				//			//})
+				//		},
+				//		func() {
+				//
+				//		},
+				//	}
+				//	list.Layout(gtx, len(widgets), func(i int) {
+				//		layout.UniformInset(unit.Dp(16)).Layout(gtx, widgets[i])
+				//	})
+
+			}))
+	})
+}

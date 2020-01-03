@@ -1,4 +1,4 @@
-package components
+package componentsWidgets
 
 import (
 	"github.com/p9c/pod/cmd/gui/helpers"

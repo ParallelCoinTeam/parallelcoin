@@ -56,4 +56,4 @@
 // Specialized widgets: Theme both define a generic Label method
 // that takes a text size, and specialized methods for standard text
 // sizes such as Theme.H1 and Theme.Body2.
-package theme
+package components

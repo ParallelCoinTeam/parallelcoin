@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package theme
+package components
 
 import (
 	"github.com/p9c/pod/cmd/gui/helpers"
@@ -55,7 +55,7 @@ func (b DuoUIpage) Layout(gtx *layout.Context, content func()) {
 			in := layout.UniformInset(unit.Dp(1))
 			in.Layout(gtx, func() {
 
-				helpers.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+				helpers.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffacacac"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 				// Overview <<<
 				in := layout.UniformInset(unit.Dp(1))
 				in.Layout(gtx, func() {

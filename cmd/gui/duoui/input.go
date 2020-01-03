@@ -2,9 +2,9 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/componentsWidgets"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/widget"
-	"github.com/p9c/pod/cmd/gui/components"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/pod"
@@ -47,7 +47,7 @@ func (f *Field) inputFields(duo *models.DuoUI, cx *conte.Xt) {
 	case "input":
 		switch f.field.InputType {
 		case "text":
-			components.DuoUIinputField(duo, cx, f.field.Name, f.field.Model, (duo.DuoUIconfiguration.Settings.Daemon.Widgets[f.field.Name]).(*widget.DuoUIeditor))
+			componentsWidgets.DuoUIinputField(duo, cx, f.field.Name, f.field.Model, (duo.DuoUIconfiguration.Settings.Daemon.Widgets[f.field.Name]).(*widget.DuoUIeditor))
 		case "number":
 			e := duo.DuoUItheme.DuoUIeditor(f.field.Name, f.field.Name)
 			e.Font.Style = text.Italic
