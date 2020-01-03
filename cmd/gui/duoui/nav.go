@@ -32,9 +32,9 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 
 	var (
 		width             float32 = 96
-		height            float32 = 96
+		height            float32 = 72
 		iconSize          int     = 48
-		paddingVertical   float32 = 4
+		paddingVertical   float32 = 2
 		paddingHorizontal float32 = 8
 	)
 	//overviewButton :=
