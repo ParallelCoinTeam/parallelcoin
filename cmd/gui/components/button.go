@@ -46,7 +46,7 @@ func (t *DuoUItheme) DuoUIbutton(txt, txtColor, bgColor, iconColor string, iconS
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
-			Size: t.TextSize.Scale(10.0 / 12.0),
+			Size: t.TextSize.Scale(8.0 / 10.0),
 		},
 		Width:             width,
 		Height:            height,

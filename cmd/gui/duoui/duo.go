@@ -1,8 +1,8 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/cmd/gui/components"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"image/color"
 
@@ -184,13 +184,14 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 	//	IcoSize:    unit.Dp(32),
 	//	NavButtons: navButtons,
 	//}
+	//log.INFO("unutra: ", rcd.GetCoreSettings(cx).Schema.Groups )
 
 	// Icons
-
+	rc.Settings.Daemon = rcd.GetCoreSettings(cx)
 	// Settings tabs
 	confTabs := make(map[string]*widget.Button)
 	settingsFields := make(map[string]interface{})
-	for _, group := range rcd.GetCoreSettings(cx).Schema.Groups {
+	for _, group := range rc.Settings.Daemon.Schema.Groups {
 		confTabs[group.Legend] = new(widget.Button)
 		for _, field := range group.Fields {
 			switch field.Type {

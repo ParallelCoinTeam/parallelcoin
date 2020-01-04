@@ -1,6 +1,7 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/componentsWidgets"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -19,7 +20,7 @@ func DuoUIsend(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 				in.Layout(duo.DuoUIcontext, func() {
 					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIconstraints.Width.Max, duo.DuoUIconstraints.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 
-					//widgets.DuoUIsend(duo,cx,rc)
+					componentsWidgets.DuoUIsend(duo,cx,rc)
 				})
 				// Overview >>>
 			})

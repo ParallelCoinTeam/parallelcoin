@@ -40,7 +40,7 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					}),
 					layout.Rigid(func() {
 						cs := duo.DuoUIcontext.Constraints
-						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, helpers.HexARGB("ffcf44cf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 						groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
 						groupsList.Layout(duo.DuoUIcontext, groupsNumber, func(i int) {
 							in.Layout(duo.DuoUIcontext, func() {
