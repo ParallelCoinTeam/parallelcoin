@@ -33,6 +33,7 @@ type
 	}
 type
 	DuoUItransactionsExcerpts struct {
+		TxsListNumber int
 		Txs           []DuoUItransactionExcerpt `json:"txs"`
 		TxsNumber     int                       `json:"txsnumber"`
 		Balance       float64                   `json:"balance"`

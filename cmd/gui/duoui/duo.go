@@ -115,7 +115,7 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 		Inset:  layout.UniformInset(unit.Dp(30)),
 	}
 	overview := models.DuoUIcomponent{
-		Layout: layout.Flex{Axis: layout.Horizontal},
+		Layout: layout.Flex{Axis: layout.Vertical},
 	}
 	send := models.DuoUIcomponent{
 		Layout: layout.Flex{Axis: layout.Vertical},

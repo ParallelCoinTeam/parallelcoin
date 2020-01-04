@@ -1,6 +1,7 @@
 package duoui
 
 import (
+	"fmt"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/cmd/gui/components"
@@ -59,6 +60,18 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) {
 					balance.Layout(duo.DuoUIcontext)
 				})
 			})
+
+		}),
+			layout.Rigid(func() {
+				layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
+					layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
+						balance := duo.DuoUItheme.Body2("dimenzion: "+ fmt.Sprint(duo.DuoUIcontext.Constraints.Width.Max))
+						balance.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+						balance.Alignment = text.End
+						balance.Layout(duo.DuoUIcontext)
+					})
+				})
+
 		}))
 
 	// Header >>>

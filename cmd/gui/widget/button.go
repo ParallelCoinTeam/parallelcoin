@@ -3,7 +3,6 @@
 package widget
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/p9c/pod/pkg/gio/f32"
@@ -68,11 +67,11 @@ func (b *Button) Layout(gtx *layout.Context) {
 }
 
 func (b *Button) processEvents(gtx *layout.Context) {
-	if b.click.State() != gesture.StateFocused{
-		fmt.Println("assssssssssssssssStateNormal")
-	}else{
-		fmt.Println("assssssssssssssssStateFocused")
-	}
+	//if b.click.State() != gesture.StateFocused{
+	//	fmt.Println("assssssssssssssssStateNormal")
+	//}else{
+	//	fmt.Println("assssssssssssssssStateFocused")
+	//}
 
 	//case gesture.StateNormal:
 	//	fmt.Println("assssssssssssssssStateNormal")

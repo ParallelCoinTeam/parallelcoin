@@ -18,7 +18,14 @@ func DuoUIoverview(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	rc.GetDuoUIlocalLost(duo)
 	rc.GetDuoUIdifficulty(duo, cx)
 
-	duo.DuoUIcomponents.Overview.Layout.Layout(duo.DuoUIcontext,
+	viewport := layout.Flex{Axis: layout.Horizontal}
+
+	if duo.DuoUIcontext.Constraints.Width.Max < 1024 {
+		viewport = layout.Flex{Axis: layout.Vertical}
+	}
+
+
+	viewport.Layout(duo.DuoUIcontext,
 		layout.Flexed(0.5, func() {
 			cs := duo.DuoUIcontext.Constraints
 			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))

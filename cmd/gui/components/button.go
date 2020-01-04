@@ -46,7 +46,7 @@ func (t *DuoUItheme) DuoUIbutton(txt, txtColor, bgColor, iconColor string, iconS
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
-			Size: t.TextSize.Scale(14.0 / 16.0),
+			Size: t.TextSize.Scale(10.0 / 12.0),
 		},
 		Width:             width,
 		Height:            height,
@@ -99,10 +99,12 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 					},
 					func() {
 						if b.Text != "" {
-							layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(gtx, func() {
+							//layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(4), Right: unit.Dp(4)}.Layout(gtx, func() {
 								paint.ColorOp{Color: col}.Add(gtx.Ops)
-								widget.Label{}.Layout(gtx, b.shaper, b.Font, b.Text)
-							})
+								widget.Label{
+									Alignment:text.Middle,
+								}.Layout(gtx, b.shaper, b.Font, b.Text)
+							//})
 						}
 					},
 				}
