@@ -1,17 +1,16 @@
 package componentsWidgets
 
 import (
-	"fmt"
 	"github.com/p9c/pod/cmd/gui/helpers"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/cmd/gui/models"
+	"github.com/p9c/pod/cmd/gui/widget"
+	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/f32"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/op/clip"
 	"github.com/p9c/pod/pkg/gio/op/paint"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/cmd/gui/widget"
 	"image"
 	"image/color"
 	"reflect"
@@ -35,8 +34,6 @@ var (
 func DuoUIinputField(duo *models.DuoUI, cx *conte.Xt, fieldName, fieldModel string, lineEditor *widget.DuoUIeditor) {
 	//var btn material.Button
 	//fmt.Println("daj sta das", makeInstance(fieldModel))
-	fmt.Println("daj dddddddddddddd: ", fieldModel)
-
 	bgcol := helpers.HexARGB("ffcfcfcf")
 	brcol := helpers.HexARGB("ff303030")
 	hmin := duo.DuoUIcontext.Constraints.Width.Min

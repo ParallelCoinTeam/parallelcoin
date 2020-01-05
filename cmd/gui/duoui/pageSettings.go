@@ -29,7 +29,7 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			duo.DuoUIcomponents.Settings.Inset.Layout(duo.DuoUIcontext, func() {
-				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIconstraints.Width.Max, duo.DuoUIconstraints.Height.Max, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+				//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIconstraints.Width.Max, duo.DuoUIconstraints.Height.Max, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
 
 				// Settings  <<<
 				layout.Flex{

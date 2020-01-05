@@ -71,7 +71,7 @@ func DuoUIstatusWidget(duo *models.DuoUI, rc *rcd.RcVar){
 						connections.Layout(duo.DuoUIcontext)
 					}),
 					layout.Rigid(func() {
-						connections := duo.DuoUItheme.H5(fmt.Sprint(rc.Connections))
+						connections := duo.DuoUItheme.H5(fmt.Sprint(rc.ConnectionCount))
 						connections.Color = duo.DuoUIconfiguration.PrimaryTextColor
 						connections.Layout(duo.DuoUIcontext)
 					}),

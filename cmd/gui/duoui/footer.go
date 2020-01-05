@@ -96,7 +96,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) {
 						var blocksMenuItem components.DuoUIbutton
 						blocksMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, blocksIcon)
 						for buttonBlocks.Clicked(duo.DuoUIcontext) {
-							duo.CurrentPage = "Blocks"
+							duo.CurrentPage = "Explorer"
 						}
 						blocksMenuItem.Layout(duo.DuoUIcontext, buttonBlocks)
 					},

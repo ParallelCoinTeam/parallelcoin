@@ -103,3 +103,13 @@ type DaemonConfig struct {
 	Schema  pod.Schema  `json:"schema"`
 	Widgets map[string]interface{}
 }
+
+
+type DuoUIblock struct {
+	Height     int64   `json:"height"`
+	PowAlgoID  uint32  `json:"pow"`
+	Difficulty float64 `json:"diff"`
+	Amount     float64 `json:"amount"`
+	TxNum      int     `json:"txnum"`
+	Time       int64   `json:"time"`
+}

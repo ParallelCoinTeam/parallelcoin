@@ -14,7 +14,7 @@ func DuoUIoverview(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	rc.GetDuoUIbalance(duo, cx)
 	rc.GetDuoUIunconfirmedBalance(duo, cx)
 	rc.GetDuoUIblockHeight(duo, cx)
-	rc.GetDuoUItatus(duo, cx)
+	rc.GetDuoUIstatus(duo, cx)
 	rc.GetDuoUIlocalLost(duo)
 	rc.GetDuoUIdifficulty(duo, cx)
 

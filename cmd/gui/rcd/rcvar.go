@@ -1,18 +1,21 @@
 package rcd
 
-import "github.com/p9c/pod/cmd/gui/models"
+import (
+	"github.com/p9c/pod/cmd/gui/models"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+)
 
 type RcVar struct {
-	Alert        models.DuoUIalert
-	Status       models.DuoUIstatus
-	Hashes       int64
-	NetHash      int64
-	BlockHeight  int32
-	BestBlock    string
-	Difficulty   float64
-	BlockCount   int64
-	NetLastBlock int32
-	Connections  int32
+	Alert            models.DuoUIalert
+	Status           models.DuoUIstatus
+	Hashes           int64
+	NetHash          int64
+	BlockHeight      int32
+	BestBlock        string
+	Difficulty       float64
+	BlockCount       int64
+	NetworkLastBlock int32
+	ConnectionCount int32
 
 	Balance      string
 	Unconfirmed  string
@@ -26,6 +29,9 @@ type RcVar struct {
 	IsFirstRun bool
 	Localhost  models.DuoUIlocalHost
 
+	Uptime int
+	Peers  []*btcjson.GetPeerInfoResult `json:"peers"`
+	Blocks []models.DuoUIblock
 	screen string `json:"screen"`
 }
 
@@ -43,25 +49,25 @@ type RcVar struct {
 
 func RcInit() *RcVar {
 	return &RcVar{
-		Alert:        models.DuoUIalert{},
-		Status:       models.DuoUIstatus{},
-		Hashes:       0,
-		NetHash:      0,
-		BlockHeight:  0,
-		BestBlock:    "",
-		Difficulty:   0,
-		BlockCount:   0,
-		NetLastBlock: 0,
-		Connections:  0,
-		Balance:      "",
-		Unconfirmed:  "",
-		TxsNumber:    0,
-		Transactions: models.DuoUItransactions{},
-		Txs:          models.DuoUItransactionsExcerpts{},
-		LastTxs:      models.DuoUItransactions{},
-		Sent:         false,
-		IsFirstRun:   false,
-		Localhost:    models.DuoUIlocalHost{},
-		screen:       "",
+		Alert:            models.DuoUIalert{},
+		Status:           models.DuoUIstatus{},
+		Hashes:           0,
+		NetHash:          0,
+		BlockHeight:      0,
+		BestBlock:        "",
+		Difficulty:       0,
+		BlockCount:       0,
+		NetworkLastBlock: 0,
+		ConnectionCount: 0,
+		Balance:          "",
+		Unconfirmed:      "",
+		TxsNumber:        0,
+		Transactions:     models.DuoUItransactions{},
+		Txs:              models.DuoUItransactionsExcerpts{},
+		LastTxs:          models.DuoUItransactions{},
+		Sent:             false,
+		IsFirstRun:       false,
+		Localhost:        models.DuoUIlocalHost{},
+		screen:           "",
 	}
 }
