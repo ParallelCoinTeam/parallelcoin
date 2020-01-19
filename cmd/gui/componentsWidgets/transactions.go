@@ -5,12 +5,12 @@ import (
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gio/io/pointer"
-	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/text"
-	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gui/io/pointer"
+	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/text"
+	"github.com/p9c/pod/pkg/gui/unit"
 	"image"
 )
 

@@ -1,17 +1,17 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/components"
+	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"image/color"
 
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/fonts"
-	"github.com/p9c/pod/pkg/gio/app"
-	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gui/app"
+	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/unit"
 )
 
 func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
@@ -36,7 +36,7 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 	duo.DuoUIcontext = layout.NewContext(duo.DuoUIwindow.Queue())
 	duo.DuoUIconstraints = &duo.DuoUIcontext.Constraints
 
-	navigations := make(map[string]*components.DuoUIthemeNav)
+	navigations := make(map[string]*parallel.DuoUIthemeNav)
 
 	//	NavList: *new(widget.Enum),
 	//
@@ -218,11 +218,11 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 		TabsList: confTabs,
 	}
 	duo.DuoUIconfiguration.Settings.Daemon.Widgets = settingsFields
-	duo.DuoUItheme = components.NewDuoUItheme()
+	duo.DuoUItheme = parallel.NewDuoUItheme()
 	return
 }
 
-func mainMenu() *components.DuoUIthemeNav {
+func mainMenu() *parallel.DuoUIthemeNav {
 	//mainNavButtons := make(map[string]*theme.DuoUIbutton)
 	//
 	//overviewIcon, _ := theme.NewDuoUIicon(icons.ActionHome)
@@ -275,7 +275,7 @@ func mainMenu() *components.DuoUIthemeNav {
 	//}
 	//mainNavButtons["Network"] = &network
 
-	return &components.DuoUIthemeNav{
+	return &parallel.DuoUIthemeNav{
 		Title:         "mainMenu",
 		IcoBackground: color.RGBA{A: 0xff, R: 0x38, G: 0x11, B: 0x88},
 		IcoColor:      color.RGBA{A: 0xff, R: 0x38, G: 0x11, B: 0x88},

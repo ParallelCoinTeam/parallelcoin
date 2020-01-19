@@ -4,9 +4,9 @@ package duoui
 import (
 	"github.com/p9c/pod/cmd/gui/componentsWidgets"
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gio/text"
+	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/pod"
 	"reflect"
 )

@@ -1,14 +1,14 @@
 package loader
 
 import (
-	"github.com/p9c/pod/cmd/gui/components"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/text"
-	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/text"
+	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"github.com/p9c/pod/pkg/log"
 	"image/color"
 )
@@ -93,7 +93,7 @@ func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 					seedCheckBox.Layout(duo.DuoUIcontext, seed)
 				},
 				func() {
-					var createWalletbuttonComp components.DuoUIbutton
+					var createWalletbuttonComp parallel.DuoUIbutton
 					createWalletbuttonComp = duo.DuoUItheme.DuoUIbutton("Create wallet", "ff303030", "ffcfcfcf", "ff303030", 0, 125, 32, 4, 4, nil)
 					for createWalletbutton.Clicked(duo.DuoUIcontext) {
 							if passPhrase != "" && passPhrase == confirmPassPhrase {

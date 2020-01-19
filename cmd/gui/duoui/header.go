@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/components"
-	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/text"
-	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/text"
+	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/gui/widget"
+	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"image/color"
 )
 
@@ -25,7 +25,7 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) {
 			layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
 				layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(duo.DuoUIcontext, func() {
 
-					logo := components.DuoUIlogo{
+					logo := parallel.DuoUIlogo{
 						Background: color.RGBA{},
 						Color:      color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
 						Icon:       duo.DuoUIico["Logo"],

@@ -4,11 +4,11 @@ import (
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/components"
-	"github.com/p9c/pod/pkg/gio/widget"
+	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
@@ -24,11 +24,11 @@ var (
 )
 
 func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-	overviewIcon, _ := components.NewDuoUIicon(icons.ActionHome)
-	sendIcon, _ := components.NewDuoUIicon(icons.NavigationArrowDropUp)
-	receiveIcon, _ := components.NewDuoUIicon(icons.NavigationArrowDropDown)
-	addressBookIcon, _ := components.NewDuoUIicon(icons.ActionBook)
-	historyIcon, _ := components.NewDuoUIicon(icons.ActionHistory)
+	overviewIcon, _ := parallel.NewDuoUIicon(icons.ActionHome)
+	sendIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropUp)
+	receiveIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropDown)
+	addressBookIcon, _ := parallel.NewDuoUIicon(icons.ActionBook)
+	historyIcon, _ := parallel.NewDuoUIicon(icons.ActionHistory)
 
 	var (
 		width             float32 = 96
@@ -51,7 +51,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 						navButtons := []func(){
 							func() {
 								in.Layout(duo.DuoUIcontext, func() {
-									var overviewMenuItem components.DuoUIbutton
+									var overviewMenuItem parallel.DuoUIbutton
 									overviewMenuItem = duo.DuoUItheme.DuoUIbutton("Overview", "ff303030",  "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, overviewIcon)
 									for buttonOverview.Clicked(duo.DuoUIcontext) {
 										duo.CurrentPage = "Overview"
@@ -63,7 +63,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							},
 							func() {
-								var sendMenuItem components.DuoUIbutton
+								var sendMenuItem parallel.DuoUIbutton
 								sendMenuItem = duo.DuoUItheme.DuoUIbutton("Send", "ff303030",  "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, sendIcon)
 								for buttonSend.Clicked(duo.DuoUIcontext) {
 									duo.CurrentPage = "Send"
@@ -75,7 +75,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 							},
 							func() {
 								in.Layout(duo.DuoUIcontext, func() {
-									var receiveMenuItem components.DuoUIbutton
+									var receiveMenuItem parallel.DuoUIbutton
 									receiveMenuItem = duo.DuoUItheme.DuoUIbutton("Receive", "ff303030",  "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, receiveIcon)
 									for buttonReceive.Clicked(duo.DuoUIcontext) {
 										duo.CurrentPage = "Receive"
@@ -87,7 +87,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							},
 							func() {
-								var addressBookMenuItem components.DuoUIbutton
+								var addressBookMenuItem parallel.DuoUIbutton
 								addressBookMenuItem = duo.DuoUItheme.DuoUIbutton("Address Book", "ff303030",  "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, addressBookIcon)
 								for buttonAddressBook.Clicked(duo.DuoUIcontext) {
 									duo.CurrentPage = "AddressBook"
@@ -98,7 +98,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							},
 							func() {
-								var historyMenuItem components.DuoUIbutton
+								var historyMenuItem parallel.DuoUIbutton
 								historyMenuItem = duo.DuoUItheme.DuoUIbutton("History", "ff303030",  "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, historyIcon)
 								for buttonHistory.Clicked(duo.DuoUIcontext) {
 									duo.CurrentPage = "History"

@@ -3,7 +3,7 @@ package loader
 import (
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gui/layout"
 )
 
 func DuoUIloaderIntro(duo *models.DuoUI) {

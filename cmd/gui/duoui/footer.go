@@ -1,13 +1,13 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/components"
+	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gio/widget"
-	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gui/widget"
+	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/unit"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
@@ -39,11 +39,11 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) {
 		paddingVertical   float32 = 8
 		paddingHorizontal float32 = 8
 	)
-	settingsIcon, _ := components.NewDuoUIicon(icons.ActionSettings)
-	blocksIcon, _ := components.NewDuoUIicon(icons.ActionExplore)
-	networkIcon, _ := components.NewDuoUIicon(icons.ActionFingerprint)
-	consoleIcon, _ := components.NewDuoUIicon(icons.ActionInput)
-	helpIcon, _ := components.NewDuoUIicon(icons.NavigationArrowDropDown)
+	settingsIcon, _ := parallel.NewDuoUIicon(icons.ActionSettings)
+	blocksIcon, _ := parallel.NewDuoUIicon(icons.ActionExplore)
+	networkIcon, _ := parallel.NewDuoUIicon(icons.ActionFingerprint)
+	consoleIcon, _ := parallel.NewDuoUIicon(icons.ActionInput)
+	helpIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropDown)
 
 	//overviewButton :=
 	//historyButton :=
@@ -56,7 +56,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) {
 				cornerButtons := []func(){
 					func() {
 						in.Layout(duo.DuoUIcontext, func() {
-							var networkMeniItem components.DuoUIbutton
+							var networkMeniItem parallel.DuoUIbutton
 							networkMeniItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
 							for buttonCornerOne.Clicked(duo.DuoUIcontext) {
 								duo.CurrentPage = "Network"
@@ -65,7 +65,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) {
 						})
 					},
 					func() {
-						var settingsMenuItem components.DuoUIbutton
+						var settingsMenuItem parallel.DuoUIbutton
 						settingsMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, settingsIcon)
 
 						for buttonCornerTwo.Clicked(duo.DuoUIcontext) {
@@ -84,7 +84,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) {
 				navButtons := []func(){
 					func() {
 						in.Layout(duo.DuoUIcontext, func() {
-							var networkMeniItem components.DuoUIbutton
+							var networkMeniItem parallel.DuoUIbutton
 							networkMeniItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
 							for buttonNetwork.Clicked(duo.DuoUIcontext) {
 								duo.CurrentPage = "Network"
@@ -93,7 +93,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) {
 						})
 					},
 					func() {
-						var blocksMenuItem components.DuoUIbutton
+						var blocksMenuItem parallel.DuoUIbutton
 						blocksMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, blocksIcon)
 						for buttonBlocks.Clicked(duo.DuoUIcontext) {
 							duo.CurrentPage = "Explorer"
@@ -101,7 +101,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) {
 						blocksMenuItem.Layout(duo.DuoUIcontext, buttonBlocks)
 					},
 					func() {
-						var helpMenuItem components.DuoUIbutton
+						var helpMenuItem parallel.DuoUIbutton
 						helpMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, helpIcon)
 						for buttonHelp.Clicked(duo.DuoUIcontext) {
 							duo.CurrentPage = "Help"
@@ -110,7 +110,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) {
 					},
 					func() {
 						in.Layout(duo.DuoUIcontext, func() {
-							var consoleMenuItem components.DuoUIbutton
+							var consoleMenuItem parallel.DuoUIbutton
 							consoleMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, consoleIcon)
 							for buttonConsole.Clicked(duo.DuoUIcontext) {
 								duo.CurrentPage = "Console"
@@ -119,7 +119,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) {
 						})
 					},
 					func() {
-						var settingsMenuItem components.DuoUIbutton
+						var settingsMenuItem parallel.DuoUIbutton
 						settingsMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, settingsIcon)
 
 						for buttonSettings.Clicked(duo.DuoUIcontext) {

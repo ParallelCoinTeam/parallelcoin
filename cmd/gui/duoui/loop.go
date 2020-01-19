@@ -8,8 +8,8 @@ import (
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gio/io/system"
-	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gui/io/system"
+	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )

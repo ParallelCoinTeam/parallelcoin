@@ -1,9 +1,9 @@
 package loader
 
 import (
-	"github.com/p9c/pod/pkg/gio/widget"
-	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gui/widget"
+	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/unit"
 )
 
 var (

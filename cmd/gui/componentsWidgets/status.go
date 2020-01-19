@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/unit"
+	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/unit"
 )
 
 func DuoUIstatusWidget(duo *models.DuoUI, rc *rcd.RcVar){
