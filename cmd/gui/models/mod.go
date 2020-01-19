@@ -2,7 +2,7 @@ package models
 
 import (
 	"github.com/p9c/pod/cmd/gui/components"
-	"github.com/p9c/pod/cmd/gui/widget"
+	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/pod"
@@ -104,12 +104,12 @@ type DaemonConfig struct {
 	Widgets map[string]interface{}
 }
 
-
 type DuoUIblock struct {
 	Height     int64   `json:"height"`
+	BlockHash  string  `json:"hash"`
 	PowAlgoID  uint32  `json:"pow"`
 	Difficulty float64 `json:"diff"`
 	Amount     float64 `json:"amount"`
 	TxNum      int     `json:"txnum"`
-	Time       int64   `json:"time"`
+	Time       string  `json:"time"`
 }

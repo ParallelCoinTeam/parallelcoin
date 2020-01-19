@@ -20,7 +20,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, helpers.HexARGB("ff3030cf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, helpers.HexARGB("ff3030cf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 			in := layout.UniformInset(unit.Dp(8))
 			in.Layout(duo.DuoUIcontext, func() {
@@ -39,7 +39,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					// Balance status item
 					layout.Rigid(func() {
 						cs := duo.DuoUIcontext.Constraints
-						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff424242"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff424242"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 						//const n = 5
 						//list.Layout(duo.DuoUIcontext, n, func(i int) {
@@ -56,52 +56,59 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 							t := rc.Transactions.Txs[i]
 							a := 1.0
 							//const duration = 5
-							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 							layout.Flex{
 								Spacing: layout.SpaceBetween,
 							}.Layout(duo.DuoUIcontext,
 								layout.Rigid(func() {
+									in := layout.UniformInset(unit.Dp(15))
+									in.Layout(duo.DuoUIcontext, func() {
 
-									layout.Flex{
-										Axis: layout.Vertical,
-									}.Layout(duo.DuoUIcontext,
-										layout.Rigid(func() {
+										layout.Flex{
+											Axis: layout.Vertical,
+										}.Layout(duo.DuoUIcontext,
+											layout.Rigid(func() {
 
-											tim := duo.DuoUItheme.Body1(t.TxID)
-											tim.Color = helpers.Alpha(a, tim.Color)
-											tim.Layout(duo.DuoUIcontext)
-										}),
-										layout.Rigid(func() {
-											amount := duo.DuoUItheme.H5(fmt.Sprintf("%0.8f", t.Amount))
-											amount.Color = helpers.RGB(0x003300)
-											amount.Color = helpers.Alpha(a, amount.Color)
-											amount.Alignment = text.End
-											amount.Font.Variant = "Mono"
-											amount.Font.Weight = text.Bold
-											amount.Layout(duo.DuoUIcontext)
-										}),
-										layout.Rigid(func() {
-											sat := duo.DuoUItheme.Body1(t.Category)
-											sat.Color = helpers.Alpha(a, sat.Color)
-											sat.Layout(duo.DuoUIcontext)
-										}),
-										layout.Rigid(func() {
+												tim := duo.DuoUItheme.Caption(t.TxID)
+												tim.Color = helpers.Alpha(a, tim.Color)
+												tim.Layout(duo.DuoUIcontext)
+											}),
+											layout.Rigid(func() {
+												amount := duo.DuoUItheme.H5(fmt.Sprintf("%0.8f", t.Amount))
+												amount.Color = helpers.RGB(0x003300)
+												amount.Color = helpers.Alpha(a, amount.Color)
+												amount.Alignment = text.End
+												amount.Font.Variant = "Bold"
+												amount.Font.Weight = text.Bold
+												amount.Layout(duo.DuoUIcontext)
+											}),
+											layout.Rigid(func() {
+												sat := duo.DuoUItheme.Body1(t.Category)
+												sat.Color = helpers.Alpha(a, sat.Color)
+												sat.Layout(duo.DuoUIcontext)
+											}),
+											layout.Rigid(func() {
 
-											l := duo.DuoUItheme.Body2(helpers.FormatTime(t.Time))
-											l.Color = duo.DuoUItheme.Color.Hint
-											l.Color = helpers.Alpha(a, l.Color)
-											l.Layout(duo.DuoUIcontext)
+												l := duo.DuoUItheme.Body1(helpers.FormatTime(t.Time))
+												l.Color = duo.DuoUItheme.Color.Hint
+												l.Color = helpers.Alpha(a, l.Color)
+												l.Layout(duo.DuoUIcontext)
 
-										}),
-									)
+											}),
+										)
+									})
 
 								}),
 								layout.Rigid(func() {
+									in := layout.UniformInset(unit.Dp(15))
+									in.Layout(duo.DuoUIcontext, func() {
 
-									sat := duo.DuoUItheme.Body1(fmt.Sprintf("%0.8f", t.Amount))
-									sat.Color = helpers.Alpha(a, sat.Color)
-									sat.Layout(duo.DuoUIcontext)
+										sat := duo.DuoUItheme.H6(fmt.Sprintf("%0.8f", t.Amount))
+										sat.Color = helpers.Alpha(a, sat.Color)
+										sat.Layout(duo.DuoUIcontext)
+									})
+
 
 								}),
 							)

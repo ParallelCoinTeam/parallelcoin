@@ -8,7 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/cmd/gui/widget"
+	"github.com/p9c/pod/pkg/gio/widget"
 	"image/color"
 )
 

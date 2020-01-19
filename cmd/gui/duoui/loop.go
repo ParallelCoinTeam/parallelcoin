@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"errors"
+	"github.com/p9c/pod/cmd/gui/loader"
 
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
@@ -9,7 +10,6 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/io/system"
 	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/unit"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -17,7 +17,7 @@ import (
 func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 	for {
 		select {
-		case <- duo.Ready:
+		case <-duo.Ready:
 			duo.IsReady = true
 		case <-duo.Quit:
 			log.DEBUG("quit signal received")
@@ -39,9 +39,15 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 			case system.FrameEvent:
 				if duo.IsReady {
 					duo.DuoUIcontext.Reset(e.Config, e.Size)
-					DuoUIgrid(duo, cx, rc)
+
+					if rc.IsFirstRun {
+						loader.DuoUIloaderCreateWallet(duo, cx)
+					} else {
+						DuoUIgrid(duo, cx, rc)
+					}
+
 					e.Frame(duo.DuoUIcontext.Ops)
-				}else {
+				} else {
 					duo.DuoUIcontext.Reset(e.Config, e.Size)
 					DuoUImainMenu(duo, cx, rc)
 					e.Frame(duo.DuoUIcontext.Ops)
@@ -57,12 +63,12 @@ func DuoUImainMenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	duo.DuoUIcomponents.View.Layout.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			//DuoUIheader(duo,rc)
 		}),
 		layout.Flexed(1, func() {
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			//DuoUIbody(duo,cx,rc)
 		}),
 	)
@@ -72,17 +78,17 @@ func DuoUImainMenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 func DuoUIgrid(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	// START View <<<
 	cs := duo.DuoUIcontext.Constraints
-	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
-	layout.Flex{Axis:layout.Vertical}.Layout(duo.DuoUIcontext,
+	layout.Flex{Axis: layout.Vertical}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
-			DuoUIheader(duo,rc)
+			DuoUIheader(duo, rc)
 		}),
 		layout.Flexed(1, func() {
-			DuoUIbody(duo,cx,rc)
+			DuoUIbody(duo, cx, rc)
 		}),
 		layout.Rigid(func() {
-			DuoUIfooter(duo,rc)
+			DuoUIfooter(duo, rc)
 		}),
 	)
 }

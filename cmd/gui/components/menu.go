@@ -16,35 +16,35 @@ type DuoUIthemeNav struct {
 	Font          text.Font
 	BgColor       color.RGBA
 	CornerRadius  unit.Value
-	Icon          *DuoUIicon
+	//Icon          *DuoUIicon
 	IcoBackground color.RGBA
 	IcoColor      color.RGBA
 	IcoPadding    unit.Value
 	IcoSize       unit.Value
 	Size          unit.Value
 	Padding       unit.Value
-	NavButtons    map[string]*DuoUIbutton
-	theme         DuoUItheme
+	//NavButtons    map[string]*DuoUIbutton
+	//theme         DuoUItheme
 }
 
-func (t *DuoUItheme) DuoUIthemeNav(txt string, items *map[string]*DuoUIbutton) DuoUIthemeNav {
-	//for it, item := range items {
-	//	items[it] = t.DuoUIbutton(item.Text, item.Icon)
-	//}
-
-	return DuoUIthemeNav{
-		Title: txt,
-		Font: text.Font{
-			Size: t.TextSize.Scale(14.0 / 16.0),
-		},
-		BgColor:    t.Color.Primary,
-		TxColor:    t.Color.InvText,
-		Size:       unit.Dp(56),
-		Padding:    unit.Dp(16),
-		NavButtons: *items,
-		theme:      *t,
-	}
-}
+//func (t *DuoUItheme) DuoUIthemeNav(txt string, items *map[string]*DuoUIbutton) DuoUIthemeNav {
+//	//for it, item := range items {
+//	//	items[it] = t.DuoUIbutton(item.Text, item.Icon)
+//	//}
+//
+//	return DuoUIthemeNav{
+//		Title: txt,
+//		Font: text.Font{
+//			Size: t.TextSize.Scale(14.0 / 16.0),
+//		},
+//		BgColor:    t.Color.Primary,
+//		TxColor:    t.Color.InvText,
+//		Size:       unit.Dp(56),
+//		Padding:    unit.Dp(16),
+//		NavButtons: *items,
+//		theme:      *t,
+//	}
+//}
 
 func (n DuoUIthemeNav) Layout(gtx *layout.Context) {
 	//navList := &layout.List{

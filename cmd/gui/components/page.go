@@ -30,7 +30,7 @@ type DuoUIpage struct {
 	//IconColor         color.RGBA
 	//PaddingVertical   unit.Value
 	//PaddingHorizontal unit.Value
-	shaper *text.Shaper
+	shaper text.Shaper
 }
 
 func (t *DuoUItheme) DuoUIpage(txtColor, bgColor string, width, height, paddingVertical, paddingHorizontal float32) DuoUIpage {
@@ -55,11 +55,11 @@ func (b DuoUIpage) Layout(gtx *layout.Context, content func()) {
 			in := layout.UniformInset(unit.Dp(1))
 			in.Layout(gtx, func() {
 
-				helpers.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffacacac"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+				helpers.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffacacac"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				// Overview <<<
 				in := layout.UniformInset(unit.Dp(1))
 				in.Layout(gtx, func() {
-					helpers.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+					helpers.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 					content()
 				})
 				// Overview >>>

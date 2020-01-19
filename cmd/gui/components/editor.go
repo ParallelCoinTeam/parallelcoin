@@ -3,7 +3,7 @@
 package components
 
 import (
-	"github.com/p9c/pod/cmd/gui/widget"
+	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/op"
 	"github.com/p9c/pod/pkg/gio/op/paint"
@@ -20,7 +20,7 @@ type DuoUIeditor struct {
 	// HintColor is the color of hint text.
 	HintColor color.RGBA
 	Text      string
-	shaper    *text.Shaper
+	shaper    text.Shaper
 }
 
 func (t *DuoUItheme) DuoUIeditor(hint, txt string) DuoUIeditor {
@@ -58,7 +58,7 @@ func (t *DuoUItheme) DuoUIeditor(hint, txt string) DuoUIeditor {
 //
 
 
-func (e DuoUIeditor) Layout(gtx *layout.Context, editor *widget.DuoUIeditor) {
+func (e DuoUIeditor) Layout(gtx *layout.Context, editor *widget.Editor) {
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	var macro op.MacroOp

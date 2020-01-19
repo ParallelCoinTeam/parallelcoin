@@ -10,7 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	
+
 	"github.com/urfave/cli"
 )
 
@@ -18,9 +18,9 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		Configure(cx, c)
 		rc := rcd.RcInit()
-		var firstRun bool
+		//var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
-			firstRun = true
+			rc.IsFirstRun = true
 		}
 
 		duo, err := duoui.DuOuI(rc, cx)
@@ -28,9 +28,9 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 			close(duo.Quit)
 		})
 
-		log.INFO("ima", firstRun)
+		log.INFO("ima", rc.IsFirstRun)
 
-		// loader.DuoUIloader(duo, cx, firstRun)
+		//loader.DuoUIloader(rc, cx, firstRun)
 
 		// signal the GUI that the back end is ready
 		log.DEBUG("sending ready signal")

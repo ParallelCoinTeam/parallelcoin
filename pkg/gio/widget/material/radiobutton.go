@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package components
+package material
 
 import (
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/cmd/gui/widget"
+	"github.com/p9c/pod/pkg/gio/widget"
 )
 
-type DuoUIradioButton struct {
+type RadioButton struct {
 	checkable
 	Key string
 }
 
 // RadioButton returns a RadioButton with a label. The key specifies
 // the value for the Enum.
-func (t *DuoUItheme) DuoUIradioButton(key, label string) DuoUIradioButton {
-	return DuoUIradioButton{
+func (t *Theme) RadioButton(key, label string) RadioButton {
+	return RadioButton{
 		checkable: checkable{
 			Label: label,
 
@@ -35,7 +35,7 @@ func (t *DuoUItheme) DuoUIradioButton(key, label string) DuoUIradioButton {
 	}
 }
 
-func (r DuoUIradioButton) Layout(gtx *layout.Context, enum *widget.Enum) {
+func (r RadioButton) Layout(gtx *layout.Context, enum *widget.Enum) {
 	r.layout(gtx, enum.Value(gtx) == r.Key)
 	enum.Layout(gtx, r.Key)
 }

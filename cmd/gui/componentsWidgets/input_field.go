@@ -3,7 +3,7 @@ package componentsWidgets
 import (
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/cmd/gui/widget"
+	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/f32"
 	"github.com/p9c/pod/pkg/gio/layout"
@@ -31,10 +31,10 @@ var (
 //button            = new(widget.Button)
 )
 
-func DuoUIinputField(duo *models.DuoUI, cx *conte.Xt, fieldName, fieldModel string, lineEditor *widget.DuoUIeditor) {
+func DuoUIinputField(duo *models.DuoUI, cx *conte.Xt, fieldName, fieldModel string, lineEditor *widget.Editor) {
 	//var btn material.Button
 	//fmt.Println("daj sta das", makeInstance(fieldModel))
-	bgcol := helpers.HexARGB("ffcfcfcf")
+	bgcol := helpers.HexARGB("ffe4e4e4")
 	brcol := helpers.HexARGB("ff303030")
 	hmin := duo.DuoUIcontext.Constraints.Width.Min
 	vmin := duo.DuoUIcontext.Constraints.Height.Min
@@ -97,7 +97,7 @@ func DuoUIinputField(duo *models.DuoUI, cx *conte.Xt, fieldName, fieldModel stri
 		}),
 	)
 	//cs := duo.DuoUIcontext.Constraints
-	//DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, HexARGB("ff305530"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+	//DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, HexARGB("ff305530"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	//
 	//e := duo.DuoUItheme.DuoUIeditor(fieldName)
 	//e.Font.Style = text.Italic

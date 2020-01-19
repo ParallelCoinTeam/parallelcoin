@@ -9,7 +9,6 @@ import (
 	"github.com/p9c/pod/pkg/gio/op/paint"
 	"github.com/p9c/pod/pkg/gio/text"
 	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/cmd/gui/widget"
 )
 
 type DuoUIlabel struct {
@@ -23,7 +22,7 @@ type DuoUIlabel struct {
 	MaxLines int
 	Text     string
 
-	shaper *text.Shaper
+	shaper text.Shaper
 }
 
 func (t *DuoUItheme) H1(txt string) DuoUIlabel {
@@ -75,6 +74,6 @@ func (t *DuoUItheme) DuoUIlabel(size unit.Value, txt string) DuoUIlabel {
 
 func (l DuoUIlabel) Layout(gtx *layout.Context) {
 	paint.ColorOp{Color: l.Color}.Add(gtx.Ops)
-	tl := widget.Label{Alignment: l.Alignment, MaxLines: l.MaxLines}
-	tl.Layout(gtx, l.shaper, l.Font, l.Text)
+	//tl := widget.Label{Alignment: l.Alignment, MaxLines: l.MaxLines}
+	//tl.Layout(gtx, l.shaper, l.Font, l.Text)
 }

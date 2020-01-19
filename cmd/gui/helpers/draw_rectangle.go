@@ -12,8 +12,13 @@ import (
 )
 
 
-func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color color.RGBA, borderRadius [4]float32, inset unit.Value) {
-	in := layout.UniformInset(inset)
+func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color color.RGBA, borderRadius [4]float32, padding [4]float32) {
+	in := layout.Inset{
+		Top:    unit.Dp(padding[0]),
+		Right:  unit.Dp(padding[1]),
+		Bottom: unit.Dp(padding[2]),
+		Left:   unit.Dp(padding[3]),
+	}
 	in.Layout(gtx, func() {
 		square := f32.Rectangle{
 			Max: f32.Point{

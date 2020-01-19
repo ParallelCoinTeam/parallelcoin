@@ -7,7 +7,7 @@ import (
 	"image/color"
 
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/cmd/gui/widget"
+	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/fonts"
 	"github.com/p9c/pod/pkg/gio/app"
 	"github.com/p9c/pod/pkg/gio/layout"
@@ -198,7 +198,7 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 			case "array":
 				settingsFields[field.Name] = new(widget.Button)
 			case "input":
-				settingsFields[field.Name] = &widget.DuoUIeditor{
+				settingsFields[field.Name] = &widget.Editor{
 					SingleLine: true,
 					Submit:     true,
 				}

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package components
+package material
 
 import (
 	"image"
@@ -15,7 +15,7 @@ import (
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
-type DuoUItheme struct {
+type Theme struct {
 	Shaper text.Shaper
 	Color  struct {
 		Primary color.RGBA
@@ -24,31 +24,31 @@ type DuoUItheme struct {
 		InvText color.RGBA
 	}
 	TextSize              unit.Value
-	checkBoxCheckedIcon   *DuoUIicon
-	checkBoxUncheckedIcon *DuoUIicon
-	radioCheckedIcon      *DuoUIicon
-	radioUncheckedIcon    *DuoUIicon
+	checkBoxCheckedIcon   *Icon
+	checkBoxUncheckedIcon *Icon
+	radioCheckedIcon      *Icon
+	radioUncheckedIcon    *Icon
 }
 
-func NewDuoUItheme() *DuoUItheme {
-	t := &DuoUItheme{
+func NewTheme() *Theme {
+	t := &Theme{
 		Shaper: font.Default(),
 	}
 	t.Color.Primary = rgb(0x3f51b5)
-	t.Color.Text = rgb(0x303030)
-	t.Color.Hint = rgb(0x888888)
-	t.Color.InvText = rgb(0xcfcfcf)
+	t.Color.Text = rgb(0x000000)
+	t.Color.Hint = rgb(0xbbbbbb)
+	t.Color.InvText = rgb(0xffffff)
 	t.TextSize = unit.Sp(16)
 
-	t.checkBoxCheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleCheckBox))
-	t.checkBoxUncheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleCheckBoxOutlineBlank))
-	t.radioCheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonChecked))
-	t.radioUncheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonUnchecked))
+	t.checkBoxCheckedIcon = mustIcon(NewIcon(icons.ToggleCheckBox))
+	t.checkBoxUncheckedIcon = mustIcon(NewIcon(icons.ToggleCheckBoxOutlineBlank))
+	t.radioCheckedIcon = mustIcon(NewIcon(icons.ToggleRadioButtonChecked))
+	t.radioUncheckedIcon = mustIcon(NewIcon(icons.ToggleRadioButtonUnchecked))
 
 	return t
 }
 
-func mustIcon(ic *DuoUIicon, err error) *DuoUIicon {
+func mustIcon(ic *Icon, err error) *Icon {
 	if err != nil {
 		panic(err)
 	}

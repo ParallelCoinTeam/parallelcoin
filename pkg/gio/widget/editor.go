@@ -23,7 +23,7 @@ import (
 )
 
 // Editor implements an editable and scrollable text area.
-type DuoUIeditor struct {
+type Editor struct {
 	Alignment text.Alignment
 	// SingleLine force the text to stay on a single line.
 	// SingleLine also sets the scrolling direction to
@@ -89,7 +89,7 @@ const (
 )
 
 // Events returns available editor events.
-func (e *DuoUIeditor) Events(gtx *layout.Context) []EditorEvent {
+func (e *Editor) Events(gtx *layout.Context) []EditorEvent {
 	e.processEvents(gtx)
 	events := e.events
 	e.events = nil
@@ -97,12 +97,12 @@ func (e *DuoUIeditor) Events(gtx *layout.Context) []EditorEvent {
 	return events
 }
 
-func (e *DuoUIeditor) processEvents(gtx *layout.Context) {
+func (e *Editor) processEvents(gtx *layout.Context) {
 	e.processPointer(gtx)
 	e.processKey(gtx)
 }
 
-func (e *DuoUIeditor) processPointer(gtx *layout.Context) {
+func (e *Editor) processPointer(gtx *layout.Context) {
 	sbounds := e.scrollBounds()
 	var smin, smax int
 	var axis gesture.Axis
@@ -142,7 +142,7 @@ func (e *DuoUIeditor) processPointer(gtx *layout.Context) {
 	}
 }
 
-func (e *DuoUIeditor) processKey(gtx *layout.Context) {
+func (e *Editor) processKey(gtx *layout.Context) {
 	for _, ke := range gtx.Events(&e.eventKey) {
 		e.blinkStart = gtx.Now()
 		switch ke := ke.(type) {
@@ -175,7 +175,7 @@ func (e *DuoUIeditor) processKey(gtx *layout.Context) {
 	}
 }
 
-func (e *DuoUIeditor) command(k key.Event) bool {
+func (e *Editor) command(k key.Event) bool {
 	switch k.Name {
 	case key.NameReturn, key.NameEnter:
 		e.append("\n")
@@ -208,12 +208,12 @@ func (e *DuoUIeditor) command(k key.Event) bool {
 }
 
 // Focus requests the input focus for the Editor.
-func (e *DuoUIeditor) Focus() {
+func (e *Editor) Focus() {
 	e.requestFocus = true
 }
 
 // Layout lays out the editor.
-func (e *DuoUIeditor) Layout(gtx *layout.Context, sh *text.Shaper, font text.Font) {
+func (e *Editor) Layout(gtx *layout.Context, sh text.Shaper, font text.Font) {
 	// Flush events from before the previous frame.
 	copy(e.events, e.events[e.prevEvents:])
 	e.events = e.events[:len(e.events)-e.prevEvents]
@@ -226,7 +226,7 @@ func (e *DuoUIeditor) Layout(gtx *layout.Context, sh *text.Shaper, font text.Fon
 	e.layout(gtx, sh)
 }
 
-func (e *DuoUIeditor) layout(gtx *layout.Context, sh *text.Shaper) {
+func (e *Editor) layout(gtx *layout.Context, sh text.Shaper) {
 	// Crude configuration change detection.
 	if scale := gtx.Px(unit.Sp(100)); scale != e.scale {
 		e.invalidate()
@@ -273,11 +273,11 @@ func (e *DuoUIeditor) layout(gtx *layout.Context, sh *text.Shaper) {
 	}
 	e.shapes = e.shapes[:0]
 	for {
-		str, off, ok := it.Next()
+		_, _, layout, off, ok := it.Next()
 		if !ok {
 			break
 		}
-		path := sh.Shape(gtx, e.font, str)
+		path := sh.Shape(gtx, e.font, layout)
 		e.shapes = append(e.shapes, line{off, path})
 	}
 
@@ -309,7 +309,7 @@ func (e *DuoUIeditor) layout(gtx *layout.Context, sh *text.Shaper) {
 	gtx.Dimensions = layout.Dimensions{Size: e.viewSize, Baseline: e.dims.Baseline}
 }
 
-func (e *DuoUIeditor) PaintText(gtx *layout.Context) {
+func (e *Editor) PaintText(gtx *layout.Context) {
 	clip := textPadding(e.lines)
 	clip.Max = clip.Max.Add(e.viewSize)
 	for _, shape := range e.shapes {
@@ -322,7 +322,7 @@ func (e *DuoUIeditor) PaintText(gtx *layout.Context) {
 	}
 }
 
-func (e *DuoUIeditor) PaintCaret(gtx *layout.Context) {
+func (e *Editor) PaintCaret(gtx *layout.Context) {
 	if !e.caretOn {
 		return
 	}
@@ -358,23 +358,23 @@ func (e *DuoUIeditor) PaintCaret(gtx *layout.Context) {
 }
 
 // Len is the length of the editor contents.
-func (e *DuoUIeditor) Len() int {
+func (e *Editor) Len() int {
 	return e.rr.len()
 }
 
 // Text returns the contents of the editor.
-func (e *DuoUIeditor) Text() string {
+func (e *Editor) Text() string {
 	return e.rr.String()
 }
 
 // SetText replaces the contents of the editor.
-func (e *DuoUIeditor) SetText(s string) {
+func (e *Editor) SetText(s string) {
 	e.rr = editBuffer{}
 	e.carXOff = 0
 	e.prepend(s)
 }
 
-func (e *DuoUIeditor) scrollBounds() image.Rectangle {
+func (e *Editor) scrollBounds() image.Rectangle {
 	var b image.Rectangle
 	if e.SingleLine {
 		if len(e.lines) > 0 {
@@ -390,11 +390,11 @@ func (e *DuoUIeditor) scrollBounds() image.Rectangle {
 	return b
 }
 
-func (e *DuoUIeditor) scrollRel(dx, dy int) {
+func (e *Editor) scrollRel(dx, dy int) {
 	e.scrollAbs(e.scrollOff.X+dx, e.scrollOff.Y+dy)
 }
 
-func (e *DuoUIeditor) scrollAbs(x, y int) {
+func (e *Editor) scrollAbs(x, y int) {
 	e.scrollOff.X = x
 	e.scrollOff.Y = y
 	b := e.scrollBounds()
@@ -412,7 +412,7 @@ func (e *DuoUIeditor) scrollAbs(x, y int) {
 	}
 }
 
-func (e *DuoUIeditor) moveCoord(c unit.Converter, pos image.Point) {
+func (e *Editor) moveCoord(c unit.Converter, pos image.Point) {
 	var (
 		prevDesc fixed.Int26_6
 		carLine  int
@@ -430,18 +430,16 @@ func (e *DuoUIeditor) moveCoord(c unit.Converter, pos image.Point) {
 	e.moveToLine(x, carLine)
 }
 
-func (e *DuoUIeditor) layoutText(c unit.Converter, s *text.Shaper, font text.Font) ([]text.Line, layout.Dimensions) {
-	txt := e.rr.String()
+func (e *Editor) layoutText(c unit.Converter, s text.Shaper, font text.Font) ([]text.Line, layout.Dimensions) {
+	e.rr.Reset()
 	opts := text.LayoutOptions{MaxWidth: e.maxWidth}
-	textLayout := s.Layout(c, font, txt, opts)
-	lines := textLayout.Lines
+	lines, _ := s.Layout(c, font, &e.rr, opts)
 	dims := linesDimens(lines)
 	for i := 0; i < len(lines)-1; i++ {
-		s := lines[i].Text.String
 		// To avoid layout flickering while editing, assume a soft newline takes
 		// up all available space.
-		if len(s) > 0 {
-			r, _ := utf8.DecodeLastRuneInString(s)
+		if layout := lines[i].Layout; len(layout) > 0 {
+			r := layout[len(layout)-1].Rune
 			if r != '\n' {
 				dims.Size.X = e.maxWidth
 				break
@@ -451,7 +449,7 @@ func (e *DuoUIeditor) layoutText(c unit.Converter, s *text.Shaper, font text.Fon
 	return lines, dims
 }
 
-func (e *DuoUIeditor) layoutCaret() (carLine, carCol int, x fixed.Int26_6, y int) {
+func (e *Editor) layoutCaret() (carLine, carCol int, x fixed.Int26_6, y int) {
 	var idx int
 	var prevDesc fixed.Int26_6
 loop:
@@ -459,46 +457,43 @@ loop:
 		l := e.lines[carLine]
 		y += (prevDesc + l.Ascent).Ceil()
 		prevDesc = l.Descent
-		if carLine == len(e.lines)-1 || idx+len(l.Text.String) > e.rr.caret {
-			str := l.Text.String
-			for _, adv := range l.Text.Advances {
+		if carLine == len(e.lines)-1 || idx+len(l.Layout) > e.rr.caret {
+			for _, g := range l.Layout {
 				if idx == e.rr.caret {
 					break loop
 				}
-				x += adv
-				_, s := utf8.DecodeRuneInString(str)
-				idx += s
-				str = str[s:]
+				x += g.Advance
+				idx += utf8.RuneLen(g.Rune)
 				carCol++
 			}
 			break
 		}
-		idx += len(l.Text.String)
+		idx += l.Len
 	}
 	x += align(e.Alignment, e.lines[carLine].Width, e.viewSize.X)
 	return
 }
 
-func (e *DuoUIeditor) invalidate() {
+func (e *Editor) invalidate() {
 	e.valid = false
 }
 
 // Delete runes from the caret position. The sign of runes specifies the
 // direction to delete: positive is forward, negative is backward.
-func (e *DuoUIeditor) Delete(runes int) {
+func (e *Editor) Delete(runes int) {
 	e.rr.deleteRunes(runes)
 	e.carXOff = 0
 	e.invalidate()
 }
 
 // Insert inserts text at the caret, moving the caret forward.
-func (e *DuoUIeditor) Insert(s string) {
+func (e *Editor) Insert(s string) {
 	e.append(s)
 	e.caretScroll = true
 	e.invalidate()
 }
 
-func (e *DuoUIeditor) append(s string) {
+func (e *Editor) append(s string) {
 	if e.SingleLine {
 		s = strings.ReplaceAll(s, "\n", "")
 	}
@@ -506,13 +501,13 @@ func (e *DuoUIeditor) append(s string) {
 	e.rr.caret += len(s)
 }
 
-func (e *DuoUIeditor) prepend(s string) {
+func (e *Editor) prepend(s string) {
 	e.rr.prepend(s)
 	e.carXOff = 0
 	e.invalidate()
 }
 
-func (e *DuoUIeditor) movePages(pages int) {
+func (e *Editor) movePages(pages int) {
 	_, _, carX, carY := e.layoutCaret()
 	y := carY + pages*e.viewSize.Y
 	var (
@@ -536,7 +531,7 @@ func (e *DuoUIeditor) movePages(pages int) {
 	e.carXOff = e.moveToLine(carX+e.carXOff, carLine2)
 }
 
-func (e *DuoUIeditor) moveToLine(carX fixed.Int26_6, carLine2 int) fixed.Int26_6 {
+func (e *Editor) moveToLine(carX fixed.Int26_6, carLine2 int) fixed.Int26_6 {
 	carLine, carCol, _, _ := e.layoutCaret()
 	if carLine2 < 0 {
 		carLine2 = 0
@@ -553,11 +548,11 @@ func (e *DuoUIeditor) moveToLine(carX fixed.Int26_6, carLine2 int) fixed.Int26_6
 		// Move to start of line2.
 		if carLine2 > carLine {
 			for i := carLine; i < carLine2; i++ {
-				e.rr.caret += len(e.lines[i].Text.String)
+				e.rr.caret += e.lines[i].Len
 			}
 		} else {
 			for i := carLine - 1; i >= carLine2; i-- {
-				e.rr.caret -= len(e.lines[i].Text.String)
+				e.rr.caret -= e.lines[i].Len
 			}
 		}
 	}
@@ -569,15 +564,15 @@ func (e *DuoUIeditor) moveToLine(carX fixed.Int26_6, carLine2 int) fixed.Int26_6
 		end = 1
 	}
 	// Move to rune closest to previous horizontal position.
-	for i := 0; i < len(l2.Text.Advances)-end; i++ {
-		adv := l2.Text.Advances[i]
+	for i := 0; i < len(l2.Layout)-end; i++ {
+		g := l2.Layout[i]
 		if carX2 >= carX {
 			break
 		}
-		if carX2+adv-carX >= carX-carX2 {
+		if carX2+g.Advance-carX >= carX-carX2 {
 			break
 		}
-		carX2 += adv
+		carX2 += g.Advance
 		_, s := e.rr.runeAt(e.rr.caret)
 		e.rr.caret += s
 	}
@@ -586,23 +581,23 @@ func (e *DuoUIeditor) moveToLine(carX fixed.Int26_6, carLine2 int) fixed.Int26_6
 
 // Move the caret: positive distance moves forward, negative distance moves
 // backward.
-func (e *DuoUIeditor) Move(distance int) {
+func (e *Editor) Move(distance int) {
 	e.rr.move(distance)
 	e.carXOff = 0
 }
 
-func (e *DuoUIeditor) moveStart() {
+func (e *Editor) moveStart() {
 	carLine, carCol, x, _ := e.layoutCaret()
-	advances := e.lines[carLine].Text.Advances
+	layout := e.lines[carLine].Layout
 	for i := carCol - 1; i >= 0; i-- {
 		_, s := e.rr.runeBefore(e.rr.caret)
 		e.rr.caret -= s
-		x -= advances[i]
+		x -= layout[i].Advance
 	}
 	e.carXOff = -x
 }
 
-func (e *DuoUIeditor) moveEnd() {
+func (e *Editor) moveEnd() {
 	carLine, carCol, x, _ := e.layoutCaret()
 	l := e.lines[carLine]
 	// Only move past the end of the last line
@@ -610,8 +605,9 @@ func (e *DuoUIeditor) moveEnd() {
 	if carLine < len(e.lines)-1 {
 		end = 1
 	}
-	for i := carCol; i < len(l.Text.Advances)-end; i++ {
-		adv := l.Text.Advances[i]
+	layout := l.Layout
+	for i := carCol; i < len(layout)-end; i++ {
+		adv := layout[i].Advance
 		_, s := e.rr.runeAt(e.rr.caret)
 		e.rr.caret += s
 		x += adv
@@ -620,7 +616,7 @@ func (e *DuoUIeditor) moveEnd() {
 	e.carXOff = l.Width + a - x
 }
 
-func (e *DuoUIeditor) scrollToCaret() {
+func (e *Editor) scrollToCaret() {
 	carLine, _, x, y := e.layoutCaret()
 	l := e.lines[carLine]
 	if e.SingleLine {

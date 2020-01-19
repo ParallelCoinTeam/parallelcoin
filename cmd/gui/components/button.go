@@ -8,7 +8,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/p9c/pod/cmd/gui/widget"
+	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/gio/f32"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/op"
@@ -38,7 +38,7 @@ type DuoUIbutton struct {
 	IconColor         color.RGBA
 	PaddingVertical   unit.Value
 	PaddingHorizontal unit.Value
-	shaper            *text.Shaper
+	shaper            text.Shaper
 	hover             bool
 }
 
@@ -111,7 +111,6 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 				buttonLayoutList.Layout(gtx, len(buttonLayout), func(i int) {
 					layout.UniformInset(unit.Dp(0)).Layout(gtx, buttonLayout[i])
 				})
-
 			})
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
 			button.Layout(gtx)

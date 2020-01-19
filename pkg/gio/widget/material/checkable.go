@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package components
+package material
 
 import (
 	"image"
@@ -21,13 +21,13 @@ type checkable struct {
 	IconColor          color.RGBA
 	Size               unit.Value
 	shaper             text.Shaper
-	checkedStateIcon   *DuoUIicon
-	uncheckedStateIcon *DuoUIicon
+	checkedStateIcon   *Icon
+	uncheckedStateIcon *Icon
 }
 
 func (c *checkable) layout(gtx *layout.Context, checked bool) {
 
-	var icon *DuoUIicon
+	var icon *Icon
 	if checked {
 		icon = c.checkedStateIcon
 	} else {

@@ -3,19 +3,20 @@ package loader
 import (
 	"encoding/hex"
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet"
 	"time"
 )
 
-func CreateWallet(ldr *DuoUIload, privPassphrase, duoSeed, pubPassphrase, walletDir string) {
+func CreateWallet(cx *conte.Xt, privPassphrase, duoSeed, pubPassphrase, walletDir string) {
 	var err error
 	var seed []byte
 	if walletDir == "" {
-		walletDir = *ldr.cx.Config.WalletFile
+		walletDir = *cx.Config.WalletFile
 	}
-	l := wallet.NewLoader(ldr.cx.ActiveNet, *ldr.cx.Config.WalletFile, 250)
+	l := wallet.NewLoader(cx.ActiveNet, *cx.Config.WalletFile, 250)
 
 	if duoSeed == "" {
 		seed, err = hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
@@ -38,9 +39,9 @@ func CreateWallet(ldr *DuoUIload, privPassphrase, duoSeed, pubPassphrase, wallet
 	}
 
 	//duo.Boot.IsFirstRun = false
-	*ldr.cx.Config.WalletPass = pubPassphrase
-	*ldr.cx.Config.WalletFile = walletDir
+	*cx.Config.WalletPass = pubPassphrase
+	*cx.Config.WalletFile = walletDir
 
-	save.Pod(ldr.cx.Config)
+	save.Pod(cx.Config)
 	//log.INFO(rc)
 }

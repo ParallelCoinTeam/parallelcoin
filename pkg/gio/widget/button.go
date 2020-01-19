@@ -25,7 +25,6 @@ type Button struct {
 type Click struct {
 	Position f32.Point
 	Time     time.Time
-	Hover    bool
 }
 
 func (b *Button) Clicked(gtx *layout.Context) bool {
@@ -53,8 +52,6 @@ func (b *Button) Layout(gtx *layout.Context) {
 	b.clicks -= b.prevClicks
 	b.prevClicks = 0
 	b.processEvents(gtx)
-	//if e.Modifiers.
-
 	b.click.Add(gtx.Ops)
 	for len(b.history) > 0 {
 		c := b.history[0]
@@ -67,17 +64,6 @@ func (b *Button) Layout(gtx *layout.Context) {
 }
 
 func (b *Button) processEvents(gtx *layout.Context) {
-	//if b.click.State() != gesture.StateFocused{
-	//	fmt.Println("assssssssssssssssStateNormal")
-	//}else{
-	//	fmt.Println("assssssssssssssssStateFocused")
-	//}
-
-	//case gesture.StateNormal:
-	//	fmt.Println("assssssssssssssssStateNormal")
-	//case gesture.StateFocused:
-	//	fmt.Println("assssssssssssssssStateFocused")
-	//}
 	for _, e := range b.click.Events(gtx) {
 		switch e.Type {
 		case gesture.TypeClick:

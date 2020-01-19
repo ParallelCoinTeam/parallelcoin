@@ -35,6 +35,7 @@ type RcVar struct {
 	screen string `json:"screen"`
 }
 
+
 //type rcVar interface {
 //	GetDuoUItransactions(sfrom, count int, cat string)
 //	GetDuoUIbalance()

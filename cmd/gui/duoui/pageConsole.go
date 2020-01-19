@@ -3,7 +3,7 @@ package duoui
 import (
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/widget"
+	"github.com/p9c/pod/pkg/gio/widget"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gio/layout"
 	"github.com/p9c/pod/pkg/gio/unit"
@@ -11,7 +11,7 @@ import (
 
 var (
 	testLabel         = "testtopLabel"
-	consoleInputField = &widget.DuoUIeditor{
+	consoleInputField = &widget.Editor{
 		SingleLine: true,
 		Submit:     true,
 	}
@@ -27,13 +27,13 @@ func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 		layout.Flexed(0.9, func() {
 
 			duo.DuoUIcomponents.Console.Inset.Layout(duo.DuoUIcontext, func() {
-				//helpers.DuoUIdrawRect(duo.DuoUIcontext, duo.Cs.Width.Max, duo.Cs.Height.Max, helpers.HexARGB("ff30cfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+				//helpers.DuoUIdrawRect(duo.DuoUIcontext, duo.Cs.Width.Max, duo.Cs.Height.Max, helpers.HexARGB("ff30cfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				// Overview <<<
 				layout.Flex{}.Layout(duo.DuoUIcontext,
 					layout.Flexed(1, func() {
 
 						//duo.comp.content.i.Layout(duo.DuoUIcontext, func() {
-						//helpers.DuoUIdrawRect(duo.DuoUIcontext, duo.Cs.Width.Max, 180, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+						//helpers.DuoUIdrawRect(duo.DuoUIcontext, duo.Cs.Width.Max, 180, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 						// OverviewTop <<<
 						//balance := duo.comp.OverviewTop.Layout.Flex(duo.DuoUIcontext, 0.4, func() {
 						//	helpers.DuoUIdrawRect(duo.DuoUIcontext, duo.Cs.Width.Max-30, 180, color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}, 9.9, 9.9, 9.9, 9.9)
@@ -57,9 +57,9 @@ func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 				layout.Flex{}.Layout(duo.DuoUIcontext,
 					layout.Rigid(func() {
 
-						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.Cs.Width.Max, 60, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.Cs.Width.Max, 60, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 						//ln.Layout(duo.DuoUIcontext, func() {
-						//	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.Cs.Width.Max, 50, helpers.HexARGB("fff4f4f4"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+						//	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.Cs.Width.Max, 50, helpers.HexARGB("fff4f4f4"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 						//	in.Layout(duo.DuoUIcontext, func() {
 						//		e := duo.Th.DuoUIeditor("Run command", "Run txt")
 						//		e.Font.Style = text.Regular
@@ -85,10 +85,10 @@ func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 		}),
 	)
 	//return duo.comp.Content.Layout.Rigid(duo.DuoUIcontext, func() {
-	//	//helpers.DuoUIdrawRect(duo.DuoUIcontext, duo.Cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+	//	//helpers.DuoUIdrawRect(duo.DuoUIcontext, duo.Cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	//	// Header <<<
 	//	consoleOut := duo.comp.ConsoleOutput.Layout.Rigid(duo.DuoUIcontext, func() {
-	//		//helpers.DuoUIdrawRect(duo.DuoUIcontext, 64, 64, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, unit.Dp(0))
+	//		//helpers.DuoUIdrawRect(duo.DuoUIcontext, 64, 64, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	//
 	//
 	//
