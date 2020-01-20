@@ -14,8 +14,6 @@ require (
 	github.com/btcsuite/goleveldb v1.0.0
 	github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792
 	github.com/buger/goterm v0.0.0-20181115115552-c206103e1f37
-	github.com/chromedp/cdproto v0.0.0-20191114225735-6626966fbae4
-	github.com/chromedp/chromedp v0.5.2
 	github.com/conformal/fastsha256 v0.0.0-20160815193821-637e65642941
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
@@ -44,10 +42,9 @@ require (
 	golang.org/x/image v0.0.0-20191214001246-9130b4cfad52
 	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
 	golang.org/x/sys v0.0.0-20191218084908-4a24b4065292
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20191218040434-6f9e13bbec44
+	golang.org/x/tools v0.0.0-20191218040434-6f9e13bbec44 // indirect
 	google.golang.org/grpc v1.26.0
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
