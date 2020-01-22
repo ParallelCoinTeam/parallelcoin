@@ -24,7 +24,7 @@ func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 		layout.Flexed(1, func() {
 			cs := duo.DuoUIcontext.Constraints
 
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 			// START View <<<
 			widgets := []func(){
@@ -46,9 +46,9 @@ func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 					bal.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 					bal.Layout(duo.DuoUIcontext)
 
-					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff303030"), [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff303030", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 					ln.Layout(duo.DuoUIcontext, func() {
-						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "fff4f4f4", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 						in.Layout(duo.DuoUIcontext, func() {
 							e := duo.DuoUItheme.DuoUIeditor("Enter Passpharse", "Enter Passpharse")
 							e.Font.Style = text.Regular
@@ -65,9 +65,9 @@ func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 				},
 				func() {
 
-					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff303030"), [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff303030", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 					ln.Layout(duo.DuoUIcontext, func() {
-						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "fff4f4f4", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 						in.Layout(duo.DuoUIcontext, func() {
 							e := duo.DuoUItheme.DuoUIeditor("Repeat Passpharse", "Repeat Passpharse")
 							e.Font.Style = text.Regular

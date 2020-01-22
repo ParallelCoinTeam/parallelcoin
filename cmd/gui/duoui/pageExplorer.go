@@ -30,7 +30,7 @@ func DuoUIexplorer(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 			a := 1.0
 			//const duration = 5
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, helpers.HexARGB("ff535353"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, "ff535353", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 			layout.Flex{
 				Spacing: layout.SpaceBetween,

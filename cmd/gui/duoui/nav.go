@@ -60,7 +60,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								})
 							},
 							func() {
-								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							},
 							func() {
 								var sendMenuItem parallel.DuoUIbutton
@@ -71,7 +71,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								sendMenuItem.Layout(duo.DuoUIcontext, buttonSend)
 							},
 							func() {
-								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							},
 							func() {
 								in.Layout(duo.DuoUIcontext, func() {
@@ -84,7 +84,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								})
 							},
 							func() {
-								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							},
 							func() {
 								var addressBookMenuItem parallel.DuoUIbutton
@@ -95,7 +95,7 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								addressBookMenuItem.Layout(duo.DuoUIcontext, buttonAddressBook)
 							},
 							func() {
-								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							},
 							func() {
 								var historyMenuItem parallel.DuoUIbutton

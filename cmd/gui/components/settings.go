@@ -1,4 +1,4 @@
-package duoui
+package components
 
 import (
 	"fmt"
@@ -21,15 +21,14 @@ var (
 	}
 )
 
-func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-
+func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar){
 
 	layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			duo.DuoUIcomponents.Settings.Inset.Layout(duo.DuoUIcontext, func() {
-				//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIconstraints.Width.Max, duo.DuoUIconstraints.Height.Max, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIconstraints.Width.Max, duo.DuoUIconstraints.Height.Max, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 				// Settings  <<<
 				layout.Flex{
@@ -40,7 +39,7 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					}),
 					layout.Rigid(func() {
 						cs := duo.DuoUIcontext.Constraints
-						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, helpers.HexARGB("ffcf44cf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, "ffcf44cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 						groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
 						groupsList.Layout(duo.DuoUIcontext, groupsNumber, func(i int) {
 							in.Layout(duo.DuoUIcontext, func() {
@@ -64,8 +63,8 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 				if fmt.Sprint(fields.Legend) == duo.DuoUIconfiguration.Tabs.Current {
 					fieldsList.Layout(duo.DuoUIcontext, len(fields.Fields), func(il int) {
 						il = len(fields.Fields) - 1 - il
-						tl := Field{
-							field: &fields.Fields[il],
+						tl := helpers.Field{
+							Field: &fields.Fields[il],
 						}
 						layout.Flex{
 							Axis: layout.Vertical,
@@ -78,12 +77,12 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 										}.Layout(duo.DuoUIcontext,
 											layout.Rigid(func() {
 												in.Layout(duo.DuoUIcontext, func() {
-													duo.DuoUItheme.H6(fmt.Sprint(tl.field.Name)).Layout(duo.DuoUIcontext)
+													duo.DuoUItheme.H6(fmt.Sprint(tl.Field.Name)).Layout(duo.DuoUIcontext)
 												})
 											}),
 											layout.Rigid(func() {
 												in.Layout(duo.DuoUIcontext, func() {
-													duo.DuoUItheme.Body2(fmt.Sprint(tl.field.Description)).Layout(duo.DuoUIcontext)
+													duo.DuoUItheme.Body2(fmt.Sprint(tl.Field.Description)).Layout(duo.DuoUIcontext)
 												})
 											}),
 										)
@@ -91,7 +90,7 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 									layout.Flexed(0.38, func() {
 										layout.Align(layout.Start).Layout(duo.DuoUIcontext, func() {
 											layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(duo.DuoUIcontext, func() {
-												tl.inputFields(duo, cx)
+												tl.InputFields(duo, cx)
 											})
 										})
 									}),
@@ -99,13 +98,11 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 							}),
 							layout.Rigid(func() {
 								cs := duo.DuoUIcontext.Constraints
-								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							}))
 					})
 				}
 			}
 		}),
 	)
-
-	// Overview >>>
 }

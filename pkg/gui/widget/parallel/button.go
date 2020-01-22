@@ -3,12 +3,10 @@
 package parallel
 
 import (
-	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/pkg/gui/io/pointer"
 	"image"
 	"image/color"
 
-	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/gui/f32"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/op"
@@ -16,6 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/op/paint"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/gui/widget"
 )
 
 var (
@@ -50,11 +49,11 @@ func (t *DuoUItheme) DuoUIbutton(txt, txtColor, bgColor, iconColor string, iconS
 		},
 		Width:             width,
 		Height:            height,
-		TxColor:           helpers.HexARGB(txtColor),
-		BgColor:           helpers.HexARGB(bgColor),
+		TxColor:           HexARGB(txtColor),
+		BgColor:           HexARGB(bgColor),
 		Icon:              icon,
 		IconSize:          iconSize,
-		IconColor:             helpers.HexARGB(iconColor),
+		IconColor:         HexARGB(iconColor),
 		PaddingVertical:   unit.Dp(paddingVertical),
 		PaddingHorizontal: unit.Dp(paddingHorizontal),
 		shaper:            t.Shaper,
@@ -100,10 +99,10 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 					func() {
 						if b.Text != "" {
 							//layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(4), Right: unit.Dp(4)}.Layout(gtx, func() {
-								paint.ColorOp{Color: col}.Add(gtx.Ops)
-								widget.Label{
-									Alignment:text.Middle,
-								}.Layout(gtx, b.shaper, b.Font, b.Text)
+							paint.ColorOp{Color: col}.Add(gtx.Ops)
+							widget.Label{
+								Alignment: text.Middle,
+							}.Layout(gtx, b.shaper, b.Font, b.Text)
 							//})
 						}
 					},

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Unlicense OR MIT
-package duoui
+package helpers
 
 import (
-	"github.com/p9c/pod/cmd/gui/componentsWidgets"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/conte"
@@ -32,26 +31,26 @@ import (
 //)
 
 type Field struct {
-	field *pod.Field
+	Field *pod.Field
 }
 
-func (f *Field) inputFields(duo *models.DuoUI, cx *conte.Xt) {
+func (f *Field) InputFields(duo *models.DuoUI, cx *conte.Xt) {
 
-	switch f.field.Type {
+	switch f.Field.Type {
 	case "array":
-		switch f.field.InputType {
+		switch f.Field.InputType {
 		case "text":
 
 		default:
 		}
 	case "input":
-		switch f.field.InputType {
+		switch f.Field.InputType {
 		case "text":
-			componentsWidgets.DuoUIinputField(duo, cx, f.field.Name, f.field.Model, (duo.DuoUIconfiguration.Settings.Daemon.Widgets[f.field.Name]).(*widget.Editor))
+			DuoUIinputField(duo, cx, f.Field.Name, f.Field.Model, (duo.DuoUIconfiguration.Settings.Daemon.Widgets[f.Field.Name]).(*widget.Editor))
 		case "number":
-			e := duo.DuoUItheme.DuoUIeditor(f.field.Name, f.field.Name)
+			e := duo.DuoUItheme.DuoUIeditor(f.Field.Name, f.Field.Name)
 			e.Font.Style = text.Italic
-			lineEditor := (duo.DuoUIconfiguration.Settings.Daemon.Widgets[f.field.Name]).(*widget.Editor)
+			lineEditor := (duo.DuoUIconfiguration.Settings.Daemon.Widgets[f.Field.Name]).(*widget.Editor)
 			e.Layout(duo.DuoUIcontext, lineEditor)
 			for _, e := range lineEditor.Events(duo.DuoUIcontext) {
 				if _, ok := e.(widget.SubmitEvent); ok {
@@ -62,7 +61,7 @@ func (f *Field) inputFields(duo *models.DuoUI, cx *conte.Xt) {
 		default:
 		}
 	case "switch":
-		duo.DuoUItheme.DuoUIcheckBox(f.field.Name).Layout(duo.DuoUIcontext, (duo.DuoUIconfiguration.Settings.Daemon.Widgets[f.field.Name]).(*widget.CheckBox))
+		duo.DuoUItheme.DuoUIcheckBox(f.Field.Name).Layout(duo.DuoUIcontext, (duo.DuoUIconfiguration.Settings.Daemon.Widgets[f.Field.Name]).(*widget.CheckBox))
 	case "radio":
 		//radioButtonsGroup := (duo.DuoUIconfiguration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 		//layout.Flex{}.Layout(duo.DuoUIcontext,

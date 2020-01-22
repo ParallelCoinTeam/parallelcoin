@@ -3,7 +3,6 @@
 package parallel
 
 import (
-	"github.com/p9c/pod/cmd/gui/helpers"
 	"image/color"
 
 	"github.com/p9c/pod/pkg/gui/layout"
@@ -18,7 +17,6 @@ var (
 
 type DuoUIpage struct {
 	Text string
-	// Color is the text color.
 	TxColor      color.RGBA
 	Font         text.Font
 	Width        float32
@@ -40,8 +38,8 @@ func (t *DuoUItheme) DuoUIpage(txtColor, bgColor string, width, height, paddingV
 		},
 		Width:   width,
 		Height:  height,
-		TxColor: helpers.HexARGB(txtColor),
-		BgColor: helpers.HexARGB(bgColor),
+		TxColor: HexARGB(txtColor),
+		BgColor: HexARGB(bgColor),
 		//PaddingVertical:   unit.Dp(paddingVertical),
 		//PaddingHorizontal: unit.Dp(paddingHorizontal),
 		shaper: t.Shaper,
@@ -52,14 +50,14 @@ func (b DuoUIpage) Layout(gtx *layout.Context, content func()) {
 	layout.Flex{}.Layout(gtx,
 		layout.Flexed(1, func() {
 			cs := gtx.Constraints
-			in := layout.UniformInset(unit.Dp(1))
+			in := layout.UniformInset(unit.Dp(0))
 			in.Layout(gtx, func() {
 
-				helpers.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffacacac"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, HexARGB("ffacacac"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				// Overview <<<
 				in := layout.UniformInset(unit.Dp(1))
 				in.Layout(gtx, func() {
-					helpers.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+					DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 					content()
 				})
 				// Overview >>>

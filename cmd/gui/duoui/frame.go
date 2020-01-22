@@ -1,7 +1,6 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
@@ -10,6 +9,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/op/clip"
 	"github.com/p9c/pod/pkg/gui/op/paint"
 	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"image"
 	"image/color"
 )
@@ -47,7 +47,7 @@ func DuoUIframe(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar, bgColor string, 
 								}},
 								NE: borderRadius[0], NW: borderRadius[1], SE: borderRadius[2], SW: borderRadius[3],
 							}.Op(duo.DuoUIcontext.Ops).Add(duo.DuoUIcontext.Ops)
-							fill(duo.DuoUIcontext, helpers.HexARGB(bgColor))
+							fill(duo.DuoUIcontext, parallel.HexARGB(bgColor))
 						}),
 						layout.Stacked(func() {
 							cs.Width.Min = hmin

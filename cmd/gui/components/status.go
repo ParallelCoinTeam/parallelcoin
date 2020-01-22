@@ -1,4 +1,4 @@
-package componentsWidgets
+package components
 
 import (
 	"fmt"

@@ -1,9 +1,7 @@
-package componentsWidgets
+package helpers
 
 import (
-	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/f32"
 	"github.com/p9c/pod/pkg/gui/layout"
@@ -11,9 +9,9 @@ import (
 	"github.com/p9c/pod/pkg/gui/op/paint"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/gui/widget"
 	"image"
 	"image/color"
-	"reflect"
 )
 
 var (
@@ -34,8 +32,8 @@ var (
 func DuoUIinputField(duo *models.DuoUI, cx *conte.Xt, fieldName, fieldModel string, lineEditor *widget.Editor) {
 	//var btn material.Button
 	//fmt.Println("daj sta das", makeInstance(fieldModel))
-	bgcol := helpers.HexARGB("ffe4e4e4")
-	brcol := helpers.HexARGB("ff303030")
+	bgcol := hexARGB("ffe4e4e4")
+	brcol := hexARGB("ff303030")
 	hmin := duo.DuoUIcontext.Constraints.Width.Min
 	vmin := duo.DuoUIcontext.Constraints.Height.Min
 	layout.Stack{Alignment: layout.Center}.Layout(duo.DuoUIcontext,
@@ -156,12 +154,4 @@ func fill(gtx *layout.Context, col color.RGBA) {
 	paint.ColorOp{Color: col}.Add(gtx.Ops)
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	gtx.Dimensions = layout.Dimensions{Size: d}
-}
-
-var typeRegistry = make(map[string]reflect.Type)
-
-func makeInstance(name string) interface{} {
-	v := reflect.New(typeRegistry[name]).Elem()
-	// Maybe fill in fields here if necessary
-	return v.Interface()
 }

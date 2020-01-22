@@ -1,16 +1,19 @@
-package helpers
+package parallel
 
 import (
+	"image"
+	"image/color"
+	"fmt"
+
 	"github.com/p9c/pod/pkg/gui/f32"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/op/clip"
 	"github.com/p9c/pod/pkg/gui/op/paint"
 	"github.com/p9c/pod/pkg/gui/unit"
-	"image"
 )
 
 
-func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color string, borderRadius [4]float32, padding [4]float32) {
+func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color color.RGBA, borderRadius [4]float32, padding [4]float32) {
 	in := layout.Inset{
 		Top:    unit.Dp(padding[0]),
 		Right:  unit.Dp(padding[1]),
@@ -24,7 +27,7 @@ func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color string, borderRadiu
 				Y: float32(h),
 			},
 		}
-		paint.ColorOp{Color: hexARGB(color)}.Add(gtx.Ops)
+		paint.ColorOp{Color: color}.Add(gtx.Ops)
 
 		clip.Rect{Rect: square,
 			NE: borderRadius[0], NW: borderRadius[1], SE: borderRadius[2], SW: borderRadius[3]}.Op(gtx.Ops).Add(gtx.Ops) // HLdraw
@@ -33,3 +36,8 @@ func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color string, borderRadiu
 	})
 }
 
+
+func HexARGB(s string) (c color.RGBA) {
+	_, _ = fmt.Sscanf(s, "%02x%02x%02x%02x", &c.A, &c.R, &c.G, &c.B)
+	return
+}

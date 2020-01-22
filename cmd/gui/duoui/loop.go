@@ -63,12 +63,12 @@ func DuoUImainMenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	duo.DuoUIcomponents.View.Layout.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			//DuoUIheader(duo,rc)
 		}),
 		layout.Flexed(1, func() {
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			//DuoUIbody(duo,cx,rc)
 		}),
 	)
@@ -78,7 +78,7 @@ func DuoUImainMenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 func DuoUIgrid(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	// START View <<<
 	cs := duo.DuoUIcontext.Constraints
-	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 	layout.Flex{Axis: layout.Vertical}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {

@@ -1,4 +1,4 @@
-package componentsWidgets
+package components
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ func listItem(duo *models.DuoUI, name, value string){
 				layout.Rigid(func() {
 					layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right:unit.Dp(0)}.Layout(duo.DuoUIcontext, func() {
 						if Icon != nil {
-							Icon.Color = helpers.HexARGB("ff303030")
+							Icon.Color = hexARGB("ff303030")
 							Icon.Layout(duo.DuoUIcontext, unit.Px(float32(32)))
 						}
 						duo.DuoUIcontext.Dimensions = layout.Dimensions{
@@ -68,13 +68,13 @@ cs := duo.DuoUIcontext.Constraints
 				listItem(duo, "Balance :", rc.Balance + " " + duo.DuoUIconfiguration.Abbrevation)
 			},
 			func(){
-				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max , 1, helpers.HexARGB("ffbdbdbd"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max , 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			},
 			func() {
 				listItem(duo, "Unconfirmed :", rc.Unconfirmed)
 			},
 			func(){
-				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max , 1, helpers.HexARGB("ffbdbdbd"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max , 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			},
 			func() {
 				listItem(duo, "Transactions :", fmt.Sprint(rc.Transactions.TxsNumber))
@@ -122,4 +122,9 @@ cs := duo.DuoUIcontext.Constraints
 	//	)
 	//
 	//})
+}
+
+func hexARGB(s string) (c color.RGBA) {
+	_, _ = fmt.Sscanf(s, "%02x%02x%02x%02x", &c.A, &c.R, &c.G, &c.B)
+	return
 }

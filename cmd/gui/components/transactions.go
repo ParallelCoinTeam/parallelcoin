@@ -1,4 +1,4 @@
-package componentsWidgets
+package components
 
 import (
 	"fmt"
@@ -73,7 +73,7 @@ func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, helpers.HexARGB("ff3030cf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, "ff3030cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 			in := layout.UniformInset(unit.Dp(8))
 			in.Layout(duo.DuoUIcontext, func() {
@@ -120,7 +120,7 @@ func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					// Balance status item
 					layout.Rigid(func() {
 						cs := duo.DuoUIcontext.Constraints
-						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff424242"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff424242", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 						//const n = 5
 						//list.Layout(duo.DuoUIcontext, n, func(i int) {
@@ -147,7 +147,7 @@ func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 							t := rc.Txs.Txs[i]
 							a := 1.0
 							//const duration = 5
-							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, helpers.HexARGB("ff535353"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, "ff535353", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 							layout.Flex{
 								Spacing: layout.SpaceBetween,
@@ -220,7 +220,7 @@ func counter(duo *models.DuoUI) {
 					layout.Flex{Axis: layout.Horizontal}.Layout(duo.DuoUIcontext,
 						layout.Rigid(func() {
 							//cs := duo.DuoUIcontext.Constraints
-							//helpers.DrawRectangle(duo.DuoUIcontext, cs.Width.Max, 120, helpers.HexARGB("ff3030cf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+							//helpers.DrawRectangle(duo.DuoUIcontext, cs.Width.Max, 120, "ff3030cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							in := layout.UniformInset(unit.Dp(0))
 							in.Layout(duo.DuoUIcontext, func() {
 								layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
@@ -261,13 +261,13 @@ func (b *Button) Layout(duo *models.DuoUI) {
 	}
 
 	cs := duo.DuoUIcontext.Constraints
-	colorBg := helpers.HexARGB("ff30cfcf")
-	colorBorder := helpers.HexARGB("ffcf3030")
+	colorBg := "ff30cfcf"
+	colorBorder := "ffcf3030"
 	border := unit.Dp(1)
 
 	if b.pressed {
-		colorBg = helpers.HexARGB("ffcf30cf")
-		colorBorder = helpers.HexARGB("ff303030")
+		colorBg = "ffcf30cf"
+		colorBorder = "ff303030"
 		border = unit.Dp(3)
 	}
 	pointer.Rect( // HLevent

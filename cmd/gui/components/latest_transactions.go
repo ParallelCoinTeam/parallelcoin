@@ -1,4 +1,4 @@
-package componentsWidgets
+package components
 
 import (
 	"fmt"
@@ -20,13 +20,13 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, helpers.HexARGB("ff3030cf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, "ff3030cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 			in := layout.UniformInset(unit.Dp(8))
 			in.Layout(duo.DuoUIcontext, func() {
 
 				latestx := duo.DuoUItheme.H5("Latest Transactions")
-				latestx.Color = helpers.HexARGB("ffcfcfcf")
+				//latestx.Color = "ffcfcfcf"
 				latestx.Alignment = text.Start
 				latestx.Layout(duo.DuoUIcontext)
 			})
@@ -39,7 +39,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					// Balance status item
 					layout.Rigid(func() {
 						cs := duo.DuoUIcontext.Constraints
-						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff424242"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff424242", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 						//const n = 5
 						//list.Layout(duo.DuoUIcontext, n, func(i int) {
@@ -56,7 +56,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 							t := rc.Transactions.Txs[i]
 							a := 1.0
 							//const duration = 5
-							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 							layout.Flex{
 								Spacing: layout.SpaceBetween,
