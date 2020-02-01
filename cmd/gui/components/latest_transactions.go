@@ -11,6 +11,12 @@ import (
 	"github.com/p9c/pod/pkg/gui/unit"
 )
 
+var (
+	latestTransList = &layout.List{
+		Axis: layout.Vertical,
+	}
+)
+
 func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 
 	rc.GetDuoUIlastTxs(duo, cx)
@@ -47,10 +53,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 						//
 						//	duo.DuoUItheme.H3(txt).Layout(duo.DuoUIcontext)
 						//})
-						transList := &layout.List{
-							Axis: layout.Vertical,
-						}
-						transList.Layout(duo.DuoUIcontext, len(rc.Transactions.Txs), func(i int) {
+						latestTransList.Layout(duo.DuoUIcontext, len(rc.Transactions.Txs), func(i int) {
 							// Invert list
 							//i = len(txs.Txs) - 1 - i
 							t := rc.Transactions.Txs[i]
@@ -108,7 +111,6 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 										sat.Color = helpers.Alpha(a, sat.Color)
 										sat.Layout(duo.DuoUIcontext)
 									})
-
 
 								}),
 							)

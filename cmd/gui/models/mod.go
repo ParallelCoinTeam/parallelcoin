@@ -1,9 +1,9 @@
 package models
 
 import (
-	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/gui/app"
 	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"github.com/p9c/pod/pkg/pod"
 	"image/color"
