@@ -7,10 +7,10 @@ import (
 	"github.com/p9c/pod/pkg/gui/layout"
 )
 
-func DuoUIsidebar(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-	duo.DuoUIcomponents.Sidebar.Layout.Layout(duo.DuoUIcontext,
-		layout.Rigid(func() {
-			DuoUImenu(duo, cx, rc)
-		}),
-	)
+func DuoUIsidebar(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
+	return func(){
+		duo.DuoUIcomponents.Sidebar.Layout.Layout(duo.DuoUIcontext,
+			layout.Rigid(DuoUImenu(duo, cx, rc)),
+		)
+	}
 }

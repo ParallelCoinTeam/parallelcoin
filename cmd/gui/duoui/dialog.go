@@ -6,10 +6,12 @@ import (
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
 	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"golang.org/x/exp/shiny/materialdesign/icons"
+	"image/color"
 )
 
 var (
@@ -42,9 +44,8 @@ func DuoUIdialog(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	cs := duo.DuoUIcontext.Constraints
 	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ee000000", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
-
 		cs := duo.DuoUIcontext.Constraints
-		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Min, cs.Height.Min, "ee000000", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Min, cs.Height.Min, "ff000555", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 		layout.Flex{
 			Axis:      layout.Vertical,
@@ -55,10 +56,16 @@ func DuoUIdialog(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					Axis: layout.Horizontal,
 					Alignment: layout.Middle,
 				}.Layout(duo.DuoUIcontext,
-					layout.Rigid(dialogButon("Cancel", duo, rc, buttonDialogCancel, iconCancel)),
-					layout.Rigid(dialogButon("OK", duo, rc, buttonDialogOK, iconOK)),
-					layout.Rigid(dialogButon("Close", duo, rc, buttonDialogClose, iconClose)),
-
+					layout.Rigid(func(){
+							layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
+								layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
+									cur := duo.DuoUItheme.H4("Dialog box!")
+									cur.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+									cur.Alignment = text.Start
+									cur.Layout(duo.DuoUIcontext)
+								})
+							})
+					}),
 				)
 			}),
 			layout.Rigid(func() {
