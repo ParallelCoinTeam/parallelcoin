@@ -14,7 +14,7 @@ import (
 // System Ststus
 
 func
-(rc *RcVar) GetDuoUItatus(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIstatus(duo *models.DuoUI, cx *conte.Xt) {
 	rc.Status = *new(models.DuoUIstatus)
 	v, err := rpc.HandleVersion(cx.RPCServer, nil, nil)
 	if err != nil {
@@ -70,15 +70,15 @@ func
 (rc *RcVar) GetDuoUInetworkLastBlock(duo *models.DuoUI, cx *conte.Xt) {
 	for _, g := range cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
 		l := g.ToPeer().StatsSnapshot().LastBlock
-		if l > rc.NetLastBlock {
-			rc.NetLastBlock = l
+		if l > rc.NetworkLastBlock {
+			rc.NetworkLastBlock = l
 		}
 	}
 	return
 }
 func
 (rc *RcVar) GetDuoUIconnectionCount(duo *models.DuoUI, cx *conte.Xt) {
-	rc.Connections = cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+	rc.ConnectionCount = cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
 	return
 }
 func

@@ -64,46 +64,48 @@ func
 		rc.PushDuoUIalert("Error", err.Error(), "error")
 	}
 	rc.Transactions.TxsNumber = len(lt)
+	txsArray := *new([]models.DuoUItx)
 	// lt := listTransactions.([]json.ListTransactionsResult)
 	switch c := cat; c {
 	case "received":
 		for _, tx := range lt {
 			if tx.Category == "received" {
-				rc.Transactions.Txs = append(rc.Transactions.Txs, txs(tx))
+				txsArray = append(txsArray, txs(tx))
 			}
 		}
 	case "sent":
 		for _, tx := range lt {
 			if tx.Category == "sent" {
-				rc.Transactions.Txs = append(rc.Transactions.Txs, txs(tx))
+				txsArray = append(txsArray, txs(tx))
 			}
 		}
 	case "immature":
 		for _, tx := range lt {
 			if tx.Category == "immature" {
-				rc.Transactions.Txs = append(rc.Transactions.Txs, txs(tx))
+				txsArray = append(txsArray, txs(tx))
 			}
 		}
 	case "generate":
 		for _, tx := range lt {
 			if tx.Category == "generate" {
-				rc.Transactions.Txs = append(rc.Transactions.Txs, txs(tx))
+				txsArray = append(txsArray, txs(tx))
 			}
 		}
 	default:
 		for _, tx := range lt {
-			rc.Transactions.Txs = append(rc.Transactions.Txs, txs(tx))
+			txsArray = append(txsArray, txs(tx))
 		}
 	}
+	rc.Transactions.Txs = txsArray
 	return &rc.Transactions
 }
 func
 txs(t btcjson.ListTransactionsResult) models.DuoUItx {
 	return models.DuoUItx{
-		TxID:   t.TxID,
-		Amount: t.Amount,
+		TxID:     t.TxID,
+		Amount:   t.Amount,
 		Category: t.Category,
-		Time:   time.Unix(t.Time, 0),
+		Time:     time.Unix(t.Time, 0),
 	}
 
 }
@@ -114,7 +116,7 @@ func
 }
 func
 (rc *RcVar) GetDuoUITransactionsExcertps(duo *models.DuoUI, cx *conte.Xt) {
-	lt, err := cx.WalletServer.ListTransactions(0, 99999)
+	lt, err := cx.WalletServer.ListTransactions(0, rc.Txs.TxsListNumber)
 	if err != nil {
 		rc.PushDuoUIalert("Error", err.Error(), "error")
 	}
@@ -137,14 +139,17 @@ func
 		})
 	}
 	var balance float64
+	txs := *new([]models.DuoUItransactionExcerpt)
 	for _, tx := range txseRaw {
 		balance = balance + tx.Amount
 		tx.Balance = balance
-		rc.Txs.Txs = append(rc.Txs.Txs, tx)
+		txs = append(txs, tx)
 		if rc.Txs.Balance > balanceHeight {
 			balanceHeight = rc.Txs.Balance
 		}
+
 	}
+	rc.Txs.Txs = txs
 	rc.Txs.BalanceHeight = balanceHeight
 	return
 }

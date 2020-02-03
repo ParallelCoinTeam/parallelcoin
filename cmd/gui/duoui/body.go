@@ -4,16 +4,18 @@ import (
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gio/layout"
+	"github.com/p9c/pod/pkg/gui/layout"
 )
 
-func DuoUIbody(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-	duo.Comp.Body.Layout.Layout(duo.Gc,
-		layout.Rigid(func() {
-			DuoUIsidebar(duo, cx, rc)
-		}),
-		layout.Flexed(1, func() {
-			DuoUIcontent(duo,cx,rc)
-		}),
-	)
+func DuoUIbody(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
+	return func() {
+		duo.DuoUIcomponents.Body.Layout.Layout(duo.DuoUIcontext,
+			layout.Rigid(func() {
+				DuoUIsidebar(duo, cx, rc)
+			}),
+			layout.Flexed(1, func() {
+				DuoUIcontent(duo, cx, rc)
+			}),
+		)
+	}
 }

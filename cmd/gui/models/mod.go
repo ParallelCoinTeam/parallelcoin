@@ -1,46 +1,48 @@
 package models
 
 import (
-	"github.com/p9c/pod/pkg/gio/app"
-	"github.com/p9c/pod/pkg/gio/layout"
-	"github.com/p9c/pod/pkg/gio/unit"
-	"github.com/p9c/pod/pkg/gio/widget"
-	"github.com/p9c/pod/pkg/gio/widget/material"
+	"github.com/p9c/pod/pkg/gui/app"
+	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/widget"
+	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"github.com/p9c/pod/pkg/pod"
 	"image/color"
 	"time"
 )
 
 type DuoUI struct {
-	Boot    *Boot
-	Ww      *app.Window
-	Gc      *layout.Context
-	Th      *material.Theme
-	Cs      *layout.Constraints
-	Ico     *DuoUIicons
-	Comp    *DuoUIcomponents
-	Menu    *DuoUInav
-	Conf    *DuoUIconf
-	Quit    chan struct{}
-	Ready   chan struct{}
-	IsReady bool
+	DuoUIboot          *Boot
+	DuoUIwindow        *app.Window
+	DuoUIcontext       *layout.Context
+	DuoUItheme         *parallel.DuoUItheme
+	DuoUIconstraints   *layout.Constraints
+	DuoUIico           map[string]*parallel.DuoUIicon
+	DuoUIcomponents    *DuoUIcomponents
+	DuoUIconfiguration *DuoUIconfiguration
+	Quit               chan struct{}
+	Ready              chan struct{}
+	IsReady            bool
+	DuoUIready         chan struct{}
+	DuoUIisReady       bool
+	CurrentPage        string
 }
 
 type DuoUIcomponents struct {
 	View   DuoUIcomponent
 	Header DuoUIcomponent
+	Footer DuoUIcomponent
 	// Intro              DuoUIcomponent
 	Logo DuoUIcomponent
 	// Log                DuoUIcomponent
-	Body        DuoUIcomponent
-	Sidebar     DuoUIcomponent
-	Menu        DuoUIcomponent
-	Content     DuoUIcomponent
-	Overview    DuoUIcomponent
-	OverviewTop DuoUIcomponent
-	// SendReceive        DuoUIcomponent
-	// SendReceiveButtons DuoUIcomponent
-	OverviewBottom DuoUIcomponent
+	Body           DuoUIcomponent
+	Sidebar        DuoUIcomponent
+	Menu           DuoUIcomponent
+	Content        DuoUIcomponent
+	Overview       DuoUIcomponent
+	Send           DuoUIcomponent
+	SendButtons    DuoUIcomponent
+	Receive        DuoUIcomponent
+	ReceiveButtons DuoUIcomponent
 	Status         DuoUIcomponent
 	StatusItem     DuoUIcomponent
 	History        DuoUIcomponent
@@ -58,43 +60,29 @@ type DuoUIcomponent struct {
 	Inset  layout.Inset
 }
 
-type DuoUInav struct {
-	Current       string
-	IcoBackground color.RGBA
-	IcoColor      color.RGBA
-	IcoPadding    unit.Value
-	IcoSize       unit.Value
-	Overview      widget.Button
-	History       widget.Button
-	AddressBook   widget.Button
-	Explorer      widget.Button
-	Console       widget.Button
-	Settings      widget.Button
-}
-
-type DuoUIicons struct {
-	Logo        *material.Icon
-	Overview    *material.Icon
-	History     *material.Icon
-	AddressBook *material.Icon
-	Network     *material.Icon
-	Explorer    *material.Icon
-	Console     *material.Icon
-	Settings    *material.Icon
-}
-
 type Boot struct {
-	IsBoot     bool `json:"boot"`
-	IsFirstRun bool `json:"firstrun"`
-	IsBootMenu bool `json:"menu"`
-	IsBootLogo bool `json:"logo"`
-	IsLoading  bool `json:"loading"`
+	IsBoot     bool   `json:"boot"`
+	IsFirstRun bool   `json:"firstrun"`
+	IsBootMenu bool   `json:"menu"`
+	IsBootLogo bool   `json:"logo"`
+	IsLoading  bool   `json:"loading"`
+	IsScreen   string `json:"screen"`
 }
 
-type DuoUIconf struct {
-	Abbrevation     string
-	StatusTextColor color.RGBA
-	Settings        DuoUIsettings
+type DuoUIconfiguration struct {
+	Abbrevation        string
+	PrimaryTextColor   color.RGBA
+	SecondaryTextColor color.RGBA
+	PrimaryBgColor     color.RGBA
+	SecondaryBgColor   color.RGBA
+	Navigations        map[string]*parallel.DuoUIthemeNav
+	Tabs               DuoUIconfTabs
+	Settings           DuoUIsettings
+}
+
+type DuoUIconfTabs struct {
+	Current  string
+	TabsList map[string]*widget.Button
 }
 
 type DuoUIalert struct {
@@ -111,6 +99,17 @@ type DuoUIsettings struct {
 }
 
 type DaemonConfig struct {
-	Config *pod.Config `json:"config"`
-	Schema pod.Schema  `json:"schema"`
+	Config  *pod.Config `json:"config"`
+	Schema  pod.Schema  `json:"schema"`
+	Widgets map[string]interface{}
+}
+
+type DuoUIblock struct {
+	Height     int64   `json:"height"`
+	BlockHash  string  `json:"hash"`
+	PowAlgoID  uint32  `json:"pow"`
+	Difficulty float64 `json:"diff"`
+	Amount     float64 `json:"amount"`
+	TxNum      int     `json:"txnum"`
+	Time       string  `json:"time"`
 }

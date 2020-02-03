@@ -2,9 +2,9 @@ package fonts
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/gio/font"
-	"github.com/p9c/pod/pkg/gio/font/opentype"
-	"github.com/p9c/pod/pkg/gio/text"
+	"github.com/p9c/pod/pkg/gui/font"
+	"github.com/p9c/pod/pkg/gui/font/opentype"
+	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/fonts/bariolbold"
 	"github.com/p9c/pod/pkg/fonts/bariolbolditalic"
 	"github.com/p9c/pod/pkg/fonts/bariollightitalic"

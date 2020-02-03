@@ -1,0 +1,18 @@
+package loader
+
+import (
+	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/gui/app"
+	"github.com/p9c/pod/pkg/log"
+)
+
+func DuoUIloader(rc *rcd.RcVar, cx *conte.Xt, firstRun bool) (err error) {
+	go func() {
+		if err := DuoUIloaderLoop(firstRun, cx); err != nil {
+			log.FATAL(err)
+		}
+	}()
+	app.Main()
+	return
+}
