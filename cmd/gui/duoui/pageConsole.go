@@ -24,8 +24,8 @@ var (
 	in = layout.UniformInset(unit.Dp(8))
 )
 
-func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
-	return func() {
+func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
 		layout.Flex{}.Layout(duo.DuoUIcontext,
 			layout.Flexed(1, func() {
 				duo.DuoUIcomponents.Console.Inset.Layout(duo.DuoUIcontext, func() {
@@ -46,7 +46,6 @@ func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
 									}),
 								)
 							})
-
 						}),
 						layout.Rigid(func() {
 							in.Layout(duo.DuoUIcontext, func() {

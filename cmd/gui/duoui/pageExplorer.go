@@ -17,8 +17,8 @@ var (
 	}
 )
 
-func DuoUIexplorer(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
-	return func() {
+func DuoUIexplorer(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
 		rc.GetBlocksExcerpts(cx, 0, 5)
 
 		in := layout.UniformInset(unit.Dp(60))

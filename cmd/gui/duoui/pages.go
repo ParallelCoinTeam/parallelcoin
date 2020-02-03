@@ -9,8 +9,8 @@ import (
 	"github.com/p9c/pod/pkg/gui/layout"
 )
 
-func DuoUIoverview(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
-	return func() {
+func DuoUIoverview(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
 		viewport := layout.Flex{Axis: layout.Horizontal}
 		if duo.DuoUIcontext.Constraints.Width.Max < 1024 {
 			viewport = layout.Flex{Axis: layout.Vertical}
@@ -32,16 +32,16 @@ func DuoUIoverview(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 		})
 	}
 }
-func DuoUIsend(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
-	return func() {
+func DuoUIsend(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
 		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
 		page.Layout(duo.DuoUIcontext, func() {
 			components.DuoUIsend(duo, cx, rc)
 		})
 	}
 }
-func DuoUIreceive(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
-	return func() {
+func DuoUIreceive(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
 		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
 		page.Layout(duo.DuoUIcontext, func() {
 			duo.DuoUItheme.H5("receive :").Layout(duo.DuoUIcontext)
@@ -49,16 +49,16 @@ func DuoUIreceive(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 	}
 }
 
-func DuoUIaddressbook(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
-	return func() {
+func DuoUIaddressbook(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
 		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
 		page.Layout(duo.DuoUIcontext, func() {
 			duo.DuoUItheme.H5("addressbook :").Layout(duo.DuoUIcontext)
 		})
 	}
 }
-func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
-	return func() {
+func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
 		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 0, 0)
 		page.Layout(duo.DuoUIcontext, func() {
 			components.DuoUIsettingsWidget(duo, cx, rc)
@@ -66,8 +66,8 @@ func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 	}
 }
 
-func DuoUInetwork(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
-	return func() {
+func DuoUInetwork(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
 		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
 		page.Layout(duo.DuoUIcontext, func() {
 			duo.DuoUItheme.H5("network :").Layout(duo.DuoUIcontext)
@@ -75,8 +75,8 @@ func DuoUInetwork(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 	}
 }
 
-func DuoUIhistory(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
-	return func() {
+func DuoUIhistory(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
 		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
 		page.Layout(duo.DuoUIcontext, func() {
 			components.DuoUItransactionsWidget(duo, cx, rc)
