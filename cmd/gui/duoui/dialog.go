@@ -45,7 +45,7 @@ func DuoUIdialog(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ee000000", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
 		//cs := duo.DuoUIcontext.Constraints
-		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, 408,150, "ff000555", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, 408,150, "ff3030cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 		layout.Flex{
 			Axis:      layout.Vertical,
@@ -73,9 +73,9 @@ func DuoUIdialog(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					Axis: layout.Horizontal,
 					Alignment: layout.Middle,
 				}.Layout(duo.DuoUIcontext,
-					layout.Rigid(dialogButon("Cancel", "ffcf30cf", "ff3030cf", "ff30cfcf", duo, rc, buttonDialogCancel, iconCancel)),
-					layout.Rigid(dialogButon("OK", "ffcf30cf", "ff3030cf", "ff30cfcf", duo, rc, buttonDialogOK, iconOK)),
-					layout.Rigid(dialogButon("Close", "ffcf30cf", "ff3030cf", "ff30cfcf", duo, rc, buttonDialogClose, iconClose)),
+					layout.Rigid(dialogButon("Cancel", "ffcfcfcf", "ffcf3030", "ffcfcfcf", duo, rc, buttonDialogCancel, iconCancel)),
+					layout.Rigid(dialogButon("OK", "ffcfcfcf", "ff308030", "ffcfcfcf", duo, rc, buttonDialogOK, iconOK)),
+					layout.Rigid(dialogButon("Close", "ffcfcfcf", "ffcf8030", "ffcfcfcf", duo, rc, buttonDialogClose, iconClose)),
 
 				)
 			}),
@@ -83,11 +83,11 @@ func DuoUIdialog(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	})
 }
 
-func dialogButon(text, bgColor,txtColor,iconColor string, duo *models.DuoUI, rc *rcd.RcVar, button *widget.Button, icon *parallel.DuoUIicon) func() {
+func dialogButon(text, txtColor, bgColor,iconColor string, duo *models.DuoUI, rc *rcd.RcVar, button *widget.Button, icon *parallel.DuoUIicon) func() {
 	var b parallel.DuoUIbutton
 	return func() {
 		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(duo.DuoUIcontext, func() {
-			b = duo.DuoUItheme.DuoUIbutton(text, bgColor,txtColor,iconColor, 24, 120, 60, 0, 0, icon)
+			b = duo.DuoUItheme.DuoUIbutton(text, txtColor, bgColor,iconColor, 24, 120, 60, 0, 0, icon)
 			for button.Clicked(duo.DuoUIcontext) {
 				rc.IsNotificationRun = false
 			}

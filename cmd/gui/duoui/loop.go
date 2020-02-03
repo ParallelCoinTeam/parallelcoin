@@ -2,8 +2,6 @@ package duoui
 
 import (
 	"errors"
-	"github.com/p9c/pod/cmd/gui/loader"
-
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -41,9 +39,9 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 					duo.DuoUIcontext.Reset(e.Config, e.Size)
 
 					//if rc.IsFirstRun {
-						loader.DuoUIloaderCreateWallet(duo, cx)
+					//	loader.DuoUIloaderCreateWallet(duo, cx)
 					//} else {
-					//	DuoUIgrid(duo, cx, rc)
+						DuoUIgrid(duo, cx, rc)
 						if rc.IsNotificationRun {
 							DuoUIdialog(duo, cx, rc)
 						}

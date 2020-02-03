@@ -16,13 +16,11 @@ import (
 	"github.com/p9c/pod/pkg/gui/unit"
 	"github.com/p9c/pod/pkg/gui/widget"
 )
-
 var (
-	buttonLayoutList = &layout.List{
+	buttonInsideLayoutList = &layout.List{
 		Axis: layout.Vertical,
 	}
 )
-
 type DuoUIbutton struct {
 	Text string
 	// Color is the text color.
@@ -61,8 +59,6 @@ func (t *DuoUItheme) DuoUIbutton(txt, txtColor, bgColor, iconColor string, iconS
 }
 
 func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
-	col := b.TxColor
-	bgcol := b.BgColor
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
 			rr := float32(gtx.Px(unit.Dp(0)))
@@ -73,7 +69,7 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 				}},
 				NE: rr, NW: rr, SE: rr, SW: rr,
 			}.Op(gtx.Ops).Add(gtx.Ops)
-			fill(gtx, bgcol)
+			fill(gtx, b.BgColor)
 			for _, c := range button.History() {
 				drawInk(gtx, c)
 			}
@@ -82,33 +78,9 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 			gtx.Constraints.Width.Min = int(b.Width)
 			gtx.Constraints.Height.Min = int(b.Height)
 			layout.Align(layout.Center).Layout(gtx, func() {
-				buttonLayout := []func(){
-					func() {
-						if b.Icon != nil {
-							layout.Inset{Top: b.PaddingVertical, Bottom: b.PaddingVertical, Left: b.PaddingHorizontal, Right: b.PaddingHorizontal}.Layout(gtx, func() {
-								if b.Icon != nil {
-									b.Icon.Color = b.IconColor
-									b.Icon.Layout(gtx, unit.Px(float32(b.IconSize)))
-								}
-								gtx.Dimensions = layout.Dimensions{
-									Size: image.Point{X: b.IconSize, Y: b.IconSize},
-								}
-							})
-						}
-					},
-					func() {
-						if b.Text != "" {
-							//layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(4), Right: unit.Dp(4)}.Layout(gtx, func() {
-							paint.ColorOp{Color: col}.Add(gtx.Ops)
-							widget.Label{
-								Alignment: text.Middle,
-							}.Layout(gtx, b.shaper, b.Font, b.Text)
-							//})
-						}
-					},
-				}
-				buttonLayoutList.Layout(gtx, len(buttonLayout), func(i int) {
-					layout.UniformInset(unit.Dp(0)).Layout(gtx, buttonLayout[i])
+
+				buttonInsideLayoutList.Layout(gtx, len(b.insideLayout(gtx)), func(i int) {
+					layout.UniformInset(unit.Dp(0)).Layout(gtx, b.insideLayout(gtx)[i])
 				})
 			})
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
@@ -117,15 +89,36 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 	)
 }
 
+func (b DuoUIbutton)insideLayout(gtx *layout.Context) []func() {
+	buttonLayout := []func(){
+		func() {
+			if b.Icon != nil {
+				layout.Inset{Top: b.PaddingVertical, Bottom: b.PaddingVertical, Left: b.PaddingHorizontal, Right: b.PaddingHorizontal}.Layout(gtx, func() {
+					if b.Icon != nil {
+						b.Icon.Color = b.IconColor
+						b.Icon.Layout(gtx, unit.Px(float32(b.IconSize)))
+					}
+					gtx.Dimensions = layout.Dimensions{
+						Size: image.Point{X: b.IconSize, Y: b.IconSize},
+					}
+				})
+			}
+		},
+		func() {
+			layout.Inset{Top: b.PaddingVertical, Bottom: b.PaddingVertical, Left: b.PaddingHorizontal, Right: b.PaddingHorizontal}.Layout(gtx, func() {
+				if b.Text != "" {
+					paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
+					widget.Label{
+						Alignment: text.Middle,
+					}.Layout(gtx, b.shaper, b.Font, b.Text)
+				}
+			})
+		},
+	}
+	return buttonLayout
+}
 func toPointF(p image.Point) f32.Point {
 	return f32.Point{X: float32(p.X), Y: float32(p.Y)}
-}
-
-func toRectF(r image.Rectangle) f32.Rectangle {
-	return f32.Rectangle{
-		Min: toPointF(r.Min),
-		Max: toPointF(r.Max),
-	}
 }
 
 func drawInk(gtx *layout.Context, c widget.Click) {

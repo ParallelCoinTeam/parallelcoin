@@ -42,17 +42,8 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 			in := layout.UniformInset(unit.Dp(16))
 			in.Layout(duo.DuoUIcontext, func() {
 				duo.DuoUIcomponents.Status.Layout.Layout(duo.DuoUIcontext,
-					// Balance status item
 					layout.Rigid(func() {
 						cs := duo.DuoUIcontext.Constraints
-						//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff424242", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
-						//const n = 5
-						//list.Layout(duo.DuoUIcontext, n, func(i int) {
-						//	txt := fmt.Sprintf("List element #%d", i)
-						//
-						//	duo.DuoUItheme.H3(txt).Layout(duo.DuoUIcontext)
-						//})
 						latestTransList.Layout(duo.DuoUIcontext, len(rc.Transactions.Txs), func(i int) {
 							// Invert list
 							//i = len(txs.Txs) - 1 - i
@@ -60,7 +51,6 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 							a := 1.0
 							//const duration = 5
 							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
 							layout.Flex{
 								Spacing: layout.SpaceBetween,
 							}.Layout(duo.DuoUIcontext,
@@ -97,16 +87,13 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 												l.Color = duo.DuoUItheme.Color.Hint
 												l.Color = helpers.Alpha(a, l.Color)
 												l.Layout(duo.DuoUIcontext)
-
 											}),
 										)
 									})
-
 								}),
 								layout.Rigid(func() {
 									in := layout.UniformInset(unit.Dp(15))
 									in.Layout(duo.DuoUIcontext, func() {
-
 										sat := duo.DuoUItheme.H6(fmt.Sprintf("%0.8f", t.Amount))
 										sat.Color = helpers.Alpha(a, sat.Color)
 										sat.Layout(duo.DuoUIcontext)

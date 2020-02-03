@@ -19,6 +19,7 @@ var (
 	}
 	consoleOutputList = &layout.List{
 		Axis: layout.Vertical,
+		ScrollToEnd:true,
 	}
 	ln = layout.UniformInset(unit.Dp(1))
 	in = layout.UniformInset(unit.Dp(8))
@@ -33,7 +34,7 @@ func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Conte
 						Axis:    layout.Vertical,
 						Spacing: layout.SpaceAround,
 					}.Layout(duo.DuoUIcontext,
-						layout.Rigid(func() {
+						layout.Flexed(1, func() {
 							consoleOutputList.Layout(duo.DuoUIcontext, len(rc.CommandsHistory.Commands), func(i int) {
 								t := rc.CommandsHistory.Commands[i]
 								layout.Flex{
