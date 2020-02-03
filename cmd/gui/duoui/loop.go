@@ -17,8 +17,8 @@ import (
 func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 	for {
 		select {
-		//case <-duo.Ready:
-		//	duo.IsReady = true
+		case <-duo.Ready:
+			duo.IsReady = true
 		case <-duo.Quit:
 			log.DEBUG("quit signal received")
 			interrupt.Request()
@@ -40,14 +40,14 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 				if duo.IsReady {
 					duo.DuoUIcontext.Reset(e.Config, e.Size)
 
-					if rc.IsFirstRun {
+					//if rc.IsFirstRun {
 						loader.DuoUIloaderCreateWallet(duo, cx)
-					} else {
-						DuoUIgrid(duo, cx, rc)
+					//} else {
+					//	DuoUIgrid(duo, cx, rc)
 						if rc.IsNotificationRun {
 							DuoUIdialog(duo, cx, rc)
 						}
-					}
+					//}
 
 					e.Frame(duo.DuoUIcontext.Ops)
 				} else {
