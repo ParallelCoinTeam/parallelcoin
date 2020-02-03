@@ -37,6 +37,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// we can do this without blocking because the channel has 1 buffer this way it falls
 		// immediately the GUI starts
 		duo.Ready <- struct{}{}
+		duo.IsReady = true
 		// Start Node
 		err = gui.DuoUInode(cx)
 		if err != nil {

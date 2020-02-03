@@ -7,13 +7,15 @@ import (
 	"github.com/p9c/pod/pkg/gui/layout"
 )
 
-func DuoUIbody(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
-	duo.DuoUIcomponents.Body.Layout.Layout(duo.DuoUIcontext,
-		layout.Rigid(func() {
-			DuoUIsidebar(duo, cx, rc)
-		}),
-		layout.Flexed(1, func() {
-			DuoUIcontent(duo,cx,rc)
-		}),
-	)
+func DuoUIbody(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
+	return func() {
+		duo.DuoUIcomponents.Body.Layout.Layout(duo.DuoUIcontext,
+			layout.Rigid(func() {
+				DuoUIsidebar(duo, cx, rc)
+			}),
+			layout.Flexed(1, func() {
+				DuoUIcontent(duo, cx, rc)
+			}),
+		)
+	}
 }

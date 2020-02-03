@@ -2,7 +2,16 @@ package rcd
 
 import (
 	"github.com/p9c/pod/cmd/gui/models"
+	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"time"
+)
+
+var (
+	consoleInputField = &widget.Editor{
+		SingleLine: true,
+		Submit:     true,
+	}
 )
 
 type RcVar struct {
@@ -15,26 +24,27 @@ type RcVar struct {
 	Difficulty       float64
 	BlockCount       int64
 	NetworkLastBlock int32
-	ConnectionCount int32
+	ConnectionCount  int32
 
-	Balance      string
-	Unconfirmed  string
-	TxsNumber    int
-	Transactions models.DuoUItransactions
-	Txs          models.DuoUItransactionsExcerpts
-	LastTxs      models.DuoUItransactions
-	Settings     models.DuoUIsettings
+	Balance         string
+	Unconfirmed     string
+	TxsNumber       int
+	CommandsHistory models.DuoUIcommandsHistory
+	Transactions    models.DuoUItransactions
+	Txs             models.DuoUItransactionsExcerpts
+	LastTxs         models.DuoUItransactions
+	Settings        models.DuoUIsettings
 
-	Sent       bool
-	IsFirstRun bool
-	Localhost  models.DuoUIlocalHost
+	Sent              bool
+	IsFirstRun        bool
+	IsNotificationRun bool
+	Localhost         models.DuoUIlocalHost
 
 	Uptime int
 	Peers  []*btcjson.GetPeerInfoResult `json:"peers"`
 	Blocks []models.DuoUIblock
 	screen string `json:"screen"`
 }
-
 
 //type rcVar interface {
 //	GetDuoUItransactions(sfrom, count int, cat string)
@@ -59,16 +69,47 @@ func RcInit() *RcVar {
 		Difficulty:       0,
 		BlockCount:       0,
 		NetworkLastBlock: 0,
-		ConnectionCount: 0,
+		ConnectionCount:  0,
 		Balance:          "",
 		Unconfirmed:      "",
 		TxsNumber:        0,
-		Transactions:     models.DuoUItransactions{},
-		Txs:              models.DuoUItransactionsExcerpts{},
-		LastTxs:          models.DuoUItransactions{},
-		Sent:             false,
-		IsFirstRun:       false,
-		Localhost:        models.DuoUIlocalHost{},
-		screen:           "",
+		CommandsHistory: models.DuoUIcommandsHistory{
+			Commands: []models.DuoUIcommand{
+				models.DuoUIcommand{
+					ComID:    "input",
+					Category: "input",
+					Time:     time.Now(),
+
+					//Out: input(duo),
+				},
+			},
+			CommandsNumber: 1,
+		},
+		Transactions:      models.DuoUItransactions{},
+		Txs:               models.DuoUItransactionsExcerpts{},
+		LastTxs:           models.DuoUItransactions{},
+		Sent:              false,
+		IsFirstRun:        false,
+		IsNotificationRun: true,
+		Localhost:         models.DuoUIlocalHost{},
+		screen:            "",
 	}
 }
+
+//func input(duo models.DuoUI) func() {
+//	return func() {
+//		e := duo.DuoUItheme.DuoUIeditor("Run command", "Run txt")
+//		e.Font.Style = text.Regular
+//		e.Font.Size = unit.Dp(16)
+//		e.Layout(duo.DuoUIcontext, consoleInputField)
+//		for _, e := range consoleInputField.Events(duo.DuoUIcontext) {
+//			if e, ok := e.(widget.SubmitEvent); ok {
+//				rc.CommandsHistory.Commands = append(rc.CommandsHistory.Commands, models.DuoUIcommand{
+//					CommandsID: e.Text,
+//					Time:       time.Time{},
+//				})
+//				consoleInputField.SetText("")
+//			}
+//		}
+//	}
+//}

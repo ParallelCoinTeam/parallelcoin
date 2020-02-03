@@ -16,11 +16,12 @@ var (
 	transList = &layout.List{
 		Axis: layout.Vertical,
 	}
-	allTxs      = new(widget.CheckBox)
-	mintedTxs   = new(widget.CheckBox)
-	immatureTxs = new(widget.CheckBox)
-	sentTxs     = new(widget.CheckBox)
-	receivedTxs = new(widget.CheckBox)
+	allTxs              = new(widget.CheckBox)
+	mintedTxs           = new(widget.CheckBox)
+	immatureTxs         = new(widget.CheckBox)
+	sentTxs             = new(widget.CheckBox)
+	receivedTxs         = new(widget.CheckBox)
+	transactionsCounter = new(widget.Counter)
 )
 
 func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {

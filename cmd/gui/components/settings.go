@@ -71,9 +71,14 @@ func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar){
 						}.Layout(duo.DuoUIcontext,
 							layout.Rigid(func() {
 								layout.Flex{}.Layout(duo.DuoUIcontext,
+									layout.Rigid(func(){
+										helpers.DuoUIdrawRectangle(duo.DuoUIcontext, 30, 3, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+									}),
 									layout.Flexed(0.62, func() {
 										layout.Flex{
 											Axis: layout.Vertical,
+											Spacing:10,
+
 										}.Layout(duo.DuoUIcontext,
 											layout.Rigid(func() {
 												in.Layout(duo.DuoUIcontext, func() {

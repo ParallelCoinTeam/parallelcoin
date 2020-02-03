@@ -32,7 +32,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 			in.Layout(duo.DuoUIcontext, func() {
 
 				latestx := duo.DuoUItheme.H5("Latest Transactions")
-				//latestx.Color = "ffcfcfcf"
+				latestx.Color = hexARGB("ffcfcfcf")
 				latestx.Alignment = text.Start
 				latestx.Layout(duo.DuoUIcontext)
 			})

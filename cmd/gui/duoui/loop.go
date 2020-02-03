@@ -17,8 +17,8 @@ import (
 func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 	for {
 		select {
-		case <-duo.Ready:
-			duo.IsReady = true
+		//case <-duo.Ready:
+		//	duo.IsReady = true
 		case <-duo.Quit:
 			log.DEBUG("quit signal received")
 			interrupt.Request()
@@ -44,6 +44,9 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 						loader.DuoUIloaderCreateWallet(duo, cx)
 					} else {
 						DuoUIgrid(duo, cx, rc)
+						if rc.IsNotificationRun {
+							DuoUIdialog(duo, cx, rc)
+						}
 					}
 
 					e.Frame(duo.DuoUIcontext.Ops)
@@ -81,14 +84,8 @@ func DuoUIgrid(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 	layout.Flex{Axis: layout.Vertical}.Layout(duo.DuoUIcontext,
-		layout.Rigid(func() {
-			DuoUIheader(duo, rc)
-		}),
-		layout.Flexed(1, func() {
-			DuoUIbody(duo, cx, rc)
-		}),
-		layout.Rigid(func() {
-			DuoUIfooter(duo, rc)
-		}),
+		layout.Rigid(DuoUIheader(duo, rc)),
+		layout.Flexed(1, DuoUIbody(duo, cx, rc)),
+		layout.Rigid(DuoUIfooter(duo, rc)),
 	)
 }
