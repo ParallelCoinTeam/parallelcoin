@@ -3,8 +3,7 @@ package blockchain
 import (
 	"fmt"
 	"math/big"
-	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
 )
@@ -14,10 +13,7 @@ import (
 // rules. This function differs from the exported  CalcNextRequiredDifficulty
 // in that the exported version uses the current best chain as the previous
 // block node while this function accepts any block node.
-func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(
-	workerNumber uint32, lastNode *BlockNode,
-	newBlockTime time.Time, algoname string, l bool) (newTargetBits uint32,
-	err error) {
+func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32, err error) {
 	if workerNumber != 0 {
 		l = false
 	}

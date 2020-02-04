@@ -206,7 +206,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 	for _, txOut := range transactions[0].MsgTx().TxOut {
 		totalSatoshiOut += txOut.Value
 	}
-	expectedSatoshiOut := CalcBlockSubsidy(node.height, b.params) +
+	expectedSatoshiOut := CalcBlockSubsidy(node.height, b.params, 0) +
 		totalFees
 	if totalSatoshiOut > expectedSatoshiOut {
 		str := fmt.Sprintf("coinbase transaction for block pays %v "+
@@ -661,7 +661,7 @@ func // CalcBlockSubsidy returns the subsidy amount a block at the provided
 // Mathematically this is: baseSubsidy / 2^(
 // height/SubsidyReductionInterval) At the target block generation rate for
 // the main network, this is approximately every 4 years.
-CalcBlockSubsidy(height int32, chainParams *netparams.Params) (r int64) {
+CalcBlockSubsidy(height int32, chainParams *netparams.Params, version int32) (r int64) {
 	if chainParams.SubsidyReductionInterval == 0 {
 		return int64(baseSubsidy)
 	}
@@ -685,14 +685,14 @@ CalcBlockSubsidy(height int32, chainParams *netparams.Params) (r int64) {
 			for i := range payees {
 				total += payees[i].Amount
 			}
-			total += util.Amount(CalcBlockSubsidy(height-1, chainParams))
+			total += util.Amount(CalcBlockSubsidy(height-1, chainParams, version))
 			total += hardfork.TestnetCoreAmount
 			return int64(total)
 		}
 		// Plan 9 hard fork prescribes a smooth supply curve made using an
 		// exponential decay formula adjusted to fit the previous halving
 		// cycle and accounting for the block time difference
-		ttpb := float64(fork.List[1].TargetTimePerBlock)
+		ttpb := float64(fork.List[1].Algos[fork.GetAlgoName(version, height)].VersionInterval)
 		r = int64(2.7 * ttpb / 300 * (math.Pow(2.7, -float64(height)*300*9/ttpb/375000.0)) * 100000000 / 9)
 	}
 	return

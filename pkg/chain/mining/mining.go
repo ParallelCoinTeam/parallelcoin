@@ -289,7 +289,7 @@ func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte,
 		Sequence:        wire.MaxTxInSequenceNum,
 	})
 	tx.AddTxOut(&wire.TxOut{
-		Value:    blockchain.CalcBlockSubsidy(nextBlockHeight, params),
+		Value:    blockchain.CalcBlockSubsidy(nextBlockHeight, params, 0),
 		PkScript: pkScript,
 	})
 	return util.NewTx(tx), nil

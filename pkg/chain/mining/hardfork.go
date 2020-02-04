@@ -58,7 +58,7 @@ func createHardForkSubsidyTx(params *netparams.Params, coinbaseScript []byte, ne
 	// add miner's reward based on last non-hf reward
 	script, _ = txscript.PayToAddrScript(addr)
 	tx.AddTxOut(&wire.TxOut{
-		Value:    blockchain.CalcBlockSubsidy(nextBlockHeight-1, params),
+		Value:    blockchain.CalcBlockSubsidy(nextBlockHeight-1, params, 0),
 		PkScript: script,
 	})
 	return util.NewTx(tx), nil

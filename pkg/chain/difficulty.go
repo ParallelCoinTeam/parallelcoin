@@ -2,11 +2,12 @@ package blockchain
 
 import (
 	"encoding/hex"
-	"github.com/p9c/pod/pkg/log"
 	"math/big"
 	"strings"
 	"time"
-
+	
+	"github.com/p9c/pod/pkg/log"
+	
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
@@ -29,11 +30,11 @@ var (
 	}()
 )
 
-func // CalcNextRequiredDifficulty calculates the required difficulty for the
+// CalcNextRequiredDifficulty calculates the required difficulty for the
 // block after the end of the current best chain based on the difficulty
 // retarget rules. This function is safe for concurrent access.
-(b *BlockChain) CalcNextRequiredDifficulty(workerNumber uint32, timestamp time.
-	Time, algo string) (difficulty uint32, err error) {
+func (b *BlockChain) CalcNextRequiredDifficulty(workerNumber uint32, timestamp time.
+Time, algo string) (difficulty uint32, err error) {
 	b.chainLock.Lock()
 	difficulty, err = b.calcNextRequiredDifficulty(workerNumber, b.BestChain.
 		Tip(), timestamp, algo, false)
@@ -68,7 +69,7 @@ func // calcEasiestDifficulty calculates the easiest possible difficulty that a
 func // calcNextRequiredDifficulty calculates the required difficulty for the
 // block after the passed previous block node based on the difficulty
 // retarget rules.
-// This function differs from the exported  CalcNextRequiredDifficulty in that
+// This function differs from the exported CalcNextRequiredDifficulty in that
 // the exported version uses the current best chain as the previous block node
 // while this function accepts any block node.
 (b *BlockChain) calcNextRequiredDifficulty(
@@ -80,9 +81,9 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 	switch cF {
 	// Legacy difficulty adjustment
 	case 0:
-		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode,
-			newBlockTime, algoname, l)
-	case 1: // Plan 9 from Crypto Space
+		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode, algoname, l)
+	// Plan 9 from Crypto Space
+	case 1:
 		lastNode.DiffMx.Lock()
 		if lastNode.Diffs == nil {
 			lNd := make(map[int32]uint32)
@@ -92,20 +93,19 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 			Version]
 		lastNode.DiffMx.Unlock()
 		if ok {
-			//log.DEBUG("used precomputed difficulty", algoname, newTargetBits)
+			// log.DEBUG("used precomputed difficulty", algoname, newTargetBits)
 		} else {
-			//log.DEBUG("calculating difficulty for the first time")
-			bits, _, err = b.CalcNextRequiredDifficultyPlan9(
-				workerNumber, lastNode, newBlockTime, algoname, l)
-			//bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(
+			// log.DEBUG("calculating difficulty for the first time")
+			bits, _, err = b.CalcNextRequiredDifficultyPlan9(workerNumber, lastNode, algoname, l)
+			// bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(
 			//	lastNode)
 			if err != nil {
 				log.ERROR(err)
 				return
 			}
-			//bits = bitsMap[fork.List[1].Algos[algoname].Version]
+			// bits = bitsMap[fork.List[1].Algos[algoname].Version]
 			// save it for next time
-			//log.TRACE("saving difficulty for next query")
+			// log.TRACE("saving difficulty for next query")
 			lastNode.DiffMx.Lock()
 			if lastNode.Diffs == nil {
 				lastNode.Diffs = new(map[int32]uint32)
@@ -193,10 +193,6 @@ CalcWork(bits uint32, height int32, algover int32) *big.Int {
 	// To make the difficulty values correlate to number of hash operations,
 	// multiply this difficulty base by the nanoseconds/hash figures in the
 	// fork algorithms list
-	current := fork.GetCurrent(height)
-	algoname := fork.List[current].AlgoVers[algover]
-	difficultyNum = new(big.Int).Mul(difficultyNum, big.NewInt(fork.List[current].Algos[algoname].NSperOp))
-	difficultyNum = new(big.Int).Quo(difficultyNum, big.NewInt(fork.List[current].WorkBase))
 	if difficultyNum.Sign() <= 0 {
 		return big.NewInt(0)
 	}
