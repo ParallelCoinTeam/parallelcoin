@@ -20,7 +20,7 @@ var (
 func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) func(){
 	return func() {
 		// Header <<<
-		duo.DuoUIcomponents.Header.Layout.Layout(duo.DuoUIcontext,
+		layout.Flex{Axis: layout.Horizontal}.Layout(duo.DuoUIcontext,
 			layout.Rigid(func() {
 				layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
 					layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(duo.DuoUIcontext, func() {

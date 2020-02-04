@@ -24,8 +24,6 @@ var (
 	list = &layout.List{
 		Axis: layout.Vertical,
 	}
-	ln = layout.UniformInset(unit.Dp(1))
-	in = layout.UniformInset(unit.Dp(0))
 )
 
 func DuoUIsend(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
@@ -37,10 +35,10 @@ func DuoUIsend(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 				Axis: layout.Vertical,
 			}.Layout(duo.DuoUIcontext,
 				layout.Rigid(func() {
-					ln.Layout(duo.DuoUIcontext, func() {
+					layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 						cs := duo.DuoUIcontext.Constraints
 						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-						in.Layout(duo.DuoUIcontext, func() {
+						layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							e := duo.DuoUItheme.DuoUIeditor("DUO address", "DUO dva")
 							e.Font.Style = text.Italic
@@ -56,10 +54,10 @@ func DuoUIsend(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					})
 				}),
 				layout.Rigid(func() {
-					ln.Layout(duo.DuoUIcontext, func() {
+					layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 						cs := duo.DuoUIcontext.Constraints
 						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-						in.Layout(duo.DuoUIcontext, func() {
+						layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							e := duo.DuoUItheme.DuoUIeditor("DUO Amount", "DUO dva")
 							e.Font.Style = text.Italic

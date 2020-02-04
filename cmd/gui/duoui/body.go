@@ -9,7 +9,7 @@ import (
 
 func DuoUIbody(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 	return func() {
-		duo.DuoUIcomponents.Body.Layout.Layout(duo.DuoUIcontext,
+		layout.Flex{Axis: layout.Horizontal}.Layout(duo.DuoUIcontext,
 			layout.Rigid(DuoUIsidebar(duo, cx, rc)),
 			layout.Flexed(1, DuoUIcontent(duo, cx, rc)),
 		)

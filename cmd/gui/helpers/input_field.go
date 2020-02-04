@@ -14,26 +14,11 @@ import (
 	"image/color"
 )
 
-var (
-//topLabel   = "testtopLabel"
-//lineEditor = &widget.Editor{
-//	SingleLine: true,
-//	Submit:     true,
-//}
-//list = &layout.List{
-//	Axis: layout.Vertical,
-//}
-//kln = layout.UniformInset(unit.Dp(0))
-//ln  = layout.UniformInset(unit.Dp(1))
-//in  = layout.UniformInset(unit.Dp(16))
-//button            = new(widget.Button)
-)
-
 func DuoUIinputField(duo *models.DuoUI, cx *conte.Xt, fieldName, fieldModel string, lineEditor *widget.Editor) {
 	//var btn material.Button
 	//fmt.Println("daj sta das", makeInstance(fieldModel))
-	bgcol := hexARGB("ffe4e4e4")
-	brcol := hexARGB("ff303030")
+	bgcol := HexARGB("ffe4e4e4")
+	brcol := HexARGB("ff303030")
 	hmin := duo.DuoUIcontext.Constraints.Width.Min
 	vmin := duo.DuoUIcontext.Constraints.Height.Min
 	layout.Stack{Alignment: layout.Center}.Layout(duo.DuoUIcontext,

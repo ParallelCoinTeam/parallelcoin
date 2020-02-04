@@ -46,17 +46,13 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 		consoleIcon, _ := parallel.NewDuoUIicon(icons.ActionInput)
 		helpIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropDown)
 
-		//overviewButton :=
-		//historyButton :=
-
-		in := layout.UniformInset(unit.Dp(0))
 
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(duo.DuoUIcontext,
 			layout.Rigid(func() {
-				in.Layout(duo.DuoUIcontext, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 					cornerButtons := []func(){
 						func() {
-							in.Layout(duo.DuoUIcontext, func() {
+							layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 								var networkMeniItem parallel.DuoUIbutton
 								networkMeniItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
 								for buttonCornerOne.Clicked(duo.DuoUIcontext) {
@@ -81,10 +77,10 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 				})
 			}),
 			layout.Rigid(func() {
-				in.Layout(duo.DuoUIcontext, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 					navButtons := []func(){
 						func() {
-							in.Layout(duo.DuoUIcontext, func() {
+							layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 								var networkMeniItem parallel.DuoUIbutton
 								networkMeniItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
 								for buttonNetwork.Clicked(duo.DuoUIcontext) {
@@ -110,7 +106,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 							helpMenuItem.Layout(duo.DuoUIcontext, buttonHelp)
 						},
 						func() {
-							in.Layout(duo.DuoUIcontext, func() {
+							layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 								var consoleMenuItem parallel.DuoUIbutton
 								consoleMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, consoleIcon)
 								for buttonConsole.Clicked(duo.DuoUIcontext) {
@@ -141,3 +137,4 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 
 	}
 }
+

@@ -12,7 +12,7 @@ import (
 func DuoUIoverview(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
 	return duo.DuoUIcontext, func() {
 		viewport := layout.Flex{Axis: layout.Horizontal}
-		if duo.DuoUIcontext.Constraints.Width.Max < 1024 {
+		if duo.DuoUIcontext.Constraints.Width.Max < 780 {
 			viewport = layout.Flex{Axis: layout.Vertical}
 		}
 		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)

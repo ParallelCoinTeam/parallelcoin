@@ -21,15 +21,13 @@ var (
 		Axis: layout.Vertical,
 		ScrollToEnd:true,
 	}
-	ln = layout.UniformInset(unit.Dp(1))
-	in = layout.UniformInset(unit.Dp(8))
 )
 
 func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
 	return duo.DuoUIcontext, func() {
 		layout.Flex{}.Layout(duo.DuoUIcontext,
 			layout.Flexed(1, func() {
-				duo.DuoUIcomponents.Console.Inset.Layout(duo.DuoUIcontext, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 					layout.Flex{
 						Axis:    layout.Vertical,
 						Spacing: layout.SpaceAround,
@@ -49,7 +47,7 @@ func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Conte
 							})
 						}),
 						layout.Rigid(func() {
-							in.Layout(duo.DuoUIcontext, func() {
+							layout.UniformInset(unit.Dp(8)).Layout(duo.DuoUIcontext, func() {
 								e := duo.DuoUItheme.DuoUIeditor("Run command", "Run txt")
 								e.Font.Style = text.Regular
 								e.Font.Size = unit.Dp(16)

@@ -9,7 +9,7 @@ import (
 
 func DuoUIsidebar(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
 	return func(){
-		duo.DuoUIcomponents.Sidebar.Layout.Layout(duo.DuoUIcontext,
+		layout.Flex{Axis: layout.Vertical}.Layout(duo.DuoUIcontext,
 			layout.Rigid(DuoUImenu(duo, cx, rc)),
 		)
 	}

@@ -32,7 +32,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 			in.Layout(duo.DuoUIcontext, func() {
 
 				latestx := duo.DuoUItheme.H5("Latest Transactions")
-				latestx.Color = hexARGB("ffcfcfcf")
+				latestx.Color = helpers.HexARGB("ffcfcfcf")
 				latestx.Alignment = text.Start
 				latestx.Layout(duo.DuoUIcontext)
 			})
@@ -41,7 +41,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 
 			in := layout.UniformInset(unit.Dp(16))
 			in.Layout(duo.DuoUIcontext, func() {
-				duo.DuoUIcomponents.Status.Layout.Layout(duo.DuoUIcontext,
+				layout.Flex{Axis: layout.Vertical}.Layout(duo.DuoUIcontext,
 					layout.Rigid(func() {
 						cs := duo.DuoUIcontext.Constraints
 						latestTransList.Layout(duo.DuoUIcontext, len(rc.Transactions.Txs), func(i int) {
@@ -102,7 +102,6 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 								}),
 							)
 						})
-
 					}))
 			})
 		}),

@@ -43,7 +43,10 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
 
 		in := layout.UniformInset(unit.Dp(0))
 
-		duo.DuoUIcomponents.Menu.Layout.Layout(duo.DuoUIcontext,
+		layout.Flex{
+			Axis:      layout.Vertical,
+			Alignment: layout.Middle,
+			Spacing:   layout.SpaceEvenly}.Layout(duo.DuoUIcontext,
 			layout.Rigid(func() {
 				layout.Flex{}.Layout(duo.DuoUIcontext,
 					layout.Rigid(func() {

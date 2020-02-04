@@ -27,9 +27,7 @@ func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar){
 		Axis: layout.Vertical,
 	}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
-			duo.DuoUIcomponents.Settings.Inset.Layout(duo.DuoUIcontext, func() {
-				//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIconstraints.Width.Max, duo.DuoUIconstraints.Height.Max, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
+			layout.UniformInset(unit.Dp(15)).Layout(duo.DuoUIcontext, func() {
 				// Settings  <<<
 				layout.Flex{
 					Axis: layout.Vertical,
@@ -42,7 +40,7 @@ func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar){
 						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, "ffcf44cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 						groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
 						groupsList.Layout(duo.DuoUIcontext, groupsNumber, func(i int) {
-							in.Layout(duo.DuoUIcontext, func() {
+							layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 								i = groupsNumber - 1 - i
 								t := rc.Settings.Daemon.Schema.Groups[i]
 								txt := fmt.Sprint(t.Legend)
@@ -81,12 +79,12 @@ func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar){
 
 										}.Layout(duo.DuoUIcontext,
 											layout.Rigid(func() {
-												in.Layout(duo.DuoUIcontext, func() {
+												layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 													duo.DuoUItheme.H6(fmt.Sprint(tl.Field.Name)).Layout(duo.DuoUIcontext)
 												})
 											}),
 											layout.Rigid(func() {
-												in.Layout(duo.DuoUIcontext, func() {
+												layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 													duo.DuoUItheme.Body2(fmt.Sprint(tl.Field.Description)).Layout(duo.DuoUIcontext)
 												})
 											}),
