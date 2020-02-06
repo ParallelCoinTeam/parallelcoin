@@ -809,14 +809,14 @@ mempoolLoop:
 	// potentially adjusted to ensure it comes after the median time of the last
 	// several blocks per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
-	//log.TRACE("algo ", ts, " ", algo)
+	log.TRACE("algo ", ts, " ", algo)
 	reqDifficulty, err := g.Chain.CalcNextRequiredDifficulty(workerNumber, ts,
 		algo)
 	if err != nil {
 		log.ERROR(err)
 		return nil, err
 	}
-	//log.TRACEF("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
+	log.TRACEF("reqDifficulty %d %08x %064x", vers, reqDifficulty, fork.CompactToBig(reqDifficulty))
 	// Create a new block ready to be solved.
 	merkles := blockchain.BuildMerkleTreeStore(blockTxns, false)
 	var msgBlock wire.MsgBlock

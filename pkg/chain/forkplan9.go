@@ -47,6 +47,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		}
 	}
 	const minAvSamples = 2
+	ttpb := float64(fork.List[1].Algos[algoname].VersionInterval)
 	if len(algStamps) > minAvSamples {
 		intervals := float64(0)
 		// calculate intervals
@@ -59,7 +60,6 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 			}
 		}
 		if intervals >= minAvSamples {
-			ttpb := float64(fork.List[1].Algos[algoname].VersionInterval)
 			// calculate exponential weighted moving average from intervals
 			awi := ewma.NewMovingAverage()
 			for _, x := range algIntervals {
@@ -70,6 +70,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		}
 	}
 	if last == nil {
+		log.TRACE("last was nil")
 		last = new(BlockNode)
 		last.bits = fork.SecondPowLimitBits
 		last.version = algoVer
@@ -93,14 +94,15 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 			an += strings.Repeat(" ", pad)
 		}
 		log.DEBUGC(func() string {
-			return fmt.Sprintf("%08x %s %s %08x %d interval",
+			return fmt.Sprintf("%08x %s %s %08x av %s, %4.0f interval",
 				// RightJustify(fmt.Sprint(workerNumber), 3),
 				// RightJustify(fmt.Sprint(last.height+1), 9),
 				last.bits,
 				an,
 				RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11),
 				newTargetBits,
-				fork.List[1].Algos[algoname].VersionInterval,
+				RightJustify(fmt.Sprintf("%4.4f", adjustment * ttpb), 11),
+				ttpb, // fork.List[1].Algos[algoname].VersionInterval,
 			)
 		})
 	}

@@ -66,13 +66,13 @@ func // calcEasiestDifficulty calculates the easiest possible difficulty that a
 	return BigToCompact(newTarget)
 }
 
-func // calcNextRequiredDifficulty calculates the required difficulty for the
+// calcNextRequiredDifficulty calculates the required difficulty for the
 // block after the passed previous block node based on the difficulty
 // retarget rules.
 // This function differs from the exported CalcNextRequiredDifficulty in that
 // the exported version uses the current best chain as the previous block node
 // while this function accepts any block node.
-(b *BlockChain) calcNextRequiredDifficulty(
+func (b *BlockChain) calcNextRequiredDifficulty(
 	workerNumber uint32, lastNode *BlockNode, newBlockTime time.Time,
 	algoname string, l bool) (newTargetBits uint32, err error) {
 	nH := lastNode.height + 1
@@ -93,9 +93,10 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 			Version]
 		lastNode.DiffMx.Unlock()
 		if ok {
-			// log.DEBUG("used precomputed difficulty", algoname, newTargetBits)
+			log.DEBUGF("used precomputed difficulty %s %d %08x", algoname,
+				fork.GetAlgoVer(algoname, lastNode.height), newTargetBits)
 		} else {
-			// log.DEBUG("calculating difficulty for the first time")
+			log.DEBUG("calculating difficulty for the first time")
 			bits, _, err = b.CalcNextRequiredDifficultyPlan9(workerNumber, lastNode, algoname, l)
 			// bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(
 			//	lastNode)
@@ -105,7 +106,7 @@ func // calcNextRequiredDifficulty calculates the required difficulty for the
 			}
 			// bits = bitsMap[fork.List[1].Algos[algoname].Version]
 			// save it for next time
-			// log.TRACE("saving difficulty for next query")
+			log.TRACE("saving difficulty for next query")
 			lastNode.DiffMx.Lock()
 			if lastNode.Diffs == nil {
 				lastNode.Diffs = new(map[int32]uint32)

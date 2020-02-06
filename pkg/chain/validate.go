@@ -1108,7 +1108,7 @@ checkBlockHeaderSanity(header *wire.BlockHeader, powLimit *big.Int, timeSource M
 	// the block hash is less than the target value described by the bits.
 	err := checkProofOfWork(header, powLimit, flags, height)
 	if err != nil {
-		log.ERROR(err)
+		log.ERRORF("%d %08x %+v",header.Version, header.Bits, err)
 		return err
 	}
 	// A block timestamp must not have a greater precision than one second. This
@@ -1244,19 +1244,20 @@ func // checkProofOfWork ensures the block header bits which indicate the target
 //  - BFNoPoWCheck: The check to ensure the block hash is less than the
 //  target difficulty is not performed.
 checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlags, height int32) error {
-	//log.TRACEF("hash %s", header.BlockHashWithAlgos(height))
+	log.TRACEF("hash %s", header.BlockHashWithAlgos(height))
 	// The target difficulty must be larger than zero.
 	if powLimit == nil {
 		return errors.New("PoW limit was not set")
 	}
 	target := fork.CompactToBig(header.Bits)
-	//log.TRACEF("target %064x %08x", target, header.Bits)
+	log.TRACEF("target %064x %08x", target, header.Bits)
+	log.TRACEF("header: %+v", header)
 	if target.Sign() <= 0 {
 		str := fmt.Sprintf("block target difficulty of %064x is too low",
 			target)
 		return ruleError(ErrUnexpectedDifficulty, str)
 	}
-	//log.TRACEF("checkProofOfWork powLimit %064x %064x", powLimit, target)
+	log.TRACEF("checkProofOfWork powLimit %064x %064x", powLimit, target)
 	// The target difficulty must be less than the maximum allowed.
 	if target.Cmp(powLimit) > 0 {
 		str := fmt.Sprintf("height %d block target difficulty of %064x is higher than max of %064x", height, target, powLimit)
