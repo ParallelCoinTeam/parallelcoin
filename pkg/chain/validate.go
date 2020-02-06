@@ -206,7 +206,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 	for _, txOut := range transactions[0].MsgTx().TxOut {
 		totalSatoshiOut += txOut.Value
 	}
-	expectedSatoshiOut := CalcBlockSubsidy(node.height, b.params, 0) +
+	expectedSatoshiOut := CalcBlockSubsidy(node.height, b.params, node.version) +
 		totalFees
 	if totalSatoshiOut > expectedSatoshiOut {
 		str := fmt.Sprintf("coinbase transaction for block pays %v "+
@@ -402,7 +402,7 @@ Block) error {
 	b.chainLock.Lock() // previously this was done before the above, it might be jumping the gun on a new block
 	defer b.chainLock.Unlock()
 	tip := b.BestChain.Tip()
-	log.TRACEF("%+v", tip)
+	// log.TRACEF("%+v", tip)
 	header := block.MsgBlock().Header
 	if tip.hash != header.PrevBlock {
 		str := fmt.Sprintf("previous block must be the current chain tip %v, instead got %v", tip.hash, header.PrevBlock)
@@ -415,7 +415,7 @@ Block) error {
 	}
 	err = b.checkBlockContext(workerNumber, block, tip, flags, true)
 	if err != nil {
-		log.ERROR(err)
+		log.ERROR("checkBlockContext error:", err)
 		return err
 	}
 	// Leave the spent txouts entry nil in the state since the information is

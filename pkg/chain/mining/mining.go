@@ -248,8 +248,8 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 // address is nil, the coinbase transaction will instead be redeemable by
 // anyone. See the comment for NewBlockTemplate for more information about why
 // the nil address handling is useful.
-func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte,
-	nextBlockHeight int32, addr util.Address) (*util.Tx, error) {
+func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte, nextBlockHeight int32,
+	addr util.Address, version int32) (*util.Tx, error) {
 	// if this is the hard fork activation height coming up, we create the
 	// special disbursement coinbase
 	if nextBlockHeight == fork.List[1].ActivationHeight &&
@@ -289,7 +289,7 @@ func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte,
 		Sequence:        wire.MaxTxInSequenceNum,
 	})
 	tx.AddTxOut(&wire.TxOut{
-		Value:    blockchain.CalcBlockSubsidy(nextBlockHeight, params, 0),
+		Value:    blockchain.CalcBlockSubsidy(nextBlockHeight, params, version),
 		PkScript: pkScript,
 	})
 	return util.NewTx(tx), nil
@@ -425,7 +425,7 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 //   -----------------------------------  --
 (g *BlkTmplGenerator) NewBlockTemplate(workerNumber uint32, payToAddress util.
 	Address, algo string) (*BlockTemplate, error) {
-	//log.TRACE("NewBlockTemplate", algo)
+	// log.TRACE("NewBlockTemplate", algo)
 	if algo == "" {
 		algo = "random"
 	}
@@ -434,7 +434,7 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 	nextBlockHeight := best.Height + 1
 	vers := fork.GetAlgoVer(algo, nextBlockHeight)
 	algo = fork.GetAlgoName(vers, nextBlockHeight)
-	//log.TRACE("parsed block version", algo, vers)
+	// log.TRACE("parsed block version", algo, vers)
 	// Create a standard coinbase transaction paying to the provided address.
 	// NOTE: The coinbase value will be updated to include the fees from the
 	// selected transactions later after they have actually been selected.  It
@@ -448,8 +448,7 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 		log.ERROR(err)
 		return nil, err
 	}
-	coinbaseTx, err := createCoinbaseTx(g.ChainParams, coinbaseScript,
-		nextBlockHeight, payToAddress)
+	coinbaseTx, err := createCoinbaseTx(g.ChainParams, coinbaseScript, nextBlockHeight, payToAddress, vers)
 	if err != nil {
 		log.ERROR(err)
 		return nil, err
@@ -486,7 +485,7 @@ func // NewBlockTemplate returns a new block template that is ready to be solved
 	txSigOpCosts := make([]int64, 0, len(sourceTxns))
 	txFees = append(txFees, -1) // Updated once known
 	txSigOpCosts = append(txSigOpCosts, coinbaseSigOpCost)
-	//log.TRACEF("considering %d transactions for inclusion to new block", len(sourceTxns))
+	// log.TRACEF("considering %d transactions for inclusion to new block", len(sourceTxns))
 mempoolLoop:
 	for _, txDesc := range sourceTxns {
 		// A block can't have more than one coinbase or contain non-finalized
@@ -847,7 +846,7 @@ mempoolLoop:
 		return fmt.Sprintf(
 			"created new block template (algo %s, %d transactions, "+
 				"%d in fees, %d signature operations cost, %d weight, "+
-				"target difficulty %064x prevblockhash %064x  %064x)",
+				"target difficulty %064x prevblockhash %064x %064x subsidy %d)",
 			algo,
 			len(msgBlock.Transactions),
 			totalFees,
@@ -856,6 +855,7 @@ mempoolLoop:
 			fork.CompactToBig(msgBlock.Header.Bits),
 			msgBlock.Header.PrevBlock.CloneBytes(),
 			bh.CloneBytes(),
+			msgBlock.Transactions[0].TxOut[0].Value,
 		)
 	})
 	//log.SPEW(msgBlock)
