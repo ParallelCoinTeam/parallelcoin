@@ -24,6 +24,9 @@ import (
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 	lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32,
 	adjustment float64, err error) {
+	if lastNode == nil {
+		log.TRACE("lastNode is nil")
+	}
 	algoInterval := fork.P9Algos[algoname].VersionInterval
 	algoVer := fork.P9Algos[algoname].Version
 	_ = algoInterval
@@ -87,25 +90,25 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		newTargetBits = BigToCompact(newTarget)
 		log.TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
 	}
-	if l {
-		an := fork.List[1].AlgoVers[algoVer]
-		pad := 9 - len(an)
-		if pad > 0 {
-			an += strings.Repeat(" ", pad)
-		}
-		log.DEBUGC(func() string {
-			return fmt.Sprintf("%08x %s %s %08x av %s, %4.0f interval",
-				// RightJustify(fmt.Sprint(workerNumber), 3),
-				// RightJustify(fmt.Sprint(last.height+1), 9),
-				last.bits,
-				an,
-				RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11),
-				newTargetBits,
-				RightJustify(fmt.Sprintf("%4.4f", adjustment * ttpb), 11),
-				ttpb, // fork.List[1].Algos[algoname].VersionInterval,
-			)
-		})
+	// if l {
+	an := fork.List[1].AlgoVers[algoVer]
+	pad := 9 - len(an)
+	if pad > 0 {
+		an += strings.Repeat(" ", pad)
 	}
+	log.DEBUGC(func() string {
+		return fmt.Sprintf("%08x %s %s %08x av %s, %4.0f interval",
+			// RightJustify(fmt.Sprint(workerNumber), 3),
+			// RightJustify(fmt.Sprint(last.height+1), 9),
+			last.bits,
+			an,
+			RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11),
+			newTargetBits,
+			RightJustify(fmt.Sprintf("%4.4f", adjustment*ttpb), 11),
+			ttpb, // fork.List[1].Algos[algoname].VersionInterval,
+		)
+	})
+	// }
 	return
 }
 
