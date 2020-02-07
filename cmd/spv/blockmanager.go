@@ -2234,6 +2234,7 @@ func // checkHeaderSanity checks the PoW, and timestamp of a block header.
 		log.ERROR(err)
 		return err
 	}
+	blockHeader.Bits = diff
 	stubBlock := util.NewBlock(&wire.MsgBlock{
 		Header: *blockHeader,
 	})
