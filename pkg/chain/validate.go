@@ -590,7 +590,7 @@ BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 		expectedDifficulty, err := b.calcNextRequiredDifficulty(
 			workerNumber, prevNode, header.Timestamp,
 			fork.GetAlgoName(header.Version, prevNode.height+1),
-			false)
+			true)
 		if err != nil {
 			log.ERROR(err)
 			return err
