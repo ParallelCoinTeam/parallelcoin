@@ -959,7 +959,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	// rpcclient.UseLogger(rpcLogger)
 // 	// Create a btcd SimNet node and generate 800 blocks
 // 	h1, err := rpctest.New(
-// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
+// 		&netparams.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if err != nil {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -975,7 +975,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	}
 // 	// Create a second btcd SimNet node
 // 	h2, err := rpctest.New(
-// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
+// 		&netparams.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if err != nil {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -987,7 +987,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	}
 // 	// Create a third btcd SimNet node and generate 1200 blocks
 // 	h3, err := rpctest.New(
-// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
+// 		&netparams.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if err != nil {
 // 		t.Fatalf("Couldn't create harness: %s", err)

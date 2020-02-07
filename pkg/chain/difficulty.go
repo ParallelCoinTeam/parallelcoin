@@ -98,9 +98,6 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 					fork.GetAlgoVer(algoname, lastNode.height), bits)
 			}
 		} else {
-			if l {
-				log.DEBUG("calculating difficulty for the first time")
-			}
 			bits, _, err = b.CalcNextRequiredDifficultyPlan9(workerNumber, lastNode, algoname, l)
 			// bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(
 			//	lastNode)
@@ -110,7 +107,9 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 			}
 			// bits = bitsMap[fork.List[1].Algos[algoname].Version]
 			// save it for next time
-			log.TRACEF("saving difficulty for next query %08x", bits)
+			if l {
+				log.TRACEF("saving difficulty for next query %08x", bits)
+			}
 			lastNode.DiffMx.Lock()
 			if lastNode.Diffs == nil {
 				lastNode.Diffs = new(map[int32]uint32)

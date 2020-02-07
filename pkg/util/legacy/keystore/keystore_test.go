@@ -18,7 +18,7 @@ import (
 
 const dummyDir = ""
 
-var tstNetParams = &chaincfg.MainNetParams
+var tstNetParams = &netparams.MainNetParams
 
 func makeBS(height int32) *BlockStamp {
 	return &BlockStamp{

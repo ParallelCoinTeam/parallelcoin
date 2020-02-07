@@ -11,7 +11,7 @@ import (
 	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
-// RawTxInWitnessSignature returns the serialized ECDA signature for the input idx of the given transaction, with the hashType appended to it. This function is identical to RawTxInSignature, however the signature generated signs a new sighash digest defined in BIP0143.
+// RawTxInWitnessSignature returns the serialized ECDSA signature for the input idx of the given transaction, with the hashType appended to it. This function is identical to RawTxInSignature, however the signature generated signs a new sighash digest defined in BIP0143.
 func RawTxInWitnessSignature(tx *wire.MsgTx, sigHashes *TxSigHashes, idx int,
 	amt int64, subScript []byte, hashType SigHashType,
 	key *ec.PrivateKey) ([]byte, error) {

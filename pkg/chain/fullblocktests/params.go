@@ -78,7 +78,7 @@ var (
 //
 // NOTE: The test generator intentionally does not use the existing definitions in the chaincfg package since the intent is to be able to generate known good tests which exercise that code.  Using the chaincfg parameters would allow them to change out from under the tests potentially invalidating them.
 var regressionNetParams = &netparams.Params{
-	Params: &chaincfg.Params{
+	Params: &netparams.Params{
 		Name:        "regtest",
 		Net:         wire.TestNet,
 		DefaultPort: "18444",

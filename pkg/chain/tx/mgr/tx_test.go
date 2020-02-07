@@ -81,7 +81,7 @@ func testStore() (*Store, walletdb.DB, func(), error) {
 		if err != nil {
 			return err
 		}
-		s, err = Open(ns, &chaincfg.TestNet3Params)
+		s, err = Open(ns, &netparams.TestNet3Params)
 		return err
 	})
 	return s, db, teardown, err

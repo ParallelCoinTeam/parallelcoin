@@ -67,7 +67,7 @@ func TestUseBlockHash(t *testing.T) {
 		Index: 4321,
 	}
 	// util.Address
-	addr, err := util.DecodeAddress(testAddr, &chaincfg.MainNetParams)
+	addr, err := util.DecodeAddress(testAddr, &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Address decode failed: %s", err.Error())
 	}
