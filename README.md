@@ -6,7 +6,7 @@
 
 #### by plan 9 crypto
 
-protocols and back end - Loki Verloren
+protocols and back end - David Vennik
 
 gui - Djordje Marcetin
 
