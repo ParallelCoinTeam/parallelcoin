@@ -5,6 +5,7 @@
 #### by plan 9 crypto
 
 protocols and back end - Loki Verloren
+
 gui - Djordje Marcetin
 
 ## pod 
