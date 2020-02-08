@@ -2,13 +2,13 @@
 
 ## parallelcoin 
 
+### pod
+
 #### by plan 9 crypto
 
 protocols and back end - Loki Verloren
 
 gui - Djordje Marcetin
-
-## pod 
 
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod) 
 
