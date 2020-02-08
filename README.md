@@ -4,7 +4,8 @@
 
 #### by plan 9 crypto
 
-written by Loki Verloren and Djordje Marcetin
+protocols and back end - Loki Verloren
+gui - Djordje Marcetin
 
 ## pod 
 
