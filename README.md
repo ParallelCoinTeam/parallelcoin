@@ -1,19 +1,15 @@
-#  φ
+# ![Logo](https://git.parallelcoin.io/dev/legacy/raw/commit/f709194e16960103834b0d0e25aec06c3d84f85b/logo/logo48x48.png) Parallelcoin Pod 
 
-## parallelcoin 
-
-### pod
-
-#### by plan 9 crypto
-
-protocols and back end - David Vennik
-
-gui - Djordje Marcetin
 
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod) 
 
 Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for Parallelcoin
 
+~~~~
+φ plan 9 crypto
+    protocols and back end           David Vennik
+    gui                              Djordje Marcetin
+~~~~
 ## Installation
 
 Straight to business, this is the part I am looking for so it's here at the top.
