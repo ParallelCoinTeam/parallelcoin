@@ -2,7 +2,9 @@
 
 ## parallelcoin 
 
-#### plan 9 crypto
+#### by plan 9 crypto
+
+written by Loki Verloren and Djordje Marcetin
 
 ## pod 
 
