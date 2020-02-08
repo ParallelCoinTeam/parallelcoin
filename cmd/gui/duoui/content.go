@@ -4,7 +4,6 @@ import (
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gui/unit"
 	"github.com/p9c/pod/pkg/gui/widget/parallel"
 )
 
@@ -13,10 +12,7 @@ func DuoUIcontent(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 	return func() {
 		var page = parallel.DuoUIpage{
 			TxColor:      parallel.HexARGB("ff303030"),
-			Width:        0,
-			Height:       0,
 			BgColor:      parallel.HexARGB("ffcfcfcf"),
-			CornerRadius: unit.Dp(16),
 		}
 		switch duo.CurrentPage {
 		case "Overview":
@@ -24,15 +20,15 @@ func DuoUIcontent(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 		case "Send":
 			page.Layout(DuoUIsend(duo, cx, rc))
 		case "Receive":
-			page.Layout(DuoUIreceive(duo, cx, rc))
+			page.Layout(DuoUIreceive(duo))
 		case "History":
 			page.Layout(DuoUIhistory(duo, cx, rc))
 		case "AddressBook":
-			page.Layout(DuoUIaddressbook(duo, cx, rc))
+			page.Layout(DuoUIaddressbook(duo))
 		case "Explorer":
 			page.Layout(DuoUIexplorer(duo, cx, rc))
 		case "Network":
-			page.Layout(DuoUInetwork(duo, cx, rc))
+			page.Layout(DuoUInetwork(duo))
 		case "Console":
 			page.Layout(DuoUIconsole(duo, cx, rc))
 		case "Settings":

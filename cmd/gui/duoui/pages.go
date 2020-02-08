@@ -15,7 +15,7 @@ func DuoUIoverview(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Cont
 		if duo.DuoUIcontext.Constraints.Width.Max < 780 {
 			viewport = layout.Flex{Axis: layout.Vertical}
 		}
-		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
+		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 0, 0)
 		page.Layout(duo.DuoUIcontext, func() {
 			viewport.Layout(duo.DuoUIcontext,
 				layout.Flexed(0.5, func() {
@@ -34,24 +34,22 @@ func DuoUIoverview(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Cont
 }
 func DuoUIsend(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
 	return duo.DuoUIcontext, func() {
-		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
-		page.Layout(duo.DuoUIcontext, func() {
-			components.DuoUIsend(duo, cx, rc)
-		})
+		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 10, 10)
+		page.Layout(duo.DuoUIcontext, components.DuoUIsend(duo))
 	}
 }
-func DuoUIreceive(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+func DuoUIreceive(duo *models.DuoUI) (*layout.Context, func()) {
 	return duo.DuoUIcontext, func() {
-		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
+		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 10, 10)
 		page.Layout(duo.DuoUIcontext, func() {
 			duo.DuoUItheme.H5("receive :").Layout(duo.DuoUIcontext)
 		})
 	}
 }
 
-func DuoUIaddressbook(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+func DuoUIaddressbook(duo *models.DuoUI) (*layout.Context, func()) {
 	return duo.DuoUIcontext, func() {
-		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
+		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 10, 10)
 		page.Layout(duo.DuoUIcontext, func() {
 			duo.DuoUItheme.H5("addressbook :").Layout(duo.DuoUIcontext)
 		})
@@ -59,16 +57,14 @@ func DuoUIaddressbook(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.C
 }
 func DuoUIsettings(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
 	return duo.DuoUIcontext, func() {
-		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 0, 0)
-		page.Layout(duo.DuoUIcontext, func() {
-			components.DuoUIsettingsWidget(duo, cx, rc)
-		})
+		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 0, 0)
+		page.Layout(duo.DuoUIcontext, components.DuoUIsettingsWidget(duo, cx, rc))
 	}
 }
 
-func DuoUInetwork(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+func DuoUInetwork(duo *models.DuoUI) (*layout.Context, func()) {
 	return duo.DuoUIcontext, func() {
-		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
+		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 10, 10)
 		page.Layout(duo.DuoUIcontext, func() {
 			duo.DuoUItheme.H5("network :").Layout(duo.DuoUIcontext)
 		})
@@ -77,9 +73,14 @@ func DuoUInetwork(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Conte
 
 func DuoUIhistory(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
 	return duo.DuoUIcontext, func() {
-		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 500, 500, 10, 10)
-		page.Layout(duo.DuoUIcontext, func() {
-			components.DuoUItransactionsWidget(duo, cx, rc)
-		})
+		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 10, 10)
+		page.Layout(duo.DuoUIcontext, components.DuoUItransactionsWidget(duo, cx, rc))
+	}
+}
+
+func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
+		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 10, 10)
+		page.Layout(duo.DuoUIcontext, components.DuoUIconsoleWidget(duo, cx, rc))
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/op/paint"
 	"github.com/p9c/pod/pkg/gui/unit"
 	"image"
+	"image/color"
 )
 
 
@@ -25,7 +26,6 @@ func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color string, borderRadiu
 			},
 		}
 		paint.ColorOp{Color: HexARGB(color)}.Add(gtx.Ops)
-
 		clip.Rect{Rect: square,
 			NE: borderRadius[0], NW: borderRadius[1], SE: borderRadius[2], SW: borderRadius[3]}.Op(gtx.Ops).Add(gtx.Ops) // HLdraw
 		paint.PaintOp{Rect: square}.Add(gtx.Ops)
@@ -33,3 +33,15 @@ func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color string, borderRadiu
 	})
 }
 
+
+
+func DuoUIfill(gtx *layout.Context, col color.RGBA) {
+	cs := gtx.Constraints
+	d := image.Point{X: cs.Width.Min, Y: cs.Height.Min}
+	dr := f32.Rectangle{
+		Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
+	}
+	paint.ColorOp{Color: col}.Add(gtx.Ops)
+	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	gtx.Dimensions = layout.Dimensions{Size: d}
+}

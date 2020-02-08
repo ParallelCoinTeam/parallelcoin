@@ -31,8 +31,6 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 	return func() {
 		cs := duo.DuoUIcontext.Constraints
 		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
-		// Footer <<<
 		var (
 			width             float32 = 48
 			height            float32 = 48
@@ -45,8 +43,6 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 		networkIcon, _ := parallel.NewDuoUIicon(icons.ActionFingerprint)
 		consoleIcon, _ := parallel.NewDuoUIicon(icons.ActionInput)
 		helpIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropDown)
-
-
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(duo.DuoUIcontext,
 			layout.Rigid(func() {
 				layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
@@ -131,10 +127,5 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 				})
 			}),
 		)
-		//}),
-		//)
-		// Footer >>>
-
 	}
 }
-

@@ -25,9 +25,7 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 		Ready: make(chan struct{}, 1),
 	}
 	fonts.Register()
-	duo.DuoUIico = DuoIcons()
 	duo.DuoUIcontext = layout.NewContext(duo.DuoUIwindow.Queue())
-	duo.DuoUIconstraints = &duo.DuoUIcontext.Constraints
 	navigations := make(map[string]*parallel.DuoUIthemeNav)
 	navigations["mainMenu"] = mainMenu()
 	duo.DuoUIconfiguration = &models.DuoUIconfiguration{

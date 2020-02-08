@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"fmt"
+	"github.com/p9c/pod/cmd/gui/ico"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/layout"
@@ -13,32 +14,26 @@ import (
 )
 
 var (
-	inLogo     = layout.Stack{Alignment: layout.Center}
 	logoButton = new(widget.Button)
 )
 
 func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) func(){
 	return func() {
-		// Header <<<
+		logo, _ := parallel.NewDuoUIicon(ico.ParallelCoin)
 		layout.Flex{Axis: layout.Horizontal}.Layout(duo.DuoUIcontext,
 			layout.Rigid(func() {
 				layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
 					layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(duo.DuoUIcontext, func() {
-
 						logo := parallel.DuoUIlogo{
 							Background: color.RGBA{},
 							Color:      color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
-							Icon:       duo.DuoUIico["Logo"],
-							Size:       unit.Dp(96),
-							Padding:    unit.Dp(8),
+							Icon:       logo,
+							Size:       unit.Dp(128),
+							Padding:    unit.Dp(16),
 						}
 						logo.Layout(duo.DuoUIcontext, logoButton)
-						//
-						//duo.Ico.Logo.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
-						//duo.Ico.Logo.Layout(duo.DuoUIcontext, unit.Dp(48))
 					})
 				})
-
 			}),
 			layout.Flexed(1, func() {
 				layout.Align(layout.Start).Layout(duo.DuoUIcontext, func() {
@@ -49,7 +44,6 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) func(){
 						currentPage.Layout(duo.DuoUIcontext)
 					})
 				})
-
 			}),
 			layout.Rigid(func() {
 				layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
@@ -60,7 +54,6 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) func(){
 						balance.Layout(duo.DuoUIcontext)
 					})
 				})
-
 			}),
 			layout.Rigid(func() {
 				layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
@@ -71,10 +64,6 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) func(){
 						balance.Layout(duo.DuoUIcontext)
 					})
 				})
-
 			}))
-
-		// Header >>>
-
 	}
 }

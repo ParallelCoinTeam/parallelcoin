@@ -15,8 +15,6 @@ type DuoUI struct {
 	DuoUIwindow        *app.Window
 	DuoUIcontext       *layout.Context
 	DuoUItheme         *parallel.DuoUItheme
-	DuoUIconstraints   *layout.Constraints
-	DuoUIico           map[string]*parallel.DuoUIicon
 	DuoUIcomponents    *DuoUIcomponents
 	DuoUIconfiguration *DuoUIconfiguration
 	Quit               chan struct{}
