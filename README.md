@@ -1,5 +1,4 @@
-#  φ
-## Parallelcoin Pod 
+#  φarallelcoin Pod 
 
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod) 
 
