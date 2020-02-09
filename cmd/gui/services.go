@@ -12,8 +12,7 @@ import (
 	"sync/atomic"
 )
 
-func Services(cx *conte.Xt) error {
-	walletChan := make(chan *wallet.Wallet)
+func Services(cx *conte.Xt, walletChan chan *wallet.Wallet) error {
 	cx.WalletKill = make(chan struct{})
 	cx.Wallet = &atomic.Value{}
 	cx.Wallet.Store(false)
@@ -30,10 +29,6 @@ func Services(cx *conte.Xt) error {
 				os.Exit(1)
 			}
 		}()
-		log.DEBUG("waiting for walletChan")
-		cx.WalletServer = <-walletChan
-		log.DEBUG("walletChan sent")
-		cx.Wallet.Store(true)
 	}
 	interrupt.AddHandler(func() {
 		log.WARN("interrupt received, " +

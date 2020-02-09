@@ -30,7 +30,7 @@ var (
 func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 	return func() {
 		cs := duo.DuoUIcontext.Constraints
-		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, duo.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		var (
 			width             float32 = 48
 			height            float32 = 48

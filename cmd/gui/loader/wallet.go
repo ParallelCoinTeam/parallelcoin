@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/text"
@@ -22,12 +21,6 @@ var (
 		SingleLine: true,
 		Submit:     true,
 	}
-	logOutputList = &layout.List{
-		Axis:        layout.Vertical,
-		ScrollToEnd: true,
-	}
-	logMessages []log.Entry
-	logChan     = make(chan log.Entry, 111)
 )
 
 func init() {
@@ -43,13 +36,13 @@ func init() {
 	}()
 }
 
-// START OMIT
+
 func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 	//const buflen = 9
 	layout.Flex{}.Layout(duo.DuoUIcontext,
 		layout.Flexed(0.5, func() {
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			// START View <<<
 			widgets := []func(){
 				func() {
@@ -67,9 +60,9 @@ func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 					bal := duo.DuoUItheme.H3("Enter the private passphrase for your new wallet:")
 					bal.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 					bal.Layout(duo.DuoUIcontext)
-					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff303030", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Bg, [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 					ln.Layout(duo.DuoUIcontext, func() {
-						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "fff4f4f4", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 						in.Layout(duo.DuoUIcontext, func() {
 							e := duo.DuoUItheme.DuoUIeditor("Enter Passpharse", "Enter Passpharse")
 							e.Font.Style = text.Regular
@@ -86,9 +79,9 @@ func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 				},
 				func() {
 
-					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff303030", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Bg, [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 					ln.Layout(duo.DuoUIcontext, func() {
-						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "fff4f4f4", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 						in.Layout(duo.DuoUIcontext, func() {
 							e := duo.DuoUItheme.DuoUIeditor("Repeat Passpharse", "Repeat Passpharse")
 							e.Font.Style = text.Regular
@@ -164,80 +157,11 @@ func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 					col = "ffcf3030"
 				}
 
-				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, col, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB(col), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 				logText := duo.DuoUItheme.H6(fmt.Sprint(i) + "->" + fmt.Sprint(t.Text))
 				logText.Layout(duo.DuoUIcontext)
 			})
 		}),
 	)
-}
-
-// END OMIT
-
-func ttDuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
-	//const buflen = 1000
-	//log.L.LogChan = make(chan log.Entry)
-	//
-	//logMessages := make([]string, buflen)
-	//var cursor int
-	//quit := make(chan struct{})
-	//
-	//go func() {
-	//	for {
-	//		select {
-	//		case n := <-log.L.LogChan:
-	//			log.INFO(n)
-	//		logMessages[cursor] = fmt.Sprint(n)
-	//		cursor ++
-	//		if cursor > buflen {
-	//			cursor = 0
-	//		}
-	//		case <-quit:
-	//		}
-	//	}
-	//}()
-	//logMessages := []string{"asasas", "Eeee"}
-
-	return duo.DuoUIcontext, func() {
-		layout.Flex{}.Layout(duo.DuoUIcontext,
-			layout.Flexed(1, func() {
-
-				layout.Flex{}.Layout(duo.DuoUIcontext,
-					layout.Flexed(1, func() {
-						duo.DuoUIcomponents.Console.Inset.Layout(duo.DuoUIcontext, func() {
-							layout.Flex{
-								Axis:    layout.Vertical,
-								Spacing: layout.SpaceAround,
-							}.Layout(duo.DuoUIcontext,
-								layout.Rigid(func() {
-									cs := duo.DuoUIcontext.Constraints
-									helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff303030", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
-
-									///
-									//logOutputList.Layout(duo.DuoUIcontext, len(logMessages), func(i int) {
-									//	t := logMessages[i]
-									//	layout.Flex{
-									//		Alignment: layout.End,
-									//	}.Layout(duo.DuoUIcontext,
-									//		layout.Rigid(func() {
-									//			sat := duo.DuoUItheme.Body1(t)
-									//			sat.Font.Size = unit.Dp(16)
-									//			sat.Layout(duo.DuoUIcontext)
-									//		}),
-									//	)
-									//})
-									const n = 1e6
-									logOutputList.Layout(duo.DuoUIcontext, n, func(i int) {
-										txt := fmt.Sprintf("List element #%d", i)
-
-										duo.DuoUItheme.H3(txt).Layout(duo.DuoUIcontext)
-									})
-								}))
-							// Overview >>>
-						})
-					}),
-				)
-			}))
-	}
 }

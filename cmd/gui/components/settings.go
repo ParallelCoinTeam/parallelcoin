@@ -36,7 +36,7 @@ func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() 
 						}),
 						layout.Rigid(func() {
 							cs := duo.DuoUIcontext.Constraints
-							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, "ffcf44cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, helpers.HexARGB("ffcf44cf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
 							groupsList.Layout(duo.DuoUIcontext, groupsNumber, func(i int) {
 								layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
@@ -67,7 +67,7 @@ func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() 
 								layout.Rigid(func() {
 									layout.Flex{}.Layout(duo.DuoUIcontext,
 										layout.Rigid(func() {
-											helpers.DuoUIdrawRectangle(duo.DuoUIcontext, 30, 3, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+											helpers.DuoUIdrawRectangle(duo.DuoUIcontext, 30, 3, duo.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 										}),
 										layout.Flexed(0.62, func() {
 											layout.Flex{
@@ -97,7 +97,7 @@ func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() 
 								}),
 								layout.Rigid(func() {
 									cs := duo.DuoUIcontext.Constraints
-									helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+									helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, duo.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								}))
 						})
 					}

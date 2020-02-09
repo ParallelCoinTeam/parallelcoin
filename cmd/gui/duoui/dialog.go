@@ -42,10 +42,10 @@ func DuoUIdialog(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 	iconClose, _ := parallel.NewDuoUIicon(icons.NavigationClose)
 
 	cs := duo.DuoUIcontext.Constraints
-	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ee000000", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max,helpers.HexARGB("ee000000"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
 		//cs := duo.DuoUIcontext.Constraints
-		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, 408,150, "ff3030cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, 408,150, duo.DuoUItheme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 		layout.Flex{
 			Axis:      layout.Vertical,

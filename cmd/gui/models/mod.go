@@ -11,7 +11,6 @@ import (
 )
 
 type DuoUI struct {
-	DuoUIboot          *Boot
 	DuoUIwindow        *app.Window
 	DuoUIcontext       *layout.Context
 	DuoUItheme         *parallel.DuoUItheme
@@ -20,8 +19,6 @@ type DuoUI struct {
 	Quit               chan struct{}
 	Ready              chan struct{}
 	IsReady            bool
-	DuoUIready         chan struct{}
-	DuoUIisReady       bool
 	CurrentPage        string
 }
 
@@ -58,14 +55,6 @@ type DuoUIcomponent struct {
 	Inset  layout.Inset
 }
 
-type Boot struct {
-	IsBoot     bool   `json:"boot"`
-	IsFirstRun bool   `json:"firstrun"`
-	IsBootMenu bool   `json:"menu"`
-	IsBootLogo bool   `json:"logo"`
-	IsLoading  bool   `json:"loading"`
-	IsScreen   string `json:"screen"`
-}
 
 type DuoUIconfiguration struct {
 	Abbrevation        string

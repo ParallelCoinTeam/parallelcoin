@@ -34,7 +34,7 @@ func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) fun
 		}.Layout(duo.DuoUIcontext,
 			layout.Rigid(func() {
 				cs := duo.DuoUIcontext.Constraints
-				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, "ff3030cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, duo.DuoUItheme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 				in := layout.UniformInset(unit.Dp(8))
 				in.Layout(duo.DuoUIcontext, func() {
@@ -110,7 +110,7 @@ func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) fun
 								t := rc.Txs.Txs[i]
 								a := 1.0
 								//const duration = 5
-								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, "ff535353", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+								helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, helpers.HexARGB("ff535353"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 								layout.Flex{
 									Spacing: layout.SpaceBetween,

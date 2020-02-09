@@ -20,13 +20,13 @@ func DuoUIoverview(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Cont
 			viewport.Layout(duo.DuoUIcontext,
 				layout.Flexed(0.5, func() {
 					cs := duo.DuoUIcontext.Constraints
-					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Light, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 					components.DuoUIbalanceWidget(duo, rc)
 				}),
 				layout.Flexed(0.5, func() {
 					cs := duo.DuoUIcontext.Constraints
-					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ff424242", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-					components.DuoUIlatestTxsWidget(duo, cx, rc)
+					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ff424242"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+					components.DuoUIlatestTxsWidget(duo, rc)
 				}),
 			)
 		})

@@ -12,8 +12,7 @@ import (
 
 )
 
-func DuoUInode(cx *conte.Xt) error {
-	nodeChan := make(chan *rpc.Server)
+func DuoUInode(cx *conte.Xt, nodeChan chan *rpc.Server) error {
 	cx.NodeKill = make(chan struct{})
 	cx.Node = &atomic.Value{}
 	cx.Node.Store(false)
@@ -29,10 +28,7 @@ func DuoUInode(cx *conte.Xt) error {
 				os.Exit(1)
 			}
 		}()
-		log.DEBUG("waiting for nodeChan")
-		cx.RPCServer = <-nodeChan
-		log.DEBUG("nodeChan sent")
-		cx.Node.Store(true)
+
 	}
 	interrupt.AddHandler(func() {
 		log.WARN("interrupt received, " +
@@ -41,6 +37,3 @@ func DuoUInode(cx *conte.Xt) error {
 	})
 	return err
 }
-
-
-

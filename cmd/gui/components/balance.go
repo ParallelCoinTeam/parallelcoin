@@ -33,9 +33,9 @@ func DuoUIbalanceWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 		cs := duo.DuoUIcontext.Constraints
 		navButtons := []func(){
 			listItem(duo, "Balance :", rc.Balance+" "+duo.DuoUIconfiguration.Abbrevation),
-			func() { helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
+			func() { helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, helpers.HexARGB("ffbdbdbd"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
 			listItem(duo, "Unconfirmed :", rc.Unconfirmed),
-			func() { helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
+			func() { helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, helpers.HexARGB("ffbdbdbd"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
 			listItem(duo, "Transactions :", fmt.Sprint(rc.Transactions.TxsNumber)),
 		}
 		itemsList.Layout(duo.DuoUIcontext, len(navButtons), func(i int) {

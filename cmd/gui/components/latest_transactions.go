@@ -5,7 +5,6 @@ import (
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
@@ -17,16 +16,15 @@ var (
 	}
 )
 
-func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
+func DuoUIlatestTxsWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 
-	rc.GetDuoUIlastTxs(duo, cx)
 
 	layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(duo.DuoUIcontext,
 		layout.Rigid(func() {
 			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, "ff3030cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 48, duo.DuoUItheme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 			in := layout.UniformInset(unit.Dp(8))
 			in.Layout(duo.DuoUIcontext, func() {
@@ -50,7 +48,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 							t := rc.Transactions.Txs[i]
 							a := 1.0
 							//const duration = 5
-							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+							helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Text, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							layout.Flex{
 								Spacing: layout.SpaceBetween,
 							}.Layout(duo.DuoUIcontext,

@@ -15,6 +15,7 @@ var (
 )
 
 type RcVar struct {
+	Boot             *Boot
 	Alert            models.DuoUIalert
 	Status           models.DuoUIstatus
 	Hashes           int64
@@ -36,7 +37,6 @@ type RcVar struct {
 	Settings        models.DuoUIsettings
 
 	Sent              bool
-	IsFirstRun        bool
 	IsNotificationRun bool
 	Localhost         models.DuoUIlocalHost
 
@@ -44,6 +44,15 @@ type RcVar struct {
 	Peers  []*btcjson.GetPeerInfoResult `json:"peers"`
 	Blocks []models.DuoUIblock
 	screen string `json:"screen"`
+}
+
+type Boot struct {
+	IsBoot     bool   `json:"boot"`
+	IsFirstRun bool   `json:"firstrun"`
+	IsBootMenu bool   `json:"menu"`
+	IsBootLogo bool   `json:"logo"`
+	IsLoading  bool   `json:"loading"`
+	IsScreen   string `json:"screen"`
 }
 
 //type rcVar interface {
@@ -59,7 +68,16 @@ type RcVar struct {
 //}
 
 func RcInit() *RcVar {
+	b := Boot{
+		IsBoot:     true,
+		IsFirstRun: false,
+		IsBootMenu: false,
+		IsBootLogo: false,
+		IsLoading:  false,
+		IsScreen:   "",
+	}
 	return &RcVar{
+		Boot:             &b,
 		Alert:            models.DuoUIalert{},
 		Status:           models.DuoUIstatus{},
 		Hashes:           0,
@@ -89,7 +107,6 @@ func RcInit() *RcVar {
 		Txs:               models.DuoUItransactionsExcerpts{},
 		LastTxs:           models.DuoUItransactions{},
 		Sent:              false,
-		IsFirstRun:        false,
 		IsNotificationRun: true,
 		Localhost:         models.DuoUIlocalHost{},
 		screen:            "",
