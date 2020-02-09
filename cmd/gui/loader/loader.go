@@ -34,9 +34,10 @@ func DuoUIloader(duo *models.DuoUI) {
 	//const buflen = 9
 	layout.UniformInset(unit.Dp(10)).Layout(duo.DuoUIcontext, func() {
 		//const n = 1e6
+			cs := duo.DuoUIcontext.Constraints
+		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		logOutputList.Layout(duo.DuoUIcontext, len(logMessages), func(i int) {
 			t := logMessages[i]
-			cs := duo.DuoUIcontext.Constraints
 			col := "ff3030cf"
 
 			if t.Level == "TRC" {
@@ -58,9 +59,10 @@ func DuoUIloader(duo *models.DuoUI) {
 				col = "ffcf3030"
 			}
 
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB(col), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
-			logText := duo.DuoUItheme.H6(fmt.Sprint(i) + "->" + fmt.Sprint(t.Text))
+			logText := duo.DuoUItheme.Caption(fmt.Sprint(i) + "->" + fmt.Sprint(t.Text))
+			logText.Font.Typeface = "bariol"
+			logText.Color = helpers.HexARGB(col)
 			logText.Layout(duo.DuoUIcontext)
 		})
 	})

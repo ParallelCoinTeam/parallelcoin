@@ -40,23 +40,23 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
-				if rc.Boot.IsBoot {
+				//if rc.Boot.IsBoot {
 					duo.DuoUIcontext.Reset(e.Config, e.Size)
 					DuoUImainScreen(duo, rc)
 					e.Frame(duo.DuoUIcontext.Ops)
-				} else {
-					duo.DuoUIcontext.Reset(e.Config, e.Size)
-					if rc.Boot.IsFirstRun {
-						loader.DuoUIloaderCreateWallet(duo, cx)
-					} else {
-						DuoUIgrid(duo, cx, rc)
-						if rc.IsNotificationRun {
-							DuoUIdialog(duo, cx, rc)
-						}
-					}
-					e.Frame(duo.DuoUIcontext.Ops)
-					duo.DuoUIcontext.Reset(e.Config, e.Size)
-				}
+				//} else {
+				//	duo.DuoUIcontext.Reset(e.Config, e.Size)
+				//	if rc.Boot.IsFirstRun {
+				//		loader.DuoUIloaderCreateWallet(duo, cx)
+				//	} else {
+				//		DuoUIgrid(duo, cx, rc)
+				//		if rc.IsNotificationRun {
+				//			DuoUIdialog(duo, cx, rc)
+				//		}
+				//	}
+				//	e.Frame(duo.DuoUIcontext.Ops)
+				//	duo.DuoUIcontext.Reset(e.Config, e.Size)
+				//}
 			}
 		}
 	}
@@ -64,21 +64,31 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 
 // Main wallet screen
 func DuoUImainScreen(duo *models.DuoUI, rc *rcd.RcVar) {
-	//helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIcontext.Constraints.Width.Max, duo.DuoUIcontext.Constraints.Height.Max, duo.DuoUItheme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	helpers.DuoUIdrawRectangle(duo.DuoUIcontext, duo.DuoUIcontext.Constraints.Width.Max, duo.DuoUIcontext.Constraints.Height.Max, duo.DuoUItheme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	// START View <<<
 	logo, _ := parallel.NewDuoUIicon(ico.ParallelCoin)
 	layout.Flex{Axis: layout.Vertical}.Layout(duo.DuoUIcontext,
 		layout.Flexed(0.6, func() {
-			layout.UniformInset(unit.Dp(8)).Layout(duo.DuoUIcontext, func() {
-				size := duo.DuoUIcontext.Px(unit.Dp(256)) - 2*duo.DuoUIcontext.Px(unit.Dp(8))
-				if logo != nil {
-					logo.Color = duo.DuoUItheme.Color.Dark
-					logo.Layout(duo.DuoUIcontext, unit.Px(float32(size)))
-				}
-				duo.DuoUIcontext.Dimensions = layout.Dimensions{
-					Size: image.Point{X: size, Y: size},
-				}
-			})
+		layout.Flex{Axis:layout.Horizontal}.Layout(duo.DuoUIcontext,
+
+			layout.Rigid(func(){
+				layout.UniformInset(unit.Dp(8)).Layout(duo.DuoUIcontext, func() {
+					size := duo.DuoUIcontext.Px(unit.Dp(256)) - 2*duo.DuoUIcontext.Px(unit.Dp(8))
+					if logo != nil {
+						logo.Color = duo.DuoUItheme.Color.Dark
+						logo.Layout(duo.DuoUIcontext, unit.Px(float32(size)))
+					}
+					duo.DuoUIcontext.Dimensions = layout.Dimensions{
+						Size: image.Point{X: size, Y: size},
+					}
+				})
+			}),
+			layout.Flexed(1, func(){
+				layout.UniformInset(unit.Dp(60)).Layout(duo.DuoUIcontext, func() {
+					duo.DuoUItheme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE").Layout(duo.DuoUIcontext)
+				})
+			}),
+			)
 		}),
 		layout.Flexed(0.4, func() {
 			loader.DuoUIloader(duo)
