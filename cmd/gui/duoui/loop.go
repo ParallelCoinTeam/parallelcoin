@@ -41,6 +41,7 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 				return e.Err
 			case system.FrameEvent:
 				if rc.Boot.IsBoot {
+					duo.DuoUIcontext.Reset(e.Config, e.Size)
 					DuoUImainScreen(duo, rc)
 					e.Frame(duo.DuoUIcontext.Ops)
 				} else {
