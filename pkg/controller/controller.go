@@ -171,7 +171,7 @@ var handlers = transport.HandleFunc{
 				if _, ok := err.(blockchain.RuleError); !ok {
 					log.WARNF(
 						"Unexpected error while processing block submitted"+
-							" via CPU miner:", err,
+							" via kopach miner:", err,
 					)
 				} else {
 					log.WARN("block submitted via kopach miner rejected:", err)

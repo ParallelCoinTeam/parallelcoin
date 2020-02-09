@@ -5,9 +5,10 @@ import (
 	"net"
 	"sort"
 	"time"
-
+	
 	"github.com/davecgh/go-spew/spew"
-
+	
+	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -16,9 +17,9 @@ import (
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/Bitses"
 	"github.com/p9c/pod/pkg/simplebuffer/Hash"
+	"github.com/p9c/pod/pkg/simplebuffer/Hashes"
 	"github.com/p9c/pod/pkg/simplebuffer/IPs"
 	"github.com/p9c/pod/pkg/simplebuffer/Int32"
-	"github.com/p9c/pod/pkg/simplebuffer/Transaction"
 	"github.com/p9c/pod/pkg/simplebuffer/Uint16"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -37,7 +38,7 @@ type Job struct {
 	Height          int32
 	PrevBlockHash   *chainhash.Hash
 	Bitses          map[int32]uint32
-	Txs             []*wire.MsgTx
+	Hashes          map[int32]*chainhash.Hash
 }
 
 // Get returns a message broadcast by a node and each field is decoded
@@ -50,23 +51,23 @@ type Job struct {
 // copying memory, or deserialize their contents which will be concurrent safe
 // All of the fields are in the same order that they will be serialized to
 func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Container) {
-	//msg := append(Serializers{}, GetMessageBase(cx)...)
+	// msg := append(Serializers{}, GetMessageBase(cx)...)
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
 	msg = append(msg, nBH)
 	mH := Hash.New().Put(mB.MsgBlock().Header.PrevBlock)
 	msg = append(msg, mH)
 	tip := cx.RealNode.Chain.BestChain.Tip()
-	//// this should be the same as the block in the notification
-	//tth := tip.Header()
-	//tH := &tth
-	//tbh := tH.BlockHash()
-	//if tbh.IsEqual(mB.Hash()) {
+	// // this should be the same as the block in the notification
+	// tth := tip.Header()
+	// tH := &tth
+	// tbh := tH.BlockHash()
+	// if tbh.IsEqual(mB.Hash()) {
 	//	log.DEBUG("notification block is tip block")
-	//} else {
+	// } else {
 	//	log.DEBUG("notification block is not tip block")
-	//}
-	bM := map[int32]uint32{}
+	// }
+	bM := make(map[int32]uint32)
 	bitsMap := &bM
 	var err error
 	if tip.Diffs == nil ||
@@ -83,15 +84,35 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Contai
 	} else {
 		bitsMap = tip.Diffs
 	}
+	log.SPEW(*bitsMap)
 	bitses := Bitses.NewBitses()
 	bitses.Put(*bitsMap)
 	msg = append(msg, bitses)
-	txs := mB.MsgBlock().Transactions
-	for i := range txs {
-		t := (&Transaction.Transaction{}).Put(txs[i])
-		msg = append(msg, t)
+	// Now we need to get the values for coinbase for each algorithm
+	// then regenerate the merkle roots
+	// To mine this block a miner only needs the matching merkle roots for the version number
+	// but to get them first get the values
+	var val int64
+	mTS := map[int32]*chainhash.Hash{}
+	for i := range *bitsMap {
+		val = blockchain.CalcBlockSubsidy(bH, cx.ActiveNet, i)
+		mB.Transactions()[0].MsgTx().TxOut[0].Value = val
+		mTree := blockchain.BuildMerkleTreeStore(mB.Transactions(), false)
+		log.SPEW(mTree[len(mTree)-1].CloneBytes())
+		mTS[i] = &chainhash.Hash{}
+		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
 	}
-	//log.SPEW(msg)
+	log.SPEW(mTS)
+	mHashes := Hashes.NewHashes()
+	mHashes.Put(mTS)
+	msg = append(msg, mHashes)
+	// previously were sending blocks, no need for that really miner only needs valid block headers
+	// txs := mB.MsgBlock().Transactions
+	// for i := range txs {
+	// 	t := (&Transaction.Transaction{}).Put(txs[i])
+	// 	msg = append(msg, t)
+	// }
+	// log.SPEW(msg)
 	return Container{*msg.CreateContainer(WorkMagic)}
 }
 
@@ -128,13 +149,9 @@ func (j *Container) GetBitses() map[int32]uint32 {
 	return Bitses.NewBitses().DecodeOne(j.Get(6)).Get()
 }
 
-func (j *Container) GetTxs() (out []*wire.MsgTx) {
-	count := j.Count()
-	i := count
-	// there has to be at least one transaction so we won't check if there is
-	for i = 7; i < count; i++ {
-		out = append(out, Transaction.NewTransaction().DecodeOne(j.Get(i)).Get())
-	}
+// GetHashes returns the merkle roots per version
+func (j *Container) GetHashes() (out map[int32]*chainhash.Hash) {
+	Hashes.NewHashes().DecodeOne(j.Get(7)).Get()
 	return
 }
 
@@ -174,8 +191,8 @@ func (j *Container) String() (s string) {
 			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes())
 		s += "\n"
 	}
-	s += "8 Transactions:\n"
-	s += spew.Sdump(j.GetTxs())
+	s += "8 Merkles:\n"
+	s += spew.Sdump(j.GetHashes())
 	return
 }
 
@@ -197,7 +214,7 @@ func (j *Container) Struct() (out Job) {
 		Height:          j.GetNewHeight(),
 		PrevBlockHash:   j.GetPrevBlockHash(),
 		Bitses:          j.GetBitses(),
-		Txs:             j.GetTxs(),
+		Hashes:          j.GetHashes(),
 	}
 	return
 }
@@ -218,9 +235,10 @@ func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
 			Header: wire.BlockHeader{
 				Version:   version,
 				PrevBlock: *j.PrevBlockHash,
+				MerkleRoot: *j.Hashes[version],
 				Timestamp: time.Now(),
 			},
-			Transactions: j.Txs,
+			// Transactions: j.Txs,
 		}
 	}
 	return

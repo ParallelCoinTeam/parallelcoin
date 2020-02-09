@@ -2,6 +2,7 @@ package worker
 
 import (
 	"crypto/cipher"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -10,6 +11,7 @@ import (
 	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -35,6 +37,7 @@ type Worker struct {
 	block        *util.Block
 	msgBlock     *wire.MsgBlock
 	bitses       map[int32]uint32
+	hashes       map[int32]*chainhash.Hash
 	roller       *Counter
 	startNonce   uint32
 	startChan    chan struct{}
@@ -229,21 +232,27 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
 	rand.Seed(time.Now().UnixNano())
 	w.msgBlock.Header.Nonce = rand.Uint32()
-	w.msgBlock.Transactions = job.GetTxs()
+	w.hashes = job.GetHashes()
+	if w.hashes != nil {
+		log.TRACE(w.hashes)
+		w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
+	} else {
+		return errors.New("failed to decode merkle roots")
+	}
 	w.msgBlock.Header.Timestamp = time.Now()
 	// create the unique extra nonce for this worker,
 	// which creates a different merkel root
-	extraNonce, err := wire.RandomUint64()
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
-	log.TRACE("updating extra nonce")
-	err = UpdateExtraNonce(w.msgBlock, newHeight, extraNonce)
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
+	// extraNonce, err := wire.RandomUint64()
+	// if err != nil {
+	// 	log.ERROR(err)
+	// 	return
+	// }
+	// log.TRACE("updating extra nonce")
+	// err = UpdateExtraNonce(w.msgBlock, newHeight, extraNonce)
+	// if err != nil {
+	// 	log.ERROR(err)
+	// 	return
+	// }
 	// log.SPEW(w.msgBlock)
 	// make the work select block start running
 	w.startChan <- struct{}{}
@@ -324,4 +333,17 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 	return txscript.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
 		AddInt64(int64(extraNonce)).AddData([]byte(mining.CoinbaseFlags)).
 		Script()
+}
+
+// calcMerkleRoot creates a merkle tree from the slice of transactions and returns the root of the tree.
+func calcMerkleRoot(txns []*wire.MsgTx) chainhash.Hash {
+	if len(txns) == 0 {
+		return chainhash.Hash{}
+	}
+	utilTxns := make([]*util.Tx, 0, len(txns))
+	for _, tx := range txns {
+		utilTxns = append(utilTxns, util.NewTx(tx))
+	}
+	merkles := blockchain.BuildMerkleTreeStore(utilTxns, false)
+	return *merkles[len(merkles)-1]
 }
