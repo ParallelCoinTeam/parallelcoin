@@ -39,6 +39,7 @@ type Job struct {
 	PrevBlockHash   *chainhash.Hash
 	Bitses          map[int32]uint32
 	Hashes          map[int32]*chainhash.Hash
+	CoinBases       map[int32]*util.Tx
 }
 
 // Get returns a message broadcast by a node and each field is decoded
@@ -50,7 +51,7 @@ type Job struct {
 // and a set of methods that extracts the individual requested field without
 // copying memory, or deserialize their contents which will be concurrent safe
 // All of the fields are in the same order that they will be serialized to
-func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Container) {
+func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs map[int32]*wire.MsgTx) (out Container) {
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
@@ -70,6 +71,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Contai
 	bM := make(map[int32]uint32)
 	bitsMap := &bM
 	var err error
+	
 	if tip.Diffs == nil ||
 		len(*tip.Diffs) != len(fork.List[1].AlgoVers) {
 		bitsMap, err = cx.RealNode.Chain.
@@ -84,7 +86,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Contai
 	} else {
 		bitsMap = tip.Diffs
 	}
-	log.SPEW(*bitsMap)
+	// log.SPEW(*bitsMap)
 	bitses := Bitses.NewBitses()
 	bitses.Put(*bitsMap)
 	msg = append(msg, bitses)
@@ -100,13 +102,14 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Contai
 		val = blockchain.CalcBlockSubsidy(bH, cx.ActiveNet, i)
 		txs.TxOut[0].Value = val
 		txx := util.NewTx(txs)
+		cbs[i] = txs
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, mB.Transactions()[1:]...), false)
-		log.SPEW(mTree[len(mTree)-1].CloneBytes())
+		// log.SPEW(mTree[len(mTree)-1].CloneBytes())
 		mTS[i] = &chainhash.Hash{}
 		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
 	}
-	log.SPEW(mTS)
+	// log.SPEW(mTS)
 	mHashes := Hashes.NewHashes()
 	mHashes.Put(mTS)
 	msg = append(msg, mHashes)
@@ -237,10 +240,10 @@ func (j *Job) GetMsgBlock(version int32) (out *wire.MsgBlock) {
 	if found {
 		out = &wire.MsgBlock{
 			Header: wire.BlockHeader{
-				Version:   version,
-				PrevBlock: *j.PrevBlockHash,
+				Version:    version,
+				PrevBlock:  *j.PrevBlockHash,
 				MerkleRoot: *j.Hashes[version],
-				Timestamp: time.Now(),
+				Timestamp:  time.Now(),
 			},
 			// Transactions: j.Txs,
 		}

@@ -389,11 +389,11 @@ func // checkConnectBlock performs several checks to confirm connecting the
 func (b *BlockChain) CheckConnectBlockTemplate(workerNumber uint32, block *util.
 Block) error {
 	algo := block.MsgBlock().Header.Version
-	log.TRACE("algo ", algo)
+	// log.TRACE("algo ", algo)
 	height := block.Height()
-	log.TRACE("height ", height)
+	// log.TRACE("height ", height)
 	algoname := fork.GetAlgoName(algo, height)
-	log.TRACE("algoname ", algoname)
+	// log.TRACE("algoname ", algoname)
 	powLimit := fork.GetMinDiff(algoname, height)
 	// Skip the proof of work check as this is just a block template.
 	flags := BFNoPoWCheck
@@ -1103,7 +1103,7 @@ func // checkBlockHeaderSanity performs some preliminary checks on a block
 // The flags do not modify the behavior of this function directly,
 // however they are needed to pass along to checkProofOfWork.
 checkBlockHeaderSanity(header *wire.BlockHeader, powLimit *big.Int, timeSource MedianTimeSource, flags BehaviorFlags, height int32) error {
-	log.TRACEF("checkBlockHeaderSanity %064x %+v", powLimit, header)
+	// log.TRACEF("checkBlockHeaderSanity %064x %+v", powLimit, header)
 	// Ensure the proof of work bits in the block header is in min/max range and
 	// the block hash is less than the target value described by the bits.
 	err := checkProofOfWork(header, powLimit, flags, height)
@@ -1250,8 +1250,8 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 		return errors.New("PoW limit was not set")
 	}
 	target := fork.CompactToBig(header.Bits)
-	log.TRACEF("target %064x %08x", target, header.Bits)
-	log.TRACEF("header: %+v", header)
+	// log.TRACEF("target %064x %08x", target, header.Bits)
+	// log.TRACEF("header: %+v", header)
 	if target.Sign() <= 0 {
 		str := fmt.Sprintf("block target difficulty of %064x is too low",
 			target)
@@ -1269,9 +1269,9 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 	if flags&BFNoPoWCheck == 0 {
 		// The block hash must be less than the claimed target.
 		// Unless there is less than 10 previous with the same version (algo)...
-		log.DEBUG("height", height, fork.IsTestnet)
+		// log.DEBUG("height", height, fork.IsTestnet)
 		hash := header.BlockHashWithAlgos(height)
-		log.DEBUG("blockhashwithalgos", hash, fork.IsTestnet)
+		// log.DEBUG("blockhashwithalgos", hash, fork.IsTestnet)
 		bigHash := HashToBig(&hash)
 		if bigHash.Cmp(target) > 0 {
 			str := fmt.Sprintf("block hash of "+

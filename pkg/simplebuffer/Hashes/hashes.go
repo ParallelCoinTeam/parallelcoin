@@ -79,12 +79,12 @@ func (b *Hashes) Get() (out map[int32]*chainhash.Hash) {
 func (b *Hashes) Put(in map[int32]*chainhash.Hash) *Hashes {
 	b.Lock()
 	defer b.Unlock()
-	log.SPEW(in)
+	// log.SPEW(in)
 	b.Length = byte(len(in))
 	b.Byteses = make(map[int32][]byte, b.Length)
 	for algoVer := range in {
 		b.Byteses[algoVer] = in[algoVer].CloneBytes()
 	}
-	log.SPEW(b.Byteses)
+	// log.SPEW(b.Byteses)
 	return b
 }

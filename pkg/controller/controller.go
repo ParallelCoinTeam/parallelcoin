@@ -7,13 +7,14 @@ import (
 	"net"
 	"sync"
 	"time"
-
+	
 	"go.uber.org/atomic"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
+	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller/advertisment"
 	"github.com/p9c/pod/pkg/controller/job"
@@ -35,7 +36,7 @@ const (
 	// This protocol is connectionless and stateless so if one misses,
 	// the next one probably won't, usually a second or 3 later
 	MaxDatagramSize = blockchain.MaxBlockBaseSize / 3
-	//UDP6MulticastAddress = "ff02::1"
+	// UDP6MulticastAddress = "ff02::1"
 	UDP4MulticastAddress = "224.0.0.1:11049"
 )
 
@@ -46,6 +47,7 @@ type Controller struct {
 	cx                     *conte.Xt
 	mx                     *sync.Mutex
 	blockTemplateGenerator *mining.BlkTmplGenerator
+	transactions           map[int32]*wire.MsgTx
 	oldBlocks              *atomic.Value
 	prevHash               *chainhash.Hash
 	lastTxUpdate           time.Time
@@ -79,8 +81,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		return
 	}
 	for !cx.RealNode.SyncManager.IsCurrent() {
-		log.DEBUG("node is not synced, waiting 5 seconds to start controller")
-		time.Sleep(time.Second*5)
+		log.DEBUG("node is not synced, waiting 2 seconds to start controller")
+		time.Sleep(time.Second * 2)
 	}
 	ctrl := &Controller{
 		conn:                   conn,
@@ -96,6 +98,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		subMx:                  &sync.Mutex{},
 		submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
+		transactions:           make(map[int32]*wire.MsgTx),
 	}
 	ctrl.active.Store(false)
 	pM := pause.GetPauseContainer(cx)
@@ -146,9 +149,13 @@ var handlers = transport.HandleFunc{
 		err error) {
 		return func(b []byte) (err error) {
 			log.DEBUG("received solution")
+			// log.SPEW(ctx)
 			c := ctx.(*Controller)
 			j := sol.LoadSolContainer(b)
 			msgBlock := j.GetMsgBlock()
+			log.SPEW(c.transactions)
+			// msgBlock.Header.Version
+			// msgBlock.Transactions = append(c.transactions[msgBlock.Header.Version], c.)
 			log.SPEW(msgBlock)
 			if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
 				BestSnapshot().Hash) {
@@ -209,13 +216,15 @@ var handlers = transport.HandleFunc{
 
 func (c *Controller) sendNewBlockTemplate() (err error) {
 	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
+	// c.transactions = template.Block.Transactions
 	if template == nil {
 		err = errors.New("could not get template")
 		log.ERROR(err)
 		return
 	}
 	msgB := template.Block
-	fMC := job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx))
+	txs := make(map[int32]*wire.MsgTx)
+	fMC := job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), txs)
 	shards, err := c.conn.CreateShards(fMC.Data, job.WorkMagic)
 	err = c.conn.SendShards(shards)
 	if err != nil {
@@ -299,7 +308,7 @@ out:
 			ctrl.oldBlocks.Store(oB)
 		case <-ctrl.ctx.Done():
 			break out
-			//default:
+			// default:
 		}
 	}
 }
@@ -325,7 +334,7 @@ out:
 
 func updater(ctrl *Controller) {
 	// check if new transactions have arrived
-
+	
 	// send out new work
 }
 
@@ -337,22 +346,25 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 			case blockchain.NTBlockAccepted:
 				c.subMx.Lock()
 				defer c.subMx.Unlock()
-				//log.DEBUG("received new chain notification")
+				log.DEBUG("received new chain notification")
 				// construct work message
-				//log.SPEW(n)
+				log.SPEW(n)
 				_, ok := n.Data.(*util.Block)
 				if !ok {
 					log.WARN("chain accepted notification is not a block")
 					break
 				}
+				txs := make(map[int32]*wire.MsgTx)
 				template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 				if template != nil {
-					//log.DEBUG("got new template")
+					// log.DEBUG("got new template")
 					msgB := template.Block
-					//log.DEBUG(*c.cx.Config.Controller)
-					mC := job.Get(c.cx, util.NewBlock(msgB),
-						advertisment.Get(c.cx))
-					//log.SPEW(mC.Data)
+					// log.DEBUG(*c.cx.Config.Controller)
+					// c.transactions = msgB.Transactions
+					mC := job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), txs)
+					// copy out altered coinbase transactions to select correct upon found solution
+					c.transactions = txs
+					// log.SPEW(mC.Data)
 					shards, err := c.conn.CreateShards(mC.Data, job.WorkMagic)
 					if err != nil {
 						log.TRACE(err)

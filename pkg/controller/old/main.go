@@ -245,7 +245,8 @@ func sendNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 		return nil, errors.New("could not get template")
 	}
 	msgB := template.Block
-	fMC := job.Get(cx, util.NewBlock(msgB), msgBase)
+	txs := make(map[int32]*wire.MsgTx)
+	fMC := job.Get(cx, util.NewBlock(msgB), msgBase, txs)
 	for i := range sendAddresses {
 		shards, err = Send(sendAddresses[i], fMC.Data, job.WorkMagic, ciph,
 			conns[i])
@@ -339,7 +340,8 @@ func getNotifier(active *atomic.Bool, bTG *mining.BlkTmplGenerator,
 				template := getNewBlockTemplate(cx, bTG)
 				if template != nil {
 					msgB := template.Block
-					mC := job.Get(cx, util.NewBlock(msgB), msgBase)
+					txs := make(map[int32]*wire.MsgTx)
+					mC := job.Get(cx, util.NewBlock(msgB), msgBase, txs)
 					for i := range sendAddresses {
 						shards, err := Send(sendAddresses[i], mC.Data,
 							job.WorkMagic, ciph, conns[i])
