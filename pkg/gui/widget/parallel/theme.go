@@ -31,6 +31,9 @@ type DuoUItheme struct {
 		Hint      color.RGBA
 		InvText   color.RGBA
 	}
+	Font struct{
+		Primary, Secondary text.Typeface
+	}
 	TextSize              unit.Value
 	checkBoxCheckedIcon   *DuoUIicon
 	checkBoxUncheckedIcon *DuoUIicon
@@ -54,6 +57,8 @@ func NewDuoUItheme() *DuoUItheme {
 	t.Color.Info = rgb(0x3080cf)
 	t.Color.Hint = rgb(0x888888)
 	t.Color.InvText = rgb(0xcfcfcf)
+	t.Font.Primary = "bariol"
+	t.Font.Secondary = "plan9"
 	t.TextSize = unit.Sp(16)
 
 	t.checkBoxCheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleCheckBox))

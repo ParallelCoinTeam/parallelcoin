@@ -12,8 +12,8 @@ import (
 )
 
 var (
+	buttonTrace = new(widget.Button)
 	buttonCornerOne = new(widget.Button)
-	buttonCornerTwo = new(widget.Button)
 	buttonSettings  = new(widget.Button)
 	buttonNetwork   = new(widget.Button)
 	buttonBlocks    = new(widget.Button)
@@ -41,6 +41,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 		settingsIcon, _ := parallel.NewDuoUIicon(icons.ActionSettings)
 		blocksIcon, _ := parallel.NewDuoUIicon(icons.ActionExplore)
 		networkIcon, _ := parallel.NewDuoUIicon(icons.ActionFingerprint)
+		traceIcon, _ := parallel.NewDuoUIicon(icons.ActionTrackChanges)
 		consoleIcon, _ := parallel.NewDuoUIicon(icons.ActionInput)
 		helpIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropDown)
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(duo.DuoUIcontext,
@@ -52,19 +53,19 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 								var networkMeniItem parallel.DuoUIbutton
 								networkMeniItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
 								for buttonCornerOne.Clicked(duo.DuoUIcontext) {
-									duo.CurrentPage = "Network"
+									duo.CurrentPage = "NETWORK"
 								}
 								networkMeniItem.Layout(duo.DuoUIcontext, buttonCornerOne)
 							})
 						},
 						func() {
 							var settingsMenuItem parallel.DuoUIbutton
-							settingsMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, settingsIcon)
+							settingsMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, traceIcon)
 
-							for buttonCornerTwo.Clicked(duo.DuoUIcontext) {
-								duo.CurrentPage = "Settings"
+							for buttonTrace.Clicked(duo.DuoUIcontext) {
+								duo.CurrentPage = "TRACE"
 							}
-							settingsMenuItem.Layout(duo.DuoUIcontext, buttonCornerTwo)
+							settingsMenuItem.Layout(duo.DuoUIcontext, buttonTrace)
 						},
 					}
 					cornerNav.Layout(duo.DuoUIcontext, len(cornerButtons), func(i int) {
@@ -80,7 +81,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 								var networkMeniItem parallel.DuoUIbutton
 								networkMeniItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
 								for buttonNetwork.Clicked(duo.DuoUIcontext) {
-									duo.CurrentPage = "Network"
+									duo.CurrentPage = "NETWORK"
 								}
 								networkMeniItem.Layout(duo.DuoUIcontext, buttonNetwork)
 							})
@@ -89,7 +90,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 							var blocksMenuItem parallel.DuoUIbutton
 							blocksMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, blocksIcon)
 							for buttonBlocks.Clicked(duo.DuoUIcontext) {
-								duo.CurrentPage = "Explorer"
+								duo.CurrentPage = "EXPLORER"
 							}
 							blocksMenuItem.Layout(duo.DuoUIcontext, buttonBlocks)
 						},
@@ -106,7 +107,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 								var consoleMenuItem parallel.DuoUIbutton
 								consoleMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, consoleIcon)
 								for buttonConsole.Clicked(duo.DuoUIcontext) {
-									duo.CurrentPage = "Console"
+									duo.CurrentPage = "CONSOLE"
 								}
 								consoleMenuItem.Layout(duo.DuoUIcontext, buttonConsole)
 							})
@@ -116,7 +117,7 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 							settingsMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, settingsIcon)
 
 							for buttonSettings.Clicked(duo.DuoUIcontext) {
-								duo.CurrentPage = "Settings"
+								duo.CurrentPage = "SETTINGS"
 							}
 							settingsMenuItem.Layout(duo.DuoUIcontext, buttonSettings)
 						},

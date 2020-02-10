@@ -29,7 +29,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 			in := layout.UniformInset(unit.Dp(8))
 			in.Layout(duo.DuoUIcontext, func() {
 
-				latestx := duo.DuoUItheme.H5("Latest Transactions")
+				latestx := duo.DuoUItheme.H5("LATEST TRANSACTIONS")
 				latestx.Color = helpers.HexARGB("ffcfcfcf")
 				latestx.Alignment = text.Start
 				latestx.Layout(duo.DuoUIcontext)
@@ -70,6 +70,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 												amount.Color = helpers.RGB(0x003300)
 												amount.Color = helpers.Alpha(a, amount.Color)
 												amount.Alignment = text.End
+												amount.Font.Typeface = "bariol"
 												amount.Font.Variant = "Bold"
 												amount.Font.Weight = text.Bold
 												amount.Layout(duo.DuoUIcontext)

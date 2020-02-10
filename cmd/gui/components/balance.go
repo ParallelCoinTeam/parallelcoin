@@ -32,11 +32,11 @@ func DuoUIbalanceWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 	in.Layout(duo.DuoUIcontext, func() {
 		cs := duo.DuoUIcontext.Constraints
 		navButtons := []func(){
-			listItem(duo, "Balance :", rc.Balance+" "+duo.DuoUIconfiguration.Abbrevation),
+			listItem(duo, "BALANCE :", rc.Balance+" "+duo.DuoUIconfiguration.Abbrevation),
 			func() { helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, helpers.HexARGB("ffbdbdbd"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
-			listItem(duo, "Unconfirmed :", rc.Unconfirmed),
+			listItem(duo, "UNCNFIRMED :", rc.Unconfirmed),
 			func() { helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 1, helpers.HexARGB("ffbdbdbd"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
-			listItem(duo, "Transactions :", fmt.Sprint(rc.Transactions.TxsNumber)),
+			listItem(duo, "TRANSACTIONS :", fmt.Sprint(rc.Transactions.TxsNumber)),
 		}
 		itemsList.Layout(duo.DuoUIcontext, len(navButtons), func(i int) {
 			layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, navButtons[i])
@@ -65,6 +65,7 @@ func listItem(duo *models.DuoUI, name, value string) func() {
 					}),
 					layout.Rigid(func() {
 						txt := duo.DuoUItheme.H6(name)
+						txt.Font.Typeface = "bariol"
 						txt.Color = duo.DuoUIconfiguration.SecondaryTextColor
 						txt.Layout(duo.DuoUIcontext)
 					}),
@@ -72,6 +73,7 @@ func listItem(duo *models.DuoUI, name, value string) func() {
 			}),
 			layout.Rigid(func() {
 				value := duo.DuoUItheme.H5(value)
+				value.Font.Typeface = "bariol"
 				value.Color = color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}
 				value.Alignment = text.End
 				value.Layout(duo.DuoUIcontext)

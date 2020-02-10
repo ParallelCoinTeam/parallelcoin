@@ -50,6 +50,7 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) func(){
 					layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
 						balance := duo.DuoUItheme.Body2(rc.Balance + " " + duo.DuoUIconfiguration.Abbrevation)
 						balance.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+						balance.Font.Typeface = "bariol"
 						balance.Alignment = text.End
 						balance.Layout(duo.DuoUIcontext)
 					})
@@ -61,6 +62,7 @@ func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) func(){
 						balance := duo.DuoUItheme.Body2("dimenzion: " + fmt.Sprint(duo.DuoUIcontext.Constraints.Width.Max))
 						balance.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 						balance.Alignment = text.End
+						balance.Font.Typeface = "bariol"
 						balance.Layout(duo.DuoUIcontext)
 					})
 				})

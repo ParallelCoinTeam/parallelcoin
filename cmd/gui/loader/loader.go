@@ -38,10 +38,9 @@ func DuoUIloader(duo *models.DuoUI) {
 		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		logOutputList.Layout(duo.DuoUIcontext, len(logMessages), func(i int) {
 			t := logMessages[i]
-			col := "ff3030cf"
-
+			col := "ff3080cf"
 			if t.Level == "TRC" {
-				col = "ff3030cf"
+				col = "ff3080cf"
 			}
 			if t.Level == "DBG" {
 				col = "ffcfcf30"
@@ -52,7 +51,7 @@ func DuoUIloader(duo *models.DuoUI) {
 			if t.Level == "WRN" {
 				col = "ffcfcf30"
 			}
-			if t.Level == "Error" {
+			if t.Level == "ERROR" {
 				col = "ffcf8030"
 			}
 			if t.Level == "FTL" {

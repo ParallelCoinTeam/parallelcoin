@@ -56,9 +56,9 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
 								func() {
 									in.Layout(duo.DuoUIcontext, func() {
 										var overviewMenuItem parallel.DuoUIbutton
-										overviewMenuItem = duo.DuoUItheme.DuoUIbutton("Overview", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, overviewIcon)
+										overviewMenuItem = duo.DuoUItheme.DuoUIbutton("OVERVIEW", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, overviewIcon)
 										for buttonOverview.Clicked(duo.DuoUIcontext) {
-											duo.CurrentPage = "Overview"
+											duo.CurrentPage = "OVERVIEW"
 										}
 										overviewMenuItem.Layout(duo.DuoUIcontext, buttonOverview)
 									})
@@ -68,9 +68,9 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
 								},
 								func() {
 									var sendMenuItem parallel.DuoUIbutton
-									sendMenuItem = duo.DuoUItheme.DuoUIbutton("Send", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, sendIcon)
+									sendMenuItem = duo.DuoUItheme.DuoUIbutton("SEND", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, sendIcon)
 									for buttonSend.Clicked(duo.DuoUIcontext) {
-										duo.CurrentPage = "Send"
+										duo.CurrentPage = "SEND"
 									}
 									sendMenuItem.Layout(duo.DuoUIcontext, buttonSend)
 								},
@@ -80,9 +80,9 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
 								func() {
 									in.Layout(duo.DuoUIcontext, func() {
 										var receiveMenuItem parallel.DuoUIbutton
-										receiveMenuItem = duo.DuoUItheme.DuoUIbutton("Receive", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, receiveIcon)
+										receiveMenuItem = duo.DuoUItheme.DuoUIbutton("RECEIVE", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, receiveIcon)
 										for buttonReceive.Clicked(duo.DuoUIcontext) {
-											duo.CurrentPage = "Receive"
+											duo.CurrentPage = "RECEIVE"
 										}
 										receiveMenuItem.Layout(duo.DuoUIcontext, buttonReceive)
 									})
@@ -92,9 +92,9 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
 								},
 								func() {
 									var addressBookMenuItem parallel.DuoUIbutton
-									addressBookMenuItem = duo.DuoUItheme.DuoUIbutton("Address Book", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, addressBookIcon)
+									addressBookMenuItem = duo.DuoUItheme.DuoUIbutton("ADDRESS BOOK", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, addressBookIcon)
 									for buttonAddressBook.Clicked(duo.DuoUIcontext) {
-										duo.CurrentPage = "AddressBook"
+										duo.CurrentPage = "ADDRESSBOOK"
 									}
 									addressBookMenuItem.Layout(duo.DuoUIcontext, buttonAddressBook)
 								},
@@ -103,9 +103,9 @@ func DuoUImenu(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
 								},
 								func() {
 									var historyMenuItem parallel.DuoUIbutton
-									historyMenuItem = duo.DuoUItheme.DuoUIbutton("History", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, historyIcon)
+									historyMenuItem = duo.DuoUItheme.DuoUIbutton("HISTORY", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, historyIcon)
 									for buttonHistory.Clicked(duo.DuoUIcontext) {
-										duo.CurrentPage = "History"
+										duo.CurrentPage = "HISTORY"
 									}
 									historyMenuItem.Layout(duo.DuoUIcontext, buttonHistory)
 								},

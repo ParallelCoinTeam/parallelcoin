@@ -15,23 +15,25 @@ func DuoUIcontent(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 			BgColor:      parallel.HexARGB("ffcfcfcf"),
 		}
 		switch duo.CurrentPage {
-		case "Overview":
+		case "OVERVIEW":
 			page.Layout(DuoUIoverview(duo, cx, rc))
-		case "Send":
+		case "SEND":
 			page.Layout(DuoUIsend(duo, cx, rc))
-		case "Receive":
+		case "RECEIVE":
 			page.Layout(DuoUIreceive(duo))
-		case "History":
+		case "HISTORY":
 			page.Layout(DuoUIhistory(duo, cx, rc))
-		case "AddressBook":
+		case "ADDRESSBOOK":
 			page.Layout(DuoUIaddressbook(duo))
-		case "Explorer":
+		case "EXPLORER":
 			page.Layout(DuoUIexplorer(duo, cx, rc))
-		case "Network":
+		case "NETWORK":
 			page.Layout(DuoUInetwork(duo))
-		case "Console":
+		case "CONSOLE":
 			page.Layout(DuoUIconsole(duo, cx, rc))
-		case "Settings":
+		case "TRACE":
+			page.Layout(DuoUItrace(duo, cx, rc))
+		case "SETTINGS":
 			page.Layout(DuoUIsettings(duo, cx, rc))
 		default:
 			page.Layout(DuoUIoverview(duo, cx, rc))

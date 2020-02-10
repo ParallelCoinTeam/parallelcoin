@@ -45,19 +45,19 @@ func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) fun
 						layout.Rigid(func() {
 							layout.Flex{}.Layout(duo.DuoUIcontext,
 								layout.Rigid(func() {
-									duo.DuoUItheme.DuoUIcheckBox("All").Layout(duo.DuoUIcontext, allTxs)
+									duo.DuoUItheme.DuoUIcheckBox("ALL").Layout(duo.DuoUIcontext, allTxs)
 								}),
 								layout.Rigid(func() {
-									duo.DuoUItheme.DuoUIcheckBox("Minted").Layout(duo.DuoUIcontext, mintedTxs)
+									duo.DuoUItheme.DuoUIcheckBox("MINTED").Layout(duo.DuoUIcontext, mintedTxs)
 								}),
 								layout.Rigid(func() {
-									duo.DuoUItheme.DuoUIcheckBox("Immature").Layout(duo.DuoUIcontext, immatureTxs)
+									duo.DuoUItheme.DuoUIcheckBox("IMATURE").Layout(duo.DuoUIcontext, immatureTxs)
 								}),
 								layout.Rigid(func() {
-									duo.DuoUItheme.DuoUIcheckBox("Sent").Layout(duo.DuoUIcontext, sentTxs)
+									duo.DuoUItheme.DuoUIcheckBox("SENT").Layout(duo.DuoUIcontext, sentTxs)
 								}),
 								layout.Rigid(func() {
-									duo.DuoUItheme.DuoUIcheckBox("Received").Layout(duo.DuoUIcontext, receivedTxs)
+									duo.DuoUItheme.DuoUIcheckBox("RECEIVED").Layout(duo.DuoUIcontext, receivedTxs)
 								}),
 							)
 						}),
@@ -121,16 +121,19 @@ func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) fun
 										}.Layout(duo.DuoUIcontext,
 											layout.Rigid(func() {
 												num := duo.DuoUItheme.Body1(fmt.Sprint(i))
+												num.Font.Typeface = "bariol"
 												num.Color = helpers.Alpha(a, num.Color)
 												num.Layout(duo.DuoUIcontext)
 											}),
 											layout.Rigid(func() {
 												tim := duo.DuoUItheme.Body1(t.TxID)
+												tim.Font.Typeface = "bariol"
 												tim.Color = helpers.Alpha(a, tim.Color)
 												tim.Layout(duo.DuoUIcontext)
 											}),
 											layout.Rigid(func() {
 												amount := duo.DuoUItheme.H5(fmt.Sprintf("%0.8f", t.Amount))
+												amount.Font.Typeface = "bariol"
 												amount.Color = helpers.RGB(0x003300)
 												amount.Color = helpers.Alpha(a, amount.Color)
 												amount.Alignment = text.End
@@ -140,11 +143,13 @@ func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) fun
 											}),
 											layout.Rigid(func() {
 												sat := duo.DuoUItheme.Body1(t.Category)
+												sat.Font.Typeface = "bariol"
 												sat.Color = helpers.Alpha(a, sat.Color)
 												sat.Layout(duo.DuoUIcontext)
 											}),
 											layout.Rigid(func() {
 												l := duo.DuoUItheme.Body2(t.Time)
+												l.Font.Typeface = "bariol"
 												l.Color = duo.DuoUItheme.Color.Hint
 												l.Color = helpers.Alpha(a, l.Color)
 												l.Layout(duo.DuoUIcontext)
@@ -153,6 +158,7 @@ func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) fun
 									}),
 									layout.Rigid(func() {
 										sat := duo.DuoUItheme.Body1(fmt.Sprintf("%0.8f", t.Amount))
+										sat.Font.Typeface = "bariol"
 										sat.Color = helpers.Alpha(a, sat.Color)
 										sat.Layout(duo.DuoUIcontext)
 									}),

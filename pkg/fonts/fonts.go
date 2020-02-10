@@ -18,11 +18,11 @@ import (
 func Register() {
 	register(text.Font{Typeface: "plan9"}, plan9.TTF)
 	register(text.Font{Typeface: "bariol"}, bariolregular.TTF)
-	register(text.Font{Style: text.Italic}, bariolregularitalic.TTF)
-	register(text.Font{Weight: text.Bold}, bariolbold.TTF)
-	register(text.Font{Style: text.Italic, Weight: text.Bold}, bariolbolditalic.TTF)
-	register(text.Font{Weight: text.Medium}, bariollight.TTF)
-	register(text.Font{Weight: text.Medium, Style: text.Italic}, bariollightitalic.TTF)
+	register(text.Font{Typeface: "bariol",Style: text.Italic}, bariolregularitalic.TTF)
+	register(text.Font{Typeface: "bariol",Weight: text.Bold}, bariolbold.TTF)
+	register(text.Font{Typeface: "bariol",Style: text.Italic, Weight: text.Bold}, bariolbolditalic.TTF)
+	register(text.Font{Typeface: "bariol",Weight: text.Medium}, bariollight.TTF)
+	register(text.Font{Typeface: "bariol",Weight: text.Medium, Style: text.Italic}, bariollightitalic.TTF)
 }
 
 func register(fnt text.Font, ttf []byte) {

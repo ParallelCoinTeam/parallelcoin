@@ -32,7 +32,9 @@ func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() 
 						Axis: layout.Vertical,
 					}.Layout(duo.DuoUIcontext,
 						layout.Rigid(func() {
-							duo.DuoUItheme.H3(duo.DuoUIconfiguration.Tabs.Current).Layout(duo.DuoUIcontext)
+							t := duo.DuoUItheme.H3(duo.DuoUIconfiguration.Tabs.Current)
+							t.Font.Typeface = duo.DuoUItheme.Font.Primary
+							t.Layout(duo.DuoUIcontext)
 						}),
 						layout.Rigid(func() {
 							cs := duo.DuoUIcontext.Constraints
@@ -76,12 +78,16 @@ func DuoUIsettingsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() 
 											}.Layout(duo.DuoUIcontext,
 												layout.Rigid(func() {
 													layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
-														duo.DuoUItheme.H6(fmt.Sprint(tl.Field.Name)).Layout(duo.DuoUIcontext)
+														name := duo.DuoUItheme.H6(fmt.Sprint(tl.Field.Name))
+														name.Font.Typeface = duo.DuoUItheme.Font.Primary
+														name.Layout(duo.DuoUIcontext)
 													})
 												}),
 												layout.Rigid(func() {
 													layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
-														duo.DuoUItheme.Body2(fmt.Sprint(tl.Field.Description)).Layout(duo.DuoUIcontext)
+														desc := duo.DuoUItheme.Body2(fmt.Sprint(tl.Field.Description))
+														desc.Font.Typeface = duo.DuoUItheme.Font.Primary
+														desc.Layout(duo.DuoUIcontext)
 													})
 												}),
 											)

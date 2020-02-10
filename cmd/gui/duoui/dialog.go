@@ -59,7 +59,7 @@ func DuoUIdialog(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					layout.Rigid(func(){
 							layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
 								layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
-									cur := duo.DuoUItheme.H4("Dialog box!")
+									cur := duo.DuoUItheme.H4("DIALOG BOX!")
 									cur.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 									cur.Alignment = text.Start
 									cur.Layout(duo.DuoUIcontext)
@@ -73,9 +73,9 @@ func DuoUIdialog(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) {
 					Axis: layout.Horizontal,
 					Alignment: layout.Middle,
 				}.Layout(duo.DuoUIcontext,
-					layout.Rigid(dialogButon("Cancel", "ffcfcfcf", "ffcf3030", "ffcfcfcf", duo, rc, buttonDialogCancel, iconCancel)),
+					layout.Rigid(dialogButon("CANCEL", "ffcfcfcf", "ffcf3030", "ffcfcfcf", duo, rc, buttonDialogCancel, iconCancel)),
 					layout.Rigid(dialogButon("OK", "ffcfcfcf", "ff308030", "ffcfcfcf", duo, rc, buttonDialogOK, iconOK)),
-					layout.Rigid(dialogButon("Close", "ffcfcfcf", "ffcf8030", "ffcfcfcf", duo, rc, buttonDialogClose, iconClose)),
+					layout.Rigid(dialogButon("CLOSE", "ffcfcfcf", "ffcf8030", "ffcfcfcf", duo, rc, buttonDialogClose, iconClose)),
 
 				)
 			}),

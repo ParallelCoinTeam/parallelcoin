@@ -3,6 +3,7 @@ package duoui
 import (
 	"github.com/p9c/pod/cmd/gui/components"
 	"github.com/p9c/pod/cmd/gui/helpers"
+	"github.com/p9c/pod/cmd/gui/loader"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
@@ -83,4 +84,12 @@ func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Conte
 		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 10, 10)
 		page.Layout(duo.DuoUIcontext, components.DuoUIconsoleWidget(duo, cx, rc))
 	}
+}
+
+func DuoUItrace(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
+	return duo.DuoUIcontext, func() {
+		page := duo.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 10, 10)
+		page.Layout(duo.DuoUIcontext, func() {
+			loader.DuoUIloader(duo)
+		})	}
 }

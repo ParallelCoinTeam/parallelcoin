@@ -27,7 +27,7 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 	fonts.Register()
 	duo.DuoUIcontext = layout.NewContext(duo.DuoUIwindow.Queue())
 	navigations := make(map[string]*parallel.DuoUIthemeNav)
-	navigations["mainMenu"] = mainMenu()
+	//navigations["mainMenu"] = mainMenu()
 	duo.DuoUIconfiguration = &models.DuoUIconfiguration{
 		Abbrevation:        "DUO",
 		PrimaryBgColor:     color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30},
@@ -68,17 +68,4 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 	duo.DuoUIconfiguration.Settings.Daemon.Widgets = settingsFields
 	duo.DuoUItheme = parallel.NewDuoUItheme()
 	return
-}
-
-func mainMenu() *parallel.DuoUIthemeNav {
-	return &parallel.DuoUIthemeNav{
-		Title:         "mainMenu",
-		IcoBackground: color.RGBA{A: 0xff, R: 0x38, G: 0x11, B: 0x88},
-		IcoColor:      color.RGBA{A: 0xff, R: 0x38, G: 0x11, B: 0x88},
-		IcoPadding:    unit.Dp(16),
-		IcoSize:       unit.Dp(32),
-		TxColor:       color.RGBA{A: 0xff, R: 0x38, G: 0x11, B: 0x88},
-		BgColor:       color.RGBA{A: 0xff, R: 0xff, G: 0x33, B: 0x33},
-		//NavButtons:    mainNavButtons,
-	}
 }

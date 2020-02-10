@@ -40,23 +40,23 @@ func DuoUImainLoop(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
-				//if rc.Boot.IsBoot {
+				if rc.Boot.IsBoot {
 					duo.DuoUIcontext.Reset(e.Config, e.Size)
 					DuoUImainScreen(duo, rc)
 					e.Frame(duo.DuoUIcontext.Ops)
-				//} else {
-				//	duo.DuoUIcontext.Reset(e.Config, e.Size)
-				//	if rc.Boot.IsFirstRun {
-				//		loader.DuoUIloaderCreateWallet(duo, cx)
-				//	} else {
-				//		DuoUIgrid(duo, cx, rc)
-				//		if rc.IsNotificationRun {
-				//			DuoUIdialog(duo, cx, rc)
-				//		}
-				//	}
-				//	e.Frame(duo.DuoUIcontext.Ops)
-				//	duo.DuoUIcontext.Reset(e.Config, e.Size)
-				//}
+				} else {
+					duo.DuoUIcontext.Reset(e.Config, e.Size)
+					if rc.Boot.IsFirstRun {
+						loader.DuoUIloaderCreateWallet(duo, cx)
+					} else {
+						DuoUIgrid(duo, cx, rc)
+						if rc.IsNotificationRun {
+							DuoUIdialog(duo, cx, rc)
+						}
+					}
+					e.Frame(duo.DuoUIcontext.Ops)
+					duo.DuoUIcontext.Reset(e.Config, e.Size)
+				}
 			}
 		}
 	}
