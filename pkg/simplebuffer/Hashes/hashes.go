@@ -30,10 +30,10 @@ func (b *Hashes) Decode(by []byte) (out []byte) {
 	if len(by) >= 7 {
 		nB := by[0]
 		if len(by) >= int(nB)*8 {
-			for i := 0; i < int(nB)*36+1; i+=36 {
-				algoVer := int32(binary.BigEndian.Uint32(by[1+i*8 : 1+i*8+4]))
+			for i := 0; i < int(nB); i++ {
+				algoVer := int32(binary.BigEndian.Uint32(by[1+i*36 : 1+i*36+4]))
 				//log.DEBUG("algoVer", algoVer, by[1+i*8+4:1+i*8+8], b.Byteses)
-				b.Byteses[algoVer] = by[1+i*8+4 : 1+i*8+36]
+				b.Byteses[algoVer] = by[1+i*36+4 : 1+i*36+36]
 			}
 		}
 		bL := int(nB)*36 + 1

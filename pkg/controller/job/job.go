@@ -94,10 +94,14 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Contai
 	// but to get them first get the values
 	var val int64
 	mTS := map[int32]*chainhash.Hash{}
+	txs := mB.Transactions()[0].MsgTx()
+	
 	for i := range *bitsMap {
 		val = blockchain.CalcBlockSubsidy(bH, cx.ActiveNet, i)
-		mB.Transactions()[0].MsgTx().TxOut[0].Value = val
-		mTree := blockchain.BuildMerkleTreeStore(mB.Transactions(), false)
+		txs.TxOut[0].Value = val
+		txx := util.NewTx(txs)
+		mTree := blockchain.BuildMerkleTreeStore(
+			append([]*util.Tx{txx}, mB.Transactions()[1:]...), false)
 		log.SPEW(mTree[len(mTree)-1].CloneBytes())
 		mTS[i] = &chainhash.Hash{}
 		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
@@ -106,7 +110,8 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers) (out Contai
 	mHashes := Hashes.NewHashes()
 	mHashes.Put(mTS)
 	msg = append(msg, mHashes)
-	// previously were sending blocks, no need for that really miner only needs valid block headers
+	// previously were sending blocks, no need for that really miner only needs
+	// valid block headers
 	// txs := mB.MsgBlock().Transactions
 	// for i := range txs {
 	// 	t := (&Transaction.Transaction{}).Put(txs[i])
@@ -151,8 +156,7 @@ func (j *Container) GetBitses() map[int32]uint32 {
 
 // GetHashes returns the merkle roots per version
 func (j *Container) GetHashes() (out map[int32]*chainhash.Hash) {
-	Hashes.NewHashes().DecodeOne(j.Get(7)).Get()
-	return
+	return Hashes.NewHashes().DecodeOne(j.Get(7)).Get()
 }
 
 func (j *Container) String() (s string) {

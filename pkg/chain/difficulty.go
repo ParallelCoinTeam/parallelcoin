@@ -93,12 +93,13 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 			Version]
 		lastNode.DiffMx.Unlock()
 		if ok && bits != 0 {
-			if l {
+			// if l {
 				log.DEBUGF("used precomputed difficulty %s %d %08x", algoname,
 					fork.GetAlgoVer(algoname, lastNode.height), bits)
-			}
+			// }
 		} else {
-			bits, _, err = b.CalcNextRequiredDifficultyPlan9(workerNumber, lastNode, algoname, l)
+			bits, _, err = b.CalcNextRequiredDifficultyPlan9(workerNumber, lastNode,
+				algoname, l)
 			// bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(
 			//	lastNode)
 			if err != nil {
@@ -107,9 +108,9 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 			}
 			// bits = bitsMap[fork.List[1].Algos[algoname].Version]
 			// save it for next time
-			if l {
+			// if l {
 				log.TRACEF("saving difficulty for next query %08x", bits)
-			}
+			// }
 			lastNode.DiffMx.Lock()
 			if lastNode.Diffs == nil {
 				lastNode.Diffs = new(map[int32]uint32)

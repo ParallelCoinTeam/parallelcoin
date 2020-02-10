@@ -151,11 +151,11 @@ var handlers = transport.HandleFunc{
 			}
 			for i := range w.workers {
 				log.DEBUG("sending job to worker", i)
-				log.SPEW(j)
 				err := w.workers[i].NewJob(&j)
 				if err != nil {
 					log.ERROR(err)
 				}
+				log.SPEW(j)
 			}
 			return
 		}
