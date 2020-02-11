@@ -62,6 +62,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 											layout.Rigid(func() {
 
 												tim := duo.DuoUItheme.Caption(t.TxID)
+												tim.Color = helpers.RGB(0xcfcfcf)
 												tim.Color = helpers.Alpha(a, tim.Color)
 												tim.Layout(duo.DuoUIcontext)
 											}),
@@ -77,12 +78,17 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 											}),
 											layout.Rigid(func() {
 												sat := duo.DuoUItheme.Body1(t.Category)
+												sat.Color = helpers.RGB(0xcfcfcf)
+												sat.Font.Typeface = "bariol"
+
 												sat.Color = helpers.Alpha(a, sat.Color)
 												sat.Layout(duo.DuoUIcontext)
 											}),
 											layout.Rigid(func() {
 
 												l := duo.DuoUItheme.Body1(helpers.FormatTime(t.Time))
+												l.Font.Typeface = "bariol"
+												l.Color = helpers.RGB(0xcfcfcf)
 												l.Color = duo.DuoUItheme.Color.Hint
 												l.Color = helpers.Alpha(a, l.Color)
 												l.Layout(duo.DuoUIcontext)
@@ -94,6 +100,7 @@ func DuoUIlatestTxsWidget(duo *models.DuoUI, rc *rcd.RcVar) {
 									in := layout.UniformInset(unit.Dp(15))
 									in.Layout(duo.DuoUIcontext, func() {
 										sat := duo.DuoUItheme.H6(fmt.Sprintf("%0.8f", t.Amount))
+										sat.Font.Typeface = "bariol"
 										sat.Color = helpers.Alpha(a, sat.Color)
 										sat.Layout(duo.DuoUIcontext)
 									})

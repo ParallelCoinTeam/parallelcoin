@@ -4,11 +4,13 @@ import (
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/op"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
 	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"image/color"
+	"time"
 )
 
 var (
@@ -21,7 +23,7 @@ var (
 	}
 )
 
-func (duo *DuoUI)DuoUItoastSys(rc *rcd.RcVar) {
+func (duo *DuoUI) DuoUItoastSys(rc *rcd.RcVar) {
 	layout.Align(layout.NE).Layout(duo.m.DuoUIcontext, func() {
 		listToasts.Layout(duo.m.DuoUIcontext, len(rc.Toasts), func(i int) {
 			layout.UniformInset(unit.Dp(16)).Layout(duo.m.DuoUIcontext, rc.Toasts[i])
@@ -78,4 +80,10 @@ func toastAdd(duo *DuoUI, rc *rcd.RcVar) {
 			}),
 		)
 	})
+	go func(duo *DuoUI, ops *op.Ops) {
+		time.Sleep(3 * time.Second)
+		rc.Toasts[len(rc.Toasts)-1] = nil // or the zero value of T
+		rc.Toasts = rc.Toasts[:len(rc.Toasts)-1]
+		op.InvalidateOp{}.Add(ops)
+	}(duo, duo.m.DuoUIcontext.Ops)
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/widget/parallel"
+	"github.com/p9c/pod/pkg/log"
 	"image/color"
 
 	"github.com/p9c/pod/cmd/gui/models"
@@ -18,7 +19,30 @@ type DuoUI struct {
 	m *models.DuoUI
 }
 
+func startLogger() (stopLogger chan struct{}) {
+	log.L.LogChan = logChan
+	log.L.SetLevel("Info", false)
+	go func() {
+	out:
+		for {
+			select {
+			case n := <-log.L.LogChan:
+				logMessages = append(logMessages, n)
+			case <-stopLogger:
+				defer func() {
+					stopLogger = make(chan struct{})
+				}()
+				logMessages = []log.Entry{}
+				log.L.LogChan = nil
+				break out
+			}
+		}
+	}()
+	return
+}
+
 func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
+
 	duo = &models.DuoUI{
 		CurrentPage: "overview",
 		DuoUIwindow: app.NewWindow(
@@ -30,6 +54,9 @@ func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 	}
 	fonts.Register()
 	duo.DuoUIcontext = layout.NewContext(duo.DuoUIwindow.Queue())
+
+	startLogger()
+
 	navigations := make(map[string]*parallel.DuoUIthemeNav)
 	//navigations["mainMenu"] = mainMenu()
 	duo.DuoUIconfiguration = &models.DuoUIconfiguration{

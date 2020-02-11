@@ -88,7 +88,7 @@ func DuoUItrace(duo *DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func(
 	return duo.m.DuoUIcontext, func() {
 		page := duo.m.DuoUItheme.DuoUIpage("ffcf30cf", "ffcf3030", 10, 10)
 		page.Layout(duo.m.DuoUIcontext, func() {
-			//loader.DuoUIloader(duo)
+			DuoUIloader(duo.m)
 		})
 	}
 }

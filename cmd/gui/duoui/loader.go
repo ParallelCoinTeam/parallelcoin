@@ -1,11 +1,13 @@
-package loader
+package duoui
 
 import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/op"
 	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/log"
 )
 
@@ -16,20 +18,28 @@ var (
 	}
 	logMessages []log.Entry
 	logChan     = make(chan log.Entry, 111)
+	stopLogger = make(chan struct{})
+	passPhrase        = ""
+	confirmPassPhrase = ""
+	passEditor        = &widget.Editor{
+		SingleLine: true,
+		Submit:     true,
+	}
+	confirmPassEditor = &widget.Editor{
+		SingleLine: true,
+		Submit:     true,
+	}
+	encryption         = new(widget.CheckBox)
+	seed               = new(widget.CheckBox)
+	buttonCreateWallet = new(widget.Button)
+	list               = &layout.List{
+		Axis: layout.Vertical,
+	}
+	ln = layout.UniformInset(unit.Dp(1))
+	in = layout.UniformInset(unit.Dp(8))
 )
 
-func init() {
-	log.L.LogChan = logChan
-	log.L.SetLevel("Info", false)
-	go func() {
-		for {
-			select {
-			case n := <-log.L.LogChan:
-				logMessages = append(logMessages, n)
-			}
-		}
-	}()
-}
+
 func DuoUIloader(duo *models.DuoUI) {
 	//const buflen = 9
 	layout.UniformInset(unit.Dp(10)).Layout(duo.DuoUIcontext, func() {
@@ -63,6 +73,8 @@ func DuoUIloader(duo *models.DuoUI) {
 			logText.Font.Typeface = "bariol"
 			logText.Color = helpers.HexARGB(col)
 			logText.Layout(duo.DuoUIcontext)
+			op.InvalidateOp{}.Add(duo.DuoUIcontext.Ops)
+
 		})
 	})
 }

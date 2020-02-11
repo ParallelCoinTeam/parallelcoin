@@ -1,4 +1,4 @@
-package loader
+package duoui
 
 import (
 	"fmt"
@@ -22,19 +22,19 @@ var (
 		Submit:     true,
 	}
 )
-
-func init() {
-	log.L.LogChan = logChan
-	log.L.SetLevel("Info", false)
-	go func() {
-		for {
-			select {
-			case n := <-log.L.LogChan:
-				logMessages = append(logMessages, n)
-			}
-		}
-	}()
-}
+//
+//func init() {
+//	log.L.LogChan = logChan
+//	log.L.SetLevel("Info", false)
+//	go func() {
+//		for {
+//			select {
+//			case n := <-log.L.LogChan:
+//				logMessages = append(logMessages, n)
+//			}
+//		}
+//	}()
+//}
 
 
 func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {

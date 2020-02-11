@@ -45,8 +45,8 @@ func (t *DuoUItheme) DuoUIbutton(txt, txtColor, bgColor, iconColor string, iconS
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
-			Typeface:t.Font.Secondary,
-			Size: t.TextSize.Scale(8.0 / 10.0),
+			Typeface: t.Font.Secondary,
+			Size:     t.TextSize.Scale(8.0 / 10.0),
 		},
 		Width:             width,
 		Height:            height,
@@ -80,10 +80,36 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 		layout.Stacked(func() {
 			gtx.Constraints.Width.Min = int(b.Width)
 			gtx.Constraints.Height.Min = int(b.Height)
-			layout.Align(layout.Center).Layout(gtx, func() {
 
-				buttonInsideLayoutList.Layout(gtx, len(b.insideLayout(gtx)), func(i int) {
-					layout.UniformInset(unit.Dp(0)).Layout(gtx, b.insideLayout(gtx)[i])
+			layout.Align(layout.Center).Layout(gtx, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+
+					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+						layout.Rigid(func() {
+							if b.Icon != nil {
+								layout.Align(layout.Center).Layout(gtx, func() {
+									if b.Icon != nil {
+										layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+											b.Icon.Color = b.IconColor
+											b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
+										})
+									}
+									gtx.Dimensions = layout.Dimensions{
+										Size: image.Point{X: b.IconSize, Y: b.IconSize},
+									}
+								})
+							}
+						}),
+						layout.Rigid(func() {
+							layout.Align(layout.Center).Layout(gtx, func() {
+								if b.Text != "" {
+									paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
+									widget.Label{
+										Alignment: text.Middle,
+									}.Layout(gtx, b.shaper, b.Font, b.Text)
+								}
+							})
+						}))
 				})
 			})
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
@@ -92,37 +118,6 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 	)
 }
 
-func (b DuoUIbutton) insideLayout(gtx *layout.Context) []func() {
-	//cs := gtx.Constraints
-	//duoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max)
-
-	buttonLayout := []func(){
-		func() {
-			if b.Icon != nil {
-				layout.Align(layout.Center).Layout(gtx, func() {
-					if b.Icon != nil {
-						b.Icon.Color = b.IconColor
-						b.Icon.Layout(gtx, unit.Px(float32(b.IconSize)))
-					}
-					gtx.Dimensions = layout.Dimensions{
-						Size: image.Point{X: b.IconSize, Y: b.IconSize},
-					}
-				})
-			}
-		},
-		func() {
-			layout.Align(layout.Center).Layout(gtx, func() {
-				if b.Text != "" {
-					paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
-					widget.Label{
-						Alignment: text.Middle,
-					}.Layout(gtx, b.shaper, b.Font, b.Text)
-				}
-			})
-		},
-	}
-	return buttonLayout
-}
 func toPointF(p image.Point) f32.Point {
 	return f32.Point{X: float32(p.X), Y: float32(p.Y)}
 }
@@ -158,7 +153,7 @@ func drawInk(gtx *layout.Context, c widget.Click) {
 	op.InvalidateOp{}.Add(gtx.Ops)
 }
 
-func duoUIdrawRectangle(gtx *layout.Context, w, h int){
+func duoUIdrawRectangle(gtx *layout.Context, w, h int) {
 	square := f32.Rectangle{
 		Max: f32.Point{
 			X: float32(w),

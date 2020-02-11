@@ -3,7 +3,6 @@ package rcd
 import (
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/pkg/gui/widget"
-	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"time"
 )
@@ -132,20 +131,20 @@ func RcInit() *RcVar {
 //}
 
 func (rc *RcVar) RCtoast() {
-	tickerChannel := time.NewTicker(3 * time.Second)
-	go func() {
-		for {
-			select {
-			case <-tickerChannel.C:
-				for i := range rc.Toasts {
-					log.DEBUG("RRRRRR")
-					if i < len(rc.Toasts)-1 {
-						copy(rc.Toasts[i:], rc.Toasts[i+1:])
-					}
-					rc.Toasts[len(rc.Toasts)-1] = nil // or the zero value of T
-					rc.Toasts = rc.Toasts[:len(rc.Toasts)-1]				}
-			}
-		}
-	}()
+	//tickerChannel := time.NewTicker(3 * time.Second)
+	//go func() {
+	//	for {
+	//		select {
+	//		case <-tickerChannel.C:
+	//			for i := range rc.Toasts {
+	//				log.DEBUG("RRRRRR")
+	//				if i < len(rc.Toasts)-1 {
+	//					copy(rc.Toasts[i:], rc.Toasts[i+1:])
+	//				}
+	//				rc.Toasts[len(rc.Toasts)-1] = nil // or the zero value of T
+	//				rc.Toasts = rc.Toasts[:len(rc.Toasts)-1]				}
+	//		}
+	//	}
+	//}()
 	//time.Sleep(6 * time.Second)
 }

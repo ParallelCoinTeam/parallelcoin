@@ -17,7 +17,7 @@ import (
 )
 
 func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
-	duo := DuoUI{m:d}
+	duo := DuoUI{m: d}
 	for {
 		select {
 		case <-duo.m.Ready:
@@ -47,7 +47,7 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 				} else {
 					duo.m.DuoUIcontext.Reset(e.Config, e.Size)
 					if rc.Boot.IsFirstRun {
-						//loader.DuoUIloaderCreateWallet(cx)
+						DuoUIloaderCreateWallet(duo.m, cx)
 					} else {
 						duo.DuoUIgrid(cx, rc)
 						if rc.ShowDialog {
@@ -55,14 +55,16 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 						}
 						duo.DuoUItoastSys(rc)
 
-						rc.GetDuoUIbalance(cx)
-						rc.GetDuoUIunconfirmedBalance(cx)
-						rc.GetDuoUIblockHeight(cx)
-						rc.GetDuoUIstatus(cx)
-						rc.GetDuoUIlocalLost()
-						rc.GetDuoUIdifficulty(cx)
+						//rc.GetDuoUIbalance(cx)
+						//rc.GetDuoUIunconfirmedBalance(cx)
+						rc.GetDuoUITransactionsExcertps(cx)
 
-						rc.GetDuoUIlastTxs(cx)
+						//rc.GetDuoUIblockHeight(cx)
+						//rc.GetDuoUIstatus(cx)
+						//rc.GetDuoUIlocalLost()
+						//rc.GetDuoUIdifficulty(cx)
+						//
+						//rc.GetDuoUIlastTxs(cx)
 					}
 					e.Frame(duo.m.DuoUIcontext.Ops)
 					duo.m.DuoUIcontext.Reset(e.Config, e.Size)
@@ -73,7 +75,7 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 }
 
 // Main wallet screen
-func (duo *DuoUI)DuoUImainScreen() {
+func (duo *DuoUI) DuoUImainScreen() {
 	helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, duo.m.DuoUIcontext.Constraints.Width.Max, duo.m.DuoUIcontext.Constraints.Height.Max, duo.m.DuoUItheme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	// START View <<<
 	logo, _ := parallel.NewDuoUIicon(ico.ParallelCoin)
@@ -101,13 +103,13 @@ func (duo *DuoUI)DuoUImainScreen() {
 			)
 		}),
 		layout.Flexed(0.4, func() {
-			//loader.DuoUIloader(duo)
+			DuoUIloader(duo.m)
 		}),
 	)
 }
 
 // Main wallet screen
-func (duo *DuoUI)DuoUIgrid(cx *conte.Xt, rc *rcd.RcVar) {
+func (duo *DuoUI) DuoUIgrid(cx *conte.Xt, rc *rcd.RcVar) {
 	// START View <<<
 	cs := duo.m.DuoUIcontext.Constraints
 	helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.m.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
