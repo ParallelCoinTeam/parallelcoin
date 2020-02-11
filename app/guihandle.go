@@ -29,9 +29,20 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 			close(duo.Quit)
 		})
 
+
 		log.INFO("IsFirstRun? ", rc.Boot.IsFirstRun)
 
 		//loader.DuoUIloader(rc, cx, firstRun)
+		//rcd.ListenInit()
+		//go func() {
+		//	for {
+		//		select {
+		//		case <-duo.Quit:
+		//			break
+		//			case
+		//		}
+		//	}
+		//}()
 
 		// signal the GUI that the back end is ready
 		log.DEBUG("sending ready signal")
@@ -39,7 +50,6 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// immediately the GUI starts
 		duo.Ready <- struct{}{}
 		go func() {
-
 			nodeChan := make(chan *rpc.Server)
 			// Start Node
 			err = gui.DuoUInode(cx, nodeChan)

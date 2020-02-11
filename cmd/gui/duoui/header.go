@@ -3,7 +3,6 @@ package duoui
 import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/ico"
-	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/text"
@@ -17,53 +16,53 @@ var (
 	logoButton = new(widget.Button)
 )
 
-func DuoUIheader(duo *models.DuoUI, rc *rcd.RcVar) func(){
+func (duo *DuoUI)DuoUIheader(rc *rcd.RcVar) func(){
 	return func() {
 		logo, _ := parallel.NewDuoUIicon(ico.ParallelCoin)
-		layout.Flex{Axis: layout.Horizontal}.Layout(duo.DuoUIcontext,
+		layout.Flex{Axis: layout.Horizontal}.Layout(duo.m.DuoUIcontext,
 			layout.Rigid(func() {
-				layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
-					layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(duo.DuoUIcontext, func() {
+				layout.Align(layout.Center).Layout(duo.m.DuoUIcontext, func() {
+					layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(duo.m.DuoUIcontext, func() {
 						logo := parallel.DuoUIlogo{
 							Background: color.RGBA{},
 							Color:      color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf},
 							Icon:       logo,
-							Size:       unit.Dp(128),
-							Padding:    unit.Dp(16),
+							Size:       unit.Dp(112),
+							Padding:    unit.Dp(8),
 						}
-						logo.Layout(duo.DuoUIcontext, logoButton)
+						logo.Layout(duo.m.DuoUIcontext, logoButton)
 					})
 				})
 			}),
 			layout.Flexed(1, func() {
-				layout.Align(layout.Start).Layout(duo.DuoUIcontext, func() {
-					layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
-						currentPage := duo.DuoUItheme.H4(duo.CurrentPage)
+				layout.Align(layout.Start).Layout(duo.m.DuoUIcontext, func() {
+					layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(duo.m.DuoUIcontext, func() {
+						currentPage := duo.m.DuoUItheme.H4(duo.m.CurrentPage)
 						currentPage.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 						currentPage.Alignment = text.Start
-						currentPage.Layout(duo.DuoUIcontext)
+						currentPage.Layout(duo.m.DuoUIcontext)
 					})
 				})
 			}),
 			layout.Rigid(func() {
-				layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
-					layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
-						balance := duo.DuoUItheme.Body2(rc.Balance + " " + duo.DuoUIconfiguration.Abbrevation)
+				layout.Align(layout.Center).Layout(duo.m.DuoUIcontext, func() {
+					layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(duo.m.DuoUIcontext, func() {
+						balance := duo.m.DuoUItheme.Body2(rc.Balance + " " + duo.m.DuoUIconfiguration.Abbrevation)
 						balance.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 						balance.Font.Typeface = "bariol"
 						balance.Alignment = text.End
-						balance.Layout(duo.DuoUIcontext)
+						balance.Layout(duo.m.DuoUIcontext)
 					})
 				})
 			}),
 			layout.Rigid(func() {
-				layout.Align(layout.Center).Layout(duo.DuoUIcontext, func() {
-					layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(duo.DuoUIcontext, func() {
-						balance := duo.DuoUItheme.Body2("dimenzion: " + fmt.Sprint(duo.DuoUIcontext.Constraints.Width.Max))
+				layout.Align(layout.Center).Layout(duo.m.DuoUIcontext, func() {
+					layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(duo.m.DuoUIcontext, func() {
+						balance := duo.m.DuoUItheme.Body2("dimenzion: " + fmt.Sprint(duo.m.DuoUIcontext.Constraints.Width.Max))
 						balance.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 						balance.Alignment = text.End
 						balance.Font.Typeface = "bariol"
-						balance.Layout(duo.DuoUIcontext)
+						balance.Layout(duo.m.DuoUIcontext)
 					})
 				})
 			}))

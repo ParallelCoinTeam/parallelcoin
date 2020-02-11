@@ -1,18 +1,22 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"image/color"
 
 	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/fonts"
 	"github.com/p9c/pod/pkg/gui/app"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/gui/widget"
 )
+
+type DuoUI struct {
+	m *models.DuoUI
+}
 
 func DuOuI(rc *rcd.RcVar, cx *conte.Xt) (duo *models.DuoUI, err error) {
 	duo = &models.DuoUI{

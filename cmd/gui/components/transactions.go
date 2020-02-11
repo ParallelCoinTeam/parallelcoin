@@ -27,7 +27,7 @@ var (
 func DuoUItransactionsWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 	return func() {
 		rc.Txs.TxsListNumber = 55
-		rc.GetDuoUITransactionsExcertps(duo, cx)
+		rc.GetDuoUITransactionsExcertps(cx)
 
 		layout.Flex{
 			Axis: layout.Vertical,

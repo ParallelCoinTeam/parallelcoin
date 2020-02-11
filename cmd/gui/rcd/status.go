@@ -14,7 +14,7 @@ import (
 // System Ststus
 
 func
-(rc *RcVar) GetDuoUIstatus(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIstatus(cx *conte.Xt) {
 	rc.Status = *new(models.DuoUIstatus)
 	v, err := rpc.HandleVersion(cx.RPCServer, nil, nil)
 	if err != nil {
@@ -27,12 +27,12 @@ func
 	return
 }
 func
-(rc *RcVar) GetDuoUIhashesPerSec(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIhashesPerSec(cx *conte.Xt) {
 	rc.Hashes = int64(cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
 	return
 }
 func
-(rc *RcVar) GetDuoUInetworkHashesPerSec(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUInetworkHashesPerSec(cx *conte.Xt) {
 	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(cx.RPCServer, btcjson.NewGetNetworkHashPSCmd(nil, nil), nil)
 	if err != nil {
 	}
@@ -43,22 +43,22 @@ func
 	return
 }
 func
-(rc *RcVar) GetDuoUIblockHeight(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIblockHeight(cx *conte.Xt) {
 	rc.BlockHeight = cx.RPCServer.Cfg.Chain.BestSnapshot().Height
 	return
 }
 func
-(rc *RcVar) GetDuoUIbestBlockHash(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIbestBlockHash(cx *conte.Xt) {
 	rc.BestBlock = cx.RPCServer.Cfg.Chain.BestSnapshot().Hash.String()
 	return
 }
 func
-(rc *RcVar) GetDuoUIdifficulty(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIdifficulty(cx *conte.Xt) {
 	rc.Difficulty = rpc.GetDifficultyRatio(cx.RPCServer.Cfg.Chain.BestSnapshot().Bits, cx.RPCServer.Cfg.ChainParams, 2)
 	return
 }
 func
-(rc *RcVar) GetDuoUIblockCount(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIblockCount(cx *conte.Xt) {
 	getBlockCount, err := rpc.HandleGetBlockCount(cx.RPCServer, nil, nil)
 	if err != nil {
 		rc.PushDuoUIalert("Error", err.Error(), "error")
@@ -67,7 +67,7 @@ func
 	return
 }
 func
-(rc *RcVar) GetDuoUInetworkLastBlock(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUInetworkLastBlock(cx *conte.Xt) {
 	for _, g := range cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
 		l := g.ToPeer().StatsSnapshot().LastBlock
 		if l > rc.NetworkLastBlock {
@@ -77,12 +77,12 @@ func
 	return
 }
 func
-(rc *RcVar) GetDuoUIconnectionCount(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIconnectionCount(cx *conte.Xt) {
 	rc.ConnectionCount = cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
 	return
 }
 func
-(rc *RcVar) GetDuoUIlocalLost(duo *models.DuoUI) {
+(rc *RcVar) GetDuoUIlocalLost() {
 	rc.Localhost = *new(models.DuoUIlocalHost)
 	sm, _ := mem.VirtualMemory()
 	sc, _ := cpu.Info()
