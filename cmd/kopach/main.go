@@ -42,7 +42,9 @@ type Worker struct {
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
+		log.L.SetLevel("trace", true)
 		log.DEBUG("miner controller starting")
+		
 		quit := make(chan struct{})
 		ctx, cancel := context.WithCancel(context.Background())
 		conn, err := transport.NewConnection("", controller.UDP4MulticastAddress,

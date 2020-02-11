@@ -6,8 +6,6 @@ import (
 	"sort"
 	"time"
 	
-	"github.com/davecgh/go-spew/spew"
-	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -51,7 +49,7 @@ type Job struct {
 // and a set of methods that extracts the individual requested field without
 // copying memory, or deserialize their contents which will be concurrent safe
 // All of the fields are in the same order that they will be serialized to
-func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs map[int32]*wire.MsgTx) (out Container) {
+func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[int32]*wire.MsgTx) (out Container) {
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
@@ -95,14 +93,15 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs map[int
 	// To mine this block a miner only needs the matching merkle roots for the version number
 	// but to get them first get the values
 	var val int64
-	mTS := map[int32]*chainhash.Hash{}
+	mTS := make(map[int32]*chainhash.Hash)
 	txs := mB.Transactions()[0].MsgTx()
-	
 	for i := range *bitsMap {
 		val = blockchain.CalcBlockSubsidy(bH, cx.ActiveNet, i)
-		txs.TxOut[0].Value = val
-		txx := util.NewTx(txs)
-		cbs[i] = txs
+		txc := txs.Copy()
+		txc.TxOut[0].Value = val
+		txx := util.NewTx(txc)
+		// log.SPEW(txs)
+		(*cbs)[i] = txx.MsgTx()
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, mB.Transactions()[1:]...), false)
 		// log.SPEW(mTree[len(mTree)-1].CloneBytes())
@@ -192,14 +191,21 @@ func (j *Container) String() (s string) {
 	}
 	sort.Ints(sortedBitses)
 	for i := range sortedBitses {
-		s += fmt.Sprintf("  version: %3d %-10v %064x", sortedBitses[i],
+		s += fmt.Sprintf("  %2d %-10v %d %064x", sortedBitses[i],
 			fork.List[fork.GetCurrent(h)].
 				AlgoVers[int32(sortedBitses[i])],
+			bitses[int32(sortedBitses[i])],
 			fork.CompactToBig(bitses[int32(sortedBitses[i])]).Bytes())
 		s += "\n"
 	}
 	s += "8 Merkles:\n"
-	s += spew.Sdump(j.GetHashes())
+	hashes := j.GetHashes()
+	for i := range sortedBitses {
+		s += fmt.Sprintf("  %2d %s\n", sortedBitses[i],
+			hashes[int32(sortedBitses[i])].String())
+	}
+	
+	// s += spew.Sdump(j.GetHashes())
 	return
 }
 

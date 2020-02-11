@@ -5,7 +5,6 @@ import (
 	"sync"
 	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/log"
 )
 
 type Hashes struct {
@@ -26,13 +25,13 @@ func (b *Hashes) DecodeOne(by []byte) *Hashes {
 func (b *Hashes) Decode(by []byte) (out []byte) {
 	b.Lock()
 	defer b.Unlock()
-	//log.SPEW(by)
+	// log.SPEW(by)
 	if len(by) >= 7 {
 		nB := by[0]
 		if len(by) >= int(nB)*8 {
 			for i := 0; i < int(nB); i++ {
 				algoVer := int32(binary.BigEndian.Uint32(by[1+i*36 : 1+i*36+4]))
-				//log.DEBUG("algoVer", algoVer, by[1+i*8+4:1+i*8+8], b.Byteses)
+				// log.DEBUG("algoVer", algoVer, by[1+i*8+4:1+i*8+8], b.Byteses)
 				b.Byteses[algoVer] = by[1+i*36+4 : 1+i*36+36]
 			}
 		}
@@ -41,7 +40,7 @@ func (b *Hashes) Decode(by []byte) (out []byte) {
 			out = by[bL:]
 		}
 	}
-	//log.SPEW(b.Byteses)
+	// log.SPEW(b.Byteses)
 	return
 }
 
@@ -62,7 +61,6 @@ func (b *Hashes) Get() (out map[int32]*chainhash.Hash) {
 	b.Lock()
 	defer b.Unlock()
 	out = make(map[int32]*chainhash.Hash)
-	log.SPEW(b.Byteses)
 	for algoVer := range b.Byteses {
 		oB := b.Byteses[algoVer][:32]
 		cH := chainhash.Hash{}
@@ -72,7 +70,6 @@ func (b *Hashes) Get() (out map[int32]*chainhash.Hash) {
 			out[algoVer] = &cH
 		}
 	}
-	log.SPEW(out)
 	return
 }
 

@@ -23,7 +23,7 @@ func (B *Block) DecodeOne(b []byte) *Block {
 }
 
 func (B *Block) Decode(b []byte) (out []byte) {
-	log.SPEW(b)
+	// log.SPEW(b)
 	if len(b) >= 4 {
 		B.Length = binary.BigEndian.Uint32(b[:4])
 		//log.DEBUG("length", B.Length)

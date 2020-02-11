@@ -146,8 +146,10 @@ func NewWithConnAndSemaphore(
 							"total hashes since startup",
 							w.roller.C-int(w.startNonce),
 							fork.IsTestnet,
+							w.msgBlock.Header.Version,
+							w.msgBlock.Header.Bits,
+							w.msgBlock.Header.MerkleRoot.String(),
 						)
-						// log.SPEW(w.msgBlock)
 						srs := sol.GetSolContainer(w.msgBlock)
 						_ = srs
 						err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
@@ -219,6 +221,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.stopChan <- struct{}{}
 	*reply = true
 	w.bitses = job.GetBitses()
+	w.hashes = job.GetHashes()
 	newHeight := job.GetNewHeight()
 	w.roller.Algos = []int32{}
 	for i := range w.bitses {
@@ -232,9 +235,9 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
 	rand.Seed(time.Now().UnixNano())
 	w.msgBlock.Header.Nonce = rand.Uint32()
-	w.hashes = job.GetHashes()
+	log.TRACE(w.hashes)
 	if w.hashes != nil {
-		log.TRACE(w.hashes)
+		log.DEBUG(w.hashes)
 		w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
 	} else {
 		return errors.New("failed to decode merkle roots")
@@ -255,6 +258,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// }
 	// log.SPEW(w.msgBlock)
 	// make the work select block start running
+	w.block=util.NewBlock(w.msgBlock)
 	w.startChan <- struct{}{}
 	return
 }
