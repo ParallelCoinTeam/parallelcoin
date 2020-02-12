@@ -47,8 +47,8 @@ type Controller struct {
 	cx                     *conte.Xt
 	mx                     *sync.Mutex
 	blockTemplateGenerator *mining.BlkTmplGenerator
-	coinbases              map[int32]*wire.MsgTx
-	transactions           []*wire.MsgTx
+	coinbases              map[int32]*util.Tx
+	transactions           []*util.Tx
 	oldBlocks              *atomic.Value
 	prevHash               *chainhash.Hash
 	lastTxUpdate           time.Time
@@ -99,7 +99,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		subMx:                  &sync.Mutex{},
 		submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
-		coinbases:              make(map[int32]*wire.MsgTx),
+		coinbases:              make(map[int32]*util.Tx),
 	}
 	ctrl.active.Store(false)
 	pM := pause.GetPauseContainer(cx)
@@ -154,10 +154,14 @@ var handlers = transport.HandleFunc{
 			c := ctx.(*Controller)
 			j := sol.LoadSolContainer(b)
 			msgBlock := j.GetMsgBlock()
-			// msgBlock.Header.Version
+			log.WARN(msgBlock.Header.Version)
 			// msgBlock.Transactions = append(c.coinbases[msgBlock.Header.Version], c.)
-			msgBlock.Transactions = append([]*wire.MsgTx{c.coinbases[msgBlock.Header.Version]}, c.transactions...)
-			log.SPEW(msgBlock)
+			msgBlock.Transactions = []*wire.MsgTx{}
+			txs := append([]*util.Tx{c.coinbases[msgBlock.Header.Version]}, c.transactions...)
+			for i := range txs {
+				msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
+			}
+			// log.SPEW(msgBlock)
 			// log.SPEW(c.coinbases)
 			// log.SPEW(c.transactions)
 			if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
@@ -226,8 +230,9 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 		return
 	}
 	msgB := template.Block
-	c.coinbases = make(map[int32]*wire.MsgTx)
-	fMC := job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
+	c.coinbases = make(map[int32]*util.Tx)
+	var fMC job.Container
+	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
 	shards, err := c.conn.CreateShards(fMC.Data, job.WorkMagic)
 	err = c.conn.SendShards(shards)
 	if err != nil {
@@ -357,15 +362,20 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 					log.WARN("chain accepted notification is not a block")
 					break
 				}
-				c.coinbases = make(map[int32]*wire.MsgTx)
+				c.coinbases = make(map[int32]*util.Tx)
 				template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 				if template != nil {
-					c.transactions = template.Block.Transactions[1:]
+					c.transactions = []*util.Tx{}
+					for _, v := range template.Block.Transactions[1:] {
+						c.transactions = append(c.transactions, util.NewTx(v))
+					}
 					// log.DEBUG("got new template")
 					msgB := template.Block
 					// log.DEBUG(*c.cx.Config.Controller)
 					// c.coinbases = msgB.Transactions
-					mC := job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
+					var mC job.Container
+					mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
+					log.SPEW(c.coinbases)
 					// log.SPEW(mC.Data)
 					shards, err := c.conn.CreateShards(mC.Data, job.WorkMagic)
 					if err != nil {

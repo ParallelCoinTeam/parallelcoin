@@ -136,6 +136,7 @@ func NewWithConnAndSemaphore(
 				default:
 					// work
 					nH := w.block.Height()
+					w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
 					hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
 					bigHash := blockchain.HashToBig(&hash)
 					if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
@@ -149,7 +150,9 @@ func NewWithConnAndSemaphore(
 							w.msgBlock.Header.Version,
 							w.msgBlock.Header.Bits,
 							w.msgBlock.Header.MerkleRoot.String(),
+							hash,
 						)
+						log.INFO(w.msgBlock)
 						srs := sol.GetSolContainer(w.msgBlock)
 						_ = srs
 						err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
@@ -198,6 +201,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
 	log.TRACE("loading dispatch connection from job message")
+	log.INFO(job.String())
 	// if there is no dispatch connection, make one.
 	// If there is one but the server died or was disconnected the
 	// connection the existing dispatch connection is nilled and this
@@ -228,7 +232,6 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		// we don't need to know net params if version numbers come with jobs
 		w.roller.Algos = append(w.roller.Algos, i)
 	}
-	w.block.SetHeight(newHeight)
 	w.msgBlock.Header.PrevBlock = *job.GetPrevBlockHash()
 	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
 	w.msgBlock.Header.Version = w.roller.GetAlgoVer()
@@ -237,7 +240,6 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.msgBlock.Header.Nonce = rand.Uint32()
 	log.TRACE(w.hashes)
 	if w.hashes != nil {
-		log.DEBUG(w.hashes)
 		w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
 	} else {
 		return errors.New("failed to decode merkle roots")
@@ -258,7 +260,9 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// }
 	// log.SPEW(w.msgBlock)
 	// make the work select block start running
-	w.block=util.NewBlock(w.msgBlock)
+	w.block = util.NewBlock(w.msgBlock)
+	w.block.SetHeight(newHeight)
+	log.INFO("height", newHeight)
 	w.startChan <- struct{}{}
 	return
 }

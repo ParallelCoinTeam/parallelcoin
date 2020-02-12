@@ -190,7 +190,7 @@ func (sm *SyncManager) Pause() chan<- struct{} {
 // ProcessBlock makes use of ProcessBlock on an internal instance of a block chain.
 func (sm *SyncManager) ProcessBlock(block *util.Block, flags blockchain.BehaviorFlags) (bool, error) {
 	log.TRACE("processing block")
-	log.SPEW(block)
+	// log.SPEW(block)
 	reply := make(chan processBlockResponse, 1)
 	//log.TRACE("sending to msgChan")
 	sm.msgChan <- processBlockMsg{block: block, flags: flags, reply: reply}

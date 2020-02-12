@@ -48,9 +48,14 @@ type Job struct {
 // there is a creation function,
 // and a set of methods that extracts the individual requested field without
 // copying memory, or deserialize their contents which will be concurrent safe
-// All of the fields are in the same order that they will be serialized to
-func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[int32]*wire.MsgTx) (out Container) {
+// The varying coinbase payment values are in transaction 0 last output,
+// the individual varying transactions are stored separately and will be
+// reassembled at the end
+func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[int32]*util.Tx) (out Container, txr []*util.Tx) {
 	// msg := append(Serializers{}, GetMessageBase(cx)...)
+	if txr == nil {
+		txr = []*util.Tx{}
+	}
 	bH := cx.RealNode.Chain.BestSnapshot().Height + 1
 	nBH := Int32.New().Put(bH)
 	msg = append(msg, nBH)
@@ -94,16 +99,27 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// but to get them first get the values
 	var val int64
 	mTS := make(map[int32]*chainhash.Hash)
-	txs := mB.Transactions()[0].MsgTx()
+	txs := mB.Transactions()[0]
+	for i, v := range mB.Transactions()[1:] {
+		txr[i] = v
+	}
+	nbH := bH
+	if (cx.ActiveNet.Net == wire.MainNet &&
+		nbH == fork.List[1].ActivationHeight) ||
+		(cx.ActiveNet.Net == wire.TestNet3 &&
+			nbH == fork.List[1].TestnetStart) {
+		nbH++
+	}
 	for i := range *bitsMap {
-		val = blockchain.CalcBlockSubsidy(bH, cx.ActiveNet, i)
-		txc := txs.Copy()
-		txc.TxOut[0].Value = val
-		txx := util.NewTx(txc)
+		val = blockchain.CalcBlockSubsidy(nbH, cx.ActiveNet, i)
+		txc := txs.MsgTx().Copy()
+		txc.TxOut[len(txc.TxOut)-1].Value = val
+		txx := util.NewTx(txc.Copy())
 		// log.SPEW(txs)
-		(*cbs)[i] = txx.MsgTx()
+		(*cbs)[i] = txx
+		log.DEBUG("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
-			append([]*util.Tx{txx}, mB.Transactions()[1:]...), false)
+			append([]*util.Tx{txx}, txr...), false)
 		// log.SPEW(mTree[len(mTree)-1].CloneBytes())
 		mTS[i] = &chainhash.Hash{}
 		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
@@ -120,7 +136,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// 	msg = append(msg, t)
 	// }
 	// log.SPEW(msg)
-	return Container{*msg.CreateContainer(WorkMagic)}
+	return Container{*msg.CreateContainer(WorkMagic)}, txr
 }
 
 func LoadMinerContainer(b []byte) (out Container) {

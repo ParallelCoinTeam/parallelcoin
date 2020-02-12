@@ -676,8 +676,6 @@ CalcBlockSubsidy(height int32, chainParams *netparams.Params, version int32) (r 
 			height == fork.List[1].ActivationHeight) ||
 			(chainParams.Net == wire.TestNet3 &&
 				height == fork.List[1].TestnetStart) {
-			
-			log.TRACE("hard fork activation")
 			payees := hardfork.Payees
 			if chainParams.Net == wire.TestNet3 {
 				payees = hardfork.TestnetPayees
@@ -1243,8 +1241,9 @@ func // checkProofOfWork ensures the block header bits which indicate the target
 // The flags modify the behavior of this function as follows:
 //  - BFNoPoWCheck: The check to ensure the block hash is less than the
 //  target difficulty is not performed.
-checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlags, height int32) error {
-	log.TRACEF("hash %s", header.BlockHashWithAlgos(height))
+checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlags,
+	height int32) error {
+	log.TRACEF("hash %d %s", height, header.BlockHashWithAlgos(height))
 	// The target difficulty must be larger than zero.
 	if powLimit == nil {
 		return errors.New("PoW limit was not set")
@@ -1274,9 +1273,9 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 		// log.DEBUG("blockhashwithalgos", hash, fork.IsTestnet)
 		bigHash := HashToBig(&hash)
 		if bigHash.Cmp(target) > 0 {
-			str := fmt.Sprintf("block hash of "+
+			str := fmt.Sprintf("block hash of %d"+
 				"%064x is higher than expected max of "+
-				"%064x", bigHash, target)
+				"%064x", height, bigHash, target)
 			log.WARN(str)
 			return ruleError(ErrHighHash, str)
 		}

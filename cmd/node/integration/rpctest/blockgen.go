@@ -91,9 +91,7 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 
 // createCoinbaseTx returns a coinbase transaction paying an appropriate
 // subsidy based on the passed block height to the provided address.
-func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32,
-	addr util.Address, mineTo []wire.TxOut,
-	net *netparams.Params) (*util.Tx, error) {
+func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Address, mineTo []wire.TxOut, net *netparams.Params, version int32) (*util.Tx, error) {
 	// Create the script to pay to the provided payment address.
 	pkScript, err := txscript.PayToAddrScript(addr)
 	if err != nil {
@@ -164,8 +162,8 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 		log.ERROR(err)
 		return nil, err
 	}
-	coinbaseTx, err := createCoinbaseTx(
-		coinbaseScript, blockHeight, miningAddr, mineTo, net)
+	coinbaseTx, err := createCoinbaseTx(coinbaseScript, blockHeight, miningAddr,
+		mineTo, net, blockVersion)
 	if err != nil {
 		log.ERROR(err)
 		return nil, err

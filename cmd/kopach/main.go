@@ -157,7 +157,7 @@ var handlers = transport.HandleFunc{
 				if err != nil {
 					log.ERROR(err)
 				}
-				log.SPEW(j)
+				// log.SPEW(j)
 			}
 			return
 		}
