@@ -154,7 +154,7 @@ var handlers = transport.HandleFunc{
 			c := ctx.(*Controller)
 			j := sol.LoadSolContainer(b)
 			msgBlock := j.GetMsgBlock()
-			log.WARN(msgBlock.Header.Version)
+			// log.WARN(msgBlock.Header.Version)
 			// msgBlock.Transactions = append(c.coinbases[msgBlock.Header.Version], c.)
 			msgBlock.Transactions = []*wire.MsgTx{}
 			txs := append([]*util.Tx{c.coinbases[msgBlock.Header.Version]}, c.transactions...)

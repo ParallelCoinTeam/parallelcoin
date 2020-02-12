@@ -21,8 +21,8 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block,
 	flags BehaviorFlags) (bool, error) {
-	log.WARN("maybeAcceptBlock")
-	log.INFO(block.MsgBlock())
+	// log.WARN("maybeAcceptBlock")
+	// log.INFO(block.MsgBlock())
 	// The height of this block is one more than the referenced previous block.
 	prevHash := &block.MsgBlock().Header.PrevBlock
 	prevNode := b.Index.LookupNode(prevHash)
