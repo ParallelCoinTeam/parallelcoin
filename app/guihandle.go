@@ -7,10 +7,11 @@ import (
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
-
+	"github.com/p9c/pod/pkg/wallet"
 	"github.com/urfave/cli"
 )
 
@@ -20,7 +21,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		rc := rcd.RcInit()
 		//var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
-			rc.IsFirstRun = true
+			rc.Boot.IsFirstRun = true
 		}
 
 		duo, err := duoui.DuOuI(rc, cx)
@@ -28,26 +29,50 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 			close(duo.Quit)
 		})
 
-		log.INFO("ima", rc.IsFirstRun)
+
+		log.INFO("IsFirstRun? ", rc.Boot.IsFirstRun)
 
 		//loader.DuoUIloader(rc, cx, firstRun)
+		//rcd.ListenInit()
+		//go func() {
+		//	for {
+		//		select {
+		//		case <-duo.Quit:
+		//			break
+		//			case
+		//		}
+		//	}
+		//}()
 
 		// signal the GUI that the back end is ready
 		log.DEBUG("sending ready signal")
 		// we can do this without blocking because the channel has 1 buffer this way it falls
 		// immediately the GUI starts
 		duo.Ready <- struct{}{}
-		duo.IsReady = true
-		// Start Node
-		err = gui.DuoUInode(cx)
-		if err != nil {
-			log.ERROR(err)
-		}
-		// Start wallet
-		err = gui.Services(cx)
-		if err != nil {
-			log.ERROR(err)
-		}
+		go func() {
+			nodeChan := make(chan *rpc.Server)
+			// Start Node
+			err = gui.DuoUInode(cx, nodeChan)
+			if err != nil {
+				log.ERROR(err)
+			}
+			log.DEBUG("waiting for nodeChan")
+			cx.RPCServer = <-nodeChan
+			log.DEBUG("nodeChan sent")
+			cx.Node.Store(true)
+
+			walletChan := make(chan *wallet.Wallet)
+			// Start wallet
+			err = gui.Services(cx, walletChan)
+			if err != nil {
+				log.ERROR(err)
+			}
+			log.DEBUG("waiting for walletChan")
+			cx.WalletServer = <-walletChan
+			log.DEBUG("walletChan sent")
+			cx.Wallet.Store(true)
+			rc.Boot.IsBoot = false
+		}()
 
 		// Start up GUI
 		log.DEBUG("starting up GUI")

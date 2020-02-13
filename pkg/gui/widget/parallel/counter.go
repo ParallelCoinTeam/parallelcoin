@@ -16,6 +16,12 @@ import (
 )
 
 var (
+	buttonLayoutList = &layout.List{
+		Axis: layout.Vertical,
+	}
+)
+
+var (
 	increase = &button{
 		Name:         "increase",
 		OperateValue: 1,

@@ -14,7 +14,7 @@ import (
 )
 
 func
-(rc *RcVar) GetDuoUIbalance(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIbalance(cx *conte.Xt) {
 	acct := "default"
 	minconf := 0
 	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
@@ -30,7 +30,7 @@ func
 	return
 }
 func
-(rc *RcVar) GetDuoUIunconfirmedBalance(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUIunconfirmedBalance(cx *conte.Xt) {
 	acct := "default"
 	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, cx.WalletServer)
 	if err != nil {
@@ -45,7 +45,7 @@ func
 }
 
 func
-(rc *RcVar) GetDuoUItransactionsNumber(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUItransactionsNumber(cx *conte.Xt) {
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := cx.WalletServer.ListTransactions(0, 999999999)
@@ -56,7 +56,7 @@ func
 }
 
 func
-(rc *RcVar) GetDuoUItransactions(duo *models.DuoUI, cx *conte.Xt, sfrom, count int, cat string) *models.DuoUItransactions {
+(rc *RcVar) GetDuoUItransactions(cx *conte.Xt, sfrom, count int, cat string) *models.DuoUItransactions {
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := cx.WalletServer.ListTransactions(sfrom, count)
@@ -110,12 +110,12 @@ txs(t btcjson.ListTransactionsResult) models.DuoUItx {
 
 }
 func
-(rc *RcVar) GetDuoUIlastTxs(duo *models.DuoUI, cx *conte.Xt) {
-	rc.LastTxs = *rc.GetDuoUItransactions(duo, cx, 0, 10, "")
+(rc *RcVar) GetDuoUIlastTxs(cx *conte.Xt) {
+	rc.LastTxs = *rc.GetDuoUItransactions(cx, 0, 10, "")
 	return
 }
 func
-(rc *RcVar) GetDuoUITransactionsExcertps(duo *models.DuoUI, cx *conte.Xt) {
+(rc *RcVar) GetDuoUITransactionsExcertps( cx *conte.Xt) {
 	lt, err := cx.WalletServer.ListTransactions(0, rc.Txs.TxsListNumber)
 	if err != nil {
 		rc.PushDuoUIalert("Error", err.Error(), "error")
@@ -155,7 +155,7 @@ func
 }
 
 func
-(rc *RcVar) DuoSend(duo *models.DuoUI, cx *conte.Xt, wp string, ad string, am float64) {
+(rc *RcVar) DuoSend(cx *conte.Xt, wp string, ad string, am float64) {
 	if am > 0 {
 		getBlockChain, err := rpc.HandleGetBlockChainInfo(cx.RPCServer, nil, nil)
 		if err != nil {

@@ -11,15 +11,16 @@ import (
 
 func WalletGUI(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	go func() {
+
 		log.DEBUG("starting UI main loop")
 
-		rc.GetDuoUIbalance(duo, cx)
-		rc.GetDuoUIunconfirmedBalance(duo, cx)
-		rc.GetDuoUIblockHeight(duo, cx)
-		rc.GetDuoUIstatus(duo, cx)
-		rc.GetDuoUIlocalLost(duo)
-		rc.GetDuoUIdifficulty(duo, cx)
+		if duo.IsReady != false {
 
+
+
+
+
+		}
 		if err := duoui.DuoUImainLoop(duo, cx, rc); err != nil {
 			log.FATAL(err.Error(), "- shutting down")
 		}

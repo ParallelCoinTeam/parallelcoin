@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense OR MIT
-package helpers
+package components
 
 import (
 	"github.com/p9c/pod/cmd/gui/models"

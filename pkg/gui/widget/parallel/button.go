@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	buttonLayoutList = &layout.List{
+	buttonInsideLayoutList = &layout.List{
 		Axis: layout.Vertical,
 	}
 )
@@ -45,7 +45,8 @@ func (t *DuoUItheme) DuoUIbutton(txt, txtColor, bgColor, iconColor string, iconS
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
-			Size: t.TextSize.Scale(8.0 / 10.0),
+			Typeface: t.Font.Secondary,
+			Size:     t.TextSize.Scale(8.0 / 10.0),
 		},
 		Width:             width,
 		Height:            height,
@@ -61,8 +62,6 @@ func (t *DuoUItheme) DuoUIbutton(txt, txtColor, bgColor, iconColor string, iconS
 }
 
 func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
-	col := b.TxColor
-	bgcol := b.BgColor
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
 			rr := float32(gtx.Px(unit.Dp(0)))
@@ -73,7 +72,7 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 				}},
 				NE: rr, NW: rr, SE: rr, SW: rr,
 			}.Op(gtx.Ops).Add(gtx.Ops)
-			fill(gtx, bgcol)
+			fill(gtx, b.BgColor)
 			for _, c := range button.History() {
 				drawInk(gtx, c)
 			}
@@ -81,34 +80,36 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 		layout.Stacked(func() {
 			gtx.Constraints.Width.Min = int(b.Width)
 			gtx.Constraints.Height.Min = int(b.Height)
+
 			layout.Align(layout.Center).Layout(gtx, func() {
-				buttonLayout := []func(){
-					func() {
-						if b.Icon != nil {
-							layout.Inset{Top: b.PaddingVertical, Bottom: b.PaddingVertical, Left: b.PaddingHorizontal, Right: b.PaddingHorizontal}.Layout(gtx, func() {
-								if b.Icon != nil {
-									b.Icon.Color = b.IconColor
-									b.Icon.Layout(gtx, unit.Px(float32(b.IconSize)))
-								}
-								gtx.Dimensions = layout.Dimensions{
-									Size: image.Point{X: b.IconSize, Y: b.IconSize},
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+
+					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+						layout.Rigid(func() {
+							if b.Icon != nil {
+								layout.Align(layout.Center).Layout(gtx, func() {
+									if b.Icon != nil {
+										layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+											b.Icon.Color = b.IconColor
+											b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
+										})
+									}
+									gtx.Dimensions = layout.Dimensions{
+										Size: image.Point{X: b.IconSize, Y: b.IconSize},
+									}
+								})
+							}
+						}),
+						layout.Rigid(func() {
+							layout.Align(layout.Center).Layout(gtx, func() {
+								if b.Text != "" {
+									paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
+									widget.Label{
+										Alignment: text.Middle,
+									}.Layout(gtx, b.shaper, b.Font, b.Text)
 								}
 							})
-						}
-					},
-					func() {
-						if b.Text != "" {
-							//layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(4), Right: unit.Dp(4)}.Layout(gtx, func() {
-							paint.ColorOp{Color: col}.Add(gtx.Ops)
-							widget.Label{
-								Alignment: text.Middle,
-							}.Layout(gtx, b.shaper, b.Font, b.Text)
-							//})
-						}
-					},
-				}
-				buttonLayoutList.Layout(gtx, len(buttonLayout), func(i int) {
-					layout.UniformInset(unit.Dp(0)).Layout(gtx, buttonLayout[i])
+						}))
 				})
 			})
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
@@ -119,13 +120,6 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *widget.Button) {
 
 func toPointF(p image.Point) f32.Point {
 	return f32.Point{X: float32(p.X), Y: float32(p.Y)}
-}
-
-func toRectF(r image.Rectangle) f32.Rectangle {
-	return f32.Rectangle{
-		Min: toPointF(r.Min),
-		Max: toPointF(r.Max),
-	}
 }
 
 func drawInk(gtx *layout.Context, c widget.Click) {
@@ -157,4 +151,18 @@ func drawInk(gtx *layout.Context, c widget.Click) {
 	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(size), Y: float32(size)}}}.Add(gtx.Ops)
 	stack.Pop()
 	op.InvalidateOp{}.Add(gtx.Ops)
+}
+
+func duoUIdrawRectangle(gtx *layout.Context, w, h int) {
+	square := f32.Rectangle{
+		Max: f32.Point{
+			X: float32(w),
+			Y: float32(h),
+		},
+	}
+	paint.ColorOp{Color: color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}}.Add(gtx.Ops)
+
+	clip.Rect{Rect: square}.Op(gtx.Ops).Add(gtx.Ops)
+	paint.PaintOp{Rect: square}.Add(gtx.Ops)
+	gtx.Dimensions = layout.Dimensions{Size: image.Point{X: w, Y: h}}
 }

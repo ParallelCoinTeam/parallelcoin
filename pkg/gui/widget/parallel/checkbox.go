@@ -20,6 +20,7 @@ func (t *DuoUItheme) DuoUIcheckBox(label string) DuoUIcheckBox {
 			Color:     t.Color.Text,
 			IconColor: t.Color.Primary,
 			Font: text.Font{
+				Typeface: t.Font.Primary,
 				Size: t.TextSize.Scale(14.0 / 16.0),
 			},
 			Size:               unit.Dp(26),

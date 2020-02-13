@@ -18,10 +18,21 @@ import (
 type DuoUItheme struct {
 	Shaper text.Shaper
 	Color  struct {
-		Primary color.RGBA
-		Text    color.RGBA
-		Hint    color.RGBA
-		InvText color.RGBA
+		Light     color.RGBA
+		Dark      color.RGBA
+		Bg        color.RGBA
+		Text      color.RGBA
+		Primary   color.RGBA
+		Secondary color.RGBA
+		Success   color.RGBA
+		Danger    color.RGBA
+		Warning   color.RGBA
+		Info      color.RGBA
+		Hint      color.RGBA
+		InvText   color.RGBA
+	}
+	Font struct{
+		Primary, Secondary text.Typeface
 	}
 	TextSize              unit.Value
 	checkBoxCheckedIcon   *DuoUIicon
@@ -34,10 +45,20 @@ func NewDuoUItheme() *DuoUItheme {
 	t := &DuoUItheme{
 		Shaper: font.Default(),
 	}
-	t.Color.Primary = rgb(0x3f51b5)
+	t.Color.Light = rgb(0xcfcfcf)
+	t.Color.Dark = rgb(0x303030)
+	t.Color.Bg = rgb(0xcfcfcf)
 	t.Color.Text = rgb(0x303030)
+	t.Color.Primary = rgb(0x308080)
+	t.Color.Secondary = rgb(0x803080)
+	t.Color.Success = rgb(0x30cf30)
+	t.Color.Danger = rgb(0xcf3030)
+	t.Color.Warning = rgb(0xcfcf30)
+	t.Color.Info = rgb(0x3080cf)
 	t.Color.Hint = rgb(0x888888)
 	t.Color.InvText = rgb(0xcfcfcf)
+	t.Font.Primary = "bariol"
+	t.Font.Secondary = "plan9"
 	t.TextSize = unit.Sp(16)
 
 	t.checkBoxCheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleCheckBox))

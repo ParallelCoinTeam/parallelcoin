@@ -1,41 +1,38 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gui/unit"
 	"github.com/p9c/pod/pkg/gui/widget/parallel"
 )
 
-func DuoUIcontent(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
+func DuoUIcontent(duo *DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 	// Content <<<
 	return func() {
 		var page = parallel.DuoUIpage{
-			TxColor:      parallel.HexARGB("ff303030"),
-			Width:        0,
-			Height:       0,
-			BgColor:      parallel.HexARGB("ffcfcfcf"),
-			CornerRadius: unit.Dp(16),
+			TxColor: parallel.HexARGB("ff303030"),
+			BgColor: parallel.HexARGB("ffcfcfcf"),
 		}
-		switch duo.CurrentPage {
-		case "Overview":
+		switch duo.m.CurrentPage {
+		case "OVERVIEW":
 			page.Layout(DuoUIoverview(duo, cx, rc))
-		case "Send":
+		case "SEND":
 			page.Layout(DuoUIsend(duo, cx, rc))
-		case "Receive":
-			page.Layout(DuoUIreceive(duo, cx, rc))
-		case "History":
+		case "RECEIVE":
+			page.Layout(DuoUIreceive(duo))
+		case "HISTORY":
 			page.Layout(DuoUIhistory(duo, cx, rc))
-		case "AddressBook":
-			page.Layout(DuoUIaddressbook(duo, cx, rc))
-		case "Explorer":
-			page.Layout(DuoUIexplorer(duo, cx, rc))
-		case "Network":
-			page.Layout(DuoUInetwork(duo, cx, rc))
-		case "Console":
+		case "ADDRESSBOOK":
+			page.Layout(DuoUIaddressbook(duo))
+		case "EXPLORER":
+			page.Layout(duo.DuoUIexplorer(cx, rc))
+		case "NETWORK":
+			page.Layout(DuoUInetwork(duo))
+		case "CONSOLE":
 			page.Layout(DuoUIconsole(duo, cx, rc))
-		case "Settings":
+		case "TRACE":
+			page.Layout(DuoUItrace(duo, cx, rc))
+		case "SETTINGS":
 			page.Layout(DuoUIsettings(duo, cx, rc))
 		default:
 			page.Layout(DuoUIoverview(duo, cx, rc))

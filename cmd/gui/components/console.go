@@ -1,4 +1,4 @@
-package duoui
+package components
 
 import (
 	"github.com/p9c/pod/cmd/gui/models"
@@ -19,21 +19,20 @@ var (
 	}
 	consoleOutputList = &layout.List{
 		Axis: layout.Vertical,
+		ScrollToEnd:true,
 	}
-	ln = layout.UniformInset(unit.Dp(1))
-	in = layout.UniformInset(unit.Dp(8))
 )
 
-func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Context, func()) {
-	return duo.DuoUIcontext, func() {
+func DuoUIconsoleWidget(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
+	return func() {
 		layout.Flex{}.Layout(duo.DuoUIcontext,
 			layout.Flexed(1, func() {
-				duo.DuoUIcomponents.Console.Inset.Layout(duo.DuoUIcontext, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, func() {
 					layout.Flex{
 						Axis:    layout.Vertical,
 						Spacing: layout.SpaceAround,
 					}.Layout(duo.DuoUIcontext,
-						layout.Rigid(func() {
+						layout.Flexed(1, func() {
 							consoleOutputList.Layout(duo.DuoUIcontext, len(rc.CommandsHistory.Commands), func(i int) {
 								t := rc.CommandsHistory.Commands[i]
 								layout.Flex{
@@ -48,7 +47,7 @@ func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Conte
 							})
 						}),
 						layout.Rigid(func() {
-							in.Layout(duo.DuoUIcontext, func() {
+							layout.UniformInset(unit.Dp(8)).Layout(duo.DuoUIcontext, func() {
 								e := duo.DuoUItheme.DuoUIeditor("Run command", "Run txt")
 								e.Font.Style = text.Regular
 								e.Font.Size = unit.Dp(16)
@@ -63,24 +62,9 @@ func DuoUIconsole(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (*layout.Conte
 									}
 								}
 							})
-							//duo.comp.OverviewBottom.Layout.Layout(duo.DuoUIcontext, transactions, status)
-
 						}))
-					// Overview >>>
 				})
 			}),
 		)
-		//return duo.comp.Content.Layout.Rigid(duo.DuoUIcontext, func() {
-		//	//helpers.DuoUIdrawRect(duo.DuoUIcontext, duo.Cs.Width.Max, 64, helpers.HexARGB("ffcfcfcf"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		//	// Header <<<
-		//	consoleOut := duo.comp.ConsoleOutput.Layout.Rigid(duo.DuoUIcontext, func() {
-		//		//helpers.DuoUIdrawRect(duo.DuoUIcontext, 64, 64, helpers.HexARGB("ff303030"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		//
-		//
-		//
-		//	})
-		//
-		//	// Header >>>
-		//})
 	}
 }

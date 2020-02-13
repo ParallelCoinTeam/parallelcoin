@@ -2,7 +2,6 @@ package duoui
 
 import (
 	"github.com/p9c/pod/cmd/gui/helpers"
-	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/unit"
@@ -12,8 +11,8 @@ import (
 )
 
 var (
+	buttonTrace     = new(widget.Button)
 	buttonCornerOne = new(widget.Button)
-	buttonCornerTwo = new(widget.Button)
 	buttonSettings  = new(widget.Button)
 	buttonNetwork   = new(widget.Button)
 	buttonBlocks    = new(widget.Button)
@@ -27,12 +26,10 @@ var (
 	}
 )
 
-func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
+func (duo *DuoUI) DuoUIfooter(rc *rcd.RcVar) func() {
 	return func() {
-		cs := duo.DuoUIcontext.Constraints
-		helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, 64, "ff303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
-		// Footer <<<
+		cs := duo.m.DuoUIcontext.Constraints
+		helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, cs.Width.Max, 64, duo.m.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		var (
 			width             float32 = 48
 			height            float32 = 48
@@ -43,101 +40,94 @@ func DuoUIfooter(duo *models.DuoUI, rc *rcd.RcVar) func() {
 		settingsIcon, _ := parallel.NewDuoUIicon(icons.ActionSettings)
 		blocksIcon, _ := parallel.NewDuoUIicon(icons.ActionExplore)
 		networkIcon, _ := parallel.NewDuoUIicon(icons.ActionFingerprint)
+		traceIcon, _ := parallel.NewDuoUIicon(icons.ActionTrackChanges)
 		consoleIcon, _ := parallel.NewDuoUIicon(icons.ActionInput)
 		helpIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropDown)
-
-		//overviewButton :=
-		//historyButton :=
-
-		in := layout.UniformInset(unit.Dp(0))
-
-		layout.Flex{Spacing: layout.SpaceBetween}.Layout(duo.DuoUIcontext,
+		layout.Flex{Spacing: layout.SpaceBetween}.Layout(duo.m.DuoUIcontext,
 			layout.Rigid(func() {
-				in.Layout(duo.DuoUIcontext, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(duo.m.DuoUIcontext, func() {
 					cornerButtons := []func(){
 						func() {
-							in.Layout(duo.DuoUIcontext, func() {
+							layout.UniformInset(unit.Dp(0)).Layout(duo.m.DuoUIcontext, func() {
 								var networkMeniItem parallel.DuoUIbutton
-								networkMeniItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
-								for buttonCornerOne.Clicked(duo.DuoUIcontext) {
-									duo.CurrentPage = "Network"
+								networkMeniItem = duo.m.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
+								for buttonCornerOne.Clicked(duo.m.DuoUIcontext) {
+									duo.m.CurrentPage = "NETWORK"
 								}
-								networkMeniItem.Layout(duo.DuoUIcontext, buttonCornerOne)
+								networkMeniItem.Layout(duo.m.DuoUIcontext, buttonCornerOne)
 							})
 						},
 						func() {
 							var settingsMenuItem parallel.DuoUIbutton
-							settingsMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, settingsIcon)
+							settingsMenuItem = duo.m.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, traceIcon)
 
-							for buttonCornerTwo.Clicked(duo.DuoUIcontext) {
-								duo.CurrentPage = "Settings"
+							for buttonTrace.Clicked(duo.m.DuoUIcontext) {
+								duo.m.CurrentPage = "TRACE"
 							}
-							settingsMenuItem.Layout(duo.DuoUIcontext, buttonCornerTwo)
+							settingsMenuItem.Layout(duo.m.DuoUIcontext, buttonTrace)
 						},
 					}
-					cornerNav.Layout(duo.DuoUIcontext, len(cornerButtons), func(i int) {
-						layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, cornerButtons[i])
+					cornerNav.Layout(duo.m.DuoUIcontext, len(cornerButtons), func(i int) {
+						layout.UniformInset(unit.Dp(0)).Layout(duo.m.DuoUIcontext, cornerButtons[i])
 					})
 				})
 			}),
 			layout.Rigid(func() {
-				in.Layout(duo.DuoUIcontext, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(duo.m.DuoUIcontext, func() {
 					navButtons := []func(){
 						func() {
-							in.Layout(duo.DuoUIcontext, func() {
+							layout.UniformInset(unit.Dp(0)).Layout(duo.m.DuoUIcontext, func() {
 								var networkMeniItem parallel.DuoUIbutton
-								networkMeniItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
-								for buttonNetwork.Clicked(duo.DuoUIcontext) {
-									duo.CurrentPage = "Network"
+								networkMeniItem = duo.m.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
+								for buttonNetwork.Clicked(duo.m.DuoUIcontext) {
+									duo.m.CurrentPage = "NETWORK"
 								}
-								networkMeniItem.Layout(duo.DuoUIcontext, buttonNetwork)
+								networkMeniItem.Layout(duo.m.DuoUIcontext, buttonNetwork)
 							})
 						},
 						func() {
 							var blocksMenuItem parallel.DuoUIbutton
-							blocksMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, blocksIcon)
-							for buttonBlocks.Clicked(duo.DuoUIcontext) {
-								duo.CurrentPage = "Explorer"
+							blocksMenuItem = duo.m.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, blocksIcon)
+							for buttonBlocks.Clicked(duo.m.DuoUIcontext) {
+								//duo.CurrentPage = "EXPLORER"
+								//rc.ShowToast = true
+								toastAdd(duo, rc)
 							}
-							blocksMenuItem.Layout(duo.DuoUIcontext, buttonBlocks)
+							blocksMenuItem.Layout(duo.m.DuoUIcontext, buttonBlocks)
 						},
 						func() {
 							var helpMenuItem parallel.DuoUIbutton
-							helpMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, helpIcon)
-							for buttonHelp.Clicked(duo.DuoUIcontext) {
-								rc.IsNotificationRun = true
+							helpMenuItem = duo.m.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, helpIcon)
+							for buttonHelp.Clicked(duo.m.DuoUIcontext) {
+								rc.ShowDialog = true
 							}
-							helpMenuItem.Layout(duo.DuoUIcontext, buttonHelp)
+							helpMenuItem.Layout(duo.m.DuoUIcontext, buttonHelp)
 						},
 						func() {
-							in.Layout(duo.DuoUIcontext, func() {
+							layout.UniformInset(unit.Dp(0)).Layout(duo.m.DuoUIcontext, func() {
 								var consoleMenuItem parallel.DuoUIbutton
-								consoleMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, consoleIcon)
-								for buttonConsole.Clicked(duo.DuoUIcontext) {
-									duo.CurrentPage = "Console"
+								consoleMenuItem = duo.m.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, consoleIcon)
+								for buttonConsole.Clicked(duo.m.DuoUIcontext) {
+									duo.m.CurrentPage = "CONSOLE"
 								}
-								consoleMenuItem.Layout(duo.DuoUIcontext, buttonConsole)
+								consoleMenuItem.Layout(duo.m.DuoUIcontext, buttonConsole)
 							})
 						},
 						func() {
 							var settingsMenuItem parallel.DuoUIbutton
-							settingsMenuItem = duo.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, settingsIcon)
+							settingsMenuItem = duo.m.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, settingsIcon)
 
-							for buttonSettings.Clicked(duo.DuoUIcontext) {
-								duo.CurrentPage = "Settings"
+							for buttonSettings.Clicked(duo.m.DuoUIcontext) {
+								duo.m.CurrentPage = "SETTINGS"
 							}
-							settingsMenuItem.Layout(duo.DuoUIcontext, buttonSettings)
+							settingsMenuItem.Layout(duo.m.DuoUIcontext, buttonSettings)
 						},
 					}
-					footerNav.Layout(duo.DuoUIcontext, len(navButtons), func(i int) {
-						layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, navButtons[i])
+					footerNav.Layout(duo.m.DuoUIcontext, len(navButtons), func(i int) {
+						layout.UniformInset(unit.Dp(0)).Layout(duo.m.DuoUIcontext, navButtons[i])
 					})
 				})
 			}),
 		)
-		//}),
-		//)
-		// Footer >>>
-
 	}
 }
