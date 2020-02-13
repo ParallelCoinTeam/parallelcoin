@@ -2,10 +2,10 @@ package interrupt
 
 import (
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strings"
-	"syscall"
 	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/app/apputil"
@@ -43,13 +43,15 @@ func Listener() {
 		log.DEBUG("interrupt handlers finished")
 		if Restart {
 			log.DEBUG("restarting")
-			// time.Sleep(time.Second * 3)
-			log.DEBUG(cleanAndExpandPath(os.Args[0]), os.Args, os.Environ())
-			err := syscall.Exec(cleanAndExpandPath(os.Args[0]), os.Args, os.Environ())
+			cmd := exec.Command(os.Args[0], os.Args[1:]...)
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err := cmd.Start()
 			if err != nil {
 				log.ERROR(err)
-				os.Exit(1)
 			}
+			os.Exit(1)
 		} else {
 			os.Exit(0)
 		}
@@ -57,7 +59,7 @@ func Listener() {
 	for {
 		select {
 		case sig := <-Chan:
-			log.Printf(">>> received signal (%s)\n", sig)
+			log.Printf("\r>>> received signal (%s)\n", sig)
 			log.DEBUG("received interrupt signal")
 			requested = true
 			invokeCallbacks()

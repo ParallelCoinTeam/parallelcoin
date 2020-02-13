@@ -935,7 +935,7 @@ func (s *Server) Stop() error {
 	}
 	s.NtfnMgr.Shutdown()
 	s.NtfnMgr.WaitForShutdown()
-	close(s.Quit)
+	// close(s.Quit)
 	s.WG.Wait()
 	log.DEBUG("RPC server shutdown complete")
 	return nil
@@ -4185,7 +4185,7 @@ func HandleRestart(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	case s.RequestProcessShutdown <- struct{}{}:
 	default:
 	}
-	defer interrupt.RequestRestart()
+	interrupt.RequestRestart()
 	return "node restarting", nil
 }
 

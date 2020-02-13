@@ -17,7 +17,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/upnp"
@@ -40,7 +40,6 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/bloom"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 const DefaultMaxOrphanTxSize = 100000
@@ -480,7 +479,7 @@ func (s *Node) Stop() error {
 		log.ERROR(err)
 	}
 	// Signal the remaining goroutines to quit.
-	close(s.Quit)
+	// close(s.Quit)
 	return nil
 }
 
@@ -2831,7 +2830,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 			if len(rpcListeners) == 0 {
 				return nil, errors.New("RPCS: No valid listen address")
 			}
-
+			
 			rp, err := NewRPCServer(&ServerConfig{
 				Listeners:    rpcListeners,
 				StartupTime:  s.StartupTime,
@@ -2861,7 +2860,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 			for i := range s.RPCServers {
 				<-s.RPCServers[i].RequestedProcessShutdown()
 			}
-			interrupt.Request()
+			// interrupt.Request()
 		}()
 	}
 	return &s, nil
