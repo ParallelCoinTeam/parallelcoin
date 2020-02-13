@@ -2,6 +2,8 @@ package duoui
 
 import (
 	"errors"
+	"image"
+	
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/ico"
 	"github.com/p9c/pod/cmd/gui/models"
@@ -9,11 +11,11 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/io/system"
 	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/op"
 	"github.com/p9c/pod/pkg/gui/unit"
 	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"image"
 )
 
 func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
@@ -21,6 +23,7 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 	for {
 		select {
 		case <-duo.m.Ready:
+			rcd.ListenInit(cx, rc)
 			duo.m.IsReady = true
 		case <-duo.m.Quit:
 			log.DEBUG("quit signal received")
@@ -54,17 +57,13 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 							duo.DuoUIdialog(cx, rc)
 						}
 						duo.DuoUItoastSys(rc)
-
-						//rc.GetDuoUIbalance(cx)
-						//rc.GetDuoUIunconfirmedBalance(cx)
-						rc.GetDuoUITransactionsExcertps(cx)
-
-						//rc.GetDuoUIblockHeight(cx)
-						//rc.GetDuoUIstatus(cx)
-						//rc.GetDuoUIlocalLost()
-						//rc.GetDuoUIdifficulty(cx)
-						//
-						//rc.GetDuoUIlastTxs(cx)
+						select {
+						case <-rc.UpdateTrigger:
+							// force a repaint as a new block changes all rc data
+							log.DEBUG("update trigger received")
+							op.InvalidateOp{}.Add(d.DuoUIcontext.Ops)
+						default:
+						}
 					}
 					e.Frame(duo.m.DuoUIcontext.Ops)
 					duo.m.DuoUIcontext.Reset(e.Config, e.Size)
@@ -82,7 +81,7 @@ func (duo *DuoUI) DuoUImainScreen() {
 	layout.Flex{Axis: layout.Vertical}.Layout(duo.m.DuoUIcontext,
 		layout.Flexed(0.6, func() {
 			layout.Flex{Axis: layout.Horizontal}.Layout(duo.m.DuoUIcontext,
-
+				
 				layout.Rigid(func() {
 					layout.UniformInset(unit.Dp(8)).Layout(duo.m.DuoUIcontext, func() {
 						size := duo.m.DuoUIcontext.Px(unit.Dp(256)) - 2*duo.m.DuoUIcontext.Px(unit.Dp(8))
@@ -113,7 +112,7 @@ func (duo *DuoUI) DuoUIgrid(cx *conte.Xt, rc *rcd.RcVar) {
 	// START View <<<
 	cs := duo.m.DuoUIcontext.Constraints
 	helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.m.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
+	
 	layout.Flex{Axis: layout.Vertical}.Layout(duo.m.DuoUIcontext,
 		layout.Rigid(duo.DuoUIheader(rc)),
 		layout.Flexed(1, duo.DuoUIbody(cx, rc)),

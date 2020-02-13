@@ -1,10 +1,12 @@
 package rcd
 
 import (
+	"sync"
+	"time"
+	
 	"github.com/p9c/pod/cmd/gui/models"
 	"github.com/p9c/pod/pkg/gui/widget"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"time"
 )
 
 var (
@@ -17,6 +19,7 @@ var (
 type RcVar struct {
 	Boot             *Boot
 	Events           chan Event
+	UpdateTrigger    chan struct{}
 	Alert            models.DuoUIalert
 	Status           models.DuoUIstatus
 	Hashes           int64
@@ -43,6 +46,7 @@ type RcVar struct {
 	Peers            []*btcjson.GetPeerInfoResult `json:"peers"`
 	Blocks           []models.DuoUIblock
 	screen           string `json:"screen"`
+	mutex            sync.Mutex
 }
 
 type Boot struct {
@@ -54,7 +58,7 @@ type Boot struct {
 	IsScreen   string `json:"screen"`
 }
 
-//type rcVar interface {
+// type rcVar interface {
 //	GetDuoUItransactions(sfrom, count int, cat string)
 //	GetDuoUIbalance()
 //	GetDuoUItransactionsExcerpts()
@@ -64,7 +68,7 @@ type Boot struct {
 //	GetDuoUIblockHeight()
 //	GetDuoUIblockCount()
 //	GetDuoUIconnectionCount()
-//}
+// }
 
 func RcInit() *RcVar {
 	b := Boot{
@@ -96,8 +100,8 @@ func RcInit() *RcVar {
 					ComID:    "input",
 					Category: "input",
 					Time:     time.Now(),
-
-					//Out: input(duo),
+					
+					// Out: input(duo),
 				},
 			},
 			CommandsNumber: 1,
@@ -112,7 +116,7 @@ func RcInit() *RcVar {
 	}
 }
 
-//func input(duo models.DuoUI) func() {
+// func input(duo models.DuoUI) func() {
 //	return func() {
 //		e := duo.DuoUItheme.DuoUIeditor("Run command", "Run txt")
 //		e.Font.Style = text.Regular
@@ -128,11 +132,11 @@ func RcInit() *RcVar {
 //			}
 //		}
 //	}
-//}
+// }
 
 func (rc *RcVar) RCtoast() {
-	//tickerChannel := time.NewTicker(3 * time.Second)
-	//go func() {
+	// tickerChannel := time.NewTicker(3 * time.Second)
+	// go func() {
 	//	for {
 	//		select {
 	//		case <-tickerChannel.C:
@@ -145,6 +149,6 @@ func (rc *RcVar) RCtoast() {
 	//				rc.Toasts = rc.Toasts[:len(rc.Toasts)-1]				}
 	//		}
 	//	}
-	//}()
-	//time.Sleep(6 * time.Second)
+	// }()
+	// time.Sleep(6 * time.Second)
 }
