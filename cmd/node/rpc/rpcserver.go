@@ -935,7 +935,7 @@ func (s *Server) Stop() error {
 	}
 	s.NtfnMgr.Shutdown()
 	s.NtfnMgr.WaitForShutdown()
-	close(s.Quit)
+	// close(s.Quit)
 	s.WG.Wait()
 	log.DEBUG("RPC server shutdown complete")
 	return nil
