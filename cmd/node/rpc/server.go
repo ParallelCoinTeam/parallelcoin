@@ -479,7 +479,7 @@ func (s *Node) Stop() error {
 		log.ERROR(err)
 	}
 	// Signal the remaining goroutines to quit.
-	// close(s.Quit)
+	close(s.Quit)
 	return nil
 }
 
