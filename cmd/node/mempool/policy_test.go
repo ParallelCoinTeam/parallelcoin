@@ -298,7 +298,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 	}
 	addrHash := [20]byte{0x01}
 	addr, err := util.NewAddressPubKeyHash(addrHash[:],
-		&chaincfg.TestNet3Params)
+		&netparams.TestNet3Params)
 
 	if err != nil {
 		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", err)

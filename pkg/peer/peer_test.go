@@ -201,7 +201,7 @@ func TestPeerConnection(t *testing.T) {
 		UserAgentName:     "peer",
 		UserAgentVersion:  "1.0",
 		UserAgentComments: []string{"comment"},
-		ChainParams:       &chaincfg.MainNetParams,
+		ChainParams:       &netparams.MainNetParams,
 		ProtocolVersion:   wire.RejectVersion, // Configure with older version
 		Services:          0,
 		TrickleInterval:   time.Second * 10,
@@ -211,7 +211,7 @@ func TestPeerConnection(t *testing.T) {
 		UserAgentName:     "peer",
 		UserAgentVersion:  "1.0",
 		UserAgentComments: []string{"comment"},
-		ChainParams:       &chaincfg.MainNetParams,
+		ChainParams:       &netparams.MainNetParams,
 		Services:          wire.SFNodeNetwork | wire.SFNodeWitness,
 		TrickleInterval:   time.Second * 10,
 	}
@@ -409,7 +409,7 @@ func TestPeerListeners(t *testing.T) {
 		UserAgentName:     "peer",
 		UserAgentVersion:  "1.0",
 		UserAgentComments: []string{"comment"},
-		ChainParams:       &chaincfg.MainNetParams,
+		ChainParams:       &netparams.MainNetParams,
 		Services:          wire.SFNodeBloom,
 		TrickleInterval:   time.Second * 10,
 	}
@@ -575,7 +575,7 @@ func TestOutboundPeer(t *testing.T) {
 		UserAgentName:     "peer",
 		UserAgentVersion:  "1.0",
 		UserAgentComments: []string{"comment"},
-		ChainParams:       &chaincfg.MainNetParams,
+		ChainParams:       &netparams.MainNetParams,
 		Services:          0,
 		TrickleInterval:   time.Second * 10,
 	}
@@ -697,7 +697,7 @@ func TestOutboundPeer(t *testing.T) {
 // 		UserAgentName:     "peer",
 // 		UserAgentVersion:  "1.0",
 // 		UserAgentComments: []string{"comment"},
-// 		ChainParams:       &chaincfg.MainNetParams,
+// 		ChainParams:       &netparams.MainNetParams,
 // 		Services:          0,
 // 		TrickleInterval:   time.Second * 10,
 // 	}
@@ -796,7 +796,7 @@ func TestDuplicateVersionMsg(t *testing.T) {
 		},
 		UserAgentName:    "peer",
 		UserAgentVersion: "1.0",
-		ChainParams:      &chaincfg.MainNetParams,
+		ChainParams:      &netparams.MainNetParams,
 		Services:         0,
 	}
 	inConn, outConn := pipe(

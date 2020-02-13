@@ -252,7 +252,7 @@ func (g *testGenerator) createCoinbaseTx(blockHeight int32) *wire.MsgTx {
 		SignatureScript: coinbaseScript,
 	})
 	tx.AddTxOut(&wire.TxOut{
-		Value:    blockchain.CalcBlockSubsidy(blockHeight, g.params),
+		Value:    blockchain.CalcBlockSubsidy(blockHeight, g.params, 0),
 		PkScript: opTrueScript,
 	})
 	return tx

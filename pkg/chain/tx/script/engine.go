@@ -335,7 +335,9 @@ func (vm *Engine) CheckErrorCondition(finalScript bool) error {
 	return nil
 }
 
-// Step will execute the next instruction and move the program counter to the next opcode in the script, or the next script if the current has ended.  Step will return true in the case that the last opcode was successfully executed. The result of calling Step or any other method is undefined if an error is returned.
+// Step will execute the next instruction and move the program counter to the next opcode in the script, or the next
+// script if the current has ended.  Step will return true in the case that the last opcode was successfully executed.
+// The result of calling Step or any other method is undefined if an error is returned.
 func (vm *Engine) Step() (done bool, e error) {
 	// Verify that it is pointing to a valid script address.
 	e = vm.validPC()
@@ -344,12 +346,14 @@ func (vm *Engine) Step() (done bool, e error) {
 	}
 	opcode := &vm.scripts[vm.scriptIdx.Load()][vm.scriptOff.Load()]
 	vm.scriptOff.Inc()
-	// Execute the opcode while taking into account several things such as disabled opcodes, illegal opcodes, maximum allowed operations per script, maximum script element sizes, and conditionals.
+	// Execute the opcode while taking into account several things such as disabled opcodes, illegal opcodes, maximum
+	// allowed operations per script, maximum script element sizes, and conditionals.
 	e = vm.executeOpcode(opcode)
 	if e != nil {
 		return true, e
 	}
-	// The number of elements in the combination of the data and alt stacks must not exceed the maximum number of stack elements allowed.
+	// The number of elements in the combination of the data and alt stacks must not exceed the maximum number of stack
+	// elements allowed.
 	combinedStackSize := vm.dstack.Depth() + vm.astack.Depth()
 	if combinedStackSize > MaxStackSize {
 		str := fmt.Sprintf("combined stack size %d > max allowed %d",

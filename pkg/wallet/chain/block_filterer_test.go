@@ -280,7 +280,7 @@ func TestBlockFiltererOneInOneOut(t *testing.T) {
 	req := &chain.FilterBlocksRequest{
 		WatchedOutPoints: watchedOutPoints,
 	}
-	blockFilterer := chain.NewBlockFilterer(&chaincfg.SimNetParams, req)
+	blockFilterer := chain.NewBlockFilterer(&netparams.SimNetParams, req)
 	// Filter block 100000, which should find matches for the watched
 	// outpoints.
 	match := blockFilterer.FilterBlock(&Block100000)

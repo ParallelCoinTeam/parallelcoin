@@ -408,7 +408,7 @@ func TestRollBackLastOutputInsufficientOutputs(t *testing.T) {
 	_, _, err := tx.rollBackLastOutput()
 	TstCheckError(t, "", err, ErrPreconditionNotMet)
 	output := &WithdrawalOutput{request: TstNewOutputRequest(
-		t, 1, "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", util.Amount(3), &chaincfg.MainNetParams)}
+		t, 1, "34eVkREKgvvGASZW7hkgE2uNc1yycntMK6", util.Amount(3), &netparams.MainNetParams)}
 	tx.addOutput(output.request)
 	_, _, err = tx.rollBackLastOutput()
 	TstCheckError(t, "", err, ErrPreconditionNotMet)

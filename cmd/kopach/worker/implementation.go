@@ -2,6 +2,7 @@ package worker
 
 import (
 	"crypto/cipher"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net"
@@ -10,6 +11,7 @@ import (
 	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -23,7 +25,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-const RoundsPerAlgo = 1
+const RoundsPerAlgo = 33
 
 type Worker struct {
 	sem          sem.T
@@ -35,6 +37,7 @@ type Worker struct {
 	block        *util.Block
 	msgBlock     *wire.MsgBlock
 	bitses       map[int32]uint32
+	hashes       map[int32]*chainhash.Hash
 	roller       *Counter
 	startNonce   uint32
 	startChan    chan struct{}
@@ -126,44 +129,66 @@ func NewWithConnAndSemaphore(
 					// drain start channel in run mode
 					continue
 				case <-w.stopChan:
+					w.block = nil
+					w.bitses = nil
+					w.hashes = nil
 					break running
 				case <-w.Quit:
 					log.DEBUG("worker stopping on pausing message")
 					break pausing
 				default:
-					// work
-					nH := w.block.Height()
-					hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
-					bigHash := blockchain.HashToBig(&hash)
-					if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
-						log.WARN("solution found h:", nH,
-							hash.String(),
-							fork.List[fork.GetCurrent(nH)].
-								AlgoVers[w.msgBlock.Header.Version],
-							"total hashes since startup",
-							w.roller.C-int(w.startNonce),
-							fork.IsTestnet,
-						)
-						// log.SPEW(w.msgBlock)
-						srs := sol.GetSolContainer(w.msgBlock)
-						_ = srs
-						err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
-						if err != nil {
-							log.ERROR(err)
+					if w.block == nil || w.bitses == nil || w.hashes == nil {
+						// log.INFO("stop was called before we started working")
+					} else {
+						// work
+						nH := w.block.Height()
+						w.msgBlock.Header.Version = w.roller.GetAlgoVer()
+						w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
+						w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
+						select {
+						case <-w.stopChan:
+							w.block = nil
+							w.bitses = nil
+							w.hashes = nil
+							break running
+						default:
 						}
-						log.DEBUG("sent solution")
-						break running
-					}
-					nextAlgo := w.roller.GetAlgoVer()
-					w.msgBlock.Header.Version = nextAlgo
-					w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
-					w.msgBlock.Header.Nonce++
-					if w.roller.C%len(w.roller.Algos) == 0 {
-						since := int(time.Now().Sub(tn)/time.Second) + 1
-						total := w.roller.C - int(w.startNonce)
-						_, _ = fmt.Fprintf(os.Stderr,
-							"\r %9d hash/s        \r", total/since)
-						
+						hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
+						bigHash := blockchain.HashToBig(&hash)
+						if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
+							log.WARN("solution found h:", nH,
+								hash.String(),
+								fork.List[fork.GetCurrent(nH)].
+									AlgoVers[w.msgBlock.Header.Version],
+								"total hashes since startup",
+								w.roller.C-int(w.startNonce),
+								fork.IsTestnet,
+								w.msgBlock.Header.Version,
+								w.msgBlock.Header.Bits,
+								w.msgBlock.Header.MerkleRoot.String(),
+								hash,
+							)
+							log.INFO(w.msgBlock)
+							srs := sol.GetSolContainer(w.msgBlock)
+							_ = srs
+							err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
+							if err != nil {
+								log.ERROR(err)
+							}
+							log.DEBUG("sent solution")
+							break running
+						}
+						nextAlgo := w.roller.GetAlgoVer()
+						w.msgBlock.Header.Version = nextAlgo
+						w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
+						w.msgBlock.Header.Nonce++
+						if w.roller.C%len(w.roller.Algos) == 0 {
+							since := int(time.Now().Sub(tn)/time.Second) + 1
+							total := w.roller.C - int(w.startNonce)
+							_, _ = fmt.Fprintf(os.Stderr,
+								"\r %9d hash/s %s       \r", total/since, fork.GetAlgoName(w.msgBlock.Header.Version, nH))
+							
+						}
 					}
 				}
 			}
@@ -193,6 +218,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
 	log.TRACE("loading dispatch connection from job message")
+	log.INFO(job.String())
 	// if there is no dispatch connection, make one.
 	// If there is one but the server died or was disconnected the
 	// connection the existing dispatch connection is nilled and this
@@ -212,40 +238,52 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	}
 	// }
 	// log.SPEW(w.dispatchConn)
+	*reply = true
 	// halting current work
 	w.stopChan <- struct{}{}
-	*reply = true
 	w.bitses = job.GetBitses()
+	w.hashes = job.GetHashes()
 	newHeight := job.GetNewHeight()
 	w.roller.Algos = []int32{}
 	for i := range w.bitses {
 		// we don't need to know net params if version numbers come with jobs
 		w.roller.Algos = append(w.roller.Algos, i)
 	}
-	w.block.SetHeight(newHeight)
 	w.msgBlock.Header.PrevBlock = *job.GetPrevBlockHash()
 	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
 	w.msgBlock.Header.Version = w.roller.GetAlgoVer()
 	w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
 	rand.Seed(time.Now().UnixNano())
 	w.msgBlock.Header.Nonce = rand.Uint32()
-	w.msgBlock.Transactions = job.GetTxs()
+	log.TRACE(w.hashes)
+	if w.hashes != nil {
+		w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
+	} else {
+		return errors.New("failed to decode merkle roots")
+	}
 	w.msgBlock.Header.Timestamp = time.Now()
+	// halting current work
+	w.stopChan <- struct{}{}
 	// create the unique extra nonce for this worker,
 	// which creates a different merkel root
-	extraNonce, err := wire.RandomUint64()
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
-	log.TRACE("updating extra nonce")
-	err = UpdateExtraNonce(w.msgBlock, newHeight, extraNonce)
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
+	// extraNonce, err := wire.RandomUint64()
+	// if err != nil {
+	// 	log.ERROR(err)
+	// 	return
+	// }
+	// log.TRACE("updating extra nonce")
+	// err = UpdateExtraNonce(w.msgBlock, newHeight, extraNonce)
+	// if err != nil {
+	// 	log.ERROR(err)
+	// 	return
+	// }
 	// log.SPEW(w.msgBlock)
 	// make the work select block start running
+	w.block = util.NewBlock(w.msgBlock)
+	w.block.SetHeight(newHeight)
+	// halting current work
+	w.stopChan <- struct{}{}
+	log.INFO("height", newHeight)
 	w.startChan <- struct{}{}
 	return
 }
@@ -324,4 +362,17 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 	return txscript.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
 		AddInt64(int64(extraNonce)).AddData([]byte(mining.CoinbaseFlags)).
 		Script()
+}
+
+// calcMerkleRoot creates a merkle tree from the slice of transactions and returns the root of the tree.
+func calcMerkleRoot(txns []*wire.MsgTx) chainhash.Hash {
+	if len(txns) == 0 {
+		return chainhash.Hash{}
+	}
+	utilTxns := make([]*util.Tx, 0, len(txns))
+	for _, tx := range txns {
+		utilTxns = append(utilTxns, util.NewTx(tx))
+	}
+	merkles := blockchain.BuildMerkleTreeStore(utilTxns, false)
+	return *merkles[len(merkles)-1]
 }

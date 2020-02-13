@@ -51,7 +51,7 @@ func ExamplePayToAddrScript() {
 // 	}
 // 	// Extract and print details from the script.
 // 	scriptClass, addresses, reqSigs, err := txscript.ExtractPkScriptAddrs(
-// 		script, &chaincfg.MainNetParams)
+// 		script, &netparams.MainNetParams)
 // 	if err != nil {
 // 		log.ERROR(err)
 // 		return

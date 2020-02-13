@@ -49,7 +49,7 @@ func findCandidates(
 	if latestCheckpoint == nil {
 		// Set the latest checkpoint to the genesis block if there isn't
 		// already one.
-		latestCheckpoint = &chaincfg.Checkpoint{
+		latestCheckpoint = &netparams.Checkpoint{
 			Hash:   activeNetParams.GenesisHash,
 			Height: 0,
 		}
