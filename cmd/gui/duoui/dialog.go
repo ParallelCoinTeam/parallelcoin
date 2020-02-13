@@ -1,67 +1,48 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/helpers"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
-	"github.com/p9c/pod/pkg/gui/widget"
-	"github.com/p9c/pod/pkg/gui/widget/parallel"
-	"golang.org/x/exp/shiny/materialdesign/icons"
 	"image/color"
 )
 
 var (
-	buttonDialogCancel = new(widget.Button)
-	buttonDialogOK     = new(widget.Button)
-	buttonDialogClose  = new(widget.Button)
+	buttonDialogCancel = new(controller.Button)
+	buttonDialogOK     = new(controller.Button)
+	buttonDialogClose  = new(controller.Button)
+
+	list               = &layout.List{
+		Axis: layout.Vertical,
+	}
 )
 
 // Main wallet screen
-func (duo *DuoUI) DuoUIdialog(cx *conte.Xt, rc *rcd.RcVar) {
-	// START View <<<
-	//cs := duo.Model.DuoUIcontext.Constraints
-	//	helpers.DuoUIdrawRectangle(duo.Model.DuoUIcontext, cs.Width.Max, cs.Height.Max, "ee303030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-	//layout.Flexed(1, func() {
-	//
-	//	layout.Align(layout.Center).Layout(duo.Model.DuoUIcontext, func() {
-	//		layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(duo.Model.DuoUIcontext, func() {
-	//			cur := duo.Model.DuoUItheme.H4("dddddddddddddddddddddddddddd")
-	//			cur.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
-	//			cur.Alignment = text.Start
-	//			cur.Layout(duo.Model.DuoUIcontext)
-	//		})
-	//	})
-	//
-	//})
-	iconCancel, _ := parallel.NewDuoUIicon(icons.NavigationCancel)
-	iconOK, _ := parallel.NewDuoUIicon(icons.NavigationCheck)
-	iconClose, _ := parallel.NewDuoUIicon(icons.NavigationClose)
-
-	cs := duo.Model.DuoUIcontext.Constraints
-	helpers.DuoUIdrawRectangle(duo.Model.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("ee000000"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-	layout.Align(layout.Center).Layout(duo.Model.DuoUIcontext, func() {
-		//cs := duo.Model.DuoUIcontext.Constraints
-		helpers.DuoUIdrawRectangle(duo.Model.DuoUIcontext, 408, 150, duo.Model.DuoUItheme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+func (ui *DuoUI) DuoUIdialog() {
+	cs := ui.ly.Context.Constraints
+	theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, "ee000000", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	layout.Align(layout.Center).Layout(ui.ly.Context, func() {
+		//cs := ui.ly.Context.Constraints
+		theme.DuoUIdrawRectangle(ui.ly.Context, 408, 150, ui.ly.Theme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 		layout.Flex{
 			Axis:      layout.Vertical,
 			Alignment: layout.Middle,
-		}.Layout(duo.Model.DuoUIcontext,
+		}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
 				layout.Flex{
 					Axis:      layout.Horizontal,
 					Alignment: layout.Middle,
-				}.Layout(duo.Model.DuoUIcontext,
+				}.Layout(ui.ly.Context,
 					layout.Rigid(func() {
-						layout.Align(layout.Center).Layout(duo.Model.DuoUIcontext, func() {
-							layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(duo.Model.DuoUIcontext, func() {
-								cur := duo.Model.DuoUItheme.H4("DIALOG BOX!")
+						layout.Align(layout.Center).Layout(ui.ly.Context, func() {
+							layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(ui.ly.Context, func() {
+								cur := ui.ly.Theme.H4(ui.rc.Dialog.Text)
 								cur.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 								cur.Alignment = text.Start
-								cur.Layout(duo.Model.DuoUIcontext)
+								cur.Layout(ui.ly.Context)
 							})
 						})
 					}),
@@ -71,26 +52,25 @@ func (duo *DuoUI) DuoUIdialog(cx *conte.Xt, rc *rcd.RcVar) {
 				layout.Flex{
 					Axis:      layout.Horizontal,
 					Alignment: layout.Middle,
-				}.Layout(duo.Model.DuoUIcontext,
-					layout.Rigid(dialogButon("CANCEL", "ffcfcfcf", "ffcf3030", "ffcfcfcf", duo, rc, buttonDialogCancel, iconCancel)),
-					layout.Rigid(dialogButon("OK", "ffcfcfcf", "ff308030", "ffcfcfcf", duo, rc, buttonDialogOK, iconOK)),
-					layout.Rigid(dialogButon("CLOSE", "ffcfcfcf", "ffcf8030", "ffcfcfcf", duo, rc, buttonDialogClose, iconClose)),
-
+				}.Layout(ui.ly.Context,
+					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Cancel()},"CANCEL", "ffcfcfcf", "ffcf3030", "ffcfcfcf", buttonDialogCancel, ui.ly.Theme.Icons["iconCancel"])),
+					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Ok()},"OK", "ffcfcfcf", "ff308030", "ffcfcfcf", buttonDialogOK, ui.ly.Theme.Icons["iconOK"])),
+					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Show = false},"CLOSE", "ffcfcfcf", "ffcf8030", "ffcfcfcf", buttonDialogClose, ui.ly.Theme.Icons["iconClose"])),
 				)
 			}),
 		)
 	})
 }
 
-func dialogButon(text, txtColor, bgColor, iconColor string, duo *DuoUI, rc *rcd.RcVar, button *widget.Button, icon *parallel.DuoUIicon) func() {
-	var b parallel.DuoUIbutton
+func (ui *DuoUI)dialogButon(f func(),t, txtColor, bgColor, iconColor string, button *controller.Button, icon *theme.DuoUIicon) func() {
+	var b theme.DuoUIbutton
 	return func() {
-		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(duo.Model.DuoUIcontext, func() {
-			b = duo.Model.DuoUItheme.DuoUIbutton(text, txtColor, bgColor, iconColor, 24, 120, 60, 0, 0, icon)
-			for button.Clicked(duo.Model.DuoUIcontext) {
-				rc.ShowDialog = false
+		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(ui.ly.Context, func() {
+			b = ui.ly.Theme.DuoUIbutton(t, txtColor, bgColor, iconColor, 24, 120, 60, 0, 0, icon)
+			for button.Clicked(ui.ly.Context) {
+				f()
 			}
-			b.Layout(duo.Model.DuoUIcontext, button)
+			b.Layout(ui.ly.Context, button)
 		})
 	}
 }

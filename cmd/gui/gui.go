@@ -1,27 +1,21 @@
 package gui
 
 import (
+	"github.com/p9c/pod/cmd/gui/mvc/view"
 	"github.com/p9c/pod/cmd/gui/duoui"
-	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/app"
 	"github.com/p9c/pod/pkg/log"
 )
 
-func WalletGUI(duo *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) (err error) {
+func WalletGUI(sys *view.DuOS) (err error) {
 	go func() {
 
 		log.DEBUG("starting UI main loop")
 
-		if duo.IsReady != false {
-
-
-
-
+		if sys.Duo.IsReady != false {
 
 		}
-		if err := duoui.DuoUImainLoop(duo, cx, rc); err != nil {
+		if err := duoui.DuoUImainLoop(sys); err != nil {
 			log.FATAL(err.Error(), "- shutting down")
 		}
 	}()

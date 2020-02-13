@@ -2,7 +2,7 @@ package rcd
 
 import (
 	"bytes"
-	"github.com/p9c/pod/cmd/gui/models"
+	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
@@ -19,11 +19,11 @@ import (
 func (r *RcVar) GetNetworkLastBlock(cx *conte.Xt) int32 {
 	for _, g := range cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
 		l := g.ToPeer().StatsSnapshot().LastBlock
-		if l > r.NetworkLastBlock {
-			r.NetworkLastBlock = l
+		if l > r.Status.Node.NetworkLastBlock {
+			r.Status.Node.NetworkLastBlock = l
 		}
 	}
-	return r.NetworkLastBlock
+	return r.Status.Node.NetworkLastBlock
 }
 
 // func (n *DuoVUEnode) GetBlocks() {
@@ -82,8 +82,8 @@ func (r *RcVar) GetNetworkLastBlock(cx *conte.Xt) int32 {
 //
 // }
 
-func (r *RcVar) GetBlockExcerpt(cx *conte.Xt, height int) (b models.DuoUIblock) {
-	b = *new(models.DuoUIblock)
+func (r *RcVar) GetBlockExcerpt(cx *conte.Xt, height int) (b model.DuoUIblock) {
+	b = *new(model.DuoUIblock)
 	hashHeight, err := cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
 	if err != nil {
 		log.ERROR("Block Hash By Height:", err)
@@ -165,7 +165,7 @@ func (r *RcVar) GetBlockExcerpt(cx *conte.Xt, height int) (b models.DuoUIblock) 
 }
 
 func (r *RcVar) GetBlocksExcerpts(cx *conte.Xt, startBlock, blockHeight int) {
-	blocks := *new([]models.DuoUIblock)
+	blocks := *new([]model.DuoUIblock)
 	for i := startBlock; i <= blockHeight; i++ {
 		blocks = append(blocks, r.GetBlockExcerpt(cx, i))
 	}
@@ -240,7 +240,7 @@ func (r *RcVar) GetBlockCount(cx *conte.Xt) {
 	if err != nil {
 		//dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
-	r.BlockCount = getBlockCount.(int64)
+	r.Status.Node.BlockCount = getBlockCount.(int64)
 	return
 }
 func (r *RcVar) GetBlockHash(cx *conte.Xt, blockHeight int) string {
@@ -274,7 +274,7 @@ func (r *RcVar) GetBlock(cx *conte.Xt, hash string) btcjson.GetBlockVerboseResul
 // }
 
 func (r *RcVar) GetConnectionCount(cx *conte.Xt) {
-	r.ConnectionCount = cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+	r.Status.Node.ConnectionCount = cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
 	return
 }
 
@@ -284,7 +284,7 @@ func (r *RcVar) GetDifficulty(cx *conte.Xt) {
 	if err != nil {
 		//dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
-	r.Difficulty = diff.(float64)
+	r.Status.Node.Difficulty = diff.(float64)
 	return
 }
 

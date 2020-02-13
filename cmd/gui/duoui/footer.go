@@ -1,35 +1,35 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/helpers"
-	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/model"
+	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/unit"
-	"github.com/p9c/pod/pkg/gui/widget"
-	"github.com/p9c/pod/pkg/gui/widget/parallel"
-	"golang.org/x/exp/shiny/materialdesign/icons"
+	"os"
 )
 
 var (
-	buttonTrace     = new(widget.Button)
-	buttonCornerOne = new(widget.Button)
-	buttonSettings  = new(widget.Button)
-	buttonNetwork   = new(widget.Button)
-	buttonBlocks    = new(widget.Button)
-	buttonConsole   = new(widget.Button)
-	buttonHelp      = new(widget.Button)
-	cornerNav       = &layout.List{
+	buttonTrace    = new(controller.Button)
+	buttonClose    = new(controller.Button)
+	buttonSettings = new(controller.Button)
+	buttonNetwork  = new(controller.Button)
+	buttonBlocks   = new(controller.Button)
+	buttonConsole  = new(controller.Button)
+	buttonHelp     = new(controller.Button)
+	cornerNav      = &layout.List{
 		Axis: layout.Horizontal,
 	}
 	footerNav = &layout.List{
 		Axis: layout.Horizontal,
 	}
+	OsExiter = os.Exit
 )
 
-func (duo *DuoUI) DuoUIfooter(rc *rcd.RcVar) func() {
+func (ui *DuoUI)DuoUIfooter() func() {
 	return func() {
-		cs := duo.Model.DuoUIcontext.Constraints
-		helpers.DuoUIdrawRectangle(duo.Model.DuoUIcontext, cs.Width.Max, 64, duo.Model.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		cs := ui.ly.Context.Constraints
+		theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 64, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		var (
 			width             float32 = 48
 			height            float32 = 48
@@ -37,94 +37,98 @@ func (duo *DuoUI) DuoUIfooter(rc *rcd.RcVar) func() {
 			paddingVertical   float32 = 8
 			paddingHorizontal float32 = 8
 		)
-		settingsIcon, _ := parallel.NewDuoUIicon(icons.ActionSettings)
-		blocksIcon, _ := parallel.NewDuoUIicon(icons.ActionExplore)
-		networkIcon, _ := parallel.NewDuoUIicon(icons.ActionFingerprint)
-		traceIcon, _ := parallel.NewDuoUIicon(icons.ActionTrackChanges)
-		consoleIcon, _ := parallel.NewDuoUIicon(icons.ActionInput)
-		helpIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropDown)
-		layout.Flex{Spacing: layout.SpaceBetween}.Layout(duo.Model.DuoUIcontext,
+
+		layout.Flex{Spacing: layout.SpaceBetween}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
-				layout.UniformInset(unit.Dp(0)).Layout(duo.Model.DuoUIcontext, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 					cornerButtons := []func(){
 						func() {
-							layout.UniformInset(unit.Dp(0)).Layout(duo.Model.DuoUIcontext, func() {
-								var networkMeniItem parallel.DuoUIbutton
-								networkMeniItem = duo.Model.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
-								for buttonCornerOne.Clicked(duo.Model.DuoUIcontext) {
-									duo.Model.CurrentPage = "NETWORK"
+							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+								var closeMeniItem theme.DuoUIbutton
+								closeMeniItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["closeIcon"])
+								for buttonClose.Clicked(ui.ly.Context) {
+									ui.rc.Dialog = new(model.DuoUIdialog)
+									ui.rc.Dialog = &model.DuoUIdialog{
+										Show: true,
+										Ok: func() {
+											OsExiter(1)
+										},
+										Title: "Are you sure?",
+										Text:  "Confirm ParallelCoin close",
+									}
+
 								}
-								networkMeniItem.Layout(duo.Model.DuoUIcontext, buttonCornerOne)
+								closeMeniItem.Layout(ui.ly.Context, buttonClose)
 							})
 						},
 						func() {
-							var settingsMenuItem parallel.DuoUIbutton
-							settingsMenuItem = duo.Model.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, traceIcon)
+							var settingsMenuItem theme.DuoUIbutton
+							settingsMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["traceIcon"])
 
-							for buttonTrace.Clicked(duo.Model.DuoUIcontext) {
-								duo.Model.CurrentPage = "TRACE"
+							for buttonTrace.Clicked(ui.ly.Context) {
+								ui.rc.ShowPage = "TRACE"
 							}
-							settingsMenuItem.Layout(duo.Model.DuoUIcontext, buttonTrace)
+							settingsMenuItem.Layout(ui.ly.Context, buttonTrace)
 						},
 					}
-					cornerNav.Layout(duo.Model.DuoUIcontext, len(cornerButtons), func(i int) {
-						layout.UniformInset(unit.Dp(0)).Layout(duo.Model.DuoUIcontext, cornerButtons[i])
+					cornerNav.Layout(ui.ly.Context, len(cornerButtons), func(i int) {
+						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, cornerButtons[i])
 					})
 				})
 			}),
 			layout.Rigid(func() {
-				layout.UniformInset(unit.Dp(0)).Layout(duo.Model.DuoUIcontext, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 					navButtons := []func(){
 						func() {
-							layout.UniformInset(unit.Dp(0)).Layout(duo.Model.DuoUIcontext, func() {
-								var networkMeniItem parallel.DuoUIbutton
-								networkMeniItem = duo.Model.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, networkIcon)
-								for buttonNetwork.Clicked(duo.Model.DuoUIcontext) {
-									duo.Model.CurrentPage = "NETWORK"
+							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+								var networkMeniItem theme.DuoUIbutton
+								networkMeniItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["networkIcon"])
+								for buttonNetwork.Clicked(ui.ly.Context) {
+									ui.rc.ShowPage = "NETWORK"
 								}
-								networkMeniItem.Layout(duo.Model.DuoUIcontext, buttonNetwork)
+								networkMeniItem.Layout(ui.ly.Context, buttonNetwork)
 							})
 						},
 						func() {
-							var blocksMenuItem parallel.DuoUIbutton
-							blocksMenuItem = duo.Model.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, blocksIcon)
-							for buttonBlocks.Clicked(duo.Model.DuoUIcontext) {
+							var blocksMenuItem theme.DuoUIbutton
+							blocksMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["blocksIcon"])
+							for buttonBlocks.Clicked(ui.ly.Context) {
 								//duo.CurrentPage = "EXPLORER"
-								//rc.ShowToast = true
-								toastAdd(duo, rc)
+								//ui.rc.ShowToast = true
+								//toastAdd(duo, rc)
 							}
-							blocksMenuItem.Layout(duo.Model.DuoUIcontext, buttonBlocks)
+							blocksMenuItem.Layout(ui.ly.Context, buttonBlocks)
 						},
 						func() {
-							var helpMenuItem parallel.DuoUIbutton
-							helpMenuItem = duo.Model.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, helpIcon)
-							for buttonHelp.Clicked(duo.Model.DuoUIcontext) {
-								rc.ShowDialog = true
+							var helpMenuItem theme.DuoUIbutton
+							helpMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["helpIcon"])
+							for buttonHelp.Clicked(ui.ly.Context) {
+								//ui.rc.ShowDialog = true
 							}
-							helpMenuItem.Layout(duo.Model.DuoUIcontext, buttonHelp)
+							helpMenuItem.Layout(ui.ly.Context, buttonHelp)
 						},
 						func() {
-							layout.UniformInset(unit.Dp(0)).Layout(duo.Model.DuoUIcontext, func() {
-								var consoleMenuItem parallel.DuoUIbutton
-								consoleMenuItem = duo.Model.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, consoleIcon)
-								for buttonConsole.Clicked(duo.Model.DuoUIcontext) {
-									duo.Model.CurrentPage = "CONSOLE"
+							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+								var consoleMenuItem theme.DuoUIbutton
+								consoleMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["consoleIcon"])
+								for buttonConsole.Clicked(ui.ly.Context) {
+									ui.rc.ShowPage = "CONSOLE"
 								}
-								consoleMenuItem.Layout(duo.Model.DuoUIcontext, buttonConsole)
+								consoleMenuItem.Layout(ui.ly.Context, buttonConsole)
 							})
 						},
 						func() {
-							var settingsMenuItem parallel.DuoUIbutton
-							settingsMenuItem = duo.Model.DuoUItheme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, settingsIcon)
+							var settingsMenuItem theme.DuoUIbutton
+							settingsMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["settingsIcon"])
 
-							for buttonSettings.Clicked(duo.Model.DuoUIcontext) {
-								duo.Model.CurrentPage = "SETTINGS"
+							for buttonSettings.Clicked(ui.ly.Context) {
+								ui.rc.ShowPage = "SETTINGS"
 							}
-							settingsMenuItem.Layout(duo.Model.DuoUIcontext, buttonSettings)
+							settingsMenuItem.Layout(ui.ly.Context, buttonSettings)
 						},
 					}
-					footerNav.Layout(duo.Model.DuoUIcontext, len(navButtons), func(i int) {
-						layout.UniformInset(unit.Dp(0)).Layout(duo.Model.DuoUIcontext, navButtons[i])
+					footerNav.Layout(ui.ly.Context, len(navButtons), func(i int) {
+						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, navButtons[i])
 					})
 				})
 			}),
