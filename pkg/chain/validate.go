@@ -711,17 +711,18 @@ CheckProofOfWork(block *util.Block, powLimit *big.Int, height int32) error {
 	return checkProofOfWork(&block.MsgBlock().Header, powLimit, BFNone, height)
 }
 
-func // CheckTransactionInputs performs a series of checks on the inputs to a
+// CheckTransactionInputs performs a series of checks on the inputs to a
 // transaction to ensure they are valid.
 // An example of some of the checks include verifying all inputs exist,
 // ensuring the coinbase seasoning requirements are met,
 // detecting double spends,
 // validating all values and fees are in the legal range and the total output
 // amount doesn't exceed the input amount,
-// and verifying the signatures to prove the spender was the owner of the bitcoins and therefore allowed to spend them.  As it checks the inputs, it also calculates the total fees for the transaction and returns that value.
+// and verifying the signatures to prove the spender was the owner of the bitcoins and therefore allowed to spend
+// them.  As it checks the inputs, it also calculates the total fees for the transaction and returns that value.
 // NOTE: The transaction MUST have already been sanity checked with the
 // CheckTransactionSanity function prior to calling this function.
-CheckTransactionInputs(tx *util.Tx, txHeight int32, utxoView *UtxoViewpoint, chainParams *netparams.Params) (int64, error) {
+func CheckTransactionInputs(tx *util.Tx, txHeight int32, utxoView *UtxoViewpoint, chainParams *netparams.Params) (int64, error) {
 	// Coinbase transactions have no inputs.
 	if IsCoinBase(tx) {
 		return 0, nil
