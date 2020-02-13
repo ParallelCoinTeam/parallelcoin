@@ -13,7 +13,7 @@ func DuoUIcontent(duo *DuoUI, cx *conte.Xt, rc *rcd.RcVar) func() {
 			TxColor: parallel.HexARGB("ff303030"),
 			BgColor: parallel.HexARGB("ffcfcfcf"),
 		}
-		switch duo.m.CurrentPage {
+		switch duo.Model.CurrentPage {
 		case "OVERVIEW":
 			page.Layout(DuoUIoverview(duo, cx, rc))
 		case "SEND":

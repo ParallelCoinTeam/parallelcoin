@@ -16,7 +16,7 @@ import (
 )
 
 type DuoUI struct {
-	m *models.DuoUI
+	Model *models.DuoUI
 }
 
 func startLogger() (stopLogger chan struct{}) {

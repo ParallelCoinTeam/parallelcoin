@@ -24,9 +24,9 @@ var (
 )
 
 func (duo *DuoUI) DuoUItoastSys(rc *rcd.RcVar) {
-	layout.Align(layout.NE).Layout(duo.m.DuoUIcontext, func() {
-		listToasts.Layout(duo.m.DuoUIcontext, len(rc.Toasts), func(i int) {
-			layout.UniformInset(unit.Dp(16)).Layout(duo.m.DuoUIcontext, rc.Toasts[i])
+	layout.Align(layout.NE).Layout(duo.Model.DuoUIcontext, func() {
+		listToasts.Layout(duo.Model.DuoUIcontext, len(rc.Toasts), func(i int) {
+			layout.UniformInset(unit.Dp(16)).Layout(duo.Model.DuoUIcontext, rc.Toasts[i])
 		})
 	})
 }
@@ -34,12 +34,12 @@ func (duo *DuoUI) DuoUItoastSys(rc *rcd.RcVar) {
 func toastButton(text, txtColor, bgColor, iconColor string, duo *DuoUI, rc *rcd.RcVar, button *widget.Button, icon *parallel.DuoUIicon) func() {
 	var b parallel.DuoUIbutton
 	return func() {
-		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(duo.m.DuoUIcontext, func() {
-			b = duo.m.DuoUItheme.DuoUIbutton(text, txtColor, bgColor, iconColor, 24, 120, 60, 0, 0, icon)
-			for button.Clicked(duo.m.DuoUIcontext) {
+		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(duo.Model.DuoUIcontext, func() {
+			b = duo.Model.DuoUItheme.DuoUIbutton(text, txtColor, bgColor, iconColor, 24, 120, 60, 0, 0, icon)
+			for button.Clicked(duo.Model.DuoUIcontext) {
 				//rc.ShowToast = false
 			}
-			b.Layout(duo.m.DuoUIcontext, button)
+			b.Layout(duo.Model.DuoUIcontext, button)
 		})
 	}
 }
@@ -47,24 +47,24 @@ func toastButton(text, txtColor, bgColor, iconColor string, duo *DuoUI, rc *rcd.
 func toastAdd(duo *DuoUI, rc *rcd.RcVar) {
 	rc.Toasts = append(rc.Toasts, func() {
 		//iconOK, _ := parallel.NewDuoUIicon(icons.NavigationCheck)
-		helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, 418, 160, helpers.HexARGB("aa000000"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, 408, 150, duo.m.DuoUItheme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		helpers.DuoUIdrawRectangle(duo.Model.DuoUIcontext, 418, 160, helpers.HexARGB("aa000000"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		helpers.DuoUIdrawRectangle(duo.Model.DuoUIcontext, 408, 150, duo.Model.DuoUItheme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		layout.Flex{
 			Axis:      layout.Vertical,
 			Alignment: layout.Middle,
-		}.Layout(duo.m.DuoUIcontext,
+		}.Layout(duo.Model.DuoUIcontext,
 			layout.Rigid(func() {
 				layout.Flex{
 					Axis:      layout.Horizontal,
 					Alignment: layout.Middle,
-				}.Layout(duo.m.DuoUIcontext,
+				}.Layout(duo.Model.DuoUIcontext,
 					layout.Rigid(func() {
-						layout.Align(layout.Center).Layout(duo.m.DuoUIcontext, func() {
-							layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(duo.m.DuoUIcontext, func() {
-								cur := duo.m.DuoUItheme.H4("TOAST MESSAGE!!!")
+						layout.Align(layout.Center).Layout(duo.Model.DuoUIcontext, func() {
+							layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(duo.Model.DuoUIcontext, func() {
+								cur := duo.Model.DuoUItheme.H4("TOAST MESSAGE!!!")
 								cur.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 								cur.Alignment = text.Start
-								cur.Layout(duo.m.DuoUIcontext)
+								cur.Layout(duo.Model.DuoUIcontext)
 							})
 						})
 					}),
@@ -74,7 +74,7 @@ func toastAdd(duo *DuoUI, rc *rcd.RcVar) {
 				layout.Flex{
 					Axis:      layout.Horizontal,
 					Alignment: layout.Middle,
-				}.Layout(duo.m.DuoUIcontext,
+				}.Layout(duo.Model.DuoUIcontext,
 					//layout.Rigid(toastButton("OK", "ffcfcfcf", "ff308030", "ffcfcfcf", duo, rc, buttonToastOK, iconOK)),
 				)
 			}),
@@ -85,5 +85,5 @@ func toastAdd(duo *DuoUI, rc *rcd.RcVar) {
 		rc.Toasts[len(rc.Toasts)-1] = nil // or the zero value of T
 		rc.Toasts = rc.Toasts[:len(rc.Toasts)-1]
 		op.InvalidateOp{}.Add(ops)
-	}(duo, duo.m.DuoUIcontext.Ops)
+	}(duo, duo.Model.DuoUIcontext.Ops)
 }

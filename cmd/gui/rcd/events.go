@@ -3,7 +3,6 @@ package rcd
 import (
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
 )
 
 const (
@@ -18,11 +17,10 @@ type Event struct {
 }
 
 var EventsChan = make(chan Event, 1)
-var UpdateTrigger = make(chan struct{}, 1)
 
-func ListenInit(cx *conte.Xt, rc *RcVar) {
+func ListenInit(cx *conte.Xt, rc *RcVar, trigger chan struct{}) {
 	rc.Events = EventsChan
-	rc.UpdateTrigger = UpdateTrigger
+	rc.UpdateTrigger = trigger
 	// first time starting up get all of these and trigger update
 	rc.GetDuoUIbalance(cx)
 	rc.GetDuoUIunconfirmedBalance(cx)
@@ -32,9 +30,6 @@ func ListenInit(cx *conte.Xt, rc *RcVar) {
 	rc.GetDuoUIlocalLost()
 	rc.GetDuoUIdifficulty(cx)
 	rc.GetDuoUIlastTxs(cx)
-	log.DEBUG("sending trigger to populate data for first start")
-	rc.UpdateTrigger <- struct{}{}
-	log.DEBUG("sent trigger to populate data for first start")
 	cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted:
@@ -46,10 +41,9 @@ func ListenInit(cx *conte.Xt, rc *RcVar) {
 			rc.GetDuoUIlocalLost()
 			rc.GetDuoUIdifficulty(cx)
 			rc.GetDuoUIlastTxs(cx)
-			log.DEBUG("sending trigger to populate data for new block")
 			rc.UpdateTrigger <- struct{}{}
-			log.DEBUG("sent trigger to populate data for new block")
 		}
+		rc.UpdateTrigger <- struct{}{}
 	})
 	
 	return

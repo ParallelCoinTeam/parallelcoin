@@ -8,7 +8,7 @@ import (
 
 func (duo *DuoUI)DuoUIsidebar(cx *conte.Xt, rc *rcd.RcVar) func() {
 	return func() {
-		layout.Flex{Axis: layout.Vertical}.Layout(duo.m.DuoUIcontext,
+		layout.Flex{Axis: layout.Vertical}.Layout(duo.Model.DuoUIcontext,
 			layout.Rigid(DuoUImenu(duo, cx, rc)),
 		)
 	}

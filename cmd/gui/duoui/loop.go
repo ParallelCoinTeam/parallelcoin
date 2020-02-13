@@ -11,7 +11,6 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/io/system"
 	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op"
 	"github.com/p9c/pod/pkg/gui/unit"
 	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"github.com/p9c/pod/pkg/log"
@@ -19,13 +18,26 @@ import (
 )
 
 func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
-	duo := DuoUI{m: d}
+	duo := DuoUI{Model: d}
 	for {
 		select {
-		case <-duo.m.Ready:
-			rcd.ListenInit(cx, rc)
-			duo.m.IsReady = true
-		case <-duo.m.Quit:
+		case <-duo.Model.Ready:
+			updateTrigger := make(chan struct{}, 1)
+			go func() {
+			quitTrigger:
+				for {
+					select {
+					case <-updateTrigger:
+						log.DEBUG("repaint forced")
+						duo.Model.DuoUIwindow.Invalidate()
+					case <-duo.Model.Quit:
+						break quitTrigger
+					}
+				}
+			}()
+			rcd.ListenInit(cx, rc, updateTrigger)
+			duo.Model.IsReady = true
+		case <-duo.Model.Quit:
 			log.DEBUG("quit signal received")
 			interrupt.Request()
 			// This case is for handling when some external application is controlling the GUI and to gracefully
@@ -34,7 +46,7 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 			<-interrupt.HandlersDone
 			log.DEBUG("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
-		case e := <-duo.m.DuoUIwindow.Events():
+		case e := <-duo.Model.DuoUIwindow.Events():
 			switch e := e.(type) {
 			case system.DestroyEvent:
 				log.DEBUG("destroy event received")
@@ -44,29 +56,22 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 				return e.Err
 			case system.FrameEvent:
 				if rc.Boot.IsBoot {
-					duo.m.DuoUIcontext.Reset(e.Config, e.Size)
+					duo.Model.DuoUIcontext.Reset(e.Config, e.Size)
 					duo.DuoUImainScreen()
-					e.Frame(duo.m.DuoUIcontext.Ops)
+					e.Frame(duo.Model.DuoUIcontext.Ops)
 				} else {
-					duo.m.DuoUIcontext.Reset(e.Config, e.Size)
+					duo.Model.DuoUIcontext.Reset(e.Config, e.Size)
 					if rc.Boot.IsFirstRun {
-						DuoUIloaderCreateWallet(duo.m, cx)
+						DuoUIloaderCreateWallet(duo.Model, cx)
 					} else {
 						duo.DuoUIgrid(cx, rc)
 						if rc.ShowDialog {
 							duo.DuoUIdialog(cx, rc)
 						}
 						duo.DuoUItoastSys(rc)
-						select {
-						case <-rc.UpdateTrigger:
-							// force a repaint as a new block changes all rc data
-							log.DEBUG("update trigger received")
-							op.InvalidateOp{}.Add(d.DuoUIcontext.Ops)
-						default:
-						}
 					}
-					e.Frame(duo.m.DuoUIcontext.Ops)
-					duo.m.DuoUIcontext.Reset(e.Config, e.Size)
+					e.Frame(duo.Model.DuoUIcontext.Ops)
+					duo.Model.DuoUIcontext.Reset(e.Config, e.Size)
 				}
 			}
 		}
@@ -75,34 +80,34 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 
 // Main wallet screen
 func (duo *DuoUI) DuoUImainScreen() {
-	helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, duo.m.DuoUIcontext.Constraints.Width.Max, duo.m.DuoUIcontext.Constraints.Height.Max, duo.m.DuoUItheme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	helpers.DuoUIdrawRectangle(duo.Model.DuoUIcontext, duo.Model.DuoUIcontext.Constraints.Width.Max, duo.Model.DuoUIcontext.Constraints.Height.Max, duo.Model.DuoUItheme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	// START View <<<
 	logo, _ := parallel.NewDuoUIicon(ico.ParallelCoin)
-	layout.Flex{Axis: layout.Vertical}.Layout(duo.m.DuoUIcontext,
+	layout.Flex{Axis: layout.Vertical}.Layout(duo.Model.DuoUIcontext,
 		layout.Flexed(0.6, func() {
-			layout.Flex{Axis: layout.Horizontal}.Layout(duo.m.DuoUIcontext,
+			layout.Flex{Axis: layout.Horizontal}.Layout(duo.Model.DuoUIcontext,
 				
 				layout.Rigid(func() {
-					layout.UniformInset(unit.Dp(8)).Layout(duo.m.DuoUIcontext, func() {
-						size := duo.m.DuoUIcontext.Px(unit.Dp(256)) - 2*duo.m.DuoUIcontext.Px(unit.Dp(8))
+					layout.UniformInset(unit.Dp(8)).Layout(duo.Model.DuoUIcontext, func() {
+						size := duo.Model.DuoUIcontext.Px(unit.Dp(256)) - 2*duo.Model.DuoUIcontext.Px(unit.Dp(8))
 						if logo != nil {
-							logo.Color = duo.m.DuoUItheme.Color.Dark
-							logo.Layout(duo.m.DuoUIcontext, unit.Px(float32(size)))
+							logo.Color = duo.Model.DuoUItheme.Color.Dark
+							logo.Layout(duo.Model.DuoUIcontext, unit.Px(float32(size)))
 						}
-						duo.m.DuoUIcontext.Dimensions = layout.Dimensions{
+						duo.Model.DuoUIcontext.Dimensions = layout.Dimensions{
 							Size: image.Point{X: size, Y: size},
 						}
 					})
 				}),
 				layout.Flexed(1, func() {
-					layout.UniformInset(unit.Dp(60)).Layout(duo.m.DuoUIcontext, func() {
-						duo.m.DuoUItheme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE").Layout(duo.m.DuoUIcontext)
+					layout.UniformInset(unit.Dp(60)).Layout(duo.Model.DuoUIcontext, func() {
+						duo.Model.DuoUItheme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE").Layout(duo.Model.DuoUIcontext)
 					})
 				}),
 			)
 		}),
 		layout.Flexed(0.4, func() {
-			DuoUIloader(duo.m)
+			DuoUIloader(duo.Model)
 		}),
 	)
 }
@@ -110,10 +115,10 @@ func (duo *DuoUI) DuoUImainScreen() {
 // Main wallet screen
 func (duo *DuoUI) DuoUIgrid(cx *conte.Xt, rc *rcd.RcVar) {
 	// START View <<<
-	cs := duo.m.DuoUIcontext.Constraints
-	helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.m.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	cs := duo.Model.DuoUIcontext.Constraints
+	helpers.DuoUIdrawRectangle(duo.Model.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.Model.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	
-	layout.Flex{Axis: layout.Vertical}.Layout(duo.m.DuoUIcontext,
+	layout.Flex{Axis: layout.Vertical}.Layout(duo.Model.DuoUIcontext,
 		layout.Rigid(duo.DuoUIheader(rc)),
 		layout.Flexed(1, duo.DuoUIbody(cx, rc)),
 		layout.Rigid(duo.DuoUIfooter(rc)),
