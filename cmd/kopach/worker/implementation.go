@@ -129,49 +129,65 @@ func NewWithConnAndSemaphore(
 					// drain start channel in run mode
 					continue
 				case <-w.stopChan:
+					w.block = nil
+					w.bitses = nil
+					w.hashes = nil
 					break running
 				case <-w.Quit:
 					log.DEBUG("worker stopping on pausing message")
 					break pausing
 				default:
-					// work
-					nH := w.block.Height()
-					w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
-					hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
-					bigHash := blockchain.HashToBig(&hash)
-					if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
-						log.WARN("solution found h:", nH,
-							hash.String(),
-							fork.List[fork.GetCurrent(nH)].
-								AlgoVers[w.msgBlock.Header.Version],
-							"total hashes since startup",
-							w.roller.C-int(w.startNonce),
-							fork.IsTestnet,
-							w.msgBlock.Header.Version,
-							w.msgBlock.Header.Bits,
-							w.msgBlock.Header.MerkleRoot.String(),
-							hash,
-						)
-						log.INFO(w.msgBlock)
-						srs := sol.GetSolContainer(w.msgBlock)
-						_ = srs
-						err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
-						if err != nil {
-							log.ERROR(err)
+					if w.block == nil || w.bitses == nil || w.hashes == nil {
+						log.INFO("stop was called before we started working")
+					} else {
+						// work
+						nH := w.block.Height()
+						w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
+						w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
+						select {
+						case <-w.stopChan:
+							w.block = nil
+							w.bitses = nil
+							w.hashes = nil
+							break running
+						default:
 						}
-						log.DEBUG("sent solution")
-						break running
-					}
-					nextAlgo := w.roller.GetAlgoVer()
-					w.msgBlock.Header.Version = nextAlgo
-					w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
-					w.msgBlock.Header.Nonce++
-					if w.roller.C%len(w.roller.Algos) == 0 {
-						since := int(time.Now().Sub(tn)/time.Second) + 1
-						total := w.roller.C - int(w.startNonce)
-						_, _ = fmt.Fprintf(os.Stderr,
-							"\r %9d hash/s        \r", total/since)
-						
+						hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
+						bigHash := blockchain.HashToBig(&hash)
+						if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
+							log.WARN("solution found h:", nH,
+								hash.String(),
+								fork.List[fork.GetCurrent(nH)].
+									AlgoVers[w.msgBlock.Header.Version],
+								"total hashes since startup",
+								w.roller.C-int(w.startNonce),
+								fork.IsTestnet,
+								w.msgBlock.Header.Version,
+								w.msgBlock.Header.Bits,
+								w.msgBlock.Header.MerkleRoot.String(),
+								hash,
+							)
+							log.INFO(w.msgBlock)
+							srs := sol.GetSolContainer(w.msgBlock)
+							_ = srs
+							err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
+							if err != nil {
+								log.ERROR(err)
+							}
+							log.DEBUG("sent solution")
+							break running
+						}
+						nextAlgo := w.roller.GetAlgoVer()
+						w.msgBlock.Header.Version = nextAlgo
+						w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
+						w.msgBlock.Header.Nonce++
+						if w.roller.C%len(w.roller.Algos) == 0 {
+							since := int(time.Now().Sub(tn)/time.Second) + 1
+							total := w.roller.C - int(w.startNonce)
+							_, _ = fmt.Fprintf(os.Stderr,
+								"\r %9d hash/s        \r", total/since)
+							
+						}
 					}
 				}
 			}
@@ -221,9 +237,9 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	}
 	// }
 	// log.SPEW(w.dispatchConn)
+	*reply = true
 	// halting current work
 	w.stopChan <- struct{}{}
-	*reply = true
 	w.bitses = job.GetBitses()
 	w.hashes = job.GetHashes()
 	newHeight := job.GetNewHeight()
@@ -245,6 +261,8 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		return errors.New("failed to decode merkle roots")
 	}
 	w.msgBlock.Header.Timestamp = time.Now()
+	// halting current work
+	w.stopChan <- struct{}{}
 	// create the unique extra nonce for this worker,
 	// which creates a different merkel root
 	// extraNonce, err := wire.RandomUint64()
@@ -262,6 +280,8 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// make the work select block start running
 	w.block = util.NewBlock(w.msgBlock)
 	w.block.SetHeight(newHeight)
+	// halting current work
+	w.stopChan <- struct{}{}
 	log.INFO("height", newHeight)
 	w.startChan <- struct{}{}
 	return
