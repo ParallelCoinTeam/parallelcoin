@@ -1,27 +1,37 @@
 package duoui
 
 import (
-	"fmt"
-	"github.com/p9c/pod/cmd/gui/helpers"
-	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
-	"github.com/p9c/pod/pkg/gui/widget"
-	"github.com/p9c/pod/pkg/gui/widget/parallel"
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/pkg/log"
 	"image/color"
 )
 
 var (
-	createWalletbutton = new(widget.Button)
-
-	consoleInputField = &widget.Editor{
+	createWalletbutton = new(controller.Button)
+	passEditor = &controller.Editor{
 		SingleLine: true,
 		Submit:     true,
 	}
+	confirmPassEditor = &controller.Editor{
+		SingleLine: true,
+		Submit:     true,
+	}
+
+
+	//logOutputList = &layout.List{
+	//	Axis:        layout.Vertical,
+	//	ScrollToEnd: true,
+	//}
+
+	encryption         = new(controller.CheckBox)
+	seed               = new(controller.CheckBox)
+	buttonCreateWallet = new(controller.Button)
 )
+
 //
 //func init() {
 //	log.L.LogChan = logChan
@@ -36,41 +46,40 @@ var (
 //	}()
 //}
 
-
-func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
+func (ui *DuoUI) DuoUIloaderCreateWallet() {
 	//const buflen = 9
-	layout.Flex{}.Layout(duo.DuoUIcontext,
+	layout.Flex{}.Layout(ui.ly.Context,
 		layout.Flexed(0.5, func() {
-			cs := duo.DuoUIcontext.Constraints
-			helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			cs := ui.ly.Context.Constraints
+			theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			// START View <<<
-			widgets := []func(){
+			controllers := []func(){
 				func() {
-					bale := duo.DuoUItheme.H3(passPhrase)
+					bale := ui.ly.Theme.H3(ui.rc.PassPhrase)
 					bale.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
-					bale.Layout(duo.DuoUIcontext)
+					bale.Layout(ui.ly.Context)
 				},
 				func() {
-					balr := duo.DuoUItheme.H3(confirmPassPhrase)
+					balr := ui.ly.Theme.H3(ui.rc.ConfirmPassPhrase)
 
 					balr.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
-					balr.Layout(duo.DuoUIcontext)
+					balr.Layout(ui.ly.Context)
 				},
 				func() {
-					bal := duo.DuoUItheme.H3("Enter the private passphrase for your new wallet:")
+					bal := ui.ly.Theme.H3("Enter the private passphrase for your new wallet:")
 					bal.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
-					bal.Layout(duo.DuoUIcontext)
-					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Bg, [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
-					ln.Layout(duo.DuoUIcontext, func() {
-						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
-						in.Layout(duo.DuoUIcontext, func() {
-							e := duo.DuoUItheme.DuoUIeditor("Enter Passpharse", "Enter Passpharse")
+					bal.Layout(ui.ly.Context)
+					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Bg, [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+					layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
+						theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, "fff4f4f4", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+						layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
+							e := ui.ly.Theme.DuoUIeditor("Enter Passpharse", "Enter Passpharse")
 							e.Font.Style = text.Regular
 							e.Font.Size = unit.Dp(24)
-							e.Layout(duo.DuoUIcontext, passEditor)
-							for _, e := range passEditor.Events(duo.DuoUIcontext) {
-								if e, ok := e.(widget.SubmitEvent); ok {
-									passPhrase = e.Text
+							e.Layout(ui.ly.Context, passEditor)
+							for _, e := range passEditor.Events(ui.ly.Context) {
+								if e, ok := e.(controller.SubmitEvent); ok {
+									ui.rc.PassPhrase = e.Text
 									passEditor.SetText("")
 								}
 							}
@@ -79,17 +88,17 @@ func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 				},
 				func() {
 
-					helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.DuoUItheme.Color.Bg, [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
-					ln.Layout(duo.DuoUIcontext, func() {
-						helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB("fff4f4f4"), [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
-						in.Layout(duo.DuoUIcontext, func() {
-							e := duo.DuoUItheme.DuoUIeditor("Repeat Passpharse", "Repeat Passpharse")
+					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Bg, [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+					layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
+						theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, "fff4f4f4", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
+						layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
+							e := ui.ly.Theme.DuoUIeditor("Repeat Passpharse", "Repeat Passpharse")
 							e.Font.Style = text.Regular
 							e.Font.Size = unit.Dp(24)
-							e.Layout(duo.DuoUIcontext, confirmPassEditor)
-							for _, e := range confirmPassEditor.Events(duo.DuoUIcontext) {
-								if e, ok := e.(widget.SubmitEvent); ok {
-									confirmPassPhrase = e.Text
+							e.Layout(ui.ly.Context, confirmPassEditor)
+							for _, e := range confirmPassEditor.Events(ui.ly.Context) {
+								if e, ok := e.(controller.SubmitEvent); ok {
+									ui.rc.ConfirmPassPhrase = e.Text
 									confirmPassEditor.SetText("")
 								}
 							}
@@ -97,71 +106,71 @@ func DuoUIloaderCreateWallet(duo *models.DuoUI, cx *conte.Xt) {
 					})
 				},
 				func() {
-					encryptionCheckBox := duo.DuoUItheme.DuoUIcheckBox("Do you want to add an additional layer of encryption for public data?")
+					encryptionCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you want to add an additional layer of encryption for public data?")
 					encryptionCheckBox.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
-					encryptionCheckBox.Layout(duo.DuoUIcontext, encryption)
+					encryptionCheckBox.Layout(ui.ly.Context, encryption)
 				},
 				func() {
-					seedCheckBox := duo.DuoUItheme.DuoUIcheckBox("Do you have an existing wallet seed you want to use?")
+					seedCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you have an existing wallet seed you want to use?")
 					seedCheckBox.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
-					seedCheckBox.Layout(duo.DuoUIcontext, seed)
+					seedCheckBox.Layout(ui.ly.Context, seed)
 				},
 				func() {
-					var createWalletbuttonComp parallel.DuoUIbutton
-					createWalletbuttonComp = duo.DuoUItheme.DuoUIbutton("Create wallet", "ff303030", "ffcfcfcf", "ff303030", 0, 125, 32, 4, 4, nil)
-					for createWalletbutton.Clicked(duo.DuoUIcontext) {
-						if passPhrase != "" && passPhrase == confirmPassPhrase {
-							CreateWallet(cx, passPhrase, "", "", "")
+					var createWalletbuttonComp theme.DuoUIbutton
+					createWalletbuttonComp = ui.ly.Theme.DuoUIbutton("Create wallet", "ff303030", "ffcfcfcf", "ff303030", 0, 125, 32, 4, 4, nil)
+					for createWalletbutton.Clicked(ui.ly.Context) {
+						if ui.rc.PassPhrase != "" && ui.rc.PassPhrase == ui.rc.ConfirmPassPhrase {
+							CreateWallet(ui.rc.Cx, ui.rc.PassPhrase, "", "", "")
 							log.INFO("WOIKOS!")
 						}
 					}
-					createWalletbuttonComp.Layout(duo.DuoUIcontext, createWalletbutton)
-					//for buttonCreateWallet.Clicked(duo.DuoUIcontext) {
+					createWalletbuttonComp.Layout(ui.ly.Context, createWalletbutton)
+					//for buttonCreateWallet.Clicked(ui.ly.Context) {
 					//	if passPhrase != "" && passPhrase == confirmPassPhrase {
 					//		//CreateWallet(ldr, passPhrase, "", "", "")
 					//		log.INFO("WOIKOS!")
 					//	}
 					//
 					//}
-					////duo.DuoUItheme.DuoUIbutton("Create wallet").Layout(duo.DuoUIcontext, buttonCreateWallet)
-					//duo.DuoUItheme.DuoUIbutton("Create wallet", "ff303030",  "ff989898", "ff303030", 0, 125, 32, 4, 4, nil)
+					////ui.ly.Theme.DuoUIbutton("Create wallet").Layout(ui.ly.Context, buttonCreateWallet)
+					//ui.ly.Theme.DuoUIbutton("Create wallet", "ff303030",  "ff989898", "ff303030", 0, 125, 32, 4, 4, nil)
 				},
 			}
-			list.Layout(duo.DuoUIcontext, len(widgets), func(i int) {
-				layout.UniformInset(unit.Dp(0)).Layout(duo.DuoUIcontext, widgets[i])
+			list.Layout(ui.ly.Context, len(controllers), func(i int) {
+				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, controllers[i])
 			})
 		}),
 		layout.Flexed(0.5, func() {
 			//const n = 1e6
-			logOutputList.Layout(duo.DuoUIcontext, len(logMessages), func(i int) {
-				t := logMessages[i]
-				cs := duo.DuoUIcontext.Constraints
-				col := "ff3030cf"
-
-				if t.Level == "TRC" {
-					col = "ff3030cf"
-				}
-				if t.Level == "DBG" {
-					col = "ffcfcf30"
-				}
-				if t.Level == "INF" {
-					col = "ff30cf30"
-				}
-				if t.Level == "WRN" {
-					col = "ffcfcf30"
-				}
-				if t.Level == "Error" {
-					col = "ffcf8030"
-				}
-				if t.Level == "FTL" {
-					col = "ffcf3030"
-				}
-
-				helpers.DuoUIdrawRectangle(duo.DuoUIcontext, cs.Width.Max, cs.Height.Max, helpers.HexARGB(col), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
-				logText := duo.DuoUItheme.H6(fmt.Sprint(i) + "->" + fmt.Sprint(t.Text))
-				logText.Layout(duo.DuoUIcontext)
-			})
+			//logOutputList.Layout(ui.ly.Context, len(rc.Log.LogMessages), func(i int) {
+			//	t := ui.rc.Log.LogMessages[i]
+			//	cs := ui.ly.Context.Constraints
+			//	col := "ff3030cf"
+			//
+			//	if t.Level == "TRC" {
+			//		col = "ff3030cf"
+			//	}
+			//	if t.Level == "DBG" {
+			//		col = "ffcfcf30"
+			//	}
+			//	if t.Level == "INF" {
+			//		col = "ff30cf30"
+			//	}
+			//	if t.Level == "WRN" {
+			//		col = "ffcfcf30"
+			//	}
+			//	if t.Level == "Error" {
+			//		col = "ffcf8030"
+			//	}
+			//	if t.Level == "FTL" {
+			//		col = "ffcf3030"
+			//	}
+			//
+			//	view.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, col, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			//
+			//	logText := ui.ly.Theme.H6(fmt.Sprint(i) + "->" + fmt.Sprint(t.Text))
+			//	logText.Layout(ui.ly.Context)
+			//})
 		}),
 	)
 }

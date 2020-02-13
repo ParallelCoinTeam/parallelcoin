@@ -1,41 +1,32 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/helpers"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/unit"
-	"github.com/p9c/pod/pkg/gui/widget"
-	"github.com/p9c/pod/pkg/gui/widget/parallel"
-	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
 var (
-	buttonOverview    = new(widget.Button)
-	buttonSend        = new(widget.Button)
-	buttonReceive     = new(widget.Button)
-	buttonAddressBook = new(widget.Button)
-	buttonHistory     = new(widget.Button)
+	buttonOverview    = new(controller.Button)
+	buttonSend        = new(controller.Button)
+	buttonReceive     = new(controller.Button)
+	buttonAddressBook = new(controller.Button)
+	buttonHistory     = new(controller.Button)
 	mainNav           = &layout.List{
 		Axis: layout.Vertical,
 	}
 )
 
-func DuoUImenu(duo *DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
+func (ui *DuoUI)DuoUImenu() func() {
 	return func() {
-		overviewIcon, _ := parallel.NewDuoUIicon(icons.ActionHome)
-		sendIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropUp)
-		receiveIcon, _ := parallel.NewDuoUIicon(icons.NavigationArrowDropDown)
-		addressBookIcon, _ := parallel.NewDuoUIicon(icons.ActionBook)
-		historyIcon, _ := parallel.NewDuoUIicon(icons.ActionHistory)
 
 		var (
 			width             float32 = 96
 			height            float32 = 72
-			iconSize          int     = 48
-			paddingVertical   float32 = 2
-			paddingHorizontal float32 = 8
+			iconSize          int     = 72
+			paddingVertical   float32 = 0
+			paddingHorizontal float32 = 0
 		)
 		//overviewButton :=
 		//historyButton :=
@@ -45,72 +36,72 @@ func DuoUImenu(duo *DuoUI, cx *conte.Xt, rc *rcd.RcVar) func(){
 		layout.Flex{
 			Axis:      layout.Vertical,
 			Alignment: layout.Middle,
-			Spacing:   layout.SpaceEvenly}.Layout(duo.m.DuoUIcontext,
+			Spacing:   layout.SpaceEvenly}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
-				layout.Flex{}.Layout(duo.m.DuoUIcontext,
+				layout.Flex{}.Layout(ui.ly.Context,
 					layout.Rigid(func() {
-						in.Layout(duo.m.DuoUIcontext, func() {
+						in.Layout(ui.ly.Context, func() {
 
 							navButtons := []func(){
 								func() {
-									in.Layout(duo.m.DuoUIcontext, func() {
-										var overviewMenuItem parallel.DuoUIbutton
-										overviewMenuItem = duo.m.DuoUItheme.DuoUIbutton("OVERVIEW", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, overviewIcon)
-										for buttonOverview.Clicked(duo.m.DuoUIcontext) {
-											duo.m.CurrentPage = "OVERVIEW"
+									in.Layout(ui.ly.Context, func() {
+										var overviewMenuItem theme.DuoUIbutton
+										overviewMenuItem = ui.ly.Theme.DuoUIbutton("OVERVIEW", "ff303030", "ff989898", "ff80a8cf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["overviewIcon"])
+										for buttonOverview.Clicked(ui.ly.Context) {
+											ui.rc.ShowPage = "OVERVIEW"
 										}
-										overviewMenuItem.Layout(duo.m.DuoUIcontext, buttonOverview)
+										overviewMenuItem.Layout(ui.ly.Context, buttonOverview)
 									})
 								},
 								func() {
-									helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+									theme.DuoUIdrawRectangle(ui.ly.Context, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								},
 								func() {
-									var sendMenuItem parallel.DuoUIbutton
-									sendMenuItem = duo.m.DuoUItheme.DuoUIbutton("SEND", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, sendIcon)
-									for buttonSend.Clicked(duo.m.DuoUIcontext) {
-										duo.m.CurrentPage = "SEND"
+									var sendMenuItem theme.DuoUIbutton
+									sendMenuItem = ui.ly.Theme.DuoUIbutton("SEND", "ff303030", "ff989898", "ff80a8cf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["sendIcon"])
+									for buttonSend.Clicked(ui.ly.Context) {
+										ui.rc.ShowPage = "SEND"
 									}
-									sendMenuItem.Layout(duo.m.DuoUIcontext, buttonSend)
+									sendMenuItem.Layout(ui.ly.Context, buttonSend)
 								},
 								func() {
-									helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+									theme.DuoUIdrawRectangle(ui.ly.Context, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								},
 								func() {
-									in.Layout(duo.m.DuoUIcontext, func() {
-										var receiveMenuItem parallel.DuoUIbutton
-										receiveMenuItem = duo.m.DuoUItheme.DuoUIbutton("RECEIVE", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, receiveIcon)
-										for buttonReceive.Clicked(duo.m.DuoUIcontext) {
-											duo.m.CurrentPage = "RECEIVE"
+									in.Layout(ui.ly.Context, func() {
+										var receiveMenuItem theme.DuoUIbutton
+										receiveMenuItem = ui.ly.Theme.DuoUIbutton("RECEIVE", "ff303030", "ff989898", ui.ly.Theme.Color.Light, iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["receiveIcon"])
+										for buttonReceive.Clicked(ui.ly.Context) {
+											ui.rc.ShowPage = "RECEIVE"
 										}
-										receiveMenuItem.Layout(duo.m.DuoUIcontext, buttonReceive)
+										receiveMenuItem.Layout(ui.ly.Context, buttonReceive)
 									})
 								},
 								func() {
-									helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+									theme.DuoUIdrawRectangle(ui.ly.Context, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								},
 								func() {
-									var addressBookMenuItem parallel.DuoUIbutton
-									addressBookMenuItem = duo.m.DuoUItheme.DuoUIbutton("ADDRESS BOOK", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, addressBookIcon)
-									for buttonAddressBook.Clicked(duo.m.DuoUIcontext) {
-										duo.m.CurrentPage = "ADDRESSBOOK"
+									var addressBookMenuItem theme.DuoUIbutton
+									addressBookMenuItem = ui.ly.Theme.DuoUIbutton("ADDRESS BOOK", "ff303030", "ff989898", "ff80a8cf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["addressBookIcon"])
+									for buttonAddressBook.Clicked(ui.ly.Context) {
+										ui.rc.ShowPage = "ADDRESSBOOK"
 									}
-									addressBookMenuItem.Layout(duo.m.DuoUIcontext, buttonAddressBook)
+									addressBookMenuItem.Layout(ui.ly.Context, buttonAddressBook)
 								},
 								func() {
-									helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, int(width), 1, helpers.HexARGB("ff888888"), [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+									theme.DuoUIdrawRectangle(ui.ly.Context, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								},
 								func() {
-									var historyMenuItem parallel.DuoUIbutton
-									historyMenuItem = duo.m.DuoUItheme.DuoUIbutton("HISTORY", "ff303030", "ff989898", "ff303030", iconSize, width, height, paddingVertical, paddingHorizontal, historyIcon)
-									for buttonHistory.Clicked(duo.m.DuoUIcontext) {
-										duo.m.CurrentPage = "HISTORY"
+									var historyMenuItem theme.DuoUIbutton
+									historyMenuItem = ui.ly.Theme.DuoUIbutton("HISTORY", "ff303030", "ff989898", "ff80a8cf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["historyIcon"])
+									for buttonHistory.Clicked(ui.ly.Context) {
+										ui.rc.ShowPage = "HISTORY"
 									}
-									historyMenuItem.Layout(duo.m.DuoUIcontext, buttonHistory)
+									historyMenuItem.Layout(ui.ly.Context, buttonHistory)
 								},
 							}
-							mainNav.Layout(duo.m.DuoUIcontext, len(navButtons), func(i int) {
-								layout.UniformInset(unit.Dp(0)).Layout(duo.m.DuoUIcontext, navButtons[i])
+							mainNav.Layout(ui.ly.Context, len(navButtons), func(i int) {
+								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, navButtons[i])
 							})
 						})
 					}),

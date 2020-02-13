@@ -2,27 +2,23 @@ package duoui
 
 import (
 	"errors"
-	"github.com/p9c/pod/cmd/gui/helpers"
-	"github.com/p9c/pod/cmd/gui/ico"
-	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/cmd/gui/mvc/view"
 	"github.com/p9c/pod/pkg/gui/io/system"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/unit"
-	"github.com/p9c/pod/pkg/gui/widget/parallel"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"image"
 )
 
-func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
-	duo := DuoUI{m: d}
+func DuoUImainLoop(sys *view.DuOS) error {
+	ui := &DuoUI{
+		ly:sys.Duo,
+		rc:sys.Rc,
+	}
+	sys.Duo.Pages = ui.LoadPages()
 	for {
 		select {
-		case <-duo.m.Ready:
-			duo.m.IsReady = true
-		case <-duo.m.Quit:
+		case <-ui.ly.Ready:
+			ui.ly.IsReady = true
+		case <-ui.ly.Quit:
 			log.DEBUG("quit signal received")
 			interrupt.Request()
 			// This case is for handling when some external application is controlling the GUI and to gracefully
@@ -31,7 +27,7 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 			<-interrupt.HandlersDone
 			log.DEBUG("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
-		case e := <-duo.m.DuoUIwindow.Events():
+		case e := <-ui.ly.Window.Events():
 			switch e := e.(type) {
 			case system.DestroyEvent:
 				log.DEBUG("destroy event received")
@@ -40,83 +36,54 @@ func DuoUImainLoop(d *models.DuoUI, cx *conte.Xt, rc *rcd.RcVar) error {
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
-				if rc.Boot.IsBoot {
-					duo.m.DuoUIcontext.Reset(e.Config, e.Size)
-					duo.DuoUImainScreen()
-					e.Frame(duo.m.DuoUIcontext.Ops)
-				} else {
-					duo.m.DuoUIcontext.Reset(e.Config, e.Size)
-					if rc.Boot.IsFirstRun {
-						DuoUIloaderCreateWallet(duo.m, cx)
-					} else {
-						duo.DuoUIgrid(cx, rc)
-						if rc.ShowDialog {
-							duo.DuoUIdialog(cx, rc)
-						}
-						duo.DuoUItoastSys(rc)
+				ui.ly.Context.Reset(e.Config, e.Size)
+				//go func() {
+				//sys.Rc.GetDuoUIbalance()
+				//sys.Rc.GetDuoUIunconfirmedBalance()
+				//sys.Rc.ComTransactions()
+				//
+				//sys.Rc.GetDuoUIblockHeight()
+				//sys.Rc.GetDuoUIstatus()
+				//rc.GetDuoUIlocalLost()
+				//rc.GetDuoUIdifficulty()
 
-						//rc.GetDuoUIbalance(cx)
-						//rc.GetDuoUIunconfirmedBalance(cx)
-						rc.GetDuoUITransactionsExcertps(cx)
+				//rc.GetDuoUIlastTxs()
+				//time.Sleep(1 * time.Second)
+				//}()
 
-						//rc.GetDuoUIblockHeight(cx)
-						//rc.GetDuoUIstatus(cx)
-						//rc.GetDuoUIlocalLost()
-						//rc.GetDuoUIdifficulty(cx)
-						//
-						//rc.GetDuoUIlastTxs(cx)
-					}
-					e.Frame(duo.m.DuoUIcontext.Ops)
-					duo.m.DuoUIcontext.Reset(e.Config, e.Size)
-				}
+				//if rc.Boot.IsBoot {
+				//d.DuoUImainScreen()
+				//e.Frame(d.mod.Context.Ops)
+				//} else {
+				//	d.mod.Context.Reset(e.Config, e.Size)
+				//	if rc.Boot.IsFirstRun {
+				//		//DuoUIloaderCreateWallet(duo.m, cx, rc)
+				//	} else {
+				ui.DuoUImainScreen()
+				//		if rc.Dialog.Show {
+				//			d.DuoUIdialog(rc)
+				//		}
+				//		d.DuoUItoastSys()
+				//
+				//		go func() {
+				//			time.Sleep(1 * time.Second)
+				//
+				//			//rc.GetDuoUIbalance()
+				//			//rc.GetDuoUIunconfirmedBalance()
+				//rc.GetDuoUITransactionsExcertps()
+				//
+				//			//rc.GetDuoUIblockHeight()
+				//			//rc.GetDuoUIstatus()
+				//			//rc.GetDuoUIlocalLost()
+				//			//rc.GetDuoUIdifficulty()
+				//
+				//			//rc.GetDuoUIlastTxs()
+				//		}()
+				//	}
+				e.Frame(ui.ly.Context.Ops)
+				sys.Duo.Context.Reset(e.Config, e.Size)
+				//}
 			}
 		}
 	}
-}
-
-// Main wallet screen
-func (duo *DuoUI) DuoUImainScreen() {
-	helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, duo.m.DuoUIcontext.Constraints.Width.Max, duo.m.DuoUIcontext.Constraints.Height.Max, duo.m.DuoUItheme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-	// START View <<<
-	logo, _ := parallel.NewDuoUIicon(ico.ParallelCoin)
-	layout.Flex{Axis: layout.Vertical}.Layout(duo.m.DuoUIcontext,
-		layout.Flexed(0.6, func() {
-			layout.Flex{Axis: layout.Horizontal}.Layout(duo.m.DuoUIcontext,
-
-				layout.Rigid(func() {
-					layout.UniformInset(unit.Dp(8)).Layout(duo.m.DuoUIcontext, func() {
-						size := duo.m.DuoUIcontext.Px(unit.Dp(256)) - 2*duo.m.DuoUIcontext.Px(unit.Dp(8))
-						if logo != nil {
-							logo.Color = duo.m.DuoUItheme.Color.Dark
-							logo.Layout(duo.m.DuoUIcontext, unit.Px(float32(size)))
-						}
-						duo.m.DuoUIcontext.Dimensions = layout.Dimensions{
-							Size: image.Point{X: size, Y: size},
-						}
-					})
-				}),
-				layout.Flexed(1, func() {
-					layout.UniformInset(unit.Dp(60)).Layout(duo.m.DuoUIcontext, func() {
-						duo.m.DuoUItheme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE").Layout(duo.m.DuoUIcontext)
-					})
-				}),
-			)
-		}),
-		layout.Flexed(0.4, func() {
-			DuoUIloader(duo.m)
-		}),
-	)
-}
-
-// Main wallet screen
-func (duo *DuoUI) DuoUIgrid(cx *conte.Xt, rc *rcd.RcVar) {
-	// START View <<<
-	cs := duo.m.DuoUIcontext.Constraints
-	helpers.DuoUIdrawRectangle(duo.m.DuoUIcontext, cs.Width.Max, cs.Height.Max, duo.m.DuoUItheme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
-	layout.Flex{Axis: layout.Vertical}.Layout(duo.m.DuoUIcontext,
-		layout.Rigid(duo.DuoUIheader(rc)),
-		layout.Flexed(1, duo.DuoUIbody(cx, rc)),
-		layout.Rigid(duo.DuoUIfooter(rc)),
-	)
 }

@@ -5,6 +5,7 @@ package app
 import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui"
+	"github.com/p9c/pod/cmd/gui/mvc/view"
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/cmd/node/rpc"
@@ -18,66 +19,69 @@ import (
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		Configure(cx, c)
-		rc := rcd.RcInit()
+		sys := view.DuOSboot()
+		sys.Rc = rcd.RcInit(cx)
+		//sys.Components = mvc.LoadComponents(duo,rc)
+
 		//var firstRun bool
 		if !apputil.FileExists(*cx.Config.WalletFile) {
-			rc.Boot.IsFirstRun = true
+			sys.Rc.Boot.IsFirstRun = true
 		}
+		duo, err := duoui.DuOuI(sys.Rc)
+		sys.Duo = duo
+		//sys.Components["logger"].Controller()
 
-		duo, err := duoui.DuOuI(rc, cx)
 		interrupt.AddHandler(func() {
-			close(duo.Quit)
+			close(sys.Duo.Quit)
 		})
 
+		log.INFO("IsFirstRun? ", sys.Rc.Boot.IsFirstRun)
 
-		log.INFO("IsFirstRun? ", rc.Boot.IsFirstRun)
-
-		//loader.DuoUIloader(rc, cx, firstRun)
-		//rcd.ListenInit()
-		//go func() {
-		//	for {
-		//		select {
-		//		case <-duo.Quit:
-		//			break
-		//			case
-		//		}
-		//	}
-		//}()
+		//(rc, cx, firstRun)
+		//rcd.ListenInit(*rc)
+		go func() {
+			for {
+				select {
+				case <-sys.Duo.Quit:
+					break
+				}
+			}
+		}()
 
 		// signal the GUI that the back end is ready
 		log.DEBUG("sending ready signal")
 		// we can do this without blocking because the channel has 1 buffer this way it falls
 		// immediately the GUI starts
-		duo.Ready <- struct{}{}
+		sys.Duo.Ready <- struct{}{}
 		go func() {
 			nodeChan := make(chan *rpc.Server)
 			// Start Node
-			err = gui.DuoUInode(cx, nodeChan)
+			err = gui.DuoUInode(sys.Rc.Cx, nodeChan)
 			if err != nil {
 				log.ERROR(err)
 			}
 			log.DEBUG("waiting for nodeChan")
-			cx.RPCServer = <-nodeChan
+			sys.Rc.Cx.RPCServer = <-nodeChan
 			log.DEBUG("nodeChan sent")
-			cx.Node.Store(true)
+			sys.Rc.Cx.Node.Store(true)
 
 			walletChan := make(chan *wallet.Wallet)
 			// Start wallet
-			err = gui.Services(cx, walletChan)
+			err = gui.Services(sys.Rc.Cx, walletChan)
 			if err != nil {
 				log.ERROR(err)
 			}
 			log.DEBUG("waiting for walletChan")
-			cx.WalletServer = <-walletChan
+			sys.Rc.Cx.WalletServer = <-walletChan
 			log.DEBUG("walletChan sent")
-			cx.Wallet.Store(true)
-			rc.Boot.IsBoot = false
+			sys.Rc.Cx.Wallet.Store(true)
+			sys.Rc.Boot.IsBoot = false
 		}()
 
 		// Start up GUI
 		log.DEBUG("starting up GUI")
 		// go func() {
-		err = gui.WalletGUI(duo, cx, rc)
+		err = gui.WalletGUI(sys)
 		if err != nil {
 			log.ERROR(err)
 		}
@@ -85,12 +89,12 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		log.DEBUG("wallet GUI finished")
 		// }()
 		// wait for stop signal
-		<-duo.Quit
+		<-sys.Duo.Quit
 		// b.IsBootLogo = false
 		// b.IsBoot = false
 		log.DEBUG("shutting down node")
-		if !cx.Node.Load().(bool) {
-			close(cx.WalletKill)
+		if !sys.Rc.Cx.Node.Load().(bool) {
+			close(sys.Rc.Cx.WalletKill)
 		}
 		log.DEBUG("shutting down wallet")
 		if !cx.Wallet.Load().(bool) {

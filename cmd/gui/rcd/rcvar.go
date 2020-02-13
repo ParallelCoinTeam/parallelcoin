@@ -1,48 +1,34 @@
 package rcd
 
 import (
-	"github.com/p9c/pod/cmd/gui/models"
-	"github.com/p9c/pod/pkg/gui/widget"
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/model"
+	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"time"
 )
 
-var (
-	consoleInputField = &widget.Editor{
-		SingleLine: true,
-		Submit:     true,
-	}
-)
+
 
 type RcVar struct {
-	Boot             *Boot
-	Events           chan Event
-	Alert            models.DuoUIalert
-	Status           models.DuoUIstatus
-	Hashes           int64
-	NetHash          int64
-	BlockHeight      int32
-	BestBlock        string
-	Difficulty       float64
-	BlockCount       int64
-	NetworkLastBlock int32
-	ConnectionCount  int32
-	Balance          string
-	Unconfirmed      string
-	TxsNumber        int
-	CommandsHistory  models.DuoUIcommandsHistory
-	Transactions     models.DuoUItransactions
-	Txs              models.DuoUItransactionsExcerpts
-	LastTxs          models.DuoUItransactions
-	Settings         models.DuoUIsettings
-	Sent             bool
-	ShowDialog       bool
-	Toasts           []func()
-	Localhost        models.DuoUIlocalHost
-	Uptime           int
-	Peers            []*btcjson.GetPeerInfoResult `json:"peers"`
-	Blocks           []models.DuoUIblock
-	screen           string `json:"screen"`
+	Cx              *conte.Xt
+	Boot            *Boot
+	Events          chan Event
+	Status          *model.DuoUIstatus
+	Dialog          *model.DuoUIdialog
+	Log             *model.DuoUIlog
+	CommandsHistory *model.DuoUIcommandsHistory
+
+	Settings          *model.DuoUIsettings
+	Sent              bool
+	Toasts            []func()
+	Localhost         model.DuoUIlocalHost
+	Uptime            int
+	Peers             []*btcjson.GetPeerInfoResult `json:"peers"`
+	Blocks            []model.DuoUIblock
+	ShowPage          string
+	PassPhrase        string
+	ConfirmPassPhrase string
 }
 
 type Boot struct {
@@ -66,7 +52,8 @@ type Boot struct {
 //	GetDuoUIconnectionCount()
 //}
 
-func RcInit() *RcVar {
+func RcInit(cx *conte.Xt) (r *RcVar) {
+
 	b := Boot{
 		IsBoot:     true,
 		IsFirstRun: false,
@@ -75,24 +62,57 @@ func RcInit() *RcVar {
 		IsLoading:  false,
 		IsScreen:   "",
 	}
-	return &RcVar{
-		Boot:             &b,
-		Alert:            models.DuoUIalert{},
-		Status:           models.DuoUIstatus{},
-		Hashes:           0,
-		NetHash:          0,
-		BlockHeight:      0,
-		BestBlock:        "",
-		Difficulty:       0,
-		BlockCount:       0,
-		NetworkLastBlock: 0,
-		ConnectionCount:  0,
-		Balance:          "",
-		Unconfirmed:      "",
-		TxsNumber:        0,
-		CommandsHistory: models.DuoUIcommandsHistory{
-			Commands: []models.DuoUIcommand{
-				models.DuoUIcommand{
+	//d := models.DuoUIdialog{
+	//	Show:   true,
+	//	Ok:     func() { r.Dialog.Show = false },
+	//	Cancel: func() { r.Dialog.Show = false },
+	//	Title:  "Dialog!",
+	//	Text:   "Dialog text",
+	//}
+	l := new(model.DuoUIlog)
+
+	settings := new(model.DuoUIsettings)
+	settings.Abbrevation = "DUO"
+
+	// Settings tabs
+	confTabs := make(map[string]*controller.Button)
+	settingsFields := make(map[string]interface{})
+	for _, group := range settings.Daemon.Schema.Groups {
+		confTabs[group.Legend] = new(controller.Button)
+		for _, field := range group.Fields {
+			switch field.Type {
+			case "array":
+				settingsFields[field.Name] = new(controller.Button)
+			case "input":
+				settingsFields[field.Name] = &controller.Editor{
+					SingleLine: true,
+					Submit:     true,
+				}
+			case "switch":
+				settingsFields[field.Name] = new(controller.CheckBox)
+			case "radio":
+				settingsFields[field.Name] = new(controller.Enum)
+			default:
+				settingsFields[field.Name] = new(controller.Button)
+			}
+		}
+	}
+	settings.Tabs = model.DuoUIconfTabs{
+		Current:  "wallet",
+		TabsList: confTabs,
+	}
+	settings.Daemon.Widgets = settingsFields
+
+	r = &RcVar{
+		Cx:     cx,
+		Boot:   &b,
+		Status: &model.DuoUIstatus{},
+		//Dialog: d,
+		Settings: settings,
+		Log:      l,
+		CommandsHistory: &model.DuoUIcommandsHistory{
+			Commands: []controller.Command{
+				controller.Command{
 					ComID:    "input",
 					Category: "input",
 					Time:     time.Now(),
@@ -102,49 +122,9 @@ func RcInit() *RcVar {
 			},
 			CommandsNumber: 1,
 		},
-		Transactions: models.DuoUItransactions{},
-		Txs:          models.DuoUItransactionsExcerpts{},
-		LastTxs:      models.DuoUItransactions{},
-		Sent:         false,
-		ShowDialog:   true,
-		Localhost:    models.DuoUIlocalHost{},
-		screen:       "",
+		Sent:      false,
+		Localhost: model.DuoUIlocalHost{},
+		ShowPage:  "OVERVIEW",
 	}
-}
-
-//func input(duo models.DuoUI) func() {
-//	return func() {
-//		e := duo.DuoUItheme.DuoUIeditor("Run command", "Run txt")
-//		e.Font.Style = text.Regular
-//		e.Font.Size = unit.Dp(16)
-//		e.Layout(duo.DuoUIcontext, consoleInputField)
-//		for _, e := range consoleInputField.Events(duo.DuoUIcontext) {
-//			if e, ok := e.(widget.SubmitEvent); ok {
-//				rc.CommandsHistory.Commands = append(rc.CommandsHistory.Commands, models.DuoUIcommand{
-//					CommandsID: e.Text,
-//					Time:       time.Time{},
-//				})
-//				consoleInputField.SetText("")
-//			}
-//		}
-//	}
-//}
-
-func (rc *RcVar) RCtoast() {
-	//tickerChannel := time.NewTicker(3 * time.Second)
-	//go func() {
-	//	for {
-	//		select {
-	//		case <-tickerChannel.C:
-	//			for i := range rc.Toasts {
-	//				log.DEBUG("RRRRRR")
-	//				if i < len(rc.Toasts)-1 {
-	//					copy(rc.Toasts[i:], rc.Toasts[i+1:])
-	//				}
-	//				rc.Toasts[len(rc.Toasts)-1] = nil // or the zero value of T
-	//				rc.Toasts = rc.Toasts[:len(rc.Toasts)-1]				}
-	//		}
-	//	}
-	//}()
-	//time.Sleep(6 * time.Second)
+	return
 }

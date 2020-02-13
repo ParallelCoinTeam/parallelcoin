@@ -1,15 +1,13 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/layout"
 )
 
-func (duo *DuoUI)DuoUIsidebar(cx *conte.Xt, rc *rcd.RcVar) func() {
+func (ui *DuoUI)DuoUIsidebar() func() {
 	return func() {
-		layout.Flex{Axis: layout.Vertical}.Layout(duo.m.DuoUIcontext,
-			layout.Rigid(DuoUImenu(duo, cx, rc)),
+		layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
+			layout.Rigid(ui.DuoUImenu()),
 		)
 	}
 }
