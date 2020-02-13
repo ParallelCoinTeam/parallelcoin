@@ -40,7 +40,8 @@ func (ui *DuoUI) DuoUIheader() func() {
 			layout.Rigid(func() {
 				layout.Align(layout.Center).Layout(ui.ly.Context, func() {
 					layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(ui.ly.Context, func() {
-						balance := ui.ly.Theme.Body2(ui.rc.Status.Wallet.Balance + " " + ui.rc.Settings.Abbrevation)
+						balance := ui.ly.Theme.Body2(ui.rc.Status.Wallet.Balance +
+							" " + ui.rc.Settings.Abbrevation)
 						balance.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 						balance.Font.Typeface = "bariol"
 						balance.Alignment = text.End

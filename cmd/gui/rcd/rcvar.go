@@ -2,7 +2,7 @@ package rcd
 
 import (
 	"time"
-	
+
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/pkg/conte"
@@ -18,7 +18,7 @@ type RcVar struct {
 	Dialog          *model.DuoUIdialog
 	Log             *model.DuoUIlog
 	CommandsHistory *model.DuoUIcommandsHistory
-	
+
 	Settings          *model.DuoUIsettings
 	Sent              bool
 	Toasts            []func()
@@ -53,7 +53,7 @@ type Boot struct {
 // }
 
 func RcInit(cx *conte.Xt) (r *RcVar) {
-	
+
 	b := Boot{
 		IsBoot:     true,
 		IsFirstRun: false,
@@ -70,10 +70,10 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 	//	Text:   "Dialog text",
 	// }
 	l := new(model.DuoUIlog)
-	
+
 	settings := new(model.DuoUIsettings)
 	settings.Abbrevation = "DUO"
-	
+
 	// Settings tabs
 	confTabs := make(map[string]*controller.Button)
 	settingsFields := make(map[string]interface{})
@@ -102,12 +102,20 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		TabsList: confTabs,
 	}
 	settings.Daemon.Widgets = settingsFields
-	
+
 	r = &RcVar{
-		Cx:     cx,
-		Boot:   &b,
-		Status: &model.DuoUIstatus{},
-		// Dialog: d,
+		Cx:   cx,
+		Boot: &b,
+		Status: &model.DuoUIstatus{
+			Node: &model.NodeStatus{},
+			Wallet: &model.WalletStatus{
+				WalletVersion: make(map[string]btcjson.VersionResult),
+				Transactions: &model.DuoUItransactions{},
+				Txs:          &model.DuoUItransactionsExcerpts{},
+				LastTxs:      &model.DuoUItransactions{},
+			},
+		},
+		Dialog:          &model.DuoUIdialog{},
 		Settings: settings,
 		Log:      l,
 		CommandsHistory: &model.DuoUIcommandsHistory{
@@ -116,7 +124,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 					ComID:    "input",
 					Category: "input",
 					Time:     time.Now(),
-					
+
 					// Out: input(duo),
 				},
 			},

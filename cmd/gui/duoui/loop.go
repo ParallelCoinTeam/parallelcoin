@@ -2,19 +2,20 @@ package duoui
 
 import (
 	"errors"
-	"github.com/p9c/pod/cmd/gui/mvc/view"
+	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/io/system"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-func DuoUImainLoop(sys *view.DuOS) error {
-	ui := &DuoUI{
-		ly:sys.Duo,
-		rc:sys.Rc,
+func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
+	ui := new(DuoUI)
+	ui = &DuoUI{
+		ly: d,
+		rc: r,
 	}
-	sys.Duo.Pages = ui.LoadPages()
+	//ui.ly.Pages = ui.LoadPages()
 	for {
 		select {
 		case <-ui.ly.Ready:
@@ -31,7 +32,7 @@ func DuoUImainLoop(sys *view.DuOS) error {
 					}
 				}
 			}()
-			rcd.ListenInit(ui.rc.Cx, ui.rc, updateTrigger)
+			ui.rc.ListenInit(updateTrigger)
 			ui.ly.IsReady = true
 		case <-ui.ly.Quit:
 			log.DEBUG("quit signal received")
@@ -52,20 +53,7 @@ func DuoUImainLoop(sys *view.DuOS) error {
 				return e.Err
 			case system.FrameEvent:
 				ui.ly.Context.Reset(e.Config, e.Size)
-				//go func() {
-				//sys.Rc.GetDuoUIbalance()
-				//sys.Rc.GetDuoUIunconfirmedBalance()
-				//sys.Rc.ComTransactions()
-				//
-				//sys.Rc.GetDuoUIblockHeight()
-				//sys.Rc.GetDuoUIstatus()
-				//rc.GetDuoUIlocalLost()
-				//rc.GetDuoUIdifficulty()
-
-				//rc.GetDuoUIlastTxs()
-				//time.Sleep(1 * time.Second)
-				//}()
-
+				ui.ly.Pages = ui.LoadPages()
 				//if rc.Boot.IsBoot {
 				//d.DuoUImainScreen()
 				//e.Frame(d.mod.Context.Ops)
@@ -75,28 +63,14 @@ func DuoUImainLoop(sys *view.DuOS) error {
 				//		//DuoUIloaderCreateWallet(duo.m, cx, rc)
 				//	} else {
 				ui.DuoUImainScreen()
-				//		if rc.Dialog.Show {
-				//			d.DuoUIdialog(rc)
-				//		}
-				//		d.DuoUItoastSys()
+				if ui.rc.Dialog.Show {
+					ui.DuoUIdialog()
+				}
+				//d.DuoUItoastSys()
 				//
-				//		go func() {
-				//			time.Sleep(1 * time.Second)
-				//
-				//			//rc.GetDuoUIbalance()
-				//			//rc.GetDuoUIunconfirmedBalance()
-				//rc.GetDuoUITransactionsExcertps()
-				//
-				//			//rc.GetDuoUIblockHeight()
-				//			//rc.GetDuoUIstatus()
-				//			//rc.GetDuoUIlocalLost()
-				//			//rc.GetDuoUIdifficulty()
-				//
-				//			//rc.GetDuoUIlastTxs()
-				//		}()
 				//	}
 				e.Frame(ui.ly.Context.Ops)
-				sys.Duo.Context.Reset(e.Config, e.Size)
+				ui.ly.Context.Reset(e.Config, e.Size)
 				//}
 			}
 		}

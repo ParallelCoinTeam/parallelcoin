@@ -14,9 +14,9 @@ type
 		UpTime     int64  `json:"uptime"`
 		CurrentNet string `json:"net"`
 		Chain      string `json:"chain"`
-		Node       NodeStatus
-		Wallet     WalletStatus
-		Kopach     KopachStatus
+		Node       *NodeStatus
+		Wallet     *WalletStatus
+		Kopach     *KopachStatus
 	}
 
 type NodeStatus struct {
@@ -36,9 +36,9 @@ type WalletStatus struct {
 	Balance       string
 	Unconfirmed   string
 	TxsNumber     int
-	Transactions  DuoUItransactions
-	Txs           DuoUItransactionsExcerpts
-	LastTxs       DuoUItransactions
+	Transactions  *DuoUItransactions
+	Txs           *DuoUItransactionsExcerpts
+	LastTxs       *DuoUItransactions
 }
 type
 	DuoUIhashes struct{ int64 }

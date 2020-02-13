@@ -1,12 +1,12 @@
 package duoui
 
 import (
+	"fmt"
+	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/unit"
-	"os"
 )
 
 var (
@@ -23,10 +23,9 @@ var (
 	footerNav = &layout.List{
 		Axis: layout.Horizontal,
 	}
-	OsExiter = os.Exit
 )
 
-func (ui *DuoUI)DuoUIfooter() func() {
+func (ui *DuoUI) DuoUIfooter() func() {
 	return func() {
 		cs := ui.ly.Context.Constraints
 		theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 64, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
@@ -42,34 +41,45 @@ func (ui *DuoUI)DuoUIfooter() func() {
 			layout.Rigid(func() {
 				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 					cornerButtons := []func(){
-						func() {
-							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
-								var closeMeniItem theme.DuoUIbutton
-								closeMeniItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["closeIcon"])
-								for buttonClose.Clicked(ui.ly.Context) {
-									ui.rc.Dialog = new(model.DuoUIdialog)
-									ui.rc.Dialog = &model.DuoUIdialog{
-										Show: true,
-										Ok: func() {
-											OsExiter(1)
-										},
-										Title: "Are you sure?",
-										Text:  "Confirm ParallelCoin close",
-									}
-
-								}
-								closeMeniItem.Layout(ui.ly.Context, buttonClose)
-							})
-						},
+						//func() {
+						//	layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+						//		var closeMeniItem theme.DuoUIbutton
+						//		closeMeniItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["closeIcon"])
+						//		for buttonClose.Clicked(ui.ly.Context) {
+						//			ui.rc.Dialog.Show = true
+						//			//ui.rc.Dialog = &model.DuoUIdialog{
+						//			//	Show: true,
+						//			//	Ok: func() {
+						//			//		interrupt.Request()
+						//			//	},
+						//			//	Title: "Are you sure?",
+						//			//	Text:  "Confirm ParallelCoin close",
+						//			//}
+						//
+						//		}
+						//		closeMeniItem.Layout(ui.ly.Context, buttonClose)
+						//	})
+						//},
 						func() {
 							var settingsMenuItem theme.DuoUIbutton
 							settingsMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["traceIcon"])
 
 							for buttonTrace.Clicked(ui.ly.Context) {
-								ui.rc.ShowPage = "TRACE"
+								ui.rc.ShowPage = "SETTINGS"
+							}
+							settingsMenuItem.Layout(ui.ly.Context, buttonClose)
+						},
+
+						func() {
+							var settingsMenuItem theme.DuoUIbutton
+							settingsMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["traceIcon"])
+
+							for buttonTrace.Clicked(ui.ly.Context) {
+								ui.rc.ShowPage = "LOG"
 							}
 							settingsMenuItem.Layout(ui.ly.Context, buttonTrace)
 						},
+
 					}
 					cornerNav.Layout(ui.ly.Context, len(cornerButtons), func(i int) {
 						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, cornerButtons[i])
@@ -79,6 +89,16 @@ func (ui *DuoUI)DuoUIfooter() func() {
 			layout.Rigid(func() {
 				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 					navButtons := []func(){
+
+						func() {
+							a := 1.0
+
+							tim := ui.ly.Theme.Caption("Blocks:" + fmt.Sprint(ui.rc.Status.Wallet.Balance))
+							tim.Font.Typeface = "bariol"
+							tim.Color = helpers.RGB(0xcfcfcf)
+							tim.Color = helpers.Alpha(a, tim.Color)
+							tim.Layout(ui.ly.Context)
+						},
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 								var networkMeniItem theme.DuoUIbutton

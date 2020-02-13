@@ -356,7 +356,6 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 				defer c.subMx.Unlock()
 				log.DEBUG("received new chain notification")
 				// construct work message
-				log.SPEW(n)
 				_, ok := n.Data.(*util.Block)
 				if !ok {
 					log.WARN("chain accepted notification is not a block")

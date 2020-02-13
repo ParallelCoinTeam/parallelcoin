@@ -2,7 +2,6 @@ package rcd
 
 import (
 	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/conte"
 )
 
 const (
@@ -18,32 +17,32 @@ type Event struct {
 
 var EventsChan = make(chan Event, 1)
 
-func ListenInit(cx *conte.Xt, rc *RcVar, trigger chan struct{}) {
-	rc.Events = EventsChan
-	rc.UpdateTrigger = trigger
+func (r *RcVar)ListenInit(trigger chan struct{}){
+	r.Events = EventsChan
+	r.UpdateTrigger = trigger
 	// first time starting up get all of these and trigger update
-	rc.GetDuoUIbalance()
-	rc.GetDuoUIunconfirmedBalance()
-	rc.ComTransactions()
-	rc.GetDuoUIblockHeight()
-	rc.GetDuoUIstatus()
-	rc.GetDuoUIlocalLost()
-	rc.GetDuoUIdifficulty()
-	rc.ComLatestTransactions()
-	cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
+	r.GetDuoUIbalance()
+	r.GetDuoUIunconfirmedBalance()
+	r.ComTransactions()
+	r.GetDuoUIblockHeight()
+	r.GetDuoUIstatus()
+	r.GetDuoUIlocalLost()
+	r.GetDuoUIdifficulty()
+	r.ComLatestTransactions()
+	r.Cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted:
-			rc.GetDuoUIbalance()
-			rc.GetDuoUIunconfirmedBalance()
-			rc.ComTransactions()
-			rc.GetDuoUIblockHeight()
-			rc.GetDuoUIstatus()
-			rc.GetDuoUIlocalLost()
-			rc.GetDuoUIdifficulty()
-			rc.ComLatestTransactions()
-			rc.UpdateTrigger <- struct{}{}
+			r.GetDuoUIbalance()
+			r.GetDuoUIunconfirmedBalance()
+			r.ComTransactions()
+			r.GetDuoUIblockHeight()
+			r.GetDuoUIstatus()
+			r.GetDuoUIlocalLost()
+			r.GetDuoUIdifficulty()
+			r.ComLatestTransactions()
+			r.UpdateTrigger <- struct{}{}
 		}
-		rc.UpdateTrigger <- struct{}{}
+		r.UpdateTrigger <- struct{}{}
 	})
 	
 	return
