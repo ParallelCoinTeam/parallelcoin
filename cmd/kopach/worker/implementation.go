@@ -138,7 +138,7 @@ func NewWithConnAndSemaphore(
 					break pausing
 				default:
 					if w.block == nil || w.bitses == nil || w.hashes == nil {
-						log.INFO("stop was called before we started working")
+						// log.INFO("stop was called before we started working")
 					} else {
 						// work
 						nH := w.block.Height()

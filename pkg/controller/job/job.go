@@ -178,7 +178,7 @@ func (j *Container) GetHashes() (out map[int32]*chainhash.Hash) {
 }
 
 func (j *Container) String() (s string) {
-	s += fmt.Sprint("type '"+string(WorkMagic)+"' elements:", j.Count())
+	s += fmt.Sprint("\ntype '"+string(WorkMagic)+"' elements:", j.Count())
 	s += "\n"
 	ips := j.GetIPs()
 	s += "1 IPs:"
