@@ -25,7 +25,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-const RoundsPerAlgo = 1
+const RoundsPerAlgo = 256
 
 type Worker struct {
 	sem          sem.T
@@ -142,6 +142,7 @@ func NewWithConnAndSemaphore(
 					} else {
 						// work
 						nH := w.block.Height()
+						w.msgBlock.Header.Version = w.roller.GetAlgoVer()
 						w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
 						w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
 						select {
@@ -185,7 +186,7 @@ func NewWithConnAndSemaphore(
 							since := int(time.Now().Sub(tn)/time.Second) + 1
 							total := w.roller.C - int(w.startNonce)
 							_, _ = fmt.Fprintf(os.Stderr,
-								"\r %9d hash/s        \r", total/since)
+								"\r %9d hash/s %s       \r", total/since, fork.GetAlgoName(w.msgBlock.Header.Version, nH))
 							
 						}
 					}
