@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 var (
-	buttonTrace    = new(controller.Button)
-	buttonClose    = new(controller.Button)
+	buttonLog      = new(controller.Button)
+	buttonQuit    = new(controller.Button)
 	buttonSettings = new(controller.Button)
 	buttonNetwork  = new(controller.Button)
 	buttonBlocks   = new(controller.Button)
@@ -41,43 +43,35 @@ func (ui *DuoUI) DuoUIfooter() func() {
 			layout.Rigid(func() {
 				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 					cornerButtons := []func(){
-						//func() {
-						//	layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
-						//		var closeMeniItem theme.DuoUIbutton
-						//		closeMeniItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["closeIcon"])
-						//		for buttonClose.Clicked(ui.ly.Context) {
-						//			ui.rc.Dialog.Show = true
-						//			//ui.rc.Dialog = &model.DuoUIdialog{
-						//			//	Show: true,
-						//			//	Ok: func() {
-						//			//		interrupt.Request()
-						//			//	},
-						//			//	Title: "Are you sure?",
-						//			//	Text:  "Confirm ParallelCoin close",
-						//			//}
-						//
-						//		}
-						//		closeMeniItem.Layout(ui.ly.Context, buttonClose)
-						//	})
-						//},
 						func() {
-							var settingsMenuItem theme.DuoUIbutton
-							settingsMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["traceIcon"])
+							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+								var closeMeniItem theme.DuoUIbutton
+								closeMeniItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["closeIcon"])
+								for buttonQuit.Clicked(ui.ly.Context) {
+									ui.rc.Dialog.Show = true
+									ui.rc.Dialog = &model.DuoUIdialog{
+										Show: true,
+										Ok: func() {
+											interrupt.Request()
+										},
+										Title: "Are you sure?",
+										Text:  "Confirm ParallelCoin close",
+									}
 
-							for buttonTrace.Clicked(ui.ly.Context) {
-								ui.rc.ShowPage = "SETTINGS"
-							}
-							settingsMenuItem.Layout(ui.ly.Context, buttonClose)
+								}
+								closeMeniItem.Layout(ui.ly.Context, buttonQuit)
+							})
 						},
 
-						func() {
-							var settingsMenuItem theme.DuoUIbutton
-							settingsMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["traceIcon"])
 
-							for buttonTrace.Clicked(ui.ly.Context) {
+						func() {
+							var logMenuItem theme.DuoUIbutton
+							logMenuItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["traceIcon"])
+
+							for buttonLog.Clicked(ui.ly.Context) {
 								ui.rc.ShowPage = "LOG"
 							}
-							settingsMenuItem.Layout(ui.ly.Context, buttonTrace)
+							logMenuItem.Layout(ui.ly.Context, buttonLog)
 						},
 
 					}

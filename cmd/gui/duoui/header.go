@@ -21,7 +21,7 @@ func (ui *DuoUI) DuoUIheader() func() {
 				layout.Align(layout.Center).Layout(ui.ly.Context, func() {
 					var logoMeniItem theme.DuoUIbutton
 					logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", 64, 96, 96, 8, 8, ui.ly.Theme.Icons["logo"])
-					for buttonClose.Clicked(ui.ly.Context) {
+					for logoButton.Clicked(ui.ly.Context) {
 						//d.mod.CurrentPage = "NETWORK"
 					}
 					logoMeniItem.Layout(ui.ly.Context, logoButton)
