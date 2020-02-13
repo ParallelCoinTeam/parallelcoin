@@ -23,7 +23,7 @@ var (
 	podHomeDir      = util.AppDataDir("pod", false)
 	defaultDataDir  = filepath.Join(podHomeDir, "data")
 	knownDbTypes    = database.SupportedDrivers()
-	activeNetParams = &chaincfg.MainNetParamsRPC
+	activeNetParams = &netparams.MainNetParamsRPC
 )
 
 // config defines the configuration options for findcheckpoint. See loadConfig for details on the configuration load process.
@@ -97,15 +97,15 @@ if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 	// while we're at it
 	if cfg.TestNet3 {
 		numNets++
-		activeNetParams = &chaincfg.TestNet3ParamsRPC
+		activeNetParams = &netparams.TestNet3ParamsRPC
 	}
 	if cfg.RegressionTest {
 		numNets++
-		activeNetParams = &chaincfg.RegressionTestParams
+		activeNetParams = &netparams.RegressionTestParams
 	}
 	if cfg.SimNet {
 		numNets++
-		activeNetParams = &chaincfg.SimNetParamsRPC
+		activeNetParams = &netparams.SimNetParamsRPC
 	}
 	if numNets > 1 {
 		str := "%s: The testnet, regtest, and simnet params can't be " +

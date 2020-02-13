@@ -6,16 +6,16 @@ import (
 	"math/big"
 	"math/rand"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/log"
 )
 
 // AlgoParams are the identifying block version number and their minimum target bits
 type AlgoParams struct {
-	Version int32
-	MinBits uint32
-	AlgoID  uint32
-	NSperOp int64
+	Version         int32
+	MinBits         uint32
+	AlgoID          uint32
+	VersionInterval int
 }
 
 // HardForks is the details related to a hard fork, number, name and activation height
@@ -25,7 +25,6 @@ type HardForks struct {
 	Name               string
 	Algos              map[string]AlgoParams
 	AlgoVers           map[int32]string
-	WorkBase           int64
 	TargetTimePerBlock int32
 	AveragingInterval  int64
 	TestnetStart       int32
@@ -44,14 +43,12 @@ var (
 		AlgoVers[2]: {
 			Version: 2,
 			MinBits: MainPowLimitBits,
-			NSperOp: 824,
-		}, // 824 ns/op
+		},
 		AlgoVers[514]: {
 			Version: 514,
 			MinBits: MainPowLimitBits,
 			AlgoID:  1,
-			NSperOp: 740839,
-		}, // 740839 ns/op
+		},
 	}
 	// FirstPowLimit is
 	FirstPowLimit = func() big.Int {
@@ -71,13 +68,6 @@ var (
 			ActivationHeight: 0,
 			Algos:            Algos,
 			AlgoVers:         AlgoVers,
-			WorkBase: func() (out int64) {
-				for i := range Algos {
-					out += Algos[i].NSperOp
-				}
-				out /= int64(len(Algos))
-				return
-			}(),
 			TargetTimePerBlock: 300,
 			AveragingInterval:  10, // 50 minutes
 			TestnetStart:       0,
@@ -88,13 +78,6 @@ var (
 			ActivationHeight: 250000,
 			Algos:            P9Algos,
 			AlgoVers:         P9AlgoVers,
-			WorkBase: func() (out int64) {
-				for i := range P9Algos {
-					out += P9Algos[i].NSperOp
-				}
-				out /= int64(len(P9Algos))
-				return
-			}(),
 			TargetTimePerBlock: 36,
 			AveragingInterval:  3600,
 			TestnetStart:       1,
@@ -113,26 +96,21 @@ var (
 		13: "lyra2rev2",
 	}
 	// P9Algos is the algorithm specifications after the hard fork
-	// given ns/op values are approximate and kopach bench writes them to
-	// a file. These should vary on different architectures due to limitations
-	// of division bit width and the cache behavior of hash functions, and
-	// refers to one thread of execution, how this relates to number of cores
-	// will vary also
 	P9Algos = map[string]AlgoParams{
-		P9AlgoVers[5]:  {5, FirstPowLimitBits, 0, 60425},     // 69495444},
-		P9AlgoVers[6]:  {6, FirstPowLimitBits, 1, 66177},     // 79734306},
-		P9AlgoVers[7]:  {7, FirstPowLimitBits, 2, 102982451}, // 69968425},
-		P9AlgoVers[8]:  {8, FirstPowLimitBits, 3, 64589},     // 71988313},
-		P9AlgoVers[9]:  {9, FirstPowLimitBits, 4, 1416611},   // 68395274},
-		P9AlgoVers[10]: {10, FirstPowLimitBits, 5, 67040},    // 67460443},
-		P9AlgoVers[11]: {11, FirstPowLimitBits, 7, 66803},    // 64433603},
-		P9AlgoVers[12]: {12, FirstPowLimitBits, 6, 1858295},  // 69987634},
-		P9AlgoVers[13]: {13, FirstPowLimitBits, 8, 134025},   // 64936544},
+		P9AlgoVers[5]:  {5, FirstPowLimitBits, 0, 3*3},        // 2
+		P9AlgoVers[6]:  {6, FirstPowLimitBits, 1, 5*3},        // 3
+		P9AlgoVers[7]:  {7, FirstPowLimitBits, 2, 11*3},       // 5
+		P9AlgoVers[8]:  {8, FirstPowLimitBits, 3, 17*3},       // 7
+		P9AlgoVers[9]:  {9, FirstPowLimitBits, 4, 31*3},       // 11
+		P9AlgoVers[10]: {10, FirstPowLimitBits, 5, 41*3},      // 13
+		P9AlgoVers[11]: {11, FirstPowLimitBits, 7, 59*3},      // 17
+		P9AlgoVers[12]: {12, FirstPowLimitBits, 6, 67*3},      // 19
+		P9AlgoVers[13]: {13, FirstPowLimitBits, 8, 83*3},  // 23
 	}
 	// SecondPowLimit is
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
-			"001f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f")
+			"01f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1")
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	SecondPowLimitBits = BigToCompact(&SecondPowLimit)
@@ -232,16 +210,16 @@ func GetCurrent(height int32) (curr int) {
 
 // GetMinBits returns the minimum diff bits based on height and testnet
 func GetMinBits(algoname string, height int32) (mb uint32) {
-	//log.TRACE("GetMinBits", algoname)
+	// log.TRACE("GetMinBits", algoname)
 	curr := GetCurrent(height)
 	mb = List[curr].Algos[algoname].MinBits
-	//log.TRACE("minbits", mb)
+	// log.TRACE("minbits", mb)
 	return
 }
 
 // GetMinDiff returns the minimum difficulty in uint256 form
 func GetMinDiff(algoname string, height int32) (md *big.Int) {
-	//log.TRACE("GetMinDiff", algoname)
+	// log.TRACE("GetMinDiff", algoname)
 	return CompactToBig(GetMinBits(algoname, height))
 }
 

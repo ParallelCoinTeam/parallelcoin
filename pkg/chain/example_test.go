@@ -23,7 +23,7 @@ import (
 // 	// Create a new BlockChain instance using the underlying database for the main bitcoin network.  This example does not demonstrate some of the other available configuration options such as specifying a notification callback and signature cache.  Also, the caller would ordinarily keep a reference to the median time source and add time values obtained from other peers on the network so the local time is adjusted to be in agreement with other peers.
 // 	chain, err := blockchain.New(&blockchain.Config{
 // 		DB:          db,
-// 		ChainParams: &chaincfg.MainNetParams,
+// 		ChainParams: &netparams.MainNetParams,
 // 		TimeSource:  blockchain.NewMedianTime(),
 // 	})
 // 	if err != nil {

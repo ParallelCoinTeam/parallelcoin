@@ -94,7 +94,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	}
 	pb := pn.GetLastWithAlgo(algo)
 	if pb == nil {
-		// pl = &chaincfg.AllOnes !!!!!!!!!!!!!!!!!!
+		// pl = &netparams.AllOnes !!!!!!!!!!!!!!!!!!
 		DoNotCheckPow = true
 	}
 	// log.WARNF("checkBlockSanity powLimit %d %s %d %064x", algo,

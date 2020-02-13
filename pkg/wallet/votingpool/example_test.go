@@ -62,7 +62,7 @@ func ExampleCreate() {
 		return
 	}
 	// Create the address manager.
-	mgr, err := createWaddrmgr(mgrNamespace, &chaincfg.MainNetParams)
+	mgr, err := createWaddrmgr(mgrNamespace, &netparams.MainNetParams)
 	if err != nil {
 		log.ERROR(err)
 		return
@@ -281,7 +281,7 @@ func exampleCreateDBAndMgr() (teardown func(), db walletdb.DB, mgr *waddrmgr.Man
 			return err
 		}
 		// Create the address manager
-		mgr, err = createWaddrmgr(addrmgrNs, &chaincfg.MainNetParams)
+		mgr, err = createWaddrmgr(addrmgrNs, &netparams.MainNetParams)
 		return err
 	})
 	if err != nil {
@@ -326,7 +326,7 @@ func exampleCreateTxStore(ns walletdb.ReadWriteBucket) *wtxmgr.Store {
 	if err != nil {
 		panic(err)
 	}
-	s, err := wtxmgr.Open(ns, &chaincfg.MainNetParams)
+	s, err := wtxmgr.Open(ns, &netparams.MainNetParams)
 	if err != nil {
 		panic(err)
 	}

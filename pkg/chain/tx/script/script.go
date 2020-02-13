@@ -11,10 +11,10 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
-var // Bip16Activation is the timestamp where BIP0016 is valid to use in the
+// Bip16Activation is the timestamp where BIP0016 is valid to use in the
 // blockchain.  To be used to determine if BIP0016 should be called for or
 // not. This timestamp corresponds to Sun Apr 1 00:00:00 UTC 2012.
-Bip16Activation = time.Unix(1333238400, 0)
+var Bip16Activation = time.Unix(1333238400, 0)
 
 type // SigHashType represents hash type bits at the end of a signature.
 SigHashType uint32
@@ -33,27 +33,27 @@ const ( // Hash type bits from the end of a signature.
 	MaxScriptElementSize  = 520 // Max bytes pushable to the stack.
 )
 
-func // isSmallInt returns whether or not the opcode is considered a small
+// isSmallInt returns whether or not the opcode is considered a small
 // integer, which is an OP_0, or OP_1 through OP_16.
-isSmallInt(op *opcode) bool {
+func isSmallInt(op *opcode) bool {
 	if op.value == OP_0 || (op.value >= OP_1 && op.value <= OP_16) {
 		return true
 	}
 	return false
 }
 
-func // isScriptHash returns true if the script passed is a pay-to-script
+// isScriptHash returns true if the script passed is a pay-to-script
 // -hash transaction, false otherwise.
-isScriptHash(pops []parsedOpcode) bool {
+func isScriptHash(pops []parsedOpcode) bool {
 	return len(pops) == 3 &&
 		pops[0].opcode.value == OP_HASH160 &&
 		pops[1].opcode.value == OP_DATA_20 &&
 		pops[2].opcode.value == OP_EQUAL
 }
 
-func // IsPayToScriptHash returns true if the script is in the standard pay
+// IsPayToScriptHash returns true if the script is in the standard pay
 // -to-script-hash (P2SH) format, false otherwise.
-IsPayToScriptHash(script []byte) bool {
+func IsPayToScriptHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -62,17 +62,17 @@ IsPayToScriptHash(script []byte) bool {
 	return isScriptHash(pops)
 }
 
-func // isWitnessScriptHash returns true if the passed script is a pay-to
+// isWitnessScriptHash returns true if the passed script is a pay-to
 // -witness-script-hash transaction, false otherwise.
-isWitnessScriptHash(pops []parsedOpcode) bool {
+func isWitnessScriptHash(pops []parsedOpcode) bool {
 	return len(pops) == 2 &&
 		pops[0].opcode.value == OP_0 &&
 		pops[1].opcode.value == OP_DATA_32
 }
 
-func // IsPayToWitnessScriptHash returns true if the is in the standard pay
+// IsPayToWitnessScriptHash returns true if the is in the standard pay
 // -to-witness-script-hash (P2WSH) format, false otherwise.
-IsPayToWitnessScriptHash(script []byte) bool {
+func IsPayToWitnessScriptHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -81,9 +81,9 @@ IsPayToWitnessScriptHash(script []byte) bool {
 	return isWitnessScriptHash(pops)
 }
 
-func // IsPayToWitnessPubKeyHash returns true if the is in the standard pay
+// IsPayToWitnessPubKeyHash returns true if the is in the standard pay
 // -to-witness-pubkey-hash (P2WKH) format, false otherwise.
-IsPayToWitnessPubKeyHash(script []byte) bool {
+func IsPayToWitnessPubKeyHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -92,19 +92,19 @@ IsPayToWitnessPubKeyHash(script []byte) bool {
 	return isWitnessPubKeyHash(pops)
 }
 
-func // isWitnessPubKeyHash returns true if the passed script is a pay-to
+// isWitnessPubKeyHash returns true if the passed script is a pay-to
 // -witness-pubkey-hash, and false otherwise.
-isWitnessPubKeyHash(pops []parsedOpcode) bool {
+func isWitnessPubKeyHash(pops []parsedOpcode) bool {
 	return len(pops) == 2 &&
 		pops[0].opcode.value == OP_0 &&
 		pops[1].opcode.value == OP_DATA_20
 }
 
-func // IsWitnessProgram returns true if the passed script is a valid witness
+// IsWitnessProgram returns true if the passed script is a valid witness
 // program which is encoded according to the passed witness program version.
 // A witness program must be a small integer (from 0-16),
 // followed by 2-40 bytes of pushed data.
-IsWitnessProgram(script []byte) bool {
+func IsWitnessProgram(script []byte) bool {
 	// The length of the script must be between 4 and 42 bytes. The smallest program is the witness version, followed by a data push of 2 bytes.  The largest allowed witness program has a data push of 40-bytes.
 	if len(script) < 4 || len(script) > 42 {
 		return false
@@ -117,23 +117,23 @@ IsWitnessProgram(script []byte) bool {
 	return isWitnessProgram(pops)
 }
 
-func // isWitnessProgram returns true if the passed script is a witness
+// isWitnessProgram returns true if the passed script is a witness
 // program, and false otherwise.
 // A witness program MUST adhere to the following constraints: there must be
 // exactly two pops (program version and the program itself),
 // the first opcode MUST be a small integer (0-16),
 // the push data MUST be canonical,
 // and finally the size of the push data must be between 2 and 40 bytes.
-isWitnessProgram(pops []parsedOpcode) bool {
+func isWitnessProgram(pops []parsedOpcode) bool {
 	return len(pops) == 2 &&
 		isSmallInt(pops[0].opcode) &&
 		canonicalPush(pops[1]) &&
 		(len(pops[1].data) >= 2 && len(pops[1].data) <= 40)
 }
 
-func // ExtractWitnessProgramInfo attempts to extract the witness program
+// ExtractWitnessProgramInfo attempts to extract the witness program
 // version, as well as the witness program itself from the passed script.
-ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
+func ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -151,8 +151,8 @@ ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
 	return witnessVersion, witnessProgram, nil
 }
 
-func // isPushOnly returns true if the script only pushes data, false otherwise.
-isPushOnly(pops []parsedOpcode) bool {
+func isPushOnly(pops []parsedOpcode) bool {
+// isPushOnly returns true if the script only pushes data, false otherwise.
 	// NOTE: This function does NOT verify opcodes directly since it is
 	// internal and is only called with parsed opcodes for scripts that did
 	// not have any parse errors.  Thus, consensus is properly maintained.
@@ -168,9 +168,9 @@ isPushOnly(pops []parsedOpcode) bool {
 	return true
 }
 
-func // IsPushOnlyScript returns whether or not the passed script only pushes
+func IsPushOnlyScript(script []byte) bool {
+// IsPushOnlyScript returns whether or not the passed script only pushes
 // data. False will be returned when the script does not parse.
-IsPushOnlyScript(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -179,11 +179,11 @@ IsPushOnlyScript(script []byte) bool {
 	return isPushOnly(pops)
 }
 
-func // ParseScriptTemplate is the same as parseScript but allows the passing
+// ParseScriptTemplate is the same as parseScript but allows the passing
 // of the template list for testing purposes.  When there are parse errors,
 // it returns the list of parsed opcodes up to the point of failure along
 // with the error.
-ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, error) {
+func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, error) {
 	retScript := make([]parsedOpcode, 0, len(script))
 	for i := 0; i < len(script); {
 		instr := script[i]
@@ -255,14 +255,14 @@ ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, error)
 	return retScript, nil
 }
 
-func // parseScript preparses the script in bytes into a list of parsedOpcodes while applying a number of sanity checks.
-parseScript(script []byte) ([]parsedOpcode, error) {
+// parseScript preparses the script in bytes into a list of parsedOpcodes while applying a number of sanity checks.
+func parseScript(script []byte) ([]parsedOpcode, error) {
 	return ParseScriptTemplate(script, &OpcodeArray)
 }
 
-func // unparseScript reversed the action of parseScript and returns the
+// unparseScript reversed the action of parseScript and returns the
 // parsedOpcodes as a list of bytes
-unparseScript(pops []parsedOpcode) ([]byte, error) {
+func unparseScript(pops []parsedOpcode) ([]byte, error) {
 	script := make([]byte, 0, len(pops))
 	for _, pop := range pops {
 		b, err := pop.bytes()
@@ -275,13 +275,13 @@ unparseScript(pops []parsedOpcode) ([]byte, error) {
 	return script, nil
 }
 
-func // DisasmString formats a disassembled script for one line printing.
+// DisasmString formats a disassembled script for one line printing.
 // When the script fails to parse,
 // the returned string will contain the disassembled script up to the point
 // the failure occurred along with the string '[error]' appended.
 // In addition, the reason the script failed to parse is returned if the
 // caller wants more information about the failure.
-DisasmString(buf []byte) (string, error) {
+func DisasmString(buf []byte) (string, error) {
 	var disbuf bytes.Buffer
 	opcodes, err := parseScript(buf)
 	for _, pop := range opcodes {
@@ -298,9 +298,9 @@ DisasmString(buf []byte) (string, error) {
 	return disbuf.String(), err
 }
 
-func // removeOpcode will remove any opcode matching ``opcode'' from the
+// removeOpcode will remove any opcode matching ``opcode'' from the
 // opcode stream in pkscript
-removeOpcode(pkscript []parsedOpcode, opcode byte) []parsedOpcode {
+func removeOpcode(pkscript []parsedOpcode, opcode byte) []parsedOpcode {
 	retScript := make([]parsedOpcode, 0, len(pkscript))
 	for _, pop := range pkscript {
 		if pop.opcode.value != opcode {
@@ -310,11 +310,11 @@ removeOpcode(pkscript []parsedOpcode, opcode byte) []parsedOpcode {
 	return retScript
 }
 
-func // canonicalPush returns true if the object is either not a push
+// canonicalPush returns true if the object is either not a push
 // instruction or the push instruction contained wherein is matches the
 // canonical form or using the smallest instruction to do the job.
 // False otherwise.
-canonicalPush(pop parsedOpcode) bool {
+func canonicalPush(pop parsedOpcode) bool {
 	opcode := pop.opcode.value
 	data := pop.data
 	dataLen := len(pop.data)
@@ -336,9 +336,9 @@ canonicalPush(pop parsedOpcode) bool {
 	return true
 }
 
-func // removeOpcodeByData will return the script minus any opcodes that
+// removeOpcodeByData will return the script minus any opcodes that
 // would push the passed data to the stack.
-removeOpcodeByData(pkscript []parsedOpcode, data []byte) []parsedOpcode {
+func removeOpcodeByData(pkscript []parsedOpcode, data []byte) []parsedOpcode {
 	retScript := make([]parsedOpcode, 0, len(pkscript))
 	for _, pop := range pkscript {
 		if !canonicalPush(pop) || !bytes.Contains(pop.data, data) {
@@ -348,13 +348,13 @@ removeOpcodeByData(pkscript []parsedOpcode, data []byte) []parsedOpcode {
 	return retScript
 }
 
-func // calcHashPrevOuts calculates a single hash of all the previous outputs
+// calcHashPrevOuts calculates a single hash of all the previous outputs
 // (txid:index) referenced within the passed transaction.
 // This calculated hash can be re-used when validating all inputs spending
 // segwit outputs, with a signature hash type of SigHashAll.
 // This allows validation to re-use previous hashing computation,
 // reducing the complexity of validating SigHashAll inputs from  O(N^2) to O(N).
-calcHashPrevOuts(tx *wire.MsgTx) chainhash.Hash {
+func calcHashPrevOuts(tx *wire.MsgTx) chainhash.Hash {
 	var b bytes.Buffer
 	for _, in := range tx.TxIn {
 		// First write out the 32-byte transaction ID one of whose outputs
@@ -369,13 +369,13 @@ calcHashPrevOuts(tx *wire.MsgTx) chainhash.Hash {
 	return chainhash.DoubleHashH(b.Bytes())
 }
 
-func // calcHashSequence computes an aggregated hash of each of the sequence
+// calcHashSequence computes an aggregated hash of each of the sequence
 // numbers within the inputs of the passed transaction.
 // This single hash can be re-used when validating all inputs spending segwit
 // outputs, which include signatures using the SigHashAll sighash type.
 // This allows validation to re-use previous hashing computation,
 // reducing the complexity of validating SigHashAll inputs from O(N^2) to O(N).
-calcHashSequence(tx *wire.MsgTx) chainhash.Hash {
+func calcHashSequence(tx *wire.MsgTx) chainhash.Hash {
 	var b bytes.Buffer
 	for _, in := range tx.TxIn {
 		var buf [4]byte
@@ -385,14 +385,14 @@ calcHashSequence(tx *wire.MsgTx) chainhash.Hash {
 	return chainhash.DoubleHashH(b.Bytes())
 }
 
-func // calcHashOutputs computes a hash digest of all outputs created by the
+// calcHashOutputs computes a hash digest of all outputs created by the
 // transaction encoded using the wire format.
 // This single hash can be re-used when validating all inputs spending
 // witness programs,
 // which include signatures using the SigHashAll sighash type.
 // This allows computation to be cached,
 // reducing the total hashing complexity from O(N^2) to O(N).
-calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
+func calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
 	var b bytes.Buffer
 	for _, out := range tx.TxOut {
 		err := wire.WriteTxOut(&b, 0, 0, out)
@@ -403,7 +403,7 @@ calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
 	return chainhash.DoubleHashH(b.Bytes())
 }
 
-func // calcWitnessSignatureHash computes the sighash digest of a transaction's
+// calcWitnessSignatureHash computes the sighash digest of a transaction's
 // segwit input using the new optimized digest calculation algorithm defined
 // in BIP0143: https://github.// com/bitcoin/bips/blob/master/bip-0143.mediawiki
 // This function makes use of pre-calculated sighash fragments stored within
@@ -414,7 +414,7 @@ func // calcWitnessSignatureHash computes the sighash digest of a transaction's
 // exact amount being spent in addition to the final transaction fee.
 // In the case the wallet if fed an invalid input amount,
 // the real sighash will differ causing the produced signature to be invalid.
-calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
+func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
 	// As a sanity check,
 	// ensure the passed input index for the transaction is valid.
 	if idx > len(tx.TxIn)-1 {
@@ -509,9 +509,9 @@ calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashT
 	return chainhash.DoubleHashB(sigHash.Bytes()), nil
 }
 
-func // CalcWitnessSigHash computes the sighash digest for the specified
+// CalcWitnessSigHash computes the sighash digest for the specified
 // input of the target transaction observing the desired sig hash type.
-CalcWitnessSigHash(script []byte, sigHashes *TxSigHashes, hType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
+func CalcWitnessSigHash(script []byte, sigHashes *TxSigHashes, hType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
 	parsedScript, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -521,12 +521,12 @@ CalcWitnessSigHash(script []byte, sigHashes *TxSigHashes, hType SigHashType, tx 
 		amt)
 }
 
-func // shallowCopyTx creates a shallow copy of the transaction for use when
+// shallowCopyTx creates a shallow copy of the transaction for use when
 // calculating the signature hash.
 // It is used over the Copy method on the transaction itself since that is a
 // deep copy and therefore does more work and allocates much more space than
 // needed.
-shallowCopyTx(tx *wire.MsgTx) wire.MsgTx {
+func shallowCopyTx(tx *wire.MsgTx) wire.MsgTx {
 	// As an additional memory optimization, use contiguous backing arrays for the copied inputs and outputs and point the final slice of pointers into the contiguous arrays.  This avoids a lot of small allocations.
 	txCopy := wire.MsgTx{
 		Version:  tx.Version,
@@ -547,10 +547,10 @@ shallowCopyTx(tx *wire.MsgTx) wire.MsgTx {
 	return txCopy
 }
 
-func // CalcSignatureHash will given a script and hash type for the current
+// CalcSignatureHash will given a script and hash type for the current
 // script engine instance calculate the signature hash to be used for signing
 // and verification.
-CalcSignatureHash(script []byte, hashType SigHashType, tx *wire.MsgTx, idx int) ([]byte, error) {
+func CalcSignatureHash(script []byte, hashType SigHashType, tx *wire.MsgTx, idx int) ([]byte, error) {
 	parsedScript, err := parseScript(script)
 	if err != nil {
 		log.ERROR(err)
@@ -559,10 +559,10 @@ CalcSignatureHash(script []byte, hashType SigHashType, tx *wire.MsgTx, idx int) 
 	return calcSignatureHash(parsedScript, hashType, tx, idx), nil
 }
 
-func // calcSignatureHash will given a script and hash type for the current
+// calcSignatureHash will given a script and hash type for the current
 // script engine instance calculate the signature hash to be used for signing
 // and verification.
-calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.MsgTx, idx int) []byte {
+func calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.MsgTx, idx int) []byte {
 	// The SigHashSingle signature type signs only the corresponding input
 	// and output (the output with the same index number as the input).
 	// Since transactions can have more inputs than outputs,
@@ -652,20 +652,20 @@ calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.MsgTx, i
 	return chainhash.DoubleHashB(wbuf.Bytes())
 }
 
-func // asSmallInt returns the passed opcode which must be true according to
+// asSmallInt returns the passed opcode which must be true according to
 // isSmallInt(), as an integer.
-asSmallInt(op *opcode) int {
+func asSmallInt(op *opcode) int {
 	if op.value == OP_0 {
 		return 0
 	}
 	return int(op.value - (OP_1 - 1))
 }
 
-func // getSigOpCount is the implementation function for counting the number of
+// getSigOpCount is the implementation function for counting the number of
 // signature operations in the script provided by pops.
 // If precise mode is requested then we attempt to count the number of
 // operations for a multisig op. Otherwise we use the maximum.
-getSigOpCount(pops []parsedOpcode, precise bool) int {
+func getSigOpCount(pops []parsedOpcode, precise bool) int {
 	nSigs := 0
 	for i, pop := range pops {
 		switch pop.opcode.value {
@@ -693,23 +693,23 @@ getSigOpCount(pops []parsedOpcode, precise bool) int {
 	return nSigs
 }
 
-func // GetSigOpCount provides a quick count of the number of signature
+// GetSigOpCount provides a quick count of the number of signature
 // operations in a script. a CHECKSIG operations counts for 1,
 // and a CHECK_MULTISIG for 20. If the script fails to parse,
 // then the count up to the point of failure is returned.
-GetSigOpCount(script []byte) int {
+func GetSigOpCount(script []byte) int {
 	// Don't check error since parseScript returns the parsed-up-to-error
 	// list of pops.
 	pops, _ := parseScript(script)
 	return getSigOpCount(pops, false)
 }
 
-func // GetPreciseSigOpCount returns the number of signature operations in
+// GetPreciseSigOpCount returns the number of signature operations in
 // scriptPubKey.  If bip16 is true then scriptSig may be searched for the Pay
 // -To-Script-Hash script in order to find the precise number of signature
 // operations in the transaction.  If the script fails to parse,
 // then the count up to the point of failure is returned.
-GetPreciseSigOpCount(scriptSig, scriptPubKey []byte, bip16 bool) int {
+func GetPreciseSigOpCount(scriptSig, scriptPubKey []byte, bip16 bool) int {
 	// Don't check error since parseScript returns the parsed-up-to-error
 	// list of pops.
 	pops, _ := parseScript(scriptPubKey)
@@ -744,14 +744,14 @@ GetPreciseSigOpCount(scriptSig, scriptPubKey []byte, bip16 bool) int {
 	return getSigOpCount(shPops, true)
 }
 
-func // GetWitnessSigOpCount returns the number of signature operations
+// GetWitnessSigOpCount returns the number of signature operations
 // generated by spending the passed pkScript with the specified witness,
 // or sigScript. Unlike GetPreciseSigOpCount,
 // this function is able to accurately count the number of signature
 // operations generated by spending witness programs,
 // and nested p2sh witness programs. If the script fails to parse,
 // then the count up to the point of failure is returned.
-GetWitnessSigOpCount(sigScript, pkScript []byte, witness wire.TxWitness) int {
+func GetWitnessSigOpCount(sigScript, pkScript []byte, witness wire.TxWitness) int {
 	// If this is a regular witness program,
 	// then we can proceed directly to counting its signature operations
 	// without any further processing.
@@ -773,12 +773,12 @@ GetWitnessSigOpCount(sigScript, pkScript []byte, witness wire.TxWitness) int {
 	return 0
 }
 
-func // getWitnessSigOps returns the number of signature operations generated
+// getWitnessSigOps returns the number of signature operations generated
 // by spending the passed witness program wit the passed witness.
 // The exact signature counting heuristic is modified by the version of the
 // passed witness program. If the version of the witness program is unable to
 // be extracted, then 0 is returned for the sig op count.
-getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
+func getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
 	// Attempt to extract the witness program version.
 	witnessVersion, witnessProgram, err := ExtractWitnessProgramInfo(
 		pkScript,

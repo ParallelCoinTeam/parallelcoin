@@ -24,7 +24,7 @@ func mustParseShortForm(script string) []byte {
 // newAddressPubKey returns a new util.AddressPubKey from the provided serialized public key.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
 func newAddressPubKey(serializedPubKey []byte) util.Address {
 	addr, err := util.NewAddressPubKey(serializedPubKey,
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		panic("invalid public key in test source")
 	}
@@ -33,7 +33,7 @@ func newAddressPubKey(serializedPubKey []byte) util.Address {
 
 // newAddressPubKeyHash returns a new util.AddressPubKeyHash from the provided hash.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
 func newAddressPubKeyHash(pkHash []byte) util.Address {
-	addr, err := util.NewAddressPubKeyHash(pkHash, &chaincfg.MainNetParams)
+	addr, err := util.NewAddressPubKeyHash(pkHash, &netparams.MainNetParams)
 	if err != nil {
 		panic("invalid public key hash in test source")
 	}
@@ -43,7 +43,7 @@ func newAddressPubKeyHash(pkHash []byte) util.Address {
 // newAddressScriptHash returns a new util.AddressScriptHash from the provided hash.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
 func newAddressScriptHash(scriptHash []byte) util.Address {
 	addr, err := util.NewAddressScriptHashFromHash(scriptHash,
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		panic("invalid script hash in test source")
 	}
@@ -313,7 +313,7 @@ func TestExtractPkScriptAddrs(t *testing.T) {
 	t.Logf("Running %d tests.", len(tests))
 	for i, test := range tests {
 		class, addrs, reqSigs, err := ExtractPkScriptAddrs(
-			test.script, &chaincfg.MainNetParams)
+			test.script, &netparams.MainNetParams)
 		if err != nil {
 			t.Log(err)
 		}
@@ -546,27 +546,27 @@ func TestPayToAddrScript(t *testing.T) {
 	t.Parallel()
 	// 1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX
 	p2pkhMain, err := util.NewAddressPubKeyHash(hexToBytes("e34cce70c86"+
-		"373273efcc54ce7d2a491bb4a0e84"), &chaincfg.MainNetParams)
+		"373273efcc54ce7d2a491bb4a0e84"), &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create public key hash address: %v", err)
 	}
 	// Taken from transaction: b0539a45de13b3e0403909b8bd1a555b8cbe45fd4e3f3fda76f3a5f52835c29d
 	p2shMain, _ := util.NewAddressScriptHashFromHash(hexToBytes("e8c300"+
-		"c87986efa84c37c0519929019ef86eb5b4"), &chaincfg.MainNetParams)
+		"c87986efa84c37c0519929019ef86eb5b4"), &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create script hash address: %v", err)
 	}
 	//  mainnet p2pk 13CG6SJ3yHUXo4Cr2RY4THLLJrNFuG3gUg
 	p2pkCompressedMain, err := util.NewAddressPubKey(hexToBytes("02192d"+
 		"74d0cb94344c9569c2e77901573d8d7903c3ebec3a957724895dca52c6b4"),
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (compressed): %v",
 			err)
 	}
 	p2pkCompressed2Main, err := util.NewAddressPubKey(hexToBytes("03b0b"+
 		"d634234abbb1ba1e986e884185c61cf43e001f9137f23c2c409273eb16e65"),
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (compressed 2): %v",
 			err)
@@ -574,7 +574,7 @@ func TestPayToAddrScript(t *testing.T) {
 	p2pkUncompressedMain, err := util.NewAddressPubKey(hexToBytes("0411"+
 		"db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5"+
 		"cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b4"+
-		"12a3"), &chaincfg.MainNetParams)
+		"12a3"), &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (uncompressed): %v",
 			err)
@@ -653,14 +653,14 @@ func TestMultiSigScript(t *testing.T) {
 	//  mainnet p2pk 13CG6SJ3yHUXo4Cr2RY4THLLJrNFuG3gUg
 	p2pkCompressedMain, err := util.NewAddressPubKey(hexToBytes("02192d"+
 		"74d0cb94344c9569c2e77901573d8d7903c3ebec3a957724895dca52c6b4"),
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (compressed): %v",
 			err)
 	}
 	p2pkCompressed2Main, err := util.NewAddressPubKey(hexToBytes("03b0b"+
 		"d634234abbb1ba1e986e884185c61cf43e001f9137f23c2c409273eb16e65"),
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (compressed 2): %v",
 			err)
@@ -668,7 +668,7 @@ func TestMultiSigScript(t *testing.T) {
 	p2pkUncompressedMain, err := util.NewAddressPubKey(hexToBytes("0411"+
 		"db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5"+
 		"cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b4"+
-		"12a3"), &chaincfg.MainNetParams)
+		"12a3"), &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (uncompressed): %v",
 			err)

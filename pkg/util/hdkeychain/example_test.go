@@ -76,12 +76,12 @@ func ExampleNewMaster() {
 // 		return
 // 	}
 // 	// Get and show the address associated with the extended keys for the main bitcoin	network.
-// 	acct0ExtAddr, err := acct0Ext10.Address(&chaincfg.MainNetParams)
+// 	acct0ExtAddr, err := acct0Ext10.Address(&netparams.MainNetParams)
 // 	if err != nil {
 // 		log.ERROR(err)
 // 		return
 // 	}
-// 	acct0IntAddr, err := acct0Int0.Address(&chaincfg.MainNetParams)
+// 	acct0IntAddr, err := acct0Int0.Address(&netparams.MainNetParams)
 // 	if err != nil {
 // 		log.ERROR(err)
 // 		return

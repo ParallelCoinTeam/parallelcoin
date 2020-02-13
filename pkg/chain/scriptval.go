@@ -120,10 +120,10 @@ func // Validate validates the scripts for all of the passed transaction inputs
 	if maxGoRoutines <= 0 {
 		maxGoRoutines = 1
 	}
-	if maxGoRoutines > len(items) {
-		maxGoRoutines = len(items)
+	if maxGoRoutines > len(items)*3 {
+		maxGoRoutines = len(items)*3
 	}
-	maxGoRoutines = 1
+	// maxGoRoutines = 1
 	// Start up validation handlers that are used to asynchronously validate
 	// each transaction input.
 	// TODO: this creates an insane amount of goroutines that run for tens of

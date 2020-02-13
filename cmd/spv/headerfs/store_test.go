@@ -44,7 +44,7 @@ func createTestBlockHeaderStore() (func(), walletdb.DB, string,
 }
 func createTestBlockHeaderChain(numHeaders uint32) []BlockHeader {
 	blockHeaders := make([]BlockHeader, numHeaders)
-	prevHeader := &chaincfg.SimNetParams.GenesisBlock.Header
+	prevHeader := &netparams.SimNetParams.GenesisBlock.Header
 	for i := uint32(1); i <= numHeaders; i++ {
 		bitcoinHeader := &wire.BlockHeader{
 			Bits:      uint32(rand.Int31()),
@@ -181,7 +181,7 @@ func TestBlockHeaderStoreRecovery(t *testing.T) {
 	}
 	// Next, we'll re-create the block header store in order to trigger the
 	// recovery logic.
-	hs, err := NewBlockHeaderStore(tempDir, db, &chaincfg.SimNetParams)
+	hs, err := NewBlockHeaderStore(tempDir, db, &netparams.SimNetParams)
 	if err != nil {
 		t.Fatalf("unable to re-create bhs: %v", err)
 	}

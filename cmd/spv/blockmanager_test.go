@@ -471,7 +471,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 			err)
 // 	}
 // 	hdrStore, err := headerfs.NewBlockHeaderStore(
-// 		tempDir, db, &chaincfg.SimNetParams,
+// 		tempDir, db, &netparams.SimNetParams,
 // 	)
 // 	if err != nil {
 // 		db.Close()
@@ -484,7 +484,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 	}
 // 	cfStore, err := headerfs.NewFilterHeaderStore(
 // 		tempDir, db, headerfs.RegularFilter,
-// 		&chaincfg.SimNetParams,
+// 		&netparams.SimNetParams,
 // 	)
 // 	if err != nil {
 // 		cleanUp()

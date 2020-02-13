@@ -16,7 +16,7 @@ import (
 var (
 	podHomeDir      = util.AppDataDir("pod", false)
 	knownDbTypes    = database.SupportedDrivers()
-	activeNetParams = &chaincfg.MainNetParamsRPC
+	activeNetParams = &netparams.MainNetParamsRPC
 	// Default global config.
 	cfg = &config{
 		DataDir: filepath.Join(podHomeDir, "data"),
@@ -70,15 +70,15 @@ func setupGlobalConfig(	) error {
 	numNets := 0
 	if cfg.TestNet3 {
 		numNets++
-		activeNetParams = &chaincfg.TestNet3ParamsRPC
+		activeNetParams = &netparams.TestNet3ParamsRPC
 	}
 	if cfg.RegressionTest {
 		numNets++
-		activeNetParams = &chaincfg.RegressionTestParams
+		activeNetParams = &netparams.RegressionTestParams
 	}
 	if cfg.SimNet {
 		numNets++
-		activeNetParams = &chaincfg.SimNetParamsRPC
+		activeNetParams = &netparams.SimNetParamsRPC
 	}
 	if numNets > 1 {
 		return errors.New("The testnet, regtest, and simnet params " +

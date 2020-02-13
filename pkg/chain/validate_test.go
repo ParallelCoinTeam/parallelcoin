@@ -56,7 +56,7 @@ func TestSequenceLocksActive(t *testing.T) {
 // func TestCheckConnectBlockTemplate(// 	t *testing.T) {
 // 	// Create a new database and chain instance to run tests against.
 // 	chain, teardownFunc, err := chainSetup("checkconnectblocktemplate",
-// 		&chaincfg.MainNetParams)
+// 		&netparams.MainNetParams)
 // 	if err != nil {
 // 		t.Errorf("Failed to setup chain instance: %v", err)
 // 		return

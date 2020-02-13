@@ -31,7 +31,7 @@ import (
 // 	}
 // 	// Create a new database and chain instance to run tests against.
 // 	chain, teardownFunc, err := chainSetup("haveblock",
-// 		&chaincfg.MainNetParams)
+// 		&netparams.MainNetParams)
 // 	if err != nil {
 // 		t.Errorf("Failed to setup chain instance: %v", err)
 // 		return
@@ -96,7 +96,7 @@ import (
 // }
 // TestCalcSequenceLock tests the LockTimeToSequence function, and the CalcSequenceLock method of a Chain instance. The tests exercise several combinations of inputs to the CalcSequenceLock function in order to ensure the returned SequenceLocks are correct for each test instance.
 func TestCalcSequenceLock(t *testing.T) {
-	netParams := &chaincfg.SimNetParams
+	netParams := &netparams.SimNetParams
 	// We need to activate CSV in order to test the processing logic, so manually craft the block version that's used to signal the soft-fork activation.
 	csvBit := netParams.Deployments[chaincfg.DeploymentCSV].BitNumber
 	blockVersion := int32(0x20000000 | (uint32(1) << csvBit))
@@ -390,7 +390,7 @@ func TestLocateInventory(t *testing.T) {
 	// 	genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
 	// 	                              \-> 16a -> 17a
 	tip := tstTip
-	chain := newFakeChain(&chaincfg.MainNetParams)
+	chain := newFakeChain(&netparams.MainNetParams)
 	branch0Nodes := chainedNodes(chain.BestChain.Genesis(), 18)
 	branch1Nodes := chainedNodes(branch0Nodes[14], 2)
 	for _, node := range branch0Nodes {
@@ -645,7 +645,7 @@ func TestHeightToHashRange(t *testing.T) {
 	// 	genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
 	// 	                              \-> 16a -> 17a -> 18a (unvalidated)
 	tip := tstTip
-	chain := newFakeChain(&chaincfg.MainNetParams)
+	chain := newFakeChain(&netparams.MainNetParams)
 	branch0Nodes := chainedNodes(chain.BestChain.Genesis(), 18)
 	branch1Nodes := chainedNodes(branch0Nodes[14], 3)
 	for _, node := range branch0Nodes {
@@ -737,7 +737,7 @@ func TestIntervalBlockHashes(t *testing.T) {
 	// 	genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
 	// 	                              \-> 16a -> 17a -> 18a (unvalidated)
 	tip := tstTip
-	chain := newFakeChain(&chaincfg.MainNetParams)
+	chain := newFakeChain(&netparams.MainNetParams)
 	branch0Nodes := chainedNodes(chain.BestChain.Genesis(), 18)
 	branch1Nodes := chainedNodes(branch0Nodes[14], 3)
 	for _, node := range branch0Nodes {
