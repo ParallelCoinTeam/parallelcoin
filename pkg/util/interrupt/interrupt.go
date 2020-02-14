@@ -2,10 +2,12 @@ package interrupt
 
 import (
 	"os"
-	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
+	
+	"github.com/kardianos/osext"
 	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/app/apputil"
@@ -43,16 +45,19 @@ func Listener() {
 		log.DEBUG("interrupt handlers finished")
 		if Restart {
 			log.DEBUG("restarting")
-			cmd := exec.Command(os.Args[0], os.Args[1:]...)
-			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			err := cmd.Start()
+			file, err := osext.Executable()
 			if err != nil {
 				log.ERROR(err)
+				return
 			}
+			err = syscall.Exec(file, os.Args, os.Environ())
+			if err != nil {
+				log.FATAL(err)
+			}
+			// return
 			os.Exit(1)
 		} else {
+			// return
 			os.Exit(1)
 		}
 	}

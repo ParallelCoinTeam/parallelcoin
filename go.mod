@@ -22,10 +22,11 @@ require (
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.3.3
-	github.com/google/go-github/v24 v24.0.1
+	github.com/google/go-github/v24 v24.0.1 // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/jcelliott/lumber v0.0.0-20160324203708-dd349441af25 // indirect
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
 	github.com/minio/highwayhash v1.0.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
@@ -41,7 +42,7 @@ require (
 	golang.org/x/exp v0.0.0-20200119233911-0405dc783f0a
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5
 	golang.org/x/text v0.3.2
 	google.golang.org/grpc v1.27.0

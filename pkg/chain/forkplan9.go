@@ -24,6 +24,7 @@ import (
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 	lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32,
 	adjustment float64, err error) {
+	newTargetBits = fork.SecondPowLimitBits
 	if lastNode == nil {
 		log.TRACE("lastNode is nil")
 	}
