@@ -50,7 +50,7 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, name, value string) fun
 					layout.Rigid(func() {
 						layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(gtx, func() {
 							if Icon != nil {
-								Icon.Color = theme.HexARGB("ff303030")
+								Icon.Color = theme.HexARGB(th.Color.Dark)
 								Icon.Layout(gtx, unit.Px(float32(32)))
 							}
 							gtx.Dimensions = layout.Dimensions{

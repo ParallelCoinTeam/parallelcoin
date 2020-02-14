@@ -16,12 +16,12 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 	layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
 		layout.Flexed(0.6, func() {
 			layout.Flex{Axis: layout.Horizontal}.Layout(ui.ly.Context,
-
 				layout.Rigid(func() {
 					layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
 						size := ui.ly.Context.Px(unit.Dp(256)) - 2*ui.ly.Context.Px(unit.Dp(8))
 						if logo != nil {
 							logo.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
+							logo.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
 							logo.Layout(ui.ly.Context, unit.Px(float32(size)))
 						}
 						ui.ly.Context.Dimensions = layout.Dimensions{
@@ -31,7 +31,9 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 				}),
 				layout.Flexed(1, func() {
 					layout.UniformInset(unit.Dp(60)).Layout(ui.ly.Context, func() {
-						ui.ly.Theme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE").Layout(ui.ly.Context)
+						txt := ui.ly.Theme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE")
+						txt.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
+						txt.Layout(ui.ly.Context)
 					})
 				}),
 			)

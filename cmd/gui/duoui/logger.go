@@ -6,7 +6,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/op"
 	"github.com/p9c/pod/pkg/gui/unit"
-	"github.com/p9c/pod/pkg/log"
 )
 
 var (
@@ -25,7 +24,7 @@ func (ui *DuoUI) DuoUIlogger() func() {
 			theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			logOutputList.Layout(ui.ly.Context, len(ui.rc.Log.LogMessages), func(i int) {
 				t := ui.rc.Log.LogMessages[i]
-				col := ui.ly.Theme.Color.Dark
+				col := ui.ly.Theme.Color.Primary
 				if t.Level == "TRC" {
 					col = ui.ly.Theme.Color.Success
 				}
@@ -56,25 +55,3 @@ func (ui *DuoUI) DuoUIlogger() func() {
 	}
 }
 
-func (ui *DuoUI) DuoUIloggerController() func() {
-	return func() {
-		log.L.LogChan = ui.rc.Log.LogChan
-		log.L.SetLevel("Info", false)
-		go func() {
-		out:
-			for {
-				select {
-				case n := <-log.L.LogChan:
-					ui.rc.Log.LogMessages = append(ui.rc.Log.LogMessages, n)
-				case <-ui.rc.Log.StopLogger:
-					defer func() {
-						ui.rc.Log.StopLogger = make(chan struct{})
-					}()
-					ui.rc.Log.LogMessages = []log.Entry{}
-					log.L.LogChan = nil
-					break out
-				}
-			}
-		}()
-	}
-}
