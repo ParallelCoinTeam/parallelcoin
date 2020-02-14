@@ -580,6 +580,14 @@ func NewRestartCmd() *RestartCmd {
 	return &RestartCmd{}
 }
 
+// DropWalletHistoryCmd defines the restart JSON-RPC command.
+type DropWalletHistoryCmd struct{}
+
+// NewDropWalletHistoryCmd returns a new instance which can be used to issue a stop JSON-RPC command.
+func NewDropWalletHistoryCmd() *DropWalletHistoryCmd {
+	return &DropWalletHistoryCmd{}
+}
+
 // SubmitBlockOptions represents the optional options struct provided with a SubmitBlockCmd command.
 type SubmitBlockOptions struct {
 	// must be provided if server provided a workid with template.

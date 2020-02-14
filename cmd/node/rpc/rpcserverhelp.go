@@ -612,6 +612,12 @@ var HelpDescsEnUS = map[string]string{
 	// StopCmd help.
 	"stop--synopsis": "Shutdown pod.",
 	"stop--result0":  "The string 'pod stopping.'",
+	// RestartCmd help
+	"restart--synopsis": "Restarts pod in-place",
+	"restart--result0": "The string 'pod restarting'",
+	// DropWalletHistoryCmd help
+	"dropwallethistory--synopsis": "Clears history from wallet and restarts",
+	"dropwallethistory--result0": "The string 'dropped wallet history, restarting'",
 	// SubmitBlockOptions help.
 	"submitblockoptions-workid": "This parameter is currently ignored",
 	// SubmitBlockCmd help.
@@ -788,6 +794,7 @@ var ResultTypes = map[string][]interface{}{
 	"setgenerate":           nil,
 	"stop":                  {(*string)(nil)},
 	"restart":               {(*string)(nil)},
+	"dropwallethistory":     {(*string)(nil)},
 	"submitblock":           {nil, (*string)(nil)},
 	"uptime":                {(*int64)(nil)},
 	"validateaddress":       {(*btcjson.ValidateAddressChainResult)(nil)},

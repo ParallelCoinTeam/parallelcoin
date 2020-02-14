@@ -118,6 +118,8 @@ type Server struct {
 
 // ServerConfig is a descriptor containing the RPC server configuration.
 type ServerConfig struct {
+	// Cx passes through the context variable for setting up a server
+	Cfg *pod.Config
 	// Listeners defines a slice of listeners for which the RPC server will
 	// take ownership of and accept connections.
 	// Since the RPC server takes ownership of these listeners,
@@ -400,6 +402,7 @@ var (
 		"setgenerate":           HandleSetGenerate,
 		"stop":                  HandleStop,
 		"restart":               HandleRestart,
+		"dropwallethistory":     HandleDropWalletHistory,
 		"submitblock":           HandleSubmitBlock,
 		"uptime":                HandleUptime,
 		"validateaddress":       HandleValidateAddress,
@@ -4188,6 +4191,12 @@ func HandleRestart(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	}
 	interrupt.RequestRestart()
 	return "node restarting", nil
+}
+
+func HandleDropWalletHistory(s *Server, cmd interface{}, closeChan <-chan struct{}) (in interface{}, err error) {
+	err = DropWalletHistory(s.Config)(nil)
+	interrupt.RequestRestart()
+	return "dropped wallet history, restarting", nil
 }
 
 // HandleSubmitBlock implements the submitblock command.
