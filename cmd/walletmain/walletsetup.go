@@ -153,7 +153,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 		return err
 	}
 	log.DEBUG("Creating the wallet")
-	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now(), false)
+	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now(), false, config)
 	if err != nil {
 		log.ERROR(err)
 		log.DEBUG(err)

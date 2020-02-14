@@ -1,20 +1,22 @@
-package rpc
+package legacy
 
 import (
 	"encoding/binary"
 	"fmt"
 	"path/filepath"
+	"time"
 	
 	"github.com/urfave/cli"
 	
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/wallet"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
-func DropWalletHistory(cfg *pod.Config) func(c *cli.Context) error {
+func DropWalletHistory(w *wallet.Wallet) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
+		cfg := w.PodConfig
 		fmt.Println("\n", cfg)
 		var (
 			// Namespace keys.
@@ -66,6 +68,23 @@ func DropWalletHistory(cfg *pod.Config) func(c *cli.Context) error {
 		if err != nil {
 			log.ERROR(err)
 			return err
+		}
+		if w != nil {
+			// Rescan chain to ensure balance is correctly regenerated
+			job := &wallet.RescanJob{
+				InitialSync: true,
+			}
+			// Submit rescan job and log when the import has completed.
+			// Do not block on finishing the rescan.  The rescan success
+			// or failure is logged elsewhere, and the channel is not
+			// required to be read, so discard the return value.
+			errC := w.SubmitRescan(job)
+			select {
+			case err := <-errC:
+				log.ERROR(err)
+			case <-time.After(time.Second * 5):
+				break
+			}
 		}
 		return err
 	}

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 	"time"
-
+	
 	"github.com/davecgh/go-spew/spew"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -21,6 +21,7 @@ import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -96,6 +97,7 @@ type Wallet struct {
 	// reorganizeToHash chainhash.Hash
 	// reorganizing     bool
 	NtfnServer  *NotificationServer
+	PodConfig   *pod.Config
 	chainParams *netparams.Params
 	wg          sync.WaitGroup
 	started     bool
@@ -355,7 +357,7 @@ func (w *Wallet) syncWithChain() error {
 			log.ERROR(err)
 			return err
 		}
-		//log.DEBUG("bestHeight", bestHeight)
+		// log.DEBUG("bestHeight", bestHeight)
 		checkHeight := bestHeight
 		if len(w.chainParams.Checkpoints) > 0 {
 			checkHeight = w.chainParams.Checkpoints[len(
@@ -3259,7 +3261,7 @@ func Create(db walletdb.DB, pubPass, privPass, seed []byte, params *netparams.Pa
 
 // Open loads an already-created wallet from the passed database and namespaces.
 func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks,
-	params *netparams.Params, recoveryWindow uint32) (*Wallet, error) {
+	params *netparams.Params, recoveryWindow uint32, podConfig *pod.Config) (*Wallet, error) {
 	log.WARN("opening wallet")
 	err := walletdb.View(db, func(tx walletdb.ReadTx) error {
 		waddrmgrBucket := tx.ReadBucket(waddrmgrNamespaceKey)
@@ -3325,17 +3327,18 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks,
 		rescanAddJob:        make(chan *RescanJob),
 		rescanBatch:         make(chan *rescanBatch),
 		rescanNotifications: make(chan interface{}),
-		rescanProgress:      make(chan *RescanProgressMsg),
-		rescanFinished:      make(chan *RescanFinishedMsg),
-		createTxRequests:    make(chan createTxRequest),
-		unlockRequests:      make(chan unlockRequest),
-		lockRequests:        make(chan struct{}),
-		holdUnlockRequests:  make(chan chan heldUnlock),
-		lockState:           make(chan bool),
-		changePassphrase:    make(chan changePassphraseRequest),
-		changePassphrases:   make(chan changePassphrasesRequest),
-		chainParams:         params,
-		quit:                make(chan struct{}),
+		rescanProgress:     make(chan *RescanProgressMsg),
+		rescanFinished:     make(chan *RescanFinishedMsg),
+		createTxRequests:   make(chan createTxRequest),
+		unlockRequests:     make(chan unlockRequest),
+		lockRequests:       make(chan struct{}),
+		holdUnlockRequests: make(chan chan heldUnlock),
+		lockState:          make(chan bool),
+		changePassphrase:   make(chan changePassphraseRequest),
+		changePassphrases:  make(chan changePassphrasesRequest),
+		chainParams:        params,
+		PodConfig:          podConfig,
+		quit:               make(chan struct{}),
 	}
 	w.NtfnServer = newNotificationServer(w)
 	w.TxStore.NotifyUnspent = func(hash *chainhash.Hash, index uint32) {

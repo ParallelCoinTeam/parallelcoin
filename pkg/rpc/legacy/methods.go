@@ -21,6 +21,7 @@ import (
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
 	ec "github.com/p9c/pod/pkg/util/elliptic"
+	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
@@ -897,6 +898,14 @@ func GetTransaction(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	ret.Amount = creditTotal.ToDUO()
 	return ret, nil
 }
+
+
+func HandleDropWalletHistory(icmd interface{}, w *wallet.Wallet) (in interface{}, err error) {
+	err = DropWalletHistory(w)(nil)
+	interrupt.RequestRestart()
+	return "dropped wallet history, restarting", nil
+}
+
 
 // These generators create the following global variables in this package:
 //

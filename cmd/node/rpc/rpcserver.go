@@ -319,6 +319,7 @@ var (
 		"createmultisig":         {},
 		"dumpprivkey":            {},
 		"dumpwallet":             {},
+		"dropwallethistory":      {},
 		"encryptwallet":          {},
 		"getaccount":             {},
 		"getaccountaddress":      {},
@@ -405,13 +406,13 @@ var (
 		"stop":                  HandleStop,
 		"restart":               HandleRestart,
 		"resetchain":            HandleResetChain,
-		"dropwallethistory":     HandleDropWalletHistory,
-		"submitblock":           HandleSubmitBlock,
-		"uptime":                HandleUptime,
-		"validateaddress":       HandleValidateAddress,
-		"verifychain":           HandleVerifyChain,
-		"verifymessage":         HandleVerifyMessage,
-		"version":               HandleVersion,
+		// "dropwallethistory":     HandleDropWalletHistory,
+		"submitblock":     HandleSubmitBlock,
+		"uptime":          HandleUptime,
+		"validateaddress": HandleValidateAddress,
+		"verifychain":     HandleVerifyChain,
+		"verifymessage":   HandleVerifyMessage,
+		"version":         HandleVersion,
 	}
 	
 	// RPCLimited isCommands that are available to a limited user
@@ -4196,12 +4197,6 @@ func HandleRestart(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	return "node restarting", nil
 }
 
-func HandleDropWalletHistory(s *Server, cmd interface{}, closeChan <-chan struct{}) (in interface{}, err error) {
-	err = DropWalletHistory(s.Config)(nil)
-	interrupt.RequestRestart()
-	return "dropped wallet history, restarting", nil
-}
-
 // HandleSubmitBlock implements the submitblock command.
 func HandleSubmitBlock(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (interface{}, error) {
@@ -4281,6 +4276,8 @@ func HandleVerifyChain(s *Server, cmd interface{},
 	err := VerifyChain(s, checkLevel, checkDepth)
 	return err == nil, nil
 }
+
+
 
 // HandleResetChain deletes the existing chain database and restarts
 func HandleResetChain(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {

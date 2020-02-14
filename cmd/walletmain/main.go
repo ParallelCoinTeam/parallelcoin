@@ -68,7 +68,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 		// or this will return an appropriate error.
 		var w *wallet.Wallet
 		w, err = loader.OpenExistingWallet([]byte(*config.WalletPass),
-			true)
+			true, config)
 		//log.WARN("wallet", w)
 		if err != nil {
 			log.ERROR(err)

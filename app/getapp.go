@@ -6,7 +6,7 @@ import (
 	// _ "github.com/gohouse/i18n/parser_json"
 	
 	"github.com/p9c/pod/cmd/kopach/kopach_worker"
-	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	
 	"github.com/urfave/cli"
@@ -118,7 +118,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the transaction history in the wallet ("+
 							"for development and testing as well as clearing up"+
 							" transaction mess)",
-						rpc.DropWalletHistory(cx.Config),
+						legacy.DropWalletHistory(cx.WalletServer),
 						apputil.SubCommands(),
 					),
 				),

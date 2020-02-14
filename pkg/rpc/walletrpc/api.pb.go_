@@ -4,13 +4,15 @@
 package walletrpc
 
 import (
-	context "context"
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
-	math "math"
+	"context"
+	"fmt"
+	"math"
+	
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/golang/protobuf/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -3731,8 +3733,8 @@ func (c *walletLoaderServiceClient) StartConsensusRPC(ctx context.Context, in *S
 // WalletLoaderServiceServer is the server API for WalletLoaderService service.
 type WalletLoaderServiceServer interface {
 	WalletExists(context.Context, *WalletExistsRequest) (*WalletExistsResponse, error)
-	CreateWallet(context.Context, *CreateWalletRequest) (*CreateWalletResponse, error)
-	OpenWallet(context.Context, *OpenWalletRequest) (*OpenWalletResponse, error)
+	CreateWallet(context.Context, *CreateWalletRequest, *pod.Config) (*CreateWalletResponse, error)
+	OpenWallet(context.Context, *OpenWalletRequest, *pod.Config) (*OpenWalletResponse, error)
 	CloseWallet(context.Context, *CloseWalletRequest) (*CloseWalletResponse, error)
 	StartConsensusRPC(context.Context, *StartConsensusRPCRequest) (*StartConsensusRPCResponse, error)
 }
@@ -3744,10 +3746,10 @@ type UnimplementedWalletLoaderServiceServer struct {
 func (*UnimplementedWalletLoaderServiceServer) WalletExists(ctx context.Context, req *WalletExistsRequest) (*WalletExistsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WalletExists not implemented")
 }
-func (*UnimplementedWalletLoaderServiceServer) CreateWallet(ctx context.Context, req *CreateWalletRequest) (*CreateWalletResponse, error) {
+func (*UnimplementedWalletLoaderServiceServer) CreateWallet(ctx context.Context, req *CreateWalletRequest, pC *pod.Config) (*CreateWalletResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateWallet not implemented")
 }
-func (*UnimplementedWalletLoaderServiceServer) OpenWallet(ctx context.Context, req *OpenWalletRequest) (*OpenWalletResponse, error) {
+func (*UnimplementedWalletLoaderServiceServer) OpenWallet(ctx context.Context, req *OpenWalletRequest, pC *pod.Config) (*OpenWalletResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method OpenWallet not implemented")
 }
 func (*UnimplementedWalletLoaderServiceServer) CloseWallet(ctx context.Context, req *CloseWalletRequest) (*CloseWalletResponse, error) {

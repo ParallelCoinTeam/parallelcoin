@@ -32,7 +32,7 @@ func CreateWallet(cx *conte.Xt, privPassphrase, duoSeed, pubPassphrase, walletDi
 		}
 	}
 
-	_, err = l.CreateNewWallet([]byte(pubPassphrase), []byte(privPassphrase), seed, time.Now(), true)
+	_, err = l.CreateNewWallet([]byte(pubPassphrase), []byte(privPassphrase), seed, time.Now(), true, cx.Config)
 	if err != nil {
 		log.ERROR(err)
 		panic(err)
