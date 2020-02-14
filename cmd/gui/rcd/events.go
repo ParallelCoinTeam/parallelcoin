@@ -25,23 +25,25 @@ func (r *RcVar)ListenInit(trigger chan struct{}){
 	r.GetDuoUIunconfirmedBalance()
 	r.GetDuoUItransactionsNumber()
 	r.GetTransactions()
-	//r.GetDuoUIblockHeight()
+	r.GetLatestTransactions()
 	//r.GetDuoUIstatus()
 	//r.GetDuoUIlocalLost()
-	//r.GetDuoUIdifficulty()
-	r.GetLatestTransactions()
-	r.Cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
+	r.GetDuoUIblockHeight()
+	r.GetDuoUIdifficulty()
+	r.GetDuoUIconnectionCount()
+	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted:
 			r.GetDuoUIbalance()
 			r.GetDuoUIunconfirmedBalance()
 			r.GetDuoUItransactionsNumber()
 			r.GetTransactions()
-			//r.GetDuoUIblockHeight()
+			r.GetLatestTransactions()
 			//r.GetDuoUIstatus()
 			//r.GetDuoUIlocalLost()
-			//r.GetDuoUIdifficulty()
-			r.GetLatestTransactions()
+			r.GetDuoUIblockHeight()
+			r.GetDuoUIdifficulty()
+			r.GetDuoUIconnectionCount()
 			r.UpdateTrigger <- struct{}{}
 		}
 		r.UpdateTrigger <- struct{}{}

@@ -2,7 +2,6 @@ package duoui
 
 import (
 	"fmt"
-	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
@@ -13,7 +12,7 @@ import (
 
 var (
 	buttonLog      = new(controller.Button)
-	buttonQuit    = new(controller.Button)
+	buttonQuit     = new(controller.Button)
 	buttonSettings = new(controller.Button)
 	buttonNetwork  = new(controller.Button)
 	buttonBlocks   = new(controller.Button)
@@ -54,11 +53,10 @@ func (ui *DuoUI) DuoUIfooter() func() {
 										Ok: func() {
 											interrupt.Request()
 										},
-										Cancel:func(){ui.rc.Dialog.Show = false},
-										Title: "Are you sure?",
-										Text:  "Confirm ParallelCoin close",
+										Cancel: func() { ui.rc.Dialog.Show = false },
+										Title:  "Are you sure?",
+										Text:   "Confirm ParallelCoin close",
 									}
-
 								}
 								closeMeniItem.Layout(ui.ly.Context, buttonQuit)
 							})
@@ -74,7 +72,6 @@ func (ui *DuoUI) DuoUIfooter() func() {
 							}
 							logMenuItem.Layout(ui.ly.Context, buttonLog)
 						},
-
 					}
 					cornerNav.Layout(ui.ly.Context, len(cornerButtons), func(i int) {
 						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, cornerButtons[i])
@@ -86,13 +83,20 @@ func (ui *DuoUI) DuoUIfooter() func() {
 					navButtons := []func(){
 
 						func() {
-							a := 1.0
-
-							tim := ui.ly.Theme.Caption("Blocks:" + fmt.Sprint(ui.rc.Status.Wallet.Balance))
-							tim.Font.Typeface = "bariol"
-							tim.Color = helpers.RGB(0xcfcfcf)
-							tim.Color = helpers.Alpha(a, tim.Color)
-							tim.Layout(ui.ly.Context)
+							layout.UniformInset(unit.Dp(14)).Layout(ui.ly.Context, func() {
+								tim := ui.ly.Theme.Caption("Blocks: " + fmt.Sprint(ui.rc.Status.Node.BlockHeight))
+								tim.Font.Typeface = "bariol"
+								tim.Color = ui.ly.Theme.Color.Light
+								tim.Layout(ui.ly.Context)
+							})
+						},
+						func() {
+							layout.UniformInset(unit.Dp(14)).Layout(ui.ly.Context, func() {
+								tim := ui.ly.Theme.Caption("Connections: " + fmt.Sprint(ui.rc.Status.Node.ConnectionCount))
+								tim.Font.Typeface = "bariol"
+								tim.Color = ui.ly.Theme.Color.Light
+								tim.Layout(ui.ly.Context)
+							})
 						},
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {

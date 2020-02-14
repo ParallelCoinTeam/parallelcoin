@@ -24,29 +24,29 @@ func (ui *DuoUI) DuoUIlogger() func() {
 			theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			logOutputList.Layout(ui.ly.Context, len(ui.rc.Log.LogMessages), func(i int) {
 				t := ui.rc.Log.LogMessages[i]
-				col := ui.ly.Theme.Color.Primary
-				if t.Level == "TRC" {
-					col = ui.ly.Theme.Color.Success
-				}
-				if t.Level == "DBG" {
-					col = ui.ly.Theme.Color.Secondary
-				}
-				if t.Level == "INF" {
-					col = ui.ly.Theme.Color.Info
-				}
-				if t.Level == "WRN" {
-					col = ui.ly.Theme.Color.Warning
-				}
-				if t.Level == "ERROR" {
-					col = ui.ly.Theme.Color.Danger
-				}
-				if t.Level == "FTL" {
-					col = ui.ly.Theme.Color.Primary
-				}
-
 				logText := ui.ly.Theme.Caption(fmt.Sprint(i) + "->" + fmt.Sprint(t.Text))
 				logText.Font.Typeface = "bariol"
-				logText.Color = theme.HexARGB(col)
+
+				logText.Color = ui.ly.Theme.Color.Primary
+				if t.Level == "TRC" {
+					logText.Color = ui.ly.Theme.Color.Success
+				}
+				if t.Level == "DBG" {
+					logText.Color = ui.ly.Theme.Color.Secondary
+				}
+				if t.Level == "INF" {
+					logText.Color = ui.ly.Theme.Color.Info
+				}
+				if t.Level == "WRN" {
+					logText.Color = ui.ly.Theme.Color.Warning
+				}
+				if t.Level == "ERROR" {
+					logText.Color = ui.ly.Theme.Color.Danger
+				}
+				if t.Level == "FTL" {
+					logText.Color = ui.ly.Theme.Color.Primary
+				}
+
 				logText.Layout(ui.ly.Context)
 				op.InvalidateOp{}.Add(ui.ly.Context.Ops)
 

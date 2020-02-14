@@ -27,6 +27,9 @@ func (ui *DuoUI)DuoUImenu() func() {
 			iconSize          int     = 72
 			paddingVertical   float32 = 0
 			paddingHorizontal float32 = 0
+			bgColor = "ff9a9a9a"
+			textColor = "ff303030"
+			iconColor = "ffacacac"
 		)
 		//overviewButton :=
 		//historyButton :=
@@ -46,7 +49,7 @@ func (ui *DuoUI)DuoUImenu() func() {
 								func() {
 									in.Layout(ui.ly.Context, func() {
 										var overviewMenuItem theme.DuoUIbutton
-										overviewMenuItem = ui.ly.Theme.DuoUIbutton("OVERVIEW", "ff303030", "ff989898", "ff80a8cf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["overviewIcon"])
+										overviewMenuItem = ui.ly.Theme.DuoUIbutton("OVERVIEW", textColor, bgColor, iconColor, iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["overviewIcon"])
 										for buttonOverview.Clicked(ui.ly.Context) {
 											ui.rc.ShowPage = "OVERVIEW"
 										}
@@ -58,7 +61,7 @@ func (ui *DuoUI)DuoUImenu() func() {
 								},
 								func() {
 									var sendMenuItem theme.DuoUIbutton
-									sendMenuItem = ui.ly.Theme.DuoUIbutton("SEND", "ff303030", "ff989898", "ff80a8cf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["sendIcon"])
+									sendMenuItem = ui.ly.Theme.DuoUIbutton("SEND", textColor, bgColor, iconColor, iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["sendIcon"])
 									for buttonSend.Clicked(ui.ly.Context) {
 										ui.rc.ShowPage = "SEND"
 									}
@@ -70,7 +73,7 @@ func (ui *DuoUI)DuoUImenu() func() {
 								func() {
 									in.Layout(ui.ly.Context, func() {
 										var receiveMenuItem theme.DuoUIbutton
-										receiveMenuItem = ui.ly.Theme.DuoUIbutton("RECEIVE", "ff303030", "ff989898", ui.ly.Theme.Color.Light, iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["receiveIcon"])
+										receiveMenuItem = ui.ly.Theme.DuoUIbutton("RECEIVE", textColor,bgColor,  iconColor, iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["receiveIcon"])
 										for buttonReceive.Clicked(ui.ly.Context) {
 											ui.rc.ShowPage = "RECEIVE"
 										}
@@ -82,7 +85,7 @@ func (ui *DuoUI)DuoUImenu() func() {
 								},
 								func() {
 									var addressBookMenuItem theme.DuoUIbutton
-									addressBookMenuItem = ui.ly.Theme.DuoUIbutton("ADDRESS BOOK", "ff303030", "ff989898", "ff80a8cf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["addressBookIcon"])
+									addressBookMenuItem = ui.ly.Theme.DuoUIbutton("ADDRESS BOOK", textColor, bgColor, iconColor, iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["addressBookIcon"])
 									for buttonAddressBook.Clicked(ui.ly.Context) {
 										ui.rc.ShowPage = "ADDRESSBOOK"
 									}
@@ -93,7 +96,7 @@ func (ui *DuoUI)DuoUImenu() func() {
 								},
 								func() {
 									var historyMenuItem theme.DuoUIbutton
-									historyMenuItem = ui.ly.Theme.DuoUIbutton("HISTORY", "ff303030", "ff989898", "ff80a8cf", iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["historyIcon"])
+									historyMenuItem = ui.ly.Theme.DuoUIbutton("HISTORY", textColor,  bgColor, iconColor, iconSize, width, height, paddingVertical, paddingHorizontal, ui.ly.Theme.Icons["historyIcon"])
 									for buttonHistory.Clicked(ui.ly.Context) {
 										ui.rc.ShowPage = "HISTORY"
 									}

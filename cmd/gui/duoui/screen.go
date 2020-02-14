@@ -32,7 +32,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 				layout.Flexed(1, func() {
 					layout.UniformInset(unit.Dp(60)).Layout(ui.ly.Context, func() {
 						txt := ui.ly.Theme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE")
-						txt.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
+						txt.Color = ui.ly.Theme.Color.Light
 						txt.Layout(ui.ly.Context)
 					})
 				}),

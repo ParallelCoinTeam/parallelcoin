@@ -56,18 +56,18 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			controllers := []func(){
 				func() {
 					bale := ui.ly.Theme.H3(ui.rc.PassPhrase)
-					bale.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+					bale.Color = ui.ly.Theme.Color.Light
 					bale.Layout(ui.ly.Context)
 				},
 				func() {
 					balr := ui.ly.Theme.H3(ui.rc.ConfirmPassPhrase)
 
-					balr.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+					balr.Color = ui.ly.Theme.Color.Light
 					balr.Layout(ui.ly.Context)
 				},
 				func() {
 					bal := ui.ly.Theme.H3("Enter the private passphrase for your new wallet:")
-					bal.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+					bal.Color = ui.ly.Theme.Color.Light
 					bal.Layout(ui.ly.Context)
 					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Bg, [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 					layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
@@ -120,7 +120,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 					createWalletbuttonComp = ui.ly.Theme.DuoUIbutton("Create wallet", "ff303030", "ffcfcfcf", "ff303030", 0, 125, 32, 4, 4, nil)
 					for createWalletbutton.Clicked(ui.ly.Context) {
 						if ui.rc.PassPhrase != "" && ui.rc.PassPhrase == ui.rc.ConfirmPassPhrase {
-							CreateWallet(ui.rc.Cx, ui.rc.PassPhrase, "", "", "")
+							//CreateWallet(ui.rc.Cx, ui.rc.PassPhrase, "", "", "")
 							log.INFO("WOIKOS!")
 						}
 					}

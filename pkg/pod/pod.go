@@ -113,7 +113,7 @@ type Config struct {
 	CAFile                   *string          `group:"tls" name:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
 	ConfigFile               *string
 	ConnectPeers             *cli.StringSlice `group:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"array" inputType:"text" model:"array" featured:"false"`
-	Controller               *string          `category:"mining" name:"Controller Listener" description:"address to bind miner controller to"`
+	Controller               *string          `group:"mining" name:"Controller Listener" description:"address to bind miner controller to"`
 	CPUProfile               *string          `group:"debug" name:"CPU Profile" description:"write cpu profile to this file" type:"input" inputType:"text" model:"CPUProfile" featured:"false"`
 	DataDir                  *string          `group:"config" name:"Data Dir" description:"Root folder where application data is stored" type:"input" inputType:"text" model:"DataDir" featured:"false"`
 	DbType                   *string          `group:"debug" name:"Db Type" description:"type of database storage engine to use (only one right now)" type:"input" inputType:"text" model:"DbType" featured:"false"`
@@ -122,7 +122,7 @@ type Config struct {
 	DisableDNSSeed           *bool            `group:"node" name:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"switch" model:"DisableDNSSeed" featured:"false"`
 	DisableListen            *bool            `group:"node" name:"Disable Listen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
 	DisableRPC               *bool            `group:"rpc" name:"Disable RPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
-	EnableController         *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
+	EnableController         *bool            `group:"node" name:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
 	// ExperimentalRPCListeners *cli.StringSlice `group:"wallet" name:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"array" inputType:"text" model:"array" featured:"false"`
 	ExternalIPs              *cli.StringSlice `group:"node" name:"External IPs" description:"extra addresses to tell peers they can connect to" type:"array" inputType:"text" model:"ExternalIPs" featured:"false"`
 	FreeTxRelayLimit         *float64         `group:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"text" model:"FreeTxRelayLimit" featured:"false"`

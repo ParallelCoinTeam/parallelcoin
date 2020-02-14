@@ -45,25 +45,25 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		go func() {
 			nodeChan := make(chan *rpc.Server)
 			// Start Node
-			err = gui.DuoUInode(rc.Cx, nodeChan)
+			err = gui.DuoUInode(cx, nodeChan)
 			if err != nil {
 				log.ERROR(err)
 			}
 			log.DEBUG("waiting for nodeChan")
-			rc.Cx.RPCServer = <-nodeChan
+			cx.RPCServer = <-nodeChan
 			log.DEBUG("nodeChan sent")
-			rc.Cx.Node.Store(true)
+			cx.Node.Store(true)
 			
 			walletChan := make(chan *wallet.Wallet)
 			// Start wallet
-			err = gui.Services(rc.Cx, walletChan)
+			err = gui.Services(cx, walletChan)
 			if err != nil {
 				log.ERROR(err)
 			}
 			log.DEBUG("waiting for walletChan")
-			rc.Cx.WalletServer = <-walletChan
+			cx.WalletServer = <-walletChan
 			log.DEBUG("walletChan sent")
-			rc.Cx.Wallet.Store(true)
+			cx.Wallet.Store(true)
 			rc.Boot.IsBoot = false
 			duo.Ready <- struct{}{}
 		}()
@@ -83,8 +83,8 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// b.IsBootLogo = false
 		// b.IsBoot = false
 		log.DEBUG("shutting down node")
-		if !rc.Cx.Node.Load().(bool) {
-			close(rc.Cx.WalletKill)
+		if !cx.Node.Load().(bool) {
+			close(cx.WalletKill)
 		}
 		log.DEBUG("shutting down wallet")
 		if !cx.Wallet.Load().(bool) {
