@@ -1,0 +1,3 @@
+#!/bin/sh
+
+protoc -I. api.proto_ --go_out=plugins=grpc:walletrpc

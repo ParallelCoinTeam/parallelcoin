@@ -605,10 +605,10 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				8,
 				cx.Config.WalletRPCMaxWebsockets,
 			),
-			apputil.StringSlice(
-				"experimentalrpclisten",
-				"Listen for RPC connections on this interface/port",
-				cx.Config.ExperimentalRPCListeners),
+			// apputil.StringSlice(
+			// 	"experimentalrpclisten",
+			// 	"Listen for RPC connections on this interface/port",
+			// 	cx.Config.ExperimentalRPCListeners),
 			apputil.Bool(
 				"nodeoff",
 				"Starts GUI with node turned off",

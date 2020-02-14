@@ -123,7 +123,7 @@ type Config struct {
 	DisableListen            *bool            `group:"node" name:"Disable Listen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
 	DisableRPC               *bool            `group:"rpc" name:"Disable RPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
 	EnableController         *bool            `category:"node" name:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
-	ExperimentalRPCListeners *cli.StringSlice `group:"wallet" name:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"array" inputType:"text" model:"array" featured:"false"`
+	// ExperimentalRPCListeners *cli.StringSlice `group:"wallet" name:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"array" inputType:"text" model:"array" featured:"false"`
 	ExternalIPs              *cli.StringSlice `group:"node" name:"External IPs" description:"extra addresses to tell peers they can connect to" type:"array" inputType:"text" model:"ExternalIPs" featured:"false"`
 	FreeTxRelayLimit         *float64         `group:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"text" model:"FreeTxRelayLimit" featured:"false"`
 	Generate                 *bool            `group:"mining" name:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
@@ -217,7 +217,7 @@ func EmptyConfig() *Config {
 		DisableDNSSeed:           newbool(),
 		DisableListen:            newbool(),
 		DisableRPC:               newbool(),
-		ExperimentalRPCListeners: newStringSlice(),
+		// ExperimentalRPCListeners: newStringSlice(),
 		ExternalIPs:              newStringSlice(),
 		FreeTxRelayLimit:         new(float64),
 		Generate:                 newbool(),

@@ -49,7 +49,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 	// This will be updated with the wallet and chain server RPC client
 	// created below after each is created.
 	log.TRACE("starting RPC servers")
-	rpcS, legacyServer, err := startRPCServers(config, stateCfg, activeNet,
+	legacyServer, err := startRPCServers(config, stateCfg, activeNet,
 		loader)
 	if err != nil {
 		log.ERROR("unable to create RPC servers:", err)
@@ -57,7 +57,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 	}
 	loader.RunAfterLoad(func(w *wallet.Wallet) {
 		log.TRACE("starting wallet RPC services", w != nil)
-		startWalletRPCServices(w, rpcS, legacyServer)
+		startWalletRPCServices(w, legacyServer)
 	})
 	if !*config.NoInitialLoad {
 		log.TRACE("starting rpc client connection handler")
@@ -93,15 +93,6 @@ func Main(config *pod.Config, stateCfg *state.Config,
 			log.ERROR("failed to close wallet:", err)
 		}
 	})
-	if rpcS != nil {
-		interrupt.AddHandler(func() {
-			// TODO: Does this need to wait for the grpc server to
-			// finish up any requests?
-			log.WARN("stopping RPC server")
-			rpcS.Stop()
-			log.INFO("RPC server shutdown")
-		})
-	}
 	if legacyServer != nil {
 		interrupt.AddHandler(func() {
 			log.TRACE("stopping wallet RPC server")
@@ -120,16 +111,6 @@ func Main(config *pod.Config, stateCfg *state.Config,
 			log.WARN("stopping wallet RPC server")
 			legacyServer.Stop()
 			log.INFO("stopped wallet RPC server")
-		}
-		if rpcS != nil {
-			log.WARN("stopping RPC server")
-			rpcS.Stop()
-			log.INFO("RPC server shutdown")
-			log.INFO("unloading wallet")
-			err := loader.UnloadWallet()
-			if err != nil && err != wallet.ErrNotLoaded {
-				log.ERROR("failed to close wallet:", err)
-			}
 		}
 		log.INFO("wallet shutdown from killswitch complete")
 		wg.Done()

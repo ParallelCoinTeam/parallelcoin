@@ -405,10 +405,10 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.TRACE("set walletrpcmaxwebsockets", c.Int("walletrpcmaxwebsockets"))
 			*cx.Config.WalletRPCMaxWebsockets = c.Int("walletrpcmaxwebsockets")
 		}
-		if c.IsSet("experimentalrpclisten") {
-			log.TRACE("set experimentalrpclisten", c.StringSlice("experimentalrpclisten"))
-			*cx.Config.ExperimentalRPCListeners = c.StringSlice("experimentalrpclisten")
-		}
+		// if c.IsSet("experimentalrpclisten") {
+		// 	log.TRACE("set experimentalrpclisten", c.StringSlice("experimentalrpclisten"))
+		// 	*cx.Config.ExperimentalRPCListeners = c.StringSlice("experimentalrpclisten")
+		// }
 		if c.IsSet("nodeoff") {
 			log.TRACE("set nodeoff", c.Bool("nodeoff"))
 			*cx.Config.NodeOff = c.Bool("nodeoff")

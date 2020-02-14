@@ -851,7 +851,7 @@ func (s *Server) RequestedProcessShutdown() <-chan struct{} {
 	return s.RequestProcessShutdown
 }
 
-// Start is used by server.go to start the rpc listener.
+// Start is used by server.go_ to start the rpc listener.
 func (s *Server) Start() {
 	if atomic.AddInt32(&s.Started, 1) != 1 {
 		return
@@ -922,7 +922,7 @@ func (s *Server) Start() {
 	s.NtfnMgr.Start()
 }
 
-// Stop is used by server.go to stop the rpc listener.
+// Stop is used by server.go_ to stop the rpc listener.
 func (s *Server) Stop() error {
 	if atomic.AddInt32(&s.Shutdown, 1) != 1 {
 		log.WARN("RPC server is already in the process of shutting down")

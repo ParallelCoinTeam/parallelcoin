@@ -28,7 +28,6 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
-	pb "github.com/p9c/pod/pkg/rpc/walletrpc"
 	"github.com/p9c/pod/pkg/util"
 	cfgutil "github.com/p9c/pod/pkg/util/config"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
