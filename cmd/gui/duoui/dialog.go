@@ -40,6 +40,7 @@ func (ui *DuoUI) DuoUIdialog() {
 						layout.Align(layout.Center).Layout(ui.ly.Context, func() {
 							layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(ui.ly.Context, func() {
 								cur := ui.ly.Theme.H4(ui.rc.Dialog.Text)
+								cur.Font.Typeface = "bariol"
 								cur.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
 								cur.Alignment = text.Start
 								cur.Layout(ui.ly.Context)

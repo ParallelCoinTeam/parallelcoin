@@ -16,7 +16,7 @@ type DuoUI struct {
 	rc *rcd.RcVar
 }
 
-func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
+func DuOuI() (duo *model.DuoUI, err error) {
 
 	duo = &model.DuoUI{
 		Window: app.NewWindow(

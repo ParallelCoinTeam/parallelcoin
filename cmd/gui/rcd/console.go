@@ -1,6 +1,6 @@
 package rcd
 
-func (rc *RcVar) ComConsole() func() {
+func (r *RcVar) ComConsole() func() {
 	return func() {
 
 	}
