@@ -8,6 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
+	"github.com/p9c/pod/pkg/log"
 )
 
 var (
@@ -26,10 +27,10 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 			layout.Rigid(func() {
 				cs := ui.ly.Context.Constraints
 				theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 48, ui.ly.Theme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
+				
 				in := layout.UniformInset(unit.Dp(8))
 				in.Layout(ui.ly.Context, func() {
-
+					
 					latestx := ui.ly.Theme.H5("LATEST TRANSACTIONS")
 					latestx.Color = theme.HexARGB("ffcfcfcf")
 					latestx.Alignment = text.Start
@@ -37,7 +38,7 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 				})
 			}),
 			layout.Flexed(1, func() {
-
+				
 				in := layout.UniformInset(unit.Dp(16))
 				in.Layout(ui.ly.Context, func() {
 					layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
@@ -45,12 +46,12 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 							cs := ui.ly.Context.Constraints
 							latestTransList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.LastTxs.Txs), func(i int) {
 								// Invert list
-								//i = len(txs.Txs) - 1 - i
+								// i = len(txs.Txs) - 1 - i
 								log.INFO("")
 								log.INFO("LATEST TXS TEST>>", ui.rc.Status.Wallet.LastTxs)
 								t := ui.rc.Status.Wallet.LastTxs.Txs[i]
 								a := 1.0
-								//const duration = 5
+								// const duration = 5
 								theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Text, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								layout.Flex{
 									Spacing: layout.SpaceBetween,
@@ -58,12 +59,12 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 									layout.Rigid(func() {
 										in := layout.UniformInset(unit.Dp(15))
 										in.Layout(ui.ly.Context, func() {
-
+											
 											layout.Flex{
 												Axis: layout.Vertical,
 											}.Layout(ui.ly.Context,
 												layout.Rigid(func() {
-
+													
 													tim := ui.ly.Theme.Caption(t.TxID)
 													tim.Font.Typeface = "bariol"
 													tim.Color = helpers.RGB(0xcfcfcf)
@@ -84,12 +85,12 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 													sat := ui.ly.Theme.Body1(t.Category)
 													sat.Color = helpers.RGB(0xcfcfcf)
 													sat.Font.Typeface = "bariol"
-
+													
 													sat.Color = helpers.Alpha(a, sat.Color)
 													sat.Layout(ui.ly.Context)
 												}),
 												layout.Rigid(func() {
-
+													
 													l := ui.ly.Theme.Body1(t.Time)
 													l.Font.Typeface = "bariol"
 													l.Color = helpers.RGB(0xcfcfcf)
@@ -109,7 +110,7 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 											sat.Color = helpers.Alpha(a, sat.Color)
 											sat.Layout(ui.ly.Context)
 										})
-
+										
 									}),
 								)
 							})
