@@ -570,7 +570,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			apputil.String(
 				"walletserver, ws",
 				"set wallet server to connect to",
-				"",
+				"127.0.0.1:11046",
 				cx.Config.WalletServer),
 			apputil.String(
 				"walletpass",

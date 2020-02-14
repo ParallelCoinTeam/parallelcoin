@@ -798,7 +798,7 @@ var ResultTypes = map[string][]interface{}{
 	"stop":                  {(*string)(nil)},
 	"restart":               {(*string)(nil)},
 	"resetchain":            {(*string)(nil)},
-	"dropwallethistory":     {(*string)(nil)},
+	// "dropwallethistory":     {(*string)(nil)},
 	"submitblock":           {nil, (*string)(nil)},
 	"uptime":                {(*int64)(nil)},
 	"validateaddress":       {(*btcjson.ValidateAddressChainResult)(nil)},

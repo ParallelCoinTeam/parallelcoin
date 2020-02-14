@@ -172,6 +172,10 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	if h == "" {
 		*cfg.RPCConnect = net.JoinHostPort("127.0.0.1", p)
 	}
+	if len(*cfg.WalletRPCListeners) > 0 {
+		splitted := strings.Split((*cfg.WalletRPCListeners)[0], ":")
+		*cfg.WalletServer = "localhost:" + splitted[1]
+	}
 }
 
 // GetFreePort asks the kernel for free open ports that are ready to use.

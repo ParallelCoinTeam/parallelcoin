@@ -2,12 +2,12 @@ package duoui
 
 import (
 	"fmt"
+	
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
-	"github.com/p9c/pod/pkg/log"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 )
 
 func (ui *DuoUI) DuoUIlatestTransactions() {
-	log.INFO(ui.rc.Status.Wallet.LastTxs)
+	// log.INFO(ui.rc.Status.Wallet.LastTxs)
 	layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(ui.ly.Context,

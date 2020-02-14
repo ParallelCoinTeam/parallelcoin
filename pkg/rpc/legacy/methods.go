@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
@@ -129,6 +129,7 @@ var RPCHandlers = map[string]struct {
 	"listalltransactions":     {Handler: ListAllTransactions},
 	"renameaccount":           {Handler: RenameAccount},
 	"walletislocked":          {Handler: WalletIsLocked},
+	"dropwallethistory":       {Handler: HandleDropWalletHistory},
 }
 
 // Unimplemented handles an Unimplemented RPC request with the
@@ -899,13 +900,11 @@ func GetTransaction(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 	return ret, nil
 }
 
-
 func HandleDropWalletHistory(icmd interface{}, w *wallet.Wallet) (in interface{}, err error) {
 	err = DropWalletHistory(w)(nil)
 	interrupt.RequestRestart()
 	return "dropped wallet history, restarting", nil
 }
-
 
 // These generators create the following global variables in this package:
 //
