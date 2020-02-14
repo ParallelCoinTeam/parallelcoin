@@ -91,7 +91,7 @@ func (ui *DuoUI)DuoUIsettings() {
 									layout.Flexed(0.38, func() {
 										layout.Align(layout.Start).Layout(ui.ly.Context, func() {
 											layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(ui.ly.Context, func() {
-												// todo
+												// TODO:
 												// Input fileds must be set as theme part
 												//tl.InputFields(ui.ly.Context, ui.ly.Theme, ui.rc.Settings)
 											})

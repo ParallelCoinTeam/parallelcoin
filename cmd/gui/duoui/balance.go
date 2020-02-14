@@ -22,21 +22,25 @@ var (
 	Icon, _ = theme.NewDuoUIicon(icons.EditorMonetizationOn)
 )
 
-func (ui *DuoUI) DuoUIbalance() {
-	in := layout.UniformInset(unit.Dp(16))
-	in.Layout(ui.ly.Context, func() {
+func (ui *DuoUI) DuoUIbalance() func() {
+	return func() {
 		cs := ui.ly.Context.Constraints
-		navButtons := []func(){
-			listItem(ui.ly.Context, ui.ly.Theme, "BALANCE :", ui.rc.Status.Wallet.Balance+" "+ui.rc.Settings.Abbrevation),
-			func() { theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
-			listItem(ui.ly.Context, ui.ly.Theme, "UNCNFIRMED :", ui.rc.Status.Wallet.Unconfirmed),
-			func() { theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
-			listItem(ui.ly.Context, ui.ly.Theme, "TRANSACTIONS :", fmt.Sprint(ui.rc.Status.Wallet.Transactions.TxsNumber)),
-		}
-		itemsList.Layout(ui.ly.Context, len(navButtons), func(i int) {
-			layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, navButtons[i])
+		theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Light, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		in := layout.UniformInset(unit.Dp(16))
+		in.Layout(ui.ly.Context, func() {
+			cs := ui.ly.Context.Constraints
+			navButtons := []func(){
+				listItem(ui.ly.Context, ui.ly.Theme, "BALANCE :", ui.rc.Status.Wallet.Balance+" "+ui.rc.Settings.Abbrevation),
+				func() { theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
+				listItem(ui.ly.Context, ui.ly.Theme, "UNCNFIRMED :", ui.rc.Status.Wallet.Unconfirmed),
+				func() { theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
+				listItem(ui.ly.Context, ui.ly.Theme, "TRANSACTIONS :", fmt.Sprint(ui.rc.Status.Wallet.TxsNumber)),
+			}
+			itemsList.Layout(ui.ly.Context, len(navButtons), func(i int) {
+				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, navButtons[i])
+			})
 		})
-	})
+	}
 }
 
 func listItem(gtx *layout.Context, th *theme.DuoUItheme, name, value string) func() {
