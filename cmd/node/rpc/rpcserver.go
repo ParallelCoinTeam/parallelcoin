@@ -16,6 +16,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -24,6 +25,7 @@ import (
 	
 	"github.com/btcsuite/websocket"
 	
+	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/version"
@@ -402,6 +404,7 @@ var (
 		"setgenerate":           HandleSetGenerate,
 		"stop":                  HandleStop,
 		"restart":               HandleRestart,
+		"resetchain":            HandleResetChain,
 		"dropwallethistory":     HandleDropWalletHistory,
 		"submitblock":           HandleSubmitBlock,
 		"uptime":                HandleUptime,
@@ -4277,6 +4280,22 @@ func HandleVerifyChain(s *Server, cmd interface{},
 	}
 	err := VerifyChain(s, checkLevel, checkDepth)
 	return err == nil, nil
+}
+
+// HandleResetChain deletes the existing chain database and restarts
+func HandleResetChain(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
+	dbName := blockdb.NamePrefix + "_" + *s.Config.DbType
+	if *s.Config.DbType == "sqlite" {
+		dbName += ".db"
+	}
+	dbPath := filepath.Join(filepath.Join(*s.Config.DataDir, s.Cfg.ChainParams.Name), dbName)
+	os.RemoveAll(dbPath)
+	select {
+	case s.RequestProcessShutdown <- struct{}{}:
+	default:
+	}
+	interrupt.RequestRestart()
+	return "chain database deleted, restarting", nil
 }
 
 // HandleVerifyMessage implements the verifymessage command.

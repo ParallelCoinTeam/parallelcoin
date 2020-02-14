@@ -42,6 +42,14 @@ func NewCreateMultisigCmd(nRequired int, keys []string) *CreateMultisigCmd {
 	}
 }
 
+// DropWalletHistoryCmd defines the restart JSON-RPC command.
+type DropWalletHistoryCmd struct{}
+
+// NewDropWalletHistoryCmd returns a new instance which can be used to issue a stop JSON-RPC command.
+func NewDropWalletHistoryCmd() *DropWalletHistoryCmd {
+	return &DropWalletHistoryCmd{}
+}
+
 // DumpPrivKeyCmd defines the dumpprivkey JSON-RPC command.
 type DumpPrivKeyCmd struct {
 	Address string

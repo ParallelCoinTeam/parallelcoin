@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/pkg/controller"
 	"net"
 	"net/http"
@@ -226,7 +227,7 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 	}
 	warnMultipleDBs(cx)
 	// The database name is based on the database type.
-	dbPath := path.BlockDb(cx, *cx.Config.DbType)
+	dbPath := path.BlockDb(cx, *cx.Config.DbType, blockdb.NamePrefix)
 	// The regression test is special in that it needs a clean database
 	// for each run, so remove it now if it already exists.
 	e := removeRegressionDB(cx, dbPath)
@@ -295,14 +296,14 @@ func warnMultipleDBs(cx *conte.Xt) {
 			continue
 		}
 		// store db path as a duplicate db if it exists
-		dbPath := path.BlockDb(cx, dbType)
+		dbPath := path.BlockDb(cx, dbType, blockdb.NamePrefix)
 		if apputil.FileExists(dbPath) {
 			duplicateDbPaths = append(duplicateDbPaths, dbPath)
 		}
 	}
 	// warn if there are extra databases
 	if len(duplicateDbPaths) > 0 {
-		selectedDbPath := path.BlockDb(cx, *cx.Config.DbType)
+		selectedDbPath := path.BlockDb(cx, *cx.Config.DbType, blockdb.NamePrefix)
 		log.WARNF(
 			"\nThere are multiple block chain databases using different"+
 				" database types.\nYou probably don't want to waste disk"+

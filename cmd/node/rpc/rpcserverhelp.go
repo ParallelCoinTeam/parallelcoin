@@ -614,10 +614,10 @@ var HelpDescsEnUS = map[string]string{
 	"stop--result0":  "The string 'pod stopping.'",
 	// RestartCmd help
 	"restart--synopsis": "Restarts pod in-place",
-	"restart--result0": "The string 'pod restarting'",
+	"restart--result0":  "The string 'pod restarting'",
 	// DropWalletHistoryCmd help
 	"dropwallethistory--synopsis": "Clears history from wallet and restarts",
-	"dropwallethistory--result0": "The string 'dropped wallet history, restarting'",
+	"dropwallethistory--result0":  "The string 'dropped wallet history, restarting'",
 	// SubmitBlockOptions help.
 	"submitblockoptions-workid": "This parameter is currently ignored",
 	// SubmitBlockCmd help.
@@ -645,6 +645,9 @@ var HelpDescsEnUS = map[string]string{
 	"verifychain-checklevel": "How thorough the block verification is",
 	"verifychain-checkdepth": "The number of blocks to check",
 	"verifychain--result0":   "Whether or not the chain verified",
+	// ResetChainCmd help
+	"resetchain--synopsis": "deletes the existing chain database and restarts",
+	"resetchain--result0":  "the string 'chain database deleted, restarting'",
 	// VerifyMessageCmd help.
 	"verifymessage--synopsis": "Verify a signed message.",
 	"verifymessage-address":   "The bitcoin address to use for the signature",
@@ -794,6 +797,7 @@ var ResultTypes = map[string][]interface{}{
 	"setgenerate":           nil,
 	"stop":                  {(*string)(nil)},
 	"restart":               {(*string)(nil)},
+	"resetchain":            {(*string)(nil)},
 	"dropwallethistory":     {(*string)(nil)},
 	"submitblock":           {nil, (*string)(nil)},
 	"uptime":                {(*int64)(nil)},

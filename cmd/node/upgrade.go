@@ -4,9 +4,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-
+	
 	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/cmd/node/path"
+	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 )
@@ -76,7 +76,7 @@ func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) error {
 		// The new database name is based on the database type and resides in
 		// a directory named after the network type.
 		newDbRoot := filepath.Join(filepath.Dir(*cx.Config.DataDir), netName)
-		newDbName := path.BlockDbNamePrefix + "_" + oldDbType
+		newDbName := blockdb.NamePrefix + "_" + oldDbType
 		if oldDbType == "sqlite" {
 			newDbName = newDbName + ".db"
 		}

@@ -580,12 +580,12 @@ func NewRestartCmd() *RestartCmd {
 	return &RestartCmd{}
 }
 
-// DropWalletHistoryCmd defines the restart JSON-RPC command.
-type DropWalletHistoryCmd struct{}
+// ResetChainCmd defines the resetchain JSON-RPC command
+type ResetChainCmd struct{}
 
-// NewDropWalletHistoryCmd returns a new instance which can be used to issue a stop JSON-RPC command.
-func NewDropWalletHistoryCmd() *DropWalletHistoryCmd {
-	return &DropWalletHistoryCmd{}
+// NewResetChainCmd returns a new instance which can be used to issue a resetchain JSON-RPC command
+func NewResetChainCmd() *ResetChainCmd {
+	return &ResetChainCmd{}
 }
 
 // SubmitBlockOptions represents the optional options struct provided with a SubmitBlockCmd command.
@@ -710,6 +710,7 @@ func init() {
 	MustRegisterCmd("ping", (*PingCmd)(nil), flags)
 	MustRegisterCmd("preciousblock", (*PreciousBlockCmd)(nil), flags)
 	MustRegisterCmd("reconsiderblock", (*ReconsiderBlockCmd)(nil), flags)
+	MustRegisterCmd("resetchain", (*ResetChainCmd)(nil), flags)
 	MustRegisterCmd("searchrawtransactions", (*SearchRawTransactionsCmd)(nil), flags)
 	MustRegisterCmd("sendrawtransaction", (*SendRawTransactionCmd)(nil), flags)
 	MustRegisterCmd("setgenerate", (*SetGenerateCmd)(nil), flags)
