@@ -54,6 +54,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 										Ok: func() {
 											interrupt.Request()
 										},
+										Cancel:func(){ui.rc.Dialog.Show = false},
 										Title: "Are you sure?",
 										Text:  "Confirm ParallelCoin close",
 									}

@@ -52,26 +52,25 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
-				ui.ly.Context.Reset(e.Config, e.Size)
-				ui.ly.Pages = ui.LoadPages()
-				//if rc.Boot.IsBoot {
-				//d.DuoUImainScreen()
-				//e.Frame(d.mod.Context.Ops)
-				//} else {
-				//	d.mod.Context.Reset(e.Config, e.Size)
-				//	if rc.Boot.IsFirstRun {
-				//		//DuoUIloaderCreateWallet(duo.m, cx, rc)
-				//	} else {
-				ui.DuoUImainScreen()
-				if ui.rc.Dialog.Show {
-					ui.DuoUIdialog()
+				if ui.rc.Boot.IsBoot {
+					ui.ly.Context.Reset(e.Config, e.Size)
+					ui.DuoUIsplashScreen()
+					e.Frame(ui.ly.Context.Ops)
+				} else {
+					//ui.ly.Context.Reset(e.Config, e.Size)
+					if ui.rc.Boot.IsFirstRun {
+						//DuoUIloaderCreateWallet(duo.m, cx, rc)
+					} else {
+						ui.ly.Pages = ui.LoadPages()
+						ui.DuoUImainScreen()
+						if ui.rc.Dialog.Show {
+							ui.DuoUIdialog()
+						}
+						//d.DuoUItoastSys()
+					}
+					e.Frame(ui.ly.Context.Ops)
+					ui.ly.Context.Reset(e.Config, e.Size)
 				}
-				//d.DuoUItoastSys()
-				//
-				//	}
-				e.Frame(ui.ly.Context.Ops)
-				ui.ly.Context.Reset(e.Config, e.Size)
-				//}
 			}
 		}
 	}

@@ -30,6 +30,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		duo, err := duoui.DuOuI()
 
 		// sys.Components["logger"].Controller()
+		rc.DuoUIloggerController()
 		
 		interrupt.AddHandler(func() {
 			close(duo.Quit)
