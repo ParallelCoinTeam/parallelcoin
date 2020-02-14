@@ -23,23 +23,25 @@ func (r *RcVar)ListenInit(trigger chan struct{}){
 	// first time starting up get all of these and trigger update
 	r.GetDuoUIbalance()
 	r.GetDuoUIunconfirmedBalance()
-	r.ComTransactions()
-	r.GetDuoUIblockHeight()
-	r.GetDuoUIstatus()
-	r.GetDuoUIlocalLost()
-	r.GetDuoUIdifficulty()
-	r.ComLatestTransactions()
+	r.GetDuoUItransactionsNumber()
+	r.GetTransactions()
+	//r.GetDuoUIblockHeight()
+	//r.GetDuoUIstatus()
+	//r.GetDuoUIlocalLost()
+	//r.GetDuoUIdifficulty()
+	r.GetLatestTransactions()
 	r.Cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted:
 			r.GetDuoUIbalance()
 			r.GetDuoUIunconfirmedBalance()
-			r.ComTransactions()
-			r.GetDuoUIblockHeight()
-			r.GetDuoUIstatus()
-			r.GetDuoUIlocalLost()
-			r.GetDuoUIdifficulty()
-			r.ComLatestTransactions()
+			r.GetDuoUItransactionsNumber()
+			r.GetTransactions()
+			//r.GetDuoUIblockHeight()
+			//r.GetDuoUIstatus()
+			//r.GetDuoUIlocalLost()
+			//r.GetDuoUIdifficulty()
+			r.GetLatestTransactions()
 			r.UpdateTrigger <- struct{}{}
 		}
 		r.UpdateTrigger <- struct{}{}
