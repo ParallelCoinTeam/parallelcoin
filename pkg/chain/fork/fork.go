@@ -144,6 +144,12 @@ func GetAlgoName(algoVer int32, height int32) (name string) {
 	return
 }
 
+// GetRandomVersion returns a random version relevant to the current hard fork state and height
+func GetRandomVersion(height int32) int32 {
+	rand.Seed(time.Now().UnixNano())
+	return int32(rand.Intn(len(List[GetCurrent(height)].Algos)) + 5)
+}
+
 // GetAlgoVer returns the version number for a given algorithm (by string name)
 // at a given height. If "random" is given, a random number is taken from the
 // system secure random source (for randomised cpu mining)

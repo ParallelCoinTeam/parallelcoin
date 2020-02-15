@@ -683,7 +683,7 @@ CalcBlockSubsidy(height int32, chainParams *netparams.Params, version int32) (r 
 			for i := range payees {
 				total += payees[i].Amount
 			}
-			total += util.Amount(CalcBlockSubsidy(height-1, chainParams, version))
+			total += util.Amount(CalcBlockSubsidy(height+1, chainParams, version))
 			total += hardfork.TestnetCoreAmount
 			return int64(total)
 		}
