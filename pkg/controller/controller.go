@@ -17,6 +17,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller/advertisment"
+	"github.com/p9c/pod/pkg/controller/hashrate"
 	"github.com/p9c/pod/pkg/controller/job"
 	"github.com/p9c/pod/pkg/controller/pause"
 	"github.com/p9c/pod/pkg/controller/sol"
@@ -146,8 +147,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 // these are the handlers for specific message types.
 // Controller only listens for submissions (currently)
 var handlers = transport.HandleFunc{
-	string(sol.SolutionMagic): func(ctx interface{}) func(b []byte) (
-		err error) {
+	string(sol.SolutionMagic): func(ctx interface{}) func(b []byte) (err error) {
 		return func(b []byte) (err error) {
 			log.DEBUG("received solution")
 			// log.SPEW(ctx)
@@ -216,6 +216,15 @@ var handlers = transport.HandleFunc{
 				block.MsgBlock().Header.Bits,
 				util.Amount(coinbaseTx.Value),
 				fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
+			return
+		}
+	},
+	string(hashrate.HashrateMagic): func(ctx interface{}) func(b []byte) (err error) {
+		return func(b []byte) (err error) {
+			log.TRACE("received hashrate report")
+			c := ctx.(*Controller)
+			hp := hashrate.LoadContainer(b)
+			_, _ = c, hp
 			return
 		}
 	},

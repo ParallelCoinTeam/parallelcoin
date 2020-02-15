@@ -42,9 +42,8 @@ type Worker struct {
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-		log.L.SetLevel("trace", true)
+		// log.L.SetLevel("trace", true)
 		log.DEBUG("miner controller starting")
-		
 		quit := make(chan struct{})
 		ctx, cancel := context.WithCancel(context.Background())
 		conn, err := transport.NewConnection("", controller.UDP4MulticastAddress,
@@ -133,7 +132,7 @@ var handlers = transport.HandleFunc{
 		return func(b []byte) (err error) {
 			log.DEBUG("received job")
 			w := ctx.(*Worker)
-			j := job.LoadMinerContainer(b)
+			j := job.LoadContainer(b)
 			ips := j.GetIPs()
 			cP := j.GetControllerListenerPort()
 			addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))

@@ -16,6 +16,7 @@ import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/controller"
+	"github.com/p9c/pod/pkg/controller/hashrate"
 	"github.com/p9c/pod/pkg/controller/job"
 	"github.com/p9c/pod/pkg/controller/sol"
 	"github.com/p9c/pod/pkg/log"
@@ -170,7 +171,6 @@ func NewWithConnAndSemaphore(
 							)
 							log.INFO(w.msgBlock)
 							srs := sol.GetSolContainer(w.msgBlock)
-							_ = srs
 							err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
 							if err != nil {
 								log.ERROR(err)
@@ -182,12 +182,18 @@ func NewWithConnAndSemaphore(
 						w.msgBlock.Header.Version = nextAlgo
 						w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
 						w.msgBlock.Header.Nonce++
-						if w.roller.C%len(w.roller.Algos) == 0 {
+						// if we have completed a cycle report the hashrate on starting new algo
+						if w.roller.C%w.roller.RoundsPerAlgo == 0 {
 							since := int(time.Now().Sub(tn)/time.Second) + 1
 							total := w.roller.C - int(w.startNonce)
 							_, _ = fmt.Fprintf(os.Stderr,
 								"\r %9d hash/s %s       \r", total/since, fork.GetAlgoName(w.msgBlock.Header.Version, nH))
-							
+							// send out broadcast containing worker nonce and algorithm and count of blocks
+							hashReport := hashrate.Get(w.roller.RoundsPerAlgo, nextAlgo, nH)
+							err := w.dispatchConn.Send(hashReport.Data, hashrate.HashrateMagic)
+							if err != nil {
+								log.ERROR(err)
+							}
 						}
 					}
 				}

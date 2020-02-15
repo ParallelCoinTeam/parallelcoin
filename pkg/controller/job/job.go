@@ -139,7 +139,9 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	return Container{*msg.CreateContainer(WorkMagic)}, txr
 }
 
-func LoadMinerContainer(b []byte) (out Container) {
+// LoadContainer takes a message byte slice payload and loads it into a container
+// ready to be decoded
+func LoadContainer(b []byte) (out Container) {
 	out.Data = b
 	return
 }
