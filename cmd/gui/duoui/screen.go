@@ -14,7 +14,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 	theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	logo, _ := theme.NewDuoUIicon(ico.ParallelCoin)
 	layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
-		layout.Flexed(0.6, func() {
+		layout.Rigid(func() {
 			layout.Flex{Axis: layout.Horizontal}.Layout(ui.ly.Context,
 				layout.Rigid(func() {
 					layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
@@ -38,7 +38,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 				}),
 			)
 		}),
-		layout.Flexed(0.4, ui.DuoUIlogger()),
+		layout.Flexed(1, ui.DuoUIlogger()),
 	)
 }
 

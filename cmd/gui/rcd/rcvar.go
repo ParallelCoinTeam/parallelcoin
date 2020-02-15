@@ -12,6 +12,7 @@ import (
 
 type RcVar struct {
 	cx              *conte.Xt
+	db              *DuoUIdb
 	Boot            *Boot
 	Events          chan Event
 	UpdateTrigger   chan struct{}
@@ -22,11 +23,12 @@ type RcVar struct {
 
 	Settings          *model.DuoUIsettings
 	Sent              bool
-	Toasts            []func()
+	Toasts            []model.DuoUItoast
 	Localhost         model.DuoUIlocalHost
 	Uptime            int
 	Peers             []*btcjson.GetPeerInfoResult `json:"peers"`
 	Blocks            []model.DuoUIblock
+	AddressBook       model.DuoUIaddressBook
 	ShowPage          string
 	PassPhrase        string
 	ConfirmPassPhrase string
@@ -71,23 +73,22 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 	// }
 	l := new(model.DuoUIlog)
 	settings := &model.DuoUIsettings{
-		Abbrevation:  "DUO",
-		Tabs:    &model.DuoUIconfTabs{
+		Abbrevation: "DUO",
+		Tabs: &model.DuoUIconfTabs{
 			Current:  "wallet",
 			TabsList: make(map[string]*controller.Button),
 		},
-		Daemon:&model.DaemonConfig{
+		Daemon: &model.DaemonConfig{
 			Config: cx.Config,
 			Schema: pod.GetConfigSchema(),
 		},
 	}
 
-
 	// Settings tabs
 
 	settingsFields := make(map[string]interface{})
 	for _, group := range settings.Daemon.Schema.Groups {
-	settings.Tabs.TabsList[group.Legend] = new(controller.Button)
+		settings.Tabs.TabsList[group.Legend] = new(controller.Button)
 		for _, field := range group.Fields {
 			switch field.Type {
 			case "array":
@@ -116,12 +117,12 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			Node: &model.NodeStatus{},
 			Wallet: &model.WalletStatus{
 				WalletVersion: make(map[string]btcjson.VersionResult),
-				Transactions: &model.DuoUItransactions{},
-				Txs:          &model.DuoUItransactionsExcerpts{},
-				LastTxs:      &model.DuoUItransactions{},
+				Transactions:  &model.DuoUItransactions{},
+				Txs:           &model.DuoUItransactionsExcerpts{},
+				LastTxs:       &model.DuoUItransactions{},
 			},
 		},
-		Dialog:          &model.DuoUIdialog{},
+		Dialog:   &model.DuoUIdialog{},
 		Settings: settings,
 		Log:      l,
 		CommandsHistory: &model.DuoUIcommandsHistory{

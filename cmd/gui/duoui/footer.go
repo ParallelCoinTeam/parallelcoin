@@ -46,7 +46,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 								var closeMeniItem theme.DuoUIbutton
-								closeMeniItem = ui.ly.Theme.DuoUIbutton("", "", "","ff303030", "closeIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
+								closeMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", "ff303030", "closeIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
 								for buttonQuit.Clicked(ui.ly.Context) {
 									ui.rc.Dialog.Show = true
 									ui.rc.Dialog = &model.DuoUIdialog{
@@ -54,8 +54,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 										Ok: func() {
 											interrupt.Request()
 										},
-										Close:func() {
-											log.DEBUG("requested restart")
+										Close: func() {
 											interrupt.RequestRestart()
 										},
 										Cancel: func() { ui.rc.Dialog.Show = false },
@@ -67,10 +66,9 @@ func (ui *DuoUI) DuoUIfooter() func() {
 							})
 						},
 
-
 						func() {
 							var logMenuItem theme.DuoUIbutton
-							logMenuItem = ui.ly.Theme.DuoUIbutton("","", "", "ff303030", "traceIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
+							logMenuItem = ui.ly.Theme.DuoUIbutton("", "", "", "ff303030", "traceIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
 
 							for buttonLog.Clicked(ui.ly.Context) {
 								ui.rc.ShowPage = "LOG"
@@ -87,27 +85,27 @@ func (ui *DuoUI) DuoUIfooter() func() {
 				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 					navButtons := []func(){
 
-						func() {
-							layout.UniformInset(unit.Dp(14)).Layout(ui.ly.Context, func() {
-								tim := ui.ly.Theme.Caption("Blocks: " + fmt.Sprint(ui.rc.Status.Node.BlockHeight))
-								tim.Font.Typeface = "bariol"
-								tim.Color = ui.ly.Theme.Color.Light
-								tim.Layout(ui.ly.Context)
-							})
-						},
-						func() {
-							layout.UniformInset(unit.Dp(14)).Layout(ui.ly.Context, func() {
-								tim := ui.ly.Theme.Caption("Connections: " + fmt.Sprint(ui.rc.Status.Node.ConnectionCount))
-								tim.Font.Typeface = "bariol"
-								tim.Color = ui.ly.Theme.Color.Light
-								tim.Layout(ui.ly.Context)
-							})
-						},
+						//func() {
+						//	layout.UniformInset(unit.Dp(14)).Layout(ui.ly.Context, func() {
+						//		tim := ui.ly.Theme.Caption("Blocks: " + fmt.Sprint(ui.rc.Status.Node.BlockHeight))
+						//		tim.Font.Typeface = "bariol"
+						//		tim.Color = ui.ly.Theme.Color.Light
+						//		tim.Layout(ui.ly.Context)
+						//	})
+						//},
+						//func() {
+						//	layout.UniformInset(unit.Dp(14)).Layout(ui.ly.Context, func() {
+						//		tim := ui.ly.Theme.Caption("Connections: " + fmt.Sprint(ui.rc.Status.Node.ConnectionCount))
+						//		tim.Font.Typeface = "bariol"
+						//		tim.Color = ui.ly.Theme.Color.Light
+						//		tim.Layout(ui.ly.Context)
+						//	})
+						//},
 
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 								var networkMeniItem theme.DuoUIbutton
-								networkMeniItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary,"Connections: " + fmt.Sprint(ui.rc.Status.Node.ConnectionCount),  "ffcfcfcf", "","","", iconSize, 80, height, paddingVertical, 0)
+								networkMeniItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "Connections: "+fmt.Sprint(ui.rc.Status.Node.ConnectionCount), "ffcfcfcf", "", "", "", iconSize, 80, height, paddingVertical, 0)
 								for buttonNetwork.Clicked(ui.ly.Context) {
 									//ui.rc.ShowPage = "NETWORK"
 								}
@@ -117,16 +115,15 @@ func (ui *DuoUI) DuoUIfooter() func() {
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 								var blocksMenuItem theme.DuoUIbutton
-								blocksMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "Blocks: " + fmt.Sprint(ui.rc.Status.Node.BlockHeight), "ffcfcfcf", "","","", iconSize, 80, height, paddingVertical, 0)
+								blocksMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "Blocks: "+fmt.Sprint(ui.rc.Status.Node.BlockHeight), "ffcfcfcf", "", "", "", iconSize, 80, height, paddingVertical, 0)
 								for buttonBlocks.Clicked(ui.ly.Context) {
 									//ui.rc.ShowPage = "EXPLORER"
 									//ui.rc.ShowToast = true
-											ui.toastAdd()
+									//ui.toastAdd()
 								}
 								blocksMenuItem.Layout(ui.ly.Context, buttonBlocks)
 							})
 						},
-
 
 						//func() {
 						//	layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
@@ -150,7 +147,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 						//},
 						func() {
 							var helpMenuItem theme.DuoUIbutton
-							helpMenuItem = ui.ly.Theme.DuoUIbutton("","", "", "ff303030", "helpIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
+							helpMenuItem = ui.ly.Theme.DuoUIbutton("", "", "", "ff303030", "helpIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
 							for buttonHelp.Clicked(ui.ly.Context) {
 								//ui.rc.ShowDialog = true
 							}
@@ -159,7 +156,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 								var consoleMenuItem theme.DuoUIbutton
-								consoleMenuItem = ui.ly.Theme.DuoUIbutton("","", "", "ff303030", "consoleIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
+								consoleMenuItem = ui.ly.Theme.DuoUIbutton("", "", "", "ff303030", "consoleIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
 								for buttonConsole.Clicked(ui.ly.Context) {
 									ui.rc.ShowPage = "CONSOLE"
 								}
@@ -168,7 +165,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 						},
 						func() {
 							var settingsMenuItem theme.DuoUIbutton
-							settingsMenuItem = ui.ly.Theme.DuoUIbutton("","", "", "ff303030", "settingsIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
+							settingsMenuItem = ui.ly.Theme.DuoUIbutton("", "", "", "ff303030", "settingsIcon", "ffcfcfcf", iconSize, width, height, paddingVertical, paddingHorizontal)
 
 							for buttonSettings.Clicked(ui.ly.Context) {
 								ui.rc.ShowPage = "SETTINGS"

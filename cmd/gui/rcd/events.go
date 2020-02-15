@@ -1,7 +1,9 @@
 package rcd
 
 import (
+	"fmt"
 	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (
@@ -31,6 +33,8 @@ func (r *RcVar)ListenInit(trigger chan struct{}){
 	r.GetDuoUIblockHeight()
 	r.GetDuoUIdifficulty()
 	r.GetDuoUIconnectionCount()
+
+	r.GetAddressBook()
 	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted:
@@ -45,6 +49,7 @@ func (r *RcVar)ListenInit(trigger chan struct{}){
 			r.GetDuoUIdifficulty()
 			r.GetDuoUIconnectionCount()
 			r.UpdateTrigger <- struct{}{}
+			r.toastAdd("New block: " + fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
 		}
 		r.UpdateTrigger <- struct{}{}
 	})

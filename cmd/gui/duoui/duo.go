@@ -3,6 +3,8 @@ package duoui
 import (
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gui/clipboard"
+	"sync"
 
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/pkg/fonts"
@@ -10,6 +12,9 @@ import (
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/unit"
 )
+
+var clipboardStarted bool
+var clipboardMu sync.Mutex
 
 type DuoUI struct {
 	ly *model.DuoUI
@@ -42,5 +47,13 @@ func DuOuI() (duo *model.DuoUI, err error) {
 
 	duo.Theme = theme.NewDuoUItheme()
 	//duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
+
+	clipboardMu.Lock()
+	if !clipboardStarted {
+		clipboardStarted = true
+		clipboard.Start()
+	}
+	clipboardMu.Unlock()
+
 	return
 }

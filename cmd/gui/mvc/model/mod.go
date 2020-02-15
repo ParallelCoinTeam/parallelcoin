@@ -18,10 +18,10 @@ type DuOScomponent struct {
 }
 
 type DuoUI struct {
-	Window  *app.Window
-	Context *layout.Context
-	Theme   *theme.DuoUItheme
-	Pages   map[string]*theme.DuoUIpage
+	Window     *app.Window
+	Context    *layout.Context
+	Theme      *theme.DuoUItheme
+	Pages      map[string]*theme.DuoUIpage
 	Navigation map[string]*theme.DuoUIthemeNav
 	//Configuration *DuoUIconfiguration
 	Quit    chan struct{}
@@ -76,4 +76,9 @@ type DuoUIblock struct {
 	Amount     float64 `json:"amount"`
 	TxNum      int     `json:"txnum"`
 	Time       string  `json:"time"`
+}
+
+type DuoUItoast struct {
+	Title   string
+	Message string
 }

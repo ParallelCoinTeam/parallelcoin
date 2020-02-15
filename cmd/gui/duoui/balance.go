@@ -31,7 +31,7 @@ func (ui *DuoUI) DuoUIbalance() func() {
 			navButtons := []func(){
 				listItem(ui.ly.Context, ui.ly.Theme, "BALANCE :", ui.rc.Status.Wallet.Balance+" "+ui.rc.Settings.Abbrevation),
 				func() { theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
-				listItem(ui.ly.Context, ui.ly.Theme, "UNCNFIRMED :", ui.rc.Status.Wallet.Unconfirmed),
+				listItem(ui.ly.Context, ui.ly.Theme, "UNCNFIRMED :", ui.rc.Status.Wallet.Unconfirmed+" "+ui.rc.Settings.Abbrevation),
 				func() { theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
 				listItem(ui.ly.Context, ui.ly.Theme, "TRANSACTIONS :", fmt.Sprint(ui.rc.Status.Wallet.TxsNumber)),
 			}
@@ -63,15 +63,15 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, name, value string) fun
 					}),
 					layout.Rigid(func() {
 						txt := th.H6(name)
-						txt.Font.Typeface = "bariol"
-						txt.Color = th.Color.Secondary
+						txt.Font.Typeface = th.Font.Primary
+						txt.Color = th.Color.Primary
 						txt.Layout(gtx)
 					}),
 				)
 			}),
 			layout.Rigid(func() {
 				value := th.H5(value)
-				value.Font.Typeface = "bariol"
+				value.Font.Typeface = th.Font.Primary
 				value.Color = th.Color.Dark
 				value.Alignment = text.End
 				value.Layout(gtx)
