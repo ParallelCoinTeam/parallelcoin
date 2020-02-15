@@ -18,7 +18,7 @@ func
 	acct := "default"
 	minconf := 0
 	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
-		MinConf: &minconf}, r.Cx.WalletServer)
+		MinConf: &minconf}, r.cx.WalletServer)
 	if err != nil {
 		//r.PushDuoUIalert("Error", err.Error(), "error")
 	}
@@ -32,7 +32,7 @@ func
 func
 (r *RcVar) GetDuoUIunconfirmedBalance() {
 	acct := "default"
-	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, r.Cx.WalletServer)
+	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
 	if err != nil {
 		//r.PushDuoUIalert("Error", err.Error(), "error")
 	}
@@ -48,7 +48,7 @@ func
 (r *RcVar) GetDuoUItransactionsNumber() {
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
-	lt, err := r.Cx.WalletServer.ListTransactions(0, 999999999)
+	lt, err := r.cx.WalletServer.ListTransactions(0, 999999999)
 	if err != nil {
 		//r.PushDuoUIalert("Error", err.Error(), "error")
 	}
@@ -60,7 +60,7 @@ func
 (r *RcVar) GetDuoUItransactions(sfrom, count int, cat string) *model.DuoUItransactions {
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
-	lt, err := r.Cx.WalletServer.ListTransactions(sfrom, count)
+	lt, err := r.cx.WalletServer.ListTransactions(sfrom, count)
 	if err != nil {
 		//r.PushDuoUIalert("Error", err.Error(), "error")
 	}
@@ -113,13 +113,11 @@ txs(t btcjson.ListTransactionsResult) model.DuoUItx {
 func
 (r *RcVar) GetLatestTransactions() {
 	r.Status.Wallet.LastTxs = r.GetDuoUItransactions(0, 10, "")
-	log.INFO("")
-	log.INFO("LATEST TXS TEST>>", r.Status.Wallet.LastTxs)
 	return
 }
 func
 (r *RcVar) GetTransactions() {
-	lt, err := r.Cx.WalletServer.ListTransactions(0, r.Status.Wallet.Txs.TxsListNumber)
+	lt, err := r.cx.WalletServer.ListTransactions(0, r.Status.Wallet.Txs.TxsListNumber)
 	if err != nil {
 		////r.PushDuoUIalert("Error", err.Error(), "error")
 	}
@@ -160,7 +158,7 @@ func
 func
 (r *RcVar) DuoSend(wp string, ad string, am float64) {
 	if am > 0 {
-		getBlockChain, err := rpc.HandleGetBlockChainInfo(r.Cx.RPCServer, nil, nil)
+		getBlockChain, err := rpc.HandleGetBlockChainInfo(r.cx.RPCServer, nil, nil)
 		if err != nil {
 			//r.PushDuoUIalert("Error", err.Error(), "error")
 
@@ -189,7 +187,7 @@ func
 		if err == nil {
 			var va interface{}
 			va, err = legacy.ValidateAddress(&btcjson.
-			ValidateAddressCmd{Address: addr.String()}, r.Cx.WalletServer)
+			ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
 			if err != nil {
 				//r.PushDuoUIalert("Error", err.Error(), "error")
 			}
@@ -197,14 +195,14 @@ func
 			validateAddr = &vva
 			if validateAddr.IsValid {
 				legacy.WalletPassphrase(btcjson.NewWalletPassphraseCmd(wp, 5),
-					r.Cx.WalletServer)
+					r.cx.WalletServer)
 				if err != nil {
 					//r.PushDuoUIalert("Error", err.Error(), "error")
 				}
 				_, err = legacy.SendToAddress(
 					&btcjson.SendToAddressCmd{
 						Address: addr.EncodeAddress(), Amount: amount.ToDUO(),
-					}, r.Cx.WalletServer)
+					}, r.cx.WalletServer)
 				if err != nil {
 					//r.PushDuoUIalert("error sending to address:", err.Error(), "error")
 

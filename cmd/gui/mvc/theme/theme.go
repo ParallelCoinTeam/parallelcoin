@@ -33,7 +33,7 @@ type DuoUItheme struct {
 		InvText   string
 	}
 	Font struct {
-		Primary, Secondary text.Typeface
+		Primary, Secondary, Mono text.Typeface
 	}
 	TextSize unit.Value
 	Icons    map[string]*DuoUIicon
@@ -57,6 +57,8 @@ func NewDuoUItheme() *DuoUItheme {
 	t.Color.InvText = "0xcfcfcf"
 	t.Font.Primary = "bariol"
 	t.Font.Secondary = "plan9"
+	t.Font.Mono = "go"
+
 	t.TextSize = unit.Sp(16)
 
 	i := make(map[string]*DuoUIicon)

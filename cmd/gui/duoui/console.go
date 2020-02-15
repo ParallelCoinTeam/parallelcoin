@@ -37,6 +37,8 @@ func (ui *DuoUI) DuoUIconsole() func() {
 								}.Layout(ui.ly.Context,
 									layout.Rigid(func() {
 										sat := ui.ly.Theme.Body1("ds://" + t.ComID)
+										sat.Font.Typeface = ui.ly.Theme.Font.Mono
+										sat.Color = ui.ly.Theme.Color.Dark
 										sat.Font.Size = unit.Dp(16)
 										sat.Layout(ui.ly.Context)
 									}),
@@ -46,6 +48,8 @@ func (ui *DuoUI) DuoUIconsole() func() {
 						layout.Rigid(func() {
 							layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
 								e := ui.ly.Theme.DuoUIeditor("Run command", "Run txt")
+								e.Font.Typeface = ui.ly.Theme.Font.Mono
+								e.Color = ui.ly.Theme.Color.Dark
 								e.Font.Style = text.Regular
 								e.Font.Size = unit.Dp(16)
 								e.Layout(ui.ly.Context, consoleInputField)

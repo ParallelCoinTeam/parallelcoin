@@ -3,6 +3,7 @@ package duoui
 
 import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/view"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/pod"
 	"reflect"
@@ -44,9 +45,10 @@ func (f *Field) InputFields(ui *DuoUI) {
 	case "input":
 		switch f.Field.InputType {
 		case "text":
-			//DuoUIinputField(duo, cx, f.Field.Name, f.Field.Model, (duo.Configuration.Settings.Daemon.Widgets[f.Field.Name]).(*widget.Editor))
+			view.DuoUIinputField(ui.ly, f.Field.Name, f.Field.Model, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
 		case "number":
 			e := ui.ly.Theme.DuoUIeditor(f.Field.Name, f.Field.Name)
+			e.Font.Typeface = ui.ly.Theme.Font.Primary
 			e.Font.Style = text.Italic
 			lineEditor := (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor)
 			e.Layout(ui.ly.Context, lineEditor)

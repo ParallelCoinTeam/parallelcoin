@@ -41,18 +41,18 @@ type DuoUIbutton struct {
 	hover             bool
 }
 
-func (t *DuoUItheme) DuoUIbutton(txt, txtColor, bgColor, iconColor string, iconSize int, width, height, paddingVertical, paddingHorizontal float32, icon *DuoUIicon) DuoUIbutton {
+func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface,txt, txtColor, bgColor, icon,iconColor string, iconSize int, width, height, paddingVertical, paddingHorizontal float32) DuoUIbutton {
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
-			Typeface: t.Font.Secondary,
+			Typeface: txtFont,
 			Size:     t.TextSize.Scale(8.0 / 10.0),
 		},
 		Width:             width,
 		Height:            height,
 		TxColor:           HexARGB(txtColor),
 		BgColor:           HexARGB(bgColor),
-		Icon:              icon,
+		Icon:              t.Icons[icon],
 		IconSize:          iconSize,
 		IconColor:         HexARGB(iconColor),
 		PaddingVertical:   unit.Dp(paddingVertical),

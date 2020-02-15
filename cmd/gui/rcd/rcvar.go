@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"github.com/p9c/pod/pkg/pod"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
@@ -10,7 +11,7 @@ import (
 )
 
 type RcVar struct {
-	Cx              *conte.Xt
+	cx              *conte.Xt
 	Boot            *Boot
 	Events          chan Event
 	UpdateTrigger   chan struct{}
@@ -53,7 +54,6 @@ type Boot struct {
 // }
 
 func RcInit(cx *conte.Xt) (r *RcVar) {
-
 	b := Boot{
 		IsBoot:     true,
 		IsFirstRun: false,
@@ -70,15 +70,24 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 	//	Text:   "Dialog text",
 	// }
 	l := new(model.DuoUIlog)
+	settings := &model.DuoUIsettings{
+		Abbrevation:  "DUO",
+		Tabs:    &model.DuoUIconfTabs{
+			Current:  "wallet",
+			TabsList: make(map[string]*controller.Button),
+		},
+		Daemon:&model.DaemonConfig{
+			Config: cx.Config,
+			Schema: pod.GetConfigSchema(),
+		},
+	}
 
-	settings := new(model.DuoUIsettings)
-	settings.Abbrevation = "DUO"
 
 	// Settings tabs
-	confTabs := make(map[string]*controller.Button)
+
 	settingsFields := make(map[string]interface{})
 	for _, group := range settings.Daemon.Schema.Groups {
-		confTabs[group.Legend] = new(controller.Button)
+	settings.Tabs.TabsList[group.Legend] = new(controller.Button)
 		for _, field := range group.Fields {
 			switch field.Type {
 			case "array":
@@ -97,14 +106,11 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			}
 		}
 	}
-	settings.Tabs = model.DuoUIconfTabs{
-		Current:  "wallet",
-		TabsList: confTabs,
-	}
+
 	settings.Daemon.Widgets = settingsFields
 
 	r = &RcVar{
-		Cx:   cx,
+		cx:   cx,
 		Boot: &b,
 		Status: &model.DuoUIstatus{
 			Node: &model.NodeStatus{},

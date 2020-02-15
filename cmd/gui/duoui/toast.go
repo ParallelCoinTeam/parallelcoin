@@ -1,13 +1,12 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/op"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
-	"image/color"
 	"time"
 )
 
@@ -29,11 +28,11 @@ func (ui *DuoUI) DuoUItoastSys() {
 	})
 }
 
-func (ui *DuoUI)toastButton(text, txtColor, bgColor, iconColor string, button *controller.Button, icon *theme.DuoUIicon) func() {
+func (ui *DuoUI)toastButton(text, txtColor, bgColor, icon, iconColor string, button *controller.Button) func() {
 	var b theme.DuoUIbutton
 	return func() {
 		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(ui.ly.Context, func() {
-			b = ui.ly.Theme.DuoUIbutton(text, txtColor, bgColor, iconColor, 24, 120, 60, 0, 0, icon)
+			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary,text, txtColor, bgColor, icon, iconColor, 24, 120, 60, 0, 0)
 			for button.Clicked(ui.ly.Context) {
 				//ui.rc.ShowToast = false
 			}
@@ -60,7 +59,7 @@ func (ui *DuoUI)toastAdd() {
 						layout.Align(layout.Center).Layout(ui.ly.Context, func() {
 							layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(ui.ly.Context, func() {
 								cur := ui.ly.Theme.H4("TOAST MESSAGE!!!")
-								cur.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0xcf, B: 0xcf}
+								cur.Color = ui.ly.Theme.Color.Light
 								cur.Alignment = text.Start
 								cur.Layout(ui.ly.Context)
 							})

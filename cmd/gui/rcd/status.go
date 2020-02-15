@@ -14,24 +14,24 @@ import (
 
 func
 (r *RcVar) GetDuoUIstatus() {
-	v, err := rpc.HandleVersion(r.Cx.RPCServer, nil, nil)
+	v, err := rpc.HandleVersion(r.cx.RPCServer, nil, nil)
 	if err != nil {
 	}
 	r.Status.Version = "0.0.1"
 	r.Status.Wallet.WalletVersion = v.(map[string]btcjson.VersionResult)
-	r.Status.UpTime = time.Now().Unix() - r.Cx.RPCServer.Cfg.StartupTime
-	r.Status.CurrentNet = r.Cx.RPCServer.Cfg.ChainParams.Net.String()
-	r.Status.Chain = r.Cx.RPCServer.Cfg.ChainParams.Name
+	r.Status.UpTime = time.Now().Unix() - r.cx.RPCServer.Cfg.StartupTime
+	r.Status.CurrentNet = r.cx.RPCServer.Cfg.ChainParams.Net.String()
+	r.Status.Chain = r.cx.RPCServer.Cfg.ChainParams.Name
 	return
 }
 func
 (r *RcVar) GetDuoUIhashesPerSec() {
-	r.Status.Wallet.Hashes = int64(r.Cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
+	r.Status.Wallet.Hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
 	return
 }
 func
 (r *RcVar) GetDuoUInetworkHashesPerSec() {
-	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(r.Cx.RPCServer, btcjson.NewGetNetworkHashPSCmd(nil, nil), nil)
+	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(r.cx.RPCServer, btcjson.NewGetNetworkHashPSCmd(nil, nil), nil)
 	if err != nil {
 	}
 	networkHashesPerSec, ok := networkHashesPerSecIface.(int64)
@@ -42,22 +42,22 @@ func
 }
 func
 (r *RcVar) GetDuoUIblockHeight() {
-	r.Status.Node.BlockHeight = r.Cx.RPCServer.Cfg.Chain.BestSnapshot().Height
+	r.Status.Node.BlockHeight = r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height
 	return
 }
 func
 (r *RcVar) GetDuoUIbestBlockHash() {
-	r.Status.Node.BestBlock = r.Cx.RPCServer.Cfg.Chain.BestSnapshot().Hash.String()
+	r.Status.Node.BestBlock = r.cx.RPCServer.Cfg.Chain.BestSnapshot().Hash.String()
 	return
 }
 func
 (r *RcVar) GetDuoUIdifficulty() {
-	r.Status.Node.Difficulty = rpc.GetDifficultyRatio(r.Cx.RPCServer.Cfg.Chain.BestSnapshot().Bits, r.Cx.RPCServer.Cfg.ChainParams, 2)
+	r.Status.Node.Difficulty = rpc.GetDifficultyRatio(r.cx.RPCServer.Cfg.Chain.BestSnapshot().Bits, r.cx.RPCServer.Cfg.ChainParams, 2)
 	return
 }
 func
 (r *RcVar) GetDuoUIblockCount() {
-	getBlockCount, err := rpc.HandleGetBlockCount(r.Cx.RPCServer, nil, nil)
+	getBlockCount, err := rpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
 	if err != nil {
 		//r.PushDuoUIalert("Error", err.Error(), "error")
 	}
@@ -66,7 +66,7 @@ func
 }
 func
 (r *RcVar) GetDuoUInetworkLastBlock() {
-	for _, g := range r.Cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
+	for _, g := range r.cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
 		l := g.ToPeer().StatsSnapshot().LastBlock
 		if l > r.Status.Node.NetworkLastBlock {
 			r.Status.Node.NetworkLastBlock = l
@@ -76,7 +76,7 @@ func
 }
 func
 (r *RcVar) GetDuoUIconnectionCount() {
-	r.Status.Node.ConnectionCount = r.Cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
+	r.Status.Node.ConnectionCount = r.cx.RPCServer.Cfg.ConnMgr.ConnectedCount()
 	return
 }
 func

@@ -14,7 +14,7 @@ import (
 type DuoUIeditor struct {
 	Font text.Font
 	// Color is the text color.
-	Color color.RGBA
+	Color string
 	// Hint contains the text displayed when the editor is empty.
 	Hint string
 	// HintColor is the color of hint text.
@@ -28,7 +28,7 @@ func (t *DuoUItheme) DuoUIeditor(hint, txt string) DuoUIeditor {
 		Font: text.Font{
 			Size: t.TextSize,
 		},
-		Color:     HexARGB(t.Color.Text),
+		Color:     t.Color.Text,
 		shaper:    t.Shaper,
 		Hint:      hint,
 		HintColor: HexARGB(t.Color.Hint),
@@ -75,12 +75,12 @@ func (e DuoUIeditor) Layout(gtx *layout.Context, editor *controller.Editor) {
 	}
 	editor.Layout(gtx, e.shaper, e.Font)
 	if editor.Len() > 0 {
-		paint.ColorOp{Color: e.Color}.Add(gtx.Ops)
+		paint.ColorOp{Color: HexARGB(e.Color)}.Add(gtx.Ops)
 		editor.PaintText(gtx)
 	} else {
 		macro.Add()
 	}
-	paint.ColorOp{Color: e.Color}.Add(gtx.Ops)
+	paint.ColorOp{Color: HexARGB(e.Color)}.Add(gtx.Ops)
 	editor.PaintCaret(gtx)
 	stack.Pop()
 }

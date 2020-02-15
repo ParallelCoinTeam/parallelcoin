@@ -58,8 +58,8 @@ type DuoUIconfTabs struct {
 
 type DuoUIsettings struct {
 	Abbrevation string
-	Tabs        DuoUIconfTabs
-	Daemon      DaemonConfig `json:"daemon"`
+	Tabs        *DuoUIconfTabs
+	Daemon      *DaemonConfig `json:"daemon"`
 }
 
 type DaemonConfig struct {

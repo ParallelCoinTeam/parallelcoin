@@ -8,7 +8,6 @@ import (
 	"github.com/p9c/pod/pkg/gui/unit"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"image"
-	"image/color"
 )
 
 var (
@@ -65,7 +64,7 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, name, value string) fun
 					layout.Rigid(func() {
 						txt := th.H6(name)
 						txt.Font.Typeface = "bariol"
-						txt.Color = theme.HexARGB(th.Color.Secondary)
+						txt.Color = th.Color.Secondary
 						txt.Layout(gtx)
 					}),
 				)
@@ -73,7 +72,7 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, name, value string) fun
 			layout.Rigid(func() {
 				value := th.H5(value)
 				value.Font.Typeface = "bariol"
-				value.Color = color.RGBA{A: 0xff, R: 0x30, G: 0x30, B: 0x30}
+				value.Color = th.Color.Dark
 				value.Alignment = text.End
 				value.Layout(gtx)
 			}),

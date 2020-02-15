@@ -12,6 +12,10 @@ import (
 	"github.com/p9c/pod/pkg/gui/font"
 	"github.com/p9c/pod/pkg/gui/font/opentype"
 	"github.com/p9c/pod/pkg/gui/text"
+	"golang.org/x/image/font/gofont/gomono"
+	"golang.org/x/image/font/gofont/gomonobold"
+	"golang.org/x/image/font/gofont/gomonobolditalic"
+	"golang.org/x/image/font/gofont/gomonoitalic"
 )
 
 
@@ -23,6 +27,11 @@ func Register() {
 	register(text.Font{Typeface: "bariol",Style: text.Italic, Weight: text.Bold}, bariolbolditalic.TTF)
 	register(text.Font{Typeface: "bariol",Weight: text.Medium}, bariollight.TTF)
 	register(text.Font{Typeface: "bariol",Weight: text.Medium, Style: text.Italic}, bariollightitalic.TTF)
+	register(text.Font{Typeface: "go"}, gomono.TTF)
+	register(text.Font{Typeface: "go", Weight: text.Bold}, gomonobold.TTF)
+	register(text.Font{Typeface: "go", Weight: text.Bold, Style: text.Italic}, gomonobolditalic.TTF)
+	register(text.Font{Typeface: "go", Style: text.Italic}, gomonoitalic.TTF)
+	register(text.Font{Typeface: "go", Style: text.Italic}, gomonoitalic.TTF)
 }
 
 func register(fnt text.Font, ttf []byte) {
