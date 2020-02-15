@@ -66,7 +66,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 						if ui.rc.Dialog.Show {
 							ui.DuoUIdialog()
 						}
-						//d.DuoUItoastSys()
+						ui.DuoUItoastSys()
 					}
 					e.Frame(ui.ly.Context.Ops)
 					ui.ly.Context.Reset(e.Config, e.Size)

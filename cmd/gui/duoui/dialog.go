@@ -53,9 +53,9 @@ func (ui *DuoUI) DuoUIdialog() {
 					Axis:      layout.Horizontal,
 					Alignment: layout.Middle,
 				}.Layout(ui.ly.Context,
-					layout.Rigid(ui.dialogButon(func() { ui.rc.Dialog.Cancel() }, "CANCEL", "ffcf3030", "iconCancel", "ffcf8080", buttonDialogCancel)),
-					layout.Rigid(ui.dialogButon(func() { ui.rc.Dialog.Ok() }, "QUIT", "ff30cf30", "iconOK", "ff80cf80", buttonDialogOK)),
-					layout.Rigid(ui.dialogButon(func() { ui.rc.Dialog.Close() }, "RESTART", "ffcf8030", "iconClose", "ffcfa880", buttonDialogClose)),
+					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Cancel()},"CANCEL", "ffcf3030", "iconCancel", "ffcf8080", buttonDialogCancel)),
+					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Ok()},"QUIT",  "ff30cf30", "iconOK", "ff80cf80", buttonDialogOK)),
+					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Close()},"RESTART", "ffcf8030", "iconClose", "ffcfa880", buttonDialogClose)),
 				)
 			}),
 		)
