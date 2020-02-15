@@ -256,7 +256,7 @@ func createCoinbaseTx(params *netparams.Params, coinbaseScript []byte, nextBlock
 		params.Net == wire.MainNet ||
 		nextBlockHeight == fork.List[1].TestnetStart &&
 			params.Net == wire.TestNet3 {
-		return createHardForkSubsidyTx(params, coinbaseScript, nextBlockHeight, addr)
+		return createHardForkSubsidyTx(params, coinbaseScript, nextBlockHeight, addr, version)
 	}
 
 	// Create the script to pay to the provided payment address if one was

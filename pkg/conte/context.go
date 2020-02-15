@@ -56,6 +56,7 @@ type Xt struct {
 	RealNode *rpc.Node
 	// HashrateBuffer is the ring buffer containing hashrate messages
 	HashrateBuffer *ring.Ring
+	HRBMutex       sync.Mutex
 }
 
 // GetNewContext returns a fresh new context
