@@ -25,7 +25,7 @@ func (ui *DuoUI) DuoUIlogger() func() {
 			logOutputList.Layout(ui.ly.Context, len(ui.rc.Log.LogMessages), func(i int) {
 				t := ui.rc.Log.LogMessages[i]
 				logText := ui.ly.Theme.Caption(fmt.Sprint(i) + "->" + fmt.Sprint(t.Text))
-				logText.Font.Typeface = "bariol"
+				logText.Font.Typeface = ui.ly.Theme.Font.Mono
 
 				logText.Color = ui.ly.Theme.Color.Primary
 				if t.Level == "TRC" {
