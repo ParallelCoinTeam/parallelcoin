@@ -32,36 +32,8 @@ func (ui *DuoUI) DuoUIaddressBook() func() {
 										layout.Flex{
 											Alignment: layout.End,
 										}.Layout(ui.ly.Context,
-											layout.Flexed(0.05, func() {
+											layout.Flexed(0.1, func() {
 												sat := ui.ly.Theme.Body1(fmt.Sprint(t.Index))
-												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = ui.ly.Theme.Color.Dark
-												sat.Font.Size = unit.Dp(16)
-												sat.Layout(ui.ly.Context)
-											}),
-											layout.Flexed(0.45, func() {
-												sat := ui.ly.Theme.Body1(t.Address)
-												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = ui.ly.Theme.Color.Dark
-												sat.Font.Size = unit.Dp(16)
-												sat.Layout(ui.ly.Context)
-											}),
-											layout.Flexed(0.1, func() {
-												sat := ui.ly.Theme.Body1(t.Account)
-												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = ui.ly.Theme.Color.Dark
-												sat.Font.Size = unit.Dp(16)
-												sat.Layout(ui.ly.Context)
-											}),
-											layout.Flexed(0.3, func() {
-												sat := ui.ly.Theme.Body1(t.Label)
-												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = ui.ly.Theme.Color.Dark
-												sat.Font.Size = unit.Dp(16)
-												sat.Layout(ui.ly.Context)
-											}),
-											layout.Flexed(0.1, func() {
-												sat := ui.ly.Theme.Body1(fmt.Sprint(t.Amount))
 												sat.Font.Typeface = ui.ly.Theme.Font.Primary
 												sat.Color = ui.ly.Theme.Color.Dark
 												sat.Font.Size = unit.Dp(16)
@@ -70,7 +42,7 @@ func (ui *DuoUI) DuoUIaddressBook() func() {
 											layout.Rigid(func() {
 
 												var copyButton theme.DuoUIbutton
-												copyButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "COPY", "ffcfcfcf", "ff303030", "", "ffcfcfcf", 0, 64, 24, 0, 0)
+												copyButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Mono, t.Address, ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Primary, "", "", 0, 300, 24, 0, 0)
 
 												for t.Copy.Clicked(ui.ly.Context) {
 
@@ -79,6 +51,28 @@ func (ui *DuoUI) DuoUIaddressBook() func() {
 												copyButton.Layout(ui.ly.Context, t.Copy)
 
 											}),
+											layout.Flexed(0.2, func() {
+												sat := ui.ly.Theme.Body1(t.Account)
+												sat.Font.Typeface = ui.ly.Theme.Font.Primary
+												sat.Color = ui.ly.Theme.Color.Dark
+												sat.Font.Size = unit.Dp(16)
+												sat.Layout(ui.ly.Context)
+											}),
+											layout.Flexed(0.4, func() {
+												sat := ui.ly.Theme.Body1(t.Label)
+												sat.Font.Typeface = ui.ly.Theme.Font.Primary
+												sat.Color = ui.ly.Theme.Color.Dark
+												sat.Font.Size = unit.Dp(16)
+												sat.Layout(ui.ly.Context)
+											}),
+											layout.Flexed(0.3, func() {
+												sat := ui.ly.Theme.Body1(fmt.Sprint(t.Amount))
+												sat.Font.Typeface = ui.ly.Theme.Font.Primary
+												sat.Color = ui.ly.Theme.Color.Dark
+												sat.Font.Size = unit.Dp(16)
+												sat.Layout(ui.ly.Context)
+											}),
+
 										)
 									}),
 									layout.Rigid(func() {

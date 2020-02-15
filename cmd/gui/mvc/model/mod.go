@@ -69,13 +69,15 @@ type DaemonConfig struct {
 }
 
 type DuoUIblock struct {
-	Height     int64   `json:"height"`
-	BlockHash  string  `json:"hash"`
-	PowAlgoID  uint32  `json:"pow"`
-	Difficulty float64 `json:"diff"`
-	Amount     float64 `json:"amount"`
-	TxNum      int     `json:"txnum"`
-	Time       string  `json:"time"`
+	Height        int64   `json:"height"`
+	BlockHash     string  `json:"hash"`
+	PowAlgoID     uint32  `json:"pow"`
+	Difficulty    float64 `json:"diff"`
+	Amount        float64 `json:"amount"`
+	TxNum         int     `json:"txnum"`
+	Confirmations int64
+	Time          string `json:"time"`
+	Link          *controller.Button
 }
 
 type DuoUItoast struct {

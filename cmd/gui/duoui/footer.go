@@ -116,7 +116,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 								var blocksMenuItem theme.DuoUIbutton
 								blocksMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "Blocks: "+fmt.Sprint(ui.rc.Status.Node.BlockHeight), "ffcfcfcf", "", "", "", iconSize, 80, height, paddingVertical, 0)
 								for buttonBlocks.Clicked(ui.ly.Context) {
-									//ui.rc.ShowPage = "EXPLORER"
+									ui.rc.ShowPage = "EXPLORER"
 									//ui.rc.ShowToast = true
 									//ui.toastAdd()
 								}

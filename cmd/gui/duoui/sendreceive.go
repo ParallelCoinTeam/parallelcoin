@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/clipboard"
 	"github.com/p9c/pod/pkg/gui/layout"
@@ -16,11 +17,12 @@ var (
 	passPharse        string
 	addressLineEditor = &controller.Editor{
 		SingleLine: true,
-		Submit:     true,
 	}
 	amountLineEditor = &controller.Editor{
 		SingleLine: true,
-		Submit:     true,
+	}
+	passLineEditor = &controller.Editor{
+		SingleLine: true,
 	}
 	buttonPasteAddress = new(controller.Button)
 	buttonPasteAmount  = new(controller.Button)
@@ -37,10 +39,8 @@ func (ui *DuoUI) DuoUIsend() func() {
 					Axis: layout.Vertical,
 				}.Layout(ui.ly.Context,
 					layout.Rigid(func() {
-
 						layout.Flex{}.Layout(ui.ly.Context,
 							layout.Flexed(1, func() {
-
 								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 									cs := ui.ly.Context.Constraints
 									theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
@@ -59,7 +59,6 @@ func (ui *DuoUI) DuoUIsend() func() {
 										}
 									})
 								})
-
 							}),
 							layout.Rigid(func() {
 								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
@@ -73,7 +72,6 @@ func (ui *DuoUI) DuoUIsend() func() {
 								})
 
 							}))
-
 					}),
 					layout.Rigid(func() {
 						layout.Flex{}.Layout(ui.ly.Context,
@@ -106,11 +104,35 @@ func (ui *DuoUI) DuoUIsend() func() {
 									pasteAmountButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "PASTE AMOUNT", "ffcfcfcf", "ff303030", "", "ffcfcfcf", 0, 128, 48, 0, 0)
 
 									for buttonPasteAmount.Clicked(ui.ly.Context) {
-										addressLineEditor.SetText(clipboard.Get())
+										amountLineEditor.SetText(clipboard.Get())
 									}
 									pasteAmountButton.Layout(ui.ly.Context, buttonPasteAmount)
 								})
 
+							}))
+					}),
+					layout.Rigid(func() {
+						layout.Flex{}.Layout(ui.ly.Context,
+							layout.Flexed(1, func() {
+								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+									cs := ui.ly.Context.Constraints
+									theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+									layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+										theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+										e := ui.ly.Theme.DuoUIeditor("DUO Amount", "DUO dva")
+										e.Font.Typeface = ui.ly.Theme.Font.Primary
+										e.Font.Style = text.Italic
+										e.Font.Size = unit.Dp(24)
+										e.Layout(ui.ly.Context, passLineEditor)
+										for _, e := range passLineEditor.Events(ui.ly.Context) {
+											if e, ok := e.(controller.SubmitEvent); ok {
+													passPharse = e.Text
+													passLineEditor.SetText("")
+
+											}
+										}
+									})
+								})
 							}))
 					}),
 					layout.Rigid(func() {
@@ -120,6 +142,19 @@ func (ui *DuoUI) DuoUIsend() func() {
 
 							for buttonSend.Clicked(ui.ly.Context) {
 
+								ui.rc.Dialog.Show = true
+								ui.rc.Dialog = &model.DuoUIdialog{
+									Show: true,
+									Ok: func() {
+										ui.rc.DuoSend(passPharse, address,amount)
+									},
+									Close: func() {
+
+									},
+									Cancel: func() { ui.rc.Dialog.Show = false },
+									Title:  "Are you sure?",
+									Text:   "Confirm ParallelCoin send",
+								}
 							}
 							sendButton.Layout(ui.ly.Context, buttonSend)
 						})
