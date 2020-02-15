@@ -2,9 +2,6 @@ package model
 
 import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/mem"
 )
 
 // System Ststus
@@ -61,8 +58,8 @@ type
 	DuoUIconnections struct{ int32 }
 type
 	DuoUIlocalHost struct {
-		Cpu        []cpu.InfoStat        `json:"cpu"`
-		CpuPercent []float64             `json:"cpupercent"`
-		Memory     mem.VirtualMemoryStat `json:"mem"`
-		Disk       disk.UsageStat        `json:"disk"`
+		//Cpu        []cpu.InfoStat        `json:"cpu"`
+		//CpuPercent []float64             `json:"cpupercent"`
+		//Memory     mem.VirtualMemoryStat `json:"mem"`
+		//Disk       disk.UsageStat        `json:"disk"`
 	}

@@ -4,9 +4,6 @@ import (
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/mem"
 	"time"
 )
 
@@ -82,13 +79,13 @@ func
 func
 (r *RcVar) GetDuoUIlocalLost() {
 	r.Localhost = *new(model.DuoUIlocalHost)
-	sm, _ := mem.VirtualMemory()
-	sc, _ := cpu.Info()
-	sp, _ := cpu.Percent(0, true)
-	sd, _ := disk.Usage("/")
-	r.Localhost.Cpu = sc
-	r.Localhost.CpuPercent = sp
-	r.Localhost.Memory = *sm
-	r.Localhost.Disk = *sd
+	//sm, _ := mem.VirtualMemory()
+	//sc, _ := cpu.Info()
+	//sp, _ := cpu.Percent(0, true)
+	//sd, _ := disk.Usage("/")
+	//r.Localhost.Cpu = sc
+	//r.Localhost.CpuPercent = sp
+	//r.Localhost.Memory = *sm
+	//r.Localhost.Disk = *sd
 	return
 }
