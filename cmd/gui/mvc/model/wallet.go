@@ -1,5 +1,7 @@
 package model
 
+import "github.com/p9c/pod/cmd/gui/mvc/controller"
+
 type
 	DuoUIbalance struct {
 		Balance string `json:"balance"`
@@ -46,3 +48,16 @@ type
 		TxID          string  `json:"txid"`
 		Comment       string  `json:"comment,omitempty"`
 	}
+
+type Address struct {
+	Index   int     `json:"num"`
+	Label   string  `json:"label"`
+	Account string  `json:"account"`
+	Address string  `json:"address"`
+	Amount  float64 `json:"amount"`
+	Copy    *controller.Button
+}
+type DuoUIaddressBook struct {
+	Num       int       `json:"num"`
+	Addresses []Address `json:"addresses"`
+}

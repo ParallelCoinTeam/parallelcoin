@@ -33,6 +33,8 @@ func (r *RcVar)ListenInit(trigger chan struct{}){
 	r.GetDuoUIblockHeight()
 	r.GetDuoUIdifficulty()
 	r.GetDuoUIconnectionCount()
+
+	r.GetAddressBook()
 	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted:

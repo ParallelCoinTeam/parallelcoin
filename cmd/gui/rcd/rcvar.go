@@ -28,6 +28,7 @@ type RcVar struct {
 	Uptime            int
 	Peers             []*btcjson.GetPeerInfoResult `json:"peers"`
 	Blocks            []model.DuoUIblock
+	AddressBook       model.DuoUIaddressBook
 	ShowPage          string
 	PassPhrase        string
 	ConfirmPassPhrase string
