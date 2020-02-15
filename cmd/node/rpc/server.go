@@ -27,8 +27,6 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	indexers "github.com/p9c/pod/pkg/chain/index"
-	"github.com/p9c/pod/pkg/chain/mining"
-	cpuminer "github.com/p9c/pod/pkg/chain/mining/cpu"
 	netsync "github.com/p9c/pod/pkg/chain/sync"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -116,19 +114,19 @@ type (
 	Node struct {
 		// The following variables must only be used atomically. Putting the
 		// uint64s first makes them 64-bit aligned for 32-bit systems.
-		BytesReceived        uint64 // Total bytes received from all peers since start.
-		BytesSent            uint64 // Total bytes sent by all peers since start.
-		StartupTime          int64
-		ChainParams          *netparams.Params
-		AddrManager          *addrmgr.AddrManager
-		ConnManager          *connmgr.ConnManager
-		SigCache             *txscript.SigCache
-		HashCache            *txscript.HashCache
-		RPCServers           []*Server
-		SyncManager          *netsync.SyncManager
-		Chain                *blockchain.BlockChain
-		TxMemPool            *mempool.TxPool
-		CPUMiner             *cpuminer.CPUMiner
+		BytesReceived uint64 // Total bytes received from all peers since start.
+		BytesSent     uint64 // Total bytes sent by all peers since start.
+		StartupTime   int64
+		ChainParams   *netparams.Params
+		AddrManager   *addrmgr.AddrManager
+		ConnManager   *connmgr.ConnManager
+		SigCache      *txscript.SigCache
+		HashCache     *txscript.HashCache
+		RPCServers    []*Server
+		SyncManager   *netsync.SyncManager
+		Chain         *blockchain.BlockChain
+		TxMemPool     *mempool.TxPool
+		// CPUMiner             *cpuminer.CPUMiner
 		ModifyRebroadcastInv chan interface{}
 		NewPeers             chan *NodePeer
 		DonePeers            chan *NodePeer
@@ -442,7 +440,8 @@ func (s *Node) Start() {
 	}
 	// Start the CPU miner if generation is enabled.
 	if *s.Config.Generate {
-		s.CPUMiner.Start()
+		log.DEBUG("not starting nonexistent currently cpu miner")
+		// s.CPUMiner.Start()
 	}
 }
 
@@ -456,7 +455,8 @@ func (s *Node) Stop() error {
 	}
 	log.TRACE("node shutting down")
 	// Stop the CPU miner if needed
-	s.CPUMiner.Stop()
+	// s.CPUMiner.Stop()
+	log.DEBUG("we would be stopping the cpu miner here")
 	// Shutdown the RPC server if it's not disabled.
 	if !*s.Config.DisableRPC {
 		for i := range s.RPCServers {
@@ -2504,30 +2504,35 @@ NewPeerConfig(sp *NodePeer) *peer.Config {
 	}
 }
 
+type Context struct {
+	// Config is the pod all-in-one server config
+	Config *pod.Config
+	// StateCfg is a reference to the main node state configuration struct
+	StateCfg *state.Config
+	// ActiveNet is the active net parameters
+	ActiveNet *netparams.Params
+	// Language libraries
+}
+
 func // NewNode returns a new pod server configured to listen on addr for the
 // bitcoin network type specified by chainParams.  Use start to begin accepting
 // connections from peers.
 // TODO: simplify/modularise this
-NewNode(config *pod.Config, stateCfg *state.Config,
-	activeNet *netparams.Params, listenAddrs []string, db database.DB,
-	chainParams *netparams.Params, interruptChan <-chan struct{},
-	algo string) (*Node, error) {
+NewNode(listenAddrs []string, db database.DB, interruptChan <-chan struct{}, algo string, cx *Context) (*Node, error) {
 	log.TRACE("listenAddrs ", listenAddrs)
 	services := DefaultServices
-	if *config.NoPeerBloomFilters {
+	if *cx.Config.NoPeerBloomFilters {
 		services &^= wire.SFNodeBloom
 	}
-	if *config.NoCFilters {
+	if *cx.Config.NoCFilters {
 		services &^= wire.SFNodeCF
 	}
-	aMgr := addrmgr.New(*config.DataDir+string(os.PathSeparator)+activeNet.
-		Name, Lookup(stateCfg))
+	aMgr := addrmgr.New(*cx.Config.DataDir+string(os.PathSeparator)+cx.ActiveNet.Name, Lookup(cx.StateCfg))
 	var listeners []net.Listener
 	var nat upnp.NAT
-	if !*config.DisableListen {
+	if !*cx.Config.DisableListen {
 		var err error
-		listeners, nat, err = InitListeners(config, activeNet, aMgr,
-			listenAddrs, services)
+		listeners, nat, err = InitListeners(cx.Config, cx.ActiveNet, aMgr, listenAddrs, services)
 		if err != nil {
 			log.ERROR(err)
 			return nil, err
@@ -2538,21 +2543,21 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	}
 	nThreads := runtime.NumCPU()
 	var thr int
-	if *config.GenThreads == -1 || thr > nThreads {
+	if *cx.Config.GenThreads == -1 || thr > nThreads {
 		thr = nThreads
 	} else {
-		thr = *config.GenThreads
+		thr = *cx.Config.GenThreads
 	}
 	log.TRACE("set genthreads to ", nThreads)
 	s := Node{
-		ChainParams:          chainParams,
+		ChainParams:          cx.ActiveNet,
 		AddrManager:          aMgr,
-		NewPeers:             make(chan *NodePeer, *config.MaxPeers),
-		DonePeers:            make(chan *NodePeer, *config.MaxPeers),
-		BanPeers:             make(chan *NodePeer, *config.MaxPeers),
+		NewPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
+		DonePeers:            make(chan *NodePeer, *cx.Config.MaxPeers),
+		BanPeers:             make(chan *NodePeer, *cx.Config.MaxPeers),
 		Query:                make(chan interface{}),
-		RelayInv:             make(chan RelayMsg, *config.MaxPeers),
-		Broadcast:            make(chan BroadcastMsg, *config.MaxPeers),
+		RelayInv:             make(chan RelayMsg, *cx.Config.MaxPeers),
+		Broadcast:            make(chan BroadcastMsg, *cx.Config.MaxPeers),
 		Quit:                 make(chan struct{}),
 		ModifyRebroadcastInv: make(chan interface{}),
 		PeerHeightsUpdate:    make(chan UpdatePeerHeightsMsg),
@@ -2560,14 +2565,14 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 		DB:                   db,
 		TimeSource:           blockchain.NewMedianTime(),
 		Services:             services,
-		SigCache:             txscript.NewSigCache(uint(*config.SigCacheMaxSize)),
-		HashCache:            txscript.NewHashCache(uint(*config.SigCacheMaxSize)),
+		SigCache:             txscript.NewSigCache(uint(*cx.Config.SigCacheMaxSize)),
+		HashCache:            txscript.NewHashCache(uint(*cx.Config.SigCacheMaxSize)),
 		CFCheckptCaches:      make(map[wire.FilterType][]CFHeaderKV),
 		GenThreads:           uint32(thr),
 		Algo:                 algo,
-		Config:               config,
-		StateCfg:             stateCfg,
-		ActiveNet:            activeNet,
+		Config:               cx.Config,
+		StateCfg:             cx.StateCfg,
+		ActiveNet:            cx.ActiveNet,
 	}
 	// Create the transaction and address indexes if needed.
 	// CAUTION: the txindex needs to be first in the indexes array because the
@@ -2575,28 +2580,28 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	// If the addrindex is run first,
 	// it may not have the transactions from the current block indexed.
 	var indexes []indexers.Indexer
-	log.DEBUG("txindex", *config.TxIndex, "addrindex", *config.AddrIndex)
-	if *config.TxIndex || *config.AddrIndex {
+	log.DEBUG("txindex", *cx.Config.TxIndex, "addrindex", *cx.Config.AddrIndex)
+	if *cx.Config.TxIndex || *cx.Config.AddrIndex {
 		// Enable transaction index if address index is enabled since it
 		// requires it.
-		if !*config.TxIndex {
+		if !*cx.Config.TxIndex {
 			log.INFO("transaction index enabled because it is required by the" +
 				" address index")
-			*config.TxIndex = true
+			*cx.Config.TxIndex = true
 		} else {
 			log.INFO("transaction index is enabled")
 		}
 		s.TxIndex = indexers.NewTxIndex(db)
 		indexes = append(indexes, s.TxIndex)
 	}
-	if *config.AddrIndex {
+	if *cx.Config.AddrIndex {
 		log.INFO("address index is enabled")
-		s.AddrIndex = indexers.NewAddrIndex(db, chainParams)
+		s.AddrIndex = indexers.NewAddrIndex(db, cx.ActiveNet)
 		indexes = append(indexes, s.AddrIndex)
 	}
-	if !*config.NoCFilters {
+	if !*cx.Config.NoCFilters {
 		log.TRACE("committed filter index is enabled")
-		s.CFIndex = indexers.NewCfIndex(db, chainParams)
+		s.CFIndex = indexers.NewCfIndex(db, cx.ActiveNet)
 		indexes = append(indexes, s.CFIndex)
 	}
 	// Create an index manager if any of the optional indexes are enabled.
@@ -2606,9 +2611,9 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	}
 	// Merge given checkpoints with the default ones unless they are disabled.
 	var checkpoints []chaincfg.Checkpoint
-	if !*config.DisableCheckpoints {
+	if !*cx.Config.DisableCheckpoints {
 		checkpoints = MergeCheckpoints(
-			s.ChainParams.Checkpoints, stateCfg.AddedCheckpoints)
+			s.ChainParams.Checkpoints, cx.StateCfg.AddedCheckpoints)
 	}
 	// Create a new block chain instance with the appropriate configuration.
 	var err error
@@ -2665,16 +2670,16 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	}
 	txC := mempool.Config{
 		Policy: mempool.Policy{
-			DisableRelayPriority: *config.NoRelayPriority,
-			AcceptNonStd:         *config.RelayNonStd,
-			FreeTxRelayLimit:     *config.FreeTxRelayLimit,
-			MaxOrphanTxs:         *config.MaxOrphanTxs,
+			DisableRelayPriority: *cx.Config.NoRelayPriority,
+			AcceptNonStd:         *cx.Config.RelayNonStd,
+			FreeTxRelayLimit:     *cx.Config.FreeTxRelayLimit,
+			MaxOrphanTxs:         *cx.Config.MaxOrphanTxs,
 			MaxOrphanTxSize:      DefaultMaxOrphanTxSize,
 			MaxSigOpCostPerTx:    blockchain.MaxBlockSigOpsCost / 4,
-			MinRelayTxFee:        stateCfg.ActiveMinRelayTxFee,
+			MinRelayTxFee:        cx.StateCfg.ActiveMinRelayTxFee,
 			MaxTxVersion:         2,
 		},
-		ChainParams:   chainParams,
+		ChainParams:   cx.ActiveNet,
 		FetchUtxoView: s.Chain.FetchUtxoView,
 		BestHeight: func() int32 {
 			return s.Chain.BestSnapshot().Height
@@ -2700,8 +2705,8 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 				Chain:              s.Chain,
 				TxMemPool:          s.TxMemPool,
 				ChainParams:        s.ChainParams,
-				DisableCheckpoints: *config.DisableCheckpoints,
-				MaxPeers:           *config.MaxPeers,
+				DisableCheckpoints: *cx.Config.DisableCheckpoints,
+				MaxPeers:           *cx.Config.MaxPeers,
 				FeeEstimator:       s.FeeEstimator,
 			},
 		)
@@ -2709,33 +2714,33 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 		log.ERROR(err)
 		return nil, err
 	}
-	// Create the mining policy and block template generator based on the
-	// configuration options.
-	// NOTE: The CPU miner relies on the mempool, so the mempool has to be
-	// created before calling the function to create the CPU miner.
-	policy := mining.Policy{
-		BlockMinWeight:    uint32(*config.BlockMinWeight),
-		BlockMaxWeight:    uint32(*config.BlockMaxWeight),
-		BlockMinSize:      uint32(*config.BlockMinSize),
-		BlockMaxSize:      uint32(*config.BlockMaxSize),
-		BlockPrioritySize: uint32(*config.BlockPrioritySize),
-		TxMinFreeFee:      stateCfg.ActiveMinRelayTxFee,
-	}
-	blockTemplateGenerator := mining.NewBlkTmplGenerator(&policy,
-		s.ChainParams, s.TxMemPool, s.Chain, s.TimeSource,
-		s.SigCache, s.HashCache, s.Algo)
-	s.CPUMiner = cpuminer.New(&cpuminer.Config{
-		Blockchain:             s.Chain,
-		ChainParams:            chainParams,
-		BlockTemplateGenerator: blockTemplateGenerator,
-		MiningAddrs:            stateCfg.ActiveMiningAddrs,
-		ProcessBlock:           s.SyncManager.ProcessBlock,
-		ConnectedCount:         s.ConnectedCount,
-		IsCurrent:              s.SyncManager.IsCurrent,
-		NumThreads:             s.GenThreads,
-		Algo:                   s.Algo,
-		Solo:                   *config.Solo,
-	})
+	// // Create the mining policy and block template generator based on the
+	// // configuration options.
+	// // NOTE: The CPU miner relies on the mempool, so the mempool has to be
+	// // created before calling the function to create the CPU miner.
+	// policy := mining.Policy{
+	// 	BlockMinWeight:    uint32(*config.BlockMinWeight),
+	// 	BlockMaxWeight:    uint32(*config.BlockMaxWeight),
+	// 	BlockMinSize:      uint32(*config.BlockMinSize),
+	// 	BlockMaxSize:      uint32(*config.BlockMaxSize),
+	// 	BlockPrioritySize: uint32(*config.BlockPrioritySize),
+	// 	TxMinFreeFee:      stateCfg.ActiveMinRelayTxFee,
+	// }
+	// blockTemplateGenerator := mining.NewBlkTmplGenerator(&policy,
+	// 	s.ChainParams, s.TxMemPool, s.Chain, s.TimeSource,
+	// 	s.SigCache, s.HashCache, s.Algo)
+	// s.CPUMiner = cpuminer.New(&cpuminer.Config{
+	// 	Blockchain:             s.Chain,
+	// 	ChainParams:            chainParams,
+	// 	BlockTemplateGenerator: blockTemplateGenerator,
+	// 	MiningAddrs:            stateCfg.ActiveMiningAddrs,
+	// 	ProcessBlock:           s.SyncManager.ProcessBlock,
+	// 	ConnectedCount:         s.ConnectedCount,
+	// 	IsCurrent:              s.SyncManager.IsCurrent,
+	// 	NumThreads:             s.GenThreads,
+	// 	Algo:                   s.Algo,
+	// 	Solo:                   *config.Solo,
+	// })
 	// Only setup a function to return new addresses to connect to when
 	// not running in connect-only mode.  The simulation network is always
 	// in connect-only mode since it is only intended to connect to
@@ -2743,7 +2748,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	// discovered peers in order to prevent it from becoming a public test
 	// network.
 	var newAddressFunc func() (net.Addr, error)
-	if !((*config.Network)[0] == 's') && len(*config.ConnectPeers) == 0 {
+	if !((*cx.Config.Network)[0] == 's') && len(*cx.Config.ConnectPeers) == 0 {
 		newAddressFunc = func() (net.Addr, error) {
 			for tries := 0; tries < 100; tries++ {
 				addr := s.AddrManager.GetAddress()
@@ -2766,19 +2771,19 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 				}
 				// allow non default ports after 50 failed tries.
 				if tries < 50 && fmt.Sprintf("%d", addr.NetAddress().Port) !=
-					activeNet.DefaultPort {
+					cx.ActiveNet.DefaultPort {
 					continue
 				}
 				addrString := addrmgr.NetAddressKey(addr.NetAddress())
-				return AddrStringToNetAddr(config, stateCfg, addrString)
+				return AddrStringToNetAddr(cx.Config, cx.StateCfg, addrString)
 			}
 			return nil, errors.New("no valid connect address")
 		}
 	}
 	// Create a connection manager.
 	targetOutbound := DefaultTargetOutbound
-	if *config.MaxPeers < targetOutbound {
-		targetOutbound = *config.MaxPeers
+	if *cx.Config.MaxPeers < targetOutbound {
+		targetOutbound = *cx.Config.MaxPeers
 	}
 	cMgr, err :=
 		connmgr.New(
@@ -2787,7 +2792,7 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 				OnAccept:       s.InboundPeerConnected,
 				RetryDuration:  ConnectionRetryInterval,
 				TargetOutbound: uint32(targetOutbound),
-				Dial:           Dial(stateCfg),
+				Dial:           Dial(cx.StateCfg),
 				OnConnection:   s.OutboundPeerConnected,
 				GetNewAddress:  newAddressFunc,
 			},
@@ -2798,12 +2803,12 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 	}
 	s.ConnManager = cMgr
 	// Start up persistent peers.
-	permanentPeers := *config.ConnectPeers
+	permanentPeers := *cx.Config.ConnectPeers
 	if len(permanentPeers) == 0 {
-		permanentPeers = *config.AddPeers
+		permanentPeers = *cx.Config.AddPeers
 	}
 	for _, addr := range permanentPeers {
-		netAddr, err := AddrStringToNetAddr(config, stateCfg, addr)
+		netAddr, err := AddrStringToNetAddr(cx.Config, cx.StateCfg, addr)
 		if err != nil {
 			log.ERROR(err)
 			return nil, err
@@ -2815,14 +2820,14 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 			},
 		)
 	}
-	if !*config.DisableRPC {
+	if !*cx.Config.DisableRPC {
 		// Setup listeners for the configured RPC listen addresses and
 		// TLS settings.
 		listeners := map[string][]string{
-			"sha256d": *config.RPCListeners,
+			"sha256d": *cx.Config.RPCListeners,
 		}
 		for l := range listeners {
-			rpcListeners, err := SetupRPCListeners(config, listeners[l])
+			rpcListeners, err := SetupRPCListeners(cx.Config, listeners[l])
 			if err != nil {
 				log.ERROR(err)
 				return nil, err
@@ -2832,23 +2837,23 @@ NewNode(config *pod.Config, stateCfg *state.Config,
 			}
 			
 			rp, err := NewRPCServer(&ServerConfig{
-				Listeners:    rpcListeners,
-				StartupTime:  s.StartupTime,
-				ConnMgr:      &ConnManager{&s},
-				SyncMgr:      &SyncManager{&s, s.SyncManager},
-				TimeSource:   s.TimeSource,
-				Chain:        s.Chain,
-				ChainParams:  chainParams,
-				DB:           db,
-				TxMemPool:    s.TxMemPool,
-				Generator:    blockTemplateGenerator,
-				CPUMiner:     s.CPUMiner,
+				Listeners:   rpcListeners,
+				StartupTime: s.StartupTime,
+				ConnMgr:     &ConnManager{&s},
+				SyncMgr:     &SyncManager{&s, s.SyncManager},
+				TimeSource:  s.TimeSource,
+				Chain:       s.Chain,
+				ChainParams: cx.ActiveNet,
+				DB:          db,
+				TxMemPool:   s.TxMemPool,
+				// Generator:    blockTemplateGenerator,
+				// CPUMiner:     s.CPUMiner,
 				TxIndex:      s.TxIndex,
 				AddrIndex:    s.AddrIndex,
 				CfIndex:      s.CFIndex,
 				FeeEstimator: s.FeeEstimator,
 				Algo:         l,
-			}, stateCfg, config)
+			}, cx.StateCfg, cx.Config)
 			if err != nil {
 				log.ERROR(err)
 				return nil, err

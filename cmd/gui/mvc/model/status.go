@@ -32,7 +32,7 @@ type KopachStatus struct {
 }
 type WalletStatus struct {
 	WalletVersion map[string]btcjson.VersionResult `json:"walletver"`
-	Hashes        int64
+	Hashes        float64
 	Balance       string
 	Unconfirmed   string
 	TxsNumber     int

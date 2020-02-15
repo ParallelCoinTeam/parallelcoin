@@ -36,7 +36,6 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	"github.com/p9c/pod/pkg/chain/mining"
-	cpuminer "github.com/p9c/pod/pkg/chain/mining/cpu"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
@@ -151,7 +150,7 @@ type ServerConfig struct {
 	// CPU mining is typically only useful for test purposes when doing
 	// regression or simulation testing.
 	Generator *mining.BlkTmplGenerator
-	CPUMiner  *cpuminer.CPUMiner
+	// CPUMiner  *cpuminer.CPUMiner
 	// These fields define any optional indexes the RPC server can make use
 	// of to provide additional data when queried.
 	TxIndex   *indexers.TxIndex
@@ -2027,34 +2026,36 @@ func HandleGenerate(s *Server, cmd interface{},
 				" with the CPU.", s.Cfg.ChainParams.Net),
 		}
 	}
+	log.DEBUG("cpu miner stuff is missing here")
 	// Set the algorithm according to the port we were called on
-	s.Cfg.CPUMiner.SetAlgo(s.Cfg.Algo)
-	c := cmd.(*btcjson.GenerateCmd)
-	// Respond with an error if the client is requesting 0 blocks to be
-	// generated.
-	if c.NumBlocks == 0 {
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCInternal.Code,
-			Message: "Please request a nonzero number of blocks to generate.",
-		}
-	}
-	// Create a reply
-	reply := make([]string, c.NumBlocks)
-	blockHashes, err := s.Cfg.CPUMiner.GenerateNBlocks(0, c.NumBlocks,
-		s.Cfg.Algo)
-	if err != nil {
-		log.ERROR(err)
-		return nil, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCInternal.Code,
-			Message: err.Error(),
-		}
-	}
-	// Mine the correct number of blocks, assigning the hex representation of
-	// the hash of each one to its place in the reply.
-	for i, hash := range blockHashes {
-		reply[i] = hash.String()
-	}
-	return reply, nil
+	// s.Cfg.CPUMiner.SetAlgo(s.Cfg.Algo)
+	// c := cmd.(*btcjson.GenerateCmd)
+	// // Respond with an error if the client is requesting 0 blocks to be
+	// // generated.
+	// if c.NumBlocks == 0 {
+	// 	return nil, &btcjson.RPCError{
+	// 		Code:    btcjson.ErrRPCInternal.Code,
+	// 		Message: "Please request a nonzero number of blocks to generate.",
+	// 	}
+	// }
+	// // Create a reply
+	// reply := make([]string, c.NumBlocks)
+	// blockHashes, err := s.Cfg.CPUMiner.GenerateNBlocks(0, c.NumBlocks,
+	// 	s.Cfg.Algo)
+	// if err != nil {
+	// 	log.ERROR(err)
+	// 	return nil, &btcjson.RPCError{
+	// 		Code:    btcjson.ErrRPCInternal.Code,
+	// 		Message: err.Error(),
+	// 	}
+	// }
+	// // Mine the correct number of blocks, assigning the hex representation of
+	// // the hash of each one to its place in the reply.
+	// for i, hash := range blockHashes {
+	// 	reply[i] = hash.String()
+	// }
+	// return reply, nil
+	return nil, nil
 }
 
 // HandleGetAddedNodeInfo handles getaddednodeinfo commands.
@@ -2856,13 +2857,17 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 // HandleGetGenerate implements the getgenerate command.
 func HandleGetGenerate(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (interface{}, error) {
-	return s.Cfg.CPUMiner.IsMining(), nil
+	log.DEBUG("not implemented")
+	return nil, nil
+	// return s.Cfg.CPUMiner.IsMining(), nil
 }
 
 // HandleGetHashesPerSec implements the gethashespersec command.
 func HandleGetHashesPerSec(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (interface{}, error) {
-	return int64(s.Cfg.CPUMiner.HashesPerSecond()), nil
+	// return int64(s.Cfg.CPUMiner.HashesPerSecond()), nil
+	log.DEBUG("miner hashes per second - multicast thing")
+	return int64(0), nil
 }
 
 // HandleGetHeaders implements the getheaders command. NOTE: This is a btcsuite
@@ -3167,6 +3172,7 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 			Difficulty = dScrypt
 		default:
 		}
+		log.DEBUG("missing generate stats in here")
 		ret = &btcjson.GetMiningInfoResult0{
 			Blocks:             int64(best.Height),
 			CurrentBlockSize:   best.BlockSize,
@@ -3177,9 +3183,9 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 			Difficulty:         Difficulty,
 			DifficultySHA256D:  dSHA256D,
 			DifficultyScrypt:   dScrypt,
-			Generate:           s.Cfg.CPUMiner.IsMining(),
-			GenProcLimit:       s.Cfg.CPUMiner.NumWorkers(),
-			HashesPerSec:       int64(s.Cfg.CPUMiner.HashesPerSecond()),
+			// Generate:           s.Cfg.CPUMiner.IsMining(),
+			// GenProcLimit:       s.Cfg.CPUMiner.NumWorkers(),
+			// HashesPerSec:       int64(s.Cfg.CPUMiner.HashesPerSecond()),
 			NetworkHashPS:      networkHashesPerSec,
 			PooledTx:           uint64(s.Cfg.TxMemPool.Count()),
 			TestNet:            (*s.Config.Network)[0] == 't',
@@ -3277,6 +3283,7 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 			Difficulty = dX11
 		default:
 		}
+		log.DEBUG("missing cpu miner stuff in here")
 		ret = &btcjson.GetMiningInfoResult{
 			Blocks:              int64(best.Height),
 			CurrentBlockSize:    best.BlockSize,
@@ -3294,10 +3301,10 @@ func HandleGetMiningInfo(s *Server, cmd interface{},
 			DifficultySkein:     dSkein,
 			DifficultyStribog:   dStribog,
 			DifficultyX11:       dX11,
-			Generate:            s.Cfg.CPUMiner.IsMining(),
-			GenAlgo:             s.Cfg.CPUMiner.GetAlgo(),
-			GenProcLimit:        s.Cfg.CPUMiner.NumWorkers(),
-			HashesPerSec:        int64(s.Cfg.CPUMiner.HashesPerSecond()),
+			// Generate:            s.Cfg.CPUMiner.IsMining(),
+			// GenAlgo:             s.Cfg.CPUMiner.GetAlgo(),
+			// GenProcLimit:        s.Cfg.CPUMiner.NumWorkers(),
+			// HashesPerSec:        int64(s.Cfg.CPUMiner.HashesPerSecond()),
 			NetworkHashPS:       networkHashesPerSec,
 			PooledTx:            uint64(s.Cfg.TxMemPool.Count()),
 			TestNet:             (*s.Config.Network)[0] == 't',
@@ -4137,41 +4144,42 @@ func HandleSendRawTransaction(s *Server, cmd interface{},
 // HandleSetGenerate implements the setgenerate command.
 func HandleSetGenerate(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (interface{}, error) {
-	c := cmd.(*btcjson.SetGenerateCmd)
+	// c := cmd.(*btcjson.SetGenerateCmd)
 	// Disable generation regardless of the provided generate flag if the
 	// maximum number of threads (goroutines for our purposes) is 0. Otherwise
 	// enable or disable it depending on the provided flag.
 	// l.Error(*c.GenProcLimit, c.Generate)
 	
-	generate := c.Generate
-	genProcLimit := -1
-	if c.GenProcLimit != nil {
-		genProcLimit = *c.GenProcLimit
-	}
-	if genProcLimit == 0 {
-		generate = false
-	}
-	if s.Cfg.CPUMiner.IsMining() {
-		// if s.cfg.CPUMiner.GetAlgo() != s.cfg.Algo {
-		s.Cfg.CPUMiner.Stop()
-		generate = true
-		// }
-	}
-	if !generate {
-		s.Cfg.CPUMiner.Stop()
-	} else {
-		// Respond with an error if there are no addresses to pay the created
-		// blocks to.
-		if len(s.StateCfg.ActiveMiningAddrs) == 0 {
-			return nil, &btcjson.RPCError{
-				Code:    btcjson.ErrRPCInternal.Code,
-				Message: "no payment addresses specified via --miningaddr",
-			}
-		}
-		// It's safe to call start even if it's already started.
-		s.Cfg.CPUMiner.SetNumWorkers(int32(genProcLimit))
-		s.Cfg.CPUMiner.Start()
-	}
+	// generate := c.Generate
+	// genProcLimit := -1
+	// if c.GenProcLimit != nil {
+	// 	genProcLimit = *c.GenProcLimit
+	// }
+	// if genProcLimit == 0 {
+	// 	generate = false
+	// }
+	// if s.Cfg.CPUMiner.IsMining() {
+	// 	// if s.cfg.CPUMiner.GetAlgo() != s.cfg.Algo {
+	// 	s.Cfg.CPUMiner.Stop()
+	// 	generate = true
+	// 	// }
+	// }
+	// if !generate {
+	// 	s.Cfg.CPUMiner.Stop()
+	// } else {
+	// 	// Respond with an error if there are no addresses to pay the created
+	// 	// blocks to.
+	// 	if len(s.StateCfg.ActiveMiningAddrs) == 0 {
+	// 		return nil, &btcjson.RPCError{
+	// 			Code:    btcjson.ErrRPCInternal.Code,
+	// 			Message: "no payment addresses specified via --miningaddr",
+	// 		}
+	// 	}
+	// 	// It's safe to call start even if it's already started.
+	// 	s.Cfg.CPUMiner.SetNumWorkers(int32(genProcLimit))
+	// 	s.Cfg.CPUMiner.Start()
+	// }
+	log.DEBUG("setgenerate not implemented")
 	return nil, nil
 }
 
@@ -4276,8 +4284,6 @@ func HandleVerifyChain(s *Server, cmd interface{},
 	err := VerifyChain(s, checkLevel, checkDepth)
 	return err == nil, nil
 }
-
-
 
 // HandleResetChain deletes the existing chain database and restarts
 func HandleResetChain(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {

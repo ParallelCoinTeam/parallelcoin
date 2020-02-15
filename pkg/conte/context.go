@@ -69,3 +69,9 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		DataDir:  appdata.Dir(appName, false),
 	}
 }
+
+func GetContext(cx *Xt) *rpc.Context {
+	return &rpc.Context{
+		Config: cx.Config, StateCfg: cx.StateCfg, ActiveNet: cx.ActiveNet,
+	}
+}

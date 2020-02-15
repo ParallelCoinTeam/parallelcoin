@@ -138,14 +138,9 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			),
 			apputil.NewCommand("kopach",
 				"standalone miner for clusters",
-				kopachHandle(cx),
+				KopachHandle(cx),
 				apputil.SubCommands(),
 				"k"),
-			apputil.NewCommand("kopachgui",
-				"standalone miner for clusters with GUI monitor and control",
-				kopachGUIHandle(cx),
-				apputil.SubCommands(),
-				"K"),
 			apputil.NewCommand("worker",
 				"single thread parallelcoin miner controlled with binary IPC"+
 					" interface on stdin/stdout; internal use, must have network name string as second arg after worker and"+

@@ -1,6 +1,6 @@
 module github.com/p9c/pod
 
-go 1.13
+go 1.14
 
 require (
 	git.parallelcoin.io/dev/cryptonight v0.3.1
@@ -21,8 +21,7 @@ require (
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/golang/protobuf v1.3.3
-	github.com/google/go-github/v24 v24.0.1 // indirect
+	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/jcelliott/lumber v0.0.0-20160324203708-dd349441af25 // indirect
 	github.com/jessevdk/go-flags v1.4.0
@@ -38,14 +37,12 @@ require (
 	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.uber.org/atomic v1.5.1
-	golang.org/x/crypto v0.0.0-20200128174031-69ecbb4d6d5d
-	golang.org/x/exp v0.0.0-20200119233911-0405dc783f0a
+	golang.org/x/crypto v0.0.0-20200214034016-1d94cc7ab1c6
+	golang.org/x/exp v0.0.0-20200213203834-85f925bdd4d0
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
-	golang.org/x/sys v0.0.0-20200202164722-d101bd2416d5
+	golang.org/x/sys v0.0.0-20200212091648-12a6c2dcc1e4
 	golang.org/x/text v0.3.2
-	google.golang.org/grpc v1.27.0
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 )

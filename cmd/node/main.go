@@ -153,9 +153,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 		}
 	}
 	// create server and start it
-	server, err := rpc.NewNode(cx.Config, cx.StateCfg, cx.ActiveNet,
-		*cx.Config.Listeners, db, cx.ActiveNet,
-		interrupt.ShutdownRequestChan, *cx.Config.Algo)
+	server, err := rpc.NewNode(*cx.Config.Listeners, db, interrupt.ShutdownRequestChan, *cx.Config.Algo, conte.GetContext(cx))
 	if err != nil {
 		log.ERRORF("unable to start server on %v: %v",
 			*cx.Config.Listeners, err)
@@ -164,7 +162,8 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 	var stopController context.CancelFunc
 	gracefulShutdown := func() {
 		log.INFO("gracefully shutting down the server...")
-		server.CPUMiner.Stop()
+		log.DEBUG("we would be stopping the cpu miner here")
+		// server.CPUMiner.Stop()
 		if stopController != nil {
 			log.DEBUG("stopping controller")
 			stopController()

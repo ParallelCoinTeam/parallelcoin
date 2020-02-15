@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-func kopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
+func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		log.INFO("starting up kopach standalone miner for parallelcoin")
 		Configure(cx, c)
@@ -30,20 +30,20 @@ func kopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		return
 	}
 }
-
-func kopachGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
-	return func(c *cli.Context) (err error) {
-		log.INFO("starting up kopach standalone miner with GUI for parallelcoin")
-		Configure(cx, c)
-		quit := make(chan struct{})
-		interrupt.AddHandler(func() {
-			close(quit)
-			os.Exit(0)
-		})
-		err = kopach.KopachHandle(cx)(c)
-		<-quit
-		log.DEBUG("kopach main finished")
-		return
-	}
-}
+//
+// func kopachGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
+// 	return func(c *cli.Context) (err error) {
+// 		log.INFO("starting up kopach standalone miner with GUI for parallelcoin")
+// 		Configure(cx, c)
+// 		quit := make(chan struct{})
+// 		interrupt.AddHandler(func() {
+// 			close(quit)
+// 			os.Exit(0)
+// 		})
+// 		err = kopach.KopachHandle(cx)(c)
+// 		<-quit
+// 		log.DEBUG("kopach main finished")
+// 		return
+// 	}
+// }
 
