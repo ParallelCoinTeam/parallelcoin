@@ -46,8 +46,6 @@ type Xt struct {
 	Wallet *atomic.Value
 	// WalletKill is the killswitch for the Wallet
 	WalletKill chan struct{}
-	// // Window is the fyne window when running GUI
-	// Window *fyne.Window
 	// RPCServer is needed to directly query data
 	RPCServer *rpc.Server
 	// WalletServer is needed to query the wallet

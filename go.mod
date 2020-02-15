@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	git.parallelcoin.io/dev/cryptonight v0.3.1
+	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
