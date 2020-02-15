@@ -62,6 +62,7 @@ func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface,txt, txtColor, bgColor, i
 }
 
 func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
+
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
 			rr := float32(gtx.Px(unit.Dp(0)))

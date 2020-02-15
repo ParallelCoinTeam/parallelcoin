@@ -17,8 +17,8 @@ func (t *DuoUItheme) DuoUIcheckBox(label string) DuoUIcheckBox {
 	return DuoUIcheckBox{
 		checkable{
 			Label:     label,
-			Color:     HexARGB(t.Color.Text),
-			IconColor: HexARGB(t.Color.Primary),
+			Color:     HexARGB(t.Color.Light),
+			IconColor: HexARGB(t.Color.Light),
 			Font: text.Font{
 				Typeface: t.Font.Primary,
 				Size: t.TextSize.Scale(14.0 / 16.0),

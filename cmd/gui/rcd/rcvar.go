@@ -22,7 +22,7 @@ type RcVar struct {
 
 	Settings          *model.DuoUIsettings
 	Sent              bool
-	Toasts            []func()
+	Toasts            []model.DuoUItoast
 	Localhost         model.DuoUIlocalHost
 	Uptime            int
 	Peers             []*btcjson.GetPeerInfoResult `json:"peers"`
