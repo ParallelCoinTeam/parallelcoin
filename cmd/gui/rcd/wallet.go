@@ -1,7 +1,9 @@
 package rcd
 
 import (
+	"encoding/hex"
 	"fmt"
+	"github.com/minio/highwayhash"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/node/rpc"
@@ -10,6 +12,8 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/parallelcointeam11/parallelcoin/cmd/gui/vue/mod"
 	"time"
 )
 
@@ -221,4 +225,31 @@ func
 	}
 	r.Sent = true
 	return
+}
+
+
+func (r *RcVar) CreateNewAddress(acctName string) string {
+	account, err := r.cx.WalletServer.AccountNumber(waddrmgr.KeyScopeBIP0044, acctName)
+	if err != nil {
+	}
+	addr, err := r.cx.WalletServer.NewAddress(account,
+		waddrmgr.KeyScopeBIP0044, true)
+	if err != nil {
+	}
+	//dv.PushDuoVUEalert("New address created:", addr.EncodeAddress(), "success")
+	fmt.Println("low", addr.EncodeAddress())
+	return addr.EncodeAddress()
+}
+
+func (r *RcVar) SaveAddressLabel(address, label string) {
+	hf, err := highwayhash.New64(make([]byte, 32))
+	if err != nil {
+		panic(err)
+	}
+	addressHash := hex.EncodeToString(hf.Sum([]byte(address)))
+	r.db.DbWrite("addressbook", addressHash, mod.AddBook{
+		Address: addressHash,
+		Label:   label,
+	})
+
 }
