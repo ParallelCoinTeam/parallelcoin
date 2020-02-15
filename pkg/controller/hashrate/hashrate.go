@@ -42,7 +42,7 @@ func Get(count int, version int32, height int32) Container {
 
 // LoadContainer takes a message byte slice payload and loads it into a container
 // ready to be decoded
-func LoadContainer(b []byte) (out simplebuffer.Container) {
+func LoadContainer(b []byte) (out Container) {
 	out.Data = b
 	return
 }

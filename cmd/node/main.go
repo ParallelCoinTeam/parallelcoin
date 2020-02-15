@@ -2,17 +2,18 @@ package node
 
 import (
 	"context"
-	"github.com/p9c/pod/cmd/node/blockdb"
-	"github.com/p9c/pod/pkg/controller"
 	"net"
 	"net/http"
-	//// This enables pprof
-	//_ "net/http/pprof"
+	// // This enables pprof
+	// _ "net/http/pprof"
 	"os"
 	"runtime/pprof"
 	"sync"
 	"time"
-
+	
+	"github.com/p9c/pod/cmd/node/blockdb"
+	"github.com/p9c/pod/pkg/controller"
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node/path"
 	"github.com/p9c/pod/cmd/node/rpc"
@@ -40,8 +41,7 @@ var winServiceMain func() (bool, error)
 // when requested from the service control manager.
 //  - shutdownchan can be used to wait for the node to shut down
 //  - killswitch can be closed to shut the node down
-func Main(cx *conte.Xt, shutdownChan chan struct{},
-	killswitch chan struct{}, nodechan chan *rpc.Server,
+func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, nodechan chan *rpc.Server,
 	wg *sync.WaitGroup) (err error) {
 	log.TRACE("starting up node main")
 	wg.Add(1)
@@ -189,7 +189,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},
 	}
 	// set up interrupt shutdown handlers to stop servers
 	if *cx.Config.EnableController {
-		stopController = controller.Run(cx)
+		stopController, cx.HashrateBuffer = controller.Run(cx)
 	}
 	//interrupt.AddHandler(gracefulShutdown)
 

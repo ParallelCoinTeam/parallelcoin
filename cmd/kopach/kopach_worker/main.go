@@ -33,7 +33,7 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 				fork.IsTestnet = true
 			}
 		}
-		log.L.SetLevel("info", true)
+		log.L.SetLevel("trace", true)
 		log.DEBUG("miner worker starting")
 		w, conn := worker.New(sem.New(1))
 		interrupt.AddHandler(func() {

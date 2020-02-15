@@ -343,7 +343,7 @@ func GetUDPAddr(address string) (sendAddr *net.UDPAddr) {
 	}
 	sendAddr = &net.UDPAddr{IP: net.ParseIP(sendHost),
 		Port: int(sendPortI)}
-	log.DEBUG("multicast", address)
-	log.SPEW(sendAddr)
+	// log.DEBUG("multicast", address)
+	// log.SPEW(sendAddr)
 	return
 }

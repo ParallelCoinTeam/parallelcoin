@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"container/ring"
 	"context"
 	"errors"
 	"math/rand"
@@ -39,6 +40,7 @@ const (
 	MaxDatagramSize = blockchain.MaxBlockBaseSize / 3
 	// UDP6MulticastAddress = "ff02::1"
 	UDP4MulticastAddress = "224.0.0.1:11049"
+	BufferSize           = 4096
 )
 
 type Controller struct {
@@ -58,9 +60,10 @@ type Controller struct {
 	sendAddresses          []*net.UDPAddr
 	subMx                  *sync.Mutex
 	submitChan             chan []byte
+	buffer                 *ring.Ring
 }
 
-func Run(cx *conte.Xt) (cancel context.CancelFunc) {
+func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
 		log.WARN("no mining addresses, not starting controller")
 		return
@@ -101,8 +104,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc) {
 		submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
 		coinbases:              make(map[int32]*util.Tx),
+		buffer:                 ring.New(BufferSize),
 	}
 	ctrl.active.Store(false)
+	buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
 	pauseShards, err := ctrl.conn.CreateShards(pM.Data, pause.PauseMagic)
 	if err != nil {
@@ -221,10 +226,13 @@ var handlers = transport.HandleFunc{
 	},
 	string(hashrate.HashrateMagic): func(ctx interface{}) func(b []byte) (err error) {
 		return func(b []byte) (err error) {
-			log.TRACE("received hashrate report")
+			// log.TRACE("received hashrate report")
 			c := ctx.(*Controller)
 			hp := hashrate.LoadContainer(b)
-			_, _ = c, hp
+			// here we should store into a ring buffer
+			// log.TRACEC(hp.String)
+			c.buffer.Value = hp.Struct()
+			c.buffer.Next()
 			return
 		}
 	},

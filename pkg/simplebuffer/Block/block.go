@@ -56,7 +56,6 @@ func (B *Block) Get() (b *wire.MsgBlock) {
 }
 
 func (B *Block) Put(b *wire.MsgBlock) *Block {
-	log.SPEW(b)
 	var buffer bytes.Buffer
 	err := b.Serialize(&buffer)
 	if err != nil {
@@ -64,7 +63,6 @@ func (B *Block) Put(b *wire.MsgBlock) *Block {
 		return B
 	}
 	B.Bytes = buffer.Bytes()
-	log.SPEW(B.Bytes)
 	B.Length = uint32(len(B.Bytes))
 	return B
 }

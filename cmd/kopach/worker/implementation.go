@@ -121,7 +121,7 @@ func NewWithConnAndSemaphore(
 				log.DEBUG("worker stopping on pausing message")
 				break pausing
 			}
-			log.INFO("worker running")
+			log.DEBUG("worker running")
 			// Run state
 		running:
 			for {
@@ -157,19 +157,22 @@ func NewWithConnAndSemaphore(
 						hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
 						bigHash := blockchain.HashToBig(&hash)
 						if bigHash.Cmp(fork.CompactToBig(w.msgBlock.Header.Bits)) <= 0 {
-							log.WARN("solution found h:", nH,
-								hash.String(),
-								fork.List[fork.GetCurrent(nH)].
-									AlgoVers[w.msgBlock.Header.Version],
-								"total hashes since startup",
-								w.roller.C-int(w.startNonce),
-								fork.IsTestnet,
-								w.msgBlock.Header.Version,
-								w.msgBlock.Header.Bits,
-								w.msgBlock.Header.MerkleRoot.String(),
-								hash,
-							)
-							log.INFO(w.msgBlock)
+							log.DEBUGC(func() string {
+								return fmt.Sprintln(
+									"solution found h:", nH,
+									hash.String(),
+									fork.List[fork.GetCurrent(nH)].
+										AlgoVers[w.msgBlock.Header.Version],
+									"total hashes since startup",
+									w.roller.C-int(w.startNonce),
+									fork.IsTestnet,
+									w.msgBlock.Header.Version,
+									w.msgBlock.Header.Bits,
+									w.msgBlock.Header.MerkleRoot.String(),
+									hash,
+								)
+							})
+							log.SPEW(w.msgBlock)
 							srs := sol.GetSolContainer(w.msgBlock)
 							err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
 							if err != nil {
@@ -198,7 +201,7 @@ func NewWithConnAndSemaphore(
 					}
 				}
 			}
-			log.INFO("worker pausing")
+			log.DEBUG("worker pausing")
 		}
 		log.DEBUG("worker finished")
 	}()
@@ -223,8 +226,8 @@ func New(s sem.T) (w *Worker, conn net.Conn) {
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
-	log.TRACE("loading dispatch connection from job message")
-	log.INFO(job.String())
+	log.DEBUG("loading dispatch connection from job message")
+	log.TRACE(job.String())
 	// if there is no dispatch connection, make one.
 	// If there is one but the server died or was disconnected the
 	// connection the existing dispatch connection is nilled and this
@@ -261,7 +264,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
 	rand.Seed(time.Now().UnixNano())
 	w.msgBlock.Header.Nonce = rand.Uint32()
-	log.TRACE(w.hashes)
+	// log.TRACE(w.hashes)
 	if w.hashes != nil {
 		w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
 	} else {
@@ -289,7 +292,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.block.SetHeight(newHeight)
 	// halting current work
 	w.stopChan <- struct{}{}
-	log.INFO("height", newHeight)
+	// log.INFO("height", newHeight)
 	w.startChan <- struct{}{}
 	return
 }
