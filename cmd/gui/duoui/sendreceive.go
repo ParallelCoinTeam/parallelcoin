@@ -39,35 +39,35 @@ func (ui *DuoUI) DuoUIsend() func() {
 					layout.Rigid(func() {
 
 						layout.Flex{}.Layout(ui.ly.Context,
-							layout.Flexed(1, func(){
+							layout.Flexed(1, func() {
 
-						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
-							cs := ui.ly.Context.Constraints
-							theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
-								theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-								e := ui.ly.Theme.DuoUIeditor("DUO address", "DUO dva")
-								e.Font.Typeface = ui.ly.Theme.Font.Primary
-								e.Font.Style = text.Italic
-								e.Font.Size = unit.Dp(24)
-								e.Layout(ui.ly.Context, addressLineEditor)
-								for _, e := range addressLineEditor.Events(ui.ly.Context) {
-									if e, ok := e.(controller.SubmitEvent); ok {
-										address = e.Text
-										addressLineEditor.SetText("")
-									}
-								}
-							})
-						})
+								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+									cs := ui.ly.Context.Constraints
+									theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+									layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+										theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+										e := ui.ly.Theme.DuoUIeditor("DUO address", "DUO dva")
+										e.Font.Typeface = ui.ly.Theme.Font.Primary
+										e.Font.Style = text.Italic
+										e.Font.Size = unit.Dp(24)
+										e.Layout(ui.ly.Context, addressLineEditor)
+										for _, e := range addressLineEditor.Events(ui.ly.Context) {
+											if e, ok := e.(controller.SubmitEvent); ok {
+												address = e.Text
+												addressLineEditor.SetText("")
+											}
+										}
+									})
+								})
 
 							}),
 							layout.Rigid(func() {
 								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 									var pasteAddressButton theme.DuoUIbutton
-									pasteAddressButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "SEND", "ffcfcfcf", "ff303030", "", "ffcfcfcf", 0, 128, 48, 0, 0)
+									pasteAddressButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "PASTE ADDRESS", "ffcfcfcf", "ff303030", "", "ffcfcfcf", 0, 128, 48, 0, 0)
 
 									for buttonPasteAddress.Clicked(ui.ly.Context) {
-										clipboard.Get()
+										addressLineEditor.SetText(clipboard.Get())
 									}
 									pasteAddressButton.Layout(ui.ly.Context, buttonPasteAddress)
 								})
@@ -76,27 +76,42 @@ func (ui *DuoUI) DuoUIsend() func() {
 
 					}),
 					layout.Rigid(func() {
-						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
-							cs := ui.ly.Context.Constraints
-							theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
-								theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-								e := ui.ly.Theme.DuoUIeditor("DUO Amount", "DUO dva")
-								e.Font.Typeface = ui.ly.Theme.Font.Primary
-								e.Font.Style = text.Italic
-								e.Font.Size = unit.Dp(24)
-								e.Layout(ui.ly.Context, amountLineEditor)
-								for _, e := range amountLineEditor.Events(ui.ly.Context) {
-									if e, ok := e.(controller.SubmitEvent); ok {
-										f, err := strconv.ParseFloat(e.Text, 64)
-										if err != nil {
-											amount = f
-											amountLineEditor.SetText("")
+						layout.Flex{}.Layout(ui.ly.Context,
+							layout.Flexed(1, func() {
+								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+									cs := ui.ly.Context.Constraints
+									theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+									layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+										theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+										e := ui.ly.Theme.DuoUIeditor("DUO Amount", "DUO dva")
+										e.Font.Typeface = ui.ly.Theme.Font.Primary
+										e.Font.Style = text.Italic
+										e.Font.Size = unit.Dp(24)
+										e.Layout(ui.ly.Context, amountLineEditor)
+										for _, e := range amountLineEditor.Events(ui.ly.Context) {
+											if e, ok := e.(controller.SubmitEvent); ok {
+												f, err := strconv.ParseFloat(e.Text, 64)
+												if err != nil {
+													amount = f
+													amountLineEditor.SetText("")
+												}
+											}
 										}
+									})
+								})
+							}),
+							layout.Rigid(func() {
+								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+									var pasteAmountButton theme.DuoUIbutton
+									pasteAmountButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "PASTE AMOUNT", "ffcfcfcf", "ff303030", "", "ffcfcfcf", 0, 128, 48, 0, 0)
+
+									for buttonPasteAmount.Clicked(ui.ly.Context) {
+										addressLineEditor.SetText(clipboard.Get())
 									}
-								}
-							})
-						})
+									pasteAmountButton.Layout(ui.ly.Context, buttonPasteAmount)
+								})
+
+							}))
 					}),
 					layout.Rigid(func() {
 						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
