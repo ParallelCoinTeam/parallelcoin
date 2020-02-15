@@ -28,11 +28,11 @@ func (ui *DuoUI) DuoUItoastSys() {
 	})
 }
 
-func (ui *DuoUI)toastButton(text, txtColor, bgColor, iconColor string, button *controller.Button, icon *theme.DuoUIicon) func() {
+func (ui *DuoUI)toastButton(text, txtColor, bgColor, icon, iconColor string, button *controller.Button) func() {
 	var b theme.DuoUIbutton
 	return func() {
 		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(ui.ly.Context, func() {
-			b = ui.ly.Theme.DuoUIbutton(text, txtColor, bgColor, iconColor, 24, 120, 60, 0, 0, icon)
+			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary,text, txtColor, bgColor, icon, iconColor, 24, 120, 60, 0, 0)
 			for button.Clicked(ui.ly.Context) {
 				//ui.rc.ShowToast = false
 			}

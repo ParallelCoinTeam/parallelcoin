@@ -53,20 +53,20 @@ func (ui *DuoUI) DuoUIdialog() {
 					Axis:      layout.Horizontal,
 					Alignment: layout.Middle,
 				}.Layout(ui.ly.Context,
-					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Cancel()},"CANCEL", "ffcf3030", "ffcf8080", buttonDialogCancel, ui.ly.Theme.Icons["iconCancel"])),
-					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Ok()},"OK",  "ff30cf30", "ff80cf80", buttonDialogOK, ui.ly.Theme.Icons["iconOK"])),
-					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Show = false},"CLOSE", "ffcf8030", "ffcfa880", buttonDialogClose, ui.ly.Theme.Icons["iconClose"])),
+					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Cancel()},"CANCEL", "ffcf3030", "iconCancel", "ffcf8080", buttonDialogCancel)),
+					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Ok()},"QUIT",  "ff30cf30", "iconOK", "ff80cf80", buttonDialogOK)),
+					layout.Rigid(ui.dialogButon(func(){ui.rc.Dialog.Show = false},"RESTART", "ffcf8030", "iconClose", "ffcfa880", buttonDialogClose)),
 				)
 			}),
 		)
 	})
 }
 
-func (ui *DuoUI)dialogButon(f func(),t, bgColor, iconColor string, button *controller.Button, icon *theme.DuoUIicon) func() {
+func (ui *DuoUI)dialogButon(f func(),t, bgColor, icon, iconColor string, button *controller.Button) func() {
 	var b theme.DuoUIbutton
 	return func() {
 		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(ui.ly.Context, func() {
-			b = ui.ly.Theme.DuoUIbutton(t, "ff303030", bgColor, iconColor, 48, 120, 60, 0, 0, icon)
+			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, t, "ff303030", bgColor, icon, iconColor, 48, 120, 60, 0, 0)
 			for button.Clicked(ui.ly.Context) {
 				f()
 			}

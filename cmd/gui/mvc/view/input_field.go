@@ -5,7 +5,6 @@ import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/f32"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/op/clip"
@@ -13,9 +12,9 @@ import (
 	"github.com/p9c/pod/pkg/gui/unit"
 )
 
-func inputField(duo *model.DuoUI, cx *conte.Xt, fieldName, fieldModel string, lineEditor *controller.Editor) *model.DuOScomponent {
+func DuoUIinputField(duo *model.DuoUI, fieldName, fieldModel string, lineEditor *controller.Editor) func() {
 
-	v := func() {
+	return func() {
 		//var btn material.Button
 		//fmt.Println("daj sta das", makeInstance(fieldModel))
 		bgcol := theme.HexARGB("ffe4e4e4")
@@ -77,12 +76,5 @@ func inputField(duo *model.DuoUI, cx *conte.Xt, fieldName, fieldModel string, li
 				})
 			}),
 		)
-	}
-	return &model.DuOScomponent{
-		Name:    "logger",
-		Version: "0.1",
-		//Model:      ,
-		View: v,
-		//Controller: c,
 	}
 }

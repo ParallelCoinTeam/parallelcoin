@@ -15,11 +15,12 @@ var (
 
 func (ui *DuoUI) DuoUIheader() func() {
 	return func() {
+		width := ui.ly.Context.Constraints.Width.Max
 		layout.Flex{Axis: layout.Horizontal}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
 				layout.Align(layout.Center).Layout(ui.ly.Context, func() {
 					var logoMeniItem theme.DuoUIbutton
-					logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "ff303030", "ffcfcfcf", 64, 96, 96, 8, 8, ui.ly.Theme.Icons["logo"])
+					logoMeniItem = ui.ly.Theme.DuoUIbutton("","", "", "ff303030", "logo","ffcfcfcf", 64, 96, 96, 8, 8)
 					for logoButton.Clicked(ui.ly.Context) {
 						//d.mod.CurrentPage = "NETWORK"
 					}
@@ -51,7 +52,7 @@ func (ui *DuoUI) DuoUIheader() func() {
 			layout.Rigid(func() {
 				layout.Align(layout.Center).Layout(ui.ly.Context, func() {
 					layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(16), Left: unit.Dp(16), Right: unit.Dp(4)}.Layout(ui.ly.Context, func() {
-						balance := ui.ly.Theme.Body2("dimenzion: " + fmt.Sprint(ui.ly.Context.Constraints.Width.Max))
+						balance := ui.ly.Theme.Body2("dimenzion: " + fmt.Sprint(width))
 						balance.Color = ui.ly.Theme.Color.Light
 						balance.Alignment = text.End
 						balance.Font.Typeface = "bariol"

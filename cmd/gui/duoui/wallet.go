@@ -117,7 +117,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 				},
 				func() {
 					var createWalletbuttonComp theme.DuoUIbutton
-					createWalletbuttonComp = ui.ly.Theme.DuoUIbutton("Create wallet", "ff303030", "ffcfcfcf", "ff303030", 0, 125, 32, 4, 4, nil)
+					createWalletbuttonComp = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary,"Create wallet", "ff303030", "ffcfcfcf","", "ff303030", 0, 125, 32, 4, 4)
 					for createWalletbutton.Clicked(ui.ly.Context) {
 						if ui.rc.PassPhrase != "" && ui.rc.PassPhrase == ui.rc.ConfirmPassPhrase {
 							//CreateWallet(ui.rc.Cx, ui.rc.PassPhrase, "", "", "")

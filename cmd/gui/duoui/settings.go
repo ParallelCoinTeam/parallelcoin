@@ -35,8 +35,6 @@ func (ui *DuoUI) DuoUIsettings() func() {
 							t.Layout(ui.ly.Context)
 						}),
 						layout.Rigid(func() {
-							cs := ui.ly.Context.Constraints
-							theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 64, "ffcf44cf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							groupsNumber := len(ui.rc.Settings.Daemon.Schema.Groups)
 							groupsList.Layout(ui.ly.Context, groupsNumber, func(i int) {
 								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
@@ -47,7 +45,7 @@ func (ui *DuoUI) DuoUIsettings() func() {
 										ui.rc.Settings.Tabs.Current = txt
 										log.INFO("unutra: ", txt)
 									}
-									ui.ly.Theme.DuoUIbutton(txt, "ff303030", "ff989898", "ff303030", 0, 125, 32, 4, 4, nil).Layout(ui.ly.Context, ui.rc.Settings.Tabs.TabsList[txt])
+									ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary,txt, "ff303030", "ff989898", "","ff303030", 0, 80, 32, 4, 4).Layout(ui.ly.Context, ui.rc.Settings.Tabs.TabsList[txt])
 								})
 							})
 						}))
@@ -95,7 +93,7 @@ func (ui *DuoUI) DuoUIsettings() func() {
 												layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(ui.ly.Context, func() {
 													// TODO:
 													// Input fileds must be set as theme part
-													//tl.InputFields(ui.ly.Context, ui.ly.Theme, ui.rc.Settings)
+													tl.InputFields(ui)
 												})
 											})
 										}),
