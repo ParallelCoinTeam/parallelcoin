@@ -1,12 +1,12 @@
 package rcd
 
 import (
-	"github.com/p9c/pod/cmd/gui/helpers"
+	"time"
+	
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"time"
 )
 
 // System Ststus
@@ -27,8 +27,7 @@ func
 (r *RcVar) GetDuoUIhashesPerSec() {
 	// r.Status.Wallet.Hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
 	log.DEBUG("centralise hash function stuff here")
-	h, _ := helpers.GetHashrate(r.cx)
-	r.Status.Wallet.Hashes = h
+	r.Status.Wallet.Hashes = r.cx.Hashrate.Load().(float64)
 	return
 }
 func

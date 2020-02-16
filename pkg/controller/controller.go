@@ -62,6 +62,7 @@ type Controller struct {
 	subMx                  *sync.Mutex
 	submitChan             chan []byte
 	buffer                 *ring.Ring
+	began                  time.Time
 }
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
@@ -107,6 +108,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
 		coinbases:              make(map[int32]*util.Tx),
 		buffer:                 ring.New(BufferSize),
+		began:                  time.Now(),
 	}
 	ctrl.height.Store(int32(0))
 	ctrl.active.Store(false)
@@ -143,9 +145,16 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
-	select {
-	case <-ctx.Done():
-	case <-interrupt.HandlersDone:
+	ticker := time.NewTicker(time.Second*5)
+	cont := true
+	for cont {
+		select {
+		case <-ticker.C:
+			hr, _ := cx.Hashrate.Load().(int)
+			log.INFOF("average hashrate since starting %0.3f hash/s", float64(hr)/time.Now().Sub(ctrl.began).Seconds())
+		case <-ctx.Done():
+		case <-interrupt.HandlersDone:
+		}
 	}
 	log.TRACE("controller exiting")
 	ctrl.active.Store(false)
@@ -200,19 +209,19 @@ var handlers = transport.HandleFunc{
 					return
 				} else {
 					log.WARN("block submitted via kopach miner rejected:", err)
+					if isOrphan {
+						log.WARN("block is an orphan")
+						return
+					}
 					return
 				}
-				if isOrphan {
-					log.WARN("block is an orphan")
-					return
-				}
-				// maybe something wrong with the network,
-				// send current work again
-				err = c.sendNewBlockTemplate()
-				if err != nil {
-					log.DEBUG(err)
-				}
-				return
+				// // maybe something wrong with the network,
+				// // send current work again
+				// err = c.sendNewBlockTemplate()
+				// if err != nil {
+				// 	log.DEBUG(err)
+				// }
+				// return
 			}
 			log.DEBUG("the block was accepted")
 			coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
@@ -234,13 +243,13 @@ var handlers = transport.HandleFunc{
 	},
 	string(hashrate.HashrateMagic): func(ctx interface{}) func(b []byte) (err error) {
 		return func(b []byte) (err error) {
-			// log.TRACE("received hashrate report")
 			c := ctx.(*Controller)
 			hp := hashrate.LoadContainer(b)
-			// here we should store into a ring buffer
-			// log.TRACEC(hp.String)
-			c.buffer.Value = hp.Struct()
-			c.buffer.Next()
+			report := hp.Struct()
+			// add to total hash counts
+			current, _ := c.cx.Hashrate.Load().(int)
+			// log.TRACE("received hashrate report", current, report.Count)
+			c.cx.Hashrate.Store(report.Count + current)
 			return
 		}
 	},

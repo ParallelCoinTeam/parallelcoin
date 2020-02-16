@@ -188,7 +188,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 	}
 	// set up interrupt shutdown handlers to stop servers
 	if *cx.Config.EnableController {
-		stopController, cx.HashrateBuffer = controller.Run(cx)
+		stopController, _ = controller.Run(cx)
 	}
 	//interrupt.AddHandler(gracefulShutdown)
 

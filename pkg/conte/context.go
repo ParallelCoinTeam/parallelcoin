@@ -3,7 +3,6 @@
 package conte
 
 import (
-	"container/ring"
 	"sync"
 	"sync/atomic"
 	
@@ -52,9 +51,8 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// RealNode is the main node
 	RealNode *rpc.Node
-	// HashrateBuffer is the ring buffer containing hashrate messages
-	HashrateBuffer *ring.Ring
-	HRBMutex       sync.Mutex
+	// Hashrate is the current total hashrate from kopach workers taking work from this node
+	Hashrate atomic.Value
 }
 
 // GetNewContext returns a fresh new context
