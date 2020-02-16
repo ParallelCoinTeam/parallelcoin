@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"io"
 	"net"
@@ -12,9 +11,9 @@ import (
 	"strings"
 	"sync"
 	"time"
-
+	
 	"golang.org/x/net/ipv4"
-
+	
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
@@ -305,15 +304,15 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 								// buffers,
 								// we don't add more data for the already
 								// decoded.
-								log.TRACE("deleting superseded buffer",
-									hex.EncodeToString([]byte(i)))
+								// log.TRACE("deleting superseded buffer",
+								// 	hex.EncodeToString([]byte(i)))
 								delete(c.buffers, i)
 							}
 						}
 					}
 				} else {
-					log.TRACE("new message arriving",
-						hex.EncodeToString([]byte(nonce)))
+					// log.TRACE("new message arriving",
+					// 	hex.EncodeToString([]byte(nonce)))
 					c.buffers[nonce] = &MsgBuffer{[][]byte{},
 						time.Now(), false, &src}
 					c.buffers[nonce].Buffers = append(c.buffers[nonce].

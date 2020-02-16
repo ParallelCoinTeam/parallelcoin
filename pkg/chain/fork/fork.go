@@ -30,7 +30,7 @@ type HardForks struct {
 	TestnetStart       int32
 }
 
-const IntervalBase = 5
+const IntervalBase = 3
 
 var (
 	// AlgoVers is the lookup for pre hardfork
@@ -113,7 +113,8 @@ var (
 	// SecondPowLimit is
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
-			"01f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1")
+			// "01f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1")
+			"0099999999999999999999999999999999999999999999999999999999999999")
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	SecondPowLimitBits = BigToCompact(&SecondPowLimit)
@@ -176,13 +177,13 @@ func GetAlgoVer(name string, height int32) (version int32) {
 			}
 			return
 		case 1:
-			// INFO("rng", randomalgover, randomalgover }
+			log.INFO("rng", randomalgover, randomalgover)
 			actualver := randomalgover
-			// INFO("actualver", actualver}
+			log.INFO("actualver", actualver)
 			rndalgo := List[1].AlgoVers[actualver]
-			// INFO("algo", rndalgo}
+			log.INFO("algo", rndalgo)
 			algo := List[1].Algos[rndalgo].Version
-			// INFO("actualalgo", algo}
+			log.INFO("actualalgo", algo)
 			return algo
 		}
 	} else {
@@ -201,6 +202,7 @@ func GetAveragingInterval(height int32) (r int64) {
 
 // GetCurrent returns the hardfork number code
 func GetCurrent(height int32) (curr int) {
+	// log.TRACE("istestnet", IsTestnet)
 	if IsTestnet {
 		for i := range List {
 			if height >= List[i].TestnetStart {
@@ -219,17 +221,19 @@ func GetCurrent(height int32) (curr int) {
 
 // GetMinBits returns the minimum diff bits based on height and testnet
 func GetMinBits(algoname string, height int32) (mb uint32) {
-	// log.TRACE("GetMinBits", algoname)
 	curr := GetCurrent(height)
+	// log.TRACE("GetMinBits", algoname, height, curr, List[curr].Algos)
 	mb = List[curr].Algos[algoname].MinBits
-	// log.TRACE("minbits", mb)
+	// log.TRACEF("minbits %08x, %d", mb, mb)
 	return
 }
 
 // GetMinDiff returns the minimum difficulty in uint256 form
 func GetMinDiff(algoname string, height int32) (md *big.Int) {
 	// log.TRACE("GetMinDiff", algoname)
-	return CompactToBig(GetMinBits(algoname, height))
+	minbits := GetMinBits(algoname, height)
+	// log.TRACEF("mindiff minbits %08x", minbits)
+	return CompactToBig(minbits)
 }
 
 // GetTargetTimePerBlock returns the active block interval target based on

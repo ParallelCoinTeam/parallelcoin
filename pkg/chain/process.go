@@ -50,10 +50,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	blockHash := block.Hash()
 	hf := fork.GetCurrent(blockHeight)
-	blockHashWithAlgo := block.MsgBlock().BlockHashWithAlgos(blockHeight).String()
-	// log.WARNC(func() string {
-	// 		return "processing block " + blockHashWithAlgo
-	// 	})
+	bhwa := block.MsgBlock().BlockHashWithAlgos
 	var algo int32
 	switch hf {
 	case 0:
@@ -72,13 +69,13 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		return false, false, err
 	}
 	if exists {
-		str := fmt.Sprintf("already have block %v", blockHashWithAlgo)
+		str := fmt.Sprintf("already have block %v", bhwa(blockHeight).String())
 		return false, false, ruleError(ErrDuplicateBlock, str)
 	}
 	// The block must not already exist as an orphan.
 	if _, exists := b.orphans[*blockHash]; exists {
 		str := fmt.Sprintf(
-			"already have block (orphan) %v", blockHashWithAlgo)
+			"already have block (orphan) %v", )
 		return false, false, ruleError(ErrDuplicateBlock, str)
 	}
 	// Perform preliminary sanity checks on the block and its transactions.
@@ -123,7 +120,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		checkpointTime := time.Unix(checkpointNode.timestamp, 0)
 		if blockHeader.Timestamp.Before(checkpointTime) {
 			str := fmt.Sprintf("block %v has timestamp %v before "+
-				"last checkpoint timestamp %v", blockHashWithAlgo,
+				"last checkpoint timestamp %v", bhwa(blockHeight).String(),
 				blockHeader.Timestamp, checkpointTime)
 			return false, false, ruleError(ErrCheckpointTimeTooOld, str)
 		}
@@ -158,7 +155,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		log.WARNC(func() string {
 			return fmt.Sprintf(
 				"adding orphan block %v with parent %v",
-				blockHashWithAlgo,
+				bhwa(blockHeight).String(),
 				prevHash,
 			)
 		})
@@ -185,7 +182,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		return false, false, err
 	}
 	log.TRACEF("accepted block %d %v %s",
-		blockHeight, blockHashWithAlgo, fork.GetAlgoName(block.MsgBlock().
+		blockHeight, bhwa(blockHeight).String(), fork.GetAlgoName(block.MsgBlock().
 			Header.Version, blockHeight))
 	// log.WARN("finished blockchain.ProcessBlock")
 	return isMainChain, false, nil

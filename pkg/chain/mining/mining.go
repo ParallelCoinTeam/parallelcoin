@@ -808,7 +808,7 @@ mempoolLoop:
 	// potentially adjusted to ensure it comes after the median time of the last
 	// several blocks per the chain consensus rules.
 	ts := medianAdjustedTime(best, g.TimeSource)
-	log.TRACE("algo ", ts, " ", algo)
+	// log.TRACE("algo ", ts, " ", algo)
 	reqDifficulty, err := g.Chain.CalcNextRequiredDifficulty(workerNumber, ts,
 		algo)
 	if err != nil {

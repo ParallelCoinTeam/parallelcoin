@@ -38,6 +38,7 @@ Time, algo string) (difficulty uint32, err error) {
 	b.chainLock.Lock()
 	difficulty, err = b.calcNextRequiredDifficulty(workerNumber, b.BestChain.
 		Tip(), timestamp, algo, false)
+	// log.TRACE("CalcNextRequiredDifficulty", difficulty)
 	b.chainLock.Unlock()
 	return
 }
@@ -78,48 +79,33 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 	nH := lastNode.height + 1
 	cF := fork.GetCurrent(nH)
 	newTargetBits = fork.GetMinBits(algoname, nH)
+	// log.TRACEF("calcNextRequiredDifficulty %08x", newTargetBits)
 	switch cF {
 	// Legacy difficulty adjustment
 	case 0:
+		// log.TRACE("before hardfork")
 		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode, algoname, l)
 	// Plan 9 from Crypto Space
 	case 1:
 		lastNode.DiffMx.Lock()
+		defer lastNode.DiffMx.Unlock()
 		if lastNode.Diffs == nil {
 			lNd := make(map[int32]uint32)
 			lastNode.Diffs = &lNd
 		}
-		bits, ok := (*lastNode.Diffs)[fork.List[1].Algos[algoname].
-			Version]
-		lastNode.DiffMx.Unlock()
-		if ok && bits != 0 {
-			if l {
-				log.DEBUGF("used precomputed difficulty %s %d %08x", algoname,
-					fork.GetAlgoVer(algoname, lastNode.height), bits)
-			}
-		} else {
-			bits, _, err = b.CalcNextRequiredDifficultyPlan9(workerNumber, lastNode,
-				algoname, l)
-			// bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(
-			//	lastNode)
+		bits := lastNode.Diffs
+		version := fork.GetAlgoVer(algoname, lastNode.height+1)
+		if (*bits)[version] == 0 {
+			bits, err = b.CalcNextRequiredDifficultyPlan9Controller(lastNode)
 			if err != nil {
 				log.ERROR(err)
 				return
 			}
-			// bits = bitsMap[fork.List[1].Algos[algoname].Version]
-			// save it for next time
-			if l {
-				log.TRACEF("saving difficulty for next query %08x", bits)
-			}
-			lastNode.DiffMx.Lock()
-			if lastNode.Diffs == nil {
-				lastNode.Diffs = new(map[int32]uint32)
-			}
-			(*lastNode.Diffs)[fork.List[1].Algos[algoname].
-				Version] = bits
-			lastNode.DiffMx.Unlock()
+			b.DifficultyBits = bits
+			// log.DEBUGF("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
 		}
-		return bits, err
+		newTargetBits = (*bits)[version]
+		return
 	}
 	return
 }

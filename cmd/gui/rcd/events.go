@@ -2,6 +2,7 @@ package rcd
 
 import (
 	"fmt"
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -19,7 +20,7 @@ type Event struct {
 
 var EventsChan = make(chan Event, 1)
 
-func (r *RcVar)ListenInit(trigger chan struct{}){
+func (r *RcVar) ListenInit(trigger chan struct{}) {
 	r.Events = EventsChan
 	r.UpdateTrigger = trigger
 	// first time starting up get all of these and trigger update
@@ -28,12 +29,12 @@ func (r *RcVar)ListenInit(trigger chan struct{}){
 	r.GetDuoUItransactionsNumber()
 	r.GetTransactions()
 	r.GetLatestTransactions()
-	//r.GetDuoUIstatus()
-	//r.GetDuoUIlocalLost()
+	// r.GetDuoUIstatus()
+	// r.GetDuoUIlocalLost()
 	r.GetDuoUIblockHeight()
 	r.GetDuoUIdifficulty()
 	r.GetDuoUIconnectionCount()
-
+	
 	r.GetAddressBook()
 	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
@@ -43,15 +44,16 @@ func (r *RcVar)ListenInit(trigger chan struct{}){
 			r.GetDuoUItransactionsNumber()
 			r.GetTransactions()
 			r.GetLatestTransactions()
-			//r.GetDuoUIstatus()
-			//r.GetDuoUIlocalLost()
+			// r.GetDuoUIstatus()
+			// r.GetDuoUIlocalLost()
 			r.GetDuoUIblockHeight()
 			r.GetDuoUIdifficulty()
 			r.GetDuoUIconnectionCount()
+			// r.UpdateTrigger <- struct{}{}
+			r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
 			r.UpdateTrigger <- struct{}{}
-			r.toastAdd("New block: " + fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
+			// return
 		}
-		r.UpdateTrigger <- struct{}{}
 	})
 	
 	return

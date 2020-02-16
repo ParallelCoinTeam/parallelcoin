@@ -4,6 +4,7 @@ import (
 	"sort"
 	
 	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/log"
 )
 
 func secondPowLimitBits(currFork int) (out *map[int32]uint32) {
@@ -51,21 +52,29 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 		}
 		return &nTB, nil
 	case 1:
-		currFork := fork.GetCurrent(nH)
-		algos := make(AlgoList, len(fork.List[currFork].Algos))
-		var counter int
-		for i := range fork.List[1].Algos {
-			algos[counter] = Algo{
-				Name:   i,
-				Params: fork.List[currFork].Algos[i],
+		if b.DifficultyHeight != nH {
+			b.DifficultyHeight = nH
+			currFork := fork.GetCurrent(nH)
+			algos := make(AlgoList, len(fork.List[currFork].Algos))
+			var counter int
+			for i := range fork.List[1].Algos {
+				algos[counter] = Algo{
+					Name:   i,
+					Params: fork.List[currFork].Algos[i],
+				}
+				counter++
 			}
-			counter++
+			sort.Sort(algos)
+			for _, v := range algos {
+				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(0, lastNode, v.Name, true)
+			}
+			newTargetBits = &nTB
+			// log.SPEW(newTargetBits)
+		} else {
+			newTargetBits = b.DifficultyBits
 		}
-		sort.Sort(algos)
-		for _, v := range algos {
-			nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(0, lastNode, v.Name, true)
-		}
-		newTargetBits = &nTB
+		return
 	}
+	log.TRACE("should not fall through here")
 	return
 }

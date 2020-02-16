@@ -395,6 +395,7 @@ Block) error {
 	algoname := fork.GetAlgoName(algo, height)
 	// log.TRACE("algoname ", algoname)
 	powLimit := fork.GetMinDiff(algoname, height)
+	// log.TRACEF("CheckConnectBlockTemplate %08x %064x", block.MsgBlock().Header.Bits, powLimit)
 	// Skip the proof of work check as this is just a block template.
 	flags := BFNoPoWCheck
 	// This only checks whether the block can be connected to the tip of the
@@ -408,7 +409,7 @@ Block) error {
 		str := fmt.Sprintf("previous block must be the current chain tip %v, instead got %v", tip.hash, header.PrevBlock)
 		return ruleError(ErrPrevBlockNotBest, str)
 	}
-	err := checkBlockSanity(block, powLimit, b.timeSource, flags, true, block.Height())
+	err := checkBlockSanity(block, powLimit, b.timeSource, flags, false, block.Height())
 	if err != nil {
 		log.ERROR("block processing error:", err)
 		return err
@@ -700,7 +701,7 @@ func // CheckBlockSanity performs some preliminary checks on a block to
 // ensure it is sane before continuing with block processing.
 // These checks are context free.
 CheckBlockSanity(block *util.Block, powLimit *big.Int, timeSource MedianTimeSource, DoNotCheckPow bool, height int32) error {
-	log.TRACE("powlimit %64x", powLimit)
+	log.TRACE("CheckBlockSanity powlimit %64x", powLimit)
 	return checkBlockSanity(block, powLimit, timeSource, BFNone, DoNotCheckPow, height)
 }
 
@@ -1137,7 +1138,7 @@ func // checkBlockSanity performs some preliminary checks on a block to
 // The flags do not modify the behavior of this function directly,
 // however they are needed to pass along to checkBlockHeaderSanity.
 checkBlockSanity(block *util.Block, powLimit *big.Int, timeSource MedianTimeSource, flags BehaviorFlags, DoNotCheckPow bool, height int32) error {
-	// log.TRACEF("checkBlockSanity %064x", powLimit)
+	log.TRACEF("checkBlockSanity %08x %064x", block.MsgBlock().Header.Bits, powLimit)
 	msgBlock := block.MsgBlock()
 	header := &msgBlock.Header
 	err := checkBlockHeaderSanity(header, powLimit, timeSource, flags, height)
@@ -1257,7 +1258,7 @@ checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlag
 			target)
 		return ruleError(ErrUnexpectedDifficulty, str)
 	}
-	log.TRACEF("checkProofOfWork powLimit %064x %064x", powLimit, target)
+	// log.TRACEF("checkProofOfWork powLimit %064x %064x", powLimit, target)
 	// The target difficulty must be less than the maximum allowed.
 	if target.Cmp(powLimit) > 0 {
 		str := fmt.Sprintf("height %d block target difficulty of %064x is higher than max of %064x", height, target, powLimit)

@@ -2238,7 +2238,8 @@ func // checkHeaderSanity checks the PoW, and timestamp of a block header.
 	stubBlock := util.NewBlock(&wire.MsgBlock{
 		Header: *blockHeader,
 	})
-	err = blockchain.CheckProofOfWork(stubBlock, fork.CompactToBig(diff), height)
+	err = blockchain.CheckProofOfWork(stubBlock,
+		fork.GetMinDiff(fork.GetAlgoName(blockHeader.Version, height), height), height)
 	if err != nil {
 		log.ERROR(err)
 		return err

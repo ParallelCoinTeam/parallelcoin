@@ -3,11 +3,12 @@ package blockchain
 import (
 	"container/list"
 	"fmt"
-	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/log"
 	"sync"
 	"time"
-
+	
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/log"
+	
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -168,6 +169,8 @@ type // BlockChain provides functions for working with the bitcoin block chain.
 		// DifficultyAdjustments keeps track of the latest difficulty adjustment
 		// for each algorithm
 		DifficultyAdjustments map[string]float64
+		DifficultyBits        *map[int32]uint32
+		DifficultyHeight      int32
 	}
 
 func // HaveBlock returns whether or not the chain instance has the block
@@ -537,7 +540,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		log.DEBUG(str)
 		return AssertError(str)
 	}
-
+	
 	// No warnings about unknown rules or versions until the chain is current.
 	if b.isCurrent() {
 		// Warn if any unknown new rules are either about to activate or have
@@ -547,14 +550,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 			return err
 		}
 	}
-
+	
 	// Write any block status changes to DB before updating best state.
 	err := b.Index.flushToDB()
 	if err != nil {
 		log.ERROR(err)
 		return err
 	}
-	//log.SPEW(node.Diffs)
+	// log.SPEW(node.Diffs)
 	// Generate a new best state snapshot that will be used to update the
 	// database and later memory if all database updates are successful.
 	b.stateLock.RLock()
@@ -588,7 +591,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 			log.TRACE("dbPutUtxoView", err)
 			return err
 		}
-
+		
 		// Update the transaction spend journal by adding a record for the
 		// block that contains all txos spent by it.
 		err = dbPutSpendJournalEntry(dbTx, block.Hash(), stxos)
@@ -615,7 +618,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	// Prune fully spent entries and mark all entries in the view unmodified
 	// now that the modifications have been committed to the database.
 	view.commit()
-
+	
 	// This node is now the end of the best chain.
 	b.BestChain.SetTip(node)
 	// Update the state for the best block.
@@ -628,14 +631,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	b.stateSnapshot = state
 	b.stateLock.Unlock()
 	//
-	//// TODO: this should not run if the chain is syncing
-	//tN := time.Now()
-	//tB, err := b.CalcNextRequiredDifficultyPlan9Controller(node)
-	//if err != nil {
+	// // TODO: this should not run if the chain is syncing
+	// tN := time.Now()
+	// tB, err := b.CalcNextRequiredDifficultyPlan9Controller(node)
+	// if err != nil {
 	//	log.ERROR(err)
-	//}
-	//log.TRACE(time.Now().Sub(tN), "to compute all block difficulties")
-	//node.Diffs = tB
+	// }
+	// log.TRACE(time.Now().Sub(tN), "to compute all block difficulties")
+	// node.Diffs = tB
 	// Notify the caller that the block was connected to the main chain.
 	// The caller would typically want to react with actions such as updating wallets.
 	b.chainLock.Unlock()
@@ -1027,7 +1030,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,
 	flags BehaviorFlags) (bool, error) {
-	//log.TRACE("connectBestChain")
+	// log.TRACE("connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
 		// Intentionally ignore errors writing updated node status to DB.
@@ -1043,7 +1046,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.BestChain.Tip().hash) {
-		//log.TRACE("can attach to tip")
+		// log.TRACE("can attach to tip")
 		// Skip checks if node has already been fully validated.
 		fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
 		// Perform several checks to verify the block can be connected to the
@@ -1053,7 +1056,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 		view.SetBestHash(parentHash)
 		stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
 		if !fastAdd {
-			//log.TRACE("not fast adding")
+			// log.TRACE("not fast adding")
 			err := b.checkConnectBlock(node, block, view, &stxos)
 			if err == nil {
 				b.Index.SetStatusFlags(node, statusValid)
@@ -1634,6 +1637,7 @@ New(config *Config) (*BlockChain, error) {
 		warningCaches:         newThresholdCaches(vbNumBits),
 		deploymentCaches:      newThresholdCaches(chaincfg.DefinedDeployments),
 		DifficultyAdjustments: make(map[string]float64),
+		DifficultyBits:        new(map[int32]uint32),
 	}
 	// Initialize the chain state from the passed database.
 	// When the db does not yet contain any chain state,
