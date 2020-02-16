@@ -34,12 +34,12 @@ func (b *DuoUIstatus) View(gtx *layout.Context, th *theme.DuoUItheme, stat *mode
 					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func() {
 							balanceTxt := th.H5("Balance :")
-							balanceTxt.Color = th.Color.Primary
+							balanceTxt.Color = theme.HexARGB(th.Color.Primary)
 							balanceTxt.Layout(gtx)
 						}),
 						layout.Rigid(func() {
 							balance := th.H5(stat.Wallet.Balance + " " + abbr)
-							balance.Color = th.Color.Primary
+							balance.Color = theme.HexARGB(th.Color.Primary)
 							balance.Layout(gtx)
 						}),
 
@@ -50,12 +50,12 @@ func (b *DuoUIstatus) View(gtx *layout.Context, th *theme.DuoUItheme, stat *mode
 					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func() {
 							blockheightTxt := th.H5("Block Height :")
-							blockheightTxt.Color = th.Color.Primary
+							blockheightTxt.Color = theme.HexARGB(th.Color.Primary)
 							blockheightTxt.Layout(gtx)
 						}),
 						layout.Rigid(func() {
 							blockheightVal := th.H5(fmt.Sprint(stat.Node.BlockHeight))
-							blockheightVal.Color = th.Color.Primary
+							blockheightVal.Color = theme.HexARGB(th.Color.Primary)
 							blockheightVal.Layout(gtx)
 						}),
 
@@ -67,12 +67,12 @@ func (b *DuoUIstatus) View(gtx *layout.Context, th *theme.DuoUItheme, stat *mode
 					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func() {
 							difficulty := th.H5("Difficulty :")
-							difficulty.Color = th.Color.Primary
+							difficulty.Color = theme.HexARGB(th.Color.Primary)
 							difficulty.Layout(gtx)
 						}),
 						layout.Rigid(func() {
 							difficulty := th.H5(fmt.Sprintf("%f", stat.Node.Difficulty))
-							difficulty.Color = th.Color.Primary
+							difficulty.Color = theme.HexARGB(th.Color.Primary)
 							difficulty.Layout(gtx)
 						}),
 
@@ -84,12 +84,12 @@ func (b *DuoUIstatus) View(gtx *layout.Context, th *theme.DuoUItheme, stat *mode
 					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func() {
 							connections := th.H5("Connections :")
-							connections.Color = th.Color.Primary
+							connections.Color = theme.HexARGB(th.Color.Primary)
 							connections.Layout(gtx)
 						}),
 						layout.Rigid(func() {
 							connections := th.H5(fmt.Sprint(stat.Node.ConnectionCount))
-							connections.Color = th.Color.Primary
+							connections.Color = theme.HexARGB(th.Color.Primary)
 							connections.Layout(gtx)
 						}),
 

@@ -16,12 +16,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/p9c/pod/pkg/gui/app/internal/gl"
+	"github.com/p9c/pod/pkg/gui/app/internal/glimpl"
+	"github.com/p9c/pod/pkg/gui/gpu/gl"
 )
 
 type context struct {
 	owner                    *window
-	c                        *gl.Functions
+	c                        *glimpl.Functions
 	ctx                      C.CFTypeRef
 	layer                    C.CFTypeRef
 	init                     bool
@@ -44,12 +45,12 @@ func newContext(w *window) (*context, error) {
 		ctx:   ctx,
 		owner: w,
 		layer: C.CFTypeRef(w.contextLayer()),
-		c:     new(gl.Functions),
+		c:     new(glimpl.Functions),
 	}
 	return c, nil
 }
 
-func (c *context) Functions() *gl.Functions {
+func (c *context) Functions() *glimpl.Functions {
 	return c.c
 }
 

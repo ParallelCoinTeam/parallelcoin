@@ -9,7 +9,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/p9c/pod/pkg/gui/app/internal/gl"
+	"github.com/p9c/pod/pkg/gui/app/internal/glimpl"
 	"github.com/p9c/pod/pkg/gui/io/event"
 	"github.com/p9c/pod/pkg/gui/io/system"
 	"github.com/p9c/pod/pkg/gui/unit"
@@ -32,7 +32,7 @@ type Callbacks interface {
 }
 
 type Context interface {
-	Functions() *gl.Functions
+	Functions() *glimpl.Functions
 	Present() error
 	MakeCurrent() error
 	Release()

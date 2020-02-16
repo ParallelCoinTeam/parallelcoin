@@ -18,7 +18,7 @@ var (
 	immatureTxs         = new(controller.CheckBox)
 	sentTxs             = new(controller.CheckBox)
 	receivedTxs         = new(controller.CheckBox)
-	transactionsCounter = new(controller.Counter)
+	//transactionsCounter = new(controller.Counter)
 )
 
 func (ui *DuoUI) DuoUItransactions() func() {
@@ -61,7 +61,11 @@ func (ui *DuoUI) DuoUItransactions() func() {
 								layout.Rigid(func() {
 
 									//view.DuoUIcounter(duo)
+									var txsCounter theme.DuoUIcounter
+									txsCounter = ui.ly.Theme.DuoUIcounter(ui.ly.Theme.Font.Primary, "ffcfcfcf", "ff303030", 128, 48, 0, 0)
 
+
+									txsCounter.Layout(ui.ly.Context, ui.ly.Theme)
 								}),
 							)
 						}),
@@ -90,19 +94,19 @@ func (ui *DuoUI) DuoUItransactions() func() {
 											layout.Rigid(func() {
 												num := ui.ly.Theme.Body1(fmt.Sprint(i))
 												num.Font.Typeface = ui.ly.Theme.Font.Primary
-												num.Color = ui.ly.Theme.Color.Hint
+												num.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 												num.Layout(ui.ly.Context)
 											}),
 											layout.Rigid(func() {
 												tim := ui.ly.Theme.Body1(t.TxID)
 												tim.Font.Typeface = ui.ly.Theme.Font.Primary
-												tim.Color = ui.ly.Theme.Color.Hint
+												tim.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 												tim.Layout(ui.ly.Context)
 											}),
 											layout.Rigid(func() {
 												amount := ui.ly.Theme.H5(fmt.Sprintf("%0.8f", t.Amount))
 												amount.Font.Typeface = ui.ly.Theme.Font.Primary
-												amount.Color = ui.ly.Theme.Color.Hint
+												amount.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 												amount.Alignment = text.End
 												amount.Font.Variant = "Mono"
 												amount.Font.Weight = text.Bold
@@ -111,13 +115,13 @@ func (ui *DuoUI) DuoUItransactions() func() {
 											layout.Rigid(func() {
 												sat := ui.ly.Theme.Body1(t.Category)
 												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = ui.ly.Theme.Color.Hint
+												sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 												sat.Layout(ui.ly.Context)
 											}),
 											layout.Rigid(func() {
 												l := ui.ly.Theme.Body2(t.Time)
 												l.Font.Typeface = ui.ly.Theme.Font.Primary
-												l.Color = ui.ly.Theme.Color.Hint
+												l.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 												l.Layout(ui.ly.Context)
 											}),
 										)
@@ -125,7 +129,7 @@ func (ui *DuoUI) DuoUItransactions() func() {
 									layout.Rigid(func() {
 										sat := ui.ly.Theme.Body1(fmt.Sprintf("%0.8f", t.Amount))
 										sat.Font.Typeface = ui.ly.Theme.Font.Primary
-										sat.Color = ui.ly.Theme.Color.Hint
+										sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 										sat.Layout(ui.ly.Context)
 									}),
 								)

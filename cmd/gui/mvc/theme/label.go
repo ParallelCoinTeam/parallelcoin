@@ -4,6 +4,8 @@ package theme
 
 import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"image/color"
+
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/op/paint"
 	"github.com/p9c/pod/pkg/gui/text"
@@ -14,12 +16,13 @@ type DuoUIlabel struct {
 	// Face defines the text style.
 	Font text.Font
 	// Color is the text color.
-	Color string
+	Color color.RGBA
 	// Alignment specify the text alignment.
 	Alignment text.Alignment
 	// MaxLines limits the number of lines. Zero means no limit.
 	MaxLines int
 	Text     string
+	TextSize unit.Value
 
 	shaper text.Shaper
 }
@@ -62,17 +65,15 @@ func (t *DuoUItheme) Caption(txt string) DuoUIlabel {
 
 func (t *DuoUItheme) DuoUIlabel(size unit.Value, txt string) DuoUIlabel {
 	return DuoUIlabel{
-		Text:  txt,
-		Color: t.Color.Text,
-		Font: text.Font{
-			Size: size,
-		},
-		shaper: t.Shaper,
+		Text:     txt,
+		Color:    HexARGB(t.Color.Text),
+		TextSize: size,
+		shaper:   t.Shaper,
 	}
 }
 
 func (l DuoUIlabel) Layout(gtx *layout.Context) {
-	paint.ColorOp{Color: HexARGB(l.Color)}.Add(gtx.Ops)
+	paint.ColorOp{Color: l.Color}.Add(gtx.Ops)
 	tl := controller.Label{Alignment: l.Alignment, MaxLines: l.MaxLines}
-	tl.Layout(gtx, l.shaper, l.Font, l.Text)
+	tl.Layout(gtx, l.shaper, l.Font, l.TextSize, l.Text)
 }

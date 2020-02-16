@@ -36,7 +36,6 @@ func DuoUIinputField(duo *model.DuoUI, fieldName, fieldModel string, lineEditor 
 			layout.Stacked(func() {
 				duo.Context.Constraints.Width.Min = hmin
 				duo.Context.Constraints.Height.Min = vmin
-				layout.Align(layout.Center).Layout(duo.Context, func() {
 					layout.Inset{Top: unit.Dp(1), Bottom: unit.Dp(1), Left: unit.Dp(1), Right: unit.Dp(1)}.Layout(duo.Context, func() {
 
 						layout.Stack{Alignment: layout.Center}.Layout(duo.Context,
@@ -54,11 +53,10 @@ func DuoUIinputField(duo *model.DuoUI, fieldName, fieldModel string, lineEditor 
 							layout.Stacked(func() {
 								duo.Context.Constraints.Width.Min = hmin
 								duo.Context.Constraints.Height.Min = vmin
-								layout.Align(layout.Center).Layout(duo.Context, func() {
 									layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(10), Left: unit.Dp(12), Right: unit.Dp(12)}.Layout(duo.Context, func() {
 										//paint.ColorOp{Color: col}.Add(duo.Context.Ops)
 										//widget.Label{}.Layout(duo.Context, btn.shaper, btn.Font, btn.Text)
-										e := duo.Theme.DuoUIeditor(fieldName, fieldName)
+										e := duo.Theme.DuoUIeditor(fieldName)
 										e.Font.Style = text.Italic
 
 										e.Layout(duo.Context, lineEditor)
@@ -69,11 +67,9 @@ func DuoUIinputField(duo *model.DuoUI, fieldName, fieldModel string, lineEditor 
 											}
 										}
 									})
-								})
-							}),
+								}),
 						)
 					})
-				})
 			}),
 		)
 	}

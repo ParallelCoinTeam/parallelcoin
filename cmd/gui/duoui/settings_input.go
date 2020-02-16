@@ -47,7 +47,7 @@ func (f *Field) InputFields(ui *DuoUI) {
 		case "text":
 			view.DuoUIinputField(ui.ly, f.Field.Name, f.Field.Model, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
 		case "number":
-			e := ui.ly.Theme.DuoUIeditor(f.Field.Name, f.Field.Name)
+			e := ui.ly.Theme.DuoUIeditor(f.Field.Name)
 			e.Font.Typeface = ui.ly.Theme.Font.Primary
 			e.Font.Style = text.Italic
 			lineEditor := (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor)

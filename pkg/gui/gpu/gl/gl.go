@@ -21,6 +21,7 @@ const (
 	DST_COLOR                             = 0x306
 	ELEMENT_ARRAY_BUFFER                  = 0x8893
 	EXTENSIONS                            = 0x1f03
+	FALSE                                 = 0
 	FLOAT                                 = 0x1406
 	FRAGMENT_SHADER                       = 0x8b30
 	FRAMEBUFFER                           = 0x8d40
@@ -69,6 +70,7 @@ const (
 	TEXTURE1                              = 0x84c1
 	TRIANGLE_STRIP                        = 0x5
 	TRIANGLES                             = 0x4
+	TRUE                                  = 1
 	UNPACK_ALIGNMENT                      = 0xcf5
 	UNSIGNED_BYTE                         = 0x1401
 	UNSIGNED_SHORT                        = 0x1403
@@ -81,15 +83,13 @@ const (
 	GPU_DISJOINT_EXT = 0x8FBB
 )
 
-// Enforce Functions interface.
-var _ interface {
+type Functions interface {
 	ActiveTexture(texture Enum)
 	AttachShader(p Program, s Shader)
 	BeginQuery(target Enum, query Query)
 	BindAttribLocation(p Program, a Attrib, name string)
 	BindBuffer(target Enum, b Buffer)
 	BindFramebuffer(target Enum, fb Framebuffer)
-	BindRenderbuffer(target Enum, rb Renderbuffer)
 	BindTexture(target Enum, t Texture)
 	BlendEquation(mode Enum)
 	BlendFunc(sfactor, dfactor Enum)
@@ -103,14 +103,12 @@ var _ interface {
 	CreateFramebuffer() Framebuffer
 	CreateProgram() Program
 	CreateQuery() Query
-	CreateRenderbuffer() Renderbuffer
 	CreateShader(ty Enum) Shader
 	CreateTexture() Texture
 	DeleteBuffer(v Buffer)
 	DeleteFramebuffer(v Framebuffer)
 	DeleteProgram(p Program)
 	DeleteQuery(query Query)
-	DeleteRenderbuffer(v Renderbuffer)
 	DeleteShader(s Shader)
 	DeleteTexture(v Texture)
 	DepthFunc(f Enum)
@@ -122,13 +120,9 @@ var _ interface {
 	Enable(cap Enum)
 	EnableVertexAttribArray(a Attrib)
 	EndQuery(target Enum)
-	Finish()
-	FramebufferRenderbuffer(target, attachment, renderbuffertarget Enum, renderbuffer Renderbuffer)
 	FramebufferTexture2D(target, attachment, texTarget Enum, t Texture, level int)
 	GetBinding(pname Enum) Object
 	GetError() Enum
-	GetRenderbufferParameteri(target, pname Enum) int
-	GetFramebufferAttachmentParameteri(target, attachment, pname Enum) int
 	GetInteger(pname Enum) int
 	GetProgrami(p Program, pname Enum) int
 	GetProgramInfoLog(p Program) string
@@ -139,12 +133,8 @@ var _ interface {
 	GetUniformLocation(p Program, name string) Uniform
 	InvalidateFramebuffer(target, attachment Enum)
 	LinkProgram(p Program)
-	PixelStorei(pname Enum, param int32)
-	RenderbufferStorage(target, internalformat Enum, width, height int)
-	Scissor(x, y, width, height int32)
 	ShaderSource(s Shader, src string)
 	TexImage2D(target Enum, level int, internalFormat int, width, height int, format, ty Enum, data []byte)
-	TexSubImage2D(target Enum, level int, x, y, width, height int, format, ty Enum, data []byte)
 	TexParameteri(target, pname Enum, param int)
 	Uniform1f(dst Uniform, v float32)
 	Uniform1i(dst Uniform, v int)
@@ -154,4 +144,4 @@ var _ interface {
 	UseProgram(p Program)
 	VertexAttribPointer(dst Attrib, size int, ty Enum, normalized bool, stride, offset int)
 	Viewport(x, y, width, height int)
-} = (*Functions)(nil)
+}

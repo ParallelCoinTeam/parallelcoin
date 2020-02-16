@@ -9,8 +9,10 @@ import (
 	"image"
 	"runtime"
 
-	"github.com/p9c/pod/pkg/gui/app/internal/gl"
-	"github.com/p9c/pod/pkg/gui/app/internal/gpu"
+	"github.com/p9c/pod/pkg/gui/app/internal/glimpl"
+	"github.com/p9c/pod/pkg/gui/app/internal/srgb"
+	"github.com/p9c/pod/pkg/gui/gpu"
+	"github.com/p9c/pod/pkg/gui/gpu/gl"
 	"github.com/p9c/pod/pkg/gui/op"
 )
 
@@ -18,12 +20,12 @@ import (
 type Window struct {
 	size image.Point
 	ctx  context
-	fbo  *gl.SRGBFBO
+	fbo  *srgb.SRGBFBO
 	gpu  *gpu.GPU
 }
 
 type context interface {
-	Functions() *gl.Functions
+	Functions() *glimpl.Functions
 	MakeCurrent() error
 	ReleaseCurrent()
 	Release()
@@ -41,7 +43,7 @@ func NewWindow(width, height int) (*Window, error) {
 	}
 	err = contextDo(ctx, func() error {
 		f := ctx.Functions()
-		fbo, err := gl.NewSRGBFBO(f)
+		fbo, err := srgb.NewSRGBFBO(f)
 		if err != nil {
 			ctx.Release()
 			return err
@@ -51,7 +53,13 @@ func NewWindow(width, height int) (*Window, error) {
 			ctx.Release()
 			return err
 		}
-		gpu, err := gpu.New(f)
+		backend, err := gl.NewBackend(f)
+		if err != nil {
+			fbo.Release()
+			ctx.Release()
+			return err
+		}
+		gpu, err := gpu.New(backend)
 		if err != nil {
 			fbo.Release()
 			ctx.Release()
@@ -90,9 +98,9 @@ func (w *Window) Release() {
 // operation list.
 func (w *Window) Frame(frame *op.Ops) {
 	contextDo(w.ctx, func() error {
-		w.gpu.Collect(false, w.size, frame)
-		w.gpu.Frame(false, w.size)
-		w.gpu.EndFrame(false)
+		w.gpu.Collect(w.size, frame)
+		w.gpu.BeginFrame()
+		w.gpu.EndFrame()
 		return nil
 	})
 }

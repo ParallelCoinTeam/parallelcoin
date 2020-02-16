@@ -27,24 +27,24 @@ func (ui *DuoUI) DuoUIlogger() func() {
 				logText := ui.ly.Theme.Caption(fmt.Sprint(i) + "->" + fmt.Sprint(t.Text))
 				logText.Font.Typeface = ui.ly.Theme.Font.Mono
 
-				logText.Color = ui.ly.Theme.Color.Primary
+				logText.Color = theme.HexARGB(ui.ly.Theme.Color.Primary)
 				if t.Level == "TRC" {
-					logText.Color = ui.ly.Theme.Color.Success
+					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Success)
 				}
 				if t.Level == "DBG" {
-					logText.Color = ui.ly.Theme.Color.Secondary
+					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Secondary)
 				}
 				if t.Level == "INF" {
-					logText.Color = ui.ly.Theme.Color.Info
+					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Info)
 				}
 				if t.Level == "WRN" {
-					logText.Color = ui.ly.Theme.Color.Warning
+					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Warning)
 				}
 				if t.Level == "ERROR" {
-					logText.Color = ui.ly.Theme.Color.Danger
+					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Danger)
 				}
 				if t.Level == "FTL" {
-					logText.Color = ui.ly.Theme.Color.Primary
+					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Primary)
 				}
 
 				logText.Layout(ui.ly.Context)

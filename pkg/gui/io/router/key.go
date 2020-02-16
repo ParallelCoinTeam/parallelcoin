@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-package input
+package router
 
 import (
 	"github.com/p9c/pod/pkg/gui/internal/opconst"

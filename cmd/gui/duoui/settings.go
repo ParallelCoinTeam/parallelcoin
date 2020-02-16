@@ -31,7 +31,7 @@ func (ui *DuoUI) DuoUIsettings() func() {
 						layout.Rigid(func() {
 							t := ui.ly.Theme.H3(ui.rc.Settings.Tabs.Current)
 							t.Font.Typeface = ui.ly.Theme.Font.Primary
-							t.Color = ui.ly.Theme.Color.Primary
+							t.Color = theme.HexARGB(ui.ly.Theme.Color.Primary)
 							t.Layout(ui.ly.Context)
 						}),
 						layout.Rigid(func() {
@@ -89,13 +89,11 @@ func (ui *DuoUI) DuoUIsettings() func() {
 											)
 										}),
 										layout.Flexed(0.38, func() {
-											layout.Align(layout.Start).Layout(ui.ly.Context, func() {
 												layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(ui.ly.Context, func() {
 													// TODO:
 													// Input fileds must be set as theme part
 													tl.InputFields(ui)
 												})
-											})
 										}),
 									)
 								}),

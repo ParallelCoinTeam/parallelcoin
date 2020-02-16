@@ -56,26 +56,25 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			controllers := []func(){
 				func() {
 					bale := ui.ly.Theme.H3(ui.rc.PassPhrase)
-					bale.Color = ui.ly.Theme.Color.Light
+					bale.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
 					bale.Layout(ui.ly.Context)
 				},
 				func() {
 					balr := ui.ly.Theme.H3(ui.rc.ConfirmPassPhrase)
 
-					balr.Color = ui.ly.Theme.Color.Light
+					balr.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
 					balr.Layout(ui.ly.Context)
 				},
 				func() {
 					bal := ui.ly.Theme.H3("Enter the private passphrase for your new wallet:")
-					bal.Color = ui.ly.Theme.Color.Light
+					bal.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
 					bal.Layout(ui.ly.Context)
 					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Bg, [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 					layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
 						theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, "fff4f4f4", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 						layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
-							e := ui.ly.Theme.DuoUIeditor("Enter Passpharse", "Enter Passpharse")
+							e := ui.ly.Theme.DuoUIeditor("Enter Passpharse")
 							e.Font.Style = text.Regular
-							e.Font.Size = unit.Dp(24)
 							e.Layout(ui.ly.Context, passEditor)
 							for _, e := range passEditor.Events(ui.ly.Context) {
 								if e, ok := e.(controller.SubmitEvent); ok {
@@ -92,9 +91,8 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 					layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
 						theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, "fff4f4f4", [4]float32{9, 9, 9, 9}, [4]float32{0, 0, 0, 0})
 						layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
-							e := ui.ly.Theme.DuoUIeditor("Repeat Passpharse", "Repeat Passpharse")
+							e := ui.ly.Theme.DuoUIeditor("Repeat Passpharse")
 							e.Font.Style = text.Regular
-							e.Font.Size = unit.Dp(24)
 							e.Layout(ui.ly.Context, confirmPassEditor)
 							for _, e := range confirmPassEditor.Events(ui.ly.Context) {
 								if e, ok := e.(controller.SubmitEvent); ok {

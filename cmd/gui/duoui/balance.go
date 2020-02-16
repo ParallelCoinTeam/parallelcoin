@@ -64,7 +64,7 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, name, value string) fun
 					layout.Rigid(func() {
 						txt := th.H6(name)
 						txt.Font.Typeface = th.Font.Primary
-						txt.Color = th.Color.Primary
+						txt.Color = theme.HexARGB(th.Color.Primary)
 						txt.Layout(gtx)
 					}),
 				)
@@ -72,7 +72,7 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, name, value string) fun
 			layout.Rigid(func() {
 				value := th.H5(value)
 				value.Font.Typeface = th.Font.Primary
-				value.Color = th.Color.Dark
+				value.Color = theme.HexARGB(th.Color.Dark)
 				value.Alignment = text.End
 				value.Layout(gtx)
 			}),

@@ -6,14 +6,15 @@ import (
 	"errors"
 	"syscall/js"
 
-	"github.com/p9c/pod/pkg/gui/app/internal/gl"
+	"github.com/p9c/pod/pkg/gui/app/internal/glimpl"
+	"github.com/p9c/pod/pkg/gui/app/internal/srgb"
 )
 
 type context struct {
 	ctx     js.Value
 	cnv     js.Value
-	f       *gl.Functions
-	srgbFBO *gl.SRGBFBO
+	f       *glimpl.Functions
+	srgbFBO *srgb.SRGBFBO
 }
 
 func newContext(w *window) (*context, error) {
@@ -32,7 +33,7 @@ func newContext(w *window) (*context, error) {
 	if ctx.IsNull() {
 		return nil, errors.New("app: webgl is not supported")
 	}
-	f := &gl.Functions{Ctx: ctx}
+	f := &glimpl.Functions{Ctx: ctx}
 	if err := f.Init(version); err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func newContext(w *window) (*context, error) {
 	return c, nil
 }
 
-func (c *context) Functions() *gl.Functions {
+func (c *context) Functions() *glimpl.Functions {
 	return c.f
 }
 
@@ -75,7 +76,7 @@ func (c *context) Unlock() {}
 func (c *context) MakeCurrent() error {
 	if c.srgbFBO == nil {
 		var err error
-		c.srgbFBO, err = gl.NewSRGBFBO(c.f)
+		c.srgbFBO, err = srgb.NewSRGBFBO(c.f)
 		if err != nil {
 			c.Release()
 			c.srgbFBO = nil

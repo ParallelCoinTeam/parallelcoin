@@ -30,7 +30,7 @@ func (t *DuoUItheme) DuoUIpage(txt, txtColor, bgColor string, paddingVertical, p
 	return &DuoUIpage{
 		Text: txt,
 		Font: text.Font{
-			Size: t.TextSize.Scale(14.0 / 16.0),
+			//Size: t.TextSize.Scale(14.0 / 16.0),
 		},
 		TxColor: HexARGB(txtColor),
 		BgColor: HexARGB(bgColor),
