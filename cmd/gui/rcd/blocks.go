@@ -1,23 +1,16 @@
 package rcd
 
 import (
-	"bytes"
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
-	"time"
-
-	"github.com/p9c/pod/cmd/node/rpc"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/util"
 )
 
-func (r *RcVar) GetNetworkLastBlock(cx *conte.Xt) int32 {
-	for _, g := range cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
+func (r *RcVar) GetNetworkLastBlock() int32 {
+	for _, g := range r.cx.RPCServer.Cfg.ConnMgr.ConnectedPeers() {
 		l := g.ToPeer().StatsSnapshot().LastBlock
 		if l > r.Status.Node.NetworkLastBlock {
 			r.Status.Node.NetworkLastBlock = l
@@ -82,92 +75,111 @@ func (r *RcVar) GetNetworkLastBlock(cx *conte.Xt) int32 {
 //
 // }
 
-func (r *RcVar) GetBlockExcerpt(cx *conte.Xt, height int) (b model.DuoUIblock) {
+func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	b = *new(model.DuoUIblock)
-	hashHeight, err := cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
+	hashHeight, err := r.cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
 	if err != nil {
 		log.ERROR("Block Hash By Height:", err)
 	}
-	// Load the raw block bytes from the database.
-	hash, err := chainhash.NewHashFromStr(hashHeight.String())
+
+	verbose, verbosetx := true, true
+	bcmd := btcjson.GetBlockCmd{
+		Hash:      hashHeight.String(),
+		Verbose:   &verbose,
+		VerboseTx: &verbosetx,
+	}
+	bl, err := rpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil)
 	if err != nil {
+		//dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
-	var blkBytes []byte
-	err = cx.RPCServer.Cfg.DB.View(func(dbTx database.Tx) error {
-		var err error
-		blkBytes, err = dbTx.FetchBlock(hash)
-		return err
-	})
-	if err != nil {
-	}
-	// The verbose flag is set, so generate the JSON object and return it.
-	// Deserialize the block.
-	blk, err := util.NewBlockFromBytes(blkBytes)
-	if err != nil {
-	}
-	// Get the block height from chain.
-	blockHeight, err := cx.RPCServer.Cfg.Chain.BlockHeightByHash(hash)
-	if err != nil {
-	}
-	blk.SetHeight(blockHeight)
-	params := cx.RPCServer.Cfg.ChainParams
-	blockHeader := &blk.MsgBlock().Header
-	algoname := fork.GetAlgoName(blockHeader.Version, blockHeight)
-	a := fork.GetAlgoVer(algoname, blockHeight)
-	algoid := fork.GetAlgoID(algoname, blockHeight)
-	var value float64
-	b.PowAlgoID = algoid
+	block := bl.(btcjson.GetBlockVerboseResult)
+	b.Height = block.Height
+	b.BlockHash = block.Hash
+	b.Confirmations = block.Confirmations
+	b.TxNum = block.TxNum
+	b.Time = string(block.Time)
+	b.Link = &controller.Button{}
 
-	b.Time = blockHeader.Timestamp.Format(time.RFC3339)
-
-	b.BlockHash = hash.String()
-	b.Height = int64(blockHeight)
-	b.TxNum = len(blk.Transactions())
-	b.Difficulty = rpc.GetDifficultyRatio(blockHeader.Bits, params, a)
-	txns := blk.Transactions()
-
-	for _, tx := range txns {
-		// Try to fetch the transaction from the memory pool and if that fails, try
-		// the block database.
-		var mtx *wire.MsgTx
-
-		// Look up the location of the transaction.
-		blockRegion, err := cx.RPCServer.Cfg.TxIndex.TxBlockRegion(tx.Hash())
-		if err != nil {
-			log.ERROR("Tx Block Region:", err)
-		}
-		if blockRegion == nil {
-		}
-		// Load the raw transaction bytes from the database.
-		var txBytes []byte
-		err = cx.RPCServer.Cfg.DB.View(func(dbTx database.Tx) error {
-			var err error
-			txBytes, err = dbTx.FetchBlockRegion(blockRegion)
-			return err
-		})
-		if err != nil {
-		}
-		// Deserialize the transaction
-		var msgTx wire.MsgTx
-		err = msgTx.Deserialize(bytes.NewReader(txBytes))
-		if err != nil {
-		}
-		mtx = &msgTx
-
-		for _, vout := range rpc.CreateVoutList(mtx, cx.RPCServer.Cfg.ChainParams, nil) {
-
-			value = value + vout.Value
-		}
-
-	b.Amount = value
-	}
+	//// Load the raw block bytes from the database.
+	//hash, err := chainhash.NewHashFromStr(hashHeight.String())
+	//if err != nil {
+	//}
+	//var blkBytes []byte
+	//err = r.cx.RPCServer.Cfg.DB.View(func(dbTx database.Tx) error {
+	//	var err error
+	//	blkBytes, err = dbTx.FetchBlock(hash)
+	//	return err
+	//})
+	//if err != nil {
+	//}
+	//// The verbose flag is set, so generate the JSON object and return it.
+	//// Deserialize the block.
+	//blk, err := util.NewBlockFromBytes(blkBytes)
+	//if err != nil {
+	//}
+	//// Get the block height from chain.
+	//blockHeight, err := r.cx.RPCServer.Cfg.Chain.BlockHeightByHash(hash)
+	//if err != nil {
+	//}
+	//blk.SetHeight(blockHeight)
+	//params := r.cx.RPCServer.Cfg.ChainParams
+	//blockHeader := &blk.MsgBlock().Header
+	//algoname := fork.GetAlgoName(blockHeader.Version, blockHeight)
+	//a := fork.GetAlgoVer(algoname, blockHeight)
+	//algoid := fork.GetAlgoID(algoname, blockHeight)
+	//var value float64
+	//b.PowAlgoID = algoid
+	//
+	//b.Time = blockHeader.Timestamp.Format(time.RFC3339)
+	//
+	//b.BlockHash = hash.String()
+	//b.Height = int64(blockHeight)
+	//b.TxNum = len(blk.Transactions())
+	//b.Difficulty = rpc.GetDifficultyRatio(blockHeader.Bits, params, a)
+	//txns := blk.Transactions()
+	//
+	//for _, tx := range txns {
+	//	// Try to fetch the transaction from the memory pool and if that fails, try
+	//	// the block database.
+	//	var mtx *wire.MsgTx
+	//
+	//	// Look up the location of the transaction.
+	//	blockRegion, err := r.cx.RPCServer.Cfg.TxIndex.TxBlockRegion(tx.Hash())
+	//	if err != nil {
+	//		log.ERROR("Tx Block Region:", err)
+	//	}
+	//	if blockRegion == nil {
+	//	}
+	//	// Load the raw transaction bytes from the database.
+	//	var txBytes []byte
+	//	err = r.cx.RPCServer.Cfg.DB.View(func(dbTx database.Tx) error {
+	//		var err error
+	//		txBytes, err = dbTx.FetchBlockRegion(blockRegion)
+	//		return err
+	//	})
+	//	if err != nil {
+	//	}
+	//	// Deserialize the transaction
+	//	var msgTx wire.MsgTx
+	//	err = msgTx.Deserialize(bytes.NewReader(txBytes))
+	//	if err != nil {
+	//	}
+	//	mtx = &msgTx
+	//
+	//	for _, vout := range rpc.CreateVoutList(mtx, r.cx.RPCServer.Cfg.ChainParams, nil) {
+	//
+	//		value = value + vout.Value
+	//	}
+	//
+	//b.Amount = value
+	//}
 	return
 }
 
-func (r *RcVar) GetBlocksExcerpts(cx *conte.Xt, startBlock, blockHeight int) {
+func (r *RcVar) GetBlocksExcerpts(startBlock, blockHeight int) {
 	blocks := *new([]model.DuoUIblock)
 	for i := startBlock; i <= blockHeight; i++ {
-		blocks = append(blocks, r.GetBlockExcerpt(cx, i))
+		blocks = append(blocks, r.GetBlockExcerpt(i))
 	}
 	r.Blocks = blocks
 	return

@@ -17,6 +17,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"sort"
 	"time"
 )
 
@@ -259,6 +260,21 @@ func (r *RcVar) SaveAddressLabel(address, label string) {
 
 
 
+type AddressSlice []model.Address
+
+func (a AddressSlice) Len() int {
+	return len(a)
+}
+
+func (a AddressSlice) Less(i, j int) bool {
+	return a[i].Index < a[j].Index
+}
+
+func (a AddressSlice) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
+
 func (r *RcVar) GetAddressBook() {
 	addressbook := new(model.DuoUIaddressBook)
 	minConf := 1
@@ -322,7 +338,7 @@ func (r *RcVar) GetAddressBook() {
 	})
 	if err != nil {
 	}
-	var addrs []model.Address
+	var addrs AddressSlice
 	// Massage address data into output format.
 	addressbook.Num = len(allAddrData)
 	for address, addrData := range allAddrData {
@@ -338,6 +354,7 @@ func (r *RcVar) GetAddressBook() {
 			Copy: new(controller.Button),
 		})
 	}
+	sort.Sort(addrs)
 	addressbook.Addresses = addrs
 	r.AddressBook = *addressbook
 	return
