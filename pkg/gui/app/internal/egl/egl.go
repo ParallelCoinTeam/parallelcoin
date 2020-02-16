@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense OR MIT
 
-// +build linux windows freebsd
+// +build linux windows freebsd openbsd
 
 package egl
 
@@ -10,18 +10,19 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/p9c/pod/pkg/gui/app/internal/gl"
+	"github.com/p9c/pod/pkg/gui/app/internal/glimpl"
+	"github.com/p9c/pod/pkg/gui/app/internal/srgb"
 )
 
 type Context struct {
-	c             *gl.Functions
+	c             *glimpl.Functions
 	disp          _EGLDisplay
 	eglCtx        *eglContext
 	eglSurf       _EGLSurface
 	width, height int
 	refreshFBO    bool
 	// For sRGB emulation.
-	srgbFBO *gl.SRGBFBO
+	srgbFBO *srgb.SRGBFBO
 }
 
 type eglContext struct {
@@ -109,12 +110,12 @@ func NewContext(disp NativeDisplayType) (*Context, error) {
 	c := &Context{
 		disp:   eglDisp,
 		eglCtx: eglCtx,
-		c:      new(gl.Functions),
+		c:      new(glimpl.Functions),
 	}
 	return c, nil
 }
 
-func (c *Context) Functions() *gl.Functions {
+func (c *Context) Functions() *glimpl.Functions {
 	return c.c
 }
 
@@ -160,7 +161,7 @@ func (c *Context) MakeCurrent() error {
 	}
 	if c.srgbFBO == nil {
 		var err error
-		c.srgbFBO, err = gl.NewSRGBFBO(c.c)
+		c.srgbFBO, err = srgb.NewSRGBFBO(c.c)
 		if err != nil {
 			return err
 		}

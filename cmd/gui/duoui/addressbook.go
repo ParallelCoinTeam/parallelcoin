@@ -11,7 +11,7 @@ import (
 var (
 	addressBookList = &layout.List{
 		Axis:        layout.Vertical,
-		ScrollToEnd: true,
+		//ScrollToEnd: true,
 	}
 )
 
@@ -35,8 +35,7 @@ func (ui *DuoUI) DuoUIaddressBook() func() {
 											layout.Flexed(0.1, func() {
 												sat := ui.ly.Theme.Body1(fmt.Sprint(t.Index))
 												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = ui.ly.Theme.Color.Dark
-												sat.Font.Size = unit.Dp(16)
+												sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 												sat.Layout(ui.ly.Context)
 											}),
 											layout.Rigid(func() {
@@ -54,22 +53,19 @@ func (ui *DuoUI) DuoUIaddressBook() func() {
 											layout.Flexed(0.2, func() {
 												sat := ui.ly.Theme.Body1(t.Account)
 												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = ui.ly.Theme.Color.Dark
-												sat.Font.Size = unit.Dp(16)
+												sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 												sat.Layout(ui.ly.Context)
 											}),
 											layout.Flexed(0.4, func() {
 												sat := ui.ly.Theme.Body1(t.Label)
 												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = ui.ly.Theme.Color.Dark
-												sat.Font.Size = unit.Dp(16)
+												sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 												sat.Layout(ui.ly.Context)
 											}),
 											layout.Flexed(0.3, func() {
 												sat := ui.ly.Theme.Body1(fmt.Sprint(t.Amount))
 												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = ui.ly.Theme.Color.Dark
-												sat.Font.Size = unit.Dp(16)
+												sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 												sat.Layout(ui.ly.Context)
 											}),
 

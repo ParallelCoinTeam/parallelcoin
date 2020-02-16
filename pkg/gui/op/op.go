@@ -15,9 +15,9 @@ to a ui/app.Window's Update method.
 
 Drawing a colored square:
 
-	import "github.com/p9c/pod/pkg/gui/unit"
-	import "github.com/p9c/pod/pkg/gui/app"
-	import "github.com/p9c/pod/pkg/gui/op/paint"
+	import "gioui.org/unit"
+	import "gioui.org/app"
+	import "gioui.org/op/paint"
 
 	var w app.Window
 	var e system.FrameEvent

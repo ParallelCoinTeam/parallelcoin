@@ -126,8 +126,8 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		Settings: settings,
 		Log:      l,
 		CommandsHistory: &model.DuoUIcommandsHistory{
-			Commands: []controller.Command{
-				controller.Command{
+			Commands: []model.DuoUIcommand{
+				model.DuoUIcommand{
 					ComID:    "input",
 					Category: "input",
 					Time:     time.Now(),

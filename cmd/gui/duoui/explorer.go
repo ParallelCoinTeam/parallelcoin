@@ -34,7 +34,7 @@ func (ui *DuoUI) DuoUIexplorer() func() {
 							layout.Rigid(func() {
 								num := ui.ly.Theme.Body1(fmt.Sprint(i))
 								num.Font.Typeface = ui.ly.Theme.Font.Primary
-								num.Color = ui.ly.Theme.Color.Hint
+								num.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 								num.Layout(ui.ly.Context)
 							}),
 							layout.Rigid(func() {
@@ -48,7 +48,7 @@ func (ui *DuoUI) DuoUIexplorer() func() {
 							layout.Rigid(func() {
 								amount := ui.ly.Theme.H5(fmt.Sprintf("%0.8f", b.Amount))
 								amount.Font.Typeface = ui.ly.Theme.Font.Primary
-								amount.Color = ui.ly.Theme.Color.Hint
+								amount.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 								amount.Alignment = text.End
 								amount.Font.Variant = "Mono"
 								amount.Font.Weight = text.Bold
@@ -57,26 +57,26 @@ func (ui *DuoUI) DuoUIexplorer() func() {
 							layout.Rigid(func() {
 								sat := ui.ly.Theme.Body1(fmt.Sprint(b.TxNum))
 								sat.Font.Typeface = ui.ly.Theme.Font.Primary
-								sat.Color = ui.ly.Theme.Color.Hint
+								sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 								sat.Layout(ui.ly.Context)
 							}),
 							layout.Rigid(func() {
 								sat := ui.ly.Theme.Body1(fmt.Sprint(b.BlockHash))
 								sat.Font.Typeface = ui.ly.Theme.Font.Mono
-								sat.Color = ui.ly.Theme.Color.Hint
+								sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 								sat.Layout(ui.ly.Context)
 							}),
 							layout.Rigid(func() {
 								l := ui.ly.Theme.Body2(b.Time)
 								l.Font.Typeface = ui.ly.Theme.Font.Primary
-								l.Color = ui.ly.Theme.Color.Hint
+								l.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 								l.Layout(ui.ly.Context)
 							}),
 						)
 					}),
 					layout.Rigid(func() {
 						sat := ui.ly.Theme.Body1(fmt.Sprintf("%0.8f", b.Amount))
-						sat.Color = ui.ly.Theme.Color.Hint
+						sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 						sat.Layout(ui.ly.Context)
 					}),
 				)

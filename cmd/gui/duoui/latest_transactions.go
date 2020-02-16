@@ -26,7 +26,7 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 				theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 48, ui.ly.Theme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				layout.UniformInset(unit.Dp(16)).Layout(ui.ly.Context, func() {
 					latestx := ui.ly.Theme.H5("LATEST TRANSACTIONS")
-					latestx.Color = ui.ly.Theme.Color.Light
+					latestx.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
 					latestx.Alignment = text.Start
 					latestx.Layout(ui.ly.Context)
 				})
@@ -80,7 +80,7 @@ func lTtxid(gtx *layout.Context, th *theme.DuoUItheme, v string) func () {
 	return func() {
 		tim := th.Caption(v)
 		tim.Font.Typeface = "bariol"
-		tim.Color = th.Color.Light
+		tim.Color = theme.HexARGB(th.Color.Light)
 		tim.Layout(gtx)
 	}
 }
@@ -88,7 +88,7 @@ func lTtxid(gtx *layout.Context, th *theme.DuoUItheme, v string) func () {
 func lTcategory(gtx *layout.Context, th *theme.DuoUItheme, v string) func () {
 	return func() {
 		sat := th.Body1(v)
-		sat.Color = th.Color.Light
+		sat.Color = theme.HexARGB(th.Color.Light)
 		sat.Font.Typeface = "bariol"
 		sat.Layout(gtx)
 	}
@@ -98,8 +98,8 @@ func lTtime(gtx *layout.Context, th *theme.DuoUItheme, v string) func () {
 	return func() {
 		l := th.Body1(v)
 		l.Font.Typeface = "bariol"
-		l.Color = th.Color.Light
-		l.Color = th.Color.Hint
+		l.Color = theme.HexARGB(th.Color.Light)
+		l.Color = theme.HexARGB(th.Color.Hint)
 		l.Layout(gtx)
 	}
 }
@@ -109,7 +109,7 @@ func lTamount(gtx *layout.Context, th *theme.DuoUItheme, v float64) func () {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			sat := th.Body1(fmt.Sprintf("%0.8f", v))
 			sat.Font.Typeface = "bariol"
-			sat.Color = th.Color.Light
+			sat.Color = theme.HexARGB(th.Color.Light)
 			sat.Layout(gtx)
 		})
 	}

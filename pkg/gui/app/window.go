@@ -8,10 +8,10 @@ import (
 	"image"
 	"time"
 
-	"github.com/p9c/pod/pkg/gui/app/internal/input"
 	"github.com/p9c/pod/pkg/gui/app/internal/window"
 	"github.com/p9c/pod/pkg/gui/io/event"
 	"github.com/p9c/pod/pkg/gui/io/profile"
+	"github.com/p9c/pod/pkg/gui/io/router"
 	"github.com/p9c/pod/pkg/gui/io/system"
 	"github.com/p9c/pod/pkg/gui/op"
 	"github.com/p9c/pod/pkg/gui/unit"
@@ -56,7 +56,7 @@ type callbacks struct {
 // Queue is an event.Queue implementation that distributes system events
 // to the input handlers declared in the most recent frame.
 type Queue struct {
-	q input.Router
+	q router.Router
 }
 
 // driverEvent is sent when a new native driver
@@ -125,12 +125,12 @@ func (w *Window) update(frame *op.Ops) {
 }
 
 func (w *Window) draw(frameStart time.Time, size image.Point, frame *op.Ops) {
-	sync := w.loop.Draw(w.queue.q.Profiling(), size, frame)
+	sync := w.loop.Draw(size, frame)
 	w.queue.q.Frame(frame)
 	switch w.queue.q.TextInputState() {
-	case input.TextInputOpen:
+	case router.TextInputOpen:
 		w.driver.ShowTextInput(true)
-	case input.TextInputClose:
+	case router.TextInputClose:
 		w.driver.ShowTextInput(false)
 	}
 	if w.queue.q.Profiling() {
@@ -138,7 +138,7 @@ func (w *Window) draw(frameStart time.Time, size image.Point, frame *op.Ops) {
 		frameDur = frameDur.Truncate(100 * time.Microsecond)
 		q := 100 * time.Microsecond
 		timings := fmt.Sprintf("tot:%7s %s", frameDur.Round(q), w.loop.Summary())
-		w.queue.q.AddProfile(profile.Event{Timings: timings})
+		w.queue.q.Add(profile.Event{Timings: timings})
 	}
 	if t, ok := w.queue.q.WakeupTime(); ok {
 		w.setNextFrame(t)

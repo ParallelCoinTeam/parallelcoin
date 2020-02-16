@@ -5,7 +5,7 @@
 package window
 
 import (
-	"github.com/p9c/pod/pkg/gui/app/internal/gl"
+	"github.com/p9c/pod/pkg/gui/app/internal/glimpl"
 )
 
 /*
@@ -18,7 +18,7 @@ import (
 import "C"
 
 type context struct {
-	c    *gl.Functions
+	c    *glimpl.Functions
 	ctx  C.CFTypeRef
 	view C.CFTypeRef
 }
@@ -34,13 +34,13 @@ func newContext(w *window) (*context, error) {
 	ctx := C.gio_contextForView(view)
 	c := &context{
 		ctx:  ctx,
-		c:    new(gl.Functions),
+		c:    new(glimpl.Functions),
 		view: view,
 	}
 	return c, nil
 }
 
-func (c *context) Functions() *gl.Functions {
+func (c *context) Functions() *glimpl.Functions {
 	return c.c
 }
 

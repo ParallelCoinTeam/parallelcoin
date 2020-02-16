@@ -2,7 +2,9 @@
 
 package headless
 
-import "github.com/p9c/pod/pkg/gui/app/internal/gl"
+import (
+	"github.com/p9c/pod/pkg/gui/app/internal/glimpl"
+)
 
 /*
 #cgo CFLAGS: -DGL_SILENCE_DEPRECATION -Werror -Wno-deprecated-declarations -fmodules -fobjc-arc -x objective-c
@@ -13,14 +15,14 @@ import "github.com/p9c/pod/pkg/gui/app/internal/gl"
 import "C"
 
 type nsContext struct {
-	c        *gl.Functions
+	c        *glimpl.Functions
 	ctx      C.CFTypeRef
 	prepared bool
 }
 
 func newContext() (context, error) {
 	ctx := C.gio_headless_newContext()
-	return &nsContext{ctx: ctx, c: new(gl.Functions)}, nil
+	return &nsContext{ctx: ctx, c: new(glimpl.Functions)}, nil
 }
 
 func (c *nsContext) MakeCurrent() error {
@@ -36,7 +38,7 @@ func (c *nsContext) ReleaseCurrent() {
 	C.gio_headless_clearCurrentContext(c.ctx)
 }
 
-func (c *nsContext) Functions() *gl.Functions {
+func (c *nsContext) Functions() *glimpl.Functions {
 	return c.c
 }
 

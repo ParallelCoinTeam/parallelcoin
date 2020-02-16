@@ -34,8 +34,9 @@ type Editor struct {
 	Submit bool
 
 	eventKey     int
-	scale        int
 	font         text.Font
+	shaper       text.Shaper
+	textSize     fixed.Int26_6
 	blinkStart   time.Time
 	focused      bool
 	rr           editBuffer
@@ -45,7 +46,6 @@ type Editor struct {
 	lines        []text.Line
 	shapes       []line
 	dims         layout.Dimensions
-	carWidth     fixed.Int26_6
 	requestFocus bool
 	caretOn      bool
 	caretScroll  bool
@@ -98,8 +98,20 @@ func (e *Editor) Events(gtx *layout.Context) []EditorEvent {
 }
 
 func (e *Editor) processEvents(gtx *layout.Context) {
+	if e.shaper == nil {
+		// Can't process events without a shaper.
+		return
+	}
+	e.makeValid()
 	e.processPointer(gtx)
 	e.processKey(gtx)
+}
+
+func (e *Editor) makeValid() {
+	if !e.valid {
+		e.lines, e.dims = e.layoutText(e.shaper)
+		e.valid = true
+	}
 }
 
 func (e *Editor) processPointer(gtx *layout.Context) {
@@ -212,30 +224,24 @@ func (e *Editor) Focus() {
 	e.requestFocus = true
 }
 
+// Focused returns whether the editor is focused or not.
+func (e *Editor) Focused() bool {
+	return e.focused
+}
+
 // Layout lays out the editor.
-func (e *Editor) Layout(gtx *layout.Context, sh text.Shaper, font text.Font) {
+func (e *Editor) Layout(gtx *layout.Context, sh text.Shaper, font text.Font, size unit.Value) {
 	// Flush events from before the previous frame.
 	copy(e.events, e.events[e.prevEvents:])
 	e.events = e.events[:len(e.events)-e.prevEvents]
 	e.prevEvents = len(e.events)
-	if e.font != font {
+	textSize := fixed.I(gtx.Px(size))
+	if e.font != font || e.textSize != textSize {
 		e.invalidate()
 		e.font = font
+		e.textSize = textSize
 	}
-	e.processEvents(gtx)
-	e.layout(gtx, sh)
-}
-
-func (e *Editor) layout(gtx *layout.Context, sh text.Shaper) {
-	// Crude configuration change detection.
-	if scale := gtx.Px(unit.Sp(100)); scale != e.scale {
-		e.invalidate()
-		e.scale = scale
-	}
-	cs := gtx.Constraints
-	e.carWidth = fixed.I(gtx.Px(unit.Dp(1)))
-
-	maxWidth := cs.Width.Max
+	maxWidth := gtx.Constraints.Width.Max
 	if e.SingleLine {
 		maxWidth = inf
 	}
@@ -243,13 +249,19 @@ func (e *Editor) layout(gtx *layout.Context, sh text.Shaper) {
 		e.maxWidth = maxWidth
 		e.invalidate()
 	}
-
-	if !e.valid {
-		e.lines, e.dims = e.layoutText(gtx, sh, e.font)
-		e.valid = true
+	if sh != e.shaper {
+		e.shaper = sh
+		e.invalidate()
 	}
 
-	e.viewSize = cs.Constrain(e.dims.Size)
+	e.processEvents(gtx)
+	e.layout(gtx)
+}
+
+func (e *Editor) layout(gtx *layout.Context) {
+	e.makeValid()
+
+	e.viewSize = gtx.Constraints.Constrain(e.dims.Size)
 	// Adjust scrolling for new viewport and layout.
 	e.scrollRel(0, 0)
 
@@ -277,7 +289,7 @@ func (e *Editor) layout(gtx *layout.Context, sh text.Shaper) {
 		if !ok {
 			break
 		}
-		path := sh.Shape(gtx, e.font, layout)
+		path := e.shaper.Shape(e.font, e.textSize, layout)
 		e.shapes = append(e.shapes, line{off, path})
 	}
 
@@ -326,15 +338,16 @@ func (e *Editor) PaintCaret(gtx *layout.Context) {
 	if !e.caretOn {
 		return
 	}
+	carWidth := fixed.I(gtx.Px(unit.Dp(1)))
 	carLine, _, carX, carY := e.layoutCaret()
 
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
-	carX -= e.carWidth / 2
+	carX -= carWidth / 2
 	carAsc, carDesc := -e.lines[carLine].Bounds.Min.Y, e.lines[carLine].Bounds.Max.Y
 	carRect := image.Rectangle{
 		Min: image.Point{X: carX.Ceil(), Y: carY - carAsc.Ceil()},
-		Max: image.Point{X: carX.Ceil() + e.carWidth.Ceil(), Y: carY + carDesc.Ceil()},
+		Max: image.Point{X: carX.Ceil() + carWidth.Ceil(), Y: carY + carDesc.Ceil()},
 	}
 	carRect = carRect.Add(image.Point{
 		X: -e.scrollOff.X,
@@ -342,7 +355,7 @@ func (e *Editor) PaintCaret(gtx *layout.Context) {
 	})
 	clip := textPadding(e.lines)
 	// Account for caret width to each side.
-	whalf := (e.carWidth / 2).Ceil()
+	whalf := (carWidth / 2).Ceil()
 	if clip.Max.X < whalf {
 		clip.Max.X = whalf
 	}
@@ -430,10 +443,9 @@ func (e *Editor) moveCoord(c unit.Converter, pos image.Point) {
 	e.moveToLine(x, carLine)
 }
 
-func (e *Editor) layoutText(c unit.Converter, s text.Shaper, font text.Font) ([]text.Line, layout.Dimensions) {
+func (e *Editor) layoutText(s text.Shaper) ([]text.Line, layout.Dimensions) {
 	e.rr.Reset()
-	opts := text.LayoutOptions{MaxWidth: e.maxWidth}
-	lines, _ := s.Layout(c, font, &e.rr, opts)
+	lines, _ := s.Layout(e.font, e.textSize, e.maxWidth, &e.rr)
 	dims := linesDimens(lines)
 	for i := 0; i < len(lines)-1; i++ {
 		// To avoid layout flickering while editing, assume a soft newline takes
@@ -447,6 +459,19 @@ func (e *Editor) layoutText(c unit.Converter, s text.Shaper, font text.Font) ([]
 		}
 	}
 	return lines, dims
+}
+
+// CaretPos returns the line & column numbers of the caret.
+func (e *Editor) CaretPos() (line, col int) {
+	line, col, _, _ = e.layoutCaret()
+	return
+}
+
+// CaretCoords returns the x & y coordinates of the caret, relative to the
+// editor itself.
+func (e *Editor) CaretCoords() (x fixed.Int26_6, y int) {
+	_, _, x, y = e.layoutCaret()
+	return
 }
 
 func (e *Editor) layoutCaret() (carLine, carCol int, x fixed.Int26_6, y int) {
@@ -638,6 +663,12 @@ func (e *Editor) scrollToCaret() {
 		}
 		e.scrollRel(0, dist)
 	}
+}
+
+// NumLines returns the number of lines in the editor.
+func (e *Editor) NumLines() int {
+	e.makeValid()
+	return len(e.lines)
 }
 
 func (s ChangeEvent) isEditorEvent() {}

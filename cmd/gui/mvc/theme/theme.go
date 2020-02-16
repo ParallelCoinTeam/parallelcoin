@@ -35,8 +35,12 @@ type DuoUItheme struct {
 	Font struct {
 		Primary, Secondary, Mono text.Typeface
 	}
-	TextSize unit.Value
-	Icons    map[string]*DuoUIicon
+	TextSize              unit.Value
+	checkBoxCheckedIcon   *DuoUIicon
+	checkBoxUncheckedIcon *DuoUIicon
+	radioCheckedIcon      *DuoUIicon
+	radioUncheckedIcon    *DuoUIicon
+	Icons                 map[string]*DuoUIicon
 }
 
 func NewDuoUItheme() *DuoUItheme {
@@ -78,7 +82,6 @@ func NewDuoUItheme() *DuoUItheme {
 	i["receiveIcon"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropDown))
 	i["addressBookIcon"] = mustIcon(NewDuoUIicon(icons.ActionBook))
 	i["historyIcon"] = mustIcon(NewDuoUIicon(icons.ActionHistory))
-
 
 	i["closeIcon"] = mustIcon(NewDuoUIicon(icons.NavigationClose))
 	i["settingsIcon"] = mustIcon(NewDuoUIicon(icons.ActionSettings))

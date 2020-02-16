@@ -10,7 +10,8 @@ import (
 
 	syscall "golang.org/x/sys/windows"
 
-	"github.com/p9c/pod/pkg/gui/app/internal/gl"
+	"github.com/p9c/pod/pkg/gui/app/internal/glimpl"
+	gunsafe "github.com/p9c/pod/pkg/gui/internal/unsafe"
 )
 
 type (
@@ -56,7 +57,7 @@ func loadDLLs() error {
 	if err := loadDLL(libEGL, "libEGL.dll"); err != nil {
 		return err
 	}
-	if err := loadDLL(gl.LibGLESv2, "libGLESv2.dll"); err != nil {
+	if err := loadDLL(glimpl.LibGLESv2, "libGLESv2.dll"); err != nil {
 		return err
 	}
 	// d3dcompiler_47.dll is needed internally for shader compilation to function.
@@ -156,7 +157,7 @@ func eglTerminate(disp _EGLDisplay) bool {
 
 func eglQueryString(disp _EGLDisplay, name _EGLint) string {
 	r, _, _ := _eglQueryString.Call(uintptr(disp), uintptr(name))
-	return gl.GoString(gl.SliceOf(r))
+	return gunsafe.GoString(gunsafe.SliceOf(r))
 }
 
 // issue34474KeepAlive calls runtime.KeepAlive as a

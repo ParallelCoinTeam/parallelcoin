@@ -46,10 +46,9 @@ func (ui *DuoUI) DuoUIsend() func() {
 									theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 									layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 										theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-										e := ui.ly.Theme.DuoUIeditor("DUO address", "DUO dva")
+										e := ui.ly.Theme.DuoUIeditor("DUO address")
 										e.Font.Typeface = ui.ly.Theme.Font.Primary
 										e.Font.Style = text.Italic
-										e.Font.Size = unit.Dp(24)
 										e.Layout(ui.ly.Context, addressLineEditor)
 										for _, e := range addressLineEditor.Events(ui.ly.Context) {
 											if e, ok := e.(controller.SubmitEvent); ok {
@@ -81,10 +80,9 @@ func (ui *DuoUI) DuoUIsend() func() {
 									theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 									layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 										theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-										e := ui.ly.Theme.DuoUIeditor("DUO Amount", "DUO dva")
+										e := ui.ly.Theme.DuoUIeditor("DUO Amount")
 										e.Font.Typeface = ui.ly.Theme.Font.Primary
 										e.Font.Style = text.Italic
-										e.Font.Size = unit.Dp(24)
 										e.Layout(ui.ly.Context, amountLineEditor)
 										for _, e := range amountLineEditor.Events(ui.ly.Context) {
 											if e, ok := e.(controller.SubmitEvent); ok {
@@ -119,10 +117,9 @@ func (ui *DuoUI) DuoUIsend() func() {
 									theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 									layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 										theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-										e := ui.ly.Theme.DuoUIeditor("DUO Amount", "DUO dva")
+										e := ui.ly.Theme.DuoUIeditor("DUO Amount")
 										e.Font.Typeface = ui.ly.Theme.Font.Primary
 										e.Font.Style = text.Italic
-										e.Font.Size = unit.Dp(24)
 										e.Layout(ui.ly.Context, passLineEditor)
 										for _, e := range passLineEditor.Events(ui.ly.Context) {
 											if e, ok := e.(controller.SubmitEvent); ok {

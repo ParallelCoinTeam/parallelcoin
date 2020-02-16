@@ -6,8 +6,9 @@ import (
 	"image"
 	"runtime"
 
-	"github.com/p9c/pod/pkg/gui/app/internal/gpu"
 	"github.com/p9c/pod/pkg/gui/app/internal/window"
+	"github.com/p9c/pod/pkg/gui/gpu"
+	"github.com/p9c/pod/pkg/gui/gpu/gl"
 	"github.com/p9c/pod/pkg/gui/op"
 )
 
@@ -26,13 +27,12 @@ type renderLoop struct {
 }
 
 type frame struct {
-	collectStats bool
-	viewport     image.Point
-	ops          *op.Ops
+	viewport image.Point
+	ops      *op.Ops
 }
 
 type frameResult struct {
-	summary string
+	profile string
 	err     error
 }
 
@@ -67,7 +67,12 @@ func (l *renderLoop) renderLoop(glctx window.Context) error {
 			initErr <- err
 			return
 		}
-		g, err := gpu.New(glctx.Functions())
+		ctx, err := gl.NewBackend(glctx.Functions())
+		if err != nil {
+			initErr <- err
+			return
+		}
+		g, err := gpu.New(ctx)
 		if err != nil {
 			initErr <- err
 			return
@@ -81,13 +86,14 @@ func (l *renderLoop) renderLoop(glctx window.Context) error {
 				l.refreshErr <- glctx.MakeCurrent()
 			case frame := <-l.frames:
 				glctx.Lock()
-				g.Collect(frame.collectStats, frame.viewport, frame.ops)
+				g.Collect(frame.viewport, frame.ops)
 				// Signal that we're done with the frame ops.
 				l.ack <- struct{}{}
-				g.Frame(frame.collectStats, frame.viewport)
+				g.BeginFrame()
 				var res frameResult
 				res.err = glctx.Present()
-				res.summary = g.EndFrame(frame.collectStats)
+				g.EndFrame()
+				res.profile = g.Profile()
 				glctx.Unlock()
 				l.results <- res
 			case <-l.stop:
@@ -110,8 +116,8 @@ func (l *renderLoop) Flush() error {
 	if l.drawing {
 		st := <-l.results
 		l.setErr(st.err)
-		if st.summary != "" {
-			l.summary = st.summary
+		if st.profile != "" {
+			l.summary = st.profile
 		}
 		l.drawing = false
 	}
@@ -134,13 +140,13 @@ func (l *renderLoop) Refresh() {
 
 // Draw initiates a draw of a frame. It returns a channel
 // than signals when the frame is no longer being accessed.
-func (l *renderLoop) Draw(profile bool, viewport image.Point, frameOps *op.Ops) <-chan struct{} {
+func (l *renderLoop) Draw(viewport image.Point, frameOps *op.Ops) <-chan struct{} {
 	if l.err != nil {
 		l.ack <- struct{}{}
 		return l.ack
 	}
 	l.Flush()
-	l.frames <- frame{profile, viewport, frameOps}
+	l.frames <- frame{viewport, frameOps}
 	l.drawing = true
 	return l.ack
 }

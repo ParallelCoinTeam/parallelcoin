@@ -130,12 +130,12 @@ func formatLayout(gtx *layout.Context, f *formatter, widgets []layout.Widget) {
 	fexpr := func() {
 		formatExpr(gtx, f, widgets)
 	}
-	align, ok := dirFor(name)
-	if ok {
-		layout.Align(align).Layout(gtx, fexpr)
-		expect(f, ")")
-		return
-	}
+	//align, ok := dirFor(name)
+	//if ok {
+	//	layout.Align(align).Layout(gtx, fexpr)
+	//	expect(f, ")")
+	//	return
+	//}
 	switch name {
 	case "inset":
 		in := parseInset(gtx, f, widgets)

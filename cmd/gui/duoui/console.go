@@ -2,6 +2,8 @@ package duoui
 
 import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/model"
+	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
@@ -38,8 +40,7 @@ func (ui *DuoUI) DuoUIconsole() func() {
 									layout.Rigid(func() {
 										sat := ui.ly.Theme.Body1("ds://" + t.ComID)
 										sat.Font.Typeface = ui.ly.Theme.Font.Mono
-										sat.Color = ui.ly.Theme.Color.Dark
-										sat.Font.Size = unit.Dp(16)
+										sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 										sat.Layout(ui.ly.Context)
 									}),
 								)
@@ -47,15 +48,14 @@ func (ui *DuoUI) DuoUIconsole() func() {
 						}),
 						layout.Rigid(func() {
 							layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
-								e := ui.ly.Theme.DuoUIeditor("Run command", "Run txt")
+								e := ui.ly.Theme.DuoUIeditor("Run command")
 								e.Font.Typeface = ui.ly.Theme.Font.Mono
-								e.Color = ui.ly.Theme.Color.Dark
+								e.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 								e.Font.Style = text.Regular
-								e.Font.Size = unit.Dp(16)
 								e.Layout(ui.ly.Context, consoleInputField)
 								for _, e := range consoleInputField.Events(ui.ly.Context) {
 									if e, ok := e.(controller.SubmitEvent); ok {
-										ui.rc.CommandsHistory.Commands = append(ui.rc.CommandsHistory.Commands, controller.Command{
+										ui.rc.CommandsHistory.Commands = append(ui.rc.CommandsHistory.Commands, model.DuoUIcommand{
 											ComID: e.Text,
 											Time:  time.Time{},
 										})
