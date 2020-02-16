@@ -79,6 +79,8 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		last.bits = fork.SecondPowLimitBits
 		last.version = algoVer
 	}
+	unsquared := adjustment
+	adjustment *= adjustment
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
@@ -106,7 +108,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 				an,
 				RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11),
 				newTargetBits,
-				RightJustify(fmt.Sprintf("%4.4f", adjustment*ttpb), 11),
+				RightJustify(fmt.Sprintf("%4.4f", unsquared*ttpb), 11),
 				ttpb, // fork.List[1].Algos[algoname].VersionInterval,
 			)
 		})
