@@ -49,6 +49,7 @@ type Controller struct {
 	ctx                    context.Context
 	cx                     *conte.Xt
 	mx                     *sync.Mutex
+	height                 *atomic.Value
 	blockTemplateGenerator *mining.BlkTmplGenerator
 	coinbases              map[int32]*util.Tx
 	transactions           []*util.Tx
@@ -95,6 +96,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		ctx:                    ctx,
 		cx:                     cx,
 		mx:                     &sync.Mutex{},
+		height:                 &atomic.Value{},
 		oldBlocks:              &atomic.Value{},
 		lastTxUpdate:           time.Now(),
 		lastGenerated:          time.Now(),
@@ -106,6 +108,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		coinbases:              make(map[int32]*util.Tx),
 		buffer:                 ring.New(BufferSize),
 	}
+	ctrl.height.Store(int32(0))
 	ctrl.active.Store(false)
 	buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
@@ -157,6 +160,8 @@ var handlers = transport.HandleFunc{
 			log.DEBUG("received solution")
 			// log.SPEW(ctx)
 			c := ctx.(*Controller)
+			c.mx.Lock()
+			defer c.mx.Unlock()
 			j := sol.LoadSolContainer(b)
 			msgBlock := j.GetMsgBlock()
 			// log.WARN(msgBlock.Header.Version)
@@ -180,6 +185,7 @@ var handlers = transport.HandleFunc{
 			err = c.conn.SendShards(c.pauseShards)
 			if err != nil {
 				log.ERROR(err)
+				return
 			}
 			block := util.NewBlock(msgBlock)
 			isOrphan, err := c.cx.RealNode.SyncManager.ProcessBlock(block,
@@ -190,13 +196,15 @@ var handlers = transport.HandleFunc{
 				if _, ok := err.(blockchain.RuleError); !ok {
 					log.WARNF(
 						"Unexpected error while processing block submitted"+
-							" via kopach miner:", err,
-					)
+							" via kopach miner:", err)
+					return
 				} else {
 					log.WARN("block submitted via kopach miner rejected:", err)
+					return
 				}
 				if isOrphan {
 					log.WARN("block is an orphan")
+					return
 				}
 				// maybe something wrong with the network,
 				// send current work again
@@ -391,6 +399,14 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 					// c.coinbases = msgB.Transactions
 					var mC job.Container
 					mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
+					nH := mC.GetNewHeight()
+					if c.height.Load().(int32) > nH {
+						log.DEBUG("new height")
+						c.height.Store(nH)
+					} else {
+						log.DEBUG("stale or orphan from being later, not sending out")
+						return
+					}
 					log.SPEW(c.coinbases)
 					// log.SPEW(mC.Data)
 					shards, err := c.conn.CreateShards(mC.Data, job.WorkMagic)
