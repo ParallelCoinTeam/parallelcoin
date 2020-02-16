@@ -7,6 +7,7 @@ require (
 	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/VividCortex/ewma v1.1.1
+	github.com/aarzilli/nucular v0.0.0-20191227141642-cca133278403
 	github.com/aead/siphash v1.0.1
 	github.com/aead/skein v0.0.0-20160722084837-9365ae6e95d2 // indirect
 	github.com/bitgoin/lyra2rev2 v0.0.0-20161212102046-bae9ad2043bb

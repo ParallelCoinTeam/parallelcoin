@@ -30,6 +30,8 @@ type HardForks struct {
 	TestnetStart       int32
 }
 
+const IntervalBase = 5
+
 var (
 	// AlgoVers is the lookup for pre hardfork
 	//
@@ -63,21 +65,21 @@ var (
 	// List is the list of existing hard forks and when they activate
 	List = []HardForks{
 		{
-			Number:           0,
-			Name:             "Halcyon days",
-			ActivationHeight: 0,
-			Algos:            Algos,
-			AlgoVers:         AlgoVers,
+			Number:             0,
+			Name:               "Halcyon days",
+			ActivationHeight:   0,
+			Algos:              Algos,
+			AlgoVers:           AlgoVers,
 			TargetTimePerBlock: 300,
 			AveragingInterval:  10, // 50 minutes
 			TestnetStart:       0,
 		},
 		{
-			Number:           1,
-			Name:             "Plan 9 from Crypto Space",
-			ActivationHeight: 250000,
-			Algos:            P9Algos,
-			AlgoVers:         P9AlgoVers,
+			Number:             1,
+			Name:               "Plan 9 from Crypto Space",
+			ActivationHeight:   250000,
+			Algos:              P9Algos,
+			AlgoVers:           P9AlgoVers,
 			TargetTimePerBlock: 36,
 			AveragingInterval:  3600,
 			TestnetStart:       1,
@@ -95,17 +97,18 @@ var (
 		12: "stribog",
 		13: "lyra2rev2",
 	}
+	
 	// P9Algos is the algorithm specifications after the hard fork
 	P9Algos = map[string]AlgoParams{
-		P9AlgoVers[5]:  {5, FirstPowLimitBits, 0, 3*3},        // 2
-		P9AlgoVers[6]:  {6, FirstPowLimitBits, 1, 5*3},        // 3
-		P9AlgoVers[7]:  {7, FirstPowLimitBits, 2, 11*3},       // 5
-		P9AlgoVers[8]:  {8, FirstPowLimitBits, 3, 17*3},       // 7
-		P9AlgoVers[9]:  {9, FirstPowLimitBits, 4, 31*3},       // 11
-		P9AlgoVers[10]: {10, FirstPowLimitBits, 5, 41*3},      // 13
-		P9AlgoVers[11]: {11, FirstPowLimitBits, 7, 59*3},      // 17
-		P9AlgoVers[12]: {12, FirstPowLimitBits, 6, 67*3},      // 19
-		P9AlgoVers[13]: {13, FirstPowLimitBits, 8, 83*3},  // 23
+		P9AlgoVers[5]:  {5, FirstPowLimitBits, 0, 3 * IntervalBase},   // 2
+		P9AlgoVers[6]:  {6, FirstPowLimitBits, 1, 5 * IntervalBase},   // 3
+		P9AlgoVers[7]:  {7, FirstPowLimitBits, 2, 11 * IntervalBase},  // 5
+		P9AlgoVers[8]:  {8, FirstPowLimitBits, 3, 17 * IntervalBase},  // 7
+		P9AlgoVers[9]:  {9, FirstPowLimitBits, 4, 31 * IntervalBase},  // 11
+		P9AlgoVers[10]: {10, FirstPowLimitBits, 5, 41 * IntervalBase}, // 13
+		P9AlgoVers[11]: {11, FirstPowLimitBits, 7, 59 * IntervalBase}, // 17
+		P9AlgoVers[12]: {12, FirstPowLimitBits, 6, 67 * IntervalBase}, // 19
+		P9AlgoVers[13]: {13, FirstPowLimitBits, 8, 83 * IntervalBase}, // 23
 	}
 	// SecondPowLimit is
 	SecondPowLimit = func() big.Int {

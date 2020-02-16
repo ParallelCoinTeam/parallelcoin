@@ -176,7 +176,7 @@ var handlers = transport.HandleFunc{
 			// log.SPEW(c.transactions)
 			if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
 				BestSnapshot().Hash) {
-				log.WARN("block submitted by kopach miner worker is stale")
+				log.DEBUG("block submitted by kopach miner worker is stale")
 				return
 			}
 			// set old blocks to pause and send pause directly as block is
