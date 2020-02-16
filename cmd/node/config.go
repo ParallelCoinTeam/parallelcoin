@@ -461,7 +461,7 @@ func loadConfig() (
 	switch cfg.Algo {
 	case "blake14lr", "cryptonight7v2", "keccak", "lyra2rev2", "scrypt", "skein", "x11", "stribog", "random", "easy":
 	default:
-		cfg.Algo = "sha256d"
+		cfg.Algo = fork.SHA256d
 	}
 	// Set the default policy for relaying non-standard transactions according to the default of the active network. The set configuration value takes precedence over the default value for the selected network.
 	relayNonStd := ActiveNetParams.RelayNonStdTxs

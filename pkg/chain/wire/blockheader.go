@@ -2,10 +2,12 @@ package wire
 
 import (
 	"bytes"
-	"github.com/p9c/pod/pkg/log"
 	"io"
 	"time"
-
+	
+	"github.com/p9c/pod/pkg/chain/forkhash"
+	"github.com/p9c/pod/pkg/log"
+	
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
@@ -51,7 +53,7 @@ func (h *BlockHeader) BlockHashWithAlgos(height int32) (out chainhash.Hash) {
 	}
 	vers := h.Version
 	algo := fork.GetAlgoName(vers, height)
-	out = fork.Hash(buf.Bytes(), algo, height)
+	out = forkhash.Hash(buf.Bytes(), algo, height)
 	// log.Printf("BlockHashWithAlgos %d %s %s %s\n", vers, algo, out)
 	return
 }

@@ -382,8 +382,8 @@ var HelpDescsEnUS = map[string]string{
 		" multiple of the minimum difficulty, according to the currently" +
 		" configured cpu mining algorithm.",
 	"getdifficulty-algo": "Defaults to the configured --algo for the" +
-		" CPU miner, can be set to sha256 or scrypt",
-	"getdifficulty--condition0": "algo=sha256d or scrypt",
+		" CPU miner, can be set to sha256 or Scrypt",
+	"getdifficulty--condition0": "algo=SHA256d or Scrypt",
 	"getdifficulty--result0":    "The difficulty of the requested algorithm",
 	// GetGenerateCmd help.
 	"getgenerate--synopsis": "Returns if the server is set to generate" +

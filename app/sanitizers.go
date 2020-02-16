@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 	
+	"github.com/p9c/pod/pkg/chain/forkhash"
 	"github.com/p9c/pod/pkg/controller/pause"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
@@ -650,7 +651,7 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 		// os.Exit(1)
 	}
 	if *cfg.MinerPass != "" {
-		state.ActiveMinerKey = fork.Argon2i([]byte(*cfg.MinerPass))
+		state.ActiveMinerKey = forkhash.Argon2i([]byte(*cfg.MinerPass))
 	}
 }
 

@@ -181,15 +181,14 @@ type GetMiningInfoResult struct {
 	PowAlgoID           uint32  `json:"pow_algo_id"`
 	PowAlgo             string  `json:"pow_algo"`
 	Difficulty          float64 `json:"difficulty"`
+	DifficultyArgon2i   float64 `json:"difficulty_argon2i"`
 	DifficultyBlake2b   float64 `json:"difficulty_blake2b"`
-	DifficultyBlake14lr float64 `json:"difficulty_blake14lr"`
-	DifficultyBlake2s   float64 `json:"difficulty_blake2s"`
 	DifficultyKeccak    float64 `json:"difficulty_keccak"`
+	DifficultyLyra2rev2 float64 `json:"difficulty_lyra2rev2"`
 	DifficultyScrypt    float64 `json:"difficulty_scrypt"`
 	DifficultySHA256D   float64 `json:"difficulty_sha256d"`
 	DifficultySkein     float64 `json:"difficulty_skein"`
 	DifficultyStribog   float64 `json:"difficulty_stribog"`
-	DifficultyX11       float64 `json:"difficulty_x11"`
 	Errors              string  `json:"errors"`
 	Generate            bool    `json:"generate"`
 	GenAlgo             string  `json:"genalgo"`
@@ -453,21 +452,21 @@ type (
 
 // HasWitness returns a bool to show if a Vin has any witness data associated with it or not.
 func (
-	v *Vin,
+v *Vin,
 ) HasWitness() bool {
 	return len(v.Witness) > 0
 }
 
 // IsCoinBase returns a bool to show if a Vin is a Coinbase one or not.
 func (
-	v *Vin,
+v *Vin,
 ) IsCoinBase() bool {
 	return len(v.Coinbase) > 0
 }
 
 // MarshalJSON provides a custom Marshal method for Vin.
 func (
-	v *Vin,
+v *Vin,
 ) MarshalJSON() ([]byte, error) {
 	if v.IsCoinBase() {
 		coinbaseStruct := struct {
@@ -513,21 +512,21 @@ func (
 
 // HasWitness returns a bool to show if a Vin has any witness data associated with it or not.
 func (
-	v *VinPrevOut,
+v *VinPrevOut,
 ) HasWitness() bool {
 	return len(v.Witness) > 0
 }
 
 // IsCoinBase returns a bool to show if a Vin is a Coinbase one or not.
 func (
-	v *VinPrevOut,
+v *VinPrevOut,
 ) IsCoinBase() bool {
 	return len(v.Coinbase) > 0
 }
 
 // MarshalJSON provides a custom Marshal method for VinPrevOut.
 func (
-	v *VinPrevOut,
+v *VinPrevOut,
 ) MarshalJSON() ([]byte, error) {
 	if v.IsCoinBase() {
 		coinbaseStruct := struct {

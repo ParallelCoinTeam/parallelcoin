@@ -145,7 +145,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
-	ticker := time.NewTicker(time.Second*fork.IntervalBase)
+	ticker := time.NewTicker(time.Second * fork.IntervalBase)
 	cont := true
 	for cont {
 		select {
@@ -290,7 +290,7 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
 		MiningAddrs))]
 	template, err := bTG.NewBlockTemplate(0, payToAddr,
-		"sha256d")
+		fork.SHA256d)
 	if err != nil {
 		log.ERROR(err)
 	}

@@ -25,6 +25,7 @@ import (
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	netsync "github.com/p9c/pod/pkg/chain/sync"
@@ -2825,7 +2826,7 @@ NewNode(listenAddrs []string, db database.DB, interruptChan <-chan struct{}, alg
 		// Setup listeners for the configured RPC listen addresses and
 		// TLS settings.
 		listeners := map[string][]string{
-			"sha256d": *cx.Config.RPCListeners,
+			fork.SHA256d: *cx.Config.RPCListeners,
 		}
 		for l := range listeners {
 			rpcListeners, err := SetupRPCListeners(cx.Config, listeners[l])

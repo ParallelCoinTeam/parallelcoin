@@ -10,6 +10,18 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
+const (
+	Argon2i   = "argon2i"
+	Blake2b   = "blake2b"
+	CN7v2     = "cn7v2"
+	Keccak    = "keccak"
+	Lyra2rev2 = "lyra2rev2"
+	Scrypt    = "scrypt"
+	SHA256d   = "sha256d"
+	Skein     = "skein"
+	Stribog   = "stribog"
+)
+
 // AlgoParams are the identifying block version number and their minimum target bits
 type AlgoParams struct {
 	Version         int32
@@ -36,8 +48,8 @@ var (
 	// AlgoVers is the lookup for pre hardfork
 	//
 	AlgoVers = map[int32]string{
-		2:   "sha256d",
-		514: "scrypt",
+		2:   SHA256d,
+		514: Scrypt,
 	}
 	// Algos are the specifications identifying the algorithm used in the
 	// block proof
@@ -87,15 +99,15 @@ var (
 	}
 	// P9AlgoVers is the lookup for after 1st hardfork
 	P9AlgoVers = map[int32]string{
-		5:  "blake2b",
-		6:  "argon2i",
-		7:  "cn7v2",
-		8:  "keccak",
-		9:  "scrypt",
-		10: "sha256d",
-		11: "skein",
-		12: "stribog",
-		13: "lyra2rev2",
+		5:  Blake2b,
+		6:  Argon2i,
+		7:  CN7v2,
+		8:  Keccak,
+		9:  Scrypt,
+		10: SHA256d,
+		11: Skein,
+		12: Stribog,
+		13: Lyra2rev2,
 	}
 	
 	// P9Algos is the algorithm specifications after the hard fork
@@ -142,7 +154,7 @@ func GetAlgoName(algoVer int32, height int32) (name string) {
 	var ok bool
 	name, ok = List[hf].AlgoVers[algoVer]
 	if hf < 1 && !ok {
-		name = "sha256d"
+		name = SHA256d
 	}
 	// INFO("GetAlgoName", algoVer, height, name}
 	return
@@ -158,7 +170,7 @@ func GetRandomVersion(height int32) int32 {
 // at a given height. If "random" is given, a random number is taken from the
 // system secure random source (for randomised cpu mining)
 func GetAlgoVer(name string, height int32) (version int32) {
-	n := "sha256d"
+	n := SHA256d
 	hf := GetCurrent(height)
 	// INFO("GetAlgoVer", name, height, hf}
 	if name == "random" {
