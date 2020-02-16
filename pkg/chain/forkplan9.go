@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	"time"
 	
 	"github.com/VividCortex/ewma"
 	
@@ -122,9 +121,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 // rules. This function differs from the exported  CalcNextRequiredDifficulty
 // in that the exported version uses the current best chain as the previous
 // block node while this function accepts any block node.
-func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(workerNumber uint32,
-	lastNode *BlockNode, newBlockTime time.Time, algoname string,
-	l bool) (newTargetBits uint32, adjustment float64, err error) {
+func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32, adjustment float64, err error) {
 	nH := lastNode.height + 1
 	newTargetBits = fork.SecondPowLimitBits
 	adjustment = 1.0
@@ -161,9 +158,8 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(workerNumber uint32,
 			an += strings.Repeat(" ", pad)
 		}
 		log.DEBUGC(func() string {
-			return fmt.Sprintf("wrkr: %s hght: %d %08x %s %s %s %s %s %s %s"+
+			return fmt.Sprintf("hght: %d %08x %s %s %s %s %s %s %s"+
 				" %s %s %08x",
-				RightJustify(fmt.Sprint(workerNumber), 3),
 				lastNode.height+1,
 				last.bits,
 				an,

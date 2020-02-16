@@ -162,7 +162,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 	var stopController context.CancelFunc
 	gracefulShutdown := func() {
 		log.INFO("gracefully shutting down the server...")
-		log.DEBUG("we would be stopping the cpu miner here")
+		log.DEBUG("we would be stopping the cpu miner here") // cpuminer
 		// server.CPUMiner.Stop()
 		if stopController != nil {
 			log.DEBUG("stopping controller")

@@ -145,13 +145,14 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
-	ticker := time.NewTicker(time.Second*5)
+	ticker := time.NewTicker(time.Second*fork.IntervalBase)
 	cont := true
 	for cont {
 		select {
 		case <-ticker.C:
 			hr, _ := cx.Hashrate.Load().(int)
-			log.INFOF("average hashrate since starting %0.3f hash/s", float64(hr)/time.Now().Sub(ctrl.began).Seconds())
+			total := time.Now().Sub(ctrl.began)
+			log.INFOF("%24d total hashes %0.3f hash/s", hr, float64(hr)/total.Seconds())
 		case <-ctx.Done():
 		case <-interrupt.HandlersDone:
 		}

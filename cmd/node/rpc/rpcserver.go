@@ -2857,7 +2857,7 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 // HandleGetGenerate implements the getgenerate command.
 func HandleGetGenerate(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (interface{}, error) {
-	log.DEBUG("not implemented")
+	log.DEBUG("not implemented") // cpuminer
 	return nil, nil
 	// return s.Cfg.CPUMiner.IsMining(), nil
 }
@@ -2866,7 +2866,7 @@ func HandleGetGenerate(s *Server, cmd interface{},
 func HandleGetHashesPerSec(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (interface{}, error) {
 	// return int64(s.Cfg.CPUMiner.HashesPerSecond()), nil
-	log.DEBUG("miner hashes per second - multicast thing")
+	log.DEBUG("miner hashes per second - multicast thing") // cpuminer
 	return int64(0), nil
 }
 

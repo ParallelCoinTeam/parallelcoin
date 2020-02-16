@@ -26,7 +26,7 @@ func
 func
 (r *RcVar) GetDuoUIhashesPerSec() {
 	// r.Status.Wallet.Hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
-	log.DEBUG("centralise hash function stuff here")
+	log.DEBUG("centralise hash function stuff here") // cpuminer
 	r.Status.Wallet.Hashes = r.cx.Hashrate.Load().(float64)
 	return
 }

@@ -440,7 +440,7 @@ func (s *Node) Start() {
 	}
 	// Start the CPU miner if generation is enabled.
 	if *s.Config.Generate {
-		log.DEBUG("not starting nonexistent currently cpu miner")
+		log.DEBUG("not starting nonexistent currently cpu miner") // cpuminer
 		// s.CPUMiner.Start()
 	}
 }
@@ -456,7 +456,7 @@ func (s *Node) Stop() error {
 	log.TRACE("node shutting down")
 	// Stop the CPU miner if needed
 	// s.CPUMiner.Stop()
-	log.DEBUG("we would be stopping the cpu miner here")
+	log.DEBUG("we would be stopping the cpu miner here") // cpuminer
 	// Shutdown the RPC server if it's not disabled.
 	if !*s.Config.DisableRPC {
 		for i := range s.RPCServers {
