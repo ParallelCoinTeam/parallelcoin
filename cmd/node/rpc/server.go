@@ -10,6 +10,7 @@ import (
 	"math"
 	"net"
 	"os"
+	"os/exec"
 	"runtime"
 	"sort"
 	"strconv"
@@ -115,19 +116,19 @@ type (
 	Node struct {
 		// The following variables must only be used atomically. Putting the
 		// uint64s first makes them 64-bit aligned for 32-bit systems.
-		BytesReceived uint64 // Total bytes received from all peers since start.
-		BytesSent     uint64 // Total bytes sent by all peers since start.
-		StartupTime   int64
-		ChainParams   *netparams.Params
-		AddrManager   *addrmgr.AddrManager
-		ConnManager   *connmgr.ConnManager
-		SigCache      *txscript.SigCache
-		HashCache     *txscript.HashCache
-		RPCServers    []*Server
-		SyncManager   *netsync.SyncManager
-		Chain         *blockchain.BlockChain
-		TxMemPool     *mempool.TxPool
-		// CPUMiner             *cpuminer.CPUMiner
+		BytesReceived        uint64 // Total bytes received from all peers since start.
+		BytesSent            uint64 // Total bytes sent by all peers since start.
+		StartupTime          int64
+		ChainParams          *netparams.Params
+		AddrManager          *addrmgr.AddrManager
+		ConnManager          *connmgr.ConnManager
+		SigCache             *txscript.SigCache
+		HashCache            *txscript.HashCache
+		RPCServers           []*Server
+		SyncManager          *netsync.SyncManager
+		Chain                *blockchain.BlockChain
+		TxMemPool            *mempool.TxPool
+		CPUMiner             *exec.Cmd
 		ModifyRebroadcastInv chan interface{}
 		NewPeers             chan *NodePeer
 		DonePeers            chan *NodePeer
@@ -441,8 +442,15 @@ func (s *Node) Start() {
 	}
 	// Start the CPU miner if generation is enabled.
 	if *s.Config.Generate {
-		log.DEBUG("not starting nonexistent currently cpu miner") // cpuminer
+		log.DEBUG("starting cpu miner") // cpuminer
+		s.CPUMiner = exec.Command(os.Args[0], "-D", *s.Config.DataDir,
+			"kopach")
+		s.CPUMiner.Stdin = os.Stdin
+		s.CPUMiner.Stdout = os.Stdout
+		s.CPUMiner.Stderr = os.Stderr
+		s.CPUMiner.Start()
 		// s.CPUMiner.Start()
+		
 	}
 }
 
@@ -457,7 +465,10 @@ func (s *Node) Stop() error {
 	log.TRACE("node shutting down")
 	// Stop the CPU miner if needed
 	// s.CPUMiner.Stop()
-	log.DEBUG("we would be stopping the cpu miner here") // cpuminer
+	if s.CPUMiner != nil {
+		log.DEBUG("stopping the cpu miner") // cpuminer
+		s.CPUMiner.Process.Kill()
+	}
 	// Shutdown the RPC server if it's not disabled.
 	if !*s.Config.DisableRPC {
 		for i := range s.RPCServers {

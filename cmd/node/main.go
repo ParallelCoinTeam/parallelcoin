@@ -152,6 +152,10 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 			}
 		}
 	}
+	// return now if an interrupt signal was triggered
+	if interrupt.Requested() {
+		return nil
+	}
 	// create server and start it
 	server, err := rpc.NewNode(*cx.Config.Listeners, db, interrupt.ShutdownRequestChan, *cx.Config.Algo, conte.GetContext(cx))
 	if err != nil {
@@ -162,7 +166,6 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 	var stopController context.CancelFunc
 	gracefulShutdown := func() {
 		log.INFO("gracefully shutting down the server...")
-		log.DEBUG("we would be stopping the cpu miner here") // cpuminer
 		// server.CPUMiner.Stop()
 		if stopController != nil {
 			log.DEBUG("stopping controller")

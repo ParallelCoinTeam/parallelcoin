@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	MaxLogLogLength = 16384
-	HighWaterMark = 24000
+	// MaxLogLength is a var so it can be changed dynamically
+	MaxLogLength = 16384
 )
 
 func (r *RcVar) DuoUIloggerController() {
@@ -19,10 +19,10 @@ func (r *RcVar) DuoUIloggerController() {
 			select {
 			case n := <-log.L.LogChan:
 				r.Log.LogMessages = append(r.Log.LogMessages, n)
-				// If log length exceeds high water mark, trim it back to MaxLogLength
+				// Once length exceeds MaxLogLength we trim off the start to keep it the same size
 				ll := len(r.Log.LogMessages)
-				if ll > HighWaterMark {
-					r.Log.LogMessages = r.Log.LogMessages[ll-MaxLogLogLength:]
+				if ll > MaxLogLength {
+					r.Log.LogMessages = r.Log.LogMessages[ll-MaxLogLength:]
 				}
 			case <-r.Log.StopLogger:
 				defer func() {
