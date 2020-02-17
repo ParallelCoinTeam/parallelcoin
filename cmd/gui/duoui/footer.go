@@ -101,10 +101,20 @@ func (ui *DuoUI) DuoUIfooter() func() {
 						//	})
 						//},
 
+						//func() {
+						//	layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+						//		var networkMeniItem theme.DuoUIbutton
+						//		networkMeniItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "Connections: "+fmt.Sprint(ui.rc.Status.Node.ConnectionCount), "ffcfcfcf", "", "", "", iconSize, 80, height, paddingVertical, 0)
+						//		for buttonNetwork.Clicked(ui.ly.Context) {
+						//			//ui.rc.ShowPage = "NETWORK"
+						//		}
+						//		networkMeniItem.Layout(ui.ly.Context, buttonNetwork)
+						//	})
+						//},
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
-								var networkMeniItem theme.DuoUIbutton
-								networkMeniItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "Connections: "+fmt.Sprint(ui.rc.Status.Node.ConnectionCount), "ffcfcfcf", "", "", "", iconSize, 80, height, paddingVertical, 0)
+								var networkMeniItem theme.Button
+								networkMeniItem = ui.ly.Theme.Button("Connections: " + fmt.Sprint(ui.rc.Status.Node.ConnectionCount))
 								for buttonNetwork.Clicked(ui.ly.Context) {
 									//ui.rc.ShowPage = "NETWORK"
 								}

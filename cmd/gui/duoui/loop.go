@@ -26,7 +26,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					select {
 					case <-updateTrigger:
 						log.DEBUG("repaint forced")
-						ui.ly.Window.Invalidate()
+						//ui.ly.Window.Invalidate()
 					case <-ui.ly.Quit:
 						break quitTrigger
 					}

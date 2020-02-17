@@ -19,7 +19,7 @@ type Event struct {
 
 var EventsChan = make(chan Event, 1)
 
-func (r *RcVar)ListenInit(trigger chan struct{}){
+func (r *RcVar) ListenInit(trigger chan struct{}) {
 	r.Events = EventsChan
 	r.UpdateTrigger = trigger
 	// first time starting up get all of these and trigger update
@@ -38,21 +38,21 @@ func (r *RcVar)ListenInit(trigger chan struct{}){
 	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted:
-			r.GetDuoUIbalance()
-			r.GetDuoUIunconfirmedBalance()
-			r.GetDuoUItransactionsNumber()
-			r.GetTransactions()
-			r.GetLatestTransactions()
+			go r.GetDuoUIbalance()
+			go r.GetDuoUIunconfirmedBalance()
+			go r.GetDuoUItransactionsNumber()
+			go r.GetTransactions()
+			go r.GetLatestTransactions()
 			//r.GetDuoUIstatus()
 			//r.GetDuoUIlocalLost()
-			r.GetDuoUIblockHeight()
-			r.GetDuoUIdifficulty()
-			r.GetDuoUIconnectionCount()
+			go r.GetDuoUIblockHeight()
+			go r.GetDuoUIdifficulty()
+			go r.GetDuoUIconnectionCount()
 			r.UpdateTrigger <- struct{}{}
-			r.toastAdd("New block: " + fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
+			go r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
 		}
 		r.UpdateTrigger <- struct{}{}
 	})
-	
+
 	return
 }

@@ -38,6 +38,9 @@ type IconButton struct {
 
 func (t *DuoUItheme) Button(txt string) Button {
 	return Button{
+		Font: text.Font{
+			Typeface: t.Font.Primary,
+		},
 		Text:       txt,
 		Color:      rgb(0xffffff),
 		Background: HexARGB(t.Color.Primary),
