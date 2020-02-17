@@ -16,6 +16,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -25,6 +26,7 @@ import (
 	
 	"github.com/btcsuite/websocket"
 	
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
@@ -160,7 +162,8 @@ type ServerConfig struct {
 	// Algo sets the algorithm expected from the RPC endpoint. This allows
 	// multiple ports to serve multiple types of miners with one main node per
 	// algorithm. Currently 514 for Scrypt and anything else passes for SHA256d.
-	Algo string
+	Algo     string
+	CPUMiner *exec.Cmd
 }
 
 // ServerConnManager represents a connection manager for use with the RPC
@@ -2852,9 +2855,15 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 
 // HandleGetGenerate implements the getgenerate command.
 func HandleGetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
-	log.DEBUG("not implemented")
-	return nil, nil
+	generating := s.Cfg.CPUMiner != nil
+	if generating {
+		log.DEBUG("miner is running internally")
+	} else {
+		log.DEBUG("miner is not running")
+	}
+	// return nil, nil
 	// return s.Cfg.CPUMiner.IsMining(), nil
+	return s.Cfg.CPUMiner != nil, nil
 }
 
 // HandleGetHashesPerSec implements the gethashespersec command.
@@ -4120,20 +4129,20 @@ func HandleSendRawTransaction(s *Server, cmd interface{},
 
 // HandleSetGenerate implements the setgenerate command.
 func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
-	// c := cmd.(*btcjson.SetGenerateCmd)
+	c := cmd.(*btcjson.SetGenerateCmd)
 	// Disable generation regardless of the provided generate flag if the
 	// maximum number of threads (goroutines for our purposes) is 0. Otherwise
 	// enable or disable it depending on the provided flag.
 	// l.Error(*c.GenProcLimit, c.Generate)
-	
-	// generate := c.Generate
-	// genProcLimit := -1
-	// if c.GenProcLimit != nil {
-	// 	genProcLimit = *c.GenProcLimit
-	// }
-	// if genProcLimit == 0 {
-	// 	generate = false
-	// }
+	generate := c.Generate
+	genProcLimit := *s.Config.GenThreads
+	if c.GenProcLimit != nil {
+		genProcLimit = *c.GenProcLimit
+	}
+	if genProcLimit == 0 {
+		generate = false
+	}
+	log.DEBUG("generating", generate, "threads", genProcLimit)
 	// if s.Cfg.CPUMiner.IsMining() {
 	// 	// if s.cfg.CPUMiner.GetAlgo() != s.cfg.Algo {
 	// 	s.Cfg.CPUMiner.Stop()
@@ -4155,7 +4164,22 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 	// 	s.Cfg.CPUMiner.SetNumWorkers(int32(genProcLimit))
 	// 	s.Cfg.CPUMiner.Start()
 	// }
-	log.DEBUG("setgenerate not implemented")
+	if s.Cfg.CPUMiner != nil {
+		s.Cfg.CPUMiner.Process.Kill()
+	}
+	*s.Config.Generate = generate
+	*s.Config.GenThreads = genProcLimit
+	save.Pod(s.Config)
+	if generate {
+		s.Cfg.CPUMiner = exec.Command(os.Args[0], "-D", *s.Config.DataDir,
+			"kopach")
+		s.Cfg.CPUMiner.Stdin = os.Stdin
+		s.Cfg.CPUMiner.Stdout = os.Stdout
+		s.Cfg.CPUMiner.Stderr = os.Stderr
+		s.Cfg.CPUMiner.Start()
+	} else {
+		s.Cfg.CPUMiner = nil
+	}
 	return nil, nil
 }
 

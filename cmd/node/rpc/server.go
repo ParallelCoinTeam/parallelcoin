@@ -464,11 +464,11 @@ func (s *Node) Stop() error {
 	}
 	log.TRACE("node shutting down")
 	// Stop the CPU miner if needed
-	// s.CPUMiner.Stop()
 	if s.CPUMiner != nil {
 		log.DEBUG("stopping the cpu miner") // cpuminer
 		s.CPUMiner.Process.Kill()
 	}
+	
 	// Shutdown the RPC server if it's not disabled.
 	if !*s.Config.DisableRPC {
 		for i := range s.RPCServers {
@@ -2860,7 +2860,7 @@ NewNode(listenAddrs []string, db database.DB, interruptChan <-chan struct{}, alg
 				DB:          db,
 				TxMemPool:   s.TxMemPool,
 				// Generator:    blockTemplateGenerator,
-				// CPUMiner:     s.CPUMiner,
+				CPUMiner:     s.CPUMiner,
 				TxIndex:      s.TxIndex,
 				AddrIndex:    s.AddrIndex,
 				CfIndex:      s.CFIndex,
