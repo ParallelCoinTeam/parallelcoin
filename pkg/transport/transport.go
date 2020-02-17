@@ -37,7 +37,7 @@ type MsgBuffer struct {
 type Connection struct {
 	maxDatagramSize int
 	buffers         map[string]*MsgBuffer
-	sendAddress     *net.UDPAddr
+	sendAddress     []*net.UDPAddr
 	SendConn        []*net.UDPConn
 	listenAddress   *net.UDPAddr
 	listenConn      net.PacketConn
@@ -50,12 +50,12 @@ type Connection struct {
 // connection and listener and pre shared key password for encryption on the
 // local network
 func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx context.Context, multicast bool) (c *Connection, err error) {
-	var sendAddr *net.UDPAddr
+	var sendAddr []*net.UDPAddr
 	sendConn := []*net.UDPConn{}
 	var sC *net.UDPConn
 	var listenAddr *net.UDPAddr
 	var listenConn net.PacketConn
-	var mcInterface net.Interface
+	var mcInterface []net.Interface
 	var ifi []net.Interface
 	ifi, err = net.Interfaces()
 	if err != nil {
@@ -66,8 +66,7 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 		if ifi[i].Flags&net.FlagMulticast != 0 &&
 			ifi[i].HardwareAddr != nil &&
 			ad != nil {
-			mcInterface = ifi[i]
-			break
+			mcInterface = append(mcInterface, ifi[i])
 		}
 	}
 	if listen != "" {
@@ -78,14 +77,17 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 				log.ERROR(err)
 			}
 			pc := ipv4.NewPacketConn(conn)
-			err = pc.JoinGroup(&mcInterface, &net.UDPAddr{IP: net.IPv4(
-				224, 0, 0, 1)})
-			if err != nil {
-				log.ERROR(err)
-				err = conn.Close()
+			for i := range mcInterface {
+				
+				err = pc.JoinGroup(&mcInterface[i], &net.UDPAddr{IP: net.IPv4(
+					224, 0, 0, 1)})
 				if err != nil {
 					log.ERROR(err)
-					return
+					err = conn.Close()
+					if err != nil {
+						log.ERROR(err)
+						return
+					}
 				}
 			}
 			listenConn = conn
@@ -100,31 +102,33 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 		}
 	}
 	if send != "" {
-		mI, _ := mcInterface.Addrs()
-		log.SPEW(mI)
-		var listenWithoutEveryInterface string
-		for i := range mI {
-			_ = mI[i]
-			log.DEBUG("ADDRESSS", mI[i])
-			a := strings.Split(mI[i].String(), "/")[0]
-			if strings.Count(a, ":") == 0 {
-				listenWithoutEveryInterface = net.JoinHostPort(a, "0")
+		for i := range mcInterface {
+			mI, _ := mcInterface[i].Addrs()
+			log.SPEW(mI)
+			var listenWithoutEveryInterface string
+			for i := range mI {
+				_ = mI[i]
+				log.DEBUG("ADDRESSS", mI[i])
+				a := strings.Split(mI[i].String(), "/")[0]
+				if strings.Count(a, ":") == 0 {
+					listenWithoutEveryInterface = net.JoinHostPort(a, "0")
+				}
 			}
+			log.DEBUG(listenWithoutEveryInterface)
+			var laddr *net.UDPAddr
+			laddr, err = net.ResolveUDPAddr("udp", listenWithoutEveryInterface)
+			if err != nil {
+				log.ERROR(err)
+				return
+			}
+			sendAddr = append(sendAddr, GetUDPAddr(send))
+			sC, err = net.DialUDP("udp", laddr, sendAddr[len(sendAddr)-1])
+			if err != nil {
+				log.ERROR(err)
+				return
+			}
+			sendConn = append(sendConn, sC)
 		}
-		log.DEBUG(listenWithoutEveryInterface)
-		var laddr *net.UDPAddr
-		laddr, err = net.ResolveUDPAddr("udp", listenWithoutEveryInterface)
-		if err != nil {
-			log.ERROR(err)
-			return
-		}
-		sendAddr = GetUDPAddr(send)
-		sC, err = net.DialUDP("udp", laddr, sendAddr)
-		if err != nil {
-			log.ERROR(err)
-			return
-		}
-		sendConn = append(sendConn, sC)
 	}
 	ciph := gcm.GetCipher(preSharedKey)
 	return &Connection{
@@ -260,7 +264,7 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 			n, src, err := c.listenConn.ReadFrom(buffer)
 			buf := buffer[:n]
 			if err != nil {
-				//log.ERROR("ReadFromUDP failed:", err)
+				// log.ERROR("ReadFromUDP failed:", err)
 				continue
 			}
 			magic := string(buf[:4])

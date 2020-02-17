@@ -4143,10 +4143,12 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 	genProcLimit := *s.Config.GenThreads
 	if c.GenProcLimit != nil {
 		genProcLimit = *c.GenProcLimit
-		*s.Config.GenThreads = genProcLimit
-	}
-	if genProcLimit == 0 {
-		generate = false
+		if !generate {
+			*c.GenProcLimit = 0
+		}
+		if *c.GenProcLimit == 0 {
+			generate = false
+		}
 	}
 	log.DEBUG("generating", generate, "threads", genProcLimit)
 	// if s.Cfg.CPUMiner.IsMining() {
