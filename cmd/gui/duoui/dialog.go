@@ -22,6 +22,7 @@ var (
 func (ui *DuoUI) DuoUIdialog() {
 	cs := ui.ly.Context.Constraints
 	theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, "ee000000", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	layout.Center.Layout(ui.ly.Context, func() {
 		//cs := ui.ly.Context.Constraints
 		theme.DuoUIdrawRectangle(ui.ly.Context, 408, 150, ui.ly.Theme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		
@@ -35,7 +36,7 @@ func (ui *DuoUI) DuoUIdialog() {
 					Alignment: layout.Middle,
 				}.Layout(ui.ly.Context,
 					layout.Rigid(func() {
-
+						layout.Center.Layout(ui.ly.Context, func() {
 							layout.Inset{Top: unit.Dp(24), Bottom: unit.Dp(8), Left: unit.Dp(0), Right: unit.Dp(4)}.Layout(ui.ly.Context, func() {
 								cur := ui.ly.Theme.H4(ui.rc.Dialog.Text)
 								cur.Font.Typeface = "bariol"
@@ -43,6 +44,7 @@ func (ui *DuoUI) DuoUIdialog() {
 								cur.Alignment = text.Start
 								cur.Layout(ui.ly.Context)
 							})
+						})
 					}),
 				)
 			}),
@@ -57,7 +59,7 @@ func (ui *DuoUI) DuoUIdialog() {
 				)
 			}),
 		)
-
+	})
 }
 
 func (ui *DuoUI) dialogButon(f func(), t, bgColor, icon, iconColor string, button *controller.Button) func() {

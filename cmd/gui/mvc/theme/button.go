@@ -17,6 +17,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/unit"
 )
 
+
 type Button struct {
 	Text string
 	// Color is the text color.
@@ -164,6 +165,9 @@ func drawInk(gtx *layout.Context, c controller.Click) {
 	op.InvalidateOp{}.Add(gtx.Ops)
 }
 
+
+
+
 var (
 	buttonInsideLayoutList = &layout.List{
 		Axis: layout.Vertical,
@@ -175,7 +179,7 @@ type DuoUIbutton struct {
 	// Color is the text color.
 	TxColor           color.RGBA
 	Font              text.Font
-	TextSize          unit.Value
+	TextSize     unit.Value
 	Width             float32
 	Height            float32
 	BgColor           color.RGBA
@@ -189,7 +193,7 @@ type DuoUIbutton struct {
 	hover             bool
 }
 
-func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, icon, iconColor string, iconSize int, width, height, paddingVertical, paddingHorizontal float32) DuoUIbutton {
+func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface,txt, txtColor, bgColor, icon,iconColor string, iconSize int, width, height, paddingVertical, paddingHorizontal float32) DuoUIbutton {
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
@@ -229,27 +233,37 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 			gtx.Constraints.Width.Min = int(b.Width)
 			gtx.Constraints.Height.Min = int(b.Height)
 
-			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-				if b.Icon != nil {
+			layout.Center.Layout(gtx, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 					if b.Icon != nil {
-						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-							b.Icon.Color = b.IconColor
-							b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
+						layout.Center.Layout(gtx, func() {
+							if b.Icon != nil {
+								layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+									b.Icon.Color = b.IconColor
+									b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
+								})
+							}
+							gtx.Dimensions = layout.Dimensions{
+								Size: image.Point{X: b.IconSize, Y: b.IconSize},
+							}
 						})
 					}
-					gtx.Dimensions = layout.Dimensions{
-						Size: image.Point{X: b.IconSize, Y: b.IconSize},
-					}
-				}
+				})
 			})
 
-			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-				if b.Text != "" {
-					paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
-					controller.Label{
-						Alignment: text.Middle,
-					}.Layout(gtx, b.shaper, b.Font, unit.Dp(20), b.Text)
-				}
+			layout.Center.Layout(gtx, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+					layout.Center.Layout(gtx, func() {
+						if b.Text != "" {
+							layout.Center.Layout(gtx, func() {
+								layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(10), Left: unit.Dp(12), Right: unit.Dp(12)}.Layout(gtx, func() {
+									paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
+									controller.Label{}.Layout(gtx, b.shaper, b.Font, b.TextSize, b.Text)
+								})
+							})
+						}
+					})
+				})
 			})
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
 			button.Layout(gtx)
