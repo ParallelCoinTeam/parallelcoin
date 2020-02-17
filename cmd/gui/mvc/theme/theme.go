@@ -66,10 +66,15 @@ func NewDuoUItheme() *DuoUItheme {
 	t.TextSize = unit.Sp(16)
 
 	i := make(map[string]*DuoUIicon)
-	i["checkBoxCheckedIcon"] = mustIcon(NewDuoUIicon(icons.ToggleCheckBox))
-	i["checkBoxUncheckedIcon"] = mustIcon(NewDuoUIicon(icons.ToggleCheckBoxOutlineBlank))
-	i["radioCheckedIcon"] = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonChecked))
-	i["radioUncheckedIcon"] = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonUnchecked))
+	t.checkBoxCheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleCheckBox))
+	t.checkBoxUncheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleCheckBoxOutlineBlank))
+	t.radioCheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonChecked))
+	t.radioUncheckedIcon = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonUnchecked))
+
+	//i["checkBoxCheckedIcon"] = mustIcon(NewDuoUIicon(icons.ToggleCheckBox))
+	//i["checkBoxUncheckedIcon"] = mustIcon(NewDuoUIicon(icons.ToggleCheckBoxOutlineBlank))
+	//i["radioCheckedIcon"] = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonChecked))
+	//i["radioUncheckedIcon"] = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonUnchecked))
 
 	i["iconCancel"] = mustIcon(NewDuoUIicon(icons.NavigationCancel))
 	i["iconOK"] = mustIcon(NewDuoUIicon(icons.NavigationCheck))

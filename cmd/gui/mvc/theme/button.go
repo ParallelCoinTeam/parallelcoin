@@ -209,7 +209,6 @@ func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, 
 }
 
 func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
-
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
 			rr := float32(gtx.Px(unit.Dp(0)))
@@ -228,8 +227,8 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 		layout.Stacked(func() {
 			gtx.Constraints.Width.Min = int(b.Width)
 			gtx.Constraints.Height.Min = int(b.Height)
+			layout.Center.Layout(gtx, func() {
 
-			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 				if b.Icon != nil {
 					if b.Icon != nil {
 						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
@@ -241,9 +240,7 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 						Size: image.Point{X: b.IconSize, Y: b.IconSize},
 					}
 				}
-			})
 
-			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 				if b.Text != "" {
 					paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
 					controller.Label{
