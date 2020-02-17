@@ -2,6 +2,8 @@ package duoui
 
 import (
 	"fmt"
+	"time"
+	
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/gui/layout"
 	"github.com/p9c/pod/pkg/gui/op"
@@ -15,18 +17,20 @@ var (
 	}
 )
 
+var StartupTime = time.Now()
+
 func (ui *DuoUI) DuoUIlogger() func() {
 	return func() {
-		//const buflen = 9
+		// const buflen = 9
 		layout.UniformInset(unit.Dp(10)).Layout(ui.ly.Context, func() {
-			//const n = 1e6
+			// const n = 1e6
 			cs := ui.ly.Context.Constraints
 			theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			logOutputList.Layout(ui.ly.Context, len(ui.rc.Log.LogMessages), func(i int) {
 				t := ui.rc.Log.LogMessages[i]
-				logText := ui.ly.Theme.Caption(fmt.Sprint(i) + "->" + fmt.Sprint(t.Text))
+				logText := ui.ly.Theme.Caption(fmt.Sprint(t.Time.Sub(StartupTime)/time.Second*time.Second) + "->" + fmt.Sprint(t.Text))
 				logText.Font.Typeface = ui.ly.Theme.Font.Mono
-
+				
 				logText.Color = theme.HexARGB(ui.ly.Theme.Color.Primary)
 				if t.Level == "TRC" {
 					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Success)
@@ -46,12 +50,11 @@ func (ui *DuoUI) DuoUIlogger() func() {
 				if t.Level == "FTL" {
 					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Primary)
 				}
-
+				
 				logText.Layout(ui.ly.Context)
 				op.InvalidateOp{}.Add(ui.ly.Context.Ops)
-
+				
 			})
 		})
 	}
 }
-

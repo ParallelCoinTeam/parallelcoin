@@ -211,6 +211,7 @@ func NewWithConnAndSemaphore(
 // loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
 func New(s sem.T) (w *Worker, conn net.Conn) {
+	log.L.SetLevel("debug", true)
 	quit := make(chan struct{})
 	conn = stdconn.New(os.Stdin, os.Stdout, quit)
 	return NewWithConnAndSemaphore(
@@ -226,7 +227,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
 	log.DEBUG("loading dispatch connection from job message")
-	log.TRACE(job.String())
+	log.DEBUG(job.String())
 	// if there is no dispatch connection, make one.
 	// If there is one but the server died or was disconnected the
 	// connection the existing dispatch connection is nilled and this
