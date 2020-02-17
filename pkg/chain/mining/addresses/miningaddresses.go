@@ -15,7 +15,7 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	// we make the list up to 1000 so the user does not have to attend to
 	// this too often
 	miningAddressLen := len(*cfg.MiningAddrs)
-	toMake := 100 - miningAddressLen
+	toMake := 999 - miningAddressLen
 	if toMake < 3 {
 		return
 	}

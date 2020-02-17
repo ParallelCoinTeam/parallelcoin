@@ -3303,8 +3303,8 @@ func HandleGetNetTotals(s *Server, cmd interface{},
 }
 
 // HandleGetNetworkHashPS implements the getnetworkhashps command. This command
-// does not default to the same end block as the parallelcoind. TODO: Really
-// this needs to be expanded to show per-algorithm hashrates
+// does not default to the same end block as the parallelcoind.
+// TODO: Really this needs to be expanded to show per-algorithm hashrates
 func HandleGetNetworkHashPS(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (interface{}, error) {
 	// Note: All valid error return paths should return an int64. Literal zeros
@@ -4119,8 +4119,7 @@ func HandleSendRawTransaction(s *Server, cmd interface{},
 }
 
 // HandleSetGenerate implements the setgenerate command.
-func HandleSetGenerate(s *Server, cmd interface{},
-	closeChan <-chan struct{}) (interface{}, error) {
+func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
 	// c := cmd.(*btcjson.SetGenerateCmd)
 	// Disable generation regardless of the provided generate flag if the
 	// maximum number of threads (goroutines for our purposes) is 0. Otherwise

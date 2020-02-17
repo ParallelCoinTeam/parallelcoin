@@ -17,9 +17,14 @@ import (
 )
 
 const (
-	// The Bitcoin protocol encodes block height as int32, so max number of blocks is 2^31.  Max block size per the protocol is 32MiB per block. So the theoretical max at the time this comment was written is 64PiB (pebibytes).  With files @ 512MiB each, this would require a maximum of 134,217,728 files.  Thus, choose 9 digits of precision for the filenames.  An additional benefit is 9 digits provides 10^9 files @ 512MiB each for a total of ~476.84PiB (roughly 7.4 times the current theoretical max), so there is room for the max block size to grow in the future.
+	// The Bitcoin protocol encodes block height as int32, so max number of blocks is 2^31.  Max block size per the
+	// protocol is 32MiB per block. So the theoretical max at the time this comment was written is 64PiB (pebibytes).
+	// With files @ 512MiB each, this would require a maximum of 134,217,728 files.  Thus, choose 9 digits of precision
+	// for the filenames.  An additional benefit is 9 digits provides 10^9 files @ 512MiB each for a total of ~476.84PiB
+	// (roughly 7.4 times the current theoretical max), so there is room for the max block size to grow in the future.
 	blockFilenameTemplate = "%09d.fdb"
-	// maxOpenFiles is the max number of open files to maintain in the open blocks cache.  Note that this does not include the current write file, so there will typically be one more than this value open.
+	// maxOpenFiles is the max number of open files to maintain in the open blocks cache.  Note that this does not include
+	// the current write file, so there will typically be one more than this value open.
 	maxOpenFiles = 25
 	// maxBlockFileSize is the maximum size for each file used to store blocks.
 	// NOTE: The current code uses uint32 for all offsets,

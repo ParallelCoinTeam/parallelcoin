@@ -264,18 +264,6 @@ func trimReturn(s string) string {
 	return s
 }
 
-// RightJustify takes a string and right justifies it by a width or crops it
-func rightJustify(s string, w int) string {
-	sw := len(s)
-	diff := w - sw
-	if diff > 0 {
-		s = strings.Repeat(" ", diff) + s
-	} else if diff < 0 {
-		s = s[:w]
-	}
-	return s
-}
-
 func Composite(text, level string, color bool) string {
 	terminalWidth := gt.Width()
 	if terminalWidth < 120 {
@@ -292,12 +280,11 @@ func Composite(text, level string, color bool) string {
 	if len(files) > 1 {
 		file = files[1]
 	}
-	sinceS := fmt.Sprint(time.Now().Sub(StartupTime) / time.Second * time.Second)
 	sinceW := 12
 	if level == "STATUS" {
 		sinceW = 9
 	}
-	since := rightJustify(sinceS, sinceW)
+	since := fmt.Sprintf("%-"+fmt.Sprint(sinceW)+"s", time.Now().Sub(StartupTime)/time.Second*time.Second)
 	if terminalWidth > 200 {
 		since = fmt.Sprint(time.Now())[:25]
 	}
