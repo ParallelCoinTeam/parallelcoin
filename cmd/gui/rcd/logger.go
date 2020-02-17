@@ -4,6 +4,11 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
+var (
+	MaxLogLogLength = 16384
+	HighWaterMark = 24000
+)
+
 func (r *RcVar) DuoUIloggerController() {
 	log.L.LogChan = make(chan log.Entry)
 	r.Log.LogChan = log.L.LogChan
@@ -14,6 +19,11 @@ func (r *RcVar) DuoUIloggerController() {
 			select {
 			case n := <-log.L.LogChan:
 				r.Log.LogMessages = append(r.Log.LogMessages, n)
+				// If log length exceeds high water mark, trim it back to MaxLogLength
+				ll := len(r.Log.LogMessages)
+				if ll > HighWaterMark {
+					r.Log.LogMessages = r.Log.LogMessages[ll-MaxLogLogLength:]
+				}
 			case <-r.Log.StopLogger:
 				defer func() {
 					r.Log.StopLogger = make(chan struct{})
