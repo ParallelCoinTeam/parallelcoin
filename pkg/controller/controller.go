@@ -152,7 +152,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		case <-ticker.C:
 			hr, _ := cx.Hashrate.Load().(int)
 			total := time.Now().Sub(ctrl.began)
-			log.INFOF("%24d total hashes %0.3f hash/s", hr, float64(hr)/total.Seconds())
+			log.INFOF("%0.3f hash/s %24d total hashes", float64(hr)/total.Seconds(), hr)
 		case <-ctx.Done():
 		case <-interrupt.HandlersDone:
 		}
@@ -163,8 +163,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 }
 
 // these are the handlers for specific message types.
-// Controller only listens for submissions (currently)
 var handlers = transport.HandleFunc{
+	// Solutions submitted by workers
 	string(sol.SolutionMagic): func(ctx interface{}) func(b []byte) (err error) {
 		return func(b []byte) (err error) {
 			log.DEBUG("received solution")
@@ -242,6 +242,7 @@ var handlers = transport.HandleFunc{
 			return
 		}
 	},
+	// hashrate reports from workers
 	string(hashrate.HashrateMagic): func(ctx interface{}) func(b []byte) (err error) {
 		return func(b []byte) (err error) {
 			c := ctx.(*Controller)
