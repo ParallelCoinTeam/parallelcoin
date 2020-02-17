@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"errors"
+	
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/io/system"
@@ -15,7 +16,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 		ly: d,
 		rc: r,
 	}
-	//ui.ly.Pages = ui.LoadPages()
+	// ui.ly.Pages = ui.LoadPages()
 	for {
 		select {
 		case <-ui.ly.Ready:
@@ -36,7 +37,9 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			ui.ly.IsReady = true
 		case <-ui.ly.Quit:
 			log.DEBUG("quit signal received")
-			interrupt.Request()
+			if !interrupt.Requested() {
+				interrupt.Request()
+			}
 			// This case is for handling when some external application is controlling the GUI and to gracefully
 			// handle the back-end servers being shut down by the interrupt library receiving an interrupt signal
 			// Probably nothing needs to be run between starting it and shutting down
@@ -57,16 +60,16 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					ui.DuoUIsplashScreen()
 					e.Frame(ui.ly.Context.Ops)
 				} else {
-					//ui.ly.Context.Reset(e.Config, e.Size)
+					// ui.ly.Context.Reset(e.Config, e.Size)
 					if ui.rc.Boot.IsFirstRun {
-						//DuoUIloaderCreateWallet(duo.m, cx, rc)
+						// DuoUIloaderCreateWallet(duo.m, cx, rc)
 					} else {
 						ui.ly.Pages = ui.LoadPages()
 						ui.DuoUImainScreen()
 						if ui.rc.Dialog.Show {
 							ui.DuoUIdialog()
 						}
-						//ui.DuoUItoastSys()
+						// ui.DuoUItoastSys()
 					}
 					e.Frame(ui.ly.Context.Ops)
 					ui.ly.Context.Reset(e.Config, e.Size)

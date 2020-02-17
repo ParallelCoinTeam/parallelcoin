@@ -164,6 +164,7 @@ type ServerConfig struct {
 	// algorithm. Currently 514 for Scrypt and anything else passes for SHA256d.
 	Algo     string
 	CPUMiner *exec.Cmd
+	Hashrate *atomic.Value
 }
 
 // ServerConnManager represents a connection manager for use with the RPC
@@ -2863,14 +2864,18 @@ func HandleGetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 	}
 	// return nil, nil
 	// return s.Cfg.CPUMiner.IsMining(), nil
-	return s.Cfg.CPUMiner != nil, nil
+	return generating, nil
 }
+
+var startTime = time.Now()
 
 // HandleGetHashesPerSec implements the gethashespersec command.
 func HandleGetHashesPerSec(s *Server, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) { // cpuminer
 	// return int64(s.Cfg.CPUMiner.HashesPerSecond()), nil
-	log.DEBUG("miner hashes per second - multicast thing")
-	return int64(0), nil
+	// TODO: finish this - needs generator for momentary rate (ewma)
+	// log.DEBUG("miner hashes per second - multicast thing TODO")
+	// simple average for now
+	return s.Cfg.Hashrate.Load().(int), nil
 }
 
 // HandleGetHeaders implements the getheaders command. NOTE: This is a btcsuite
@@ -4138,6 +4143,7 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 	genProcLimit := *s.Config.GenThreads
 	if c.GenProcLimit != nil {
 		genProcLimit = *c.GenProcLimit
+		*s.Config.GenThreads = genProcLimit
 	}
 	if genProcLimit == 0 {
 		generate = false
@@ -4164,13 +4170,17 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 	// 	s.Cfg.CPUMiner.SetNumWorkers(int32(genProcLimit))
 	// 	s.Cfg.CPUMiner.Start()
 	// }
-	if s.Cfg.CPUMiner != nil {
-		s.Cfg.CPUMiner.Process.Kill()
-	}
 	*s.Config.Generate = generate
 	*s.Config.GenThreads = genProcLimit
+	if s.Cfg.CPUMiner != nil {
+		log.DEBUG("stopping existing process")
+		err := s.Cfg.CPUMiner.Process.Kill()
+		if err != nil {
+			log.ERROR(err)
+		}
+	}
 	save.Pod(s.Config)
-	if generate {
+	if *s.Config.Generate && *s.Config.GenThreads != 0 {
 		s.Cfg.CPUMiner = exec.Command(os.Args[0], "-D", *s.Config.DataDir,
 			"kopach")
 		s.Cfg.CPUMiner.Stdin = os.Stdin

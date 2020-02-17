@@ -40,6 +40,7 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/bloom"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 const DefaultMaxOrphanTxSize = 100000
@@ -450,7 +451,11 @@ func (s *Node) Start() {
 		s.CPUMiner.Stderr = os.Stderr
 		s.CPUMiner.Start()
 		// s.CPUMiner.Start()
-		
+		interrupt.AddHandler(func() {
+			// Stop the CPU miner if needed
+			log.DEBUG("stopping the cpu miner") // cpuminer
+			s.CPUMiner.Process.Kill()
+		})
 	}
 }
 
@@ -463,11 +468,6 @@ func (s *Node) Stop() error {
 		return nil
 	}
 	log.TRACE("node shutting down")
-	// Stop the CPU miner if needed
-	if s.CPUMiner != nil {
-		log.DEBUG("stopping the cpu miner") // cpuminer
-		s.CPUMiner.Process.Kill()
-	}
 	
 	// Shutdown the RPC server if it's not disabled.
 	if !*s.Config.DisableRPC {
@@ -2523,14 +2523,16 @@ type Context struct {
 	StateCfg *state.Config
 	// ActiveNet is the active net parameters
 	ActiveNet *netparams.Params
-	// Language libraries
+	// Hashrate is the hash counter
+	Hashrate *atomic.Value
 }
 
 func // NewNode returns a new pod server configured to listen on addr for the
 // bitcoin network type specified by chainParams.  Use start to begin accepting
 // connections from peers.
 // TODO: simplify/modularise this
-NewNode(listenAddrs []string, db database.DB, interruptChan <-chan struct{}, algo string, cx *Context) (*Node, error) {
+NewNode(listenAddrs []string, db database.DB,
+	interruptChan <-chan struct{}, algo string, cx *Context) (*Node, error) {
 	log.TRACE("listenAddrs ", listenAddrs)
 	services := DefaultServices
 	if *cx.Config.NoPeerBloomFilters {
@@ -2866,6 +2868,7 @@ NewNode(listenAddrs []string, db database.DB, interruptChan <-chan struct{}, alg
 				CfIndex:      s.CFIndex,
 				FeeEstimator: s.FeeEstimator,
 				Algo:         l,
+				Hashrate:     cx.Hashrate,
 			}, cx.StateCfg, cx.Config)
 			if err != nil {
 				log.ERROR(err)

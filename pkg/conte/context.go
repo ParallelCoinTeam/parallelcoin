@@ -52,22 +52,26 @@ type Xt struct {
 	// RealNode is the main node
 	RealNode *rpc.Node
 	// Hashrate is the current total hashrate from kopach workers taking work from this node
-	Hashrate atomic.Value
+	Hashrate *atomic.Value
 }
 
 // GetNewContext returns a fresh new context
 func GetNewContext(appName, appLang, subtext string) *Xt {
+	hr := &atomic.Value{}
+	hr.Store(int(0))
 	return &Xt{
 		App:      cli.NewApp(),
 		Config:   pod.EmptyConfig(),
 		StateCfg: new(state.Config),
 		Language: lang.ExportLanguage(appLang),
 		DataDir:  appdata.Dir(appName, false),
+		Hashrate: hr,
 	}
 }
 
 func GetContext(cx *Xt) *rpc.Context {
 	return &rpc.Context{
 		Config: cx.Config, StateCfg: cx.StateCfg, ActiveNet: cx.ActiveNet,
+		Hashrate: cx.Hashrate,
 	}
 }
