@@ -7,6 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 var (
@@ -23,6 +24,7 @@ var (
 
 	encryption         = new(controller.CheckBox)
 	seed               = new(controller.CheckBox)
+	testnet            = new(controller.CheckBox)
 	buttonCreateWallet = new(controller.Button)
 )
 
@@ -78,11 +80,23 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 				seedCheckBox.Layout(ui.ly.Context, seed)
 			},
 			func() {
+				testnetCheckBox := ui.ly.Theme.DuoUIcheckBox("Use testnet?")
+				testnetCheckBox.Font.Typeface = ui.ly.Theme.Font.Primary
+				testnetCheckBox.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
+				testnetCheckBox.Layout(ui.ly.Context, testnet)
+			},
+			func() {
 				var createWalletbuttonComp theme.DuoUIbutton
-				createWalletbuttonComp = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "CREATE WALLET", "ff303030", "ffcfcfcf", "", "ff303030", 0, 125, 32, 4, 4)
+				createWalletbuttonComp = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "CREATE WALLET", "ff303030", "ffcfcfcf", "", "ff303030", 16, 0, 125, 32, 4, 4)
 				for buttonCreateWallet.Clicked(ui.ly.Context) {
 					if passPhrase != "" && passPhrase == confirmPassPhrase {
+						if testnet.Checked(ui.ly.Context) {
+							ui.rc.UseTestnet()
+						}
 						ui.rc.CreateWallet(passPhrase, "", "", "")
+						if testnet.Checked(ui.ly.Context) {
+							interrupt.RequestRestart()
+						}
 						log.INFO("WOIKOS!")
 					}
 					log.INFO("confirmPassPhrase: ", confirmPassPhrase)
@@ -90,20 +104,6 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 					log.INFO("posleWOIKOS!")
 				}
 				createWalletbuttonComp.Layout(ui.ly.Context, buttonCreateWallet)
-
-				//ui.ly.Theme.DuoUIbutton("Create wallet").Layout(ui.ly.Context, buttonCreateWallet)
-				//ui.ly.Theme.DuoUIbutton("Create wallet", "ff303030", "ff989898", "ff303030", 0, 125, 32, 4, 4, nil)
-				//linkButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Mono, "CREATE WALLET", "ffcfcfcf", "ff303030", "", "ffcfcfcf", 0, 60, 24, 0, 0)
-				//
-				//var blocksMenuItem theme.DuoUIbutton
-				//blocksMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "Blocks: "+fmt.Sprint(ui.rc.Status.Node.BlockHeight), "ffcfcfcf", "", "", "", iconSize, 80, height, paddingVertical, 0)
-				//for buttonBlocks.Clicked(ui.ly.Context) {
-				//	ui.rc.ShowPage = "EXPLORER"
-				//	//ui.rc.ShowToast = true
-				//	//ui.toastAdd()
-				//}
-				//blocksMenuItem.Layout(ui.ly.Context, buttonBlocks)
-
 			},
 		}
 		list.Layout(ui.ly.Context, len(controllers), func(i int) {

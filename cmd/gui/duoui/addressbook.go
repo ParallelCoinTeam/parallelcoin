@@ -10,7 +10,7 @@ import (
 
 var (
 	addressBookList = &layout.List{
-		Axis:        layout.Vertical,
+		Axis: layout.Vertical,
 		//ScrollToEnd: true,
 	}
 )
@@ -41,7 +41,7 @@ func (ui *DuoUI) DuoUIaddressBook() func() {
 											layout.Rigid(func() {
 
 												var copyButton theme.DuoUIbutton
-												copyButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Mono, t.Address, ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Primary, "", "", 0, 300, 24, 0, 0)
+												copyButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Mono, t.Address, ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Primary, "", "", 16, 0, 300, 24, 0, 0)
 
 												for t.Copy.Clicked(ui.ly.Context) {
 
@@ -68,7 +68,6 @@ func (ui *DuoUI) DuoUIaddressBook() func() {
 												sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 												sat.Layout(ui.ly.Context)
 											}),
-
 										)
 									}),
 									layout.Rigid(func() {

@@ -34,8 +34,8 @@ type RcVar struct {
 	AddressBook model.DuoUIaddressBook
 	ShowPage    string
 
-	NodeChan          chan *rpc.Server
-	WalletChan        chan *wallet.Wallet
+	NodeChan   chan *rpc.Server
+	WalletChan chan *wallet.Wallet
 
 	Quit    chan struct{}
 	Ready   chan struct{}
@@ -88,7 +88,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		},
 		Daemon: &model.DaemonConfig{
 			Config: cx.Config,
-			Schema: pod.GetConfigSchema(),
+			Schema: pod.GetConfigSchema(cx.Config),
 		},
 	}
 
@@ -104,7 +104,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			case "input":
 				settingsFields[field.Name] = &controller.Editor{
 					SingleLine: true,
-					Submit:     true,
+					//Submit:     true,
 				}
 			case "switch":
 				settingsFields[field.Name] = new(controller.CheckBox)
