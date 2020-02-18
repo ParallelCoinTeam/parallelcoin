@@ -22,7 +22,7 @@ func (ui *DuoUI) DuoUImenu() func() {
 	return func() {
 		var (
 			width             int = 96
-			height            int = 48
+			height            int = 72
 			textSize          int = 48
 			iconSize          int = 36
 			paddingVertical   int = 8

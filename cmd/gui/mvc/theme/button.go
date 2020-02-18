@@ -233,7 +233,6 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 		layout.Stacked(func() {
 			gtx.Constraints.Width.Min = hmin
 			gtx.Constraints.Height.Min = vmin
-
 			layout.Center.Layout(gtx, func() {
 				layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(10), Left: unit.Dp(12), Right: unit.Dp(12)}.Layout(gtx, func() {
 
@@ -302,26 +301,28 @@ func (b DuoUIbutton) MenuLayout(gtx *layout.Context, button *controller.Button) 
 		layout.Stacked(func() {
 			gtx.Constraints.Width.Min = b.Width
 			gtx.Constraints.Height.Min = b.Height
-			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-				layout.Rigid(func() {
-					layout.Center.Layout(gtx, func() {
-						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-							b.Icon.Color = b.IconColor
-							b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
+			layout.Center.Layout(gtx, func() {
+				layout.Flex{Axis: layout.Vertical, Alignment: layout.Middle}.Layout(gtx,
+					layout.Rigid(func() {
+						layout.Center.Layout(gtx, func() {
+							layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+								b.Icon.Color = b.IconColor
+								b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
+							})
+							gtx.Dimensions = layout.Dimensions{
+								Size: image.Point{X: b.IconSize, Y: b.IconSize},
+							}
 						})
-						gtx.Dimensions = layout.Dimensions{
-							Size: image.Point{X: b.IconSize, Y: b.IconSize},
-						}
-					})
-				}),
-				layout.Rigid(func() {
-					layout.Center.Layout(gtx, func() {
-						paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
-						controller.Label{
-							Alignment: text.Middle,
-						}.Layout(gtx, b.shaper, b.Font, unit.Dp(12), b.Text)
-					})
-				}))
+					}),
+					layout.Rigid(func() {
+						layout.Center.Layout(gtx, func() {
+							paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
+							controller.Label{
+								Alignment: text.Middle,
+							}.Layout(gtx, b.shaper, b.Font, unit.Dp(12), b.Text)
+						})
+					}))
+			})
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
 			button.Layout(gtx)
 		}),
