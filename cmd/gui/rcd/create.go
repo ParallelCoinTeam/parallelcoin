@@ -1,22 +1,21 @@
-package duoui
+package rcd
 
 import (
 	"encoding/hex"
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet"
 	"time"
 )
 
-func CreateWallet(cx *conte.Xt, privPassphrase, duoSeed, pubPassphrase, walletDir string) {
+func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir string) {
 	var err error
 	var seed []byte
 	if walletDir == "" {
-		walletDir = *cx.Config.WalletFile
+		walletDir = *r.cx.Config.WalletFile
 	}
-	l := wallet.NewLoader(cx.ActiveNet, *cx.Config.WalletFile, 250)
+	l := wallet.NewLoader(r.cx.ActiveNet, *r.cx.Config.WalletFile, 250)
 
 	if duoSeed == "" {
 		seed, err = hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
@@ -32,16 +31,16 @@ func CreateWallet(cx *conte.Xt, privPassphrase, duoSeed, pubPassphrase, walletDi
 		}
 	}
 
-	_, err = l.CreateNewWallet([]byte(pubPassphrase), []byte(privPassphrase), seed, time.Now(), true, cx.Config)
+	_, err = l.CreateNewWallet([]byte(pubPassphrase), []byte(privPassphrase), seed, time.Now(), true, r.cx.Config)
 	if err != nil {
 		log.ERROR(err)
 		panic(err)
 	}
 
-	//duo.Boot.IsFirstRun = false
-	*cx.Config.WalletPass = pubPassphrase
-	*cx.Config.WalletFile = walletDir
+	r.Boot.IsFirstRun = false
+	*r.cx.Config.WalletPass = pubPassphrase
+	*r.cx.Config.WalletFile = walletDir
 
-	save.Pod(cx.Config)
+	save.Pod(r.cx.Config)
 	//log.INFO(rc)
 }

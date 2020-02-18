@@ -1,28 +1,25 @@
-package gui
+package rcd
 
 import (
 	"github.com/p9c/pod/cmd/node"
-	"github.com/p9c/pod/cmd/node/rpc"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"os"
 	"sync"
 	"sync/atomic"
-
 )
 
-func DuoUInode(cx *conte.Xt, nodeChan chan *rpc.Server) error {
-	cx.NodeKill = make(chan struct{})
-	cx.Node = &atomic.Value{}
-	cx.Node.Store(false)
+func (r *RcVar) DuoUInode() error {
+	r.cx.NodeKill = make(chan struct{})
+	r.cx.Node = &atomic.Value{}
+	r.cx.Node.Store(false)
 	var err error
 	var wg sync.WaitGroup
-	if !*cx.Config.NodeOff {
+	if !*r.cx.Config.NodeOff {
 		go func() {
-			log.INFO(cx.Language.RenderText("goApp_STARTINGNODE"))
+			log.INFO(r.cx.Language.RenderText("goApp_STARTINGNODE"))
 			//utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
-			err = node.Main(cx, nil, cx.NodeKill, nodeChan, &wg)
+			err = node.Main(r.cx, nil, r.cx.NodeKill, r.NodeChan, &wg)
 			if err != nil {
 				log.INFO("error running node:", err)
 				os.Exit(1)
@@ -33,7 +30,7 @@ func DuoUInode(cx *conte.Xt, nodeChan chan *rpc.Server) error {
 	interrupt.AddHandler(func() {
 		log.WARN("interrupt received, " +
 			"shutting down shell modules")
-		close(cx.NodeKill)
+		close(r.cx.NodeKill)
 	})
 	return err
 }

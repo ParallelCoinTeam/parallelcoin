@@ -5,6 +5,7 @@ package theme
 import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
 )
 
@@ -15,6 +16,9 @@ type DuoUIcheckBox struct {
 func (t *DuoUItheme) DuoUIcheckBox(label string) DuoUIcheckBox {
 	return DuoUIcheckBox{
 		checkable{
+			Font: text.Font{
+				Typeface: t.Font.Primary,
+			},
 			Label:              label,
 			Color:              HexARGB(t.Color.Text),
 			IconColor:          HexARGB(t.Color.Primary),

@@ -1,7 +1,10 @@
 package rcd
 
 import (
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/wallet"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
@@ -21,17 +24,22 @@ type RcVar struct {
 	Log             *model.DuoUIlog
 	CommandsHistory *model.DuoUIcommandsHistory
 
-	Settings          *model.DuoUIsettings
-	Sent              bool
-	Toasts            []model.DuoUItoast
-	Localhost         model.DuoUIlocalHost
-	Uptime            int
-	Peers             []*btcjson.GetPeerInfoResult `json:"peers"`
-	Blocks            []model.DuoUIblock
-	AddressBook       model.DuoUIaddressBook
-	ShowPage          string
-	PassPhrase        string
-	ConfirmPassPhrase string
+	Settings    *model.DuoUIsettings
+	Sent        bool
+	Toasts      []model.DuoUItoast
+	Localhost   model.DuoUIlocalHost
+	Uptime      int
+	Peers       []*btcjson.GetPeerInfoResult `json:"peers"`
+	Blocks      []model.DuoUIblock
+	AddressBook model.DuoUIaddressBook
+	ShowPage    string
+
+	NodeChan          chan *rpc.Server
+	WalletChan        chan *wallet.Wallet
+
+	Quit    chan struct{}
+	Ready   chan struct{}
+	IsReady bool
 }
 
 type Boot struct {
@@ -57,7 +65,7 @@ type Boot struct {
 
 func RcInit(cx *conte.Xt) (r *RcVar) {
 	b := Boot{
-		IsBoot:     true,
+		IsBoot:     false,
 		IsFirstRun: false,
 		IsBootMenu: false,
 		IsBootLogo: false,
@@ -140,6 +148,35 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		Sent:      false,
 		Localhost: model.DuoUIlocalHost{},
 		ShowPage:  "OVERVIEW",
+		Quit:      make(chan struct{}),
+		Ready:     make(chan struct{}, 1),
 	}
+	return
+}
+
+func (r *RcVar) StartServices() (err error) {
+	nodeChan := make(chan *rpc.Server)
+	// Start Node
+	err = r.DuoUInode()
+	if err != nil {
+		log.ERROR(err)
+	}
+	log.DEBUG("waiting for nodeChan")
+	r.cx.RPCServer = <-nodeChan
+	log.DEBUG("nodeChan sent")
+	r.cx.Node.Store(true)
+
+	walletChan := make(chan *wallet.Wallet)
+	// Start wallet
+	err = r.Services(walletChan)
+	if err != nil {
+		log.ERROR(err)
+	}
+	log.DEBUG("waiting for walletChan")
+	r.cx.WalletServer = <-walletChan
+	log.DEBUG("walletChan sent")
+	r.cx.Wallet.Store(true)
+	//r.Boot.IsBoot = false
+	r.Ready <- struct{}{}
 	return
 }

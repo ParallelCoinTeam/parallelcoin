@@ -76,16 +76,16 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 	}
 }
 
-func lTtxid(gtx *layout.Context, th *theme.DuoUItheme, v string) func () {
+func lTtxid(gtx *layout.Context, th *theme.DuoUItheme, v string) func() {
 	return func() {
 		tim := th.Caption(v)
-		tim.Font.Typeface = "bariol"
+		tim.Font.Typeface = th.Font.Mono
 		tim.Color = theme.HexARGB(th.Color.Light)
 		tim.Layout(gtx)
 	}
 }
 
-func lTcategory(gtx *layout.Context, th *theme.DuoUItheme, v string) func () {
+func lTcategory(gtx *layout.Context, th *theme.DuoUItheme, v string) func() {
 	return func() {
 		sat := th.Body1(v)
 		sat.Color = theme.HexARGB(th.Color.Light)
@@ -94,7 +94,7 @@ func lTcategory(gtx *layout.Context, th *theme.DuoUItheme, v string) func () {
 	}
 }
 
-func lTtime(gtx *layout.Context, th *theme.DuoUItheme, v string) func () {
+func lTtime(gtx *layout.Context, th *theme.DuoUItheme, v string) func() {
 	return func() {
 		l := th.Body1(v)
 		l.Font.Typeface = "bariol"
@@ -104,7 +104,7 @@ func lTtime(gtx *layout.Context, th *theme.DuoUItheme, v string) func () {
 	}
 }
 
-func lTamount(gtx *layout.Context, th *theme.DuoUItheme, v float64) func () {
+func lTamount(gtx *layout.Context, th *theme.DuoUItheme, v float64) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			sat := th.Body1(fmt.Sprintf("%0.8f", v))

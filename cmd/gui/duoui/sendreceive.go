@@ -123,8 +123,8 @@ func (ui *DuoUI) DuoUIsend() func() {
 										e.Layout(ui.ly.Context, passLineEditor)
 										for _, e := range passLineEditor.Events(ui.ly.Context) {
 											if e, ok := e.(controller.SubmitEvent); ok {
-													passPharse = e.Text
-													passLineEditor.SetText("")
+												passPharse = e.Text
+												passLineEditor.SetText("")
 
 											}
 										}
@@ -142,9 +142,7 @@ func (ui *DuoUI) DuoUIsend() func() {
 								ui.rc.Dialog.Show = true
 								ui.rc.Dialog = &model.DuoUIdialog{
 									Show: true,
-									Ok: func() {
-										ui.rc.DuoSend(passPharse, address,amount)
-									},
+									Ok:   ui.rc.DuoSend(passPharse, address, amount),
 									Close: func() {
 
 									},

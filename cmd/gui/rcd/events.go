@@ -39,22 +39,20 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted:
-			r.GetDuoUIbalance()
-			r.GetDuoUIunconfirmedBalance()
-			r.GetDuoUItransactionsNumber()
-			r.GetTransactions()
-			r.GetLatestTransactions()
-			// r.GetDuoUIstatus()
-			// r.GetDuoUIlocalLost()
-			r.GetDuoUIblockHeight()
-			r.GetDuoUIdifficulty()
-			r.GetDuoUIconnectionCount()
-			// r.UpdateTrigger <- struct{}{}
-			r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
+			go r.GetDuoUIbalance()
+			go r.GetDuoUIunconfirmedBalance()
+			go r.GetDuoUItransactionsNumber()
+			go r.GetTransactions()
+			go r.GetLatestTransactions()
+			//r.GetDuoUIstatus()
+			//r.GetDuoUIlocalLost()
+			go r.GetDuoUIblockHeight()
+			go r.GetDuoUIdifficulty()
+			go r.GetDuoUIconnectionCount()
 			r.UpdateTrigger <- struct{}{}
-			// return
+			go r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
 		}
 	})
-	
+
 	return
 }

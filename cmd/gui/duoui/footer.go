@@ -32,11 +32,11 @@ func (ui *DuoUI) DuoUIfooter() func() {
 		cs := ui.ly.Context.Constraints
 		theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 64, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		var (
-			width             float32 = 48
-			height            float32 = 48
-			iconSize          int     = 32
-			paddingVertical   float32 = 8
-			paddingHorizontal float32 = 8
+			width             int = 48
+			height            int = 48
+			iconSize          int = 32
+			paddingVertical   int = 8
+			paddingHorizontal int = 8
 		)
 		
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(ui.ly.Context,
@@ -62,7 +62,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 										Text:   "Confirm ParallelCoin close",
 									}
 								}
-								closeMeniItem.Layout(ui.ly.Context, buttonQuit)
+								closeMeniItem.IconLayout(ui.ly.Context, buttonQuit)
 							})
 						},
 						
@@ -73,7 +73,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 							for buttonLog.Clicked(ui.ly.Context) {
 								ui.rc.ShowPage = "LOG"
 							}
-							logMenuItem.Layout(ui.ly.Context, buttonLog)
+							logMenuItem.IconLayout(ui.ly.Context, buttonLog)
 						},
 					}
 					cornerNav.Layout(ui.ly.Context, len(cornerButtons), func(i int) {
@@ -105,7 +105,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 								var networkMeniItem theme.DuoUIbutton
-								networkMeniItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "Connections: "+fmt.Sprint(ui.rc.Status.Node.ConnectionCount), "ffcfcfcf", "", "", "", iconSize, 80, height, paddingVertical, 0)
+								networkMeniItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "CONNECTIONS: "+fmt.Sprint(ui.rc.Status.Node.ConnectionCount), "ffcfcfcf", "", "", "", iconSize, 0, height, paddingVertical, 0)
 								for buttonNetwork.Clicked(ui.ly.Context) {
 									// ui.rc.ShowPage = "NETWORK"
 								}
@@ -115,7 +115,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 								var blocksMenuItem theme.DuoUIbutton
-								blocksMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, "Blocks: "+fmt.Sprint(ui.rc.Status.Node.BlockHeight), "ffcfcfcf", "", "", "", iconSize, 80, height, paddingVertical, 0)
+								blocksMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "BLOCKS: "+fmt.Sprint(ui.rc.Status.Node.BlockHeight), "ffcfcfcf", "", "", "", iconSize, 80, height, paddingVertical, 0)
 								for buttonBlocks.Clicked(ui.ly.Context) {
 									ui.rc.ShowPage = "EXPLORER"
 									//ui.rc.ShowToast = true
@@ -151,7 +151,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 							for buttonHelp.Clicked(ui.ly.Context) {
 								// ui.rc.ShowDialog = true
 							}
-							helpMenuItem.Layout(ui.ly.Context, buttonHelp)
+							helpMenuItem.IconLayout(ui.ly.Context, buttonHelp)
 						},
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
@@ -160,7 +160,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 								for buttonConsole.Clicked(ui.ly.Context) {
 									ui.rc.ShowPage = "CONSOLE"
 								}
-								consoleMenuItem.Layout(ui.ly.Context, buttonConsole)
+								consoleMenuItem.IconLayout(ui.ly.Context, buttonConsole)
 							})
 						},
 						func() {
@@ -170,7 +170,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 							for buttonSettings.Clicked(ui.ly.Context) {
 								ui.rc.ShowPage = "SETTINGS"
 							}
-							settingsMenuItem.Layout(ui.ly.Context, buttonSettings)
+							settingsMenuItem.IconLayout(ui.ly.Context, buttonSettings)
 						},
 					}
 					footerNav.Layout(ui.ly.Context, len(navButtons), func(i int) {

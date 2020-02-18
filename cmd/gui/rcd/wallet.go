@@ -21,8 +21,7 @@ import (
 	"time"
 )
 
-func
-(r *RcVar) GetDuoUIbalance() {
+func (r *RcVar) GetDuoUIbalance() {
 	acct := "default"
 	minconf := 0
 	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
@@ -37,8 +36,7 @@ func
 	}
 	return
 }
-func
-(r *RcVar) GetDuoUIunconfirmedBalance() {
+func (r *RcVar) GetDuoUIunconfirmedBalance() {
 	acct := "default"
 	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
 	if err != nil {
@@ -52,8 +50,7 @@ func
 	return
 }
 
-func
-(r *RcVar) GetDuoUItransactionsNumber() {
+func (r *RcVar) GetDuoUItransactionsNumber() {
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := r.cx.WalletServer.ListTransactions(0, 999999999)
@@ -64,8 +61,7 @@ func
 	return
 }
 
-func
-(r *RcVar) GetDuoUItransactions(sfrom, count int, cat string) *model.DuoUItransactions {
+func (r *RcVar) GetDuoUItransactions(sfrom, count int, cat string) *model.DuoUItransactions {
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := r.cx.WalletServer.ListTransactions(sfrom, count)
@@ -108,8 +104,7 @@ func
 	r.Status.Wallet.Transactions.Txs = txsArray
 	return r.Status.Wallet.Transactions
 }
-func
-txs(t btcjson.ListTransactionsResult) model.DuoUItx {
+func txs(t btcjson.ListTransactionsResult) model.DuoUItx {
 	return model.DuoUItx{
 		TxID:     t.TxID,
 		Amount:   t.Amount,
@@ -118,13 +113,11 @@ txs(t btcjson.ListTransactionsResult) model.DuoUItx {
 	}
 
 }
-func
-(r *RcVar) GetLatestTransactions() {
+func (r *RcVar) GetLatestTransactions() {
 	r.Status.Wallet.LastTxs = r.GetDuoUItransactions(0, 10, "")
 	return
 }
-func
-(r *RcVar) GetTransactions() {
+func (r *RcVar) GetTransactions() {
 	lt, err := r.cx.WalletServer.ListTransactions(0, r.Status.Wallet.Txs.TxsListNumber)
 	if err != nil {
 		////r.PushDuoUIalert("Error", err.Error(), "error")
@@ -163,74 +156,74 @@ func
 	return
 }
 
-func
-(r *RcVar) DuoSend(wp string, ad string, am float64) {
-	if am > 0 {
-		getBlockChain, err := rpc.HandleGetBlockChainInfo(r.cx.RPCServer, nil, nil)
-		if err != nil {
-			//r.PushDuoUIalert("Error", err.Error(), "error")
+func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
+	return func() {
+		if am > 0 {
+			getBlockChain, err := rpc.HandleGetBlockChainInfo(r.cx.RPCServer, nil, nil)
+			if err != nil {
+				//r.PushDuoUIalert("Error", err.Error(), "error")
 
-		}
-		result, ok := getBlockChain.(*btcjson.GetBlockChainInfoResult)
-		if !ok {
-			result = &btcjson.GetBlockChainInfoResult{}
-		}
-		var defaultNet *netparams.Params
-		switch result.Chain {
-		case "mainnet":
-			defaultNet = &netparams.MainNetParams
-		case "testnet":
-			defaultNet = &netparams.TestNet3Params
-		case "regtest":
-			defaultNet = &netparams.RegressionTestParams
-		default:
-			defaultNet = &netparams.MainNetParams
-		}
-		amount, _ := util.NewAmount(am)
-		addr, err := util.DecodeAddress(ad, defaultNet)
-		if err != nil {
-			//r.PushDuoUIalert("Error", err.Error(), "error")
-		}
-		var validateAddr *btcjson.ValidateAddressWalletResult
-		if err == nil {
-			var va interface{}
-			va, err = legacy.ValidateAddress(&btcjson.
-			ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
+			}
+			result, ok := getBlockChain.(*btcjson.GetBlockChainInfoResult)
+			if !ok {
+				result = &btcjson.GetBlockChainInfoResult{}
+			}
+			var defaultNet *netparams.Params
+			switch result.Chain {
+			case "mainnet":
+				defaultNet = &netparams.MainNetParams
+			case "testnet":
+				defaultNet = &netparams.TestNet3Params
+			case "regtest":
+				defaultNet = &netparams.RegressionTestParams
+			default:
+				defaultNet = &netparams.MainNetParams
+			}
+			amount, _ := util.NewAmount(am)
+			addr, err := util.DecodeAddress(ad, defaultNet)
 			if err != nil {
 				//r.PushDuoUIalert("Error", err.Error(), "error")
 			}
-			vva := va.(btcjson.ValidateAddressWalletResult)
-			validateAddr = &vva
-			if validateAddr.IsValid {
-				legacy.WalletPassphrase(btcjson.NewWalletPassphraseCmd(wp, 5),
-					r.cx.WalletServer)
+			var validateAddr *btcjson.ValidateAddressWalletResult
+			if err == nil {
+				var va interface{}
+				va, err = legacy.ValidateAddress(&btcjson.
+					ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
 				if err != nil {
 					//r.PushDuoUIalert("Error", err.Error(), "error")
 				}
-				_, err = legacy.SendToAddress(
-					&btcjson.SendToAddressCmd{
-						Address: addr.EncodeAddress(), Amount: amount.ToDUO(),
-					}, r.cx.WalletServer)
-				if err != nil {
-					//r.PushDuoUIalert("error sending to address:", err.Error(), "error")
+				vva := va.(btcjson.ValidateAddressWalletResult)
+				validateAddr = &vva
+				if validateAddr.IsValid {
+					legacy.WalletPassphrase(btcjson.NewWalletPassphraseCmd(wp, 5),
+						r.cx.WalletServer)
+					if err != nil {
+						//r.PushDuoUIalert("Error", err.Error(), "error")
+					}
+					_, err = legacy.SendToAddress(
+						&btcjson.SendToAddressCmd{
+							Address: addr.EncodeAddress(), Amount: amount.ToDUO(),
+						}, r.cx.WalletServer)
+					if err != nil {
+						//r.PushDuoUIalert("error sending to address:", err.Error(), "error")
 
+					} else {
+						//r.PushDuoUIalert("Address OK", "OK", "success")
+					}
 				} else {
-					//r.PushDuoUIalert("Address OK", "OK", "success")
+					if err != nil {
+						//r.PushDuoUIalert("Invalid address", "INVALID", "error")
+					}
 				}
-			} else {
-				if err != nil {
-					//r.PushDuoUIalert("Invalid address", "INVALID", "error")
-				}
+				//r.PushDuoUIalert("Payment sent", "PAYMENT", "success")
 			}
-			//r.PushDuoUIalert("Payment sent", "PAYMENT", "success")
+		} else {
+			log.Println(am)
 		}
-	} else {
-		log.Println(am)
+		r.Sent = true
+		return
 	}
-	r.Sent = true
-	return
 }
-
 
 func (r *RcVar) CreateNewAddress(acctName string) string {
 	account, err := r.cx.WalletServer.AccountNumber(waddrmgr.KeyScopeBIP0044, acctName)
@@ -258,8 +251,6 @@ func (r *RcVar) SaveAddressLabel(address, label string) {
 
 }
 
-
-
 type AddressSlice []model.Address
 
 func (a AddressSlice) Len() int {
@@ -273,7 +264,6 @@ func (a AddressSlice) Less(i, j int) bool {
 func (a AddressSlice) Swap(i, j int) {
 	a[i], a[j] = a[j], a[i]
 }
-
 
 func (r *RcVar) GetAddressBook() {
 	addressbook := new(model.DuoUIaddressBook)
@@ -351,7 +341,7 @@ func (r *RcVar) GetAddressBook() {
 			Account: addr.Account,
 			Address: addr.Address,
 			Amount:  addr.Amount,
-			Copy: new(controller.Button),
+			Copy:    new(controller.Button),
 		})
 	}
 	sort.Sort(addrs)

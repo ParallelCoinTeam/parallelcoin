@@ -28,8 +28,6 @@ func DuOuI() (duo *model.DuoUI, err error) {
 			app.Size(unit.Dp(1024), unit.Dp(640)),
 			app.Title("ParallelCoin"),
 		),
-		Quit:  make(chan struct{}),
-		Ready: make(chan struct{}, 1),
 	}
 	fonts.Register()
 	duo.Context = layout.NewContext(duo.Window.Queue())
