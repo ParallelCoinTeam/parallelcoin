@@ -3,8 +3,8 @@ package duoui
 
 import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/view"
 	"github.com/p9c/pod/pkg/gui/text"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 	"reflect"
 )
@@ -44,19 +44,29 @@ func (f *Field) InputFields(ui *DuoUI) {
 	case "input":
 		switch f.Field.InputType {
 		case "text":
-			view.DuoUIinputField(ui.ly, f.Field.Name, f.Field.Model, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
-		case "number":
+			//ui.DuoUIinputField(f)
 			e := ui.ly.Theme.DuoUIeditor(f.Field.Name)
 			e.Font.Typeface = ui.ly.Theme.Font.Primary
 			e.Font.Style = text.Italic
-			lineEditor := (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor)
-			e.Layout(ui.ly.Context, lineEditor)
-			for _, e := range lineEditor.Events(ui.ly.Context) {
-				if _, ok := e.(controller.SubmitEvent); ok {
-					//topLabel = e.Text
-					lineEditor.SetText("")
-				}
-			}
+			e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
+			(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(f.Field.Value.(reflect.Value).String())
+			//log.INFO(f.Field.Value.(reflect.Value).String())
+		case "number":
+			//ui.DuoUIinputField(f)
+			e := ui.ly.Theme.DuoUIeditor(f.Field.Name)
+			e.Font.Typeface = ui.ly.Theme.Font.Primary
+			e.Font.Style = text.Italic
+			e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
+			(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(f.Field.Value.(reflect.Value).String())
+			//log.INFO(f.Field.Value.(reflect.Value).String())
+		case "password":
+			//ui.DuoUIinputField(f)
+			e := ui.ly.Theme.DuoUIeditor(f.Field.Name)
+			e.Font.Typeface = ui.ly.Theme.Font.Primary
+			e.Font.Style = text.Italic
+			e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
+			(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(f.Field.Value.(reflect.Value).String())
+			log.INFO(f.Field.Value.(reflect.Value))
 		default:
 		}
 	case "switch":

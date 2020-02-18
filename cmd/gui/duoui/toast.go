@@ -29,7 +29,7 @@ func (ui *DuoUI) toastButton(text, txtColor, bgColor, icon, iconColor string, bu
 	var b theme.DuoUIbutton
 	return func() {
 		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(ui.ly.Context, func() {
-			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, text, txtColor, bgColor, icon, iconColor, 24, 120, 60, 0, 0)
+			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, text, txtColor, bgColor, icon, iconColor, 16, 24, 120, 60, 0, 0)
 			for button.Clicked(ui.ly.Context) {
 				//ui.rc.ShowToast = false
 			}

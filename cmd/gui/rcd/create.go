@@ -44,3 +44,8 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 	save.Pod(r.cx.Config)
 	//log.INFO(rc)
 }
+
+func (r *RcVar) UseTestnet() {
+	*r.cx.Config.Network = "testnet"
+	save.Pod(r.cx.Config)
+}

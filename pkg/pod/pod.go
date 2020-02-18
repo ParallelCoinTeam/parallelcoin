@@ -38,10 +38,11 @@ type Field struct {
 	Model       string   `json:"model"`
 	Datatype    string   `json:"datatype"`
 	Options     []string `json:"options"`
+	Value       interface{}
 }
 
-func GetConfigSchema() Schema {
-	t := reflect.TypeOf(Config{})
+func GetConfigSchema(cfg *Config) Schema {
+	t := reflect.TypeOf(*cfg)
 	var levelOptions, network, algos []string
 	for _, i := range log.Levels {
 		levelOptions = append(levelOptions, i)
@@ -76,6 +77,7 @@ func GetConfigSchema() Schema {
 			Options:     options,
 			Datatype:    field.Type.String(),
 			Model:       field.Tag.Get("model"),
+			Value:       reflect.ValueOf(field),
 		}
 		if f.Group != "" {
 			rawFields[f.Group] = append(rawFields[f.Group], f)
@@ -132,7 +134,7 @@ type Config struct {
 	Generate               *bool            `group:"mining" name:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
 	GenThreads             *int             `group:"mining" name:"Gen Threads" description:"number of CPU threads to mine using" type:"input" inputType:"number" model:"GenThreads" featured:"false"`
 	Language               *string          `group:"config" name:"Language" description:"User interface language i18 localization" type:"input" inputType:"text" model:"Language" featured:"false"`
-	LimitPass              *string          `group:"rpc" name:"Limit Pass" type:"password" description:"limited user password" type:"input" inputType:"text" model:"LimitPass" featured:"false"`
+	LimitPass              *string          `group:"rpc" name:"Limit Pass" description:"limited user password" type:"input" inputType:"password" model:"LimitPass" featured:"false"`
 	LimitUser              *string          `group:"rpc" name:"Limit User" description:"limited user name" type:"input" inputType:"text" model:"LimitUser" featured:"false"`
 	Listeners              *cli.StringSlice `group:"node" name:"Listeners" description:"List of addresses to bind the node listener to" type:"array" inputType:"text" model:"array" featured:"false"`
 	LogDir                 *string          `group:"config" name:"Log Dir" description:"Folder where log files are written" type:"input" inputType:"text" model:"LogDir" featured:"false"`
@@ -151,12 +153,12 @@ type Config struct {
 	OneTimeTLSKey          *bool            `group:"wallet" name:"One Time TLS Key" description:"generate a new TLS certpair at startup, but only write the certificate to disk" type:"switch" model:"OneTimeTLSKey" featured:"false"`
 	Onion                  *bool            `group:"proxy" name:"Onion" description:"enable tor proxy" type:"switch" model:"Onion" featured:"false"`
 	OnionProxy             *string          `group:"proxy" name:"Onion Proxy" description:"address of tor proxy you want to connect to" type:"input" inputType:"text" model:"OnionProxy" featured:"false"`
-	OnionProxyPass         *string          `group:"proxy" name:"Onion Proxy Pass" type:"password" description:"password for tor proxy" type:"input" inputType:"text" model:"OnionProxyPass" featured:"false"`
+	OnionProxyPass         *string          `group:"proxy" name:"Onion Proxy Pass" description:"password for tor proxy" type:"input" inputType:"password" model:"OnionProxyPass" featured:"false"`
 	OnionProxyUser         *string          `group:"proxy" name:"Onion Proxy User" description:"tor proxy username" type:"input" inputType:"text" model:"OnionProxyUser" featured:"false"`
-	Password               *string          `group:"rpc" name:"Password" type:"password" description:"password for client RPC connections" type:"input" inputType:"text" model:"Password" featured:"false"`
+	Password               *string          `group:"rpc" name:"Password" description:"password for client RPC connections" type:"input" inputType:"text" model:"Password" featured:"false"`
 	Profile                *string          `group:"debug" name:"Profile" description:"http profiling on given port (1024-40000)" type:"input" inputType:"text" model:"Profile" featured:"false"`
 	Proxy                  *string          `group:"proxy" name:"Proxy" description:"address of proxy to connect to for outbound connections" type:"input" inputType:"text" model:"Proxy" featured:"false"`
-	ProxyPass              *string          `group:"proxy" name:"Proxy Pass" type:"password" description:"proxy password, if required" type:"input" inputType:"text" model:"ProxyPass" featured:"false"`
+	ProxyPass              *string          `group:"proxy" name:"Proxy Pass" description:"proxy password, if required" type:"input" inputType:"password" model:"ProxyPass" featured:"false"`
 	ProxyUser              *string          `group:"proxy" name:"ProxyUser" description:"proxy username, if required" type:"input" inputType:"text" model:"ProxyUser" featured:"false"`
 	RejectNonStd           *bool            `group:"node" name:"Reject Non Std" description:"reject non-standard transactions regardless of the default settings for the active network" type:"switch" model:"RejectNonStd" featured:"false"`
 	RelayNonStd            *bool            `group:"node" name:"Relay Non Std" description:"relay non-standard transactions regardless of the default settings for the active network" type:"switch" model:"RelayNonStd" featured:"false"`
@@ -168,7 +170,7 @@ type Config struct {
 	RPCMaxConcurrentReqs   *int             `group:"rpc" name:"RPC Max Concurrent Reqs" description:"maximum number of requests to process concurrently" type:"input" inputType:"number" model:"RPCMaxConcurrentReqs" featured:"false"`
 	RPCMaxWebsockets       *int             `group:"rpc" name:"RPC Max Websockets" description:"maximum number of websocket clients to allow" type:"input" inputType:"number" model:"RPCMaxWebsockets" featured:"false"`
 	RPCQuirks              *bool            `group:"rpc" name:"RPC Quirks" description:"enable bugs that replicate bitcoin core RPC's JSON" type:"switch" model:"RPCQuirks" featured:"false"`
-	ServerPass             *string          `group:"rpc" name:"Server Pass" type:"password" description:"password for server connections" type:"input" inputType:"text" model:"ServerPass" featured:"false"`
+	ServerPass             *string          `group:"rpc" name:"Server Pass" description:"password for server connections" type:"input" inputType:"password" model:"ServerPass" featured:"false"`
 	ServerTLS              *bool            `group:"wallet" name:"Server TLS" description:"Enable TLS for the wallet connection to node RPC server" type:"switch" model:"ServerTLS" featured:"false"`
 	ServerUser             *string          `group:"rpc" name:"Server User" description:"username for server connections" type:"input" inputType:"text" model:"ServerUser" featured:"false"`
 	SigCacheMaxSize        *int             `group:"node" name:"Sig Cache Max Size" description:"the maximum number of entries in the signature verification cache" type:"input" inputType:"number" model:"SigCacheMaxSize" featured:"false"`

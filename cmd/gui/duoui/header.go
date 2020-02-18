@@ -19,7 +19,7 @@ func (ui *DuoUI) DuoUIheader() func() {
 		layout.Flex{Axis: layout.Horizontal}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
 				var logoMeniItem theme.DuoUIbutton
-				logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", "ff303030", "logo", "ffcfcfcf", 64, 96, 96, 8, 8)
+				logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", "ff303030", "logo", "ffcfcfcf", 16, 64, 96, 96, 8, 8)
 				for logoButton.Clicked(ui.ly.Context) {
 					//d.mod.CurrentPage = "NETWORK"
 				}

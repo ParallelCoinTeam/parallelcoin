@@ -17,7 +17,7 @@ var (
 
 func (ui *DuoUI) DuoUIexplorer() func() {
 	return func() {
-		ui.rc.GetBlocksExcerpts(0,11)
+		ui.rc.GetBlocksExcerpts(0, 11)
 		in := layout.UniformInset(unit.Dp(0))
 		in.Layout(ui.ly.Context, func() {
 			blocksList.Layout(ui.ly.Context, len(ui.rc.Blocks), func(i int) {
@@ -39,7 +39,7 @@ func (ui *DuoUI) DuoUIexplorer() func() {
 							}),
 							layout.Rigid(func() {
 								var linkButton theme.DuoUIbutton
-								linkButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Mono, fmt.Sprint(b.Height), "ffcfcfcf", "ff303030", "", "ffcfcfcf", 0, 60, 24, 0, 0)
+								linkButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Mono, fmt.Sprint(b.Height), "ffcfcfcf", "ff303030", "", "ffcfcfcf", 16, 0, 60, 24, 0, 0)
 								for b.Link.Clicked(ui.ly.Context) {
 									clipboard.Set(b.BlockHash)
 								}

@@ -192,12 +192,13 @@ type DuoUIbutton struct {
 	hover             bool
 }
 
-func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, icon, iconColor string, iconSize, width, height, paddingVertical, paddingHorizontal int) DuoUIbutton {
+func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, icon, iconColor string, textSize, iconSize, width, height, paddingVertical, paddingHorizontal int) DuoUIbutton {
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
 			Typeface: txtFont,
 		},
+		TextSize:          unit.Dp(float32(textSize)),
 		Width:             width,
 		Height:            height,
 		TxColor:           HexARGB(txtColor),
@@ -239,7 +240,7 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 					paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
 					controller.Label{
 						Alignment: text.Middle,
-					}.Layout(gtx, b.shaper, b.Font, unit.Dp(20), b.Text)
+					}.Layout(gtx, b.shaper, b.Font, b.TextSize, b.Text)
 				})
 			})
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
