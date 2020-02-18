@@ -15,10 +15,10 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 		ly: d,
 		rc: r,
 	}
-	//ui.ly.Pages = ui.LoadPages()
+	ui.ly.Pages = ui.LoadPages()
 	for {
 		select {
-		case <-ui.ly.Ready:
+		case <-ui.rc.Ready:
 			updateTrigger := make(chan struct{}, 1)
 			go func() {
 			quitTrigger:
@@ -27,14 +27,14 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					case <-updateTrigger:
 						log.DEBUG("repaint forced")
 						//ui.ly.Window.Invalidate()
-					case <-ui.ly.Quit:
+					case <-ui.rc.Quit:
 						break quitTrigger
 					}
 				}
 			}()
 			ui.rc.ListenInit(updateTrigger)
 			ui.ly.IsReady = true
-		case <-ui.ly.Quit:
+		case <-ui.rc.Quit:
 			log.DEBUG("quit signal received")
 			interrupt.Request()
 			// This case is for handling when some external application is controlling the GUI and to gracefully
@@ -52,25 +52,23 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
-				if ui.rc.Boot.IsBoot {
-					ui.ly.Context.Reset(e.Config, e.Size)
-					ui.DuoUIsplashScreen()
-					e.Frame(ui.ly.Context.Ops)
-				} else {
-					//ui.ly.Context.Reset(e.Config, e.Size)
-					if ui.rc.Boot.IsFirstRun {
-						//DuoUIloaderCreateWallet(duo.m, cx, rc)
-					} else {
-						ui.ly.Pages = ui.LoadPages()
-						ui.DuoUImainScreen()
-						if ui.rc.Dialog.Show {
-							ui.DuoUIdialog()
-						}
-						//ui.DuoUItoastSys()
-					}
-					e.Frame(ui.ly.Context.Ops)
-					ui.ly.Context.Reset(e.Config, e.Size)
+				if ui.rc.Boot.IsFirstRun {
+					ui.DuoUIloaderCreateWallet()
 				}
+				//if ui.rc.Boot.IsBoot {
+				//	ui.ly.Context.Reset(e.Config, e.Size)
+				//	ui.DuoUIsplashScreen()
+				//	e.Frame(ui.ly.Context.Ops)
+				//} else {
+				//	//ui.ly.Context.Reset(e.Config, e.Size)
+				//	ui.DuoUImainScreen()
+				//	if ui.rc.Dialog.Show {
+				//		ui.DuoUIdialog()
+				//	}
+				//	//ui.DuoUItoastSys()
+				//}
+				e.Frame(ui.ly.Context.Ops)
+				ui.ly.Context.Reset(e.Config, e.Size)
 			}
 		}
 	}

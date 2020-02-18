@@ -34,7 +34,6 @@ type Field struct {
 }
 
 func (f *Field) InputFields(ui *DuoUI) {
-
 	switch f.Field.Type {
 	case "array":
 		switch f.Field.InputType {

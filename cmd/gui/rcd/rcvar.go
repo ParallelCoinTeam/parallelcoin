@@ -1,7 +1,10 @@
 package rcd
 
 import (
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/wallet"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
@@ -14,6 +17,8 @@ type RcVar struct {
 	cx              *conte.Xt
 	db              *DuoUIdb
 	Boot            *Boot
+	Quit            chan struct{}
+	Ready           chan struct{}
 	Events          chan Event
 	UpdateTrigger   chan struct{}
 	Status          *model.DuoUIstatus
@@ -32,6 +37,8 @@ type RcVar struct {
 	ShowPage          string
 	PassPhrase        string
 	ConfirmPassPhrase string
+	NodeChan          chan *rpc.Server
+	WalletChan        chan *wallet.Wallet
 }
 
 type Boot struct {
@@ -64,6 +71,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		IsLoading:  false,
 		IsScreen:   "",
 	}
+
 	// d := models.DuoUIdialog{
 	//	Show:   true,
 	//	Ok:     func() { r.Dialog.Show = false },
@@ -111,8 +119,10 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 	settings.Daemon.Widgets = settingsFields
 
 	r = &RcVar{
-		cx:   cx,
-		Boot: &b,
+		cx:    cx,
+		Quit:  make(chan struct{}),
+		Ready: make(chan struct{}, 1),
+		Boot:  &b,
 		Status: &model.DuoUIstatus{
 			Node: &model.NodeStatus{},
 			Wallet: &model.WalletStatus{
@@ -137,9 +147,36 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			},
 			CommandsNumber: 1,
 		},
-		Sent:      false,
-		Localhost: model.DuoUIlocalHost{},
-		ShowPage:  "OVERVIEW",
+		Sent:       false,
+		Localhost:  model.DuoUIlocalHost{},
+		ShowPage:   "OVERVIEW",
+		NodeChan:   make(chan *rpc.Server),
+		WalletChan: make(chan *wallet.Wallet),
 	}
+	return
+}
+
+func (r *RcVar) DuoUIservices() (err error) {
+	// Start Node
+	err = r.DuoUInode()
+	if err != nil {
+		log.ERROR(err)
+	}
+	log.DEBUG("waiting for nodeChan")
+	r.cx.RPCServer = <-r.NodeChan
+	log.DEBUG("nodeChan sent")
+	r.cx.Node.Store(true)
+
+	// Start wallet
+	err = r.DuoUIwallet()
+	if err != nil {
+		log.ERROR(err)
+	}
+	log.DEBUG("waiting for walletChan")
+	r.cx.WalletServer = <-r.WalletChan
+	log.DEBUG("walletChan sent")
+	r.cx.Wallet.Store(true)
+	r.Boot.IsBoot = false
+	r.Ready <- struct{}{}
 	return
 }

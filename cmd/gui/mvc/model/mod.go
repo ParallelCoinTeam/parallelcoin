@@ -24,8 +24,6 @@ type DuoUI struct {
 	Pages      map[string]*theme.DuoUIpage
 	Navigation map[string]*theme.DuoUIthemeNav
 	//Configuration *DuoUIconfiguration
-	Quit    chan struct{}
-	Ready   chan struct{}
 	IsReady bool
 }
 

@@ -179,8 +179,8 @@ type DuoUIbutton struct {
 	TxColor           color.RGBA
 	Font              text.Font
 	TextSize          unit.Value
-	Width             float32
-	Height            float32
+	Width             int
+	Height            int
 	BgColor           color.RGBA
 	CornerRadius      unit.Value
 	Icon              *DuoUIicon
@@ -192,7 +192,7 @@ type DuoUIbutton struct {
 	hover             bool
 }
 
-func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, icon, iconColor string, iconSize int, width, height, paddingVertical, paddingHorizontal float32) DuoUIbutton {
+func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, icon, iconColor string, iconSize, width, height, paddingVertical, paddingHorizontal int) DuoUIbutton {
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
@@ -205,13 +205,50 @@ func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, 
 		Icon:              t.Icons[icon],
 		IconSize:          iconSize,
 		IconColor:         HexARGB(iconColor),
-		PaddingVertical:   unit.Dp(paddingVertical),
-		PaddingHorizontal: unit.Dp(paddingHorizontal),
+		PaddingVertical:   unit.Dp(float32(paddingVertical)),
+		PaddingHorizontal: unit.Dp(float32(paddingHorizontal)),
 		shaper:            t.Shaper,
 	}
 }
 
 func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
+	hmin := gtx.Constraints.Width.Min
+	vmin := gtx.Constraints.Height.Min
+	layout.Stack{Alignment: layout.Center}.Layout(gtx,
+		layout.Expanded(func() {
+			rr := float32(gtx.Px(unit.Dp(0)))
+			clip.Rect{
+				Rect: f32.Rectangle{Max: f32.Point{
+					X: float32(gtx.Constraints.Width.Min),
+					Y: float32(gtx.Constraints.Height.Min),
+				}},
+				NE: rr, NW: rr, SE: rr, SW: rr,
+			}.Op(gtx.Ops).Add(gtx.Ops)
+			fill(gtx, b.BgColor)
+			for _, c := range button.History() {
+				drawInk(gtx, c)
+			}
+		}),
+		layout.Stacked(func() {
+			gtx.Constraints.Width.Min = hmin
+			gtx.Constraints.Height.Min = vmin
+
+			layout.Center.Layout(gtx, func() {
+				layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(10), Left: unit.Dp(12), Right: unit.Dp(12)}.Layout(gtx, func() {
+
+					paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
+					controller.Label{
+						Alignment: text.Middle,
+					}.Layout(gtx, b.shaper, b.Font, unit.Dp(20), b.Text)
+				})
+			})
+			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
+			button.Layout(gtx)
+		}),
+	)
+}
+
+func (b DuoUIbutton) IconLayout(gtx *layout.Context, button *controller.Button) {
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
 			rr := float32(gtx.Px(unit.Dp(0)))
@@ -228,29 +265,62 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 			}
 		}),
 		layout.Stacked(func() {
-			gtx.Constraints.Width.Min = int(b.Width)
-			gtx.Constraints.Height.Min = int(b.Height)
+			gtx.Constraints.Width.Min = b.Width
+			gtx.Constraints.Height.Min = b.Height
 			layout.Center.Layout(gtx, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+					b.Icon.Color = b.IconColor
+					b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
+				})
+				gtx.Dimensions = layout.Dimensions{
+					Size: image.Point{X: b.IconSize, Y: b.IconSize},
+				}
+			})
+			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
+			button.Layout(gtx)
+		}),
+	)
+}
 
-				if b.Icon != nil {
-					if b.Icon != nil {
+func (b DuoUIbutton) MenuLayout(gtx *layout.Context, button *controller.Button) {
+	layout.Stack{Alignment: layout.Center}.Layout(gtx,
+		layout.Expanded(func() {
+			rr := float32(gtx.Px(unit.Dp(0)))
+			clip.Rect{
+				Rect: f32.Rectangle{Max: f32.Point{
+					X: float32(b.Width),
+					Y: float32(b.Height),
+				}},
+				NE: rr, NW: rr, SE: rr, SW: rr,
+			}.Op(gtx.Ops).Add(gtx.Ops)
+			fill(gtx, b.BgColor)
+			for _, c := range button.History() {
+				drawInk(gtx, c)
+			}
+		}),
+		layout.Stacked(func() {
+			gtx.Constraints.Width.Min = b.Width
+			gtx.Constraints.Height.Min = b.Height
+			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+				layout.Rigid(func() {
+					layout.Center.Layout(gtx, func() {
 						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 							b.Icon.Color = b.IconColor
 							b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
 						})
-					}
-					gtx.Dimensions = layout.Dimensions{
-						Size: image.Point{X: b.IconSize, Y: b.IconSize},
-					}
-				}
-
-				if b.Text != "" {
-					paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
-					controller.Label{
-						Alignment: text.Middle,
-					}.Layout(gtx, b.shaper, b.Font, unit.Dp(20), b.Text)
-				}
-			})
+						gtx.Dimensions = layout.Dimensions{
+							Size: image.Point{X: b.IconSize, Y: b.IconSize},
+						}
+					})
+				}),
+				layout.Rigid(func() {
+					layout.Center.Layout(gtx, func() {
+						paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
+						controller.Label{
+							Alignment: text.Middle,
+						}.Layout(gtx, b.shaper, b.Font, unit.Dp(12), b.Text)
+					})
+				}))
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
 			button.Layout(gtx)
 		}),

@@ -1,29 +1,27 @@
-package gui
+package rcd
 
 import (
 	"fmt"
 	"github.com/p9c/pod/cmd/walletmain"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/wallet"
 	"os"
 	"sync"
 	"sync/atomic"
 )
 
-func Services(cx *conte.Xt, walletChan chan *wallet.Wallet) error {
-	cx.WalletKill = make(chan struct{})
-	cx.Wallet = &atomic.Value{}
-	cx.Wallet.Store(false)
+func (r *RcVar) DuoUIwallet() error {
+	r.cx.WalletKill = make(chan struct{})
+	r.cx.Wallet = &atomic.Value{}
+	r.cx.Wallet.Store(false)
 	var err error
 	var wg sync.WaitGroup
-	if !*cx.Config.WalletOff {
+	if !*r.cx.Config.WalletOff {
 		go func() {
 			log.INFO("starting wallet")
 			//utils.GetBiosMessage(view, "starting wallet")
-			err = walletmain.Main(cx.Config, cx.StateCfg,
-				cx.ActiveNet, walletChan, cx.WalletKill, &wg)
+			err = walletmain.Main(r.cx.Config, r.cx.StateCfg,
+				r.cx.ActiveNet, r.WalletChan, r.cx.WalletKill, &wg)
 			if err != nil {
 				fmt.Println("error running wallet:", err)
 				os.Exit(1)
@@ -33,7 +31,7 @@ func Services(cx *conte.Xt, walletChan chan *wallet.Wallet) error {
 	interrupt.AddHandler(func() {
 		log.WARN("interrupt received, " +
 			"shutting down shell modules")
-		close(cx.WalletKill)
+		close(r.cx.WalletKill)
 	})
 	return err
 }

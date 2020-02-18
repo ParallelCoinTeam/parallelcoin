@@ -11,9 +11,12 @@ import (
 func WalletGUI(duo *model.DuoUI, rc *rcd.RcVar) (err error) {
 	go func() {
 		log.DEBUG("starting UI main loop")
+		if rc.Boot.IsFirstRun != true {
+			rc.DuoUIservices()
+		}
 		if duo.IsReady != false {
 		}
-		if err := duoui.DuoUImainLoop(duo,rc); err != nil {
+		if err := duoui.DuoUImainLoop(duo, rc); err != nil {
 			log.FATAL(err.Error(), "- shutting down")
 		}
 	}()

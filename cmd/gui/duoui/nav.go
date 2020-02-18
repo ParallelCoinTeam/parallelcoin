@@ -13,23 +13,22 @@ var (
 	navButtonReceive     = new(controller.Button)
 	navButtonAddressBook = new(controller.Button)
 	navButtonHistory     = new(controller.Button)
-	mainNav           = &layout.List{
+	mainNav              = &layout.List{
 		Axis: layout.Vertical,
 	}
 )
 
-func (ui *DuoUI)DuoUImenu() func() {
+func (ui *DuoUI) DuoUImenu() func() {
 	return func() {
-
 		var (
-			width             float32 = 96
-			height            float32 = 72
-			iconSize          int     = 72
-			paddingVertical   float32 = 0
-			paddingHorizontal float32 = 0
-			bgColor = "ff9a9a9a"
-			textColor = "ff303030"
-			iconColor = "ffacacac"
+			width             int = 96
+			height            int = 48
+			iconSize          int = 36
+			paddingVertical   int = 8
+			paddingHorizontal int = 0
+			bgColor               = "ff9a9a9a"
+			textColor             = "ff303030"
+			iconColor             = "ffacacac"
 		)
 		//overviewButton :=
 		//historyButton :=
@@ -49,11 +48,11 @@ func (ui *DuoUI)DuoUImenu() func() {
 								func() {
 									in.Layout(ui.ly.Context, func() {
 										var overviewMenuItem theme.DuoUIbutton
-										overviewMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary,"OVERVIEW", textColor, bgColor, "overviewIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
+										overviewMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "OVERVIEW", textColor, bgColor, "overviewIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
 										for navButtonOverview.Clicked(ui.ly.Context) {
 											ui.rc.ShowPage = "OVERVIEW"
 										}
-										overviewMenuItem.Layout(ui.ly.Context, navButtonOverview)
+										overviewMenuItem.MenuLayout(ui.ly.Context, navButtonOverview)
 									})
 								},
 								func() {
@@ -61,11 +60,11 @@ func (ui *DuoUI)DuoUImenu() func() {
 								},
 								func() {
 									var sendMenuItem theme.DuoUIbutton
-									sendMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary,"SEND", textColor, bgColor, "sendIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
+									sendMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "SEND", textColor, bgColor, "sendIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
 									for navButtonSend.Clicked(ui.ly.Context) {
 										ui.rc.ShowPage = "SEND"
 									}
-									sendMenuItem.Layout(ui.ly.Context, navButtonSend)
+									sendMenuItem.MenuLayout(ui.ly.Context, navButtonSend)
 								},
 								func() {
 									theme.DuoUIdrawRectangle(ui.ly.Context, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
@@ -73,11 +72,11 @@ func (ui *DuoUI)DuoUImenu() func() {
 								func() {
 									in.Layout(ui.ly.Context, func() {
 										var receiveMenuItem theme.DuoUIbutton
-										receiveMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary,"RECEIVE", textColor,bgColor,  "receiveIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
+										receiveMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "RECEIVE", textColor, bgColor, "receiveIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
 										for navButtonReceive.Clicked(ui.ly.Context) {
 											ui.rc.ShowPage = "RECEIVE"
 										}
-										receiveMenuItem.Layout(ui.ly.Context, navButtonReceive)
+										receiveMenuItem.MenuLayout(ui.ly.Context, navButtonReceive)
 									})
 								},
 								func() {
@@ -85,22 +84,22 @@ func (ui *DuoUI)DuoUImenu() func() {
 								},
 								func() {
 									var addressBookMenuItem theme.DuoUIbutton
-									addressBookMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary,"ADDRESS BOOK", textColor, bgColor, "addressBookIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
+									addressBookMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "ADDRESS BOOK", textColor, bgColor, "addressBookIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
 									for navButtonAddressBook.Clicked(ui.ly.Context) {
 										ui.rc.ShowPage = "ADDRESSBOOK"
 									}
-									addressBookMenuItem.Layout(ui.ly.Context, navButtonAddressBook)
+									addressBookMenuItem.MenuLayout(ui.ly.Context, navButtonAddressBook)
 								},
 								func() {
 									theme.DuoUIdrawRectangle(ui.ly.Context, int(width), 1, "ff888888", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								},
 								func() {
 									var historyMenuItem theme.DuoUIbutton
-									historyMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary,"HISTORY", textColor,  bgColor, "historyIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
+									historyMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "HISTORY", textColor, bgColor, "historyIcon", iconColor, iconSize, width, height, paddingVertical, paddingHorizontal)
 									for navButtonHistory.Clicked(ui.ly.Context) {
 										ui.rc.ShowPage = "HISTORY"
 									}
-									historyMenuItem.Layout(ui.ly.Context, navButtonHistory)
+									historyMenuItem.MenuLayout(ui.ly.Context, navButtonHistory)
 								},
 							}
 							mainNav.Layout(ui.ly.Context, len(navButtons), func(i int) {
