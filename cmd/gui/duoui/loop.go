@@ -16,7 +16,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 		ly: d,
 		rc: r,
 	}
-	// ui.ly.Pages = ui.LoadPages()
+	ui.ly.Pages = ui.LoadPages()
 	for {
 		select {
 		case <-ui.rc.Ready:
@@ -63,7 +63,6 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					if ui.rc.Boot.IsFirstRun {
 						ui.DuoUIloaderCreateWallet()
 					} else {
-						ui.ly.Pages = ui.LoadPages()
 						ui.DuoUImainScreen()
 						if ui.rc.Dialog.Show {
 							ui.DuoUIdialog()
