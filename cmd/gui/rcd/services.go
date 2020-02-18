@@ -5,12 +5,13 @@ import (
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/wallet"
 	"os"
 	"sync"
 	"sync/atomic"
 )
 
-func (r *RcVar) DuoUIwallet() error {
+func (r *RcVar) Services(walletChan chan *wallet.Wallet) error {
 	r.cx.WalletKill = make(chan struct{})
 	r.cx.Wallet = &atomic.Value{}
 	r.cx.Wallet.Store(false)
@@ -21,7 +22,7 @@ func (r *RcVar) DuoUIwallet() error {
 			log.INFO("starting wallet")
 			//utils.GetBiosMessage(view, "starting wallet")
 			err = walletmain.Main(r.cx.Config, r.cx.StateCfg,
-				r.cx.ActiveNet, r.WalletChan, r.cx.WalletKill, &wg)
+				r.cx.ActiveNet, walletChan, r.cx.WalletKill, &wg)
 			if err != nil {
 				fmt.Println("error running wallet:", err)
 				os.Exit(1)

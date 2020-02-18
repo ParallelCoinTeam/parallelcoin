@@ -17,8 +17,6 @@ type RcVar struct {
 	cx              *conte.Xt
 	db              *DuoUIdb
 	Boot            *Boot
-	Quit            chan struct{}
-	Ready           chan struct{}
 	Events          chan Event
 	UpdateTrigger   chan struct{}
 	Status          *model.DuoUIstatus
@@ -26,19 +24,22 @@ type RcVar struct {
 	Log             *model.DuoUIlog
 	CommandsHistory *model.DuoUIcommandsHistory
 
-	Settings          *model.DuoUIsettings
-	Sent              bool
-	Toasts            []model.DuoUItoast
-	Localhost         model.DuoUIlocalHost
-	Uptime            int
-	Peers             []*btcjson.GetPeerInfoResult `json:"peers"`
-	Blocks            []model.DuoUIblock
-	AddressBook       model.DuoUIaddressBook
-	ShowPage          string
-	PassPhrase        string
-	ConfirmPassPhrase string
+	Settings    *model.DuoUIsettings
+	Sent        bool
+	Toasts      []model.DuoUItoast
+	Localhost   model.DuoUIlocalHost
+	Uptime      int
+	Peers       []*btcjson.GetPeerInfoResult `json:"peers"`
+	Blocks      []model.DuoUIblock
+	AddressBook model.DuoUIaddressBook
+	ShowPage    string
+
 	NodeChan          chan *rpc.Server
 	WalletChan        chan *wallet.Wallet
+
+	Quit    chan struct{}
+	Ready   chan struct{}
+	IsReady bool
 }
 
 type Boot struct {
@@ -64,14 +65,13 @@ type Boot struct {
 
 func RcInit(cx *conte.Xt) (r *RcVar) {
 	b := Boot{
-		IsBoot:     true,
+		IsBoot:     false,
 		IsFirstRun: false,
 		IsBootMenu: false,
 		IsBootLogo: false,
 		IsLoading:  false,
 		IsScreen:   "",
 	}
-
 	// d := models.DuoUIdialog{
 	//	Show:   true,
 	//	Ok:     func() { r.Dialog.Show = false },
@@ -119,10 +119,8 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 	settings.Daemon.Widgets = settingsFields
 
 	r = &RcVar{
-		cx:    cx,
-		Quit:  make(chan struct{}),
-		Ready: make(chan struct{}, 1),
-		Boot:  &b,
+		cx:   cx,
+		Boot: &b,
 		Status: &model.DuoUIstatus{
 			Node: &model.NodeStatus{},
 			Wallet: &model.WalletStatus{
@@ -147,36 +145,38 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			},
 			CommandsNumber: 1,
 		},
-		Sent:       false,
-		Localhost:  model.DuoUIlocalHost{},
-		ShowPage:   "OVERVIEW",
-		NodeChan:   make(chan *rpc.Server),
-		WalletChan: make(chan *wallet.Wallet),
+		Sent:      false,
+		Localhost: model.DuoUIlocalHost{},
+		ShowPage:  "OVERVIEW",
+		Quit:      make(chan struct{}),
+		Ready:     make(chan struct{}, 1),
 	}
 	return
 }
 
-func (r *RcVar) DuoUIservices() (err error) {
+func (r *RcVar) StartServices() (err error) {
+	nodeChan := make(chan *rpc.Server)
 	// Start Node
 	err = r.DuoUInode()
 	if err != nil {
 		log.ERROR(err)
 	}
 	log.DEBUG("waiting for nodeChan")
-	r.cx.RPCServer = <-r.NodeChan
+	r.cx.RPCServer = <-nodeChan
 	log.DEBUG("nodeChan sent")
 	r.cx.Node.Store(true)
 
+	walletChan := make(chan *wallet.Wallet)
 	// Start wallet
-	err = r.DuoUIwallet()
+	err = r.Services(walletChan)
 	if err != nil {
 		log.ERROR(err)
 	}
 	log.DEBUG("waiting for walletChan")
-	r.cx.WalletServer = <-r.WalletChan
+	r.cx.WalletServer = <-walletChan
 	log.DEBUG("walletChan sent")
 	r.cx.Wallet.Store(true)
-	r.Boot.IsBoot = false
+	//r.Boot.IsBoot = false
 	r.Ready <- struct{}{}
 	return
 }

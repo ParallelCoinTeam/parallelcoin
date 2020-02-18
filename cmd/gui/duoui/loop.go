@@ -15,7 +15,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 		ly: d,
 		rc: r,
 	}
-	ui.ly.Pages = ui.LoadPages()
+	//ui.ly.Pages = ui.LoadPages()
 	for {
 		select {
 		case <-ui.rc.Ready:
@@ -33,7 +33,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				}
 			}()
 			ui.rc.ListenInit(updateTrigger)
-			ui.ly.IsReady = true
+			ui.rc.IsReady = true
 		case <-ui.rc.Quit:
 			log.DEBUG("quit signal received")
 			interrupt.Request()
@@ -52,23 +52,23 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
-				if ui.rc.Boot.IsFirstRun {
-					ui.DuoUIloaderCreateWallet()
-				}
-				//if ui.rc.Boot.IsBoot {
-				//	ui.ly.Context.Reset(e.Config, e.Size)
-				//	ui.DuoUIsplashScreen()
-				//	e.Frame(ui.ly.Context.Ops)
-				//} else {
-				//	//ui.ly.Context.Reset(e.Config, e.Size)
-				//	ui.DuoUImainScreen()
-				//	if ui.rc.Dialog.Show {
-				//		ui.DuoUIdialog()
-				//	}
-				//	//ui.DuoUItoastSys()
-				//}
-				e.Frame(ui.ly.Context.Ops)
 				ui.ly.Context.Reset(e.Config, e.Size)
+				if ui.rc.Boot.IsBoot {
+					ui.DuoUIsplashScreen()
+					e.Frame(ui.ly.Context.Ops)
+				} else {
+					if ui.rc.Boot.IsFirstRun {
+						ui.DuoUIloaderCreateWallet()
+					} else {
+						ui.ly.Pages = ui.LoadPages()
+						ui.DuoUImainScreen()
+						if ui.rc.Dialog.Show {
+							ui.DuoUIdialog()
+						}
+						//ui.DuoUItoastSys()
+					}
+					e.Frame(ui.ly.Context.Ops)
+				}
 			}
 		}
 	}

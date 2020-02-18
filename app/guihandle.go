@@ -40,6 +40,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		log.DEBUG("sending ready signal")
 		// we can do this without blocking because the channel has 1 buffer this way it falls
 		// immediately the GUI starts
+		go rc.StartServices()
 
 		// Start up GUI
 		log.DEBUG("starting up GUI")
@@ -66,3 +67,4 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		return
 	}
 }
+
