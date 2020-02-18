@@ -37,7 +37,7 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 		panic(err)
 	}
 
-	//duo.Boot.IsFirstRun = false
+	r.Boot.IsFirstRun = false
 	*r.cx.Config.WalletPass = pubPassphrase
 	*r.cx.Config.WalletFile = walletDir
 

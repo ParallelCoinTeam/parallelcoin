@@ -32,18 +32,6 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 	layout.Center.Layout(ui.ly.Context, func() {
 		controllers := []func(){
 			func() {
-				bale := ui.ly.Theme.Body1(passPhrase)
-				bale.Font.Typeface = ui.ly.Theme.Font.Primary
-				bale.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
-				bale.Layout(ui.ly.Context)
-			},
-			func() {
-				balr := ui.ly.Theme.Body1(confirmPassPhrase)
-				balr.Font.Typeface = ui.ly.Theme.Font.Primary
-				balr.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
-				balr.Layout(ui.ly.Context)
-			},
-			func() {
 				bal := ui.ly.Theme.H5("Enter the private passphrase for your new wallet:")
 				bal.Font.Typeface = ui.ly.Theme.Font.Primary
 				bal.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
