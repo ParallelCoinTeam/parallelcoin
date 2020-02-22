@@ -13,7 +13,7 @@ type StdConn struct {
 }
 
 func New(in io.ReadCloser, out io.WriteCloser, quit chan struct{}) (s StdConn) {
-	return StdConn{in, out, make(chan struct{})}
+	return StdConn{in, out, quit}
 }
 
 func (s StdConn) Read(b []byte) (n int, err error) {
