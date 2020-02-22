@@ -100,7 +100,7 @@ func (c *Connection) SetSendConn(ad string) (err error) {
 		log.ERROR(err)
 	}
 	var sC net.Conn
-	sC, err = net.DialUDP("udp", nil, c.sendAddress)
+	sC, err = net.Dial("udp", ad)
 	if err != nil {
 		log.ERROR(err)
 		return
