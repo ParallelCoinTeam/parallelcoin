@@ -46,8 +46,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		log.DEBUG("miner controller starting")
 		quit := make(chan struct{})
 		ctx, cancel := context.WithCancel(context.Background())
-		conn, err := transport.NewConnection("", controller.UDP4MulticastAddress,
-			*cx.Config.MinerPass, controller.MaxDatagramSize, ctx, true)
+		conn, err := transport.NewConnection("", controller.UDP4MulticastAddress, *cx.Config.MinerPass, controller.MaxDatagramSize, ctx)
 		if err != nil {
 			log.ERROR(err)
 			cancel()

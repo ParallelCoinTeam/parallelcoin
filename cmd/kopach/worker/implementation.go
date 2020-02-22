@@ -321,7 +321,7 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 // pod) configuration to allow workers to dispatch their solutions
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	log.DEBUG("receiving dispatch password")
-	conn, err := transport.NewConnection("", "", pass, controller.MaxDatagramSize, nil, false)
+	conn, err := transport.NewConnection("", "", pass, controller.MaxDatagramSize, nil)
 	if err != nil {
 		log.ERROR(err)
 	}

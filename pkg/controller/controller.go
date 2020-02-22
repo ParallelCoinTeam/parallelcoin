@@ -80,8 +80,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	conn, err := transport.NewConnection(UDP4MulticastAddress,
-		*cx.Config.Controller, *cx.Config.MinerPass, MaxDatagramSize,
-		ctx, true)
+		*cx.Config.Controller, *cx.Config.MinerPass, MaxDatagramSize, ctx)
 	if err != nil {
 		log.ERROR(err)
 		cancel()

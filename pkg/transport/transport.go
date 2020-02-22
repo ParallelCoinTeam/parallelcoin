@@ -11,7 +11,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
@@ -36,7 +36,7 @@ type Connection struct {
 	maxDatagramSize int
 	buffers         map[string]*MsgBuffer
 	sendAddress     *net.UDPAddr
-	SendConn        *net.UDPConn
+	SendConn        net.Conn
 	listenAddress   *net.UDPAddr
 	listenConn      *net.PacketConn
 	ciph            cipher.AEAD
@@ -46,17 +46,20 @@ type Connection struct {
 
 func reusePort(network, address string, conn syscall.RawConn) error {
 	return conn.Control(func(descriptor uintptr) {
-		syscall.SetsockoptInt(int(descriptor), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
+		err := syscall.SetsockoptInt(int(descriptor), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
+		if err != nil {
+			log.ERROR(err)
+		}
 	})
 }
 
 // NewConnection creates a new connection with a defined default send
 // connection and listener and pre shared key password for encryption on the
 // local network
-func NewConnection(send, listen, preSharedKey string, maxDatagramSize int,
-	ctx context.Context, multicast bool) (c *Connection, err error) {
+func NewConnection(send, listen, preSharedKey string,
+	maxDatagramSize int, ctx context.Context) (c *Connection, err error) {
 	sendAddr := &net.UDPAddr{}
-	sendConn := &net.UDPConn{}
+	var sendConn net.Conn
 	listenAddr := &net.UDPAddr{}
 	var listenConn net.PacketConn
 	if listen != "" {
@@ -71,7 +74,7 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int,
 		if err != nil {
 			log.ERROR(err)
 		}
-		sendConn, err = net.DialUDP("udp4", nil, sendAddr)
+		sendConn, err = net.Dial("udp4", send)
 		if err != nil {
 			log.ERROR(err, sendAddr)
 		}
@@ -96,8 +99,7 @@ func (c *Connection) SetSendConn(ad string) (err error) {
 	if err != nil {
 		log.ERROR(err)
 	}
-	c.SendConn = &net.UDPConn{}
-	var sC *net.UDPConn
+	var sC net.Conn
 	sC, err = net.DialUDP("udp", nil, c.sendAddress)
 	if err != nil {
 		log.ERROR(err)
@@ -132,7 +134,7 @@ func (c *Connection) CreateShards(b, magic []byte) (shards [][]byte,
 	return
 }
 
-func send(shards [][]byte, sendConn *net.UDPConn) (err error) {
+func send(shards [][]byte, sendConn net.Conn) (err error) {
 	for i := range shards {
 		_, err = sendConn.Write(shards[i])
 		if err != nil {
