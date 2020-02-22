@@ -70,10 +70,10 @@ func NewConnection(send, listen, preSharedKey string,
 		}
 	}
 	if send != "" {
-		sendAddr, err = net.ResolveUDPAddr("udp4", send)
-		if err != nil {
-			log.ERROR(err)
-		}
+		// sendAddr, err = net.ResolveUDPAddr("udp4", send)
+		// if err != nil {
+		// 	log.ERROR(err)
+		// }
 		sendConn, err = net.Dial("udp4", send)
 		if err != nil {
 			log.ERROR(err, sendAddr)
@@ -95,12 +95,12 @@ func NewConnection(send, listen, preSharedKey string,
 }
 
 func (c *Connection) SetSendConn(ad string) (err error) {
-	c.sendAddress, err = net.ResolveUDPAddr("udp4", ad)
-	if err != nil {
-		log.ERROR(err)
-	}
+	// c.sendAddress, err = net.ResolveUDPAddr("udp4", ad)
+	// if err != nil {
+	// 	log.ERROR(err)
+	// }
 	var sC net.Conn
-	sC, err = net.Dial("udp", ad)
+	sC, err = net.Dial("udp4", ad)
 	if err != nil {
 		log.ERROR(err)
 		return
