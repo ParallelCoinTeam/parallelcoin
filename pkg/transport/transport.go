@@ -9,7 +9,6 @@ import (
 	"net"
 	"strconv"
 	"sync"
-	"syscall"
 	"time"
 	
 	"github.com/p9c/pod/pkg/fec"
@@ -42,15 +41,6 @@ type Connection struct {
 	ciph            cipher.AEAD
 	ctx             context.Context
 	mx              *sync.Mutex
-}
-
-func reusePort(network, address string, conn syscall.RawConn) error {
-	return conn.Control(func(descriptor uintptr) {
-		err := syscall.SetsockoptInt(int(descriptor), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
-		if err != nil {
-			log.ERROR(err)
-		}
-	})
 }
 
 // NewConnection creates a new connection with a defined default send
