@@ -18,7 +18,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	
+
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/upnp"
@@ -455,6 +455,8 @@ func (s *Node) Start() {
 			// Stop the CPU miner if needed
 			log.DEBUG("stopping the cpu miner") // cpuminer
 			s.CPUMiner.Process.Kill()
+			s.CPUMiner.Wait()
+			log.DEBUG("miner has stopped")
 		})
 	}
 }
@@ -468,7 +470,7 @@ func (s *Node) Stop() error {
 		return nil
 	}
 	log.TRACE("node shutting down")
-	
+
 	// Shutdown the RPC server if it's not disabled.
 	if !*s.Config.DisableRPC {
 		for i := range s.RPCServers {
@@ -2850,7 +2852,7 @@ NewNode(listenAddrs []string, db database.DB,
 			if len(rpcListeners) == 0 {
 				return nil, errors.New("RPCS: No valid listen address")
 			}
-			
+
 			rp, err := NewRPCServer(&ServerConfig{
 				Listeners:   rpcListeners,
 				StartupTime: s.StartupTime,

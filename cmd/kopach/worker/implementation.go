@@ -242,6 +242,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// 		fmt.Sprint(job.GetControllerListenerPort()))
 	// }
 	address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
+	log.DEBUG(address)
 	err = w.dispatchConn.SetSendConn(address)
 	if err != nil {
 		log.ERROR(err)
