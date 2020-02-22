@@ -8,12 +8,10 @@ import (
 	"io"
 	"net"
 	"strconv"
-	"strings"
 	"sync"
+	"syscall"
 	"time"
-	
-	"golang.org/x/net/ipv4"
-	
+
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
@@ -37,98 +35,47 @@ type MsgBuffer struct {
 type Connection struct {
 	maxDatagramSize int
 	buffers         map[string]*MsgBuffer
-	sendAddress     []*net.UDPAddr
-	SendConn        []*net.UDPConn
+	sendAddress     *net.UDPAddr
+	SendConn        *net.UDPConn
 	listenAddress   *net.UDPAddr
-	listenConn      net.PacketConn
+	listenConn      *net.PacketConn
 	ciph            cipher.AEAD
 	ctx             context.Context
 	mx              *sync.Mutex
 }
 
+func reusePort(network, address string, conn syscall.RawConn) error {
+	return conn.Control(func(descriptor uintptr) {
+		syscall.SetsockoptInt(int(descriptor), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
+	})
+}
+
 // NewConnection creates a new connection with a defined default send
 // connection and listener and pre shared key password for encryption on the
 // local network
-func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx context.Context, multicast bool) (c *Connection, err error) {
-	var sendAddr []*net.UDPAddr
-	sendConn := []*net.UDPConn{}
-	var sC *net.UDPConn
-	var listenAddr *net.UDPAddr
+func NewConnection(send, listen, preSharedKey string, maxDatagramSize int,
+	ctx context.Context, multicast bool) (c *Connection, err error) {
+	sendAddr := &net.UDPAddr{}
+	sendConn := &net.UDPConn{}
+	listenAddr := &net.UDPAddr{}
 	var listenConn net.PacketConn
-	var mcInterface []net.Interface
-	var ifi []net.Interface
-	ifi, err = net.Interfaces()
-	if err != nil {
-		log.ERROR(err)
-	}
-	for i := range ifi {
-		ad, _ := ifi[i].Addrs()
-		if ifi[i].Flags&net.FlagMulticast != 0 &&
-			ifi[i].HardwareAddr != nil &&
-			ad != nil {
-			mcInterface = append(mcInterface, ifi[i])
-		}
-	}
 	if listen != "" {
-		if multicast {
-			var conn net.PacketConn
-			conn, err = net.ListenPacket("udp", listen)
-			if err != nil {
-				log.ERROR(err)
-			}
-			pc := ipv4.NewPacketConn(conn)
-			for i := range mcInterface {
-				
-				err = pc.JoinGroup(&mcInterface[i], &net.UDPAddr{IP: net.IPv4(
-					224, 0, 0, 1)})
-				if err != nil {
-					log.ERROR(err)
-					err = conn.Close()
-					if err != nil {
-						log.ERROR(err)
-						return
-					}
-				}
-			}
-			listenConn = conn
-		} else {
-			listenAddr = GetUDPAddr(listen)
-			listenConn, err = net.ListenUDP("udp", listenAddr)
-			if err != nil {
-				log.ERROR(err)
-				return
-			}
-			// log.SPEW(listenConn)
+		config := &net.ListenConfig{Control: reusePort}
+		listenConn, err = config.ListenPacket(context.Background(), "udp4", listen)
+		if err != nil {
+			log.ERROR(err)
 		}
 	}
 	if send != "" {
-		for i := range mcInterface {
-			mI, _ := mcInterface[i].Addrs()
-			log.SPEW(mI)
-			var listenWithoutEveryInterface string
-			for i := range mI {
-				_ = mI[i]
-				log.DEBUG("ADDRESSS", mI[i])
-				a := strings.Split(mI[i].String(), "/")[0]
-				if strings.Count(a, ":") == 0 {
-					listenWithoutEveryInterface = net.JoinHostPort(a, "0")
-				}
-			}
-			log.DEBUG(listenWithoutEveryInterface)
-			var laddr *net.UDPAddr
-			laddr, err = net.ResolveUDPAddr("udp", listenWithoutEveryInterface)
-			if err != nil {
-				log.ERROR(err)
-				return
-			}
-			sendAddr = append(sendAddr, GetUDPAddr(send))
-			sC, err = net.DialUDP("udp", laddr, sendAddr[len(sendAddr)-1])
-			if err != nil {
-				log.ERROR(err)
-				return
-			}
-			sendConn = append(sendConn, sC)
+		sendAddr, err = net.ResolveUDPAddr("udp4", send)
+		if err != nil {
+			log.ERROR(err)
 		}
+		sendConn, err = net.DialUDP("udp4", nil, sendAddr)
+		if err != nil {
+			log.ERROR(err, sendAddr)
+		}
+		// log.SPEW(sendConn)
 	}
 	ciph := gcm.GetCipher(preSharedKey)
 	return &Connection{
@@ -137,24 +84,22 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int, ctx c
 		sendAddress:     sendAddr,
 		SendConn:        sendConn,
 		listenAddress:   listenAddr,
-		listenConn:      listenConn,
+		listenConn:      &listenConn,
 		ciph:            ciph, // gcm.GetCipher(*cx.Config.MinerPass),
 		ctx:             ctx,
 		mx:              &sync.Mutex{},
 	}, err
 }
 
-func (c *Connection) SetSendConn(ad ...string) (err error) {
-	c.SendConn = []*net.UDPConn{}
+func (c *Connection) SetSendConn(ad string) (err error) {
+	c.SendConn = &net.UDPConn{}
 	var sC *net.UDPConn
-	for i := range ad {
-		sC, err = net.DialUDP("udp", nil, GetUDPAddr(ad[i]))
-		if err != nil {
-			log.ERROR(err)
-			return
-		}
-		c.SendConn = append(c.SendConn, sC)
+	sC, err = net.DialUDP("udp", nil, GetUDPAddr(ad))
+	if err != nil {
+		log.ERROR(err)
+		return
 	}
+	c.SendConn = sC
 	return
 }
 
@@ -201,11 +146,9 @@ func (c *Connection) Send(b, magic []byte) (err error) {
 	}
 	var shards [][]byte
 	shards, err = c.CreateShards(b, magic)
-	for _, sC := range c.SendConn {
-		err = send(shards, sC)
-		if err != nil {
-			log.ERROR(err)
-		}
+	err = send(shards, c.SendConn)
+	if err != nil {
+		log.ERROR(err)
 	}
 	return
 }
@@ -230,11 +173,9 @@ func (c *Connection) SendTo(addr *net.UDPAddr, b, magic []byte) (err error) {
 }
 
 func (c *Connection) SendShards(shards [][]byte) (err error) {
-	for _, sC := range c.SendConn {
-		err = send(shards, sC)
-		if err != nil {
-			log.ERROR(err)
-		}
+	err = send(shards, c.SendConn)
+	if err != nil {
+		log.ERROR(err)
 	}
 	return
 }
@@ -261,7 +202,7 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 	out:
 		// read from socket until context is cancelled
 		for {
-			n, src, err := c.listenConn.ReadFrom(buffer)
+			n, src, err := (*c.listenConn).ReadFrom(buffer)
 			buf := buffer[:n]
 			if err != nil {
 				// log.ERROR("ReadFromUDP failed:", err)

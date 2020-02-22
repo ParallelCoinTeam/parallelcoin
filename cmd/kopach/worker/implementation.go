@@ -8,7 +8,7 @@ import (
 	"net"
 	"os"
 	"time"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -234,14 +234,15 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// will run. If there is no controllers on the network,
 	// the worker pauses
 	ips := job.GetIPs()
-	var addresses []string
-	for i := range ips {
-		// generally there is only one but if a server had two interfaces
-		// to different lans it would send both
-		addresses = append(addresses, ips[i].String()+":"+
-			fmt.Sprint(job.GetControllerListenerPort()))
-	}
-	err = w.dispatchConn.SetSendConn(addresses...)
+	// var addresses []string
+	// for i := range ips {
+	// 	generally there is only one but if a server had two interfaces
+	// 	to different lans it would send both
+	// 	addresses = append(addresses, ips[i].String()+":"+
+	// 		fmt.Sprint(job.GetControllerListenerPort()))
+	// }
+	address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
+	err = w.dispatchConn.SetSendConn(address)
 	if err != nil {
 		log.ERROR(err)
 	}
