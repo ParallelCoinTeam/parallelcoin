@@ -92,9 +92,13 @@ func NewConnection(send, listen, preSharedKey string, maxDatagramSize int,
 }
 
 func (c *Connection) SetSendConn(ad string) (err error) {
+	c.sendAddress, err = net.ResolveUDPAddr("udp4", ad)
+	if err != nil {
+		log.ERROR(err)
+	}
 	c.SendConn = &net.UDPConn{}
 	var sC *net.UDPConn
-	sC, err = net.DialUDP("udp", nil, GetUDPAddr(ad))
+	sC, err = net.DialUDP("udp", nil, c.sendAddress)
 	if err != nil {
 		log.ERROR(err)
 		return
