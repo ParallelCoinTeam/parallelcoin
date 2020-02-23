@@ -1,15 +1,15 @@
 package duoui
 
 import (
+	"gioui.org/f32"
+	"gioui.org/io/pointer"
+	"gioui.org/layout"
+	"gioui.org/op/clip"
+	"gioui.org/op/paint"
+	"gioui.org/text"
+	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
-	"github.com/p9c/pod/pkg/gui/f32"
-	"github.com/p9c/pod/pkg/gui/io/pointer"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op/clip"
-	"github.com/p9c/pod/pkg/gui/op/paint"
-	"github.com/p9c/pod/pkg/gui/text"
-	"github.com/p9c/pod/pkg/gui/unit"
 	"image"
 	"image/color"
 )

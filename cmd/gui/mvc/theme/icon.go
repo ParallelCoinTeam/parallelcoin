@@ -7,10 +7,10 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/p9c/pod/pkg/gui/f32"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op/paint"
-	"github.com/p9c/pod/pkg/gui/unit"
+	"gioui.org/f32"
+	"gioui.org/layout"
+	"gioui.org/op/paint"
+	"gioui.org/unit"
 	"golang.org/x/exp/shiny/iconvg"
 )
 

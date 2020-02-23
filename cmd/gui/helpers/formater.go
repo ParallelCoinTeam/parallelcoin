@@ -3,8 +3,8 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/unit"
+	"gioui.org/layout"
+	"gioui.org/unit"
 	"image/color"
 	"strconv"
 	"time"

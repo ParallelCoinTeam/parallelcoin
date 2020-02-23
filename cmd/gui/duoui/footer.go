@@ -2,12 +2,12 @@ package duoui
 
 import (
 	"fmt"
-	
+
+	"gioui.org/layout"
+	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/unit"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -39,7 +39,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 			paddingVertical   int = 8
 			paddingHorizontal int = 8
 		)
-		
+
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
 				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
@@ -66,7 +66,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 								closeMeniItem.IconLayout(ui.ly.Context, buttonQuit)
 							})
 						},
-						
+
 						func() {
 							var logMenuItem theme.DuoUIbutton
 							logMenuItem = ui.ly.Theme.DuoUIbutton("", "", "", "ff303030", "traceIcon", "ffcfcfcf", textSize, iconSize, width, height, paddingVertical, paddingHorizontal)
@@ -85,7 +85,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 			layout.Rigid(func() {
 				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 					navButtons := []func(){
-						
+
 						// func() {
 						//	layout.UniformInset(unit.Dp(14)).Layout(ui.ly.Context, func() {
 						//		tim := ui.ly.Theme.Caption("Blocks: " + fmt.Sprint(ui.rc.Status.Node.BlockHeight))
@@ -102,7 +102,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 						//		tim.Layout(ui.ly.Context)
 						//	})
 						// },
-						
+
 						func() {
 							layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 								var networkMeniItem theme.DuoUIbutton
@@ -125,7 +125,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 								blocksMenuItem.Layout(ui.ly.Context, buttonBlocks)
 							})
 						},
-						
+
 						// func() {
 						//	layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 						//		var networkMeniItem theme.DuoUIbutton
@@ -182,4 +182,3 @@ func (ui *DuoUI) DuoUIfooter() func() {
 		)
 	}
 }
-

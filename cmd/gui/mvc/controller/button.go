@@ -5,10 +5,10 @@ package controller
 import (
 	"time"
 
-	"github.com/p9c/pod/pkg/gui/f32"
-	"github.com/p9c/pod/pkg/gui/gesture"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op"
+	"gioui.org/f32"
+	"gioui.org/gesture"
+	"gioui.org/layout"
+	"gioui.org/op"
 )
 
 type Button struct {

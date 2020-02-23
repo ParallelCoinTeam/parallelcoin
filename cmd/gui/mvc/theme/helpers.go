@@ -1,15 +1,15 @@
 package theme
 
 import (
+	"fmt"
 	"image"
 	"image/color"
-	"fmt"
 
-	"github.com/p9c/pod/pkg/gui/f32"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op/clip"
-	"github.com/p9c/pod/pkg/gui/op/paint"
-	"github.com/p9c/pod/pkg/gui/unit"
+	"gioui.org/f32"
+	"gioui.org/layout"
+	"gioui.org/op/clip"
+	"gioui.org/op/paint"
+	"gioui.org/unit"
 )
 
 func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color string, borderRadius [4]float32, padding [4]float32) {
@@ -33,7 +33,6 @@ func DuoUIdrawRectangle(gtx *layout.Context, w, h int, color string, borderRadiu
 		gtx.Dimensions = layout.Dimensions{Size: image.Point{X: w, Y: h}}
 	})
 }
-
 
 func HexARGB(s string) (c color.RGBA) {
 	_, _ = fmt.Sscanf(s, "%02x%02x%02x%02x", &c.A, &c.R, &c.G, &c.B)

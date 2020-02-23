@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"github.com/p9c/pod/pkg/gui/gesture"
-	"github.com/p9c/pod/pkg/gui/layout"
+	"gioui.org/gesture"
+	"gioui.org/layout"
 )
 
 type CheckBox struct {

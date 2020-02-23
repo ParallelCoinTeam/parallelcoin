@@ -6,11 +6,11 @@ import (
 	"github.com/p9c/pod/pkg/gui/clipboard"
 	"sync"
 
+	"gioui.org/app"
+	"gioui.org/layout"
+	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/pkg/fonts"
-	"github.com/p9c/pod/pkg/gui/app"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/unit"
 )
 
 var clipboardStarted bool

@@ -2,10 +2,10 @@ package view
 
 import (
 	"fmt"
+	"gioui.org/layout"
+	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/unit"
 )
 
 type DuoUIstatus struct {
@@ -42,7 +42,6 @@ func (b *DuoUIstatus) View(gtx *layout.Context, th *theme.DuoUItheme, stat *mode
 							balance.Color = theme.HexARGB(th.Color.Primary)
 							balance.Layout(gtx)
 						}),
-
 					)
 				}),
 				// Block height status item
@@ -58,7 +57,6 @@ func (b *DuoUIstatus) View(gtx *layout.Context, th *theme.DuoUItheme, stat *mode
 							blockheightVal.Color = theme.HexARGB(th.Color.Primary)
 							blockheightVal.Layout(gtx)
 						}),
-
 					)
 				}),
 
@@ -75,7 +73,6 @@ func (b *DuoUIstatus) View(gtx *layout.Context, th *theme.DuoUItheme, stat *mode
 							difficulty.Color = theme.HexARGB(th.Color.Primary)
 							difficulty.Layout(gtx)
 						}),
-
 					)
 				}),
 
@@ -92,10 +89,8 @@ func (b *DuoUIstatus) View(gtx *layout.Context, th *theme.DuoUItheme, stat *mode
 							connections.Color = theme.HexARGB(th.Color.Primary)
 							connections.Layout(gtx)
 						}),
-
 					)
 				}),
-
 			)
 		})
 	}

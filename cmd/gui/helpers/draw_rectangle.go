@@ -1,15 +1,12 @@
 package helpers
 
 import (
-	"github.com/p9c/pod/pkg/gui/f32"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op/paint"
+	"gioui.org/f32"
+	"gioui.org/layout"
+	"gioui.org/op/paint"
 	"image"
 	"image/color"
 )
-
-
-
 
 func DuoUIfill(gtx *layout.Context, col color.RGBA) {
 	cs := gtx.Constraints

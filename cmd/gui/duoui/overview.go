@@ -1,7 +1,7 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/pkg/gui/layout"
+	"gioui.org/layout"
 )
 
 func (ui *DuoUI) DuoUIoverview() func() {

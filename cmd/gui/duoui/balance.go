@@ -2,10 +2,10 @@ package duoui
 
 import (
 	"fmt"
+	"gioui.org/layout"
+	"gioui.org/text"
+	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/text"
-	"github.com/p9c/pod/pkg/gui/unit"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"image"
 )
@@ -30,9 +30,13 @@ func (ui *DuoUI) DuoUIbalance() func() {
 			cs := ui.ly.Context.Constraints
 			navButtons := []func(){
 				listItem(ui.ly.Context, ui.ly.Theme, "BALANCE :", ui.rc.Status.Wallet.Balance+" "+ui.rc.Settings.Abbrevation),
-				func() { theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
+				func() {
+					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				},
 				listItem(ui.ly.Context, ui.ly.Theme, "UNCNFIRMED :", ui.rc.Status.Wallet.Unconfirmed+" "+ui.rc.Settings.Abbrevation),
-				func() { theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0}) },
+				func() {
+					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				},
 				listItem(ui.ly.Context, ui.ly.Theme, "TRANSACTIONS :", fmt.Sprint(ui.rc.Status.Wallet.TxsNumber)),
 			}
 			itemsList.Layout(ui.ly.Context, len(navButtons), func(i int) {

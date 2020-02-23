@@ -6,11 +6,11 @@ import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"image/color"
 
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op"
-	"github.com/p9c/pod/pkg/gui/op/paint"
-	"github.com/p9c/pod/pkg/gui/text"
-	"github.com/p9c/pod/pkg/gui/unit"
+	"gioui.org/layout"
+	"gioui.org/op"
+	"gioui.org/op/paint"
+	"gioui.org/text"
+	"gioui.org/unit"
 )
 
 type DuoUIeditor struct {

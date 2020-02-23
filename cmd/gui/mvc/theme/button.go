@@ -3,20 +3,19 @@
 package theme
 
 import (
-	"github.com/p9c/pod/pkg/gui/io/pointer"
 	"image"
 	"image/color"
 
+	"gioui.org/f32"
+	"gioui.org/io/pointer"
+	"gioui.org/layout"
+	"gioui.org/op"
+	"gioui.org/op/clip"
+	"gioui.org/op/paint"
+	"gioui.org/text"
+	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/pkg/gui/f32"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op"
-	"github.com/p9c/pod/pkg/gui/op/clip"
-	"github.com/p9c/pod/pkg/gui/op/paint"
-	"github.com/p9c/pod/pkg/gui/text"
-	"github.com/p9c/pod/pkg/gui/unit"
 )
-
 
 type Button struct {
 	Text string
@@ -167,9 +166,6 @@ func drawInk(gtx *layout.Context, c controller.Click) {
 	stack.Pop()
 	op.InvalidateOp{}.Add(gtx.Ops)
 }
-
-
-
 
 var (
 	buttonInsideLayoutList = &layout.List{

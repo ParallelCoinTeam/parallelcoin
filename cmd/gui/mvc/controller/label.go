@@ -7,12 +7,12 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"github.com/p9c/pod/pkg/gui/f32"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op"
-	"github.com/p9c/pod/pkg/gui/op/paint"
-	"github.com/p9c/pod/pkg/gui/text"
-	"github.com/p9c/pod/pkg/gui/unit"
+	"gioui.org/f32"
+	"gioui.org/layout"
+	"gioui.org/op"
+	"gioui.org/op/paint"
+	"gioui.org/text"
+	"gioui.org/unit"
 
 	"golang.org/x/image/math/fixed"
 )

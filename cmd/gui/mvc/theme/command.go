@@ -3,21 +3,20 @@
 package theme
 
 import (
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/unit"
+	"gioui.org/layout"
+	"gioui.org/unit"
 	"time"
 )
 
 var ()
 
-type
-	Command struct {
-		Com      interface{}
-		ComID    string
-		Category string
-		Out      func()
-		Time     time.Time
-	}
+type Command struct {
+	Com      interface{}
+	ComID    string
+	Category string
+	Out      func()
+	Time     time.Time
+}
 
 func (t *DuoUItheme) Command(name string) *DuoUIcomponent {
 	return &DuoUIcomponent{

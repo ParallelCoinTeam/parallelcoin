@@ -5,9 +5,9 @@ package theme
 import (
 	"image/color"
 
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/text"
-	"github.com/p9c/pod/pkg/gui/unit"
+	"gioui.org/layout"
+	"gioui.org/text"
+	"gioui.org/unit"
 )
 
 var ()

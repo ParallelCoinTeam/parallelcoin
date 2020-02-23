@@ -3,8 +3,8 @@
 package theme
 
 import (
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/unit"
+	"gioui.org/layout"
+	"gioui.org/unit"
 )
 
 var ()

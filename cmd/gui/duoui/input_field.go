@@ -1,8 +1,8 @@
 package duoui
 
 import (
+	"gioui.org/text"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/log"
 	"reflect"
 )

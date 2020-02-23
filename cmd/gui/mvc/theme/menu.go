@@ -3,19 +3,19 @@
 package theme
 
 import (
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/text"
-	"github.com/p9c/pod/pkg/gui/unit"
+	"gioui.org/layout"
+	"gioui.org/text"
+	"gioui.org/unit"
 	"image/color"
 )
 
 type DuoUIthemeNav struct {
 	Title string
 	// Color is the text color.
-	TxColor       color.RGBA
-	Font          text.Font
-	BgColor       color.RGBA
-	CornerRadius  unit.Value
+	TxColor      color.RGBA
+	Font         text.Font
+	BgColor      color.RGBA
+	CornerRadius unit.Value
 	//Icon          *DuoUIicon
 	IcoBackground color.RGBA
 	IcoColor      color.RGBA

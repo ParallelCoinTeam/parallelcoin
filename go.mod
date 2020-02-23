@@ -3,11 +3,10 @@ module github.com/p9c/pod
 go 1.14
 
 require (
+	gioui.org v0.0.0-20200220081202-150b34aedef6
 	git.parallelcoin.io/dev/cryptonight v0.3.1
 	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
-	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/VividCortex/ewma v1.1.1
-	github.com/aarzilli/nucular v0.0.0-20191227141642-cca133278403
 	github.com/aead/siphash v1.0.1
 	github.com/aead/skein v0.0.0-20160722084837-9365ae6e95d2 // indirect
 	github.com/bitgoin/lyra2rev2 v0.0.0-20161212102046-bae9ad2043bb
@@ -19,10 +18,9 @@ require (
 	github.com/conformal/fastsha256 v0.0.0-20160815193821-637e65642941
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
-	github.com/dchest/blake256 v1.1.0
+	github.com/dchest/blake256 v1.1.0 // indirect
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
-	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/jcelliott/lumber v0.0.0-20160324203708-dd349441af25 // indirect
@@ -41,8 +39,8 @@ require (
 	golang.org/x/crypto v0.0.0-20200214034016-1d94cc7ab1c6
 	golang.org/x/exp v0.0.0-20200213203834-85f925bdd4d0
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
-	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
-	golang.org/x/sys v0.0.0-20200212091648-12a6c2dcc1e4
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
+	golang.org/x/sys v0.0.0-20200212091648-12a6c2dcc1e4 // indirect
 	golang.org/x/text v0.3.2
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect

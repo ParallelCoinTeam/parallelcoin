@@ -2,10 +2,10 @@ package duoui
 
 import (
 	"errors"
-	
+
+	"gioui.org/io/system"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/io/system"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )

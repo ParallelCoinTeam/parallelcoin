@@ -2,11 +2,11 @@ package theme
 
 import (
 	"fmt"
+	"gioui.org/layout"
+	"gioui.org/op/paint"
+	"gioui.org/text"
+	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/pkg/gui/layout"
-	"github.com/p9c/pod/pkg/gui/op/paint"
-	"github.com/p9c/pod/pkg/gui/text"
-	"github.com/p9c/pod/pkg/gui/unit"
 	"image/color"
 )
 
