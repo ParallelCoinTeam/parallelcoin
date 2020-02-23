@@ -4,82 +4,46 @@ import (
 	"fmt"
 	"net"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/transport"
 )
 
-const UDP4MulticastAddress = "224.0.0.1:11049"
-
 func main() {
+	log.L.SetLevel("trace", true)
 	ready := make(chan struct{})
+	var listener *net.UDPConn
+	var err error
+	transport.Address = "224.0.0.1:1234"
 	go func() {
-		log.INFO("listening")
+		listener, err = transport.Listen(8192,
+			func(addr *net.UDPAddr, count int, data []byte) {
+				log.INFOF("%s [%d] received '%s'", addr, count, string(data[:count]))
+			})
 		ready <- struct{}{}
-		Listen(UDP4MulticastAddress, func(addr *net.UDPAddr, count int, data []byte) {
-			log.INFO(addr, count, string(data[:count]))
-		})
 	}()
-	bc, err := NewBroadcaster(UDP4MulticastAddress)
+	<-ready
+	bc, err := transport.NewBroadcaster(8192)
 	if err != nil {
 		log.ERROR(err)
 	}
-	<-ready
+	var n int
 	for i := 0; i < 10; i++ {
-		log.INFO("sending", i)
-		// var n int
-		_, err = bc.Write([]byte(fmt.Sprintf("this is a test %d", i)))
-		// log.INFO(n, err)
+		text := fmt.Sprintf("this is a test %d", i)
+		n, err = bc.Write([]byte(text))
 		if err != nil {
 			log.ERROR(err)
 		}
+		log.INFOF("%s sent %d '%s'", bc.RemoteAddr(), n, text)
+	}
+	err = bc.Close()
+	if err != nil {
+		log.ERROR(err)
 	}
 	time.Sleep(time.Second * 1)
-}
-
-const (
-	maxDatagramSize = 8192
-)
-
-// NewBroadcaster creates a new UDP multicast connection on which to broadcast
-func NewBroadcaster(address string) (*net.UDPConn, error) {
-	addr, err := net.ResolveUDPAddr("udp", address)
-	if err != nil {
-		return nil, err
-	}
-
-	conn, err := net.DialUDP("udp", nil, addr)
-	if err != nil {
-		return nil, err
-	}
-
-	return conn, nil
-}
-
-// Listen binds to the UDP address and port given and writes packets received
-// from that address to a buffer which is passed to a hander
-func Listen(address string, handler func(*net.UDPAddr, int, []byte)) {
-	// Parse the string address
-	addr, err := net.ResolveUDPAddr("udp", address)
+	err = listener.Close()
 	if err != nil {
 		log.ERROR(err)
 	}
-
-	// Open up a connection
-	conn, err := net.ListenMulticastUDP("udp", nil, addr)
-	if err != nil {
-		log.ERROR(err)
-	}
-
-	conn.SetReadBuffer(maxDatagramSize)
-
-	// Loop forever reading from the socket
-	for {
-		buffer := make([]byte, maxDatagramSize)
-		numBytes, src, err := conn.ReadFromUDP(buffer)
-		if err != nil {
-			log.ERROR("ReadFromUDP failed:", err)
-		}
-
-		handler(src, numBytes, buffer)
-	}
+	time.Sleep(time.Second * 1)
 }

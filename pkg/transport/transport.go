@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 	"net"
-	"strconv"
 	"sync"
 	"time"
 	
@@ -217,7 +216,8 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 				shard, err := c.ciph.Open(nil, nonceBytes,
 					buf[16:], nil)
 				if err != nil {
-					log.ERROR(err)
+					// log.ERROR(err)
+					// corrupted or irrelevant message
 					continue
 				}
 				if bn, ok := c.buffers[nonce]; ok {
@@ -269,21 +269,21 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 	}()
 	return
 }
-
-func GetUDPAddr(address string) (sendAddr *net.UDPAddr) {
-	sendHost, sendPort, err := net.SplitHostPort(address)
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
-	sendPortI, err := strconv.ParseInt(sendPort, 10, 64)
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
-	sendAddr = &net.UDPAddr{IP: net.ParseIP(sendHost),
-		Port: int(sendPortI)}
-	// log.DEBUG("multicast", address)
-	// log.SPEW(sendAddr)
-	return
-}
+//
+// func GetUDPAddr(address string) (sendAddr *net.UDPAddr) {
+// 	sendHost, sendPort, err := net.SplitHostPort(address)
+// 	if err != nil {
+// 		log.ERROR(err)
+// 		return
+// 	}
+// 	sendPortI, err := strconv.ParseInt(sendPort, 10, 64)
+// 	if err != nil {
+// 		log.ERROR(err)
+// 		return
+// 	}
+// 	sendAddr = &net.UDPAddr{IP: net.ParseIP(sendHost),
+// 		Port: int(sendPortI)}
+// 	// log.DEBUG("multicast", Address)
+// 	// log.SPEW(sendAddr)
+// 	return
+// }
