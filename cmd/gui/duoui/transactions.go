@@ -48,39 +48,41 @@ func (ui *DuoUI) DuoUItransactions() func() {
 					layout.Stacked(func() {
 						ui.ly.Context.Constraints.Width.Min = hmin
 						ui.ly.Context.Constraints.Height.Min = vmin
-						layout.Flex{
-							Spacing: layout.SpaceBetween,
-						}.Layout(ui.ly.Context,
-							layout.Rigid(func() {
-								layout.Flex{}.Layout(ui.ly.Context,
-									layout.Rigid(func() {
-										ui.ly.Theme.DuoUIcheckBox("ALL", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, allTxs)
-									}),
-									layout.Rigid(func() {
-										ui.ly.Theme.DuoUIcheckBox("MINTED", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, mintedTxs)
-									}),
-									layout.Rigid(func() {
-										ui.ly.Theme.DuoUIcheckBox("IMATURE", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, immatureTxs)
-									}),
-									layout.Rigid(func() {
-										ui.ly.Theme.DuoUIcheckBox("SENT", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, sentTxs)
-									}),
-									layout.Rigid(func() {
-										ui.ly.Theme.DuoUIcheckBox("RECEIVED", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, receivedTxs)
-									}),
-								)
-							}),
-							layout.Rigid(func() {
-								layout.Flex{}.Layout(ui.ly.Context,
-									layout.Rigid(func() {
-										c := ui.ly.Theme.DuoUIcounter()
+						layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
+							layout.Flex{
+								Spacing: layout.SpaceBetween,
+							}.Layout(ui.ly.Context,
+								layout.Rigid(func() {
+									layout.Flex{}.Layout(ui.ly.Context,
+										layout.Rigid(func() {
+											ui.ly.Theme.DuoUIcheckBox("ALL", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, allTxs)
+										}),
+										layout.Rigid(func() {
+											ui.ly.Theme.DuoUIcheckBox("MINTED", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, mintedTxs)
+										}),
+										layout.Rigid(func() {
+											ui.ly.Theme.DuoUIcheckBox("IMATURE", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, immatureTxs)
+										}),
+										layout.Rigid(func() {
+											ui.ly.Theme.DuoUIcheckBox("SENT", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, sentTxs)
+										}),
+										layout.Rigid(func() {
+											ui.ly.Theme.DuoUIcheckBox("RECEIVED", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, receivedTxs)
+										}),
+									)
+								}),
+								layout.Rigid(func() {
+									layout.Flex{}.Layout(ui.ly.Context,
+										layout.Rigid(func() {
+											c := ui.ly.Theme.DuoUIcounter()
 
-										c.Layout(ui.ly.Context, itemValue)
+											c.Layout(ui.ly.Context, itemValue)
 
-									}),
-								)
-							}),
-						)
+										}),
+									)
+								}),
+							)
+						})
 					}),
 				)
 			}),
