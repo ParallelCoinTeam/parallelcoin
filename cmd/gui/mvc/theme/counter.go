@@ -16,50 +16,10 @@ var (
 	couterReset    = new(controller.Button)
 )
 
-//type button struct {
-//	pressed      bool
-//	Name         string
-//	ColorBg      string
-//	BorderRadius [4]float32
-//	OperateValue interface{}
-//	Font         text.Font
-//	TxColor      color.RGBA
-//	TextSize     unit.Value
-//	shaper       text.Shaper
-//}
-//
-//func (b *button) Layout(gtx *layout.Context, action func(interface{})) {
-//	for _, e := range gtx.Events(b) {
-//		if e, ok := e.(pointer.Event); ok {
-//			switch e.Type {
-//			case pointer.Press:
-//				b.pressed = true
-//				action(b.OperateValue)
-//				log.INFO("Itwoikoos")
-//
-//			case pointer.Release:
-//				b.pressed = false
-//			}
-//		}
-//	}
-//
-//	cs := gtx.Constraints
-//	if b.pressed {
-//	}
-//	pointer.Rect(
-//		image.Rectangle{Max: image.Point{X: cs.Width.Min, Y: cs.Height.Min}},
-//	).Add(gtx.Ops)
-//	pointer.InputOp{Key: b}.Add(gtx.Ops)
-//	paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
-//	controller.Label{
-//		Alignment: text.Middle,
-//	}.Layout(gtx, b.shaper, b.Font, b.TextSize, b.Name)
-//}
-
 type DuoUIcounter struct {
-	increase *DuoUIbutton
-	decrease *DuoUIbutton
-	reset    *DuoUIbutton
+	increase DuoUIbutton
+	decrease DuoUIbutton
+	reset    DuoUIbutton
 	Font     text.Font
 	TextSize unit.Value
 	TxColor  color.RGBA
@@ -69,39 +29,9 @@ type DuoUIcounter struct {
 
 func (t *DuoUItheme) DuoUIcounter() DuoUIcounter {
 	return DuoUIcounter{
-		increase: &DuoUIbutton{
-			Text:         "increase",
-			BgColor:      HexARGB(t.Color.Light),
-			CornerRadius: unit.Value{},
-			Font: text.Font{
-				Typeface: t.Font.Primary,
-			},
-			TxColor:  HexARGB(t.Color.Primary),
-			TextSize: unit.Dp(float32(16)),
-			shaper:   t.Shaper,
-		},
-		decrease: &DuoUIbutton{
-			Text:         "decrease",
-			BgColor:      HexARGB(t.Color.Light),
-			CornerRadius: unit.Value{},
-			Font: text.Font{
-				Typeface: t.Font.Primary,
-			},
-			TxColor:  HexARGB(t.Color.Primary),
-			TextSize: unit.Dp(float32(16)),
-			shaper:   t.Shaper,
-		},
-		reset: &DuoUIbutton{
-			Text:         "reset",
-			BgColor:      HexARGB(t.Color.Light),
-			CornerRadius: unit.Value{},
-			Font: text.Font{
-				Typeface: t.Font.Primary,
-			},
-			TxColor:  HexARGB(t.Color.Primary),
-			TextSize: unit.Dp(float32(16)),
-			shaper:   t.Shaper,
-		},
+		increase: t.DuoUIbutton(t.Font.Secondary, "INCREASE", t.Color.Primary, t.Color.Light, "", "", 16, 0, 128, 48, 0, 0),
+		decrease: t.DuoUIbutton(t.Font.Secondary, "DECREASE", t.Color.Primary, t.Color.Light, "", "", 16, 0, 128, 48, 0, 0),
+		reset:    t.DuoUIbutton(t.Font.Secondary, "RESET", t.Color.Primary, t.Color.Light, "", "", 16, 0, 128, 48, 0, 0),
 		Font: text.Font{
 			Typeface: t.Font.Primary,
 		},
@@ -125,8 +55,6 @@ func (c DuoUIcounter) Layout(gtx *layout.Context, cc *controller.DuoUIcounter) {
 
 					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func() {
-							//cs := gtx.Constraints
-
 							in := layout.UniformInset(unit.Dp(0))
 							in.Layout(gtx, func() {
 								paint.ColorOp{Color: c.TxColor}.Add(gtx.Ops)
@@ -144,16 +72,16 @@ func (c DuoUIcounter) Layout(gtx *layout.Context, cc *controller.DuoUIcounter) {
 									c.increase.Layout(gtx, couterIncrease)
 								}),
 								layout.Flexed(0.2, func() {
-									for couterDecrease.Clicked(gtx) {
-										cc.Decrease()
-									}
-									c.decrease.Layout(gtx, couterDecrease)
-								}),
-								layout.Flexed(0.4, func() {
 									for couterReset.Clicked(gtx) {
 										cc.Reset()
 									}
 									c.reset.Layout(gtx, couterReset)
+								}),
+								layout.Flexed(0.4, func() {
+									for couterDecrease.Clicked(gtx) {
+										cc.Decrease()
+									}
+									c.decrease.Layout(gtx, couterDecrease)
 								}),
 							)
 						}),
