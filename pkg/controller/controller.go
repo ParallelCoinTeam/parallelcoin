@@ -44,7 +44,8 @@ const (
 )
 
 type Controller struct {
-	conn                   *transport.Connection
+	multiConn              *transport.Channel
+	uniConn                *transport.Channel
 	active                 *atomic.Bool
 	ctx                    context.Context
 	cx                     *conte.Xt
@@ -57,7 +58,7 @@ type Controller struct {
 	prevHash               *chainhash.Hash
 	lastTxUpdate           time.Time
 	lastGenerated          time.Time
-	pauseShards            [][]byte
+	pauseShards            transport.BufIter
 	sendAddresses          []*net.UDPAddr
 	subMx                  *sync.Mutex
 	submitChan             chan []byte
@@ -78,20 +79,12 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		log.WARN("not running controller without p2p listener enabled")
 		return
 	}
-	ctx, cancel := context.WithCancel(context.Background())
-	conn, err := transport.NewConnection(UDP4MulticastAddress,
-		*cx.Config.Controller, *cx.Config.MinerPass, MaxDatagramSize, ctx)
-	if err != nil {
-		log.ERROR(err)
-		cancel()
-		return
-	}
 	// for !cx.RealNode.SyncManager.IsCurrent() {
 	// 	log.DEBUG("node is not synced, waiting 2 seconds to start controller")
 	// 	time.Sleep(time.Second * 2)
 	// }
+	ctx, cancel := context.WithCancel(context.Background())
 	ctrl := &Controller{
-		conn:                   conn,
 		active:                 &atomic.Bool{},
 		ctx:                    ctx,
 		cx:                     cx,
@@ -100,7 +93,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		oldBlocks:              &atomic.Value{},
 		lastTxUpdate:           time.Now(),
 		lastGenerated:          time.Now(),
-		pauseShards:            [][]byte{},
 		sendAddresses:          []*net.UDPAddr{},
 		subMx:                  &sync.Mutex{},
 		submitChan:             make(chan []byte),
@@ -109,13 +101,21 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		buffer:                 ring.New(BufferSize),
 		began:                  time.Now(),
 	}
+	var err error
+	ctrl.multiConn, err = transport.NewBroadcastChannel(ctrl, *cx.Config.MinerPass,
+		11049, MaxDatagramSize, make(transport.Handlers))
+	if err != nil {
+		log.ERROR(err)
+		cancel()
+		return
+	}
+	
 	ctrl.height.Store(int32(0))
 	ctrl.active.Store(false)
 	buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
-	pauseShards, err := ctrl.conn.CreateShards(pM.Data, pause.PauseMagic)
-	if err != nil {
-		log.ERROR(err)
+	var pauseShards *transport.BufIter
+	if pauseShards = transport.GetShards(pM.Data); log.Check(err) {
 	} else {
 		ctrl.active.Store(true)
 	}
@@ -123,7 +123,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	defer func() {
 		log.DEBUG("miner controller shutting down")
 		ctrl.active.Store(false)
-		err := ctrl.conn.SendShards(pauseShards)
+		err := ctrl.multiConn.SendMany(pause.PauseMagic, pauseShards)
 		if err != nil {
 			log.ERROR(err)
 		}
@@ -135,7 +135,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	} else {
 		ctrl.active.Store(true)
 	}
-	err = ctrl.conn.Listen(handlers, ctrl, nil, nil)
+	ctrl.uniConn, err = transport.NewUnicastChannel(ctrl, *cx.Config.MinerPass,
+		":0", ":0", MaxDatagramSize, handlersUnicast)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
@@ -161,98 +162,95 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	return
 }
 
-// these are the handlers for specific message types.
-var handlers = transport.HandleFunc{
+var handlersUnicast = transport.Handlers{
 	// Solutions submitted by workers
-	string(sol.SolutionMagic): func(ctx interface{}) func(b []byte) (err error) {
-		return func(b []byte) (err error) {
-			log.DEBUG("received solution")
-			// log.SPEW(ctx)
-			c := ctx.(*Controller)
-			c.mx.Lock()
-			defer c.mx.Unlock()
-			j := sol.LoadSolContainer(b)
-			msgBlock := j.GetMsgBlock()
-			// log.WARN(msgBlock.Header.Version)
-			// msgBlock.Transactions = append(c.coinbases[msgBlock.Header.Version], c.)
-			msgBlock.Transactions = []*wire.MsgTx{}
-			txs := append([]*util.Tx{c.coinbases[msgBlock.Header.Version]}, c.transactions...)
-			for i := range txs {
-				msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
-			}
-			// log.SPEW(msgBlock)
-			// log.SPEW(c.coinbases)
-			// log.SPEW(c.transactions)
-			if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
-				BestSnapshot().Hash) {
-				log.DEBUG("block submitted by kopach miner worker is stale")
+	string(sol.SolutionMagic):
+	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
+		log.DEBUG("received solution")
+		// log.SPEW(ctx)
+		c := ctx.(*Controller)
+		c.mx.Lock()
+		defer c.mx.Unlock()
+		j := sol.LoadSolContainer(b)
+		msgBlock := j.GetMsgBlock()
+		// log.WARN(msgBlock.Header.Version)
+		// msgBlock.Transactions = append(c.coinbases[msgBlock.Header.Version], c.)
+		msgBlock.Transactions = []*wire.MsgTx{}
+		txs := append([]*util.Tx{c.coinbases[msgBlock.Header.Version]}, c.transactions...)
+		for i := range txs {
+			msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
+		}
+		// log.SPEW(msgBlock)
+		// log.SPEW(c.coinbases)
+		// log.SPEW(c.transactions)
+		if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
+			BestSnapshot().Hash) {
+			log.DEBUG("block submitted by kopach miner worker is stale")
+			return
+		}
+		// set old blocks to pause and send pause directly as block is
+		// probably a solution
+		c.oldBlocks.Store(c.pauseShards)
+		err = c.multiConn.SendMany(pause.PauseMagic, &c.pauseShards)
+		if err != nil {
+			log.ERROR(err)
+			return
+		}
+		block := util.NewBlock(msgBlock)
+		isOrphan, err := c.cx.RealNode.SyncManager.ProcessBlock(block,
+			blockchain.BFNone)
+		if err != nil {
+			// Anything other than a rule violation is an unexpected error, so log
+			// that error as an internal error.
+			if _, ok := err.(blockchain.RuleError); !ok {
+				log.WARNF(
+					"Unexpected error while processing block submitted"+
+						" via kopach miner:", err)
 				return
-			}
-			// set old blocks to pause and send pause directly as block is
-			// probably a solution
-			c.oldBlocks.Store(c.pauseShards)
-			err = c.conn.SendShards(c.pauseShards)
-			if err != nil {
-				log.ERROR(err)
-				return
-			}
-			block := util.NewBlock(msgBlock)
-			isOrphan, err := c.cx.RealNode.SyncManager.ProcessBlock(block,
-				blockchain.BFNone)
-			if err != nil {
-				// Anything other than a rule violation is an unexpected error, so log
-				// that error as an internal error.
-				if _, ok := err.(blockchain.RuleError); !ok {
-					log.WARNF(
-						"Unexpected error while processing block submitted"+
-							" via kopach miner:", err)
-					return
-				} else {
-					log.WARN("block submitted via kopach miner rejected:", err)
-					if isOrphan {
-						log.WARN("block is an orphan")
-						return
-					}
+			} else {
+				log.WARN("block submitted via kopach miner rejected:", err)
+				if isOrphan {
+					log.WARN("block is an orphan")
 					return
 				}
-				// // maybe something wrong with the network,
-				// // send current work again
-				// err = c.sendNewBlockTemplate()
-				// if err != nil {
-				// 	log.DEBUG(err)
-				// }
-				// return
+				return
 			}
-			log.DEBUG("the block was accepted")
-			coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
-			prevHeight := block.Height() - 1
-			prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
-			prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
-			since := block.MsgBlock().Header.Timestamp.Unix() - prevTime
-			bHash := block.MsgBlock().BlockHashWithAlgos(block.Height())
-			log.WARNF("new block height %d %08x %s%10d %08x %v %s %ds since prev",
-				block.Height(),
-				prevBlock.MsgBlock().Header.Bits,
-				bHash,
-				block.MsgBlock().Header.Timestamp.Unix(),
-				block.MsgBlock().Header.Bits,
-				util.Amount(coinbaseTx.Value),
-				fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
-			return
+			// // maybe something wrong with the network,
+			// // send current work again
+			// err = c.sendNewBlockTemplate()
+			// if err != nil {
+			// 	log.DEBUG(err)
+			// }
+			// return
 		}
+		log.DEBUG("the block was accepted")
+		coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
+		prevHeight := block.Height() - 1
+		prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
+		prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
+		since := block.MsgBlock().Header.Timestamp.Unix() - prevTime
+		bHash := block.MsgBlock().BlockHashWithAlgos(block.Height())
+		log.WARNF("new block height %d %08x %s%10d %08x %v %s %ds since prev",
+			block.Height(),
+			prevBlock.MsgBlock().Header.Bits,
+			bHash,
+			block.MsgBlock().Header.Timestamp.Unix(),
+			block.MsgBlock().Header.Bits,
+			util.Amount(coinbaseTx.Value),
+			fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
+		return
 	},
 	// hashrate reports from workers
-	string(hashrate.HashrateMagic): func(ctx interface{}) func(b []byte) (err error) {
-		return func(b []byte) (err error) {
-			c := ctx.(*Controller)
-			hp := hashrate.LoadContainer(b)
-			report := hp.Struct()
-			// add to total hash counts
-			current, _ := c.cx.Hashrate.Load().(int)
-			// log.TRACE("received hashrate report", current, report.Count)
-			c.cx.Hashrate.Store(report.Count + current)
-			return
-		}
+	string(hashrate.HashrateMagic):
+	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
+		c := ctx.(*Controller)
+		hp := hashrate.LoadContainer(b)
+		report := hp.Struct()
+		// add to total hash counts
+		current, _ := c.cx.Hashrate.Load().(int)
+		// log.TRACE("received hashrate report", current, report.Count)
+		c.cx.Hashrate.Store(report.Count + current)
+		return
 	},
 }
 
@@ -268,8 +266,8 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
 	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
-	shards, err := c.conn.CreateShards(fMC.Data, job.WorkMagic)
-	err = c.conn.SendShards(shards)
+	shards := transport.GetShards(fMC.Data)
+	err = c.multiConn.SendMany(job.WorkMagic, shards)
 	if err != nil {
 		log.ERROR(err)
 	}
@@ -339,12 +337,12 @@ out:
 				}
 				break
 			}
-			oB, ok := ctrl.oldBlocks.Load().([][]byte)
-			if len(oB) == 0 || !ok {
+			oB, ok := ctrl.oldBlocks.Load().(transport.BufIter)
+			if oB.Len() == 0 || !ok {
 				log.DEBUG("template is empty")
 				break
 			}
-			err := ctrl.conn.SendShards(oB)
+			err := ctrl.multiConn.SendMany(job.WorkMagic, &oB)
 			if err != nil {
 				log.ERROR(err)
 			}
@@ -408,7 +406,8 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 					// log.DEBUG(*c.cx.Config.Controller)
 					// c.coinbases = msgB.Transactions
 					var mC job.Container
-					mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
+					mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB),
+						advertisment.Get(c.cx), &c.coinbases)
 					nH := mC.GetNewHeight()
 					if c.height.Load().(int32) > nH {
 						log.DEBUG("new height")
@@ -419,14 +418,9 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 					}
 					log.SPEW(c.coinbases)
 					// log.SPEW(mC.Data)
-					shards, err := c.conn.CreateShards(mC.Data, job.WorkMagic)
-					if err != nil {
-						log.TRACE(err)
-					}
+					shards := transport.GetShards(mC.Data)
 					c.oldBlocks.Store(shards)
-					err = c.conn.SendShards(shards)
-					if err != nil {
-						log.ERROR(err)
+					if err := c.multiConn.SendMany(job.WorkMagic, shards); log.Check(err) {
 					}
 				}
 			}

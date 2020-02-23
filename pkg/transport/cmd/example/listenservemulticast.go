@@ -20,10 +20,11 @@ var (
 
 func main() {
 	log.L.SetLevel("trace", true)
-	if c, err := transport.NewBroadcastChannel("cipher",
+	if c, err := transport.NewBroadcastChannel(nil, "cipher",
 		1234, 8192, transport.Handlers{
-			TestMagic: func(src *net.UDPAddr, dst string, count int, data []byte) (err error) {
-				log.INFOF("%s <- %s [%d] '%s'", src.String(), dst, count, string(data[:count]))
+			TestMagic: func(ctx interface{}, src *net.UDPAddr, dst string,
+				b []byte) (err error) {
+				log.INFOF("%s <- %s [%d] '%s'", src.String(), dst, len(b), string(b))
 				return
 			},
 		},
@@ -33,7 +34,7 @@ func main() {
 		var n int
 		loop.To(10, func(i int) {
 			text := []byte(fmt.Sprintf("this is a test %d", i))
-			if n, err = c.Send(TestMagicB, text); log.Check(err) {
+			if err = c.SendMany(TestMagicB, transport.GetShards(text)); log.Check(err) {
 			} else {
 				log.INFOF("%s -> %s [%d] '%s'",
 					c.Sender.LocalAddr(), c.Sender.RemoteAddr(), n-4, text)

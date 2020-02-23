@@ -27,20 +27,21 @@ import (
 const RoundsPerAlgo = 23
 
 type Worker struct {
-	sem          sem.T
-	conn         net.Conn
-	dispatchConn *transport.Connection
-	ciph         cipher.AEAD
-	Quit         chan struct{}
-	run          sem.T
-	block        *util.Block
-	msgBlock     *wire.MsgBlock
-	bitses       map[int32]uint32
-	hashes       map[int32]*chainhash.Hash
-	roller       *Counter
-	startNonce   uint32
-	startChan    chan struct{}
-	stopChan     chan struct{}
+	sem           sem.T
+	multicastConn net.Conn
+	unicastConn   net.Conn
+	dispatchConn  *transport.Channel
+	ciph          cipher.AEAD
+	Quit          chan struct{}
+	run           sem.T
+	block         *util.Block
+	msgBlock      *wire.MsgBlock
+	bitses        map[int32]uint32
+	hashes        map[int32]*chainhash.Hash
+	roller        *Counter
+	startNonce    uint32
+	startChan     chan struct{}
+	stopChan      chan struct{}
 	// running    uint32
 }
 
@@ -90,15 +91,15 @@ func NewWithConnAndSemaphore(
 	log.DEBUG("creating new worker")
 	msgBlock := &wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
-		sem:       s,
-		conn:      conn,
-		Quit:      quit,
-		run:       sem.New(1),
-		block:     util.NewBlock(msgBlock),
-		msgBlock:  msgBlock,
-		roller:    NewCounter(RoundsPerAlgo),
-		startChan: make(chan struct{}),
-		stopChan:  make(chan struct{}),
+		sem:           s,
+		multicastConn: conn,
+		Quit:          quit,
+		run:           sem.New(1),
+		block:         util.NewBlock(msgBlock),
+		msgBlock:      msgBlock,
+		roller:        NewCounter(RoundsPerAlgo),
+		startChan:     make(chan struct{}),
+		stopChan:      make(chan struct{}),
 	}
 	// with this we can report cumulative hash counts as well as using it to
 	// distribute algorithms evenly
@@ -171,7 +172,8 @@ func NewWithConnAndSemaphore(
 							})
 							log.SPEW(w.msgBlock)
 							srs := sol.GetSolContainer(w.msgBlock)
-							err := w.dispatchConn.Send(srs.Data, sol.SolutionMagic)
+							err := w.dispatchConn.SendMany(sol.SolutionMagic,
+								transport.GetShards(srs.Data))
 							if err != nil {
 								log.ERROR(err)
 							}
@@ -190,7 +192,8 @@ func NewWithConnAndSemaphore(
 							// 	"\r %9d hash/s %s       \r", total/since, fork.GetAlgoName(w.msgBlock.Header.Version, nH))
 							// send out broadcast containing worker nonce and algorithm and count of blocks
 							hashReport := hashrate.Get(w.roller.RoundsPerAlgo, nextAlgo, nH)
-							err := w.dispatchConn.Send(hashReport.Data, hashrate.HashrateMagic)
+							err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
+								transport.GetShards(hashReport.Data))
 							if err != nil {
 								log.ERROR(err)
 							}
@@ -241,9 +244,11 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// }
 	address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
 	log.DEBUG(address)
-	err = w.dispatchConn.SetSendConn(address)
-	if err != nil {
-		log.ERROR(err)
+	if address != w.dispatchConn.Sender.RemoteAddr().String() {
+		err = w.dispatchConn.SetDestination(address)
+		if err != nil {
+			log.ERROR(err)
+		}
 	}
 	// }
 	// log.SPEW(w.dispatchConn)
@@ -318,7 +323,8 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 // pod) configuration to allow workers to dispatch their solutions
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	log.DEBUG("receiving dispatch password")
-	conn, err := transport.NewConnection("", "", pass, controller.MaxDatagramSize, nil)
+	conn, err := transport.NewUnicastChannel(w, pass, "", ":0",
+		controller.MaxDatagramSize, nil)
 	if err != nil {
 		log.ERROR(err)
 	}

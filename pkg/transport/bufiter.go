@@ -13,6 +13,11 @@ func NewBufIter(buf Buf) *BufIter {
 	return &BufIter{Buf: buf}
 }
 
+// Len returns the length of the buffer
+func (b *BufIter) Len() int {
+	return len(b.Buf)
+}
+
 // Get returns the currently selected Buf
 func (b *BufIter) Get() []byte {
 	return b.Buf[b.cursor]
