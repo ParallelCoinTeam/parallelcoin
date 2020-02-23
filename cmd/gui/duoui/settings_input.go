@@ -70,7 +70,7 @@ func (f *Field) InputFields(ui *DuoUI) {
 		default:
 		}
 	case "switch":
-		ui.ly.Theme.DuoUIcheckBox(f.Field.Name).Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.CheckBox))
+		ui.ly.Theme.DuoUIcheckBox(f.Field.Name, "ff303030", "ff303030").Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.CheckBox))
 	case "radio":
 		//radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 		//layout.Flex{}.Layout(gtx,

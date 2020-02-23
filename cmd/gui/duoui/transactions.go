@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/pkg/gui/f32"
 	"github.com/p9c/pod/pkg/gui/layout"
+	"github.com/p9c/pod/pkg/gui/op/clip"
 	"github.com/p9c/pod/pkg/gui/text"
 	"github.com/p9c/pod/pkg/gui/unit"
 )
@@ -13,12 +15,15 @@ var (
 	transList = &layout.List{
 		Axis: layout.Vertical,
 	}
-	allTxs              = new(controller.CheckBox)
-	mintedTxs           = new(controller.CheckBox)
-	immatureTxs         = new(controller.CheckBox)
-	sentTxs             = new(controller.CheckBox)
-	receivedTxs         = new(controller.CheckBox)
-	//transactionsCounter = new(controller.Counter)
+	allTxs      = new(controller.CheckBox)
+	mintedTxs   = new(controller.CheckBox)
+	immatureTxs = new(controller.CheckBox)
+	sentTxs     = new(controller.CheckBox)
+	receivedTxs = new(controller.CheckBox)
+	itemValue   = &controller.DuoUIcounter{
+		Value:        11,
+		OperateValue: 1,
+	}
 )
 
 func (ui *DuoUI) DuoUItransactions() func() {
@@ -28,49 +33,56 @@ func (ui *DuoUI) DuoUItransactions() func() {
 			Axis: layout.Vertical,
 		}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
-				cs := ui.ly.Context.Constraints
-				theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 48, ui.ly.Theme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				hmin := ui.ly.Context.Constraints.Width.Min
+				vmin := ui.ly.Context.Constraints.Height.Min
+				layout.Stack{Alignment: layout.Center}.Layout(ui.ly.Context,
+					layout.Expanded(func() {
+						clip.Rect{
+							Rect: f32.Rectangle{Max: f32.Point{
+								X: float32(ui.ly.Context.Constraints.Width.Min),
+								Y: float32(ui.ly.Context.Constraints.Height.Min),
+							}},
+						}.Op(ui.ly.Context.Ops).Add(ui.ly.Context.Ops)
+						fill(ui.ly.Context, theme.HexARGB(ui.ly.Theme.Color.Primary))
+					}),
+					layout.Stacked(func() {
+						ui.ly.Context.Constraints.Width.Min = hmin
+						ui.ly.Context.Constraints.Height.Min = vmin
+						layout.Flex{
+							Spacing: layout.SpaceBetween,
+						}.Layout(ui.ly.Context,
+							layout.Rigid(func() {
+								layout.Flex{}.Layout(ui.ly.Context,
+									layout.Rigid(func() {
+										ui.ly.Theme.DuoUIcheckBox("ALL", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, allTxs)
+									}),
+									layout.Rigid(func() {
+										ui.ly.Theme.DuoUIcheckBox("MINTED", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, mintedTxs)
+									}),
+									layout.Rigid(func() {
+										ui.ly.Theme.DuoUIcheckBox("IMATURE", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, immatureTxs)
+									}),
+									layout.Rigid(func() {
+										ui.ly.Theme.DuoUIcheckBox("SENT", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, sentTxs)
+									}),
+									layout.Rigid(func() {
+										ui.ly.Theme.DuoUIcheckBox("RECEIVED", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, receivedTxs)
+									}),
+								)
+							}),
+							layout.Rigid(func() {
+								layout.Flex{}.Layout(ui.ly.Context,
+									layout.Rigid(func() {
+										c := ui.ly.Theme.DuoUIcounter()
 
-				in := layout.UniformInset(unit.Dp(8))
-				in.Layout(ui.ly.Context, func() {
+										c.Layout(ui.ly.Context, itemValue)
 
-					layout.Flex{
-						Spacing: layout.SpaceBetween,
-					}.Layout(ui.ly.Context,
-						layout.Rigid(func() {
-							layout.Flex{}.Layout(ui.ly.Context,
-								layout.Rigid(func() {
-									ui.ly.Theme.DuoUIcheckBox("ALL").Layout(ui.ly.Context, allTxs)
-								}),
-								layout.Rigid(func() {
-									ui.ly.Theme.DuoUIcheckBox("MINTED").Layout(ui.ly.Context, mintedTxs)
-								}),
-								layout.Rigid(func() {
-									ui.ly.Theme.DuoUIcheckBox("IMATURE").Layout(ui.ly.Context, immatureTxs)
-								}),
-								layout.Rigid(func() {
-									ui.ly.Theme.DuoUIcheckBox("SENT").Layout(ui.ly.Context, sentTxs)
-								}),
-								layout.Rigid(func() {
-									ui.ly.Theme.DuoUIcheckBox("RECEIVED").Layout(ui.ly.Context, receivedTxs)
-								}),
-							)
-						}),
-						layout.Rigid(func() {
-							layout.Flex{}.Layout(ui.ly.Context,
-								layout.Rigid(func() {
-
-									//view.DuoUIcounter(duo)
-									var txsCounter theme.DuoUIcounter
-									txsCounter = ui.ly.Theme.DuoUIcounter(ui.ly.Theme.Font.Primary, "ffcfcfcf", "ff303030", 128, 48, 0, 0)
-
-
-									txsCounter.Layout(ui.ly.Context, ui.ly.Theme)
-								}),
-							)
-						}),
-					)
-				})
+									}),
+								)
+							}),
+						)
+					}),
+				)
 			}),
 			layout.Flexed(1, func() {
 				in := layout.UniformInset(unit.Dp(16))

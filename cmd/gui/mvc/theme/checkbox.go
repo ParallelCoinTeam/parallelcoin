@@ -13,15 +13,15 @@ type DuoUIcheckBox struct {
 	checkable
 }
 
-func (t *DuoUItheme) DuoUIcheckBox(label string) DuoUIcheckBox {
+func (t *DuoUItheme) DuoUIcheckBox(label, color, iconColor string) DuoUIcheckBox {
 	return DuoUIcheckBox{
 		checkable{
 			Font: text.Font{
 				Typeface: t.Font.Primary,
 			},
 			Label:              label,
-			Color:              HexARGB(t.Color.Text),
-			IconColor:          HexARGB(t.Color.Primary),
+			Color:              HexARGB(color),
+			IconColor:          HexARGB(iconColor),
 			TextSize:           t.TextSize.Scale(14.0 / 16.0),
 			Size:               unit.Dp(26),
 			shaper:             t.Shaper,

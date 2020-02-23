@@ -68,19 +68,19 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 				})
 			},
 			func() {
-				encryptionCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you want to add an additional layer of encryption for public data?")
+				encryptionCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you want to add an additional layer of encryption for public data?", "ff303030", "ff303030")
 				encryptionCheckBox.Font.Typeface = ui.ly.Theme.Font.Primary
 				encryptionCheckBox.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 				encryptionCheckBox.Layout(ui.ly.Context, encryption)
 			},
 			func() {
-				seedCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you have an existing wallet seed you want to use?")
+				seedCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you have an existing wallet seed you want to use?", "ff303030", "ff303030")
 				seedCheckBox.Font.Typeface = ui.ly.Theme.Font.Primary
 				seedCheckBox.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 				seedCheckBox.Layout(ui.ly.Context, seed)
 			},
 			func() {
-				testnetCheckBox := ui.ly.Theme.DuoUIcheckBox("Use testnet?")
+				testnetCheckBox := ui.ly.Theme.DuoUIcheckBox("Use testnet?", "ff303030", "ff303030")
 				testnetCheckBox.Font.Typeface = ui.ly.Theme.Font.Primary
 				testnetCheckBox.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 				testnetCheckBox.Layout(ui.ly.Context, testnet)

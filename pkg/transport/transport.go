@@ -11,7 +11,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	
+
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
@@ -100,7 +100,7 @@ func (c *Connection) SetSendConn(ad string) (err error) {
 		log.ERROR(err)
 	}
 	var sC net.Conn
-	sC, err = net.Dial("udp", ad)
+	sC, err = net.Dial("udp4", ad)
 	if err != nil {
 		log.ERROR(err)
 		return
