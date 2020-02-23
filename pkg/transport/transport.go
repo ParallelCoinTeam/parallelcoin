@@ -9,7 +9,6 @@ import (
 	"net"
 	"strconv"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/p9c/pod/pkg/fec"
@@ -44,15 +43,6 @@ type Connection struct {
 	mx              *sync.Mutex
 }
 
-func reusePort(network, address string, conn syscall.RawConn) error {
-	return conn.Control(func(descriptor uintptr) {
-		err := syscall.SetsockoptInt(int(descriptor), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
-		if err != nil {
-			log.ERROR(err)
-		}
-	})
-}
-
 // NewConnection creates a new connection with a defined default send
 // connection and listener and pre shared key password for encryption on the
 // local network
@@ -70,10 +60,10 @@ func NewConnection(send, listen, preSharedKey string,
 		}
 	}
 	if send != "" {
-		sendAddr, err = net.ResolveUDPAddr("udp4", send)
-		if err != nil {
-			log.ERROR(err)
-		}
+		// sendAddr, err = net.ResolveUDPAddr("udp4", send)
+		// if err != nil {
+		// 	log.ERROR(err)
+		// }
 		sendConn, err = net.Dial("udp4", send)
 		if err != nil {
 			log.ERROR(err, sendAddr)
@@ -95,10 +85,10 @@ func NewConnection(send, listen, preSharedKey string,
 }
 
 func (c *Connection) SetSendConn(ad string) (err error) {
-	c.sendAddress, err = net.ResolveUDPAddr("udp4", ad)
-	if err != nil {
-		log.ERROR(err)
-	}
+	// c.sendAddress, err = net.ResolveUDPAddr("udp4", ad)
+	// if err != nil {
+	// 	log.ERROR(err)
+	// }
 	var sC net.Conn
 	sC, err = net.Dial("udp4", ad)
 	if err != nil {
