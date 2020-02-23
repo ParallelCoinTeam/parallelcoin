@@ -3,14 +3,20 @@ package controller
 type DuoUIcounter struct {
 	Value        int
 	OperateValue int
+	From         int
+	To           int
 }
 
 func (c *DuoUIcounter) Increase() {
-	c.Value = c.Value + c.OperateValue
+	if c.Value < c.To {
+		c.Value = c.Value + c.OperateValue
+	}
 }
 
 func (c *DuoUIcounter) Decrease() {
-	c.Value = c.Value - c.OperateValue
+	if c.Value > c.From {
+		c.Value = c.Value - c.OperateValue
+	}
 }
 func (c *DuoUIcounter) Reset() {
 	c.Value = 0

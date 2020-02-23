@@ -29,9 +29,9 @@ type DuoUIcounter struct {
 
 func (t *DuoUItheme) DuoUIcounter() DuoUIcounter {
 	return DuoUIcounter{
-		increase: t.DuoUIbutton(t.Font.Secondary, "INCREASE", t.Color.Primary, t.Color.Light, "", "", 12, 0, 64, 24, 0, 0),
-		decrease: t.DuoUIbutton(t.Font.Secondary, "DECREASE", t.Color.Primary, t.Color.Light, "", "", 12, 0, 64, 24, 0, 0),
-		reset:    t.DuoUIbutton(t.Font.Secondary, "RESET", t.Color.Primary, t.Color.Light, "", "", 12, 0, 64, 24, 0, 0),
+		increase: t.DuoUIbutton(t.Font.Secondary, "INCREASE", t.Color.Primary, t.Color.Light, "", "", 12, 0, 64, 44, 0, 0),
+		decrease: t.DuoUIbutton(t.Font.Secondary, "DECREASE", t.Color.Primary, t.Color.Light, "", "", 12, 0, 64, 44, 0, 0),
+		reset:    t.DuoUIbutton(t.Font.Secondary, "RESET", t.Color.Primary, t.Color.Light, "", "", 12, 0, 64, 44, 0, 0),
 		Font: text.Font{
 			Typeface: t.Font.Primary,
 		},

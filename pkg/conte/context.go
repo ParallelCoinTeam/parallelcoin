@@ -5,9 +5,9 @@ package conte
 import (
 	"sync"
 	"sync/atomic"
-	
+
 	"github.com/urfave/cli"
-	
+
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"
@@ -29,6 +29,8 @@ type Xt struct {
 	App *cli.App
 	// Config is the pod all-in-one server config
 	Config *pod.Config
+	// ConfigMap
+	ConfigMap map[string]interface{}
 	// StateCfg is a reference to the main node state configuration struct
 	StateCfg *state.Config
 	// ActiveNet is the active net parameters
@@ -59,13 +61,15 @@ type Xt struct {
 func GetNewContext(appName, appLang, subtext string) *Xt {
 	hr := &atomic.Value{}
 	hr.Store(int(0))
+	config, configMap := pod.EmptyConfig()
 	return &Xt{
-		App:      cli.NewApp(),
-		Config:   pod.EmptyConfig(),
-		StateCfg: new(state.Config),
-		Language: lang.ExportLanguage(appLang),
-		DataDir:  appdata.Dir(appName, false),
-		Hashrate: hr,
+		App:       cli.NewApp(),
+		Config:    config,
+		ConfigMap: configMap,
+		StateCfg:  new(state.Config),
+		Language:  lang.ExportLanguage(appLang),
+		DataDir:   appdata.Dir(appName, false),
+		Hashrate:  hr,
 	}
 }
 

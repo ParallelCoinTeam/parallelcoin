@@ -88,7 +88,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		},
 		Daemon: &model.DaemonConfig{
 			Config: cx.Config,
-			Schema: pod.GetConfigSchema(cx.Config),
+			Schema: pod.GetConfigSchema(cx.Config, cx.ConfigMap),
 		},
 	}
 

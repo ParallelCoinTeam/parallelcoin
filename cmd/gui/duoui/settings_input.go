@@ -2,6 +2,7 @@
 package duoui
 
 import (
+	"fmt"
 	"gioui.org/text"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/pkg/log"
@@ -49,28 +50,34 @@ func (f *Field) InputFields(ui *DuoUI) {
 			e.Font.Typeface = ui.ly.Theme.Font.Primary
 			e.Font.Style = text.Italic
 			e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
-			(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(f.Field.Value.(reflect.Value).String())
-			//log.INFO(f.Field.Value.(reflect.Value).String())
+			(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(fmt.Sprint(*f.Field.Value.(*string)))
+			log.INFO(f.Field.Value)
 		case "number":
 			//ui.DuoUIinputField(f)
 			e := ui.ly.Theme.DuoUIeditor(f.Field.Name)
 			e.Font.Typeface = ui.ly.Theme.Font.Primary
 			e.Font.Style = text.Italic
 			e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
-			(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(f.Field.Value.(reflect.Value).String())
-			//log.INFO(f.Field.Value.(reflect.Value).String())
+			//(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(fmt.Sprint(*f.Field.Value.(*string)))
+			log.INFO(f.Field.Value)
 		case "password":
 			//ui.DuoUIinputField(f)
 			e := ui.ly.Theme.DuoUIeditor(f.Field.Name)
 			e.Font.Typeface = ui.ly.Theme.Font.Primary
 			e.Font.Style = text.Italic
 			e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
-			(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(f.Field.Value.(reflect.Value).String())
-			log.INFO(f.Field.Value.(reflect.Value))
+			//(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(fmt.Sprint(*f.Field.Value.(*string)))
+			log.INFO(f.Field.Value)
 		default:
 		}
 	case "switch":
 		ui.ly.Theme.DuoUIcheckBox(f.Field.Name, "ff303030", "ff303030").Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.CheckBox))
+		log.INFO("")
+		log.INFO(*f.Field.Value.(*bool))
+		log.INFO("testLohg")
+
+		(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.CheckBox).SetChecked(*f.Field.Value.(*bool))
+
 	case "radio":
 		//radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 		//layout.Flex{}.Layout(gtx,

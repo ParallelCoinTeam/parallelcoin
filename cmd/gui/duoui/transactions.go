@@ -23,6 +23,8 @@ var (
 	itemValue   = &controller.DuoUIcounter{
 		Value:        11,
 		OperateValue: 1,
+		From:         0,
+		To:           15,
 	}
 )
 

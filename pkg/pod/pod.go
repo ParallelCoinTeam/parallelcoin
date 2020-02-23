@@ -41,7 +41,7 @@ type Field struct {
 	Value       interface{}
 }
 
-func GetConfigSchema(cfg *Config) Schema {
+func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 	t := reflect.TypeOf(*cfg)
 	var levelOptions, network, algos []string
 	for _, i := range log.Levels {
@@ -77,7 +77,7 @@ func GetConfigSchema(cfg *Config) Schema {
 			Options:     options,
 			Datatype:    field.Type.String(),
 			Model:       field.Tag.Get("model"),
-			Value:       reflect.ValueOf(field),
+			Value:       cfgMap[field.Tag.Get("model")],
 		}
 		if f.Group != "" {
 			rawFields[f.Group] = append(rawFields[f.Group], f)
@@ -107,7 +107,7 @@ type Config struct {
 	AddrIndex          *bool            `group:"node" name:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"switch" model:"AddrIndex" featured:"false"`
 	Algo               *string          `group:"mining" name:"Algo" description:"algorithm to mine, random is best" type:"input" inputType:"text" model:"Algo" featured:"false"`
 	AutoPorts          *bool            `group:"node" name:"Automatic	Ports" description:"with controller enabled p2p, rpc and controller ports are randomized" type:"switch" model:"AutoPorts" featured:"false"`
-	BanDuration        *time.Duration   `group:"debug" name:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"input" inputType:"text" model:"BanDuration" featured:"false"`
+	BanDuration        *time.Duration   `group:"debug" name:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"input" inputType:"time" model:"BanDuration" featured:"false"`
 	BanThreshold       *int             `group:"debug" name:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"input" inputType:"number" model:"BanThreshold" featured:"false"`
 	BlockMaxSize       *int             `group:"mining" name:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"input" inputType:"number" model:"BlockMaxSize" featured:"false"`
 	BlockMaxWeight     *int             `group:"mining" name:"Block Max Weight" description:"maximum block weight to be used when creating a block" type:"input" inputType:"number" model:"BlockMaxWeight" featured:"false"`
@@ -130,7 +130,7 @@ type Config struct {
 	EnableController   *bool            `group:"node" name:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
 	// ExperimentalRPCListeners *cli.StringSlice `group:"wallet" name:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"array" inputType:"text" model:"array" featured:"false"`
 	ExternalIPs            *cli.StringSlice `group:"node" name:"External IPs" description:"extra addresses to tell peers they can connect to" type:"array" inputType:"text" model:"ExternalIPs" featured:"false"`
-	FreeTxRelayLimit       *float64         `group:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"text" model:"FreeTxRelayLimit" featured:"false"`
+	FreeTxRelayLimit       *float64         `group:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"decimal" model:"FreeTxRelayLimit" featured:"false"`
 	Generate               *bool            `group:"mining" name:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
 	GenThreads             *int             `group:"mining" name:"Gen Threads" description:"number of CPU threads to mine using" type:"input" inputType:"number" model:"GenThreads" featured:"false"`
 	Language               *string          `group:"config" name:"Language" description:"User interface language i18 localization" type:"input" inputType:"text" model:"Language" featured:"false"`
@@ -143,7 +143,7 @@ type Config struct {
 	MaxPeers               *int             `group:"node" name:"Max Peers" description:"Maximum number of peers to hold connections with" type:"input" inputType:"number" model:"MaxPeers" featured:"false"`
 	MinerPass              *string          `group:"mining" name:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"input" inputType:"text" model:"MinerPass" featured:"false"`
 	MiningAddrs            *cli.StringSlice `group:"mining" name:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"array" inputType:"text" model:"array" featured:"false"`
-	MinRelayTxFee          *float64         `group:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"text" model:"MinRelayTxFee" featured:"false"`
+	MinRelayTxFee          *float64         `group:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"decimal" model:"MinRelayTxFee" featured:"false"`
 	Network                *string          `group:"node" name:"Network" description:"Which network are you connected to (eg.: mainnet, testnet)" type:"input" inputType:"text" model:"Network" featured:"false"`
 	NoCFilters             *bool            `group:"node" name:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" model:"NoCFilters" featured:"false"`
 	NodeOff                *bool            `group:"debug" name:"Node Off" description:"turn off the node backend" type:"switch" model:"NodeOff" featured:"false"`
@@ -178,7 +178,7 @@ type Config struct {
 	TLS                    *bool            `group:"tls" name:"TLS" description:"enable TLS for RPC connections" type:"switch" model:"TLS" featured:"false"`
 	TLSSkipVerify          *bool            `group:"tls" name:"TLS Skip Verify" description:"skip TLS certificate verification (ignore CA errors)" type:"switch" model:"TLSSkipVerify" featured:"false"`
 	TorIsolation           *bool            `group:"proxy" name:"Tor Isolation" description:"makes a separate proxy connection for each connection" type:"switch" model:"TorIsolation" featured:"false"`
-	TrickleInterval        *time.Duration   `group:"policy" name:"Trickle Interval" description:"minimum time between attempts to send new inventory to a connected peer" type:"input" inputType:"text" model:"TrickleInterval" featured:"false"`
+	TrickleInterval        *time.Duration   `group:"policy" name:"Trickle Interval" description:"minimum time between attempts to send new inventory to a connected peer" type:"input" inputType:"time" model:"TrickleInterval" featured:"false"`
 	TxIndex                *bool            `group:"node" name:"Tx Index" description:"maintain a full hash-based transaction index which makes all transactions available via the getrawtransaction RPC" type:"switch" model:"TxIndex" featured:"false"`
 	UPNP                   *bool            `group:"node" name:"UPNP" description:"enable UPNP for NAT traversal" type:"switch" model:"UPNP" featured:"false"`
 	UserAgentComments      *cli.StringSlice `group:"node" name:"User Agent Comments" description:"Comment to add to the user agent -- See BIP 14 for more information" type:"array" inputType:"text" model:"array" featured:"false"`
@@ -194,35 +194,34 @@ type Config struct {
 	Whitelists             *cli.StringSlice `group:"debug" name:"Whitelists" description:"peers that you don't want to ever ban" type:"array" inputType:"text" model:"array" featured:"false"`
 }
 
-func EmptyConfig() *Config {
+func EmptyConfig() (c *Config, conf map[string]interface{}) {
 	datadir := appdata.Dir(AppName, false)
-	return &Config{
-		AddCheckpoints:     newStringSlice(),
-		AddPeers:           newStringSlice(),
-		AddrIndex:          newbool(),
-		Algo:               newstring(),
-		AutoPorts:          newbool(),
-		BanDuration:        newDuration(),
-		BanThreshold:       newint(),
-		BlockMaxSize:       newint(),
-		BlockMaxWeight:     newint(),
-		BlockMinSize:       newint(),
-		BlockMinWeight:     newint(),
-		BlockPrioritySize:  newint(),
-		BlocksOnly:         newbool(),
-		CAFile:             newstring(),
-		ConfigFile:         newstring(),
-		ConnectPeers:       newStringSlice(),
-		Controller:         newstring(),
-		CPUProfile:         newstring(),
-		DataDir:            &datadir,
-		DbType:             newstring(),
-		DisableBanning:     newbool(),
-		DisableCheckpoints: newbool(),
-		DisableDNSSeed:     newbool(),
-		DisableListen:      newbool(),
-		DisableRPC:         newbool(),
-		// ExperimentalRPCListeners: newStringSlice(),
+	c = &Config{
+		AddCheckpoints:         newStringSlice(),
+		AddPeers:               newStringSlice(),
+		AddrIndex:              newbool(),
+		Algo:                   newstring(),
+		AutoPorts:              newbool(),
+		BanDuration:            newDuration(),
+		BanThreshold:           newint(),
+		BlockMaxSize:           newint(),
+		BlockMaxWeight:         newint(),
+		BlockMinSize:           newint(),
+		BlockMinWeight:         newint(),
+		BlockPrioritySize:      newint(),
+		BlocksOnly:             newbool(),
+		CAFile:                 newstring(),
+		ConfigFile:             newstring(),
+		ConnectPeers:           newStringSlice(),
+		Controller:             newstring(),
+		CPUProfile:             newstring(),
+		DataDir:                &datadir,
+		DbType:                 newstring(),
+		DisableBanning:         newbool(),
+		DisableCheckpoints:     newbool(),
+		DisableDNSSeed:         newbool(),
+		DisableListen:          newbool(),
+		DisableRPC:             newbool(),
 		ExternalIPs:            newStringSlice(),
 		FreeTxRelayLimit:       new(float64),
 		Generate:               newbool(),
@@ -288,6 +287,98 @@ func EmptyConfig() *Config {
 		WalletServer:           newstring(),
 		Whitelists:             newStringSlice(),
 	}
+	conf = map[string]interface{}{
+		"AddCheckpoints":         c.AddCheckpoints,
+		"AddPeers":               c.AddPeers,
+		"AddrIndex":              c.AddrIndex,
+		"Algo":                   c.Algo,
+		"AutoPorts":              c.AutoPorts,
+		"BanDuration":            c.BanDuration,
+		"BanThreshold":           c.BanThreshold,
+		"BlockMaxSize":           c.BlockMaxSize,
+		"BlockMaxWeight":         c.BlockMaxWeight,
+		"BlockMinSize":           c.BlockMinSize,
+		"BlockMinWeight":         c.BlockMinWeight,
+		"BlockPrioritySize":      c.BlockPrioritySize,
+		"BlocksOnly":             c.BlocksOnly,
+		"CAFile":                 c.CAFile,
+		"ConfigFile":             c.ConfigFile,
+		"ConnectPeers":           c.ConnectPeers,
+		"Controller":             c.Controller,
+		"CPUProfile":             c.CPUProfile,
+		"DataDir":                c.DataDir,
+		"DbType":                 c.DbType,
+		"DisableBanning":         c.DisableBanning,
+		"DisableCheckpoints":     c.DisableCheckpoints,
+		"DisableDNSSeed":         c.DisableDNSSeed,
+		"DisableListen":          c.DisableListen,
+		"DisableRPC":             c.DisableRPC,
+		"ExternalIPs":            c.ExternalIPs,
+		"FreeTxRelayLimit":       c.FreeTxRelayLimit,
+		"Generate":               c.Generate,
+		"GenThreads":             c.GenThreads,
+		"Language":               c.Language,
+		"LimitPass":              c.LimitPass,
+		"LimitUser":              c.LimitUser,
+		"Listeners":              c.Listeners,
+		"LogDir":                 c.LogDir,
+		"LogLevel":               c.LogLevel,
+		"MaxOrphanTxs":           c.MaxOrphanTxs,
+		"MaxPeers":               c.MaxPeers,
+		"MinerPass":              c.MinerPass,
+		"MiningAddrs":            c.MiningAddrs,
+		"MinRelayTxFee":          c.MinRelayTxFee,
+		"Network":                c.Network,
+		"NoCFilters":             c.NoCFilters,
+		"EnableController":       c.EnableController,
+		"NodeOff":                c.NodeOff,
+		"NoInitialLoad":          c.NoInitialLoad,
+		"NoPeerBloomFilters":     c.NoPeerBloomFilters,
+		"NoRelayPriority":        c.NoRelayPriority,
+		"OneTimeTLSKey":          c.OneTimeTLSKey,
+		"Onion":                  c.Onion,
+		"OnionProxy":             c.OnionProxy,
+		"OnionProxyPass":         c.OnionProxyPass,
+		"OnionProxyUser":         c.OnionProxyUser,
+		"Password":               c.Password,
+		"Profile":                c.Profile,
+		"Proxy":                  c.Proxy,
+		"ProxyPass":              c.ProxyPass,
+		"ProxyUser":              c.ProxyUser,
+		"RejectNonStd":           c.RejectNonStd,
+		"RelayNonStd":            c.RelayNonStd,
+		"RPCCert":                c.RPCCert,
+		"RPCConnect":             c.RPCConnect,
+		"RPCKey":                 c.RPCKey,
+		"RPCListeners":           c.RPCListeners,
+		"RPCMaxClients":          c.RPCMaxClients,
+		"RPCMaxConcurrentReqs":   c.RPCMaxConcurrentReqs,
+		"RPCMaxWebsockets":       c.RPCMaxWebsockets,
+		"RPCQuirks":              c.RPCQuirks,
+		"ServerPass":             c.ServerPass,
+		"ServerTLS":              c.ServerTLS,
+		"ServerUser":             c.ServerUser,
+		"SigCacheMaxSize":        c.SigCacheMaxSize,
+		"Solo":                   c.Solo,
+		"TLS":                    c.TLS,
+		"TLSSkipVerify":          c.TLSSkipVerify,
+		"TorIsolation":           c.TorIsolation,
+		"TrickleInterval":        c.TrickleInterval,
+		"TxIndex":                c.TxIndex,
+		"UPNP":                   c.UPNP,
+		"UserAgentComments":      c.UserAgentComments,
+		"Username":               c.Username,
+		"Wallet":                 c.Wallet,
+		"WalletFile":             c.WalletFile,
+		"WalletOff":              c.WalletOff,
+		"WalletPass":             c.WalletPass,
+		"WalletRPCListeners":     c.WalletRPCListeners,
+		"WalletRPCMaxClients":    c.WalletRPCMaxClients,
+		"WalletRPCMaxWebsockets": c.WalletRPCMaxWebsockets,
+		"WalletServer":           c.WalletServer,
+		"Whitelists":             c.Whitelists,
+	}
+	return
 }
 
 func newbool() *bool {

@@ -38,7 +38,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
 			log.DEBUG("loaded config from disk")
 			if err == nil {
-				cx.Config = pod.EmptyConfig()
+				cx.Config, cx.ConfigMap = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
 					log.ERROR("error unmarshalling config", err)
