@@ -489,13 +489,13 @@ func TestCancelIgnoreDelayedConnection(t *testing.T) {
 	}
 }
 
-// mockListener implements the net.Listener interface and is used to test code that deals with net.Listeners without having to actually make any real connections.
+// mockListener implements the net.Receiver interface and is used to test code that deals with net.Listeners without having to actually make any real connections.
 type mockListener struct {
 	localAddr   string
 	provideConn chan net.Conn
 }
 
-// Accept returns a mock connection when it receives a signal via the Connect function. This is part of the net.Listener interface.
+// Accept returns a mock connection when it receives a signal via the Connect function. This is part of the net.Receiver interface.
 func (m *mockListener) Accept() (net.Conn, error) {
 	for conn := range m.provideConn {
 		return conn, nil
@@ -503,13 +503,13 @@ func (m *mockListener) Accept() (net.Conn, error) {
 	return nil, errors.New("network connection closed")
 }
 
-// Close closes the mock listener which will cause any blocked Accept operations to be unblocked and return errors. This is part of the net.Listener interface.
+// Close closes the mock listener which will cause any blocked Accept operations to be unblocked and return errors. This is part of the net.Receiver interface.
 func (m *mockListener) Close() error {
 	close(m.provideConn)
 	return nil
 }
 
-// Addr returns the address the mock listener was configured with. This is part of the net.Listener interface.
+// Addr returns the address the mock listener was configured with. This is part of the net.Receiver interface.
 func (m *mockListener) Addr() net.Addr {
 	return &mockAddr{"tcp", m.localAddr}
 }

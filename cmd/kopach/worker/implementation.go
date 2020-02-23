@@ -8,12 +8,10 @@ import (
 	"net"
 	"os"
 	"time"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/mining"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/controller"
 	"github.com/p9c/pod/pkg/controller/hashrate"
@@ -294,7 +292,6 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.block.SetHeight(newHeight)
 	// halting current work
 	w.stopChan <- struct{}{}
-	// log.INFO("height", newHeight)
 	w.startChan <- struct{}{}
 	return
 }
@@ -328,62 +325,4 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	w.dispatchConn = conn
 	*reply = true
 	return
-}
-
-// UpdateExtraNonce updates the extra nonce in the coinbase script of the
-// passed block by regenerating the coinbase script with the passed value and
-// block height.  It also recalculates and updates the new merkle root that
-// results from changing the coinbase script.
-func UpdateExtraNonce(msgBlock *wire.MsgBlock, blockHeight int32,
-	extraNonce uint64) error {
-	if msgBlock == nil {
-		log.ERROR("cannot update a nil MsgBlock")
-	}
-	log.DEBUG("UpdateExtraNonce")
-	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
-	if err != nil {
-		return err
-	}
-	if len(coinbaseScript) > blockchain.MaxCoinbaseScriptLen {
-		return fmt.Errorf(
-			"coinbase transaction script length of %d is out of range ("+
-				"min: %d, max: %d)",
-			len(coinbaseScript),
-			blockchain.MinCoinbaseScriptLen,
-			blockchain.MaxCoinbaseScriptLen)
-	}
-	// log.SPEW(msgBlock.Transactions)
-	msgBlock.Transactions[0].TxIn[0].SignatureScript = coinbaseScript
-	// TODO(davec): A util.Solution should use saved in the state to avoid
-	//  recalculating all of the other transaction hashes.
-	//  block.Transaction[0].InvalidateCache() Recalculate the merkle root with
-	//  the updated extra nonce.
-	block := util.NewBlock(msgBlock)
-	log.DEBUG("recalculating merkle root")
-	merkles := blockchain.BuildMerkleTreeStore(block.Transactions(), false)
-	msgBlock.Header.MerkleRoot = *merkles[len(merkles)-1]
-	return nil
-}
-
-// standardCoinbaseScript returns a standard script suitable for use as the
-// signature script of the coinbase transaction of a new block.  In particular,
-// it starts with the block height that is required by version 2 blocks and
-// adds the extra nonce as well as additional coinbase flags.
-func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, error) {
-	return txscript.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
-		AddInt64(int64(extraNonce)).AddData([]byte(mining.CoinbaseFlags)).
-		Script()
-}
-
-// calcMerkleRoot creates a merkle tree from the slice of transactions and returns the root of the tree.
-func calcMerkleRoot(txns []*wire.MsgTx) chainhash.Hash {
-	if len(txns) == 0 {
-		return chainhash.Hash{}
-	}
-	utilTxns := make([]*util.Tx, 0, len(txns))
-	for _, tx := range txns {
-		utilTxns = append(utilTxns, util.NewTx(tx))
-	}
-	merkles := blockchain.BuildMerkleTreeStore(utilTxns, false)
-	return *merkles[len(merkles)-1]
 }

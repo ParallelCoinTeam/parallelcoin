@@ -118,7 +118,7 @@ type Config struct {
 	CAFile             *string          `group:"tls" name:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
 	ConfigFile         *string
 	ConnectPeers       *cli.StringSlice `group:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"array" inputType:"text" model:"array" featured:"false"`
-	Controller         *string          `group:"mining" name:"Controller Listener" description:"address to bind miner controller to"`
+	Controller         *string          `group:"mining" name:"Controller Receiver" description:"address to bind miner controller to"`
 	CPUProfile         *string          `group:"debug" name:"CPU Profile" description:"write cpu profile to this file" type:"input" inputType:"text" model:"CPUProfile" featured:"false"`
 	DataDir            *string          `group:"config" name:"Data Dir" description:"Root folder where application data is stored" type:"input" inputType:"text" model:"DataDir" featured:"false"`
 	DbType             *string          `group:"debug" name:"Db Type" description:"type of database storage engine to use (only one right now)" type:"input" inputType:"text" model:"DbType" featured:"false"`

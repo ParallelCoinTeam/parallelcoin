@@ -69,7 +69,9 @@ func NewConnection(send, listen, preSharedKey string,
 		}
 		// log.SPEW(sendConn)
 	}
-	ciph := gcm.GetCipher(preSharedKey)
+	var ciph cipher.AEAD
+	if ciph, err = gcm.GetCipher(preSharedKey); log.Check(err) {
+	}
 	return &Connection{
 		maxDatagramSize: maxDatagramSize,
 		buffers:         make(map[string]*MsgBuffer),
@@ -269,6 +271,7 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 	}()
 	return
 }
+
 //
 // func GetUDPAddr(address string) (sendAddr *net.UDPAddr) {
 // 	sendHost, sendPort, err := net.SplitHostPort(address)

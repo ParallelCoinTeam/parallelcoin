@@ -3,34 +3,25 @@ package gcm
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/sha1"
-
-	"github.com/btcsuite/golangcrypto/pbkdf2"
-
+	
+	"golang.org/x/crypto/argon2"
+	
 	"github.com/p9c/pod/pkg/log"
 )
 
 // GetCipher returns a GCM cipher given a password string. Note that this cipher
 // must be renewed every 4gb of encrypted data
-func GetCipher(password string) cipher.AEAD {
-	key := pbkdf2.Key(reverse([]byte(password)), []byte(password),
-		4096, 32,
-		sha1.New)
-	c, err := aes.NewCipher(key)
-	if err != nil {
-		log.ERROR(err)
+func GetCipher(password string) (gcm cipher.AEAD, err error) {
+	bytes := []byte(password)
+	if c, err := aes.NewCipher(argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 4, 32)); log.Check(err) {
+	} else if gcm, err = cipher.NewGCM(c); log.Check(err) {
 	}
-	gcm, err := cipher.NewGCM(c)
-	if err != nil {
-		log.ERROR(err)
-	}
-	return gcm
+	return
 }
 
 func reverse(b []byte) []byte {
-	out := make([]byte, len(b))
 	for i := range b {
-		out[i] = b[len(b)-1]
+		b[i] = b[len(b)-1]
 	}
-	return out
+	return b
 }

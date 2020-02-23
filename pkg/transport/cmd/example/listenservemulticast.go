@@ -6,44 +6,42 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/loop"
 	"github.com/p9c/pod/pkg/transport"
+)
+
+const (
+	TestMagic = "TEST"
+)
+
+var (
+	TestMagicB = []byte(TestMagic)
 )
 
 func main() {
 	log.L.SetLevel("trace", true)
-	ready := make(chan struct{})
-	var listener *net.UDPConn
-	var err error
-	transport.Address = "224.0.0.1:1234"
-	go func() {
-		listener, err = transport.Listen(8192,
-			func(addr *net.UDPAddr, count int, data []byte) {
-				log.INFOF("%s [%d] received '%s'", addr, count, string(data[:count]))
-			})
-		ready <- struct{}{}
-	}()
-	<-ready
-	bc, err := transport.NewBroadcaster(8192)
-	if err != nil {
-		log.ERROR(err)
-	}
-	var n int
-	for i := 0; i < 10; i++ {
-		text := fmt.Sprintf("this is a test %d", i)
-		n, err = bc.Write([]byte(text))
-		if err != nil {
-			log.ERROR(err)
+	if c, err := transport.NewBroadcastChannel("cipher",
+		1234, 8192, transport.Handlers{
+			TestMagic: func(src *net.UDPAddr, dst string, count int, data []byte) (err error) {
+				log.INFOF("%s <- %s [%d] '%s'", src.String(), dst, count, string(data[:count]))
+				return
+			},
+		},
+	); log.Check(err) {
+		panic(err)
+	} else {
+		var n int
+		loop.To(10, func(i int) {
+			text := []byte(fmt.Sprintf("this is a test %d", i))
+			if n, err = c.Send(TestMagicB, text); log.Check(err) {
+			} else {
+				log.INFOF("%s -> %s [%d] '%s'",
+					c.Sender.LocalAddr(), c.Sender.RemoteAddr(), n-4, text)
+			}
+		})
+		time.Sleep(time.Second)
+		if err = c.Close(); !log.Check(err) {
+			time.Sleep(time.Second * 1)
 		}
-		log.INFOF("%s sent %d '%s'", bc.RemoteAddr(), n, text)
 	}
-	err = bc.Close()
-	if err != nil {
-		log.ERROR(err)
-	}
-	time.Sleep(time.Second * 1)
-	err = listener.Close()
-	if err != nil {
-		log.ERROR(err)
-	}
-	time.Sleep(time.Second * 1)
 }
