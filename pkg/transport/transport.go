@@ -7,23 +7,14 @@ import (
 	"errors"
 	"io"
 	"net"
-	"strconv"
 	"sync"
 	"time"
 
 	"github.com/p9c/pod/pkg/fec"
-	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
 )
 
 type HandleFunc map[string]func(ctx interface{}) func(b []byte) (err error)
-
-type MsgBuffer struct {
-	Buffers [][]byte
-	First   time.Time
-	Decoded bool
-	Source  *net.Addr
-}
 
 // Connection is the state and working memory references for a simple
 // reliable UDP lan transport, encrypted by a GCM AES cipher,
@@ -42,47 +33,49 @@ type Connection struct {
 	ctx             context.Context
 	mx              *sync.Mutex
 }
-
-// NewConnection creates a new connection with a defined default send
-// connection and listener and pre shared key password for encryption on the
-// local network
-func NewConnection(send, listen, preSharedKey string,
-	maxDatagramSize int, ctx context.Context) (c *Connection, err error) {
-	sendAddr := &net.UDPAddr{}
-	var sendConn net.Conn
-	listenAddr := &net.UDPAddr{}
-	var listenConn net.PacketConn
-	if listen != "" {
-		config := &net.ListenConfig{Control: reusePort}
-		listenConn, err = config.ListenPacket(context.Background(), "udp4", listen)
-		if err != nil {
-			log.ERROR(err)
-		}
-	}
-	if send != "" {
-		// sendAddr, err = net.ResolveUDPAddr("udp4", send)
-		// if err != nil {
-		// 	log.ERROR(err)
-		// }
-		sendConn, err = net.Dial("udp4", send)
-		if err != nil {
-			log.ERROR(err, sendAddr)
-		}
-		// log.SPEW(sendConn)
-	}
-	ciph := gcm.GetCipher(preSharedKey)
-	return &Connection{
-		maxDatagramSize: maxDatagramSize,
-		buffers:         make(map[string]*MsgBuffer),
-		sendAddress:     sendAddr,
-		SendConn:        sendConn,
-		listenAddress:   listenAddr,
-		listenConn:      &listenConn,
-		ciph:            ciph, // gcm.GetCipher(*cx.Config.MinerPass),
-		ctx:             ctx,
-		mx:              &sync.Mutex{},
-	}, err
-}
+//
+// // NewConnection creates a new connection with a defined default send
+// // connection and listener and pre shared key password for encryption on the
+// // local network
+// func NewConnection(send, listen, preSharedKey string,
+// 	maxDatagramSize int, ctx context.Context) (c *Connection, err error) {
+// 	sendAddr := &net.UDPAddr{}
+// 	var sendConn net.Conn
+// 	listenAddr := &net.UDPAddr{}
+// 	var listenConn net.PacketConn
+// 	if listen != "" {
+// 		config := &net.ListenConfig{Control: reusePort}
+// 		listenConn, err = config.ListenPacket(context.Background(), "udp4", listen)
+// 		if err != nil {
+// 			log.ERROR(err)
+// 		}
+// 	}
+// 	if send != "" {
+// 		// sendAddr, err = net.ResolveUDPAddr("udp4", send)
+// 		// if err != nil {
+// 		// 	log.ERROR(err)
+// 		// }
+// 		sendConn, err = net.Dial("udp4", send)
+// 		if err != nil {
+// 			log.ERROR(err, sendAddr)
+// 		}
+// 		// log.SPEW(sendConn)
+// 	}
+// 	var ciph cipher.AEAD
+// 	if ciph, err = gcm.GetCipher(preSharedKey); log.Check(err) {
+// 	}
+// 	return &Connection{
+// 		maxDatagramSize: maxDatagramSize,
+// 		buffers:         make(map[string]*MsgBuffer),
+// 		sendAddress:     sendAddr,
+// 		SendConn:        sendConn,
+// 		listenAddress:   listenAddr,
+// 		listenConn:      &listenConn,
+// 		ciph:            ciph, // gcm.GetCipher(*cx.Config.MinerPass),
+// 		ctx:             ctx,
+// 		mx:              &sync.Mutex{},
+// 	}, err
+// }
 
 func (c *Connection) SetSendConn(ad string) (err error) {
 	// c.sendAddress, err = net.ResolveUDPAddr("udp4", ad)
@@ -217,7 +210,8 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 				shard, err := c.ciph.Open(nil, nonceBytes,
 					buf[16:], nil)
 				if err != nil {
-					log.ERROR(err)
+					// log.ERROR(err)
+					// corrupted or irrelevant message
 					continue
 				}
 				if bn, ok := c.buffers[nonce]; ok {
@@ -255,7 +249,7 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 					// log.TRACE("new message arriving",
 					// 	hex.EncodeToString([]byte(nonce)))
 					c.buffers[nonce] = &MsgBuffer{[][]byte{},
-						time.Now(), false, &src}
+						time.Now(), false, src}
 					c.buffers[nonce].Buffers = append(c.buffers[nonce].
 						Buffers, shard)
 				}
@@ -270,20 +264,21 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 	return
 }
 
-func GetUDPAddr(address string) (sendAddr *net.UDPAddr) {
-	sendHost, sendPort, err := net.SplitHostPort(address)
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
-	sendPortI, err := strconv.ParseInt(sendPort, 10, 64)
-	if err != nil {
-		log.ERROR(err)
-		return
-	}
-	sendAddr = &net.UDPAddr{IP: net.ParseIP(sendHost),
-		Port: int(sendPortI)}
-	// log.DEBUG("multicast", address)
-	// log.SPEW(sendAddr)
-	return
-}
+//
+// func GetUDPAddr(address string) (sendAddr *net.UDPAddr) {
+// 	sendHost, sendPort, err := net.SplitHostPort(address)
+// 	if err != nil {
+// 		log.ERROR(err)
+// 		return
+// 	}
+// 	sendPortI, err := strconv.ParseInt(sendPort, 10, 64)
+// 	if err != nil {
+// 		log.ERROR(err)
+// 		return
+// 	}
+// 	sendAddr = &net.UDPAddr{IP: net.ParseIP(sendHost),
+// 		Port: int(sendPortI)}
+// 	// log.DEBUG("multicast", Address)
+// 	// log.SPEW(sendAddr)
+// 	return
+// }

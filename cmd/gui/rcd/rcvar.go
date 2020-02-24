@@ -109,7 +109,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 				if field.Value != nil {
 					switch field.InputType {
 					case "text":
-						(settingsFields[field.Label]).(*controller.Editor).SetText(*field.Value.(*string))
+						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(field.Value))
 					case "number":
 						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*int)))
 					case "decimal":

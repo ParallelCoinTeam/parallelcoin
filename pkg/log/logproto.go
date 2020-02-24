@@ -1,5 +1,12 @@
 package log
 
+func Check(err error) (isNotNil bool) {
+	if isNotNil = err != nil; isNotNil {
+		ERROR(err)
+	}
+	return
+}
+
 func FATAL(a ...interface{}) {
 	if L.Fatal != nil {
 		f := L.Fatal
