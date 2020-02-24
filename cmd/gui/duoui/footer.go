@@ -83,7 +83,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 					navButtons := []func(){
 						ui.footerMenuButton("NETWORK", "CONNECTIONS: "+fmt.Sprint(ui.rc.Status.Node.ConnectionCount), "", buttonNetwork),
-						ui.footerMenuButton("EXPLORER", "BLOCKS: "+fmt.Sprint(ui.rc.Status.Node.BlockHeight), "", buttonBlocks),
+						ui.footerMenuButton("EXPLORER", "BLOCKS: "+fmt.Sprint(ui.rc.Status.Node.BlockCount), "", buttonBlocks),
 						ui.footerMenuButton("EXPLORER", "", "helpIcon", buttonHelp),
 						ui.footerMenuButton("CONSOLE", "", "consoleIcon", buttonConsole),
 						ui.footerMenuButton("SETTINGS", "", "settingsIcon", buttonSettings),

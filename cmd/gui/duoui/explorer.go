@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"fmt"
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/pkg/gui/clipboard"
 
 	"gioui.org/layout"
@@ -13,6 +14,12 @@ import (
 var (
 	blocksList = &layout.List{
 		Axis: layout.Vertical,
+	}
+	blockNumber = &controller.DuoUIcounter{
+		Value:        11,
+		OperateValue: 1,
+		From:         0,
+		To:           15,
 	}
 )
 

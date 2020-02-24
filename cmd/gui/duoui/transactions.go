@@ -35,42 +35,7 @@ func (ui *DuoUI) DuoUItransactions() func() {
 		layout.Flex{
 			Axis: layout.Vertical,
 		}.Layout(ui.ly.Context,
-			layout.Rigid(func() {
-				hmin := ui.ly.Context.Constraints.Width.Min
-				vmin := ui.ly.Context.Constraints.Height.Min
-				layout.Stack{Alignment: layout.Center}.Layout(ui.ly.Context,
-					layout.Expanded(func() {
-						clip.Rect{
-							Rect: f32.Rectangle{Max: f32.Point{
-								X: float32(ui.ly.Context.Constraints.Width.Min),
-								Y: float32(ui.ly.Context.Constraints.Height.Min),
-							}},
-						}.Op(ui.ly.Context.Ops).Add(ui.ly.Context.Ops)
-						fill(ui.ly.Context, theme.HexARGB(ui.ly.Theme.Color.Primary))
-					}),
-					layout.Stacked(func() {
-						ui.ly.Context.Constraints.Width.Min = hmin
-						ui.ly.Context.Constraints.Height.Min = vmin
-						layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
-							layout.Flex{
-								Spacing: layout.SpaceBetween,
-							}.Layout(ui.ly.Context,
-								layout.Rigid(ui.txsFilter()),
-								layout.Rigid(func() {
-									layout.Flex{}.Layout(ui.ly.Context,
-										layout.Rigid(func() {
-											c := ui.ly.Theme.DuoUIcounter()
-
-											c.Layout(ui.ly.Context, itemValue)
-
-										}),
-									)
-								}),
-							)
-						})
-					}),
-				)
-			}),
+			layout.Rigid(ui.contentHeader(ui.contentHeaderBodyTransactions())),
 			layout.Flexed(1, func() {
 				in := layout.UniformInset(unit.Dp(16))
 				in.Layout(ui.ly.Context, func() {
@@ -82,7 +47,6 @@ func (ui *DuoUI) DuoUItransactions() func() {
 							transList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.LastTxs.Txs), func(i int) {
 								t := ui.rc.Status.Wallet.LastTxs.Txs[i]
 								theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ff535353", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
 								layout.Flex{
 									Spacing: layout.SpaceBetween,
 								}.Layout(ui.ly.Context,
@@ -105,21 +69,17 @@ func (ui *DuoUI) DuoUItransactions() func() {
 func (ui *DuoUI) txsFilter() func() {
 	return func() {
 		layout.Flex{}.Layout(ui.ly.Context,
-			layout.Rigid(func() {
-				ui.ly.Theme.DuoUIcheckBox("ALL", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, allTxs)
-			}),
-			layout.Rigid(func() {
-				ui.ly.Theme.DuoUIcheckBox("MINTED", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, mintedTxs)
-			}),
-			layout.Rigid(func() {
-				ui.ly.Theme.DuoUIcheckBox("IMATURE", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, immatureTxs)
-			}),
-			layout.Rigid(func() {
-				ui.ly.Theme.DuoUIcheckBox("SENT", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, sentTxs)
-			}),
-			layout.Rigid(func() {
-				ui.ly.Theme.DuoUIcheckBox("RECEIVED", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, receivedTxs)
-			}))
+			layout.Rigid(ui.txsFilterItem("ALL", allTxs)),
+			layout.Rigid(ui.txsFilterItem("MINTED", mintedTxs)),
+			layout.Rigid(ui.txsFilterItem("IMATURE", immatureTxs)),
+			layout.Rigid(ui.txsFilterItem("SENT", sentTxs)),
+			layout.Rigid(ui.txsFilterItem("RECEIVED", receivedTxs)))
+	}
+}
+
+func (ui *DuoUI) txsFilterItem(id string, c *controller.CheckBox) func() {
+	return func() {
+		ui.ly.Theme.DuoUIcheckBox(id, ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, c)
 	}
 }
 
@@ -160,6 +120,42 @@ func (ui *DuoUI) txsDetails(i int, t *model.DuoUItx) func() {
 				l.Font.Typeface = ui.ly.Theme.Font.Primary
 				l.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
 				l.Layout(ui.ly.Context)
+			}),
+		)
+	}
+}
+
+func (ui *DuoUI) contentHeader(b func()) func() {
+	return func() {
+		hmin := ui.ly.Context.Constraints.Width.Min
+		vmin := ui.ly.Context.Constraints.Height.Min
+		layout.Stack{Alignment: layout.Center}.Layout(ui.ly.Context,
+			layout.Expanded(func() {
+				clip.Rect{
+					Rect: f32.Rectangle{Max: f32.Point{
+						X: float32(ui.ly.Context.Constraints.Width.Min),
+						Y: float32(ui.ly.Context.Constraints.Height.Min),
+					}},
+				}.Op(ui.ly.Context.Ops).Add(ui.ly.Context.Ops)
+				fill(ui.ly.Context, theme.HexARGB(ui.ly.Theme.Color.Primary))
+			}),
+			layout.Stacked(func() {
+				ui.ly.Context.Constraints.Width.Min = hmin
+				ui.ly.Context.Constraints.Height.Min = vmin
+				layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, b)
+			}),
+		)
+	}
+}
+
+func (ui *DuoUI) contentHeaderBodyTransactions() func() {
+	return func() {
+		layout.Flex{
+			Spacing: layout.SpaceBetween,
+		}.Layout(ui.ly.Context,
+			layout.Rigid(ui.txsFilter()),
+			layout.Rigid(func() {
+				ui.ly.Theme.DuoUIcounter().Layout(ui.ly.Context, itemValue)
 			}),
 		)
 	}

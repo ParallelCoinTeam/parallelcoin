@@ -101,31 +101,31 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		for _, field := range group.Fields {
 			switch field.Type {
 			case "array":
-				settingsFields[field.Name] = new(controller.Button)
+				settingsFields[field.Label] = new(controller.Button)
 			case "input":
-				settingsFields[field.Name] = &controller.Editor{
+				settingsFields[field.Label] = &controller.Editor{
 					SingleLine: true,
 				}
 				if field.Value != nil {
 					switch field.InputType {
 					case "text":
-						(settingsFields[field.Name]).(*controller.Editor).SetText(*field.Value.(*string))
+						(settingsFields[field.Label]).(*controller.Editor).SetText(*field.Value.(*string))
 					case "number":
-						(settingsFields[field.Name]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*int)))
+						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*int)))
 					case "decimal":
-						(settingsFields[field.Name]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*float64)))
+						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*float64)))
 					case "time":
-						(settingsFields[field.Name]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*time.Duration)))
+						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*time.Duration)))
 					}
 				}
 			case "switch":
-				settingsFields[field.Name] = new(controller.CheckBox)
-				(settingsFields[field.Name]).(*controller.CheckBox).SetChecked(*field.Value.(*bool))
+				settingsFields[field.Label] = new(controller.CheckBox)
+				(settingsFields[field.Label]).(*controller.CheckBox).SetChecked(*field.Value.(*bool))
 				log.INFO(*field.Value.(*bool))
 			case "radio":
-				settingsFields[field.Name] = new(controller.Enum)
+				settingsFields[field.Label] = new(controller.Enum)
 			default:
-				settingsFields[field.Name] = new(controller.Button)
+				settingsFields[field.Label] = new(controller.Button)
 			}
 		}
 	}
