@@ -15,7 +15,7 @@ func (ui *DuoUI) LoadPages() (p map[string]*theme.DuoUIpage) {
 	p["SETTINGS"] = ui.ly.Theme.DuoUIpage("SETTINGS", ui.contentHeader(ui.headerSettings()), ui.settingsBody(), func() {})
 	p["NETWORK"] = ui.ly.Theme.DuoUIpage("NETWORK", func() {}, func() { ui.ly.Theme.H5("network :").Layout(ui.ly.Context) }, func() {})
 	p["HISTORY"] = ui.ly.Theme.DuoUIpage("HISTORY", ui.contentHeader(ui.headerTransactions()), ui.txsBody(), func() {})
-	p["EXPLORER"] = ui.ly.Theme.DuoUIpage("EXPLORER", func() {}, ui.DuoUIexplorer(), func() {})
+	p["EXPLORER"] = ui.ly.Theme.DuoUIpage("EXPLORER", ui.contentHeader(ui.headerExplorer()), ui.bodyExplorer(), func() {})
 	p["CONSOLE"] = ui.ly.Theme.DuoUIpage("CONSOLE", func() {}, ui.DuoUIconsole(), func() {})
 	p["LOG"] = ui.ly.Theme.DuoUIpage("LOG", func() {}, ui.DuoUIlogger(), func() {})
 	return
