@@ -137,7 +137,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		ctrl.active.Store(true)
 	}
 	ctrl.uniConn, err = transport.NewUnicastChannel("controller", ctrl, *cx.Config.MinerPass,
-		"0.0.0.0:0", pM.GetControllerListener()[0], MaxDatagramSize, handlersUnicast)
+		pM.GetIPs()[0].String()+":14422", pM.GetControllerListener()[0], MaxDatagramSize, handlersUnicast)
 	if err != nil {
 		log.ERROR(err)
 		cancel()

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"time"
 	
@@ -121,10 +122,12 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 		ready <- struct{}{}
 	}()
 	<-ready
+	log.WARN(sender, receiver)
 	channel.Sender, err = NewSender(sender, maxDatagramSize)
 	if err != nil {
 		log.ERROR(err)
 	}
+	log.WARN(channel.Sender)
 	log.WARN("starting unicast channel:", channel.Creator, sender, receiver, magics)
 	return
 }
@@ -135,6 +138,7 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err erro
 	if addr, err = net.ResolveUDPAddr("udp4", address); log.Check(err) {
 		return
 	} else if conn, err = net.DialUDP("udp4", nil, addr); log.Check(err) {
+		debug.PrintStack()
 		return
 	}
 	log.DEBUG("started new sender on", conn.LocalAddr(), "->", conn.RemoteAddr())

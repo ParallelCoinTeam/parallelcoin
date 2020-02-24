@@ -325,7 +325,10 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 // pod) configuration to allow workers to dispatch their solutions
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	log.DEBUG("receiving dispatch password", pass)
-	conn, err := transport.NewUnicastChannel("kopachworker", w, pass, "", "",
+	rand.Seed(time.Now().UnixNano())
+	sp := fmt.Sprint(rand.Intn(32767)+1025)
+	rp := fmt.Sprint(rand.Intn(32767)+1025)
+	conn, err := transport.NewUnicastChannel("kopachworker", w, pass, "0.0.0.0:"+sp, "0.0.0.0:"+rp,
 		controller.MaxDatagramSize, nil)
 	if err != nil {
 		log.ERROR(err)
