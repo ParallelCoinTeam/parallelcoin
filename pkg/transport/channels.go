@@ -10,7 +10,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
-	
+
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
@@ -264,7 +264,7 @@ out:
 				nonce := string(nonceBytes)
 				// decipher
 				var shard []byte
-				if shard, err = channel.ciph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); log.Check(err) {
+				if shard, err = channel.ciph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); err != nil {
 					continue
 				}
 				if bn, ok := channel.buffers[nonce]; ok {

@@ -37,15 +37,10 @@ func (ui *DuoUI) bodyExplorer() func() {
 				}.Layout(ui.ly.Context,
 					layout.Rigid(func() {
 						layout.Flex{
-							Axis: layout.Horizontal,
+							Axis:    layout.Horizontal,
+							Spacing: layout.SpaceAround,
 						}.Layout(ui.ly.Context,
-							layout.Rigid(func() {
-								num := ui.ly.Theme.Body1(fmt.Sprint(i))
-								num.Font.Typeface = ui.ly.Theme.Font.Primary
-								num.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-								num.Layout(ui.ly.Context)
-							}),
-							layout.Rigid(func() {
+							layout.Flexed(0.6, func() {
 								var linkButton theme.DuoUIbutton
 								linkButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Mono, fmt.Sprint(b.Height), ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Dark, "", ui.ly.Theme.Color.Light, 16, 0, 60, 24, 0, 0)
 								for b.Link.Clicked(ui.ly.Context) {
@@ -56,7 +51,7 @@ func (ui *DuoUI) bodyExplorer() func() {
 							layout.Rigid(func() {
 								amount := ui.ly.Theme.H5(fmt.Sprintf("%0.8f", b.Amount))
 								amount.Font.Typeface = ui.ly.Theme.Font.Primary
-								amount.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+								amount.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 								amount.Alignment = text.End
 								amount.Font.Variant = "Mono"
 								amount.Font.Weight = text.Bold
@@ -65,26 +60,26 @@ func (ui *DuoUI) bodyExplorer() func() {
 							layout.Rigid(func() {
 								sat := ui.ly.Theme.Body1(fmt.Sprint(b.TxNum))
 								sat.Font.Typeface = ui.ly.Theme.Font.Primary
-								sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+								sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 								sat.Layout(ui.ly.Context)
 							}),
 							layout.Rigid(func() {
 								sat := ui.ly.Theme.Body1(fmt.Sprint(b.BlockHash))
 								sat.Font.Typeface = ui.ly.Theme.Font.Mono
-								sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+								sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 								sat.Layout(ui.ly.Context)
 							}),
 							layout.Rigid(func() {
 								l := ui.ly.Theme.Body2(b.Time)
 								l.Font.Typeface = ui.ly.Theme.Font.Primary
-								l.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+								l.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 								l.Layout(ui.ly.Context)
 							}),
 						)
 					}),
 					layout.Rigid(func() {
 						sat := ui.ly.Theme.Body1(fmt.Sprintf("%0.8f", b.Amount))
-						sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+						sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 						sat.Layout(ui.ly.Context)
 					}),
 				)
