@@ -104,7 +104,7 @@ func NewWithConnAndSemaphore(
 	// with this we can report cumulative hash counts as well as using it to
 	// distribute algorithms evenly
 	w.startNonce = uint32(w.roller.C)
-	go func() {
+	go func(w *Worker) {
 		log.DEBUG("main work loop starting")
 	pausing:
 		for {
@@ -204,7 +204,7 @@ func NewWithConnAndSemaphore(
 			log.DEBUG("worker pausing")
 		}
 		log.DEBUG("worker finished")
-	}()
+	}(w)
 	return w
 }
 

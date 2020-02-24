@@ -116,9 +116,9 @@ func NewUnicastChannel(ctx interface{}, key, sender, receiver string, maxDatagra
 // NewSender creates a new UDP connection to a specified address
 func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err error) {
 	var addr *net.UDPAddr
-	if addr, err = net.ResolveUDPAddr("udp", address); log.Check(err) {
+	if addr, err = net.ResolveUDPAddr("udp4", address); log.Check(err) {
 		return
-	} else if conn, err = net.DialUDP("udp", nil, addr); log.Check(err) {
+	} else if conn, err = net.DialUDP("udp4", nil, addr); log.Check(err) {
 		return
 	}
 	log.DEBUG("started new sender on", conn.LocalAddr(), "->", conn.RemoteAddr())
@@ -131,9 +131,9 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err erro
 // from that Address to a buffer which is passed to a handler
 func Listen(address string, channel *Channel, maxDatagramSize int, handlers Handlers) (conn *net.UDPConn, err error) {
 	var addr *net.UDPAddr
-	if addr, err = net.ResolveUDPAddr("udp", address); log.Check(err) {
+	if addr, err = net.ResolveUDPAddr("udp4", address); log.Check(err) {
 		return
-	} else if conn, err = net.ListenUDP("udp", addr); log.Check(err) {
+	} else if conn, err = net.ListenUDP("udp4", addr); log.Check(err) {
 		return
 	} else if conn == nil {
 		return nil, errors.New("unable to start connection ")
@@ -176,10 +176,10 @@ func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers H
 	address := net.JoinHostPort(UDPMulticastAddress, fmt.Sprint(port))
 	var addr *net.UDPAddr
 	// Parse the string Address
-	if addr, err = net.ResolveUDPAddr("udp", address); log.Check(err) {
+	if addr, err = net.ResolveUDPAddr("udp4", address); log.Check(err) {
 		return
 		// Open up a connection
-	} else if conn, err = net.ListenMulticastUDP("udp", nil, addr); log.Check(err) {
+	} else if conn, err = net.ListenMulticastUDP("udp4", nil, addr); log.Check(err) {
 		return
 	} else if conn == nil {
 		return nil, errors.New("unable to start connection ")
@@ -221,10 +221,10 @@ out:
 			// Filter messages by magic, if there is no match in the map the packet is ignored
 		} else if numBytes > 4 {
 			magic := string(buffer[:4])
-			log.DEBUG("magic", magic)
-			for i := range handlers {
-				log.INFO(i)
-			}
+			// log.DEBUG("magic", magic)
+			// for i := range handlers {
+			// 	log.INFO(i)
+			// }
 			if handler, ok := handlers[magic]; ok {
 				// if caller needs to know the liveness status of the
 				// controller it is working on, the code below
@@ -237,7 +237,7 @@ out:
 				nonce := string(nonceBytes)
 				// decipher
 				var shard []byte
-				if shard, err = channel.ciph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); log.Check(err) {
+				if shard, err = channel.ciph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); err != nil {
 					continue
 				}
 				if bn, ok := channel.buffers[nonce]; ok {
@@ -281,7 +281,7 @@ out:
 						Buffers, shard)
 				}
 			} else {
-				log.DEBUG("ignoring irrelevant message")
+				// log.DEBUG("ignoring irrelevant message")
 				continue
 			}
 		} else {

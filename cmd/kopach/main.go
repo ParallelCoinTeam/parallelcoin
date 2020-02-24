@@ -54,6 +54,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			sendAddresses: []*net.UDPAddr{},
 			lastSent:      time.Now(),
 		}
+		log.SPEW(handlers)
 		w.conn, err = transport.
 			NewBroadcastChannel(w, *cx.Config.MinerPass, 11049,
 				controller.MaxDatagramSize, handlers)
