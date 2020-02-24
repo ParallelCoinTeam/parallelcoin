@@ -117,36 +117,36 @@ type Config struct {
 	BlocksOnly         *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"switch" model:"BlocksOnly" featured:"false"`
 	CAFile             *string          `group:"tls" label:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
 	ConfigFile         *string
-	ConnectPeers       *cli.StringSlice `group:"node" label:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"array" inputType:"text" model:"array" featured:"false"`
-	Controller         *string          `group:"mining" label:"Controller Listener" description:"address to bind miner controller to"`
-	CPUProfile         *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"input" inputType:"text" model:"CPUProfile" featured:"false"`
-	DataDir            *string          `group:"config" label:"Data Dir" description:"Root folder where application data is stored" type:"input" inputType:"text" model:"DataDir" featured:"false"`
-	DbType             *string          `group:"debug" label:"Db Type" description:"type of database storage engine to use (only one right now)" type:"input" inputType:"text" model:"DbType" featured:"false"`
-	DisableBanning     *bool            `group:"debug" label:"Disable Banning" description:"Disables banning of misbehaving peers" type:"switch" model:"DisableBanning" featured:"false"`
-	DisableCheckpoints *bool            `group:"debug" label:"Disable Checkpoints" description:"disables all checkpoints" type:"switch" model:"DisableCheckpoints" featured:"false"`
-	DisableDNSSeed     *bool            `group:"node" label:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"switch" model:"DisableDNSSeed" featured:"false"`
-	DisableListen      *bool            `group:"node" label:"Disable Listen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
-	DisableRPC         *bool            `group:"rpc" label:"Disable RPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
-	EnableController   *bool            `group:"node" label:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
-	// ExperimentalRPCListeners *cli.StringSlice `group:"wallet" label:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"array" inputType:"text" model:"array" featured:"false"`
-	ExternalIPs            *cli.StringSlice `group:"node" label:"External IPs" description:"extra addresses to tell peers they can connect to" type:"array" inputType:"text" model:"ExternalIPs" featured:"false"`
-	FreeTxRelayLimit       *float64         `group:"policy" label:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"decimal" model:"FreeTxRelayLimit" featured:"false"`
-	Generate               *bool            `group:"mining" label:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
-	GenThreads             *int             `group:"mining" label:"Gen Threads" description:"number of CPU threads to mine using" type:"input" inputType:"number" model:"GenThreads" featured:"false"`
-	Language               *string          `group:"config" label:"Language" description:"User interface language i18 localization" type:"input" inputType:"text" model:"Language" featured:"false"`
-	LimitPass              *string          `group:"rpc" label:"Limit Pass" description:"limited user password" type:"input" inputType:"password" model:"LimitPass" featured:"false"`
-	LimitUser              *string          `group:"rpc" label:"Limit User" description:"limited user name" type:"input" inputType:"text" model:"LimitUser" featured:"false"`
-	Listeners              *cli.StringSlice `group:"node" label:"Listeners" description:"List of addresses to bind the node listener to" type:"array" inputType:"text" model:"array" featured:"false"`
-	LogDir                 *string          `group:"config" label:"Log Dir" description:"Folder where log files are written" type:"input" inputType:"text" model:"LogDir" featured:"false"`
-	LogLevel               *string          `group:"config" label:"Log Level" description:"Verbosity of log printouts" type:"input" inputType:"text" model:"LogLevel" featured:"false"`
-	MaxOrphanTxs           *int             `group:"policy" label:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"input" inputType:"number" model:"MaxOrphanTxs" featured:"false"`
-	MaxPeers               *int             `group:"node" label:"Max Peers" description:"Maximum number of peers to hold connections with" type:"input" inputType:"number" model:"MaxPeers" featured:"false"`
-	MinerPass              *string          `group:"mining" label:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"input" inputType:"text" model:"MinerPass" featured:"false"`
-	MiningAddrs            *cli.StringSlice `group:"mining" label:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"array" inputType:"text" model:"array" featured:"false"`
-	MinRelayTxFee          *float64         `group:"policy" label:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"decimal" model:"MinRelayTxFee" featured:"false"`
-	Network                *string          `group:"node" label:"Network" description:"Which network are you connected to (eg.: mainnet, testnet)" type:"input" inputType" model:"Network" featured:"false"`
-	NoCFilters             *bool            `group:"node" label:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" model:"NoCFilters" featured:"false"`
-	NodeOff                *bool            `group:"debug" label:"Node Off" description:"turn off the node backend" type:"switch" model:"NodeOff" featured:"false"`
+	ConnectPeers       *cli.StringSlice `group:"node" name:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"array" inputType:"text" model:"array" featured:"false"`
+	Controller         *string          `group:"mining" name:"Controller Receiver" description:"address to bind miner controller to"`
+	CPUProfile         *string          `group:"debug" name:"CPU Profile" description:"write cpu profile to this file" type:"input" inputType:"text" model:"CPUProfile" featured:"false"`
+	DataDir            *string          `group:"config" name:"Data Dir" description:"Root folder where application data is stored" type:"input" inputType:"text" model:"DataDir" featured:"false"`
+	DbType             *string          `group:"debug" name:"Db Type" description:"type of database storage engine to use (only one right now)" type:"input" inputType:"text" model:"DbType" featured:"false"`
+	DisableBanning     *bool            `group:"debug" name:"Disable Banning" description:"Disables banning of misbehaving peers" type:"switch" model:"DisableBanning" featured:"false"`
+	DisableCheckpoints *bool            `group:"debug" name:"Disable Checkpoints" description:"disables all checkpoints" type:"switch" model:"DisableCheckpoints" featured:"false"`
+	DisableDNSSeed     *bool            `group:"node" name:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"switch" model:"DisableDNSSeed" featured:"false"`
+	DisableListen      *bool            `group:"node" name:"Disable Listen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
+	DisableRPC         *bool            `group:"rpc" name:"Disable RPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
+	EnableController   *bool            `group:"node" name:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
+	// ExperimentalRPCListeners *cli.StringSlice `group:"wallet" name:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"array" inputType:"text" model:"array" featured:"false"`
+	ExternalIPs            *cli.StringSlice `group:"node" name:"External IPs" description:"extra addresses to tell peers they can connect to" type:"array" inputType:"text" model:"ExternalIPs" featured:"false"`
+	FreeTxRelayLimit       *float64         `group:"policy" name:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"text" model:"FreeTxRelayLimit" featured:"false"`
+	Generate               *bool            `group:"mining" name:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
+	GenThreads             *int             `group:"mining" name:"Gen Threads" description:"number of CPU threads to mine using" type:"input" inputType:"number" model:"GenThreads" featured:"false"`
+	Language               *string          `group:"config" name:"Language" description:"User interface language i18 localization" type:"input" inputType:"text" model:"Language" featured:"false"`
+	LimitPass              *string          `group:"rpc" name:"Limit Pass" description:"limited user password" type:"input" inputType:"password" model:"LimitPass" featured:"false"`
+	LimitUser              *string          `group:"rpc" name:"Limit User" description:"limited user name" type:"input" inputType:"text" model:"LimitUser" featured:"false"`
+	Listeners              *cli.StringSlice `group:"node" name:"Listeners" description:"List of addresses to bind the node listener to" type:"array" inputType:"text" model:"array" featured:"false"`
+	LogDir                 *string          `group:"config" name:"Log Dir" description:"Folder where log files are written" type:"input" inputType:"text" model:"LogDir" featured:"false"`
+	LogLevel               *string          `group:"config" name:"Log Level" description:"Verbosity of log printouts" type:"input" inputType:"text" model:"LogLevel" featured:"false"`
+	MaxOrphanTxs           *int             `group:"policy" name:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"input" inputType:"number" model:"MaxOrphanTxs" featured:"false"`
+	MaxPeers               *int             `group:"node" name:"Max Peers" description:"Maximum number of peers to hold connections with" type:"input" inputType:"number" model:"MaxPeers" featured:"false"`
+	MinerPass              *string          `group:"mining" name:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"input" inputType:"text" model:"MinerPass" featured:"false"`
+	MiningAddrs            *cli.StringSlice `group:"mining" name:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"array" inputType:"text" model:"array" featured:"false"`
+	MinRelayTxFee          *float64         `group:"policy" name:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"text" model:"MinRelayTxFee" featured:"false"`
+	Network                *string          `group:"node" name:"Network" description:"Which network are you connected to (eg.: mainnet, testnet)" type:"input" inputType:"text" model:"Network" featured:"false"`
+	NoCFilters             *bool            `group:"node" name:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" model:"NoCFilters" featured:"false"`
+	NodeOff                *bool            `group:"debug" name:"Node Off" description:"turn off the node backend" type:"switch" model:"NodeOff" featured:"false"`
 	NoInitialLoad          *bool
 	NoPeerBloomFilters     *bool            `group:"node" label:"No Peer Bloom Filters" description:"disable bloom filtering support" type:"switch" model:"NoPeerBloomFilters" featured:"false"`
 	NoRelayPriority        *bool            `group:"policy" label:"No Relay Priority" description:"do not require free or low-fee transactions to have high priority for relaying" type:"switch" model:"NoRelayPriority" featured:"false"`

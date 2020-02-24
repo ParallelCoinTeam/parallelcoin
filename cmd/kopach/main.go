@@ -28,7 +28,7 @@ type HashCount struct {
 
 type Worker struct {
 	active        *atomic.Bool
-	conn          *transport.Connection
+	conn          *transport.Channel
 	ctx           context.Context
 	cx            *conte.Xt
 	mx            *sync.Mutex
@@ -46,29 +46,28 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		log.DEBUG("miner controller starting")
 		quit := make(chan struct{})
 		ctx, cancel := context.WithCancel(context.Background())
-		conn, err := transport.NewConnection("", controller.UDP4MulticastAddress, *cx.Config.MinerPass, controller.MaxDatagramSize, ctx)
-		if err != nil {
-			log.ERROR(err)
-			cancel()
-			return
-		}
-		var workers []*client.Client
-		// start up the workers
-		for i := 0; i < *cx.Config.GenThreads; i++ {
-			log.DEBUG("starting worker", i)
-			cmd := worker.Spawn(os.Args[0], "worker",
-				cx.ActiveNet.Name)
-			workers = append(workers, client.New(cmd.StdConn))
-		}
 		w := &Worker{
-			conn:          conn,
 			active:        &atomic.Bool{},
 			ctx:           ctx,
 			cx:            cx,
 			mx:            &sync.Mutex{},
 			sendAddresses: []*net.UDPAddr{},
-			workers:       workers,
 			lastSent:      time.Now(),
+		}
+		w.conn, err = transport.
+			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass, 11049,
+				controller.MaxDatagramSize, handlers)
+		if err != nil {
+			log.ERROR(err)
+			cancel()
+			return
+		}
+		// start up the workers
+		for i := 0; i < *cx.Config.GenThreads; i++ {
+			log.DEBUG("starting worker", i)
+			cmd := worker.Spawn(os.Args[0], "worker",
+				cx.ActiveNet.Name)
+			w.workers = append(w.workers, client.New(cmd.StdConn))
 		}
 		w.active.Store(false)
 		for i := range w.workers {
@@ -77,12 +76,6 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			if err != nil {
 				log.ERROR(err)
 			}
-		}
-		err = w.conn.Listen(handlers, w, &w.lastSent, &w.FirstSender)
-		if err != nil {
-			log.ERROR(err)
-			cancel()
-			return
 		}
 		// controller watcher thread
 		go func() {
@@ -126,56 +119,54 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 }
 
 // these are the handlers for specific message types.
-var handlers = transport.HandleFunc{
-	string(job.WorkMagic): func(ctx interface{}) func(b []byte) (err error) {
-		return func(b []byte) (err error) {
-			log.DEBUG("received job")
-			w := ctx.(*Worker)
-			j := job.LoadContainer(b)
-			ips := j.GetIPs()
-			cP := j.GetControllerListenerPort()
-			addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
-			w.mx.Lock()
-			otherSent := w.FirstSender != addr && w.FirstSender != ""
-			w.mx.Unlock()
-			if otherSent {
-				// ignore other controllers while one is active and received
-				// first
-				log.DEBUG("ignoring other controller", addr)
-				return
-			} else {
-				w.mx.Lock()
-				w.FirstSender = addr
-				w.lastSent = time.Now()
-				w.mx.Unlock()
-			}
-			for i := range w.workers {
-				log.DEBUG("sending job to worker", i)
-				err := w.workers[i].NewJob(&j)
-				if err != nil {
-					log.ERROR(err)
-				}
-				// log.SPEW(j)
-			}
+var handlers = transport.Handlers{
+	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
+		b []byte) (err error) {
+		log.DEBUG("received job")
+		w := ctx.(*Worker)
+		j := job.LoadContainer(b)
+		ips := j.GetIPs()
+		cP := j.GetControllerListenerPort()
+		addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
+		w.mx.Lock()
+		otherSent := w.FirstSender != addr && w.FirstSender != ""
+		w.mx.Unlock()
+		if otherSent {
+			// ignore other controllers while one is active and received
+			// first
+			log.DEBUG("ignoring other controller", addr)
 			return
+		} else {
+			w.mx.Lock()
+			w.FirstSender = addr
+			w.lastSent = time.Now()
+			w.mx.Unlock()
 		}
+		for i := range w.workers {
+			log.DEBUG("sending job to worker", i)
+			err := w.workers[i].NewJob(&j)
+			if err != nil {
+				log.ERROR(err)
+			}
+			// log.SPEW(j)
+		}
+		return
 	},
-	string(pause.PauseMagic): func(ctx interface{}) func(b []byte) (err error) {
-		return func(b []byte) (err error) {
-			log.DEBUG("received pause")
-			w := ctx.(*Worker)
-			for i := range w.workers {
-				log.DEBUG("sending pause to worker", i)
-				err := w.workers[i].Pause()
-				if err != nil {
-					log.ERROR(err)
-				}
+	string(pause.PauseMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
+		b []byte) (err error) {
+		log.DEBUG("received pause")
+		w := ctx.(*Worker)
+		for i := range w.workers {
+			log.DEBUG("sending pause to worker", i)
+			err := w.workers[i].Pause()
+			if err != nil {
+				log.ERROR(err)
 			}
-			w.mx.Lock()
-			// clear the FirstSender
-			w.FirstSender = ""
-			w.mx.Unlock()
-			return
 		}
+		w.mx.Lock()
+		// clear the FirstSender
+		w.FirstSender = ""
+		w.mx.Unlock()
+		return
 	},
 }

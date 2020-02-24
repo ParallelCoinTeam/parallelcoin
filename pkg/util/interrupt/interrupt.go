@@ -31,7 +31,7 @@ var (
 	HandlersDone = make(chan struct{})
 )
 
-// Listener listens for interrupt signals, registers interrupt callbacks, and
+// Receiver listens for interrupt signals, registers interrupt callbacks, and
 // responds to custom shutdown signals as required
 func Listener() {
 	var interruptCallbacks []func()

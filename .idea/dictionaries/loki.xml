@@ -5,6 +5,7 @@
       <w>datagram</w>
       <w>merkle</w>
       <w>routeable</w>
+      <w>unicast</w>
     </words>
   </dictionary>
 </component>

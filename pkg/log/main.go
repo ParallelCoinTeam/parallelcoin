@@ -270,8 +270,8 @@ func Composite(text, level string, color bool) string {
 		terminalWidth = 120
 	}
 	skip := 3
-	if level == "STATUS" {
-		skip = 1
+	if level == "ERR" {
+		skip = 4
 	}
 	_, loc, iline, _ := runtime.Caller(skip)
 	line := fmt.Sprint(iline)
@@ -281,7 +281,7 @@ func Composite(text, level string, color bool) string {
 		file = files[1]
 	}
 	sinceW := 12
-	if level == "STATUS" {
+	if level == "ERR" {
 		sinceW = 9
 	}
 	since := fmt.Sprintf("%-"+fmt.Sprint(sinceW)+"s", time.Now().Sub(StartupTime)/time.Second*time.Second)
@@ -325,8 +325,8 @@ func Composite(text, level string, color bool) string {
 			since = colorViolet + since + colorOff
 			file = colorItalic + colorBlue + file
 			line = line + colorOff
-		case "STATUS":
-			level = backgroundGrey + colorBold + level + colorOff + backgroundGrey
+		case "CHK":
+			level = colorBold + level + colorOff
 			// since = since
 			file = colorItalic + file
 			line = line + colorOff
