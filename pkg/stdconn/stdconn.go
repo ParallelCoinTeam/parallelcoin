@@ -25,7 +25,14 @@ func (s StdConn) Write(b []byte) (n int, err error) {
 }
 
 func (s StdConn) Close() (err error) {
-	close(s.Quit)
+	var ok bool
+	select {
+	case _, ok = <-s.Quit:
+	default:
+	}
+	if !ok {
+		close(s.Quit)
+	}
 	return
 }
 

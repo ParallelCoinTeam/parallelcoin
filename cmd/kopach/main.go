@@ -19,6 +19,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/stdconn/worker"
 	"github.com/p9c/pod/pkg/transport"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 type HashCount struct {
@@ -38,6 +39,7 @@ type Worker struct {
 	lastSent      time.Time
 	Status        atomic.String
 	HashTick      chan HashCount
+	LastHash      string
 }
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
@@ -62,13 +64,21 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			cancel()
 			return
 		}
+		var wks []*worker.Worker
 		// start up the workers
 		for i := 0; i < *cx.Config.GenThreads; i++ {
 			log.DEBUG("starting worker", i)
 			cmd := worker.Spawn(os.Args[0], "worker",
 				cx.ActiveNet.Name)
+			wks = append(wks, cmd)
 			w.workers = append(w.workers, client.New(cmd.StdConn))
 		}
+		interrupt.AddHandler(func() {
+			for i := range w.workers {
+				if err := wks[i].Kill(); log.Check(err) {
+				}
+			}
+		})
 		w.active.Store(false)
 		for i := range w.workers {
 			log.DEBUG("sending pass to worker", i)
@@ -122,15 +132,33 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 var handlers = transport.Handlers{
 	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
 		b []byte) (err error) {
-		log.DEBUG("received job")
 		w := ctx.(*Worker)
 		j := job.LoadContainer(b)
+		h := j.GetHashes()
+		w.mx.Lock()
 		ips := j.GetIPs()
 		cP := j.GetControllerListenerPort()
 		addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
-		w.mx.Lock()
 		otherSent := w.FirstSender != addr && w.FirstSender != ""
+		w.FirstSender = addr
+		w.lastSent = time.Now()
 		w.mx.Unlock()
+		if len(h) > 0 {
+			// log.DEBUG(h)
+			hS := h[5].String()
+			if w.LastHash == hS {
+				log.TRACE("not responding to same job")
+				return
+			} else {
+				w.LastHash = hS
+			}
+		}
+		log.TRACE("received job")
+		// if newHash == w.LastHash {
+		// 	return
+		// } else {
+		// 	w.LastHash = newHash
+		// }
 		if otherSent {
 			// ignore other controllers while one is active and received
 			// first
@@ -143,7 +171,7 @@ var handlers = transport.Handlers{
 			w.mx.Unlock()
 		}
 		for i := range w.workers {
-			log.DEBUG("sending job to worker", i)
+			log.TRACE("sending job to worker", i)
 			err := w.workers[i].NewJob(&j)
 			if err != nil {
 				log.ERROR(err)
