@@ -231,6 +231,19 @@ The regexp that I use given my system base path is (exactly this with all newlin
 ]
 ```
 
+These two seem to the work the best including allowing clicking on stack trace 
+code location references. Change goland launcher and package root path as required.
+
+```
+[/]((([a-zA-Z0-9-_.]+/)+([a-zA-Z0-9-_.]+)):([0-9]+))[ ]
+
+/home/loki/bin/goland --line $5 /$1
+
+[ ]((([a-zA-Z0-9-_.]+/)+([a-zA-Z0-9-_.]+)):([0-9]+))
+
+/home/loki/bin/goland --line $5 /home/loki/Public/pod/$1
+```
+
 (the text fields in tilix's editor are very weird so it will be easier to
 just paste this in and gnome dconf editor should remove the newlines
 automatically)

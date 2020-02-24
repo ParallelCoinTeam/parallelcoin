@@ -58,7 +58,7 @@ type Controller struct {
 	prevHash               *chainhash.Hash
 	lastTxUpdate           time.Time
 	lastGenerated          time.Time
-	pauseShards            transport.BufIter
+	pauseShards            [][]byte
 	sendAddresses          []*net.UDPAddr
 	subMx                  *sync.Mutex
 	submitChan             chan []byte
@@ -102,7 +102,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		began:                  time.Now(),
 	}
 	var err error
-	ctrl.multiConn, err = transport.NewBroadcastChannel(ctrl, *cx.Config.MinerPass,
+	ctrl.multiConn, err = transport.NewBroadcastChannel("controller", ctrl, *cx.Config.MinerPass,
 		11049, MaxDatagramSize, make(transport.Handlers))
 	if err != nil {
 		log.ERROR(err)
@@ -114,10 +114,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	ctrl.active.Store(false)
 	buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
-	var pauseShards *transport.BufIter
+	var pauseShards [][]byte
 	if pauseShards = transport.GetShards(pM.Data); log.Check(err) {
 	} else {
-		log.DEBUG(pauseShards.Get())
+		// log.DEBUG(pauseShards)
 		ctrl.active.Store(true)
 	}
 	ctrl.oldBlocks.Store(pauseShards)
@@ -136,8 +136,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	} else {
 		ctrl.active.Store(true)
 	}
-	ctrl.uniConn, err = transport.NewUnicastChannel(ctrl, *cx.Config.MinerPass,
-		":0", ":0", MaxDatagramSize, handlersUnicast)
+	ctrl.uniConn, err = transport.NewUnicastChannel("controller", ctrl, *cx.Config.MinerPass,
+		"0.0.0.0:0", pM.GetControllerListener()[0], MaxDatagramSize, handlersUnicast)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
@@ -155,7 +155,9 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 			total := time.Now().Sub(ctrl.began)
 			log.INFOF("%0.3f hash/s %24d total hashes", float64(hr)/total.Seconds(), hr)
 		case <-ctx.Done():
+			cont = false
 		case <-interrupt.HandlersDone:
+			cont = false
 		}
 	}
 	log.TRACE("controller exiting")
@@ -192,7 +194,7 @@ var handlersUnicast = transport.Handlers{
 		// set old blocks to pause and send pause directly as block is
 		// probably a solution
 		c.oldBlocks.Store(c.pauseShards)
-		err = c.multiConn.SendMany(pause.PauseMagic, &c.pauseShards)
+		err = c.multiConn.SendMany(pause.PauseMagic, c.pauseShards)
 		if err != nil {
 			log.ERROR(err)
 			return
@@ -338,8 +340,8 @@ out:
 				}
 				break
 			}
-			oB, ok := ctrl.oldBlocks.Load().(*transport.BufIter)
-			if oB.Len() == 0 || !ok {
+			oB, ok := ctrl.oldBlocks.Load().([][]byte)
+			if len(oB) == 0 || !ok {
 				log.DEBUG("template is empty")
 				break
 			}

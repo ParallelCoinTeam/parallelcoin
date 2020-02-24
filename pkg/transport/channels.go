@@ -2,9 +2,11 @@ package transport
 
 import (
 	"crypto/cipher"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
+	"runtime"
 	"strings"
 	"time"
 	
@@ -29,8 +31,9 @@ type (
 	}
 	// HandlerFunc is a function that is used to process a received message
 	HandlerFunc func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error)
-	Handlers map[string]HandlerFunc
-	Channel  struct {
+	Handlers    map[string]HandlerFunc
+	Channel     struct {
+		Creator         string
 		context         interface{}
 		buffers         map[string]*MsgBuffer
 		Sender          *net.UDPConn
@@ -44,30 +47,38 @@ type (
 
 // SetDestination changes the address the outbound connection of a channel directs to
 func (c *Channel) SetDestination(dst string) (err error) {
+	log.DEBUG("sending to", dst)
 	if c.Sender, err = NewSender(dst, c.MaxDatagramSize); log.Check(err) {
 	}
 	return
 }
 
-// Send fires off some data through the configured channel's outbound
-func (c *Channel) Send(magic []byte, data []byte) (n int, err error) {
+// Send fires off some data through the configured channel's outbound.
+func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, err error) {
 	if len(data) == 0 {
 		err = errors.New("not sending empty packet")
 		log.ERROR(err)
 		return
 	}
 	var msg []byte
-	if msg, err = encryptMessage(magic, c.ciph, data); log.Check(err) {
+	if msg, err = EncryptMessage(c.Creator, c.ciph, magic, nonce, data); log.Check(err) {
 	}
 	n, err = c.Sender.Write(msg)
+	// log.DEBUG(msg)
 	return
 }
 
 // SendMany sends a BufIter of shards as produced by GetShards
-func (c *Channel) SendMany(magic []byte, b *BufIter) (err error) {
-	for ; b.More(); b.Next() {
-		if _, err = c.Send(magic, b.Get()); log.Check(err) {
+func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
+	if nonce, err := GetNonce(c.ciph); log.Check(err) {
+	} else {
+		for i := 0; i < len(b); i++ {
+			// log.DEBUG(i)
+			if _, err = c.Send(magic, nonce, b[i]); log.Check(err) {
+				// debug.PrintStack()
+			}
 		}
+		log.DEBUG(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
 	}
 	return
 }
@@ -83,19 +94,23 @@ func (c *Channel) Close() (err error) {
 
 // GetShards returns a buffer iterator to feed to Channel.SendMany containing
 // fec encoded shards built from the provided buffer
-func GetShards(data []byte) (bI *BufIter) {
-	bI = &BufIter{}
+func GetShards(data []byte) (shards [][]byte) {
 	var err error
-	if bI.Buf, err = fec.Encode(data); log.Check(err) {
+	if shards, err = fec.Encode(data); log.Check(err) {
 	}
 	return
 }
 
 // NewUnicastChannel sets up a listener and sender for a specified destination
-func NewUnicastChannel(ctx interface{}, key, sender, receiver string, maxDatagramSize int,
+func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver string, maxDatagramSize int,
 	handlers Handlers) (channel *Channel, err error) {
-	channel = &Channel{MaxDatagramSize: maxDatagramSize, buffers: make(map[string]*MsgBuffer),
+	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize, buffers: make(map[string]*MsgBuffer),
 		context: ctx}
+	var magics []string
+	for i := range handlers {
+		magics = append(magics, i)
+	}
+	// log.DEBUG("magics", magics, PrevCallers())
 	if key != "" {
 		if channel.ciph, err = gcm.GetCipher(key); log.Check(err) {
 		}
@@ -110,6 +125,7 @@ func NewUnicastChannel(ctx interface{}, key, sender, receiver string, maxDatagra
 	if err != nil {
 		log.ERROR(err)
 	}
+	log.WARN("starting unicast channel:", channel.Creator, sender, receiver, magics)
 	return
 }
 
@@ -149,8 +165,8 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 // NewBroadcastChannel returns a broadcaster and listener with a given handler on a multicast
 // address and specified port. The handlers define the messages that will be processed and
 // any other messages are ignored
-func NewBroadcastChannel(ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers) (channel *Channel, err error) {
-	channel = &Channel{MaxDatagramSize: maxDatagramSize, buffers: make(map[string]*MsgBuffer),
+func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers) (channel *Channel, err error) {
+	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize, buffers: make(map[string]*MsgBuffer),
 		context: ctx}
 	if key != "" {
 		if channel.ciph, err = gcm.GetCipher(key); log.Check(err) {
@@ -184,13 +200,19 @@ func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers H
 	} else if conn == nil {
 		return nil, errors.New("unable to start connection ")
 	}
-	log.DEBUG("starting broadcast listener", address)
+	var magics []string
+	for i := range handlers {
+		magics = append(magics, i)
+	}
+	// log.DEBUG("magics", magics, PrevCallers())
+	log.INFO("starting broadcast listener", channel.Creator, address, magics)
 	if err = conn.SetReadBuffer(maxDatagramSize); log.Check(err) {
 	}
 	channel.Receiver = conn
 	go Handle(address, channel, handlers, maxDatagramSize)
 	return
 }
+
 func handleNetworkError(address string, err error) (result int) {
 	if len(strings.Split(err.Error(), "use of closed network connection")) >= 2 {
 		log.DEBUG("connection closed", address)
@@ -207,6 +229,7 @@ func handleNetworkError(address string, err error) (result int) {
 // on the complete received messages
 func Handle(address string, channel *Channel, handlers Handlers, maxDatagramSize int) {
 	buffer := make([]byte, maxDatagramSize)
+	log.WARN("starting handler for", channel.Creator, "listener")
 	// Loop forever reading from the socket until it is closed
 out:
 	for {
@@ -237,11 +260,13 @@ out:
 				nonce := string(nonceBytes)
 				// decipher
 				var shard []byte
-				if shard, err = channel.ciph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); err != nil {
+				if shard, err = channel.ciph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); log.Check(err) {
 					continue
 				}
 				if bn, ok := channel.buffers[nonce]; ok {
+					// log.DEBUGF("%s adding shard to %"+fmt.Sprint(nL*2)+"x", channel.Creator, nonceBytes)
 					if !bn.Decoded {
+						// log.DEBUG(PrevCallers())
 						bn.Buffers = append(bn.Buffers, shard)
 						if len(bn.Buffers) >= 3 {
 							// try to decode it
@@ -251,18 +276,21 @@ out:
 								log.ERROR(err)
 								continue
 							}
+							log.DEBUG(hex.EncodeToString(cipherText))
 							bn.Decoded = true
-							err = handler(channel.context, src, channel.Sender.RemoteAddr().String(), cipherText)
-							if err != nil {
-								log.ERROR(err)
-								continue
+							// if channel.ciph != nil {
+							// 	if msg, err = DecryptMessage(channel.Creator, channel.ciph, cipherText); log.Check(err) {
+							// 		log.WARN(PrevCallers())
+							// 		continue
+							// 	}
+							if err = handler(channel.context, src, address, cipherText); log.Check(err) {
+								// err = handler(channel.context, src, channel.Sender.RemoteAddr().String(), cipherText)
+								// if err != nil {
+								// 	log.ERROR(err)
+								// 	continue
+								// }
 							}
-						}
-						if channel.ciph != nil {
-							if msg, err = decryptMessage(channel.ciph, msg); log.Check(err) {
-								continue
-							}
-						} else if err = handler(channel.context, src, address, msg); log.Check(err) {
+							// }
 						}
 					} else {
 						for i := range channel.buffers {
@@ -275,17 +303,27 @@ out:
 						}
 					}
 				} else {
+					log.DEBUGF("%s adding %s %x to buffers", channel.Creator, magic, nonceBytes)
 					channel.buffers[nonce] = &MsgBuffer{[][]byte{},
 						time.Now(), false, src}
 					channel.buffers[nonce].Buffers = append(channel.buffers[nonce].
 						Buffers, shard)
 				}
 			} else {
-				// log.DEBUG("ignoring irrelevant message")
+				// log.DEBUGF("ignoring irrelevant message %s\n%s\n%s", magic, PrevCallers(), string(debug.Stack()))
+				// log.DEBUG("ignoring irrelevant message", magic, channel.Creator)
 				continue
 			}
 		} else {
-			log.DEBUG("short message")
+			log.DEBUG(channel.Creator, "short message")
 		}
 	}
+}
+
+func PrevCallers() (out string) {
+	for i := 0; i < 10; i++ {
+		_, loc, iline, _ := runtime.Caller(i)
+		out += fmt.Sprintf("%s:%d \n", loc, iline)
+	}
+	return
 }

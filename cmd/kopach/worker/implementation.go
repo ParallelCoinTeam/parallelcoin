@@ -28,6 +28,7 @@ const RoundsPerAlgo = 23
 
 type Worker struct {
 	sem           sem.T
+	pipeConn      *stdconn.StdConn
 	multicastConn net.Conn
 	unicastConn   net.Conn
 	dispatchConn  *transport.Channel
@@ -84,22 +85,22 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 // connection while retaining the same RPC API to allow a worker to be
 // configured to run on a bare metal system with a different launcher main
 func NewWithConnAndSemaphore(
-	conn net.Conn,
+	conn *stdconn.StdConn,
 	s sem.T,
 	quit chan struct{},
 ) *Worker {
 	log.DEBUG("creating new worker")
 	msgBlock := &wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
-		sem:           s,
-		multicastConn: conn,
-		Quit:          quit,
-		run:           sem.New(1),
-		block:         util.NewBlock(msgBlock),
-		msgBlock:      msgBlock,
-		roller:        NewCounter(RoundsPerAlgo),
-		startChan:     make(chan struct{}),
-		stopChan:      make(chan struct{}),
+		sem:       s,
+		pipeConn:  conn,
+		Quit:      quit,
+		run:       sem.New(1),
+		block:     util.NewBlock(msgBlock),
+		msgBlock:  msgBlock,
+		roller:    NewCounter(RoundsPerAlgo),
+		startChan: make(chan struct{}),
+		stopChan:  make(chan struct{}),
 	}
 	// with this we can report cumulative hash counts as well as using it to
 	// distribute algorithms evenly
@@ -212,13 +213,13 @@ func NewWithConnAndSemaphore(
 // loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
 func New(s sem.T) (w *Worker, conn net.Conn) {
-	log.L.SetLevel("trace", true)
+	// log.L.SetLevel("trace", true)
 	quit := make(chan struct{})
-	conn = stdconn.New(os.Stdin, os.Stdout, quit)
+	sc := stdconn.New(os.Stdin, os.Stdout, quit)
 	return NewWithConnAndSemaphore(
-		conn,
+		&sc,
 		s,
-		quit), conn
+		quit), &sc
 }
 
 // NewJob is a delivery of a new job for the worker,
@@ -245,6 +246,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
 	log.DEBUG(address)
 	if address != w.dispatchConn.Sender.RemoteAddr().String() {
+		log.DEBUG("setting destination", address)
 		err = w.dispatchConn.SetDestination(address)
 		if err != nil {
 			log.ERROR(err)
@@ -323,7 +325,7 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 // pod) configuration to allow workers to dispatch their solutions
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	log.DEBUG("receiving dispatch password", pass)
-	conn, err := transport.NewUnicastChannel(w, pass, "", ":0",
+	conn, err := transport.NewUnicastChannel("kopachworker", w, pass, "", "",
 		controller.MaxDatagramSize, nil)
 	if err != nil {
 		log.ERROR(err)
