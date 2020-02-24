@@ -117,6 +117,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	var pauseShards *transport.BufIter
 	if pauseShards = transport.GetShards(pM.Data); log.Check(err) {
 	} else {
+		log.DEBUG(pauseShards.Get())
 		ctrl.active.Store(true)
 	}
 	ctrl.oldBlocks.Store(pauseShards)
@@ -337,12 +338,12 @@ out:
 				}
 				break
 			}
-			oB, ok := ctrl.oldBlocks.Load().(transport.BufIter)
+			oB, ok := ctrl.oldBlocks.Load().(*transport.BufIter)
 			if oB.Len() == 0 || !ok {
 				log.DEBUG("template is empty")
 				break
 			}
-			err := ctrl.multiConn.SendMany(job.WorkMagic, &oB)
+			err := ctrl.multiConn.SendMany(job.WorkMagic, oB)
 			if err != nil {
 				log.ERROR(err)
 			}

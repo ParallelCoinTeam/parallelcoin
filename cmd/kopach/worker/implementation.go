@@ -322,7 +322,7 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 // SendPass gives the encryption key configured in the kopach controller (
 // pod) configuration to allow workers to dispatch their solutions
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
-	log.DEBUG("receiving dispatch password")
+	log.DEBUG("receiving dispatch password", pass)
 	conn, err := transport.NewUnicastChannel(w, pass, "", ":0",
 		controller.MaxDatagramSize, nil)
 	if err != nil {

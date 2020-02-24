@@ -221,6 +221,10 @@ out:
 			// Filter messages by magic, if there is no match in the map the packet is ignored
 		} else if numBytes > 4 {
 			magic := string(buffer[:4])
+			log.DEBUG("magic", magic)
+			for i := range handlers {
+				log.INFO(i)
+			}
 			if handler, ok := handlers[magic]; ok {
 				// if caller needs to know the liveness status of the
 				// controller it is working on, the code below
