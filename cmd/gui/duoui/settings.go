@@ -3,6 +3,7 @@ package duoui
 import (
 	"fmt"
 	"gioui.org/layout"
+	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/log"
@@ -40,32 +41,29 @@ func (ui *DuoUI) settingsFieldDescription(f *Field) func() {
 
 func (ui *DuoUI) headerSettings() func() {
 	return func() {
-		layout.UniformInset(unit.Dp(15)).Layout(ui.ly.Context, func() {
-			layout.Flex{
-				Axis: layout.Vertical,
-			}.Layout(ui.ly.Context,
-				layout.Rigid(func() {
-					t := ui.ly.Theme.H3(ui.rc.Settings.Tabs.Current)
-					t.Font.Typeface = ui.ly.Theme.Font.Primary
-					t.Color = theme.HexARGB(ui.ly.Theme.Color.Primary)
-					t.Layout(ui.ly.Context)
-				}),
-				layout.Rigid(func() {
-					groupsNumber := len(ui.rc.Settings.Daemon.Schema.Groups)
-					groupsList.Layout(ui.ly.Context, groupsNumber, func(i int) {
-						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
-							i = groupsNumber - 1 - i
-							t := ui.rc.Settings.Daemon.Schema.Groups[i]
-							txt := fmt.Sprint(t.Legend)
-							for ui.rc.Settings.Tabs.TabsList[txt].Clicked(ui.ly.Context) {
-								ui.rc.Settings.Tabs.Current = txt
-								log.INFO("unutra: ", txt)
-							}
-							ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, txt, ui.ly.Theme.Color.Dark, "ff989898", "", ui.ly.Theme.Color.Dark, 16, 0, 80, 32, 4, 4).Layout(ui.ly.Context, ui.rc.Settings.Tabs.TabsList[txt])
-						})
+		layout.Flex{Spacing: layout.SpaceAround}.Layout(ui.ly.Context,
+			layout.Rigid(func() {
+				t := ui.ly.Theme.H6(ui.rc.Settings.Tabs.Current)
+				t.Font.Typeface = ui.ly.Theme.Font.Primary
+				t.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
+				t.Alignment = text.Start
+				t.Layout(ui.ly.Context)
+			}),
+			layout.Rigid(func() {
+				groupsNumber := len(ui.rc.Settings.Daemon.Schema.Groups)
+				groupsList.Layout(ui.ly.Context, groupsNumber, func(i int) {
+					layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+						i = groupsNumber - 1 - i
+						t := ui.rc.Settings.Daemon.Schema.Groups[i]
+						txt := fmt.Sprint(t.Legend)
+						for ui.rc.Settings.Tabs.TabsList[txt].Clicked(ui.ly.Context) {
+							ui.rc.Settings.Tabs.Current = txt
+							log.INFO("unutra: ", txt)
+						}
+						ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, txt, ui.ly.Theme.Color.Dark, "ff989898", "", ui.ly.Theme.Color.Dark, 16, 0, 80, 32, 4, 4).Layout(ui.ly.Context, ui.rc.Settings.Tabs.TabsList[txt])
 					})
-				}))
-		})
+				})
+			}))
 	}
 }
 

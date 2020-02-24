@@ -76,14 +76,14 @@ func Main(args []string, cx *conte.Xt) {
 		if jerr, ok := err.(btcjson.Error); ok {
 			fmt.Fprintf(os.Stderr, "%s command: %v (code: %s)\n",
 				method, err, jerr.ErrorCode)
-			commandUsage(method)
+			CommandUsage(method)
 			os.Exit(1)
 		}
 		// The error is not a json.Error and this really should not happen.
 		// Nevertheless fall back to just showing the error if it should
 		// happen due to a bug in the package.
 		fmt.Fprintf(os.Stderr, "%s command: %v\n", method, err)
-		commandUsage(method)
+		CommandUsage(method)
 		os.Exit(1)
 	}
 	// Marshal the command into a JSON-RPC byte slice in preparation for sending
@@ -124,8 +124,8 @@ func Main(args []string, cx *conte.Xt) {
 	}
 }
 
-// commandUsage display the usage for a specific command.
-func commandUsage(method string) {
+// CommandUsage display the usage for a specific command.
+func CommandUsage(method string) {
 	usage, err := btcjson.MethodUsageText(method)
 	if err != nil {
 		log.ERROR(err)

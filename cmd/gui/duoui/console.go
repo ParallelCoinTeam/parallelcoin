@@ -35,10 +35,17 @@ func (ui *DuoUI) DuoUIconsole() func() {
 							consoleOutputList.Layout(ui.ly.Context, len(ui.rc.CommandsHistory.Commands), func(i int) {
 								t := ui.rc.CommandsHistory.Commands[i]
 								layout.Flex{
+									Axis:      layout.Vertical,
 									Alignment: layout.End,
 								}.Layout(ui.ly.Context,
 									layout.Rigid(func() {
 										sat := ui.ly.Theme.Body1("ds://" + t.ComID)
+										sat.Font.Typeface = ui.ly.Theme.Font.Mono
+										sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
+										sat.Layout(ui.ly.Context)
+									}),
+									layout.Rigid(func() {
+										sat := ui.ly.Theme.Body1(t.Out)
 										sat.Font.Typeface = ui.ly.Theme.Font.Mono
 										sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
 										sat.Layout(ui.ly.Context)
@@ -58,6 +65,7 @@ func (ui *DuoUI) DuoUIconsole() func() {
 										ui.rc.CommandsHistory.Commands = append(ui.rc.CommandsHistory.Commands, model.DuoUIcommand{
 											ComID: e.Text,
 											Time:  time.Time{},
+											Out:   ui.rc.ConsoleCmd(e.Text),
 										})
 										consoleInputField.SetText("")
 									}

@@ -121,7 +121,6 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			case "switch":
 				settingsFields[field.Label] = new(controller.CheckBox)
 				(settingsFields[field.Label]).(*controller.CheckBox).SetChecked(*field.Value.(*bool))
-				log.INFO(*field.Value.(*bool))
 			case "radio":
 				settingsFields[field.Label] = new(controller.Enum)
 			default:
