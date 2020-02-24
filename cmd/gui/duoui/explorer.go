@@ -40,7 +40,7 @@ func (ui *DuoUI) DuoUIexplorer() func() {
 							}),
 							layout.Rigid(func() {
 								var linkButton theme.DuoUIbutton
-								linkButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Mono, fmt.Sprint(b.Height), "ffcfcfcf", "ff303030", "", "ffcfcfcf", 16, 0, 60, 24, 0, 0)
+								linkButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Mono, fmt.Sprint(b.Height), ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Dark, "", ui.ly.Theme.Color.Light, 16, 0, 60, 24, 0, 0)
 								for b.Link.Clicked(ui.ly.Context) {
 									clipboard.Set(b.BlockHash)
 								}

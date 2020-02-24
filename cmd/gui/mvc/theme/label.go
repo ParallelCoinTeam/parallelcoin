@@ -66,7 +66,7 @@ func (t *DuoUItheme) Caption(txt string) DuoUIlabel {
 func (t *DuoUItheme) DuoUIlabel(size unit.Value, txt string) DuoUIlabel {
 	return DuoUIlabel{
 		Text:     txt,
-		Color:    HexARGB(t.Color.Text),
+		Color:    HexARGB(t.Color.Dark),
 		TextSize: size,
 		shaper:   t.Shaper,
 	}

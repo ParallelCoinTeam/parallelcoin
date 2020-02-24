@@ -2,7 +2,6 @@
 package duoui
 
 import (
-	"fmt"
 	"gioui.org/text"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/pkg/log"
@@ -34,7 +33,7 @@ type Field struct {
 	Field *pod.Field
 }
 
-func (f *Field) InputFields(ui *DuoUI) {
+func (f *Field) InputField(ui *DuoUI) {
 	switch f.Field.Type {
 	case "array":
 		switch f.Field.InputType {
@@ -50,7 +49,7 @@ func (f *Field) InputFields(ui *DuoUI) {
 			e.Font.Typeface = ui.ly.Theme.Font.Primary
 			e.Font.Style = text.Italic
 			e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor))
-			(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(fmt.Sprint(*f.Field.Value.(*string)))
+			//(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.Editor).SetText(fmt.Sprint(*f.Field.Value.(*string)))
 			log.INFO(f.Field.Value)
 		case "number":
 			//ui.DuoUIinputField(f)
@@ -71,12 +70,12 @@ func (f *Field) InputFields(ui *DuoUI) {
 		default:
 		}
 	case "switch":
-		ui.ly.Theme.DuoUIcheckBox(f.Field.Name, "ff303030", "ff303030").Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.CheckBox))
-		log.INFO("")
-		log.INFO(*f.Field.Value.(*bool))
-		log.INFO("testLohg")
+		ui.ly.Theme.DuoUIcheckBox(f.Field.Name, ui.ly.Theme.Color.Dark, ui.ly.Theme.Color.Dark).Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.CheckBox))
+		//log.INFO("")
+		//log.INFO(*f.Field.Value.(*bool))
+		//log.INFO("testLohg")
 
-		(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.CheckBox).SetChecked(*f.Field.Value.(*bool))
+		//(ui.rc.Settings.Daemon.Widgets[f.Field.Name]).(*controller.CheckBox).SetChecked(*f.Field.Value.(*bool))
 
 	case "radio":
 		//radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)

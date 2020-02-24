@@ -38,7 +38,7 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 							cs := ui.ly.Context.Constraints
 							latestTransList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.LastTxs.Txs), func(i int) {
 								t := ui.rc.Status.Wallet.LastTxs.Txs[i]
-								theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Text, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+								theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								layout.Inset{
 									Top:    unit.Dp(8),
 									Right:  unit.Dp(16),

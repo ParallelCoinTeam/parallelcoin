@@ -31,11 +31,11 @@ func (ui *DuoUI) DuoUIbalance() func() {
 			navButtons := []func(){
 				listItem(ui.ly.Context, ui.ly.Theme, "BALANCE :", ui.rc.Status.Wallet.Balance+" "+ui.rc.Settings.Abbrevation),
 				func() {
-					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, ui.ly.Theme.Color.LightGrayII, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				},
 				listItem(ui.ly.Context, ui.ly.Theme, "UNCNFIRMED :", ui.rc.Status.Wallet.Unconfirmed+" "+ui.rc.Settings.Abbrevation),
 				func() {
-					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ffbdbdbd", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, ui.ly.Theme.Color.LightGray, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				},
 				listItem(ui.ly.Context, ui.ly.Theme, "TRANSACTIONS :", fmt.Sprint(ui.rc.Status.Wallet.TxsNumber)),
 			}

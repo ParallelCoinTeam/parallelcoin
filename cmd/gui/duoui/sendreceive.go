@@ -34,7 +34,7 @@ func (ui *DuoUI) DuoUIsend() func() {
 		layout.Flex{}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
 				cs := ui.ly.Context.Constraints
-				theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 180, ui.ly.Theme.Color.Bg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 180, ui.ly.Theme.Color.Light, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				layout.Flex{
 					Axis: layout.Vertical,
 				}.Layout(ui.ly.Context,
@@ -62,7 +62,7 @@ func (ui *DuoUI) DuoUIsend() func() {
 							layout.Rigid(func() {
 								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 									var pasteAddressButton theme.DuoUIbutton
-									pasteAddressButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "PASTE ADDRESS", "ffcfcfcf", "ff303030", "", "ffcfcfcf", 16, 0, 128, 48, 0, 0)
+									pasteAddressButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "PASTE ADDRESS", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Dark, "", ui.ly.Theme.Color.Light, 16, 0, 128, 48, 0, 0)
 
 									for buttonPasteAddress.Clicked(ui.ly.Context) {
 										addressLineEditor.SetText(clipboard.Get())
@@ -99,7 +99,7 @@ func (ui *DuoUI) DuoUIsend() func() {
 							layout.Rigid(func() {
 								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 									var pasteAmountButton theme.DuoUIbutton
-									pasteAmountButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "PASTE AMOUNT", "ffcfcfcf", "ff303030", "", "ffcfcfcf", 16, 0, 128, 48, 0, 0)
+									pasteAmountButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "PASTE AMOUNT", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Dark, "", ui.ly.Theme.Color.Light, 16, 0, 128, 48, 0, 0)
 
 									for buttonPasteAmount.Clicked(ui.ly.Context) {
 										amountLineEditor.SetText(clipboard.Get())
@@ -135,7 +135,7 @@ func (ui *DuoUI) DuoUIsend() func() {
 					layout.Rigid(func() {
 						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 							var sendButton theme.DuoUIbutton
-							sendButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "SEND", "ffcfcfcf", "ff303030", "", "ffcfcfcf", 16, 0, 128, 48, 0, 0)
+							sendButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "SEND", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Dark, "", ui.ly.Theme.Color.Light, 16, 0, 128, 48, 0, 0)
 
 							for buttonSend.Clicked(ui.ly.Context) {
 

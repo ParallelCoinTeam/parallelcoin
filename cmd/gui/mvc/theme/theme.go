@@ -19,18 +19,24 @@ import (
 type DuoUItheme struct {
 	Shaper text.Shaper
 	Color  struct {
-		Light     string
-		Dark      string
-		Bg        string
-		Text      string
-		Primary   string
-		Secondary string
-		Success   string
-		Danger    string
-		Warning   string
-		Info      string
-		Hint      string
-		InvText   string
+		Gray         string
+		Light        string
+		LightGray    string
+		LightGrayI   string
+		LightGrayII  string
+		LightGrayIII string
+		Dark         string
+		DarkGray     string
+		DarkGrayI    string
+		DarkGrayII   string
+		Primary      string
+		Secondary    string
+		Success      string
+		Danger       string
+		Warning      string
+		Info         string
+		Hint         string
+		InvText      string
 	}
 	Font struct {
 		Primary, Secondary, Mono text.Typeface
@@ -47,10 +53,16 @@ func NewDuoUItheme() *DuoUItheme {
 	t := &DuoUItheme{
 		Shaper: font.Default(),
 	}
+	t.Color.Gray = "ff808080"
 	t.Color.Light = "ffcfcfcf"
+	t.Color.LightGray = "ffbdbdbd"
+	t.Color.LightGrayI = "ffacacac"
+	t.Color.LightGrayII = "ff9a9a9a"
+	t.Color.LightGrayIII = "ff888888"
 	t.Color.Dark = "ff303030"
-	t.Color.Bg = "ffcfcfcf"
-	t.Color.Text = "ff303030"
+	t.Color.DarkGray = "ff424242"
+	t.Color.DarkGrayI = "ff535353"
+	t.Color.DarkGrayII = "ff656565"
 	t.Color.Primary = "ff308080"
 	t.Color.Secondary = "ff803080"
 	t.Color.Success = "ff30cf30"

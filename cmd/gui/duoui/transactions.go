@@ -8,6 +8,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 )
 
@@ -54,25 +55,7 @@ func (ui *DuoUI) DuoUItransactions() func() {
 							layout.Flex{
 								Spacing: layout.SpaceBetween,
 							}.Layout(ui.ly.Context,
-								layout.Rigid(func() {
-									layout.Flex{}.Layout(ui.ly.Context,
-										layout.Rigid(func() {
-											ui.ly.Theme.DuoUIcheckBox("ALL", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, allTxs)
-										}),
-										layout.Rigid(func() {
-											ui.ly.Theme.DuoUIcheckBox("MINTED", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, mintedTxs)
-										}),
-										layout.Rigid(func() {
-											ui.ly.Theme.DuoUIcheckBox("IMATURE", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, immatureTxs)
-										}),
-										layout.Rigid(func() {
-											ui.ly.Theme.DuoUIcheckBox("SENT", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, sentTxs)
-										}),
-										layout.Rigid(func() {
-											ui.ly.Theme.DuoUIcheckBox("RECEIVED", "ffcfcfcf", "ffcfcfcf").Layout(ui.ly.Context, receivedTxs)
-										}),
-									)
-								}),
+								layout.Rigid(ui.txsFilter()),
 								layout.Rigid(func() {
 									layout.Flex{}.Layout(ui.ly.Context,
 										layout.Rigid(func() {
@@ -103,45 +86,7 @@ func (ui *DuoUI) DuoUItransactions() func() {
 								layout.Flex{
 									Spacing: layout.SpaceBetween,
 								}.Layout(ui.ly.Context,
-									layout.Rigid(func() {
-										layout.Flex{
-											Axis: layout.Vertical,
-										}.Layout(ui.ly.Context,
-											layout.Rigid(func() {
-												num := ui.ly.Theme.Body1(fmt.Sprint(i))
-												num.Font.Typeface = ui.ly.Theme.Font.Primary
-												num.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-												num.Layout(ui.ly.Context)
-											}),
-											layout.Rigid(func() {
-												tim := ui.ly.Theme.Body1(t.TxID)
-												tim.Font.Typeface = ui.ly.Theme.Font.Primary
-												tim.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-												tim.Layout(ui.ly.Context)
-											}),
-											layout.Rigid(func() {
-												amount := ui.ly.Theme.H5(fmt.Sprintf("%0.8f", t.Amount))
-												amount.Font.Typeface = ui.ly.Theme.Font.Primary
-												amount.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-												amount.Alignment = text.End
-												amount.Font.Variant = "Mono"
-												amount.Font.Weight = text.Bold
-												amount.Layout(ui.ly.Context)
-											}),
-											layout.Rigid(func() {
-												sat := ui.ly.Theme.Body1(t.Category)
-												sat.Font.Typeface = ui.ly.Theme.Font.Primary
-												sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-												sat.Layout(ui.ly.Context)
-											}),
-											layout.Rigid(func() {
-												l := ui.ly.Theme.Body2(t.Time)
-												l.Font.Typeface = ui.ly.Theme.Font.Primary
-												l.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-												l.Layout(ui.ly.Context)
-											}),
-										)
-									}),
+									layout.Rigid(ui.txsDetails(i, &t)),
 									layout.Rigid(func() {
 										sat := ui.ly.Theme.Body1(fmt.Sprintf("%0.8f", t.Amount))
 										sat.Font.Typeface = ui.ly.Theme.Font.Primary
@@ -152,6 +97,69 @@ func (ui *DuoUI) DuoUItransactions() func() {
 							})
 						}))
 				})
+			}),
+		)
+	}
+}
+
+func (ui *DuoUI) txsFilter() func() {
+	return func() {
+		layout.Flex{}.Layout(ui.ly.Context,
+			layout.Rigid(func() {
+				ui.ly.Theme.DuoUIcheckBox("ALL", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, allTxs)
+			}),
+			layout.Rigid(func() {
+				ui.ly.Theme.DuoUIcheckBox("MINTED", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, mintedTxs)
+			}),
+			layout.Rigid(func() {
+				ui.ly.Theme.DuoUIcheckBox("IMATURE", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, immatureTxs)
+			}),
+			layout.Rigid(func() {
+				ui.ly.Theme.DuoUIcheckBox("SENT", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, sentTxs)
+			}),
+			layout.Rigid(func() {
+				ui.ly.Theme.DuoUIcheckBox("RECEIVED", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, receivedTxs)
+			}))
+	}
+}
+
+func (ui *DuoUI) txsDetails(i int, t *model.DuoUItx) func() {
+	return func() {
+		layout.Flex{
+			Axis: layout.Vertical,
+		}.Layout(ui.ly.Context,
+			layout.Rigid(func() {
+				num := ui.ly.Theme.Body1(fmt.Sprint(i))
+				num.Font.Typeface = ui.ly.Theme.Font.Primary
+				num.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+				num.Layout(ui.ly.Context)
+			}),
+			layout.Rigid(func() {
+				tim := ui.ly.Theme.Body1(t.TxID)
+				tim.Font.Typeface = ui.ly.Theme.Font.Primary
+				tim.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+				tim.Layout(ui.ly.Context)
+			}),
+			layout.Rigid(func() {
+				amount := ui.ly.Theme.H5(fmt.Sprintf("%0.8f", t.Amount))
+				amount.Font.Typeface = ui.ly.Theme.Font.Primary
+				amount.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+				amount.Alignment = text.End
+				amount.Font.Variant = "Mono"
+				amount.Font.Weight = text.Bold
+				amount.Layout(ui.ly.Context)
+			}),
+			layout.Rigid(func() {
+				sat := ui.ly.Theme.Body1(t.Category)
+				sat.Font.Typeface = ui.ly.Theme.Font.Primary
+				sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+				sat.Layout(ui.ly.Context)
+			}),
+			layout.Rigid(func() {
+				l := ui.ly.Theme.Body2(t.Time)
+				l.Font.Typeface = ui.ly.Theme.Font.Primary
+				l.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+				l.Layout(ui.ly.Context)
 			}),
 		)
 	}

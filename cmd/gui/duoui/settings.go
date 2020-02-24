@@ -45,7 +45,7 @@ func (ui *DuoUI) DuoUIsettings() func() {
 										ui.rc.Settings.Tabs.Current = txt
 										log.INFO("unutra: ", txt)
 									}
-									ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, txt, "ff303030", "ff989898", "", "ff303030", 16, 0, 80, 32, 4, 4).Layout(ui.ly.Context, ui.rc.Settings.Tabs.TabsList[txt])
+									ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, txt, ui.ly.Theme.Color.Dark, "ff989898", "", ui.ly.Theme.Color.Dark, 16, 0, 80, 32, 4, 4).Layout(ui.ly.Context, ui.rc.Settings.Tabs.TabsList[txt])
 								})
 							})
 						}))
@@ -92,7 +92,7 @@ func (ui *DuoUI) DuoUIsettings() func() {
 											layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(ui.ly.Context, func() {
 												// TODO:
 												// Input fileds must be set as theme part
-												tl.InputFields(ui)
+												tl.InputField(ui)
 											})
 										}),
 									)

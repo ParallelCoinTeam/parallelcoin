@@ -19,9 +19,9 @@ func (ui *DuoUI) DuoUIheader() func() {
 		layout.Flex{Axis: layout.Horizontal}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
 				var logoMeniItem theme.DuoUIbutton
-				logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", "ff303030", "logo", "ffcfcfcf", 16, 64, 96, 96, 8, 8)
+				logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", ui.ly.Theme.Color.Dark, "logo", ui.ly.Theme.Color.Light, 16, 64, 96, 96, 8, 8)
 				for logoButton.Clicked(ui.ly.Context) {
-					//d.mod.CurrentPage = "NETWORK"
+					ui.changeLightDark()
 				}
 				logoMeniItem.IconLayout(ui.ly.Context, logoButton)
 			}),
@@ -53,4 +53,15 @@ func (ui *DuoUI) DuoUIheader() func() {
 				})
 			}))
 	}
+}
+
+func (ui *DuoUI) changeLightDark() {
+	light := ui.ly.Theme.Color.Light
+	dark := ui.ly.Theme.Color.Dark
+	lightGray := ui.ly.Theme.Color.LightGrayIII
+	darkGray := ui.ly.Theme.Color.DarkGrayII
+	ui.ly.Theme.Color.Light = dark
+	ui.ly.Theme.Color.Dark = light
+	ui.ly.Theme.Color.LightGrayIII = darkGray
+	ui.ly.Theme.Color.DarkGrayII = lightGray
 }

@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"fmt"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
@@ -104,10 +105,23 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			case "input":
 				settingsFields[field.Name] = &controller.Editor{
 					SingleLine: true,
-					//Submit:     true,
+				}
+				if field.Value != nil {
+					switch field.InputType {
+					case "text":
+						(settingsFields[field.Name]).(*controller.Editor).SetText(*field.Value.(*string))
+					case "number":
+						(settingsFields[field.Name]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*int)))
+					case "decimal":
+						(settingsFields[field.Name]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*float64)))
+					case "time":
+						(settingsFields[field.Name]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*time.Duration)))
+					}
 				}
 			case "switch":
 				settingsFields[field.Name] = new(controller.CheckBox)
+				(settingsFields[field.Name]).(*controller.CheckBox).SetChecked(*field.Value.(*bool))
+				log.INFO(*field.Value.(*bool))
 			case "radio":
 				settingsFields[field.Name] = new(controller.Enum)
 			default:

@@ -3,8 +3,6 @@
 package theme
 
 import (
-	"image/color"
-
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
@@ -13,10 +11,10 @@ import (
 var ()
 
 type DuoUIpage struct {
-	Text    string
-	TxColor color.RGBA
+	Title   string
+	TxColor string
 	Font    text.Font
-	BgColor color.RGBA
+	BgColor string
 	//Icon              *DuoUIicon
 	//IconSize          int
 	//IconColor         color.RGBA
@@ -26,14 +24,14 @@ type DuoUIpage struct {
 	layout func()
 }
 
-func (t *DuoUItheme) DuoUIpage(txt, txtColor, bgColor string, paddingVertical, paddingHorizontal float32, f func()) *DuoUIpage {
+func (t *DuoUItheme) DuoUIpage(txt string, paddingVertical, paddingHorizontal float32, f func()) *DuoUIpage {
 	return &DuoUIpage{
-		Text: txt,
-		Font: text.Font{
+		Title: txt,
+		Font:  text.Font{
 			//Size: t.TextSize.Scale(14.0 / 16.0),
 		},
-		TxColor: HexARGB(txtColor),
-		BgColor: HexARGB(bgColor),
+		TxColor: t.Color.Dark,
+		BgColor: t.Color.Light,
 		//PaddingVertical:   unit.Dp(paddingVertical),
 		//PaddingHorizontal: unit.Dp(paddingHorizontal),
 		shaper: t.Shaper,
@@ -51,7 +49,7 @@ func (p DuoUIpage) Layout(gtx *layout.Context) {
 				// Overview <<<
 				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 					cs := gtx.Constraints
-					DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+					DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, p.BgColor, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 					p.layout()
 				})
 				// Overview >>>

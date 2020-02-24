@@ -18,9 +18,9 @@ type Command struct {
 	Time     time.Time
 }
 
-func (t *DuoUItheme) Command(name string) *DuoUIcomponent {
-	return &DuoUIcomponent{
-		Name: name,
+func (t *DuoUItheme) Command(name string) *Command {
+	return &Command{
+		ComID: name,
 	}
 }
 
