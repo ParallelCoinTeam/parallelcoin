@@ -35,8 +35,8 @@ type RcVar struct {
 	AddressBook model.DuoUIaddressBook
 	ShowPage    string
 
-	NodeChan   chan *rpc.Server
-	WalletChan chan *wallet.Wallet
+	// NodeChan   chan *rpc.Server
+	// WalletChan chan *wallet.Wallet
 
 	Quit    chan struct{}
 	Ready   chan struct{}
@@ -170,7 +170,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 func (r *RcVar) StartServices() (err error) {
 	nodeChan := make(chan *rpc.Server)
 	// Start Node
-	err = r.DuoUInode()
+	err = r.DuoUInode(nodeChan)
 	if err != nil {
 		log.ERROR(err)
 	}
