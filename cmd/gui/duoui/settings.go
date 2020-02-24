@@ -18,17 +18,6 @@ var (
 	}
 )
 
-func (ui *DuoUI) DuoUIsettings() func() {
-	return func() {
-		layout.Flex{
-			Axis: layout.Vertical,
-		}.Layout(ui.ly.Context,
-			layout.Rigid(ui.contentHeaderBodySettings()),
-			layout.Flexed(1, ui.settingsBody()),
-		)
-	}
-}
-
 func (ui *DuoUI) settingsFieldLabel(f *Field) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
@@ -49,7 +38,7 @@ func (ui *DuoUI) settingsFieldDescription(f *Field) func() {
 	}
 }
 
-func (ui *DuoUI) contentHeaderBodySettings() func() {
+func (ui *DuoUI) headerSettings() func() {
 	return func() {
 		layout.UniformInset(unit.Dp(15)).Layout(ui.ly.Context, func() {
 			layout.Flex{

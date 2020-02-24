@@ -29,43 +29,6 @@ var (
 	}
 )
 
-func (ui *DuoUI) DuoUItransactions() func() {
-	return func() {
-		ui.rc.Status.Wallet.Txs.ModelTxsListNumber = 55
-		layout.Flex{
-			Axis: layout.Vertical,
-		}.Layout(ui.ly.Context,
-			layout.Rigid(ui.contentHeader(ui.contentHeaderBodyTransactions())),
-			layout.Flexed(1, func() {
-				in := layout.UniformInset(unit.Dp(16))
-				in.Layout(ui.ly.Context, func() {
-					layout.Flex{
-						Axis: layout.Vertical,
-					}.Layout(ui.ly.Context,
-						layout.Rigid(func() {
-							cs := ui.ly.Context.Constraints
-							transList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.LastTxs.Txs), func(i int) {
-								t := ui.rc.Status.Wallet.LastTxs.Txs[i]
-								theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ff535353", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-								layout.Flex{
-									Spacing: layout.SpaceBetween,
-								}.Layout(ui.ly.Context,
-									layout.Rigid(ui.txsDetails(i, &t)),
-									layout.Rigid(func() {
-										sat := ui.ly.Theme.Body1(fmt.Sprintf("%0.8f", t.Amount))
-										sat.Font.Typeface = ui.ly.Theme.Font.Primary
-										sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-										sat.Layout(ui.ly.Context)
-									}),
-								)
-							})
-						}))
-				})
-			}),
-		)
-	}
-}
-
 func (ui *DuoUI) txsFilter() func() {
 	return func() {
 		layout.Flex{}.Layout(ui.ly.Context,
@@ -148,7 +111,7 @@ func (ui *DuoUI) contentHeader(b func()) func() {
 	}
 }
 
-func (ui *DuoUI) contentHeaderBodyTransactions() func() {
+func (ui *DuoUI) headerTransactions() func() {
 	return func() {
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
@@ -158,5 +121,33 @@ func (ui *DuoUI) contentHeaderBodyTransactions() func() {
 				ui.ly.Theme.DuoUIcounter().Layout(ui.ly.Context, itemValue)
 			}),
 		)
+	}
+}
+
+func (ui *DuoUI) txsBody() func() {
+	return func() {
+		layout.UniformInset(unit.Dp(16)).Layout(ui.ly.Context, func() {
+			layout.Flex{
+				Axis: layout.Vertical,
+			}.Layout(ui.ly.Context,
+				layout.Rigid(func() {
+					cs := ui.ly.Context.Constraints
+					transList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.LastTxs.Txs), func(i int) {
+						t := ui.rc.Status.Wallet.LastTxs.Txs[i]
+						theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ff535353", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+						layout.Flex{
+							Spacing: layout.SpaceBetween,
+						}.Layout(ui.ly.Context,
+							layout.Rigid(ui.txsDetails(i, &t)),
+							layout.Rigid(func() {
+								sat := ui.ly.Theme.Body1(fmt.Sprintf("%0.8f", t.Amount))
+								sat.Font.Typeface = ui.ly.Theme.Font.Primary
+								sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
+								sat.Layout(ui.ly.Context)
+							}),
+						)
+					})
+				}))
+		})
 	}
 }

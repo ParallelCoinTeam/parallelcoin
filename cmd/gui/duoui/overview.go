@@ -4,7 +4,7 @@ import (
 	"gioui.org/layout"
 )
 
-func (ui *DuoUI) DuoUIoverview() func() {
+func (ui *DuoUI) overviewBody() func() {
 	return func() {
 		viewport := layout.Flex{Axis: layout.Horizontal}
 		if ui.ly.Context.Constraints.Width.Max < 780 {

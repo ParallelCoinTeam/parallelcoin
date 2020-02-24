@@ -22,9 +22,12 @@ type DuoUIpage struct {
 	//PaddingHorizontal unit.Value
 	shaper text.Shaper
 	layout func()
+	header func()
+	body   func()
+	footer func()
 }
 
-func (t *DuoUItheme) DuoUIpage(txt string, paddingVertical, paddingHorizontal float32, f func()) *DuoUIpage {
+func (t *DuoUItheme) DuoUIpage(txt string, header, body, footer func()) *DuoUIpage {
 	return &DuoUIpage{
 		Title: txt,
 		Font:  text.Font{
@@ -35,7 +38,9 @@ func (t *DuoUItheme) DuoUIpage(txt string, paddingVertical, paddingHorizontal fl
 		//PaddingVertical:   unit.Dp(paddingVertical),
 		//PaddingHorizontal: unit.Dp(paddingHorizontal),
 		shaper: t.Shaper,
-		layout: f,
+		header: header,
+		body:   body,
+		footer: footer,
 	}
 }
 
@@ -50,7 +55,13 @@ func (p DuoUIpage) Layout(gtx *layout.Context) {
 				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 					cs := gtx.Constraints
 					DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, p.BgColor, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-					p.layout()
+					layout.Flex{
+						Axis: layout.Vertical,
+					}.Layout(gtx,
+						layout.Rigid(p.header),
+						layout.Flexed(1, p.body),
+						layout.Rigid(p.footer),
+					)
 				})
 				// Overview >>>
 			})
