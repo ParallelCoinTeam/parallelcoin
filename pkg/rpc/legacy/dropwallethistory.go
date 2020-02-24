@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"path/filepath"
-	"time"
 	
 	"github.com/urfave/cli"
 	
@@ -82,8 +81,8 @@ func DropWalletHistory(w *wallet.Wallet) func(c *cli.Context) error {
 			select {
 			case err := <-errC:
 				log.ERROR(err)
-			case <-time.After(time.Second * 5):
-				break
+				// case <-time.After(time.Second * 5):
+				// 	break
 			}
 		}
 		return err

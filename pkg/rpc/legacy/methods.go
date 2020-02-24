@@ -901,6 +901,12 @@ func GetTransaction(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 }
 
 func HandleDropWalletHistory(icmd interface{}, w *wallet.Wallet) (in interface{}, err error) {
+	rwt, err := w.Database().BeginReadWriteTx()
+	if err != nil {
+		log.ERROR(err)
+	}
+	ns := rwt.ReadWriteBucket([]byte("waddrmgr"))
+	w.Manager.SetSyncedTo(ns, nil)
 	err = DropWalletHistory(w)(nil)
 	interrupt.RequestRestart()
 	return "dropped wallet history, restarting", nil

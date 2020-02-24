@@ -79,7 +79,7 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		log.DEBUG(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
+		log.TRACE(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
 	}
 	return
 }
@@ -127,7 +127,6 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 	if err != nil {
 		log.ERROR(err)
 	}
-	log.WARN(channel.Sender)
 	log.WARN("starting unicast channel:", channel.Creator, sender, receiver, magics)
 	return
 }
@@ -280,7 +279,7 @@ out:
 								log.ERROR(err)
 								continue
 							}
-							log.DEBUG(hex.EncodeToString(cipherText))
+							// log.DEBUG(hex.EncodeToString(cipherText))
 							bn.Decoded = true
 							// if channel.ciph != nil {
 							// 	if msg, err = DecryptMessage(channel.Creator, channel.ciph, cipherText); log.Check(err) {
@@ -307,7 +306,7 @@ out:
 						}
 					}
 				} else {
-					log.DEBUGF("%s adding %s %x to buffers", channel.Creator, magic, nonceBytes)
+					// log.DEBUGF("%s adding %s %x to buffers", channel.Creator, magic, nonceBytes)
 					channel.buffers[nonce] = &MsgBuffer{[][]byte{},
 						time.Now(), false, src}
 					channel.buffers[nonce].Buffers = append(channel.buffers[nonce].

@@ -2,6 +2,7 @@ package rcd
 
 import (
 	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"sync/atomic"
 )
 
-func (r *RcVar) DuoUInode() error {
+func (r *RcVar) DuoUInode(nodeChan chan *rpc.Server) error {
 	r.cx.NodeKill = make(chan struct{})
 	r.cx.Node = &atomic.Value{}
 	r.cx.Node.Store(false)
@@ -19,7 +20,7 @@ func (r *RcVar) DuoUInode() error {
 		go func() {
 			log.INFO(r.cx.Language.RenderText("goApp_STARTINGNODE"))
 			//utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
-			err = node.Main(r.cx, nil, r.cx.NodeKill, r.NodeChan, &wg)
+			err = node.Main(r.cx, nil, r.cx.NodeKill, nodeChan, &wg)
 			if err != nil {
 				log.INFO("error running node:", err)
 				os.Exit(1)
