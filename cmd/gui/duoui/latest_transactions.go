@@ -62,10 +62,7 @@ func (ui *DuoUI) DuoUIlatestTransactions() func() {
 												layout.Rigid(lTamount(ui.ly.Context, ui.ly.Theme, t.Amount)),
 											)
 										}),
-										layout.Rigid(func() {
-											cs := ui.ly.Context.Constraints
-											theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, ui.ly.Theme.Color.Hint, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-										}),
+										layout.Rigid(ui.line(ui.ly.Theme.Color.Hint)),
 									)
 								})
 							})

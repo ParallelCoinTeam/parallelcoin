@@ -1,10 +1,13 @@
 package controller
 
 type DuoUIcounter struct {
-	Value          int
-	OperateValue   int
-	From           int
-	To             int
+	Value           int
+	OperateValue    int
+	From            int
+	To              int
+	CounterIncrease *Button
+	CounterDecrease *Button
+	CounterReset    *Button
 }
 
 func (c *DuoUIcounter) Increase() {

@@ -10,12 +10,6 @@ import (
 	"image/color"
 )
 
-var (
-	couterIncrease = *new(controller.Button)
-	couterDecrease = *new(controller.Button)
-	couterReset    = *new(controller.Button)
-)
-
 type DuoUIcounter struct {
 	increase DuoUIbutton
 	decrease DuoUIbutton
@@ -42,6 +36,7 @@ func (t *DuoUItheme) DuoUIcounter() DuoUIcounter {
 }
 
 func (c DuoUIcounter) Layout(gtx *layout.Context, cc *controller.DuoUIcounter) {
+
 	layout.Flex{}.Layout(gtx,
 		layout.Flexed(0.2, func() {
 			paint.ColorOp{Color: c.TxColor}.Add(gtx.Ops)
@@ -50,22 +45,22 @@ func (c DuoUIcounter) Layout(gtx *layout.Context, cc *controller.DuoUIcounter) {
 			}.Layout(gtx, c.shaper, c.Font, c.TextSize, fmt.Sprint(cc.Value))
 		}),
 		layout.Flexed(0.3, func() {
-			for couterIncrease.Clicked(gtx) {
+			for cc.CounterIncrease.Clicked(gtx) {
 				cc.Increase()
 			}
-			c.increase.Layout(gtx, &couterIncrease)
+			c.increase.Layout(gtx, cc.CounterIncrease)
 		}),
 		layout.Flexed(0.2, func() {
-			for couterReset.Clicked(gtx) {
+			for cc.CounterReset.Clicked(gtx) {
 				cc.Reset()
 			}
-			c.reset.Layout(gtx, &couterReset)
+			c.reset.Layout(gtx, cc.CounterReset)
 		}),
 		layout.Flexed(0.3, func() {
-			for couterDecrease.Clicked(gtx) {
+			for cc.CounterDecrease.Clicked(gtx) {
 				cc.Decrease()
 			}
-			c.decrease.Layout(gtx, &couterDecrease)
+			c.decrease.Layout(gtx, cc.CounterDecrease)
 		}),
 	)
 }
