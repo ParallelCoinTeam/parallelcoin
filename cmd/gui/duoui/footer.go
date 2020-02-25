@@ -53,9 +53,13 @@ func (ui *DuoUI) DuoUIfooter() func() {
 										Show: true,
 										Ok: func() {
 											interrupt.Request()
+											// TODO make this close the window or at least switch to a shutdown screen
+											ui.rc.Dialog.Show = false
 										},
 										Close: func() {
 											interrupt.RequestRestart()
+											// TODO make this close the window or at least switch to a shutdown screen
+											ui.rc.Dialog.Show = false
 										},
 										Cancel: func() { ui.rc.Dialog.Show = false },
 										Title:  "Are you sure?",
