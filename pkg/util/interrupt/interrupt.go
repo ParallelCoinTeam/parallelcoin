@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+	"time"
 	
 	"github.com/kardianos/osext"
 	
@@ -56,11 +57,9 @@ func Listener() {
 				log.FATAL(err)
 			}
 			// return
-			os.Exit(1)
-		} else {
-			// return
-			os.Exit(1)
 		}
+		time.Sleep(time.Second)
+		os.Exit(1)
 	}
 	for {
 		select {
