@@ -88,6 +88,7 @@ func Main(config *pod.Config, stateCfg *state.Config,
 	// before exiting.  Interrupt handlers run in LIFO order, so the wallet
 	// (which should be closed last) is added first.
 	interrupt.AddHandler(func() {
+		log.DEBUG("wallet.Main interrupt")
 		err := loader.UnloadWallet()
 		if err != nil && err != wallet.ErrNotLoaded {
 			log.ERROR("failed to close wallet:", err)

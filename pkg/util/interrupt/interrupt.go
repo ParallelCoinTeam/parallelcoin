@@ -36,6 +36,7 @@ var (
 func Listener() {
 	var interruptCallbacks []func()
 	invokeCallbacks := func() {
+		log.DEBUG("running interrupt callbacks")
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i
@@ -64,8 +65,8 @@ func Listener() {
 	for {
 		select {
 		case sig := <-Chan:
-			log.Printf("\r>>> received signal (%s)\n", sig)
-			log.DEBUG("received interrupt signal")
+			// log.Printf("\r>>> received signal (%s)\n", sig)
+			log.DEBUG("received interrupt signal", sig)
 			requested = true
 			invokeCallbacks()
 			return
@@ -95,12 +96,23 @@ func AddHandler(handler func()) {
 
 // Request programatically requests a shutdown
 func Request() {
-	close(ShutdownRequestChan)
+	log.DEBUG("interrupt requested")
+	ShutdownRequestChan <- struct{}{}
+	// var ok bool
+	// select {
+	// case _, ok = <-ShutdownRequestChan:
+	// default:
+	// }
+	// log.DEBUG("shutdownrequestchan", ok)
+	// if ok {
+	// 	close(ShutdownRequestChan)
+	// }
 }
 
 // RequestRestart sets the reset flag and requests a restart
 func RequestRestart() {
 	Restart = true
+	log.DEBUG("requesting restart")
 	Request()
 }
 

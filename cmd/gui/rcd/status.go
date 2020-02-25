@@ -56,7 +56,7 @@ func (r *RcVar) GetDuoUIblockCount() {
 		//r.PushDuoUIalert("Error", err.Error(), "error")
 	}
 	r.Status.Node.BlockCount = getBlockCount.(int64)
-	log.INFO(getBlockCount)
+	// log.INFO(getBlockCount)
 	return
 }
 func (r *RcVar) GetDuoUInetworkLastBlock() {

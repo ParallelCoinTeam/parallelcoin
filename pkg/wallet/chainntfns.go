@@ -283,7 +283,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *tm.TxRecord, bloc
 					log.ERROR(err)
 					return err
 				}
-				log.DEBUG("marked address used:", addr)
+				log.TRACE("marked address used:", addr)
 				continue
 			}
 			// Missing addresses are skipped.  Other errors should

@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"gioui.org/layout"
+	"gioui.org/op"
 )
 
 func (ui *DuoUI) overviewBody() func() {
@@ -14,5 +15,6 @@ func (ui *DuoUI) overviewBody() func() {
 			layout.Flexed(0.5, ui.DuoUIbalance()),
 			layout.Flexed(0.5, ui.DuoUIlatestTransactions()),
 		)
+		op.InvalidateOp{}.Add(ui.ly.Context.Ops)
 	}
 }

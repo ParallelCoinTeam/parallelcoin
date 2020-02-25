@@ -412,7 +412,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 					mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB),
 						advertisment.Get(c.cx), &c.coinbases)
 					nH := mC.GetNewHeight()
-					if c.height.Load().(int32) > nH {
+					if c.height.Load().(int32) < nH {
 						log.DEBUG("new height")
 						c.height.Store(nH)
 					} else {

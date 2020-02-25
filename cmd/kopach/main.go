@@ -74,6 +74,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			w.workers = append(w.workers, client.New(cmd.StdConn))
 		}
 		interrupt.AddHandler(func() {
+			log.DEBUG("KopachHandle interrupt")
 			for i := range w.workers {
 				if err := wks[i].Kill(); log.Check(err) {
 				}

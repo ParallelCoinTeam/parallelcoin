@@ -37,6 +37,7 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 		log.DEBUG("miner worker starting")
 		w, conn := worker.New(sem.New(1))
 		interrupt.AddHandler(func() {
+			log.DEBUG("KopachWorkerHandle interrupt")
 			if err := conn.Close(); log.Check(err) {
 			}
 		})

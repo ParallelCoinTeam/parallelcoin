@@ -30,7 +30,7 @@ func (r *RcVar) DuoUInode(nodeChan chan *rpc.Server) error {
 	}
 	interrupt.AddHandler(func() {
 		log.WARN("interrupt received, " +
-			"shutting down shell modules")
+			"shutting down node")
 		close(r.cx.NodeKill)
 	})
 	return err

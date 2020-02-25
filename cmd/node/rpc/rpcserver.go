@@ -4198,21 +4198,17 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 // HandleStop implements the stop command.
 func HandleStop(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	interface{}, error) {
-	select {
-	case s.RequestProcessShutdown <- struct{}{}:
-	default:
-	}
-	defer os.Exit(1)
+	interrupt.Request()
 	return "node stopping", nil
 }
 
 // HandleRestart implements the restart command.
 func HandleRestart(s *Server, cmd interface{}, closeChan <-chan struct{}) (
 	interface{}, error) {
-	select {
-	case s.RequestProcessShutdown <- struct{}{}:
-	default:
-	}
+	// select {
+	// case s.RequestProcessShutdown <- struct{}{}:
+	// default:
+	// }
 	interrupt.RequestRestart()
 	return "node restarting", nil
 }
