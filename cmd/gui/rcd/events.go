@@ -1,10 +1,8 @@
 package rcd
 
 import (
-	"fmt"
-
 	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/log"
 )
 
 const (
@@ -24,37 +22,48 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 	r.Events = EventsChan
 	r.UpdateTrigger = trigger
 	// first time starting up get all of these and trigger update
-	r.GetDuoUIbalance()
-	r.GetDuoUIunconfirmedBalance()
-	r.GetDuoUItransactionsNumber()
-	//r.GetTransactions()
-	r.GetLatestTransactions()
-	// r.GetDuoUIstatus()
-	// r.GetDuoUIlocalLost()
-	//r.GetDuoUIblockHeight()
-	r.GetDuoUIblockCount()
-	r.GetDuoUIdifficulty()
-	r.GetDuoUIconnectionCount()
-
-	r.GetAddressBook()
+	update(r)
 	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted:
-			go r.GetDuoUIbalance()
-			go r.GetDuoUIunconfirmedBalance()
-			go r.GetDuoUItransactionsNumber()
-			//go r.GetTransactions()
-			go r.GetLatestTransactions()
-			//r.GetDuoUIstatus()
-			//r.GetDuoUIlocalLost()
-			//go r.GetDuoUIblockHeight()
-			go r.GetDuoUIblockCount()
-			go r.GetDuoUIdifficulty()
-			go r.GetDuoUIconnectionCount()
-			r.UpdateTrigger <- struct{}{}
-			go r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
+			go update(r)
+			// go r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
 		}
 	})
-
+	go func(){
+		out:
+			for {
+				select {
+				case <-r.cx.WalletServer.Update:
+					go update(r)
+				case <-r.cx.KillAll:
+					break out
+				}
+			}
+	}()
+	log.WARN("event update listener started")
 	return
+}
+
+func update(r *RcVar) {
+	// log.WARN("GetDuoUIbalance")
+	r.GetDuoUIbalance()
+	// log.WARN("GetDuoUIunconfirmedBalance")
+	r.GetDuoUIunconfirmedBalance()
+	// log.WARN("GetDuoUItransactionsNumber")
+	r.GetDuoUItransactionsNumber()
+	// r.GetTransactions()
+	// log.WARN("GetLatestTransactions")
+	r.GetLatestTransactions()
+	// r.GetDuoUIstatus()
+	// r.GetDuoUIlocalLost()
+	// r.GetDuoUIblockHeight()
+	// log.WARN("GetDuoUIblockCount")
+	r.GetDuoUIblockCount()
+	// log.WARN("GetDuoUIdifficulty")
+	r.GetDuoUIdifficulty()
+	// log.WARN("GetDuoUIconnectionCount")
+	r.GetDuoUIconnectionCount()
+	r.GetAddressBook()
+	r.UpdateTrigger <- struct{}{}
 }

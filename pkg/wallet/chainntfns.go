@@ -3,7 +3,7 @@ package wallet
 import (
 	"bytes"
 	"strings"
-
+	
 	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/log"
@@ -25,7 +25,7 @@ func (w *Wallet) handleChainNotifications() {
 	}
 	sync := func(w *Wallet) {
 		if w.db != nil {
-
+			
 			// At the moment there is no recourse if the rescan fails for
 			// some reason, however, the wallet will not be marked synced
 			// and many methods will error early since the wallet is known

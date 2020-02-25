@@ -103,6 +103,7 @@ type Wallet struct {
 	started     bool
 	quit        chan struct{}
 	quitMu      sync.Mutex
+	Update      chan struct{}
 }
 
 // Start starts the goroutines necessary to manage a wallet.
