@@ -1839,9 +1839,9 @@ outputs:
 // ListSinceBlock returns a slice of objects with details about transactions
 // since the given block. If the block is -1 then all transactions are included.
 // This is intended to be used for listsinceblock RPC replies.
-func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) ([]btcjson.ListTransactionsResult, error) {
-	txList := []btcjson.ListTransactionsResult{}
-	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
+func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) (txList []btcjson.ListTransactionsResult, err error) {
+	txList = []btcjson.ListTransactionsResult{}
+	err = walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		rangeFn := func(details []wtxmgr.TxDetails) (bool, error) {
 			for _, detail := range details {
@@ -1853,15 +1853,15 @@ func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) ([]btcjson.ListTra
 		}
 		return w.TxStore.RangeTransactions(txmgrNs, start, end, rangeFn)
 	})
-	return txList, err
+	return
 }
 
 // ListTransactions returns a slice of objects with details about a recorded
 // transaction.  This is intended to be used for listtransactions RPC
 // replies.
-func (w *Wallet) ListTransactions(from, count int) ([]btcjson.ListTransactionsResult, error) {
+func (w *Wallet) ListTransactions(from, count int) (listTxResult []btcjson.ListTransactionsResult, err error) {
 	txList := []btcjson.ListTransactionsResult{}
-	err := walletdb.View(w.db, func(tx walletdb.ReadTx) error {
+	if err = walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		// Get current block.  The block height used for calculating
 		// the number of tx confirmations.
@@ -1896,8 +1896,9 @@ func (w *Wallet) ListTransactions(from, count int) ([]btcjson.ListTransactionsRe
 		// Return newer results first by starting at mempool height and working
 		// down to the genesis block.
 		return w.TxStore.RangeTransactions(txmgrNs, -1, 0, rangeFn)
-	})
-	return txList, err
+	}); log.Check(err) {
+	}
+	return
 }
 
 // ListAddressTransactions returns a slice of objects with details about
@@ -3327,18 +3328,18 @@ func Open(db walletdb.DB, pubPass []byte, cbs *waddrmgr.OpenCallbacks,
 		rescanAddJob:        make(chan *RescanJob),
 		rescanBatch:         make(chan *rescanBatch),
 		rescanNotifications: make(chan interface{}),
-		rescanProgress:     make(chan *RescanProgressMsg),
-		rescanFinished:     make(chan *RescanFinishedMsg),
-		createTxRequests:   make(chan createTxRequest),
-		unlockRequests:     make(chan unlockRequest),
-		lockRequests:       make(chan struct{}),
-		holdUnlockRequests: make(chan chan heldUnlock),
-		lockState:          make(chan bool),
-		changePassphrase:   make(chan changePassphraseRequest),
-		changePassphrases:  make(chan changePassphrasesRequest),
-		chainParams:        params,
-		PodConfig:          podConfig,
-		quit:               make(chan struct{}),
+		rescanProgress:      make(chan *RescanProgressMsg),
+		rescanFinished:      make(chan *RescanFinishedMsg),
+		createTxRequests:    make(chan createTxRequest),
+		unlockRequests:      make(chan unlockRequest),
+		lockRequests:        make(chan struct{}),
+		holdUnlockRequests:  make(chan chan heldUnlock),
+		lockState:           make(chan bool),
+		changePassphrase:    make(chan changePassphraseRequest),
+		changePassphrases:   make(chan changePassphrasesRequest),
+		chainParams:         params,
+		PodConfig:           podConfig,
+		quit:                make(chan struct{}),
 	}
 	w.NtfnServer = newNotificationServer(w)
 	w.TxStore.NotifyUnspent = func(hash *chainhash.Hash, index uint32) {

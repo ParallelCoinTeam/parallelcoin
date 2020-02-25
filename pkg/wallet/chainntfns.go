@@ -39,15 +39,15 @@ func (w *Wallet) handleChainNotifications() {
 	catchUpHashes := func(w *Wallet, client chain.Interface,
 		height int32) error {
 		// TODO(aakselrod): There's a race condition here, which
-		// happens when a reorg occurs between the
-		// rescanProgress notification and the last GetBlockHash
-		// call. The solution when using pod is to make pod
-		// send blockconnected notifications with each block
-		// the way Neutrino does, and get rid of the loop. The
-		// other alternative is to check the final hash and,
-		// if it doesn't match the original hash returned by
-		// the notification, to roll back and restart the
-		// rescan.
+		//  happens when a reorg occurs between the
+		//  rescanProgress notification and the last GetBlockHash
+		//  call. The solution when using pod is to make pod
+		//  send blockconnected notifications with each block
+		//  the way Neutrino does, and get rid of the loop. The
+		//  other alternative is to check the final hash and,
+		//  if it doesn't match the original hash returned by
+		//  the notification, to roll back and restart the
+		//  rescan.
 		log.INFOF(
 			"handleChainNotifications: catching up block hashes to height %d, this might take a while", height,
 		)

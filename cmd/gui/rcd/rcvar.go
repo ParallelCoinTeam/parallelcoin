@@ -2,12 +2,11 @@ package rcd
 
 import (
 	"fmt"
-	"github.com/p9c/pod/cmd/node/rpc"
+	"time"
+	
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/wallet"
-	"time"
-
+	
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/pkg/conte"
@@ -170,25 +169,23 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 }
 
 func (r *RcVar) StartServices() (err error) {
-	nodeChan := make(chan *rpc.Server)
 	// Start Node
-	err = r.DuoUInode(nodeChan)
+	err = r.DuoUInode()
 	if err != nil {
 		log.ERROR(err)
 	}
 	log.DEBUG("waiting for nodeChan")
-	r.cx.RPCServer = <-nodeChan
+	r.cx.RPCServer = <-r.cx.NodeChan
 	log.DEBUG("nodeChan sent")
 	r.cx.Node.Store(true)
 
-	walletChan := make(chan *wallet.Wallet)
 	// Start wallet
-	err = r.Services(walletChan)
+	err = r.Services(r.cx.WalletChan)
 	if err != nil {
 		log.ERROR(err)
 	}
 	log.DEBUG("waiting for walletChan")
-	r.cx.WalletServer = <-walletChan
+	r.cx.WalletServer = <-r.cx.WalletChan
 	log.DEBUG("walletChan sent")
 	r.cx.Wallet.Store(true)
 	//r.Boot.IsBoot = false

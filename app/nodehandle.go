@@ -1,13 +1,9 @@
 package app
 
 import (
-	"github.com/p9c/pod/pkg/util/interrupt"
-	"sync"
-
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/cmd/node"
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
 )
@@ -15,7 +11,6 @@ import (
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		log.TRACE("running node handler")
-		var wg sync.WaitGroup
 		Configure(cx, c)
 		// serviceOptions defines the configuration options for the daemon as a service on Windows.
 		type serviceOptions struct {
@@ -40,20 +35,19 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 			return nil
 		}
 		shutdownChan := make(chan struct{})
-		nodeChan := make(chan *rpc.Server)
-		killswitch := make(chan struct{})
 		go func() {
-			err := node.Main(cx, shutdownChan, killswitch, nodeChan, &wg)
+			err := node.Main(cx, shutdownChan)
 			if err != nil {
 				log.ERROR("error starting node ", err)
 			}
 		}()
-		cx.RPCServer = <-nodeChan
-		interrupt.AddHandler(func() {
-			log.WARN("interrupt received, starting node shutdown")
-			close(killswitch)
-		})
-		wg.Wait()
+		log.DEBUG("sending back node rpc server handler")
+		cx.RPCServer = <-cx.NodeChan
+		// interrupt.AddHandler(func() {
+		// 	log.WARN("interrupt received, starting node shutdown")
+		// 	close(cx.NodeKill)
+		// })
+		cx.WaitGroup.Wait()
 		return nil
 	}
 }

@@ -1,11 +1,13 @@
 package app
 
 import (
+	"os"
+	"path/filepath"
 	"time"
 	
-	// _ "github.com/gohouse/i18n/parser_json"
-	
 	"github.com/p9c/pod/cmd/kopach/kopach_worker"
+	"github.com/p9c/pod/cmd/node/blockdb"
+	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	
@@ -107,6 +109,22 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						},
 						apputil.SubCommands(),
 					),
+					apputil.NewCommand("resetchain",
+						"reset the chain",
+						func(c *cli.Context) (err error) {
+							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
+							if *cx.Config.DbType == "sqlite" {
+								dbName += ".db"
+							}
+							dbPath := filepath.Join(filepath.Join(*cx.Config.DataDir,
+								cx.ActiveNet.Name), dbName)
+							if err = os.RemoveAll(dbPath); log.Check(err) {
+							}
+							// return nodeHandle(cx)(c)
+							return nil
+						},
+						apputil.SubCommands(),
+					),
 				),
 				"n",
 			),
@@ -118,7 +136,23 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"drop the transaction history in the wallet ("+
 							"for development and testing as well as clearing up"+
 							" transaction mess)",
-						legacy.DropWalletHistory(cx.WalletServer),
+						func(c *cli.Context) (err error) {
+							Configure(cx, c)
+							log.INFO("dropping wallet history")
+							go func() {
+								log.WARN("starting wallet")
+								if err = walletmain.Main(cx); log.Check(err) {
+									os.Exit(1)
+								} else {
+									log.DEBUG("wallet started")
+								}
+							}()
+							log.DEBUG("waiting for walletChan")
+							cx.WalletServer = <-cx.WalletChan
+							log.DEBUG("walletChan sent")
+							err = legacy.DropWalletHistory(cx.WalletServer)(c)
+							return
+						},
 						apputil.SubCommands(),
 					),
 				),

@@ -46,7 +46,6 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		// log.L.SetLevel("trace", true)
 		log.DEBUG("miner controller starting")
-		quit := make(chan struct{})
 		ctx, cancel := context.WithCancel(context.Background())
 		w := &Worker{
 			active:        &atomic.Bool{},
@@ -56,6 +55,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			sendAddresses: []*net.UDPAddr{},
 			lastSent:      time.Now(),
 		}
+		log.DEBUG("opening broadcast channel listener")
 		w.conn, err = transport.
 			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass, 11049,
 				controller.MaxDatagramSize, handlers)
@@ -66,6 +66,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		var wks []*worker.Worker
 		// start up the workers
+		log.DEBUG("starting up kopach workers")
 		for i := 0; i < *cx.Config.GenThreads; i++ {
 			log.DEBUG("starting worker", i)
 			cmd := worker.Spawn(os.Args[0], "worker",
@@ -78,6 +79,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			for i := range w.workers {
 				if err := wks[i].Kill(); log.Check(err) {
 				}
+				log.DEBUG("stopped worker", i)
 			}
 		})
 		w.active.Store(false)
@@ -90,7 +92,9 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		// controller watcher thread
 		go func() {
+			log.DEBUG("starting controller watcher")
 			ticker := time.NewTicker(time.Second)
+		out:
 			for {
 				select {
 				case <-ticker.C:
@@ -118,12 +122,13 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 							}
 						}
 					}
-				case <-quit:
+				case <-cx.KillAll:
+					break out
 				}
 			}
 		}()
 		log.DEBUG("listening on", controller.UDP4MulticastAddress)
-		<-quit
+		<-cx.KillAll
 		log.INFO("kopach shutting down")
 		return
 	}
@@ -155,7 +160,7 @@ var handlers = transport.Handlers{
 			// log.DEBUG(h)
 			hS := h[5].String()
 			if w.LastHash == hS {
-				log.TRACE("not responding to same job")
+				// log.TRACE("not responding to same job")
 				return
 			} else {
 				w.LastHash = hS
@@ -167,7 +172,7 @@ var handlers = transport.Handlers{
 		// } else {
 		// 	w.LastHash = newHash
 		// }
-
+		
 		for i := range w.workers {
 			log.TRACE("sending job to worker", i)
 			err := w.workers[i].NewJob(&j)

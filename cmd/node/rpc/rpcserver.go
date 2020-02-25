@@ -4181,8 +4181,10 @@ func HandleSetGenerate(s *Server, cmd interface{}, closeChan <-chan struct{}) (i
 			log.ERROR(err)
 		}
 	}
+	log.DEBUG("saving configuration")
 	save.Pod(s.Config)
 	if *s.Config.Generate && *s.Config.GenThreads != 0 {
+		log.DEBUG("starting miner")
 		s.Cfg.CPUMiner = exec.Command(os.Args[0], "-D", *s.Config.DataDir,
 			"kopach")
 		s.Cfg.CPUMiner.Stdin = os.Stdin

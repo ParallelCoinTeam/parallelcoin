@@ -18,7 +18,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/upnp"
@@ -463,38 +463,37 @@ func (s *Node) Start() {
 
 // Stop gracefully shuts down the server by stopping and disconnecting all
 // peers and the main listener.
-func (s *Node) Stop() error {
+func (s *Node) Stop() (err error) {
 	// Make sure this only happens once.
 	if atomic.AddInt32(&s.Shutdown, 1) != 1 {
 		log.DEBUG("server is already in the process of shutting down")
 		return nil
 	}
 	log.TRACE("node shutting down")
-
+	
 	// Shutdown the RPC server if it's not disabled.
 	if !*s.Config.DisableRPC {
 		for i := range s.RPCServers {
-			err := s.RPCServers[i].Stop()
+			err = s.RPCServers[i].Stop()
 			if err != nil {
 				log.ERROR(err)
 			}
 		}
 	}
 	// Save fee estimator state in the database.
-	err := s.DB.Update(func(tx database.Tx) error {
+	if err = s.DB.Update(func(tx database.Tx) error {
 		metadata := tx.Metadata()
 		err := metadata.Put(mempool.EstimateFeeDatabaseKey, s.FeeEstimator.Save())
 		if err != nil {
 			log.ERROR(err)
 		}
 		return nil
-	})
-	if err != nil {
-		log.ERROR(err)
+	}); log.Check(err) {
 	}
+	
 	// Signal the remaining goroutines to quit.
 	close(s.Quit)
-	return nil
+	return
 }
 
 // Transaction has one confirmation on the main chain. Now we can mark it as no
@@ -2852,7 +2851,6 @@ NewNode(listenAddrs []string, db database.DB,
 			if len(rpcListeners) == 0 {
 				return nil, errors.New("RPCS: No valid listen address")
 			}
-
 			rp, err := NewRPCServer(&ServerConfig{
 				Listeners:   rpcListeners,
 				StartupTime: s.StartupTime,

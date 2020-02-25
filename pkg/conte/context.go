@@ -5,9 +5,9 @@ package conte
 import (
 	"sync"
 	"sync/atomic"
-
+	
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"
@@ -24,6 +24,8 @@ var _d _dtype
 // Xt as in conte.Xt stores all the common state data used in pod
 type Xt struct {
 	sync.Mutex
+	WaitGroup sync.WaitGroup
+	KillAll   chan struct{}
 	// App is the heart of the application system,
 	// this creates and initialises it.
 	App *cli.App
@@ -49,8 +51,11 @@ type Xt struct {
 	WalletKill chan struct{}
 	// RPCServer is needed to directly query data
 	RPCServer *rpc.Server
+	NodeChan  chan *rpc.Server
 	// WalletServer is needed to query the wallet
 	WalletServer *wallet.Wallet
+	// WalletChan is a channel used to return the wallet server pointer when it starts
+	WalletChan chan *wallet.Wallet
 	// RealNode is the main node
 	RealNode *rpc.Node
 	// Hashrate is the current total hashrate from kopach workers taking work from this node

@@ -8,7 +8,6 @@ import (
 	// _ "net/http/pprof"
 	"os"
 	"runtime/pprof"
-	"sync"
 	"time"
 	
 	"github.com/p9c/pod/cmd/node/blockdb"
@@ -41,19 +40,10 @@ var winServiceMain func() (bool, error)
 // when requested from the service control manager.
 //  - shutdownchan can be used to wait for the node to shut down
 //  - killswitch can be closed to shut the node down
-func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, nodechan chan *rpc.Server,
-	wg *sync.WaitGroup) (err error) {
+func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	log.TRACE("starting up node main")
-	wg.Add(1)
-	if shutdownChan != nil {
-		interrupt.AddHandler(func() {
-			log.DEBUG("node.Main interrupt")
-			log.TRACE("closing shutdown channel")
-				close(shutdownChan)
-			},
-		)
-	}
-
+	cx.WaitGroup.Add(1)
+	
 	// show version at startup
 	log.INFO("version", version.Version())
 	// enable http profiling server if requested
@@ -82,9 +72,9 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 		if e != nil {
 			log.WARN("failed to start up cpu profiler:", e)
 		} else {
-			//go func() {
+			// go func() {
 			//	log.ERROR(http.ListenAndServe(":6060", nil))
-			//}()
+			// }()
 			interrupt.AddHandler(func() {
 				log.WARN("stopping CPU profiler")
 				err := f.Close()
@@ -157,7 +147,8 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 		return nil
 	}
 	// create server and start it
-	server, err := rpc.NewNode(*cx.Config.Listeners, db, interrupt.ShutdownRequestChan, *cx.Config.Algo, conte.GetContext(cx))
+	server, err := rpc.NewNode(*cx.Config.Listeners, db,
+		interrupt.ShutdownRequestChan, *cx.Config.Algo, conte.GetContext(cx))
 	if err != nil {
 		log.ERRORF("unable to start server on %v: %v",
 			*cx.Config.Listeners, err)
@@ -177,32 +168,38 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 		}
 		server.WaitForShutdown()
 		log.INFO("server shutdown complete")
-		wg.Done()
+		cx.WaitGroup.Done()
+	}
+	if shutdownChan != nil {
+		interrupt.AddHandler(func() {
+			log.DEBUG("node.Main interrupt")
+			gracefulShutdown()
+			close(shutdownChan)
+		})
 	}
 	server.Start()
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 {
 		log.TRACE("propagating rpc server handle (node has started)")
 		cx.RPCServer = server.RPCServers[0]
-		if nodechan != nil {
+		if cx.NodeChan != nil {
 			log.TRACE("sending back node")
-			nodechan <- server.RPCServers[0]
+			cx.NodeChan <- server.RPCServers[0]
 		}
 	}
 	// set up interrupt shutdown handlers to stop servers
 	if *cx.Config.EnableController {
 		stopController, _ = controller.Run(cx)
 	}
-	//interrupt.AddHandler(gracefulShutdown)
-
+	// interrupt.AddHandler(gracefulShutdown)
+	
 	// Wait until the interrupt signal is received from an OS signal or
 	// shutdown is requested through one of the subsystems such as the
 	// RPC server.
 	select {
-	case <-killswitch:
+	case <-cx.NodeKill:
 		gracefulShutdown()
-		return nil
-		//case <-interrupt.HandlersDone:
+		// case <-interrupt.HandlersDone:
 		//	wg.Done()
 	}
 	return nil

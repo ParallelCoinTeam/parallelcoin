@@ -5,13 +5,18 @@ import (
 	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli
 Configure(cx *conte.Xt, ctx *cli.Context) {
 	log.TRACE("configuring pod")
+	cx.WalletChan = make(chan *wallet.Wallet)
+	cx.NodeChan = make(chan *rpc.Server)
+	cx.KillAll = make(chan struct{})
 	cx.StateCfg.Save = false
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
