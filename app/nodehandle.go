@@ -50,7 +50,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}()
 		cx.RPCServer = <-nodeChan
 		interrupt.AddHandler(func() {
-			log.WARN("interrupt received, starting shutdown")
+			log.WARN("interrupt received, starting node shutdown")
 			close(killswitch)
 		})
 		wg.Wait()

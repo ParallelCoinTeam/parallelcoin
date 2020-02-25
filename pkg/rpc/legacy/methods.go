@@ -901,15 +901,22 @@ func GetTransaction(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 }
 
 func HandleDropWalletHistory(icmd interface{}, w *wallet.Wallet) (in interface{}, err error) {
-	rwt, err := w.Database().BeginReadWriteTx()
-	if err != nil {
-		log.ERROR(err)
+	log.DEBUG("dropping wallet history")
+	if err = DropWalletHistory(w)(nil); log.Check(err) {
 	}
-	ns := rwt.ReadWriteBucket([]byte("waddrmgr"))
-	w.Manager.SetSyncedTo(ns, nil)
-	err = DropWalletHistory(w)(nil)
+	log.DEBUG("dropped wallet history")
+	// go func() {
+	// 	rwt, err := w.Database().BeginReadWriteTx()
+	// 	if err != nil {
+	// 		log.ERROR(err)
+	// 	}
+	// 	ns := rwt.ReadWriteBucket([]byte("waddrmgr"))
+	// 	w.Manager.SetSyncedTo(ns, nil)
+	// 	if err = rwt.Commit(); log.Check(err) {
+	// 	}
+	// }()
 	interrupt.RequestRestart()
-	return "dropped wallet history, restarting", nil
+	return "dropped wallet history", nil
 }
 
 // These generators create the following global variables in this package:

@@ -21,6 +21,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		}
 		quit := make(chan struct{})
 		interrupt.AddHandler(func() {
+			log.DEBUG("KopachHandle interrupt")
 			close(quit)
 			os.Exit(0)
 		})

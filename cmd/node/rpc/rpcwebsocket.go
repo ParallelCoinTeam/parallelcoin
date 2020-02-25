@@ -1706,9 +1706,9 @@ func HandleRescan(wsc *WSClient, icmd interface{}) (interface{}, error) {
 	}
 	numAddrs := len(cmd.Addresses)
 	if numAddrs == 1 {
-		log.INFO("beginning rescan for 1 address")
+		log.DEBUG("beginning rescan for 1 address")
 	} else {
-		log.INFOF("beginning rescan for %d addresses", numAddrs)
+		log.DEBUGF("beginning rescan for %d addresses", numAddrs)
 	}
 	// Build lookup maps.
 	lookups := RescanKeys{

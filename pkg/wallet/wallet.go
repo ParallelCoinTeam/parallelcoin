@@ -1005,7 +1005,7 @@ func logFilterBlocksResp(block wtxmgr.BlockMeta,
 		nFoundExternal += len(indexes)
 	}
 	if nFoundExternal > 0 {
-		log.INFOF(
+		log.TRACEF(
 			"recovered %d external addrs at height=%d hash=%v",
 			nFoundExternal, block.Height, block.Hash,
 		)
@@ -1016,7 +1016,7 @@ func logFilterBlocksResp(block wtxmgr.BlockMeta,
 		nFoundInternal += len(indexes)
 	}
 	if nFoundInternal > 0 {
-		log.INFOF(
+		log.TRACEF(
 			"recovered %d internal addrs at height=%d hash=%v",
 			nFoundInternal, block.Height, block.Hash,
 		)
@@ -1024,7 +1024,7 @@ func logFilterBlocksResp(block wtxmgr.BlockMeta,
 	// Log the number of outpoints found in this block.
 	nFoundOutPoints := len(resp.FoundOutPoints)
 	if nFoundOutPoints > 0 {
-		log.INFOF(
+		log.TRACEF(
 			"found %d spends from watched outpoints at height=%d hash=%v",
 			nFoundOutPoints, block.Height, block.Hash,
 		)

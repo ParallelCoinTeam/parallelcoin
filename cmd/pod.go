@@ -36,15 +36,14 @@ func Main() {
 			if err != nil {
 				log.ERROR("could not start tracing", err)
 			} else {
-				interrupt.AddHandler(
-					func() {
-						log.DEBUG("stopping trace")
-						trace.Stop()
-						err := f.Close()
-						if err != nil {
-							log.ERROR(err)
-						}
-					},
+				interrupt.AddHandler(func() {
+					log.DEBUG("stopping trace")
+					trace.Stop()
+					err := f.Close()
+					if err != nil {
+						log.ERROR(err)
+					}
+				},
 				)
 			}
 		}

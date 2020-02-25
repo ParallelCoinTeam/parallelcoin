@@ -409,7 +409,7 @@ func // addCredit is an AddCredit helper that runs in an update transaction.
 		return false, nil
 	}
 	txOutAmt := util.Amount(rec.MsgTx.TxOut[index].Value)
-	log.DEBUGF(
+	log.TRACEF(
 		"marking transaction %v output %d (%v) spendable",
 		rec.Hash, index, txOutAmt)
 	cred := credit{
@@ -468,7 +468,7 @@ func (s *Store) rollback(ns walletdb.ReadWriteBucket, height int32) error {
 			break
 		}
 		heightsToRemove = append(heightsToRemove, it.elem.Height)
-		log.INFOF(
+		log.TRACEF(
 			"rolling back %d transactions from block %v height %d",
 			len(b.transactions), b.Hash, b.Height,
 		)

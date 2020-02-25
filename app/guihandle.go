@@ -31,6 +31,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		rc.DuoUIloggerController()
 
 		interrupt.AddHandler(func() {
+			log.DEBUG("guiHandle interrupt")
 			close(rc.Quit)
 		})
 

@@ -2,8 +2,6 @@ package legacy
 
 import (
 	"encoding/binary"
-	"fmt"
-	"path/filepath"
 	
 	"github.com/urfave/cli"
 	
@@ -15,9 +13,9 @@ import (
 
 func DropWalletHistory(w *wallet.Wallet) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		cfg := w.PodConfig
-		fmt.Println("\n", cfg)
+		// cfg := w.PodConfig
 		var (
+			err error
 			// Namespace keys.
 			syncBucketName    = []byte("sync")
 			waddrmgrNamespace = []byte("waddrmgr")
@@ -27,64 +25,66 @@ func DropWalletHistory(w *wallet.Wallet) func(c *cli.Context) error {
 			startBlockName   = []byte("startblock")
 			recentBlocksName = []byte("recentblocks")
 		)
-		db, err := walletdb.Open("bdb",
-			filepath.Join(*cfg.DataDir,
-				*cfg.Network, "wallet.db"))
-		if err != nil {
-			log.Println("failed to open database:", err)
-			return err
-		}
-		defer db.Close()
-		log.Println("dropping wtxmgr namespace")
-		err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
-			err := tx.DeleteTopLevelBucket(wtxmgrNamespace)
+		// dbPath := filepath.Join(*cfg.DataDir,
+		// 	*cfg.Network, "wallet.db")
+		// log.INFO("dbPath", dbPath)
+		// db, err := walletdb.Open("bdb",
+		// 	dbPath)
+		// if log.Check(err) {
+		// 	// log.ERROR("failed to open database:", err)
+		// 	return err
+		// }
+		// defer db.Close()
+		log.DEBUG("dropping wtxmgr namespace")
+		err = walletdb.Update(w.Database(), func(tx walletdb.ReadWriteTx) error {
+			log.DEBUG("deleting top level bucket")
+			if err := tx.DeleteTopLevelBucket(wtxmgrNamespace); log.Check(err) {
+			}
 			if err != nil && err != walletdb.ErrBucketNotFound {
 				return err
 			}
-			ns, err := tx.CreateTopLevelBucket(wtxmgrNamespace)
-			if err != nil {
-				log.ERROR(err)
+			var ns walletdb.ReadWriteBucket
+			log.DEBUG("creating new top level bucket")
+			if ns, err = tx.CreateTopLevelBucket(wtxmgrNamespace); log.Check(err) {
 				return err
 			}
-			err = wtxmgr.Create(ns)
-			if err != nil {
-				log.ERROR(err)
+			if err = wtxmgr.Create(ns); log.Check(err) {
 				return err
 			}
 			ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 			startBlock := ns.Get(startBlockName)
-			err = ns.Put(syncedToName, startBlock)
-			if err != nil {
-				log.ERROR(err)
+			log.DEBUG("putting start block", startBlock)
+			if err = ns.Put(syncedToName, startBlock); log.Check(err) {
 				return err
 			}
 			recentBlocks := make([]byte, 40)
 			copy(recentBlocks[0:4], startBlock[0:4])
 			copy(recentBlocks[8:], startBlock[4:])
 			binary.LittleEndian.PutUint32(recentBlocks[4:8], uint32(1))
+			defer log.DEBUG("put recent blocks")
 			return ns.Put(recentBlocksName, recentBlocks)
 		})
-		if err != nil {
-			log.ERROR(err)
+		if log.Check(err) {
 			return err
 		}
-		if w != nil {
-			// Rescan chain to ensure balance is correctly regenerated
-			job := &wallet.RescanJob{
-				InitialSync: true,
-			}
-			// Submit rescan job and log when the import has completed.
-			// Do not block on finishing the rescan.  The rescan success
-			// or failure is logged elsewhere, and the channel is not
-			// required to be read, so discard the return value.
-			errC := w.SubmitRescan(job)
-			select {
-			case err := <-errC:
-				log.ERROR(err)
-				// case <-time.After(time.Second * 5):
-				// 	break
-			}
-		}
+		log.DEBUG("updated wallet")
+		// if w != nil {
+		// 	// Rescan chain to ensure balance is correctly regenerated
+		// 	job := &wallet.RescanJob{
+		// 		InitialSync: true,
+		// 	}
+		// 	// Submit rescan job and log when the import has completed.
+		// 	// Do not block on finishing the rescan.  The rescan success
+		// 	// or failure is logged elsewhere, and the channel is not
+		// 	// required to be read, so discard the return value.
+		// 	errC := w.SubmitRescan(job)
+		// 	select {
+		// 	case err := <-errC:
+		// 		log.ERROR(err)
+		// 		// case <-time.After(time.Second * 5):
+		// 		// 	break
+		// 	}
+		// }
 		return err
 	}
 }

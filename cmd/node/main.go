@@ -46,9 +46,9 @@ func Main(cx *conte.Xt, shutdownChan chan struct{},	killswitch chan struct{}, no
 	log.TRACE("starting up node main")
 	wg.Add(1)
 	if shutdownChan != nil {
-		interrupt.AddHandler(
-			func() {
-				log.TRACE("closing shutdown channel")
+		interrupt.AddHandler(func() {
+			log.DEBUG("node.Main interrupt")
+			log.TRACE("closing shutdown channel")
 				close(shutdownChan)
 			},
 		)
