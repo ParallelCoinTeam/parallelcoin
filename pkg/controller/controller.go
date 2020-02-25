@@ -419,7 +419,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 						log.DEBUG("stale or orphan from being later, not sending out")
 						return
 					}
-					log.SPEW(c.coinbases)
+					// log.SPEW(c.coinbases)
 					// log.SPEW(mC.Data)
 					shards := transport.GetShards(mC.Data)
 					c.oldBlocks.Store(shards)

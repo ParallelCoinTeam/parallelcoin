@@ -141,8 +141,15 @@ var handlers = transport.Handlers{
 		cP := j.GetControllerListenerPort()
 		addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
 		otherSent := w.FirstSender != addr && w.FirstSender != ""
-		w.FirstSender = addr
-		w.lastSent = time.Now()
+		if otherSent {
+			// ignore other controllers while one is active and received
+			// first
+			log.DEBUG("ignoring other controller", addr)
+			return
+		} else {
+			w.FirstSender = addr
+			w.lastSent = time.Now()
+		}
 		w.mx.Unlock()
 		if len(h) > 0 {
 			// log.DEBUG(h)
@@ -160,17 +167,7 @@ var handlers = transport.Handlers{
 		// } else {
 		// 	w.LastHash = newHash
 		// }
-		if otherSent {
-			// ignore other controllers while one is active and received
-			// first
-			log.DEBUG("ignoring other controller", addr)
-			return
-		} else {
-			w.mx.Lock()
-			w.FirstSender = addr
-			w.lastSent = time.Now()
-			w.mx.Unlock()
-		}
+
 		for i := range w.workers {
 			log.TRACE("sending job to worker", i)
 			err := w.workers[i].NewJob(&j)

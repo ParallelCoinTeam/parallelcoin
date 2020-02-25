@@ -244,10 +244,12 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// 		fmt.Sprint(job.GetControllerListenerPort()))
 	// }
 	address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
-	ra := w.dispatchConn.Sender
-	var remoteAddress string
-	if ra != nil {
-		remoteAddress = ra.RemoteAddr().String()
+	remoteAddress := address
+	if w.dispatchConn != nil {
+		ra := w.dispatchConn.Sender
+		if ra != nil {
+			remoteAddress = ra.RemoteAddr().String()
+		}
 	}
 	if address != remoteAddress {
 		log.DEBUG("setting destination", address)
@@ -330,8 +332,8 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	log.DEBUG("receiving dispatch password", pass)
 	rand.Seed(time.Now().UnixNano())
-	sp := fmt.Sprint(rand.Intn(32767)+1025)
-	rp := fmt.Sprint(rand.Intn(32767)+1025)
+	sp := fmt.Sprint(rand.Intn(32767) + 1025)
+	rp := fmt.Sprint(rand.Intn(32767) + 1025)
 	conn, err := transport.NewUnicastChannel("kopachworker", w, pass, "0.0.0.0:"+sp, "0.0.0.0:"+rp,
 		controller.MaxDatagramSize, nil)
 	if err != nil {
