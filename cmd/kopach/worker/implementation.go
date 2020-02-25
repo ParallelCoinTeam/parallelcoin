@@ -244,8 +244,12 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// 		fmt.Sprint(job.GetControllerListenerPort()))
 	// }
 	address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
-	log.DEBUG(address)
-	if address != w.dispatchConn.Sender.RemoteAddr().String() {
+	ra := w.dispatchConn.Sender
+	var remoteAddress string
+	if ra != nil {
+		remoteAddress = ra.RemoteAddr().String()
+	}
+	if address != remoteAddress {
 		log.DEBUG("setting destination", address)
 		err = w.dispatchConn.SetDestination(address)
 		if err != nil {
