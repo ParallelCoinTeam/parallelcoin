@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	couterIncrease = new(controller.Button)
-	couterDecrease = new(controller.Button)
-	couterReset    = new(controller.Button)
+	couterIncrease = *new(controller.Button)
+	couterDecrease = *new(controller.Button)
+	couterReset    = *new(controller.Button)
 )
 
 type DuoUIcounter struct {
@@ -53,19 +53,19 @@ func (c DuoUIcounter) Layout(gtx *layout.Context, cc *controller.DuoUIcounter) {
 			for couterIncrease.Clicked(gtx) {
 				cc.Increase()
 			}
-			c.increase.Layout(gtx, couterIncrease)
+			c.increase.Layout(gtx, &couterIncrease)
 		}),
 		layout.Flexed(0.2, func() {
 			for couterReset.Clicked(gtx) {
 				cc.Reset()
 			}
-			c.reset.Layout(gtx, couterReset)
+			c.reset.Layout(gtx, &couterReset)
 		}),
 		layout.Flexed(0.3, func() {
 			for couterDecrease.Clicked(gtx) {
 				cc.Decrease()
 			}
-			c.decrease.Layout(gtx, couterDecrease)
+			c.decrease.Layout(gtx, &couterDecrease)
 		}),
 	)
 }

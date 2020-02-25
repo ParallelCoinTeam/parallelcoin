@@ -2,9 +2,7 @@ package duoui
 
 import (
 	"fmt"
-	"gioui.org/f32"
 	"gioui.org/layout"
-	"gioui.org/op/clip"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
@@ -88,28 +86,6 @@ func (ui *DuoUI) txsDetails(i int, t *model.DuoUItx) func() {
 	}
 }
 
-func (ui *DuoUI) contentHeader(b func()) func() {
-	return func() {
-		hmin := ui.ly.Context.Constraints.Width.Min
-		vmin := ui.ly.Context.Constraints.Height.Min
-		layout.Stack{Alignment: layout.Center}.Layout(ui.ly.Context,
-			layout.Expanded(func() {
-				clip.Rect{
-					Rect: f32.Rectangle{Max: f32.Point{
-						X: float32(ui.ly.Context.Constraints.Width.Min),
-						Y: float32(ui.ly.Context.Constraints.Height.Min),
-					}},
-				}.Op(ui.ly.Context.Ops).Add(ui.ly.Context.Ops)
-				fill(ui.ly.Context, theme.HexARGB(ui.ly.Theme.Color.Primary))
-			}),
-			layout.Stacked(func() {
-				ui.ly.Context.Constraints.Width.Min = hmin
-				ui.ly.Context.Constraints.Height.Min = vmin
-				layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, b)
-			}),
-		)
-	}
-}
 
 func (ui *DuoUI) headerTransactions() func() {
 	return func() {
@@ -132,8 +108,8 @@ func (ui *DuoUI) txsBody() func() {
 			}.Layout(ui.ly.Context,
 				layout.Rigid(func() {
 					cs := ui.ly.Context.Constraints
-					transList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.LastTxs.Txs), func(i int) {
-						t := ui.rc.Status.Wallet.LastTxs.Txs[i]
+					transList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.Transactions.Txs), func(i int) {
+						t := ui.rc.Status.Wallet.Transactions.Txs[i]
 						theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ff535353", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 						layout.Flex{
 							Spacing: layout.SpaceBetween,

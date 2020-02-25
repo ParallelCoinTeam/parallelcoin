@@ -21,11 +21,17 @@ var (
 		From:         0,
 		To:           50,
 	}
+	blockFrom = &controller.DuoUIcounter{
+		Value:        20,
+		OperateValue: 1,
+		From:         0,
+		To:           50,
+	}
 )
 
 func (ui *DuoUI) bodyExplorer() func() {
 	return func() {
-		ui.rc.GetBlocksExcerpts(0, blockNumber.Value)
+		ui.rc.GetBlocksExcerpts(blockFrom.Value, blockNumber.Value)
 		in := layout.UniformInset(unit.Dp(0))
 		in.Layout(ui.ly.Context, func() {
 			blocksList.Layout(ui.ly.Context, len(ui.rc.Blocks), func(i int) {
@@ -92,10 +98,14 @@ func (ui *DuoUI) headerExplorer() func() {
 	return func() {
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
+			Axis:layout.Vertical,
 		}.Layout(ui.ly.Context,
 			//layout.Rigid(ui.txsFilter()),
 			layout.Rigid(func() {
 				ui.ly.Theme.DuoUIcounter().Layout(ui.ly.Context, blockNumber)
+			}),
+			layout.Rigid(func() {
+				ui.ly.Theme.DuoUIcounter().Layout(ui.ly.Context, blockFrom)
 			}),
 		)
 	}

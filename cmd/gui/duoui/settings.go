@@ -3,8 +3,8 @@ package duoui
 import (
 	"fmt"
 	"gioui.org/layout"
-	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/pkg/log"
 )
@@ -17,6 +17,7 @@ var (
 	fieldsList = &layout.List{
 		Axis: layout.Vertical,
 	}
+	buttonSettingsSave = new(controller.Button)
 )
 
 func (ui *DuoUI) settingsFieldLabel(f *Field) func() {
@@ -41,14 +42,7 @@ func (ui *DuoUI) settingsFieldDescription(f *Field) func() {
 
 func (ui *DuoUI) headerSettings() func() {
 	return func() {
-		layout.Flex{Spacing: layout.SpaceAround}.Layout(ui.ly.Context,
-			layout.Rigid(func() {
-				t := ui.ly.Theme.H6(ui.rc.Settings.Tabs.Current)
-				t.Font.Typeface = ui.ly.Theme.Font.Primary
-				t.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
-				t.Alignment = text.Start
-				t.Layout(ui.ly.Context)
-			}),
+		layout.Flex{Spacing: layout.SpaceBetween}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
 				groupsNumber := len(ui.rc.Settings.Daemon.Schema.Groups)
 				groupsList.Layout(ui.ly.Context, groupsNumber, func(i int) {
@@ -63,7 +57,16 @@ func (ui *DuoUI) headerSettings() func() {
 						ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, txt, ui.ly.Theme.Color.Dark, "ff989898", "", ui.ly.Theme.Color.Dark, 16, 0, 80, 32, 4, 4).Layout(ui.ly.Context, ui.rc.Settings.Tabs.TabsList[txt])
 					})
 				})
-			}))
+			}),
+			layout.Rigid(func() {
+				var settingsSaveButton theme.DuoUIbutton
+				settingsSaveButton = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "SAVE", ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Dark, "", ui.ly.Theme.Color.Light, 16, 0, 128, 48, 0, 0)
+				for buttonSettingsSave.Clicked(ui.ly.Context) {
+					//addressLineEditor.SetText(clipboard.Get())
+				}
+				settingsSaveButton.Layout(ui.ly.Context, buttonSettingsSave)
+			}),
+		)
 	}
 }
 
