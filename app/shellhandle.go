@@ -2,7 +2,6 @@ package app
 
 import (
 	"os"
-	"sync"
 	
 	"github.com/urfave/cli"
 	
@@ -16,8 +15,8 @@ import (
 
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		var wg sync.WaitGroup
 		Configure(cx, c)
+		log.DEBUG("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
@@ -36,9 +35,9 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			os.Exit(1)
 			// log.L.SetLevel(*cx.Config.LogLevel, true)
 		}
+		log.WARN("starting node")
 		if !*cx.Config.NodeOff {
 			go func() {
-				Configure(cx, c)
 				err = node.Main(cx, shutdownChan)
 				if err != nil {
 					log.ERROR("error starting node ", err)
@@ -46,6 +45,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}()
 			cx.RPCServer = <-cx.NodeChan
 		}
+		log.WARN("starting wallet")
 		if !*cx.Config.WalletOff {
 			go func() {
 				err = walletmain.Main(cx)
@@ -56,13 +56,14 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			cx.WalletServer = <-cx.WalletChan
 			// save.Pod(cx.Config)
 		}
+		log.DEBUG("shell started")
 		// interrupt.AddHandler(func() {
 		// 	log.WARN("interrupt received, " +
 		// 		"shutting down shell modules")
 		// 	close(cx.WalletKill)
 		// 	close(cx.NodeKill)
 		// })
-		wg.Wait()
+		cx.WaitGroup.Wait()
 		return nil
 	}
 }

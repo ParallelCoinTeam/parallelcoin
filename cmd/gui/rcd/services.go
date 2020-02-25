@@ -2,42 +2,41 @@ package rcd
 
 import (
 	"fmt"
+	"os"
+	"sync/atomic"
+	
 	"github.com/p9c/pod/cmd/node"
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/wallet"
 )
 
 func (r *RcVar) StartServices() (err error) {
-	nodeChan := make(chan *rpc.Server)
+	log.DEBUG("starting up services")
 	// Start Node
-	err = r.DuoNodeService(nodeChan)
+	err = r.DuoNodeService()
 	if err != nil {
 		log.ERROR(err)
 	}
 	log.DEBUG("waiting for nodeChan")
-	r.cx.RPCServer = <-nodeChan
+	r.cx.RPCServer = <-r.cx.NodeChan
 	log.DEBUG("nodeChan sent")
 	r.cx.Node.Store(true)
-
-	walletChan := make(chan *wallet.Wallet)
 	// Start wallet
-	err = r.DuoWalletService(walletChan)
+	err = r.DuoWalletService()
 	if err != nil {
 		log.ERROR(err)
 	}
 	log.DEBUG("waiting for walletChan")
-	r.cx.WalletServer = <-walletChan
+	r.cx.WalletServer = <-r.cx.WalletChan
 	log.DEBUG("walletChan sent")
 	r.cx.Wallet.Store(true)
-	//r.Boot.IsBoot = false
+	// r.Boot.IsBoot = false
 	r.Ready <- struct{}{}
 	return
 }
 
-func (r *RcVar) DuoWalletService(walletChan chan *wallet.Wallet) error {
+func (r *RcVar) DuoWalletService() error {
 	r.cx.WalletKill = make(chan struct{})
 	r.cx.Wallet = &atomic.Value{}
 	r.cx.Wallet.Store(false)
@@ -52,6 +51,7 @@ func (r *RcVar) DuoWalletService(walletChan chan *wallet.Wallet) error {
 				os.Exit(1)
 			}
 		}()
+		r.cx.WalletServer = <-r.cx.WalletChan
 	}
 	interrupt.AddHandler(func() {
 		log.WARN("interrupt received, " +
@@ -61,23 +61,22 @@ func (r *RcVar) DuoWalletService(walletChan chan *wallet.Wallet) error {
 	return err
 }
 
-func (r *RcVar) DuoNodeService(nodeChan chan *rpc.Server) error {
+func (r *RcVar) DuoNodeService() error {
 	r.cx.NodeKill = make(chan struct{})
 	r.cx.Node = &atomic.Value{}
 	r.cx.Node.Store(false)
 	var err error
-	var wg sync.WaitGroup
 	if !*r.cx.Config.NodeOff {
 		go func() {
 			log.INFO(r.cx.Language.RenderText("goApp_STARTINGNODE"))
-			//utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
-			err = node.Main(r.cx, nil, r.cx.NodeKill, nodeChan, &wg)
+			// utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
+			err = node.Main(r.cx, nil)
 			if err != nil {
 				log.INFO("error running node:", err)
 				os.Exit(1)
 			}
 		}()
-
+		r.cx.RPCServer = <-r.cx.NodeChan
 	}
 	interrupt.AddHandler(func() {
 		log.WARN("interrupt received, " +

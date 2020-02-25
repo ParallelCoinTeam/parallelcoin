@@ -17,6 +17,7 @@ import (
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		Configure(cx, c)
+		log.WARN("starting GUI")
 		//sys := view.DuOSboot()
 		rc := rcd.RcInit(cx)
 		// sys.Components = mvc.LoadComponents(duo,rc)
