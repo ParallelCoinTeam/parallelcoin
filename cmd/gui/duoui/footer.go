@@ -84,7 +84,7 @@ func (ui *DuoUI) DuoUIfooter() func() {
 					navButtons := []func(){
 						ui.footerMenuButton("NETWORK", "CONNECTIONS: "+fmt.Sprint(ui.rc.Status.Node.ConnectionCount), "", buttonNetwork),
 						ui.footerMenuButton("EXPLORER", "BLOCKS: "+fmt.Sprint(ui.rc.Status.Node.BlockCount), "", buttonBlocks),
-						ui.footerMenuButton("EXPLORER", "", "helpIcon", buttonHelp),
+						ui.footerMenuButton("MINER", "", "helpIcon", buttonHelp),
 						ui.footerMenuButton("CONSOLE", "", "consoleIcon", buttonConsole),
 						ui.footerMenuButton("SETTINGS", "", "settingsIcon", buttonSettings),
 					}

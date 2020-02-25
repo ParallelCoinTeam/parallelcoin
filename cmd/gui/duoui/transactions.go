@@ -20,10 +20,13 @@ var (
 	sentTxs     = new(controller.CheckBox)
 	receivedTxs = new(controller.CheckBox)
 	itemValue   = &controller.DuoUIcounter{
-		Value:        11,
-		OperateValue: 1,
-		From:         0,
-		To:           15,
+		Value:           11,
+		OperateValue:    1,
+		From:            0,
+		To:              15,
+		CounterIncrease: new(controller.Button),
+		CounterDecrease: new(controller.Button),
+		CounterReset:    new(controller.Button),
 	}
 )
 
@@ -86,7 +89,6 @@ func (ui *DuoUI) txsDetails(i int, t *model.DuoUItx) func() {
 	}
 }
 
-
 func (ui *DuoUI) headerTransactions() func() {
 	return func() {
 		layout.Flex{
@@ -107,10 +109,9 @@ func (ui *DuoUI) txsBody() func() {
 				Axis: layout.Vertical,
 			}.Layout(ui.ly.Context,
 				layout.Rigid(func() {
-					cs := ui.ly.Context.Constraints
 					transList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.Transactions.Txs), func(i int) {
 						t := ui.rc.Status.Wallet.Transactions.Txs[i]
-						theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ff535353", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+						ui.line(ui.ly.Theme.Color.Hint)()
 						layout.Flex{
 							Spacing: layout.SpaceBetween,
 						}.Layout(ui.ly.Context,

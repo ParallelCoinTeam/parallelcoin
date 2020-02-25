@@ -18,7 +18,7 @@ var (
 		Axis:    layout.Horizontal,
 		Spacing: layout.SpaceBetween,
 	}
-	Icon, _ = theme.NewDuoUIicon(icons.EditorMonetizationOn)
+	icon, _ = theme.NewDuoUIicon(icons.EditorMonetizationOn)
 )
 
 func (ui *DuoUI) DuoUIbalance() func() {
@@ -27,16 +27,12 @@ func (ui *DuoUI) DuoUIbalance() func() {
 		theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Light, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		in := layout.UniformInset(unit.Dp(16))
 		in.Layout(ui.ly.Context, func() {
-			cs := ui.ly.Context.Constraints
+			//cs := ui.ly.Context.Constraints
 			navButtons := []func(){
 				listItem(ui.ly.Context, ui.ly.Theme, "BALANCE :", ui.rc.Status.Wallet.Balance+" "+ui.rc.Settings.Abbrevation),
-				func() {
-					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, ui.ly.Theme.Color.LightGrayII, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-				},
+				ui.line(ui.ly.Theme.Color.LightGrayII),
 				listItem(ui.ly.Context, ui.ly.Theme, "UNCNFIRMED :", ui.rc.Status.Wallet.Unconfirmed+" "+ui.rc.Settings.Abbrevation),
-				func() {
-					theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, ui.ly.Theme.Color.LightGray, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-				},
+				ui.line(ui.ly.Theme.Color.LightGrayII),
 				listItem(ui.ly.Context, ui.ly.Theme, "TRANSACTIONS :", fmt.Sprint(ui.rc.Status.Wallet.TxsNumber)),
 			}
 			itemsList.Layout(ui.ly.Context, len(navButtons), func(i int) {
@@ -56,9 +52,9 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, name, value string) fun
 				layout.Flex{}.Layout(gtx,
 					layout.Rigid(func() {
 						layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(gtx, func() {
-							if Icon != nil {
-								Icon.Color = theme.HexARGB(th.Color.Dark)
-								Icon.Layout(gtx, unit.Px(float32(32)))
+							if icon != nil {
+								icon.Color = theme.HexARGB(th.Color.Dark)
+								icon.Layout(gtx, unit.Px(float32(32)))
 							}
 							gtx.Dimensions = layout.Dimensions{
 								Size: image.Point{X: 32, Y: 32},

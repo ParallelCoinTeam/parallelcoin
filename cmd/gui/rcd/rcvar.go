@@ -1,13 +1,8 @@
 package rcd
 
 import (
-	"fmt"
 	"time"
-	
-	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/pod/pkg/pod"
-	
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
+
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -80,57 +75,6 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 	//	Text:   "Dialog text",
 	// }
 	l := new(model.DuoUIlog)
-	settings := &model.DuoUIsettings{
-		Abbrevation: "DUO",
-		Tabs: &model.DuoUIconfTabs{
-			Current:  "wallet",
-			TabsList: make(map[string]*controller.Button),
-		},
-		Daemon: &model.DaemonConfig{
-			Config: cx.Config,
-			Schema: pod.GetConfigSchema(cx.Config, cx.ConfigMap),
-		},
-	}
-
-	// Settings tabs
-
-
-	settingsFields := make(map[string]interface{})
-	for _, group := range settings.Daemon.Schema.Groups {
-		settings.Tabs.TabsList[group.Legend] = new(controller.Button)
-		for _, field := range group.Fields {
-			switch field.Type {
-			case "array":
-				settingsFields[field.Label] = new(controller.Button)
-			case "input":
-				settingsFields[field.Label] = &controller.Editor{
-					SingleLine: true,
-				}
-				//if field.Value != nil {
-					switch field.InputType {
-					case "text":
-						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*string)))
-						//(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*string)))
-					case "number":
-						//(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*int)))
-					case "decimal":
-						//(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*float64)))
-					case "time":
-						//(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*time.Duration)))
-					}
-				//}
-			case "switch":
-				settingsFields[field.Label] = new(controller.CheckBox)
-				(settingsFields[field.Label]).(*controller.CheckBox).SetChecked(*cx.ConfigMap[field.Model].(*bool))
-			case "radio":
-				settingsFields[field.Label] = new(controller.Enum)
-			default:
-				settingsFields[field.Label] = new(controller.Button)
-			}
-		}
-	}
-
-	settings.Daemon.Widgets = settingsFields
 
 	r = &RcVar{
 		cx:   cx,
@@ -145,7 +89,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			},
 		},
 		Dialog:   &model.DuoUIdialog{},
-		Settings: settings,
+		Settings: settings(cx),
 		Log:      l,
 		CommandsHistory: &model.DuoUIcommandsHistory{
 			Commands: []model.DuoUIcommand{
@@ -165,30 +109,5 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		Quit:      make(chan struct{}),
 		Ready:     make(chan struct{}, 1),
 	}
-	return
-}
-
-func (r *RcVar) StartServices() (err error) {
-	// Start Node
-	err = r.DuoUInode()
-	if err != nil {
-		log.ERROR(err)
-	}
-	log.DEBUG("waiting for nodeChan")
-	r.cx.RPCServer = <-r.cx.NodeChan
-	log.DEBUG("nodeChan sent")
-	r.cx.Node.Store(true)
-
-	// Start wallet
-	err = r.Services(r.cx.WalletChan)
-	if err != nil {
-		log.ERROR(err)
-	}
-	log.DEBUG("waiting for walletChan")
-	r.cx.WalletServer = <-r.cx.WalletChan
-	log.DEBUG("walletChan sent")
-	r.cx.Wallet.Store(true)
-	//r.Boot.IsBoot = false
-	r.Ready <- struct{}{}
 	return
 }

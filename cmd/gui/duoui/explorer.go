@@ -16,16 +16,22 @@ var (
 		Axis: layout.Vertical,
 	}
 	blockNumber = &controller.DuoUIcounter{
-		Value:        20,
-		OperateValue: 1,
-		From:         0,
-		To:           50,
+		Value:           20,
+		OperateValue:    1,
+		From:            0,
+		To:              50,
+		CounterIncrease: new(controller.Button),
+		CounterDecrease: new(controller.Button),
+		CounterReset:    new(controller.Button),
 	}
 	blockFrom = &controller.DuoUIcounter{
-		Value:        20,
-		OperateValue: 1,
-		From:         0,
-		To:           50,
+		Value:           20,
+		OperateValue:    1,
+		From:            0,
+		To:              50,
+		CounterIncrease: new(controller.Button),
+		CounterDecrease: new(controller.Button),
+		CounterReset:    new(controller.Button),
 	}
 )
 
@@ -36,8 +42,7 @@ func (ui *DuoUI) bodyExplorer() func() {
 		in.Layout(ui.ly.Context, func() {
 			blocksList.Layout(ui.ly.Context, len(ui.rc.Blocks), func(i int) {
 				b := ui.rc.Blocks[i]
-				cs := ui.ly.Context.Constraints
-				theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 1, "ff535353", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				ui.line(ui.ly.Theme.Color.Dark)()
 				layout.Flex{
 					Spacing: layout.SpaceBetween,
 				}.Layout(ui.ly.Context,
@@ -98,13 +103,13 @@ func (ui *DuoUI) headerExplorer() func() {
 	return func() {
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
-			Axis:layout.Vertical,
+			Axis:    layout.Horizontal,
 		}.Layout(ui.ly.Context,
 			//layout.Rigid(ui.txsFilter()),
-			layout.Rigid(func() {
+			layout.Flexed(0.5, func() {
 				ui.ly.Theme.DuoUIcounter().Layout(ui.ly.Context, blockNumber)
 			}),
-			layout.Rigid(func() {
+			layout.Flexed(0.5, func() {
 				ui.ly.Theme.DuoUIcounter().Layout(ui.ly.Context, blockFrom)
 			}),
 		)
