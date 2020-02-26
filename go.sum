@@ -1,8 +1,6 @@
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 gioui.org v0.0.0-20200220081202-150b34aedef6 h1:l5egeGesHfrZTN3NelvBrQEGHGKdr5XE/WIbNZxaMPs=
 gioui.org v0.0.0-20200220081202-150b34aedef6/go.mod h1:AHI9rFr6AEEHCb8EPVtb/p5M+NMJRKH58IOp8O3Je04=
-git.parallelcoin.io/dev/cryptonight v0.3.1 h1:KOYA3re83Sg6pzKSByrmMT1WOeQk/AR9zzw44y6xma0=
-git.parallelcoin.io/dev/cryptonight v0.3.1/go.mod h1:n1SWthC+JOElqDnUkMYQrkdxuc6Z62QXw+21fZ1JdzE=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802 h1:1BDTz0u9nC3//pOCMdNH+CiXJVYJh5UQNCOBG7jbELc=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
@@ -10,10 +8,8 @@ github.com/VividCortex/ewma v1.1.1 h1:MnEK4VOv6n0RSY4vtRe3h11qjxL3+t0B8yOL8iMXdc
 github.com/VividCortex/ewma v1.1.1/go.mod h1:2Tkkvm3sRDVXaiyucHiACn4cqf7DpdyLvmxzcbUokwA=
 github.com/aead/siphash v1.0.1 h1:FwHfE/T45KPKYuuSAKyyvE+oPWcaQ+CUmFW0bPlM+kg=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=
-github.com/aead/skein v0.0.0-20160722084837-9365ae6e95d2 h1:q5TSngwXJdajCyZPQR+eKyRRgI3/ZXC/Nq1ZxZ4Zxu8=
-github.com/aead/skein v0.0.0-20160722084837-9365ae6e95d2/go.mod h1:4JBZEId5BaLqvA2DGU53phvwkn2WpeLhNSF79/uKBPs=
-github.com/bitgoin/lyra2rev2 v0.0.0-20161212102046-bae9ad2043bb h1:2FbdV3Tfmli5z4jYgKrosbBRAA48PtYbt4igU5HaXY4=
-github.com/bitgoin/lyra2rev2 v0.0.0-20161212102046-bae9ad2043bb/go.mod h1:0vfuB+dfDvUoqr7oGBAZzGvaAyxfKFsYnRwUrNM4ft8=
+github.com/bitbandi/go-x11 v0.0.0-20171024232457-5fddbc9b2b09 h1:Gv0u6/aDygacB8WwTZCQURvifjTit87CdXAMuD+OEAY=
+github.com/bitbandi/go-x11 v0.0.0-20171024232457-5fddbc9b2b09/go.mod h1:p4/CBgPWeJOuTuVf7TfNjYuqwIgP9MGdZ5NhaW4zF/E=
 github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd h1:R/opQEbFEy9JGkIguV40SvRY1uliPX8ifOvi6ICsFCw=
 github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd/go.mod h1:HHNXQzUsZCxOoE+CPiyCTO6x34Zs86zZUiwtpXoGdtg=
 github.com/btcsuite/golangcrypto v0.0.0-20150304025918-53f62d9b43e8 h1:nOsAWScwueMVk/VLm/dvQQD7DuanyvAUb6B3P3eT274=
@@ -35,8 +31,6 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:ma
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dchest/blake256 v1.1.0 h1:4AuEhGPT/3TTKFhTfBpZ8hgZE7wJpawcYaEawwsbtqM=
-github.com/dchest/blake256 v1.1.0/go.mod h1:xXNWCE1jsAP8DAjP+rKw2MbeqLczjI3TRx2VK+9OEYY=
 github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815 h1:D22EM5TeYZJp43hGDx6dUng8mvtyYbB9BnE3+BmJR1Q=
 github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815/go.mod h1:wYFFK4LYXbX7j+76mOq7aiC/EAw2S22CrzPHqgsisPw=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
@@ -142,3 +136,5 @@ gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWD
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+lukechampine.com/blake3 v1.0.0 h1:dNj1NVD7SLgkU7dykKjmmOSOTTx7ZmxnDyUyvxnQP2Q=
+lukechampine.com/blake3 v1.0.0/go.mod h1:e0XQzEQp6LtbXBhzYxRoh6s3kcmX+fMMg8sC9VgWloQ=

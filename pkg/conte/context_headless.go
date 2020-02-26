@@ -4,7 +4,7 @@ package conte
 
 import (
 	"sync"
-	"sync/atomic"
+	"go.uber.org/atomic"
 
 	"github.com/urfave/cli"
 

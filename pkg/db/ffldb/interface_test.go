@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"sync/atomic"
+	"go.uber.org/atomic"
 	"testing"
 	"time"
 

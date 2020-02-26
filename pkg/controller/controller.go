@@ -50,6 +50,7 @@ type Controller struct {
 	ctx                    context.Context
 	cx                     *conte.Xt
 	mx                     *sync.Mutex
+	Ready                  atomic.Bool
 	height                 *atomic.Value
 	blockTemplateGenerator *mining.BlkTmplGenerator
 	coinbases              map[int32]*util.Tx

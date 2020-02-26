@@ -11,15 +11,15 @@ import (
 )
 
 const (
-	Argon2i   = "argon2i"
-	Blake2b   = "blake2b"
-	CN7v2     = "cn7v2"
-	Keccak    = "keccak"
-	Lyra2rev2 = "lyra2rev2"
-	Scrypt    = "scrypt"
-	SHA256d   = "sha256d"
-	Skein     = "skein"
-	Stribog   = "stribog"
+	Argon2i = "argon2i"
+	Blake2b = "blake2b"
+	X11     = "cn7v2"
+	Keccak  = "keccak"
+	Blake3  = "blake3"
+	Scrypt  = "scrypt"
+	SHA256d = "sha256d"
+	Skein   = "skein"
+	Stribog = "stribog"
 )
 
 // AlgoParams are the identifying block version number and their minimum target bits
@@ -101,13 +101,13 @@ var (
 	P9AlgoVers = map[int32]string{
 		5:  Blake2b,
 		6:  Argon2i,
-		7:  CN7v2,
+		7:  X11,
 		8:  Keccak,
 		9:  Scrypt,
 		10: SHA256d,
 		11: Skein,
 		12: Stribog,
-		13: Lyra2rev2,
+		13: Blake3,
 	}
 	
 	// P9Algos is the algorithm specifications after the hard fork
