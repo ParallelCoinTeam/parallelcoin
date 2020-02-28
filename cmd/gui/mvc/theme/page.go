@@ -18,13 +18,13 @@ type DuoUIpage struct {
 	BorderColor string
 	Border      float32
 	shaper      text.Shaper
-	Command     interface{}
+	Command     func()
 	header      func()
 	body        func()
 	footer      func()
 }
 
-func (t *DuoUItheme) DuoUIpage(txt string, border float32, command interface{}, header, body, footer func()) *DuoUIpage {
+func (t *DuoUItheme) DuoUIpage(txt string, border float32, command, header, body, footer func()) *DuoUIpage {
 	return &DuoUIpage{
 		Title: txt,
 		Font:  text.Font{

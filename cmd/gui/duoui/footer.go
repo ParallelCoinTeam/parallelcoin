@@ -112,7 +112,7 @@ func (ui *DuoUI) footerMenuButton(page *theme.DuoUIpage, text, icon string, foot
 				for footerButton.Clicked(ui.ly.Context) {
 					ui.rc.ShowPage = page.Title
 					setPage(ui.rc, ui.ly.Pages.Theme[page.Title])
-					//page.Command()
+					page.Command()
 				}
 				footerMenuItem.IconLayout(ui.ly.Context, footerButton)
 			} else {
@@ -120,7 +120,7 @@ func (ui *DuoUI) footerMenuButton(page *theme.DuoUIpage, text, icon string, foot
 				for footerButton.Clicked(ui.ly.Context) {
 					ui.rc.ShowPage = page.Title
 					setPage(ui.rc, ui.ly.Pages.Theme[page.Title])
-					//page.Command()
+					page.Command()
 				}
 				footerMenuItem.Layout(ui.ly.Context, footerButton)
 			}

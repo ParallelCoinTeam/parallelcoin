@@ -27,6 +27,7 @@ type RcVar struct {
 	Uptime      int
 	Peers       []*btcjson.GetPeerInfoResult `json:"peers"`
 	Blocks      []model.DuoUIblock
+	SingleBlock btcjson.GetBlockVerboseResult
 	AddressBook model.DuoUIaddressBook
 	ShowPage    string
 	CurrentPage *theme.DuoUIpage

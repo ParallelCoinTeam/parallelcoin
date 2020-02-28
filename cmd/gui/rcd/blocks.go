@@ -8,6 +8,12 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
+func (r *RcVar) GetSingleBlock(hash string) func() {
+	return func() {
+		r.SingleBlock = r.GetBlock(hash)
+	}
+}
+
 func (r *RcVar) GetBlock(hash string) btcjson.GetBlockVerboseResult {
 	verbose, verbosetx := true, true
 	bcmd := btcjson.GetBlockCmd{
