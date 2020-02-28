@@ -2,10 +2,10 @@ package duoui
 
 import (
 	"fmt"
-	
+
 	"gioui.org/layout"
 	"gioui.org/unit"
-	
+
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
@@ -88,11 +88,11 @@ func (ui *DuoUI) DuoUIfooter() func() {
 			layout.Rigid(func() {
 				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 					navButtons := []func(){
-						ui.footerMenuButton("NETWORK", "CONNECTIONS: "+fmt.Sprint(ui.rc.Status.Node.ConnectionCount), "", buttonNetwork),
-						ui.footerMenuButton("EXPLORER", "BLOCKS: "+fmt.Sprint(ui.rc.Status.Node.BlockCount), "", buttonBlocks),
-						ui.footerMenuButton("MINER", "", "helpIcon", buttonHelp),
-						ui.footerMenuButton("CONSOLE", "", "consoleIcon", buttonConsole),
-						ui.footerMenuButton("SETTINGS", "", "settingsIcon", buttonSettings),
+						ui.footerMenuButton(ui.ly.Pages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(ui.rc.Status.Node.ConnectionCount), "", buttonNetwork),
+						ui.footerMenuButton(ui.ly.Pages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(ui.rc.Status.Node.BlockCount), "", buttonBlocks),
+						ui.footerMenuButton(ui.ly.Pages.Theme["MINER"], "", "helpIcon", buttonHelp),
+						ui.footerMenuButton(ui.ly.Pages.Theme["CONSOLE"], "", "consoleIcon", buttonConsole),
+						ui.footerMenuButton(ui.ly.Pages.Theme["SETTINGS"], "", "settingsIcon", buttonSettings),
 					}
 					footerNav.Layout(ui.ly.Context, len(navButtons), func(i int) {
 						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, navButtons[i])
@@ -103,20 +103,24 @@ func (ui *DuoUI) DuoUIfooter() func() {
 	}
 }
 
-func (ui *DuoUI) footerMenuButton(title, text, icon string, footerButton *controller.Button) func() {
+func (ui *DuoUI) footerMenuButton(page *theme.DuoUIpage, text, icon string, footerButton *controller.Button) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
 			var footerMenuItem theme.DuoUIbutton
 			if icon != "" {
-				footerMenuItem = ui.ly.Theme.DuoUIbutton("", "", "", ui.ly.Theme.Color.Dark, icon, currentCurrentPageColor(ui.rc.ShowPage, title, navItemIconColor, ui.ly.Theme.Color.Primary), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
+				footerMenuItem = ui.ly.Theme.DuoUIbutton("", "", "", ui.ly.Theme.Color.Dark, icon, currentCurrentPageColor(ui.rc.ShowPage, page.Title, navItemIconColor, ui.ly.Theme.Color.Primary), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
 				for footerButton.Clicked(ui.ly.Context) {
-					ui.rc.ShowPage = title
+					ui.rc.ShowPage = page.Title
+					setPage(ui.rc, ui.ly.Pages.Theme[page.Title])
+					//page.Command()
 				}
 				footerMenuItem.IconLayout(ui.ly.Context, footerButton)
 			} else {
-				footerMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, text, currentCurrentPageColor(ui.rc.ShowPage, title, ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Primary), "", "", "", footerMenuItemTextSize, footerMenuItemIconSize, 0, footerMenuItemHeight, footerMenuItemPaddingVertical, 0)
+				footerMenuItem = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, text, currentCurrentPageColor(ui.rc.ShowPage, page.Title, ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Primary), "", "", "", footerMenuItemTextSize, footerMenuItemIconSize, 0, footerMenuItemHeight, footerMenuItemPaddingVertical, 0)
 				for footerButton.Clicked(ui.ly.Context) {
-					ui.rc.ShowPage = title
+					ui.rc.ShowPage = page.Title
+					setPage(ui.rc, ui.ly.Pages.Theme[page.Title])
+					//page.Command()
 				}
 				footerMenuItem.Layout(ui.ly.Context, footerButton)
 			}

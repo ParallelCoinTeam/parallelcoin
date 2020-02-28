@@ -50,6 +50,7 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 		Theme:      LoadPages(rc, duo.Context, duo.Theme),
 	}
 
+	setPage(rc, duo.Pages.Theme["OVERVIEW"])
 	clipboardMu.Lock()
 	if !clipboardStarted {
 		clipboardStarted = true

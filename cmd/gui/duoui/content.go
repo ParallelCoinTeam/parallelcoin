@@ -10,7 +10,7 @@ import (
 
 func (ui *DuoUI) DuoUIcontent() func() {
 	return func() {
-		ui.ly.Pages.Theme[ui.rc.ShowPage].Layout(ui.ly.Context, ui.ly.Pages.Controller[ui.rc.ShowPage])
+		ui.rc.CurrentPage.Layout(ui.ly.Context)
 	}
 }
 

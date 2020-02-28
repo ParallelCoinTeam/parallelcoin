@@ -2,7 +2,7 @@ package controller
 
 type DuoUIpage struct {
 	Name    string
-	Command func(interface{})
+	Command func()
 	Data    interface{}
 }
 

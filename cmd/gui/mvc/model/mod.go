@@ -28,8 +28,9 @@ type DuoUI struct {
 }
 
 type DuoUIpages struct {
-	Controller map[string]*controller.DuoUIpage
-	Theme      map[string]*theme.DuoUIpage
+	CurrentPage *theme.DuoUIpage
+	Controller  map[string]*controller.DuoUIpage
+	Theme       map[string]*theme.DuoUIpage
 }
 type DuoUIlog struct {
 	LogMessages []log.Entry

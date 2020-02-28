@@ -39,7 +39,7 @@ func (r *RcVar) GetDuoUInetworkHashesPerSec() {
 	return
 }
 func (r *RcVar) GetDuoUIblockHeight() {
-	r.Status.Node.BlockHeight = r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height
+	r.Status.Node.BlockHeight = int(r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
 	return
 }
 func (r *RcVar) GetDuoUIbestBlockHash() {
@@ -55,7 +55,7 @@ func (r *RcVar) GetDuoUIblockCount() {
 	if err != nil {
 		//r.PushDuoUIalert("Error", err.Error(), "error")
 	}
-	r.Status.Node.BlockCount = getBlockCount.(int64)
+	r.Status.Node.BlockCount = int(getBlockCount.(int64))
 	// log.INFO(getBlockCount)
 	return
 }

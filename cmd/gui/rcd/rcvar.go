@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/mvc/model"
@@ -28,7 +29,7 @@ type RcVar struct {
 	Blocks      []model.DuoUIblock
 	AddressBook model.DuoUIaddressBook
 	ShowPage    string
-
+	CurrentPage *theme.DuoUIpage
 	// NodeChan   chan *rpc.Server
 	// WalletChan chan *wallet.Wallet
 

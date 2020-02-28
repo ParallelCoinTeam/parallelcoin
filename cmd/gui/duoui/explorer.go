@@ -2,21 +2,20 @@ package duoui
 
 import (
 	"fmt"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/clipboard"
-
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/rcd"
 )
 
 var (
 	blocksList = &layout.List{
 		Axis: layout.Vertical,
 	}
-	blockNumber = &controller.DuoUIcounter{
+	perPage = &controller.DuoUIcounter{
 		Value:           20,
 		OperateValue:    1,
 		From:            0,
@@ -25,8 +24,8 @@ var (
 		CounterDecrease: new(controller.Button),
 		CounterReset:    new(controller.Button),
 	}
-	blockFrom = &controller.DuoUIcounter{
-		Value:           20,
+	page = &controller.DuoUIcounter{
+		Value:           0,
 		OperateValue:    1,
 		From:            0,
 		To:              50,
@@ -41,7 +40,8 @@ func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 		in := layout.UniformInset(unit.Dp(0))
 		in.Layout(gtx, func() {
 			blocksList.Layout(gtx, len(rc.Blocks), func(i int) {
-				blockRow(rc, gtx, th, i)
+				b := rc.Blocks[i]
+				blockRow(rc, gtx, th, &b)
 			})
 		})
 	}
@@ -55,17 +55,17 @@ func headerExplorer(gtx *layout.Context, th *theme.DuoUItheme) func() {
 		}.Layout(gtx,
 			//layout.Rigid(ui.txsFilter()),
 			layout.Flexed(0.5, func() {
-				th.DuoUIcounter().Layout(gtx, blockNumber)
+				th.DuoUIcounter().Layout(gtx, page)
 			}),
 			layout.Flexed(0.5, func() {
-				th.DuoUIcounter().Layout(gtx, blockFrom)
+				th.DuoUIcounter().Layout(gtx, perPage)
 			}),
 		)
 	}
 }
 
-func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, i int) {
-	b := rc.Blocks[i]
+func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *model.DuoUIblock) {
+	rc.GetBlocksExcerpts(page.Value, perPage.Value)
 	line(gtx, th.Color.Dark)()
 	layout.Flex{
 		Spacing: layout.SpaceBetween,
@@ -77,14 +77,16 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, i int) {
 			}.Layout(gtx,
 				layout.Flexed(0.6, func() {
 					var linkButton theme.DuoUIbutton
-					linkButton = th.DuoUIbutton(th.Font.Mono, fmt.Sprint(b.Height), th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
-					for b.Link.Clicked(gtx) {
-						clipboard.Set(b.BlockHash)
+					linkButton = th.DuoUIbutton(th.Font.Mono, fmt.Sprint(block.Height), th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+					for block.Link.Clicked(gtx) {
+						//clipboard.Set(b.BlockHash)
+						rc.ShowPage = "BLOCK"
+						setPage(rc, blockPage(rc, gtx, th, block.BlockHash))
 					}
-					linkButton.Layout(gtx, b.Link)
+					linkButton.Layout(gtx, block.Link)
 				}),
 				layout.Rigid(func() {
-					amount := th.H5(fmt.Sprintf("%0.8f", b.Amount))
+					amount := th.H5(fmt.Sprintf("%0.8f", block.Amount))
 					amount.Font.Typeface = th.Font.Primary
 					amount.Color = theme.HexARGB(th.Color.Dark)
 					amount.Alignment = text.End
@@ -93,19 +95,19 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, i int) {
 					amount.Layout(gtx)
 				}),
 				layout.Rigid(func() {
-					sat := th.Body1(fmt.Sprint(b.TxNum))
+					sat := th.Body1(fmt.Sprint(block.TxNum))
 					sat.Font.Typeface = th.Font.Primary
 					sat.Color = theme.HexARGB(th.Color.Dark)
 					sat.Layout(gtx)
 				}),
 				layout.Rigid(func() {
-					sat := th.Body1(fmt.Sprint(b.BlockHash))
+					sat := th.Body1(fmt.Sprint(block.BlockHash))
 					sat.Font.Typeface = th.Font.Mono
 					sat.Color = theme.HexARGB(th.Color.Dark)
 					sat.Layout(gtx)
 				}),
 				layout.Rigid(func() {
-					l := th.Body2(b.Time)
+					l := th.Body2(block.Time)
 					l.Font.Typeface = th.Font.Primary
 					l.Color = theme.HexARGB(th.Color.Dark)
 					l.Layout(gtx)
@@ -113,8 +115,12 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, i int) {
 			)
 		}),
 		layout.Rigid(func() {
-			sat := th.Body1(fmt.Sprintf("%0.8f", b.Amount))
+			sat := th.Body1(fmt.Sprintf("%0.8f", block.Amount))
 			sat.Color = theme.HexARGB(th.Color.Dark)
 			sat.Layout(gtx)
 		}))
+}
+
+func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block string) *theme.DuoUIpage {
+	return th.DuoUIpage("BLOCK", 0, rc.GetBlock(block), func() {}, func() { th.H5("block :").Layout(gtx) }, func() {})
 }

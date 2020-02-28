@@ -6,7 +6,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
 )
 
 var ()
@@ -19,13 +18,13 @@ type DuoUIpage struct {
 	BorderColor string
 	Border      float32
 	shaper      text.Shaper
-	layout      func()
+	Command     interface{}
 	header      func()
 	body        func()
 	footer      func()
 }
 
-func (t *DuoUItheme) DuoUIpage(txt string, border float32, header, body, footer func()) *DuoUIpage {
+func (t *DuoUItheme) DuoUIpage(txt string, border float32, command interface{}, header, body, footer func()) *DuoUIpage {
 	return &DuoUIpage{
 		Title: txt,
 		Font:  text.Font{
@@ -36,13 +35,14 @@ func (t *DuoUItheme) DuoUIpage(txt string, border float32, header, body, footer 
 		BorderColor: t.Color.LightGrayI,
 		Border:      border,
 		shaper:      t.Shaper,
+		Command:     command,
 		header:      header,
 		body:        body,
 		footer:      footer,
 	}
 }
 
-func (p DuoUIpage) Layout(gtx *layout.Context, page *controller.DuoUIpage) {
+func (p DuoUIpage) Layout(gtx *layout.Context) {
 	layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(gtx,
