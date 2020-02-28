@@ -7,6 +7,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"time"
 )
 
@@ -22,50 +23,50 @@ var (
 	}
 )
 
-func (ui *DuoUI) DuoUIconsole() func() {
+func console(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
-		layout.Flex{}.Layout(ui.ly.Context,
+		layout.Flex{}.Layout(gtx,
 			layout.Flexed(1, func() {
-				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 					layout.Flex{
 						Axis:    layout.Vertical,
 						Spacing: layout.SpaceAround,
-					}.Layout(ui.ly.Context,
+					}.Layout(gtx,
 						layout.Flexed(1, func() {
-							consoleOutputList.Layout(ui.ly.Context, len(ui.rc.CommandsHistory.Commands), func(i int) {
-								t := ui.rc.CommandsHistory.Commands[i]
+							consoleOutputList.Layout(gtx, len(rc.CommandsHistory.Commands), func(i int) {
+								t := rc.CommandsHistory.Commands[i]
 								layout.Flex{
 									Axis:      layout.Vertical,
 									Alignment: layout.End,
-								}.Layout(ui.ly.Context,
+								}.Layout(gtx,
 									layout.Rigid(func() {
-										sat := ui.ly.Theme.Body1("ds://" + t.ComID)
-										sat.Font.Typeface = ui.ly.Theme.Font.Mono
-										sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
-										sat.Layout(ui.ly.Context)
+										sat := th.Body1("ds://" + t.ComID)
+										sat.Font.Typeface = th.Font.Mono
+										sat.Color = theme.HexARGB(th.Color.Dark)
+										sat.Layout(gtx)
 									}),
 									layout.Rigid(func() {
-										sat := ui.ly.Theme.Body1(t.Out)
-										sat.Font.Typeface = ui.ly.Theme.Font.Mono
-										sat.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
-										sat.Layout(ui.ly.Context)
+										sat := th.Body1(t.Out)
+										sat.Font.Typeface = th.Font.Mono
+										sat.Color = theme.HexARGB(th.Color.Dark)
+										sat.Layout(gtx)
 									}),
 								)
 							})
 						}),
 						layout.Rigid(func() {
-							layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
-								e := ui.ly.Theme.DuoUIeditor("Run command")
-								e.Font.Typeface = ui.ly.Theme.Font.Mono
-								e.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
+							layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+								e := th.DuoUIeditor("Run command")
+								e.Font.Typeface = th.Font.Mono
+								e.Color = theme.HexARGB(th.Color.Dark)
 								e.Font.Style = text.Regular
-								e.Layout(ui.ly.Context, consoleInputField)
-								for _, e := range consoleInputField.Events(ui.ly.Context) {
+								e.Layout(gtx, consoleInputField)
+								for _, e := range consoleInputField.Events(gtx) {
 									if e, ok := e.(controller.SubmitEvent); ok {
-										ui.rc.CommandsHistory.Commands = append(ui.rc.CommandsHistory.Commands, model.DuoUIcommand{
+										rc.CommandsHistory.Commands = append(rc.CommandsHistory.Commands, model.DuoUIcommand{
 											ComID: e.Text,
 											Time:  time.Time{},
-											Out:   ui.rc.ConsoleCmd(e.Text),
+											Out:   rc.ConsoleCmd(e.Text),
 										})
 										consoleInputField.SetText("")
 									}

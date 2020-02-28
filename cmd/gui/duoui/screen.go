@@ -38,7 +38,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 				}),
 			)
 		}),
-		layout.Flexed(1, ui.DuoUIlogger()),
+		layout.Flexed(1, DuoUIlogger(ui.rc, ui.ly.Context, ui.ly.Theme)),
 	)
 }
 

@@ -21,12 +21,16 @@ type DuoUI struct {
 	Window     *app.Window
 	Context    *layout.Context
 	Theme      *theme.DuoUItheme
-	Pages      map[string]*theme.DuoUIpage
+	Pages      *DuoUIpages
 	Navigation map[string]*theme.DuoUIthemeNav
 	//Configuration *DuoUIconfiguration
 	IsReady bool
 }
 
+type DuoUIpages struct {
+	Controller map[string]*controller.DuoUIpage
+	Theme      map[string]*theme.DuoUIpage
+}
 type DuoUIlog struct {
 	LogMessages []log.Entry
 	LogChan     chan log.Entry

@@ -6,6 +6,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 	"image"
 )
@@ -21,22 +22,22 @@ var (
 	icon, _ = theme.NewDuoUIicon(icons.EditorMonetizationOn)
 )
 
-func (ui *DuoUI) DuoUIbalance() func() {
+func DuoUIbalance(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
-		cs := ui.ly.Context.Constraints
-		theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Light, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		cs := gtx.Constraints
+		theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Color.Light, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		in := layout.UniformInset(unit.Dp(16))
-		in.Layout(ui.ly.Context, func() {
-			//cs := ui.ly.Context.Constraints
+		in.Layout(gtx, func() {
+			//cs := gtx.Constraints
 			navButtons := []func(){
-				listItem(ui.ly.Context, ui.ly.Theme, "BALANCE :", ui.rc.Status.Wallet.Balance+" "+ui.rc.Settings.Abbrevation),
-				ui.line(ui.ly.Theme.Color.LightGrayII),
-				listItem(ui.ly.Context, ui.ly.Theme, "UNCNFIRMED :", ui.rc.Status.Wallet.Unconfirmed+" "+ui.rc.Settings.Abbrevation),
-				ui.line(ui.ly.Theme.Color.LightGrayII),
-				listItem(ui.ly.Context, ui.ly.Theme, "TRANSACTIONS :", fmt.Sprint(ui.rc.Status.Wallet.TxsNumber)),
+				listItem(gtx, th, "BALANCE :", rc.Status.Wallet.Balance+" "+rc.Settings.Abbrevation),
+				line(gtx, th.Color.LightGrayII),
+				listItem(gtx, th, "UNCNFIRMED :", rc.Status.Wallet.Unconfirmed+" "+rc.Settings.Abbrevation),
+				line(gtx, th.Color.LightGrayII),
+				listItem(gtx, th, "TRANSACTIONS :", fmt.Sprint(rc.Status.Wallet.TxsNumber)),
 			}
-			itemsList.Layout(ui.ly.Context, len(navButtons), func(i int) {
-				layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, navButtons[i])
+			itemsList.Layout(gtx, len(navButtons), func(i int) {
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, navButtons[i])
 			})
 		})
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/rcd"
 )
 
 var (
@@ -30,101 +31,101 @@ var (
 	}
 )
 
-func (ui *DuoUI) txsFilter() func() {
+func txsFilter(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
-		layout.Flex{}.Layout(ui.ly.Context,
-			layout.Rigid(ui.txsFilterItem("ALL", allTxs)),
-			layout.Rigid(ui.txsFilterItem("MINTED", mintedTxs)),
-			layout.Rigid(ui.txsFilterItem("IMATURE", immatureTxs)),
-			layout.Rigid(ui.txsFilterItem("SENT", sentTxs)),
-			layout.Rigid(ui.txsFilterItem("RECEIVED", receivedTxs)))
+		layout.Flex{}.Layout(gtx,
+			layout.Rigid(txsFilterItem(gtx, th, "ALL", allTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "MINTED", mintedTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "IMATURE", immatureTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "SENT", sentTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "RECEIVED", receivedTxs)))
 	}
 }
 
-func (ui *DuoUI) txsFilterItem(id string, c *controller.CheckBox) func() {
+func txsFilterItem(gtx *layout.Context, th *theme.DuoUItheme, id string, c *controller.CheckBox) func() {
 	return func() {
-		ui.ly.Theme.DuoUIcheckBox(id, ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light).Layout(ui.ly.Context, c)
+		th.DuoUIcheckBox(id, th.Color.Light, th.Color.Light).Layout(gtx, c)
 	}
 }
 
-func (ui *DuoUI) txsDetails(i int, t *model.DuoUItx) func() {
-	return func() {
-		layout.Flex{
-			Axis: layout.Vertical,
-		}.Layout(ui.ly.Context,
-			layout.Rigid(func() {
-				num := ui.ly.Theme.Body1(fmt.Sprint(i))
-				num.Font.Typeface = ui.ly.Theme.Font.Primary
-				num.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-				num.Layout(ui.ly.Context)
-			}),
-			layout.Rigid(func() {
-				tim := ui.ly.Theme.Body1(t.TxID)
-				tim.Font.Typeface = ui.ly.Theme.Font.Primary
-				tim.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-				tim.Layout(ui.ly.Context)
-			}),
-			layout.Rigid(func() {
-				amount := ui.ly.Theme.H5(fmt.Sprintf("%0.8f", t.Amount))
-				amount.Font.Typeface = ui.ly.Theme.Font.Primary
-				amount.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-				amount.Alignment = text.End
-				amount.Font.Variant = "Mono"
-				amount.Font.Weight = text.Bold
-				amount.Layout(ui.ly.Context)
-			}),
-			layout.Rigid(func() {
-				sat := ui.ly.Theme.Body1(t.Category)
-				sat.Font.Typeface = ui.ly.Theme.Font.Primary
-				sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-				sat.Layout(ui.ly.Context)
-			}),
-			layout.Rigid(func() {
-				l := ui.ly.Theme.Body2(t.Time)
-				l.Font.Typeface = ui.ly.Theme.Font.Primary
-				l.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-				l.Layout(ui.ly.Context)
-			}),
-		)
-	}
-}
-
-func (ui *DuoUI) headerTransactions() func() {
+func headerTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
-		}.Layout(ui.ly.Context,
-			layout.Rigid(ui.txsFilter()),
+		}.Layout(gtx,
+			layout.Rigid(txsFilter(rc, gtx, th)),
 			layout.Rigid(func() {
-				ui.ly.Theme.DuoUIcounter().Layout(ui.ly.Context, itemValue)
+				th.DuoUIcounter().Layout(gtx, itemValue)
 			}),
 		)
 	}
 }
 
-func (ui *DuoUI) txsBody() func() {
+func txsBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
-		layout.UniformInset(unit.Dp(16)).Layout(ui.ly.Context, func() {
+		layout.UniformInset(unit.Dp(16)).Layout(gtx, func() {
 			layout.Flex{
 				Axis: layout.Vertical,
-			}.Layout(ui.ly.Context,
+			}.Layout(gtx,
 				layout.Rigid(func() {
-					transList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.Transactions.Txs), func(i int) {
-						t := ui.rc.Status.Wallet.Transactions.Txs[i]
-						ui.line(ui.ly.Theme.Color.Hint)()
+					transList.Layout(gtx, len(rc.Status.Wallet.Transactions.Txs), func(i int) {
+						t := rc.Status.Wallet.Transactions.Txs[i]
+						line(gtx, th.Color.Hint)()
 						layout.Flex{
 							Spacing: layout.SpaceBetween,
-						}.Layout(ui.ly.Context,
-							layout.Rigid(ui.txsDetails(i, &t)),
+						}.Layout(gtx,
+							layout.Rigid(txsDetails(gtx, th, i, &t)),
 							layout.Rigid(func() {
-								sat := ui.ly.Theme.Body1(fmt.Sprintf("%0.8f", t.Amount))
-								sat.Font.Typeface = ui.ly.Theme.Font.Primary
-								sat.Color = theme.HexARGB(ui.ly.Theme.Color.Hint)
-								sat.Layout(ui.ly.Context)
+								sat := th.Body1(fmt.Sprintf("%0.8f", t.Amount))
+								sat.Font.Typeface = th.Font.Primary
+								sat.Color = theme.HexARGB(th.Color.Hint)
+								sat.Layout(gtx)
 							}),
 						)
 					})
 				}))
 		})
+	}
+}
+
+func txsDetails(gtx *layout.Context, th *theme.DuoUItheme, i int, t *model.DuoUItx) func() {
+	return func() {
+		layout.Flex{
+			Axis: layout.Vertical,
+		}.Layout(gtx,
+			layout.Rigid(func() {
+				num := th.Body1(fmt.Sprint(i))
+				num.Font.Typeface = th.Font.Primary
+				num.Color = theme.HexARGB(th.Color.Hint)
+				num.Layout(gtx)
+			}),
+			layout.Rigid(func() {
+				tim := th.Body1(t.TxID)
+				tim.Font.Typeface = th.Font.Primary
+				tim.Color = theme.HexARGB(th.Color.Hint)
+				tim.Layout(gtx)
+			}),
+			layout.Rigid(func() {
+				amount := th.H5(fmt.Sprintf("%0.8f", t.Amount))
+				amount.Font.Typeface = th.Font.Primary
+				amount.Color = theme.HexARGB(th.Color.Hint)
+				amount.Alignment = text.End
+				amount.Font.Variant = "Mono"
+				amount.Font.Weight = text.Bold
+				amount.Layout(gtx)
+			}),
+			layout.Rigid(func() {
+				sat := th.Body1(t.Category)
+				sat.Font.Typeface = th.Font.Primary
+				sat.Color = theme.HexARGB(th.Color.Hint)
+				sat.Layout(gtx)
+			}),
+			layout.Rigid(func() {
+				l := th.Body2(t.Time)
+				l.Font.Typeface = th.Font.Primary
+				l.Color = theme.HexARGB(th.Color.Hint)
+				l.Layout(gtx)
+			}),
+		)
 	}
 }

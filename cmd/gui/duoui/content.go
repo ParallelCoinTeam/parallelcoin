@@ -8,31 +8,30 @@ import (
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 )
 
-func  (ui *DuoUI)DuoUIcontent() func() {
+func (ui *DuoUI) DuoUIcontent() func() {
 	return func() {
-		ui.ly.Pages[ui.rc.ShowPage].Layout(ui.ly.Context)
+		ui.ly.Pages.Theme[ui.rc.ShowPage].Layout(ui.ly.Context, ui.ly.Pages.Controller[ui.rc.ShowPage])
 	}
 }
 
-
-func (ui *DuoUI) contentHeader(b func()) func() {
+func contentHeader(gtx *layout.Context, th *theme.DuoUItheme, b func()) func() {
 	return func() {
-		hmin := ui.ly.Context.Constraints.Width.Min
-		vmin := ui.ly.Context.Constraints.Height.Min
-		layout.Stack{Alignment: layout.Center}.Layout(ui.ly.Context,
+		hmin := gtx.Constraints.Width.Min
+		vmin := gtx.Constraints.Height.Min
+		layout.Stack{Alignment: layout.Center}.Layout(gtx,
 			layout.Expanded(func() {
 				clip.Rect{
 					Rect: f32.Rectangle{Max: f32.Point{
-						X: float32(ui.ly.Context.Constraints.Width.Min),
-						Y: float32(ui.ly.Context.Constraints.Height.Min),
+						X: float32(gtx.Constraints.Width.Min),
+						Y: float32(gtx.Constraints.Height.Min),
 					}},
-				}.Op(ui.ly.Context.Ops).Add(ui.ly.Context.Ops)
-				fill(ui.ly.Context, theme.HexARGB(ui.ly.Theme.Color.Primary))
+				}.Op(gtx.Ops).Add(gtx.Ops)
+				fill(gtx, theme.HexARGB(th.Color.Primary))
 			}),
 			layout.Stacked(func() {
-				ui.ly.Context.Constraints.Width.Min = hmin
-				ui.ly.Context.Constraints.Height.Min = vmin
-				layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, b)
+				gtx.Constraints.Width.Min = hmin
+				gtx.Constraints.Height.Min = vmin
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, b)
 			}),
 		)
 	}

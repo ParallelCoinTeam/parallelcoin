@@ -6,6 +6,8 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/pod"
 	"reflect"
 )
@@ -14,9 +16,9 @@ type Field struct {
 	Field *pod.Field
 }
 
-func (ui *DuoUI) InputField(f *Field) func() {
+func inputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
 	return func() {
-		layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(ui.ly.Context, func() {
+		layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(gtx, func() {
 			switch f.Field.Type {
 			case "array":
 				switch f.Field.InputType {
@@ -27,24 +29,24 @@ func (ui *DuoUI) InputField(f *Field) func() {
 			case "input":
 				switch f.Field.InputType {
 				case "text":
-					e := ui.ly.Theme.DuoUIeditor(f.Field.Label)
-					e.Font.Typeface = ui.ly.Theme.Font.Primary
+					e := th.DuoUIeditor(f.Field.Label)
+					e.Font.Typeface = th.Font.Primary
 					e.Font.Style = text.Italic
-					e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
+					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
 				case "number":
-					e := ui.ly.Theme.DuoUIeditor(f.Field.Label)
-					e.Font.Typeface = ui.ly.Theme.Font.Primary
+					e := th.DuoUIeditor(f.Field.Label)
+					e.Font.Typeface = th.Font.Primary
 					e.Font.Style = text.Italic
-					e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
+					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
 				case "password":
-					e := ui.ly.Theme.DuoUIeditor(f.Field.Label)
-					e.Font.Typeface = ui.ly.Theme.Font.Primary
+					e := th.DuoUIeditor(f.Field.Label)
+					e.Font.Typeface = th.Font.Primary
 					e.Font.Style = text.Italic
-					e.Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
+					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
 				default:
 				}
 			case "switch":
-				ui.ly.Theme.DuoUIcheckBox(f.Field.Label, ui.ly.Theme.Color.Dark, ui.ly.Theme.Color.Dark).Layout(ui.ly.Context, (ui.rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.CheckBox))
+				th.DuoUIcheckBox(f.Field.Label, th.Color.Dark, th.Color.Dark).Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.CheckBox))
 			case "radio":
 				//radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 				//layout.Flex{}.Layout(gtx,

@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"fmt"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"time"
 
 	"gioui.org/layout"
@@ -19,40 +20,40 @@ var (
 
 var StartupTime = time.Now()
 
-func (ui *DuoUI) DuoUIlogger() func() {
+func DuoUIlogger(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		// const buflen = 9
-		layout.UniformInset(unit.Dp(10)).Layout(ui.ly.Context, func() {
+		layout.UniformInset(unit.Dp(10)).Layout(gtx, func() {
 			// const n = 1e6
-			cs := ui.ly.Context.Constraints
-			theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-			logOutputList.Layout(ui.ly.Context, len(ui.rc.Log.LogMessages), func(i int) {
-				t := ui.rc.Log.LogMessages[i]
-				logText := ui.ly.Theme.Caption(fmt.Sprintf("%-12s", t.Time.Sub(StartupTime)/time.Second*time.Second) + " " + fmt.Sprint(t.Text))
-				logText.Font.Typeface = ui.ly.Theme.Font.Mono
+			cs := gtx.Constraints
+			theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			logOutputList.Layout(gtx, len(rc.Log.LogMessages), func(i int) {
+				t := rc.Log.LogMessages[i]
+				logText := th.Caption(fmt.Sprintf("%-12s", t.Time.Sub(StartupTime)/time.Second*time.Second) + " " + fmt.Sprint(t.Text))
+				logText.Font.Typeface = th.Font.Mono
 
-				logText.Color = theme.HexARGB(ui.ly.Theme.Color.Primary)
+				logText.Color = theme.HexARGB(th.Color.Primary)
 				if t.Level == "TRC" {
-					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Success)
+					logText.Color = theme.HexARGB(th.Color.Success)
 				}
 				if t.Level == "DBG" {
-					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Secondary)
+					logText.Color = theme.HexARGB(th.Color.Secondary)
 				}
 				if t.Level == "INF" {
-					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Info)
+					logText.Color = theme.HexARGB(th.Color.Info)
 				}
 				if t.Level == "WRN" {
-					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Warning)
+					logText.Color = theme.HexARGB(th.Color.Warning)
 				}
 				if t.Level == "ERROR" {
-					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Danger)
+					logText.Color = theme.HexARGB(th.Color.Danger)
 				}
 				if t.Level == "FTL" {
-					logText.Color = theme.HexARGB(ui.ly.Theme.Color.Primary)
+					logText.Color = theme.HexARGB(th.Color.Primary)
 				}
 
-				logText.Layout(ui.ly.Context)
-				op.InvalidateOp{}.Add(ui.ly.Context.Ops)
+				logText.Layout(gtx)
+				op.InvalidateOp{}.Add(gtx.Ops)
 
 			})
 		})

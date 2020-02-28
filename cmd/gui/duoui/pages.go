@@ -1,23 +1,25 @@
 package duoui
 
 import (
+	"gioui.org/layout"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/rcd"
 )
 
-func (ui *DuoUI) LoadPages() (p map[string]*theme.DuoUIpage) {
+func LoadPages(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) (p map[string]*theme.DuoUIpage) {
 	p = make(map[string]*theme.DuoUIpage)
 	//p := *new(*parallel.DuoUIpage)
 
-	p["OVERVIEW"] = ui.ly.Theme.DuoUIpage("OVERVIEW", func() {}, ui.overviewBody(), func() {})
-	p["SEND"] = ui.ly.Theme.DuoUIpage("SEND", func() {}, ui.DuoUIsend(), func() {})
-	p["RECEIVE"] = ui.ly.Theme.DuoUIpage("RECEIVE", func() {}, func() { ui.ly.Theme.H5("receive :").Layout(ui.ly.Context) }, func() {})
-	p["ADDRESSBOOK"] = ui.ly.Theme.DuoUIpage("ADDRESSBOOK", func() {}, ui.DuoUIaddressBook(), func() {})
-	p["SETTINGS"] = ui.ly.Theme.DuoUIpage("SETTINGS", ui.contentHeader(ui.headerSettings()), ui.settingsBody(), func() {})
-	p["NETWORK"] = ui.ly.Theme.DuoUIpage("NETWORK", func() {}, func() { ui.ly.Theme.H5("network :").Layout(ui.ly.Context) }, func() {})
-	p["HISTORY"] = ui.ly.Theme.DuoUIpage("HISTORY", ui.contentHeader(ui.headerTransactions()), ui.txsBody(), func() {})
-	p["EXPLORER"] = ui.ly.Theme.DuoUIpage("EXPLORER", ui.contentHeader(ui.headerExplorer()), ui.bodyExplorer(), func() {})
-	p["MINER"] = ui.ly.Theme.DuoUIpage("MINER", func() {}, ui.DuoUIminer(), func() {})
-	p["CONSOLE"] = ui.ly.Theme.DuoUIpage("CONSOLE", func() {}, ui.DuoUIconsole(), func() {})
-	p["LOG"] = ui.ly.Theme.DuoUIpage("LOG", func() {}, ui.DuoUIlogger(), func() {})
+	p["OVERVIEW"] = th.DuoUIpage("OVERVIEW", 0, func() {}, overviewBody(rc, gtx, th), func() {})
+	p["SEND"] = th.DuoUIpage("SEND", 10, func() {}, send(rc, gtx, th), func() {})
+	p["RECEIVE"] = th.DuoUIpage("RECEIVE", 10, func() {}, func() { th.H5("receive :").Layout(gtx) }, func() {})
+	p["ADDRESSBOOK"] = th.DuoUIpage("ADDRESSBOOK", 10, func() {}, addressBook(rc, gtx, th), func() {})
+	p["SETTINGS"] = th.DuoUIpage("SETTINGS", 0, contentHeader(gtx, th, headerSettings(rc, gtx, th)), settingsBody(rc, gtx, th), func() {})
+	p["NETWORK"] = th.DuoUIpage("NETWORK", 0, func() {}, func() { th.H5("network :").Layout(gtx) }, func() {})
+	p["HISTORY"] = th.DuoUIpage("HISTORY", 0, contentHeader(gtx, th, headerTransactions(rc, gtx, th)), txsBody(rc, gtx, th), func() {})
+	p["EXPLORER"] = th.DuoUIpage("EXPLORER", 0, contentHeader(gtx, th, headerExplorer(gtx, th)), bodyExplorer(rc, gtx, th), func() {})
+	p["MINER"] = th.DuoUIpage("MINER", 0, func() {}, DuoUIminer(rc, gtx, th), func() {})
+	p["CONSOLE"] = th.DuoUIpage("CONSOLE", 0, func() {}, console(rc, gtx, th), func() {})
+	p["LOG"] = th.DuoUIpage("LOG", 0, func() {}, DuoUIlogger(rc, gtx, th), func() {})
 	return
 }
