@@ -1,6 +1,7 @@
 package duoui
 
 import (
+	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/clipboard"
@@ -21,7 +22,7 @@ type DuoUI struct {
 	rc *rcd.RcVar
 }
 
-func DuOuI() (duo *model.DuoUI, err error) {
+func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 
 	duo = &model.DuoUI{
 		Window: app.NewWindow(
@@ -45,7 +46,12 @@ func DuOuI() (duo *model.DuoUI, err error) {
 
 	duo.Theme = theme.NewDuoUItheme()
 	//duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
+	duo.Pages = &model.DuoUIpages{
+		Controller: nil,
+		Theme:      LoadPages(rc, duo.Context, duo.Theme),
+	}
 
+	component.SetPage(rc, duo.Pages.Theme["OVERVIEW"])
 	clipboardMu.Lock()
 	if !clipboardStarted {
 		clipboardStarted = true

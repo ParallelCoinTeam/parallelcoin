@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sync/atomic"
+	"go.uber.org/atomic"
 	"testing"
 	"time"
 

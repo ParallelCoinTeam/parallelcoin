@@ -40,7 +40,8 @@ type (
 		Sender          *net.UDPConn
 		Receiver        *net.UDPConn
 		MaxDatagramSize int
-		ciph            cipher.AEAD
+		sendCiph        cipher.AEAD
+		receiveCiph     cipher.AEAD
 		lastSent        *time.Time
 		firstSender     *string
 	}
@@ -62,7 +63,7 @@ func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, err erro
 		return
 	}
 	var msg []byte
-	if msg, err = EncryptMessage(c.Creator, c.ciph, magic, nonce, data); log.Check(err) {
+	if msg, err = EncryptMessage(c.Creator, c.sendCiph, magic, nonce, data); log.Check(err) {
 	}
 	n, err = c.Sender.Write(msg)
 	// log.DEBUG(msg)
@@ -71,7 +72,7 @@ func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, err erro
 
 // SendMany sends a BufIter of shards as produced by GetShards
 func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
-	if nonce, err := GetNonce(c.ciph); log.Check(err) {
+	if nonce, err := GetNonce(c.sendCiph); log.Check(err) {
 	} else {
 		for i := 0; i < len(b); i++ {
 			// log.DEBUG(i)
@@ -105,23 +106,25 @@ func GetShards(data []byte) (shards [][]byte) {
 // NewUnicastChannel sets up a listener and sender for a specified destination
 func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver string, maxDatagramSize int,
 	handlers Handlers) (channel *Channel, err error) {
-	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize, buffers: make(map[string]*MsgBuffer),
-		context: ctx}
+	channel = &Channel{
+		Creator:         creator,
+		MaxDatagramSize: maxDatagramSize,
+		buffers:         make(map[string]*MsgBuffer),
+		context:         ctx,
+	}
 	var magics []string
+
 	for i := range handlers {
 		magics = append(magics, i)
 	}
 	// log.DEBUG("magics", magics, PrevCallers())
 	if key != "" {
-		if channel.ciph, err = gcm.GetCipher(key); log.Check(err) {
+		if channel.sendCiph, err = gcm.GetCipher(key); log.Check(err) {
+		}
+		if channel.receiveCiph, err = gcm.GetCipher(key); log.Check(err) {
 		}
 	}
-	ready := make(chan struct{})
-	go func() {
-		channel.Receiver, err = Listen(receiver, channel, maxDatagramSize, handlers)
-		ready <- struct{}{}
-	}()
-	<-ready
+	channel.Receiver, err = Listen(receiver, channel, maxDatagramSize, handlers)
 	log.WARN(sender, receiver)
 	channel.Sender, err = NewSender(sender, maxDatagramSize)
 	if err != nil {
@@ -172,7 +175,9 @@ func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, 
 	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize, buffers: make(map[string]*MsgBuffer),
 		context: ctx}
 	if key != "" {
-		if channel.ciph, err = gcm.GetCipher(key); log.Check(err) {
+		if channel.sendCiph, err = gcm.GetCipher(key); log.Check(err) {
+		}
+		if channel.receiveCiph, err = gcm.GetCipher(key); log.Check(err) {
 		}
 	}
 	if channel.Receiver, err = ListenBroadcast(port, channel, maxDatagramSize, handlers); log.Check(err) {
@@ -258,12 +263,12 @@ out:
 					*channel.lastSent = time.Now()
 				}
 				msg := buffer[:numBytes]
-				nL := channel.ciph.NonceSize()
+				nL := channel.receiveCiph.NonceSize()
 				nonceBytes := msg[4 : 4+nL]
 				nonce := string(nonceBytes)
 				// decipher
 				var shard []byte
-				if shard, err = channel.ciph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); err != nil {
+				if shard, err = channel.receiveCiph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); err != nil {
 					continue
 				}
 				if bn, ok := channel.buffers[nonce]; ok {
@@ -285,6 +290,7 @@ out:
 							// 	if msg, err = DecryptMessage(channel.Creator, channel.ciph, cipherText); log.Check(err) {
 							// 		log.WARN(PrevCallers())
 							// 		continue
+
 							// 	}
 							if err = handler(channel.context, src, address, cipherText); log.Check(err) {
 								// err = handler(channel.context, src, channel.Sender.RemoteAddr().String(), cipherText)

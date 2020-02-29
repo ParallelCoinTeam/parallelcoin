@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 	
+	"go.uber.org/atomic"
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -32,13 +34,14 @@ type Worker struct {
 	multicastConn net.Conn
 	unicastConn   net.Conn
 	dispatchConn  *transport.Channel
+	dispatchReady atomic.Bool
 	ciph          cipher.AEAD
 	Quit          chan struct{}
 	run           sem.T
 	block         *util.Block
 	msgBlock      *wire.MsgBlock
-	bitses        map[int32]uint32
-	hashes        map[int32]*chainhash.Hash
+	bitses        atomic.Value
+	hashes        atomic.Value
 	roller        *Counter
 	startNonce    uint32
 	startChan     chan struct{}
@@ -102,6 +105,7 @@ func NewWithConnAndSemaphore(
 		startChan: make(chan struct{}),
 		stopChan:  make(chan struct{}),
 	}
+	w.dispatchReady.Store(false)
 	// with this we can report cumulative hash counts as well as using it to
 	// distribute algorithms evenly
 	w.startNonce = uint32(w.roller.C)
@@ -130,26 +134,28 @@ func NewWithConnAndSemaphore(
 					continue
 				case <-w.stopChan:
 					w.block = nil
-					w.bitses = nil
-					w.hashes = nil
+					w.bitses.Store((map[int32]uint32)(nil))
+					w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 					break running
 				case <-w.Quit:
 					log.DEBUG("worker stopping on pausing message")
 					break pausing
 				default:
-					if w.block == nil || w.bitses == nil || w.hashes == nil {
+					if w.block == nil || w.bitses.Load() == nil || w.hashes.Load() == nil ||
+						!w.dispatchReady.Load() {
 						// log.INFO("stop was called before we started working")
 					} else {
 						// work
 						nH := w.block.Height()
 						w.msgBlock.Header.Version = w.roller.GetAlgoVer()
-						w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
-						w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
+						w.msgBlock.Header.MerkleRoot = *w.hashes.
+							Load().(map[int32]*chainhash.Hash)[w.msgBlock.Header.Version]
+						w.msgBlock.Header.Bits = w.bitses.Load().(map[int32]uint32)[w.msgBlock.Header.Version]
 						select {
 						case <-w.stopChan:
 							w.block = nil
-							w.bitses = nil
-							w.hashes = nil
+							w.bitses.Store((map[int32]uint32)(nil))
+							w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 							break running
 						default:
 						}
@@ -183,7 +189,7 @@ func NewWithConnAndSemaphore(
 						}
 						nextAlgo := w.roller.GetAlgoVer()
 						w.msgBlock.Header.Version = nextAlgo
-						w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
+						w.msgBlock.Header.Bits = w.bitses.Load().(map[int32]uint32)[w.msgBlock.Header.Version]
 						w.msgBlock.Header.Nonce++
 						// if we have completed a cycle report the hashrate on starting new algo
 						if w.roller.C%w.roller.RoundsPerAlgo == 0 {
@@ -226,6 +232,10 @@ func New(s sem.T) (w *Worker, conn net.Conn) {
 // this makes the miner start mining from pause or pause,
 // prepare the work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
+	if !w.dispatchReady.Load() {
+		*reply = true
+		return
+	}
 	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
 	log.DEBUG("loading dispatch connection from job message")
@@ -263,23 +273,24 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	*reply = true
 	// halting current work
 	w.stopChan <- struct{}{}
-	w.bitses = job.GetBitses()
-	w.hashes = job.GetHashes()
+	w.bitses.Store(job.GetBitses())
+	w.hashes.Store(job.GetHashes())
 	newHeight := job.GetNewHeight()
 	w.roller.Algos = []int32{}
-	for i := range w.bitses {
+	for i := range w.bitses.Load().(map[int32]uint32) {
 		// we don't need to know net params if version numbers come with jobs
 		w.roller.Algos = append(w.roller.Algos, i)
 	}
 	w.msgBlock.Header.PrevBlock = *job.GetPrevBlockHash()
 	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
 	w.msgBlock.Header.Version = w.roller.GetAlgoVer()
-	w.msgBlock.Header.Bits = w.bitses[w.msgBlock.Header.Version]
+	w.msgBlock.Header.Bits = w.bitses.Load().(map[int32]uint32)[w.msgBlock.Header.Version]
 	rand.Seed(time.Now().UnixNano())
 	w.msgBlock.Header.Nonce = rand.Uint32()
 	// log.TRACE(w.hashes)
-	if w.hashes != nil {
-		w.msgBlock.Header.MerkleRoot = *w.hashes[w.msgBlock.Header.Version]
+	if w.hashes.Load() != nil {
+		w.msgBlock.Header.MerkleRoot = *w.hashes.
+			Load().(map[int32]*chainhash.Hash)[w.msgBlock.Header.Version]
 	} else {
 		return errors.New("failed to decode merkle roots")
 	}
@@ -340,6 +351,7 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 		log.ERROR(err)
 	}
 	w.dispatchConn = conn
+	w.dispatchReady.Store(true)
 	*reply = true
 	return
 }

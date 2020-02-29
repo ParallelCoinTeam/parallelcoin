@@ -16,7 +16,6 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 		ly: d,
 		rc: r,
 	}
-	ui.ly.Pages = ui.LoadPages()
 	for {
 		select {
 		case <-ui.rc.Ready:

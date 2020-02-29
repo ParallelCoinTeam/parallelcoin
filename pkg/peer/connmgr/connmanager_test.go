@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"sync/atomic"
+	"go.uber.org/atomic"
 	"testing"
 	"time"
 )

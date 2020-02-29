@@ -5,15 +5,15 @@ import (
 	
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/bitbandi/go-x11"
 	
-	"git.parallelcoin.io/dev/cryptonight"
-	"github.com/bitgoin/lyra2rev2"
 	skein "github.com/enceve/crypto/skein/skein256"
 	gost "github.com/programmer10110/gostreebog"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/scrypt"
 	"golang.org/x/crypto/sha3"
+	"lukechampine.com/blake3"
 	
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
@@ -27,7 +27,7 @@ import (
 // ~119000 decimal digits, which is then finally hashed down to 32 bytes
 var HashReps = 2
 
-// Argon2i takes bytes, generates a Lyra2REv2 hash as salt, generates an argon2i key
+// Argon2i takes bytes, generates a Blake3 hash as salt, generates an argon2i key
 func Argon2i(bytes []byte) []byte {
 	return argon2.IDKey(reverse(bytes), bytes, 1, 4*1024, 1, 32)
 }
@@ -38,9 +38,13 @@ func Blake2b(bytes []byte) []byte {
 	return b[:]
 }
 
-// Cryptonight7v2 takes bytes and returns a cryptonight 7 v2 256 bit hash
-func Cryptonight7v2(bytes []byte) []byte {
-	return cryptonight.Sum(bytes, 2)
+// X11 takes bytes and returns a cryptonight 7 v2 256 bit hash
+func X11(bytes []byte) (out []byte) {
+	hf := x11.New()
+	out = make([]byte, len(bytes))
+	hf.Hash(bytes, out)
+	return
+	// return cryptonight.Sum(bytes, 2)
 }
 
 func reverse(b []byte) []byte {
@@ -131,11 +135,11 @@ func DivHash(hf func([]byte) []byte, blockbytes []byte, howmany int) []byte {
 	ddd := make([]byte, dlen)
 	copy(ddd, reverse(divdb))
 	// this allows us run this operation an arbitrary number of times
-	//log.Printf("%d bytes %x\n", len(ddd), ddd)
+	// log.Printf("%d bytes %x\n", len(ddd), ddd)
 	if howmany > 0 {
 		return DivHash(hf, append(ddd, reverse(ddd)...), howmany-1)
 	}
-	// return Cryptonight7v2(hf(ddd))
+	// return X11(hf(ddd))
 	return hf(ddd)
 }
 
@@ -146,7 +150,7 @@ func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
 		switch {
 		case height == 1:
 			hR = 0
-			//case height < 10:
+			// case height < 10:
 			//	hR = 6
 		}
 	}
@@ -155,10 +159,10 @@ func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
 		_ = out.SetBytes(DivHash(Blake2b, bytes, hR))
 	case fork.Argon2i:
 		_ = out.SetBytes(DivHash(Argon2i, bytes, hR))
-	case fork.CN7v2:
-		_ = out.SetBytes(DivHash(Cryptonight7v2, bytes, hR))
-	case fork.Lyra2rev2:
-		_ = out.SetBytes(DivHash(Lyra2REv2, bytes, hR))
+	case fork.X11:
+		_ = out.SetBytes(DivHash(X11, bytes, hR))
+	case fork.Blake3:
+		_ = out.SetBytes(DivHash(Blake3, bytes, hR))
 	case fork.Scrypt:
 		if fork.GetCurrent(height) > 0 {
 			_ = out.SetBytes(DivHash(Scrypt, bytes, hR))
@@ -188,10 +192,10 @@ func Keccak(bytes []byte) []byte {
 	return sum[:]
 }
 
-// Lyra2REv2 takes bytes and returns a lyra2rev2 256 bit hash
-func Lyra2REv2(bytes []byte) []byte {
-	bytes, _ = lyra2rev2.Sum(bytes)
-	return bytes
+// Blake3 takes bytes and returns a lyra2rev2 256 bit hash
+func Blake3(bytes []byte) []byte {
+	b := blake3.Sum256(bytes)
+	return b[:]
 }
 
 // Scrypt takes bytes and returns a scrypt 256 bit hash

@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/mvc/model"
@@ -26,9 +27,10 @@ type RcVar struct {
 	Uptime      int
 	Peers       []*btcjson.GetPeerInfoResult `json:"peers"`
 	Blocks      []model.DuoUIblock
+	SingleBlock btcjson.GetBlockVerboseResult
 	AddressBook model.DuoUIaddressBook
 	ShowPage    string
-
+	CurrentPage *theme.DuoUIpage
 	// NodeChan   chan *rpc.Server
 	// WalletChan chan *wallet.Wallet
 
@@ -87,6 +89,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 				Txs:           &model.DuoUItransactionsExcerpts{},
 				LastTxs:       &model.DuoUItransactions{},
 			},
+			Kopach: &model.KopachStatus{},
 		},
 		Dialog:   &model.DuoUIdialog{},
 		Settings: settings(cx),

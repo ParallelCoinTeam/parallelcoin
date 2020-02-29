@@ -31,13 +31,11 @@ func (p Command) Layout(gtx *layout.Context, f func()) {
 			in.Layout(gtx, func() {
 				cs := gtx.Constraints
 				DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, "ffacacac", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-				// Overview <<<
 				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 					cs := gtx.Constraints
 					DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, "ffcfcfcf", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 					f()
 				})
-				// Overview >>>
 			})
 		}),
 	)

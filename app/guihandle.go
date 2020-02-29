@@ -26,7 +26,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			rc.Boot.IsFirstRun = true
 		}
-		duo, err := duoui.DuOuI()
+		duo, err := duoui.DuOuI(rc)
 
 		// sys.Components["logger"].Controller()
 		rc.DuoUIloggerController()
@@ -69,4 +69,3 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		return
 	}
 }
-

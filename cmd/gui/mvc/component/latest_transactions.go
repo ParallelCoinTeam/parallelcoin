@@ -1,4 +1,4 @@
-package duoui
+package component
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/rcd"
 )
 
 var (
@@ -14,55 +15,55 @@ var (
 	}
 )
 
-func (ui *DuoUI) DuoUIlatestTransactions() func() {
+func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
-		cs := ui.ly.Context.Constraints
-		theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, "ff424242", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		cs := gtx.Constraints
+		theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, "ff424242", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		layout.Flex{
 			Axis: layout.Vertical,
-		}.Layout(ui.ly.Context,
+		}.Layout(gtx,
 			layout.Rigid(func() {
-				cs := ui.ly.Context.Constraints
-				theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, 48, ui.ly.Theme.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-				layout.UniformInset(unit.Dp(16)).Layout(ui.ly.Context, func() {
-					latestx := ui.ly.Theme.H5("LATEST TRANSACTIONS")
-					latestx.Color = theme.HexARGB(ui.ly.Theme.Color.Light)
+				cs := gtx.Constraints
+				theme.DuoUIdrawRectangle(gtx, cs.Width.Max, 48, th.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				layout.UniformInset(unit.Dp(16)).Layout(gtx, func() {
+					latestx := th.H5("LATEST TRANSACTIONS")
+					latestx.Color = theme.HexARGB(th.Color.Light)
 					latestx.Alignment = text.Start
-					latestx.Layout(ui.ly.Context)
+					latestx.Layout(gtx)
 				})
 			}),
 			layout.Flexed(1, func() {
-				layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
-					layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func() {
-							cs := ui.ly.Context.Constraints
-							latestTransList.Layout(ui.ly.Context, len(ui.rc.Status.Wallet.LastTxs.Txs), func(i int) {
-								t := ui.rc.Status.Wallet.LastTxs.Txs[i]
-								theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+							cs := gtx.Constraints
+							latestTransList.Layout(gtx, len(rc.Status.Wallet.LastTxs.Txs), func(i int) {
+								t := rc.Status.Wallet.LastTxs.Txs[i]
+								theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								layout.Inset{
 									Top:    unit.Dp(8),
 									Right:  unit.Dp(16),
 									Bottom: unit.Dp(8),
 									Left:   unit.Dp(16),
-								}.Layout(ui.ly.Context, func() {
-									layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
-										layout.Rigid(lTtxid(ui.ly.Context, ui.ly.Theme, t.TxID)),
+								}.Layout(gtx, func() {
+									layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+										layout.Rigid(lTtxid(gtx, th, t.TxID)),
 										layout.Rigid(func() {
 											layout.Flex{
 												Spacing: layout.SpaceBetween,
-											}.Layout(ui.ly.Context,
+											}.Layout(gtx,
 												layout.Rigid(func() {
 													layout.Flex{
 														Axis: layout.Vertical,
-													}.Layout(ui.ly.Context,
-														layout.Rigid(lTcategory(ui.ly.Context, ui.ly.Theme, t.Category)),
-														layout.Rigid(lTtime(ui.ly.Context, ui.ly.Theme, t.Time)),
+													}.Layout(gtx,
+														layout.Rigid(lTcategory(gtx, th, t.Category)),
+														layout.Rigid(lTtime(gtx, th, t.Time)),
 													)
 												}),
-												layout.Rigid(lTamount(ui.ly.Context, ui.ly.Theme, t.Amount)),
+												layout.Rigid(lTamount(gtx, th, t.Amount)),
 											)
 										}),
-										layout.Rigid(ui.line(ui.ly.Theme.Color.Hint)),
+										layout.Rigid(HorizontalLine(gtx, 1, th.Color.Hint)),
 									)
 								})
 							})

@@ -17,16 +17,27 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 	//	params = nil
 	//}
 	c, err := btcjson.NewCmd(split[0], strings.Join(params, " "))
-	out, err := rpc.RPCHandlers[split[0]](r.cx.RPCServer, c, make(chan struct{}))
 	if err != nil {
 		o = fmt.Sprint(err)
-	} else {
-		if split[0] == "help" {
-			o = out.(string)
+	}
+	_, ok := rpc.RPCHandlers[split[0]]
+	if ok {
+		out, err := rpc.RPCHandlers[split[0]](
+			r.cx.RPCServer,
+			c,
+			make(chan struct{}))
+		if err != nil {
+			o = fmt.Sprint(err)
 		} else {
-			j, _ := json.MarshalIndent(out, "", "  ")
-			o = fmt.Sprint(string(j))
+			if split[0] == "help" {
+				o = out.(string)
+			} else {
+				j, _ := json.MarshalIndent(out, "", "  ")
+				o = fmt.Sprint(string(j))
+			}
 		}
+	} else {
+		o = "Command does not exist"
 	}
 	return
 }

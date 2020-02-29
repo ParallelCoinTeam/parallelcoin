@@ -90,6 +90,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 				log.ERROR(err)
 			}
 		}
+		w.active.Store(true)
 		// controller watcher thread
 		go func() {
 			log.DEBUG("starting controller watcher")
@@ -138,9 +139,10 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 var handlers = transport.Handlers{
 	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
 		b []byte) (err error) {
+		log.DEBUG("received job")
 		w := ctx.(*Worker)
 		j := job.LoadContainer(b)
-		h := j.GetHashes()
+		// h := j.GetHashes()
 		w.mx.Lock()
 		ips := j.GetIPs()
 		cP := j.GetControllerListenerPort()
@@ -156,16 +158,16 @@ var handlers = transport.Handlers{
 			w.lastSent = time.Now()
 		}
 		w.mx.Unlock()
-		if len(h) > 0 {
-			// log.DEBUG(h)
-			hS := h[5].String()
-			if w.LastHash == hS {
-				// log.TRACE("not responding to same job")
-				return
-			} else {
-				w.LastHash = hS
-			}
-		}
+		// if len(h) > 0 {
+		// 	// log.DEBUG(h)
+		// 	hS := h[5].String()
+		// 	if w.LastHash == hS {
+		// 		log.TRACE("not responding to same job")
+		// 		return
+		// 	} else {
+		// 		w.LastHash = hS
+		// 	}
+		// }
 		log.TRACE("received job")
 		// if newHash == w.LastHash {
 		// 	return

@@ -23,8 +23,9 @@ type DuoUIcounter struct {
 
 func (t *DuoUItheme) DuoUIcounter() DuoUIcounter {
 	return DuoUIcounter{
-		increase: t.DuoUIbutton(t.Font.Secondary, "INCREASE", t.Color.Primary, t.Color.Light, "", "", 12, 0, 64, 44, 0, 0),
-		decrease: t.DuoUIbutton(t.Font.Secondary, "DECREASE", t.Color.Primary, t.Color.Light, "", "", 12, 0, 64, 44, 0, 0),
+		//ToDo Replace theme's buttons with counter exclusive buttons, set icons for increase/decrease
+		increase: t.DuoUIbutton(t.Font.Mono, "+", t.Color.Primary, t.Color.Light, "", "", 24, 0, 64, 22, 0, 0),
+		decrease: t.DuoUIbutton(t.Font.Mono, "-", t.Color.Primary, t.Color.Light, "", "", 24, 0, 64, 22, 0, 0),
 		reset:    t.DuoUIbutton(t.Font.Secondary, "RESET", t.Color.Primary, t.Color.Light, "", "", 12, 0, 64, 44, 0, 0),
 		Font: text.Font{
 			Typeface: t.Font.Primary,
@@ -36,7 +37,6 @@ func (t *DuoUItheme) DuoUIcounter() DuoUIcounter {
 }
 
 func (c DuoUIcounter) Layout(gtx *layout.Context, cc *controller.DuoUIcounter) {
-
 	layout.Flex{}.Layout(gtx,
 		layout.Flexed(0.2, func() {
 			paint.ColorOp{Color: c.TxColor}.Add(gtx.Ops)
@@ -45,10 +45,10 @@ func (c DuoUIcounter) Layout(gtx *layout.Context, cc *controller.DuoUIcounter) {
 			}.Layout(gtx, c.shaper, c.Font, c.TextSize, fmt.Sprint(cc.Value))
 		}),
 		layout.Flexed(0.3, func() {
-			for cc.CounterIncrease.Clicked(gtx) {
-				cc.Increase()
+			for cc.CounterDecrease.Clicked(gtx) {
+				cc.Decrease()
 			}
-			c.increase.Layout(gtx, cc.CounterIncrease)
+			c.decrease.Layout(gtx, cc.CounterDecrease)
 		}),
 		layout.Flexed(0.2, func() {
 			for cc.CounterReset.Clicked(gtx) {
@@ -57,10 +57,10 @@ func (c DuoUIcounter) Layout(gtx *layout.Context, cc *controller.DuoUIcounter) {
 			c.reset.Layout(gtx, cc.CounterReset)
 		}),
 		layout.Flexed(0.3, func() {
-			for cc.CounterDecrease.Clicked(gtx) {
-				cc.Decrease()
+			for cc.CounterIncrease.Clicked(gtx) {
+				cc.Increase()
 			}
-			c.decrease.Layout(gtx, cc.CounterDecrease)
+			c.increase.Layout(gtx, cc.CounterIncrease)
 		}),
 	)
 }

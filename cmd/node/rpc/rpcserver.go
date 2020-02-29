@@ -3202,7 +3202,7 @@ func HandleGetMiningInfo(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 					dBlake2b = GetDifficultyRatio(lastbitsBlake2b,
 						s.Cfg.ChainParams, v.Header().Version)
 				}
-			case fork.CN7v2:
+			case fork.X11:
 				if lastbitsCN7v2 == 0 {
 					foundcount++
 					lastbitsCN7v2 = v.Header().Bits
@@ -3216,7 +3216,7 @@ func HandleGetMiningInfo(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 					dKeccak = GetDifficultyRatio(lastbitsKeccak,
 						s.Cfg.ChainParams, v.Header().Version)
 				}
-			case fork.Lyra2rev2:
+			case fork.Blake3:
 				if lastbitsLyra2rev2 == 0 {
 					foundcount++
 					lastbitsLyra2rev2 = v.Header().Bits
@@ -3261,11 +3261,11 @@ func HandleGetMiningInfo(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 			Difficulty = dArgon2i
 		case fork.Blake2b:
 			Difficulty = dBlake2b
-		case fork.CN7v2:
+		case fork.X11:
 			Difficulty = dCN7v2
 		case fork.Keccak:
 			Difficulty = dKeccak
-		case fork.Lyra2rev2:
+		case fork.Blake3:
 			Difficulty = dLyra2rev2
 		case fork.Scrypt:
 			Difficulty = dScrypt

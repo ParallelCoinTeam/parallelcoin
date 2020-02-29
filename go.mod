@@ -4,12 +4,10 @@ go 1.14
 
 require (
 	gioui.org v0.0.0-20200220081202-150b34aedef6
-	git.parallelcoin.io/dev/cryptonight v0.3.1
 	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
-	github.com/aead/skein v0.0.0-20160722084837-9365ae6e95d2 // indirect
-	github.com/bitgoin/lyra2rev2 v0.0.0-20161212102046-bae9ad2043bb
+	github.com/bitbandi/go-x11 v0.0.0-20171024232457-5fddbc9b2b09
 	github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd
 	github.com/btcsuite/golangcrypto v0.0.0-20150304025918-53f62d9b43e8
 	github.com/btcsuite/goleveldb v1.0.0
@@ -18,7 +16,6 @@ require (
 	github.com/conformal/fastsha256 v0.0.0-20160815193821-637e65642941
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
-	github.com/dchest/blake256 v1.1.0 // indirect
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
@@ -44,4 +41,5 @@ require (
 	golang.org/x/text v0.3.2
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
+	lukechampine.com/blake3 v1.0.0
 )
