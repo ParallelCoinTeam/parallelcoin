@@ -76,86 +76,53 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *m
 		Spacing: layout.SpaceBetween,
 	}.Layout(gtx,
 		layout.Rigid(func() {
-			layout.Flex{
-				Axis:    layout.Horizontal,
-				Spacing: layout.SpaceAround,
-			}.Layout(gtx,
-				layout.Flexed(0.6, func() {
-					var linkButton theme.DuoUIbutton
-					linkButton = th.DuoUIbutton(th.Font.Mono, fmt.Sprint(block.Height), th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
-					for block.Link.Clicked(gtx) {
-						//clipboard.Set(b.BlockHash)
-						rc.ShowPage = "BLOCK" + block.BlockHash
-						rc.GetSingleBlock(block.BlockHash)()
-						setPage(rc, blockPage(rc, gtx, th, block.BlockHash))
-					}
-					linkButton.Layout(gtx, block.Link)
-				}),
-				layout.Rigid(func() {
-					amount := th.H5(fmt.Sprintf("%0.8f", block.Amount))
-					amount.Font.Typeface = th.Font.Primary
-					amount.Color = theme.HexARGB(th.Color.Dark)
-					amount.Alignment = text.End
-					amount.Font.Variant = "Mono"
-					amount.Font.Weight = text.Bold
-					amount.Layout(gtx)
-				}),
-				layout.Rigid(func() {
-					sat := th.Body1(fmt.Sprint(block.TxNum))
-					sat.Font.Typeface = th.Font.Primary
-					sat.Color = theme.HexARGB(th.Color.Dark)
-					sat.Layout(gtx)
-				}),
-				layout.Rigid(func() {
-					sat := th.Body1(fmt.Sprint(block.BlockHash))
-					sat.Font.Typeface = th.Font.Mono
-					sat.Color = theme.HexARGB(th.Color.Dark)
-					sat.Layout(gtx)
-				}),
-				layout.Rigid(func() {
-					l := th.Body2(block.Time)
-					l.Font.Typeface = th.Font.Primary
-					l.Color = theme.HexARGB(th.Color.Dark)
-					l.Layout(gtx)
-				}),
-			)
+			var linkButton theme.DuoUIbutton
+			linkButton = th.DuoUIbutton(th.Font.Mono, fmt.Sprint(block.Height), th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+			for block.Link.Clicked(gtx) {
+				//clipboard.Set(b.BlockHash)
+				rc.ShowPage = "BLOCK" + block.BlockHash
+				rc.GetSingleBlock(block.BlockHash)()
+				setPage(rc, blockPage(rc, gtx, th, block.BlockHash))
+			}
+			linkButton.Layout(gtx, block.Link)
 		}),
 		layout.Rigid(func() {
-			sat := th.Body1(fmt.Sprintf("%0.8f", block.Amount))
-			sat.Color = theme.HexARGB(th.Color.Dark)
-			sat.Layout(gtx)
+			l := th.Body2(block.BlockHash)
+			l.Font.Typeface = th.Font.Mono
+			l.Color = theme.HexARGB(th.Color.Dark)
+			l.Layout(gtx)
 		}))
 }
 
 func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block string) *theme.DuoUIpage {
-	return th.DuoUIpage("BLOCK", 0, rc.GetSingleBlock(block), func() {}, singleBlockBody(rc, gtx, th, rc.SingleBlock), func() {})
+	return th.DuoUIpage("BLOCK", 10, rc.GetSingleBlock(block), func() {}, singleBlockBody(rc, gtx, th, rc.SingleBlock), func() {})
 }
 
 func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block btcjson.GetBlockVerboseResult) func() {
 	return func() {
-		line(gtx, th.Color.Dark)()
+
 		widgets := []func(){
 			blockField(gtx, th, layout.Vertical, 16, 24, "Hash", fmt.Sprint(block.Hash)),
 			trioFields(gtx, th, 16, 32,
 				"Height", fmt.Sprint(block.Height),
 				"Confirmations", fmt.Sprint(block.Confirmations),
-				"PowAlgo", fmt.Sprint(block.PowAlgo)),
+				"Time", fmt.Sprint(block.Time)),
+			blockField(gtx, th, layout.Vertical, 16, 12, "MerkleRoot", block.MerkleRoot),
 			trioFields(gtx, th, 18, 16,
-				"Time", fmt.Sprint(block.Time),
+				"PowAlgo", fmt.Sprint(block.PowAlgo),
 				"Difficulty", fmt.Sprint(block.Difficulty),
 				"Nonce", fmt.Sprint(block.Nonce)),
+			blockField(gtx, th, layout.Vertical, 16, 12, "PowHash", fmt.Sprint(block.PowHash)),
 			trioFields(gtx, th, 16, 16,
 				"Size", fmt.Sprint(block.Size),
 				"Weight", fmt.Sprint(block.Weight),
 				"Bits", fmt.Sprint(block.Bits)),
+			line(gtx, th.Color.Dark),
 			trioFields(gtx, th, 16, 16,
 				"TxNum", fmt.Sprint(block.TxNum),
 				"StrippedSize", fmt.Sprint(block.StrippedSize),
 				"Version", fmt.Sprint(block.Version)),
-			blockField(gtx, th, layout.Horizontal, 16, 12, "VersionHex", fmt.Sprint(block.VersionHex)),
-			blockField(gtx, th, layout.Horizontal, 16, 12, "PowHash", fmt.Sprint(block.PowHash)),
-			blockField(gtx, th, layout.Horizontal, 16, 12, "MerkleRoot", block.MerkleRoot),
-			blockField(gtx, th, layout.Horizontal, 16, 12, "Tx", fmt.Sprint(block.Tx)),
+			blockField(gtx, th, layout.Vertical, 16, 12, "Tx", fmt.Sprint(block.Tx)),
 			blockField(gtx, th, layout.Vertical, 14, 12, "RawTx", fmt.Sprint(block.RawTx)),
 			blockNavButtons(rc, gtx, th, block.PreviousHash, block.NextHash),
 		}
