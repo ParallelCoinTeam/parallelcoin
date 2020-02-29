@@ -89,6 +89,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 				Txs:           &model.DuoUItransactionsExcerpts{},
 				LastTxs:       &model.DuoUItransactions{},
 			},
+			Kopach: &model.KopachStatus{},
 		},
 		Dialog:   &model.DuoUIdialog{},
 		Settings: settings(cx),

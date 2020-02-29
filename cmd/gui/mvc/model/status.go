@@ -25,10 +25,11 @@ type NodeStatus struct {
 	ConnectionCount  int32
 }
 type KopachStatus struct {
+	Hashrate int
+	Hps      []int
 }
 type WalletStatus struct {
 	WalletVersion map[string]btcjson.VersionResult `json:"walletver"`
-	Hashes        float64
 	Balance       string
 	Unconfirmed   string
 	TxsNumber     int

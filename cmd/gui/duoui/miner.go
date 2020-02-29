@@ -1,18 +1,16 @@
 package duoui
 
 import (
+	"fmt"
 	"gioui.org/layout"
-	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"time"
 )
 
 func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
+		rc.GetDuoUIhashesPerSecList()
 		layout.Flex{}.Layout(gtx,
 			layout.Flexed(1, func() {
 				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
@@ -21,20 +19,14 @@ func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func()
 						Spacing: layout.SpaceAround,
 					}.Layout(gtx,
 						layout.Flexed(1, func() {
-							consoleOutputList.Layout(gtx, len(rc.CommandsHistory.Commands), func(i int) {
-								t := rc.CommandsHistory.Commands[i]
+							consoleOutputList.Layout(gtx, len(rc.Status.Kopach.Hps), func(i int) {
+								t := rc.Status.Kopach.Hps[i]
 								layout.Flex{
 									Axis:      layout.Vertical,
 									Alignment: layout.End,
 								}.Layout(gtx,
 									layout.Rigid(func() {
-										sat := th.Body1("ds://" + t.ComID)
-										sat.Font.Typeface = th.Font.Mono
-										sat.Color = theme.HexARGB(th.Color.Dark)
-										sat.Layout(gtx)
-									}),
-									layout.Rigid(func() {
-										sat := th.Body1(t.Out)
+										sat := th.Body1(fmt.Sprint(t))
 										sat.Font.Typeface = th.Font.Mono
 										sat.Color = theme.HexARGB(th.Color.Dark)
 										sat.Layout(gtx)
@@ -42,25 +34,7 @@ func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func()
 								)
 							})
 						}),
-						layout.Rigid(func() {
-							layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-								e := th.DuoUIeditor("Run command")
-								e.Font.Typeface = th.Font.Mono
-								e.Color = theme.HexARGB(th.Color.Dark)
-								e.Font.Style = text.Regular
-								e.Layout(gtx, consoleInputField)
-								for _, e := range consoleInputField.Events(gtx) {
-									if e, ok := e.(controller.SubmitEvent); ok {
-										rc.CommandsHistory.Commands = append(rc.CommandsHistory.Commands, model.DuoUIcommand{
-											ComID: e.Text,
-											Time:  time.Time{},
-											Out:   rc.ConsoleCmd(e.Text),
-										})
-										consoleInputField.SetText("")
-									}
-								}
-							})
-						}))
+					)
 				})
 			}),
 		)

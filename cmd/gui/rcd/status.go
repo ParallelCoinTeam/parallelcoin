@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/mvc/model"
@@ -25,7 +26,7 @@ func (r *RcVar) GetDuoUIstatus() {
 func (r *RcVar) GetDuoUIhashesPerSec() {
 	// r.Status.Wallet.Hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
 	log.DEBUG("centralise hash function stuff here") // cpuminer
-	r.Status.Wallet.Hashes = r.cx.Hashrate.Load().(float64)
+	r.Status.Kopach.Hashrate = r.cx.Hashrate.Load().(int)
 	return
 }
 func (r *RcVar) GetDuoUInetworkHashesPerSec() {
@@ -83,4 +84,28 @@ func (r *RcVar) GetDuoUIlocalLost() {
 	//r.Localhost.Memory = *sm
 	//r.Localhost.Disk = *sd
 	return
+}
+
+func (r *RcVar) GetDuoUIhashesPerSecList() {
+	//// Create a new ring of size 5
+	//hps := ring.New(3)
+	////GetDuoUIhashesPerSec
+	//// Get the length of the ring
+	//n := hps.Len()
+	//
+	//// Initialize the ring with some integer values
+	//for i := 0; i < n; i++ {
+	r.GetDuoUIhashesPerSec()
+	//hps.Value = r.Status.Kopach.Hashrate
+	//	hps = hps.Next()
+	//}
+	//
+	//// Iterate through the ring and print its contents
+	//hps.Do(func(p interface{}) {
+	//	r.Status.Kopach.Hps = append(r.Status.Kopach.Hps, p.(float64))
+	//
+	fmt.Println(r.Status.Kopach.Hashrate)
+
+	//})
+
 }
