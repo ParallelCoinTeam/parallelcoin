@@ -50,7 +50,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address", func(e controller.SubmitEvent) {
 								address = e.Text
 							})),
-							layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Font.Primary, "PASTE ADDRESS", func() {
+							layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Font.Primary, 12, th.Color.ButtonText, th.Color.ButtonBg, "PASTE ADDRESS", func() {
 								addressLineEditor.SetText(clipboard.Get())
 							})))
 					},
@@ -63,7 +63,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 									amountLineEditor.SetText("")
 								}
 							})),
-							layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Font.Primary, "PASTE AMOUNT", func() {
+							layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Font.Primary, 12, th.Color.ButtonText, th.Color.ButtonBg, "PASTE AMOUNT", func() {
 								amountLineEditor.SetText(clipboard.Get())
 							})))
 					},
@@ -74,7 +74,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 							})))
 					},
 					func() {
-						component.Button(gtx, th, buttonSend, th.Font.Primary, "SEND", func() {
+						component.Button(gtx, th, buttonSend, th.Font.Primary, 12, th.Color.ButtonText, th.Color.ButtonBg, "SEND", func() {
 							rc.Dialog.Show = true
 							rc.Dialog = &model.DuoUIdialog{
 								Show: true,

@@ -5,7 +5,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/component"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -15,54 +14,37 @@ var (
 	blocksList = &layout.List{
 		Axis: layout.Vertical,
 	}
-	perPage = &controller.DuoUIcounter{
-		Value:           20,
-		OperateValue:    1,
-		From:            0,
-		To:              50,
-		CounterIncrease: new(controller.Button),
-		CounterDecrease: new(controller.Button),
-		CounterReset:    new(controller.Button),
-	}
-	page = &controller.DuoUIcounter{
-		Value:           0,
-		OperateValue:    1,
-		From:            0,
-		To:              50,
-		CounterIncrease: new(controller.Button),
-		CounterDecrease: new(controller.Button),
-		CounterReset:    new(controller.Button),
-	}
 )
 
 func Explorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
-	return th.DuoUIpage("EXPLORER", 0, rc.GetBlocksExcerpts(page.Value, perPage.Value), component.ContentHeader(gtx, th, headerExplorer(gtx, th)), bodyExplorer(rc, gtx, th), func() {})
+	return th.DuoUIpage("EXPLORER", 0, rc.GetBlocksExcerpts(), component.ContentHeader(gtx, th, headerExplorer(rc, gtx, th)), bodyExplorer(rc, gtx, th), func() {})
 }
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
-		//rc.GetBlocksExcerpts(page.Value, perPage.Value)
+		rc.GetBlocksExcerpts()
 		in := layout.UniformInset(unit.Dp(0))
 		in.Layout(gtx, func() {
-			blocksList.Layout(gtx, len(rc.Blocks), func(i int) {
-				b := rc.Blocks[i]
+			blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
+				b := rc.Explorer.Blocks[i]
 				blockRow(rc, gtx, th, &b)
 			})
 		})
 	}
 }
 
-func headerExplorer(gtx *layout.Context, th *theme.DuoUItheme) func() {
+func headerExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
 			Axis:    layout.Horizontal,
 		}.Layout(gtx,
 			//layout.Rigid(ui.txsFilter()),
+			layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "Block count: "+fmt.Sprint(rc.Status.Node.BlockCount))),
 			layout.Flexed(0.5, func() {
-				th.DuoUIcounter().Layout(gtx, page)
+				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page)
 			}),
 			layout.Flexed(0.5, func() {
-				th.DuoUIcounter().Layout(gtx, perPage)
+				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.PerPage)
 			}),
 		)
 	}
@@ -83,6 +65,12 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *m
 					component.SetPage(rc, blockPage(rc, gtx, th, block.BlockHash))
 				}
 				linkButton.Layout(gtx, block.Link)
+			}),
+			layout.Rigid(func() {
+				l := th.Body2(block.Time)
+				l.Font.Typeface = th.Font.Mono
+				l.Color = theme.HexARGB(th.Color.Dark)
+				l.Layout(gtx)
 			}),
 			layout.Rigid(func() {
 				l := th.Body2(block.BlockHash)

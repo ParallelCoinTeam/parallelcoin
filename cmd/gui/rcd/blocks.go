@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"fmt"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/node/rpc"
@@ -10,7 +11,7 @@ import (
 
 func (r *RcVar) GetSingleBlock(hash string) func() {
 	return func() {
-		r.SingleBlock = r.GetBlock(hash)
+		r.Explorer.SingleBlock = r.GetBlock(hash)
 	}
 }
 
@@ -60,16 +61,20 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	b.BlockHash = block.Hash
 	b.Confirmations = block.Confirmations
 	b.TxNum = block.TxNum
-	b.Time = string(block.Time)
+
+	//t := time.Unix(0, block.Time)
+	//b.Time = t.Format("02/01/2006, 15:04:05")
+	b.Time = fmt.Sprint(block.Time)
+
 	b.Link = &controller.Button{}
 	return
 }
 
-func (r *RcVar) GetBlocksExcerpts(page, perPage int) func() {
+func (r *RcVar) GetBlocksExcerpts() func() {
 	return func() {
-		//pages := r.Status.Node.BlockCount / perPage
-		startBlock := page * perPage
-		endBlock := page*perPage + perPage
+		//r.Explorer.Pages = r.Status.Node.BlockCount / r.Explorer.PerPage
+		startBlock := r.Explorer.Page.Value * r.Explorer.PerPage.Value
+		endBlock := r.Explorer.Page.Value*r.Explorer.PerPage.Value + r.Explorer.PerPage.Value
 
 		blocks := *new([]model.DuoUIblock)
 		for i := startBlock; i <= endBlock; i++ {
@@ -77,7 +82,7 @@ func (r *RcVar) GetBlocksExcerpts(page, perPage int) func() {
 			log.INFO("trazo")
 			log.INFO(r.Status.Node.BlockHeight)
 		}
-		r.Blocks = blocks
+		r.Explorer.Blocks = blocks
 		return
 	}
 }

@@ -59,11 +59,11 @@ func Editor(gtx *layout.Context, th *theme.DuoUItheme, editorControler *controll
 	}
 }
 
-func Button(gtx *layout.Context, th *theme.DuoUItheme, buttonController *controller.Button, font text.Typeface, label string, handler func()) func() {
+func Button(gtx *layout.Context, th *theme.DuoUItheme, buttonController *controller.Button, font text.Typeface, textSize int, color, bgColor, label string, handler func()) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var button theme.DuoUIbutton
-			button = th.DuoUIbutton(font, label, th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 128, 48, 0, 0)
+			button = th.DuoUIbutton(font, label, color, bgColor, "", th.Color.Light, textSize, 0, 128, 48, 0, 0)
 			for buttonController.Clicked(gtx) {
 				handler()
 			}
@@ -73,11 +73,11 @@ func Button(gtx *layout.Context, th *theme.DuoUItheme, buttonController *control
 	}
 }
 
-func Label(gtx *layout.Context, th *theme.DuoUItheme, font text.Typeface, label string) func() {
+func Label(gtx *layout.Context, th *theme.DuoUItheme, font text.Typeface, size float32, color, label string) func() {
 	return func() {
-		l := th.Body1(label)
+		l := th.DuoUIlabel(unit.Dp(size), label)
 		l.Font.Typeface = font
-		l.Color = theme.HexARGB(th.Color.Dark)
+		l.Color = theme.HexARGB(color)
 		l.Layout(gtx)
 	}
 }

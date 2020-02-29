@@ -18,7 +18,9 @@ var (
 	buttonConsole    = new(controller.Button)
 	buttonHelp       = new(controller.Button)
 	navItemIconColor = "ffacacac"
-
+	cornerNav        = &layout.List{
+		Axis: layout.Horizontal,
+	}
 	footerNav = &layout.List{
 		Axis: layout.Horizontal,
 	}
@@ -38,19 +40,34 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, 
 				footerMenuItem = th.DuoUIbutton("", "", "", th.Color.Dark, icon, CurrentCurrentPageColor(rc.ShowPage, page.Title, navItemIconColor, th.Color.Primary), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
 				for footerButton.Clicked(gtx) {
 					rc.ShowPage = page.Title
-					SetPage(rc, page)
 					page.Command()
+					SetPage(rc, page)
 				}
 				footerMenuItem.IconLayout(gtx, footerButton)
 			} else {
 				footerMenuItem = th.DuoUIbutton(th.Font.Primary, text, CurrentCurrentPageColor(rc.ShowPage, page.Title, th.Color.Light, th.Color.Primary), "", "", "", footerMenuItemTextSize, footerMenuItemIconSize, 0, footerMenuItemHeight, footerMenuItemPaddingVertical, 0)
 				for footerButton.Clicked(gtx) {
 					rc.ShowPage = page.Title
-					SetPage(rc, page)
 					page.Command()
+					SetPage(rc, page)
 				}
 				footerMenuItem.Layout(gtx, footerButton)
 			}
+		})
+	}
+}
+
+func FooterLeftMenu(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPages *model.DuoUIpages) func() {
+	return func() {
+		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+			cornerButtons := []func(){
+				QuitButton(rc, gtx, th),
+				//footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
+				footerMenuButton(rc, gtx, th, allPages.Theme["LOG"], "LOG", "traceIcon", buttonLog),
+			}
+			cornerNav.Layout(gtx, len(cornerButtons), func(i int) {
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, cornerButtons[i])
+			})
 		})
 	}
 }

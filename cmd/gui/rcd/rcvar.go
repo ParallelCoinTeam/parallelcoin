@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"time"
 
@@ -20,23 +21,22 @@ type RcVar struct {
 	Log             *model.DuoUIlog
 	CommandsHistory *model.DuoUIcommandsHistory
 
-	Settings    *model.DuoUIsettings
-	Sent        bool
-	Toasts      []model.DuoUItoast
-	Localhost   model.DuoUIlocalHost
-	Uptime      int
-	Peers       []*btcjson.GetPeerInfoResult `json:"peers"`
-	Blocks      []model.DuoUIblock
-	SingleBlock btcjson.GetBlockVerboseResult
+	Settings  *model.DuoUIsettings
+	Sent      bool
+	Toasts    []model.DuoUItoast
+	Localhost model.DuoUIlocalHost
+	Uptime    int
+	Peers     []*btcjson.GetPeerInfoResult `json:"peers"`
+
 	AddressBook model.DuoUIaddressBook
 	ShowPage    string
 	CurrentPage *theme.DuoUIpage
 	// NodeChan   chan *rpc.Server
 	// WalletChan chan *wallet.Wallet
-
-	Quit    chan struct{}
-	Ready   chan struct{}
-	IsReady bool
+	Explorer *model.Explorer
+	Quit     chan struct{}
+	Ready    chan struct{}
+	IsReady  bool
 }
 
 type Boot struct {
@@ -109,8 +109,30 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		Sent:      false,
 		Localhost: model.DuoUIlocalHost{},
 		ShowPage:  "OVERVIEW",
-		Quit:      make(chan struct{}),
-		Ready:     make(chan struct{}, 1),
+		Explorer: &model.Explorer{
+			PerPage: &controller.DuoUIcounter{
+				Value:           20,
+				OperateValue:    1,
+				From:            0,
+				To:              50,
+				CounterIncrease: new(controller.Button),
+				CounterDecrease: new(controller.Button),
+				CounterReset:    new(controller.Button),
+			},
+			Page: &controller.DuoUIcounter{
+				Value:           0,
+				OperateValue:    1,
+				From:            0,
+				To:              50,
+				CounterIncrease: new(controller.Button),
+				CounterDecrease: new(controller.Button),
+				CounterReset:    new(controller.Button),
+			},
+			Blocks:      []model.DuoUIblock{},
+			SingleBlock: btcjson.GetBlockVerboseResult{},
+		},
+		Quit:  make(chan struct{}),
+		Ready: make(chan struct{}, 1),
 	}
 	return
 }

@@ -12,8 +12,32 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 )
 
+var (
+	groupsList = &layout.List{
+		Axis:      layout.Horizontal,
+		Alignment: layout.Start,
+	}
+)
+
 type Field struct {
 	Field *pod.Field
+}
+
+func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+	return func() {
+		groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
+		groupsList.Layout(gtx, groupsNumber, func(i int) {
+			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+				i = groupsNumber - 1 - i
+				t := rc.Settings.Daemon.Schema.Groups[i]
+				txt := fmt.Sprint(t.Legend)
+				for rc.Settings.Tabs.TabsList[txt].Clicked(gtx) {
+					rc.Settings.Tabs.Current = txt
+				}
+				th.DuoUIbutton(th.Font.Primary, txt, th.Color.Light, th.Color.Info, "", th.Color.Dark, 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
+			})
+		})
+	}
 }
 
 func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
@@ -29,10 +53,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f
 			case "input":
 				switch f.Field.InputType {
 				case "text":
-					e := th.DuoUIeditor(f.Field.Label)
-					e.Font.Typeface = th.Font.Primary
-					e.Font.Style = text.Italic
-					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
+					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor), f.Field.Label, func(e controller.SubmitEvent) {})
 				case "number":
 					e := th.DuoUIeditor(f.Field.Label)
 					e.Font.Typeface = th.Font.Primary
