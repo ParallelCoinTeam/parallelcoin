@@ -1,4 +1,4 @@
-package duoui
+package component
 
 import (
 	"fmt"
@@ -31,9 +31,9 @@ func DuoUIbalance(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 			//cs := gtx.Constraints
 			navButtons := []func(){
 				listItem(gtx, th, "BALANCE :", rc.Status.Wallet.Balance+" "+rc.Settings.Abbrevation),
-				line(gtx, th.Color.LightGrayII),
+				HorizontalLine(gtx, 1, th.Color.LightGrayII),
 				listItem(gtx, th, "UNCNFIRMED :", rc.Status.Wallet.Unconfirmed+" "+rc.Settings.Abbrevation),
-				line(gtx, th.Color.LightGrayII),
+				HorizontalLine(gtx, 1, th.Color.LightGrayII),
 				listItem(gtx, th, "TRANSACTIONS :", fmt.Sprint(rc.Status.Wallet.TxsNumber)),
 			}
 			itemsList.Layout(gtx, len(navButtons), func(i int) {

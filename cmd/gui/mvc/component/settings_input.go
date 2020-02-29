@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense OR MIT
-package duoui
+package component
 
 import (
 	"gioui.org/layout"

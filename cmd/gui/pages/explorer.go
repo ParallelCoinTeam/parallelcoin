@@ -1,17 +1,21 @@
-package duoui
+package pages
 
 import (
 	"fmt"
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
+	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"image"
+	"image/color"
 )
 
 var (
@@ -40,6 +44,9 @@ var (
 	nextBlockHashButton     = new(controller.Button)
 )
 
+func Explorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+	return th.DuoUIpage("EXPLORER", 0, rc.GetBlocksExcerpts(page.Value, perPage.Value), component.ContentHeader(gtx, th, headerExplorer(gtx, th)), bodyExplorer(rc, gtx, th), func() {})
+}
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		//rc.GetBlocksExcerpts(page.Value, perPage.Value)
@@ -71,27 +78,30 @@ func headerExplorer(gtx *layout.Context, th *theme.DuoUItheme) func() {
 }
 
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *model.DuoUIblock) {
-	line(gtx, th.Color.Dark)()
-	layout.Flex{
-		Spacing: layout.SpaceBetween,
-	}.Layout(gtx,
-		layout.Rigid(func() {
-			var linkButton theme.DuoUIbutton
-			linkButton = th.DuoUIbutton(th.Font.Mono, fmt.Sprint(block.Height), th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
-			for block.Link.Clicked(gtx) {
-				//clipboard.Set(b.BlockHash)
-				rc.ShowPage = "BLOCK" + block.BlockHash
-				rc.GetSingleBlock(block.BlockHash)()
-				setPage(rc, blockPage(rc, gtx, th, block.BlockHash))
-			}
-			linkButton.Layout(gtx, block.Link)
-		}),
-		layout.Rigid(func() {
-			l := th.Body2(block.BlockHash)
-			l.Font.Typeface = th.Font.Mono
-			l.Color = theme.HexARGB(th.Color.Dark)
-			l.Layout(gtx)
-		}))
+	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
+
+		component.HorizontalLine(gtx, 1, th.Color.Dark)()
+		layout.Flex{
+			Spacing: layout.SpaceBetween,
+		}.Layout(gtx,
+			layout.Rigid(func() {
+				var linkButton theme.DuoUIbutton
+				linkButton = th.DuoUIbutton(th.Font.Mono, fmt.Sprint(block.Height), th.Color.Light, th.Color.Info, "", th.Color.Light, 14, 0, 60, 24, 0, 0)
+				for block.Link.Clicked(gtx) {
+					//clipboard.Set(b.BlockHash)
+					rc.ShowPage = "BLOCK" + block.BlockHash
+					rc.GetSingleBlock(block.BlockHash)()
+					component.SetPage(rc, blockPage(rc, gtx, th, block.BlockHash))
+				}
+				linkButton.Layout(gtx, block.Link)
+			}),
+			layout.Rigid(func() {
+				l := th.Body2(block.BlockHash)
+				l.Font.Typeface = th.Font.Mono
+				l.Color = theme.HexARGB(th.Color.Dark)
+				l.Layout(gtx)
+			}))
+	})
 }
 
 func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block string) *theme.DuoUIpage {
@@ -117,7 +127,7 @@ func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, b
 				"Size", fmt.Sprint(block.Size),
 				"Weight", fmt.Sprint(block.Weight),
 				"Bits", fmt.Sprint(block.Bits)),
-			line(gtx, th.Color.Dark),
+			component.HorizontalLine(gtx, 1, th.Color.Dark),
 			trioFields(gtx, th, 16, 16,
 				"TxNum", fmt.Sprint(block.TxNum),
 				"StrippedSize", fmt.Sprint(block.StrippedSize),
@@ -163,23 +173,23 @@ func blockNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, p
 		layout.Flex{}.Layout(gtx,
 			layout.Flexed(0.5, func() {
 				var previousBlockButton theme.DuoUIbutton
-				previousBlockButton = th.DuoUIbutton(th.Font.Mono, "Previous Block "+previousBlockHash, th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+				previousBlockButton = th.DuoUIbutton(th.Font.Mono, "Previous Block "+previousBlockHash, th.Color.Light, th.Color.Info, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
 				for previousBlockHashButton.Clicked(gtx) {
 					//clipboard.Set(b.BlockHash)
 					rc.ShowPage = "BLOCK" + previousBlockHash
 					rc.GetSingleBlock(previousBlockHash)()
-					setPage(rc, blockPage(rc, gtx, th, previousBlockHash))
+					component.SetPage(rc, blockPage(rc, gtx, th, previousBlockHash))
 				}
 				previousBlockButton.Layout(gtx, previousBlockHashButton)
 			}),
 			layout.Flexed(0.5, func() {
 				var nextBlockButton theme.DuoUIbutton
-				nextBlockButton = th.DuoUIbutton(th.Font.Mono, "Next Block "+nextBlockHash, th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+				nextBlockButton = th.DuoUIbutton(th.Font.Mono, "Next Block "+nextBlockHash, th.Color.Light, th.Color.Info, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
 				for nextBlockHashButton.Clicked(gtx) {
 					//clipboard.Set(b.BlockHash)
 					rc.ShowPage = "BLOCK" + nextBlockHash
 					rc.GetSingleBlock(nextBlockHash)()
-					setPage(rc, blockPage(rc, gtx, th, nextBlockHash))
+					component.SetPage(rc, blockPage(rc, gtx, th, nextBlockHash))
 				}
 				nextBlockButton.Layout(gtx, nextBlockHashButton)
 			}))
@@ -216,4 +226,15 @@ func blockFieldValue(gtx *layout.Context, th *theme.DuoUItheme, text, color, bgC
 			}),
 		)
 	}
+}
+
+func fill(gtx *layout.Context, col color.RGBA) {
+	cs := gtx.Constraints
+	d := image.Point{X: cs.Width.Min, Y: cs.Height.Min}
+	dr := f32.Rectangle{
+		Max: f32.Point{X: float32(d.X), Y: float32(d.Y)},
+	}
+	paint.ColorOp{Color: col}.Add(gtx.Ops)
+	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
+	gtx.Dimensions = layout.Dimensions{Size: d}
 }

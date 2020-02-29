@@ -4,6 +4,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/ico"
+	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"image"
 )
@@ -38,7 +39,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 				}),
 			)
 		}),
-		layout.Flexed(1, DuoUIlogger(ui.rc, ui.ly.Context, ui.ly.Theme)),
+		layout.Flexed(1, component.DuoUIlogger(ui.rc, ui.ly.Context, ui.ly.Theme)),
 	)
 }
 

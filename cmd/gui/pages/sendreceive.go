@@ -1,4 +1,4 @@
-package duoui
+package pages
 
 import (
 	"gioui.org/layout"
@@ -32,6 +32,10 @@ var (
 	buttonPasteAmount  = new(controller.Button)
 	buttonSend         = new(controller.Button)
 )
+
+func Send(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+	return th.DuoUIpage("SEND", 10, func() {}, func() {}, send(rc, gtx, th), func() {})
+}
 
 func send(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {

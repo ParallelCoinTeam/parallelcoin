@@ -1,10 +1,11 @@
-package duoui
+package pages
 
 import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
@@ -31,6 +32,9 @@ var (
 	}
 )
 
+func History(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+	return th.DuoUIpage("HISTORY", 0, func() {}, component.ContentHeader(gtx, th, headerTransactions(rc, gtx, th)), txsBody(rc, gtx, th), func() {})
+}
 func txsFilter(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
@@ -70,7 +74,7 @@ func txsBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 				layout.Rigid(func() {
 					transList.Layout(gtx, len(rc.Status.Wallet.Transactions.Txs), func(i int) {
 						t := rc.Status.Wallet.Transactions.Txs[i]
-						line(gtx, th.Color.Hint)()
+						component.HorizontalLine(gtx, 1, th.Color.Hint)()
 						layout.Flex{
 							Spacing: layout.SpaceBetween,
 						}.Layout(gtx,

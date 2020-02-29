@@ -1,4 +1,4 @@
-package duoui
+package pages
 
 import (
 	"gioui.org/layout"
@@ -23,6 +23,9 @@ var (
 	}
 )
 
+func Console(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+	return th.DuoUIpage("CONSOLE", 0, func() {}, func() {}, console(rc, gtx, th), func() {})
+}
 func console(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,

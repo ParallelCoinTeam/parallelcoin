@@ -1,9 +1,10 @@
-package duoui
+package pages
 
 import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/clipboard"
@@ -15,6 +16,10 @@ var (
 		//ScrollToEnd: true,
 	}
 )
+
+func AddressBook(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+	return th.DuoUIpage("ADDRESSBOOK", 10, func() {}, func() {}, addressBook(rc, gtx, th), func() {})
+}
 
 func addressBook(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
@@ -71,7 +76,7 @@ func addressBook(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func(
 											}),
 										)
 									}),
-									layout.Rigid(line(gtx, th.Color.Hint)),
+									layout.Rigid(component.HorizontalLine(gtx, 1, th.Color.Hint)),
 								)
 							})
 						}))

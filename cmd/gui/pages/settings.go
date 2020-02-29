@@ -1,9 +1,10 @@
-package duoui
+package pages
 
 import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -21,7 +22,11 @@ var (
 	buttonSettingsSave = new(controller.Button)
 )
 
-func settingsFieldLabel(gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
+func Settings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+	return th.DuoUIpage("SETTINGS", 0, func() {}, component.ContentHeader(gtx, th, headerSettings(rc, gtx, th)), settingsBody(rc, gtx, th), func() {})
+}
+
+func settingsFieldLabel(gtx *layout.Context, th *theme.DuoUItheme, f *component.Field) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			name := th.H6(fmt.Sprint(f.Field.Label))
@@ -31,7 +36,7 @@ func settingsFieldLabel(gtx *layout.Context, th *theme.DuoUItheme, f *Field) fun
 	}
 }
 
-func settingsFieldDescription(gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
+func settingsFieldDescription(gtx *layout.Context, th *theme.DuoUItheme, f *component.Field) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			desc := th.Body2(fmt.Sprint(f.Field.Description))
@@ -77,21 +82,21 @@ func settingsBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 			if fmt.Sprint(fields.Legend) == rc.Settings.Tabs.Current {
 				fieldsList.Layout(gtx, len(fields.Fields), func(il int) {
 					il = len(fields.Fields) - 1 - il
-					tl := Field{
+					tl := component.Field{
 						Field: &fields.Fields[il],
 					}
 					layout.Flex{
 						Axis: layout.Vertical,
 					}.Layout(gtx,
 						layout.Rigid(settingsItemRow(rc, gtx, th, &tl)),
-						layout.Rigid(line(gtx, th.Color.Dark)))
+						layout.Rigid(component.HorizontalLine(gtx, 1, th.Color.Dark)))
 				})
 			}
 		}
 	}
 }
 
-func settingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
+func settingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f *component.Field) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
@@ -106,7 +111,7 @@ func settingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f
 					layout.Rigid(settingsFieldDescription(gtx, th, f)),
 				)
 			}),
-			layout.Flexed(0.38, inputField(rc, gtx, th, f)),
+			layout.Flexed(0.38, component.DuoUIinputField(rc, gtx, th, f)),
 		)
 	}
 }

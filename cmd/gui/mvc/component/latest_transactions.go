@@ -1,4 +1,4 @@
-package duoui
+package component
 
 import (
 	"fmt"
@@ -63,7 +63,7 @@ func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUI
 												layout.Rigid(lTamount(gtx, th, t.Amount)),
 											)
 										}),
-										layout.Rigid(line(gtx, th.Color.Hint)),
+										layout.Rigid(HorizontalLine(gtx, 1, th.Color.Hint)),
 									)
 								})
 							})
