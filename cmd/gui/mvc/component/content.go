@@ -49,7 +49,7 @@ func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pr
 				previousBlockButton = th.DuoUIbutton(th.Font.Mono, "Previous Block "+previousBlockHash, th.Color.Light, th.Color.Info, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
 				for previousBlockHashButton.Clicked(gtx) {
 					//clipboard.Set(b.BlockHash)
-					rc.ShowPage = "BLOCK" + previousBlockHash
+					rc.ShowPage = fmt.Sprintf("BLOCK %s", previousBlockHash)
 					rc.GetSingleBlock(previousBlockHash)()
 					SetPage(rc, prevPage)
 				}
@@ -60,7 +60,7 @@ func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pr
 				nextBlockButton = th.DuoUIbutton(th.Font.Mono, "Next Block "+nextBlockHash, th.Color.Light, th.Color.Info, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
 				for nextBlockHashButton.Clicked(gtx) {
 					//clipboard.Set(b.BlockHash)
-					rc.ShowPage = "BLOCK" + nextBlockHash
+					rc.ShowPage = fmt.Sprintf("BLOCK %s", nextBlockHash)
 					rc.GetSingleBlock(nextBlockHash)()
 					SetPage(rc, nextPage)
 				}
