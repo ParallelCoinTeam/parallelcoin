@@ -25,7 +25,11 @@ func (r *RcVar) GetBlock(hash string) btcjson.GetBlockVerboseResult {
 	if err != nil {
 		//dv.PushDuoVUEalert("Error", err.Error(), "error")
 	}
-	return bl.(btcjson.GetBlockVerboseResult)
+	gbvr, ok := bl.(btcjson.GetBlockVerboseResult)
+	if ok {
+		return gbvr
+	}
+	return btcjson.GetBlockVerboseResult{}
 }
 
 func (r *RcVar) GetNetworkLastBlock() int32 {
@@ -70,9 +74,13 @@ func (r *RcVar) GetBlocksExcerpts(page, perPage int) func() {
 		//pages := r.Status.Node.BlockCount / perPage
 		startBlock := page * perPage
 		endBlock := page*perPage + perPage
-
+		height := int(r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
+		log.DEBUG("GetBlocksExcerpts", startBlock, endBlock, height)
+		if endBlock > height {
+			endBlock = height
+		}
 		blocks := *new([]model.DuoUIblock)
-		for i := startBlock; i <= endBlock; i++ {
+		for i := startBlock; i < endBlock; i++ {
 			blocks = append(blocks, r.GetBlockExcerpt(i))
 			log.INFO("trazo")
 			log.INFO(r.Status.Node.BlockHeight)

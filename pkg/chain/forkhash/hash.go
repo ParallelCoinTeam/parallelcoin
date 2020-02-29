@@ -38,11 +38,12 @@ func Blake2b(bytes []byte) []byte {
 	return b[:]
 }
 
-// X11 takes bytes and returns a cryptonight 7 v2 256 bit hash
+// X11 takes bytes and returns a X11 256 bit hash
 func X11(bytes []byte) (out []byte) {
 	hf := x11.New()
-	out = make([]byte, len(bytes))
+	out = make([]byte, 32)
 	hf.Hash(bytes, out)
+	// log.DEBUGF("x11 %x", out)
 	return
 	// return cryptonight.Sum(bytes, 2)
 }

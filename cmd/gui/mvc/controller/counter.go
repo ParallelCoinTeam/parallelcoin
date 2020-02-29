@@ -20,6 +20,9 @@ func (c *DuoUIcounter) Decrease() {
 	if c.Value > c.From {
 		c.Value = c.Value - c.OperateValue
 	}
+	if c.Value < 0 {
+		c.Value = 0
+	}
 }
 func (c *DuoUIcounter) Reset() {
 	c.Value = 0

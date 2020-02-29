@@ -36,7 +36,7 @@ var (
 )
 
 func Explorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
-	return th.DuoUIpage("EXPLORER", 0, rc.GetBlocksExcerpts(page.Value, perPage.Value), component.ContentHeader(gtx, th, headerExplorer(gtx, th)), bodyExplorer(rc, gtx, th), func() {})
+	return th.DuoUIpage("EXPLORER", 8, rc.GetBlocksExcerpts(page.Value, perPage.Value), component.ContentHeader(gtx, th, headerExplorer(gtx, th)), bodyExplorer(rc, gtx, th), func() {})
 }
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
