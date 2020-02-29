@@ -36,6 +36,8 @@ var (
 		CounterDecrease: new(controller.Button),
 		CounterReset:    new(controller.Button),
 	}
+	previousBlockHashButton = new(controller.Button)
+	nextBlockHashButton     = new(controller.Button)
 )
 
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
@@ -126,103 +128,125 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *m
 }
 
 func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block string) *theme.DuoUIpage {
-	return th.DuoUIpage("BLOCK", 0, rc.GetSingleBlock(block), func() {}, singleBlockBody(gtx, th, rc.SingleBlock), func() {})
+	return th.DuoUIpage("BLOCK", 0, rc.GetSingleBlock(block), func() {}, singleBlockBody(rc, gtx, th, rc.SingleBlock), func() {})
 }
 
-func singleBlockBody(gtx *layout.Context, th *theme.DuoUItheme, block btcjson.GetBlockVerboseResult) func() {
+func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block btcjson.GetBlockVerboseResult) func() {
 	return func() {
 		line(gtx, th.Color.Dark)()
+		widgets := []func(){
+			blockField(gtx, th, layout.Vertical, 16, 24, "Hash", fmt.Sprint(block.Hash)),
+			trioFields(gtx, th, 16, 32,
+				"Height", fmt.Sprint(block.Height),
+				"Confirmations", fmt.Sprint(block.Confirmations),
+				"PowAlgo", fmt.Sprint(block.PowAlgo)),
+			trioFields(gtx, th, 18, 16,
+				"Time", fmt.Sprint(block.Time),
+				"Difficulty", fmt.Sprint(block.Difficulty),
+				"Nonce", fmt.Sprint(block.Nonce)),
+			trioFields(gtx, th, 16, 16,
+				"Size", fmt.Sprint(block.Size),
+				"Weight", fmt.Sprint(block.Weight),
+				"Bits", fmt.Sprint(block.Bits)),
+			trioFields(gtx, th, 16, 16,
+				"TxNum", fmt.Sprint(block.TxNum),
+				"StrippedSize", fmt.Sprint(block.StrippedSize),
+				"Version", fmt.Sprint(block.Version)),
+			blockField(gtx, th, layout.Horizontal, 16, 12, "VersionHex", fmt.Sprint(block.VersionHex)),
+			blockField(gtx, th, layout.Horizontal, 16, 12, "PowHash", fmt.Sprint(block.PowHash)),
+			blockField(gtx, th, layout.Horizontal, 16, 12, "MerkleRoot", block.MerkleRoot),
+			blockField(gtx, th, layout.Horizontal, 16, 12, "Tx", fmt.Sprint(block.Tx)),
+			blockField(gtx, th, layout.Vertical, 14, 12, "RawTx", fmt.Sprint(block.RawTx)),
+			blockNavButtons(rc, gtx, th, block.PreviousHash, block.NextHash),
+		}
+		layautList.Layout(gtx, len(widgets), func(i int) {
+			layout.UniformInset(unit.Dp(4)).Layout(gtx, widgets[i])
+		})
+
+	}
+}
+
+func trioFields(gtx *layout.Context, th *theme.DuoUItheme, labelTextSize, valueTextSize float32, unoLabel, unoValue, duoLabel, duoValue, treLabel, treValue string) func() {
+
+	return func() {
 		layout.Flex{
+			Axis:    layout.Horizontal,
 			Spacing: layout.SpaceBetween,
 		}.Layout(gtx,
-			layout.Rigid(func() {
+			layout.Flexed(0.3, blockField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, unoLabel, fmt.Sprint(unoValue))),
+			layout.Flexed(0.3, blockField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, duoLabel, fmt.Sprint(duoValue))),
+			layout.Flexed(0.3, blockField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, treLabel, fmt.Sprint(treValue))),
+		)
 
-				widgets := []func(){
-					blockField(gtx, th, "Confirmations:", fmt.Sprint(block.Confirmations)),
-					blockField(gtx, th, "TxNum:", fmt.Sprint(block.TxNum)),
-					blockField(gtx, th, "Hash:", fmt.Sprint(block.Hash)),
-					blockField(gtx, th, "Time:", fmt.Sprint(block.Time)),
-					blockField(gtx, th, "StrippedSize:", fmt.Sprint(block.StrippedSize)),
-					blockField(gtx, th, "Size:", fmt.Sprint(block.Size)),
-					blockField(gtx, th, "Weight:", fmt.Sprint(block.Weight)),
-					blockField(gtx, th, "Height:", fmt.Sprint(block.Height)),
-					blockField(gtx, th, "Version:", fmt.Sprint(block.Version)),
-					blockField(gtx, th, "VersionHex:", fmt.Sprint(block.VersionHex)),
-					blockField(gtx, th, "PowAlgoID:", fmt.Sprint(block.PowAlgoID)),
-					blockField(gtx, th, "PowAlgo:", fmt.Sprint(block.PowAlgo)),
-					blockField(gtx, th, "PowHash:", fmt.Sprint(block.PowHash)),
-					blockField(gtx, th, "MerkleRoot:", block.MerkleRoot),
-					blockField(gtx, th, "Tx:", fmt.Sprint(block.Tx)),
-					blockField(gtx, th, "RawTx:", fmt.Sprint(block.RawTx)),
-					blockField(gtx, th, "Time:", fmt.Sprint(block.Time)),
-					blockField(gtx, th, "Nonce:", fmt.Sprint(block.Nonce)),
-					blockField(gtx, th, "Bits:", block.Bits),
-					blockField(gtx, th, "Difficulty:", fmt.Sprint(block.Difficulty)),
-					blockField(gtx, th, "PreviousHash:", block.PreviousHash),
-					blockField(gtx, th, "NextHash:", block.NextHash),
+	}
+}
+
+func blockField(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, label, value string) func() {
+	return func() {
+		layout.Flex{
+			Axis: axis,
+		}.Layout(gtx,
+			layout.Rigid(blockFieldValue(gtx, th, label, th.Color.Light, th.Color.Dark, th.Font.Primary, labelTextSize)),
+			layout.Rigid(blockFieldValue(gtx, th, value, th.Color.Light, th.Color.DarkGray, th.Font.Mono, valueTextSize)))
+	}
+}
+
+func blockNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, previousBlockHash, nextBlockHash string) func() {
+	return func() {
+		layout.Flex{}.Layout(gtx,
+			layout.Flexed(0.5, func() {
+				var previousBlockButton theme.DuoUIbutton
+				previousBlockButton = th.DuoUIbutton(th.Font.Mono, "Previous Block "+previousBlockHash, th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+				for previousBlockHashButton.Clicked(gtx) {
+					//clipboard.Set(b.BlockHash)
+					rc.ShowPage = "BLOCK" + previousBlockHash
+					rc.GetSingleBlock(previousBlockHash)()
+					setPage(rc, blockPage(rc, gtx, th, previousBlockHash))
 				}
-				layautList.Layout(gtx, len(widgets), func(i int) {
-					layout.UniformInset(unit.Dp(8)).Layout(gtx, widgets[i])
-				})
+				previousBlockButton.Layout(gtx, previousBlockHashButton)
 			}),
-			layout.Rigid(func() {
-				//sat := th.Body1(fmt.Sprintf("%0.8f", block.NextHash))
-				sat := th.Body1(block.NextHash)
-				sat.Color = theme.HexARGB(th.Color.Dark)
-				sat.Font.Typeface = th.Font.Mono
-				sat.Layout(gtx)
+			layout.Flexed(0.5, func() {
+				var nextBlockButton theme.DuoUIbutton
+				nextBlockButton = th.DuoUIbutton(th.Font.Mono, "Next Block "+nextBlockHash, th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+				for nextBlockHashButton.Clicked(gtx) {
+					//clipboard.Set(b.BlockHash)
+					rc.ShowPage = "BLOCK" + nextBlockHash
+					rc.GetSingleBlock(nextBlockHash)()
+					setPage(rc, blockPage(rc, gtx, th, nextBlockHash))
+				}
+				nextBlockButton.Layout(gtx, nextBlockHashButton)
 			}))
 	}
 }
 
-func blockField(gtx *layout.Context, th *theme.DuoUItheme, label, value string) func() {
+func blockFieldValue(gtx *layout.Context, th *theme.DuoUItheme, text, color, bgColor string, font text.Typeface, textSize float32) func() {
 	return func() {
-		layout.Flex{}.Layout(gtx,
-			layout.Rigid(stackedField(gtx, th, label, th.Color.Success, th.Color.Dark, th.Font.Primary)),
-			layout.Flexed(1, blockFieldValue(gtx, th, value)))
-	}
-}
-
-func stackedField(gtx *layout.Context, th *theme.DuoUItheme, text, color, bgColor string, font text.Typeface) func() {
-	return func() {
-		width := 120
-		height := 40
-		layout.Stack{Alignment: layout.Center}.Layout(gtx,
+		hmin := gtx.Constraints.Width.Min
+		vmin := gtx.Constraints.Height.Min
+		layout.Stack{Alignment: layout.W}.Layout(gtx,
 			layout.Expanded(func() {
 				rr := float32(gtx.Px(unit.Dp(0)))
 				clip.Rect{
 					Rect: f32.Rectangle{Max: f32.Point{
-						X: float32(width),
-						Y: float32(height),
+						X: float32(gtx.Constraints.Width.Min),
+						Y: float32(gtx.Constraints.Height.Min),
 					}},
 					NE: rr, NW: rr, SE: rr, SW: rr,
 				}.Op(gtx.Ops).Add(gtx.Ops)
 				fill(gtx, theme.HexARGB(bgColor))
 			}),
 			layout.Stacked(func() {
-				gtx.Constraints.Width.Min = width
-				gtx.Constraints.Height.Min = height
+				gtx.Constraints.Width.Min = hmin
+				gtx.Constraints.Height.Min = vmin
 				layout.Center.Layout(gtx, func() {
-					//paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
-					//controller.Label{
-					//	Alignment: text.Middle,
-					//}.Layout(gtx, b.shaper, b.Font, unit.Dp(12), b.Text)
-					l := th.Body2(text)
-					l.Font.Typeface = font
-					l.Color = theme.HexARGB(color)
-					l.Layout(gtx)
+					layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+						l := th.DuoUIlabel(unit.Dp(textSize), text)
+						l.Font.Typeface = font
+						l.Color = theme.HexARGB(color)
+						l.Layout(gtx)
+					})
 				})
 			}),
 		)
 	}
-
-}
-func blockFieldValue(gtx *layout.Context, th *theme.DuoUItheme, value string) func() {
-	return func() {
-		l := th.Body2(value)
-		l.Font.Typeface = th.Font.Mono
-		l.Color = theme.HexARGB(th.Color.Dark)
-		l.Layout(gtx)
-	}
-
 }
