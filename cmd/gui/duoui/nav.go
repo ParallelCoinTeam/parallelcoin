@@ -2,7 +2,6 @@ package duoui
 
 import (
 	"gioui.org/layout"
-	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 )
@@ -33,13 +32,7 @@ func (ui *DuoUI) DuoUImenu() func() {
 			Spacing:   layout.SpaceEvenly}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
 				layout.Flex{}.Layout(ui.ly.Context,
-					layout.Rigid(func() {
-						layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, func() {
-							mainNav.Layout(ui.ly.Context, len(component.NavButtons(ui.rc, ui.ly.Context, ui.ly.Theme, ui.ly.Pages)), func(i int) {
-								layout.UniformInset(unit.Dp(0)).Layout(ui.ly.Context, component.NavButtons(ui.rc, ui.ly.Context, ui.ly.Theme, ui.ly.Pages)[i])
-							})
-						})
-					}),
+					layout.Rigid(component.MainNavigation(ui.rc, ui.ly.Context, ui.ly.Theme, ui.ly.Pages)),
 				)
 			}),
 		)

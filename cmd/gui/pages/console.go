@@ -2,8 +2,8 @@ package pages
 
 import (
 	"gioui.org/layout"
-	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/model"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	testLabel         = "testtopLabel"
 	consoleInputField = &controller.Editor{
 		SingleLine: true,
 		Submit:     true,
@@ -24,9 +23,9 @@ var (
 )
 
 func Console(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
-	return th.DuoUIpage("CONSOLE", 0, func() {}, func() {}, console(rc, gtx, th), func() {})
+	return th.DuoUIpage("CONSOLE", 0, func() {}, func() {}, consoleBody(rc, gtx, th), func() {})
 }
-func console(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Flexed(1, func() {
@@ -42,40 +41,19 @@ func console(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 									Axis:      layout.Vertical,
 									Alignment: layout.End,
 								}.Layout(gtx,
-									layout.Rigid(func() {
-										sat := th.Body1("ds://" + t.ComID)
-										sat.Font.Typeface = th.Font.Mono
-										sat.Color = theme.HexARGB(th.Color.Dark)
-										sat.Layout(gtx)
-									}),
-									layout.Rigid(func() {
-										sat := th.Body1(t.Out)
-										sat.Font.Typeface = th.Font.Mono
-										sat.Color = theme.HexARGB(th.Color.Dark)
-										sat.Layout(gtx)
-									}),
+									layout.Rigid(component.Label(gtx, th, th.Font.Mono, "ds://"+t.ComID)),
+									layout.Rigid(component.Label(gtx, th, th.Font.Mono, t.Out)),
 								)
 							})
 						}),
-						layout.Rigid(func() {
-							layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-								e := th.DuoUIeditor("Run command")
-								e.Font.Typeface = th.Font.Mono
-								e.Color = theme.HexARGB(th.Color.Dark)
-								e.Font.Style = text.Regular
-								e.Layout(gtx, consoleInputField)
-								for _, e := range consoleInputField.Events(gtx) {
-									if e, ok := e.(controller.SubmitEvent); ok {
-										rc.CommandsHistory.Commands = append(rc.CommandsHistory.Commands, model.DuoUIcommand{
-											ComID: e.Text,
-											Time:  time.Time{},
-											Out:   rc.ConsoleCmd(e.Text),
-										})
-										consoleInputField.SetText("")
-									}
-								}
-							})
-						}))
+						layout.Rigid(
+							component.Editor(gtx, th, consoleInputField, "Run command", func(e controller.SubmitEvent) {
+								rc.CommandsHistory.Commands = append(rc.CommandsHistory.Commands, model.DuoUIcommand{
+									ComID: e.Text,
+									Time:  time.Time{},
+									Out:   rc.ConsoleCmd(e.Text),
+								})
+							})))
 				})
 			}),
 		)

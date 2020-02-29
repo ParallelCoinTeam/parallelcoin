@@ -3,7 +3,6 @@ package pages
 import (
 	"fmt"
 	"gioui.org/layout"
-	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
@@ -79,13 +78,7 @@ func txsBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 							Spacing: layout.SpaceBetween,
 						}.Layout(gtx,
 							layout.Rigid(txsDetails(gtx, th, i, &t)),
-							layout.Rigid(func() {
-								sat := th.Body1(fmt.Sprintf("%0.8f", t.Amount))
-								sat.Font.Typeface = th.Font.Primary
-								sat.Color = theme.HexARGB(th.Color.Hint)
-								sat.Layout(gtx)
-							}),
-						)
+							layout.Rigid(component.Label(gtx, th, th.Font.Mono, fmt.Sprintf("%0.8f", t.Amount))))
 					})
 				}))
 		})
@@ -97,39 +90,11 @@ func txsDetails(gtx *layout.Context, th *theme.DuoUItheme, i int, t *model.DuoUI
 		layout.Flex{
 			Axis: layout.Vertical,
 		}.Layout(gtx,
-			layout.Rigid(func() {
-				num := th.Body1(fmt.Sprint(i))
-				num.Font.Typeface = th.Font.Primary
-				num.Color = theme.HexARGB(th.Color.Hint)
-				num.Layout(gtx)
-			}),
-			layout.Rigid(func() {
-				tim := th.Body1(t.TxID)
-				tim.Font.Typeface = th.Font.Primary
-				tim.Color = theme.HexARGB(th.Color.Hint)
-				tim.Layout(gtx)
-			}),
-			layout.Rigid(func() {
-				amount := th.H5(fmt.Sprintf("%0.8f", t.Amount))
-				amount.Font.Typeface = th.Font.Primary
-				amount.Color = theme.HexARGB(th.Color.Hint)
-				amount.Alignment = text.End
-				amount.Font.Variant = "Mono"
-				amount.Font.Weight = text.Bold
-				amount.Layout(gtx)
-			}),
-			layout.Rigid(func() {
-				sat := th.Body1(t.Category)
-				sat.Font.Typeface = th.Font.Primary
-				sat.Color = theme.HexARGB(th.Color.Hint)
-				sat.Layout(gtx)
-			}),
-			layout.Rigid(func() {
-				l := th.Body2(t.Time)
-				l.Font.Typeface = th.Font.Primary
-				l.Color = theme.HexARGB(th.Color.Hint)
-				l.Layout(gtx)
-			}),
+			layout.Rigid(component.Label(gtx, th, th.Font.Primary, fmt.Sprint(i))),
+			layout.Rigid(component.Label(gtx, th, th.Font.Primary, t.TxID)),
+			layout.Rigid(component.Label(gtx, th, th.Font.Primary, fmt.Sprintf("%0.8f", t.Amount))),
+			layout.Rigid(component.Label(gtx, th, th.Font.Primary, t.Category)),
+			layout.Rigid(component.Label(gtx, th, th.Font.Primary, t.Time)),
 		)
 	}
 }

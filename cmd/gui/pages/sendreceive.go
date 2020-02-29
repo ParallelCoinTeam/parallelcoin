@@ -34,10 +34,10 @@ var (
 )
 
 func Send(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
-	return th.DuoUIpage("SEND", 10, func() {}, func() {}, send(rc, gtx, th), func() {})
+	return th.DuoUIpage("SEND", 10, func() {}, func() {}, sendBody(rc, gtx, th), func() {})
 }
 
-func send(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
@@ -50,7 +50,7 @@ func send(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address", func(e controller.SubmitEvent) {
 								address = e.Text
 							})),
-							layout.Rigid(component.Button(gtx, th, buttonPasteAddress, "PASTE ADDRESS", func() {
+							layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Font.Primary, "PASTE ADDRESS", func() {
 								addressLineEditor.SetText(clipboard.Get())
 							})))
 					},
@@ -63,7 +63,7 @@ func send(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 									amountLineEditor.SetText("")
 								}
 							})),
-							layout.Rigid(component.Button(gtx, th, buttonPasteAmount, "PASTE AMOUNT", func() {
+							layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Font.Primary, "PASTE AMOUNT", func() {
 								amountLineEditor.SetText(clipboard.Get())
 							})))
 					},
@@ -74,7 +74,7 @@ func send(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 							})))
 					},
 					func() {
-						layout.Rigid(component.Button(gtx, th, buttonSend, "SEND", func() {
+						component.Button(gtx, th, buttonSend, th.Font.Primary, "SEND", func() {
 							rc.Dialog.Show = true
 							rc.Dialog = &model.DuoUIdialog{
 								Show: true,
@@ -86,7 +86,7 @@ func send(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 								Title:  "Are you sure?",
 								Text:   "Confirm ParallelCoin send",
 							}
-						}))
+						})
 					},
 				}
 				layautList.Layout(gtx, len(widgets), func(i int) {

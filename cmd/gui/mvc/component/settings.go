@@ -2,6 +2,7 @@
 package component
 
 import (
+	"fmt"
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
@@ -9,7 +10,6 @@ import (
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/pod"
-	"reflect"
 )
 
 type Field struct {
@@ -70,10 +70,31 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f
 	}
 }
 
-var typeRegistry = make(map[string]reflect.Type)
+//
+//var typeRegistry = make(map[string]reflect.Type)
+//
+//func makeInstance(name string) interface{} {
+//	v := reflect.New(typeRegistry["cx.DuoUIconfigurationig."+name]).Elem()
+//	// Maybe fill in fields here if necessary
+//	return v.Interface()
+//}
 
-func makeInstance(name string) interface{} {
-	v := reflect.New(typeRegistry["cx.DuoUIconfigurationig."+name]).Elem()
-	// Maybe fill in fields here if necessary
-	return v.Interface()
+func SettingsFieldLabel(gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
+	return func() {
+		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+			name := th.H6(fmt.Sprint(f.Field.Label))
+			name.Font.Typeface = th.Font.Primary
+			name.Layout(gtx)
+		})
+	}
+}
+
+func SettingsFieldDescription(gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
+	return func() {
+		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+			desc := th.Body2(fmt.Sprint(f.Field.Description))
+			desc.Font.Typeface = th.Font.Primary
+			desc.Layout(gtx)
+		})
+	}
 }

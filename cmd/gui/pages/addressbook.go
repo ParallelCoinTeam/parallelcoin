@@ -18,10 +18,10 @@ var (
 )
 
 func AddressBook(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
-	return th.DuoUIpage("ADDRESSBOOK", 10, func() {}, func() {}, addressBook(rc, gtx, th), func() {})
+	return th.DuoUIpage("ADDRESSBOOK", 10, func() {}, func() {}, addressBookBody(rc, gtx, th), func() {})
 }
 
-func addressBook(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func addressBookBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Flexed(1, func() {
@@ -38,42 +38,11 @@ func addressBook(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func(
 										layout.Flex{
 											Alignment: layout.End,
 										}.Layout(gtx,
-											layout.Flexed(0.1, func() {
-												sat := th.Body1(fmt.Sprint(t.Index))
-												sat.Font.Typeface = th.Font.Primary
-												sat.Color = theme.HexARGB(th.Color.Dark)
-												sat.Layout(gtx)
-											}),
-											layout.Rigid(func() {
-
-												var copyButton theme.DuoUIbutton
-												copyButton = th.DuoUIbutton(th.Font.Mono, t.Address, th.Color.Light, th.Color.Primary, "", "", 16, 0, 300, 24, 0, 0)
-
-												for t.Copy.Clicked(gtx) {
-
-													clipboard.Set(t.Address)
-												}
-												copyButton.Layout(gtx, t.Copy)
-
-											}),
-											layout.Flexed(0.2, func() {
-												sat := th.Body1(t.Account)
-												sat.Font.Typeface = th.Font.Primary
-												sat.Color = theme.HexARGB(th.Color.Dark)
-												sat.Layout(gtx)
-											}),
-											layout.Flexed(0.4, func() {
-												sat := th.Body1(t.Label)
-												sat.Font.Typeface = th.Font.Primary
-												sat.Color = theme.HexARGB(th.Color.Dark)
-												sat.Layout(gtx)
-											}),
-											layout.Flexed(0.3, func() {
-												sat := th.Body1(fmt.Sprint(t.Amount))
-												sat.Font.Typeface = th.Font.Primary
-												sat.Color = theme.HexARGB(th.Color.Dark)
-												sat.Layout(gtx)
-											}),
+											layout.Flexed(0.1, component.Label(gtx, th, th.Font.Primary, fmt.Sprint(t.Index))),
+											layout.Flexed(0.2, component.Label(gtx, th, th.Font.Primary, t.Account)),
+											layout.Rigid(component.Button(gtx, th, t.Copy, th.Font.Mono, t.Address, func() { clipboard.Set(t.Address) })),
+											layout.Flexed(0.4, component.Label(gtx, th, th.Font.Primary, t.Label)),
+											layout.Flexed(0.3, component.Label(gtx, th, th.Font.Primary, fmt.Sprint(t.Amount))),
 										)
 									}),
 									layout.Rigid(component.HorizontalLine(gtx, 1, th.Color.Hint)),

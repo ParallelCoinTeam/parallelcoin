@@ -26,26 +26,6 @@ func Settings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.D
 	return th.DuoUIpage("SETTINGS", 0, func() {}, component.ContentHeader(gtx, th, headerSettings(rc, gtx, th)), settingsBody(rc, gtx, th), func() {})
 }
 
-func settingsFieldLabel(gtx *layout.Context, th *theme.DuoUItheme, f *component.Field) func() {
-	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			name := th.H6(fmt.Sprint(f.Field.Label))
-			name.Font.Typeface = th.Font.Primary
-			name.Layout(gtx)
-		})
-	}
-}
-
-func settingsFieldDescription(gtx *layout.Context, th *theme.DuoUItheme, f *component.Field) func() {
-	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			desc := th.Body2(fmt.Sprint(f.Field.Description))
-			desc.Font.Typeface = th.Font.Primary
-			desc.Layout(gtx)
-		})
-	}
-}
-
 func headerSettings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(gtx,
@@ -107,8 +87,8 @@ func settingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f
 					Axis:    layout.Vertical,
 					Spacing: 10,
 				}.Layout(gtx,
-					layout.Rigid(settingsFieldLabel(gtx, th, f)),
-					layout.Rigid(settingsFieldDescription(gtx, th, f)),
+					layout.Rigid(component.SettingsFieldLabel(gtx, th, f)),
+					layout.Rigid(component.SettingsFieldDescription(gtx, th, f)),
 				)
 			}),
 			layout.Flexed(0.38, component.DuoUIinputField(rc, gtx, th, f)),

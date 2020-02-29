@@ -70,7 +70,6 @@ func headerExplorer(gtx *layout.Context, th *theme.DuoUItheme) func() {
 
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *model.DuoUIblock) {
 	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-
 		component.HorizontalLine(gtx, 1, th.Color.Dark)()
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
@@ -79,7 +78,6 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *m
 				var linkButton theme.DuoUIbutton
 				linkButton = th.DuoUIbutton(th.Font.Mono, fmt.Sprint(block.Height), th.Color.Light, th.Color.Info, "", th.Color.Light, 14, 0, 60, 24, 0, 0)
 				for block.Link.Clicked(gtx) {
-					//clipboard.Set(b.BlockHash)
 					rc.ShowPage = "BLOCK" + block.BlockHash
 					rc.GetSingleBlock(block.BlockHash)()
 					component.SetPage(rc, blockPage(rc, gtx, th, block.BlockHash))

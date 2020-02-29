@@ -27,7 +27,17 @@ var (
 	navItemPaddingHorizontal int = 0
 )
 
-func NavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPages *model.DuoUIpages) []func() {
+func MainNavigation(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPages *model.DuoUIpages) func() {
+	return func() {
+		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+			mainNav.Layout(gtx, len(navButtons(rc, gtx, th, allPages)), func(i int) {
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, navButtons(rc, gtx, th, allPages)[i])
+			})
+		})
+	}
+}
+
+func navButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPages *model.DuoUIpages) []func() {
 	return []func(){
 		navMenuButton(rc, gtx, th, allPages.Theme["OVERVIEW"], "OVERVIEW", "overviewIcon", navButtonOverview),
 		navMenuLine(gtx, th),
