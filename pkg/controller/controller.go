@@ -258,7 +258,7 @@ var handlersMulticast = transport.Handlers{
 			log.DEBUG("not active yet")
 			return
 		}
-		log.WARN("received job")
+		// log.WARN("received job")
 		j := job.LoadContainer(b)
 		otherIPs := j.GetIPs()
 		otherPort := j.GetP2PListenersPort()

@@ -148,9 +148,9 @@ var handlers = transport.Handlers{
 			w.FirstSender.Store(addr)
 			w.lastSent.Store(time.Now().UnixNano())
 		}
-		log.TRACE("received job")
+		// log.TRACE("received job")
 		for i := range w.workers {
-			log.TRACE("sending job to worker", i)
+			// log.TRACE("sending job to worker", i)
 			err := w.workers[i].NewJob(&j)
 			if err != nil {
 				log.ERROR(err)
