@@ -305,7 +305,6 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	}
 	rand.Seed(time.Now().UnixNano())
 	w.msgBlock.Header.Nonce = rand.Uint32()
-	// log.TRACE(w.hashes)
 	if w.hashes.Load() == nil {
 		return errors.New("failed to decode merkle roots")
 	} else {
@@ -317,22 +316,6 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		w.msgBlock.Header.MerkleRoot = *hh
 	}
 	w.msgBlock.Header.Timestamp = time.Now()
-	// halting current work
-	w.stopChan <- struct{}{}
-	// create the unique extra nonce for this worker,
-	// which creates a different merkel root
-	// extraNonce, err := wire.RandomUint64()
-	// if err != nil {
-	// 	log.ERROR(err)
-	// 	return
-	// }
-	// log.TRACE("updating extra nonce")
-	// err = UpdateExtraNonce(w.msgBlock, newHeight, extraNonce)
-	// if err != nil {
-	// 	log.ERROR(err)
-	// 	return
-	// }
-	// log.SPEW(w.msgBlock)
 	// make the work select block start running
 	w.block = util.NewBlock(w.msgBlock)
 	w.block.SetHeight(newHeight)
