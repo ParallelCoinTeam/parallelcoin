@@ -297,7 +297,10 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	var fMC job.Container
 	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
 	shards := transport.GetShards(fMC.Data)
-	log.WARN("shards", len(shards))
+	shardsLen := len(shards)
+	if shardsLen < 1 {
+		log.WARN("shards", shardsLen)
+	}
 	err = c.multiConn.SendMany(job.WorkMagic, shards)
 	if err != nil {
 		log.ERROR(err)
