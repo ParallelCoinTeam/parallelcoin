@@ -1958,6 +1958,7 @@ func NewOutboundPeer(cfg *Config, addr string) (*Peer, error) {
 	}
 	return p, nil
 }
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }

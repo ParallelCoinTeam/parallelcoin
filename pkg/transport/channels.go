@@ -125,7 +125,6 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 		}
 	}
 	channel.Receiver, err = Listen(receiver, channel, maxDatagramSize, handlers)
-	log.WARN(sender, receiver)
 	channel.Sender, err = NewSender(sender, maxDatagramSize)
 	if err != nil {
 		log.ERROR(err)

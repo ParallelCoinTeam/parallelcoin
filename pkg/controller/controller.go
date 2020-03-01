@@ -4,6 +4,7 @@ import (
 	"container/ring"
 	"context"
 	"errors"
+	"fmt"
 	"math/rand"
 	"net"
 	"sync"
@@ -65,6 +66,7 @@ type Controller struct {
 	submitChan             chan []byte
 	buffer                 *ring.Ring
 	began                  time.Time
+	otherNodes             map[string]time.Time
 }
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
@@ -101,10 +103,11 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		coinbases:              make(map[int32]*util.Tx),
 		buffer:                 ring.New(BufferSize),
 		began:                  time.Now(),
+		otherNodes:             make(map[string]time.Time),
 	}
 	var err error
 	ctrl.multiConn, err = transport.NewBroadcastChannel("controller", ctrl, *cx.Config.MinerPass,
-		11049, MaxDatagramSize, make(transport.Handlers))
+		11049, MaxDatagramSize, handlersMulticast)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
@@ -115,6 +118,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	ctrl.active.Store(false)
 	buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
+	ll := pM.GetP2PListeners()
+	for i := range ll{
+		ctrl.otherNodes[ll[i]] = time.Now()
+	}
 	var pauseShards [][]byte
 	if pauseShards = transport.GetShards(pM.Data); log.Check(err) {
 	} else {
@@ -254,6 +261,25 @@ var handlersUnicast = transport.Handlers{
 		current, _ := c.cx.Hashrate.Load().(int)
 		// log.TRACE("received hashrate report", current, report.Count)
 		c.cx.Hashrate.Store(report.Count + current)
+		return
+	},
+}
+
+var handlersMulticast = transport.Handlers{
+	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
+		b []byte) (err error) {
+		c := ctx.(*Controller)
+		j := job.LoadContainer(b)
+		otherIPs := j.GetIPs()
+		otherPort := j.GetP2PListenersPort()
+		for i := range otherIPs {
+			o := fmt.Sprintf("%s:%d", otherIPs[i], otherPort)
+			if _, ok := c.otherNodes[o]; !ok {
+				log.WARN("connecting to lan peer with same PSK", o)
+				c.otherNodes[o] = time.Now()
+						err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true)
+			}
+		}
 		return
 	},
 }

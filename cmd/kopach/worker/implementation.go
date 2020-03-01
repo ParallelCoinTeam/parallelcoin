@@ -42,6 +42,7 @@ type Worker struct {
 	msgBlock      *wire.MsgBlock
 	bitses        atomic.Value
 	hashes        atomic.Value
+	lastMerkle    *chainhash.Hash
 	roller        *Counter
 	startNonce    uint32
 	startChan     chan struct{}
@@ -251,6 +252,13 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// will run. If there is no controllers on the network,
 	// the worker pauses
 	ips := job.GetIPs()
+	hashes := job.GetHashes()
+	if hashes[5].IsEqual(w.lastMerkle) {
+		log.DEBUG("not a new job")
+		*reply = true
+		return
+	}
+	w.lastMerkle = hashes[5]
 	// var addresses []string
 	// for i := range ips {
 	// 	generally there is only one but if a server had two interfaces
@@ -279,7 +287,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// halting current work
 	w.stopChan <- struct{}{}
 	w.bitses.Store(job.GetBitses())
-	w.hashes.Store(job.GetHashes())
+	w.hashes.Store(hashes)
 	newHeight := job.GetNewHeight()
 	w.roller.Algos = []int32{}
 	for i := range w.bitses.Load().(map[int32]uint32) {
