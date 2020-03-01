@@ -76,7 +76,7 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 
 func (r *RcVar) GetBlocksExcerpts() func() {
 	return func() {
-		//r.Explorer.Pages = r.Status.Node.BlockCount / r.Explorer.PerPage
+		r.Explorer.Page.To = r.Status.Node.BlockCount / r.Explorer.PerPage.Value
 		startBlock := r.Explorer.Page.Value * r.Explorer.PerPage.Value
 		endBlock := r.Explorer.Page.Value*r.Explorer.PerPage.Value + r.Explorer.PerPage.Value
 		height := int(r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height)

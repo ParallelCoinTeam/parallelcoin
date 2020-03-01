@@ -9,7 +9,7 @@ import (
 func iconButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, page *theme.DuoUIpage) func() {
 	return func() {
 		var logMenuItem theme.DuoUIbutton
-		logMenuItem = th.DuoUIbutton("", "", "", th.Color.Dark, "traceIcon", CurrentCurrentPageColor(rc.ShowPage, "LOG", th.Color.Light, th.Color.Primary), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
+		logMenuItem = th.DuoUIbutton("", "", "", th.Color.Dark, "", "", "traceIcon", CurrentCurrentPageColor(rc.ShowPage, "LOG", th.Color.Light, th.Color.Primary), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
 		for buttonLog.Clicked(gtx) {
 			SetPage(rc, page)
 			rc.ShowPage = "LOG"

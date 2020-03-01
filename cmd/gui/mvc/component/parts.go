@@ -63,7 +63,7 @@ func Button(gtx *layout.Context, th *theme.DuoUItheme, buttonController *control
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var button theme.DuoUIbutton
-			button = th.DuoUIbutton(font, label, color, bgColor, "", th.Color.Light, textSize, 0, 128, 48, 0, 0)
+			button = th.DuoUIbutton(font, label, color, bgColor, "", "", "", th.Color.Light, textSize, 0, 128, 48, 0, 0)
 			for buttonController.Clicked(gtx) {
 				handler()
 			}

@@ -26,7 +26,7 @@ func headerSettings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) fu
 			layout.Rigid(component.SettingsTabs(rc, gtx, th)),
 			layout.Rigid(func() {
 				var settingsSaveButton theme.DuoUIbutton
-				settingsSaveButton = th.DuoUIbutton(th.Font.Secondary, "SAVE", th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 128, 48, 0, 0)
+				settingsSaveButton = th.DuoUIbutton(th.Font.Secondary, "SAVE", th.Color.Light, th.Color.Dark, th.Color.Dark, th.Color.Light, "", th.Color.Light, 16, 0, 128, 48, 0, 0)
 				for buttonSettingsSave.Clicked(gtx) {
 					//addressLineEditor.SetText(clipboard.Get())
 				}

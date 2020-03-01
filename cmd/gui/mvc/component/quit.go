@@ -18,7 +18,7 @@ func QuitButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func()
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var closeMeniItem theme.DuoUIbutton
-			closeMeniItem = th.DuoUIbutton("", "", "", th.Color.Dark, "closeIcon", CurrentCurrentPageColor(rc.ShowPage, "CLOSE", th.Color.Light, th.Color.Primary), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
+			closeMeniItem = th.DuoUIbutton("", "", "", th.Color.Dark, "", "", "closeIcon", CurrentCurrentPageColor(rc.ShowPage, "CLOSE", th.Color.Light, th.Color.Primary), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
 			for buttonQuit.Clicked(gtx) {
 				rc.Dialog.Show = true
 				rc.Dialog = &model.DuoUIdialog{

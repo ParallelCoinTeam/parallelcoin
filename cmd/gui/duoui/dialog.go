@@ -157,7 +157,7 @@ func (ui *DuoUI) dialogButon(f func(), t, bgColor, icon, iconColor string, butto
 	var b theme.DuoUIbutton
 	return func() {
 		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(ui.ly.Context, func() {
-			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, t, ui.ly.Theme.Color.Dark, bgColor, icon, iconColor, 16, 48, 120, 60, 0, 0)
+			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, t, ui.ly.Theme.Color.Dark, bgColor, ui.ly.Theme.Color.Info, bgColor, icon, iconColor, 16, 48, 120, 60, 0, 0)
 			for button.Clicked(ui.ly.Context) {
 				f()
 			}
