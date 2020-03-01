@@ -203,8 +203,8 @@ func NewWithConnAndSemaphore(
 							since := int(time.Now().Sub(tn)/time.Second) + 1
 							total := w.roller.C - int(w.startNonce)
 							log.INFOF(
-								"%9d hash/s %s", total/since,
-								fork.GetAlgoName(w.msgBlock.Header.Version, nH))
+								"%9d hash/s %s %d total", total/since,
+								fork.GetAlgoName(w.msgBlock.Header.Version, nH), total)
 							// send out broadcast containing worker nonce and algorithm and count of blocks
 							hashReport := hashrate.Get(w.roller.RoundsPerAlgo, nextAlgo, nH)
 							err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
@@ -247,7 +247,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
 	// log.DEBUG("loading dispatch connection from job message")
-	log.TRACE(job.String())
+	// log.TRACE(job.String())
 	// if there is no dispatch connection, make one.
 	// If there is one but the server died or was disconnected the
 	// connection the existing dispatch connection is nilled and this
