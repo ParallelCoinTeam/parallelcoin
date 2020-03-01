@@ -38,11 +38,11 @@ func addressBookBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) f
 										layout.Flex{
 											Alignment: layout.End,
 										}.Layout(gtx,
-											layout.Flexed(0.1, component.Label(gtx, th, th.Font.Primary, fmt.Sprint(t.Index))),
-											layout.Flexed(0.2, component.Label(gtx, th, th.Font.Primary, t.Account)),
-											layout.Rigid(component.Button(gtx, th, t.Copy, th.Font.Mono, t.Address, func() { clipboard.Set(t.Address) })),
-											layout.Flexed(0.4, component.Label(gtx, th, th.Font.Primary, t.Label)),
-											layout.Flexed(0.3, component.Label(gtx, th, th.Font.Primary, fmt.Sprint(t.Amount))),
+											layout.Flexed(0.1, component.Label(gtx, th, th.Font.Primary, 12, th.Color.Dark, fmt.Sprint(t.Index))),
+											layout.Flexed(0.2, component.Label(gtx, th, th.Font.Primary, 12, th.Color.Dark, t.Account)),
+											layout.Rigid(component.Button(gtx, th, t.Copy, th.Font.Mono, 12, th.Color.ButtonText, th.Color.ButtonBg, t.Address, func() { clipboard.Set(t.Address) })),
+											layout.Flexed(0.4, component.Label(gtx, th, th.Font.Primary, 12, th.Color.Dark, t.Label)),
+											layout.Flexed(0.3, component.Label(gtx, th, th.Font.Primary, 12, th.Color.Dark, fmt.Sprint(t.Amount))),
 										)
 									}),
 									layout.Rigid(component.HorizontalLine(gtx, 1, th.Color.Hint)),

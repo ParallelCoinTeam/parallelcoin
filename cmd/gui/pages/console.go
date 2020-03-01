@@ -41,8 +41,8 @@ func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func(
 									Axis:      layout.Vertical,
 									Alignment: layout.End,
 								}.Layout(gtx,
-									layout.Rigid(component.Label(gtx, th, th.Font.Mono, "ds://"+t.ComID)),
-									layout.Rigid(component.Label(gtx, th, th.Font.Mono, t.Out)),
+									layout.Rigid(component.Label(gtx, th, th.Font.Mono, 12, th.Color.Dark, "ds://"+t.ComID)),
+									layout.Rigid(component.Label(gtx, th, th.Font.Mono, 12, th.Color.Dark, t.Out)),
 								)
 							})
 						}),

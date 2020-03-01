@@ -114,44 +114,46 @@ func (r *RcVar) GetLatestTransactions() {
 	r.Status.Wallet.LastTxs = r.GetDuoUItransactions(0, 10, "")
 	return
 }
-func (r *RcVar) GetTransactions() {
-	log.DEBUG("getting transactions")
-	lt, err := r.cx.WalletServer.ListTransactions(0, r.Status.Wallet.Txs.TxsListNumber)
-	if err != nil {
-		////r.PushDuoUIalert("Error", err.Error(), "error")
-	}
-	r.Status.Wallet.Txs.TxsNumber = len(lt)
-	// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
-	//	lt[i], lt[j] = lt[j], lt[i]
-	// }
-	balanceHeight := 0.0
-	txseRaw := []model.DuoUItransactionExcerpt{}
-	for _, txRaw := range lt {
-		unixTimeUTC := time.Unix(txRaw.Time, 0) // gives unix time stamp in utc
-		txseRaw = append(txseRaw, model.DuoUItransactionExcerpt{
-			// Balance:       txse.Balance + txRaw.Amount,
-			Comment:       txRaw.Comment,
-			Amount:        txRaw.Amount,
-			Category:      txRaw.Category,
-			Confirmations: txRaw.Confirmations,
-			Time:          unixTimeUTC.Format(time.RFC3339),
-			TxID:          txRaw.TxID,
-		})
-	}
-	var balance float64
-	txs := *new([]model.DuoUItransactionExcerpt)
-	for _, tx := range txseRaw {
-		balance = balance + tx.Amount
-		tx.Balance = balance
-		txs = append(txs, tx)
-		if r.Status.Wallet.Txs.Balance > balanceHeight {
-			balanceHeight = r.Status.Wallet.Txs.Balance
+func (r *RcVar) GetTransactions() func() {
+	return func() {
+		log.DEBUG("getting transactions")
+		lt, err := r.cx.WalletServer.ListTransactions(0, r.Status.Wallet.Txs.TxsListNumber)
+		if err != nil {
+			////r.PushDuoUIalert("Error", err.Error(), "error")
 		}
+		r.Status.Wallet.Txs.TxsNumber = len(lt)
+		// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
+		//	lt[i], lt[j] = lt[j], lt[i]
+		// }
+		balanceHeight := 0.0
+		txseRaw := []model.DuoUItransactionExcerpt{}
+		for _, txRaw := range lt {
+			unixTimeUTC := time.Unix(txRaw.Time, 0) // gives unix time stamp in utc
+			txseRaw = append(txseRaw, model.DuoUItransactionExcerpt{
+				// Balance:       txse.Balance + txRaw.Amount,
+				Comment:       txRaw.Comment,
+				Amount:        txRaw.Amount,
+				Category:      txRaw.Category,
+				Confirmations: txRaw.Confirmations,
+				Time:          unixTimeUTC.Format(time.RFC3339),
+				TxID:          txRaw.TxID,
+			})
+		}
+		var balance float64
+		txs := *new([]model.DuoUItransactionExcerpt)
+		for _, tx := range txseRaw {
+			balance = balance + tx.Amount
+			tx.Balance = balance
+			txs = append(txs, tx)
+			if r.Status.Wallet.Txs.Balance > balanceHeight {
+				balanceHeight = r.Status.Wallet.Txs.Balance
+			}
 
+		}
+		r.Status.Wallet.Txs.Txs = txs
+		r.Status.Wallet.Txs.BalanceHeight = balanceHeight
+		return
 	}
-	r.Status.Wallet.Txs.Txs = txs
-	r.Status.Wallet.Txs.BalanceHeight = balanceHeight
-	return
 }
 
 func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {

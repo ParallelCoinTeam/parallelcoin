@@ -37,6 +37,8 @@ type DuoUItheme struct {
 		Info         string
 		Hint         string
 		InvText      string
+		ButtonText   string
+		ButtonBg     string
 	}
 	Font struct {
 		Primary, Secondary, Mono text.Typeface
@@ -71,6 +73,10 @@ func NewDuoUItheme() *DuoUItheme {
 	t.Color.Info = "ff3080cf"
 	t.Color.Hint = "ff888888"
 	t.Color.InvText = "0xcfcfcf"
+
+	t.Color.ButtonText = "ffcfcfcf"
+	t.Color.ButtonBg = "ff3080cf"
+
 	t.Font.Primary = "bariol"
 	t.Font.Secondary = "plan9"
 	t.Font.Mono = "go"

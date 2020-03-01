@@ -3,19 +3,13 @@ package pages
 import (
 	"fmt"
 	"gioui.org/layout"
-	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/mvc/component"
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/log"
 )
 
 var (
-	groupsList = &layout.List{
-		Axis:      layout.Horizontal,
-		Alignment: layout.Start,
-	}
 	fieldsList = &layout.List{
 		Axis: layout.Vertical,
 	}
@@ -29,21 +23,7 @@ func Settings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.D
 func headerSettings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(gtx,
-			layout.Rigid(func() {
-				groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
-				groupsList.Layout(gtx, groupsNumber, func(i int) {
-					layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-						i = groupsNumber - 1 - i
-						t := rc.Settings.Daemon.Schema.Groups[i]
-						txt := fmt.Sprint(t.Legend)
-						for rc.Settings.Tabs.TabsList[txt].Clicked(gtx) {
-							rc.Settings.Tabs.Current = txt
-							log.INFO("unutra: ", txt)
-						}
-						th.DuoUIbutton(th.Font.Primary, txt, th.Color.Dark, "ff989898", "", th.Color.Dark, 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
-					})
-				})
-			}),
+			layout.Rigid(component.SettingsTabs(rc, gtx, th)),
 			layout.Rigid(func() {
 				var settingsSaveButton theme.DuoUIbutton
 				settingsSaveButton = th.DuoUIbutton(th.Font.Secondary, "SAVE", th.Color.Light, th.Color.Dark, "", th.Color.Light, 16, 0, 128, 48, 0, 0)
