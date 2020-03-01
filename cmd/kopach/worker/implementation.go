@@ -26,7 +26,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-const RoundsPerAlgo = 10
+const RoundsPerAlgo = 25
 
 type Worker struct {
 	sem           sem.T
