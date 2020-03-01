@@ -82,10 +82,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		log.WARN("not running controller without p2p listener enabled")
 		return
 	}
-	// for !cx.RealNode.SyncManager.IsCurrent() {
-	// 	log.DEBUG("node is not synced, waiting 2 seconds to start controller")
-	// 	time.Sleep(time.Second * 2)
-	// }
+	for !cx.RealNode.SyncManager.IsCurrent() {
+		log.DEBUG("node is not synced, waiting 2 seconds to start controller")
+		time.Sleep(time.Second * 2)
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	ctrl := &Controller{
 		active:                 &atomic.Bool{},
