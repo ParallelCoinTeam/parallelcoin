@@ -26,7 +26,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-const RoundsPerAlgo = 23
+const RoundsPerAlgo = 144
 
 type Worker struct {
 	sem           sem.T
@@ -251,7 +251,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// connection the existing dispatch connection is nilled and this
 	// will run. If there is no controllers on the network,
 	// the worker pauses
-	ips := job.GetIPs()
+	// ips := job.GetIPs()
 	hashes := job.GetHashes()
 	if hashes[5].IsEqual(w.lastMerkle) {
 		// log.DEBUG("not a new job")
@@ -266,21 +266,21 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// 	addresses = append(addresses, ips[i].String()+":"+
 	// 		fmt.Sprint(job.GetControllerListenerPort()))
 	// }
-	address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
-	remoteAddress := address
-	if w.dispatchConn != nil {
-		ra := w.dispatchConn.Sender
-		if ra != nil {
-			remoteAddress = ra.RemoteAddr().String()
-		}
-	}
-	if address != remoteAddress {
-		log.DEBUG("setting destination", address)
-		err = w.dispatchConn.SetDestination(address)
-		if err != nil {
-			log.ERROR(err)
-		}
-	}
+	// address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
+	// remoteAddress := address
+	// if w.dispatchConn != nil {
+	// 	ra := w.dispatchConn.Sender
+	// 	if ra != nil {
+	// 		remoteAddress = ra.RemoteAddr().String()
+	// 	}
+	// }
+	// if address != remoteAddress {
+	// 	log.DEBUG("setting destination", address)
+	// 	err = w.dispatchConn.SetDestination(address)
+	// 	if err != nil {
+	// 		log.ERROR(err)
+	// 	}
+	// }
 	// }
 	// log.SPEW(w.dispatchConn)
 	*reply = true
@@ -348,10 +348,11 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	log.DEBUG("receiving dispatch password", pass)
 	rand.Seed(time.Now().UnixNano())
-	sp := fmt.Sprint(rand.Intn(32767) + 1025)
-	rp := fmt.Sprint(rand.Intn(32767) + 1025)
-	conn, err := transport.NewUnicastChannel("kopachworker", w, pass, "0.0.0.0:"+sp, "0.0.0.0:"+rp,
-		controller.MaxDatagramSize, nil)
+	// sp := fmt.Sprint(rand.Intn(32767) + 1025)
+	// rp := fmt.Sprint(rand.Intn(32767) + 1025)
+	var conn *transport.Channel
+	conn, err = transport.NewBroadcastChannel("kopachworker", w, pass,
+		transport.DefaultPort, controller.MaxDatagramSize, nil)
 	if err != nil {
 		log.ERROR(err)
 	}

@@ -57,8 +57,8 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		log.DEBUG("opening broadcast channel listener")
 		w.conn, err = transport.
-			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass, 11049,
-				controller.MaxDatagramSize, handlers)
+			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
+				transport.DefaultPort, controller.MaxDatagramSize, handlers)
 		if err != nil {
 			log.ERROR(err)
 			cancel()

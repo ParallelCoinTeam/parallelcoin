@@ -106,8 +106,9 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		otherNodes:             make(map[string]time.Time),
 	}
 	var err error
-	ctrl.multiConn, err = transport.NewBroadcastChannel("controller", ctrl, *cx.Config.MinerPass,
-		11049, MaxDatagramSize, handlersMulticast)
+	ctrl.multiConn, err = transport.NewBroadcastChannel("controller",
+		ctrl, *cx.Config.MinerPass,
+		transport.DefaultPort, MaxDatagramSize, handlersMulticast)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
@@ -144,13 +145,13 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	} else {
 		ctrl.active.Store(true)
 	}
-	ctrl.uniConn, err = transport.NewUnicastChannel("controller", ctrl, *cx.Config.MinerPass,
-		pM.GetIPs()[0].String()+":14422", pM.GetControllerListener()[0], MaxDatagramSize, handlersUnicast)
-	if err != nil {
-		log.ERROR(err)
-		cancel()
-		return
-	}
+	// ctrl.uniConn, err = transport.NewUnicastChannel("controller", ctrl, *cx.Config.MinerPass,
+	// 	pM.GetIPs()[0].String()+":14422", pM.GetControllerListener()[0], MaxDatagramSize, handlersUnicast)
+	// if err != nil {
+	// 	log.ERROR(err)
+	// 	cancel()
+	// 	return
+	// }
 	cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
@@ -173,7 +174,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	return
 }
 
-var handlersUnicast = transport.Handlers{
+var handlersUnicast = transport.Handlers{}
+var handlersMulticast = transport.Handlers{
 	// Solutions submitted by workers
 	string(sol.SolutionMagic):
 	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
@@ -251,24 +253,11 @@ var handlersUnicast = transport.Handlers{
 			fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
 		return
 	},
-	// hashrate reports from workers
-	string(hashrate.HashrateMagic):
-	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
-		c := ctx.(*Controller)
-		hp := hashrate.LoadContainer(b)
-		report := hp.Struct()
-		// add to total hash counts
-		current, _ := c.cx.Hashrate.Load().(int)
-		// log.TRACE("received hashrate report", current, report.Count)
-		c.cx.Hashrate.Store(report.Count + current)
-		return
-	},
-}
 
-var handlersMulticast = transport.Handlers{
 	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
 		b []byte) (err error) {
 		c := ctx.(*Controller)
+		log.DEBUG("received job")
 		j := job.LoadContainer(b)
 		otherIPs := j.GetIPs()
 		otherPort := j.GetP2PListenersPort()
@@ -282,6 +271,19 @@ var handlersMulticast = transport.Handlers{
 				err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true)
 			}
 		}
+		return
+	},
+	// hashrate reports from workers
+	string(hashrate.HashrateMagic):
+	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
+		log.DEBUG("received hashrate report from", src.String(), dst)
+		c := ctx.(*Controller)
+		hp := hashrate.LoadContainer(b)
+		report := hp.Struct()
+		// add to total hash counts
+		current, _ := c.cx.Hashrate.Load().(int)
+		// log.TRACE("received hashrate report", current, report.Count)
+		c.cx.Hashrate.Store(report.Count + current)
 		return
 	},
 }
