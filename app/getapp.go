@@ -177,8 +177,8 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				"k"),
 			apputil.NewCommand("worker",
 				"single thread parallelcoin miner controlled with binary IPC"+
-					" interface on stdin/stdout; internal use, must have network name string as second arg after worker and"+
-					"nothing before; communicates via net/rpc encoding/gob as default over stdio",
+					" interface on stdin/stdout; internal use, must have network name string as second arg after worker third is datadir"+
+					" communicates via net/rpc encoding/gob as default over stdio",
 				kopach_worker.KopachWorkerHandle(cx),
 				apputil.SubCommands(),
 			),

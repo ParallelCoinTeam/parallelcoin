@@ -70,7 +70,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		for i := 0; i < *cx.Config.GenThreads; i++ {
 			log.DEBUG("starting worker", i)
 			cmd := worker.Spawn(os.Args[0], "worker",
-				cx.ActiveNet.Name)
+				cx.ActiveNet.Name, *cx.Config.LogLevel)
 			wks = append(wks, cmd)
 			w.workers = append(w.workers, client.New(cmd.StdConn))
 		}
