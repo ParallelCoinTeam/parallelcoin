@@ -41,151 +41,120 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			return nil
 		},
 		Commands: []cli.Command{
-			apputil.NewCommand("version",
-				"print version and exit",
-				func(c *cli.Context) error {
-					log.Println(c.App.Name, c.App.Version)
-					return nil
-				},
-				apputil.SubCommands(),
-				"v"),
-			apputil.NewCommand("ctl",
-				"send RPC commands to a node or wallet and print the result",
-				ctlHandle(cx),
-				apputil.SubCommands(
-					apputil.NewCommand(
-						"listcommands",
-						"list commands available at endpoint",
-						ctlHandleList,
-						nil,
-						"list", "l",
-					),
+			apputil.NewCommand("version", "print version and exit", func(c *cli.Context) error {
+				log.Println(c.App.Name, c.App.Version)
+				return nil
+			}, apputil.SubCommands(), nil, "v"),
+			apputil.NewCommand("ctl", "send RPC commands to a node or wallet and print the result", ctlHandle(cx), apputil.SubCommands(
+				apputil.NewCommand(
+					"listcommands",
+					"list commands available at endpoint",
+					ctlHandleList,
+					apputil.SubCommands(),
+					nil,
+					"list",
+					"l",
 				),
-				"c"),
-			apputil.NewCommand("ctlgui",
-				"GUI interface send RPC commands to a node or wallet and print the result",
-				ctlGUIHandle(cx),
-				apputil.SubCommands(),
-				"C"),
-			apputil.NewCommand("node",
-				"start parallelcoin full node",
-				nodeHandle(cx),
-				apputil.SubCommands(
-					apputil.NewCommand("dropaddrindex",
-						"drop the address search index",
-						func(c *cli.Context) error {
-							cx.StateCfg.DropAddrIndex = true
-							// return nodeHandle(cx)(c)
-							return nil
-						},
-						apputil.SubCommands(),
-					),
-					apputil.NewCommand("droptxindex",
-						"drop the address search index",
-						func(c *cli.Context) error {
-							cx.StateCfg.DropTxIndex = true
-							// return nodeHandle(cx)(c)
-							return nil
-						},
-						apputil.SubCommands(),
-					),
-					apputil.NewCommand("dropindexes",
-						"drop all of the indexes",
-						func(c *cli.Context) error {
-							cx.StateCfg.DropAddrIndex = true
-							cx.StateCfg.DropTxIndex = true
-							cx.StateCfg.DropCfIndex = true
-							// return nodeHandle(cx)(c)
-							return nil
-						},
-						apputil.SubCommands(),
-					),
-					apputil.NewCommand("dropcfindex",
-						"drop the address search index",
-						func(c *cli.Context) error {
-							cx.StateCfg.DropCfIndex = true
-							// return nodeHandle(cx)(c)
-							return nil
-						},
-						apputil.SubCommands(),
-					),
-					apputil.NewCommand("resetchain",
-						"reset the chain",
-						func(c *cli.Context) (err error) {
-							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
-							if *cx.Config.DbType == "sqlite" {
-								dbName += ".db"
+			), nil, "c"),
+			apputil.NewCommand("ctlgui", "GUI interface send RPC commands to a node or wallet and print the result", ctlGUIHandle(cx), apputil.SubCommands(), nil, "C"),
+			apputil.NewCommand("node", "start parallelcoin full node", nodeHandle(cx), apputil.SubCommands(
+				apputil.NewCommand("dropaddrindex",
+					"drop the address search index",
+					func(c *cli.Context) error {
+						cx.StateCfg.DropAddrIndex = true
+						// return nodeHandle(cx)(c)
+						return nil
+					},
+					apputil.SubCommands(),
+					nil,
+				),
+				apputil.NewCommand("droptxindex",
+					"drop the address search index",
+					func(c *cli.Context) error {
+						cx.StateCfg.DropTxIndex = true
+						// return nodeHandle(cx)(c)
+						return nil
+					},
+					apputil.SubCommands(),
+					nil,
+				),
+				apputil.NewCommand("dropindexes",
+					"drop all of the indexes",
+					func(c *cli.Context) error {
+						cx.StateCfg.DropAddrIndex = true
+						cx.StateCfg.DropTxIndex = true
+						cx.StateCfg.DropCfIndex = true
+						// return nodeHandle(cx)(c)
+						return nil
+					},
+					apputil.SubCommands(),
+					nil,
+				),
+				apputil.NewCommand("dropcfindex",
+					"drop the address search index",
+					func(c *cli.Context) error {
+						cx.StateCfg.DropCfIndex = true
+						// return nodeHandle(cx)(c)
+						return nil
+					},
+					apputil.SubCommands(),
+					nil,
+				),
+				apputil.NewCommand("resetchain",
+					"reset the chain",
+					func(c *cli.Context) (err error) {
+						dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
+						if *cx.Config.DbType == "sqlite" {
+							dbName += ".db"
+						}
+						dbPath := filepath.Join(filepath.Join(*cx.Config.DataDir,
+							cx.ActiveNet.Name), dbName)
+						if err = os.RemoveAll(dbPath); log.Check(err) {
+						}
+						// return nodeHandle(cx)(c)
+						return nil
+					},
+					apputil.SubCommands(),
+					nil,
+				),
+			), nil, "n", ),
+			apputil.NewCommand("wallet", "start parallelcoin wallet server", WalletHandle(cx), apputil.SubCommands(
+				apputil.NewCommand("drophistory",
+					"drop the transaction history in the wallet ("+
+						"for development and testing as well as clearing up"+
+						" transaction mess)",
+					func(c *cli.Context) (err error) {
+						Configure(cx, c)
+						log.INFO("dropping wallet history")
+						go func() {
+							log.WARN("starting wallet")
+							if err = walletmain.Main(cx); log.Check(err) {
+								os.Exit(1)
+							} else {
+								log.DEBUG("wallet started")
 							}
-							dbPath := filepath.Join(filepath.Join(*cx.Config.DataDir,
-								cx.ActiveNet.Name), dbName)
-							if err = os.RemoveAll(dbPath); log.Check(err) {
-							}
-							// return nodeHandle(cx)(c)
-							return nil
-						},
-						apputil.SubCommands(),
-					),
+						}()
+						log.DEBUG("waiting for walletChan")
+						cx.WalletServer = <-cx.WalletChan
+						log.DEBUG("walletChan sent")
+						err = legacy.DropWalletHistory(cx.WalletServer)(c)
+						return
+					},
+					apputil.SubCommands(),
+					nil,
 				),
-				"n",
-			),
-			apputil.NewCommand("wallet",
-				"start parallelcoin wallet server",
-				WalletHandle(cx),
-				apputil.SubCommands(
-					apputil.NewCommand("drophistory",
-						"drop the transaction history in the wallet ("+
-							"for development and testing as well as clearing up"+
-							" transaction mess)",
-						func(c *cli.Context) (err error) {
-							Configure(cx, c)
-							log.INFO("dropping wallet history")
-							go func() {
-								log.WARN("starting wallet")
-								if err = walletmain.Main(cx); log.Check(err) {
-									os.Exit(1)
-								} else {
-									log.DEBUG("wallet started")
-								}
-							}()
-							log.DEBUG("waiting for walletChan")
-							cx.WalletServer = <-cx.WalletChan
-							log.DEBUG("walletChan sent")
-							err = legacy.DropWalletHistory(cx.WalletServer)(c)
-							return
-						},
-						apputil.SubCommands(),
-					),
-				),
-				"w",
-			),
-			apputil.NewCommand("shell",
-				"start combined wallet/node shell",
-				shellHandle(cx),
-				apputil.SubCommands(),
-				"s",
-			),
-			apputil.NewCommand(
-				"gui",
-				"start GUI",
-				guiHandle(cx),
-				apputil.SubCommands(),
-			),
-			apputil.NewCommand("kopach",
-				"standalone miner for clusters",
-				KopachHandle(cx),
-				apputil.SubCommands(),
-				"k"),
-			apputil.NewCommand("worker",
-				"single thread parallelcoin miner controlled with binary IPC"+
-					" interface on stdin/stdout; internal use, must have network name string as second arg after worker and"+
-					"nothing before; communicates via net/rpc encoding/gob as default over stdio",
-				kopach_worker.KopachWorkerHandle(cx),
-				apputil.SubCommands(),
-			),
+			), nil, "w", ),
+			apputil.NewCommand("shell", "start combined wallet/node shell", shellHandle(cx), apputil.SubCommands(), nil, "s", ),
+			apputil.NewCommand("gui", "start GUI", guiHandle(cx), apputil.SubCommands(), nil, ),
+			apputil.NewCommand("kopach", "standalone miner for clusters", KopachHandle(cx), apputil.SubCommands(), nil, "k"),
+			apputil.NewCommand("worker", "single thread parallelcoin miner controlled with binary IPC"+
+				" interface on stdin/stdout; internal use, must have network name string as second arg after worker and"+
+				"nothing before; communicates via net/rpc encoding/gob as default over stdio", kopach_worker.KopachWorkerHandle(cx), apputil.SubCommands(), nil, ),
 			apputil.NewCommand("init",
 				"steps through creation of new wallet and initialization for a network with these specified in the main",
 				initHandle(cx),
 				apputil.SubCommands(),
+				nil,
 				"I"),
 		},
 		Flags: []cli.Flag{
