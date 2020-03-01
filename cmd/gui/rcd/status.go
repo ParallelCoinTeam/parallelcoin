@@ -26,7 +26,7 @@ func (r *RcVar) GetDuoUIstatus() {
 func (r *RcVar) GetDuoUIhashesPerSec() {
 	// r.Status.Wallet.Hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
 	log.DEBUG("centralise hash function stuff here") // cpuminer
-	r.Status.Kopach.Hashrate = r.cx.Hashrate.Load().(int)
+	r.Status.Kopach.Hashrate = r.cx.Hashrate.Load()
 	return
 }
 func (r *RcVar) GetDuoUInetworkHashesPerSec() {

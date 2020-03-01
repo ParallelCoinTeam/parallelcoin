@@ -25,7 +25,7 @@ type NodeStatus struct {
 	ConnectionCount  int32
 }
 type KopachStatus struct {
-	Hashrate int
+	Hashrate uint64
 	Hps      []int
 }
 type WalletStatus struct {

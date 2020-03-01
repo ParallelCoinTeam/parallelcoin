@@ -23,7 +23,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	
+	uberatomic "go.uber.org/atomic"
 	"github.com/btcsuite/websocket"
 	
 	"github.com/p9c/pod/app/save"
@@ -164,7 +164,7 @@ type ServerConfig struct {
 	// algorithm. Currently 514 for Scrypt and anything else passes for SHA256d.
 	Algo     string
 	CPUMiner *exec.Cmd
-	Hashrate *atomic.Value
+	Hashrate uberatomic.Uint64
 }
 
 // ServerConnManager represents a connection manager for use with the RPC
@@ -2875,7 +2875,7 @@ func HandleGetHashesPerSec(s *Server, cmd interface{}, closeChan <-chan struct{}
 	// TODO: finish this - needs generator for momentary rate (ewma)
 	// log.DEBUG("miner hashes per second - multicast thing TODO")
 	// simple average for now
-	return s.Cfg.Hashrate.Load().(int), nil
+	return int(s.Cfg.Hashrate.Load()), nil
 }
 
 // HandleGetHeaders implements the getheaders command. NOTE: This is a btcsuite

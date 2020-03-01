@@ -19,6 +19,8 @@ import (
 	"sync/atomic"
 	"time"
 	
+	uberatomic "go.uber.org/atomic"
+	
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/upnp"
@@ -2525,7 +2527,7 @@ type Context struct {
 	// ActiveNet is the active net parameters
 	ActiveNet *netparams.Params
 	// Hashrate is the hash counter
-	Hashrate *atomic.Value
+	Hashrate uberatomic.Uint64
 }
 
 func // NewNode returns a new pod server configured to listen on addr for the

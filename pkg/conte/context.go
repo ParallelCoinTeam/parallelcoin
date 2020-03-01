@@ -4,7 +4,8 @@ package conte
 
 import (
 	"sync"
-	"sync/atomic"
+	
+	"go.uber.org/atomic"
 	
 	"github.com/urfave/cli"
 	
@@ -59,7 +60,7 @@ type Xt struct {
 	// RealNode is the main node
 	RealNode *rpc.Node
 	// Hashrate is the current total hashrate from kopach workers taking work from this node
-	Hashrate *atomic.Value
+	Hashrate atomic.Uint64
 }
 
 // GetNewContext returns a fresh new context
@@ -74,7 +75,6 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 		StateCfg:  new(state.Config),
 		Language:  lang.ExportLanguage(appLang),
 		DataDir:   appdata.Dir(appName, false),
-		Hashrate:  hr,
 	}
 }
 

@@ -79,10 +79,10 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		log.WARN("not running controller without p2p listener enabled")
 		return
 	}
-//	for !cx.RealNode.SyncManager.IsCurrent() {
-//		log.DEBUG("node is not synced, waiting 2 seconds to start controller")
-//		time.Sleep(time.Second * 2)
-//	}
+	//	for !cx.RealNode.SyncManager.IsCurrent() {
+	//		log.DEBUG("node is not synced, waiting 2 seconds to start controller")
+	//		time.Sleep(time.Second * 2)
+	//	}
 	ctx, cancel := context.WithCancel(context.Background())
 	ctrl := &Controller{
 		ctx:                    ctx,
@@ -155,7 +155,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	for cont {
 		select {
 		case <-ticker.C:
-			hr, _ := cx.Hashrate.Load().(int)
+			hr := cx.Hashrate.Load()
 			total := time.Now().Sub(ctrl.began)
 			log.WARNF("%0.3f hash/s %24d total hashes", float64(hr)/total.Seconds(), hr)
 		case <-ctx.Done():
@@ -185,8 +185,14 @@ var handlersMulticast = transport.Handlers{
 		msgBlock := j.GetMsgBlock()
 		// log.WARN(msgBlock.Header.Version)
 		// msgBlock.Transactions = append(c.coinbases[msgBlock.Header.Version], c.)
+		cb, ok := c.coinbases[msgBlock.Header.Version]
+		if !ok {
+			log.DEBUG("coinbases not found", cb)
+			return
+		}
+		cbs := []*util.Tx{cb}
 		msgBlock.Transactions = []*wire.MsgTx{}
-		txs := append([]*util.Tx{c.coinbases[msgBlock.Header.Version]}, c.transactions...)
+		txs := append(cbs, c.transactions...)
 		for i := range txs {
 			msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
 		}
@@ -286,9 +292,9 @@ var handlersMulticast = transport.Handlers{
 		hp := hashrate.LoadContainer(b)
 		report := hp.Struct()
 		// add to total hash counts
-		current, _ := c.cx.Hashrate.Load().(int)
+		current := c.cx.Hashrate.Load()
 		// log.TRACE("received hashrate report", current, report.Count)
-		c.cx.Hashrate.Store(report.Count + current)
+		c.cx.Hashrate.Store(uint64(report.Count) + current)
 		return
 	},
 }
@@ -373,7 +379,7 @@ out:
 			// one minute.
 			if ctrl.lastTxUpdate.Load() != ctrl.blockTemplateGenerator.GetTxSource().
 				LastUpdated() && time.Now().After(time.Unix(0,
-				ctrl.lastGenerated.Load().(int64) + int64(time.Minute))) {
+				ctrl.lastGenerated.Load().(int64)+int64(time.Minute))) {
 				ctrl.UpdateAndSendTemplate()
 				break
 			}

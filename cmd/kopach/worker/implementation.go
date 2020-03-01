@@ -103,7 +103,7 @@ func NewWithConnAndSemaphore(
 	w.dispatchReady.Store(false)
 	// with this we can report cumulative hash counts as well as using it to
 	// distribute algorithms evenly
-	tn := time.Now()
+	// tn := time.Now()
 	w.startNonce = uint32(w.roller.C)
 	go func(w *Worker) {
 		log.DEBUG("main work loop starting")
@@ -194,11 +194,11 @@ func NewWithConnAndSemaphore(
 						w.msgBlock.Header.Nonce++
 						// if we have completed a cycle report the hashrate on starting new algo
 						if w.roller.C%w.roller.RoundsPerAlgo == 0 {
-							since := int(time.Now().Sub(tn)/time.Second) + 1
-							total := w.roller.C - int(w.startNonce)
-							log.INFOF(
-								"%9d hash/s %s %d total", total/since,
-								fork.GetAlgoName(w.msgBlock.Header.Version, nH), total)
+							// since := int(time.Now().Sub(tn)/time.Second) + 1
+							// total := w.roller.C - int(w.startNonce)
+							// log.INFOF(
+							// 	"%9d hash/s %s %d total", total/since,
+							// 	fork.GetAlgoName(w.msgBlock.Header.Version, nH), total)
 							// send out broadcast containing worker nonce and algorithm and count of blocks
 							hashReport := hashrate.Get(w.roller.RoundsPerAlgo, nextAlgo, nH)
 							err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
