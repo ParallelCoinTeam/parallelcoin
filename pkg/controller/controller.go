@@ -275,6 +275,8 @@ var handlersMulticast = transport.Handlers{
 		for i := range otherIPs {
 			o := fmt.Sprintf("%s:%d", otherIPs[i], otherPort)
 			if _, ok := c.otherNodes[o]; !ok {
+				// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
+				// recommended).
 				log.WARN("connecting to lan peer with same PSK", o)
 				c.otherNodes[o] = time.Now()
 				err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true)
@@ -455,7 +457,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 			log.DEBUG("new height")
 			c.height.Store(nH)
 		} else {
-			log.DEBUG("stale or orphan from being later, not sending out")
+			// log.DEBUG("stale or orphan from being later, not sending out")
 			return
 		}
 		// log.SPEW(c.coinbases)
