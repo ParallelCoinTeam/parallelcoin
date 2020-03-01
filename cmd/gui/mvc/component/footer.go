@@ -37,7 +37,7 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, 
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var footerMenuItem theme.DuoUIbutton
 			if icon != "" {
-				footerMenuItem = th.DuoUIbutton("", "", "", th.Color.Dark, icon, CurrentCurrentPageColor(rc.ShowPage, page.Title, navItemIconColor, th.Color.Primary), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
+				footerMenuItem = th.DuoUIbutton("", "", "", "", "", th.Color.Dark, icon, CurrentCurrentPageColor(rc.ShowPage, page.Title, navItemIconColor, th.Color.Primary), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
 				for footerButton.Clicked(gtx) {
 					rc.ShowPage = page.Title
 					page.Command()
@@ -45,7 +45,7 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, 
 				}
 				footerMenuItem.IconLayout(gtx, footerButton)
 			} else {
-				footerMenuItem = th.DuoUIbutton(th.Font.Primary, text, CurrentCurrentPageColor(rc.ShowPage, page.Title, th.Color.Light, th.Color.Primary), "", "", "", footerMenuItemTextSize, footerMenuItemIconSize, 0, footerMenuItemHeight, footerMenuItemPaddingVertical, 0)
+				footerMenuItem = th.DuoUIbutton(th.Font.Primary, text, CurrentCurrentPageColor(rc.ShowPage, page.Title, th.Color.Light, th.Color.Primary), "", "", "", "", "", footerMenuItemTextSize, footerMenuItemIconSize, 0, footerMenuItemHeight, footerMenuItemPaddingVertical, 0)
 				for footerButton.Clicked(gtx) {
 					rc.ShowPage = page.Title
 					page.Command()

@@ -34,7 +34,7 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 				for rc.Settings.Tabs.TabsList[txt].Clicked(gtx) {
 					rc.Settings.Tabs.Current = txt
 				}
-				th.DuoUIbutton(th.Font.Primary, txt, th.Color.Light, th.Color.Info, "", th.Color.Dark, 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
+				th.DuoUIbutton(th.Font.Primary, txt, th.Color.Light, th.Color.Info, th.Color.Info, th.Color.Light, "", th.Color.Dark, 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
 			})
 		})
 	}

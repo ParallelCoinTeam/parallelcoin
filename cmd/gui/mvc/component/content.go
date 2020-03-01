@@ -2,13 +2,13 @@ package component
 
 import (
 	"fmt"
-	
+
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/text"
 	"gioui.org/unit"
-	
+
 	"github.com/p9c/pod/cmd/gui/mvc/controller"
 	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -20,38 +20,64 @@ var (
 	nextBlockHashButton     = new(controller.Button)
 )
 
-func TrioFields(gtx *layout.Context, th *theme.DuoUItheme, labelTextSize, valueTextSize float32, unoLabel, unoValue, duoLabel, duoValue, treLabel, treValue string) func() {
+func UnoField(gtx *layout.Context, field func()) func() {
 	return func() {
 		layout.Flex{
 			Axis:    layout.Horizontal,
-			Spacing: layout.SpaceBetween,
+			Spacing: layout.SpaceAround,
 		}.Layout(gtx,
-			layout.Flexed(0.3, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, unoLabel, fmt.Sprint(unoValue))),
-			layout.Flexed(0.3, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, duoLabel, fmt.Sprint(duoValue))),
-			layout.Flexed(0.3, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, treLabel, fmt.Sprint(treValue))),
+			layout.Flexed(0.99, field),
 		)
-		
+
+	}
+}
+func DuoFields(gtx *layout.Context, axis layout.Axis, left, right func()) func() {
+	return func() {
+		layout.Flex{
+			Axis:    axis,
+			Spacing: layout.SpaceAround,
+		}.Layout(gtx,
+			layout.Rigid(left),
+			layout.Rigid(right),
+		)
+
+	}
+}
+
+func TrioFields(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, unoLabel, unoValue, duoLabel, duoValue, treLabel, treValue string) func() {
+	return func() {
+		layout.Flex{
+			Axis:    axis,
+			Spacing: layout.SpaceAround,
+		}.Layout(gtx,
+			layout.Rigid(ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, unoLabel, fmt.Sprint(unoValue))),
+			layout.Rigid(ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, duoLabel, fmt.Sprint(duoValue))),
+			layout.Rigid(ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, treLabel, fmt.Sprint(treValue))),
+		)
+
 	}
 }
 
 func ContentLabeledField(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, label, value string) func() {
 	return func() {
-		layout.Flex{
-			Axis: axis,
-		}.Layout(gtx,
-			layout.Rigid(contentField(gtx, th, label, th.Color.Light, th.Color.Dark, th.Font.Primary, labelTextSize)),
-			layout.Rigid(contentField(gtx, th, value, th.Color.Light, th.Color.DarkGray, th.Font.Mono, valueTextSize)))
+		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+			layout.Flex{
+				Axis: axis,
+			}.Layout(gtx,
+				layout.Rigid(contentField(gtx, th, label, th.Color.Light, th.Color.Dark, th.Font.Primary, labelTextSize)),
+				layout.Rigid(contentField(gtx, th, value, th.Color.Light, th.Color.DarkGray, th.Font.Mono, valueTextSize)))
+		})
 	}
 }
 
 func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, previousBlockHash, nextBlockHash string, prevPage, nextPage *theme.DuoUIpage) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
-			layout.Flexed(0.5, func() {
+			layout.Flexed(0.495, func() {
 				eh := chainhash.Hash{}
 				if previousBlockHash != eh.String() {
 					var previousBlockButton theme.DuoUIbutton
-					previousBlockButton = th.DuoUIbutton(th.Font.Mono, "Previous Block "+previousBlockHash, th.Color.Light, th.Color.Info, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+					previousBlockButton = th.DuoUIbutton(th.Font.Mono, "Previous Block "+previousBlockHash, th.Color.Light, th.Color.Info, th.Color.Info, th.Color.Light, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
 					for previousBlockHashButton.Clicked(gtx) {
 						// clipboard.Set(b.BlockHash)
 						rc.ShowPage = fmt.Sprintf("BLOCK %s", previousBlockHash)
@@ -61,10 +87,10 @@ func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pr
 					previousBlockButton.Layout(gtx, previousBlockHashButton)
 				}
 			}),
-			layout.Flexed(0.5, func() {
+			layout.Flexed(0.495, func() {
 				if nextBlockHash != "" {
 					var nextBlockButton theme.DuoUIbutton
-					nextBlockButton = th.DuoUIbutton(th.Font.Mono, "Next Block "+nextBlockHash, th.Color.Light, th.Color.Info, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+					nextBlockButton = th.DuoUIbutton(th.Font.Mono, "Next Block "+nextBlockHash, th.Color.Light, th.Color.Info, th.Color.Info, th.Color.Light, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
 					for nextBlockHashButton.Clicked(gtx) {
 						// clipboard.Set(b.BlockHash)
 						rc.ShowPage = fmt.Sprintf("BLOCK %s", nextBlockHash)

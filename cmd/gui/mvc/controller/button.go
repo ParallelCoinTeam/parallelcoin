@@ -43,6 +43,17 @@ func (b *Button) Clicked(gtx *layout.Context) bool {
 	return false
 }
 
+func (b *Button) Hover(gtx *layout.Context) (hover bool) {
+	b.processEvents(gtx)
+	switch b.click.State() {
+	case gesture.StateFocused:
+		hover = true
+	case gesture.StateNormal:
+		hover = false
+	}
+	return
+}
+
 func (b *Button) History() []Click {
 	return b.history
 }

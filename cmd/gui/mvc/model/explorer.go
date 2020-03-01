@@ -8,7 +8,6 @@ import (
 type Explorer struct {
 	Page        *controller.DuoUIcounter
 	PerPage     *controller.DuoUIcounter
-	Pages       int
 	Blocks      []DuoUIblock
 	SingleBlock btcjson.GetBlockVerboseResult
 }

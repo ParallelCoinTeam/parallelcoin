@@ -177,11 +177,13 @@ type DuoUIbutton struct {
 	Text string
 	// Color is the text color.
 	TxColor           color.RGBA
+	BgColor           color.RGBA
+	TxColorHover      color.RGBA
+	BgColorHover      color.RGBA
 	Font              text.Font
 	TextSize          unit.Value
 	Width             int
 	Height            int
-	BgColor           color.RGBA
 	CornerRadius      unit.Value
 	Icon              *DuoUIicon
 	IconSize          int
@@ -192,7 +194,7 @@ type DuoUIbutton struct {
 	hover             bool
 }
 
-func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, icon, iconColor string, textSize, iconSize, width, height, paddingVertical, paddingHorizontal int) DuoUIbutton {
+func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, txtHoverColor, bgHoverColor, icon, iconColor string, textSize, iconSize, width, height, paddingVertical, paddingHorizontal int) DuoUIbutton {
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
@@ -203,6 +205,8 @@ func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, 
 		Height:            height,
 		TxColor:           HexARGB(txtColor),
 		BgColor:           HexARGB(bgColor),
+		TxColorHover:      HexARGB(txtHoverColor),
+		BgColorHover:      HexARGB(bgHoverColor),
 		Icon:              t.Icons[icon],
 		IconSize:          iconSize,
 		IconColor:         HexARGB(iconColor),
@@ -215,6 +219,16 @@ func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor, 
 func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 	hmin := gtx.Constraints.Width.Min
 	vmin := gtx.Constraints.Height.Min
+	txColor := b.TxColor
+	bgColor := b.BgColor
+	//switch button.Hover(gtx) {
+	//case true:
+	//	txColor = b.TxColorHover
+	//	bgColor = b.BgColorHover
+	//default:
+	//	txColor = b.TxColor
+	//	bgColor = b.BgColor
+	//}
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
 			rr := float32(gtx.Px(unit.Dp(0)))
@@ -225,7 +239,7 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 				}},
 				NE: rr, NW: rr, SE: rr, SW: rr,
 			}.Op(gtx.Ops).Add(gtx.Ops)
-			fill(gtx, b.BgColor)
+			fill(gtx, bgColor)
 			for _, c := range button.History() {
 				drawInk(gtx, c)
 			}
@@ -236,7 +250,7 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 			layout.Center.Layout(gtx, func() {
 				layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(10), Left: unit.Dp(12), Right: unit.Dp(12)}.Layout(gtx, func() {
 
-					paint.ColorOp{Color: b.TxColor}.Add(gtx.Ops)
+					paint.ColorOp{Color: txColor}.Add(gtx.Ops)
 					controller.Label{
 						Alignment: text.Middle,
 					}.Layout(gtx, b.shaper, b.Font, b.TextSize, b.Text)
