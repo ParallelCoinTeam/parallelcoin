@@ -152,6 +152,7 @@ var handlers = transport.Handlers{
 			// ignore other controllers while one is active and received
 			// first
 			log.DEBUG("ignoring other controller", addr)
+			w.mx.Unlock()
 			return
 		} else {
 			w.FirstSender = addr

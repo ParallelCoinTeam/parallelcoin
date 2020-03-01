@@ -148,9 +148,14 @@ func NewWithConnAndSemaphore(
 						// work
 						nH := w.block.Height()
 						w.msgBlock.Header.Version = w.roller.GetAlgoVer()
-						w.msgBlock.Header.MerkleRoot = *w.hashes.
-							Load().(map[int32]*chainhash.Hash)[w.msgBlock.Header.Version]
-						w.msgBlock.Header.Bits = w.bitses.Load().(map[int32]uint32)[w.msgBlock.Header.Version]
+						h := w.hashes.Load().(map[int32]*chainhash.Hash)
+						if h != nil {
+							w.msgBlock.Header.MerkleRoot = *h[w.msgBlock.Header.Version]
+						}
+						b := w.bitses.Load().(map[int32]uint32)
+						if bb, ok := b[w.msgBlock.Header.Version]; ok {
+							w.msgBlock.Header.Bits = bb
+						}
 						select {
 						case <-w.stopChan:
 							w.block = nil
@@ -284,15 +289,24 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.msgBlock.Header.PrevBlock = *job.GetPrevBlockHash()
 	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
 	w.msgBlock.Header.Version = w.roller.GetAlgoVer()
-	w.msgBlock.Header.Bits = w.bitses.Load().(map[int32]uint32)[w.msgBlock.Header.Version]
+	b := w.bitses.Load().(map[int32]uint32)
+	var ok bool
+	w.msgBlock.Header.Bits, ok = b[w.msgBlock.Header.Version]
+	if !ok {
+		return errors.New("bits are empty")
+	}
 	rand.Seed(time.Now().UnixNano())
 	w.msgBlock.Header.Nonce = rand.Uint32()
 	// log.TRACE(w.hashes)
-	if w.hashes.Load() != nil {
-		w.msgBlock.Header.MerkleRoot = *w.hashes.
-			Load().(map[int32]*chainhash.Hash)[w.msgBlock.Header.Version]
-	} else {
+	if w.hashes.Load() == nil {
 		return errors.New("failed to decode merkle roots")
+	} else {
+		h := w.hashes.Load().(map[int32]*chainhash.Hash)
+		hh, ok := h[w.msgBlock.Header.Version]
+		if !ok {
+			return errors.New("could not get merkle root from job")
+		}
+		w.msgBlock.Header.MerkleRoot = *hh
 	}
 	w.msgBlock.Header.Timestamp = time.Now()
 	// halting current work
