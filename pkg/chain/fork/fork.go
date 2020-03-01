@@ -13,7 +13,7 @@ import (
 const (
 	Argon2i = "argon2i"
 	Blake2b = "blake2b"
-	X11     = "cn7v2"
+	X11     = "x11"
 	Keccak  = "keccak"
 	Blake3  = "blake3"
 	Scrypt  = "scrypt"
