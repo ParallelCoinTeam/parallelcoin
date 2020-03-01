@@ -139,7 +139,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 var handlers = transport.Handlers{
 	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
 		b []byte) (err error) {
-		log.DEBUG("received job")
+		log.TRACE("received job")
 		w := ctx.(*Worker)
 		j := job.LoadContainer(b)
 		// h := j.GetHashes()

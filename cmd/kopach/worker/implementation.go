@@ -125,7 +125,7 @@ func NewWithConnAndSemaphore(
 				log.DEBUG("worker stopping on pausing message")
 				break pausing
 			}
-			log.DEBUG("worker running")
+			log.TRACE("worker running")
 			// Run state
 		running:
 			for {
@@ -214,9 +214,9 @@ func NewWithConnAndSemaphore(
 					}
 				}
 			}
-			log.DEBUG("worker pausing")
+			log.TRACE("worker pausing")
 		}
-		log.DEBUG("worker finished")
+		log.TRACE("worker finished")
 	}(w)
 	return w
 }
@@ -244,7 +244,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	}
 	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
-	log.DEBUG("loading dispatch connection from job message")
+	// log.DEBUG("loading dispatch connection from job message")
 	log.TRACE(job.String())
 	// if there is no dispatch connection, make one.
 	// If there is one but the server died or was disconnected the
@@ -254,7 +254,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	ips := job.GetIPs()
 	hashes := job.GetHashes()
 	if hashes[5].IsEqual(w.lastMerkle) {
-		log.DEBUG("not a new job")
+		// log.DEBUG("not a new job")
 		*reply = true
 		return
 	}

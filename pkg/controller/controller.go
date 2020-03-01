@@ -297,6 +297,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	var fMC job.Container
 	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
 	shards := transport.GetShards(fMC.Data)
+	log.WARN("shards", len(shards))
 	err = c.multiConn.SendMany(job.WorkMagic, shards)
 	if err != nil {
 		log.ERROR(err)
@@ -368,8 +369,12 @@ out:
 				break
 			}
 			oB, ok := ctrl.oldBlocks.Load().([][]byte)
-			if len(oB) == 0 || !ok {
-				log.DEBUG("template is empty")
+			if len(oB) == 0 {
+				log.WARN("template is zero length")
+				break
+			}
+			if !ok {
+				log.DEBUG("template is nil")
 				break
 			}
 			err := ctrl.multiConn.SendMany(job.WorkMagic, oB)

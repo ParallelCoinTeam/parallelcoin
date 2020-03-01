@@ -87,8 +87,8 @@ func (r *RcVar) GetBlocksExcerpts() func() {
 		blocks := *new([]model.DuoUIblock)
 		for i := startBlock; i < endBlock; i++ {
 			blocks = append(blocks, r.GetBlockExcerpt(i))
-			log.INFO("trazo")
-			log.INFO(r.Status.Node.BlockHeight)
+			// log.INFO("trazo")
+			// log.INFO(r.Status.Node.BlockHeight)
 		}
 		r.Explorer.Blocks = blocks
 		return
