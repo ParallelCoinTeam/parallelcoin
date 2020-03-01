@@ -42,7 +42,9 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}()
 		log.DEBUG("sending back node rpc server handler")
+		cx.Node.Store(false)
 		cx.RPCServer = <-cx.NodeChan
+		cx.Node.Store(true)
 		// interrupt.AddHandler(func() {
 		// 	log.WARN("interrupt received, starting node shutdown")
 		// 	close(cx.NodeKill)

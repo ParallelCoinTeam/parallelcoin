@@ -71,27 +71,24 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// } else {
 	//	log.DEBUG("notification block is not tip block")
 	// }
-	bM := make(map[int32]uint32)
-	bitsMap := &bM
+	bitsMap := make(map[int32]uint32)
 	var err error
-	
-	if tip.Diffs == nil ||
-		len(*tip.Diffs) != len(fork.List[1].AlgoVers) {
+	df := tip.Diffs.Load().(map[int32]uint32)
+	if df == nil ||
+		len(df) != len(fork.List[1].AlgoVers) {
 		bitsMap, err = cx.RealNode.Chain.
 			CalcNextRequiredDifficultyPlan9Controller(tip)
 		if err != nil {
 			log.ERROR(err)
 			return
 		}
-		tip.DiffMx.Lock()
-		tip.Diffs = bitsMap
-		tip.DiffMx.Unlock()
+		tip.Diffs.Store(bitsMap)
 	} else {
-		bitsMap = tip.Diffs
+		bitsMap = tip.Diffs.Load().(map[int32]uint32)
 	}
 	// log.SPEW(*bitsMap)
 	bitses := Bitses.NewBitses()
-	bitses.Put(*bitsMap)
+	bitses.Put(bitsMap)
 	msg = append(msg, bitses)
 	// Now we need to get the values for coinbase for each algorithm
 	// then regenerate the merkle roots
@@ -110,7 +107,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 			nbH == fork.List[1].TestnetStart) {
 		nbH++
 	}
-	for i := range *bitsMap {
+	for i := range bitsMap {
 		val = blockchain.CalcBlockSubsidy(nbH, cx.ActiveNet, i)
 		txc := txs.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val

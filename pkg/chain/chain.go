@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 	
+	"go.uber.org/atomic"
+	
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
 	
@@ -169,8 +171,8 @@ type // BlockChain provides functions for working with the bitcoin block chain.
 		// DifficultyAdjustments keeps track of the latest difficulty adjustment
 		// for each algorithm
 		DifficultyAdjustments map[string]float64
-		DifficultyBits        *map[int32]uint32
-		DifficultyHeight      int32
+		DifficultyBits        atomic.Value
+		DifficultyHeight      atomic.Int32
 	}
 
 func // HaveBlock returns whether or not the chain instance has the block
@@ -1637,8 +1639,8 @@ New(config *Config) (*BlockChain, error) {
 		warningCaches:         newThresholdCaches(vbNumBits),
 		deploymentCaches:      newThresholdCaches(chaincfg.DefinedDeployments),
 		DifficultyAdjustments: make(map[string]float64),
-		DifficultyBits:        new(map[int32]uint32),
 	}
+	b.DifficultyBits.Store(make(map[int32]uint32))
 	// Initialize the chain state from the passed database.
 	// When the db does not yet contain any chain state,
 	// both it and the chain state will be initialized to contain only the
@@ -1664,15 +1666,14 @@ New(config *Config) (*BlockChain, error) {
 		return nil, err
 	}
 	bestNode := b.BestChain.Tip()
-	if bestNode.Diffs == nil ||
-		len(*bestNode.Diffs) != len(fork.List[1].AlgoVers) {
+	df, ok := bestNode.Diffs.Load().(map[int32]uint32)
+	if df == nil || !ok ||
+		len(df) != len(fork.List[1].AlgoVers) {
 		bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(bestNode)
 		if err != nil {
 			log.ERROR(err)
 		}
-		bestNode.DiffMx.Lock()
-		bestNode.Diffs = bitsMap
-		bestNode.DiffMx.Unlock()
+		bestNode.Diffs.Store(bitsMap)
 	}
 	log.INFOF("chain state (height %d, hash %v, totaltx %d, work %v)",
 		bestNode.height, bestNode.hash, b.stateSnapshot.TotalTxns,

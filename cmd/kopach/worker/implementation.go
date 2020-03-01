@@ -26,7 +26,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-const RoundsPerAlgo = 50
+const RoundsPerAlgo = 10
 
 type Worker struct {
 	sem           sem.T
@@ -38,7 +38,7 @@ type Worker struct {
 	ciph          cipher.AEAD
 	Quit          chan struct{}
 	run           sem.T
-	block         *util.Block
+	block         atomic.Value
 	msgBlock      *wire.MsgBlock
 	bitses        atomic.Value
 	hashes        atomic.Value
@@ -47,13 +47,7 @@ type Worker struct {
 	startNonce    uint32
 	startChan     chan struct{}
 	stopChan      chan struct{}
-	// running    uint32
 }
-
-const (
-	OFF uint32 = iota
-	ON
-)
 
 type Counter struct {
 	C             int
@@ -100,12 +94,12 @@ func NewWithConnAndSemaphore(
 		pipeConn:  conn,
 		Quit:      quit,
 		run:       sem.New(1),
-		block:     util.NewBlock(msgBlock),
 		msgBlock:  msgBlock,
 		roller:    NewCounter(RoundsPerAlgo),
 		startChan: make(chan struct{}),
 		stopChan:  make(chan struct{}),
 	}
+	w.block.Store(util.NewBlock(msgBlock))
 	w.dispatchReady.Store(false)
 	// with this we can report cumulative hash counts as well as using it to
 	// distribute algorithms evenly
@@ -135,7 +129,7 @@ func NewWithConnAndSemaphore(
 					// drain start channel in run mode
 					continue
 				case <-w.stopChan:
-					w.block = nil
+					w.block.Store(&util.Block{})
 					w.bitses.Store((map[int32]uint32)(nil))
 					w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 					break running
@@ -143,12 +137,12 @@ func NewWithConnAndSemaphore(
 					log.DEBUG("worker stopping on pausing message")
 					break pausing
 				default:
-					if w.block == nil || w.bitses.Load() == nil || w.hashes.Load() == nil ||
+					if w.block.Load() == nil || w.bitses.Load() == nil || w.hashes.Load() == nil ||
 						!w.dispatchReady.Load() {
 						// log.INFO("stop was called before we started working")
 					} else {
 						// work
-						nH := w.block.Height()
+						nH := w.block.Load().(*util.Block).Height()
 						w.msgBlock.Header.Version = w.roller.GetAlgoVer()
 						h := w.hashes.Load().(map[int32]*chainhash.Hash)
 						if h != nil {
@@ -160,7 +154,7 @@ func NewWithConnAndSemaphore(
 						}
 						select {
 						case <-w.stopChan:
-							w.block = nil
+							w.block.Store(&util.Block{})
 							w.bitses.Store((map[int32]uint32)(nil))
 							w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 							break running
@@ -319,8 +313,9 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	}
 	w.msgBlock.Header.Timestamp = time.Now()
 	// make the work select block start running
-	w.block = util.NewBlock(w.msgBlock)
-	w.block.SetHeight(newHeight)
+	bb := util.NewBlock(w.msgBlock)
+	bb.SetHeight(newHeight)
+	w.block.Store(bb)
 	// halting current work
 	w.stopChan <- struct{}{}
 	w.startChan <- struct{}{}

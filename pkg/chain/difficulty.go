@@ -87,32 +87,30 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode, algoname, l)
 	// Plan 9 from Crypto Space
 	case 1:
-		lastNode.DiffMx.Lock()
-		defer lastNode.DiffMx.Unlock()
-		if lastNode.Diffs == nil {
-			lNd := make(map[int32]uint32)
-			lastNode.Diffs = &lNd
+		bits, ok := lastNode.Diffs.Load().(map[int32]uint32)
+		if bits == nil || !ok {
+			lastNode.Diffs.Store(make(map[int32]uint32))
 		}
-		bits := lastNode.Diffs
 		version := fork.GetAlgoVer(algoname, lastNode.height+1)
-		if (*bits)[version] == 0 {
+		if bits[version] == 0 {
 			bits, err = b.CalcNextRequiredDifficultyPlan9Controller(lastNode)
 			if err != nil {
 				log.ERROR(err)
 				return
 			}
-			b.DifficultyBits = bits
+			// log.DEBUG(bits, reflect.TypeOf(bits))
+			b.DifficultyBits.Store(bits)
 			// log.DEBUGF("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
 		}
-		newTargetBits = (*bits)[version]
+		newTargetBits = bits[version]
 		return
 	}
 	return
 }
 
-func // RightJustify takes a string and right justifies it by a width or
+// RightJustify takes a string and right justifies it by a width or
 // crops it
-RightJustify(s string, w int) string {
+func RightJustify(s string, w int) string {
 	sw := len(s)
 	diff := w - sw
 	if diff > 0 {

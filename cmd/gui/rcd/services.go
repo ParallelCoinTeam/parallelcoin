@@ -3,7 +3,6 @@ package rcd
 import (
 	"fmt"
 	"os"
-	"sync/atomic"
 	
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/walletmain"
@@ -31,7 +30,6 @@ func (r *RcVar) StartServices() (err error) {
 
 func (r *RcVar) DuoWalletService() error {
 	r.cx.WalletKill = make(chan struct{})
-	r.cx.Wallet = &atomic.Value{}
 	r.cx.Wallet.Store(false)
 	var err error
 	if !*r.cx.Config.WalletOff {
@@ -57,7 +55,6 @@ func (r *RcVar) DuoWalletService() error {
 
 func (r *RcVar) DuoNodeService() error {
 	r.cx.NodeKill = make(chan struct{})
-	r.cx.Node = &atomic.Value{}
 	r.cx.Node.Store(false)
 	var err error
 	if !*r.cx.Config.NodeOff {

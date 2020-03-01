@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"sync"
 	"time"
 	
 	"go.uber.org/atomic"
@@ -47,10 +46,9 @@ const (
 type Controller struct {
 	multiConn              *transport.Channel
 	uniConn                *transport.Channel
-	active                 *atomic.Bool
+	active                 atomic.Bool
 	ctx                    context.Context
 	cx                     *conte.Xt
-	mx                     *sync.Mutex
 	Ready                  atomic.Bool
 	height                 *atomic.Value
 	blockTemplateGenerator *mining.BlkTmplGenerator
@@ -58,11 +56,10 @@ type Controller struct {
 	transactions           []*util.Tx
 	oldBlocks              *atomic.Value
 	prevHash               *chainhash.Hash
-	lastTxUpdate           time.Time
-	lastGenerated          time.Time
+	lastTxUpdate           atomic.Value
+	lastGenerated          atomic.Value
 	pauseShards            [][]byte
 	sendAddresses          []*net.UDPAddr
-	subMx                  *sync.Mutex
 	submitChan             chan []byte
 	buffer                 *ring.Ring
 	began                  time.Time
@@ -88,16 +85,11 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	ctrl := &Controller{
-		active:                 &atomic.Bool{},
 		ctx:                    ctx,
 		cx:                     cx,
-		mx:                     &sync.Mutex{},
 		height:                 &atomic.Value{},
 		oldBlocks:              &atomic.Value{},
-		lastTxUpdate:           time.Now(),
-		lastGenerated:          time.Now(),
 		sendAddresses:          []*net.UDPAddr{},
-		subMx:                  &sync.Mutex{},
 		submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
 		coinbases:              make(map[int32]*util.Tx),
@@ -105,6 +97,9 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		began:                  time.Now(),
 		otherNodes:             make(map[string]time.Time),
 	}
+	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
+	ctrl.lastGenerated.Store(time.Now().UnixNano())
+	ctrl.active.Store(false)
 	var err error
 	ctrl.multiConn, err = transport.NewBroadcastChannel("controller",
 		ctrl, *cx.Config.MinerPass,
@@ -162,7 +157,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		case <-ticker.C:
 			hr, _ := cx.Hashrate.Load().(int)
 			total := time.Now().Sub(ctrl.began)
-			log.INFOF("%0.3f hash/s %24d total hashes", float64(hr)/total.Seconds(), hr)
+			log.WARNF("%0.3f hash/s %24d total hashes", float64(hr)/total.Seconds(), hr)
 		case <-ctx.Done():
 			cont = false
 		case <-interrupt.HandlersDone:
@@ -182,8 +177,10 @@ var handlersMulticast = transport.Handlers{
 		log.DEBUG("received solution")
 		// log.SPEW(ctx)
 		c := ctx.(*Controller)
-		c.mx.Lock()
-		defer c.mx.Unlock()
+		if !c.active.Load() || !c.cx.Node.Load().(bool) {
+			log.DEBUG("not active yet")
+			return
+		}
 		j := sol.LoadSolContainer(b)
 		msgBlock := j.GetMsgBlock()
 		// log.WARN(msgBlock.Header.Version)
@@ -253,11 +250,15 @@ var handlersMulticast = transport.Handlers{
 			fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
 		return
 	},
-
-	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
+	string(job.WorkMagic):
+	func(ctx interface{}, src *net.UDPAddr, dst string,
 		b []byte) (err error) {
 		c := ctx.(*Controller)
-		// log.DEBUG("received job")
+		if !c.active.Load() {
+			log.DEBUG("not active yet")
+			return
+		}
+		log.WARN("received job")
 		j := job.LoadContainer(b)
 		otherIPs := j.GetIPs()
 		otherPort := j.GetP2PListenersPort()
@@ -278,6 +279,10 @@ var handlersMulticast = transport.Handlers{
 	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
 		// log.DEBUG("received hashrate report from", src.String(), dst)
 		c := ctx.(*Controller)
+		if !c.active.Load() {
+			log.DEBUG("not active yet")
+			return
+		}
 		hp := hashrate.LoadContainer(b)
 		report := hp.Struct()
 		// add to total hash counts
@@ -311,8 +316,8 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	}
 	c.prevHash = &template.Block.Header.PrevBlock
 	c.oldBlocks.Store(shards)
-	c.lastGenerated = time.Now()
-	c.lastTxUpdate = time.Now()
+	c.lastGenerated.Store(time.Now().UnixNano())
+	c.lastTxUpdate.Store(time.Now().UnixNano())
 	return
 }
 
@@ -366,9 +371,9 @@ out:
 			// The current block is stale if the memory pool has been updated
 			// since the block template was generated and it has been at least
 			// one minute.
-			if ctrl.lastTxUpdate != ctrl.blockTemplateGenerator.GetTxSource().
-				LastUpdated() && time.Now().After(
-				ctrl.lastGenerated.Add(time.Minute)) {
+			if ctrl.lastTxUpdate.Load() != ctrl.blockTemplateGenerator.GetTxSource().
+				LastUpdated() && time.Now().After(time.Unix(0,
+				ctrl.lastGenerated.Load().(int64) + int64(time.Minute))) {
 				ctrl.UpdateAndSendTemplate()
 				break
 			}
@@ -424,8 +429,6 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 			// First to arrive locks out any others while processing
 			switch n.Type {
 			case blockchain.NTBlockAccepted:
-				c.subMx.Lock()
-				defer c.subMx.Unlock()
 				log.DEBUG("received new chain notification")
 				// construct work message
 				_, ok := n.Data.(*util.Block)
@@ -468,7 +471,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 		c.oldBlocks.Store(shards)
 		if err := c.multiConn.SendMany(job.WorkMagic, shards); log.Check(err) {
 		}
-		c.lastGenerated = time.Now()
-		c.lastTxUpdate = time.Now()
+		c.lastGenerated.Store(time.Now().UnixNano())
+		c.lastTxUpdate.Store(time.Now().UnixNano())
 	}
 }

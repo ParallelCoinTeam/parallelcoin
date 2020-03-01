@@ -42,11 +42,11 @@ type Xt struct {
 	// DataDir is the default data dir
 	DataDir string
 	// Node is the run state of the node
-	Node *atomic.Value
+	Node atomic.Value
 	// NodeKill is the killswitch for the Node
 	NodeKill chan struct{}
 	// Wallet is the run state of the wallet
-	Wallet *atomic.Value
+	Wallet atomic.Value
 	// WalletKill is the killswitch for the Wallet
 	WalletKill chan struct{}
 	// RPCServer is needed to directly query data

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"sync"
 	"time"
 	
 	"github.com/urfave/cli"
@@ -29,15 +28,14 @@ type HashCount struct {
 }
 
 type Worker struct {
-	active        *atomic.Bool
+	active        atomic.Bool
 	conn          *transport.Channel
 	ctx           context.Context
 	cx            *conte.Xt
-	mx            *sync.Mutex
 	sendAddresses []*net.UDPAddr
 	workers       []*client.Client
-	FirstSender   string
-	lastSent      time.Time
+	FirstSender   atomic.String
+	lastSent      atomic.Int64
 	Status        atomic.String
 	HashTick      chan HashCount
 	LastHash      *chainhash.Hash
@@ -49,13 +47,12 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		log.DEBUG("miner controller starting")
 		ctx, cancel := context.WithCancel(context.Background())
 		w := &Worker{
-			active:        &atomic.Bool{},
 			ctx:           ctx,
 			cx:            cx,
-			mx:            &sync.Mutex{},
 			sendAddresses: []*net.UDPAddr{},
-			lastSent:      time.Now(),
 		}
+		w.lastSent.Store(time.Now().UnixNano())
+		w.active.Store(false)
 		log.DEBUG("opening broadcast channel listener")
 		w.conn, err = transport.
 			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
@@ -103,18 +100,14 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 					// log.DEBUG("tick", w.lastSent, w.FirstSender)
 					// if the last message sent was 3 seconds ago the server is
 					// almost certainly disconnected or crashed so clear FirstSender
-					w.mx.Lock()
-					since := time.Now().Sub(w.lastSent)
-					wasSending := since > time.Second*3 && w.FirstSender != ""
-					w.mx.Unlock()
+					since := time.Now().Sub(time.Unix(0 , int64(w.lastSent.Load())))
+					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
 						log.DEBUG("previous current controller has stopped" +
 							" broadcasting")
 						// when this string is clear other broadcasts will be
 						// listened to
-						w.mx.Lock()
-						w.FirstSender = ""
-						w.mx.Unlock()
+						w.FirstSender.Store("")
 						// pause the workers
 						for i := range w.workers {
 							log.DEBUG("sending pause to worker", i)
@@ -143,31 +136,18 @@ var handlers = transport.Handlers{
 		w := ctx.(*Worker)
 		j := job.LoadContainer(b)
 		// h := j.GetHashes()
-		w.mx.Lock()
 		ips := j.GetIPs()
 		cP := j.GetControllerListenerPort()
 		addr := net.JoinHostPort(ips[0].String(), fmt.Sprint(cP))
-		otherSent := w.FirstSender != addr && w.FirstSender != ""
+		firstSender := w.FirstSender.Load()
+		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
-			// ignore other controllers while one is active and received
-			// first
-			// log.DEBUG("ignoring other controller", addr)
-			w.mx.Unlock()
+			// ignore other controllers while one is active and received first
 			return
 		} else {
-			w.FirstSender = addr
-			w.lastSent = time.Now()
+			w.FirstSender.Store(addr)
+			w.lastSent.Store(time.Now().UnixNano())
 		}
-		w.mx.Unlock()
-		// if len(h) > 0 {
-		// 	// log.DEBUG(h)
-		// 	if w.LastHash.IsEqual(h[5]) {
-		// 		log.TRACE("not responding to same job")
-		// 		return
-		// 	} else {
-		// 		w.LastHash = h[5]
-		// 	}
-		// }
 		log.TRACE("received job")
 		for i := range w.workers {
 			log.TRACE("sending job to worker", i)
@@ -190,10 +170,8 @@ var handlers = transport.Handlers{
 				log.ERROR(err)
 			}
 		}
-		w.mx.Lock()
 		// clear the FirstSender
-		w.FirstSender = ""
-		w.mx.Unlock()
+		w.FirstSender.Store("")
 		return
 	},
 }

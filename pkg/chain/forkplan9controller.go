@@ -39,21 +39,20 @@ func (al AlgoList) Swap(i, j int) {
 // difficulty targets for sending out with the other pieces required to
 // construct a block, as these numbers are generated from block timestamps
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
-	lastNode *BlockNode) (newTargetBits *map[int32]uint32, err error) {
+	lastNode *BlockNode) (newTargetBits map[int32]uint32, err error) {
 	nH := lastNode.height + 1
 	currFork := fork.GetCurrent(nH)
 	nTB := make(map[int32]uint32)
-	newTargetBits = &nTB
 	switch currFork {
 	case 0:
 		for i := range fork.List[0].Algos {
 			v := fork.List[0].Algos[i].Version
 			nTB[v], err = b.CalcNextRequiredDifficultyHalcyon(0, lastNode, i, true)
 		}
-		return &nTB, nil
+		return nTB, nil
 	case 1:
-		if b.DifficultyHeight != nH {
-			b.DifficultyHeight = nH
+		if b.DifficultyHeight.Load() != nH {
+			b.DifficultyHeight.Store(nH)
 			currFork := fork.GetCurrent(nH)
 			algos := make(AlgoList, len(fork.List[currFork].Algos))
 			var counter int
@@ -68,10 +67,10 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 			for _, v := range algos {
 				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(0, lastNode, v.Name, true)
 			}
-			newTargetBits = &nTB
+			newTargetBits = nTB
 			// log.SPEW(newTargetBits)
 		} else {
-			newTargetBits = b.DifficultyBits
+			newTargetBits = b.DifficultyBits.Load().(map[int32]uint32)
 		}
 		return
 	}

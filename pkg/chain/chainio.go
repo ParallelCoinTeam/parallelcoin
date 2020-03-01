@@ -914,12 +914,12 @@ func // createChainState initializes both the database and the chain state to
 	node := NewBlockNode(header, nil)
 	node.status = statusDataStored | statusValid
 	var err error
-	node.DiffMx.Lock()
-	node.Diffs, err = b.CalcNextRequiredDifficultyPlan9Controller(node)
+	var df map[int32]uint32
+	df, err = b.CalcNextRequiredDifficultyPlan9Controller(node)
+	node.Diffs.Store(df)
 	if err != nil {
 		log.ERROR(err)
 	}
-	node.DiffMx.Unlock()
 	b.BestChain.SetTip(node)
 	// Add the new node to the index which is used for faster lookups.
 	b.Index.addNode(node)
