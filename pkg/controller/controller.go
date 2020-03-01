@@ -257,7 +257,7 @@ var handlersMulticast = transport.Handlers{
 	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
 		b []byte) (err error) {
 		c := ctx.(*Controller)
-		log.DEBUG("received job")
+		// log.DEBUG("received job")
 		j := job.LoadContainer(b)
 		otherIPs := j.GetIPs()
 		otherPort := j.GetP2PListenersPort()
@@ -276,7 +276,7 @@ var handlersMulticast = transport.Handlers{
 	// hashrate reports from workers
 	string(hashrate.HashrateMagic):
 	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
-		log.DEBUG("received hashrate report from", src.String(), dst)
+		// log.DEBUG("received hashrate report from", src.String(), dst)
 		c := ctx.(*Controller)
 		hp := hashrate.LoadContainer(b)
 		report := hp.Struct()

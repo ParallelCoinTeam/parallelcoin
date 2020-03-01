@@ -12,6 +12,7 @@ import (
 	"go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/kopach/client"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/controller"
 	"github.com/p9c/pod/pkg/controller/job"
@@ -39,7 +40,7 @@ type Worker struct {
 	lastSent      time.Time
 	Status        atomic.String
 	HashTick      chan HashCount
-	LastHash      string
+	LastHash      *chainhash.Hash
 }
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
@@ -139,7 +140,6 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 var handlers = transport.Handlers{
 	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
 		b []byte) (err error) {
-		log.TRACE("received job")
 		w := ctx.(*Worker)
 		j := job.LoadContainer(b)
 		// h := j.GetHashes()
@@ -161,21 +161,14 @@ var handlers = transport.Handlers{
 		w.mx.Unlock()
 		// if len(h) > 0 {
 		// 	// log.DEBUG(h)
-		// 	hS := h[5].String()
-		// 	if w.LastHash == hS {
+		// 	if w.LastHash.IsEqual(h[5]) {
 		// 		log.TRACE("not responding to same job")
 		// 		return
 		// 	} else {
-		// 		w.LastHash = hS
+		// 		w.LastHash = h[5]
 		// 	}
 		// }
 		log.TRACE("received job")
-		// if newHash == w.LastHash {
-		// 	return
-		// } else {
-		// 	w.LastHash = newHash
-		// }
-		
 		for i := range w.workers {
 			log.TRACE("sending job to worker", i)
 			err := w.workers[i].NewJob(&j)
