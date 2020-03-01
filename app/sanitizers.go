@@ -140,8 +140,9 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 		}
 	}
 	if *cx.Config.AutoPorts {
-		*cfg.Listeners = cli.StringSlice{}
-		*cfg.RPCListeners = cli.StringSlice{}
+		*cfg.WalletRPCListeners = cli.StringSlice{":0"}
+		*cfg.Listeners = cli.StringSlice{":0"}
+		*cfg.RPCListeners = cli.StringSlice{":0"}
 	}
 	if *cfg.RPCConnect == "" {
 		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
