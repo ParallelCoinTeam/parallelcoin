@@ -119,7 +119,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
 	ll := pM.GetP2PListeners()
-	for i := range ll{
+	for i := range ll {
 		ctrl.otherNodes[ll[i]] = time.Now()
 	}
 	var pauseShards [][]byte
@@ -277,7 +277,7 @@ var handlersMulticast = transport.Handlers{
 			if _, ok := c.otherNodes[o]; !ok {
 				log.WARN("connecting to lan peer with same PSK", o)
 				c.otherNodes[o] = time.Now()
-						err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true)
+				err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true)
 			}
 		}
 		return
@@ -365,10 +365,7 @@ out:
 			if ctrl.lastTxUpdate != ctrl.blockTemplateGenerator.GetTxSource().
 				LastUpdated() && time.Now().After(
 				ctrl.lastGenerated.Add(time.Minute)) {
-				err := ctrl.sendNewBlockTemplate()
-				if err != nil {
-					log.ERROR(err)
-				}
+				ctrl.UpdateAndSendTemplate()
 				break
 			}
 			oB, ok := ctrl.oldBlocks.Load().([][]byte)
@@ -432,36 +429,42 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 					log.WARN("chain accepted notification is not a block")
 					break
 				}
-				c.coinbases = make(map[int32]*util.Tx)
-				template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
-				if template != nil {
-					c.transactions = []*util.Tx{}
-					for _, v := range template.Block.Transactions[1:] {
-						c.transactions = append(c.transactions, util.NewTx(v))
-					}
-					// log.DEBUG("got new template")
-					msgB := template.Block
-					// log.DEBUG(*c.cx.Config.Controller)
-					// c.coinbases = msgB.Transactions
-					var mC job.Container
-					mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB),
-						advertisment.Get(c.cx), &c.coinbases)
-					nH := mC.GetNewHeight()
-					if c.height.Load().(int32) < nH {
-						log.DEBUG("new height")
-						c.height.Store(nH)
-					} else {
-						log.DEBUG("stale or orphan from being later, not sending out")
-						return
-					}
-					// log.SPEW(c.coinbases)
-					// log.SPEW(mC.Data)
-					shards := transport.GetShards(mC.Data)
-					c.oldBlocks.Store(shards)
-					if err := c.multiConn.SendMany(job.WorkMagic, shards); log.Check(err) {
-					}
-				}
+				c.UpdateAndSendTemplate()
 			}
 		}
+	}
+}
+
+func (c *Controller) UpdateAndSendTemplate() {
+	c.coinbases = make(map[int32]*util.Tx)
+	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
+	if template != nil {
+		c.transactions = []*util.Tx{}
+		for _, v := range template.Block.Transactions[1:] {
+			c.transactions = append(c.transactions, util.NewTx(v))
+		}
+		// log.DEBUG("got new template")
+		msgB := template.Block
+		// log.DEBUG(*c.cx.Config.Controller)
+		// c.coinbases = msgB.Transactions
+		var mC job.Container
+		mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB),
+			advertisment.Get(c.cx), &c.coinbases)
+		nH := mC.GetNewHeight()
+		if c.height.Load().(int32) < nH {
+			log.DEBUG("new height")
+			c.height.Store(nH)
+		} else {
+			log.DEBUG("stale or orphan from being later, not sending out")
+			return
+		}
+		// log.SPEW(c.coinbases)
+		// log.SPEW(mC.Data)
+		shards := transport.GetShards(mC.Data)
+		c.oldBlocks.Store(shards)
+		if err := c.multiConn.SendMany(job.WorkMagic, shards); log.Check(err) {
+		}
+		c.lastGenerated = time.Now()
+		c.lastTxUpdate = time.Now()
 	}
 }
