@@ -2,7 +2,6 @@ package transport
 
 import (
 	"crypto/cipher"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
@@ -81,9 +80,9 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		log.TRACE(c.Creator, "sent packets", string(magic),
-			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
-			c.Sender.RemoteAddr())
+		// log.TRACE(c.Creator, "sent packets", string(magic),
+		// 	hex.EncodeToString(nonce), c.Sender.LocalAddr(),
+		// 	c.Sender.RemoteAddr())
 	}
 	return
 }
@@ -254,10 +253,6 @@ out:
 			// Filter messages by magic, if there is no match in the map the packet is ignored
 		} else if numBytes > 4 {
 			magic := string(buffer[:4])
-			// log.DEBUG("magic", magic)
-			// for i := range handlers {
-			// 	log.INFO(i)
-			// }
 			if handler, ok := handlers[magic]; ok {
 				// if caller needs to know the liveness status of the
 				// controller it is working on, the code below
@@ -274,9 +269,7 @@ out:
 					continue
 				}
 				if bn, ok := channel.buffers[nonce]; ok {
-					// log.DEBUGF("%s adding shard to %"+fmt.Sprint(nL*2)+"x", channel.Creator, nonceBytes)
 					if !bn.Decoded {
-						// log.DEBUG(PrevCallers())
 						bn.Buffers = append(bn.Buffers, shard)
 						if len(bn.Buffers) >= 3 {
 							// try to decode it
@@ -286,22 +279,9 @@ out:
 								log.ERROR(err)
 								continue
 							}
-							// log.DEBUG(hex.EncodeToString(cipherText))
 							bn.Decoded = true
-							// if channel.ciph != nil {
-							// 	if msg, err = DecryptMessage(channel.Creator, channel.ciph, cipherText); log.Check(err) {
-							// 		log.WARN(PrevCallers())
-							// 		continue
-							
-							// 	}
 							if err = handler(channel.context, src, address, cipherText); log.Check(err) {
-								// err = handler(channel.context, src, channel.Sender.RemoteAddr().String(), cipherText)
-								// if err != nil {
-								// 	log.ERROR(err)
-								// 	continue
-								// }
 							}
-							// }
 						}
 					} else {
 						for i := range channel.buffers {
@@ -314,15 +294,12 @@ out:
 						}
 					}
 				} else {
-					// log.DEBUGF("%s adding %s %x to buffers", channel.Creator, magic, nonceBytes)
 					channel.buffers[nonce] = &MsgBuffer{[][]byte{},
 						time.Now(), false, src}
 					channel.buffers[nonce].Buffers = append(channel.buffers[nonce].
 						Buffers, shard)
 				}
 			} else {
-				// log.DEBUGF("ignoring irrelevant message %s\n%s\n%s", magic, PrevCallers(), string(debug.Stack()))
-				// log.DEBUG("ignoring irrelevant message", magic, channel.Creator)
 				continue
 			}
 		} else {

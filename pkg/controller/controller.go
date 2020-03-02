@@ -9,6 +9,7 @@ import (
 	"net"
 	"time"
 	
+	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 	
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -23,6 +24,7 @@ import (
 	"github.com/p9c/pod/pkg/controller/pause"
 	"github.com/p9c/pod/pkg/controller/sol"
 	"github.com/p9c/pod/pkg/log"
+	rav "github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/simplebuffer/Uint16"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
@@ -66,6 +68,8 @@ type Controller struct {
 	began                  time.Time
 	otherNodes             map[string]time.Time
 	listenPort             int
+	hashCount              atomic.Uint64
+	hashSampleBuf          *rav.BufferUint64
 }
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
@@ -97,6 +101,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		began:                  time.Now(),
 		otherNodes:             make(map[string]time.Time),
 		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
+		hashSampleBuf:          rav.NewBufferUint64(100),
 	}
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
@@ -111,7 +116,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		cancel()
 		return
 	}
-	buffer = ctrl.buffer
+	// buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
 	ll := pM.GetP2PListeners()
 	for i := range ll {
@@ -149,15 +154,12 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
-	ticker := time.NewTicker(time.Second * fork.IntervalBase)
+	ticker := time.NewTicker(time.Second)
 	cont := true
 	for cont {
 		select {
 		case <-ticker.C:
-			hr := cx.Hashrate.Load()
-			total := time.Now().Sub(ctrl.began)
-			log.WARNF("%0.3f hash/s %24d total hashes",
-				float64(hr)/total.Seconds(), hr)
+			log.DEBUGF("average hashrate %.2f", ctrl.HashReport())
 		case <-ctx.Done():
 			cont = false
 		case <-interrupt.HandlersDone:
@@ -167,6 +169,29 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	log.TRACE("controller exiting")
 	ctrl.active.Store(false)
 	return
+}
+
+func (c *Controller) HashReport() float64 {
+	c.hashSampleBuf.Add(c.hashCount.Load())
+	// log.DEBUG(c.hashSampleBuf.Buf)
+	av := ewma.NewMovingAverage()
+	var i int
+	var prev uint64
+	if err := c.hashSampleBuf.ForEach(func(v uint64) error {
+		if i < 1 {
+			prev = v
+		} else {
+			interval := v - prev
+			av.Add(float64(interval))
+			prev = v
+		}
+		i++
+		return nil
+	}); log.Check(err) {
+	}
+	// log.INFO(w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
+	// log.INFO("average hashrate", )
+	return av.Value()
 }
 
 // var handlersUnicast = transport.Handlers{}
@@ -294,15 +319,15 @@ var handlersMulticast = transport.Handlers{
 		// log.DEBUG("received hashrate report from", src.String(), dst)
 		c := ctx.(*Controller)
 		if !c.active.Load() {
-			log.DEBUG("not active yet")
+			// log.DEBUG("not active yet")
 			return
 		}
 		hp := hashrate.LoadContainer(b)
-		report := hp.Struct()
+		// report := hp.Struct()
 		// add to total hash counts
-		current := c.cx.Hashrate.Load()
-		// log.TRACE("received hashrate report", current, report.Count)
-		c.cx.Hashrate.Store(uint64(report.Count) + current)
+		// current :=
+		// log.DEBUG(c.hashCount.Load())
+		c.hashCount.Store(c.hashCount.Load() + uint64(hp.GetCount()))
 		return
 	},
 }
@@ -464,16 +489,16 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 }
 
 func (c *Controller) UpdateAndSendTemplate() {
-	log.DEBUG("updating and sending out template")
+	// log.DEBUG("updating and sending out template")
 	c.coinbases = make(map[int32]*util.Tx)
 	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 	if template != nil {
-		log.DEBUG("got a template for sending")
+		// log.DEBUG("got a template for sending")
 		c.transactions = []*util.Tx{}
 		for _, v := range template.Block.Transactions[1:] {
 			c.transactions = append(c.transactions, util.NewTx(v))
 		}
-		log.DEBUG("got new template")
+		// log.DEBUG("got new template")
 		msgB := template.Block
 		// log.DEBUG(*c.cx.Config.Controller)
 		// c.coinbases = msgB.Transactions
@@ -490,7 +515,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 		}
 		// log.SPEW(c.coinbases)
 		// log.SPEW(mC.Data)
-		log.DEBUG("getting shards for message")
+		// log.DEBUG("getting shards for message")
 		shards := transport.GetShards(mC.Data)
 		c.oldBlocks.Store(shards)
 		if err := c.multiConn.SendMany(job.WorkMagic, shards); log.Check(err) {
@@ -498,7 +523,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 		c.prevHash = &template.Block.Header.PrevBlock
 		c.lastGenerated.Store(time.Now().UnixNano())
 		c.lastTxUpdate.Store(time.Now().UnixNano())
-		log.DEBUG("sent out template")
+		// log.DEBUG("sent out template")
 	} else {
 		log.DEBUG("got nil template")
 	}

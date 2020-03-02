@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 	
+	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 	
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -20,6 +21,7 @@ import (
 	"github.com/p9c/pod/pkg/controller/job"
 	"github.com/p9c/pod/pkg/controller/sol"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/sem"
 	"github.com/p9c/pod/pkg/stdconn"
 	"github.com/p9c/pod/pkg/transport"
@@ -48,6 +50,8 @@ type Worker struct {
 	startNonce    uint32
 	startChan     chan struct{}
 	stopChan      chan struct{}
+	hashCount     atomic.Uint64
+	hashSampleBuf *ring.BufferUint64
 }
 
 type Counter struct {
@@ -80,6 +84,27 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 	return
 }
 
+func (w *Worker) HashReport() {
+	w.hashSampleBuf.Add(w.hashCount.Load())
+	av := ewma.NewMovingAverage()
+	var i int
+	var prev uint64
+	if err := w.hashSampleBuf.ForEach(func(v uint64) error {
+		if i < 1 {
+			prev = v
+		} else {
+			interval := v - prev
+			av.Add(float64(interval))
+			prev = v
+		}
+		i++
+		return nil
+	}); log.Check(err) {
+	}
+	// log.INFO(w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
+	log.INFOF("average hashrate %.2f", av.Value())
+}
+
 // NewWithConnAndSemaphore is exposed to enable use an actual network
 // connection while retaining the same RPC API to allow a worker to be
 // configured to run on a bare metal system with a different launcher main
@@ -91,14 +116,15 @@ func NewWithConnAndSemaphore(
 	log.DEBUG("creating new worker")
 	msgBlock := &wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
-		sem:       s,
-		pipeConn:  conn,
-		Quit:      quit,
-		run:       sem.New(1),
-		msgBlock:  msgBlock,
-		roller:    NewCounter(RoundsPerAlgo),
-		startChan: make(chan struct{}),
-		stopChan:  make(chan struct{}),
+		sem:           s,
+		pipeConn:      conn,
+		Quit:          quit,
+		run:           sem.New(1),
+		msgBlock:      msgBlock,
+		roller:        NewCounter(RoundsPerAlgo),
+		startChan:     make(chan struct{}),
+		stopChan:      make(chan struct{}),
+		hashSampleBuf: ring.NewBufferUint64(100),
 	}
 	w.block.Store(util.NewBlock(msgBlock))
 	w.dispatchReady.Store(false)
@@ -108,10 +134,13 @@ func NewWithConnAndSemaphore(
 	w.startNonce = uint32(w.roller.C)
 	go func(w *Worker) {
 		log.DEBUG("main work loop starting")
+		sampleTicker := time.NewTicker(time.Second)
 	pausing:
 		for {
 			// Pause state
 			select {
+			case <-sampleTicker.C:
+				w.HashReport()
 			case <-w.stopChan:
 				// drain stop channel in pause
 				continue
@@ -126,6 +155,8 @@ func NewWithConnAndSemaphore(
 		running:
 			for {
 				select {
+				case <-sampleTicker.C:
+					w.HashReport()
 				case <-w.startChan:
 					// drain start channel in run mode
 					continue
@@ -195,12 +226,8 @@ func NewWithConnAndSemaphore(
 						w.msgBlock.Header.Nonce++
 						// if we have completed a cycle report the hashrate on starting new algo
 						if w.roller.C%w.roller.RoundsPerAlgo == 0 {
-							// since := int(time.Now().Sub(tn)/time.Second) + 1
-							// total := w.roller.C - int(w.startNonce)
-							// log.INFOF(
-							// 	"%9d hash/s %s %d total", total/since,
-							// 	fork.GetAlgoName(w.msgBlock.Header.Version, nH), total)
 							// send out broadcast containing worker nonce and algorithm and count of blocks
+							w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo))
 							hashReport := hashrate.Get(w.roller.RoundsPerAlgo, nextAlgo, nH)
 							err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
 								transport.GetShards(hashReport.Data))

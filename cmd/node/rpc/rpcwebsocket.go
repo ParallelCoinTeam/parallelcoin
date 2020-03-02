@@ -1145,7 +1145,6 @@ func (m *WSNtfnMgr) NotifyFilteredBlockConnected(
 	var w bytes.Buffer
 	err := block.MsgBlock().Header.Serialize(&w)
 	if err != nil {
-		log.ERROR(err)
 		log.ERROR("failed to serialize header for filtered block connected"+
 			" notification:", err)
 		return
@@ -1172,7 +1171,6 @@ func (m *WSNtfnMgr) NotifyFilteredBlockConnected(
 		// Marshal and queue notification.
 		marshalledJSON, err := btcjson.MarshalCmd(nil, ntfn)
 		if err != nil {
-			log.ERROR(err)
 			log.ERRORF(
 				"failed to marshal filtered block connected notification:",
 				err)
