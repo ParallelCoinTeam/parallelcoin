@@ -173,8 +173,8 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 // address and specified port. The handlers define the messages that will be processed and
 // any other messages are ignored
 func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers) (channel *Channel, err error) {
-	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize, buffers: make(map[string]*MsgBuffer),
-		context: ctx}
+	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
+		buffers: make(map[string]*MsgBuffer), context: ctx}
 	if key != "" {
 		if channel.sendCiph, err = gcm.GetCipher(key); log.Check(err) {
 		}
@@ -240,9 +240,10 @@ func Handle(address string, channel *Channel, handlers Handlers, maxDatagramSize
 	buffer := make([]byte, maxDatagramSize)
 	log.WARN("starting handler for", channel.Creator, "listener")
 	// Loop forever reading from the socket until it is closed
+	// seenNonce := ""
 out:
 	for {
-		if numBytes, src, err := channel.Receiver.ReadFromUDP(buffer); err != nil {
+		if numBytes, src, err := channel.Receiver.ReadFromUDP(buffer); log.Check(err) {
 			switch handleNetworkError(address, err) {
 			case closed:
 				break out
@@ -250,6 +251,7 @@ out:
 				continue
 			case success:
 			}
+			log.DEBUG("numBytes", numBytes)
 			// Filter messages by magic, if there is no match in the map the packet is ignored
 		} else if numBytes > 4 {
 			magic := string(buffer[:4])
@@ -282,10 +284,17 @@ out:
 							bn.Decoded = true
 							if err = handler(channel.context, src, address, cipherText); log.Check(err) {
 							}
+							// src = nil
+							// buffer = buffer[:0]
 						}
 					} else {
+						// if nonce == seenNonce {
+						// 	continue
+						// }
+						// seenNonce = nonce
 						for i := range channel.buffers {
-							if i != nonce {
+							if i != nonce || (channel.buffers[i].Decoded &&
+								len(channel.buffers[i].Buffers) > 8) {
 								// superseded messages can be deleted from the
 								// buffers, we don't add more data for the already
 								// decoded.
@@ -304,6 +313,9 @@ out:
 			}
 		} else {
 			log.DEBUG(channel.Creator, "short message")
+		}
+		for i := range buffer {
+			buffer[i] = 0
 		}
 	}
 }

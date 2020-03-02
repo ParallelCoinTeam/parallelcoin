@@ -308,7 +308,6 @@ var handlersMulticast = transport.Handlers{
 	// hashrate reports from workers
 	string(hashrate.HashrateMagic):
 	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
-		// log.DEBUG("received hashrate report from", src.String(), dst)
 		c := ctx.(*Controller)
 		if !c.active.Load() {
 			// log.DEBUG("not active yet")
