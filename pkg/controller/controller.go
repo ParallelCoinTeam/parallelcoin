@@ -156,7 +156,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		case <-ticker.C:
 			hr := cx.Hashrate.Load()
 			total := time.Now().Sub(ctrl.began)
-			log.WARNF("%0.3f hash/s %24d total hashes", float64(hr)/total.Seconds(), hr)
+			log.WARNF("%0.3f hash/s %24d total hashes",
+				float64(hr)/total.Seconds(), hr)
 		case <-ctx.Done():
 			cont = false
 		case <-interrupt.HandlersDone:
