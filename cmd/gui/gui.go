@@ -3,7 +3,7 @@ package gui
 import (
 	"gioui.org/app"
 	"github.com/p9c/pod/cmd/gui/duoui"
-	"github.com/p9c/pod/cmd/gui/mvc/model"
+	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/log"
 )

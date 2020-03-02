@@ -1,12 +1,12 @@
 package pages
 
 import (
-	"github.com/p9c/pod/cmd/gui/mvc/component"
+	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"time"
 
 	"gioui.org/layout"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/theme"
 )
 
 var (

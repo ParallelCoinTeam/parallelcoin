@@ -9,9 +9,9 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/gui/theme"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
@@ -43,7 +43,6 @@ func DuoFields(gtx *layout.Context, axis layout.Axis, left, right func()) func()
 			fieldAxis(axis, left, 0.5),
 			fieldAxis(axis, right, 0.5),
 		)
-
 	}
 }
 

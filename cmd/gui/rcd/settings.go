@@ -2,8 +2,8 @@ package rcd
 
 import (
 	"fmt"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/model"
+	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/pod"
 )

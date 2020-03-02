@@ -3,7 +3,7 @@
 package theme
 
 import (
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
+	"github.com/p9c/pod/cmd/gui/controller"
 	"image/color"
 
 	"gioui.org/layout"

@@ -5,7 +5,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/theme"
 )
 
 func ContentHeader(gtx *layout.Context, th *theme.DuoUItheme, b func()) func() {

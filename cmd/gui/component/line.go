@@ -2,7 +2,7 @@ package component
 
 import (
 	"gioui.org/layout"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/theme"
 )
 
 func HorizontalLine(gtx *layout.Context, height int, color string) func() {

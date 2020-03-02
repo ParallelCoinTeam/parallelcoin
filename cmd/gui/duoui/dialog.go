@@ -8,8 +8,8 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/cmd/gui/theme"
 	"image"
 	"image/color"
 )

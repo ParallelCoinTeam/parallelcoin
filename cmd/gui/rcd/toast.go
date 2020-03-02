@@ -1,7 +1,7 @@
 package rcd
 
 import (
-	"github.com/p9c/pod/cmd/gui/mvc/model"
+	"github.com/p9c/pod/cmd/gui/model"
 )
 
 func (r *RcVar) toastAdd(t, m string) {
