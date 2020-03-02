@@ -68,7 +68,7 @@ func NewCounter(roundsPerAlgo int) (c *Counter) {
 	// Start the counter at a random position
 	rand.Seed(time.Now().UnixNano())
 	c = &Counter{
-		C:             rand.Intn(roundsPerAlgo+1)+1,
+		C:             rand.Intn(roundsPerAlgo+1) + 1,
 		Algos:         algos,
 		RoundsPerAlgo: roundsPerAlgo,
 	}
@@ -106,7 +106,7 @@ func (w *Worker) HashReport() {
 		return nil
 	}); log.Check(err) {
 	}
-	log.INFO(w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
+	// log.INFO("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
 	log.INFOF("average hashrate %.2f", av.Value())
 }
 
@@ -129,7 +129,7 @@ func NewWithConnAndSemaphore(
 		roller:        NewCounter(RoundsPerAlgo),
 		startChan:     make(chan struct{}),
 		stopChan:      make(chan struct{}),
-		hashSampleBuf: ring.NewBufferUint64(100),
+		hashSampleBuf: ring.NewBufferUint64(10),
 	}
 	w.block.Store(util.NewBlock(msgBlock))
 	w.dispatchReady.Store(false)
@@ -230,6 +230,7 @@ func NewWithConnAndSemaphore(
 						w.msgBlock.Header.Bits = w.bitses.Load().(map[int32]uint32)[w.msgBlock.Header.Version]
 						w.msgBlock.Header.Nonce++
 						// if we have completed a cycle report the hashrate on starting new algo
+						// log.DEBUG(w.hashCount.Load(), uint64(w.roller.RoundsPerAlgo), w.roller.C)
 						if w.roller.C%w.roller.RoundsPerAlgo == 0 {
 							// send out broadcast containing worker nonce and algorithm and count of blocks
 							w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo))

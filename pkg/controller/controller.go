@@ -94,7 +94,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		began:                  time.Now(),
 		otherNodes:             make(map[string]time.Time),
 		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
-		hashSampleBuf:          rav.NewBufferUint64(100),
+		hashSampleBuf:          rav.NewBufferUint64(10),
 	}
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
@@ -181,7 +181,7 @@ func (c *Controller) HashReport() float64 {
 		return nil
 	}); log.Check(err) {
 	}
-	log.INFO(c.hashSampleBuf.Cursor, c.hashSampleBuf.Buf)
+	// log.INFO("controller ",c.hashSampleBuf.Cursor, c.hashSampleBuf.Buf)
 	// log.INFO("average hashrate", )
 	return av.Value()
 }
@@ -315,11 +315,12 @@ var handlersMulticast = transport.Handlers{
 			return
 		}
 		hp := hashrate.LoadContainer(b)
-		// report := hp.Struct()
+		report := hp.Struct()
+		// log.DEBUG(report)
 		// add to total hash counts
 		// current :=
-		// log.DEBUG(c.hashCount.Load())
-		c.hashCount.Store(c.hashCount.Load() + uint64(hp.GetCount()))
+		// log.DEBUG(c.hashCount.Load(), report.Count)
+		c.hashCount.Store(c.hashCount.Load() + uint64(report.Count))
 		return
 	},
 }
