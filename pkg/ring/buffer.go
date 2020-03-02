@@ -34,7 +34,7 @@ func (b *BufferUint64) ForEach(fn func(v uint64) error) (err error) {
 	}
 	// log.DEBUG(b.Buf)
 	for ; ; i++ {
-		if i > len(b.Buf)-1 {
+		if i == len(b.Buf) {
 			i = 0
 		}
 		if i == b.Cursor {
