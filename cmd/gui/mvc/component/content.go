@@ -18,6 +18,9 @@ import (
 var (
 	previousBlockHashButton = new(controller.Button)
 	nextBlockHashButton     = new(controller.Button)
+	list                    = &layout.List{
+		Axis: layout.Vertical,
+	}
 )
 
 func UnoField(gtx *layout.Context, field func()) func() {
@@ -37,8 +40,8 @@ func DuoFields(gtx *layout.Context, axis layout.Axis, left, right func()) func()
 			Axis:    axis,
 			Spacing: layout.SpaceAround,
 		}.Layout(gtx,
-			layout.Rigid(left),
-			layout.Rigid(right),
+			fieldAxis(axis, left, 0.5),
+			fieldAxis(axis, right, 0.5),
 		)
 
 	}
@@ -50,12 +53,22 @@ func TrioFields(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, lab
 			Axis:    axis,
 			Spacing: layout.SpaceAround,
 		}.Layout(gtx,
-			layout.Rigid(ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, unoLabel, fmt.Sprint(unoValue))),
-			layout.Rigid(ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, duoLabel, fmt.Sprint(duoValue))),
-			layout.Rigid(ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, treLabel, fmt.Sprint(treValue))),
+			fieldAxis(axis, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, unoLabel, fmt.Sprint(unoValue)), 0.3),
+			fieldAxis(axis, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, duoLabel, fmt.Sprint(duoValue)), 0.3),
+			fieldAxis(axis, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, treLabel, fmt.Sprint(treValue)), 0.3),
 		)
-
 	}
+}
+
+func fieldAxis(axis layout.Axis, field func(), size float32) layout.FlexChild {
+	var f layout.FlexChild
+	switch axis {
+	case layout.Horizontal:
+		f = layout.Flexed(size, field)
+	case layout.Vertical:
+		f = layout.Rigid(field)
+	}
+	return f
 }
 
 func ContentLabeledField(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, label, value string) func() {
