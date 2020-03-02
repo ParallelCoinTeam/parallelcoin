@@ -166,7 +166,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 
 func (c *Controller) HashReport() float64 {
 	c.hashSampleBuf.Add(c.hashCount.Load())
-	log.DEBUG(c.hashSampleBuf.Buf)
+	// log.DEBUG(c.hashSampleBuf.Buf)
 	av := ewma.NewMovingAverage()
 	var i int
 	var prev uint64

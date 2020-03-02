@@ -1,16 +1,12 @@
 package rcd
 
 import (
-	"fmt"
+	"time"
+	
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/cmd/node/rpc"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/legacy"
-	"github.com/p9c/pod/pkg/util"
-	"time"
 )
 
 func (r *RcVar) GetDuoUItransactionsNumber() {
@@ -19,7 +15,7 @@ func (r *RcVar) GetDuoUItransactionsNumber() {
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := r.cx.WalletServer.ListTransactions(0, 999999999)
 	if err != nil {
-		//r.PushDuoUIalert("Error", err.Error(), "error")
+		// r.PushDuoUIalert("Error", err.Error(), "error")
 	}
 	r.Status.Wallet.TxsNumber = len(lt)
 	return
@@ -31,7 +27,7 @@ func (r *RcVar) GetDuoUItransactions(sfrom, count int, cat string) *model.DuoUIt
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := r.cx.WalletServer.ListTransactions(sfrom, count)
 	if err != nil {
-		//r.PushDuoUIalert("Error", err.Error(), "error")
+		// r.PushDuoUIalert("Error", err.Error(), "error")
 	}
 	r.Status.Wallet.Transactions.TxsNumber = len(lt)
 	txsArray := *new([]model.DuoUItx)
@@ -76,7 +72,7 @@ func txs(t btcjson.ListTransactionsResult) model.DuoUItx {
 		Category: t.Category,
 		Time:     helpers.FormatTime(time.Unix(t.Time, 0)),
 	}
-
+	
 }
 func (r *RcVar) GetLatestTransactions() {
 	log.DEBUG("getting latest transactions")
@@ -89,7 +85,7 @@ func (r *RcVar) GetTransactions() func() {
 		log.DEBUG("getting transactions")
 		lt, err := r.cx.WalletServer.ListTransactions(0, r.Status.Wallet.Txs.TxsListNumber)
 		if err != nil {
-			////r.PushDuoUIalert("Error", err.Error(), "error")
+			// //r.PushDuoUIalert("Error", err.Error(), "error")
 		}
 		r.Status.Wallet.Txs.TxsNumber = len(lt)
 		// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
@@ -118,7 +114,7 @@ func (r *RcVar) GetTransactions() func() {
 			if r.Status.Wallet.Txs.Balance > balanceHeight {
 				balanceHeight = r.Status.Wallet.Txs.Balance
 			}
-
+			
 		}
 		r.Status.Wallet.Txs.Txs = txs
 		r.Status.Wallet.Txs.BalanceHeight = balanceHeight

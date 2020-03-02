@@ -25,17 +25,22 @@ func (b *BufferUint64) Add(value uint64) {
 }
 
 func (b *BufferUint64) ForEach(fn func(v uint64) error) (err error) {
-	newest := b.Cursor + 1
-	if newest >= len(b.Buf) {
-		newest = 0
+	i := b.Cursor + 1
+	if i > len(b.Buf)-1 {
+		i = 0
 	}
 	if !b.Full {
-		newest = 0
+		i = 0
 	}
-	for i := newest; i != b.Cursor; i++ {
-		if i >= len(b.Buf) {
+	// log.DEBUG(b.Buf)
+	for ; ; i++ {
+		if i > len(b.Buf)-1 {
 			i = 0
 		}
+		if i == b.Cursor {
+			break
+		}
+		// log.DEBUG(i, b.Cursor)
 		if err = fn(b.Buf[i]); err != nil {
 			break
 		}
