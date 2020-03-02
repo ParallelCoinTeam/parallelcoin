@@ -146,7 +146,7 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
-			log.DEBUG("ignoring other controller job")
+			// log.DEBUG("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
 		} else {
