@@ -50,11 +50,11 @@ type Controller struct {
 	ctx                    context.Context
 	cx                     *conte.Xt
 	Ready                  atomic.Bool
-	height                 *atomic.Value
+	height                 atomic.Uint64
 	blockTemplateGenerator *mining.BlkTmplGenerator
 	coinbases              map[int32]*util.Tx
 	transactions           []*util.Tx
-	oldBlocks              *atomic.Value
+	oldBlocks              atomic.Value
 	prevHash               *chainhash.Hash
 	lastTxUpdate           atomic.Value
 	lastGenerated          atomic.Value
@@ -87,8 +87,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	ctrl := &Controller{
 		ctx:                    ctx,
 		cx:                     cx,
-		height:                 &atomic.Value{},
-		oldBlocks:              &atomic.Value{},
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
 		blockTemplateGenerator: getBlkTemplateGenerator(cx),
@@ -99,6 +97,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	}
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
+	ctrl.height.Store(0)
 	ctrl.active.Store(false)
 	var err error
 	ctrl.multiConn, err = transport.NewBroadcastChannel("controller",
@@ -109,9 +108,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		cancel()
 		return
 	}
-	
-	ctrl.height.Store(int32(0))
-	ctrl.active.Store(false)
 	buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
 	ll := pM.GetP2PListeners()
@@ -169,7 +165,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	return
 }
 
-var handlersUnicast = transport.Handlers{}
+// var handlersUnicast = transport.Handlers{}
 var handlersMulticast = transport.Handlers{
 	// Solutions submitted by workers
 	string(sol.SolutionMagic):
@@ -275,7 +271,10 @@ var handlersMulticast = transport.Handlers{
 				// recommended).
 				log.WARN("connecting to lan peer with same PSK", o)
 				c.otherNodes[o] = time.Now()
-				err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true)
+				go func() {
+					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); log.Check(err) {
+					}
+				}()
 			}
 		}
 		return
@@ -329,17 +328,22 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 
 func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 ) (template *mining.BlockTemplate) {
+	log.DEBUG("getting new block template")
 	if len(*cx.Config.MiningAddrs) < 1 {
+		log.DEBUG("no mining addresses")
 		return
 	}
 	// Choose a payment address at random.
 	rand.Seed(time.Now().UnixNano())
 	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
 		MiningAddrs))]
+	log.DEBUG("calling new block template")
 	template, err := bTG.NewBlockTemplate(0, payToAddr,
 		fork.SHA256d)
 	if err != nil {
 		log.ERROR(err)
+	} else {
+		log.DEBUG("got new block template")
 	}
 	return
 }
@@ -368,21 +372,20 @@ out:
 			// The current block is stale if the best block has changed.
 			best := ctrl.blockTemplateGenerator.BestSnapshot()
 			if !ctrl.prevHash.IsEqual(&best.Hash) {
-				err := ctrl.sendNewBlockTemplate()
-				if err != nil {
-					log.ERROR(err)
-				}
-				break
-			}
-			// The current block is stale if the memory pool has been updated
-			// since the block template was generated and it has been at least
-			// one minute.
-			if ctrl.lastTxUpdate.Load() != ctrl.blockTemplateGenerator.GetTxSource().
-				LastUpdated() && time.Now().After(time.Unix(0,
-				ctrl.lastGenerated.Load().(int64)+int64(time.Minute))) {
+				log.DEBUG("new best block hash")
 				ctrl.UpdateAndSendTemplate()
 				break
 			}
+			// // The current block is stale if the memory pool has been updated
+			// // since the block template was generated and it has been at least
+			// // one minute.
+			// if ctrl.lastTxUpdate.Load() != ctrl.blockTemplateGenerator.GetTxSource().
+			// 	LastUpdated() && time.Now().After(time.Unix(0,
+			// 	ctrl.lastGenerated.Load().(int64)+int64(time.Minute))) {
+			// 	log.DEBUG("block is stale")
+			// 	ctrl.UpdateAndSendTemplate()
+			// 	break
+			// }
 			oB, ok := ctrl.oldBlocks.Load().([][]byte)
 			if len(oB) == 0 {
 				log.WARN("template is zero length")
@@ -392,6 +395,7 @@ out:
 				log.DEBUG("template is nil")
 				break
 			}
+			// log.DEBUG("rebroadcaster sending out blocks")
 			err := ctrl.multiConn.SendMany(job.WorkMagic, oB)
 			if err != nil {
 				log.ERROR(err)
@@ -444,19 +448,23 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 				}
 				c.UpdateAndSendTemplate()
 			}
+		} else {
+			log.DEBUG("notifier called but controller not active")
 		}
 	}
 }
 
 func (c *Controller) UpdateAndSendTemplate() {
+	log.DEBUG("updating and sending out template")
 	c.coinbases = make(map[int32]*util.Tx)
 	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 	if template != nil {
+		log.DEBUG("got a template for sending")
 		c.transactions = []*util.Tx{}
 		for _, v := range template.Block.Transactions[1:] {
 			c.transactions = append(c.transactions, util.NewTx(v))
 		}
-		// log.DEBUG("got new template")
+		log.DEBUG("got new template")
 		msgB := template.Block
 		// log.DEBUG(*c.cx.Config.Controller)
 		// c.coinbases = msgB.Transactions
@@ -464,20 +472,25 @@ func (c *Controller) UpdateAndSendTemplate() {
 		mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB),
 			advertisment.Get(c.cx), &c.coinbases)
 		nH := mC.GetNewHeight()
-		if c.height.Load().(int32) < nH {
+		if c.height.Load() < uint64(nH) {
 			log.DEBUG("new height")
-			c.height.Store(nH)
+			c.height.Store(uint64(nH))
 		} else {
-			// log.DEBUG("stale or orphan from being later, not sending out")
-			return
+			log.DEBUG("stale or orphan from being later, not sending out")
+			// return
 		}
 		// log.SPEW(c.coinbases)
 		// log.SPEW(mC.Data)
+		log.DEBUG("getting shards for message")
 		shards := transport.GetShards(mC.Data)
 		c.oldBlocks.Store(shards)
 		if err := c.multiConn.SendMany(job.WorkMagic, shards); log.Check(err) {
 		}
+		c.prevHash = &template.Block.Header.PrevBlock
 		c.lastGenerated.Store(time.Now().UnixNano())
 		c.lastTxUpdate.Store(time.Now().UnixNano())
+		log.DEBUG("sent out template")
+	} else {
+		log.DEBUG("got nil template")
 	}
 }

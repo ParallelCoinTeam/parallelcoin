@@ -100,7 +100,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 					// log.DEBUG("tick", w.lastSent, w.FirstSender)
 					// if the last message sent was 3 seconds ago the server is
 					// almost certainly disconnected or crashed so clear FirstSender
-					since := time.Now().Sub(time.Unix(0 , int64(w.lastSent.Load())))
+					since := time.Now().Sub(time.Unix(0 , w.lastSent.Load()))
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
 						log.DEBUG("previous current controller has stopped" +
@@ -134,6 +134,10 @@ var handlers = transport.Handlers{
 	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
 		b []byte) (err error) {
 		w := ctx.(*Worker)
+		if !w.active.Load() {
+			log.DEBUG("not active")
+			return
+		}
 		j := job.LoadContainer(b)
 		// h := j.GetHashes()
 		ips := j.GetIPs()
@@ -142,6 +146,7 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
+			log.DEBUG("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
 		} else {
