@@ -23,6 +23,7 @@ import (
 	"github.com/p9c/pod/pkg/controller/pause"
 	"github.com/p9c/pod/pkg/controller/sol"
 	"github.com/p9c/pod/pkg/log"
+	"github.com/p9c/pod/pkg/simplebuffer/Uint16"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -64,6 +65,7 @@ type Controller struct {
 	buffer                 *ring.Ring
 	began                  time.Time
 	otherNodes             map[string]time.Time
+	listenPort             int
 }
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
@@ -94,6 +96,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		buffer:                 ring.New(BufferSize),
 		began:                  time.Now(),
 		otherNodes:             make(map[string]time.Time),
+		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
 	}
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
@@ -178,6 +181,11 @@ var handlersMulticast = transport.Handlers{
 			return
 		}
 		j := sol.LoadSolContainer(b)
+		senderPort := j.GetSenderPort()
+		if int(senderPort) != c.listenPort {
+			log.DEBUG("not able to submit jobs created by other node peers")
+			return
+		}
 		msgBlock := j.GetMsgBlock()
 		// log.WARN(msgBlock.Header.Version)
 		// msgBlock.Transactions = append(c.coinbases[msgBlock.Header.Version], c.)

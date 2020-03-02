@@ -39,6 +39,7 @@ type Worker struct {
 	Quit          chan struct{}
 	run           sem.T
 	block         atomic.Value
+	senderPort    atomic.Uint32
 	msgBlock      *wire.MsgBlock
 	bitses        atomic.Value
 	hashes        atomic.Value
@@ -179,7 +180,7 @@ func NewWithConnAndSemaphore(
 								)
 							})
 							log.SPEW(w.msgBlock)
-							srs := sol.GetSolContainer(w.msgBlock)
+							srs := sol.GetSolContainer(w.senderPort.Load(), w.msgBlock)
 							err := w.dispatchConn.SendMany(sol.SolutionMagic,
 								transport.GetShards(srs.Data))
 							if err != nil {
@@ -316,6 +317,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	bb := util.NewBlock(w.msgBlock)
 	bb.SetHeight(newHeight)
 	w.block.Store(bb)
+	w.senderPort.Store(uint32(job.GetControllerListenerPort()))
 	// halting current work
 	w.stopChan <- struct{}{}
 	w.startChan <- struct{}{}
