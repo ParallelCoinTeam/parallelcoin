@@ -509,7 +509,7 @@ func (w *Wallet) syncWithChain() error {
 				recoveryMgr.ResetBlockBatch()
 			}
 			// Every 10K blocks, commit and start a new database TX.
-			if height%10000 == 0 {
+			if height%1000 == 0 {
 				err = tx.Commit()
 				if err != nil {
 					log.ERROR(err)
