@@ -1,12 +1,12 @@
 package rcd
 
 import (
-	"time"
-	
+	"fmt"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"time"
 )
 
 func (r *RcVar) GetDuoUItransactionsNumber() {
@@ -25,11 +25,12 @@ func (r *RcVar) GetDuoUItransactions(sfrom, count int, cat string) *model.DuoUIt
 	log.DEBUG("getting transactions")
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
-	lt, err := r.cx.WalletServer.ListTransactions(sfrom, count)
+	lt, err := r.cx.WalletServer.ListTransactions(0, 11)
 	if err != nil {
-		// r.PushDuoUIalert("Error", err.Error(), "error")
+		log.INFO(err)
 	}
 	r.Status.Wallet.Transactions.TxsNumber = len(lt)
+	log.INFO("ETO:" + fmt.Sprint(lt))
 	txsArray := *new([]model.DuoUItx)
 	// lt := listTransactions.([]json.ListTransactionsResult)
 	switch c := cat; c {
@@ -72,11 +73,11 @@ func txs(t btcjson.ListTransactionsResult) model.DuoUItx {
 		Category: t.Category,
 		Time:     helpers.FormatTime(time.Unix(t.Time, 0)),
 	}
-	
+
 }
 func (r *RcVar) GetLatestTransactions() {
 	log.DEBUG("getting latest transactions")
-	r.Status.Wallet.LastTxs = r.GetDuoUItransactions(0, 10, "")
+	//r.Status.Wallet.LastTxs = r.GetDuoUItransactions(0, 10, "")
 	return
 }
 
@@ -114,7 +115,7 @@ func (r *RcVar) GetTransactions() func() {
 			if r.Status.Wallet.Txs.Balance > balanceHeight {
 				balanceHeight = r.Status.Wallet.Txs.Balance
 			}
-			
+
 		}
 		r.Status.Wallet.Txs.Txs = txs
 		r.Status.Wallet.Txs.BalanceHeight = balanceHeight

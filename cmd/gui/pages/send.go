@@ -69,24 +69,25 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 					},
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, passLineEditor, "DUO address", func(e controller.SubmitEvent) {
-								passPharse = e.Text
-							})))
-					},
-					func() {
-						component.Button(gtx, th, buttonSend, th.Font.Primary, 12, th.Color.ButtonText, th.Color.ButtonBg, "SEND", func() {
-							rc.Dialog.Show = true
-							rc.Dialog = &model.DuoUIdialog{
-								Show: true,
-								Ok:   rc.DuoSend(passPharse, address, amount),
-								Close: func() {
+							layout.Rigid(component.Button(gtx, th, buttonSend, th.Font.Primary, 12, th.Color.ButtonText, th.Color.ButtonBg, "SEND", func() {
+								rc.Dialog.Show = true
+								rc.Dialog = &model.DuoUIdialog{
+									Show: true,
+									Ok:   rc.DuoSend(passPharse, address, amount),
+									Close: func() {
 
-								},
-								Cancel: func() { rc.Dialog.Show = false },
-								Title:  "Are you sure?",
-								Text:   "Confirm ParallelCoin send",
-							}
-						})
+									},
+									CustomField: func() {
+										layout.Flex{}.Layout(gtx,
+											layout.Flexed(1, component.Editor(gtx, th, passLineEditor, "Enter your password", func(e controller.SubmitEvent) {
+												passPharse = e.Text
+											})))
+									},
+									Cancel: func() { rc.Dialog.Show = false },
+									Title:  "Are you sure?",
+									Text:   "Confirm ParallelCoin send",
+								}
+							})))
 					},
 				}
 				layautList.Layout(gtx, len(widgets), func(i int) {
