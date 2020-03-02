@@ -5,8 +5,8 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/gui/theme"
 )
 
 var (

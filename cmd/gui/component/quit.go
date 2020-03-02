@@ -3,10 +3,10 @@ package component
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/model"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/gui/theme"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 

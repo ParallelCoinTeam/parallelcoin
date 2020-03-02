@@ -4,8 +4,8 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/cmd/gui/theme"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )

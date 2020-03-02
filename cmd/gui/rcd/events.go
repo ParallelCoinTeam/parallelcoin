@@ -30,16 +30,16 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 			// go r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
 		}
 	})
-	go func(){
-		out:
-			for {
-				select {
-				case <-r.cx.WalletServer.Update:
-					go update(r)
-				case <-r.cx.KillAll:
-					break out
-				}
+	go func() {
+	out:
+		for {
+			select {
+			case <-r.cx.WalletServer.Update:
+				go update(r)
+			case <-r.cx.KillAll:
+				break out
 			}
+		}
 	}()
 	log.WARN("event update listener started")
 	return
@@ -55,6 +55,10 @@ func update(r *RcVar) {
 	// r.GetTransactions()
 	// log.WARN("GetLatestTransactions")
 	r.GetLatestTransactions()
+	log.INFO("")
+	log.INFO("UPDATE")
+	log.INFO(r.Status.Wallet.LastTxs.Txs)
+	log.INFO("")
 	// r.GetDuoUIstatus()
 	// r.GetDuoUIlocalLost()
 	// r.GetDuoUIblockHeight()

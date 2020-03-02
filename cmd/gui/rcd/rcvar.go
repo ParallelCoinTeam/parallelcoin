@@ -1,11 +1,11 @@
 package rcd
 
 import (
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/cmd/gui/theme"
 	"time"
 
-	"github.com/p9c/pod/cmd/gui/mvc/model"
+	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/gui/theme"
 )
 
 func Miner(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {

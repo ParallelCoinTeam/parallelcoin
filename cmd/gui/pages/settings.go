@@ -3,10 +3,10 @@ package pages
 import (
 	"fmt"
 	"gioui.org/layout"
-	"github.com/p9c/pod/cmd/gui/mvc/component"
-	"github.com/p9c/pod/cmd/gui/mvc/controller"
-	"github.com/p9c/pod/cmd/gui/mvc/theme"
+	"github.com/p9c/pod/cmd/gui/component"
+	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/cmd/gui/theme"
 )
 
 var (
