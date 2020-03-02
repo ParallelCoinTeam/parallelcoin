@@ -14,14 +14,14 @@ func NewBufferUint64(size int) *BufferUint64 {
 }
 
 func (b *BufferUint64) Add(value uint64) {
-	if b.Cursor >= len(b.Buf) {
+	b.Cursor++
+	if b.Cursor > len(b.Buf)-1 {
 		b.Cursor = 0
 		if !b.Full {
 			b.Full = true
 		}
 	}
 	b.Buf[b.Cursor] = value
-	b.Cursor++
 }
 
 func (b *BufferUint64) ForEach(fn func(v uint64) error) (err error) {

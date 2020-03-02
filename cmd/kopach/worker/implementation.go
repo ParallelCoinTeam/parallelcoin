@@ -68,7 +68,7 @@ func NewCounter(roundsPerAlgo int) (c *Counter) {
 	// Start the counter at a random position
 	rand.Seed(time.Now().UnixNano())
 	c = &Counter{
-		C:             rand.Intn(roundsPerAlgo),
+		C:             rand.Intn(roundsPerAlgo+1)+1,
 		Algos:         algos,
 		RoundsPerAlgo: roundsPerAlgo,
 	}
@@ -79,7 +79,12 @@ func NewCounter(roundsPerAlgo int) (c *Counter) {
 func (c *Counter) GetAlgoVer() (ver int32) {
 	// the formula below rolls through versions with blocks roundsPerAlgo
 	// long for each algorithm by its index
-	ver = c.Algos[(c.C/c.RoundsPerAlgo)%len(c.Algos)]
+	if c.RoundsPerAlgo < 1 || len(c.Algos) < 1 {
+		log.DEBUG("roundsperalgo is", c.RoundsPerAlgo, len(c.Algos))
+	}
+	ver = c.Algos[(c.C/
+		c.RoundsPerAlgo)%
+		len(c.Algos)]
 	c.C++
 	return
 }

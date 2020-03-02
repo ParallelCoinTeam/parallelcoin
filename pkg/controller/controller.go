@@ -32,15 +32,8 @@ import (
 )
 
 const (
-	// MaxDatagramSize is the largest a packet could be,
-	// it is a little larger but this is easier to calculate.
-	// There is only one listening thread but it needs a buffer this size for
-	// worst case largest block possible.
-	// Note also this is why FEC is used on the packets in case some get lost it
-	// has to puncture 6 of the 9 to fail.
-	// This protocol is connectionless and stateless so if one misses,
-	// the next one probably won't, usually a second or 3 later
-	MaxDatagramSize = blockchain.MaxBlockBaseSize / 3
+	// MaxDatagramSize is the largest a
+	MaxDatagramSize = 8192
 	// UDP6MulticastAddress = "ff02::1"
 	UDP4MulticastAddress = "224.0.0.1:11049"
 	BufferSize           = 4096
@@ -173,7 +166,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 
 func (c *Controller) HashReport() float64 {
 	c.hashSampleBuf.Add(c.hashCount.Load())
-	// log.DEBUG(c.hashSampleBuf.Buf)
+	log.DEBUG(c.hashSampleBuf.Buf)
 	av := ewma.NewMovingAverage()
 	var i int
 	var prev uint64
@@ -189,7 +182,7 @@ func (c *Controller) HashReport() float64 {
 		return nil
 	}); log.Check(err) {
 	}
-	// log.INFO(w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
+	// log.INFO(c.hashSampleBuf.Cursor, c.hashSampleBuf.Buf)
 	// log.INFO("average hashrate", )
 	return av.Value()
 }
