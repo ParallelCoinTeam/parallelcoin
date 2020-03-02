@@ -25,7 +25,9 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 	update(r)
 	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
-		case blockchain.NTBlockAccepted:
+		case blockchain.NTBlockAccepted,
+			blockchain.NTBlockConnected,
+			blockchain.NTBlockDisconnected:
 			go update(r)
 			// go r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
 		}

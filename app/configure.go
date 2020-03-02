@@ -16,7 +16,6 @@ Configure(cx *conte.Xt, ctx *cli.Context) {
 	log.TRACE("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
 	cx.NodeChan = make(chan *rpc.Server)
-	cx.KillAll = make(chan struct{})
 	cx.StateCfg.Save = false
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config

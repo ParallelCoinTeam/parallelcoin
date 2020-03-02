@@ -69,6 +69,7 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 	hr.Store(int(0))
 	config, configMap := pod.EmptyConfig()
 	return &Xt{
+		KillAll:   make(chan struct{}),
 		App:       cli.NewApp(),
 		Config:    config,
 		ConfigMap: configMap,

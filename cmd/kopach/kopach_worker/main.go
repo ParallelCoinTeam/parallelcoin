@@ -37,7 +37,7 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 			log.L.SetLevel(os.Args[3], true)
 		}
 		log.DEBUG("miner worker starting")
-		w, conn := worker.New(sem.New(1))
+		w, conn := worker.New(sem.New(1), cx.KillAll)
 		interrupt.AddHandler(func() {
 			log.DEBUG("KopachWorkerHandle interrupt")
 			if err := conn.Close(); log.Check(err) {
@@ -49,9 +49,10 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 			return err
 		}
 		log.DEBUG("starting up worker IPC")
-		go rpc.ServeConn(conn)
-		log.DEBUG("started worker IPC")
-		<-w.Quit
+		rpc.ServeConn(conn)
+		log.DEBUG("stopping worker IPC")
+		if err := conn.Close(); log.Check(err) {
+		}
 		log.DEBUG("finished")
 		return nil
 	}

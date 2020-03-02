@@ -43,7 +43,7 @@ type Controller struct {
 	multiConn              *transport.Channel
 	uniConn                *transport.Channel
 	active                 atomic.Bool
-	ctx                    context.Context
+	quit                   chan struct{}
 	cx                     *conte.Xt
 	Ready                  atomic.Bool
 	height                 atomic.Uint64
@@ -63,6 +63,7 @@ type Controller struct {
 	listenPort             int
 	hashCount              atomic.Uint64
 	hashSampleBuf          *rav.BufferUint64
+	lastNonce              int32
 }
 
 func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
@@ -82,9 +83,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	//		log.DEBUG("node is not synced, waiting 2 seconds to start controller")
 	//		time.Sleep(time.Second * 2)
 	//	}
-	ctx, cancel := context.WithCancel(context.Background())
 	ctrl := &Controller{
-		ctx:                    ctx,
+		quit:                   cx.KillAll,
 		cx:                     cx,
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
@@ -103,7 +103,8 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	var err error
 	ctrl.multiConn, err = transport.NewBroadcastChannel("controller",
 		ctrl, *cx.Config.MinerPass,
-		transport.DefaultPort, MaxDatagramSize, handlersMulticast)
+		transport.DefaultPort, MaxDatagramSize, handlersMulticast,
+		ctrl.quit)
 	if err != nil {
 		log.ERROR(err)
 		cancel()
@@ -122,14 +123,16 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		ctrl.active.Store(true)
 	}
 	ctrl.oldBlocks.Store(pauseShards)
-	defer func() {
+	interrupt.AddHandler(func() {
 		log.DEBUG("miner controller shutting down")
 		ctrl.active.Store(false)
 		err := ctrl.multiConn.SendMany(pause.PauseMagic, pauseShards)
 		if err != nil {
 			log.ERROR(err)
 		}
-	}()
+		ctrl.multiConn.Close()
+		close(ctrl.quit)
+	})
 	log.DEBUG("sending broadcasts to:", UDP4MulticastAddress)
 	err = ctrl.sendNewBlockTemplate()
 	if err != nil {
@@ -153,7 +156,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		select {
 		case <-ticker.C:
 			log.DEBUGF("network hashrate %.2f", ctrl.HashReport())
-		case <-ctx.Done():
+		case <-ctrl.quit:
 			cont = false
 		case <-interrupt.HandlersDone:
 			cont = false
@@ -190,7 +193,7 @@ func (c *Controller) HashReport() float64 {
 var handlersMulticast = transport.Handlers{
 	// Solutions submitted by workers
 	string(sol.SolutionMagic):
-	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
+	func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		log.DEBUG("received solution")
 		// log.SPEW(ctx)
 		c := ctx.(*Controller)
@@ -279,11 +282,11 @@ var handlersMulticast = transport.Handlers{
 		return
 	},
 	string(job.WorkMagic):
-	func(ctx interface{}, src *net.UDPAddr, dst string,
+	func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
-			log.DEBUG("not active yet")
+			log.DEBUG("not active")
 			return
 		}
 		// log.WARN("received job")
@@ -307,19 +310,25 @@ var handlersMulticast = transport.Handlers{
 	},
 	// hashrate reports from workers
 	string(hashrate.HashrateMagic):
-	func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error) {
+	func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
-			// log.DEBUG("not active yet")
+			log.DEBUG("not active")
 			return
 		}
 		hp := hashrate.LoadContainer(b)
-		report := hp.Struct()
+		count := hp.GetCount()
+		nonce := hp.GetNonce()
+		if c.lastNonce == nonce {
+			return
+		}
+		c.lastNonce=nonce
+		// newSender:=report.IPs[0].String()
 		// log.DEBUG(report)
 		// add to total hash counts
 		// current :=
-		// log.DEBUG(c.hashCount.Load(), report.Count)
-		c.hashCount.Store(c.hashCount.Load() + uint64(report.Count))
+		// log.DEBUG(nonce, c.hashCount.Load(), count)
+		c.hashCount.Store(c.hashCount.Load() + uint64(count))
 		return
 	},
 }
@@ -427,7 +436,7 @@ out:
 				log.ERROR(err)
 			}
 			ctrl.oldBlocks.Store(oB)
-		case <-ctrl.ctx.Done():
+		case <-ctrl.quit:
 			break out
 			// default:
 		}
@@ -447,7 +456,7 @@ out:
 			}
 			log.SPEW(decodedB)
 			//
-		case <-ctrl.ctx.Done():
+		case <-ctrl.quit:
 			break out
 		}
 	}

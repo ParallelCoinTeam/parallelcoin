@@ -20,14 +20,16 @@ var (
 
 func main() {
 	log.L.SetLevel("trace", true)
-	if c, err := transport.NewBroadcastChannel(nil, "cipher",
+	quit := make(chan struct{})
+	if c, err := transport.NewBroadcastChannel("test", nil, "cipher",
 		1234, 8192, transport.Handlers{
-			TestMagic: func(ctx interface{}, src *net.UDPAddr, dst string,
+			TestMagic: func(ctx interface{}, src net.Addr, dst string,
 				b []byte) (err error) {
 				log.INFOF("%s <- %s [%d] '%s'", src.String(), dst, len(b), string(b))
 				return
 			},
 		},
+		quit,
 	); log.Check(err) {
 		panic(err)
 	} else {
@@ -40,7 +42,7 @@ func main() {
 					c.Sender.LocalAddr(), c.Sender.RemoteAddr(), n-4, text)
 			}
 		})
-		time.Sleep(time.Second)
+		close(quit)
 		if err = c.Close(); !log.Check(err) {
 			time.Sleep(time.Second * 1)
 		}

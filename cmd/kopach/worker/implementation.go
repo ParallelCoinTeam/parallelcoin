@@ -26,6 +26,7 @@ import (
 	"github.com/p9c/pod/pkg/stdconn"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 const RoundsPerAlgo = 25
@@ -55,20 +56,30 @@ type Worker struct {
 }
 
 type Counter struct {
-	C             int
+	C             int32
 	Algos         []int32
-	RoundsPerAlgo int
+	RoundsPerAlgo int32
 }
+
+// func (w *Worker) Close() {
+// 	if err := w.multicastConn.Close(); log.Check(err) {
+// 	}
+// 	if err := w.unicastConn.Close(); log.Check(err) {
+// 	}
+// 	if err := w.dispatchConn.Close(); log.Check(err) {
+// 	}
+//
+// }
 
 // NewCounter returns an initialized algorithm rolling counter that ensures
 // each miner does equal amounts of every algorithm
-func NewCounter(roundsPerAlgo int) (c *Counter) {
+func NewCounter(roundsPerAlgo int32) (c *Counter) {
 	// these will be populated when work arrives
 	var algos []int32
 	// Start the counter at a random position
 	rand.Seed(time.Now().UnixNano())
 	c = &Counter{
-		C:             rand.Intn(roundsPerAlgo+1) + 1,
+		C:             int32(rand.Intn(int(roundsPerAlgo)+1) + 1),
 		Algos:         algos,
 		RoundsPerAlgo: roundsPerAlgo,
 	}
@@ -84,12 +95,12 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 	}
 	ver = c.Algos[(c.C/
 		c.RoundsPerAlgo)%
-		len(c.Algos)]
+		int32(len(c.Algos))]
 	c.C++
 	return
 }
 
-func (w *Worker) HashReport() {
+func (w *Worker) hashReport() {
 	w.hashSampleBuf.Add(w.hashCount.Load())
 	av := ewma.NewMovingAverage()
 	var i int
@@ -121,10 +132,10 @@ func NewWithConnAndSemaphore(
 	log.DEBUG("creating new worker")
 	msgBlock := &wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
-		sem:           s,
-		pipeConn:      conn,
-		Quit:          quit,
-		run:           sem.New(1),
+		// sem:           s,
+		pipeConn: conn,
+		Quit:     quit,
+		// run:           sem.New(1),
 		msgBlock:      msgBlock,
 		roller:        NewCounter(RoundsPerAlgo),
 		startChan:     make(chan struct{}),
@@ -137,6 +148,12 @@ func NewWithConnAndSemaphore(
 	// distribute algorithms evenly
 	// tn := time.Now()
 	w.startNonce = uint32(w.roller.C)
+	interrupt.AddHandler(func() {
+		log.DEBUG("worker quitting")
+		close(w.Quit)
+		// w.pipeConn.Close()
+		w.dispatchReady.Store(false)
+	})
 	go func(w *Worker) {
 		log.DEBUG("main work loop starting")
 		sampleTicker := time.NewTicker(time.Second)
@@ -145,7 +162,7 @@ func NewWithConnAndSemaphore(
 			// Pause state
 			select {
 			case <-sampleTicker.C:
-				w.HashReport()
+				w.hashReport()
 			case <-w.stopChan:
 				// drain stop channel in pause
 				continue
@@ -161,7 +178,7 @@ func NewWithConnAndSemaphore(
 			for {
 				select {
 				case <-sampleTicker.C:
-					w.HashReport()
+					w.hashReport()
 				case <-w.startChan:
 					// drain start channel in run mode
 					continue
@@ -171,7 +188,7 @@ func NewWithConnAndSemaphore(
 					w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 					break running
 				case <-w.Quit:
-					log.DEBUG("worker stopping on pausing message")
+					log.DEBUG("worker stopping while running")
 					break pausing
 				default:
 					if w.block.Load() == nil || w.bitses.Load() == nil || w.hashes.Load() == nil ||
@@ -184,10 +201,14 @@ func NewWithConnAndSemaphore(
 						h := w.hashes.Load().(map[int32]*chainhash.Hash)
 						if h != nil {
 							w.msgBlock.Header.MerkleRoot = *h[w.msgBlock.Header.Version]
+						} else {
+							continue
 						}
 						b := w.bitses.Load().(map[int32]uint32)
 						if bb, ok := b[w.msgBlock.Header.Version]; ok {
 							w.msgBlock.Header.Bits = bb
+						} else {
+							continue
 						}
 						select {
 						case <-w.stopChan:
@@ -195,7 +216,29 @@ func NewWithConnAndSemaphore(
 							w.bitses.Store((map[int32]uint32)(nil))
 							w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 							break running
+						case <-w.Quit:
+							log.DEBUG("worker stopping in the middle of it")
+							break pausing
 						default:
+						}
+						var nextAlgo int32
+						if w.roller.C%w.roller.RoundsPerAlgo == 0 {
+							select {
+							case <-w.Quit:
+								log.DEBUG("worker stopping on pausing message")
+								break pausing
+							default:
+							}
+							// log.DEBUG("sending hashcount")
+							// send out broadcast containing worker nonce and algorithm and count of blocks
+							w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo))
+							nextAlgo = w.roller.C+1
+							hashReport := hashrate.Get(w.roller.RoundsPerAlgo, nextAlgo, nH)
+							err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
+								transport.GetShards(hashReport.Data))
+							if err != nil {
+								log.ERROR(err)
+							}
 						}
 						hash := w.msgBlock.Header.BlockHashWithAlgos(nH)
 						bigHash := blockchain.HashToBig(&hash)
@@ -207,7 +250,7 @@ func NewWithConnAndSemaphore(
 									fork.List[fork.GetCurrent(nH)].
 										AlgoVers[w.msgBlock.Header.Version],
 									"total hashes since startup",
-									w.roller.C-int(w.startNonce),
+									w.roller.C-int32(w.startNonce),
 									fork.IsTestnet,
 									w.msgBlock.Header.Version,
 									w.msgBlock.Header.Bits,
@@ -217,6 +260,12 @@ func NewWithConnAndSemaphore(
 							})
 							log.SPEW(w.msgBlock)
 							srs := sol.GetSolContainer(w.senderPort.Load(), w.msgBlock)
+							select {
+							case <-w.Quit:
+								log.DEBUG("worker stopping in the middle of it")
+								break pausing
+							default:
+							}
 							err := w.dispatchConn.SendMany(sol.SolutionMagic,
 								transport.GetShards(srs.Data))
 							if err != nil {
@@ -225,28 +274,25 @@ func NewWithConnAndSemaphore(
 							log.DEBUG("sent solution")
 							break running
 						}
-						nextAlgo := w.roller.GetAlgoVer()
 						w.msgBlock.Header.Version = nextAlgo
 						w.msgBlock.Header.Bits = w.bitses.Load().(map[int32]uint32)[w.msgBlock.Header.Version]
 						w.msgBlock.Header.Nonce++
 						// if we have completed a cycle report the hashrate on starting new algo
 						// log.DEBUG(w.hashCount.Load(), uint64(w.roller.RoundsPerAlgo), w.roller.C)
-						if w.roller.C%w.roller.RoundsPerAlgo == 0 {
-							// send out broadcast containing worker nonce and algorithm and count of blocks
-							w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo))
-							hashReport := hashrate.Get(w.roller.RoundsPerAlgo, nextAlgo, nH)
-							err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
-								transport.GetShards(hashReport.Data))
-							if err != nil {
-								log.ERROR(err)
-							}
+						select {
+						case <-w.Quit:
+							log.DEBUG("worker stopping in the middle of it")
+							break pausing
+						default:
 						}
+						
 					}
 				}
 			}
 			log.TRACE("worker pausing")
 		}
 		log.TRACE("worker finished")
+		// w.Close()
 	}(w)
 	return w
 }
@@ -254,9 +300,8 @@ func NewWithConnAndSemaphore(
 // New initialises the state for a worker,
 // loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
-func New(s sem.T) (w *Worker, conn net.Conn) {
+func New(s sem.T, quit chan struct{}) (w *Worker, conn net.Conn) {
 	// log.L.SetLevel("trace", true)
-	quit := make(chan struct{})
 	sc := stdconn.New(os.Stdin, os.Stdout, quit)
 	return NewWithConnAndSemaphore(
 		&sc,
@@ -316,14 +361,16 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	*reply = true
 	// halting current work
 	w.stopChan <- struct{}{}
-	w.bitses.Store(job.GetBitses())
+	bitses := job.GetBitses()
+	w.bitses.Store(bitses)
 	w.hashes.Store(hashes)
 	newHeight := job.GetNewHeight()
-	w.roller.Algos = []int32{}
-	for i := range w.bitses.Load().(map[int32]uint32) {
+	var algos []int32
+	for i := range bitses {
 		// we don't need to know net params if version numbers come with jobs
-		w.roller.Algos = append(w.roller.Algos, i)
+		algos = append(algos, i)
 	}
+	w.roller.Algos = algos
 	w.msgBlock.Header.PrevBlock = *job.GetPrevBlockHash()
 	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
 	w.msgBlock.Header.Version = w.roller.GetAlgoVer()
@@ -384,7 +431,7 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	// rp := fmt.Sprint(rand.Intn(32767) + 1025)
 	var conn *transport.Channel
 	conn, err = transport.NewBroadcastChannel("kopachworker", w, pass,
-		transport.DefaultPort, controller.MaxDatagramSize, nil)
+		transport.DefaultPort, controller.MaxDatagramSize, transport.Handlers{}, w.Quit)
 	if err != nil {
 		log.ERROR(err)
 	}

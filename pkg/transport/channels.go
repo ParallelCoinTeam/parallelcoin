@@ -2,6 +2,7 @@ package transport
 
 import (
 	"crypto/cipher"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
@@ -31,7 +32,7 @@ type (
 		Source  net.Addr
 	}
 	// HandlerFunc is a function that is used to process a received message
-	HandlerFunc func(ctx interface{}, src *net.UDPAddr, dst string, b []byte) (err error)
+	HandlerFunc func(ctx interface{}, src net.Addr, dst string, b []byte) (err error)
 	Handlers    map[string]HandlerFunc
 	Channel     struct {
 		Creator         string
@@ -80,19 +81,19 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		// log.TRACE(c.Creator, "sent packets", string(magic),
-		// 	hex.EncodeToString(nonce), c.Sender.LocalAddr(),
-		// 	c.Sender.RemoteAddr())
+		log.TRACE(c.Creator, "sent packets", string(magic),
+			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
+			c.Sender.RemoteAddr())
 	}
 	return
 }
 
 // Close the channel
 func (c *Channel) Close() (err error) {
-	if err = c.Sender.Close(); log.Check(err) {
-	}
-	if err = c.Receiver.Close(); log.Check(err) {
-	}
+	// if err = c.Sender.Close(); log.Check(err) {
+	// }
+	// if err = c.Receiver.Close(); log.Check(err) {
+	// }
 	return
 }
 
@@ -107,7 +108,7 @@ func GetShards(data []byte) (shards [][]byte) {
 
 // NewUnicastChannel sets up a listener and sender for a specified destination
 func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver string, maxDatagramSize int,
-	handlers Handlers) (channel *Channel, err error) {
+	handlers Handlers, quit chan struct{}) (channel *Channel, err error) {
 	channel = &Channel{
 		Creator:         creator,
 		MaxDatagramSize: maxDatagramSize,
@@ -126,7 +127,7 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 		if channel.receiveCiph, err = gcm.GetCipher(key); log.Check(err) {
 		}
 	}
-	channel.Receiver, err = Listen(receiver, channel, maxDatagramSize, handlers)
+	channel.Receiver, err = Listen(receiver, channel, maxDatagramSize, handlers, quit)
 	channel.Sender, err = NewSender(sender, maxDatagramSize)
 	if err != nil {
 		log.ERROR(err)
@@ -152,7 +153,8 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err erro
 
 // Listen binds to the UDP Address and port given and writes packets received
 // from that Address to a buffer which is passed to a handler
-func Listen(address string, channel *Channel, maxDatagramSize int, handlers Handlers) (conn *net.UDPConn, err error) {
+func Listen(address string, channel *Channel, maxDatagramSize int, handlers Handlers,
+	quit chan struct{}) (conn *net.UDPConn, err error) {
 	var addr *net.UDPAddr
 	if addr, err = net.ResolveUDPAddr("udp4", address); log.Check(err) {
 		return
@@ -165,14 +167,15 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 	if err = conn.SetReadBuffer(maxDatagramSize); log.Check(err) {
 		// not a critical error but should not happen
 	}
-	go Handle(address, channel, handlers, maxDatagramSize)
+	go Handle(address, channel, handlers, maxDatagramSize, quit)
 	return
 }
 
 // NewBroadcastChannel returns a broadcaster and listener with a given handler on a multicast
 // address and specified port. The handlers define the messages that will be processed and
 // any other messages are ignored
-func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers) (channel *Channel, err error) {
+func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
+	quit chan struct{}) (channel *Channel, err error) {
 	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
 		buffers: make(map[string]*MsgBuffer), context: ctx}
 	if key != "" {
@@ -181,7 +184,7 @@ func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, 
 		if channel.receiveCiph, err = gcm.GetCipher(key); log.Check(err) {
 		}
 	}
-	if channel.Receiver, err = ListenBroadcast(port, channel, maxDatagramSize, handlers); log.Check(err) {
+	if channel.Receiver, err = ListenBroadcast(port, channel, maxDatagramSize, handlers, quit); log.Check(err) {
 	} else if channel.Sender, err = NewBroadcaster(port, maxDatagramSize); log.Check(err) {
 	}
 	return
@@ -197,7 +200,8 @@ func NewBroadcaster(port int, maxDatagramSize int) (conn *net.UDPConn, err error
 
 // ListenBroadcast binds to the UDP Address and port given and writes packets received
 // from that Address to a buffer which is passed to a handler
-func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers Handlers) (conn *net.UDPConn, err error) {
+func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers Handlers,
+	quit chan struct{}) (conn *net.UDPConn, err error) {
 	address := net.JoinHostPort(UDPMulticastAddress, fmt.Sprint(port))
 	var addr *net.UDPAddr
 	// Parse the string Address
@@ -218,7 +222,7 @@ func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers H
 	if err = conn.SetReadBuffer(maxDatagramSize); log.Check(err) {
 	}
 	channel.Receiver = conn
-	go Handle(address, channel, handlers, maxDatagramSize)
+	go Handle(address, channel, handlers, maxDatagramSize, quit)
 	return
 }
 
@@ -236,14 +240,24 @@ func handleNetworkError(address string, err error) (result int) {
 // Handle listens for messages, decodes them, aggregates them, recovers the data from the
 // reed solomon fec shards received and invokes the handler provided matching the magic
 // on the complete received messages
-func Handle(address string, channel *Channel, handlers Handlers, maxDatagramSize int) {
+func Handle(address string, channel *Channel,
+	handlers Handlers, maxDatagramSize int, quit chan struct{}) {
 	buffer := make([]byte, maxDatagramSize)
 	log.WARN("starting handler for", channel.Creator, "listener")
 	// Loop forever reading from the socket until it is closed
 	// seenNonce := ""
+	var err error
+	var numBytes int
+	var src net.Addr
+	// var seenNonce string
 out:
 	for {
-		if numBytes, src, err := channel.Receiver.ReadFromUDP(buffer); log.Check(err) {
+		select {
+		case <-quit:
+			break out
+		default:
+		}
+		if numBytes, src, err = channel.Receiver.ReadFromUDP(buffer); log.Check(err) {
 			switch handleNetworkError(address, err) {
 			case closed:
 				break out
@@ -251,68 +265,70 @@ out:
 				continue
 			case success:
 			}
-			log.DEBUG("numBytes", numBytes)
-			// Filter messages by magic, if there is no match in the map the packet is ignored
-		} else if numBytes > 4 {
-			magic := string(buffer[:4])
-			if handler, ok := handlers[magic]; ok {
-				// if caller needs to know the liveness status of the
-				// controller it is working on, the code below
-				if channel.lastSent != nil && channel.firstSender != nil {
-					*channel.lastSent = time.Now()
-				}
-				msg := buffer[:numBytes]
-				nL := channel.receiveCiph.NonceSize()
-				nonceBytes := msg[4 : 4+nL]
-				nonce := string(nonceBytes)
-				// decipher
-				var shard []byte
-				if shard, err = channel.receiveCiph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); err != nil {
-					continue
-				}
-				if bn, ok := channel.buffers[nonce]; ok {
-					if !bn.Decoded {
-						bn.Buffers = append(bn.Buffers, shard)
-						if len(bn.Buffers) >= 3 {
-							// try to decode it
-							var cipherText []byte
-							cipherText, err = fec.Decode(bn.Buffers)
-							if err != nil {
-								log.ERROR(err)
-								continue
-							}
-							bn.Decoded = true
-							if err = handler(channel.context, src, address, cipherText); log.Check(err) {
-							}
-							// src = nil
-							// buffer = buffer[:0]
-						}
-					} else {
-						// if nonce == seenNonce {
-						// 	continue
-						// }
-						// seenNonce = nonce
-						for i := range channel.buffers {
-							if i != nonce || (channel.buffers[i].Decoded &&
-								len(channel.buffers[i].Buffers) > 8) {
-								// superseded messages can be deleted from the
-								// buffers, we don't add more data for the already
-								// decoded.
-								delete(channel.buffers, i)
-							}
-						}
-					}
-				} else {
-					channel.buffers[nonce] = &MsgBuffer{[][]byte{},
-						time.Now(), false, src}
-					channel.buffers[nonce].Buffers = append(channel.buffers[nonce].
-						Buffers, shard)
-				}
-			} else {
+		}
+		// Filter messages by magic, if there is no match in the map the packet is ignored
+		magic := string(buffer[:4])
+		if handler, ok := handlers[magic]; ok {
+			// if caller needs to know the liveness status of the
+			// controller it is working on, the code below
+			if channel.lastSent != nil && channel.firstSender != nil {
+				*channel.lastSent = time.Now()
+			}
+			msg := buffer[:numBytes]
+			nL := channel.receiveCiph.NonceSize()
+			nonceBytes := msg[4 : 4+nL]
+			nonce := string(nonceBytes)
+			// if nonce == seenNonce {
+			// 	log.DEBUG("seen this one")
+			// 	continue
+			// }
+			// seenNonce = nonce
+			// decipher
+			var shard []byte
+			if shard, err = channel.receiveCiph.Open(nil, nonceBytes, msg[4+len(nonceBytes):], nil); err != nil {
 				continue
 			}
-		} else {
-			log.DEBUG(channel.Creator, "short message")
+			// log.DEBUG("read", numBytes, "from", src, err, hex.EncodeToString(msg))
+			if bn, ok := channel.buffers[nonce]; ok {
+				if !bn.Decoded {
+					bn.Buffers = append(bn.Buffers, shard)
+					if len(bn.Buffers) >= 3 {
+						// log.DEBUG(len(bn.Buffers))
+						// try to decode it
+						var cipherText []byte
+						cipherText, err = fec.Decode(bn.Buffers)
+						if err != nil {
+							log.ERROR(err)
+							continue
+						}
+						bn.Decoded = true
+						// log.DEBUG(numBytes, src, err)
+						if err = handler(channel.context, src, address, cipherText); log.Check(err) {
+						}
+						// src = nil
+						// buffer = buffer[:0]
+					}
+				} else {
+					// if nonce == seenNonce {
+					// 	continue
+					// }
+					// seenNonce = nonce
+					for i := range channel.buffers {
+						if i != nonce || (channel.buffers[i].Decoded &&
+							len(channel.buffers[i].Buffers) > 8) {
+							// superseded messages can be deleted from the
+							// buffers, we don't add more data for the already
+							// decoded.
+							delete(channel.buffers, i)
+						}
+					}
+				}
+			} else {
+				channel.buffers[nonce] = &MsgBuffer{[][]byte{},
+					time.Now(), false, src}
+				channel.buffers[nonce].Buffers = append(channel.buffers[nonce].
+					Buffers, shard)
+			}
 		}
 		for i := range buffer {
 			buffer[i] = 0

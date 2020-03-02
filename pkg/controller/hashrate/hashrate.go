@@ -6,10 +6,14 @@
 package hashrate
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"fmt"
+	"io"
 	"net"
 	"time"
 	
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/IPs"
 	"github.com/p9c/pod/pkg/simplebuffer/Int32"
@@ -28,15 +32,20 @@ type Hashrate struct {
 	Count   int
 	Version int32
 	Height  int32
+	Nonce   int32
 }
 
-func Get(count int, version int32, height int32) Container {
+func Get(count int32, version int32, height int32) Container {
+	nonce := make([]byte, 4)
+	if _, err := io.ReadFull(rand.Reader, nonce); log.Check(err) {
+	}
 	return Container{*simplebuffer.Serializers{
 		Time.New().Put(time.Now()),
 		IPs.GetListenable(),
-		Int32.New().Put(int32(count)),
+		Int32.New().Put(count),
 		Int32.New().Put(version),
 		Int32.New().Put(height),
+		Int32.New().Put(int32(binary.BigEndian.Uint32(nonce))),
 	}.CreateContainer(HashrateMagic)}
 }
 
@@ -65,6 +74,10 @@ func (j *Container) GetVersion() int32 {
 
 func (j *Container) GetHeight() int32 {
 	return Int32.New().DecodeOne(j.Get(4)).Get()
+}
+
+func (j *Container) GetNonce() int32 {
+	return Int32.New().DecodeOne(j.Get(5)).Get()
 }
 
 func (j *Container) String() (s string) {
@@ -103,6 +116,7 @@ func (j *Container) Struct() (out Hashrate) {
 		Count:   j.GetCount(),
 		Version: j.GetVersion(),
 		Height:  j.GetHeight(),
+		Nonce:   j.GetNonce(),
 	}
 	return
 }

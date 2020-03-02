@@ -31,6 +31,7 @@ type Worker struct {
 	active        atomic.Bool
 	conn          *transport.Channel
 	ctx           context.Context
+	quit          chan struct{}
 	cx            *conte.Xt
 	sendAddresses []*net.UDPAddr
 	workers       []*client.Client
@@ -49,6 +50,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		w := &Worker{
 			ctx:           ctx,
 			cx:            cx,
+			quit:          cx.KillAll,
 			sendAddresses: []*net.UDPAddr{},
 		}
 		w.lastSent.Store(time.Now().UnixNano())
@@ -56,7 +58,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		log.DEBUG("opening broadcast channel listener")
 		w.conn, err = transport.
 			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
-				transport.DefaultPort, controller.MaxDatagramSize, handlers)
+				transport.DefaultPort, controller.MaxDatagramSize, handlers, cx.KillAll)
 		if err != nil {
 			log.ERROR(err)
 			cancel()
@@ -73,14 +75,18 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			w.workers = append(w.workers, client.New(cmd.StdConn))
 		}
 		interrupt.AddHandler(func() {
+			w.active.Store(false)
 			log.DEBUG("KopachHandle interrupt")
 			for i := range w.workers {
+				if err := wks[i].StdConn.Close(); log.Check(err) {
+				}
+				if err := wks[i].Stop(); log.Check(err) {
+				}
 				if err := wks[i].Kill(); log.Check(err) {
 				}
 				log.DEBUG("stopped worker", i)
 			}
 		})
-		w.active.Store(false)
 		for i := range w.workers {
 			log.DEBUG("sending pass to worker", i)
 			err := w.workers[i].SendPass(*cx.Config.MinerPass)
@@ -100,7 +106,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 					// log.DEBUG("tick", w.lastSent, w.FirstSender)
 					// if the last message sent was 3 seconds ago the server is
 					// almost certainly disconnected or crashed so clear FirstSender
-					since := time.Now().Sub(time.Unix(0 , w.lastSent.Load()))
+					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
 						log.DEBUG("previous current controller has stopped" +
@@ -131,7 +137,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 
 // these are the handlers for specific message types.
 var handlers = transport.Handlers{
-	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
+	string(job.WorkMagic): func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
 		w := ctx.(*Worker)
 		if !w.active.Load() {
@@ -164,7 +170,7 @@ var handlers = transport.Handlers{
 		}
 		return
 	},
-	string(pause.PauseMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
+	string(pause.PauseMagic): func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
 		log.DEBUG("received pause")
 		w := ctx.(*Worker)
