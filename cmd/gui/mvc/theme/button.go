@@ -3,6 +3,7 @@
 package theme
 
 import (
+	"github.com/p9c/pod/pkg/log"
 	"image"
 	"image/color"
 
@@ -221,14 +222,13 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *controller.Button) {
 	vmin := gtx.Constraints.Height.Min
 	txColor := b.TxColor
 	bgColor := b.BgColor
-	//switch button.Hover(gtx) {
-	//case true:
-	//	txColor = b.TxColorHover
-	//	bgColor = b.BgColorHover
-	//default:
-	//	txColor = b.TxColor
-	//	bgColor = b.BgColor
-	//}
+	if button.Hover(gtx) {
+		txColor = b.TxColorHover
+		bgColor = b.BgColorHover
+		log.INFO("")
+		log.INFO("oce")
+		log.INFO("")
+	}
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
 			rr := float32(gtx.Px(unit.Dp(0)))
