@@ -152,7 +152,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	for cont {
 		select {
 		case <-ticker.C:
-			log.DEBUGF("average hashrate %.2f", ctrl.HashReport())
+			log.DEBUGF("network hashrate %.2f", ctrl.HashReport())
 		case <-ctx.Done():
 			cont = false
 		case <-interrupt.HandlersDone:
@@ -166,7 +166,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 
 func (c *Controller) HashReport() float64 {
 	c.hashSampleBuf.Add(c.hashCount.Load())
-	// log.DEBUG(c.hashSampleBuf.Buf)
 	av := ewma.NewMovingAverage()
 	var i int
 	var prev uint64
@@ -182,7 +181,7 @@ func (c *Controller) HashReport() float64 {
 		return nil
 	}); log.Check(err) {
 	}
-	// log.INFO(c.hashSampleBuf.Cursor, c.hashSampleBuf.Buf)
+	log.INFO(c.hashSampleBuf.Cursor, c.hashSampleBuf.Buf)
 	// log.INFO("average hashrate", )
 	return av.Value()
 }

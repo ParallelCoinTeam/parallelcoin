@@ -106,7 +106,7 @@ func (w *Worker) HashReport() {
 		return nil
 	}); log.Check(err) {
 	}
-	// log.INFO(w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
+	log.INFO(w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
 	log.INFOF("average hashrate %.2f", av.Value())
 }
 

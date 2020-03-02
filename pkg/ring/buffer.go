@@ -9,7 +9,7 @@ type BufferUint64 struct {
 func NewBufferUint64(size int) *BufferUint64 {
 	return &BufferUint64{
 		Buf:    make([]uint64, size),
-		Cursor: 0,
+		Cursor: -1,
 	}
 }
 
