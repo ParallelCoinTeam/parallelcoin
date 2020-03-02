@@ -26,7 +26,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-const RoundsPerAlgo = 23
+const RoundsPerAlgo = 10
 
 type Worker struct {
 	sem           sem.T
@@ -42,6 +42,7 @@ type Worker struct {
 	msgBlock      *wire.MsgBlock
 	bitses        atomic.Value
 	hashes        atomic.Value
+	lastMerkle    *chainhash.Hash
 	roller        *Counter
 	startNonce    uint32
 	startChan     chan struct{}
@@ -124,7 +125,7 @@ func NewWithConnAndSemaphore(
 				log.DEBUG("worker stopping on pausing message")
 				break pausing
 			}
-			log.DEBUG("worker running")
+			log.TRACE("worker running")
 			// Run state
 		running:
 			for {
@@ -213,9 +214,9 @@ func NewWithConnAndSemaphore(
 					}
 				}
 			}
-			log.DEBUG("worker pausing")
+			log.TRACE("worker pausing")
 		}
-		log.DEBUG("worker finished")
+		log.TRACE("worker finished")
 	}(w)
 	return w
 }
@@ -243,14 +244,21 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	}
 	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
-	log.DEBUG("loading dispatch connection from job message")
+	// log.DEBUG("loading dispatch connection from job message")
 	log.TRACE(job.String())
 	// if there is no dispatch connection, make one.
 	// If there is one but the server died or was disconnected the
 	// connection the existing dispatch connection is nilled and this
 	// will run. If there is no controllers on the network,
 	// the worker pauses
-	ips := job.GetIPs()
+	// ips := job.GetIPs()
+	hashes := job.GetHashes()
+	if hashes[5].IsEqual(w.lastMerkle) {
+		// log.DEBUG("not a new job")
+		*reply = true
+		return
+	}
+	w.lastMerkle = hashes[5]
 	// var addresses []string
 	// for i := range ips {
 	// 	generally there is only one but if a server had two interfaces
@@ -258,28 +266,28 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// 	addresses = append(addresses, ips[i].String()+":"+
 	// 		fmt.Sprint(job.GetControllerListenerPort()))
 	// }
-	address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
-	remoteAddress := address
-	if w.dispatchConn != nil {
-		ra := w.dispatchConn.Sender
-		if ra != nil {
-			remoteAddress = ra.RemoteAddr().String()
-		}
-	}
-	if address != remoteAddress {
-		log.DEBUG("setting destination", address)
-		err = w.dispatchConn.SetDestination(address)
-		if err != nil {
-			log.ERROR(err)
-		}
-	}
+	// address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
+	// remoteAddress := address
+	// if w.dispatchConn != nil {
+	// 	ra := w.dispatchConn.Sender
+	// 	if ra != nil {
+	// 		remoteAddress = ra.RemoteAddr().String()
+	// 	}
+	// }
+	// if address != remoteAddress {
+	// 	log.DEBUG("setting destination", address)
+	// 	err = w.dispatchConn.SetDestination(address)
+	// 	if err != nil {
+	// 		log.ERROR(err)
+	// 	}
+	// }
 	// }
 	// log.SPEW(w.dispatchConn)
 	*reply = true
 	// halting current work
 	w.stopChan <- struct{}{}
 	w.bitses.Store(job.GetBitses())
-	w.hashes.Store(job.GetHashes())
+	w.hashes.Store(hashes)
 	newHeight := job.GetNewHeight()
 	w.roller.Algos = []int32{}
 	for i := range w.bitses.Load().(map[int32]uint32) {
@@ -297,7 +305,6 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	}
 	rand.Seed(time.Now().UnixNano())
 	w.msgBlock.Header.Nonce = rand.Uint32()
-	// log.TRACE(w.hashes)
 	if w.hashes.Load() == nil {
 		return errors.New("failed to decode merkle roots")
 	} else {
@@ -309,22 +316,6 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		w.msgBlock.Header.MerkleRoot = *hh
 	}
 	w.msgBlock.Header.Timestamp = time.Now()
-	// halting current work
-	w.stopChan <- struct{}{}
-	// create the unique extra nonce for this worker,
-	// which creates a different merkel root
-	// extraNonce, err := wire.RandomUint64()
-	// if err != nil {
-	// 	log.ERROR(err)
-	// 	return
-	// }
-	// log.TRACE("updating extra nonce")
-	// err = UpdateExtraNonce(w.msgBlock, newHeight, extraNonce)
-	// if err != nil {
-	// 	log.ERROR(err)
-	// 	return
-	// }
-	// log.SPEW(w.msgBlock)
 	// make the work select block start running
 	w.block = util.NewBlock(w.msgBlock)
 	w.block.SetHeight(newHeight)
@@ -357,10 +348,11 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	log.DEBUG("receiving dispatch password", pass)
 	rand.Seed(time.Now().UnixNano())
-	sp := fmt.Sprint(rand.Intn(32767) + 1025)
-	rp := fmt.Sprint(rand.Intn(32767) + 1025)
-	conn, err := transport.NewUnicastChannel("kopachworker", w, pass, "0.0.0.0:"+sp, "0.0.0.0:"+rp,
-		controller.MaxDatagramSize, nil)
+	// sp := fmt.Sprint(rand.Intn(32767) + 1025)
+	// rp := fmt.Sprint(rand.Intn(32767) + 1025)
+	var conn *transport.Channel
+	conn, err = transport.NewBroadcastChannel("kopachworker", w, pass,
+		transport.DefaultPort, controller.MaxDatagramSize, nil)
 	if err != nil {
 		log.ERROR(err)
 	}

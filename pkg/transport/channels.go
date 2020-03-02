@@ -10,7 +10,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
-
+	
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
@@ -21,6 +21,7 @@ const (
 	success             int = iota // this is implicit zero of an int but starts the iota
 	closed
 	other
+	DefaultPort = 11049
 )
 
 type (
@@ -80,7 +81,9 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		log.TRACE(c.Creator, "sent packets", string(magic), hex.EncodeToString(nonce), c.Sender.LocalAddr(), c.Sender.RemoteAddr())
+		log.TRACE(c.Creator, "sent packets", string(magic),
+			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
+			c.Sender.RemoteAddr())
 	}
 	return
 }
@@ -113,7 +116,7 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 		context:         ctx,
 	}
 	var magics []string
-
+	
 	for i := range handlers {
 		magics = append(magics, i)
 	}
@@ -125,7 +128,6 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 		}
 	}
 	channel.Receiver, err = Listen(receiver, channel, maxDatagramSize, handlers)
-	log.WARN(sender, receiver)
 	channel.Sender, err = NewSender(sender, maxDatagramSize)
 	if err != nil {
 		log.ERROR(err)
@@ -290,7 +292,7 @@ out:
 							// 	if msg, err = DecryptMessage(channel.Creator, channel.ciph, cipherText); log.Check(err) {
 							// 		log.WARN(PrevCallers())
 							// 		continue
-
+							
 							// 	}
 							if err = handler(channel.context, src, address, cipherText); log.Check(err) {
 								// err = handler(channel.context, src, channel.Sender.RemoteAddr().String(), cipherText)

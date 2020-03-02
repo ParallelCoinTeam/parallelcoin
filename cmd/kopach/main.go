@@ -57,8 +57,8 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		log.DEBUG("opening broadcast channel listener")
 		w.conn, err = transport.
-			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass, 11049,
-				controller.MaxDatagramSize, handlers)
+			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
+				transport.DefaultPort, controller.MaxDatagramSize, handlers)
 		if err != nil {
 			log.ERROR(err)
 			cancel()
@@ -139,7 +139,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 var handlers = transport.Handlers{
 	string(job.WorkMagic): func(ctx interface{}, src *net.UDPAddr, dst string,
 		b []byte) (err error) {
-		log.DEBUG("received job")
+		log.TRACE("received job")
 		w := ctx.(*Worker)
 		j := job.LoadContainer(b)
 		// h := j.GetHashes()
@@ -151,7 +151,7 @@ var handlers = transport.Handlers{
 		if otherSent {
 			// ignore other controllers while one is active and received
 			// first
-			log.DEBUG("ignoring other controller", addr)
+			// log.DEBUG("ignoring other controller", addr)
 			w.mx.Unlock()
 			return
 		} else {

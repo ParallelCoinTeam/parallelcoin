@@ -545,7 +545,6 @@ func (s *ChainService) outboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) 
 	sp := newServerPeer(s, c.Permanent)
 	p, err := peer.NewOutboundPeer(newPeerConfig(sp), c.Addr.String())
 	if err != nil {
-		log.ERROR(err)
 		log.DEBUGF(
 			"cannot create outbound peer %s: %s %s", c.Addr, err,
 		)
@@ -583,7 +582,6 @@ func (s *ChainService) peerHandler() {
 	s.blockManager.Start()
 	err := s.utxoScanner.Start()
 	if err != nil {
-		log.ERROR(err)
 		log.DEBUG(err)
 	}
 	state := &peerState{
