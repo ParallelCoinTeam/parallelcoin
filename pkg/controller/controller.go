@@ -94,7 +94,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		began:                  time.Now(),
 		otherNodes:             make(map[string]time.Time),
 		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
-		hashSampleBuf:          rav.NewBufferUint64(10),
+		hashSampleBuf:          rav.NewBufferUint64(1000),
 	}
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())

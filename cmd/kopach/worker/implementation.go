@@ -129,7 +129,7 @@ func NewWithConnAndSemaphore(
 		roller:        NewCounter(RoundsPerAlgo),
 		startChan:     make(chan struct{}),
 		stopChan:      make(chan struct{}),
-		hashSampleBuf: ring.NewBufferUint64(10),
+		hashSampleBuf: ring.NewBufferUint64(1000),
 	}
 	w.block.Store(util.NewBlock(msgBlock))
 	w.dispatchReady.Store(false)
