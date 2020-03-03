@@ -34,7 +34,6 @@ type WalletStatus struct {
 	Unconfirmed   string
 	TxsNumber     int
 	Transactions  *DuoUItransactions
-	Txs           *DuoUItransactionsExcerpts
 	LastTxs       *DuoUItransactions
 }
 type DuoUIhashes struct{ int64 }

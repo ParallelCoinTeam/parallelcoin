@@ -16,7 +16,7 @@ var (
 	}
 )
 
-func Explorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
 	return th.DuoUIpage("EXPLORER", 0, rc.GetBlocksExcerpts(), component.ContentHeader(gtx, th, headerExplorer(rc, gtx, th)), bodyExplorer(rc, gtx, th), func() {})
 }
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
@@ -35,23 +35,15 @@ func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 func headerExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{
-			Spacing: layout.SpaceBetween,
-			Axis:    layout.Horizontal,
+			Spacing:   layout.SpaceBetween,
+			Axis:      layout.Horizontal,
+			Alignment: layout.Middle,
 		}.Layout(gtx,
-			layout.Flexed(0.5, func() {
-				layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-					layout.Rigid(func() { th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page) }),
-					layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "Pages: "+fmt.Sprint(rc.Explorer.Page.To))),
-				)
+			layout.Rigid(func() {
+				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page, "PAGE", fmt.Sprint(rc.Explorer.Page.Value))
 			}),
-			layout.Flexed(0.5, func() {
-				layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-					layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "PER PAGE:"+fmt.Sprint(rc.Explorer.PerPage.Value))),
-					layout.Rigid(func() {
-						th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.PerPage)
-					}),
-					layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "Max pages 100")),
-				)
+			layout.Rigid(func() {
+				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.PerPage, "PER PAGE", fmt.Sprint(rc.Explorer.PerPage.Value))
 			}),
 		)
 	}
