@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"gioui.org/text"
 	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/theme"
 	"time"
@@ -33,7 +34,8 @@ type RcVar struct {
 	CurrentPage *theme.DuoUIpage
 	// NodeChan   chan *rpc.Server
 	// WalletChan chan *wallet.Wallet
-	Explorer *model.Explorer
+	Explorer *model.DuoUIexplorer
+	History  *model.DuoUIhistory
 	Quit     chan struct{}
 	Ready    chan struct{}
 	IsReady  bool
@@ -86,7 +88,6 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			Wallet: &model.WalletStatus{
 				WalletVersion: make(map[string]btcjson.VersionResult),
 				Transactions:  &model.DuoUItransactions{},
-				Txs:           &model.DuoUItransactionsExcerpts{},
 				LastTxs:       &model.DuoUItransactions{},
 			},
 			Kopach: &model.KopachStatus{},
@@ -109,27 +110,72 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		Sent:      false,
 		Localhost: model.DuoUIlocalHost{},
 		ShowPage:  "OVERVIEW",
-		Explorer: &model.Explorer{
+		Explorer: &model.DuoUIexplorer{
 			PerPage: &controller.DuoUIcounter{
-				Value:           20,
-				OperateValue:    1,
-				From:            0,
-				To:              50,
+				Value:        20,
+				OperateValue: 1,
+				From:         0,
+				To:           50,
+				CounterInput: &controller.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
 				CounterIncrease: new(controller.Button),
 				CounterDecrease: new(controller.Button),
 				CounterReset:    new(controller.Button),
 			},
 			Page: &controller.DuoUIcounter{
-				Value:           0,
-				OperateValue:    1,
-				From:            0,
-				To:              50,
+				Value:        0,
+				OperateValue: 1,
+				From:         0,
+				To:           50,
+				CounterInput: &controller.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
 				CounterIncrease: new(controller.Button),
 				CounterDecrease: new(controller.Button),
 				CounterReset:    new(controller.Button),
 			},
 			Blocks:      []model.DuoUIblock{},
 			SingleBlock: btcjson.GetBlockVerboseResult{},
+		},
+		History: &model.DuoUIhistory{
+			PerPage: &controller.DuoUIcounter{
+				Value:        20,
+				OperateValue: 1,
+				From:         0,
+				To:           50,
+				CounterInput: &controller.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
+				CounterIncrease: new(controller.Button),
+				CounterDecrease: new(controller.Button),
+				CounterReset:    new(controller.Button),
+			},
+			Page: &controller.DuoUIcounter{
+				Value:        0,
+				OperateValue: 1,
+				From:         0,
+				To:           50,
+				CounterInput: &controller.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
+				CounterIncrease: new(controller.Button),
+				CounterDecrease: new(controller.Button),
+				CounterReset:    new(controller.Button),
+			},
+			Txs: &model.DuoUItransactionsExcerpts{
+				ModelTxsListNumber: 0,
+				TxsListNumber:      0,
+				Txs:                []model.DuoUItransactionExcerpt{},
+				TxsNumber:          0,
+				Balance:            0,
+				BalanceHeight:      0,
+			},
+			SingleTx: btcjson.GetTransactionDetailsResult{},
 		},
 		Quit:  make(chan struct{}),
 		Ready: make(chan struct{}, 1),

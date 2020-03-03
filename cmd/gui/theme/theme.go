@@ -48,6 +48,8 @@ type DuoUItheme struct {
 	checkBoxUncheckedIcon *DuoUIicon
 	radioCheckedIcon      *DuoUIicon
 	radioUncheckedIcon    *DuoUIicon
+	counterPlusIcon       *DuoUIicon
+	counterMinusIcon      *DuoUIicon
 	Icons                 map[string]*DuoUIicon
 }
 
@@ -115,6 +117,26 @@ func NewDuoUItheme() *DuoUItheme {
 	i["traceIcon"] = mustIcon(NewDuoUIicon(icons.ActionTrackChanges))
 	i["consoleIcon"] = mustIcon(NewDuoUIicon(icons.ActionInput))
 	i["helpIcon"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropDown))
+
+	i["counterPlusIcon"] = mustIcon(NewDuoUIicon(icons.ImageExposurePlus1))
+	i["counterMinusIcon"] = mustIcon(NewDuoUIicon(icons.ImageExposureNeg1))
+
+	i["CommunicationImportExport"] = mustIcon(NewDuoUIicon(icons.CommunicationImportExport))
+	i["NotificationNetworkCheck"] = mustIcon(NewDuoUIicon(icons.NotificationNetworkCheck))
+	i["NotificationSync"] = mustIcon(NewDuoUIicon(icons.NotificationSync))
+	i["NotificationSyncDisabled"] = mustIcon(NewDuoUIicon(icons.NotificationSyncDisabled))
+	i["NotificationSyncProblem"] = mustIcon(NewDuoUIicon(icons.NotificationSyncProblem))
+	i["NotificationVPNLock"] = mustIcon(NewDuoUIicon(icons.NotificationVPNLock))
+	i["NotificationWiFi"] = mustIcon(NewDuoUIicon(icons.NotificationWiFi))
+	i["MapsLayers"] = mustIcon(NewDuoUIicon(icons.MapsLayers))
+	i["MapsLayersClear"] = mustIcon(NewDuoUIicon(icons.MapsLayersClear))
+	i["ImageTimer"] = mustIcon(NewDuoUIicon(icons.ImageTimer))
+	i["ImageRemoveRedEye"] = mustIcon(NewDuoUIicon(icons.ImageRemoveRedEye))
+	i["DeviceSignalCellular0Bar"] = mustIcon(NewDuoUIicon(icons.DeviceSignalCellular0Bar))
+	i["DeviceWidgets"] = mustIcon(NewDuoUIicon(icons.DeviceWidgets))
+	i["ActionTimeline"] = mustIcon(NewDuoUIicon(icons.ActionTimeline))
+	i["HardwareWatch"] = mustIcon(NewDuoUIicon(icons.HardwareWatch))
+	i["HardwareKeyboardHide"] = mustIcon(NewDuoUIicon(icons.HardwareKeyboardHide))
 
 	t.Icons = i
 	return t

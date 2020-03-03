@@ -84,11 +84,11 @@ func (r *RcVar) GetLatestTransactions() {
 func (r *RcVar) GetTransactions() func() {
 	return func() {
 		log.DEBUG("getting transactions")
-		lt, err := r.cx.WalletServer.ListTransactions(0, r.Status.Wallet.Txs.TxsListNumber)
+		lt, err := r.cx.WalletServer.ListTransactions(0, r.History.Txs.TxsListNumber)
 		if err != nil {
 			// //r.PushDuoUIalert("Error", err.Error(), "error")
 		}
-		r.Status.Wallet.Txs.TxsNumber = len(lt)
+		r.History.Txs.TxsNumber = len(lt)
 		// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
 		//	lt[i], lt[j] = lt[j], lt[i]
 		// }
@@ -112,13 +112,13 @@ func (r *RcVar) GetTransactions() func() {
 			balance = balance + tx.Amount
 			tx.Balance = balance
 			txs = append(txs, tx)
-			if r.Status.Wallet.Txs.Balance > balanceHeight {
-				balanceHeight = r.Status.Wallet.Txs.Balance
+			if r.History.Txs.Balance > balanceHeight {
+				balanceHeight = r.History.Txs.Balance
 			}
 
 		}
-		r.Status.Wallet.Txs.Txs = txs
-		r.Status.Wallet.Txs.BalanceHeight = balanceHeight
+		r.History.Txs.Txs = txs
+		r.History.Txs.BalanceHeight = balanceHeight
 		return
 	}
 }
