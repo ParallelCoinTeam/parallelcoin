@@ -45,7 +45,6 @@ type WalletStatus struct {
 	TxsNumber     atomic.Uint64
 	// components
 	Transactions  *DuoUItransactions
-	Txs           *DuoUItransactionsExcerpts
 	LastTxs       *DuoUItransactions
 }
 

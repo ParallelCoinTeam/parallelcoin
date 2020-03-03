@@ -5,6 +5,7 @@ type DuoUIcounter struct {
 	OperateValue    int
 	From            int
 	To              int
+	CounterInput    *Editor
 	CounterIncrease *Button
 	CounterDecrease *Button
 	CounterReset    *Button

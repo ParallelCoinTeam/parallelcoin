@@ -5,7 +5,7 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-type Explorer struct {
+type DuoUIexplorer struct {
 	Page        *controller.DuoUIcounter
 	PerPage     *controller.DuoUIcounter
 	Blocks      []DuoUIblock

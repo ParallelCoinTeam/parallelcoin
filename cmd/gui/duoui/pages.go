@@ -18,7 +18,7 @@ func LoadPages(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) (p map[
 	p["NETWORK"] = th.DuoUIpage("NETWORK", 0, func() {}, func() {}, func() { th.H5("network :").Layout(gtx) }, func() {})
 	p["BLOCK"] = th.DuoUIpage("BLOCK", 0, func() {}, func() {}, func() { th.H5("block :").Layout(gtx) }, func() {})
 	p["HISTORY"] = pages.History(rc, gtx, th)
-	p["EXPLORER"] = pages.Explorer(rc, gtx, th)
+	p["EXPLORER"] = pages.DuoUIexplorer(rc, gtx, th)
 	p["MINER"] = pages.Miner(rc, gtx, th)
 	p["CONSOLE"] = pages.Console(rc, gtx, th)
 	p["LOG"] = pages.Logger(rc, gtx, th)
