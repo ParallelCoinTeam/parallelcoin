@@ -2,13 +2,13 @@ package model
 
 import (
 	"sync"
-	
+
 	"gioui.org/app"
 	"gioui.org/layout"
 	"go.uber.org/atomic"
-	
-	"github.com/p9c/pod/cmd/gui/controller"
-	"github.com/p9c/pod/cmd/gui/theme"
+
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 )

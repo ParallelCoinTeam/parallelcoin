@@ -5,9 +5,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -49,7 +49,7 @@ func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, b
 				component.ContentLabeledField(gtx, th, layout.Vertical, 16, 12, "MerkleRoot", block.MerkleRoot),
 				component.ContentLabeledField(gtx, th, layout.Vertical, 16, 12, "PowHash", fmt.Sprint(block.PowHash)),
 			),
-			component.HorizontalLine(gtx, 1, th.Color.Dark),
+			component.HorizontalLine(gtx, 1, th.Colors["Dark"]),
 			component.DuoFields(gtx, duo,
 				component.TrioFields(gtx, th, trio, 16, 16,
 					"Size", fmt.Sprint(block.Size),

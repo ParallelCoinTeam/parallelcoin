@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"gioui.org/layout"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (

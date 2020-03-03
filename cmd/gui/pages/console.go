@@ -4,10 +4,10 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"time"
 )
 
@@ -41,8 +41,8 @@ func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func(
 									Axis:      layout.Vertical,
 									Alignment: layout.End,
 								}.Layout(gtx,
-									layout.Rigid(component.Label(gtx, th, th.Font.Mono, 12, th.Color.Dark, "ds://"+t.ComID)),
-									layout.Rigid(component.Label(gtx, th, th.Font.Mono, 12, th.Color.Dark, t.Out)),
+									layout.Rigid(component.Label(gtx, th, th.Fonts["Mono"], 12, th.Colors["Dark"], "ds://"+t.ComID)),
+									layout.Rigid(component.Label(gtx, th, th.Fonts["Mono"], 12, th.Colors["Dark"], t.Out)),
 								)
 							})
 						}),

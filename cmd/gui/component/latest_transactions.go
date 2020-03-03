@@ -6,7 +6,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
@@ -24,10 +24,10 @@ func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUI
 		}.Layout(gtx,
 			layout.Rigid(func() {
 				cs := gtx.Constraints
-				theme.DuoUIdrawRectangle(gtx, cs.Width.Max, 48, th.Color.Primary, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				theme.DuoUIdrawRectangle(gtx, cs.Width.Max, 48, th.Colors["Primary"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				layout.UniformInset(unit.Dp(16)).Layout(gtx, func() {
 					latestx := th.H5("LATEST TRANSACTIONS")
-					latestx.Color = theme.HexARGB(th.Color.Light)
+					latestx.Color = theme.HexARGB(th.Colors["Light"])
 					latestx.Alignment = text.Start
 					latestx.Layout(gtx)
 				})
@@ -39,7 +39,7 @@ func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUI
 							cs := gtx.Constraints
 							latestTransList.Layout(gtx, len(rc.Status.Wallet.LastTxs.Txs), func(i int) {
 								t := rc.Status.Wallet.LastTxs.Txs[i]
-								theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+								theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								layout.Inset{
 									Top:    unit.Dp(8),
 									Right:  unit.Dp(16),
@@ -63,7 +63,7 @@ func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUI
 												layout.Rigid(lTamount(gtx, th, t.Amount)),
 											)
 										}),
-										layout.Rigid(HorizontalLine(gtx, 1, th.Color.Hint)),
+										layout.Rigid(HorizontalLine(gtx, 1, th.Colors["Hint"])),
 									)
 								})
 							})
@@ -77,8 +77,8 @@ func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUI
 func lTtxid(gtx *layout.Context, th *theme.DuoUItheme, v string) func() {
 	return func() {
 		tim := th.Caption(v)
-		tim.Font.Typeface = th.Font.Mono
-		tim.Color = theme.HexARGB(th.Color.Light)
+		tim.Font.Typeface = th.Fonts["Mono"]
+		tim.Color = theme.HexARGB(th.Colors["Light"])
 		tim.Layout(gtx)
 	}
 }
@@ -86,7 +86,7 @@ func lTtxid(gtx *layout.Context, th *theme.DuoUItheme, v string) func() {
 func lTcategory(gtx *layout.Context, th *theme.DuoUItheme, v string) func() {
 	return func() {
 		sat := th.Body1(v)
-		sat.Color = theme.HexARGB(th.Color.Light)
+		sat.Color = theme.HexARGB(th.Colors["Light"])
 		sat.Font.Typeface = "bariol"
 		sat.Layout(gtx)
 	}
@@ -96,8 +96,8 @@ func lTtime(gtx *layout.Context, th *theme.DuoUItheme, v string) func() {
 	return func() {
 		l := th.Body1(v)
 		l.Font.Typeface = "bariol"
-		l.Color = theme.HexARGB(th.Color.Light)
-		l.Color = theme.HexARGB(th.Color.Hint)
+		l.Color = theme.HexARGB(th.Colors["Light"])
+		l.Color = theme.HexARGB(th.Colors["Hint"])
 		l.Layout(gtx)
 	}
 }
@@ -107,7 +107,7 @@ func lTamount(gtx *layout.Context, th *theme.DuoUItheme, v float64) func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			sat := th.Body1(fmt.Sprintf("%0.8f", v))
 			sat.Font.Typeface = "bariol"
-			sat.Color = theme.HexARGB(th.Color.Light)
+			sat.Color = theme.HexARGB(th.Colors["Light"])
 			sat.Layout(gtx)
 		})
 	}

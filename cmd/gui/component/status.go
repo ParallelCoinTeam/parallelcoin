@@ -6,8 +6,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
-	"golang.org/x/exp/shiny/materialdesign/icons"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"image"
 )
 
@@ -19,32 +18,31 @@ var (
 		Axis:    layout.Horizontal,
 		Spacing: layout.SpaceBetween,
 	}
-	icon, _ = theme.NewDuoUIicon(icons.EditorMonetizationOn)
 )
 
 func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		cs := gtx.Constraints
-		theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Color.Light, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		in := layout.UniformInset(unit.Dp(16))
 		in.Layout(gtx, func() {
 			//cs := gtx.Constraints
 			bigStatus := []func(){
-				listItem(gtx, th, 32, "BALANCE :", rc.Status.Wallet.Balance.Load()+" "+rc.Settings.Abbrevation),
-				HorizontalLine(gtx, 1, th.Color.LightGrayII),
-				listItem(gtx, th, 32, "UNCONFIRMED :", rc.Status.Wallet.Unconfirmed.Load()+" "+
+				listItem(gtx, th, 32, "EditorMonetizationOn", "BALANCE :", rc.Status.Wallet.Balance.Load()+" "+rc.Settings.Abbrevation),
+				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				listItem(gtx, th, 32, "MapsLayersClear", "UNCONFIRMED :", rc.Status.Wallet.Unconfirmed.Load()+" "+
 					rc.Settings.Abbrevation),
-				HorizontalLine(gtx, 1, th.Color.LightGrayII),
-				listItem(gtx, th, 32, "TRANSACTIONS :", fmt.Sprint(rc.Status.Wallet.TxsNumber)),
+				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				listItem(gtx, th, 32, "CommunicationImportExport", "TRANSACTIONS :", fmt.Sprint(rc.Status.Wallet.TxsNumber)),
 
-				HorizontalLine(gtx, 1, th.Color.LightGrayII),
-				listItem(gtx, th, 16, "Block Count :", fmt.Sprint(rc.Status.Node.BlockCount)),
+				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				listItem(gtx, th, 16, "DeviceWidgets", "Block Count :", fmt.Sprint(rc.Status.Node.BlockCount)),
 
-				HorizontalLine(gtx, 1, th.Color.LightGrayII),
-				listItem(gtx, th, 16, "Difficulty :", fmt.Sprint(rc.Status.Node.Difficulty)),
+				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				listItem(gtx, th, 16, "ImageTimer", "Difficulty :", fmt.Sprint(rc.Status.Node.Difficulty)),
 
-				HorizontalLine(gtx, 1, th.Color.LightGrayII),
-				listItem(gtx, th, 16, "Connections :", fmt.Sprint(rc.Status.Node.ConnectionCount)),
+				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				listItem(gtx, th, 16, "NotificationVPNLock", "Connections :", fmt.Sprint(rc.Status.Node.ConnectionCount)),
 			}
 			itemsList.Layout(gtx, len(bigStatus), func(i int) {
 				layout.UniformInset(unit.Dp(0)).Layout(gtx, bigStatus[i])
@@ -53,8 +51,9 @@ func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func(
 	}
 }
 
-func listItem(gtx *layout.Context, th *theme.DuoUItheme, size int, name, value string) func() {
+func listItem(gtx *layout.Context, th *theme.DuoUItheme, size int, iconName, name, value string) func() {
 	return func() {
+		icon := th.Icons[iconName]
 		layout.Flex{
 			Axis:    layout.Horizontal,
 			Spacing: layout.SpaceBetween,
@@ -64,7 +63,7 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, size int, name, value s
 					layout.Rigid(func() {
 						layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(gtx, func() {
 							if icon != nil {
-								icon.Color = theme.HexARGB(th.Color.Dark)
+								icon.Color = theme.HexARGB(th.Colors["Dark"])
 								icon.Layout(gtx, unit.Px(float32(size)))
 							}
 							gtx.Dimensions = layout.Dimensions{
@@ -74,8 +73,8 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, size int, name, value s
 					}),
 					layout.Rigid(func() {
 						txt := th.H6(name)
-						txt.Font.Typeface = th.Font.Primary
-						txt.Color = theme.HexARGB(th.Color.Primary)
+						txt.Font.Typeface = th.Fonts["Primary"]
+						txt.Color = theme.HexARGB(th.Colors["Primary"])
 						txt.Layout(gtx)
 					}),
 				)
@@ -83,8 +82,8 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, size int, name, value s
 			layout.Rigid(func() {
 				value := th.H5(value)
 				value.TextSize = unit.Dp(float32(size))
-				value.Font.Typeface = th.Font.Primary
-				value.Color = theme.HexARGB(th.Color.Dark)
+				value.Font.Typeface = th.Fonts["Primary"]
+				value.Color = theme.HexARGB(th.Colors["Dark"])
 				value.Alignment = text.End
 				value.Layout(gtx)
 			}),

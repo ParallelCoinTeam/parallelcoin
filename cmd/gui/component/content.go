@@ -9,10 +9,10 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
@@ -76,8 +76,8 @@ func ContentLabeledField(gtx *layout.Context, th *theme.DuoUItheme, axis layout.
 			layout.Flex{
 				Axis: axis,
 			}.Layout(gtx,
-				layout.Rigid(contentField(gtx, th, label, th.Color.Light, th.Color.Dark, th.Font.Primary, labelTextSize)),
-				layout.Rigid(contentField(gtx, th, value, th.Color.Light, th.Color.DarkGray, th.Font.Mono, valueTextSize)))
+				layout.Rigid(contentField(gtx, th, label, th.Colors["Light"], th.Colors["Dark"], th.Fonts["Primary"], labelTextSize)),
+				layout.Rigid(contentField(gtx, th, value, th.Colors["Light"], th.Colors["DarkGray"], th.Fonts["Mono"], valueTextSize)))
 		})
 	}
 }
@@ -89,7 +89,7 @@ func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pr
 				eh := chainhash.Hash{}
 				if previousBlockHash != eh.String() {
 					var previousBlockButton theme.DuoUIbutton
-					previousBlockButton = th.DuoUIbutton(th.Font.Mono, "Previous Block "+previousBlockHash, th.Color.Light, th.Color.Info, th.Color.Info, th.Color.Light, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+					previousBlockButton = th.DuoUIbutton(th.Fonts["Mono"], "Previous Block "+previousBlockHash, th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Light"], 16, 0, 60, 24, 0, 0)
 					for previousBlockHashButton.Clicked(gtx) {
 						// clipboard.Set(b.BlockHash)
 						rc.ShowPage = fmt.Sprintf("BLOCK %s", previousBlockHash)
@@ -102,7 +102,7 @@ func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pr
 			layout.Flexed(0.495, func() {
 				if nextBlockHash != "" {
 					var nextBlockButton theme.DuoUIbutton
-					nextBlockButton = th.DuoUIbutton(th.Font.Mono, "Next Block "+nextBlockHash, th.Color.Light, th.Color.Info, th.Color.Info, th.Color.Light, "", th.Color.Light, 16, 0, 60, 24, 0, 0)
+					nextBlockButton = th.DuoUIbutton(th.Fonts["Mono"], "Next Block "+nextBlockHash, th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Light"], 16, 0, 60, 24, 0, 0)
 					for nextBlockHashButton.Clicked(gtx) {
 						// clipboard.Set(b.BlockHash)
 						rc.ShowPage = fmt.Sprintf("BLOCK %s", nextBlockHash)

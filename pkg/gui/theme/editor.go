@@ -3,7 +3,7 @@
 package theme
 
 import (
-	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/pkg/gui/controller"
 	"image/color"
 
 	"gioui.org/layout"
@@ -29,10 +29,10 @@ type DuoUIeditor struct {
 func (t *DuoUItheme) DuoUIeditor(hint string) DuoUIeditor {
 	return DuoUIeditor{
 		TextSize:  t.TextSize,
-		Color:     HexARGB(t.Color.Dark),
+		Color:     HexARGB(t.Colors["Dark"]),
 		shaper:    t.Shaper,
 		Hint:      hint,
-		HintColor: HexARGB(t.Color.Hint),
+		HintColor: HexARGB(t.Colors["Hint"]),
 	}
 }
 

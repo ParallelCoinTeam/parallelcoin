@@ -4,8 +4,8 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/controller"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -30,19 +30,19 @@ var (
 
 func (ui *DuoUI) DuoUIloaderCreateWallet() {
 	cs := ui.ly.Context.Constraints
-	theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Color.Light, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	layout.Center.Layout(ui.ly.Context, func() {
 		controllers := []func(){
 			func() {
 				bal := ui.ly.Theme.H5("Enter the private passphrase for your new wallet:")
-				bal.Font.Typeface = ui.ly.Theme.Font.Primary
-				bal.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
+				bal.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
+				bal.Color = theme.HexARGB(ui.ly.Theme.Colors["Dark"])
 				bal.Layout(ui.ly.Context)
 			},
 			func() {
 				layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
 					e := ui.ly.Theme.DuoUIeditor("Enter Passpharse")
-					e.Font.Typeface = ui.ly.Theme.Font.Primary
+					e.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
 					e.Font.Style = text.Regular
 					e.Layout(ui.ly.Context, passEditor)
 					for _, e := range passEditor.Events(ui.ly.Context) {
@@ -56,7 +56,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			func() {
 				layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
 					e := ui.ly.Theme.DuoUIeditor("Repeat Passpharse")
-					e.Font.Typeface = ui.ly.Theme.Font.Primary
+					e.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
 					e.Font.Style = text.Regular
 					e.Layout(ui.ly.Context, confirmPassEditor)
 					for _, e := range confirmPassEditor.Events(ui.ly.Context) {
@@ -68,26 +68,26 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 				})
 			},
 			func() {
-				encryptionCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you want to add an additional layer of encryption for public data?", ui.ly.Theme.Color.Dark, ui.ly.Theme.Color.Dark)
-				encryptionCheckBox.Font.Typeface = ui.ly.Theme.Font.Primary
-				encryptionCheckBox.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
+				encryptionCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you want to add an additional layer of encryption for public data?", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
+				encryptionCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
+				encryptionCheckBox.Color = theme.HexARGB(ui.ly.Theme.Colors["Dark"])
 				encryptionCheckBox.Layout(ui.ly.Context, encryption)
 			},
 			func() {
-				seedCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you have an existing wallet seed you want to use?", ui.ly.Theme.Color.Dark, ui.ly.Theme.Color.Dark)
-				seedCheckBox.Font.Typeface = ui.ly.Theme.Font.Primary
-				seedCheckBox.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
+				seedCheckBox := ui.ly.Theme.DuoUIcheckBox("Do you have an existing wallet seed you want to use?", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
+				seedCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
+				seedCheckBox.Color = theme.HexARGB(ui.ly.Theme.Colors["Dark"])
 				seedCheckBox.Layout(ui.ly.Context, seed)
 			},
 			func() {
-				testnetCheckBox := ui.ly.Theme.DuoUIcheckBox("Use testnet?", ui.ly.Theme.Color.Dark, ui.ly.Theme.Color.Dark)
-				testnetCheckBox.Font.Typeface = ui.ly.Theme.Font.Primary
-				testnetCheckBox.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
+				testnetCheckBox := ui.ly.Theme.DuoUIcheckBox("Use testnet?", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
+				testnetCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
+				testnetCheckBox.Color = theme.HexARGB(ui.ly.Theme.Colors["Dark"])
 				testnetCheckBox.Layout(ui.ly.Context, testnet)
 			},
 			func() {
 				var createWalletbuttonComp theme.DuoUIbutton
-				createWalletbuttonComp = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Secondary, "CREATE WALLET", ui.ly.Theme.Color.Dark, ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Light, ui.ly.Theme.Color.Dark, "", ui.ly.Theme.Color.Dark, 16, 0, 125, 32, 4, 4)
+				createWalletbuttonComp = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Fonts["Secondary"], "CREATE WALLET", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Light"], ui.ly.Theme.Colors["Light"], ui.ly.Theme.Colors["Dark"], "", ui.ly.Theme.Colors["Dark"], 16, 0, 125, 32, 4, 4)
 				for buttonCreateWallet.Clicked(ui.ly.Context) {
 					if passPhrase != "" && passPhrase == confirmPassPhrase {
 						if testnet.Checked(ui.ly.Context) {

@@ -30,9 +30,9 @@ func (t *DuoUItheme) DuoUIpage(txt string, border float32, command, header, body
 		Font:  text.Font{
 			//Size: t.TextSize.Scale(14.0 / 16.0),
 		},
-		TxColor:     t.Color.Dark,
-		BgColor:     t.Color.Light,
-		BorderColor: t.Color.LightGrayI,
+		TxColor:     t.Colors["Dark"],
+		BgColor:     t.Colors["Light"],
+		BorderColor: t.Colors["LightGrayI"],
 		Border:      border,
 		shaper:      t.Shaper,
 		Command:     command,

@@ -15,7 +15,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/pkg/gui/controller"
 )
 
 type Button struct {
@@ -40,11 +40,11 @@ type IconButton struct {
 func (t *DuoUItheme) Button(txt string) Button {
 	return Button{
 		Font: text.Font{
-			Typeface: t.Font.Primary,
+			Typeface: t.Fonts["Primary"],
 		},
 		Text:       txt,
 		Color:      rgb(0xffffff),
-		Background: HexARGB(t.Color.Primary),
+		Background: HexARGB(t.Colors["Primary"]),
 		TextSize:   t.TextSize.Scale(14.0 / 16.0),
 		shaper:     t.Shaper,
 	}
@@ -52,8 +52,8 @@ func (t *DuoUItheme) Button(txt string) Button {
 
 func (t *DuoUItheme) IconButton(icon *DuoUIicon) IconButton {
 	return IconButton{
-		Background: HexARGB(t.Color.Primary),
-		Color:      HexARGB(t.Color.InvText),
+		Background: HexARGB(t.Colors["Primary"]),
+		Color:      HexARGB(t.Colors["InvText"]),
 		Icon:       icon,
 		Size:       unit.Dp(56),
 		Padding:    unit.Dp(16),

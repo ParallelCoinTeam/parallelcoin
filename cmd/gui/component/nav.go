@@ -3,10 +3,10 @@ package component
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
@@ -55,7 +55,7 @@ func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pag
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var menuItem theme.DuoUIbutton
-			menuItem = th.DuoUIbutton(th.Font.Secondary, title, th.Color.Dark, th.Color.LightGrayII, th.Color.LightGrayII, th.Color.Dark, icon, CurrentCurrentPageColor(rc.ShowPage, title, navItemIconColor, th.Color.Primary), navItemTextSize, navItemTconSize, navItemWidth, navItemHeight, navItemPaddingVertical, navItemPaddingHorizontal)
+			menuItem = th.DuoUIbutton(th.Fonts["Secondary"], title, th.Colors["Dark"], th.Colors["LightGrayII"], th.Colors["LightGrayII"], th.Colors["Dark"], icon, CurrentCurrentPageColor(rc.ShowPage, title, navItemIconColor, th.Colors["Primary"]), navItemTextSize, navItemTconSize, navItemWidth, navItemHeight, navItemPaddingVertical, navItemPaddingHorizontal)
 			for navButton.Clicked(gtx) {
 				rc.ShowPage = title
 				SetPage(rc, page)
@@ -67,6 +67,6 @@ func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pag
 
 func navMenuLine(gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
-		theme.DuoUIdrawRectangle(gtx, int(navItemWidth), 1, th.Color.LightGrayIII, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		theme.DuoUIdrawRectangle(gtx, int(navItemWidth), 1, th.Colors["LightGrayIII"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	}
 }

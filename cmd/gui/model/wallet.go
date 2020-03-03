@@ -1,6 +1,6 @@
 package model
 
-import "github.com/p9c/pod/cmd/gui/controller"
+import "github.com/p9c/pod/pkg/gui/controller"
 
 type DuoUIbalance struct {
 	Balance string `json:"balance"`

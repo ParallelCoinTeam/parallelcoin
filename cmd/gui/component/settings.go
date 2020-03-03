@@ -6,9 +6,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -34,7 +34,7 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 				for rc.Settings.Tabs.TabsList[txt].Clicked(gtx) {
 					rc.Settings.Tabs.Current = txt
 				}
-				th.DuoUIbutton(th.Font.Primary, txt, th.Color.Light, th.Color.Info, th.Color.Info, th.Color.Light, "", th.Color.Dark, 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
+				th.DuoUIbutton(th.Fonts["Primary"], txt, th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Dark"], 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
 			})
 		})
 	}
@@ -56,18 +56,18 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f
 					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor), f.Field.Label, func(e controller.SubmitEvent) {})
 				case "number":
 					e := th.DuoUIeditor(f.Field.Label)
-					e.Font.Typeface = th.Font.Primary
+					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Italic
 					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
 				case "password":
 					e := th.DuoUIeditor(f.Field.Label)
-					e.Font.Typeface = th.Font.Primary
+					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Italic
 					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
 				default:
 				}
 			case "switch":
-				th.DuoUIcheckBox(f.Field.Label, th.Color.Dark, th.Color.Dark).Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.CheckBox))
+				th.DuoUIcheckBox(f.Field.Label, th.Colors["Dark"], th.Colors["Dark"]).Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.CheckBox))
 			case "radio":
 				//radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 				//layout.Flex{}.Layout(gtx,
@@ -104,7 +104,7 @@ func SettingsFieldLabel(gtx *layout.Context, th *theme.DuoUItheme, f *Field) fun
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			name := th.H6(fmt.Sprint(f.Field.Label))
-			name.Font.Typeface = th.Font.Primary
+			name.Font.Typeface = th.Fonts["Primary"]
 			name.Layout(gtx)
 		})
 	}
@@ -114,7 +114,7 @@ func SettingsFieldDescription(gtx *layout.Context, th *theme.DuoUItheme, f *Fiel
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			desc := th.Body2(fmt.Sprint(f.Field.Description))
-			desc.Font.Typeface = th.Font.Primary
+			desc.Font.Typeface = th.Fonts["Primary"]
 			desc.Layout(gtx)
 		})
 	}

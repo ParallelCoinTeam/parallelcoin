@@ -6,9 +6,9 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"image"
 	"image/color"
 )
@@ -45,7 +45,7 @@ func Editor(gtx *layout.Context, th *theme.DuoUItheme, editorControler *controll
 			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 				theme.DuoUIdrawRectangle(gtx, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				e := th.DuoUIeditor(label)
-				e.Font.Typeface = th.Font.Primary
+				e.Font.Typeface = th.Fonts["Primary"]
 				e.Font.Style = text.Italic
 				e.Layout(gtx, editorControler)
 				for _, e := range editorControler.Events(gtx) {
@@ -63,7 +63,7 @@ func Button(gtx *layout.Context, th *theme.DuoUItheme, buttonController *control
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var button theme.DuoUIbutton
-			button = th.DuoUIbutton(font, label, color, bgColor, "", "", "", th.Color.Light, textSize, 0, 128, 48, 0, 0)
+			button = th.DuoUIbutton(font, label, color, bgColor, "", "", "", th.Colors["Light"], textSize, 0, 128, 48, 0, 0)
 			for buttonController.Clicked(gtx) {
 				handler()
 			}

@@ -7,7 +7,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
@@ -51,13 +51,13 @@ func headerExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) fu
 
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *model.DuoUIblock) {
 	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-		component.HorizontalLine(gtx, 1, th.Color.Dark)()
+		component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
 		}.Layout(gtx,
 			layout.Rigid(func() {
 				var linkButton theme.DuoUIbutton
-				linkButton = th.DuoUIbutton(th.Font.Mono, fmt.Sprint(block.Height), th.Color.Light, th.Color.Info, th.Color.Info, th.Color.Light, "", th.Color.Light, 14, 0, 60, 24, 0, 0)
+				linkButton = th.DuoUIbutton(th.Fonts["Mono"], fmt.Sprint(block.Height), th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Light"], 14, 0, 60, 24, 0, 0)
 				for block.Link.Clicked(gtx) {
 					rc.ShowPage = fmt.Sprintf("BLOCK %s", block.BlockHash)
 					rc.GetSingleBlock(block.BlockHash)()
@@ -67,14 +67,14 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *m
 			}),
 			layout.Rigid(func() {
 				l := th.Body2(block.Time)
-				l.Font.Typeface = th.Font.Mono
-				l.Color = theme.HexARGB(th.Color.Dark)
+				l.Font.Typeface = th.Fonts["Mono"]
+				l.Color = theme.HexARGB(th.Colors["Dark"])
 				l.Layout(gtx)
 			}),
 			layout.Rigid(func() {
 				l := th.Body2(block.BlockHash)
-				l.Font.Typeface = th.Font.Mono
-				l.Color = theme.HexARGB(th.Color.Dark)
+				l.Font.Typeface = th.Fonts["Mono"]
+				l.Color = theme.HexARGB(th.Colors["Dark"])
 				l.Layout(gtx)
 			}))
 	})
