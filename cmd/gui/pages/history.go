@@ -37,7 +37,7 @@ func headerTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme
 		}.Layout(gtx,
 			layout.Rigid(component.TransactionsFilter(rc, gtx, th)),
 			layout.Rigid(func() {
-				th.DuoUIcounter(rc.GetTransactions()).Layout(gtx, itemValue, "TxNum: ", string(rc.Txs.TxsNumber))
+				th.DuoUIcounter(rc.GetTransactions()).Layout(gtx, rc.History.PerPage, "TxNum: ", string(rc.History.Txs.TxsNumber))
 			}),
 		)
 	}

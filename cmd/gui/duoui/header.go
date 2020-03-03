@@ -12,16 +12,33 @@ import (
 var (
 	logoButton = new(controller.Button)
 	headerList = &layout.List{
-		Axis:      layout.Vertical,
+		Axis:      layout.Horizontal,
 		Alignment: layout.Start,
-	}
-	headerListItems = []*theme.DuoUIicon{
-		//""
 	}
 )
 
 func (ui *DuoUI) DuoUIheader() func() {
 	return func() {
+
+		headerListItems := []*theme.DuoUIicon{
+			ui.ly.Theme.Icons["CommunicationImportExport"],
+			ui.ly.Theme.Icons["NotificationNetworkCheck"],
+			ui.ly.Theme.Icons["NotificationSync"],
+			ui.ly.Theme.Icons["NotificationSyncDisabled"],
+			ui.ly.Theme.Icons["NotificationSyncProblem"],
+			ui.ly.Theme.Icons["NotificationVPNLock"],
+			ui.ly.Theme.Icons["NotificationWiFi"],
+			ui.ly.Theme.Icons["MapsLayers"],
+			ui.ly.Theme.Icons["MapsLayersClear"],
+			ui.ly.Theme.Icons["ImageTimer"],
+			ui.ly.Theme.Icons["ImageRemoveRedEye"],
+			ui.ly.Theme.Icons["DeviceSignalCellular0Bar"],
+			ui.ly.Theme.Icons["DeviceWidgets"],
+			ui.ly.Theme.Icons["ActionTimeline"],
+			ui.ly.Theme.Icons["HardwareWatch"],
+			ui.ly.Theme.Icons["HardwareKeyboardHide"],
+		}
+
 		layout.Flex{
 			Axis:    layout.Horizontal,
 			Spacing: layout.SpaceBetween,

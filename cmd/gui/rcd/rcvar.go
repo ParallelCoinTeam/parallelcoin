@@ -35,7 +35,7 @@ type RcVar struct {
 	// NodeChan   chan *rpc.Server
 	// WalletChan chan *wallet.Wallet
 	Explorer *model.DuoUIexplorer
-	Txs      *model.DuoUItransactionsExcerpts
+	History  *model.DuoUIhistory
 	Quit     chan struct{}
 	Ready    chan struct{}
 	IsReady  bool
@@ -140,7 +140,43 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			Blocks:      []model.DuoUIblock{},
 			SingleBlock: btcjson.GetBlockVerboseResult{},
 		},
-		Txs:   &model.DuoUItransactionsExcerpts{},
+		History: &model.DuoUIhistory{
+			PerPage: &controller.DuoUIcounter{
+				Value:        20,
+				OperateValue: 1,
+				From:         0,
+				To:           50,
+				CounterInput: &controller.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
+				CounterIncrease: new(controller.Button),
+				CounterDecrease: new(controller.Button),
+				CounterReset:    new(controller.Button),
+			},
+			Page: &controller.DuoUIcounter{
+				Value:        0,
+				OperateValue: 1,
+				From:         0,
+				To:           50,
+				CounterInput: &controller.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
+				CounterIncrease: new(controller.Button),
+				CounterDecrease: new(controller.Button),
+				CounterReset:    new(controller.Button),
+			},
+			Txs: &model.DuoUItransactionsExcerpts{
+				ModelTxsListNumber: 0,
+				TxsListNumber:      0,
+				Txs:                []model.DuoUItransactionExcerpt{},
+				TxsNumber:          0,
+				Balance:            0,
+				BalanceHeight:      0,
+			},
+			SingleTx: btcjson.GetTransactionDetailsResult{},
+		},
 		Quit:  make(chan struct{}),
 		Ready: make(chan struct{}, 1),
 	}

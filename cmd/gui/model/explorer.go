@@ -11,3 +11,10 @@ type DuoUIexplorer struct {
 	Blocks      []DuoUIblock
 	SingleBlock btcjson.GetBlockVerboseResult
 }
+
+type DuoUIhistory struct {
+	Page     *controller.DuoUIcounter
+	PerPage  *controller.DuoUIcounter
+	Txs      *DuoUItransactionsExcerpts
+	SingleTx btcjson.GetTransactionDetailsResult
+}

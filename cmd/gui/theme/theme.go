@@ -128,16 +128,15 @@ func NewDuoUItheme() *DuoUItheme {
 	i["NotificationSyncProblem"] = mustIcon(NewDuoUIicon(icons.NotificationSyncProblem))
 	i["NotificationVPNLock"] = mustIcon(NewDuoUIicon(icons.NotificationVPNLock))
 	i["NotificationWiFi"] = mustIcon(NewDuoUIicon(icons.NotificationWiFi))
-
-	i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.MapsLayers))
-	i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.MapsLayersClear))
-	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
-	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
-	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
-	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
-	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
-	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
-	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
+	i["MapsLayers"] = mustIcon(NewDuoUIicon(icons.MapsLayers))
+	i["MapsLayersClear"] = mustIcon(NewDuoUIicon(icons.MapsLayersClear))
+	i["ImageTimer"] = mustIcon(NewDuoUIicon(icons.ImageTimer))
+	i["ImageRemoveRedEye"] = mustIcon(NewDuoUIicon(icons.ImageRemoveRedEye))
+	i["DeviceSignalCellular0Bar"] = mustIcon(NewDuoUIicon(icons.DeviceSignalCellular0Bar))
+	i["DeviceWidgets"] = mustIcon(NewDuoUIicon(icons.DeviceWidgets))
+	i["ActionTimeline"] = mustIcon(NewDuoUIicon(icons.ActionTimeline))
+	i["HardwareWatch"] = mustIcon(NewDuoUIicon(icons.HardwareWatch))
+	i["HardwareKeyboardHide"] = mustIcon(NewDuoUIicon(icons.HardwareKeyboardHide))
 
 	t.Icons = i
 	return t
