@@ -30,9 +30,10 @@ func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func(
 		in.Layout(gtx, func() {
 			//cs := gtx.Constraints
 			bigStatus := []func(){
-				listItem(gtx, th, 32, "BALANCE :", rc.Status.Wallet.Balance+" "+rc.Settings.Abbrevation),
+				listItem(gtx, th, 32, "BALANCE :", rc.Status.Wallet.Balance.Load()+" "+rc.Settings.Abbrevation),
 				HorizontalLine(gtx, 1, th.Color.LightGrayII),
-				listItem(gtx, th, 32, "UNCNFIRMED :", rc.Status.Wallet.Unconfirmed+" "+rc.Settings.Abbrevation),
+				listItem(gtx, th, 32, "UNCONFIRMED :", rc.Status.Wallet.Unconfirmed.Load()+" "+
+					rc.Settings.Abbrevation),
 				HorizontalLine(gtx, 1, th.Color.LightGrayII),
 				listItem(gtx, th, 32, "TRANSACTIONS :", fmt.Sprint(rc.Status.Wallet.TxsNumber)),
 

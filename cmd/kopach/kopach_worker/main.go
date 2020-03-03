@@ -11,7 +11,6 @@ import (
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/pod/pkg/sem"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -37,7 +36,7 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 			log.L.SetLevel(os.Args[3], true)
 		}
 		log.DEBUG("miner worker starting")
-		w, conn := worker.New(sem.New(1), cx.KillAll)
+		w, conn := worker.New(cx.KillAll)
 		interrupt.AddHandler(func() {
 			log.DEBUG("KopachWorkerHandle interrupt")
 			if err := conn.Close(); log.Check(err) {

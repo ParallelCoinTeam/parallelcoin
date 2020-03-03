@@ -469,10 +469,6 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				"autoports",
 				"uses random automatic ports for p2p, rpc and controller",
 				cx.Config.AutoPorts),
-			apputil.BoolTrue(
-				"enablecontroller",
-				"enable miner controller",
-				cx.Config.EnableController),
 			apputil.StringSlice(
 				"miningaddr",
 				"Add the specified payment address to the list of"+

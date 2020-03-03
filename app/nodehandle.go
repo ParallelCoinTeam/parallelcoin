@@ -12,6 +12,8 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		log.TRACE("running node handler")
 		Configure(cx, c)
+		cx.NodeReady = make(chan struct{})
+		cx.Node.Store(false)
 		// serviceOptions defines the configuration options for the daemon as a service on Windows.
 		type serviceOptions struct {
 			ServiceCommand string `short:"s" long:"service" description:"Service command {install, remove, start, stop}"`
@@ -42,8 +44,8 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}()
 		log.DEBUG("sending back node rpc server handler")
-		cx.Node.Store(false)
 		cx.RPCServer = <-cx.NodeChan
+		close(cx.NodeReady)
 		cx.Node.Store(true)
 		// interrupt.AddHandler(func() {
 		// 	log.WARN("interrupt received, starting node shutdown")

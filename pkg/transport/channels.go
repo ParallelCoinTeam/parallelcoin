@@ -35,16 +35,17 @@ type (
 	HandlerFunc func(ctx interface{}, src net.Addr, dst string, b []byte) (err error)
 	Handlers    map[string]HandlerFunc
 	Channel     struct {
-		Creator         string
-		context         interface{}
 		buffers         map[string]*MsgBuffer
-		Sender          *net.UDPConn
-		Receiver        *net.UDPConn
-		MaxDatagramSize int
-		sendCiph        cipher.AEAD
-		receiveCiph     cipher.AEAD
-		lastSent        *time.Time
+		Ready           chan struct{}
+		context         interface{}
+		Creator         string
 		firstSender     *string
+		lastSent        *time.Time
+		MaxDatagramSize int
+		receiveCiph     cipher.AEAD
+		Receiver        *net.UDPConn
+		sendCiph        cipher.AEAD
+		Sender          *net.UDPConn
 	}
 )
 
@@ -177,7 +178,7 @@ func Listen(address string, channel *Channel, maxDatagramSize int, handlers Hand
 func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, maxDatagramSize int, handlers Handlers,
 	quit chan struct{}) (channel *Channel, err error) {
 	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
-		buffers: make(map[string]*MsgBuffer), context: ctx}
+		buffers: make(map[string]*MsgBuffer), context: ctx, Ready: make(chan struct{})}
 	if key != "" {
 		if channel.sendCiph, err = gcm.GetCipher(key); log.Check(err) {
 		}
@@ -185,8 +186,10 @@ func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, 
 		}
 	}
 	if channel.Receiver, err = ListenBroadcast(port, channel, maxDatagramSize, handlers, quit); log.Check(err) {
-	} else if channel.Sender, err = NewBroadcaster(port, maxDatagramSize); log.Check(err) {
 	}
+	if channel.Sender, err = NewBroadcaster(port, maxDatagramSize); log.Check(err) {
+	}
+	close(channel.Ready)
 	return
 }
 
@@ -250,6 +253,7 @@ func Handle(address string, channel *Channel,
 	var numBytes int
 	var src net.Addr
 	// var seenNonce string
+	<-channel.Ready
 out:
 	for {
 		select {

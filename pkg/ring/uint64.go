@@ -13,6 +13,19 @@ func NewBufferUint64(size int) *BufferUint64 {
 	}
 }
 
+// Get returns the value at the given index or nil if nothing
+func (b *BufferUint64) Get(index int) (out *uint64) {
+	bl := len(b.Buf)
+	if index < bl {
+		cursor := b.Cursor + index
+		if cursor > bl {
+			cursor = cursor - bl
+		}
+		return &b.Buf[cursor]
+	}
+	return
+}
+
 func (b *BufferUint64) Add(value uint64) {
 	b.Cursor++
 	if b.Cursor == len(b.Buf) {

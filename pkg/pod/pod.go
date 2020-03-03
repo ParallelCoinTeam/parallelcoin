@@ -126,8 +126,6 @@ type Config struct {
 	DisableDNSSeed     *bool            `group:"node" label:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"switch" model:"DisableDNSSeed" featured:"false"`
 	DisableListen      *bool            `group:"node" label:"Disable Listen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
 	DisableRPC         *bool            `group:"rpc" label:"Disable RPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
-	EnableController   *bool            `group:"node" label:"Disable Controller" description:"disables the zeroconf peer routeable/miner controller system"`
-	// ExperimentalRPCListeners *cli.StringSlice `group:"wallet" label:"Experimental RPC Listeners" description:"addresses for experimental RPC listeners to listen on" type:"array" inputType:"text" model:"array" featured:"false"`
 	ExternalIPs            *cli.StringSlice `group:"node" label:"External IPs" description:"extra addresses to tell peers they can connect to" type:"array" inputType:"text" model:"ExternalIPs" featured:"false"`
 	FreeTxRelayLimit       *float64         `group:"policy" label:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"decimal" model:"FreeTxRelayLimit" featured:"false"`
 	Generate               *bool            `group:"mining" label:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
@@ -238,7 +236,6 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		MinRelayTxFee:          new(float64),
 		Network:                newstring(),
 		NoCFilters:             newbool(),
-		EnableController:       newbool(),
 		NodeOff:                newbool(),
 		NoInitialLoad:          newbool(),
 		NoPeerBloomFilters:     newbool(),
@@ -329,7 +326,6 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"MinRelayTxFee":          c.MinRelayTxFee,
 		"Network":                c.Network,
 		"NoCFilters":             c.NoCFilters,
-		"EnableController":       c.EnableController,
 		"NodeOff":                c.NodeOff,
 		"NoInitialLoad":          c.NoInitialLoad,
 		"NoPeerBloomFilters":     c.NoPeerBloomFilters,

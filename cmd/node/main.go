@@ -1,7 +1,6 @@
 package node
 
 import (
-	"context"
 	"net"
 	"net/http"
 	// // This enables pprof
@@ -154,29 +153,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 			*cx.Config.Listeners, err)
 		return err
 	}
-	var stopController context.CancelFunc
-	gracefulShutdown := func() {
-		log.INFO("gracefully shutting down the server...")
-		// server.CPUMiner.Stop()
-		if stopController != nil {
-			log.DEBUG("stopping controller")
-			stopController()
-		}
-		e := server.Stop()
-		if e != nil {
-			log.WARN("failed to stop server", e)
-		}
-		server.WaitForShutdown()
-		log.INFO("server shutdown complete")
-		cx.WaitGroup.Done()
-	}
-	if shutdownChan != nil {
-		interrupt.AddHandler(func() {
-			log.DEBUG("node.Main interrupt")
-			gracefulShutdown()
-			close(shutdownChan)
-		})
-	}
+	
 	server.Start()
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 {
@@ -188,8 +165,29 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		}
 	}
 	// set up interrupt shutdown handlers to stop servers
-	if *cx.Config.EnableController {
-		stopController, _ = controller.Run(cx)
+	stopController := controller.Run(cx)
+	cx.Controller.Store(true)
+	gracefulShutdown := func() {
+		log.INFO("gracefully shutting down the server...")
+		// server.CPUMiner.Stop()
+		log.DEBUG("stopping controller")
+		e := server.Stop()
+		if e != nil {
+			log.WARN("failed to stop server", e)
+		}
+		close(stopController)
+		server.WaitForShutdown()
+		log.INFO("server shutdown complete")
+		cx.WaitGroup.Done()
+	}
+	if shutdownChan != nil {
+		interrupt.AddHandler(func() {
+			log.DEBUG("node.Main interrupt")
+			if cx.Controller.Load() {
+				gracefulShutdown()
+			}
+			close(shutdownChan)
+		})
 	}
 	// interrupt.AddHandler(gracefulShutdown)
 	

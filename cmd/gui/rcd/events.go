@@ -37,7 +37,7 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 		for {
 			select {
 			case <-r.cx.WalletServer.Update:
-				go update(r)
+				update(r)
 			case <-r.cx.KillAll:
 				break out
 			}

@@ -1,8 +1,12 @@
 package model
 
 import (
+	"sync"
+	
 	"gioui.org/app"
 	"gioui.org/layout"
+	"go.uber.org/atomic"
+	
 	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/theme"
 	"github.com/p9c/pod/pkg/log"
@@ -23,7 +27,7 @@ type DuoUI struct {
 	Theme      *theme.DuoUItheme
 	Pages      *DuoUIpages
 	Navigation map[string]*theme.DuoUIthemeNav
-	//Configuration *DuoUIconfiguration
+	// Configuration *DuoUIconfiguration
 	IsReady bool
 }
 
@@ -33,31 +37,32 @@ type DuoUIpages struct {
 	Theme       map[string]*theme.DuoUIpage
 }
 type DuoUIlog struct {
-	LogMessages []log.Entry
+	Mx          sync.Mutex
+	LogMessages atomic.Value // []log.Entry
 	LogChan     chan log.Entry
 	StopLogger  chan struct{}
 }
 
-//type DuoUIconfiguration struct {
+// type DuoUIconfiguration struct {
 //	Abbrevation        string
 //	PrimaryTextColor   color.RGBA
 //	SecondaryTextColor color.RGBA
 //	PrimaryBgColor     color.RGBA
 //	SecondaryBgColor   color.RGBA
 //	Navigations        map[string]*view.DuoUIthemeNav
-//}
+// }
 
 type DuoUIconfTabs struct {
 	Current  string
 	TabsList map[string]*controller.Button
 }
 
-//type DuoUIalert struct {
+// type DuoUIalert struct {
 //	Time      time.Time   `json:"time"`
 //	Title     string      `json:"title"`
 //	Message   interface{} `json:"message"`
 //	AlertType string      `json:"type"`
-//}
+// }
 
 type DuoUIsettings struct {
 	Abbrevation string

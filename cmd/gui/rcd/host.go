@@ -16,7 +16,7 @@ func (r *RcVar) GetDuoUIstatus() {
 	}
 	r.Status.Version = "0.0.1"
 	r.Status.Wallet.WalletVersion = v.(map[string]btcjson.VersionResult)
-	r.Status.UpTime = time.Now().Unix() - r.cx.RPCServer.Cfg.StartupTime
+	r.Status.StartTime = time.Unix(0, r.cx.RPCServer.Cfg.StartupTime)
 	r.Status.CurrentNet = r.cx.RPCServer.Cfg.ChainParams.Net.String()
 	r.Status.Chain = r.cx.RPCServer.Cfg.ChainParams.Name
 	return

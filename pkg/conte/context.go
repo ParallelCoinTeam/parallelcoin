@@ -44,6 +44,8 @@ type Xt struct {
 	DataDir string
 	// Node is the run state of the node
 	Node atomic.Value
+	// NodeReady is closed when it is ready then always returns
+	NodeReady chan struct{}
 	// NodeKill is the killswitch for the Node
 	NodeKill chan struct{}
 	// Wallet is the run state of the wallet
@@ -61,6 +63,8 @@ type Xt struct {
 	RealNode *rpc.Node
 	// Hashrate is the current total hashrate from kopach workers taking work from this node
 	Hashrate atomic.Uint64
+	// Controller is the run state indicator of the controller
+	Controller atomic.Bool
 }
 
 // GetNewContext returns a fresh new context

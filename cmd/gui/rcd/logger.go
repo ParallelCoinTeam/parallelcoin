@@ -18,17 +18,23 @@ func (r *RcVar) DuoUIloggerController() {
 		for {
 			select {
 			case n := <-log.L.LogChan:
-				r.Log.LogMessages = append(r.Log.LogMessages, n)
-				// Once length exceeds MaxLogLength we trim off the start to keep it the same size
-				ll := len(r.Log.LogMessages)
-				if ll > MaxLogLength {
-					r.Log.LogMessages = r.Log.LogMessages[ll-MaxLogLength:]
+				le, ok := r.Log.LogMessages.Load().([]log.Entry)
+				if ok {
+					le = append(le, n)
+					// Once length exceeds MaxLogLength we trim off the start to keep it the same size
+					ll := len(le)
+					if ll > MaxLogLength {
+						le = le[ll-MaxLogLength:]
+					}
+					r.Log.LogMessages.Store(le)
+				} else {
+					r.Log.LogMessages.Store([]log.Entry{n})
 				}
 			case <-r.Log.StopLogger:
 				defer func() {
 					r.Log.StopLogger = make(chan struct{})
 				}()
-				r.Log.LogMessages = []log.Entry{}
+				r.Log.LogMessages.Store([]log.Entry{})
 				log.L.LogChan = nil
 				break out
 			}

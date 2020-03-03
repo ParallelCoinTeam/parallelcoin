@@ -2,7 +2,6 @@ package controller
 
 import (
 	"container/ring"
-	"context"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -51,7 +50,7 @@ type Controller struct {
 	coinbases              map[int32]*util.Tx
 	transactions           []*util.Tx
 	oldBlocks              atomic.Value
-	prevHash               *chainhash.Hash
+	prevHash               atomic.Value
 	lastTxUpdate           atomic.Value
 	lastGenerated          atomic.Value
 	pauseShards            [][]byte
@@ -66,7 +65,7 @@ type Controller struct {
 	lastNonce              int32
 }
 
-func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
+func Run(cx *conte.Xt) (quit chan struct{}) {
 	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
 		log.WARN("no mining addresses, not starting controller")
 		return
@@ -84,7 +83,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 	//		time.Sleep(time.Second * 2)
 	//	}
 	ctrl := &Controller{
-		quit:                   cx.KillAll,
+		quit:                   make(chan struct{}),
 		cx:                     cx,
 		sendAddresses:          []*net.UDPAddr{},
 		submitChan:             make(chan []byte),
@@ -96,6 +95,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		listenPort:             int(Uint16.GetActualPort(*cx.Config.Controller)),
 		hashSampleBuf:          rav.NewBufferUint64(1000),
 	}
+	quit = ctrl.quit
 	ctrl.lastTxUpdate.Store(time.Now().UnixNano())
 	ctrl.lastGenerated.Store(time.Now().UnixNano())
 	ctrl.height.Store(0)
@@ -107,7 +107,7 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 		ctrl.quit)
 	if err != nil {
 		log.ERROR(err)
-		cancel()
+		close(ctrl.quit)
 		return
 	}
 	// buffer = ctrl.buffer
@@ -131,7 +131,6 @@ func Run(cx *conte.Xt) (cancel context.CancelFunc, buffer *ring.Ring) {
 			log.ERROR(err)
 		}
 		ctrl.multiConn.Close()
-		close(ctrl.quit)
 	})
 	log.DEBUG("sending broadcasts to:", UDP4MulticastAddress)
 	err = ctrl.sendNewBlockTemplate()
@@ -300,10 +299,11 @@ var handlersMulticast = transport.Handlers{
 				// recommended).
 				log.WARN("connecting to lan peer with same PSK", o)
 				c.otherNodes[o] = time.Now()
-				go func() {
-					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); log.Check(err) {
-					}
-				}()
+				// go func() {
+				<-c.cx.NodeReady
+				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); log.Check(err) {
+				}
+				// }()
 			}
 		}
 		return
@@ -322,7 +322,7 @@ var handlersMulticast = transport.Handlers{
 		if c.lastNonce == nonce {
 			return
 		}
-		c.lastNonce=nonce
+		c.lastNonce = nonce
 		// newSender:=report.IPs[0].String()
 		// log.DEBUG(report)
 		// add to total hash counts
@@ -354,7 +354,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	if err != nil {
 		log.ERROR(err)
 	}
-	c.prevHash = &template.Block.Header.PrevBlock
+	c.prevHash.Store(&template.Block.Header.PrevBlock)
 	c.oldBlocks.Store(shards)
 	c.lastGenerated.Store(time.Now().UnixNano())
 	c.lastTxUpdate.Store(time.Now().UnixNano())
@@ -406,7 +406,7 @@ out:
 		case <-rebroadcastTicker.C:
 			// The current block is stale if the best block has changed.
 			best := ctrl.blockTemplateGenerator.BestSnapshot()
-			if !ctrl.prevHash.IsEqual(&best.Hash) {
+			if !ctrl.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
 				log.DEBUG("new best block hash")
 				ctrl.UpdateAndSendTemplate()
 				break
@@ -521,7 +521,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 		c.oldBlocks.Store(shards)
 		if err := c.multiConn.SendMany(job.WorkMagic, shards); log.Check(err) {
 		}
-		c.prevHash = &template.Block.Header.PrevBlock
+		c.prevHash.Store(&template.Block.Header.PrevBlock)
 		c.lastGenerated.Store(time.Now().UnixNano())
 		c.lastTxUpdate.Store(time.Now().UnixNano())
 		// log.DEBUG("sent out template")

@@ -17,7 +17,7 @@ func (r *RcVar) GetDuoUItransactionsNumber() {
 	if err != nil {
 		// r.PushDuoUIalert("Error", err.Error(), "error")
 	}
-	r.Status.Wallet.TxsNumber = len(lt)
+	r.Status.Wallet.TxsNumber.Store(uint64(len(lt)))
 	return
 }
 

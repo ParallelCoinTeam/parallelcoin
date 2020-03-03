@@ -3,6 +3,8 @@ package component
 import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/log"
+	
 	"time"
 
 	"gioui.org/layout"
@@ -27,8 +29,9 @@ func DuoUIlogger(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func(
 			// const n = 1e6
 			cs := gtx.Constraints
 			theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-			logOutputList.Layout(gtx, len(rc.Log.LogMessages), func(i int) {
-				t := rc.Log.LogMessages[i]
+			lm := rc.Log.LogMessages.Load().([]log.Entry)
+			logOutputList.Layout(gtx, len(lm), func(i int) {
+				t := lm[i]
 				logText := th.Caption(fmt.Sprintf("%-12s", t.Time.Sub(StartupTime)/time.Second*time.Second) + " " + fmt.Sprint(t.Text))
 				logText.Font.Typeface = th.Font.Mono
 

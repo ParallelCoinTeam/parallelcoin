@@ -127,17 +127,15 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 		log.DEBUG("setting save flag because rpc listeners is empty and rpc is not disabled")
 		cx.StateCfg.Save = true
 	}
-	if *cx.Config.EnableController {
-		msgBase := pause.GetPauseContainer(cx)
-		// mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
-		listenHost := msgBase.GetIPs()[0].String() + ":0"
-		switch ctx.Command.Name {
-		// only the wallet listener is important with shell as it proxies for
-		// node, the rest better they are automatic
-		case "shell":
-			*cfg.Listeners = cli.StringSlice{listenHost}
-			*cfg.RPCListeners = cli.StringSlice{listenHost}
-		}
+	msgBase := pause.GetPauseContainer(cx)
+	// mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
+	listenHost := msgBase.GetIPs()[0].String() + ":0"
+	switch ctx.Command.Name {
+	// only the wallet listener is important with shell as it proxies for
+	// node, the rest better they are automatic
+	case "shell":
+		*cfg.Listeners = cli.StringSlice{listenHost}
+		*cfg.RPCListeners = cli.StringSlice{listenHost}
 	}
 	if *cx.Config.AutoPorts {
 		*cfg.WalletRPCListeners = cli.StringSlice{":0"}

@@ -22,7 +22,7 @@ func (ui *DuoUI) DuoUIheader() func() {
 				}
 				logoMeniItem.IconLayout(ui.ly.Context, logoButton)
 			}),
-			layout.Rigid(component.Label(ui.ly.Context, ui.ly.Theme, ui.ly.Theme.Font.Primary, 12, ui.ly.Theme.Color.Dark, ui.rc.Status.Wallet.Balance+" "+ui.rc.Settings.Abbrevation)),
+			layout.Rigid(component.Label(ui.ly.Context, ui.ly.Theme, ui.ly.Theme.Font.Primary, 12, ui.ly.Theme.Color.Dark, ui.rc.Status.Wallet.Balance.Load()+" "+ui.rc.Settings.Abbrevation)),
 		)
 	}
 }

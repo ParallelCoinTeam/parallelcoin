@@ -283,7 +283,6 @@ func (sm *SyncManager) blockHandler(workerNumber uint32) {
 out:
 	for {
 		select {
-
 		case m := <-sm.msgChan:
 			switch msg := m.(type) {
 			case *newPeerMsg:

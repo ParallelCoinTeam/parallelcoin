@@ -22,7 +22,7 @@ func (r *RcVar) GetDuoUIbalance() {
 	gb, ok := getBalance.(float64)
 	if ok {
 		bb := fmt.Sprintf("%0.8f", gb)
-		r.Status.Wallet.Balance = bb
+		r.Status.Wallet.Balance.Store(bb)
 	}
 	return
 }
@@ -37,7 +37,7 @@ func (r *RcVar) GetDuoUIunconfirmedBalance() {
 	ub, ok := getUnconfirmedBalance.(float64)
 	if ok {
 		ubb := fmt.Sprintf("%0.8f", ub)
-		r.Status.Wallet.Unconfirmed = ubb
+		r.Status.Wallet.Unconfirmed.Store(ubb)
 	}
 	return
 }

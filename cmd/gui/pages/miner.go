@@ -23,8 +23,8 @@ func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func()
 						Spacing: layout.SpaceAround,
 					}.Layout(gtx,
 						layout.Flexed(1, func() {
-							consoleOutputList.Layout(gtx, len(rc.Status.Kopach.Hps), func(i int) {
-								t := rc.Status.Kopach.Hps[i]
+							consoleOutputList.Layout(gtx, rc.Status.Kopach.Hps.Len(), func(i int) {
+								t := rc.Status.Kopach.Hps.Get(i)
 								layout.Flex{
 									Axis:      layout.Vertical,
 									Alignment: layout.End,
