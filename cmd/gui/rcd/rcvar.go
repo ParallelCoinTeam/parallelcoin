@@ -2,8 +2,8 @@ package rcd
 
 import (
 	"gioui.org/text"
-	"github.com/p9c/pod/cmd/gui/controller"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/model"

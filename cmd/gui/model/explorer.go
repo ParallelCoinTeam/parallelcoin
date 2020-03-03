@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/pkg/gui/controller"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 

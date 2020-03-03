@@ -6,8 +6,8 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
 	"github.com/p9c/pod/pkg/gui/clipboard"
+	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
@@ -38,14 +38,14 @@ func addressBookBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) f
 										layout.Flex{
 											Alignment: layout.End,
 										}.Layout(gtx,
-											layout.Flexed(0.1, component.Label(gtx, th, th.Font.Primary, 12, th.Color.Dark, fmt.Sprint(t.Index))),
-											layout.Flexed(0.2, component.Label(gtx, th, th.Font.Primary, 12, th.Color.Dark, t.Account)),
-											layout.Rigid(component.Button(gtx, th, t.Copy, th.Font.Mono, 12, th.Color.ButtonText, th.Color.ButtonBg, t.Address, func() { clipboard.Set(t.Address) })),
-											layout.Flexed(0.4, component.Label(gtx, th, th.Font.Primary, 12, th.Color.Dark, t.Label)),
-											layout.Flexed(0.3, component.Label(gtx, th, th.Font.Primary, 12, th.Color.Dark, fmt.Sprint(t.Amount))),
+											layout.Flexed(0.1, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprint(t.Index))),
+											layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], t.Account)),
+											layout.Rigid(component.Button(gtx, th, t.Copy, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], t.Address, func() { clipboard.Set(t.Address) })),
+											layout.Flexed(0.4, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], t.Label)),
+											layout.Flexed(0.3, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprint(t.Amount))),
 										)
 									}),
-									layout.Rigid(component.HorizontalLine(gtx, 1, th.Color.Hint)),
+									layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Hint"])),
 								)
 							})
 						}))

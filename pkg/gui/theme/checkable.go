@@ -11,7 +11,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/pkg/gui/controller"
 )
 
 type checkable struct {

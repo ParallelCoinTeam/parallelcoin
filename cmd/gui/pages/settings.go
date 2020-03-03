@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
@@ -26,7 +26,7 @@ func headerSettings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) fu
 			layout.Rigid(component.SettingsTabs(rc, gtx, th)),
 			layout.Rigid(func() {
 				var settingsSaveButton theme.DuoUIbutton
-				settingsSaveButton = th.DuoUIbutton(th.Font.Secondary, "SAVE", th.Color.Light, th.Color.Dark, th.Color.Dark, th.Color.Light, "", th.Color.Light, 16, 0, 128, 48, 0, 0)
+				settingsSaveButton = th.DuoUIbutton(th.Fonts["Secondary"], "SAVE", th.Colors["Light"], th.Colors["Dark"], th.Colors["Dark"], th.Colors["Light"], "", th.Colors["Light"], 16, 0, 128, 48, 0, 0)
 				for buttonSettingsSave.Clicked(gtx) {
 					//addressLineEditor.SetText(clipboard.Get())
 				}
@@ -49,7 +49,7 @@ func settingsBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 						Axis: layout.Vertical,
 					}.Layout(gtx,
 						layout.Rigid(settingsItemRow(rc, gtx, th, &tl)),
-						layout.Rigid(component.HorizontalLine(gtx, 1, th.Color.Dark)))
+						layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Dark"])))
 				})
 			}
 		}
@@ -60,7 +60,7 @@ func settingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
-				theme.DuoUIdrawRectangle(gtx, 30, 3, th.Color.Dark, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				theme.DuoUIdrawRectangle(gtx, 30, 3, th.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			}),
 			layout.Flexed(0.62, func() {
 				layout.Flex{

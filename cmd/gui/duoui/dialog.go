@@ -8,8 +8,8 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/controller"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"image"
 	"image/color"
 )
@@ -84,8 +84,8 @@ func (ui *DuoUI) DuoUIdialog() {
 										layout.Rigid(func() {
 											layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(8), Left: unit.Dp(4), Right: unit.Dp(4)}.Layout(ui.ly.Context, func() {
 												cur := ui.ly.Theme.H4(ui.rc.Dialog.Text)
-												cur.Font.Typeface = ui.ly.Theme.Font.Primary
-												cur.Color = theme.HexARGB(ui.ly.Theme.Color.Dark)
+												cur.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
+												cur.Color = theme.HexARGB(ui.ly.Theme.Colors["Dark"])
 												cur.Alignment = text.Start
 												cur.Layout(ui.ly.Context)
 											})
@@ -117,7 +117,7 @@ func (ui *DuoUI) dialogButon(f func(), t, bgColor, icon, iconColor string, butto
 	var b theme.DuoUIbutton
 	return func() {
 		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(ui.ly.Context, func() {
-			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Font.Primary, t, ui.ly.Theme.Color.Dark, bgColor, ui.ly.Theme.Color.Info, bgColor, icon, iconColor, 16, 48, 120, 60, 0, 0)
+			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Fonts["Primary"], t, ui.ly.Theme.Colors["Dark"], bgColor, ui.ly.Theme.Colors["Info"], bgColor, icon, iconColor, 16, 48, 120, 60, 0, 0)
 			for button.Clicked(ui.ly.Context) {
 				f()
 			}

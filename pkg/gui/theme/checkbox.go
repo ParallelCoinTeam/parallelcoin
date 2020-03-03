@@ -6,7 +6,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/pkg/gui/controller"
 )
 
 type DuoUIcheckBox struct {
@@ -17,7 +17,7 @@ func (t *DuoUItheme) DuoUIcheckBox(label, color, iconColor string) DuoUIcheckBox
 	return DuoUIcheckBox{
 		checkable{
 			Font: text.Font{
-				Typeface: t.Font.Primary,
+				Typeface: t.Fonts["Primary"],
 			},
 			Label:              label,
 			Color:              HexARGB(color),

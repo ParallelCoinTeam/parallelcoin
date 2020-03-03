@@ -4,11 +4,11 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/cmd/gui/controller"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
 	"github.com/p9c/pod/pkg/gui/clipboard"
+	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"strconv"
 )
 
@@ -42,7 +42,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
 				cs := gtx.Constraints
-				theme.DuoUIdrawRectangle(gtx, cs.Width.Max, 180, th.Color.Light, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				theme.DuoUIdrawRectangle(gtx, cs.Width.Max, 180, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 				widgets := []func(){
 					func() {
@@ -50,7 +50,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address", func(e controller.SubmitEvent) {
 								address = e.Text
 							})),
-							layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Font.Primary, 12, th.Color.ButtonText, th.Color.ButtonBg, "PASTE ADDRESS", func() {
+							layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Fonts["Primary"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE ADDRESS", func() {
 								addressLineEditor.SetText(clipboard.Get())
 							})))
 					},
@@ -63,13 +63,13 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 									amountLineEditor.SetText("")
 								}
 							})),
-							layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Font.Primary, 12, th.Color.ButtonText, th.Color.ButtonBg, "PASTE AMOUNT", func() {
+							layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Fonts["Primary"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE AMOUNT", func() {
 								amountLineEditor.SetText(clipboard.Get())
 							})))
 					},
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Rigid(component.Button(gtx, th, buttonSend, th.Font.Primary, 12, th.Color.ButtonText, th.Color.ButtonBg, "SEND", func() {
+							layout.Rigid(component.Button(gtx, th, buttonSend, th.Fonts["Primary"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], "SEND", func() {
 								rc.Dialog.Show = true
 								rc.Dialog = &model.DuoUIdialog{
 									Show: true,

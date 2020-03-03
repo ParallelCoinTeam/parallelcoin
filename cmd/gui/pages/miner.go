@@ -5,7 +5,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
+	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 func Miner(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
@@ -31,8 +31,8 @@ func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func()
 								}.Layout(gtx,
 									layout.Rigid(func() {
 										sat := th.Body1(fmt.Sprint(t))
-										sat.Font.Typeface = th.Font.Mono
-										sat.Color = theme.HexARGB(th.Color.Dark)
+										sat.Font.Typeface = th.Fonts["Mono"]
+										sat.Color = theme.HexARGB(th.Colors["Dark"])
 										sat.Layout(gtx)
 									}),
 								)

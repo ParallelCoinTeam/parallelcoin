@@ -2,10 +2,10 @@ package rcd
 
 import (
 	"fmt"
-	
-	"github.com/p9c/pod/cmd/gui/controller"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/gui/controller"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -50,7 +50,7 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	if err != nil {
 		log.ERROR("Block Hash By Height:", err)
 	}
-	
+
 	verbose, verbosetx := true, true
 	bcmd := btcjson.GetBlockCmd{
 		Hash:      hashHeight.String(),
@@ -66,11 +66,11 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	b.BlockHash = block.Hash
 	b.Confirmations = block.Confirmations
 	b.TxNum = block.TxNum
-	
+
 	// t := time.Unix(0, block.Time)
 	// b.Time = t.Format("02/01/2006, 15:04:05")
 	b.Time = fmt.Sprint(block.Time)
-	
+
 	b.Link = &controller.Button{}
 	return
 }

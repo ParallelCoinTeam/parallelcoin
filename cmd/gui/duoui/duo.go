@@ -3,8 +3,8 @@ package duoui
 import (
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/cmd/gui/theme"
 	"github.com/p9c/pod/pkg/gui/clipboard"
+	"github.com/p9c/pod/pkg/gui/theme"
 	"sync"
 
 	"gioui.org/app"

@@ -3,7 +3,7 @@
 package theme
 
 import (
-	"github.com/p9c/pod/cmd/gui/controller"
+	"github.com/p9c/pod/pkg/gui/controller"
 	"image/color"
 
 	"gioui.org/layout"
@@ -66,7 +66,7 @@ func (t *DuoUItheme) Caption(txt string) DuoUIlabel {
 func (t *DuoUItheme) DuoUIlabel(size unit.Value, txt string) DuoUIlabel {
 	return DuoUIlabel{
 		Text:     txt,
-		Color:    HexARGB(t.Color.Dark),
+		Color:    HexARGB(t.Colors["Dark"]),
 		TextSize: size,
 		shaper:   t.Shaper,
 	}
