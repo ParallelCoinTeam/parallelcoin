@@ -120,6 +120,25 @@ func NewDuoUItheme() *DuoUItheme {
 
 	i["counterPlusIcon"] = mustIcon(NewDuoUIicon(icons.ImageExposurePlus1))
 	i["counterMinusIcon"] = mustIcon(NewDuoUIicon(icons.ImageExposureNeg1))
+
+	i["CommunicationImportExport"] = mustIcon(NewDuoUIicon(icons.CommunicationImportExport))
+	i["NotificationNetworkCheck"] = mustIcon(NewDuoUIicon(icons.NotificationNetworkCheck))
+	i["NotificationSync"] = mustIcon(NewDuoUIicon(icons.NotificationSync))
+	i["NotificationSyncDisabled"] = mustIcon(NewDuoUIicon(icons.NotificationSyncDisabled))
+	i["NotificationSyncProblem"] = mustIcon(NewDuoUIicon(icons.NotificationSyncProblem))
+	i["NotificationVPNLock"] = mustIcon(NewDuoUIicon(icons.NotificationVPNLock))
+	i["NotificationWiFi"] = mustIcon(NewDuoUIicon(icons.NotificationWiFi))
+
+	i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.MapsLayers))
+	i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.MapsLayersClear))
+	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
+	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
+	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
+	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
+	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
+	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
+	//i["XXXXXXXXXX"] = mustIcon(NewDuoUIicon(icons.XXXXXXXXXX))
+
 	t.Icons = i
 	return t
 }
