@@ -38,15 +38,20 @@ func headerExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) fu
 			Spacing: layout.SpaceBetween,
 			Axis:    layout.Horizontal,
 		}.Layout(gtx,
-			//layout.Rigid(ui.txsFilter()),
-			layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "Block count: "+fmt.Sprint(rc.Status.Node.BlockCount))),
-			layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "Pages: "+fmt.Sprint(rc.Explorer.Page.To))),
-			//layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "Block count: "+fmt.Sprint(rc.Status.Node.BlockCount))),
 			layout.Flexed(0.5, func() {
-				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page)
+				layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+					layout.Rigid(func() { th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page) }),
+					layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "Pages: "+fmt.Sprint(rc.Explorer.Page.To))),
+				)
 			}),
 			layout.Flexed(0.5, func() {
-				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.PerPage)
+				layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+					layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "PER PAGE:"+fmt.Sprint(rc.Explorer.PerPage.Value))),
+					layout.Rigid(func() {
+						th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.PerPage)
+					}),
+					layout.Rigid(component.Label(gtx, th, th.Font.Primary, 12, th.Color.Light, "Max pages 100")),
+				)
 			}),
 		)
 	}

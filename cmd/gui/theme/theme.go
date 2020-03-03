@@ -48,6 +48,8 @@ type DuoUItheme struct {
 	checkBoxUncheckedIcon *DuoUIicon
 	radioCheckedIcon      *DuoUIicon
 	radioUncheckedIcon    *DuoUIicon
+	counterPlusIcon       *DuoUIicon
+	counterMinusIcon      *DuoUIicon
 	Icons                 map[string]*DuoUIicon
 }
 
@@ -116,6 +118,8 @@ func NewDuoUItheme() *DuoUItheme {
 	i["consoleIcon"] = mustIcon(NewDuoUIicon(icons.ActionInput))
 	i["helpIcon"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropDown))
 
+	i["counterPlusIcon"] = mustIcon(NewDuoUIicon(icons.ImageExposurePlus1))
+	i["counterMinusIcon"] = mustIcon(NewDuoUIicon(icons.ImageExposureNeg1))
 	t.Icons = i
 	return t
 }
