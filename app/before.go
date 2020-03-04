@@ -297,6 +297,10 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.WARN("set solo", c.Bool("solo"))
 			*cx.Config.Solo = c.Bool("solo")
 		}
+		if c.IsSet("lan") {
+			log.WARN("set lan", c.Bool("lan"))
+			*cx.Config.LAN = c.Bool("lan")
+		}
 		if c.IsSet("controller") {
 			log.TRACE("set controller listener address", c.String("controller"))
 			*cx.Config.Controller = c.String("controller")

@@ -459,6 +459,10 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				"solo",
 				"mine DUO even if not connected to the network",
 				cx.Config.Solo),
+			apputil.Bool(
+				"lan",
+				"mine duo if not connected to nodes on internet",
+				cx.Config.LAN),
 			apputil.String(
 				"controller",
 				"port controller listens on for solutions from workers"+

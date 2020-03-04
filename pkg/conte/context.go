@@ -14,6 +14,7 @@ import (
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/lang"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -65,6 +66,8 @@ type Xt struct {
 	Hashrate atomic.Uint64
 	// Controller is the run state indicator of the controller
 	Controller atomic.Bool
+	// OtherNodes is the count of nodes connected automatically on the LAN
+	OtherNodes atomic.Int32
 }
 
 // GetNewContext returns a fresh new context
@@ -92,12 +95,20 @@ func GetContext(cx *Xt) *rpc.Context {
 
 
 func (cx *Xt) IsCurrent() (is bool) {
-	connected := cx.RealNode.ConnectedCount() > 0
+	cc := cx.RealNode.ConnectedCount()
+	othernodes := cx.OtherNodes.Load()
+	log.DEBUG("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
+	if !*cx.Config.LAN {
+		cc -= othernodes
+		log.DEBUG("LAN enabled, non-lan node count:", cc)
+	}
+	connected := cc > 0
 	if *cx.Config.Solo {
 		connected = true
 	}
 	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() &&
 		connected
+	
 	// log.DEBUG(is, ":", cx.
 	// 	RealNode.Chain.IsCurrent(), cx.
 	// 	RealNode.SyncManager.IsCurrent(), !*cx.
