@@ -326,6 +326,7 @@ var handlersMulticast = transport.Handlers{
 			}
 		}
 		log.DEBUG("lan nodes connected", len(c.otherNodes), c.otherNodes)
+		c.cx.OtherNodes.Store(int32(len(c.otherNodes)))
 		return
 	},
 	// hashrate reports from workers

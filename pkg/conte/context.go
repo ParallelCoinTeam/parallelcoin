@@ -93,15 +93,14 @@ func GetContext(cx *Xt) *rpc.Context {
 	}
 }
 
-
 func (cx *Xt) IsCurrent() (is bool) {
 	cc := cx.RealNode.ConnectedCount()
 	othernodes := cx.OtherNodes.Load()
-	log.DEBUG("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
 	if !*cx.Config.LAN {
-		cc -= othernodes
-		log.DEBUG("LAN enabled, non-lan node count:", cc)
+		cc -= othernodes * 2
+		// log.DEBUG("LAN disabled, non-lan node count:", cc)
 	}
+	log.DEBUG("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
 	connected := cc > 0
 	if *cx.Config.Solo {
 		connected = true
@@ -109,10 +108,10 @@ func (cx *Xt) IsCurrent() (is bool) {
 	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() &&
 		connected
 	
-	// log.DEBUG(is, ":", cx.
-	// 	RealNode.Chain.IsCurrent(), cx.
-	// 	RealNode.SyncManager.IsCurrent(), !*cx.
-	// 	Config.Solo,
-	// 	"connected", cx.RealNode.ConnectedCount(), (cx.RealNode.ConnectedCount() > 0))
+	log.DEBUG(is, ":", cx.
+		RealNode.Chain.IsCurrent(), cx.
+		RealNode.SyncManager.IsCurrent(), !*cx.
+		Config.Solo,
+		"connected", cx.RealNode.ConnectedCount(), (cx.RealNode.ConnectedCount() > 0))
 	return is
 }
