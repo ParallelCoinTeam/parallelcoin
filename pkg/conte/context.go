@@ -66,6 +66,8 @@ type Xt struct {
 	Hashrate atomic.Uint64
 	// Controller is the run state indicator of the controller
 	Controller atomic.Bool
+	// OtherNodes is the count of nodes connected automatically on the LAN
+	OtherNodes atomic.Int32
 }
 
 // GetNewContext returns a fresh new context
@@ -91,14 +93,21 @@ func GetContext(cx *Xt) *rpc.Context {
 	}
 }
 
-
 func (cx *Xt) IsCurrent() (is bool) {
-	connected := cx.RealNode.ConnectedCount() > 0
+	cc := cx.RealNode.ConnectedCount()
+	othernodes := cx.OtherNodes.Load()
+	if !*cx.Config.LAN {
+		cc -= othernodes
+		// log.DEBUG("LAN disabled, non-lan node count:", cc)
+	}
+	log.DEBUG("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
+	connected := cc > 0
 	if *cx.Config.Solo {
 		connected = true
 	}
 	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() &&
 		connected
+	
 	log.DEBUG(is, ":", cx.
 		RealNode.Chain.IsCurrent(), cx.
 		RealNode.SyncManager.IsCurrent(), !*cx.

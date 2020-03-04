@@ -13,8 +13,14 @@ import (
 	"strings"
 	"time"
 	
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/cmd/node"
+	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/forkhash"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
+	"github.com/p9c/pod/pkg/normalize"
+	"github.com/p9c/pod/pkg/peer/connmgr"
+	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
 	
@@ -22,18 +28,12 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/state"
-	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/p9c/pod/pkg/normalize"
-	"github.com/p9c/pod/pkg/peer/connmgr"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/util"
 )
 
 var funcName = "loadConfig"
@@ -138,9 +138,38 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 		*cfg.RPCListeners = cli.StringSlice{listenHost}
 	}
 	if *cx.Config.AutoPorts {
-		*cfg.WalletRPCListeners = cli.StringSlice{":0"}
-		*cfg.Listeners = cli.StringSlice{":0"}
-		*cfg.RPCListeners = cli.StringSlice{":0"}
+		var h, p string
+		if h, p, err = net.SplitHostPort((*cfg.WalletRPCListeners)[0]); p == "0" {
+			if err != nil {
+				log.ERROR(err)
+			}
+		}
+		fP, err := GetFreePort()
+		if err != nil {
+			log.ERROR(err)
+		}
+		*cfg.Listeners = cli.StringSlice{h + ":" + fmt.Sprint(fP)}
+		if h, p, err = net.SplitHostPort((*cfg.WalletRPCListeners)[0]); p == "0" {
+			if err != nil {
+				log.ERROR(err)
+			}
+		}
+		fP, err = GetFreePort()
+		if err != nil {
+			log.ERROR(err)
+		}
+		*cfg.Listeners = cli.StringSlice{h + ":" + fmt.Sprint(fP)}
+		if h, p, err = net.SplitHostPort((*cfg.WalletRPCListeners)[0]); p == "0" {
+			if err != nil {
+				log.ERROR(err)
+			}
+		}
+		fP, err = GetFreePort()
+		if err != nil {
+			log.ERROR(err)
+		}
+		*cfg.RPCListeners = cli.StringSlice{h + ":" + fmt.Sprint(fP)}
+		cx.StateCfg.Save = true
 	}
 	if *cfg.RPCConnect == "" {
 		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
@@ -168,6 +197,10 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 			}
 		}
 	}
+	(*cfg.WalletRPCListeners)[0] = (*listeners[0])[0]
+	(*cfg.Listeners)[0] = (*listeners[1])[0]
+	(*cfg.RPCListeners)[0] = (*listeners[2])[0]
+	
 	*cfg.RPCConnect = (*cfg.RPCListeners)[0]
 	h, p, _ := net.SplitHostPort(*cfg.RPCConnect)
 	if h == "" {
@@ -180,7 +213,8 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 }
 
 // GetFreePort asks the kernel for free open ports that are ready to use.
-func GetFreePort() (int, error) {
+func
+GetFreePort() (int, error) {
 	var port int
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {
@@ -196,7 +230,8 @@ func GetFreePort() (int, error) {
 	return port, nil
 }
 
-func initTLSStuffs(cfg *pod.Config, st *state.Config) {
+func
+initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	isNew := false
 	if *cfg.RPCCert == "" {
 		*cfg.RPCCert =
@@ -288,7 +323,8 @@ func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	}
 }
 
-func initLogLevel(cfg *pod.Config) {
+func
+initLogLevel(cfg *pod.Config) {
 	loglevel := *cfg.LogLevel
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
@@ -304,7 +340,8 @@ func initLogLevel(cfg *pod.Config) {
 	log.L.SetLevel(*cfg.LogLevel, color)
 }
 
-func normalizeAddresses(cfg *pod.Config) {
+func
+normalizeAddresses(cfg *pod.Config) {
 	log.TRACE("normalising addresses")
 	port := node.DefaultPort
 	nrm := normalize.StringSliceAddresses
@@ -315,7 +352,8 @@ func normalizeAddresses(cfg *pod.Config) {
 	// nrm(cfg.RPCListeners, port)
 }
 
-func setAlgo(cfg *pod.Config) {
+func
+setAlgo(cfg *pod.Config) {
 	p9 := fork.P9AlgoVers
 	// Set the mining algorithm correctly, default to random if unrecognised
 	switch *cfg.Algo {
@@ -325,7 +363,8 @@ func setAlgo(cfg *pod.Config) {
 	}
 	log.TRACE("mining algorithm ", *cfg.Algo)
 }
-func setRelayReject(cfg *pod.Config) {
+func
+setRelayReject(cfg *pod.Config) {
 	relayNonStd := *cfg.RelayNonStd
 	switch {
 	case *cfg.RelayNonStd && *cfg.RejectNonStd:
@@ -343,7 +382,8 @@ func setRelayReject(cfg *pod.Config) {
 	*cfg.RelayNonStd = relayNonStd
 }
 
-func validateDBtype(cfg *pod.Config) {
+func
+validateDBtype(cfg *pod.Config) {
 	// Validate database type.
 	log.TRACE("validating database type")
 	if !node.ValidDbType(*cfg.DbType) {
@@ -356,7 +396,8 @@ func validateDBtype(cfg *pod.Config) {
 	}
 }
 
-func validateProfilePort(cfg *pod.Config) {
+func
+validateProfilePort(cfg *pod.Config) {
 	// Validate profile port number
 	log.TRACE("validating profile port number")
 	if *cfg.Profile != "" {
@@ -369,7 +410,8 @@ func validateProfilePort(cfg *pod.Config) {
 		}
 	}
 }
-func validateBanDuration(cfg *pod.Config) {
+func
+validateBanDuration(cfg *pod.Config) {
 	// Don't allow ban durations that are too short.
 	log.TRACE("validating ban duration")
 	if *cfg.BanDuration < time.Second {
@@ -380,7 +422,8 @@ func validateBanDuration(cfg *pod.Config) {
 	}
 }
 
-func validateWhitelists(cfg *pod.Config, st *state.Config) {
+func
+validateWhitelists(cfg *pod.Config, st *state.Config) {
 	// Validate any given whitelisted IP addresses and networks.
 	log.TRACE("validating whitelists")
 	if len(*cfg.Whitelists) > 0 {
@@ -416,7 +459,8 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 	}
 }
 
-func validatePeerLists(cfg *pod.Config) {
+func
+validatePeerLists(cfg *pod.Config) {
 	log.TRACE("checking addpeer and connectpeer lists")
 	if len(*cfg.AddPeers) > 0 && len(*cfg.ConnectPeers) > 0 {
 		err := fmt.Errorf(
@@ -426,7 +470,8 @@ func validatePeerLists(cfg *pod.Config) {
 		os.Exit(1)
 	}
 }
-func configListener(cfg *pod.Config, params *netparams.Params) {
+func
+configListener(cfg *pod.Config, params *netparams.Params) {
 	// --proxy or --connect without --listen disables listening.
 	log.TRACE("checking proxy/connect for disabling listening")
 	if (*cfg.Proxy != "" ||
@@ -442,7 +487,8 @@ func configListener(cfg *pod.Config, params *netparams.Params) {
 	}
 }
 
-func validateUsers(cfg *pod.Config) {
+func
+validateUsers(cfg *pod.Config) {
 	// Check to make sure limited and admin users don't have the same username
 	log.TRACE("checking admin and limited username is different")
 	if *cfg.Username != "" &&
@@ -463,7 +509,8 @@ func validateUsers(cfg *pod.Config) {
 	}
 }
 
-func configRPC(cfg *pod.Config, params *netparams.Params) {
+func
+configRPC(cfg *pod.Config, params *netparams.Params) {
 	// The RPC server is disabled if no username or password is provided.
 	log.TRACE("checking rpc server has a login enabled")
 	if (*cfg.Username == "" || *cfg.Password == "") &&
@@ -507,8 +554,10 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 	*cfg.ConnectPeers = nrms(*cfg.ConnectPeers, params.DefaultPort)
 }
 
-func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
+func
+validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	var err error
+	
 	// Validate the the minrelaytxfee.
 	log.TRACE("checking min relay tx fee")
 	stateConfig.ActiveMinRelayTxFee, err = util.NewAmount(*cfg.MinRelayTxFee)
@@ -565,8 +614,8 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	case *cfg.BlockMaxSize == node.DefaultBlockMaxSize &&
 		*cfg.BlockMaxWeight != node.DefaultBlockMaxWeight:
 		*cfg.BlockMaxSize = blockchain.MaxBlockBaseSize - 1000
-	// If the max block weight isn't set, but the block size is, then we'll
-	// scale the set weight accordingly based on the max block size value.
+		// If the max block weight isn't set, but the block size is, then we'll
+		// scale the set weight accordingly based on the max block size value.
 	case *cfg.BlockMaxSize != node.DefaultBlockMaxSize &&
 		*cfg.BlockMaxWeight == node.DefaultBlockMaxWeight:
 		*cfg.BlockMaxWeight = *cfg.BlockMaxSize * blockchain.WitnessScaleFactor
@@ -594,7 +643,8 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		os.Exit(1)
 	}
 }
-func validateOnions(cfg *pod.Config) {
+func
+validateOnions(cfg *pod.Config) {
 	// --onionproxy and not --onion are contradictory (TODO: this is kinda
 	//  stupid hm? switch *and* toggle by presence of flag value, one should be
 	//  enough)
@@ -618,7 +668,8 @@ func validateOnions(cfg *pod.Config) {
 	
 }
 
-func validateMiningStuff(cfg *pod.Config, state *state.Config,
+func
+validateMiningStuff(cfg *pod.Config, state *state.Config,
 	params *netparams.Params) {
 	// Check mining addresses are valid and saved parsed versions.
 	log.TRACE("checking mining addresses")
@@ -655,7 +706,8 @@ func validateMiningStuff(cfg *pod.Config, state *state.Config,
 	}
 }
 
-func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
+func
+setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	// Setup dial and DNS resolution (lookup) functions depending on the
 	// specified options.  The default is to use the standard net.DialTimeout
 	// function as well as the system DNS resolver.  When a proxy is specified,
@@ -738,6 +790,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			}
 			return proxy.DialTimeout(network, addr, timeout)
 		}
+	
 	// When configured in bridge mode (both --onion and --proxy are
 	// configured), it means that the proxy configured by --proxy is not a
 	// tor proxy, so override the DNS resolution to use the onion-specific

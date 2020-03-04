@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-
+	
 	"github.com/urfave/cli"
-
+	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
@@ -18,7 +19,7 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		//log.INFO("running beforeFunc")
+		// log.INFO("running beforeFunc")
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
@@ -68,7 +69,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				log.TRACE("on testnet")
 				cx.ActiveNet = &netparams.TestNet3Params
 				fork.IsTestnet = true
-				//fork.HashReps = 3
+				// fork.HashReps = 3
 			case "regtestnet", "regressiontest", "r":
 				log.TRACE("on regression testnet")
 				fork.IsTestnet = true
@@ -296,6 +297,17 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("solo") {
 			log.WARN("set solo", c.Bool("solo"))
 			*cx.Config.Solo = c.Bool("solo")
+		}
+		if c.IsSet("lan") {
+			// if LAN is turned on we need to remove the seeds from netparams not on mainnet
+			// mainnet is never in lan mode
+			if cx.ActiveNet.Name != "mainnet" {
+				log.WARN("set lan", c.Bool("lan"))
+				*cx.Config.LAN = c.Bool("lan")
+				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
+			} else {
+				*cx.Config.LAN = false
+			}
 		}
 		if c.IsSet("controller") {
 			log.TRACE("set controller listener address", c.String("controller"))

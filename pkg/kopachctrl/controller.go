@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"strings"
 	"time"
 	
 	"github.com/VividCortex/ewma"
@@ -112,10 +113,10 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 	}
 	// buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
-	ll := pM.GetP2PListeners()
-	for i := range ll {
-		ctrl.otherNodes[ll[i]] = time.Now()
-	}
+	// ll := pM.GetP2PListeners()
+	// for i := range ll {
+	// 	ctrl.otherNodes[ll[i]] = time.Now()
+	// }
 	var pauseShards [][]byte
 	if pauseShards = transport.GetShards(pM.Data); log.Check(err) {
 	} else {
@@ -298,21 +299,34 @@ var handlersMulticast = transport.Handlers{
 		// log.WARN("received job")
 		j := p2padvt.LoadContainer(b)
 		otherIPs := j.GetIPs()
-		otherPort := j.GetP2PListenersPort()
+		otherPort := fmt.Sprint(j.GetP2PListenersPort())
+		myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
+		// log.WARN("myPort", myPort, "otherPort", otherPort)
 		for i := range otherIPs {
-			o := fmt.Sprintf("%s:%d", otherIPs[i], otherPort)
-			if _, ok := c.otherNodes[o]; !ok {
-				// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
-				// recommended).
-				log.WARN("connecting to lan peer with same PSK", o)
-				c.otherNodes[o] = time.Now()
-				// go func() {
-				<-c.cx.NodeReady
-				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); log.Check(err) {
+			o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
+			if otherPort != myPort {
+				if _, ok := c.otherNodes[o]; !ok {
+					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
+					// recommended).
+					// go func() {
+					// <-c.cx.NodeReady
+					log.WARN("connecting to lan peer with same PSK", o)
+					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, false); log.Check(err) {
+					}
+					// }()
 				}
-				// }()
+				c.otherNodes[o] = time.Now()
+				// } else {
 			}
 		}
+		for i := range c.otherNodes {
+			log.DEBUG(i, c.otherNodes[i], time.Now().Sub(c.otherNodes[i]))
+			if time.Now().Sub(c.otherNodes[i]) > time.Second*3 {
+				delete(c.otherNodes, i)
+			}
+		}
+		log.DEBUG("lan nodes connected", len(c.otherNodes), c.otherNodes)
+		c.cx.OtherNodes.Store(int32(len(c.otherNodes)))
 		return
 	},
 	// hashrate reports from workers
