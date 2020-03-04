@@ -13,9 +13,9 @@ import (
 	"github.com/p9c/pod/cmd/kopach/client"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/controller"
-	"github.com/p9c/pod/pkg/controller/job"
-	"github.com/p9c/pod/pkg/controller/pause"
+	"github.com/p9c/pod/pkg/kopachctrl"
+	"github.com/p9c/pod/pkg/kopachctrl/job"
+	"github.com/p9c/pod/pkg/kopachctrl/pause"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/stdconn/worker"
 	"github.com/p9c/pod/pkg/transport"
@@ -58,7 +58,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		log.DEBUG("opening broadcast channel listener")
 		w.conn, err = transport.
 			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
-				transport.DefaultPort, controller.MaxDatagramSize, handlers, cx.KillAll)
+				transport.DefaultPort, kopachctrl.MaxDatagramSize, handlers, cx.KillAll)
 		if err != nil {
 			log.ERROR(err)
 			cancel()
@@ -78,8 +78,8 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			w.active.Store(false)
 			log.DEBUG("KopachHandle interrupt")
 			for i := range w.workers {
-				if err := wks[i].StdConn.Close(); log.Check(err) {
-				}
+				// if err := wks[i].StdConn.Close(); log.Check(err) {
+				// }
 				if err := wks[i].Stop(); log.Check(err) {
 				}
 				if err := wks[i].Kill(); log.Check(err) {
@@ -110,7 +110,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
 						log.DEBUG("previous current controller has stopped" +
-							" broadcasting")
+							" broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be
 						// listened to
 						w.FirstSender.Store("")
@@ -128,7 +128,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 				}
 			}
 		}()
-		log.DEBUG("listening on", controller.UDP4MulticastAddress)
+		log.DEBUG("listening on", kopachctrl.UDP4MulticastAddress)
 		<-cx.KillAll
 		log.INFO("kopach shutting down")
 		return
@@ -137,13 +137,14 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 
 // these are the handlers for specific message types.
 var handlers = transport.Handlers{
-	string(job.WorkMagic): func(ctx interface{}, src net.Addr, dst string,
+	string(job.Magic): func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
 		w := ctx.(*Worker)
 		if !w.active.Load() {
 			log.DEBUG("not active")
 			return
 		}
+		log.DEBUG("received job")
 		j := job.LoadContainer(b)
 		// h := j.GetHashes()
 		ips := j.GetIPs()
@@ -152,13 +153,12 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
-			// log.DEBUG("ignoring other controller job")
+			log.DEBUG("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
-		} else {
-			w.FirstSender.Store(addr)
-			w.lastSent.Store(time.Now().UnixNano())
 		}
+		w.FirstSender.Store(addr)
+		w.lastSent.Store(time.Now().UnixNano())
 		// log.TRACE("received job")
 		for i := range w.workers {
 			// log.TRACE("sending job to worker", i)
@@ -182,7 +182,16 @@ var handlers = transport.Handlers{
 			}
 		}
 		// clear the FirstSender
-		w.FirstSender.Store("")
+		// w.FirstSender.Store("")
 		return
 	},
+	// string(p2padvt.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	// 	w := ctx.(*Worker)
+	// 	ad := p2padvt.LoadContainer(b)
+	// 	addr := net.JoinHostPort(ad.GetIPs()[0].String(), fmt.Sprint(ad.GetControllerListenerPort()))
+	// 	if addr == w.FirstSender.Load() {
+	// 		w.lastSent.Store(time.Now().UnixNano())
+	// 	}
+	// 	return
+	// },
 }

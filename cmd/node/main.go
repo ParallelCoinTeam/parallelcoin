@@ -10,7 +10,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/cmd/node/blockdb"
-	"github.com/p9c/pod/pkg/controller"
+	"github.com/p9c/pod/pkg/kopachctrl"
 	
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node/path"
@@ -165,7 +165,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		}
 	}
 	// set up interrupt shutdown handlers to stop servers
-	stopController := controller.Run(cx)
+	stopController := kopachctrl.Run(cx)
 	cx.Controller.Store(true)
 	gracefulShutdown := func() {
 		log.INFO("gracefully shutting down the server...")

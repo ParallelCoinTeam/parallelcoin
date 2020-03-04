@@ -2,7 +2,7 @@ package pause
 
 import (
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/controller/advertisment"
+	"github.com/p9c/pod/pkg/kopachctrl/p2padvt"
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/IPs"
 	"github.com/p9c/pod/pkg/simplebuffer/Uint16"
@@ -16,7 +16,7 @@ type PauseContainer struct {
 }
 
 func GetPauseContainer(cx *conte.Xt) *PauseContainer {
-	mB := advertisment.Get(cx).CreateContainer(PauseMagic)
+	mB := p2padvt.Get(cx).CreateContainer(PauseMagic)
 	return &PauseContainer{*mB}
 }
 

@@ -4,7 +4,7 @@ import (
 	"container/ring"
 	"time"
 	
-	"github.com/p9c/pod/pkg/controller/hashrate"
+	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
 	"github.com/p9c/pod/pkg/log"
 )
 

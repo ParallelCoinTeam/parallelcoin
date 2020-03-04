@@ -22,7 +22,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 )
 
-var WorkMagic = []byte{'w', 'o', 'r', 'k'}
+var Magic = []byte{'w', 'o', 'r', 'k'}
 
 type Container struct {
 	simplebuffer.Container
@@ -133,7 +133,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// 	msg = append(msg, t)
 	// }
 	// log.SPEW(msg)
-	return Container{*msg.CreateContainer(WorkMagic)}, txr
+	return Container{*msg.CreateContainer(Magic)}, txr
 }
 
 // LoadContainer takes a message byte slice payload and loads it into a container
@@ -177,7 +177,7 @@ func (j *Container) GetHashes() (out map[int32]*chainhash.Hash) {
 }
 
 func (j *Container) String() (s string) {
-	s += fmt.Sprint("\ntype '"+string(WorkMagic)+"' elements:", j.Count())
+	s += fmt.Sprint("\ntype '"+string(Magic)+"' elements:", j.Count())
 	s += "\n"
 	ips := j.GetIPs()
 	s += "1 IPs:"
