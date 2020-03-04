@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	prand "math/rand"
 	"net"
 	"os"
 	"os/exec"
@@ -19,6 +20,7 @@ import (
 	"sync/atomic"
 	"time"
 	
+	"github.com/urfave/cli"
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
@@ -653,16 +655,38 @@ func (n *Node) HandleDonePeerMsg(state *PeerState, sp *NodePeer) {
 
 // HandleQuery is the central handler for all queries and commands from other
 // goroutines related to peer state.
+// Previously this counts two if the same node was connected outbound and then connected back
+// inbound. The nonce given in a Version message is now added to the Peer struct and
+// then as this iterates the connected peers list, it adds nonces from Peers marked connected
+// to a map, thus excluding double-counting, and returns this value. No idea why it was not written to
+// exclude keeping multiple peers open like this, since a connection is a duplex channel, but at least
+// now the ConnectedCount query will provide the correct numbers (this was changed in order to allow
+// identifying local area network nodes so a non-internet test environment can be created
 func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 	switch msg := querymsg.(type) {
 	case GetConnCountMsg:
-		nconnected := int32(0)
+		nonces := make(map[string]struct{})
+		nonce := ""
+		counter := 0
 		state.ForAllPeers(func(sp *NodePeer) {
-			if sp.Connected() {
-				nconnected++
+			ua := strings.Split(sp.UserAgent(), "nonce")
+			if len(ua) < 2 {
+				// peer did not send a nonce in the UAC, give it a sequential number instead
+				nonce = fmt.Sprint(counter)
+				counter++
+			} else {
+				nonce = ua[1][:8]
+			}
+			_, ok := nonces[nonce]
+			if !ok {
+				if sp.Connected() {
+					nonces[nonce] = struct{}{}
+					// nconnected++
+				}
 			}
 		})
-		msg.Reply <- nconnected
+		// log.DEBUG(nonces)
+		msg.Reply <- int32(len(nonces))
 	case GetPeersMsg:
 		peers := make([]*NodePeer, 0, state.Count())
 		state.ForAllPeers(func(sp *NodePeer) {
@@ -2475,8 +2499,19 @@ MergeCheckpoints(defaultCheckpoints, additional []chaincfg.Checkpoint) []chaincf
 	return checkpoints
 }
 
+var nonce string
+
+func init() {
+	prand.Seed(time.Now().UnixNano())
+	nonce = fmt.Sprintf("nonce%0x", prand.Uint32())
+}
+
 func // NewPeerConfig returns the configuration for the given ServerPeer.
 NewPeerConfig(sp *NodePeer) *peer.Config {
+	// to work around the lack of a single identifier in the protocol, for dealing with testing situations with multiple
+	// nodes on one IP address (and there is a to-do on this) we generate a random 32 bit value, convert to hex and
+	// set it as the first of the user agent comments, which we can then use to count individual connections properly
+	*sp.Server.Config.UserAgentComments = append(cli.StringSlice{nonce}, *sp.Server.Config.UserAgentComments...)
 	return &peer.Config{
 		Listeners: peer.MessageListeners{
 			OnVersion:      sp.OnVersion,

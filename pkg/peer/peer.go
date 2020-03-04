@@ -12,10 +12,10 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
+	
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/davecgh/go-spew/spew"
-
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -65,9 +65,9 @@ var (
 	// zeroHash is the zero value hash (all zeros).
 	// It is defined as a convenience.
 	zeroHash chainhash.Hash
-	// sentNonces houses the unique nonces that are generated when pushing
+	// SentNonces houses the unique nonces that are generated when pushing
 	// version messages that are used to detect self connections.
-	sentNonces = newMruNonceMap(50)
+	SentNonces = newMruNonceMap(50)
 	// AllowSelfConns is only used to allow the tests to bypass the self
 	// connection detecting and disconnect logic since they intentionally
 	// do so for testing purposes.
@@ -365,16 +365,17 @@ type Peer struct {
 	conn          net.Conn
 	// These fields are set at creation time and never modified,
 	// so they are safe to read from concurrently without a mutex.
-	addr                 string
-	cfg                  Config
-	inbound              bool
-	flagsMtx             sync.Mutex // protects the peer flags below
-	na                   *wire.NetAddress
-	id                   int32
-	userAgent            string
-	services             wire.ServiceFlag
-	versionKnown         bool
-	advertisedProtoVer   uint32 // protocol version advertised by remote
+	Nonce              uint64
+	addr               string
+	cfg                Config
+	inbound            bool
+	flagsMtx           sync.Mutex // protects the peer flags below
+	na                 *wire.NetAddress
+	id                 int32
+	userAgent          string
+	services           wire.ServiceFlag
+	versionKnown       bool
+	advertisedProtoVer uint32 // protocol version advertised by remote
 	protocolVersion      uint32 // negotiated protocol version
 	sendHeadersPreferred bool   // peer sent a sendheaders message
 	verAckReceived       bool
@@ -395,7 +396,7 @@ type Peer struct {
 	startingHeight     int32
 	lastBlock          int32
 	lastAnnouncedBlock *chainhash.Hash
-	lastPingNonce      uint64    // Set to nonce if we have a pending ping.
+	lastPingNonce      uint64    // Set to Nonce if we have a pending ping.
 	lastPingTime       time.Time // Time we sent last ping.
 	lastPingMicros     int64     // Time for last ping to return.
 	stallControl       chan stallControlMsg
@@ -536,7 +537,7 @@ func (p *Peer) LastAnnouncedBlock() *chainhash.Hash {
 	return lastAnnouncedBlock
 }
 
-// LastPingNonce returns the last ping nonce of the remote peer.
+// LastPingNonce returns the last ping Nonce of the remote peer.
 // This function is safe for concurrent access.
 func (p *Peer) LastPingNonce() uint64 {
 	p.statsMtx.RLock()
@@ -834,7 +835,7 @@ func (p *Peer) PushRejectMsg(command string, code wire.RejectCode, reason string
 func (p *Peer) handlePingMsg(msg *wire.MsgPing) {
 	// Only reply with pong if the message is from a new enough client.
 	if p.ProtocolVersion() > wire.BIP0031Version {
-		// Include nonce from ping so pong can be identified.
+		// Include Nonce from ping so pong can be identified.
 		p.QueueMessage(wire.NewMsgPong(msg.Nonce), nil)
 	}
 }
@@ -1662,12 +1663,13 @@ func (p *Peer) readRemoteVersionMsg() error {
 		return errors.New(reason)
 	}
 	// Detect self connections.
-	if !AllowSelfConns && sentNonces.Exists(msg.Nonce) {
+	if !AllowSelfConns && SentNonces.Exists(msg.Nonce) {
 		return errors.New("disconnecting peer connected to self")
 	}
 	// Negotiate the protocol version and set the services to what the remote
 	// peer advertised.
 	p.flagsMtx.Lock()
+	p.Nonce = msg.Nonce
 	p.advertisedProtoVer = uint32(msg.ProtocolVersion)
 	p.protocolVersion = minUint32(p.protocolVersion, p.advertisedProtoVer)
 	p.versionKnown = true
@@ -1761,18 +1763,17 @@ func (p *Peer) localVersionMsg() (*wire.MsgVersion, error) {
 	ourNA := &wire.NetAddress{
 		Services: p.cfg.Services,
 	}
-	// Generate a unique nonce for this peer so self connections can be
+	// Generate a unique Nonce for this peer so self connections can be
 	// detected.  This is accomplished by adding it to a size-limited map of
 	// recently seen nonces.
 	nonce := uint64(rand.Int63())
-	sentNonces.Add(nonce)
+	SentNonces.Add(nonce)
 	// Version message.
 	msg := wire.NewMsgVersion(ourNA, theirNA, nonce, blockNum)
 	err := msg.AddUserAgent(p.cfg.UserAgentName, p.cfg.UserAgentVersion,
 		p.cfg.UserAgentComments...)
 	if err != nil {
 		log.ERROR(err)
-		log.DEBUG(err)
 	}
 	// Advertise local services.
 	msg.Services = p.cfg.Services

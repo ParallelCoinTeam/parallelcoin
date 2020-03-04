@@ -301,7 +301,7 @@ var handlersMulticast = transport.Handlers{
 		otherIPs := j.GetIPs()
 		otherPort := fmt.Sprint(j.GetP2PListenersPort())
 		myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
-		log.WARN("myPort", myPort, "otherPort", otherPort)
+		// log.WARN("myPort", myPort, "otherPort", otherPort)
 		for i := range otherIPs {
 			o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
 			if otherPort != myPort {
@@ -311,7 +311,7 @@ var handlersMulticast = transport.Handlers{
 					// go func() {
 					// <-c.cx.NodeReady
 					log.WARN("connecting to lan peer with same PSK", o)
-					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); log.Check(err) {
+					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, false); log.Check(err) {
 					}
 					// }()
 				}

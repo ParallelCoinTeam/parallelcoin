@@ -97,7 +97,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 	cc := cx.RealNode.ConnectedCount()
 	othernodes := cx.OtherNodes.Load()
 	if !*cx.Config.LAN {
-		cc -= othernodes * 2
+		cc -= othernodes
 		// log.DEBUG("LAN disabled, non-lan node count:", cc)
 	}
 	log.DEBUG("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)

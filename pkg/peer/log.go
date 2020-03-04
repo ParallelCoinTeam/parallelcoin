@@ -112,10 +112,10 @@ func messageSummary(msg wire.Message) string {
 		return fmt.Sprintf("%d addr", len(msg.AddrList))
 
 	case *wire.MsgPing:
-		// No summary - perhaps add nonce.
+		// No summary - perhaps add Nonce.
 
 	case *wire.MsgPong:
-		// No summary - perhaps add nonce.
+		// No summary - perhaps add Nonce.
 
 	case *wire.MsgAlert:
 		// No summary.
