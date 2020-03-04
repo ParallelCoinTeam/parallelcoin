@@ -98,7 +98,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 		connected = true
 	}
 	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() &&
-		connected || *cx.Config.Solo
+		connected
 	log.DEBUG(is, ":", cx.
 		RealNode.Chain.IsCurrent(), cx.
 		RealNode.SyncManager.IsCurrent(), !*cx.
