@@ -14,6 +14,7 @@ import (
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/lang"
+	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -88,4 +89,15 @@ func GetContext(cx *Xt) *rpc.Context {
 		Config: cx.Config, StateCfg: cx.StateCfg, ActiveNet: cx.ActiveNet,
 		Hashrate: cx.Hashrate,
 	}
+}
+
+
+func (cx *Xt) IsCurrent() (is bool) {
+	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() && (cx.RealNode.ConnectedCount() > 0) || *cx.Config.Solo
+	log.DEBUG(is, ":", cx.
+		RealNode.Chain.IsCurrent(), cx.
+		RealNode.SyncManager.IsCurrent(), !*cx.
+		Config.Solo,
+		"connected", cx.RealNode.ConnectedCount(), (cx.RealNode.ConnectedCount() > 0))
+	return is
 }

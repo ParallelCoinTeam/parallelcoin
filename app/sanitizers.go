@@ -14,7 +14,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/chain/forkhash"
-	"github.com/p9c/pod/pkg/controller/pause"
+	"github.com/p9c/pod/pkg/kopachctrl/pause"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
 	

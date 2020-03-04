@@ -1,4 +1,4 @@
-package controller
+package kopachctrl
 
 import (
 	"container/ring"
@@ -17,11 +17,11 @@ import (
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/controller/advertisment"
-	"github.com/p9c/pod/pkg/controller/hashrate"
-	"github.com/p9c/pod/pkg/controller/job"
-	"github.com/p9c/pod/pkg/controller/pause"
-	"github.com/p9c/pod/pkg/controller/sol"
+	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
+	"github.com/p9c/pod/pkg/kopachctrl/job"
+	"github.com/p9c/pod/pkg/kopachctrl/p2padvt"
+	"github.com/p9c/pod/pkg/kopachctrl/pause"
+	"github.com/p9c/pod/pkg/kopachctrl/sol"
 	"github.com/p9c/pod/pkg/log"
 	rav "github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/simplebuffer/Uint16"
@@ -130,7 +130,8 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		if err != nil {
 			log.ERROR(err)
 		}
-		ctrl.multiConn.Close()
+		if err = ctrl.multiConn.Close(); log.Check(err) {
+		}
 	})
 	log.DEBUG("sending broadcasts to:", UDP4MulticastAddress)
 	err = ctrl.sendNewBlockTemplate()
@@ -149,6 +150,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 	cx.RealNode.Chain.Subscribe(ctrl.getNotifier())
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
+	go advertiser(ctrl)
 	ticker := time.NewTicker(time.Second)
 	cont := true
 	for cont {
@@ -168,7 +170,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 
 func (c *Controller) HashReport() float64 {
 	c.hashSampleBuf.Add(c.hashCount.Load())
-	av := ewma.NewMovingAverage()
+	av := ewma.NewMovingAverage(3)
 	var i int
 	var prev uint64
 	if err := c.hashSampleBuf.ForEach(func(v uint64) error {
@@ -196,6 +198,11 @@ var handlersMulticast = transport.Handlers{
 		log.DEBUG("received solution")
 		// log.SPEW(ctx)
 		c := ctx.(*Controller)
+		// if !c.cx.IsCurrent() {
+		// 	// if err := c.multiConn.SendMany(pause.PauseMagic, c.pauseShards); log.Check(err) {
+		// 	// }
+		// 	return
+		// }
 		if !c.active.Load() || !c.cx.Node.Load().(bool) {
 			log.DEBUG("not active yet")
 			return
@@ -230,7 +237,7 @@ var handlersMulticast = transport.Handlers{
 		}
 		// set old blocks to pause and send pause directly as block is
 		// probably a solution
-		c.oldBlocks.Store(c.pauseShards)
+		// c.oldBlocks.Store(c.pauseShards)
 		err = c.multiConn.SendMany(pause.PauseMagic, c.pauseShards)
 		if err != nil {
 			log.ERROR(err)
@@ -280,7 +287,7 @@ var handlersMulticast = transport.Handlers{
 			fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
 		return
 	},
-	string(job.WorkMagic):
+	string(p2padvt.Magic):
 	func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
 		c := ctx.(*Controller)
@@ -289,7 +296,7 @@ var handlersMulticast = transport.Handlers{
 			return
 		}
 		// log.WARN("received job")
-		j := job.LoadContainer(b)
+		j := p2padvt.LoadContainer(b)
 		otherIPs := j.GetIPs()
 		otherPort := j.GetP2PListenersPort()
 		for i := range otherIPs {
@@ -344,13 +351,14 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	msgB := template.Block
 	c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
-	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), advertisment.Get(c.cx), &c.coinbases)
+	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), p2padvt.Get(c.cx), &c.coinbases)
 	shards := transport.GetShards(fMC.Data)
 	shardsLen := len(shards)
 	if shardsLen < 1 {
 		log.WARN("shards", shardsLen)
+		return fmt.Errorf("shards len %d", shardsLen)
 	}
-	err = c.multiConn.SendMany(job.WorkMagic, shards)
+	err = c.multiConn.SendMany(job.Magic, shards)
 	if err != nil {
 		log.ERROR(err)
 	}
@@ -398,44 +406,19 @@ func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 		s.SigCache, s.HashCache, s.Algo)
 }
 
-func rebroadcaster(ctrl *Controller) {
-	rebroadcastTicker := time.NewTicker(time.Second)
+func advertiser(ctrl *Controller) {
+	advertismentTicker := time.NewTicker(time.Second)
+	advt := p2padvt.Get(ctrl.cx)
+	ad := transport.GetShards(advt.CreateContainer(p2padvt.Magic).Data)
 out:
 	for {
 		select {
-		case <-rebroadcastTicker.C:
-			// The current block is stale if the best block has changed.
-			best := ctrl.blockTemplateGenerator.BestSnapshot()
-			if !ctrl.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
-				log.DEBUG("new best block hash")
-				ctrl.UpdateAndSendTemplate()
-				break
-			}
-			// // The current block is stale if the memory pool has been updated
-			// // since the block template was generated and it has been at least
-			// // one minute.
-			// if ctrl.lastTxUpdate.Load() != ctrl.blockTemplateGenerator.GetTxSource().
-			// 	LastUpdated() && time.Now().After(time.Unix(0,
-			// 	ctrl.lastGenerated.Load().(int64)+int64(time.Minute))) {
-			// 	log.DEBUG("block is stale")
-			// 	ctrl.UpdateAndSendTemplate()
-			// 	break
-			// }
-			oB, ok := ctrl.oldBlocks.Load().([][]byte)
-			if len(oB) == 0 {
-				log.WARN("template is zero length")
-				break
-			}
-			if !ok {
-				log.DEBUG("template is nil")
-				break
-			}
+		case <-advertismentTicker.C:
 			// log.DEBUG("rebroadcaster sending out blocks")
-			err := ctrl.multiConn.SendMany(job.WorkMagic, oB)
+			err := ctrl.multiConn.SendMany(p2padvt.Magic, ad)
 			if err != nil {
 				log.ERROR(err)
 			}
-			ctrl.oldBlocks.Store(oB)
 		case <-ctrl.quit:
 			break out
 			// default:
@@ -443,20 +426,80 @@ out:
 	}
 }
 
-func submitter(ctrl *Controller) {
+func rebroadcaster(c *Controller) {
+	rebroadcastTicker := time.NewTicker(time.Second)
 out:
 	for {
 		select {
-		case msg := <-ctrl.submitChan:
+		case <-rebroadcastTicker.C:
+			if !c.cx.IsCurrent() {
+				c.oldBlocks.Store(c.pauseShards)
+				// if err := c.multiConn.SendMany(pause.PauseMagic, c.pauseShards); log.Check(err) {
+				// }
+				// break
+			}
+			// The current block is stale if the best block has changed.
+			best := c.blockTemplateGenerator.BestSnapshot()
+			if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
+				log.DEBUG("new best block hash")
+				c.UpdateAndSendTemplate()
+				break
+			}
+			// // The current block is stale if the memory pool has been updated
+			// // since the block template was generated and it has been at least
+			// // one minute.
+			// if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
+			// 	LastUpdated() && time.Now().After(time.Unix(0,
+			// 	c.lastGenerated.Load().(int64)+int64(time.Minute))) {
+			// 	log.DEBUG("block is stale")
+			// 	c.UpdateAndSendTemplate()
+			// 	break
+			// }
+			oB, ok := c.oldBlocks.Load().([][]byte)
+			if len(oB) == 0 {
+				log.WARN("template is zero length")
+				c.oldBlocks.Store(c.pauseShards)
+				// break
+			}
+			if !ok {
+				log.DEBUG("template is nil")
+				// break
+				c.oldBlocks.Store(c.pauseShards)
+				oB = c.pauseShards
+			}
+			// log.DEBUG("rebroadcaster sending out blocks")
+			err := c.multiConn.SendMany(job.Magic, oB)
+			if err != nil {
+				log.ERROR(err)
+			}
+			c.oldBlocks.Store(oB)
+			break
+		case <-c.quit:
+			break out
+			// default:
+		}
+	}
+}
+
+func submitter(c *Controller) {
+out:
+	for {
+		select {
+		case msg := <-c.submitChan:
+			// if !c.cx.IsCurrent() {
+			// 	if err := c.multiConn.SendMany(pause.PauseMagic, c.pauseShards); log.Check(err) {
+			// 	}
+			// 	break
+			// }
 			log.SPEW(msg)
 			decodedB, err := util.NewBlockFromBytes(msg)
 			if err != nil {
 				log.ERROR(err)
-				return
+				break
 			}
 			log.SPEW(decodedB)
 			//
-		case <-ctrl.quit:
+		case <-c.quit:
 			break out
 		}
 	}
@@ -481,7 +524,10 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 					log.WARN("chain accepted notification is not a block")
 					break
 				}
+				// if c.cx.IsCurrent() {
+				log.DEBUG("sending out new template")
 				c.UpdateAndSendTemplate()
+				// }
 			}
 		} else {
 			log.DEBUG("notifier called but controller not active")
@@ -505,7 +551,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 		// c.coinbases = msgB.Transactions
 		var mC job.Container
 		mC, c.transactions = job.Get(c.cx, util.NewBlock(msgB),
-			advertisment.Get(c.cx), &c.coinbases)
+			p2padvt.Get(c.cx), &c.coinbases)
 		nH := mC.GetNewHeight()
 		if c.height.Load() < uint64(nH) {
 			log.DEBUG("new height")
@@ -519,7 +565,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 		// log.DEBUG("getting shards for message")
 		shards := transport.GetShards(mC.Data)
 		c.oldBlocks.Store(shards)
-		if err := c.multiConn.SendMany(job.WorkMagic, shards); log.Check(err) {
+		if err := c.multiConn.SendMany(job.Magic, shards); log.Check(err) {
 		}
 		c.prevHash.Store(&template.Block.Header.PrevBlock)
 		c.lastGenerated.Store(time.Now().UnixNano())

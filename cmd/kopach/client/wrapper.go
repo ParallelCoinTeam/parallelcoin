@@ -4,8 +4,8 @@ import (
 	"errors"
 	"io"
 	"net/rpc"
-
-	"github.com/p9c/pod/pkg/controller/job"
+	
+	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/log"
 )
 

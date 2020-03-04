@@ -82,7 +82,7 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		log.TRACE(c.Creator, "sent packets", string(magic),
+		log.DEBUG(c.Creator, "sent packets", string(magic),
 			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
 			c.Sender.RemoteAddr())
 	}
