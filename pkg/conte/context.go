@@ -93,7 +93,12 @@ func GetContext(cx *Xt) *rpc.Context {
 
 
 func (cx *Xt) IsCurrent() (is bool) {
-	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() && (cx.RealNode.ConnectedCount() > 0) || *cx.Config.Solo
+	connected := cx.RealNode.ConnectedCount() > 0
+	if *cx.Config.Solo {
+		connected = true
+	}
+	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() &&
+		connected || *cx.Config.Solo
 	log.DEBUG(is, ":", cx.
 		RealNode.Chain.IsCurrent(), cx.
 		RealNode.SyncManager.IsCurrent(), !*cx.

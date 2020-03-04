@@ -433,10 +433,10 @@ out:
 		select {
 		case <-rebroadcastTicker.C:
 			if !c.cx.IsCurrent() {
-				c.oldBlocks.Store(c.pauseShards)
+				// c.oldBlocks.Store(c.pauseShards)
 				// if err := c.multiConn.SendMany(pause.PauseMagic, c.pauseShards); log.Check(err) {
 				// }
-				// break
+				break
 			}
 			// The current block is stale if the best block has changed.
 			best := c.blockTemplateGenerator.BestSnapshot()
@@ -458,14 +458,15 @@ out:
 			oB, ok := c.oldBlocks.Load().([][]byte)
 			if len(oB) == 0 {
 				log.WARN("template is zero length")
-				c.oldBlocks.Store(c.pauseShards)
+				
+				// c.oldBlocks.Store(c.pauseShards)
 				// break
 			}
 			if !ok {
 				log.DEBUG("template is nil")
 				// break
-				c.oldBlocks.Store(c.pauseShards)
-				oB = c.pauseShards
+				// c.oldBlocks.Store(c.pauseShards)
+				// oB = c.pauseShards
 			}
 			// log.DEBUG("rebroadcaster sending out blocks")
 			err := c.multiConn.SendMany(job.Magic, oB)
