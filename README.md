@@ -3,6 +3,8 @@
 
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod) 
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/p9c/pod)](https://goreportcard.com/report/github.com/p9c/pod)
+
 Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for Parallelcoin
 
 ~~~~
