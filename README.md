@@ -9,8 +9,6 @@
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=ncloc)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=p9c_pod)
 
-[![CodeScene Code Health](https://codescene.io/projects/7291/status-badges/code-health)](https://codescene.io/projects/7291)
-[![CodeScene System Mastery](https://codescene.io/projects/7291/status-badges/system-mastery)](https://codescene.io/projects/7291)
 [![CodeScene general](https://codescene.io/images/analyzed-by-codescene-badge.svg)](https://codescene.io/projects/7291)
 
 Fully integrated all-in-one cli client, full node, wallet server, miner and GUI wallet for Parallelcoin
