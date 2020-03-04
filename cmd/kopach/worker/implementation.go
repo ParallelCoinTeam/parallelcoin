@@ -328,7 +328,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		*reply = true
 		return
 	}
-	log.DEBUG("running NewJob RPC method")
+	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
 	// log.DEBUG("loading dispatch connection from job message")
 	// log.TRACE(job.String())

@@ -14,7 +14,6 @@ import (
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/lang"
-	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -99,10 +98,10 @@ func (cx *Xt) IsCurrent() (is bool) {
 	}
 	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() &&
 		connected
-	log.DEBUG(is, ":", cx.
-		RealNode.Chain.IsCurrent(), cx.
-		RealNode.SyncManager.IsCurrent(), !*cx.
-		Config.Solo,
-		"connected", cx.RealNode.ConnectedCount(), (cx.RealNode.ConnectedCount() > 0))
+	// log.DEBUG(is, ":", cx.
+	// 	RealNode.Chain.IsCurrent(), cx.
+	// 	RealNode.SyncManager.IsCurrent(), !*cx.
+	// 	Config.Solo,
+	// 	"connected", cx.RealNode.ConnectedCount(), (cx.RealNode.ConnectedCount() > 0))
 	return is
 }

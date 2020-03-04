@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"strings"
 	"time"
 	
 	"github.com/VividCortex/ewma"
@@ -299,20 +300,36 @@ var handlersMulticast = transport.Handlers{
 		j := p2padvt.LoadContainer(b)
 		otherIPs := j.GetIPs()
 		otherPort := j.GetP2PListenersPort()
+		myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
+		// log.DEBUG("myPort", myPort)
 		for i := range otherIPs {
 			o := fmt.Sprintf("%s:%d", otherIPs[i], otherPort)
-			if _, ok := c.otherNodes[o]; !ok {
-				// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
-				// recommended).
-				log.WARN("connecting to lan peer with same PSK", o)
-				c.otherNodes[o] = time.Now()
-				// go func() {
-				<-c.cx.NodeReady
-				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); log.Check(err) {
+			// log.DEBUG("otherPort", otherPort)
+			if fmt.Sprint(otherPort) != myPort {
+				if _, ok := c.otherNodes[o]; !ok {
+					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
+					// recommended).
+					// go func() {
+					// <-c.cx.NodeReady
+					if time.Now().Sub(c.otherNodes[o]) > time.Second*3 {
+						log.WARN("connecting to lan peer with same PSK", o)
+						if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); log.Check(err) {
+						}
+						c.otherNodes[o] = time.Now()
+					}
+					// }()
+				} else {
+					c.otherNodes[o] = time.Now()
 				}
-				// }()
 			}
 		}
+		for i := range c.otherNodes {
+			// log.DEBUG(i, c.otherNodes[i], time.Now().Sub(c.otherNodes[i]))
+			if time.Now().Sub(c.otherNodes[i]) > time.Second*3 {
+				delete(c.otherNodes, i)
+			}
+		}
+		log.DEBUG("lan nodes connected", len(c.otherNodes), c.otherNodes)
 		return
 	},
 	// hashrate reports from workers

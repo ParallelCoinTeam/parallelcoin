@@ -144,7 +144,7 @@ var handlers = transport.Handlers{
 			log.DEBUG("not active")
 			return
 		}
-		log.DEBUG("received job")
+		// log.DEBUG("received job")
 		j := job.LoadContainer(b)
 		// h := j.GetHashes()
 		ips := j.GetIPs()
@@ -153,7 +153,7 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
-			log.DEBUG("ignoring other controller job")
+			// log.DEBUG("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
 		}
