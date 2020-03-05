@@ -42,7 +42,7 @@ type HardForks struct {
 	TestnetStart       int32
 }
 
-const IntervalBase = 3
+const IntervalBase = 1
 
 var (
 	// AlgoVers is the lookup for pre hardfork

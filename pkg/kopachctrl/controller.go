@@ -157,7 +157,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 	for cont {
 		select {
 		case <-ticker.C:
-			log.DEBUGF("network hashrate %.2f", ctrl.HashReport())
+			// log.DEBUGF("network hashrate %.2f", ctrl.HashReport())
 			if !ctrl.Ready.Load() {
 				if cx.IsCurrent() {
 					log.WARN("READY!")
@@ -214,10 +214,10 @@ var handlersMulticast = transport.Handlers{
 			log.DEBUG("not active yet")
 			return
 		}
-		if !c.Ready.Load() {
-			log.DEBUG("not ready for solutions yet")
-			return
-		}
+		// if !c.Ready.Load() {
+		// 	log.DEBUG("not ready for solutions yet")
+		// 	return
+		// }
 		j := sol.LoadSolContainer(b)
 		senderPort := j.GetSenderPort()
 		if int(senderPort) != c.listenPort {
@@ -580,7 +580,7 @@ func (c *Controller) UpdateAndSendTemplate() {
 			p2padvt.Get(c.cx), &c.coinbases)
 		nH := mC.GetNewHeight()
 		if c.height.Load() < uint64(nH) {
-			log.DEBUG("new height")
+			log.DEBUG("new height", nH)
 			c.height.Store(uint64(nH))
 		} else {
 			log.DEBUG("stale or orphan from being later, not sending out")

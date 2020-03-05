@@ -159,15 +159,11 @@ var handlers = transport.Handlers{
 		}
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())
-		// log.DEBUG(j.GetHashes())
-		// log.TRACE("received job")
 		for i := range w.workers {
-			// log.TRACE("sending job to worker", i)
 			err := w.workers[i].NewJob(&j)
 			if err != nil {
 				log.ERROR(err)
 			}
-			// log.SPEW(j)
 		}
 		return
 	},
@@ -182,17 +178,6 @@ var handlers = transport.Handlers{
 				log.ERROR(err)
 			}
 		}
-		// clear the FirstSender
-		// w.FirstSender.Store("")
 		return
 	},
-	// string(p2padvt.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
-	// 	w := ctx.(*Worker)
-	// 	ad := p2padvt.LoadContainer(b)
-	// 	addr := net.JoinHostPort(ad.GetIPs()[0].String(), fmt.Sprint(ad.GetControllerListenerPort()))
-	// 	if addr == w.FirstSender.Load() {
-	// 		w.lastSent.Store(time.Now().UnixNano())
-	// 	}
-	// 	return
-	// },
 }

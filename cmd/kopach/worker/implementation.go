@@ -94,6 +94,7 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 	// the formula below rolls through versions with blocks roundsPerAlgo
 	// long for each algorithm by its index
 	algs := c.Algos.Load().([]int32)
+	// log.DEBUG(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
 		log.DEBUG("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
 		return 0
@@ -194,9 +195,9 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}, ) *Worke
 					break
 				case <-w.stopChan:
 					log.DEBUG("received pause signal while running")
-					w.block.Store(&util.Block{})
-					w.bitses.Store((map[int32]uint32)(nil))
-					w.hashes.Store((map[int32]*chainhash.Hash)(nil))
+					// w.block.Store(&util.Block{})
+					// w.bitses.Store((map[int32]uint32)(nil))
+					// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 					break running
 				case <-w.Quit:
 					log.DEBUG("worker stopping while running")
@@ -209,12 +210,18 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}, ) *Worke
 						// work
 						nH := w.block.Load().(*util.Block).Height()
 						hv := w.roller.GetAlgoVer()
+						// log.DEBUG(hv)
+						h := w.hashes.Load().(map[int32]*chainhash.Hash)
+						// log.DEBUG("hashes", hv, h)
 						mmb := w.msgBlock.Load().(wire.MsgBlock)
 						mb := &mmb
 						mb.Header.Version = hv
-						h := w.hashes.Load().(map[int32]*chainhash.Hash)
 						if h != nil {
-							mb.Header.MerkleRoot = *h[mb.Header.Version]
+							mr, ok := h[hv]
+							if !ok {
+								continue
+							}
+							mb.Header.MerkleRoot = *mr
 						} else {
 							continue
 						}
@@ -329,59 +336,26 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		*reply = true
 		return
 	}
-	// log.DEBUG("running NewJob RPC method")
-	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
-	// log.DEBUG("loading dispatch connection from job message")
-	// log.TRACE(job.String())
-	// if there is no dispatch connection, make one.
-	// If there is one but the server died or was disconnected the
-	// connection the existing dispatch connection is nilled and this
-	// will run. If there is no controllers on the network,
-	// the worker pauses
-	// ips := job.GetIPs()
-	hashes := job.GetHashes()
-	if hashes[5].IsEqual(w.lastMerkle) {
+	j := job.Struct()
+	w.bitses.Store(j.Bitses)
+	w.hashes.Store(j.Hashes)
+	if j.Hashes[5].IsEqual(w.lastMerkle) {
 		// log.DEBUG("not a new job")
 		*reply = true
 		return
 	}
-	w.lastMerkle = hashes[5]
-	// var addresses []string
-	// for i := range ips {
-	// 	generally there is only one but if a server had two interfaces
-	// 	to different LANs it would send both
-	// 	addresses = append(addresses, ips[i].String()+":"+
-	// 		fmt.Sprint(job.GetControllerListenerPort()))
-	// }
-	// address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
-	// remoteAddress := address
-	// if w.dispatchConn != nil {
-	// 	ra := w.dispatchConn.Sender
-	// 	if ra != nil {
-	// 		remoteAddress = ra.RemoteAddr().String()
-	// 	}
-	// }
-	// if address != remoteAddress {
-	// 	log.DEBUG("setting destination", address)
-	// 	err = w.dispatchConn.SetDestination(address)
-	// 	if err != nil {
-	// 		log.ERROR(err)
-	// 	}
-	// }
-	// }
-	// log.SPEW(w.dispatchConn)
-	*reply = true
-	// halting current work
-	w.stopChan <- struct{}{}
-	bitses := job.GetBitses()
-	w.bitses.Store(bitses)
-	w.hashes.Store(hashes)
-	newHeight := job.GetNewHeight()
 	var algos []int32
-	for i := range bitses {
+	for i := range j.Bitses {
 		// we don't need to know net params if version numbers come with jobs
 		algos = append(algos, i)
 	}
+	// log.DEBUG(algos)
+	w.lastMerkle = j.Hashes[5]
+	*reply = true
+	// halting current work
+	w.stopChan <- struct{}{}
+	newHeight := job.GetNewHeight()
+
 	if len(algos) > 0 {
 		// if we didn't get them in the job don't update the old
 		w.roller.Algos.Store(algos)
@@ -392,20 +366,17 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
 	hv := w.roller.GetAlgoVer()
 	mb.Header.Version = hv
-	b := w.bitses.Load().(map[int32]uint32)
 	var ok bool
-	mb.Header.Bits, ok = b[mb.Header.Version]
+	mb.Header.Bits, ok = j.Bitses[mb.Header.Version]
 	if !ok {
 		return errors.New("bits are empty")
 	}
 	rand.Seed(time.Now().UnixNano())
 	mb.Header.Nonce = rand.Uint32()
-	if w.hashes.Load() == nil {
+	if j.Hashes == nil {
 		return errors.New("failed to decode merkle roots")
 	} else {
-		h := w.hashes.Load().(map[int32]*chainhash.Hash)
-		// log.DEBUG(h)
-		hh, ok := h[hv]
+		hh, ok := j.Hashes[hv]
 		if !ok {
 			return errors.New("could not get merkle root from job")
 		}
