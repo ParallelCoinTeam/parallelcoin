@@ -3,7 +3,6 @@
 
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/p9c/pod)](https://goreportcard.com/report/github.com/p9c/pod)
-
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=alert_status)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=bugs)](https://sonarcloud.io/dashboard?id=p9c_pod)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=p9c_pod&metric=ncloc)](https://sonarcloud.io/dashboard?id=p9c_pod)
