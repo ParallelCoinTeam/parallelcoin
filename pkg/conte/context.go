@@ -94,7 +94,8 @@ func GetContext(cx *Xt) *rpc.Context {
 }
 
 func (cx *Xt) IsCurrent() (is bool) {
-	cc := cx.RealNode.ConnectedCount()
+	rn := cx.RealNode
+	cc := rn.ConnectedCount()
 	othernodes := cx.OtherNodes.Load()
 	if !*cx.Config.LAN {
 		cc -= othernodes
@@ -105,13 +106,16 @@ func (cx *Xt) IsCurrent() (is bool) {
 	if *cx.Config.Solo {
 		connected = true
 	}
-	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() &&
-		connected
-	
-	log.TRACE("is current:",is, "-", cx.
+	is = rn.Chain.IsCurrent() &&
+		rn.SyncManager.IsCurrent() &&
+		connected &&
+		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load()
+	log.WARN("is current:", is, "-", cx.
 		RealNode.Chain.IsCurrent(), cx.
 		RealNode.SyncManager.IsCurrent(), !*cx.
 		Config.Solo,
-		"connected", cx.RealNode.ConnectedCount(), cx.RealNode.ConnectedCount() > 0)
+		"connected", rn.HighestKnown.Load(),
+		rn.Chain.BestChain.Height(),
+	)
 	return is
 }

@@ -168,6 +168,7 @@ type (
 		Started            int32
 		Shutdown           int32
 		ShutdownSched      int32
+		HighestKnown       uberatomic.Int32
 	}
 	// NodePeer extends the peer to maintain state shared by the server and
 	// the blockmanager.
@@ -2056,6 +2057,10 @@ func (np *NodePeer) OnVersion(
 	// Choose whether or not to relay transactions before a filter command is
 	// received.
 	np.SetDisableRelayTx(msg.DisableRelayTx)
+	hn := np.Server.HighestKnown.Load()
+	if msg.LastBlock >= hn {
+		np.Server.HighestKnown.Store(msg.LastBlock)
+	}
 	// Add valid peer to the server.
 	np.Server.AddPeer(np)
 	return nil

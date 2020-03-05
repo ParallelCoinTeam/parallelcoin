@@ -158,6 +158,9 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		select {
 		case <-ticker.C:
 			log.DEBUGF("network hashrate %.2f", ctrl.HashReport())
+			if cx.IsCurrent() {
+				ctrl.Ready.Store(true)
+			}
 		case <-ctrl.quit:
 			cont = false
 		case <-interrupt.HandlersDone:
@@ -199,12 +202,17 @@ var handlersMulticast = transport.Handlers{
 		log.DEBUG("received solution")
 		// log.SPEW(ctx)
 		c := ctx.(*Controller)
+		if c.Ready.Load() {
+			log.DEBUG("not ready for solutions yet")
+			return
+		}
 		// if !c.cx.IsCurrent() {
 		// 	// if err := c.multiConn.SendMany(pause.PauseMagic, c.pauseShards); log.Check(err) {
 		// 	// }
 		// 	return
 		// }
-		if !c.active.Load() || !c.cx.Node.Load().(bool) {
+		if !c.active.Load() || !c.cx.Node.Load().(bool) ||
+			!c.cx.IsCurrent() {
 			log.DEBUG("not active yet")
 			return
 		}
@@ -528,24 +536,28 @@ func updater(ctrl *Controller) {
 
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
-		if c.active.Load() {
-			// First to arrive locks out any others while processing
-			switch n.Type {
-			case blockchain.NTBlockAccepted:
-				log.DEBUG("received new chain notification")
-				// construct work message
-				_, ok := n.Data.(*util.Block)
-				if !ok {
-					log.WARN("chain accepted notification is not a block")
-					break
-				}
-				// if c.cx.IsCurrent() {
-				log.DEBUG("sending out new template")
-				c.UpdateAndSendTemplate()
-				// }
+		if !c.active.Load() {
+			log.DEBUG("not active")
+			return
+		}
+		if !c.Ready.Load() {
+			log.DEBUG("not ready")
+			return
+		}
+		// First to arrive locks out any others while processing
+		switch n.Type {
+		case blockchain.NTBlockAccepted:
+			log.DEBUG("received new chain notification")
+			// construct work message
+			_, ok := n.Data.(*util.Block)
+			if !ok {
+				log.WARN("chain accepted notification is not a block")
+				break
 			}
-		} else {
-			log.DEBUG("notifier called but controller not active")
+			// if c.cx.IsCurrent() {
+			log.DEBUG("sending out new template")
+			c.UpdateAndSendTemplate()
+			// }
 		}
 	}
 }
