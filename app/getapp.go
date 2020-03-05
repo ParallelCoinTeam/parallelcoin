@@ -30,10 +30,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
 		Action:      guiHandle(cx),
-		Before: func(c *cli.Context) error {
-			log.TRACE("running beforeFunc")
-			return beforeFunc(cx)(c)
-		},
+		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
 			log.TRACE("subcommand completed")
 			if interrupt.Restart {

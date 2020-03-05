@@ -138,37 +138,26 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 		*cfg.RPCListeners = cli.StringSlice{listenHost}
 	}
 	if *cx.Config.AutoPorts {
-		var h, p string
-		if h, p, err = net.SplitHostPort((*cfg.WalletRPCListeners)[0]); p == "0" {
-			if err != nil {
-				log.ERROR(err)
-			}
-		}
 		fP, err := GetFreePort()
 		if err != nil {
 			log.ERROR(err)
 		}
-		*cfg.Listeners = cli.StringSlice{h + ":" + fmt.Sprint(fP)}
-		if h, p, err = net.SplitHostPort((*cfg.WalletRPCListeners)[0]); p == "0" {
-			if err != nil {
-				log.ERROR(err)
-			}
-		}
+		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}
 		fP, err = GetFreePort()
 		if err != nil {
 			log.ERROR(err)
 		}
-		*cfg.Listeners = cli.StringSlice{h + ":" + fmt.Sprint(fP)}
-		if h, p, err = net.SplitHostPort((*cfg.WalletRPCListeners)[0]); p == "0" {
-			if err != nil {
-				log.ERROR(err)
-			}
-		}
+		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}
 		fP, err = GetFreePort()
 		if err != nil {
 			log.ERROR(err)
 		}
-		*cfg.RPCListeners = cli.StringSlice{h + ":" + fmt.Sprint(fP)}
+		*cfg.RPCListeners = cli.StringSlice{":" + fmt.Sprint(fP)}
+		fP, err = GetFreePort()
+		if err != nil {
+			log.ERROR(err)
+		}
+		*cfg.WalletRPCListeners = cli.StringSlice{":" + fmt.Sprint(fP)}
 		cx.StateCfg.Save = true
 	}
 	if *cfg.RPCConnect == "" {
@@ -200,7 +189,13 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	(*cfg.WalletRPCListeners)[0] = (*listeners[0])[0]
 	(*cfg.Listeners)[0] = (*listeners[1])[0]
 	(*cfg.RPCListeners)[0] = (*listeners[2])[0]
-	
+	// if lan mode is set, remove the peers.json so no unwanted nodes are connected to
+	if *cfg.LAN && cx.ActiveNet.Name != "mainnet" {
+		peersFile := filepath.Join(filepath.Join(
+			*cfg.DataDir, cx.ActiveNet.Name), "peers.json")
+		os.Remove(peersFile)
+		log.DEBUG("removed", peersFile)
+	}
 	*cfg.RPCConnect = (*cfg.RPCListeners)[0]
 	h, p, _ := net.SplitHostPort(*cfg.RPCConnect)
 	if h == "" {

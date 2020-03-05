@@ -22,7 +22,7 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		// log.INFO("running beforeFunc")
+		log.INFO("running beforeFunc")
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
@@ -301,6 +301,10 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.WARN("set solo", c.Bool("solo"))
 			*cx.Config.Solo = c.Bool("solo")
 		}
+		if c.IsSet("autoports") {
+			log.WARN("set autoports", c.Bool("autoports"))
+			*cx.Config.AutoPorts = c.Bool("autoports")
+		}
 		if c.IsSet("lan") {
 			// if LAN is turned on we need to remove the seeds from netparams not on mainnet
 			// mainnet is never in lan mode
@@ -315,10 +319,6 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("controller") {
 			log.TRACE("set controller listener address", c.String("controller"))
 			*cx.Config.Controller = c.String("controller")
-		}
-		if c.IsSet("autoports") {
-			log.TRACE("set autoports", c.String("autoports"))
-			*cx.Config.AutoPorts = c.Bool("autoports")
 		}
 		if c.IsSet("miningaddrs") {
 			log.TRACE("set miningaddrs", c.StringSlice("miningaddrs"))
