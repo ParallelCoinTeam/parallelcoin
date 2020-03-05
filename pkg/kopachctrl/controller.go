@@ -171,7 +171,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 
 func (c *Controller) HashReport() float64 {
 	c.hashSampleBuf.Add(c.hashCount.Load())
-	av := ewma.NewMovingAverage(3)
+	av := ewma.NewMovingAverage(15)
 	var i int
 	var prev uint64
 	if err := c.hashSampleBuf.ForEach(func(v uint64) error {
@@ -320,12 +320,12 @@ var handlersMulticast = transport.Handlers{
 			}
 		}
 		for i := range c.otherNodes {
-			log.DEBUG(i, c.otherNodes[i], time.Now().Sub(c.otherNodes[i]))
+			// log.DEBUG(i, c.otherNodes[i], time.Now().Sub(c.otherNodes[i]))
 			if time.Now().Sub(c.otherNodes[i]) > time.Second*3 {
 				delete(c.otherNodes, i)
 			}
 		}
-		log.DEBUG("lan nodes connected", len(c.otherNodes), c.otherNodes)
+		// log.DEBUG("lan nodes connected", len(c.otherNodes), c.otherNodes)
 		c.cx.OtherNodes.Store(int32(len(c.otherNodes)))
 		return
 	},

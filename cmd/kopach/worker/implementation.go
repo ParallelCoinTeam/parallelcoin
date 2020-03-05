@@ -109,7 +109,7 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 
 func (w *Worker) hashReport() {
 	w.hashSampleBuf.Add(w.hashCount.Load())
-	av := ewma.NewMovingAverage(3)
+	av := ewma.NewMovingAverage(15)
 	var i int
 	var prev uint64
 	if err := w.hashSampleBuf.ForEach(func(v uint64) error {

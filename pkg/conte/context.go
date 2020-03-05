@@ -100,7 +100,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 		cc -= othernodes
 		// log.DEBUG("LAN disabled, non-lan node count:", cc)
 	}
-	log.DEBUG("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
+	// log.DEBUG("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
 	connected := cc > 0
 	if *cx.Config.Solo {
 		connected = true
@@ -108,10 +108,10 @@ func (cx *Xt) IsCurrent() (is bool) {
 	is = cx.RealNode.Chain.IsCurrent() && cx.RealNode.SyncManager.IsCurrent() &&
 		connected
 	
-	log.DEBUG(is, ":", cx.
+	log.DEBUG("is current:",is, "-", cx.
 		RealNode.Chain.IsCurrent(), cx.
 		RealNode.SyncManager.IsCurrent(), !*cx.
 		Config.Solo,
-		"connected", cx.RealNode.ConnectedCount(), (cx.RealNode.ConnectedCount() > 0))
+		"connected", cx.RealNode.ConnectedCount(), cx.RealNode.ConnectedCount() > 0)
 	return is
 }

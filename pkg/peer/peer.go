@@ -365,17 +365,17 @@ type Peer struct {
 	conn          net.Conn
 	// These fields are set at creation time and never modified,
 	// so they are safe to read from concurrently without a mutex.
-	Nonce              uint64
-	addr               string
-	cfg                Config
-	inbound            bool
-	flagsMtx           sync.Mutex // protects the peer flags below
-	na                 *wire.NetAddress
-	id                 int32
-	userAgent          string
-	services           wire.ServiceFlag
-	versionKnown       bool
-	advertisedProtoVer uint32 // protocol version advertised by remote
+	Nonce                uint64
+	addr                 string
+	cfg                  Config
+	inbound              bool
+	flagsMtx             sync.Mutex // protects the peer flags below
+	na                   *wire.NetAddress
+	id                   int32
+	userAgent            string
+	services             wire.ServiceFlag
+	versionKnown         bool
+	advertisedProtoVer   uint32 // protocol version advertised by remote
 	protocolVersion      uint32 // negotiated protocol version
 	sendHeadersPreferred bool   // peer sent a sendheaders message
 	verAckReceived       bool
@@ -1196,16 +1196,22 @@ out:
 		case *wire.MsgVerAck:
 			// No read lock is necessary because verAckReceived is not
 			// written to in any other goroutine.
-			if p.verAckReceived {
-				log.INFOF("already received 'verack' from peer %v"+
-					" -- disconnecting", p)
-				break out
-			}
-			p.flagsMtx.Lock()
-			p.verAckReceived = true
-			p.flagsMtx.Unlock()
-			if p.cfg.Listeners.OnVerAck != nil {
-				p.cfg.Listeners.OnVerAck(p, msg)
+			// because of the potential for an attacker to use the UAC based node identifiers to cause a peer to
+			// disconnect from the attacked node, we have commented this thing out.
+			// if p.verAckReceived {
+			// 	log.INFOF("already received 'verack' from peer %v"+
+			// 		" -- disconnecting", p)
+			// 	break out
+			// }
+			// because of the commented section above, we won't run this if the peer is already marked
+			// VerAckReceived. This basically responds to spurious veracks by dropping them
+			if !p.verAckReceived {
+				p.flagsMtx.Lock()
+				p.verAckReceived = true
+				p.flagsMtx.Unlock()
+				if p.cfg.Listeners.OnVerAck != nil {
+					p.cfg.Listeners.OnVerAck(p, msg)
+				}
 			}
 		case *wire.MsgGetAddr:
 			if p.cfg.Listeners.OnGetAddr != nil {
@@ -1646,6 +1652,10 @@ func (p *Peer) Disconnect() {
 // peer.  If the next message is not a version message or the version is not
 // acceptable then return an error.
 func (p *Peer) readRemoteVersionMsg() error {
+	if p.versionKnown {
+		log.DEBUG("received version previously, dropping")
+		return nil
+	}
 	// Read their version message.
 	remoteMsg, _, err := p.readMessage(wire.LatestEncoding)
 	if err != nil {

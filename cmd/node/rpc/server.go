@@ -667,15 +667,13 @@ func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 	case GetConnCountMsg:
 		nonces := make(map[string]struct{})
 		nonce := ""
-		counter := 0
 		state.ForAllPeers(func(sp *NodePeer) {
 			ua := strings.Split(sp.UserAgent(), "nonce")
 			if len(ua) < 2 {
-				// peer did not send a nonce in the UAC, give it a sequential number instead
-				nonce = fmt.Sprint(counter)
-				counter++
+				nonce = fmt.Sprintf("%s/%s",sp.Peer.LocalAddr().String(), sp.Peer.Addr())
 			} else {
-				nonce = ua[1][:8]
+				nonce = fmt.Sprintf("%s/%s",ua[1][:8],
+					strings.Split(sp.Peer.Addr(),":")[0])
 			}
 			_, ok := nonces[nonce]
 			if !ok {
@@ -2014,7 +2012,7 @@ func (np *NodePeer) OnVersion(
 	// peer for outbound connections.  This is skipped when running on the
 	// simulation test network since it is only intended to connect to specified
 	// peers and actively avoids advertising and connecting to discovered peers.
-	if !((*np.Server.Config.Network)[0] == 't') && !isInbound {
+	if !((*np.Server.Config.Network)[0] == 's') && !isInbound {
 		// After soft-fork activation, only make outbound connection to peers if
 		// they flag that they're segwit enabled.
 		chain := np.Server.Chain
