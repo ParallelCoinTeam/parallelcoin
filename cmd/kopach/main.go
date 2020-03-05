@@ -159,6 +159,7 @@ var handlers = transport.Handlers{
 		}
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())
+		// log.DEBUG(j.GetHashes())
 		// log.TRACE("received job")
 		for i := range w.workers {
 			// log.TRACE("sending job to worker", i)

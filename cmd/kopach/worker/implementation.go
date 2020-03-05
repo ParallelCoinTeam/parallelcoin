@@ -404,7 +404,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		return errors.New("failed to decode merkle roots")
 	} else {
 		h := w.hashes.Load().(map[int32]*chainhash.Hash)
-		log.DEBUG(h)
+		// log.DEBUG(h)
 		hh, ok := h[hv]
 		if !ok {
 			return errors.New("could not get merkle root from job")

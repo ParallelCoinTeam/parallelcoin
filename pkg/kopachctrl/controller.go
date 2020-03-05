@@ -555,7 +555,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 			}
 			// if c.cx.IsCurrent() {
 			// log.DEBUG("sending out new template")
-			// c.UpdateAndSendTemplate()
+			c.UpdateAndSendTemplate()
 			// }
 		}
 	}

@@ -308,6 +308,7 @@ out:
 						bn.Decoded = true
 						// log.DEBUG(numBytes, src, err)
 						if err = handler(channel.context, src, address, cipherText); log.Check(err) {
+							continue
 						}
 						// src = nil
 						// buffer = buffer[:0]
@@ -334,9 +335,9 @@ out:
 					Buffers, shard)
 			}
 		}
-		for i := range buffer {
-			buffer[i] = 0
-		}
+		// for i := range buffer {
+		// 	buffer[i] = 0
+		// }
 	}
 }
 
