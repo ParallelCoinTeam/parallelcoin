@@ -116,7 +116,7 @@ func (r *RcVar) GetBlockHash(blockHeight int) string {
 }
 
 func (r *RcVar) GetConnectionCount() {
-	r.Status.Node.ConnectionCount.Store(r.cx.RPCServer.Cfg.ConnMgr.ConnectedCount())
+	r.Status.Node.ConnectionCount.Store(r.cx.RealNode.ConnectedCount())
 	return
 }
 

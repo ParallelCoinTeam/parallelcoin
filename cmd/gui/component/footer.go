@@ -77,7 +77,8 @@ func FooterRightMenu(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, a
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			navButtons := []func(){
 				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "settingsIcon", buttonSettings),
-				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount), "", buttonNetwork),
+				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"],
+					"CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount.Load()), "", buttonNetwork),
 				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonSettings),
 				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
 				footerMenuButton(rc, gtx, th, allPages.Theme["MINER"], "", "helpIcon", buttonHelp),

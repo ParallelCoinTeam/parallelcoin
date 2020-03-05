@@ -58,7 +58,7 @@ func (r *RcVar) GetDuoUInetworkLastBlock() {
 	return
 }
 func (r *RcVar) GetDuoUIconnectionCount() {
-	r.Status.Node.ConnectionCount.Store(r.cx.RPCServer.Cfg.ConnMgr.ConnectedCount())
+	r.Status.Node.ConnectionCount.Store(r.cx.RealNode.ConnectedCount())
 	return
 }
 

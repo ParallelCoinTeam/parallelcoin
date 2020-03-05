@@ -2,8 +2,11 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	prand "math/rand"
 	"os"
+	"time"
 	
 	"github.com/urfave/cli"
 	
@@ -345,9 +348,14 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.TRACE("set blockprioritysize", c.Int("blockprioritysize"))
 			*cx.Config.BlockPrioritySize = c.Int("blockprioritysize")
 		}
+		prand.Seed(time.Now().UnixNano())
+		nonce := fmt.Sprintf("nonce%0x", prand.Uint32())
+		*cx.Config.UserAgentComments = append(cli.StringSlice{nonce},
+			*cx.Config.UserAgentComments...)
 		if c.IsSet("uacomment") {
 			log.TRACE("set uacomment", c.StringSlice("uacomment"))
-			*cx.Config.UserAgentComments = c.StringSlice("uacomment")
+			*cx.Config.UserAgentComments = append(*cx.Config.UserAgentComments,
+				c.StringSlice("uacomment")...)
 		}
 		if c.IsSet("nopeerbloomfilters") {
 			log.TRACE("set nopeerbloomfilters", c.Bool("nopeerbloomfilters"))

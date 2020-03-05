@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	prand "math/rand"
 	"net"
 	"os"
 	"os/exec"
@@ -20,7 +19,6 @@ import (
 	"sync/atomic"
 	"time"
 	
-	"github.com/urfave/cli"
 	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/cmd/node/mempool"
@@ -670,10 +668,10 @@ func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 		state.ForAllPeers(func(sp *NodePeer) {
 			ua := strings.Split(sp.UserAgent(), "nonce")
 			if len(ua) < 2 {
-				nonce = fmt.Sprintf("%s/%s",sp.Peer.LocalAddr().String(), sp.Peer.Addr())
+				nonce = fmt.Sprintf("%s/%s", sp.Peer.LocalAddr().String(), sp.Peer.Addr())
 			} else {
-				nonce = fmt.Sprintf("%s/%s",ua[1][:8],
-					strings.Split(sp.Peer.Addr(),":")[0])
+				nonce = fmt.Sprintf("%s/%s", ua[1][:8],
+					strings.Split(sp.Peer.LocalAddr().String(), ":")[0])
 			}
 			_, ok := nonces[nonce]
 			if !ok {
@@ -683,7 +681,6 @@ func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 				}
 			}
 		})
-		// log.DEBUG(nonces)
 		msg.Reply <- int32(len(nonces))
 	case GetPeersMsg:
 		peers := make([]*NodePeer, 0, state.Count())
@@ -2497,19 +2494,11 @@ MergeCheckpoints(defaultCheckpoints, additional []chaincfg.Checkpoint) []chaincf
 	return checkpoints
 }
 
-var nonce string
-
-func init() {
-	prand.Seed(time.Now().UnixNano())
-	nonce = fmt.Sprintf("nonce%0x", prand.Uint32())
-}
-
 func // NewPeerConfig returns the configuration for the given ServerPeer.
 NewPeerConfig(sp *NodePeer) *peer.Config {
 	// to work around the lack of a single identifier in the protocol, for dealing with testing situations with multiple
 	// nodes on one IP address (and there is a to-do on this) we generate a random 32 bit value, convert to hex and
 	// set it as the first of the user agent comments, which we can then use to count individual connections properly
-	*sp.Server.Config.UserAgentComments = append(cli.StringSlice{nonce}, *sp.Server.Config.UserAgentComments...)
 	return &peer.Config{
 		Listeners: peer.MessageListeners{
 			OnVersion:      sp.OnVersion,
