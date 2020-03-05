@@ -1,9 +1,13 @@
 package pages
 
 import (
+	"encoding/json"
 	"fmt"
+	"time"
+	
 	"gioui.org/layout"
 	"gioui.org/unit"
+	
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/controller"
@@ -22,7 +26,7 @@ func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block s
 
 func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block btcjson.GetBlockVerboseResult) func() {
 	return func() {
-
+		
 		duo := layout.Horizontal
 		if gtx.Constraints.Width.Max < 1280 {
 			duo = layout.Vertical
@@ -31,15 +35,17 @@ func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, b
 		if gtx.Constraints.Width.Max < 780 {
 			trio = layout.Vertical
 		}
-
+		
+		blockJSON, _ := json.MarshalIndent(block, "", "  ")
+		blockText := string(blockJSON)
 		widgets := []func(){
-
+			
 			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 16, 24, "Hash", fmt.Sprint(block.Hash))),
 			component.DuoFields(gtx, duo,
-				component.TrioFields(gtx, th, trio, 16, 32,
+				component.TrioFields(gtx, th, trio, 16, 16,
 					"Height", fmt.Sprint(block.Height),
 					"Confirmations", fmt.Sprint(block.Confirmations),
-					"Time", fmt.Sprint(block.Time)),
+					"Time", fmt.Sprint(time.Unix(block.Time, 0).Format("2006-01-02 15:04:05"))),
 				component.TrioFields(gtx, th, trio, 18, 16,
 					"PowAlgo", fmt.Sprint(block.PowAlgo),
 					"Difficulty", fmt.Sprint(block.Difficulty),
@@ -61,12 +67,12 @@ func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, b
 					"Version", fmt.Sprint(block.Version)),
 			),
 			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 16, 12, "Tx", fmt.Sprint(block.Tx))),
-			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 14, 12, "RawTx", fmt.Sprint(block.RawTx))),
+			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 14, 12, "RawTx", fmt.Sprint(blockText))),
 			component.PageNavButtons(rc, gtx, th, block.PreviousHash, block.NextHash, blockPage(rc, gtx, th, block.PreviousHash), blockPage(rc, gtx, th, block.NextHash)),
 		}
 		layautList.Layout(gtx, len(widgets), func(i int) {
 			layout.UniformInset(unit.Dp(4)).Layout(gtx, widgets[i])
 		})
-
+		
 	}
 }
