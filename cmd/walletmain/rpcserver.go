@@ -211,26 +211,6 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 		walletListen = func(net string, laddr string) (net.Listener, error) {
 			return tls.Listen(net, laddr, tlsConfig)
 		}
-		// if len(*config.ExperimentalRPCListeners) != 0 {
-		// 	listeners := makeListeners(*config.ExperimentalRPCListeners, net.Listen)
-		// 	if len(listeners) == 0 {
-		// 		err := errors.New("failed to create listeners for RPC server")
-		// 		return nil, nil, err
-		// 	}
-		//
-		// 	creds := credentials.NewServerTLSFromCert(&keyPair)
-		// 	server = grpc.NewServer(grpc.Creds(creds))
-		// 	rpcserver.StartVersionService(server)
-		// 	rpcserver.StartWalletLoaderService(server, walletLoader, activeNet)
-		// 	for _, lis := range listeners {
-		// 		listener := lis
-		// 		go func() {
-		// 			log.INFO("experimental RPC server listening on", listener)
-		// 			err = server.Serve(lis)
-		// 			log.TRACE("finished serving experimental RPC:", err)
-		// 		}()
-		// 	}
-		// }
 	}
 	if *config.Username == "" || *config.Password == "" {
 		log.INFO("legacy RPC server disabled (requires username and password)")
@@ -256,14 +236,9 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 }
 
 // startWalletRPCServices associates each of the (optionally-nil) RPC servers
-// with a wallet to enable remote wallet access.  For the GRPC server, this
-// registers the WalletService service, and for the legacy JSON-RPC server it
+// with a wallet to enable remote wallet access.  For the legacy JSON-RPC server it
 // enables methods that require a loaded wallet.
 func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *legacy.Server) {
-	// if server != nil {
-	// 	log.WARN("starting grpc experimental wallet rpc server")
-	// 	rpcserver.StartWalletService(server, wallet)
-	// }
 	if legacyServer != nil {
 		log.WARN("starting legacy wallet rpc server")
 		legacyServer.RegisterWallet(wallet)

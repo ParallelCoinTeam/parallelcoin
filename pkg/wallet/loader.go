@@ -51,8 +51,10 @@ var (
 	errNoConsole = errors.New("db upgrade requires console access for additional input")
 )
 
-// CreateNewWallet creates a new wallet using the provided public and private passphrases.  The seed is optional.  If non-nil, addresses are derived from this seed.  If nil, a secure random seed is generated.
-func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bday time.Time, noStart bool, podConfig *pod.Config) (*Wallet, error) {
+// CreateNewWallet creates a new wallet using the provided public and private passphrases.  The seed is optional.  If
+// non-nil, addresses are derived from this seed.  If nil, a secure random seed is generated.
+func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bday time.Time, noStart bool,
+	podConfig *pod.Config) (*Wallet, error) {
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	if ld.Loaded {
