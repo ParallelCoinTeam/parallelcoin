@@ -545,7 +545,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 		}
 		// First to arrive locks out any others while processing
 		switch n.Type {
-		case blockchain.NTBlockAccepted:
+		case blockchain.NTBlockConnected:
 			log.DEBUG("received new chain notification")
 			// construct work message
 			_, ok := n.Data.(*util.Block)
@@ -554,8 +554,8 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 				break
 			}
 			// if c.cx.IsCurrent() {
-			log.DEBUG("sending out new template")
-			c.UpdateAndSendTemplate()
+			// log.DEBUG("sending out new template")
+			// c.UpdateAndSendTemplate()
 			// }
 		}
 	}
