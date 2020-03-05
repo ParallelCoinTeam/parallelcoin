@@ -666,6 +666,7 @@ func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 		nonces := make(map[string]struct{})
 		nonce := ""
 		state.ForAllPeers(func(sp *NodePeer) {
+			// log.DEBUG(sp.UserAgent())
 			ua := strings.Split(sp.UserAgent(), "nonce")
 			if len(ua) < 2 {
 				nonce = fmt.Sprintf("%s/%s", sp.Peer.LocalAddr().String(), sp.Peer.Addr())
@@ -681,6 +682,7 @@ func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 				}
 			}
 		})
+		// log.DEBUG(nonces)
 		msg.Reply <- int32(len(nonces))
 	case GetPeersMsg:
 		peers := make([]*NodePeer, 0, state.Count())

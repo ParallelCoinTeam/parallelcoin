@@ -350,8 +350,11 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		prand.Seed(time.Now().UnixNano())
 		nonce := fmt.Sprintf("nonce%0x", prand.Uint32())
-		*cx.Config.UserAgentComments = append(cli.StringSlice{nonce},
-			*cx.Config.UserAgentComments...)
+		if cx.Config.UserAgentComments == nil {
+			cx.Config.UserAgentComments = &cli.StringSlice{nonce}
+		} else {
+			*cx.Config.UserAgentComments = append(cli.StringSlice{nonce}, *cx.Config.UserAgentComments...)
+		}
 		if c.IsSet("uacomment") {
 			log.TRACE("set uacomment", c.StringSlice("uacomment"))
 			*cx.Config.UserAgentComments = append(*cx.Config.UserAgentComments,
