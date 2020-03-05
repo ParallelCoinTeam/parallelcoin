@@ -166,7 +166,8 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}, ) *Worke
 				select {
 				case <-sampleTicker.C:
 					w.hashReport()
-					break
+					log.DEBUG("hash report")
+					break pausing
 				case <-w.stopChan:
 					log.DEBUG("received pause signal while paused")
 					// drain stop channel in pause

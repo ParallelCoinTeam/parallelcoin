@@ -158,17 +158,20 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		select {
 		case <-ticker.C:
 			log.DEBUGF("network hashrate %.2f", ctrl.HashReport())
-			if cx.IsCurrent() {
-				ctrl.Ready.Store(true)
+			if !ctrl.Ready.Load() {
+				if cx.IsCurrent() {
+					log.WARN("READY!")
+					ctrl.Ready.Store(true)
+				}
 			}
 		case <-ctrl.quit:
 			cont = false
+			ctrl.active.Store(false)
 		case <-interrupt.HandlersDone:
 			cont = false
 		}
 	}
 	log.TRACE("controller exiting")
-	ctrl.active.Store(false)
 	return
 }
 
@@ -202,18 +205,17 @@ var handlersMulticast = transport.Handlers{
 		log.DEBUG("received solution")
 		// log.SPEW(ctx)
 		c := ctx.(*Controller)
-		if c.Ready.Load() {
-			log.DEBUG("not ready for solutions yet")
-			return
-		}
 		// if !c.cx.IsCurrent() {
 		// 	// if err := c.multiConn.SendMany(pause.PauseMagic, c.pauseShards); log.Check(err) {
 		// 	// }
 		// 	return
 		// }
-		if !c.active.Load() || !c.cx.Node.Load().(bool) ||
-			!c.cx.IsCurrent() {
+		if !c.active.Load() || !c.cx.Node.Load().(bool) {
 			log.DEBUG("not active yet")
+			return
+		}
+		if !c.Ready.Load() {
+			log.DEBUG("not ready for solutions yet")
 			return
 		}
 		j := sol.LoadSolContainer(b)
@@ -455,9 +457,6 @@ out:
 		select {
 		case <-rebroadcastTicker.C:
 			if !c.cx.IsCurrent() {
-				// c.oldBlocks.Store(c.pauseShards)
-				// if err := c.multiConn.SendMany(pause.PauseMagic, c.pauseShards); log.Check(err) {
-				// }
 				break
 			}
 			// The current block is stale if the best block has changed.
@@ -467,16 +466,16 @@ out:
 				c.UpdateAndSendTemplate()
 				break
 			}
-			// // The current block is stale if the memory pool has been updated
-			// // since the block template was generated and it has been at least
-			// // one minute.
-			// if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
-			// 	LastUpdated() && time.Now().After(time.Unix(0,
-			// 	c.lastGenerated.Load().(int64)+int64(time.Minute))) {
-			// 	log.DEBUG("block is stale")
-			// 	c.UpdateAndSendTemplate()
-			// 	break
-			// }
+			// The current block is stale if the memory pool has been updated
+			// since the block template was generated and it has been at least
+			// one minute.
+			if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
+				LastUpdated() && time.Now().After(time.Unix(0,
+				c.lastGenerated.Load().(int64)+int64(time.Minute))) {
+				log.DEBUG("block is stale")
+				c.UpdateAndSendTemplate()
+				break
+			}
 			oB, ok := c.oldBlocks.Load().([][]byte)
 			if len(oB) == 0 {
 				log.WARN("template is zero length")
@@ -541,7 +540,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 			return
 		}
 		if !c.Ready.Load() {
-			log.DEBUG("not ready")
+			// log.DEBUG("not ready")
 			return
 		}
 		// First to arrive locks out any others while processing

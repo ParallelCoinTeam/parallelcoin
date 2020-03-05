@@ -110,7 +110,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load()
-	log.WARN("is current:", is, "-", cx.
+	log.TRACE("is current:", is, "-", cx.
 		RealNode.Chain.IsCurrent(), cx.
 		RealNode.SyncManager.IsCurrent(), !*cx.
 		Config.Solo,

@@ -1,6 +1,10 @@
 package rcd
 
 import (
+	"time"
+	
+	"go.uber.org/atomic"
+	
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/log"
 )
@@ -23,19 +27,36 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 	r.UpdateTrigger = trigger
 	// first time starting up get all of these and trigger update
 	update(r)
+	var ready atomic.Bool
+	ready.Store(false)
 	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
 		switch callback.Type {
 		case blockchain.NTBlockAccepted,
 			blockchain.NTBlockConnected,
 			blockchain.NTBlockDisconnected:
-			go update(r)
+			if !ready.Load() {
+				return
+			}
+			update(r)
 			// go r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
 		}
 	})
 	go func() {
+		ticker := time.NewTicker(time.Second)
 	out:
 		for {
 			select {
+			case <-ticker.C:
+				if !ready.Load() {
+					if r.cx.IsCurrent() {
+						ready.Store(true)
+						r.cx.WalletServer.Rescan(nil, nil)
+						r.UpdateTrigger <- struct{}{}
+					}
+				}
+				r.GetDuoUIconnectionCount()
+				r.UpdateTrigger <- struct{}{}
+			// log.WARN("GetDuoUIconnectionCount")
 			case <-r.cx.WalletServer.Update:
 				update(r)
 			case <-r.cx.KillAll:
@@ -57,19 +78,17 @@ func update(r *RcVar) {
 	// r.GetTransactions()
 	// log.WARN("GetLatestTransactions")
 	r.GetLatestTransactions()
-	log.INFO("")
-	log.INFO("UPDATE")
+	// log.INFO("")
+	// log.INFO("UPDATE")
 	log.INFO(r.Status.Wallet.LastTxs.Txs)
-	log.INFO("")
+	// log.INFO("")
 	// r.GetDuoUIstatus()
 	// r.GetDuoUIlocalLost()
 	// r.GetDuoUIblockHeight()
 	// log.WARN("GetDuoUIblockCount")
+	r.GetDuoUIdifficulty()
 	r.GetDuoUIblockCount()
 	// log.WARN("GetDuoUIdifficulty")
-	r.GetDuoUIdifficulty()
-	// log.WARN("GetDuoUIconnectionCount")
-	r.GetDuoUIconnectionCount()
 	r.GetAddressBook()
 	r.UpdateTrigger <- struct{}{}
 }
