@@ -97,8 +97,7 @@ func NewDuoUItheme() *DuoUItheme {
 	//i["radioUncheckedIcon"] = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonUnchecked))
 
 	i["iconPlus"] = mustIcon(NewDuoUIicon(icons.NavigationCheck))
-	i["iconMinus"] = mustIcon(NewDuoUIicon(icons.))
-
+	i["iconMinus"] = mustIcon(NewDuoUIicon(icons.ImageExposurePlus1))
 
 	i["iconCancel"] = mustIcon(NewDuoUIicon(icons.NavigationCancel))
 	i["iconOK"] = mustIcon(NewDuoUIicon(icons.NavigationCheck))
