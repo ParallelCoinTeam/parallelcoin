@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	
+
 	"github.com/VividCortex/ewma"
-	
+
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
@@ -79,7 +79,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		last.version = algoVer
 	}
 	unsquared := adjustment
-	// adjustment *= adjustment
+	adjustment *= adjustment * adjustment
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
@@ -129,7 +129,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		return
 	}
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
-	dayDiv := b.GetCommonP9Averages(lastNode, nH)
+		dayDiv := b.GetCommonP9Averages(lastNode, nH)
 	algoVer := fork.GetAlgoVer(algoname, nH)
 	since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode,
 		algoVer)

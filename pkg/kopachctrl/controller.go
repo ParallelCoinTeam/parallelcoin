@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"strings"
 	"time"
-	
+
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -112,10 +113,10 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 	}
 	// buffer = ctrl.buffer
 	pM := pause.GetPauseContainer(cx)
-	ll := pM.GetP2PListeners()
-	for i := range ll {
-		ctrl.otherNodes[ll[i]] = time.Now()
-	}
+	// ll := pM.GetP2PListeners()
+	// for i := range ll {
+	// 	ctrl.otherNodes[ll[i]] = time.Now()
+	// }
 	var pauseShards [][]byte
 	if pauseShards = transport.GetShards(pM.Data); log.Check(err) {
 	} else {
@@ -157,20 +158,26 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		select {
 		case <-ticker.C:
 			log.DEBUGF("network hashrate %.2f", ctrl.HashReport())
+			if !ctrl.Ready.Load() {
+				if cx.IsCurrent() {
+					log.WARN("READY!")
+					ctrl.Ready.Store(true)
+				}
+			}
 		case <-ctrl.quit:
 			cont = false
+			ctrl.active.Store(false)
 		case <-interrupt.HandlersDone:
 			cont = false
 		}
 	}
 	log.TRACE("controller exiting")
-	ctrl.active.Store(false)
 	return
 }
 
 func (c *Controller) HashReport() float64 {
 	c.hashSampleBuf.Add(c.hashCount.Load())
-	av := ewma.NewMovingAverage(3)
+	av := ewma.NewMovingAverage(15)
 	var i int
 	var prev uint64
 	if err := c.hashSampleBuf.ForEach(func(v uint64) error {
@@ -193,8 +200,7 @@ func (c *Controller) HashReport() float64 {
 // var handlersUnicast = transport.Handlers{}
 var handlersMulticast = transport.Handlers{
 	// Solutions submitted by workers
-	string(sol.SolutionMagic):
-	func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		log.DEBUG("received solution")
 		// log.SPEW(ctx)
 		c := ctx.(*Controller)
@@ -205,6 +211,10 @@ var handlersMulticast = transport.Handlers{
 		// }
 		if !c.active.Load() || !c.cx.Node.Load().(bool) {
 			log.DEBUG("not active yet")
+			return
+		}
+		if !c.Ready.Load() {
+			log.DEBUG("not ready for solutions yet")
 			return
 		}
 		j := sol.LoadSolContainer(b)
@@ -287,8 +297,7 @@ var handlersMulticast = transport.Handlers{
 			fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
 		return
 	},
-	string(p2padvt.Magic):
-	func(ctx interface{}, src net.Addr, dst string,
+	string(p2padvt.Magic): func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
@@ -298,26 +307,38 @@ var handlersMulticast = transport.Handlers{
 		// log.WARN("received job")
 		j := p2padvt.LoadContainer(b)
 		otherIPs := j.GetIPs()
-		otherPort := j.GetP2PListenersPort()
+		otherPort := fmt.Sprint(j.GetP2PListenersPort())
+		myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
+		// log.WARN("myPort", myPort, "otherPort", otherPort)
 		for i := range otherIPs {
-			o := fmt.Sprintf("%s:%d", otherIPs[i], otherPort)
-			if _, ok := c.otherNodes[o]; !ok {
-				// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
-				// recommended).
-				log.WARN("connecting to lan peer with same PSK", o)
-				c.otherNodes[o] = time.Now()
-				// go func() {
-				<-c.cx.NodeReady
-				if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); log.Check(err) {
+			o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
+			if otherPort != myPort {
+				if _, ok := c.otherNodes[o]; !ok {
+					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
+					// recommended).
+					// go func() {
+					// <-c.cx.NodeReady
+					log.WARN("connecting to lan peer with same PSK", o)
+					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, false); log.Check(err) {
+					}
+					// }()
 				}
-				// }()
+				c.otherNodes[o] = time.Now()
+				// } else {
 			}
 		}
+		for i := range c.otherNodes {
+			// log.DEBUG(i, c.otherNodes[i], time.Now().Sub(c.otherNodes[i]))
+			if time.Now().Sub(c.otherNodes[i]) > time.Second*3 {
+				delete(c.otherNodes, i)
+			}
+		}
+		// log.DEBUG("lan nodes connected", len(c.otherNodes), c.otherNodes)
+		c.cx.OtherNodes.Store(int32(len(c.otherNodes)))
 		return
 	},
 	// hashrate reports from workers
-	string(hashrate.HashrateMagic):
-	func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(hashrate.HashrateMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
 			log.DEBUG("not active")
@@ -433,9 +454,6 @@ out:
 		select {
 		case <-rebroadcastTicker.C:
 			if !c.cx.IsCurrent() {
-				// c.oldBlocks.Store(c.pauseShards)
-				// if err := c.multiConn.SendMany(pause.PauseMagic, c.pauseShards); log.Check(err) {
-				// }
 				break
 			}
 			// The current block is stale if the best block has changed.
@@ -445,20 +463,20 @@ out:
 				c.UpdateAndSendTemplate()
 				break
 			}
-			// // The current block is stale if the memory pool has been updated
-			// // since the block template was generated and it has been at least
-			// // one minute.
-			// if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
-			// 	LastUpdated() && time.Now().After(time.Unix(0,
-			// 	c.lastGenerated.Load().(int64)+int64(time.Minute))) {
-			// 	log.DEBUG("block is stale")
-			// 	c.UpdateAndSendTemplate()
-			// 	break
-			// }
+			// The current block is stale if the memory pool has been updated
+			// since the block template was generated and it has been at least
+			// one minute.
+			if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
+				LastUpdated() && time.Now().After(time.Unix(0,
+				c.lastGenerated.Load().(int64)+int64(time.Minute))) {
+				log.DEBUG("block is stale")
+				c.UpdateAndSendTemplate()
+				break
+			}
 			oB, ok := c.oldBlocks.Load().([][]byte)
 			if len(oB) == 0 {
 				log.WARN("template is zero length")
-				
+
 				// c.oldBlocks.Store(c.pauseShards)
 				// break
 			}
@@ -508,30 +526,34 @@ out:
 
 func updater(ctrl *Controller) {
 	// check if new coinbases have arrived
-	
+
 	// send out new work
 }
 
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
-		if c.active.Load() {
-			// First to arrive locks out any others while processing
-			switch n.Type {
-			case blockchain.NTBlockAccepted:
-				log.DEBUG("received new chain notification")
-				// construct work message
-				_, ok := n.Data.(*util.Block)
-				if !ok {
-					log.WARN("chain accepted notification is not a block")
-					break
-				}
-				// if c.cx.IsCurrent() {
-				log.DEBUG("sending out new template")
-				c.UpdateAndSendTemplate()
-				// }
+		if !c.active.Load() {
+			log.DEBUG("not active")
+			return
+		}
+		if !c.Ready.Load() {
+			// log.DEBUG("not ready")
+			return
+		}
+		// First to arrive locks out any others while processing
+		switch n.Type {
+		case blockchain.NTBlockConnected:
+			log.DEBUG("received new chain notification")
+			// construct work message
+			_, ok := n.Data.(*util.Block)
+			if !ok {
+				log.WARN("chain accepted notification is not a block")
+				break
 			}
-		} else {
-			log.DEBUG("notifier called but controller not active")
+			// if c.cx.IsCurrent() {
+			// log.DEBUG("sending out new template")
+			c.UpdateAndSendTemplate()
+			// }
 		}
 	}
 }

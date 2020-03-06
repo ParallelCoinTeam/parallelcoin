@@ -32,7 +32,7 @@ A quick overview of the major features peer provides are as follows:
 
  - Automatic periodic keep-alive pinging and pong responses
 
- - Random nonce generation and self connection detection
+ - Random Nonce generation and self connection detection
 
  - Proper handling of bloom filter related commands when the caller does not specify the related flag to signal support
 

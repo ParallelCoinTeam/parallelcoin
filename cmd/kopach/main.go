@@ -6,10 +6,10 @@ import (
 	"net"
 	"os"
 	"time"
-	
+
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
-	
+
 	"github.com/p9c/pod/cmd/kopach/client"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/conte"
@@ -109,7 +109,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
-						log.DEBUG("previous current controller has stopped" +
+						log.DEBUG("previous current controller has stopped"+
 							" broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be
 						// listened to
@@ -144,7 +144,7 @@ var handlers = transport.Handlers{
 			log.DEBUG("not active")
 			return
 		}
-		log.DEBUG("received job")
+		// log.DEBUG("received job")
 		j := job.LoadContainer(b)
 		// h := j.GetHashes()
 		ips := j.GetIPs()
@@ -153,12 +153,13 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
-			log.DEBUG("ignoring other controller job")
+			// log.DEBUG("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
 		}
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())
+		// log.DEBUG(j.GetHashes())
 		// log.TRACE("received job")
 		for i := range w.workers {
 			// log.TRACE("sending job to worker", i)

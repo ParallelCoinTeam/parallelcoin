@@ -10,7 +10,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
-	
+
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
 	"github.com/p9c/pod/pkg/log"
@@ -82,7 +82,7 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		log.DEBUG(c.Creator, "sent packets", string(magic),
+		log.TRACE(c.Creator, "sent packets", string(magic),
 			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
 			c.Sender.RemoteAddr())
 	}
@@ -117,7 +117,7 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 		context:         ctx,
 	}
 	var magics []string
-	
+
 	for i := range handlers {
 		magics = append(magics, i)
 	}
@@ -308,6 +308,7 @@ out:
 						bn.Decoded = true
 						// log.DEBUG(numBytes, src, err)
 						if err = handler(channel.context, src, address, cipherText); log.Check(err) {
+							continue
 						}
 						// src = nil
 						// buffer = buffer[:0]
@@ -334,9 +335,9 @@ out:
 					Buffers, shard)
 			}
 		}
-		for i := range buffer {
-			buffer[i] = 0
-		}
+		// for i := range buffer {
+		// 	buffer[i] = 0
+		// }
 	}
 }
 

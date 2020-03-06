@@ -51,8 +51,10 @@ var (
 	errNoConsole = errors.New("db upgrade requires console access for additional input")
 )
 
-// CreateNewWallet creates a new wallet using the provided public and private passphrases.  The seed is optional.  If non-nil, addresses are derived from this seed.  If nil, a secure random seed is generated.
-func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bday time.Time, noStart bool, podConfig *pod.Config) (*Wallet, error) {
+// CreateNewWallet creates a new wallet using the provided public and private passphrases.  The seed is optional.  If
+// non-nil, addresses are derived from this seed.  If nil, a secure random seed is generated.
+func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bday time.Time, noStart bool,
+	podConfig *pod.Config) (*Wallet, error) {
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	if ld.Loaded {
@@ -68,7 +70,7 @@ func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bd
 		return nil, errors.New("Wallet ERROR: " + ld.DDDirPath + " already exists")
 	}
 	// Create the wallet database backed by bolt db.
-	p :=  filepath.Dir(ld.DDDirPath)
+	p := filepath.Dir(ld.DDDirPath)
 	err = os.MkdirAll(p, 0700)
 	if err != nil {
 		log.ERROR(err)

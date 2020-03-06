@@ -27,7 +27,7 @@ import (
 // potential peers on the bitcoin network.
 type AddrManager struct {
 	mtx            sync.Mutex
-	peersFile      string
+	PeersFile      string
 	lookupFunc     func(string) ([]net.IP, error)
 	rand           *rand.Rand
 	key            [32]byte
@@ -348,16 +348,16 @@ func (a *AddrManager) savePeers() {
 			j++
 		}
 	}
-	w, err := os.Create(a.peersFile)
+	w, err := os.Create(a.PeersFile)
 	if err != nil {
 		log.ERROR(err)
-		log.ERRORF("error opening file %s: %v", a.peersFile, err)
+		log.ERRORF("error opening file %s: %v", a.PeersFile, err)
 		return
 	}
 	enc := json.NewEncoder(w)
 	defer w.Close()
 	if err := enc.Encode(&sam); err != nil {
-		log.ERRORF("failed to encode file %s: %v", a.peersFile, err)
+		log.ERRORF("failed to encode file %s: %v", a.PeersFile, err)
 		return
 	}
 }
@@ -369,15 +369,15 @@ func (a *AddrManager) loadPeers() {
 
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
-	err := a.deserializePeers(a.peersFile)
+	err := a.deserializePeers(a.PeersFile)
 	if err != nil {
 		log.ERROR(err)
-		log.ERRORF("failed to parse file %s: %v", a.peersFile, err)
+		log.ERRORF("failed to parse file %s: %v", a.PeersFile, err)
 		// if it is invalid we nuke the old one unconditionally.
-		err = os.Remove(a.peersFile)
+		err = os.Remove(a.PeersFile)
 		if err != nil {
 			log.ERROR(err)
-			log.WARNF("failed to remove corrupt peers file %s: %v", a.peersFile,
+			log.WARNF("failed to remove corrupt peers file %s: %v", a.PeersFile,
 				err)
 		}
 		a.reset()
@@ -386,7 +386,7 @@ func (a *AddrManager) loadPeers() {
 	//log.TRACEC(func() string {
 	//	return fmt.Sprintf(
 	//		"loaded %d addresses from file '%s'",
-	//		a.numAddresses(), a.peersFile,
+	//		a.numAddresses(), a.PeersFile,
 	//	)
 	//})
 }
@@ -1006,7 +1006,7 @@ func // New returns a new bitcoin address manager. Use Start to begin processing
 // asynchronous address updates.
 New(dataDir string, lookupFunc func(string) ([]net.IP, error)) *AddrManager {
 	am := AddrManager{
-		peersFile:      filepath.Join(dataDir, "peers.json"),
+		PeersFile:      filepath.Join(dataDir, "peers.json"),
 		lookupFunc:     lookupFunc,
 		rand:           rand.New(rand.NewSource(time.Now().UnixNano())),
 		quit:           make(chan struct{}),

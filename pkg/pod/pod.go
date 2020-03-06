@@ -1,10 +1,11 @@
 package pod
 
 import (
-	"github.com/p9c/pod/app/appdata"
 	"reflect"
 	"sync"
 	"time"
+
+	"github.com/p9c/pod/app/appdata"
 
 	"github.com/davecgh/go-spew/spew"
 
@@ -76,7 +77,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 			Options:     options,
 			Datatype:    field.Type.String(),
 			Model:       field.Tag.Get("model"),
-			//Value:       cfgMap[field.Tag.Get("model")],
+			// Value:       cfgMap[field.Tag.Get("model")],
 		}
 		if f.Group != "" {
 			rawFields[f.Group] = append(rawFields[f.Group], f)
@@ -101,31 +102,31 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 // Config is
 type Config struct {
 	sync.Mutex
-	AddCheckpoints     *cli.StringSlice `group:"debug" label:"AddCheckpoints" description:"add custom checkpoints" type:"array" inputType:"text" model:"array" featured:"false"`
-	AddPeers           *cli.StringSlice `group:"node" label:"Add Peers" description:"Manually adds addresses to try to connect to" type:"array" inputType:"text" model:"array" featured:"false"`
-	AddrIndex          *bool            `group:"node" label:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"switch" model:"AddrIndex" featured:"false"`
-	Algo               *string          `group:"mining" label:"Algo" description:"algorithm to mine, random is best" type:"input" inputType:"text" model:"Algo" featured:"false"`
-	AutoPorts          *bool            `group:"node" label:"Automatic	Ports" description:"with controller enabled p2p, rpc and controller ports are randomized" type:"switch" model:"AutoPorts" featured:"false"`
-	BanDuration        *time.Duration   `group:"debug" label:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"input" inputType:"time" model:"BanDuration" featured:"false"`
-	BanThreshold       *int             `group:"debug" label:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"input" inputType:"number" model:"BanThreshold" featured:"false"`
-	BlockMaxSize       *int             `group:"mining" label:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"input" inputType:"number" model:"BlockMaxSize" featured:"false"`
-	BlockMaxWeight     *int             `group:"mining" label:"Block Max Weight" description:"maximum block weight to be used when creating a block" type:"input" inputType:"number" model:"BlockMaxWeight" featured:"false"`
-	BlockMinSize       *int             `group:"mining" label:"Block Min Size" description:"minimum block size in bytes to be used when creating a block" type:"input" inputType:"number" model:"BlockMinSize" featured:"false"`
-	BlockMinWeight     *int             `group:"mining" label:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"input" inputType:"number" model:"BlockMinWeight" featured:"false"`
-	BlockPrioritySize  *int             `group:"mining" label:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"input" inputType:"number" model:"BlockPrioritySize" featured:"false"`
-	BlocksOnly         *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"switch" model:"BlocksOnly" featured:"false"`
-	CAFile             *string          `group:"tls" label:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
-	ConfigFile         *string
-	ConnectPeers       *cli.StringSlice `group:"node" label:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"array" inputType:"text" model:"array" featured:"false"`
-	Controller         *string          `group:"mining" label:"Controller Receiver" description:"address to bind miner controller to"`
-	CPUProfile         *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"input" inputType:"text" model:"CPUProfile" featured:"false"`
-	DataDir            *string          `group:"config" label:"Data Dir" description:"Root folder where application data is stored" type:"input" inputType:"text" model:"DataDir" featured:"false"`
-	DbType             *string          `group:"debug" label:"Db Type" description:"type of database storage engine to use (only one right now)" type:"input" inputType:"text" model:"DbType" featured:"false"`
-	DisableBanning     *bool            `group:"debug" label:"Disable Banning" description:"Disables banning of misbehaving peers" type:"switch" model:"DisableBanning" featured:"false"`
-	DisableCheckpoints *bool            `group:"debug" label:"Disable Checkpoints" description:"disables all checkpoints" type:"switch" model:"DisableCheckpoints" featured:"false"`
-	DisableDNSSeed     *bool            `group:"node" label:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"switch" model:"DisableDNSSeed" featured:"false"`
-	DisableListen      *bool            `group:"node" label:"Disable Listen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
-	DisableRPC         *bool            `group:"rpc" label:"Disable RPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
+	AddCheckpoints         *cli.StringSlice `group:"debug" label:"AddCheckpoints" description:"add custom checkpoints" type:"array" inputType:"text" model:"array" featured:"false"`
+	AddPeers               *cli.StringSlice `group:"node" label:"Add Peers" description:"Manually adds addresses to try to connect to" type:"array" inputType:"text" model:"array" featured:"false"`
+	AddrIndex              *bool            `group:"node" label:"Addr Index" description:"maintain a full address-based transaction index which makes the searchrawtransactions RPC available" type:"switch" model:"AddrIndex" featured:"false"`
+	Algo                   *string          `group:"mining" label:"Algo" description:"algorithm to mine, random is best" type:"input" inputType:"text" model:"Algo" featured:"false"`
+	AutoPorts              *bool            `group:"node" label:"Automatic	Ports" description:"with controller enabled p2p, rpc and controller ports are randomized" type:"switch" model:"AutoPorts" featured:"false"`
+	BanDuration            *time.Duration   `group:"debug" label:"Ban Duration" description:"how long a ban of a misbehaving peer lasts" type:"input" inputType:"time" model:"BanDuration" featured:"false"`
+	BanThreshold           *int             `group:"debug" label:"Ban Threshold" description:"ban score that triggers a ban (default 100)" type:"input" inputType:"number" model:"BanThreshold" featured:"false"`
+	BlockMaxSize           *int             `group:"mining" label:"Block Max Size" description:"maximum block size in bytes to be used when creating a block" type:"input" inputType:"number" model:"BlockMaxSize" featured:"false"`
+	BlockMaxWeight         *int             `group:"mining" label:"Block Max Weight" description:"maximum block weight to be used when creating a block" type:"input" inputType:"number" model:"BlockMaxWeight" featured:"false"`
+	BlockMinSize           *int             `group:"mining" label:"Block Min Size" description:"minimum block size in bytes to be used when creating a block" type:"input" inputType:"number" model:"BlockMinSize" featured:"false"`
+	BlockMinWeight         *int             `group:"mining" label:"Block Min Weight" description:"minimum block weight to be used when creating a block" type:"input" inputType:"number" model:"BlockMinWeight" featured:"false"`
+	BlockPrioritySize      *int             `group:"mining" label:"Block Priority Size" description:"size in bytes for high-priority/low-fee transactions when creating a block" type:"input" inputType:"number" model:"BlockPrioritySize" featured:"false"`
+	BlocksOnly             *bool            `group:"node" label:"Blocks Only" description:"do not accept transactions from remote peers" type:"switch" model:"BlocksOnly" featured:"false"`
+	CAFile                 *string          `group:"tls" label:"CA File" description:"certificate authority file for TLS certificate validation" type:"input" inputType:"text" model:"CAFile" featured:"false"`
+	ConfigFile             *string
+	ConnectPeers           *cli.StringSlice `group:"node" label:"Connect Peers" description:"Connect ONLY to these addresses (disables inbound connections)" type:"array" inputType:"text" model:"array" featured:"false"`
+	Controller             *string          `group:"mining" label:"Controller Receiver" description:"address to bind miner controller to"`
+	CPUProfile             *string          `group:"debug" label:"CPU Profile" description:"write cpu profile to this file" type:"input" inputType:"text" model:"CPUProfile" featured:"false"`
+	DataDir                *string          `group:"config" label:"Data Dir" description:"Root folder where application data is stored" type:"input" inputType:"text" model:"DataDir" featured:"false"`
+	DbType                 *string          `group:"debug" label:"Db Type" description:"type of database storage engine to use (only one right now)" type:"input" inputType:"text" model:"DbType" featured:"false"`
+	DisableBanning         *bool            `group:"debug" label:"Disable Banning" description:"Disables banning of misbehaving peers" type:"switch" model:"DisableBanning" featured:"false"`
+	DisableCheckpoints     *bool            `group:"debug" label:"Disable Checkpoints" description:"disables all checkpoints" type:"switch" model:"DisableCheckpoints" featured:"false"`
+	DisableDNSSeed         *bool            `group:"node" label:"Disable DNS Seed" description:"disable seeding of addresses to peers" type:"switch" model:"DisableDNSSeed" featured:"false"`
+	DisableListen          *bool            `group:"node" label:"Disable Listen" description:"Disables inbound connections for the peer to peer network" type:"switch" model:"DisableListen" featured:"false"`
+	DisableRPC             *bool            `group:"rpc" label:"Disable RPC" description:"disable rpc servers" type:"switch" model:"DisableRPC" featured:"false"`
 	ExternalIPs            *cli.StringSlice `group:"node" label:"External IPs" description:"extra addresses to tell peers they can connect to" type:"array" inputType:"text" model:"ExternalIPs" featured:"false"`
 	FreeTxRelayLimit       *float64         `group:"policy" label:"Free Tx Relay Limit" description:"Limit relay of transactions with no transaction fee to the given amount in thousands of bytes per minute" type:"input" inputType:"decimal" model:"FreeTxRelayLimit" featured:"false"`
 	Generate               *bool            `group:"mining" label:"Generate" description:"turn on built in CPU miner" type:"switch" model:"Generate" featured:"false"`
@@ -189,6 +190,7 @@ type Config struct {
 	WalletRPCMaxWebsockets *int             `group:"wallet" label:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"input" inputType:"number" model:"LegacyRPCMaxWebsockets" featured:"false"`
 	WalletServer           *string          `group:"wallet" label:"node address to connect wallet server to" type:"input" inputType:"text" model:"WalletServer" featured:"false"`
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"array" inputType:"text" model:"array" featured:"false"`
+	LAN                    *bool
 }
 
 func EmptyConfig() (c *Config, conf map[string]interface{}) {
@@ -223,6 +225,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		FreeTxRelayLimit:       new(float64),
 		Generate:               newbool(),
 		GenThreads:             newint(),
+		LAN:                    newbool(),
 		Language:               newstring(),
 		LimitPass:              newstring(),
 		LimitUser:              newstring(),
@@ -313,6 +316,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"FreeTxRelayLimit":       c.FreeTxRelayLimit,
 		"Generate":               c.Generate,
 		"GenThreads":             c.GenThreads,
+		"LAN":                    c.LAN,
 		"Language":               c.Language,
 		"LimitPass":              c.LimitPass,
 		"LimitUser":              c.LimitUser,

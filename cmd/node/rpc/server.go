@@ -18,9 +18,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	
+
 	uberatomic "go.uber.org/atomic"
-	
+
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/upnp"
@@ -168,6 +168,7 @@ type (
 		Started            int32
 		Shutdown           int32
 		ShutdownSched      int32
+		HighestKnown       uberatomic.Int32
 	}
 	// NodePeer extends the peer to maintain state shared by the server and
 	// the blockmanager.
@@ -472,7 +473,7 @@ func (n *Node) Stop() (err error) {
 		return nil
 	}
 	log.TRACE("node shutting down")
-	
+
 	// Shutdown the RPC server if it'n not disabled.
 	if !*n.Config.DisableRPC {
 		for i := range n.RPCServers {
@@ -492,7 +493,7 @@ func (n *Node) Stop() (err error) {
 		return nil
 	}); log.Check(err) {
 	}
-	
+
 	// Signal the remaining goroutines to quit.
 	close(n.Quit)
 	return
@@ -653,16 +654,37 @@ func (n *Node) HandleDonePeerMsg(state *PeerState, sp *NodePeer) {
 
 // HandleQuery is the central handler for all queries and commands from other
 // goroutines related to peer state.
+// Previously this counts two if the same node was connected outbound and then connected back
+// inbound. The nonce given in a Version message is now added to the Peer struct and
+// then as this iterates the connected peers list, it adds nonces from Peers marked connected
+// to a map, thus excluding double-counting, and returns this value. No idea why it was not written to
+// exclude keeping multiple peers open like this, since a connection is a duplex channel, but at least
+// now the ConnectedCount query will provide the correct numbers (this was changed in order to allow
+// identifying local area network nodes so a non-internet test environment can be created
 func (n *Node) HandleQuery(state *PeerState, querymsg interface{}) {
 	switch msg := querymsg.(type) {
 	case GetConnCountMsg:
-		nconnected := int32(0)
+		nonces := make(map[string]struct{})
+		nonce := ""
 		state.ForAllPeers(func(sp *NodePeer) {
-			if sp.Connected() {
-				nconnected++
+			// log.DEBUG(sp.UserAgent())
+			ua := strings.Split(sp.UserAgent(), "nonce")
+			if len(ua) < 2 {
+				nonce = fmt.Sprintf("%s/%s", sp.Peer.LocalAddr().String(), sp.Peer.Addr())
+			} else {
+				nonce = fmt.Sprintf("%s/%s", ua[1][:8],
+					strings.Split(sp.Peer.LocalAddr().String(), ":")[0])
+			}
+			_, ok := nonces[nonce]
+			if !ok {
+				if sp.Connected() {
+					nonces[nonce] = struct{}{}
+					// nconnected++
+				}
 			}
 		})
-		msg.Reply <- nconnected
+		// log.DEBUG(nonces)
+		msg.Reply <- int32(len(nonces))
 	case GetPeersMsg:
 		peers := make([]*NodePeer, 0, state.Count())
 		state.ForAllPeers(func(sp *NodePeer) {
@@ -1990,7 +2012,7 @@ func (np *NodePeer) OnVersion(
 	// peer for outbound connections.  This is skipped when running on the
 	// simulation test network since it is only intended to connect to specified
 	// peers and actively avoids advertising and connecting to discovered peers.
-	if !((*np.Server.Config.Network)[0] == 't') && !isInbound {
+	if !((*np.Server.Config.Network)[0] == 's') && !isInbound {
 		// After soft-fork activation, only make outbound connection to peers if
 		// they flag that they're segwit enabled.
 		chain := np.Server.Chain
@@ -2035,6 +2057,10 @@ func (np *NodePeer) OnVersion(
 	// Choose whether or not to relay transactions before a filter command is
 	// received.
 	np.SetDisableRelayTx(msg.DisableRelayTx)
+	hn := np.Server.HighestKnown.Load()
+	if msg.LastBlock >= hn {
+		np.Server.HighestKnown.Store(msg.LastBlock)
+	}
 	// Add valid peer to the server.
 	np.Server.AddPeer(np)
 	return nil
@@ -2477,6 +2503,9 @@ MergeCheckpoints(defaultCheckpoints, additional []chaincfg.Checkpoint) []chaincf
 
 func // NewPeerConfig returns the configuration for the given ServerPeer.
 NewPeerConfig(sp *NodePeer) *peer.Config {
+	// to work around the lack of a single identifier in the protocol, for dealing with testing situations with multiple
+	// nodes on one IP address (and there is a to-do on this) we generate a random 32 bit value, convert to hex and
+	// set it as the first of the user agent comments, which we can then use to count individual connections properly
 	return &peer.Config{
 		Listeners: peer.MessageListeners{
 			OnVersion:      sp.OnVersion,

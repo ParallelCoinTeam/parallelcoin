@@ -157,12 +157,14 @@ out:
 	w.wg.Done()
 }
 
-// rescanProgressHandler handles notifications for partially and fully completed rescans by marking each rescanned address as partially or fully synced.
+// rescanProgressHandler handles notifications for partially and fully completed rescans by marking each rescanned
+// address as partially or fully synced.
 func (w *Wallet) rescanProgressHandler() {
 	quit := w.quitChan()
 out:
 	for {
-		// These can't be processed out of order since both chans are unbuffured and are sent from same context (the batch handler).
+		// These can't be processed out of order since both chans are unbuffured and are sent from same context (the
+		// batch handler).
 		select {
 		case msg := <-w.rescanProgress:
 			n := msg.Notification

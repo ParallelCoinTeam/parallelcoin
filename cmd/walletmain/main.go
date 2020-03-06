@@ -6,12 +6,11 @@ import (
 	// This enables pprof
 	// _ "net/http/pprof"
 	"sync"
-	
+
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"github.com/p9c/pod/pkg/conte"
-	
+
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
@@ -25,12 +24,10 @@ import (
 // Instead, main runs this function and checks for a non-nil error, at point
 // any defers have already run, and if the error is non-nil, the program can be
 // exited with an error exit status.
-func Main(cx *conte.Xt) error {
+func Main(cx *conte.Xt) (err error) {
 	log.INFO("starting wallet")
 	cx.WaitGroup.Add(1)
-	if cx.ActiveNet.Name == "testnet" {
-		fork.IsTestnet = true
-	}
+
 	// if *config.Profile != "" {
 	//	go func() {
 	//		listenAddr := net.JoinHostPort("127.0.0.1", *config.Profile)
@@ -50,10 +47,10 @@ func Main(cx *conte.Xt) error {
 		loader)
 	if err != nil {
 		log.ERROR("unable to create RPC servers:", err)
-		return err
+		return
 	}
 	loader.RunAfterLoad(func(w *wallet.Wallet) {
-		log.TRACE("starting wallet RPC services", w != nil)
+		log.WARN("starting wallet RPC services", w != nil)
 		startWalletRPCServices(w, legacyServer)
 	})
 	if !*cx.Config.NoInitialLoad {
@@ -69,7 +66,7 @@ func Main(cx *conte.Xt) error {
 		// log.WARN("wallet", w)
 		if err != nil {
 			log.ERROR(err)
-			return err
+			return
 		}
 		go func() {
 			addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
@@ -111,13 +108,13 @@ func Main(cx *conte.Xt) error {
 		}
 		log.INFO("wallet shutdown from killswitch complete")
 		cx.WaitGroup.Done()
-		return nil
+		return
 		// <-legacyServer.RequestProcessShutdownChan()
 	case <-interrupt.HandlersDone:
 	}
 	log.INFO("wallet shutdown complete")
 	cx.WaitGroup.Done()
-	return nil
+	return
 }
 
 func ReadCAFile(config *pod.Config) []byte {
@@ -138,15 +135,12 @@ func ReadCAFile(config *pod.Config) []byte {
 	return certs
 }
 
-// rpcClientConnectLoop continuously attempts a connection to the consensus
-// RPC server.
-// When a connection is established,
-// the client is used to sync the loaded wallet,
-// either immediately or when loaded at a later time.
+// rpcClientConnectLoop continuously attempts a connection to the consensus RPC server.
+// When a connection is established, the client is used to sync the loaded wallet, either immediately or when loaded at
+// a later time.
 //
-// The legacy RPC is optional. If set,
-// the connected RPC client will be associated with the server for RPC
-// pass-through and to enable additional methods.
+// The legacy RPC is optional. If set, the connected RPC client will be associated with the server for RPC pass-through
+// and to enable additional methods.
 func rpcClientConnectLoop(config *pod.Config, activeNet *netparams.Params,
 	legacyServer *legacy.Server, loader *wallet.Loader) {
 	// var certs []byte

@@ -9,10 +9,10 @@ import (
 	"os"
 	"sync"
 	"time"
-	
+
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -109,7 +109,7 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 
 func (w *Worker) hashReport() {
 	w.hashSampleBuf.Add(w.hashCount.Load())
-	av := ewma.NewMovingAverage(3)
+	av := ewma.NewMovingAverage(15)
 	var i int
 	var prev uint64
 	if err := w.hashSampleBuf.ForEach(func(v uint64) error {
@@ -131,7 +131,7 @@ func (w *Worker) hashReport() {
 // NewWithConnAndSemaphore is exposed to enable use an actual network
 // connection while retaining the same RPC API to allow a worker to be
 // configured to run on a bare metal system with a different launcher main
-func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}, ) *Worker {
+func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker {
 	log.DEBUG("creating new worker")
 	msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
@@ -166,7 +166,8 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}, ) *Worke
 				select {
 				case <-sampleTicker.C:
 					w.hashReport()
-					break
+					log.DEBUG("hash report")
+					break pausing
 				case <-w.stopChan:
 					log.DEBUG("received pause signal while paused")
 					// drain stop channel in pause
@@ -299,7 +300,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}, ) *Worke
 							break out
 						default:
 						}
-						
+
 					}
 				}
 			}
@@ -328,7 +329,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		*reply = true
 		return
 	}
-	log.DEBUG("running NewJob RPC method")
+	// log.DEBUG("running NewJob RPC method")
 	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
 	// log.DEBUG("loading dispatch connection from job message")
 	// log.TRACE(job.String())
@@ -403,6 +404,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		return errors.New("failed to decode merkle roots")
 	} else {
 		h := w.hashes.Load().(map[int32]*chainhash.Hash)
+		// log.DEBUG(h)
 		hh, ok := h[hv]
 		if !ok {
 			return errors.New("could not get merkle root from job")

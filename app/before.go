@@ -2,13 +2,17 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	prand "math/rand"
 	"os"
+	"time"
 
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
@@ -18,7 +22,7 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		//log.INFO("running beforeFunc")
+		log.INFO("running beforeFunc")
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
@@ -68,7 +72,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				log.TRACE("on testnet")
 				cx.ActiveNet = &netparams.TestNet3Params
 				fork.IsTestnet = true
-				//fork.HashReps = 3
+				// fork.HashReps = 3
 			case "regtestnet", "regressiontest", "r":
 				log.TRACE("on regression testnet")
 				fork.IsTestnet = true
@@ -297,13 +301,24 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.WARN("set solo", c.Bool("solo"))
 			*cx.Config.Solo = c.Bool("solo")
 		}
+		if c.IsSet("autoports") {
+			log.WARN("set autoports", c.Bool("autoports"))
+			*cx.Config.AutoPorts = c.Bool("autoports")
+		}
+		if c.IsSet("lan") {
+			// if LAN is turned on we need to remove the seeds from netparams not on mainnet
+			// mainnet is never in lan mode
+			if cx.ActiveNet.Name != "mainnet" {
+				log.WARN("set lan", c.Bool("lan"))
+				*cx.Config.LAN = c.Bool("lan")
+				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
+			} else {
+				*cx.Config.LAN = false
+			}
+		}
 		if c.IsSet("controller") {
 			log.TRACE("set controller listener address", c.String("controller"))
 			*cx.Config.Controller = c.String("controller")
-		}
-		if c.IsSet("autoports") {
-			log.TRACE("set autoports", c.String("autoports"))
-			*cx.Config.AutoPorts = c.Bool("autoports")
 		}
 		if c.IsSet("miningaddrs") {
 			log.TRACE("set miningaddrs", c.StringSlice("miningaddrs"))
@@ -333,9 +348,17 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			log.TRACE("set blockprioritysize", c.Int("blockprioritysize"))
 			*cx.Config.BlockPrioritySize = c.Int("blockprioritysize")
 		}
+		prand.Seed(time.Now().UnixNano())
+		nonce := fmt.Sprintf("nonce%0x", prand.Uint32())
+		if cx.Config.UserAgentComments == nil {
+			cx.Config.UserAgentComments = &cli.StringSlice{nonce}
+		} else {
+			*cx.Config.UserAgentComments = append(cli.StringSlice{nonce}, *cx.Config.UserAgentComments...)
+		}
 		if c.IsSet("uacomment") {
 			log.TRACE("set uacomment", c.StringSlice("uacomment"))
-			*cx.Config.UserAgentComments = c.StringSlice("uacomment")
+			*cx.Config.UserAgentComments = append(*cx.Config.UserAgentComments,
+				c.StringSlice("uacomment")...)
 		}
 		if c.IsSet("nopeerbloomfilters") {
 			log.TRACE("set nopeerbloomfilters", c.Bool("nopeerbloomfilters"))
