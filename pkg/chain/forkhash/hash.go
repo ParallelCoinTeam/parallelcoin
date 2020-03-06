@@ -3,9 +3,10 @@ package forkhash
 import (
 	"math/big"
 	
+	"github.com/bitbandi/go-x11"
+	
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
-	"github.com/bitbandi/go-x11"
 	
 	skein "github.com/enceve/crypto/skein/skein256"
 	gost "github.com/programmer10110/gostreebog"
@@ -156,14 +157,6 @@ func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
 		}
 	}
 	switch name {
-	case fork.Blake2b:
-		_ = out.SetBytes(DivHash(Blake2b, bytes, hR))
-	case fork.Argon2i:
-		_ = out.SetBytes(DivHash(Argon2i, bytes, hR))
-	case fork.X11:
-		_ = out.SetBytes(DivHash(X11, bytes, hR))
-	case fork.Blake3:
-		_ = out.SetBytes(DivHash(Blake3, bytes, hR))
 	case fork.Scrypt:
 		if fork.GetCurrent(height) > 0 {
 			_ = out.SetBytes(DivHash(Scrypt, bytes, hR))
@@ -177,12 +170,8 @@ func Hash(bytes []byte, name string, height int32) (out chainhash.Hash) {
 			_ = out.SetBytes(chainhash.DoubleHashB(
 				bytes))
 		}
-	case fork.Stribog:
-		_ = out.SetBytes(DivHash(Stribog, bytes, hR))
-	case fork.Skein:
-		_ = out.SetBytes(DivHash(Skein, bytes, hR))
-	case fork.Keccak:
-		_ = out.SetBytes(DivHash(Keccak, bytes, hR))
+	default:
+		_ = out.SetBytes(DivHash(Blake3, bytes, hR))
 	}
 	return
 }

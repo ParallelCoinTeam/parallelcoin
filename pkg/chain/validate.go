@@ -1245,7 +1245,7 @@ func // checkProofOfWork ensures the block header bits which indicate the target
 //  target difficulty is not performed.
 checkProofOfWork(header *wire.BlockHeader, powLimit *big.Int, flags BehaviorFlags,
 	height int32) error {
-	log.TRACEF("hash %d %s", height, header.BlockHashWithAlgos(height))
+	// log.TRACEF("hash %d %s", height, header.BlockHashWithAlgos(height))
 	// The target difficulty must be larger than zero.
 	if powLimit == nil {
 		return errors.New("PoW limit was not set")

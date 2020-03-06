@@ -12,6 +12,24 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
+func (b *BlockChain) PerAlgoAverage(algoname string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
+	found bool, algStamps []uint64, version int32) {
+	version = fork.P9Algos[algoname].Version
+	algStamps = []uint64{uint64(lastNode.timestamp)}
+	for ln := lastNode; ln != nil && ln.height > startHeight &&
+		len(algStamps) <= int(fork.List[1].AveragingInterval); ln = ln.
+		RelativeAncestor(1) {
+		if ln.version == version && ln.height > startHeight {
+			algStamps = append(algStamps, uint64(ln.timestamp))
+			if !found {
+				found = true
+				last = ln
+			}
+		}
+	}
+	return
+}
+
 // CalcNextRequiredDifficultyPlan9 implements the Parallel Prime Difficulty
 // Adjustment.
 // From the first 9 primes 2, 3, 5, 7, 11, 13, 17, 19, 23
@@ -27,59 +45,40 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 	if lastNode == nil {
 		log.TRACE("lastNode is nil")
 	}
-	algoInterval := fork.P9Algos[algoname].VersionInterval
-	algoVer := fork.P9Algos[algoname].Version
-	_ = algoInterval
+	// algoInterval := fork.P9Algos[algoname].VersionInterval
 	adjustment = 1
 	startHeight := fork.List[1].ActivationHeight
 	if b.params.Net == wire.TestNet3 {
 		startHeight = fork.List[1].TestnetStart
 	}
-	var last *BlockNode
-	var found bool
-	algStamps := []uint64{uint64(lastNode.timestamp)}
-	for ln := lastNode; ln != nil && ln.height > startHeight &&
-		len(algStamps) <= int(fork.List[1].AveragingInterval); ln = ln.
-		RelativeAncestor(1) {
-		if ln.version == algoVer && ln.height > startHeight {
-			algStamps = append(algStamps, uint64(ln.timestamp))
-			if !found {
-				found = true
-				last = ln
-			}
-		}
-	}
-	const minAvSamples = 2
-	ttpb := float64(fork.List[1].Algos[algoname].VersionInterval)
-	if len(algStamps) > minAvSamples {
-		intervals := float64(0)
-		// calculate intervals
-		algIntervals := []uint64{}
-		for i := range algStamps {
-			if i > 0 {
-				r := algStamps[i-1] - algStamps[i]
-				intervals++
-				algIntervals = append(algIntervals, r)
-			}
-		}
-		if intervals >= minAvSamples {
-			// calculate exponential weighted moving average from intervals
-			awi := ewma.NewMovingAverage()
-			for _, x := range algIntervals {
-				awi.Add(float64(x))
-			}
-			adjustment = capP9Adjustment(awi.Value() / ttpb / float64(len(fork.
-				P9Algos)))
-		}
-	}
-	if last == nil {
+	last, found, algStamps, algoVer := b.PerAlgoAverage(algoname, startHeight, lastNode)
+	if !found {
 		log.TRACE("last was nil")
 		last = new(BlockNode)
 		last.bits = fork.SecondPowLimitBits
 		last.version = algoVer
 	}
+	const minAvSamples = 3
+	ttpb := float64(fork.List[1].Algos[algoname].VersionInterval)
+	if len(algStamps) > minAvSamples {
+		// calculate intervals
+		algIntervals := []uint64{}
+		for i := range algStamps {
+			if i > 0 {
+				r := algStamps[i-1] - algStamps[i]
+				algIntervals = append(algIntervals, r)
+			}
+		}
+		// calculate exponential weighted moving average from intervals
+		awi := ewma.NewMovingAverage()
+		for _, x := range algIntervals {
+			awi.Add(float64(x))
+		}
+		adjustment = capP9Adjustment(awi.Value() / ttpb / float64(len(fork.
+			P9Algos)))
+	}
+
 	unsquared := adjustment
-	adjustment *= adjustment * adjustment
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)

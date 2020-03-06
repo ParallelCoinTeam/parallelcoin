@@ -273,13 +273,6 @@ var handlersMulticast = transport.Handlers{
 				}
 				return
 			}
-			// // maybe something wrong with the network,
-			// // send current work again
-			// err = c.sendNewBlockTemplate()
-			// if err != nil {
-			// 	log.DEBUG(err)
-			// }
-			// return
 		}
 		log.DEBUG("the block was accepted")
 		coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
