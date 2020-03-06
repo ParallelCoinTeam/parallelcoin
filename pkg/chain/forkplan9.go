@@ -12,20 +12,29 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
-func (b *BlockChain) PerAlgoAverage(algoname string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
+func (b *BlockChain) GetAlgStamps(algoname string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
 	found bool, algStamps []uint64, version int32) {
 	version = fork.P9Algos[algoname].Version
 	algStamps = []uint64{uint64(lastNode.timestamp)}
 	for ln := lastNode; ln != nil && ln.height > startHeight &&
 		len(algStamps) <= int(fork.List[1].AveragingInterval); ln = ln.
 		RelativeAncestor(1) {
-		if ln.version == version && ln.height > startHeight {
+		if ln.version == version {
 			algStamps = append(algStamps, uint64(ln.timestamp))
 			if !found {
 				found = true
 				last = ln
 			}
 		}
+	}
+	return
+}
+
+func (b *BlockChain) GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []uint64) {
+	allStamps = []uint64{uint64(lastNode.timestamp)}
+	for ln := lastNode; ln != nil && ln.height > startHeight &&
+		len(allStamps) <= int(fork.List[1].AveragingInterval); ln = ln.RelativeAncestor(1) {
+		allStamps = append(allStamps, uint64(ln.timestamp))
 	}
 	return
 }
@@ -41,25 +50,29 @@ func (b *BlockChain) PerAlgoAverage(algoname string, startHeight int32, lastNode
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 	lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32,
 	adjustment float64, err error) {
+	
+	ttpb := float64(fork.List[1].Algos[algoname].VersionInterval)
 	newTargetBits = fork.SecondPowLimitBits
+	const minAvSamples = 3
+	adjustment = 1
+	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, ttpb
 	if lastNode == nil {
 		log.TRACE("lastNode is nil")
 	}
 	// algoInterval := fork.P9Algos[algoname].VersionInterval
-	adjustment = 1
 	startHeight := fork.List[1].ActivationHeight
 	if b.params.Net == wire.TestNet3 {
 		startHeight = fork.List[1].TestnetStart
 	}
-	last, found, algStamps, algoVer := b.PerAlgoAverage(algoname, startHeight, lastNode)
+	allStamps := b.GetAllStamps(startHeight, lastNode)
+	_, _ = allStamps, allAv
+	last, found, algStamps, algoVer := b.GetAlgStamps(algoname, startHeight, lastNode)
 	if !found {
 		log.TRACE("last was nil")
 		last = new(BlockNode)
 		last.bits = fork.SecondPowLimitBits
 		last.version = algoVer
 	}
-	const minAvSamples = 3
-	ttpb := float64(fork.List[1].Algos[algoname].VersionInterval)
 	if len(algStamps) > minAvSamples {
 		// calculate intervals
 		algIntervals := []uint64{}
@@ -74,11 +87,13 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		for _, x := range algIntervals {
 			awi.Add(float64(x))
 		}
-		adjustment = capP9Adjustment(awi.Value() / ttpb / float64(len(fork.
+		algAv = awi.Value()
+		algAdj = capP9Adjustment(algAv / ttpb / float64(len(fork.
 			P9Algos)))
 	}
-
-	unsquared := adjustment
+	
+	adjustment = (algAdj + allAdj) / 2
+	
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
@@ -91,27 +106,34 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		newTargetBits = BigToCompact(newTarget)
 		// log.TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
 	}
-	// if l {
-	an := fork.List[1].AlgoVers[algoVer]
-	pad := 9 - len(an)
-	if pad > 0 {
-		an += strings.Repeat(" ", pad)
-	}
 	if l && workerNumber == 0 {
 		log.DEBUGC(func() string {
-			return fmt.Sprintf("%08x %s %s %08x av %s, %4.0f interval",
+			an := fork.List[1].AlgoVers[algoVer]
+			pad := 9 - len(an)
+			if pad > 0 {
+				an += strings.Repeat(" ", pad)
+			}
+			factor := 1 / adjustment
+			symbol := "->"
+			if factor < 1 {
+				factor = adjustment
+				symbol = "<-"
+			}
+			if factor == 1 {
+				symbol = "--"
+			}
+			return fmt.Sprintf("%s %s av %s %s %08x %08x",
 				// RightJustify(fmt.Sprint(workerNumber), 3),
 				// RightJustify(fmt.Sprint(last.height+1), 9),
-				last.bits,
 				an,
-				RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11),
+				RightJustify(fmt.Sprintf("%4.1f", algAv), 7),
+				RightJustify(fmt.Sprintf("%4.4f", factor), 9),
+				symbol,
+				last.bits,
 				newTargetBits,
-				RightJustify(fmt.Sprintf("%4.4f", unsquared*ttpb), 11),
-				ttpb, // fork.List[1].Algos[algoname].VersionInterval,
 			)
 		})
 	}
-	// }
 	return
 }
 
