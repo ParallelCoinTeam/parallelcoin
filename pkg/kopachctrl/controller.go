@@ -8,10 +8,10 @@ import (
 	"net"
 	"strings"
 	"time"
-	
+
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -200,8 +200,7 @@ func (c *Controller) HashReport() float64 {
 // var handlersUnicast = transport.Handlers{}
 var handlersMulticast = transport.Handlers{
 	// Solutions submitted by workers
-	string(sol.SolutionMagic):
-	func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		log.DEBUG("received solution")
 		// log.SPEW(ctx)
 		c := ctx.(*Controller)
@@ -291,8 +290,7 @@ var handlersMulticast = transport.Handlers{
 			fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
 		return
 	},
-	string(p2padvt.Magic):
-	func(ctx interface{}, src net.Addr, dst string,
+	string(p2padvt.Magic): func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
@@ -333,8 +331,7 @@ var handlersMulticast = transport.Handlers{
 		return
 	},
 	// hashrate reports from workers
-	string(hashrate.HashrateMagic):
-	func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(hashrate.HashrateMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
 			log.DEBUG("not active")
@@ -472,7 +469,7 @@ out:
 			oB, ok := c.oldBlocks.Load().([][]byte)
 			if len(oB) == 0 {
 				log.WARN("template is zero length")
-				
+
 				// c.oldBlocks.Store(c.pauseShards)
 				// break
 			}
@@ -522,7 +519,7 @@ out:
 
 func updater(ctrl *Controller) {
 	// check if new coinbases have arrived
-	
+
 	// send out new work
 }
 

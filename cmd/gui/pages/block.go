@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-	
+
 	"gioui.org/layout"
 	"gioui.org/unit"
-	
+
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/controller"
@@ -26,7 +26,7 @@ func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block s
 
 func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block btcjson.GetBlockVerboseResult) func() {
 	return func() {
-		
+
 		duo := layout.Horizontal
 		if gtx.Constraints.Width.Max < 1280 {
 			duo = layout.Vertical
@@ -35,11 +35,11 @@ func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, b
 		if gtx.Constraints.Width.Max < 780 {
 			trio = layout.Vertical
 		}
-		
+
 		blockJSON, _ := json.MarshalIndent(block, "", "  ")
 		blockText := string(blockJSON)
 		widgets := []func(){
-			
+
 			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 16, 24, "Hash", fmt.Sprint(block.Hash))),
 			component.DuoFields(gtx, duo,
 				component.TrioFields(gtx, th, trio, 16, 16,
@@ -73,6 +73,6 @@ func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, b
 		layautList.Layout(gtx, len(widgets), func(i int) {
 			layout.UniformInset(unit.Dp(4)).Layout(gtx, widgets[i])
 		})
-		
+
 	}
 }

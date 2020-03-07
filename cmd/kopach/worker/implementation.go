@@ -9,10 +9,10 @@ import (
 	"os"
 	"sync"
 	"time"
-	
+
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -132,7 +132,7 @@ func (w *Worker) hashReport() {
 // NewWithConnAndSemaphore is exposed to enable use an actual network
 // connection while retaining the same RPC API to allow a worker to be
 // configured to run on a bare metal system with a different launcher main
-func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}, ) *Worker {
+func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker {
 	log.DEBUG("creating new worker")
 	msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
@@ -307,7 +307,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}, ) *Worke
 							break out
 						default:
 						}
-						
+
 					}
 				}
 			}

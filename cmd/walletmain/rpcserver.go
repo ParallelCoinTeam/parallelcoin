@@ -11,7 +11,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
-	
+
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/log"

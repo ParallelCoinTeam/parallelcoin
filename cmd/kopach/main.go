@@ -6,10 +6,10 @@ import (
 	"net"
 	"os"
 	"time"
-	
+
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
-	
+
 	"github.com/p9c/pod/cmd/kopach/client"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/conte"
@@ -109,7 +109,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
-						log.DEBUG("previous current controller has stopped" +
+						log.DEBUG("previous current controller has stopped"+
 							" broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be
 						// listened to

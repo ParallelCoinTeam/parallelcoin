@@ -7,9 +7,9 @@ import (
 	prand "math/rand"
 	"os"
 	"time"
-	
+
 	"github.com/urfave/cli"
-	
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"

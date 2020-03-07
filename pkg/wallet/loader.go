@@ -70,7 +70,7 @@ func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bd
 		return nil, errors.New("Wallet ERROR: " + ld.DDDirPath + " already exists")
 	}
 	// Create the wallet database backed by bolt db.
-	p :=  filepath.Dir(ld.DDDirPath)
+	p := filepath.Dir(ld.DDDirPath)
 	err = os.MkdirAll(p, 0700)
 	if err != nil {
 		log.ERROR(err)

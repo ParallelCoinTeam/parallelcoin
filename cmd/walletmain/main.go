@@ -6,10 +6,10 @@ import (
 	// This enables pprof
 	// _ "net/http/pprof"
 	"sync"
-	
+
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"github.com/p9c/pod/pkg/conte"
-	
+
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
@@ -27,7 +27,7 @@ import (
 func Main(cx *conte.Xt) (err error) {
 	log.INFO("starting wallet")
 	cx.WaitGroup.Add(1)
-	
+
 	// if *config.Profile != "" {
 	//	go func() {
 	//		listenAddr := net.JoinHostPort("127.0.0.1", *config.Profile)

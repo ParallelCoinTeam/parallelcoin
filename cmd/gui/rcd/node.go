@@ -2,7 +2,7 @@ package rcd
 
 import (
 	"fmt"
-	
+
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -81,7 +81,7 @@ func (r *RcVar) GetDuoUIhashesPerSecList() {
 	//	r.Status.Kopach.Hps = append(r.Status.Kopach.Hps, p.(float64))
 	//
 	fmt.Println(r.Status.Kopach.Hashrate)
-	
+
 	// })
-	
+
 }

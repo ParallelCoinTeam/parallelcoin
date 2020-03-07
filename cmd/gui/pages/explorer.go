@@ -7,12 +7,20 @@ import (
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gui/controller"
 	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
 	blocksList = &layout.List{
 		Axis: layout.Vertical,
+	}
+	blocksPanel = &controller.Panel{
+		Name: "",
+		PanelContentLayout: &layout.List{
+			Axis:        layout.Vertical,
+			ScrollToEnd: false,
+		},
 	}
 )
 
@@ -22,8 +30,13 @@ func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *th
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		rc.GetBlocksExcerpts()
-		in := layout.UniformInset(unit.Dp(0))
-		in.Layout(gtx, func() {
+		th.DuoUIpanel(explorerContent(rc, gtx, th)).Layout(gtx, addressBookPanel)
+	}
+}
+
+func explorerContent(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+	return func() {
+		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
 				b := rc.Explorer.Blocks[i]
 				blockRow(rc, gtx, th, &b)
@@ -31,7 +44,6 @@ func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 		})
 	}
 }
-
 func headerExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{

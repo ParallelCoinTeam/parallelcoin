@@ -26,18 +26,18 @@ import (
 // AddrManager provides a concurrency safe address manager for caching
 // potential peers on the bitcoin network.
 type AddrManager struct {
-	mtx        sync.Mutex
-	PeersFile  string
-	lookupFunc func(string) ([]net.IP, error)
-	rand       *rand.Rand
-	key        [32]byte
-	addrIndex  map[string]*KnownAddress // address key to ka for all addrs.
-	addrNew    [newBucketCount]map[string]*KnownAddress
-	addrTried  [triedBucketCount]*list.List
-	started    int32
-	shutdown   int32
-	wg         sync.WaitGroup
-	quit       chan struct{}
+	mtx            sync.Mutex
+	PeersFile      string
+	lookupFunc     func(string) ([]net.IP, error)
+	rand           *rand.Rand
+	key            [32]byte
+	addrIndex      map[string]*KnownAddress // address key to ka for all addrs.
+	addrNew        [newBucketCount]map[string]*KnownAddress
+	addrTried      [triedBucketCount]*list.List
+	started        int32
+	shutdown       int32
+	wg             sync.WaitGroup
+	quit           chan struct{}
 	nTried         int
 	nNew           int
 	lamtx          sync.Mutex

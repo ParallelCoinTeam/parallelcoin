@@ -4,11 +4,11 @@ package conte
 
 import (
 	"sync"
-	
+
 	"go.uber.org/atomic"
-	
+
 	"github.com/urfave/cli"
-	
+
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"

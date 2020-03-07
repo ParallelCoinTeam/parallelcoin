@@ -4,15 +4,15 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-	
+
 	"github.com/p9c/pod/cmd/kopach/kopach_worker"
 	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
-	
+
 	"github.com/urfave/cli"
-	
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
@@ -114,7 +114,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 					apputil.SubCommands(),
 					nil,
 				),
-			), nil, "n", ),
+			), nil, "n"),
 			apputil.NewCommand("wallet", "start parallelcoin wallet server", WalletHandle(cx), apputil.SubCommands(
 				apputil.NewCommand("drophistory",
 					"drop the transaction history in the wallet ("+
@@ -140,13 +140,13 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 					apputil.SubCommands(),
 					nil,
 				),
-			), nil, "w", ),
-			apputil.NewCommand("shell", "start combined wallet/node shell", shellHandle(cx), apputil.SubCommands(), nil, "s", ),
-			apputil.NewCommand("gui", "start GUI", guiHandle(cx), apputil.SubCommands(), nil, ),
+			), nil, "w"),
+			apputil.NewCommand("shell", "start combined wallet/node shell", shellHandle(cx), apputil.SubCommands(), nil, "s"),
+			apputil.NewCommand("gui", "start GUI", guiHandle(cx), apputil.SubCommands(), nil),
 			apputil.NewCommand("kopach", "standalone miner for clusters", KopachHandle(cx), apputil.SubCommands(), nil, "k"),
 			apputil.NewCommand("worker", "single thread parallelcoin miner controlled with binary IPC"+
 				" interface on stdin/stdout; internal use, must have network name string as second arg after worker and"+
-				"nothing before; communicates via net/rpc encoding/gob as default over stdio", kopach_worker.KopachWorkerHandle(cx), apputil.SubCommands(), nil, ),
+				"nothing before; communicates via net/rpc encoding/gob as default over stdio", kopach_worker.KopachWorkerHandle(cx), apputil.SubCommands(), nil),
 			apputil.NewCommand("init",
 				"steps through creation of new wallet and initialization for a network with these specified in the main",
 				initHandle(cx),

@@ -18,9 +18,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	
+
 	uberatomic "go.uber.org/atomic"
-	
+
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/upnp"
@@ -473,7 +473,7 @@ func (n *Node) Stop() (err error) {
 		return nil
 	}
 	log.TRACE("node shutting down")
-	
+
 	// Shutdown the RPC server if it'n not disabled.
 	if !*n.Config.DisableRPC {
 		for i := range n.RPCServers {
@@ -493,7 +493,7 @@ func (n *Node) Stop() (err error) {
 		return nil
 	}); log.Check(err) {
 	}
-	
+
 	// Signal the remaining goroutines to quit.
 	close(n.Quit)
 	return

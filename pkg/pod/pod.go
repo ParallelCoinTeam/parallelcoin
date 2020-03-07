@@ -4,13 +4,13 @@ import (
 	"reflect"
 	"sync"
 	"time"
-	
+
 	"github.com/p9c/pod/app/appdata"
-	
+
 	"github.com/davecgh/go-spew/spew"
-	
+
 	"github.com/urfave/cli"
-	
+
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
 )
@@ -52,7 +52,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 		algos = append(algos, x)
 	}
 	network = []string{"mainnet", "testnet", "regtestnet", "simnet"}
-	
+
 	//  groups = []string{"config", "node", "debug", "rpc", "wallet", "proxy", "policy", "mining", "tls"}
 	var groups []string
 	rawFields := make(map[string]Fields)
@@ -93,7 +93,7 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 		}
 		outGroups = append(outGroups, group)
 	}
-	
+
 	return Schema{
 		Groups: outGroups,
 	}

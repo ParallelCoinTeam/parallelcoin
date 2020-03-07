@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	
+
 	"github.com/VividCortex/ewma"
-	
+
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/log"
@@ -183,7 +183,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		return
 	}
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
-	dayDiv := b.GetCommonP9Averages(lastNode, nH)
+		dayDiv := b.GetCommonP9Averages(lastNode, nH)
 	algoVer := fork.GetAlgoVer(algoname, nH)
 	since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode,
 		algoVer)

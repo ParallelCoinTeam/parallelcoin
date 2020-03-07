@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -23,10 +23,10 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"
-	
+
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/urfave/cli"
-	
+
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
@@ -182,7 +182,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 					log.ERROR(err)
 				}
 				*listeners[i] = cli.
-				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
+					StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
 			}
 		}
 	}
@@ -208,14 +208,13 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 }
 
 // GetFreePort asks the kernel for free open ports that are ready to use.
-func
-GetFreePort() (int, error) {
+func GetFreePort() (int, error) {
 	var port int
 	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
 	if err != nil {
 		return 0, err
 	}
-	
+
 	l, err := net.ListenTCP("tcp", addr)
 	if err != nil {
 		return 0, err
@@ -225,8 +224,7 @@ GetFreePort() (int, error) {
 	return port, nil
 }
 
-func
-initTLSStuffs(cfg *pod.Config, st *state.Config) {
+func initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	isNew := false
 	if *cfg.RPCCert == "" {
 		*cfg.RPCCert =
@@ -318,8 +316,7 @@ initTLSStuffs(cfg *pod.Config, st *state.Config) {
 	}
 }
 
-func
-initLogLevel(cfg *pod.Config) {
+func initLogLevel(cfg *pod.Config) {
 	loglevel := *cfg.LogLevel
 	switch loglevel {
 	case "trace", "debug", "info", "warn", "error", "fatal", "off":
@@ -335,8 +332,7 @@ initLogLevel(cfg *pod.Config) {
 	log.L.SetLevel(*cfg.LogLevel, color)
 }
 
-func
-normalizeAddresses(cfg *pod.Config) {
+func normalizeAddresses(cfg *pod.Config) {
 	log.TRACE("normalising addresses")
 	port := node.DefaultPort
 	nrm := normalize.StringSliceAddresses
@@ -347,8 +343,7 @@ normalizeAddresses(cfg *pod.Config) {
 	// nrm(cfg.RPCListeners, port)
 }
 
-func
-setAlgo(cfg *pod.Config) {
+func setAlgo(cfg *pod.Config) {
 	p9 := fork.P9AlgoVers
 	// Set the mining algorithm correctly, default to random if unrecognised
 	switch *cfg.Algo {
@@ -358,8 +353,7 @@ setAlgo(cfg *pod.Config) {
 	}
 	log.TRACE("mining algorithm ", *cfg.Algo)
 }
-func
-setRelayReject(cfg *pod.Config) {
+func setRelayReject(cfg *pod.Config) {
 	relayNonStd := *cfg.RelayNonStd
 	switch {
 	case *cfg.RelayNonStd && *cfg.RejectNonStd:
@@ -377,8 +371,7 @@ setRelayReject(cfg *pod.Config) {
 	*cfg.RelayNonStd = relayNonStd
 }
 
-func
-validateDBtype(cfg *pod.Config) {
+func validateDBtype(cfg *pod.Config) {
 	// Validate database type.
 	log.TRACE("validating database type")
 	if !node.ValidDbType(*cfg.DbType) {
@@ -391,8 +384,7 @@ validateDBtype(cfg *pod.Config) {
 	}
 }
 
-func
-validateProfilePort(cfg *pod.Config) {
+func validateProfilePort(cfg *pod.Config) {
 	// Validate profile port number
 	log.TRACE("validating profile port number")
 	if *cfg.Profile != "" {
@@ -405,8 +397,7 @@ validateProfilePort(cfg *pod.Config) {
 		}
 	}
 }
-func
-validateBanDuration(cfg *pod.Config) {
+func validateBanDuration(cfg *pod.Config) {
 	// Don't allow ban durations that are too short.
 	log.TRACE("validating ban duration")
 	if *cfg.BanDuration < time.Second {
@@ -417,8 +408,7 @@ validateBanDuration(cfg *pod.Config) {
 	}
 }
 
-func
-validateWhitelists(cfg *pod.Config, st *state.Config) {
+func validateWhitelists(cfg *pod.Config, st *state.Config) {
 	// Validate any given whitelisted IP addresses and networks.
 	log.TRACE("validating whitelists")
 	if len(*cfg.Whitelists) > 0 {
@@ -454,8 +444,7 @@ validateWhitelists(cfg *pod.Config, st *state.Config) {
 	}
 }
 
-func
-validatePeerLists(cfg *pod.Config) {
+func validatePeerLists(cfg *pod.Config) {
 	log.TRACE("checking addpeer and connectpeer lists")
 	if len(*cfg.AddPeers) > 0 && len(*cfg.ConnectPeers) > 0 {
 		err := fmt.Errorf(
@@ -465,8 +454,7 @@ validatePeerLists(cfg *pod.Config) {
 		os.Exit(1)
 	}
 }
-func
-configListener(cfg *pod.Config, params *netparams.Params) {
+func configListener(cfg *pod.Config, params *netparams.Params) {
 	// --proxy or --connect without --listen disables listening.
 	log.TRACE("checking proxy/connect for disabling listening")
 	if (*cfg.Proxy != "" ||
@@ -482,8 +470,7 @@ configListener(cfg *pod.Config, params *netparams.Params) {
 	}
 }
 
-func
-validateUsers(cfg *pod.Config) {
+func validateUsers(cfg *pod.Config) {
 	// Check to make sure limited and admin users don't have the same username
 	log.TRACE("checking admin and limited username is different")
 	if *cfg.Username != "" &&
@@ -504,8 +491,7 @@ validateUsers(cfg *pod.Config) {
 	}
 }
 
-func
-configRPC(cfg *pod.Config, params *netparams.Params) {
+func configRPC(cfg *pod.Config, params *netparams.Params) {
 	// The RPC server is disabled if no username or password is provided.
 	log.TRACE("checking rpc server has a login enabled")
 	if (*cfg.Username == "" || *cfg.Password == "") &&
@@ -549,10 +535,9 @@ configRPC(cfg *pod.Config, params *netparams.Params) {
 	*cfg.ConnectPeers = nrms(*cfg.ConnectPeers, params.DefaultPort)
 }
 
-func
-validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
+func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 	var err error
-	
+
 	// Validate the the minrelaytxfee.
 	log.TRACE("checking min relay tx fee")
 	stateConfig.ActiveMinRelayTxFee, err = util.NewAmount(*cfg.MinRelayTxFee)
@@ -638,8 +623,7 @@ validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		os.Exit(1)
 	}
 }
-func
-validateOnions(cfg *pod.Config) {
+func validateOnions(cfg *pod.Config) {
 	// --onionproxy and not --onion are contradictory (TODO: this is kinda
 	//  stupid hm? switch *and* toggle by presence of flag value, one should be
 	//  enough)
@@ -660,11 +644,10 @@ validateOnions(cfg *pod.Config) {
 	if !*cfg.Onion {
 		*cfg.OnionProxy = ""
 	}
-	
+
 }
 
-func
-validateMiningStuff(cfg *pod.Config, state *state.Config,
+func validateMiningStuff(cfg *pod.Config, state *state.Config,
 	params *netparams.Params) {
 	// Check mining addresses are valid and saved parsed versions.
 	log.TRACE("checking mining addresses")
@@ -701,8 +684,7 @@ validateMiningStuff(cfg *pod.Config, state *state.Config,
 	}
 }
 
-func
-setDiallers(cfg *pod.Config, stateConfig *state.Config) {
+func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 	// Setup dial and DNS resolution (lookup) functions depending on the
 	// specified options.  The default is to use the standard net.DialTimeout
 	// function as well as the system DNS resolver.  When a proxy is specified,
@@ -785,7 +767,7 @@ setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			}
 			return proxy.DialTimeout(network, addr, timeout)
 		}
-	
+
 	// When configured in bridge mode (both --onion and --proxy are
 	// configured), it means that the proxy configured by --proxy is not a
 	// tor proxy, so override the DNS resolution to use the onion-specific
