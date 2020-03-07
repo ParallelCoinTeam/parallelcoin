@@ -57,6 +57,9 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["HardwareWatch"] = mustIcon(NewDuoUIicon(icons.HardwareWatch))
 	i["EditorMonetizationOn"] = mustIcon(NewDuoUIicon(icons.EditorMonetizationOn))
 
+	i["iconGrab"] = mustIcon(NewDuoUIicon(icons.NavigationMenu))
+	i["iconUp"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropUp))
+	i["iconDown"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropDown))
 	return i
 }
 

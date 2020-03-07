@@ -76,16 +76,12 @@ func FooterRightMenu(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, a
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			navButtons := []func(){
-<<<<<<< HEAD
 				//footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "networkIcon", buttonNetwork),
 				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount), "", buttonNetwork),
 				//footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonBlocks),
-=======
 				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "settingsIcon", buttonSettings),
-				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"],
-					"CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount.Load()), "", buttonNetwork),
+				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount.Load()), "", buttonNetwork),
 				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonSettings),
->>>>>>> 12f1f46da1ab69d1b64d41693cefff7e0254953a
 				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
 				footerMenuButton(rc, gtx, th, allPages.Theme["MINER"], "", "helpIcon", buttonHelp),
 				footerMenuButton(rc, gtx, th, allPages.Theme["CONSOLE"], "", "HardwareKeyboardHide", buttonConsole),
