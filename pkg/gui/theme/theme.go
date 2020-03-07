@@ -20,6 +20,7 @@ type DuoUItheme struct {
 	Colors                map[string]string
 	Fonts                 map[string]text.Typeface
 	Icons                 map[string]*DuoUIicon
+	scrollBarSize         int
 }
 
 func NewDuoUItheme() *DuoUItheme {

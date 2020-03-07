@@ -5,53 +5,49 @@ import (
 	"gioui.org/layout"
 )
 
-type item struct {
-	i int
-}
-
-func (it *item) doSlide(n int) {
-	it.i = it.i + n
-}
+var (
+	itemValue = item{
+		i: 0,
+	}
+	body = &ScrollBarBody{
+		pressed: false,
+		Do: func(n interface{}) {
+			itemValue.doSlide(n.(int))
+		},
+		OperateValue: 1,
+	}
+)
 
 type Panel struct {
-	Name              string
-	totalHeight       int
-	visibleHeight     int
-	totalOffset       int
-	panelContent      *layout.List
-	panelObject       []func()
-	panelObjectHeight int
-	scrollUnit        float32
+	Name          string
+	TotalHeight   int
+	VisibleHeight int
+	TotalOffset   int
+	//panelObject       []func()
+	PanelContentLayout *layout.List
+	PanelObjectHeight  int
+	ScrollUnit         float32
+	ScrollBar          *ScrollBar
 }
 
-func (p *Panel) Panel(gtx *layout.Context, c func()) func() {
-	return func() {
-		content := []func(){
-			c,
-		}
-		p.panelContent.Layout(gtx, len(content), func(i int) {
-			content[i]()
-			p.totalHeight = gtx.Dimensions.Size.Y
-		})
-		p.visibleHeight = gtx.Constraints.Height.Max
+func (p *Panel) Layout(gtx *layout.Context) {
+	p.ScrollBar = &ScrollBar{
+		body: body,
 	}
-}
+	p.TotalOffset = p.TotalHeight - p.VisibleHeight
 
-func (p *Panel) Layout() {
-	p.totalOffset = p.totalHeight - p.visibleHeight
+	p.ScrollUnit = float32(p.ScrollBar.BodyHeight) / float32(p.TotalHeight)
+	p.ScrollBar.CursorHeight = int(p.ScrollUnit * float32(p.VisibleHeight))
+	p.ScrollBar.Cursor = float32(p.PanelContentLayout.Position.Offset * int(p.ScrollUnit))
+	fmt.Println("bodyHeight:", p.ScrollBar.BodyHeight)
+	fmt.Println("cursorHeight:", p.ScrollBar.CursorHeight)
 
-	//p.scrollUnit = float32(p.scrollBar.body.Height) / float32(p.totalHeight)
-	//p.scrollBar.body.CursorHeight = p.scrollUnit * float32(p.visibleHeight)
-	//p.scrollBar.body.Cursor = float32(p.panelContent.Position.Offset) * p.scrollUnit
-	//p.scrollBar.body.Cursor = float32(p.panelContent.Position.Offset)
-	//fmt.Println("bodyHeight:", p.scrollBar.body.Height)
-
-	fmt.Println("totalOffset:", p.totalOffset)
-	fmt.Println("scrollUnit:", p.scrollUnit)
+	fmt.Println("totalOffset:", p.TotalOffset)
+	fmt.Println("scrollUnit:", p.ScrollUnit)
 
 	//fmt.Println("cursor:", p.scrollBar.body.Cursor)
-	fmt.Println("visibleHeight:", p.visibleHeight)
+	fmt.Println("visibleHeight:", p.VisibleHeight)
 
-	fmt.Println("total:", p.totalHeight)
-	fmt.Println("offset:", p.panelContent.Position.Offset)
+	fmt.Println("total:", p.TotalHeight)
+	//fmt.Println("offset:", p.panelContent.Position.Offset)
 }

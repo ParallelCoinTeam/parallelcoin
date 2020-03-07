@@ -5,6 +5,10 @@ import (
 	"github.com/p9c/pod/pkg/gui/controller"
 )
 
+var (
+	c *controller.ScrollBar
+)
+
 type item struct {
 	i int
 }
@@ -14,40 +18,42 @@ func (it *item) doSlide(n int) {
 }
 
 type DuoUIpanel struct {
-	Name               string
-	totalHeight        int
-	visibleHeight      int
-	totalOffset        int
-	panelContent       *func()
-	panelContentLayout *layout.List
-	panelObject        []func()
-	panelObjectHeight  int
-	scrollBar          *ScrollBar
-	scrollUnit         float32
+	Name        string
+	panelObject []func()
+	scrollBar   *ScrollBar
 }
 
-func (t *DuoUItheme) DuoUIpanel(content *func()) *DuoUIpanel {
+func (t *DuoUItheme) DuoUIpanel(content func()) *DuoUIpanel {
 	return &DuoUIpanel{
-		Name:         "OneDuoUIpanel",
-		panelContent: content,
-		panelContentLayout: &layout.List{
-			Axis:        layout.Vertical,
-			ScrollToEnd: false,
+		Name: "OneDuoUIpanel",
+		panelObject: []func(){
+			content,
 		},
-		scrollBar: t.ScrollBar(),
+		scrollBar: t.ScrollBar(c),
 	}
 }
 
-func (p *DuoUIpanel) Layout(gtx *layout.Context, panel controller.Panel) {
+func (p *DuoUIpanel) Layout(gtx *layout.Context, panel *controller.Panel) {
 	layout.Flex{
 		Axis:    layout.Horizontal,
 		Spacing: layout.SpaceBetween,
 	}.Layout(gtx,
-		layout.Flexed(1, panel.Panel(gtx, *p.panelContent)),
+		layout.Flexed(1, func() {
+			panel.PanelContentLayout.Layout(gtx, len(p.panelObject), func(i int) {
+				p.panelObject[i]()
+				panel.TotalHeight = gtx.Dimensions.Size.Y
+			})
+			panel.VisibleHeight = gtx.Constraints.Height.Max
+		}),
 		layout.Rigid(func() {
-			if p.totalOffset > 0 {
-				p.SliderLayout(gtx)
-			}
+			//if panel.TotalOffset > 0 {
+			//p.scrollBar = t.ScrollBar(32)
+			p.scrollBar.Layout(gtx,
+				panel.PanelContentLayout.Position.Offset,
+				panel.ScrollUnit,
+			)
+			//}
 		}),
 	)
+	panel.Layout(gtx)
 }
