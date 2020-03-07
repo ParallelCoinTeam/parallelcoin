@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
-func (b *BlockChain) GetAlgStamps(algoname string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
+func GetAlgStamps(algoname string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
 	found bool, algStamps []uint64, version int32) {
 	version = fork.P9Algos[algoname].Version
 	algStamps = []uint64{uint64(lastNode.timestamp)}
@@ -30,12 +30,55 @@ func (b *BlockChain) GetAlgStamps(algoname string, startHeight int32, lastNode *
 	return
 }
 
-func (b *BlockChain) GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []uint64) {
+func GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []uint64) {
 	allStamps = []uint64{uint64(lastNode.timestamp)}
 	for ln := lastNode; ln != nil && ln.height > startHeight &&
 		len(allStamps) <= int(fork.List[1].AveragingInterval); ln = ln.RelativeAncestor(1) {
 		allStamps = append(allStamps, uint64(ln.timestamp))
 	}
+	return
+}
+
+func GetAll(allStamps []uint64) (allAv, allAdj float64) {
+	allAdj = 1
+	allAv = fork.P9Average
+	// calculate intervals
+	allIntervals := make([]float64, len(allStamps)-1)
+	for i := range allStamps {
+		if i > 0 {
+			r := allStamps[i-1] - allStamps[i]
+			allIntervals[i-1] = float64(r)
+		}
+	}
+	// calculate exponential weighted moving average from intervals
+	aewma := ewma.NewMovingAverage()
+	for _, x := range allIntervals {
+		aewma.Add(x)
+	}
+	allAv = aewma.Value()
+	if allAv != 0 {
+		allAdj = allAv / fork.P9Average
+	}
+	return
+}
+
+func GetAlg(algStamps []uint64, ttpb float64) (algAv, algAdj float64) {
+	// calculate intervals
+	algIntervals := make([]uint64, len(algStamps)-1)
+	for i := range algStamps {
+		if i > 0 {
+			r := algStamps[i-1] - algStamps[i]
+			algIntervals[i-1] = r
+		}
+	}
+	// calculate exponential weighted moving average from intervals
+	gewma := ewma.NewMovingAverage()
+	for _, x := range algIntervals {
+		gewma.Add(float64(x))
+	}
+	algAv = gewma.Value()
+	algAdj = capP9Adjustment(algAv / ttpb / float64(len(fork.
+		P9Algos)))
 	return
 }
 
@@ -64,38 +107,28 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 	if b.params.Net == wire.TestNet3 {
 		startHeight = fork.List[1].TestnetStart
 	}
-	allStamps := b.GetAllStamps(startHeight, lastNode)
-	_, _ = allStamps, allAv
-	last, found, algStamps, algoVer := b.GetAlgStamps(algoname, startHeight, lastNode)
-	if !found {
-		log.TRACE("last was nil")
-		last = new(BlockNode)
-		last.bits = fork.SecondPowLimitBits
-		last.version = algoVer
-	}
+	allStamps := GetAllStamps(startHeight, lastNode)
+	last, _, algStamps, algoVer := GetAlgStamps(algoname, startHeight, lastNode)
+	// if !found {
+	// 	log.TRACE("last was nil")
+	// 	last = new(BlockNode)
+	// 	last.bits = fork.SecondPowLimitBits
+	// 	last.version = algoVer
+	// 	return
+	// }
+	allAv, allAdj = GetAll(allStamps)
 	if len(algStamps) > minAvSamples {
-		// calculate intervals
-		algIntervals := []uint64{}
-		for i := range algStamps {
-			if i > 0 {
-				r := algStamps[i-1] - algStamps[i]
-				algIntervals = append(algIntervals, r)
-			}
-		}
-		// calculate exponential weighted moving average from intervals
-		awi := ewma.NewMovingAverage()
-		for _, x := range algIntervals {
-			awi.Add(float64(x))
-		}
-		algAv = awi.Value()
-		algAdj = capP9Adjustment(algAv / ttpb / float64(len(fork.
-			P9Algos)))
+		algAv, algAdj = GetAlg(algStamps, ttpb)
 	}
-	
+	bits := fork.SecondPowLimitBits
+	if last != nil {
+		bits = last.bits
+	}
+	// log.DEBUG(algAdj, allAdj)
 	adjustment = (algAdj + allAdj) / 2
 	
 	bigAdjustment := big.NewFloat(adjustment)
-	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
+	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
@@ -106,34 +139,34 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		newTargetBits = BigToCompact(newTarget)
 		// log.TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
 	}
-	if l && workerNumber == 0 {
-		log.DEBUGC(func() string {
-			an := fork.List[1].AlgoVers[algoVer]
-			pad := 9 - len(an)
-			if pad > 0 {
-				an += strings.Repeat(" ", pad)
-			}
-			factor := 1 / adjustment
-			symbol := "->"
-			if factor < 1 {
-				factor = adjustment
-				symbol = "<-"
-			}
-			if factor == 1 {
-				symbol = "--"
-			}
-			return fmt.Sprintf("%s %s av %s %s %08x %08x",
-				// RightJustify(fmt.Sprint(workerNumber), 3),
-				// RightJustify(fmt.Sprint(last.height+1), 9),
-				an,
-				RightJustify(fmt.Sprintf("%4.1f", algAv), 7),
-				RightJustify(fmt.Sprintf("%4.4f", factor), 9),
-				symbol,
-				last.bits,
-				newTargetBits,
-			)
-		})
-	}
+	// if l && workerNumber == 0 {
+	log.DEBUGC(func() string {
+		an := fork.List[1].AlgoVers[algoVer]
+		pad := 9 - len(an)
+		if pad > 0 {
+			an += strings.Repeat(" ", pad)
+		}
+		factor := 1 / adjustment
+		symbol := "->"
+		if factor < 1 {
+			factor = adjustment
+			symbol = "<-"
+		}
+		if factor == 1 {
+			symbol = "--"
+		}
+		return fmt.Sprintf("%s %s av %s/%2.2f %s %s %08x %08x",
+			an,
+			RightJustify(fmt.Sprintf("%4.1f", algAv), 7),
+			RightJustify(fmt.Sprintf("%4.1f", allAv), 7),
+			fork.P9Average,
+			RightJustify(fmt.Sprintf("%4.4f", factor), 9),
+			symbol,
+			bits,
+			newTargetBits,
+		)
+	})
+	// }
 	return
 }
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"math/rand"
+	"sort"
 	"time"
 	
 	"github.com/p9c/pod/pkg/log"
@@ -36,7 +37,7 @@ type HardForks struct {
 	TestnetStart       int32
 }
 
-const IntervalBase = 20
+const IntervalBase = 9
 
 func init() {
 	log.INFO("running fork data init")
@@ -46,29 +47,58 @@ func init() {
 	for i, v := range P9AlgoVers {
 		List[1].Algos[v] = p9AlgosNumeric[i]
 	}
-	AlgoSlices = append(AlgoSlices, []AlgoSlice{})
+	AlgoSlices = append(AlgoSlices, AlgoSpecs{})
 	for i := range Algos {
-		AlgoSlices[0] = append(AlgoSlices[0], AlgoSlice{
+		AlgoSlices[0] = append(AlgoSlices[0], AlgoSpec{
 			List[0].Algos[i].Version,
 			i,
 		})
 	}
-	AlgoSlices = append(AlgoSlices, []AlgoSlice{})
+	AlgoSlices = append(AlgoSlices, AlgoSpecs{})
 	for i := range P9Algos {
-		AlgoSlices[1] = append(AlgoSlices[1], AlgoSlice{
+		AlgoSlices[1] = append(AlgoSlices[1], AlgoSpec{
 			List[1].Algos[i].Version,
 			i,
 		})
 	}
+	sort.Sort(AlgoSlices[0])
+	sort.Sort(AlgoSlices[1])
+	log.WARN(P9AlgoVers)
+	baseVersionName := AlgoSlices[1][0].Name
+	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
+	log.WARN(baseVersionName, baseVersionInterval)
+	P9Average = 0
+	for _, i := range AlgoSlices[1] {
+		vi := float64(P9Algos[i.Name].VersionInterval)
+		p9a := baseVersionInterval / vi
+		P9Average += p9a
+		log.WARNF("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
+	}
+	log.WARN(P9Average)
+	P9Average = baseVersionInterval / P9Average
+	log.WARN(P9Average)
 }
 
-type AlgoSlice struct {
+type AlgoSpec struct {
 	Version int32
 	Name    string
 }
+type AlgoSpecs []AlgoSpec
+
+func (a AlgoSpecs) Len() int {
+	return len(a)
+}
+
+func (a AlgoSpecs) Less(i, j int) bool {
+	return a[i].Version < a[j].Version
+}
+
+func (a AlgoSpecs) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
 
 var (
-	AlgoSlices [][]AlgoSlice
+	AlgoSlices []AlgoSpecs
 	// AlgoVers is the lookup for pre hardfork
 	//
 	AlgoVers = map[int32]string{
@@ -138,13 +168,8 @@ var (
 		13: {13, FirstPowLimitBits, 8, 83 * IntervalBase}, // 23
 	}
 	
-	P9Average = func() (out float64) {
-		out = IntervalBase
-		for _, i := range P9AlgoVers {
-			out -= IntervalBase / float64(P9Algos[i].VersionInterval)
-		}
-		return
-	}()
+	P9Average float64
+	
 	// SecondPowLimit is
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
