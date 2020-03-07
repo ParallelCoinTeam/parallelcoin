@@ -201,7 +201,7 @@ func (c *Controller) HashReport() float64 {
 var handlersMulticast = transport.Handlers{
 	// Solutions submitted by workers
 	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
-		log.DEBUG("received solution")
+		log.TRACE("received solution")
 		// log.SPEW(ctx)
 		c := ctx.(*Controller)
 		// if !c.cx.IsCurrent() {
@@ -220,7 +220,7 @@ var handlersMulticast = transport.Handlers{
 		j := sol.LoadSolContainer(b)
 		senderPort := j.GetSenderPort()
 		if int(senderPort) != c.listenPort {
-			log.DEBUG("not able to submit jobs created by other node peers")
+			//log.DEBUG("not able to submit jobs created by other node peers")
 			return
 		}
 		msgBlock := j.GetMsgBlock()
@@ -273,7 +273,7 @@ var handlersMulticast = transport.Handlers{
 				return
 			}
 		}
-		log.DEBUG("the block was accepted")
+		log.TRACE("the block was accepted")
 		coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
 		prevHeight := block.Height() - 1
 		prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
@@ -385,7 +385,7 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 
 func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 ) (template *mining.BlockTemplate) {
-	log.DEBUG("getting new block template")
+	log.TRACE("getting new block template")
 	if len(*cx.Config.MiningAddrs) < 1 {
 		log.DEBUG("no mining addresses")
 		return
@@ -394,13 +394,13 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 	rand.Seed(time.Now().UnixNano())
 	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
 		MiningAddrs))]
-	log.DEBUG("calling new block template")
+	log.TRACE("calling new block template")
 	template, err := bTG.NewBlockTemplate(0, payToAddr,
 		fork.SHA256d)
 	if err != nil {
 		log.ERROR(err)
 	} else {
-		log.DEBUG("got new block template")
+		//log.DEBUG("got new block template")
 	}
 	return
 }
@@ -536,7 +536,7 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 		// First to arrive locks out any others while processing
 		switch n.Type {
 		case blockchain.NTBlockConnected:
-			log.DEBUG("received new chain notification")
+			log.TRACE("received new chain notification")
 			// construct work message
 			_, ok := n.Data.(*util.Block)
 			if !ok {
@@ -570,10 +570,10 @@ func (c *Controller) UpdateAndSendTemplate() {
 			p2padvt.Get(c.cx), &c.coinbases)
 		nH := mC.GetNewHeight()
 		if c.height.Load() < uint64(nH) {
-			log.DEBUG("new height", nH)
+			log.TRACE("new height", nH)
 			c.height.Store(uint64(nH))
-		} else {
-			log.DEBUG("stale or orphan from being later, not sending out")
+		//} else {
+			//log.DEBUG("stale or orphan from being later, not sending out")
 			// return
 		}
 		// log.SPEW(c.coinbases)

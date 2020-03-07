@@ -2,7 +2,7 @@
 <module type="WEB_MODULE" version="4">
   <component name="Go">
     <buildTags>
-      <option name="os" value="freebsd" />
+      <option name="compiler" value="gc" />
     </buildTags>
   </component>
   <component name="NewModuleRootManager">

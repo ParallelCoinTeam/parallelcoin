@@ -40,7 +40,7 @@ type HardForks struct {
 const IntervalBase = 9
 
 func init() {
-	log.INFO("running fork data init")
+	log.TRACE("running fork data init")
 	for i := range p9AlgosNumeric {
 		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", p9AlgosNumeric[i].VersionInterval)
 	}
@@ -63,20 +63,20 @@ func init() {
 	}
 	sort.Sort(AlgoSlices[0])
 	sort.Sort(AlgoSlices[1])
-	log.WARN(P9AlgoVers)
+	log.TRACE(P9AlgoVers)
 	baseVersionName := AlgoSlices[1][0].Name
 	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
-	log.WARN(baseVersionName, baseVersionInterval)
+	log.TRACE(baseVersionName, baseVersionInterval)
 	P9Average = 0
 	for _, i := range AlgoSlices[1] {
 		vi := float64(P9Algos[i.Name].VersionInterval)
 		p9a := baseVersionInterval / vi
 		P9Average += p9a
-		log.WARNF("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
+		log.TRACEF("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
 	}
-	log.WARN(P9Average)
+	log.TRACE(P9Average)
 	P9Average = baseVersionInterval / P9Average
-	log.WARN(P9Average)
+	log.TRACE(P9Average)
 }
 
 type AlgoSpec struct {
@@ -157,15 +157,15 @@ var (
 	// P9Algos is the algorithm specifications after the hard fork
 	P9Algos        = make(map[string]AlgoParams)
 	p9AlgosNumeric = map[int32]AlgoParams{
-		5:  {5, FirstPowLimitBits, 0, 3 * IntervalBase},   // 2
-		6:  {6, FirstPowLimitBits, 1, 5 * IntervalBase},   // 3
-		7:  {7, FirstPowLimitBits, 2, 11 * IntervalBase},  // 5
-		8:  {8, FirstPowLimitBits, 3, 17 * IntervalBase},  // 7
-		9:  {9, FirstPowLimitBits, 4, 31 * IntervalBase},  // 11
-		10: {10, FirstPowLimitBits, 5, 41 * IntervalBase}, // 13
-		11: {11, FirstPowLimitBits, 7, 59 * IntervalBase}, // 17
-		12: {12, FirstPowLimitBits, 6, 67 * IntervalBase}, // 19
-		13: {13, FirstPowLimitBits, 8, 83 * IntervalBase}, // 23
+		5:  {5, FirstPowLimitBits, 0, 1<<1 * IntervalBase},   // 2
+		6:  {6, FirstPowLimitBits, 1, 1<<2 * IntervalBase},   // 3
+		7:  {7, FirstPowLimitBits, 2, 1<<3 * IntervalBase},  // 5
+		8:  {8, FirstPowLimitBits, 3, 1<<4 * IntervalBase},  // 7
+		9:  {9, FirstPowLimitBits, 4, 1<<5 * IntervalBase},  // 11
+		10: {10, FirstPowLimitBits, 5, 1<<6 * IntervalBase}, // 13
+		11: {11, FirstPowLimitBits, 7, 1<<7 * IntervalBase}, // 17
+		12: {12, FirstPowLimitBits, 6, 1<<8 * IntervalBase}, // 19
+		13: {13, FirstPowLimitBits, 8, 1<<9 * IntervalBase}, // 23
 	}
 	
 	P9Average float64
@@ -174,7 +174,7 @@ var (
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
 			// "01f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1")
-			"0099999999999999999999999999999999999999999999999999999999999999")
+			"0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	SecondPowLimitBits = BigToCompact(&SecondPowLimit)
@@ -220,7 +220,7 @@ func GetRandomVersion(height int32) int32 {
 func GetAlgoVer(name string, height int32) (version int32) {
 	hf := GetCurrent(height)
 	n := AlgoSlices[hf][0].Name
-	log.DEBUG("GetAlgoVer", name, height, hf, n)
+	//log.DEBUG("GetAlgoVer", name, height, hf, n)
 	if _, ok := List[hf].Algos[name]; ok {
 		n = name
 	}

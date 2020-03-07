@@ -77,8 +77,9 @@ func GetAlg(algStamps []uint64, ttpb float64) (algAv, algAdj float64) {
 		gewma.Add(float64(x))
 	}
 	algAv = gewma.Value()
-	algAdj = capP9Adjustment(algAv / ttpb / float64(len(fork.
-		P9Algos)))
+	if algAv != 0 {
+		algAdj = algAv / ttpb
+	}
 	return
 }
 
@@ -93,12 +94,12 @@ func GetAlg(algStamps []uint64, ttpb float64) (algAv, algAdj float64) {
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 	lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32,
 	adjustment float64, err error) {
-	
+
 	ttpb := float64(fork.List[1].Algos[algoname].VersionInterval)
 	newTargetBits = fork.SecondPowLimitBits
 	const minAvSamples = 3
 	adjustment = 1
-	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, ttpb
+	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, fork.P9Average
 	if lastNode == nil {
 		log.TRACE("lastNode is nil")
 	}
@@ -109,14 +110,9 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 	}
 	allStamps := GetAllStamps(startHeight, lastNode)
 	last, _, algStamps, algoVer := GetAlgStamps(algoname, startHeight, lastNode)
-	// if !found {
-	// 	log.TRACE("last was nil")
-	// 	last = new(BlockNode)
-	// 	last.bits = fork.SecondPowLimitBits
-	// 	last.version = algoVer
-	// 	return
-	// }
-	allAv, allAdj = GetAll(allStamps)
+	if len(allStamps) > minAvSamples {
+		allAv, allAdj = GetAll(allStamps)
+	}
 	if len(algStamps) > minAvSamples {
 		algAv, algAdj = GetAlg(algStamps, ttpb)
 	}
@@ -125,8 +121,8 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		bits = last.bits
 	}
 	// log.DEBUG(algAdj, allAdj)
-	adjustment = (algAdj + allAdj) / 2
-	
+	adjustment = algAdj + allAdj
+	adjustment /= 2
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
@@ -183,7 +179,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		return
 	}
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
-		dayDiv := b.GetCommonP9Averages(lastNode, nH)
+	dayDiv := b.GetCommonP9Averages(lastNode, nH)
 	algoVer := fork.GetAlgoVer(algoname, nH)
 	since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode,
 		algoVer)
