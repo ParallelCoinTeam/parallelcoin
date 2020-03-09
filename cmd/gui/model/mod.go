@@ -84,7 +84,7 @@ type DuoUIblock struct {
 	Amount        float64 `json:"amount"`
 	TxNum         int     `json:"txnum"`
 	Confirmations int64
-	Time          string `json:"time"`
+	Time          int64 `json:"time"`
 	Link          *controller.Button
 }
 

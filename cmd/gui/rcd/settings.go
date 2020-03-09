@@ -2,14 +2,16 @@ package rcd
 
 import (
 	"fmt"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/controller"
 	"github.com/p9c/pod/pkg/pod"
+	"time"
 )
 
 func (r *RcVar) SaveDaemonCfg() {
-	//save.Pod(r.Settings.Daemon.Config)
+	save.Pod(r.Settings.Daemon.Config)
 }
 
 func settings(cx *conte.Xt) *model.DuoUIsettings {
@@ -38,19 +40,18 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 				settingsFields[field.Label] = &controller.Editor{
 					SingleLine: true,
 				}
-				//if field.Value != nil {
-				switch field.InputType {
-				case "text":
-					(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*string)))
-					//(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*string)))
-				case "number":
-					//(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*int)))
-				case "decimal":
-					//(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*float64)))
-				case "time":
-					//(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*field.Value.(*time.Duration)))
+				if cx.ConfigMap[field.Model] != nil {
+					switch field.InputType {
+					case "text":
+						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*string)))
+					case "number":
+						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*int)))
+					case "decimal":
+						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*float64)))
+					case "time":
+						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*time.Duration)))
+					}
 				}
-				//}
 			case "switch":
 				settingsFields[field.Label] = new(controller.CheckBox)
 				(settingsFields[field.Label]).(*controller.CheckBox).SetChecked(*cx.ConfigMap[field.Model].(*bool))

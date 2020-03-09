@@ -13,7 +13,7 @@ func LoadPages(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) (p map[
 	p["OVERVIEW"] = pages.Overview(rc, gtx, th)
 	p["SEND"] = pages.Send(rc, gtx, th)
 	p["RECEIVE"] = th.DuoUIpage("RECEIVE", 10, func() {}, func() {}, func() { th.H5("receive :").Layout(gtx) }, func() {})
-	p["ADDRESSBOOK"] = pages.AddressBook(rc, gtx, th)
+	p["ADDRESSBOOK"] = pages.DuoUIaddressBook(rc, gtx, th)
 	p["SETTINGS"] = pages.Settings(rc, gtx, th)
 	p["NETWORK"] = th.DuoUIpage("NETWORK", 0, func() {}, func() {}, func() { th.H5("network :").Layout(gtx) }, func() {})
 	p["BLOCK"] = th.DuoUIpage("BLOCK", 0, func() {}, func() {}, func() { th.H5("block :").Layout(gtx) }, func() {})

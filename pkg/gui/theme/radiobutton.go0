@@ -28,8 +28,8 @@ func (t *DuoUItheme) DuoUIradioButton(key, label string) DuoUIradioButton {
 			},
 			Size:               unit.Dp(26),
 			shaper:             t.Shaper,
-			checkedStateIcon:   t.radioCheckedIcon,
-			uncheckedStateIcon: t.radioUncheckedIcon,
+			checkedStateIcon:   t.Icons["RadioUnchecked"],
+			uncheckedStateIcon: t.Icons["RadioChecked"],
 		},
 		Key: key,
 	}

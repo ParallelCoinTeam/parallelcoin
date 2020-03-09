@@ -58,6 +58,7 @@ func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pag
 			menuItem = th.DuoUIbutton(th.Fonts["Secondary"], title, th.Colors["Dark"], th.Colors["LightGrayII"], th.Colors["LightGrayII"], th.Colors["Dark"], icon, CurrentCurrentPageColor(rc.ShowPage, title, navItemIconColor, th.Colors["Primary"]), navItemTextSize, navItemTconSize, navItemWidth, navItemHeight, navItemPaddingVertical, navItemPaddingHorizontal)
 			for navButton.Clicked(gtx) {
 				rc.ShowPage = title
+				page.Command()
 				SetPage(rc, page)
 			}
 			menuItem.MenuLayout(gtx, navButton)

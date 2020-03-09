@@ -82,6 +82,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 
 	r = &RcVar{
 		cx:   cx,
+		db:   new(DuoUIdb),
 		Boot: &b,
 		Status: &model.DuoUIstatus{
 			Node: &model.NodeStatus{},
@@ -180,5 +181,6 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		Quit:  make(chan struct{}),
 		Ready: make(chan struct{}, 1),
 	}
+	r.db.DuoUIdbInit(r.cx.DataDir)
 	return
 }

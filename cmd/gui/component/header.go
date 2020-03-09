@@ -57,7 +57,6 @@ func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPag
 				headerMenuButton(rc, gtx, th, "", "DeviceWidgets", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "ActionTimeline", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "HardwareWatch", buttonHeader),
-				headerMenuButton(rc, gtx, th, "", "HardwareKeyboardHide", buttonHeader),
 			}
 			footerNav.Layout(gtx, len(headerNav), func(i int) {
 				layout.UniformInset(unit.Dp(0)).Layout(gtx, headerNav[i])

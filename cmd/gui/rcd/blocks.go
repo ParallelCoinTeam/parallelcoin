@@ -1,8 +1,6 @@
 package rcd
 
 import (
-	"fmt"
-
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/gui/controller"
@@ -69,7 +67,7 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 
 	// t := time.Unix(0, block.Time)
 	// b.Time = t.Format("02/01/2006, 15:04:05")
-	b.Time = fmt.Sprint(block.Time)
+	b.Time = block.Time
 
 	b.Link = &controller.Button{}
 	return

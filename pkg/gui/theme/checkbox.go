@@ -25,8 +25,8 @@ func (t *DuoUItheme) DuoUIcheckBox(label, color, iconColor string) DuoUIcheckBox
 			TextSize:           t.TextSize.Scale(14.0 / 16.0),
 			Size:               unit.Dp(26),
 			shaper:             t.Shaper,
-			checkedStateIcon:   t.checkBoxCheckedIcon,
-			uncheckedStateIcon: t.checkBoxUncheckedIcon,
+			checkedStateIcon:   t.Icons["Checked"],
+			uncheckedStateIcon: t.Icons["Unchecked"],
 		},
 	}
 }

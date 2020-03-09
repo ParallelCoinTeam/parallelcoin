@@ -46,15 +46,15 @@ func DuoFields(gtx *layout.Context, axis layout.Axis, left, right func()) func()
 	}
 }
 
-func TrioFields(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, unoLabel, unoValue, duoLabel, duoValue, treLabel, treValue string) func() {
+func TrioFields(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, unoLabel, unoValue, unoHeadcolor, unoHeadbgColor, unoColor, unoBgColor, duoLabel, duoValue, duoHeadcolor, duoHeadbgColor, duoColor, duoBgColor, treLabel, treValue, treHeadcolor, treHeadbgColor, treColor, treBgColor string) func() {
 	return func() {
 		layout.Flex{
 			Axis:    axis,
 			Spacing: layout.SpaceAround,
 		}.Layout(gtx,
-			fieldAxis(axis, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, unoLabel, fmt.Sprint(unoValue)), 0.3),
-			fieldAxis(axis, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, duoLabel, fmt.Sprint(duoValue)), 0.3),
-			fieldAxis(axis, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, treLabel, fmt.Sprint(treValue)), 0.3),
+			fieldAxis(axis, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, unoLabel, unoHeadcolor, unoHeadbgColor, unoColor, unoBgColor, fmt.Sprint(unoValue)), 0.3),
+			fieldAxis(axis, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, duoLabel, duoHeadcolor, duoHeadbgColor, duoColor, duoBgColor, fmt.Sprint(duoValue)), 0.3),
+			fieldAxis(axis, ContentLabeledField(gtx, th, layout.Vertical, labelTextSize, valueTextSize, treLabel, treHeadbgColor, treHeadcolor, treColor, treBgColor, fmt.Sprint(treValue)), 0.3),
 		)
 	}
 }
@@ -70,14 +70,14 @@ func fieldAxis(axis layout.Axis, field func(), size float32) layout.FlexChild {
 	return f
 }
 
-func ContentLabeledField(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, label, value string) func() {
+func ContentLabeledField(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, label, headcolor, headbgColor, color, bgColor, value string) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			layout.Flex{
 				Axis: axis,
 			}.Layout(gtx,
-				layout.Rigid(contentField(gtx, th, label, th.Colors["Light"], th.Colors["Dark"], th.Fonts["Primary"], labelTextSize)),
-				layout.Rigid(contentField(gtx, th, value, th.Colors["Light"], th.Colors["DarkGray"], th.Fonts["Mono"], valueTextSize)))
+				layout.Rigid(contentField(gtx, th, label, th.Colors[headcolor], th.Colors[headbgColor], th.Fonts["Primary"], labelTextSize)),
+				layout.Rigid(contentField(gtx, th, value, th.Colors[color], th.Colors[bgColor], th.Fonts["Mono"], valueTextSize)))
 		})
 	}
 }

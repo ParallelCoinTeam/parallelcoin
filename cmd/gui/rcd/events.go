@@ -25,8 +25,11 @@ var EventsChan = make(chan Event, 1)
 func (r *RcVar) ListenInit(trigger chan struct{}) {
 	r.Events = EventsChan
 	r.UpdateTrigger = trigger
+
 	// first time starting up get all of these and trigger update
 	update(r)
+	r.labelMiningAddreses()
+
 	var ready atomic.Bool
 	ready.Store(false)
 	r.cx.RealNode.Chain.Subscribe(func(callback *blockchain.Notification) {
@@ -89,6 +92,5 @@ func update(r *RcVar) {
 	r.GetDuoUIdifficulty()
 	r.GetDuoUIblockCount()
 	// log.WARN("GetDuoUIdifficulty")
-	r.GetAddressBook()
 	r.UpdateTrigger <- struct{}{}
 }

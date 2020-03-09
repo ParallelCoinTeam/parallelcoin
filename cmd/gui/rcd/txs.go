@@ -29,6 +29,9 @@ func (r *RcVar) GetDuoUItransactions(sfrom, count int, cat string) *model.DuoUIt
 	if err != nil {
 		log.INFO(err)
 	}
+	log.DEBUG("TRZNZA:")
+	log.DEBUG(lt)
+
 	r.Status.Wallet.Transactions.TxsNumber = len(lt)
 	log.INFO("ETO:" + fmt.Sprint(lt))
 	txsArray := *new([]model.DuoUItx)
@@ -76,8 +79,24 @@ func txs(t btcjson.ListTransactionsResult) model.DuoUItx {
 
 }
 func (r *RcVar) GetLatestTransactions() {
-	log.DEBUG("getting latest transactions")
+	log.DEBUG("FUCTIONZ getting latest transactions")
 	//r.Status.Wallet.LastTxs = r.GetDuoUItransactions(0, 10, "")
+
+	//cmd := icmd.(*btcjson.ListTransactionsCmd)
+	//// TODO: ListTransactions does not currently understand the difference
+	//// between transactions pertaining to one account from another.  This
+	//// will be resolved when wtxmgr is combined with the waddrmgr namespace.
+	//if cmd.Account != nil && *cmd.Account != "*" {
+	//// For now, don't bother trying to continue if the user
+	//// specified an account, since this can't be (easily or
+	//// efficiently) calculated.
+	//return nil, &btcjson.RPCError{
+	//Code:    btcjson.ErrRPCWallet,
+	//Message: "Transactions are not yet grouped by account",
+	//}
+	//}
+	log.INFO(r.cx.WalletServer.ListTransactions(0, 11))
+	//}
 	return
 }
 

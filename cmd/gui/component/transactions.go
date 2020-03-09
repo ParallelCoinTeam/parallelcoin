@@ -51,10 +51,10 @@ func txsDetails(gtx *layout.Context, th *theme.DuoUItheme, i int, t *model.DuoUI
 func TransactionsFilter(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
-			//layout.Rigid(txsFilterItem(gtx, th, "ALL", allTxs)),
-			//layout.Rigid(txsFilterItem(gtx, th, "MINTED", mintedTxs)),
-			//layout.Rigid(txsFilterItem(gtx, th, "IMATURE", immatureTxs)),
-			//layout.Rigid(txsFilterItem(gtx, th, "SENT", sentTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "ALL", allTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "MINTED", mintedTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "IMATURE", immatureTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "SENT", sentTxs)),
 			layout.Rigid(txsFilterItem(gtx, th, "RECEIVED", receivedTxs)))
 	}
 }

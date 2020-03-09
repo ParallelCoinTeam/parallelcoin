@@ -9,18 +9,12 @@ import (
 )
 
 type DuoUItheme struct {
-	Shaper                text.Shaper
-	TextSize              unit.Value
-	checkBoxCheckedIcon   *DuoUIicon
-	checkBoxUncheckedIcon *DuoUIicon
-	radioCheckedIcon      *DuoUIicon
-	radioUncheckedIcon    *DuoUIicon
-	counterPlusIcon       *DuoUIicon
-	counterMinusIcon      *DuoUIicon
-	Colors                map[string]string
-	Fonts                 map[string]text.Typeface
-	Icons                 map[string]*DuoUIicon
-	scrollBarSize         int
+	Shaper        text.Shaper
+	TextSize      unit.Value
+	Colors        map[string]string
+	Fonts         map[string]text.Typeface
+	Icons         map[string]*DuoUIicon
+	scrollBarSize int
 }
 
 func NewDuoUItheme() *DuoUItheme {

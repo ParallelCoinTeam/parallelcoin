@@ -17,6 +17,7 @@ var (
 
 func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
+
 		cs := gtx.Constraints
 		theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, "ff424242", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		layout.Flex{

@@ -92,19 +92,12 @@ func (d *DuoUIdb) DbReadAll(folder string) DuoUIitems {
 	}
 }
 
-func (d *DuoUIdb) DbReadAddressBook() map[string]string {
-	addressbookRaw, err := d.DB.ReadAll("addressbook")
-	if err != nil {
+func (d *DuoUIdb) DbReadAddressBook() (addressbook map[string]string) {
+	addressbook = make(map[string]string)
+	if err := d.DB.Read("user", "addressbook", &addressbook); err != nil {
 		fmt.Println("Error", err)
 	}
-	addressbook := make(map[string]string)
-	for _, addressRaw := range addressbookRaw {
-		address := AddBook{}
-		if err := json.Unmarshal([]byte(addressRaw), &address); err != nil {
-			fmt.Println("Error", err)
-		}
-		addressbook[address.Address] = address.Label
-	}
+
 	return addressbook
 }
 func (d *DuoUIdb) DbRead(folder, name string) {
@@ -113,7 +106,6 @@ func (d *DuoUIdb) DbRead(folder, name string) {
 		fmt.Println("Error", err)
 	}
 	d.Data = item
-	fmt.Println("Daasdddddddaaa", item)
 }
 func (d *DuoUIdb) DbWrite(folder, name string, data interface{}) {
 	d.DB.Write(folder, name, data)

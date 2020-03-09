@@ -3,25 +3,20 @@ package pages
 import (
 	"fmt"
 	"gioui.org/layout"
+	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/controller"
 	"github.com/p9c/pod/pkg/gui/theme"
+	"time"
 )
 
 var (
 	blocksList = &layout.List{
 		Axis: layout.Vertical,
 	}
-	blocksPanel = &controller.Panel{
-		Name: "",
-		PanelContentLayout: &layout.List{
-			Axis:        layout.Vertical,
-			ScrollToEnd: false,
-		},
-	}
+	txwidth int
 )
 
 func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
@@ -30,17 +25,24 @@ func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *th
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		rc.GetBlocksExcerpts()
-		th.DuoUIpanel(explorerContent(rc, gtx, th)).Layout(gtx, addressBookPanel)
+		explorerContent(rc, gtx, th)()
 	}
 }
 
 func explorerContent(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
-				b := rc.Explorer.Blocks[i]
-				blockRow(rc, gtx, th, &b)
-			})
+			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+				layout.Rigid(func() {
+					blockRowCellLabels(rc, gtx, th)
+				}),
+				layout.Flexed(1, func() {
+					blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
+						b := rc.Explorer.Blocks[i]
+						blockRow(rc, gtx, th, &b)
+					})
+				}),
+			)
 		})
 	}
 }
@@ -61,8 +63,62 @@ func headerExplorer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) fu
 	}
 }
 
+func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) {
+	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
+		component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
+		layout.Flex{
+			Spacing: layout.SpaceBetween,
+		}.Layout(gtx,
+			layout.Rigid(func() {
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					l := th.Body2("Height")
+					l.Font.Typeface = th.Fonts["Mono"]
+					l.Alignment = text.Middle
+					l.Color = theme.HexARGB(th.Colors["Light"])
+					l.Layout(gtx)
+				})
+			}),
+			layout.Rigid(func() {
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					l := th.Body2("Time")
+					l.Font.Typeface = th.Fonts["Mono"]
+					l.Alignment = text.Middle
+					l.Color = theme.HexARGB(th.Colors["Light"])
+					l.Layout(gtx)
+				})
+			}),
+			layout.Rigid(func() {
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					l := th.Body2("Confirmations")
+					l.Font.Typeface = th.Fonts["Mono"]
+					l.Color = theme.HexARGB(th.Colors["Light"])
+					l.Layout(gtx)
+				})
+			}),
+			layout.Rigid(func() {
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					l := th.Body2("TxNum")
+					l.Font.Typeface = th.Fonts["Mono"]
+					l.Color = theme.HexARGB(th.Colors["Light"])
+					l.Layout(gtx)
+				})
+			}),
+			layout.Rigid(func() {
+				layout.Inset{
+					Right: unit.Dp(float32(txwidth - 64)),
+				}.Layout(gtx, func() {
+					l := th.Body2("BlockHash")
+					l.Font.Typeface = th.Fonts["Mono"]
+					l.Color = theme.HexARGB(th.Colors["Light"])
+					l.Layout(gtx)
+				})
+			}))
+	})
+}
+
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *model.DuoUIblock) {
 	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
+		theme.DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, gtx.Constraints.Height.Max, th.Colors["DarkGrayI"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
@@ -78,16 +134,38 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block *m
 				linkButton.Layout(gtx, block.Link)
 			}),
 			layout.Rigid(func() {
-				l := th.Body2(block.Time)
-				l.Font.Typeface = th.Fonts["Mono"]
-				l.Color = theme.HexARGB(th.Colors["Dark"])
-				l.Layout(gtx)
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					l := th.Body2(fmt.Sprint(time.Unix(block.Time, 0).Format("2006-01-02 15:04:05")))
+					l.Font.Typeface = th.Fonts["Mono"]
+					l.Alignment = text.Middle
+					l.Color = theme.HexARGB(th.Colors["Light"])
+					l.Layout(gtx)
+				})
 			}),
 			layout.Rigid(func() {
-				l := th.Body2(block.BlockHash)
-				l.Font.Typeface = th.Fonts["Mono"]
-				l.Color = theme.HexARGB(th.Colors["Dark"])
-				l.Layout(gtx)
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					l := th.Body2(fmt.Sprint(block.Confirmations))
+					l.Font.Typeface = th.Fonts["Mono"]
+					l.Color = theme.HexARGB(th.Colors["Light"])
+					l.Layout(gtx)
+				})
+			}),
+			layout.Rigid(func() {
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					l := th.Body2(fmt.Sprint(block.TxNum))
+					l.Font.Typeface = th.Fonts["Mono"]
+					l.Color = theme.HexARGB(th.Colors["Light"])
+					l.Layout(gtx)
+				})
+			}),
+			layout.Rigid(func() {
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					l := th.Body2(block.BlockHash)
+					l.Font.Typeface = th.Fonts["Mono"]
+					l.Color = theme.HexARGB(th.Colors["Light"])
+					l.Layout(gtx)
+					txwidth = gtx.Dimensions.Size.X
+				})
 			}))
 	})
 }

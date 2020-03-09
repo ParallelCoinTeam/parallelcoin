@@ -42,7 +42,7 @@ type DuoUItransactionExcerpt struct {
 	Comment       string  `json:"comment,omitempty"`
 }
 
-type Address struct {
+type DuoUIaddress struct {
 	Index   int     `json:"num"`
 	Label   string  `json:"label"`
 	Account string  `json:"account"`
@@ -51,6 +51,7 @@ type Address struct {
 	Copy    *controller.Button
 }
 type DuoUIaddressBook struct {
-	Num       int       `json:"num"`
-	Addresses []Address `json:"addresses"`
+	ShowMiningAddresses bool
+	Num                 int            `json:"num"`
+	Addresses           []DuoUIaddress `json:"addresses"`
 }
