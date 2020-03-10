@@ -1,6 +1,9 @@
 package model
 
-import "github.com/p9c/pod/pkg/gui/controller"
+import (
+	"gioui.org/op/paint"
+	"github.com/p9c/pod/pkg/gui/controller"
+)
 
 type DuoUIbalance struct {
 	Balance string `json:"balance"`
@@ -49,9 +52,15 @@ type DuoUIaddress struct {
 	Address string  `json:"address"`
 	Amount  float64 `json:"amount"`
 	Copy    *controller.Button
+	QrCode  *controller.Button
 }
 type DuoUIaddressBook struct {
 	ShowMiningAddresses bool
 	Num                 int            `json:"num"`
 	Addresses           []DuoUIaddress `json:"addresses"`
+}
+
+type DuoUIqrCode struct {
+	AddrQR  paint.ImageOp
+	PubAddr string
 }

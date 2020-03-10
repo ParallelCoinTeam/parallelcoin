@@ -28,5 +28,6 @@ func Pod(c *pod.Config) (success bool) {
 		success = true
 	}
 	*c.UserAgentComments = uac
+
 	return
 }

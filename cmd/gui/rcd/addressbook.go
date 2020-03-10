@@ -172,12 +172,13 @@ func (r *RcVar) GetAddressBook() func() {
 					Address: addr.Address,
 					Amount:  addr.Amount,
 					Copy:    new(controller.Button),
+					QrCode:  new(controller.Button),
 				})
 			}
 		}
 		sort.Sort(addrs)
 		addressbook.Addresses = addrs
-		r.AddressBook = *addressbook
+		r.AddressBook = addressbook
 		return
 	}
 }

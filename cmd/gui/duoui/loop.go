@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"errors"
+	"github.com/p9c/pod/cmd/gui/component"
 
 	"gioui.org/io/system"
 	"github.com/p9c/pod/cmd/gui/model"
@@ -45,6 +46,13 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			<-interrupt.HandlersDone
 			log.DEBUG("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
+			//TODO events of gui
+		//case e := <-a.wallet.events:
+		//	switch e := e.(type) {
+		//	case TransactionEvent:
+		//		a.trans = append(a.trans, e.Trans)
+		//		w.Invalidate()
+		//	}
 		case e := <-ui.ly.Window.Events():
 			switch e := e.(type) {
 			case system.DestroyEvent:
@@ -64,7 +72,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					} else {
 						ui.DuoUImainScreen()
 						if ui.rc.Dialog.Show {
-							ui.DuoUIdialog()
+							component.DuoUIdialog(ui.rc,ui.ly.Context,ui.ly.Theme)
 						}
 						// ui.DuoUItoastSys()
 					}

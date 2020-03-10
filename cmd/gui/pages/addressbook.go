@@ -87,7 +87,6 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme)
 					Text:   rc.CreateNewAddress(""),
 				}
 			})))
-
 	}
 }
 
@@ -105,6 +104,7 @@ func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme
 						layout.Rigid(component.Button(gtx, th, t.Copy, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], t.Address, func() { clipboard.Set(t.Address) })),
 						layout.Flexed(0.4, component.Label(gtx, th, th.Fonts["Primary"], 14, th.Colors["Dark"], t.Label)),
 						layout.Flexed(0.3, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprint(t.Amount))),
+						layout.Rigid(component.Button(gtx, th, t.QrCode, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], "QR", component.QrDialog(rc,gtx))),
 					)
 				}),
 				layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Hint"])),

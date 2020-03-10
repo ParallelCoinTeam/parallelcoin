@@ -27,6 +27,7 @@ require (
 	github.com/minio/highwayhash v1.0.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
+	github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9
 	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
 	github.com/urfave/cli v1.22.2

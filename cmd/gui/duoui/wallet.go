@@ -21,7 +21,9 @@ var (
 		SingleLine: true,
 		//Submit:     true,
 	}
-
+	listWallet = &layout.List{
+		Axis: layout.Vertical,
+	}
 	encryption         = new(controller.CheckBox)
 	seed               = new(controller.CheckBox)
 	testnet            = new(controller.CheckBox)
@@ -106,7 +108,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 				createWalletbuttonComp.Layout(ui.ly.Context, buttonCreateWallet)
 			},
 		}
-		list.Layout(ui.ly.Context, len(controllers), func(i int) {
+		listWallet.Layout(ui.ly.Context, len(controllers), func(i int) {
 			layout.UniformInset(unit.Dp(10)).Layout(ui.ly.Context, controllers[i])
 		})
 	})

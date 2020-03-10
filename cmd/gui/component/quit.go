@@ -34,6 +34,7 @@ func QuitButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func()
 						rc.Dialog.Show = false
 					},
 					Cancel: func() { rc.Dialog.Show = false },
+					CustomField: func() {},
 					Title:  "Are you sure?",
 					Text:   "Confirm ParallelCoin close",
 				}
