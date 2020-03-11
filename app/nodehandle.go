@@ -18,16 +18,13 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		type serviceOptions struct {
 			ServiceCommand string `short:"s" long:"service" description:"Service command {install, remove, start, stop}"`
 		}
-		// runServiceCommand is only set to a real function on Windows.  It is
-		// used to parse and execute service commands specified via the -s flag.
+		// runServiceCommand is only set to a real function on Windows.  It is used to parse and execute service
+		// commands specified via the -s flag.
 		var runServiceCommand func(string) error
 		// Service options which are only added on Windows.
-		//
 		serviceOpts := serviceOptions{}
-		// Perform service command and exit if specified.  Invalid service
-		// commands show an appropriate error.
-		// Only runs on Windows since the runServiceCommand function will be nil
-		// when not on Windows.
+		// Perform service command and exit if specified.  Invalid service commands show an appropriate error.
+		// Only runs on Windows since the runServiceCommand function will be nil when not on Windows.
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
 			err := runServiceCommand(serviceOpts.ServiceCommand)
 			if err != nil {
@@ -47,10 +44,6 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		cx.RPCServer = <-cx.NodeChan
 		close(cx.NodeReady)
 		cx.Node.Store(true)
-		// interrupt.AddHandler(func() {
-		// 	log.WARN("interrupt received, starting node shutdown")
-		// 	close(cx.NodeKill)
-		// })
 		cx.WaitGroup.Wait()
 		return nil
 	}

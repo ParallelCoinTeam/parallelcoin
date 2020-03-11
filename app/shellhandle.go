@@ -33,7 +33,6 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}
 			log.Println("restart to complete initial setup")
 			os.Exit(1)
-			// log.L.SetLevel(*cx.Config.LogLevel, true)
 		}
 		log.WARN("starting node")
 		if !*cx.Config.NodeOff {
@@ -54,15 +53,8 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				}
 			}()
 			cx.WalletServer = <-cx.WalletChan
-			// save.Pod(cx.Config)
 		}
 		log.DEBUG("shell started")
-		// interrupt.AddHandler(func() {
-		// 	log.WARN("interrupt received, " +
-		// 		"shutting down shell modules")
-		// 	close(cx.WalletKill)
-		// 	close(cx.NodeKill)
-		// })
 		cx.WaitGroup.Wait()
 		return nil
 	}

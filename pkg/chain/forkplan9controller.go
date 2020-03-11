@@ -2,19 +2,10 @@ package blockchain
 
 import (
 	"sort"
-	
+
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
 )
-
-func secondPowLimitBits(currFork int) (out *map[int32]uint32) {
-	aV := fork.List[currFork].AlgoVers
-	o := make(map[int32]uint32, len(aV))
-	for i := range aV {
-		o[i] = fork.SecondPowLimitBits
-	}
-	return &o
-}
 
 type Algo struct {
 	Name   string
@@ -35,14 +26,16 @@ func (al AlgoList) Swap(i, j int) {
 	al[i], al[j] = al[j], al[i]
 }
 
+type TargetBits map[int32]uint32
+
 // CalcNextRequiredDifficultyPlan9Controller returns all of the algorithm
 // difficulty targets for sending out with the other pieces required to
 // construct a block, as these numbers are generated from block timestamps
 func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
-	lastNode *BlockNode) (newTargetBits map[int32]uint32, err error) {
+	lastNode *BlockNode) (newTargetBits TargetBits, err error) {
 	nH := lastNode.height + 1
 	currFork := fork.GetCurrent(nH)
-	nTB := make(map[int32]uint32)
+	nTB := make(TargetBits)
 	switch currFork {
 	case 0:
 		for i := range fork.List[0].Algos {
@@ -64,13 +57,14 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 				counter++
 			}
 			sort.Sort(algos)
+			log.DEBUG("")
 			for _, v := range algos {
-				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(0, lastNode, v.Name, true)
+				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(lastNode, v.Name, true)
 			}
 			newTargetBits = nTB
 			// log.SPEW(newTargetBits)
 		} else {
-			newTargetBits = b.DifficultyBits.Load().(map[int32]uint32)
+			newTargetBits = b.DifficultyBits.Load().(TargetBits)
 		}
 		return
 	}

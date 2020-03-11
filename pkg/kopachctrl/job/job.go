@@ -35,7 +35,7 @@ type Job struct {
 	SubmitPort      uint16
 	Height          int32
 	PrevBlockHash   *chainhash.Hash
-	Bitses          map[int32]uint32
+	Bitses          blockchain.TargetBits
 	Hashes          map[int32]*chainhash.Hash
 	CoinBases       map[int32]*util.Tx
 }
@@ -71,9 +71,9 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// } else {
 	//	log.DEBUG("notification block is not tip block")
 	// }
-	bitsMap := make(map[int32]uint32)
+	bitsMap := make(blockchain.TargetBits)
 	var err error
-	df := tip.Diffs.Load().(map[int32]uint32)
+	df := tip.Diffs.Load().(blockchain.TargetBits)
 	if df == nil ||
 		len(df) != len(fork.List[1].AlgoVers) {
 		bitsMap, err = cx.RealNode.Chain.
@@ -84,7 +84,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		}
 		tip.Diffs.Store(bitsMap)
 	} else {
-		bitsMap = tip.Diffs.Load().(map[int32]uint32)
+		bitsMap = tip.Diffs.Load().(blockchain.TargetBits)
 	}
 	// log.SPEW(*bitsMap)
 	bitses := Bitses.NewBitses()
@@ -167,7 +167,7 @@ func (j *Container) GetPrevBlockHash() (out *chainhash.Hash) {
 	return Hash.New().DecodeOne(j.Get(5)).Get()
 }
 
-func (j *Container) GetBitses() map[int32]uint32 {
+func (j *Container) GetBitses() blockchain.TargetBits {
 	return Bitses.NewBitses().DecodeOne(j.Get(6)).Get()
 }
 

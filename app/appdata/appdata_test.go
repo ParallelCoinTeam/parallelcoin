@@ -17,7 +17,9 @@ func TestAppDataDir(t *testing.T) {
 	appName := "myapp"
 	appNameUpper := string(unicode.ToUpper(rune(appName[0]))) + appName[1:]
 	appNameLower := string(unicode.ToLower(rune(appName[0]))) + appName[1:]
-	// When we're on Windows, set the expected local and roaming directories per the environment vars.  When we aren't on Windows, the function should return the current directory when forced to provide the Windows path since the environment variables won't exist.
+	// When we're on Windows, set the expected local and roaming directories per the environment vars.  When we aren't
+	// on Windows, the function should return the current directory when forced to provide the Windows path since the
+	// environment variables won't exist.
 	winLocal := "."
 	winRoaming := "."
 	if runtime.GOOS == "windows" {

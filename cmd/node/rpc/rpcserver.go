@@ -23,8 +23,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	uberatomic "go.uber.org/atomic"
+	
 	"github.com/btcsuite/websocket"
+	uberatomic "go.uber.org/atomic"
 	
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/blockdb"
@@ -2926,9 +2927,7 @@ func HandleGetInfo(s *Server, cmd interface{},
 	closeChan <-chan struct{}) (ret interface{}, err error) {
 	var Difficulty, dBlake2b, dBlake14lr, dBlake2s, dKeccak, dScrypt, dSHA256D,
 	dSkein, dStribog, dX11 float64
-	var lastbitsBlake2b, lastbitsKeccak,
-	lastbitsScrypt, lastbitsSHA256D, lastbitsSkein,
-	lastbitsStribog uint32
+	var lastbitsScrypt, lastbitsSHA256D uint32
 	best := s.
 		Cfg.
 		Chain.
@@ -2988,20 +2987,6 @@ func HandleGetInfo(s *Server, cmd interface{},
 		for foundcount < 9 &&
 			height > fork.List[fork.GetCurrent(height)].ActivationHeight-512 {
 			switch fork.GetAlgoName(v.Header().Version, height) {
-			case fork.Blake2b:
-				if lastbitsBlake2b == 0 {
-					foundcount++
-					lastbitsBlake2b = v.Header().Bits
-					dBlake2b = GetDifficultyRatio(lastbitsBlake2b,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
-			case fork.Keccak:
-				if lastbitsKeccak == 0 {
-					foundcount++
-					lastbitsKeccak = v.Header().Bits
-					dKeccak = GetDifficultyRatio(lastbitsKeccak,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
 			case fork.Scrypt:
 				if lastbitsScrypt == 0 {
 					foundcount++
@@ -3016,38 +3001,16 @@ func HandleGetInfo(s *Server, cmd interface{},
 					dSHA256D = GetDifficultyRatio(lastbitsSHA256D,
 						s.Cfg.ChainParams, v.Header().Version)
 				}
-			case fork.Skein:
-				if lastbitsSkein == 0 {
-					foundcount++
-					lastbitsSkein = v.Header().Bits
-					dSkein = GetDifficultyRatio(lastbitsSkein,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
-			case fork.Stribog:
-				if lastbitsStribog == 0 {
-					foundcount++
-					lastbitsStribog = v.Header().Bits
-					dStribog = GetDifficultyRatio(lastbitsStribog,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
 			default:
 			}
 			v = v.RelativeAncestor(1)
 			height--
 		}
 		switch s.Cfg.Algo {
-		case fork.Blake2b:
-			Difficulty = dBlake2b
-		case fork.Keccak:
-			Difficulty = dKeccak
 		case fork.Scrypt:
 			Difficulty = dScrypt
 		case fork.SHA256d:
 			Difficulty = dSHA256D
-		case fork.Skein:
-			Difficulty = dSkein
-		case fork.Stribog:
-			Difficulty = dStribog
 		default:
 		}
 		ret = &btcjson.InfoChainResult{
@@ -3114,25 +3077,8 @@ func HandleGetMiningInfo(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 			Message: "networkHashesPerSec is not an int64",
 		}
 	}
-	var Difficulty,
-	dArgon2i,
-	dBlake2b,
-	dCN7v2,
-	dKeccak,
-	dLyra2rev2,
-	dScrypt,
-	dSHA256D,
-	dSkein,
-	dStribog float64
-	var lastbitsArgon2i,
-	lastbitsBlake2b,
-	lastbitsCN7v2,
-	lastbitsKeccak,
-	lastbitsLyra2rev2,
-	lastbitsScrypt,
-	lastbitsSHA256D,
-	lastbitsSkein,
-	lastbitsStribog uint32
+	var Difficulty, dScrypt, dSHA256D float64
+	var lastbitsScrypt, lastbitsSHA256D uint32
 	best := s.Cfg.Chain.BestSnapshot()
 	v := s.Cfg.Chain.Index.LookupNode(&best.Hash)
 	foundCount, height := 0, best.Height
@@ -3188,41 +3134,6 @@ func HandleGetMiningInfo(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 		foundcount, height := 0, best.Height
 		for foundcount < 9 && height > fork.List[fork.GetCurrent(height)].ActivationHeight-512 {
 			switch fork.GetAlgoName(v.Header().Version, height) {
-			case fork.Argon2i:
-				if lastbitsArgon2i == 0 {
-					foundcount++
-					lastbitsArgon2i = v.Header().Bits
-					dArgon2i = GetDifficultyRatio(lastbitsArgon2i,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
-			case fork.Blake2b:
-				if lastbitsBlake2b == 0 {
-					foundcount++
-					lastbitsBlake2b = v.Header().Bits
-					dBlake2b = GetDifficultyRatio(lastbitsBlake2b,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
-			case fork.X11:
-				if lastbitsCN7v2 == 0 {
-					foundcount++
-					lastbitsCN7v2 = v.Header().Bits
-					dBlake2b = GetDifficultyRatio(lastbitsCN7v2,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
-			case fork.Keccak:
-				if lastbitsKeccak == 0 {
-					foundcount++
-					lastbitsKeccak = v.Header().Bits
-					dKeccak = GetDifficultyRatio(lastbitsKeccak,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
-			case fork.Blake3:
-				if lastbitsLyra2rev2 == 0 {
-					foundcount++
-					lastbitsLyra2rev2 = v.Header().Bits
-					dKeccak = GetDifficultyRatio(lastbitsLyra2rev2,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
 			case fork.Scrypt:
 				if lastbitsScrypt == 0 {
 					foundcount++
@@ -3237,44 +3148,16 @@ func HandleGetMiningInfo(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 					dSHA256D = GetDifficultyRatio(lastbitsSHA256D,
 						s.Cfg.ChainParams, v.Header().Version)
 				}
-			case fork.Skein:
-				if lastbitsSkein == 0 {
-					foundcount++
-					lastbitsSkein = v.Header().Bits
-					dSkein = GetDifficultyRatio(lastbitsSkein,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
-			case fork.Stribog:
-				if lastbitsStribog == 0 {
-					foundcount++
-					lastbitsStribog = v.Header().Bits
-					dStribog = GetDifficultyRatio(lastbitsStribog,
-						s.Cfg.ChainParams, v.Header().Version)
-				}
 			default:
 			}
 			v = v.RelativeAncestor(1)
 			height--
 		}
 		switch s.Cfg.Algo {
-		case fork.Argon2i:
-			Difficulty = dArgon2i
-		case fork.Blake2b:
-			Difficulty = dBlake2b
-		case fork.X11:
-			Difficulty = dCN7v2
-		case fork.Keccak:
-			Difficulty = dKeccak
-		case fork.Blake3:
-			Difficulty = dLyra2rev2
 		case fork.Scrypt:
 			Difficulty = dScrypt
 		case fork.SHA256d:
 			Difficulty = dSHA256D
-		case fork.Skein:
-			Difficulty = dSkein
-		case fork.Stribog:
-			Difficulty = dStribog
 		default:
 		}
 		log.DEBUG("missing cpu miner stuff in here") // cpuminer
@@ -3286,16 +3169,8 @@ func HandleGetMiningInfo(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 			PowAlgoID:          fork.GetAlgoID(s.Cfg.Algo, height),
 			PowAlgo:            s.Cfg.Algo,
 			Difficulty:         Difficulty,
-			DifficultyBlake2b:  dBlake2b,
-			DifficultyKeccak:   dKeccak,
 			DifficultyScrypt:   dScrypt,
 			DifficultySHA256D:  dSHA256D,
-			DifficultySkein:    dSkein,
-			DifficultyStribog:  dStribog,
-			// Generate:            s.Cfg.CPUMiner.IsMining(), // cpuminer
-			// GenAlgo:             s.Cfg.CPUMiner.GetAlgo(),
-			// GenProcLimit:        s.Cfg.CPUMiner.NumWorkers(),
-			// HashesPerSec:        int64(s.Cfg.CPUMiner.HashesPerSecond()),
 			NetworkHashPS: networkHashesPerSec,
 			PooledTx:      uint64(s.Cfg.TxMemPool.Count()),
 			TestNet:       (*s.Config.Network)[0] == 't',

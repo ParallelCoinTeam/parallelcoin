@@ -12,36 +12,14 @@ import (
 	"github.com/p9c/pod/pkg/log"
 )
 
-// CalcNextRequiredDifficultyPlan9 implements the Parallel Prime Difficulty
-// Adjustment.
-// From the first 9 primes 2, 3, 5, 7, 11, 13, 17, 19, 23
-// using these values to pick the primes in sequence of these numbers:
-// 3, 5, 11, 17, 31, 41, 59, 67, 83 being the interval in seconds
-// This sequence has an effective cumulative product of 37066.310186611 years
-// Thus it is effectively random as a whole though each parallel interval/version
-// is cyclic.
-func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
-	lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32,
-	adjustment float64, err error) {
-	newTargetBits = fork.SecondPowLimitBits
-	if lastNode == nil {
-		log.TRACE("lastNode is nil")
-	}
-	algoInterval := fork.P9Algos[algoname].VersionInterval
-	algoVer := fork.P9Algos[algoname].Version
-	_ = algoInterval
-	adjustment = 1
-	startHeight := fork.List[1].ActivationHeight
-	if b.params.Net == wire.TestNet3 {
-		startHeight = fork.List[1].TestnetStart
-	}
-	var last *BlockNode
-	var found bool
-	algStamps := []uint64{uint64(lastNode.timestamp)}
-	for ln := lastNode; ln != nil && ln.height > startHeight &&
+func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
+	found bool, algStamps []uint64, version int32) {
+
+	version = fork.P9Algos[algoName].Version
+	for ln := lastNode.RelativeAncestor(1); ln != nil && ln.height > startHeight &&
 		len(algStamps) <= int(fork.List[1].AveragingInterval); ln = ln.
 		RelativeAncestor(1) {
-		if ln.version == algoVer && ln.height > startHeight {
+		if ln.version == version {
 			algStamps = append(algStamps, uint64(ln.timestamp))
 			if !found {
 				found = true
@@ -49,39 +27,99 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 			}
 		}
 	}
-	const minAvSamples = 2
-	ttpb := float64(fork.List[1].Algos[algoname].VersionInterval)
+	return
+}
+
+func GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []uint64) {
+
+	for ln := lastNode.RelativeAncestor(1); ln != nil && ln.height > startHeight &&
+		len(allStamps) <= int(fork.List[1].AveragingInterval); ln = ln.RelativeAncestor(1) {
+		allStamps = append(allStamps, uint64(ln.timestamp))
+	}
+	return
+}
+
+func GetAll(allStamps []uint64) (allAv, allAdj float64) {
+	allAdj = 1
+	allAv = fork.P9Average
+	// calculate intervals
+	allIntervals := make([]float64, len(allStamps)-1)
+	for i := range allStamps {
+		if i > 0 {
+			r := allStamps[i-1] - allStamps[i]
+			allIntervals[i-1] = float64(r)
+		}
+	}
+	// calculate exponential weighted moving average from intervals
+	aewma := ewma.NewMovingAverage()
+	for _, x := range allIntervals {
+		aewma.Add(x)
+	}
+	allAv = aewma.Value()
+	if allAv != 0 {
+		allAdj = allAv / fork.P9Average
+	}
+	return
+}
+
+func GetAlg(algStampsP []uint64, targetTimePerBlock float64) (algAv, algAdj float64) {
+	algStamps := algStampsP
+	// calculate intervals
+	algIntervals := make([]uint64, len(algStamps)-1)
+	for i := range algStamps {
+		if i > 0 {
+			r := algStamps[i-1] - algStamps[i]
+			algIntervals[i-1] = r
+		}
+	}
+	// calculate exponential weighted moving average from intervals
+	gewma := ewma.NewMovingAverage()
+	for _, x := range algIntervals {
+		gewma.Add(float64(x))
+	}
+	algAv = gewma.Value()
+	if algAv != 0 {
+		algAdj = algAv / targetTimePerBlock
+	}
+	return
+}
+
+// CalcNextRequiredDifficultyPlan9 returns the consensus difficulty adjustment by processing recent past blocks
+func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoName string,
+	l bool) (newTargetBits uint32, adjustment float64, err error) {
+	lastNode := lastNodeP
+
+	algoVer := fork.GetAlgoVer(algoName, lastNode.height+1)
+	ttpb := float64(fork.List[1].Algos[algoName].VersionInterval)
+	newTargetBits = fork.SecondPowLimitBits
+	const minAvSamples = 4
+	adjustment = 1
+	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, fork.P9Average
+	if lastNode == nil {
+		log.TRACE("lastNode is nil")
+	}
+	// algoInterval := fork.P9Algos[algoname].VersionInterval
+	startHeight := fork.List[1].ActivationHeight
+	if b.params.Net == wire.TestNet3 {
+		startHeight = fork.List[1].TestnetStart
+	}
+	allStamps := GetAllStamps(startHeight, lastNode)
+	last, _, algStamps, algoVer := GetAlgStamps(algoName, startHeight, lastNode)
+	if len(allStamps) > minAvSamples {
+		allAv, allAdj = GetAll(allStamps)
+	}
 	if len(algStamps) > minAvSamples {
-		intervals := float64(0)
-		// calculate intervals
-		algIntervals := []uint64{}
-		for i := range algStamps {
-			if i > 0 {
-				r := algStamps[i-1] - algStamps[i]
-				intervals++
-				algIntervals = append(algIntervals, r)
-			}
-		}
-		if intervals >= minAvSamples {
-			// calculate exponential weighted moving average from intervals
-			awi := ewma.NewMovingAverage()
-			for _, x := range algIntervals {
-				awi.Add(float64(x))
-			}
-			adjustment = capP9Adjustment(awi.Value() / ttpb / float64(len(fork.
-				P9Algos)))
-		}
+		algAv, algAdj = GetAlg(algStamps, ttpb)
 	}
-	if last == nil {
-		log.TRACE("last was nil")
-		last = new(BlockNode)
-		last.bits = fork.SecondPowLimitBits
-		last.version = algoVer
+	bits := fork.SecondPowLimitBits
+	if last != nil {
+		bits = last.bits
 	}
-	unsquared := adjustment
-	adjustment *= adjustment * adjustment
+	// log.DEBUG(algAdj, allAdj)
+	adjustment = algAdj + allAdj*allAdj*allAdj
+	adjustment /= 2
 	bigAdjustment := big.NewFloat(adjustment)
-	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(last.bits))
+	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
@@ -92,27 +130,39 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 		newTargetBits = BigToCompact(newTarget)
 		// log.TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
 	}
-	// if l {
-	an := fork.List[1].AlgoVers[algoVer]
-	pad := 9 - len(an)
-	if pad > 0 {
-		an += strings.Repeat(" ", pad)
-	}
-	if l && workerNumber == 0 {
+	if l {
 		log.DEBUGC(func() string {
-			return fmt.Sprintf("%08x %s %s %08x av %s, %4.0f interval",
-				// RightJustify(fmt.Sprint(workerNumber), 3),
-				// RightJustify(fmt.Sprint(last.height+1), 9),
-				last.bits,
+			an := fork.List[1].AlgoVers[algoVer]
+			pad := 9 - len(an)
+			if pad > 0 {
+				an += strings.Repeat(" ", pad)
+			}
+			factor := 1 / adjustment
+			symbol := "->"
+			if factor < 1 {
+				factor = adjustment
+				symbol = "<-"
+			}
+			if factor == 1 {
+				symbol = "--"
+			}
+			isNewest := ""
+			if lastNode.version == algoVer {
+				isNewest = "*"
+			}
+			return fmt.Sprintf("%s %s av %s/%2.2f %s %s %08x %08x%s",
 				an,
-				RightJustify(fmt.Sprintf("%4.4fx", 1/adjustment), 11),
+				RightJustify(fmt.Sprintf("%4.1f", algAv), 7),
+				RightJustify(fmt.Sprintf("%4.1f", allAv), 7),
+				fork.P9Average,
+				RightJustify(fmt.Sprintf("%4.4f", factor), 9),
+				symbol,
+				bits,
 				newTargetBits,
-				RightJustify(fmt.Sprintf("%4.4f", unsquared*ttpb), 11),
-				ttpb, // fork.List[1].Algos[algoname].VersionInterval,
+				isNewest,
 			)
 		})
 	}
-	// }
 	return
 }
 
@@ -121,7 +171,9 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(workerNumber uint32,
 // rules. This function differs from the exported  CalcNextRequiredDifficulty
 // in that the exported version uses the current best chain as the previous
 // block node while this function accepts any block node.
-func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32, adjustment float64, err error) {
+func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, algoName string, l bool,
+) (newTargetBits uint32, adjustment float64, err error) {
+
 	nH := lastNode.height + 1
 	newTargetBits = fork.SecondPowLimitBits
 	adjustment = 1.0
@@ -129,10 +181,9 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		return
 	}
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
-		dayDiv := b.GetCommonP9Averages(lastNode, nH)
-	algoVer := fork.GetAlgoVer(algoname, nH)
-	since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode,
-		algoVer)
+	dayDiv := b.GetCommonP9Averages(lastNode, nH)
+	algoVer := fork.GetAlgoVer(algoName, nH)
+	since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode, algoVer)
 	if last == nil {
 		return
 	}

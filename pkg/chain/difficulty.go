@@ -5,9 +5,9 @@ import (
 	"math/big"
 	"strings"
 	"time"
-	
+
 	"github.com/p9c/pod/pkg/log"
-	
+
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
@@ -87,9 +87,9 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode, algoname, l)
 	// Plan 9 from Crypto Space
 	case 1:
-		bits, ok := lastNode.Diffs.Load().(map[int32]uint32)
+		bits, ok := lastNode.Diffs.Load().(TargetBits)
 		if bits == nil || !ok {
-			lastNode.Diffs.Store(make(map[int32]uint32))
+			lastNode.Diffs.Store(make(TargetBits))
 		}
 		version := fork.GetAlgoVer(algoname, lastNode.height+1)
 		if bits[version] == 0 {

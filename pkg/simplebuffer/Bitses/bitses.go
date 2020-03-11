@@ -3,6 +3,8 @@ package Bitses
 import (
 	"encoding/binary"
 	"sync"
+
+	blockchain "github.com/p9c/pod/pkg/chain"
 )
 
 type Bitses struct {
@@ -55,10 +57,10 @@ func (b *Bitses) Encode() (out []byte) {
 	return
 }
 
-func (b *Bitses) Get() (out map[int32]uint32) {
+func (b *Bitses) Get() (out blockchain.TargetBits) {
 	b.Lock()
 	defer b.Unlock()
-	out = make(map[int32]uint32)
+	out = make(blockchain.TargetBits)
 	for algoVer := range b.Byteses {
 		oB := binary.BigEndian.Uint32(b.Byteses[algoVer])
 		out[algoVer] = oB
@@ -67,7 +69,7 @@ func (b *Bitses) Get() (out map[int32]uint32) {
 	return
 }
 
-func (b *Bitses) Put(in map[int32]uint32) *Bitses {
+func (b *Bitses) Put(in blockchain.TargetBits) *Bitses {
 	b.Lock()
 	defer b.Unlock()
 	b.Length = byte(len(in))

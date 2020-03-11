@@ -3,7 +3,6 @@ package worker
 import (
 	"crypto/cipher"
 	"errors"
-	"fmt"
 	"math/rand"
 	"net"
 	"os"
@@ -30,7 +29,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 25
+const RoundsPerAlgo = 9
 
 type Worker struct {
 	mx            sync.Mutex
@@ -64,16 +63,6 @@ type Counter struct {
 	RoundsPerAlgo atomic.Int32
 }
 
-// func (w *Worker) Close() {
-// 	if err := w.multicastConn.Close(); log.Check(err) {
-// 	}
-// 	if err := w.unicastConn.Close(); log.Check(err) {
-// 	}
-// 	if err := w.dispatchConn.Close(); log.Check(err) {
-// 	}
-//
-// }
-
 // NewCounter returns an initialized algorithm rolling counter that ensures
 // each miner does equal amounts of every algorithm
 func NewCounter(roundsPerAlgo int32) (c *Counter) {
@@ -94,6 +83,7 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 	// the formula below rolls through versions with blocks roundsPerAlgo
 	// long for each algorithm by its index
 	algs := c.Algos.Load().([]int32)
+	// log.DEBUG(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
 		log.DEBUG("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
 		return 0
@@ -125,7 +115,7 @@ func (w *Worker) hashReport() {
 	}); log.Check(err) {
 	}
 	// log.INFO("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
-	log.INFOF("average hashrate %.2f", av.Value())
+	log.TRACEF("average hashrate %.2f", av.Value())
 }
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network
@@ -166,20 +156,19 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 				select {
 				case <-sampleTicker.C:
 					w.hashReport()
-					log.DEBUG("hash report")
 					break pausing
 				case <-w.stopChan:
-					log.DEBUG("received pause signal while paused")
+					log.TRACE("received pause signal while paused")
 					// drain stop channel in pause
 					break
 				case <-w.startChan:
-					log.DEBUG("received start signal")
+					log.TRACE("received start signal")
 					break pausing
 				case <-w.Quit:
-					log.DEBUG("quitting")
+					log.TRACE("quitting")
 					break out
 				}
-				log.DEBUG("worker running")
+				log.TRACE("worker running")
 			}
 			// Run state
 		running:
@@ -189,17 +178,17 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 					w.hashReport()
 					break
 				case <-w.startChan:
-					log.DEBUG("received start signal while running")
+					log.TRACE("received start signal while running")
 					// drain start channel in run mode
 					break
 				case <-w.stopChan:
-					log.DEBUG("received pause signal while running")
-					w.block.Store(&util.Block{})
-					w.bitses.Store((map[int32]uint32)(nil))
-					w.hashes.Store((map[int32]*chainhash.Hash)(nil))
+					log.TRACE("received pause signal while running")
+					// w.block.Store(&util.Block{})
+					// w.bitses.Store((blockchain.TargetBits)(nil))
+					// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 					break running
 				case <-w.Quit:
-					log.DEBUG("worker stopping while running")
+					log.TRACE("worker stopping while running")
 					break out
 				default:
 					if w.block.Load() == nil || w.bitses.Load() == nil || w.hashes.Load() == nil ||
@@ -209,37 +198,32 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 						// work
 						nH := w.block.Load().(*util.Block).Height()
 						hv := w.roller.GetAlgoVer()
+						// log.DEBUG(hv)
+						h := w.hashes.Load().(map[int32]*chainhash.Hash)
+						// log.DEBUG("hashes", hv, h)
 						mmb := w.msgBlock.Load().(wire.MsgBlock)
 						mb := &mmb
 						mb.Header.Version = hv
-						h := w.hashes.Load().(map[int32]*chainhash.Hash)
 						if h != nil {
-							mb.Header.MerkleRoot = *h[mb.Header.Version]
+							mr, ok := h[hv]
+							if !ok {
+								continue
+							}
+							mb.Header.MerkleRoot = *mr
 						} else {
 							continue
 						}
-						b := w.bitses.Load().(map[int32]uint32)
+						b := w.bitses.Load().(blockchain.TargetBits)
 						if bb, ok := b[mb.Header.Version]; ok {
 							mb.Header.Bits = bb
 						} else {
 							continue
 						}
-						select {
-						case <-w.stopChan:
-							w.block.Store(&util.Block{})
-							w.bitses.Store((map[int32]uint32)(nil))
-							w.hashes.Store((map[int32]*chainhash.Hash)(nil))
-							break running
-						case <-w.Quit:
-							log.DEBUG("worker stopping in the middle of it")
-							break out
-						default:
-						}
 						var nextAlgo int32
 						if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 							select {
 							case <-w.Quit:
-								log.DEBUG("worker stopping on pausing message")
+								log.TRACE("worker stopping on pausing message")
 								break out
 							default:
 							}
@@ -257,50 +241,37 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 						hash := mb.Header.BlockHashWithAlgos(nH)
 						bigHash := blockchain.HashToBig(&hash)
 						if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
-							log.DEBUGC(func() string {
-								return fmt.Sprintln(
-									"solution found h:", nH,
-									hash.String(),
-									fork.List[fork.GetCurrent(nH)].
-										AlgoVers[mb.Header.Version],
-									"total hashes since startup",
-									w.roller.C.Load()-int32(w.startNonce),
-									fork.IsTestnet,
-									mb.Header.Version,
-									mb.Header.Bits,
-									mb.Header.MerkleRoot.String(),
-									hash,
-								)
-							})
-							log.SPEW(mb)
+							//log.DEBUGC(func() string {
+							//	return fmt.Sprintln(
+							//		"solution found h:", nH,
+							//		hash.String(),
+							//		fork.List[fork.GetCurrent(nH)].
+							//			AlgoVers[mb.Header.Version],
+							//		"total hashes since startup",
+							//		w.roller.C.Load()-int32(w.startNonce),
+							//		fork.IsTestnet,
+							//		mb.Header.Version,
+							//		mb.Header.Bits,
+							//		mb.Header.MerkleRoot.String(),
+							//		hash,
+							//	)
+							//})
+							//log.SPEW(mb)
 							srs := sol.GetSolContainer(w.senderPort.Load(), mb)
-							select {
-							case <-w.Quit:
-								log.DEBUG("worker stopping in the middle of it")
-								break out
-							default:
-							}
 							err := w.dispatchConn.SendMany(sol.SolutionMagic,
 								transport.GetShards(srs.Data))
 							if err != nil {
 								log.ERROR(err)
 							}
-							log.DEBUG("sent solution")
+							log.TRACE("sent solution")
 							break running
 						}
 						mb.Header.Version = nextAlgo
-						mb.Header.Bits = w.bitses.Load().(map[int32]uint32)[mb.Header.Version]
+						mb.Header.Bits = w.bitses.Load().(blockchain.TargetBits)[mb.Header.Version]
 						mb.Header.Nonce++
 						w.msgBlock.Store(*mb)
 						// if we have completed a cycle report the hashrate on starting new algo
 						// log.DEBUG(w.hashCount.Load(), uint64(w.roller.RoundsPerAlgo), w.roller.C)
-						select {
-						case <-w.Quit:
-							log.DEBUG("worker stopping in the middle of it")
-							break out
-						default:
-						}
-
 					}
 				}
 			}
@@ -329,59 +300,26 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		*reply = true
 		return
 	}
-	// log.DEBUG("running NewJob RPC method")
-	// if w.dispatchConn.SendConn == nil || len(w.dispatchConn.SendConn) < 1 {
-	// log.DEBUG("loading dispatch connection from job message")
-	// log.TRACE(job.String())
-	// if there is no dispatch connection, make one.
-	// If there is one but the server died or was disconnected the
-	// connection the existing dispatch connection is nilled and this
-	// will run. If there is no controllers on the network,
-	// the worker pauses
-	// ips := job.GetIPs()
-	hashes := job.GetHashes()
-	if hashes[5].IsEqual(w.lastMerkle) {
+	j := job.Struct()
+	w.bitses.Store(j.Bitses)
+	w.hashes.Store(j.Hashes)
+	if j.Hashes[5].IsEqual(w.lastMerkle) {
 		// log.DEBUG("not a new job")
 		*reply = true
 		return
 	}
-	w.lastMerkle = hashes[5]
-	// var addresses []string
-	// for i := range ips {
-	// 	generally there is only one but if a server had two interfaces
-	// 	to different LANs it would send both
-	// 	addresses = append(addresses, ips[i].String()+":"+
-	// 		fmt.Sprint(job.GetControllerListenerPort()))
-	// }
-	// address := ips[0].String() + ":" + fmt.Sprint(job.GetControllerListenerPort())
-	// remoteAddress := address
-	// if w.dispatchConn != nil {
-	// 	ra := w.dispatchConn.Sender
-	// 	if ra != nil {
-	// 		remoteAddress = ra.RemoteAddr().String()
-	// 	}
-	// }
-	// if address != remoteAddress {
-	// 	log.DEBUG("setting destination", address)
-	// 	err = w.dispatchConn.SetDestination(address)
-	// 	if err != nil {
-	// 		log.ERROR(err)
-	// 	}
-	// }
-	// }
-	// log.SPEW(w.dispatchConn)
-	*reply = true
-	// halting current work
-	w.stopChan <- struct{}{}
-	bitses := job.GetBitses()
-	w.bitses.Store(bitses)
-	w.hashes.Store(hashes)
-	newHeight := job.GetNewHeight()
 	var algos []int32
-	for i := range bitses {
+	for i := range j.Bitses {
 		// we don't need to know net params if version numbers come with jobs
 		algos = append(algos, i)
 	}
+	// log.DEBUG(algos)
+	w.lastMerkle = j.Hashes[5]
+	*reply = true
+	// halting current work
+	w.stopChan <- struct{}{}
+	newHeight := job.GetNewHeight()
+
 	if len(algos) > 0 {
 		// if we didn't get them in the job don't update the old
 		w.roller.Algos.Store(algos)
@@ -392,20 +330,17 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	// TODO: ensure worker time sync - ntp? time wrapper with skew adjustment
 	hv := w.roller.GetAlgoVer()
 	mb.Header.Version = hv
-	b := w.bitses.Load().(map[int32]uint32)
 	var ok bool
-	mb.Header.Bits, ok = b[mb.Header.Version]
+	mb.Header.Bits, ok = j.Bitses[mb.Header.Version]
 	if !ok {
 		return errors.New("bits are empty")
 	}
 	rand.Seed(time.Now().UnixNano())
 	mb.Header.Nonce = rand.Uint32()
-	if w.hashes.Load() == nil {
+	if j.Hashes == nil {
 		return errors.New("failed to decode merkle roots")
 	} else {
-		h := w.hashes.Load().(map[int32]*chainhash.Hash)
-		// log.DEBUG(h)
-		hh, ok := h[hv]
+		hh, ok := j.Hashes[hv]
 		if !ok {
 			return errors.New("could not get merkle root from job")
 		}

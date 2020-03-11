@@ -3,23 +3,18 @@ package fork
 
 import (
 	"encoding/hex"
+	"fmt"
 	"math/big"
 	"math/rand"
+	"sort"
 	"time"
 	
 	"github.com/p9c/pod/pkg/log"
 )
 
 const (
-	Argon2i = "argon2i"
-	Blake2b = "blake2b"
-	X11     = "x11"
-	Keccak  = "keccak"
-	Blake3  = "blake3"
 	Scrypt  = "scrypt"
 	SHA256d = "sha256d"
-	Skein   = "skein"
-	Stribog = "stribog"
 )
 
 // AlgoParams are the identifying block version number and their minimum target bits
@@ -42,9 +37,68 @@ type HardForks struct {
 	TestnetStart       int32
 }
 
-const IntervalBase = 3
+const IntervalBase = 9
+
+func init() {
+	log.TRACE("running fork data init")
+	for i := range p9AlgosNumeric {
+		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", p9AlgosNumeric[i].VersionInterval)
+	}
+	for i, v := range P9AlgoVers {
+		List[1].Algos[v] = p9AlgosNumeric[i]
+	}
+	AlgoSlices = append(AlgoSlices, AlgoSpecs{})
+	for i := range Algos {
+		AlgoSlices[0] = append(AlgoSlices[0], AlgoSpec{
+			List[0].Algos[i].Version,
+			i,
+		})
+	}
+	AlgoSlices = append(AlgoSlices, AlgoSpecs{})
+	for i := range P9Algos {
+		AlgoSlices[1] = append(AlgoSlices[1], AlgoSpec{
+			List[1].Algos[i].Version,
+			i,
+		})
+	}
+	sort.Sort(AlgoSlices[0])
+	sort.Sort(AlgoSlices[1])
+	log.TRACE(P9AlgoVers)
+	baseVersionName := AlgoSlices[1][0].Name
+	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
+	log.TRACE(baseVersionName, baseVersionInterval)
+	P9Average = 0
+	for _, i := range AlgoSlices[1] {
+		vi := float64(P9Algos[i.Name].VersionInterval)
+		p9a := baseVersionInterval / vi
+		P9Average += p9a
+		log.TRACEF("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
+	}
+	log.TRACE(P9Average)
+	P9Average = baseVersionInterval / P9Average
+	log.TRACE(P9Average)
+}
+
+type AlgoSpec struct {
+	Version int32
+	Name    string
+}
+type AlgoSpecs []AlgoSpec
+
+func (a AlgoSpecs) Len() int {
+	return len(a)
+}
+
+func (a AlgoSpecs) Less(i, j int) bool {
+	return a[i].Version < a[j].Version
+}
+
+func (a AlgoSpecs) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
 
 var (
+	AlgoSlices []AlgoSpecs
 	// AlgoVers is the lookup for pre hardfork
 	//
 	AlgoVers = map[int32]string{
@@ -98,35 +152,29 @@ var (
 		},
 	}
 	// P9AlgoVers is the lookup for after 1st hardfork
-	P9AlgoVers = map[int32]string{
-		5:  Blake2b,
-		6:  Argon2i,
-		7:  X11,
-		8:  Keccak,
-		9:  Scrypt,
-		10: SHA256d,
-		11: Skein,
-		12: Stribog,
-		13: Blake3,
-	}
+	P9AlgoVers = make(map[int32]string)
 	
 	// P9Algos is the algorithm specifications after the hard fork
-	P9Algos = map[string]AlgoParams{
-		P9AlgoVers[5]:  {5, FirstPowLimitBits, 0, 3 * IntervalBase},   // 2
-		P9AlgoVers[6]:  {6, FirstPowLimitBits, 1, 5 * IntervalBase},   // 3
-		P9AlgoVers[7]:  {7, FirstPowLimitBits, 2, 11 * IntervalBase},  // 5
-		P9AlgoVers[8]:  {8, FirstPowLimitBits, 3, 17 * IntervalBase},  // 7
-		P9AlgoVers[9]:  {9, FirstPowLimitBits, 4, 31 * IntervalBase},  // 11
-		P9AlgoVers[10]: {10, FirstPowLimitBits, 5, 41 * IntervalBase}, // 13
-		P9AlgoVers[11]: {11, FirstPowLimitBits, 7, 59 * IntervalBase}, // 17
-		P9AlgoVers[12]: {12, FirstPowLimitBits, 6, 67 * IntervalBase}, // 19
-		P9AlgoVers[13]: {13, FirstPowLimitBits, 8, 83 * IntervalBase}, // 23
+	P9Algos        = make(map[string]AlgoParams)
+	p9AlgosNumeric = map[int32]AlgoParams{
+		5:  {5, FirstPowLimitBits, 0, 1<<1 * IntervalBase},   // 2
+		6:  {6, FirstPowLimitBits, 1, 1<<2 * IntervalBase},   // 3
+		7:  {7, FirstPowLimitBits, 2, 1<<3 * IntervalBase},  // 5
+		8:  {8, FirstPowLimitBits, 3, 1<<4 * IntervalBase},  // 7
+		9:  {9, FirstPowLimitBits, 4, 1<<5 * IntervalBase},  // 11
+		10: {10, FirstPowLimitBits, 5, 1<<6 * IntervalBase}, // 13
+		11: {11, FirstPowLimitBits, 7, 1<<7 * IntervalBase}, // 17
+		12: {12, FirstPowLimitBits, 6, 1<<8 * IntervalBase}, // 19
+		13: {13, FirstPowLimitBits, 8, 1<<9 * IntervalBase}, // 23
 	}
+	
+	P9Average float64
+	
 	// SecondPowLimit is
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
 			// "01f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1")
-			"0099999999999999999999999999999999999999999999999999999999999999")
+			"0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	SecondPowLimitBits = BigToCompact(&SecondPowLimit)
@@ -170,35 +218,10 @@ func GetRandomVersion(height int32) int32 {
 // at a given height. If "random" is given, a random number is taken from the
 // system secure random source (for randomised cpu mining)
 func GetAlgoVer(name string, height int32) (version int32) {
-	n := SHA256d
 	hf := GetCurrent(height)
-	// INFO("GetAlgoVer", name, height, hf}
-	if name == "random" {
-		rng := rand.New(rand.NewSource(time.Now().Unix()))
-		rn := rng.Intn(len(List[hf].AlgoVers)) + 5
-		log.TRACE("random!", rn)
-		randomalgover := int32(rn)
-		switch hf {
-		case 0:
-			// INFO("rng", randomalgover, randomalgover }
-			switch randomalgover & 1 {
-			case 0:
-				version = 2
-			case 1:
-				version = 514
-			}
-			return
-		case 1:
-			log.INFO("rng", randomalgover, randomalgover)
-			actualver := randomalgover
-			log.INFO("actualver", actualver)
-			rndalgo := List[1].AlgoVers[actualver]
-			log.INFO("algo", rndalgo)
-			algo := List[1].Algos[rndalgo].Version
-			log.INFO("actualalgo", algo)
-			return algo
-		}
-	} else {
+	n := AlgoSlices[hf][0].Name
+	//log.DEBUG("GetAlgoVer", name, height, hf, n)
+	if _, ok := List[hf].Algos[name]; ok {
 		n = name
 	}
 	version = List[hf].Algos[n].Version
