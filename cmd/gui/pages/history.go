@@ -4,33 +4,33 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
-	itemValue = &controller.DuoUIcounter{
+	itemValue = &gel.DuoUIcounter{
 		Value:        11,
 		OperateValue: 1,
 		From:         0,
 		To:           15,
-		CounterInput: &controller.Editor{
+		CounterInput: &gel.Editor{
 			Alignment:  text.Middle,
 			SingleLine: true,
 		},
-		CounterIncrease: new(controller.Button),
+		CounterIncrease: new(gel.Button),
 		//CounterDecrease: new(controller.Button),
-		CounterReset: new(controller.Button),
+		CounterReset: new(gel.Button),
 	}
 )
 
-func History(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+func History(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	return th.DuoUIpage("HISTORY", 0, func() {}, component.ContentHeader(gtx, th, headerTransactions(rc, gtx, th)), txsBody(rc, gtx, th), func() {})
 }
 
-func headerTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func headerTransactions(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
@@ -43,7 +43,7 @@ func headerTransactions(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme
 	}
 }
 
-func txsBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func txsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(16)).Layout(gtx, func() {
 			layout.Flex{

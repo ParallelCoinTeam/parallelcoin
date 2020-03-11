@@ -2,10 +2,10 @@ package rcd
 
 import (
 	"fmt"
+	"github.com/p9c/gel"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gui/controller"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 	"reflect"
@@ -72,7 +72,7 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 		Abbrevation: "DUO",
 		Tabs: &model.DuoUIconfTabs{
 			Current:  "wallet",
-			TabsList: make(map[string]*controller.Button),
+			TabsList: make(map[string]*gel.Button),
 		},
 		Daemon: &model.DaemonConfig{
 			Config: cx.Config,
@@ -83,34 +83,34 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 
 	settingsFields := make(map[string]interface{})
 	for _, group := range settings.Daemon.Schema.Groups {
-		settings.Tabs.TabsList[group.Legend] = new(controller.Button)
+		settings.Tabs.TabsList[group.Legend] = new(gel.Button)
 		for _, field := range group.Fields {
 			switch field.Type {
 			case "array":
-				settingsFields[field.Label] = new(controller.Button)
+				settingsFields[field.Label] = new(gel.Button)
 			case "input":
-				settingsFields[field.Label] = &controller.Editor{
+				settingsFields[field.Label] = &gel.Editor{
 					SingleLine: true,
 				}
 				if cx.ConfigMap[field.Model] != nil {
 					switch field.InputType {
 					case "text":
-						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*string)))
+						(settingsFields[field.Label]).(*gel.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*string)))
 					case "number":
-						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*int)))
+						(settingsFields[field.Label]).(*gel.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*int)))
 					case "decimal":
-						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*float64)))
+						(settingsFields[field.Label]).(*gel.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*float64)))
 					case "time":
-						(settingsFields[field.Label]).(*controller.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*time.Duration)))
+						(settingsFields[field.Label]).(*gel.Editor).SetText(fmt.Sprint(*cx.ConfigMap[field.Model].(*time.Duration)))
 					}
 				}
 			case "switch":
-				settingsFields[field.Label] = new(controller.CheckBox)
-				(settingsFields[field.Label]).(*controller.CheckBox).SetChecked(*cx.ConfigMap[field.Model].(*bool))
+				settingsFields[field.Label] = new(gel.CheckBox)
+				(settingsFields[field.Label]).(*gel.CheckBox).SetChecked(*cx.ConfigMap[field.Model].(*bool))
 			case "radio":
-				settingsFields[field.Label] = new(controller.Enum)
+				settingsFields[field.Label] = new(gel.Enum)
 			default:
-				settingsFields[field.Label] = new(controller.Button)
+				settingsFields[field.Label] = new(gel.Button)
 			}
 		}
 	}

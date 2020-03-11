@@ -1,9 +1,9 @@
 package rcd
 
 import (
+	"github.com/p9c/gel"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/node/rpc"
-	"github.com/p9c/pod/pkg/gui/controller"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -69,7 +69,7 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	// b.Time = t.Format("02/01/2006, 15:04:05")
 	b.Time = block.Time
 
-	b.Link = &controller.Button{}
+	b.Link = &gel.Button{}
 	return
 }
 

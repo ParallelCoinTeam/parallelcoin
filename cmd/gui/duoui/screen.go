@@ -3,17 +3,17 @@ package duoui
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/pkg/gui/ico"
-	"github.com/p9c/pod/pkg/gui/theme"
 	"image"
 )
 
 // Main wallet screen
 func (ui *DuoUI) DuoUIsplashScreen() {
 	cs := ui.ly.Context.Constraints
-	theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-	logo, _ := theme.NewDuoUIicon(ico.ParallelCoin)
+	gelook.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	logo, _ := gelook.NewDuoUIicon(ico.ParallelCoin)
 	layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
 		layout.Rigid(func() {
 			layout.Flex{Axis: layout.Horizontal}.Layout(ui.ly.Context,
@@ -21,8 +21,8 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 					layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
 						size := ui.ly.Context.Px(unit.Dp(256)) - 2*ui.ly.Context.Px(unit.Dp(8))
 						if logo != nil {
-							logo.Color = theme.HexARGB(ui.ly.Theme.Colors["Dark"])
-							logo.Color = theme.HexARGB(ui.ly.Theme.Colors["Light"])
+							logo.Color = gelook.HexARGB(ui.ly.Theme.Colors["Dark"])
+							logo.Color = gelook.HexARGB(ui.ly.Theme.Colors["Light"])
 							logo.Layout(ui.ly.Context, unit.Px(float32(size)))
 						}
 						ui.ly.Context.Dimensions = layout.Dimensions{
@@ -33,7 +33,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 				layout.Flexed(1, func() {
 					layout.UniformInset(unit.Dp(60)).Layout(ui.ly.Context, func() {
 						txt := ui.ly.Theme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE")
-						txt.Color = theme.HexARGB(ui.ly.Theme.Colors["Light"])
+						txt.Color = gelook.HexARGB(ui.ly.Theme.Colors["Light"])
 						txt.Layout(ui.ly.Context)
 					})
 				}),
@@ -46,7 +46,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 // Main wallet screen
 func (ui *DuoUI) DuoUImainScreen() {
 	cs := ui.ly.Context.Constraints
-	theme.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	gelook.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max, cs.Height.Max, ui.ly.Theme.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
 		layout.Rigid(ui.DuoUIheader()),
 		layout.Flexed(1, ui.DuoUIbody()),

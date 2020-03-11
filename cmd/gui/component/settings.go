@@ -6,9 +6,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -23,7 +23,7 @@ type Field struct {
 	Field *pod.Field
 }
 
-func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
 		groupsList.Layout(gtx, groupsNumber, func(i int) {
@@ -40,7 +40,7 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 	}
 }
 
-func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
+func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
 		layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(gtx, func() {
 			switch f.Field.Type {
@@ -53,21 +53,21 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f
 			case "input":
 				switch f.Field.InputType {
 				case "text":
-					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor), f.Field.Label, func(e controller.SubmitEvent) {})
+					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*gel.Editor), f.Field.Label, func(e gel.SubmitEvent) {})
 				case "number":
 					e := th.DuoUIeditor(f.Field.Label)
 					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Italic
-					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
+					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*gel.Editor))
 				case "password":
 					e := th.DuoUIeditor(f.Field.Label)
 					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Italic
-					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
+					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*gel.Editor))
 				default:
 				}
 			case "switch":
-				th.DuoUIcheckBox(f.Field.Label, th.Colors["Dark"], th.Colors["Dark"]).Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.CheckBox))
+				th.DuoUIcheckBox(f.Field.Label, th.Colors["Dark"], th.Colors["Dark"]).Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*gel.CheckBox))
 			case "radio":
 				//radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 				//layout.Flex{}.Layout(gtx,
@@ -100,7 +100,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f
 //	return v.Interface()
 //}
 
-func SettingsFieldLabel(gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
+func SettingsFieldLabel(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			name := th.H6(fmt.Sprint(f.Field.Label))
@@ -110,7 +110,7 @@ func SettingsFieldLabel(gtx *layout.Context, th *theme.DuoUItheme, f *Field) fun
 	}
 }
 
-func SettingsFieldDescription(gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
+func SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			desc := th.Body2(fmt.Sprint(f.Field.Description))

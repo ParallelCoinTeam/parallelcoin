@@ -8,24 +8,24 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 var (
-	previousBlockHashButton                                = new(controller.Button)
-	nextBlockHashButton                                    = new(controller.Button)
+	previousBlockHashButton                                = new(gel.Button)
+	nextBlockHashButton                                    = new(gel.Button)
 	algoHeadColor, algoHeadBgColor, algoColor, algoBgColor string
 )
 
-func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block string) *theme.DuoUIpage {
+func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block string) *gelook.DuoUIpage {
 	return th.DuoUIpage("BLOCK", 10, rc.GetSingleBlock(block), func() {}, singleBlockBody(rc, gtx, th, rc.Explorer.SingleBlock), func() {})
 }
 
-func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, block btcjson.GetBlockVerboseResult) func() {
+func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block btcjson.GetBlockVerboseResult) func() {
 	return func() {
 
 		switch block.PowAlgo {

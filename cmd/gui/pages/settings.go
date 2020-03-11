@@ -3,29 +3,29 @@ package pages
 import (
 	"fmt"
 	"gioui.org/layout"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
 	fieldsList = &layout.List{
 		Axis: layout.Vertical,
 	}
-	buttonSettingsSave = new(controller.Button)
+	buttonSettingsSave = new(gel.Button)
 )
 
-func Settings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	return th.DuoUIpage("SETTINGS", 0, func() {}, component.ContentHeader(gtx, th, headerSettings(rc, gtx, th)), settingsBody(rc, gtx, th), func() {})
 }
 
-func headerSettings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func headerSettings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(gtx,
 			layout.Rigid(component.SettingsTabs(rc, gtx, th)),
 			layout.Rigid(func() {
-				var settingsSaveButton theme.DuoUIbutton
+				var settingsSaveButton gelook.DuoUIbutton
 				settingsSaveButton = th.DuoUIbutton(th.Fonts["Secondary"], "SAVE", th.Colors["Light"], th.Colors["Dark"], th.Colors["Dark"], th.Colors["Light"], "", th.Colors["Light"], 16, 0, 128, 48, 0, 0)
 				for buttonSettingsSave.Clicked(gtx) {
 					rc.SaveDaemonCfg()
@@ -36,7 +36,7 @@ func headerSettings(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) fu
 	}
 }
 
-func settingsBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func settingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		for _, fields := range rc.Settings.Daemon.Schema.Groups {
 			if fmt.Sprint(fields.Legend) == rc.Settings.Tabs.Current {
@@ -56,11 +56,11 @@ func settingsBody(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func
 	}
 }
 
-func settingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f *component.Field) func() {
+func settingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *component.Field) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
-				theme.DuoUIdrawRectangle(gtx, 30, 3, th.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				gelook.DuoUIdrawRectangle(gtx, 30, 3, th.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			}),
 			layout.Flexed(0.62, func() {
 				layout.Flex{

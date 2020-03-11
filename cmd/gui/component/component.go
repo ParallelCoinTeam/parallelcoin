@@ -1,13 +1,13 @@
 package component
 
 import (
-	"github.com/p9c/pod/pkg/gui/theme"
+	"github.com/p9c/gelook"
 )
 
 type DuoUIcomponent struct {
 	Name    string
 	Version string
-	Theme   *theme.DuoUItheme
+	Theme   *gelook.DuoUItheme
 	M       interface{}
 	V       func()
 	C       func()
