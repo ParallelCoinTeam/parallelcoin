@@ -24,10 +24,10 @@ require (
 	github.com/p9c/p9fonts v0.0.2
 	github.com/p9c/ring v0.0.1
 	github.com/p9c/rpc v0.0.1
-	github.com/p9c/simplebuffer v0.0.3
+	github.com/p9c/simplebuffer v0.0.4
 	github.com/p9c/stdconn v0.0.1
 	github.com/p9c/transport v0.0.2
-	github.com/p9c/util v0.0.1
+	github.com/p9c/util v0.0.2
 	github.com/p9c/wallet v0.0.1
 	github.com/p9c/wire v0.0.1
 	github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9

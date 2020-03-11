@@ -99,12 +99,16 @@ github.com/p9c/simplebuffer v0.0.2 h1:sRMlLR0vRQdCBmCpQo+l9+6kzaWxJaE7ey+j9an+8U
 github.com/p9c/simplebuffer v0.0.2/go.mod h1:5VvESf7QnywSTkUCrgD8XCBLGySsChRH7PO5WCNBgHk=
 github.com/p9c/simplebuffer v0.0.3 h1:Gbv1/nrkNB3FDEhYvU3Gj407q+UjlxCS2rOFZvOW2Bg=
 github.com/p9c/simplebuffer v0.0.3/go.mod h1:f+Unk/LJU0S/P7Btb9q2u6LSpAFW5rFksxWpbGRUy3Y=
+github.com/p9c/simplebuffer v0.0.4 h1:p23XuYi1Ft9NZfaktSvZXUdNGglaQMOiE61sAuIjM2E=
+github.com/p9c/simplebuffer v0.0.4/go.mod h1:rEOfQvJj4c5pxzkJiMWpNtl1WbM9FZCA535o3AXyO2o=
 github.com/p9c/stdconn v0.0.1 h1:Ac+8GIghRnRKnPIibxcYJ/cL+UY1eSQemQXVO3IDI3g=
 github.com/p9c/stdconn v0.0.1/go.mod h1:gBCliKfmFBjQCXgavmc8JAlreJVy/OQfEOWcL/limcg=
 github.com/p9c/transport v0.0.2 h1:eOX4iDWu/6Zo/QoQJOwl0RwSXV9ybp4GaSjanKr+hes=
 github.com/p9c/transport v0.0.2/go.mod h1:1g0WWxkE5OEXkN4Y1y/KAZL4h7eJpnLOsIqb8W2+t+Q=
 github.com/p9c/util v0.0.1 h1:a4j7jhoceA+kSQ5jTkZMZNQ5WpxYEZa/uluS4rntnIE=
 github.com/p9c/util v0.0.1/go.mod h1:30UiAgfs00SjoPw50VtQMj9QlvUSalw7oKYrYQgmQi4=
+github.com/p9c/util v0.0.2 h1:t3UQoQrw/43VjaT64Jmv/FrExUAZN44Zj1Ps+2/AxdU=
+github.com/p9c/util v0.0.2/go.mod h1:MbxgEZ1n1wzeATKDLEXNpZJwm/1FcKWbCWssVXhNvn0=
 github.com/p9c/wallet v0.0.1 h1:QJCulYwKbFcrJ8kXNJHyTA2iQEVyunVEeKu7379mMCo=
 github.com/p9c/wallet v0.0.1/go.mod h1:DOjhbSgGT0OFtlnWn6eJmzbRv6J8OvJaeXlMI6fMm0w=
 github.com/p9c/wire v0.0.1 h1:r7AbdbKUpTDM4aLaEA7mkbbp6Wr1EroKsGlzTBkVs1M=
