@@ -2,11 +2,12 @@ package p2padvt
 
 import (
 	"net"
-	
+
+	"github.com/p9c/simplebuffer"
+	"github.com/p9c/simplebuffer/IPs"
+	"github.com/p9c/simplebuffer/Uint16"
+
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/simplebuffer"
-	"github.com/p9c/pod/pkg/simplebuffer/IPs"
-	"github.com/p9c/pod/pkg/simplebuffer/Uint16"
 )
 
 var Magic = []byte{'a', 'd', 'v', 't'}

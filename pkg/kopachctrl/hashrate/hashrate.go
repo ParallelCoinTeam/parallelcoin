@@ -15,10 +15,10 @@ import (
 
 	log "github.com/p9c/logi"
 
-	"github.com/p9c/pod/pkg/simplebuffer"
-	"github.com/p9c/pod/pkg/simplebuffer/IPs"
-	"github.com/p9c/pod/pkg/simplebuffer/Int32"
-	"github.com/p9c/pod/pkg/simplebuffer/Time"
+	"github.com/p9c/simplebuffer"
+	"github.com/p9c/simplebuffer/IPs"
+	"github.com/p9c/simplebuffer/Int32"
+	"github.com/p9c/simplebuffer/Time"
 )
 
 var HashrateMagic = []byte{'h', 'a', 's', 'h'}

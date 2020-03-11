@@ -12,6 +12,9 @@ import (
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 
+	log "github.com/p9c/logi"
+	"github.com/p9c/simplebuffer/Uint16"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -23,9 +26,7 @@ import (
 	"github.com/p9c/pod/pkg/kopachctrl/p2padvt"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
-	log "github.com/p9c/logi"
 	rav "github.com/p9c/pod/pkg/ring"
-	"github.com/p9c/pod/pkg/simplebuffer/Uint16"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"

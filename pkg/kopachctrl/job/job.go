@@ -5,20 +5,21 @@ import (
 	"net"
 	"sort"
 	"time"
-	
+
+	log "github.com/p9c/logi"
+	"github.com/p9c/simplebuffer"
+	"github.com/p9c/simplebuffer/Bitses"
+	"github.com/p9c/simplebuffer/Hash"
+	"github.com/p9c/simplebuffer/Hashes"
+	"github.com/p9c/simplebuffer/IPs"
+	"github.com/p9c/simplebuffer/Int32"
+	"github.com/p9c/simplebuffer/Uint16"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/simplebuffer"
-	"github.com/p9c/pod/pkg/simplebuffer/Bitses"
-	"github.com/p9c/pod/pkg/simplebuffer/Hash"
-	"github.com/p9c/pod/pkg/simplebuffer/Hashes"
-	"github.com/p9c/pod/pkg/simplebuffer/IPs"
-	"github.com/p9c/pod/pkg/simplebuffer/Int32"
-	"github.com/p9c/pod/pkg/simplebuffer/Uint16"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -219,7 +220,7 @@ func (j *Container) String() (s string) {
 		s += fmt.Sprintf("  %2d %s\n", sortedBitses[i],
 			hashes[int32(sortedBitses[i])].String())
 	}
-	
+
 	// s += spew.Sdump(j.GetHashes())
 	return
 }
