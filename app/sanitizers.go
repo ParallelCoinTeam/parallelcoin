@@ -329,7 +329,7 @@ func initLogLevel(cfg *pod.Config) {
 	if runtime.GOOS == "windows" {
 		color = false
 	}
-	log.L.SetLevel(*cfg.LogLevel, color)
+	log.L.SetLevel(*cfg.LogLevel, color, "pod")
 }
 
 func normalizeAddresses(cfg *pod.Config) {

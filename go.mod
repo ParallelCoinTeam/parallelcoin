@@ -25,7 +25,7 @@ require (
 	github.com/kkdai/bstream v1.0.0
 	github.com/minio/highwayhash v1.0.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
-	github.com/p9c/gel v0.0.1
+	github.com/p9c/gel v0.0.2
 	github.com/p9c/gelook v0.0.0-20200311045057-0f256a5503f5
 	github.com/p9c/logi v0.0.12
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
