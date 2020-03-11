@@ -13,6 +13,7 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
 	github.com/p9c/blockdb v0.0.2
+
 	github.com/p9c/chain v0.0.7
 	github.com/p9c/chaincfg v0.0.1
 	github.com/p9c/chainhash v0.0.1
