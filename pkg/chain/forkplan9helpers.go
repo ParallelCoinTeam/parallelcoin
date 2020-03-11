@@ -4,7 +4,7 @@ import (
 	"github.com/VividCortex/ewma"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
@@ -17,7 +17,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 		startHeight = fork.List[1].TestnetStart
 	}
 	if nH <= startHeight {
-		log.DEBUG("on hard fork", nH, startHeight)
+		log.L.Debug("on hard fork", nH, startHeight)
 		return
 	}
 	var oldestStamp int64

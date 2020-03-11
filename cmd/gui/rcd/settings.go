@@ -6,7 +6,7 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 	"reflect"
 	"time"
@@ -30,27 +30,27 @@ func getField(v *pod.Config, configMap map[string]interface{}) *pod.Config {
 
 		//fmt.Printf("%d: %s %s = %v\n", i,
 		//	typeOfT.Field(i).Name, f.Type(), f.Interface())
-		//log.INFO("lastaviac", f.Type().String())
+		//log.L.Info("lastaviac", f.Type().String())
 		if s.IsValid() {
 			switch s.Type().String() {
 			case "*bool":
-				log.INFO("bool", label)
-				log.INFO("bool", *data.(*bool))
+				log.L.Info("bool", label)
+				log.L.Info("bool", *data.(*bool))
 				s.SetBool(*data.(*bool))
 				//reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetBool(configMap[field.Model].(bool))
 			case "*int":
-				log.INFO("int", label)
-				log.INFO("int", *data.(*int))
+				log.L.Info("int", label)
+				log.L.Info("int", *data.(*int))
 				s.SetInt(*data.(*int64))
 				//reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetInt(configMap[field.Model].(int64))
 			case "*float64":
-				log.INFO("float64", label)
-				log.INFO("float64", *data.(*float64))
+				log.L.Info("float64", label)
+				log.L.Info("float64", *data.(*float64))
 				s.SetFloat(*data.(*float64))
 				//reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetFloat(configMap[field.Model].(float64))
 			case "*string":
-				log.INFO("string", label)
-				log.INFO("string", *data.(*string))
+				log.L.Info("string", label)
+				log.L.Info("string", *data.(*string))
 				//s.SetString(*data.(*string))
 				//reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetString(configMap[field.Model].(string))
 			case "*cli.StringSlice":
@@ -60,8 +60,8 @@ func getField(v *pod.Config, configMap map[string]interface{}) *pod.Config {
 				//f.SetBool(*configMap[typeOfT.Field(i).Name].(*bool))
 			}
 		}
-		//log.INFO("IDE", configMap[typeOfT.Field(i).Name])
-		//log.INFO("IDE", typeOfT.Field(i).Name)
+		//log.L.Info("IDE", configMap[typeOfT.Field(i).Name])
+		//log.L.Info("IDE", typeOfT.Field(i).Name)
 	}
 	return v
 }

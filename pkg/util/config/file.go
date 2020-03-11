@@ -1,7 +1,7 @@
 package cfgutil
 
 import (
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"os"
 )
 
@@ -9,7 +9,7 @@ import (
 func FileExists(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		if os.IsNotExist(err) {
 			return false, nil
 		}

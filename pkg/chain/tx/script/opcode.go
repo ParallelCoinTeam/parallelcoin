@@ -12,7 +12,7 @@ import (
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
@@ -907,7 +907,7 @@ popIfBool(vm *Engine) (bool, error) {
 	// At this point, a v0 witness program is being executed and the minimal if flag is set, so enforce additional constraints on the top stack item.
 	so, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return false, err
 	}
 	// The top element MUST have a length of at least one.
@@ -936,7 +936,7 @@ opcodeIf(op *parsedOpcode, vm *Engine) error {
 	if vm.isBranchExecuting() {
 		ok, err := popIfBool(vm)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		if ok {
@@ -958,7 +958,7 @@ func opcodeNotIf(op *parsedOpcode, vm *Engine) error {
 	if vm.isBranchExecuting() {
 		ok, err := popIfBool(vm)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		if !ok {
@@ -1017,7 +1017,7 @@ func // abstractVerify examines the top item on the data stack as a boolean
 abstractVerify(op *parsedOpcode, vm *Engine, c ErrorCode) error {
 	verified, err := vm.dstack.PopBool()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if !verified {
@@ -1074,12 +1074,12 @@ opcodeCheckLockTimeVerify(op *parsedOpcode, vm *Engine) error {
 	// PeekByteArray is used here instead of PeekInt because we do not want to be limited to a 4-byte integer for reasons specified above.
 	so, err := vm.dstack.PeekByteArray(0)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	lockTime, err := makeScriptNum(so, vm.dstack.verifyMinimalData, 5)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// In the rare event that the argument needs to be < 0 due to some arithmetic being done first, you can always use 0 OP_MAX OP_CHECKLOCKTIMEVERIFY.
@@ -1091,7 +1091,7 @@ opcodeCheckLockTimeVerify(op *parsedOpcode, vm *Engine) error {
 	err = verifyLockTime(int64(vm.tx.LockTime), LockTimeThreshold,
 		int64(lockTime))
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// The lock time feature can also be disabled, thereby bypassing OP_CHECKLOCKTIMEVERIFY, if every transaction input has been finalized by setting its sequence to the maximum value (wire.MaxTxInSequenceNum).  This condition would result in the transaction being allowed into the blockchain making the opcode ineffective.
@@ -1122,12 +1122,12 @@ opcodeCheckSequenceVerify(op *parsedOpcode, vm *Engine) error {
 	// PeekByteArray is used here instead of PeekInt because we do not want to be limited to a 4-byte integer for reasons specified above.
 	so, err := vm.dstack.PeekByteArray(0)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	stackSequence, err := makeScriptNum(so, vm.dstack.verifyMinimalData, 5)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// In the rare event that the argument needs to be < 0 due to some arithmetic being done first, you can always use 0 OP_MAX OP_CHECKSEQUENCEVERIFY.
@@ -1167,7 +1167,7 @@ func // opcodeToAltStack removes the top item from the main data stack and
 opcodeToAltStack(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.astack.PushByteArray(so)
@@ -1181,7 +1181,7 @@ func // opcodeFromAltStack removes the top item from the alternate data stack
 opcodeFromAltStack(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.astack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushByteArray(so)
@@ -1231,7 +1231,7 @@ func // opcodeIfDup duplicates the top item of the stack if it is not zero.
 opcodeIfDup(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.dstack.PeekByteArray(0)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// Push copy of data iff it isn't zero
@@ -1283,7 +1283,7 @@ func // opcodePick treats the top item on the data stack as an integer and
 opcodePick(op *parsedOpcode, vm *Engine) error {
 	val, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	return vm.dstack.PickN(val.Int32())
@@ -1297,7 +1297,7 @@ func // opcodeRoll treats the top item on the data stack as an integer and
 opcodeRoll(op *parsedOpcode, vm *Engine) error {
 	val, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	return vm.dstack.RollN(val.Int32())
@@ -1328,7 +1328,7 @@ func // opcodeSize pushes the size of the top item of the data stack onto the
 opcodeSize(op *parsedOpcode, vm *Engine) error {
 	so, err := vm.dstack.PeekByteArray(0)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushInt(scriptNum(len(so)))
@@ -1342,12 +1342,12 @@ func // opcodeEqual removes the top 2 items of the data stack,
 opcodeEqual(op *parsedOpcode, vm *Engine) error {
 	a, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	b, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushBool(bytes.Equal(a, b))
@@ -1374,7 +1374,7 @@ func // opcode1Add treats the top item on the data stack as an integer and
 opcode1Add(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushInt(m + 1)
@@ -1387,7 +1387,7 @@ func // opcode1Sub treats the top item on the data stack as an integer and
 opcode1Sub(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushInt(m - 1)
@@ -1400,7 +1400,7 @@ func // opcodeNegate treats the top item on the data stack as an integer and
 opcodeNegate(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushInt(-m)
@@ -1413,7 +1413,7 @@ func // opcodeAbs treats the top item on the data stack as an integer and
 opcodeAbs(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if m < 0 {
@@ -1431,7 +1431,7 @@ func // opcodeNot treats the top item on the data stack as an integer and
 opcodeNot(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if m == 0 {
@@ -1450,7 +1450,7 @@ func // opcode0NotEqual treats the top item on the data stack as an integer
 opcode0NotEqual(op *parsedOpcode, vm *Engine) error {
 	m, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if m != 0 {
@@ -1466,12 +1466,12 @@ func // opcodeAdd treats the top two items on the data stack as integers and
 opcodeAdd(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushInt(v0 + v1)
@@ -1485,12 +1485,12 @@ func // opcodeSub treats the top two items on the data stack as integers and
 opcodeSub(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushInt(v1 - v0)
@@ -1506,12 +1506,12 @@ func // opcodeBoolAnd treats the top two items on the data stack as integers.
 opcodeBoolAnd(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v0 != 0 && v1 != 0 {
@@ -1531,12 +1531,12 @@ func // opcodeBoolOr treats the top two items on the data stack as integers.
 opcodeBoolOr(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v0 != 0 || v1 != 0 {
@@ -1554,12 +1554,12 @@ func // opcodeNumEqual treats the top two items on the data stack as
 opcodeNumEqual(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v0 == v1 {
@@ -1592,12 +1592,12 @@ func // opcodeNumNotEqual treats the top two items on the data stack as
 opcodeNumNotEqual(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v0 != v1 {
@@ -1615,12 +1615,12 @@ func // opcodeLessThan treats the top two items on the data stack as
 opcodeLessThan(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v1 < v0 {
@@ -1637,12 +1637,12 @@ func // opcodeGreaterThan treats the top two items on the data stack as
 opcodeGreaterThan(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v1 > v0 {
@@ -1660,12 +1660,12 @@ func // opcodeLessThanOrEqual treats the top two items on the data stack as
 opcodeLessThanOrEqual(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v1 <= v0 {
@@ -1683,12 +1683,12 @@ func // opcodeGreaterThanOrEqual treats the top two items on the data stack
 opcodeGreaterThanOrEqual(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v1 >= v0 {
@@ -1705,12 +1705,12 @@ func // opcodeMin treats the top two items on the data stack as integers and
 opcodeMin(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v1 < v0 {
@@ -1727,12 +1727,12 @@ func // opcodeMax treats the top two items on the data stack as integers and
 opcodeMax(op *parsedOpcode, vm *Engine) error {
 	v0, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	v1, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if v1 > v0 {
@@ -1752,17 +1752,17 @@ func // opcodeWithin treats the top 3 items on the data stack as integers.
 opcodeWithin(op *parsedOpcode, vm *Engine) error {
 	maxVal, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	minVal, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	x, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	if x >= minVal && x < maxVal {
@@ -1777,8 +1777,8 @@ func // calcHash calculates the hash of hasher over buf.
 calcHash(buf []byte, hasher hash.Hash) []byte {
 	_, err := hasher.Write(buf)
 	if err != nil {
-		log.ERROR(err)
-		log.DEBUG(err)
+		log.L.Error(err)
+		log.L.Debug(err)
 	}
 	return hasher.Sum(nil)
 }
@@ -1789,7 +1789,7 @@ func // opcodeRipeMD160 treats the top item of the data stack as raw bytes
 opcodeRipeMD160(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushByteArray(calcHash(buf, ripemd160.New()))
@@ -1802,7 +1802,7 @@ func // opcodeSHA1 treats the top item of the data stack as raw bytes and
 opcodeSHA1(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	hash := sha1.Sum(buf)
@@ -1816,7 +1816,7 @@ func // opcodeSHA256 treats the top item of the data stack as raw bytes and
 opcodeSHA256(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	hash := sha256.Sum256(buf)
@@ -1830,7 +1830,7 @@ func // opcodeHash160 treats the top item of the data stack as raw bytes and
 opcodeHash160(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	hash := sha256.Sum256(buf)
@@ -1844,7 +1844,7 @@ func // opcodeHash256 treats the top item of the data stack as raw bytes and
 opcodeHash256(op *parsedOpcode, vm *Engine) error {
 	buf, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	vm.dstack.PushByteArray(chainhash.DoubleHashB(buf))
@@ -1876,12 +1876,12 @@ func // opcodeCheckSig treats the top 2 items on the stack as a public key
 opcodeCheckSig(op *parsedOpcode, vm *Engine) error {
 	pkBytes, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	fullSigBytes, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// The signature actually needs needs to be longer than this,
@@ -1929,7 +1929,7 @@ opcodeCheckSig(op *parsedOpcode, vm *Engine) error {
 		hash, err = calcWitnessSignatureHash(subScript, sigHashes, hashType,
 			&vm.tx, vm.txIdx, vm.inputAmount)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 	} else {
@@ -1939,7 +1939,7 @@ opcodeCheckSig(op *parsedOpcode, vm *Engine) error {
 	}
 	pubKey, err := ec.ParsePubKey(pkBytes, ec.S256())
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		vm.dstack.PushBool(false)
 		return nil
 	}
@@ -1951,7 +1951,7 @@ opcodeCheckSig(op *parsedOpcode, vm *Engine) error {
 		signature, err = ec.ParseSignature(sigBytes, ec.S256())
 	}
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		vm.dstack.PushBool(false)
 		return nil
 	}
@@ -2017,7 +2017,7 @@ func // opcodeCheckMultiSig treats the top item on the stack as an integer
 opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) error {
 	numKeys, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	numPubKeys := int(numKeys.Int32())
@@ -2041,14 +2041,14 @@ opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) error {
 	for i := 0; i < numPubKeys; i++ {
 		pubKey, err := vm.dstack.PopByteArray()
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		pubKeys = append(pubKeys, pubKey)
 	}
 	numSigs, err := vm.dstack.PopInt()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	numSignatures := int(numSigs.Int32())
@@ -2066,7 +2066,7 @@ opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) error {
 	for i := 0; i < numSignatures; i++ {
 		signature, err := vm.dstack.PopByteArray()
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		sigInfo := &parsedSigInfo{signature: signature}
@@ -2078,7 +2078,7 @@ opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) error {
 	// be required to fix it.
 	dummy, err := vm.dstack.PopByteArray()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// Since the dummy argument is otherwise not checked,
@@ -2147,7 +2147,7 @@ opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) error {
 			}
 			sigInfo.parsed = true
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				continue
 			}
 			sigInfo.parsedSignature = parsedSig
@@ -2165,7 +2165,7 @@ opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) error {
 		// Parse the pubkey.
 		parsedPubKey, err := ec.ParsePubKey(pubKey, ec.S256())
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			continue
 		}
 		// Generate the signature hash based on the signature hash type.
@@ -2180,7 +2180,7 @@ opcodeCheckMultiSig(op *parsedOpcode, vm *Engine) error {
 			hash, err = calcWitnessSignatureHash(script, sigHashes, hashType,
 				&vm.tx, vm.txIdx, vm.inputAmount)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return err
 			}
 		} else {

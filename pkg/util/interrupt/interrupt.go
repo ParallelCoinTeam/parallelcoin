@@ -3,16 +3,12 @@ package interrupt
 import (
 	"os"
 	"os/signal"
-	"path/filepath"
-	"strings"
 	"syscall"
 	"time"
-	
+
 	"github.com/kardianos/osext"
-	
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/pkg/log"
+
+	log "github.com/p9c/logi"
 )
 
 var (
@@ -37,24 +33,24 @@ var (
 func Listener() {
 	var interruptCallbacks []func()
 	invokeCallbacks := func() {
-		log.DEBUG("running interrupt callbacks")
+		log.L.Debug("running interrupt callbacks")
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i
 			interruptCallbacks[idx]()
 		}
 		close(HandlersDone)
-		log.DEBUG("interrupt handlers finished")
+		log.L.Debug("interrupt handlers finished")
 		if Restart {
-			log.DEBUG("restarting")
+			log.L.Debug("restarting")
 			file, err := osext.Executable()
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return
 			}
 			err = syscall.Exec(file, os.Args, os.Environ())
 			if err != nil {
-				log.FATAL(err)
+				log.L.Fatal(err)
 			}
 			// return
 		}
@@ -64,18 +60,18 @@ func Listener() {
 	for {
 		select {
 		case sig := <-Chan:
-			// log.Printf("\r>>> received signal (%s)\n", sig)
-			log.DEBUG("received interrupt signal", sig)
+			// log.L.Printf("\r>>> received signal (%s)\n", sig)
+			log.L.Debug("received interrupt signal", sig)
 			requested = true
 			invokeCallbacks()
 			return
 		case <-ShutdownRequestChan:
-			log.WARN("received shutdown request - shutting down...")
+			log.L.Warn("received shutdown request - shutting down...")
 			requested = true
 			invokeCallbacks()
 			return
 		case handler := <-AddHandlerChan:
-			log.DEBUG("adding handler")
+			log.L.Debug("adding handler")
 			interruptCallbacks = append(interruptCallbacks, handler)
 		}
 	}
@@ -95,14 +91,14 @@ func AddHandler(handler func()) {
 
 // Request programatically requests a shutdown
 func Request() {
-	log.DEBUG("interrupt requested")
+	log.L.Debug("interrupt requested")
 	ShutdownRequestChan <- struct{}{}
 	// var ok bool
 	// select {
 	// case _, ok = <-ShutdownRequestChan:
 	// default:
 	// }
-	// log.DEBUG("shutdownrequestchan", ok)
+	// log.L.Debug("shutdownrequestchan", ok)
 	// if ok {
 	// 	close(ShutdownRequestChan)
 	// }
@@ -111,30 +107,11 @@ func Request() {
 // RequestRestart sets the reset flag and requests a restart
 func RequestRestart() {
 	Restart = true
-	log.DEBUG("requesting restart")
+	log.L.Debug("requesting restart")
 	Request()
 }
 
 // Requested returns true if an interrupt has been requested
 func Requested() bool {
 	return requested
-}
-
-// cleanAndExpandPath expands environement variables and leading ~ in the passed path, cleans the result, and returns it.
-func cleanAndExpandPath(path string) string {
-	// Expand initial ~ to OS specific home directory.
-	if strings.HasPrefix(path, "~") {
-		appHomeDir := appdata.Dir("gencerts", false)
-		homeDir := filepath.Dir(appHomeDir)
-		path = strings.Replace(path, "~", homeDir, 1)
-	}
-	if !apputil.FileExists(path) {
-		wd, err := os.Getwd()
-		if err != nil {
-			log.ERROR("can't get working dir:", err)
-		}
-		path = filepath.Join(wd, path)
-	}
-	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but they variables can still be expanded via POSIX-style $VARIABLE.
-	return filepath.Clean(os.ExpandEnv(path))
 }

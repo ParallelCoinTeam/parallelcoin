@@ -5,12 +5,12 @@ import (
 	
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-		log.TRACE("running node handler")
+		log.L.Trace("running node handler")
 		Configure(cx, c)
 		cx.NodeReady = make(chan struct{})
 		cx.Node.Store(false)
@@ -28,7 +28,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
 			err := runServiceCommand(serviceOpts.ServiceCommand)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return err
 			}
 			return nil
@@ -37,10 +37,10 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		go func() {
 			err := node.Main(cx, shutdownChan)
 			if err != nil {
-				log.ERROR("error starting node ", err)
+				log.L.Error("error starting node ", err)
 			}
 		}()
-		log.DEBUG("sending back node rpc server handler")
+		log.L.Debug("sending back node rpc server handler")
 		cx.RPCServer = <-cx.NodeChan
 		close(cx.NodeReady)
 		cx.Node.Store(true)

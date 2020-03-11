@@ -25,13 +25,13 @@ func (b *Bitses) DecodeOne(by []byte) *Bitses {
 func (b *Bitses) Decode(by []byte) (out []byte) {
 	b.Lock()
 	defer b.Unlock()
-	//log.SPEW(by)
+	//log.L.Traces(by)
 	if len(by) >= 7 {
 		nB := by[0]
 		if len(by) >= int(nB)*8 {
 			for i := 0; i < int(nB); i++ {
 				algoVer := int32(binary.BigEndian.Uint32(by[1+i*8 : 1+i*8+4]))
-				//log.DEBUG("algoVer", algoVer, by[1+i*8+4:1+i*8+8], b.Byteses)
+				//log.L.Debug("algoVer", algoVer, by[1+i*8+4:1+i*8+8], b.Byteses)
 				b.Byteses[algoVer] = by[1+i*8+4 : 1+i*8+8]
 			}
 		}
@@ -40,7 +40,7 @@ func (b *Bitses) Decode(by []byte) (out []byte) {
 			out = by[bL:]
 		}
 	}
-	//log.SPEW(b.Byteses)
+	//log.L.Traces(b.Byteses)
 	return
 }
 
@@ -53,7 +53,7 @@ func (b *Bitses) Encode() (out []byte) {
 		binary.BigEndian.PutUint32(by, uint32(algoVer))
 		out = append(out, append(by, b.Byteses[algoVer]...)...)
 	}
-	//log.SPEW(out)
+	//log.L.Traces(out)
 	return
 }
 
@@ -65,7 +65,7 @@ func (b *Bitses) Get() (out blockchain.TargetBits) {
 		oB := binary.BigEndian.Uint32(b.Byteses[algoVer])
 		out[algoVer] = oB
 	}
-	//log.SPEW(out)
+	//log.L.Traces(out)
 	return
 }
 
@@ -79,6 +79,6 @@ func (b *Bitses) Put(in blockchain.TargetBits) *Bitses {
 		binary.BigEndian.PutUint32(bits, in[algoVer])
 		b.Byteses[algoVer] = bits
 	}
-	//log.SPEW(b.Byteses)
+	//log.L.Traces(b.Byteses)
 	return b
 }

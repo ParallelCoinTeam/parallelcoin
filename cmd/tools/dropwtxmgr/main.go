@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 
 	"github.com/jessevdk/go-flags"
 
@@ -33,7 +33,7 @@ var opts = struct {
 func init() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		os.Exit(1)
 	}
 }
@@ -86,7 +86,7 @@ func mainInt() int {
 		}
 		err := scanner.Err()
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return 1
 		}
 		resp := scanner.Text()
@@ -112,19 +112,19 @@ func mainInt() int {
 		}
 		ns, err := tx.CreateTopLevelBucket(wtxmgrNamespace)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		err = wtxmgr.Create(ns)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 		startBlock := ns.Get(startBlockName)
 		err = ns.Put(syncedToName, startBlock)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		recentBlocks := make([]byte, 40)
@@ -134,7 +134,7 @@ func mainInt() int {
 		return ns.Put(recentBlocksName, recentBlocks)
 	})
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		log.Println("Failed to drop and re-create namespace:", err)
 		return 1
 	}

@@ -4,7 +4,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 	am "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
@@ -134,8 +134,8 @@ func (bf *BlockFilterer) FilterTx(tx *wire.MsgTx) bool {
 			out.PkScript, bf.Params,
 		)
 		if err != nil {
-			log.ERROR(err)
-			log.WARNF(
+			log.L.Error(err)
+			log.L.Warnf(
 				"could not parse output script in %s:%d: %v",
 				tx.TxHash(), i, err,
 			)

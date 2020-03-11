@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"reflect"
 	"testing"
 )

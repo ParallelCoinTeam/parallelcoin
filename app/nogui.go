@@ -8,12 +8,12 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		log.WARN("GUI was disabled for this build (server only version)")
+		log.L.Warn("GUI was disabled for this build (server only version)")
 		os.Exit(1)
 		return nil
 	}

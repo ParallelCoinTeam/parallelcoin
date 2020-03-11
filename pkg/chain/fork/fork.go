@@ -9,7 +9,7 @@ import (
 	"sort"
 	"time"
 	
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 const (
@@ -40,7 +40,7 @@ type HardForks struct {
 const IntervalBase = 23
 
 func init() {
-	log.TRACE("running fork data init")
+	log.L.Trace("running fork data init")
 	for i := range p9AlgosNumeric {
 		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", p9AlgosNumeric[i].VersionInterval)
 	}
@@ -63,20 +63,20 @@ func init() {
 	}
 	sort.Sort(AlgoSlices[0])
 	sort.Sort(AlgoSlices[1])
-	log.TRACE(P9AlgoVers)
+	log.L.Trace(P9AlgoVers)
 	baseVersionName := AlgoSlices[1][0].Name
 	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
-	log.TRACE(baseVersionName, baseVersionInterval)
+	log.L.Trace(baseVersionName, baseVersionInterval)
 	P9Average = 0
 	for _, i := range AlgoSlices[1] {
 		vi := float64(P9Algos[i.Name].VersionInterval)
 		p9a := baseVersionInterval / vi
 		P9Average += p9a
-		log.TRACEF("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
+		log.L.Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
 	}
-	log.TRACE(P9Average)
+	log.L.Trace(P9Average)
 	P9Average = baseVersionInterval / P9Average
-	log.TRACE(P9Average)
+	log.L.Trace(P9Average)
 }
 
 type AlgoSpec struct {
@@ -220,7 +220,7 @@ func GetRandomVersion(height int32) int32 {
 func GetAlgoVer(name string, height int32) (version int32) {
 	hf := GetCurrent(height)
 	n := AlgoSlices[hf][0].Name
-	//log.DEBUG("GetAlgoVer", name, height, hf, n)
+	//log.L.DEBUG("GetAlgoVer", name, height, hf, n)
 	if _, ok := List[hf].Algos[name]; ok {
 		n = name
 	}
@@ -237,7 +237,7 @@ func GetAveragingInterval(height int32) (r int64) {
 
 // GetCurrent returns the hardfork number code
 func GetCurrent(height int32) (curr int) {
-	// log.TRACE("istestnet", IsTestnet)
+	// log.L.Trace("istestnet", IsTestnet)
 	if IsTestnet {
 		for i := range List {
 			if height >= List[i].TestnetStart {
@@ -257,17 +257,17 @@ func GetCurrent(height int32) (curr int) {
 // GetMinBits returns the minimum diff bits based on height and testnet
 func GetMinBits(algoname string, height int32) (mb uint32) {
 	curr := GetCurrent(height)
-	// log.TRACE("GetMinBits", algoname, height, curr, List[curr].Algos)
+	// log.L.Trace("GetMinBits", algoname, height, curr, List[curr].Algos)
 	mb = List[curr].Algos[algoname].MinBits
-	// log.TRACEF("minbits %08x, %d", mb, mb)
+	// log.L.TraceF("minbits %08x, %d", mb, mb)
 	return
 }
 
 // GetMinDiff returns the minimum difficulty in uint256 form
 func GetMinDiff(algoname string, height int32) (md *big.Int) {
-	// log.TRACE("GetMinDiff", algoname)
+	// log.L.Trace("GetMinDiff", algoname)
 	minbits := GetMinBits(algoname, height)
-	// log.TRACEF("mindiff minbits %08x", minbits)
+	// log.L.TraceF("mindiff minbits %08x", minbits)
 	return CompactToBig(minbits)
 }
 

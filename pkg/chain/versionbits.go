@@ -4,7 +4,7 @@ import (
 	"math"
 
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 const (
@@ -88,7 +88,7 @@ func // Condition returns true when the specific bit associated with the checker
 	}
 	expectedVersion, err := c.chain.calcNextBlockVersion(node.parent)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return false, err
 	}
 	return expectedVersion&conditionMask == 0, nil
@@ -170,7 +170,7 @@ func // calcNextBlockVersion calculates the expected version of the block after
 		checker := deploymentChecker{deployment: deployment, chain: b}
 		state, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return 0, err
 		}
 		if state == ThresholdStarted || state == ThresholdLockedIn {
@@ -202,19 +202,19 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 		cache := &b.warningCaches[bit]
 		state, err := b.thresholdState(node.parent, checker, cache)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		switch state {
 		case ThresholdActive:
 			if !b.unknownRulesWarned {
-				log.WARNF("unknown new rules activated (bit %d)", bit)
+				log.L.Warnf("unknown new rules activated (bit %d)", bit)
 				b.unknownRulesWarned = true
 			}
 		case ThresholdLockedIn:
 			window := int32(checker.MinerConfirmationWindow())
 			activationHeight := window - (node.height % window)
-			log.WARNF("Unknown new rules are about to activate in %d blocks ("+
+			log.L.Warnf("Unknown new rules are about to activate in %d blocks ("+
 				"bit %d)", activationHeight, bit)
 		}
 	}
@@ -234,7 +234,7 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 // 	for i := uint32(0); i < unknownVerNumToCheck && node != nil; i++ {
 // 		expectedVersion, err := b.calcNextBlockVersion(node.parent)
 // 		if err != nil {
-// log.ERROR(err)
+// log.L.Error(err)
 // 			return err
 // 		}
 // 		if expectedVersion > vbLegacyBlockVersion &&

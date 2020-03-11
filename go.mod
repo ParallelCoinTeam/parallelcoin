@@ -3,7 +3,7 @@ module github.com/p9c/pod
 go 1.14
 
 require (
-	gioui.org v0.0.0-20200229151555-bd7c7a108a9e
+	gioui.org v0.0.0-20200311164516-7024a0e6914d
 	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
@@ -12,7 +12,6 @@ require (
 	github.com/btcsuite/golangcrypto v0.0.0-20150304025918-53f62d9b43e8
 	github.com/btcsuite/goleveldb v1.0.0
 	github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792
-	github.com/buger/goterm v0.0.0-20181115115552-c206103e1f37
 	github.com/conformal/fastsha256 v0.0.0-20160815193821-637e65642941
 	github.com/coreos/bbolt v1.3.3
 	github.com/davecgh/go-spew v1.1.1
@@ -26,9 +25,9 @@ require (
 	github.com/kkdai/bstream v1.0.0
 	github.com/minio/highwayhash v1.0.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
-	github.com/p9c/gel v0.0.0-20200311043132-3f22eec0b0cf
+	github.com/p9c/gel v0.0.1
 	github.com/p9c/gelook v0.0.0-20200311045057-0f256a5503f5
-	github.com/p9c/logi v0.0.12 // indirect
+	github.com/p9c/logi v0.0.12
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9
 	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect

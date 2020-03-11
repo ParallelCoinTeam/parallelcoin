@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 	
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -845,7 +845,7 @@ func (c *HelpCacher) RPCMethodHelp(method string) (string, error) {
 	// Generate, cache, and return the help.
 	help, err := btcjson.GenerateHelp(method, HelpDescsEnUS, resultTypes...)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return "", err
 	}
 	c.methodHelp[method] = help
@@ -865,7 +865,7 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 	for k := range RPCHandlers {
 		usage, err := btcjson.MethodUsageText(k)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return "", err
 		}
 		usageTexts = append(usageTexts, usage)
@@ -875,7 +875,7 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 		for k := range WSHandlers {
 			usage, err := btcjson.MethodUsageText(k)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return "", err
 			}
 			usageTexts = append(usageTexts, usage)

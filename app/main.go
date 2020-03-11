@@ -9,7 +9,7 @@ package app
 
 import (
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"os"
 )
 
@@ -25,7 +25,7 @@ const (
 func Main() int {
 	cx := conte.GetNewContext(appName, appLanguage, "main")
 	cx.App = GetApp(cx)
-	log.DEBUG("running App")
+	log.L.Debug("running App")
 
 	e := cx.App.Run(os.Args)
 	if e != nil {

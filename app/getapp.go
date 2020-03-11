@@ -17,7 +17,7 @@ import (
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util/base58"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
@@ -32,7 +32,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 		Action:      guiHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			log.TRACE("subcommand completed")
+			log.L.Trace("subcommand completed")
 			if interrupt.Restart {
 			}
 			return nil
@@ -106,7 +106,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						}
 						dbPath := filepath.Join(filepath.Join(*cx.Config.DataDir,
 							cx.ActiveNet.Name), dbName)
-						if err = os.RemoveAll(dbPath); log.Check(err) {
+						if err = os.RemoveAll(dbPath); log.L.Check(err) {
 						}
 						// return nodeHandle(cx)(c)
 						return nil
@@ -122,18 +122,18 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						" transaction mess)",
 					func(c *cli.Context) (err error) {
 						Configure(cx, c)
-						log.INFO("dropping wallet history")
+						log.L.Info("dropping wallet history")
 						go func() {
-							log.WARN("starting wallet")
-							if err = walletmain.Main(cx); log.Check(err) {
+							log.L.Warn("starting wallet")
+							if err = walletmain.Main(cx); log.L.Check(err) {
 								os.Exit(1)
 							} else {
-								log.DEBUG("wallet started")
+								log.L.Debug("wallet started")
 							}
 						}()
-						log.DEBUG("waiting for walletChan")
+						log.L.Debug("waiting for walletChan")
 						cx.WalletServer = <-cx.WalletChan
-						log.DEBUG("walletChan sent")
+						log.L.Debug("walletChan sent")
 						err = legacy.DropWalletHistory(cx.WalletServer)(c)
 						return
 					},

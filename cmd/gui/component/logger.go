@@ -3,7 +3,7 @@ package component
 import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 
 	"time"
 

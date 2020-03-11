@@ -3,7 +3,7 @@ package walletmain
 import (
 	"bytes"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"strings"
 )
 
@@ -61,7 +61,7 @@ func normalizeVerString(str string) string {
 			// Writing to a bytes.Buffer panics on OOM, and all
 			// errors are unexpected.
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				panic(err)
 			}
 		}

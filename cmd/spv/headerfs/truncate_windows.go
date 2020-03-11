@@ -5,7 +5,7 @@ package headerfs
 import (
 	"fmt"
 	"os"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 // singleTruncate truncates a single header from the end of the header file.
@@ -21,7 +21,7 @@ func (h *headerStore) singleTruncate() error {
 	fileInfo, err := h.file.Stat()
 
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 

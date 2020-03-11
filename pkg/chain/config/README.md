@@ -37,7 +37,7 @@ func main(	) {
 	pubKeyHash := make([]byte, 20)
 	addr, err := util.NewAddressPubKeyHash(pubKeyHash, chainParams)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 	}
 	log.Println(addr)
 }

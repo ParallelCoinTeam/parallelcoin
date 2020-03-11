@@ -2,7 +2,7 @@ package spv
 
 import (
 	"errors"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 
 	"github.com/p9c/pod/pkg/peer/addrmgr"
 	"github.com/p9c/pod/pkg/peer/connmgr"
@@ -83,7 +83,7 @@ func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 		}
 		netAddr, err := s.addrStringToNetAddr(msg.addr)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			msg.reply <- err
 			return
 		}

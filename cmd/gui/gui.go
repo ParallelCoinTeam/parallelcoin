@@ -5,20 +5,20 @@ import (
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 func WalletGUI(duo *model.DuoUI, rc *rcd.RcVar) (err error) {
 	go func() {
-		log.DEBUG("starting UI main loop")
+		log.L.Debug("starting UI main loop")
 		if rc.IsReady != false {
 		}
 		if err := duoui.DuoUImainLoop(duo, rc); err != nil {
-			log.FATAL(err.Error(), "- shutting down")
+			log.L.Fatal(err.Error(), "- shutting down")
 		}
 	}()
-	log.DEBUG("starting up gio app main")
+	log.L.Debug("starting up gio app main")
 	app.Main()
-	log.DEBUG("GUI shut down")
+	log.L.Debug("GUI shut down")
 	return
 }

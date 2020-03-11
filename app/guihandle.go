@@ -10,14 +10,14 @@ import (
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		Configure(cx, c)
-		log.WARN("starting GUI")
+		log.L.Warn("starting GUI")
 		rc := rcd.RcInit(cx)
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			rc.Boot.IsFirstRun = true
@@ -25,28 +25,28 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		duo, err := duoui.DuOuI(rc)
 		rc.DuoUIloggerController()
 		interrupt.AddHandler(func() {
-			log.DEBUG("guiHandle interrupt")
+			log.L.Debug("guiHandle interrupt")
 			close(rc.Quit)
 		})
-		log.INFO("IsFirstRun? ", rc.Boot.IsFirstRun)
+		log.L.Info("IsFirstRun? ", rc.Boot.IsFirstRun)
 		// signal the GUI that the back end is ready
-		log.DEBUG("sending ready signal")
+		log.L.Debug("sending ready signal")
 		// we can do this without blocking because the channel has 1 buffer this way it falls immediately the GUI starts
 		go rc.StartServices()
 		// Start up GUI
-		log.DEBUG("starting up GUI")
+		log.L.Debug("starting up GUI")
 		err = gui.WalletGUI(duo, rc)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 		}
-		log.DEBUG("wallet GUI finished")
+		log.L.Debug("wallet GUI finished")
 		// wait for stop signal
 		<-rc.Quit
-		log.DEBUG("shutting down node")
+		log.L.Debug("shutting down node")
 		if !cx.Node.Load() {
 			close(cx.WalletKill)
 		}
-		log.DEBUG("shutting down wallet")
+		log.L.Debug("shutting down wallet")
 		if !cx.Wallet.Load() {
 			close(cx.NodeKill)
 		}

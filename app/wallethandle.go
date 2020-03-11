@@ -9,7 +9,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
@@ -21,7 +21,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			Params.Name + slash + wallet.WalletDbName
 		if !apputil.FileExists(dbFilename) {
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				log.ERROR("failed to create wallet", err)
+				log.L.Error("failed to create wallet", err)
 				return err
 			}
 			log.Println("restart to complete initial setup")
@@ -32,7 +32,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		go func() {
 			err = walletmain.Main(cx)
 			if err != nil {
-				log.ERROR("failed to start up wallet", err)
+				log.L.Error("failed to start up wallet", err)
 			}
 		}()
 		cx.WalletServer = <-walletChan

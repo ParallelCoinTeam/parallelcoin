@@ -6,9 +6,10 @@ import (
 	"crypto/subtle"
 	"encoding/binary"
 	"errors"
-	"github.com/p9c/pod/pkg/log"
 	"io"
 	"runtime/debug"
+
+	log "github.com/p9c/logi"
 
 	"github.com/btcsuite/golangcrypto/nacl/secretbox"
 	"github.com/btcsuite/golangcrypto/scrypt"
@@ -44,7 +45,7 @@ func (ck *CryptoKey) Encrypt(in []byte) ([]byte, error) {
 	var nonce [NonceSize]byte
 	_, err := io.ReadFull(prng, nonce[:])
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	blob := secretbox.Seal(nil, in, &nonce, (*[KeySize]byte)(ck))
@@ -80,7 +81,7 @@ func GenerateCryptoKey() (*CryptoKey, error) {
 	var key CryptoKey
 	_, err := io.ReadFull(prng, key[:])
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	return &key, nil
@@ -110,7 +111,7 @@ func (sk *SecretKey) deriveKey(password *[]byte) error {
 		sk.Parameters.P,
 		len(sk.Key))
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	copy(sk.Key[:], key)
@@ -216,13 +217,13 @@ func NewSecretKey(password *[]byte, N, r, p int) (*SecretKey, error) {
 	sk.Parameters.P = p
 	_, err := io.ReadFull(prng, sk.Parameters.Salt[:])
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	// derive key
 	err = sk.deriveKey(password)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	// store digest

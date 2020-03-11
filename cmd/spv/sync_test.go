@@ -26,7 +26,7 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	ec "github.com/p9c/pod/pkg/util/elliptic"
 	"github.com/p9c/pod/pkg/util/gcs/builder"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )

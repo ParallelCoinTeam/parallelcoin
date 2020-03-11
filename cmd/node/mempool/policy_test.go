@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -98,7 +98,7 @@ func TestCheckPkScriptStandard(t *testing.T) {
 	for i := 0; i < 4; i++ {
 		pk, err := ec.NewPrivateKey(ec.S256())
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			t.Fatalf("TestCheckPkScriptStandard NewPrivateKey failed: %v",
 				err)
 			return

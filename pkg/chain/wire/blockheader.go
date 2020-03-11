@@ -6,7 +6,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/chain/forkhash"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -49,12 +49,12 @@ func (h *BlockHeader) BlockHashWithAlgos(height int32) (out chainhash.Hash) {
 	buf := bytes.NewBuffer(make([]byte, 0, MaxBlockHeaderPayload))
 	err := writeBlockHeader(buf, 0, h)
 	if err != nil {
-		log.ERROR("error writing block header to buffer", err)
+		log.L.Error("error writing block header to buffer", err)
 	}
 	vers := h.Version
 	algo := fork.GetAlgoName(vers, height)
 	out = forkhash.Hash(buf.Bytes(), algo, height)
-	// log.Printf("BlockHashWithAlgos %d %s %s %s\n", vers, algo, out)
+	// log.L.Prror("BlockHashWithAlgos %d %s %s %s\n", vers, algo, out)
 	return
 }
 

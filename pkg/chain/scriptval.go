@@ -5,7 +5,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/hardfork"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 	"math"
 	"runtime"
@@ -73,7 +73,7 @@ out:
 				txVI.txInIndex, v.flags, v.sigCache, txVI.sigHashes,
 				inputAmount)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				str := fmt.Sprintf("failed to parse input "+
 					"%s:%d which references output %v - "+
 					"%v (input witness %x, input script "+
@@ -152,7 +152,7 @@ func // Validate validates the scripts for all of the passed transaction inputs
 		case err := <-v.resultChan:
 			processedItems++
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				close(v.quitChan)
 				return err
 			}
@@ -279,7 +279,7 @@ checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 		return err
 	}
 	//elapsed := time.Since(start)
-	//log.TRACEC(func() string {
+	//log.L.Tracec(func() string {
 	//	return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
 	//})
 	// If the HashCache is present, once we have validated the block,

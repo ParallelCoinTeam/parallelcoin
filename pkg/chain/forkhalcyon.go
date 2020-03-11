@@ -5,7 +5,7 @@ import (
 	"math/big"
 	
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 // calcNextRequiredDifficultyHalcyon calculates the required difficulty for the
@@ -20,7 +20,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	nH := lastNode.height + 1
 	if lastNode == nil {
 		if l {
-			log.DEBUG("lastNode is nil")
+			log.L.Debug("lastNode is nil")
 		}
 		return newTargetBits, nil
 	}
@@ -31,7 +31,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	prevNode := lastNode.GetLastWithAlgo(algo)
 	if prevNode == nil {
 		if l {
-			log.DEBUG("prevNode is nil")
+			log.L.Debug("prevNode is nil")
 		}
 		return newTargetBits, nil
 	}
@@ -47,7 +47,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	actualTimespan := prevNode.timestamp - firstNode.timestamp
 	adjustedTimespan := actualTimespan
 	if l {
-		log.TRACEF("actual %d", actualTimespan)
+		log.L.Tracef("actual %d", actualTimespan)
 	}
 	if actualTimespan < b.params.MinActualTimespan {
 		adjustedTimespan = b.params.MinActualTimespan
@@ -55,7 +55,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 		adjustedTimespan = b.params.MaxActualTimespan
 	}
 	if l {
-		log.TRACEF("adjusted %d", adjustedTimespan)
+		log.L.Tracef("adjusted %d", adjustedTimespan)
 	}
 	oldTarget := CompactToBig(prevNode.bits)
 	newTarget := new(big.Int).
@@ -67,7 +67,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	}
 	newTargetBits = BigToCompact(newTarget)
 	if l {
-		log.DEBUGF(
+		log.L.Debugf(
 			"difficulty retarget at block height %d, old %08x new %08x",
 			lastNode.height+1,
 			prevNode.bits,
@@ -75,7 +75,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 		)
 	}
 	if l {
-		log.TRACEC(func() string {
+		log.L.Tracec(func() string {
 			return fmt.Sprintf(
 				"actual timespan %v, adjusted timespan %v, target timespan %v"+
 					"\nOld %064x\nNew %064x",

@@ -3,7 +3,7 @@ package util
 import (
 	"bytes"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"io"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -51,7 +51,7 @@ func (b *Block) Bytes() ([]byte, error) {
 	w := bytes.NewBuffer(make([]byte, 0, b.msgBlock.SerializeSize()))
 	err := b.msgBlock.Serialize(w)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	serializedBlock := w.Bytes()
@@ -70,7 +70,7 @@ func (b *Block) BytesNoWitness() ([]byte, error) {
 	var w bytes.Buffer
 	err := b.msgBlock.SerializeNoWitness(&w)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	serializedBlock := w.Bytes()
@@ -142,7 +142,7 @@ func (b *Block) TxHash(txNum int) (*chainhash.Hash, error) {
 	// Attempt to get a wrapped transaction for the specified index.  It will be created lazily if needed or simply return the cached version if it has already been generated.
 	tx, err := b.Tx(txNum)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	// Defer to the wrapped transaction which will return the cached hash if it has already been generated.
@@ -153,14 +153,14 @@ func (b *Block) TxHash(txNum int) (*chainhash.Hash, error) {
 func (b *Block) TxLoc() ([]wire.TxLoc, error) {
 	rawMsg, err := b.Bytes()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	rbuf := bytes.NewBuffer(rawMsg)
 	var mblock wire.MsgBlock
 	txLocs, err := mblock.DeserializeTxLoc(rbuf)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	return txLocs, err
@@ -189,7 +189,7 @@ func NewBlockFromBytes(serializedBlock []byte) (*Block, error) {
 	br := bytes.NewReader(serializedBlock)
 	b, err := NewBlockFromReader(br)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	b.serializedBlock = serializedBlock
@@ -202,7 +202,7 @@ func NewBlockFromReader(r io.Reader) (*Block, error) {
 	var msgBlock wire.MsgBlock
 	err := msgBlock.Deserialize(r)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	b := Block{

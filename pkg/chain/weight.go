@@ -2,7 +2,7 @@ package blockchain
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -48,7 +48,7 @@ func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16
 	if bip16 {
 		numP2SHSigOps, err := CountP2SHSigOps(tx, isCoinBaseTx, utxoView)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return 0, nil
 		}
 		numSigOps += numP2SHSigOps * WitnessScaleFactor

@@ -3,7 +3,7 @@ package indexers
 import (
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"sync"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
@@ -88,7 +88,7 @@ func deserializeAddrIndexEntry(serialized []byte, region *database.BlockRegion, 
 	}
 	hash, err := fetchBlockHash(serialized[0:4])
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	region.Hash = hash
@@ -146,7 +146,7 @@ func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, block
 		}
 		err := bucket.Put(curLevelKey[:], mergedData)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		// Move all of the levels before the previous one up a level.
@@ -156,7 +156,7 @@ func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, block
 			prevData := bucket.Get(prevLevelKey[:])
 			err := bucket.Put(mergeLevelKey[:], prevData)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return err
 			}
 		}
@@ -213,7 +213,7 @@ func dbFetchAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, n
 		err := deserializeAddrIndexEntry(serialized[offset:],
 			&results[i], fetchBlockHash)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			// Ensure any deserialization errors are returned as database corruption errors.
 			if isDeserializeErr(err) {
 				err = database.Error{
@@ -263,14 +263,14 @@ func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, 
 			if len(data) == 0 {
 				err := bucket.Delete(curLevelKey[:])
 				if err != nil {
-					log.ERROR(err)
+					log.L.Error(err)
 					return err
 				}
 				continue
 			}
 			err := bucket.Put(curLevelKey[:], data)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return err
 			}
 		}
@@ -465,7 +465,7 @@ func (idx *AddrIndex) indexPkScript(data writeIndexData, pkScript []byte, txIdx 
 	for _, addr := range addrs {
 		addrKey, err := addrToKey(addr)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			// Ignore unsupported address types.
 			continue
 		}
@@ -507,13 +507,13 @@ func (idx *AddrIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 	// The offset and length of the transactions within the serialized block.
 	txLocs, err := block.TxLoc()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// Get the internal block ID associated with the block.
 	blockID, err := dbFetchBlockIDByHash(dbTx, block.Hash())
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// Build all of the address to transaction mappings in a local map.
@@ -526,7 +526,7 @@ func (idx *AddrIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 			err := dbPutAddrIndexEntry(addrIdxBucket, addrKey,
 				blockID, txLocs[txIdx])
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return err
 			}
 		}
@@ -545,7 +545,7 @@ func (idx *AddrIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
 	for addrKey, txIdxs := range addrsToTxns {
 		err := dbRemoveAddrIndexEntries(bucket, addrKey, len(txIdxs))
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 	}
@@ -556,7 +556,7 @@ func (idx *AddrIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
 func (idx *AddrIndex) TxRegionsForAddress(dbTx database.Tx, addr util.Address, numToSkip, numRequested uint32, reverse bool) ([]database.BlockRegion, uint32, error) {
 	addrKey, err := addrToKey(addr)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, 0, err
 	}
 	var regions []database.BlockRegion
@@ -586,7 +586,7 @@ func (idx *AddrIndex) indexUnconfirmedAddresses(pkScript []byte, tx *util.Tx) {
 		// Ignore unsupported address types.
 		addrKey, err := addrToKey(addr)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			continue
 		}
 		// Add a mapping from the address to the transaction.
@@ -646,7 +646,7 @@ func (idx *AddrIndex) UnconfirmedTxnsForAddress(addr util.Address) []*util.Tx {
 	// Ignore unsupported address types.
 	addrKey, err := addrToKey(addr)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil
 	}
 	// Protect concurrent access.

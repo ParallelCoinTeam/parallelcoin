@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 func main() {
@@ -27,10 +27,10 @@ func main() {
 		bbb := make([]byte, len(blockbytes))
 		copy(bbb, blockbytes)
 		bl := big.NewInt(0).SetBytes(bbb)
-		log.DEBUG("bl", len(fmt.Sprint(bl)), bl)
+		log.L.Debug("bl", len(fmt.Sprint(bl)), bl)
 		fh := big.NewInt(0).SetBytes(fhc)
-		log.SPEW(fhc)
-		log.DEBUG("fh", len(fmt.Sprint(fh)), fh)
+		log.L.Traces(fhc)
+		log.L.Debug("fh", len(fmt.Sprint(fh)), fh)
 		sh := big.NewInt(0).SetBytes(shc)
 		sqfh := fh.Mul(fh, fh)
 		sqsh := sh.Mul(sh, sh)
@@ -41,8 +41,8 @@ func main() {
 		ddd := make([]byte, dlen)
 		copy(ddd, reverse(divdb))
 		dddB := big.NewInt(0).SetBytes(ddd)
-		log.SPEW(ddd)
-		log.DEBUG(dddB)
+		log.L.Traces(ddd)
+		log.L.Debug(dddB)
 	}
 }
 

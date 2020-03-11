@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
 )
 
 func (r *RcVar) GetDuoUIbalance() {
-	log.TRACE("getting balance")
+	log.L.Trace("getting balance")
 	acct := "default"
 	minconf := 0
 	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
@@ -28,7 +28,7 @@ func (r *RcVar) GetDuoUIbalance() {
 }
 
 func (r *RcVar) GetDuoUIunconfirmedBalance() {
-	log.TRACE("getting unconfirmed balance")
+	log.L.Trace("getting unconfirmed balance")
 	acct := "default"
 	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
 	if err != nil {
@@ -44,7 +44,7 @@ func (r *RcVar) GetDuoUIunconfirmedBalance() {
 
 func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 	return func() {
-		log.TRACE("sending", wp, ad, am)
+		log.L.Trace("sending", wp, ad, am)
 		if am > 0 {
 			getBlockChain, err := rpc.HandleGetBlockChainInfo(r.cx.RPCServer, nil, nil)
 			if err != nil {

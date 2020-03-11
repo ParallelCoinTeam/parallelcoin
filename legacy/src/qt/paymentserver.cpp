@@ -106,7 +106,7 @@ PaymentServer::PaymentServer(QApplication* parent) : QObject(parent), saveURIs(t
     uriServer = new QLocalServer(this);
 
     if (!uriServer->listen(name))
-        qlog.DEBUG() << tr("Cannot start parallelcoin: click-to-pay handler");
+        qlog.L.Debug() << tr("Cannot start parallelcoin: click-to-pay handler");
     else
         connect(uriServer, SIGNAL(newConnection()), this, SLOT(handleURIConnection()));
 }

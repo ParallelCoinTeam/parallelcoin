@@ -26,7 +26,7 @@ func (e ErrScriptNotCanonical) Error() string {
 // 	builder.AddOp(txscript.OP_CHECKMULTISIG)
 // 	script, err := builder.Script()
 // 	if err != nil {
-//	log.ERROR(err)
+//	log.L.Error(err)
 // 		// Handle the error.
 // 		return
 // 	}

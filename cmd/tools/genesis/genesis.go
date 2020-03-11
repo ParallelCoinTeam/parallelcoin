@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"os"
 	"runtime"
 	"strconv"
@@ -79,36 +79,36 @@ func main() {
 		pubkey = make([]byte, 65)
 		n, err := rand.Read(pubkey)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			os.Exit(1)
 		}
 		if n != 65 {
-			log.ERROR("For some reason did not get 65 random bytes")
+			log.L.Error("For some reason did not get 65 random bytes")
 			os.Exit(1)
 		}
 		log.Printf("\nGenerated random public key:\n0x%x\n", pubkey)
 	} else {
 		if len(args[1]) != 130 {
-			log.ERROR("Invalid public key length. Should be 130 hex digits,")
+			log.L.Error("Invalid public key length. Should be 130 hex digits,")
 			os.Exit(1)
 		}
 		var err error
 		pubkey, err = hex.DecodeString(args[1])
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			log.Println("Public key had invalid characters")
 		}
 	}
 	timestamp := args[2]
 	if len(timestamp) > 254 || len(timestamp) < 1 {
-		log.ERROR("Timestamp was either longer than 254 characters or zero" +
+		log.L.Error("Timestamp was either longer than 254 characters or zero" +
 			" length")
 		os.Exit(1)
 	}
 	tx := initTransaction()
 	nbits, err := strconv.ParseInt(args[3], 10, 32)
 	if err != nil {
-		log.ERROR("nBits was not a decimal number or exceeded the precision of 32 bits")
+		log.L.Error("nBits was not a decimal number or exceeded the precision of 32 bits")
 		os.Exit(0)
 	}
 	nBits := uint32(nbits)
@@ -176,7 +176,7 @@ func main() {
 		bytes = bytes - bits/8
 		bits = bits % 8
 	}
-	log.INFO("\nSearching for nonce/unixtime combination that satisfies " +
+	log.L.Info("\nSearching for nonce/unixtime combination that satisfies " +
 		"minimum target %d with %d threads on %d cores...\nPlease wait... ",
 		nBits, runtime.GOMAXPROCS(-1), runtime.NumCPU())
 	start := time.Now()

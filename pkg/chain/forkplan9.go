@@ -9,7 +9,7 @@ import (
 
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
@@ -96,7 +96,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	adjustment = 1
 	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, fork.P9Average
 	if lastNode == nil {
-		log.TRACE("lastNode is nil")
+		log.L.Trace("lastNode is nil")
 	}
 	// algoInterval := fork.P9Algos[algoname].VersionInterval
 	startHeight := fork.List[1].ActivationHeight
@@ -115,7 +115,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	if last != nil {
 		bits = last.bits
 	}
-	// log.DEBUG(algAdj, allAdj)
+	// log.L.Debug(algAdj, allAdj)
 	adjustment = algAdj + allAdj
 	adjustment /= 2
 	bigAdjustment := big.NewFloat(adjustment)
@@ -123,15 +123,15 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
-		log.INFO("newTarget is nil ")
+		log.L.Info("newTarget is nil ")
 		return
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
 		newTargetBits = BigToCompact(newTarget)
-		// log.TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
+		// log.L.Tracef("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
-		log.DEBUGC(func() string {
+		log.L.Debugc(func() string {
 			an := fork.List[1].AlgoVers[algoVer]
 			pad := 9 - len(an)
 			if pad > 0 {
@@ -195,12 +195,12 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
-		log.INFO("newTarget is nil ")
+		log.L.Info("newTarget is nil ")
 		return
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
 		newTargetBits = BigToCompact(newTarget)
-		log.TRACEF("newTarget %064x %08x", newTarget, newTargetBits)
+		log.L.Tracef("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
 		an := fork.List[1].AlgoVers[algoVer]
@@ -208,7 +208,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
-		log.DEBUGC(func() string {
+		log.L.Debugc(func() string {
 			return fmt.Sprintf("hght: %d %08x %s %s %s %s %s %s %s"+
 				" %s %s %08x",
 				lastNode.height+1,

@@ -2,7 +2,7 @@ package wire
 
 import (
 	"bytes"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"io"
 	"reflect"
 	"testing"
@@ -235,7 +235,7 @@ func TestInvWireErrors(t *testing.T) {
 	baseInv := NewMsgInv()
 	err = baseInv.AddInvVect(iv)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 	}
 	baseInvEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -250,7 +250,7 @@ func TestInvWireErrors(t *testing.T) {
 	for i := 0; i < MaxInvPerMsg; i++ {
 		err = maxInv.AddInvVect(iv)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 		}
 	}
 	maxInv.InvList = append(maxInv.InvList, iv)

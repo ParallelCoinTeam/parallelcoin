@@ -2,7 +2,7 @@ package wire
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"io"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -32,13 +32,13 @@ func (msg *MsgCFilter) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) er
 	// Read filter type
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// Read the hash of the filter's block
 	err = readElement(r, &msg.BlockHash)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// Read filter data
@@ -57,12 +57,12 @@ func (msg *MsgCFilter) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) er
 	}
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	err = writeElement(w, msg.BlockHash)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	return WriteVarBytes(w, pver, msg.Data)

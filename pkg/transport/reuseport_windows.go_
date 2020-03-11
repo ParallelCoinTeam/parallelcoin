@@ -5,14 +5,14 @@ package transport
 import (
 	"syscall"
 	
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 func reusePort(network, address string, conn syscall.RawConn) error {
 	return conn.Control(func(descriptor uintptr) {
 		err := syscall.SetsockoptInt(syscall.Handle(descriptor), syscall.SOL_SOCKET, syscall.SO_REUSEADDR, 1)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 		}
 	})
 }

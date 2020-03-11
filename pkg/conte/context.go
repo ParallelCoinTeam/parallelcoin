@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/lang"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 )
@@ -99,9 +99,9 @@ func (cx *Xt) IsCurrent() (is bool) {
 	othernodes := cx.OtherNodes.Load()
 	if !*cx.Config.LAN {
 		cc -= othernodes
-		// log.DEBUG("LAN disabled, non-lan node count:", cc)
+		// log.L.Debug("LAN disabled, non-lan node count:", cc)
 	}
-	// log.DEBUG("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
+	// log.L.Debug("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
 	connected := cc > 0
 	if *cx.Config.Solo {
 		connected = true
@@ -110,7 +110,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load()
-	log.TRACE("is current:", is, "-", cx.
+	log.L.Trace("is current:", is, "-", cx.
 		RealNode.Chain.IsCurrent(), cx.
 		RealNode.SyncManager.IsCurrent(), !*cx.
 		Config.Solo,

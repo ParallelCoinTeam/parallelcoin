@@ -1,6 +1,6 @@
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
-gioui.org v0.0.0-20200229151555-bd7c7a108a9e h1:jLQovLMnxFQfBQw4QkeGYkwSgDd2W39x18PxXkc32to=
-gioui.org v0.0.0-20200229151555-bd7c7a108a9e/go.mod h1:AHI9rFr6AEEHCb8EPVtb/p5M+NMJRKH58IOp8O3Je04=
+gioui.org v0.0.0-20200311164516-7024a0e6914d h1:wCPZaOH3EkLnUyFZT2q+EQExN7XQ1DAPdgbocdSALWc=
+gioui.org v0.0.0-20200311164516-7024a0e6914d/go.mod h1:AHI9rFr6AEEHCb8EPVtb/p5M+NMJRKH58IOp8O3Je04=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802 h1:1BDTz0u9nC3//pOCMdNH+CiXJVYJh5UQNCOBG7jbELc=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
@@ -20,8 +20,6 @@ github.com/btcsuite/snappy-go v1.0.0 h1:ZxaA6lo2EpxGddsA8JwWOcxlzRybb444sgmeJQMJ
 github.com/btcsuite/snappy-go v1.0.0/go.mod h1:8woku9dyThutzjeg+3xrA5iCpBRH8XEEg3lh6TiUghc=
 github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792 h1:R8vQdOQdZ9Y3SkEwmHoWBmX1DNXhXZqlTpq6s4tyJGc=
 github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792/go.mod h1:ghJtEyQwv5/p4Mg4C0fgbePVuGr935/5ddU9Z3TmDRY=
-github.com/buger/goterm v0.0.0-20181115115552-c206103e1f37 h1:uxxtrnACqI9zK4ENDMf0WpXfUsHP5V8liuq5QdgDISU=
-github.com/buger/goterm v0.0.0-20181115115552-c206103e1f37/go.mod h1:u9UyCz2eTrSGy6fbupqJ54eY5c4IC8gREQ1053dK12U=
 github.com/conformal/fastsha256 v0.0.0-20160815193821-637e65642941 h1:rOVcN552l7af5e6si8Wdd574TTEaBP6xqHiF7T1ZWsU=
 github.com/conformal/fastsha256 v0.0.0-20160815193821-637e65642941/go.mod h1:L/DvjsI5Fhg+SLf++bxzYa06pZd1fwtOEm7CSFSmtjo=
 github.com/coreos/bbolt v1.3.3 h1:n6AiVyVRKQFNb6mJlwESEvvLoDyiTzXX7ORAUlkeBdY=
@@ -57,8 +55,8 @@ github.com/onsi/ginkgo v1.6.0 h1:Ix8l273rp3QzYgXSR+c8d1fTG7UPgYkOSELPhiY/YGw=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/gomega v1.4.1 h1:PZSj/UFNaVp3KxrzHOcS7oyuWA7LoOY/77yCTEFu21U=
 github.com/onsi/gomega v1.4.1/go.mod h1:C1qb7wdrVGGVU+Z6iS04AVkA3Q65CEZX59MT0QO5uiA=
-github.com/p9c/gel v0.0.0-20200311043132-3f22eec0b0cf h1:sl0H2uMND0+13+bhmmDELgEIkg4p9HJuCuqbYvqS6vE=
-github.com/p9c/gel v0.0.0-20200311043132-3f22eec0b0cf/go.mod h1:fTJL2O8H3ZlZDj2VOB0xwE7cyH1/S7UEGAsSDutZtrI=
+github.com/p9c/gel v0.0.1 h1:dUhkB77xmr2mvv+aJcw7mkwFC5XOiAnuHIRApMGdFIk=
+github.com/p9c/gel v0.0.1/go.mod h1:XrSaE/yNCdnkxUKTkcFXgo00A2SnhfmIOFhJsLhRDFg=
 github.com/p9c/gelook v0.0.0-20200311045057-0f256a5503f5 h1:jdhr2p3NONjC36IFJyLPWiQ1AZcg6VQxEA8FFSveRDo=
 github.com/p9c/gelook v0.0.0-20200311045057-0f256a5503f5/go.mod h1:JhzyuHiIyF/BI3/zJTk0GJleNw6+7ZV5Cl24P4Z0wWo=
 github.com/p9c/goterm v0.0.2 h1:XOc0BTicZqOxff2ytn4fOLCLutFONgJfAzl6ONr6OCk=
@@ -116,7 +114,6 @@ golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn
 golang.org/x/net v0.0.0-20190620200207-3b0461eec859/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/net v0.0.0-20200202094626-16171245cfb2 h1:CCH4IOTTfewWjGOlSp+zGcjutRKlBEZQ6wTn8ozI/nI=
 golang.org/x/net v0.0.0-20200202094626-16171245cfb2/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
-golang.org/x/sync v0.0.0-20190423024810-112230192c58 h1:8gQV6CLnAEikrhgkHFbMAEhagSSnXWGV915qUMm9mrU=
 golang.org/x/sync v0.0.0-20190423024810-112230192c58/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sys v0.0.0-20190130150945-aca44879d564/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

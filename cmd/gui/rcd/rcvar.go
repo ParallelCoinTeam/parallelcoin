@@ -5,7 +5,7 @@ import (
 	"gioui.org/text"
 	"github.com/p9c/gel"
 	"github.com/p9c/gelook"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/skip2/go-qrcode"
 	"strings"
 	"time"
@@ -87,7 +87,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 
 	qr, err := qrcode.New(strings.ToUpper("sdasdasfsdgfdshsdfhdjtjrtkjrtykdyjdfgjfdghjfdgsh"), qrcode.Highest)
 	if err != nil {
-		log.FATAL(err)
+		log.L.Fatal(err)
 	}
 	qr.BackgroundColor = gelook.HexARGB("ff3030cf")
 	qrcode := &model.DuoUIqrCode{

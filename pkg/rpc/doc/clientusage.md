@@ -50,7 +50,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 "path/filepath"
 
 	pb "git.parallelcoin.io/mod/rpc/walletrpc"
@@ -68,12 +68,12 @@ func main(	) {
 
 	creds, err := credentials.NewClientTLSFromFile(certificateFile, "localhost")
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return
 	}
 	conn, err := grpc.Dial("localhost:18332", grpc.WithTransportCredentials(creds))
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return
 	}
 	defer conn.Close()
@@ -85,7 +85,7 @@ func main(	) {
 	}
 	balanceResponse, err := c.Balance(context.Background(), balanceRequest)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return
 	}
 

@@ -9,14 +9,14 @@ import (
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		Configure(cx, c)
-		log.DEBUG("starting shell")
+		log.L.Debug("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
@@ -29,22 +29,22 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if !apputil.FileExists(dbFilename) {
 			// log.L.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				log.ERROR("failed to create wallet", err)
+				log.L.Error("failed to create wallet", err)
 			}
 			log.Println("restart to complete initial setup")
 			os.Exit(1)
 		}
-		log.WARN("starting node")
+		log.L.Warn("starting node")
 		if !*cx.Config.NodeOff {
 			go func() {
 				err = node.Main(cx, shutdownChan)
 				if err != nil {
-					log.ERROR("error starting node ", err)
+					log.L.Error("error starting node ", err)
 				}
 			}()
 			cx.RPCServer = <-cx.NodeChan
 		}
-		log.WARN("starting wallet")
+		log.L.Warn("starting wallet")
 		if !*cx.Config.WalletOff {
 			go func() {
 				err = walletmain.Main(cx)
@@ -54,7 +54,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}()
 			cx.WalletServer = <-cx.WalletChan
 		}
-		log.DEBUG("shell started")
+		log.L.Debug("shell started")
 		cx.WaitGroup.Wait()
 		return nil
 	}

@@ -8,7 +8,7 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -180,7 +180,7 @@ dbFetchTxIndexEntry(dbTx database.Tx, txHash *chainhash.Hash) (*database.BlockRe
 	// Load the block hash associated with the block ID.
 	hash, err := dbFetchBlockHashBySerializedID(dbTx, serializedData[0:4])
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, database.Error{
 			ErrorCode: database.ErrCorruption,
 			Description: fmt.Sprintf("corrupt transaction index "+
@@ -201,7 +201,7 @@ dbAddTxIndexEntries(dbTx database.Tx, block *util.Block, blockID uint32) error {
 	// The offset and length of the transactions within the serialized block.
 	txLocs, err := block.TxLoc()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// As an optimization,
@@ -218,7 +218,7 @@ dbAddTxIndexEntries(dbTx database.Tx, block *util.Block, blockID uint32) error {
 		err := dbPutTxIndexEntry(dbTx, tx.Hash(),
 			serializedValues[offset:endOffset:endOffset])
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		offset += txEntrySize
@@ -245,7 +245,7 @@ dbRemoveTxIndexEntries(dbTx database.Tx, block *util.Block) error {
 	for _, tx := range block.Transactions() {
 		err := dbRemoveTxIndexEntry(dbTx, tx.Hash())
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 	}
@@ -279,14 +279,14 @@ func // Init initializes the hash-based transaction index.  In particular,
 		for {
 			_, err := dbFetchBlockHashByID(dbTx, testBlockID)
 			if err != nil {
-				//log.TRACE(err)
+				//log.L.Trace(err)
 				nextUnknown = testBlockID
 				break
 			}
 			highestKnown = testBlockID
 			testBlockID += increment
 		}
-		log.TRACEF("forward scan (highest known %d, next unknown %d)", highestKnown, nextUnknown)
+		log.L.Tracef("forward scan (highest known %d, next unknown %d)", highestKnown, nextUnknown)
 		// No used block IDs due to new database.
 		if nextUnknown == 1 {
 			return nil
@@ -297,12 +297,12 @@ func // Init initializes the hash-based transaction index.  In particular,
 			testBlockID = (highestKnown + nextUnknown) / 2
 			_, err := dbFetchBlockHashByID(dbTx, testBlockID)
 			if err != nil {
-				//log.TRACE(err)
+				//log.L.Trace(err)
 				nextUnknown = testBlockID
 			} else {
 				highestKnown = testBlockID
 			}
-			log.TRACEF(
+			log.L.Tracef(
 				"binary scan (highest known %d, next unknown %d)",
 				highestKnown,
 				nextUnknown,
@@ -315,10 +315,10 @@ func // Init initializes the hash-based transaction index.  In particular,
 		return nil
 	})
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
-	log.TRACE("current internal block ID:", idx.curBlockID)
+	log.L.Trace("current internal block ID:", idx.curBlockID)
 	return nil
 }
 
@@ -366,7 +366,7 @@ func // ConnectBlock is invoked by the index manager when a new block has been
 	// update the current internal block ID accordingly.
 	err := dbPutBlockIDIndexEntry(dbTx, block.Hash(), newBlockID)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	idx.curBlockID = newBlockID
@@ -424,7 +424,7 @@ dropBlockIDIndex(db database.DB) error {
 		meta := dbTx.Metadata()
 		err := meta.DeleteBucket(idByHashIndexBucketName)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		return meta.DeleteBucket(hashByIDIndexBucketName)
@@ -437,7 +437,7 @@ func // DropTxIndex drops the transaction index from the provided database if it
 DropTxIndex(db database.DB, interrupt <-chan struct{}) error {
 	err := dropIndex(db, addrIndexKey, addrIndexName, interrupt)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	return dropIndex(db, txIndexKey, txIndexName, interrupt)

@@ -6,7 +6,7 @@ import (
 	"github.com/bitbandi/go-x11"
 	
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	
 	skein "github.com/enceve/crypto/skein/skein256"
 	gost "github.com/programmer10110/gostreebog"
@@ -44,7 +44,7 @@ func X11(bytes []byte) (out []byte) {
 	hf := x11.New()
 	out = make([]byte, 32)
 	hf.Hash(bytes, out)
-	// log.DEBUGF("x11 %x", out)
+	// log.L.Debugf("x11 %x", out)
 	return
 	// return cryptonight.Sum(bytes, 2)
 }
@@ -195,7 +195,7 @@ func Scrypt(bytes []byte) []byte {
 	copy(c, b)
 	dk, err := scrypt.Key(c, c, 1024, 1, 1, 32)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return make([]byte, 32)
 	}
 	o := make([]byte, 32)

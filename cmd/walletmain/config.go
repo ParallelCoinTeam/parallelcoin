@@ -172,7 +172,7 @@ return err
 	dest, err := os.OpenFile(destinationPath,
 		os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-log.ERROR(err)
+log.L.Error(err)
 		return err
 	}
 	defer dest.Close()

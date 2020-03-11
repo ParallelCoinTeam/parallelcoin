@@ -1,7 +1,7 @@
 package worker
 
 import (
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/stdconn"
 	"os"
 	"os/exec"
@@ -23,18 +23,18 @@ func Spawn(args ...string) (w *Worker) {
 	w.Stderr = os.Stdout
 	cmdOut, err := w.StdoutPipe()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return
 	}
 	cmdIn, err := w.StdinPipe()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, make(chan struct{}))
 	err = w.Start()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil
 	} else {
 		return

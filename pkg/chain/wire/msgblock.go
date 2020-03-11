@@ -3,7 +3,7 @@ package wire
 import (
 	"bytes"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"io"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -50,12 +50,12 @@ func (msg *MsgBlock) ClearTransactions() {
 func (msg *MsgBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
 	err := readBlockHeader(r, pver, &msg.Header)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	txCount, err := ReadVarInt(r, pver)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// Prevent more transactions than could possibly fit into a block. It would be possible to cause memory exhaustion and panics without a sane upper bound on this count.
@@ -69,7 +69,7 @@ func (msg *MsgBlock) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) er
 		tx := MsgTx{}
 		err := tx.BtcDecode(r, pver, enc)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		msg.Transactions = append(msg.Transactions, &tx)
@@ -94,12 +94,12 @@ func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) ([]TxLoc, error) {
 	// At the current time, there is no difference between the wire encoding at protocol version 0 and the stable long-term storage format.  As a result, make use of existing wire protocol functions.
 	err := readBlockHeader(r, 0, &msg.Header)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	txCount, err := ReadVarInt(r, 0)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	// Prevent more transactions than could possibly fit into a block. It would be possible to cause memory exhaustion and panics without a sane upper bound on this count.
@@ -116,7 +116,7 @@ func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) ([]TxLoc, error) {
 		tx := MsgTx{}
 		err := tx.Deserialize(r)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return nil, err
 		}
 		msg.Transactions = append(msg.Transactions, &tx)
@@ -131,18 +131,18 @@ func (msg *MsgBlock) DeserializeTxLoc(r *bytes.Buffer) ([]TxLoc, error) {
 func (msg *MsgBlock) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) error {
 	err := writeBlockHeader(w, pver, &msg.Header)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	err = WriteVarInt(w, pver, uint64(len(msg.Transactions)))
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	for _, tx := range msg.Transactions {
 		err = tx.BtcEncode(w, pver, enc)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 	}

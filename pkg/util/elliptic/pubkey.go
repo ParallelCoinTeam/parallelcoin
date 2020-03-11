@@ -4,7 +4,7 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"math/big"
 )
 
@@ -100,7 +100,7 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 		pubkey.X = new(big.Int).SetBytes(pubKeyStr[1:33])
 		pubkey.Y, err = decompressPoint(curve, pubkey.X, ybit)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return nil, err
 		}
 	default: // wrong!

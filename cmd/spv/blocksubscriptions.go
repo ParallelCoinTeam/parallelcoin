@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 type (
@@ -83,7 +83,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 		if filterHeaderTip == bestHeight {
 			return nil
 		}
-		log.DEBUGF(
+		log.L.Debugf(
 			"delivering backlog block notifications from height=%v, to height=%v",
 			bestHeight, filterHeaderTip,
 		)
@@ -98,7 +98,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 				currentHeight,
 			)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return fmt.Errorf(
 					"unable to read header at height: %v: %v",
 					currentHeight, err,
@@ -112,7 +112,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 		return nil
 	})
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	return &subscription, nil

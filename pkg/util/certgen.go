@@ -11,7 +11,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"math/big"
 	"net"
 	"os"
@@ -26,7 +26,7 @@ func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []stri
 	}
 	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, nil, err
 	}
 	// end of ASN.1 time
@@ -37,12 +37,12 @@ func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []stri
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, nil, fmt.Errorf("failed to generate serial number: %s", err)
 	}
 	host, err := os.Hostname()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, nil, err
 	}
 	ipAddresses := []net.IP{net.ParseIP("127.0.0.1"), net.ParseIP("::1")}
@@ -68,7 +68,7 @@ func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []stri
 	}
 	addrs, err := interfaceAddrs()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, nil, err
 	}
 	for _, a := range addrs {
@@ -80,7 +80,7 @@ func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []stri
 	for _, hostStr := range extraHosts {
 		host, _, err := net.SplitHostPort(hostStr)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			host = hostStr
 		}
 		if ip := net.ParseIP(host); ip != nil {
@@ -107,24 +107,24 @@ func NewTLSCertPair(organization string, validUntil time.Time, extraHosts []stri
 	derBytes, err := x509.CreateCertificate(rand.Reader, &template,
 		&template, &priv.PublicKey, priv)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, nil, fmt.Errorf("failed to create certificate: %v", err)
 	}
 	certBuf := &bytes.Buffer{}
 	err = pem.Encode(certBuf, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, nil, fmt.Errorf("failed to encode certificate: %v", err)
 	}
 	keybytes, err := x509.MarshalECPrivateKey(priv)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, nil, fmt.Errorf("failed to marshal private key: %v", err)
 	}
 	keyBuf := &bytes.Buffer{}
 	err = pem.Encode(keyBuf, &pem.Block{Type: "EC PRIVATE KEY", Bytes: keybytes})
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, nil, fmt.Errorf("failed to encode private key: %v", err)
 	}
 	return certBuf.Bytes(), keyBuf.Bytes(), nil

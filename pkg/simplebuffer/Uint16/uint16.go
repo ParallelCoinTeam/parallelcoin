@@ -4,8 +4,9 @@ import (
 	"encoding/binary"
 	"net"
 	"strconv"
-	
-	"github.com/p9c/pod/pkg/log"
+
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/simplebuffer"
 )
 
@@ -50,7 +51,7 @@ func (p *Uint16) Put(i uint16) *Uint16 {
 }
 
 func GetPort(listener string) simplebuffer.Serializer {
-	// log.DEBUG(listener)
+	// log.L.Debug(listener)
 	oI := GetActualPort(listener)
 	port := &Uint16{}
 	port.Put(uint16(oI))
@@ -60,11 +61,11 @@ func GetPort(listener string) simplebuffer.Serializer {
 func GetActualPort(listener string) uint16 {
 	_, p, err := net.SplitHostPort(listener)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 	}
 	oI, err := strconv.ParseUint(p, 10, 16)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 	}
 	return uint16(oI)
 }

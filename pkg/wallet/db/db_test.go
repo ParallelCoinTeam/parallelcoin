@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
@@ -80,7 +80,7 @@ func TestCreateOpenFail(t *testing.T) {
 	}
 	err := walletdb.RegisterDriver(driver)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 	}
 	// Ensure creating a database with the new type fails with the expected
 	// error.

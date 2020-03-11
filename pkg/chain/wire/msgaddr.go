@@ -2,8 +2,9 @@ package wire
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
 	"io"
+
+	log "github.com/p9c/logi"
 )
 
 // MaxAddrPerMsg is the maximum number of addresses that can be in a single bitcoin addr message (MsgAddr).
@@ -30,7 +31,7 @@ func (msg *MsgAddr) AddAddresses(netAddrs ...*NetAddress) error {
 	for _, na := range netAddrs {
 		err := msg.AddAddress(na)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 	}
@@ -46,7 +47,7 @@ func (msg *MsgAddr) ClearAddresses() {
 func (msg *MsgAddr) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// Limit to max addresses per message.
@@ -61,12 +62,12 @@ func (msg *MsgAddr) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) err
 		na := &addrList[i]
 		err := readNetAddress(r, pver, na, true)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		err = msg.AddAddress(na)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 		}
 	}
 	return nil
@@ -88,13 +89,13 @@ func (msg *MsgAddr) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) err
 	}
 	err := WriteVarInt(w, pver, uint64(count))
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	for _, na := range msg.AddrList {
 		err = writeNetAddress(w, pver, na, true)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 	}

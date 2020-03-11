@@ -4,7 +4,7 @@ import (
 	"sort"
 
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 type Algo struct {
@@ -57,17 +57,17 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 				counter++
 			}
 			sort.Sort(algos)
-			log.DEBUG("")
+			log.L.Debug("")
 			for _, v := range algos {
 				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(lastNode, v.Name, true)
 			}
 			newTargetBits = nTB
-			// log.SPEW(newTargetBits)
+			// log.L.Traces(newTargetBits)
 		} else {
 			newTargetBits = b.DifficultyBits.Load().(TargetBits)
 		}
 		return
 	}
-	log.TRACE("should not fall through here")
+	log.L.Trace("should not fall through here")
 	return
 }

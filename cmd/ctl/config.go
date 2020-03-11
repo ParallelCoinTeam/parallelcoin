@@ -1,7 +1,7 @@
 package ctl
 
 import (
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"path/filepath"
 
 	"github.com/p9c/pod/app/appdata"
@@ -47,7 +47,7 @@ func ListCommands() {
 	for _, method := range cmdMethods {
 		flags, err := btcjson.MethodUsageFlags(method)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue
@@ -58,7 +58,7 @@ func ListCommands() {
 		}
 		usage, err := btcjson.MethodUsageText(method)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue

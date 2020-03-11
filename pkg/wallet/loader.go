@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util/prompt"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
@@ -63,7 +63,7 @@ func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bd
 	//dbPath := filepath.Join(ld.DDDirPath, WalletDbName)
 	exists, err := fileExists(ld.DDDirPath)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	if exists {
@@ -73,24 +73,24 @@ func (ld *Loader) CreateNewWallet(pubPassphrase, privPassphrase, seed []byte, bd
 	p := filepath.Dir(ld.DDDirPath)
 	err = os.MkdirAll(p, 0700)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	db, err := walletdb.Create("bdb", ld.DDDirPath)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	// Initialize the newly created database for the wallet before opening.
 	err = Create(db, pubPassphrase, privPassphrase, seed, ld.ChainParams, bday)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	// Open the newly-created wallet.
 	w, err := Open(db, pubPassphrase, nil, ld.ChainParams, ld.RecoveryWindow, podConfig)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	if !noStart {
@@ -118,25 +118,25 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 	ld.Mutex.Lock()
 	// INFO("opening existing wallet", ld.DDDirPath}
 	if ld.Loaded {
-		log.INFO("already loaded wallet")
+		log.L.Info("already loaded wallet")
 		return nil, ErrLoaded
 	}
 	// Ensure that the network directory exists.
 	if err := checkCreateDir(filepath.Dir(ld.DDDirPath)); err != nil {
-		log.ERROR("cannot create directory", ld.DDDirPath)
+		log.L.Error("cannot create directory", ld.DDDirPath)
 		return nil, err
 	}
-	log.INFO("directory exists")
+	log.L.Info("directory exists")
 	// Open the database using the boltdb backend.
 	dbPath := ld.DDDirPath
-	log.INFO("opening database", dbPath)
+	log.L.Info("opening database", dbPath)
 	db, err := walletdb.Open("bdb", dbPath)
 	if err != nil {
-		log.ERROR(err)
-		log.ERROR("failed to open database '", ld.DDDirPath, "':", err)
+		log.L.Error(err)
+		log.L.Error("failed to open database '", ld.DDDirPath, "':", err)
 		return nil, err
 	}
-	log.INFO("opened wallet database")
+	log.L.Info("opened wallet database")
 	var cbs *waddrmgr.OpenCallbacks
 	if canConsolePrompt {
 		cbs = &waddrmgr.OpenCallbacks{
@@ -149,26 +149,26 @@ func (ld *Loader) OpenExistingWallet(pubPassphrase []byte, canConsolePrompt bool
 			ObtainPrivatePass: noConsole,
 		}
 	}
-	log.TRACE("opening wallet")
+	log.L.Trace("opening wallet")
 	w, err := Open(db, pubPassphrase, cbs, ld.ChainParams, ld.RecoveryWindow, podConfig)
 	if err != nil {
-		log.ERROR(err)
-		log.INFO("failed to open wallet", err)
+		log.L.Error(err)
+		log.L.Info("failed to open wallet", err)
 		// If opening the wallet fails (e.g. because of wrong
 		// passphrase), we must close the backing database to
 		// allow future calls to walletdb.Open().
 		e := db.Close()
 		if e != nil {
-			log.WARN("error closing database:", e)
+			log.L.Warn("error closing database:", e)
 		}
 		return nil, err
 	}
 	ld.Wallet = w
-	log.TRACE("starting wallet", w != nil)
+	log.L.Trace("starting wallet", w != nil)
 	w.Start()
-	log.TRACE("waiting for load", db != nil)
+	log.L.Trace("waiting for load", db != nil)
 	ld.onLoaded(db)
-	log.TRACE("wallet opened successfully", w != nil)
+	log.L.Trace("wallet opened successfully", w != nil)
 	return w, nil
 }
 
@@ -192,29 +192,29 @@ func (ld *Loader) RunAfterLoad(fn func(*Wallet)) {
 // CreateNewWallet or LoadExistingWallet.  The Loader may be reused if this
 // function returns without error.
 func (ld *Loader) UnloadWallet() error {
-	log.TRACE("unloading wallet")
+	log.L.Trace("unloading wallet")
 	defer ld.Mutex.Unlock()
 	ld.Mutex.Lock()
 	if ld.Wallet == nil {
-		log.DEBUG("wallet not loaded")
+		log.L.Debug("wallet not loaded")
 		return ErrNotLoaded
 	}
-	log.TRACE("wallet stopping")
+	log.L.Trace("wallet stopping")
 	ld.Wallet.Stop()
-	log.TRACE("waiting for wallet shutdown")
+	log.L.Trace("waiting for wallet shutdown")
 	ld.Wallet.WaitForShutdown()
 	if ld.DB == nil {
-		log.DEBUG("there was no database")
+		log.L.Debug("there was no database")
 		return ErrNotLoaded
 	}
-	log.TRACE("wallet stopped")
+	log.L.Trace("wallet stopped")
 	err := ld.DB.Close()
 	if err != nil {
-		log.ERROR(err)
-		log.DEBUG("error closing database", err)
+		log.L.Error(err)
+		log.L.Debug("error closing database", err)
 		return err
 	}
-	log.TRACE("database closed")
+	log.L.Trace("database closed")
 	time.Sleep(time.Second / 4)
 	ld.Loaded = false
 	ld.DB = nil
@@ -230,11 +230,11 @@ func (ld *Loader) WalletExists() (bool, error) {
 // onLoaded executes each added callback and prevents loader from loading any
 // additional wallets.  Requires mutex to be locked.
 func (ld *Loader) onLoaded(db walletdb.DB) {
-	log.TRACE("wallet loader callbacks running ", ld.Wallet != nil)
+	log.L.Trace("wallet loader callbacks running ", ld.Wallet != nil)
 	for _, fn := range ld.Callbacks {
 		fn(ld.Wallet)
 	}
-	log.TRACE("wallet loader callbacks finished")
+	log.L.Trace("wallet loader callbacks finished")
 	ld.Loaded = true
 	ld.DB = db
 	ld.Callbacks = nil // not needed anymore
@@ -254,7 +254,7 @@ func NewLoader(chainParams *netparams.Params, dbDirPath string, recoveryWindow u
 func fileExists(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		if os.IsNotExist(err) {
 			return false, nil
 		}

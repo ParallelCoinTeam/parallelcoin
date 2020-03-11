@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"os"
 	"time"
 
@@ -31,7 +31,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 		ctl.HelpPrint = func() {
 			err := cli.ShowSubcommandHelp(c)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 			}
 		}
 		ctl.Main(args, cx)

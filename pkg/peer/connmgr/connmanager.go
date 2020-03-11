@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 // maxFailedAttempts is the maximum number of successive failed connection
@@ -185,14 +185,14 @@ func (cm *ConnManager) handleFailedConn(c *ConnReq) {
 		if d > maxRetryDuration {
 			d = maxRetryDuration
 		}
-		log.TRACEF("retrying connection to %v in %v", c, d)
+		log.L.Tracef("retrying connection to %v in %v", c, d)
 		time.AfterFunc(d, func() {
 			cm.Connect(c)
 		})
 	} else if cm.Cfg.GetNewAddress != nil {
 		cm.failedAttempts++
 		if cm.failedAttempts >= maxFailedAttempts {
-			// log.TRACEF("max failed connection attempts reached: [%d" +
+			// log.L.Tracef("max failed connection attempts reached: [%d" +
 			// 	"] -- retrying" +
 			// 	" connection in: %v",
 			// 	maxFailedAttempts,
@@ -233,13 +233,13 @@ out:
 					if msg.conn != nil {
 						msg.conn.Close()
 					}
-					log.DEBUG("ignoring connection for canceled connreq", connReq)
+					log.L.Debug("ignoring connection for canceled connreq", connReq)
 					continue
 				}
 				connReq.updateState(ConnEstablished)
 				connReq.conn = msg.conn
 				conns[connReq.id] = connReq
-				log.TRACE("connected to ", connReq)
+				log.L.Trace("connected to ", connReq)
 				connReq.retryCount = 0
 				cm.failedAttempts = 0
 				delete(pending, connReq.id)
@@ -251,20 +251,20 @@ out:
 				if !ok {
 					connReq, ok = pending[msg.id]
 					if !ok {
-						log.ERROR("unknown connid", msg.id)
+						log.L.Error("unknown connid", msg.id)
 						continue
 					}
 					// Pending connection was found,
 					// remove it from pending map if we should ignore a
 					// later, successful connection.
 					connReq.updateState(ConnCanceled)
-					log.DEBUG("canceling:", connReq)
+					log.L.Debug("canceling:", connReq)
 					delete(pending, msg.id)
 					continue
 				}
 				// An existing connection was located,
 				// mark as disconnected and execute disconnection callback.
-				log.TRACE("disconnected from", connReq)
+				log.L.Trace("disconnected from", connReq)
 				delete(conns, msg.id)
 				if connReq.conn != nil {
 					connReq.conn.Close()
@@ -292,11 +292,11 @@ out:
 			case handleFailed:
 				connReq := msg.c
 				if _, ok := pending[connReq.id]; !ok {
-					log.DEBUG("ignoring connection for canceled conn req:", connReq)
+					log.L.Debug("ignoring connection for canceled conn req:", connReq)
 					continue
 				}
 				connReq.updateState(ConnFailing)
-				// log.TRACEF("failed to connect to %v: %v", connReq, msg.err)
+				// log.L.Tracef("failed to connect to %v: %v", connReq, msg.err)
 				cm.handleFailedConn(connReq)
 			}
 		case <-cm.quit:
@@ -335,7 +335,7 @@ func (cm *ConnManager) NewConnReq() {
 	}
 	addr, err := cm.Cfg.GetNewAddress()
 	if err != nil {
-		//log.TRACE(err)
+		//log.L.Trace(err)
 		select {
 		case cm.requests <- handleFailed{c, err}:
 		case <-cm.quit:
@@ -358,14 +358,14 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 		// manager. By registering the id before the connection is even
 		// established, we'll be able to later cancel the connection via the
 		// Remove method.
-		log.TRACE("sending request to register connection")
+		log.L.Trace("sending request to register connection")
 		done := make(chan struct{})
 		select {
 		case cm.requests <- registerPending{c, done}:
 		case <-cm.quit:
 			return
 		}
-		log.TRACE("waiting for response")
+		log.L.Trace("waiting for response")
 		// Wait for the registration to successfully add the pending conn req to
 		// the conn manager's internal state.
 		select {
@@ -374,16 +374,16 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 			return
 		}
 	}
-	log.TRACE("response received", cm.Cfg.Listeners)
+	log.L.Trace("response received", cm.Cfg.Listeners)
 	if len(cm.Cfg.Listeners) > 0 {
-		log.TRACEF("%s attempting to connect to '%s'",
+		log.L.Tracef("%s attempting to connect to '%s'",
 			cm.Cfg.Listeners[0].Addr(), c.Addr)
 	}
-	log.SPEW(cm.Cfg.Dial)
+	log.L.Traces(cm.Cfg.Dial)
 	conn, err := cm.Cfg.Dial(c.Addr)
-	log.TRACE(err, c.Addr)
+	log.L.Trace(err, c.Addr)
 	if err != nil {
-		log.TRACE(err)
+		log.L.Trace(err)
 		select {
 		case cm.requests <- handleFailed{c, err}:
 		case <-cm.quit:
@@ -425,23 +425,23 @@ func (cm *ConnManager) Remove(id uint64) {
 // listenHandler accepts incoming connections on a given listener.  It must be
 // run as a goroutine.
 func (cm *ConnManager) listenHandler(listener net.Listener) {
-	log.INFOC(func() string {
+	log.L.Infoc(func() string {
 		return fmt.Sprint("node listening on ", listener.Addr())
 	})
 	for atomic.LoadInt32(&cm.stop) == 0 {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.TRACE(err)
+			log.L.Trace(err)
 			// Only log the error if not forcibly shutting down.
 			if atomic.LoadInt32(&cm.stop) == 0 {
-				log.ERROR("can't accept connection:", err)
+				log.L.Error("can't accept connection:", err)
 			}
 			continue
 		}
 		go cm.Cfg.OnAccept(conn)
 	}
 	cm.wg.Done()
-	log.TRACE(func() string {
+	log.L.Trace(func() string {
 		return fmt.Sprint("listener handler done for ", listener.Addr())
 	})
 }
@@ -475,7 +475,7 @@ func (cm *ConnManager) Wait() {
 // Stop gracefully shuts down the connection manager.
 func (cm *ConnManager) Stop() {
 	if atomic.AddInt32(&cm.stop, 1) != 1 {
-		log.WARN("connection manager already stopped")
+		log.L.Warn("connection manager already stopped")
 		return
 	}
 	// Stop all the listeners.  There will not be any listeners if listening is
@@ -492,7 +492,7 @@ func (cm *ConnManager) Stop() {
 // network.
 func New(cfg *Config) (*ConnManager, error) {
 	if cfg.Dial == nil {
-		log.ERROR("Cfg.Dial is nil")
+		log.L.Error("Cfg.Dial is nil")
 		return nil, ErrDialNil
 	}
 	// Default to sane values

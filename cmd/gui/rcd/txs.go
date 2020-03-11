@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"time"
 )
 
 func (r *RcVar) GetDuoUItransactionsNumber() {
-	log.DEBUG("getting transaction count")
+	log.L.Debug("getting transaction count")
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := r.cx.WalletServer.ListTransactions(0, 999999999)
@@ -22,18 +22,18 @@ func (r *RcVar) GetDuoUItransactionsNumber() {
 }
 
 func (r *RcVar) GetDuoUItransactions(sfrom, count int, cat string) *model.DuoUItransactions {
-	log.DEBUG("getting transactions")
+	log.L.Debug("getting transactions")
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := r.cx.WalletServer.ListTransactions(0, 11)
 	if err != nil {
-		log.INFO(err)
+		log.L.Info(err)
 	}
-	log.DEBUG("TRZNZA:")
-	log.DEBUG(lt)
+	log.L.Debug("TRZNZA:")
+	log.L.Debug(lt)
 
 	r.Status.Wallet.Transactions.TxsNumber = len(lt)
-	log.INFO("ETO:" + fmt.Sprint(lt))
+	log.L.Info("ETO:" + fmt.Sprint(lt))
 	txsArray := *new([]model.DuoUItx)
 	// lt := listTransactions.([]json.ListTransactionsResult)
 	switch c := cat; c {
@@ -79,7 +79,7 @@ func txs(t btcjson.ListTransactionsResult) model.DuoUItx {
 
 }
 func (r *RcVar) GetLatestTransactions() {
-	log.DEBUG("FUCTIONZ getting latest transactions")
+	log.L.Debug("FUCTIONZ getting latest transactions")
 	//r.Status.Wallet.LastTxs = r.GetDuoUItransactions(0, 10, "")
 
 	//cmd := icmd.(*btcjson.ListTransactionsCmd)
@@ -95,14 +95,14 @@ func (r *RcVar) GetLatestTransactions() {
 	//Message: "Transactions are not yet grouped by account",
 	//}
 	//}
-	log.INFO(r.cx.WalletServer.ListTransactions(0, 11))
+	log.L.Info(r.cx.WalletServer.ListTransactions(0, 11))
 	//}
 	return
 }
 
 func (r *RcVar) GetTransactions() func() {
 	return func() {
-		log.DEBUG("getting transactions")
+		log.L.Debug("getting transactions")
 		lt, err := r.cx.WalletServer.ListTransactions(0, r.History.Txs.TxsListNumber)
 		if err != nil {
 			// //r.PushDuoUIalert("Error", err.Error(), "error")

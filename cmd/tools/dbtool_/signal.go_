@@ -23,12 +23,12 @@ func mainInterruptHandler(	) {
 		case <-interruptChannel:
 			// Ignore more than one shutdown signal.
 			if isShutdown {
-				log.Infof("Received SIGINT (Ctrl+C).  " +
+				log.L.Infof("Received SIGINT (Ctrl+C).  " +
 					"Already shutting down...")
 				continue
 			}
 			isShutdown = true
-			log.Infof("Received SIGINT (Ctrl+C).  Shutting down...")
+			log.L.Infof("Received SIGINT (Ctrl+C).  Shutting down...")
 			// Run handlers in LIFO order.
 			for i := range interruptCallbacks {
 				idx := len(interruptCallbacks) - 1 - i

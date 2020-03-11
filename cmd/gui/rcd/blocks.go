@@ -4,7 +4,7 @@ import (
 	"github.com/p9c/gel"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/node/rpc"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -46,7 +46,7 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	b = *new(model.DuoUIblock)
 	hashHeight, err := r.cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
 	if err != nil {
-		log.ERROR("Block Hash By Height:", err)
+		log.L.Error("Block Hash By Height:", err)
 	}
 
 	verbose, verbosetx := true, true
@@ -79,15 +79,15 @@ func (r *RcVar) GetBlocksExcerpts() func() {
 		startBlock := r.Explorer.Page.Value * r.Explorer.PerPage.Value
 		endBlock := r.Explorer.Page.Value*r.Explorer.PerPage.Value + r.Explorer.PerPage.Value
 		height := int(r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
-		log.DEBUG("GetBlocksExcerpts", startBlock, endBlock, height)
+		log.L.Debug("GetBlocksExcerpts", startBlock, endBlock, height)
 		if endBlock > height {
 			endBlock = height
 		}
 		blocks := *new([]model.DuoUIblock)
 		for i := startBlock; i < endBlock; i++ {
 			blocks = append(blocks, r.GetBlockExcerpt(i))
-			// log.INFO("trazo")
-			// log.INFO(r.Status.Node.BlockHeight)
+			// log.L.Info("trazo")
+			// log.L.Info(r.Status.Node.BlockHeight)
 		}
 		r.Explorer.Blocks = blocks
 		return

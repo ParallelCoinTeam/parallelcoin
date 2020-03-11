@@ -7,7 +7,7 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
@@ -49,15 +49,15 @@ func lookupInputAccount(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetai
 	prevOP := &details.MsgTx.TxIn[deb.Index].PreviousOutPoint
 	prev, err := w.TxStore.TxDetails(txmgrNs, &prevOP.Hash)
 	if err != nil {
-		log.ERROR(err)
-		log.ERRORF(
+		log.L.Error(err)
+		log.L.Errorf(
 			"cannot query previous transaction details for %v: %v %s",
 			prevOP.Hash,
 			err)
 		return 0
 	}
 	if prev == nil {
-		log.ERROR(
+		log.L.Error(
 			"missing previous transaction", prevOP.Hash)
 		return 0
 	}
@@ -68,8 +68,8 @@ func lookupInputAccount(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetai
 		_, inputAcct, err = w.Manager.AddrAccount(addrmgrNs, addrs[0])
 	}
 	if err != nil {
-		log.ERROR(err)
-		log.ERRORF(
+		log.L.Error(err)
+		log.L.Errorf(
 			"cannot fetch account for previous output %v: %v", prevOP, err)
 		inputAcct = 0
 	}
@@ -85,8 +85,8 @@ func lookupOutputChain(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetail
 		ma, err = w.Manager.Address(addrmgrNs, addrs[0])
 	}
 	if err != nil {
-		log.ERROR(err)
-		log.ERROR("cannot fetch account for wallet output:", err)
+		log.L.Error(err)
+		log.L.Error("cannot fetch account for wallet output:", err)
 	} else {
 		account = ma.Account()
 		internal = ma.Internal()
@@ -99,8 +99,8 @@ func makeTxSummary(dbtx walletdb.ReadTx, w *Wallet, details *wtxmgr.TxDetails) T
 		var buf bytes.Buffer
 		err := details.MsgTx.Serialize(&buf)
 		if err != nil {
-			log.ERROR(err)
-			log.ERROR(
+			log.L.Error(err)
+			log.L.Error(
 				"transaction serialization:", err)
 		}
 		serializedTx = buf.Bytes()
@@ -153,7 +153,7 @@ func totalBalances(dbtx walletdb.ReadTx, w *Wallet, m map[uint32]util.Amount) er
 	addrmgrNs := dbtx.ReadBucket(waddrmgrNamespaceKey)
 	unspent, err := w.TxStore.UnspentOutputs(dbtx.ReadBucket(wtxmgrNamespaceKey))
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	for i := range unspent {
@@ -194,7 +194,7 @@ func (s *NotificationServer) notifyUnminedTransaction(dbtx walletdb.ReadTx, deta
 	// Sanity check: should not be currently coalescing a notification for
 	// mined transactions at the same time that an unmined tx is notified.
 	if s.currentTxNtfn != nil {
-		log.ERRORF(
+		log.L.Errorf(
 			"notifying unmined tx notification (%s) while creating notification for blocks",
 			details.Hash)
 	}
@@ -207,8 +207,8 @@ func (s *NotificationServer) notifyUnminedTransaction(dbtx walletdb.ReadTx, deta
 	unminedTxs := []TransactionSummary{makeTxSummary(dbtx, s.wallet, details)}
 	unminedHashes, err := s.wallet.TxStore.UnminedTxHashes(dbtx.ReadBucket(wtxmgrNamespaceKey))
 	if err != nil {
-		log.ERROR(err)
-		log.ERROR(
+		log.L.Error(err)
+		log.L.Error(
 			"cannot fetch unmined transaction hashes:", err)
 		return
 	}
@@ -216,8 +216,8 @@ func (s *NotificationServer) notifyUnminedTransaction(dbtx walletdb.ReadTx, deta
 	relevantAccounts(s.wallet, bals, unminedTxs)
 	err = totalBalances(dbtx, s.wallet, bals)
 	if err != nil {
-		log.ERROR(err)
-		log.ERRORF(
+		log.L.Error(err)
+		log.L.Errorf(
 			"cannot determine balances for relevant accounts:", err)
 		return
 	}
@@ -290,8 +290,8 @@ func (s *NotificationServer) notifyAttachedBlock(dbtx walletdb.ReadTx, block *wt
 	txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)
 	unminedHashes, err := s.wallet.TxStore.UnminedTxHashes(txmgrNs)
 	if err != nil {
-		log.ERROR(err)
-		log.ERROR(
+		log.L.Error(err)
+		log.L.Error(
 			"cannot fetch unmined transaction hashes:", err)
 		return
 	}
@@ -302,8 +302,8 @@ func (s *NotificationServer) notifyAttachedBlock(dbtx walletdb.ReadTx, block *wt
 	}
 	err = totalBalances(dbtx, s.wallet, bals)
 	if err != nil {
-		log.ERROR(err)
-		log.ERROR(
+		log.L.Error(err)
+		log.L.Error(
 			"cannot determine balances for relevant accounts:", err)
 		return
 	}

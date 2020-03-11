@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/p9c/pod/cmd/walletmain"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/wallet/chain"
@@ -14,7 +14,7 @@ import (
 func (r *RcVar) ConsoleCmd(com string) (o string) {
 	split := strings.Split(com, " ")
 	params := make([]interface{}, 0, len(split[1:]))
-	log.INFO(len(params))
+	log.L.Info(len(params))
 	c, err := btcjson.NewCmd(split[0], params...)
 	if err != nil {
 		o = fmt.Sprint(err)
@@ -26,28 +26,28 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 			rpcC, err := chain.NewRPCClient(r.cx.ActiveNet, *r.cx.Config.RPCConnect,
 				*r.cx.Config.Username, *r.cx.Config.Password, walletmain.ReadCAFile(r.cx.Config), !*r.cx.Config.TLS, 0)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 			}
 			err = rpcC.Start()
 			if err != nil {
-				log.ERROR(
+				log.L.Error(
 					"unable to open connection to consensus RPC server:", err)
 			}
 			out, err = handler.HandlerWithChain(
 				c,
 				r.cx.WalletServer,
 				rpcC)
-			log.DEBUG("HandlerWithChain")
+			log.L.Debug("HandlerWithChain")
 		}
 		if handler.Handler != nil {
 			out, err = handler.Handler(
 				c,
 				r.cx.WalletServer)
 			if err != nil {
-				log.ERROR(
+				log.L.Error(
 					"unable to open connection to consensus RPC server:", err)
 			}
-			log.DEBUG("Handler")
+			log.L.Debug("Handler")
 		}
 		if err != nil {
 			o = fmt.Sprint(err)

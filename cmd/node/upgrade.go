@@ -8,14 +8,14 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 // dirEmpty returns whether or not the specified directory path is empty
 func dirEmpty(dirPath string) (bool, error) {
 	f, err := os.Open(dirPath)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return false, err
 	}
 	defer f.Close()
@@ -24,7 +24,7 @@ func dirEmpty(dirPath string) (bool, error) {
 	// so allow it.
 	names, err := f.Readdirnames(1)
 	if err != nil && err != io.EOF {
-		log.ERROR(err)
+		log.L.Error(err)
 		return false, err
 	}
 	return len(names) == 0, nil
@@ -34,7 +34,7 @@ func dirEmpty(dirPath string) (bool, error) {
 func doUpgrades(cx *conte.Xt) error {
 	err := upgradeDBPaths(cx)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	return upgradeDataPaths()
@@ -85,14 +85,14 @@ func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) error {
 		//
 		err = os.MkdirAll(newDbRoot, 0700)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		// Move and rename the old database
 		//
 		err := os.Rename(oldDbPath, newDbPath)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 	}
@@ -110,20 +110,20 @@ func upgradeDBPaths(cx *conte.Xt) error {
 	oldDbRoot := filepath.Join(oldPodHomeDir(), "db")
 	err := upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet")
 	if err != nil {
-		log.ERROR(err)
-		log.DEBUG(err)
+		log.L.Error(err)
+		log.L.Debug(err)
 	}
 	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_testnet.db"),
 		"testnet")
 	if err != nil {
-		log.ERROR(err)
-		log.DEBUG(err)
+		log.L.Error(err)
+		log.L.Debug(err)
 	}
 	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_regtest.db"),
 		"regtest")
 	if err != nil {
-		log.ERROR(err)
-		log.DEBUG(err)
+		log.L.Error(err)
+		log.L.Debug(err)
 	}
 	// Remove the old db directory
 	//
@@ -142,11 +142,11 @@ func upgradeDataPaths() error {
 	// Only migrate if the old path exists and the new one doesn't
 	if apputil.FileExists(oldHomePath) && !apputil.FileExists(newHomePath) {
 		// Create the new path
-		log.INFOF("migrating application home path from '%s' to '%s'",
+		log.L.Infof("migrating application home path from '%s' to '%s'",
 			oldHomePath, newHomePath)
 		err := os.MkdirAll(newHomePath, 0700)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		// Move old pod.conf into new location if needed
@@ -155,7 +155,7 @@ func upgradeDataPaths() error {
 		if apputil.FileExists(oldConfPath) && !apputil.FileExists(newConfPath) {
 			err := os.Rename(oldConfPath, newConfPath)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return err
 			}
 		}
@@ -165,24 +165,24 @@ func upgradeDataPaths() error {
 		if apputil.FileExists(oldDataPath) && !apputil.FileExists(newDataPath) {
 			err := os.Rename(oldDataPath, newDataPath)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return err
 			}
 		}
 		// Remove the old home if it is empty or show a warning if not
 		ohpEmpty, err := dirEmpty(oldHomePath)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		if ohpEmpty {
 			err := os.Remove(oldHomePath)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return err
 			}
 		} else {
-			log.WARNF("not removing '%s' since it contains files not created by"+
+			log.L.Warnf("not removing '%s' since it contains files not created by"+
 				" this application you may want to manually move them or"+
 				" delete them.", oldHomePath)
 		}

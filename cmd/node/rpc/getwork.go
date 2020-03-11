@@ -15,7 +15,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -105,7 +105,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		state.Template, err = generator.NewBlockTemplate(0, payToAddr,
 			s.Cfg.Algo)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return nil, err
 		}
 	}
@@ -119,7 +119,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		if state.prevHash != nil && !state.prevHash.IsEqual(latestHash) {
 			e := state.UpdateBlockTemplate(s, false)
 			if e != nil {
-				log.WARN("failed to update block template", e)
+				log.L.Warn("failed to update block template", e)
 			}
 		}
 		//	Reset the previous best hash the block template was generated
@@ -131,7 +131,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 			s.Cfg.Algo)
 		if err != nil {
 			errStr := fmt.Sprintf("Failed to create new block template: %v", err)
-			log.ERROR(errStr)
+			log.L.Error(errStr)
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCInternal.Code,
 				Message: errStr,
@@ -144,7 +144,7 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		state.LastGenerated = time.Now()
 		state.LastTxUpdate = lastTxUpdate
 		state.prevHash = latestHash
-		log.DEBUGC(func() string {
+		log.L.Debugc(func() string {
 			return fmt.Sprintf(
 				"generated block template (timestamp %v, target %064x, "+
 					"merkle root %s, signature script %x)",
@@ -165,12 +165,12 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 		// several blocks per the chain consensus rules.
 		e := generator.UpdateBlockTime(0, msgBlock)
 		if e != nil {
-			log.WARN("failed to update block time", e)
+			log.L.Warn("failed to update block time", e)
 		}
 		// Increment the extra nonce and update the block template with the new
 		// value by regenerating the coinbase script and setting the merkle root
 		// to the new value.
-		log.DEBUGF(
+		log.L.Debugf(
 			"updated block template (timestamp %v, target %064x, "+
 				"merkle root %s, signature script %x)",
 			msgBlock.Header.Timestamp, fork.CompactToBig(msgBlock.Header.Bits),
@@ -196,9 +196,9 @@ func HandleGetWork(s *Server, cmd interface{}, closeChan <-chan struct{}) (inter
 	buf := bytes.NewBuffer(data)
 	err := msgBlock.Header.Serialize(buf)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		errStr := fmt.Sprintf("Failed to serialize data: %v", err)
-		log.WARN(errStr)
+		log.L.Warn(errStr)
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInternal.Code,
 			Message: errStr,
@@ -259,7 +259,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	}
 	data, err := hex.DecodeString(hexData)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, &btcjson.RPCError{
 			Code: btcjson.ErrRPCInvalidParameter,
 			Message: fmt.Sprintf("argument must be "+
@@ -284,7 +284,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	bhBuf := bytes.NewBuffer(data[0:wire.MaxBlockHeaderPayload])
 	err = submittedHeader.Deserialize(bhBuf)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return false, &btcjson.RPCError{
 			Code: btcjson.ErrRPCInvalidParameter,
 			Message: fmt.Sprintf("argument does not "+
@@ -296,7 +296,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	state := s.GBTWorkState
 
 	if state.Template.Block.Header.MerkleRoot.String() == "" {
-		log.DEBUG(
+		log.L.Debug(
 			"Block submitted via getwork has no matching template for merkle root",
 			submittedHeader.MerkleRoot)
 		return false, nil
@@ -314,7 +314,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	pl := fork.GetMinDiff(s.Cfg.Algo, s.Cfg.Chain.BestSnapshot().Height)
 	err = blockchain.CheckProofOfWork(block, pl, s.Cfg.Chain.BestSnapshot().Height)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		// Anything other than a rule violation is an unexpected error, so return
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
@@ -324,13 +324,13 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 					" of work: %v", err),
 			}
 		}
-		log.DEBUG("block submitted via getwork does not meet the required proof of"+
+		log.L.Debug("block submitted via getwork does not meet the required proof of"+
 			" work:", err)
 		return false, nil
 	}
 	latestHash := &s.Cfg.Chain.BestSnapshot().Hash
 	if !msgBlock.Header.PrevBlock.IsEqual(latestHash) {
-		log.DEBUGF(
+		log.L.Debugf(
 			"block submitted via getwork with previous block %s is stale",
 			msgBlock.Header.PrevBlock)
 		return false, nil
@@ -340,7 +340,7 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 	_, isOrphan, err := s.Cfg.Chain.ProcessBlock(0, block, 0,
 		s.Cfg.Chain.BestSnapshot().Height)
 	if err != nil || isOrphan {
-		log.ERROR(err)
+		log.L.Error(err)
 		// Anything other than a rule violation is an unexpected error, so return
 		// that error as an internal error.
 		if _, ok := err.(blockchain.RuleError); !ok {
@@ -350,12 +350,12 @@ func HandleGetWorkSubmission(s *Server, hexData string) (interface{}, error) {
 					": %v", err),
 			}
 		}
-		log.INFO("block submitted via getwork rejected:", err)
+		log.L.Info("block submitted via getwork rejected:", err)
 		return false, nil
 	}
 	// The block was accepted.
 	blockSha := block.Hash()
-	log.INFO("block submitted via getwork accepted:", blockSha)
+	log.L.Info("block submitted via getwork accepted:", blockSha)
 	return true, nil
 }
 

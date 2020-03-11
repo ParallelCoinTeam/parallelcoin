@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 // DefaultConnectTimeout is a reasonable 30 seconds
@@ -24,11 +24,11 @@ var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, error) {
 			return stateCfg.Oniondial(addr.Network(), addr.String(),
 				DefaultConnectTimeout)
 		}
-		log.TRACE("StateCfg.Dial", addr.Network(), addr.String(),
+		log.L.Trace("StateCfg.Dial", addr.Network(), addr.String(),
 			DefaultConnectTimeout)
 		conn, er := stateCfg.Dial(addr.Network(), addr.String(), DefaultConnectTimeout)
 		if er != nil {
-			log.TRACE("connection error:", conn, er)
+			log.L.Trace("connection error:", conn, er)
 		}
 		return conn, er
 	}

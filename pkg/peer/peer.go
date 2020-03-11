@@ -20,7 +20,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 const (
@@ -254,13 +254,13 @@ func newNetAddress(addr net.Addr, services wire.ServiceFlag) (*wire.NetAddress, 
 	// as a last resort.
 	host, portStr, err := net.SplitHostPort(addr.String())
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	ip := net.ParseIP(host)
 	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	na := wire.NewNetAddressIPPort(ip, uint16(port), services)
@@ -420,7 +420,7 @@ func (p *Peer) String() string {
 // This function is safe for concurrent access.
 func (p *Peer) UpdateLastBlockHeight(newHeight int32) {
 	p.statsMtx.Lock()
-	log.TRACEF(
+	log.L.Tracef(
 		"updating last block height of peer %v from %v to %v",
 		p.addr,
 		p.lastBlock,
@@ -433,7 +433,7 @@ func (p *Peer) UpdateLastBlockHeight(newHeight int32) {
 // UpdateLastAnnouncedBlock updates meta-data about the last block hash this
 // peer is known to have announced. This function is safe for concurrent access.
 func (p *Peer) UpdateLastAnnouncedBlock(blkHash *chainhash.Hash) {
-	log.TRACE("updating last blk for peer", p.addr, ",", blkHash)
+	log.L.Trace("updating last blk for peer", p.addr, ",", blkHash)
 	p.statsMtx.Lock()
 	p.lastAnnouncedBlock = blkHash
 	p.statsMtx.Unlock()
@@ -726,7 +726,7 @@ func (p *Peer) PushGetBlocksMsg(locator blockchain.BlockLocator, stopHash *chain
 		beginHash.IsEqual(p.prevGetBlocksBegin)
 	p.prevGetBlocksMtx.Unlock()
 	if isDuplicate {
-		log.TRACEF(
+		log.L.Tracef(
 			"filtering duplicate [getblocks] with begin hash %v, stop hash %v",
 			beginHash,
 			stopHash,
@@ -738,7 +738,7 @@ func (p *Peer) PushGetBlocksMsg(locator blockchain.BlockLocator, stopHash *chain
 	for _, hash := range locator {
 		err := msg.AddBlockLocatorHash(hash)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 	}
@@ -769,7 +769,7 @@ func (p *Peer) PushGetHeadersMsg(locator blockchain.BlockLocator, stopHash *chai
 		beginHash.IsEqual(p.prevGetHdrsBegin)
 	p.prevGetHdrsMtx.Unlock()
 	if isDuplicate {
-		log.TRACE(
+		log.L.Trace(
 			"Filtering duplicate [getheaders] with begin hash", beginHash,
 		)
 		return nil
@@ -780,7 +780,7 @@ func (p *Peer) PushGetHeadersMsg(locator blockchain.BlockLocator, stopHash *chai
 	for _, hash := range locator {
 		err := msg.AddBlockLocatorHash(hash)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 	}
@@ -808,7 +808,7 @@ func (p *Peer) PushRejectMsg(command string, code wire.RejectCode, reason string
 	msg := wire.NewMsgReject(command, code, reason)
 	if command == wire.CmdTx || command == wire.CmdBlock {
 		if hash == nil {
-			log.WARN(
+			log.L.Warn(
 				"Sending a reject message for command type", command,
 				"which should have specified a hash but does not",
 			)
@@ -870,12 +870,12 @@ func (p *Peer) readMessage(encoding wire.MessageEncoding) (wire.Message, []byte,
 		p.cfg.Listeners.OnRead(p, n, msg, err)
 	}
 	if err != nil {
-		log.TRACE(err)
+		log.L.Trace(err)
 		return nil, nil, err
 	}
 	// Use closures to log expensive operations so they are only run when the
 	// logging level requires it.
-	log.TRACEC(func() string {
+	log.L.Tracec(func() string {
 		// Debug summary of message.
 		summary := messageSummary(msg)
 		if len(summary) > 0 {
@@ -899,7 +899,7 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) error {
 	}
 	// Use closures to log expensive operations so they are only run when the
 	// logging level requires it.
-	log.TRACEC(func() string {
+	log.L.Tracec(func() string {
 		// Debug summary of message.
 		summary := messageSummary(msg)
 		if len(summary) > 0 {
@@ -912,7 +912,7 @@ func (p *Peer) writeMessage(msg wire.Message, enc wire.MessageEncoding) error {
 		_, err := wire.WriteMessageWithEncodingN(&buf, msg, p.ProtocolVersion(),
 			p.cfg.ChainParams.Net, enc)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err.Error()
 		}
 		return o + spew.Sdump(buf.Bytes())
@@ -944,7 +944,7 @@ func (p *Peer) isAllowedReadError(err error) bool {
 	// hostname can't be determined for some reason.
 	host, _, err := net.SplitHostPort(p.addr)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return false
 	}
 	if host != "127.0.0.1" && host != "localhost" {
@@ -1012,7 +1012,7 @@ func (p *Peer) maybeAddDeadline(pendingResponses map[string]time.Time, msgCmd st
 // deadlines while accounting for the time spent in callbacks.
 // It must be run as a goroutine.
 func (p *Peer) stallHandler() {
-	log.TRACE("starting stallHandler for", p.addr)
+	log.L.Trace("starting stallHandler for", p.addr)
 	// These variables are used to adjust the deadline times forward by the
 	// time it takes callbacks to execute.
 	// This is done because new messages aren't read until the previous one
@@ -1061,7 +1061,7 @@ out:
 			case sccHandlerStart:
 				// Warn on unbalanced callback signalling.
 				if handlerActive {
-					log.WARN(
+					log.L.Warn(
 						"Received handler start control command while a handler is already active",
 					)
 					continue
@@ -1071,7 +1071,7 @@ out:
 			case sccHandlerDone:
 				// Warn on unbalanced callback signalling.
 				if !handlerActive {
-					log.WARN(
+					log.L.Warn(
 						"Received handler done control command when a handler is not already active",
 					)
 					continue
@@ -1082,7 +1082,7 @@ out:
 				deadlineOffset += duration
 				handlerActive = false
 			default:
-				log.WARN(
+				log.L.Warn(
 					"Unsupported message command", msg.command,
 				)
 			}
@@ -1100,7 +1100,7 @@ out:
 				if now.Before(deadline.Add(offset)) {
 					continue
 				}
-				log.DEBUGF(
+				log.L.Debugf(
 					"Peer %s appears to be stalled or misbehaving, %s timeout -- disconnecting",
 					p,
 					command)
@@ -1135,17 +1135,17 @@ cleanup:
 			break cleanup
 		}
 	}
-	log.TRACE("peer stall handler done for", p)
+	log.L.Trace("peer stall handler done for", p)
 }
 
 // inHandler handles all incoming messages for the peer.
 // It must be run as a goroutine.
 func (p *Peer) inHandler() {
-	log.TRACE("starting inHandler for", p.addr)
+	log.L.Trace("starting inHandler for", p.addr)
 	// The timer is stopped when a new message is received and reset after it
 	// is processed.
 	idleTimer := time.AfterFunc(idleTimeout, func() {
-		log.WARNF("peer %s no answer for %s -- disconnecting", p, idleTimeout)
+		log.L.Warnf("peer %s no answer for %s -- disconnecting", p, idleTimeout)
 		p.Disconnect()
 	})
 out:
@@ -1155,12 +1155,12 @@ out:
 		rMsg, buf, err := p.readMessage(p.wireEncoding)
 		idleTimer.Stop()
 		if err != nil {
-			log.TRACE(err)
+			log.L.Trace(err)
 			// In order to allow regression tests with malformed messages,
 			// don't disconnect the peer when we're in regression test mode
 			// and the error is one of the allowed errors.
 			if p.isAllowedReadError(err) {
-				log.ERRORF("allowed test error from %s: %v", p, err)
+				log.L.Errorf("allowed test error from %s: %v", p, err)
 				idleTimer.Reset(idleTimeout)
 				continue
 			}
@@ -1170,7 +1170,7 @@ out:
 			if p.shouldHandleReadError(err) {
 				errMsg := fmt.Sprintf("Can't read message from %s: %v", p, err)
 				if err != io.ErrUnexpectedEOF {
-					log.ERROR(errMsg)
+					log.L.Error(errMsg)
 				}
 				// Push a reject message for the malformed message and wait
 				// for the message to be sent before disconnecting.
@@ -1199,7 +1199,7 @@ out:
 			// because of the potential for an attacker to use the UAC based node identifiers to cause a peer to
 			// disconnect from the attacked node, we have commented this thing out.
 			// if p.verAckReceived {
-			// 	log.INFOF("already received 'verack' from peer %v"+
+			// 	log.L.Infof("already received 'verack' from peer %v"+
 			// 		" -- disconnecting", p)
 			// 	break out
 			// }
@@ -1323,7 +1323,7 @@ out:
 				p.cfg.Listeners.OnSendHeaders(p, msg)
 			}
 		default:
-			log.DEBUGF(
+			log.L.Debugf(
 				"Received unhandled message of type %v from %v %s",
 				rMsg.Command(),
 				p)
@@ -1337,7 +1337,7 @@ out:
 	// Ensure connection is closed.
 	p.Disconnect()
 	close(p.inQuit)
-	log.TRACE("peer input handler done for", p)
+	log.L.Trace("peer input handler done for", p)
 }
 
 // queueHandler handles the queuing of outgoing data for the peer.
@@ -1345,7 +1345,7 @@ out:
 // server and peer handlers will not block on us sending a message.
 // That data is then passed on outHandler to be actually written.
 func (p *Peer) queueHandler() {
-	log.TRACE("starting queueHandler for", p.addr)
+	log.L.Trace("starting queueHandler for", p.addr)
 	pendingMsgs := list.New()
 	invSendQueue := list.New()
 	trickleTicker := time.NewTicker(p.cfg.TrickleInterval)
@@ -1395,8 +1395,8 @@ out:
 					invMsg := wire.NewMsgInvSizeHint(1)
 					err := invMsg.AddInvVect(iv)
 					if err != nil {
-						log.ERROR(err)
-						log.DEBUG(err)
+						log.L.Error(err)
+						log.L.Debug(err)
 					}
 					waiting = queuePacket(outMsg{msg: invMsg},
 						pendingMsgs, waiting)
@@ -1423,8 +1423,8 @@ out:
 				}
 				err := invMsg.AddInvVect(iv)
 				if err != nil {
-					log.ERROR(err)
-					log.DEBUG(err)
+					log.L.Error(err)
+					log.L.Debug(err)
 				}
 				if len(invMsg.InvList) >= maxInvTrickleSize {
 					waiting = queuePacket(
@@ -1468,7 +1468,7 @@ cleanup:
 		}
 	}
 	close(p.queueQuit)
-	log.TRACE("peer queue handler done for", p)
+	log.L.Trace("peer queue handler done for", p)
 }
 
 // shouldLogWriteError returns whether or not the passed error,
@@ -1494,7 +1494,7 @@ func (p *Peer) shouldLogWriteError(err error) bool {
 // It uses a buffered channel to serialize output messages while allowing the
 // sender to continue running asynchronously.
 func (p *Peer) outHandler() {
-	log.TRACE("starting outHandler for", p.addr)
+	log.L.Trace("starting outHandler for", p.addr)
 out:
 	for {
 		select {
@@ -1513,10 +1513,10 @@ out:
 			p.stallControl <- stallControlMsg{sccSendMessage, msg.msg}
 			err := p.writeMessage(msg.msg, msg.encoding)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				p.Disconnect()
 				if p.shouldLogWriteError(err) {
-					log.ERRORF("failed to send message to %s: %v", p, err)
+					log.L.Errorf("failed to send message to %s: %v", p, err)
 				}
 				if msg.doneChan != nil {
 					msg.doneChan <- struct{}{}
@@ -1555,12 +1555,12 @@ cleanup:
 		}
 	}
 	close(p.outQuit)
-	log.TRACE("peer output handler done for", p)
+	log.L.Trace("peer output handler done for", p)
 }
 
 // pingHandler periodically pings the peer.  It must be run as a goroutine.
 func (p *Peer) pingHandler() {
-	log.TRACE("starting pingHandler for", p.addr)
+	log.L.Trace("starting pingHandler for", p.addr)
 	pingTicker := time.NewTicker(pingInterval)
 	defer pingTicker.Stop()
 out:
@@ -1569,8 +1569,8 @@ out:
 		case <-pingTicker.C:
 			nonce, err := wire.RandomUint64()
 			if err != nil {
-				log.ERROR(err)
-				log.ERRORF("not sending ping to %s: %v", p, err)
+				log.L.Error(err)
+				log.L.Errorf("not sending ping to %s: %v", p, err)
 				continue
 			}
 			p.QueueMessage(wire.NewMsgPing(nonce), nil)
@@ -1641,7 +1641,7 @@ func (p *Peer) Disconnect() {
 	if atomic.AddInt32(&p.disconnect, 1) != 1 {
 		return
 	}
-	log.TRACE("disconnecting", p)
+	log.L.Trace("disconnecting", p)
 	if atomic.LoadInt32(&p.connected) != 0 {
 		_ = p.conn.Close()
 	}
@@ -1653,13 +1653,13 @@ func (p *Peer) Disconnect() {
 // acceptable then return an error.
 func (p *Peer) readRemoteVersionMsg() error {
 	if p.versionKnown {
-		log.DEBUG("received version previously, dropping")
+		log.L.Debug("received version previously, dropping")
 		return nil
 	}
 	// Read their version message.
 	remoteMsg, _, err := p.readMessage(wire.LatestEncoding)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	// Notify and disconnect clients if the first message is not a version
@@ -1685,7 +1685,7 @@ func (p *Peer) readRemoteVersionMsg() error {
 	p.versionKnown = true
 	p.services = msg.Services
 	p.flagsMtx.Unlock()
-	log.TRACEF("negotiated protocol version %d for peer %s",
+	log.L.Tracef("negotiated protocol version %d for peer %s",
 		p.protocolVersion, p)
 	// Updating a bunch of stats including block based stats,
 	// and the peer's time offset.
@@ -1747,7 +1747,7 @@ func (p *Peer) localVersionMsg() (*wire.MsgVersion, error) {
 		var err error
 		_, blockNum, err = p.cfg.NewestBlock()
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return nil, err
 		}
 	}
@@ -1783,7 +1783,7 @@ func (p *Peer) localVersionMsg() (*wire.MsgVersion, error) {
 	err := msg.AddUserAgent(p.cfg.UserAgentName, p.cfg.UserAgentVersion,
 		p.cfg.UserAgentComments...)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 	}
 	// Advertise local services.
 	msg.Services = p.cfg.Services
@@ -1798,7 +1798,7 @@ func (p *Peer) localVersionMsg() (*wire.MsgVersion, error) {
 func (p *Peer) writeLocalVersionMsg() error {
 	localVerMsg, err := p.localVersionMsg()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	return p.writeMessage(localVerMsg, wire.LatestEncoding)
@@ -1826,7 +1826,7 @@ func (p *Peer) negotiateOutboundProtocol() error {
 
 // start begins processing input and output messages.
 func (p *Peer) start() error {
-	log.TRACE("starting peer", p)
+	log.L.Trace("starting peer", p)
 	negotiateErr := make(chan error, 1)
 	go func() {
 		if p.inbound {
@@ -1839,7 +1839,7 @@ func (p *Peer) start() error {
 	select {
 	case err := <-negotiateErr:
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			p.Disconnect()
 			return err
 		}
@@ -1847,7 +1847,7 @@ func (p *Peer) start() error {
 		p.Disconnect()
 		return errors.New("protocol negotiation timeout")
 	}
-	log.TRACE("connected to", p)
+	log.L.Trace("connected to", p)
 	// The protocol has been negotiated successfully so start processing input
 	// and output messages.
 	go p.stallHandler()
@@ -1876,8 +1876,8 @@ func (p *Peer) AssociateConnection(conn net.Conn) {
 		// time and no point recomputing.
 		na, err := newNetAddress(p.conn.RemoteAddr(), p.services)
 		if err != nil {
-			log.ERROR(err)
-			log.ERROR("cannot create remote net address:", err)
+			log.L.Error(err)
+			log.L.Error("cannot create remote net address:", err)
 			p.Disconnect()
 			return
 		}
@@ -1885,7 +1885,7 @@ func (p *Peer) AssociateConnection(conn net.Conn) {
 	}
 	go func() {
 		if err := p.start(); err != nil {
-			log.DEBUGF("cannot start peer %v: %v", p, err)
+			log.L.Debugf("cannot start peer %v: %v", p, err)
 			p.Disconnect()
 		}
 	}()
@@ -1949,18 +1949,18 @@ func NewOutboundPeer(cfg *Config, addr string) (*Peer, error) {
 	p.addr = addr
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	if cfg.HostToNetAddress != nil {
 		na, err := cfg.HostToNetAddress(host, uint16(port), 0)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return nil, err
 		}
 		p.na = na

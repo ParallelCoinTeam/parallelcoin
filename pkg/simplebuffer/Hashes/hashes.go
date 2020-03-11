@@ -25,13 +25,13 @@ func (b *Hashes) DecodeOne(by []byte) *Hashes {
 func (b *Hashes) Decode(by []byte) (out []byte) {
 	b.Lock()
 	defer b.Unlock()
-	// log.SPEW(by)
+	// log.L.Traces(by)
 	if len(by) >= 7 {
 		nB := by[0]
 		if len(by) >= int(nB)*8 {
 			for i := 0; i < int(nB); i++ {
 				algoVer := int32(binary.BigEndian.Uint32(by[1+i*36 : 1+i*36+4]))
-				// log.DEBUG("algoVer", algoVer, by[1+i*8+4:1+i*8+8], b.Byteses)
+				// log.L.Debug("algoVer", algoVer, by[1+i*8+4:1+i*8+8], b.Byteses)
 				b.Byteses[algoVer] = by[1+i*36+4 : 1+i*36+36]
 			}
 		}
@@ -40,7 +40,7 @@ func (b *Hashes) Decode(by []byte) (out []byte) {
 			out = by[bL:]
 		}
 	}
-	// log.SPEW(b.Byteses)
+	// log.L.Traces(b.Byteses)
 	return
 }
 
@@ -53,7 +53,7 @@ func (b *Hashes) Encode() (out []byte) {
 		binary.BigEndian.PutUint32(by, uint32(algoVer))
 		out = append(out, append(by, b.Byteses[algoVer]...)...)
 	}
-	// log.SPEW(out)
+	// log.L.Traces(out)
 	return
 }
 
@@ -76,12 +76,12 @@ func (b *Hashes) Get() (out map[int32]*chainhash.Hash) {
 func (b *Hashes) Put(in map[int32]*chainhash.Hash) *Hashes {
 	b.Lock()
 	defer b.Unlock()
-	// log.SPEW(in)
+	// log.L.Traces(in)
 	b.Length = byte(len(in))
 	b.Byteses = make(map[int32][]byte, b.Length)
 	for algoVer := range in {
 		b.Byteses[algoVer] = in[algoVer].CloneBytes()
 	}
-	// log.SPEW(b.Byteses)
+	// log.L.Traces(b.Byteses)
 	return b
 }

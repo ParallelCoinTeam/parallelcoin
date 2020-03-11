@@ -7,13 +7,13 @@ import (
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli
 Configure(cx *conte.Xt, ctx *cli.Context) {
-	log.TRACE("configuring pod")
+	log.L.Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
 	cx.NodeChan = make(chan *rpc.Server)
 	cx.StateCfg.Save = false
@@ -49,7 +49,7 @@ Configure(cx *conte.Xt, ctx *cli.Context) {
 	setDiallers(cfg, cx.StateCfg)
 	// if the user set the save flag, or file doesn't exist save the file now
 	if cx.StateCfg.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
-		log.TRACE("saving configuration")
+		log.L.Trace("saving configuration")
 		save.Pod(cx.Config)
 	}
 }

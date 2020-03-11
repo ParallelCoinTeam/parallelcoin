@@ -1,8 +1,9 @@
 package routeable
 
 import (
-	"github.com/p9c/pod/pkg/log"
 	"net"
+
+	log "github.com/p9c/logi"
 )
 
 // GetInterface returns the address and interface of multicast capable
@@ -12,20 +13,20 @@ func GetInterface() (lanInterface []*net.Interface) {
 	var interfaces []net.Interface
 	interfaces, err = net.Interfaces()
 	if err != nil {
-		log.ERROR("error:", err)
+		log.L.Error("error:", err)
 	}
-	//log.SPEW(interfaces)
+	// log.L.Traces(interfaces)
 	for ifi := range interfaces {
 		if interfaces[ifi].Flags&net.FlagLoopback == 0 && interfaces[ifi].
 			HardwareAddr != nil {
-			//iads, _ := interfaces[ifi].Addrs()
-			//for i := range iads {
-			//	//log.SPEW(iads[i].Network())
-			//}
-			//log.DEBUG(interfaces[ifi].MulticastAddrs())
+			// iads, _ := interfaces[ifi].Addrs()
+			// for i := range iads {
+			//	//log.L.Traces(iads[i].Network())
+			// }
+			// log.L.Debug(interfaces[ifi].MulticastAddrs())
 			lanInterface = append(lanInterface, &interfaces[ifi])
 		}
 	}
-	//log.SPEW(lanInterface)
+	// log.L.Traces(lanInterface)
 	return
 }

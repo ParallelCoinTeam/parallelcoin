@@ -4,7 +4,7 @@ import (
 	"github.com/p9c/pod/cmd/kopach"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/urfave/cli"
 	"os"
 
@@ -14,20 +14,20 @@ import (
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		log.INFO("starting up kopach standalone miner for parallelcoin")
+		log.L.Info("starting up kopach standalone miner for parallelcoin")
 		Configure(cx, c)
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true
 		}
 		quit := make(chan struct{})
 		interrupt.AddHandler(func() {
-			log.DEBUG("KopachHandle interrupt")
+			log.L.Debug("KopachHandle interrupt")
 			close(quit)
 			os.Exit(0)
 		})
 		err = kopach.KopachHandle(cx)(c)
 		<-quit
-		log.DEBUG("kopach main finished")
+		log.L.Debug("kopach main finished")
 		return
 	}
 }

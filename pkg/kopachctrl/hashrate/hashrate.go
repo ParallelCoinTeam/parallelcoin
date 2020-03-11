@@ -12,8 +12,9 @@ import (
 	"io"
 	"net"
 	"time"
-	
-	"github.com/p9c/pod/pkg/log"
+
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/IPs"
 	"github.com/p9c/pod/pkg/simplebuffer/Int32"
@@ -37,7 +38,7 @@ type Hashrate struct {
 
 func Get(count int32, version int32, height int32) Container {
 	nonce := make([]byte, 4)
-	if _, err := io.ReadFull(rand.Reader, nonce); log.Check(err) {
+	if _, err := io.ReadFull(rand.Reader, nonce); log.L.Check(err) {
 	}
 	return Container{*simplebuffer.Serializers{
 		Time.New().Put(time.Now()),

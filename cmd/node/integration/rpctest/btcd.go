@@ -2,7 +2,7 @@ package rpctest
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"go/build"
 	"os/exec"
 	"path/filepath"
@@ -36,7 +36,7 @@ func podExecutablePath() (string, error) {
 	}
 	testDir, err := baseDir()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return "", err
 	}
 	// Determine import path of this package.
@@ -48,7 +48,7 @@ func podExecutablePath() (string, error) {
 	podPkgPath := filepath.Join(rpctestDir, "..", "..", "..")
 	podPkg, err := build.ImportDir(podPkgPath, build.FindOnly)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return "", fmt.Errorf("Failed to build pod: %v", err)
 	}
 	// Build pod and output an executable in a static temp path.
@@ -59,7 +59,7 @@ func podExecutablePath() (string, error) {
 	cmd := exec.Command("go", "build", "-o", outputPath, podPkg.ImportPath)
 	err = cmd.Run()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return "", fmt.Errorf("Failed to build pod: %v", err)
 	}
 	// Save executable path so future calls do not recompile.

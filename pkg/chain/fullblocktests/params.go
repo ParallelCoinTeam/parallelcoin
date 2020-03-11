@@ -2,7 +2,7 @@ package fullblocktests
 
 import (
 	"encoding/hex"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"math/big"
 	"time"
 
@@ -16,7 +16,7 @@ import (
 func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		panic(err)
 	}
 	return hash
@@ -26,7 +26,7 @@ func newHashFromStr(hexStr string) *chainhash.Hash {
 func fromHex(s string) []byte {
 	r, err := hex.DecodeString(s)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		panic("invalid hex in source file: " + s)
 	}
 	return r

@@ -3,7 +3,7 @@ package peer
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"testing"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -119,7 +119,7 @@ func BenchmarkMruInventoryList(b *testing.B) {
 		hashBytes := make([]byte, chainhash.HashSize)
 		_, err := rand.Read(hashBytes)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 		}
 		hash, _ := chainhash.NewHash(hashBytes)
 		iv := wire.NewInvVect(wire.InvTypeBlock, hash)

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -59,7 +59,7 @@ func // LogBlockHeight logs a new block height as an information message to
 		txStr = "transaction "
 	}
 	tD := tDuration.Seconds()
-	log.INFOF(
+	log.L.Infof(
 		"%s %6d %s in the last %s (%6d %s, height %8d, %s) %0.2f tx/s",
 		b.progressAction,
 		b.receivedLogBlocks,

@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 const AppName = "pod"

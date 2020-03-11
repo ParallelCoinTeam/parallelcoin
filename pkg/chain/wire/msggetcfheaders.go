@@ -1,7 +1,7 @@
 package wire
 
 import (
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"io"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -18,12 +18,12 @@ type MsgGetCFHeaders struct {
 func (msg *MsgGetCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) error {
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	err = readElement(r, &msg.StartHeight)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	return readElement(r, &msg.StopHash)
@@ -33,12 +33,12 @@ func (msg *MsgGetCFHeaders) BtcDecode(r io.Reader, pver uint32, _ MessageEncodin
 func (msg *MsgGetCFHeaders) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) error {
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	err = writeElement(w, &msg.StartHeight)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	return writeElement(w, &msg.StopHash)

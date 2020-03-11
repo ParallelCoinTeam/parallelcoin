@@ -4,7 +4,7 @@ import (
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
@@ -122,7 +122,7 @@ out:
 			switch n := n.(type) {
 			case *chain.RescanProgress:
 				if curBatch == nil {
-					log.WARN("received rescan progress" +
+					log.L.Warn("received rescan progress" +
 						" notification but no rescan currently running")
 					continue
 				}
@@ -132,7 +132,7 @@ out:
 				}
 			case *chain.RescanFinished:
 				if curBatch == nil {
-					log.WARN("received rescan finished notification but no" +
+					log.L.Warn("received rescan finished notification but no" +
 						" rescan currently running",
 					)
 					continue
@@ -168,7 +168,7 @@ out:
 		select {
 		case msg := <-w.rescanProgress:
 			n := msg.Notification
-			log.INFOF(
+			log.L.Infof(
 				"rescanned through block %v (height %d)",
 				n.Hash,
 				n.Height)
@@ -176,7 +176,7 @@ out:
 			n := msg.Notification
 			addrs := msg.Addresses
 			noun := log.PickNoun(len(addrs), "address", "addresses")
-			log.INFOF(
+			log.L.Infof(
 				"finished rescan for %d %s (synced to block %s, height %d)",
 				len(addrs),
 				noun,
@@ -196,8 +196,8 @@ out:
 func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		log.ERROR(err)
-		log.ERRORF("rescanRPCHandler called without an RPC client", err)
+		log.L.Error(err)
+		log.L.Errorf("rescanRPCHandler called without an RPC client", err)
 		w.wg.Done()
 		return
 	}
@@ -209,7 +209,7 @@ out:
 			// Log the newly-started rescan.
 			numAddrs := len(batch.addrs)
 			noun := log.PickNoun(numAddrs, "address", "addresses")
-			log.INFOF(
+			log.L.Infof(
 				"started rescan from block %v (height %d) for %d %s",
 				batch.bs.Hash,
 				batch.bs.Height,
@@ -218,8 +218,8 @@ out:
 			err := chainClient.Rescan(&batch.bs.Hash, batch.addrs,
 				batch.outpoints)
 			if err != nil {
-				log.ERROR(err)
-				log.ERRORF(
+				log.L.Error(err)
+				log.L.Errorf(
 					"rescan for %d %s failed: %v %s",
 					numAddrs,
 					noun,
@@ -251,7 +251,7 @@ func (w *Wallet) rescanWithTarget(addrs []util.Address,
 			output.PkScript, w.chainParams,
 		)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return err
 		}
 		outpoints[output.OutPoint] = outputAddrs[0]

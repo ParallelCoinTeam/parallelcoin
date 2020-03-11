@@ -2,7 +2,7 @@ package parameters
 
 import (
 	"encoding/hex"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"testing"
 )
 

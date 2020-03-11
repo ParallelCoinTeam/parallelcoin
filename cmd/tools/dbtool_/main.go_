@@ -30,7 +30,7 @@ func loadBlockDB(	) (database.DB, error) {
 	l.Infof("Loading block database from '%s'", dbPath)
 	db, err := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 // Return the error if it's not because the database doesn't
 		// exist.
 		if dbErr, ok := err.(database.Error); !ok || dbErr.ErrorCode !=
@@ -40,12 +40,12 @@ func loadBlockDB(	) (database.DB, error) {
 		// Create the db if it does not exist.
 		err = os.MkdirAll(cfg.DataDir, 0700)
 		if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 return nil, err
 		}
 		db, err = database.Create(cfg.DbType, dbPath, activeNetParams.Net)
 		if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 return nil, err
 		}
 	}

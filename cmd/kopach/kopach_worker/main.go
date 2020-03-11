@@ -10,7 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -33,26 +33,26 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}
 		if len(os.Args) > 3 {
-			log.L.SetLevel(os.Args[3], true)
+			log.L.SetLevel(os.Args[3], true, "pod")
 		}
-		log.DEBUG("miner worker starting")
+		log.L.Debug("miner worker starting")
 		w, conn := worker.New(cx.KillAll)
 		interrupt.AddHandler(func() {
-			log.DEBUG("KopachWorkerHandle interrupt")
-			if err := conn.Close(); log.Check(err) {
+			log.L.Debug("KopachWorkerHandle interrupt")
+			if err := conn.Close(); log.L.Check(err) {
 			}
 		})
 		err := rpc.Register(w)
 		if err != nil {
-			log.DEBUG(err)
+			log.L.Debug(err)
 			return err
 		}
-		log.DEBUG("starting up worker IPC")
+		log.L.Debug("starting up worker IPC")
 		rpc.ServeConn(conn)
-		log.DEBUG("stopping worker IPC")
-		if err := conn.Close(); log.Check(err) {
+		log.L.Debug("stopping worker IPC")
+		if err := conn.Close(); log.L.Check(err) {
 		}
-		log.DEBUG("finished")
+		log.L.Debug("finished")
 		return nil
 	}
 }

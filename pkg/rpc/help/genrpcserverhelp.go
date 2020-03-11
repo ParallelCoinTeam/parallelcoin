@@ -15,8 +15,8 @@ import (
 var outputFile = func() *os.File {
 	fi, err := os.Create("rpcserverhelp.go")
 	if err != nil {
-		log.ERROR(err)
-		log.Fatal(err)
+		log.L.Error(err)
+		log.L.Fatal(err)
 	}
 	return fi
 }()
@@ -24,13 +24,13 @@ var outputFile = func() *os.File {
 func writefln(format string, args ...interface{}) {
 	_, err := fmt.Fprintf(outputFile, format, args...)
 	if err != nil {
-		log.ERROR(err)
-		log.Fatal(err)
+		log.L.Error(err)
+		log.L.Fatal(err)
 	}
 	_, err = outputFile.Write([]byte{'\n'})
 	if err != nil {
-		log.ERROR(err)
-		log.Fatal(err)
+		log.L.Error(err)
+		log.L.Fatal(err)
 	}
 }
 func writeLocaleHelp(locale, goLocale string, descs map[string]string) {
@@ -41,8 +41,8 @@ func writeLocaleHelp(locale, goLocale string, descs map[string]string) {
 		m := &rpchelp.Methods[i]
 		helpText, err := btcjson.GenerateHelp(m.Method, descs, m.ResultTypes...)
 		if err != nil {
-			log.ERROR(err)
-			log.Fatal(err)
+			log.L.Error(err)
+			log.L.Fatal(err)
 		}
 		writefln("%q: %q,", m.Method, helpText)
 	}
@@ -62,8 +62,8 @@ func writeUsage() {
 	for i := range rpchelp.Methods {
 		usageStrs[i], err = btcjson.MethodUsageText(rpchelp.Methods[i].Method)
 		if err != nil {
-			log.ERROR(err)
-			log.Fatal(err)
+			log.L.Error(err)
+			log.L.Fatal(err)
 		}
 	}
 	usages := strings.Join(usageStrs, "\n")

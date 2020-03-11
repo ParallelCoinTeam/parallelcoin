@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -38,7 +38,7 @@ Time, algo string) (difficulty uint32, err error) {
 	b.chainLock.Lock()
 	difficulty, err = b.calcNextRequiredDifficulty(workerNumber, b.BestChain.
 		Tip(), timestamp, algo, false)
-	// log.TRACE("CalcNextRequiredDifficulty", difficulty)
+	// log.L.Trace("CalcNextRequiredDifficulty", difficulty)
 	b.chainLock.Unlock()
 	return
 }
@@ -79,11 +79,11 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 	nH := lastNode.height + 1
 	cF := fork.GetCurrent(nH)
 	newTargetBits = fork.GetMinBits(algoname, nH)
-	// log.TRACEF("calcNextRequiredDifficulty %08x", newTargetBits)
+	// log.L.Tracef("calcNextRequiredDifficulty %08x", newTargetBits)
 	switch cF {
 	// Legacy difficulty adjustment
 	case 0:
-		// log.TRACE("before hardfork")
+		// log.L.Trace("before hardfork")
 		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode, algoname, l)
 	// Plan 9 from Crypto Space
 	case 1:
@@ -95,12 +95,12 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 		if bits[version] == 0 {
 			bits, err = b.CalcNextRequiredDifficultyPlan9Controller(lastNode)
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return
 			}
-			// log.DEBUG(bits, reflect.TypeOf(bits))
+			// log.L.Debug(bits, reflect.TypeOf(bits))
 			b.DifficultyBits.Store(bits)
-			// log.DEBUGF("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
+			// log.L.Debugf("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
 		}
 		newTargetBits = bits[version]
 		return

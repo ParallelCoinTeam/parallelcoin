@@ -6,7 +6,7 @@ import (
 	"go.uber.org/atomic"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 )
 
 const (
@@ -59,7 +59,7 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 				}
 				r.GetDuoUIconnectionCount()
 				r.UpdateTrigger <- struct{}{}
-			// log.WARN("GetDuoUIconnectionCount")
+			// log.L.Warn("GetDuoUIconnectionCount")
 			case <-r.cx.WalletServer.Update:
 				update(r)
 			case <-r.cx.KillAll:
@@ -67,30 +67,30 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 			}
 		}
 	}()
-	log.WARN("event update listener started")
+	log.L.Warn("event update listener started")
 	return
 }
 
 func update(r *RcVar) {
-	// log.WARN("GetDuoUIbalance")
+	// log.L.Warn("GetDuoUIbalance")
 	r.GetDuoUIbalance()
-	// log.WARN("GetDuoUIunconfirmedBalance")
+	// log.L.Warn("GetDuoUIunconfirmedBalance")
 	r.GetDuoUIunconfirmedBalance()
-	// log.WARN("GetDuoUItransactionsNumber")
+	// log.L.Warn("GetDuoUItransactionsNumber")
 	r.GetDuoUItransactionsNumber()
 	// r.GetTransactions()
-	// log.WARN("GetLatestTransactions")
+	// log.L.Warn("GetLatestTransactions")
 	r.GetLatestTransactions()
-	// log.INFO("")
-	// log.INFO("UPDATE")
-	log.INFO(r.Status.Wallet.LastTxs.Txs)
-	// log.INFO("")
+	// log.L.Info("")
+	// log.L.Info("UPDATE")
+	log.L.Info(r.Status.Wallet.LastTxs.Txs)
+	// log.L.Info("")
 	// r.GetDuoUIstatus()
 	// r.GetDuoUIlocalLost()
 	// r.GetDuoUIblockHeight()
-	// log.WARN("GetDuoUIblockCount")
+	// log.L.Warn("GetDuoUIblockCount")
 	r.GetDuoUIdifficulty()
 	r.GetDuoUIblockCount()
-	// log.WARN("GetDuoUIdifficulty")
+	// log.L.Warn("GetDuoUIdifficulty")
 	r.UpdateTrigger <- struct{}{}
 }

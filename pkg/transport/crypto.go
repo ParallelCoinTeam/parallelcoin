@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	
-	"github.com/p9c/pod/pkg/log"
+
+	log "github.com/p9c/logi"
 )
 
 func DecryptMessage(creator string, ciph cipher.AEAD, data []byte) (msg []byte, err error) {
@@ -17,7 +17,7 @@ func DecryptMessage(creator string, ciph cipher.AEAD, data []byte) (msg []byte, 
 	if err != nil {
 		err = errors.New(fmt.Sprintf("%s %s", creator, err.Error()))
 	} else {
-	log.DEBUG("decrypted message", hex.EncodeToString(data[:nonceSize]))
+		log.L.Debug("decrypted message", hex.EncodeToString(data[:nonceSize]))
 	}
 	return
 }
@@ -33,14 +33,14 @@ func EncryptMessage(creator string, ciph cipher.AEAD, magic []byte, nonce, data 
 	} else {
 		msg = append(magic, data...)
 	}
-	
+
 	return
 }
 
 func GetNonce(ciph cipher.AEAD) (nonce []byte, err error) {
 	// get a nonce for the packet, it is both message ID and salt
 	nonce = make([]byte, ciph.NonceSize())
-	if _, err = io.ReadFull(rand.Reader, nonce); log.Check(err) {
+	if _, err = io.ReadFull(rand.Reader, nonce); log.L.Check(err) {
 	}
 	return
 }

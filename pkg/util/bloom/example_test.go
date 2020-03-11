@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"

@@ -1,7 +1,7 @@
 package IPs
 
 import (
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/routeable"
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/IP"
@@ -73,7 +73,7 @@ func GetListenable() simplebuffer.Serializer {
 	for i := range rI {
 		l, err := rI[i].Addrs()
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return nil
 		}
 		lA = append(lA, l...)

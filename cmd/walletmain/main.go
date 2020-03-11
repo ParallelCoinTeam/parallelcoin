@@ -11,7 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -25,13 +25,13 @@ import (
 // any defers have already run, and if the error is non-nil, the program can be
 // exited with an error exit status.
 func Main(cx *conte.Xt) (err error) {
-	log.INFO("starting wallet")
+	log.L.Info("starting wallet")
 	cx.WaitGroup.Add(1)
 
 	// if *config.Profile != "" {
 	//	go func() {
 	//		listenAddr := net.JoinHostPort("127.0.0.1", *config.Profile)
-	//		log.INFO("profile server listening on", listenAddr)
+	//		log.L.Info("profile server listening on", listenAddr)
 	//		profileRedirect := http.RedirectHandler("/debug/pprof",
 	//			http.StatusSeeOther)
 	//		http.Handle("/", profileRedirect)
@@ -42,30 +42,30 @@ func Main(cx *conte.Xt) (err error) {
 	// Create and start HTTP server to serve wallet client connections.
 	// This will be updated with the wallet and chain server RPC client
 	// created below after each is created.
-	log.TRACE("starting RPC servers")
+	log.L.Trace("starting RPC servers")
 	legacyServer, err := startRPCServers(cx.Config, cx.StateCfg, cx.ActiveNet,
 		loader)
 	if err != nil {
-		log.ERROR("unable to create RPC servers:", err)
+		log.L.Error("unable to create RPC servers:", err)
 		return
 	}
 	loader.RunAfterLoad(func(w *wallet.Wallet) {
-		log.WARN("starting wallet RPC services", w != nil)
+		log.L.Warn("starting wallet RPC services", w != nil)
 		startWalletRPCServices(w, legacyServer)
 	})
 	if !*cx.Config.NoInitialLoad {
-		log.TRACE("starting rpc client connection handler")
+		log.L.Trace("starting rpc client connection handler")
 		// Create and start chain RPC client so it's ready to connect to
 		// the wallet when loaded later.
-		log.TRACE("loading database")
+		log.L.Trace("loading database")
 		// Load the wallet database.  It must have been created already
 		// or this will return an appropriate error.
 		var w *wallet.Wallet
 		w, err = loader.OpenExistingWallet([]byte(*cx.Config.WalletPass),
 			true, cx.Config)
-		// log.WARN("wallet", w)
+		// log.L.Warn("wallet", w)
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return
 		}
 		go func() {
@@ -73,24 +73,24 @@ func Main(cx *conte.Xt) (err error) {
 		}()
 		go rpcClientConnectLoop(cx.Config, cx.ActiveNet, legacyServer, loader)
 		loader.Wallet = w
-		log.TRACE("sending back wallet")
+		log.L.Trace("sending back wallet")
 		cx.WalletChan <- w
-		log.TRACE("adding interrupt handler to unload wallet")
+		log.L.Trace("adding interrupt handler to unload wallet")
 		// Add interrupt handlers to shutdown the various process components
 		// before exiting.  Interrupt handlers run in LIFO order, so the wallet
 		// (which should be closed last) is added first.
 		interrupt.AddHandler(func() {
-			log.DEBUG("wallet.Main interrupt")
+			log.L.Debug("wallet.Main interrupt")
 			err := loader.UnloadWallet()
 			if err != nil && err != wallet.ErrNotLoaded {
-				log.ERROR("failed to close wallet:", err)
+				log.L.Error("failed to close wallet:", err)
 			}
 		})
 		if legacyServer != nil {
 			interrupt.AddHandler(func() {
-				log.TRACE("stopping wallet RPC server")
+				log.L.Trace("stopping wallet RPC server")
 				legacyServer.Stop()
-				log.TRACE("wallet RPC server shutdown")
+				log.L.Trace("wallet RPC server shutdown")
 			})
 		}
 		go func() {
@@ -100,19 +100,19 @@ func Main(cx *conte.Xt) (err error) {
 	}
 	select {
 	case <-cx.WalletKill:
-		log.WARN("wallet killswitch activated")
+		log.L.Warn("wallet killswitch activated")
 		if legacyServer != nil {
-			log.WARN("stopping wallet RPC server")
+			log.L.Warn("stopping wallet RPC server")
 			legacyServer.Stop()
-			log.INFO("stopped wallet RPC server")
+			log.L.Info("stopped wallet RPC server")
 		}
-		log.INFO("wallet shutdown from killswitch complete")
+		log.L.Info("wallet shutdown from killswitch complete")
 		cx.WaitGroup.Done()
 		return
 		// <-legacyServer.RequestProcessShutdownChan()
 	case <-interrupt.HandlersDone:
 	}
-	log.INFO("wallet shutdown complete")
+	log.L.Info("wallet shutdown complete")
 	cx.WaitGroup.Done()
 	return
 }
@@ -124,13 +124,13 @@ func ReadCAFile(config *pod.Config) []byte {
 		var err error
 		certs, err = ioutil.ReadFile(*config.CAFile)
 		if err != nil {
-			log.ERROR("cannot open CA file:", err)
+			log.L.Error("cannot open CA file:", err)
 			// If there's an error reading the CA file, continue
 			// with nil certs and without the client connection.
 			certs = nil
 		}
 	} else {
-		log.INFO("chain server RPC TLS is disabled")
+		log.L.Info("chain server RPC TLS is disabled")
 	}
 	return certs
 }
@@ -185,7 +185,7 @@ func rpcClientConnectLoop(config *pod.Config, activeNet *netparams.Params,
 		// } else {
 		chainClient, err = startChainRPC(config, activeNet, certs)
 		if err != nil {
-			log.ERROR(
+			log.L.Error(
 				"unable to open connection to consensus RPC server:", err)
 			continue
 		}
@@ -238,14 +238,14 @@ func rpcClientConnectLoop(config *pod.Config, activeNet *netparams.Params,
 // there is no recovery in case the server is not available or if there is an
 // authentication error.  Instead, all requests to the client will simply error.
 func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, error) {
-	log.TRACEF(
+	log.L.Tracef(
 		"attempting RPC client connection to %v, TLS: %s",
 		*config.RPCConnect, fmt.Sprint(*config.TLS),
 	)
 	rpcC, err := chain.NewRPCClient(activeNet, *config.RPCConnect,
 		*config.Username, *config.Password, certs, !*config.TLS, 0)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return nil, err
 	}
 	err = rpcC.Start()

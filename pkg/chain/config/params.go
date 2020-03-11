@@ -1,7 +1,7 @@
 package chaincfg
 
 import (
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"strings"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -70,7 +70,7 @@ func HDPrivateKeyToPublicKeyID(id []byte) ([]byte, error) {
 func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		// Ordinarily I don't like panics in library code since it can take applications down without them having a chance to recover which is extremely annoying, however an exception is being made in this case because the only way this can panic is if there is an error in the hard-coded hashes.  Thus it will only ever potentially panic on init and therefore is 100% predictable.
 		// loki: Panics are good when the condition should not happen!
 		panic(err)

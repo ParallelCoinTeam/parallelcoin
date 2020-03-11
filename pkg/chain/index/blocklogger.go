@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -55,7 +55,7 @@ func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
 	if b.receivedLogTx == 1 {
 		txStr = "transaction "
 	}
-	log.INFOF("%s %6d %s in the last %s (%6d %s, height %6d, %s)",
+	log.L.Infof("%s %6d %s in the last %s (%6d %s, height %6d, %s)",
 		b.progressAction, b.receivedLogBlocks, blockStr, fmt.Sprintf("%0.1fs", tDuration.Seconds()), b.receivedLogTx,
 		txStr, block.Height(), block.MsgBlock().Header.Timestamp)
 	b.receivedLogBlocks = 0

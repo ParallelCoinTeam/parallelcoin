@@ -16,7 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -39,20 +39,20 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				cx.Config, cx.ConfigMap = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
-					log.ERROR("error unmarshalling config", err)
+					log.L.Error("error unmarshalling config", err)
 					os.Exit(1)
 				}
 			} else {
-				log.FATAL("unexpected error reading configuration file:", err)
+				log.L.Fatal("unexpected error reading configuration file:", err)
 				os.Exit(1)
 			}
 		} else {
 			*cx.Config.ConfigFile = ""
-			log.DEBUG("will save config after configuration")
+			log.L.Debug("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
 		if c.String("loglevel") != "" {
-			log.TRACE("set loglevel", c.String("loglevel"))
+			log.L.Trace("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
 		}
 		if c.IsSet("network") {
@@ -71,7 +71,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			default:
 				if *cx.Config.Network != "mainnet" &&
 					*cx.Config.Network != "m" {
-					log.WARN("using mainnet for node")
+					log.L.Warn("using mainnet for node")
 				}
 				cx.ActiveNet = &netparams.MainNetParams
 			}
@@ -242,7 +242,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			// if LAN is turned on we need to remove the seeds from netparams not on mainnet mainnet is never in lan
 			// mode
 			if cx.ActiveNet.Name != "mainnet" {
-				log.WARN("set lan", c.Bool("lan"))
+				log.L.Warn("set lan", c.Bool("lan"))
 				*cx.Config.LAN = c.Bool("lan")
 				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
 			} else {
@@ -339,7 +339,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.WalletOff = c.Bool("walletoff")
 		}
 		if c.IsSet("save") {
-			log.INFO("saving configuration")
+			log.L.Info("saving configuration")
 			save.Pod(cx.Config)
 		}
 		return nil

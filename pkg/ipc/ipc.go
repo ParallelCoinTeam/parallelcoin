@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/minio/highwayhash"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"hash"
 	"io"
 	"os"
@@ -110,7 +110,7 @@ func (c *Conn) Read(p []byte) (n int, err error) {
 	u32 := binary.LittleEndian.Uint32
 	n, err = r(p[:4])
 	if err != nil || n != 4 {
-		log.ERROR(err)
+		log.L.Error(err)
 	}
 	c.printlnE("read", p[:4])
 	bLen := u32(p[:4])

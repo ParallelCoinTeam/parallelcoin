@@ -3,7 +3,7 @@ package lru
 import (
 	"container/list"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"sync"
 
 	"github.com/p9c/pod/cmd/spv/cache"
@@ -69,7 +69,7 @@ func (c *Cache) evict(needed uint64) error {
 			ce := elr.Value.(*entry)
 			es, err := ce.value.Size()
 			if err != nil {
-				log.ERROR(err)
+				log.L.Error(err)
 				return fmt.Errorf("couldn't determine size of "+
 					"existing cache value %v", err)
 			}
@@ -89,7 +89,7 @@ func (c *Cache) evict(needed uint64) error {
 func (c *Cache) Put(key interface{}, value cache.Value) error {
 	vs, err := value.Size()
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return fmt.Errorf("couldn't determine size of cache value: %v",
 			err)
 	}
@@ -104,7 +104,7 @@ func (c *Cache) Put(key interface{}, value cache.Value) error {
 	if ok {
 		es, err := el.Value.(*entry).value.Size()
 		if err != nil {
-			log.ERROR(err)
+			log.L.Error(err)
 			return fmt.Errorf("couldn't determine size of existing"+
 				"cache value %v", err)
 		}

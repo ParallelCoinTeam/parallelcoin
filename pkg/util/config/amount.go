@@ -1,7 +1,7 @@
 package cfgutil
 
 import (
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"strconv"
 	"strings"
 
@@ -29,12 +29,12 @@ func (a *AmountFlag) UnmarshalFlag(value string) error {
 	value = strings.TrimSuffix(value, " DUO")
 	valueF64, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	amount, err := util.NewAmount(valueF64)
 	if err != nil {
-		log.ERROR(err)
+		log.L.Error(err)
 		return err
 	}
 	a.Amount = amount

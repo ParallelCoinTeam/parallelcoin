@@ -7,7 +7,7 @@ import (
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/log"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -67,7 +67,7 @@ func // verifyCheckpoint returns whether the passed block height and hash
 	if !checkpoint.Hash.IsEqual(hash) {
 		return false
 	}
-	log.INFOF("Verified checkpoint at height %d/block %s", checkpoint.Height,
+	log.L.Infof("Verified checkpoint at height %d/block %s", checkpoint.Height,
 		checkpoint.Hash)
 	return true
 }
