@@ -37,7 +37,7 @@ type HardForks struct {
 	TestnetStart       int32
 }
 
-const IntervalBase = 9
+const IntervalBase = 23
 
 func init() {
 	log.TRACE("running fork data init")

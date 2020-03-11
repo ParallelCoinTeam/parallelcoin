@@ -43,11 +43,11 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// wait for stop signal
 		<-rc.Quit
 		log.DEBUG("shutting down node")
-		if !cx.Node.Load().(bool) {
+		if !cx.Node.Load() {
 			close(cx.WalletKill)
 		}
 		log.DEBUG("shutting down wallet")
-		if !cx.Wallet.Load().(bool) {
+		if !cx.Wallet.Load() {
 			close(cx.NodeKill)
 		}
 		return

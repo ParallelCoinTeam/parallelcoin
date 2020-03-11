@@ -116,7 +116,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 		bits = last.bits
 	}
 	// log.DEBUG(algAdj, allAdj)
-	adjustment = algAdj + allAdj*allAdj*allAdj
+	adjustment = algAdj + allAdj
 	adjustment /= 2
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(bits))

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 	"time"
-	
+
 	"github.com/davecgh/go-spew/spew"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -1862,16 +1862,19 @@ func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) (txList []btcjson.
 // replies.
 func (w *Wallet) ListTransactions(from, count int) (listTxResult []btcjson.ListTransactionsResult, err error) {
 	txList := []btcjson.ListTransactionsResult{}
+	log.DEBUG("ListTransactions", from, count)
 	if err = walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		// Get current block.  The block height used for calculating
 		// the number of tx confirmations.
 		syncBlock := w.Manager.SyncedTo()
+		log.DEBUG("synced to", syncBlock)
 		// Need to skip the first from transactions, and after those, only
 		// include the next count transactions.
 		skipped := 0
 		n := 0
 		rangeFn := func(details []wtxmgr.TxDetails) (bool, error) {
+			log.DEBUG("calling rangeFn")
 			// Iterate over transactions at this height in reverse order.
 			// This does nothing for unmined transactions, which are
 			// unsorted, but it will process mined transactions in the
@@ -1891,6 +1894,7 @@ func (w *Wallet) ListTransactions(from, count int) (listTxResult []btcjson.ListT
 				if len(jsonResults) > 0 {
 					n++
 				}
+				log.SPEW(txList)
 			}
 			return false, nil
 		}

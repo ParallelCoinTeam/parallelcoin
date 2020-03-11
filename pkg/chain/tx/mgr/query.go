@@ -2,6 +2,7 @@ package wtxmgr
 
 import (
 	"fmt"
+
 	"github.com/p9c/pod/pkg/log"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -200,9 +201,12 @@ func (s *Store) UniqueTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 // Error returns from f (if any) are propigated to the caller.  Returns true
 // (signaling breaking out of a RangeTransactions) iff f executes and returns
 // true.
-func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket, f func([]TxDetails) (bool, error)) (bool, error) {
+func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
+	f func([]TxDetails) (bool, error)) (bool, error) {
+	log.DEBUG("rangeUnminedTransactions")
 	var details []TxDetails
 	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) error {
+		log.DEBUG("k", k, "v", v)
 		if len(k) < 32 {
 			str := fmt.Sprintf("%s: short key (expected %d "+
 				"bytes, read %d)", bucketUnmined, 32, len(k))
@@ -233,6 +237,7 @@ func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket, f func([]TxDeta
 // f executes and returns true.
 func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error)) (bool, error) {
+	log.DEBUG("rangeBlockTransactions", begin, end)
 	// Mempool height is considered a high bound.
 	if begin < 0 {
 		begin = int32(^uint32(0) >> 1)
@@ -240,6 +245,7 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	if end < 0 {
 		end = int32(^uint32(0) >> 1)
 	}
+	log.DEBUG("begin", begin, "end", end)
 	var blockIter blockIterator
 	var advance func(*blockIterator) bool
 	if begin < end {
@@ -345,15 +351,19 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 // use it after the loop iteration it was acquired.
 func (s *Store) RangeTransactions(ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error)) error {
-	var addedUnmined bool
+	log.DEBUG("RangeTransactions")
+	var addedUnmined, brk bool
+	var err error
 	if begin < 0 {
-		brk, err := s.rangeUnminedTransactions(ns, f)
+		brk, err = s.rangeUnminedTransactions(ns, f)
 		if err != nil || brk {
+			log.ERROR(err)
 			return err
 		}
 		addedUnmined = true
 	}
-	brk, err := s.rangeBlockTransactions(ns, begin, end, f)
+	if brk, err = s.rangeBlockTransactions(ns, begin, end, f); log.Check(err) {
+	}
 	if err == nil && !brk && !addedUnmined && end < 0 {
 		_, err = s.rangeUnminedTransactions(ns, f)
 	}

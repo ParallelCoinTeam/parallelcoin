@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	MaxDatagramSize = 8192
+	MaxDatagramSize      = 8192
 	UDP4MulticastAddress = "224.0.0.1:11049"
 	BufferSize           = 4096
 )
@@ -142,6 +142,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 				if cx.IsCurrent() {
 					log.WARN("READY!")
 					ctrl.Ready.Store(true)
+					ctrl.active.Store(true)
 				}
 			}
 		case <-ctrl.quit:
@@ -180,7 +181,7 @@ var handlersMulticast = transport.Handlers{
 	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		log.TRACE("received solution")
 		c := ctx.(*Controller)
-		if !c.active.Load() || !c.cx.Node.Load().(bool) {
+		if !c.active.Load() { // || !c.cx.Node.Load() {
 			log.DEBUG("not active yet")
 			return
 		}
@@ -349,7 +350,7 @@ func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 	if err != nil {
 		log.ERROR(err)
 	} else {
-		//log.DEBUG("got new block template")
+		// log.DEBUG("got new block template")
 	}
 	return
 }

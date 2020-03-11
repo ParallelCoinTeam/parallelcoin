@@ -185,7 +185,7 @@ func LazyApplyHandler(request *btcjson.Request, w *wallet.Wallet, chainClient ch
 			}
 		}
 	}
-	log.INFO("handler", handlerData.Handler, "wallet", w)
+	// log.INFO("handler", handlerData.Handler, "wallet", w)
 	if ok && handlerData.Handler != nil && w != nil {
 		log.INFO("handling", request.Method)
 		return func() (interface{}, *btcjson.RPCError) {
@@ -1228,11 +1228,12 @@ func ListSinceBlock(icmd interface{}, w *wallet.Wallet, chainClient *chain.RPCCl
 
 // ListTransactions handles a listtransactions request by returning an
 // array of maps with details of sent and recevied wallet transactions.
-func ListTransactions(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
+func ListTransactions(icmd interface{}, w *wallet.Wallet) (txs interface{}, err error) {
 	cmd := icmd.(*btcjson.ListTransactionsCmd)
+	log.SPEW(cmd)
 	// TODO: ListTransactions does not currently understand the difference
-	// between transactions pertaining to one account from another.  This
-	// will be resolved when wtxmgr is combined with the waddrmgr namespace.
+	//  between transactions pertaining to one account from another.  This
+	//  will be resolved when wtxmgr is combined with the waddrmgr namespace.
 	if cmd.Account != nil && *cmd.Account != "*" {
 		// For now, don't bother trying to continue if the user
 		// specified an account, since this can't be (easily or
@@ -1242,7 +1243,8 @@ func ListTransactions(icmd interface{}, w *wallet.Wallet) (interface{}, error) {
 			Message: "Transactions are not yet grouped by account",
 		}
 	}
-	return w.ListTransactions(*cmd.From, *cmd.Count)
+	txs, err = w.ListTransactions(*cmd.From, *cmd.Count)
+	return txs, err
 }
 
 // ListAddressTransactions handles a listaddresstransactions request by

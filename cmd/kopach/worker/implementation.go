@@ -29,7 +29,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-const RoundsPerAlgo = 9
+const RoundsPerAlgo = 69
 
 type Worker struct {
 	mx            sync.Mutex
