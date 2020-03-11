@@ -17,6 +17,8 @@ import (
 
 	"github.com/p9c/ring"
 
+	"github.com/p9c/stdconn"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -26,7 +28,6 @@ import (
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
 	"github.com/p9c/pod/pkg/sem"
-	"github.com/p9c/pod/pkg/stdconn"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
