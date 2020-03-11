@@ -2,22 +2,21 @@ package component
 
 import (
 	"fmt"
-
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/text"
 	"gioui.org/unit"
 
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
-	previousBlockHashButton = new(controller.Button)
-	nextBlockHashButton     = new(controller.Button)
+	previousBlockHashButton = new(gel.Button)
+	nextBlockHashButton     = new(gel.Button)
 	list                    = &layout.List{
 		Axis: layout.Vertical,
 	}
@@ -46,7 +45,7 @@ func DuoFields(gtx *layout.Context, axis layout.Axis, left, right func()) func()
 	}
 }
 
-func TrioFields(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, unoLabel, unoValue, unoHeadcolor, unoHeadbgColor, unoColor, unoBgColor, duoLabel, duoValue, duoHeadcolor, duoHeadbgColor, duoColor, duoBgColor, treLabel, treValue, treHeadcolor, treHeadbgColor, treColor, treBgColor string) func() {
+func TrioFields(gtx *layout.Context, th *gelook.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, unoLabel, unoValue, unoHeadcolor, unoHeadbgColor, unoColor, unoBgColor, duoLabel, duoValue, duoHeadcolor, duoHeadbgColor, duoColor, duoBgColor, treLabel, treValue, treHeadcolor, treHeadbgColor, treColor, treBgColor string) func() {
 	return func() {
 		layout.Flex{
 			Axis:    axis,
@@ -70,7 +69,7 @@ func fieldAxis(axis layout.Axis, field func(), size float32) layout.FlexChild {
 	return f
 }
 
-func ContentLabeledField(gtx *layout.Context, th *theme.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, label, headcolor, headbgColor, color, bgColor, value string) func() {
+func ContentLabeledField(gtx *layout.Context, th *gelook.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, label, headcolor, headbgColor, color, bgColor, value string) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			layout.Flex{
@@ -82,13 +81,13 @@ func ContentLabeledField(gtx *layout.Context, th *theme.DuoUItheme, axis layout.
 	}
 }
 
-func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, previousBlockHash, nextBlockHash string, prevPage, nextPage *theme.DuoUIpage) func() {
+func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, previousBlockHash, nextBlockHash string, prevPage, nextPage *gelook.DuoUIpage) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Flexed(0.495, func() {
 				eh := chainhash.Hash{}
 				if previousBlockHash != eh.String() {
-					var previousBlockButton theme.DuoUIbutton
+					var previousBlockButton gelook.DuoUIbutton
 					previousBlockButton = th.DuoUIbutton(th.Fonts["Mono"], "Previous Block "+previousBlockHash, th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Light"], 16, 0, 60, 24, 0, 0)
 					for previousBlockHashButton.Clicked(gtx) {
 						// clipboard.Set(b.BlockHash)
@@ -101,7 +100,7 @@ func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pr
 			}),
 			layout.Flexed(0.495, func() {
 				if nextBlockHash != "" {
-					var nextBlockButton theme.DuoUIbutton
+					var nextBlockButton gelook.DuoUIbutton
 					nextBlockButton = th.DuoUIbutton(th.Fonts["Mono"], "Next Block "+nextBlockHash, th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Light"], 16, 0, 60, 24, 0, 0)
 					for nextBlockHashButton.Clicked(gtx) {
 						// clipboard.Set(b.BlockHash)
@@ -115,7 +114,7 @@ func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pr
 	}
 }
 
-func contentField(gtx *layout.Context, th *theme.DuoUItheme, text, color, bgColor string, font text.Typeface, textSize float32) func() {
+func contentField(gtx *layout.Context, th *gelook.DuoUItheme, text, color, bgColor string, font text.Typeface, textSize float32) func() {
 	return func() {
 		hmin := gtx.Constraints.Width.Min
 		vmin := gtx.Constraints.Height.Min
@@ -129,7 +128,7 @@ func contentField(gtx *layout.Context, th *theme.DuoUItheme, text, color, bgColo
 					}},
 					NE: rr, NW: rr, SE: rr, SW: rr,
 				}.Op(gtx.Ops).Add(gtx.Ops)
-				fill(gtx, theme.HexARGB(bgColor))
+				fill(gtx, gelook.HexARGB(bgColor))
 			}),
 			layout.Stacked(func() {
 				gtx.Constraints.Width.Min = hmin
@@ -138,7 +137,7 @@ func contentField(gtx *layout.Context, th *theme.DuoUItheme, text, color, bgColo
 					layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 						l := th.DuoUIlabel(unit.Dp(textSize), text)
 						l.Font.Typeface = font
-						l.Color = theme.HexARGB(color)
+						l.Color = gelook.HexARGB(color)
 						l.Layout(gtx)
 					})
 				})

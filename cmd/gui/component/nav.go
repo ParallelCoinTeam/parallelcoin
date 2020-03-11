@@ -3,18 +3,18 @@ package component
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
-	navButtonOverview    = new(controller.Button)
-	navButtonSend        = new(controller.Button)
-	navButtonReceive     = new(controller.Button)
-	navButtonAddressBook = new(controller.Button)
-	navButtonHistory     = new(controller.Button)
+	navButtonOverview    = new(gel.Button)
+	navButtonSend        = new(gel.Button)
+	navButtonReceive     = new(gel.Button)
+	navButtonAddressBook = new(gel.Button)
+	navButtonHistory     = new(gel.Button)
 	mainNav              = &layout.List{
 		Axis: layout.Vertical,
 	}
@@ -27,7 +27,7 @@ var (
 	navItemPaddingHorizontal int = 0
 )
 
-func MainNavigation(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPages *model.DuoUIpages) func() {
+func MainNavigation(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			mainNav.Layout(gtx, len(navButtons(rc, gtx, th, allPages)), func(i int) {
@@ -37,7 +37,7 @@ func MainNavigation(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, al
 	}
 }
 
-func navButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPages *model.DuoUIpages) []func() {
+func navButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) []func() {
 	return []func(){
 		navMenuButton(rc, gtx, th, allPages.Theme["OVERVIEW"], "OVERVIEW", "overviewIcon", navButtonOverview),
 		navMenuLine(gtx, th),
@@ -51,10 +51,10 @@ func navButtons(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPag
 	}
 }
 
-func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, page *theme.DuoUIpage, title, icon string, navButton *controller.Button) func() {
+func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, title, icon string, navButton *gel.Button) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			var menuItem theme.DuoUIbutton
+			var menuItem gelook.DuoUIbutton
 			menuItem = th.DuoUIbutton(th.Fonts["Secondary"], title, th.Colors["Dark"], th.Colors["LightGrayII"], th.Colors["LightGrayII"], th.Colors["Dark"], icon, CurrentCurrentPageColor(rc.ShowPage, title, navItemIconColor, th.Colors["Primary"]), navItemTextSize, navItemTconSize, navItemWidth, navItemHeight, navItemPaddingVertical, navItemPaddingHorizontal)
 			for navButton.Clicked(gtx) {
 				rc.ShowPage = title
@@ -66,8 +66,8 @@ func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, pag
 	}
 }
 
-func navMenuLine(gtx *layout.Context, th *theme.DuoUItheme) func() {
+func navMenuLine(gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		theme.DuoUIdrawRectangle(gtx, int(navItemWidth), 1, th.Colors["LightGrayIII"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		gelook.DuoUIdrawRectangle(gtx, int(navItemWidth), 1, th.Colors["LightGrayIII"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 	}
 }

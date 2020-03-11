@@ -2,10 +2,10 @@ package rcd
 
 import (
 	"fmt"
+	"github.com/p9c/gel"
 	"github.com/p9c/pod/cmd/gui/model"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/gui/controller"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet"
@@ -171,8 +171,8 @@ func (r *RcVar) GetAddressBook() func() {
 					Account: addr.Account,
 					Address: addr.Address,
 					Amount:  addr.Amount,
-					Copy:    new(controller.Button),
-					QrCode:  new(controller.Button),
+					Copy:    new(gel.Button),
+					QrCode:  new(gel.Button),
 				})
 			}
 		}

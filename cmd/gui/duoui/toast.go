@@ -3,12 +3,12 @@ package duoui
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 )
 
 var (
-	buttonToastOK = new(controller.Button)
+	buttonToastOK = new(gel.Button)
 	listToasts    = &layout.List{
 		Axis:        layout.Vertical,
 		ScrollToEnd: false,
@@ -25,8 +25,8 @@ var (
 //	})
 //}
 
-func (ui *DuoUI) toastButton(text, txtColor, bgColor, txtHoverColor, bgHoverColor, icon, iconColor string, button *controller.Button) func() {
-	var b theme.DuoUIbutton
+func (ui *DuoUI) toastButton(text, txtColor, bgColor, txtHoverColor, bgHoverColor, icon, iconColor string, button *gel.Button) func() {
+	var b gelook.DuoUIbutton
 	return func() {
 		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(ui.ly.Context, func() {
 			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Fonts["Primary"], text, txtColor, bgColor, txtHoverColor, bgHoverColor, icon, iconColor, 16, 24, 120, 60, 0, 0)

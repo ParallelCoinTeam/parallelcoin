@@ -5,17 +5,17 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/unit"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
-	buttonHeader = new(controller.Button)
+	buttonHeader = new(gel.Button)
 )
 
-func ContentHeader(gtx *layout.Context, th *theme.DuoUItheme, b func()) func() {
+func ContentHeader(gtx *layout.Context, th *gelook.DuoUItheme, b func()) func() {
 	return func() {
 		hmin := gtx.Constraints.Width.Min
 		vmin := gtx.Constraints.Height.Min
@@ -27,7 +27,7 @@ func ContentHeader(gtx *layout.Context, th *theme.DuoUItheme, b func()) func() {
 						Y: float32(gtx.Constraints.Height.Min),
 					}},
 				}.Op(gtx.Ops).Add(gtx.Ops)
-				fill(gtx, theme.HexARGB(th.Colors["Primary"]))
+				fill(gtx, gelook.HexARGB(th.Colors["Primary"]))
 			}),
 			layout.Stacked(func() {
 				gtx.Constraints.Width.Min = hmin
@@ -38,7 +38,7 @@ func ContentHeader(gtx *layout.Context, th *theme.DuoUItheme, b func()) func() {
 	}
 }
 
-func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPages *model.DuoUIpages) func() {
+func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			headerNav := []func(){
@@ -65,10 +65,10 @@ func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPag
 	}
 }
 
-func headerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, text, icon string, headerButton *controller.Button) func() {
+func headerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, text, icon string, headerButton *gel.Button) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			var footerMenuItem theme.DuoUIbutton
+			var footerMenuItem gelook.DuoUIbutton
 			footerMenuItem = th.DuoUIbutton("", "", "", "", "", th.Colors["Dark"], icon, CurrentCurrentPageColor(rc.ShowPage, text, navItemIconColor, th.Colors["Primary"]), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
 			for headerButton.Clicked(gtx) {
 				rc.ShowPage = text

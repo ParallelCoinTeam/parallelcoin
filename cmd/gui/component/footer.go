@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
 )
 
 var (
-	buttonLog        = new(controller.Button)
-	buttonSettings   = new(controller.Button)
-	buttonNetwork    = new(controller.Button)
-	buttonBlocks     = new(controller.Button)
-	buttonConsole    = new(controller.Button)
-	buttonHelp       = new(controller.Button)
+	buttonLog        = new(gel.Button)
+	buttonSettings   = new(gel.Button)
+	buttonNetwork    = new(gel.Button)
+	buttonBlocks     = new(gel.Button)
+	buttonConsole    = new(gel.Button)
+	buttonHelp       = new(gel.Button)
 	navItemIconColor = "ffacacac"
 	cornerNav        = &layout.List{
 		Axis: layout.Horizontal,
@@ -32,10 +32,10 @@ var (
 	footerMenuItemPaddingHorizontal int = 8
 )
 
-func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, page *theme.DuoUIpage, text, icon string, footerButton *controller.Button) func() {
+func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			var footerMenuItem theme.DuoUIbutton
+			var footerMenuItem gelook.DuoUIbutton
 			if icon != "" {
 				footerMenuItem = th.DuoUIbutton("", "", "", "", "", th.Colors["Dark"], icon, CurrentCurrentPageColor(rc.ShowPage, page.Title, navItemIconColor, th.Colors["Primary"]), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
 				for footerButton.Clicked(gtx) {
@@ -57,7 +57,7 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, 
 	}
 }
 
-func FooterLeftMenu(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPages *model.DuoUIpages) func() {
+func FooterLeftMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			cornerButtons := []func(){
@@ -72,7 +72,7 @@ func FooterLeftMenu(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, al
 	}
 }
 
-func FooterRightMenu(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, allPages *model.DuoUIpages) func() {
+func FooterRightMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			navButtons := []func(){

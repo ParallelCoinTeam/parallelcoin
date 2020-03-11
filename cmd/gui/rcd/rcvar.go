@@ -3,8 +3,8 @@ package rcd
 import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/skip2/go-qrcode"
 	"strings"
@@ -36,7 +36,7 @@ type RcVar struct {
 	AddressBook *model.DuoUIaddressBook
 	QrCode      *model.DuoUIqrCode
 	ShowPage    string
-	CurrentPage *theme.DuoUIpage
+	CurrentPage *gelook.DuoUIpage
 	// NodeChan   chan *rpc.Server
 	// WalletChan chan *wallet.Wallet
 	Explorer *model.DuoUIexplorer
@@ -89,16 +89,16 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 	if err != nil {
 		log.FATAL(err)
 	}
-	qr.BackgroundColor = theme.HexARGB("ff3030cf")
+	qr.BackgroundColor = gelook.HexARGB("ff3030cf")
 	qrcode := &model.DuoUIqrCode{
 		AddrQR: paint.NewImageOp(qr.Image(256)),
 	}
 	r = &RcVar{
-		cx:   cx,
-		db:   new(DuoUIdb),
-		Boot: &b,
+		cx:          cx,
+		db:          new(DuoUIdb),
+		Boot:        &b,
 		AddressBook: new(model.DuoUIaddressBook),
-			QrCode: qrcode,
+		QrCode:      qrcode,
 		Status: &model.DuoUIstatus{
 			Node: &model.NodeStatus{},
 			Wallet: &model.WalletStatus{
@@ -127,61 +127,61 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		Localhost: model.DuoUIlocalHost{},
 		ShowPage:  "OVERVIEW",
 		Explorer: &model.DuoUIexplorer{
-			PerPage: &controller.DuoUIcounter{
+			PerPage: &gel.DuoUIcounter{
 				Value:        20,
 				OperateValue: 1,
 				From:         0,
 				To:           50,
-				CounterInput: &controller.Editor{
+				CounterInput: &gel.Editor{
 					Alignment:  text.Middle,
 					SingleLine: true,
 				},
-				CounterIncrease: new(controller.Button),
-				CounterDecrease: new(controller.Button),
-				CounterReset:    new(controller.Button),
+				CounterIncrease: new(gel.Button),
+				CounterDecrease: new(gel.Button),
+				CounterReset:    new(gel.Button),
 			},
-			Page: &controller.DuoUIcounter{
+			Page: &gel.DuoUIcounter{
 				Value:        0,
 				OperateValue: 1,
 				From:         0,
 				To:           50,
-				CounterInput: &controller.Editor{
+				CounterInput: &gel.Editor{
 					Alignment:  text.Middle,
 					SingleLine: true,
 				},
-				CounterIncrease: new(controller.Button),
-				CounterDecrease: new(controller.Button),
-				CounterReset:    new(controller.Button),
+				CounterIncrease: new(gel.Button),
+				CounterDecrease: new(gel.Button),
+				CounterReset:    new(gel.Button),
 			},
 			Blocks:      []model.DuoUIblock{},
 			SingleBlock: btcjson.GetBlockVerboseResult{},
 		},
 		History: &model.DuoUIhistory{
-			PerPage: &controller.DuoUIcounter{
+			PerPage: &gel.DuoUIcounter{
 				Value:        20,
 				OperateValue: 1,
 				From:         0,
 				To:           50,
-				CounterInput: &controller.Editor{
+				CounterInput: &gel.Editor{
 					Alignment:  text.Middle,
 					SingleLine: true,
 				},
-				CounterIncrease: new(controller.Button),
-				CounterDecrease: new(controller.Button),
-				CounterReset:    new(controller.Button),
+				CounterIncrease: new(gel.Button),
+				CounterDecrease: new(gel.Button),
+				CounterReset:    new(gel.Button),
 			},
-			Page: &controller.DuoUIcounter{
+			Page: &gel.DuoUIcounter{
 				Value:        0,
 				OperateValue: 1,
 				From:         0,
 				To:           50,
-				CounterInput: &controller.Editor{
+				CounterInput: &gel.Editor{
 					Alignment:  text.Middle,
 					SingleLine: true,
 				},
-				CounterIncrease: new(controller.Button),
-				CounterDecrease: new(controller.Button),
-				CounterReset:    new(controller.Button),
+				CounterIncrease: new(gel.Button),
+				CounterDecrease: new(gel.Button),
+				CounterReset:    new(gel.Button),
 			},
 			Txs: &model.DuoUItransactionsExcerpts{
 				ModelTxsListNumber: 0,

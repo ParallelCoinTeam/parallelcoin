@@ -2,16 +2,16 @@ package duoui
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/gel"
 	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/pkg/gui/controller"
 )
 
 var (
-	navButtonOverview    = new(controller.Button)
-	navButtonSend        = new(controller.Button)
-	navButtonReceive     = new(controller.Button)
-	navButtonAddressBook = new(controller.Button)
-	navButtonHistory     = new(controller.Button)
+	navButtonOverview    = new(gel.Button)
+	navButtonSend        = new(gel.Button)
+	navButtonReceive     = new(gel.Button)
+	navButtonAddressBook = new(gel.Button)
+	navButtonHistory     = new(gel.Button)
 	mainNav              = &layout.List{
 		Axis: layout.Vertical,
 	}

@@ -2,7 +2,7 @@ package model
 
 import (
 	"gioui.org/op/paint"
-	"github.com/p9c/pod/pkg/gui/controller"
+	"github.com/p9c/gel"
 )
 
 type DuoUIbalance struct {
@@ -51,8 +51,8 @@ type DuoUIaddress struct {
 	Account string  `json:"account"`
 	Address string  `json:"address"`
 	Amount  float64 `json:"amount"`
-	Copy    *controller.Button
-	QrCode  *controller.Button
+	Copy    *gel.Button
+	QrCode  *gel.Button
 }
 type DuoUIaddressBook struct {
 	ShowMiningAddresses bool

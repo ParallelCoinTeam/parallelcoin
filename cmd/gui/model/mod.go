@@ -7,8 +7,8 @@ import (
 	"gioui.org/layout"
 	"go.uber.org/atomic"
 
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/pkg/log"
 	"github.com/p9c/pod/pkg/pod"
 )
@@ -24,17 +24,17 @@ type DuOScomponent struct {
 type DuoUI struct {
 	Window     *app.Window
 	Context    *layout.Context
-	Theme      *theme.DuoUItheme
+	Theme      *gelook.DuoUItheme
 	Pages      *DuoUIpages
-	Navigation map[string]*theme.DuoUIthemeNav
+	Navigation map[string]*gelook.DuoUIthemeNav
 	// Configuration *DuoUIconfiguration
 	IsReady bool
 }
 
 type DuoUIpages struct {
-	CurrentPage *theme.DuoUIpage
-	Controller  map[string]*controller.DuoUIpage
-	Theme       map[string]*theme.DuoUIpage
+	CurrentPage *gelook.DuoUIpage
+	Controller  map[string]*gel.DuoUIpage
+	Theme       map[string]*gelook.DuoUIpage
 }
 type DuoUIlog struct {
 	Mx          sync.Mutex
@@ -54,7 +54,7 @@ type DuoUIlog struct {
 
 type DuoUIconfTabs struct {
 	Current  string
-	TabsList map[string]*controller.Button
+	TabsList map[string]*gel.Button
 }
 
 // type DuoUIalert struct {
@@ -85,7 +85,7 @@ type DuoUIblock struct {
 	TxNum         int     `json:"txnum"`
 	Confirmations int64
 	Time          int64 `json:"time"`
-	Link          *controller.Button
+	Link          *gel.Button
 }
 
 type DuoUItoast struct {

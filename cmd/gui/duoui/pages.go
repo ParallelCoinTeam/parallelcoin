@@ -2,13 +2,13 @@ package duoui
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/pages"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/theme"
 )
 
-func LoadPages(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) (p map[string]*theme.DuoUIpage) {
-	p = make(map[string]*theme.DuoUIpage)
+func LoadPages(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) (p map[string]*gelook.DuoUIpage) {
+	p = make(map[string]*gelook.DuoUIpage)
 
 	p["OVERVIEW"] = pages.Overview(rc, gtx, th)
 	p["SEND"] = pages.Send(rc, gtx, th)

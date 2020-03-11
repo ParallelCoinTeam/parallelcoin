@@ -1,10 +1,10 @@
 package duoui
 
 import (
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/clipboard"
-	"github.com/p9c/pod/pkg/gui/theme"
 	"sync"
 
 	"gioui.org/app"
@@ -38,13 +38,13 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 
 	//d.sys.Components["logger"].View
 
-	duo.Navigation = make(map[string]*theme.DuoUIthemeNav)
+	duo.Navigation = make(map[string]*gelook.DuoUIthemeNav)
 	//navigations["mainMenu"] = mainMenu()
 
 	// Icons
 	//rc.Settings.Daemon = rcd.GetCoreSettings()
 
-	duo.Theme = theme.NewDuoUItheme()
+	duo.Theme = gelook.NewDuoUItheme()
 	//duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
 	duo.Pages = &model.DuoUIpages{
 		Controller: nil,

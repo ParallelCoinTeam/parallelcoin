@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gui/theme"
+	"github.com/p9c/gelook"
 )
 
 var (
@@ -18,6 +18,6 @@ var (
 
 var StartupTime = time.Now()
 
-func Logger(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+func Logger(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	return th.DuoUIpage("LOG", 0, func() {}, func() {}, component.DuoUIlogger(rc, gtx, th), func() {})
 }

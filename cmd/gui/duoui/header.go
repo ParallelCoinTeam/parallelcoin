@@ -4,15 +4,15 @@ import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/gel"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/pkg/gui/controller"
-	"github.com/p9c/pod/pkg/gui/theme"
 	"image"
 	"image/color"
 )
 
 var (
-	logoButton = new(controller.Button)
+	logoButton = new(gel.Button)
 	headerList = &layout.List{
 		Axis:      layout.Horizontal,
 		Alignment: layout.Start,
@@ -27,7 +27,7 @@ func (ui *DuoUI) DuoUIheader() func() {
 			Alignment: layout.Middle,
 		}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
-				var logoMeniItem theme.DuoUIbutton
+				var logoMeniItem gelook.DuoUIbutton
 				logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", ui.ly.Theme.Colors["Dark"], "", "", "logo", ui.ly.Theme.Colors["Light"], 16, 64, 96, 96, 8, 8)
 				for logoButton.Clicked(ui.ly.Context) {
 					ui.changeLightDark()
@@ -51,7 +51,7 @@ func (ui *DuoUI) changeLightDark() {
 	ui.ly.Theme.Colors["DarkGrayII"] = lightGray
 }
 
-func renderIcon(gtx *layout.Context, icon *theme.DuoUIicon) func() {
+func renderIcon(gtx *layout.Context, icon *gelook.DuoUIicon) func() {
 	return func() {
 		icon.Color = color.RGBA{A: 0xff, R: 0xcf, G: 0x55, B: 0x30}
 		icon.Layout(gtx, unit.Dp(float32(48)))

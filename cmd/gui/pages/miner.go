@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/theme"
 )
 
-func Miner(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) *theme.DuoUIpage {
+func Miner(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	return th.DuoUIpage("MINER", 0, func() {}, func() {}, DuoUIminer(rc, gtx, th), func() {})
 }
 
-func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		rc.GetDuoUIhashesPerSecList()
 		layout.Flex{}.Layout(gtx,
@@ -32,7 +32,7 @@ func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func()
 									layout.Rigid(func() {
 										sat := th.Body1(fmt.Sprint(t))
 										sat.Font.Typeface = th.Fonts["Mono"]
-										sat.Color = theme.HexARGB(th.Colors["Dark"])
+										sat.Color = gelook.HexARGB(th.Colors["Dark"])
 										sat.Layout(gtx)
 									}),
 								)

@@ -5,8 +5,8 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/gelook"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/theme"
 	"image"
 )
 
@@ -20,10 +20,10 @@ var (
 	}
 )
 
-func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func() {
+func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		cs := gtx.Constraints
-		theme.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		in := layout.UniformInset(unit.Dp(16))
 		in.Layout(gtx, func() {
 			//cs := gtx.Constraints
@@ -51,7 +51,7 @@ func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme) func(
 	}
 }
 
-func listItem(gtx *layout.Context, th *theme.DuoUItheme, size, top int, iconName, name, value string) func() {
+func listItem(gtx *layout.Context, th *gelook.DuoUItheme, size, top int, iconName, name, value string) func() {
 	return func() {
 		icon := th.Icons[iconName]
 		layout.Flex{
@@ -63,7 +63,7 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, size, top int, iconName
 					layout.Rigid(func() {
 						layout.Inset{Top: unit.Dp(float32(top)), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(gtx, func() {
 							if icon != nil {
-								icon.Color = theme.HexARGB(th.Colors["Dark"])
+								icon.Color = gelook.HexARGB(th.Colors["Dark"])
 								icon.Layout(gtx, unit.Px(float32(size)))
 							}
 							gtx.Dimensions = layout.Dimensions{
@@ -74,7 +74,7 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, size, top int, iconName
 					layout.Rigid(func() {
 						txt := th.DuoUIlabel(unit.Dp(float32(size)), name)
 						txt.Font.Typeface = th.Fonts["Primary"]
-						txt.Color = theme.HexARGB(th.Colors["Primary"])
+						txt.Color = gelook.HexARGB(th.Colors["Primary"])
 						txt.Layout(gtx)
 					}),
 				)
@@ -83,7 +83,7 @@ func listItem(gtx *layout.Context, th *theme.DuoUItheme, size, top int, iconName
 				value := th.H5(value)
 				value.TextSize = unit.Dp(float32(size))
 				value.Font.Typeface = th.Fonts["Primary"]
-				value.Color = theme.HexARGB(th.Colors["Dark"])
+				value.Color = gelook.HexARGB(th.Colors["Dark"])
 				value.Alignment = text.End
 				value.Layout(gtx)
 			}),
