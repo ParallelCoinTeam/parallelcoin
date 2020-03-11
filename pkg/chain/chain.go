@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	
+
 	"go.uber.org/atomic"
-	
+
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/log"
-	
+
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -542,7 +542,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		log.DEBUG(str)
 		return AssertError(str)
 	}
-	
+
 	// No warnings about unknown rules or versions until the chain is current.
 	if b.isCurrent() {
 		// Warn if any unknown new rules are either about to activate or have
@@ -552,7 +552,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 			return err
 		}
 	}
-	
+
 	// Write any block status changes to DB before updating best state.
 	err := b.Index.flushToDB()
 	if err != nil {
@@ -593,7 +593,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 			log.TRACE("dbPutUtxoView", err)
 			return err
 		}
-		
+
 		// Update the transaction spend journal by adding a record for the
 		// block that contains all txos spent by it.
 		err = dbPutSpendJournalEntry(dbTx, block.Hash(), stxos)
@@ -620,7 +620,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	// Prune fully spent entries and mark all entries in the view unmodified
 	// now that the modifications have been committed to the database.
 	view.commit()
-	
+
 	// This node is now the end of the best chain.
 	b.BestChain.SetTip(node)
 	// Update the state for the best block.
@@ -1109,10 +1109,10 @@ func // connectBestChain handles connecting the passed block to the chain while
 			b.Index.SetStatusFlags(node, statusValid)
 			flushIndexState()
 		}
-		return true, nil
 		if fastAdd {
 			log.WARNF("fastAdd set in the side chain case? %v\n", block.Hash())
 		}
+		return true, nil
 	}
 	node.workSum = CalcWork(node.bits, node.height, node.version)
 	// We're extending (or creating) a side chain,
@@ -1640,7 +1640,7 @@ New(config *Config) (*BlockChain, error) {
 		deploymentCaches:      newThresholdCaches(chaincfg.DefinedDeployments),
 		DifficultyAdjustments: make(map[string]float64),
 	}
-	b.DifficultyBits.Store(make(map[int32]uint32))
+	b.DifficultyBits.Store(make(TargetBits))
 	// Initialize the chain state from the passed database.
 	// When the db does not yet contain any chain state,
 	// both it and the chain state will be initialized to contain only the
@@ -1666,7 +1666,7 @@ New(config *Config) (*BlockChain, error) {
 		return nil, err
 	}
 	bestNode := b.BestChain.Tip()
-	df, ok := bestNode.Diffs.Load().(map[int32]uint32)
+	df, ok := bestNode.Diffs.Load().(TargetBits)
 	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
 		bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(bestNode)

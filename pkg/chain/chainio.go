@@ -905,16 +905,16 @@ func // createChainState initializes both the database and the chain state to
 (b *BlockChain) createChainState() error {
 	// Create a new node from the genesis block and set it as the best node.
 	genesisBlock := util.NewBlock(b.params.GenesisBlock)
-	//log.TRACEC(func() string {
+	// log.TRACEC(func() string {
 	//	xx, _ := genesisBlock.Bytes()
 	//	return hex.EncodeToString(xx)
-	//})
+	// })
 	genesisBlock.SetHeight(0)
 	header := &genesisBlock.MsgBlock().Header
 	node := NewBlockNode(header, nil)
 	node.status = statusDataStored | statusValid
 	var err error
-	var df map[int32]uint32
+	var df TargetBits
 	df, err = b.CalcNextRequiredDifficultyPlan9Controller(node)
 	node.Diffs.Store(df)
 	if err != nil {

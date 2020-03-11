@@ -184,7 +184,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 				case <-w.stopChan:
 					log.TRACE("received pause signal while running")
 					// w.block.Store(&util.Block{})
-					// w.bitses.Store((map[int32]uint32)(nil))
+					// w.bitses.Store((blockchain.TargetBits)(nil))
 					// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 					break running
 				case <-w.Quit:
@@ -213,7 +213,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 						} else {
 							continue
 						}
-						b := w.bitses.Load().(map[int32]uint32)
+						b := w.bitses.Load().(blockchain.TargetBits)
 						if bb, ok := b[mb.Header.Version]; ok {
 							mb.Header.Bits = bb
 						} else {
@@ -267,7 +267,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 							break running
 						}
 						mb.Header.Version = nextAlgo
-						mb.Header.Bits = w.bitses.Load().(map[int32]uint32)[mb.Header.Version]
+						mb.Header.Bits = w.bitses.Load().(blockchain.TargetBits)[mb.Header.Version]
 						mb.Header.Nonce++
 						w.msgBlock.Store(*mb)
 						// if we have completed a cycle report the hashrate on starting new algo

@@ -11,6 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 )
 
+// Pod saves the configuration to the configured location
 func Pod(c *pod.Config) (success bool) {
 	log.TRACE("saving configuration to", *c.ConfigFile)
 	var uac cli.StringSlice
