@@ -8,7 +8,7 @@ import (
 
 	"github.com/p9c/chainhash"
 
-	rpcclient "github.com/p9c/rpc/rpcclient"
+	rpcclient "github.com/p9c/rpc/client"
 )
 
 // JoinType is an enum representing a particular type of "node join". A node

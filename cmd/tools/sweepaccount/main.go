@@ -19,7 +19,7 @@ import (
 	txscript "github.com/p9c/chain/tx/script"
 	"github.com/p9c/wire"
 	"github.com/p9c/rpc/btcjson"
-	rpcclient "github.com/p9c/rpc/rpcclient"
+	rpcclient "github.com/p9c/rpc/client"
 	"github.com/p9c/util"
 	cfgutil "github.com/p9c/util/config"
 )

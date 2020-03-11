@@ -13,7 +13,7 @@ import (
 
 	"github.com/p9c/util"
 
-	rpc "github.com/p9c/rpc/rpcclient"
+	rpc "github.com/p9c/rpc/client"
 )
 
 // nodeConfig contains all the args and data required to launch a pod process

@@ -18,7 +18,7 @@ import (
 	"github.com/p9c/util"
 	"github.com/p9c/wire"
 
-	rpcclient "github.com/p9c/rpc/rpcclient"
+	rpcclient "github.com/p9c/rpc/client"
 )
 
 const (

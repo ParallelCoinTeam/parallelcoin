@@ -1131,7 +1131,7 @@ This section provides example code for interacting with the JSON-RPC API in vari
 **9.1 Go**
 
  is section provides examples of using the RPC interface using Go and  he
-[ pcclient](https://github.com/p9c/pod/rpcclient) package.
+[ pcclient](https://github.com/p9c/rpc/client) package.
 
 
 * [Using getblockcount to Retrieve the Current Block Height](#ExampleGetBlockCount)
@@ -1144,7 +1144,7 @@ This section provides example code for interacting with the JSON-RPC API in vari
 
 **9.1.1 Using getblockcount to Retrieve the Current Block Height**<br />
 
-The following is an example Go application which uses the [rpcclient](https://github.com/p9c/pod/rpcclient) package to connect with a pod instance via Websockets, issues [getblockcount](#getblockcount) to retrieve the current block height, and displays it.
+The following is an example Go application which uses the [rpcclient](https://github.com/p9c/rpc/client) package to connect with a pod instance via Websockets, issues [getblockcount](#getblockcount) to retrieve the current block height, and displays it.
 
 ```Go
 package main
@@ -1154,7 +1154,7 @@ import (
 "path/filepath"
 
 "github.com/p9c/pod/btcutil"
-"github.com/p9c/rpc/rpcclient"
+"github.com/p9c/rpc/client"
 
 
 
@@ -1204,12 +1204,12 @@ Block count: 276978
 
 **9.1.2 Using getblock to Retrieve the Genesis Block**<br />
 
-The following is an example Go application which uses the [rpcclient](https://github.com/p9c/pod/rpcclient) package to connect with a pod instance via Websockets, issues [getblock](#getblock) to retrieve information about the Genesis block, and display a few details about it.
+The following is an example Go application which uses the [rpcclient](https://github.com/p9c/rpc/client) package to connect with a pod instance via Websockets, issues [getblock](#getblock) to retrieve information about the Genesis block, and display a few details about it.
 
 ```Go
 package main
 import (
-	"github.com/p9c/rpc/rpcclient" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/chainhash"
+	"github.com/p9c/rpc/client" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/chainhash"
 
 	"github.com/p9c/wire"
 	"io/ioutil"
@@ -1289,12 +1289,12 @@ Num transactions: 1
 
 Notifications (Websocket-specific)**<br />
 
-The following is an example Go application which uses the [rpcclient](https://github.com/p9c/pod/rpcclient) package to connect with a pod instance via Websockets and registers for [blockconnected](#blockconnected) and [blockdisconnected](#blockdisconnected) notifications with [notifyblocks](#notifyblocks).  It also sets up handlers for the notifications.
+The following is an example Go application which uses the [rpcclient](https://github.com/p9c/rpc/client) package to connect with a pod instance via Websockets and registers for [blockconnected](#blockconnected) and [blockdisconnected](#blockdisconnected) notifications with [notifyblocks](#notifyblocks).  It also sets up handlers for the notifications.
 
 ```Go
 package main
 import (
-	"github.com/p9c/rpc/rpcclient" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/chainhash"
+	"github.com/p9c/rpc/client" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/chainhash"
 
 	"github.com/p9c/wire"
 	"io/ioutil"

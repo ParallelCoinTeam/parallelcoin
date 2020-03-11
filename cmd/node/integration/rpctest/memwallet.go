@@ -17,7 +17,7 @@ import (
 
 	blockchain "github.com/p9c/chain"
 	txscript "github.com/p9c/chain/tx/script"
-	rpcclient "github.com/p9c/rpc/rpcclient"
+	"github.com/p9c/rpc/client"
 )
 
 var (

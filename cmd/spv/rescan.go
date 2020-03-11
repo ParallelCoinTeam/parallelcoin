@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/wire"
 	log "github.com/p9c/logi"
 	"github.com/p9c/rpc/btcjson"
-	rpcclient "github.com/p9c/rpc/rpcclient"
+	rpcclient "github.com/p9c/rpc/client"
 	"github.com/p9c/util"
 	"github.com/p9c/util/gcs"
 	"github.com/p9c/util/gcs/builder"
