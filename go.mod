@@ -23,6 +23,7 @@ require (
 	github.com/p9c/gel v0.0.2
 	github.com/p9c/gelook v0.0.0-20200311045057-0f256a5503f5
 	github.com/p9c/logi v0.0.12
+	github.com/p9c/p9fonts v0.0.2
 	github.com/p9c/simplebuffer v0.0.2
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9
@@ -31,7 +32,6 @@ require (
 	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
 	go.uber.org/atomic v1.5.1
 	golang.org/x/crypto v0.0.0-20200214034016-1d94cc7ab1c6
-	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
 	golang.org/x/text v0.3.2
 	lukechampine.com/blake3 v1.0.0
 )

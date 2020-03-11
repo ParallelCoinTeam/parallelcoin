@@ -2,12 +2,14 @@ package duoui
 
 import (
 	"errors"
+
 	"github.com/p9c/pod/cmd/gui/component"
 
 	"gioui.org/io/system"
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -27,7 +29,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					select {
 					case <-updateTrigger:
 						log.L.Trace("repaint forced")
-						//ui.ly.Window.Invalidate()
+						// ui.ly.Window.Invalidate()
 					case <-ui.rc.Quit:
 						break quitTrigger
 					}
@@ -46,8 +48,8 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			<-interrupt.HandlersDone
 			log.L.Debug("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
-			//TODO events of gui
-		//case e := <-a.wallet.events:
+			// TODO events of gui
+		// case e := <-a.wallet.events:
 		//	switch e := e.(type) {
 		//	case TransactionEvent:
 		//		a.trans = append(a.trans, e.Trans)
@@ -72,7 +74,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					} else {
 						ui.DuoUImainScreen()
 						if ui.rc.Dialog.Show {
-							component.DuoUIdialog(ui.rc,ui.ly.Context,ui.ly.Theme)
+							component.DuoUIdialog(ui.rc, ui.ly.Context, ui.ly.Theme)
 						}
 						// ui.DuoUItoastSys()
 					}

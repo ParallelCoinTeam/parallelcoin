@@ -7,6 +7,7 @@ import (
 	"github.com/p9c/gel"
 	"github.com/p9c/gelook"
 	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -15,11 +16,11 @@ var (
 	confirmPassPhrase string
 	passEditor        = &gel.Editor{
 		SingleLine: true,
-		//Submit:     true,
+		// Submit:     true,
 	}
 	confirmPassEditor = &gel.Editor{
 		SingleLine: true,
-		//Submit:     true,
+		// Submit:     true,
 	}
 	listWallet = &layout.List{
 		Axis: layout.Vertical,

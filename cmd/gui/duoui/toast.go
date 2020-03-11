@@ -17,13 +17,13 @@ var (
 	}
 )
 
-//func (ui *DuoUI) DuoUItoastSys() {
+// func (ui *DuoUI) DuoUItoastSys() {
 //	layout.Align(layout.NE).Layout(ui.ly.Context, func() {
 //		listToasts.Layout(ui.ly.Context, len(ui.rc.Toasts), func(i int) {
 //			layout.UniformInset(unit.Dp(16)).Layout(ui.ly.Context, ui.rc.Toasts[i])
 //		})
 //	})
-//}
+// }
 
 func (ui *DuoUI) toastButton(text, txtColor, bgColor, txtHoverColor, bgHoverColor, icon, iconColor string, button *gel.Button) func() {
 	var b gelook.DuoUIbutton
@@ -31,14 +31,14 @@ func (ui *DuoUI) toastButton(text, txtColor, bgColor, txtHoverColor, bgHoverColo
 		layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(ui.ly.Context, func() {
 			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Fonts["Primary"], text, txtColor, bgColor, txtHoverColor, bgHoverColor, icon, iconColor, 16, 24, 120, 60, 0, 0)
 			for button.Clicked(ui.ly.Context) {
-				//ui.rc.ShowToast = false
+				// ui.rc.ShowToast = false
 			}
 			b.Layout(ui.ly.Context, button)
 		})
 	}
 }
 
-//func (ui *DuoUI) toastAdd() {
+// func (ui *DuoUI) toastAdd() {
 //	ui.rc.Toasts = append(ui.rc.Toasts, func() {
 //		//iconOK, _ := view.NewDuoUIicon(icons.NavigationCheck)
 //		theme.DuoUIdrawRectangle(ui.ly.Context, 418, 160, "aa000000", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
@@ -80,4 +80,4 @@ func (ui *DuoUI) toastButton(text, txtColor, bgColor, txtHoverColor, bgHoverColo
 //		ui.rc.Toasts = ui.rc.Toasts[:len(ui.rc.Toasts)-1]
 //		op.InvalidateOp{}.Add(ui.ly.Context.Ops)
 //	}(ui)
-//}
+// }

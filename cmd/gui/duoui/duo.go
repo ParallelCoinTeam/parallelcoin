@@ -1,17 +1,20 @@
 package duoui
 
 import (
+	"sync"
+
 	"github.com/p9c/gelook"
+
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/clipboard"
-	"sync"
 
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/p9fonts"
+
 	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/pkg/fonts"
 )
 
 var clipboardStarted bool
@@ -33,19 +36,19 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 	fonts.Register()
 	duo.Context = layout.NewContext(duo.Window.Queue())
 
-	//rc.StartLogger()
-	//sys.Components["logger"].View()
+	// rc.StartLogger()
+	// sys.Components["logger"].View()
 
-	//d.sys.Components["logger"].View
+	// d.sys.Components["logger"].View
 
 	duo.Navigation = make(map[string]*gelook.DuoUIthemeNav)
-	//navigations["mainMenu"] = mainMenu()
+	// navigations["mainMenu"] = mainMenu()
 
 	// Icons
-	//rc.Settings.Daemon = rcd.GetCoreSettings()
+	// rc.Settings.Daemon = rcd.GetCoreSettings()
 
 	duo.Theme = gelook.NewDuoUItheme()
-	//duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
+	// duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
 	duo.Pages = &model.DuoUIpages{
 		Controller: nil,
 		Theme:      LoadPages(rc, duo.Context, duo.Theme),
