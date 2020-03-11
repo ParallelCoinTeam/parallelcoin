@@ -12,6 +12,9 @@ import (
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 
+	log "github.com/p9c/logi"
+	"github.com/p9c/transport"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -20,11 +23,9 @@ import (
 	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/sem"
 	"github.com/p9c/pod/pkg/stdconn"
-	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -241,7 +242,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 						hash := mb.Header.BlockHashWithAlgos(nH)
 						bigHash := blockchain.HashToBig(&hash)
 						if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
-							//log.L.Debugc(func() string {
+							// log.L.Debugc(func() string {
 							//	return fmt.Sprintln(
 							//		"solution found h:", nH,
 							//		hash.String(),
@@ -255,8 +256,8 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 							//		mb.Header.MerkleRoot.String(),
 							//		hash,
 							//	)
-							//})
-							//log.L.Traces(mb)
+							// })
+							// log.L.Traces(mb)
 							srs := sol.GetSolContainer(w.senderPort.Load(), mb)
 							err := w.dispatchConn.SendMany(sol.SolutionMagic,
 								transport.GetShards(srs.Data))

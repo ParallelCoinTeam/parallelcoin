@@ -4,9 +4,10 @@ import (
 	"errors"
 	"io"
 	"net/rpc"
-	
-	"github.com/p9c/pod/pkg/kopachctrl/job"
+
 	log "github.com/p9c/logi"
+
+	"github.com/p9c/pod/pkg/kopachctrl/job"
 )
 
 type Client struct {
@@ -42,7 +43,7 @@ func (c *Client) NewJob(job *job.Container) (err error) {
 }
 
 func (c *Client) Pause() (err error) {
-	//log.L.Debug("sending pause")
+	// log.L.Debug("sending pause")
 	var reply bool
 	err = c.Call("Worker.Pause", 1, &reply)
 	if err != nil {
@@ -72,7 +73,7 @@ func (c *Client) Stop() (err error) {
 func (c *Client) SendPass(pass string) (err error) {
 	log.L.Debug("sending dispatch password")
 	var reply bool
-		err = c.Call("Worker.SendPass", pass, &reply)
+	err = c.Call("Worker.SendPass", pass, &reply)
 	if err != nil {
 		log.L.Error(err)
 		return

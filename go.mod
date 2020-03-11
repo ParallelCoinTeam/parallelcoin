@@ -25,13 +25,13 @@ require (
 	github.com/p9c/logi v0.0.12
 	github.com/p9c/p9fonts v0.0.2
 	github.com/p9c/simplebuffer v0.0.2
+	github.com/p9c/transport v0.0.2
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
 	github.com/urfave/cli v1.22.2
-	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
 	go.uber.org/atomic v1.5.1
-	golang.org/x/crypto v0.0.0-20200214034016-1d94cc7ab1c6
+	golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4
 	golang.org/x/text v0.3.2
 	lukechampine.com/blake3 v1.0.0
 )

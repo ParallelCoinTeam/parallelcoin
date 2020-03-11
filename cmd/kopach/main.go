@@ -10,15 +10,16 @@ import (
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 
+	log "github.com/p9c/logi"
+	"github.com/p9c/transport"
+
 	"github.com/p9c/pod/cmd/kopach/client"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/kopachctrl"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/stdconn/worker"
-	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
