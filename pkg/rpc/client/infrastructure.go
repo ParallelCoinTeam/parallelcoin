@@ -581,7 +581,7 @@ out:
 				if scaledDuration > time.Minute {
 					scaledDuration = time.Minute
 				}
-				log.TRACE("retrying connection to %s in %s %s",
+				log.TRACEF("retrying connection to %s in %s %s",
 					c.config.Host, scaledDuration)
 				time.Sleep(scaledDuration)
 				continue reconnect

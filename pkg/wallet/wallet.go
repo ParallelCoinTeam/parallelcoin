@@ -358,7 +358,7 @@ func (w *Wallet) syncWithChain() error {
 			log.ERROR(err)
 			return err
 		}
-		// log.DEBUG("bestHeight", bestHeight)
+		log.DEBUG("bestHeight", bestHeight)
 		checkHeight := bestHeight
 		if len(w.chainParams.Checkpoints) > 0 {
 			checkHeight = w.chainParams.Checkpoints[len(
@@ -591,9 +591,6 @@ func (w *Wallet) syncWithChain() error {
 			if err != nil {
 				log.ERROR(err)
 				return err
-			}
-			if height-1 > 0 {
-				height--
 			}
 			chainHash, err := chainClient.GetBlockHash(int64(height))
 			if err != nil {

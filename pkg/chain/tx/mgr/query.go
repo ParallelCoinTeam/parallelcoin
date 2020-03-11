@@ -253,6 +253,7 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 		blockIter = makeReadBlockIterator(ns, begin)
 		advance = func(it *blockIterator) bool {
 			if !it.next() {
+				log.DEBUG("end of blocks")
 				return false
 			}
 			return it.elem.Height <= end
@@ -270,6 +271,7 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	var details []TxDetails
 	for advance(&blockIter) {
 		block := &blockIter.elem
+		log.SPEW(block)
 		if cap(details) < len(block.transactions) {
 			details = make([]TxDetails, 0, len(block.transactions))
 		} else {
