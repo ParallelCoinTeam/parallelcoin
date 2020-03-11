@@ -2,10 +2,11 @@ package node
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/p9c/pod/pkg/log"
 
 	"github.com/p9c/pod/app/appdata"
 	blockchain "github.com/p9c/pod/pkg/chain"

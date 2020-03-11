@@ -2,9 +2,10 @@ package bloom_test
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
 	"math/rand"
 	"time"
+
+	"github.com/p9c/pod/pkg/log"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -27,7 +28,7 @@ func ExampleNewFilter() {
 	filter.AddHash(txHash)
 	// Show that the filter matches.
 	matches := filter.Matches(txHash[:])
-	log.Println("Filter Matches?:", matches)
+	fmt.Println("Filter Matches?:", matches)
 	// Output:
 	// Filter Matches?: true
 }

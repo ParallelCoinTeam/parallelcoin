@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util"
@@ -564,7 +564,7 @@ func TestSignTxOutput(t *testing.T) {
 					"%s: %v", msg, err)
 				break
 			}
-			//nolint
+			// nolint
 			sigScript, err := SignTxOutput(&netparams.TestNet3Params,
 				tx, i, scriptPkScript, hashType,
 				mkGetKey(map[string]addressToKey{
@@ -687,7 +687,7 @@ func TestSignTxOutput(t *testing.T) {
 					"%s: %v", msg, err)
 				break
 			}
-			//nolint
+			// nolint
 			sigScript, err := SignTxOutput(&netparams.TestNet3Params,
 				tx, i, scriptPkScript, hashType,
 				mkGetKey(map[string]addressToKey{
@@ -809,7 +809,7 @@ func TestSignTxOutput(t *testing.T) {
 					"%s: %v", msg, err)
 				break
 			}
-			//nolint
+			// nolint
 			sigScript, err := SignTxOutput(&netparams.TestNet3Params,
 				tx, i, scriptPkScript, hashType,
 				mkGetKey(map[string]addressToKey{
@@ -930,7 +930,7 @@ func TestSignTxOutput(t *testing.T) {
 					"%s: %v", msg, err)
 				break
 			}
-			//nolint
+			// nolint
 			sigScript, err := SignTxOutput(&netparams.TestNet3Params,
 				tx, i, scriptPkScript, hashType,
 				mkGetKey(map[string]addressToKey{

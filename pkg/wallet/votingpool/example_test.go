@@ -3,14 +3,14 @@ package votingpool_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/log"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/log"
+
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/util"
@@ -114,7 +114,7 @@ func Example_depositAddress() {
 		if err != nil {
 			return err
 		}
-		log.INFO("Generated deposit address:", addr.EncodeAddress())
+		fmt.Println("Generated deposit address:", addr.EncodeAddress())
 		return nil
 	})
 	if err != nil {

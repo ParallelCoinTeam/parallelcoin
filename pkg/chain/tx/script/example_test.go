@@ -2,6 +2,8 @@ package txscript_test
 
 import (
 	"encoding/hex"
+	"fmt"
+
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/log"
 
@@ -28,13 +30,13 @@ func ExamplePayToAddrScript() {
 		log.ERROR(err)
 		return
 	}
-	log.Printf("Script Hex: %x\n", script)
+	fmt.Printf("Script Hex: %x\n", script)
 	disasm, err := txscript.DisasmString(script)
 	if err != nil {
 		log.ERROR(err)
 		return
 	}
-	log.Println("Script Disassembly:", disasm)
+	fmt.Println("Script Disassembly:", disasm)
 	// Output:
 	// Script Hex: 76a914128004ff2fcaf13b2b91eb654b1dc2b674f7ec6188ac
 	// Script Disassembly: OP_DUP OP_HASH160 128004ff2fcaf13b2b91eb654b1dc2b674f7ec61 OP_EQUALVERIFY OP_CHECKSIG
@@ -135,7 +137,7 @@ func ExampleSignTxOutput() {
 		log.ERROR(err)
 		return
 	}
-	log.INFO("Transaction successfully signed")
+	fmt.Println("Transaction successfully signed")
 	// Output:
 	// Transaction successfully signed
 }

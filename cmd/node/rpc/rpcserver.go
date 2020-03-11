@@ -398,7 +398,7 @@ var (
 		"getrawmempool":         HandleGetRawMempool,
 		"getrawtransaction":     HandleGetRawTransaction,
 		"gettxout":              HandleGetTxOut,
-		"getwork":               HandleGetWork,
+		// "getwork":               HandleGetWork,
 		"help":                  HandleHelp,
 		"node":                  HandleNode,
 		"ping":                  HandlePing,

@@ -1,15 +1,14 @@
-// +build rpctest
-
 package integration
 
 import (
 	"bytes"
+	"log"
 	"os"
 	"runtime/debug"
 	"testing"
 
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 )
 
 func testGetBestBlock(r *rpctest.Harness, t *testing.T) {

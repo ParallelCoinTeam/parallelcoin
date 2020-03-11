@@ -6,11 +6,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"go.uber.org/atomic"
+	"sync/atomic"
 	"testing"
 	"time"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"

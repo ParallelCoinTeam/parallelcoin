@@ -5,8 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
 	"testing"
+
+	"github.com/p9c/pod/pkg/log"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"

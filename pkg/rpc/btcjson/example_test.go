@@ -3,6 +3,7 @@ package btcjson_test
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/p9c/pod/pkg/log"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -21,7 +22,7 @@ func ExampleMarshalCmd() {
 		return
 	}
 	// Display the marshalled command.  Ordinarily this would be sent across the wire to the RPC server, but for this example, just display it.
-	log.Printf("%s\n", marshalledBytes)
+	fmt.Printf("%s\n", marshalledBytes)
 	// Output: {"jsonrpc":"1.0","method":"getblock","netparams":["000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",false],"id":1}
 }
 
@@ -57,9 +58,9 @@ func ExampleUnmarshalCmd() {
 		return
 	}
 	// Display the fields in the concrete command.
-	log.Println("Hash:", gbCmd.Hash)
-	log.Println("Verbose:", *gbCmd.Verbose)
-	log.Println("VerboseTx:", *gbCmd.VerboseTx)
+	fmt.Println("Hash:", gbCmd.Hash)
+	fmt.Println("Verbose:", *gbCmd.Verbose)
+	fmt.Println("VerboseTx:", *gbCmd.VerboseTx)
 	// Output:
 	// Hash: 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
 	// Verbose: false
@@ -75,7 +76,7 @@ func ExampleMarshalResponse() {
 		return
 	}
 	// Display the marshalled response.  Ordinarily this would be sent across the wire to the RPC client, but for this example, just display it.
-	log.Printf("%s\n", marshalledBytes)
+	fmt.Printf("%s\n", marshalledBytes)
 	// Output: {"result":350001,"error":null,"id":1}
 }
 

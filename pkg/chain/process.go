@@ -75,7 +75,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// The block must not already exist as an orphan.
 	if _, exists := b.orphans[*blockHash]; exists {
 		str := fmt.Sprintf(
-			"already have block (orphan) %v", )
+			"already have block (orphan)", )
 		return false, false, ruleError(ErrDuplicateBlock, str)
 	}
 	// Perform preliminary sanity checks on the block and its transactions.

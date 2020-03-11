@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -39,9 +38,9 @@ type checkCFHTestCase struct {
 }
 type resolveCFHTestCase struct {
 	name string
-	//nolint
+	// nolint
 	block *wire.MsgBlock
-	//nolint
+	// nolint
 	idx         int
 	peerFilters map[string]*gcs.Filter
 	badPeers    []string

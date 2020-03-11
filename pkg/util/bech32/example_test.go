@@ -2,6 +2,8 @@ package bech32_test
 
 import (
 	"encoding/hex"
+	"fmt"
+
 	"github.com/p9c/pod/pkg/log"
 
 	"github.com/p9c/pod/pkg/util/bech32"
@@ -15,8 +17,8 @@ func ExampleDecode() {
 		log.ERROR("Error:", err)
 	}
 	// Show the decoded data.
-	log.Println("Decoded human-readable part:", hrp)
-	log.Println("Decoded Data:", hex.EncodeToString(decoded))
+	fmt.Println("Decoded human-readable part:", hrp)
+	fmt.Println("Decoded Data:", hex.EncodeToString(decoded))
 	// Output:
 	// Decoded human-readable part: bc
 	// Decoded Data: 010e140f070d1a001912060b0d081504140311021d030c1d03040f1814060e1e160e140f070d1a001912060b0d081504140311021d030c1d03040f1814060e1e16
@@ -35,7 +37,7 @@ func ExampleEncode() {
 		log.ERROR("Error:", err)
 	}
 	// Show the encoded data.
-	log.Println("Encoded Data:", encoded)
+	fmt.Println("Encoded Data:", encoded)
 	// Output:
 	// Encoded Data: customHrp!11111q123jhxapqv3shgcgumastr
 }

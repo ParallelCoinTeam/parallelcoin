@@ -9,7 +9,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/util"

@@ -2,12 +2,12 @@ package peer_test
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/log"
 	"net"
 	"time"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/log"
+
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/peer"
 )
@@ -56,7 +56,7 @@ func Example_newOutboundPeer() {
 		TrickleInterval:  time.Second * 10,
 		Listeners: peer.MessageListeners{
 			OnVersion: func(p *peer.Peer, msg *wire.MsgVersion) *wire.MsgReject {
-				log.ERROR("outbound: received version")
+				fmt.Println("outbound: received version")
 				return nil
 			},
 			OnVerAck: func(p *peer.Peer, msg *wire.MsgVerAck) {

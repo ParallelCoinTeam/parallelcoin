@@ -93,7 +93,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 			name:   "embedded field",
 			method: "registertestcmd",
 			cmdFunc: func() interface{} {
-				//nolint
+				// nolint
 				type test struct{ int }
 				return (*test)(nil)
 			},
@@ -103,7 +103,7 @@ func TestRegisterCmdErrors(t *testing.T) {
 			name:   "unexported field",
 			method: "registertestcmd",
 			cmdFunc: func() interface{} {
-				//nolint
+				// nolint
 				type test struct{ a int }
 				return (*test)(nil)
 			},

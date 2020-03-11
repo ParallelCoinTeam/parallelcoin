@@ -2,11 +2,12 @@ package mempool
 
 import (
 	"bytes"
-	"github.com/p9c/pod/pkg/log"
 	"testing"
 	"time"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/log"
+
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -47,7 +48,7 @@ func TestCalcMinRequiredTxRelayFee(t *testing.T) {
 			"max standard tx size with max satoshi relay fee",
 			maxStandardTxWeight / 4,
 			util.MaxSatoshi,
-			util.MaxSatoshi,
+			util.MaxSatoshi.Int64(),
 		},
 		{
 			"1500 bytes with 5000 relay fee",
@@ -195,7 +196,6 @@ func TestCheckPkScriptStandard(t *testing.T) {
 		got := checkPkScriptStandard(script, scriptClass)
 
 		if (test.isStandard && got != nil) ||
-
 			(!test.isStandard && got == nil) {
 
 			t.Fatalf("TestCheckPkScriptStandard test '%s' failed",
@@ -248,7 +248,7 @@ func TestDust(t *testing.T) {
 		{
 			// Maximum allowed value is never dust.
 			"max satoshi amount is never dust",
-			wire.TxOut{Value: util.MaxSatoshi, PkScript: pkScript},
+			wire.TxOut{Value: util.MaxSatoshi.Int64(), PkScript: pkScript},
 			util.MaxSatoshi,
 			false,
 		},

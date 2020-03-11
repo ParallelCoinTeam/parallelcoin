@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/p9c/pod/pkg/log"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )

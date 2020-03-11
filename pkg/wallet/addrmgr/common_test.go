@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
@@ -16,35 +16,35 @@ import (
 
 var (
 	// seed is the master seed used throughout the tests.
-	//nolint
+	// nolint
 	seed = []byte{
 		0x2a, 0x64, 0xdf, 0x08, 0x5e, 0xef, 0xed, 0xd8, 0xbf,
 		0xdb, 0xb3, 0x31, 0x76, 0xb5, 0xba, 0x2e, 0x62, 0xe8,
 		0xbe, 0x8b, 0x56, 0xc8, 0x83, 0x77, 0x95, 0x59, 0x8b,
 		0xb6, 0xc4, 0x40, 0xc0, 0x64,
 	}
-	//nolint
+	// nolint
 	pubPassphrase = []byte("_DJr{fL4H0O}*-0\n:V1izc)(6BomK")
-	//nolint
+	// nolint
 	privPassphrase = []byte("81lUHXnOMZ@?XXd7O9xyDIWIbXX-lj")
-	//nolint
+	// nolint
 	pubPassphrase2 = []byte("-0NV4P~VSJBWbunw}%<Z]fuGpbN[ZI")
-	//nolint
+	// nolint
 	privPassphrase2 = []byte("~{<]08%6!-?2s<$(8$8:f(5[4/!/{Y")
 	// fastScrypt are parameters used throughout the tests to speed up the
 	// scrypt operations.
-	//nolint
+	// nolint
 	fastScrypt = &waddrmgr.ScryptOptions{
 		N: 16,
 		R: 8,
 		P: 1,
 	}
 	// waddrmgrNamespaceKey is the namespace key for the waddrmgr package.
-	//nolint
+	// nolint
 	waddrmgrNamespaceKey = []byte("waddrmgrNamespace")
 	// expectedAddrs is the list of all expected addresses generated from the
 	// seed.
-	//nolint
+	// nolint
 	expectedAddrs = []expectedAddr{
 		{
 			address:     "14wtcepMNiEazuN7YosWY8bwD9tcCtxXRB",
@@ -199,11 +199,11 @@ var (
 	}
 	// expectedExternalAddrs is the list of expected external addresses
 	// generated from the seed
-	//nolint
+	// nolint
 	expectedExternalAddrs = expectedAddrs[:5]
 	// expectedInternalAddrs is the list of expected internal addresses
 	// generated from the seed
-	//nolint
+	// nolint
 	expectedInternalAddrs = expectedAddrs[5:]
 )
 
@@ -226,7 +226,7 @@ func checkManagerError(t *testing.T, testName string, gotErr error, wantErrCode 
 
 // hexToBytes is a wrapper around hex.DecodeString that panics if there is an
 // error.  It MUST only be used with hard coded values in the tests.
-//nolint
+// nolint
 func hexToBytes(origHex string) []byte {
 	buf, err := hex.DecodeString(origHex)
 	if err != nil {

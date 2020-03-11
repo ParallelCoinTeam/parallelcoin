@@ -3,6 +3,7 @@ package wtxmgr_test
 
 import (
 	"fmt"
+
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/log"
 
@@ -77,7 +78,7 @@ func ExampleStore_Balance() {
 			log.ERROR(err)
 			return
 		}
-		log.INFO("%v, %v, %v\n", zeroConfBal, oneConfBal, sixConfBal)
+		fmt.Printf("%v, %v, %v\n", zeroConfBal, oneConfBal, sixConfBal)
 	}
 	// Insert a transaction which outputs 10 DUO unmined and mark the output
 	// as a credit.
@@ -138,7 +139,7 @@ func ExampleStore_Rollback() {
 		if details == nil {
 			return fmt.Errorf("no details found")
 		}
-		log.Println(details.Block.Height)
+		fmt.Println(details.Block.Height)
 		return nil
 	})
 	if err != nil {
@@ -226,7 +227,7 @@ func Example_basicUsage() {
 		log.ERROR(err)
 		return
 	}
-	log.Println(bal)
+	fmt.Println(bal)
 	// Fetch unspent outputs.
 	utxos, err := s.UnspentOutputs(b)
 	if err != nil {
@@ -234,7 +235,7 @@ func Example_basicUsage() {
 	}
 	expectedOutPoint := wire.OutPoint{Hash: exampleTxRecordB.Hash, Index: 1}
 	for _, utxo := range utxos {
-		log.INFO(utxo.OutPoint == expectedOutPoint)
+		fmt.Println(utxo.OutPoint == expectedOutPoint)
 	}
 	// Output:
 	// 5 DUO

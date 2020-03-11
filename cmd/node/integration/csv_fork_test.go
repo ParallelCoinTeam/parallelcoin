@@ -1,5 +1,3 @@
-// +build rpctest
-
 package integration
 
 import (
@@ -11,7 +9,7 @@ import (
 
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
 	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -123,7 +121,7 @@ func TestBIP0113Activation(t *testing.T) {
 	})
 	tx.AddTxOut(&wire.TxOut{
 		PkScript: addrScript,
-		Value:    outputValue - 1000,
+		Value:    int64(outputValue) - 1000,
 	})
 	// We set the lock-time of the transaction to just one minute after the
 	// current MTP of the chain.
@@ -205,7 +203,7 @@ func TestBIP0113Activation(t *testing.T) {
 		})
 		tx.AddTxOut(&wire.TxOut{
 			PkScript: addrScript,
-			Value:    outputValue - 1000,
+			Value:    int64(outputValue) - 1000,
 		})
 		tx.LockTime = uint32(medianTimePast + timeLockDelta)
 		sigScript, err = txscript.SignatureScript(tx, 0, testPkScript,
@@ -374,7 +372,7 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 		relativeBlockLock = 10
 	)
 	sweepOutput := &wire.TxOut{
-		Value:    outputAmt - 5000,
+		Value:    int64(outputAmt) - 5000,
 		PkScript: harnessScript,
 	}
 	// As the soft-fork hasn't yet activated _any_ transaction version which

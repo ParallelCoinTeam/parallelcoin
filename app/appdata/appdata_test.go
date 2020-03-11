@@ -8,7 +8,7 @@ import (
 	"testing"
 	"unicode"
 
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/app/appdata"
 )
 
 // TestAppDataDir tests the API for Dir to ensure it gives expected results for various operating systems.
@@ -108,12 +108,18 @@ func TestAppDataDir(t *testing.T) {
 	}
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		ret := util.TstAppDataDir(test.goos, test.appName, test.roaming)
+		ret := TstAppDataDir(test.goos, test.appName, test.roaming)
 		if ret != test.want {
-			t.Errorf("appDataDir #%d (%s) does not match - "+
+			t.Errorf("AppDataDir #%d (%s) does not match - "+
 				"expected got %s, want %s", i, test.goos, ret,
 				test.want)
 			continue
 		}
 	}
+}
+
+// TstAppDataDir makes the internal appDataDir function available to the test package.
+//nolint
+func TstAppDataDir(goos, appName string, roaming bool) string {
+	return appdata.AppDataDir(goos, appName, roaming)
 }

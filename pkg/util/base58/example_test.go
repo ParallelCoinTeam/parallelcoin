@@ -1,7 +1,7 @@
 package base58_test
 
 import (
-	"github.com/p9c/pod/pkg/log"
+	"fmt"
 
 	"github.com/p9c/pod/pkg/util/base58"
 )
@@ -12,7 +12,7 @@ func ExampleDecode() {
 	encoded := "25JnwSn7XKfNQ"
 	decoded := base58.Decode(encoded)
 	// Show the decoded data.
-	log.Println("Decoded Data:", string(decoded))
+	fmt.Println("Decoded Data:", string(decoded))
 	// Output:
 	// Decoded Data: Test data
 }
@@ -23,7 +23,7 @@ func ExampleEncode() {
 	data := []byte("Test data")
 	encoded := base58.Encode(data)
 	// Show the encoded data.
-	log.Println("Encoded Data:", encoded)
+	fmt.Println("Encoded Data:", encoded)
 	// Output:
 	// Encoded Data: 25JnwSn7XKfNQ
 }
@@ -34,12 +34,12 @@ func ExampleCheckDecode() {
 	encoded := "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
 	decoded, version, err := base58.CheckDecode(encoded)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		return
 	}
 	// Show the decoded data.
-	log.Printf("Decoded data: %x\n", decoded)
-	log.Println("Version Byte:", version)
+	fmt.Printf("Decoded data: %x\n", decoded)
+	fmt.Println("Version Byte:", version)
 	// Output:
 	// Decoded data: 62e907b15cbf27d5425399ebf6f0fb50ebb88f18
 	// Version Byte: 0
@@ -51,7 +51,7 @@ func ExampleCheckEncode() {
 	data := []byte("Test data")
 	encoded := base58.CheckEncode(data, 0)
 	// Show the encoded data.
-	log.Println("Encoded Data:", encoded)
+	fmt.Println("Encoded Data:", encoded)
 	// Output:
 	// Encoded Data: 182iP79GRURMp7oMHDU
 }

@@ -2,9 +2,10 @@ package walletdb_test
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/log"
 	"os"
 	"testing"
+
+	"github.com/p9c/pod/pkg/log"
 
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"

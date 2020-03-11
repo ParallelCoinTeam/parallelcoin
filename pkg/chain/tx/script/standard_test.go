@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util"
 )

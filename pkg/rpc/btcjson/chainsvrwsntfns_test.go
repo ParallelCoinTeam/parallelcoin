@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	btcjson "github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // TestChainSvrWsNtfns tests all of the chain server websocket-specific notifications marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.

@@ -3,6 +3,7 @@ package ec_test
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/p9c/pod/pkg/log"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -34,7 +35,7 @@ func Example_decryptMessage() {
 		log.ERROR(err)
 		return
 	}
-	log.Println(string(plaintext))
+	fmt.Println(string(plaintext))
 	// Output:
 	// test message
 }
@@ -77,7 +78,7 @@ func Example_encryptMessage() {
 		log.ERROR(err)
 		return
 	}
-	log.Println(string(plaintext))
+	fmt.Println(string(plaintext))
 	// Output:
 	// test message
 }
@@ -102,10 +103,10 @@ func Example_signMessage() {
 		return
 	}
 	// Serialize and display the signature.
-	log.Printf("Serialized Signature: %x\n", signature.Serialize())
+	fmt.Printf("Serialized Signature: %x\n", signature.Serialize())
 	// Verify the signature for the message using the public key.
 	verified := signature.Verify(messageHash, pubKey)
-	log.Printf("Signature Verified? %v\n", verified)
+	fmt.Printf("Signature Verified? %v\n", verified)
 	// Output:
 	// Serialized Signature: 304402201008e236fa8cd0f25df4482dddbb622e8a8b26ef0ba731719458de3ccd93805b022032f8ebe514ba5f672466eba334639282616bb3c2f0ab09998037513d1f9e3d6d
 	// Signature Verified? true
@@ -144,7 +145,7 @@ func Example_verifySignature() {
 	message := "test message"
 	messageHash := chainhash.DoubleHashB([]byte(message))
 	verified := signature.Verify(messageHash, pubKey)
-	log.Println("Signature Verified?", verified)
+	fmt.Println("Signature Verified?", verified)
 	// Output:
 	// Signature Verified? true
 }

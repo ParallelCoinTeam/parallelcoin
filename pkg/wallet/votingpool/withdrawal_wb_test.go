@@ -6,7 +6,7 @@ import (
 	"sort"
 	"testing"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"

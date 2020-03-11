@@ -1,13 +1,12 @@
-// +build rpctest
-
 package rpctest
 
 import (
+	"log"
 	"os"
 	"testing"
 	"time"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -269,7 +268,7 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to create script: %v", err)
 	}
-	output := wire.NewTxOut(util.SatoshiPerBitcoin, pkScript)
+	output := wire.NewTxOut(util.SatoshiPerBitcoin.Int64(), pkScript)
 	const numTxns = 5
 	txns := make([]*util.Tx, 0, numTxns)
 	for i := 0; i < numTxns; i++ {
@@ -325,7 +324,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(r *Harness,
 	if err != nil {
 		t.Fatalf("unable to create script: %v", err)
 	}
-	output := wire.NewTxOut(util.SatoshiPerBitcoin, pkScript)
+	output := wire.NewTxOut(util.SatoshiPerBitcoin.Int64(), pkScript)
 	const numTxns = 5
 	txns := make([]*util.Tx, 0, numTxns)
 	for i := 0; i < numTxns; i++ {

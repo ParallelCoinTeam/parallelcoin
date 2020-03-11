@@ -10,6 +10,7 @@ import (
 	"time"
 
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	. "github.com/p9c/pod/pkg/chain/tx/mgr"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"

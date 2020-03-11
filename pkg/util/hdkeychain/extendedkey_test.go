@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 )
 
 // // TestBIP0032Vectors tests the vectors provided by [BIP32] to ensure the derivation works as intended.
