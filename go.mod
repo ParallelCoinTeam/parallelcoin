@@ -13,7 +13,7 @@ require (
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
 	github.com/p9c/blockdb v0.0.2
-	github.com/p9c/chain v0.0.4
+	github.com/p9c/chain v0.0.5
 	github.com/p9c/chaincfg v0.0.1
 	github.com/p9c/chainhash v0.0.1
 	github.com/p9c/fork v0.0.1
@@ -27,8 +27,8 @@ require (
 	github.com/p9c/simplebuffer v0.0.4
 	github.com/p9c/stdconn v0.0.1
 	github.com/p9c/transport v0.0.2
-	github.com/p9c/util v0.0.5
-	github.com/p9c/wallet v0.0.2
+	github.com/p9c/util v0.0.6
+	github.com/p9c/wallet v0.0.3
 	github.com/p9c/wire v0.0.1
 	github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9
 	github.com/urfave/cli v1.22.3
