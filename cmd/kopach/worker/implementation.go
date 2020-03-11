@@ -15,6 +15,8 @@ import (
 	log "github.com/p9c/logi"
 	"github.com/p9c/transport"
 
+	"github.com/p9c/ring"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -23,7 +25,6 @@ import (
 	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
-	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/sem"
 	"github.com/p9c/pod/pkg/stdconn"
 	"github.com/p9c/pod/pkg/util"

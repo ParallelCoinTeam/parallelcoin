@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/p9c/gel"
+
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 

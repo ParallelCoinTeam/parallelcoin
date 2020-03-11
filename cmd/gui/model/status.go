@@ -2,10 +2,11 @@ package model
 
 import (
 	"time"
-	
+
 	"go.uber.org/atomic"
-	
-	"github.com/p9c/pod/pkg/ring"
+
+	"github.com/p9c/ring"
+
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -29,7 +30,7 @@ type NodeStatus struct {
 	BlockCount       atomic.Uint64
 	NetworkLastBlock atomic.Int32
 	// update every 5 seconds
-	ConnectionCount  atomic.Int32
+	ConnectionCount atomic.Int32
 }
 type KopachStatus struct {
 	// update every second
@@ -40,12 +41,12 @@ type WalletStatus struct {
 	// unchanging
 	WalletVersion map[string]btcjson.VersionResult `json:"walletver"`
 	// update on new block and at start
-	Balance       atomic.String
-	Unconfirmed   atomic.String
-	TxsNumber     atomic.Uint64
+	Balance     atomic.String
+	Unconfirmed atomic.String
+	TxsNumber   atomic.Uint64
 	// components
-	Transactions  *DuoUItransactions
-	LastTxs       *DuoUItransactions
+	Transactions *DuoUItransactions
+	LastTxs      *DuoUItransactions
 }
 
 // slots of user interface
@@ -55,14 +56,14 @@ type DuoUIheight struct{ int32 }
 type DuoUIbestBlockHash struct{ string }
 type DuoUIdifficulty struct{ float64 }
 
-//type
+// type
 // MempoolInfo      struct { string}
 type DuoUIblockCount struct{ int64 }
 type DuoUInetLastBlock struct{ int32 }
 type DuoUIconnections struct{ int32 }
 type DuoUIlocalHost struct {
-	//Cpu        []cpu.InfoStat        `json:"cpu"`
-	//CpuPercent []float64             `json:"cpupercent"`
-	//Memory     mem.VirtualMemoryStat `json:"mem"`
-	//Disk       disk.UsageStat        `json:"disk"`
+	// Cpu        []cpu.InfoStat        `json:"cpu"`
+	// CpuPercent []float64             `json:"cpupercent"`
+	// Memory     mem.VirtualMemoryStat `json:"mem"`
+	// Disk       disk.UsageStat        `json:"disk"`
 }

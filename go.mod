@@ -24,6 +24,7 @@ require (
 	github.com/p9c/gelook v0.0.0-20200311045057-0f256a5503f5
 	github.com/p9c/logi v0.0.12
 	github.com/p9c/p9fonts v0.0.2
+	github.com/p9c/ring v0.0.1
 	github.com/p9c/simplebuffer v0.0.2
 	github.com/p9c/transport v0.0.2
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2

@@ -28,7 +28,7 @@ import (
 	"github.com/p9c/pod/pkg/kopachctrl/p2padvt"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
-	rav "github.com/p9c/pod/pkg/ring"
+	rav "github.com/p9c/ring"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )

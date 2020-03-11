@@ -9,4 +9,3 @@ type DuoUIdialog struct {
 	Title       string
 	Text        string
 }
-
