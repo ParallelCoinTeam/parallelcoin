@@ -9,13 +9,13 @@ import (
 	"path/filepath"
 	"sync"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	blockchain "github.com/p9c/chain"
+	"github.com/p9c/chaincfg/netparams"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
+	"github.com/p9c/util/gcs/builder"
+	waddrmgr "github.com/p9c/wallet/addrmgr"
+	walletdb "github.com/p9c/wallet/db"
 )
 
 // BlockHeaderStore is an interface that provides an abstraction for a generic

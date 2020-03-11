@@ -17,20 +17,21 @@ import (
 
 	"github.com/p9c/transport"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/mining"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/chainhash"
+	"github.com/p9c/fork"
+	rav "github.com/p9c/ring"
+	"github.com/p9c/util"
+	"github.com/p9c/util/interrupt"
+	"github.com/p9c/wire"
+
+	blockchain "github.com/p9c/chain"
+	"github.com/p9c/chain/mining"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/p2padvt"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
-	rav "github.com/p9c/ring"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 const (

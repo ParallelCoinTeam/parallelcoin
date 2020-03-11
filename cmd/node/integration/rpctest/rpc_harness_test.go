@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/chaincfg/netparams"
+	"github.com/p9c/chainhash"
+	"github.com/p9c/util"
+	"github.com/p9c/wire"
+
+	txscript "github.com/p9c/chain/tx/script"
 )
 
 func testSendOutputs(r *Harness, t *testing.T) {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/rpc/btcjson"
 )
 
 // newHTTPClient returns a new HTTP client that is configured according to the

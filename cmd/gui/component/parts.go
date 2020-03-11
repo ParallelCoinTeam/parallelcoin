@@ -1,6 +1,9 @@
 package component
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
@@ -8,9 +11,8 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/gel"
 	"github.com/p9c/gelook"
+
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"image"
-	"image/color"
 )
 
 func SetPage(rc *rcd.RcVar, page *gelook.DuoUIpage) {

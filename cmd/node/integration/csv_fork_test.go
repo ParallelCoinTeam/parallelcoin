@@ -8,13 +8,13 @@ import (
 	"time"
 
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
+	blockchain "github.com/p9c/chain"
+	"github.com/p9c/chaincfg/netparams"
+	chainhash "github.com/p9c/chainhash"
+	txscript "github.com/p9c/chain/tx/script"
+	"github.com/p9c/wire"
+	"github.com/p9c/util"
+	ec "github.com/p9c/util/elliptic"
 )
 
 const (

@@ -2,16 +2,18 @@ package component
 
 import (
 	"fmt"
+
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/text"
 	"gioui.org/unit"
 
+	"github.com/p9c/chainhash"
 	"github.com/p9c/gel"
 	"github.com/p9c/gelook"
+
 	"github.com/p9c/pod/cmd/gui/rcd"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 var (

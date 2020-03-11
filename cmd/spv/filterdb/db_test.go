@@ -7,13 +7,13 @@ import (
 	"reflect"
 	"testing"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/util/gcs"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
-	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
+	chaincfg "github.com/p9c/chaincfg"
+	"github.com/p9c/chaincfg/netparams"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/util/gcs"
+	"github.com/p9c/util/gcs/builder"
+	walletdb "github.com/p9c/wallet/db"
+	_ "github.com/p9c/wallet/db/bdb"
 )
 
 func createTestDatabase() (func(), FilterDatabase, error) {

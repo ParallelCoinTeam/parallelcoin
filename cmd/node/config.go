@@ -10,10 +10,11 @@ import (
 
 	database "github.com/p9c/blockdb"
 
+	"github.com/p9c/chaincfg"
+	"github.com/p9c/chainhash"
+
 	"github.com/p9c/pod/app/appdata"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	blockchain "github.com/p9c/chain"
 
 	// This ensures the database drivers get registered
 	_ "github.com/p9c/blockdb/ffldb"

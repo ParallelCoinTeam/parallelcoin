@@ -15,13 +15,14 @@ import (
 
 	"github.com/p9c/stdconn/worker"
 
+	"github.com/p9c/chainhash"
+	"github.com/p9c/util/interrupt"
+
 	"github.com/p9c/pod/cmd/kopach/client"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/kopachctrl"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 type HashCount struct {

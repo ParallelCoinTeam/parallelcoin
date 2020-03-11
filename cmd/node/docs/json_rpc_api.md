@@ -1154,7 +1154,7 @@ import (
 "path/filepath"
 
 "github.com/p9c/pod/btcutil"
-"github.com/p9c/pod/pkg/rpc/client"
+"github.com/p9c/rpc/rpcclient"
 
 
 
@@ -1209,9 +1209,9 @@ The following is an example Go application which uses the [rpcclient](https://gi
 ```Go
 package main
 import (
-	"github.com/p9c/pod/pkg/rpc/client" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/rpc/rpcclient" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/chainhash"
 
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/wire"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -1294,9 +1294,9 @@ The following is an example Go application which uses the [rpcclient](https://gi
 ```Go
 package main
 import (
-	"github.com/p9c/pod/pkg/rpc/client" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/rpc/rpcclient" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/chainhash"
 
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/wire"
 	"io/ioutil"
 	"log"
 	"path/filepath"

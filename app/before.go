@@ -10,13 +10,14 @@ import (
 
 	"github.com/urfave/cli"
 
+	"github.com/p9c/chaincfg"
+	"github.com/p9c/chaincfg/netparams"
+	"github.com/p9c/fork"
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 )
 

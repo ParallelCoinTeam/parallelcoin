@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/rpc/btcjson"
 )
 
 // HelpPrint is the uninitialized help print function

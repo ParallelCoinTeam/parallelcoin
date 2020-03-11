@@ -2,9 +2,10 @@ package app
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
 	"os"
 	"time"
+
+	log "github.com/p9c/logi"
 
 	"github.com/urfave/cli"
 
@@ -42,7 +43,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		Configure(cx, c)
-		
+
 		return nil
 	}
 }

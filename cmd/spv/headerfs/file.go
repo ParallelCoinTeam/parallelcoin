@@ -5,8 +5,8 @@ import (
 	"fmt"
 	log "github.com/p9c/logi"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
 )
 
 // appendRaw appends a new raw header to the end of the flat file.

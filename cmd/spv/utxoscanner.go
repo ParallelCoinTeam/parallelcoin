@@ -6,10 +6,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/chainhash"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/util"
-	am "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/util"
+	am "github.com/p9c/wallet/addrmgr"
 )
 
 type (

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/p9c/pod/cmd/node/integration/rpctest"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/chaincfg/netparams"
 )
 
 func testGetBestBlock(r *rpctest.Harness, t *testing.T) {

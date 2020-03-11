@@ -4,18 +4,20 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	log "github.com/p9c/logi"
 	"sync"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
-	"github.com/p9c/pod/pkg/util"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
-	"github.com/p9c/pod/pkg/util/hdkeychain"
+	log "github.com/p9c/logi"
+
+	"github.com/p9c/chaincfg/netparams"
+	"github.com/p9c/chainhash"
+	"github.com/p9c/util"
+	ec "github.com/p9c/util/elliptic"
+	"github.com/p9c/util/hdkeychain"
+	"github.com/p9c/wire"
+
+	blockchain "github.com/p9c/chain"
+	txscript "github.com/p9c/chain/tx/script"
+	rpcclient "github.com/p9c/rpc/rpcclient"
 )
 
 var (

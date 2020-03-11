@@ -2,12 +2,13 @@ package rpctest
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
 	"go/build"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"sync"
+
+	log "github.com/p9c/logi"
 )
 
 var (

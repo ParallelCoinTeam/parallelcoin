@@ -7,7 +7,7 @@ import (
 
 	"github.com/p9c/ring"
 
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/rpc/btcjson"
 )
 
 // System Ststus

@@ -14,10 +14,10 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	"github.com/p9c/chaincfg/netparams"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
+	walletdb "github.com/p9c/wallet/db"
 )
 
 func createTestBlockHeaderStore() (func(), walletdb.DB, string,

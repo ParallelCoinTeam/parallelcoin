@@ -1,12 +1,14 @@
 package rpctest
 
 import (
-	log "github.com/p9c/logi"
 	"reflect"
 	"time"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	log "github.com/p9c/logi"
+
+	"github.com/p9c/chainhash"
+
+	rpcclient "github.com/p9c/rpc/rpcclient"
 )
 
 // JoinType is an enum representing a particular type of "node join". A node

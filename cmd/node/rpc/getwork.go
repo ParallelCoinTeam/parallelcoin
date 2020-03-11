@@ -11,13 +11,13 @@ import (
 
 	"github.com/conformal/fastsha256"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/chain"
+	"github.com/p9c/fork"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/rpc/btcjson"
+	"github.com/p9c/util"
 )
 
 // Uint256Size is the number of bytes needed to represent an unsigned 256-bit

@@ -10,9 +10,9 @@ import (
 
 	"github.com/btcsuite/go-socks/socks"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/chaincfg/netparams"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
 	"github.com/p9c/pod/pkg/peer"
 )
 

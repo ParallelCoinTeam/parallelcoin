@@ -12,7 +12,7 @@ import (
 	"github.com/jessevdk/go-flags"
 
 	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/util"
 )
 
 type config struct {

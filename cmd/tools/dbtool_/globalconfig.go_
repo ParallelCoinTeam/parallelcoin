@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/chaincfg"
 	"github.com/p9c/pod/pkg/db"
 	_ "github.com/p9c/pod/pkg/db/ffldb"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/util"
+	"github.com/p9c/wire"
 )
 
 var (

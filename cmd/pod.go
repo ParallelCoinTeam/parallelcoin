@@ -10,10 +10,10 @@ import (
 	"runtime/trace"
 	
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/util/interrupt"
 	
 	"github.com/p9c/pod/app"
-	"github.com/p9c/pod/pkg/util/limits"
+	"github.com/p9c/util/limits"
 )
 
 // Main is the main entry point for pod

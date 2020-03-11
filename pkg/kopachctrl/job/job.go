@@ -15,12 +15,13 @@ import (
 	"github.com/p9c/simplebuffer/Int32"
 	"github.com/p9c/simplebuffer/Uint16"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/chainhash"
+	"github.com/p9c/fork"
+	"github.com/p9c/util"
+	"github.com/p9c/wire"
+
+	blockchain "github.com/p9c/chain"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/util"
 )
 
 var Magic = []byte{'w', 'o', 'r', 'k'}

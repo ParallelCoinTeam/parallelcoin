@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/p9c/gel"
 	"github.com/p9c/pod/cmd/gui/model"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	wtxmgr "github.com/p9c/chain/tx/mgr"
+	txscript "github.com/p9c/chain/tx/script"
+	"github.com/p9c/rpc/btcjson"
+	"github.com/p9c/util"
+	"github.com/p9c/wallet"
+	waddrmgr "github.com/p9c/wallet/addrmgr"
 	"sort"
 )
 

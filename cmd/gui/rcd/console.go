@@ -3,11 +3,11 @@ package rcd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/wallet/walletmain"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/legacy"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/p9c/rpc/btcjson"
+	"github.com/p9c/rpc/legacy"
+	"github.com/p9c/wallet/chain"
 	"strings"
 )
 

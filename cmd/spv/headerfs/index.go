@@ -7,8 +7,8 @@ import (
 	log "github.com/p9c/logi"
 	"sort"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	chainhash "github.com/p9c/chainhash"
+	walletdb "github.com/p9c/wallet/db"
 )
 
 var (

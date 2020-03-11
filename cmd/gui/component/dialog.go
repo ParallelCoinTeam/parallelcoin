@@ -1,6 +1,8 @@
 package component
 
 import (
+	"image"
+
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
@@ -9,8 +11,8 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/gel"
 	"github.com/p9c/gelook"
+
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"image"
 )
 
 var (

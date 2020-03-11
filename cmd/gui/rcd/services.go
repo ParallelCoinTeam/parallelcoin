@@ -5,9 +5,9 @@ import (
 	"os"
 	
 	"github.com/p9c/pod/cmd/node"
-	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/wallet/walletmain"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/util/interrupt"
 )
 
 func (r *RcVar) StartServices() (err error) {

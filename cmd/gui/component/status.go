@@ -2,12 +2,14 @@ package component
 
 import (
 	"fmt"
+	"image"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/gelook"
+
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"image"
 )
 
 var (
@@ -26,7 +28,7 @@ func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 		gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		in := layout.UniformInset(unit.Dp(16))
 		in.Layout(gtx, func() {
-			//cs := gtx.Constraints
+			// cs := gtx.Constraints
 			bigStatus := []func(){
 				listItem(gtx, th, 22, 6, "EditorMonetizationOn", "BALANCE :", rc.Status.Wallet.Balance.Load()+" "+rc.Settings.Abbrevation),
 				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),

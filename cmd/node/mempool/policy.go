@@ -2,13 +2,15 @@ package mempool
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
 	"time"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
+	log "github.com/p9c/logi"
+
+	"github.com/p9c/util"
+	"github.com/p9c/wire"
+
+	blockchain "github.com/p9c/chain"
+	txscript "github.com/p9c/chain/tx/script"
 )
 
 const (

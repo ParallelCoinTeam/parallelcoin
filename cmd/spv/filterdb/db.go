@@ -4,11 +4,11 @@ import (
 	"fmt"
 	log "github.com/p9c/logi"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/util/gcs"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	"github.com/p9c/chaincfg/netparams"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/util/gcs"
+	"github.com/p9c/util/gcs/builder"
+	walletdb "github.com/p9c/wallet/db"
 )
 
 var (

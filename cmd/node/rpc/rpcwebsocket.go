@@ -21,13 +21,13 @@ import (
 	database "github.com/p9c/blockdb"
 	log "github.com/p9c/logi"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/util"
+	blockchain "github.com/p9c/chain"
+	"github.com/p9c/chaincfg/netparams"
+	chainhash "github.com/p9c/chainhash"
+	txscript "github.com/p9c/chain/tx/script"
+	"github.com/p9c/wire"
+	"github.com/p9c/rpc/btcjson"
+	"github.com/p9c/util"
 )
 
 // Notification types

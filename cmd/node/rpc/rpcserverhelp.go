@@ -8,7 +8,7 @@ import (
 	
 	log "github.com/p9c/logi"
 	
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/rpc/btcjson"
 )
 
 // HelpDescsEnUS defines the English descriptions used for the help strings.

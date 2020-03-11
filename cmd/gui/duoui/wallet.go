@@ -8,7 +8,7 @@ import (
 	"github.com/p9c/gelook"
 	log "github.com/p9c/logi"
 
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/util/interrupt"
 )
 
 var (

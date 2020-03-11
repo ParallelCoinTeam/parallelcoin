@@ -12,11 +12,11 @@ import (
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/chaincfg/netparams"
 	"github.com/p9c/pod/pkg/lang"
 	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/wallet"
+	"github.com/p9c/wallet"
 )
 
 type _dtype int

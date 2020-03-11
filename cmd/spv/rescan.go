@@ -9,16 +9,16 @@ import (
 	"time"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/chainhash"
+	txscript "github.com/p9c/chain/tx/script"
+	"github.com/p9c/wire"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/gcs"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/rpc/btcjson"
+	rpcclient "github.com/p9c/rpc/rpcclient"
+	"github.com/p9c/util"
+	"github.com/p9c/util/gcs"
+	"github.com/p9c/util/gcs/builder"
+	waddrmgr "github.com/p9c/wallet/addrmgr"
 )
 
 var // ErrRescanExit is an error returned to the caller in case the ongoing

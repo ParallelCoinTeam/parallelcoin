@@ -1,8 +1,8 @@
 package spv
 
 import (
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
 	log "github.com/p9c/logi"
 )
 

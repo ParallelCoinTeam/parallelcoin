@@ -12,16 +12,16 @@ import (
 	
 	"github.com/p9c/pod/cmd/spv/headerfs"
 	"github.com/p9c/pod/cmd/spv/headerlist"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/chain"
+	chaincfg "github.com/p9c/chaincfg"
+	"github.com/p9c/fork"
+	chainhash "github.com/p9c/chainhash"
+	txscript "github.com/p9c/chain/tx/script"
+	"github.com/p9c/wire"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/gcs"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
+	"github.com/p9c/util"
+	"github.com/p9c/util/gcs"
+	"github.com/p9c/util/gcs/builder"
 )
 
 const (

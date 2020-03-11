@@ -2,10 +2,12 @@ package component
 
 import (
 	"fmt"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/p9c/gelook"
+
 	"github.com/p9c/pod/cmd/gui/rcd"
 )
 

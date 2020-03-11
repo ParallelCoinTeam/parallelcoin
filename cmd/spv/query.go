@@ -10,13 +10,13 @@ import (
 
 	"github.com/p9c/pod/cmd/spv/cache"
 	"github.com/p9c/pod/cmd/spv/filterdb"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/chain"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/gcs"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
+	"github.com/p9c/util"
+	"github.com/p9c/util/gcs"
+	"github.com/p9c/util/gcs/builder"
 )
 
 var (

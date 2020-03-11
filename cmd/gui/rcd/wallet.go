@@ -3,11 +3,11 @@ package rcd
 import (
 	"fmt"
 	"github.com/p9c/pod/cmd/node/rpc"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/chaincfg/netparams"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/legacy"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/rpc/btcjson"
+	"github.com/p9c/rpc/legacy"
+	"github.com/p9c/util"
 )
 
 func (r *RcVar) GetDuoUIbalance() {

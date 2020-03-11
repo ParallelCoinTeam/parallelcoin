@@ -5,6 +5,7 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/gel"
 	"github.com/p9c/gelook"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 )
@@ -19,12 +20,12 @@ var (
 		Axis: layout.Vertical,
 	}
 
-	navItemWidth             int = 96
-	navItemHeight            int = 72
-	navItemTextSize          int = 48
-	navItemTconSize          int = 36
-	navItemPaddingVertical   int = 8
-	navItemPaddingHorizontal int = 0
+	navItemWidth             = 96
+	navItemHeight            = 72
+	navItemTextSize          = 48
+	navItemTconSize          = 36
+	navItemPaddingVertical   = 8
+	navItemPaddingHorizontal = 0
 )
 
 func MainNavigation(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {

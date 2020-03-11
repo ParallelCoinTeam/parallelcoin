@@ -13,26 +13,28 @@ import (
 	"strings"
 	"time"
 
+	blockchain "github.com/p9c/chain"
+	"github.com/p9c/forkhash"
+	"github.com/p9c/util"
+	"github.com/p9c/util/interrupt"
+	"github.com/p9c/wallet"
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/forkhash"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
 	"github.com/p9c/pod/pkg/normalize"
 	"github.com/p9c/pod/pkg/peer/connmgr"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/wallet"
 
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/urfave/cli"
 
+	"github.com/p9c/chaincfg/netparams"
+	"github.com/p9c/fork"
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -182,7 +184,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 					log.L.Error(err)
 				}
 				*listeners[i] = cli.
-					StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
+				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
 			}
 		}
 	}

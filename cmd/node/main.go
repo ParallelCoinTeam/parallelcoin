@@ -19,9 +19,9 @@ import (
 	"github.com/p9c/pod/cmd/node/path"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/version"
-	indexers "github.com/p9c/pod/pkg/chain/index"
+	indexers "github.com/p9c/chain/index"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/util/interrupt"
 )
 
 // var StateCfg = new(state.Config)

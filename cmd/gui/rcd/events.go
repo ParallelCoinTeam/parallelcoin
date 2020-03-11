@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/atomic"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
+	blockchain "github.com/p9c/chain"
 	log "github.com/p9c/logi"
 )
 

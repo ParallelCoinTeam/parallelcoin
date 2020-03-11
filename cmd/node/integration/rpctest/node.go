@@ -2,7 +2,6 @@ package rpctest
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -10,8 +9,11 @@ import (
 	"runtime"
 	"time"
 
-	rpc "github.com/p9c/pod/pkg/rpc/client"
-	"github.com/p9c/pod/pkg/util"
+	log "github.com/p9c/logi"
+
+	"github.com/p9c/util"
+
+	rpc "github.com/p9c/rpc/rpcclient"
 )
 
 // nodeConfig contains all the args and data required to launch a pod process

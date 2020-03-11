@@ -5,7 +5,7 @@ import (
 
 	"github.com/p9c/pod/cmd/node/rpc"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/rpc/btcjson"
 )
 
 func (r *RcVar) GetDuoUIhashesPerSec() {

@@ -2,10 +2,12 @@ package component
 
 import (
 	"fmt"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/gel"
 	"github.com/p9c/gelook"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 )
@@ -24,12 +26,12 @@ var (
 	footerNav = &layout.List{
 		Axis: layout.Horizontal,
 	}
-	footerMenuItemWidth             int = 48
-	footerMenuItemHeight            int = 48
-	footerMenuItemTextSize          int = 16
-	footerMenuItemIconSize          int = 32
-	footerMenuItemPaddingVertical   int = 8
-	footerMenuItemPaddingHorizontal int = 8
+	footerMenuItemWidth             = 48
+	footerMenuItemHeight            = 48
+	footerMenuItemTextSize          = 16
+	footerMenuItemIconSize          = 32
+	footerMenuItemPaddingVertical   = 8
+	footerMenuItemPaddingHorizontal = 8
 )
 
 func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {
@@ -62,7 +64,7 @@ func FooterLeftMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, a
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			cornerButtons := []func(){
 				QuitButton(rc, gtx, th),
-				//footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
+				// footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
 				footerMenuButton(rc, gtx, th, allPages.Theme["LOG"], "LOG", "traceIcon", buttonLog),
 			}
 			cornerNav.Layout(gtx, len(cornerButtons), func(i int) {
@@ -76,9 +78,9 @@ func FooterRightMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			navButtons := []func(){
-				//footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "networkIcon", buttonNetwork),
-				//footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount), "", buttonNetwork),
-				//footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonBlocks),
+				// footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "networkIcon", buttonNetwork),
+				// footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount), "", buttonNetwork),
+				// footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonBlocks),
 				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "settingsIcon", buttonNetwork),
 				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount.Load()), "", buttonNetwork),
 				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonBlocks),

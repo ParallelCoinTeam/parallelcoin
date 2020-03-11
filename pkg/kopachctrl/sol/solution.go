@@ -1,7 +1,7 @@
 package sol
 
 import (
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/wire"
 	"github.com/p9c/simplebuffer"
 	"github.com/p9c/simplebuffer/Block"
 	"github.com/p9c/simplebuffer/Int32"

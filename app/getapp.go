@@ -5,21 +5,24 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/p9c/util/interrupt"
+
+	"github.com/p9c/rpc/legacy"
+	"github.com/p9c/wallet/walletmain"
+
 	"github.com/p9c/pod/cmd/kopach/kopach_worker"
 	"github.com/p9c/pod/cmd/node/blockdb"
-	"github.com/p9c/pod/cmd/walletmain"
-	"github.com/p9c/pod/pkg/rpc/legacy"
-	"github.com/p9c/pod/pkg/util/interrupt"
 
 	"github.com/urfave/cli"
+
+	log "github.com/p9c/logi"
+	"github.com/p9c/util/base58"
+	"github.com/p9c/util/hdkeychain"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/util/base58"
-	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
 func // GetApp defines the pod app

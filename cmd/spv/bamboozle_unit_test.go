@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util/gcs"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	"github.com/p9c/chaincfg/netparams"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
+	"github.com/p9c/util/gcs"
+	"github.com/p9c/util/gcs/builder"
+	walletdb "github.com/p9c/wallet/db"
 )
 
 func decodeHashNoError(str string) *chainhash.Hash {

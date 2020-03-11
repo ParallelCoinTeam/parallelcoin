@@ -5,9 +5,9 @@ import (
 	log "github.com/p9c/logi"
 	"path/filepath"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	blockchain "github.com/p9c/chain"
+	chaincfg "github.com/p9c/chaincfg"
+	chainhash "github.com/p9c/chainhash"
 	database "github.com/p9c/blockdb"
 )
 

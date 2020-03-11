@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/p9c/pod/cmd/spv/headerfs"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	blockchain "github.com/p9c/chain"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
+	waddrmgr "github.com/p9c/wallet/addrmgr"
 )
 
 // mockBlockHeaderStore is an implementation of the BlockHeaderStore backed by

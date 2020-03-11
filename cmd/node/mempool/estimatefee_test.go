@@ -5,11 +5,12 @@ import (
 	"math/rand"
 	"testing"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/mining"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/chainhash"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/util"
+	"github.com/p9c/wire"
+
+	"github.com/p9c/chain/mining"
 )
 
 // estimateFeeTester interacts with the FeeEstimator to keep track of its
@@ -136,7 +137,7 @@ func (eft *estimateFeeTester) round(txHistory [][]*TxDesc,
 }
 
 func (
-	eft *estimateFeeTester,
+eft *estimateFeeTester,
 ) testTx(
 	fee util.Amount) *TxDesc {
 	eft.version++

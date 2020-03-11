@@ -2,13 +2,14 @@ package app
 
 import (
 	"github.com/urfave/cli"
-	
+
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/wallet"
+	"github.com/p9c/wallet"
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli

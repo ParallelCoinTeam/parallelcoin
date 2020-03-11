@@ -1,16 +1,18 @@
 package component
 
 import (
+	"image"
+
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"image"
 )
 
-//func DuoUIqrCode(pubAddr string) {
+// func DuoUIqrCode(pubAddr string) {
 //	//qr, err := qrcode.New(strings.ToUpper(pubAddr), qrcode.Medium)
 //	//if err != nil {
 //	//	log.L.Fatal(err)
@@ -18,9 +20,9 @@ import (
 //	//qr.BackgroundColor = rgb(0xe8f5e9)
 //	//addrQR := paint.NewImageOp(qr.Image(256))
 //	return
-//}
+// }
 
-//func NewQrCode(pubAddr string) *model.DuoUIqrCode {
+// func NewQrCode(pubAddr string) *model.DuoUIqrCode {
 //	//qr, err := qrcode.New(strings.ToUpper(pubAddr), qrcode.Medium)
 //	//if err != nil {
 //	//	log.L.Fatal(err)
@@ -31,7 +33,7 @@ import (
 //	//	AddrQR:  paint.NewImageOp(qr.Image(256)),
 //	//	PubAddr: pubAddr,
 //	//}
-//}
+// }
 
 func DuoUIqrCode(rc *rcd.RcVar, gtx *layout.Context) func() {
 	return func() {
@@ -50,11 +52,11 @@ func DuoUIqrCode(rc *rcd.RcVar, gtx *layout.Context) func() {
 
 func QrDialog(rc *rcd.RcVar, gtx *layout.Context) func() {
 	return func() {
-		//clipboard.Set(t.Address)
+		// clipboard.Set(t.Address)
 		rc.Dialog.Show = true
 		rc.Dialog = &model.DuoUIdialog{
 			Show: true,
-			//Ok:   rc.DuoSend(passPharse, address, amount),
+			// Ok:   rc.DuoSend(passPharse, address, amount),
 			Close: func() {
 
 			},

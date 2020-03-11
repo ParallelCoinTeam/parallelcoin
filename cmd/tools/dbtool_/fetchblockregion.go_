@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/chainhash"
 	"github.com/p9c/pod/pkg/db"
 )
 

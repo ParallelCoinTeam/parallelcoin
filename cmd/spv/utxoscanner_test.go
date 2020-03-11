@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/gcs"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	chainhash "github.com/p9c/chainhash"
+	"github.com/p9c/wire"
+	"github.com/p9c/util"
+	"github.com/p9c/util/gcs"
+	waddrmgr "github.com/p9c/wallet/addrmgr"
 )
 
 type MockChainClient struct {

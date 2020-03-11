@@ -5,9 +5,10 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/gel"
 	"github.com/p9c/gelook"
+	"github.com/p9c/util/interrupt"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 var (

@@ -7,10 +7,10 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/wallet/walletmain"
 	"github.com/p9c/pod/pkg/conte"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/wallet"
+	"github.com/p9c/wallet"
 )
 
 func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {

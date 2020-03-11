@@ -2,7 +2,6 @@ package rpctest
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
 	"io/ioutil"
 	"net"
 	"os"
@@ -12,11 +11,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
-	"github.com/p9c/pod/pkg/util"
+	log "github.com/p9c/logi"
+
+	"github.com/p9c/chaincfg/netparams"
+	"github.com/p9c/chainhash"
+	"github.com/p9c/util"
+	"github.com/p9c/wire"
+
+	rpcclient "github.com/p9c/rpc/rpcclient"
 )
 
 const (

@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/indexers"
+	"github.com/p9c/chain"
+	"github.com/p9c/chain/indexers"
 	"github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/limits"
 	l "github.com/p9c/logi"

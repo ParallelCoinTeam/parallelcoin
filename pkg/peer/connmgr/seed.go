@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/chaincfg/netparams"
+	"github.com/p9c/wire"
 	log "github.com/p9c/logi"
 )
 

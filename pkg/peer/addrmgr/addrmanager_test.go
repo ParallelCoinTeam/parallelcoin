@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/wire"
 	"github.com/p9c/pod/pkg/peer/addrmgr"
 )
 

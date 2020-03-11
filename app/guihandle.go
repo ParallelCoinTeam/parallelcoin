@@ -11,7 +11,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	log "github.com/p9c/logi"
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/util/interrupt"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {

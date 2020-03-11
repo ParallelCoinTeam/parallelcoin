@@ -19,17 +19,18 @@ import (
 
 	"github.com/p9c/stdconn"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/chainhash"
+	"github.com/p9c/fork"
+	"github.com/p9c/util"
+	"github.com/p9c/util/interrupt"
+	"github.com/p9c/wire"
+
+	blockchain "github.com/p9c/chain"
 	"github.com/p9c/pod/pkg/kopachctrl"
 	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
 	"github.com/p9c/pod/pkg/sem"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 const RoundsPerAlgo = 69
