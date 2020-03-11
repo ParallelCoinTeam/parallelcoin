@@ -2,12 +2,14 @@ package blockchain
 
 import (
 	"fmt"
+
 	log "github.com/p9c/logi"
+
+	database "github.com/p9c/blockdb"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/util"
 )
 

@@ -7,12 +7,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	database "github.com/p9c/blockdb"
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
 )
 
 // blockStatus is a bit field representing the validation state of the block.
@@ -92,7 +93,7 @@ type BlockNode struct {
 	status blockStatus
 	// Diffs is the computed difficulty targets for a block to be connected
 	// to this one
-	Diffs  atomic.Value
+	Diffs atomic.Value
 }
 
 // initBlockNode initializes a block node from the given header and parent
@@ -294,7 +295,7 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		return
 	}
 	if fork.GetCurrent(node.height+1) == 0 {
-		//log.L.Trace("checking pre-hardfork algo versions")
+		// log.L.Trace("checking pre-hardfork algo versions")
 		if algo != 514 &&
 			algo != 2 {
 			log.L.Debug("irregular version", algo, "block, assuming 2 (sha256d)")
@@ -306,10 +307,10 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		if prev == nil {
 			return nil
 		}
-		//log.L.Tracef("node %d %d %8x", prev.height, prev.version, prev.bits)
+		// log.L.Tracef("node %d %d %8x", prev.height, prev.version, prev.bits)
 		prevversion := prev.version
 		if fork.GetCurrent(prev.height) == 0 {
-			//log.L.Trace("checking pre-hardfork algo versions")
+			// log.L.Trace("checking pre-hardfork algo versions")
 			if prev.version != 514 &&
 				prev.version != 2 {
 				log.L.Debug("irregular version block", prev.version, ", assuming 2 (sha256d)")
@@ -317,7 +318,7 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 			}
 		}
 		if prevversion == algo {
-			//log.L.Tracef(
+			// log.L.Tracef(
 			//	"found height %d version %d prev version %d prev bits %8x",
 			//	prev.height, prev.version, prevversion, prev.bits)
 			return

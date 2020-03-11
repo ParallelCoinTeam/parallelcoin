@@ -7,11 +7,12 @@ import (
 	"os"
 	"path/filepath"
 
+	database "github.com/p9c/blockdb"
+	_ "github.com/p9c/blockdb/ffldb"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	database "github.com/p9c/pod/pkg/db"
-	_ "github.com/p9c/pod/pkg/db/ffldb"
 	"github.com/p9c/pod/pkg/util"
 )
 

@@ -11,7 +11,7 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
+	database "github.com/p9c/blockdb"
 	"github.com/p9c/pod/pkg/util"
 )
 

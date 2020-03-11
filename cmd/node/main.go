@@ -8,18 +8,19 @@ import (
 	"os"
 	"runtime/pprof"
 	"time"
-	
+
 	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/pkg/kopachctrl"
-	
+
+	database "github.com/p9c/blockdb"
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node/path"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/version"
 	indexers "github.com/p9c/pod/pkg/chain/index"
 	"github.com/p9c/pod/pkg/conte"
-	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -42,7 +43,7 @@ var winServiceMain func() (bool, error)
 func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	log.L.Trace("starting up node main")
 	cx.WaitGroup.Add(1)
-	
+
 	// show version at startup
 	log.L.Info("version", version.Version())
 	// enable http profiling server if requested
@@ -153,7 +154,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 			*cx.Config.Listeners, err)
 		return err
 	}
-	
+
 	server.Start()
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 {
@@ -190,7 +191,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		})
 	}
 	// interrupt.AddHandler(gracefulShutdown)
-	
+
 	// Wait until the interrupt signal is received from an OS signal or
 	// shutdown is requested through one of the subsystems such as the
 	// RPC server.

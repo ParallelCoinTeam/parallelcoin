@@ -8,10 +8,11 @@ import (
 	"sync"
 	"time"
 
+	database "github.com/p9c/blockdb"
+	log "github.com/p9c/logi"
+
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 )
 

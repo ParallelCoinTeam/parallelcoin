@@ -3,8 +3,9 @@ package blockchain
 import (
 	"sort"
 
-	"github.com/p9c/pod/pkg/chain/fork"
 	log "github.com/p9c/logi"
+
+	"github.com/p9c/pod/pkg/chain/fork"
 )
 
 type Algo struct {

@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+
 	log "github.com/p9c/logi"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

@@ -7,7 +7,9 @@ import (
 	"math"
 	"math/big"
 	"time"
-	
+
+	log "github.com/p9c/logi"
+
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
@@ -15,7 +17,6 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -230,7 +231,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 		if b.params.Net == wire.TestNet3 {
 			payees = hardfork.TestnetPayees
 		}
-		
+
 		txo := btx.MsgTx().TxOut
 		for i := range payees {
 			if txo[i].Value != int64(payees[i].Amount) {
@@ -257,7 +258,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 			return ruleError(ErrBadCoinbaseValue,
 				"hardfork coinbase does not pay correct amount to dev fund multisig address")
 		}
-		
+
 		corepk := hardfork.CorePubkeyBytes
 		if b.params.Net == wire.TestNet3 {
 			corepk = hardfork.TestnetCorePubkeyBytes
@@ -613,7 +614,7 @@ BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 			return ruleError(ErrTimeTooOld, str)
 		}
 	}
-	
+
 	// The height of this block is one more than the referenced previous block.
 	blockHeight := prevNode.height + 1
 	// Ensure chain matches up to predetermined checkpoints.

@@ -16,10 +16,11 @@ import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/util"
 
+	database "github.com/p9c/blockdb"
+	_ "github.com/p9c/blockdb/ffldb"
+
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 const (

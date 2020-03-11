@@ -18,13 +18,14 @@ import (
 	"github.com/btcsuite/websocket"
 	"golang.org/x/crypto/ripemd160"
 
+	database "github.com/p9c/blockdb"
+	log "github.com/p9c/logi"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -952,7 +953,7 @@ func (*WSNtfnMgr) AddAddrRequests(
 // clients to add a new request watch all of the outpoints in ops and create
 // and send a notification when spent to the websocket client wsc.
 func (m *WSNtfnMgr) AddSpentRequests(opMap map[wire.
-	OutPoint]map[chan struct{}]*WSClient, wsc *WSClient, ops []*wire.OutPoint) {
+OutPoint]map[chan struct{}]*WSClient, wsc *WSClient, ops []*wire.OutPoint) {
 	for _, op := range ops {
 		// Track the request in the client as well so it can be quickly be
 		// removed on disconnect.
@@ -1294,7 +1295,7 @@ func (m *WSNtfnMgr) NotifyForTx(ops map[wire.OutPoint]map[chan struct{}]*WSClien
 // a watched output.  If block is non-nil, any matching spent requests are
 // removed.
 func (m *WSNtfnMgr) NotifyForTxIns(ops map[wire.
-	OutPoint]map[chan struct{}]*WSClient, tx *util.Tx, block *util.Block) {
+OutPoint]map[chan struct{}]*WSClient, tx *util.Tx, block *util.Block) {
 	// Nothing to do if nobody is watching outpoints.
 	if len(ops) == 0 {
 		return
@@ -1437,7 +1438,7 @@ func (*WSNtfnMgr) RemoveAddrRequest(
 // outpoint is spent.  If wsc is the last client, the outpoint key is removed
 // from the map.
 func (*WSNtfnMgr) RemoveSpentRequest(ops map[wire.
-	OutPoint]map[chan struct{}]*WSClient, wsc *WSClient, op *wire.OutPoint) {
+OutPoint]map[chan struct{}]*WSClient, wsc *WSClient, op *wire.OutPoint) {
 	// Remove the request tracking from the client.
 	delete(wsc.SpentRequests, *op)
 	// Remove the client from the list to notify.

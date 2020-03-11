@@ -4,11 +4,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	
+
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
 )
 
 // dirEmpty returns whether or not the specified directory path is empty

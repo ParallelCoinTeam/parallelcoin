@@ -2,35 +2,37 @@ package blockchain
 
 import (
 	"fmt"
+	"math"
+	"runtime"
+
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/chain/hardfork"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
-	"math"
-	"runtime"
 )
 
 type // txValidateItem holds a transaction along with which input to validate.
-txValidateItem struct {
-	txInIndex int
-	txIn      *wire.TxIn
-	tx        *util.Tx
-	sigHashes *txscript.TxSigHashes
-}
+	txValidateItem struct {
+		txInIndex int
+		txIn      *wire.TxIn
+		tx        *util.Tx
+		sigHashes *txscript.TxSigHashes
+	}
 
 type // txValidator provides a type which asynchronously validates transaction
-// inputs.  It provides several channels for communication and a processing
-// function that is intended to be in run multiple goroutines.
-txValidator struct {
-	validateChan chan *txValidateItem
-	quitChan     chan struct{}
-	resultChan   chan error
-	utxoView     *UtxoViewpoint
-	flags        txscript.ScriptFlags
-	sigCache     *txscript.SigCache
-	hashCache    *txscript.HashCache
-}
+	// inputs.  It provides several channels for communication and a processing
+	// function that is intended to be in run multiple goroutines.
+	txValidator struct {
+		validateChan chan *txValidateItem
+		quitChan     chan struct{}
+		resultChan   chan error
+		utxoView     *UtxoViewpoint
+		flags        txscript.ScriptFlags
+		sigCache     *txscript.SigCache
+		hashCache    *txscript.HashCache
+	}
 
 func // sendResult sends the result of a script pair validation on the internal
 // result channel while respecting the quit channel.
@@ -121,7 +123,7 @@ func // Validate validates the scripts for all of the passed transaction inputs
 		maxGoRoutines = 1
 	}
 	if maxGoRoutines > len(items)*3 {
-		maxGoRoutines = len(items)*3
+		maxGoRoutines = len(items) * 3
 	}
 	// maxGoRoutines = 1
 	// Start up validation handlers that are used to asynchronously validate
@@ -274,14 +276,14 @@ checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 	}
 	// Validate all of the inputs.
 	validator := newTxValidator(utxoView, scriptFlags, sigCache, hashCache)
-	//start := time.Now()
+	// start := time.Now()
 	if err := validator.Validate(txValItems); err != nil {
 		return err
 	}
-	//elapsed := time.Since(start)
-	//log.L.Tracec(func() string {
+	// elapsed := time.Since(start)
+	// log.L.Tracec(func() string {
 	//	return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
-	//})
+	// })
 	// If the HashCache is present, once we have validated the block,
 	// we no longer need the cached hashes for these transactions,
 	// so we purge them from the cache.

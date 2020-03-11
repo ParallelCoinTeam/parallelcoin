@@ -23,10 +23,13 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	
+
 	"github.com/btcsuite/websocket"
 	uberatomic "go.uber.org/atomic"
-	
+
+	log "github.com/p9c/logi"
+	database "github.com/p9c/blockdb"
+
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/cmd/node/mempool"
@@ -41,8 +44,6 @@ import (
 	"github.com/p9c/pod/pkg/chain/mining"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
 	p "github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -309,7 +310,7 @@ var (
 	GBTMutableFields = []string{
 		"time", "transactions/add", "prevblock", "coinbase/append",
 	}
-	
+
 	// RPCAskWallet is list of commands that we recognize,
 	// but for which pod has no support because it lacks support for wallet
 	// functionality. For these commands the user should ask a connected
@@ -368,36 +369,36 @@ var (
 		"addnode":              HandleAddNode,
 		"createrawtransaction": HandleCreateRawTransaction,
 		// "debuglevel":            handleDebugLevel,
-		"decoderawtransaction":  HandleDecodeRawTransaction,
-		"decodescript":          HandleDecodeScript,
-		"estimatefee":           HandleEstimateFee,
-		"generate":              HandleGenerate,
-		"getaddednodeinfo":      HandleGetAddedNodeInfo,
-		"getbestblock":          HandleGetBestBlock,
-		"getbestblockhash":      HandleGetBestBlockHash,
-		"getblock":              HandleGetBlock,
-		"getblockchaininfo":     HandleGetBlockChainInfo,
-		"getblockcount":         HandleGetBlockCount,
-		"getblockhash":          HandleGetBlockHash,
-		"getblockheader":        HandleGetBlockHeader,
-		"getblocktemplate":      HandleGetBlockTemplate,
-		"getcfilter":            HandleGetCFilter,
-		"getcfilterheader":      HandleGetCFilterHeader,
-		"getconnectioncount":    HandleGetConnectionCount,
-		"getcurrentnet":         HandleGetCurrentNet,
-		"getdifficulty":         HandleGetDifficulty,
-		"getgenerate":           HandleGetGenerate,
-		"gethashespersec":       HandleGetHashesPerSec,
-		"getheaders":            HandleGetHeaders,
-		"getinfo":               HandleGetInfo,
-		"getmempoolinfo":        HandleGetMempoolInfo,
-		"getmininginfo":         HandleGetMiningInfo,
-		"getnettotals":          HandleGetNetTotals,
-		"getnetworkhashps":      HandleGetNetworkHashPS,
-		"getpeerinfo":           HandleGetPeerInfo,
-		"getrawmempool":         HandleGetRawMempool,
-		"getrawtransaction":     HandleGetRawTransaction,
-		"gettxout":              HandleGetTxOut,
+		"decoderawtransaction": HandleDecodeRawTransaction,
+		"decodescript":         HandleDecodeScript,
+		"estimatefee":          HandleEstimateFee,
+		"generate":             HandleGenerate,
+		"getaddednodeinfo":     HandleGetAddedNodeInfo,
+		"getbestblock":         HandleGetBestBlock,
+		"getbestblockhash":     HandleGetBestBlockHash,
+		"getblock":             HandleGetBlock,
+		"getblockchaininfo":    HandleGetBlockChainInfo,
+		"getblockcount":        HandleGetBlockCount,
+		"getblockhash":         HandleGetBlockHash,
+		"getblockheader":       HandleGetBlockHeader,
+		"getblocktemplate":     HandleGetBlockTemplate,
+		"getcfilter":           HandleGetCFilter,
+		"getcfilterheader":     HandleGetCFilterHeader,
+		"getconnectioncount":   HandleGetConnectionCount,
+		"getcurrentnet":        HandleGetCurrentNet,
+		"getdifficulty":        HandleGetDifficulty,
+		"getgenerate":          HandleGetGenerate,
+		"gethashespersec":      HandleGetHashesPerSec,
+		"getheaders":           HandleGetHeaders,
+		"getinfo":              HandleGetInfo,
+		"getmempoolinfo":       HandleGetMempoolInfo,
+		"getmininginfo":        HandleGetMiningInfo,
+		"getnettotals":         HandleGetNetTotals,
+		"getnetworkhashps":     HandleGetNetworkHashPS,
+		"getpeerinfo":          HandleGetPeerInfo,
+		"getrawmempool":        HandleGetRawMempool,
+		"getrawtransaction":    HandleGetRawTransaction,
+		"gettxout":             HandleGetTxOut,
 		// "getwork":               HandleGetWork,
 		"help":                  HandleHelp,
 		"node":                  HandleNode,
@@ -416,7 +417,7 @@ var (
 		"verifymessage":   HandleVerifyMessage,
 		"version":         HandleVersion,
 	}
-	
+
 	// RPCLimited isCommands that are available to a limited user
 	RPCLimited = map[string]struct{}{
 		// Websockets commands
@@ -779,7 +780,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 			msgBlock.Header.Timestamp,
 			targetDifficulty,
 			msgBlock.Header.MerkleRoot)
-		
+
 		// Notify any clients that are long polling about the new template.
 		state.NotifyLongPollers(latestHash, lastTxUpdate)
 	} else {
@@ -822,14 +823,14 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 		if err != nil {
 			log.L.Error(err)
 			log.L.Debug(err)
-			
+
 		}
 		msgBlock.Header.Nonce = 0
 		log.L.Debugf(
 			"updated block template (timestamp %v, target %s)",
 			msgBlock.Header.Timestamp,
 			targetDifficulty)
-		
+
 	}
 	return nil
 }
@@ -901,7 +902,7 @@ func (s *Server) Start() {
 			log.L.Error(err)
 			if _, ok := err.(websocket.HandshakeError); !ok {
 				log.L.Error("unexpected websocket error:", err)
-				
+
 			}
 			http.Error(w, "400 Bad Request.", http.StatusBadRequest)
 			return
@@ -917,7 +918,7 @@ func (s *Server) Start() {
 				log.L.Trace(err)
 			}
 			log.L.Trace("chain RPC listener done for", listener.Addr())
-			
+
 			s.WG.Done()
 		}(listener)
 	}
@@ -932,13 +933,13 @@ func (s *Server) Stop() error {
 		return nil
 	}
 	log.L.Trace("RPC server shutting down")
-	
+
 	for _, listener := range s.Cfg.Listeners {
 		err := listener.Close()
 		if err != nil {
 			log.L.Error(err)
 			log.L.Error("problem shutting down RPC:", err)
-			
+
 			return err
 		}
 	}
@@ -963,7 +964,7 @@ func (s *Server) CheckAuth(r *http.Request, require bool) (bool, bool, error) {
 	if len(authhdr) == 0 {
 		if require {
 			log.L.Warn("RPC authentication failure from", r.RemoteAddr)
-			
+
 			return false, false, errors.New("auth failure")
 		}
 		return false, false, nil
@@ -982,7 +983,7 @@ func (s *Server) CheckAuth(r *http.Request, require bool) (bool, bool, error) {
 	}
 	// Request's auth doesn't match either user
 	log.L.Warn("RPC authentication failure from", r.RemoteAddr)
-	
+
 	return false, false, errors.New("auth failure")
 }
 
@@ -1096,7 +1097,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	if !ok {
 		errMsg := "webserver doesn't support hijacking"
 		log.L.Warnf(errMsg)
-		
+
 		errCode := http.StatusInternalServerError
 		http.Error(w, strconv.Itoa(errCode)+" "+errMsg, errCode)
 		return
@@ -1105,7 +1106,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	if err != nil {
 		log.L.Error(err)
 		log.L.Warn("failed to hijack HTTP connection:", err)
-		
+
 		errCode := http.StatusInternalServerError
 		http.Error(w, strconv.Itoa(errCode)+" "+err.Error(), errCode)
 		return
@@ -1116,7 +1117,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	if err != nil {
 		log.L.Error(err)
 		log.L.Debug(err)
-		
+
 	}
 	// Attempt to parse the raw body into a JSON-RPC request.
 	var responseID interface{}
@@ -1185,7 +1186,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	if err != nil {
 		log.L.Error(err)
 		log.L.Error("failed to marshal reply:", err)
-		
+
 		return
 	}
 	// Write the response.
@@ -1193,17 +1194,17 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	if err != nil {
 		log.L.Error(err)
 		log.L.Error(err.Error())
-		
+
 		return
 	}
 	if _, err := buf.Write(msg); err != nil {
 		log.L.Error("failed to write marshalled reply:", err)
-		
+
 	}
 	// Terminate with newline to maintain compatibility with Bitcoin Core.
 	if err := buf.WriteByte('\n'); err != nil {
 		log.L.Error("failed to append terminating newline to reply:", err)
-		
+
 	}
 }
 
@@ -1215,7 +1216,7 @@ func (s *Server) LimitConnections(w http.ResponseWriter, remoteAddr string) bool
 		log.L.Infof(
 			"max RPC clients exceeded [%d] - disconnecting client %s",
 			s.Config.RPCMaxClients, remoteAddr)
-		
+
 		http.Error(w, "503 Too busy.  Try again later.",
 			http.StatusServiceUnavailable)
 		return true
@@ -1754,7 +1755,7 @@ func GetDifficultyRatio(bits uint32, params *netparams.Params,
 	if err != nil {
 		log.L.Error(err)
 		log.L.Error("cannot get difficulty:", err)
-		
+
 		return 0
 	}
 	return diff
@@ -2626,14 +2627,14 @@ func HandleGetBlockTemplateProposal(s *Server,
 		if _, ok := err.(blockchain.RuleError); !ok {
 			errStr := fmt.Sprintf("failed to process block proposal: %v", err)
 			log.L.Error(errStr)
-			
+
 			return nil, &btcjson.RPCError{
 				Code:    btcjson.ErrRPCVerify,
 				Message: errStr,
 			}
 		}
 		log.L.Info("rejected block proposal:", err)
-		
+
 		return ChainErrToGBTErrString(err), nil
 	}
 	return nil, nil
@@ -2739,14 +2740,14 @@ func HandleGetCFilter(s *Server, cmd interface{},
 			"could not find committed filter for %v: %v",
 			hash,
 			err)
-		
+
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCBlockNotFound,
 			Message: "block not found",
 		}
 	}
 	log.L.Trace("found committed filter for", hash)
-	
+
 	return hex.EncodeToString(filterBytes), nil
 }
 
@@ -2768,24 +2769,24 @@ func HandleGetCFilterHeader(s *Server, cmd interface{},
 	headerBytes, err := s.Cfg.CfIndex.FilterHeaderByBlockHash(hash, c.FilterType)
 	if len(headerBytes) > 0 {
 		log.L.Debug("found header of committed filter for", hash)
-		
+
 	} else {
 		log.L.Debugf(
 			"could not find header of committed filter for %v: %v",
 			hash,
 			err)
-		
+
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCBlockNotFound,
 			Message: "Block not found",
 		}
 	}
-	
+
 	err = hash.SetBytes(headerBytes)
 	if err != nil {
 		log.L.Error(err)
 		log.L.Debug(err)
-		
+
 	}
 	return hash.String(), nil
 }
@@ -2811,7 +2812,7 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 	if err != nil {
 		log.L.Error(err)
 		log.L.Error("ERROR", err)
-		
+
 	}
 	var algo = prev.MsgBlock().Header.Version
 	if algo != 514 {
@@ -2827,7 +2828,7 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 				if err != nil {
 					log.L.Error(err)
 					log.L.Error("ERROR", err)
-					
+
 				}
 				continue
 			}
@@ -2844,7 +2845,7 @@ func HandleGetDifficulty(s *Server, cmd interface{},
 				if err != nil {
 					log.L.Error(err)
 					log.L.Error("ERROR", err)
-					
+
 				}
 				continue
 			}
@@ -3171,9 +3172,9 @@ func HandleGetMiningInfo(s *Server, cmd interface{}, closeChan <-chan struct{}) 
 			Difficulty:         Difficulty,
 			DifficultyScrypt:   dScrypt,
 			DifficultySHA256D:  dSHA256D,
-			NetworkHashPS: networkHashesPerSec,
-			PooledTx:      uint64(s.Cfg.TxMemPool.Count()),
-			TestNet:       (*s.Config.Network)[0] == 't',
+			NetworkHashPS:      networkHashesPerSec,
+			PooledTx:           uint64(s.Cfg.TxMemPool.Count()),
+			TestNet:            (*s.Config.Network)[0] == 't',
 		}
 	}
 	return ret, nil
@@ -3239,7 +3240,7 @@ func HandleGetNetworkHashPS(s *Server, cmd interface{},
 		"calculating network hashes per second from %d to %d",
 		startHeight,
 		endHeight)
-	
+
 	// Find the min and max block timestamps as well as calculate the total
 	// amount of work that happened between the start and end blocks.
 	var minTimestamp, maxTimestamp time.Time
@@ -3970,12 +3971,12 @@ func HandleSendRawTransaction(s *Server, cmd interface{},
 		// client with the deserialization error code (to match bitcoind behavior).
 		if _, ok := err.(mempool.RuleError); ok {
 			log.L.Debugf("rejected transaction %v: %v", tx.Hash(), err)
-			
+
 		} else {
 			log.L.Errorf(
 				"failed to process transaction %v: %v", tx.Hash(), err,
 			)
-			
+
 		}
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCDeserialization,
@@ -4122,7 +4123,7 @@ func HandleSubmitBlock(s *Server, cmd interface{},
 	log.L.Infof(
 		"accepted block %s via submitblock", block.Hash(),
 	)
-	
+
 	return nil, nil
 }
 
@@ -4223,13 +4224,13 @@ func HandleVerifyMessage(s *Server, cmd interface{},
 	if err != nil {
 		log.L.Error(err)
 		log.L.Debug(err)
-		
+
 	}
 	err = wire.WriteVarString(&buf, 0, c.Message)
 	if err != nil {
 		log.L.Error(err)
 		log.L.Debug(err)
-		
+
 	}
 	expectedMessageHash := chainhash.DoubleHashB(buf.Bytes())
 	pk, wasCompressed, err := ec.RecoverCompact(ec.S256(), sig,
@@ -4289,7 +4290,7 @@ func InternalRPCError(errStr, context string) *btcjson.RPCError {
 		logStr = context + ": " + errStr
 	}
 	log.L.Error(logStr)
-	
+
 	return btcjson.NewRPCError(btcjson.ErrRPCInternal.Code, errStr)
 }
 
@@ -4438,7 +4439,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 		best.Height-finishHeight,
 		level,
 	)
-	
+
 	for height := best.Height; height > finishHeight; height-- {
 		// Level 0 just looks up the block.
 		block, err := s.Cfg.Chain.BlockByHeight(height)
@@ -4449,7 +4450,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 				height,
 				err,
 			)
-			
+
 			return err
 		}
 		powLimit := fork.GetMinDiff(fork.GetAlgoName(block.MsgBlock().Header.
@@ -4463,7 +4464,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 				log.L.Errorf(
 					"verify is unable to validate block at hash %v height %d: %v %s",
 					block.Hash(), height, err)
-				
+
 				return err
 			}
 		}

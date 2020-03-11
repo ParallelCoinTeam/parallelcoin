@@ -8,14 +8,16 @@ import (
 
 	log "github.com/p9c/logi"
 
+	database "github.com/p9c/blockdb"
+
 	"github.com/p9c/pod/app/appdata"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	database "github.com/p9c/pod/pkg/db"
 
 	// This ensures the database drivers get registered
-	_ "github.com/p9c/pod/pkg/db/ffldb"
+	_ "github.com/p9c/blockdb/ffldb"
+
 	"github.com/p9c/pod/pkg/peer"
 )
 

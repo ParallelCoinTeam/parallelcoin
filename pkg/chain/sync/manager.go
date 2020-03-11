@@ -14,7 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
+	database "github.com/p9c/blockdb"
 	log "github.com/p9c/logi"
 	peerpkg "github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/util"

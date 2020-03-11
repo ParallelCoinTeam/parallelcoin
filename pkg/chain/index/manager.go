@@ -5,7 +5,7 @@ import (
 
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	database "github.com/p9c/pod/pkg/db"
+	database "github.com/p9c/blockdb"
 	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 )

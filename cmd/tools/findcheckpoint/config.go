@@ -11,8 +11,8 @@ import (
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	_ "github.com/p9c/pod/pkg/db/ffldb"
+	database "github.com/p9c/blockdb"
+	_ "github.com/p9c/blockdb/ffldb"
 )
 
 const (

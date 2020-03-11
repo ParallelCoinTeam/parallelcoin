@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"time"
 
+	database "github.com/p9c/blockdb"
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 )
 
 type // BehaviorFlags is a bitmask defining tweaks to the normal behavior when
-// performing chain processing and consensus rules checks.
-BehaviorFlags uint32
+	// performing chain processing and consensus rules checks.
+	BehaviorFlags uint32
 
 const (
 	// BFFastAdd may be set to indicate that several checks can be avoided
@@ -174,7 +175,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// orphans) and repeat for those accepted blocks until there are no more.
 	if isMainChain {
 		log.L.Trace("new block on main chain")
-		//log.L.Traces(block)
+		// log.L.Traces(block)
 	}
 	err = b.processOrphans(workerNumber, blockHash, flags)
 	if err != nil {

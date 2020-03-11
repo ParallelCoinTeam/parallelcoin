@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"time"
 
+	log "github.com/p9c/logi"
+
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util"
 )
 

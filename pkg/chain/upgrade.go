@@ -7,22 +7,23 @@ import (
 	"fmt"
 	"time"
 
+	database "github.com/p9c/blockdb"
+	log "github.com/p9c/logi"
+
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
 )
 
 const // blockHdrOffset defines the offsets into a v1 block index row for the
-// block header.
-//
-// The serialized block index row format is:
-//   <blocklocation><blockheader>
-blockHdrOffset = 12
+	// block header.
+	//
+	// The serialized block index row format is:
+	//   <blocklocation><blockheader>
+	blockHdrOffset = 12
 
 var // errInterruptRequested indicates that an operation was cancelled due
-// to a user-requested interrupt.
-errInterruptRequested = errors.New("interrupt requested")
+	// to a user-requested interrupt.
+	errInterruptRequested = errors.New("interrupt requested")
 
 func // interruptRequested returns true when the provided channel has been
 // closed.
@@ -38,14 +39,14 @@ interruptRequested(interrupted <-chan struct{}) bool {
 }
 
 type // blockChainContext represents a particular block's placement in the block
-// chain. This is used by the block index migration to track block metadata that
-// will be written to disk.
-blockChainContext struct {
-	parent    *chainhash.Hash
-	children  []*chainhash.Hash
-	height    int32
-	mainChain bool
-}
+	// chain. This is used by the block index migration to track block metadata that
+	// will be written to disk.
+	blockChainContext struct {
+		parent    *chainhash.Hash
+		children  []*chainhash.Hash
+		height    int32
+		mainChain bool
+	}
 
 func // migrateBlockIndex migrates all block entries from the v1 block index
 // bucket to the v2 bucket. The v1 bucket stores all block entries keyed by

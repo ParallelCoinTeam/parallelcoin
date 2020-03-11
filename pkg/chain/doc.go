@@ -19,7 +19,7 @@ Before a block is allowed into the block chain, it must go through an intensive 
  - Run the transaction scripts to verify the spender is allowed to spend the coins
  - Insert the block into the block database
 
-Errors
+Errors;
 
 Errors returned by this package are either the raw errors provided by underlying calls or of type blockchain.RuleError.  This allows the caller to differentiate between unexpected errors, such as database errors, versus errors due to rule violations through type assertions.  In addition, callers can programmatically determine the specific rule violation by examining the ErrorCode field of the type asserted blockchain.RuleError.
 

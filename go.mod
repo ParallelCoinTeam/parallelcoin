@@ -10,7 +10,6 @@ require (
 	github.com/bitbandi/go-x11 v0.0.0-20171024232457-5fddbc9b2b09
 	github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd
 	github.com/btcsuite/golangcrypto v0.0.0-20150304025918-53f62d9b43e8
-	github.com/btcsuite/goleveldb v1.0.0
 	github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792
 	github.com/conformal/fastsha256 v0.0.0-20160815193821-637e65642941
 	github.com/coreos/bbolt v1.3.3
@@ -20,6 +19,7 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
+	github.com/p9c/blockdb v0.0.1
 	github.com/p9c/gel v0.0.2
 	github.com/p9c/gelook v0.0.0-20200311045057-0f256a5503f5
 	github.com/p9c/logi v0.0.12

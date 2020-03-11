@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
-	database "github.com/p9c/pod/pkg/db"
+	database "github.com/p9c/blockdb"
 	"github.com/p9c/pod/pkg/util"
 )
 

@@ -8,7 +8,7 @@ import (
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	database "github.com/p9c/pod/pkg/db"
+	database "github.com/p9c/blockdb"
 )
 
 const blockDbNamePrefix = "blocks"
