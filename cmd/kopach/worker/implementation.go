@@ -339,7 +339,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 
 // Pause signals the worker to stop working,
 // releases its semaphore and the worker is then idle
-func (w *Worker) Pause(origin string, reply *bool) (err error) {
+func (w *Worker) Pause(_ int, reply *bool) (err error) {
 
 	log.L.Debug("pausing from IPC")
 	w.running.Store(false)

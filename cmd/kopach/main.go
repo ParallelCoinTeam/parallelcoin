@@ -165,15 +165,16 @@ var handlers = transport.Handlers{
 		w := ctx.(*Worker)
 		p := pause.LoadPauseContainer(b)
 		fs := w.FirstSender.Load()
-		ns := p.GetIPs()[0].String()
-		log.L.Warn("pausing", fs, ns)
-		// origin := net.JoinHostPort(ns, p.GetP2PListenersPort())
-		// log.L.Debug("received pause")
-		for i := range w.workers {
-			log.L.Debug("sending pause to worker", i)
-			err := w.workers[i].Pause()
-			if err != nil {
-				log.L.Error(err)
+		ni := p.GetIPs()[0].String()
+		np := p.GetControllerListenerPort()
+		ns := net.JoinHostPort(ni, fmt.Sprint(np))
+		if fs == ns {
+			for i := range w.workers {
+				log.L.Debug("sending pause to worker", i, fs, ns)
+				err := w.workers[i].Pause()
+				if err != nil {
+					log.L.Error(err)
+				}
 			}
 		}
 		return

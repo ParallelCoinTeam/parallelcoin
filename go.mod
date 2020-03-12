@@ -3,6 +3,7 @@ module github.com/p9c/pod
 go 1.14
 
 require (
+	eliasnaur.com/giox v0.0.0-20200114124148-7ce24a79aa1d
 	gioui.org v0.0.0-20200311164516-7024a0e6914d
 	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
 	github.com/VividCortex/ewma v1.1.1
@@ -25,7 +26,9 @@ require (
 	github.com/kkdai/bstream v1.0.0
 	github.com/minio/highwayhash v1.0.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
-	github.com/p9c/logi v0.0.12
+	github.com/p9c/gel v0.0.3
+	github.com/p9c/gelook v0.0.3
+	github.com/p9c/logi v0.0.13
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/skip2/go-qrcode v0.0.0-20190110000554-dc11ecdae0a9
 	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect
@@ -35,11 +38,12 @@ require (
 	go.etcd.io/bbolt v1.3.3 // indirect
 	go.uber.org/atomic v1.5.1
 	golang.org/x/crypto v0.0.0-20200214034016-1d94cc7ab1c6
-	golang.org/x/exp v0.0.0-20200213203834-85f925bdd4d0
+	golang.org/x/exp v0.0.0-20200228211341-fcea875c7e85
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
 	golang.org/x/text v0.3.2
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	lukechampine.com/blake3 v1.0.0
+
 )
