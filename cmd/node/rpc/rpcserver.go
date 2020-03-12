@@ -44,7 +44,7 @@ import (
 	"github.com/p9c/chain/mining"
 	txscript "github.com/p9c/chain/tx/script"
 	"github.com/p9c/wire"
-	p "github.com/p9c/pod/pkg/peer"
+	p "github.com/p9c/peer"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/rpc/btcjson"
 	"github.com/p9c/util"

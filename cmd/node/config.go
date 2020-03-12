@@ -19,7 +19,7 @@ import (
 	// This ensures the database drivers get registered
 	_ "github.com/p9c/blockdb/ffldb"
 
-	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/peer"
 )
 
 //

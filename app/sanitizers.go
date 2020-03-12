@@ -24,7 +24,7 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/pkg/normalize"
-	"github.com/p9c/pod/pkg/peer/connmgr"
+	"github.com/p9c/peer/connmgr"
 
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/urfave/cli"

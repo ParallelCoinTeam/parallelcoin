@@ -8,7 +8,7 @@ import (
 	chainhash "github.com/p9c/chainhash"
 	netsync "github.com/p9c/chain/sync"
 	"github.com/p9c/wire"
-	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/peer"
 	"github.com/p9c/util"
 )
 

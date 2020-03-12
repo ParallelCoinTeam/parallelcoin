@@ -4,8 +4,8 @@ import (
 	"errors"
 	log "github.com/p9c/logi"
 
-	"github.com/p9c/pod/pkg/peer/addrmgr"
-	"github.com/p9c/pod/pkg/peer/connmgr"
+	"github.com/p9c/peer/addrmgr"
+	"github.com/p9c/peer/connmgr"
 )
 
 type (
