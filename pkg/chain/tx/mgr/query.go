@@ -271,7 +271,6 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	var details []TxDetails
 	for advance(&blockIter) {
 		block := &blockIter.elem
-		log.L.Traces(block)
 		if cap(details) < len(block.transactions) {
 			details = make([]TxDetails, 0, len(block.transactions))
 		} else {

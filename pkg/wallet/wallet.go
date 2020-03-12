@@ -12,6 +12,8 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
+	log "github.com/p9c/logi"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -20,7 +22,6 @@ import (
 	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
@@ -1857,8 +1858,8 @@ func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) (txList []btcjson.
 // ListTransactions returns a slice of objects with details about a recorded
 // transaction.  This is intended to be used for listtransactions RPC
 // replies.
-func (w *Wallet) ListTransactions(from, count int) (listTxResult []btcjson.ListTransactionsResult, err error) {
-	txList := []btcjson.ListTransactionsResult{}
+func (w *Wallet) ListTransactions(from, count int) (txList []btcjson.ListTransactionsResult, err error) {
+	// txList := []btcjson.ListTransactionsResult{}
 	log.L.Debug("ListTransactions", from, count)
 	if err = walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
@@ -1871,7 +1872,6 @@ func (w *Wallet) ListTransactions(from, count int) (listTxResult []btcjson.ListT
 		skipped := 0
 		n := 0
 		rangeFn := func(details []wtxmgr.TxDetails) (bool, error) {
-			log.L.Debug("calling rangeFn")
 			// Iterate over transactions at this height in reverse order.
 			// This does nothing for unmined transactions, which are
 			// unsorted, but it will process mined transactions in the
@@ -1891,7 +1891,6 @@ func (w *Wallet) ListTransactions(from, count int) (listTxResult []btcjson.ListT
 				if len(jsonResults) > 0 {
 					n++
 				}
-				log.L.Traces(txList)
 			}
 			return false, nil
 		}
