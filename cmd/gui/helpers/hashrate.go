@@ -3,9 +3,10 @@ package helpers
 import (
 	"container/ring"
 	"time"
-	
-	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
+
 	log "github.com/p9c/logi"
+
+	"github.com/p9c/kopach/kopachctrl/hashrate"
 )
 
 // GetHashrate returns the exponential weighted moving average of the total hashrate and

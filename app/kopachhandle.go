@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/p9c/pod/cmd/kopach"
+	"github.com/p9c/kopach"
 	"github.com/p9c/chaincfg/netparams"
 	"github.com/p9c/fork"
 	log "github.com/p9c/logi"

@@ -9,19 +9,20 @@ import (
 	"runtime/pprof"
 	"time"
 
+	"github.com/p9c/kopach/kopachctrl"
 	"github.com/p9c/pod/cmd/node/blockdb"
-	"github.com/p9c/pod/pkg/kopachctrl"
 
 	database "github.com/p9c/blockdb"
 	log "github.com/p9c/logi"
+
+	indexers "github.com/p9c/chain/index"
+	"github.com/p9c/util/interrupt"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node/path"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/version"
-	indexers "github.com/p9c/chain/index"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/util/interrupt"
 )
 
 // var StateCfg = new(state.Config)

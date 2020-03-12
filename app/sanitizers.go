@@ -20,8 +20,8 @@ import (
 	"github.com/p9c/wallet"
 
 	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/kopach/kopachctrl/pause"
 	"github.com/p9c/pod/cmd/node"
-	"github.com/p9c/pod/pkg/kopachctrl/pause"
 	"github.com/p9c/pod/pkg/normalize"
 	"github.com/p9c/pod/pkg/peer/connmgr"
 

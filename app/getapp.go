@@ -10,7 +10,7 @@ import (
 	"github.com/p9c/rpc/legacy"
 	"github.com/p9c/wallet/walletmain"
 
-	"github.com/p9c/pod/cmd/kopach/kopach_worker"
+	"github.com/p9c/kopach/kopach_worker"
 	"github.com/p9c/pod/cmd/node/blockdb"
 
 	"github.com/urfave/cli"

@@ -92,6 +92,8 @@ github.com/p9c/gelook v0.0.0-20200311045057-0f256a5503f5 h1:jdhr2p3NONjC36IFJyLP
 github.com/p9c/gelook v0.0.0-20200311045057-0f256a5503f5/go.mod h1:JhzyuHiIyF/BI3/zJTk0GJleNw6+7ZV5Cl24P4Z0wWo=
 github.com/p9c/goterm v0.0.2 h1:XOc0BTicZqOxff2ytn4fOLCLutFONgJfAzl6ONr6OCk=
 github.com/p9c/goterm v0.0.2/go.mod h1:+Y8lgDRodZxWcmBlnxnBZdnBfDESKDjvzi7BJpGc6u8=
+github.com/p9c/kopach v0.0.1 h1:mAx6R5N92cVEGZYMM+rDcpHWKEXUTb2MMPw4/lbJbX4=
+github.com/p9c/kopach v0.0.1/go.mod h1:B9dcfVm5Q7jZXbfNADij3Hgw/fnNl2q3a3eedJrhgl8=
 github.com/p9c/logi v0.0.12 h1:BIaKAlZmjmVOLeFya6t3w4PeVGk9Zi1mPsVvMFzUIy4=
 github.com/p9c/logi v0.0.12/go.mod h1:Be10Z8AjLd+iQ6Ik22gP86Z57vEHQdMA/4g3OdSbPSg=
 github.com/p9c/p9fonts v0.0.2 h1:YTuwlPTHC4PcmbRinOFjlf7QCxLtKTB6UYiyR14aQis=
