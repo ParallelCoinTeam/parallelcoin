@@ -2,7 +2,7 @@ package gelook
 
 import (
 	"gioui.org/layout"
-	"github.com/p9c/gel"
+	"github.com/p9c/pod/pkg/gel"
 )
 
 var (

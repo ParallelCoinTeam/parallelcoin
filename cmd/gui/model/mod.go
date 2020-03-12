@@ -7,8 +7,8 @@ import (
 	"gioui.org/layout"
 	"go.uber.org/atomic"
 
-	"github.com/p9c/gel"
-	"github.com/p9c/gelook"
+	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gelook"
 	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 )

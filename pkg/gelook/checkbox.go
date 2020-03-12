@@ -6,7 +6,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/gel"
+	"github.com/p9c/pod/pkg/gel"
 )
 
 type DuoUIcheckBox struct {

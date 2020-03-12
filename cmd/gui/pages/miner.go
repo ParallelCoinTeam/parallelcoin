@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/gelook"
+	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/rcd"
 )
 

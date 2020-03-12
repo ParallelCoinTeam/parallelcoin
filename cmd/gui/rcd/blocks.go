@@ -1,7 +1,7 @@
 package rcd
 
 import (
-	"github.com/p9c/gel"
+	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/node/rpc"
 	log "github.com/p9c/logi"

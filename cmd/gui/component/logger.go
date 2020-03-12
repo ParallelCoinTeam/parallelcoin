@@ -10,7 +10,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
-	"github.com/p9c/gelook"
+	"github.com/p9c/pod/pkg/gelook"
 )
 
 var (

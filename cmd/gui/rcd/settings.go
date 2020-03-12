@@ -2,7 +2,7 @@ package rcd
 
 import (
 	"fmt"
-	"github.com/p9c/gel"
+	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/conte"

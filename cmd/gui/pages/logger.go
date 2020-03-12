@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"gioui.org/layout"
-	"github.com/p9c/gelook"
+	"github.com/p9c/pod/pkg/gelook"
 )
 
 var (

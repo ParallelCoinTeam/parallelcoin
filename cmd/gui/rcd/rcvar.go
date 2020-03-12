@@ -3,8 +3,8 @@ package rcd
 import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"github.com/p9c/gel"
-	"github.com/p9c/gelook"
+	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gelook"
 	log "github.com/p9c/logi"
 	"github.com/skip2/go-qrcode"
 	"strings"
