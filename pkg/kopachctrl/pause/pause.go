@@ -11,59 +11,33 @@ import (
 
 var PauseMagic = []byte{'p', 'a', 'u', 's'}
 
-type PauseContainer struct {
+type Container struct {
 	simplebuffer.Container
 }
 
-func GetPauseContainer(cx *conte.Xt) *PauseContainer {
+func GetPauseContainer(cx *conte.Xt) *Container {
 	mB := p2padvt.Get(cx).CreateContainer(PauseMagic)
-	return &PauseContainer{*mB}
+	return &Container{*mB}
 }
 
-func LoadPauseContainer(b []byte) (out *PauseContainer) {
-	out = &PauseContainer{}
+func LoadPauseContainer(b []byte) (out *Container) {
+	out = &Container{}
 	out.Data = b
 	return
 }
 
-func (mC *PauseContainer) GetIPs() []*net.IP {
-	return IPs.New().DecodeOne(mC.Get(0)).Get()
+func (j *Container) GetIPs() []*net.IP {
+	return IPs.New().DecodeOne(j.Get(0)).Get()
 }
 
-func (mC *PauseContainer) GetP2PListenersPort() uint16 {
-	return Uint16.New().DecodeOne(mC.Get(1)).Get()
+func (j *Container) GetP2PListenersPort() uint16 {
+	return Uint16.New().DecodeOne(j.Get(1)).Get()
 }
 
-func (mC *PauseContainer) GetP2PListeners() (out []string) {
-	p := Uint16.New().DecodeOne(mC.Get(1)).String()
-	ips := mC.GetIPs()
-	for i := range ips {
-		out = append(out, net.JoinHostPort(ips[i].String(), p))
-	}
-	return
+func (j *Container) GetRPCListenersPort() uint16 {
+	return Uint16.New().DecodeOne(j.Get(2)).Get()
 }
 
-func (mC *PauseContainer) GetRPCListenersPort() uint16 {
-	return Uint16.New().DecodeOne(mC.Get(2)).Get()
-}
-
-func (mC *PauseContainer) GetRPCListeners() (out []string) {
-	p := Uint16.New().DecodeOne(mC.Get(2)).String()
-	ips := mC.GetIPs()
-	for i := range ips {
-		out = append(out, net.JoinHostPort(ips[i].String(), p))
-	}
-	return
-}
-func (mC *PauseContainer) GetControllerListenerPort() uint16 {
-	return Uint16.New().DecodeOne(mC.Get(3)).Get()
-}
-
-func (mC *PauseContainer) GetControllerListener() (out []string) {
-	p := Uint16.New().DecodeOne(mC.Get(3)).String()
-	ips := mC.GetIPs()
-	for i := range ips {
-		out = append(out, net.JoinHostPort(ips[i].String(), p))
-	}
-	return
+func (j *Container) GetControllerListenerPort() uint16 {
+	return Uint16.New().DecodeOne(j.Get(3)).Get()
 }

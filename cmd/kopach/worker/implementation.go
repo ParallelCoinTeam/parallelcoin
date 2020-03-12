@@ -12,6 +12,8 @@ import (
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 
+	log "github.com/p9c/logi"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -20,7 +22,6 @@ import (
 	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/sem"
 	"github.com/p9c/pod/pkg/stdconn"
@@ -227,7 +228,6 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 								break out
 							default:
 							}
-							// log.L.Debug("sending hashcount")
 							// send out broadcast containing worker nonce and algorithm and count of blocks
 							w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
 							nextAlgo = w.roller.C.Load() + 1
@@ -241,22 +241,6 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 						hash := mb.Header.BlockHashWithAlgos(nH)
 						bigHash := blockchain.HashToBig(&hash)
 						if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
-							//log.L.Debugc(func() string {
-							//	return fmt.Sprintln(
-							//		"solution found h:", nH,
-							//		hash.String(),
-							//		fork.List[fork.GetCurrent(nH)].
-							//			AlgoVers[mb.Header.Version],
-							//		"total hashes since startup",
-							//		w.roller.C.Load()-int32(w.startNonce),
-							//		fork.IsTestnet,
-							//		mb.Header.Version,
-							//		mb.Header.Bits,
-							//		mb.Header.MerkleRoot.String(),
-							//		hash,
-							//	)
-							//})
-							//log.L.Traces(mb)
 							srs := sol.GetSolContainer(w.senderPort.Load(), mb)
 							err := w.dispatchConn.SendMany(sol.SolutionMagic,
 								transport.GetShards(srs.Data))
@@ -270,21 +254,17 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 						mb.Header.Bits = w.bitses.Load().(blockchain.TargetBits)[mb.Header.Version]
 						mb.Header.Nonce++
 						w.msgBlock.Store(*mb)
-						// if we have completed a cycle report the hashrate on starting new algo
-						// log.L.Debug(w.hashCount.Load(), uint64(w.roller.RoundsPerAlgo), w.roller.C)
 					}
 				}
 			}
 			log.L.Trace("worker pausing")
 		}
 		log.L.Trace("worker finished")
-		// w.Close()
 	}(w)
 	return w
 }
 
-// New initialises the state for a worker,
-// loading the work function handler that runs a round of processing between
+// New initialises the state for a worker, loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
 func New(quit chan struct{}) (w *Worker, conn net.Conn) {
 	// log.L.SetLevel("trace", true)
@@ -292,9 +272,8 @@ func New(quit chan struct{}) (w *Worker, conn net.Conn) {
 	return NewWithConnAndSemaphore(&sc, quit), &sc
 }
 
-// NewJob is a delivery of a new job for the worker,
-// this makes the miner start mining from pause or pause,
-// prepare the work and restart
+// NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
+// work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
 		*reply = true
@@ -313,7 +292,6 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 		// we don't need to know net params if version numbers come with jobs
 		algos = append(algos, i)
 	}
-	// log.L.Debug(algos)
 	w.lastMerkle = j.Hashes[5]
 	*reply = true
 	// halting current work
@@ -361,7 +339,8 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 
 // Pause signals the worker to stop working,
 // releases its semaphore and the worker is then idle
-func (w *Worker) Pause(_ int, reply *bool) (err error) {
+func (w *Worker) Pause(origin string, reply *bool) (err error) {
+
 	log.L.Debug("pausing from IPC")
 	w.running.Store(false)
 	w.stopChan <- struct{}{}

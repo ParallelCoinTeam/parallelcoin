@@ -10,13 +10,14 @@ import (
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/cmd/kopach/client"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/kopachctrl"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/stdconn/worker"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -160,10 +161,14 @@ var handlers = transport.Handlers{
 		}
 		return
 	},
-	string(pause.PauseMagic): func(ctx interface{}, src net.Addr, dst string,
-		b []byte) (err error) {
-		log.L.Debug("received pause")
+	string(pause.PauseMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		w := ctx.(*Worker)
+		p := pause.LoadPauseContainer(b)
+		fs := w.FirstSender.Load()
+		ns := p.GetIPs()[0].String()
+		log.L.Warn("pausing", fs, ns)
+		// origin := net.JoinHostPort(ns, p.GetP2PListenersPort())
+		// log.L.Debug("received pause")
 		for i := range w.workers {
 			log.L.Debug("sending pause to worker", i)
 			err := w.workers[i].Pause()

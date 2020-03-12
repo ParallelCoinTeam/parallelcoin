@@ -111,7 +111,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 	} else {
 		ctrl.active.Store(true)
 	}
-	ctrl.oldBlocks.Store(pauseShards)
+	// ctrl.oldBlocks.Store(pauseShards)
 	interrupt.AddHandler(func() {
 		log.L.Debug("miner controller shutting down")
 		ctrl.active.Store(false)
@@ -316,18 +316,18 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
 	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), p2padvt.Get(c.cx), &c.coinbases)
-	shards := transport.GetShards(fMC.Data)
-	shardsLen := len(shards)
+	jobShards := transport.GetShards(fMC.Data)
+	shardsLen := len(jobShards)
 	if shardsLen < 1 {
-		log.L.Warn("shards", shardsLen)
-		return fmt.Errorf("shards len %d", shardsLen)
+		log.L.Warn("jobShards", shardsLen)
+		return fmt.Errorf("jobShards len %d", shardsLen)
 	}
-	err = c.multiConn.SendMany(job.Magic, shards)
+	err = c.multiConn.SendMany(job.Magic, jobShards)
 	if err != nil {
 		log.L.Error(err)
 	}
 	c.prevHash.Store(&template.Block.Header.PrevBlock)
-	c.oldBlocks.Store(shards)
+	c.oldBlocks.Store(jobShards)
 	c.lastGenerated.Store(time.Now().UnixNano())
 	c.lastTxUpdate.Store(time.Now().UnixNano())
 	return

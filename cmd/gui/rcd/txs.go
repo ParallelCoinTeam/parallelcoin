@@ -79,25 +79,43 @@ func txs(t btcjson.ListTransactionsResult) model.DuoUItx {
 
 }
 func (r *RcVar) GetLatestTransactions() {
-	log.L.Debug("FUCTIONZ getting latest transactions")
-	//r.Status.Wallet.LastTxs = r.GetDuoUItransactions(0, 10, "")
+	log.L.Debug("getting latest transactions")
+		lt, err := r.cx.WalletServer.ListTransactions(0, 10)
+		if err != nil {
+			// //r.PushDuoUIalert("Error", err.Error(), "error")
+		}
+		r.History.Txs.TxsNumber = len(lt)
+		// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
+		//	lt[i], lt[j] = lt[j], lt[i]
+		// }
+		balanceHeight := 0.0
+		txseRaw := []model.DuoUItransactionExcerpt{}
+		for _, txRaw := range lt {
+			unixTimeUTC := time.Unix(txRaw.Time, 0) // gives unix time stamp in utc
+			txseRaw = append(txseRaw, model.DuoUItransactionExcerpt{
+				// Balance:       txse.Balance + txRaw.Amount,
+				Comment:       txRaw.Comment,
+				Amount:        txRaw.Amount,
+				Category:      txRaw.Category,
+				Confirmations: txRaw.Confirmations,
+				Time:          unixTimeUTC.Format(time.RFC3339),
+				TxID:          txRaw.TxID,
+			})
+		}
+		var balance float64
+		txs := *new([]model.DuoUItransactionExcerpt)
+		for _, tx := range txseRaw {
+			balance = balance + tx.Amount
+			tx.Balance = balance
+			txs = append(txs, tx)
+			if r.History.Txs.Balance > balanceHeight {
+				balanceHeight = r.History.Txs.Balance
+			}
 
-	//cmd := icmd.(*btcjson.ListTransactionsCmd)
-	//// TODO: ListTransactions does not currently understand the difference
-	//// between transactions pertaining to one account from another.  This
-	//// will be resolved when wtxmgr is combined with the waddrmgr namespace.
-	//if cmd.Account != nil && *cmd.Account != "*" {
-	//// For now, don't bother trying to continue if the user
-	//// specified an account, since this can't be (easily or
-	//// efficiently) calculated.
-	//return nil, &btcjson.RPCError{
-	//Code:    btcjson.ErrRPCWallet,
-	//Message: "Transactions are not yet grouped by account",
-	//}
-	//}
-	log.L.Info(r.cx.WalletServer.ListTransactions(0, 11))
-	//}
-	return
+		}
+		r.History.Txs.Txs = txs
+		r.History.Txs.BalanceHeight = balanceHeight
+
 }
 
 func (r *RcVar) GetTransactions() func() {
@@ -138,6 +156,5 @@ func (r *RcVar) GetTransactions() func() {
 		}
 		r.History.Txs.Txs = txs
 		r.History.Txs.BalanceHeight = balanceHeight
-		return
 	}
 }
