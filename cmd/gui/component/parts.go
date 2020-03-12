@@ -6,9 +6,9 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	"github.com/p9c/pod/cmd/gui/rcd"
 	"image"
 	"image/color"
 )
@@ -69,7 +69,6 @@ func Button(gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Bu
 			}
 			button.Layout(gtx, buttonController)
 		})
-
 	}
 }
 

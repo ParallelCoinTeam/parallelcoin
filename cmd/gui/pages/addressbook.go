@@ -3,12 +3,13 @@ package pages
 import (
 	"fmt"
 	"gioui.org/layout"
+	"gioui.org/op"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/gui/clipboard"
 )
 
@@ -67,25 +68,17 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 			layout.Rigid(func() {
 				//th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page, "PAGE", fmt.Sprint(rc.Explorer.Page.Value))
 			}),
+			//layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["ButtonText"], th.Colors["Dark"], "NEW ADDRESS", component.QrDialog(rc, gtx, rc.CreateNewAddress("")))))
 			layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["ButtonText"], th.Colors["Dark"], "NEW ADDRESS", func() {
 				rc.Dialog.Show = true
-
 				rc.Dialog = &model.DuoUIdialog{
-					Show: true,
-					Ok:   nil,
-					Close: func() {
-
-					},
-					CustomField: func() {
-						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, passLineEditor, "Enter your password", func(e gel.SubmitEvent) {
-								passPharse = e.Text
-							})))
-					},
-					Cancel: func() { rc.Dialog.Show = false },
-					Title:  "Copy address",
-					Text:   rc.CreateNewAddress(""),
+					Show:        true,
+					Close:       func() { rc.Dialog.Show = false },
+					CustomField: component.DuoUIqrCode(gtx, address, 256),
+					Title:       "Copy address",
+					Text:        rc.CreateNewAddress(""),
 				}
+				op.InvalidateOp{}.Add(gtx.Ops)
 			})))
 	}
 }
@@ -104,7 +97,7 @@ func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 						layout.Rigid(component.Button(gtx, th, t.Copy, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], t.Address, func() { clipboard.Set(t.Address) })),
 						layout.Flexed(0.4, component.Label(gtx, th, th.Fonts["Primary"], 14, th.Colors["Dark"], t.Label)),
 						layout.Flexed(0.3, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprint(t.Amount))),
-						layout.Rigid(component.Button(gtx, th, t.QrCode, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], "QR", component.QrDialog(rc, gtx))),
+						layout.Rigid(component.Button(gtx, th, t.QrCode, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], "QR", component.QrDialog(rc, gtx, t.Address))),
 					)
 				}),
 				layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Hint"])),

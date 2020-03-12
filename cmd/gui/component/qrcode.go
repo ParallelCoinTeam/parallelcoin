@@ -5,8 +5,10 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
+	"github.com/nfnt/resize"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/qrcode"
 	"image"
 )
 
@@ -33,10 +35,16 @@ import (
 //	//}
 //}
 
-func DuoUIqrCode(rc *rcd.RcVar, gtx *layout.Context) func() {
+func DuoUIqrCode(gtx *layout.Context, hash string, size uint) func() {
 	return func() {
-		sz := gtx.Constraints.Width.Constrain(gtx.Px(unit.Dp(500)))
-		rc.QrCode.AddrQR.Add(gtx.Ops)
+		qr, err := qrcode.Encode(hash, 3, qrcode.ECLevelM)
+		if err != nil {
+		}
+		qrResize := resize.Resize(size, 0, qr, resize.NearestNeighbor)
+		addrQR := paint.NewImageOp(qrResize)
+
+		sz := gtx.Constraints.Width.Constrain(gtx.Px(unit.Dp(float32(size))))
+		addrQR.Add(gtx.Ops)
 		paint.PaintOp{
 			Rect: f32.Rectangle{
 				Max: f32.Point{
@@ -48,20 +56,16 @@ func DuoUIqrCode(rc *rcd.RcVar, gtx *layout.Context) func() {
 	}
 }
 
-func QrDialog(rc *rcd.RcVar, gtx *layout.Context) func() {
+func QrDialog(rc *rcd.RcVar, gtx *layout.Context, address string) func() {
 	return func() {
 		//clipboard.Set(t.Address)
 		rc.Dialog.Show = true
 		rc.Dialog = &model.DuoUIdialog{
-			Show: true,
-			//Ok:   rc.DuoSend(passPharse, address, amount),
-			Close: func() {
-
-			},
-			CustomField: DuoUIqrCode(rc, gtx),
-			Cancel:      func() { rc.Dialog.Show = false },
-			Title:       "Are you sure?",
-			Text:        "Confirm ParallelCoin send",
+			Show:        true,
+			CustomField: DuoUIqrCode(gtx, address, 256),
+			Close:       func() { rc.Dialog.Show = false },
+			Title:       "ParallelCoin address",
+			Text:        address,
 		}
 	}
 }

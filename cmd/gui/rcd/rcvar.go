@@ -1,13 +1,9 @@
 package rcd
 
 import (
-	"gioui.org/op/paint"
 	"gioui.org/text"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	log "github.com/p9c/logi"
-	"github.com/skip2/go-qrcode"
-	"strings"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/model"
@@ -34,7 +30,6 @@ type RcVar struct {
 	Peers     []*btcjson.GetPeerInfoResult `json:"peers"`
 
 	AddressBook *model.DuoUIaddressBook
-	QrCode      *model.DuoUIqrCode
 	ShowPage    string
 	CurrentPage *gelook.DuoUIpage
 	// NodeChan   chan *rpc.Server
@@ -85,20 +80,11 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 	// }
 	l := new(model.DuoUIlog)
 
-	qr, err := qrcode.New(strings.ToUpper("sdasdasfsdgfdshsdfhdjtjrtkjrtykdyjdfgjfdghjfdgsh"), qrcode.Highest)
-	if err != nil {
-		log.L.Fatal(err)
-	}
-	qr.BackgroundColor = gelook.HexARGB("ff3030cf")
-	qrcode := &model.DuoUIqrCode{
-		AddrQR: paint.NewImageOp(qr.Image(256)),
-	}
 	r = &RcVar{
 		cx:          cx,
 		db:          new(DuoUIdb),
 		Boot:        &b,
 		AddressBook: new(model.DuoUIaddressBook),
-		QrCode:      qrcode,
 		Status: &model.DuoUIstatus{
 			Node: &model.NodeStatus{},
 			Wallet: &model.WalletStatus{
