@@ -8,9 +8,10 @@ import (
 	"gioui.org/io/system"
 	log "github.com/p9c/logi"
 
+	"github.com/p9c/util/interrupt"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/util/interrupt"
 )
 
 func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {

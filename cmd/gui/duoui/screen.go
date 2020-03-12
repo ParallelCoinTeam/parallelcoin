@@ -7,8 +7,9 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/gelook"
 
+	"github.com/p9c/gelook/ico"
+
 	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/pkg/gui/ico"
 )
 
 // Main wallet screen
