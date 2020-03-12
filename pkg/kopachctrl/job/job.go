@@ -73,8 +73,8 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// }
 	bitsMap := make(blockchain.TargetBits)
 	var err error
-	df := tip.Diffs.Load().(blockchain.TargetBits)
-	if df == nil ||
+	df, ok := tip.Diffs.Load().(blockchain.TargetBits)
+	if df == nil || !ok ||
 		len(df) != len(fork.List[1].AlgoVers) {
 		bitsMap, err = cx.RealNode.Chain.
 			CalcNextRequiredDifficultyPlan9Controller(tip)
