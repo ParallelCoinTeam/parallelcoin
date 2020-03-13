@@ -206,7 +206,7 @@ func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
 	log.L.Debug("rangeUnminedTransactions")
 	var details []TxDetails
 	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) error {
-		log.L.Debug("k", k, "v", v)
+		// log.L.Debug("k", k, "v", v)
 		if len(k) < 32 {
 			str := fmt.Sprintf("%s: short key (expected %d "+
 				"bytes, read %d)", bucketUnmined, 32, len(k))

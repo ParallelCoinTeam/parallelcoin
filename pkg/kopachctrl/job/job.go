@@ -97,7 +97,8 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	var val int64
 	mTS := make(map[int32]*chainhash.Hash)
 	txs := mB.Transactions()[0]
-	for i, v := range mB.Transactions()[1:] {
+	rtx := mB.Transactions()[1:]
+	for i, v := range rtx {
 		txr[i] = v
 	}
 	nbH := bH
