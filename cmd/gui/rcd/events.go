@@ -91,6 +91,7 @@ func update(r *RcVar) {
 	// log.L.Warn("GetDuoUIblockCount")
 	r.GetDuoUIdifficulty()
 	r.GetDuoUIblockCount()
+	r.GetPeerInfo()
 	// log.L.Warn("GetDuoUIdifficulty")
 	r.UpdateTrigger <- struct{}{}
 }

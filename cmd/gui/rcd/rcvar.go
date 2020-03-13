@@ -30,7 +30,6 @@ type RcVar struct {
 	Toasts    []model.DuoUItoast
 	Localhost model.DuoUIlocalHost
 	Uptime    int
-	Peers     []*btcjson.GetPeerInfoResult `json:"peers"`
 
 	AddressBook *model.DuoUIaddressBook
 	ShowPage    string
@@ -39,6 +38,7 @@ type RcVar struct {
 	// WalletChan chan *wallet.Wallet
 	Explorer *model.DuoUIexplorer
 	History  *model.DuoUIhistory
+	Network  *model.DuoUInetwork
 	Quit     chan struct{}
 	Ready    chan struct{}
 	IsReady  bool
@@ -145,6 +145,40 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			Blocks:      []model.DuoUIblock{},
 			SingleBlock: btcjson.GetBlockVerboseResult{},
 		},
+
+		Network: &model.DuoUInetwork{
+			PerPage: &gel.DuoUIcounter{
+				Value:        20,
+				OperateValue: 1,
+				From:         0,
+				To:           50,
+				CounterInput: &gel.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
+				CounterIncrease: new(gel.Button),
+				CounterDecrease: new(gel.Button),
+				CounterReset:    new(gel.Button),
+			},
+			Page: &gel.DuoUIcounter{
+				Value:        0,
+				OperateValue: 1,
+				From:         0,
+				To:           50,
+				CounterInput: &gel.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
+				CounterIncrease: new(gel.Button),
+				CounterDecrease: new(gel.Button),
+				CounterReset:    new(gel.Button),
+			},
+			PeersList: &layout.List{
+				Axis: layout.Vertical,
+			},
+			//Peers:     []*btcjson.GetPeerInfoResult
+		},
+
 		History: &model.DuoUIhistory{
 			PerPage: &gel.DuoUIcounter{
 				Value:        20,

@@ -26,10 +26,10 @@ var (
 )
 
 func History(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("HISTORY", 0, rc.GetDuoUItransactions(), component.ContentHeader(gtx, th, headerTransactions(rc, gtx, th)), txsBody(rc, gtx, th), func() {})
+	return th.DuoUIpage("HISTORY", 0, rc.GetDuoUItransactions(), component.ContentHeader(gtx, th, historyHeader(rc, gtx, th)), historyBody(rc, gtx, th), func() {})
 }
 
-func headerTransactions(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func historyHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
@@ -45,7 +45,7 @@ func headerTransactions(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 	}
 }
 
-func txsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func historyBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(16)).Layout(gtx, func() {
 			layout.Flex{

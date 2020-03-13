@@ -1,10 +1,10 @@
 package rcd
 
 import (
-	"github.com/p9c/pod/pkg/gel"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/node/rpc"
-	log "github.com/p9c/logi"
+	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -163,14 +163,6 @@ func (r *RcVar) GetDifficulty() {
 // 	r = int64(0)
 // 	return
 // }
-func (r *RcVar) GetPeerInfo() {
-	getPeers, err := rpc.HandleGetPeerInfo(r.cx.RPCServer, nil, nil)
-	if err != nil {
-		// dV.PushDuoVUEalert("Error", err.Error(), "error")
-	}
-	r.Peers = getPeers.([]*btcjson.GetPeerInfoResult)
-	return
-}
 
 // func (v *DuoVUEnode) Stop() {
 // 	r, err := v.r.cx.RPCServer.HandleStop(v.r.cx.RPCServer, a, nil)

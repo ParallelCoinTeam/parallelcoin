@@ -47,7 +47,7 @@ func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 							})
 						}),
 						layout.Rigid(
-							component.Editor(gtx, th, consoleInputField, "Run command", func(e gel.SubmitEvent) {
+							component.ConsoleInput(gtx, th, consoleInputField, "Run command", func(e gel.SubmitEvent) {
 								rc.ConsoleHistory.Commands = append(rc.ConsoleHistory.Commands, model.DuoUIconsoleCommand{
 									ComID: e.Text,
 									Time:  time.Time{},

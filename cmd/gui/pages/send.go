@@ -1,13 +1,14 @@
 package pages
 
 import (
+	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/gui/clipboard"
 	"strconv"
 )
@@ -43,12 +44,11 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 			layout.Rigid(func() {
 				cs := gtx.Constraints
 				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 180, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
 				widgets := []func(){
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address", func(e gel.SubmitEvent) {
-								address = e.Text
+							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, address, "DUO address", func(e gel.EditorEvent) {
+								address = addressLineEditor.Text()
 							})),
 							layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Fonts["Primary"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE ADDRESS", func() {
 								addressLineEditor.SetText(clipboard.Get())
@@ -56,8 +56,8 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 					},
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, amountLineEditor, "DUO Amount", func(e gel.SubmitEvent) {
-								f, err := strconv.ParseFloat(e.Text, 64)
+							layout.Flexed(1, component.Editor(gtx, th, amountLineEditor, fmt.Sprint(amount), "DUO Amount", func(e gel.EditorEvent) {
+								f, err := strconv.ParseFloat(amountLineEditor.Text(), 64)
 								if err != nil {
 									amount = f
 									amountLineEditor.SetText("")
@@ -73,14 +73,14 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 								rc.Dialog.Show = true
 								rc.Dialog = &model.DuoUIdialog{
 									Show: true,
-									Ok:   rc.DuoSend(passPharse, address, amount),
+									Ok:   rc.DuoSend(passPharse, address, 1),
 									Close: func() {
 
 									},
 									CustomField: func() {
 										layout.Flex{}.Layout(gtx,
-											layout.Flexed(1, component.Editor(gtx, th, passLineEditor, "Enter your password", func(e gel.SubmitEvent) {
-												passPharse = e.Text
+											layout.Flexed(1, component.Editor(gtx, th, passLineEditor, passPharse, "Enter your password", func(e gel.EditorEvent) {
+												passPharse = passLineEditor.Text()
 											})))
 									},
 									Cancel: func() { rc.Dialog.Show = false },

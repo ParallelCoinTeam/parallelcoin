@@ -1,9 +1,10 @@
 package duoui
 
 import (
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
+	"github.com/p9c/pod/cmd/gui/pages"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/gui/clipboard"
 	"sync"
 
@@ -48,7 +49,7 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 	//duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
 	duo.Pages = &model.DuoUIpages{
 		Controller: nil,
-		Theme:      LoadPages(rc, duo.Context, duo.Theme),
+		Theme:      pages.LoadPages(rc, duo.Context, duo.Theme),
 	}
 
 	component.SetPage(rc, duo.Pages.Theme["OVERVIEW"])

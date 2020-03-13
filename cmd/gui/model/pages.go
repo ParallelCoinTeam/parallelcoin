@@ -29,3 +29,10 @@ type DuoUIhistoryCategories struct {
 	SentTxs     *gel.CheckBox
 	ReceivedTxs *gel.CheckBox
 }
+
+type DuoUInetwork struct {
+	PeersList *layout.List
+	Page      *gel.DuoUIcounter
+	PerPage   *gel.DuoUIcounter
+	Peers     []*btcjson.GetPeerInfoResult `json:"peers"`
+}

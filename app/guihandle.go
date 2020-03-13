@@ -5,12 +5,12 @@ package app
 import (
 	"github.com/urfave/cli"
 
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -32,7 +32,9 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		// signal the GUI that the back end is ready
 		log.L.Debug("sending ready signal")
 		// we can do this without blocking because the channel has 1 buffer this way it falls immediately the GUI starts
-		go rc.StartServices()
+		if !rc.Boot.IsFirstRun {
+			go rc.StartServices()
+		}
 		// Start up GUI
 		log.L.Debug("starting up GUI")
 		err = gui.WalletGUI(duo, rc)

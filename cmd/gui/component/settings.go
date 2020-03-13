@@ -53,7 +53,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 			case "input":
 				switch f.Field.InputType {
 				case "text":
-					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), f.Field.Label, func(e gel.SubmitEvent) {})
+					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), rc.Settings.Daemon.Config[f.Field.Model].(string), f.Field.Label, func(e gel.EditorEvent) {})
 				case "number":
 					e := th.DuoUIeditor(f.Field.Label)
 					e.Font.Typeface = th.Fonts["Primary"]
