@@ -26,6 +26,7 @@ var (
 	}
 	showMiningAddresses = &gel.CheckBox{}
 	buttonNewAddress    = new(gel.Button)
+	address             string
 )
 
 func DuoUIaddressBook(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {

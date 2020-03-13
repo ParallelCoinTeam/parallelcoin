@@ -2,6 +2,7 @@ package pages
 
 import (
 	"fmt"
+	log "github.com/p9c/logi"
 	"strconv"
 
 	"gioui.org/layout"
@@ -19,9 +20,6 @@ var (
 	layautList = &layout.List{
 		Axis: layout.Vertical,
 	}
-	address           string
-	amount            float64
-	passPharse        string
 	addressLineEditor = &gel.Editor{
 		SingleLine: true,
 	}
@@ -34,7 +32,14 @@ var (
 	buttonPasteAddress = new(gel.Button)
 	buttonPasteAmount  = new(gel.Button)
 	buttonSend         = new(gel.Button)
+	sendStruct         = new(send)
 )
+
+type send struct {
+	address    string
+	amount     float64
+	passPharse string
+}
 
 func Send(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	return th.DuoUIpage("SEND", 10, func() {}, func() {}, sendBody(rc, gtx, th), func() {})
@@ -50,9 +55,9 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 				widgets := []func(){
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, address, "DUO address",
+							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address",
 								func(e gel.EditorEvent) {
-									address = addressLineEditor.Text()
+									sendStruct.address = addressLineEditor.Text()
 								})),
 							layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Fonts["Primary"], 12,
 								th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE ADDRESS", func() {
@@ -61,13 +66,12 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 					},
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, amountLineEditor, fmt.Sprint(amount),
+							layout.Flexed(1, component.Editor(gtx, th, amountLineEditor,
 								"DUO Amount", func(e gel.EditorEvent) {
 									f, err := strconv.ParseFloat(amountLineEditor.Text(), 64)
 									if err != nil {
-										amount = f
-										amountLineEditor.SetText("")
 									}
+									sendStruct.amount = f
 								})),
 							layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Fonts["Primary"], 12,
 								th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE AMOUNT", func() {
@@ -78,18 +82,21 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 						layout.Flex{}.Layout(gtx,
 							layout.Rigid(component.Button(gtx, th, buttonSend, th.Fonts["Primary"], 12,
 								th.Colors["ButtonText"], th.Colors["ButtonBg"], "SEND", func() {
+									log.L.Info("passPharse:" + sendStruct.passPharse)
+									log.L.Info("address" + sendStruct.address)
+									log.L.Info("amount:" + fmt.Sprint(sendStruct.amount))
 									rc.Dialog.Show = true
 									rc.Dialog = &model.DuoUIdialog{
 										Show: true,
-										Ok:   rc.DuoSend(passPharse, address, 1),
+										Ok:   rc.DuoSend(sendStruct.passPharse, sendStruct.address, 11),
 										Close: func() {
 
 										},
 										CustomField: func() {
 											layout.Flex{}.Layout(gtx,
-												layout.Flexed(1, component.Editor(gtx, th, passLineEditor, passPharse,
-													"Enter your password", func(e gel.EditorEvent) {
-														passPharse = passLineEditor.Text()
+												layout.Flexed(1, component.Editor(gtx, th, passLineEditor, "Enter your password",
+													func(e gel.EditorEvent) {
+														sendStruct.passPharse = passLineEditor.Text()
 													})))
 										},
 										Cancel: func() { rc.Dialog.Show = false },
