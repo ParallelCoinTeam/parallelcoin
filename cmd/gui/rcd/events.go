@@ -5,8 +5,8 @@ import (
 
 	"go.uber.org/atomic"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
 	log "github.com/p9c/logi"
+	blockchain "github.com/p9c/pod/pkg/chain"
 )
 
 const (
@@ -83,7 +83,7 @@ func update(r *RcVar) {
 	r.GetLatestTransactions()
 	// log.L.Info("")
 	// log.L.Info("UPDATE")
-	log.L.Info(r.Status.Wallet.LastTxs.Txs)
+	log.L.Info(r.History.PerPage)
 	// log.L.Info("")
 	// r.GetDuoUIstatus()
 	// r.GetDuoUIlocalLost()
@@ -91,6 +91,7 @@ func update(r *RcVar) {
 	// log.L.Warn("GetDuoUIblockCount")
 	r.GetDuoUIdifficulty()
 	r.GetDuoUIblockCount()
+	r.GetPeerInfo()
 	// log.L.Warn("GetDuoUIdifficulty")
 	r.UpdateTrigger <- struct{}{}
 }

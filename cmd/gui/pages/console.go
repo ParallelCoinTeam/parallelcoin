@@ -3,11 +3,11 @@ package pages
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gelook"
 	"time"
 )
 
@@ -35,8 +35,8 @@ func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 						Spacing: layout.SpaceAround,
 					}.Layout(gtx,
 						layout.Flexed(1, func() {
-							consoleOutputList.Layout(gtx, len(rc.CommandsHistory.Commands), func(i int) {
-								t := rc.CommandsHistory.Commands[i]
+							consoleOutputList.Layout(gtx, len(rc.ConsoleHistory.Commands), func(i int) {
+								t := rc.ConsoleHistory.Commands[i]
 								layout.Flex{
 									Axis:      layout.Vertical,
 									Alignment: layout.End,
@@ -47,8 +47,8 @@ func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 							})
 						}),
 						layout.Rigid(
-							component.Editor(gtx, th, consoleInputField, "Run command", func(e gel.SubmitEvent) {
-								rc.CommandsHistory.Commands = append(rc.CommandsHistory.Commands, model.DuoUIcommand{
+							component.ConsoleInput(gtx, th, consoleInputField, "Run command", func(e gel.SubmitEvent) {
+								rc.ConsoleHistory.Commands = append(rc.ConsoleHistory.Commands, model.DuoUIconsoleCommand{
 									ComID: e.Text,
 									Time:  time.Time{},
 									Out:   rc.ConsoleCmd(e.Text),

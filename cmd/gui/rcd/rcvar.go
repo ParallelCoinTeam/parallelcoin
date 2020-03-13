@@ -1,13 +1,10 @@
 package rcd
 
 import (
-	"gioui.org/op/paint"
+	"gioui.org/layout"
 	"gioui.org/text"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	log "github.com/p9c/logi"
-	"github.com/skip2/go-qrcode"
-	"strings"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/model"
@@ -16,31 +13,32 @@ import (
 )
 
 type RcVar struct {
-	cx              *conte.Xt
-	db              *DuoUIdb
-	Boot            *Boot
-	Events          chan Event
-	UpdateTrigger   chan struct{}
-	Status          *model.DuoUIstatus
-	Dialog          *model.DuoUIdialog
-	Log             *model.DuoUIlog
-	CommandsHistory *model.DuoUIcommandsHistory
+	cx             *conte.Xt
+	db             *DuoUIdb
+	Boot           *Boot
+	Events         chan Event
+	UpdateTrigger  chan struct{}
+	Status         *model.DuoUIstatus
+	Dialog         *model.DuoUIdialog
+	Log            *model.DuoUIlog
+	ConsoleHistory *model.DuoUIconsoleHistory
+
+	Commands *DuoUIcommands
 
 	Settings  *model.DuoUIsettings
 	Sent      bool
 	Toasts    []model.DuoUItoast
 	Localhost model.DuoUIlocalHost
 	Uptime    int
-	Peers     []*btcjson.GetPeerInfoResult `json:"peers"`
 
 	AddressBook *model.DuoUIaddressBook
-	QrCode      *model.DuoUIqrCode
 	ShowPage    string
 	CurrentPage *gelook.DuoUIpage
 	// NodeChan   chan *rpc.Server
 	// WalletChan chan *wallet.Wallet
 	Explorer *model.DuoUIexplorer
 	History  *model.DuoUIhistory
+	Network  *model.DuoUInetwork
 	Quit     chan struct{}
 	Ready    chan struct{}
 	IsReady  bool
@@ -85,35 +83,26 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 	// }
 	l := new(model.DuoUIlog)
 
-	qr, err := qrcode.New(strings.ToUpper("sdasdasfsdgfdshsdfhdjtjrtkjrtykdyjdfgjfdghjfdgsh"), qrcode.Highest)
-	if err != nil {
-		log.L.Fatal(err)
-	}
-	qr.BackgroundColor = gelook.HexARGB("ff3030cf")
-	qrcode := &model.DuoUIqrCode{
-		AddrQR: paint.NewImageOp(qr.Image(256)),
-	}
 	r = &RcVar{
 		cx:          cx,
 		db:          new(DuoUIdb),
 		Boot:        &b,
 		AddressBook: new(model.DuoUIaddressBook),
-		QrCode:      qrcode,
 		Status: &model.DuoUIstatus{
 			Node: &model.NodeStatus{},
 			Wallet: &model.WalletStatus{
 				WalletVersion: make(map[string]btcjson.VersionResult),
-				Transactions:  &model.DuoUItransactions{},
-				LastTxs:       &model.DuoUItransactions{},
+				LastTxs:       &model.DuoUItransactionsExcerpts{},
 			},
 			Kopach: &model.KopachStatus{},
 		},
 		Dialog:   &model.DuoUIdialog{},
 		Settings: settings(cx),
 		Log:      l,
-		CommandsHistory: &model.DuoUIcommandsHistory{
-			Commands: []model.DuoUIcommand{
-				model.DuoUIcommand{
+		Commands: new(DuoUIcommands),
+		ConsoleHistory: &model.DuoUIconsoleHistory{
+			Commands: []model.DuoUIconsoleCommand{
+				model.DuoUIconsoleCommand{
 					ComID:    "input",
 					Category: "input",
 					Time:     time.Now(),
@@ -156,7 +145,8 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			Blocks:      []model.DuoUIblock{},
 			SingleBlock: btcjson.GetBlockVerboseResult{},
 		},
-		History: &model.DuoUIhistory{
+
+		Network: &model.DuoUInetwork{
 			PerPage: &gel.DuoUIcounter{
 				Value:        20,
 				OperateValue: 1,
@@ -182,6 +172,49 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 				CounterIncrease: new(gel.Button),
 				CounterDecrease: new(gel.Button),
 				CounterReset:    new(gel.Button),
+			},
+			PeersList: &layout.List{
+				Axis: layout.Vertical,
+			},
+			//Peers:     []*btcjson.GetPeerInfoResult
+		},
+
+		History: &model.DuoUIhistory{
+			PerPage: &gel.DuoUIcounter{
+				Value:        20,
+				OperateValue: 1,
+				From:         1,
+				To:           50,
+				CounterInput: &gel.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
+				CounterIncrease: new(gel.Button),
+				CounterDecrease: new(gel.Button),
+				CounterReset:    new(gel.Button),
+			},
+			Page: &gel.DuoUIcounter{
+				Value:        0,
+				OperateValue: 1,
+				From:         0,
+				To:           50,
+				CounterInput: &gel.Editor{
+					Alignment:  text.Middle,
+					SingleLine: true,
+				},
+				CounterIncrease: new(gel.Button),
+				CounterDecrease: new(gel.Button),
+				CounterReset:    new(gel.Button),
+			},
+			TransList: &layout.List{
+				Axis: layout.Vertical,
+			},
+			Categories: &model.DuoUIhistoryCategories{
+				AllTxs:      new(gel.CheckBox),
+				MintedTxs:   new(gel.CheckBox),
+				ImmatureTxs: new(gel.CheckBox),
+				SentTxs:     new(gel.CheckBox),
+				ReceivedTxs: new(gel.CheckBox),
 			},
 			Txs: &model.DuoUItransactionsExcerpts{
 				ModelTxsListNumber: 0,

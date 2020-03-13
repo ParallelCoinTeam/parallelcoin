@@ -11,18 +11,6 @@ type DuoUIbalance struct {
 type DuoUIunconfirmed struct {
 	Unconfirmed string `json:"unconfirmed"`
 }
-type DuoUItransactions struct {
-	Txs       []DuoUItx `json:"txs"`
-	TxsNumber int       `json:"txsnumber"`
-}
-type DuoUItx struct {
-	TxID          string
-	Amount        float64
-	Category      string
-	Confirmations int64
-	Time          string
-	Added         string
-}
 
 type DuoUItransactionsNumber struct {
 	TxsNumber int `json:"txsnumber"`

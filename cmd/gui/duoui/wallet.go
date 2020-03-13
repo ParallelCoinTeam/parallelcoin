@@ -6,7 +6,6 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -99,11 +98,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 						if testnet.Checked(ui.ly.Context) {
 							interrupt.RequestRestart()
 						}
-						log.L.Info("WOIKOS!")
 					}
-					log.L.Info("confirmPassPhrase: ", confirmPassPhrase)
-					log.L.Info("passPhrase: ", passPhrase)
-					log.L.Info("posleWOIKOS!")
 				}
 				createWalletbuttonComp.Layout(ui.ly.Context, buttonCreateWallet)
 			},

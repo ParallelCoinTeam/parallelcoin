@@ -2,9 +2,9 @@ package rcd
 
 import (
 	"fmt"
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
@@ -45,6 +45,7 @@ func (r *RcVar) GetDuoUIunconfirmedBalance() {
 func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 	return func() {
 		log.L.Trace("sending", wp, ad, am)
+		log.L.Info("sending", wp, ad, am)
 		if am > 0 {
 			getBlockChain, err := rpc.HandleGetBlockChainInfo(r.cx.RPCServer, nil, nil)
 			if err != nil {

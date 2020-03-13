@@ -1,11 +1,12 @@
 package rcd
 
+//)
 //
 //type
 //DuOShistory struct {
 //	cx *conte.Xt
 //	db DuoUIdb
-//	txs DuOStransactionsExcerpts
+//	txs model.DuOStransactionsExcerpts
 //}
 //
 //func (d *DuOShistory)GetDuOShistory() {

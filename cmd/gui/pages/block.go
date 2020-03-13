@@ -8,10 +8,10 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -89,7 +89,7 @@ func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 		blockText := string(blockJSON)
 		widgets := []func(){
 
-			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 12, 18, "Hash", "Light", "Dark", "Light", "DarkGray", fmt.Sprint(block.Hash))),
+			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 4, 12, 18, "Hash", "Light", "Dark", "Light", "DarkGray", fmt.Sprint(block.Hash))),
 			component.DuoFields(gtx, duo,
 				component.TrioFields(gtx, th, trio, 12, 16,
 					"Height", fmt.Sprint(block.Height), "Light", "Dark", "Light", "DarkGray",
@@ -103,10 +103,9 @@ func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				),
 			),
 			component.DuoFields(gtx, duo,
-				component.ContentLabeledField(gtx, th, layout.Vertical, 12, 12, "MerkleRoot", "Light", "Dark", "Light", "DarkGray", block.MerkleRoot),
-				component.ContentLabeledField(gtx, th, layout.Vertical, 12, 12, "PowHash", "Light", "Dark", "Light", "DarkGray", fmt.Sprint(block.PowHash)),
+				component.ContentLabeledField(gtx, th, layout.Vertical, 4, 12, 12, "MerkleRoot", "Light", "Dark", "Light", "DarkGray", block.MerkleRoot),
+				component.ContentLabeledField(gtx, th, layout.Vertical, 4, 12, 12, "PowHash", "Light", "Dark", "Light", "DarkGray", fmt.Sprint(block.PowHash)),
 			),
-			component.HorizontalLine(gtx, 1, th.Colors["Dark"]),
 			component.DuoFields(gtx, duo,
 				component.TrioFields(gtx, th, trio, 12, 16,
 					"Size", fmt.Sprint(block.Size), "Light", "Dark", "Light", "DarkGray",
@@ -119,12 +118,12 @@ func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 					"Version", fmt.Sprint(block.Version), "Light", "Dark", "Light", "DarkGray",
 				),
 			),
-			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 12, 12, "Tx", "Light", "Dark", "Light", "DarkGray", fmt.Sprint(block.Tx))),
-			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 12, 12, "RawTx", "Light", "Dark", "Light", "DarkGray", fmt.Sprint(blockText))),
+			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 4, 12, 12, "Tx", "Light", "Dark", "Light", "DarkGray", fmt.Sprint(block.Tx))),
+			component.UnoField(gtx, component.ContentLabeledField(gtx, th, layout.Vertical, 4, 12, 12, "RawTx", "Light", "Dark", "Light", "DarkGray", fmt.Sprint(blockText))),
 			component.PageNavButtons(rc, gtx, th, block.PreviousHash, block.NextHash, blockPage(rc, gtx, th, block.PreviousHash), blockPage(rc, gtx, th, block.NextHash)),
 		}
 		layautList.Layout(gtx, len(widgets), func(i int) {
-			layout.UniformInset(unit.Dp(4)).Layout(gtx, widgets[i])
+			layout.UniformInset(unit.Dp(0)).Layout(gtx, widgets[i])
 		})
 
 	}

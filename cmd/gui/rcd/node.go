@@ -3,8 +3,8 @@ package rcd
 import (
 	"fmt"
 
-	"github.com/p9c/pod/cmd/node/rpc"
 	log "github.com/p9c/logi"
+	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -84,4 +84,13 @@ func (r *RcVar) GetDuoUIhashesPerSecList() {
 
 	// })
 
+}
+
+func (r *RcVar) GetPeerInfo() {
+	getPeers, err := rpc.HandleGetPeerInfo(r.cx.RPCServer, nil, nil)
+	if err != nil {
+		// dV.PushDuoVUEalert("Error", err.Error(), "error")
+	}
+	r.Network.Peers = getPeers.([]*btcjson.GetPeerInfoResult)
+	return
 }

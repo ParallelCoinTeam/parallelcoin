@@ -6,9 +6,9 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	"github.com/p9c/pod/cmd/gui/rcd"
 	"image"
 	"image/color"
 )
@@ -36,8 +36,32 @@ func fill(gtx *layout.Context, col color.RGBA) {
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	gtx.Dimensions = layout.Dimensions{Size: d}
 }
+func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, value, label string, handler func(gel.EditorEvent)) func() {
+	return func() {
+		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+			cs := gtx.Constraints
+			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				e := th.DuoUIeditor(label)
+				e.Font.Typeface = th.Fonts["Primary"]
+				e.Font.Style = text.Italic
+				e.Layout(gtx, editorControler)
 
-func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, label string, handler func(gel.SubmitEvent)) func() {
+				for _, e := range editorControler.Events(gtx) {
+					switch e.(type) {
+					case gel.ChangeEvent:
+						value = editorControler.Text()
+						handler(e)
+						editorControler.SetText(value)
+					}
+				}
+			})
+		})
+	}
+}
+
+func ConsoleInput(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, label string, handler func(gel.SubmitEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			cs := gtx.Constraints
@@ -69,7 +93,6 @@ func Button(gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Bu
 			}
 			button.Layout(gtx, buttonController)
 		})
-
 	}
 }
 
