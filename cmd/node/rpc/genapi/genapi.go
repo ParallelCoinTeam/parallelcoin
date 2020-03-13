@@ -8,350 +8,312 @@ import (
 )
 
 type handler struct {
-	Method, Handler, Cmd, Res, ResType string
+	Method, Handler, Cmd, ResType string
 }
 
 var handlers = []handler{
 	{
 		Method:  "addnode",
-		Handler: "HandleAddNode",
+		Handler: "AddNode",
 		Cmd:     "btcjson.AddNodeCmd",
-		Res:     "AddNodeRes",
 		ResType: "None",
 	},
 	{
 		Method:  "createrawtransaction",
-		Handler: "HandleCreateRawTransaction",
+		Handler: "CreateRawTransaction",
 		Cmd:     "btcjson.CreateRawTransactionCmd",
-		Res:     "CreateRawTransactionRes",
 		ResType: "string",
 	},
 	{
 		Method:  "decoderawtransaction",
-		Handler: "HandleDecodeRawTransaction",
+		Handler: "DecodeRawTransaction",
 		Cmd:     "btcjson.DecodeRawTransactionCmd",
-		Res:     "DecodeRawTransactionRes",
 		ResType: "btcjson.TxRawDecodeResult",
 	},
 	{
 		Method:  "decodescript",
-		Handler: "HandleDecodeScript",
+		Handler: "DecodeScript",
 		Cmd:     "btcjson.DecodeScriptCmd",
-		Res:     "DecodeScriptRes",
 		ResType: "btcjson.DecodeScriptResult",
 	},
 	{
 		Method:  "estimatefee",
-		Handler: "HandleEstimateFee",
+		Handler: "EstimateFee",
 		Cmd:     "btcjson.EstimateFeeCmd",
-		Res:     "EstimateFeeRes",
 		ResType: "float64",
 	},
 	{
 		Method:  "generate",
-		Handler: "HandleGenerate",
-		Cmd:     "nil",
-		Res:     "GenerateRes",
+		Handler: "Generate",
+		Cmd:     "None",
 		ResType: "[]string",
 	},
 	{
 		Method:  "getaddednodeinfo",
-		Handler: "HandleGetAddedNodeInfo",
+		Handler: "GetAddedNodeInfo",
 		Cmd:     "btcjson.GetAddedNodeInfoCmd",
-		Res:     "GetAddedNodeInfoRes",
 		ResType: "[]btcjson.GetAddedNodeInfoResultAddr",
 	},
 	{
 		Method:  "getbestblock",
-		Handler: "HandleGetBestBlock",
-		Cmd:     "nil",
-		Res:     "GetBestBlockRes",
+		Handler: "GetBestBlock",
+		Cmd:     "None",
 		ResType: "btcjson.GetBestBlockResult",
 	},
 	{
 		Method:  "getbestblockhash",
-		Handler: "HandleGetBestBlockHash",
-		Cmd:     "nil",
-		Res:     "GetBestBlockHashRes",
+		Handler: "GetBestBlockHash",
+		Cmd:     "None",
 		ResType: "string",
 	},
 	{
 		Method:  "getblock",
-		Handler: "HandleGetBlock",
+		Handler: "GetBlock",
 		Cmd:     "btcjson.GetBlockCmd",
-		Res:     "GetBlockRes",
 		ResType: "btcjson.GetBlockVerboseResult",
 	},
 	{
 		Method:  "getblockchaininfo",
-		Handler: "HandleGetBlockChainInfo",
-		Cmd:     "nil",
-		Res:     "GetBlockChainInfoRes",
+		Handler: "GetBlockChainInfo",
+		Cmd:     "None",
 		ResType: "btcjson.GetBlockChainInfoResult",
 	},
 	{
 		Method:  "getblockcount",
-		Handler: "HandleGetBlockCount",
-		Cmd:     "nil",
-		Res:     "GetBlockCountRes",
+		Handler: "GetBlockCount",
+		Cmd:     "None",
 		ResType: "int64",
 	},
 	{
 		Method:  "getblockhash",
-		Handler: "HandleGetBlockHash",
+		Handler: "GetBlockHash",
 		Cmd:     "btcjson.GetBlockHashCmd",
-		Res:     "GetBlockHashRes",
 		ResType: "string",
 	},
 	{
 		Method:  "getblockheader",
-		Handler: "HandleGetBlockHeader",
+		Handler: "GetBlockHeader",
 		Cmd:     "btcjson.GetBlockHeaderCmd",
-		Res:     "GetBlockHeaderRes",
 		ResType: "btcjson.GetBlockHeaderVerboseResult",
 	},
 	{
 		Method:  "getblocktemplate",
-		Handler: "HandleGetBlockTemplate",
+		Handler: "GetBlockTemplate",
 		Cmd:     "btcjson.GetBlockTemplateCmd",
-		Res:     "GetBlockTemplateRes",
 		ResType: "string",
 	},
 	{
 		Method:  "getcfilter",
-		Handler: "HandleGetCFilter",
+		Handler: "GetCFilter",
 		Cmd:     "btcjson.GetCFilterCmd",
-		Res:     "GetCFilterRes",
 		ResType: "string",
 	},
 	{
 		Method:  "getcfilterheader",
-		Handler: "HandleGetCFilterHeader",
+		Handler: "GetCFilterHeader",
 		Cmd:     "btcjson.GetCFilterHeaderCmd",
-		Res:     "GetCFilterHeaderRes",
 		ResType: "string",
 	},
 	{
 		Method:  "getconnectioncount",
-		Handler: "HandleGetConnectionCount",
-		Cmd:     "nil",
-		Res:     "GetConnectionCountRes",
+		Handler: "GetConnectionCount",
+		Cmd:     "None",
 		ResType: "int32",
 	},
 	{
 		Method:  "getcurrentnet",
-		Handler: "HandleGetCurrentNet",
-		Cmd:     "nil",
-		Res:     "GetCurrentNetRes",
+		Handler: "GetCurrentNet",
+		Cmd:     "None",
 		ResType: "string",
 	},
 	{
 		Method:  "getdifficulty",
-		Handler: "HandleGetDifficulty",
+		Handler: "GetDifficulty",
 		Cmd:     "btcjson.GetDifficultyCmd",
-		Res:     "GetDifficultyRes",
 		ResType: "float64",
 	},
 	{
 		Method:  "getgenerate",
-		Handler: "HandleGetGenerate",
+		Handler: "GetGenerate",
 		Cmd:     "btcjson.GetHeadersCmd",
-		Res:     "GetGenerateRes",
 		ResType: "bool",
 	},
 	{
 		Method:  "gethashespersec",
-		Handler: "HandleGetHashesPerSec",
-		Cmd:     "nil",
-		Res:     "GetHashesPerSecRes",
+		Handler: "GetHashesPerSec",
+		Cmd:     "None",
 		ResType: "float64",
 	},
 	{
 		Method:  "getheaders",
-		Handler: "HandleGetHeaders",
+		Handler: "GetHeaders",
 		Cmd:     "btcjson.GetHeadersCmd",
-		Res:     "GetHeadersRes",
 		ResType: "[]string",
 	},
 	{
 		Method:  "getinfo",
-		Handler: "HandleGetInfo",
-		Cmd:     "nil",
-		Res:     "GetInfoRes",
+		Handler: "GetInfo",
+		Cmd:     "None",
 		ResType: "btcjson.InfoChainResult0",
 	},
 	{
 		Method:  "getmempoolinfo",
-		Handler: "HandleGetMempoolInfo",
-		Cmd:     "nil",
-		Res:     "GetMempoolInfoRes",
+		Handler: "GetMempoolInfo",
+		Cmd:     "None",
 		ResType: "btcjson.GetMempoolInfoResult",
 	},
 	{
 		Method:  "getmininginfo",
-		Handler: "HandleGetMiningInfo",
-		Cmd:     "nil",
-		Res:     "GetMiningInfoRes",
+		Handler: "GetMiningInfo",
+		Cmd:     "None",
 		ResType: "btcjson.GetMiningInfoResult",
 	},
 	{
 		Method:  "getnettotals",
-		Handler: "HandleGetNetTotals",
-		Cmd:     "nil",
-		Res:     "GetNetTotalsRes",
+		Handler: "GetNetTotals",
+		Cmd:     "None",
 		ResType: "btcjson.GetNetTotalsResult",
 	},
 	{
 		Method:  "getnetworkhashps",
-		Handler: "HandleGetNetworkHashPS",
+		Handler: "GetNetworkHashPS",
 		Cmd:     "btcjson.GetNetworkHashPSCmd",
-		Res:     "GetNetworkHashPSRes",
 		ResType: "[]btcjson.GetPeerInfoResult",
 	},
 	{
 		Method:  "getpeerinfo",
-		Handler: "HandleGetPeerInfo",
-		Cmd:     "nil",
-		Res:     "GetPeerInfoRes",
+		Handler: "GetPeerInfo",
+		Cmd:     "None",
 		ResType: "[]btcjson.GetPeerInfoResult",
 	},
 	{
 		Method:  "getrawmempool",
-		Handler: "HandleGetRawMempool",
+		Handler: "GetRawMempool",
 		Cmd:     "btcjson.GetRawMempoolCmd",
-		Res:     "GetRawMempoolRes",
 		ResType: "[]string",
 	},
 	{
 		Method:  "getrawtransaction",
-		Handler: "HandleGetRawTransaction",
+		Handler: "GetRawTransaction",
 		Cmd:     "btcjson.GetRawTransactionCmd",
-		Res:     "GetRawTransactionRes",
 		ResType: "string",
 	},
 	{
 		Method:  "gettxout",
-		Handler: "HandleGetTxOut",
+		Handler: "GetTxOut",
 		Cmd:     "btcjson.GetTxOutCmd",
-		Res:     "GetTxOutRes",
 		ResType: "string",
 	},
 	{
 		Method:  "help",
-		Handler: "HandleHelp",
+		Handler: "Help",
 		Cmd:     "btcjson.HelpCmd",
-		Res:     "HelpRes",
 		ResType: "string",
 	},
 	{
 		Method:  "node",
-		Handler: "HandleNode",
+		Handler: "Node",
 		Cmd:     "btcjson.NodeCmd",
-		Res:     "NodeRes",
 		ResType: "None",
 	},
 	{
 		Method:  "ping",
-		Handler: "HandlePing",
-		Cmd:     "nil",
-		Res:     "PingRes",
+		Handler: "Ping",
+		Cmd:     "None",
 		ResType: "None",
 	},
 	{
 		Method:  "searchrawtransactions",
-		Handler: "HandleSearchRawTransactions",
+		Handler: "SearchRawTransactions",
 		Cmd:     "btcjson.SearchRawTransactionsCmd",
-		Res:     "SearchRawTransactionsRes",
 		ResType: "[]btcjson.SearchRawTransactionsResult",
 	},
 	{
 		Method:  "sendrawtransaction",
-		Handler: "HandleSendRawTransaction",
+		Handler: "SendRawTransaction",
 		Cmd:     "btcjson.SendRawTransactionCmd",
-		Res:     "SendRawTransactionRes",
 		ResType: "None",
 	},
 	{
 		Method:  "setgenerate",
-		Handler: "HandleSetGenerate",
+		Handler: "SetGenerate",
 		Cmd:     "btcjson.SetGenerateCmd",
-		Res:     "SetGenerateRes",
 		ResType: "None",
 	},
 	{
 		Method:  "stop",
-		Handler: "HandleStop",
-		Cmd:     "nil",
-		Res:     "StopRes",
+		Handler: "Stop",
+		Cmd:     "None",
 		ResType: "None",
 	},
 	{
 		Method:  "restart",
-		Handler: "HandleRestart",
-		Cmd:     "nil",
-		Res:     "RestartRes",
+		Handler: "Restart",
+		Cmd:     "None",
 		ResType: "None",
 	},
 	{
 		Method:  "resetchain",
-		Handler: "HandleResetChain",
-		Cmd:     "nil",
-		Res:     "ResetChainRes",
+		Handler: "ResetChain",
+		Cmd:     "None",
 		ResType: "None",
 	},
 	{
 		Method:  "submitblock",
-		Handler: "HandleSubmitBlock",
+		Handler: "SubmitBlock",
 		Cmd:     "btcjson.SubmitBlockCmd",
-		Res:     "SubmitBlockRes",
 		ResType: "string",
 	},
 	{
 		Method:  "uptime",
-		Handler: "HandleUptime",
-		Cmd:     "nil",
-		Res:     "UptimeRes",
+		Handler: "Uptime",
+		Cmd:     "None",
 		ResType: "btcjson.GetMempoolInfoResult",
 	},
 	{
 		Method:  "validateaddress",
-		Handler: "HandleValidateAddress",
+		Handler: "ValidateAddress",
 		Cmd:     "btcjson.ValidateAddressCmd",
-		Res:     "ValidateAddressRes",
 		ResType: "btcjson.ValidateAddressChainResult",
 	},
 	{
 		Method:  "verifychain",
-		Handler: "HandleVerifyChain",
+		Handler: "VerifyChain",
 		Cmd:     "btcjson.VerifyChainCmd",
-		Res:     "VerifyChainRes",
 		ResType: "bool",
 	},
 	{
 		Method:  "verifymessage",
-		Handler: "HandleVerifyMessage",
+		Handler: "VerifyMessage",
 		Cmd:     "btcjson.VerifyMessageCmd",
-		Res:     "VerifyMessageRes",
 		ResType: "bool",
 	},
 	{
 		Method:  "version",
-		Handler: "HandleVersion",
+		Handler: "Version",
 		Cmd:     "btcjson.VersionCmd",
-		Res:     "VersionRes",
 		ResType: "map[string]btcjson.VersionResult",
 	},
 }
 
 func main() {
-	t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
-	if err := t.Execute(os.Stdout, handlers); log.L.Check(err) {
+	log.L.SetLevel("trace", true, "pod")
+	if fd, err := os.Create("../rpchandlers.go"); log.L.Check(err) {
+	} else {
+		defer fd.Close()
+		t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
+		if err = t.Execute(fd, handlers); log.L.Check(err) {
+		}
 	}
 }
 
-var NodeRPCHandlerTpl = `package rpc
+var NodeRPCHandlerTpl = `// generated by go run gen.go; DO NOT EDIT
+
+package rpc
 
 import (
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -360,12 +322,13 @@ type API struct {
 	Params interface{}
 }
 
-RPCHandlersBeforeInit = map[string]CommandHandler{
-{{range .}}	"{{ .Method }}":{ 
-		{{ .Handler }}, make(chan API), func() API {
+var RPCHandlersBeforeInit = map[string]CommandHandler{
+{{range .}}	"{{.Method}}":{ 
+		Fn: Handle{{.Handler}}, 
+		Call: make(chan API), 
+		Result: func() API {
 			return API{
-				{{ .Cmd }}{},
-				make(chan {{ .Res }}),
+				Ch: make(chan {{.Handler}}Res),
 			}
 		},
 	}, 
@@ -374,10 +337,39 @@ RPCHandlersBeforeInit = map[string]CommandHandler{
 
 type (
 	None struct{} {{range .}}
-	{{.Res}} struct {
+	{{.Handler}}Res struct {
 		Res {{.ResType}}
 		Err error
 	}
 	{{end}}
 )
+{{range .}}
+func (a API) {{.Handler}}(cmd {{.Cmd}}) (err error) {
+		RPCHandlers["{{.Method}}"].Call <- API{a.Ch, cmd}
+		return
+}
+{{end}}
+
+// StartAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result
+// Note that the parameters are type asserted to prevent the consumer of the API from sending wrong message types not
+// because it's necessary since they are interfaces end to end
+func StartAPI(server *Server, quit chan struct{}) {
+	nrh := RPCHandlers
+	go func() {
+		var err error
+		var res interface{}
+		for {
+			select { {{range .}}
+			case msg := <-nrh["{{.Method}}"].Call:
+				if res, err = nrh["{{.Method}}"].
+					Fn(server, msg.Params.({{.Cmd}}), nil); log.L.Check(err) {
+				}
+				msg.Ch.(chan {{.Handler}}Res) <- {{.Handler}}Res{
+					Res: res.({{.ResType}}), Err: err} {{end}}
+			case <-quit:
+				return
+			}
+		}
+	}()
+}
 `

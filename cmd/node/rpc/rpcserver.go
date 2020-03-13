@@ -374,287 +374,287 @@ var (
 	// causes a dependency loop.
 	RPCHandlers map[string]CommandHandler
 	// RPCHandlersBeforeInit is
-	RPCHandlersBeforeInit = map[string]CommandHandler{
-		"addnode": {
-			HandleAddNode, make(chan API), func() API {
-				return API{
-					btcjson.AddNodeCmd{},
-					make(chan AddNodeRes),
-				}
-			},
-		},
-		"createrawtransaction": {
-			HandleCreateRawTransaction, make(chan API),
-			func() API {
-				return API{btcjson.CreateRawTransactionCmd{},
-					make(chan CreateRawTransactionRes)}
-			},
-		},
-		// "debuglevel":            handleDebugLevel,
-		"decoderawtransaction": {
-			HandleDecodeRawTransaction, make(chan API),
-			func() API {
-				return API{btcjson.DecodeRawTransactionCmd{},
-					make(chan DecodeRawTransactionRes)}
-			},
-		},
-		"decodescript": {
-			HandleDecodeScript, make(chan API),
-			func() API {
-				return API{btcjson.DecodeScriptCmd{},
-					make(chan DecodeScriptRes)}
-			},
-		},
-		"estimatefee": {
-			HandleEstimateFee, make(chan API),
-			func() API {
-				return API{btcjson.EstimateFeeCmd{},
-					make(chan EstimateFeeRes)}
-			},
-		},
-		"generate": {
-			HandleGenerate, make(chan API),
-			func() API { return API{nil, make(chan GenerateRes)} },
-		},
-		"getaddednodeinfo": {
-			HandleGetAddedNodeInfo, make(chan API),
-			func() API {
-				return API{btcjson.GetAddedNodeInfoCmd{},
-					make(chan GetAddedNodeInfoRes)}
-			},
-		},
-		"getbestblock": {
-			HandleGetBestBlock, make(chan API),
-			func() API { return API{nil, make(chan GetBestBlockRes)} },
-		},
-		"getbestblockhash": {
-			HandleGetBestBlockHash, make(chan API),
-			func() API { return API{nil, make(chan GetBestBlockHashRes)} },
-		},
-		"getblock": {
-			HandleGetBlock, make(chan API),
-			func() API {
-				return API{btcjson.GetBlockCmd{},
-					make(chan GetBlockRes)}
-			},
-		},
-		"getblockchaininfo": {
-			HandleGetBlockChainInfo, make(chan API),
-			func() API { return API{nil, make(chan GetBlockChainInfoRes)} },
-		},
-		"getblockcount": {
-			HandleGetBlockCount, make(chan API),
-			func() API { return API{nil, make(chan GetBlockCountRes)} },
-		},
-		"getblockhash": {
-			HandleGetBlockHash, make(chan API),
-			func() API {
-				return API{btcjson.GetBlockHashCmd{},
-					make(chan GetBlockHashRes)}
-			},
-		},
-		"getblockheader": {
-			HandleGetBlockHeader, make(chan API),
-			func() API {
-				return API{btcjson.GetBlockHeaderCmd{},
-					make(chan GetBlockHeaderRes)}
-			},
-		},
-		"getblocktemplate": {
-			HandleGetBlockTemplate, make(chan API),
-			func() API {
-				return API{btcjson.GetBlockTemplateCmd{},
-					make(chan GetBlockTemplateRes)}
-			},
-		},
-		"getcfilter": {
-			HandleGetCFilter, make(chan API),
-			func() API {
-				return API{btcjson.GetCFilterCmd{},
-					make(chan GetCFilterRes)}
-			},
-		},
-		"getcfilterheader": {
-			HandleGetCFilterHeader, make(chan API),
-			func() API {
-				return API{btcjson.GetCFilterHeaderCmd{},
-					make(chan GetCFilterHeaderRes)}
-			},
-		},
-		"getconnectioncount": {
-			HandleGetConnectionCount, make(chan API),
-			func() API { return API{nil, make(chan GetConnectionCountRes)} },
-		},
-		"getcurrentnet": {
-			HandleGetCurrentNet, make(chan API),
-			func() API { return API{nil, make(chan GetCurrentNetRes)} },
-		},
-		"getdifficulty": {
-			HandleGetDifficulty, make(chan API),
-			func() API {
-				return API{btcjson.GetDifficultyCmd{},
-					make(chan GetDifficultyRes)}
-			},
-		},
-		"getgenerate": {
-			HandleGetGenerate, make(chan API),
-			func() API {
-				return API{btcjson.GetHeadersCmd{},
-					make(chan GetGenerateRes)}
-			},
-		},
-		"gethashespersec": {
-			HandleGetHashesPerSec, make(chan API),
-			func() API { return API{nil, make(chan GetHashesPerSecRes)} },
-		},
-		"getheaders": {
-			HandleGetHeaders, make(chan API),
-			func() API {
-				return API{btcjson.GetHeadersCmd{},
-					make(chan GetHeadersRes)}
-			},
-		},
-		"getinfo": {
-			HandleGetInfo, make(chan API),
-			func() API { return API{nil, make(chan GetInfoRes)} },
-		},
-		"getmempoolinfo": {
-			HandleGetMempoolInfo, make(chan API),
-			func() API { return API{nil, make(chan GetMempoolInfoRes)} },
-		},
-		"getmininginfo": {
-			HandleGetMiningInfo, make(chan API),
-			func() API { return API{nil, make(chan GetMiningInfoRes)} },
-		},
-		"getnettotals": {
-			HandleGetNetTotals, make(chan API),
-			func() API { return API{nil, make(chan GetNetTotalsRes)} },
-		},
-		"getnetworkhashps": {
-			HandleGetNetworkHashPS, make(chan API),
-			func() API {
-				return API{btcjson.GetNetworkHashPSCmd{},
-					make(chan GetNetworkHashPSRes)}
-			},
-		},
-		"getpeerinfo": {
-			HandleGetPeerInfo, make(chan API),
-			func() API { return API{nil, make(chan GetPeerInfoRes)} },
-		},
-		"getrawmempool": {
-			HandleGetRawMempool, make(chan API),
-			func() API {
-				return API{btcjson.GetRawMempoolCmd{},
-					make(chan GetRawMempoolRes)}
-			},
-		},
-		"getrawtransaction": {
-			HandleGetRawTransaction, make(chan API),
-			func() API {
-				return API{btcjson.GetRawTransactionCmd{},
-					make(chan GetRawTransactionRes)}
-			},
-		},
-		"gettxout": {
-			HandleGetTxOut, make(chan API),
-			func() API {
-				return API{btcjson.GetTxOutCmd{},
-					make(chan GetTxOutRes)}
-			},
-		},
-		// "getwork":               HandleGetWork,
-		"help": {
-			HandleHelp, make(chan API),
-			func() API {
-				return API{btcjson.HelpCmd{},
-					make(chan HelpRes)}
-			},
-		},
-		"node": {
-			HandleNode, make(chan API),
-			func() API {
-				return API{btcjson.NodeCmd{},
-					make(chan NodeRes)}
-			},
-		},
-		"ping": {
-			HandlePing, make(chan API),
-			func() API { return API{nil, make(chan PingRes)} },
-		},
-		"searchrawtransactions": {
-			HandleSearchRawTransactions, make(chan API),
-			func() API {
-				return API{btcjson.SearchRawTransactionsCmd{},
-					make(chan SearchRawTransactionsRes)}
-			},
-		},
-		"sendrawtransaction": {
-			HandleSendRawTransaction, make(chan API),
-			func() API {
-				return API{btcjson.SendRawTransactionCmd{},
-					make(chan SendRawTransactionRes)}
-			},
-		},
-		"setgenerate": {
-			HandleSetGenerate, make(chan API),
-			func() API {
-				return API{btcjson.SetGenerateCmd{},
-					make(chan SetGenerateRes)}
-			},
-		},
-		"stop": {
-			HandleStop, make(chan API),
-			func() API { return API{nil, make(chan StopRes)} },
-		},
-		"restart": {
-			HandleRestart, make(chan API),
-			func() API { return API{nil, make(chan RestartRes)} },
-		},
-		"resetchain": {
-			HandleResetChain, make(chan API),
-			func() API { return API{nil, make(chan ResetChainRes)} },
-		},
-		// "dropwallethistory":     HandleDropWalletHistory,
-		"submitblock": {
-			HandleSubmitBlock, make(chan API),
-			func() API {
-				return API{btcjson.SubmitBlockCmd{},
-					make(chan SubmitBlockRes)}
-			},
-		},
-		"uptime": {
-			HandleUptime, make(chan API),
-			func() API { return API{nil, make(chan UptimeRes)} },
-		},
-		"validateaddress": {
-			HandleValidateAddress, make(chan API),
-			func() API {
-				return API{btcjson.ValidateAddressCmd{},
-					make(chan ValidateAddressRes)}
-			},
-		},
-		"verifychain": {
-			HandleVerifyChain, make(chan API),
-			func() API {
-				return API{btcjson.VerifyChainCmd{},
-					make(chan VerifyChainRes)}
-			},
-		},
-		"verifymessage": {
-			HandleVerifyMessage, make(chan API),
-			func() API {
-				return API{btcjson.VerifyMessageCmd{},
-					make(chan VerifyMessageRes)}
-			},
-		},
-		"version": {
-			HandleVersion, make(chan API),
-			func() API {
-				return API{btcjson.VersionCmd{},
-					make(chan VersionRes)}
-			},
-		},
-	}
+	// RPCHandlersBeforeInit = map[string]CommandHandler{
+	// 	"addnode": {
+	// 		HandleAddNode, make(chan API), func() API {
+	// 			return API{
+	// 				btcjson.AddNodeCmd{},
+	// 				make(chan AddNodeRes),
+	// 			}
+	// 		},
+	// 	},
+	// 	"createrawtransaction": {
+	// 		HandleCreateRawTransaction, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.CreateRawTransactionCmd{},
+	// 				make(chan CreateRawTransactionRes)}
+	// 		},
+	// 	},
+	// 	// "debuglevel":            handleDebugLevel,
+	// 	"decoderawtransaction": {
+	// 		HandleDecodeRawTransaction, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.DecodeRawTransactionCmd{},
+	// 				make(chan DecodeRawTransactionRes)}
+	// 		},
+	// 	},
+	// 	"decodescript": {
+	// 		HandleDecodeScript, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.DecodeScriptCmd{},
+	// 				make(chan DecodeScriptRes)}
+	// 		},
+	// 	},
+	// 	"estimatefee": {
+	// 		HandleEstimateFee, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.EstimateFeeCmd{},
+	// 				make(chan EstimateFeeRes)}
+	// 		},
+	// 	},
+	// 	"generate": {
+	// 		HandleGenerate, make(chan API),
+	// 		func() API { return API{nil, make(chan GenerateRes)} },
+	// 	},
+	// 	"getaddednodeinfo": {
+	// 		HandleGetAddedNodeInfo, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetAddedNodeInfoCmd{},
+	// 				make(chan GetAddedNodeInfoRes)}
+	// 		},
+	// 	},
+	// 	"getbestblock": {
+	// 		HandleGetBestBlock, make(chan API),
+	// 		func() API { return API{nil, make(chan GetBestBlockRes)} },
+	// 	},
+	// 	"getbestblockhash": {
+	// 		HandleGetBestBlockHash, make(chan API),
+	// 		func() API { return API{nil, make(chan GetBestBlockHashRes)} },
+	// 	},
+	// 	"getblock": {
+	// 		HandleGetBlock, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetBlockCmd{},
+	// 				make(chan GetBlockRes)}
+	// 		},
+	// 	},
+	// 	"getblockchaininfo": {
+	// 		HandleGetBlockChainInfo, make(chan API),
+	// 		func() API { return API{nil, make(chan GetBlockChainInfoRes)} },
+	// 	},
+	// 	"getblockcount": {
+	// 		HandleGetBlockCount, make(chan API),
+	// 		func() API { return API{nil, make(chan GetBlockCountRes)} },
+	// 	},
+	// 	"getblockhash": {
+	// 		HandleGetBlockHash, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetBlockHashCmd{},
+	// 				make(chan GetBlockHashRes)}
+	// 		},
+	// 	},
+	// 	"getblockheader": {
+	// 		HandleGetBlockHeader, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetBlockHeaderCmd{},
+	// 				make(chan GetBlockHeaderRes)}
+	// 		},
+	// 	},
+	// 	"getblocktemplate": {
+	// 		HandleGetBlockTemplate, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetBlockTemplateCmd{},
+	// 				make(chan GetBlockTemplateRes)}
+	// 		},
+	// 	},
+	// 	"getcfilter": {
+	// 		HandleGetCFilter, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetCFilterCmd{},
+	// 				make(chan GetCFilterRes)}
+	// 		},
+	// 	},
+	// 	"getcfilterheader": {
+	// 		HandleGetCFilterHeader, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetCFilterHeaderCmd{},
+	// 				make(chan GetCFilterHeaderRes)}
+	// 		},
+	// 	},
+	// 	"getconnectioncount": {
+	// 		HandleGetConnectionCount, make(chan API),
+	// 		func() API { return API{nil, make(chan GetConnectionCountRes)} },
+	// 	},
+	// 	"getcurrentnet": {
+	// 		HandleGetCurrentNet, make(chan API),
+	// 		func() API { return API{nil, make(chan GetCurrentNetRes)} },
+	// 	},
+	// 	"getdifficulty": {
+	// 		HandleGetDifficulty, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetDifficultyCmd{},
+	// 				make(chan GetDifficultyRes)}
+	// 		},
+	// 	},
+	// 	"getgenerate": {
+	// 		HandleGetGenerate, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetHeadersCmd{},
+	// 				make(chan GetGenerateRes)}
+	// 		},
+	// 	},
+	// 	"gethashespersec": {
+	// 		HandleGetHashesPerSec, make(chan API),
+	// 		func() API { return API{nil, make(chan GetHashesPerSecRes)} },
+	// 	},
+	// 	"getheaders": {
+	// 		HandleGetHeaders, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetHeadersCmd{},
+	// 				make(chan GetHeadersRes)}
+	// 		},
+	// 	},
+	// 	"getinfo": {
+	// 		HandleGetInfo, make(chan API),
+	// 		func() API { return API{nil, make(chan GetInfoRes)} },
+	// 	},
+	// 	"getmempoolinfo": {
+	// 		HandleGetMempoolInfo, make(chan API),
+	// 		func() API { return API{nil, make(chan GetMempoolInfoRes)} },
+	// 	},
+	// 	"getmininginfo": {
+	// 		HandleGetMiningInfo, make(chan API),
+	// 		func() API { return API{nil, make(chan GetMiningInfoRes)} },
+	// 	},
+	// 	"getnettotals": {
+	// 		HandleGetNetTotals, make(chan API),
+	// 		func() API { return API{nil, make(chan GetNetTotalsRes)} },
+	// 	},
+	// 	"getnetworkhashps": {
+	// 		HandleGetNetworkHashPS, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetNetworkHashPSCmd{},
+	// 				make(chan GetNetworkHashPSRes)}
+	// 		},
+	// 	},
+	// 	"getpeerinfo": {
+	// 		HandleGetPeerInfo, make(chan API),
+	// 		func() API { return API{nil, make(chan GetPeerInfoRes)} },
+	// 	},
+	// 	"getrawmempool": {
+	// 		HandleGetRawMempool, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetRawMempoolCmd{},
+	// 				make(chan GetRawMempoolRes)}
+	// 		},
+	// 	},
+	// 	"getrawtransaction": {
+	// 		HandleGetRawTransaction, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetRawTransactionCmd{},
+	// 				make(chan GetRawTransactionRes)}
+	// 		},
+	// 	},
+	// 	"gettxout": {
+	// 		HandleGetTxOut, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.GetTxOutCmd{},
+	// 				make(chan GetTxOutRes)}
+	// 		},
+	// 	},
+	// 	// "getwork":               HandleGetWork,
+	// 	"help": {
+	// 		HandleHelp, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.HelpCmd{},
+	// 				make(chan HelpRes)}
+	// 		},
+	// 	},
+	// 	"node": {
+	// 		HandleNode, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.NodeCmd{},
+	// 				make(chan NodeRes)}
+	// 		},
+	// 	},
+	// 	"ping": {
+	// 		HandlePing, make(chan API),
+	// 		func() API { return API{nil, make(chan PingRes)} },
+	// 	},
+	// 	"searchrawtransactions": {
+	// 		HandleSearchRawTransactions, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.SearchRawTransactionsCmd{},
+	// 				make(chan SearchRawTransactionsRes)}
+	// 		},
+	// 	},
+	// 	"sendrawtransaction": {
+	// 		HandleSendRawTransaction, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.SendRawTransactionCmd{},
+	// 				make(chan SendRawTransactionRes)}
+	// 		},
+	// 	},
+	// 	"setgenerate": {
+	// 		HandleSetGenerate, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.SetGenerateCmd{},
+	// 				make(chan SetGenerateRes)}
+	// 		},
+	// 	},
+	// 	"stop": {
+	// 		HandleStop, make(chan API),
+	// 		func() API { return API{nil, make(chan StopRes)} },
+	// 	},
+	// 	"restart": {
+	// 		HandleRestart, make(chan API),
+	// 		func() API { return API{nil, make(chan RestartRes)} },
+	// 	},
+	// 	"resetchain": {
+	// 		HandleResetChain, make(chan API),
+	// 		func() API { return API{nil, make(chan ResetChainRes)} },
+	// 	},
+	// 	// "dropwallethistory":     HandleDropWalletHistory,
+	// 	"submitblock": {
+	// 		HandleSubmitBlock, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.SubmitBlockCmd{},
+	// 				make(chan SubmitBlockRes)}
+	// 		},
+	// 	},
+	// 	"uptime": {
+	// 		HandleUptime, make(chan API),
+	// 		func() API { return API{nil, make(chan UptimeRes)} },
+	// 	},
+	// 	"validateaddress": {
+	// 		HandleValidateAddress, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.ValidateAddressCmd{},
+	// 				make(chan ValidateAddressRes)}
+	// 		},
+	// 	},
+	// 	"verifychain": {
+	// 		HandleVerifyChain, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.VerifyChainCmd{},
+	// 				make(chan VerifyChainRes)}
+	// 		},
+	// 	},
+	// 	"verifymessage": {
+	// 		HandleVerifyMessage, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.VerifyMessageCmd{},
+	// 				make(chan VerifyMessageRes)}
+	// 		},
+	// 	},
+	// 	"version": {
+	// 		HandleVersion, make(chan API),
+	// 		func() API {
+	// 			return API{btcjson.VersionCmd{},
+	// 				make(chan VersionRes)}
+	// 		},
+	// 	},
+	// }
 
 	// RPCLimited isCommands that are available to a limited user
 	RPCLimited = map[string]CommandHandler{
