@@ -47,13 +47,10 @@ func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Edi
 				e.Font.Typeface = th.Fonts["Primary"]
 				e.Font.Style = text.Italic
 				e.Layout(gtx, editorControler)
-
 				for _, e := range editorControler.Events(gtx) {
 					switch e.(type) {
 					case gel.ChangeEvent:
-						value = editorControler.Text()
 						handler(e)
-						editorControler.SetText(value)
 					}
 				}
 			})

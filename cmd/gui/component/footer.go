@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gelook"
 )
 
 var (
@@ -82,7 +82,7 @@ func FooterRightMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "settingsIcon", buttonNetwork),
 				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount.Load()), "", buttonNetwork),
 				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonBlocks),
-				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
+				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount.Load()), "", buttonBlocks),
 				footerMenuButton(rc, gtx, th, allPages.Theme["MINER"], "", "helpIcon", buttonHelp),
 				footerMenuButton(rc, gtx, th, allPages.Theme["CONSOLE"], "", "consoleIcon", buttonConsole),
 				footerMenuButton(rc, gtx, th, allPages.Theme["SETTINGS"], "", "settingsIcon", buttonSettings),

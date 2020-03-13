@@ -5,8 +5,8 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gelook"
 	"image"
 )
 
@@ -33,16 +33,16 @@ func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 				listItem(gtx, th, 22, 6, "MapsLayersClear", "UNCONFIRMED :", rc.Status.Wallet.Unconfirmed.Load()+" "+
 					rc.Settings.Abbrevation),
 				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
-				listItem(gtx, th, 22, 6, "CommunicationImportExport", "TRANSACTIONS :", fmt.Sprint(rc.Status.Wallet.TxsNumber)),
+				listItem(gtx, th, 22, 6, "CommunicationImportExport", "TRANSACTIONS :", fmt.Sprint(rc.Status.Wallet.TxsNumber.Load())),
 
 				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
-				listItem(gtx, th, 16, 4, "DeviceWidgets", "Block Count :", fmt.Sprint(rc.Status.Node.BlockCount)),
+				listItem(gtx, th, 16, 4, "DeviceWidgets", "Block Count :", fmt.Sprint(rc.Status.Node.BlockCount.Load())),
 
 				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
-				listItem(gtx, th, 16, 4, "ImageTimer", "Difficulty :", fmt.Sprint(rc.Status.Node.Difficulty)),
+				listItem(gtx, th, 16, 4, "ImageTimer", "Difficulty :", fmt.Sprint(rc.Status.Node.Difficulty.Load())),
 
 				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
-				listItem(gtx, th, 16, 4, "NotificationVPNLock", "Connections :", fmt.Sprint(rc.Status.Node.ConnectionCount)),
+				listItem(gtx, th, 16, 4, "NotificationVPNLock", "Connections :", fmt.Sprint(rc.Status.Node.ConnectionCount.Load())),
 			}
 			itemsList.Layout(gtx, len(bigStatus), func(i int) {
 				layout.UniformInset(unit.Dp(0)).Layout(gtx, bigStatus[i])
