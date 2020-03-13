@@ -2,11 +2,11 @@ package model
 
 import "time"
 
-type DuoUIcommandsHistory struct {
-	Commands       []DuoUIcommand `json:"coms"`
-	CommandsNumber int            `json:"comnumber"`
+type DuoUIconsoleHistory struct {
+	Commands       []DuoUIconsoleCommand `json:"coms"`
+	CommandsNumber int                   `json:"comnumber"`
 }
-type DuoUIcommand struct {
+type DuoUIconsoleCommand struct {
 	Com      interface{}
 	ComID    string
 	Category string
@@ -14,6 +14,6 @@ type DuoUIcommand struct {
 	Time     time.Time
 }
 
-type DuoUIcommandsNumber struct {
+type DuoUIconsoleCommandsNumber struct {
 	CommandsNumber int `json:"comnumber"`
 }

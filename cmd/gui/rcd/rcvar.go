@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"gioui.org/layout"
 	"gioui.org/text"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
@@ -12,15 +13,17 @@ import (
 )
 
 type RcVar struct {
-	cx              *conte.Xt
-	db              *DuoUIdb
-	Boot            *Boot
-	Events          chan Event
-	UpdateTrigger   chan struct{}
-	Status          *model.DuoUIstatus
-	Dialog          *model.DuoUIdialog
-	Log             *model.DuoUIlog
-	CommandsHistory *model.DuoUIcommandsHistory
+	cx             *conte.Xt
+	db             *DuoUIdb
+	Boot           *Boot
+	Events         chan Event
+	UpdateTrigger  chan struct{}
+	Status         *model.DuoUIstatus
+	Dialog         *model.DuoUIdialog
+	Log            *model.DuoUIlog
+	ConsoleHistory *model.DuoUIconsoleHistory
+
+	Commands *DuoUIcommands
 
 	Settings  *model.DuoUIsettings
 	Sent      bool
@@ -89,17 +92,17 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			Node: &model.NodeStatus{},
 			Wallet: &model.WalletStatus{
 				WalletVersion: make(map[string]btcjson.VersionResult),
-				Transactions:  &model.DuoUItransactions{},
-				LastTxs:       &model.DuoUItransactions{},
+				LastTxs:       &model.DuoUItransactionsExcerpts{},
 			},
 			Kopach: &model.KopachStatus{},
 		},
 		Dialog:   &model.DuoUIdialog{},
 		Settings: settings(cx),
 		Log:      l,
-		CommandsHistory: &model.DuoUIcommandsHistory{
-			Commands: []model.DuoUIcommand{
-				model.DuoUIcommand{
+		Commands: new(DuoUIcommands),
+		ConsoleHistory: &model.DuoUIconsoleHistory{
+			Commands: []model.DuoUIconsoleCommand{
+				model.DuoUIconsoleCommand{
 					ComID:    "input",
 					Category: "input",
 					Time:     time.Now(),
@@ -146,7 +149,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			PerPage: &gel.DuoUIcounter{
 				Value:        20,
 				OperateValue: 1,
-				From:         0,
+				From:         1,
 				To:           50,
 				CounterInput: &gel.Editor{
 					Alignment:  text.Middle,
@@ -168,6 +171,16 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 				CounterIncrease: new(gel.Button),
 				CounterDecrease: new(gel.Button),
 				CounterReset:    new(gel.Button),
+			},
+			TransList: &layout.List{
+				Axis: layout.Vertical,
+			},
+			Categories: &model.DuoUIhistoryCategories{
+				AllTxs:      new(gel.CheckBox),
+				MintedTxs:   new(gel.CheckBox),
+				ImmatureTxs: new(gel.CheckBox),
+				SentTxs:     new(gel.CheckBox),
+				ReceivedTxs: new(gel.CheckBox),
 			},
 			Txs: &model.DuoUItransactionsExcerpts{
 				ModelTxsListNumber: 0,

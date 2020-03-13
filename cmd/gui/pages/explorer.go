@@ -5,10 +5,10 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gelook"
 	"time"
 )
 
@@ -46,6 +46,7 @@ func explorerContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) 
 		})
 	}
 }
+
 func headerExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{

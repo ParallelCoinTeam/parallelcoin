@@ -2,9 +2,9 @@ package model
 
 import (
 	"time"
-	
+
 	"go.uber.org/atomic"
-	
+
 	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -29,7 +29,7 @@ type NodeStatus struct {
 	BlockCount       atomic.Uint64
 	NetworkLastBlock atomic.Int32
 	// update every 5 seconds
-	ConnectionCount  atomic.Int32
+	ConnectionCount atomic.Int32
 }
 type KopachStatus struct {
 	// update every second
@@ -40,12 +40,11 @@ type WalletStatus struct {
 	// unchanging
 	WalletVersion map[string]btcjson.VersionResult `json:"walletver"`
 	// update on new block and at start
-	Balance       atomic.String
-	Unconfirmed   atomic.String
-	TxsNumber     atomic.Uint64
+	Balance     atomic.String
+	Unconfirmed atomic.String
+	TxsNumber   atomic.Uint64
 	// components
-	Transactions  *DuoUItransactions
-	LastTxs       *DuoUItransactions
+	LastTxs *DuoUItransactionsExcerpts
 }
 
 // slots of user interface
