@@ -5,9 +5,9 @@ import (
 	"sort"
 	"strings"
 	"sync"
-	
+
 	log "github.com/p9c/logi"
-	
+
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -799,12 +799,12 @@ var ResultTypes = map[string][]interface{}{
 	"restart":               {(*string)(nil)},
 	"resetchain":            {(*string)(nil)},
 	// "dropwallethistory":     {(*string)(nil)},
-	"submitblock":           {nil, (*string)(nil)},
-	"uptime":                {(*int64)(nil)},
-	"validateaddress":       {(*btcjson.ValidateAddressChainResult)(nil)},
-	"verifychain":           {(*bool)(nil)},
-	"verifymessage":         {(*bool)(nil)},
-	"version":               {(*map[string]btcjson.VersionResult)(nil)},
+	"submitblock":     {nil, (*string)(nil)},
+	"uptime":          {(*int64)(nil)},
+	"validateaddress": {(*btcjson.ValidateAddressChainResult)(nil)},
+	"verifychain":     {(*bool)(nil)},
+	"verifymessage":   {(*bool)(nil)},
+	"version":         {(*map[string]btcjson.VersionResult)(nil)},
 	// Websocket commands.
 	"loadtxfilter":              nil,
 	"session":                   {(*btcjson.SessionResult)(nil)},

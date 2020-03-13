@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/p9c/pod/cmd/node/state"
 	log "github.com/p9c/logi"
+
+	"github.com/p9c/pod/cmd/node/state"
 )
 
 // DefaultConnectTimeout is a reasonable 30 seconds

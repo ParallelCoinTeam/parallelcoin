@@ -21,6 +21,8 @@ import (
 
 	uberatomic "go.uber.org/atomic"
 
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/cmd/node/upnp"
@@ -35,7 +37,6 @@ import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/peer/addrmgr"
 	"github.com/p9c/pod/pkg/peer/connmgr"
