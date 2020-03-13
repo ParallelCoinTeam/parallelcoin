@@ -1,5 +1,12 @@
 package main
 
+import (
+	"os"
+	"text/template"
+
+	log "github.com/p9c/logi"
+)
+
 type handler struct {
 	Method, Handler, Cmd, Res, ResType string
 }
@@ -337,14 +344,40 @@ var handlers = []handler{
 }
 
 func main() {
-
+	t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
+	if err := t.Execute(os.Stdout, handlers); log.L.Check(err) {
+	}
 }
 
-var RPCHandlerTpl = `	"{{ .Method }}":{
-	{{ .Handler }}, make(chan API),
-		func() API {
-			return API{ {{ .Cmd }}{},
-				make(chan {{ .Res }} )}
-			},
-	},
+var NodeRPCHandlerTpl = `package rpc
+
+import (
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+)
+
+type API struct {
+	Ch     interface{}
+	Params interface{}
+}
+
+RPCHandlersBeforeInit = map[string]CommandHandler{
+{{range .}}	"{{ .Method }}":{ 
+		{{ .Handler }}, make(chan API), func() API {
+			return API{
+				{{ .Cmd }}{},
+				make(chan {{ .Res }}),
+			}
+		},
+	}, 
+{{end}}
+}
+
+type (
+	None struct{} {{range .}}
+	{{.Res}} struct {
+		Res {{.ResType}}
+		Err error
+	}
+	{{end}}
+)
 `

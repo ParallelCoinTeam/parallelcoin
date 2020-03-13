@@ -376,10 +376,11 @@ var (
 	// RPCHandlersBeforeInit is
 	RPCHandlersBeforeInit = map[string]CommandHandler{
 		"addnode": {
-			HandleAddNode, make(chan API),
-			func() API {
-				return API{btcjson.AddNodeCmd{},
-					make(chan AddNodeRes)}
+			HandleAddNode, make(chan API), func() API {
+				return API{
+					btcjson.AddNodeCmd{},
+					make(chan AddNodeRes),
+				}
 			},
 		},
 		"createrawtransaction": {
