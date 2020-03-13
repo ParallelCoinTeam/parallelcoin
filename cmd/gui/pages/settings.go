@@ -18,15 +18,15 @@ var (
 
 func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	return th.DuoUIpage("SETTINGS", 0, func() {}, component.ContentHeader(gtx, th, headerSettings(rc, gtx, th)), settingsBody(rc, gtx, th), func() {
-		var msg string
+		//var msg string
 		//if rc.Settings.Daemon.Config["DisableBanning"].(*bool) != true{
 		//	msg = "ima"
 		//}else{
 		//	msg = "nema"
-		//}
-		ttt := th.H6(fmt.Sprint(msg))
-		ttt.Color = gelook.HexARGB("ffcfcfcf")
-		ttt.Layout(gtx)
+		////}
+		//ttt := th.H6(fmt.Sprint(rc.Settings.Daemon.Config))
+		//ttt.Color = gelook.HexARGB("ffcfcfcf")
+		//ttt.Layout(gtx)
 	})
 }
 
