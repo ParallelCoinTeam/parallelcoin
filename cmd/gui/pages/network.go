@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/component"
@@ -25,7 +26,7 @@ var (
 )
 
 func Network(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("HISTORY", 0, rc.GetDuoUItransactions(), component.ContentHeader(gtx, th, networkHeader(rc, gtx, th)), networkBody(rc, gtx, th), func() {})
+	return th.DuoUIpage("HISTORY", 0, rc.GetPeerInfo(), component.ContentHeader(gtx, th, networkHeader(rc, gtx, th)), networkBody(rc, gtx, th), func() {})
 }
 
 func networkHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
@@ -35,10 +36,10 @@ func networkHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fu
 		}.Layout(gtx,
 			//layout.Rigid(component.TransactionsFilter(rc, gtx, th)),
 			layout.Rigid(func() {
-				//th.DuoUIcounter(rc.GetDuoUItransactions()).Layout(gtx, rc.History.PerPage, "TxNum per page: ", fmt.Sprint(rc.History.PerPage.Value))
+				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx, rc.Network.PerPage, "TxNum per page: ", fmt.Sprint(rc.Network.PerPage.Value))
 			}),
 			layout.Rigid(func() {
-				//th.DuoUIcounter(rc.GetDuoUItransactions()).Layout(gtx, rc.History.Page, "TxNum page: ", fmt.Sprint(rc.History.Page.Value))
+				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx, rc.Network.Page, "TxNum page: ", fmt.Sprint(rc.Network.Page.Value))
 			}),
 		)
 	}

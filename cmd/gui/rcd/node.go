@@ -86,11 +86,13 @@ func (r *RcVar) GetDuoUIhashesPerSecList() {
 
 }
 
-func (r *RcVar) GetPeerInfo() {
-	getPeers, err := rpc.HandleGetPeerInfo(r.cx.RPCServer, nil, nil)
-	if err != nil {
-		// dV.PushDuoVUEalert("Error", err.Error(), "error")
+func (r *RcVar) GetPeerInfo() func() {
+	return func() {
+
+		getPeers, err := rpc.HandleGetPeerInfo(r.cx.RPCServer, nil, nil)
+		if err != nil {
+			// dV.PushDuoVUEalert("Error", err.Error(), "error")
+		}
+		r.Network.Peers = getPeers.([]*btcjson.GetPeerInfoResult)
 	}
-	r.Network.Peers = getPeers.([]*btcjson.GetPeerInfoResult)
-	return
 }
