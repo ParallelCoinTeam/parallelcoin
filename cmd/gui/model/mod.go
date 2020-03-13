@@ -7,9 +7,9 @@ import (
 	"gioui.org/layout"
 	"go.uber.org/atomic"
 
+	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -71,8 +71,9 @@ type DuoUIsettings struct {
 }
 
 type DaemonConfig struct {
-	Config  *pod.Config `json:"config"`
-	Schema  pod.Schema  `json:"schema"`
+	//Config  *pod.Config `json:"config"`
+	Config  map[string]interface{} `json:"config"`
+	Schema  pod.Schema             `json:"schema"`
 	Widgets map[string]interface{}
 }
 

@@ -6,9 +6,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -53,21 +53,24 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 			case "input":
 				switch f.Field.InputType {
 				case "text":
-					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*gel.Editor), f.Field.Label, func(e gel.SubmitEvent) {})
+					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), f.Field.Label, func(e gel.SubmitEvent) {})
 				case "number":
 					e := th.DuoUIeditor(f.Field.Label)
 					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Italic
-					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*gel.Editor))
+					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor))
 				case "password":
 					e := th.DuoUIeditor(f.Field.Label)
 					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Italic
-					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*gel.Editor))
+					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor))
 				default:
 				}
 			case "switch":
-				th.DuoUIcheckBox(f.Field.Label, th.Colors["Dark"], th.Colors["Dark"]).Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*gel.CheckBox))
+				th.DuoUIcheckBox(f.Field.Label, th.Colors["Dark"], th.Colors["Dark"]).Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox))
+				if (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox).Checked(gtx) {
+					rc.Settings.Daemon.Config[f.Field.Model] = true
+				}
 			case "radio":
 				//radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 				//layout.Flex{}.Layout(gtx,
