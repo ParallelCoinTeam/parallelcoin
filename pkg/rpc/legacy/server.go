@@ -13,10 +13,11 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	
+
 	"github.com/btcsuite/websocket"
-	
+
 	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/wallet"

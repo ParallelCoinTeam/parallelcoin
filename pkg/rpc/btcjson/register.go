@@ -14,10 +14,10 @@ import (
 // UsageFlag define flags that specify additional properties about the circumstances under which a command can be used.
 type UsageFlag uint32
 
-// methodInfo keeps track of information about each registered method such as the parameter information.
-type methodInfo struct {
-	maxParams    int
-	numReqParams int
+// MethodInfo keeps track of information about each registered method such as the parameter information.
+type MethodInfo struct {
+	MaxParams    int
+	NumReqParams int
 	numOptParams int
 	defaults     map[int]reflect.Value
 	flags        UsageFlag
@@ -38,7 +38,7 @@ const (
 var (
 	concreteTypeToMethod = make(map[reflect.Type]string)
 	methodToConcreteType = make(map[string]reflect.Type)
-	methodToInfo         = make(map[string]methodInfo)
+	methodToInfo         = make(map[string]MethodInfo)
 	// These fields are used to map the registered types to method names.
 	registerLock sync.RWMutex
 	// Map of UsageFlag values back to their constant names for pretty printing.
@@ -78,7 +78,10 @@ func MustRegisterCmd(method string, cmd interface{}, flags UsageFlag) {
 		panic(fmt.Sprintf("failed to register type %q: %v\n", method,
 			err))
 	}
+	RegisteredCommands[method] = cmd
 }
+
+var RegisteredCommands = make(map[string]interface{})
 
 /*
 RegisterCmd registers a new command that will automatically marshal to and from JSON-RPC with full type checking and positional parameter support.  It also accepts usage flags which identify the circumstances under which the command can be used.
@@ -184,9 +187,9 @@ func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
 	}
 	// Update the registration maps.
 	methodToConcreteType[method] = rtp
-	methodToInfo[method] = methodInfo{
-		maxParams:    numFields,
-		numReqParams: numFields - numOptFields,
+	methodToInfo[method] = MethodInfo{
+		MaxParams:    numFields,
+		NumReqParams: numFields - numOptFields,
 		numOptParams: numOptFields,
 		defaults:     defaults,
 		flags:        flags,

@@ -3,10 +3,12 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
-	log "github.com/p9c/logi"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
+
+	log "github.com/p9c/logi"
 )
 
 // makeParams creates a slice of interface values for the given struct.
@@ -27,7 +29,9 @@ func makeParams(rt reflect.Type, rv reflect.Value) []interface{} {
 	return params
 }
 
-// MarshalCmd marshals the passed command to a JSON-RPC request byte slice that is suitable for transmission to an RPC server.  The provided command type must be a registered type.  All commands provided by this package are registered by default.
+// MarshalCmd marshals the passed command to a JSON-RPC request byte slice that is suitable for
+// transmission to an RPC server.  The provided command type must be a registered type.  All
+// commands provided by this package are registered by default.
 func MarshalCmd(id interface{}, cmd interface{}) ([]byte, error) {
 	// Look up the cmd type and error out if not registered.
 	rt := reflect.TypeOf(cmd)
@@ -54,7 +58,6 @@ func MarshalCmd(id interface{}, cmd interface{}) ([]byte, error) {
 	}
 	return json.Marshal(rawCmd)
 }
-
 
 // MarshalRequest marshals the passed command to a btcjson.Request
 func MarshalRequest(id interface{}, cmd interface{}) (rawCmd *Request, err error) {
@@ -84,28 +87,27 @@ func MarshalRequest(id interface{}, cmd interface{}) (rawCmd *Request, err error
 	return
 }
 
-
 // checkNumParams ensures the supplied number of netparams is at least the minimum required number for the command and less than the maximum allowed.
-func checkNumParams(numParams int, info *methodInfo) error {
-	if numParams < info.numReqParams || numParams > info.maxParams {
-		if info.numReqParams == info.maxParams {
+func checkNumParams(numParams int, info *MethodInfo) error {
+	if numParams < info.NumReqParams || numParams > info.MaxParams {
+		if info.NumReqParams == info.MaxParams {
 			str := fmt.Sprintf("wrong number of netparams (expected "+
-				"%d, received %d)", info.numReqParams,
+				"%d, received %d)", info.NumReqParams,
 				numParams)
 			return makeError(ErrNumParams, str)
 		}
 		str := fmt.Sprintf("wrong number of netparams (expected "+
-			"between %d and %d, received %d)", info.numReqParams,
-			info.maxParams, numParams)
+			"between %d and %d, received %d)", info.NumReqParams,
+			info.MaxParams, numParams)
 		return makeError(ErrNumParams, str)
 	}
 	return nil
 }
 
 // populateDefaults populates default values into any remaining optional struct fields that did not have parameters explicitly provided. The caller should have previously checked that the number of parameters being passed is at least the required number of parameters to avoid unnecessary work in this function, but since required fields never have default values, it will work properly even without the check.
-func populateDefaults(numParams int, info *methodInfo, rv reflect.Value) {
+func populateDefaults(numParams int, info *MethodInfo, rv reflect.Value) {
 	// When there are no more parameters left in the supplied parameters, any remaining struct fields must be optional.  Thus, populate them with their associated default value as needed.
-	for i := numParams; i < info.maxParams; i++ {
+	for i := numParams; i < info.MaxParams; i++ {
 		rvf := rv.Field(i)
 		if defaultVal, ok := info.defaults[i]; ok {
 			rvf.Set(defaultVal)
@@ -152,7 +154,7 @@ func UnmarshalCmd(r *Request) (interface{}, error) {
 		}
 	}
 	// When there are less supplied parameters than the total number of netparams, any remaining struct fields must be optional.  Thus, populate them with their associated default value as needed.
-	if numParams < info.maxParams {
+	if numParams < info.MaxParams {
 		populateDefaults(numParams, &info, rv)
 	}
 	return rvp.Interface(), nil
@@ -429,13 +431,26 @@ func assignField(paramNum int, fieldName string, dest reflect.Value, src reflect
 	return nil
 }
 
-// NewCmd provides a generic mechanism to create a new command that can marshal to a JSON-RPC request while respecting the requirements of the provided method.  The method must have been registered with the package already along with its type definition.  All methods associated with the commands exported by this package are already registered by default. The arguments are most efficient when they are the exact same type as the underlying field in the command struct associated with the the method, however this function also will perform a variety of conversions to make it more flexible.  This allows, for example, command line args which are strings to be passed unaltered.  In particular, the following conversions are supported:
-//   - Conversion between any size signed or unsigned integer so long as the value does not overflow the destination type
+// NewCmd provides a generic mechanism to create a new command that can marshal to a JSON-RPC request
+// while respecting the requirements of the provided method.
+//
+// The method must have been registered with the package already along with its type definition.  All methods
+// associated with the commands exported by this package are already registered by default.
+//
+// The arguments are most efficient when they are the exact same type as the underlying field in the
+// command struct associated with the the method, however this function also will perform a variety of
+// conversions to make it more flexible.
+//
+// This allows, for example, command line args which are strings to be passed unaltered.  In particular,
+// the following conversions are supported:
+//   - Conversion between any size signed or unsigned integer so long as the value does not overflow the destination
+//   type
 //   - Conversion between float32 and float64 so long as the value does not overflow the destination type
 //   - Conversion from string to boolean for everything strconv.ParseBool recognizes
 //   - Conversion from string to any size integer for everything strconv.ParseInt and strconv.ParseUint recognizes
 //   - Conversion from string to any size float for everything strconv.ParseFloat recognizes
-//   - Conversion from string to arrays, slices, structs, and maps by treating the string as marshalled JSON and calling json.Unmarshal into the destination field
+//   - Conversion from string to arrays, slices, structs, and maps by treating the string as marshalled JSON and
+//   calling json.Unmarshal into the destination field
 func NewCmd(method string, args ...interface{}) (interface{}, error) {
 	// Look up details about the provided method.  Any methods that aren't registered are an error.
 	registerLock.RLock()
@@ -451,7 +466,8 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 	if err := checkNumParams(numParams, &info); err != nil {
 		return nil, err
 	}
-	// Create the appropriate command type for the method.  Since all types are enforced to be a pointer to a struct at registration time, it's safe to indirect to the struct now.
+	// Create the appropriate command type for the method.  Since all types are enforced to be a pointer to a struct at
+	// registration time, it's safe to indirect to the struct now.
 	rvp := reflect.New(rtp.Elem())
 	rv := rvp.Elem()
 	rt := rtp.Elem()
@@ -467,4 +483,21 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 		}
 	}
 	return rvp.Interface(), nil
+}
+
+func MethodToInfo(method string) *MethodInfo {
+	log.L.Trace(method)
+	log.L.Traces(methodToInfo[method])
+	return nil
+}
+
+func GetMethods() (out []string) {
+	out = make([]string, len(methodToInfo))
+	var i int
+	for v := range methodToInfo {
+		out[i] = v
+		i++
+	}
+	sort.Strings(out)
+	return
 }

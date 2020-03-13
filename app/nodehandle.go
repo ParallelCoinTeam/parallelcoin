@@ -2,10 +2,11 @@ package app
 
 import (
 	"github.com/urfave/cli"
-	
+
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
 )
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {

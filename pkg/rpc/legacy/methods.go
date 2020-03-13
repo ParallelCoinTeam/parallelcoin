@@ -9,14 +9,15 @@ import (
 	"fmt"
 	"sync"
 	"time"
-	
+
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -66,46 +67,197 @@ var RPCHandlers = map[string]struct {
 	// A single map and this bool is here is used rather than several maps
 	// for the unimplemented handlers so every method has exactly one
 	// handler function.
+	//
+	// The Return field returns a new channel of the type returned by this function. This makes it possible to
+	// use this for callers to receive a response in the `cpc` library which implements the functions as channel pipes
 	NoHelp bool
+	Params interface{}
+	Return func() interface{}
 }{
 	// Reference implementation wallet methods (implemented)
-	"addmultisigaddress":     {Handler: AddMultiSigAddress},
-	"createmultisig":         {Handler: CreateMultiSig},
-	"dumpprivkey":            {Handler: DumpPrivKey},
-	"getaccount":             {Handler: GetAccount},
-	"getaccountaddress":      {Handler: GetAccountAddress},
-	"getaddressesbyaccount":  {Handler: GetAddressesByAccount},
-	"getbalance":             {Handler: GetBalance},
-	"getbestblockhash":       {Handler: GetBestBlockHash},
-	"getblockcount":          {Handler: GetBlockCount},
-	"getinfo":                {HandlerWithChain: GetInfo},
-	"getnewaddress":          {Handler: GetNewAddress},
-	"getrawchangeaddress":    {Handler: GetRawChangeAddress},
-	"getreceivedbyaccount":   {Handler: GetReceivedByAccount},
-	"getreceivedbyaddress":   {Handler: GetReceivedByAddress},
-	"gettransaction":         {Handler: GetTransaction},
-	"help":                   {Handler: HelpNoChainRPC, HandlerWithChain: HelpWithChainRPC},
-	"importprivkey":          {Handler: ImportPrivKey},
-	"keypoolrefill":          {Handler: KeypoolRefill},
-	"listaccounts":           {Handler: ListAccounts},
-	"listlockunspent":        {Handler: ListLockUnspent},
-	"listreceivedbyaccount":  {Handler: ListReceivedByAccount},
-	"listreceivedbyaddress":  {Handler: ListReceivedByAddress},
-	"listsinceblock":         {HandlerWithChain: ListSinceBlock},
-	"listtransactions":       {Handler: ListTransactions},
-	"listunspent":            {Handler: ListUnspent},
-	"lockunspent":            {Handler: LockUnspent},
-	"sendfrom":               {HandlerWithChain: SendFrom},
-	"sendmany":               {Handler: SendMany},
-	"sendtoaddress":          {Handler: SendToAddress},
-	"settxfee":               {Handler: SetTxFee},
-	"signmessage":            {Handler: SignMessage},
-	"signrawtransaction":     {HandlerWithChain: SignRawTransaction},
-	"validateaddress":        {Handler: ValidateAddress},
-	"verifymessage":          {Handler: VerifyMessage},
-	"walletlock":             {Handler: WalletLock},
-	"walletpassphrase":       {Handler: WalletPassphrase},
-	"walletpassphrasechange": {Handler: WalletPassphraseChange},
+	"addmultisigaddress": {
+		Handler: AddMultiSigAddress,
+		Params:  make(chan btcjson.AddMultisigAddressCmd),
+		Return:  func() interface{} { return make(chan AddMultiSigAddressRes) },
+	},
+	"createmultisig": {
+		Handler: CreateMultiSig,
+		Params:  make(chan btcjson.CreateMultisigCmd),
+		Return:  func() interface{} { return make(chan CreateMultiSigRes) },
+	},
+	"dumpprivkey": {
+		Handler: DumpPrivKey,
+		Params:  make(chan btcjson.DumpPrivKeyCmd),
+		Return:  func() interface{} { return make(chan DumpPrivKeyRes) },
+	},
+	"getaccount": {
+		Handler: GetAccount,
+		Params:  make(chan btcjson.GetAccountCmd),
+		Return:  func() interface{} { return make(chan GetAccountRes) },
+	},
+	"getaccountaddress": {
+		Handler: GetAccountAddress,
+		Params:  make(chan btcjson.GetAccountAddressCmd),
+		Return:  func() interface{} { return make(chan GetAccountAddressRes) },
+	},
+	"getaddressesbyaccount": {
+		Handler: GetAddressesByAccount,
+		Params:  make(chan btcjson.GetAddressesByAccountCmd),
+		Return:  func() interface{} { return make(chan GetAddressesByAccountRes) },
+	},
+	"getbalance": {
+		Handler: GetBalance,
+		Params:  make(chan btcjson.GetBalanceCmd),
+		Return:  func() interface{} { return make(chan GetBalanceRes) },
+	},
+	"getbestblockhash": {
+		Handler: GetBestBlockHash,
+		Return:  func() interface{} { return make(chan GetBestBlockHashRes) },
+	},
+	"getblockcount": {
+		Handler: GetBlockCount,
+		Return:  func() interface{} { return make(chan GetBlockCountRes) },
+	},
+	"getinfo": {
+		HandlerWithChain: GetInfo,
+		Return:           func() interface{} { return make(chan GetInfoRes) },
+	},
+	"getnewaddress": {
+		Handler: GetNewAddress,
+		Params:  make(chan btcjson.GetNewAddressCmd),
+		Return:  func() interface{} { return make(chan GetNewAddressRes) },
+	},
+	"getrawchangeaddress": {
+		Handler: GetRawChangeAddress,
+		Params:  make(chan btcjson.GetRawChangeAddressCmd),
+		Return:  func() interface{} { return make(chan GetRawChangeAddressRes) },
+	},
+	"getreceivedbyaccount": {
+		Handler: GetReceivedByAccount,
+		Params:  make(chan btcjson.GetReceivedByAccountCmd),
+		Return:  func() interface{} { return make(chan GetReceivedByAccountRes) },
+	},
+	"getreceivedbyaddress": {
+		Handler: GetReceivedByAddress,
+		Params:  make(chan btcjson.GetReceivedByAddressCmd),
+		Return:  func() interface{} { return make(chan GetReceivedByAddressRes) },
+	},
+	"gettransaction": {
+		Handler: GetTransaction,
+		Params:  make(chan btcjson.GetTransactionCmd),
+		Return:  func() interface{} { return make(chan GetTransactionRes) },
+	},
+	"help": {
+		Handler:          HelpNoChainRPC,
+		HandlerWithChain: HelpWithChainRPC,
+		Params:           make(chan btcjson.HelpCmd),
+		Return:           func() interface{} { return make(chan HelpNoChainRPCRes) },
+	},
+	"importprivkey": {
+		Handler: ImportPrivKey,
+		Params:  make(chan btcjson.ImportPrivKeyCmd),
+		Return:  func() interface{} { return make(chan ImportPrivKeyRes) },
+	},
+	"keypoolrefill": {
+		Handler: KeypoolRefill,
+		Params:  make(chan struct{}),
+		Return:  func() interface{} { return make(chan KeypoolRefillRes) },
+	},
+	"listaccounts": {
+		Handler: ListAccounts,
+		Params:  make(chan btcjson.ListAccountsCmd),
+		Return:  func() interface{} { return make(chan ListAccountsRes) },
+	},
+	"listlockunspent": {
+		Handler: ListLockUnspent,
+		Params:  make(chan struct{}),
+		Return:  func() interface{} { return make(chan ListLockUnspentRes) },
+	},
+	"listreceivedbyaccount": {
+		Handler: ListReceivedByAccount,
+		Params:  make(chan btcjson.ListReceivedByAccountCmd),
+		Return:  func() interface{} { return make(chan ListReceivedByAccountRes) },
+	},
+	"listreceivedbyaddress": {
+		Handler: ListReceivedByAddress,
+		Params:  make(chan btcjson.ListReceivedByAddressCmd),
+		Return:  func() interface{} { return make(chan ListReceivedByAddressRes) },
+	},
+	"listsinceblock": {
+		HandlerWithChain: ListSinceBlock,
+		Params:           make(chan btcjson.ListSinceBlockCmd),
+		Return:           func() interface{} { return make(chan ListSinceBlockRes) },
+	},
+	"listtransactions": {
+		Handler: ListTransactions,
+		Params:  make(chan btcjson.ListTransactionsCmd),
+		Return:  func() interface{} { return make(chan ListTransactionsRes) },
+	},
+	"listunspent": {
+		Handler: ListUnspent,
+		Params:  make(chan btcjson.ListUnspentCmd),
+		Return:  func() interface{} { return make(chan ListUnspentRes) },
+	},
+	"lockunspent": {
+		Handler: LockUnspent,
+		Params:  make(chan btcjson.LockUnspentCmd),
+		Return:  func() interface{} { return make(chan LockUnspentRes) },
+	},
+	"sendfrom": {
+		HandlerWithChain: SendFrom,
+		Params:           make(chan btcjson.SendFromCmd),
+		Return:           func() interface{} { return make(chan SendFromRes) },
+	},
+	"sendmany": {
+		Handler: SendMany,
+		Params:  make(chan btcjson.SendManyCmd),
+		Return:  func() interface{} { return make(chan SendManyRes) },
+	},
+	"sendtoaddress": {
+		Handler: SendToAddress,
+		Params:  make(chan btcjson.SendToAddressCmd),
+		Return:  func() interface{} { return make(chan SendToAddressRes) },
+	},
+	"settxfee": {
+		Handler: SetTxFee,
+		Params:  make(chan btcjson.SetTxFeeCmd),
+		Return:  func() interface{} { return make(chan SetTxFeeRes) },
+	},
+	"signmessage": {
+		Handler: SignMessage,
+		Params:  make(chan btcjson.SignMessageCmd),
+		Return:  func() interface{} { return make(chan SignMessageRes) },
+	},
+	"signrawtransaction": {
+		HandlerWithChain: SignRawTransaction,
+		Params:           make(chan btcjson.SignRawTransactionCmd),
+		Return:           func() interface{} { return make(chan SignRawTransactionRes) },
+	},
+	"validateaddress": {
+		Handler: ValidateAddress,
+		Params:  make(chan btcjson.ValidateAddressCmd),
+		Return:  func() interface{} { return make(chan ValidateAddressRes) },
+	},
+	"verifymessage": {
+		Handler: VerifyMessage,
+		Params:  make(chan btcjson.VerifyMessageCmd),
+		Return:  func() interface{} { return make(chan VerifyMessageRes) },
+	},
+	"walletlock": {
+		Handler: WalletLock,
+		Params:  make(chan struct{}),
+		Return:  func() interface{} { return make(chan WalletLockRes) },
+	},
+	"walletpassphrase": {
+		Handler: WalletPassphrase,
+		Params:  make(chan btcjson.WalletPassphraseCmd),
+		Return:  func() interface{} { return make(chan WalletPassphraseRes) },
+	},
+	"walletpassphrasechange": {
+		Handler: WalletPassphraseChange,
+		Params:  make(chan btcjson.WalletPassphraseChangeCmd),
+		Return:  func() interface{} { return make(chan WalletPassphraseChangeRes) },
+	},
 	// Reference implementation methods (still unimplemented)
 	"backupwallet":         {Handler: Unimplemented, NoHelp: true},
 	"dumpwallet":           {Handler: Unimplemented, NoHelp: true},
@@ -118,18 +270,50 @@ var RPCHandlers = map[string]struct {
 	"move":          {Handler: Unsupported, NoHelp: true},
 	"setaccount":    {Handler: Unsupported, NoHelp: true},
 	// Extensions to the reference client JSON-RPC API
-	"createnewaccount": {Handler: CreateNewAccount},
-	"getbestblock":     {Handler: GetBestBlock},
+	"createnewaccount": {
+		Handler: CreateNewAccount,
+		Params:  make(chan btcjson.CreateNewAccountCmd),
+		Return:  func() interface{} { return make(chan CreateNewAccountRes) },
+	},
+	"getbestblock": {
+		Handler: GetBestBlock,
+		Params:  make(chan struct{}),
+		Return:  func() interface{} { return make(chan GetBestBlockRes) },
+	},
 	// This was an extension but the reference implementation added it as
 	// well, but with a different API (no account parameter).  It's listed
 	// here because it hasn't been update to use the reference
 	// implemenation's API.
-	"getunconfirmedbalance":   {Handler: GetUnconfirmedBalance},
-	"listaddresstransactions": {Handler: ListAddressTransactions},
-	"listalltransactions":     {Handler: ListAllTransactions},
-	"renameaccount":           {Handler: RenameAccount},
-	"walletislocked":          {Handler: WalletIsLocked},
-	"dropwallethistory":       {Handler: HandleDropWalletHistory},
+	"getunconfirmedbalance": {
+		Handler: GetUnconfirmedBalance,
+		Params:  make(chan btcjson.GetUnconfirmedBalanceCmd),
+		Return:  func() interface{} { return make(chan GetUnconfirmedBalanceRes) },
+	},
+	"listaddresstransactions": {
+		Handler: ListAddressTransactions,
+		Params:  make(chan btcjson.ListAddressTransactionsCmd),
+		Return:  func() interface{} { return make(chan ListAddressTransactionsRes) },
+	},
+	"listalltransactions": {
+		Handler: ListAllTransactions,
+		Params:  make(chan btcjson.ListAllTransactionsCmd),
+		Return:  func() interface{} { return make(chan ListAllTransactionsRes) },
+	},
+	"renameaccount": {
+		Handler: RenameAccount,
+		Params:  make(chan btcjson.RenameAccountCmd),
+		Return:  func() interface{} { return make(chan RenameAccountRes) },
+	},
+	"walletislocked": {
+		Handler: WalletIsLocked,
+		Params:  make(chan struct{}),
+		Return:  func() interface{} { return make(chan WalletIsLockedRes) },
+	},
+	"dropwallethistory": {
+		Handler: HandleDropWalletHistory,
+		Params:  make(chan struct{}),
+		Return:  func() interface{} { return make(chan DropWalletHistoryRes) },
+	},
 }
 
 // Unimplemented handles an Unimplemented RPC request with the
@@ -915,8 +1099,8 @@ func HandleDropWalletHistory(icmd interface{}, w *wallet.Wallet) (in interface{}
 	// 	if err = rwt.Commit(); log.L.Check(err) {
 	// 	}
 	// }()
-	interrupt.RequestRestart()
-	return "dropped wallet history", nil
+	defer interrupt.RequestRestart()
+	return nil, err
 }
 
 // These generators create the following global variables in this package:
