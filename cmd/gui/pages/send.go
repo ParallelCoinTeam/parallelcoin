@@ -55,7 +55,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 				widgets := []func(){
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, sendStruct.address, "DUO address",
+							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address",
 								func(e gel.EditorEvent) {
 									sendStruct.address = addressLineEditor.Text()
 								})),
@@ -66,13 +66,12 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 					},
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, amountLineEditor, fmt.Sprint(sendStruct.amount),
+							layout.Flexed(1, component.Editor(gtx, th, amountLineEditor,
 								"DUO Amount", func(e gel.EditorEvent) {
 									f, err := strconv.ParseFloat(amountLineEditor.Text(), 64)
 									if err != nil {
 									}
 									sendStruct.amount = f
-
 								})),
 							layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Fonts["Primary"], 12,
 								th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE AMOUNT", func() {
@@ -95,7 +94,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 										},
 										CustomField: func() {
 											layout.Flex{}.Layout(gtx,
-												layout.Flexed(1, component.Editor(gtx, th, passLineEditor, sendStruct.passPharse, "Enter your password",
+												layout.Flexed(1, component.Editor(gtx, th, passLineEditor, "Enter your password",
 													func(e gel.EditorEvent) {
 														sendStruct.passPharse = passLineEditor.Text()
 													})))

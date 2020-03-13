@@ -36,13 +36,13 @@ func fill(gtx *layout.Context, col color.RGBA) {
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	gtx.Dimensions = layout.Dimensions{Size: d}
 }
-func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, value, label string, handler func(gel.EditorEvent)) func() {
+func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			cs := gtx.Constraints
-			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32, "ffcf8030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 30, "ffffffff", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 30, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				e := th.DuoUIeditor(label)
 				e.Font.Typeface = th.Fonts["Primary"]
 				e.Font.Style = text.Italic

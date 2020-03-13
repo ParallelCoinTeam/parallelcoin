@@ -10,6 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/pod"
+	"strconv"
 )
 
 var (
@@ -53,12 +54,26 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 			case "input":
 				switch f.Field.InputType {
 				case "text":
-					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), rc.Settings.Daemon.Config[f.Field.Model].(string), f.Field.Label, func(e gel.EditorEvent) {})
+					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+						func(e gel.EditorEvent) {
+							rc.Settings.Daemon.Config[f.Field.Model] = (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text()
+						})()
 				case "number":
-					e := th.DuoUIeditor(f.Field.Label)
-					e.Font.Typeface = th.Fonts["Primary"]
-					e.Font.Style = text.Italic
-					e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor))
+					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+						func(e gel.EditorEvent) {
+							number, err := strconv.Atoi((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
+							if err == nil {
+							}
+							rc.Settings.Daemon.Config[f.Field.Model] = number
+						})()
+				case "decimal":
+					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+						func(e gel.EditorEvent) {
+							decimal, err := strconv.ParseFloat((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(), 64)
+							if err != nil {
+							}
+							rc.Settings.Daemon.Config[f.Field.Model] = decimal
+						})()
 				case "password":
 					e := th.DuoUIeditor(f.Field.Label)
 					e.Font.Typeface = th.Fonts["Primary"]
