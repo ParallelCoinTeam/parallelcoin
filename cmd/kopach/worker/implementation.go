@@ -116,7 +116,7 @@ func (w *Worker) hashReport() {
 	}); log.L.Check(err) {
 	}
 	// log.L.Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
-	log.L.Tracef("average hashrate %.2f", av.Value())
+	log.L.Debugf("average hashrate %.2f", av.Value())
 }
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network

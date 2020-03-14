@@ -146,6 +146,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 					ctrl.active.Store(true)
 				}
 			}
+			log.L.Debug("network hashrate", ctrl.HashReport())
 		case <-ctrl.quit:
 			cont = false
 			ctrl.active.Store(false)
@@ -250,7 +251,8 @@ var handlersMulticast = transport.Handlers{
 			block.MsgBlock().Header.Timestamp.Unix(),
 			block.MsgBlock().Header.Bits,
 			util.Amount(coinbaseTx.Value),
-			fork.GetAlgoName(block.MsgBlock().Header.Version, block.Height()), since)
+			fork.GetAlgoName(block.MsgBlock().Header.Version,
+				block.Height()), since)
 		return
 	},
 	string(p2padvt.Magic): func(ctx interface{}, src net.Addr, dst string,

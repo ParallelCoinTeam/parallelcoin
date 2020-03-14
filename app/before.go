@@ -10,13 +10,13 @@ import (
 
 	"github.com/urfave/cli"
 
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/save"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -340,7 +340,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		if c.IsSet("save") {
 			log.L.Info("saving configuration")
-			save.Pod(cx.Config)
+			cx.StateCfg.Save = true
 		}
 		return nil
 	}

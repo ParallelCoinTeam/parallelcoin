@@ -94,7 +94,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	algoVer := fork.GetAlgoVer(algoName, lastNode.height+1)
 	ttpb := float64(fork.List[1].Algos[algoName].VersionInterval)
 	newTargetBits = fork.SecondPowLimitBits
-	const minAvSamples = 4
+	const minAvSamples = 2
 	adjustment = 1
 	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, fork.P9Average
 	if lastNode == nil {
@@ -119,8 +119,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	}
 	// log.L.Debug(allAv, fork.P9Average, allAv / fork.P9Average, algAv, algAdj,
 	// 	allAdj)
-	adjustment = algAdj + allAdj
-	adjustment /= 2
+	adjustment = algAdj * allAdj
 	adjustment *= adjustment
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(bits))
