@@ -27,7 +27,12 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 			return fmt.Sprint(res)
 		}
 	} else if x, ok := legacy.RPCHandlers[split[0]]; ok {
-
+		_ = x
+		// if res, err := x.Handler(cmd, r.cx.RPCServer,, nil); log.L.Check(err) {
+		//
+		// } else {
+		// 	return fmt.Sprint(res)
+		// }
 	}
 
 	return
