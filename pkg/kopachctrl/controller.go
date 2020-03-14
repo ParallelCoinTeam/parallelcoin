@@ -40,7 +40,7 @@ const (
 
 type Controller struct {
 	multiConn              *transport.Channel
-	uniConn                *transport.Channel
+	// uniConn                *transport.Channel
 	active                 atomic.Bool
 	quit                   chan struct{}
 	cx                     *conte.Xt

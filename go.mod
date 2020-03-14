@@ -27,7 +27,7 @@ require (
 	github.com/minio/highwayhash v1.0.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
-	github.com/p9c/logi v0.0.12
+	github.com/p9c/logi v0.0.16
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba

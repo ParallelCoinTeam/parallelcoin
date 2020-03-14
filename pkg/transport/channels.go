@@ -11,9 +11,10 @@ import (
 	"strings"
 	"time"
 
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/fec"
 	"github.com/p9c/pod/pkg/gcm"
-	log "github.com/p9c/logi"
 )
 
 const (
@@ -121,12 +122,9 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 	for i := range handlers {
 		magics = append(magics, i)
 	}
-	// log.L.DEBUG("magics", magics, PrevCallers())
-	if key != "" {
-		if channel.sendCiph, err = gcm.GetCipher(key); log.L.Check(err) {
-		}
-		if channel.receiveCiph, err = gcm.GetCipher(key); log.L.Check(err) {
-		}
+	if channel.sendCiph, err = gcm.GetCipher(key); log.L.Check(err) {
+	}
+	if channel.receiveCiph, err = gcm.GetCipher(key); log.L.Check(err) {
 	}
 	channel.Receiver, err = Listen(receiver, channel, maxDatagramSize, handlers, quit)
 	channel.Sender, err = NewSender(sender, maxDatagramSize)
@@ -179,11 +177,15 @@ func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, 
 	quit chan struct{}) (channel *Channel, err error) {
 	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
 		buffers: make(map[string]*MsgBuffer), context: ctx, Ready: make(chan struct{})}
-	if key != "" {
-		if channel.sendCiph, err = gcm.GetCipher(key); log.L.Check(err) {
-		}
-		if channel.receiveCiph, err = gcm.GetCipher(key); log.L.Check(err) {
-		}
+	if channel.sendCiph, err = gcm.GetCipher(key); log.L.Check(err) {
+	}
+	if channel.sendCiph == nil {
+		panic("nil send cipher")
+	}
+	if channel.receiveCiph, err = gcm.GetCipher(key); log.L.Check(err) {
+	}
+	if channel.receiveCiph == nil {
+		panic("nil receive cipher")
 	}
 	if channel.Receiver, err = ListenBroadcast(port, channel, maxDatagramSize, handlers, quit); log.L.Check(err) {
 	}

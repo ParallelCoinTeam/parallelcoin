@@ -17,7 +17,7 @@ func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last
 	found bool, algStamps []uint64, version int32) {
 
 	version = fork.P9Algos[algoName].Version
-	for ln := lastNode.RelativeAncestor(1); ln != nil && ln.height > startHeight &&
+	for ln := lastNode; ln != nil && ln.height > startHeight &&
 		len(algStamps) <= int(fork.List[1].AveragingInterval); ln = ln.
 		RelativeAncestor(1) {
 		if ln.version == version {
@@ -33,7 +33,7 @@ func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last
 
 func GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []uint64) {
 
-	for ln := lastNode.RelativeAncestor(1); ln != nil && ln.height > startHeight &&
+	for ln := lastNode; ln != nil && ln.height > startHeight &&
 		len(allStamps) <= int(fork.List[1].AveragingInterval); ln = ln.RelativeAncestor(1) {
 		allStamps = append(allStamps, uint64(ln.timestamp))
 	}
