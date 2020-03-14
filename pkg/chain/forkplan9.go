@@ -154,10 +154,10 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 			if lastNode.version == algoVer {
 				isNewest = "*"
 			}
-			return fmt.Sprintf("%s %s av %s/%2.2f %s %s %08x %08x%s",
+			return fmt.Sprintf("%s %s av %s /%2.0f %s %s %08x %08x%s",
 				an,
-				RightJustify(fmt.Sprintf("%4.1f", algAv), 7),
-				RightJustify(fmt.Sprintf("%4.1f", allAv), 7),
+				RightJustify(fmt.Sprintf("%4.4f", algAv), 11),
+				RightJustify(fmt.Sprintf("%4.4f", allAv), 11),
 				fork.P9Average,
 				RightJustify(fmt.Sprintf("%4.4f", factor), 9),
 				symbol,

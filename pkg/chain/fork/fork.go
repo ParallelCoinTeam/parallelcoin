@@ -174,7 +174,7 @@ var (
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
 			// "01f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1")
-			"00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+			"0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	SecondPowLimitBits = BigToCompact(&SecondPowLimit)
