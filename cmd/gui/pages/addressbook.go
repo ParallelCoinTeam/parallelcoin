@@ -72,8 +72,11 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 			layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["ButtonText"], th.Colors["Dark"], "NEW ADDRESS", func() {
 				rc.Dialog.Show = true
 				rc.Dialog = &model.DuoUIdialog{
-					Show:        true,
-					Close:       func() { rc.Dialog.Show = false },
+					Show: true,
+					Close: func() {
+						rc.Dialog.Show = false
+
+					},
 					CustomField: component.DuoUIqrCode(gtx, address, 256),
 					Title:       "Copy address",
 					Text:        rc.CreateNewAddress(""),
