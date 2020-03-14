@@ -488,9 +488,7 @@ func (c *CAPI) {{.Handler}}(req *{{.Cmd}}, resp *{{.ResType}}) (err error) {
 {{end}}
 // Client call wrappers for a CAPI client with a given Conn
 {{range .}}
-func (r *CAPIClient) {{.Handler}}(
-	cmd ...{{.Cmd}}) (
-	res {{.ResType}}, err error) {
+func (r *CAPIClient) {{.Handler}}(cmd ...{{.Cmd}}) (res {{.ResType}}, err error) {
 	var c {{.Cmd}}
 	if len(cmd) > 0 {
 		c = cmd[0]
