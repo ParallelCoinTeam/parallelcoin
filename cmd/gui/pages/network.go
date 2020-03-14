@@ -36,10 +36,10 @@ func networkHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fu
 		}.Layout(gtx,
 			//layout.Rigid(component.TransactionsFilter(rc, gtx, th)),
 			layout.Rigid(func() {
-				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx, rc.Network.PerPage, "TxNum per page: ", fmt.Sprint(rc.Network.PerPage.Value))
+				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx, rc.Network.PerPage, "Peers per page: ", fmt.Sprint(rc.Network.PerPage.Value))
 			}),
 			layout.Rigid(func() {
-				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx, rc.Network.Page, "TxNum page: ", fmt.Sprint(rc.Network.Page.Value))
+				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx, rc.Network.Page, "Peers page: ", fmt.Sprint(rc.Network.Page.Value))
 			}),
 		)
 	}

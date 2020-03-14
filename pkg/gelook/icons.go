@@ -44,7 +44,7 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["NotificationSyncDisabled"] = mustIcon(NewDuoUIicon(icons.NotificationSyncDisabled))
 	i["NotificationSyncProblem"] = mustIcon(NewDuoUIicon(icons.NotificationSyncProblem))
 	i["NotificationVPNLock"] = mustIcon(NewDuoUIicon(icons.NotificationVPNLock))
-	i["NotificationWiFi"] = mustIcon(NewDuoUIicon(icons.NotificationWiFi))
+	i["network"] = mustIcon(NewDuoUIicon(icons.NotificationWiFi))
 	i["MapsLayers"] = mustIcon(NewDuoUIicon(icons.MapsLayers))
 	i["MapsLayersClear"] = mustIcon(NewDuoUIicon(icons.MapsLayersClear))
 	i["ImageTimer"] = mustIcon(NewDuoUIicon(icons.ImageTimer))

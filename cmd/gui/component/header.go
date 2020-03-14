@@ -5,10 +5,10 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gelook"
 )
 
 var (
@@ -48,7 +48,7 @@ func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPa
 				headerMenuButton(rc, gtx, th, "", "NotificationSyncDisabled", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "NotificationSyncProblem", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "NotificationVPNLock", buttonHeader),
-				headerMenuButton(rc, gtx, th, "", "NotificationWiFi", buttonHeader),
+				headerMenuButton(rc, gtx, th, "", "network", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "MapsLayers", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "MapsLayersClear", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "ImageTimer", buttonHeader),

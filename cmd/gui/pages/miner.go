@@ -1,11 +1,10 @@
 package pages
 
 import (
-	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gelook"
 )
 
 func Miner(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
@@ -23,20 +22,20 @@ func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func(
 						Spacing: layout.SpaceAround,
 					}.Layout(gtx,
 						layout.Flexed(1, func() {
-							consoleOutputList.Layout(gtx, rc.Status.Kopach.Hps.Len(), func(i int) {
-								t := rc.Status.Kopach.Hps.Get(i)
-								layout.Flex{
-									Axis:      layout.Vertical,
-									Alignment: layout.End,
-								}.Layout(gtx,
-									layout.Rigid(func() {
-										sat := th.Body1(fmt.Sprint(t))
-										sat.Font.Typeface = th.Fonts["Mono"]
-										sat.Color = gelook.HexARGB(th.Colors["Dark"])
-										sat.Layout(gtx)
-									}),
-								)
-							})
+							//	consoleOutputList.Layout(gtx, rc.Status.Kopach.Hps.Len(), func(i int) {
+							//		t := rc.Status.Kopach.Hps.Get(i)
+							//		layout.Flex{
+							//			Axis:      layout.Vertical,
+							//			Alignment: layout.End,
+							//		}.Layout(gtx,
+							//			layout.Rigid(func() {
+							//				sat := th.Body1(fmt.Sprint(t))
+							//				sat.Font.Typeface = th.Fonts["Mono"]
+							//				sat.Color = gelook.HexARGB(th.Colors["Dark"])
+							//				sat.Layout(gtx)
+							//			}),
+							//		)
+							//	})
 						}),
 					)
 				})
