@@ -152,12 +152,13 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 	out:
 		for {
 			// Pause state
+			log.L.Debug("worker pausing")
 		pausing:
 			for {
 				select {
 				case <-sampleTicker.C:
 					w.hashReport()
-					break pausing
+					break
 				case <-w.stopChan:
 					log.L.Trace("received pause signal while paused")
 					// drain stop channel in pause
@@ -169,9 +170,9 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 					log.L.Trace("quitting")
 					break out
 				}
-				log.L.Trace("worker running")
 			}
 			// Run state
+			log.L.Debug("worker running")
 		running:
 			for {
 				select {
@@ -258,9 +259,8 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 					}
 				}
 			}
-			log.L.Trace("worker pausing")
 		}
-		log.L.Trace("worker finished")
+		log.L.Debug("worker finished")
 	}(w)
 	return w
 }
