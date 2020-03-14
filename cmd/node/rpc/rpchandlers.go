@@ -2826,9 +2826,7 @@ func (c *CAPI) Version(req *btcjson.VersionCmd, resp *map[string]btcjson.Version
 
 // Client call wrappers for a CAPI client with a given Conn
 
-func (r *CAPIClient) AddNode(
-	cmd ...btcjson.AddNodeCmd) (
-	res None, err error) {
+func (r *CAPIClient) AddNode(cmd ...btcjson.AddNodeCmd) (res None, err error) {
 	var c btcjson.AddNodeCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2838,9 +2836,7 @@ func (r *CAPIClient) AddNode(
 	return
 }
 
-func (r *CAPIClient) CreateRawTransaction(
-	cmd ...btcjson.CreateRawTransactionCmd) (
-	res string, err error) {
+func (r *CAPIClient) CreateRawTransaction(cmd ...btcjson.CreateRawTransactionCmd) (res string, err error) {
 	var c btcjson.CreateRawTransactionCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2850,9 +2846,7 @@ func (r *CAPIClient) CreateRawTransaction(
 	return
 }
 
-func (r *CAPIClient) DecodeRawTransaction(
-	cmd ...btcjson.DecodeRawTransactionCmd) (
-	res btcjson.TxRawDecodeResult, err error) {
+func (r *CAPIClient) DecodeRawTransaction(cmd ...btcjson.DecodeRawTransactionCmd) (res btcjson.TxRawDecodeResult, err error) {
 	var c btcjson.DecodeRawTransactionCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2862,9 +2856,7 @@ func (r *CAPIClient) DecodeRawTransaction(
 	return
 }
 
-func (r *CAPIClient) DecodeScript(
-	cmd ...btcjson.DecodeScriptCmd) (
-	res btcjson.DecodeScriptResult, err error) {
+func (r *CAPIClient) DecodeScript(cmd ...btcjson.DecodeScriptCmd) (res btcjson.DecodeScriptResult, err error) {
 	var c btcjson.DecodeScriptCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2874,9 +2866,7 @@ func (r *CAPIClient) DecodeScript(
 	return
 }
 
-func (r *CAPIClient) EstimateFee(
-	cmd ...btcjson.EstimateFeeCmd) (
-	res float64, err error) {
+func (r *CAPIClient) EstimateFee(cmd ...btcjson.EstimateFeeCmd) (res float64, err error) {
 	var c btcjson.EstimateFeeCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2886,9 +2876,7 @@ func (r *CAPIClient) EstimateFee(
 	return
 }
 
-func (r *CAPIClient) Generate(
-	cmd ...None) (
-	res []string, err error) {
+func (r *CAPIClient) Generate(cmd ...None) (res []string, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2898,9 +2886,7 @@ func (r *CAPIClient) Generate(
 	return
 }
 
-func (r *CAPIClient) GetAddedNodeInfo(
-	cmd ...btcjson.GetAddedNodeInfoCmd) (
-	res []btcjson.GetAddedNodeInfoResultAddr, err error) {
+func (r *CAPIClient) GetAddedNodeInfo(cmd ...btcjson.GetAddedNodeInfoCmd) (res []btcjson.GetAddedNodeInfoResultAddr, err error) {
 	var c btcjson.GetAddedNodeInfoCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2910,9 +2896,7 @@ func (r *CAPIClient) GetAddedNodeInfo(
 	return
 }
 
-func (r *CAPIClient) GetBestBlock(
-	cmd ...None) (
-	res btcjson.GetBestBlockResult, err error) {
+func (r *CAPIClient) GetBestBlock(cmd ...None) (res btcjson.GetBestBlockResult, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2922,9 +2906,7 @@ func (r *CAPIClient) GetBestBlock(
 	return
 }
 
-func (r *CAPIClient) GetBestBlockHash(
-	cmd ...None) (
-	res string, err error) {
+func (r *CAPIClient) GetBestBlockHash(cmd ...None) (res string, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2934,9 +2916,7 @@ func (r *CAPIClient) GetBestBlockHash(
 	return
 }
 
-func (r *CAPIClient) GetBlock(
-	cmd ...btcjson.GetBlockCmd) (
-	res btcjson.GetBlockVerboseResult, err error) {
+func (r *CAPIClient) GetBlock(cmd ...btcjson.GetBlockCmd) (res btcjson.GetBlockVerboseResult, err error) {
 	var c btcjson.GetBlockCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2946,9 +2926,7 @@ func (r *CAPIClient) GetBlock(
 	return
 }
 
-func (r *CAPIClient) GetBlockChainInfo(
-	cmd ...None) (
-	res btcjson.GetBlockChainInfoResult, err error) {
+func (r *CAPIClient) GetBlockChainInfo(cmd ...None) (res btcjson.GetBlockChainInfoResult, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2958,9 +2936,7 @@ func (r *CAPIClient) GetBlockChainInfo(
 	return
 }
 
-func (r *CAPIClient) GetBlockCount(
-	cmd ...None) (
-	res int64, err error) {
+func (r *CAPIClient) GetBlockCount(cmd ...None) (res int64, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2970,9 +2946,7 @@ func (r *CAPIClient) GetBlockCount(
 	return
 }
 
-func (r *CAPIClient) GetBlockHash(
-	cmd ...btcjson.GetBlockHashCmd) (
-	res string, err error) {
+func (r *CAPIClient) GetBlockHash(cmd ...btcjson.GetBlockHashCmd) (res string, err error) {
 	var c btcjson.GetBlockHashCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2982,9 +2956,7 @@ func (r *CAPIClient) GetBlockHash(
 	return
 }
 
-func (r *CAPIClient) GetBlockHeader(
-	cmd ...btcjson.GetBlockHeaderCmd) (
-	res btcjson.GetBlockHeaderVerboseResult, err error) {
+func (r *CAPIClient) GetBlockHeader(cmd ...btcjson.GetBlockHeaderCmd) (res btcjson.GetBlockHeaderVerboseResult, err error) {
 	var c btcjson.GetBlockHeaderCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -2994,9 +2966,7 @@ func (r *CAPIClient) GetBlockHeader(
 	return
 }
 
-func (r *CAPIClient) GetBlockTemplate(
-	cmd ...btcjson.GetBlockTemplateCmd) (
-	res string, err error) {
+func (r *CAPIClient) GetBlockTemplate(cmd ...btcjson.GetBlockTemplateCmd) (res string, err error) {
 	var c btcjson.GetBlockTemplateCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3006,9 +2976,7 @@ func (r *CAPIClient) GetBlockTemplate(
 	return
 }
 
-func (r *CAPIClient) GetCFilter(
-	cmd ...btcjson.GetCFilterCmd) (
-	res string, err error) {
+func (r *CAPIClient) GetCFilter(cmd ...btcjson.GetCFilterCmd) (res string, err error) {
 	var c btcjson.GetCFilterCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3018,9 +2986,7 @@ func (r *CAPIClient) GetCFilter(
 	return
 }
 
-func (r *CAPIClient) GetCFilterHeader(
-	cmd ...btcjson.GetCFilterHeaderCmd) (
-	res string, err error) {
+func (r *CAPIClient) GetCFilterHeader(cmd ...btcjson.GetCFilterHeaderCmd) (res string, err error) {
 	var c btcjson.GetCFilterHeaderCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3030,9 +2996,7 @@ func (r *CAPIClient) GetCFilterHeader(
 	return
 }
 
-func (r *CAPIClient) GetConnectionCount(
-	cmd ...None) (
-	res int32, err error) {
+func (r *CAPIClient) GetConnectionCount(cmd ...None) (res int32, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3042,9 +3006,7 @@ func (r *CAPIClient) GetConnectionCount(
 	return
 }
 
-func (r *CAPIClient) GetCurrentNet(
-	cmd ...None) (
-	res string, err error) {
+func (r *CAPIClient) GetCurrentNet(cmd ...None) (res string, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3054,9 +3016,7 @@ func (r *CAPIClient) GetCurrentNet(
 	return
 }
 
-func (r *CAPIClient) GetDifficulty(
-	cmd ...btcjson.GetDifficultyCmd) (
-	res float64, err error) {
+func (r *CAPIClient) GetDifficulty(cmd ...btcjson.GetDifficultyCmd) (res float64, err error) {
 	var c btcjson.GetDifficultyCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3066,9 +3026,7 @@ func (r *CAPIClient) GetDifficulty(
 	return
 }
 
-func (r *CAPIClient) GetGenerate(
-	cmd ...btcjson.GetHeadersCmd) (
-	res bool, err error) {
+func (r *CAPIClient) GetGenerate(cmd ...btcjson.GetHeadersCmd) (res bool, err error) {
 	var c btcjson.GetHeadersCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3078,9 +3036,7 @@ func (r *CAPIClient) GetGenerate(
 	return
 }
 
-func (r *CAPIClient) GetHashesPerSec(
-	cmd ...None) (
-	res float64, err error) {
+func (r *CAPIClient) GetHashesPerSec(cmd ...None) (res float64, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3090,9 +3046,7 @@ func (r *CAPIClient) GetHashesPerSec(
 	return
 }
 
-func (r *CAPIClient) GetHeaders(
-	cmd ...btcjson.GetHeadersCmd) (
-	res []string, err error) {
+func (r *CAPIClient) GetHeaders(cmd ...btcjson.GetHeadersCmd) (res []string, err error) {
 	var c btcjson.GetHeadersCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3102,9 +3056,7 @@ func (r *CAPIClient) GetHeaders(
 	return
 }
 
-func (r *CAPIClient) GetInfo(
-	cmd ...None) (
-	res btcjson.InfoChainResult0, err error) {
+func (r *CAPIClient) GetInfo(cmd ...None) (res btcjson.InfoChainResult0, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3114,9 +3066,7 @@ func (r *CAPIClient) GetInfo(
 	return
 }
 
-func (r *CAPIClient) GetMempoolInfo(
-	cmd ...None) (
-	res btcjson.GetMempoolInfoResult, err error) {
+func (r *CAPIClient) GetMempoolInfo(cmd ...None) (res btcjson.GetMempoolInfoResult, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3126,9 +3076,7 @@ func (r *CAPIClient) GetMempoolInfo(
 	return
 }
 
-func (r *CAPIClient) GetMiningInfo(
-	cmd ...None) (
-	res btcjson.GetMiningInfoResult, err error) {
+func (r *CAPIClient) GetMiningInfo(cmd ...None) (res btcjson.GetMiningInfoResult, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3138,9 +3086,7 @@ func (r *CAPIClient) GetMiningInfo(
 	return
 }
 
-func (r *CAPIClient) GetNetTotals(
-	cmd ...None) (
-	res btcjson.GetNetTotalsResult, err error) {
+func (r *CAPIClient) GetNetTotals(cmd ...None) (res btcjson.GetNetTotalsResult, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3150,9 +3096,7 @@ func (r *CAPIClient) GetNetTotals(
 	return
 }
 
-func (r *CAPIClient) GetNetworkHashPS(
-	cmd ...btcjson.GetNetworkHashPSCmd) (
-	res []btcjson.GetPeerInfoResult, err error) {
+func (r *CAPIClient) GetNetworkHashPS(cmd ...btcjson.GetNetworkHashPSCmd) (res []btcjson.GetPeerInfoResult, err error) {
 	var c btcjson.GetNetworkHashPSCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3162,9 +3106,7 @@ func (r *CAPIClient) GetNetworkHashPS(
 	return
 }
 
-func (r *CAPIClient) GetPeerInfo(
-	cmd ...None) (
-	res []btcjson.GetPeerInfoResult, err error) {
+func (r *CAPIClient) GetPeerInfo(cmd ...None) (res []btcjson.GetPeerInfoResult, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3174,9 +3116,7 @@ func (r *CAPIClient) GetPeerInfo(
 	return
 }
 
-func (r *CAPIClient) GetRawMempool(
-	cmd ...btcjson.GetRawMempoolCmd) (
-	res []string, err error) {
+func (r *CAPIClient) GetRawMempool(cmd ...btcjson.GetRawMempoolCmd) (res []string, err error) {
 	var c btcjson.GetRawMempoolCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3186,9 +3126,7 @@ func (r *CAPIClient) GetRawMempool(
 	return
 }
 
-func (r *CAPIClient) GetRawTransaction(
-	cmd ...btcjson.GetRawTransactionCmd) (
-	res string, err error) {
+func (r *CAPIClient) GetRawTransaction(cmd ...btcjson.GetRawTransactionCmd) (res string, err error) {
 	var c btcjson.GetRawTransactionCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3198,9 +3136,7 @@ func (r *CAPIClient) GetRawTransaction(
 	return
 }
 
-func (r *CAPIClient) GetTxOut(
-	cmd ...btcjson.GetTxOutCmd) (
-	res string, err error) {
+func (r *CAPIClient) GetTxOut(cmd ...btcjson.GetTxOutCmd) (res string, err error) {
 	var c btcjson.GetTxOutCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3210,9 +3146,7 @@ func (r *CAPIClient) GetTxOut(
 	return
 }
 
-func (r *CAPIClient) Help(
-	cmd ...btcjson.HelpCmd) (
-	res string, err error) {
+func (r *CAPIClient) Help(cmd ...btcjson.HelpCmd) (res string, err error) {
 	var c btcjson.HelpCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3222,9 +3156,7 @@ func (r *CAPIClient) Help(
 	return
 }
 
-func (r *CAPIClient) Node(
-	cmd ...btcjson.NodeCmd) (
-	res None, err error) {
+func (r *CAPIClient) Node(cmd ...btcjson.NodeCmd) (res None, err error) {
 	var c btcjson.NodeCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3234,9 +3166,7 @@ func (r *CAPIClient) Node(
 	return
 }
 
-func (r *CAPIClient) Ping(
-	cmd ...None) (
-	res None, err error) {
+func (r *CAPIClient) Ping(cmd ...None) (res None, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3246,9 +3176,7 @@ func (r *CAPIClient) Ping(
 	return
 }
 
-func (r *CAPIClient) ResetChain(
-	cmd ...None) (
-	res None, err error) {
+func (r *CAPIClient) ResetChain(cmd ...None) (res None, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3258,9 +3186,7 @@ func (r *CAPIClient) ResetChain(
 	return
 }
 
-func (r *CAPIClient) Restart(
-	cmd ...None) (
-	res None, err error) {
+func (r *CAPIClient) Restart(cmd ...None) (res None, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3270,9 +3196,7 @@ func (r *CAPIClient) Restart(
 	return
 }
 
-func (r *CAPIClient) SearchRawTransactions(
-	cmd ...btcjson.SearchRawTransactionsCmd) (
-	res []btcjson.SearchRawTransactionsResult, err error) {
+func (r *CAPIClient) SearchRawTransactions(cmd ...btcjson.SearchRawTransactionsCmd) (res []btcjson.SearchRawTransactionsResult, err error) {
 	var c btcjson.SearchRawTransactionsCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3282,9 +3206,7 @@ func (r *CAPIClient) SearchRawTransactions(
 	return
 }
 
-func (r *CAPIClient) SendRawTransaction(
-	cmd ...btcjson.SendRawTransactionCmd) (
-	res None, err error) {
+func (r *CAPIClient) SendRawTransaction(cmd ...btcjson.SendRawTransactionCmd) (res None, err error) {
 	var c btcjson.SendRawTransactionCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3294,9 +3216,7 @@ func (r *CAPIClient) SendRawTransaction(
 	return
 }
 
-func (r *CAPIClient) SetGenerate(
-	cmd ...btcjson.SetGenerateCmd) (
-	res None, err error) {
+func (r *CAPIClient) SetGenerate(cmd ...btcjson.SetGenerateCmd) (res None, err error) {
 	var c btcjson.SetGenerateCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3306,9 +3226,7 @@ func (r *CAPIClient) SetGenerate(
 	return
 }
 
-func (r *CAPIClient) Stop(
-	cmd ...None) (
-	res None, err error) {
+func (r *CAPIClient) Stop(cmd ...None) (res None, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3318,9 +3236,7 @@ func (r *CAPIClient) Stop(
 	return
 }
 
-func (r *CAPIClient) SubmitBlock(
-	cmd ...btcjson.SubmitBlockCmd) (
-	res string, err error) {
+func (r *CAPIClient) SubmitBlock(cmd ...btcjson.SubmitBlockCmd) (res string, err error) {
 	var c btcjson.SubmitBlockCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3330,9 +3246,7 @@ func (r *CAPIClient) SubmitBlock(
 	return
 }
 
-func (r *CAPIClient) Uptime(
-	cmd ...None) (
-	res btcjson.GetMempoolInfoResult, err error) {
+func (r *CAPIClient) Uptime(cmd ...None) (res btcjson.GetMempoolInfoResult, err error) {
 	var c None
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3342,9 +3256,7 @@ func (r *CAPIClient) Uptime(
 	return
 }
 
-func (r *CAPIClient) ValidateAddress(
-	cmd ...btcjson.ValidateAddressCmd) (
-	res btcjson.ValidateAddressChainResult, err error) {
+func (r *CAPIClient) ValidateAddress(cmd ...btcjson.ValidateAddressCmd) (res btcjson.ValidateAddressChainResult, err error) {
 	var c btcjson.ValidateAddressCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3354,9 +3266,7 @@ func (r *CAPIClient) ValidateAddress(
 	return
 }
 
-func (r *CAPIClient) VerifyChain(
-	cmd ...btcjson.VerifyChainCmd) (
-	res bool, err error) {
+func (r *CAPIClient) VerifyChain(cmd ...btcjson.VerifyChainCmd) (res bool, err error) {
 	var c btcjson.VerifyChainCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3366,9 +3276,7 @@ func (r *CAPIClient) VerifyChain(
 	return
 }
 
-func (r *CAPIClient) VerifyMessage(
-	cmd ...btcjson.VerifyMessageCmd) (
-	res bool, err error) {
+func (r *CAPIClient) VerifyMessage(cmd ...btcjson.VerifyMessageCmd) (res bool, err error) {
 	var c btcjson.VerifyMessageCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
@@ -3378,9 +3286,7 @@ func (r *CAPIClient) VerifyMessage(
 	return
 }
 
-func (r *CAPIClient) Version(
-	cmd ...btcjson.VersionCmd) (
-	res map[string]btcjson.VersionResult, err error) {
+func (r *CAPIClient) Version(cmd ...btcjson.VersionCmd) (res map[string]btcjson.VersionResult, err error) {
 	var c btcjson.VersionCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
