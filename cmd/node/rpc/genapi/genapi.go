@@ -402,7 +402,8 @@ type (
 var ` + RPCMapName + `BeforeInit = map[string]CommandHandler{
 {{range .}}	"{{.Method}}":{ 
 		Fn: Handle{{.Handler}}, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan {{.Handler}}Res)} }}, {{end}}
+		Result: func() API { return API{Ch: make(chan {{.Handler}}Res)} }}, 
+{{end}}
 }
 
 // API functions
