@@ -164,99 +164,146 @@ type (
 var RPCHandlersBeforeInit = map[string]CommandHandler{
 	"addnode":{ 
 		Fn: HandleAddNode, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan AddNodeRes)} }}, 	"createrawtransaction":{ 
+		Result: func() API { return API{Ch: make(chan AddNodeRes)} }}, 
+	"createrawtransaction":{ 
 		Fn: HandleCreateRawTransaction, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan CreateRawTransactionRes)} }}, 	"decoderawtransaction":{ 
+		Result: func() API { return API{Ch: make(chan CreateRawTransactionRes)} }}, 
+	"decoderawtransaction":{ 
 		Fn: HandleDecodeRawTransaction, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan DecodeRawTransactionRes)} }}, 	"decodescript":{ 
+		Result: func() API { return API{Ch: make(chan DecodeRawTransactionRes)} }}, 
+	"decodescript":{ 
 		Fn: HandleDecodeScript, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan DecodeScriptRes)} }}, 	"estimatefee":{ 
+		Result: func() API { return API{Ch: make(chan DecodeScriptRes)} }}, 
+	"estimatefee":{ 
 		Fn: HandleEstimateFee, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan EstimateFeeRes)} }}, 	"generate":{ 
+		Result: func() API { return API{Ch: make(chan EstimateFeeRes)} }}, 
+	"generate":{ 
 		Fn: HandleGenerate, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GenerateRes)} }}, 	"getaddednodeinfo":{ 
+		Result: func() API { return API{Ch: make(chan GenerateRes)} }}, 
+	"getaddednodeinfo":{ 
 		Fn: HandleGetAddedNodeInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetAddedNodeInfoRes)} }}, 	"getbestblock":{ 
+		Result: func() API { return API{Ch: make(chan GetAddedNodeInfoRes)} }}, 
+	"getbestblock":{ 
 		Fn: HandleGetBestBlock, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBestBlockRes)} }}, 	"getbestblockhash":{ 
+		Result: func() API { return API{Ch: make(chan GetBestBlockRes)} }}, 
+	"getbestblockhash":{ 
 		Fn: HandleGetBestBlockHash, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBestBlockHashRes)} }}, 	"getblock":{ 
+		Result: func() API { return API{Ch: make(chan GetBestBlockHashRes)} }}, 
+	"getblock":{ 
 		Fn: HandleGetBlock, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockRes)} }}, 	"getblockchaininfo":{ 
+		Result: func() API { return API{Ch: make(chan GetBlockRes)} }}, 
+	"getblockchaininfo":{ 
 		Fn: HandleGetBlockChainInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockChainInfoRes)} }}, 	"getblockcount":{ 
+		Result: func() API { return API{Ch: make(chan GetBlockChainInfoRes)} }}, 
+	"getblockcount":{ 
 		Fn: HandleGetBlockCount, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockCountRes)} }}, 	"getblockhash":{ 
+		Result: func() API { return API{Ch: make(chan GetBlockCountRes)} }}, 
+	"getblockhash":{ 
 		Fn: HandleGetBlockHash, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockHashRes)} }}, 	"getblockheader":{ 
+		Result: func() API { return API{Ch: make(chan GetBlockHashRes)} }}, 
+	"getblockheader":{ 
 		Fn: HandleGetBlockHeader, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockHeaderRes)} }}, 	"getblocktemplate":{ 
+		Result: func() API { return API{Ch: make(chan GetBlockHeaderRes)} }}, 
+	"getblocktemplate":{ 
 		Fn: HandleGetBlockTemplate, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockTemplateRes)} }}, 	"getcfilter":{ 
+		Result: func() API { return API{Ch: make(chan GetBlockTemplateRes)} }}, 
+	"getcfilter":{ 
 		Fn: HandleGetCFilter, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetCFilterRes)} }}, 	"getcfilterheader":{ 
+		Result: func() API { return API{Ch: make(chan GetCFilterRes)} }}, 
+	"getcfilterheader":{ 
 		Fn: HandleGetCFilterHeader, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetCFilterHeaderRes)} }}, 	"getconnectioncount":{ 
+		Result: func() API { return API{Ch: make(chan GetCFilterHeaderRes)} }}, 
+	"getconnectioncount":{ 
 		Fn: HandleGetConnectionCount, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetConnectionCountRes)} }}, 	"getcurrentnet":{ 
+		Result: func() API { return API{Ch: make(chan GetConnectionCountRes)} }}, 
+	"getcurrentnet":{ 
 		Fn: HandleGetCurrentNet, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetCurrentNetRes)} }}, 	"getdifficulty":{ 
+		Result: func() API { return API{Ch: make(chan GetCurrentNetRes)} }}, 
+	"getdifficulty":{ 
 		Fn: HandleGetDifficulty, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetDifficultyRes)} }}, 	"getgenerate":{ 
+		Result: func() API { return API{Ch: make(chan GetDifficultyRes)} }}, 
+	"getgenerate":{ 
 		Fn: HandleGetGenerate, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetGenerateRes)} }}, 	"gethashespersec":{ 
+		Result: func() API { return API{Ch: make(chan GetGenerateRes)} }}, 
+	"gethashespersec":{ 
 		Fn: HandleGetHashesPerSec, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetHashesPerSecRes)} }}, 	"getheaders":{ 
+		Result: func() API { return API{Ch: make(chan GetHashesPerSecRes)} }}, 
+	"getheaders":{ 
 		Fn: HandleGetHeaders, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetHeadersRes)} }}, 	"getinfo":{ 
+		Result: func() API { return API{Ch: make(chan GetHeadersRes)} }}, 
+	"getinfo":{ 
 		Fn: HandleGetInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetInfoRes)} }}, 	"getmempoolinfo":{ 
+		Result: func() API { return API{Ch: make(chan GetInfoRes)} }}, 
+	"getmempoolinfo":{ 
 		Fn: HandleGetMempoolInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetMempoolInfoRes)} }}, 	"getmininginfo":{ 
+		Result: func() API { return API{Ch: make(chan GetMempoolInfoRes)} }}, 
+	"getmininginfo":{ 
 		Fn: HandleGetMiningInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetMiningInfoRes)} }}, 	"getnettotals":{ 
+		Result: func() API { return API{Ch: make(chan GetMiningInfoRes)} }}, 
+	"getnettotals":{ 
 		Fn: HandleGetNetTotals, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetNetTotalsRes)} }}, 	"getnetworkhashps":{ 
+		Result: func() API { return API{Ch: make(chan GetNetTotalsRes)} }}, 
+	"getnetworkhashps":{ 
 		Fn: HandleGetNetworkHashPS, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetNetworkHashPSRes)} }}, 	"getpeerinfo":{ 
+		Result: func() API { return API{Ch: make(chan GetNetworkHashPSRes)} }}, 
+	"getpeerinfo":{ 
 		Fn: HandleGetPeerInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetPeerInfoRes)} }}, 	"getrawmempool":{ 
+		Result: func() API { return API{Ch: make(chan GetPeerInfoRes)} }}, 
+	"getrawmempool":{ 
 		Fn: HandleGetRawMempool, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetRawMempoolRes)} }}, 	"getrawtransaction":{ 
+		Result: func() API { return API{Ch: make(chan GetRawMempoolRes)} }}, 
+	"getrawtransaction":{ 
 		Fn: HandleGetRawTransaction, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetRawTransactionRes)} }}, 	"gettxout":{ 
+		Result: func() API { return API{Ch: make(chan GetRawTransactionRes)} }}, 
+	"gettxout":{ 
 		Fn: HandleGetTxOut, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetTxOutRes)} }}, 	"help":{ 
+		Result: func() API { return API{Ch: make(chan GetTxOutRes)} }}, 
+	"help":{ 
 		Fn: HandleHelp, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan HelpRes)} }}, 	"node":{ 
+		Result: func() API { return API{Ch: make(chan HelpRes)} }}, 
+	"node":{ 
 		Fn: HandleNode, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan NodeRes)} }}, 	"ping":{ 
+		Result: func() API { return API{Ch: make(chan NodeRes)} }}, 
+	"ping":{ 
 		Fn: HandlePing, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan PingRes)} }}, 	"resetchain":{ 
+		Result: func() API { return API{Ch: make(chan PingRes)} }}, 
+	"resetchain":{ 
 		Fn: HandleResetChain, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan ResetChainRes)} }}, 	"restart":{ 
+		Result: func() API { return API{Ch: make(chan ResetChainRes)} }}, 
+	"restart":{ 
 		Fn: HandleRestart, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan RestartRes)} }}, 	"searchrawtransactions":{ 
+		Result: func() API { return API{Ch: make(chan RestartRes)} }}, 
+	"searchrawtransactions":{ 
 		Fn: HandleSearchRawTransactions, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan SearchRawTransactionsRes)} }}, 	"sendrawtransaction":{ 
+		Result: func() API { return API{Ch: make(chan SearchRawTransactionsRes)} }}, 
+	"sendrawtransaction":{ 
 		Fn: HandleSendRawTransaction, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan SendRawTransactionRes)} }}, 	"setgenerate":{ 
+		Result: func() API { return API{Ch: make(chan SendRawTransactionRes)} }}, 
+	"setgenerate":{ 
 		Fn: HandleSetGenerate, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan SetGenerateRes)} }}, 	"stop":{ 
+		Result: func() API { return API{Ch: make(chan SetGenerateRes)} }}, 
+	"stop":{ 
 		Fn: HandleStop, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan StopRes)} }}, 	"submitblock":{ 
+		Result: func() API { return API{Ch: make(chan StopRes)} }}, 
+	"submitblock":{ 
 		Fn: HandleSubmitBlock, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan SubmitBlockRes)} }}, 	"uptime":{ 
+		Result: func() API { return API{Ch: make(chan SubmitBlockRes)} }}, 
+	"uptime":{ 
 		Fn: HandleUptime, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan UptimeRes)} }}, 	"validateaddress":{ 
+		Result: func() API { return API{Ch: make(chan UptimeRes)} }}, 
+	"validateaddress":{ 
 		Fn: HandleValidateAddress, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan ValidateAddressRes)} }}, 	"verifychain":{ 
+		Result: func() API { return API{Ch: make(chan ValidateAddressRes)} }}, 
+	"verifychain":{ 
 		Fn: HandleVerifyChain, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan VerifyChainRes)} }}, 	"verifymessage":{ 
+		Result: func() API { return API{Ch: make(chan VerifyChainRes)} }}, 
+	"verifymessage":{ 
 		Fn: HandleVerifyMessage, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan VerifyMessageRes)} }}, 	"version":{ 
+		Result: func() API { return API{Ch: make(chan VerifyMessageRes)} }}, 
+	"version":{ 
 		Fn: HandleVersion, Call: make(chan API, 32), 
 		Result: func() API { return API{Ch: make(chan VersionRes)} }}, 
+
 }
 
 // API functions
