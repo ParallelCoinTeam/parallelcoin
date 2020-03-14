@@ -83,7 +83,7 @@ func update(r *RcVar) {
 	r.GetLatestTransactions()
 	// log.L.Info("")
 	// log.L.Info("UPDATE")
-	log.L.Info(r.History.PerPage)
+	// log.L.Trace(r.History.PerPage)
 	// log.L.Info("")
 	// r.GetDuoUIstatus()
 	// r.GetDuoUIlocalLost()

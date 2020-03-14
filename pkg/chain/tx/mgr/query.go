@@ -237,7 +237,7 @@ func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
 // f executes and returns true.
 func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error)) (bool, error) {
-	log.L.Debug("rangeBlockTransactions", begin, end)
+	log.L.Trace("rangeBlockTransactions", begin, end)
 	// Mempool height is considered a high bound.
 	if begin < 0 {
 		begin = int32(^uint32(0) >> 1)
@@ -245,7 +245,7 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	if end < 0 {
 		end = int32(^uint32(0) >> 1)
 	}
-	log.L.Debug("begin", begin, "end", end)
+	log.L.Trace("begin", begin, "end", end)
 	var blockIter blockIterator
 	var advance func(*blockIterator) bool
 	if begin < end {

@@ -1,14 +1,16 @@
 package pages
 
 import (
+	"time"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	"time"
 )
 
 var (
@@ -53,7 +55,9 @@ func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 									Time:  time.Time{},
 									Out:   rc.ConsoleCmd(e.Text),
 								})
-							})))
+							}),
+						),
+					)
 				})
 			}),
 		)

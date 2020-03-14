@@ -1866,7 +1866,7 @@ func (w *Wallet) ListTransactions(from, count int) (txList []btcjson.ListTransac
 		// Get current block.  The block height used for calculating
 		// the number of tx confirmations.
 		syncBlock := w.Manager.SyncedTo()
-		log.L.Debug("synced to", syncBlock)
+		log.L.Trace("synced to", syncBlock)
 		// Need to skip the first from transactions, and after those, only
 		// include the next count transactions.
 		skipped := 0

@@ -23,7 +23,6 @@ func (r *RcVar) StartServices() (err error) {
 	if err != nil {
 		log.L.Error(err)
 	}
-	// r.Boot.IsBoot = false
 	r.Ready <- struct{}{}
 	return
 }

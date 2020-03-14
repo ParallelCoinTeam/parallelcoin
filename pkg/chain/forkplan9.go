@@ -28,6 +28,11 @@ func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last
 			}
 		}
 	}
+	// reverse order of stamps
+	for i := 0; i < len(algStamps)/2; i++ {
+		algStamps[i], algStamps[len(algStamps)-i-1] = algStamps[len(
+			algStamps)-i-1], algStamps[i]
+	}
 	return
 }
 
@@ -37,6 +42,12 @@ func GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []uint64) {
 		len(allStamps) <= int(fork.List[1].AveragingInterval); ln = ln.RelativeAncestor(1) {
 		allStamps = append(allStamps, uint64(ln.timestamp))
 	}
+	// reverse order of stamps
+	for i := 0; i < len(allStamps)/2; i++ {
+		allStamps[i], allStamps[len(allStamps)-i-1] =
+			allStamps[len(allStamps)-i-1], allStamps[i]
+	}
+
 	return
 }
 
@@ -47,7 +58,7 @@ func GetAll(allStamps []uint64) (allAv, allAdj float64) {
 	allIntervals := make([]float64, len(allStamps)-1)
 	for i := range allStamps {
 		if i > 0 {
-			r := allStamps[i-1] - allStamps[i]
+			r := allStamps[i] - allStamps[i-1]
 			allIntervals[i-1] = float64(r)
 		}
 	}
@@ -64,13 +75,12 @@ func GetAll(allStamps []uint64) (allAv, allAdj float64) {
 	return
 }
 
-func GetAlg(algStampsP []uint64, targetTimePerBlock float64) (algAv, algAdj float64) {
-	algStamps := algStampsP
+func GetAlg(algStamps []uint64, targetTimePerBlock float64) (algAv, algAdj float64) {
 	// calculate intervals
 	algIntervals := make([]uint64, len(algStamps)-1)
 	for i := range algStamps {
 		if i > 0 {
-			r := algStamps[i-1] - algStamps[i]
+			r := algStamps[i] - algStamps[i-1]
 			algIntervals[i-1] = r
 		}
 	}

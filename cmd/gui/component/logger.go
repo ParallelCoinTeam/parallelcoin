@@ -2,14 +2,16 @@ package component
 
 import (
 	"fmt"
-	"github.com/p9c/pod/cmd/gui/rcd"
+	"time"
+
 	log "github.com/p9c/logi"
 
-	"time"
+	"github.com/p9c/pod/cmd/gui/rcd"
 
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/pkg/gelook"
 )
 
@@ -56,9 +58,9 @@ func DuoUIlogger(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 				}
 
 				logText.Layout(gtx)
-				op.InvalidateOp{}.Add(gtx.Ops)
 
 			})
+			op.InvalidateOp{}.Add(gtx.Ops)
 		})
 	}
 }

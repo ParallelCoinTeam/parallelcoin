@@ -67,7 +67,7 @@ type Boot struct {
 
 func RcInit(cx *conte.Xt) (r *RcVar) {
 	b := Boot{
-		IsBoot:     false,
+		IsBoot:     true,
 		IsFirstRun: false,
 		IsBootMenu: false,
 		IsBootLogo: false,

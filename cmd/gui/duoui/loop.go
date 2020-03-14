@@ -2,10 +2,12 @@ package duoui
 
 import (
 	"errors"
+
 	"github.com/p9c/pod/cmd/gui/component"
 
 	"gioui.org/io/system"
 	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -27,7 +29,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					select {
 					case <-updateTrigger:
 						log.L.Trace("repaint forced")
-						//ui.ly.Window.Invalidate()
+						// ui.ly.Window.Invalidate()
 					case <-ui.rc.Quit:
 						break quitTrigger
 					}
@@ -35,6 +37,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			}()
 			ui.rc.ListenInit(updateTrigger)
 			ui.rc.IsReady = true
+			r.Boot.IsBoot = false
 		case <-ui.rc.Quit:
 			log.L.Debug("quit signal received")
 			if !interrupt.Requested() {
@@ -46,7 +49,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			<-interrupt.HandlersDone
 			log.L.Debug("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
-			//TODO events of gui
+			// TODO events of gui
 		case e := <-ui.rc.Commands.Events:
 			switch e := e.(type) {
 			case rcd.DuoUIcommandEvent:
@@ -79,6 +82,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					e.Frame(ui.ly.Context.Ops)
 				}
 			}
+			ui.ly.Window.Invalidate()
 		}
 	}
 }

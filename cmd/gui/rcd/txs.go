@@ -80,7 +80,7 @@ func txs(t btcjson.ListTransactionsResult) model.DuoUItransactionExcerpt {
 
 }
 func (r *RcVar) GetLatestTransactions() {
-	log.L.Debug("getting latest transactions")
+	log.L.Trace("getting latest transactions")
 	lt, err := r.cx.WalletServer.ListTransactions(0, 10)
 	if err != nil {
 		// //r.PushDuoUIalert("Error", err.Error(), "error")
