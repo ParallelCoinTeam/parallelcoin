@@ -146,7 +146,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 					ctrl.active.Store(true)
 				}
 			}
-			log.L.Debug("network hashrate", ctrl.HashReport())
+			log.L.Trace("network hashrate", ctrl.HashReport())
 		case <-ctrl.quit:
 			cont = false
 			ctrl.active.Store(false)
@@ -180,7 +180,8 @@ func (c *Controller) HashReport() float64 {
 
 var handlersMulticast = transport.Handlers{
 	// Solutions submitted by workers
-	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string,
+		b []byte) (err error) {
 		log.L.Trace("received solution")
 		c := ctx.(*Controller)
 		if !c.active.Load() { // || !c.cx.Node.Load() {
@@ -193,6 +194,12 @@ var handlersMulticast = transport.Handlers{
 			return
 		}
 		msgBlock := j.GetMsgBlock()
+		if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
+			BestSnapshot().Hash) {
+			log.L.Debug("block submitted by kopach miner worker is stale")
+			c.UpdateAndSendTemplate()
+			return
+		}
 		// log.L.Warn(msgBlock.Header.Version)
 		cb, ok := c.coinbases[msgBlock.Header.Version]
 		if !ok {
@@ -204,11 +211,6 @@ var handlersMulticast = transport.Handlers{
 		txs := append(cbs, c.transactions...)
 		for i := range txs {
 			msgBlock.Transactions = append(msgBlock.Transactions, txs[i].MsgTx())
-		}
-		if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
-			BestSnapshot().Hash) {
-			log.L.Debug("block submitted by kopach miner worker is stale")
-			return
 		}
 		// set old blocks to pause and send pause directly as block is
 		// probably a solution
@@ -281,7 +283,7 @@ var handlersMulticast = transport.Handlers{
 			}
 		}
 		for i := range c.otherNodes {
-			if time.Now().Sub(c.otherNodes[i]) > time.Second*3 {
+			if time.Now().Sub(c.otherNodes[i]) > time.Second*9 {
 				delete(c.otherNodes, i)
 			}
 		}

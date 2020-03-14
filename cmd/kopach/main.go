@@ -112,7 +112,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 						w.FirstSender.Store("")
 						// pause the workers
 						for i := range w.workers {
-							log.L.Debug("sending pause to worker", i)
+							log.L.Trace("sending pause to worker", i)
 							err := w.workers[i].Pause()
 							if err != nil {
 								log.L.Error(err)

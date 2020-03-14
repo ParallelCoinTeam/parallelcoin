@@ -116,7 +116,7 @@ func (w *Worker) hashReport() {
 	}); log.L.Check(err) {
 	}
 	// log.L.Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
-	log.L.Debugf("average hashrate %.2f", av.Value())
+	log.L.Tracef("average hashrate %.2f", av.Value())
 }
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network
@@ -276,6 +276,7 @@ func New(quit chan struct{}) (w *Worker, conn net.Conn) {
 // NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
 // work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
+	log.L.Trace("starting new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
 		*reply = true
 		return
@@ -342,7 +343,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 // releases its semaphore and the worker is then idle
 func (w *Worker) Pause(_ int, reply *bool) (err error) {
 
-	log.L.Debug("pausing from IPC")
+	log.L.Trace("pausing from IPC")
 	w.running.Store(false)
 	w.stopChan <- struct{}{}
 	*reply = true

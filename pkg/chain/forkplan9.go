@@ -120,7 +120,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	// log.L.Debug(allAv, fork.P9Average, allAv / fork.P9Average, algAv, algAdj,
 	// 	allAdj)
 	adjustment = algAdj * allAdj
-	adjustment *= adjustment
+	// adjustment *= adjustment
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
