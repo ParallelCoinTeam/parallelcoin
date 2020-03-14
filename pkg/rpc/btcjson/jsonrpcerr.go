@@ -39,6 +39,7 @@ const (
 	ErrRPCDecodeHexString   RPCErrorCode = -22
 	// Errors that are specific to pod.
 	ErrRPCNoWallet      RPCErrorCode = -1
+	ErrRPCNoChain       RPCErrorCode = -1
 	ErrRPCUnimplemented RPCErrorCode = -1
 )
 

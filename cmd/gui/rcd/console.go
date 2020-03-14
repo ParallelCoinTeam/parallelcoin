@@ -22,7 +22,7 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 	handler, ok := legacy.RPCHandlers[split[0]]
 	if ok {
 		var out interface{}
-		if handler.HandlerWithChain != nil {
+		if handler.Handler != nil {
 			rpcC, err := chain.NewRPCClient(r.cx.ActiveNet, *r.cx.Config.RPCConnect,
 				*r.cx.Config.Username, *r.cx.Config.Password, walletmain.ReadCAFile(r.cx.Config), !*r.cx.Config.TLS, 0)
 			if err != nil {
@@ -33,7 +33,7 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 				log.L.Error(
 					"unable to open connection to consensus RPC server:", err)
 			}
-			out, err = handler.HandlerWithChain(
+			out, err = handler.Handler(
 				c,
 				r.cx.WalletServer,
 				rpcC)
