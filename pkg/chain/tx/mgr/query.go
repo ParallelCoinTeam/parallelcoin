@@ -203,7 +203,7 @@ func (s *Store) UniqueTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 // true.
 func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
 	f func([]TxDetails) (bool, error)) (bool, error) {
-	log.L.Debug("rangeUnminedTransactions")
+	log.L.Trace("rangeUnminedTransactions")
 	var details []TxDetails
 	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) error {
 		// log.L.Debug("k", k, "v", v)
@@ -352,7 +352,7 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 // use it after the loop iteration it was acquired.
 func (s *Store) RangeTransactions(ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error)) error {
-	log.L.Debug("RangeTransactions")
+	log.L.Trace("RangeTransactions")
 	var addedUnmined, brk bool
 	var err error
 	if begin < 0 {

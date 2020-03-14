@@ -19,7 +19,7 @@ var (
 )
 
 func main() {
-	log.L.SetLevel("trace", true)
+	log.L.SetLevel("trace", true, "pod")
 	quit := make(chan struct{})
 	if c, err := transport.NewBroadcastChannel("test", nil, "cipher",
 		1234, 8192, transport.Handlers{

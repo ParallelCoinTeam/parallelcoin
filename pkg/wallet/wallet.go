@@ -1860,7 +1860,7 @@ func (w *Wallet) ListSinceBlock(start, end, syncHeight int32) (txList []btcjson.
 // replies.
 func (w *Wallet) ListTransactions(from, count int) (txList []btcjson.ListTransactionsResult, err error) {
 	// txList := []btcjson.ListTransactionsResult{}
-	log.L.Debug("ListTransactions", from, count)
+	log.L.Trace("ListTransactions", from, count)
 	if err = walletdb.View(w.db, func(tx walletdb.ReadTx) error {
 		txmgrNs := tx.ReadBucket(wtxmgrNamespaceKey)
 		// Get current block.  The block height used for calculating
