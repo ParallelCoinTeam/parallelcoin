@@ -37,7 +37,7 @@ type HardForks struct {
 	TestnetStart       int32
 }
 
-const IntervalBase = 23
+const IntervalBase = 9
 
 func init() {
 	log.L.Trace("running fork data init")
@@ -174,7 +174,7 @@ var (
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
 			// "01f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1")
-			"0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+			"00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 		return *big.NewInt(0).SetBytes(mplb)
 	}()
 	SecondPowLimitBits = BigToCompact(&SecondPowLimit)

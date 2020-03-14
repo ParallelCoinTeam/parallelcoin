@@ -10,8 +10,9 @@ import (
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"github.com/p9c/pod/pkg/conte"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
 	log "github.com/p9c/logi"
+
+	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -71,8 +72,9 @@ func Main(cx *conte.Xt) (err error) {
 		go func() {
 			addresses.RefillMiningAddresses(w, cx.Config, cx.StateCfg)
 		}()
-		go rpcClientConnectLoop(cx.Config, cx.ActiveNet, legacyServer, loader)
+		go rpcClientConnectLoop(cx, legacyServer, loader)
 		loader.Wallet = w
+		legacy.RunAPI(nil, w, cx.WalletKill)
 		log.L.Trace("sending back wallet")
 		cx.WalletChan <- w
 		log.L.Trace("adding interrupt handler to unload wallet")
@@ -141,11 +143,11 @@ func ReadCAFile(config *pod.Config) []byte {
 //
 // The legacy RPC is optional. If set, the connected RPC client will be associated with the server for RPC pass-through
 // and to enable additional methods.
-func rpcClientConnectLoop(config *pod.Config, activeNet *netparams.Params,
-	legacyServer *legacy.Server, loader *wallet.Loader) {
+func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
+	loader *wallet.Loader) {
 	// var certs []byte
 	// if !cx.PodConfig.UseSPV {
-	certs := ReadCAFile(config)
+	certs := ReadCAFile(cx.Config)
 	// }
 	for {
 		var (
@@ -183,12 +185,15 @@ func rpcClientConnectLoop(config *pod.Config, activeNet *netparams.Params,
 		// 		log<-cl.Errorf{"couldn't start Neutrino client: %s", err)
 		// 	}
 		// } else {
-		chainClient, err = startChainRPC(config, activeNet, certs)
+		var cc *chain.RPCClient
+		cc, err = startChainRPC(cx.Config, cx.ActiveNet, certs)
 		if err != nil {
 			log.L.Error(
 				"unable to open connection to consensus RPC server:", err)
 			continue
 		}
+		cx.ChainClient <- cc
+		chainClient = cc
 		// }
 		// Rather than inlining this logic directly into the loader
 		// callback, a function variable is used to avoid running any of

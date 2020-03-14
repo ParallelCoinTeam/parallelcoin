@@ -1,4 +1,4 @@
-//+build !headless
+// +build !headless
 
 package conte
 
@@ -9,14 +9,16 @@ import (
 
 	"github.com/urfave/cli"
 
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/lang"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 type _dtype int
@@ -60,6 +62,8 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// WalletChan is a channel used to return the wallet server pointer when it starts
 	WalletChan chan *wallet.Wallet
+	// ChainClient is the wallet's chain RPC client
+	ChainClient chan *chain.RPCClient
 	// RealNode is the main node
 	RealNode *rpc.Node
 	// Hashrate is the current total hashrate from kopach workers taking work from this node

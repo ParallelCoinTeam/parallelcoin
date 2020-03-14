@@ -7,9 +7,10 @@ import (
 
 	"github.com/VividCortex/ewma"
 
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/logi"
 )
 
 func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
@@ -56,6 +57,7 @@ func GetAll(allStamps []uint64) (allAv, allAdj float64) {
 		aewma.Add(x)
 	}
 	allAv = aewma.Value()
+	// log.L.Warn(allAv)
 	if allAv != 0 {
 		allAdj = allAv / fork.P9Average
 	}
@@ -115,9 +117,11 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	if last != nil {
 		bits = last.bits
 	}
-	// log.L.Debug(algAdj, allAdj)
+	// log.L.Debug(allAv, fork.P9Average, allAv / fork.P9Average, algAv, algAdj,
+	// 	allAdj)
 	adjustment = algAdj + allAdj
 	adjustment /= 2
+	adjustment *= adjustment
 	bigAdjustment := big.NewFloat(adjustment)
 	bigOldTarget := big.NewFloat(1.0).SetInt(fork.CompactToBig(bits))
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)

@@ -220,6 +220,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 						} else {
 							continue
 						}
+						mb.Header.Timestamp = time.Now()
 						var nextAlgo int32
 						if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 							select {
