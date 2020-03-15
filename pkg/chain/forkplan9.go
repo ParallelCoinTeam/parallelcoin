@@ -88,7 +88,7 @@ func GetAlg(algStamps []int64, targetTimePerBlock float64) (algAv, algAdj float6
 			algIntervals[i-1] = r
 		}
 	}
-	log.L.Debug(algStamps)
+	// log.L.Debug(algStamps)
 	// calculate exponential weighted moving average from intervals
 	gewma := ewma.NewMovingAverage()
 	for _, x := range algIntervals {
