@@ -21,7 +21,7 @@ var (
 
 func DuoUIdialog(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
 	//cs := gtx.Constraints
-	th.DuoUIitem("ee000000").Layout(gtx, func() {
+	th.DuoUIitem(0, "ee000000").Layout(gtx, layout.Center, func() {
 		cs := gtx.Constraints
 		layout.Stack{Alignment: layout.Center}.Layout(gtx,
 			layout.Expanded(func() {
@@ -52,7 +52,7 @@ func DuoUIdialog(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
 										layout.Inset{Top: unit.Dp(0), Bottom: unit.Dp(8), Left: unit.Dp(4), Right: unit.Dp(4)}.Layout(gtx, func() {
 											cur := th.DuoUIlabel(unit.Dp(14), rc.Dialog.Text)
 											cur.Font.Typeface = th.Fonts["Primary"]
-											cur.Color = gelook.HexARGB(th.Colors["Dark"])
+											cur.Color = th.Colors["Dark"]
 											cur.Alignment = text.Start
 											cur.Layout(gtx)
 										})

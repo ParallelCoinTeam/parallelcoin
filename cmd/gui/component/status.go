@@ -74,7 +74,7 @@ func listItem(gtx *layout.Context, th *gelook.DuoUItheme, size, top int, iconNam
 					layout.Rigid(func() {
 						txt := th.DuoUIlabel(unit.Dp(float32(size)), name)
 						txt.Font.Typeface = th.Fonts["Primary"]
-						txt.Color = gelook.HexARGB(th.Colors["Primary"])
+						txt.Color = th.Colors["Primary"]
 						txt.Layout(gtx)
 					}),
 				)
@@ -83,7 +83,7 @@ func listItem(gtx *layout.Context, th *gelook.DuoUItheme, size, top int, iconNam
 				value := th.H5(value)
 				value.TextSize = unit.Dp(float32(size))
 				value.Font.Typeface = th.Fonts["Primary"]
-				value.Color = gelook.HexARGB(th.Colors["Dark"])
+				value.Color = th.Colors["Dark"]
 				value.Alignment = text.End
 				value.Layout(gtx)
 			}),

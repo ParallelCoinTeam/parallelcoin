@@ -25,28 +25,32 @@ type DuoUIitem struct {
 	Width         int
 	Height        int
 	CornerRadius  unit.Value
-	paddingTop    int
-	paddingRight  int
-	paddingBottom int
-	paddingLeft   int
+	PaddingTop    int
+	PaddingRight  int
+	PaddingBottom int
+	PaddingLeft   int
 	shaper        text.Shaper
 	link          bool
 	hover         bool
 }
 
-func (t *DuoUItheme) DuoUIitem(background string) DuoUIitem {
+func (t *DuoUItheme) DuoUIitem(padding int, background string) DuoUIitem {
 	return DuoUIitem{
 		Font: text.Font{
 			Typeface: t.Fonts["Primary"],
 		},
 		//Color:      rgb(0xffffff),
-		Background: background,
-		TextSize:   t.TextSize.Scale(14.0 / 16.0),
-		shaper:     t.Shaper,
+		PaddingTop:    padding,
+		PaddingRight:  padding,
+		PaddingBottom: padding,
+		PaddingLeft:   padding,
+		Background:    background,
+		TextSize:      t.TextSize.Scale(14.0 / 16.0),
+		shaper:        t.Shaper,
 	}
 }
 
-func (d DuoUIitem) Layout(gtx *layout.Context, itemContent func()) {
+func (d DuoUIitem) Layout(gtx *layout.Context, direction layout.Direction, itemContent func()) {
 	hmin := gtx.Constraints.Width.Min
 	vmin := gtx.Constraints.Height.Min
 	layout.Stack{Alignment: layout.W}.Layout(gtx,
@@ -65,12 +69,12 @@ func (d DuoUIitem) Layout(gtx *layout.Context, itemContent func()) {
 		layout.Stacked(func() {
 			gtx.Constraints.Width.Min = hmin
 			gtx.Constraints.Height.Min = vmin
-			layout.Center.Layout(gtx, func() {
+			direction.Layout(gtx, func() {
 				layout.Inset{
-					Top:    unit.Dp(float32(d.paddingTop)),
-					Right:  unit.Dp(float32(d.paddingRight)),
-					Bottom: unit.Dp(float32(d.paddingBottom)),
-					Left:   unit.Dp(float32(d.paddingLeft)),
+					Top:    unit.Dp(float32(d.PaddingTop)),
+					Right:  unit.Dp(float32(d.PaddingRight)),
+					Bottom: unit.Dp(float32(d.PaddingBottom)),
+					Left:   unit.Dp(float32(d.PaddingLeft)),
 				}.Layout(gtx, itemContent)
 			})
 		}),

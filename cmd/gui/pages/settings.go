@@ -3,6 +3,7 @@ package pages
 import (
 	"fmt"
 	"gioui.org/layout"
+	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
@@ -48,30 +49,34 @@ func settingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) f
 
 func settingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		for _, fields := range rc.Settings.Daemon.Schema.Groups {
-			if fmt.Sprint(fields.Legend) == rc.Settings.Tabs.Current {
-				fieldsList.Layout(gtx, len(fields.Fields), func(il int) {
-					il = len(fields.Fields) - 1 - il
-					tl := component.Field{
-						Field: &fields.Fields[il],
+		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+			th.DuoUIitem(16, th.Colors["Light"]).Layout(gtx, layout.N, func() {
+				for _, fields := range rc.Settings.Daemon.Schema.Groups {
+					if fmt.Sprint(fields.Legend) == rc.Settings.Tabs.Current {
+						fieldsList.Layout(gtx, len(fields.Fields), func(il int) {
+							il = len(fields.Fields) - 1 - il
+							tl := component.Field{
+								Field: &fields.Fields[il],
+							}
+							layout.Flex{
+								Axis: layout.Vertical,
+							}.Layout(gtx,
+								layout.Rigid(settingsItemRow(rc, gtx, th, &tl)),
+								layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Dark"])))
+						})
 					}
-					layout.Flex{
-						Axis: layout.Vertical,
-					}.Layout(gtx,
-						layout.Rigid(settingsItemRow(rc, gtx, th, &tl)),
-						layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Dark"])))
-				})
-			}
-		}
+				}
+			})
+		})
 	}
 }
 
 func settingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *component.Field) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
-			layout.Rigid(func() {
-				gelook.DuoUIdrawRectangle(gtx, 30, 3, th.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-			}),
+			//layout.Rigid(func() {
+			//	gelook.DuoUIdrawRectangle(gtx, 30, 3, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			//}),
 			layout.Flexed(0.62, func() {
 				layout.Flex{
 					Axis:    layout.Vertical,

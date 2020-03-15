@@ -75,7 +75,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 					l := th.Body2("Height")
 					l.Font.Typeface = th.Fonts["Mono"]
 					l.Alignment = text.Middle
-					l.Color = gelook.HexARGB(th.Colors["Light"])
+					l.Color = th.Colors["Light"]
 					l.Layout(gtx)
 				})
 			}),
@@ -84,7 +84,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 					l := th.Body2("Time")
 					l.Font.Typeface = th.Fonts["Mono"]
 					l.Alignment = text.Middle
-					l.Color = gelook.HexARGB(th.Colors["Light"])
+					l.Color = th.Colors["Light"]
 					l.Layout(gtx)
 				})
 			}),
@@ -92,7 +92,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 					l := th.Body2("Confirmations")
 					l.Font.Typeface = th.Fonts["Mono"]
-					l.Color = gelook.HexARGB(th.Colors["Light"])
+					l.Color = th.Colors["Light"]
 					l.Layout(gtx)
 				})
 			}),
@@ -100,7 +100,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 					l := th.Body2("TxNum")
 					l.Font.Typeface = th.Fonts["Mono"]
-					l.Color = gelook.HexARGB(th.Colors["Light"])
+					l.Color = th.Colors["Light"]
 					l.Layout(gtx)
 				})
 			}),
@@ -110,7 +110,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 				}.Layout(gtx, func() {
 					l := th.Body2("BlockHash")
 					l.Font.Typeface = th.Fonts["Mono"]
-					l.Color = gelook.HexARGB(th.Colors["Light"])
+					l.Color = th.Colors["Light"]
 					l.Layout(gtx)
 				})
 			}))
@@ -119,14 +119,14 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *model.DuoUIblock) {
 	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-		gelook.DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, gtx.Constraints.Height.Max, th.Colors["DarkGrayI"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		gelook.DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, gtx.Constraints.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
 		}.Layout(gtx,
 			layout.Rigid(func() {
 				var linkButton gelook.DuoUIbutton
-				linkButton = th.DuoUIbutton(th.Fonts["Mono"], fmt.Sprint(block.Height), th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Light"], 14, 0, 60, 24, 0, 0)
+				linkButton = th.DuoUIbutton(th.Fonts["Mono"], fmt.Sprint(block.Height), th.Colors["Dark"], th.Colors["Info"], th.Colors["Info"], th.Colors["Dark"], "", th.Colors["Dark"], 14, 0, 60, 24, 0, 0)
 				for block.Link.Clicked(gtx) {
 					rc.ShowPage = fmt.Sprintf("BLOCK %s", block.BlockHash)
 					rc.GetSingleBlock(block.BlockHash)()
@@ -139,7 +139,7 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *
 					l := th.Body2(fmt.Sprint(time.Unix(block.Time, 0).Format("2006-01-02 15:04:05")))
 					l.Font.Typeface = th.Fonts["Mono"]
 					l.Alignment = text.Middle
-					l.Color = gelook.HexARGB(th.Colors["Light"])
+					l.Color = th.Colors["Dark"]
 					l.Layout(gtx)
 				})
 			}),
@@ -147,7 +147,7 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *
 				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 					l := th.Body2(fmt.Sprint(block.Confirmations))
 					l.Font.Typeface = th.Fonts["Mono"]
-					l.Color = gelook.HexARGB(th.Colors["Light"])
+					l.Color = th.Colors["Dark"]
 					l.Layout(gtx)
 				})
 			}),
@@ -155,7 +155,7 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *
 				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 					l := th.Body2(fmt.Sprint(block.TxNum))
 					l.Font.Typeface = th.Fonts["Mono"]
-					l.Color = gelook.HexARGB(th.Colors["Light"])
+					l.Color = th.Colors["Dark"]
 					l.Layout(gtx)
 				})
 			}),
@@ -163,7 +163,7 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *
 				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 					l := th.Body2(block.BlockHash)
 					l.Font.Typeface = th.Fonts["Mono"]
-					l.Color = gelook.HexARGB(th.Colors["Light"])
+					l.Color = th.Colors["Dark"]
 					l.Layout(gtx)
 					txwidth = gtx.Dimensions.Size.X
 				})

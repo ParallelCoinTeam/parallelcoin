@@ -37,24 +37,24 @@ func DuoUIlogger(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 				logText := th.Caption(fmt.Sprintf("%-12s", t.Time.Sub(StartupTime)/time.Second*time.Second) + " " + fmt.Sprint(t.Text))
 				logText.Font.Typeface = th.Fonts["Mono"]
 
-				logText.Color = gelook.HexARGB(th.Colors["Primary"])
+				logText.Color = th.Colors["Primary"]
 				if t.Level == "TRC" {
-					logText.Color = gelook.HexARGB(th.Colors["Success"])
+					logText.Color = th.Colors["Success"]
 				}
 				if t.Level == "DBG" {
-					logText.Color = gelook.HexARGB(th.Colors["Secondary"])
+					logText.Color = th.Colors["Secondary"]
 				}
 				if t.Level == "INF" {
-					logText.Color = gelook.HexARGB(th.Colors["Info"])
+					logText.Color = th.Colors["Info"]
 				}
 				if t.Level == "WRN" {
-					logText.Color = gelook.HexARGB(th.Colors["Warning"])
+					logText.Color = th.Colors["Warning"]
 				}
 				if t.Level == "ERROR" {
-					logText.Color = gelook.HexARGB(th.Colors["Danger"])
+					logText.Color = th.Colors["Danger"]
 				}
 				if t.Level == "FTL" {
-					logText.Color = gelook.HexARGB(th.Colors["Primary"])
+					logText.Color = th.Colors["Primary"]
 				}
 
 				logText.Layout(gtx)

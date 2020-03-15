@@ -2,14 +2,15 @@ package rcd
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/cmd/gui/model"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/urfave/cli"
 	"sort"
 )
 
@@ -43,7 +44,7 @@ func (r *RcVar) ShowAddressBook() func() {
 
 func (r *RcVar) labelMiningAddreses() {
 	//r.db.DbReadAddressBook()
-	for _, miningAddress := range r.cx.Config.MiningAddrs.Value() {
+	for _, miningAddress := range *r.cx.ConfigMap["MiningAddrs"].(*cli.StringSlice) {
 		//for _, address := range r.AddressBook.Addresses {
 		//	if miningAddress != address.Address {
 		r.SaveAddressLabel(miningAddress, "Mining")

@@ -134,7 +134,7 @@ func contentField(gtx *layout.Context, th *gelook.DuoUItheme, text, color, bgCol
 					layout.UniformInset(unit.Dp(padding)).Layout(gtx, func() {
 						l := th.DuoUIlabel(unit.Dp(textSize), text)
 						l.Font.Typeface = font
-						l.Color = gelook.HexARGB(color)
+						l.Color = color
 						l.Layout(gtx)
 					})
 				})

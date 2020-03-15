@@ -3,8 +3,8 @@ package duoui
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/cmd/gui/component"
+	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/gui/ico"
 	"image"
 )
@@ -33,7 +33,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 				layout.Flexed(1, func() {
 					layout.UniformInset(unit.Dp(60)).Layout(ui.ly.Context, func() {
 						txt := ui.ly.Theme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE")
-						txt.Color = gelook.HexARGB(ui.ly.Theme.Colors["Light"])
+						txt.Color = ui.ly.Theme.Colors["Light"]
 						txt.Layout(ui.ly.Context)
 					})
 				}),
