@@ -26,7 +26,7 @@ var (
 )
 
 func Network(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("HISTORY", 0, rc.GetPeerInfo(), component.ContentHeader(gtx, th, networkHeader(rc, gtx, th)), networkBody(rc, gtx, th), func() {})
+	return th.DuoUIpage("NETWORK", 0, rc.GetPeerInfo(), component.ContentHeader(gtx, th, networkHeader(rc, gtx, th)), networkBody(rc, gtx, th), func() {})
 }
 
 func networkHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
