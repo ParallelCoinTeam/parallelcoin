@@ -57,7 +57,6 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 				counter++
 			}
 			sort.Sort(algos)
-			log.L.Debug("")
 			for _, v := range algos {
 				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(lastNode, v.Name, true)
 			}

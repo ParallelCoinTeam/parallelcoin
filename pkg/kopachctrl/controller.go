@@ -197,7 +197,7 @@ var handlersMulticast = transport.Handlers{
 		if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
 			BestSnapshot().Hash) {
 			log.L.Debug("block submitted by kopach miner worker is stale")
-			c.UpdateAndSendTemplate()
+			// c.UpdateAndSendTemplate()
 			return
 		}
 		// log.L.Warn(msgBlock.Header.Version)

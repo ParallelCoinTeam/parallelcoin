@@ -152,13 +152,13 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		return false, false, err
 	}
 	if !prevHashExists {
-		log.L.Warnc(func() string {
-			return fmt.Sprintf(
-				"adding orphan block %v with parent %v",
-				bhwa(blockHeight).String(),
-				prevHash,
-			)
-		})
+		// log.L.Warnc(func() string {
+		// 	return fmt.Sprintf(
+		// 		"adding orphan block %v with parent %v",
+		// 		bhwa(blockHeight).String(),
+		// 		prevHash,
+		// 	)
+		// })
 		b.addOrphanBlock(block)
 		return false, true, nil
 	}

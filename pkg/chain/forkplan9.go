@@ -14,44 +14,47 @@ import (
 )
 
 func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last *BlockNode,
-	found bool, algStamps []uint64, version int32) {
+	found bool, algStamps []int64, version int32) {
 
 	version = fork.P9Algos[algoName].Version
 	for ln := lastNode; ln != nil && ln.height > startHeight &&
 		len(algStamps) <= int(fork.List[1].AveragingInterval); ln = ln.
 		RelativeAncestor(1) {
-		if ln.version == version {
-			algStamps = append(algStamps, uint64(ln.timestamp))
+		if ln.version == version && ln.height > startHeight {
+			algStamps = append(algStamps, ln.timestamp)
 			if !found {
 				found = true
 				last = ln
 			}
 		}
 	}
+	// log.L.Debug(algStamps)
 	// reverse order of stamps
 	for i := 0; i < len(algStamps)/2; i++ {
 		algStamps[i], algStamps[len(algStamps)-i-1] = algStamps[len(
 			algStamps)-i-1], algStamps[i]
 	}
+	// log.L.Debug(algStamps)
 	return
 }
 
-func GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []uint64) {
+func GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []int64) {
 
 	for ln := lastNode; ln != nil && ln.height > startHeight &&
 		len(allStamps) <= int(fork.List[1].AveragingInterval); ln = ln.RelativeAncestor(1) {
-		allStamps = append(allStamps, uint64(ln.timestamp))
+		allStamps = append(allStamps, ln.timestamp)
 	}
+	// log.L.Debug(allStamps)
 	// reverse order of stamps
 	for i := 0; i < len(allStamps)/2; i++ {
 		allStamps[i], allStamps[len(allStamps)-i-1] =
 			allStamps[len(allStamps)-i-1], allStamps[i]
 	}
-
+	// log.L.Debug(allStamps)
 	return
 }
 
-func GetAll(allStamps []uint64) (allAv, allAdj float64) {
+func GetAll(allStamps []int64) (allAv, allAdj float64) {
 	allAdj = 1
 	allAv = fork.P9Average
 	// calculate intervals
@@ -62,6 +65,7 @@ func GetAll(allStamps []uint64) (allAv, allAdj float64) {
 			allIntervals[i-1] = float64(r)
 		}
 	}
+	// log.L.Debug(allStamps)
 	// calculate exponential weighted moving average from intervals
 	aewma := ewma.NewMovingAverage()
 	for _, x := range allIntervals {
@@ -75,15 +79,16 @@ func GetAll(allStamps []uint64) (allAv, allAdj float64) {
 	return
 }
 
-func GetAlg(algStamps []uint64, targetTimePerBlock float64) (algAv, algAdj float64) {
+func GetAlg(algStamps []int64, targetTimePerBlock float64) (algAv, algAdj float64) {
 	// calculate intervals
-	algIntervals := make([]uint64, len(algStamps)-1)
+	algIntervals := make([]int64, len(algStamps)-1)
 	for i := range algStamps {
 		if i > 0 {
 			r := algStamps[i] - algStamps[i-1]
 			algIntervals[i-1] = r
 		}
 	}
+	log.L.Debug(algStamps)
 	// calculate exponential weighted moving average from intervals
 	gewma := ewma.NewMovingAverage()
 	for _, x := range algIntervals {
@@ -127,8 +132,13 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	if last != nil {
 		bits = last.bits
 	}
-	// log.L.Debug(allAv, fork.P9Average, allAv / fork.P9Average, algAv, algAdj,
-	// 	allAdj)
+	// log.L.Debug(
+	// 	"allAv", allAv,
+	// 	"fork.P9Average", fork.P9Average,
+	// 	"allAv/fork.P9Average", allAv/fork.P9Average,
+	// 	"algAv", algAv,
+	// 	"algAdj", algAdj,
+	// 	"allAdj", allAdj)
 	adjustment = algAdj * allAdj
 	// adjustment *= adjustment
 	bigAdjustment := big.NewFloat(adjustment)
@@ -144,37 +154,37 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 		// log.L.Tracef("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
-		if lastNode.version == algoVer {
-			log.L.Debugc(func() string {
-				an := fork.List[1].AlgoVers[algoVer]
-				pad := 9 - len(an)
-				if pad > 0 {
-					an += strings.Repeat(" ", pad)
-				}
-				factor := 1 / adjustment
-				symbol := "->"
-				if factor < 1 {
-					factor = adjustment
-					symbol = "<-"
-				}
-				if factor == 1 {
-					symbol = "--"
-				}
-				isNewest := ""
-				// isNewest = "*"
-				return fmt.Sprintf("%s %s av %s /%2.0f %s %s %08x %08x%s",
-					an,
-					RightJustify(fmt.Sprintf("%4.4f", algAv), 11),
-					RightJustify(fmt.Sprintf("%4.4f", allAv), 11),
-					fork.P9Average,
-					RightJustify(fmt.Sprintf("%4.4f", factor), 9),
-					symbol,
-					bits,
-					newTargetBits,
-					isNewest,
-				)
-			})
-		}
+		// if lastNode.version == algoVer {
+		log.L.Debugc(func() string {
+			an := fork.List[1].AlgoVers[algoVer]
+			pad := 9 - len(an)
+			if pad > 0 {
+				an += strings.Repeat(" ", pad)
+			}
+			factor := 1 / adjustment
+			symbol := "->"
+			if factor < 1 {
+				factor = adjustment
+				symbol = "<-"
+			}
+			if factor == 1 {
+				symbol = "--"
+			}
+			isNewest := ""
+			// isNewest = "*"
+			return fmt.Sprintf("%s %s av %s /%2.0f %s %s %08x %08x%s",
+				an,
+				RightJustify(fmt.Sprintf("%4.4f", algAv), 11),
+				RightJustify(fmt.Sprintf("%4.4f", allAv), 11),
+				fork.P9Average,
+				RightJustify(fmt.Sprintf("%4.4f", factor), 9),
+				symbol,
+				bits,
+				newTargetBits,
+				isNewest,
+			)
+		})
+		// }
 	}
 	return
 }
