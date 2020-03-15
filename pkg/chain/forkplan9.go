@@ -144,37 +144,37 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 		// log.L.Tracef("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
-		log.L.Debugc(func() string {
-			an := fork.List[1].AlgoVers[algoVer]
-			pad := 9 - len(an)
-			if pad > 0 {
-				an += strings.Repeat(" ", pad)
-			}
-			factor := 1 / adjustment
-			symbol := "->"
-			if factor < 1 {
-				factor = adjustment
-				symbol = "<-"
-			}
-			if factor == 1 {
-				symbol = "--"
-			}
-			isNewest := ""
-			if lastNode.version == algoVer {
-				isNewest = "*"
-			}
-			return fmt.Sprintf("%s %s av %s /%2.0f %s %s %08x %08x%s",
-				an,
-				RightJustify(fmt.Sprintf("%4.4f", algAv), 11),
-				RightJustify(fmt.Sprintf("%4.4f", allAv), 11),
-				fork.P9Average,
-				RightJustify(fmt.Sprintf("%4.4f", factor), 9),
-				symbol,
-				bits,
-				newTargetBits,
-				isNewest,
-			)
-		})
+		if lastNode.version == algoVer {
+			log.L.Debugc(func() string {
+				an := fork.List[1].AlgoVers[algoVer]
+				pad := 9 - len(an)
+				if pad > 0 {
+					an += strings.Repeat(" ", pad)
+				}
+				factor := 1 / adjustment
+				symbol := "->"
+				if factor < 1 {
+					factor = adjustment
+					symbol = "<-"
+				}
+				if factor == 1 {
+					symbol = "--"
+				}
+				isNewest := ""
+				// isNewest = "*"
+				return fmt.Sprintf("%s %s av %s /%2.0f %s %s %08x %08x%s",
+					an,
+					RightJustify(fmt.Sprintf("%4.4f", algAv), 11),
+					RightJustify(fmt.Sprintf("%4.4f", allAv), 11),
+					fork.P9Average,
+					RightJustify(fmt.Sprintf("%4.4f", factor), 9),
+					symbol,
+					bits,
+					newTargetBits,
+					isNewest,
+				)
+			})
+		}
 	}
 	return
 }

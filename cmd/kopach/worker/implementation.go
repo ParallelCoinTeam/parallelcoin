@@ -193,8 +193,8 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 					log.L.Trace("worker stopping while running")
 					break out
 				default:
-					if w.block.Load() == nil || w.bitses.Load() == nil || w.hashes.Load() == nil ||
-						!w.dispatchReady.Load() {
+					if w.block.Load() == nil || w.bitses.Load() == nil ||
+						w.hashes.Load() == nil || !w.dispatchReady.Load() {
 						// log.L.Info("stop was called before we started working")
 					} else {
 						// work
@@ -250,6 +250,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 								log.L.Error(err)
 							}
 							log.L.Trace("sent solution")
+
 							break running
 						}
 						mb.Header.Version = nextAlgo
@@ -273,8 +274,8 @@ func New(quit chan struct{}) (w *Worker, conn net.Conn) {
 	return NewWithConnAndSemaphore(&sc, quit), &sc
 }
 
-// NewJob is a delivery of a new job for the worker, this makes the miner start mining from pause or pause, prepare the
-// work and restart
+// NewJob is a delivery of a new job for the worker, this makes the miner start
+// mining from pause or pause, prepare the work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	log.L.Trace("starting new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
@@ -342,7 +343,6 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 // Pause signals the worker to stop working,
 // releases its semaphore and the worker is then idle
 func (w *Worker) Pause(_ int, reply *bool) (err error) {
-
 	log.L.Trace("pausing from IPC")
 	w.running.Store(false)
 	w.stopChan <- struct{}{}

@@ -18,6 +18,7 @@ import (
 	"github.com/p9c/pod/pkg/kopachctrl"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
+	"github.com/p9c/pod/pkg/kopachctrl/sol"
 	"github.com/p9c/pod/pkg/stdconn/worker"
 	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -101,8 +102,9 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			for {
 				select {
 				case <-ticker.C:
-					// if the last message sent was 3 seconds ago the server is almost certainly disconnected or crashed
-					// so clear FirstSender
+					// if the last message sent was 3 seconds ago the server is
+					// almost certainly disconnected or crashed so clear
+					// FirstSender
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
@@ -151,6 +153,9 @@ var handlers = transport.Handlers{
 			// ignore other controllers while one is active and received first
 			return
 		}
+		if firstSender == "" {
+			log.L.Warn("new sender", addr)
+		}
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.workers {
@@ -177,6 +182,18 @@ var handlers = transport.Handlers{
 				}
 			}
 		}
+		return
+	},
+	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string,
+		b []byte) (err error) {
+		w := ctx.(*Worker)
+		// port := strings.Split(w.FirstSender.Load(), ":")[1]
+		// j := sol.LoadSolContainer(b)
+		// senderPort := j.GetSenderPort()
+		// if fmt.Sprint(senderPort) == port {
+		// 	log.L.Warn("we found a solution")
+		// }
+		w.FirstSender.Store("")
 		return
 	},
 }
