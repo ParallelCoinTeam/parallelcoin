@@ -36,7 +36,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 		return newTargetBits, nil
 	}
 	firstNode := prevNode
-	for i := int64(0); firstNode != nil &&
+	for i := int32(0); firstNode != nil &&
 		i < fork.GetAveragingInterval(nH)-1; i++ {
 		firstNode = firstNode.RelativeAncestor(1)
 		firstNode = firstNode.GetLastWithAlgo(algo)

@@ -33,7 +33,7 @@ type HardForks struct {
 	Algos              map[string]AlgoParams
 	AlgoVers           map[int32]string
 	TargetTimePerBlock int32
-	AveragingInterval  int64
+	AveragingInterval  int32
 	TestnetStart       int32
 }
 
@@ -230,7 +230,7 @@ func GetAlgoVer(name string, height int32) (version int32) {
 
 // GetAveragingInterval returns the active block interval target based on
 // hard fork status
-func GetAveragingInterval(height int32) (r int64) {
+func GetAveragingInterval(height int32) (r int32) {
 	r = List[GetCurrent(height)].AveragingInterval
 	return
 }
