@@ -97,7 +97,7 @@ func Label(gtx *layout.Context, th *gelook.DuoUItheme, font text.Typeface, size 
 	return func() {
 		l := th.DuoUIlabel(unit.Dp(size), label)
 		l.Font.Typeface = font
-		l.Color = gelook.HexARGB(color)
+		l.Color = color
 		l.Layout(gtx)
 	}
 }

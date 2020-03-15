@@ -50,7 +50,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
 				cs := gtx.Constraints
-				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 180, th.Colors["Light"], [4]float32{0, 0, 0, 0},
+				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0},
 					[4]float32{0, 0, 0, 0})
 				widgets := []func(){
 					func() {

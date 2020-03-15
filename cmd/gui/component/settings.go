@@ -124,6 +124,7 @@ func SettingsFieldLabel(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) fu
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			name := th.H6(fmt.Sprint(f.Field.Label))
+			name.Color = th.Colors["Dark"]
 			name.Font.Typeface = th.Fonts["Primary"]
 			name.Layout(gtx)
 		})
@@ -135,6 +136,7 @@ func SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Fie
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			desc := th.Body2(fmt.Sprint(f.Field.Description))
 			desc.Font.Typeface = th.Fonts["Primary"]
+			desc.Color = th.Colors["Dark"]
 			desc.Layout(gtx)
 		})
 	}

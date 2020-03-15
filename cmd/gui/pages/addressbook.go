@@ -30,7 +30,7 @@ var (
 )
 
 func DuoUIaddressBook(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("ADDRESSBOOK", 0, rc.GetAddressBook(), component.ContentHeader(gtx, th, addressBookHeader(rc, gtx, th)), addressBookBody(rc, gtx, th), func() {})
+	return th.DuoUIpage("ADDRESSBOOK", 0, rc.GetAddressBook(), component.ContentHeader(gtx, th, addressBookHeader(rc, gtx, th, rc.GetAddressBook())), addressBookBody(rc, gtx, th), func() {})
 }
 
 func addressBookBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
@@ -49,7 +49,7 @@ func addressBookBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) 
 	}
 }
 
-func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, pageFunc func()) func() {
 	return func() {
 		layout.Flex{
 			Spacing:   layout.SpaceBetween,
@@ -75,12 +75,12 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 					Show: true,
 					Close: func() {
 						rc.Dialog.Show = false
-
 					},
 					CustomField: component.DuoUIqrCode(gtx, address, 256),
 					Title:       "Copy address",
 					Text:        rc.CreateNewAddress(""),
 				}
+				pageFunc()
 			})))
 	}
 }

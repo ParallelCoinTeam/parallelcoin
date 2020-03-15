@@ -3,8 +3,6 @@
 package gelook
 
 import (
-	"image/color"
-
 	"github.com/p9c/pod/pkg/gel"
 
 	"gioui.org/layout"
@@ -17,7 +15,7 @@ type DuoUIlabel struct {
 	// Face defines the text style.
 	Font text.Font
 	// Color is the text color.
-	Color color.RGBA
+	Color string
 	// Alignment specify the text alignment.
 	Alignment text.Alignment
 	// MaxLines limits the number of lines. Zero means no limit.
@@ -67,14 +65,14 @@ func (t *DuoUItheme) Caption(txt string) DuoUIlabel {
 func (t *DuoUItheme) DuoUIlabel(size unit.Value, txt string) DuoUIlabel {
 	return DuoUIlabel{
 		Text:     txt,
-		Color:    HexARGB(t.Colors["Dark"]),
+		Color:    "Dark",
 		TextSize: size,
 		shaper:   t.Shaper,
 	}
 }
 
 func (l DuoUIlabel) Layout(gtx *layout.Context) {
-	paint.ColorOp{Color: l.Color}.Add(gtx.Ops)
+	paint.ColorOp{Color: HexARGB(l.Color)}.Add(gtx.Ops)
 	tl := gel.Label{Alignment: l.Alignment, MaxLines: l.MaxLines}
 	tl.Layout(gtx, l.shaper, l.Font, l.TextSize, l.Text)
 }
