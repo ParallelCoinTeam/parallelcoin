@@ -192,7 +192,8 @@ func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
 				"unable to open connection to consensus RPC server:", err)
 			continue
 		}
-		cx.ChainClient <- cc
+		cx.ChainClient = cc
+		cx.ChainClientReady.Store(true)
 		chainClient = cc
 		// }
 		// Rather than inlining this logic directly into the loader

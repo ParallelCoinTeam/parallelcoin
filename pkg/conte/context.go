@@ -62,8 +62,10 @@ type Xt struct {
 	WalletServer *wallet.Wallet
 	// WalletChan is a channel used to return the wallet server pointer when it starts
 	WalletChan chan *wallet.Wallet
+	// ChainClientChan returns the chainclient
+	ChainClientReady atomic.Bool
 	// ChainClient is the wallet's chain RPC client
-	ChainClient chan *chain.RPCClient
+	ChainClient *chain.RPCClient
 	// RealNode is the main node
 	RealNode *rpc.Node
 	// Hashrate is the current total hashrate from kopach workers taking work from this node
@@ -79,7 +81,10 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 	hr := &atomic.Value{}
 	hr.Store(int(0))
 	config, configMap := pod.EmptyConfig()
+	var chainClientReady atomic.Bool
+	chainClientReady.Store(false)
 	return &Xt{
+		ChainClientReady: chainClientReady,
 		KillAll:   make(chan struct{}),
 		App:       cli.NewApp(),
 		Config:    config,

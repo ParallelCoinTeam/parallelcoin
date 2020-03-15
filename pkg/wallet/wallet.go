@@ -189,7 +189,7 @@ func (w *Wallet) requireChainClient() (chain.Interface, error) {
 	return chainClient, nil
 }
 
-// ChainClient returns the optional consensus RPC client associated with the
+// ChainClientChan returns the optional consensus RPC client associated with the
 // wallet.
 //
 // This function is unstable and will be removed once sync logic is moved out of

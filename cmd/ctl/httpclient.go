@@ -6,10 +6,11 @@ import (
 	"crypto/x509"
 	js "encoding/json"
 	"fmt"
-	log "github.com/p9c/logi"
 	"io/ioutil"
 	"net"
 	"net/http"
+
+	log "github.com/p9c/logi"
 
 	"github.com/btcsuite/go-socks/socks"
 

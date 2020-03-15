@@ -5,11 +5,12 @@ import (
 	"sync"
 	"time"
 
+	log "github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
@@ -40,8 +41,8 @@ type RPCClient struct {
 // but must be done using the Start method.  If the remote server does not
 // operate on the same bitcoin network as described by the passed chain
 // parameters, the connection will be disconnected.
-func NewRPCClient(chainParams *netparams.Params, connect, user, pass string, certs []byte,
-	disableTLS bool, reconnectAttempts int) (*RPCClient, error) {
+func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
+	certs []byte, disableTLS bool, reconnectAttempts int) (*RPCClient, error) {
 	log.L.Warn("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
@@ -73,13 +74,13 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string, cer
 		OnRescanFinished:    client.onRescanFinished,
 		OnRescanProgress:    client.onRescanProgress,
 	}
-	//log.L.Warn("*actually* creating rpc client")
+	// log.L.Warn("*actually* creating rpc client")
 	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks)
 	if err != nil {
 		log.L.Error(err)
 		return nil, err
 	}
-	//defer log.L.Warn("*succeeded* in making rpc client")
+	// defer log.L.Warn("*succeeded* in making rpc client")
 	client.Client = rpcClient
 	return client, nil
 }
@@ -95,7 +96,7 @@ func (c *RPCClient) BackEnd() string {
 // function gives up, and therefore will not block forever waiting for the
 // connection to be established to a server that may not exist.
 func (c *RPCClient) Start() error {
-	//log.L.Debug(c.connConfig)
+	// log.L.Debug(c.connConfig)
 	err := c.Connect(c.reconnectAttempts)
 	if err != nil {
 		log.L.Error(err)

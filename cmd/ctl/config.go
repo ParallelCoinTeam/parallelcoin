@@ -1,8 +1,9 @@
 package ctl
 
 import (
-	log "github.com/p9c/logi"
 	"path/filepath"
+
+	log "github.com/p9c/logi"
 
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
@@ -13,7 +14,7 @@ import (
 // notifications.
 const unusableFlags = btcjson.UFWebsocketOnly | btcjson.UFNotification
 
-//nolint
+// nolint
 var (
 	// DefaultConfigFile is
 	DefaultConfigFile = filepath.Join(PodCtlHomeDir, "conf.json")

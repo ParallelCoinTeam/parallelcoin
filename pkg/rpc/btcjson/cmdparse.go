@@ -213,8 +213,13 @@ func baseType(arg reflect.Type) (reflect.Type, int) {
 	return arg, numIndirects
 }
 
-// assignField is the main workhorse for the NewCmd function which handles assigning the provided source value to the destination field.  It supports direct type assignments, indirection, conversion of numeric types, and unmarshaling of strings into arrays, slices, structs, and maps via json.Unmarshal.
-func assignField(paramNum int, fieldName string, dest reflect.Value, src reflect.Value) error {
+// assignField is the main workhorse for the NewCmd function which handles
+// assigning the provided source value to the destination field.  It supports
+// direct type assignments, indirection, conversion of numeric types, and
+// unmarshaling of strings into arrays, slices, structs, and maps via
+// json.Unmarshal.
+func assignField(paramNum int, fieldName string, dest reflect.Value,
+	src reflect.Value) error {
 	// Just error now when the types have no chance of being compatible.
 	destBaseType, destIndirects := baseType(dest.Type())
 	srcBaseType, srcIndirects := baseType(src.Type())
@@ -459,7 +464,9 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 	registerLock.RUnlock()
 	if !ok {
 		str := fmt.Sprintf("%q is not registered", method)
-		return nil, makeError(ErrUnregisteredMethod, str)
+		err := makeError(ErrUnregisteredMethod, str)
+		log.L.Check(err)
+		return nil, err
 	}
 	// Ensure the number of parameters are correct.
 	numParams := len(args)
@@ -488,6 +495,9 @@ func NewCmd(method string, args ...interface{}) (interface{}, error) {
 func MethodToInfo(method string) *MethodInfo {
 	log.L.Trace(method)
 	log.L.Traces(methodToInfo[method])
+	if v, ok := methodToInfo[method]; ok {
+		return &v
+	}
 	return nil
 }
 

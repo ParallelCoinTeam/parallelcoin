@@ -5,10 +5,11 @@ import (
 	"bytes"
 	js "encoding/json"
 	"fmt"
-	log "github.com/p9c/logi"
 	"io"
 	"os"
 	"strings"
+
+	log "github.com/p9c/logi"
 
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"

@@ -165,7 +165,8 @@ func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
 				return makeError(ErrNonOptionalField, str)
 			}
 		}
-		// Ensure the default value can be unsmarshalled into the type and that defaults are only specified for optional fields.
+		// Ensure the default value can be unsmarshalled into the type and that
+		// defaults are only specified for optional fields.
 		if tag := rtf.Tag.Get("jsonrpcdefault"); tag != "" {
 			if !isOptional {
 				str := fmt.Sprintf("required fields must not "+
