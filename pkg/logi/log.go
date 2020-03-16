@@ -25,7 +25,106 @@ const (
 	Trace = "trace"
 )
 
+var (
+	// NoClosure is a noop for a closure print function
+	NoClosure = func() PrintcFunc {
+		f := func(_ func() string) {}
+		return f
+	}
+	// NoPrintf is a noop for a closure printf function
+	NoPrintf = func() PrintfFunc {
+		f := func(_ string, _ ...interface{}) {}
+		return f
+	}
+	// NoPrintln is a noop for a println function
+	NoPrintln = func() PrintlnFunc {
+		f := func(_ ...interface{}) {}
+		return f
+	}
+	// NoPrintln is a noop for a println function
+	NoCheck = func() CheckFunc {
+		f := func(_ error) bool {
+			return true
+		}
+		return f
+	}
+	// NoSpew is a noop for a spew function
+	NoSpew = func() SpewFunc {
+		f := func(_ interface{}) {}
+		return f
+	}
+	// StartupTime allows a shorter log prefix as time since start
+	StartupTime    = time.Now()
+	BackgroundGrey = "\u001b[48;5;240m"
+	ColorBlue      = "\u001b[38;5;33m"
+	ColorBold      = "\u001b[1m"
+	ColorBrown     = "\u001b[38;5;130m"
+	ColorCyan      = "\u001b[36m"
+	ColorFaint     = "\u001b[2m"
+	ColorGreen     = "\u001b[38;5;40m"
+	ColorItalic    = "\u001b[3m"
+	ColorOff       = "\u001b[0m"
+	ColorOrange    = "\u001b[38;5;208m"
+	ColorPurple    = "\u001b[38;5;99m"
+	ColorRed       = "\u001b[38;5;196m"
+	ColorUnderline = "\u001b[4m"
+	ColorViolet    = "\u001b[38;5;201m"
+	ColorYellow    = "\u001b[38;5;226m"
+
+	L = Empty()
+
+	Levels = []string{
+		Off, Fatal, Error, Warn, Info, Check, Debug, Trace,
+	}
+)
+
+var wr LogWriter
+
 // Entry is a log entry to be printed as json to the log file
+type Entry struct {
+	Time         time.Time
+	Level        string
+	CodeLocation string
+	Text         string
+}
+
+type Logger struct {
+	Fatal         PrintlnFunc
+	Error         PrintlnFunc
+	Warn          PrintlnFunc
+	Info          PrintlnFunc
+	Check         CheckFunc
+	Debug         PrintlnFunc
+	Trace         PrintlnFunc
+	Fatalf        PrintfFunc
+	Errorf        PrintfFunc
+	Warnf         PrintfFunc
+	Infof         PrintfFunc
+	Checkf        CheckFunc
+	Debugf        PrintfFunc
+	Tracef        PrintfFunc
+	Fatalc        PrintcFunc
+	Errorc        PrintcFunc
+	Warnc         PrintcFunc
+	Infoc         PrintcFunc
+	Checkc        CheckFunc
+	Debugc        PrintcFunc
+	Tracec        PrintcFunc
+	Fatals        SpewFunc
+	Errors        SpewFunc
+	Warns         SpewFunc
+	Infos         SpewFunc
+	Debugs        SpewFunc
+	Traces        SpewFunc
+	LogFileHandle *os.File
+	Writer        LogWriter
+	Color         bool
+	Split         string
+	// If this channel is loaded log entries are composed and sent to it
+	LogChan chan Entry
+}
+
+// SetLevel enables or disables the various print functions
 func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
 	l.Split = split + string(os.PathSeparator)
 	level = sanitizeLoglevel(level)
@@ -82,6 +181,7 @@ func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
 	return l
 }
 
+// SetLogPaths sets a file path to write logs
 func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	const timeFormat = "2006-01-02_15-04-05"
 	path := filepath.Join(logFileName, logPath)
@@ -102,7 +202,10 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	_, _ = fmt.Fprintln(logFileHandle, "{")
 }
 
-// SetLevel enables or disables the various print functions
+type LogWriter struct {
+	io.Writer
+}
+
 func (w *LogWriter) Print(a ...interface{}) {
 	_, _ = fmt.Fprint(wr, a...)
 }
@@ -111,10 +214,15 @@ func (w *LogWriter) Printf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(wr, format, a...)
 }
 
-// SetLogPaths sets a file path to write logs
 func (w *LogWriter) Println(a ...interface{}) {
 	_, _ = fmt.Fprintln(wr, a...)
 }
+
+type PrintcFunc func(func() string)
+type PrintfFunc func(format string, a ...interface{})
+type PrintlnFunc func(a ...interface{})
+type CheckFunc func(err error) bool
+type SpewFunc func(interface{})
 
 func Composite(text, level string, color bool, split string) string {
 	dots := "."
@@ -514,111 +622,3 @@ func trimReturn(s string) string {
 	}
 	return s
 }
-
-type Entry struct {
-	Time         time.Time
-	Level        string
-	CodeLocation string
-	Text         string
-}
-
-type Logger struct {
-	Fatal         PrintlnFunc
-	Error         PrintlnFunc
-	Warn          PrintlnFunc
-	Info          PrintlnFunc
-	Check         CheckFunc
-	Debug         PrintlnFunc
-	Trace         PrintlnFunc
-	Fatalf        PrintfFunc
-	Errorf        PrintfFunc
-	Warnf         PrintfFunc
-	Infof         PrintfFunc
-	Checkf        CheckFunc
-	Debugf        PrintfFunc
-	Tracef        PrintfFunc
-	Fatalc        PrintcFunc
-	Errorc        PrintcFunc
-	Warnc         PrintcFunc
-	Infoc         PrintcFunc
-	Checkc        CheckFunc
-	Debugc        PrintcFunc
-	Tracec        PrintcFunc
-	Fatals        SpewFunc
-	Errors        SpewFunc
-	Warns         SpewFunc
-	Infos         SpewFunc
-	Debugs        SpewFunc
-	Traces        SpewFunc
-	LogFileHandle *os.File
-	Writer        LogWriter
-	Color         bool
-	Split         string
-	// If this channel is loaded log entries are composed and sent to it
-	LogChan chan Entry
-}
-
-type LogWriter struct {
-	io.Writer
-}
-
-type PrintcFunc func(func() string)
-type PrintfFunc func(format string, a ...interface{})
-type PrintlnFunc func(a ...interface{})
-type CheckFunc func(err error) bool
-type SpewFunc func(interface{})
-
-var (
-	// NoClosure is a noop for a closure print function
-	NoClosure = func() PrintcFunc {
-		f := func(_ func() string) {}
-		return f
-	}
-	// NoPrintf is a noop for a closure printf function
-	NoPrintf = func() PrintfFunc {
-		f := func(_ string, _ ...interface{}) {}
-		return f
-	}
-	// NoPrintln is a noop for a println function
-	NoPrintln = func() PrintlnFunc {
-		f := func(_ ...interface{}) {}
-		return f
-	}
-	// NoPrintln is a noop for a println function
-	NoCheck = func() CheckFunc {
-		f := func(_ error) bool {
-			return true
-		}
-		return f
-	}
-	// NoSpew is a noop for a spew function
-	NoSpew = func() SpewFunc {
-		f := func(_ interface{}) {}
-		return f
-	}
-	// StartupTime allows a shorter log prefix as time since start
-	StartupTime    = time.Now()
-	BackgroundGrey = "\u001b[48;5;240m"
-	ColorBlue      = "\u001b[38;5;33m"
-	ColorBold      = "\u001b[1m"
-	ColorBrown     = "\u001b[38;5;130m"
-	ColorCyan      = "\u001b[36m"
-	ColorFaint     = "\u001b[2m"
-	ColorGreen     = "\u001b[38;5;40m"
-	ColorItalic    = "\u001b[3m"
-	ColorOff       = "\u001b[0m"
-	ColorOrange    = "\u001b[38;5;208m"
-	ColorPurple    = "\u001b[38;5;99m"
-	ColorRed       = "\u001b[38;5;196m"
-	ColorUnderline = "\u001b[4m"
-	ColorViolet    = "\u001b[38;5;201m"
-	ColorYellow    = "\u001b[38;5;226m"
-)
-
-var L = Empty()
-
-var Levels = []string{
-	Off, Fatal, Error, Warn, Info, Check, Debug, Trace,
-}
-
-var wr LogWriter
