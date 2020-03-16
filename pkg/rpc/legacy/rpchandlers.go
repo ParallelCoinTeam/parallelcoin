@@ -243,7 +243,7 @@ var RPCHandlers = map[string]struct {
 		Handler: GetUnconfirmedBalance, Call: make(chan API, 32),
 		Result: func() API { return API{Ch: make(chan GetUnconfirmedBalanceRes)} }}, 
 	"help":{ 
-		Handler: HelpNoChainRPC, Call: make(chan API, 32),
+		Handler: HelpWithChainRPC, Call: make(chan API, 32),
 		Result: func() API { return API{Ch: make(chan HelpNoChainRPCRes)} }}, 
 	"importprivkey":{ 
 		Handler: ImportPrivKey, Call: make(chan API, 32),

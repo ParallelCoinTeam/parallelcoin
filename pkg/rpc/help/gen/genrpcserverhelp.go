@@ -1,19 +1,20 @@
-//+build generate
-
 package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
-	btcjson "github.com/p9c/pod/pkg/rpc/btcjson"
+	log "github.com/p9c/logi"
+
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpchelp "github.com/p9c/pod/pkg/rpc/help"
+
+	// rpchelp "github.com/p9c/pod/pkg/rpc/help"
 )
 
 var outputFile = func() *os.File {
-	fi, err := os.Create("rpcserverhelp.go")
+	fi, err := os.Create("../rpcserverhelp.go")
 	if err != nil {
 		log.L.Error(err)
 		log.L.Fatal(err)

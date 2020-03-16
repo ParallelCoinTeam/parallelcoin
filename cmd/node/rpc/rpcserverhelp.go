@@ -32,7 +32,7 @@ var HelpDescsEnUS = map[string]string{
 	"addnode-subcmd": "'add' to add a persistent peer, 'remove' to remove a" +
 		" persistent peer, or 'onetry' to try a single connection to a peer",
 	// NodeCmd help.
-	"node--synopsis": "Attempts to add or remove a peer.",
+	"node--synopsis":     "Attempts to add or remove a peer.",
 	"node-subcmd": "'disconnect' to remove all matching non-persistent" +
 		" peers, 'remove' to remove a persistent peer, or 'connect' to connect" +
 		" to a peer",
@@ -61,8 +61,8 @@ var HelpDescsEnUS = map[string]string{
 	"prevout-addresses": "previous output addresses",
 	"prevout-value":     "previous output value",
 	// VinPrevOut help.
-	"vinprevout-coinbase": "The hex-encoded bytes of the signature script (coinbase txns only)",
-	"vinprevout-txid":     "The hash of the origin transaction (non-coinbase txns only)",
+	"vinprevout-coinbase":    "The hex-encoded bytes of the signature script (coinbase txns only)",
+	"vinprevout-txid":        "The hash of the origin transaction (non-coinbase txns only)",
 	"vinprevout-vout": "The index of the output being redeemed from" +
 		" the origin transaction (non-coinbase txns only)",
 	"vinprevout-scriptSig": "The signature script used to redeem the" +
@@ -70,7 +70,7 @@ var HelpDescsEnUS = map[string]string{
 	"vinprevout-txinwitness": "The witness stack of the passed input, encoded as a JSON string array",
 	"vinprevout-prevOut": "Data from the origin transaction output with" +
 		" index vout.",
-	"vinprevout-sequence": "The script sequence number",
+	"vinprevout-sequence":    "The script sequence number",
 	// Vin help.
 	"vin-coinbase": "The hex-encoded bytes of the signature script" +
 		" (coinbase txns only)",
@@ -101,7 +101,7 @@ var HelpDescsEnUS = map[string]string{
 	// DecodeRawTransactionCmd help.
 	"decoderawtransaction--synopsis": "Returns a JSON object representing" +
 		" the provided serialized, hex-encoded transaction.",
-	"decoderawtransaction-hextx": "Serialized, hex-encoded transaction",
+	"decoderawtransaction-hextx":     "Serialized, hex-encoded transaction",
 	// DecodeScriptResult help.
 	"decodescriptresult-asm":       "Disassembly of the script",
 	"decodescriptresult-reqSigs":   "The number of required signatures",
@@ -136,7 +136,7 @@ var HelpDescsEnUS = map[string]string{
 	"getaddednodeinforesult-connected": "Whether or not the peer is currently connected",
 	"getaddednodeinforesult-addresses": "DNS lookup and connection information about the peer",
 	// GetAddedNodeInfo help.
-	"getaddednodeinfo--synopsis": "Returns information about manually added (persistent) peers.",
+	"getaddednodeinfo--synopsis":   "Returns information about manually added (persistent) peers.",
 	"getaddednodeinfo-dns": "Specifies whether the returned data is" +
 		" a JSON object including DNS and connection information, or just a" +
 		" list of added peers",
@@ -155,10 +155,10 @@ var HelpDescsEnUS = map[string]string{
 	// GetBestBlockHashCmd help.
 	"getbestblockhash--synopsis": "Returns the hash of the of the best" +
 		" (most recent) block in the longest block chain.",
-	"getbestblockhash--result0": "The hex-encoded block hash",
+	"getbestblockhash--result0":  "The hex-encoded block hash",
 	// GetBlockCmd help.
-	"getblock--synopsis": "Returns information about a block given its hash.",
-	"getblock-hash":      "The hash of the block",
+	"getblock--synopsis":   "Returns information about a block given its hash.",
+	"getblock-hash":        "The hash of the block",
 	"getblock-verbose":   "Specifies the block is returned as a JSON object instead of hex-encoded string",
 	"getblock-verbosetx": "Specifies that each transaction is returned" +
 		" as a JSON object and only applies if the verbose flag is true" +
@@ -205,8 +205,8 @@ var HelpDescsEnUS = map[string]string{
 		" softfork",
 	"softforkdescription-version": "The block version that signals " +
 		"enforcement of this softfork",
-	"softforkdescription-id": "The string identifier for the soft fork",
-	"-status":                "A bool which indicates if the soft fork is active",
+	"softforkdescription-id":      "The string identifier for the soft fork",
+	"-status":                     "A bool which indicates if the soft fork is active",
 	// TxRawResult help.
 	"txrawresult-hex":           "Hex-encoded transaction",
 	"txrawresult-txid":          "The hash of the transaction",
@@ -269,15 +269,15 @@ var HelpDescsEnUS = map[string]string{
 	"getblockheader--condition1": "verbose=true",
 	"getblockheader--result0":    "The block header hash",
 	// GetBlockHeaderVerboseResult help.
-	"getblockheaderverboseresult-hash":          "The hash of the block (same as provided)",
-	"getblockheaderverboseresult-confirmations": "The number of confirmations",
-	"getblockheaderverboseresult-height":        "The height of the block in the block chain",
-	"getblockheaderverboseresult-version":       "The block version",
-	"getblockheaderverboseresult-versionHex":    "The block version in hexadecimal",
-	"getblockheaderverboseresult-merkleroot":    "Root hash of the merkle tree",
-	"getblockheaderverboseresult-time":          "The block time in seconds since 1 Jan 1970 GMT",
-	"getblockheaderverboseresult-nonce":         "The block nonce",
-	"getblockheaderverboseresult-bits":          "The bits which represent the block difficulty",
+	"getblockheaderverboseresult-hash":              "The hash of the block (same as provided)",
+	"getblockheaderverboseresult-confirmations":     "The number of confirmations",
+	"getblockheaderverboseresult-height":            "The height of the block in the block chain",
+	"getblockheaderverboseresult-version":           "The block version",
+	"getblockheaderverboseresult-versionHex":        "The block version in hexadecimal",
+	"getblockheaderverboseresult-merkleroot":        "Root hash of the merkle tree",
+	"getblockheaderverboseresult-time":              "The block time in seconds since 1 Jan 1970 GMT",
+	"getblockheaderverboseresult-nonce":             "The block nonce",
+	"getblockheaderverboseresult-bits":              "The bits which represent the block difficulty",
 	"getblockheaderverboseresult-difficulty": "The proof-of-work" +
 		" difficulty as a multiple of the minimum difficulty",
 	"getblockheaderverboseresult-previousblockhash": "The hash of the previous block",
@@ -287,15 +287,15 @@ var HelpDescsEnUS = map[string]string{
 	"templaterequest-capabilities": "List of capabilities",
 	"templaterequest-longpollid": "The long poll ID of a job to monitor for" +
 		" expiration; required and valid only for long poll requests ",
-	"templaterequest-sigoplimit": "Number of signature operations allowed in blocks (this parameter is ignored)",
-	"templaterequest-sizelimit":  "Number of bytes allowed in blocks (this parameter is ignored)",
-	"templaterequest-maxversion": "Highest supported block version number (this parameter is ignored)",
-	"templaterequest-target":     "The desired target for the block template (this parameter is ignored)",
-	"templaterequest-data":       "Hex-encoded block data (only for mode=proposal)",
-	"templaterequest-workid":     "The server provided workid if provided in block template (not applicable)",
+	"templaterequest-sigoplimit":   "Number of signature operations allowed in blocks (this parameter is ignored)",
+	"templaterequest-sizelimit":    "Number of bytes allowed in blocks (this parameter is ignored)",
+	"templaterequest-maxversion":   "Highest supported block version number (this parameter is ignored)",
+	"templaterequest-target":       "The desired target for the block template (this parameter is ignored)",
+	"templaterequest-data":         "Hex-encoded block data (only for mode=proposal)",
+	"templaterequest-workid":       "The server provided workid if provided in block template (not applicable)",
 	// GetBlockTemplateResultTx help.
-	"getblocktemplateresulttx-data": "Hex-encoded transaction data (byte-for-byte)",
-	"getblocktemplateresulttx-hash": "Hex-encoded transaction hash (little endian if treated as a 256-bit number)",
+	"getblocktemplateresulttx-data":    "Hex-encoded transaction data (byte-for-byte)",
+	"getblocktemplateresulttx-hash":    "Hex-encoded transaction hash (little endian if treated as a 256-bit number)",
 	"getblocktemplateresulttx-depends": "Other transactions before this one" +
 		" (by 1-based index in the 'transactions'  list) that must be present in" +
 		" the final block if this one is",
@@ -303,20 +303,20 @@ var HelpDescsEnUS = map[string]string{
 		" transaction inputs and outputs (in Satoshi)",
 	"getblocktemplateresulttx-sigops": "Total number of signature operations" +
 		" as counted for purposes of block limits",
-	"getblocktemplateresulttx-weight": "The weight of the transaction",
+	"getblocktemplateresulttx-weight":  "The weight of the transaction",
 	// GetBlockTemplateResultAux help.
 	"getblocktemplateresultaux-flags": "Hex-encoded byte-for-byte data to" +
 		" include in the coinbase signature script",
 	// GetBlockTemplateResult help.
-	"getblocktemplateresult-bits": "Hex-encoded compressed difficulty",
+	"getblocktemplateresult-bits":                       "Hex-encoded compressed difficulty",
 	"getblocktemplateresult-curtime": "Current time as seen by the server" +
 		" (recommended for block time); must fall within mintime/maxtime rules",
-	"getblocktemplateresult-height":            "Height of the block to be solved",
-	"getblocktemplateresult-previousblockhash": "Hex-encoded big-endian hash of the previous block",
-	"getblocktemplateresult-sigoplimit":        "Number of sigops allowed in blocks ",
-	"getblocktemplateresult-sizelimit":         "Number of bytes allowed in blocks",
-	"getblocktemplateresult-transactions":      "Array of transactions as JSON objects",
-	"getblocktemplateresult-version":           "The block version",
+	"getblocktemplateresult-height":                     "Height of the block to be solved",
+	"getblocktemplateresult-previousblockhash":          "Hex-encoded big-endian hash of the previous block",
+	"getblocktemplateresult-sigoplimit":                 "Number of sigops allowed in blocks ",
+	"getblocktemplateresult-sizelimit":                  "Number of bytes allowed in blocks",
+	"getblocktemplateresult-transactions":               "Array of transactions as JSON objects",
+	"getblocktemplateresult-version":                    "The block version",
 	"getblocktemplateresult-coinbaseaux": "Data that should be included in the" +
 		" coinbase signature script",
 	"getblocktemplateresult-coinbasetxn": "Information about the coinbase" +
@@ -329,14 +329,14 @@ var HelpDescsEnUS = map[string]string{
 		" which allows monitoring for expiration",
 	"getblocktemplateresult-longpolluri": "An alternate URI to use for long" +
 		" poll requests if provided (not provided)",
-	"getblocktemplateresult-submitold": "Not applicable",
+	"getblocktemplateresult-submitold":                  "Not applicable",
 	"getblocktemplateresult-target": "Hex-encoded big-endian number which" +
 		" valid results must be less than",
 	"getblocktemplateresult-expires": "Maximum number of seconds (starting" +
 		" from when the server sent the response) this work is valid for",
-	"getblocktemplateresult-maxtime": "Maximum allowed time",
-	"getblocktemplateresult-mintime": "Minimum allowed time",
-	"getblocktemplateresult-mutable": "List of mutations the server explicitly allows",
+	"getblocktemplateresult-maxtime":                    "Maximum allowed time",
+	"getblocktemplateresult-mintime":                    "Minimum allowed time",
+	"getblocktemplateresult-mutable":                    "List of mutations the server explicitly allows",
 	"getblocktemplateresult-noncerange": "Two concatenated hex-encoded" +
 		" big-endian 32-bit integers which represent the valid ranges of" +
 		" nonces the miner may scan",
@@ -353,46 +353,44 @@ var HelpDescsEnUS = map[string]string{
 		" necessary to construct a block to mine or accepts a proposal to" +
 		" validate.\n" +
 		"See BIP0022 and BIP0023 for the full specification.",
-	"getblocktemplate-request": "Request object which controls the mode" +
-		" and several parameters",
+	"getblocktemplate-request":     "Request object which controls the mode and several parameters",
 	"getblocktemplate--condition0": "mode=template",
 	"getblocktemplate--condition1": "mode=proposal, rejected",
 	"getblocktemplate--condition2": "mode=proposal, accepted",
-	"getblocktemplate--result1": "An error string which represents" +
-		" why the proposal was rejected or nothing if accepted",
+	"getblocktemplate--result1":    "An error string which represents why the proposal was rejected or nothing if accepted",
+
 	// GetCFilterCmd help.
-	"getcfilter--synopsis": "Returns a block's committed filter given" +
-		" its hash.",
+	"getcfilter--synopsis":  "Returns a block's committed filter given its hash.",
 	"getcfilter-filtertype": "The type of filter to return (0=regular)",
 	"getcfilter-hash":       "The hash of the block",
 	"getcfilter--result0":   "The block's committed filter",
+
 	// GetCFilterHeaderCmd help.
 	"getcfilterheader--synopsis":  "Returns a block's compact filter header given its hash.",
 	"getcfilterheader-filtertype": "The type of filter header to return (0=regular)",
 	"getcfilterheader-hash":       "The hash of the block",
 	"getcfilterheader--result0":   "The block's gcs filter header",
+
 	// GetConnectionCountCmd help.
 	"getconnectioncount--synopsis": "Returns the number of active connections to other peers.",
 	"getconnectioncount--result0":  "The number of connections",
+
 	// GetCurrentNetCmd help.
 	"getcurrentnet--synopsis": "Get bitcoin network the server is running on.",
-	"getcurrentnet--result0":  "The network identifier",
+	"getcurrentnet--result0":  "The network identifer",
+
 	// GetDifficultyCmd help.
-	"getdifficulty--synopsis": "Returns the proof-of-work difficulty as a" +
-		" multiple of the minimum difficulty, according to the currently" +
-		" configured cpu mining algorithm.",
-	"getdifficulty-algo": "Defaults to the configured --algo for the" +
-		" CPU miner, can be set to sha256 or Scrypt",
-	"getdifficulty--condition0": "algo=SHA256d or Scrypt",
-	"getdifficulty--result0":    "The difficulty of the requested algorithm",
+	"getdifficulty--synopsis": "Returns the proof-of-work difficulty as a multiple of the minimum difficulty.",
+	"getdifficulty--result0":  "The difficulty",
+
 	// GetGenerateCmd help.
-	"getgenerate--synopsis": "Returns if the server is set to generate" +
-		" coins (mine) or not.",
-	"getgenerate--result0": "True if mining, false if not",
+	"getgenerate--synopsis": "Returns if the server is set to generate coins (mine) or not.",
+	"getgenerate--result0":  "True if mining, false if not",
+
 	// GetHashesPerSecCmd help.
-	"gethashespersec--synopsis": "Returns a recent hashes per second" +
-		" performance measurement while generating coins (mining).",
-	"gethashespersec--result0": "The number of hashes per second",
+	"gethashespersec--synopsis": "Returns a recent hashes per second performance measurement while generating coins (mining).",
+	"gethashespersec--result0":  "The number of hashes per second",
+
 	// InfoChainResult help.
 	"infochainresult-version":         "The version of the server",
 	"infochainresult-protocolversion": "The latest supported protocol version",
@@ -402,9 +400,9 @@ var HelpDescsEnUS = map[string]string{
 	"infochainresult-proxy":           "The proxy used by the server",
 	"infochainresult-difficulty":      "The current target difficulty",
 	"infochainresult-testnet":         "Whether or not server is using testnet",
-	"infochainresult-relayfee": "The minimum relay fee for non-free" +
-		" transactions in DUO/KB",
-	"infochainresult-errors": "Any current errors",
+	"infochainresult-relayfee":        "The minimum relay fee for non-free transactions in BTC/KB",
+	"infochainresult-errors":          "Any current errors",
+
 	// InfoWalletResult help.
 	"infowalletresult-version":         "The version of the server",
 	"infowalletresult-protocolversion": "The latest supported protocol version",
@@ -418,30 +416,27 @@ var HelpDescsEnUS = map[string]string{
 	"infowalletresult-testnet":         "Whether or not server is using testnet",
 	"infowalletresult-keypoololdest":   "Seconds since 1 Jan 1970 GMT of the oldest pre-generated key in the key pool",
 	"infowalletresult-keypoolsize":     "The number of new keys that are pre-generated",
-	"infowalletresult-unlocked_until": "The timestamp in seconds since 1 Jan" +
-		" 1970 GMT that the wallet is unlocked for transfers, or 0 if the wallet" +
-		" is locked",
-	"infowalletresult-paytxfee": "The transaction fee set in DUO/KB",
-	"infowalletresult-relayfee": "The minimum relay fee for non-free" +
-		" transactions in DUO/KB",
-	"infowalletresult-errors": "Any current errors",
+	"infowalletresult-unlocked_until":  "The timestamp in seconds since 1 Jan 1970 GMT that the wallet is unlocked for transfers, or 0 if the wallet is locked",
+	"infowalletresult-paytxfee":        "The transaction fee set in BTC/KB",
+	"infowalletresult-relayfee":        "The minimum relay fee for non-free transactions in BTC/KB",
+	"infowalletresult-errors":          "Any current errors",
+
 	// GetHeadersCmd help.
-	"getheaders--synopsis": "Returns block headers starting with the first known block hash from the request",
-	"getheaders-blocklocators": "JSON array of hex-encoded hashes of blocks." +
-		" Headers are returned starting from the first known hash in this list",
-	"getheaders-hashstop": "Block hash to stop including block headers" +
-		" for; if not found, all headers to the latest known block are returned.",
-	"getheaders--result0": "Serialized block headers of all located blocks," +
-		" limited to some arbitrary maximum number of hashes (currently 2000," +
-		" which matches the wire protocol headers message, but this is" +
-		" not guaranteed)",
+	"getheaders--synopsis":     "Returns block headers starting with the first known block hash from the request",
+	"getheaders-blocklocators": "JSON array of hex-encoded hashes of blocks.  Headers are returned starting from the first known hash in this list",
+	"getheaders-hashstop":      "Block hash to stop including block headers for; if not found, all headers to the latest known block are returned.",
+	"getheaders--result0":      "Serialized block headers of all located blocks, limited to some arbitrary maximum number of hashes (currently 2000, which matches the wire protocol headers message, but this is not guaranteed)",
+
 	// GetInfoCmd help.
 	"getinfo--synopsis": "Returns a JSON object containing various state info.",
+
 	// GetMempoolInfoCmd help.
 	"getmempoolinfo--synopsis": "Returns memory pool information",
+
 	// GetMempoolInfoResult help.
 	"getmempoolinforesult-bytes": "Size in bytes of the mempool",
 	"getmempoolinforesult-size":  "Number of transactions in the mempool",
+
 	// GetMiningInfoResult help.
 	"getmininginforesult-blocks":             "Height of the latest best block",
 	"getmininginforesult-currentblocksize":   "Size of the latest best block",
@@ -455,171 +450,138 @@ var HelpDescsEnUS = map[string]string{
 	"getmininginforesult-networkhashps":      "Estimated network hashes per second for the most recent blocks",
 	"getmininginforesult-pooledtx":           "Number of transactions in the memory pool",
 	"getmininginforesult-testnet":            "Whether or not server is using testnet",
+
 	// GetMiningInfoCmd help.
 	"getmininginfo--synopsis": "Returns a JSON object containing mining-related information.",
+
 	// GetNetworkHashPSCmd help.
-	"getnetworkhashps--synopsis": "Returns the estimated network hashes per" +
-		" second for the block heights provided by the parameters.",
-	"getnetworkhashps-blocks": "The number of blocks, or -1 for blocks" +
-		" since last difficulty change",
-	"getnetworkhashps-height": "Perform estimate ending with this height or" +
-		" -1 for current best chain block height",
-	"getnetworkhashps--result0": "Estimated hashes per second",
+	"getnetworkhashps--synopsis": "Returns the estimated network hashes per second for the block heights provided by the parameters.",
+	"getnetworkhashps-blocks":    "The number of blocks, or -1 for blocks since last difficulty change",
+	"getnetworkhashps-height":    "Perform estimate ending with this height or -1 for current best chain block height",
+	"getnetworkhashps--result0":  "Estimated hashes per second",
+
 	// GetNetTotalsCmd help.
-	"getnettotals--synopsis": "Returns a JSON object containing network" +
-		" traffic statistics.",
+	"getnettotals--synopsis": "Returns a JSON object containing network traffic statistics.",
+
 	// GetNetTotalsResult help.
 	"getnettotalsresult-totalbytesrecv": "Total bytes received",
 	"getnettotalsresult-totalbytessent": "Total bytes sent",
 	"getnettotalsresult-timemillis":     "Number of milliseconds since 1 Jan 1970 GMT",
+
 	// GetPeerInfoResult help.
-	"getpeerinforesult-id":        "A unique node ID",
-	"getpeerinforesult-addr":      "The ip address and port of the peer",
-	"getpeerinforesult-addrlocal": "Local address",
-	"getpeerinforesult-services": "Services bitmask which represents" +
-		" the services supported by the peer",
-	"getpeerinforesult-relaytxes": "Peer has requested transactions be" +
-		" relayed to it",
-	"getpeerinforesult-lastsend": "Time the last message was received" +
-		" in seconds since 1 Jan 1970 GMT",
-	"getpeerinforesult-lastrecv":  "Time the last message was sent in seconds since 1 Jan 1970 GMT",
-	"getpeerinforesult-bytessent": "Total bytes sent",
-	"getpeerinforesult-bytesrecv": "Total bytes received",
-	"getpeerinforesult-conntime": "Time the connection was made in" +
-		" seconds since 1 Jan 1970 GMT",
-	"getpeerinforesult-timeoffset": "The time offset of the peer",
-	"getpeerinforesult-pingtime": "Number of microseconds the last" +
-		" ping took",
-	"getpeerinforesult-pingwait": "Number of microseconds a queued" +
-		" ping has been waiting for a response",
-	"getpeerinforesult-version": "The protocol version of the peer",
-	"getpeerinforesult-subver":  "The user agent of the peer",
-	"getpeerinforesult-inbound": "Whether or not the peer is an inbound" +
-		" connection",
-	"getpeerinforesult-startingheight": "The latest block height the peer" +
-		" knew about when the connection was established",
-	"getpeerinforesult-currentheight": "The current height of the peer",
-	"getpeerinforesult-banscore":      "The ban score",
-	"getpeerinforesult-feefilter": "The requested minimum fee a" +
-		" transaction must have to be announced to the peer",
-	"getpeerinforesult-syncnode": "Whether or not the peer is the" +
-		" sync peer",
+	"getpeerinforesult-id":             "A unique node ID",
+	"getpeerinforesult-addr":           "The ip address and port of the peer",
+	"getpeerinforesult-addrlocal":      "Local address",
+	"getpeerinforesult-services":       "Services bitmask which represents the services supported by the peer",
+	"getpeerinforesult-relaytxes":      "Peer has requested transactions be relayed to it",
+	"getpeerinforesult-lastsend":       "Time the last message was received in seconds since 1 Jan 1970 GMT",
+	"getpeerinforesult-lastrecv":       "Time the last message was sent in seconds since 1 Jan 1970 GMT",
+	"getpeerinforesult-bytessent":      "Total bytes sent",
+	"getpeerinforesult-bytesrecv":      "Total bytes received",
+	"getpeerinforesult-conntime":       "Time the connection was made in seconds since 1 Jan 1970 GMT",
+	"getpeerinforesult-timeoffset":     "The time offset of the peer",
+	"getpeerinforesult-pingtime":       "Number of microseconds the last ping took",
+	"getpeerinforesult-pingwait":       "Number of microseconds a queued ping has been waiting for a response",
+	"getpeerinforesult-version":        "The protocol version of the peer",
+	"getpeerinforesult-subver":         "The user agent of the peer",
+	"getpeerinforesult-inbound":        "Whether or not the peer is an inbound connection",
+	"getpeerinforesult-startingheight": "The latest block height the peer knew about when the connection was established",
+	"getpeerinforesult-currentheight":  "The current height of the peer",
+	"getpeerinforesult-banscore":       "The ban score",
+	"getpeerinforesult-feefilter":      "The requested minimum fee a transaction must have to be announced to the peer",
+	"getpeerinforesult-syncnode":       "Whether or not the peer is the sync peer",
+
 	// GetPeerInfoCmd help.
-	"getpeerinfo--synopsis": "Returns data about each connected network peer" +
-		" as an array of json objects.",
+	"getpeerinfo--synopsis": "Returns data about each connected network peer as an array of json objects.",
+
 	// GetRawMempoolVerboseResult help.
-	"getrawmempoolverboseresult-size": "Transaction size in bytes",
-	"getrawmempoolverboseresult-fee":  "Transaction fee in bitcoins",
-	"getrawmempoolverboseresult-time": "Local time transaction" +
-		" entered pool in seconds since 1 Jan 1970 GMT",
-	"getrawmempoolverboseresult-height": "Block height when" +
-		" transaction entered the pool",
-	"getrawmempoolverboseresult-startingpriority": "Priority when transaction" +
-		" entered the pool",
-	"getrawmempoolverboseresult-currentpriority": "Current priority",
-	"getrawmempoolverboseresult-depends": "Unconfirmed transactions" +
-		" used as inputs for this transaction",
-	"getrawmempoolverboseresult-vsize": "The virtual size of a" +
-		" transaction",
+	"getrawmempoolverboseresult-size":             "Transaction size in bytes",
+	"getrawmempoolverboseresult-fee":              "Transaction fee in bitcoins",
+	"getrawmempoolverboseresult-time":             "Local time transaction entered pool in seconds since 1 Jan 1970 GMT",
+	"getrawmempoolverboseresult-height":           "Block height when transaction entered the pool",
+	"getrawmempoolverboseresult-startingpriority": "Priority when transaction entered the pool",
+	"getrawmempoolverboseresult-currentpriority":  "Current priority",
+	"getrawmempoolverboseresult-depends":          "Unconfirmed transactions used as inputs for this transaction",
+	"getrawmempoolverboseresult-vsize":            "The virtual size of a transaction",
+	"getrawmempoolverboseresult-weight":           "The transaction's weight (between vsize*4-3 and vsize*4)",
+
 	// GetRawMempoolCmd help.
-	"getrawmempool--synopsis": "Returns information about all of the" +
-		" transactions currently in the memory pool.",
-	"getrawmempool-verbose": "Returns JSON object when true or an array of" +
-		" transaction hashes when false",
+	"getrawmempool--synopsis":   "Returns information about all of the transactions currently in the memory pool.",
+	"getrawmempool-verbose":     "Returns JSON object when true or an array of transaction hashes when false",
 	"getrawmempool--condition0": "verbose=false",
 	"getrawmempool--condition1": "verbose=true",
 	"getrawmempool--result0":    "Array of transaction hashes",
+
 	// GetRawTransactionCmd help.
-	"getrawtransaction--synopsis": "Returns information about a transaction" +
-		" given its hash.",
-	"getrawtransaction-txid": "The hash of the transaction",
-	"getrawtransaction-verbose": "Specifies the transaction is returned" +
-		" as a JSON object instead of a hex-encoded string",
+	"getrawtransaction--synopsis":   "Returns information about a transaction given its hash.",
+	"getrawtransaction-txid":        "The hash of the transaction",
+	"getrawtransaction-verbose":     "Specifies the transaction is returned as a JSON object instead of a hex-encoded string",
 	"getrawtransaction--condition0": "verbose=false",
 	"getrawtransaction--condition1": "verbose=true",
-	"getrawtransaction--result0": "Hex-encoded bytes of the serialized" +
-		" transaction",
+	"getrawtransaction--result0":    "Hex-encoded bytes of the serialized transaction",
+
 	// GetTxOutResult help.
-	"gettxoutresult-bestblock": "The block hash that contains the" +
-		" transaction output",
+	"gettxoutresult-bestblock":     "The block hash that contains the transaction output",
 	"gettxoutresult-confirmations": "The number of confirmations",
-	"gettxoutresult-value":         "The transaction amount in DUO",
-	"gettxoutresult-scriptPubKey": "The public key script used to pay coins" +
-		" as a JSON object",
-	"gettxoutresult-version":  "The transaction version",
-	"gettxoutresult-coinbase": "Whether or not the transaction is a coinbase",
+	"gettxoutresult-value":         "The transaction amount in BTC",
+	"gettxoutresult-scriptPubKey":  "The public key script used to pay coins as a JSON object",
+	"gettxoutresult-version":       "The transaction version",
+	"gettxoutresult-coinbase":      "Whether or not the transaction is a coinbase",
+
 	// GetTxOutCmd help.
 	"gettxout--synopsis":      "Returns information about an unspent transaction output..",
 	"gettxout-txid":           "The hash of the transaction",
 	"gettxout-vout":           "The index of the output",
 	"gettxout-includemempool": "Include the mempool when true",
+
 	// HelpCmd help.
-	"help--synopsis": "Returns a list of all commands or help for a" +
-		" specified command.",
+	"help--synopsis":   "Returns a list of all commands or help for a specified command.",
 	"help-command":     "The command to retrieve help for",
 	"help--condition0": "no command provided",
 	"help--condition1": "command specified",
 	"help--result0":    "List of commands",
 	"help--result1":    "Help for specified command",
+
 	// PingCmd help.
 	"ping--synopsis": "Queues a ping to be sent to each connected peer.\n" +
-		"Ping times are provided by getpeerinfo via the pingtime and" +
-		" pingwait fields.",
+		"Ping times are provided by getpeerinfo via the pingtime and pingwait fields.",
+
 	// SearchRawTransactionsCmd help.
-	"searchrawtransactions--synopsis": "Returns raw data for transactions" +
-		" involving the passed address.\n" +
-		"Returned transactions are pulled from both the database, and" +
-		" transactions currently in the mempool.\n" +
-		"Transactions pulled from the mempool will have the 'confirmations' field" +
-		" set to 0.\n" +
-		"Usage of this RPC requires the optional --addrindex flag to be" +
-		" activated, otherwise all responses will simply return with an" +
-		" error stating the address index has not yet been built.\n" +
-		"Similarly, until the address index has caught up with the current" +
-		" best height, all requests will return an error response in order" +
-		" to avoid serving stale data.",
-	"searchrawtransactions-address": "The Bitcoin address to search for",
-	"searchrawtransactions-verbose": "Specifies the transaction is" +
-		" returned as a JSON object instead of hex-encoded string",
+	"searchrawtransactions--synopsis": "Returns raw data for transactions involving the passed address.\n" +
+		"Returned transactions are pulled from both the database, and transactions currently in the mempool.\n" +
+		"Transactions pulled from the mempool will have the 'confirmations' field set to 0.\n" +
+		"Usage of this RPC requires the optional --addrindex flag to be activated, otherwise all responses will simply return with an error stating the address index has not yet been built.\n" +
+		"Similarly, until the address index has caught up with the current best height, all requests will return an error response in order to avoid serving stale data.",
+	"searchrawtransactions-address":     "The Bitcoin address to search for",
+	"searchrawtransactions-verbose":     "Specifies the transaction is returned as a JSON object instead of hex-encoded string",
 	"searchrawtransactions--condition0": "verbose=0",
 	"searchrawtransactions--condition1": "verbose=1",
-	"searchrawtransactions-skip": "The number of leading transactions" +
-		" to leave out of the final response",
-	"searchrawtransactions-count": "The maximum number of transactions" +
-		" to return",
-	"searchrawtransactions-vinextra": "Specify that extra data from" +
-		" previous output will be returned in vin",
-	"searchrawtransactions-reverse": "Specifies that the transactions" +
-		" should be returned in reverse chronological order",
-	"searchrawtransactions-filteraddrs": "Address list.  Only inputs or" +
-		" outputs with matching address will be returned",
-	"searchrawtransactions--result0": "Hex-encoded serialized transaction",
+	"searchrawtransactions-skip":        "The number of leading transactions to leave out of the final response",
+	"searchrawtransactions-count":       "The maximum number of transactions to return",
+	"searchrawtransactions-vinextra":    "Specify that extra data from previous output will be returned in vin",
+	"searchrawtransactions-reverse":     "Specifies that the transactions should be returned in reverse chronological order",
+	"searchrawtransactions-filteraddrs": "Address list.  Only inputs or outputs with matching address will be returned",
+	"searchrawtransactions--result0":    "Hex-encoded serialized transaction",
+
 	// SendRawTransactionCmd help.
-	"sendrawtransaction--synopsis": "Submits the serialized, hex-encoded" +
-		" transaction to the local peer and relays it to the network.",
-	"sendrawtransaction-hextx": "Serialized, hex-encoded signed transaction",
-	"sendrawtransaction-allowhighfees": "Whether or not to allow insanely" +
-		" high fees (pod does not yet implement this parameter, so it has" +
-		" no effect)",
-	"sendrawtransaction--result0": "The hash of the transaction",
+	"sendrawtransaction--synopsis":     "Submits the serialized, hex-encoded transaction to the local peer and relays it to the network.",
+	"sendrawtransaction-hextx":         "Serialized, hex-encoded signed transaction",
+	"sendrawtransaction-allowhighfees": "Whether or not to allow insanely high fees (btcd does not yet implement this parameter, so it has no effect)",
+	"sendrawtransaction-maxfeerate":    "Used by bitcoind on or after v0.19.0",
+	"sendrawtransaction--result0":      "The hash of the transaction",
+
 	// SetGenerateCmd help.
-	"setgenerate--synopsis": "Set the server to generate coins (mine)" +
-		" or not.",
-	"setgenerate-generate": "Use true to enable generation, false to" +
-		" disable it",
-	"setgenerate-genproclimit": "The number of processors (cores) to limit" +
-		" generation to or -1 for default",
+	"setgenerate--synopsis":    "Set the server to generate coins (mine) or not.",
+	"setgenerate-generate":     "Use true to enable generation, false to disable it",
+	"setgenerate-genproclimit": "The number of processors (cores) to limit generation to or -1 for default",
+
 	// StopCmd help.
-	"stop--synopsis": "Shutdown pod.",
-	"stop--result0":  "The string 'pod stopping.'",
-	// RestartCmd help
-	"restart--synopsis": "Restarts pod in-place",
-	"restart--result0":  "The string 'pod restarting'",
-	// DropWalletHistoryCmd help
-	"dropwallethistory--synopsis": "Clears history from wallet and restarts",
-	"dropwallethistory--result0":  "The string 'dropped wallet history, restarting'",
+	"stop--synopsis": "Shutdown btcd.",
+	"stop--result0":  "The string 'btcd stopping.'",
+
 	// SubmitBlockOptions help.
 	"submitblockoptions-workid": "This parameter is currently ignored",
+
 	// SubmitBlockCmd help.
 	"submitblock--synopsis":   "Attempts to submit a new serialized, hex-encoded block to the network.",
 	"submitblock-hexblock":    "Serialized, hex-encoded block",
@@ -627,126 +589,112 @@ var HelpDescsEnUS = map[string]string{
 	"submitblock--condition0": "Block successfully submitted",
 	"submitblock--condition1": "Block rejected",
 	"submitblock--result1":    "The reason the block was rejected",
+
 	// ValidateAddressResult help.
 	"validateaddresschainresult-isvalid": "Whether or not the address is valid",
-	"validateaddresschainresult-address": "The bitcoin address (only when" +
-		" isvalid is true)",
+	"validateaddresschainresult-address": "The bitcoin address (only when isvalid is true)",
+
 	// ValidateAddressCmd help.
 	"validateaddress--synopsis": "Verify an address is valid.",
 	"validateaddress-address":   "Bitcoin address to validate",
+
 	// VerifyChainCmd help.
 	"verifychain--synopsis": "Verifies the block chain database.\n" +
-		"The actual checks performed by the checklevel parameter are" +
-		" implementation specific.\n" +
-		"For pod this is:\n" +
-		"checklevel=0 - Look up each block and ensure it can be loaded from" +
-		" the database.\n" +
+		"The actual checks performed by the checklevel parameter are implementation specific.\n" +
+		"For btcd this is:\n" +
+		"checklevel=0 - Look up each block and ensure it can be loaded from the database.\n" +
 		"checklevel=1 - Perform basic context-free sanity checks on each block.",
 	"verifychain-checklevel": "How thorough the block verification is",
 	"verifychain-checkdepth": "The number of blocks to check",
 	"verifychain--result0":   "Whether or not the chain verified",
-	// ResetChainCmd help
-	"resetchain--synopsis": "deletes the existing chain database and restarts",
-	"resetchain--result0":  "the string 'chain database deleted, restarting'",
+
 	// VerifyMessageCmd help.
 	"verifymessage--synopsis": "Verify a signed message.",
 	"verifymessage-address":   "The bitcoin address to use for the signature",
 	"verifymessage-signature": "The base-64 encoded signature provided by the signer",
 	"verifymessage-message":   "The signed message",
 	"verifymessage--result0":  "Whether or not the signature verified",
+
 	// -------- Websocket-specific help --------
+
 	// Session help.
-	"session--synopsis": "Return details regarding a websocket client's current connection session.",
-	"sessionresult-sessionid": "The unique session ID for a client's" +
-		" websocket connection.",
+	"session--synopsis":       "Return details regarding a websocket client's current connection session.",
+	"sessionresult-sessionid": "The unique session ID for a client's websocket connection.",
+
 	// NotifyBlocksCmd help.
-	"notifyblocks--synopsis": "Request notifications for whenever a block is" +
-		" connected or disconnected from the main (best) chain.",
+	"notifyblocks--synopsis": "Request notifications for whenever a block is connected or disconnected from the main (best) chain.",
+
 	// StopNotifyBlocksCmd help.
-	"stopnotifyblocks--synopsis": "Cancel registered notifications for" +
-		" whenever a block is connected or disconnected from the main (best) chain.",
+	"stopnotifyblocks--synopsis": "Cancel registered notifications for whenever a block is connected or disconnected from the main (best) chain.",
+
 	// NotifyNewTransactionsCmd help.
-	"notifynewtransactions--synopsis": "Send either a txaccepted or a" +
-		" txacceptedverbose notification when a new transaction is accepted into" +
-		" the mempool.",
-	"notifynewtransactions-verbose": "Specifies which type of notification" +
-		" to receive. If verbose is true, then the caller receives" +
-		" txacceptedverbose, otherwise the caller receives txaccepted",
+	"notifynewtransactions--synopsis": "Send either a txaccepted or a txacceptedverbose notification when a new transaction is accepted into the mempool.",
+	"notifynewtransactions-verbose":   "Specifies which type of notification to receive. If verbose is true, then the caller receives txacceptedverbose, otherwise the caller receives txaccepted",
+
 	// StopNotifyNewTransactionsCmd help.
-	"stopnotifynewtransactions--synopsis": "Stop sending either a txaccepted" +
-		" or a txacceptedverbose notification when a new transaction is accepted" +
-		" into the mempool.",
+	"stopnotifynewtransactions--synopsis": "Stop sending either a txaccepted or a txacceptedverbose notification when a new transaction is accepted into the mempool.",
+
 	// NotifyReceivedCmd help.
-	"notifyreceived--synopsis": "Send a recvtx notification when a" +
-		" transaction added to mempool or appears in a newly-attached block" +
-		" contains a txout pkScript sending to any of the passed addresses.\n" +
-		"Matching outpoints are automatically registered for redeemingtx" +
-		" notifications.",
+	"notifyreceived--synopsis": "Send a recvtx notification when a transaction added to mempool or appears in a newly-attached block contains a txout pkScript sending to any of the passed addresses.\n" +
+		"Matching outpoints are automatically registered for redeemingtx notifications.",
 	"notifyreceived-addresses": "List of address to receive notifications about",
+
 	// StopNotifyReceivedCmd help.
-	"stopnotifyreceived--synopsis": "Cancel registered receive notifications" +
-		" for each passed address.",
-	"stopnotifyreceived-addresses": "List of address to cancel receive" +
-		" notifications for",
+	"stopnotifyreceived--synopsis": "Cancel registered receive notifications for each passed address.",
+	"stopnotifyreceived-addresses": "List of address to cancel receive notifications for",
+
 	// OutPoint help.
 	"outpoint-hash":  "The hex-encoded bytes of the outpoint hash",
 	"outpoint-index": "The index of the outpoint",
+
 	// NotifySpentCmd help.
-	"notifyspent--synopsis": "Send a redeemingtx notification when a" +
-		" transaction spending an outpoint appears in mempool (if relayed to" +
-		" this pod instance) and when such a transaction first appears in a" +
-		" newly-attached block.",
+	"notifyspent--synopsis": "Send a redeemingtx notification when a transaction spending an outpoint appears in mempool (if relayed to this btcd instance) and when such a transaction first appears in a newly-attached block.",
 	"notifyspent-outpoints": "List of transaction outpoints to monitor.",
+
 	// StopNotifySpentCmd help.
 	"stopnotifyspent--synopsis": "Cancel registered spending notifications for each passed outpoint.",
 	"stopnotifyspent-outpoints": "List of transaction outpoints to stop monitoring.",
+
 	// LoadTxFilterCmd help.
-	"loadtxfilter--synopsis": "Load, add to, or reload a websocket" +
-		" client's transaction filter for mempool transactions, new blocks" +
-		" and rescanblocks.",
-	"loadtxfilter-reload": "Load a new filter instead of adding data to" +
-		" an existing one",
-	"loadtxfilter-addresses": "Array of addresses to add to the transaction" +
-		" filter",
-	"loadtxfilter-outpoints": "Array of outpoints to add to the transaction" +
-		" filter",
+	"loadtxfilter--synopsis": "Load, add to, or reload a websocket client's transaction filter for mempool transactions, new blocks and rescanblocks.",
+	"loadtxfilter-reload":    "Load a new filter instead of adding data to an existing one",
+	"loadtxfilter-addresses": "Array of addresses to add to the transaction filter",
+	"loadtxfilter-outpoints": "Array of outpoints to add to the transaction filter",
+
 	// Rescan help.
 	"rescan--synopsis": "Rescan block chain for transactions to addresses.\n" +
-		"When the endblock parameter is omitted, the rescan continues through" +
-		" the best block in the main chain.\n" +
+		"When the endblock parameter is omitted, the rescan continues through the best block in the main chain.\n" +
 		"Rescan results are sent as recvtx and redeemingtx notifications.\n" +
 		"This call returns once the rescan completes.",
 	"rescan-beginblock": "Hash of the first block to begin rescanning",
 	"rescan-addresses":  "List of addresses to include in the rescan",
-	"rescan-outpoints": "List of transaction outpoints to include in" +
-		" the rescan",
-	"rescan-endblock": "Hash of final block to rescan",
+	"rescan-outpoints":  "List of transaction outpoints to include in the rescan",
+	"rescan-endblock":   "Hash of final block to rescan",
+
 	// RescanBlocks help.
-	"rescanblocks--synopsis": "Rescan blocks for transactions matching" +
-		" the loaded transaction filter.",
-	"rescanblocks-blockhashes": "List of hashes to rescan.  Each next block" +
-		" must be a child of the previous.",
-	"rescanblocks--result0": "List of matching blocks.",
+	"rescanblocks--synopsis":   "Rescan blocks for transactions matching the loaded transaction filter.",
+	"rescanblocks-blockhashes": "List of hashes to rescan.  Each next block must be a child of the previous.",
+	"rescanblocks--result0":    "List of matching blocks.",
+
 	// RescannedBlock help.
-	"rescannedblock-hash": "Hash of the matching block.",
-	"rescannedblock-transactions": "List of matching transactions, serialized" +
-		" and hex-encoded.",
+	"rescannedblock-hash":         "Hash of the matching block.",
+	"rescannedblock-transactions": "List of matching transactions, serialized and hex-encoded.",
+
 	// Uptime help.
 	"uptime--synopsis": "Returns the total uptime of the server.",
 	"uptime--result0":  "The number of seconds that the server has been running",
+
 	// Version help.
 	"version--synopsis":       "Returns the JSON-RPC API version (semver)",
 	"version--result0--desc":  "Version objects keyed by the program or API name",
 	"version--result0--key":   "Program or API name",
 	"version--result0--value": "Object containing the semantic version",
+
 	// VersionResult help.
 	"versionresult-versionstring": "The JSON-RPC API version (semver)",
-	"versionresult-major": "The major component of the JSON-RPC" +
-		" API version",
-	"versionresult-minor": "The minor component of the JSON-RPC" +
-		" API version",
-	"versionresult-patch": "The patch component of the JSON-RPC" +
-		" API version",
+	"versionresult-major":         "The major component of the JSON-RPC API version",
+	"versionresult-minor":         "The minor component of the JSON-RPC API version",
+	"versionresult-patch":         "The patch component of the JSON-RPC API version",
 	"versionresult-prerelease":    "Prerelease info about the current build",
 	"versionresult-buildmetadata": "Metadata about the current build",
 }
@@ -799,12 +747,12 @@ var ResultTypes = map[string][]interface{}{
 	"restart":               {(*string)(nil)},
 	"resetchain":            {(*string)(nil)},
 	// "dropwallethistory":     {(*string)(nil)},
-	"submitblock":     {nil, (*string)(nil)},
-	"uptime":          {(*int64)(nil)},
-	"validateaddress": {(*btcjson.ValidateAddressChainResult)(nil)},
-	"verifychain":     {(*bool)(nil)},
-	"verifymessage":   {(*bool)(nil)},
-	"version":         {(*map[string]btcjson.VersionResult)(nil)},
+	"submitblock":           {nil, (*string)(nil)},
+	"uptime":                {(*int64)(nil)},
+	"validateaddress":       {(*btcjson.ValidateAddressChainResult)(nil)},
+	"verifychain":           {(*bool)(nil)},
+	"verifymessage":         {(*bool)(nil)},
+	"version":               {(*map[string]btcjson.VersionResult)(nil)},
 	// Websocket commands.
 	"loadtxfilter":              nil,
 	"session":                   {(*btcjson.SessionResult)(nil)},
