@@ -2,6 +2,7 @@ package pod
 
 import (
 	"reflect"
+	"sort"
 	"sync"
 	"time"
 
@@ -11,8 +12,8 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/chain/fork"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 const AppName = "pod"
@@ -26,6 +27,7 @@ type Group struct {
 	Legend string `json:"legend"`
 	Fields `json:"fields"`
 }
+
 type Fields []Field
 
 type Field struct {
@@ -86,14 +88,21 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 	}
 	spew.Dump(groups)
 	var outGroups Groups
-	for fg, f := range rawFields {
+	var rf []string
+	for i := range rawFields {
+		rf = append(rf, i)
+	}
+	sort.Strings(rf)
+	// for i := range rf {
+	// 	rf[i], rf[len(rf)-1-i] = rf[len(rf)-1-i], rf[i]
+	// }
+	for i := range rf {
 		group := Group{
-			Legend: fg,
-			Fields: f,
+			Legend: rf[i],
+			Fields: rawFields[rf[i]],
 		}
 		outGroups = append(outGroups, group)
 	}
-
 	return Schema{
 		Groups: outGroups,
 	}

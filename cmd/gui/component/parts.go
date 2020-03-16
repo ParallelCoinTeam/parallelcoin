@@ -1,16 +1,18 @@
 package component
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	"image"
-	"image/color"
 )
 
 func SetPage(rc *rcd.RcVar, page *gelook.DuoUIpage) {
@@ -38,15 +40,21 @@ func fill(gtx *layout.Context, col color.RGBA) {
 }
 func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
 			cs := gtx.Constraints
-			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32, "ffcf8030", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32,
+				th.Colors["Gray"],
+				[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 30, "fff4f4f4", [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32,
+					th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0,
+						0, 0})
 				e := th.DuoUIeditor(label)
-				e.Font.Typeface = th.Fonts["Primary"]
-				e.Font.Style = text.Italic
-				e.Layout(gtx, editorControler)
+				e.Font.Typeface = th.Fonts["Mono"]
+				// e.Font.Style = text.Italic
+				layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
+					e.Layout(gtx, editorControler)
+				})
 				for _, e := range editorControler.Events(gtx) {
 					switch e.(type) {
 					case gel.ChangeEvent:

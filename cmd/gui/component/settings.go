@@ -41,7 +41,9 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 					color = th.Colors["Light"]
 					bgColor = th.Colors["Dark"]
 				}
-				th.DuoUIbutton(th.Fonts["Primary"], txt, color, bgColor, "", "", "", "", 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
+				th.DuoUIbutton(th.Fonts["Primary"],
+					txt, color, bgColor, "", "", "", "",
+					16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
 			})
 		})
 	}
@@ -60,9 +62,11 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 			case "input":
 				switch f.Field.InputType {
 				case "text":
-					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
+						(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
 						func(e gel.EditorEvent) {
 							rc.Settings.Daemon.Config[f.Field.Model] = (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text()
+							rc.SaveDaemonCfg()
 						})()
 				case "number":
 					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
@@ -71,6 +75,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 							if err == nil {
 							}
 							rc.Settings.Daemon.Config[f.Field.Model] = number
+							rc.SaveDaemonCfg()
 						})()
 				case "decimal":
 					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
@@ -79,6 +84,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 							if err != nil {
 							}
 							rc.Settings.Daemon.Config[f.Field.Model] = decimal
+							rc.SaveDaemonCfg()
 						})()
 				case "password":
 					e := th.DuoUIeditor(f.Field.Label)
@@ -94,6 +100,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				} else {
 					rc.Settings.Daemon.Config[f.Field.Model] = false
 				}
+				rc.SaveDaemonCfg()
 			case "radio":
 				//radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 				//layout.Flex{}.Layout(gtx,

@@ -19,8 +19,10 @@ type DuoUItheme struct {
 	scrollBarSize int
 }
 
-func NewDuoUItheme() *DuoUItheme {
+func init() {
 	fonts.Register()
+}
+func NewDuoUItheme() *DuoUItheme {
 	t := &DuoUItheme{
 		Shaper: font.Default(),
 	}
