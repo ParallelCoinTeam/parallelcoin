@@ -63,7 +63,8 @@ func QrDialog(rc *rcd.RcVar, gtx *layout.Context, address string) func() {
 		rc.Dialog = &model.DuoUIdialog{
 			Show:        true,
 			CustomField: DuoUIqrCode(gtx, address, 256),
-			Close:       func() { rc.Dialog.Show = false },
+			Orange:      func() { rc.Dialog.Show = false },
+			OrangeLabel: "CLOSE",
 			Title:       "ParallelCoin address",
 			Text:        address,
 		}

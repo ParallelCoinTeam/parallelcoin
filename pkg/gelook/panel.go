@@ -20,7 +20,7 @@ func (it *item) doSlide(n int) {
 type DuoUIpanel struct {
 	Name        string
 	panelObject []func()
-	scrollBar   *ScrollBar
+	scrollBar   ScrollBar
 }
 
 func (t *DuoUItheme) DuoUIpanel(content func()) *DuoUIpanel {

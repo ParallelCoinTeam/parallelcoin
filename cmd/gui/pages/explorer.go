@@ -31,18 +31,20 @@ func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 
 func explorerContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-				layout.Rigid(func() {
-					blockRowCellLabels(rc, gtx, th)
-				}),
-				layout.Flexed(1, func() {
-					blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
-						b := rc.Explorer.Blocks[i]
-						blockRow(rc, gtx, th, &b)
-					})
-				}),
-			)
+		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+			th.DuoUIitem(0, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
+				layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+					layout.Rigid(func() {
+						blockRowCellLabels(rc, gtx, th)
+					}),
+					layout.Flexed(1, func() {
+						blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
+							b := rc.Explorer.Blocks[i]
+							blockRow(rc, gtx, th, &b)
+						})
+					}),
+				)
+			})
 		})
 	}
 }
@@ -65,8 +67,8 @@ func explorerHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) f
 }
 
 func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
-	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-		component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
+	layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+		//component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
 		}.Layout(gtx,
@@ -118,7 +120,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 }
 
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *model.DuoUIblock) {
-	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
+	layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 		gelook.DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, gtx.Constraints.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 		component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
 		layout.Flex{

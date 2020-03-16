@@ -35,7 +35,7 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 				for rc.Settings.Tabs.TabsList[txt].Clicked(gtx) {
 					rc.Settings.Tabs.Current = txt
 				}
-				th.DuoUIbutton(th.Fonts["Primary"], txt, th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Dark"], 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
+				th.DuoUIbutton(th.Fonts["Primary"], txt, th.Colors["Dark"], th.Colors["Light"], th.Colors["Light"], th.Colors["Dark"], "", th.Colors["Light"], 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
 			})
 		})
 	}
@@ -82,7 +82,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				default:
 				}
 			case "switch":
-				th.DuoUIcheckBox(f.Field.Label, th.Colors["Dark"], th.Colors["Dark"]).Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox))
+				th.DuoUIcheckBox(f.Field.Label, th.Colors["Light"], th.Colors["Light"]).Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox))
 				if (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox).Checked(gtx) {
 					rc.Settings.Daemon.Config[f.Field.Model] = true
 				} else {
@@ -124,7 +124,7 @@ func SettingsFieldLabel(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) fu
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			name := th.H6(fmt.Sprint(f.Field.Label))
-			name.Color = th.Colors["Dark"]
+			name.Color = th.Colors["Light"]
 			name.Font.Typeface = th.Fonts["Primary"]
 			name.Layout(gtx)
 		})
@@ -136,7 +136,7 @@ func SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Fie
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			desc := th.Body2(fmt.Sprint(f.Field.Description))
 			desc.Font.Typeface = th.Fonts["Primary"]
-			desc.Color = th.Colors["Dark"]
+			desc.Color = th.Colors["Light"]
 			desc.Layout(gtx)
 		})
 	}

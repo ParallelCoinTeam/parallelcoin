@@ -6,6 +6,7 @@ import (
 	"gioui.org/font"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/fonts"
 )
 
 type DuoUItheme struct {
@@ -18,6 +19,7 @@ type DuoUItheme struct {
 }
 
 func NewDuoUItheme() *DuoUItheme {
+	fonts.Register()
 	t := &DuoUItheme{
 		Shaper: font.Default(),
 	}
