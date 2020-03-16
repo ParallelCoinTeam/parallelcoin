@@ -18,7 +18,7 @@ var (
 )
 
 func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("SETTINGS", 0, func() {}, component.ContentHeader(gtx, th, settingsHeader(rc, gtx, th)), settingsBody(rc, gtx, th), func() {
+	return th.DuoUIpage("SETTINGS", 0, func() {}, component.ContentHeader(gtx, th, SettingsHeader(rc, gtx, th)), SettingsBody(rc, gtx, th), func() {
 		//var msg string
 		//if rc.Settings.Daemon.Config["DisableBanning"].(*bool) != true{
 		//	msg = "ima"
@@ -31,7 +31,7 @@ func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook
 	})
 }
 
-func settingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(gtx,
 			layout.Rigid(component.SettingsTabs(rc, gtx, th)),
@@ -47,7 +47,7 @@ func settingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) f
 	}
 }
 
-func settingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 			th.DuoUIitem(16, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
@@ -61,8 +61,8 @@ func settingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 							layout.Flex{
 								Axis: layout.Vertical,
 							}.Layout(gtx,
-								layout.Rigid(settingsItemRow(rc, gtx, th, &tl)),
-								layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Light"])))
+								layout.Rigid(SettingsItemRow(rc, gtx, th, &tl)),
+								layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Dark"])))
 						})
 					}
 				}
@@ -71,7 +71,7 @@ func settingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 	}
 }
 
-func settingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *component.Field) func() {
+func SettingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *component.Field) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			//layout.Rigid(func() {

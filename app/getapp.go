@@ -42,6 +42,8 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				log.Println(c.App.Name, c.App.Version)
 				return nil
 			}, apputil.SubCommands(), nil, "v"),
+			apputil.NewCommand("monitor", "run monitor GUI",
+				monitorHandle(cx), apputil.SubCommands(), nil, "mon"),
 			apputil.NewCommand("ctl", "send RPC commands to a node or wallet and print the result", ctlHandle(cx), apputil.SubCommands(
 				apputil.NewCommand(
 					"listcommands",

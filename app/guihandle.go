@@ -5,12 +5,12 @@ package app
 import (
 	"github.com/urfave/cli"
 
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
