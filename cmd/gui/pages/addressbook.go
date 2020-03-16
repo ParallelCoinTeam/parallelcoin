@@ -36,7 +36,7 @@ func DuoUIaddressBook(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme)
 func addressBookBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-			th.DuoUIitem(0, th.Colors["Light"]).Layout(gtx, layout.N, func() {
+			th.DuoUIitem(0, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
 				layout.Flex{}.Layout(gtx,
 					layout.Flexed(1, func() {
 						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
