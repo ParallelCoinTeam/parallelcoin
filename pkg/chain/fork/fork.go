@@ -37,7 +37,7 @@ type HardForks struct {
 	TestnetStart       int32
 }
 
-const IntervalBase = 15
+const IntervalBase = 90
 
 func init() {
 	log.L.Trace("running fork data init")
