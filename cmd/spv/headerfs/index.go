@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"sort"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

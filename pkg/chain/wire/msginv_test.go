@@ -2,7 +2,7 @@ package wire
 
 import (
 	"bytes"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"io"
 	"reflect"
 	"testing"

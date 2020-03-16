@@ -3,7 +3,7 @@ package gel
 import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 type item struct {

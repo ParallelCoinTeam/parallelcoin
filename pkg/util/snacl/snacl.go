@@ -9,7 +9,7 @@ import (
 	"io"
 	"runtime/debug"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/btcsuite/golangcrypto/nacl/secretbox"
 	"github.com/btcsuite/golangcrypto/scrypt"

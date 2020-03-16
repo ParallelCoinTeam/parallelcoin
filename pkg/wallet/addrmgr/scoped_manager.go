@@ -2,7 +2,7 @@ package waddrmgr
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"sync"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"

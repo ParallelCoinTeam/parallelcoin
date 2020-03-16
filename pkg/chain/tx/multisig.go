@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"

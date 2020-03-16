@@ -1,4 +1,4 @@
-module github.com/p9c/logi
+module github.com/p9c/pod/pkg/logi
 
 go 1.13
 

@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"

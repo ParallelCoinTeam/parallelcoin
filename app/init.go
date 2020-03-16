@@ -7,7 +7,7 @@ import (
 	"github.com/urfave/cli"
 	
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 var initHandle = func(cx *conte.Xt) func(c *cli.Context) error {

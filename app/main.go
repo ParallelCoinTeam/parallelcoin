@@ -9,7 +9,7 @@ package app
 
 import (
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"os"
 )
 

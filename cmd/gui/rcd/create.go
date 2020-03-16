@@ -3,7 +3,7 @@ package rcd
 import (
 	"encoding/hex"
 	"github.com/p9c/pod/app/save"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet"
 	"time"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 const charset = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"

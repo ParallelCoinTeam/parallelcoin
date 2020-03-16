@@ -5,7 +5,7 @@ package app
 import (
 	"github.com/urfave/cli"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui"
 	"github.com/p9c/pod/cmd/gui/duoui"

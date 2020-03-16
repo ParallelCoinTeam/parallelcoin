@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 func DecryptMessage(creator string, ciph cipher.AEAD, data []byte) (msg []byte, err error) {

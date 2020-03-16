@@ -5,7 +5,7 @@ import (
 	"hash/crc32"
 
 	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 func // serializeWriteRow serialize the current block file and offset where

@@ -30,7 +30,7 @@ package rename
 import (
 	"syscall"
 	"unsafe"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 var (

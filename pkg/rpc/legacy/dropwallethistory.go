@@ -6,7 +6,7 @@ import (
 	"github.com/urfave/cli"
 	
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/wallet"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )

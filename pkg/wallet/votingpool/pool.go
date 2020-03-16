@@ -2,7 +2,7 @@ package votingpool
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"sort"
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"

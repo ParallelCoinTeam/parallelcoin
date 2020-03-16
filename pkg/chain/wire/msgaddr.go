@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 // MaxAddrPerMsg is the maximum number of addresses that can be in a single bitcoin addr message (MsgAddr).

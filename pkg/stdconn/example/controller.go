@@ -1,7 +1,7 @@
 package main
 
 import (
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/stdconn/example/hello/hello"
 	"github.com/p9c/pod/pkg/stdconn/worker"
 )

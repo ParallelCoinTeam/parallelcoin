@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/crypto/argon2"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 // GetCipher returns a GCM cipher given a password string. Note that this cipher

@@ -13,7 +13,7 @@ import (
 	"net"
 	"time"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/IPs"

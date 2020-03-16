@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"

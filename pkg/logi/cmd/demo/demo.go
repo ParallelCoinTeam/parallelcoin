@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/p9c/logi"
+	"github.com/p9c/pod/pkg/logi"
 )
 
 func main() {

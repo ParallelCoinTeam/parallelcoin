@@ -5,7 +5,7 @@ package headerfs
 import (
 	"fmt"
 	"os"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 // singleTruncate truncates a single header from the end of the header file.

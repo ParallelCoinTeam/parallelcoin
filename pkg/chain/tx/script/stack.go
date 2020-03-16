@@ -3,7 +3,7 @@ package txscript
 import (
 	"encoding/hex"
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"sync"
 )
 

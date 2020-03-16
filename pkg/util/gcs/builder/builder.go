@@ -3,7 +3,7 @@ package builder
 import (
 	"crypto/rand"
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"math"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

@@ -2,7 +2,7 @@ package mempool
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"time"
 
 	blockchain "github.com/p9c/pod/pkg/chain"

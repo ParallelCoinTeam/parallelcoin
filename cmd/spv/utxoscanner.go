@@ -7,7 +7,7 @@ import (
 	"time"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util"
 	am "github.com/p9c/pod/pkg/wallet/addrmgr"
 )

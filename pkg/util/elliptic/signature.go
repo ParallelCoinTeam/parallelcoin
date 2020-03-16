@@ -8,7 +8,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"hash"
 	"math/big"
 )

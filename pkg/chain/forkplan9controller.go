@@ -4,7 +4,7 @@ import (
 	"sort"
 
 	"github.com/p9c/pod/pkg/chain/fork"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 type Algo struct {

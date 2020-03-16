@@ -3,7 +3,7 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 type (

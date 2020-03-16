@@ -2,7 +2,7 @@ package rpcclient
 
 import (
 	js "encoding/json"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"strconv"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"

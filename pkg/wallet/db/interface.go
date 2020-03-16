@@ -3,7 +3,7 @@ package walletdb
 // This interface was inspired heavily by the excellent boltdb project at
 // https://github.com/boltdb/bolt by Ben B. Johnson.
 import (
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"io"
 )
 

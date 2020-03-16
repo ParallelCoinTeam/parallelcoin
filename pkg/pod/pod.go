@@ -11,7 +11,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/chain/fork"
 )
 

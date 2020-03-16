@@ -1,7 +1,7 @@
 package chaincfg
 
 import (
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"strings"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

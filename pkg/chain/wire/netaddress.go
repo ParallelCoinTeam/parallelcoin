@@ -2,7 +2,7 @@ package wire
 
 import (
 	"encoding/binary"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"io"
 	"net"
 	"time"

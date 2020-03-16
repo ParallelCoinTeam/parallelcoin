@@ -3,7 +3,7 @@ package main
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"io/ioutil"
 	"os"
 	"path/filepath"

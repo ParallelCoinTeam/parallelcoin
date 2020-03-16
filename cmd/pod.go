@@ -9,7 +9,7 @@ import (
 	"runtime/debug"
 	"runtime/trace"
 	
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	
 	"github.com/p9c/pod/app"

@@ -9,7 +9,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"errors"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"io"
 )
 

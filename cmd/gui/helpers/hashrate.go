@@ -5,7 +5,7 @@ import (
 	"time"
 	
 	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 // GetHashrate returns the exponential weighted moving average of the total hashrate and

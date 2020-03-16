@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 // HashSize of array used to store hashes.  See Hash.

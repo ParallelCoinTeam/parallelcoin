@@ -2,5 +2,5 @@
 
 > Logging subsystem with pretty print, code loc, channel and Writer outputs
 
-[![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/logi) 
-[![Go Report Card](https://goreportcard.com/badge/github.com/p9c/logi)](https://goreportcard.com/report/github.com/p9c/logi)
+[![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/p9c/pod/pkg/logi) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/p9c/pod/pkg/logi)](https://goreportcard.com/report/github.com/p9c/pod/pkg/logi)

@@ -8,7 +8,7 @@ import (
 	"net/rpc"
 	"time"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/wallet"
@@ -150,7 +150,7 @@ type (
 // or any of the above special error classes, the server will respond with
 // the JSON-RPC appropiate error code.  All other errors use the wallet
 // catch-all error code, json.ErrRPCWallet.
-type RequestHandler func(interface{}, *wallet.Wallet, 
+type RequestHandler func(interface{}, *wallet.Wallet,
 	...*chain.RPCClient) (interface{}, error)
 
 // RPCHandlers is all of the RPC calls available

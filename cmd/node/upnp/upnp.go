@@ -28,7 +28,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"net"
 	"net/http"
 	"os"

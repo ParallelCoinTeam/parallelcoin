@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )

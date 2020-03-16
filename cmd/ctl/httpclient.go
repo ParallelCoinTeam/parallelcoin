@@ -10,7 +10,7 @@ import (
 	"net"
 	"net/http"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/btcsuite/go-socks/socks"
 

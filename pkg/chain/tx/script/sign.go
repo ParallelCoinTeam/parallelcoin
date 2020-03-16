@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"

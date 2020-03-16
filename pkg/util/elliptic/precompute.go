@@ -4,7 +4,7 @@ import (
 	"compress/zlib"
 	"encoding/base64"
 	"encoding/binary"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"io/ioutil"
 	"strings"
 )

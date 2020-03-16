@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"sync"
 	"time"
 

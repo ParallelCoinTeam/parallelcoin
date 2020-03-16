@@ -7,7 +7,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/pod"
 )
 

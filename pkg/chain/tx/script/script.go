@@ -8,7 +8,7 @@ import (
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 // Bip16Activation is the timestamp where BIP0016 is valid to use in the

@@ -21,7 +21,7 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	u "github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/treap"
 )

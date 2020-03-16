@@ -2,7 +2,7 @@ package wire
 
 import (
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"io"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

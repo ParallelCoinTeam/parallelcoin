@@ -2,7 +2,7 @@ package util
 
 import (
 	"crypto/sha256"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"hash"
 
 	"golang.org/x/crypto/ripemd160"

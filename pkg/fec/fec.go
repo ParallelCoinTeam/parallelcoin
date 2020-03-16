@@ -4,7 +4,7 @@ package fec
 
 import (
 	"encoding/binary"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/vivint/infectious"
 )
 

@@ -5,7 +5,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/duoui"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 func WalletGUI(duo *model.DuoUI, rc *rcd.RcVar) (err error) {

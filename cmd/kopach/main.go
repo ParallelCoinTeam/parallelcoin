@@ -10,7 +10,7 @@ import (
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/cmd/kopach/client"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

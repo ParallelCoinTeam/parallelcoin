@@ -8,7 +8,7 @@ import (
 
 	"github.com/kardianos/osext"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 var (

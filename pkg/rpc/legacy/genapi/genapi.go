@@ -5,7 +5,7 @@ import (
 	"sort"
 	"text/template"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 type handler struct {
@@ -324,7 +324,7 @@ import (
 	"net/rpc"
 	"time"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/wallet"

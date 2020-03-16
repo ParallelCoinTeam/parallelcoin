@@ -18,7 +18,7 @@ import (
 	"github.com/btcsuite/websocket"
 	"golang.org/x/crypto/ripemd160"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"

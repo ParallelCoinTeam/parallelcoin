@@ -4,7 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"math/big"
 )
 

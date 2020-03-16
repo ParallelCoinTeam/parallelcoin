@@ -22,7 +22,7 @@ import (
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/btcsuite/websocket"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 

@@ -6,7 +6,7 @@ import (
 	
 	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"

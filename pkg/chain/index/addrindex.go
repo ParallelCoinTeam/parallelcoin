@@ -3,7 +3,7 @@ package indexers
 import (
 	"errors"
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"sync"
 
 	blockchain "github.com/p9c/pod/pkg/chain"

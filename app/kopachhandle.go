@@ -4,7 +4,7 @@ import (
 	"github.com/p9c/pod/cmd/kopach"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/urfave/cli"
 	"os"
 

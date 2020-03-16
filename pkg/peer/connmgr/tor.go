@@ -3,7 +3,7 @@ package connmgr
 import (
 	"encoding/binary"
 	"errors"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"net"
 )
 

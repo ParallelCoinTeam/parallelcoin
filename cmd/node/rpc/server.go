@@ -21,7 +21,7 @@ import (
 
 	uberatomic "go.uber.org/atomic"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/cmd/node/mempool"
 	"github.com/p9c/pod/cmd/node/state"

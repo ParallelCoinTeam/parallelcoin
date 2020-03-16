@@ -2,7 +2,7 @@ package fullblocktests
 
 import (
 	"encoding/hex"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"math/big"
 	"time"
 

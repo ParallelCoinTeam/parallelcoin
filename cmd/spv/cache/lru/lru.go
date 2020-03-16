@@ -3,7 +3,7 @@ package lru
 import (
 	"container/list"
 	"fmt"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"sync"
 
 	"github.com/p9c/pod/cmd/spv/cache"

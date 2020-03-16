@@ -3,7 +3,7 @@ package routeable
 import (
 	"net"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 // GetInterface returns the address and interface of multicast capable

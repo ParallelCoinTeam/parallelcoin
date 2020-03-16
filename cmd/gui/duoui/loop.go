@@ -6,7 +6,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/component"
 
 	"gioui.org/io/system"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"

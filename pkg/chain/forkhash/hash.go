@@ -6,7 +6,7 @@ import (
 	"github.com/bitbandi/go-x11"
 	
 	"github.com/p9c/pod/pkg/chain/fork"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	
 	skein "github.com/enceve/crypto/skein/skein256"
 	gost "github.com/programmer10110/gostreebog"

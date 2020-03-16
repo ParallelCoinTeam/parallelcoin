@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/pkg/kopachctrl"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/node/path"

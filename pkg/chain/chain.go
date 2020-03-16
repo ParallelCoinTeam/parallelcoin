@@ -9,7 +9,7 @@ import (
 	"go.uber.org/atomic"
 
 	"github.com/p9c/pod/pkg/chain/fork"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"

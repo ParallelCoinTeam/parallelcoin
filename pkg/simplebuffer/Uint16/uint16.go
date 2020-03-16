@@ -5,7 +5,7 @@ import (
 	"net"
 	"strconv"
 
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/simplebuffer"
 )

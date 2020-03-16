@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/minio/highwayhash"
-	log "github.com/p9c/logi"
+	log "github.com/p9c/pod/pkg/logi"
 	"hash"
 	"io"
 	"os"
