@@ -25,12 +25,6 @@ func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *g
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		rc.GetBlocksExcerpts()
-		explorerContent(rc, gtx, th)()
-	}
-}
-
-func explorerContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
-	return func() {
 		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 			th.DuoUIitem(0, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
 				layout.Flex{Axis: layout.Vertical}.Layout(gtx,

@@ -8,7 +8,6 @@ import (
 
 func LoadPages(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) (p map[string]*gelook.DuoUIpage) {
 	p = make(map[string]*gelook.DuoUIpage)
-
 	p["OVERVIEW"] = Overview(rc, gtx, th)
 	p["SEND"] = Send(rc, gtx, th)
 	p["RECEIVE"] = th.DuoUIpage("RECEIVE", 10, func() {}, func() {}, func() { th.H5("receive :").Layout(gtx) }, func() {})
