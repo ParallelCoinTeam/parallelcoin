@@ -29,13 +29,19 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 		groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
 		groupsList.Layout(gtx, groupsNumber, func(i int) {
 			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+				color := th.Colors["Dark"]
+				bgColor := th.Colors["Light"]
 				i = groupsNumber - 1 - i
 				t := rc.Settings.Daemon.Schema.Groups[i]
 				txt := fmt.Sprint(t.Legend)
 				for rc.Settings.Tabs.TabsList[txt].Clicked(gtx) {
 					rc.Settings.Tabs.Current = txt
 				}
-				th.DuoUIbutton(th.Fonts["Primary"], txt, th.Colors["Dark"], th.Colors["Light"], th.Colors["Light"], th.Colors["Dark"], "", th.Colors["Light"], 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
+				if rc.Settings.Tabs.Current == txt {
+					color = th.Colors["Light"]
+					bgColor = th.Colors["Dark"]
+				}
+				th.DuoUIbutton(th.Fonts["Primary"], txt, color, bgColor, "", "", "", "", 16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
 			})
 		})
 	}
