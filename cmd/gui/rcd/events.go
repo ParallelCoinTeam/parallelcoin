@@ -6,6 +6,7 @@ import (
 	"go.uber.org/atomic"
 
 	log "github.com/p9c/logi"
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 )
 
@@ -53,8 +54,11 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 				if !ready.Load() {
 					if r.cx.IsCurrent() {
 						ready.Store(true)
-						r.cx.WalletServer.Rescan(nil, nil)
-						r.UpdateTrigger <- struct{}{}
+						// 		go func() {
+						// 			r.cx.WalletServer.Rescan(nil, nil)
+						// 			r.Ready <- struct{}{}
+						// 			r.UpdateTrigger <- struct{}{}
+						// 		}()
 					}
 				}
 				r.GetDuoUIconnectionCount()

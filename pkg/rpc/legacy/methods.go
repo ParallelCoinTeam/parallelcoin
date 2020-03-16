@@ -1268,7 +1268,7 @@ var HelpDescsMutex sync.Mutex // Help may execute concurrently, so synchronize a
 // include help messages for methods implemented by the consensus server via RPC
 // passthrough.
 func HelpWithChainRPC(icmd interface{}, w *wallet.Wallet,
-chainClient ...*chain.RPCClient) (interface{}, error) {
+	chainClient ...*chain.RPCClient) (interface{}, error) {
 	return Help(icmd, w, chainClient[0])
 }
 
@@ -1603,7 +1603,7 @@ func ListTransactions(icmd interface{}, w *wallet.Wallet,
 		}
 	}
 	cmd, ok := icmd.(*btcjson.ListTransactionsCmd)
-	if !ok {
+	if !ok || cmd.From == nil || cmd.Count == nil || cmd.Account != nil {
 		return nil, &btcjson.RPCError{
 			Code:    btcjson.ErrRPCInvalidParameter,
 			Message: HelpDescsEnUS()["listtransactions"],
@@ -1613,7 +1613,7 @@ func ListTransactions(icmd interface{}, w *wallet.Wallet,
 	// TODO: ListTransactions does not currently understand the difference
 	//  between transactions pertaining to one account from another.  This
 	//  will be resolved when wtxmgr is combined with the waddrmgr namespace.
-	if cmd.Account != nil && *cmd.Account != "*" {
+	if *cmd.Account != "*" {
 		// For now, don't bother trying to continue if the user
 		// specified an account, since this can't be (easily or
 		// efficiently) calculated.

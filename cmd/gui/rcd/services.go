@@ -17,12 +17,17 @@ func (r *RcVar) StartServices() (err error) {
 	if err != nil {
 		log.L.Error(err)
 	}
-	
+	r.cx.RPCServer = <-r.cx.NodeChan
+	r.cx.Node.Store(true)
+
 	// Start wallet
 	err = r.DuoWalletService()
 	if err != nil {
 		log.L.Error(err)
 	}
+	r.cx.WalletServer = <-r.cx.WalletChan
+	r.cx.Wallet.Store(true)
+	r.cx.WalletServer.Rescan(nil, nil)
 	r.Ready <- struct{}{}
 	return
 }
@@ -41,8 +46,6 @@ func (r *RcVar) DuoWalletService() error {
 				os.Exit(1)
 			}
 		}()
-		r.cx.WalletServer = <-r.cx.WalletChan
-		r.cx.Wallet.Store(true)
 	}
 	interrupt.AddHandler(func() {
 		log.L.Warn("interrupt received, " +
@@ -66,8 +69,6 @@ func (r *RcVar) DuoNodeService() error {
 				os.Exit(1)
 			}
 		}()
-		r.cx.RPCServer = <-r.cx.NodeChan
-		r.cx.Node.Store(true)
 	}
 	interrupt.AddHandler(func() {
 		log.L.Warn("interrupt received, " +

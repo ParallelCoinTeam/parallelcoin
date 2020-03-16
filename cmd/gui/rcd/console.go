@@ -1,6 +1,7 @@
 package rcd
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -54,16 +55,16 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 			if help, err := r.cx.RPCServer.HelpCacher.RPCMethodHelp(
 				method); log.L.Check(err) {
 				o += err.Error() + "\n"
+				o += fmt.Sprintln(res)
+				cmd = &btcjson.HelpCmd{Command: &method}
+				if res, err = legacy.RPCHandlers["help"].
+					Handler(cmd, r.cx.WalletServer, r.cx.ChainClient); log.L.Check(err) {
+					errString += fmt.Sprintln(err)
+				}
+				o += fmt.Sprintln(res)
 			} else {
 				o += help
 			}
-			// o += fmt.Sprintln(res)
-			cmd = &btcjson.HelpCmd{Command: &method}
-			if res, err = legacy.RPCHandlers["help"].
-				Handler(cmd, r.cx.WalletServer, r.cx.ChainClient); log.L.Check(err) {
-				errString += fmt.Sprintln(err)
-			}
-			// o += fmt.Sprintln(res)
 			// if _, ok := legacy.RPCHandlers[method]; ok {
 			// 	o += "wallet server:\n"
 			// 	o += legacy.HelpDescsEnUS()[method]
@@ -79,23 +80,29 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 	for _, arg := range args {
 		params = append(params, arg)
 	}
-	cmd, err = btcjson.NewCmd(method, params...)
-	if err != nil {
-		o = fmt.Sprint(err)
+	if cmd, err = btcjson.NewCmd(method, params...); log.L.Check(err) {
+		o += fmt.Sprintln(err)
 	}
 	if x, ok := rpc.RPCHandlers[method]; !ok {
 		if x, ok := legacy.RPCHandlers[method]; ok {
-			_ = x
-			res, err = x.Handler(cmd, r.cx.WalletServer, r.cx.ChainClient)
+			if res, err = x.Handler(cmd, r.cx.WalletServer,
+				r.cx.ChainClient); log.L.Check(err) {
+				o += err.Error()
+			}
+			// o += fmt.Sprintln(res)
 		}
 	} else {
 		if res, err = x.Fn(r.cx.RPCServer, cmd, nil); log.L.Check(err) {
+			o += err.Error()
 		}
-		if err != nil {
-			return err.Error()
+		// o += fmt.Sprintln(res)
+	}
+	if res != nil {
+		if j, err := json.MarshalIndent(res, "",
+			"  "); !log.L.Check(err) {
+			o += string(j)
 		}
 	}
-	return fmt.Sprint(res)
-
 	return
+
 }

@@ -227,7 +227,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			SingleTx: btcjson.GetTransactionDetailsResult{},
 		},
 		Quit:  make(chan struct{}),
-		Ready: make(chan struct{}, 1),
+		Ready: make(chan struct{}),
 	}
 	r.db.DuoUIdbInit(r.cx.DataDir)
 	return

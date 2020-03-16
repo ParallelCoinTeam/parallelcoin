@@ -35,7 +35,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					}
 				}
 			}()
-			ui.rc.ListenInit(updateTrigger)
+			go ui.rc.ListenInit(updateTrigger)
 			ui.rc.IsReady = true
 			r.Boot.IsBoot = false
 		case <-ui.rc.Quit:
@@ -81,8 +81,8 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					}
 					e.Frame(ui.ly.Context.Ops)
 				}
+				ui.ly.Window.Invalidate()
 			}
-			ui.ly.Window.Invalidate()
 		}
 	}
 }
