@@ -31,7 +31,7 @@ type ScrollBarBody struct {
 }
 
 func (s *ScrollBar) Layout(gtx *layout.Context) {
-	s.BodyHeight = gtx.Constraints.Height.Max
+	//s.BodyHeight = gtx.Constraints.Height.Max
 
 	//// Flush clicks from before the previous frame.
 	//b.clicks -= b.prevClicks

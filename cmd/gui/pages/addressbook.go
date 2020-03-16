@@ -35,17 +35,20 @@ func DuoUIaddressBook(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme)
 
 func addressBookBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		layout.Flex{}.Layout(gtx,
-			layout.Flexed(1, func() {
-				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-					layout.Flex{
-						Axis:    layout.Vertical,
-						Spacing: layout.SpaceAround,
-					}.Layout(gtx,
-						layout.Flexed(1, addressBookContent(rc, gtx, th)))
-				})
-			}),
-		)
+		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+			th.DuoUIitem(0, th.Colors["Light"]).Layout(gtx, layout.N, func() {
+				layout.Flex{}.Layout(gtx,
+					layout.Flexed(1, func() {
+						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+							layout.Flex{
+								Axis:    layout.Vertical,
+								Spacing: layout.SpaceAround,
+							}.Layout(gtx,
+								layout.Flexed(1, addressBookContent(rc, gtx, th)))
+						})
+					}))
+			})
+		})
 	}
 }
 
@@ -73,7 +76,7 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 				rc.Dialog.Show = true
 				rc.Dialog = &model.DuoUIdialog{
 					Show: true,
-					Close: func() {
+					Orange: func() {
 						rc.Dialog.Show = false
 					},
 					CustomField: component.DuoUIqrCode(gtx, address, 256),
@@ -87,6 +90,7 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 
 func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
+		//th.DuoUIpanel(func() {
 		addressBookList.Layout(gtx, len(rc.AddressBook.Addresses), func(i int) {
 			t := rc.AddressBook.Addresses[i]
 			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -105,5 +109,6 @@ func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 				layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Hint"])),
 			)
 		})
+		//}).Layout(gtx, addressBookPanel)
 	}
 }

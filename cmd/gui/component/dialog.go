@@ -37,6 +37,9 @@ func DuoUIdialog(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
 				pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
 			}),
 			layout.Stacked(func() {
+				if gtx.Constraints.Width.Max > 500 {
+					gtx.Constraints.Width.Max = 500
+				}
 				layout.Center.Layout(gtx, func() {
 					layout.Inset{Top: unit.Dp(16), Bottom: unit.Dp(16), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(gtx, func() {
 						layout.Flex{
@@ -69,9 +72,9 @@ func DuoUIdialog(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
 									Axis:      layout.Horizontal,
 									Alignment: layout.Middle,
 								}.Layout(gtx,
-									layout.Rigid(dialogButon(gtx, th, rc.Dialog.Cancel, "CANCEL", "ffcf3030", "iconCancel", "ffcf8080", buttonDialogCancel)),
-									layout.Rigid(dialogButon(gtx, th, rc.Dialog.Ok, "QUIT", "ff30cf30", "iconOK", "ff80cf80", buttonDialogOK)),
-									layout.Rigid(dialogButon(gtx, th, rc.Dialog.Close, "RESTART", "ffcf8030", "iconClose", "ffcfa880", buttonDialogClose)),
+									layout.Rigid(dialogButon(gtx, th, rc.Dialog.Red, rc.Dialog.RedLabel, "ffcf3030", "iconCancel", "ffcf8080", buttonDialogCancel)),
+									layout.Rigid(dialogButon(gtx, th, rc.Dialog.Green, rc.Dialog.GreenLabel, "ff30cf30", "iconOK", "ff80cf80", buttonDialogOK)),
+									layout.Rigid(dialogButon(gtx, th, rc.Dialog.Orange, rc.Dialog.OrangeLabel, "ffcf8030", "iconClose", "ffcfa880", buttonDialogClose)),
 								)
 							}),
 						)

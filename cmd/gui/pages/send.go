@@ -87,11 +87,9 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 									log.L.Info("amount:" + fmt.Sprint(sendStruct.amount))
 									rc.Dialog.Show = true
 									rc.Dialog = &model.DuoUIdialog{
-										Show: true,
-										Ok:   rc.DuoSend(sendStruct.passPharse, sendStruct.address, 11),
-										Close: func() {
-
-										},
+										Show:       true,
+										Green:      rc.DuoSend(sendStruct.passPharse, sendStruct.address, 11),
+										GreenLabel: "SEND",
 										CustomField: func() {
 											layout.Flex{}.Layout(gtx,
 												layout.Flexed(1, component.Editor(gtx, th, passLineEditor, "Enter your password",
@@ -99,9 +97,10 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 														sendStruct.passPharse = passLineEditor.Text()
 													})))
 										},
-										Cancel: func() { rc.Dialog.Show = false },
-										Title:  "Are you sure?",
-										Text:   "Confirm ParallelCoin send",
+										Red:      func() { rc.Dialog.Show = false },
+										RedLabel: "CANCEL",
+										Title:    "Are you sure?",
+										Text:     "Confirm ParallelCoin send",
 									}
 								})))
 					},

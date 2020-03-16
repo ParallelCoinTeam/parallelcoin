@@ -12,7 +12,6 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/pkg/fonts"
 )
 
 var clipboardStarted bool
@@ -31,7 +30,6 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 			app.Title("ParallelCoin"),
 		),
 	}
-	fonts.Register()
 	duo.Context = layout.NewContext(duo.Window.Queue())
 
 	//rc.StartLogger()
