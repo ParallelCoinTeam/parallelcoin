@@ -26,7 +26,18 @@ var (
 )
 
 func History(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("HISTORY", 0, rc.GetDuoUItransactions(), component.ContentHeader(gtx, th, historyHeader(rc, gtx, th)), historyBody(rc, gtx, th), func() {})
+	page := gelook.DuoUIpage{
+		Title:         "HISTORY",
+		Command:       rc.GetDuoUItransactions(),
+		Border:        4,
+		Header:        historyHeader(rc, gtx, th),
+		HeaderPadding: 4,
+		Body:          historyBody(rc, gtx, th),
+		BodyPadding:   0,
+		Footer:        func() {},
+		FooterPadding: 0,
+	}
+	return th.DuoUIpage(page)
 }
 
 func historyHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {

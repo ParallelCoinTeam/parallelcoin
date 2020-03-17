@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	navButtonOverview    = new(gel.Button)
-	navButtonSend        = new(gel.Button)
-	navButtonReceive     = new(gel.Button)
+	navButtonOverview = new(gel.Button)
+	navButtonSend     = new(gel.Button)
+	//navButtonReceive     = new(gel.Button)
 	navButtonAddressBook = new(gel.Button)
 	navButtonHistory     = new(gel.Button)
 	mainNav              = &layout.List{

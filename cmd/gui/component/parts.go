@@ -92,7 +92,7 @@ func Button(gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Bu
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var button gelook.DuoUIbutton
-			button = th.DuoUIbutton(font, label, color, bgColor, "", "", "", th.Colors["Light"], textSize, 0, 128, 48, 0, 0)
+			button = th.DuoUIbutton(font, label, color, bgColor, "", "", "", "", textSize, 0, 128, 48, 0, 0)
 			for buttonController.Clicked(gtx) {
 				handler()
 			}

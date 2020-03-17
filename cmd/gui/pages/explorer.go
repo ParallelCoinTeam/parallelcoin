@@ -20,11 +20,45 @@ var (
 )
 
 func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("EXPLORER", 0, rc.GetBlocksExcerpts(), component.ContentHeader(gtx, th, explorerHeader(rc, gtx, th)), bodyExplorer(rc, gtx, th), func() {})
+	page := gelook.DuoUIpage{
+		Title:         "EXPLORER",
+		TxColor:       "",
+		Command:       rc.GetBlocksExcerpts(),
+		Border:        4,
+		Header:        explorerHeader(rc, gtx, th),
+		HeaderBgColor: "",
+		HeaderPadding: 4,
+		Body:          bodyExplorer(rc, gtx, th),
+		BodyBgColor:   "",
+		BodyPadding:   4,
+		Footer:        func() {},
+		FooterBgColor: "",
+		FooterPadding: 0,
+	}
+	return th.DuoUIpage(page)
 }
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		rc.GetBlocksExcerpts()
+		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+			th.DuoUIitem(0, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
+				layout.Flex{}.Layout(gtx,
+					layout.Flexed(1, func() {
+						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+							layout.Flex{
+								Axis:    layout.Vertical,
+								Spacing: layout.SpaceAround,
+							}.Layout(gtx,
+								layout.Flexed(1, explorerContent(rc, gtx, th)))
+						})
+					}))
+			})
+		})
+	}
+}
+
+func explorerContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+	return func() {
 		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 			th.DuoUIitem(0, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
 				layout.Flex{Axis: layout.Vertical}.Layout(gtx,

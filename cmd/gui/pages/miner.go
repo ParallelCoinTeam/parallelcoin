@@ -8,7 +8,22 @@ import (
 )
 
 func Miner(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("MINER", 0, func() {}, func() {}, DuoUIminer(rc, gtx, th), func() {})
+	page := gelook.DuoUIpage{
+		Title:         "MINER",
+		TxColor:       "",
+		Command:       func() {},
+		Border:        4,
+		Header:        func() {},
+		HeaderBgColor: "",
+		HeaderPadding: 0,
+		Body:          DuoUIminer(rc, gtx, th),
+		BodyBgColor:   "",
+		BodyPadding:   0,
+		Footer:        func() {},
+		FooterBgColor: "",
+		FooterPadding: 0,
+	}
+	return th.DuoUIpage(page)
 }
 
 func DuoUIminer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {

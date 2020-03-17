@@ -19,5 +19,15 @@ var (
 var StartupTime = time.Now()
 
 func Logger(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("LOG", 0, func() {}, func() {}, component.DuoUIlogger(rc, gtx, th), func() {})
+	page := gelook.DuoUIpage{
+		Title:         "LOG",
+		Command:       func() {},
+		Border:        4,
+		Header:        func() {},
+		HeaderBgColor: "",
+		Body:          component.DuoUIlogger(rc, gtx, th),
+		Footer:        func() {},
+		FooterBgColor: "",
+	}
+	return th.DuoUIpage(page)
 }

@@ -26,7 +26,22 @@ var (
 )
 
 func Network(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("NETWORK", 0, rc.GetPeerInfo(), component.ContentHeader(gtx, th, networkHeader(rc, gtx, th)), networkBody(rc, gtx, th), func() {})
+	page := gelook.DuoUIpage{
+		Title:         "NETWORK",
+		TxColor:       "",
+		Command:       rc.GetPeerInfo(),
+		Border:        4,
+		Header:        networkHeader(rc, gtx, th),
+		HeaderBgColor: "",
+		HeaderPadding: 0,
+		Body:          networkBody(rc, gtx, th),
+		BodyBgColor:   "",
+		BodyPadding:   0,
+		Footer:        func() {},
+		FooterBgColor: "",
+		FooterPadding: 0,
+	}
+	return th.DuoUIpage(page)
 }
 
 func networkHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {

@@ -1,9 +1,7 @@
 package component
 
 import (
-	"gioui.org/f32"
 	"gioui.org/layout"
-	"gioui.org/op/clip"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -15,28 +13,28 @@ var (
 	buttonHeader = new(gel.Button)
 )
 
-func ContentHeader(gtx *layout.Context, th *gelook.DuoUItheme, b func()) func() {
-	return func() {
-		hmin := gtx.Constraints.Width.Min
-		vmin := gtx.Constraints.Height.Min
-		layout.Stack{Alignment: layout.Center}.Layout(gtx,
-			layout.Expanded(func() {
-				clip.Rect{
-					Rect: f32.Rectangle{Max: f32.Point{
-						X: float32(gtx.Constraints.Width.Min),
-						Y: float32(gtx.Constraints.Height.Min),
-					}},
-				}.Op(gtx.Ops).Add(gtx.Ops)
-				fill(gtx, gelook.HexARGB(th.Colors["Primary"]))
-			}),
-			layout.Stacked(func() {
-				gtx.Constraints.Width.Min = hmin
-				gtx.Constraints.Height.Min = vmin
-				layout.UniformInset(unit.Dp(0)).Layout(gtx, b)
-			}),
-		)
-	}
-}
+//func ContentHeader(gtx *layout.Context, th *gelook.DuoUItheme, b func()) func() {
+//	return func() {
+//		hmin := gtx.Constraints.Width.Min
+//		vmin := gtx.Constraints.Height.Min
+//		layout.Stack{Alignment: layout.Center}.Layout(gtx,
+//			layout.Expanded(func() {
+//				clip.Rect{
+//					Rect: f32.Rectangle{Max: f32.Point{
+//						X: float32(gtx.Constraints.Width.Min),
+//						Y: float32(gtx.Constraints.Height.Min),
+//					}},
+//				}.Op(gtx.Ops).Add(gtx.Ops)
+//				fill(gtx, gelook.HexARGB(th.Colors["Primary"]))
+//			}),
+//			layout.Stacked(func() {
+//				gtx.Constraints.Width.Min = hmin
+//				gtx.Constraints.Height.Min = vmin
+//				layout.UniformInset(unit.Dp(0)).Layout(gtx, b)
+//			}),
+//		)
+//	}
+//}
 
 func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {

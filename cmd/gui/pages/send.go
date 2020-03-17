@@ -41,7 +41,22 @@ type send struct {
 }
 
 func Send(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("SEND", 10, func() {}, func() {}, sendBody(rc, gtx, th), func() {})
+	page := gelook.DuoUIpage{
+		Title:         "SEND",
+		TxColor:       "",
+		Command:       func() {},
+		Border:        4,
+		Header:        func() {},
+		HeaderBgColor: "",
+		HeaderPadding: 0,
+		Body:          sendBody(rc, gtx, th),
+		BodyBgColor:   "",
+		BodyPadding:   0,
+		Footer:        func() {},
+		FooterBgColor: "",
+		FooterPadding: 0,
+	}
+	return th.DuoUIpage(page)
 }
 
 func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
