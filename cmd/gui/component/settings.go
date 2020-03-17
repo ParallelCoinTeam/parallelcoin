@@ -31,8 +31,8 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 		groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
 		groupsList.Layout(gtx, groupsNumber, func(i int) {
 			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-				color := th.Colors["Dark"]
-				bgColor := th.Colors["Primary"]
+				color := th.Colors["Light"]
+				bgColor := th.Colors["Dark"]
 				i = groupsNumber - 1 - i
 				t := rc.Settings.Daemon.Schema.Groups[i]
 				txt := fmt.Sprint(t.Legend)
@@ -40,8 +40,8 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 					rc.Settings.Tabs.Current = txt
 				}
 				if rc.Settings.Tabs.Current == txt {
-					color = th.Colors["Light"]
-					bgColor = th.Colors["Dark"]
+					color = th.Colors["Dark"]
+					bgColor = th.Colors["Light"]
 				}
 				th.DuoUIbutton(th.Fonts["Primary"],
 					txt, color, bgColor, "", "", "", "",

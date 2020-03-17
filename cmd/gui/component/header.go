@@ -32,7 +32,7 @@ func ContentHeader(gtx *layout.Context, th *gelook.DuoUItheme, b func()) func() 
 			layout.Stacked(func() {
 				gtx.Constraints.Width.Min = hmin
 				gtx.Constraints.Height.Min = vmin
-				layout.UniformInset(unit.Dp(8)).Layout(gtx, b)
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, b)
 			}),
 		)
 	}

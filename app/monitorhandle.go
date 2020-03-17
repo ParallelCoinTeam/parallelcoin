@@ -27,6 +27,17 @@ var (
 	settingsFoldButton        = new(gel.Button)
 	runmodeFoldButton         = new(gel.Button)
 	settingsOpen, runmodeOpen bool
+	modesList                 = &layout.List{
+		Axis:      layout.Horizontal,
+		Alignment: layout.Start,
+	}
+	modesButtons = map[string]*gel.Button{
+		"node":   new(gel.Button),
+		"wallet": new(gel.Button),
+		"shell":  new(gel.Button),
+		"gui":    new(gel.Button),
+	}
+	runMode = "node"
 )
 
 var monitorHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
@@ -55,106 +66,9 @@ var monitorHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 						cs.Height.Max, theme.Colors["Dark"],
 						[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 					DuoUIheader(gtx, theme)()
-				}), layout.Flexed(1, func() {
-					layout.Flex{
-						Axis: layout.Vertical,
-					}.Layout(gtx, layout.Flexed(1, func() {
-						cs := gtx.Constraints
-						gelook.DuoUIdrawRectangle(gtx, cs.Width.Max,
-							cs.Height.Max, theme.Colors["Light"],
-							[4]float32{0, 0, 0, 0},
-							[4]float32{0, 0, 0, 0},
-						)
-					}), layout.Rigid(func() {
-						cs := gtx.Constraints
-						gelook.DuoUIdrawRectangle(gtx, cs.Width.Max,
-							cs.Height.Max, theme.Colors["Primary"],
-							[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-						layout.Flex{
-							Axis: layout.Vertical,
-						}.Layout(gtx, layout.Rigid(func() {
-							cs := gtx.Constraints
-							gelook.DuoUIdrawRectangle(gtx, cs.Width.Max,
-								cs.Height.Max, theme.Colors["Primary"],
-								[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-							layout.Flex{
-								Axis: layout.Horizontal,
-							}.Layout(gtx,
-								layout.Rigid(func() {
-									theme.DuoUIbutton("", "", "",
-										theme.Colors["Primary"], "",
-										theme.Colors["Dark"], "Run",
-										theme.Colors["Light"], 0, 41, 41, 41,
-										0, 0).IconLayout(gtx, runMenuButton)
-								}),
-								layout.Rigid(func() {
-									layout.Flex{
-										Axis: layout.Horizontal,
-									}.Layout(gtx,
-										layout.Rigid(func() {
-											bg := theme.Colors["Primary"]
-											if runmodeOpen {
-												bg = theme.Colors["Dark"]
-											}
-											s := theme.DuoUIbutton(
-												theme.Fonts["Secondary"],
-												"run mode",
-												theme.Colors["Light"],
-												bg,
-												theme.Colors["Primary"],
-												theme.Colors["Light"],
-												"settingsIcon",
-												theme.Colors["Light"],
-												23, 23, 23, 23, 0, 0)
-											for runmodeFoldButton.Clicked(gtx) {
-												log.L.Debug("run mode folder clicked")
-												settingsOpen = false
-												runmodeOpen = !runmodeOpen
-											}
-											s.Layout(gtx, runmodeFoldButton)
-										}),
-										layout.Rigid(func() {
-											bg := theme.Colors["Primary"]
-											if settingsOpen {
-												bg = theme.Colors["Dark"]
-											}
-											s := theme.DuoUIbutton(
-												theme.Fonts["Secondary"],
-												"SETTINGS",
-												theme.Colors["Light"],
-												bg,
-												theme.Colors["Primary"],
-												theme.Colors["Light"],
-												"settingsIcon",
-												theme.Colors["Light"],
-												23, 0, 80, 48, 4, 4)
-											for settingsFoldButton.Clicked(gtx) {
-												log.L.Debug("settings folder clicked")
-												settingsOpen = !settingsOpen
-												runmodeOpen = false
-											}
-											s.Layout(gtx, settingsFoldButton)
-										}),
-									)
-								}),
-								layout.Rigid(func() {
-									if settingsOpen {
-										pages.SettingsHeader(rc, gtx, theme)()
-									}
-								}),
-
-								layout.Flexed(1, func() {
-									// if settingsOpen {
-									// 	pages.SettingsHeader(rc, gtx, theme)()
-									// }
-								}), )
-						}),
-							SettingsPage(gtx, rc),
-							RunModePage(gtx, rc),
-						)
-					}),
-					)
 				}),
+					Body(gtx, rc),
+					BottomBar(gtx, rc),
 				)
 				e.Frame(gtx.Ops)
 			}
@@ -168,22 +82,160 @@ var monitorHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	}
 }
 
-func dialogButon(gtx *layout.Context, th *gelook.DuoUItheme, f func(), t, bgColor, icon, iconColor string, button *gel.Button) func() {
-	return func() {
-		if f != nil {
-			var b gelook.DuoUIbutton
-			// layout.Inset{Top: unit.Dp(4), Bottom: unit.Dp(4), Left: unit.Dp(4),
-			// 	Right: unit.Dp(4)}.Layout(gtx, func() {
-			b = th.DuoUIbutton(th.Fonts["Primary"], t, th.Colors["Dark"],
-				bgColor, th.Colors["Info"], bgColor, icon, iconColor,
-				0, 23, 32, 32, 0, 0)
-			for button.Clicked(gtx) {
-				f()
+func Body(gtx *layout.Context, rc *rcd.RcVar) layout.FlexChild {
+	return layout.Flexed(1, func() {
+		layout.Flex{
+			Axis: layout.Vertical,
+		}.Layout(gtx, layout.Flexed(1, func() {
+			cs := gtx.Constraints
+			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max,
+				cs.Height.Max, theme.Colors["Light"],
+				[4]float32{0, 0, 0, 0},
+				[4]float32{0, 0, 0, 0},
+			)
+		}),
+		)
+	})
+}
+
+func BottomBar(gtx *layout.Context, rc *rcd.RcVar) layout.FlexChild {
+	return layout.Rigid(func() {
+		cs := gtx.Constraints
+		gelook.DuoUIdrawRectangle(gtx, cs.Width.Max,
+			cs.Height.Max, theme.Colors["Primary"],
+			[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		layout.Flex{
+			Axis: layout.Vertical,
+		}.Layout(gtx, layout.Rigid(func() {
+			cs := gtx.Constraints
+			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max,
+				cs.Height.Max, theme.Colors["Primary"],
+				[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			layout.Flex{
+				Axis: layout.Horizontal,
+			}.Layout(gtx,
+				layout.Rigid(func() {
+					settingsAndRunmodeButtons(gtx, rc)
+				}),
+			)
+		}),
+			SettingsPage(gtx, rc),
+			// RunModePage(gtx, rc),
+		)
+	})
+}
+
+func settingsAndRunmodeButtons(gtx *layout.Context, rc *rcd.RcVar) {
+	layout.Flex{
+		Axis: layout.Horizontal,
+	}.Layout(gtx,
+		layout.Rigid(func() {
+			theme.DuoUIbutton("", "", "",
+				theme.Colors["Primary"], "",
+				theme.Colors["Dark"], "Run",
+				theme.Colors["Light"], 0, 41, 41, 41,
+				0, 0).IconLayout(gtx, runMenuButton)
+			for runMenuButton.Clicked(gtx) {
+				log.L.Debug("clicked run button")
 			}
-			b.MenuLayout(gtx, button)
-			// })
-		}
-	}
+		}),
+		layout.Rigid(func() {
+			bg := theme.Colors["Primary"]
+			if runmodeOpen {
+				bg = theme.Colors["Dark"]
+			}
+			s := theme.DuoUIbutton(
+				theme.Fonts["Secondary"],
+				"run mode",
+				theme.Colors["Light"],
+				bg,
+				theme.Colors["Primary"],
+				theme.Colors["Light"],
+				"settingsIcon",
+				theme.Colors["Light"],
+				23, 23, 23, 23, 0, 0)
+			for runmodeFoldButton.Clicked(gtx) {
+				log.L.Debug("run mode folder clicked")
+				if runmodeOpen && settingsOpen {
+					settingsOpen = false
+				}
+				runmodeOpen = !runmodeOpen
+
+			}
+			s.Layout(gtx, runmodeFoldButton)
+		}),
+		layout.Rigid(func() {
+			if runmodeOpen {
+				modes := []string{
+					"node", "wallet", "shell", "gui",
+				}
+				modesList.Layout(gtx, len(modes), func(i int) {
+					fg, bg := theme.Colors["Light"], theme.Colors["Dark"]
+					if runMode == modes[i] {
+						fg, bg = theme.Colors["Dark"], theme.Colors["Light"]
+					}
+					theme.DuoUIbutton(theme.Fonts["Primary"],
+						modes[i],
+						fg,
+						bg,
+						"", "",
+						"", "",
+						16, 0, 80, 32, 4, 4).Layout(gtx, modesButtons[modes[i]])
+					for modesButtons[modes[i]].Clicked(gtx) {
+						if runmodeOpen {
+							runMode = modes[i]
+							runmodeOpen = false
+						}
+					}
+				})
+			} else {
+				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+					t := theme.DuoUIlabel(unit.Dp(18), runMode)
+					t.Font.Typeface = theme.Fonts["Primary"]
+					t.Layout(gtx)
+				})
+			}
+		}),
+		layout.Rigid(func() {
+			bg := theme.Colors["Primary"]
+			if settingsOpen {
+				bg = theme.Colors["Dark"]
+			}
+			s := theme.DuoUIbutton(
+				theme.Fonts["Secondary"],
+				"SETTINGS",
+				theme.Colors["Light"],
+				bg,
+				theme.Colors["Primary"],
+				theme.Colors["Light"],
+				"settingsIcon",
+				theme.Colors["Light"],
+				23, 0, 80, 48, 4, 4)
+			for settingsFoldButton.Clicked(gtx) {
+				log.L.Debug("settings folder clicked")
+				switch {
+				case runmodeOpen:
+					settingsOpen = !settingsOpen
+				case !settingsOpen:
+					settingsOpen = true
+					runmodeOpen = false
+				case settingsOpen:
+					settingsOpen = false
+				}
+			}
+			s.Layout(gtx, settingsFoldButton)
+		}),
+		layout.Rigid(func() {
+			if settingsOpen {
+				pages.SettingsHeader(rc, gtx, theme)()
+			}
+		}),
+		layout.Flexed(1, func() {
+			// if settingsOpen {
+			// 	pages.SettingsHeader(rc, gtx, theme)()
+			// }
+		}),
+	)
 }
 
 func SettingsPage(gtx *layout.Context, rc *rcd.RcVar) layout.FlexChild {
