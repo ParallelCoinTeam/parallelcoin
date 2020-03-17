@@ -15,7 +15,7 @@ import (
 //func DuoUIqrCode(pubAddr string) {
 //	//qr, err := qrcode.New(strings.ToUpper(pubAddr), qrcode.Medium)
 //	//if err != nil {
-//	//	log.L.Fatal(err)
+//	//	L.Fatal(err)
 //	//}
 //	//qr.BackgroundColor = rgb(0xe8f5e9)
 //	//addrQR := paint.NewImageOp(qr.Image(256))
@@ -25,9 +25,9 @@ import (
 //func NewQrCode(pubAddr string) *model.DuoUIqrCode {
 //	//qr, err := qrcode.New(strings.ToUpper(pubAddr), qrcode.Medium)
 //	//if err != nil {
-//	//	log.L.Fatal(err)
+//	//	L.Fatal(err)
 //	//}
-//	//log.L.Info(pubAddr)
+//	//L.Info(pubAddr)
 //	//qr.BackgroundColor = theme.HexARGB("ff3030cf")
 //	//return &model.DuoUIqrCode{
 //	//	AddrQR:  paint.NewImageOp(qr.Image(256)),

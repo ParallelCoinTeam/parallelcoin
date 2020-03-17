@@ -18,13 +18,13 @@ func main() {
 	// Notice the notification parameter is nil since notifications are not supported in HTTP POST mode.
 	client, err := rpcclient.New(connCfg, nil)
 	if err != nil {
-		log.L.Fatal(err)
+		L.Fatal(err)
 	}
 	defer client.Shutdown()
 	// Get the current block count.
 	blockCount, err := client.GetBlockCount()
 	if err != nil {
-		log.L.Fatal(err)
+		L.Fatal(err)
 	}
 	log.Printf("Block count: %d", blockCount)
 }

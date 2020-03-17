@@ -7,12 +7,12 @@ package component
 //		e.Font.Style = text.Italic
 //		//e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor))
 //		//(ui.rc.Settings.Daemon.Widgets[f.Field.Label]).(*controller.Editor).SetText(f.Field.Value.(reflect.Value).String())
-//		//log.L.Info(f.Field.Value.(reflect.Value).String())
+//		//L.Info(f.Field.Value.(reflect.Value).String())
 //		//for _, e := range lineEditor.Events(ui.ly.Context) {
 //		//	if _, ok := e.(controller.SubmitEvent); ok {
 //		//		//topLabel = e.Text
 //		//		lineEditor.SetText(f.Field.Value.(reflect.Value).String())
-//		//		log.L.Info(f.Field.Value.(reflect.Value).String())
+//		//		L.Info(f.Field.Value.(reflect.Value).String())
 //		//	}
 //		//}
 //	}

@@ -25,7 +25,7 @@ const (
 func Main() int {
 	cx := conte.GetNewContext(appName, appLanguage, "main")
 	cx.App = GetApp(cx)
-	log.L.Debug("running App")
+	L.Debug("running App")
 
 	e := cx.App.Run(os.Args)
 	if e != nil {

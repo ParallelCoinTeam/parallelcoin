@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/p9c/pod/pkg/logi"
+
 
 	"github.com/p9c/pod/cmd/node/state"
 )
@@ -25,11 +25,11 @@ var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, error) {
 			return stateCfg.Oniondial(addr.Network(), addr.String(),
 				DefaultConnectTimeout)
 		}
-		log.L.Trace("StateCfg.Dial", addr.Network(), addr.String(),
+		L.Trace("StateCfg.Dial", addr.Network(), addr.String(),
 			DefaultConnectTimeout)
 		conn, er := stateCfg.Dial(addr.Network(), addr.String(), DefaultConnectTimeout)
 		if er != nil {
-			log.L.Trace("connection error:", conn, er)
+			L.Trace("connection error:", conn, er)
 		}
 		return conn, er
 	}

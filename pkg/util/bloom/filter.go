@@ -2,7 +2,7 @@ package bloom
 
 import (
 	"encoding/binary"
-	log "github.com/p9c/pod/pkg/logi"
+
 	"math"
 	"sync"
 
@@ -203,7 +203,7 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 	for i, txOut := range tx.MsgTx().TxOut {
 		pushedData, err := txscript.PushedData(txOut.PkScript)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			continue
 		}
 		for _, data := range pushedData {
@@ -226,7 +226,7 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 		}
 		pushedData, err := txscript.PushedData(txin.SignatureScript)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			continue
 		}
 		for _, data := range pushedData {

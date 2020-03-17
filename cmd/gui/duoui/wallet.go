@@ -72,8 +72,8 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				encryptionCheckBox := ui.ly.Theme.DuoUIcheckBox(
-					"Do you want to add an additional layer of encryption" +
-					 	" for public data?", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
+					"Do you want to add an additional layer of encryption"+
+						" for public data?", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
 				encryptionCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
 				encryptionCheckBox.Color = gelook.HexARGB(ui.ly.Theme.Colors["Dark"])
 				encryptionCheckBox.Layout(ui.ly.Context, encryption)
@@ -81,7 +81,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			func() {
 				seedCheckBox := ui.ly.Theme.DuoUIcheckBox(
 					"Do you have an existing wallet seed you want to use?",
-					 ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
+					ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
 				seedCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
 				seedCheckBox.Color = gelook.HexARGB(ui.ly.Theme.Colors["Dark"])
 				seedCheckBox.Layout(ui.ly.Context, seed)

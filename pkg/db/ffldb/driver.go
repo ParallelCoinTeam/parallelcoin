@@ -2,7 +2,6 @@ package ffldb
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
@@ -36,7 +35,7 @@ func parseArgs(funcName string, args ...interface{}) (string, wire.BitcoinNet, e
 func openDBDriver(args ...interface{}) (database.DB, error) {
 	dbPath, network, err := parseArgs("Open", args...)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, network, false)
@@ -46,7 +45,7 @@ func openDBDriver(args ...interface{}) (database.DB, error) {
 func createDBDriver(args ...interface{}) (database.DB, error) {
 	dbPath, network, err := parseArgs("Create", args...)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, network, true)

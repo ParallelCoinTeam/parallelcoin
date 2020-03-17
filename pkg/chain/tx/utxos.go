@@ -30,7 +30,7 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 		// all of them at once.
 		outputs, err := w.TxStore.UnspentOutputs(txmgrNs)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		for _, output := range outputs {
@@ -51,7 +51,7 @@ func (w *Wallet) UnspentOutputs(policy OutputSelectionPolicy) ([]*TransactionOut
 			}
 			_, outputAcct, err := w.Manager.AddrAccount(addrmgrNs, addrs[0])
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return err
 			}
 			if outputAcct != policy.Account {

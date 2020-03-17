@@ -9,7 +9,6 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"errors"
-	log "github.com/p9c/pod/pkg/logi"
 	"io"
 )
 
@@ -61,7 +60,7 @@ func GenerateSharedSecret(privkey *PrivateKey, pubkey *PublicKey) []byte {
 func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	ephemeral, err := NewPrivateKey(S256())
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	ecdhKey := GenerateSharedSecret(ephemeral, pubkey)
@@ -93,7 +92,7 @@ func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	// start encryption
 	block, err := aes.NewCipher(keyE)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	mode := cipher.NewCBCEncrypter(block, iv)
@@ -102,7 +101,7 @@ func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	hm := hmac.New(sha256.New, keyM)
 	_, err = hm.Write(out[:len(out)-sha256.Size]) // everything is hashed
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 	}
 	copy(out[len(out)-sha256.Size:], hm.Sum(nil)) // write checksum
 	return out, nil
@@ -141,7 +140,7 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	// check if (X, Y) lies on the curve and create a Pubkey if it does
 	pubkey, err := ParsePubKey(pb, S256())
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	// check for cipher text length
@@ -159,7 +158,7 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	hm := hmac.New(sha256.New, keyM)
 	_, err = hm.Write(in[:len(in)-sha256.Size]) // everything is hashed
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 	}
 	expectedMAC := hm.Sum(nil)
 	if !hmac.Equal(messageMAC, expectedMAC) {
@@ -168,7 +167,7 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	// start decryption
 	block, err := aes.NewCipher(keyE)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	mode := cipher.NewCBCDecrypter(block, iv)

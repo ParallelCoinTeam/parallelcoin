@@ -83,7 +83,7 @@ func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 func SettingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *component.Field) func() {
 	return func() {
 		layout.Flex{
-			Axis: layout.Horizontal,
+			Axis:      layout.Horizontal,
 			Alignment: layout.Middle,
 		}.Layout(gtx,
 			// layout.Rigid(func() {

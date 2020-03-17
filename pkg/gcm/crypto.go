@@ -5,8 +5,6 @@ import (
 	"crypto/cipher"
 
 	"golang.org/x/crypto/argon2"
-
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 // GetCipher returns a GCM cipher given a password string. Note that this cipher
@@ -14,9 +12,9 @@ import (
 func GetCipher(password string) (gcm cipher.AEAD, err error) {
 	bytes := []byte(password)
 	var c cipher.Block
-	if c, err = aes.NewCipher(argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 4, 32)); log.L.Check(err) {
+	if c, err = aes.NewCipher(argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 4, 32)); L.Check(err) {
 	}
-	if gcm, err = cipher.NewGCM(c); log.L.Check(err) {
+	if gcm, err = cipher.NewGCM(c); L.Check(err) {
 	}
 	return
 }

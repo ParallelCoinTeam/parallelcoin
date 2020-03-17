@@ -59,7 +59,7 @@ func // LogBlockHeight logs a new block height as an information message to
 		txStr = "transaction "
 	}
 	tD := tDuration.Seconds()
-	log.L.Infof(
+	L.Infof(
 		"%s %6d %s in the last %s (%6d %s, height %8d, %s) %0.2f tx/s",
 		b.progressAction,
 		b.receivedLogBlocks,

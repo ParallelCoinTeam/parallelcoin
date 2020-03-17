@@ -105,13 +105,13 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 	}
 	testDir, err := baseDir()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	harnessID := strconv.Itoa(numTestInstances)
 	nodeTestData, err := ioutil.TempDir(testDir, "harness-"+harnessID)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	certFile := filepath.Join(nodeTestData, "rpc.cert")
@@ -121,14 +121,14 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 	}
 	wallet, err := newMemWallet(activeNet, uint32(numTestInstances))
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	miningAddr := fmt.Sprintf("--miningaddr=%s", wallet.coinbaseAddr)
 	extraArgs = append(extraArgs, miningAddr)
 	config, err := newConfig("rpctest", certFile, keyFile, extraArgs)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	// Generate p2p+rpc listening addresses.
@@ -136,7 +136,7 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 	// Create the testing node bounded to the simnet.
 	node, err := newNode(config, nodeTestData)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	nodeNum := numTestInstances
@@ -214,14 +214,14 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
 			numMatureOutputs
 		_, err := h.Node.Generate(numToGenerate)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}
 	// Block until the wallet has fully synced up to the tip of the main chain.
 	_, height, err := h.Node.GetBestBlock()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	ticker := time.NewTicker(time.Millisecond * 100)
@@ -401,12 +401,12 @@ func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	}
 	prevBlockHash, prevBlockHeight, err := h.Node.GetBestBlock()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	mBlock, err := h.Node.GetBlock(prevBlockHash)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	prevBlock := util.NewBlock(mBlock)
@@ -415,7 +415,7 @@ func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	newBlock, err := CreateBlock(prevBlock, txns, int32(blockVersion),
 		blockTime, h.wallet.coinbaseAddr, mineTo, h.ActiveNet)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	// Submit the block to the simnet node.

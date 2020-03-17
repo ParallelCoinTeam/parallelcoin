@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"math/big"
 	"math/rand"
+	"os"
+	"runtime"
 	"sort"
+	"strings"
 	"time"
-	
+
 	log "github.com/p9c/pod/pkg/logi"
 )
 
@@ -40,7 +43,18 @@ type HardForks struct {
 const IntervalBase = 36
 
 func init() {
-	log.L.Trace("running fork data init")
+	_, loc, _, _ := runtime.Caller(0)
+	files := strings.Split(loc, "pod")
+	var pkg string
+	pkg = loc
+	if len(files) > 1 {
+		pkg = files[1]
+	}
+	splitted := strings.Split(pkg, string(os.PathSeparator))
+	pkg = strings.Join(splitted[:len(splitted)-1], string(os.PathSeparator))
+	L = log.Empty(pkg).SetLevel("info", true, "pod")
+	log.Loggers[pkg] = L
+	L.Trace("running fork data init")
 	for i := range p9AlgosNumeric {
 		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", p9AlgosNumeric[i].VersionInterval)
 	}
@@ -63,20 +77,20 @@ func init() {
 	}
 	sort.Sort(AlgoSlices[0])
 	sort.Sort(AlgoSlices[1])
-	log.L.Trace(P9AlgoVers)
+	L.Trace(P9AlgoVers)
 	baseVersionName := AlgoSlices[1][0].Name
 	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
-	log.L.Trace(baseVersionName, baseVersionInterval)
+	L.Trace(baseVersionName, baseVersionInterval)
 	P9Average = 0
 	for _, i := range AlgoSlices[1] {
 		vi := float64(P9Algos[i.Name].VersionInterval)
 		p9a := baseVersionInterval / vi
 		P9Average += p9a
-		log.L.Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
+		L.Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
 	}
-	log.L.Trace(P9Average)
+	L.Trace(P9Average)
 	P9Average = baseVersionInterval / P9Average
-	log.L.Trace(P9Average)
+	L.Trace(P9Average)
 }
 
 type AlgoSpec struct {
@@ -153,23 +167,23 @@ var (
 	}
 	// P9AlgoVers is the lookup for after 1st hardfork
 	P9AlgoVers = make(map[int32]string)
-	
+
 	// P9Algos is the algorithm specifications after the hard fork
 	P9Algos        = make(map[string]AlgoParams)
 	p9AlgosNumeric = map[int32]AlgoParams{
-		5:  {5, FirstPowLimitBits, 0, 1<<1 * IntervalBase},   // 2
-		6:  {6, FirstPowLimitBits, 1, 1<<2 * IntervalBase},   // 3
-		7:  {7, FirstPowLimitBits, 2, 1<<3 * IntervalBase},  // 5
-		8:  {8, FirstPowLimitBits, 3, 1<<4 * IntervalBase},  // 7
-		9:  {9, FirstPowLimitBits, 4, 1<<5 * IntervalBase},  // 11
-		10: {10, FirstPowLimitBits, 5, 1<<6 * IntervalBase}, // 13
-		11: {11, FirstPowLimitBits, 7, 1<<7 * IntervalBase}, // 17
-		12: {12, FirstPowLimitBits, 6, 1<<8 * IntervalBase}, // 19
-		13: {13, FirstPowLimitBits, 8, 1<<9 * IntervalBase}, // 23
+		5:  {5, FirstPowLimitBits, 0, 1 << 1 * IntervalBase},  // 2
+		6:  {6, FirstPowLimitBits, 1, 1 << 2 * IntervalBase},  // 3
+		7:  {7, FirstPowLimitBits, 2, 1 << 3 * IntervalBase},  // 5
+		8:  {8, FirstPowLimitBits, 3, 1 << 4 * IntervalBase},  // 7
+		9:  {9, FirstPowLimitBits, 4, 1 << 5 * IntervalBase},  // 11
+		10: {10, FirstPowLimitBits, 5, 1 << 6 * IntervalBase}, // 13
+		11: {11, FirstPowLimitBits, 7, 1 << 7 * IntervalBase}, // 17
+		12: {12, FirstPowLimitBits, 6, 1 << 8 * IntervalBase}, // 19
+		13: {13, FirstPowLimitBits, 8, 1 << 9 * IntervalBase}, // 23
 	}
-	
+
 	P9Average float64
-	
+
 	// SecondPowLimit is
 	SecondPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString(
@@ -220,7 +234,7 @@ func GetRandomVersion(height int32) int32 {
 func GetAlgoVer(name string, height int32) (version int32) {
 	hf := GetCurrent(height)
 	n := AlgoSlices[hf][0].Name
-	//log.L.DEBUG("GetAlgoVer", name, height, hf, n)
+	// L.DEBUG("GetAlgoVer", name, height, hf, n)
 	if _, ok := List[hf].Algos[name]; ok {
 		n = name
 	}
@@ -237,7 +251,7 @@ func GetAveragingInterval(height int32) (r int32) {
 
 // GetCurrent returns the hardfork number code
 func GetCurrent(height int32) (curr int) {
-	// log.L.Trace("istestnet", IsTestnet)
+	// L.Trace("istestnet", IsTestnet)
 	if IsTestnet {
 		for i := range List {
 			if height >= List[i].TestnetStart {
@@ -257,17 +271,17 @@ func GetCurrent(height int32) (curr int) {
 // GetMinBits returns the minimum diff bits based on height and testnet
 func GetMinBits(algoname string, height int32) (mb uint32) {
 	curr := GetCurrent(height)
-	// log.L.Trace("GetMinBits", algoname, height, curr, List[curr].Algos)
+	// L.Trace("GetMinBits", algoname, height, curr, List[curr].Algos)
 	mb = List[curr].Algos[algoname].MinBits
-	// log.L.TraceF("minbits %08x, %d", mb, mb)
+	// L.TraceF("minbits %08x, %d", mb, mb)
 	return
 }
 
 // GetMinDiff returns the minimum difficulty in uint256 form
 func GetMinDiff(algoname string, height int32) (md *big.Int) {
-	// log.L.Trace("GetMinDiff", algoname)
+	// L.Trace("GetMinDiff", algoname)
 	minbits := GetMinBits(algoname, height)
-	// log.L.TraceF("mindiff minbits %08x", minbits)
+	// L.TraceF("mindiff minbits %08x", minbits)
 	return CompactToBig(minbits)
 }
 

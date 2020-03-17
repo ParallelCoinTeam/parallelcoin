@@ -27,7 +27,7 @@ func Main(args []string, cx *conte.Xt) {
 	method := args[0]
 	usageFlags, err := btcjson.MethodUsageFlags(method)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 		HelpPrint()
 		os.Exit(1)
@@ -70,7 +70,7 @@ func Main(args []string, cx *conte.Xt) {
 	// by the user.
 	cmd, err := btcjson.NewCmd(method, params...)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		// Show the error along with its error code when it's a json.
 		// Error as it realistically will always be since the NewCmd function
 		// is only supposed to return errors of that type.
@@ -91,7 +91,7 @@ func Main(args []string, cx *conte.Xt) {
 	// it to the RPC server.
 	marshalledJSON, err := btcjson.MarshalCmd(1, cmd)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		log.Println(err)
 		os.Exit(1)
 	}
@@ -99,7 +99,7 @@ func Main(args []string, cx *conte.Xt) {
 	// connection configuration.
 	result, err := sendPostRequest(marshalledJSON, cx)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		os.Exit(1)
 	}
 	// Choose how to display the result based on its type.
@@ -129,7 +129,7 @@ func Main(args []string, cx *conte.Xt) {
 func CommandUsage(method string) {
 	usage, err := btcjson.MethodUsageText(method)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		// This should never happen since the method was already checked
 		// before calling this function, but be safe.
 		log.Println("Failed to obtain command usage:", err)

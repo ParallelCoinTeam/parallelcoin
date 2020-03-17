@@ -3,8 +3,6 @@ package wire
 import (
 	"io"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
@@ -22,12 +20,12 @@ type MsgGetCFilters struct {
 func (msg *MsgGetCFilters) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) error {
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	err = readElement(r, &msg.StartHeight)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	return readElement(r, &msg.StopHash)
@@ -37,12 +35,12 @@ func (msg *MsgGetCFilters) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding
 func (msg *MsgGetCFilters) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) error {
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	err = writeElement(w, &msg.StartHeight)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	return writeElement(w, &msg.StopHash)

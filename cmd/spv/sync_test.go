@@ -21,12 +21,12 @@ import (
 	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
 	ec "github.com/p9c/pod/pkg/util/elliptic"
 	"github.com/p9c/pod/pkg/util/gcs/builder"
-	log "github.com/p9c/pod/pkg/logi"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )

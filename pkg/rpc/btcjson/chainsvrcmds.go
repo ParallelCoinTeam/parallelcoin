@@ -3,7 +3,6 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/chain/wire"
 )
@@ -206,14 +205,14 @@ func (t *TemplateRequest) UnmarshalJSON(data []byte) error {
 	// The SigOpLimit field can only be nil, bool, or int64.
 	val, err := convertTemplateRequestField("sigoplimit", request.SigOpLimit)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	request.SigOpLimit = val
 	// The SizeLimit field can only be nil, bool, or int64.
 	val, err = convertTemplateRequestField("sizelimit", request.SizeLimit)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	request.SizeLimit = val
@@ -570,7 +569,6 @@ type StopCmd struct{}
 func NewStopCmd() *StopCmd {
 	return &StopCmd{}
 }
-
 
 // RestartCmd defines the restart JSON-RPC command.
 type RestartCmd struct{}

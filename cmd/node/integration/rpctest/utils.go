@@ -45,7 +45,7 @@ retry:
 	for !poolsMatch {
 		firstPool, err := nodes[0].Node.GetRawMempool()
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// If all nodes have an identical mempool with respect to the first
@@ -54,7 +54,7 @@ retry:
 		for _, node := range nodes[1:] {
 			nodePool, err := node.Node.GetRawMempool()
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return err
 			}
 			if !reflect.DeepEqual(firstPool, nodePool) {
@@ -78,7 +78,7 @@ retry:
 		for _, node := range nodes {
 			blockHash, blockHeight, err := node.Node.GetBestBlock()
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return err
 			}
 			if prevHash != nil && (*blockHash != *prevHash ||
@@ -101,7 +101,7 @@ retry:
 func ConnectNode(from *Harness, to *Harness) error {
 	peerInfo, err := from.Node.GetPeerInfo()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	numPeers := len(peerInfo)
@@ -112,13 +112,13 @@ func ConnectNode(from *Harness, to *Harness) error {
 	// Block until a new connection has been established.
 	peerInfo, err = from.Node.GetPeerInfo()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	for len(peerInfo) <= numPeers {
 		peerInfo, err = from.Node.GetPeerInfo()
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}

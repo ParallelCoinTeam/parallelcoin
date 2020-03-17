@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/cmd/gui/rcd"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"gioui.org/layout"
 	"gioui.org/op"

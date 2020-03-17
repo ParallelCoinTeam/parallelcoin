@@ -3,14 +3,13 @@ package rcd
 import (
 	"fmt"
 
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 func (r *RcVar) GetDuoUIhashesPerSec() {
 	// r.Status.Wallet.Hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
-	log.L.Debug("centralise hash function stuff here") // cpuminer
+	L.Debug("centralise hash function stuff here") // cpuminer
 	r.Status.Kopach.Hashrate = r.cx.Hashrate.Load()
 	return
 }
@@ -45,7 +44,7 @@ func (r *RcVar) GetDuoUIblockCount() {
 		// r.PushDuoUIalert("Error", err.Error(), "error")
 	}
 	r.Status.Node.BlockCount.Store(uint64(getBlockCount.(int64)))
-	// log.L.Info(getBlockCount)
+	// L.Info(getBlockCount)
 	return
 }
 func (r *RcVar) GetDuoUInetworkLastBlock() {

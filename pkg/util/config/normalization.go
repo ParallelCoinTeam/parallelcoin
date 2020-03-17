@@ -20,7 +20,7 @@ func NormalizeAddress(addr string, defaultPort string) (hostport string, err err
 	addr = net.JoinHostPort(addr, defaultPort)
 	_, _, err = net.SplitHostPort(addr)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return "", origErr
 	}
 	return addr, nil
@@ -36,7 +36,7 @@ func NormalizeAddresses(addrs []string, defaultPort string) ([]string, error) {
 	for _, addr := range addrs {
 		normalizedAddr, err := NormalizeAddress(addr, defaultPort)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		_, seen := seenSet[normalizedAddr]

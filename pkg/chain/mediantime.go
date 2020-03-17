@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/p9c/pod/pkg/logi"
+
 )
 
 // TODO: tighten maxAllowedOffsetSecs for hf1 - also, consider changing to a
@@ -125,9 +125,9 @@ func // AddTimeSample adds a time sample that is used when determining the
 	copy(sortedOffsets, m.offsets)
 	sort.Sort(int64Sorter(sortedOffsets))
 	offsetDuration := time.Duration(offsetSecs) * time.Second
-	log.L.Tracef("Added time sample of %v (total: %v)", offsetDuration,
+	L.Tracef("Added time sample of %v (total: %v)", offsetDuration,
 		numOffsets)
-	log.L.Trace("samples:", sortedOffsets)
+	L.Trace("samples:", sortedOffsets)
 	// NOTE: The following code intentionally has a bug to mirror the buggy
 	// behavior in Bitcoin Core since the median time is used in the consensus
 	// rules. In particular, the offset is only updated when the number of
@@ -165,14 +165,14 @@ func // AddTimeSample adds a time sample that is used when determining the
 			}
 			// Warn if none of the time samples are close.
 			if !remoteHasCloseTime {
-				log.L.Warn("Please check your date and time are correct!  pod" +
+				L.Warn("Please check your date and time are correct!  pod" +
 					" will" +
 					" not work properly with an invalid time")
 			}
 		}
 	}
 	medianDuration := time.Duration(m.offsetSecs) * time.Second
-	log.L.Debug("new time offset:", medianDuration)
+	L.Debug("new time offset:", medianDuration)
 }
 
 func // Offset returns the number of seconds to adjust the local clock based

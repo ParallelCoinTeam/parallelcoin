@@ -3,7 +3,7 @@ package rcd
 import (
 	"fmt"
 
-	log "github.com/p9c/pod/pkg/logi"
+
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
@@ -11,7 +11,7 @@ import (
 )
 
 func (r *RcVar) GetDuoUIbalance() {
-	log.L.Trace("getting balance")
+	L.Trace("getting balance")
 	acct := "default"
 	minconf := 0
 	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
@@ -28,7 +28,7 @@ func (r *RcVar) GetDuoUIbalance() {
 }
 
 func (r *RcVar) GetDuoUIunconfirmedBalance() {
-	log.L.Trace("getting unconfirmed balance")
+	L.Trace("getting unconfirmed balance")
 	acct := "default"
 	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
 	if err != nil {
@@ -44,8 +44,8 @@ func (r *RcVar) GetDuoUIunconfirmedBalance() {
 
 func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 	return func() {
-		log.L.Trace("sending", wp, ad, am)
-		log.L.Info("sending", wp, ad, am)
+		L.Trace("sending", wp, ad, am)
+		L.Info("sending", wp, ad, am)
 		if am > 0 {
 			// getBlockChain, err := rpc.HandleGetBlockChainInfo(r.cx.RPCServer, nil, nil)
 			// if err != nil {
@@ -76,18 +76,18 @@ func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 			if err == nil {
 				var va interface{}
 				va, err = legacy.ValidateAddress(&btcjson.
-				ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
+					ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
 				if err != nil {
 					// r.PushDuoUIalert("Error", err.Error(), "error")
 				}
 				vva := va.(btcjson.ValidateAddressWalletResult)
 				validateAddr = &vva
 				if validateAddr.IsValid {
-					log.L.Warnf("wallet passphrase '%s'", wp)
+					L.Warnf("wallet passphrase '%s'", wp)
 					if res, err := legacy.WalletPassphrase(btcjson.NewWalletPassphraseCmd(wp, 5),
-						r.cx.WalletServer); log.L.Check(err) {
+						r.cx.WalletServer); L.Check(err) {
 					} else {
-						log.L.Warn(res)
+						L.Warn(res)
 					}
 					_, err = legacy.SendToAddress(
 						&btcjson.SendToAddressCmd{
@@ -107,7 +107,7 @@ func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 				// r.PushDuoUIalert("Payment sent", "PAYMENT", "success")
 			}
 		} else {
-			log.Println(am)
+			L.Debug(am)
 		}
 		r.Sent = true
 		return

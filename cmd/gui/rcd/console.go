@@ -6,8 +6,6 @@ import (
 	"sort"
 	"strings"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
@@ -24,12 +22,12 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 		if len(args) < 1 {
 			method = ""
 			cmd = &btcjson.HelpCmd{Command: &method}
-			if res, err = rpc.RPCHandlers["help"].Fn(r.cx.RPCServer, cmd, nil); log.L.Check(err) {
+			if res, err = rpc.RPCHandlers["help"].Fn(r.cx.RPCServer, cmd, nil); L.Check(err) {
 				errString += fmt.Sprintln(err)
 			}
 			o += fmt.Sprintln(res)
 			if res, err = legacy.RPCHandlers["help"].
-				Handler(cmd, r.cx.WalletServer, r.cx.ChainClient); log.L.Check(err) {
+				Handler(cmd, r.cx.WalletServer, r.cx.ChainClient); L.Check(err) {
 				errString += fmt.Sprintln(err)
 			}
 			o += fmt.Sprintln(res)
@@ -51,14 +49,14 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 			}
 		} else {
 			method = args[0]
-			log.L.Debug("finding help for command", method)
+			L.Debug("finding help for command", method)
 			if help, err := r.cx.RPCServer.HelpCacher.RPCMethodHelp(
-				method); log.L.Check(err) {
+				method); L.Check(err) {
 				o += err.Error() + "\n"
 				o += fmt.Sprintln(res)
 				cmd = &btcjson.HelpCmd{Command: &method}
 				if res, err = legacy.RPCHandlers["help"].
-					Handler(cmd, r.cx.WalletServer, r.cx.ChainClient); log.L.Check(err) {
+					Handler(cmd, r.cx.WalletServer, r.cx.ChainClient); L.Check(err) {
 					errString += fmt.Sprintln(err)
 				}
 				o += fmt.Sprintln(res)
@@ -80,26 +78,26 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 	for _, arg := range args {
 		params = append(params, arg)
 	}
-	if cmd, err = btcjson.NewCmd(method, params...); log.L.Check(err) {
+	if cmd, err = btcjson.NewCmd(method, params...); L.Check(err) {
 		o += fmt.Sprintln(err)
 	}
 	if x, ok := rpc.RPCHandlers[method]; !ok {
 		if x, ok := legacy.RPCHandlers[method]; ok {
 			if res, err = x.Handler(cmd, r.cx.WalletServer,
-				r.cx.ChainClient); log.L.Check(err) {
+				r.cx.ChainClient); L.Check(err) {
 				o += err.Error()
 			}
 			// o += fmt.Sprintln(res)
 		}
 	} else {
-		if res, err = x.Fn(r.cx.RPCServer, cmd, nil); log.L.Check(err) {
+		if res, err = x.Fn(r.cx.RPCServer, cmd, nil); L.Check(err) {
 			o += err.Error()
 		}
 		// o += fmt.Sprintln(res)
 	}
 	if res != nil {
 		if j, err := json.MarshalIndent(res, "",
-			"  "); !log.L.Check(err) {
+			"  "); !L.Check(err) {
 			o += string(j)
 		}
 	}

@@ -34,7 +34,7 @@ func logServiceStartOfDay(srvr *server) {
 	message += fmt.Sprintf("Configuration directory: %s\n", defaultHomeDir)
 	message += fmt.Sprintf("Configuration file: %s\n", cfg.ConfigFile)
 	message += fmt.Sprintf("Data directory: %s\n", cfg.DataDir)
-	elog.L.Info(1, message)
+	eL.Info(1, message)
 }
 
 // podService houses the main service handler which handles all service
@@ -77,7 +77,7 @@ loop:
 				// Signal the main function to exit.
 				shutdownRequestChannel <- struct{}{}
 			default:
-				elog.L.Error(1, fmt.Sprintf(
+				eL.Error(1, fmt.Sprintf(
 					"Unexpected control request #%d.", c,
 				))
 			}
@@ -86,8 +86,8 @@ loop:
 			logServiceStartOfDay(mainServer)
 		case err := <-doneChan:
 			if err != nil {
-		log.L.Error(err)
-elog.L.Error(1, err.Error())
+		L.Error(err)
+eL.Error(1, err.Error())
 			}
 			break loop
 		}
@@ -108,7 +108,7 @@ func installService() error {
 	// including the extension.
 	exePath, err := filepath.Abs(os.Args[0])
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	if filepath.Ext(exePath) == "" {
@@ -117,7 +117,7 @@ return err
 	// Connect to the windows service manager.
 	serviceManager, err := mgr.Connect()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer serviceManager.Disconnect()
@@ -133,7 +133,7 @@ return err
 		Description: svcDesc,
 	})
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer service.Close()
@@ -142,7 +142,7 @@ return err
 	// This allows easy logging of custom messges instead of needing to
 	// create our own message catalog.
 	eventlog.Remove(svcName)
-	eventsSupported := uint32(eventlog.L.Error | eventlog.Warning | eventlog.Info)
+	eventsSupported := uint32(eventL.Error | eventlog.Warning | eventlog.Info)
 	return eventlog.InstallAsEventCreate(svcName, eventsSupported)
 }
 
@@ -155,14 +155,14 @@ func removeService() error {
 	// Connect to the windows service manager.
 	serviceManager, err := mgr.Connect()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer serviceManager.Disconnect()
 	// Ensure the service exists.
 	service, err := serviceManager.OpenService(svcName)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return fmt.Errorf("service %s is not installed", svcName)
 	}
 	defer service.Close()
@@ -175,19 +175,19 @@ func startService() error {
 	// Connect to the windows service manager.
 	serviceManager, err := mgr.Connect()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer serviceManager.Disconnect()
 	service, err := serviceManager.OpenService(svcName)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return fmt.Errorf("could not access service: %v", err)
 	}
 	defer service.Close()
 	err = service.Start(os.Args)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return fmt.Errorf("could not start service: %v", err)
 	}
 	return nil
@@ -200,19 +200,19 @@ func controlService(c svc.Cmd, to svc.State) error {
 	// Connect to the windows service manager.
 	serviceManager, err := mgr.Connect()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer serviceManager.Disconnect()
 	service, err := serviceManager.OpenService(svcName)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return fmt.Errorf("could not access service: %v", err)
 	}
 	defer service.Close()
 	status, err := service.Control(c)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return fmt.Errorf("could not send control=%d: %v", c, err)
 	}
 	// Send the control message.
@@ -225,7 +225,7 @@ return fmt.Errorf("could not send control=%d: %v", c, err)
 		time.Sleep(300 * time.Millisecond)
 		status, err = service.Query()
 		if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return fmt.Errorf("could not retrieve service "+
 				"status: %v", err)
 		}
@@ -263,7 +263,7 @@ func serviceMain() (bool, error) {
 	// (or that can't be determined due to an error).
 	isInteractive, err := svc.IsAnInteractiveSession()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return false, err
 	}
 	if isInteractive {
@@ -271,14 +271,14 @@ return false, err
 	}
 	elog, err = eventlog.Open(svcName)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return false, err
 	}
 	defer elog.Close()
 	err = svc.Run(svcName, &podService{})
 	if err != nil {
-		log.L.Error(err)
-elog.L.Error(1, fmt.Sprintf("Service start failed: %v", err))
+		L.Error(err)
+eL.Error(1, fmt.Sprintf("Service start failed: %v", err))
 		return true, err
 	}
 	return true, nil

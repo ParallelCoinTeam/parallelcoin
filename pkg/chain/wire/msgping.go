@@ -1,7 +1,6 @@
 package wire
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
 	"io"
 )
 
@@ -17,7 +16,7 @@ func (msg *MsgPing) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) err
 	if pver > BIP0031Version {
 		err := readElement(r, &msg.Nonce)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}
@@ -30,7 +29,7 @@ func (msg *MsgPing) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) err
 	if pver > BIP0031Version {
 		err := writeElement(w, msg.Nonce)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}

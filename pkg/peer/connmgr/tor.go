@@ -3,7 +3,6 @@ package connmgr
 import (
 	"encoding/binary"
 	"errors"
-	log "github.com/p9c/pod/pkg/logi"
 	"net"
 )
 
@@ -43,20 +42,20 @@ var (
 func TorLookupIP(host, proxy string) ([]net.IP, error) {
 	conn, err := net.Dial("tcp", proxy)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	defer conn.Close()
 	buf := []byte{'\x05', '\x01', '\x00'}
 	_, err = conn.Write(buf)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	buf = make([]byte, 2)
 	_, err = conn.Read(buf)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	if buf[0] != '\x05' {
@@ -75,13 +74,13 @@ func TorLookupIP(host, proxy string) ([]net.IP, error) {
 	buf[5+len(host)] = 0 // Port 0
 	_, err = conn.Write(buf)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	buf = make([]byte, 4)
 	_, err = conn.Read(buf)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	if buf[0] != 5 {
@@ -102,7 +101,7 @@ func TorLookupIP(host, proxy string) ([]net.IP, error) {
 	buf = make([]byte, 4)
 	bytes, err := conn.Read(buf)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	if bytes != 4 {

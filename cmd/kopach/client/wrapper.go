@@ -5,8 +5,6 @@ import (
 	"io"
 	"net/rpc"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 )
 
@@ -29,11 +27,11 @@ func New(conn io.ReadWriteCloser) *Client {
 
 // NewJob is a delivery of a new job for the worker, this starts a miner
 func (c *Client) NewJob(job *job.Container) (err error) {
-	// log.L.Debug("sending new job")
+	// L.Debug("sending new job")
 	var reply bool
 	err = c.Call("Worker.NewJob", job, &reply)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	if reply != true {
@@ -43,11 +41,11 @@ func (c *Client) NewJob(job *job.Container) (err error) {
 }
 
 func (c *Client) Pause() (err error) {
-	// log.L.Debug("sending pause")
+	// L.Debug("sending pause")
 	var reply bool
 	err = c.Call("Worker.Pause", 1, &reply)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	if reply != true {
@@ -57,11 +55,11 @@ func (c *Client) Pause() (err error) {
 }
 
 func (c *Client) Stop() (err error) {
-	log.L.Debug("stop working (exit)")
+	L.Debug("stop working (exit)")
 	var reply bool
 	err = c.Call("Worker.Stop", 1, &reply)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	if reply != true {
@@ -71,11 +69,11 @@ func (c *Client) Stop() (err error) {
 }
 
 func (c *Client) SendPass(pass string) (err error) {
-	log.L.Debug("sending dispatch password")
+	L.Debug("sending dispatch password")
 	var reply bool
 	err = c.Call("Worker.SendPass", pass, &reply)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	if reply != true {

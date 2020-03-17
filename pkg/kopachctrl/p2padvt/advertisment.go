@@ -2,7 +2,7 @@ package p2padvt
 
 import (
 	"net"
-	
+
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/IPs"

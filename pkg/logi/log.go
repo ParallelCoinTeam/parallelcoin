@@ -71,7 +71,8 @@ var (
 	ColorViolet    = "\u001b[38;5;201m"
 	ColorYellow    = "\u001b[38;5;226m"
 
-	L = Empty()
+	L       = Empty("root")
+	Loggers = make(map[string]*Logger)
 
 	Levels = []string{
 		Off, Fatal, Error, Warn, Info, Check, Debug, Trace,
@@ -90,6 +91,7 @@ type Entry struct {
 }
 
 type Logger struct {
+	Pkg           string
 	Fatal         PrintlnFunc
 	Error         PrintlnFunc
 	Warn          PrintlnFunc
@@ -127,6 +129,13 @@ type Logger struct {
 
 // SetLevel enables or disables the various print functions
 func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
+	// if this is called on the top level logger and there is other loggers
+	// set their levels as well
+	if l.Pkg == "root" && len(Loggers) > 0 {
+		for _, v := range Loggers {
+			v.SetLevel(level, color, split)
+		}
+	}
 	l.Split = split + string(os.PathSeparator)
 	level = sanitizeLoglevel(level)
 	var fallen bool
@@ -415,8 +424,9 @@ func DirectionString(inbound bool) string {
 
 // PickNoun returns the singular or plural form of a noun depending
 // on the count n.
-func Empty() *Logger {
+func Empty(pkg string) *Logger {
 	return &Logger{
+		Pkg:    pkg,
 		Fatal:  NoPrintln(),
 		Error:  NoPrintln(),
 		Warn:   NoPrintln(),

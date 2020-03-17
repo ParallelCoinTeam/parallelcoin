@@ -6,7 +6,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/component"
 
 	"gioui.org/io/system"
-	log "github.com/p9c/pod/pkg/logi"
+
 
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -28,7 +28,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				for {
 					select {
 					case <-updateTrigger:
-						log.L.Trace("repaint forced")
+						L.Trace("repaint forced")
 						// ui.ly.Window.Invalidate()
 					case <-ui.rc.Quit:
 						break quitTrigger
@@ -39,7 +39,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			ui.rc.IsReady = true
 			r.Boot.IsBoot = false
 		case <-ui.rc.Quit:
-			log.L.Debug("quit signal received")
+			L.Debug("quit signal received")
 			if !interrupt.Requested() {
 				interrupt.Request()
 			}
@@ -47,7 +47,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			// handle the back-end servers being shut down by the interrupt library receiving an interrupt signal
 			// Probably nothing needs to be run between starting it and shutting down
 			<-interrupt.HandlersDone
-			log.L.Debug("closing GUI from interrupt/quit signal")
+			L.Debug("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
 			// TODO events of gui
 		case e := <-ui.rc.Commands.Events:
@@ -59,7 +59,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 		case e := <-ui.ly.Window.Events():
 			switch e := e.(type) {
 			case system.DestroyEvent:
-				log.L.Debug("destroy event received")
+				L.Debug("destroy event received")
 				interrupt.Request()
 				// Here do cleanup like are you sure (optional) modal or shutting down indefinite spinner
 				<-interrupt.HandlersDone

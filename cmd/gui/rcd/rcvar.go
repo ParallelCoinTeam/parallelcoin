@@ -1,11 +1,13 @@
 package rcd
 
 import (
+	"time"
+
 	"gioui.org/layout"
 	"gioui.org/text"
+
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	"time"
 
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/conte"
@@ -102,7 +104,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		Commands: new(DuoUIcommands),
 		ConsoleHistory: &model.DuoUIconsoleHistory{
 			Commands: []model.DuoUIconsoleCommand{
-				model.DuoUIconsoleCommand{
+				{
 					ComID:    "input",
 					Category: "input",
 					Time:     time.Now(),
@@ -176,7 +178,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 			PeersList: &layout.List{
 				Axis: layout.Vertical,
 			},
-			//Peers:     []*btcjson.GetPeerInfoResult
+			// Peers:     []*btcjson.GetPeerInfoResult
 		},
 
 		History: &model.DuoUIhistory{

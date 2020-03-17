@@ -42,7 +42,7 @@ package rcd
 //		}
 //	}
 //	d.txs.BalanceHeight = balanceHeight
-//	log.L.Info("HISTORY-test:VAR->", d.txs)
+//	L.Info("HISTORY-test:VAR->", d.txs)
 //
 //	return
 //}

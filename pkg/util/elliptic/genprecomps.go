@@ -17,8 +17,8 @@ func main() {
 	fi, err := os.Create("secp256k1.go")
 
 	if err != nil {
-		log.L.Error(err)
-		log.L.Fatal(err)
+		L.Error(err)
+		L.Fatal(err)
 	}
 	defer fi.Close()
 
@@ -28,7 +28,7 @@ func main() {
 	w := zlib.NewWriter(&compressed)
 
 	if _, err := w.Write(serialized); err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		os.Exit(1)
 	}
 	w.Close()

@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 type Block struct {
@@ -23,10 +22,10 @@ func (B *Block) DecodeOne(b []byte) *Block {
 }
 
 func (B *Block) Decode(b []byte) (out []byte) {
-	// log.L.Traces(b)
+	// L.Traces(b)
 	if len(b) >= 4 {
 		B.Length = binary.BigEndian.Uint32(b[:4])
-		//log.L.Debug("length", B.Length)
+		// L.Debug("length", B.Length)
 		if len(b) >= 4+int(B.Length) {
 			B.Bytes = b[4 : 4+B.Length]
 			if len(b) > 4+int(B.Length) {
@@ -34,7 +33,7 @@ func (B *Block) Decode(b []byte) (out []byte) {
 			}
 		}
 	}
-	//log.L.Traces(out)
+	// L.Traces(out)
 	return
 }
 
@@ -50,7 +49,7 @@ func (B *Block) Get() (b *wire.MsgBlock) {
 	buffer := bytes.NewBuffer(B.Bytes)
 	err := b.Deserialize(buffer)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 	}
 	return
 }
@@ -59,7 +58,7 @@ func (B *Block) Put(b *wire.MsgBlock) *Block {
 	var buffer bytes.Buffer
 	err := b.Serialize(&buffer)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return B
 	}
 	B.Bytes = buffer.Bytes()

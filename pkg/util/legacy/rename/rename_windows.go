@@ -28,9 +28,9 @@ package rename
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.import (
 import (
+	log "github.com/p9c/pod/pkg/logi"
 	"syscall"
 	"unsafe"
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 var (
@@ -61,12 +61,12 @@ func moveFileEx(from *uint16, to *uint16, flags uint32) error {
 func Atomic(oldpath, newpath string) error {
 	from, err := syscall.UTF16PtrFromString(oldpath)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	to, err := syscall.UTF16PtrFromString(newpath)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	return moveFileEx(from, to, _MOVEFILE_REPLACE_EXISTING)

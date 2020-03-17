@@ -3,7 +3,6 @@ package wire
 import (
 	"errors"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"io"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -43,19 +42,19 @@ func (msg *MsgCFCheckpt) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) 
 	// Read filter type
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Read stop hash
 	err = readElement(r, &msg.StopHash)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Read number of filter headers
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Refuse to decode an insane number of cfheaders.
@@ -68,7 +67,7 @@ func (msg *MsgCFCheckpt) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) 
 		var cfh chainhash.Hash
 		err := readElement(r, &cfh)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		msg.FilterHeaders[i] = &cfh
@@ -81,26 +80,26 @@ func (msg *MsgCFCheckpt) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) 
 	// Write filter type
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Write stop hash
 	err = writeElement(w, msg.StopHash)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Write length of FilterHeaders slice
 	count := len(msg.FilterHeaders)
 	err = WriteVarInt(w, pver, uint64(count))
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	for _, cfh := range msg.FilterHeaders {
 		err := writeElement(w, cfh)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}

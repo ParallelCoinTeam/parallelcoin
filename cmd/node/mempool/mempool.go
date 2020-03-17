@@ -19,50 +19,51 @@ import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	log "github.com/p9c/pod/pkg/logi"
+
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 )
 
 type // Config is a descriptor containing the memory pool configuration.
-Config struct {
-	// Policy defines the various mempool configuration options related to
-	// policy.
-	Policy Policy
-	// ChainParams identifies which chain parameters the txpool is associated
-	// with.
-	ChainParams *netparams.Params
-	// FetchUtxoView defines the function to use to fetch unspent transaction
-	// output information.
-	FetchUtxoView func(*util.Tx) (*blockchain.UtxoViewpoint, error)
-	// BestHeight defines the function to use to access the block height of
-	// the current best chain.
-	BestHeight func() int32
-	// MedianTimePast defines the function to use in order to access the
-	// median time past calculated from the point-of-view of the current
-	// chain tip within the best chain.
-	MedianTimePast func() time.Time
-	// CalcSequenceLock defines the function to use in order to generate the
-	// current sequence lock for the given transaction using the passed utxo
-	// view.
-	CalcSequenceLock func(*util.Tx, *blockchain.UtxoViewpoint) (*blockchain.SequenceLock, error)
-	// IsDeploymentActive returns true if the target deploymentID is active,
-	// and false otherwise. The mempool uses this function to gauge if
-	// transactions using new to be soft-forked rules should be allowed into
-	// the mempool or not.
-	IsDeploymentActive func(deploymentID uint32) (bool, error)
-	// SigCache defines a signature cache to use.
-	SigCache *txscript.SigCache
-	// HashCache defines the transaction hash mid-state cache to use.
-	HashCache *txscript.HashCache
-	// AddrIndex defines the optional address index instance to use for
-	// indexing the unconfirmed transactions in the memory pool.
-	// This can be nil if the address index is not enabled.
-	AddrIndex *indexers.AddrIndex
-	// FeeEstimatator provides a feeEstimator. If it is not nil,
-	// the mempool records all new transactions it observes into the
-	// feeEstimator.
-	FeeEstimator *FeeEstimator
-}
+	Config struct {
+		// Policy defines the various mempool configuration options related to
+		// policy.
+		Policy Policy
+		// ChainParams identifies which chain parameters the txpool is associated
+		// with.
+		ChainParams *netparams.Params
+		// FetchUtxoView defines the function to use to fetch unspent transaction
+		// output information.
+		FetchUtxoView func(*util.Tx) (*blockchain.UtxoViewpoint, error)
+		// BestHeight defines the function to use to access the block height of
+		// the current best chain.
+		BestHeight func() int32
+		// MedianTimePast defines the function to use in order to access the
+		// median time past calculated from the point-of-view of the current
+		// chain tip within the best chain.
+		MedianTimePast func() time.Time
+		// CalcSequenceLock defines the function to use in order to generate the
+		// current sequence lock for the given transaction using the passed utxo
+		// view.
+		CalcSequenceLock func(*util.Tx, *blockchain.UtxoViewpoint) (*blockchain.SequenceLock, error)
+		// IsDeploymentActive returns true if the target deploymentID is active,
+		// and false otherwise. The mempool uses this function to gauge if
+		// transactions using new to be soft-forked rules should be allowed into
+		// the mempool or not.
+		IsDeploymentActive func(deploymentID uint32) (bool, error)
+		// SigCache defines a signature cache to use.
+		SigCache *txscript.SigCache
+		// HashCache defines the transaction hash mid-state cache to use.
+		HashCache *txscript.HashCache
+		// AddrIndex defines the optional address index instance to use for
+		// indexing the unconfirmed transactions in the memory pool.
+		// This can be nil if the address index is not enabled.
+		AddrIndex *indexers.AddrIndex
+		// FeeEstimatator provides a feeEstimator. If it is not nil,
+		// the mempool records all new transactions it observes into the
+		// feeEstimator.
+		FeeEstimator *FeeEstimator
+	}
 
 // Policy houses the policy (configuration parameters) that is used to
 // control the mempool.
@@ -98,49 +99,49 @@ type Policy struct {
 }
 
 type // Tag represents an identifier to use for tagging orphan transactions.
-// The caller may choose any scheme it desires however it is common to use
-// peer IDs so that orphans can be identified by which peer first relayed them.
-Tag uint64
+	// The caller may choose any scheme it desires however it is common to use
+	// peer IDs so that orphans can be identified by which peer first relayed them.
+	Tag uint64
 
 type // TxDesc is a descriptor containing a transaction in the mempool along with
-// additional metadata.
-TxDesc struct {
-	mining.TxDesc
-	// StartingPriority is the priority of the transaction when it was added
-	// to the pool.
-	StartingPriority float64
-}
+	// additional metadata.
+	TxDesc struct {
+		mining.TxDesc
+		// StartingPriority is the priority of the transaction when it was added
+		// to the pool.
+		StartingPriority float64
+	}
 
 type // TxPool is used as a source of transactions that need to be mined into
-// blocks and relayed to other peers.
-// It is safe for concurrent access from multiple peers.
-TxPool struct {
-	// The following variables must only be used atomically.
-	lastUpdated   int64 // last time pool was updated
-	mtx           sync.RWMutex
-	cfg           Config
-	pool          map[chainhash.Hash]*TxDesc
-	orphans       map[chainhash.Hash]*orphanTx
-	orphansByPrev map[wire.OutPoint]map[chainhash.Hash]*util.Tx
-	outpoints     map[wire.OutPoint]*util.Tx
-	pennyTotal    float64 // exponentially decaying total for penny spends.
-	lastPennyUnix int64   // unix time of last ``penny spend''
-	// nextExpireScan is the time after which the orphan pool will be scanned
-	// in order to evict orphans.
-	// This is NOT a hard deadline as the scan will only run when an orphan
-	// is added to the pool as opposed to on an unconditional timer.
-	nextExpireScan time.Time
-}
+	// blocks and relayed to other peers.
+	// It is safe for concurrent access from multiple peers.
+	TxPool struct {
+		// The following variables must only be used atomically.
+		lastUpdated   int64 // last time pool was updated
+		mtx           sync.RWMutex
+		cfg           Config
+		pool          map[chainhash.Hash]*TxDesc
+		orphans       map[chainhash.Hash]*orphanTx
+		orphansByPrev map[wire.OutPoint]map[chainhash.Hash]*util.Tx
+		outpoints     map[wire.OutPoint]*util.Tx
+		pennyTotal    float64 // exponentially decaying total for penny spends.
+		lastPennyUnix int64   // unix time of last ``penny spend''
+		// nextExpireScan is the time after which the orphan pool will be scanned
+		// in order to evict orphans.
+		// This is NOT a hard deadline as the scan will only run when an orphan
+		// is added to the pool as opposed to on an unconditional timer.
+		nextExpireScan time.Time
+	}
 
 type // orphanTx is normal transaction that references an ancestor transaction
-// that is not yet available.
-// It also contains additional information related to it such as an
-// expiration time to help prevent caching the orphan forever.
-orphanTx struct {
-	tx         *util.Tx
-	tag        Tag
-	expiration time.Time
-}
+	// that is not yet available.
+	// It also contains additional information related to it such as an
+	// expiration time to help prevent caching the orphan forever.
+	orphanTx struct {
+		tx         *util.Tx
+		tag        Tag
+		expiration time.Time
+	}
 
 const (
 	// DefaultBlockPrioritySize is the default size in bytes for high
@@ -158,7 +159,7 @@ const (
 )
 
 var // Ensure the TxPool type implements the mining.TxSource interface.
-_ mining.TxSource = (*TxPool)(nil)
+	_ mining.TxSource = (*TxPool)(nil)
 
 func // CheckSpend checks whether the passed outpoint is already spent by a
 // transaction in the mempool.
@@ -298,7 +299,7 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 // This function is safe for concurrent access.
 (mp *TxPool) ProcessTransaction(b *blockchain.BlockChain, tx *util.Tx,
 	allowOrphan, rateLimit bool, tag Tag) ([]*TxDesc, error) {
-	log.L.Trace("processing transaction", tx.Hash())
+	L.Trace("processing transaction", tx.Hash())
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	defer mp.mtx.Unlock()
@@ -306,7 +307,7 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 	missingParents, txD, err := mp.maybeAcceptTransaction(b, tx, true,
 		rateLimit, true)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	if len(missingParents) == 0 {
@@ -481,7 +482,7 @@ func // addOrphan adds an orphan transaction to the orphan pool.
 	// orphan if space is still needed.
 	e := mp.limitNumOrphans()
 	if e != nil {
-		log.L.Warn("failed to set orphan limit", e)
+		L.Warn("failed to set orphan limit", e)
 	}
 	mp.orphans[*tx.Hash()] = &orphanTx{
 		tx:         tx,
@@ -495,7 +496,7 @@ func // addOrphan adds an orphan transaction to the orphan pool.
 		}
 		mp.orphansByPrev[txIn.PreviousOutPoint][*tx.Hash()] = tx
 	}
-	log.L.Debug(
+	L.Debug(
 		"stored orphan transaction", tx.Hash(), "(total:", len(mp.orphans), ")",
 	)
 }
@@ -559,7 +560,7 @@ func // fetchInputUtxos loads utxo details about the input transactions
 (mp *TxPool) fetchInputUtxos(tx *util.Tx) (*blockchain.UtxoViewpoint, error) {
 	utxoView, err := mp.cfg.FetchUtxoView(tx)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	// Attempt to populate any missing inputs from the transaction pool.
@@ -629,7 +630,7 @@ func // limitNumOrphans limits the number of orphan transactions by evicting a
 		mp.nextExpireScan = now.Add(orphanExpireScanInterval)
 		numOrphans := len(mp.orphans)
 		if numExpired := origNumOrphans - numOrphans; numExpired > 0 {
-			log.L.Debugf("Expired %d %s (remaining: %d)",
+			L.Debugf("Expired %d %s (remaining: %d)",
 				numExpired, log.PickNoun(numExpired, "orphan", "orphans"),
 				numOrphans,
 			)
@@ -668,7 +669,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	if tx.MsgTx().HasWitness() {
 		segwitActive, err := mp.cfg.IsDeploymentActive(chaincfg.DeploymentSegwit)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, nil, err
 		}
 		if !segwitActive {
@@ -694,7 +695,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// what transactions are allowed into blocks.
 	err := blockchain.CheckTransactionSanity(tx)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -719,7 +720,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 			medianTimePast, mp.cfg.Policy.MinRelayTxFee,
 			mp.cfg.Policy.MaxTxVersion)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.
 			// When not possible, fall back to a non standard error.
@@ -744,7 +745,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// actual spend data and prevents double spends.
 	err = mp.checkPoolDoubleSpend(tx)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, nil, err
 	}
 	// Fetch all of the unspent transaction outputs referenced by the inputs
@@ -754,7 +755,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// lookup.
 	utxoView, err := mp.fetchInputUtxos(tx)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -795,7 +796,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// respect to its defined relative lock times.
 	sequenceLock, err := mp.cfg.CalcSequenceLock(tx, utxoView)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -813,7 +814,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	txFee, err := blockchain.CheckTransactionInputs(tx, nextBlockHeight,
 		utxoView, mp.cfg.ChainParams)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -824,7 +825,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	if !mp.cfg.Policy.AcceptNonStd {
 		err := checkInputsStandard(tx, utxoView)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.  When not possible, fall back to a non standard error.
 			rejectCode, found := extractRejectCode(err)
@@ -847,7 +848,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// TODO(roasbeef): last bool should be conditional on segwit activation
 	sigOpCost, err := blockchain.GetSigOpCost(tx, false, utxoView, true, true)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -910,7 +911,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 		}
 		oldTotal := mp.pennyTotal
 		mp.pennyTotal += float64(serializedSize)
-		log.L.Tracef(
+		L.Tracef(
 			"rate limit: curTotal %v, nextTotal: %v, limit %v",
 			oldTotal,
 			mp.pennyTotal,
@@ -923,7 +924,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 		txscript.StandardVerifyFlags, mp.cfg.SigCache,
 		mp.cfg.HashCache)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -931,7 +932,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	}
 	// Add to transaction pool.
 	txD := mp.addTransaction(utxoView, tx, bestHeight, txFee)
-	log.L.Debugf(
+	L.Debugf(
 		"accepted transaction %v (pool size: %v) %s",
 		txHash,
 		len(mp.pool),
@@ -1000,7 +1001,7 @@ func // processOrphans is the internal function which implements the public
 				missing, txD, err := mp.maybeAcceptTransaction(
 					b, tx, true, true, false)
 				if err != nil {
-					log.L.Error(err)
+					L.Error(err)
 					// The orphan is now invalid so there is no way any other
 					// orphans which redeem any of its outputs can be
 					// accepted.  Remove them.

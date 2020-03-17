@@ -2,8 +2,7 @@ package database
 
 import (
 	"fmt"
-
-	log "github.com/p9c/pod/pkg/logi"
+	"log"
 )
 
 // Driver defines a structure for backend drivers to use when they registered themselves as a backend which implements the DB interface.

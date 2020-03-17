@@ -33,7 +33,7 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
 		dial = func(network, addr string) (net.Conn, error) {
 			c, err := proxy.Dial(network, addr)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return nil, err
 			}
 			return c, nil
@@ -44,7 +44,7 @@ func newHTTPClient(cfg *pod.Config) (*http.Client, error) {
 	if *cfg.TLS && *cfg.RPCCert != "" {
 		pem, err := ioutil.ReadFile(*cfg.RPCCert)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		pool := x509.NewCertPool()
@@ -85,7 +85,7 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	bodyReader := bytes.NewReader(marshalledJSON)
 	httpRequest, err := http.NewRequest("POST", url, bodyReader)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	httpRequest.Close = true
@@ -96,21 +96,21 @@ func sendPostRequest(marshalledJSON []byte, cx *conte.Xt) ([]byte, error) {
 	// - specified options and submit the request.
 	httpClient, err := newHTTPClient(cx.Config)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	httpResponse, err := httpClient.Do(httpRequest)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	// Read the raw bytes and close the response.
 	respBytes, err := ioutil.ReadAll(httpResponse.Body)
 	httpResponse.Body.Close()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		err = fmt.Errorf("error reading json reply: %v", err)
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	// Handle unsuccessful HTTP responses

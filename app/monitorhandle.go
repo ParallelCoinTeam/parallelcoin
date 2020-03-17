@@ -14,7 +14,6 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 var (
@@ -24,6 +23,9 @@ var (
 	}
 	logoButton                = new(gel.Button)
 	runMenuButton             = new(gel.Button)
+	stopMenuButton            = new(gel.Button)
+	pauseMenuButton           = new(gel.Button)
+	restartMenuButton         = new(gel.Button)
 	settingsFoldButton        = new(gel.Button)
 	runmodeFoldButton         = new(gel.Button)
 	settingsOpen, runmodeOpen bool
@@ -38,13 +40,15 @@ var (
 		"gui":    new(gel.Button),
 	}
 	runMode = "node"
+	running = false
+	pausing = false
 )
 
 var monitorHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		Configure(cx, c)
 		rc := rcd.RcInit(cx)
-		log.L.Warn("starting monitor GUI")
+		L.Warn("starting monitor GUI")
 		w := app.NewWindow(
 			app.Size(unit.Dp(1600), unit.Dp(900)),
 			app.Title("ParallelCoin"),
@@ -53,7 +57,7 @@ var monitorHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		for e := range w.Events() {
 			switch e := e.(type) {
 			case system.DestroyEvent:
-				log.L.Debug("destroy event received")
+				L.Debug("destroy event received")
 				close(cx.KillAll)
 				return e.Err
 			case system.FrameEvent:
@@ -130,13 +134,63 @@ func settingsAndRunmodeButtons(gtx *layout.Context, rc *rcd.RcVar) {
 		Axis: layout.Horizontal,
 	}.Layout(gtx,
 		layout.Rigid(func() {
-			theme.DuoUIbutton("", "", "",
-				theme.Colors["Primary"], "",
-				theme.Colors["Dark"], "Run",
-				theme.Colors["Light"], 0, 41, 41, 41,
-				0, 0).IconLayout(gtx, runMenuButton)
-			for runMenuButton.Clicked(gtx) {
-				log.L.Debug("clicked run button")
+			if !running {
+				theme.DuoUIbutton("", "", "",
+					theme.Colors["Primary"], "",
+					theme.Colors["Dark"], "Run",
+					theme.Colors["Light"], 0, 41, 41, 41,
+					0, 0).IconLayout(gtx, runMenuButton)
+				for runMenuButton.Clicked(gtx) {
+					L.Debug("clicked run button")
+					running = true
+				}
+			}
+			if running {
+				layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+					layout.Rigid(func() {
+						theme.DuoUIbutton("", "", "",
+							theme.Colors["Dark"], "",
+							theme.Colors["Dark"], "Stop",
+							theme.Colors["Light"], 0, 41, 41, 41,
+							0, 0).IconLayout(gtx, stopMenuButton)
+						for stopMenuButton.Clicked(gtx) {
+							L.Debug("clicked stop button")
+							running = false
+							pausing = false
+						}
+					}),
+					layout.Rigid(func() {
+						ic := "Pause"
+						rc := theme.Colors["Dark"]
+						if pausing {
+							ic = "Run"
+							rc = theme.Colors["Primary"]
+						}
+						theme.DuoUIbutton("", "", "",
+							rc, "",
+							theme.Colors["Dark"], ic,
+							theme.Colors["Light"], 0, 41, 41, 41,
+							0, 0).IconLayout(gtx, pauseMenuButton)
+						for pauseMenuButton.Clicked(gtx) {
+							if pausing {
+								L.Debug("clicked on resume button")
+							} else {
+								L.Debug("clicked pause button")
+							}
+							pausing = !pausing
+						}
+					}),
+					layout.Rigid(func() {
+						theme.DuoUIbutton("", "", "",
+							theme.Colors["Dark"], "",
+							theme.Colors["Dark"], "Restart",
+							theme.Colors["Light"], 0, 41, 41, 41,
+							0, 0).IconLayout(gtx, restartMenuButton)
+						for restartMenuButton.Clicked(gtx) {
+							L.Debug("clicked restart button")
+						}
+					}),
+				)
 			}
 		}),
 		layout.Rigid(func() {
@@ -155,7 +209,7 @@ func settingsAndRunmodeButtons(gtx *layout.Context, rc *rcd.RcVar) {
 				theme.Colors["Light"],
 				23, 23, 23, 23, 0, 0)
 			for runmodeFoldButton.Clicked(gtx) {
-				log.L.Debug("run mode folder clicked")
+				L.Debug("run mode folder clicked")
 				if runmodeOpen && settingsOpen {
 					settingsOpen = false
 				}
@@ -182,6 +236,7 @@ func settingsAndRunmodeButtons(gtx *layout.Context, rc *rcd.RcVar) {
 						"", "",
 						16, 0, 80, 32, 4, 4).Layout(gtx, modesButtons[modes[i]])
 					for modesButtons[modes[i]].Clicked(gtx) {
+						L.Debug(modes[i], "clicked")
 						if runmodeOpen {
 							runMode = modes[i]
 							runmodeOpen = false
@@ -212,7 +267,7 @@ func settingsAndRunmodeButtons(gtx *layout.Context, rc *rcd.RcVar) {
 				theme.Colors["Light"],
 				23, 0, 80, 48, 4, 4)
 			for settingsFoldButton.Clicked(gtx) {
-				log.L.Debug("settings folder clicked")
+				L.Debug("settings folder clicked")
 				switch {
 				case runmodeOpen:
 					settingsOpen = !settingsOpen
@@ -256,33 +311,6 @@ func SettingsPage(gtx *layout.Context, rc *rcd.RcVar) layout.FlexChild {
 			layout.UniformInset(unit.Dp(10)).Layout(gtx,
 				controllers[i])
 		})
-	})
-
-}
-
-func RunModePage(gtx *layout.Context, rc *rcd.RcVar) layout.FlexChild {
-	if !runmodeOpen {
-		return layout.Flexed(0, func() {})
-	}
-	return layout.Rigid(func() {
-		cs := gtx.Constraints
-		gelook.DuoUIdrawRectangle(gtx, cs.Width.Max,
-			cs.Height.Max, theme.Colors["Dark"],
-			[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-			t := theme.H3("text")
-			t.Color = theme.Colors["Light"]
-			t.Layout(gtx)
-		})
-		// controllers := []func(){
-		// 	func() {
-		// 		pages.SettingsBody(rc, gtx, theme)()
-		// 	},
-		// }
-		// mainList.Layout(gtx, len(controllers), func(i int) {
-		// 	layout.UniformInset(unit.Dp(10)).Layout(gtx,
-		// 		controllers[i])
-		// })
 	})
 
 }

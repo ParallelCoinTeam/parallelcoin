@@ -4,7 +4,6 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	log "github.com/p9c/pod/pkg/logi"
 	"math/big"
 )
 
@@ -34,7 +33,7 @@ func PrivKeyFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey,
 func NewPrivateKey(curve elliptic.Curve) (*PrivateKey, error) {
 	key, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	return (*PrivateKey)(key), nil

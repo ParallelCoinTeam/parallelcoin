@@ -3,8 +3,6 @@ package bdb
 import (
 	"fmt"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
@@ -31,7 +29,7 @@ func parseArgs(funcName string, args ...interface{}) (string, error) {
 func openDBDriver(args ...interface{}) (walletdb.DB, error) {
 	dbPath, err := parseArgs("Open", args...)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, false)
@@ -42,7 +40,7 @@ func openDBDriver(args ...interface{}) (walletdb.DB, error) {
 func createDBDriver(args ...interface{}) (walletdb.DB, error) {
 	dbPath, err := parseArgs("Create", args...)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, true)

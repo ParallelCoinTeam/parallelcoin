@@ -7,8 +7,6 @@ import (
 	"gioui.org/unit"
 )
 
-var ()
-
 type DuoUIcomponent struct {
 	Name    string
 	Version string

@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/app/appdata"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
@@ -178,7 +176,7 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	}
 	height, err := strconv.ParseInt(parts[0], 10, 32)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed height", checkpoint)
 	}
@@ -188,7 +186,7 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	}
 	hash, err := chainhash.NewHashFromStr(parts[1])
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed hash", checkpoint)
 	}
@@ -222,7 +220,7 @@ func ParseCheckpoints(checkpointStrings []string) ([]chaincfg.Checkpoint, error)
 	for i, cpString := range checkpointStrings {
 		checkpoint, err := NewCheckpointFromStr(cpString)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		checkpoints[i] = checkpoint
@@ -265,20 +263,20 @@ func ValidLogLevel(logLevel string) bool {
 // 	// Create the destination directory if it does not exists
 // 	err := os.MkdirAll(filepath.Dir(destinationPath), 0700)
 // 	if err != nil {
-//		log.L.Error(err)
+//		L.Error(err)
 // 		return err
 // 	}
 // 	// We generate a random user and password
 // 	randomBytes := make([]byte, 20)
 // 	_, err = rand.Read(randomBytes)
 // 	if err != nil {
-//		log.L.Error(err)
+//		L.Error(err)
 // 		return err
 // 	}
 // 	generatedRPCUser := base64.StdEncoding.EncodeToString(randomBytes)
 // 	_, err = rand.Read(randomBytes)
 // 	if err != nil {
-//		log.L.Error(err)
+//		L.Error(err)
 // 		return err
 // 	}
 // 	generatedRPCPass := base64.StdEncoding.EncodeToString(randomBytes)
@@ -287,7 +285,7 @@ func ValidLogLevel(logLevel string) bool {
 // 	dest, err := os.OpenFile(destinationPath,
 // 		os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 // 	if err != nil {
-//		log.L.Error(err)
+//		L.Error(err)
 // 		return err
 // 	}
 // 	defer dest.Close()
@@ -359,7 +357,7 @@ func loadConfig() (
 	_, err := preParser.Parse()
 	if err != nil {
 		if e, ok := err.(*flags.Error); ok && e.Type == flags.ErrHelp {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, nil, err
 		}
 	}

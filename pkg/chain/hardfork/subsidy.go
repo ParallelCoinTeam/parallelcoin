@@ -2,7 +2,6 @@ package hardfork
 
 import (
 	"encoding/hex"
-	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/util"
@@ -43,7 +42,7 @@ var (
 	// CorePubkeyBytes is the address and public keys for the core dev
 	// disbursement
 	CorePubkeyBytes = [][]byte{
-		//nWo
+		// nWo
 		Key("021a00c7e054279124e2d3eb8b64a58f1fda515464cd8df3c0823d2ff2931ebf37"),
 		// loki
 		Key("0387484f75bc5e45092b1334684def6b47f3dba1566b4b87f62d11c73d8f98db3e"),
@@ -74,7 +73,7 @@ var (
 func Amt(f float64) (amt util.Amount) {
 	amt, err := util.NewAmount(f)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		panic(err)
 	}
 	return
@@ -83,7 +82,7 @@ func Amt(f float64) (amt util.Amount) {
 func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
 	out, err := util.DecodeAddress(addr, defaultNet)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		panic(err)
 	}
 	return
@@ -92,7 +91,7 @@ func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
 func Key(key string) (out []byte) {
 	out, err := hex.DecodeString(key)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		panic(err)
 	}
 	return

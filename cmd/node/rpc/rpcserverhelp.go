@@ -6,8 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -32,7 +30,7 @@ var HelpDescsEnUS = map[string]string{
 	"addnode-subcmd": "'add' to add a persistent peer, 'remove' to remove a" +
 		" persistent peer, or 'onetry' to try a single connection to a peer",
 	// NodeCmd help.
-	"node--synopsis":     "Attempts to add or remove a peer.",
+	"node--synopsis": "Attempts to add or remove a peer.",
 	"node-subcmd": "'disconnect' to remove all matching non-persistent" +
 		" peers, 'remove' to remove a persistent peer, or 'connect' to connect" +
 		" to a peer",
@@ -61,8 +59,8 @@ var HelpDescsEnUS = map[string]string{
 	"prevout-addresses": "previous output addresses",
 	"prevout-value":     "previous output value",
 	// VinPrevOut help.
-	"vinprevout-coinbase":    "The hex-encoded bytes of the signature script (coinbase txns only)",
-	"vinprevout-txid":        "The hash of the origin transaction (non-coinbase txns only)",
+	"vinprevout-coinbase": "The hex-encoded bytes of the signature script (coinbase txns only)",
+	"vinprevout-txid":     "The hash of the origin transaction (non-coinbase txns only)",
 	"vinprevout-vout": "The index of the output being redeemed from" +
 		" the origin transaction (non-coinbase txns only)",
 	"vinprevout-scriptSig": "The signature script used to redeem the" +
@@ -70,7 +68,7 @@ var HelpDescsEnUS = map[string]string{
 	"vinprevout-txinwitness": "The witness stack of the passed input, encoded as a JSON string array",
 	"vinprevout-prevOut": "Data from the origin transaction output with" +
 		" index vout.",
-	"vinprevout-sequence":    "The script sequence number",
+	"vinprevout-sequence": "The script sequence number",
 	// Vin help.
 	"vin-coinbase": "The hex-encoded bytes of the signature script" +
 		" (coinbase txns only)",
@@ -101,7 +99,7 @@ var HelpDescsEnUS = map[string]string{
 	// DecodeRawTransactionCmd help.
 	"decoderawtransaction--synopsis": "Returns a JSON object representing" +
 		" the provided serialized, hex-encoded transaction.",
-	"decoderawtransaction-hextx":     "Serialized, hex-encoded transaction",
+	"decoderawtransaction-hextx": "Serialized, hex-encoded transaction",
 	// DecodeScriptResult help.
 	"decodescriptresult-asm":       "Disassembly of the script",
 	"decodescriptresult-reqSigs":   "The number of required signatures",
@@ -136,7 +134,7 @@ var HelpDescsEnUS = map[string]string{
 	"getaddednodeinforesult-connected": "Whether or not the peer is currently connected",
 	"getaddednodeinforesult-addresses": "DNS lookup and connection information about the peer",
 	// GetAddedNodeInfo help.
-	"getaddednodeinfo--synopsis":   "Returns information about manually added (persistent) peers.",
+	"getaddednodeinfo--synopsis": "Returns information about manually added (persistent) peers.",
 	"getaddednodeinfo-dns": "Specifies whether the returned data is" +
 		" a JSON object including DNS and connection information, or just a" +
 		" list of added peers",
@@ -155,10 +153,10 @@ var HelpDescsEnUS = map[string]string{
 	// GetBestBlockHashCmd help.
 	"getbestblockhash--synopsis": "Returns the hash of the of the best" +
 		" (most recent) block in the longest block chain.",
-	"getbestblockhash--result0":  "The hex-encoded block hash",
+	"getbestblockhash--result0": "The hex-encoded block hash",
 	// GetBlockCmd help.
-	"getblock--synopsis":   "Returns information about a block given its hash.",
-	"getblock-hash":        "The hash of the block",
+	"getblock--synopsis": "Returns information about a block given its hash.",
+	"getblock-hash":      "The hash of the block",
 	"getblock-verbose":   "Specifies the block is returned as a JSON object instead of hex-encoded string",
 	"getblock-verbosetx": "Specifies that each transaction is returned" +
 		" as a JSON object and only applies if the verbose flag is true" +
@@ -205,8 +203,8 @@ var HelpDescsEnUS = map[string]string{
 		" softfork",
 	"softforkdescription-version": "The block version that signals " +
 		"enforcement of this softfork",
-	"softforkdescription-id":      "The string identifier for the soft fork",
-	"-status":                     "A bool which indicates if the soft fork is active",
+	"softforkdescription-id": "The string identifier for the soft fork",
+	"-status":                "A bool which indicates if the soft fork is active",
 	// TxRawResult help.
 	"txrawresult-hex":           "Hex-encoded transaction",
 	"txrawresult-txid":          "The hash of the transaction",
@@ -269,15 +267,15 @@ var HelpDescsEnUS = map[string]string{
 	"getblockheader--condition1": "verbose=true",
 	"getblockheader--result0":    "The block header hash",
 	// GetBlockHeaderVerboseResult help.
-	"getblockheaderverboseresult-hash":              "The hash of the block (same as provided)",
-	"getblockheaderverboseresult-confirmations":     "The number of confirmations",
-	"getblockheaderverboseresult-height":            "The height of the block in the block chain",
-	"getblockheaderverboseresult-version":           "The block version",
-	"getblockheaderverboseresult-versionHex":        "The block version in hexadecimal",
-	"getblockheaderverboseresult-merkleroot":        "Root hash of the merkle tree",
-	"getblockheaderverboseresult-time":              "The block time in seconds since 1 Jan 1970 GMT",
-	"getblockheaderverboseresult-nonce":             "The block nonce",
-	"getblockheaderverboseresult-bits":              "The bits which represent the block difficulty",
+	"getblockheaderverboseresult-hash":          "The hash of the block (same as provided)",
+	"getblockheaderverboseresult-confirmations": "The number of confirmations",
+	"getblockheaderverboseresult-height":        "The height of the block in the block chain",
+	"getblockheaderverboseresult-version":       "The block version",
+	"getblockheaderverboseresult-versionHex":    "The block version in hexadecimal",
+	"getblockheaderverboseresult-merkleroot":    "Root hash of the merkle tree",
+	"getblockheaderverboseresult-time":          "The block time in seconds since 1 Jan 1970 GMT",
+	"getblockheaderverboseresult-nonce":         "The block nonce",
+	"getblockheaderverboseresult-bits":          "The bits which represent the block difficulty",
 	"getblockheaderverboseresult-difficulty": "The proof-of-work" +
 		" difficulty as a multiple of the minimum difficulty",
 	"getblockheaderverboseresult-previousblockhash": "The hash of the previous block",
@@ -287,15 +285,15 @@ var HelpDescsEnUS = map[string]string{
 	"templaterequest-capabilities": "List of capabilities",
 	"templaterequest-longpollid": "The long poll ID of a job to monitor for" +
 		" expiration; required and valid only for long poll requests ",
-	"templaterequest-sigoplimit":   "Number of signature operations allowed in blocks (this parameter is ignored)",
-	"templaterequest-sizelimit":    "Number of bytes allowed in blocks (this parameter is ignored)",
-	"templaterequest-maxversion":   "Highest supported block version number (this parameter is ignored)",
-	"templaterequest-target":       "The desired target for the block template (this parameter is ignored)",
-	"templaterequest-data":         "Hex-encoded block data (only for mode=proposal)",
-	"templaterequest-workid":       "The server provided workid if provided in block template (not applicable)",
+	"templaterequest-sigoplimit": "Number of signature operations allowed in blocks (this parameter is ignored)",
+	"templaterequest-sizelimit":  "Number of bytes allowed in blocks (this parameter is ignored)",
+	"templaterequest-maxversion": "Highest supported block version number (this parameter is ignored)",
+	"templaterequest-target":     "The desired target for the block template (this parameter is ignored)",
+	"templaterequest-data":       "Hex-encoded block data (only for mode=proposal)",
+	"templaterequest-workid":     "The server provided workid if provided in block template (not applicable)",
 	// GetBlockTemplateResultTx help.
-	"getblocktemplateresulttx-data":    "Hex-encoded transaction data (byte-for-byte)",
-	"getblocktemplateresulttx-hash":    "Hex-encoded transaction hash (little endian if treated as a 256-bit number)",
+	"getblocktemplateresulttx-data": "Hex-encoded transaction data (byte-for-byte)",
+	"getblocktemplateresulttx-hash": "Hex-encoded transaction hash (little endian if treated as a 256-bit number)",
 	"getblocktemplateresulttx-depends": "Other transactions before this one" +
 		" (by 1-based index in the 'transactions'  list) that must be present in" +
 		" the final block if this one is",
@@ -303,20 +301,20 @@ var HelpDescsEnUS = map[string]string{
 		" transaction inputs and outputs (in Satoshi)",
 	"getblocktemplateresulttx-sigops": "Total number of signature operations" +
 		" as counted for purposes of block limits",
-	"getblocktemplateresulttx-weight":  "The weight of the transaction",
+	"getblocktemplateresulttx-weight": "The weight of the transaction",
 	// GetBlockTemplateResultAux help.
 	"getblocktemplateresultaux-flags": "Hex-encoded byte-for-byte data to" +
 		" include in the coinbase signature script",
 	// GetBlockTemplateResult help.
-	"getblocktemplateresult-bits":                       "Hex-encoded compressed difficulty",
+	"getblocktemplateresult-bits": "Hex-encoded compressed difficulty",
 	"getblocktemplateresult-curtime": "Current time as seen by the server" +
 		" (recommended for block time); must fall within mintime/maxtime rules",
-	"getblocktemplateresult-height":                     "Height of the block to be solved",
-	"getblocktemplateresult-previousblockhash":          "Hex-encoded big-endian hash of the previous block",
-	"getblocktemplateresult-sigoplimit":                 "Number of sigops allowed in blocks ",
-	"getblocktemplateresult-sizelimit":                  "Number of bytes allowed in blocks",
-	"getblocktemplateresult-transactions":               "Array of transactions as JSON objects",
-	"getblocktemplateresult-version":                    "The block version",
+	"getblocktemplateresult-height":            "Height of the block to be solved",
+	"getblocktemplateresult-previousblockhash": "Hex-encoded big-endian hash of the previous block",
+	"getblocktemplateresult-sigoplimit":        "Number of sigops allowed in blocks ",
+	"getblocktemplateresult-sizelimit":         "Number of bytes allowed in blocks",
+	"getblocktemplateresult-transactions":      "Array of transactions as JSON objects",
+	"getblocktemplateresult-version":           "The block version",
 	"getblocktemplateresult-coinbaseaux": "Data that should be included in the" +
 		" coinbase signature script",
 	"getblocktemplateresult-coinbasetxn": "Information about the coinbase" +
@@ -329,14 +327,14 @@ var HelpDescsEnUS = map[string]string{
 		" which allows monitoring for expiration",
 	"getblocktemplateresult-longpolluri": "An alternate URI to use for long" +
 		" poll requests if provided (not provided)",
-	"getblocktemplateresult-submitold":                  "Not applicable",
+	"getblocktemplateresult-submitold": "Not applicable",
 	"getblocktemplateresult-target": "Hex-encoded big-endian number which" +
 		" valid results must be less than",
 	"getblocktemplateresult-expires": "Maximum number of seconds (starting" +
 		" from when the server sent the response) this work is valid for",
-	"getblocktemplateresult-maxtime":                    "Maximum allowed time",
-	"getblocktemplateresult-mintime":                    "Minimum allowed time",
-	"getblocktemplateresult-mutable":                    "List of mutations the server explicitly allows",
+	"getblocktemplateresult-maxtime": "Maximum allowed time",
+	"getblocktemplateresult-mintime": "Minimum allowed time",
+	"getblocktemplateresult-mutable": "List of mutations the server explicitly allows",
 	"getblocktemplateresult-noncerange": "Two concatenated hex-encoded" +
 		" big-endian 32-bit integers which represent the valid ranges of" +
 		" nonces the miner may scan",
@@ -747,12 +745,12 @@ var ResultTypes = map[string][]interface{}{
 	"restart":               {(*string)(nil)},
 	"resetchain":            {(*string)(nil)},
 	// "dropwallethistory":     {(*string)(nil)},
-	"submitblock":           {nil, (*string)(nil)},
-	"uptime":                {(*int64)(nil)},
-	"validateaddress":       {(*btcjson.ValidateAddressChainResult)(nil)},
-	"verifychain":           {(*bool)(nil)},
-	"verifymessage":         {(*bool)(nil)},
-	"version":               {(*map[string]btcjson.VersionResult)(nil)},
+	"submitblock":     {nil, (*string)(nil)},
+	"uptime":          {(*int64)(nil)},
+	"validateaddress": {(*btcjson.ValidateAddressChainResult)(nil)},
+	"verifychain":     {(*bool)(nil)},
+	"verifymessage":   {(*bool)(nil)},
+	"version":         {(*map[string]btcjson.VersionResult)(nil)},
 	// Websocket commands.
 	"loadtxfilter":              nil,
 	"session":                   {(*btcjson.SessionResult)(nil)},
@@ -793,7 +791,7 @@ func (c *HelpCacher) RPCMethodHelp(method string) (string, error) {
 	// Generate, cache, and return the help.
 	help, err := btcjson.GenerateHelp(method, HelpDescsEnUS, resultTypes...)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return "", err
 	}
 	c.methodHelp[method] = help
@@ -813,7 +811,7 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 	for k := range RPCHandlers {
 		usage, err := btcjson.MethodUsageText(k)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return "", err
 		}
 		usageTexts = append(usageTexts, usage)
@@ -823,7 +821,7 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 		for k := range WSHandlers {
 			usage, err := btcjson.MethodUsageText(k)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return "", err
 			}
 			usageTexts = append(usageTexts, usage)

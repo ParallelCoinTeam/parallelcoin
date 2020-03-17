@@ -4,7 +4,6 @@ import (
 	"sort"
 
 	"github.com/p9c/pod/pkg/chain/fork"
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 type Algo struct {
@@ -61,12 +60,12 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(lastNode, v.Name, true)
 			}
 			newTargetBits = nTB
-			// log.L.Traces(newTargetBits)
+			// L.Traces(newTargetBits)
 		} else {
 			newTargetBits = b.DifficultyBits.Load().(TargetBits)
 		}
 		return
 	}
-	log.L.Trace("should not fall through here")
+	L.Trace("should not fall through here")
 	return
 }

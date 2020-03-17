@@ -1,7 +1,5 @@
 package rcd
 
-import ()
-
 type DuoUIcommands struct {
 	Events  chan DuoUIcommandsEvent
 	History []DuoUIcommand

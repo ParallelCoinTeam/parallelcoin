@@ -53,15 +53,15 @@ func (b *BlockChain) Subscribe(callback NotificationCallback) {
 
 // sendNotification sends a notification with the passed type and data if the caller requested notifications by providing a callback function in the call to New.
 func (b *BlockChain) sendNotification(typ NotificationType, data interface{}) {
-	// log.L.Debug <- "sendNotification"
+	// L.Debug <- "sendNotification"
 	// Generate and send the notification.
 	n := Notification{Type: typ, Data: data}
 	b.notificationsLock.RLock()
 	for _, callback := range b.notifications {
-		// log.L.Debug <- "sending callback"
+		// L.Debug <- "sending callback"
 		callback(&n)
-		// log.L.Debug <- "sent callback"
+		// L.Debug <- "sent callback"
 	}
-	// log.L.Debug <- "done sending notifications"
+	// L.Debug <- "done sending notifications"
 	b.notificationsLock.RUnlock()
 }

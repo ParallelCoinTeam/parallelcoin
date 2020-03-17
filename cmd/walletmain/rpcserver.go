@@ -14,7 +14,7 @@ import (
 
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	log "github.com/p9c/pod/pkg/logi"
+
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
@@ -27,19 +27,19 @@ type listenFunc func(net string, laddr string) (net.Listener, error)
 // possibly also the key in PEM format to the paths specified by the config.  If
 // successful, the new keypair is returned.
 func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, error) {
-	log.L.Info("generating TLS certificates")
+	L.Info("generating TLS certificates")
 	// Create directories for cert and key files if they do not yet exist.
-	log.L.Warn("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
+	L.Warn("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
 	certDir, _ := filepath.Split(*config.RPCCert)
 	keyDir, _ := filepath.Split(*config.RPCKey)
 	err := os.MkdirAll(certDir, 0700)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return tls.Certificate{}, err
 	}
 	err = os.MkdirAll(keyDir, 0700)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return tls.Certificate{}, err
 	}
 	// Generate cert pair.
@@ -47,12 +47,12 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	validUntil := time.Now().Add(time.Hour * 24 * 365 * 10)
 	cert, key, err := util.NewTLSCertPair(org, validUntil, nil)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return tls.Certificate{}, err
 	}
 	keyPair, err := tls.X509KeyPair(cert, key)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return tls.Certificate{}, err
 	}
 	// Write cert and (potentially) the key files.
@@ -60,7 +60,7 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	if err != nil {
 		rmErr := os.Remove(*config.RPCCert)
 		if rmErr != nil {
-			log.L.Warn("cannot remove written certificates:", rmErr)
+			L.Warn("cannot remove written certificates:", rmErr)
 		}
 		return tls.Certificate{}, err
 	}
@@ -68,26 +68,26 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	if err != nil {
 		rmErr := os.Remove(*config.RPCCert)
 		if rmErr != nil {
-			log.L.Warn("cannot remove written certificates:", rmErr)
+			L.Warn("cannot remove written certificates:", rmErr)
 		}
 		return tls.Certificate{}, err
 	}
 	if writeKey {
 		err = ioutil.WriteFile(*config.RPCKey, key, 0600)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			rmErr := os.Remove(*config.RPCCert)
 			if rmErr != nil {
-				log.L.Warn("cannot remove written certificates:", rmErr)
+				L.Warn("cannot remove written certificates:", rmErr)
 			}
 			rmErr = os.Remove(*config.CAFile)
 			if rmErr != nil {
-				log.L.Warn("cannot remove written certificates:", rmErr)
+				L.Warn("cannot remove written certificates:", rmErr)
 			}
 			return tls.Certificate{}, err
 		}
 	}
-	log.L.Info("done generating TLS certificates")
+	L.Info("done generating TLS certificates")
 	return keyPair, nil
 }
 
@@ -100,9 +100,9 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range normalizedListenAddrs {
 		host, _, err := net.SplitHostPort(addr)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			// Shouldn't happen due to already being normalized.
-			log.L.Errorf(
+			L.Errorf(
 				"`%s` is not a normalized listener address", addr)
 			continue
 		}
@@ -124,7 +124,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 		ip := net.ParseIP(host)
 		switch {
 		case ip == nil:
-			log.L.Warnf("`%s` is not a valid IP address", host)
+			L.Warnf("`%s` is not a valid IP address", host)
 		case ip.To4() == nil:
 			ipv6Addrs = append(ipv6Addrs, addr)
 		default:
@@ -135,8 +135,8 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range ipv4Addrs {
 		listener, err := listen("tcp4", addr)
 		if err != nil {
-			log.L.Error(err)
-			log.L.Warnf(
+			L.Error(err)
+			L.Warnf(
 				"Can't listen on %s: %v", addr, err,
 			)
 			continue
@@ -146,8 +146,8 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range ipv6Addrs {
 		listener, err := listen("tcp6", addr)
 		if err != nil {
-			log.L.Error(err)
-			log.L.Warnf(
+			L.Error(err)
+			L.Warnf(
 				"Can't listen on %s: %v", addr, err,
 			)
 			continue
@@ -186,7 +186,7 @@ func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 }
 func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netparams.Params,
 	walletLoader *wallet.Loader) (*legacy.Server, error) {
-	log.L.Trace("startRPCServers")
+	L.Trace("startRPCServers")
 	var (
 		legacyServer *legacy.Server
 		walletListen = net.Listen
@@ -194,11 +194,11 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 		err          error
 	)
 	if !*config.TLS {
-		log.L.Info("server TLS is disabled - only legacy RPC may be used")
+		L.Info("server TLS is disabled - only legacy RPC may be used")
 	} else {
 		keyPair, err = openRPCKeyPair(config)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		// Change the standard net.Listen function to the tls one.
@@ -213,7 +213,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 		}
 	}
 	if *config.Username == "" || *config.Password == "" {
-		log.L.Info("legacy RPC server disabled (requires username and password)")
+		L.Info("legacy RPC server disabled (requires username and password)")
 	} else if len(*config.WalletRPCListeners) != 0 {
 		listeners := makeListeners(*config.WalletRPCListeners, walletListen)
 		if len(listeners) == 0 {
@@ -240,7 +240,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 // enables methods that require a loaded wallet.
 func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *legacy.Server) {
 	if legacyServer != nil {
-		log.L.Warn("starting legacy wallet rpc server")
+		L.Warn("starting legacy wallet rpc server")
 		legacyServer.RegisterWallet(wallet)
 	}
 }

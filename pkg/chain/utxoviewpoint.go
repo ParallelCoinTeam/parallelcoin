@@ -2,7 +2,7 @@ package blockchain
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
+
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -251,7 +251,7 @@ func (view *UtxoViewpoint) connectTransactions(block *util.Block, stxos *[]Spent
 	for _, tx := range block.Transactions() {
 		err := view.connectTransaction(tx, block.Height(), stxos)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}
@@ -381,7 +381,7 @@ func (view *UtxoViewpoint) disconnectTransactions(db database.DB, block *util.Bl
 			if stxo.Height == 0 {
 				utxo, err := view.fetchEntryByHash(db, txHash)
 				if err != nil {
-					log.L.Error(err)
+					L.Error(err)
 					return err
 				}
 				if utxo == nil {
@@ -455,7 +455,7 @@ func (view *UtxoViewpoint) fetchUtxosMain(db database.DB, outpoints map[wire.Out
 		for outpoint := range outpoints {
 			entry, err := dbFetchUtxoEntry(dbTx, outpoint)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return err
 			}
 			view.entries[outpoint] = entry
@@ -589,7 +589,7 @@ func (b *BlockChain) FetchUtxoEntry(outpoint wire.OutPoint) (*UtxoEntry, error) 
 		return err
 	})
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	return entry, nil

@@ -28,7 +28,7 @@ func (cmd *headersCmd) Execute(args []string) error {
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer db.Close()
@@ -42,7 +42,7 @@ return err
 				totalHdrs++
 				return nil
 			})
-			log.L.Infof("Loading headers for %d blocks...", totalHdrs)
+			L.Infof("Loading headers for %d blocks...", totalHdrs)
 			numLoaded := 0
 			startTime := time.Now()
 			blockIdxBucket.ForEach(func(k, v []byte) error {
@@ -50,13 +50,13 @@ return err
 				copy(hash[:], k)
 				_, err := tx.FetchBlockHeader(&hash)
 				if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 				}
 				numLoaded++
 				return nil
 			})
-			log.L.Infof("Loaded %d headers in %v", numLoaded,
+			L.Infof("Loaded %d headers in %v", numLoaded,
 				time.Since(startTime))
 			return nil
 		})
@@ -72,14 +72,14 @@ return err
 			hashes = append(hashes, hash)
 			return nil
 		})
-		log.L.Infof("Loading headers for %d blocks...", len(hashes))
+		L.Infof("Loading headers for %d blocks...", len(hashes))
 		startTime := time.Now()
 		hdrs, err := tx.FetchBlockHeaders(hashes)
 		if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 		}
-		log.L.Infof("Loaded %d headers in %v", len(hdrs),
+		L.Infof("Loaded %d headers in %v", len(hdrs),
 			time.Since(startTime))
 		return nil
 	})

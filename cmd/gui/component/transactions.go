@@ -9,8 +9,6 @@ import (
 	"github.com/p9c/pod/pkg/gelook"
 )
 
-var ()
-
 func TransactionsList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		rc.History.TransList.Layout(gtx, len(rc.History.Txs.Txs), func(i int) {

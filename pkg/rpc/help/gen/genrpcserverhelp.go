@@ -9,15 +9,14 @@ import (
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpchelp "github.com/p9c/pod/pkg/rpc/help"
-
 	// rpchelp "github.com/p9c/pod/pkg/rpc/help"
 )
 
 var outputFile = func() *os.File {
 	fi, err := os.Create("../rpcserverhelp.go")
 	if err != nil {
-		log.L.Error(err)
-		log.L.Fatal(err)
+		L.Error(err)
+		L.Fatal(err)
 	}
 	return fi
 }()
@@ -25,13 +24,13 @@ var outputFile = func() *os.File {
 func writefln(format string, args ...interface{}) {
 	_, err := fmt.Fprintf(outputFile, format, args...)
 	if err != nil {
-		log.L.Error(err)
-		log.L.Fatal(err)
+		L.Error(err)
+		L.Fatal(err)
 	}
 	_, err = outputFile.Write([]byte{'\n'})
 	if err != nil {
-		log.L.Error(err)
-		log.L.Fatal(err)
+		L.Error(err)
+		L.Fatal(err)
 	}
 }
 func writeLocaleHelp(locale, goLocale string, descs map[string]string) {
@@ -42,8 +41,8 @@ func writeLocaleHelp(locale, goLocale string, descs map[string]string) {
 		m := &rpchelp.Methods[i]
 		helpText, err := btcjson.GenerateHelp(m.Method, descs, m.ResultTypes...)
 		if err != nil {
-			log.L.Error(err)
-			log.L.Fatal(err)
+			L.Error(err)
+			L.Fatal(err)
 		}
 		writefln("%q: %q,", m.Method, helpText)
 	}
@@ -63,8 +62,8 @@ func writeUsage() {
 	for i := range rpchelp.Methods {
 		usageStrs[i], err = btcjson.MethodUsageText(rpchelp.Methods[i].Method)
 		if err != nil {
-			log.L.Error(err)
-			log.L.Fatal(err)
+			L.Error(err)
+			L.Fatal(err)
 		}
 	}
 	usages := strings.Join(usageStrs, "\n")

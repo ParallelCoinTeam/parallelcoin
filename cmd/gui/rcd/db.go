@@ -3,9 +3,10 @@ package rcd
 import (
 	"encoding/json"
 	"fmt"
+	"unicode"
+
 	scribble "github.com/nanobox-io/golang-scribble"
 	"golang.org/x/text/unicode/norm"
-	"unicode"
 )
 
 // Items

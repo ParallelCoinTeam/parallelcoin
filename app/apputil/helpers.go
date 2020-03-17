@@ -3,12 +3,12 @@ package apputil
 import (
 	"os"
 	"time"
-	
+
 	"github.com/urfave/cli"
 )
 
 // NewCommand returns a cli.Command
-func NewCommand(name string, usage string, action interface{}, subcommands cli.Commands, flags []cli.Flag, aliases ...string, ) cli.Command {
+func NewCommand(name string, usage string, action interface{}, subcommands cli.Commands, flags []cli.Flag, aliases ...string) cli.Command {
 	return cli.Command{
 		Name:        name,
 		Aliases:     aliases,

@@ -8,7 +8,6 @@ import (
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
@@ -67,7 +66,7 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 			ns, waddrmgr.DefaultAccountNum,
 		)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Fetch the external key count, which bounds the indexes we
@@ -122,7 +121,7 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 			credit.PkScript, rm.chainParams,
 		)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		rm.state.AddWatchedOutPoint(&credit.OutPoint, addrs[0])
@@ -135,7 +134,7 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 func (rm *RecoveryManager) AddToBlockBatch(hash *chainhash.Hash, height int32,
 	timestamp time.Time) {
 	if !rm.started {
-		log.L.Tracef(
+		L.Tracef(
 			"Seed birthday surpassed, starting recovery of wallet from height=%d hash=%v with recovery-window=%d",
 			height, *hash, rm.recoveryWindow,
 		)

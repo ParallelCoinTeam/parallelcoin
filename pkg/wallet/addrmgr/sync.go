@@ -1,7 +1,6 @@
 package waddrmgr
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
 	"time"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -54,7 +53,7 @@ func (m *Manager) SetSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) error
 	// Update the database.
 	err := putSyncedTo(ns, bs)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Update memory now that the database is updated.

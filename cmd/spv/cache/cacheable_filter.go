@@ -1,7 +1,6 @@
 package cache
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/gcs"
 )
 
@@ -15,7 +14,7 @@ type CacheableFilter struct {
 func (c *CacheableFilter) Size() (uint64, error) {
 	f, err := c.Filter.NBytes()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return 0, err
 	}
 	return uint64(len(f)), nil

@@ -39,28 +39,28 @@ func (cmd *blockRegionCmd) Execute(args []string) error {
 	// Parse arguments.
 	blockHash, err := chainhash.NewHashFromStr(args[0])
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	startOffset, err := strconv.ParseUint(args[1], 10, 32)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	regionLen, err := strconv.ParseUint(args[2], 10, 32)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer db.Close()
 	return db.View(func(tx database.Tx) error {
-		log.L.Infof("Fetching block region %s<%d:%d>", blockHash,
+		L.Infof("Fetching block region %s<%d:%d>", blockHash,
 			startOffset, startOffset+regionLen-1)
 		region := database.BlockRegion{
 			Hash:   blockHash,
@@ -70,12 +70,12 @@ return err
 		startTime := time.Now()
 		regionBytes, err := tx.FetchBlockRegion(&region)
 		if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 		}
-		log.L.Infof("Loaded block region in %v", time.Since(startTime))
-		log.L.Infof("Double Hash: %s", chainhash.DoubleHashH(regionBytes))
-		log.L.Infof("Region Hex: %s", hex.EncodeToString(regionBytes))
+		L.Infof("Loaded block region in %v", time.Since(startTime))
+		L.Infof("Double Hash: %s", chainhash.DoubleHashH(regionBytes))
+		L.Infof("Region Hex: %s", hex.EncodeToString(regionBytes))
 		return nil
 	})
 }

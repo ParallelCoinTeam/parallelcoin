@@ -3,8 +3,8 @@
 package conte
 
 import (
-	"sync"
 	"go.uber.org/atomic"
+	"sync"
 
 	"github.com/urfave/cli"
 
