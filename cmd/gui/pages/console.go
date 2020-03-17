@@ -28,9 +28,12 @@ func Console(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.
 	page := gelook.DuoUIpage{
 		Title:         "CONSOLE",
 		Command:       func() {},
+		Border:        4,
+		BorderColor:   th.Colors["Light"],
 		Header:        func() {},
 		HeaderPadding: 0,
 		Body:          consoleBody(rc, gtx, th),
+		BodyBgColor:   th.Colors["Dark"],
 		BodyPadding:   4,
 		Footer:        func() {},
 		FooterPadding: 0,

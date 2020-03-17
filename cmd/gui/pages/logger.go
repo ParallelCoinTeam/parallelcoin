@@ -23,9 +23,11 @@ func Logger(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.D
 		Title:         "LOG",
 		Command:       func() {},
 		Border:        4,
+		BorderColor:   th.Colors["Light"],
 		Header:        func() {},
 		HeaderBgColor: "",
 		Body:          component.DuoUIlogger(rc, gtx, th),
+		BodyBgColor:   th.Colors["Dark"],
 		Footer:        func() {},
 		FooterBgColor: "",
 	}
