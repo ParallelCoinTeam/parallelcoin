@@ -72,7 +72,11 @@ func DuoUIdialog(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
 									Axis:      layout.Horizontal,
 									Alignment: layout.Middle,
 								}.Layout(gtx,
-									layout.Rigid(dialogButon(gtx, th, rc.Dialog.Red, rc.Dialog.RedLabel, "ffcf3030", "iconCancel", "ffcf8080", buttonDialogCancel)),
+									layout.Rigid(
+										dialogButon(gtx, th,
+											rc.Dialog.Red, rc.Dialog.RedLabel,
+											"ffcf3030", "iconCancel", "ffcf8080",
+											buttonDialogCancel)),
 									layout.Rigid(dialogButon(gtx, th, rc.Dialog.Green, rc.Dialog.GreenLabel, "ff30cf30", "iconOK", "ff80cf80", buttonDialogOK)),
 									layout.Rigid(dialogButon(gtx, th, rc.Dialog.Orange, rc.Dialog.OrangeLabel, "ffcf8030", "iconClose", "ffcfa880", buttonDialogClose)),
 								)

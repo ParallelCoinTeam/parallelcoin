@@ -85,6 +85,7 @@ type Entry struct {
 	Time         time.Time
 	Level        string
 	CodeLocation string
+	Package      string
 	Text         string
 }
 
@@ -479,7 +480,11 @@ func printcFunc(level string, color bool, fh *os.File, ch chan Entry, split stri
 		wr.Println(Composite(text, level, color, split))
 		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(2)
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
+			splitted := strings.Split(loc, string(os.PathSeparator))
+			pkg := strings.Join(splitted[:len(splitted)-1],
+				string(os.PathSeparator))
+			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
+				text}
 			if fh != nil {
 				j, err := json.Marshal(out)
 				if err != nil {
@@ -507,7 +512,11 @@ func printfFunc(level string, color bool, fh *os.File, ch chan Entry, split stri
 		wr.Println(Composite(text, level, color, split))
 		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(2)
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
+			splitted := strings.Split(loc, string(os.PathSeparator))
+			pkg := strings.Join(splitted[:len(splitted)-1],
+				string(os.PathSeparator))
+			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
+				text}
 			if fh != nil {
 				j, err := json.Marshal(out)
 				if err != nil {
@@ -528,13 +537,18 @@ func Println(a ...interface{}) {
 	wr.Println(a...)
 }
 
-func printlnFunc(level string, color bool, fh *os.File, ch chan Entry, split string) PrintlnFunc {
+func printlnFunc(level string, color bool, fh *os.File,
+	ch chan Entry, split string) PrintlnFunc {
 	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
 		wr.Println(Composite(text, level, color, split))
 		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(2)
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
+			splitted := strings.Split(loc, string(os.PathSeparator))
+			pkg := strings.Join(splitted[:len(splitted)-1],
+				string(os.PathSeparator))
+			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
+				text}
 			if fh != nil {
 				j, err := json.Marshal(out)
 				if err != nil {
@@ -560,7 +574,11 @@ func checkFunc(color bool, fh *os.File, ch chan Entry, split string) CheckFunc {
 		wr.Println(Composite(text, "CHK", color, split))
 		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(3)
-			out := Entry{time.Now(), "CHK", fmt.Sprint(loc, ":", line), text}
+			splitted := strings.Split(loc, string(os.PathSeparator))
+			pkg := strings.Join(splitted[:len(splitted)-1],
+				string(os.PathSeparator))
+			out := Entry{time.Now(), "CHK", fmt.Sprint(loc, ":", line), pkg,
+				text}
 			if fh != nil {
 				j, err := json.Marshal(out)
 				if err != nil {
@@ -586,7 +604,11 @@ func ps(level string, color bool, fh *os.File, split string) SpewFunc {
 		wr.Print(o)
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), text}
+			splitted := strings.Split(loc, string(os.PathSeparator))
+			pkg := strings.Join(splitted[:len(splitted)-1],
+				string(os.PathSeparator))
+			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
+				text}
 			j, err := json.Marshal(out)
 			if err != nil {
 				wr.Println("logging error:", err)

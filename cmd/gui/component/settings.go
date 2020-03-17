@@ -3,14 +3,16 @@ package component
 
 import (
 	"fmt"
+	"strconv"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/pod"
-	"strconv"
 )
 
 var (
@@ -30,7 +32,7 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 		groupsList.Layout(gtx, groupsNumber, func(i int) {
 			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 				color := th.Colors["Dark"]
-				bgColor := th.Colors["Light"]
+				bgColor := th.Colors["Primary"]
 				i = groupsNumber - 1 - i
 				t := rc.Settings.Daemon.Schema.Groups[i]
 				txt := fmt.Sprint(t.Legend)
@@ -102,8 +104,8 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				}
 				rc.SaveDaemonCfg()
 			case "radio":
-				//radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
-				//layout.Flex{}.Layout(gtx,
+				// radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
+				// layout.Flex{}.Layout(gtx,
 				//	layout.Rigid(func() {
 				//		duo.Theme.RadioButton("r1", "RadioButton1").Layout(gtx,  radioButtonsGroup)
 				//
@@ -117,7 +119,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				//
 				//	}))
 			default:
-				//duo.Theme.CheckBox("Checkbox").Layout(gtx, (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
+				// duo.Theme.CheckBox("Checkbox").Layout(gtx, (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
 
 			}
 		})
@@ -125,13 +127,13 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 }
 
 //
-//var typeRegistry = make(map[string]reflect.Type)
+// var typeRegistry = make(map[string]reflect.Type)
 //
-//func makeInstance(name string) interface{} {
+// func makeInstance(name string) interface{} {
 //	v := reflect.New(typeRegistry["cx.DuoUIconfigurationig."+name]).Elem()
 //	// Maybe fill in fields here if necessary
 //	return v.Interface()
-//}
+// }
 
 func SettingsFieldLabel(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {

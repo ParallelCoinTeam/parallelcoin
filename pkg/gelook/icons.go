@@ -57,7 +57,7 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["DeviceSignalCellular0Bar"] = mustIcon(NewDuoUIicon(icons.DeviceSignalCellular0Bar))
 	i["HardwareWatch"] = mustIcon(NewDuoUIicon(icons.HardwareWatch))
 	i["EditorMonetizationOn"] = mustIcon(NewDuoUIicon(icons.EditorMonetizationOn))
-
+	i["Run"] = mustIcon(NewDuoUIicon(icons.AVPlayArrow))
 	i["iconGrab"] = mustIcon(NewDuoUIicon(icons.NavigationMenu))
 	i["iconUp"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropUp))
 	i["iconDown"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropDown))
