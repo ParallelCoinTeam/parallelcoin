@@ -31,7 +31,7 @@ func (ui *DuoUI) DuoUIheader() func() {
 				var logoMeniItem gelook.DuoUIbutton
 				logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", ui.ly.Theme.Colors["Dark"], "", "", "logo", ui.ly.Theme.Colors["Light"], 16, 64, 96, 96, 8, 8)
 				for logoButton.Clicked(ui.ly.Context) {
-					ui.changeLightDark()
+					ui.ly.Theme.ChangeLightDark()
 				}
 				logoMeniItem.IconLayout(ui.ly.Context, logoButton)
 			}),
@@ -39,17 +39,6 @@ func (ui *DuoUI) DuoUIheader() func() {
 			layout.Rigid(component.Label(ui.ly.Context, ui.ly.Theme, ui.ly.Theme.Fonts["Primary"], 12, ui.ly.Theme.Colors["Light"], ui.rc.Status.Wallet.Balance.Load()+" "+ui.rc.Settings.Abbrevation)),
 		)
 	}
-}
-
-func (ui *DuoUI) changeLightDark() {
-	light := ui.ly.Theme.Colors["Light"]
-	dark := ui.ly.Theme.Colors["Dark"]
-	lightGray := ui.ly.Theme.Colors["LightGrayIII"]
-	darkGray := ui.ly.Theme.Colors["DarkGrayII"]
-	ui.ly.Theme.Colors["Light"] = dark
-	ui.ly.Theme.Colors["Dark"] = light
-	ui.ly.Theme.Colors["LightGrayIII"] = darkGray
-	ui.ly.Theme.Colors["DarkGrayII"] = lightGray
 }
 
 func renderIcon(gtx *layout.Context, icon *gelook.DuoUIicon) func() {

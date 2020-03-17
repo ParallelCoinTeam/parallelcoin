@@ -40,3 +40,14 @@ func NewDuoUIfonts() (f map[string]text.Typeface) {
 	f["Mono"] = "go"
 	return f
 }
+
+func (t *DuoUItheme) ChangeLightDark() {
+	light := t.Colors["Light"]
+	dark := t.Colors["Dark"]
+	lightGray := t.Colors["LightGrayIII"]
+	darkGray := t.Colors["DarkGrayII"]
+	t.Colors["Light"] = dark
+	t.Colors["Dark"] = light
+	t.Colors["LightGrayIII"] = darkGray
+	t.Colors["DarkGrayII"] = lightGray
+}
