@@ -52,7 +52,7 @@ var (
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	w := app.NewWindow(
 		app.Size(unit.Dp(1600), unit.Dp(900)),
-		app.Title("ParallelCoin"),
+		app.Title("ParallelCoin Pod Monitor"),
 	)
 	gtx := layout.NewContext(w.Queue())
 	go func() {
@@ -138,70 +138,74 @@ func BottomBar(gtx *layout.Context, rc *rcd.RcVar) layout.FlexChild {
 	})
 }
 
+func RunControls(gtx *layout.Context) layout.FlexChild {
+	return layout.Rigid(func() {
+		if !running {
+			theme.DuoUIbutton("", "", "",
+				theme.Colors["Primary"], "",
+				theme.Colors["Dark"], "Run",
+				theme.Colors["Light"], 0, 41, 41, 41,
+				0, 0).IconLayout(gtx, runMenuButton)
+			for runMenuButton.Clicked(gtx) {
+				L.Debug("clicked run button")
+				running = true
+			}
+		}
+		if running {
+			layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+				layout.Rigid(func() {
+					theme.DuoUIbutton("", "", "",
+						theme.Colors["Dark"], "",
+						theme.Colors["Dark"], "Stop",
+						theme.Colors["Light"], 0, 41, 41, 41,
+						0, 0).IconLayout(gtx, stopMenuButton)
+					for stopMenuButton.Clicked(gtx) {
+						L.Debug("clicked stop button")
+						running = false
+						pausing = false
+					}
+				}),
+				layout.Rigid(func() {
+					ic := "Pause"
+					rc := theme.Colors["Dark"]
+					if pausing {
+						ic = "Run"
+						rc = theme.Colors["Primary"]
+					}
+					theme.DuoUIbutton("", "", "",
+						rc, "",
+						theme.Colors["Dark"], ic,
+						theme.Colors["Light"], 0, 41, 41, 41,
+						0, 0).IconLayout(gtx, pauseMenuButton)
+					for pauseMenuButton.Clicked(gtx) {
+						if pausing {
+							L.Debug("clicked on resume button")
+						} else {
+							L.Debug("clicked pause button")
+						}
+						pausing = !pausing
+					}
+				}),
+				layout.Rigid(func() {
+					theme.DuoUIbutton("", "", "",
+						theme.Colors["Dark"], "",
+						theme.Colors["Dark"], "Restart",
+						theme.Colors["Light"], 0, 41, 41, 41,
+						0, 0).IconLayout(gtx, restartMenuButton)
+					for restartMenuButton.Clicked(gtx) {
+						L.Debug("clicked restart button")
+					}
+				}),
+			)
+		}
+	})
+}
+
 func settingsAndRunmodeButtons(gtx *layout.Context, rc *rcd.RcVar) {
 	layout.Flex{
 		Axis: layout.Horizontal,
 	}.Layout(gtx,
-		layout.Rigid(func() {
-			if !running {
-				theme.DuoUIbutton("", "", "",
-					theme.Colors["Primary"], "",
-					theme.Colors["Dark"], "Run",
-					theme.Colors["Light"], 0, 41, 41, 41,
-					0, 0).IconLayout(gtx, runMenuButton)
-				for runMenuButton.Clicked(gtx) {
-					L.Debug("clicked run button")
-					running = true
-				}
-			}
-			if running {
-				layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
-					layout.Rigid(func() {
-						theme.DuoUIbutton("", "", "",
-							theme.Colors["Dark"], "",
-							theme.Colors["Dark"], "Stop",
-							theme.Colors["Light"], 0, 41, 41, 41,
-							0, 0).IconLayout(gtx, stopMenuButton)
-						for stopMenuButton.Clicked(gtx) {
-							L.Debug("clicked stop button")
-							running = false
-							pausing = false
-						}
-					}),
-					layout.Rigid(func() {
-						ic := "Pause"
-						rc := theme.Colors["Dark"]
-						if pausing {
-							ic = "Run"
-							rc = theme.Colors["Primary"]
-						}
-						theme.DuoUIbutton("", "", "",
-							rc, "",
-							theme.Colors["Dark"], ic,
-							theme.Colors["Light"], 0, 41, 41, 41,
-							0, 0).IconLayout(gtx, pauseMenuButton)
-						for pauseMenuButton.Clicked(gtx) {
-							if pausing {
-								L.Debug("clicked on resume button")
-							} else {
-								L.Debug("clicked pause button")
-							}
-							pausing = !pausing
-						}
-					}),
-					layout.Rigid(func() {
-						theme.DuoUIbutton("", "", "",
-							theme.Colors["Dark"], "",
-							theme.Colors["Dark"], "Restart",
-							theme.Colors["Light"], 0, 41, 41, 41,
-							0, 0).IconLayout(gtx, restartMenuButton)
-						for restartMenuButton.Clicked(gtx) {
-							L.Debug("clicked restart button")
-						}
-					}),
-				)
-			}
-		}),
+		RunControls(gtx),
 		layout.Rigid(func() {
 			bg := theme.Colors["Primary"]
 			if runmodeOpen {
@@ -305,11 +309,12 @@ func SettingsPage(gtx *layout.Context, rc *rcd.RcVar) layout.FlexChild {
 	var weight float32 = 0.5
 	var settingsInset float32 = 0
 	switch {
-	case windowWidth < 1024:
-		if windowHeight < 1024 {
-			weight = 1
-		}
-		settingsInset = 0
+	case windowWidth < 1024 && windowHeight > 1024:
+		weight = 0.333
+	case windowHeight < 1024 && windowWidth < 1024:
+		weight = 1
+	case windowHeight < 600 && windowWidth > 1024:
+		weight = 1
 	}
 	return layout.Flexed(weight, func() {
 		cs := gtx.Constraints
@@ -354,7 +359,7 @@ func DuoUIheader(gtx *layout.Context, theme *gelook.DuoUItheme,
 					insetSize, textInsetSize float32 = 16, 24
 					closeInsetSize           float32 = 4
 				)
-				if windowWidth < 1024 || windowHeight < 1280{
+				if windowWidth < 1024 || windowHeight < 1280 {
 					textSize, iconSize = 24, 24
 					width, height = 32, 32
 					paddingV, paddingH = 8, 8
