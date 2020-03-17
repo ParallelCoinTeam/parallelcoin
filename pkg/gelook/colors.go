@@ -4,6 +4,8 @@ package gelook
 
 func NewDuoUIcolors() (c map[string]string) {
 	c = make(map[string]string)
+	c["Black"] = "ff000000"
+	c["White"] = "ffffffff"
 	c["Gray"] = "ff808080"
 	c["Light"] = "ffcfcfcf"
 	c["LightGray"] = "ffbdbdbd"
@@ -24,7 +26,9 @@ func NewDuoUIcolors() (c map[string]string) {
 	c["InvText"] = "0xcfcfcf"
 	c["ButtonText"] = "ffcfcfcf"
 	c["ButtonBg"] = "ff3080cf"
-	c["ButtonText"] = "ffbdbdbd"
-	c["ButtonBg"] = "ff308080"
+	c["PanelText"] = c["Light"]
+	c["PanelBg"] = c["Dark"]
+	c["DocText"] = c["Dark"]
+	c["DocBg"] = c["Light"]
 	return c
 }

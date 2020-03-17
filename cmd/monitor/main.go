@@ -18,36 +18,70 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-var (
-	theme    = gelook.NewDuoUItheme()
-	mainList = &layout.List{
-		Axis: layout.Vertical,
+type State struct {
+	Ctx                       *conte.Xt
+	Gtx                       *layout.Context
+	Rc                        *rcd.RcVar
+	Theme                     *gelook.DuoUItheme
+	MainList                  *layout.List
+	ModesList                 *layout.List
+	CloseButton               *gel.Button
+	LogoButton                *gel.Button
+	RunMenuButton             *gel.Button
+	StopMenuButton            *gel.Button
+	PauseMenuButton           *gel.Button
+	RestartMenuButton         *gel.Button
+	SettingsFoldButton        *gel.Button
+	RunModeFoldButton         *gel.Button
+	BuildFoldButton           *gel.Button
+	ModesButtons              map[string]*gel.Button
+	RunMode                   string
+	RunModeOpen               bool
+	SettingsOpen              bool
+	BuildOpen                 bool
+	Running                   bool
+	Pausing                   bool
+	LightTheme                bool
+	WindowWidth, WindowHeight int
+}
+
+func NewMonitor(cx *conte.Xt, gtx *layout.Context,
+	rc *rcd.RcVar) *State {
+	return &State{
+		Ctx:   cx,
+		Gtx:   gtx,
+		Rc:    rc,
+		Theme: gelook.NewDuoUItheme(),
+		MainList: &layout.List{
+			Axis: layout.Vertical,
+		},
+		ModesList: &layout.List{
+			Axis:      layout.Horizontal,
+			Alignment: layout.Start,
+		},
+		CloseButton:        new(gel.Button),
+		LogoButton:         new(gel.Button),
+		RunMenuButton:      new(gel.Button),
+		StopMenuButton:     new(gel.Button),
+		PauseMenuButton:    new(gel.Button),
+		RestartMenuButton:  new(gel.Button),
+		SettingsFoldButton: new(gel.Button),
+		RunModeFoldButton:  new(gel.Button),
+		BuildFoldButton:    new(gel.Button),
+		ModesButtons: map[string]*gel.Button{
+			"node":   new(gel.Button),
+			"wallet": new(gel.Button),
+			"shell":  new(gel.Button),
+			"gui":    new(gel.Button),
+		},
+		RunMode:      "node",
+		Running:      false,
+		Pausing:      false,
+		LightTheme:   true,
+		WindowWidth:  0,
+		WindowHeight: 0,
 	}
-	closeButton                          = new(gel.Button)
-	logoButton                           = new(gel.Button)
-	runMenuButton                        = new(gel.Button)
-	stopMenuButton                       = new(gel.Button)
-	pauseMenuButton                      = new(gel.Button)
-	restartMenuButton                    = new(gel.Button)
-	settingsFoldButton                   = new(gel.Button)
-	runmodeFoldButton                    = new(gel.Button)
-	buildFoldButton                      = new(gel.Button)
-	settingsOpen, runmodeOpen, buildOpen bool
-	modesList                            = &layout.List{
-		Axis:      layout.Horizontal,
-		Alignment: layout.Start,
-	}
-	modesButtons = map[string]*gel.Button{
-		"node":   new(gel.Button),
-		"wallet": new(gel.Button),
-		"shell":  new(gel.Button),
-		"gui":    new(gel.Button),
-	}
-	runMode                   = "node"
-	running                   = false
-	pausing                   = false
-	windowWidth, windowHeight int
-)
+}
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	w := app.NewWindow(
@@ -55,6 +89,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 		app.Title("ParallelCoin Pod Monitor"),
 	)
 	gtx := layout.NewContext(w.Queue())
+	mon := NewMonitor(cx, gtx, rc)
 	go func() {
 		L.Debug("starting up GUI event loop")
 	out:
@@ -71,8 +106,9 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 				case system.FrameEvent:
 					gtx.Reset(e.Config, e.Size)
 					cs := gtx.Constraints
-					windowWidth, windowHeight = cs.Width.Max, cs.Height.Max
-					TopLevelLayout(gtx, rc, cx)()
+					mon.WindowWidth, mon.WindowHeight =
+						cs.Width.Max, cs.Height.Max
+					TopLevelLayout(mon)()
 					e.Frame(gtx.Ops)
 				}
 			}
@@ -88,27 +124,27 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	return
 }
 
-func TopLevelLayout(gtx *layout.Context, rc *rcd.RcVar, cx *conte.Xt) func() {
+func TopLevelLayout(m *State) func() {
 	return func() {
 		layout.Flex{
 			Axis: layout.Vertical,
-		}.Layout(gtx,
-			DuoUIheader(gtx, cx),
-			Body(gtx, rc),
-			BottomBar(gtx, rc),
+		}.Layout(m.Gtx,
+			DuoUIheader(m),
+			Body(m),
+			BottomBar(m),
 		)
 
 	}
 }
 
-func Body(gtx *layout.Context, rc *rcd.RcVar) layout.FlexChild {
+func Body(m *State) layout.FlexChild {
 	return layout.Flexed(1, func() {
 		layout.Flex{
 			Axis: layout.Vertical,
-		}.Layout(gtx, layout.Flexed(1, func() {
-			cs := gtx.Constraints
-			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max,
-				cs.Height.Max, theme.Colors["Light"],
+		}.Layout(m.Gtx, layout.Flexed(1, func() {
+			cs := m.Gtx.Constraints
+			gelook.DuoUIdrawRectangle(m.Gtx,
+				cs.Width.Max, cs.Height.Max, m.Theme.Colors["DocBg"],
 				[4]float32{0, 0, 0, 0},
 				[4]float32{0, 0, 0, 0},
 			)
@@ -117,17 +153,17 @@ func Body(gtx *layout.Context, rc *rcd.RcVar) layout.FlexChild {
 	})
 }
 
-func DuoUIheader(gtx *layout.Context, cx *conte.Xt) layout.FlexChild {
+func DuoUIheader(m *State) layout.FlexChild {
 	return layout.Rigid(func() {
 		layout.Flex{
 			Axis:      layout.Horizontal,
 			Spacing:   layout.SpaceBetween,
 			Alignment: layout.Middle,
-		}.Layout(gtx,
+		}.Layout(m.Gtx,
 			layout.Rigid(func() {
-				cs := gtx.Constraints
-				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max,
-					cs.Height.Max, theme.Colors["Dark"],
+				cs := m.Gtx.Constraints
+				gelook.DuoUIdrawRectangle(m.Gtx, cs.Width.Max,
+					cs.Height.Max, m.Theme.Colors["PanelBg"],
 					[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				var (
 					textSize, iconSize               = 64, 64
@@ -136,7 +172,7 @@ func DuoUIheader(gtx *layout.Context, cx *conte.Xt) layout.FlexChild {
 					insetSize, textInsetSize float32 = 16, 24
 					closeInsetSize           float32 = 4
 				)
-				if windowWidth < 1024 || windowHeight < 1280 {
+				if m.WindowWidth < 1024 || m.WindowHeight < 1280 {
 					textSize, iconSize = 24, 24
 					width, height = 32, 32
 					paddingV, paddingH = 8, 8
@@ -144,62 +180,65 @@ func DuoUIheader(gtx *layout.Context, cx *conte.Xt) layout.FlexChild {
 					textInsetSize = 16
 					closeInsetSize = 4
 				}
-				layout.Flex{Axis: layout.Horizontal}.Layout(gtx,
+				layout.Flex{Axis: layout.Horizontal}.Layout(m.Gtx,
 					layout.Rigid(func() {
-						layout.UniformInset(unit.Dp(insetSize)).Layout(gtx,
+						layout.UniformInset(unit.Dp(insetSize)).Layout(m.Gtx,
 							func() {
 								var logoMeniItem gelook.DuoUIbutton
-								logoMeniItem = theme.DuoUIbutton(
+								logoMeniItem = m.Theme.DuoUIbutton(
 									"", "",
-									"", theme.Colors["Dark"],
+									"", m.Theme.Colors["PanelBg"],
 									"", "",
-									"logo", theme.Colors["Light"],
+									"logo", m.Theme.Colors["PanelText"],
 									textSize, iconSize,
 									width, height,
 									paddingV, paddingH)
-								for logoButton.Clicked(gtx) {
-									changeLightDark(theme)
+								for m.LogoButton.Clicked(m.Gtx) {
+									FlipTheme(m)
 								}
-								logoMeniItem.IconLayout(gtx, logoButton)
+								logoMeniItem.IconLayout(m.Gtx, m.LogoButton)
 							},
 						)
 					}),
 					layout.Flexed(1, func() {
-						layout.UniformInset(unit.Dp(textInsetSize)).Layout(gtx,
+						layout.UniformInset(unit.Dp(textInsetSize)).Layout(m.
+							Gtx,
 							func() {
-								t := theme.DuoUIlabel(unit.Dp(float32(
+								t := m.Theme.DuoUIlabel(unit.Dp(float32(
 									textSize)),
 									"monitor")
-								t.Color = theme.Colors["Light"]
-								t.Layout(gtx)
+								t.Color = m.Theme.Colors["PanelText"]
+								t.Layout(m.Gtx)
 							},
 						)
 					}),
 					layout.Rigid(func() {
 						layout.UniformInset(unit.Dp(closeInsetSize*2)).Layout(
-							gtx,
+							m.Gtx,
 							func() {
-								t := theme.DuoUIlabel(unit.Dp(float32(
+								t := m.Theme.DuoUIlabel(unit.Dp(float32(
 									24)),
 									fmt.Sprintf("%dx%d",
-										gtx.Constraints.Width.Max,
-										gtx.Constraints.Height.Max))
-								t.Color = theme.Colors["Light"]
-								t.Font.Typeface = theme.Fonts["Primary"]
-								t.Layout(gtx)
+										m.Gtx.Constraints.Width.Max,
+										m.Gtx.Constraints.Height.Max))
+								t.Color = m.Theme.Colors["PanelBg"]
+								t.Font.Typeface = m.Theme.Fonts["Primary"]
+								t.Layout(m.Gtx)
 							})
 					}),
 					layout.Rigid(func() {
-						layout.UniformInset(unit.Dp(closeInsetSize)).Layout(gtx,
-							func() {
-								theme.DuoUIbutton("", "settings", theme.Colors["Light"],
+						layout.UniformInset(unit.Dp(closeInsetSize)).Layout(
+							m.Gtx, func() {
+								m.Theme.DuoUIbutton("", "settings",
+									m.Theme.Colors["PanelText"],
 									"", "",
-									theme.Colors["Dark"], "closeIcon",
-									theme.Colors["Light"], 0, 32, 41, 41,
-									0, 0).IconLayout(gtx, closeButton)
-								for closeButton.Clicked(gtx) {
+									m.Theme.Colors["PanelBg"], "closeIcon",
+									m.Theme.Colors["PanelText"],
+									0, 32, 41, 41,
+									0, 0).IconLayout(m.Gtx, m.CloseButton)
+								for m.CloseButton.Clicked(m.Gtx) {
 									L.Debug("close button clicked")
-									close(cx.KillAll)
+									close(m.Ctx.KillAll)
 								}
 							})
 					}),
@@ -209,13 +248,17 @@ func DuoUIheader(gtx *layout.Context, cx *conte.Xt) layout.FlexChild {
 	})
 }
 
-func changeLightDark(theme *gelook.DuoUItheme) {
-	light := theme.Colors["Light"]
-	dark := theme.Colors["Dark"]
-	lightGray := theme.Colors["LightGrayIII"]
-	darkGray := theme.Colors["DarkGrayII"]
-	theme.Colors["Light"] = dark
-	theme.Colors["Dark"] = light
-	theme.Colors["LightGrayIII"] = darkGray
-	theme.Colors["DarkGrayII"] = lightGray
+func FlipTheme(m *State) {
+	if m.LightTheme {
+		m.Theme.Colors["PanelText"] = m.Theme.Colors["Light"]
+		m.Theme.Colors["PanelBg"] = m.Theme.Colors["Dark"]
+		m.Theme.Colors["DocText"] = m.Theme.Colors["White"]
+		m.Theme.Colors["DocBg"] = m.Theme.Colors["Black"]
+	} else {
+		m.Theme.Colors["PanelText"] = m.Theme.Colors["Light"]
+		m.Theme.Colors["PanelBg"] = m.Theme.Colors["Dark"]
+		m.Theme.Colors["DocText"] = m.Theme.Colors["Dark"]
+		m.Theme.Colors["DocBg"] = m.Theme.Colors["Light"]
+	}
+	m.LightTheme = !m.LightTheme
 }
