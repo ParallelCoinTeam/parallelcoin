@@ -24,11 +24,23 @@ var (
 	}
 )
 
-func Console(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-) *gelook.DuoUIpage {
-	return th.DuoUIpage(
-		"CONSOLE", 0, func() {}, func() {}, consoleBody(rc, gtx, th), func() {})
+func Console(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
+	page := gelook.DuoUIpage{
+		Title:         "CONSOLE",
+		Command:       func() {},
+		Border:        4,
+		BorderColor:   th.Colors["Light"],
+		Header:        func() {},
+		HeaderPadding: 0,
+		Body:          consoleBody(rc, gtx, th),
+		BodyBgColor:   th.Colors["Dark"],
+		BodyPadding:   4,
+		Footer:        func() {},
+		FooterPadding: 0,
+	}
+	return th.DuoUIpage(page)
 }
+
 func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {

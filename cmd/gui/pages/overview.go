@@ -9,7 +9,21 @@ import (
 )
 
 func Overview(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("OVERVIEW", 0, func() {}, func() {}, overviewBody(rc, gtx, th), func() {})
+	page := gelook.DuoUIpage{
+		Title:         "OVERVIEW",
+		Border:        0,
+		Command:       func() {},
+		Header:        func() {},
+		HeaderBgColor: "",
+		HeaderPadding: 0,
+		Body:          overviewBody(rc, gtx, th),
+		BodyBgColor:   "",
+		BodyPadding:   0,
+		Footer:        func() {},
+		FooterBgColor: "",
+		FooterPadding: 0,
+	}
+	return th.DuoUIpage(page)
 }
 
 func overviewBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {

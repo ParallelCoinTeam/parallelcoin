@@ -20,7 +20,7 @@ func TransactionsList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme)
 				Spacing: layout.SpaceBetween,
 			}.Layout(gtx,
 				layout.Rigid(txsDetails(gtx, th, i, &t)),
-				layout.Rigid(Label(gtx, th, th.Fonts["Mono"], 12, th.Colors["Dark"], fmt.Sprintf("%0.8f", t.Amount))))
+				layout.Rigid(Label(gtx, th, th.Fonts["Mono"], 12, th.Colors["Light"], fmt.Sprintf("%0.8f", t.Amount))))
 		})
 	}
 }
@@ -30,11 +30,11 @@ func txsDetails(gtx *layout.Context, th *gelook.DuoUItheme, i int, t *model.DuoU
 		layout.Flex{
 			Axis: layout.Vertical,
 		}.Layout(gtx,
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprint(i))),
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], t.TxID)),
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprintf("%0.8f", t.Amount))),
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], t.Category)),
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], t.Time)),
+			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Light"], fmt.Sprint(i))),
+			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Light"], t.TxID)),
+			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Light"], fmt.Sprintf("%0.8f", t.Amount))),
+			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Light"], t.Category)),
+			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Light"], t.Time)),
 		)
 	}
 }

@@ -30,25 +30,34 @@ var (
 )
 
 func DuoUIaddressBook(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
-	return th.DuoUIpage("ADDRESSBOOK", 0, rc.GetAddressBook(), component.ContentHeader(gtx, th, addressBookHeader(rc, gtx, th, rc.GetAddressBook())), addressBookBody(rc, gtx, th), func() {})
+	page := gelook.DuoUIpage{
+		Title:         "ADDRESSBOOK",
+		Command:       rc.GetAddressBook(),
+		Border:        4,
+		BorderColor:   th.Colors["Light"],
+		Header:        addressBookHeader(rc, gtx, th, rc.GetAddressBook()),
+		HeaderPadding: 4,
+		Body:          addressBookBody(rc, gtx, th),
+		BodyBgColor:   th.Colors["Dark"],
+		BodyPadding:   4,
+		Footer:        func() {},
+		FooterPadding: 0,
+	}
+	return th.DuoUIpage(page)
 }
 
 func addressBookBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-			th.DuoUIitem(0, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
-				layout.Flex{}.Layout(gtx,
-					layout.Flexed(1, func() {
-						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-							layout.Flex{
-								Axis:    layout.Vertical,
-								Spacing: layout.SpaceAround,
-							}.Layout(gtx,
-								layout.Flexed(1, addressBookContent(rc, gtx, th)))
-						})
-					}))
-			})
-		})
+		layout.Flex{}.Layout(gtx,
+			layout.Flexed(1, func() {
+				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+					layout.Flex{
+						Axis:    layout.Vertical,
+						Spacing: layout.SpaceAround,
+					}.Layout(gtx,
+						layout.Flexed(1, addressBookContent(rc, gtx, th)))
+				})
+			}))
 	}
 }
 

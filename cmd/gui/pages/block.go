@@ -22,7 +22,23 @@ var (
 )
 
 func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block string) *gelook.DuoUIpage {
-	return th.DuoUIpage("BLOCK", 10, rc.GetSingleBlock(block), func() {}, singleBlockBody(rc, gtx, th, rc.Explorer.SingleBlock), func() {})
+	page := gelook.DuoUIpage{
+		Title:         "BLOCK",
+		TxColor:       "",
+		Command:       rc.GetSingleBlock(block),
+		Border:        4,
+		BorderColor:   th.Colors["Light"],
+		Header:        historyHeader(rc, gtx, th),
+		HeaderBgColor: "",
+		HeaderPadding: 0,
+		Body:          singleBlockBody(rc, gtx, th, rc.Explorer.SingleBlock),
+		BodyBgColor:   th.Colors["Dark"],
+		BodyPadding:   0,
+		Footer:        func() {},
+		FooterBgColor: "",
+		FooterPadding: 0,
+	}
+	return th.DuoUIpage(page)
 }
 
 func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block btcjson.GetBlockVerboseResult) func() {
