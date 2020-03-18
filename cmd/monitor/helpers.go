@@ -64,5 +64,5 @@ func (m *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 
 func Toggle(b *bool) bool {
 	*b = !*b
-	return b
+	return *b
 }
