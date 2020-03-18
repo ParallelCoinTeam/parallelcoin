@@ -8,8 +8,6 @@ import (
 	"net/rpc"
 	"time"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -31,12 +29,12 @@ type CAPI struct {
 // NewCAPI returns a new CAPI 
 func NewCAPI(quit chan struct{}, timeout ...time.Duration) (c *CAPI) {
 	c = &CAPI{quit: quit}
-	if len(timeout)>0 {
+	if len(timeout) > 0 {
 		c.Timeout = timeout[0]
 	} else {
 		c.Timeout = time.Second * 5
 	}
-	return 
+	return
 }
 
 // Wrappers around RPC calls
@@ -52,101 +50,242 @@ func NewCAPIClient(conn io.ReadWriteCloser) *CAPIClient {
 
 type (
 	// None means no parameters it is not checked so it can be nil
-	None struct{} 
+	None struct{}
 	// AddNodeRes is the result from a call to AddNode
-	AddNodeRes struct { Res *None; Err error }
+	AddNodeRes struct {
+		Res *None
+		Err error
+	}
 	// CreateRawTransactionRes is the result from a call to CreateRawTransaction
-	CreateRawTransactionRes struct { Res *string; Err error }
+	CreateRawTransactionRes struct {
+		Res *string
+		Err error
+	}
 	// DecodeRawTransactionRes is the result from a call to DecodeRawTransaction
-	DecodeRawTransactionRes struct { Res *btcjson.TxRawDecodeResult; Err error }
+	DecodeRawTransactionRes struct {
+		Res *btcjson.TxRawDecodeResult
+		Err error
+	}
 	// DecodeScriptRes is the result from a call to DecodeScript
-	DecodeScriptRes struct { Res *btcjson.DecodeScriptResult; Err error }
+	DecodeScriptRes struct {
+		Res *btcjson.DecodeScriptResult
+		Err error
+	}
 	// EstimateFeeRes is the result from a call to EstimateFee
-	EstimateFeeRes struct { Res *float64; Err error }
+	EstimateFeeRes struct {
+		Res *float64
+		Err error
+	}
 	// GenerateRes is the result from a call to Generate
-	GenerateRes struct { Res *[]string; Err error }
+	GenerateRes struct {
+		Res *[]string
+		Err error
+	}
 	// GetAddedNodeInfoRes is the result from a call to GetAddedNodeInfo
-	GetAddedNodeInfoRes struct { Res *[]btcjson.GetAddedNodeInfoResultAddr; Err error }
+	GetAddedNodeInfoRes struct {
+		Res *[]btcjson.GetAddedNodeInfoResultAddr
+		Err error
+	}
 	// GetBestBlockRes is the result from a call to GetBestBlock
-	GetBestBlockRes struct { Res *btcjson.GetBestBlockResult; Err error }
+	GetBestBlockRes struct {
+		Res *btcjson.GetBestBlockResult
+		Err error
+	}
 	// GetBestBlockHashRes is the result from a call to GetBestBlockHash
-	GetBestBlockHashRes struct { Res *string; Err error }
+	GetBestBlockHashRes struct {
+		Res *string
+		Err error
+	}
 	// GetBlockRes is the result from a call to GetBlock
-	GetBlockRes struct { Res *btcjson.GetBlockVerboseResult; Err error }
+	GetBlockRes struct {
+		Res *btcjson.GetBlockVerboseResult
+		Err error
+	}
 	// GetBlockChainInfoRes is the result from a call to GetBlockChainInfo
-	GetBlockChainInfoRes struct { Res *btcjson.GetBlockChainInfoResult; Err error }
+	GetBlockChainInfoRes struct {
+		Res *btcjson.GetBlockChainInfoResult
+		Err error
+	}
 	// GetBlockCountRes is the result from a call to GetBlockCount
-	GetBlockCountRes struct { Res *int64; Err error }
+	GetBlockCountRes struct {
+		Res *int64
+		Err error
+	}
 	// GetBlockHashRes is the result from a call to GetBlockHash
-	GetBlockHashRes struct { Res *string; Err error }
+	GetBlockHashRes struct {
+		Res *string
+		Err error
+	}
 	// GetBlockHeaderRes is the result from a call to GetBlockHeader
-	GetBlockHeaderRes struct { Res *btcjson.GetBlockHeaderVerboseResult; Err error }
+	GetBlockHeaderRes struct {
+		Res *btcjson.GetBlockHeaderVerboseResult
+		Err error
+	}
 	// GetBlockTemplateRes is the result from a call to GetBlockTemplate
-	GetBlockTemplateRes struct { Res *string; Err error }
+	GetBlockTemplateRes struct {
+		Res *string
+		Err error
+	}
 	// GetCFilterRes is the result from a call to GetCFilter
-	GetCFilterRes struct { Res *string; Err error }
+	GetCFilterRes struct {
+		Res *string
+		Err error
+	}
 	// GetCFilterHeaderRes is the result from a call to GetCFilterHeader
-	GetCFilterHeaderRes struct { Res *string; Err error }
+	GetCFilterHeaderRes struct {
+		Res *string
+		Err error
+	}
 	// GetConnectionCountRes is the result from a call to GetConnectionCount
-	GetConnectionCountRes struct { Res *int32; Err error }
+	GetConnectionCountRes struct {
+		Res *int32
+		Err error
+	}
 	// GetCurrentNetRes is the result from a call to GetCurrentNet
-	GetCurrentNetRes struct { Res *string; Err error }
+	GetCurrentNetRes struct {
+		Res *string
+		Err error
+	}
 	// GetDifficultyRes is the result from a call to GetDifficulty
-	GetDifficultyRes struct { Res *float64; Err error }
+	GetDifficultyRes struct {
+		Res *float64
+		Err error
+	}
 	// GetGenerateRes is the result from a call to GetGenerate
-	GetGenerateRes struct { Res *bool; Err error }
+	GetGenerateRes struct {
+		Res *bool
+		Err error
+	}
 	// GetHashesPerSecRes is the result from a call to GetHashesPerSec
-	GetHashesPerSecRes struct { Res *float64; Err error }
+	GetHashesPerSecRes struct {
+		Res *float64
+		Err error
+	}
 	// GetHeadersRes is the result from a call to GetHeaders
-	GetHeadersRes struct { Res *[]string; Err error }
+	GetHeadersRes struct {
+		Res *[]string
+		Err error
+	}
 	// GetInfoRes is the result from a call to GetInfo
-	GetInfoRes struct { Res *btcjson.InfoChainResult0; Err error }
+	GetInfoRes struct {
+		Res *btcjson.InfoChainResult0
+		Err error
+	}
 	// GetMempoolInfoRes is the result from a call to GetMempoolInfo
-	GetMempoolInfoRes struct { Res *btcjson.GetMempoolInfoResult; Err error }
+	GetMempoolInfoRes struct {
+		Res *btcjson.GetMempoolInfoResult
+		Err error
+	}
 	// GetMiningInfoRes is the result from a call to GetMiningInfo
-	GetMiningInfoRes struct { Res *btcjson.GetMiningInfoResult; Err error }
+	GetMiningInfoRes struct {
+		Res *btcjson.GetMiningInfoResult
+		Err error
+	}
 	// GetNetTotalsRes is the result from a call to GetNetTotals
-	GetNetTotalsRes struct { Res *btcjson.GetNetTotalsResult; Err error }
+	GetNetTotalsRes struct {
+		Res *btcjson.GetNetTotalsResult
+		Err error
+	}
 	// GetNetworkHashPSRes is the result from a call to GetNetworkHashPS
-	GetNetworkHashPSRes struct { Res *[]btcjson.GetPeerInfoResult; Err error }
+	GetNetworkHashPSRes struct {
+		Res *[]btcjson.GetPeerInfoResult
+		Err error
+	}
 	// GetPeerInfoRes is the result from a call to GetPeerInfo
-	GetPeerInfoRes struct { Res *[]btcjson.GetPeerInfoResult; Err error }
+	GetPeerInfoRes struct {
+		Res *[]btcjson.GetPeerInfoResult
+		Err error
+	}
 	// GetRawMempoolRes is the result from a call to GetRawMempool
-	GetRawMempoolRes struct { Res *[]string; Err error }
+	GetRawMempoolRes struct {
+		Res *[]string
+		Err error
+	}
 	// GetRawTransactionRes is the result from a call to GetRawTransaction
-	GetRawTransactionRes struct { Res *string; Err error }
+	GetRawTransactionRes struct {
+		Res *string
+		Err error
+	}
 	// GetTxOutRes is the result from a call to GetTxOut
-	GetTxOutRes struct { Res *string; Err error }
+	GetTxOutRes struct {
+		Res *string
+		Err error
+	}
 	// HelpRes is the result from a call to Help
-	HelpRes struct { Res *string; Err error }
+	HelpRes struct {
+		Res *string
+		Err error
+	}
 	// NodeRes is the result from a call to Node
-	NodeRes struct { Res *None; Err error }
+	NodeRes struct {
+		Res *None
+		Err error
+	}
 	// PingRes is the result from a call to Ping
-	PingRes struct { Res *None; Err error }
+	PingRes struct {
+		Res *None
+		Err error
+	}
 	// ResetChainRes is the result from a call to ResetChain
-	ResetChainRes struct { Res *None; Err error }
+	ResetChainRes struct {
+		Res *None
+		Err error
+	}
 	// RestartRes is the result from a call to Restart
-	RestartRes struct { Res *None; Err error }
+	RestartRes struct {
+		Res *None
+		Err error
+	}
 	// SearchRawTransactionsRes is the result from a call to SearchRawTransactions
-	SearchRawTransactionsRes struct { Res *[]btcjson.SearchRawTransactionsResult; Err error }
+	SearchRawTransactionsRes struct {
+		Res *[]btcjson.SearchRawTransactionsResult
+		Err error
+	}
 	// SendRawTransactionRes is the result from a call to SendRawTransaction
-	SendRawTransactionRes struct { Res *None; Err error }
+	SendRawTransactionRes struct {
+		Res *None
+		Err error
+	}
 	// SetGenerateRes is the result from a call to SetGenerate
-	SetGenerateRes struct { Res *None; Err error }
+	SetGenerateRes struct {
+		Res *None
+		Err error
+	}
 	// StopRes is the result from a call to Stop
-	StopRes struct { Res *None; Err error }
+	StopRes struct {
+		Res *None
+		Err error
+	}
 	// SubmitBlockRes is the result from a call to SubmitBlock
-	SubmitBlockRes struct { Res *string; Err error }
+	SubmitBlockRes struct {
+		Res *string
+		Err error
+	}
 	// UptimeRes is the result from a call to Uptime
-	UptimeRes struct { Res *btcjson.GetMempoolInfoResult; Err error }
+	UptimeRes struct {
+		Res *btcjson.GetMempoolInfoResult
+		Err error
+	}
 	// ValidateAddressRes is the result from a call to ValidateAddress
-	ValidateAddressRes struct { Res *btcjson.ValidateAddressChainResult; Err error }
+	ValidateAddressRes struct {
+		Res *btcjson.ValidateAddressChainResult
+		Err error
+	}
 	// VerifyChainRes is the result from a call to VerifyChain
-	VerifyChainRes struct { Res *bool; Err error }
+	VerifyChainRes struct {
+		Res *bool
+		Err error
+	}
 	// VerifyMessageRes is the result from a call to VerifyMessage
-	VerifyMessageRes struct { Res *bool; Err error }
+	VerifyMessageRes struct {
+		Res *bool
+		Err error
+	}
 	// VersionRes is the result from a call to Version
-	VersionRes struct { Res *map[string]btcjson.VersionResult; Err error }
+	VersionRes struct {
+		Res *map[string]btcjson.VersionResult
+		Err error
+	}
 )
 
 // RPCHandlersBeforeInit are created first and are added to the main list 
@@ -163,148 +302,147 @@ type (
 // Get and save the Result function's return, and you can then call the call functions
 // check, result and wait functions for asynchronous and synchronous calls to RPC functions
 var RPCHandlersBeforeInit = map[string]CommandHandler{
-	"addnode":{ 
-		Fn: HandleAddNode, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan AddNodeRes)} }}, 
-	"createrawtransaction":{ 
-		Fn: HandleCreateRawTransaction, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan CreateRawTransactionRes)} }}, 
-	"decoderawtransaction":{ 
-		Fn: HandleDecodeRawTransaction, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan DecodeRawTransactionRes)} }}, 
-	"decodescript":{ 
-		Fn: HandleDecodeScript, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan DecodeScriptRes)} }}, 
-	"estimatefee":{ 
-		Fn: HandleEstimateFee, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan EstimateFeeRes)} }}, 
-	"generate":{ 
-		Fn: HandleGenerate, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GenerateRes)} }}, 
-	"getaddednodeinfo":{ 
-		Fn: HandleGetAddedNodeInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetAddedNodeInfoRes)} }}, 
-	"getbestblock":{ 
-		Fn: HandleGetBestBlock, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBestBlockRes)} }}, 
-	"getbestblockhash":{ 
-		Fn: HandleGetBestBlockHash, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBestBlockHashRes)} }}, 
-	"getblock":{ 
-		Fn: HandleGetBlock, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockRes)} }}, 
-	"getblockchaininfo":{ 
-		Fn: HandleGetBlockChainInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockChainInfoRes)} }}, 
-	"getblockcount":{ 
-		Fn: HandleGetBlockCount, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockCountRes)} }}, 
-	"getblockhash":{ 
-		Fn: HandleGetBlockHash, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockHashRes)} }}, 
-	"getblockheader":{ 
-		Fn: HandleGetBlockHeader, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockHeaderRes)} }}, 
-	"getblocktemplate":{ 
-		Fn: HandleGetBlockTemplate, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetBlockTemplateRes)} }}, 
-	"getcfilter":{ 
-		Fn: HandleGetCFilter, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetCFilterRes)} }}, 
-	"getcfilterheader":{ 
-		Fn: HandleGetCFilterHeader, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetCFilterHeaderRes)} }}, 
-	"getconnectioncount":{ 
-		Fn: HandleGetConnectionCount, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetConnectionCountRes)} }}, 
-	"getcurrentnet":{ 
-		Fn: HandleGetCurrentNet, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetCurrentNetRes)} }}, 
-	"getdifficulty":{ 
-		Fn: HandleGetDifficulty, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetDifficultyRes)} }}, 
-	"getgenerate":{ 
-		Fn: HandleGetGenerate, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetGenerateRes)} }}, 
-	"gethashespersec":{ 
-		Fn: HandleGetHashesPerSec, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetHashesPerSecRes)} }}, 
-	"getheaders":{ 
-		Fn: HandleGetHeaders, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetHeadersRes)} }}, 
-	"getinfo":{ 
-		Fn: HandleGetInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetInfoRes)} }}, 
-	"getmempoolinfo":{ 
-		Fn: HandleGetMempoolInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetMempoolInfoRes)} }}, 
-	"getmininginfo":{ 
-		Fn: HandleGetMiningInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetMiningInfoRes)} }}, 
-	"getnettotals":{ 
-		Fn: HandleGetNetTotals, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetNetTotalsRes)} }}, 
-	"getnetworkhashps":{ 
-		Fn: HandleGetNetworkHashPS, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetNetworkHashPSRes)} }}, 
-	"getpeerinfo":{ 
-		Fn: HandleGetPeerInfo, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetPeerInfoRes)} }}, 
-	"getrawmempool":{ 
-		Fn: HandleGetRawMempool, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetRawMempoolRes)} }}, 
-	"getrawtransaction":{ 
-		Fn: HandleGetRawTransaction, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetRawTransactionRes)} }}, 
-	"gettxout":{ 
-		Fn: HandleGetTxOut, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan GetTxOutRes)} }}, 
-	"help":{ 
-		Fn: HandleHelp, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan HelpRes)} }}, 
-	"node":{ 
-		Fn: HandleNode, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan NodeRes)} }}, 
-	"ping":{ 
-		Fn: HandlePing, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan PingRes)} }}, 
-	"resetchain":{ 
-		Fn: HandleResetChain, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan ResetChainRes)} }}, 
-	"restart":{ 
-		Fn: HandleRestart, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan RestartRes)} }}, 
-	"searchrawtransactions":{ 
-		Fn: HandleSearchRawTransactions, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan SearchRawTransactionsRes)} }}, 
-	"sendrawtransaction":{ 
-		Fn: HandleSendRawTransaction, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan SendRawTransactionRes)} }}, 
-	"setgenerate":{ 
-		Fn: HandleSetGenerate, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan SetGenerateRes)} }}, 
-	"stop":{ 
-		Fn: HandleStop, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan StopRes)} }}, 
-	"submitblock":{ 
-		Fn: HandleSubmitBlock, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan SubmitBlockRes)} }}, 
-	"uptime":{ 
-		Fn: HandleUptime, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan UptimeRes)} }}, 
-	"validateaddress":{ 
-		Fn: HandleValidateAddress, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan ValidateAddressRes)} }}, 
-	"verifychain":{ 
-		Fn: HandleVerifyChain, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan VerifyChainRes)} }}, 
-	"verifymessage":{ 
-		Fn: HandleVerifyMessage, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan VerifyMessageRes)} }}, 
-	"version":{ 
-		Fn: HandleVersion, Call: make(chan API, 32), 
-		Result: func() API { return API{Ch: make(chan VersionRes)} }}, 
-
+	"addnode": {
+		Fn: HandleAddNode, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan AddNodeRes)} }},
+	"createrawtransaction": {
+		Fn: HandleCreateRawTransaction, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan CreateRawTransactionRes)} }},
+	"decoderawtransaction": {
+		Fn: HandleDecodeRawTransaction, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan DecodeRawTransactionRes)} }},
+	"decodescript": {
+		Fn: HandleDecodeScript, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan DecodeScriptRes)} }},
+	"estimatefee": {
+		Fn: HandleEstimateFee, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan EstimateFeeRes)} }},
+	"generate": {
+		Fn: HandleGenerate, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GenerateRes)} }},
+	"getaddednodeinfo": {
+		Fn: HandleGetAddedNodeInfo, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetAddedNodeInfoRes)} }},
+	"getbestblock": {
+		Fn: HandleGetBestBlock, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetBestBlockRes)} }},
+	"getbestblockhash": {
+		Fn: HandleGetBestBlockHash, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetBestBlockHashRes)} }},
+	"getblock": {
+		Fn: HandleGetBlock, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetBlockRes)} }},
+	"getblockchaininfo": {
+		Fn: HandleGetBlockChainInfo, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetBlockChainInfoRes)} }},
+	"getblockcount": {
+		Fn: HandleGetBlockCount, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetBlockCountRes)} }},
+	"getblockhash": {
+		Fn: HandleGetBlockHash, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetBlockHashRes)} }},
+	"getblockheader": {
+		Fn: HandleGetBlockHeader, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetBlockHeaderRes)} }},
+	"getblocktemplate": {
+		Fn: HandleGetBlockTemplate, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetBlockTemplateRes)} }},
+	"getcfilter": {
+		Fn: HandleGetCFilter, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetCFilterRes)} }},
+	"getcfilterheader": {
+		Fn: HandleGetCFilterHeader, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetCFilterHeaderRes)} }},
+	"getconnectioncount": {
+		Fn: HandleGetConnectionCount, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetConnectionCountRes)} }},
+	"getcurrentnet": {
+		Fn: HandleGetCurrentNet, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetCurrentNetRes)} }},
+	"getdifficulty": {
+		Fn: HandleGetDifficulty, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetDifficultyRes)} }},
+	"getgenerate": {
+		Fn: HandleGetGenerate, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetGenerateRes)} }},
+	"gethashespersec": {
+		Fn: HandleGetHashesPerSec, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetHashesPerSecRes)} }},
+	"getheaders": {
+		Fn: HandleGetHeaders, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetHeadersRes)} }},
+	"getinfo": {
+		Fn: HandleGetInfo, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetInfoRes)} }},
+	"getmempoolinfo": {
+		Fn: HandleGetMempoolInfo, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetMempoolInfoRes)} }},
+	"getmininginfo": {
+		Fn: HandleGetMiningInfo, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetMiningInfoRes)} }},
+	"getnettotals": {
+		Fn: HandleGetNetTotals, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetNetTotalsRes)} }},
+	"getnetworkhashps": {
+		Fn: HandleGetNetworkHashPS, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetNetworkHashPSRes)} }},
+	"getpeerinfo": {
+		Fn: HandleGetPeerInfo, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetPeerInfoRes)} }},
+	"getrawmempool": {
+		Fn: HandleGetRawMempool, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetRawMempoolRes)} }},
+	"getrawtransaction": {
+		Fn: HandleGetRawTransaction, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetRawTransactionRes)} }},
+	"gettxout": {
+		Fn: HandleGetTxOut, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan GetTxOutRes)} }},
+	"help": {
+		Fn: HandleHelp, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan HelpRes)} }},
+	"node": {
+		Fn: HandleNode, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan NodeRes)} }},
+	"ping": {
+		Fn: HandlePing, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan PingRes)} }},
+	"resetchain": {
+		Fn: HandleResetChain, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan ResetChainRes)} }},
+	"restart": {
+		Fn: HandleRestart, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan RestartRes)} }},
+	"searchrawtransactions": {
+		Fn: HandleSearchRawTransactions, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan SearchRawTransactionsRes)} }},
+	"sendrawtransaction": {
+		Fn: HandleSendRawTransaction, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan SendRawTransactionRes)} }},
+	"setgenerate": {
+		Fn: HandleSetGenerate, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan SetGenerateRes)} }},
+	"stop": {
+		Fn: HandleStop, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan StopRes)} }},
+	"submitblock": {
+		Fn: HandleSubmitBlock, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan SubmitBlockRes)} }},
+	"uptime": {
+		Fn: HandleUptime, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan UptimeRes)} }},
+	"validateaddress": {
+		Fn: HandleValidateAddress, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan ValidateAddressRes)} }},
+	"verifychain": {
+		Fn: HandleVerifyChain, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan VerifyChainRes)} }},
+	"verifymessage": {
+		Fn: HandleVerifyMessage, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan VerifyMessageRes)} }},
+	"version": {
+		Fn: HandleVersion, Call: make(chan API, 32),
+		Result: func() API { return API{Ch: make(chan VersionRes)} }},
 }
 
 // API functions
@@ -312,7 +450,6 @@ var RPCHandlersBeforeInit = map[string]CommandHandler{
 // The functions here provide access to the RPC through a convenient set of functions
 // generated for each call in the RPC API to request, check for, access the results and
 // wait on results
-
 
 // AddNode calls the method with the given parameters
 func (a API) AddNode(cmd btcjson.AddNodeCmd) (err error) {
@@ -324,7 +461,7 @@ func (a API) AddNode(cmd btcjson.AddNodeCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) AddNodeCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan AddNodeRes):
+	case o := <-a.Ch.(chan AddNodeRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -341,9 +478,9 @@ func (a API) AddNodeGetRes() (out *None) {
 // AddNodeWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) AddNodeWait() (out *None, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan AddNodeRes):
+	case o := <-a.Ch.(chan AddNodeRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -359,7 +496,7 @@ func (a API) CreateRawTransaction(cmd btcjson.CreateRawTransactionCmd) (err erro
 // returns true if it does, as well as storing the value in the Result field
 func (a API) CreateRawTransactionCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan CreateRawTransactionRes):
+	case o := <-a.Ch.(chan CreateRawTransactionRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -376,9 +513,9 @@ func (a API) CreateRawTransactionGetRes() (out *string) {
 // CreateRawTransactionWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) CreateRawTransactionWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan CreateRawTransactionRes):
+	case o := <-a.Ch.(chan CreateRawTransactionRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -394,7 +531,7 @@ func (a API) DecodeRawTransaction(cmd btcjson.DecodeRawTransactionCmd) (err erro
 // returns true if it does, as well as storing the value in the Result field
 func (a API) DecodeRawTransactionCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan DecodeRawTransactionRes):
+	case o := <-a.Ch.(chan DecodeRawTransactionRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -411,9 +548,9 @@ func (a API) DecodeRawTransactionGetRes() (out *btcjson.TxRawDecodeResult) {
 // DecodeRawTransactionWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) DecodeRawTransactionWait() (out *btcjson.TxRawDecodeResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan DecodeRawTransactionRes):
+	case o := <-a.Ch.(chan DecodeRawTransactionRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -429,7 +566,7 @@ func (a API) DecodeScript(cmd btcjson.DecodeScriptCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) DecodeScriptCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan DecodeScriptRes):
+	case o := <-a.Ch.(chan DecodeScriptRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -446,9 +583,9 @@ func (a API) DecodeScriptGetRes() (out *btcjson.DecodeScriptResult) {
 // DecodeScriptWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) DecodeScriptWait() (out *btcjson.DecodeScriptResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan DecodeScriptRes):
+	case o := <-a.Ch.(chan DecodeScriptRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -464,7 +601,7 @@ func (a API) EstimateFee(cmd btcjson.EstimateFeeCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) EstimateFeeCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan EstimateFeeRes):
+	case o := <-a.Ch.(chan EstimateFeeRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -481,9 +618,9 @@ func (a API) EstimateFeeGetRes() (out *float64) {
 // EstimateFeeWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) EstimateFeeWait() (out *float64, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan EstimateFeeRes):
+	case o := <-a.Ch.(chan EstimateFeeRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -499,7 +636,7 @@ func (a API) Generate(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GenerateCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GenerateRes):
+	case o := <-a.Ch.(chan GenerateRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -516,9 +653,9 @@ func (a API) GenerateGetRes() (out *[]string) {
 // GenerateWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GenerateWait() (out *[]string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GenerateRes):
+	case o := <-a.Ch.(chan GenerateRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -534,7 +671,7 @@ func (a API) GetAddedNodeInfo(cmd btcjson.GetAddedNodeInfoCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetAddedNodeInfoCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetAddedNodeInfoRes):
+	case o := <-a.Ch.(chan GetAddedNodeInfoRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -551,9 +688,9 @@ func (a API) GetAddedNodeInfoGetRes() (out *[]btcjson.GetAddedNodeInfoResultAddr
 // GetAddedNodeInfoWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetAddedNodeInfoWait() (out *[]btcjson.GetAddedNodeInfoResultAddr, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetAddedNodeInfoRes):
+	case o := <-a.Ch.(chan GetAddedNodeInfoRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -569,7 +706,7 @@ func (a API) GetBestBlock(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBestBlockCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetBestBlockRes):
+	case o := <-a.Ch.(chan GetBestBlockRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -586,9 +723,9 @@ func (a API) GetBestBlockGetRes() (out *btcjson.GetBestBlockResult) {
 // GetBestBlockWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetBestBlockWait() (out *btcjson.GetBestBlockResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetBestBlockRes):
+	case o := <-a.Ch.(chan GetBestBlockRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -604,7 +741,7 @@ func (a API) GetBestBlockHash(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBestBlockHashCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetBestBlockHashRes):
+	case o := <-a.Ch.(chan GetBestBlockHashRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -621,9 +758,9 @@ func (a API) GetBestBlockHashGetRes() (out *string) {
 // GetBestBlockHashWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetBestBlockHashWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetBestBlockHashRes):
+	case o := <-a.Ch.(chan GetBestBlockHashRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -639,7 +776,7 @@ func (a API) GetBlock(cmd btcjson.GetBlockCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetBlockRes):
+	case o := <-a.Ch.(chan GetBlockRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -656,9 +793,9 @@ func (a API) GetBlockGetRes() (out *btcjson.GetBlockVerboseResult) {
 // GetBlockWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetBlockWait() (out *btcjson.GetBlockVerboseResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetBlockRes):
+	case o := <-a.Ch.(chan GetBlockRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -674,7 +811,7 @@ func (a API) GetBlockChainInfo(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockChainInfoCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetBlockChainInfoRes):
+	case o := <-a.Ch.(chan GetBlockChainInfoRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -691,9 +828,9 @@ func (a API) GetBlockChainInfoGetRes() (out *btcjson.GetBlockChainInfoResult) {
 // GetBlockChainInfoWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetBlockChainInfoWait() (out *btcjson.GetBlockChainInfoResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetBlockChainInfoRes):
+	case o := <-a.Ch.(chan GetBlockChainInfoRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -709,7 +846,7 @@ func (a API) GetBlockCount(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockCountCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetBlockCountRes):
+	case o := <-a.Ch.(chan GetBlockCountRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -726,9 +863,9 @@ func (a API) GetBlockCountGetRes() (out *int64) {
 // GetBlockCountWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetBlockCountWait() (out *int64, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetBlockCountRes):
+	case o := <-a.Ch.(chan GetBlockCountRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -744,7 +881,7 @@ func (a API) GetBlockHash(cmd btcjson.GetBlockHashCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockHashCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetBlockHashRes):
+	case o := <-a.Ch.(chan GetBlockHashRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -761,9 +898,9 @@ func (a API) GetBlockHashGetRes() (out *string) {
 // GetBlockHashWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetBlockHashWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetBlockHashRes):
+	case o := <-a.Ch.(chan GetBlockHashRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -779,7 +916,7 @@ func (a API) GetBlockHeader(cmd btcjson.GetBlockHeaderCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockHeaderCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetBlockHeaderRes):
+	case o := <-a.Ch.(chan GetBlockHeaderRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -796,9 +933,9 @@ func (a API) GetBlockHeaderGetRes() (out *btcjson.GetBlockHeaderVerboseResult) {
 // GetBlockHeaderWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetBlockHeaderWait() (out *btcjson.GetBlockHeaderVerboseResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetBlockHeaderRes):
+	case o := <-a.Ch.(chan GetBlockHeaderRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -814,7 +951,7 @@ func (a API) GetBlockTemplate(cmd btcjson.GetBlockTemplateCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockTemplateCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetBlockTemplateRes):
+	case o := <-a.Ch.(chan GetBlockTemplateRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -831,9 +968,9 @@ func (a API) GetBlockTemplateGetRes() (out *string) {
 // GetBlockTemplateWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetBlockTemplateWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetBlockTemplateRes):
+	case o := <-a.Ch.(chan GetBlockTemplateRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -849,7 +986,7 @@ func (a API) GetCFilter(cmd btcjson.GetCFilterCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetCFilterCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetCFilterRes):
+	case o := <-a.Ch.(chan GetCFilterRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -866,9 +1003,9 @@ func (a API) GetCFilterGetRes() (out *string) {
 // GetCFilterWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetCFilterWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetCFilterRes):
+	case o := <-a.Ch.(chan GetCFilterRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -884,7 +1021,7 @@ func (a API) GetCFilterHeader(cmd btcjson.GetCFilterHeaderCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetCFilterHeaderCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetCFilterHeaderRes):
+	case o := <-a.Ch.(chan GetCFilterHeaderRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -901,9 +1038,9 @@ func (a API) GetCFilterHeaderGetRes() (out *string) {
 // GetCFilterHeaderWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetCFilterHeaderWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetCFilterHeaderRes):
+	case o := <-a.Ch.(chan GetCFilterHeaderRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -919,7 +1056,7 @@ func (a API) GetConnectionCount(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetConnectionCountCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetConnectionCountRes):
+	case o := <-a.Ch.(chan GetConnectionCountRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -936,9 +1073,9 @@ func (a API) GetConnectionCountGetRes() (out *int32) {
 // GetConnectionCountWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetConnectionCountWait() (out *int32, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetConnectionCountRes):
+	case o := <-a.Ch.(chan GetConnectionCountRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -954,7 +1091,7 @@ func (a API) GetCurrentNet(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetCurrentNetCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetCurrentNetRes):
+	case o := <-a.Ch.(chan GetCurrentNetRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -971,9 +1108,9 @@ func (a API) GetCurrentNetGetRes() (out *string) {
 // GetCurrentNetWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetCurrentNetWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetCurrentNetRes):
+	case o := <-a.Ch.(chan GetCurrentNetRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -989,7 +1126,7 @@ func (a API) GetDifficulty(cmd btcjson.GetDifficultyCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetDifficultyCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetDifficultyRes):
+	case o := <-a.Ch.(chan GetDifficultyRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1006,9 +1143,9 @@ func (a API) GetDifficultyGetRes() (out *float64) {
 // GetDifficultyWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetDifficultyWait() (out *float64, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetDifficultyRes):
+	case o := <-a.Ch.(chan GetDifficultyRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1024,7 +1161,7 @@ func (a API) GetGenerate(cmd btcjson.GetHeadersCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetGenerateCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetGenerateRes):
+	case o := <-a.Ch.(chan GetGenerateRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1041,9 +1178,9 @@ func (a API) GetGenerateGetRes() (out *bool) {
 // GetGenerateWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetGenerateWait() (out *bool, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetGenerateRes):
+	case o := <-a.Ch.(chan GetGenerateRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1059,7 +1196,7 @@ func (a API) GetHashesPerSec(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetHashesPerSecCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetHashesPerSecRes):
+	case o := <-a.Ch.(chan GetHashesPerSecRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1076,9 +1213,9 @@ func (a API) GetHashesPerSecGetRes() (out *float64) {
 // GetHashesPerSecWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetHashesPerSecWait() (out *float64, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetHashesPerSecRes):
+	case o := <-a.Ch.(chan GetHashesPerSecRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1094,7 +1231,7 @@ func (a API) GetHeaders(cmd btcjson.GetHeadersCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetHeadersCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetHeadersRes):
+	case o := <-a.Ch.(chan GetHeadersRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1111,9 +1248,9 @@ func (a API) GetHeadersGetRes() (out *[]string) {
 // GetHeadersWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetHeadersWait() (out *[]string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetHeadersRes):
+	case o := <-a.Ch.(chan GetHeadersRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1129,7 +1266,7 @@ func (a API) GetInfo(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetInfoCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetInfoRes):
+	case o := <-a.Ch.(chan GetInfoRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1146,9 +1283,9 @@ func (a API) GetInfoGetRes() (out *btcjson.InfoChainResult0) {
 // GetInfoWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetInfoWait() (out *btcjson.InfoChainResult0, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetInfoRes):
+	case o := <-a.Ch.(chan GetInfoRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1164,7 +1301,7 @@ func (a API) GetMempoolInfo(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetMempoolInfoCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetMempoolInfoRes):
+	case o := <-a.Ch.(chan GetMempoolInfoRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1181,9 +1318,9 @@ func (a API) GetMempoolInfoGetRes() (out *btcjson.GetMempoolInfoResult) {
 // GetMempoolInfoWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetMempoolInfoWait() (out *btcjson.GetMempoolInfoResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetMempoolInfoRes):
+	case o := <-a.Ch.(chan GetMempoolInfoRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1199,7 +1336,7 @@ func (a API) GetMiningInfo(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetMiningInfoCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetMiningInfoRes):
+	case o := <-a.Ch.(chan GetMiningInfoRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1216,9 +1353,9 @@ func (a API) GetMiningInfoGetRes() (out *btcjson.GetMiningInfoResult) {
 // GetMiningInfoWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetMiningInfoWait() (out *btcjson.GetMiningInfoResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetMiningInfoRes):
+	case o := <-a.Ch.(chan GetMiningInfoRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1234,7 +1371,7 @@ func (a API) GetNetTotals(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetNetTotalsCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetNetTotalsRes):
+	case o := <-a.Ch.(chan GetNetTotalsRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1251,9 +1388,9 @@ func (a API) GetNetTotalsGetRes() (out *btcjson.GetNetTotalsResult) {
 // GetNetTotalsWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetNetTotalsWait() (out *btcjson.GetNetTotalsResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetNetTotalsRes):
+	case o := <-a.Ch.(chan GetNetTotalsRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1269,7 +1406,7 @@ func (a API) GetNetworkHashPS(cmd btcjson.GetNetworkHashPSCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetNetworkHashPSCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetNetworkHashPSRes):
+	case o := <-a.Ch.(chan GetNetworkHashPSRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1286,9 +1423,9 @@ func (a API) GetNetworkHashPSGetRes() (out *[]btcjson.GetPeerInfoResult) {
 // GetNetworkHashPSWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetNetworkHashPSWait() (out *[]btcjson.GetPeerInfoResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetNetworkHashPSRes):
+	case o := <-a.Ch.(chan GetNetworkHashPSRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1304,7 +1441,7 @@ func (a API) GetPeerInfo(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetPeerInfoCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetPeerInfoRes):
+	case o := <-a.Ch.(chan GetPeerInfoRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1321,9 +1458,9 @@ func (a API) GetPeerInfoGetRes() (out *[]btcjson.GetPeerInfoResult) {
 // GetPeerInfoWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetPeerInfoWait() (out *[]btcjson.GetPeerInfoResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetPeerInfoRes):
+	case o := <-a.Ch.(chan GetPeerInfoRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1339,7 +1476,7 @@ func (a API) GetRawMempool(cmd btcjson.GetRawMempoolCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetRawMempoolCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetRawMempoolRes):
+	case o := <-a.Ch.(chan GetRawMempoolRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1356,9 +1493,9 @@ func (a API) GetRawMempoolGetRes() (out *[]string) {
 // GetRawMempoolWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetRawMempoolWait() (out *[]string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetRawMempoolRes):
+	case o := <-a.Ch.(chan GetRawMempoolRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1374,7 +1511,7 @@ func (a API) GetRawTransaction(cmd btcjson.GetRawTransactionCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetRawTransactionCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetRawTransactionRes):
+	case o := <-a.Ch.(chan GetRawTransactionRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1391,9 +1528,9 @@ func (a API) GetRawTransactionGetRes() (out *string) {
 // GetRawTransactionWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetRawTransactionWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetRawTransactionRes):
+	case o := <-a.Ch.(chan GetRawTransactionRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1409,7 +1546,7 @@ func (a API) GetTxOut(cmd btcjson.GetTxOutCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetTxOutCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan GetTxOutRes):
+	case o := <-a.Ch.(chan GetTxOutRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1426,9 +1563,9 @@ func (a API) GetTxOutGetRes() (out *string) {
 // GetTxOutWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) GetTxOutWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan GetTxOutRes):
+	case o := <-a.Ch.(chan GetTxOutRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1444,7 +1581,7 @@ func (a API) Help(cmd btcjson.HelpCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) HelpCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan HelpRes):
+	case o := <-a.Ch.(chan HelpRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1461,9 +1598,9 @@ func (a API) HelpGetRes() (out *string) {
 // HelpWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) HelpWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan HelpRes):
+	case o := <-a.Ch.(chan HelpRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1479,7 +1616,7 @@ func (a API) Node(cmd btcjson.NodeCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) NodeCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan NodeRes):
+	case o := <-a.Ch.(chan NodeRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1496,9 +1633,9 @@ func (a API) NodeGetRes() (out *None) {
 // NodeWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) NodeWait() (out *None, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan NodeRes):
+	case o := <-a.Ch.(chan NodeRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1514,7 +1651,7 @@ func (a API) Ping(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) PingCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan PingRes):
+	case o := <-a.Ch.(chan PingRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1531,9 +1668,9 @@ func (a API) PingGetRes() (out *None) {
 // PingWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) PingWait() (out *None, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan PingRes):
+	case o := <-a.Ch.(chan PingRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1549,7 +1686,7 @@ func (a API) ResetChain(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) ResetChainCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan ResetChainRes):
+	case o := <-a.Ch.(chan ResetChainRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1566,9 +1703,9 @@ func (a API) ResetChainGetRes() (out *None) {
 // ResetChainWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) ResetChainWait() (out *None, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan ResetChainRes):
+	case o := <-a.Ch.(chan ResetChainRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1584,7 +1721,7 @@ func (a API) Restart(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) RestartCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan RestartRes):
+	case o := <-a.Ch.(chan RestartRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1601,9 +1738,9 @@ func (a API) RestartGetRes() (out *None) {
 // RestartWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) RestartWait() (out *None, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan RestartRes):
+	case o := <-a.Ch.(chan RestartRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1619,7 +1756,7 @@ func (a API) SearchRawTransactions(cmd btcjson.SearchRawTransactionsCmd) (err er
 // returns true if it does, as well as storing the value in the Result field
 func (a API) SearchRawTransactionsCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan SearchRawTransactionsRes):
+	case o := <-a.Ch.(chan SearchRawTransactionsRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1636,9 +1773,9 @@ func (a API) SearchRawTransactionsGetRes() (out *[]btcjson.SearchRawTransactions
 // SearchRawTransactionsWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) SearchRawTransactionsWait() (out *[]btcjson.SearchRawTransactionsResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan SearchRawTransactionsRes):
+	case o := <-a.Ch.(chan SearchRawTransactionsRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1654,7 +1791,7 @@ func (a API) SendRawTransaction(cmd btcjson.SendRawTransactionCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) SendRawTransactionCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan SendRawTransactionRes):
+	case o := <-a.Ch.(chan SendRawTransactionRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1671,9 +1808,9 @@ func (a API) SendRawTransactionGetRes() (out *None) {
 // SendRawTransactionWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) SendRawTransactionWait() (out *None, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan SendRawTransactionRes):
+	case o := <-a.Ch.(chan SendRawTransactionRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1689,7 +1826,7 @@ func (a API) SetGenerate(cmd btcjson.SetGenerateCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) SetGenerateCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan SetGenerateRes):
+	case o := <-a.Ch.(chan SetGenerateRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1706,9 +1843,9 @@ func (a API) SetGenerateGetRes() (out *None) {
 // SetGenerateWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) SetGenerateWait() (out *None, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan SetGenerateRes):
+	case o := <-a.Ch.(chan SetGenerateRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1724,7 +1861,7 @@ func (a API) Stop(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) StopCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan StopRes):
+	case o := <-a.Ch.(chan StopRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1741,9 +1878,9 @@ func (a API) StopGetRes() (out *None) {
 // StopWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) StopWait() (out *None, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan StopRes):
+	case o := <-a.Ch.(chan StopRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1759,7 +1896,7 @@ func (a API) SubmitBlock(cmd btcjson.SubmitBlockCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) SubmitBlockCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan SubmitBlockRes):
+	case o := <-a.Ch.(chan SubmitBlockRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1776,9 +1913,9 @@ func (a API) SubmitBlockGetRes() (out *string) {
 // SubmitBlockWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) SubmitBlockWait() (out *string, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan SubmitBlockRes):
+	case o := <-a.Ch.(chan SubmitBlockRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1794,7 +1931,7 @@ func (a API) Uptime(cmd None) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) UptimeCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan UptimeRes):
+	case o := <-a.Ch.(chan UptimeRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1811,9 +1948,9 @@ func (a API) UptimeGetRes() (out *btcjson.GetMempoolInfoResult) {
 // UptimeWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) UptimeWait() (out *btcjson.GetMempoolInfoResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan UptimeRes):
+	case o := <-a.Ch.(chan UptimeRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1829,7 +1966,7 @@ func (a API) ValidateAddress(cmd btcjson.ValidateAddressCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) ValidateAddressCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan ValidateAddressRes):
+	case o := <-a.Ch.(chan ValidateAddressRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1846,9 +1983,9 @@ func (a API) ValidateAddressGetRes() (out *btcjson.ValidateAddressChainResult) {
 // ValidateAddressWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) ValidateAddressWait() (out *btcjson.ValidateAddressChainResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan ValidateAddressRes):
+	case o := <-a.Ch.(chan ValidateAddressRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1864,7 +2001,7 @@ func (a API) VerifyChain(cmd btcjson.VerifyChainCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) VerifyChainCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan VerifyChainRes):
+	case o := <-a.Ch.(chan VerifyChainRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1881,9 +2018,9 @@ func (a API) VerifyChainGetRes() (out *bool) {
 // VerifyChainWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) VerifyChainWait() (out *bool, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan VerifyChainRes):
+	case o := <-a.Ch.(chan VerifyChainRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1899,7 +2036,7 @@ func (a API) VerifyMessage(cmd btcjson.VerifyMessageCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) VerifyMessageCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan VerifyMessageRes):
+	case o := <-a.Ch.(chan VerifyMessageRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1916,9 +2053,9 @@ func (a API) VerifyMessageGetRes() (out *bool) {
 // VerifyMessageWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) VerifyMessageWait() (out *bool, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan VerifyMessageRes):
+	case o := <-a.Ch.(chan VerifyMessageRes):
 		out, err = o.Res, o.Err
 	}
 	return
@@ -1934,7 +2071,7 @@ func (a API) Version(cmd btcjson.VersionCmd) (err error) {
 // returns true if it does, as well as storing the value in the Result field
 func (a API) VersionCheck() (isNew bool) {
 	select {
-	case o := <- a.Ch.(chan VersionRes):
+	case o := <-a.Ch.(chan VersionRes):
 		a.Result = o.Res
 		isNew = true
 	default:
@@ -1951,14 +2088,13 @@ func (a API) VersionGetRes() (out *map[string]btcjson.VersionResult) {
 // VersionWait calls the method and blocks until it returns or 5 seconds passes
 func (a API) VersionWait() (out *map[string]btcjson.VersionResult, err error) {
 	select {
-	case <-time.After(time.Second*5):
+	case <-time.After(time.Second * 5):
 		break
-	case o := <- a.Ch.(chan VersionRes):
+	case o := <-a.Ch.(chan VersionRes):
 		out, err = o.Res, o.Err
 	}
 	return
 }
-
 
 // RunAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result
 // Note that the parameters are type asserted to prevent the consumer of the API from sending wrong message types not
@@ -1966,295 +2102,342 @@ func (a API) VersionWait() (out *map[string]btcjson.VersionResult, err error) {
 func RunAPI(server *Server, quit chan struct{}) {
 	nrh := RPCHandlers
 	go func() {
-		log.L.Debug("starting up node cAPI")
+		L.Debug("starting up node cAPI")
 		var err error
 		var res interface{}
 		for {
-			select { 
+			select {
 			case msg := <-nrh["addnode"].Call:
 				if res, err = nrh["addnode"].
-					Fn(server, msg.Params.(btcjson.AddNodeCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.AddNodeCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(None); ok { 
-					msg.Ch.(chan AddNodeRes) <- AddNodeRes{&r, err} } 
+				if r, ok := res.(None); ok {
+					msg.Ch.(chan AddNodeRes) <- AddNodeRes{&r, err}
+				}
 			case msg := <-nrh["createrawtransaction"].Call:
 				if res, err = nrh["createrawtransaction"].
-					Fn(server, msg.Params.(btcjson.CreateRawTransactionCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.CreateRawTransactionCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan CreateRawTransactionRes) <- CreateRawTransactionRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan CreateRawTransactionRes) <- CreateRawTransactionRes{&r, err}
+				}
 			case msg := <-nrh["decoderawtransaction"].Call:
 				if res, err = nrh["decoderawtransaction"].
-					Fn(server, msg.Params.(btcjson.DecodeRawTransactionCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.DecodeRawTransactionCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.TxRawDecodeResult); ok { 
-					msg.Ch.(chan DecodeRawTransactionRes) <- DecodeRawTransactionRes{&r, err} } 
+				if r, ok := res.(btcjson.TxRawDecodeResult); ok {
+					msg.Ch.(chan DecodeRawTransactionRes) <- DecodeRawTransactionRes{&r, err}
+				}
 			case msg := <-nrh["decodescript"].Call:
 				if res, err = nrh["decodescript"].
-					Fn(server, msg.Params.(btcjson.DecodeScriptCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.DecodeScriptCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.DecodeScriptResult); ok { 
-					msg.Ch.(chan DecodeScriptRes) <- DecodeScriptRes{&r, err} } 
+				if r, ok := res.(btcjson.DecodeScriptResult); ok {
+					msg.Ch.(chan DecodeScriptRes) <- DecodeScriptRes{&r, err}
+				}
 			case msg := <-nrh["estimatefee"].Call:
 				if res, err = nrh["estimatefee"].
-					Fn(server, msg.Params.(btcjson.EstimateFeeCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.EstimateFeeCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(float64); ok { 
-					msg.Ch.(chan EstimateFeeRes) <- EstimateFeeRes{&r, err} } 
+				if r, ok := res.(float64); ok {
+					msg.Ch.(chan EstimateFeeRes) <- EstimateFeeRes{&r, err}
+				}
 			case msg := <-nrh["generate"].Call:
 				if res, err = nrh["generate"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.([]string); ok { 
-					msg.Ch.(chan GenerateRes) <- GenerateRes{&r, err} } 
+				if r, ok := res.([]string); ok {
+					msg.Ch.(chan GenerateRes) <- GenerateRes{&r, err}
+				}
 			case msg := <-nrh["getaddednodeinfo"].Call:
 				if res, err = nrh["getaddednodeinfo"].
-					Fn(server, msg.Params.(btcjson.GetAddedNodeInfoCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetAddedNodeInfoCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.([]btcjson.GetAddedNodeInfoResultAddr); ok { 
-					msg.Ch.(chan GetAddedNodeInfoRes) <- GetAddedNodeInfoRes{&r, err} } 
+				if r, ok := res.([]btcjson.GetAddedNodeInfoResultAddr); ok {
+					msg.Ch.(chan GetAddedNodeInfoRes) <- GetAddedNodeInfoRes{&r, err}
+				}
 			case msg := <-nrh["getbestblock"].Call:
 				if res, err = nrh["getbestblock"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.GetBestBlockResult); ok { 
-					msg.Ch.(chan GetBestBlockRes) <- GetBestBlockRes{&r, err} } 
+				if r, ok := res.(btcjson.GetBestBlockResult); ok {
+					msg.Ch.(chan GetBestBlockRes) <- GetBestBlockRes{&r, err}
+				}
 			case msg := <-nrh["getbestblockhash"].Call:
 				if res, err = nrh["getbestblockhash"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan GetBestBlockHashRes) <- GetBestBlockHashRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan GetBestBlockHashRes) <- GetBestBlockHashRes{&r, err}
+				}
 			case msg := <-nrh["getblock"].Call:
 				if res, err = nrh["getblock"].
-					Fn(server, msg.Params.(btcjson.GetBlockCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetBlockCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.GetBlockVerboseResult); ok { 
-					msg.Ch.(chan GetBlockRes) <- GetBlockRes{&r, err} } 
+				if r, ok := res.(btcjson.GetBlockVerboseResult); ok {
+					msg.Ch.(chan GetBlockRes) <- GetBlockRes{&r, err}
+				}
 			case msg := <-nrh["getblockchaininfo"].Call:
 				if res, err = nrh["getblockchaininfo"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.GetBlockChainInfoResult); ok { 
-					msg.Ch.(chan GetBlockChainInfoRes) <- GetBlockChainInfoRes{&r, err} } 
+				if r, ok := res.(btcjson.GetBlockChainInfoResult); ok {
+					msg.Ch.(chan GetBlockChainInfoRes) <- GetBlockChainInfoRes{&r, err}
+				}
 			case msg := <-nrh["getblockcount"].Call:
 				if res, err = nrh["getblockcount"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(int64); ok { 
-					msg.Ch.(chan GetBlockCountRes) <- GetBlockCountRes{&r, err} } 
+				if r, ok := res.(int64); ok {
+					msg.Ch.(chan GetBlockCountRes) <- GetBlockCountRes{&r, err}
+				}
 			case msg := <-nrh["getblockhash"].Call:
 				if res, err = nrh["getblockhash"].
-					Fn(server, msg.Params.(btcjson.GetBlockHashCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetBlockHashCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan GetBlockHashRes) <- GetBlockHashRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan GetBlockHashRes) <- GetBlockHashRes{&r, err}
+				}
 			case msg := <-nrh["getblockheader"].Call:
 				if res, err = nrh["getblockheader"].
-					Fn(server, msg.Params.(btcjson.GetBlockHeaderCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetBlockHeaderCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.GetBlockHeaderVerboseResult); ok { 
-					msg.Ch.(chan GetBlockHeaderRes) <- GetBlockHeaderRes{&r, err} } 
+				if r, ok := res.(btcjson.GetBlockHeaderVerboseResult); ok {
+					msg.Ch.(chan GetBlockHeaderRes) <- GetBlockHeaderRes{&r, err}
+				}
 			case msg := <-nrh["getblocktemplate"].Call:
 				if res, err = nrh["getblocktemplate"].
-					Fn(server, msg.Params.(btcjson.GetBlockTemplateCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetBlockTemplateCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan GetBlockTemplateRes) <- GetBlockTemplateRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan GetBlockTemplateRes) <- GetBlockTemplateRes{&r, err}
+				}
 			case msg := <-nrh["getcfilter"].Call:
 				if res, err = nrh["getcfilter"].
-					Fn(server, msg.Params.(btcjson.GetCFilterCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetCFilterCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan GetCFilterRes) <- GetCFilterRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan GetCFilterRes) <- GetCFilterRes{&r, err}
+				}
 			case msg := <-nrh["getcfilterheader"].Call:
 				if res, err = nrh["getcfilterheader"].
-					Fn(server, msg.Params.(btcjson.GetCFilterHeaderCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetCFilterHeaderCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan GetCFilterHeaderRes) <- GetCFilterHeaderRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan GetCFilterHeaderRes) <- GetCFilterHeaderRes{&r, err}
+				}
 			case msg := <-nrh["getconnectioncount"].Call:
 				if res, err = nrh["getconnectioncount"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(int32); ok { 
-					msg.Ch.(chan GetConnectionCountRes) <- GetConnectionCountRes{&r, err} } 
+				if r, ok := res.(int32); ok {
+					msg.Ch.(chan GetConnectionCountRes) <- GetConnectionCountRes{&r, err}
+				}
 			case msg := <-nrh["getcurrentnet"].Call:
 				if res, err = nrh["getcurrentnet"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan GetCurrentNetRes) <- GetCurrentNetRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan GetCurrentNetRes) <- GetCurrentNetRes{&r, err}
+				}
 			case msg := <-nrh["getdifficulty"].Call:
 				if res, err = nrh["getdifficulty"].
-					Fn(server, msg.Params.(btcjson.GetDifficultyCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetDifficultyCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(float64); ok { 
-					msg.Ch.(chan GetDifficultyRes) <- GetDifficultyRes{&r, err} } 
+				if r, ok := res.(float64); ok {
+					msg.Ch.(chan GetDifficultyRes) <- GetDifficultyRes{&r, err}
+				}
 			case msg := <-nrh["getgenerate"].Call:
 				if res, err = nrh["getgenerate"].
-					Fn(server, msg.Params.(btcjson.GetHeadersCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetHeadersCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(bool); ok { 
-					msg.Ch.(chan GetGenerateRes) <- GetGenerateRes{&r, err} } 
+				if r, ok := res.(bool); ok {
+					msg.Ch.(chan GetGenerateRes) <- GetGenerateRes{&r, err}
+				}
 			case msg := <-nrh["gethashespersec"].Call:
 				if res, err = nrh["gethashespersec"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(float64); ok { 
-					msg.Ch.(chan GetHashesPerSecRes) <- GetHashesPerSecRes{&r, err} } 
+				if r, ok := res.(float64); ok {
+					msg.Ch.(chan GetHashesPerSecRes) <- GetHashesPerSecRes{&r, err}
+				}
 			case msg := <-nrh["getheaders"].Call:
 				if res, err = nrh["getheaders"].
-					Fn(server, msg.Params.(btcjson.GetHeadersCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetHeadersCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.([]string); ok { 
-					msg.Ch.(chan GetHeadersRes) <- GetHeadersRes{&r, err} } 
+				if r, ok := res.([]string); ok {
+					msg.Ch.(chan GetHeadersRes) <- GetHeadersRes{&r, err}
+				}
 			case msg := <-nrh["getinfo"].Call:
 				if res, err = nrh["getinfo"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.InfoChainResult0); ok { 
-					msg.Ch.(chan GetInfoRes) <- GetInfoRes{&r, err} } 
+				if r, ok := res.(btcjson.InfoChainResult0); ok {
+					msg.Ch.(chan GetInfoRes) <- GetInfoRes{&r, err}
+				}
 			case msg := <-nrh["getmempoolinfo"].Call:
 				if res, err = nrh["getmempoolinfo"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.GetMempoolInfoResult); ok { 
-					msg.Ch.(chan GetMempoolInfoRes) <- GetMempoolInfoRes{&r, err} } 
+				if r, ok := res.(btcjson.GetMempoolInfoResult); ok {
+					msg.Ch.(chan GetMempoolInfoRes) <- GetMempoolInfoRes{&r, err}
+				}
 			case msg := <-nrh["getmininginfo"].Call:
 				if res, err = nrh["getmininginfo"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.GetMiningInfoResult); ok { 
-					msg.Ch.(chan GetMiningInfoRes) <- GetMiningInfoRes{&r, err} } 
+				if r, ok := res.(btcjson.GetMiningInfoResult); ok {
+					msg.Ch.(chan GetMiningInfoRes) <- GetMiningInfoRes{&r, err}
+				}
 			case msg := <-nrh["getnettotals"].Call:
 				if res, err = nrh["getnettotals"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.GetNetTotalsResult); ok { 
-					msg.Ch.(chan GetNetTotalsRes) <- GetNetTotalsRes{&r, err} } 
+				if r, ok := res.(btcjson.GetNetTotalsResult); ok {
+					msg.Ch.(chan GetNetTotalsRes) <- GetNetTotalsRes{&r, err}
+				}
 			case msg := <-nrh["getnetworkhashps"].Call:
 				if res, err = nrh["getnetworkhashps"].
-					Fn(server, msg.Params.(btcjson.GetNetworkHashPSCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetNetworkHashPSCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.([]btcjson.GetPeerInfoResult); ok { 
-					msg.Ch.(chan GetNetworkHashPSRes) <- GetNetworkHashPSRes{&r, err} } 
+				if r, ok := res.([]btcjson.GetPeerInfoResult); ok {
+					msg.Ch.(chan GetNetworkHashPSRes) <- GetNetworkHashPSRes{&r, err}
+				}
 			case msg := <-nrh["getpeerinfo"].Call:
 				if res, err = nrh["getpeerinfo"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.([]btcjson.GetPeerInfoResult); ok { 
-					msg.Ch.(chan GetPeerInfoRes) <- GetPeerInfoRes{&r, err} } 
+				if r, ok := res.([]btcjson.GetPeerInfoResult); ok {
+					msg.Ch.(chan GetPeerInfoRes) <- GetPeerInfoRes{&r, err}
+				}
 			case msg := <-nrh["getrawmempool"].Call:
 				if res, err = nrh["getrawmempool"].
-					Fn(server, msg.Params.(btcjson.GetRawMempoolCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetRawMempoolCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.([]string); ok { 
-					msg.Ch.(chan GetRawMempoolRes) <- GetRawMempoolRes{&r, err} } 
+				if r, ok := res.([]string); ok {
+					msg.Ch.(chan GetRawMempoolRes) <- GetRawMempoolRes{&r, err}
+				}
 			case msg := <-nrh["getrawtransaction"].Call:
 				if res, err = nrh["getrawtransaction"].
-					Fn(server, msg.Params.(btcjson.GetRawTransactionCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetRawTransactionCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan GetRawTransactionRes) <- GetRawTransactionRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan GetRawTransactionRes) <- GetRawTransactionRes{&r, err}
+				}
 			case msg := <-nrh["gettxout"].Call:
 				if res, err = nrh["gettxout"].
-					Fn(server, msg.Params.(btcjson.GetTxOutCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.GetTxOutCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan GetTxOutRes) <- GetTxOutRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan GetTxOutRes) <- GetTxOutRes{&r, err}
+				}
 			case msg := <-nrh["help"].Call:
 				if res, err = nrh["help"].
-					Fn(server, msg.Params.(btcjson.HelpCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.HelpCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan HelpRes) <- HelpRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan HelpRes) <- HelpRes{&r, err}
+				}
 			case msg := <-nrh["node"].Call:
 				if res, err = nrh["node"].
-					Fn(server, msg.Params.(btcjson.NodeCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.NodeCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(None); ok { 
-					msg.Ch.(chan NodeRes) <- NodeRes{&r, err} } 
+				if r, ok := res.(None); ok {
+					msg.Ch.(chan NodeRes) <- NodeRes{&r, err}
+				}
 			case msg := <-nrh["ping"].Call:
 				if res, err = nrh["ping"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(None); ok { 
-					msg.Ch.(chan PingRes) <- PingRes{&r, err} } 
+				if r, ok := res.(None); ok {
+					msg.Ch.(chan PingRes) <- PingRes{&r, err}
+				}
 			case msg := <-nrh["resetchain"].Call:
 				if res, err = nrh["resetchain"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(None); ok { 
-					msg.Ch.(chan ResetChainRes) <- ResetChainRes{&r, err} } 
+				if r, ok := res.(None); ok {
+					msg.Ch.(chan ResetChainRes) <- ResetChainRes{&r, err}
+				}
 			case msg := <-nrh["restart"].Call:
 				if res, err = nrh["restart"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(None); ok { 
-					msg.Ch.(chan RestartRes) <- RestartRes{&r, err} } 
+				if r, ok := res.(None); ok {
+					msg.Ch.(chan RestartRes) <- RestartRes{&r, err}
+				}
 			case msg := <-nrh["searchrawtransactions"].Call:
 				if res, err = nrh["searchrawtransactions"].
-					Fn(server, msg.Params.(btcjson.SearchRawTransactionsCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.SearchRawTransactionsCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.([]btcjson.SearchRawTransactionsResult); ok { 
-					msg.Ch.(chan SearchRawTransactionsRes) <- SearchRawTransactionsRes{&r, err} } 
+				if r, ok := res.([]btcjson.SearchRawTransactionsResult); ok {
+					msg.Ch.(chan SearchRawTransactionsRes) <- SearchRawTransactionsRes{&r, err}
+				}
 			case msg := <-nrh["sendrawtransaction"].Call:
 				if res, err = nrh["sendrawtransaction"].
-					Fn(server, msg.Params.(btcjson.SendRawTransactionCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.SendRawTransactionCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(None); ok { 
-					msg.Ch.(chan SendRawTransactionRes) <- SendRawTransactionRes{&r, err} } 
+				if r, ok := res.(None); ok {
+					msg.Ch.(chan SendRawTransactionRes) <- SendRawTransactionRes{&r, err}
+				}
 			case msg := <-nrh["setgenerate"].Call:
 				if res, err = nrh["setgenerate"].
-					Fn(server, msg.Params.(btcjson.SetGenerateCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.SetGenerateCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(None); ok { 
-					msg.Ch.(chan SetGenerateRes) <- SetGenerateRes{&r, err} } 
+				if r, ok := res.(None); ok {
+					msg.Ch.(chan SetGenerateRes) <- SetGenerateRes{&r, err}
+				}
 			case msg := <-nrh["stop"].Call:
 				if res, err = nrh["stop"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(None); ok { 
-					msg.Ch.(chan StopRes) <- StopRes{&r, err} } 
+				if r, ok := res.(None); ok {
+					msg.Ch.(chan StopRes) <- StopRes{&r, err}
+				}
 			case msg := <-nrh["submitblock"].Call:
 				if res, err = nrh["submitblock"].
-					Fn(server, msg.Params.(btcjson.SubmitBlockCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.SubmitBlockCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(string); ok { 
-					msg.Ch.(chan SubmitBlockRes) <- SubmitBlockRes{&r, err} } 
+				if r, ok := res.(string); ok {
+					msg.Ch.(chan SubmitBlockRes) <- SubmitBlockRes{&r, err}
+				}
 			case msg := <-nrh["uptime"].Call:
 				if res, err = nrh["uptime"].
-					Fn(server, msg.Params.(None), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(None), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.GetMempoolInfoResult); ok { 
-					msg.Ch.(chan UptimeRes) <- UptimeRes{&r, err} } 
+				if r, ok := res.(btcjson.GetMempoolInfoResult); ok {
+					msg.Ch.(chan UptimeRes) <- UptimeRes{&r, err}
+				}
 			case msg := <-nrh["validateaddress"].Call:
 				if res, err = nrh["validateaddress"].
-					Fn(server, msg.Params.(btcjson.ValidateAddressCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.ValidateAddressCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(btcjson.ValidateAddressChainResult); ok { 
-					msg.Ch.(chan ValidateAddressRes) <- ValidateAddressRes{&r, err} } 
+				if r, ok := res.(btcjson.ValidateAddressChainResult); ok {
+					msg.Ch.(chan ValidateAddressRes) <- ValidateAddressRes{&r, err}
+				}
 			case msg := <-nrh["verifychain"].Call:
 				if res, err = nrh["verifychain"].
-					Fn(server, msg.Params.(btcjson.VerifyChainCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.VerifyChainCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(bool); ok { 
-					msg.Ch.(chan VerifyChainRes) <- VerifyChainRes{&r, err} } 
+				if r, ok := res.(bool); ok {
+					msg.Ch.(chan VerifyChainRes) <- VerifyChainRes{&r, err}
+				}
 			case msg := <-nrh["verifymessage"].Call:
 				if res, err = nrh["verifymessage"].
-					Fn(server, msg.Params.(btcjson.VerifyMessageCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.VerifyMessageCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(bool); ok { 
-					msg.Ch.(chan VerifyMessageRes) <- VerifyMessageRes{&r, err} } 
+				if r, ok := res.(bool); ok {
+					msg.Ch.(chan VerifyMessageRes) <- VerifyMessageRes{&r, err}
+				}
 			case msg := <-nrh["version"].Call:
 				if res, err = nrh["version"].
-					Fn(server, msg.Params.(btcjson.VersionCmd), nil); log.L.Check(err) {
+					Fn(server, msg.Params.(btcjson.VersionCmd), nil); L.Check(err) {
 				}
-				if r, ok := res.(map[string]btcjson.VersionResult); ok { 
-					msg.Ch.(chan VersionRes) <- VersionRes{&r, err} } 
+				if r, ok := res.(map[string]btcjson.VersionResult); ok {
+					msg.Ch.(chan VersionRes) <- VersionRes{&r, err}
+				}
 			case <-quit:
-				log.L.Debug("stopping wallet cAPI")
+				L.Debug("stopping wallet cAPI")
 				return
 			}
 		}
@@ -2271,9 +2454,9 @@ func (c *CAPI) AddNode(req *btcjson.AddNodeCmd, resp *None) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) CreateRawTransaction(req *btcjson.CreateRawTransactionCmd, resp *string) (err error) {
@@ -2284,9 +2467,9 @@ func (c *CAPI) CreateRawTransaction(req *btcjson.CreateRawTransactionCmd, resp *
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) DecodeRawTransaction(req *btcjson.DecodeRawTransactionCmd, resp *btcjson.TxRawDecodeResult) (err error) {
@@ -2297,9 +2480,9 @@ func (c *CAPI) DecodeRawTransaction(req *btcjson.DecodeRawTransactionCmd, resp *
 	select {
 	case *resp = <-res.Ch.(chan btcjson.TxRawDecodeResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) DecodeScript(req *btcjson.DecodeScriptCmd, resp *btcjson.DecodeScriptResult) (err error) {
@@ -2310,9 +2493,9 @@ func (c *CAPI) DecodeScript(req *btcjson.DecodeScriptCmd, resp *btcjson.DecodeSc
 	select {
 	case *resp = <-res.Ch.(chan btcjson.DecodeScriptResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) EstimateFee(req *btcjson.EstimateFeeCmd, resp *float64) (err error) {
@@ -2323,9 +2506,9 @@ func (c *CAPI) EstimateFee(req *btcjson.EstimateFeeCmd, resp *float64) (err erro
 	select {
 	case *resp = <-res.Ch.(chan float64):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) Generate(req *None, resp *[]string) (err error) {
@@ -2336,9 +2519,9 @@ func (c *CAPI) Generate(req *None, resp *[]string) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan []string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetAddedNodeInfo(req *btcjson.GetAddedNodeInfoCmd, resp *[]btcjson.GetAddedNodeInfoResultAddr) (err error) {
@@ -2349,9 +2532,9 @@ func (c *CAPI) GetAddedNodeInfo(req *btcjson.GetAddedNodeInfoCmd, resp *[]btcjso
 	select {
 	case *resp = <-res.Ch.(chan []btcjson.GetAddedNodeInfoResultAddr):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetBestBlock(req *None, resp *btcjson.GetBestBlockResult) (err error) {
@@ -2362,9 +2545,9 @@ func (c *CAPI) GetBestBlock(req *None, resp *btcjson.GetBestBlockResult) (err er
 	select {
 	case *resp = <-res.Ch.(chan btcjson.GetBestBlockResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetBestBlockHash(req *None, resp *string) (err error) {
@@ -2375,9 +2558,9 @@ func (c *CAPI) GetBestBlockHash(req *None, resp *string) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetBlock(req *btcjson.GetBlockCmd, resp *btcjson.GetBlockVerboseResult) (err error) {
@@ -2388,9 +2571,9 @@ func (c *CAPI) GetBlock(req *btcjson.GetBlockCmd, resp *btcjson.GetBlockVerboseR
 	select {
 	case *resp = <-res.Ch.(chan btcjson.GetBlockVerboseResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetBlockChainInfo(req *None, resp *btcjson.GetBlockChainInfoResult) (err error) {
@@ -2401,9 +2584,9 @@ func (c *CAPI) GetBlockChainInfo(req *None, resp *btcjson.GetBlockChainInfoResul
 	select {
 	case *resp = <-res.Ch.(chan btcjson.GetBlockChainInfoResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetBlockCount(req *None, resp *int64) (err error) {
@@ -2414,9 +2597,9 @@ func (c *CAPI) GetBlockCount(req *None, resp *int64) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan int64):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetBlockHash(req *btcjson.GetBlockHashCmd, resp *string) (err error) {
@@ -2427,9 +2610,9 @@ func (c *CAPI) GetBlockHash(req *btcjson.GetBlockHashCmd, resp *string) (err err
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetBlockHeader(req *btcjson.GetBlockHeaderCmd, resp *btcjson.GetBlockHeaderVerboseResult) (err error) {
@@ -2440,9 +2623,9 @@ func (c *CAPI) GetBlockHeader(req *btcjson.GetBlockHeaderCmd, resp *btcjson.GetB
 	select {
 	case *resp = <-res.Ch.(chan btcjson.GetBlockHeaderVerboseResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetBlockTemplate(req *btcjson.GetBlockTemplateCmd, resp *string) (err error) {
@@ -2453,9 +2636,9 @@ func (c *CAPI) GetBlockTemplate(req *btcjson.GetBlockTemplateCmd, resp *string) 
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetCFilter(req *btcjson.GetCFilterCmd, resp *string) (err error) {
@@ -2466,9 +2649,9 @@ func (c *CAPI) GetCFilter(req *btcjson.GetCFilterCmd, resp *string) (err error) 
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetCFilterHeader(req *btcjson.GetCFilterHeaderCmd, resp *string) (err error) {
@@ -2479,9 +2662,9 @@ func (c *CAPI) GetCFilterHeader(req *btcjson.GetCFilterHeaderCmd, resp *string) 
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetConnectionCount(req *None, resp *int32) (err error) {
@@ -2492,9 +2675,9 @@ func (c *CAPI) GetConnectionCount(req *None, resp *int32) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan int32):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetCurrentNet(req *None, resp *string) (err error) {
@@ -2505,9 +2688,9 @@ func (c *CAPI) GetCurrentNet(req *None, resp *string) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetDifficulty(req *btcjson.GetDifficultyCmd, resp *float64) (err error) {
@@ -2518,9 +2701,9 @@ func (c *CAPI) GetDifficulty(req *btcjson.GetDifficultyCmd, resp *float64) (err 
 	select {
 	case *resp = <-res.Ch.(chan float64):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetGenerate(req *btcjson.GetHeadersCmd, resp *bool) (err error) {
@@ -2531,9 +2714,9 @@ func (c *CAPI) GetGenerate(req *btcjson.GetHeadersCmd, resp *bool) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan bool):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetHashesPerSec(req *None, resp *float64) (err error) {
@@ -2544,9 +2727,9 @@ func (c *CAPI) GetHashesPerSec(req *None, resp *float64) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan float64):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetHeaders(req *btcjson.GetHeadersCmd, resp *[]string) (err error) {
@@ -2557,9 +2740,9 @@ func (c *CAPI) GetHeaders(req *btcjson.GetHeadersCmd, resp *[]string) (err error
 	select {
 	case *resp = <-res.Ch.(chan []string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetInfo(req *None, resp *btcjson.InfoChainResult0) (err error) {
@@ -2570,9 +2753,9 @@ func (c *CAPI) GetInfo(req *None, resp *btcjson.InfoChainResult0) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan btcjson.InfoChainResult0):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetMempoolInfo(req *None, resp *btcjson.GetMempoolInfoResult) (err error) {
@@ -2583,9 +2766,9 @@ func (c *CAPI) GetMempoolInfo(req *None, resp *btcjson.GetMempoolInfoResult) (er
 	select {
 	case *resp = <-res.Ch.(chan btcjson.GetMempoolInfoResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetMiningInfo(req *None, resp *btcjson.GetMiningInfoResult) (err error) {
@@ -2596,9 +2779,9 @@ func (c *CAPI) GetMiningInfo(req *None, resp *btcjson.GetMiningInfoResult) (err 
 	select {
 	case *resp = <-res.Ch.(chan btcjson.GetMiningInfoResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetNetTotals(req *None, resp *btcjson.GetNetTotalsResult) (err error) {
@@ -2609,9 +2792,9 @@ func (c *CAPI) GetNetTotals(req *None, resp *btcjson.GetNetTotalsResult) (err er
 	select {
 	case *resp = <-res.Ch.(chan btcjson.GetNetTotalsResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetNetworkHashPS(req *btcjson.GetNetworkHashPSCmd, resp *[]btcjson.GetPeerInfoResult) (err error) {
@@ -2622,9 +2805,9 @@ func (c *CAPI) GetNetworkHashPS(req *btcjson.GetNetworkHashPSCmd, resp *[]btcjso
 	select {
 	case *resp = <-res.Ch.(chan []btcjson.GetPeerInfoResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetPeerInfo(req *None, resp *[]btcjson.GetPeerInfoResult) (err error) {
@@ -2635,9 +2818,9 @@ func (c *CAPI) GetPeerInfo(req *None, resp *[]btcjson.GetPeerInfoResult) (err er
 	select {
 	case *resp = <-res.Ch.(chan []btcjson.GetPeerInfoResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetRawMempool(req *btcjson.GetRawMempoolCmd, resp *[]string) (err error) {
@@ -2648,9 +2831,9 @@ func (c *CAPI) GetRawMempool(req *btcjson.GetRawMempoolCmd, resp *[]string) (err
 	select {
 	case *resp = <-res.Ch.(chan []string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetRawTransaction(req *btcjson.GetRawTransactionCmd, resp *string) (err error) {
@@ -2661,9 +2844,9 @@ func (c *CAPI) GetRawTransaction(req *btcjson.GetRawTransactionCmd, resp *string
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) GetTxOut(req *btcjson.GetTxOutCmd, resp *string) (err error) {
@@ -2674,9 +2857,9 @@ func (c *CAPI) GetTxOut(req *btcjson.GetTxOutCmd, resp *string) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) Help(req *btcjson.HelpCmd, resp *string) (err error) {
@@ -2687,9 +2870,9 @@ func (c *CAPI) Help(req *btcjson.HelpCmd, resp *string) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) Node(req *btcjson.NodeCmd, resp *None) (err error) {
@@ -2700,9 +2883,9 @@ func (c *CAPI) Node(req *btcjson.NodeCmd, resp *None) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) Ping(req *None, resp *None) (err error) {
@@ -2713,9 +2896,9 @@ func (c *CAPI) Ping(req *None, resp *None) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) ResetChain(req *None, resp *None) (err error) {
@@ -2726,9 +2909,9 @@ func (c *CAPI) ResetChain(req *None, resp *None) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) Restart(req *None, resp *None) (err error) {
@@ -2739,9 +2922,9 @@ func (c *CAPI) Restart(req *None, resp *None) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) SearchRawTransactions(req *btcjson.SearchRawTransactionsCmd, resp *[]btcjson.SearchRawTransactionsResult) (err error) {
@@ -2752,9 +2935,9 @@ func (c *CAPI) SearchRawTransactions(req *btcjson.SearchRawTransactionsCmd, resp
 	select {
 	case *resp = <-res.Ch.(chan []btcjson.SearchRawTransactionsResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) SendRawTransaction(req *btcjson.SendRawTransactionCmd, resp *None) (err error) {
@@ -2765,9 +2948,9 @@ func (c *CAPI) SendRawTransaction(req *btcjson.SendRawTransactionCmd, resp *None
 	select {
 	case *resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) SetGenerate(req *btcjson.SetGenerateCmd, resp *None) (err error) {
@@ -2778,9 +2961,9 @@ func (c *CAPI) SetGenerate(req *btcjson.SetGenerateCmd, resp *None) (err error) 
 	select {
 	case *resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) Stop(req *None, resp *None) (err error) {
@@ -2791,9 +2974,9 @@ func (c *CAPI) Stop(req *None, resp *None) (err error) {
 	select {
 	case *resp = <-res.Ch.(chan None):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) SubmitBlock(req *btcjson.SubmitBlockCmd, resp *string) (err error) {
@@ -2804,9 +2987,9 @@ func (c *CAPI) SubmitBlock(req *btcjson.SubmitBlockCmd, resp *string) (err error
 	select {
 	case *resp = <-res.Ch.(chan string):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) Uptime(req *None, resp *btcjson.GetMempoolInfoResult) (err error) {
@@ -2817,9 +3000,9 @@ func (c *CAPI) Uptime(req *None, resp *btcjson.GetMempoolInfoResult) (err error)
 	select {
 	case *resp = <-res.Ch.(chan btcjson.GetMempoolInfoResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) ValidateAddress(req *btcjson.ValidateAddressCmd, resp *btcjson.ValidateAddressChainResult) (err error) {
@@ -2830,9 +3013,9 @@ func (c *CAPI) ValidateAddress(req *btcjson.ValidateAddressCmd, resp *btcjson.Va
 	select {
 	case *resp = <-res.Ch.(chan btcjson.ValidateAddressChainResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) VerifyChain(req *btcjson.VerifyChainCmd, resp *bool) (err error) {
@@ -2843,9 +3026,9 @@ func (c *CAPI) VerifyChain(req *btcjson.VerifyChainCmd, resp *bool) (err error) 
 	select {
 	case *resp = <-res.Ch.(chan bool):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) VerifyMessage(req *btcjson.VerifyMessageCmd, resp *bool) (err error) {
@@ -2856,9 +3039,9 @@ func (c *CAPI) VerifyMessage(req *btcjson.VerifyMessageCmd, resp *bool) (err err
 	select {
 	case *resp = <-res.Ch.(chan bool):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 func (c *CAPI) Version(req *btcjson.VersionCmd, resp *map[string]btcjson.VersionResult) (err error) {
@@ -2869,9 +3052,9 @@ func (c *CAPI) Version(req *btcjson.VersionCmd, resp *map[string]btcjson.Version
 	select {
 	case *resp = <-res.Ch.(chan map[string]btcjson.VersionResult):
 	case <-time.After(c.Timeout):
-	case <- c.quit:
-	} 
-	return 
+	case <-c.quit:
+	}
+	return
 }
 
 // Client call wrappers for a CAPI client with a given Conn
@@ -2881,7 +3064,7 @@ func (r *CAPIClient) AddNode(cmd ...btcjson.AddNodeCmd) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.AddNode", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.AddNode", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2891,7 +3074,7 @@ func (r *CAPIClient) CreateRawTransaction(cmd ...btcjson.CreateRawTransactionCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.CreateRawTransaction", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.CreateRawTransaction", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2901,7 +3084,7 @@ func (r *CAPIClient) DecodeRawTransaction(cmd ...btcjson.DecodeRawTransactionCmd
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.DecodeRawTransaction", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.DecodeRawTransaction", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2911,7 +3094,7 @@ func (r *CAPIClient) DecodeScript(cmd ...btcjson.DecodeScriptCmd) (res btcjson.D
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.DecodeScript", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.DecodeScript", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2921,7 +3104,7 @@ func (r *CAPIClient) EstimateFee(cmd ...btcjson.EstimateFeeCmd) (res float64, er
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.EstimateFee", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.EstimateFee", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2931,7 +3114,7 @@ func (r *CAPIClient) Generate(cmd ...None) (res []string, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Generate", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.Generate", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2941,7 +3124,7 @@ func (r *CAPIClient) GetAddedNodeInfo(cmd ...btcjson.GetAddedNodeInfoCmd) (res [
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetAddedNodeInfo", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetAddedNodeInfo", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2951,7 +3134,7 @@ func (r *CAPIClient) GetBestBlock(cmd ...None) (res btcjson.GetBestBlockResult, 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBestBlock", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetBestBlock", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2961,7 +3144,7 @@ func (r *CAPIClient) GetBestBlockHash(cmd ...None) (res string, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBestBlockHash", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetBestBlockHash", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2971,7 +3154,7 @@ func (r *CAPIClient) GetBlock(cmd ...btcjson.GetBlockCmd) (res btcjson.GetBlockV
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlock", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetBlock", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2981,7 +3164,7 @@ func (r *CAPIClient) GetBlockChainInfo(cmd ...None) (res btcjson.GetBlockChainIn
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockChainInfo", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetBlockChainInfo", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -2991,7 +3174,7 @@ func (r *CAPIClient) GetBlockCount(cmd ...None) (res int64, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockCount", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetBlockCount", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3001,7 +3184,7 @@ func (r *CAPIClient) GetBlockHash(cmd ...btcjson.GetBlockHashCmd) (res string, e
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockHash", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetBlockHash", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3011,7 +3194,7 @@ func (r *CAPIClient) GetBlockHeader(cmd ...btcjson.GetBlockHeaderCmd) (res btcjs
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockHeader", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetBlockHeader", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3021,7 +3204,7 @@ func (r *CAPIClient) GetBlockTemplate(cmd ...btcjson.GetBlockTemplateCmd) (res s
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockTemplate", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetBlockTemplate", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3031,7 +3214,7 @@ func (r *CAPIClient) GetCFilter(cmd ...btcjson.GetCFilterCmd) (res string, err e
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetCFilter", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetCFilter", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3041,7 +3224,7 @@ func (r *CAPIClient) GetCFilterHeader(cmd ...btcjson.GetCFilterHeaderCmd) (res s
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetCFilterHeader", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetCFilterHeader", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3051,7 +3234,7 @@ func (r *CAPIClient) GetConnectionCount(cmd ...None) (res int32, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetConnectionCount", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetConnectionCount", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3061,7 +3244,7 @@ func (r *CAPIClient) GetCurrentNet(cmd ...None) (res string, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetCurrentNet", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetCurrentNet", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3071,7 +3254,7 @@ func (r *CAPIClient) GetDifficulty(cmd ...btcjson.GetDifficultyCmd) (res float64
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetDifficulty", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetDifficulty", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3081,7 +3264,7 @@ func (r *CAPIClient) GetGenerate(cmd ...btcjson.GetHeadersCmd) (res bool, err er
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetGenerate", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetGenerate", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3091,7 +3274,7 @@ func (r *CAPIClient) GetHashesPerSec(cmd ...None) (res float64, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetHashesPerSec", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetHashesPerSec", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3101,7 +3284,7 @@ func (r *CAPIClient) GetHeaders(cmd ...btcjson.GetHeadersCmd) (res []string, err
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetHeaders", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetHeaders", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3111,7 +3294,7 @@ func (r *CAPIClient) GetInfo(cmd ...None) (res btcjson.InfoChainResult0, err err
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetInfo", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetInfo", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3121,7 +3304,7 @@ func (r *CAPIClient) GetMempoolInfo(cmd ...None) (res btcjson.GetMempoolInfoResu
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetMempoolInfo", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetMempoolInfo", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3131,7 +3314,7 @@ func (r *CAPIClient) GetMiningInfo(cmd ...None) (res btcjson.GetMiningInfoResult
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetMiningInfo", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetMiningInfo", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3141,7 +3324,7 @@ func (r *CAPIClient) GetNetTotals(cmd ...None) (res btcjson.GetNetTotalsResult, 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetNetTotals", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetNetTotals", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3151,7 +3334,7 @@ func (r *CAPIClient) GetNetworkHashPS(cmd ...btcjson.GetNetworkHashPSCmd) (res [
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetNetworkHashPS", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetNetworkHashPS", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3161,7 +3344,7 @@ func (r *CAPIClient) GetPeerInfo(cmd ...None) (res []btcjson.GetPeerInfoResult, 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetPeerInfo", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetPeerInfo", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3171,7 +3354,7 @@ func (r *CAPIClient) GetRawMempool(cmd ...btcjson.GetRawMempoolCmd) (res []strin
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetRawMempool", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetRawMempool", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3181,7 +3364,7 @@ func (r *CAPIClient) GetRawTransaction(cmd ...btcjson.GetRawTransactionCmd) (res
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetRawTransaction", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetRawTransaction", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3191,7 +3374,7 @@ func (r *CAPIClient) GetTxOut(cmd ...btcjson.GetTxOutCmd) (res string, err error
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetTxOut", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.GetTxOut", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3201,7 +3384,7 @@ func (r *CAPIClient) Help(cmd ...btcjson.HelpCmd) (res string, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Help", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.Help", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3211,7 +3394,7 @@ func (r *CAPIClient) Node(cmd ...btcjson.NodeCmd) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Node", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.Node", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3221,7 +3404,7 @@ func (r *CAPIClient) Ping(cmd ...None) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Ping", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.Ping", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3231,7 +3414,7 @@ func (r *CAPIClient) ResetChain(cmd ...None) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.ResetChain", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.ResetChain", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3241,7 +3424,7 @@ func (r *CAPIClient) Restart(cmd ...None) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Restart", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.Restart", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3251,7 +3434,7 @@ func (r *CAPIClient) SearchRawTransactions(cmd ...btcjson.SearchRawTransactionsC
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.SearchRawTransactions", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.SearchRawTransactions", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3261,7 +3444,7 @@ func (r *CAPIClient) SendRawTransaction(cmd ...btcjson.SendRawTransactionCmd) (r
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.SendRawTransaction", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.SendRawTransaction", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3271,7 +3454,7 @@ func (r *CAPIClient) SetGenerate(cmd ...btcjson.SetGenerateCmd) (res None, err e
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.SetGenerate", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.SetGenerate", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3281,7 +3464,7 @@ func (r *CAPIClient) Stop(cmd ...None) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Stop", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.Stop", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3291,7 +3474,7 @@ func (r *CAPIClient) SubmitBlock(cmd ...btcjson.SubmitBlockCmd) (res string, err
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.SubmitBlock", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.SubmitBlock", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3301,7 +3484,7 @@ func (r *CAPIClient) Uptime(cmd ...None) (res btcjson.GetMempoolInfoResult, err 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Uptime", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.Uptime", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3311,7 +3494,7 @@ func (r *CAPIClient) ValidateAddress(cmd ...btcjson.ValidateAddressCmd) (res btc
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.ValidateAddress", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.ValidateAddress", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3321,7 +3504,7 @@ func (r *CAPIClient) VerifyChain(cmd ...btcjson.VerifyChainCmd) (res bool, err e
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.VerifyChain", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.VerifyChain", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3331,7 +3514,7 @@ func (r *CAPIClient) VerifyMessage(cmd ...btcjson.VerifyMessageCmd) (res bool, e
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.VerifyMessage", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.VerifyMessage", c, &res); L.Check(err) {
 	}
 	return
 }
@@ -3341,8 +3524,7 @@ func (r *CAPIClient) Version(cmd ...btcjson.VersionCmd) (res map[string]btcjson.
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Version", c, &res); log.L.Check(err) {
+	if err = r.Call("CAPI.Version", c, &res); L.Check(err) {
 	}
 	return
 }
-

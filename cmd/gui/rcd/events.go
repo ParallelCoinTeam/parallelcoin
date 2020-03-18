@@ -5,8 +5,6 @@ import (
 
 	"go.uber.org/atomic"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	blockchain "github.com/p9c/pod/pkg/chain"
 )
 
@@ -63,7 +61,7 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 				}
 				r.GetDuoUIconnectionCount()
 				r.UpdateTrigger <- struct{}{}
-			// log.L.Warn("GetDuoUIconnectionCount")
+			// L.Warn("GetDuoUIconnectionCount")
 			case <-r.cx.WalletServer.Update:
 				update(r)
 			case <-r.cx.KillAll:
@@ -71,31 +69,31 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 			}
 		}
 	}()
-	log.L.Warn("event update listener started")
+	L.Warn("event update listener started")
 	return
 }
 
 func update(r *RcVar) {
-	// log.L.Warn("GetDuoUIbalance")
+	// L.Warn("GetDuoUIbalance")
 	r.GetDuoUIbalance()
-	// log.L.Warn("GetDuoUIunconfirmedBalance")
+	// L.Warn("GetDuoUIunconfirmedBalance")
 	r.GetDuoUIunconfirmedBalance()
-	// log.L.Warn("GetDuoUItransactionsNumber")
+	// L.Warn("GetDuoUItransactionsNumber")
 	r.GetDuoUItransactionsNumber()
 	// r.GetTransactions()
-	// log.L.Warn("GetLatestTransactions")
+	// L.Warn("GetLatestTransactions")
 	r.GetLatestTransactions()
-	// log.L.Info("")
-	// log.L.Info("UPDATE")
-	// log.L.Trace(r.History.PerPage)
-	// log.L.Info("")
+	// L.Info("")
+	// L.Info("UPDATE")
+	// L.Trace(r.History.PerPage)
+	// L.Info("")
 	// r.GetDuoUIstatus()
 	// r.GetDuoUIlocalLost()
 	// r.GetDuoUIblockHeight()
-	// log.L.Warn("GetDuoUIblockCount")
+	// L.Warn("GetDuoUIblockCount")
 	r.GetDuoUIdifficulty()
 	r.GetDuoUIblockCount()
 	r.GetPeerInfo()
-	// log.L.Warn("GetDuoUIdifficulty")
+	// L.Warn("GetDuoUIdifficulty")
 	r.UpdateTrigger <- struct{}{}
 }

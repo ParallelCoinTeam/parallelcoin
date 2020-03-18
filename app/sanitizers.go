@@ -182,7 +182,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 					L.Error(err)
 				}
 				*listeners[i] = cli.
-					StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
+				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
 			}
 		}
 	}

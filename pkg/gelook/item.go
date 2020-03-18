@@ -3,13 +3,14 @@
 package gelook
 
 import (
+	"image"
+
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"image"
 )
 
 type DuoUIitem struct {
@@ -39,7 +40,7 @@ func (t *DuoUItheme) DuoUIitem(padding int, background string) DuoUIitem {
 		Font: text.Font{
 			Typeface: t.Fonts["Primary"],
 		},
-		//Color:      rgb(0xffffff),
+		// Color:      rgb(0xffffff),
 		PaddingTop:    padding,
 		PaddingRight:  padding,
 		PaddingBottom: padding,

@@ -9,8 +9,6 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/state"
@@ -85,13 +83,13 @@ func GetNewContext(appName, appLang, subtext string) *Xt {
 	chainClientReady.Store(false)
 	return &Xt{
 		ChainClientReady: chainClientReady,
-		KillAll:   make(chan struct{}),
-		App:       cli.NewApp(),
-		Config:    config,
-		ConfigMap: configMap,
-		StateCfg:  new(state.Config),
-		Language:  lang.ExportLanguage(appLang),
-		DataDir:   appdata.Dir(appName, false),
+		KillAll:          make(chan struct{}),
+		App:              cli.NewApp(),
+		Config:           config,
+		ConfigMap:        configMap,
+		StateCfg:         new(state.Config),
+		Language:         lang.ExportLanguage(appLang),
+		DataDir:          appdata.Dir(appName, false),
 	}
 }
 
@@ -108,9 +106,9 @@ func (cx *Xt) IsCurrent() (is bool) {
 	othernodes := cx.OtherNodes.Load()
 	if !*cx.Config.LAN {
 		cc -= othernodes
-		// log.L.Debug("LAN disabled, non-lan node count:", cc)
+		// L.Debug("LAN disabled, non-lan node count:", cc)
 	}
-	// log.L.Debug("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
+	// L.Debug("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
 	connected := cc > 0
 	if *cx.Config.Solo {
 		connected = true
@@ -119,7 +117,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load()
-	log.L.Trace("is current:", is, "-", cx.
+	L.Trace("is current:", is, "-", cx.
 		RealNode.Chain.IsCurrent(), cx.
 		RealNode.SyncManager.IsCurrent(), !*cx.
 		Config.Solo,

@@ -3,11 +3,12 @@ package helpers
 
 import (
 	"fmt"
-	"gioui.org/layout"
-	"gioui.org/unit"
 	"image/color"
 	"strconv"
 	"time"
+
+	"gioui.org/layout"
+	"gioui.org/unit"
 )
 
 type formatter struct {
@@ -81,7 +82,7 @@ func FormatTime(t time.Time) string {
 
 func FormatAmount(a float64) string {
 	return fmt.Sprintf("%0.8f", a)
-	//return fmt.Sprintf("%d", t.amount)
+	// return fmt.Sprintf("%d", t.amount)
 }
 func Alpha(a float64, col color.RGBA) color.RGBA {
 	col.A = byte(float64(col.A) * a)
@@ -130,12 +131,12 @@ func formatLayout(gtx *layout.Context, f *formatter, widgets []layout.Widget) {
 	fexpr := func() {
 		formatExpr(gtx, f, widgets)
 	}
-	//align, ok := dirFor(name)
-	//if ok {
+	// align, ok := dirFor(name)
+	// if ok {
 	//	layout.Align(align).Layout(gtx, fexpr)
 	//	expect(f, ")")
 	//	return
-	//}
+	// }
 	switch name {
 	case "inset":
 		in := parseInset(gtx, f, widgets)
@@ -246,9 +247,9 @@ loop:
 			expect(f, ",")
 		case 'r':
 			expect(f, "r(")
-			//children = append(children, st.Rigid(gtx, func() {
+			// children = append(children, st.Rigid(gtx, func() {
 			//	formatExpr(gtx, f, widgets)
-			//}))
+			// }))
 			expect(f, ")")
 			commaOK = true
 		case 'e':
@@ -284,9 +285,9 @@ loop:
 			child++
 		case 'e':
 			expect(f, "e(")
-			//children[child] = st.Expand(gtx, func() {
+			// children[child] = st.Expand(gtx, func() {
 			//	formatExpr(gtx, f, widgets)
-			//})
+			// })
 			expect(f, ")")
 			child++
 		default:
@@ -323,9 +324,9 @@ loop:
 			expect(f, ",")
 		case 'r':
 			expect(f, "r(")
-			//children = append(children, fl.Rigid(gtx, func() {
+			// children = append(children, fl.Rigid(gtx, func() {
 			//	formatExpr(gtx, f, widgets)
-			//}))
+			// }))
 			expect(f, ")")
 			commaOK = true
 		case 'f':
@@ -363,11 +364,11 @@ loop:
 			child++
 		case 'f':
 			expect(f, "f(")
-			//weight := parseFloat(f)
+			// weight := parseFloat(f)
 			expect(f, ",")
-			//children[child] = fl.Flex(gtx, weight, func() {
+			// children[child] = fl.Flex(gtx, weight, func() {
 			//	formatExpr(gtx, f, widgets)
-			//})
+			// })
 			expect(f, ")")
 			child++
 		default:

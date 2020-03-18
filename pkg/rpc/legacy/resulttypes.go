@@ -1,4 +1,5 @@
 package legacy
+
 //
 // import (
 // 	"github.com/p9c/pod/pkg/rpc/btcjson"

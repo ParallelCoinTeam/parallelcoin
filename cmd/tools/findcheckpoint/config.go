@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"os"
 	"path/filepath"
 
@@ -74,7 +73,7 @@ func loadConfig() (*config, []string, error) {
 	parser := flags.NewParser(&cfg, flags.Default)
 	remainingArgs, err := parser.Parse()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}

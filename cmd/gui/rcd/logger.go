@@ -10,14 +10,14 @@ var (
 )
 
 func (r *RcVar) DuoUIloggerController() {
-	log.L.LogChan = make(chan log.Entry)
-	r.Log.LogChan = log.L.LogChan
+	L.LogChan = make(chan log.Entry)
+	r.Log.LogChan = L.LogChan
 	log.L.SetLevel(*r.cx.Config.LogLevel, true, "pod")
 	go func() {
 	out:
 		for {
 			select {
-			case n := <-log.L.LogChan:
+			case n := <-L.LogChan:
 				le, ok := r.Log.LogMessages.Load().([]log.Entry)
 				if ok {
 					le = append(le, n)
@@ -35,7 +35,7 @@ func (r *RcVar) DuoUIloggerController() {
 					r.Log.StopLogger = make(chan struct{})
 				}()
 				r.Log.LogMessages.Store([]log.Entry{})
-				log.L.LogChan = nil
+				L.LogChan = nil
 				break out
 			}
 		}

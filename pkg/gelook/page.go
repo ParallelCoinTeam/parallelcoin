@@ -3,13 +3,14 @@
 package gelook
 
 import (
+	"image"
+
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"image"
 )
 
 var ()
@@ -17,35 +18,35 @@ var ()
 type DuoUIpage struct {
 	Title   string
 	TxColor string
-	//Font          text.Font
+	// Font          text.Font
 	shaper  text.Shaper
 	Command func()
 
 	Header        func()
 	HeaderBgColor string
 	HeaderPadding float32
-	//header
-	//header
+	// header
+	// header
 	Border      float32
 	BorderColor string
 	Body        func()
 	BodyBgColor string
 	BodyPadding float32
-	//body
-	//body
+	// body
+	// body
 	Footer        func()
 	FooterBgColor string
 	FooterPadding float32
-	//footer
-	//footer
+	// footer
+	// footer
 }
 
 func (t *DuoUItheme) DuoUIpage(p DuoUIpage) *DuoUIpage {
 	return &DuoUIpage{
 		Title: p.Title,
-		//Font: text.Font{
+		// Font: text.Font{
 		// Size: t.TextSize.Scale(14.0 / 16.0),
-		//},
+		// },
 		TxColor:       t.Colors["Dark"],
 		shaper:        t.Shaper,
 		Command:       p.Command,

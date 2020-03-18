@@ -4,13 +4,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/minio/highwayhash"
-	log "github.com/p9c/pod/pkg/logi"
 	"hash"
 	"io"
 	"os"
 	"os/exec"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/minio/highwayhash"
 )
 
 var quitMessage = ^uint32(0)
@@ -92,7 +92,7 @@ func (c *Conn) Write(p []byte) (n int, err error) {
 	b := make([]byte, 4)
 	binary.LittleEndian.PutUint32(b, uint32(pLen))
 	out := append(append(b, sum...), p...)
-	c.printlnE("write",spew.Sdump(out))
+	c.printlnE("write", spew.Sdump(out))
 	return c.Writer.Write(out)
 }
 
@@ -110,7 +110,7 @@ func (c *Conn) Read(p []byte) (n int, err error) {
 	u32 := binary.LittleEndian.Uint32
 	n, err = r(p[:4])
 	if err != nil || n != 4 {
-		log.L.Error(err)
+		L.Error(err)
 	}
 	c.printlnE("read", p[:4])
 	bLen := u32(p[:4])
@@ -156,23 +156,23 @@ func (c *Conn) Close() (err error) {
 	return
 }
 
-func (c *Conn)  printE(a ...interface{}) {
-	out := append([]interface{}{c.Name+":"}, a...)
+func (c *Conn) printE(a ...interface{}) {
+	out := append([]interface{}{c.Name + ":"}, a...)
 	_, _ = fmt.Fprint(os.Stderr, out...)
 }
 
-func (c *Conn)  printlnE(a ...interface{}) {
-	out := append([]interface{}{c.Name+":"}, a...)
+func (c *Conn) printlnE(a ...interface{}) {
+	out := append([]interface{}{c.Name + ":"}, a...)
 	_, _ = fmt.Fprintln(os.Stderr, out...)
-	//_, _ = fmt.Fprint(os.Stderr, "\r")
+	// _, _ = fmt.Fprint(os.Stderr, "\r")
 }
 
-func (c *Conn)  printfE(format string, a ...interface{}) {
-	out := append([]interface{}{c.Name+":"}, a...)
+func (c *Conn) printfE(format string, a ...interface{}) {
+	out := append([]interface{}{c.Name + ":"}, a...)
 	_, _ = fmt.Fprintf(os.Stderr, c.Name+": "+format, out...)
 }
 
-func (c *Conn)  printErr(err error, fn func()) {
+func (c *Conn) printErr(err error, fn func()) {
 	if err != nil {
 		c.printlnE(c.Name+":", err)
 		if fn != nil {

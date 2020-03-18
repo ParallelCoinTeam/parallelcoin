@@ -13,7 +13,6 @@ import (
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/gcs"
 	"github.com/p9c/pod/pkg/util/gcs/builder"
@@ -38,47 +37,47 @@ var (
 )
 
 type // queryOptions are a set of options that can be modified per-query,
-// unlike global options.
-//
-// TODO: Make more query options that override global options.
-queryOptions struct {
-	// timeout lets the query know how long to wait for a peer to answer
-	// the query before moving onto the next peer.
-	timeout time.Duration
-	// numRetries tells the query how many times to retry asking each peer
-	// the query.
-	numRetries uint8
-	// peerConnectTimeout lets the query know how long to wait for the
-	// underlying chain service to connect to a peer before giving up
-	// on a query in case we don't have any peers.
-	peerConnectTimeout time.Duration
-	// encoding lets the query know which encoding to use when queueing
-	// messages to a peer.
-	encoding wire.MessageEncoding
-	// doneChan lets the query signal the caller when it's done, in case
-	// it's run in a goroutine.
-	doneChan chan<- struct{}
-	// persistToDisk indicates whether the filter should also be written
-	// to disk in addition to the memory cache. For "normal" wallets,
-	// they'll
-	// almost never need to re-match a filter once it's been fetched unless
-	// they're doing something like a key import.
-	persistToDisk bool
-}
+	// unlike global options.
+	//
+	// TODO: Make more query options that override global options.
+	queryOptions struct {
+		// timeout lets the query know how long to wait for a peer to answer
+		// the query before moving onto the next peer.
+		timeout time.Duration
+		// numRetries tells the query how many times to retry asking each peer
+		// the query.
+		numRetries uint8
+		// peerConnectTimeout lets the query know how long to wait for the
+		// underlying chain service to connect to a peer before giving up
+		// on a query in case we don't have any peers.
+		peerConnectTimeout time.Duration
+		// encoding lets the query know which encoding to use when queueing
+		// messages to a peer.
+		encoding wire.MessageEncoding
+		// doneChan lets the query signal the caller when it's done, in case
+		// it's run in a goroutine.
+		doneChan chan<- struct{}
+		// persistToDisk indicates whether the filter should also be written
+		// to disk in addition to the memory cache. For "normal" wallets,
+		// they'll
+		// almost never need to re-match a filter once it's been fetched unless
+		// they're doing something like a key import.
+		persistToDisk bool
+	}
 
 type // filterCacheKey represents the key used for FilterCache of the
-// ChainService.
-filterCacheKey struct {
-	blockHash  *chainhash.Hash
-	filterType filterdb.FilterType
-}
+	// ChainService.
+	filterCacheKey struct {
+		blockHash  *chainhash.Hash
+		filterType filterdb.FilterType
+	}
 
 type // QueryOption is a functional option argument to any of the network query
-// methods, such as GetBlock and GetCFilter (when that resorts to a network
-// query). These are always processed in order,
-// with later options overriding
-// earlier ones.
-QueryOption func(*queryOptions)
+	// methods, such as GetBlock and GetCFilter (when that resorts to a network
+	// query). These are always processed in order,
+	// with later options overriding
+	// earlier ones.
+	QueryOption func(*queryOptions)
 
 func // defaultQueryOptions returns a queryOptions set to package-level
 // defaults.
@@ -148,15 +147,15 @@ PersistToDisk() QueryOption {
 }
 
 type // queryState is an atomically updated per-query state for each query in a
-// batch.
-//
-// State transitions are:
-//
-// * queryWaitSubmit->queryWaitResponse - send query to peer
-// * queryWaitResponse->queryWaitSubmit - query timeout with no acceptable
-//   response
-// * queryWaitResponse->queryAnswered - acceptable response to query received
-queryState uint32
+	// batch.
+	//
+	// State transitions are:
+	//
+	// * queryWaitSubmit->queryWaitResponse - send query to peer
+	// * queryWaitResponse->queryWaitSubmit - query timeout with no acceptable
+	//   response
+	// * queryWaitResponse->queryAnswered - acceptable response to query received
+	queryState uint32
 
 const (
 	// Waiting to be submitted to a peer.
@@ -199,17 +198,17 @@ func // queryChainServiceBatch is a helper function that sends a batch of
 // so that the caller can cache as few responses as possible before
 // committing to storage. TODO(aakselrod): support for more than one in-flight query per peer to reduce effects of latency.
 queryChainServiceBatch(
-	// s is the ChainService to use.
+// s is the ChainService to use.
 	s *ChainService,
-	// queryMsgs is a slice of queries for which the caller wants responses.
+// queryMsgs is a slice of queries for which the caller wants responses.
 	queryMsgs []wire.Message,
-	// checkResponse is called for every received message to see if it
-	// answers the query message. It should return true if so.
+// checkResponse is called for every received message to see if it
+// answers the query message. It should return true if so.
 	checkResponse func(sp *ServerPeer, query wire.Message,
-		resp wire.Message) bool,
-	// queryQuit forces the query to end before it's complete.
+	resp wire.Message) bool,
+// queryQuit forces the query to end before it's complete.
 	queryQuit <-chan struct{},
-	// options takes functional options for executing the query.
+// options takes functional options for executing the query.
 	options ...QueryOption) {
 	// Starting with the set of default options, we'll apply any specified
 	// functional options to the query.
@@ -261,7 +260,7 @@ queryChainServiceBatch(
 					atomic.LoadUint32(&queryStates[i]) ==
 						uint32(queryAnswered) {
 					firstUnfinished++
-					log.L.Tracef(
+					L.Tracef(
 						"query #%v already answered, skipping", i,
 					)
 					continue
@@ -274,7 +273,7 @@ queryChainServiceBatch(
 					uint32(queryWaitSubmit),
 					uint32(queryWaitResponse),
 				) {
-					log.L.Tracef(
+					L.Tracef(
 						"query #%v already being queried for, skipping", i,
 					)
 					continue
@@ -332,7 +331,7 @@ queryChainServiceBatch(
 				if !sp.Connected() {
 					return
 				}
-				log.L.Tracec(func() string {
+				L.Tracec(func() string {
 					return fmt.Sprintf(
 						"query for #%v failed, moving on: %v",
 						handleQuery,
@@ -344,7 +343,7 @@ queryChainServiceBatch(
 				// query a success.
 				atomic.StoreUint32(&queryStates[handleQuery],
 					uint32(queryAnswered))
-				log.L.Tracef(
+				L.Tracef(
 					"query #%v answered, updating state", handleQuery,
 				)
 			}
@@ -425,18 +424,18 @@ func // queryAllPeers is a helper function that sends a query to all peers
 // variable or the Timeout functional option.
 // The NumRetries option is set to 1 by default unless overridden by the caller.
 (s *ChainService) queryAllPeers(
-	// queryMsg is the message to broadcast to all peers.
+// queryMsg is the message to broadcast to all peers.
 	queryMsg wire.Message,
-	// checkResponse is called for every message within the timeout period.
-	// The quit channel lets the query know to terminate because the
-	// required response has been found. This is done by closing the
-	// channel. The peerQuit lets the query know to terminate the query for
-	// the peer which sent the response, allowing releasing resources for
-	// peers which respond quickly while continuing to wait for slower
-	// peers to respond and nonresponsive peers to time out.
+// checkResponse is called for every message within the timeout period.
+// The quit channel lets the query know to terminate because the
+// required response has been found. This is done by closing the
+// channel. The peerQuit lets the query know to terminate the query for
+// the peer which sent the response, allowing releasing resources for
+// peers which respond quickly while continuing to wait for slower
+// peers to respond and nonresponsive peers to time out.
 	checkResponse func(sp *ServerPeer, resp wire.Message,
-		quit chan<- struct{}, peerQuit chan<- struct{}),
-	// options takes functional options for executing the query.
+	quit chan<- struct{}, peerQuit chan<- struct{}),
+// options takes functional options for executing the query.
 	options ...QueryOption) {
 
 	// Starting with the set of default options, we'll apply any specified
@@ -532,15 +531,15 @@ func // queryChainServicePeers is a helper function that sends a query to one or
 // functional option.
 queryChainServicePeers( // s is the ChainService to use.
 	s *ChainService,
-	// queryMsg is the message to send to each peer selected by selectPeer.
+// queryMsg is the message to send to each peer selected by selectPeer.
 	queryMsg wire.Message,
-	// checkResponse is called for every message within the timeout period.
-	// The quit channel lets the query know to terminate because the
-	// required response has been found. This is done by closing the
-	// channel.
+// checkResponse is called for every message within the timeout period.
+// The quit channel lets the query know to terminate because the
+// required response has been found. This is done by closing the
+// channel.
 	checkResponse func(sp *ServerPeer, resp wire.Message,
-		quit chan<- struct{}),
-	// options takes functional options for executing the query.
+	quit chan<- struct{}),
+// options takes functional options for executing the query.
 	options ...QueryOption) {
 	// Starting with the set of default options, we'll apply any specified
 	// functional options to the query.
@@ -644,7 +643,7 @@ func // getFilterFromCache returns a filter from ChainService's FilterCache
 	cacheKey := filterCacheKey{blockHash: blockHash, filterType: filterType}
 	filterValue, err := s.FilterCache.Get(cacheKey)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	return filterValue.(*cache.CacheableFilter).Filter, nil
@@ -701,15 +700,15 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 	// which is required to fetch the filter header for that block.
 	block, height, err := s.BlockHeaders.FetchHeader(&blockHash)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	if block.BlockHash() != blockHash {
 		str := "couldn't get header for block %s from database"
-		log.L.Debug(str, blockHash)
+		L.Debug(str, blockHash)
 		return nil, fmt.Errorf(str, blockHash)
 	}
-	log.L.Debugf(
+	L.Debugf(
 		"fetching filter for height=%v, hash=%v %s",
 		height, blockHash,
 	)
@@ -718,13 +717,13 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 	// are required in order to verify the authenticity of the filter.
 	curHeader, err := getHeader(&blockHash)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, fmt.Errorf("Couldn't get cfheader for block %s "+
 			"from database", blockHash)
 	}
 	prevHeader, err := getHeader(&block.PrevBlock)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, fmt.Errorf("Couldn't get cfheader for block %s "+
 			"from database", blockHash)
 	}
@@ -756,7 +755,7 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 					response.Data,
 				)
 				if err != nil {
-					log.L.Error(err)
+					L.Error(err)
 					// Malformed filter data. We can ignore
 					// this message.
 					return
@@ -788,8 +787,8 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 		// the caller requested it.
 		err := s.putFilterToCache(&blockHash, dbFilterType, filter)
 		if err != nil {
-			log.L.Error(err)
-			log.L.Warn(
+			L.Error(err)
+			L.Warn(
 				"couldn't write filter to cache:", err,
 			)
 		}
@@ -798,10 +797,10 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 		if qo.persistToDisk {
 			err := s.FilterDB.PutFilter(&blockHash, filter, dbFilterType)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return nil, err
 			}
-			log.L.Tracef(
+			L.Tracef(
 				"Wrote filter for block %s, type %d",
 				blockHash, filterType,
 			)
@@ -846,7 +845,7 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 	getData := wire.NewMsgGetData()
 	err = getData.AddInvVect(inv)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 	}
 	// The block is only updated from the checkResponse function argument,
 	// which is always called single-threadedly. We don't check the block
@@ -890,7 +889,7 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 					false,
 					block.Height(),
 				); err != nil {
-					log.L.Warnf(
+					L.Warnf(
 						"Invalid block for %s received from %s -- disconnecting peer",
 						blockHash, sp.Addr(),
 					)
@@ -917,8 +916,8 @@ func // GetBlock gets a block by requesting it from the network, one peer at a
 	// Add block to the cache before returning it.
 	err = s.BlockCache.Put(*inv, &cache.CacheableBlock{Block: foundBlock})
 	if err != nil {
-		log.L.Error(err)
-		log.L.Error("couldn't write block to cache:", err)
+		L.Error(err)
+		L.Error("couldn't write block to cache:", err)
 	}
 	return foundBlock, nil
 }
@@ -946,7 +945,7 @@ func // SendTransaction sends a transaction to all peers.
 	inv := wire.NewMsgInv()
 	err = inv.AddInvVect(wire.NewInvVect(invType, &txHash))
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 	}
 	// Send the peer query and listen for getdata.
 	s.queryAllPeers(
@@ -967,7 +966,7 @@ func // SendTransaction sends a transaction to all peers.
 						"rejected by %s: %s",
 						tx.TxHash(), sp.Addr(),
 						response.Reason)
-					log.L.Error(err)
+					L.Error(err)
 					close(quit)
 				}
 			}

@@ -2,7 +2,6 @@ package walletdbtest
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"os"
 	"reflect"
 
@@ -519,7 +518,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
@@ -537,7 +536,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}

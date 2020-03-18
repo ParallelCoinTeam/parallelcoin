@@ -3,19 +3,18 @@ package rcd
 import (
 	"fmt"
 	"os"
-	
+
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/walletmain"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func (r *RcVar) StartServices() (err error) {
-	log.L.Debug("starting up services")
+	L.Debug("starting up services")
 	// Start Node
 	err = r.DuoNodeService()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 	}
 	r.cx.RPCServer = <-r.cx.NodeChan
 	r.cx.Node.Store(true)
@@ -23,7 +22,7 @@ func (r *RcVar) StartServices() (err error) {
 	// Start wallet
 	err = r.DuoWalletService()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 	}
 	r.cx.WalletServer = <-r.cx.WalletChan
 	r.cx.Wallet.Store(true)
@@ -38,7 +37,7 @@ func (r *RcVar) DuoWalletService() error {
 	var err error
 	if !*r.cx.Config.WalletOff {
 		go func() {
-			log.L.Info("starting wallet")
+			L.Info("starting wallet")
 			// utils.GetBiosMessage(view, "starting wallet")
 			err = walletmain.Main(r.cx)
 			if err != nil {
@@ -48,7 +47,7 @@ func (r *RcVar) DuoWalletService() error {
 		}()
 	}
 	interrupt.AddHandler(func() {
-		log.L.Warn("interrupt received, " +
+		L.Warn("interrupt received, " +
 			"shutting down shell modules")
 		close(r.cx.WalletKill)
 	})
@@ -61,17 +60,17 @@ func (r *RcVar) DuoNodeService() error {
 	var err error
 	if !*r.cx.Config.NodeOff {
 		go func() {
-			log.L.Info(r.cx.Language.RenderText("goApp_STARTINGNODE"))
+			L.Info(r.cx.Language.RenderText("goApp_STARTINGNODE"))
 			// utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
 			err = node.Main(r.cx, nil)
 			if err != nil {
-				log.L.Info("error running node:", err)
+				L.Info("error running node:", err)
 				os.Exit(1)
 			}
 		}()
 	}
 	interrupt.AddHandler(func() {
-		log.L.Warn("interrupt received, " +
+		L.Warn("interrupt received, " +
 			"shutting down node")
 		close(r.cx.NodeKill)
 	})

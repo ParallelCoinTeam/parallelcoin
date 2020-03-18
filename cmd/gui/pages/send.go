@@ -2,7 +2,6 @@ package pages
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"strconv"
 
 	"gioui.org/layout"
@@ -98,9 +97,9 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 						layout.Flex{}.Layout(gtx,
 							layout.Rigid(component.Button(gtx, th, buttonSend, th.Fonts["Primary"], 12,
 								th.Colors["ButtonText"], th.Colors["ButtonBg"], "SEND", func() {
-									log.L.Info("passPharse:" + sendStruct.passPharse)
-									log.L.Info("address" + sendStruct.address)
-									log.L.Info("amount:" + fmt.Sprint(sendStruct.amount))
+									L.Info("passPharse:" + sendStruct.passPharse)
+									L.Info("address" + sendStruct.address)
+									L.Info("amount:" + fmt.Sprint(sendStruct.amount))
 									rc.Dialog.Show = true
 									rc.Dialog = &model.DuoUIdialog{
 										Show:       true,

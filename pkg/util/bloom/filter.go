@@ -2,7 +2,6 @@ package bloom
 
 import (
 	"encoding/binary"
-	log "github.com/p9c/pod/pkg/logi"
 	"math"
 	"sync"
 
@@ -99,7 +98,7 @@ func (bf *Filter) matches(data []byte) bool {
 	// The bloom filter does not contain the data if any of the bit offsets which result from hashing the data using each independent hash  are not set.  The shifts and masks below are a faster equivalent of:
 	//   arrayIndex := idx / 8     (idx >> 3)
 	//   bitOffset := idx % 8      (idx & 7)
-	///  if filter[arrayIndex] & 1<<bitOffset == 0 { ... }
+	// /  if filter[arrayIndex] & 1<<bitOffset == 0 { ... }
 	for i := uint32(0); i < bf.msgFilterLoad.HashFuncs; i++ {
 		idx := bf.hash(i, data)
 		if bf.msgFilterLoad.Filter[idx>>3]&(1<<(idx&7)) == 0 {
@@ -142,7 +141,7 @@ func (bf *Filter) add(data []byte) {
 	// Adding data to a bloom filter consists of setting all of the bit offsets which result from hashing the data using each independent hash function.  The shifts and masks below are a faster equivalent of:
 	//   arrayIndex := idx / 8    (idx >> 3)
 	//   bitOffset := idx % 8     (idx & 7)
-	///  filter[arrayIndex] |= 1<<bitOffset
+	// /  filter[arrayIndex] |= 1<<bitOffset
 	// editors note: most CPUs now implement power of two multiplication and division as shifts anyway
 	for i := uint32(0); i < bf.msgFilterLoad.HashFuncs; i++ {
 		idx := bf.hash(i, data)
@@ -203,7 +202,7 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 	for i, txOut := range tx.MsgTx().TxOut {
 		pushedData, err := txscript.PushedData(txOut.PkScript)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			continue
 		}
 		for _, data := range pushedData {
@@ -226,7 +225,7 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 		}
 		pushedData, err := txscript.PushedData(txin.SignatureScript)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			continue
 		}
 		for _, data := range pushedData {

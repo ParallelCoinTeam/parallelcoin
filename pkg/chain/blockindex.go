@@ -12,7 +12,6 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 // blockStatus is a bit field representing the validation state of the block.
@@ -92,7 +91,7 @@ type BlockNode struct {
 	status blockStatus
 	// Diffs is the computed difficulty targets for a block to be connected
 	// to this one
-	Diffs  atomic.Value
+	Diffs atomic.Value
 }
 
 // initBlockNode initializes a block node from the given header and parent
@@ -268,7 +267,7 @@ func (bi *blockIndex) flushToDB() error {
 				for node := range bi.dirty {
 					err := dbStoreBlockNode(dbTx, node)
 					if err != nil {
-						log.L.Error(err)
+						L.Error(err)
 						return err
 					}
 				}
@@ -294,10 +293,10 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		return
 	}
 	if fork.GetCurrent(node.height+1) == 0 {
-		//log.L.Trace("checking pre-hardfork algo versions")
+		// L.Trace("checking pre-hardfork algo versions")
 		if algo != 514 &&
 			algo != 2 {
-			log.L.Debug("irregular version", algo, "block, assuming 2 (sha256d)")
+			L.Debug("irregular version", algo, "block, assuming 2 (sha256d)")
 			algo = 2
 		}
 	}
@@ -306,18 +305,18 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		if prev == nil {
 			return nil
 		}
-		//log.L.Tracef("node %d %d %8x", prev.height, prev.version, prev.bits)
+		// L.Tracef("node %d %d %8x", prev.height, prev.version, prev.bits)
 		prevversion := prev.version
 		if fork.GetCurrent(prev.height) == 0 {
-			//log.L.Trace("checking pre-hardfork algo versions")
+			// L.Trace("checking pre-hardfork algo versions")
 			if prev.version != 514 &&
 				prev.version != 2 {
-				log.L.Debug("irregular version block", prev.version, ", assuming 2 (sha256d)")
+				L.Debug("irregular version block", prev.version, ", assuming 2 (sha256d)")
 				prevversion = 2
 			}
 		}
 		if prevversion == algo {
-			//log.L.Tracef(
+			// L.Tracef(
 			//	"found height %d version %d prev version %d prev bits %8x",
 			//	prev.height, prev.version, prevversion, prev.bits)
 			return
@@ -327,48 +326,48 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 }
 
 // if node == nil {
-// 	log.L.Trace("this node is nil")
+// 	L.Trace("this node is nil")
 // 	return nil
 // }
 // prev = node.RelativeAncestor(1)
 // if prev == nil {
-// 	log.L.Trace("the previous node was nil")
+// 	L.Trace("the previous node was nil")
 // 	return nil
 // }
 // prevFork := fork.GetCurrent(prev.height)
 // if prevFork == 0 {
 // 	if algo != 514 &&
 // 		algo != 2 {
-// 		log.L.Trace("bogus version halcyon", algo)
+// 		L.Trace("bogus version halcyon", algo)
 // 		algo = 2
 // 	}
 // }
 // if prev.version == algo {
-// 	log.L.Tracef("found previous %d %d %08x", prev.height, prev.version,
+// 	L.Tracef("found previous %d %d %08x", prev.height, prev.version,
 // 	prev.bits)
 // 	return prev
 // }
 // prev = prev.RelativeAncestor(1)
 // for {
 // 	if prev == nil {
-// 		log.L.Trace("passed through genesis")
+// 		L.Trace("passed through genesis")
 // 		return nil
 // 	}
-// 	log.L.Trace(prev.height)
+// 	L.Trace(prev.height)
 // 	prevVersion := prev.version
 // 	if fork.GetCurrent(prev.height) == 0 {
 // 		if prevVersion != 514 &&
 // 			prevVersion != 2 {
-// 			log.L.Trace("bogus version", prevVersion)
+// 			L.Trace("bogus version", prevVersion)
 // 			prevVersion = 2
 // 		}
 // 	}
 // 	if prevVersion == algo {
-// 		log.L.Tracef("found previous %d %d %08x", prev.height, prev.version,
+// 		L.Tracef("found previous %d %d %08x", prev.height, prev.version,
 // 			prev.bits)
 // 		return prev
 // 	} else {
-// 		log.L.Trace(prev.height)
+// 		L.Trace(prev.height)
 // 		prev = prev.RelativeAncestor(1)
 // 	}
 // }

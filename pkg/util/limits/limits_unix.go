@@ -5,8 +5,6 @@ package limits
 import (
 	"fmt"
 	"syscall"
-
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 const (
@@ -19,7 +17,7 @@ func SetLimits() error {
 	var rLimit syscall.Rlimit
 	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	if rLimit.Cur > fileLimitWant {
@@ -37,12 +35,12 @@ func SetLimits() error {
 	}
 	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		// try min value
 		rLimit.Cur = fileLimitMin
 		err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}

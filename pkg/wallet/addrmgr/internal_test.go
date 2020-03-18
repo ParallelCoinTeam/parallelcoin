@@ -58,5 +58,5 @@ func TstRunWithFailingCryptoKeyPriv(m *Manager, callback func()) {
 }
 
 // TstDefaultAccountName is the constant defaultAccountName exported for tests.
-//nolint
+// nolint
 const TstDefaultAccountName = defaultAccountName

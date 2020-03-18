@@ -2,7 +2,6 @@ package rpctest
 
 import (
 	"errors"
-	log "github.com/p9c/pod/pkg/logi"
 	"math"
 	"math/big"
 	"runtime"
@@ -95,7 +94,7 @@ func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Ad
 	// Create the script to pay to the provided payment address.
 	pkScript, err := txscript.PayToAddrScript(addr)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -159,13 +158,13 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	extraNonce := uint64(0)
 	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	coinbaseTx, err := createCoinbaseTx(coinbaseScript, blockHeight, miningAddr,
 		mineTo, net, blockVersion)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	// Create a new block ready to be solved.

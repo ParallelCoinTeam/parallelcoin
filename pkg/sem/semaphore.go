@@ -18,7 +18,7 @@ func New(limit int) T {
 // this can execute as many times as number of buffers,
 // thus blocking subsequent callers until one of the buffers is released
 func (t T) Acquire() {
-	//log.L.Debug("acquiring semaphore")
+	// L.Debug("acquiring semaphore")
 	t <- semaphore{}
 }
 
@@ -26,6 +26,6 @@ func (t T) Acquire() {
 // This essentially empties a slot in the semaphore which allows another
 // thread to acquire it
 func (t T) Release() T {
-	//log.L.Debug("releasing semaphore")
+	// L.Debug("releasing semaphore")
 	return t
 }

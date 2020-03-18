@@ -25,7 +25,7 @@ func main() {
 	certHomeDir := appdata.Dir("mod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(certHomeDir, "rpc.cert"))
 	if err != nil {
-		log.L.Fatal(err)
+		L.Fatal(err)
 	}
 	connCfg := &rpcclient.ConnConfig{
 		Host:         "localhost:11046",
@@ -36,12 +36,12 @@ func main() {
 	}
 	client, err := rpcclient.New(connCfg, &ntfnHandlers)
 	if err != nil {
-		log.L.Fatal(err)
+		L.Fatal(err)
 	}
 	// Get the list of unspent transaction outputs (utxos) that the connected wallet has at least one private key for.
 	unspent, err := client.ListUnspent()
 	if err != nil {
-		log.L.Fatal(err)
+		L.Fatal(err)
 	}
 	log.Printf("Num unspent outputs (utxos): %d", len(unspent))
 	if len(unspent) > 0 {

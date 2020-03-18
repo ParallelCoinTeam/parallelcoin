@@ -1,9 +1,10 @@
-//+build headless
+// +build headless
 
 package conte
 
 import (
 	"sync"
+
 	"go.uber.org/atomic"
 
 	"github.com/urfave/cli"

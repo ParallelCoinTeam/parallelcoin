@@ -1,8 +1,6 @@
 package Hash
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
-
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
@@ -23,7 +21,7 @@ func (h *Hash) Decode(b []byte) (out []byte) {
 	if len(b) >= 32 {
 		err := h.Hash.SetBytes(b[:32])
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return
 		}
 		if len(b) > 32 {

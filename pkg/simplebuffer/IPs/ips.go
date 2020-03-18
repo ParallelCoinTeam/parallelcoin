@@ -1,12 +1,12 @@
 package IPs
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
+	"net"
+	"strings"
+
 	"github.com/p9c/pod/pkg/routeable"
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/IP"
-	"net"
-	"strings"
 )
 
 type IPs struct {
@@ -73,7 +73,7 @@ func GetListenable() simplebuffer.Serializer {
 	for i := range rI {
 		l, err := rI[i].Addrs()
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil
 		}
 		lA = append(lA, l...)

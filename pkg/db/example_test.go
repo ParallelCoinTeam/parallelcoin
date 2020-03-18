@@ -3,7 +3,6 @@ package database_test
 import (
 	"bytes"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"os"
 	"path/filepath"
 
@@ -27,7 +26,7 @@ func ExampleCreate() {
 	dbPath := filepath.Join(os.TempDir(), "examplecreate")
 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	defer os.RemoveAll(dbPath)
@@ -51,7 +50,7 @@ func Example_basicUsage() {
 	dbPath := filepath.Join(os.TempDir(), "exampleusage")
 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	defer os.RemoveAll(dbPath)
@@ -87,7 +86,7 @@ func Example_basicUsage() {
 		return nil
 	})
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	// Output:
@@ -110,7 +109,7 @@ func Example_basicUsage() {
 // 	dbPath := filepath.Join(os.TempDir(), "exampleblkstorage")
 // 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 // 	if err != nil {
-// 		log.L.Error(err)
+// 		L.Error(err)
 // 		return
 // 	}
 // 	defer os.RemoveAll(dbPath)
@@ -123,7 +122,7 @@ func Example_basicUsage() {
 // 		return tx.StoreBlock(util.NewBlock(genesisBlock))
 // 	})
 // 	if err != nil {
-// 		log.L.Error(err)
+// 		L.Error(err)
 // 		return
 // 	}
 // 	// Use the View function of the database to perform a managed read-only
@@ -144,7 +143,7 @@ func Example_basicUsage() {
 // 		return nil
 // 	})
 // 	if err != nil {
-// 		log.L.Error(err)
+// 		L.Error(err)
 // 		return
 // 	}
 // 	// Typically at this point, the block could be deserialized via the

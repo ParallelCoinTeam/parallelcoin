@@ -8,7 +8,6 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util"
 )
 
@@ -37,7 +36,7 @@ func (eft *estimateFeeTester) checkSaveAndRestore(
 	var err error
 	eft.ef, err = RestoreFeeEstimator(save)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		eft.t.Fatalf("Could not restore database: %s", err)
 	}
 	// Save again and check that it matches the previous one.
@@ -80,7 +79,7 @@ func (eft *estimateFeeTester) newBlock(txs []*wire.MsgTx) {
 	eft.last = &lastBlock{block.Hash(), eft.last}
 	e := eft.ef.RegisterBlock(block)
 	if e != nil {
-		log.L.Warn("failed to register block:", e)
+		L.Warn("failed to register block:", e)
 	}
 }
 
@@ -90,7 +89,7 @@ func (eft *estimateFeeTester) rollback() {
 	}
 	err := eft.ef.Rollback(eft.last.hash)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		eft.t.Errorf("Could not rollback: %v", err)
 	}
 	eft.height--
@@ -136,7 +135,7 @@ func (eft *estimateFeeTester) round(txHistory [][]*TxDesc,
 }
 
 func (
-	eft *estimateFeeTester,
+eft *estimateFeeTester,
 ) testTx(
 	fee util.Amount) *TxDesc {
 	eft.version++

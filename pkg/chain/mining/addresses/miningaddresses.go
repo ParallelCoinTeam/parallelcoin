@@ -1,8 +1,6 @@
 package addresses
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/pod"
@@ -21,11 +19,11 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	if toMake < 3 {
 		return
 	}
-	log.L.Warn("refilling mining addresses")
+	L.Warn("refilling mining addresses")
 	account, err := w.AccountNumber(wm.KeyScopeBIP0044,
 		"default")
 	if err != nil {
-		log.L.Error("error getting account number ", err)
+		L.Error("error getting account number ", err)
 	}
 	for i := 0; i < toMake; i++ {
 		addr, err := w.NewAddress(account, wm.KeyScopeBIP0044,
@@ -38,14 +36,14 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 			stateCfg.ActiveMiningAddrs = append(stateCfg.
 				ActiveMiningAddrs, addr)
 		} else {
-			log.L.Error("error adding new address ", err)
+			L.Error("error adding new address ", err)
 		}
 	}
 	if save.Pod(cfg) {
-		log.L.Warn("saved config with new addresses")
-		// log.L.Info("you can now start up a node in the same config folder with fresh addresses ready to mine with")
+		L.Warn("saved config with new addresses")
+		// L.Info("you can now start up a node in the same config folder with fresh addresses ready to mine with")
 		// os.Exit(0)
 	} else {
-		log.L.Error("error adding new addresses", err)
+		L.Error("error adding new addresses", err)
 	}
 }

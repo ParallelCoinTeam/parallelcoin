@@ -1,8 +1,6 @@
 package api
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
@@ -20,14 +18,14 @@ func StartAPI(server *rpc.Server, quit chan struct{}) {
 			case msg := <-nrh["addnode"].Call:
 				if _, err = nrh["addnode"].
 					Fn(server, msg.Params.(btcjson.AddNodeCmd),
-						nil); log.L.Check(err) {
+						nil); L.Check(err) {
 				}
 				msg.Ch.(chan rpc.AddNodeRes) <- rpc.AddNodeRes{
 					Res: nil, Err: err}
 			case msg := <-nrh["createrawtransaction"].Call:
 				if res, err = nrh["createrawtransaction"].
 					Fn(server, msg.Params.(btcjson.CreateRawTransactionCmd),
-						nil); log.L.Check(err) {
+						nil); L.Check(err) {
 				}
 				msg.Ch.(chan rpc.CreateRawTransactionRes) <- rpc.CreateRawTransactionRes{
 					Res: res.(string), Err: err}
@@ -35,7 +33,7 @@ func StartAPI(server *rpc.Server, quit chan struct{}) {
 				var ret btcjson.TxRawDecodeResult
 				if res, err = nrh["decoderawtransaction"].
 					Fn(server, msg.Params.(btcjson.DecodeRawTransactionCmd),
-						nil); log.L.Check(err) {
+						nil); L.Check(err) {
 				} else {
 					ret = res.(btcjson.TxRawDecodeResult)
 				}
@@ -44,14 +42,14 @@ func StartAPI(server *rpc.Server, quit chan struct{}) {
 			case msg := <-nrh["decodescript"].Call:
 				if res, err = nrh["decodescript"].
 					Fn(server, msg.Params.(btcjson.DecodeScriptCmd),
-						nil); log.L.Check(err) {
+						nil); L.Check(err) {
 				}
 				msg.Ch.(chan rpc.DecodeScriptRes) <- rpc.DecodeScriptRes{
 					Res: res.(btcjson.DecodeScriptResult), Err: err}
 			case msg := <-nrh["estimatefee"].Call:
 				if res, err = nrh["estimatefee"].
 					Fn(server, msg.Params.(btcjson.EstimateFeeCmd),
-						nil); log.L.Check(err) {
+						nil); L.Check(err) {
 				}
 				msg.Ch.(chan rpc.EstimateFeeRes) <- rpc.EstimateFeeRes{
 					Res: res.(float64), Err: err}

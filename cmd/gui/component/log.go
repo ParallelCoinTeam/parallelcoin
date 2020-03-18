@@ -2,8 +2,9 @@ package component
 
 import (
 	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gelook"
+
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gelook"
 )
 
 func iconButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage) func() {

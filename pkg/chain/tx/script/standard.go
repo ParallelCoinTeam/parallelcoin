@@ -2,7 +2,6 @@ package txscript
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -34,7 +33,7 @@ const (
 		ScriptVerifyDiscourageUpgradeableWitnessProgram |
 		ScriptVerifyMinimalIf |
 		ScriptVerifyWitnessPubKeyType
-		// Classes of script payment known about in the blockchain.
+	// Classes of script payment known about in the blockchain.
 	NonStandardTy         ScriptClass = iota // None of the recognized forms.
 	PubKeyTy                                 // Pay pubkey.
 	PubKeyHashTy                             // Pay pubkey hash.
@@ -151,7 +150,7 @@ func typeOfScript(pops []parsedOpcode) ScriptClass {
 func GetScriptClass(script []byte) ScriptClass {
 	pops, err := parseScript(script)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return NonStandardTy
 	}
 	return typeOfScript(pops)
@@ -199,12 +198,12 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 	bip16, segwit bool) (*ScriptInfo, error) {
 	sigPops, err := parseScript(sigScript)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	pkPops, err := parseScript(pkScript)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	// Push only sigScript makes little sense.
@@ -223,7 +222,7 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 		script := sigPops[len(sigPops)-1].data
 		shPops, err := parseScript(script)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		shInputs := expectedInputs(shPops, typeOfScript(shPops))
@@ -278,7 +277,7 @@ func CalcScriptInfo(sigScript, pkScript []byte, witness wire.TxWitness,
 func CalcMultiSigStats(script []byte) (int, int, error) {
 	pops, err := parseScript(script)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return 0, 0, err
 	}
 	// A multi-signature script is of the pattern:  NUM_SIGS PUBKEY PUBKEY PUBKEY... NUM_PUBKEYS OP_CHECKMULTISIG Therefore the number of signatures is the oldest item on the stack and the number of pubkeys is the 2nd to last.  Also, the absolute minimum for a multi-signature script is 1 pubkey, so at least 4 items must be on the stack per:  OP_1 PUBKEY OP_1 OP_CHECKMULTISIG
@@ -391,7 +390,7 @@ func MultiSigScript(pubkeys []*util.AddressPubKey, nrequired int) ([]byte, error
 func PushedData(script []byte) ([][]byte, error) {
 	pops, err := parseScript(script)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	var data [][]byte
@@ -412,7 +411,7 @@ func ExtractPkScriptAddrs(pkScript []byte, chainParams *netparams.Params) (Scrip
 	// No valid addresses or required signatures if the script doesn't parse.
 	pops, err := parseScript(pkScript)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return NonStandardTy, nil, 0, err
 	}
 	scriptClass := typeOfScript(pops)
@@ -492,7 +491,7 @@ type AtomicSwapDataPushes struct {
 func ExtractAtomicSwapDataPushes(version uint16, pkScript []byte) (*AtomicSwapDataPushes, error) {
 	pops, err := parseScript(pkScript)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	if len(pops) != 20 {
@@ -528,7 +527,7 @@ func ExtractAtomicSwapDataPushes(version uint16, pkScript []byte) (*AtomicSwapDa
 	if pops[2].data != nil {
 		locktime, err := makeScriptNum(pops[2].data, true, 5)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, nil
 		}
 		pushes.SecretSize = int64(locktime)
@@ -540,7 +539,7 @@ func ExtractAtomicSwapDataPushes(version uint16, pkScript []byte) (*AtomicSwapDa
 	if pops[11].data != nil {
 		locktime, err := makeScriptNum(pops[11].data, true, 5)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, nil
 		}
 		pushes.LockTime = int64(locktime)

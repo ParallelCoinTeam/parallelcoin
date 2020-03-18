@@ -5,13 +5,12 @@ import (
 	"net"
 	"sort"
 	"time"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/simplebuffer"
 	"github.com/p9c/pod/pkg/simplebuffer/Bitses"
 	"github.com/p9c/pod/pkg/simplebuffer/Hash"
@@ -67,9 +66,9 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// tH := &tth
 	// tbh := tH.BlockHash()
 	// if tbh.IsEqual(mB.Hash()) {
-	//	log.L.Debug("notification block is tip block")
+	//	L.Debug("notification block is tip block")
 	// } else {
-	//	log.L.Debug("notification block is not tip block")
+	//	L.Debug("notification block is not tip block")
 	// }
 	bitsMap := make(blockchain.TargetBits)
 	var err error
@@ -79,14 +78,14 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		bitsMap, err = cx.RealNode.Chain.
 			CalcNextRequiredDifficultyPlan9Controller(tip)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return
 		}
 		tip.Diffs.Store(bitsMap)
 	} else {
 		bitsMap = tip.Diffs.Load().(blockchain.TargetBits)
 	}
-	// log.L.Traces(*bitsMap)
+	// L.Traces(*bitsMap)
 	bitses := Bitses.NewBitses()
 	bitses.Put(bitsMap)
 	msg = append(msg, bitses)
@@ -113,16 +112,16 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		txc := txs.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
-		// log.L.Traces(txs)
+		// L.Traces(txs)
 		(*cbs)[i] = txx
-		// log.L.Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
+		// L.Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, txr...), false)
-		// log.L.Traces(mTree[len(mTree)-1].CloneBytes())
+		// L.Traces(mTree[len(mTree)-1].CloneBytes())
 		mTS[i] = &chainhash.Hash{}
 		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
 	}
-	// log.L.Traces(mTS)
+	// L.Traces(mTS)
 	mHashes := Hashes.NewHashes()
 	mHashes.Put(mTS)
 	msg = append(msg, mHashes)
@@ -133,7 +132,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// 	t := (&Transaction.Transaction{}).Put(txs[i])
 	// 	msg = append(msg, t)
 	// }
-	// log.L.Traces(msg)
+	// L.Traces(msg)
 	return Container{*msg.CreateContainer(Magic)}, txr
 }
 
@@ -220,7 +219,7 @@ func (j *Container) String() (s string) {
 		s += fmt.Sprintf("  %2d %s\n", sortedBitses[i],
 			hashes[int32(sortedBitses[i])].String())
 	}
-	
+
 	// s += spew.Sdump(j.GetHashes())
 	return
 }

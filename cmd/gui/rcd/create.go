@@ -2,11 +2,11 @@ package rcd
 
 import (
 	"encoding/hex"
+	"time"
+
 	"github.com/p9c/pod/app/save"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/wallet"
-	"time"
 )
 
 func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir string) {
@@ -20,20 +20,20 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 	if duoSeed == "" {
 		seed, err = hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			panic(err)
 		}
 	} else {
 		seed, err = hex.DecodeString(duoSeed)
 		if err != nil {
 			// Need to make JS invocation to embed
-			log.L.Error(err)
+			L.Error(err)
 		}
 	}
 
 	_, err = l.CreateNewWallet([]byte(pubPassphrase), []byte(privPassphrase), seed, time.Now(), true, r.cx.Config)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		panic(err)
 	}
 
@@ -42,7 +42,7 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 	*r.cx.Config.WalletFile = walletDir
 
 	save.Pod(r.cx.Config)
-	//log.L.Info(rc)
+	// L.Info(rc)
 }
 
 func (r *RcVar) UseTestnet() {

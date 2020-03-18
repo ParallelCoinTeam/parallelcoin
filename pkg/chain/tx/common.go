@@ -47,8 +47,8 @@ type TransactionOutput struct {
 	OutputKind OutputKind
 	// These should be added later when the DB can return them more
 	// efficiently:
-	//TxLockTime      uint32
-	//TxExpiry        uint32
+	// TxLockTime      uint32
+	// TxExpiry        uint32
 	ContainingBlock BlockIdentity
 	ReceiveTime     time.Time
 }

@@ -3,14 +3,14 @@ package rcd
 import (
 	js "encoding/json"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
+	"reflect"
+	"time"
+
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/pod"
-	"reflect"
-	"time"
 )
 
 func (r *RcVar) SaveDaemonCfg() {
@@ -19,55 +19,55 @@ func (r *RcVar) SaveDaemonCfg() {
 	config := pod.Config{}
 	if err := js.Unmarshal(marshalled, &config); err != nil {
 	}
-	//log.L.Debug(r.cx.Config)
-	//log.L.Debug(config)
+	// L.Debug(r.cx.Config)
+	// L.Debug(config)
 	save.Pod(&config)
 }
 
 func getField(v *pod.Config, configMap map[string]interface{}) *pod.Config {
-	//s := reflect.ValueOf(v).Elem()
+	// s := reflect.ValueOf(v).Elem()
 
 	for label, data := range configMap {
 		s := reflect.ValueOf(v).Elem().FieldByName(label)
 
-		//typeOfT := s.Type()
-		//for i := 0; i < s.NumField(); i++ {
+		// typeOfT := s.Type()
+		// for i := 0; i < s.NumField(); i++ {
 		//	f := s.Field(i)
 
-		//fmt.Printf("%d: %s %s = %v\n", i,
+		// fmt.Printf("%d: %s %s = %v\n", i,
 		//	typeOfT.Field(i).Name, f.Type(), f.Interface())
-		//log.L.Info("lastaviac", f.Type().String())
+		// L.Info("lastaviac", f.Type().String())
 		if s.IsValid() {
 			switch s.Type().String() {
 			case "*bool":
-				log.L.Info("bool", label)
-				log.L.Info("bool", *data.(*bool))
+				L.Info("bool", label)
+				L.Info("bool", *data.(*bool))
 				s.SetBool(*data.(*bool))
-				//reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetBool(configMap[field.Model].(bool))
+				// reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetBool(configMap[field.Model].(bool))
 			case "*int":
-				log.L.Info("int", label)
-				log.L.Info("int", *data.(*int))
+				L.Info("int", label)
+				L.Info("int", *data.(*int))
 				s.SetInt(*data.(*int64))
-				//reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetInt(configMap[field.Model].(int64))
+				// reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetInt(configMap[field.Model].(int64))
 			case "*float64":
-				log.L.Info("float64", label)
-				log.L.Info("float64", *data.(*float64))
+				L.Info("float64", label)
+				L.Info("float64", *data.(*float64))
 				s.SetFloat(*data.(*float64))
-				//reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetFloat(configMap[field.Model].(float64))
+				// reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetFloat(configMap[field.Model].(float64))
 			case "*string":
-				log.L.Info("string", label)
-				log.L.Info("string", *data.(*string))
-				//s.SetString(*data.(*string))
-				//reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetString(configMap[field.Model].(string))
+				L.Info("string", label)
+				L.Info("string", *data.(*string))
+				// s.SetString(*data.(*string))
+				// reflect.ValueOf(&v).Elem().FieldByName(field.Model).SetString(configMap[field.Model].(string))
 			case "*cli.StringSlice":
-				//f.CallSlice(configMap[typeOfT.Field(i).Name].(cli.StringSlice))
-				//reflect.ValueOf(&v).Elem().FieldByName(field.Model).Set(configMap[field.Model].(cli.StringSlice))
+				// f.CallSlice(configMap[typeOfT.Field(i).Name].(cli.StringSlice))
+				// reflect.ValueOf(&v).Elem().FieldByName(field.Model).Set(configMap[field.Model].(cli.StringSlice))
 			case "*time":
-				//f.SetBool(*configMap[typeOfT.Field(i).Name].(*bool))
+				// f.SetBool(*configMap[typeOfT.Field(i).Name].(*bool))
 			}
 		}
-		//log.L.Info("IDE", configMap[typeOfT.Field(i).Name])
-		//log.L.Info("IDE", typeOfT.Field(i).Name)
+		// L.Info("IDE", configMap[typeOfT.Field(i).Name])
+		// L.Info("IDE", typeOfT.Field(i).Name)
 	}
 	return v
 }

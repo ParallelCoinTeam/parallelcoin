@@ -3,8 +3,6 @@ package normalize
 import (
 	"net"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/urfave/cli"
 )
 
@@ -12,7 +10,7 @@ import (
 func Address(addr, defaultPort string) string {
 	_, _, err := net.SplitHostPort(addr)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return net.JoinHostPort(addr, defaultPort)
 	}
 	return addr

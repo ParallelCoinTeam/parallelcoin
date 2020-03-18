@@ -29,26 +29,26 @@ func (cmd *fetchBlockCmd) Execute(args []string) error {
 	}
 	blockHash, err := chainhash.NewHashFromStr(args[0])
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer db.Close()
 	return db.View(func(tx database.Tx) error {
-		log.L.Infof("Fetching block %s", blockHash)
+		L.Infof("Fetching block %s", blockHash)
 		startTime := time.Now()
 		blockBytes, err := tx.FetchBlock(blockHash)
 		if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 		}
-		log.L.Infof("Loaded block in %v", time.Since(startTime))
-		log.L.Infof("Block Hex: %s", hex.EncodeToString(blockBytes))
+		L.Infof("Loaded block in %v", time.Since(startTime))
+		L.Infof("Block Hex: %s", hex.EncodeToString(blockBytes))
 		return nil
 	})
 }

@@ -4,6 +4,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -14,11 +15,11 @@ var (
 	confirmPassPhrase string
 	passEditor        = &gel.Editor{
 		SingleLine: true,
-		//Submit:     true,
+		// Submit:     true,
 	}
 	confirmPassEditor = &gel.Editor{
 		SingleLine: true,
-		//Submit:     true,
+		// Submit:     true,
 	}
 	listWallet = &layout.List{
 		Axis: layout.Vertical,
@@ -72,8 +73,8 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				encryptionCheckBox := ui.ly.Theme.DuoUIcheckBox(
-					"Do you want to add an additional layer of encryption" +
-					 	" for public data?", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
+					"Do you want to add an additional layer of encryption"+
+						" for public data?", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
 				encryptionCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
 				encryptionCheckBox.Color = gelook.HexARGB(ui.ly.Theme.Colors["Dark"])
 				encryptionCheckBox.Layout(ui.ly.Context, encryption)
@@ -81,7 +82,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			func() {
 				seedCheckBox := ui.ly.Theme.DuoUIcheckBox(
 					"Do you have an existing wallet seed you want to use?",
-					 ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
+					ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
 				seedCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
 				seedCheckBox.Color = gelook.HexARGB(ui.ly.Theme.Colors["Dark"])
 				seedCheckBox.Layout(ui.ly.Context, seed)

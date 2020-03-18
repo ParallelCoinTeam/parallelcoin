@@ -7,7 +7,6 @@ import (
 	"github.com/p9c/pod/pkg/simplebuffer/Int32"
 )
 
-
 // SolutionMagic is the marker for packets containing a solution
 var SolutionMagic = []byte{'s', 'o', 'l', 'v'}
 
@@ -28,13 +27,13 @@ func LoadSolContainer(b []byte) (out *SolContainer) {
 }
 
 func (sC *SolContainer) GetMsgBlock() *wire.MsgBlock {
-	// log.L.Traces(sC.Data)
+	// L.Traces(sC.Data)
 	buff := sC.Get(1)
-	// log.L.Traces(buff)
+	// L.Traces(buff)
 	decoded := Block.New().DecodeOne(buff)
-	// log.L.Traces(decoded)
+	// L.Traces(decoded)
 	got := decoded.Get()
-	// log.L.Traces(got)
+	// L.Traces(got)
 	return got
 }
 

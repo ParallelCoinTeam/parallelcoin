@@ -1,11 +1,10 @@
-//+build ignore
+// +build ignore
 
 package main
 
 import (
 	"bytes"
 	"io"
-	"log"
 	"os"
 	"strconv"
 )
@@ -29,18 +28,18 @@ var b58 = [256]byte{`)
 	nl       = []byte("\n")
 )
 
-func write(	w io.Writer, b []byte) {
+func write(w io.Writer, b []byte) {
 	_, err := w.Write(b)
 	if err != nil {
-		log.L.Error(err)
-log.L.Fatal(err)
+		L.Error(err)
+		L.Fatal(err)
 	}
 }
 func main() {
 	fi, err := os.Create("alphabet.go")
 	if err != nil {
-		log.L.Error(err)
-log.L.Fatal(err)
+		L.Error(err)
+		L.Fatal(err)
 	}
 	defer fi.Close()
 	write(fi, start)

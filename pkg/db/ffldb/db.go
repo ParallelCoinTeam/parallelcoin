@@ -21,7 +21,6 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	database "github.com/p9c/pod/pkg/db"
-	log "github.com/p9c/pod/pkg/logi"
 	u "github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/treap"
 )
@@ -587,7 +586,7 @@ func // CreateBucket creates and returns a new nested bucket with the given key.
 		var err error
 		childID, err = b.tx.nextBucketID()
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 	}
@@ -725,7 +724,7 @@ func // ForEach invokes the passed function with every key/value pair in the
 	for ok := c.First(); ok; ok = c.Next() {
 		err := fn(c.Key(), c.Value())
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}
@@ -759,7 +758,7 @@ func // ForEachBucket invokes the passed function with the key of every
 	for ok := c.First(); ok; ok = c.Next() {
 		err := fn(c.Key())
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}
@@ -1061,7 +1060,7 @@ func // StoreBlock stores the provided block into the database.
 	}
 	blockBytes, err := block.Bytes()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		str := fmt.Sprintf("failed to get serialized bytes for block %s",
 			blockHash)
 		return makeDbErr(database.ErrDriverSpecific, str, err)
@@ -1078,7 +1077,7 @@ func // StoreBlock stores the provided block into the database.
 		hash:  blockHash,
 		bytes: blockBytes,
 	})
-	//log.L.Tracef("added block %s to pending blocks", blockHash)
+	// L.Tracef("added block %s to pending blocks", blockHash)
 	return nil
 }
 
@@ -1195,7 +1194,7 @@ func // FetchBlock returns the raw serialized bytes for the block identified
 	// Lookup the location of the block in the files from the block index.
 	blockRow, err := tx.fetchBlockRow(hash)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	location := deserializeBlockLoc(blockRow)
@@ -1204,7 +1203,7 @@ func // FetchBlock returns the raw serialized bytes for the block identified
 	// corruption.
 	blockBytes, err := tx.db.store.readBlock(hash, location)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	return blockBytes, nil
@@ -1235,7 +1234,7 @@ func // FetchBlocks returns the raw serialized bytes for the blocks
 		var err error
 		blocks[i], err = tx.FetchBlock(&hashes[i])
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 	}
@@ -1288,7 +1287,7 @@ func // FetchBlockRegion returns the raw serialized bytes for the given block
 	if tx.pendingBlocks != nil {
 		regionBytes, err := tx.fetchPendingRegion(region)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		if regionBytes != nil {
@@ -1298,7 +1297,7 @@ func // FetchBlockRegion returns the raw serialized bytes for the given block
 	// Lookup the location of the block in the files from the block index.
 	blockRow, err := tx.fetchBlockRow(region.Hash)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	location := deserializeBlockLoc(blockRow)
@@ -1314,7 +1313,7 @@ func // FetchBlockRegion returns the raw serialized bytes for the given block
 	regionBytes, err := tx.db.store.readBlockRegion(location, region.Offset,
 		region.Len)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	return regionBytes, nil
@@ -1361,7 +1360,7 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 		if tx.pendingBlocks != nil {
 			regionBytes, err := tx.fetchPendingRegion(region)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return nil, err
 			}
 			if regionBytes != nil {
@@ -1373,7 +1372,7 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 		// index.
 		blockRow, err := tx.fetchBlockRow(region.Hash)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		location := deserializeBlockLoc(blockRow)
@@ -1397,7 +1396,7 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 		regionBytes, err := tx.db.store.readBlockRegion(*location,
 			region.Offset, region.Len)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		blockRegions[ri] = regionBytes
@@ -1453,10 +1452,10 @@ func // writePendingAndCommit writes pending block data to the flat block
 	}
 	// Loop through all of the pending blocks to store and write them.
 	for _, blockData := range tx.pendingBlockData {
-		//log.L.Tracef("storing block %s", blockData.hash)
+		// L.Tracef("storing block %s", blockData.hash)
 		location, err := tx.db.store.writeBlock(blockData.bytes)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			rollback()
 			return err
 		}
@@ -1467,7 +1466,7 @@ func // writePendingAndCommit writes pending block data to the flat block
 		blockRow := serializeBlockLoc(location)
 		err = tx.blockIdxBucket.Put(blockData.hash[:], blockRow)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			rollback()
 			return err
 		}
@@ -1581,7 +1580,7 @@ func // begin is the implementation function for the Begin database method.
 	// which in turn also handles the underlying database).
 	snapshot, err := db.cache.Snapshot()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		db.closeLock.RUnlock()
 		if writable {
 			db.writeLock.Unlock()
@@ -1643,7 +1642,7 @@ func // View invokes the passed function in the context of a managed read
 	// Start a read-only transaction.
 	tx, err := db.begin(false)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Since the user-provided function might panic,
@@ -1656,7 +1655,7 @@ func // View invokes the passed function in the context of a managed read
 	err = fn(tx)
 	tx.managed = false
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		// The error is ignored here because nothing was written yet and
 		// regardless of a rollback failure, the tx is closed now anyways.
 		_ = tx.Rollback()
@@ -1676,7 +1675,7 @@ func // Update invokes the passed function in the context of a managed read
 	// Start a read-write transaction.
 	tx, err := db.begin(true)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Since the user-provided function might panic,
@@ -1689,7 +1688,7 @@ func // Update invokes the passed function in the context of a managed read
 	err = fn(tx)
 	tx.managed = false
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		// The error is ignored here because nothing was written yet and
 		// regardless of a rollback failure, the tx is closed now anyways.
 		_ = tx.Rollback()
@@ -1793,7 +1792,7 @@ openDB(dbPath string, network wire.BitcoinNet, create bool) (database.DB, error)
 	}
 	ldb, err := leveldb.OpenFile(metadataDbPath, &opts)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, convertErr(err.Error(), err)
 	}
 	// Create the block store which includes scanning the existing flat block

@@ -63,7 +63,7 @@ func (bi *blockImporter) readBlock() ([]byte, error) {
 	var net uint32
 	err := binary.Read(bi.r, binary.LittleEndian, &net)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 if err != io.EOF {
 			return nil, err
 		}
@@ -98,7 +98,7 @@ func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 	// Deserialize the block which includes checks for malformed blocks.
 	block, err := util.NewBlockFromBytes(serializedBlock)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return false, err
 	}
 	// update progress statistics
@@ -111,7 +111,7 @@ return false, err
 		return err
 	})
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return false, err
 	}
 	if exists {
@@ -127,7 +127,7 @@ return false, err
 			return err
 		})
 		if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return false, err
 		}
 		if !exists {
@@ -141,7 +141,7 @@ return false, err
 		return tx.StoreBlock(block)
 	})
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return false, err
 	}
 	return true, nil
@@ -155,7 +155,7 @@ out:
 		// Read the next block from the file and if anything goes wrong notify the status handler with the error and bail.
 		serializedBlock, err := bi.readBlock()
 		if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 bi.errChan <- fmt.Errorf("Error reading from input "+
 				"file: %v", err.Error())
 			break out
@@ -198,7 +198,7 @@ func (bi *blockImporter) logProgress() {
 	if bi.receivedLogTx == 1 {
 		txStr = "transaction"
 	}
-	log.L.Infof("Processed %d %s in the last %s (%d %s, height %d, %s)",
+	L.Infof("Processed %d %s in the last %s (%d %s, height %d, %s)",
 		bi.receivedLogBlocks, blockStr, tDuration, bi.receivedLogTx,
 		txStr, bi.lastHeight, bi.lastBlockTime)
 	bi.receivedLogBlocks = 0
@@ -221,7 +221,7 @@ out:
 			bi.lastHeight++
 			imported, err := bi.processBlock(serializedBlock)
 			if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 bi.errChan <- err
 				break out
 			}
@@ -304,19 +304,19 @@ func (cmd *importCmd) Execute(args []string) error {
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer db.Close()
 	// Ensure the database is sync'd and closed on Ctrl+C.
 	addInterruptHandler(func() {
 
-		log.L.Infof("Gracefully shutting down the database...")
+		L.Infof("Gracefully shutting down the database...")
 		db.Close()
 	})
 	fi, err := os.Open(importCfg.InFile)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 return err
 	}
 	defer fi.Close()
@@ -325,7 +325,7 @@ return err
 	// Perform the import asynchronously and signal the main goroutine when done.  This allows blocks to be processed and read in parallel.  The results channel returned from Import contains the statistics about the import including an error if something went wrong.  This is done in a separate goroutine rather than waiting directly so the main goroutine can be signaled for shutdown by either completion, error, or from the main interrupt handler.  This is necessary since the main goroutine must be kept running long enough for the interrupt handler goroutine to finish.
 	go func() {
 
-		log.L.Info("Starting import")
+		L.Info("Starting import")
 		resultsChan := importer.Import()
 		results := <-resultsChan
 		if results.err != nil {
@@ -335,7 +335,7 @@ return err
 				return
 			}
 		}
-		log.L.Infof("Processed a total of %d blocks (%d imported, %d "+
+		L.Infof("Processed a total of %d blocks (%d imported, %d "+
 			"already known)", results.blocksProcessed,
 			results.blocksImported,
 			results.blocksProcessed-results.blocksImported)

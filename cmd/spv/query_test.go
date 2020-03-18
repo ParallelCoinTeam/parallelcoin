@@ -10,7 +10,6 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/gcs"
 	"github.com/p9c/pod/pkg/util/gcs/builder"
 )
@@ -43,18 +42,18 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
 	err := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
 	if err != nil {
-		log.L.Debug(err)
+		L.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	err = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
 	if err != nil {
-		log.L.Debug(err)
+		L.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
 	// Insert the big filter and check all previous filters are evicted.
 	err = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
 	if err != nil {
-		log.L.Debug(err)
+		L.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	assertEqual(t, getFilter(cs, b3, t), f3, "")
@@ -213,17 +212,17 @@ func TestCacheBigEnoughHoldsAllFilter(t *testing.T) {
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
 	err := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
 	if err != nil {
-		log.L.Debug(err)
+		L.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	err = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
 	if err != nil {
-		log.L.Debug(err)
+		L.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
 	err = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
 	if err != nil {
-		log.L.Debug(err)
+		L.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 3, "")
 	// Check that we can get those filters back independent of Get order.

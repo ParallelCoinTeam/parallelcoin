@@ -1,16 +1,18 @@
 package component
 
 import (
+	"image"
+
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op/clip"
 	"gioui.org/text"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
-	"image"
 )
 
 var (
@@ -20,7 +22,7 @@ var (
 )
 
 func DuoUIdialog(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
-	//cs := gtx.Constraints
+	// cs := gtx.Constraints
 	th.DuoUIitem(0, "ee000000").Layout(gtx, layout.Center, func() {
 		cs := gtx.Constraints
 		layout.Stack{Alignment: layout.Center}.Layout(gtx,

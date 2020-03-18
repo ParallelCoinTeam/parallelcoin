@@ -18,7 +18,7 @@ var MainNetParams = Params{
 	GenesisBlock:             &genesisBlock,
 	GenesisHash:              &genesisHash,
 	PowLimit:                 &mainPowLimit,
-	PowLimitBits:             MainPowLimitBits, //0x1e0fffff,
+	PowLimitBits:             MainPowLimitBits, // 0x1e0fffff,
 	BIP0034Height:            100000000,        // Reserved for future change
 	BIP0065Height:            100000000,
 	BIP0066Height:            100000000,

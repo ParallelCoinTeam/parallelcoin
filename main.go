@@ -5,8 +5,9 @@
 package main
 
 import (
-	"github.com/p9c/pod/cmd"
 	_ "net/http/pprof"
+
+	"github.com/p9c/pod/cmd"
 )
 
 func main() {

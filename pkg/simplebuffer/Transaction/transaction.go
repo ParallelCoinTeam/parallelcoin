@@ -3,8 +3,8 @@ package Transaction
 import (
 	"bytes"
 	"encoding/binary"
+
 	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 type Transaction struct {
@@ -46,7 +46,7 @@ func (t *Transaction) Get() (txs *wire.MsgTx) {
 	buffer := bytes.NewBuffer(t.Bytes)
 	err := txs.Deserialize(buffer)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 	}
 	return
 }
@@ -55,7 +55,7 @@ func (t *Transaction) Put(txs *wire.MsgTx) *Transaction {
 	var buffer bytes.Buffer
 	err := txs.Serialize(&buffer)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return t
 	}
 	t.Bytes = buffer.Bytes()

@@ -1,15 +1,15 @@
 package rcd
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
+	"time"
+
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"time"
 )
 
 func (r *RcVar) GetDuoUItransactionsNumber() {
-	log.L.Debug("getting transaction count")
+	L.Debug("getting transaction count")
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := r.cx.WalletServer.ListTransactions(0, 999999999)
@@ -24,13 +24,13 @@ func (r *RcVar) GetDuoUItransactions() func() {
 	return func() {
 		r.History.Page.To = int(r.Status.Wallet.TxsNumber.Load()) / r.History.PerPage.Value
 		startTx := r.History.Page.Value * r.History.PerPage.Value
-		//endTx := r.History.Page.Value*r.History.PerPage.Value + r.History.PerPage.Value
-		log.L.Debug("getting transactions")
+		// endTx := r.History.Page.Value*r.History.PerPage.Value + r.History.PerPage.Value
+		L.Debug("getting transactions")
 		// account, txcount, startnum, watchonly := "*", n, f, false
 		// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 		lt, err := r.cx.WalletServer.ListTransactions(startTx, r.History.PerPage.Value)
 		if err != nil {
-			log.L.Info(err)
+			L.Info(err)
 		}
 		r.History.Txs.TxsNumber = len(lt)
 		txsArray := *new([]model.DuoUItransactionExcerpt)
@@ -80,7 +80,7 @@ func txs(t btcjson.ListTransactionsResult) model.DuoUItransactionExcerpt {
 
 }
 func (r *RcVar) GetLatestTransactions() {
-	log.L.Trace("getting latest transactions")
+	L.Trace("getting latest transactions")
 	lt, err := r.cx.WalletServer.ListTransactions(0, 10)
 	if err != nil {
 		// //r.PushDuoUIalert("Error", err.Error(), "error")
@@ -118,9 +118,9 @@ func (r *RcVar) GetLatestTransactions() {
 	r.Status.Wallet.LastTxs.BalanceHeight = balanceHeight
 }
 
-//func (r *RcVar) GetTransactions() func() {
+// func (r *RcVar) GetTransactions() func() {
 //	return func() {
-//		log.L.Debug("getting transactions")
+//		L.Debug("getting transactions")
 //		lt, err := r.cx.WalletServer.ListTransactions(0, r.History.Txs.TxsListNumber)
 //		if err != nil {
 //			// //r.PushDuoUIalert("Error", err.Error(), "error")
@@ -157,4 +157,4 @@ func (r *RcVar) GetLatestTransactions() {
 //		r.History.Txs.Txs = txs
 //		r.History.Txs.BalanceHeight = balanceHeight
 //	}
-//}
+// }

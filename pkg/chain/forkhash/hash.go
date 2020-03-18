@@ -2,12 +2,9 @@ package forkhash
 
 import (
 	"math/big"
-	
+
 	"github.com/bitbandi/go-x11"
-	
-	"github.com/p9c/pod/pkg/chain/fork"
-	log "github.com/p9c/pod/pkg/logi"
-	
+
 	skein "github.com/enceve/crypto/skein/skein256"
 	gost "github.com/programmer10110/gostreebog"
 	"golang.org/x/crypto/argon2"
@@ -15,7 +12,9 @@ import (
 	"golang.org/x/crypto/scrypt"
 	"golang.org/x/crypto/sha3"
 	"lukechampine.com/blake3"
-	
+
+	"github.com/p9c/pod/pkg/chain/fork"
+
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
@@ -44,7 +43,7 @@ func X11(bytes []byte) (out []byte) {
 	hf := x11.New()
 	out = make([]byte, 32)
 	hf.Hash(bytes, out)
-	// log.L.Debugf("x11 %x", out)
+	// L.Debugf("x11 %x", out)
 	return
 	// return cryptonight.Sum(bytes, 2)
 }
@@ -195,7 +194,7 @@ func Scrypt(bytes []byte) []byte {
 	copy(c, b)
 	dk, err := scrypt.Key(c, c, 1024, 1, 1, 32)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return make([]byte, 32)
 	}
 	o := make([]byte, 32)

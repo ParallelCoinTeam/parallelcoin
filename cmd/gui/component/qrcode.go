@@ -1,39 +1,41 @@
 package component
 
 import (
+	"image"
+
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"github.com/nfnt/resize"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/qrcode"
-	"image"
 )
 
-//func DuoUIqrCode(pubAddr string) {
+// func DuoUIqrCode(pubAddr string) {
 //	//qr, err := qrcode.New(strings.ToUpper(pubAddr), qrcode.Medium)
 //	//if err != nil {
-//	//	log.L.Fatal(err)
+//	//	L.Fatal(err)
 //	//}
 //	//qr.BackgroundColor = rgb(0xe8f5e9)
 //	//addrQR := paint.NewImageOp(qr.Image(256))
 //	return
-//}
+// }
 
-//func NewQrCode(pubAddr string) *model.DuoUIqrCode {
+// func NewQrCode(pubAddr string) *model.DuoUIqrCode {
 //	//qr, err := qrcode.New(strings.ToUpper(pubAddr), qrcode.Medium)
 //	//if err != nil {
-//	//	log.L.Fatal(err)
+//	//	L.Fatal(err)
 //	//}
-//	//log.L.Info(pubAddr)
+//	//L.Info(pubAddr)
 //	//qr.BackgroundColor = theme.HexARGB("ff3030cf")
 //	//return &model.DuoUIqrCode{
 //	//	AddrQR:  paint.NewImageOp(qr.Image(256)),
 //	//	PubAddr: pubAddr,
 //	//}
-//}
+// }
 
 func DuoUIqrCode(gtx *layout.Context, hash string, size uint) func() {
 	return func() {
@@ -58,7 +60,7 @@ func DuoUIqrCode(gtx *layout.Context, hash string, size uint) func() {
 
 func QrDialog(rc *rcd.RcVar, gtx *layout.Context, address string) func() {
 	return func() {
-		//clipboard.Set(t.Address)
+		// clipboard.Set(t.Address)
 		rc.Dialog.Show = true
 		rc.Dialog = &model.DuoUIdialog{
 			Show:        true,

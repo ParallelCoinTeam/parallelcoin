@@ -2,8 +2,10 @@ package pages
 
 import (
 	"fmt"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
@@ -15,7 +17,7 @@ import (
 var (
 	addressBookList = &layout.List{
 		Axis: layout.Vertical,
-		//ScrollToEnd: true,
+		// ScrollToEnd: true,
 	}
 	addressBookPanel = &gel.Panel{
 		Name: "",
@@ -71,16 +73,16 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 			layout.Rigid(func() {
 				if showMiningAddresses.Checked(gtx) {
 					rc.AddressBook.ShowMiningAddresses = true
-					//rc.GetAddressBook()()
+					// rc.GetAddressBook()()
 				} else {
-					//rc.GetAddressBook()()
+					// rc.GetAddressBook()()
 				}
 				th.DuoUIcheckBox("SHOW MINING ADDRESSES", th.Colors["Dark"], th.Colors["Dark"]).Layout(gtx, showMiningAddresses)
 			}),
 			layout.Rigid(func() {
-				//th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page, "PAGE", fmt.Sprint(rc.Explorer.Page.Value))
+				// th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page, "PAGE", fmt.Sprint(rc.Explorer.Page.Value))
 			}),
-			//layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["ButtonText"], th.Colors["Dark"], "NEW ADDRESS", component.QrDialog(rc, gtx, rc.CreateNewAddress("")))))
+			// layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["ButtonText"], th.Colors["Dark"], "NEW ADDRESS", component.QrDialog(rc, gtx, rc.CreateNewAddress("")))))
 			layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["ButtonText"], th.Colors["Dark"], "NEW ADDRESS", func() {
 				rc.Dialog.Show = true
 				rc.Dialog = &model.DuoUIdialog{
@@ -99,7 +101,7 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 
 func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		//th.DuoUIpanel(func() {
+		// th.DuoUIpanel(func() {
 		addressBookList.Layout(gtx, len(rc.AddressBook.Addresses), func(i int) {
 			t := rc.AddressBook.Addresses[i]
 			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -118,6 +120,6 @@ func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 				layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Hint"])),
 			)
 		})
-		//}).Layout(gtx, addressBookPanel)
+		// }).Layout(gtx, addressBookPanel)
 	}
 }

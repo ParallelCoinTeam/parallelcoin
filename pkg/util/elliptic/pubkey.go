@@ -4,7 +4,6 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"math/big"
 )
 
@@ -92,7 +91,7 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 	case PubKeyBytesLenCompressed:
 		// format is 0x2 | solution, <X coordinate>
 		// solution determines which solution of the curve we use.
-		/// y^2 = x^3 + Curve.B
+		// / y^2 = x^3 + Curve.B
 		if format != pubkeyCompressed {
 			return nil, fmt.Errorf("invalid magic in compressed "+
 				"pubkey string: %d", pubKeyStr[0])
@@ -100,7 +99,7 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 		pubkey.X = new(big.Int).SetBytes(pubKeyStr[1:33])
 		pubkey.Y, err = decompressPoint(curve, pubkey.X, ybit)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 	default: // wrong!

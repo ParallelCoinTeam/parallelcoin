@@ -3,9 +3,8 @@ package helpers
 import (
 	"container/ring"
 	"time"
-	
+
 	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 // GetHashrate returns the exponential weighted moving average of the total hashrate and
@@ -22,9 +21,9 @@ func GetHashrate(hrb *ring.Ring) (hr float64, hrp map[int32]float64) {
 	var started bool
 	hrb.Do(func(entry interface{}) {
 		e, ok := entry.(hashrate.Hashrate)
-		// log.L.Debug("iterating hashrate buffer", entry)
+		// L.Debug("iterating hashrate buffer", entry)
 		if ok {
-			log.L.Debug("got entry in hashrate buffer")
+			L.Debug("got entry in hashrate buffer")
 			if !started {
 				started = true
 				firstHashTime = e.Time
@@ -34,7 +33,7 @@ func GetHashrate(hrb *ring.Ring) (hr float64, hrp map[int32]float64) {
 			lastHashTime = e.Time
 		}
 	})
-	log.L.Debug(hashTotal, hashPerVersion, firstHashTime, lastHashTime)
+	L.Debug(hashTotal, hashPerVersion, firstHashTime, lastHashTime)
 	hashDuration := lastHashTime.Sub(firstHashTime)
 	hr = float64(hashDuration) / float64(hashTotal)
 	for i := range hashPerVersion {

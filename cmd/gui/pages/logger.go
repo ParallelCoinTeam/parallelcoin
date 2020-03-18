@@ -1,11 +1,13 @@
 package pages
 
 import (
-	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/cmd/gui/rcd"
 	"time"
 
+	"github.com/p9c/pod/cmd/gui/component"
+	"github.com/p9c/pod/cmd/gui/rcd"
+
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/pkg/gelook"
 )
 

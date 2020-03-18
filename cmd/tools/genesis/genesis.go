@@ -5,11 +5,12 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	log "github.com/p9c/pod/pkg/logi"
 	"os"
 	"runtime"
 	"strconv"
 	"time"
+
+	log "github.com/p9c/pod/pkg/logi"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
@@ -63,7 +64,7 @@ func main() {
 		log.Println("Usage:")
 		log.Println("    ", args[0], "<pubkey> <timestamp> <nBits>")
 		log.Println("Example:")
-		log.Println("    ", args[0], 
+		log.Println("    ", args[0],
 			"04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f \"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks\" 486604799")
 		log.Println("\nIf you execute this without parameters another one in" +
 			" the source code will be generated, using a random public key")
@@ -79,36 +80,36 @@ func main() {
 		pubkey = make([]byte, 65)
 		n, err := rand.Read(pubkey)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			os.Exit(1)
 		}
 		if n != 65 {
-			log.L.Error("For some reason did not get 65 random bytes")
+			L.Error("For some reason did not get 65 random bytes")
 			os.Exit(1)
 		}
 		log.Printf("\nGenerated random public key:\n0x%x\n", pubkey)
 	} else {
 		if len(args[1]) != 130 {
-			log.L.Error("Invalid public key length. Should be 130 hex digits,")
+			L.Error("Invalid public key length. Should be 130 hex digits,")
 			os.Exit(1)
 		}
 		var err error
 		pubkey, err = hex.DecodeString(args[1])
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			log.Println("Public key had invalid characters")
 		}
 	}
 	timestamp := args[2]
 	if len(timestamp) > 254 || len(timestamp) < 1 {
-		log.L.Error("Timestamp was either longer than 254 characters or zero" +
+		L.Error("Timestamp was either longer than 254 characters or zero" +
 			" length")
 		os.Exit(1)
 	}
 	tx := initTransaction()
 	nbits, err := strconv.ParseInt(args[3], 10, 32)
 	if err != nil {
-		log.L.Error("nBits was not a decimal number or exceeded the precision of 32 bits")
+		L.Error("nBits was not a decimal number or exceeded the precision of 32 bits")
 		os.Exit(0)
 	}
 	nBits := uint32(nbits)
@@ -176,7 +177,7 @@ func main() {
 		bytes = bytes - bits/8
 		bits = bits % 8
 	}
-	log.L.Info("\nSearching for nonce/unixtime combination that satisfies " +
+	L.Info("\nSearching for nonce/unixtime combination that satisfies "+
 		"minimum target %d with %d threads on %d cores...\nPlease wait... ",
 		nBits, runtime.GOMAXPROCS(-1), runtime.NumCPU())
 	start := time.Now()

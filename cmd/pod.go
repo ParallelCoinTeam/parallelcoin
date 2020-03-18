@@ -8,10 +8,9 @@ import (
 	"runtime"
 	"runtime/debug"
 	"runtime/trace"
-	
-	log "github.com/p9c/pod/pkg/logi"
+
 	"github.com/p9c/pod/pkg/util/interrupt"
-	
+
 	"github.com/p9c/pod/app"
 	"github.com/p9c/pod/pkg/util/limits"
 )
@@ -28,20 +27,20 @@ func Main() {
 	}
 	if os.Getenv("POD_TRACE") == "on" {
 		if f, err := os.Create("testtrace.out"); err != nil {
-			log.L.Error("tracing env POD_TRACE=on but we can't write to it",
+			L.Error("tracing env POD_TRACE=on but we can't write to it",
 				err)
 		} else {
-			log.L.Debug("tracing started")
+			L.Debug("tracing started")
 			err = trace.Start(f)
 			if err != nil {
-				log.L.Error("could not start tracing", err)
+				L.Error("could not start tracing", err)
 			} else {
 				interrupt.AddHandler(func() {
-					log.L.Debug("stopping trace")
+					L.Debug("stopping trace")
 					trace.Stop()
 					err := f.Close()
 					if err != nil {
-						log.L.Error(err)
+						L.Error(err)
 					}
 				},
 				)

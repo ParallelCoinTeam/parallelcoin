@@ -4,7 +4,7 @@ package fec
 
 import (
 	"encoding/binary"
-	log "github.com/p9c/pod/pkg/logi"
+
 	"github.com/vivint/infectious"
 )
 
@@ -14,7 +14,7 @@ var (
 	rsFEC      = func() *infectious.FEC {
 		fec, err := infectious.NewFEC(rsRequired, rsTotal)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 		}
 		return fec
 	}()
@@ -52,7 +52,7 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 	}
 	err = rsFEC.Encode(data, output)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	for i := range shares {
@@ -60,21 +60,21 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 		chunk := append([]byte{byte(shares[i].Number)}, shares[i].Data...)
 		// Checksum includes chunk number byte so we know if its checksum is
 		// incorrect so could the chunk number be
-		//checksum := crc32.Checksum(chunk, crc32.MakeTable(crc32.Castagnoli))
-		//checkBytes := make([]byte, 4)
-		//binary.LittleEndian.PutUint32(checkBytes, checksum)
-		//chunk = append(chunk, checkBytes...)
+		// checksum := crc32.Checksum(chunk, crc32.MakeTable(crc32.Castagnoli))
+		// checkBytes := make([]byte, 4)
+		// binary.LittleEndian.PutUint32(checkBytes, checksum)
+		// chunk = append(chunk, checkBytes...)
 		chunks = append(chunks, chunk)
 	}
-	//log.L.Spew(chunks)
+	// L.Spew(chunks)
 	return
 }
 
 func Decode(chunks [][]byte) (data []byte, err error) {
 	var shares []infectious.Share
 	for i := range chunks {
-		//bodyLen := len(chunks[i])
-		//log.L.Spew(chunks[i])
+		// bodyLen := len(chunks[i])
+		// L.Spew(chunks[i])
 		body := chunks[i] // [:bodyLen]
 		share := infectious.Share{
 			Number: int(body[0]),

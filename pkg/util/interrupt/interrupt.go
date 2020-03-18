@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/kardianos/osext"
-
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 var (
@@ -33,24 +31,24 @@ var (
 func Listener() {
 	var interruptCallbacks []func()
 	invokeCallbacks := func() {
-		log.L.Debug("running interrupt callbacks")
+		L.Debug("running interrupt callbacks")
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i
 			interruptCallbacks[idx]()
 		}
 		close(HandlersDone)
-		log.L.Debug("interrupt handlers finished")
+		L.Debug("interrupt handlers finished")
 		if Restart {
-			log.L.Debug("restarting")
+			L.Debug("restarting")
 			file, err := osext.Executable()
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return
 			}
 			err = syscall.Exec(file, os.Args, os.Environ())
 			if err != nil {
-				log.L.Fatal(err)
+				L.Fatal(err)
 			}
 			// return
 		}
@@ -60,18 +58,18 @@ func Listener() {
 	for {
 		select {
 		case sig := <-Chan:
-			// log.L.Printf("\r>>> received signal (%s)\n", sig)
-			log.L.Debug("received interrupt signal", sig)
+			// L.Printf("\r>>> received signal (%s)\n", sig)
+			L.Debug("received interrupt signal", sig)
 			requested = true
 			invokeCallbacks()
 			return
 		case <-ShutdownRequestChan:
-			log.L.Warn("received shutdown request - shutting down...")
+			L.Warn("received shutdown request - shutting down...")
 			requested = true
 			invokeCallbacks()
 			return
 		case handler := <-AddHandlerChan:
-			log.L.Debug("adding handler")
+			L.Debug("adding handler")
 			interruptCallbacks = append(interruptCallbacks, handler)
 		}
 	}
@@ -91,14 +89,14 @@ func AddHandler(handler func()) {
 
 // Request programatically requests a shutdown
 func Request() {
-	log.L.Debug("interrupt requested")
+	L.Debug("interrupt requested")
 	ShutdownRequestChan <- struct{}{}
 	// var ok bool
 	// select {
 	// case _, ok = <-ShutdownRequestChan:
 	// default:
 	// }
-	// log.L.Debug("shutdownrequestchan", ok)
+	// L.Debug("shutdownrequestchan", ok)
 	// if ok {
 	// 	close(ShutdownRequestChan)
 	// }
@@ -107,7 +105,7 @@ func Request() {
 // RequestRestart sets the reset flag and requests a restart
 func RequestRestart() {
 	Restart = true
-	log.L.Debug("requesting restart")
+	L.Debug("requesting restart")
 	Request()
 }
 

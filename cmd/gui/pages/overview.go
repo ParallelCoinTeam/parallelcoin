@@ -3,9 +3,10 @@ package pages
 import (
 	"gioui.org/layout"
 	"gioui.org/op"
-	"github.com/p9c/pod/pkg/gelook"
+
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gelook"
 )
 
 func Overview(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {

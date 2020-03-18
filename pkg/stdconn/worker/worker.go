@@ -1,10 +1,10 @@
 package worker
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
-	"github.com/p9c/pod/pkg/stdconn"
 	"os"
 	"os/exec"
+
+	"github.com/p9c/pod/pkg/stdconn"
 )
 
 type Worker struct {
@@ -23,18 +23,18 @@ func Spawn(args ...string) (w *Worker) {
 	w.Stderr = os.Stdout
 	cmdOut, err := w.StdoutPipe()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	cmdIn, err := w.StdinPipe()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, make(chan struct{}))
 	err = w.Start()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil
 	} else {
 		return

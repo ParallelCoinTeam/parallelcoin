@@ -12,7 +12,7 @@ import (
 
 // createHardForkSubsidyTx creates the transaction that must be on the hard fork activation block in place of a standard coinbase transaction. The main difference is the value set on this coinbase and that it pays out to multiple addresses, several being to the developers and to a 3 of 4 multisig to the development team for marketing and ongoing development costs
 // multisig tx: NUM_SIGS PUBKEY PUBKEY PUBKEY... NUM_PUBKEYS OP_CHECKMULTISIG
-//nolint
+// nolint
 func createHardForkSubsidyTx(params *netparams.Params, coinbaseScript []byte, nextBlockHeight int32, addr util.Address, version int32) (*util.Tx, error) {
 	payees := hardfork.Payees
 	if params.Net == wire.TestNet3 {

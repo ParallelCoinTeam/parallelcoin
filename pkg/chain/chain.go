@@ -8,11 +8,9 @@ import (
 
 	"go.uber.org/atomic"
 
-	"github.com/p9c/pod/pkg/chain/fork"
-	log "github.com/p9c/pod/pkg/logi"
-
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -183,7 +181,7 @@ func // HaveBlock returns whether or not the chain instance has the block
 (b *BlockChain) HaveBlock(hash *chainhash.Hash) (bool, error) {
 	exists, err := b.blockExists(hash)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return false, err
 	}
 	return exists || b.IsKnownOrphan(hash), nil
@@ -357,7 +355,7 @@ func // calcSequenceLock computes the relative lock-times for the passed
 		// current soft-fork state.
 		csvState, err := b.deploymentState(node.parent, chaincfg.DeploymentCSV)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		csvSoftforkActive = csvState == ThresholdActive
@@ -532,14 +530,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	if !prevHash.IsEqual(&b.BestChain.Tip().hash) {
 		str := "connectBlock must be called with a block that extends the" +
 			" main chain"
-		log.L.Debug(str)
+		L.Debug(str)
 		return AssertError(str)
 	}
 	// Sanity check the correct number of stxos are provided.
 	if len(stxos) != countSpentOutputs(block) {
 		str := "connectBlock called with inconsistent spent transaction out" +
 			" information"
-		log.L.Debug(str)
+		L.Debug(str)
 		return AssertError(str)
 	}
 
@@ -548,7 +546,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// Warn if any unknown new rules are either about to activate or have
 		// already been activated.
 		if err := b.warnUnknownRuleActivations(node); err != nil {
-			log.L.Trace("warnUnknownRuleActivations ", err)
+			L.Trace("warnUnknownRuleActivations ", err)
 			return err
 		}
 	}
@@ -556,10 +554,10 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	// Write any block status changes to DB before updating best state.
 	err := b.Index.flushToDB()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
-	// log.L.Traces(node.Diffs)
+	// L.Traces(node.Diffs)
 	// Generate a new best state snapshot that will be used to update the
 	// database and later memory if all database updates are successful.
 	b.stateLock.RLock()
@@ -575,14 +573,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
 		if err != nil {
-			log.L.Trace("dbPutBestState", err)
+			L.Trace("dbPutBestState", err)
 			return err
 		}
 		// Add the block hash and height to the block index which tracks the
 		// main chain.
 		err = dbPutBlockIndex(dbTx, block.Hash(), node.height)
 		if err != nil {
-			log.L.Trace("dbPutBlockIndex", err)
+			L.Trace("dbPutBlockIndex", err)
 			return err
 		}
 		// update the utxo set using the state of the utxo view.
@@ -590,7 +588,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// ones created by the block.
 		err = dbPutUtxoView(dbTx, view)
 		if err != nil {
-			log.L.Trace("dbPutUtxoView", err)
+			L.Trace("dbPutUtxoView", err)
 			return err
 		}
 
@@ -598,7 +596,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// block that contains all txos spent by it.
 		err = dbPutSpendJournalEntry(dbTx, block.Hash(), stxos)
 		if err != nil {
-			log.L.Trace("dbPutSpendJournalEntry", err)
+			L.Trace("dbPutSpendJournalEntry", err)
 			return err
 		}
 		// Allow the index manager to call each of the currently active
@@ -607,14 +605,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		if b.indexManager != nil {
 			err := b.indexManager.ConnectBlock(dbTx, block, stxos)
 			if err != nil {
-				log.L.Trace("connectBlock ", err)
+				L.Trace("connectBlock ", err)
 				return err
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		log.L.Trace("error updating database ", err)
+		L.Trace("error updating database ", err)
 		return err
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified
@@ -637,9 +635,9 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	// tN := time.Now()
 	// tB, err := b.CalcNextRequiredDifficultyPlan9Controller(node)
 	// if err != nil {
-	//	log.L.Error(err)
+	//	L.Error(err)
 	// }
-	// log.L.Trace(time.Now().Sub(tN), "to compute all block difficulties")
+	// L.Trace(time.Now().Sub(tN), "to compute all block difficulties")
 	// node.Diffs = tB
 	// Notify the caller that the block was connected to the main chain.
 	// The caller would typically want to react with actions such as updating wallets.
@@ -668,13 +666,13 @@ func // disconnectBlock handles disconnecting the passed node/block from the end
 		return err
 	})
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Write any block status changes to DB before updating best state.
 	err = b.Index.flushToDB()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Generate a new best state snapshot that will be used to update the
@@ -692,14 +690,14 @@ func // disconnectBlock handles disconnecting the passed node/block from the end
 		// Update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Remove the block hash and height from the block index which tracks
 		// the main chain.
 		err = dbRemoveBlockIndex(dbTx, block.Hash(), node.height)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Update the utxo set using the state of the utxo view.
@@ -707,21 +705,21 @@ func // disconnectBlock handles disconnecting the passed node/block from the end
 		// ones created by the block.
 		err = dbPutUtxoView(dbTx, view)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Before we delete the spend journal entry for this back,
 		// we'll fetch it as is so the indexers can utilize if needed.
 		stxos, err := dbFetchSpendJournalEntry(dbTx, block)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Update the transaction spend journal by removing the record that
 		// contains all txos spent by the block.
 		err = dbRemoveSpendJournalEntry(dbTx, block.Hash())
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Allow the index manager to call each of the currently active
@@ -730,14 +728,14 @@ func // disconnectBlock handles disconnecting the passed node/block from the end
 		if b.indexManager != nil {
 			err := b.indexManager.DisconnectBlock(dbTx, block, stxos)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return err
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return err
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified
@@ -836,7 +834,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 			return err
 		})
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		if n.hash != *block.Hash() {
@@ -850,7 +848,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		// in the view.
 		err = view.fetchInputUtxos(b.db, block)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Load all of the spent txos for the block from the spend journal.
@@ -860,7 +858,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 			return err
 		})
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Store the loaded block and spend journal entry for later.
@@ -868,7 +866,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		detachSpentTxOuts = append(detachSpentTxOuts, stxos)
 		err = view.disconnectTransactions(b.db, block, stxos)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		newBest = n.parent
@@ -899,7 +897,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 			return err
 		})
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Store the loaded block for later.
@@ -910,12 +908,12 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		if b.Index.NodeStatus(n).KnownValid() {
 			err = view.fetchInputUtxos(b.db, block)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return err
 			}
 			err = view.connectTransactions(block, nil)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return err
 			}
 			newBest = n
@@ -930,7 +928,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		// having an invalid ancestor.
 		err = b.checkConnectBlock(n, block, view, nil)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			if _, ok := err.(RuleError); ok {
 				b.Index.SetStatusFlags(n, statusValidateFailed)
 				for de := e.Next(); de != nil; de = de.Next() {
@@ -958,7 +956,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		// in the view.
 		err := view.fetchInputUtxos(b.db, block)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Update the view to unspend all of the spent txos and remove the
@@ -966,13 +964,13 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		err = view.disconnectTransactions(b.db, block,
 			detachSpentTxOuts[i])
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Update the database and chain state.
 		err = b.disconnectBlock(n, block, view)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}
@@ -984,7 +982,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		// in the view.
 		err := view.fetchInputUtxos(b.db, block)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Update the view to mark all utxos referenced by the block as spent
@@ -993,25 +991,25 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
 		err = view.connectTransactions(block, &stxos)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		// Update the database and chain state.
 		err = b.connectBlock(n, block, view, stxos)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 	}
 	// Log the point where the chain forked and old and new best chain
 	// heads.
 	if forkNode != nil {
-		log.L.Infof("REORGANIZE: Chain forks at %v (height %v)",
+		L.Infof("REORGANIZE: Chain forks at %v (height %v)",
 			forkNode.hash, forkNode.height)
 	}
-	log.L.Infof("REORGANIZE: Old best chain head was %v (height %v)",
+	L.Infof("REORGANIZE: Old best chain head was %v (height %v)",
 		&oldBest.hash, oldBest.height)
-	log.L.Infof("REORGANIZE: New best chain head is %v (height %v)",
+	L.Infof("REORGANIZE: New best chain head is %v (height %v)",
 		newBest.hash, newBest.height)
 	return nil
 }
@@ -1032,7 +1030,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) connectBestChain(node *BlockNode, block *util.Block,
 	flags BehaviorFlags) (bool, error) {
-	// log.L.Trace("connectBestChain")
+	// L.Trace("connectBestChain")
 	fastAdd := flags&BFFastAdd == BFFastAdd
 	flushIndexState := func() {
 		// Intentionally ignore errors writing updated node status to DB.
@@ -1041,14 +1039,14 @@ func // connectBestChain handles connecting the passed block to the chain while
 		// we flush in connectBlock and if the block is invalid,
 		// the worst that can happen is we revalidate the block after a restart.
 		if writeErr := b.Index.flushToDB(); writeErr != nil {
-			log.L.Trace("Error flushing block index changes to disk:", writeErr)
+			L.Trace("Error flushing block index changes to disk:", writeErr)
 		}
 	}
 	// We are extending the main (best) chain with a new block.
 	// This is the most common case.
 	parentHash := &block.MsgBlock().Header.PrevBlock
 	if parentHash.IsEqual(&b.BestChain.Tip().hash) {
-		// log.L.Trace("can attach to tip")
+		// L.Trace("can attach to tip")
 		// Skip checks if node has already been fully validated.
 		fastAdd = fastAdd || b.Index.NodeStatus(node).KnownValid()
 		// Perform several checks to verify the block can be connected to the
@@ -1058,20 +1056,20 @@ func // connectBestChain handles connecting the passed block to the chain while
 		view.SetBestHash(parentHash)
 		stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
 		if !fastAdd {
-			// log.L.Trace("not fast adding")
+			// L.Trace("not fast adding")
 			err := b.checkConnectBlock(node, block, view, &stxos)
 			if err == nil {
 				b.Index.SetStatusFlags(node, statusValid)
 			} else if _, ok := err.(RuleError); ok {
 				b.Index.SetStatusFlags(node, statusValidateFailed)
-				log.L.Error(err)
+				L.Error(err)
 			} else {
-				log.L.Error(err)
+				L.Error(err)
 				return false, err
 			}
 			flushIndexState()
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return false, err
 			}
 		}
@@ -1081,19 +1079,19 @@ func // connectBestChain handles connecting the passed block to the chain while
 		if fastAdd {
 			err := view.fetchInputUtxos(b.db, block)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return false, err
 			}
 			err = view.connectTransactions(block, &stxos)
 			if err != nil {
-				log.L.Error(err)
+				L.Error(err)
 				return false, err
 			}
 		}
 		// Connect the block to the main chain.
 		err := b.connectBlock(node, block, view, stxos)
 		if err != nil {
-			log.L.Trace("connect block error: ", err)
+			L.Trace("connect block error: ", err)
 			// If we got hit with a rule error,
 			// then we'll mark that status of the block as invalid and flush
 			// the index state to disk before returning with the error.
@@ -1110,7 +1108,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 			flushIndexState()
 		}
 		if fastAdd {
-			log.L.Warnf("fastAdd set in the side chain case? %v\n", block.Hash())
+			L.Warnf("fastAdd set in the side chain case? %v\n", block.Hash())
 		}
 		return true, nil
 	}
@@ -1122,11 +1120,11 @@ func // connectBestChain handles connecting the passed block to the chain while
 		// Log information about how the block is forking the chain.
 		f := b.BestChain.FindFork(node)
 		if f.hash.IsEqual(parentHash) {
-			log.L.Tracef("FORK: Block %v forks the chain at height %d/block %v, "+
+			L.Tracef("FORK: Block %v forks the chain at height %d/block %v, "+
 				"but does not cause a reorganize. workSum=%d",
 				node.hash, f.height, f.hash, f.workSum)
 		} else {
-			log.L.Tracef("EXTEND FORK: Height %7d Block %v extends a side chain which"+
+			L.Tracef("EXTEND FORK: Height %7d Block %v extends a side chain which"+
 				" forks the chain at height %d/block %v. workSum=%d",
 				node.height, node.hash, f.height, f.hash, f.workSum,
 			)
@@ -1144,7 +1142,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// starting at the common ancestor (the point where the chain forked).
 	detachNodes, attachNodes := b.getReorganizeNodes(node)
 	// Reorganize the chain.
-	log.L.Infof("REORGANIZE: block %v is causing a reorganize", node.hash)
+	L.Infof("REORGANIZE: block %v is causing a reorganize", node.hash)
 	err := b.reorganizeChain(detachNodes, attachNodes)
 	// Either getReorganizeNodes or reorganizeChain could have made unsaved
 	// changes to the block index,
@@ -1152,7 +1150,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// The index would only be dirty if the block failed to connect,
 	// so we can ignore any errors writing.
 	if writeErr := b.Index.flushToDB(); writeErr != nil {
-		log.L.Trace("Error flushing block index changes to disk:", writeErr)
+		L.Trace("Error flushing block index changes to disk:", writeErr)
 	}
 	return err == nil, err
 }
@@ -1657,7 +1655,7 @@ New(config *Config) (*BlockChain, error) {
 	if config.IndexManager != nil {
 		err := config.IndexManager.Init(&b, config.Interrupt)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 	}
@@ -1671,11 +1669,11 @@ New(config *Config) (*BlockChain, error) {
 		len(df) != len(fork.List[1].AlgoVers) {
 		bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(bestNode)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 		}
 		bestNode.Diffs.Store(bitsMap)
 	}
-	log.L.Infof("chain state (height %d, hash %v, totaltx %d, work %v)",
+	L.Infof("chain state (height %d, hash %v, totaltx %d, work %v)",
 		bestNode.height, bestNode.hash, b.stateSnapshot.TotalTxns,
 		bestNode.workSum)
 	return &b, nil

@@ -24,7 +24,7 @@ var _ headerfs.BlockHeaderStore = (*mockBlockHeaderStore)(nil)
 // backed by an in-memory map. This instance is meant to be used by callers
 // outside the package to unit test components that require a BlockHeaderStore
 // interface.
-//nolint
+// nolint
 func newMockBlockHeaderStore() headerfs.BlockHeaderStore {
 	return &mockBlockHeaderStore{
 		headers: make(map[chainhash.Hash]wire.BlockHeader),

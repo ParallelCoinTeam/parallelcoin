@@ -7,9 +7,7 @@ import (
 	"sync"
 	"testing"
 	"time"
-	
-	log "github.com/p9c/pod/pkg/logi"
-	
+
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
@@ -142,7 +140,7 @@ func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32, ver
 	coinbaseScript, err := txscript.NewScriptBuilder().
 		AddInt64(int64(blockHeight)).AddInt64(extraNonce).Script()
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -209,7 +207,7 @@ func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32
 		sigScript, err := txscript.SignatureScript(tx, i, p.payScript,
 			txscript.SigHashAll, p.signKey, true)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		tx.TxIn[i].SignatureScript = sigScript
@@ -244,7 +242,7 @@ func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32)
 		sigScript, err := txscript.SignatureScript(tx, 0, p.payScript,
 			txscript.SigHashAll, p.signKey, true)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return nil, err
 		}
 		tx.TxIn[0].SignatureScript = sigScript
@@ -265,7 +263,7 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 	keyBytes, err := hex.DecodeString("700868df1838811ffbdf918fb482c1f7e" +
 		"ad62db4b97bd7012c23e726485e577d")
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, nil, err
 	}
 	signKey, signPub := ec.PrivKeyFromBytes(ec.S256(), keyBytes)
@@ -274,13 +272,13 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 	pubKeyBytes := signPub.SerializeCompressed()
 	payPubKeyAddr, err := util.NewAddressPubKey(pubKeyBytes, chainParams)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, nil, err
 	}
 	payAddr := payPubKeyAddr.AddressPubKeyHash()
 	pkScript, err := txscript.PayToAddrScript(payAddr)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, nil, err
 	}
 	// Create a new fake chain and harness bound to it.
@@ -320,7 +318,7 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 	curHeight := harness.chain.BestHeight()
 	coinbase, err := harness.CreateCoinbaseTx(curHeight+1, numOutputs, 0)
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, nil, err
 	}
 	harness.chain.utxos.AddTxOuts(coinbase, curHeight+1)

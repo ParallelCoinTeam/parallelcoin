@@ -3,7 +3,6 @@ package headerfs
 import (
 	"bytes"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -92,7 +91,7 @@ func (h *blockHeaderStore) readHeaderRange(startHeight uint32,
 	_, err := h.file.ReadAt(rawHeaderBytes, int64(seekDistance))
 
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 
@@ -130,7 +129,7 @@ func (h *blockHeaderStore) readHeader(height uint32) (wire.BlockHeader, error) {
 	rawHeader, err := h.readRaw(seekDistance)
 
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return header, err
 	}
 
@@ -154,7 +153,7 @@ func (f *FilterHeaderStore) readHeader(height uint32) (*chainhash.Hash, error) {
 	rawHeader, err := f.readRaw(seekDistance)
 
 	if err != nil {
-		log.L.Error(err)
+		L.Error(err)
 		return nil, err
 	}
 

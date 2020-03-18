@@ -122,7 +122,7 @@ out:
 			switch n := n.(type) {
 			case *chain.RescanProgress:
 				if curBatch == nil {
-					log.L.Warn("received rescan progress" +
+					L.Warn("received rescan progress" +
 						" notification but no rescan currently running")
 					continue
 				}
@@ -132,7 +132,7 @@ out:
 				}
 			case *chain.RescanFinished:
 				if curBatch == nil {
-					log.L.Warn("received rescan finished notification but no" +
+					L.Warn("received rescan finished notification but no" +
 						" rescan currently running",
 					)
 					continue
@@ -168,7 +168,7 @@ out:
 		select {
 		case msg := <-w.rescanProgress:
 			n := msg.Notification
-			log.L.Infof(
+			L.Infof(
 				"rescanned through block %v (height %d)",
 				n.Hash,
 				n.Height)
@@ -176,7 +176,7 @@ out:
 			n := msg.Notification
 			addrs := msg.Addresses
 			noun := log.PickNoun(len(addrs), "address", "addresses")
-			log.L.Infof(
+			L.Infof(
 				"finished rescan for %d %s (synced to block %s, height %d)",
 				len(addrs),
 				noun,
@@ -196,8 +196,8 @@ out:
 func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		log.L.Error(err)
-		log.L.Errorf("rescanRPCHandler called without an RPC client", err)
+		L.Error(err)
+		L.Errorf("rescanRPCHandler called without an RPC client", err)
 		w.wg.Done()
 		return
 	}
@@ -209,7 +209,7 @@ out:
 			// Log the newly-started rescan.
 			numAddrs := len(batch.addrs)
 			noun := log.PickNoun(numAddrs, "address", "addresses")
-			log.L.Infof(
+			L.Infof(
 				"started rescan from block %v (height %d) for %d %s",
 				batch.bs.Hash,
 				batch.bs.Height,
@@ -218,8 +218,8 @@ out:
 			err := chainClient.Rescan(&batch.bs.Hash, batch.addrs,
 				batch.outpoints)
 			if err != nil {
-				log.L.Error(err)
-				log.L.Errorf(
+				L.Error(err)
+				L.Errorf(
 					"rescan for %d %s failed: %v %s",
 					numAddrs,
 					noun,
@@ -251,7 +251,7 @@ func (w *Wallet) rescanWithTarget(addrs []util.Address,
 			output.PkScript, w.chainParams,
 		)
 		if err != nil {
-			log.L.Error(err)
+			L.Error(err)
 			return err
 		}
 		outpoints[output.OutPoint] = outputAddrs[0]
