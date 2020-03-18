@@ -194,86 +194,80 @@ func (m *State) Body() layout.FlexChild {
 
 func (m *State) DuoUIheader() layout.FlexChild {
 	return Rigid(func() {
-		m.FlexHorizontal(
-			Rigid(func() {
-				cs := m.Gtx.Constraints
-				m.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
-				var (
-					textSize, iconSize               = 64, 64
-					width, height                    = 72, 72
-					paddingV, paddingH               = 8, 8
-					insetSize, textInsetSize float32 = 16, 24
-					closeInsetSize                   = 4
+		m.FlexH(Rigid(func() {
+			cs := m.Gtx.Constraints
+			m.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+			var (
+				textSize, iconSize       = 64, 64
+				width, height            = 72, 72
+				paddingV, paddingH       = 8, 8
+				insetSize, textInsetSize = 16, 24
+				closeInsetSize           = 4
+			)
+			if m.WindowWidth < 1024 || m.WindowHeight < 1280 {
+				textSize, iconSize = 24, 24
+				width, height = 32, 32
+				paddingV, paddingH = 8, 8
+				insetSize = 10
+				textInsetSize = 16
+				closeInsetSize = 4
+			}
+			m.FlexH(Rigid(func() {
+				m.Inset(insetSize,
+					func() {
+						var logoMeniItem gelook.DuoUIbutton
+						logoMeniItem = m.Theme.DuoUIbutton(
+							"", "",
+							"", m.Theme.Colors["PanelBg"],
+							"", "",
+							"logo", m.Theme.Colors["PanelText"],
+							textSize, iconSize,
+							width, height,
+							paddingV, paddingH)
+						for m.LogoButton.Clicked(m.Gtx) {
+							m.FlipTheme()
+							m.SaveConfig()
+						}
+						logoMeniItem.IconLayout(m.Gtx, m.LogoButton)
+					},
 				)
-				if m.WindowWidth < 1024 || m.WindowHeight < 1280 {
-					textSize, iconSize = 24, 24
-					width, height = 32, 32
-					paddingV, paddingH = 8, 8
-					insetSize = 10
-					textInsetSize = 16
-					closeInsetSize = 4
-				}
-				m.FlexHorizontal(
-					Rigid(func() {
-						layout.UniformInset(unit.Dp(insetSize)).Layout(m.Gtx,
-							func() {
-								var logoMeniItem gelook.DuoUIbutton
-								logoMeniItem = m.Theme.DuoUIbutton(
-									"", "",
-									"", m.Theme.Colors["PanelBg"],
-									"", "",
-									"logo", m.Theme.Colors["PanelText"],
-									textSize, iconSize,
-									width, height,
-									paddingV, paddingH)
-								for m.LogoButton.Clicked(m.Gtx) {
-									m.FlipTheme()
-									m.SaveConfig()
-								}
-								logoMeniItem.IconLayout(m.Gtx, m.LogoButton)
-							},
-						)
-					}),
-					Rigid(func() {
-						m.Inset(textInsetSize, func() {
-							t := m.Theme.DuoUIlabel(unit.Dp(float32(
-								textSize)),
-								"monitor")
-							t.Color = m.Theme.Colors["PanelText"]
-							t.Layout(m.Gtx)
-						},
-						)
-					}),
-					Spacer(),
-					Rigid(func() {
-						m.Inset(closeInsetSize*2, func() {
-							t := m.Theme.DuoUIlabel(unit.Dp(float32(24)),
-								fmt.Sprintf("%dx%d",
-									m.Gtx.Constraints.Width.Max,
-									m.Gtx.Constraints.Height.Max))
-							t.Color = m.Theme.Colors["PanelText"]
-							t.Font.Typeface = m.Theme.Fonts["Primary"]
-							t.Layout(m.Gtx)
-						})
-					}),
-					Rigid(func() {
-						m.Inset(closeInsetSize, func() {
-							m.Theme.DuoUIbutton("", "settings",
-								m.Theme.Colors["PanelText"],
-								"", "",
-								m.Theme.Colors["PanelBg"], "closeIcon",
-								m.Theme.Colors["PanelText"],
-								0, 32, 41, 41,
-								0, 0).IconLayout(m.Gtx, m.CloseButton)
-							for m.CloseButton.Clicked(m.Gtx) {
-								L.Debug("close button clicked")
-								m.SaveConfig()
-								close(m.Ctx.KillAll)
-							}
-						})
-					}),
+			}), Rigid(func() {
+				m.Inset(textInsetSize, func() {
+					t := m.Theme.DuoUIlabel(unit.Dp(float32(
+						textSize)),
+						"monitor")
+					t.Color = m.Theme.Colors["PanelText"]
+					t.Layout(m.Gtx)
+				},
 				)
+			}), Spacer(), Rigid(func() {
+				m.Inset(closeInsetSize*2, func() {
+					t := m.Theme.DuoUIlabel(unit.Dp(float32(24)),
+						fmt.Sprintf("%dx%d",
+							m.Gtx.Constraints.Width.Max,
+							m.Gtx.Constraints.Height.Max))
+					t.Color = m.Theme.Colors["PanelText"]
+					t.Font.Typeface = m.Theme.Fonts["Primary"]
+					t.Layout(m.Gtx)
+				})
+			}), Rigid(func() {
+				m.Inset(closeInsetSize, func() {
+					m.Theme.DuoUIbutton("", "settings",
+						m.Theme.Colors["PanelText"],
+						"", "",
+						m.Theme.Colors["PanelBg"], "closeIcon",
+						m.Theme.Colors["PanelText"],
+						0, 32, 41, 41,
+						0, 0).IconLayout(m.Gtx, m.CloseButton)
+					for m.CloseButton.Clicked(m.Gtx) {
+						L.Debug("close button clicked")
+						m.SaveConfig()
+						close(m.Ctx.KillAll)
+					}
+				})
 			}),
+			)
+		}),
 		)
 	})
 }
