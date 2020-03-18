@@ -16,7 +16,7 @@ import (
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		Configure(cx, c)
-		log.L.Debug("starting shell")
+		L.Debug("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
@@ -27,24 +27,24 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				cx.ActiveNet.Params.Name + slash +
 				wallet.WalletDbName
 		if !apputil.FileExists(dbFilename) {
-			// log.L.SetLevel("off", false)
+			// L.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				log.L.Error("failed to create wallet", err)
+				L.Error("failed to create wallet", err)
 			}
 			log.Println("restart to complete initial setup")
 			os.Exit(1)
 		}
-		log.L.Warn("starting node")
+		L.Warn("starting node")
 		if !*cx.Config.NodeOff {
 			go func() {
 				err = node.Main(cx, shutdownChan)
 				if err != nil {
-					log.L.Error("error starting node ", err)
+					L.Error("error starting node ", err)
 				}
 			}()
 			cx.RPCServer = <-cx.NodeChan
 		}
-		log.L.Warn("starting wallet")
+		L.Warn("starting wallet")
 		if !*cx.Config.WalletOff {
 			go func() {
 				err = walletmain.Main(cx)
@@ -54,7 +54,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}()
 			cx.WalletServer = <-cx.WalletChan
 		}
-		log.L.Debug("shell started")
+		L.Debug("shell started")
 		cx.WaitGroup.Wait()
 		return nil
 	}

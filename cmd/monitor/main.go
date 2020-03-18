@@ -178,7 +178,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 }
 
 func (m *State) TopLevelLayout() {
-	m.FlexVertical(
+	m.FlexV(
 		m.DuoUIheader(),
 		m.Body(),
 		m.BottomBar(),

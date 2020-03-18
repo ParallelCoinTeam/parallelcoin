@@ -32,7 +32,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 		Action:      guiHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			log.L.Trace("subcommand completed")
+			L.Trace("subcommand completed")
 			if interrupt.Restart {
 			}
 			return nil
@@ -108,7 +108,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						}
 						dbPath := filepath.Join(filepath.Join(*cx.Config.DataDir,
 							cx.ActiveNet.Name), dbName)
-						if err = os.RemoveAll(dbPath); log.L.Check(err) {
+						if err = os.RemoveAll(dbPath); L.Check(err) {
 						}
 						// return nodeHandle(cx)(c)
 						return nil
@@ -124,18 +124,18 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						" transaction mess)",
 					func(c *cli.Context) (err error) {
 						Configure(cx, c)
-						log.L.Info("dropping wallet history")
+						L.Info("dropping wallet history")
 						go func() {
-							log.L.Warn("starting wallet")
-							if err = walletmain.Main(cx); log.L.Check(err) {
+							L.Warn("starting wallet")
+							if err = walletmain.Main(cx); L.Check(err) {
 								os.Exit(1)
 							} else {
-								log.L.Debug("wallet started")
+								L.Debug("wallet started")
 							}
 						}()
-						log.L.Debug("waiting for walletChan")
+						L.Debug("waiting for walletChan")
 						cx.WalletServer = <-cx.WalletChan
-						log.L.Debug("walletChan sent")
+						L.Debug("walletChan sent")
 						err = legacy.DropWalletHistory(cx.WalletServer)(c)
 						return
 					},

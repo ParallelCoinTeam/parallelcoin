@@ -119,7 +119,7 @@ func TestAppDataDir(t *testing.T) {
 }
 
 // TstAppDataDir makes the internal appDataDir function available to the test package.
-//nolint
+// nolint
 func TstAppDataDir(goos, appName string, roaming bool) string {
 	return appdata.AppDataDir(goos, appName, roaming)
 }

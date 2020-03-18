@@ -77,40 +77,38 @@ func (m *State) RunControls() layout.FlexChild {
 
 func (m *State) RunmodeButtons() layout.FlexChild {
 	return Rigid(func() {
-		m.FlexHorizontal(
-			Rigid(func() {
-				fg, bg := "Light", "Primary"
-				if m.Config.RunModeOpen {
-					fg, bg = "Light", "Secondary"
+		m.FlexH(Rigid(func() {
+			fg, bg := "Light", "Primary"
+			if m.Config.RunModeOpen {
+				fg, bg = "Light", "Secondary"
+			}
+			m.TextButton(m.Config.RunMode, "Secondary", 23, fg, bg,
+				m.RunModeFoldButton)
+			for m.RunModeFoldButton.Clicked(m.Gtx) {
+				Toggle(&m.Config.RunModeOpen)
+				m.SaveConfig()
+			}
+		}), Rigid(func() {
+			if m.Config.RunModeOpen {
+				modes := []string{
+					"node", "wallet", "shell", "gui",
 				}
-				m.TextButton(m.Config.RunMode, "Secondary", 23, fg, bg,
-					m.RunModeFoldButton)
-				for m.RunModeFoldButton.Clicked(m.Gtx) {
-					Toggle(&m.Config.RunModeOpen)
-					m.SaveConfig()
-				}
-			}),
-			Rigid(func() {
-				if m.Config.RunModeOpen {
-					modes := []string{
-						"node", "wallet", "shell", "gui",
+				m.ModesList.Layout(m.Gtx, len(modes), func(i int) {
+					if m.Config.RunMode != modes[i] {
+						m.TextButton(modes[i], "Primary", 16, "Light",
+							"Dark", m.ModesButtons[modes[i]])
 					}
-					m.ModesList.Layout(m.Gtx, len(modes), func(i int) {
-						if m.Config.RunMode != modes[i] {
-							m.TextButton(modes[i], "Primary", 16, "Light",
-								"Dark", m.ModesButtons[modes[i]])
+					for m.ModesButtons[modes[i]].Clicked(m.Gtx) {
+						L.Debug(modes[i], "clicked")
+						if m.Config.RunModeOpen {
+							m.Config.RunMode = modes[i]
+							m.Config.RunModeOpen = false
 						}
-						for m.ModesButtons[modes[i]].Clicked(m.Gtx) {
-							L.Debug(modes[i], "clicked")
-							if m.Config.RunModeOpen {
-								m.Config.RunMode = modes[i]
-								m.Config.RunModeOpen = false
-							}
-							m.SaveConfig()
-						}
-					})
-				}
-			}),
+						m.SaveConfig()
+					}
+				})
+			}
+		}),
 		)
 	})
 }

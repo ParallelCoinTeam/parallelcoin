@@ -2,18 +2,17 @@ package app
 
 import (
 	"github.com/urfave/cli"
-	
+
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli
 Configure(cx *conte.Xt, ctx *cli.Context) {
-	log.L.Trace("configuring pod")
+	L.Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
 	cx.NodeChan = make(chan *rpc.Server)
 	// theoretically, the configuration should be accessed only when locked
@@ -48,7 +47,7 @@ Configure(cx *conte.Xt, ctx *cli.Context) {
 	setDiallers(cfg, cx.StateCfg)
 	// if the user set the save flag, or file doesn't exist save the file now
 	if cx.StateCfg.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
-		log.L.Trace("saving configuration")
+		L.Trace("saving configuration")
 		save.Pod(cx.Config)
 	}
 }

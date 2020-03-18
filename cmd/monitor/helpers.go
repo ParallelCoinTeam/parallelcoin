@@ -8,11 +8,11 @@ import (
 	"github.com/p9c/pod/pkg/gelook"
 )
 
-func (m *State) FlexVertical(children ...layout.FlexChild) () {
+func (m *State) FlexV(children ...layout.FlexChild) () {
 	layout.Flex{Axis: layout.Vertical}.Layout(m.Gtx, children...)
 }
 
-func (m *State) FlexHorizontal(children ...layout.FlexChild) {
+func (m *State) FlexH(children ...layout.FlexChild) {
 	layout.Flex{Axis: layout.Horizontal}.Layout(m.Gtx, children...)
 }
 
