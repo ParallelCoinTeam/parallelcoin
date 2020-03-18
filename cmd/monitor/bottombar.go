@@ -2,19 +2,15 @@ package monitor
 
 import (
 	"gioui.org/layout"
-	"gioui.org/unit"
 
 	"github.com/p9c/pod/cmd/gui/pages"
-	"github.com/p9c/pod/pkg/gelook"
 )
 
 func (m *State) BottomBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := m.Gtx.Constraints
-		gelook.DuoUIdrawRectangle(m.Gtx, cs.Width.Max,
-			cs.Height.Max, m.Theme.Colors["Primary"],
-			[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		m.FlexVertical(
+		m.Rectangle(cs.Width.Max, cs.Height.Max, "Primary")
+		m.FlexV(
 			m.SettingsPage(),
 			m.BuildPage(),
 			m.StatusBar(),
@@ -25,10 +21,8 @@ func (m *State) BottomBar() layout.FlexChild {
 func (m *State) StatusBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := m.Gtx.Constraints
-		gelook.DuoUIdrawRectangle(m.Gtx, cs.Width.Max,
-			cs.Height.Max, m.Theme.Colors["Primary"],
-			[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		m.FlexHorizontal(
+		m.Rectangle(cs.Width.Max, cs.Height.Max, "Primary")
+		m.FlexH(
 			m.RunControls(),
 			m.RunmodeButtons(),
 			m.BuildButtons(),
@@ -40,11 +34,7 @@ func (m *State) StatusBar() layout.FlexChild {
 func (m *State) RunControls() layout.FlexChild {
 	return Rigid(func() {
 		if !m.Running {
-			m.Theme.DuoUIbutton("", "", "",
-				m.Theme.Colors["Primary"], "",
-				m.Theme.Colors["Dark"], "Run",
-				m.Theme.Colors["Light"], 0, 41, 41, 41,
-				0, 0).IconLayout(m.Gtx, m.RunMenuButton)
+			m.IconButton("Run", "Primary", m.RunMenuButton)
 			for m.RunMenuButton.Clicked(m.Gtx) {
 				L.Debug("clicked run button")
 				m.Running = true
@@ -53,11 +43,7 @@ func (m *State) RunControls() layout.FlexChild {
 		if m.Running {
 			m.FlexHorizontal(
 				Rigid(func() {
-					m.Theme.DuoUIbutton("", "", "",
-						m.Theme.Colors["Dark"], "",
-						m.Theme.Colors["Dark"], "Stop",
-						m.Theme.Colors["Light"], 0, 41, 41, 41,
-						0, 0).IconLayout(m.Gtx, m.StopMenuButton)
+					m.IconButton("Stop", "Dark", m.StopMenuButton)
 					for m.StopMenuButton.Clicked(m.Gtx) {
 						L.Debug("clicked stop button")
 						m.Running = false
@@ -66,16 +52,12 @@ func (m *State) RunControls() layout.FlexChild {
 				}),
 				Rigid(func() {
 					ic := "Pause"
-					rc := m.Theme.Colors["Dark"]
+					rc := "Dark"
 					if m.Pausing {
 						ic = "Run"
-						rc = m.Theme.Colors["Primary"]
+						rc = "Primary"
 					}
-					m.Theme.DuoUIbutton("", "", "",
-						rc, "",
-						m.Theme.Colors["Dark"], ic,
-						m.Theme.Colors["Light"], 0, 41, 41, 41,
-						0, 0).IconLayout(m.Gtx, m.PauseMenuButton)
+					m.IconButton(ic, rc, m.PauseMenuButton)
 					for m.PauseMenuButton.Clicked(m.Gtx) {
 						if m.Pausing {
 							L.Debug("clicked on resume button")
@@ -86,11 +68,7 @@ func (m *State) RunControls() layout.FlexChild {
 					}
 				}),
 				Rigid(func() {
-					m.Theme.DuoUIbutton("", "", "",
-						m.Theme.Colors["Dark"], "",
-						m.Theme.Colors["Dark"], "Restart",
-						m.Theme.Colors["Light"], 0, 41, 41, 41,
-						0, 0).IconLayout(m.Gtx, m.RestartMenuButton)
+					m.IconButton("Restart", "Dark", m.RestartMenuButton)
 					for m.RestartMenuButton.Clicked(m.Gtx) {
 						L.Debug("clicked restart button")
 					}
@@ -104,26 +82,16 @@ func (m *State) RunmodeButtons() layout.FlexChild {
 	return Rigid(func() {
 		m.FlexHorizontal(
 			Rigid(func() {
-				bg := m.Theme.Colors["Primary"]
+				fg, bg := "Light", "Primary"
 				if m.Config.RunModeOpen {
-					bg = m.Theme.Colors["Dark"]
+					fg, bg = "Light", "Dark"
 				}
-				s := m.Theme.DuoUIbutton(
-					m.Theme.Fonts["Secondary"],
-					"mode",
-					m.Theme.Colors["Light"],
-					bg,
-					m.Theme.Colors["Primary"],
-					m.Theme.Colors["Light"],
-					"settingsIcon",
-					m.Theme.Colors["Light"],
-					23, 23, 23, 23, 0, 0)
+				m.TextButton(m.Config.RunMode, "Secondary", 23, fg, bg,
+					m.RunModeFoldButton)
 				for m.RunModeFoldButton.Clicked(m.Gtx) {
-					L.Debug("run mode folder clicked")
 					m.Config.RunModeOpen = !m.Config.RunModeOpen
 					m.SaveConfig()
 				}
-				s.Layout(m.Gtx, m.RunModeFoldButton)
 			}),
 			Rigid(func() {
 				if m.Config.RunModeOpen {
@@ -131,20 +99,10 @@ func (m *State) RunmodeButtons() layout.FlexChild {
 						"node", "wallet", "shell", "gui",
 					}
 					m.ModesList.Layout(m.Gtx, len(modes), func(i int) {
-						fg, bg := m.Theme.Colors["Light"],
-							m.Theme.Colors["Dark"]
-						if m.Config.RunMode == modes[i] {
-							fg, bg = m.Theme.Colors["Dark"],
-								m.Theme.Colors["Light"]
+						if m.Config.RunMode != modes[i] {
+							m.TextButton(modes[i], "Primary", 16, "Light",
+								"Dark", m.ModesButtons[modes[i]])
 						}
-						m.Theme.DuoUIbutton(m.Theme.Fonts["Primary"],
-							modes[i],
-							fg,
-							bg,
-							"", "",
-							"", "",
-							16, 0, 80, 32, 4, 4).Layout(m.Gtx,
-							m.ModesButtons[modes[i]])
 						for m.ModesButtons[modes[i]].Clicked(m.Gtx) {
 							L.Debug(modes[i], "clicked")
 							if m.Config.RunModeOpen {
@@ -153,12 +111,6 @@ func (m *State) RunmodeButtons() layout.FlexChild {
 							}
 							m.SaveConfig()
 						}
-					})
-				} else {
-					layout.UniformInset(unit.Dp(8)).Layout(m.Gtx, func() {
-						t := m.Theme.DuoUIlabel(unit.Dp(18), m.Config.RunMode)
-						t.Font.Typeface = m.Theme.Fonts["Primary"]
-						t.Layout(m.Gtx)
 					})
 				}
 			}),
@@ -170,16 +122,11 @@ func (m *State) SettingsButtons() layout.FlexChild {
 	return Flexed(1, func() {
 		m.FlexHorizontal(
 			Rigid(func() {
-				bg := m.Theme.Colors["Primary"]
+				bg := "Primary"
 				if m.Config.SettingsOpen {
-					bg = m.Theme.Colors["Dark"]
+					bg = "Dark"
 				}
-				m.Theme.DuoUIbutton(m.Theme.Fonts["Primary"], "settings",
-					m.Theme.Colors["Light"],
-					bg, "",
-					m.Theme.Colors["Dark"], "settingsIcon",
-					m.Theme.Colors["Light"], 23, 32, 41, 41,
-					0, 0).IconLayout(m.Gtx, m.SettingsFoldButton)
+				m.IconButton("settingsIcon", bg, m.SettingsFoldButton)
 				for m.SettingsFoldButton.Clicked(m.Gtx) {
 					L.Debug("settings folder clicked")
 					switch {
@@ -191,13 +138,7 @@ func (m *State) SettingsButtons() layout.FlexChild {
 					}
 					m.SaveConfig()
 				}
-				// s.Layout(m.Gtx, settingsFoldButton)
 			}),
-			// Rigid(func() {
-			// 	if m.WindowWidth > 1024 && m.Config.SettingsOpen {
-			// 		pages.SettingsHeader(m.Rc, m.Gtx, m.Theme)()
-			// 	}
-			// }),
 		)
 	})
 }
@@ -207,7 +148,7 @@ func (m *State) SettingsPage() layout.FlexChild {
 		return Flexed(0, func() {})
 	}
 	var weight float32 = 0.5
-	var settingsInset float32 = 0
+	var settingsInset = 0
 	switch {
 	case m.WindowWidth < 1024 && m.WindowHeight > 1024:
 		// weight = 0.333
@@ -218,22 +159,28 @@ func (m *State) SettingsPage() layout.FlexChild {
 	}
 	return Flexed(weight, func() {
 		cs := m.Gtx.Constraints
-		gelook.DuoUIdrawRectangle(m.Gtx, cs.Width.Max,
-			cs.Height.Max, m.Theme.Colors["Secondary"],
-			[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		m.FlexVertical(
+		m.Rectangle(cs.Width.Max, cs.Height.Max, "Secondary")
+		m.FlexV(
 			Rigid(func() {
 				m.FlexHorizontal(
 					Rigid(func() {
-						t := m.Theme.DuoUIlabel(unit.Dp(float32(
-							24)), "Run Settings")
-						t.Color = m.Theme.Colors["PanelText"]
-						t.Font.Typeface = m.Theme.Fonts["Secondary"]
-						layout.UniformInset(unit.Dp(8)).Layout(m.Gtx,
-							func() {
-								t.Layout(m.Gtx)
-							},
-						)
+						m.TextButton("Run Settings", "Secondary",
+							23, "PanelText", "Secondary",
+							m.SettingsTitleCloseButton)
+						for m.SettingsTitleCloseButton.Clicked(m.Gtx) {
+							L.Debug("settings panel title close button clicked")
+							m.Config.SettingsOpen = false
+							m.SaveConfig()
+						}
+						// t := m.Theme.DuoUIlabel(unit.Dp(float32(
+						// 	24)), "Run Settings")
+						// t.Color = m.Theme.Colors["PanelText"]
+						// t.Font.Typeface = m.Theme.Fonts["Secondary"]
+						// layout.UniformInset(unit.Dp(8)).Layout(m.Gtx,
+						// 	func() {
+						// 		t.Layout(m.Gtx)
+						// 	},
+						// )
 					}),
 					Rigid(func() {
 						// if m.WindowWidth < 1024 {
@@ -242,13 +189,8 @@ func (m *State) SettingsPage() layout.FlexChild {
 					}),
 					Flexed(1, func() {}),
 					Rigid(func() {
-						m.Theme.DuoUIbutton("", "settings",
-							m.Theme.Colors["PanelText"],
-							"", "",
-							m.Theme.Colors["PanelBg"], "minimize",
-							m.Theme.Colors["PanelText"],
-							0, 32, 41, 41,
-							0, 0).IconLayout(m.Gtx, m.SettingsCloseButton)
+						m.IconButton("minimize", "Secondary",
+							m.SettingsCloseButton)
 						for m.SettingsCloseButton.Clicked(m.Gtx) {
 							L.Debug("settings panel close button clicked")
 							m.Config.SettingsOpen = false
@@ -259,10 +201,8 @@ func (m *State) SettingsPage() layout.FlexChild {
 			}),
 			Rigid(func() {
 				cs := m.Gtx.Constraints
-				gelook.DuoUIdrawRectangle(m.Gtx, cs.Width.Max,
-					cs.Height.Max, m.Theme.Colors["Dark"],
-					[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-				layout.UniformInset(unit.Dp(settingsInset)).Layout(m.Gtx,
+				m.Rectangle(cs.Width.Max, cs.Height.Max, "Dark")
+				m.Inset(settingsInset,
 					pages.SettingsBody(m.Rc, m.Gtx, m.Theme))
 			}),
 		)
@@ -275,20 +215,12 @@ func (m *State) BuildButtons() layout.FlexChild {
 			Axis: layout.Horizontal,
 		}.Layout(m.Gtx,
 			Rigid(func() {
-				bg := m.Theme.Colors["Primary"]
+				bg := "Primary"
 				if m.Config.BuildOpen {
-					bg = m.Theme.Colors["Dark"]
+					bg = "Dark"
 				}
-				s := m.Theme.DuoUIbutton(
-					m.Theme.Fonts["Secondary"],
-					"build",
-					m.Theme.Colors["Light"],
-					bg,
-					m.Theme.Colors["Primary"],
-					m.Theme.Colors["Light"],
-					"settingsIcon",
-					m.Theme.Colors["Light"],
-					23, 23, 23, 23, 0, 0)
+				m.TextButton("Build", "Secondary", 23,
+					"PanelText", bg, m.BuildFoldButton)
 				for m.BuildFoldButton.Clicked(m.Gtx) {
 					L.Debug("run mode folder clicked")
 					switch {
@@ -300,7 +232,6 @@ func (m *State) BuildButtons() layout.FlexChild {
 					}
 					m.SaveConfig()
 				}
-				s.Layout(m.Gtx, m.BuildFoldButton)
 			}),
 		)
 	})
@@ -311,10 +242,7 @@ func (m *State) BuildPage() layout.FlexChild {
 		return Flexed(0, func() {})
 	}
 	var weight float32 = 0.5
-	// var settingsInset float32 = 0
 	switch {
-	case m.WindowWidth < 1024 && m.WindowHeight > 1024:
-		// weight = 0.333
 	case m.WindowHeight < 1024 && m.WindowWidth < 1024:
 		weight = 1
 	case m.WindowHeight < 600 && m.WindowWidth > 1024:
@@ -322,32 +250,25 @@ func (m *State) BuildPage() layout.FlexChild {
 	}
 	return Flexed(weight, func() {
 		cs := m.Gtx.Constraints
-		gelook.DuoUIdrawRectangle(m.Gtx, cs.Width.Max,
-			cs.Height.Max, m.Theme.Colors["Secondary"],
-			[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		m.FlexVertical(
+		m.Rectangle(cs.Width.Max, cs.Height.Max, "Secondary")
+		m.FlexV(
 			Rigid(func() {
 				m.FlexHorizontal(
 					Rigid(func() {
-						t := m.Theme.DuoUIlabel(unit.Dp(float32(
-							24)), "Build Configuration")
-						t.Color = m.Theme.Colors["PanelText"]
-						t.Font.Typeface = m.Theme.Fonts["Secondary"]
-						layout.UniformInset(unit.Dp(8)).Layout(m.Gtx,
-							func() {
-								t.Layout(m.Gtx)
-							},
-						)
+						m.TextButton("Build Configuration", "Secondary",
+							23, "PanelText", "Secondary",
+							m.BuildTitleCloseButton)
+						for m.BuildTitleCloseButton.Clicked(m.Gtx) {
+							L.Debug("build configuration panel title close" +
+								" button clicked")
+							m.Config.BuildOpen = false
+							m.SaveConfig()
+						}
 					}),
 					Flexed(1, func() {}),
 					Rigid(func() {
-						m.Theme.DuoUIbutton("", "settings",
-							m.Theme.Colors["PanelText"],
-							"", "",
-							m.Theme.Colors["PanelBg"], "minimize",
-							m.Theme.Colors["PanelText"],
-							0, 32, 41, 41,
-							0, 0).IconLayout(m.Gtx, m.BuildCloseButton)
+						m.IconButton("minimize", "Secondary",
+							m.BuildCloseButton)
 						for m.BuildCloseButton.Clicked(m.Gtx) {
 							L.Debug("settings panel close button clicked")
 							m.Config.BuildOpen = false
@@ -358,9 +279,7 @@ func (m *State) BuildPage() layout.FlexChild {
 			}),
 			Flexed(1, func() {
 				cs := m.Gtx.Constraints
-				gelook.DuoUIdrawRectangle(m.Gtx, cs.Width.Max,
-					cs.Height.Max, m.Theme.Colors["PanelBg"],
-					[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				m.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 			}),
 		)
 	})

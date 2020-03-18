@@ -39,8 +39,10 @@ type State struct {
 	RunModeFoldButton         *gel.Button
 	SettingsFoldButton        *gel.Button
 	SettingsCloseButton       *gel.Button
+	SettingsTitleCloseButton  *gel.Button
 	BuildFoldButton           *gel.Button
 	BuildCloseButton          *gel.Button
+	BuildTitleCloseButton     *gel.Button
 	ModesButtons              map[string]*gel.Button
 	Running                   bool
 	Pausing                   bool
@@ -101,17 +103,19 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) *State {
 			Axis:      layout.Horizontal,
 			Alignment: layout.Start,
 		},
-		CloseButton:         new(gel.Button),
-		LogoButton:          new(gel.Button),
-		RunMenuButton:       new(gel.Button),
-		StopMenuButton:      new(gel.Button),
-		PauseMenuButton:     new(gel.Button),
-		RestartMenuButton:   new(gel.Button),
-		SettingsFoldButton:  new(gel.Button),
-		RunModeFoldButton:   new(gel.Button),
-		BuildFoldButton:     new(gel.Button),
-		BuildCloseButton:    new(gel.Button),
-		SettingsCloseButton: new(gel.Button),
+		CloseButton:              new(gel.Button),
+		LogoButton:               new(gel.Button),
+		RunMenuButton:            new(gel.Button),
+		StopMenuButton:           new(gel.Button),
+		PauseMenuButton:          new(gel.Button),
+		RestartMenuButton:        new(gel.Button),
+		SettingsFoldButton:       new(gel.Button),
+		RunModeFoldButton:        new(gel.Button),
+		BuildFoldButton:          new(gel.Button),
+		BuildCloseButton:         new(gel.Button),
+		BuildTitleCloseButton:    new(gel.Button),
+		SettingsCloseButton:      new(gel.Button),
+		SettingsTitleCloseButton: new(gel.Button),
 		ModesButtons: map[string]*gel.Button{
 			"node":   new(gel.Button),
 			"wallet": new(gel.Button),
@@ -184,11 +188,7 @@ func (m *State) TopLevelLayout() {
 func (m *State) Body() layout.FlexChild {
 	return Flexed(1, func() {
 		cs := m.Gtx.Constraints
-		gelook.DuoUIdrawRectangle(m.Gtx,
-			cs.Width.Max, cs.Height.Max, m.Theme.Colors["DocBg"],
-			[4]float32{0, 0, 0, 0},
-			[4]float32{0, 0, 0, 0},
-		)
+		m.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 	})
 }
 
@@ -197,9 +197,7 @@ func (m *State) DuoUIheader() layout.FlexChild {
 		m.FlexHorizontal(
 			Rigid(func() {
 				cs := m.Gtx.Constraints
-				gelook.DuoUIdrawRectangle(m.Gtx, cs.Width.Max,
-					cs.Height.Max, m.Theme.Colors["PanelBg"],
-					[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+				m.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 				var (
 					textSize, iconSize               = 64, 64
 					width, height                    = 72, 72
@@ -236,26 +234,24 @@ func (m *State) DuoUIheader() layout.FlexChild {
 							},
 						)
 					}),
-					Flexed(1, func() {
-						layout.UniformInset(unit.Dp(textInsetSize)).Layout(m.
-							Gtx,
-							func() {
-								t := m.Theme.DuoUIlabel(unit.Dp(float32(
-									textSize)),
-									"monitor")
-								t.Color = m.Theme.Colors["PanelText"]
-								t.Layout(m.Gtx)
-							},
+					Rigid(func() {
+						m.Inset(textInsetSize, func() {
+							t := m.Theme.DuoUIlabel(unit.Dp(float32(
+								textSize)),
+								"monitor")
+							t.Color = m.Theme.Colors["PanelText"]
+							t.Layout(m.Gtx)
+						},
 						)
 					}),
+					Spacer(),
 					Rigid(func() {
 						m.Inset(closeInsetSize*2, func() {
-							t := m.Theme.DuoUIlabel(unit.Dp(float32(
-								24)),
+							t := m.Theme.DuoUIlabel(unit.Dp(float32(24)),
 								fmt.Sprintf("%dx%d",
 									m.Gtx.Constraints.Width.Max,
 									m.Gtx.Constraints.Height.Max))
-							t.Color = m.Theme.Colors["PanelBg"]
+							t.Color = m.Theme.Colors["PanelText"]
 							t.Font.Typeface = m.Theme.Fonts["Primary"]
 							t.Layout(m.Gtx)
 						})
