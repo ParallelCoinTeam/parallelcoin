@@ -167,7 +167,9 @@ func (m *State) SettingsPage() layout.FlexChild {
 					m.SaveConfig()
 				}
 			}), Rigid(func() {
-				pages.SettingsHeader(m.Rc, m.Gtx, m.Theme)()
+				if m.WindowWidth > 640 {
+					pages.SettingsHeader(m.Rc, m.Gtx, m.Theme)()
+				}
 			}), Spacer(), Rigid(func() {
 				m.IconButton("minimize", "Secondary",
 					m.SettingsCloseButton)
@@ -178,6 +180,12 @@ func (m *State) SettingsPage() layout.FlexChild {
 				}
 			}),
 			)
+		}), Rigid(func() {
+			if m.WindowWidth < 640 {
+				cs := m.Gtx.Constraints
+				m.Rectangle(cs.Width.Max, cs.Height.Max, "Dark")
+				pages.SettingsHeader(m.Rc, m.Gtx, m.Theme)()
+			}
 		}), Rigid(func() {
 			cs := m.Gtx.Constraints
 			m.Rectangle(cs.Width.Max, cs.Height.Max, "Dark")
