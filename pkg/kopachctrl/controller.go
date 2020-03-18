@@ -259,7 +259,7 @@ var handlersMulticast = transport.Handlers{
 		b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
-			L.Debug("not active")
+			// L.Debug("not active")
 			return
 		}
 		j := p2padvt.LoadContainer(b)

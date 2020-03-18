@@ -1,6 +1,6 @@
 package component
 
-//func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
+// func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *theme.DuoUItheme, f *Field) func() {
 //	return func() {
 //		e := th.DuoUIeditor(f.Field.Label)
 //		e.Font.Typeface = th.Font.Primary
@@ -16,4 +16,4 @@ package component
 //		//	}
 //		//}
 //	}
-//}
+// }

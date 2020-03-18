@@ -7,7 +7,7 @@ import (
 )
 
 func Test(t *testing.T) {
-	L.SetLevel("trace", true, "olt")
+	log.log.L.SetLevel("trace", true, "olt")
 	L.Trace("testing")
 	L.Debug("testing")
 	fmt.Println("'", L.Check(errors.New("this is a test")), "'")

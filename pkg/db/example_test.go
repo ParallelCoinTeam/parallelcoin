@@ -3,7 +3,6 @@ package database_test
 import (
 	"bytes"
 	"fmt"
-
 	"os"
 	"path/filepath"
 

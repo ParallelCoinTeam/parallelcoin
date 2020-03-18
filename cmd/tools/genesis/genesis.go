@@ -5,11 +5,12 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	log "github.com/p9c/pod/pkg/logi"
 	"os"
 	"runtime"
 	"strconv"
 	"time"
+
+	log "github.com/p9c/pod/pkg/logi"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )

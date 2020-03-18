@@ -135,7 +135,7 @@ func (eft *estimateFeeTester) round(txHistory [][]*TxDesc,
 }
 
 func (
-	eft *estimateFeeTester,
+eft *estimateFeeTester,
 ) testTx(
 	fee util.Amount) *TxDesc {
 	eft.version++

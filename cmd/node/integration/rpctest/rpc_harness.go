@@ -2,7 +2,6 @@ package rpctest
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"io/ioutil"
 	"net"
 	"os"

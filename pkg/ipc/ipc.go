@@ -4,13 +4,13 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
-	"github.com/minio/highwayhash"
-	log "github.com/p9c/pod/pkg/logi"
 	"hash"
 	"io"
 	"os"
 	"os/exec"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/minio/highwayhash"
 )
 
 var quitMessage = ^uint32(0)
@@ -164,7 +164,7 @@ func (c *Conn) printE(a ...interface{}) {
 func (c *Conn) printlnE(a ...interface{}) {
 	out := append([]interface{}{c.Name + ":"}, a...)
 	_, _ = fmt.Fprintln(os.Stderr, out...)
-	//_, _ = fmt.Fprint(os.Stderr, "\r")
+	// _, _ = fmt.Fprint(os.Stderr, "\r")
 }
 
 func (c *Conn) printfE(format string, a ...interface{}) {

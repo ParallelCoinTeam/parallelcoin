@@ -18,6 +18,7 @@ import (
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/forkhash"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/normalize"
 	"github.com/p9c/pod/pkg/peer/connmgr"
 	"github.com/p9c/pod/pkg/util"
@@ -70,7 +71,7 @@ func initConfigFile(cfg *pod.Config) {
 
 func initLogDir(cfg *pod.Config) {
 	if *cfg.LogDir != "" {
-		L.SetLogPaths(*cfg.LogDir, "pod")
+		log.L.SetLogPaths(*cfg.LogDir, "pod")
 		interrupt.AddHandler(func() {
 			L.Debug("initLogDir interrupt")
 			_ = L.LogFileHandle.Close()
@@ -181,7 +182,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 					L.Error(err)
 				}
 				*listeners[i] = cli.
-					StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
+				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
 			}
 		}
 	}
@@ -328,7 +329,7 @@ func initLogLevel(cfg *pod.Config) {
 	if runtime.GOOS == "windows" {
 		color = false
 	}
-	L.SetLevel(*cfg.LogLevel, color, "pod")
+	log.L.SetLevel(*cfg.LogLevel, color, "pod")
 }
 
 func normalizeAddresses(cfg *pod.Config) {

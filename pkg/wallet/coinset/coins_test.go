@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"testing"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util"

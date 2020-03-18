@@ -3,7 +3,6 @@ package peer
 import (
 	"crypto/rand"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"testing"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

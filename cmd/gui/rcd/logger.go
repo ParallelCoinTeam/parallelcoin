@@ -12,7 +12,7 @@ var (
 func (r *RcVar) DuoUIloggerController() {
 	L.LogChan = make(chan log.Entry)
 	r.Log.LogChan = L.LogChan
-	L.SetLevel(*r.cx.Config.LogLevel, true, "pod")
+	log.L.SetLevel(*r.cx.Config.LogLevel, true, "pod")
 	go func() {
 	out:
 		for {

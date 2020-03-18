@@ -2,7 +2,6 @@ package rpctest
 
 import (
 	"errors"
-	log "github.com/p9c/pod/pkg/logi"
 	"math"
 	"math/big"
 	"runtime"

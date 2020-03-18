@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"os"
 	"path/filepath"
 

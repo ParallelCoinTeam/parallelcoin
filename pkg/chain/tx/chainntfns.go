@@ -6,7 +6,6 @@ import (
 
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	log "github.com/p9c/pod/pkg/logi"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"

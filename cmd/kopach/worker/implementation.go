@@ -267,7 +267,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 // New initialises the state for a worker, loading the work function handler that runs a round of processing between
 // checking quit signal and work semaphore
 func New(quit chan struct{}) (w *Worker, conn net.Conn) {
-	// L.SetLevel("trace", true)
+	// log.L.SetLevel("trace", true)
 	sc := stdconn.New(os.Stdin, os.Stdout, quit)
 	return NewWithConnAndSemaphore(&sc, quit), &sc
 }

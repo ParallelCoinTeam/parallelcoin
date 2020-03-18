@@ -1,14 +1,15 @@
 package Transaction
 
 import (
+	"testing"
+
 	"github.com/p9c/pod/pkg/chain/mining"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"testing"
 )
 
 func TestTransaction(t *testing.T) {
-	//txI := wire.NewMsgTx(wire.TxVersion)
-	//txx :=
+	// txI := wire.NewMsgTx(wire.TxVersion)
+	// txx :=
 }
 
 // standardCoinbaseScript returns a standard script suitable for use as the

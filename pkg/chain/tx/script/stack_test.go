@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"reflect"
 	"testing"
+
+	log "github.com/p9c/pod/pkg/logi"
 )
 
 // tstCheckScriptError ensures the type of the two passed errors are of the same type (either both nil or both of type Error) and their error codes match when not nil.

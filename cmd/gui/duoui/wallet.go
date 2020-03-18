@@ -4,6 +4,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/util/interrupt"
@@ -14,11 +15,11 @@ var (
 	confirmPassPhrase string
 	passEditor        = &gel.Editor{
 		SingleLine: true,
-		//Submit:     true,
+		// Submit:     true,
 	}
 	confirmPassEditor = &gel.Editor{
 		SingleLine: true,
-		//Submit:     true,
+		// Submit:     true,
 	}
 	listWallet = &layout.List{
 		Axis: layout.Vertical,

@@ -1,7 +1,6 @@
 package rpctest
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
 	"reflect"
 	"time"
 

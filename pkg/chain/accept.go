@@ -5,8 +5,6 @@ import (
 
 	"github.com/p9c/pod/pkg/chain/hardfork"
 	database "github.com/p9c/pod/pkg/db"
-
-
 	"github.com/p9c/pod/pkg/util"
 )
 

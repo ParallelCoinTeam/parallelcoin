@@ -1,15 +1,15 @@
 package rcd
 
-//)
+// )
 //
-//type
-//DuOShistory struct {
+// type
+// DuOShistory struct {
 //	cx *conte.Xt
 //	db DuoUIdb
 //	txs model.DuOStransactionsExcerpts
-//}
+// }
 //
-//func (d *DuOShistory)GetDuOShistory() {
+// func (d *DuOShistory)GetDuOShistory() {
 //	lt, err := d.cx.WalletServer.ListTransactions(0, 99999)
 //	if err != nil {
 //		//d.PushDuOSalert("Error", err.Error(), "error")
@@ -45,4 +45,4 @@ package rcd
 //	L.Info("HISTORY-test:VAR->", d.txs)
 //
 //	return
-//}
+// }

@@ -25,25 +25,25 @@ func ExampleNewAmount() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(amountOne) //Output 1
+	fmt.Println(amountOne) // Output 1
 	amountFraction, err := util.NewAmount(0.01234567)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(amountFraction) //Output 2
+	fmt.Println(amountFraction) // Output 2
 	amountZero, err := util.NewAmount(0)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(amountZero) //Output 3
+	fmt.Println(amountZero) // Output 3
 	amountNaN, err := util.NewAmount(math.NaN())
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(amountNaN) //Output 4
+	fmt.Println(amountNaN) // Output 4
 	// Output: 1 DUO
 	// 0.01234567 DUO
 	// 0 DUO

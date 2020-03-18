@@ -10,8 +10,6 @@ import (
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
 	"github.com/p9c/pod/pkg/conte"
 
-
-
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/legacy"

@@ -24,15 +24,15 @@ var (
 	// blockDataNet is the expected network in the test block data.
 	blockDataNet = wire.MainNet
 	// blockDataFile is the path to a file containing the first 256 blocks of the block chain.
-	//nolint
+	// nolint
 	blockDataFile = filepath.Join("..", "testdata", "blocks1-256.bz2")
 	// errSubTestFail is used to signal that a sub test returned false.
-	//nolint
+	// nolint
 	errSubTestFail = fmt.Errorf("sub test failure")
 )
 
 // loadBlocks loads the blocks contained in the testdata directory and returns a slice of them.
-//nolint
+// nolint
 func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util.Block, error) {
 	// Open the file that contains the blocks for reading.
 	fi, err := os.Open(dataFile)
@@ -112,7 +112,7 @@ func checkDbError(t *testing.T, testName string, gotErr error, wantErrCode datab
 }
 
 // testContext is used to store context information about a running test which is passed into helper functions.
-//nolint
+// nolint
 type testContext struct {
 	t            *testing.T
 	db           database.DB
@@ -218,7 +218,7 @@ func TestCornerCases(t *testing.T) {
 }
 
 // resetDatabase removes everything from the opened database associated with the test context including all metadata and the mock files.
-//nolint
+// nolint
 func resetDatabase(tc *testContext) bool {
 	// Reset the metadata.
 	err := tc.db.Update(func(tx database.Tx) error {
@@ -266,7 +266,7 @@ func resetDatabase(tc *testContext) bool {
 }
 
 // testWriteFailures tests various failures paths when writing to the block files.
-//nolint
+// nolint
 func testWriteFailures(tc *testContext) bool {
 	if !resetDatabase(tc) {
 		return false
@@ -350,7 +350,7 @@ func testWriteFailures(tc *testContext) bool {
 }
 
 // testBlockFileErrors ensures the database returns expected errors with various file-related issues such as closed and missing files.
-//nolint
+// nolint
 func testBlockFileErrors(tc *testContext) bool {
 	if !resetDatabase(tc) {
 		return false
@@ -439,7 +439,7 @@ func testBlockFileErrors(tc *testContext) bool {
 }
 
 // testCorruption ensures the database returns expected errors under various corruption scenarios.
-//nolint
+// nolint
 func testCorruption(tc *testContext) bool {
 	if !resetDatabase(tc) {
 		return false

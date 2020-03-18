@@ -7,10 +7,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"math"
 	"runtime"
 	"time"
+
+	log "github.com/p9c/pod/pkg/logi"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/config/netparams"

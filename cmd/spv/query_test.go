@@ -10,7 +10,6 @@ import (
 	"github.com/p9c/pod/cmd/spv/cache/lru"
 	"github.com/p9c/pod/cmd/spv/filterdb"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/gcs"
 	"github.com/p9c/pod/pkg/util/gcs/builder"
 )

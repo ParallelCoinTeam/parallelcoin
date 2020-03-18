@@ -2,8 +2,9 @@ package Hash
 
 import (
 	"encoding/hex"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"testing"
+
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 func TestHash(t *testing.T) {

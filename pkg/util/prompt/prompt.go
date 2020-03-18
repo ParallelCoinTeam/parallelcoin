@@ -5,9 +5,10 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"os"
 	"strings"
+
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/btcsuite/golangcrypto/ssh/terminal"
 

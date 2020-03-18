@@ -16,6 +16,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/pkg/gel"
 )
 
@@ -196,9 +197,14 @@ type DuoUIbutton struct {
 	hover             bool
 }
 
-func (t *DuoUItheme) DuoUIbutton(txtFont text.Typeface, txt, txtColor, bgColor,
-	txtHoverColor, bgHoverColor, icon, iconColor string, textSize, iconSize,
-	width, height, paddingVertical, paddingHorizontal int) DuoUIbutton {
+func (t *DuoUItheme) DuoUIbutton(
+	txtFont text.Typeface, txt,
+	txtColor, bgColor,
+	txtHoverColor, bgHoverColor,
+	icon, iconColor string,
+	textSize, iconSize,
+	width, height,
+	paddingVertical, paddingHorizontal int) DuoUIbutton {
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{

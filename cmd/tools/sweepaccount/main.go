@@ -3,10 +3,11 @@ package main
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/crypto/ssh/terminal"

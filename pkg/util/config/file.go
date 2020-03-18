@@ -1,7 +1,6 @@
 package cfgutil
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
 	"os"
 )
 

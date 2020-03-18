@@ -1,7 +1,6 @@
 package hello
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
 	"io"
 	"net/rpc"
 )

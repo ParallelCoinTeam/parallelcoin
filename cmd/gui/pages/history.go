@@ -2,15 +2,17 @@ package pages
 
 import (
 	"fmt"
+
 	"gioui.org/layout"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gelook"
 )
 
 var (
-//itemValue = &gel.DuoUIcounter{
+// itemValue = &gel.DuoUIcounter{
 //	Value:        11,
 //	OperateValue: 1,
 //	From:         0,
@@ -22,7 +24,7 @@ var (
 //	CounterIncrease: new(gel.Button),
 //	//CounterDecrease: new(controller.Button),
 //	CounterReset: new(gel.Button),
-//}
+// }
 )
 
 func History(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {

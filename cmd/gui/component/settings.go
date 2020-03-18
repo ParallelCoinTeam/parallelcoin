@@ -74,7 +74,6 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 						(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
 						func(e gel.EditorEvent) {
 							rc.Settings.Daemon.Config[f.Field.Model] = (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text()
-							rc.SaveDaemonCfg()
 						})()
 				case "number":
 					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
@@ -83,7 +82,6 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 							if err == nil {
 							}
 							rc.Settings.Daemon.Config[f.Field.Model] = number
-							rc.SaveDaemonCfg()
 						})()
 				case "decimal":
 					Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
@@ -92,7 +90,6 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 							if err != nil {
 							}
 							rc.Settings.Daemon.Config[f.Field.Model] = decimal
-							rc.SaveDaemonCfg()
 						})()
 				case "password":
 					e := th.DuoUIeditor(f.Field.Label)
@@ -108,7 +105,6 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				} else {
 					rc.Settings.Daemon.Config[f.Field.Model] = false
 				}
-				rc.SaveDaemonCfg()
 			case "radio":
 				// radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 				// layout.Flex{}.Layout(gtx,

@@ -3,7 +3,6 @@ package coinset
 import (
 	"container/list"
 	"errors"
-	log "github.com/p9c/pod/pkg/logi"
 	"sort"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

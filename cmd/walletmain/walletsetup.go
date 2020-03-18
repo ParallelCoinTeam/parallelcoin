@@ -8,7 +8,6 @@ import (
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"
-
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
 	ec "github.com/p9c/pod/pkg/util/elliptic"

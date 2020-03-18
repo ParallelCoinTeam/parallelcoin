@@ -17,7 +17,7 @@ func TestThrottle(t *testing.T) {
 	)
 	codes := make(chan int, 2)
 	for i := 0; i < cap(codes); i++ {
-		//nolint
+		// nolint
 		go func() {
 			res, err := http.Get(srv.URL)
 			if err != nil {

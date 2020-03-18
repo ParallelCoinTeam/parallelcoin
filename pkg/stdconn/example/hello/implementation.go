@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/stdconn"
 	"net/rpc"
 	"os"
+
+	"github.com/p9c/pod/pkg/stdconn"
 )
 
 type Hello struct {

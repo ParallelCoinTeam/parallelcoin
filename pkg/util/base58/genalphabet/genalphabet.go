@@ -1,11 +1,10 @@
-//+build ignore
+// +build ignore
 
 package main
 
 import (
 	"bytes"
 	"io"
-	"log"
 	"os"
 	"strconv"
 )

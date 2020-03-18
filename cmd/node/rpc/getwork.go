@@ -11,8 +11,6 @@ import (
 
 	"github.com/conformal/fastsha256"
 
-
-
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

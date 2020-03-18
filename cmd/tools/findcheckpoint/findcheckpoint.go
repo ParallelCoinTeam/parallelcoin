@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"path/filepath"
+
+	log "github.com/p9c/pod/pkg/logi"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"

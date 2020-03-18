@@ -8,9 +8,10 @@
 package app
 
 import (
+	"os"
+
 	"github.com/p9c/pod/pkg/conte"
 	log "github.com/p9c/pod/pkg/logi"
-	"os"
 )
 
 const (
@@ -25,13 +26,10 @@ const (
 func Main() int {
 	cx := conte.GetNewContext(appName, appLanguage, "main")
 	cx.App = GetApp(cx)
-	L.Debug("running App")
-
 	e := cx.App.Run(os.Args)
 	if e != nil {
 		log.Println("Pod ERROR:", e)
 		return 1
 	}
-
 	return 0
 }

@@ -7,6 +7,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/logi"
+
 	"github.com/p9c/pod/pkg/gel"
 )
 
@@ -122,15 +123,15 @@ func (s *ScrollBar) bodyLayout(gtx *layout.Context, positionOffset int, scrollUn
 	return func() {
 
 		cs := gtx.Constraints
-		//sliderBg := "ff558899"
+		// sliderBg := "ff558899"
 		colorBg := "ff30cfcf"
 		colorBorder := "ffcf3030"
 		border := unit.Dp(0)
 		// if s.body.pressed {
-		//if s.controller.Position >= 0 && s.controller.Position <= float32(cs.Height.Max-s.controller.CursorHeight) {
+		// if s.controller.Position >= 0 && s.controller.Position <= float32(cs.Height.Max-s.controller.CursorHeight) {
 		//	s.controller.Cursor = s.controller.Position
 		//	positionOffset = int(float32(s.controller.Cursor) / scrollUnit)
-		//}
+		// }
 		colorBg = "ffcf30cf"
 		colorBorder = "ff303030"
 		border = unit.Dp(0)
@@ -149,16 +150,16 @@ func (s *ScrollBar) bodyLayout(gtx *layout.Context, positionOffset int, scrollUn
 				layout.Rigid(func() {
 					layout.Center.Layout(gtx, func() {
 						layout.Inset{
-							//Top: unit.Dp(s.controller.Cursor),
+							// Top: unit.Dp(s.controller.Cursor),
 						}.Layout(gtx, func() {
 							// cs := gtx.Constraints
-							//if s.controller.CursorHeight > s.size {
+							// if s.controller.CursorHeight > s.size {
 							//	s.body.Height = s.controller.CursorHeight
-							//} else {
+							// } else {
 							//	s.body.Height = s.size
-							//}
+							// }
 
-							//DuoUIdrawRectangle(gtx, s.size, s.controller.CursorHeight, sliderBg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+							// DuoUIdrawRectangle(gtx, s.size, s.controller.CursorHeight, sliderBg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 							// DuoUIdrawRectangle(gtx, 30, 111, sliderBg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 
 							layout.Center.Layout(gtx, func() {

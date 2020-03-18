@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	logi.L.SetLevel("trace", true, "logi")
+	logi.log.log.L.SetLevel("trace", true, "logi")
 	for {
 		logi.L.Trace("testing")
 		// logi.L.Debug("testing")

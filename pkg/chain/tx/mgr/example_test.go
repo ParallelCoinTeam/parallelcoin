@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
-	log "github.com/p9c/pod/pkg/logi"
-
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	"github.com/p9c/pod/pkg/chain/wire"

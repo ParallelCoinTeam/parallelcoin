@@ -23,6 +23,7 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["iconCancel"] = mustIcon(NewDuoUIicon(icons.NavigationCancel))
 	i["iconOK"] = mustIcon(NewDuoUIicon(icons.NavigationCheck))
 	i["iconClose"] = mustIcon(NewDuoUIicon(icons.NavigationClose))
+	i["minimize"] = mustIcon(NewDuoUIicon(icons.NavigationExpandMore))
 	i["logo"] = mustIcon(NewDuoUIicon(ico.ParallelCoin))
 	i["overviewIcon"] = mustIcon(NewDuoUIicon(icons.ActionHome))
 	i["sendIcon"] = mustIcon(NewDuoUIicon(icons.ActionStarRate))

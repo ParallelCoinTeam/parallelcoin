@@ -10,6 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -32,7 +33,7 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 			}
 		}
 		if len(os.Args) > 3 {
-			L.SetLevel(os.Args[3], true, "pod")
+			log.L.SetLevel(os.Args[3], true, "pod")
 		}
 		L.Debug("miner worker starting")
 		w, conn := worker.New(cx.KillAll)

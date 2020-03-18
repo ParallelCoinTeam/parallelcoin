@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	log "github.com/p9c/pod/pkg/logi"
 	"sync"
 
 	blockchain "github.com/p9c/pod/pkg/chain"

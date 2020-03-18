@@ -7,7 +7,6 @@ import (
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-
 	"github.com/p9c/pod/pkg/util"
 )
 

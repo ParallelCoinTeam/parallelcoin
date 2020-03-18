@@ -2,6 +2,7 @@ package model
 
 import (
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )

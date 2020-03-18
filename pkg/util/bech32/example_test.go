@@ -4,8 +4,6 @@ import (
 	"encoding/hex"
 	"fmt"
 
-
-
 	"github.com/p9c/pod/pkg/util/bech32"
 )
 

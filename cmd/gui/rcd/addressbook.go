@@ -2,6 +2,10 @@ package rcd
 
 import (
 	"fmt"
+	"sort"
+
+	"github.com/urfave/cli"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
@@ -10,8 +14,6 @@ import (
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	"github.com/urfave/cli"
-	"sort"
 )
 
 type DuoUItemplates struct {
@@ -34,7 +36,7 @@ type AddBook struct {
 	Label   string `json:"label"`
 }
 
-////////////////////////
+// //////////////////////
 
 func (r *RcVar) ShowAddressBook() func() {
 	return func() {
@@ -43,13 +45,13 @@ func (r *RcVar) ShowAddressBook() func() {
 }
 
 func (r *RcVar) labelMiningAddreses() {
-	//r.db.DbReadAddressBook()
+	// r.db.DbReadAddressBook()
 	for _, miningAddress := range *r.cx.ConfigMap["MiningAddrs"].(*cli.StringSlice) {
-		//for _, address := range r.AddressBook.Addresses {
+		// for _, address := range r.AddressBook.Addresses {
 		//	if miningAddress != address.Address {
 		r.SaveAddressLabel(miningAddress, "Mining")
-		//}
-		//}
+		// }
+		// }
 	}
 }
 
@@ -66,11 +68,11 @@ func (r *RcVar) CreateNewAddress(acctName string) string {
 }
 
 func (r *RcVar) SaveAddressLabel(address, label string) {
-	//hf, err := highwayhash.New64(make([]byte, 32))
-	//if err != nil {
+	// hf, err := highwayhash.New64(make([]byte, 32))
+	// if err != nil {
 	//	panic(err)
-	//}
-	//addressHash := hex.EncodeToString(hf.Sum([]byte(address)))
+	// }
+	// addressHash := hex.EncodeToString(hf.Sum([]byte(address)))
 	addressbook := r.db.DbReadAddressBook()
 
 	addressbook[address] = label

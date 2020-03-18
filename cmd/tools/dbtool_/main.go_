@@ -60,7 +60,7 @@ func realMain(	) error {
 	defer os.Stdout.Sync()
 	log = backendLogger.Logger("MAIN")
 	dbLog := backendLogger.Logger("BCDB")
-	dbL.SetLevel(l.LevelDebug)
+	dblog.log.L.SetLevel(l.LevelDebug)
 	database.UseLogger(dbLog)
 	// Setup the parser options and commands.
 	appName := filepath.Base(os.Args[0])

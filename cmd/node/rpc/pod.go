@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-
-
 	"github.com/p9c/pod/cmd/node/state"
 )
 

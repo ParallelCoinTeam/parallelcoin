@@ -15,7 +15,6 @@ import (
 	"image/color"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"

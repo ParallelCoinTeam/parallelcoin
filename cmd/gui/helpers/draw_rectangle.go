@@ -1,11 +1,12 @@
 package helpers
 
 import (
+	"image"
+	"image/color"
+
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
-	"image"
-	"image/color"
 )
 
 func DuoUIfill(gtx *layout.Context, col color.RGBA) {

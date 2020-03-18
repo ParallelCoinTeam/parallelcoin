@@ -2,6 +2,7 @@ package model
 
 import (
 	"gioui.org/op/paint"
+
 	"github.com/p9c/pod/pkg/gel"
 )
 

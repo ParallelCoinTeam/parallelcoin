@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"go/format"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"

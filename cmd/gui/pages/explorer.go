@@ -2,14 +2,16 @@ package pages
 
 import (
 	"fmt"
+	"time"
+
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gelook"
-	"time"
 )
 
 var (
@@ -97,7 +99,7 @@ func explorerHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) f
 
 func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
 	layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-		//component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
+		// component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
 		}.Layout(gtx,

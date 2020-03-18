@@ -469,7 +469,7 @@ func FileExists(filePath string) bool {
 // DirectionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
 func init() {
 	SetLogWriter(os.Stderr)
-	L.SetLevel("info", true, "log/")
+	L.SetLevel("info", true, "pod")
 	L.Trace("starting up logger")
 }
 

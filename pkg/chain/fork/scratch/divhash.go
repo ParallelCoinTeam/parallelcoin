@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	L.SetLevel("trace", true)
+	log.L.SetLevel("trace", true)
 
 	blockbytes, _ := hex.DecodeString(
 		"05000000b415eee3e60bec16f601fa272f938344df32f230f24de0220818cb009c" +

@@ -4,12 +4,10 @@ import (
 	"os"
 	"runtime"
 	"strings"
-
-
 )
 
 var (
-	L *log.Logger
+	L = log.L
 )
 
 func init() {
