@@ -3,14 +3,18 @@
 package monitor
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
 
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gel"
@@ -23,6 +27,7 @@ type State struct {
 	Gtx                       *layout.Context
 	Rc                        *rcd.RcVar
 	Theme                     *gelook.DuoUItheme
+	Config                    *Config
 	MainList                  *layout.List
 	ModesList                 *layout.List
 	CloseButton               *gel.Button
@@ -31,22 +36,59 @@ type State struct {
 	StopMenuButton            *gel.Button
 	PauseMenuButton           *gel.Button
 	RestartMenuButton         *gel.Button
-	SettingsFoldButton        *gel.Button
 	RunModeFoldButton         *gel.Button
+	SettingsFoldButton        *gel.Button
+	SettingsCloseButton       *gel.Button
 	BuildFoldButton           *gel.Button
+	BuildCloseButton          *gel.Button
 	ModesButtons              map[string]*gel.Button
-	RunMode                   string
-	RunModeOpen               bool
-	SettingsOpen              bool
-	BuildOpen                 bool
 	Running                   bool
 	Pausing                   bool
-	LightTheme                bool
 	WindowWidth, WindowHeight int
 }
 
-func NewMonitor(cx *conte.Xt, gtx *layout.Context,
-	rc *rcd.RcVar) *State {
+const ConfigFileName = "monitor.json"
+
+func (m *State) LoadConfig() {
+	m.Config.Width, m.Config.Height = 800, 600
+	filename := filepath.Join(*m.Ctx.Config.DataDir, ConfigFileName)
+	if apputil.FileExists(filename) {
+		b, err := ioutil.ReadFile(filename)
+		if err == nil {
+			err = json.Unmarshal(b, m.Config)
+			if err != nil {
+				L.Error("error unmarshalling config", err)
+				os.Exit(1)
+			}
+		} else {
+			L.Fatal("unexpected error reading configuration file:", err)
+			os.Exit(1)
+		}
+	}
+	m.SetTheme(m.Config.LightTheme)
+}
+
+func (m *State) SaveConfig() {
+	m.Config.Width, m.Config.Height = m.WindowWidth, m.WindowHeight
+	filename := filepath.Join(*m.Ctx.Config.DataDir, ConfigFileName)
+	if yp, e := json.MarshalIndent(m.Config, "", "  "); e == nil {
+		apputil.EnsureDir(filename)
+		if e := ioutil.WriteFile(filename, yp, 0600); e != nil {
+			L.Error(e)
+		}
+	}
+}
+
+type Config struct {
+	Width, Height int
+	RunMode       string
+	RunModeOpen   bool
+	SettingsOpen  bool
+	BuildOpen     bool
+	LightTheme    bool
+}
+
+func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) *State {
 	return &State{
 		Ctx:   cx,
 		Gtx:   gtx,
@@ -59,37 +101,43 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context,
 			Axis:      layout.Horizontal,
 			Alignment: layout.Start,
 		},
-		CloseButton:        new(gel.Button),
-		LogoButton:         new(gel.Button),
-		RunMenuButton:      new(gel.Button),
-		StopMenuButton:     new(gel.Button),
-		PauseMenuButton:    new(gel.Button),
-		RestartMenuButton:  new(gel.Button),
-		SettingsFoldButton: new(gel.Button),
-		RunModeFoldButton:  new(gel.Button),
-		BuildFoldButton:    new(gel.Button),
+		CloseButton:         new(gel.Button),
+		LogoButton:          new(gel.Button),
+		RunMenuButton:       new(gel.Button),
+		StopMenuButton:      new(gel.Button),
+		PauseMenuButton:     new(gel.Button),
+		RestartMenuButton:   new(gel.Button),
+		SettingsFoldButton:  new(gel.Button),
+		RunModeFoldButton:   new(gel.Button),
+		BuildFoldButton:     new(gel.Button),
+		BuildCloseButton:    new(gel.Button),
+		SettingsCloseButton: new(gel.Button),
 		ModesButtons: map[string]*gel.Button{
 			"node":   new(gel.Button),
 			"wallet": new(gel.Button),
 			"shell":  new(gel.Button),
 			"gui":    new(gel.Button),
 		},
-		RunMode:      "node",
+		Config: &Config{
+			RunMode:    "node",
+			LightTheme: true,
+		},
 		Running:      false,
 		Pausing:      false,
-		LightTheme:   true,
 		WindowWidth:  0,
 		WindowHeight: 0,
 	}
 }
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
+	mon := NewMonitor(cx, nil, rc)
+	mon.LoadConfig()
 	w := app.NewWindow(
-		app.Size(unit.Dp(1600), unit.Dp(900)),
+		app.Size(unit.Dp(float32(mon.Config.Width)),
+			unit.Dp(float32(mon.Config.Height))),
 		app.Title("ParallelCoin Pod Monitor"),
 	)
-	gtx := layout.NewContext(w.Queue())
-	mon := NewMonitor(cx, gtx, rc)
+	mon.Gtx = layout.NewContext(w.Queue())
 	go func() {
 		L.Debug("starting up GUI event loop")
 	out:
@@ -102,14 +150,15 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 				switch e := e.(type) {
 				case system.DestroyEvent:
 					L.Debug("destroy event received")
+					mon.SaveConfig()
 					close(cx.KillAll)
 				case system.FrameEvent:
-					gtx.Reset(e.Config, e.Size)
-					cs := gtx.Constraints
+					mon.Gtx.Reset(e.Config, e.Size)
+					cs := mon.Gtx.Constraints
 					mon.WindowWidth, mon.WindowHeight =
 						cs.Width.Max, cs.Height.Max
-					TopLevelLayout(mon)()
-					e.Frame(gtx.Ops)
+					mon.TopLevelLayout()
+					e.Frame(mon.Gtx.Ops)
 				}
 			}
 		}
@@ -124,43 +173,29 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	return
 }
 
-func TopLevelLayout(m *State) func() {
-	return func() {
-		layout.Flex{
-			Axis: layout.Vertical,
-		}.Layout(m.Gtx,
-			DuoUIheader(m),
-			Body(m),
-			BottomBar(m),
-		)
-
-	}
+func (m *State) TopLevelLayout() {
+	m.FlexVertical(
+		m.DuoUIheader(),
+		m.Body(),
+		m.BottomBar(),
+	)
 }
 
-func Body(m *State) layout.FlexChild {
-	return layout.Flexed(1, func() {
-		layout.Flex{
-			Axis: layout.Vertical,
-		}.Layout(m.Gtx, layout.Flexed(1, func() {
-			cs := m.Gtx.Constraints
-			gelook.DuoUIdrawRectangle(m.Gtx,
-				cs.Width.Max, cs.Height.Max, m.Theme.Colors["DocBg"],
-				[4]float32{0, 0, 0, 0},
-				[4]float32{0, 0, 0, 0},
-			)
-		}),
+func (m *State) Body() layout.FlexChild {
+	return Flexed(1, func() {
+		cs := m.Gtx.Constraints
+		gelook.DuoUIdrawRectangle(m.Gtx,
+			cs.Width.Max, cs.Height.Max, m.Theme.Colors["DocBg"],
+			[4]float32{0, 0, 0, 0},
+			[4]float32{0, 0, 0, 0},
 		)
 	})
 }
 
-func DuoUIheader(m *State) layout.FlexChild {
-	return layout.Rigid(func() {
-		layout.Flex{
-			Axis:      layout.Horizontal,
-			Spacing:   layout.SpaceBetween,
-			Alignment: layout.Middle,
-		}.Layout(m.Gtx,
-			layout.Rigid(func() {
+func (m *State) DuoUIheader() layout.FlexChild {
+	return Rigid(func() {
+		m.FlexHorizontal(
+			Rigid(func() {
 				cs := m.Gtx.Constraints
 				gelook.DuoUIdrawRectangle(m.Gtx, cs.Width.Max,
 					cs.Height.Max, m.Theme.Colors["PanelBg"],
@@ -170,7 +205,7 @@ func DuoUIheader(m *State) layout.FlexChild {
 					width, height                    = 72, 72
 					paddingV, paddingH               = 8, 8
 					insetSize, textInsetSize float32 = 16, 24
-					closeInsetSize           float32 = 4
+					closeInsetSize                   = 4
 				)
 				if m.WindowWidth < 1024 || m.WindowHeight < 1280 {
 					textSize, iconSize = 24, 24
@@ -180,8 +215,8 @@ func DuoUIheader(m *State) layout.FlexChild {
 					textInsetSize = 16
 					closeInsetSize = 4
 				}
-				layout.Flex{Axis: layout.Horizontal}.Layout(m.Gtx,
-					layout.Rigid(func() {
+				m.FlexHorizontal(
+					Rigid(func() {
 						layout.UniformInset(unit.Dp(insetSize)).Layout(m.Gtx,
 							func() {
 								var logoMeniItem gelook.DuoUIbutton
@@ -194,13 +229,14 @@ func DuoUIheader(m *State) layout.FlexChild {
 									width, height,
 									paddingV, paddingH)
 								for m.LogoButton.Clicked(m.Gtx) {
-									FlipTheme(m)
+									m.FlipTheme()
+									m.SaveConfig()
 								}
 								logoMeniItem.IconLayout(m.Gtx, m.LogoButton)
 							},
 						)
 					}),
-					layout.Flexed(1, func() {
+					Flexed(1, func() {
 						layout.UniformInset(unit.Dp(textInsetSize)).Layout(m.
 							Gtx,
 							func() {
@@ -212,35 +248,33 @@ func DuoUIheader(m *State) layout.FlexChild {
 							},
 						)
 					}),
-					layout.Rigid(func() {
-						layout.UniformInset(unit.Dp(closeInsetSize*2)).Layout(
-							m.Gtx,
-							func() {
-								t := m.Theme.DuoUIlabel(unit.Dp(float32(
-									24)),
-									fmt.Sprintf("%dx%d",
-										m.Gtx.Constraints.Width.Max,
-										m.Gtx.Constraints.Height.Max))
-								t.Color = m.Theme.Colors["PanelBg"]
-								t.Font.Typeface = m.Theme.Fonts["Primary"]
-								t.Layout(m.Gtx)
-							})
+					Rigid(func() {
+						m.Inset(closeInsetSize*2, func() {
+							t := m.Theme.DuoUIlabel(unit.Dp(float32(
+								24)),
+								fmt.Sprintf("%dx%d",
+									m.Gtx.Constraints.Width.Max,
+									m.Gtx.Constraints.Height.Max))
+							t.Color = m.Theme.Colors["PanelBg"]
+							t.Font.Typeface = m.Theme.Fonts["Primary"]
+							t.Layout(m.Gtx)
+						})
 					}),
-					layout.Rigid(func() {
-						layout.UniformInset(unit.Dp(closeInsetSize)).Layout(
-							m.Gtx, func() {
-								m.Theme.DuoUIbutton("", "settings",
-									m.Theme.Colors["PanelText"],
-									"", "",
-									m.Theme.Colors["PanelBg"], "closeIcon",
-									m.Theme.Colors["PanelText"],
-									0, 32, 41, 41,
-									0, 0).IconLayout(m.Gtx, m.CloseButton)
-								for m.CloseButton.Clicked(m.Gtx) {
-									L.Debug("close button clicked")
-									close(m.Ctx.KillAll)
-								}
-							})
+					Rigid(func() {
+						m.Inset(closeInsetSize, func() {
+							m.Theme.DuoUIbutton("", "settings",
+								m.Theme.Colors["PanelText"],
+								"", "",
+								m.Theme.Colors["PanelBg"], "closeIcon",
+								m.Theme.Colors["PanelText"],
+								0, 32, 41, 41,
+								0, 0).IconLayout(m.Gtx, m.CloseButton)
+							for m.CloseButton.Clicked(m.Gtx) {
+								L.Debug("close button clicked")
+								m.SaveConfig()
+								close(m.Ctx.KillAll)
+							}
+						})
 					}),
 				)
 			}),
@@ -248,8 +282,13 @@ func DuoUIheader(m *State) layout.FlexChild {
 	})
 }
 
-func FlipTheme(m *State) {
-	if m.LightTheme {
+func (m *State) FlipTheme() {
+	m.Config.LightTheme = !m.Config.LightTheme
+	m.SetTheme(m.Config.LightTheme)
+}
+
+func (m *State) SetTheme(light bool) {
+	if light {
 		m.Theme.Colors["PanelText"] = m.Theme.Colors["Light"]
 		m.Theme.Colors["PanelBg"] = m.Theme.Colors["Dark"]
 		m.Theme.Colors["DocText"] = m.Theme.Colors["White"]
@@ -260,5 +299,4 @@ func FlipTheme(m *State) {
 		m.Theme.Colors["DocText"] = m.Theme.Colors["Dark"]
 		m.Theme.Colors["DocBg"] = m.Theme.Colors["Light"]
 	}
-	m.LightTheme = !m.LightTheme
 }
