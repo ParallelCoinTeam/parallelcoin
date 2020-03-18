@@ -105,7 +105,7 @@ const (
 	// fee estimations.
 	DefaultEstimateFeeMinRegisteredBlocks = 3
 	bytePerKb                             = 1000
-	duoPerSatoshi                         = 1E-8
+	duoPerSatoshi                         = 1e-8
 )
 
 // In case the format for the serialized version of the FeeEstimator changes,

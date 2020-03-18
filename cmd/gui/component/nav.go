@@ -3,7 +3,6 @@ package component
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
-
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
@@ -43,8 +42,8 @@ func navButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPa
 		navMenuButton(rc, gtx, th, allPages.Theme["OVERVIEW"], "OVERVIEW", "overviewIcon", navButtonOverview),
 		navMenuLine(gtx, th),
 		navMenuButton(rc, gtx, th, allPages.Theme["SEND"], "SEND", "sendIcon", navButtonSend),
-		// navMenuLine(gtx, th),
-		// navMenuButton(rc, gtx, th, allPages.Theme["RECEIVE"], "RECEIVE", "receiveIcon", navButtonReceive),
+		//navMenuLine(gtx, th),
+		//navMenuButton(rc, gtx, th, allPages.Theme["RECEIVE"], "RECEIVE", "receiveIcon", navButtonReceive),
 		navMenuLine(gtx, th),
 		navMenuButton(rc, gtx, th, allPages.Theme["ADDRESSBOOK"], "ADDRESSBOOK", "addressBookIcon", navButtonAddressBook),
 		navMenuLine(gtx, th),

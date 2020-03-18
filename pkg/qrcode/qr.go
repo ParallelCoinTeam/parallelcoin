@@ -879,7 +879,7 @@ func (qr *Qrcode) calcPenalty(mask int, c chan int) {
 	black := 0.0
 
 	for r, row := range module {
-		for c, _ := range row {
+		for c := range row {
 			if isColored(r, c) {
 				black++
 			}
@@ -916,7 +916,7 @@ func maskData(mask int, data [][]int) [][]int {
 	}
 
 	for r, row := range module {
-		for c, _ := range row {
+		for c := range row {
 			if !(module[r][c] == 1 || module[r][c] == -1) {
 				continue
 			}

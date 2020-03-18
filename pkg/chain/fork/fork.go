@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"math/big"
 	"math/rand"
+	"os"
+	"runtime"
 	"sort"
+	"strings"
 	"time"
 
 	log "github.com/p9c/pod/pkg/logi"
@@ -40,7 +43,18 @@ type HardForks struct {
 const IntervalBase = 36
 
 func init() {
-	log.L.Trace("running fork data init")
+	_, loc, _, _ := runtime.Caller(0)
+	files := strings.Split(loc, "pod")
+	var pkg string
+	pkg = loc
+	if len(files) > 1 {
+		pkg = files[1]
+	}
+	splitted := strings.Split(pkg, string(os.PathSeparator))
+	pkg = strings.Join(splitted[:len(splitted)-1], string(os.PathSeparator))
+	L = log.Empty(pkg).SetLevel("info", true, "pod")
+	log.Loggers[pkg] = L
+	L.Trace("running fork data init")
 	for i := range p9AlgosNumeric {
 		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", p9AlgosNumeric[i].VersionInterval)
 	}
@@ -63,21 +77,20 @@ func init() {
 	}
 	sort.Sort(AlgoSlices[0])
 	sort.Sort(AlgoSlices[1])
-	log.L.Trace(P9AlgoVers)
+	L.Trace(P9AlgoVers)
 	baseVersionName := AlgoSlices[1][0].Name
 	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
-	log.L.Trace(baseVersionName, baseVersionInterval)
+	L.Trace(baseVersionName, baseVersionInterval)
 	P9Average = 0
 	for _, i := range AlgoSlices[1] {
 		vi := float64(P9Algos[i.Name].VersionInterval)
 		p9a := baseVersionInterval / vi
 		P9Average += p9a
-		log.L.Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average,
-			IntervalBase, vi)
+		L.Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
 	}
-	log.L.Trace(P9Average)
+	L.Trace(P9Average)
 	P9Average = baseVersionInterval / P9Average
-	log.L.Trace(P9Average)
+	L.Trace(P9Average)
 }
 
 type AlgoSpec struct {

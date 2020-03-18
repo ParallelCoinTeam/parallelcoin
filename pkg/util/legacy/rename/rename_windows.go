@@ -28,6 +28,7 @@ package rename
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.import (
 import (
+	log "github.com/p9c/pod/pkg/logi"
 	"syscall"
 	"unsafe"
 )

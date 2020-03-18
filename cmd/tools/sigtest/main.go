@@ -57,7 +57,7 @@ func ProcessSignal() {
 			fmt.Println("got Termination signal/SIGTERM - portable number 15")
 		case syscall.SIGUSR1:
 			fmt.Println("got User-defined signal 1/SIGUSR1")
-			// HINT : this is where you want to tell your program do something upon receiving a user-defined-signal
+			//HINT : this is where you want to tell your program do something upon receiving a user-defined-signal
 
 		case syscall.SIGUSR2:
 			fmt.Println("got User-defined signal 2/SIGUSR2")

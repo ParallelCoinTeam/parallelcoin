@@ -2,7 +2,6 @@ package duoui
 
 import (
 	"gioui.org/layout"
-
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/pkg/gel"
 )
@@ -10,7 +9,7 @@ import (
 var (
 	navButtonOverview = new(gel.Button)
 	navButtonSend     = new(gel.Button)
-	// navButtonReceive     = new(gel.Button)
+	//navButtonReceive     = new(gel.Button)
 	navButtonAddressBook = new(gel.Button)
 	navButtonHistory     = new(gel.Button)
 	mainNav              = &layout.List{

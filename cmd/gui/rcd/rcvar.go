@@ -104,7 +104,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 		Commands: new(DuoUIcommands),
 		ConsoleHistory: &model.DuoUIconsoleHistory{
 			Commands: []model.DuoUIconsoleCommand{
-				model.DuoUIconsoleCommand{
+				{
 					ComID:    "input",
 					Category: "input",
 					Time:     time.Now(),

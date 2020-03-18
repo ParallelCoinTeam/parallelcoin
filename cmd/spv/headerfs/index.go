@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
 	"sort"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"

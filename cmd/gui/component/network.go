@@ -10,8 +10,6 @@ import (
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
-var ()
-
 func PeersList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		rc.Network.PeersList.Layout(gtx, len(rc.Network.Peers), func(i int) {

@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	log.L.SetLevel("trace", true)
+	log.log.L.SetLevel("trace", true)
 	L.Info("starting up example controller")
 	cmd := worker.Spawn("go", "run", "hello/worker.go")
 	client := hello.NewClient(cmd.StdConn)

@@ -9,8 +9,6 @@ import (
 	"gioui.org/unit"
 )
 
-var ()
-
 type Command struct {
 	Com      interface{}
 	ComID    string

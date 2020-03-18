@@ -314,6 +314,8 @@ var handlers = handlersT{
 func main() {
 	log.L.SetLevel("trace", true, "pod")
 	if fd, err := os.Create("rpchandlers.go"); L.Check(err) {
+	log.log.L.SetLevel("trace", true, "pod")
+	if fd, err := os.Create("rpchandlers.go"); L.Check(err) {
 	} else {
 		defer fd.Close()
 		t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))

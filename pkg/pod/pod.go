@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/p9c/pod/app/appdata"
+	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/davecgh/go-spew/spew"
 
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/pkg/chain/fork"
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 const AppName = "pod"

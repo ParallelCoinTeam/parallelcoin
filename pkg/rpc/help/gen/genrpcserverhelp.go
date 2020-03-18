@@ -7,7 +7,6 @@ import (
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpchelp "github.com/p9c/pod/pkg/rpc/help"
-
 	// rpchelp "github.com/p9c/pod/pkg/rpc/help"
 )
 

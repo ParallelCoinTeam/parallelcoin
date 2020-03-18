@@ -6,12 +6,11 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "github.com/p9c/pod/pkg/logi"
-
 	"github.com/p9c/pod/cmd/kopach/worker"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/conte"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 

@@ -71,7 +71,7 @@ func initConfigFile(cfg *pod.Config) {
 
 func initLogDir(cfg *pod.Config) {
 	if *cfg.LogDir != "" {
-		L.SetLogPaths(*cfg.LogDir, "pod")
+		log.L.SetLogPaths(*cfg.LogDir, "pod")
 		interrupt.AddHandler(func() {
 			L.Debug("initLogDir interrupt")
 			_ = L.LogFileHandle.Close()

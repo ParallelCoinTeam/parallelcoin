@@ -19,14 +19,14 @@ type API struct {
 	Result interface{}
 }
 
-// CAPI is the central structure for configuration and access to a 
+// CAPI is the central structure for configuration and access to a
 // net/rpc API access endpoint for this RPC API
 type CAPI struct {
 	Timeout time.Duration
 	quit    chan struct{}
 }
 
-// NewCAPI returns a new CAPI 
+// NewCAPI returns a new CAPI
 func NewCAPI(quit chan struct{}, timeout ...time.Duration) (c *CAPI) {
 	c = &CAPI{quit: quit}
 	if len(timeout) > 0 {
@@ -288,15 +288,15 @@ type (
 	}
 )
 
-// RPCHandlersBeforeInit are created first and are added to the main list 
+// RPCHandlersBeforeInit are created first and are added to the main list
 // when the init runs.
 //
 // - Fn is the handler function
-// 
-// - Call is a channel carrying a struct containing parameters and error that is 
+//
+// - Call is a channel carrying a struct containing parameters and error that is
 // listened to in RunAPI to dispatch the calls
-// 
-// - Result is a bundle of command parameters and a channel that the result will be sent 
+//
+// - Result is a bundle of command parameters and a channel that the result will be sent
 // back on
 //
 // Get and save the Result function's return, and you can then call the call functions
@@ -457,7 +457,7 @@ func (a API) AddNode(cmd btcjson.AddNodeCmd) (err error) {
 	return
 }
 
-// AddNodeCheck checks if a new message arrived on the result channel and 
+// AddNodeCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) AddNodeCheck() (isNew bool) {
 	select {
@@ -492,7 +492,7 @@ func (a API) CreateRawTransaction(cmd btcjson.CreateRawTransactionCmd) (err erro
 	return
 }
 
-// CreateRawTransactionCheck checks if a new message arrived on the result channel and 
+// CreateRawTransactionCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) CreateRawTransactionCheck() (isNew bool) {
 	select {
@@ -527,7 +527,7 @@ func (a API) DecodeRawTransaction(cmd btcjson.DecodeRawTransactionCmd) (err erro
 	return
 }
 
-// DecodeRawTransactionCheck checks if a new message arrived on the result channel and 
+// DecodeRawTransactionCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) DecodeRawTransactionCheck() (isNew bool) {
 	select {
@@ -562,7 +562,7 @@ func (a API) DecodeScript(cmd btcjson.DecodeScriptCmd) (err error) {
 	return
 }
 
-// DecodeScriptCheck checks if a new message arrived on the result channel and 
+// DecodeScriptCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) DecodeScriptCheck() (isNew bool) {
 	select {
@@ -597,7 +597,7 @@ func (a API) EstimateFee(cmd btcjson.EstimateFeeCmd) (err error) {
 	return
 }
 
-// EstimateFeeCheck checks if a new message arrived on the result channel and 
+// EstimateFeeCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) EstimateFeeCheck() (isNew bool) {
 	select {
@@ -632,7 +632,7 @@ func (a API) Generate(cmd None) (err error) {
 	return
 }
 
-// GenerateCheck checks if a new message arrived on the result channel and 
+// GenerateCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GenerateCheck() (isNew bool) {
 	select {
@@ -667,7 +667,7 @@ func (a API) GetAddedNodeInfo(cmd btcjson.GetAddedNodeInfoCmd) (err error) {
 	return
 }
 
-// GetAddedNodeInfoCheck checks if a new message arrived on the result channel and 
+// GetAddedNodeInfoCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetAddedNodeInfoCheck() (isNew bool) {
 	select {
@@ -702,7 +702,7 @@ func (a API) GetBestBlock(cmd None) (err error) {
 	return
 }
 
-// GetBestBlockCheck checks if a new message arrived on the result channel and 
+// GetBestBlockCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBestBlockCheck() (isNew bool) {
 	select {
@@ -737,7 +737,7 @@ func (a API) GetBestBlockHash(cmd None) (err error) {
 	return
 }
 
-// GetBestBlockHashCheck checks if a new message arrived on the result channel and 
+// GetBestBlockHashCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBestBlockHashCheck() (isNew bool) {
 	select {
@@ -772,7 +772,7 @@ func (a API) GetBlock(cmd btcjson.GetBlockCmd) (err error) {
 	return
 }
 
-// GetBlockCheck checks if a new message arrived on the result channel and 
+// GetBlockCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockCheck() (isNew bool) {
 	select {
@@ -807,7 +807,7 @@ func (a API) GetBlockChainInfo(cmd None) (err error) {
 	return
 }
 
-// GetBlockChainInfoCheck checks if a new message arrived on the result channel and 
+// GetBlockChainInfoCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockChainInfoCheck() (isNew bool) {
 	select {
@@ -842,7 +842,7 @@ func (a API) GetBlockCount(cmd None) (err error) {
 	return
 }
 
-// GetBlockCountCheck checks if a new message arrived on the result channel and 
+// GetBlockCountCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockCountCheck() (isNew bool) {
 	select {
@@ -877,7 +877,7 @@ func (a API) GetBlockHash(cmd btcjson.GetBlockHashCmd) (err error) {
 	return
 }
 
-// GetBlockHashCheck checks if a new message arrived on the result channel and 
+// GetBlockHashCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockHashCheck() (isNew bool) {
 	select {
@@ -912,7 +912,7 @@ func (a API) GetBlockHeader(cmd btcjson.GetBlockHeaderCmd) (err error) {
 	return
 }
 
-// GetBlockHeaderCheck checks if a new message arrived on the result channel and 
+// GetBlockHeaderCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockHeaderCheck() (isNew bool) {
 	select {
@@ -947,7 +947,7 @@ func (a API) GetBlockTemplate(cmd btcjson.GetBlockTemplateCmd) (err error) {
 	return
 }
 
-// GetBlockTemplateCheck checks if a new message arrived on the result channel and 
+// GetBlockTemplateCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetBlockTemplateCheck() (isNew bool) {
 	select {
@@ -982,7 +982,7 @@ func (a API) GetCFilter(cmd btcjson.GetCFilterCmd) (err error) {
 	return
 }
 
-// GetCFilterCheck checks if a new message arrived on the result channel and 
+// GetCFilterCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetCFilterCheck() (isNew bool) {
 	select {
@@ -1017,7 +1017,7 @@ func (a API) GetCFilterHeader(cmd btcjson.GetCFilterHeaderCmd) (err error) {
 	return
 }
 
-// GetCFilterHeaderCheck checks if a new message arrived on the result channel and 
+// GetCFilterHeaderCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetCFilterHeaderCheck() (isNew bool) {
 	select {
@@ -1052,7 +1052,7 @@ func (a API) GetConnectionCount(cmd None) (err error) {
 	return
 }
 
-// GetConnectionCountCheck checks if a new message arrived on the result channel and 
+// GetConnectionCountCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetConnectionCountCheck() (isNew bool) {
 	select {
@@ -1087,7 +1087,7 @@ func (a API) GetCurrentNet(cmd None) (err error) {
 	return
 }
 
-// GetCurrentNetCheck checks if a new message arrived on the result channel and 
+// GetCurrentNetCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetCurrentNetCheck() (isNew bool) {
 	select {
@@ -1122,7 +1122,7 @@ func (a API) GetDifficulty(cmd btcjson.GetDifficultyCmd) (err error) {
 	return
 }
 
-// GetDifficultyCheck checks if a new message arrived on the result channel and 
+// GetDifficultyCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetDifficultyCheck() (isNew bool) {
 	select {
@@ -1157,7 +1157,7 @@ func (a API) GetGenerate(cmd btcjson.GetHeadersCmd) (err error) {
 	return
 }
 
-// GetGenerateCheck checks if a new message arrived on the result channel and 
+// GetGenerateCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetGenerateCheck() (isNew bool) {
 	select {
@@ -1192,7 +1192,7 @@ func (a API) GetHashesPerSec(cmd None) (err error) {
 	return
 }
 
-// GetHashesPerSecCheck checks if a new message arrived on the result channel and 
+// GetHashesPerSecCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetHashesPerSecCheck() (isNew bool) {
 	select {
@@ -1227,7 +1227,7 @@ func (a API) GetHeaders(cmd btcjson.GetHeadersCmd) (err error) {
 	return
 }
 
-// GetHeadersCheck checks if a new message arrived on the result channel and 
+// GetHeadersCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetHeadersCheck() (isNew bool) {
 	select {
@@ -1262,7 +1262,7 @@ func (a API) GetInfo(cmd None) (err error) {
 	return
 }
 
-// GetInfoCheck checks if a new message arrived on the result channel and 
+// GetInfoCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetInfoCheck() (isNew bool) {
 	select {
@@ -1297,7 +1297,7 @@ func (a API) GetMempoolInfo(cmd None) (err error) {
 	return
 }
 
-// GetMempoolInfoCheck checks if a new message arrived on the result channel and 
+// GetMempoolInfoCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetMempoolInfoCheck() (isNew bool) {
 	select {
@@ -1332,7 +1332,7 @@ func (a API) GetMiningInfo(cmd None) (err error) {
 	return
 }
 
-// GetMiningInfoCheck checks if a new message arrived on the result channel and 
+// GetMiningInfoCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetMiningInfoCheck() (isNew bool) {
 	select {
@@ -1367,7 +1367,7 @@ func (a API) GetNetTotals(cmd None) (err error) {
 	return
 }
 
-// GetNetTotalsCheck checks if a new message arrived on the result channel and 
+// GetNetTotalsCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetNetTotalsCheck() (isNew bool) {
 	select {
@@ -1402,7 +1402,7 @@ func (a API) GetNetworkHashPS(cmd btcjson.GetNetworkHashPSCmd) (err error) {
 	return
 }
 
-// GetNetworkHashPSCheck checks if a new message arrived on the result channel and 
+// GetNetworkHashPSCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetNetworkHashPSCheck() (isNew bool) {
 	select {
@@ -1437,7 +1437,7 @@ func (a API) GetPeerInfo(cmd None) (err error) {
 	return
 }
 
-// GetPeerInfoCheck checks if a new message arrived on the result channel and 
+// GetPeerInfoCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetPeerInfoCheck() (isNew bool) {
 	select {
@@ -1472,7 +1472,7 @@ func (a API) GetRawMempool(cmd btcjson.GetRawMempoolCmd) (err error) {
 	return
 }
 
-// GetRawMempoolCheck checks if a new message arrived on the result channel and 
+// GetRawMempoolCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetRawMempoolCheck() (isNew bool) {
 	select {
@@ -1507,7 +1507,7 @@ func (a API) GetRawTransaction(cmd btcjson.GetRawTransactionCmd) (err error) {
 	return
 }
 
-// GetRawTransactionCheck checks if a new message arrived on the result channel and 
+// GetRawTransactionCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetRawTransactionCheck() (isNew bool) {
 	select {
@@ -1542,7 +1542,7 @@ func (a API) GetTxOut(cmd btcjson.GetTxOutCmd) (err error) {
 	return
 }
 
-// GetTxOutCheck checks if a new message arrived on the result channel and 
+// GetTxOutCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) GetTxOutCheck() (isNew bool) {
 	select {
@@ -1577,7 +1577,7 @@ func (a API) Help(cmd btcjson.HelpCmd) (err error) {
 	return
 }
 
-// HelpCheck checks if a new message arrived on the result channel and 
+// HelpCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) HelpCheck() (isNew bool) {
 	select {
@@ -1612,7 +1612,7 @@ func (a API) Node(cmd btcjson.NodeCmd) (err error) {
 	return
 }
 
-// NodeCheck checks if a new message arrived on the result channel and 
+// NodeCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) NodeCheck() (isNew bool) {
 	select {
@@ -1647,7 +1647,7 @@ func (a API) Ping(cmd None) (err error) {
 	return
 }
 
-// PingCheck checks if a new message arrived on the result channel and 
+// PingCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) PingCheck() (isNew bool) {
 	select {
@@ -1682,7 +1682,7 @@ func (a API) ResetChain(cmd None) (err error) {
 	return
 }
 
-// ResetChainCheck checks if a new message arrived on the result channel and 
+// ResetChainCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) ResetChainCheck() (isNew bool) {
 	select {
@@ -1717,7 +1717,7 @@ func (a API) Restart(cmd None) (err error) {
 	return
 }
 
-// RestartCheck checks if a new message arrived on the result channel and 
+// RestartCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) RestartCheck() (isNew bool) {
 	select {
@@ -1752,7 +1752,7 @@ func (a API) SearchRawTransactions(cmd btcjson.SearchRawTransactionsCmd) (err er
 	return
 }
 
-// SearchRawTransactionsCheck checks if a new message arrived on the result channel and 
+// SearchRawTransactionsCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) SearchRawTransactionsCheck() (isNew bool) {
 	select {
@@ -1787,7 +1787,7 @@ func (a API) SendRawTransaction(cmd btcjson.SendRawTransactionCmd) (err error) {
 	return
 }
 
-// SendRawTransactionCheck checks if a new message arrived on the result channel and 
+// SendRawTransactionCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) SendRawTransactionCheck() (isNew bool) {
 	select {
@@ -1822,7 +1822,7 @@ func (a API) SetGenerate(cmd btcjson.SetGenerateCmd) (err error) {
 	return
 }
 
-// SetGenerateCheck checks if a new message arrived on the result channel and 
+// SetGenerateCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) SetGenerateCheck() (isNew bool) {
 	select {
@@ -1857,7 +1857,7 @@ func (a API) Stop(cmd None) (err error) {
 	return
 }
 
-// StopCheck checks if a new message arrived on the result channel and 
+// StopCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) StopCheck() (isNew bool) {
 	select {
@@ -1892,7 +1892,7 @@ func (a API) SubmitBlock(cmd btcjson.SubmitBlockCmd) (err error) {
 	return
 }
 
-// SubmitBlockCheck checks if a new message arrived on the result channel and 
+// SubmitBlockCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) SubmitBlockCheck() (isNew bool) {
 	select {
@@ -1927,7 +1927,7 @@ func (a API) Uptime(cmd None) (err error) {
 	return
 }
 
-// UptimeCheck checks if a new message arrived on the result channel and 
+// UptimeCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) UptimeCheck() (isNew bool) {
 	select {
@@ -1962,7 +1962,7 @@ func (a API) ValidateAddress(cmd btcjson.ValidateAddressCmd) (err error) {
 	return
 }
 
-// ValidateAddressCheck checks if a new message arrived on the result channel and 
+// ValidateAddressCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) ValidateAddressCheck() (isNew bool) {
 	select {
@@ -1997,7 +1997,7 @@ func (a API) VerifyChain(cmd btcjson.VerifyChainCmd) (err error) {
 	return
 }
 
-// VerifyChainCheck checks if a new message arrived on the result channel and 
+// VerifyChainCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) VerifyChainCheck() (isNew bool) {
 	select {
@@ -2032,7 +2032,7 @@ func (a API) VerifyMessage(cmd btcjson.VerifyMessageCmd) (err error) {
 	return
 }
 
-// VerifyMessageCheck checks if a new message arrived on the result channel and 
+// VerifyMessageCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) VerifyMessageCheck() (isNew bool) {
 	select {
@@ -2067,7 +2067,7 @@ func (a API) Version(cmd btcjson.VersionCmd) (err error) {
 	return
 }
 
-// VersionCheck checks if a new message arrived on the result channel and 
+// VersionCheck checks if a new message arrived on the result channel and
 // returns true if it does, as well as storing the value in the Result field
 func (a API) VersionCheck() (isNew bool) {
 	select {

@@ -298,7 +298,7 @@ var handlers = handlersT{
 }
 
 func main() {
-	log.L.SetLevel("trace", true, "pod")
+	log.log.L.SetLevel("trace", true, "pod")
 	if fd, err := os.Create("rpchandlers.go"); L.Check(err) {
 	} else {
 		defer fd.Close()
