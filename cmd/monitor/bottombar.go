@@ -42,7 +42,7 @@ func (m *State) RunControls() layout.FlexChild {
 		}
 		if m.Running {
 			m.FlexH(Rigid(func() {
-				m.IconButton("Stop", "Dark", m.StopMenuButton)
+				m.IconButton("Stop", "Secondary", m.StopMenuButton)
 				for m.StopMenuButton.Clicked(m.Gtx) {
 					L.Debug("clicked stop button")
 					m.Running = false
@@ -50,10 +50,10 @@ func (m *State) RunControls() layout.FlexChild {
 				}
 			}), Rigid(func() {
 				ic := "Pause"
-				rc := "Dark"
+				rc := "Secondary"
 				if m.Pausing {
 					ic = "Run"
-					rc = "Primary"
+					rc = "Dark"
 				}
 				m.IconButton(ic, rc, m.PauseMenuButton)
 				for m.PauseMenuButton.Clicked(m.Gtx) {
@@ -65,7 +65,7 @@ func (m *State) RunControls() layout.FlexChild {
 					Toggle(&m.Pausing)
 				}
 			}), Rigid(func() {
-				m.IconButton("Restart", "Dark", m.RestartMenuButton)
+				m.IconButton("Restart", "Secondary", m.RestartMenuButton)
 				for m.RestartMenuButton.Clicked(m.Gtx) {
 					L.Debug("clicked restart button")
 				}
@@ -81,7 +81,7 @@ func (m *State) RunmodeButtons() layout.FlexChild {
 			Rigid(func() {
 				fg, bg := "Light", "Primary"
 				if m.Config.RunModeOpen {
-					fg, bg = "Light", "Dark"
+					fg, bg = "Light", "Secondary"
 				}
 				m.TextButton(m.Config.RunMode, "Secondary", 23, fg, bg,
 					m.RunModeFoldButton)
@@ -120,7 +120,7 @@ func (m *State) SettingsButtons() layout.FlexChild {
 		m.FlexH(Rigid(func() {
 			bg := "Primary"
 			if m.Config.SettingsOpen {
-				bg = "Dark"
+				bg = "Secondary"
 			}
 			m.IconButton("settingsIcon", bg, m.SettingsFoldButton)
 			for m.SettingsFoldButton.Clicked(m.Gtx) {
@@ -193,7 +193,7 @@ func (m *State) BuildButtons() layout.FlexChild {
 		m.FlexH(Rigid(func() {
 			bg := "Primary"
 			if m.Config.BuildOpen {
-				bg = "Dark"
+				bg = "Secondary"
 			}
 			m.TextButton("Build", "Secondary", 23,
 				"PanelText", bg, m.BuildFoldButton)

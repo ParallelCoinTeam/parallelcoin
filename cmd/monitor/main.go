@@ -244,8 +244,8 @@ func (m *State) DuoUIheader() layout.FlexChild {
 				m.Inset(closeInsetSize*2, func() {
 					t := m.Theme.DuoUIlabel(unit.Dp(float32(24)),
 						fmt.Sprintf("%dx%d",
-							m.Gtx.Constraints.Width.Max,
-							m.Gtx.Constraints.Height.Max))
+							m.WindowWidth,
+							m.WindowHeight))
 					t.Color = m.Theme.Colors["PanelText"]
 					t.Font.Typeface = m.Theme.Fonts["Primary"]
 					t.Layout(m.Gtx)
