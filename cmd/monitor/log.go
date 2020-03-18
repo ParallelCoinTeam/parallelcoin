@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	L *log.Logger
+	L = log.L
 )
 
 func init() {
@@ -20,8 +20,8 @@ func init() {
 	if len(files) > 1 {
 		pkg = files[1]
 	}
-	splitted := strings.Split(pkg, string(os.PathSeparator))
-	pkg = strings.Join(splitted[:len(splitted)-1], string(os.PathSeparator))
+	split := strings.Split(pkg, string(os.PathSeparator))
+	pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
 	L = log.Empty(pkg).SetLevel("trace", true, "pod")
 	log.Loggers[pkg] = L
 }

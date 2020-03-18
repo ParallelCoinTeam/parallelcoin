@@ -1,4 +1,4 @@
-package rename
+package component
 
 import (
 	"os"

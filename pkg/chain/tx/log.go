@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	L *log.Logger
+	L = log.L
 )
 
 func init() {

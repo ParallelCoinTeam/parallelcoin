@@ -252,13 +252,7 @@ func (m *State) DuoUIheader() layout.FlexChild {
 				})
 			}), Rigid(func() {
 				m.Inset(closeInsetSize, func() {
-					m.Theme.DuoUIbutton("", "settings",
-						m.Theme.Colors["PanelText"],
-						"", "",
-						m.Theme.Colors["PanelBg"], "closeIcon",
-						m.Theme.Colors["PanelText"],
-						0, 32, 41, 41,
-						0, 0).IconLayout(m.Gtx, m.CloseButton)
+					m.IconButton("closeIcon", "PanelBg", m.CloseButton)
 					for m.CloseButton.Clicked(m.Gtx) {
 						L.Debug("close button clicked")
 						m.SaveConfig()
