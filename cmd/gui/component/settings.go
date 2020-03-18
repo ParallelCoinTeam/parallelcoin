@@ -55,11 +55,17 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 	return func() {
 		layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(30), Left: unit.Dp(30), Right: unit.Dp(30)}.Layout(gtx, func() {
 			switch f.Field.Type {
-			case "array":
+			case "stringSlice":
 				switch f.Field.InputType {
 				case "text":
-
+					StringsArrayEditor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
+						(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+						func(e gel.EditorEvent) {
+							//rc.Settings.Daemon.Config[f.Field.Model] = (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text()
+							//rc.SaveDaemonCfg()
+						})()
 				default:
+
 				}
 			case "input":
 				switch f.Field.InputType {
