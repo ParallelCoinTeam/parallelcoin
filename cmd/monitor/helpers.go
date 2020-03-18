@@ -61,3 +61,8 @@ func (m *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		fontSize, 0, 80, 32, 4, 4).
 		Layout(m.Gtx, button)
 }
+
+func Toggle(b *bool) bool {
+	*b = !*b
+	return b
+}

@@ -62,7 +62,7 @@ func (m *State) RunControls() layout.FlexChild {
 					} else {
 						L.Debug("clicked pause button")
 					}
-					m.Pausing = !m.Pausing
+					Toggle(&m.Pausing)
 				}
 			}), Rigid(func() {
 				m.IconButton("Restart", "Dark", m.RestartMenuButton)
@@ -86,7 +86,7 @@ func (m *State) RunmodeButtons() layout.FlexChild {
 				m.TextButton(m.Config.RunMode, "Secondary", 23, fg, bg,
 					m.RunModeFoldButton)
 				for m.RunModeFoldButton.Clicked(m.Gtx) {
-					m.Config.RunModeOpen = !m.Config.RunModeOpen
+					Toggle(&m.Config.RunModeOpen)
 					m.SaveConfig()
 				}
 			}),

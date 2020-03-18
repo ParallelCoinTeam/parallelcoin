@@ -273,19 +273,14 @@ func (m *State) DuoUIheader() layout.FlexChild {
 }
 
 func (m *State) FlipTheme() {
-	m.Config.LightTheme = !m.Config.LightTheme
-	m.SetTheme(m.Config.LightTheme)
+	m.SetTheme(Toggle(&m.Config.LightTheme))
 }
 
 func (m *State) SetTheme(light bool) {
 	if light {
-		m.Theme.Colors["PanelText"] = m.Theme.Colors["Light"]
-		m.Theme.Colors["PanelBg"] = m.Theme.Colors["Dark"]
 		m.Theme.Colors["DocText"] = m.Theme.Colors["White"]
 		m.Theme.Colors["DocBg"] = m.Theme.Colors["Black"]
 	} else {
-		m.Theme.Colors["PanelText"] = m.Theme.Colors["Light"]
-		m.Theme.Colors["PanelBg"] = m.Theme.Colors["Dark"]
 		m.Theme.Colors["DocText"] = m.Theme.Colors["Dark"]
 		m.Theme.Colors["DocBg"] = m.Theme.Colors["Light"]
 	}
