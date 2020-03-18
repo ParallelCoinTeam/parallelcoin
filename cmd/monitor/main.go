@@ -67,7 +67,7 @@ func (m *State) LoadConfig() {
 			os.Exit(1)
 		}
 	}
-	m.SetTheme(m.Config.LightTheme)
+	m.SetTheme(m.Config.DarkTheme)
 }
 
 func (m *State) SaveConfig() {
@@ -87,7 +87,7 @@ type Config struct {
 	RunModeOpen   bool
 	SettingsOpen  bool
 	BuildOpen     bool
-	LightTheme    bool
+	DarkTheme     bool
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) *State {
@@ -123,8 +123,8 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) *State {
 			"gui":    new(gel.Button),
 		},
 		Config: &Config{
-			RunMode:    "node",
-			LightTheme: true,
+			RunMode:   "node",
+			DarkTheme: true,
 		},
 		Running:      false,
 		Pausing:      false,
@@ -273,7 +273,7 @@ func (m *State) DuoUIheader() layout.FlexChild {
 }
 
 func (m *State) FlipTheme() {
-	m.SetTheme(Toggle(&m.Config.LightTheme))
+	m.SetTheme(Toggle(&m.Config.DarkTheme))
 }
 
 func (m *State) SetTheme(light bool) {
