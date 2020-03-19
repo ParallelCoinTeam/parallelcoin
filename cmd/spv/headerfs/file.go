@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 
-
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 )

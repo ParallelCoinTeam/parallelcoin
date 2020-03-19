@@ -104,7 +104,7 @@ func initParams(cx *conte.Xt) {
 	}
 }
 
-func initListeners(cx *conte.Xt, ctx *cli.Context) {
+func initListeners(cx *conte.Xt, commandName string) {
 	cfg := cx.Config
 	fP, err := GetFreePort()
 	if err != nil {
@@ -130,7 +130,7 @@ func initListeners(cx *conte.Xt, ctx *cli.Context) {
 	msgBase := pause.GetPauseContainer(cx)
 	// mC := job.Get(cx, util.NewBlock(tpl.Block), msgBase)
 	listenHost := msgBase.GetIPs()[0].String() + ":0"
-	switch ctx.Command.Name {
+	switch commandName {
 	// only the wallet listener is important with shell as it proxies for
 	// node, the rest better they are automatic
 	case "shell":

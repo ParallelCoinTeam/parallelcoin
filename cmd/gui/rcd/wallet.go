@@ -3,8 +3,6 @@ package rcd
 import (
 	"fmt"
 
-
-
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util"
@@ -76,7 +74,7 @@ func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 			if err == nil {
 				var va interface{}
 				va, err = legacy.ValidateAddress(&btcjson.
-					ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
+				ValidateAddressCmd{Address: addr.String()}, r.cx.WalletServer)
 				if err != nil {
 					// r.PushDuoUIalert("Error", err.Error(), "error")
 				}

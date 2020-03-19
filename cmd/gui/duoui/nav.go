@@ -2,6 +2,7 @@ package duoui
 
 import (
 	"gioui.org/layout"
+
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/pkg/gel"
 )
@@ -9,19 +10,19 @@ import (
 var (
 	navButtonOverview = new(gel.Button)
 	navButtonSend     = new(gel.Button)
-	//navButtonReceive     = new(gel.Button)
+	// navButtonReceive     = new(gel.Button)
 	navButtonAddressBook = new(gel.Button)
 	navButtonHistory     = new(gel.Button)
 	mainNav              = &layout.List{
 		Axis: layout.Vertical,
 	}
 
-	navItemWidth             int = 96
-	navItemHeight            int = 72
-	navItemTextSize          int = 48
-	navItemTconSize          int = 36
-	navItemPaddingVertical   int = 8
-	navItemPaddingHorizontal int = 0
+	navItemWidth             = 96
+	navItemHeight            = 72
+	navItemTextSize          = 48
+	navItemTconSize          = 36
+	navItemPaddingVertical   = 8
+	navItemPaddingHorizontal = 0
 )
 
 func (ui *DuoUI) DuoUImenu() func() {

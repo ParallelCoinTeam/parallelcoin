@@ -1,8 +1,6 @@
 package app
 
 import (
-	"github.com/urfave/cli"
-
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/rpc"
@@ -11,7 +9,7 @@ import (
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli
-Configure(cx *conte.Xt, ctx *cli.Context) {
+Configure(cx *conte.Xt, commandName string) {
 	L.Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
 	cx.NodeChan = make(chan *rpc.Server)
@@ -25,7 +23,7 @@ Configure(cx *conte.Xt, ctx *cli.Context) {
 	initConfigFile(cfg)
 	initLogDir(cfg)
 	initWalletFile(cx)
-	initListeners(cx, ctx)
+	initListeners(cx, commandName)
 	// Don't add peers from the config file when in regression test mode.
 	if ((*cfg.Network)[0] == 'r') && len(*cfg.AddPeers) > 0 {
 		*cfg.AddPeers = nil

@@ -15,7 +15,7 @@ import (
 
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		Configure(cx, c)
+		Configure(cx, c.Command.Name)
 		L.Debug("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured

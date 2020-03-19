@@ -5,10 +5,8 @@ package conte
 import (
 	"sync"
 
-	"go.uber.org/atomic"
-	"sync"
-
 	"github.com/urfave/cli"
+	"go.uber.org/atomic"
 
 	"github.com/p9c/pod/app/appdata"
 	"github.com/p9c/pod/cmd/node/rpc"

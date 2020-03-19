@@ -26,12 +26,12 @@ var (
 	footerNav = &layout.List{
 		Axis: layout.Horizontal,
 	}
-	footerMenuItemWidth             int = 48
-	footerMenuItemHeight            int = 48
-	footerMenuItemTextSize          int = 16
-	footerMenuItemIconSize          int = 32
-	footerMenuItemPaddingVertical   int = 8
-	footerMenuItemPaddingHorizontal int = 8
+	footerMenuItemWidth             = 48
+	footerMenuItemHeight            = 48
+	footerMenuItemTextSize          = 16
+	footerMenuItemIconSize          = 32
+	footerMenuItemPaddingVertical   = 8
+	footerMenuItemPaddingHorizontal = 8
 )
 
 func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {

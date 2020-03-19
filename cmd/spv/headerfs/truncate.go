@@ -4,7 +4,6 @@ package headerfs
 
 import (
 	"fmt"
-
 )
 
 // singleTruncate truncates a single header from the end of the header file.

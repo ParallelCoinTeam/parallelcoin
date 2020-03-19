@@ -42,7 +42,7 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 	*r.cx.Config.WalletFile = walletDir
 
 	save.Pod(r.cx.Config)
-	//L.Info(rc)
+	// L.Info(rc)
 }
 
 func (r *RcVar) UseTestnet() {

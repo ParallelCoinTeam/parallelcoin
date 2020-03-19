@@ -1477,7 +1477,7 @@ func HandleGetInfo(
 	closeChan <-chan struct{},
 ) (ret interface{}, err error) {
 	var Difficulty, dBlake2b, dBlake14lr, dBlake2s, dKeccak, dScrypt, dSHA256D,
-		dSkein, dStribog, dX11 float64
+	dSkein, dStribog, dX11 float64
 	var lastbitsScrypt, lastbitsSHA256D uint32
 	best := s.
 		Cfg.

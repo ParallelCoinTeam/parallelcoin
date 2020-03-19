@@ -1,15 +1,15 @@
 package monitor
 
 import (
-	"gioui.org/layout"
+	"fmt"
 
-	"github.com/p9c/pod/cmd/gui/pages"
+	"gioui.org/layout"
 )
 
 func (m *State) BottomBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := m.Gtx.Constraints
-		m.Rectangle(cs.Width.Max, cs.Height.Max, "Primary")
+		m.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 		m.FlexV(
 			m.SettingsPage(),
 			m.BuildPage(),
@@ -21,7 +21,7 @@ func (m *State) BottomBar() layout.FlexChild {
 func (m *State) StatusBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := m.Gtx.Constraints
-		m.Rectangle(cs.Width.Max, cs.Height.Max, "Primary")
+		m.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 		m.FlexH(
 			m.RunControls(),
 			m.RunmodeButtons(),
@@ -34,28 +34,29 @@ func (m *State) StatusBar() layout.FlexChild {
 func (m *State) RunControls() layout.FlexChild {
 	return Rigid(func() {
 		if !m.Running {
-			m.IconButton("Run", "Primary", m.RunMenuButton)
+			m.IconButton("Run", "PanelBg", "PanelText", m.RunMenuButton)
 			for m.RunMenuButton.Clicked(m.Gtx) {
 				L.Debug("clicked run button")
 				m.Running = true
 			}
 		}
 		if m.Running {
+			ic := "Pause"
+			fg, bg := "PanelBg", "PanelText"
+			if m.Pausing {
+				ic = "Run"
+				fg, bg = "PanelText", "PanelBg"
+			}
 			m.FlexH(Rigid(func() {
-				m.IconButton("Stop", "Secondary", m.StopMenuButton)
+				m.IconButton("Stop", "PanelBg", "PanelText",
+					m.StopMenuButton)
 				for m.StopMenuButton.Clicked(m.Gtx) {
 					L.Debug("clicked stop button")
 					m.Running = false
 					m.Pausing = false
 				}
 			}), Rigid(func() {
-				ic := "Pause"
-				rc := "Secondary"
-				if m.Pausing {
-					ic = "Run"
-					rc = "Dark"
-				}
-				m.IconButton(ic, rc, m.PauseMenuButton)
+				m.IconButton(ic, fg, bg, m.PauseMenuButton)
 				for m.PauseMenuButton.Clicked(m.Gtx) {
 					if m.Pausing {
 						L.Debug("clicked on resume button")
@@ -65,7 +66,8 @@ func (m *State) RunControls() layout.FlexChild {
 					Toggle(&m.Pausing)
 				}
 			}), Rigid(func() {
-				m.IconButton("Restart", "Secondary", m.RestartMenuButton)
+				m.IconButton("Restart", "PanelBg", "PanelText",
+					m.RestartMenuButton)
 				for m.RestartMenuButton.Clicked(m.Gtx) {
 					L.Debug("clicked restart button")
 				}
@@ -78,15 +80,18 @@ func (m *State) RunControls() layout.FlexChild {
 func (m *State) RunmodeButtons() layout.FlexChild {
 	return Rigid(func() {
 		m.FlexH(Rigid(func() {
-			fg, bg := "Light", "Primary"
+			fg, bg := "ButtonText", "ButtonBg"
 			if m.Config.RunModeOpen {
-				fg, bg = "Light", "Secondary"
+				fg, bg = "ButtonText", "ButtonBg"
 			}
-			m.TextButton(m.Config.RunMode, "Secondary", 23, fg, bg,
+			m.TextButton(m.Config.RunMode, "Secondary",
+				23, fg, bg,
 				m.RunModeFoldButton)
 			for m.RunModeFoldButton.Clicked(m.Gtx) {
-				Toggle(&m.Config.RunModeOpen)
-				m.SaveConfig()
+				if !m.Running {
+					Toggle(&m.Config.RunModeOpen)
+					m.SaveConfig()
+				}
 			}
 		}), Rigid(func() {
 			if m.Config.RunModeOpen {
@@ -95,8 +100,9 @@ func (m *State) RunmodeButtons() layout.FlexChild {
 				}
 				m.ModesList.Layout(m.Gtx, len(modes), func(i int) {
 					if m.Config.RunMode != modes[i] {
-						m.TextButton(modes[i], "Primary", 16, "Light",
-							"Dark", m.ModesButtons[modes[i]])
+						m.TextButton(modes[i], "Secondary",
+							23, "ButtonText",
+							"ButtonBg", m.ModesButtons[modes[i]])
 					}
 					for m.ModesButtons[modes[i]].Clicked(m.Gtx) {
 						L.Debug(modes[i], "clicked")
@@ -113,96 +119,15 @@ func (m *State) RunmodeButtons() layout.FlexChild {
 	})
 }
 
-func (m *State) SettingsButtons() layout.FlexChild {
-	return Flexed(1, func() {
-		m.FlexH(Rigid(func() {
-			bg := "Primary"
-			if m.Config.SettingsOpen {
-				bg = "Secondary"
-			}
-			m.IconButton("settingsIcon", bg, m.SettingsFoldButton)
-			for m.SettingsFoldButton.Clicked(m.Gtx) {
-				L.Debug("settings folder clicked")
-				switch {
-				case !m.Config.SettingsOpen:
-					m.Config.BuildOpen = false
-					m.Config.SettingsOpen = true
-				case m.Config.SettingsOpen:
-					m.Config.SettingsOpen = false
-				}
-				m.SaveConfig()
-			}
-		}),
-		)
-	})
-}
-
-func (m *State) SettingsPage() layout.FlexChild {
-	if !m.Config.SettingsOpen {
-		return Flexed(0, func() {})
-	}
-	var weight float32 = 0.5
-	var settingsInset = 0
-	switch {
-	case m.WindowWidth < 1024 && m.WindowHeight > 1024:
-		// weight = 0.333
-	case m.WindowHeight < 1024 && m.WindowWidth < 1024:
-		weight = 1
-	case m.WindowHeight < 600 && m.WindowWidth > 1024:
-		weight = 1
-	}
-	return Flexed(weight, func() {
-		cs := m.Gtx.Constraints
-		m.Rectangle(cs.Width.Max, cs.Height.Max, "Secondary")
-		m.FlexV(Rigid(func() {
-			m.FlexH(Rigid(func() {
-				m.TextButton("Run Settings", "Secondary",
-					23, "PanelText", "Secondary",
-					m.SettingsTitleCloseButton)
-				for m.SettingsTitleCloseButton.Clicked(m.Gtx) {
-					L.Debug("settings panel title close button clicked")
-					m.Config.SettingsOpen = false
-					m.SaveConfig()
-				}
-			}), Rigid(func() {
-				if m.WindowWidth > 640 {
-					pages.SettingsHeader(m.Rc, m.Gtx, m.Theme)()
-				}
-			}), Spacer(), Rigid(func() {
-				m.IconButton("minimize", "Secondary",
-					m.SettingsCloseButton)
-				for m.SettingsCloseButton.Clicked(m.Gtx) {
-					L.Debug("settings panel close button clicked")
-					m.Config.SettingsOpen = false
-					m.SaveConfig()
-				}
-			}),
-			)
-		}), Rigid(func() {
-			if m.WindowWidth < 640 {
-				cs := m.Gtx.Constraints
-				m.Rectangle(cs.Width.Max, cs.Height.Max, "Dark")
-				pages.SettingsHeader(m.Rc, m.Gtx, m.Theme)()
-			}
-		}), Rigid(func() {
-			cs := m.Gtx.Constraints
-			m.Rectangle(cs.Width.Max, cs.Height.Max, "Dark")
-			m.Inset(settingsInset,
-				pages.SettingsBody(m.Rc, m.Gtx, m.Theme))
-		}),
-		)
-	})
-}
-
 func (m *State) BuildButtons() layout.FlexChild {
 	return Rigid(func() {
 		m.FlexH(Rigid(func() {
-			bg := "Primary"
+			bg, fg := "PanelBg", "PanelText"
 			if m.Config.BuildOpen {
-				bg = "Secondary"
+				bg, fg = "DocBg", "DocText"
 			}
 			m.TextButton("Build", "Secondary", 23,
-				"PanelText", bg, m.BuildFoldButton)
+				fg, bg, m.BuildFoldButton)
 			for m.BuildFoldButton.Clicked(m.Gtx) {
 				L.Debug("run mode folder clicked")
 				switch {
@@ -232,11 +157,15 @@ func (m *State) BuildPage() layout.FlexChild {
 	}
 	return Flexed(weight, func() {
 		cs := m.Gtx.Constraints
-		m.Rectangle(cs.Width.Max, cs.Height.Max, "Secondary")
+		m.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 		m.FlexV(Rigid(func() {
+			m.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+			m.Inset(4, func() {})
+		}), Rigid(func() {
+
 			m.FlexH(Rigid(func() {
 				m.TextButton("Build Configuration", "Secondary",
-					23, "PanelText", "Secondary",
+					23, "DocText", "DocBg",
 					m.BuildTitleCloseButton)
 				for m.BuildTitleCloseButton.Clicked(m.Gtx) {
 					L.Debug("build configuration panel title close" +
@@ -245,7 +174,7 @@ func (m *State) BuildPage() layout.FlexChild {
 					m.SaveConfig()
 				}
 			}), Spacer(), Rigid(func() {
-				m.IconButton("minimize", "Secondary",
+				m.IconButton("minimize", "DocText", "DocBg",
 					m.BuildCloseButton)
 				for m.BuildCloseButton.Clicked(m.Gtx) {
 					L.Debug("settings panel close button clicked")
@@ -257,7 +186,46 @@ func (m *State) BuildPage() layout.FlexChild {
 		}), Flexed(1, func() {
 			cs := m.Gtx.Constraints
 			m.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+			// m.Inset(8, func() {			})
+		}), Rigid(func() {
+			m.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+			m.Inset(4, func() {})
 		}),
 		)
+	})
+}
+
+func (m *State) SettingsHeader() func() {
+	return func() {
+		layout.Flex{Spacing: layout.SpaceBetween}.Layout(m.Gtx,
+			layout.Rigid(func() {
+				m.Inset(0, m.SettingsTabs)
+			}),
+		)
+	}
+}
+func (m *State) SettingsTabs() {
+	groupsNumber := len(m.Rc.Settings.Daemon.Schema.Groups)
+	m.GroupsList.Layout(m.Gtx, groupsNumber, func(i int) {
+		color :=
+			m.Theme.Colors["DocText"]
+		bgColor :=
+			m.Theme.Colors["DocBg"]
+		i = groupsNumber - 1 - i
+		t := m.Rc.Settings.Daemon.Schema.Groups[i]
+		txt := fmt.Sprint(t.Legend)
+		for m.Rc.Settings.Tabs.TabsList[txt].Clicked(m.Gtx) {
+			m.Rc.Settings.Tabs.Current = txt
+		}
+		if m.Rc.Settings.Tabs.Current == txt {
+			color =
+				m.Theme.Colors["PanelText"]
+			bgColor =
+				m.Theme.Colors["PanelBg"]
+		}
+		m.Theme.DuoUIbutton(m.Theme.Fonts["Primary"],
+			txt, color, bgColor, "", "", "", "",
+			16, 0, 80, 32, 0, 0).Layout(m.Gtx,
+			m.Rc.Settings.Tabs.TabsList[txt])
 	})
 }
