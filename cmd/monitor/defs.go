@@ -45,6 +45,14 @@ type State struct {
 	WindowWidth, WindowHeight int
 	Loggers                   *Node
 	SettingsFields            *layout.List
+	RunningInRepo             bool
+	RunningInRepoButton       *gel.Button
+	RunFromProfileButton      *gel.Button
+	HasGo                     bool
+	HasOtherGo                bool
+	UseBuiltinGoButton        *gel.Button
+	InstallNewGoButton        *gel.Button
+	CannotRun                 bool
 }
 
 type Config struct {
@@ -54,6 +62,8 @@ type Config struct {
 	SettingsOpen  bool
 	BuildOpen     bool
 	DarkTheme     bool
+	RunInRepo     bool
+	UseBuiltinGo  bool
 }
 
 func (st *State) LoadConfig() {

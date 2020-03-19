@@ -197,7 +197,7 @@ type Config struct {
 	WalletRPCListeners     *cli.StringSlice `group:"wallet" label:"Legacy RPC Listeners" description:"addresses for wallet RPC server to listen on" type:"stringSlice" inputType:"text" json:"WalletRPCListeners"`
 	WalletRPCMaxClients    *int             `group:"wallet" label:"Legacy RPC Max Clients" description:"maximum number of RPC clients allowed for wallet RPC" type:"input" inputType:"number" json:"WalletRPCMaxClients"`
 	WalletRPCMaxWebsockets *int             `group:"wallet" label:"Legacy RPC Max Websockets" description:"maximum number of websocket clients allowed for wallet RPC" type:"input" inputType:"number" json:"WalletRPCMaxWebsockets"`
-	WalletServer           *string          `group:"wallet" label:"node address to connect wallet server to" type:"input" inputType:"text" json:"WalletServer"`
+	WalletServer           *string          `group:"wallet" label:"Wallet Server" description:"node address to connect wallet server to" type:"input" inputType:"text" json:"WalletServer"`
 	Whitelists             *cli.StringSlice `group:"debug" label:"Whitelists" description:"peers that you don't want to ever ban" type:"stringSlice" inputType:"text" json:"Whitelists"`
 	LAN                    *bool            `json:"LAN"`
 }

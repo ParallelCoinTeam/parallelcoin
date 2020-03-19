@@ -4,11 +4,14 @@ package monitor
 
 import (
 	"os"
+	"os/exec"
+	"strings"
 
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"gopkg.in/src-d/go-git.v4"
 
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
@@ -65,6 +68,10 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) *State {
 		SettingsFields: &layout.List{
 			Axis: layout.Vertical,
 		},
+		RunningInRepoButton: new(gel.Button),
+		RunFromProfileButton: new(gel.Button),
+		UseBuiltinGoButton: new(gel.Button),
+		InstallNewGoButton: new(gel.Button),
 	}
 }
 
@@ -81,6 +88,27 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			unit.Dp(float32(mon.Config.Height))),
 		app.Title("ParallelCoin Pod Monitor"),
 	)
+	_, _ = git.PlainClone("/tmp/foo", false, &git.CloneOptions{
+		URL:      "https://github.com/src-d/go-git",
+		Progress: os.Stderr,
+	})
+	var cwd string
+	if cwd, err = os.Getwd(); L.Check(err) {
+	}
+	var repo *git.Repository
+	if repo, err = git.PlainOpen(cwd); L.Check(err) {
+	}
+	if repo != nil {
+		L.Debug("running inside repo")
+		mon.RunningInRepo = true
+		L.Debug(repo.Remotes())
+	}
+	cmd := exec.Command("go", "version")
+	var out []byte
+	out, err = cmd.CombinedOutput()
+	if !strings.HasPrefix("go version", string(out)) {
+		mon.HasGo = true
+	}
 	mon.Gtx = layout.NewContext(w.Queue())
 	go func() {
 		L.Debug("starting up GUI event loop")

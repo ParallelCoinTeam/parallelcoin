@@ -62,6 +62,31 @@ func (st *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		Layout(st.Gtx, button)
 }
 
+func (st *State) Text(txt, color, face, tag string) func() {
+	return func() {
+		var desc gelook.DuoUIlabel
+		switch tag {
+		case "body1":
+			desc = st.Theme.Body1(txt)
+		case "body2":
+			desc = st.Theme.Body2(txt)
+		case "h2":
+			desc = st.Theme.H2(txt)
+		case "h3":
+			desc = st.Theme.H3(txt)
+		case "h4":
+			desc = st.Theme.H4(txt)
+		case "h5":
+			desc = st.Theme.H5(txt)
+		case "h6":
+			desc = st.Theme.H6(txt)
+		}
+		desc.Font.Typeface = st.Theme.Fonts[face]
+		desc.Color = st.Theme.Colors[color]
+		desc.Layout(st.Gtx)
+	}
+}
+
 func Toggle(b *bool) bool {
 	*b = !*b
 	return *b
