@@ -37,7 +37,7 @@ func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook
 	}
 	return th.DuoUIpage(page)
 
-	//return th.DuoUIpage("SETTINGS", 0, func() {}, component.ContentHeader(gtx, th, SettingsHeader(rc, gtx, th)), SettingsBody(rc, gtx, th), func() {
+	// return th.DuoUIpage("SETTINGS", 0, func() {}, component.ContentHeader(gtx, th, SettingsHeader(rc, gtx, th)), SettingsBody(rc, gtx, th), func() {
 	// var msg string
 	// if rc.Settings.Daemon.Config["DisableBanning"].(*bool) != true{
 	//	msg = "ima"
@@ -47,7 +47,7 @@ func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook
 	// ttt := th.H6(fmt.Sprint(rc.Settings.Daemon.Config))
 	// ttt.Color = gelook.HexARGB("ffcfcfcf")
 	// ttt.Layout(gtx)
-	//})
+	// })
 }
 
 func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {

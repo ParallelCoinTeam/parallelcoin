@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"math/big"
 	"math/rand"
-	"os"
 	"runtime"
 	"sort"
-	"strings"
 	"time"
 
 	log "github.com/p9c/pod/pkg/logi"
@@ -44,16 +42,7 @@ const IntervalBase = 36
 
 func init() {
 	_, loc, _, _ := runtime.Caller(0)
-	files := strings.Split(loc, "pod")
-	var pkg string
-	pkg = loc
-	if len(files) > 1 {
-		pkg = files[1]
-	}
-	splitted := strings.Split(pkg, string(os.PathSeparator))
-	pkg = strings.Join(splitted[:len(splitted)-1], string(os.PathSeparator))
-	L = log.Empty(pkg).SetLevel("info", true, "pod")
-	log.Loggers[pkg] = L
+	log.Register("pod", loc, L)
 	L.Trace("running fork data init")
 	for i := range p9AlgosNumeric {
 		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", p9AlgosNumeric[i].VersionInterval)

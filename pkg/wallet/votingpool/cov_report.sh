@@ -9,9 +9,9 @@
 # Check for gocov.
 type gocov >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-	echo >&2 "This script requires the gocov tool."
-	echo >&2 "You may obtain it with the following command:"
-	echo >&2 "go get github.com/axw/gocov/gocov"
-	exit 1
+  echo >&2 "This script requires the gocov tool."
+  echo >&2 "You may obtain it with the following command:"
+  echo >&2 "go get github.com/axw/gocov/gocov"
+  exit 1
 fi
 gocov test | gocov report

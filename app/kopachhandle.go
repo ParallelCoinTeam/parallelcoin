@@ -16,7 +16,7 @@ import (
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		L.Info("starting up kopach standalone miner for parallelcoin")
-		Configure(cx, c)
+		Configure(cx, c.Command.Name)
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true
 		}

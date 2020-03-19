@@ -19,6 +19,7 @@ import (
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
+	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -44,9 +45,11 @@ type State struct {
 	BuildCloseButton          *gel.Button
 	BuildTitleCloseButton     *gel.Button
 	ModesButtons              map[string]*gel.Button
+	GroupsList                *layout.List
 	Running                   bool
 	Pausing                   bool
 	WindowWidth, WindowHeight int
+	Loggers                   *Node
 }
 
 const ConfigFileName = "monitor.json"
@@ -130,11 +133,20 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) *State {
 		Pausing:      false,
 		WindowWidth:  0,
 		WindowHeight: 0,
+		GroupsList: &layout.List{
+			Axis:      layout.Horizontal,
+			Alignment: layout.Start,
+		},
 	}
 }
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	mon := NewMonitor(cx, nil, rc)
+	var lgs []string
+	for i := range log.Loggers {
+		lgs = append(lgs, i)
+	}
+	mon.Loggers = GetTree(lgs)
 	mon.LoadConfig()
 	w := app.NewWindow(
 		app.Size(unit.Dp(float32(mon.Config.Width)),
@@ -183,13 +195,6 @@ func (m *State) TopLevelLayout() {
 		m.Body(),
 		m.BottomBar(),
 	)
-}
-
-func (m *State) Body() layout.FlexChild {
-	return Flexed(1, func() {
-		cs := m.Gtx.Constraints
-		m.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-	})
 }
 
 func (m *State) DuoUIheader() layout.FlexChild {
@@ -252,7 +257,8 @@ func (m *State) DuoUIheader() layout.FlexChild {
 				})
 			}), Rigid(func() {
 				m.Inset(closeInsetSize, func() {
-					m.IconButton("closeIcon", "PanelBg", m.CloseButton)
+					m.IconButton("closeIcon", "PanelText",
+						"PanelBg", m.CloseButton)
 					for m.CloseButton.Clicked(m.Gtx) {
 						L.Debug("close button clicked")
 						m.SaveConfig()
@@ -270,12 +276,20 @@ func (m *State) FlipTheme() {
 	m.SetTheme(Toggle(&m.Config.DarkTheme))
 }
 
-func (m *State) SetTheme(light bool) {
-	if light {
-		m.Theme.Colors["DocText"] = m.Theme.Colors["White"]
-		m.Theme.Colors["DocBg"] = m.Theme.Colors["Black"]
-	} else {
+func (m *State) SetTheme(dark bool) {
+	if dark {
 		m.Theme.Colors["DocText"] = m.Theme.Colors["Dark"]
 		m.Theme.Colors["DocBg"] = m.Theme.Colors["Light"]
+		m.Theme.Colors["PanelText"] = m.Theme.Colors["Dark"]
+		m.Theme.Colors["PanelBg"] = m.Theme.Colors["White"]
+		// m.Theme.Colors["Primary"] = m.Theme.Colors["Gray"]
+		// m.Theme.Colors["Secondary"] = m.Theme.Colors["White"]
+	} else {
+		m.Theme.Colors["DocText"] = m.Theme.Colors["Light"]
+		m.Theme.Colors["DocBg"] = m.Theme.Colors["Black"]
+		m.Theme.Colors["PanelText"] = m.Theme.Colors["Light"]
+		m.Theme.Colors["PanelBg"] = m.Theme.Colors["Dark"]
+		// m.Theme.Colors["Primary"] = m.Theme.Colors["Dark"]
+		// m.Theme.Colors["Secondary"] = m.Theme.Colors["Black"]
 	}
 }

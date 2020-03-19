@@ -452,21 +452,21 @@ type (
 
 // HasWitness returns a bool to show if a Vin has any witness data associated with it or not.
 func (
-	v *Vin,
+v *Vin,
 ) HasWitness() bool {
 	return len(v.Witness) > 0
 }
 
 // IsCoinBase returns a bool to show if a Vin is a Coinbase one or not.
 func (
-	v *Vin,
+v *Vin,
 ) IsCoinBase() bool {
 	return len(v.Coinbase) > 0
 }
 
 // MarshalJSON provides a custom Marshal method for Vin.
 func (
-	v *Vin,
+v *Vin,
 ) MarshalJSON() ([]byte, error) {
 	if v.IsCoinBase() {
 		coinbaseStruct := struct {
@@ -512,21 +512,21 @@ func (
 
 // HasWitness returns a bool to show if a Vin has any witness data associated with it or not.
 func (
-	v *VinPrevOut,
+v *VinPrevOut,
 ) HasWitness() bool {
 	return len(v.Witness) > 0
 }
 
 // IsCoinBase returns a bool to show if a Vin is a Coinbase one or not.
 func (
-	v *VinPrevOut,
+v *VinPrevOut,
 ) IsCoinBase() bool {
 	return len(v.Coinbase) > 0
 }
 
 // MarshalJSON provides a custom Marshal method for VinPrevOut.
 func (
-	v *VinPrevOut,
+v *VinPrevOut,
 ) MarshalJSON() ([]byte, error) {
 	if v.IsCoinBase() {
 		coinbaseStruct := struct {

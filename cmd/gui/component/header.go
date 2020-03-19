@@ -14,7 +14,7 @@ var (
 	buttonHeader = new(gel.Button)
 )
 
-//func ContentHeader(gtx *layout.Context, th *gelook.DuoUItheme, b func()) func() {
+// func ContentHeader(gtx *layout.Context, th *gelook.DuoUItheme, b func()) func() {
 //	return func() {
 //		hmin := gtx.Constraints.Width.Min
 //		vmin := gtx.Constraints.Height.Min
@@ -35,7 +35,7 @@ var (
 //			}),
 //		)
 //	}
-//}
+// }
 
 func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {

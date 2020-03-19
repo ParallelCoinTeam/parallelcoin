@@ -15,7 +15,7 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		Configure(cx, c)
+		Configure(cx, c.Command.Name)
 		L.Warn("starting GUI")
 		rc := rcd.RcInit(cx)
 		if !apputil.FileExists(*cx.Config.WalletFile) {

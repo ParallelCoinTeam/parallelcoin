@@ -3,6 +3,7 @@ package component
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
+
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
@@ -19,12 +20,12 @@ var (
 		Axis: layout.Vertical,
 	}
 
-	navItemWidth             int = 96
-	navItemHeight            int = 72
-	navItemTextSize          int = 48
-	navItemTconSize          int = 36
-	navItemPaddingVertical   int = 8
-	navItemPaddingHorizontal int = 0
+	navItemWidth             = 96
+	navItemHeight            = 72
+	navItemTextSize          = 48
+	navItemTconSize          = 36
+	navItemPaddingVertical   = 8
+	navItemPaddingHorizontal = 0
 )
 
 func MainNavigation(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
@@ -42,8 +43,8 @@ func navButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPa
 		navMenuButton(rc, gtx, th, allPages.Theme["OVERVIEW"], "OVERVIEW", "overviewIcon", navButtonOverview),
 		navMenuLine(gtx, th),
 		navMenuButton(rc, gtx, th, allPages.Theme["SEND"], "SEND", "sendIcon", navButtonSend),
-		//navMenuLine(gtx, th),
-		//navMenuButton(rc, gtx, th, allPages.Theme["RECEIVE"], "RECEIVE", "receiveIcon", navButtonReceive),
+		// navMenuLine(gtx, th),
+		// navMenuButton(rc, gtx, th, allPages.Theme["RECEIVE"], "RECEIVE", "receiveIcon", navButtonReceive),
 		navMenuLine(gtx, th),
 		navMenuButton(rc, gtx, th, allPages.Theme["ADDRESSBOOK"], "ADDRESSBOOK", "addressBookIcon", navButtonAddressBook),
 		navMenuLine(gtx, th),

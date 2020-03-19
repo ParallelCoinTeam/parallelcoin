@@ -75,8 +75,8 @@ isNotInMainChainErr(err error) bool {
 }
 
 type // errDeserialize signifies that a problem was encountered when
-// deserializing data.
-errDeserialize string
+	// deserializing data.
+	errDeserialize string
 
 func // Error is an implementation of the errors.* interface
 (e errDeserialize) Error() string {
@@ -193,23 +193,23 @@ dbFetchOrCreateVersion(dbTx database.Tx, key []byte, defaultVersion uint32) (uin
 // -----------------------------------------------------------------------------
 
 type // SpentTxOut contains a spent transaction output and potentially
-// additional contextual information such as whether or not it was contained
-// in a coinbase transaction,
-// the version of the transaction it was contained in,
-// and which block height the containing transaction was included in.
-// As described in the comments above,
-// the additional contextual information will only be valid when this spent
-// txout is spending the last unspent output of the containing transaction.
-SpentTxOut struct {
-	// Amount is the amount of the output.
-	Amount int64
-	// PkScipt is the the public key script for the output.
-	PkScript []byte
-	// Height is the height of the the block containing the creating tx.
-	Height int32
-	// Denotes if the creating tx is a coinbase.
-	IsCoinBase bool
-}
+	// additional contextual information such as whether or not it was contained
+	// in a coinbase transaction,
+	// the version of the transaction it was contained in,
+	// and which block height the containing transaction was included in.
+	// As described in the comments above,
+	// the additional contextual information will only be valid when this spent
+	// txout is spending the last unspent output of the containing transaction.
+	SpentTxOut struct {
+		// Amount is the amount of the output.
+		Amount int64
+		// PkScipt is the the public key script for the output.
+		PkScript []byte
+		// Height is the height of the the block containing the creating tx.
+		Height int32
+		// Denotes if the creating tx is a coinbase.
+		IsCoinBase bool
+	}
 
 func // FetchSpendJournal attempts to retrieve the spend journal,
 // or the set of outputs spent for the target block.
@@ -502,17 +502,17 @@ dbRemoveSpendJournalEntry(dbTx database.Tx, blockHash *chainhash.Hash) error {
 // -----------------------------------------------------------------------------
 
 var // maxUint32VLQSerializeSize is the maximum number of bytes a max uint32
-// takes to serialize as a VLQ.
-maxUint32VLQSerializeSize = serializeSizeVLQ(1<<32 - 1)
+	// takes to serialize as a VLQ.
+	maxUint32VLQSerializeSize = serializeSizeVLQ(1<<32 - 1)
 
 var // outpointKeyPool defines a concurrent safe free list of byte slices used to
-// provide temporary buffers for outpoint database keys.
-outpointKeyPool = sync.Pool{
-	New: func() interface{} {
-		b := make([]byte, chainhash.HashSize+maxUint32VLQSerializeSize)
-		return &b // Pointer to slice to avoid boxing alloc.
-	},
-}
+	// provide temporary buffers for outpoint database keys.
+	outpointKeyPool = sync.Pool{
+		New: func() interface{} {
+			b := make([]byte, chainhash.HashSize+maxUint32VLQSerializeSize)
+			return &b // Pointer to slice to avoid boxing alloc.
+		},
+	}
 
 func // outpointKey returns a key suitable for use as a database key in the utxo
 // set while making use of a free list.
@@ -822,13 +822,13 @@ dbFetchHashByHeight(dbTx database.Tx, height int32) (*chainhash.Hash, error) {
 // -----------------------------------------------------------------------------
 
 type // bestChainState represents the data to be stored the database for the
-// current best chain state.
-bestChainState struct {
-	hash      chainhash.Hash
-	height    uint32
-	totalTxns uint64
-	workSum   *big.Int
-}
+	// current best chain state.
+	bestChainState struct {
+		hash      chainhash.Hash
+		height    uint32
+		totalTxns uint64
+		workSum   *big.Int
+	}
 
 // serializeBestChainState returns the serialization of the passed block best
 // chain state.  This is data to be stored in the chain state bucket.

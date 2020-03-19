@@ -40,10 +40,10 @@ func (m *State) Rectangle(width, height int, color string) {
 	)
 }
 
-func (m *State) IconButton(icon, bg string, button *gel.Button) {
+func (m *State) IconButton(icon, fg, bg string, button *gel.Button) {
 	m.Theme.DuoUIbutton("", "", "",
-		m.Theme.Colors[bg], "", m.Theme.Colors["Dark"], icon,
-		m.Theme.Colors["Light"], 0, 32, 41, 41,
+		m.Theme.Colors[bg], "", m.Theme.Colors[fg], icon,
+		m.Theme.Colors[fg], 0, 32, 41, 41,
 		0, 0).IconLayout(m.Gtx, button)
 }
 

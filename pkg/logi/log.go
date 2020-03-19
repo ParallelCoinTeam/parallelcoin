@@ -629,6 +629,19 @@ func ps(level string, color bool, fh *os.File, split string) SpewFunc {
 	return f
 }
 
+// Register adds a logger to Loggers
+func Register(root, loc string, l *Logger) {
+	files := strings.Split(loc, root+string(os.PathSeparator))
+	var pkg string
+	if len(files) > 1 {
+		pkg = files[1]
+	}
+	splitted := strings.Split(pkg, string(os.PathSeparator))
+	pkg = strings.Join(splitted[:len(splitted)-1], string(os.PathSeparator))
+	l = Empty(pkg).SetLevel("info", true, root)
+	Loggers[pkg] = l
+}
+
 // FileExists reports whether the named file or directory exists.
 func sanitizeLoglevel(level string) string {
 	found := false

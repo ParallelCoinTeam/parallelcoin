@@ -24,10 +24,10 @@ fi
 linter_targets=$(glide novendor)
 # Automatic checks
 test -z "$(gometalinter.v2 -j 4 --disable-all \
---enable=gofmt \
---enable=golint \
---enable=vet \
---enable=gosimple \
---enable=unconvert \
---deadline=10m $linter_targets 2>&1 | grep -v 'ALL_CAPS\|OP_' 2>&1 | tee /dev/stderr)"
+  --enable=gofmt \
+  --enable=golint \
+  --enable=vet \
+  --enable=gosimple \
+  --enable=unconvert \
+  --deadline=10m $linter_targets 2>&1 | grep -v 'ALL_CAPS\|OP_' 2>&1 | tee /dev/stderr)"
 go test -tags rpctest $linter_targets
