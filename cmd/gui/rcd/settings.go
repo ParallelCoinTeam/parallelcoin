@@ -51,7 +51,11 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 				switch field.InputType {
 				case "text":
 					if settings.Daemon.Config[field.Model] != nil {
-						(settingsFields[field.Model]).(*gel.Editor).SetText(fmt.Sprint(*settings.Daemon.Config[field.Model].(*cli.StringSlice)))
+						var text string
+						for _, str := range *settings.Daemon.Config[field.Model].(*cli.StringSlice) {
+							text = text + str + "\n"
+						}
+						(settingsFields[field.Model]).(*gel.Editor).SetText(text)
 					}
 				}
 			case "input":
