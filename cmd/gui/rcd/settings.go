@@ -3,6 +3,7 @@ package rcd
 import (
 	js "encoding/json"
 	"fmt"
+	"github.com/urfave/cli"
 	"time"
 
 	"github.com/p9c/pod/app/save"
@@ -18,6 +19,7 @@ func (r *RcVar) SaveDaemonCfg() {
 	config := pod.Config{}
 	if err := js.Unmarshal(marshalled, &config); err != nil {
 	}
+	//app.Configure(r.cx, )
 	save.Pod(&config)
 }
 
@@ -42,9 +44,14 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 		for _, field := range group.Fields {
 			switch field.Type {
 			case "stringSlice":
+				settingsFields[field.Model] = &gel.Editor{
+					SingleLine: false,
+				}
 				switch field.InputType {
 				case "text":
-					settingsFields[field.Model] = new(gel.Editor)
+					if settings.Daemon.Config[field.Model] != nil {
+						(settingsFields[field.Model]).(*gel.Editor).SetText(fmt.Sprint(*settings.Daemon.Config[field.Model].(*cli.StringSlice)))
+					}
 				}
 			case "input":
 				settingsFields[field.Model] = &gel.Editor{
