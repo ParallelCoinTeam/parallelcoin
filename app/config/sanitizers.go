@@ -1,4 +1,4 @@
-package app
+package config
 
 import (
 	"crypto/tls"
@@ -36,6 +36,14 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 )
 
+const (
+	appName           = "pod"
+	confExt           = ".json"
+	appLanguage       = "en"
+	podConfigFilename = appName + confExt
+	PARSER            = "json"
+)
+
 var funcName = "loadConfig"
 
 func initDictionary(cfg *pod.Config) {
@@ -56,7 +64,7 @@ func initWalletFile(cx *conte.Xt) {
 	if cx.Config.WalletFile == nil || *cx.Config.WalletFile == "" {
 		*cx.
 			Config.
-			WalletFile = *cx.Config.DataDir + slash + cx.ActiveNet.Name + slash + wallet.WalletDbName
+			WalletFile = *cx.Config.DataDir + string(os.PathSeparator) + cx.ActiveNet.Name + string(os.PathSeparator) + wallet.WalletDbName
 	}
 	L.Debug("walletfile set to", *cx.Config.WalletFile)
 }
@@ -182,7 +190,7 @@ func initListeners(cx *conte.Xt, commandName string) {
 					L.Error(err)
 				}
 				*listeners[i] = cli.
-				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
+					StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
 			}
 		}
 	}

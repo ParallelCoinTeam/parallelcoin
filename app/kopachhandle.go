@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/app/config"
 	"os"
 
 	"github.com/urfave/cli"
@@ -16,7 +17,7 @@ import (
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		L.Info("starting up kopach standalone miner for parallelcoin")
-		Configure(cx, c.Command.Name)
+		config.Configure(cx, c.Command.Name)
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true
 		}

@@ -3,6 +3,7 @@ package rcd
 import (
 	js "encoding/json"
 	"fmt"
+	config2 "github.com/p9c/pod/app/config"
 	"github.com/urfave/cli"
 	"time"
 
@@ -19,7 +20,7 @@ func (r *RcVar) SaveDaemonCfg() {
 	config := pod.Config{}
 	if err := js.Unmarshal(marshalled, &config); err != nil {
 	}
-	//app.Configure(r.cx, )
+	config2.Configure(r.cx, "gui")
 	save.Pod(&config)
 }
 

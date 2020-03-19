@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/app/config"
 	"os"
 	"path/filepath"
 	"time"
@@ -123,7 +124,7 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 						"for development and testing as well as clearing up"+
 						" transaction mess)",
 					func(c *cli.Context) (err error) {
-						Configure(cx, c.Command.Name)
+						config.Configure(cx, c.Command.Name)
 						L.Info("dropping wallet history")
 						go func() {
 							L.Warn("starting wallet")

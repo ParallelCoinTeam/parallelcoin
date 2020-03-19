@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/app/config"
 	"os"
 
 	"github.com/urfave/cli"
@@ -15,7 +16,7 @@ import (
 
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		Configure(cx, c.Command.Name)
+		config.Configure(cx, c.Command.Name)
 		L.Debug("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured

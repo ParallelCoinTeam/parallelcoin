@@ -1,4 +1,4 @@
-package app
+package config
 
 import (
 	"github.com/p9c/pod/app/apputil"

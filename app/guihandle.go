@@ -3,6 +3,7 @@
 package app
 
 import (
+	"github.com/p9c/pod/app/config"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
@@ -15,7 +16,7 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		Configure(cx, c.Command.Name)
+		config.Configure(cx, c.Command.Name)
 		L.Warn("starting GUI")
 		rc := rcd.RcInit(cx)
 		if !apputil.FileExists(*cx.Config.WalletFile) {
