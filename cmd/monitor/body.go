@@ -4,11 +4,11 @@ import (
 	"gioui.org/layout"
 )
 
-func (m *State) Body() layout.FlexChild {
+func (st *State) Body() layout.FlexChild {
 	return Flexed(1, func() {
-		cs := m.Gtx.Constraints
-		m.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-		m.Inset(8, func(){
+		cs := st.Gtx.Constraints
+		st.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+		st.Inset(8, func(){
 
 		})
 	})

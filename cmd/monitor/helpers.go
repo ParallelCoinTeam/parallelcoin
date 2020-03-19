@@ -8,16 +8,16 @@ import (
 	"github.com/p9c/pod/pkg/gelook"
 )
 
-func (m *State) FlexV(children ...layout.FlexChild) () {
-	layout.Flex{Axis: layout.Vertical}.Layout(m.Gtx, children...)
+func (st *State) FlexV(children ...layout.FlexChild) () {
+	layout.Flex{Axis: layout.Vertical}.Layout(st.Gtx, children...)
 }
 
-func (m *State) FlexH(children ...layout.FlexChild) {
-	layout.Flex{Axis: layout.Horizontal}.Layout(m.Gtx, children...)
+func (st *State) FlexH(children ...layout.FlexChild) {
+	layout.Flex{Axis: layout.Horizontal}.Layout(st.Gtx, children...)
 }
 
-func (m *State) Inset(size int, fn func()) {
-	layout.UniformInset(unit.Dp(float32(size))).Layout(m.Gtx, fn)
+func (st *State) Inset(size int, fn func()) {
+	layout.UniformInset(unit.Dp(float32(size))).Layout(st.Gtx, fn)
 }
 
 func Rigid(widget func()) layout.FlexChild {
@@ -32,34 +32,34 @@ func Spacer() layout.FlexChild {
 	return Flexed(1, func() {})
 }
 
-func (m *State) Rectangle(width, height int, color string) {
-	gelook.DuoUIdrawRectangle(m.Gtx,
-		width, height, m.Theme.Colors[color],
+func (st *State) Rectangle(width, height int, color string) {
+	gelook.DuoUIdrawRectangle(st.Gtx,
+		width, height, st.Theme.Colors[color],
 		[4]float32{0, 0, 0, 0},
 		[4]float32{0, 0, 0, 0},
 	)
 }
 
-func (m *State) IconButton(icon, fg, bg string, button *gel.Button) {
-	m.Theme.DuoUIbutton("", "", "",
-		m.Theme.Colors[bg], "", m.Theme.Colors[fg], icon,
-		m.Theme.Colors[fg], 0, 32, 41, 41,
-		0, 0).IconLayout(m.Gtx, button)
+func (st *State) IconButton(icon, fg, bg string, button *gel.Button) {
+	st.Theme.DuoUIbutton("", "", "",
+		st.Theme.Colors[bg], "", st.Theme.Colors[fg], icon,
+		st.Theme.Colors[fg], 0, 32, 41, 41,
+		0, 0).IconLayout(st.Gtx, button)
 }
 
-func (m *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
+func (st *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 	button *gel.Button) {
-	m.Theme.DuoUIbutton(
-		m.Theme.Fonts[fontFace],
+	st.Theme.DuoUIbutton(
+		st.Theme.Fonts[fontFace],
 		label,
-		m.Theme.Colors[fg],
-		m.Theme.Colors[bg],
-		m.Theme.Colors[bg],
-		m.Theme.Colors[fg],
+		st.Theme.Colors[fg],
+		st.Theme.Colors[bg],
+		st.Theme.Colors[bg],
+		st.Theme.Colors[fg],
 		"settingsIcon",
-		m.Theme.Colors["Light"],
+		st.Theme.Colors["Light"],
 		fontSize, 0, 80, 32, 4, 4).
-		Layout(m.Gtx, button)
+		Layout(st.Gtx, button)
 }
 
 func Toggle(b *bool) bool {
