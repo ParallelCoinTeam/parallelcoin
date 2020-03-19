@@ -75,8 +75,7 @@ func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorContro
 				[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32,
-					th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0,
-						0, 0})
+					th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 				e := th.DuoUIeditor(label)
 				e.Font.Typeface = th.Fonts["Mono"]
 				// e.Font.Style = text.Italic
