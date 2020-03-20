@@ -22,6 +22,7 @@ type Event struct {
 var EventsChan = make(chan Event, 1)
 
 func (r *RcVar) ListenInit(trigger chan struct{}) {
+	L.Debug("listeninit")
 	r.Events = EventsChan
 	r.UpdateTrigger = trigger
 

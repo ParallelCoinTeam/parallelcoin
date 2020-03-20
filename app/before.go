@@ -240,6 +240,8 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("lan") {
 			// if LAN is turned on we need to remove the seeds from netparams not on mainnet mainnet is never in lan
 			// mode
+			// if LAN is turned on it means by default we are on testnet
+			cx.ActiveNet = &netparams.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
 				L.Warn("set lan", c.Bool("lan"))
 				*cx.Config.LAN = c.Bool("lan")

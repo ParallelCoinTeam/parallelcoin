@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
+	"time"
 )
 
 func (s *State) RunControls() layout.FlexChild {
@@ -69,7 +70,6 @@ func (s *State) RunControls() layout.FlexChild {
 func (s *State) Runner() {
 	var c *exec.Cmd
 	var err error
-	// var pid int
 	for cmd := range s.RunCommandChan {
 		switch cmd {
 		case "run":
@@ -90,13 +90,13 @@ func (s *State) Runner() {
 						s.Pausing.Store(false)
 						s.W.Invalidate()
 					}
-					//go func() {
-					//	if err = c.Wait(); L.Check(err) {
-					//	}
-					//	s.Running.Store(false)
-					//	s.Pausing.Store(false)
-					//	s.W.Invalidate()
-					//}()
+					go func() {
+						if err = c.Wait(); L.Check(err) {
+						}
+						s.Running.Store(false)
+						s.Pausing.Store(false)
+						s.W.Invalidate()
+					}()
 				}
 			}
 		case "stop":
@@ -142,7 +142,8 @@ func (s *State) Runner() {
 			if s.HasGo && c != nil {
 				if err = c.Process.Signal(syscall.SIGINT); !L.Check(err) {
 					s.Running.Store(false)
-					L.Debug("interrupted")
+					time.Sleep(time.Second*2)
+					L.Debug("restarted")
 					s.W.Invalidate()
 				}
 			}

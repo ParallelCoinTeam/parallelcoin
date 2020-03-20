@@ -236,7 +236,7 @@ func initListeners(cx *conte.Xt, commandName string) {
 		peersFile := filepath.Join(filepath.Join(
 			*cfg.DataDir, cx.ActiveNet.Name), "peers.json")
 		os.Remove(peersFile)
-		L.Debug("removed", peersFile)
+		L.Trace("removed", peersFile)
 	}
 	*cfg.RPCConnect = (*cfg.RPCListeners)[0]
 	h, p, _ := net.SplitHostPort(*cfg.RPCConnect)
