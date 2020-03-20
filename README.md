@@ -229,8 +229,10 @@ newlines removed for dconf with using tilix at the dconf path
 
 ```
 [
-    '([/ ](([a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+))[ ],
+    '([/](([a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+)),
         goland --line $5 /$2,false', 
+    '([/](([a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+))$,
+        
 ]
 ```
 
