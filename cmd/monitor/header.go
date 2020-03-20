@@ -9,11 +9,11 @@ import (
 	"github.com/p9c/pod/pkg/gelook"
 )
 
-func (st *State) DuoUIheader() layout.FlexChild {
+func (s *State) DuoUIheader() layout.FlexChild {
 	return Rigid(func() {
-		st.FlexH(Rigid(func() {
-			cs := st.Gtx.Constraints
-			st.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+		s.FlexH(Rigid(func() {
+			cs := s.Gtx.Constraints
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 			var (
 				textSize, iconSize       = 64, 64
 				width, height            = 72, 72
@@ -21,7 +21,7 @@ func (st *State) DuoUIheader() layout.FlexChild {
 				insetSize, textInsetSize = 16, 24
 				closeInsetSize           = 4
 			)
-			if st.WindowWidth < 1024 || st.WindowHeight < 1280 {
+			if s.WindowWidth < 1024 || s.WindowHeight < 1280 {
 				textSize, iconSize = 24, 24
 				width, height = 32, 32
 				paddingV, paddingH = 8, 8
@@ -29,52 +29,50 @@ func (st *State) DuoUIheader() layout.FlexChild {
 				textInsetSize = 16
 				closeInsetSize = 4
 			}
-			st.FlexH(Rigid(func() {
-				st.Inset(insetSize,
+			s.FlexH(Rigid(func() {
+				s.Inset(insetSize,
 					func() {
 						var logoMeniItem gelook.DuoUIbutton
-						logoMeniItem = st.Theme.DuoUIbutton(
+						logoMeniItem = s.Theme.DuoUIbutton(
 							"", "",
-							"", st.Theme.Colors["PanelBg"],
+							"", s.Theme.Colors["PanelBg"],
 							"", "",
-							"logo", st.Theme.Colors["PanelText"],
+							"logo", s.Theme.Colors["PanelText"],
 							textSize, iconSize,
 							width, height,
 							paddingV, paddingH)
-						for st.LogoButton.Clicked(st.Gtx) {
-							st.FlipTheme()
-							st.SaveConfig()
+						for s.LogoButton.Clicked(s.Gtx) {
+							s.FlipTheme()
 						}
-						logoMeniItem.IconLayout(st.Gtx, st.LogoButton)
+						logoMeniItem.IconLayout(s.Gtx, s.LogoButton)
 					},
 				)
 			}), Rigid(func() {
-				st.Inset(textInsetSize, func() {
-					t := st.Theme.DuoUIlabel(unit.Dp(float32(
+				s.Inset(textInsetSize, func() {
+					t := s.Theme.DuoUIlabel(unit.Dp(float32(
 						textSize)),
 						"monitor")
-					t.Color = st.Theme.Colors["PanelText"]
-					t.Layout(st.Gtx)
+					t.Color = s.Theme.Colors["PanelText"]
+					t.Layout(s.Gtx)
 				},
 				)
 			}), Spacer(), Rigid(func() {
-				st.Inset(closeInsetSize*2, func() {
-					t := st.Theme.DuoUIlabel(unit.Dp(float32(24)),
+				s.Inset(closeInsetSize*2, func() {
+					t := s.Theme.DuoUIlabel(unit.Dp(float32(24)),
 						fmt.Sprintf("%dx%d",
-							st.WindowWidth,
-							st.WindowHeight))
-					t.Color = st.Theme.Colors["PanelText"]
-					t.Font.Typeface = st.Theme.Fonts["Primary"]
-					t.Layout(st.Gtx)
+							s.WindowWidth,
+							s.WindowHeight))
+					t.Color = s.Theme.Colors["PanelText"]
+					t.Font.Typeface = s.Theme.Fonts["Primary"]
+					t.Layout(s.Gtx)
 				})
 			}), Rigid(func() {
-				st.Inset(closeInsetSize, func() {
-					st.IconButton("closeIcon", "PanelText",
-						"PanelBg", st.CloseButton)
-					for st.CloseButton.Clicked(st.Gtx) {
+				s.Inset(closeInsetSize, func() {
+					s.IconButton("closeIcon", "PanelText",
+						"PanelBg", s.CloseButton)
+					for s.CloseButton.Clicked(s.Gtx) {
 						L.Debug("close button clicked")
-						st.SaveConfig()
-						close(st.Ctx.KillAll)
+						close(s.Ctx.KillAll)
 					}
 				})
 			}),

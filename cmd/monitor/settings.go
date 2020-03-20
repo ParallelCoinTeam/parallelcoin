@@ -18,148 +18,148 @@ type Field struct {
 	Field *pod.Field
 }
 
-func (st *State) SettingsButtons() layout.FlexChild {
+func (s *State) SettingsButtons() layout.FlexChild {
 	return Flexed(1, func() {
-		st.FlexH(Rigid(func() {
+		s.FlexH(Rigid(func() {
 			bg, fg := "PanelBg", "PanelText"
-			if st.Config.SettingsOpen {
+			if s.Config.SettingsOpen.Load() {
 				bg, fg = "DocBg", "DocText"
 			}
-			st.TextButton("Settings", "Secondary",
-				23, fg, bg, st.SettingsFoldButton)
-			for st.SettingsFoldButton.Clicked(st.Gtx) {
+			s.TextButton("Settings", "Secondary",
+				23, fg, bg, s.SettingsFoldButton)
+			for s.SettingsFoldButton.Clicked(s.Gtx) {
 				L.Debug("settings folder clicked")
 				switch {
-				case !st.Config.SettingsOpen:
-					st.Config.BuildOpen = false
-					st.Config.SettingsOpen = true
-				case st.Config.SettingsOpen:
-					st.Config.SettingsOpen = false
+				case !s.Config.SettingsOpen.Load():
+					s.Config.BuildOpen.Store(false)
+					s.Config.SettingsOpen.Store(true)
+				case s.Config.SettingsOpen.Load():
+					s.Config.SettingsOpen.Store(false)
 				}
-				st.SaveConfig()
+				s.SaveConfig()
 			}
 		}),
 		)
 	})
 }
 
-func (st *State) SettingsPage() layout.FlexChild {
-	if !st.Config.SettingsOpen {
+func (s *State) SettingsPage() layout.FlexChild {
+	if !s.Config.SettingsOpen.Load() {
 		return Flexed(0, func() {})
 	}
 	var weight float32 = 0.5
 	var settingsInset = 0
 	switch {
-	case st.WindowWidth < 1024 && st.WindowHeight > 1024:
+	case s.WindowWidth < 1024 && s.WindowHeight > 1024:
 		// weight = 0.333
-	case st.WindowHeight < 1024 && st.WindowWidth < 1024:
+	case s.WindowHeight < 1024 && s.WindowWidth < 1024:
 		weight = 1
-	case st.WindowHeight < 600 && st.WindowWidth > 1024:
+	case s.WindowHeight < 600 && s.WindowWidth > 1024:
 		weight = 1
 	}
 	return Flexed(weight, func() {
-		st.Inset(settingsInset, func() {
-			cs := st.Gtx.Constraints
-			st.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-			st.FlexV(
+		s.Inset(settingsInset, func() {
+			cs := s.Gtx.Constraints
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+			s.FlexV(
 				Rigid(func() {
-					cs := st.Gtx.Constraints
-					st.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-					st.Inset(4, func() {})
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+					s.Inset(4, func() {})
 				}),
 				Rigid(func() {
-					st.FlexH(
+					s.FlexH(
 						Rigid(func() {
-							st.TextButton("Settings", "Secondary",
+							s.TextButton("Settings", "Secondary",
 								23, "DocText", "DocBg",
-								st.SettingsTitleCloseButton)
-							for st.SettingsTitleCloseButton.Clicked(st.Gtx) {
+								s.SettingsTitleCloseButton)
+							for s.SettingsTitleCloseButton.Clicked(s.Gtx) {
 								L.Debug("settings panel title close button clicked")
-								st.Config.SettingsOpen = false
-								st.SaveConfig()
+								s.Config.SettingsOpen.Store(false)
+								s.SaveConfig()
 							}
 						}),
 						Rigid(func() {
-							if st.WindowWidth > 640 {
-								st.SettingsTabs()
+							if s.WindowWidth > 640 {
+								s.SettingsTabs()
 							}
 						}),
 						Spacer(),
 						Rigid(func() {
-							st.IconButton("minimize", "DocText", "DocBg",
-								st.SettingsCloseButton)
-							for st.SettingsCloseButton.Clicked(st.Gtx) {
+							s.IconButton("minimize", "DocText", "DocBg",
+								s.SettingsCloseButton)
+							for s.SettingsCloseButton.Clicked(s.Gtx) {
 								L.Debug("settings panel close button clicked")
-								st.Config.SettingsOpen = false
-								st.SaveConfig()
+								s.Config.SettingsOpen.Store(false)
+								s.SaveConfig()
 							}
 						}),
 					)
 				}),
 				Rigid(func() {
-					if st.WindowWidth < 640 {
-						cs := st.Gtx.Constraints
-						st.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-						st.SettingsTabs()
+					if s.WindowWidth < 640 {
+						cs := s.Gtx.Constraints
+						s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+						s.SettingsTabs()
 					}
 				}),
 				Flexed(1, func() {
-					st.Inset(settingsInset, func() {
-						cs := st.Gtx.Constraints
-						st.Rectangle(cs.Width.Max, cs.Height.Max,
+					s.Inset(settingsInset, func() {
+						cs := s.Gtx.Constraints
+						s.Rectangle(cs.Width.Max, cs.Height.Max,
 							"PanelBg")
-						st.SettingsBody()
+						s.SettingsBody()
 					})
 				}),
 				Rigid(func() {
-					cs := st.Gtx.Constraints
-					st.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-					st.Inset(4, func() {})
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+					s.Inset(4, func() {})
 				}),
 			)
 		})
 	})
 }
 
-func (st *State) SettingsTabs() {
-	groupsNumber := len(st.Rc.Settings.Daemon.Schema.Groups)
-	st.GroupsList.Layout(st.Gtx, groupsNumber, func(i int) {
+func (s *State) SettingsTabs() {
+	groupsNumber := len(s.Rc.Settings.Daemon.Schema.Groups)
+	s.GroupsList.Layout(s.Gtx, groupsNumber, func(i int) {
 		color :=
 			"DocText"
 		bgColor :=
 			"DocBg"
 		i = groupsNumber - 1 - i
-		txt := st.Rc.Settings.Daemon.Schema.Groups[i].Legend
-		for st.Rc.Settings.Tabs.TabsList[txt].Clicked(st.Gtx) {
-			st.Rc.Settings.Tabs.Current = txt
+		txt := s.Rc.Settings.Daemon.Schema.Groups[i].Legend
+		for s.Rc.Settings.Tabs.TabsList[txt].Clicked(s.Gtx) {
+			s.Rc.Settings.Tabs.Current = txt
 		}
-		if st.Rc.Settings.Tabs.Current == txt {
+		if s.Rc.Settings.Tabs.Current == txt {
 			color =
 				"PanelText"
 			bgColor =
 				"PanelBg"
 		}
-		st.TextButton(txt, "Primary", 16,
-			color, bgColor, st.Rc.Settings.Tabs.TabsList[txt])
+		s.TextButton(txt, "Primary", 16,
+			color, bgColor, s.Rc.Settings.Tabs.TabsList[txt])
 	})
 }
 
-func (st *State) SettingsBody() {
-	st.FlexH(
+func (s *State) SettingsBody() {
+	s.FlexH(
 		Rigid(func() {
-			st.Theme.DuoUIitem(4, st.Theme.Colors["PanelBg"]).
-				Layout(st.Gtx, layout.N, func() {
-					for _, fields := range st.Rc.Settings.Daemon.Schema.Groups {
-						if fmt.Sprint(fields.Legend) == st.Rc.Settings.Tabs.Current {
-							st.SettingsFields.Layout(st.Gtx, len(fields.Fields),
+			s.Theme.DuoUIitem(4, s.Theme.Colors["PanelBg"]).
+				Layout(s.Gtx, layout.N, func() {
+					for _, fields := range s.Rc.Settings.Daemon.Schema.Groups {
+						if fmt.Sprint(fields.Legend) == s.Rc.Settings.Tabs.Current {
+							s.SettingsFields.Layout(s.Gtx, len(fields.Fields),
 								func(il int) {
 									il = len(fields.Fields) - 1 - il
 									tl := &Field{
 										Field: &fields.Fields[il],
 									}
-									st.FlexH(
-										st.SettingsItemLabel(tl),
-										st.SettingsItemInput(tl),
+									s.FlexH(
+										s.SettingsItemLabel(tl),
+										s.SettingsItemInput(tl),
 									)
 								},
 							)
@@ -170,30 +170,30 @@ func (st *State) SettingsBody() {
 	)
 }
 
-func (st *State) SettingsItemLabel(f *Field) layout.FlexChild {
+func (s *State) SettingsItemLabel(f *Field) layout.FlexChild {
 	return Flexed(0.5, func() {
-		st.Inset(10, func() {
-			st.FlexV(
+		s.Inset(10, func() {
+			s.FlexV(
 				Rigid(
-					st.SettingsFieldLabel(st.Gtx, st.Theme, f),
+					s.SettingsFieldLabel(s.Gtx, s.Theme, f),
 				),
 				Rigid(
-					st.SettingsFieldDescription(st.Gtx, st.Theme, f),
+					s.SettingsFieldDescription(s.Gtx, s.Theme, f),
 				),
 			)
 		})
 	})
 }
 
-func (st *State) SettingsItemInput(f *Field) layout.FlexChild {
+func (s *State) SettingsItemInput(f *Field) layout.FlexChild {
 	return Flexed(0.5, func() {
-		st.Inset(10,
-			DuoUIinputField(st.Rc, st.Gtx, st.Theme, &Field{Field: f.Field}),
+		s.Inset(10,
+			DuoUIinputField(s.Rc, s.Gtx, s.Theme, &Field{Field: f.Field}),
 		)
 	})
 }
 
-func (st *State) SettingsFieldLabel(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
+func (s *State) SettingsFieldLabel(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
 		name := th.H6(fmt.Sprint(f.Field.Label))
 		name.Color = th.Colors["PanelText"]
@@ -202,7 +202,7 @@ func (st *State) SettingsFieldLabel(gtx *layout.Context, th *gelook.DuoUItheme, 
 	}
 }
 
-func (st *State) SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
+func (s *State) SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
 		desc := th.Body2(fmt.Sprint(f.Field.Description))
 		desc.Font.Typeface = th.Fonts["Primary"]

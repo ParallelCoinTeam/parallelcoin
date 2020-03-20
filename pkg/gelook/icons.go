@@ -61,6 +61,7 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["Run"] = mustIcon(NewDuoUIicon(icons.AVPlayArrow))
 	i["Stop"] = mustIcon(NewDuoUIicon(icons.AVStop))
 	i["Pause"] = mustIcon(NewDuoUIicon(icons.AVPause))
+	i["Kill"] = mustIcon(NewDuoUIicon(icons.NavigationCancel))
 	i["Restart"] = mustIcon(NewDuoUIicon(icons.NavigationRefresh))
 	i["iconGrab"] = mustIcon(NewDuoUIicon(icons.NavigationMenu))
 	i["iconUp"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropUp))

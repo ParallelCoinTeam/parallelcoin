@@ -4,175 +4,175 @@ import (
 	"gioui.org/layout"
 )
 
-func (st *State) BuildButtons() layout.FlexChild {
+func (s *State) BuildButtons() layout.FlexChild {
 	return Rigid(func() {
-		st.FlexH(Rigid(func() {
+		s.FlexH(Rigid(func() {
 			bg, fg := "PanelBg", "PanelText"
-			if st.Config.BuildOpen {
+			if s.Config.BuildOpen.Load() {
 				bg, fg = "DocBg", "DocText"
 			}
-			st.TextButton("Build", "Secondary", 23,
-				fg, bg, st.BuildFoldButton)
-			for st.BuildFoldButton.Clicked(st.Gtx) {
+			s.TextButton("Build", "Secondary", 23,
+				fg, bg, s.BuildFoldButton)
+			for s.BuildFoldButton.Clicked(s.Gtx) {
 				L.Debug("run mode folder clicked")
 				switch {
-				case !st.Config.BuildOpen:
-					st.Config.BuildOpen = true
-					st.Config.SettingsOpen = false
-				case st.Config.BuildOpen:
-					st.Config.BuildOpen = false
+				case !s.Config.BuildOpen.Load():
+					s.Config.BuildOpen.Store(true)
+					s.Config.SettingsOpen.Store(false)
+				case s.Config.BuildOpen.Load():
+					s.Config.BuildOpen.Store(false)
 				}
-				st.SaveConfig()
+				s.SaveConfig()
 			}
 		}),
 		)
 	})
 }
 
-func (st *State) BuildPage() layout.FlexChild {
-	if !st.Config.BuildOpen {
+func (s *State) BuildPage() layout.FlexChild {
+	if !s.Config.BuildOpen.Load() {
 		return Flexed(0, func() {})
 	}
 	var weight float32 = 0.5
 	switch {
-	case st.WindowHeight < 1024 && st.WindowWidth < 1024:
+	case s.WindowHeight < 1024 && s.WindowWidth < 1024:
 		weight = 1
-	case st.WindowHeight < 600 && st.WindowWidth > 1024:
+	case s.WindowHeight < 600 && s.WindowWidth > 1024:
 		weight = 1
 	}
 	return Flexed(weight, func() {
-		cs := st.Gtx.Constraints
-		st.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-		st.FlexV(Rigid(func() {
-			st.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-			st.Inset(4, func() {})
+		cs := s.Gtx.Constraints
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+		s.FlexV(Rigid(func() {
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+			s.Inset(4, func() {})
 		}), Rigid(func() {
 
-			st.FlexH(Rigid(func() {
-				st.TextButton("Build Configuration", "Secondary",
+			s.FlexH(Rigid(func() {
+				s.TextButton("Build Configuration", "Secondary",
 					23, "DocText", "DocBg",
-					st.BuildTitleCloseButton)
-				for st.BuildTitleCloseButton.Clicked(st.Gtx) {
+					s.BuildTitleCloseButton)
+				for s.BuildTitleCloseButton.Clicked(s.Gtx) {
 					L.Debug("build configuration panel title close" +
 						" button clicked")
-					st.Config.BuildOpen = false
-					st.SaveConfig()
+					s.Config.BuildOpen.Store(false)
+					s.SaveConfig()
 				}
 			}), Spacer(), Rigid(func() {
-				st.IconButton("minimize", "DocText", "DocBg",
-					st.BuildCloseButton)
-				for st.BuildCloseButton.Clicked(st.Gtx) {
+				s.IconButton("minimize", "DocText", "DocBg",
+					s.BuildCloseButton)
+				for s.BuildCloseButton.Clicked(s.Gtx) {
 					L.Debug("settings panel close button clicked")
-					st.Config.BuildOpen = false
-					st.SaveConfig()
+					s.Config.BuildOpen.Store(false)
+					s.SaveConfig()
 				}
 			}),
 			)
 		}), Flexed(1, func() {
-			cs := st.Gtx.Constraints
-			st.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
-			st.FlexV(Flexed(1, func() {
-				st.Inset(8, func() {
-					// cs := st.Gtx.Constraints
-					// st.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-					st.BuildConfigPage()
+			cs := s.Gtx.Constraints
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+			s.FlexV(Flexed(1, func() {
+				s.Inset(8, func() {
+					// cs := s.Gtx.Constraints
+					// s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+					s.BuildConfigPage()
 				})
 			}))
 		}), Rigid(func() {
-			st.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-			st.Inset(4, func() {})
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+			s.Inset(4, func() {})
 		}),
 		)
 	})
 }
 
-func (st *State) BuildConfigPage() {
-	st.FlexV(Rigid(func() {
-		st.Inset(4, func() {
-			st.FlexH(Rigid(func() {
-				st.Inset(8,
-					st.Text("Run in", "PanelText", "Primary", "h6"),
+func (s *State) BuildConfigPage() {
+	s.FlexV(Rigid(func() {
+		s.Inset(4, func() {
+			s.FlexH(Rigid(func() {
+				s.Inset(8,
+					s.Text("Run in", "PanelText", "Primary", "h6"),
 				)
 			}), Rigid(func() {
-				if st.RunningInRepo {
+				if s.RunningInRepo {
 					fg, bg := "DocText", "DocBg"
-					if st.Config.RunInRepo {
+					if s.Config.RunInRepo.Load() {
 						fg, bg = "ButtonText", "ButtonBg"
 					}
-					st.TextButton("repo", "Primary", 16,
-						fg, bg, st.RunningInRepoButton)
-					for st.RunningInRepoButton.Clicked(st.Gtx) {
-						st.Config.RunInRepo = true
-						st.CannotRun = false
+					s.TextButton("repo", "Primary", 16,
+						fg, bg, s.RunningInRepoButton)
+					for s.RunningInRepoButton.Clicked(s.Gtx) {
+						s.Config.RunInRepo.Store(true)
+						s.CannotRun = false
 					}
 				}
 			}), Rigid(func() {
 				fg, bg := "DocText", "DocBg"
-				if !st.Config.RunInRepo {
+				if !s.Config.RunInRepo.Load() {
 					fg, bg = "ButtonText", "ButtonBg"
 				}
-				st.TextButton("profile", "Primary", 16,
-					fg, bg, st.RunFromProfileButton)
-				for st.RunFromProfileButton.Clicked(st.Gtx) {
-					st.Config.RunInRepo = false
-					st.CannotRun = false
+				s.TextButton("profile", "Primary", 16,
+					fg, bg, s.RunFromProfileButton)
+				for s.RunFromProfileButton.Clicked(s.Gtx) {
+					s.Config.RunInRepo.Store(false)
+					s.CannotRun = false
 				}
 			}), Rigid(func() {
 				txt := "run pod in its repository"
-				if !st.Config.RunInRepo {
+				if !s.Config.RunInRepo.Load() {
 					txt = "not implemented"
-					st.CannotRun = true
+					s.CannotRun = true
 				}
-				st.Inset(8,
-					st.Text(txt, "PanelText", "Primary", "h6"),
+				s.Inset(8,
+					s.Text(txt, "PanelText", "Primary", "h6"),
 				)
 			}),
 			)
 		})
 	}), Rigid(func() {
-		st.Inset(4, func() {
-			st.FlexH(Rigid(func() {
-				st.Inset(8,
-					st.Text("Use Go version", "PanelText", "Primary", "h6"),
+		s.Inset(4, func() {
+			s.FlexH(Rigid(func() {
+				s.Inset(8,
+					s.Text("Use Go version", "PanelText", "Primary", "h6"),
 				)
 			}), Rigid(func() {
-				if st.HasGo {
+				if s.HasGo {
 					fg, bg := "DocText", "DocBg"
-					if st.Config.UseBuiltinGo {
+					if s.Config.UseBuiltinGo.Load() {
 						fg, bg = "ButtonText", "ButtonBg"
 					}
-					st.TextButton("builtin", "Primary", 16,
-						fg, bg, st.UseBuiltinGoButton)
-					for st.UseBuiltinGoButton.Clicked(st.Gtx) {
-						st.Config.UseBuiltinGo = true
-						st.CannotRun = false
-						if !st.HasGo {
-							st.CannotRun = true
+					s.TextButton("builtin", "Primary", 16,
+						fg, bg, s.UseBuiltinGoButton)
+					for s.UseBuiltinGoButton.Clicked(s.Gtx) {
+						s.Config.UseBuiltinGo.Store(true)
+						s.CannotRun = false
+						if !s.HasGo {
+							s.CannotRun = true
 						}
 					}
 				}
 			}), Rigid(func() {
 				fg, bg := "DocText", "DocBg"
-				if !st.Config.UseBuiltinGo {
+				if !s.Config.UseBuiltinGo.Load() {
 					fg, bg = "ButtonText", "ButtonBg"
 				}
-				st.TextButton("install new", "Primary", 16,
-					fg, bg, st.InstallNewGoButton)
-				for st.InstallNewGoButton.Clicked(st.Gtx) {
-					st.Config.UseBuiltinGo = false
-					st.CannotRun = false
-					if !st.HasOtherGo {
-						st.CannotRun = true
+				s.TextButton("install new", "Primary", 16,
+					fg, bg, s.InstallNewGoButton)
+				for s.InstallNewGoButton.Clicked(s.Gtx) {
+					s.Config.UseBuiltinGo.Store(false)
+					s.CannotRun = false
+					if !s.HasOtherGo {
+						s.CannotRun = true
 					}
 				}
 			}), Rigid(func() {
 				txt := "build using built in go"
-				if !st.Config.UseBuiltinGo {
+				if !s.Config.UseBuiltinGo.Load() {
 					txt = "not implemented"
-					st.CannotRun = true
+					s.CannotRun = true
 				}
-				st.Inset(8,
-					st.Text(txt, "PanelText", "Primary", "h6"),
+				s.Inset(8,
+					s.Text(txt, "PanelText", "Primary", "h6"),
 				)
 			}),
 			)

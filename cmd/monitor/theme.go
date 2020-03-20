@@ -1,23 +1,27 @@
 package monitor
 
-func (st *State) FlipTheme() {
-	st.SetTheme(Toggle(&st.Config.DarkTheme))
+func (s *State) FlipTheme() {
+	L.Debug(s.Config.DarkTheme.Load())
+	s.Config.DarkTheme.Toggle()
+	L.Debug(s.Config.DarkTheme.Load())
+	s.SetTheme(s.Config.DarkTheme.Load())
+	s.SaveConfig()
 }
 
-func (st *State) SetTheme(dark bool) {
+func (s *State) SetTheme(dark bool) {
 	if dark {
-		st.Theme.Colors["DocText"] = st.Theme.Colors["Dark"]
-		st.Theme.Colors["DocBg"] = st.Theme.Colors["Light"]
-		st.Theme.Colors["PanelText"] = st.Theme.Colors["Dark"]
-		st.Theme.Colors["PanelBg"] = st.Theme.Colors["White"]
-		// st.Theme.Colors["Primary"] = st.Theme.Colors["Gray"]
-		// st.Theme.Colors["Secondary"] = st.Theme.Colors["White"]
+		s.Theme.Colors["DocText"] = s.Theme.Colors["Dark"]
+		s.Theme.Colors["DocBg"] = s.Theme.Colors["Light"]
+		s.Theme.Colors["PanelText"] = s.Theme.Colors["Dark"]
+		s.Theme.Colors["PanelBg"] = s.Theme.Colors["White"]
+		// s.Theme.Colors["Primary"] = s.Theme.Colors["Gray"]
+		// s.Theme.Colors["Secondary"] = s.Theme.Colors["White"]
 	} else {
-		st.Theme.Colors["DocText"] = st.Theme.Colors["Light"]
-		st.Theme.Colors["DocBg"] = st.Theme.Colors["Black"]
-		st.Theme.Colors["PanelText"] = st.Theme.Colors["Light"]
-		st.Theme.Colors["PanelBg"] = st.Theme.Colors["Dark"]
-		// st.Theme.Colors["Primary"] = st.Theme.Colors["Dark"]
-		// st.Theme.Colors["Secondary"] = st.Theme.Colors["Black"]
+		s.Theme.Colors["DocText"] = s.Theme.Colors["Light"]
+		s.Theme.Colors["DocBg"] = s.Theme.Colors["Black"]
+		s.Theme.Colors["PanelText"] = s.Theme.Colors["Light"]
+		s.Theme.Colors["PanelBg"] = s.Theme.Colors["Dark"]
+		// s.Theme.Colors["Primary"] = s.Theme.Colors["Dark"]
+		// s.Theme.Colors["Secondary"] = s.Theme.Colors["Black"]
 	}
 }

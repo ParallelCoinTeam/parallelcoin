@@ -3,8 +3,9 @@
 package app
 
 import (
-	"github.com/p9c/pod/app/config"
 	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/app/config"
 
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/cmd/monitor"

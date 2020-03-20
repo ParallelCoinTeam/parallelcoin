@@ -4,116 +4,65 @@ import (
 	"gioui.org/layout"
 )
 
-func (st *State) BottomBar() layout.FlexChild {
+func (s *State) BottomBar() layout.FlexChild {
 	return Rigid(func() {
-		cs := st.Gtx.Constraints
-		st.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
-		st.FlexV(
-			st.SettingsPage(),
-			st.BuildPage(),
-			st.StatusBar(),
+		cs := s.Gtx.Constraints
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+		s.FlexV(
+			s.SettingsPage(),
+			s.BuildPage(),
+			s.StatusBar(),
 		)
 	})
 }
 
-func (st *State) StatusBar() layout.FlexChild {
+func (s *State) StatusBar() layout.FlexChild {
 	return Rigid(func() {
-		cs := st.Gtx.Constraints
-		st.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
-		st.FlexH(
-			st.RunControls(),
-			st.RunmodeButtons(),
-			st.BuildButtons(),
-			st.SettingsButtons(),
+		cs := s.Gtx.Constraints
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+		s.FlexH(
+			s.RunControls(),
+			s.RunmodeButtons(),
+			s.BuildButtons(),
+			s.SettingsButtons(),
 		)
 	})
 }
 
-func (st *State) RunControls() layout.FlexChild {
+func (s *State) RunmodeButtons() layout.FlexChild {
 	return Rigid(func() {
-		if st.CannotRun {
-			return
-		}
-		if !st.Running {
-			st.IconButton("Run", "PanelBg", "PanelText", st.RunMenuButton)
-			for st.RunMenuButton.Clicked(st.Gtx) {
-				L.Debug("clicked run button")
-				if !st.Config.RunModeOpen {
-					st.Running = true
+		s.FlexH(Rigid(func() {
+			if !s.Config.RunModeOpen.Load() {
+				fg, bg := "ButtonText", "ButtonBg"
+				if s.Running.Load() {
+					fg, bg = "DocBg", "DocText"
 				}
-			}
-		}
-		if st.Running {
-			ic := "Pause"
-			fg, bg := "PanelBg", "PanelText"
-			if st.Pausing {
-				ic = "Run"
-				fg, bg = "PanelText", "PanelBg"
-			}
-			st.FlexH(Rigid(func() {
-				st.IconButton("Stop", "PanelBg", "PanelText",
-					st.StopMenuButton)
-				for st.StopMenuButton.Clicked(st.Gtx) {
-					L.Debug("clicked stop button")
-					st.Running = false
-					st.Pausing = false
-				}
-			}), Rigid(func() {
-				st.IconButton(ic, fg, bg, st.PauseMenuButton)
-				for st.PauseMenuButton.Clicked(st.Gtx) {
-					if st.Pausing {
-						L.Debug("clicked on resume button")
-					} else {
-						L.Debug("clicked pause button")
+				s.TextButton(s.Config.RunMode.Load(), "Secondary",
+					23, fg, bg,
+					s.RunModeFoldButton)
+				for s.RunModeFoldButton.Clicked(s.Gtx) {
+					if !s.Running.Load() {
+						s.Config.RunModeOpen.Store(true)
+						s.SaveConfig()
 					}
-					Toggle(&st.Pausing)
 				}
-			}), Rigid(func() {
-				st.IconButton("Restart", "PanelBg", "PanelText",
-					st.RestartMenuButton)
-				for st.RestartMenuButton.Clicked(st.Gtx) {
-					L.Debug("clicked restart button")
-				}
-			}),
-			)
-		}
-	})
-}
-
-func (st *State) RunmodeButtons() layout.FlexChild {
-	return Rigid(func() {
-		st.FlexH(Rigid(func() {
-			fg, bg := "ButtonText", "ButtonBg"
-			if st.Running {
-				fg, bg = "DocBg", "DocText"
-			}
-			st.TextButton(st.Config.RunMode, "Secondary",
-				23, fg, bg,
-				st.RunModeFoldButton)
-			for st.RunModeFoldButton.Clicked(st.Gtx) {
-				if !st.Running {
-					Toggle(&st.Config.RunModeOpen)
-					st.SaveConfig()
-				}
-			}
-		}), Rigid(func() {
-			if st.Config.RunModeOpen {
+			} else {
 				modes := []string{
-					"node", "wallet", "shell", "gui",
+					"node", "wallet", "shell", "gui", "monitor",
 				}
-				st.ModesList.Layout(st.Gtx, len(modes), func(i int) {
-					if st.Config.RunMode != modes[i] {
-						st.TextButton(modes[i], "Secondary",
-							23, "ButtonText",
-							"ButtonBg", st.ModesButtons[modes[i]])
-					}
-					for st.ModesButtons[modes[i]].Clicked(st.Gtx) {
+				s.ModesList.Layout(s.Gtx, len(modes), func(i int) {
+					// if s.Config.RunMode.Load() != modes[i] {
+					s.TextButton(modes[i], "Secondary",
+						23, "ButtonText",
+						"ButtonBg", s.ModesButtons[modes[i]])
+					// }
+					for s.ModesButtons[modes[i]].Clicked(s.Gtx) {
 						L.Debug(modes[i], "clicked")
-						if st.Config.RunModeOpen {
-							st.Config.RunMode = modes[i]
-							st.Config.RunModeOpen = false
+						if s.Config.RunModeOpen.Load() {
+							s.Config.RunMode.Store(modes[i])
+							s.Config.RunModeOpen.Store(false)
 						}
-						st.SaveConfig()
+						s.SaveConfig()
 					}
 				})
 			}
