@@ -114,8 +114,8 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 			default:
 			}
 		case "switch":
-			th.DuoUIcheckBox(f.Field.Label, th.Colors["PanelText"],
-				th.Colors["PanelText"]).Layout(gtx,
+			th.DuoUIcheckBox(f.Field.Label, th.Colors["Primary"],
+				th.Colors["Primary"]).Layout(gtx,
 				(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox))
 			if (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox).Checked(gtx) {
 				if !*rc.Settings.Daemon.Config[f.Field.Model].(*bool) {
@@ -165,7 +165,7 @@ func SettingsFieldLabel(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) fu
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			name := th.H6(fmt.Sprint(f.Field.Label))
-			name.Color = th.Colors["Light"]
+			name.Color = th.Colors["Dark"]
 			name.Font.Typeface = th.Fonts["Primary"]
 			name.Layout(gtx)
 		})
@@ -177,7 +177,7 @@ func SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Fie
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			desc := th.Body2(fmt.Sprint(f.Field.Description))
 			desc.Font.Typeface = th.Fonts["Primary"]
-			desc.Color = th.Colors["Light"]
+			desc.Color = th.Colors["Dark"]
 			desc.Layout(gtx)
 		})
 	}

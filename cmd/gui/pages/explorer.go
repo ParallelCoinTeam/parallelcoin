@@ -32,7 +32,7 @@ func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *g
 		HeaderBgColor: "",
 		HeaderPadding: 4,
 		Body:          bodyExplorer(rc, gtx, th),
-		BodyBgColor:   th.Colors["Dark"],
+		BodyBgColor:   th.Colors["Light"],
 		BodyPadding:   4,
 		Footer:        func() {},
 		FooterBgColor: "",
@@ -43,40 +43,17 @@ func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *g
 func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		rc.GetBlocksExcerpts()
-		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-			th.DuoUIitem(0, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
-				layout.Flex{}.Layout(gtx,
-					layout.Flexed(1, func() {
-						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-							layout.Flex{
-								Axis:    layout.Vertical,
-								Spacing: layout.SpaceAround,
-							}.Layout(gtx,
-								layout.Flexed(1, explorerContent(rc, gtx, th)))
-						})
-					}))
-			})
-		})
-	}
-}
-
-func explorerContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
-	return func() {
-		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-			th.DuoUIitem(0, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
-				layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-					layout.Rigid(func() {
-						blockRowCellLabels(rc, gtx, th)
-					}),
-					layout.Flexed(1, func() {
-						blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
-							b := rc.Explorer.Blocks[i]
-							blockRow(rc, gtx, th, &b)
-						})
-					}),
-				)
-			})
-		})
+		layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+			layout.Rigid(func() {
+				blockRowCellLabels(rc, gtx, th)
+			}),
+			layout.Flexed(1, func() {
+				blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
+					b := rc.Explorer.Blocks[i]
+					blockRow(rc, gtx, th, &b)
+				})
+			}),
+		)
 	}
 }
 
@@ -108,7 +85,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 					l := th.Body2("Height")
 					l.Font.Typeface = th.Fonts["Mono"]
 					l.Alignment = text.Middle
-					l.Color = th.Colors["Light"]
+					l.Color = th.Colors["Dark"]
 					l.Layout(gtx)
 				})
 			}),
@@ -117,7 +94,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 					l := th.Body2("Time")
 					l.Font.Typeface = th.Fonts["Mono"]
 					l.Alignment = text.Middle
-					l.Color = th.Colors["Light"]
+					l.Color = th.Colors["Dark"]
 					l.Layout(gtx)
 				})
 			}),
@@ -125,7 +102,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 					l := th.Body2("Confirmations")
 					l.Font.Typeface = th.Fonts["Mono"]
-					l.Color = th.Colors["Light"]
+					l.Color = th.Colors["Dark"]
 					l.Layout(gtx)
 				})
 			}),
@@ -133,7 +110,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 					l := th.Body2("TxNum")
 					l.Font.Typeface = th.Fonts["Mono"]
-					l.Color = th.Colors["Light"]
+					l.Color = th.Colors["Dark"]
 					l.Layout(gtx)
 				})
 			}),
@@ -143,7 +120,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 				}.Layout(gtx, func() {
 					l := th.Body2("BlockHash")
 					l.Font.Typeface = th.Fonts["Mono"]
-					l.Color = th.Colors["Light"]
+					l.Color = th.Colors["Dark"]
 					l.Layout(gtx)
 				})
 			}))
@@ -153,13 +130,13 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *model.DuoUIblock) {
 	layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 		gelook.DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, gtx.Constraints.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		component.HorizontalLine(gtx, 1, th.Colors["Dark"])()
+		component.HorizontalLine(gtx, 1, th.Colors["Gray"])()
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
 		}.Layout(gtx,
 			layout.Rigid(func() {
 				var linkButton gelook.DuoUIbutton
-				linkButton = th.DuoUIbutton(th.Fonts["Mono"], fmt.Sprint(block.Height), th.Colors["Dark"], th.Colors["Info"], th.Colors["Info"], th.Colors["Dark"], "", th.Colors["Dark"], 14, 0, 60, 24, 0, 0)
+				linkButton = th.DuoUIbutton(th.Fonts["Mono"], fmt.Sprint(block.Height), th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Dark"], "", th.Colors["Dark"], 14, 0, 60, 24, 0, 0)
 				for block.Link.Clicked(gtx) {
 					rc.ShowPage = fmt.Sprintf("BLOCK %s", block.BlockHash)
 					rc.GetSingleBlock(block.BlockHash)()

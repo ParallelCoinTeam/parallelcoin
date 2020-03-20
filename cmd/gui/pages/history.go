@@ -36,7 +36,7 @@ func History(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.
 		Header:        historyHeader(rc, gtx, th),
 		HeaderPadding: 4,
 		Body:          historyBody(rc, gtx, th),
-		BodyBgColor:   th.Colors["Dark"],
+		BodyBgColor:   th.Colors["Light"],
 		BodyPadding:   0,
 		Footer:        func() {},
 		FooterPadding: 0,
