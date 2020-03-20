@@ -223,45 +223,16 @@ Tilix the most usable, but it requires writing a regular expression to
 match and so the logger is written to output relative paths to the
 repository root.
 
-The regexp that I use given my system base path is (exactly this with all newlines removed for dconf with using tilix at the dconf path `/com/gexperts/Tilix/custom-hyperlinks`)
+The regexp that I use given my system base path is (exactly this with all 
+newlines removed for dconf with using tilix at the dconf path 
+`/com/gexperts/Tilix/custom-hyperlinks`)
 
 ```
 [
-    ' [/]((([a-zA-Z0-9-_.]+/)+([a-zA-Z0-9-_.]+)):([0-9]+)),
-        <goland executable> --line $5 /$1,false', 
-    'github[.]((([a-zA-Z0-9-_.]+/)+([a-zA-Z0-9-_.]+)):([0-9]+)),
-        <goland executable> --line $5 <$GOPATH>/src/github.$1,
-        false', 
-    '((([a-zA-Z0-9-_.]+/)+([a-zA-Z0-9-_.]+)):([0-9]+)),
-        <goland executable> --line $5 <$GOPATH>/src/github.com/p9c/pod/$1,
-        false'
+    '([/ ](([a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+))[ ],
+        goland --line $5 /$2,false', 
 ]
 ```
 
 These two seem to the work the best including allowing clicking on stack trace 
 code location references. Change goland launcher and package root path as required.
-
-```
-[/]((([a-zA-Z0-9-_.]+/)+([a-zA-Z0-9-_.]+)):([0-9]+))[ ]
-
-/home/loki/bin/goland --line $5 /$1
-
-[ ]((([a-zA-Z0-9-_.]+/)+([a-zA-Z0-9-_.]+)):([0-9]+))
-
-/home/loki/bin/goland --line $5 /home/loki/Public/pod/$1
-```
-
-(the text fields in tilix's editor are very weird so it will be easier to
-just paste this in and gnome dconf editor should remove the newlines
-automatically)
-
-Replace the parts inside `<` `>` with the relevant path from your environment
-and enjoy quickly hopping to source code locations while you are working on
-this project. Goland's terminal recognises most of them anyway but when you
-get a runaway log print going on it can take some time before the terminal
-decides it will listen to your control C.
-  
-The configuration shown above covers the most common relative to project root
-paths as used in the logger, as well as `go get` style paths starting with
-the domain name, as well as absolute paths (first one) that will work for
-any relevant file path with line number reference.

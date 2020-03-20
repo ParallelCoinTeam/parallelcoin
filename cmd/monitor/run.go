@@ -1,13 +1,11 @@
 package monitor
 
 import (
+	"gioui.org/layout"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"syscall"
-	"time"
-
-	"gioui.org/layout"
 )
 
 func (s *State) RunControls() layout.FlexChild {
@@ -42,10 +40,11 @@ func (s *State) RunControls() layout.FlexChild {
 				for s.PauseMenuButton.Clicked(s.Gtx) {
 					if s.Pausing.Load() {
 						L.Debug("clicked on resume button")
+						s.RunCommandChan <- "resume"
 					} else {
 						L.Debug("clicked pause button")
+						s.RunCommandChan <- "pause"
 					}
-					s.RunCommandChan <- "pause"
 				}
 			}), Rigid(func() {
 				s.IconButton("Kill", "PanelBg", "PanelText",
@@ -76,99 +75,90 @@ func (s *State) Runner() {
 		case "run":
 			L.Debug("run called")
 			if s.HasGo && !s.Running.Load() {
+				exePath := filepath.Join(*s.Ctx.Config.DataDir, "pod_mon")
 				c = exec.Command("go", "build", "-o",
-					filepath.Join(*s.Ctx.Config.DataDir, "pod"))
+					exePath)
 				c.Stdout = os.Stdout
 				c.Stderr = os.Stderr
-				c.Run()
-				c = exec.Command(filepath.Join(*s.Ctx.Config.DataDir, "pod"),
+				if err = c.Run(); !L.Check(err) {
+					c = exec.Command(exePath,
+						"-D", *s.Ctx.Config.DataDir, s.Config.RunMode.Load())
+					c.Stdout = os.Stdout
+					c.Stderr = os.Stderr
+					if err = c.Start(); !L.Check(err) {
+						s.Running.Store(true)
+						s.Pausing.Store(false)
+					}
+				}
+			}
+		case "stop":
+			L.Debug("stop called")
+			if s.HasGo && c != nil && s.Running.Load() {
+				if err = c.Process.Signal(syscall.SIGINT); !L.Check(err) {
+					s.Running.Store(false)
+					L.Debug("interrupted")
+				}
+				if err = c.Wait(); L.Check(err) {
+				}
+				if err = c.Process.Release(); L.Check(err) {
+				}
+				L.Debug("stopped")
+			}
+		case "pause":
+			L.Debug("pause called")
+			if s.HasGo && c != nil && s.Running.Load() {
+				s.Pausing.Toggle()
+				if err = c.Process.Signal(syscall.SIGSTOP); !L.Check(err) {
+					s.Pausing.Store(true)
+					L.Debug("paused")
+				}
+			}
+		case "resume":
+			L.Debug("resume called")
+			if s.HasGo && c != nil && s.Running.Load() {
+				s.Pausing.Toggle()
+				if err = c.Process.Signal(syscall.SIGCONT); !L.Check(err) {
+					s.Pausing.Store(false)
+					L.Debug("resumed")
+				}
+			}
+		case "kill":
+			L.Debug("kill called")
+			if s.HasGo && c != nil && s.Running.Load() {
+				if err = c.Process.Signal(syscall.SIGKILL); !L.Check(err) {
+					s.Pausing.Store(false)
+					s.Running.Store(false)
+					L.Debug("killed")
+				}
+			}
+		case "restart":
+			L.Debug("restart called")
+			if s.HasGo && c != nil {
+				if err = c.Process.Signal(syscall.SIGINT); !L.Check(err) {
+					s.Running.Store(false)
+					L.Debug("interrupted")
+				}
+				if err = c.Wait(); L.Check(err) {
+				}
+				if err = c.Process.Release(); L.Check(err) {
+				}
+				L.Debug("stopped")
+			}
+			exePath := filepath.Join(*s.Ctx.Config.DataDir, "pod_mon")
+			c = exec.Command("go", "build", "-o",
+				exePath)
+			c.Stdout = os.Stdout
+			c.Stderr = os.Stderr
+			if err = c.Run(); !L.Check(err) {
+				c = exec.Command(exePath,
 					"-D", *s.Ctx.Config.DataDir, s.Config.RunMode.Load())
 				c.Stdout = os.Stdout
 				c.Stderr = os.Stderr
 				if err = c.Start(); !L.Check(err) {
 					s.Running.Store(true)
 					s.Pausing.Store(false)
-					// pid = c.Process.Pid
-					// go func() {
-					// 	if err := c.Wait(); !L.Check(err) {
-					// 		s.Running.Store(false)
-					// 	}
-					// }()
 				}
 			}
-			continue
-		case "stop":
-			L.Debug("stop called")
-			if s.HasGo && c != nil && s.Running.Load() {
-				// if err = c.Process.Signal(os.Interrupt); !L.Check(err) {
-				// 	s.Running.Store(false)
-				// 	L.Debug("interrupted")
-				// }
-				// if err = syscall.Kill(pid,
-				// 	syscall.SIGINT); !L.Check(err) {
-				// 	s.Running.Store(false)
-				// 	L.Debug("killed")
-				// }
-				if err = c.Process.Kill(); !L.Check(err) {
-					L.Debug("killing harder")
-				}
-				if err = c.Wait(); L.Check(err) {
-				}
-				if err = c.Process.Release(); L.Check(err) {
-				}
-				L.Debug("dead")
-			}
-		case "pause":
-			L.Debug("pause called")
-			if s.HasGo && c != nil && s.Running.Load() {
-				s.Pausing.Toggle()
-			}
-			continue
-		case "kill":
-			L.Debug("kill called")
-			if s.HasGo && c != nil && s.Running.Load() {
-				var pgid int
-				if pgid, err = syscall.Getpgid(c.Process.Pid); L.Check(err) {
-					// if err = syscall.Kill(-pgid, 15); L.Check(err) {
-					// }
-					if err = syscall.Kill(-pgid, 9); L.Check(err) {
-					}
-				}
-			}
-			continue
-		case "restart":
-			L.Debug("restart called")
-			if s.HasGo && c != nil {
-				if err = c.Process.Signal(os.Interrupt); L.Check(err) {
-				}
-				done := make(chan struct{})
-				go func() {
-					if err := c.Wait(); L.Check(err) {
-						close(done)
-					}
-				}()
-				select {
-				case <-done:
-				case <-time.After(time.Second * 5):
-					var pgid int
-					if pgid, err = syscall.Getpgid(c.Process.Pid); L.Check(err) {
-						if err = syscall.Kill(-pgid, 15); L.Check(err) {
-						}
-					}
-					if err = c.Process.Kill(); L.Check(err) {
-					}
-				}
-				c = exec.Command("go", "run", "main.go", "-D",
-					*s.Ctx.Config.DataDir, s.Config.RunMode.Load())
-				c.Stdin = os.Stdin
-				c.Stdout = os.Stdout
-				c.Stderr = os.Stderr
-				if err = c.Start(); !L.Check(err) {
-					s.Running.Store(false)
-					s.Pausing.Store(false)
-				}
-			}
-			continue
 		}
 	}
 	return

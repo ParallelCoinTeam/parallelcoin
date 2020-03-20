@@ -169,25 +169,25 @@ func (s *State) LoadConfig() {
 	u := new(UnsafeConfig)
 	u.Width, u.Height = 800, 600
 	u.RunMode = "node"
-	L.Debugs(u)
+	//L.Debugs(u)
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if apputil.FileExists(filename) {
-		L.Debug("config file exists")
+		//L.Debug("config file exists")
 		var b []byte
 		if b, err = ioutil.ReadFile(filename); !L.Check(err) {
 			L.Warn(string(b))
 			if err = json.Unmarshal(b, u); L.Check(err) {
 				u.LoadInto(s.Config)
-				L.Debugs(s.Config)
+				//L.Debugs(s.Config)
 				s.SaveConfig()
 			}
 			u.LoadInto(s.Config)
-			L.Debugs(s.Config)
+			//L.Debugs(s.Config)
 		}
 	} else {
 		L.Warn("creating new configuration")
 		u.LoadInto(s.Config)
-		L.Debugs(s.Config)
+		//L.Debugs(s.Config)
 		s.SaveConfig()
 	}
 	s.SetTheme(u.DarkTheme)
@@ -199,7 +199,7 @@ func (s *State) SaveConfig() {
 	u := s.Config.GetUnsafeConfig()
 	// L.Debugs(u)
 	if yp, e := json.MarshalIndent(u, "", "  "); !L.Check(e) {
-		L.Debug(string(yp))
+		//L.Debug(string(yp))
 		apputil.EnsureDir(filename)
 		if e := ioutil.WriteFile(filename, yp, 0600); L.Check(e) {
 			// panic(e)

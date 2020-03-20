@@ -44,7 +44,7 @@ func (s *State) IconButton(icon, fg, bg string, button *gel.Button) {
 	s.Theme.DuoUIbutton("", "", "",
 		s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
 		s.Theme.Colors[fg], 0, 32, 41, 41,
-		0, 0).IconLayout(s.Gtx, button)
+		8, 8).IconLayout(s.Gtx, button)
 }
 
 func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,

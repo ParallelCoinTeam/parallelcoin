@@ -80,6 +80,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			}
 		}
 		L.Debug("gui shut down")
+		os.Exit(0)
 	}()
 	// w.Invalidate()
 	interrupt.AddHandler(func() {
