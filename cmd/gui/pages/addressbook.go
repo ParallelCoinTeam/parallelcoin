@@ -40,7 +40,7 @@ func DuoUIaddressBook(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme)
 		Header:        addressBookHeader(rc, gtx, th, rc.GetAddressBook()),
 		HeaderPadding: 4,
 		Body:          addressBookBody(rc, gtx, th),
-		BodyBgColor:   th.Colors["Dark"],
+		BodyBgColor:   th.Colors["Light"],
 		BodyPadding:   4,
 		Footer:        func() {},
 		FooterPadding: 0,
@@ -77,13 +77,13 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 				} else {
 					// rc.GetAddressBook()()
 				}
-				th.DuoUIcheckBox("SHOW MINING ADDRESSES", th.Colors["Dark"], th.Colors["Dark"]).Layout(gtx, showMiningAddresses)
+				th.DuoUIcheckBox("SHOW MINING ADDRESSES", th.Colors["Light"], th.Colors["Light"]).Layout(gtx, showMiningAddresses)
 			}),
 			layout.Rigid(func() {
 				// th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page, "PAGE", fmt.Sprint(rc.Explorer.Page.Value))
 			}),
 			// layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["ButtonText"], th.Colors["Dark"], "NEW ADDRESS", component.QrDialog(rc, gtx, rc.CreateNewAddress("")))))
-			layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["ButtonText"], th.Colors["Dark"], "NEW ADDRESS", func() {
+			layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["Dark"], th.Colors["Light"], "NEW ADDRESS", func() {
 				rc.Dialog.Show = true
 				rc.Dialog = &model.DuoUIdialog{
 					Show: true,
@@ -109,11 +109,11 @@ func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 					layout.Flex{
 						Alignment: layout.End,
 					}.Layout(gtx,
-						layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Light"], fmt.Sprint(t.Index))),
-						layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Light"], t.Account)),
+						layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprint(t.Index))),
+						layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], t.Account)),
 						layout.Rigid(component.Button(gtx, th, t.Copy, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], t.Address, func() { clipboard.Set(t.Address) })),
-						layout.Flexed(0.4, component.Label(gtx, th, th.Fonts["Primary"], 14, th.Colors["Light"], t.Label)),
-						layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Light"], fmt.Sprint(t.Amount))),
+						layout.Flexed(0.4, component.Label(gtx, th, th.Fonts["Primary"], 14, th.Colors["Dark"], t.Label)),
+						layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprint(t.Amount))),
 						layout.Rigid(component.Button(gtx, th, t.QrCode, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["Info"], "QR", component.QrDialog(rc, gtx, t.Address))),
 					)
 				}),

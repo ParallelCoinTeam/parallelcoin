@@ -29,7 +29,7 @@ func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook
 		HeaderBgColor: "",
 		HeaderPadding: 4,
 		Body:          SettingsBody(rc, gtx, th),
-		BodyBgColor:   th.Colors["Dark"],
+		BodyBgColor:   th.Colors["Light"],
 		BodyPadding:   0,
 		Footer:        func() {},
 		FooterBgColor: "",
@@ -77,7 +77,7 @@ func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) f
 func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		// layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-		th.DuoUIitem(16, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
+		th.DuoUIitem(16, th.Colors["Light"]).Layout(gtx, layout.N, func() {
 			for _, fields := range rc.Settings.Daemon.Schema.Groups {
 				if fmt.Sprint(fields.Legend) == rc.Settings.Tabs.Current {
 					fieldsList.Layout(gtx, len(fields.Fields), func(il int) {
@@ -89,7 +89,7 @@ func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 							Axis: layout.Vertical,
 						}.Layout(gtx,
 							layout.Rigid(SettingsItemRow(rc, gtx, th, &tl)),
-							layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Light"])))
+							layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Dark"])))
 					})
 				}
 			}

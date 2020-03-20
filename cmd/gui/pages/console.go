@@ -29,11 +29,11 @@ func Console(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.
 		Title:         "CONSOLE",
 		Command:       func() {},
 		Border:        4,
-		BorderColor:   th.Colors["Light"],
+		BorderColor:   "ff000000",
 		Header:        func() {},
 		HeaderPadding: 0,
 		Body:          consoleBody(rc, gtx, th),
-		BodyBgColor:   th.Colors["Dark"],
+		BodyBgColor:   "ff000000",
 		BodyPadding:   4,
 		Footer:        func() {},
 		FooterPadding: 0,
@@ -44,7 +44,7 @@ func Console(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.
 func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-			th.DuoUIitem(0, th.Colors["Dark"]).Layout(gtx, layout.N, func() {
+			th.DuoUIitem(0, "ff000000").Layout(gtx, layout.N, func() {
 				layout.Flex{}.Layout(gtx, layout.Flexed(1, func() {
 					layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 						layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceAround}.Layout(gtx,

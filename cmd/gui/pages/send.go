@@ -51,7 +51,7 @@ func Send(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.Duo
 		HeaderBgColor: "",
 		HeaderPadding: 0,
 		Body:          sendBody(rc, gtx, th),
-		BodyBgColor:   th.Colors["Dark"],
+		BodyBgColor:   th.Colors["Light"],
 		BodyPadding:   0,
 		Footer:        func() {},
 		FooterBgColor: "",
@@ -64,34 +64,35 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
-				cs := gtx.Constraints
-				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Dark"], [4]float32{0, 0, 0, 0},
-					[4]float32{0, 0, 0, 0})
 				widgets := []func(){
 					func() {
-						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address",
-								func(e gel.EditorEvent) {
-									sendStruct.address = addressLineEditor.Text()
-								})),
-							layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Fonts["Primary"], 12,
-								th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE ADDRESS", func() {
-									addressLineEditor.SetText(clipboard.Get())
-								})))
+						th.DuoUIitem(1, th.Colors["Gray"]).Layout(gtx, layout.Center, func() {
+							layout.Flex{}.Layout(gtx,
+								layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address",
+									func(e gel.EditorEvent) {
+										sendStruct.address = addressLineEditor.Text()
+									})),
+								layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Fonts["Primary"], 14,
+									th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE ADDRESS", func() {
+										addressLineEditor.SetText(clipboard.Get())
+									})))
+						})
 					},
 					func() {
-						layout.Flex{}.Layout(gtx,
-							layout.Flexed(1, component.Editor(gtx, th, amountLineEditor,
-								"DUO Amount", func(e gel.EditorEvent) {
-									f, err := strconv.ParseFloat(amountLineEditor.Text(), 64)
-									if err != nil {
-									}
-									sendStruct.amount = f
-								})),
-							layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Fonts["Primary"], 12,
-								th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE AMOUNT", func() {
-									amountLineEditor.SetText(clipboard.Get())
-								})))
+						th.DuoUIitem(1, th.Colors["Gray"]).Layout(gtx, layout.Center, func() {
+							layout.Flex{}.Layout(gtx,
+								layout.Flexed(1, component.Editor(gtx, th, amountLineEditor,
+									"DUO Amount", func(e gel.EditorEvent) {
+										f, err := strconv.ParseFloat(amountLineEditor.Text(), 64)
+										if err != nil {
+										}
+										sendStruct.amount = f
+									})),
+								layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Fonts["Primary"], 14,
+									th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE AMOUNT", func() {
+										amountLineEditor.SetText(clipboard.Get())
+									})))
+						})
 					},
 					func() {
 						layout.Flex{}.Layout(gtx,

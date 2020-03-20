@@ -38,7 +38,7 @@ func Network(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.
 		HeaderBgColor: "",
 		HeaderPadding: 0,
 		Body:          networkBody(rc, gtx, th),
-		BodyBgColor:   th.Colors["Dark"],
+		BodyBgColor:   th.Colors["Light"],
 		BodyPadding:   0,
 		Footer:        func() {},
 		FooterBgColor: "",
