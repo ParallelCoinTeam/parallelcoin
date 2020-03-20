@@ -229,12 +229,12 @@ newlines removed for dconf with using tilix at the dconf path
 
 ```
 [
-    '([/](([a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+)),
-        goland --line $5 /$2,false', 
-    '([/](([a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+))$,
-        
+    '[ ]((([a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+))$,goland --line $5 $HOME/Public/pod/$2,false', 
+    '([/](([a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+)),goland --line $5 /$2,false'
 ]
 ```
 
 These two seem to the work the best including allowing clicking on stack trace 
 code location references. Change goland launcher and package root path as required.
+The logger code locations start with a space and absolute paths with a forward
+slash and you have to set the repository path manually.
