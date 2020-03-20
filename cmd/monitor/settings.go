@@ -3,6 +3,7 @@ package monitor
 import (
 	"fmt"
 	"strconv"
+	. "strings"
 
 	"gioui.org/layout"
 	"gioui.org/text"
@@ -244,8 +245,11 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				StringsArrayEditor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
 					(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
 					func(e gel.EditorEvent) {
-						rc.Settings.Daemon.Config[f.Field.Model] = (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text()
+						rc.Settings.Daemon.Config[f.Field.Model] = Fields((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
 						L.Debug()
+						if e != nil {
+							rc.SaveDaemonCfg()
+						}
 					})()
 				//}
 			default:
@@ -257,8 +261,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
 					(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
 					func(e gel.EditorEvent) {
-						txt := rc.Settings.Daemon.Widgets[f.Field.Model].(
-						*gel.Editor).Text()
+						txt := rc.Settings.Daemon.Widgets[f.Field.Model].(*gel.Editor).Text()
 						rc.Settings.Daemon.Config[f.Field.Model] = txt
 						if e != nil {
 							rc.SaveDaemonCfg()
