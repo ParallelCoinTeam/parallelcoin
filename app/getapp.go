@@ -39,13 +39,16 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 			return nil
 		},
 		Commands: []cli.Command{
-			apputil.NewCommand("version", "print version and exit", func(c *cli.Context) error {
+			apputil.NewCommand("version", "print version and exit",
+				func(c *cli.Context) error {
 				log.Println(c.App.Name, c.App.Version)
 				return nil
 			}, apputil.SubCommands(), nil, "v"),
 			apputil.NewCommand("monitor", "run monitor GUI",
 				monitorHandle(cx), apputil.SubCommands(), nil, "mon"),
-			apputil.NewCommand("ctl", "send RPC commands to a node or wallet and print the result", ctlHandle(cx), apputil.SubCommands(
+			apputil.NewCommand("ctl",
+				"send RPC commands to a node or wallet and print the result",
+				ctlHandle(cx), apputil.SubCommands(
 				apputil.NewCommand(
 					"listcommands",
 					"list commands available at endpoint",
@@ -56,8 +59,12 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 					"l",
 				),
 			), nil, "c"),
-			apputil.NewCommand("ctlgui", "GUI interface send RPC commands to a node or wallet and print the result", ctlGUIHandle(cx), apputil.SubCommands(), nil, "C"),
-			apputil.NewCommand("node", "start parallelcoin full node", nodeHandle(cx), apputil.SubCommands(
+			apputil.NewCommand("ctlgui",
+				"GUI interface send RPC commands to a node or wallet and" +
+				" print the result", ctlGUIHandle(cx), apputil.SubCommands(),
+				nil, "C"),
+			apputil.NewCommand("node", "start parallelcoin full node",
+				nodeHandle(cx), apputil.SubCommands(
 				apputil.NewCommand("dropaddrindex",
 					"drop the address search index",
 					func(c *cli.Context) error {
@@ -118,7 +125,8 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 					nil,
 				),
 			), nil, "n"),
-			apputil.NewCommand("wallet", "start parallelcoin wallet server", WalletHandle(cx), apputil.SubCommands(
+			apputil.NewCommand("wallet", "start parallelcoin wallet server",
+				WalletHandle(cx), apputil.SubCommands(
 				apputil.NewCommand("drophistory",
 					"drop the transaction history in the wallet ("+
 						"for development and testing as well as clearing up"+
@@ -144,14 +152,22 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 					nil,
 				),
 			), nil, "w"),
-			apputil.NewCommand("shell", "start combined wallet/node shell", shellHandle(cx), apputil.SubCommands(), nil, "s"),
-			apputil.NewCommand("gui", "start GUI", guiHandle(cx), apputil.SubCommands(), nil),
-			apputil.NewCommand("kopach", "standalone miner for clusters", KopachHandle(cx), apputil.SubCommands(), nil, "k"),
-			apputil.NewCommand("worker", "single thread parallelcoin miner controlled with binary IPC"+
-				" interface on stdin/stdout; internal use, must have network name string as second arg after worker and"+
-				"nothing before; communicates via net/rpc encoding/gob as default over stdio", kopach_worker.KopachWorkerHandle(cx), apputil.SubCommands(), nil),
+			apputil.NewCommand("shell", "start combined wallet/node shell",
+				shellHandle(cx), apputil.SubCommands(), nil, "s"),
+			apputil.NewCommand("gui", "start GUI", guiHandle(cx),
+				apputil.SubCommands(), nil),
+			apputil.NewCommand("kopach", "standalone miner for clusters",
+				KopachHandle(cx), apputil.SubCommands(), nil, "k"),
+			apputil.NewCommand("worker",
+				"single thread parallelcoin miner controlled with binary IPC"+
+				" interface on stdin/stdout; internal use, " +
+				"must have network name string as second arg after worker and"+
+				"nothing before; communicates via net/rpc encoding/gob as" +
+				" default over stdio", kopach_worker.KopachWorkerHandle(cx),
+				apputil.SubCommands(), nil),
 			apputil.NewCommand("init",
-				"steps through creation of new wallet and initialization for a network with these specified in the main",
+				"steps through creation of new wallet and initialization for" +
+				" a network with these specified in the main",
 				initHandle(cx),
 				apputil.SubCommands(),
 				nil,

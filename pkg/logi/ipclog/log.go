@@ -1,4 +1,4 @@
-package stdconn
+package ipclog
 
 import (
 	"runtime"

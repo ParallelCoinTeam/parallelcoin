@@ -31,7 +31,7 @@ func (s StdConn) Close() (err error) {
 	default:
 	}
 	if !ok {
-		// close(s.Quit)
+		close(s.Quit)
 	}
 	return
 }

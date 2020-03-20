@@ -3,7 +3,9 @@ package logi
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/stdconn"
 	"io"
+	"net/rpc"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -90,6 +92,7 @@ type Entry struct {
 	Text         string
 }
 
+// Logger is a struct containing all the functions with nice handy names
 type Logger struct {
 	Pkg           string
 	Fatal         PrintlnFunc
@@ -127,6 +130,7 @@ type Logger struct {
 	LogChan []chan Entry
 }
 
+// AddLogChan adds a channel that log entries are sent to
 func (l *Logger) AddLogChan() chan Entry {
 	L.LogChan = append(L.LogChan, make(chan Entry))
 	return L.LogChan[len(L.LogChan)-1]
@@ -419,7 +423,7 @@ func Composite(text, level string, color bool, split string) string {
 	return final
 }
 
-// printlnFunc prints a log entry like Println
+// DirectionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
 func DirectionString(inbound bool) string {
 	if inbound {
 		return "inbound"
@@ -471,10 +475,74 @@ func FileExists(filePath string) bool {
 	return err == nil
 }
 
-// DirectionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
+type IPCLogger struct {
+	Start chan struct{}
+	Stop  chan struct{}
+	Quit  chan struct{}
+}
+
+func (il *IPCLogger) Run(_ *int, reply *bool) (err error) {
+	il.Start <- struct{}{}
+	*reply = true
+	return
+}
+func (il *IPCLogger) Pause(_ *int, reply *bool) (err error) {
+	il.Stop <- struct{}{}
+	*reply = false
+	return
+}
+
 func init() {
 	SetLogWriter(os.Stderr)
-	L.SetLevel("info", true, "pod")
+	L.SetLevel("debug", true, "pod")
+	// set up a listener on stdin/out that has a method to enable sending the
+	// entries as RPC messages
+	quit := make(chan struct{})
+	lC := L.AddLogChan()
+	sc := stdconn.New(os.Stdin, os.Stdout, quit)
+	ipcL := &IPCLogger{
+		Start: make(chan struct{}),
+		Stop:  make(chan struct{}),
+		Quit:  make(chan struct{}),
+	}
+	err := rpc.Register(ipcL)
+	if err != nil {
+		L.Debug(err)
+	}
+	// ipc logger startup
+	go func() {
+		L.Debug("starting up logger IPC")
+		rpc.ServeConn(sc)
+		L.Debug("stopping logger IPC")
+	}()
+	// listener
+	go func() {
+	out:
+		for {
+		pausing:
+			select {
+			case <-lC:
+				//fmt.Fprintln(os.Stderr, "log message", lm.Text)
+				// ignore log messages when paused
+			case <-ipcL.Quit:
+				break out
+			case <-ipcL.Start:
+				break pausing
+			case <-ipcL.Stop:
+			}
+		running:
+			select {
+			case ent := <-lC:
+				// encode and write message
+				_ = ent
+			case <-ipcL.Quit:
+				break out
+			case <-ipcL.Start:
+			case <-ipcL.Stop:
+				break running
+			}
+		}
+	}()
 	L.Trace("starting up logger")
 }
 
@@ -488,6 +556,7 @@ func Print(a ...interface{}) {
 	wr.Print(a...)
 }
 
+// printcFunc prints from a closure returning a string
 func printcFunc(level string, color bool, fh *os.File, ch []chan Entry,
 	split string) PrintcFunc {
 	f := func(fn func() string) {
@@ -518,12 +587,11 @@ func printcFunc(level string, color bool, fh *os.File, ch []chan Entry,
 	return f
 }
 
-// ps spews a variable
 func Printf(format string, a ...interface{}) {
 	wr.Printf(format, a...)
 }
 
-// Logger is a struct containing all the functions with nice handy names
+// printfFunc prints a log entry with formatting
 func printfFunc(level string, color bool, fh *os.File, ch []chan Entry,
 	split string) PrintfFunc {
 	f := func(format string, a ...interface{}) {
@@ -553,11 +621,11 @@ func printfFunc(level string, color bool, fh *os.File, ch []chan Entry,
 	return f
 }
 
-// printcFunc prints from a closure returning a string
 func Println(a ...interface{}) {
 	wr.Println(a...)
 }
 
+// printlnFunc prints a log entry like Println
 func printlnFunc(level string, color bool, fh *os.File,
 	ch []chan Entry, split string) PrintlnFunc {
 	f := func(a ...interface{}) {
@@ -621,7 +689,7 @@ func checkFunc(color bool, fh *os.File, ch []chan Entry,
 	return f
 }
 
-// printfFunc prints a log entry with formatting
+// ps spews a variable
 func ps(level string, color bool, fh *os.File, split string) SpewFunc {
 	f := func(a interface{}) {
 		text := trimReturn(spew.Sdump(a))

@@ -3,6 +3,10 @@ package worker
 import (
 	"crypto/cipher"
 	"errors"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
+	"github.com/p9c/pod/pkg/kopachctrl/sol"
 	"math/rand"
 	"net"
 	"os"
@@ -12,14 +16,10 @@ import (
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/kopachctrl"
-	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
-	"github.com/p9c/pod/pkg/kopachctrl/sol"
 	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/sem"
 	"github.com/p9c/pod/pkg/stdconn"
@@ -144,127 +144,130 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 		// w.pipeConn.Close()
 		w.dispatchReady.Store(false)
 	})
-	go func(w *Worker) {
-		L.Debug("main work loop starting")
-		sampleTicker := time.NewTicker(time.Second)
-	out:
-		for {
-			// Pause state
-			L.Debug("worker pausing")
-		pausing:
-			for {
-				select {
-				case <-sampleTicker.C:
-					w.hashReport()
-					break
-				case <-w.stopChan:
-					L.Trace("received pause signal while paused")
-					// drain stop channel in pause
-					break
-				case <-w.startChan:
-					L.Trace("received start signal")
-					break pausing
-				case <-w.Quit:
-					L.Trace("quitting")
-					break out
-				}
-			}
-			// Run state
-			L.Debug("worker running")
-		running:
-			for {
-				select {
-				case <-sampleTicker.C:
-					w.hashReport()
-					break
-				case <-w.startChan:
-					L.Trace("received start signal while running")
-					// drain start channel in run mode
-					break
-				case <-w.stopChan:
-					L.Trace("received pause signal while running")
-					// w.block.Store(&util.Block{})
-					// w.bitses.Store((blockchain.TargetBits)(nil))
-					// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
-					break running
-				case <-w.Quit:
-					L.Trace("worker stopping while running")
-					break out
-				default:
-					if w.block.Load() == nil || w.bitses.Load() == nil ||
-						w.hashes.Load() == nil || !w.dispatchReady.Load() {
-						// L.Info("stop was called before we started working")
-					} else {
-						// work
-						nH := w.block.Load().(*util.Block).Height()
-						hv := w.roller.GetAlgoVer()
-						// L.Debug(hv)
-						h := w.hashes.Load().(map[int32]*chainhash.Hash)
-						// L.Debug("hashes", hv, h)
-						mmb := w.msgBlock.Load().(wire.MsgBlock)
-						mb := &mmb
-						mb.Header.Version = hv
-						if h != nil {
-							mr, ok := h[hv]
-							if !ok {
-								continue
-							}
-							mb.Header.MerkleRoot = *mr
-						} else {
-							continue
-						}
-						b := w.bitses.Load().(blockchain.TargetBits)
-						if bb, ok := b[mb.Header.Version]; ok {
-							mb.Header.Bits = bb
-						} else {
-							continue
-						}
-						mb.Header.Timestamp = time.Now()
-						var nextAlgo int32
-						if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
-							select {
-							case <-w.Quit:
-								L.Trace("worker stopping on pausing message")
-								break out
-							default:
-							}
-							// send out broadcast containing worker nonce and algorithm and count of blocks
-							w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
-							nextAlgo = w.roller.C.Load() + 1
-							hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH)
-							err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
-								transport.GetShards(hashReport.Data))
-							if err != nil {
-								L.Error(err)
-							}
-						}
-						hash := mb.Header.BlockHashWithAlgos(nH)
-						bigHash := blockchain.HashToBig(&hash)
-						if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
-							srs := sol.GetSolContainer(w.senderPort.Load(), mb)
-							err := w.dispatchConn.SendMany(sol.SolutionMagic,
-								transport.GetShards(srs.Data))
-							if err != nil {
-								L.Error(err)
-							}
-							L.Trace("sent solution")
-
-							break running
-						}
-						mb.Header.Version = nextAlgo
-						mb.Header.Bits = w.bitses.Load().(blockchain.TargetBits)[mb.Header.Version]
-						mb.Header.Nonce++
-						w.msgBlock.Store(*mb)
-					}
-				}
-			}
-		}
-		L.Debug("worker finished")
-	}(w)
+	go worker(w)
 	return w
 }
 
-// New initialises the state for a worker, loading the work function handler that runs a round of processing between
+func worker(w *Worker) {
+	L.Debug("main work loop starting")
+	sampleTicker := time.NewTicker(time.Second)
+out:
+	for {
+		// Pause state
+		L.Debug("worker pausing")
+	pausing:
+		for {
+			select {
+			case <-sampleTicker.C:
+				w.hashReport()
+				break
+			case <-w.stopChan:
+				L.Trace("received pause signal while paused")
+				// drain stop channel in pause
+				break
+			case <-w.startChan:
+				L.Trace("received start signal")
+				break pausing
+			case <-w.Quit:
+				L.Trace("quitting")
+				break out
+			}
+		}
+		// Run state
+		L.Debug("worker running")
+	running:
+		for {
+			select {
+			case <-sampleTicker.C:
+				w.hashReport()
+				break
+			case <-w.startChan:
+				L.Trace("received start signal while running")
+				// drain start channel in run mode
+				break
+			case <-w.stopChan:
+				L.Trace("received pause signal while running")
+				// w.block.Store(&util.Block{})
+				// w.bitses.Store((blockchain.TargetBits)(nil))
+				// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
+				break running
+			case <-w.Quit:
+				L.Trace("worker stopping while running")
+				break out
+			default:
+				if w.block.Load() == nil || w.bitses.Load() == nil ||
+					w.hashes.Load() == nil || !w.dispatchReady.Load() {
+					// L.Info("stop was called before we started working")
+				} else {
+					// work
+					nH := w.block.Load().(*util.Block).Height()
+					hv := w.roller.GetAlgoVer()
+					// L.Debug(hv)
+					h := w.hashes.Load().(map[int32]*chainhash.Hash)
+					// L.Debug("hashes", hv, h)
+					mmb := w.msgBlock.Load().(wire.MsgBlock)
+					mb := &mmb
+					mb.Header.Version = hv
+					if h != nil {
+						mr, ok := h[hv]
+						if !ok {
+							continue
+						}
+						mb.Header.MerkleRoot = *mr
+					} else {
+						continue
+					}
+					b := w.bitses.Load().(blockchain.TargetBits)
+					if bb, ok := b[mb.Header.Version]; ok {
+						mb.Header.Bits = bb
+					} else {
+						continue
+					}
+					mb.Header.Timestamp = time.Now()
+					var nextAlgo int32
+					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
+						select {
+						case <-w.Quit:
+							L.Trace("worker stopping on pausing message")
+							break out
+						default:
+						}
+						// send out broadcast containing worker nonce and algorithm and count of blocks
+						w.hashCount.Store(w.hashCount.Load() + uint64(w.roller.RoundsPerAlgo.Load()))
+						nextAlgo = w.roller.C.Load() + 1
+						hashReport := hashrate.Get(w.roller.RoundsPerAlgo.Load(), nextAlgo, nH)
+						err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
+							transport.GetShards(hashReport.Data))
+						if err != nil {
+							L.Error(err)
+						}
+					}
+					hash := mb.Header.BlockHashWithAlgos(nH)
+					bigHash := blockchain.HashToBig(&hash)
+					if bigHash.Cmp(fork.CompactToBig(mb.Header.Bits)) <= 0 {
+						srs := sol.GetSolContainer(w.senderPort.Load(), mb)
+						err := w.dispatchConn.SendMany(sol.SolutionMagic,
+							transport.GetShards(srs.Data))
+						if err != nil {
+							L.Error(err)
+						}
+						L.Trace("sent solution")
+
+						break running
+					}
+					mb.Header.Version = nextAlgo
+					mb.Header.Bits = w.bitses.Load().(blockchain.TargetBits)[mb.Header.Version]
+					mb.Header.Nonce++
+					w.msgBlock.Store(*mb)
+				}
+			}
+		}
+	}
+	L.Debug("worker finished")
+}
+
+// New initialises the state for a worker, loading the work
+// function handler that runs a round of processing between
 // checking quit signal and work semaphore
 func New(quit chan struct{}) (w *Worker, conn net.Conn) {
 	// log.L.SetLevel("trace", true)
@@ -272,8 +275,9 @@ func New(quit chan struct{}) (w *Worker, conn net.Conn) {
 	return NewWithConnAndSemaphore(&sc, quit), &sc
 }
 
-// NewJob is a delivery of a new job for the worker, this makes the miner start
-// mining from pause or pause, prepare the work and restart
+// NewJob is a delivery of a new job for the worker, this
+// makes the miner start mining from pause or pause,
+// prepare the work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	L.Trace("starting new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
