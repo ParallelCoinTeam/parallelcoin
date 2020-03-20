@@ -37,9 +37,11 @@ type State struct {
 	RunModeFoldButton         *gel.Button
 	SettingsFoldButton        *gel.Button
 	SettingsCloseButton       *gel.Button
+	SettingsZoomButton        *gel.Button
 	SettingsTitleCloseButton  *gel.Button
 	BuildFoldButton           *gel.Button
 	BuildCloseButton          *gel.Button
+	BuildZoomButton           *gel.Button
 	BuildTitleCloseButton     *gel.Button
 	ModesButtons              map[string]*gel.Button
 	GroupsList                *layout.List
@@ -83,8 +85,10 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		RunModeFoldButton:        new(gel.Button),
 		BuildFoldButton:          new(gel.Button),
 		BuildCloseButton:         new(gel.Button),
+		BuildZoomButton:          new(gel.Button),
 		BuildTitleCloseButton:    new(gel.Button),
 		SettingsCloseButton:      new(gel.Button),
+		SettingsZoomButton:       new(gel.Button),
 		SettingsTitleCloseButton: new(gel.Button),
 		ModesButtons: map[string]*gel.Button{
 			"node":    new(gel.Button),
@@ -117,47 +121,56 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 }
 
 type Config struct {
-	Width, Height atomic.Int32
-	RunMode       atomic.String
-	RunModeOpen   atomic.Bool
-	SettingsOpen  atomic.Bool
-	BuildOpen     atomic.Bool
-	DarkTheme     atomic.Bool
-	RunInRepo     atomic.Bool
-	UseBuiltinGo  atomic.Bool
+	Width, Height  atomic.Int32
+	RunMode        atomic.String
+	RunModeOpen    atomic.Bool
+	RunModeZoomed  atomic.Bool
+	SettingsOpen   atomic.Bool
+	SettingsZoomed atomic.Bool
+	BuildOpen      atomic.Bool
+	BuildZoomed    atomic.Bool
+	DarkTheme      atomic.Bool
+	RunInRepo      atomic.Bool
+	UseBuiltinGo   atomic.Bool
 }
 
 func (c *Config) GetUnsafeConfig() (out *UnsafeConfig) {
 	out = &UnsafeConfig{
-		Width:        c.Width.Load(),
-		Height:       c.Height.Load(),
-		RunMode:      c.RunMode.Load(),
-		RunModeOpen:  c.RunModeOpen.Load(),
-		SettingsOpen: c.SettingsOpen.Load(),
-		BuildOpen:    c.BuildOpen.Load(),
-		DarkTheme:    c.DarkTheme.Load(),
-		RunInRepo:    c.RunInRepo.Load(),
-		UseBuiltinGo: c.UseBuiltinGo.Load(),
+		Width:          c.Width.Load(),
+		Height:         c.Height.Load(),
+		RunMode:        c.RunMode.Load(),
+		RunModeOpen:    c.RunModeOpen.Load(),
+		RunModeZoomed:  c.RunModeZoomed.Load(),
+		SettingsOpen:   c.SettingsOpen.Load(),
+		SettingsZoomed: c.SettingsZoomed.Load(),
+		BuildOpen:      c.BuildOpen.Load(),
+		DarkTheme:      c.DarkTheme.Load(),
+		RunInRepo:      c.RunInRepo.Load(),
+		UseBuiltinGo:   c.UseBuiltinGo.Load(),
 	}
 	return
 }
 
 type UnsafeConfig struct {
-	Width, Height int32
-	RunMode       string
-	RunModeOpen   bool
-	SettingsOpen  bool
-	BuildOpen     bool
-	DarkTheme     bool
-	RunInRepo     bool
-	UseBuiltinGo  bool
+	Width, Height  int32
+	RunMode        string
+	RunModeOpen    bool
+	RunModeZoomed  bool
+	SettingsOpen   bool
+	SettingsZoomed bool
+	BuildOpen      bool
+	DarkTheme      bool
+	RunInRepo      bool
+	UseBuiltinGo   bool
 }
 
 func (u *UnsafeConfig) LoadInto(c *Config) {
 	c.Width.Store(u.Width)
 	c.Height.Store(u.Height)
 	c.RunMode.Store(u.RunMode)
+	c.RunModeZoomed.Store(u.RunModeZoomed)
 	c.RunModeOpen.Store(u.RunModeOpen)
+	c.SettingsZoomed.Store(u.SettingsZoomed)
 	c.SettingsOpen.Store(u.SettingsOpen)
 	c.BuildOpen.Store(u.BuildOpen)
 	c.DarkTheme.Store(u.DarkTheme)
@@ -199,7 +212,7 @@ func (s *State) SaveConfig() {
 	// L.Debug("saving config")
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	u := s.Config.GetUnsafeConfig()
-	// L.Debugs(u)
+	//L.Debugs(u)
 	if yp, e := json.MarshalIndent(u, "", "  "); !L.Check(e) {
 		//L.Debug(string(yp))
 		apputil.EnsureDir(filename)

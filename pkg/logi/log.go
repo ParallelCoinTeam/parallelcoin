@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/p9c/goterm"
 )
 
 const (
@@ -241,10 +240,12 @@ type PrintlnFunc func(a ...interface{})
 type CheckFunc func(err error) bool
 type SpewFunc func(interface{})
 
+var TermWidth = func() int { return 120 }
+
 func Composite(text, level string, color bool, split string) string {
 	dots := "."
-	terminalWidth := goterm.Width()
-	if terminalWidth <= 80 {
+	var terminalWidth int
+	if TermWidth() <= 80 {
 		terminalWidth = 80
 	}
 	skip := 2

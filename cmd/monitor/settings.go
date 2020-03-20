@@ -50,7 +50,9 @@ func (s *State) SettingsPage() layout.FlexChild {
 	var weight float32 = 0.5
 	var settingsInset = 0
 	switch {
-	case s.WindowWidth < 1024 && s.WindowHeight > 1024:
+	case s.Config.SettingsZoomed.Load():
+		weight = 1
+	//case s.WindowWidth < 1024 && s.WindowHeight > 1024:
 		// weight = 0.333
 	case s.WindowHeight < 1024 && s.WindowWidth < 1024:
 		weight = 1
@@ -83,10 +85,23 @@ func (s *State) SettingsPage() layout.FlexChild {
 							if s.WindowWidth > 640 {
 								s.SettingsTabs()
 							}
-						}),
-						Spacer(),
-						Rigid(func() {
-							s.IconButton("minimize", "DocText", "DocBg",
+						}), Spacer(), Rigid(func() {
+							if !(s.WindowHeight < 1024 && s.WindowWidth < 1024 ||
+								s.WindowHeight < 600 && s.WindowWidth > 1024) {
+								ic := "zoom"
+								if s.Config.SettingsZoomed.Load() {
+									ic = "minimize"
+								}
+								s.IconButton(ic, "DocText", "DocBg",
+									s.SettingsZoomButton)
+								for s.SettingsZoomButton.Clicked(s.Gtx) {
+									L.Debug("settings panel close button clicked")
+									s.Config.SettingsZoomed.Toggle()
+									s.SaveConfig()
+								}
+							}
+						}), Rigid(func() {
+							s.IconButton("foldIn", "DocText", "DocBg",
 								s.SettingsCloseButton)
 							for s.SettingsCloseButton.Clicked(s.Gtx) {
 								L.Debug("settings panel close button clicked")

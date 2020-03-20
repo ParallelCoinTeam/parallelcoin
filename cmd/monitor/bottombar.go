@@ -51,11 +51,9 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 					"node", "wallet", "shell", "gui", "monitor",
 				}
 				s.ModesList.Layout(s.Gtx, len(modes), func(i int) {
-					// if s.Config.RunMode.Load() != modes[i] {
 					s.TextButton(modes[i], "Secondary",
 						23, "ButtonText",
 						"ButtonBg", s.ModesButtons[modes[i]])
-					// }
 					for s.ModesButtons[modes[i]].Clicked(s.Gtx) {
 						L.Debug(modes[i], "clicked")
 						if s.Config.RunModeOpen.Load() {

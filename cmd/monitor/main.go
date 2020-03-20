@@ -3,15 +3,14 @@
 package monitor
 
 import (
-	"os"
-	"os/exec"
-	"strings"
-
 	"gioui.org/app"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"gopkg.in/src-d/go-git.v4"
+	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"

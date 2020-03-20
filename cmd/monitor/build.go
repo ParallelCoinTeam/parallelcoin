@@ -35,6 +35,8 @@ func (s *State) BuildPage() layout.FlexChild {
 	}
 	var weight float32 = 0.5
 	switch {
+	case s.Config.BuildZoomed.Load():
+		weight = 1
 	case s.WindowHeight < 1024 && s.WindowWidth < 1024:
 		weight = 1
 	case s.WindowHeight < 600 && s.WindowWidth > 1024:
@@ -59,7 +61,22 @@ func (s *State) BuildPage() layout.FlexChild {
 					s.SaveConfig()
 				}
 			}), Spacer(), Rigid(func() {
-				s.IconButton("minimize", "DocText", "DocBg",
+				if !(s.WindowHeight < 1024 && s.WindowWidth < 1024 ||
+					s.WindowHeight < 600 && s.WindowWidth > 1024) {
+					ic := "zoom"
+					if s.Config.BuildZoomed.Load() {
+						ic = "minimize"
+					}
+					s.IconButton(ic, "DocText", "DocBg",
+						s.BuildZoomButton)
+					for s.BuildZoomButton.Clicked(s.Gtx) {
+						L.Debug("settings panel fold button clicked")
+						s.Config.BuildZoomed.Toggle()
+						s.SaveConfig()
+					}
+				}
+			}), Spacer(), Rigid(func() {
+				s.IconButton("foldIn", "DocText", "DocBg",
 					s.BuildCloseButton)
 				for s.BuildCloseButton.Clicked(s.Gtx) {
 					L.Debug("settings panel close button clicked")
