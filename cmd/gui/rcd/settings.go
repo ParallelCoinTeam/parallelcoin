@@ -15,13 +15,12 @@ import (
 )
 
 func (r *RcVar) SaveDaemonCfg() {
-
 	marshalled, _ := js.Marshal(r.Settings.Daemon.Config)
-	config := pod.Config{}
-	if err := js.Unmarshal(marshalled, &config); err != nil {
+	config, _ := pod.EmptyConfig()
+	if err := js.Unmarshal(marshalled, config); err != nil {
 	}
-	config2.Configure(r.cx, "gui")
-	save.Pod(&config)
+	config2.Configure(r.cx, r.cx.AppContext.Command.Name)
+	save.Pod(config)
 }
 
 func settings(cx *conte.Xt) *model.DuoUIsettings {

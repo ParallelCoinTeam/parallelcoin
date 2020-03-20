@@ -175,7 +175,9 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		if e != nil {
 			L.Warn("failed to stop server", e)
 		}
-		close(stopController)
+		if stopController != nil {
+			close(stopController)
+		}
 		server.WaitForShutdown()
 		L.Info("server shutdown complete")
 		cx.WaitGroup.Done()

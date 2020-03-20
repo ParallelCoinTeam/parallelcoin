@@ -31,6 +31,8 @@ type Xt struct {
 	// App is the heart of the application system,
 	// this creates and initialises it.
 	App *cli.App
+	// AppContext is the urfave/cli app context
+	AppContext *cli.Context
 	// Config is the pod all-in-one server config
 	Config *pod.Config
 	// ConfigMap

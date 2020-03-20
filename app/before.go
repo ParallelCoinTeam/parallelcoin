@@ -20,6 +20,7 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
+		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")

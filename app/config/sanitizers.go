@@ -112,11 +112,23 @@ func initParams(cx *conte.Xt) {
 	}
 }
 
+func validatePort(port string) bool {
+	var err error
+	var p int64
+	if p, err = strconv.ParseInt(port, 10, 32); L.Check(err) {
+		return false
+	}
+	if p < 1024 || p > 65535 {
+		return false
+	}
+	return true
+}
+
 func initListeners(cx *conte.Xt, commandName string) {
 	cfg := cx.Config
-	fP, err := GetFreePort()
-	if err != nil {
-		L.Error(err)
+	var fP int
+	var e error
+	if fP, e = GetFreePort(); L.Check(e) {
 	}
 	*cfg.Controller = net.JoinHostPort("0.0.0.0", fmt.Sprint(fP))
 	if len(*cfg.Listeners) < 1 && !*cfg.DisableListen &&
@@ -146,27 +158,49 @@ func initListeners(cx *conte.Xt, commandName string) {
 		*cfg.RPCListeners = cli.StringSlice{listenHost}
 	}
 	if *cx.Config.AutoPorts {
-		fP, err := GetFreePort()
-		if err != nil {
-			L.Error(err)
+		if fP, e = GetFreePort(); L.Check(e) {
 		}
 		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}
-		fP, err = GetFreePort()
-		if err != nil {
-			L.Error(err)
-		}
-		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}
-		fP, err = GetFreePort()
-		if err != nil {
-			L.Error(err)
+		if fP, e = GetFreePort(); L.Check(e) {
 		}
 		*cfg.RPCListeners = cli.StringSlice{":" + fmt.Sprint(fP)}
-		fP, err = GetFreePort()
-		if err != nil {
-			L.Error(err)
+		if fP, e = GetFreePort(); L.Check(e) {
 		}
 		*cfg.WalletRPCListeners = cli.StringSlice{":" + fmt.Sprint(fP)}
 		cx.StateCfg.Save = true
+	} else {
+		// sanitize user input and set auto on any that fail
+		l := cfg.Listeners
+		r := cfg.RPCListeners
+		w := cfg.WalletRPCListeners
+		for i := range *l {
+			if _, p, e := net.SplitHostPort((*l)[i]); !L.Check(e) {
+				if !validatePort(p) {
+					if fP, e = GetFreePort(); L.Check(e) {
+					}
+					(*l)[i] = ":" + fmt.Sprint(fP)
+				}
+			}
+		}
+		for i := range *r {
+			if _, p, e := net.SplitHostPort((*r)[i]); !L.Check(e) {
+				if !validatePort(p) {
+					if fP, e = GetFreePort(); L.Check(e) {
+					}
+					(*r)[i] = ":" + fmt.Sprint(fP)
+				}
+			}
+		}
+		for i := range *w {
+			if _, p, e := net.SplitHostPort((*w)[i]); !L.Check(e) {
+				if !validatePort(p) {
+					if fP, e = GetFreePort(); L.Check(e) {
+					}
+					(*w)[i] = ":" + fmt.Sprint(fP)
+				}
+			}
+		}
+
 	}
 	if *cfg.RPCConnect == "" {
 		*cfg.RPCConnect = "127.0.0.1:" + cx.ActiveNet.RPCClientPort
@@ -175,28 +209,28 @@ func initListeners(cx *conte.Xt, commandName string) {
 	}
 	// all of these can be autodiscovered/set but to do that and know what
 	// they are we have to reserve them
-	listeners := []*cli.StringSlice{
-		cfg.WalletRPCListeners,
-		cfg.Listeners,
-		cfg.RPCListeners,
-	}
-	for i := range listeners {
-		if h, p, err := net.SplitHostPort((*listeners[i])[0]); p == "0" {
-			if err != nil {
-				L.Error(err)
-			} else {
-				fP, err := GetFreePort()
-				if err != nil {
-					L.Error(err)
-				}
-				*listeners[i] = cli.
-					StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
-			}
-		}
-	}
-	(*cfg.WalletRPCListeners)[0] = (*listeners[0])[0]
-	(*cfg.Listeners)[0] = (*listeners[1])[0]
-	(*cfg.RPCListeners)[0] = (*listeners[2])[0]
+	//listeners := []*cli.StringSlice{
+	//	cfg.WalletRPCListeners,
+	//	cfg.Listeners,
+	//	cfg.RPCListeners,
+	//}
+	//for i := range listeners {
+	//	if h, p, err := net.SplitHostPort((*listeners[i])[0]); p == "0" {
+	//		if err != nil {
+	//			L.Error(err)
+	//		} else {
+	//			fP, err := GetFreePort()
+	//			if err != nil {
+	//				L.Error(err)
+	//			}
+	//			*listeners[i] = cli.
+	//				StringSlice{net.JoinHostPort(h, fmt.Sprint(fP))}
+	//		}
+	//	}
+	//}
+	//(*cfg.WalletRPCListeners)[0] = (*listeners[0])[0]
+	//(*cfg.Listeners)[0] = (*listeners[1])[0]
+	//(*cfg.RPCListeners)[0] = (*listeners[2])[0]
 	// if lan mode is set, remove the peers.json so no unwanted nodes are connected to
 	if *cfg.LAN && cx.ActiveNet.Name != "mainnet" {
 		peersFile := filepath.Join(filepath.Join(

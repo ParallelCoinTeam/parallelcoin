@@ -124,7 +124,12 @@ type Logger struct {
 	Color         bool
 	Split         string
 	// If this channel is loaded log entries are composed and sent to it
-	LogChan chan Entry
+	LogChan []chan Entry
+}
+
+func (l *Logger) AddLogChan() chan Entry {
+	L.LogChan = append(L.LogChan, make(chan Entry))
+	return L.LogChan[len(L.LogChan)-1]
 }
 
 // SetLevel enables or disables the various print functions
@@ -483,7 +488,8 @@ func Print(a ...interface{}) {
 	wr.Print(a...)
 }
 
-func printcFunc(level string, color bool, fh *os.File, ch chan Entry, split string) PrintcFunc {
+func printcFunc(level string, color bool, fh *os.File, ch []chan Entry,
+	split string) PrintcFunc {
 	f := func(fn func() string) {
 		t := fn()
 		text := trimReturn(t)
@@ -503,7 +509,9 @@ func printcFunc(level string, color bool, fh *os.File, ch chan Entry, split stri
 				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
 			if ch != nil {
-				ch <- out
+				for i := range ch {
+					ch[i] <- out
+				}
 			}
 		}
 	}
@@ -516,7 +524,8 @@ func Printf(format string, a ...interface{}) {
 }
 
 // Logger is a struct containing all the functions with nice handy names
-func printfFunc(level string, color bool, fh *os.File, ch chan Entry, split string) PrintfFunc {
+func printfFunc(level string, color bool, fh *os.File, ch []chan Entry,
+	split string) PrintfFunc {
 	f := func(format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
 		wr.Println(Composite(text, level, color, split))
@@ -535,7 +544,9 @@ func printfFunc(level string, color bool, fh *os.File, ch chan Entry, split stri
 				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
 			if ch != nil {
-				ch <- out
+				for i := range ch {
+					ch[i] <- out
+				}
 			}
 		}
 	}
@@ -548,7 +559,7 @@ func Println(a ...interface{}) {
 }
 
 func printlnFunc(level string, color bool, fh *os.File,
-	ch chan Entry, split string) PrintlnFunc {
+	ch []chan Entry, split string) PrintlnFunc {
 	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
 		wr.Println(Composite(text, level, color, split))
@@ -567,14 +578,17 @@ func printlnFunc(level string, color bool, fh *os.File,
 				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
 			if ch != nil {
-				ch <- out
+				for i := range ch {
+					ch[i] <- out
+				}
 			}
 		}
 	}
 	return f
 }
 
-func checkFunc(color bool, fh *os.File, ch chan Entry, split string) CheckFunc {
+func checkFunc(color bool, fh *os.File, ch []chan Entry,
+	split string) CheckFunc {
 	f := func(err error) bool {
 		n := err == nil
 		if n {
@@ -597,7 +611,9 @@ func checkFunc(color bool, fh *os.File, ch chan Entry, split string) CheckFunc {
 				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
 			if ch != nil {
-				ch <- out
+				for i := range ch {
+					ch[i] <- out
+				}
 			}
 		}
 		return true

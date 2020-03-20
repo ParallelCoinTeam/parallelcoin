@@ -10,14 +10,13 @@ var (
 )
 
 func (r *RcVar) DuoUIloggerController() {
-	L.LogChan = make(chan log.Entry)
-	r.Log.LogChan = L.LogChan
+	logChan := log.L.AddLogChan()
 	log.L.SetLevel(*r.cx.Config.LogLevel, true, "pod")
 	go func() {
 	out:
 		for {
 			select {
-			case n := <-L.LogChan:
+			case n := <-logChan:
 				le, ok := r.Log.LogMessages.Load().([]log.Entry)
 				if ok {
 					le = append(le, n)
