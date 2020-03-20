@@ -244,7 +244,7 @@ var TermWidth = func() int { return 120 }
 
 func Composite(text, level string, color bool, split string) string {
 	dots := "."
-	var terminalWidth int
+	terminalWidth := TermWidth()
 	if TermWidth() <= 80 {
 		terminalWidth = 80
 	}
