@@ -27,7 +27,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	}
 	mon.Loggers = GetTree(lgs)
 	mon.LoadConfig()
-	w := app.NewWindow(
+	mon.W = app.NewWindow(
 		app.Size(unit.Dp(float32(mon.Config.Width.Load())),
 			unit.Dp(float32(mon.Config.Height.Load()))),
 		app.Title("ParallelCoin Pod Monitor"),
@@ -53,7 +53,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	if !strings.HasPrefix("go version", string(out)) {
 		mon.HasGo = true
 	}
-	mon.Gtx = layout.NewContext(w.Queue())
+	mon.Gtx = layout.NewContext(mon.W.Queue())
 	go mon.Runner()
 	go func() {
 		L.Debug("starting up GUI event loop")
@@ -64,7 +64,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 				L.Debug("kill signal received")
 				mon.SaveConfig()
 				break out
-			case e := <-w.Events():
+			case e := <-mon.W.Events():
 				switch e := e.(type) {
 				case system.DestroyEvent:
 					L.Debug("destroy event received")

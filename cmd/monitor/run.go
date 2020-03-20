@@ -88,7 +88,15 @@ func (s *State) Runner() {
 					if err = c.Start(); !L.Check(err) {
 						s.Running.Store(true)
 						s.Pausing.Store(false)
+						s.W.Invalidate()
 					}
+					//go func() {
+					//	if err = c.Wait(); L.Check(err) {
+					//	}
+					//	s.Running.Store(false)
+					//	s.Pausing.Store(false)
+					//	s.W.Invalidate()
+					//}()
 				}
 			}
 		case "stop":
@@ -98,15 +106,13 @@ func (s *State) Runner() {
 					s.Running.Store(false)
 					L.Debug("interrupted")
 				}
-				if err = c.Wait(); L.Check(err) {
-				}
 				if err = c.Process.Release(); L.Check(err) {
 				}
 				L.Debug("stopped")
 			}
 		case "pause":
 			L.Debug("pause called")
-			if s.HasGo && c != nil && s.Running.Load() {
+			if s.HasGo && c != nil && s.Running.Load() && !s.Pausing.Load() {
 				s.Pausing.Toggle()
 				if err = c.Process.Signal(syscall.SIGSTOP); !L.Check(err) {
 					s.Pausing.Store(true)
@@ -115,7 +121,7 @@ func (s *State) Runner() {
 			}
 		case "resume":
 			L.Debug("resume called")
-			if s.HasGo && c != nil && s.Running.Load() {
+			if s.HasGo && c != nil && s.Running.Load() && s.Pausing.Load() {
 				s.Pausing.Toggle()
 				if err = c.Process.Signal(syscall.SIGCONT); !L.Check(err) {
 					s.Pausing.Store(false)
@@ -137,12 +143,8 @@ func (s *State) Runner() {
 				if err = c.Process.Signal(syscall.SIGINT); !L.Check(err) {
 					s.Running.Store(false)
 					L.Debug("interrupted")
+					s.W.Invalidate()
 				}
-				if err = c.Wait(); L.Check(err) {
-				}
-				if err = c.Process.Release(); L.Check(err) {
-				}
-				L.Debug("stopped")
 			}
 			exePath := filepath.Join(*s.Ctx.Config.DataDir, "pod_mon")
 			c = exec.Command("go", "build", "-o",
@@ -157,6 +159,7 @@ func (s *State) Runner() {
 				if err = c.Start(); !L.Check(err) {
 					s.Running.Store(true)
 					s.Pausing.Store(false)
+					s.W.Invalidate()
 				}
 			}
 		}

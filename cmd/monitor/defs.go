@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"encoding/json"
+	"gioui.org/app"
 	"io/ioutil"
 	"path/filepath"
 
@@ -20,6 +21,7 @@ const ConfigFileName = "monitor.json"
 type State struct {
 	Ctx                       *conte.Xt
 	Gtx                       *layout.Context
+	W                         *app.Window
 	Rc                        *rcd.RcVar
 	Theme                     *gelook.DuoUItheme
 	Config                    *Config
