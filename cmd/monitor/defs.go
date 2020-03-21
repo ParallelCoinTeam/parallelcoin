@@ -28,6 +28,7 @@ type State struct {
 	MainList                  *layout.List
 	ModesList                 *layout.List
 	CloseButton               *gel.Button
+	RestartButton             *gel.Button
 	LogoButton                *gel.Button
 	RunMenuButton             *gel.Button
 	StopMenuButton            *gel.Button
@@ -45,8 +46,6 @@ type State struct {
 	BuildTitleCloseButton     *gel.Button
 	ModesButtons              map[string]*gel.Button
 	GroupsList                *layout.List
-	Running                   atomic.Bool
-	Pausing                   atomic.Bool
 	WindowWidth, WindowHeight int
 	Loggers                   *Node
 	SettingsFields            *layout.List
@@ -75,6 +74,7 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 			Alignment: layout.Start,
 		},
 		CloseButton:              new(gel.Button),
+		RestartButton:            new(gel.Button),
 		LogoButton:               new(gel.Button),
 		RunMenuButton:            new(gel.Button),
 		StopMenuButton:           new(gel.Button),
@@ -113,8 +113,6 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		InstallNewGoButton:   new(gel.Button),
 		RunCommandChan:       make(chan string),
 	}
-	s.Running.Store(false)
-	s.Pausing.Store(false)
 	s.Config.RunMode.Store("node")
 	s.Config.DarkTheme.Store(true)
 	return
@@ -132,6 +130,8 @@ type Config struct {
 	DarkTheme      atomic.Bool
 	RunInRepo      atomic.Bool
 	UseBuiltinGo   atomic.Bool
+	Running        atomic.Bool
+	Pausing        atomic.Bool
 }
 
 func (c *Config) GetUnsafeConfig() (out *UnsafeConfig) {
@@ -147,6 +147,8 @@ func (c *Config) GetUnsafeConfig() (out *UnsafeConfig) {
 		DarkTheme:      c.DarkTheme.Load(),
 		RunInRepo:      c.RunInRepo.Load(),
 		UseBuiltinGo:   c.UseBuiltinGo.Load(),
+		Running:        c.Running.Load(),
+		Pausing:        c.Pausing.Load(),
 	}
 	return
 }
@@ -162,6 +164,8 @@ type UnsafeConfig struct {
 	DarkTheme      bool
 	RunInRepo      bool
 	UseBuiltinGo   bool
+	Running        bool
+	Pausing        bool
 }
 
 func (u *UnsafeConfig) LoadInto(c *Config) {
@@ -176,6 +180,8 @@ func (u *UnsafeConfig) LoadInto(c *Config) {
 	c.DarkTheme.Store(u.DarkTheme)
 	c.RunInRepo.Store(u.RunInRepo)
 	c.UseBuiltinGo.Store(u.UseBuiltinGo)
+	c.Running.Store(u.Running)
+	c.Pausing.Store(u.Pausing)
 }
 
 func (s *State) LoadConfig() {

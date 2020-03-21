@@ -49,7 +49,6 @@ func (s *State) BuildPage() layout.FlexChild {
 			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 			s.Inset(4, func() {})
 		}), Rigid(func() {
-
 			s.FlexH(Rigid(func() {
 				s.TextButton("Build Configuration", "Secondary",
 					23, "DocText", "DocBg",
@@ -119,8 +118,10 @@ func (s *State) BuildConfigPage() {
 					s.TextButton("repo", "Primary", 16,
 						fg, bg, s.RunningInRepoButton)
 					for s.RunningInRepoButton.Clicked(s.Gtx) {
-						s.Config.RunInRepo.Store(true)
-						s.CannotRun = false
+						if !s.Config.Running.Load() {
+							s.Config.RunInRepo.Store(true)
+							s.CannotRun = false
+						}
 					}
 				}
 			}), Rigid(func() {
@@ -131,8 +132,10 @@ func (s *State) BuildConfigPage() {
 				s.TextButton("profile", "Primary", 16,
 					fg, bg, s.RunFromProfileButton)
 				for s.RunFromProfileButton.Clicked(s.Gtx) {
-					s.Config.RunInRepo.Store(false)
-					s.CannotRun = false
+					if !s.Config.Running.Load() {
+						s.Config.RunInRepo.Store(false)
+						s.CannotRun = false
+					}
 				}
 			}), Rigid(func() {
 				txt := "run pod in its repository"
@@ -161,10 +164,12 @@ func (s *State) BuildConfigPage() {
 					s.TextButton("builtin", "Primary", 16,
 						fg, bg, s.UseBuiltinGoButton)
 					for s.UseBuiltinGoButton.Clicked(s.Gtx) {
-						s.Config.UseBuiltinGo.Store(true)
-						s.CannotRun = false
-						if !s.HasGo {
-							s.CannotRun = true
+						if !s.Config.RunInRepo.Load() {
+							s.Config.UseBuiltinGo.Store(true)
+							s.CannotRun = false
+							if !s.HasGo {
+								s.CannotRun = true
+							}
 						}
 					}
 				}
@@ -176,10 +181,12 @@ func (s *State) BuildConfigPage() {
 				s.TextButton("install new", "Primary", 16,
 					fg, bg, s.InstallNewGoButton)
 				for s.InstallNewGoButton.Clicked(s.Gtx) {
-					s.Config.UseBuiltinGo.Store(false)
-					s.CannotRun = false
-					if !s.HasOtherGo {
-						s.CannotRun = true
+					if !s.Config.RunInRepo.Load() {
+						s.Config.UseBuiltinGo.Store(false)
+						s.CannotRun = false
+						if !s.HasOtherGo {
+							s.CannotRun = true
+						}
 					}
 				}
 			}), Rigid(func() {

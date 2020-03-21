@@ -107,11 +107,11 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	algoVer := fork.GetAlgoVer(algoName, lastNode.height+1)
 	ttpb := float64(fork.List[1].Algos[algoName].VersionInterval)
 	newTargetBits = fork.SecondPowLimitBits
-	const minAvSamples = 2
+	const minAvSamples = 3
 	adjustment = 1
 	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, fork.P9Average
 	if lastNode == nil {
-		L.Trace("lastNode is nil")
+		L.Warn("lastNode is nil")
 	}
 	// algoInterval := fork.P9Algos[algoname].VersionInterval
 	startHeight := fork.List[1].ActivationHeight
@@ -130,13 +130,13 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	if last != nil {
 		bits = last.bits
 	}
-	// L.Debug(
-	// 	"allAv", allAv,
-	// 	"fork.P9Average", fork.P9Average,
-	// 	"allAv/fork.P9Average", allAv/fork.P9Average,
-	// 	"algAv", algAv,
-	// 	"algAdj", algAdj,
-	// 	"allAdj", allAdj)
+	//L.Debug(
+	//	"allAv", allAv,
+	//	"fork.P9Average", fork.P9Average,
+	//	"allAv/fork.P9Average", allAv/fork.P9Average,
+	//	"algAv", algAv,
+	//	"algAdj", algAdj,
+	//	"allAdj", allAdj)
 	adjustment = algAdj * allAdj
 	// adjustment *= adjustment
 	bigAdjustment := big.NewFloat(adjustment)
@@ -155,27 +155,29 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 		// if lastNode.version == algoVer {
 		L.Debugc(func() string {
 			an := fork.List[1].AlgoVers[algoVer]
-			pad := 9 - len(an)
+			pad := 8 - len(an)
 			if pad > 0 {
 				an += strings.Repeat(" ", pad)
 			}
 			factor := 1 / adjustment
-			symbol := "->"
+			symbol := ">"
 			if factor < 1 {
 				factor = adjustment
-				symbol = "<-"
+				symbol = "<"
 			}
 			if factor == 1 {
-				symbol = "--"
+				symbol = "-"
 			}
 			isNewest := ""
-			// isNewest = "*"
-			return fmt.Sprintf("%s %s av %s /%2.0f %s %s %08x %08x%s",
+			if lastNode.version == algoVer {
+				isNewest = "*"
+			}
+			return fmt.Sprintf("%s %s av %s/%2.0f %s %s %08x %08x%s",
 				an,
-				RightJustify(fmt.Sprintf("%4.4f", algAv), 11),
-				RightJustify(fmt.Sprintf("%4.4f", allAv), 11),
+				RightJustify(fmt.Sprintf("%4.2f", algAv), 8),
+				RightJustify(fmt.Sprintf("%4.2f", allAv), 7),
 				fork.P9Average,
-				RightJustify(fmt.Sprintf("%4.4f", factor), 9),
+				RightJustify(fmt.Sprintf("%4.2f", factor), 7),
 				symbol,
 				bits,
 				newTargetBits,

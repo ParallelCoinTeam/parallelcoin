@@ -245,8 +245,8 @@ var TermWidth = func() int { return 120 }
 func Composite(text, level string, color bool, split string) string {
 	dots := "."
 	terminalWidth := TermWidth()
-	if TermWidth() <= 80 {
-		terminalWidth = 80
+	if TermWidth() <= 120 {
+		terminalWidth = 120
 	}
 	skip := 2
 	if level == Check {
@@ -286,7 +286,8 @@ func Composite(text, level string, color bool, split string) string {
 			line = ""
 			dots = " "
 		}
-		since = fmt.Sprint(time.Now())[:19]
+		since = fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Millisecond*time.Millisecond)
+		//since = fmt.Sprint(time.Now())[:19]
 	case terminalWidth >= 200:
 		since = fmt.Sprint(time.Now())[:39]
 	default:
@@ -347,7 +348,7 @@ func Composite(text, level string, color bool, split string) string {
 		restLen := terminalWidth - levelLen - sinceLen
 		if len(lines) > 1 {
 			final = fmt.Sprintf("%s %s %s %s%s", level, since,
-				strings.Repeat(" ",
+				strings.Repeat(".",
 					terminalWidth-levelLen-sinceLen-fileLen-lineLen),
 				file, line)
 			final += text[:len(text)-1]

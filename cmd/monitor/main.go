@@ -7,15 +7,14 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"gopkg.in/src-d/go-git.v4"
-	"os"
-	"os/exec"
-	"strings"
-
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
+	"gopkg.in/src-d/go-git.v4"
+	"os"
+	"os/exec"
+	"strings"
 )
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
@@ -54,6 +53,16 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	}
 	mon.Gtx = layout.NewContext(mon.W.Queue())
 	go mon.Runner()
+	if mon.Config.Running.Load() {
+		go func() {
+			//time.Sleep(time.Second*3)
+			mon.RunCommandChan <- "restart"
+			if mon.Config.Pausing.Load() {
+				//time.Sleep(time.Second*3)
+				mon.RunCommandChan <- "pause"
+			}
+		}()
+	}
 	go func() {
 		L.Debug("starting up GUI event loop")
 	out:
