@@ -47,7 +47,6 @@ func (s *State) SettingsPage() layout.FlexChild {
 		return Flexed(0, func() {})
 	}
 	var weight float32 = 0.5
-	var settingsInset = 0
 	switch {
 	case s.Config.SettingsZoomed.Load():
 		weight = 1
@@ -59,79 +58,70 @@ func (s *State) SettingsPage() layout.FlexChild {
 		weight = 1
 	}
 	return Flexed(weight, func() {
-		s.Inset(settingsInset, func() {
-			cs := s.Gtx.Constraints
-			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-			s.FlexV(
-				Rigid(func() {
-					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-					s.Inset(4, func() {})
-				}),
-				Rigid(func() {
-					s.FlexH(
-						Rigid(func() {
-							s.TextButton("Settings", "Secondary",
-								23, "DocText", "DocBg",
-								s.SettingsTitleCloseButton)
-							for s.SettingsTitleCloseButton.Clicked(s.Gtx) {
-								L.Debug("settings panel title close button clicked")
-								s.Config.SettingsOpen.Store(false)
-								s.SaveConfig()
-							}
-						}),
-						Rigid(func() {
-							if s.WindowWidth > 640 {
-								s.SettingsTabs()
-							}
-						}), Spacer(), Rigid(func() {
-							if !(s.WindowHeight < 1024 && s.WindowWidth < 1024 ||
-								s.WindowHeight < 600 && s.WindowWidth > 1024) {
-								ic := "zoom"
-								if s.Config.SettingsZoomed.Load() {
-									ic = "minimize"
-								}
-								s.IconButton(ic, "DocText", "DocBg",
-									s.SettingsZoomButton)
-								for s.SettingsZoomButton.Clicked(s.Gtx) {
-									L.Debug("settings panel close button clicked")
-									s.Config.SettingsZoomed.Toggle()
-									s.SaveConfig()
-								}
-							}
-						}), Rigid(func() {
-							s.IconButton("foldIn", "DocText", "DocBg",
-								s.SettingsCloseButton)
-							for s.SettingsCloseButton.Clicked(s.Gtx) {
-								L.Debug("settings panel close button clicked")
-								s.Config.SettingsOpen.Store(false)
-								s.SaveConfig()
-							}
-						}),
-					)
-				}),
-				Rigid(func() {
-					if s.WindowWidth < 640 {
-						cs := s.Gtx.Constraints
-						s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+		cs := s.Gtx.Constraints
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+		s.FlexV(
+			Rigid(func() {
+				cs := s.Gtx.Constraints
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+				s.Inset(4, func() {})
+			}),
+			Rigid(func() {
+				s.FlexH(Rigid(func() {
+					s.TextButton("Settings", "Secondary",
+						23, "DocText", "DocBg",
+						s.SettingsTitleCloseButton)
+					for s.SettingsTitleCloseButton.Clicked(s.Gtx) {
+						L.Debug("settings panel title close button clicked")
+						s.Config.SettingsOpen.Store(false)
+						s.SaveConfig()
+					}
+				}), Rigid(func() {
+					if s.WindowWidth > 640 {
 						s.SettingsTabs()
 					}
+				}), Spacer(), Rigid(func() {
+					if !(s.WindowHeight < 1024 && s.WindowWidth < 1024 ||
+						s.WindowHeight < 600 && s.WindowWidth > 1024) {
+						ic := "zoom"
+						if s.Config.SettingsZoomed.Load() {
+							ic = "minimize"
+						}
+						s.IconButton(ic, "DocText", "DocBg",
+							s.SettingsZoomButton)
+						for s.SettingsZoomButton.Clicked(s.Gtx) {
+							L.Debug("settings panel close button clicked")
+							s.Config.SettingsZoomed.Toggle()
+							s.SaveConfig()
+						}
+					}
+				}), Rigid(func() {
+					s.IconButton("foldIn", "DocText", "DocBg",
+						s.SettingsCloseButton)
+					for s.SettingsCloseButton.Clicked(s.Gtx) {
+						L.Debug("settings panel close button clicked")
+						s.Config.SettingsOpen.Store(false)
+						s.SaveConfig()
+					}
 				}),
-				Flexed(1, func() {
-					s.Inset(settingsInset, func() {
-						cs := s.Gtx.Constraints
-						s.Rectangle(cs.Width.Max, cs.Height.Max,
-							"PanelBg")
-						s.SettingsBody()
-					})
-				}),
-				Rigid(func() {
+				)
+			}), Rigid(func() {
+				if s.WindowWidth < 640 {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
-					s.Inset(4, func() {})
-				}),
-			)
-		})
+					s.SettingsTabs()
+				}
+			}), Flexed(1, func() {
+				cs := s.Gtx.Constraints
+				s.Rectangle(cs.Width.Max, cs.Height.Max,
+					"PanelBg")
+				s.Inset(8, func() { s.SettingsBody() })
+			}), Rigid(func() {
+				cs := s.Gtx.Constraints
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+				s.Inset(4, func() {})
+			}),
+		)
 	})
 }
 
@@ -176,29 +166,45 @@ func (s *State) SettingsBody() {
 								},
 							)
 						}
-					}
-				})
-		}),
+						if tl.Field.Type == "switch" {
+							s.FlexH(Flexed(1, func() {
+								s.FlexH(
+									s.SettingsItemInput(tl),
+									s.SettingsItemLabel(tl),
+								)
+							}))
+						} else {
+							s.FlexH(Flexed(1, func() {
+								s.FlexH(
+									s.SettingsItemLabel(tl),
+									s.SettingsItemInput(tl),
+								)
+							}))
+						}
+					},
+					)
+				}
+			}
+		})
+	}),
 	)
 }
 
 func (s *State) SettingsItemLabel(f *Field) layout.FlexChild {
-	return Flexed(0.5, func() {
+	return Rigid(func() {
+		s.Gtx.Constraints.Width.Max = 16*16 + 8
+		s.Gtx.Constraints.Width.Min = 16*16 + 8
 		s.Inset(10, func() {
 			s.FlexV(
-				Rigid(
-					s.SettingsFieldLabel(s.Gtx, s.Theme, f),
-				),
-				Rigid(
-					s.SettingsFieldDescription(s.Gtx, s.Theme, f),
-				),
+				Rigid(s.SettingsFieldLabel(s.Gtx, s.Theme, f)),
+				Rigid(s.SettingsFieldDescription(s.Gtx, s.Theme, f)),
 			)
 		})
 	})
 }
 
 func (s *State) SettingsItemInput(f *Field) layout.FlexChild {
-	return Flexed(0.5, func() {
+	return Rigid(func() {
 		s.Inset(10,
 			DuoUIinputField(s.Rc, s.Gtx, s.Theme, &Field{Field: f.Field}),
 		)
@@ -230,7 +236,7 @@ func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorContro
 			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32,
 				th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0,
 					0, 0})
-			e := th.DuoUIeditor(label)
+			e := th.DuoUIeditor(label, "DocText", 32)
 			e.Font.Typeface = th.Fonts["Mono"]
 			// e.Font.Style = text.Italic
 			layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
@@ -248,6 +254,8 @@ func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorContro
 
 func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
+		//gtx.Constraints.Width.Max = 8 + 32*16
+		gtx.Constraints.Width.Min = 8 + 32*16
 		rsd := rc.Settings.Daemon
 		fld := f.Field
 		fm := fld.Model
@@ -281,61 +289,63 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 		case "input":
 			switch fld.InputType {
 			case "text":
-				Editor(gtx, th, rwe,
-					rwe.Text(),
-					func(e gel.EditorEvent) {
-						txt := rwe.Text()
-						rsd.Config[fm] = txt
-						if e != nil {
-							rc.SaveDaemonCfg()
-						}
-					})()
+				Editor(gtx, th, rwe, rwe.Text(), 32, func(e gel.EditorEvent) {
+					txt := rwe.Text()
+					rsd.Config[fm] = txt
+					if e != nil {
+						rc.SaveDaemonCfg()
+					}
+				})()
 			case "number":
-				Editor(gtx, th, rwe, rwe.Text(),
-					func(e gel.EditorEvent) {
-						number, err := strconv.Atoi(rwe.Text())
-						if err == nil {
-						}
-						rsd.Config[fm] = number
-						if e != nil {
-							rc.SaveDaemonCfg()
-						}
-					})()
+				Editor(gtx, th, rwe, rwe.Text(), 15, func(e gel.EditorEvent) {
+					number, err := strconv.Atoi(rwe.Text())
+					if err == nil {
+					}
+					rsd.Config[fm] = number
+					if e != nil {
+						rc.SaveDaemonCfg()
+					}
+				})()
 			case "decimal":
-				Editor(gtx, th, rwe, rwe.Text(),
-					func(e gel.EditorEvent) {
-						decimal, err := strconv.ParseFloat(rwe.Text(), 64)
-						if err != nil {
-						}
-						rsd.Config[fm] = decimal
-						if e != nil {
-							rc.SaveDaemonCfg()
-						}
-					})()
+				Editor(gtx, th, rwe, rwe.Text(), 15, func(e gel.EditorEvent) {
+					decimal, err := strconv.ParseFloat(rwe.Text(), 64)
+					if err != nil {
+					}
+					rsd.Config[fm] = decimal
+					if e != nil {
+						rc.SaveDaemonCfg()
+					}
+				})()
 			case "password":
-				e := th.DuoUIeditor(fld.Label)
+				e := th.DuoUIeditor(fld.Label, "DocText", 32)
 				e.Font.Typeface = th.Fonts["Primary"]
 				e.Font.Style = text.Italic
 				e.Layout(gtx, rwe)
 			default:
 			}
 		case "switch":
-			th.DuoUIcheckBox(fld.Label, th.Colors["PanelText"],
-				th.Colors["PanelText"]).Layout(gtx,
-				(rsd.Widgets[fm]).(*gel.CheckBox))
-			if (rsd.Widgets[fm]).(*gel.CheckBox).Checked(gtx) {
-				if !*rsd.Config[fm].(*bool) {
-					tt := true
-					rsd.Config[fm] = &tt
-					rc.SaveDaemonCfg()
+			gtx.Constraints.Width.Max = 16*15 + 8
+			gtx.Constraints.Width.Min = 16*15 + 8
+			layout.E.Layout(gtx, func() {
+				th.DuoUIcheckBox("",
+					//fld.Label,
+					th.Colors["PanelText"],
+					th.Colors["PanelText"]).Layout(gtx,
+					(rsd.Widgets[fm]).(*gel.CheckBox))
+				if (rsd.Widgets[fm]).(*gel.CheckBox).Checked(gtx) {
+					if !*rsd.Config[fm].(*bool) {
+						tt := true
+						rsd.Config[fm] = &tt
+						rc.SaveDaemonCfg()
+					}
+				} else {
+					if *rsd.Config[fm].(*bool) {
+						ff := false
+						rsd.Config[fm] = &ff
+						rc.SaveDaemonCfg()
+					}
 				}
-			} else {
-				if *rsd.Config[fm].(*bool) {
-					ff := false
-					rsd.Config[fm] = &ff
-					rc.SaveDaemonCfg()
-				}
-			}
+			})
 		case "radio":
 			// radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
 			// layout.Flex{}.Layout(gtx,
@@ -359,21 +369,20 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 }
 
 func Editor(gtx *layout.Context, th *gelook.DuoUItheme,
-	editorControler *gel.Editor, label string,
+	editorControler *gel.Editor, content string, width int,
 	handler func(gel.EditorEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-			cs := gtx.Constraints
-			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32,
-				th.Colors["Gray"],
+			//cs := gtx.Constraints
+			gelook.DuoUIdrawRectangle(gtx, width*16+8, 40,
+				th.Colors["DocBg"],
 				[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32,
-					th.Colors["Light"], [4]float32{0, 0, 0, 0},
-					[4]float32{0, 0, 0, 0})
-				e := th.DuoUIeditor(label)
+			layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
+				//gelook.DuoUIdrawRectangle(gtx, width*16, 32,
+				//	th.Colors["DocBg"], [4]float32{0, 0, 0, 0},
+				//	[4]float32{0, 0, 0, 0})
+				e := th.DuoUIeditor(content, "DocText", width)
 				e.Font.Typeface = th.Fonts["Mono"]
-				// e.Font.Style = text.Italic
 				layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
 					e.Layout(gtx, editorControler)
 				})

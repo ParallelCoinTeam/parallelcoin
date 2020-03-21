@@ -387,16 +387,6 @@ func normalizeAddresses(cfg *pod.Config) {
 	// nrm(cfg.RPCListeners, port)
 }
 
-func setAlgo(cfg *pod.Config) {
-	p9 := fork.P9AlgoVers
-	// Set the mining algorithm correctly, default to random if unrecognised
-	switch *cfg.Algo {
-	case p9[0], p9[1], p9[2], p9[3], p9[4], p9[5], p9[6], p9[7], p9[8], "random", "easy":
-	default:
-		*cfg.Algo = "random"
-	}
-	L.Trace("mining algorithm ", *cfg.Algo)
-}
 func setRelayReject(cfg *pod.Config) {
 	relayNonStd := *cfg.RelayNonStd
 	switch {

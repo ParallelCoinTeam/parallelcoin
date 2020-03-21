@@ -49,7 +49,8 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 				case "text":
 					if settings.Daemon.Config[field.Model] != nil {
 						var text string
-						for _, str := range *settings.Daemon.Config[field.Model].(*cli.StringSlice) {
+						for _, str := range *settings.Daemon.
+							Config[field.Model].(*cli.StringSlice) {
 							text = text + str + "\n"
 						}
 						(settingsFields[field.Model]).(*gel.Editor).SetText(text)
@@ -62,20 +63,25 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 				if settings.Daemon.Config[field.Model] != nil {
 					switch field.InputType {
 					case "text":
-						(settingsFields[field.Model]).(*gel.Editor).SetText(fmt.Sprint(*settings.Daemon.Config[field.Model].(*string)))
+						(settingsFields[field.Model]).(*gel.Editor).SetText(
+							fmt.Sprint(*settings.Daemon.Config[field.Model].(*string)))
 					case "number":
-						(settingsFields[field.Model]).(*gel.Editor).SetText(fmt.Sprint(*settings.Daemon.Config[field.Model].(*int)))
+						(settingsFields[field.Model]).(*gel.Editor).SetText(
+							fmt.Sprint(*settings.Daemon.Config[field.Model].(*int)))
 					case "decimal":
 						(settingsFields[field.Model]).(*gel.Editor).SetText(
-							fmt.Sprintf("%0.8f", *settings.Daemon.Config[field.
+							fmt.Sprintf("%0.f", *settings.Daemon.Config[field.
 								Model].(*float64)))
 					case "time":
-						(settingsFields[field.Model]).(*gel.Editor).SetText(fmt.Sprint(*settings.Daemon.Config[field.Model].(*time.Duration)))
+						(settingsFields[field.Model]).(*gel.Editor).SetText(
+							fmt.Sprint(*settings.
+								Daemon.Config[field.Model].(*time.Duration)))
 					}
 				}
 			case "switch":
 				settingsFields[field.Model] = new(gel.CheckBox)
-				(settingsFields[field.Model]).(*gel.CheckBox).SetChecked(*settings.Daemon.Config[field.Model].(*bool))
+				(settingsFields[field.Model]).(*gel.CheckBox).SetChecked(
+					*settings.Daemon.Config[field.Model].(*bool))
 			case "radio":
 				settingsFields[field.Model] = new(gel.Enum)
 			default:

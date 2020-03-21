@@ -161,7 +161,6 @@ type (
 		// cfcheckpt messages for each filter type.
 		CFCheckptCaches    map[wire.FilterType][]CFHeaderKV
 		CFCheckptCachesMtx sync.RWMutex
-		Algo               string
 		Config             *pod.Config
 		ActiveNet          *netparams.Params
 		StateCfg           *state.Config
@@ -2565,7 +2564,7 @@ func // NewNode returns a new pod server configured to listen on addr for the
 // connections from peers.
 // TODO: simplify/modularise this
 NewNode(listenAddrs []string, db database.DB,
-	interruptChan <-chan struct{}, algo string, cx *Context) (*Node, error) {
+	interruptChan <-chan struct{}, cx *Context) (*Node, error) {
 	L.Trace("listenAddrs ", listenAddrs)
 	services := DefaultServices
 	if *cx.Config.NoPeerBloomFilters {
@@ -2616,7 +2615,6 @@ NewNode(listenAddrs []string, db database.DB,
 		HashCache:            txscript.NewHashCache(uint(*cx.Config.SigCacheMaxSize)),
 		CFCheckptCaches:      make(map[wire.FilterType][]CFHeaderKV),
 		GenThreads:           uint32(thr),
-		Algo:                 algo,
 		Config:               cx.Config,
 		StateCfg:             cx.StateCfg,
 		ActiveNet:            cx.ActiveNet,

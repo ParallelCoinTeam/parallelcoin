@@ -370,7 +370,7 @@ func getBlkTemplateGenerator(cx *conte.Xt) *mining.BlkTmplGenerator {
 	s := cx.RealNode
 	return mining.NewBlkTmplGenerator(&policy,
 		s.ChainParams, s.TxMemPool, s.Chain, s.TimeSource,
-		s.SigCache, s.HashCache, s.Algo)
+		s.SigCache, s.HashCache)
 }
 
 func advertiser(ctrl *Controller) {

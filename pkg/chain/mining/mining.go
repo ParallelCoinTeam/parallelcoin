@@ -128,7 +128,6 @@ type (
 		TimeSource  blockchain.MedianTimeSource
 		SigCache    *txscript.SigCache
 		HashCache   *txscript.HashCache
-		Algo        string
 	}
 )
 
@@ -354,7 +353,7 @@ NewBlkTmplGenerator(policy *Policy, params *netparams.Params,
 	txSource TxSource, chain *blockchain.BlockChain,
 	timeSource blockchain.MedianTimeSource,
 	sigCache *txscript.SigCache,
-	hashCache *txscript.HashCache, algo string) *BlkTmplGenerator {
+	hashCache *txscript.HashCache) *BlkTmplGenerator {
 	return &BlkTmplGenerator{
 		Policy:      policy,
 		ChainParams: params,
@@ -363,7 +362,6 @@ NewBlkTmplGenerator(policy *Policy, params *netparams.Params,
 		TimeSource:  timeSource,
 		SigCache:    sigCache,
 		HashCache:   hashCache,
-		Algo:        algo,
 	}
 }
 

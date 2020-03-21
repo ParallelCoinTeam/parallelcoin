@@ -29,7 +29,6 @@ Configure(cx *conte.Xt, commandName string) {
 		*cfg.AddPeers = nil
 	}
 	normalizeAddresses(cfg)
-	setAlgo(cfg)
 	setRelayReject(cfg)
 	validateDBtype(cfg)
 	validateProfilePort(cfg)

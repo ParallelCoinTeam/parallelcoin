@@ -452,15 +452,6 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 				"Max number of orphan transactions to keep in memory",
 				node.DefaultMaxOrphanTransactions,
 				cx.Config.MaxOrphanTxs),
-			apputil.String(
-				// TODO: remove this as mining only one algo is
-				//  not advisable
-				"algo",
-				"Sets the algorithm for the CPU miner ( blake14lr,"+
-					" cn7v2, keccak, lyra2rev2, scrypt, sha256d, stribog,"+
-					" skein, x11 default is 'random')",
-				"random",
-				cx.Config.Algo),
 			apputil.Bool(
 				"generate, g",
 				"Generate (mine) DUO using the CPU",
