@@ -146,7 +146,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	}
 	// create server and start it
 	server, err := rpc.NewNode(*cx.Config.Listeners, db,
-		interrupt.ShutdownRequestChan, *cx.Config.Algo, conte.GetContext(cx))
+		interrupt.ShutdownRequestChan, conte.GetContext(cx))
 	if err != nil {
 		L.Errorf("unable to start server on %v: %v",
 			*cx.Config.Listeners, err)

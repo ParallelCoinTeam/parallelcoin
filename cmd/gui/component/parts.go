@@ -38,16 +38,16 @@ func fill(gtx *layout.Context, col color.RGBA) {
 	paint.PaintOp{Rect: dr}.Add(gtx.Ops)
 	gtx.Dimensions = layout.Dimensions{Size: d}
 }
-func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	return func() {
 		th.DuoUIitem(8, "ffffffff").Layout(gtx, layout.NW, func() {
-			e := th.DuoUIeditor(label)
+			e := th.DuoUIeditor(label, "Dark", 32)
 			e.Font.Typeface = th.Fonts["Mono"]
 			e.TextSize = unit.Dp(12)
 			layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-				e.Layout(gtx, editorControler)
+				e.Layout(gtx, editorController)
 			})
-			for _, e := range editorControler.Events(gtx) {
+			for _, e := range editorController.Events(gtx) {
 				switch e.(type) {
 				case gel.ChangeEvent:
 					handler(e)
@@ -57,16 +57,16 @@ func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Edi
 	}
 }
 
-func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	return func() {
 		th.DuoUIitem(8, "ffffffff").Layout(gtx, layout.NW, func() {
-			e := th.DuoUIeditor(label)
+			e := th.DuoUIeditor(label, "Dark", 32)
 			e.Font.Typeface = th.Fonts["Mono"]
 			// e.Font.Style = text.Italic
 			layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-				e.Layout(gtx, editorControler)
+				e.Layout(gtx, editorController)
 			})
-			for _, e := range editorControler.Events(gtx) {
+			for _, e := range editorController.Events(gtx) {
 				switch e.(type) {
 				case gel.ChangeEvent:
 					handler(e)
@@ -76,18 +76,18 @@ func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorContro
 	}
 }
 
-func ConsoleInput(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, label string, handler func(gel.SubmitEvent)) func() {
+func ConsoleInput(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.SubmitEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			e := th.DuoUIeditor(label)
+			e := th.DuoUIeditor(label, "Dark", 120)
 			e.Font.Typeface = th.Fonts["Primary"]
 			e.Color = gelook.HexARGB(th.Colors["Light"])
 			e.Font.Style = text.Italic
-			e.Layout(gtx, editorControler)
-			for _, e := range editorControler.Events(gtx) {
+			e.Layout(gtx, editorController)
+			for _, e := range editorController.Events(gtx) {
 				if e, ok := e.(gel.SubmitEvent); ok {
 					handler(e)
-					editorControler.SetText("")
+					editorController.SetText("")
 				}
 			}
 		})
