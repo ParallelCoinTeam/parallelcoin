@@ -121,6 +121,7 @@ func (s *State) BuildConfigPage() {
 						if !s.Config.Running.Load() {
 							s.Config.RunInRepo.Store(true)
 							s.CannotRun = false
+							s.SaveConfig()
 						}
 					}
 				}
@@ -135,6 +136,7 @@ func (s *State) BuildConfigPage() {
 					if !s.Config.Running.Load() {
 						s.Config.RunInRepo.Store(false)
 						s.CannotRun = false
+						s.SaveConfig()
 					}
 				}
 			}), Rigid(func() {

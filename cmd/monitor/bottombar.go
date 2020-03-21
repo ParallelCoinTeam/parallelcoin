@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
-	"time"
 )
 
 func (s *State) BottomBar() layout.FlexChild {
@@ -86,26 +85,21 @@ func (s *State) RestartRunButton() layout.FlexChild {
 			L.Debug("clicked restart button")
 			s.SaveConfig()
 			if s.HasGo {
-				s.RunCommandChan <- "stop"
-				exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
-				c = exec.Command("go", "build", "-x", "-v",
-					"-tags", "goterm", "-o", exePath)
-				c.Stderr = os.Stderr
-				c.Stdout = os.Stdout
-				if err = c.Run(); !L.Check(err) {
-					if err = syscall.Exec(exePath, os.Args,
-						os.Environ()); L.Check(err) {
+				go func() {
+					s.RunCommandChan <- "stop"
+					exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
+					c = exec.Command("go", "build", "-x", "-v",
+						"-tags", "goterm", "-o", exePath)
+					c.Stderr = os.Stderr
+					c.Stdout = os.Stdout
+					if err = c.Run(); !L.Check(err) {
+						if err = syscall.Exec(exePath, os.Args,
+							os.Environ()); L.Check(err) {
+						}
+						//time.Sleep(time.Second)
+						os.Exit(0)
 					}
-					//c = exec.Command(exePath, "-D", *s.Ctx.Config.DataDir,
-					//	"mon")
-					//c.Stderr = os.Stderr
-					//c.Stdout = os.Stdout
-					//c.Stdin = os.Stdin
-					//if err = c.Start(); !L.Check(err) {
-					//}
-					time.Sleep(time.Second)
-					os.Exit(0)
-				}
+				}()
 			}
 		}
 	})

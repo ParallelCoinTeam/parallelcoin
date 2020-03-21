@@ -137,21 +137,19 @@ func (s *State) SettingsPage() layout.FlexChild {
 
 func (s *State) SettingsTabs() {
 	groupsNumber := len(s.Rc.Settings.Daemon.Schema.Groups)
+
 	s.GroupsList.Layout(s.Gtx, groupsNumber, func(i int) {
-		color :=
-			"DocText"
-		bgColor :=
-			"DocBg"
+		color := "DocText"
+		bgColor := "DocBg"
 		i = groupsNumber - 1 - i
 		txt := s.Rc.Settings.Daemon.Schema.Groups[i].Legend
 		for s.Rc.Settings.Tabs.TabsList[txt].Clicked(s.Gtx) {
 			s.Rc.Settings.Tabs.Current = txt
+			s.Config.SettingsTab.Store(txt)
 		}
 		if s.Rc.Settings.Tabs.Current == txt {
-			color =
-				"PanelText"
-			bgColor =
-				"PanelBg"
+			color = "PanelText"
+			bgColor = "PanelBg"
 		}
 		s.TextButton(txt, "Primary", 16,
 			color, bgColor, s.Rc.Settings.Tabs.TabsList[txt])

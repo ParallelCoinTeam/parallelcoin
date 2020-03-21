@@ -141,7 +141,7 @@ func (s *State) Runner() {
 			if s.HasGo && c != nil {
 				if err = c.Process.Signal(syscall.SIGINT); !L.Check(err) {
 					s.Config.Running.Store(false)
-					time.Sleep(time.Second * 2)
+					time.Sleep(time.Second * 1)
 					L.Debug("restarted")
 					s.W.Invalidate()
 				}

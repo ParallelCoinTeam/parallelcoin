@@ -125,6 +125,7 @@ type Config struct {
 	RunModeZoomed  atomic.Bool
 	SettingsOpen   atomic.Bool
 	SettingsZoomed atomic.Bool
+	SettingsTab    atomic.String
 	BuildOpen      atomic.Bool
 	BuildZoomed    atomic.Bool
 	DarkTheme      atomic.Bool
@@ -143,7 +144,9 @@ func (c *Config) GetUnsafeConfig() (out *UnsafeConfig) {
 		RunModeZoomed:  c.RunModeZoomed.Load(),
 		SettingsOpen:   c.SettingsOpen.Load(),
 		SettingsZoomed: c.SettingsZoomed.Load(),
+		SettingsTab:    c.SettingsTab.Load(),
 		BuildOpen:      c.BuildOpen.Load(),
+		BuildZoomed:    c.BuildZoomed.Load(),
 		DarkTheme:      c.DarkTheme.Load(),
 		RunInRepo:      c.RunInRepo.Load(),
 		UseBuiltinGo:   c.UseBuiltinGo.Load(),
@@ -160,7 +163,9 @@ type UnsafeConfig struct {
 	RunModeZoomed  bool
 	SettingsOpen   bool
 	SettingsZoomed bool
+	SettingsTab    string
 	BuildOpen      bool
+	BuildZoomed    bool
 	DarkTheme      bool
 	RunInRepo      bool
 	UseBuiltinGo   bool
@@ -176,7 +181,9 @@ func (u *UnsafeConfig) LoadInto(c *Config) {
 	c.RunModeOpen.Store(u.RunModeOpen)
 	c.SettingsZoomed.Store(u.SettingsZoomed)
 	c.SettingsOpen.Store(u.SettingsOpen)
+	c.SettingsTab.Store(u.SettingsTab)
 	c.BuildOpen.Store(u.BuildOpen)
+	c.BuildZoomed.Store(u.BuildZoomed)
 	c.DarkTheme.Store(u.DarkTheme)
 	c.RunInRepo.Store(u.RunInRepo)
 	c.UseBuiltinGo.Store(u.UseBuiltinGo)
@@ -187,9 +194,9 @@ func (u *UnsafeConfig) LoadInto(c *Config) {
 func (s *State) LoadConfig() {
 	L.Debug("loading config")
 	var err error
-	u := new(UnsafeConfig)
-	u.Width, u.Height = 800, 600
-	u.RunMode = "node"
+	u := s.Config.GetUnsafeConfig()
+	//u.Width, u.Height = 800, 600
+	//u.RunMode = "node"
 	//L.Debugs(u)
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if apputil.FileExists(filename) {
@@ -208,14 +215,26 @@ func (s *State) LoadConfig() {
 	} else {
 		L.Warn("creating new configuration")
 		u.LoadInto(s.Config)
+		s.Config.UseBuiltinGo.Store(s.HasGo)
+		s.Config.RunInRepo.Store(s.RunningInRepo)
 		//L.Debugs(s.Config)
 		s.SaveConfig()
 	}
+	if s.Config.Width.Load() < 1 || s.Config.Height.Load() < 1 {
+		s.Config.Width.Store(800)
+		s.Config.Height.Store(600)
+	}
+	if s.Config.SettingsTab.Load() == "" {
+		s.Config.SettingsTab.Store("config")
+	}
+	s.Rc.Settings.Tabs.Current = s.Config.SettingsTab.Load()
 	s.SetTheme(u.DarkTheme)
 }
 
 func (s *State) SaveConfig() {
-	// L.Debug("saving config")
+	L.Debug("saving config")
+	s.Config.Width.Store(int32(s.WindowWidth))
+	s.Config.Height.Store(int32(s.WindowHeight))
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	u := s.Config.GetUnsafeConfig()
 	//L.Debugs(u)
