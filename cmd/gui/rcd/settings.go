@@ -24,7 +24,6 @@ func (r *RcVar) SaveDaemonCfg() {
 }
 
 func settings(cx *conte.Xt) *model.DuoUIsettings {
-
 	settings := &model.DuoUIsettings{
 		Abbrevation: "DUO",
 		Tabs: &model.DuoUIconfTabs{
@@ -37,7 +36,6 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 		},
 	}
 	// Settings tabs
-
 	settingsFields := make(map[string]interface{})
 	for _, group := range settings.Daemon.Schema.Groups {
 		settings.Tabs.TabsList[group.Legend] = new(gel.Button)
@@ -68,7 +66,9 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 					case "number":
 						(settingsFields[field.Model]).(*gel.Editor).SetText(fmt.Sprint(*settings.Daemon.Config[field.Model].(*int)))
 					case "decimal":
-						(settingsFields[field.Model]).(*gel.Editor).SetText(fmt.Sprint(*settings.Daemon.Config[field.Model].(*float64)))
+						(settingsFields[field.Model]).(*gel.Editor).SetText(
+							fmt.Sprintf("%0.8f", *settings.Daemon.Config[field.
+								Model].(*float64)))
 					case "time":
 						(settingsFields[field.Model]).(*gel.Editor).SetText(fmt.Sprint(*settings.Daemon.Config[field.Model].(*time.Duration)))
 					}

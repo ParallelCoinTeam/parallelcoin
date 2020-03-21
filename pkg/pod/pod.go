@@ -93,15 +93,15 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 		rf = append(rf, i)
 	}
 	sort.Strings(rf)
-	// for i := range rf {
-	// 	rf[i], rf[len(rf)-1-i] = rf[len(rf)-1-i], rf[i]
-	// }
+	for i := range rf {
+		rf[i], rf[len(rf)-1-i] = rf[len(rf)-1-i], rf[i]
+	}
 	for i := range rf {
 		group := Group{
 			Legend: rf[i],
 			Fields: rawFields[rf[i]],
 		}
-		outGroups = append(outGroups, group)
+		outGroups = append(Groups{group}, outGroups...)
 	}
 	return Schema{
 		Groups: outGroups,

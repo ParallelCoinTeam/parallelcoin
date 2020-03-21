@@ -40,6 +40,8 @@ func (c *Client) NewJob(job *job.Container) (err error) {
 	return
 }
 
+// Pause tells the worker to stop working, this is for when the controlling
+// node is not current
 func (c *Client) Pause() (err error) {
 	// L.Debug("sending pause")
 	var reply bool

@@ -3,9 +3,7 @@ package logi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/stdconn"
 	"io"
-	"net/rpc"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -13,7 +11,6 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/p9c/goterm"
 )
 
 const (
@@ -243,11 +240,13 @@ type PrintlnFunc func(a ...interface{})
 type CheckFunc func(err error) bool
 type SpewFunc func(interface{})
 
+var TermWidth = func() int { return 120 }
+
 func Composite(text, level string, color bool, split string) string {
 	dots := "."
-	terminalWidth := goterm.Width()
-	if terminalWidth <= 80 {
-		terminalWidth = 80
+	terminalWidth := TermWidth()
+	if TermWidth() <= 120 {
+		terminalWidth = 120
 	}
 	skip := 2
 	if level == Check {
@@ -287,7 +286,8 @@ func Composite(text, level string, color bool, split string) string {
 			line = ""
 			dots = " "
 		}
-		since = fmt.Sprint(time.Now())[:19]
+		since = fmt.Sprintf("%v", time.Now().Sub(StartupTime)/time.Millisecond*time.Millisecond)
+		//since = fmt.Sprint(time.Now())[:19]
 	case terminalWidth >= 200:
 		since = fmt.Sprint(time.Now())[:39]
 	default:
@@ -348,7 +348,7 @@ func Composite(text, level string, color bool, split string) string {
 		restLen := terminalWidth - levelLen - sinceLen
 		if len(lines) > 1 {
 			final = fmt.Sprintf("%s %s %s %s%s", level, since,
-				strings.Repeat(" ",
+				strings.Repeat(".",
 					terminalWidth-levelLen-sinceLen-fileLen-lineLen),
 				file, line)
 			final += text[:len(text)-1]
@@ -495,54 +495,54 @@ func (il *IPCLogger) Pause(_ *int, reply *bool) (err error) {
 func init() {
 	SetLogWriter(os.Stderr)
 	L.SetLevel("debug", true, "pod")
-	// set up a listener on stdin/out that has a method to enable sending the
-	// entries as RPC messages
-	quit := make(chan struct{})
-	lC := L.AddLogChan()
-	sc := stdconn.New(os.Stdin, os.Stdout, quit)
-	ipcL := &IPCLogger{
-		Start: make(chan struct{}),
-		Stop:  make(chan struct{}),
-		Quit:  make(chan struct{}),
-	}
-	err := rpc.Register(ipcL)
-	if err != nil {
-		L.Debug(err)
-	}
-	// ipc logger startup
-	go func() {
-		L.Debug("starting up logger IPC")
-		rpc.ServeConn(sc)
-		L.Debug("stopping logger IPC")
-	}()
-	// listener
-	go func() {
-	out:
-		for {
-		pausing:
-			select {
-			case <-lC:
-				//fmt.Fprintln(os.Stderr, "log message", lm.Text)
-				// ignore log messages when paused
-			case <-ipcL.Quit:
-				break out
-			case <-ipcL.Start:
-				break pausing
-			case <-ipcL.Stop:
-			}
-		running:
-			select {
-			case ent := <-lC:
-				// encode and write message
-				_ = ent
-			case <-ipcL.Quit:
-				break out
-			case <-ipcL.Start:
-			case <-ipcL.Stop:
-				break running
-			}
-		}
-	}()
+	//// set up a listener on stdin/out that has a method to enable sending the
+	//// entries as RPC messages
+	//quit := make(chan struct{})
+	//lC := L.AddLogChan()
+	//sc := stdconn.New(os.Stdin, os.Stdout, quit)
+	//ipcL := &IPCLogger{
+	//	Start: make(chan struct{}),
+	//	Stop:  make(chan struct{}),
+	//	Quit:  make(chan struct{}),
+	//}
+	//err := rpc.Register(ipcL)
+	//if err != nil {
+	//	L.Debug(err)
+	//}
+	//// ipc logger startup
+	//go func() {
+	//	L.Debug("starting up logger IPC")
+	//	rpc.ServeConn(sc)
+	//	L.Debug("stopping logger IPC")
+	//}()
+	//// listener
+	//go func() {
+	//out:
+	//	for {
+	//	pausing:
+	//		select {
+	//		case <-lC:
+	//			//fmt.Fprintln(os.Stderr, "log message", lm.Text)
+	//			// ignore log messages when paused
+	//		case <-ipcL.Quit:
+	//			break out
+	//		case <-ipcL.Start:
+	//			break pausing
+	//		case <-ipcL.Stop:
+	//		}
+	//	running:
+	//		select {
+	//		case ent := <-lC:
+	//			// encode and write message
+	//			_ = ent
+	//		case <-ipcL.Quit:
+	//			break out
+	//		case <-ipcL.Start:
+	//		case <-ipcL.Stop:
+	//			break running
+	//		}
+	//	}
+	//}()
 	L.Trace("starting up logger")
 }
 

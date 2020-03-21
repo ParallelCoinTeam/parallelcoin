@@ -2,12 +2,10 @@ package monitor
 
 import (
 	"fmt"
-	"strconv"
-	. "strings"
-
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"strconv"
 
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
@@ -51,8 +49,10 @@ func (s *State) SettingsPage() layout.FlexChild {
 	var weight float32 = 0.5
 	var settingsInset = 0
 	switch {
-	case s.WindowWidth < 1024 && s.WindowHeight > 1024:
-		// weight = 0.333
+	case s.Config.SettingsZoomed.Load():
+		weight = 1
+	//case s.WindowWidth < 1024 && s.WindowHeight > 1024:
+	// weight = 0.333
 	case s.WindowHeight < 1024 && s.WindowWidth < 1024:
 		weight = 1
 	case s.WindowHeight < 600 && s.WindowWidth > 1024:
@@ -84,10 +84,23 @@ func (s *State) SettingsPage() layout.FlexChild {
 							if s.WindowWidth > 640 {
 								s.SettingsTabs()
 							}
-						}),
-						Spacer(),
-						Rigid(func() {
-							s.IconButton("minimize", "DocText", "DocBg",
+						}), Spacer(), Rigid(func() {
+							if !(s.WindowHeight < 1024 && s.WindowWidth < 1024 ||
+								s.WindowHeight < 600 && s.WindowWidth > 1024) {
+								ic := "zoom"
+								if s.Config.SettingsZoomed.Load() {
+									ic = "minimize"
+								}
+								s.IconButton(ic, "DocText", "DocBg",
+									s.SettingsZoomButton)
+								for s.SettingsZoomButton.Clicked(s.Gtx) {
+									L.Debug("settings panel close button clicked")
+									s.Config.SettingsZoomed.Toggle()
+									s.SaveConfig()
+								}
+							}
+						}), Rigid(func() {
+							s.IconButton("foldIn", "DocText", "DocBg",
 								s.SettingsCloseButton)
 							for s.SettingsCloseButton.Clicked(s.Gtx) {
 								L.Debug("settings panel close button clicked")
@@ -124,21 +137,19 @@ func (s *State) SettingsPage() layout.FlexChild {
 
 func (s *State) SettingsTabs() {
 	groupsNumber := len(s.Rc.Settings.Daemon.Schema.Groups)
+
 	s.GroupsList.Layout(s.Gtx, groupsNumber, func(i int) {
-		color :=
-			"DocText"
-		bgColor :=
-			"DocBg"
+		color := "DocText"
+		bgColor := "DocBg"
 		i = groupsNumber - 1 - i
 		txt := s.Rc.Settings.Daemon.Schema.Groups[i].Legend
 		for s.Rc.Settings.Tabs.TabsList[txt].Clicked(s.Gtx) {
 			s.Rc.Settings.Tabs.Current = txt
+			s.Config.SettingsTab.Store(txt)
 		}
 		if s.Rc.Settings.Tabs.Current == txt {
-			color =
-				"PanelText"
-			bgColor =
-				"PanelBg"
+			color = "PanelText"
+			bgColor = "PanelBg"
 		}
 		s.TextButton(txt, "Primary", 16,
 			color, bgColor, s.Rc.Settings.Tabs.TabsList[txt])
@@ -237,79 +248,91 @@ func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorContro
 
 func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
-		switch f.Field.Type {
+		rsd := rc.Settings.Daemon
+		fld := f.Field
+		fm := fld.Model
+		rwe, ok := rsd.Widgets[fm].(*gel.Editor)
+		var rwc *gel.CheckBox
+		if !ok {
+			rwc, ok = rsd.Widgets[fm].(*gel.CheckBox)
+			if !ok {
+				return
+			}
+		}
+		_ = rwc
+		switch fld.Type {
 		case "stringSlice":
-			switch f.Field.InputType {
+			switch fld.InputType {
 			case "text":
-				//if f.Field.Model != "MinerPass" {
-				StringsArrayEditor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
-					(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
-					func(e gel.EditorEvent) {
-						rc.Settings.Daemon.Config[f.Field.Model] = Fields((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
-						L.Debug()
-						if e != nil {
-							rc.SaveDaemonCfg()
-						}
-					})()
+				//if fm != "MinerPass" {
+				//StringsArrayEditor(gtx, th, rsd.Widgets[fm].(*gel.
+				//Editor), (rsd.Widgets[fm]).(*gel.
+				//Editor).Text(),
+				//	func(e gel.EditorEvent) {
+				//		rsd.Config[fm] = Fields(rwe.Text())
+				//		if e != nil {
+				//			rc.SaveDaemonCfg()
+				//		}
+				//	})()
 				//}
 			default:
 
 			}
 		case "input":
-			switch f.Field.InputType {
+			switch fld.InputType {
 			case "text":
-				Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
-					(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+				Editor(gtx, th, rwe,
+					rwe.Text(),
 					func(e gel.EditorEvent) {
-						txt := rc.Settings.Daemon.Widgets[f.Field.Model].(*gel.Editor).Text()
-						rc.Settings.Daemon.Config[f.Field.Model] = txt
+						txt := rwe.Text()
+						rsd.Config[fm] = txt
 						if e != nil {
 							rc.SaveDaemonCfg()
 						}
 					})()
 			case "number":
-				Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+				Editor(gtx, th, rwe, rwe.Text(),
 					func(e gel.EditorEvent) {
-						number, err := strconv.Atoi((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
+						number, err := strconv.Atoi(rwe.Text())
 						if err == nil {
 						}
-						rc.Settings.Daemon.Config[f.Field.Model] = number
+						rsd.Config[fm] = number
 						if e != nil {
 							rc.SaveDaemonCfg()
 						}
 					})()
 			case "decimal":
-				Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+				Editor(gtx, th, rwe, rwe.Text(),
 					func(e gel.EditorEvent) {
-						decimal, err := strconv.ParseFloat((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(), 64)
+						decimal, err := strconv.ParseFloat(rwe.Text(), 64)
 						if err != nil {
 						}
-						rc.Settings.Daemon.Config[f.Field.Model] = decimal
+						rsd.Config[fm] = decimal
 						if e != nil {
 							rc.SaveDaemonCfg()
 						}
 					})()
 			case "password":
-				e := th.DuoUIeditor(f.Field.Label)
+				e := th.DuoUIeditor(fld.Label)
 				e.Font.Typeface = th.Fonts["Primary"]
 				e.Font.Style = text.Italic
-				e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor))
+				e.Layout(gtx, rwe)
 			default:
 			}
 		case "switch":
-			th.DuoUIcheckBox(f.Field.Label, th.Colors["PanelText"],
+			th.DuoUIcheckBox(fld.Label, th.Colors["PanelText"],
 				th.Colors["PanelText"]).Layout(gtx,
-				(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox))
-			if (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox).Checked(gtx) {
-				if !*rc.Settings.Daemon.Config[f.Field.Model].(*bool) {
+				(rsd.Widgets[fm]).(*gel.CheckBox))
+			if (rsd.Widgets[fm]).(*gel.CheckBox).Checked(gtx) {
+				if !*rsd.Config[fm].(*bool) {
 					tt := true
-					rc.Settings.Daemon.Config[f.Field.Model] = &tt
+					rsd.Config[fm] = &tt
 					rc.SaveDaemonCfg()
 				}
 			} else {
-				if *rc.Settings.Daemon.Config[f.Field.Model].(*bool) {
+				if *rsd.Config[fm].(*bool) {
 					ff := false
-					rc.Settings.Daemon.Config[f.Field.Model] = &ff
+					rsd.Config[fm] = &ff
 					rc.SaveDaemonCfg()
 				}
 			}
@@ -335,7 +358,9 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 	}
 }
 
-func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+func Editor(gtx *layout.Context, th *gelook.DuoUItheme,
+	editorControler *gel.Editor, label string,
+	handler func(gel.EditorEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
 			cs := gtx.Constraints
@@ -344,8 +369,8 @@ func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Edi
 				[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32,
-					th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0,
-						0, 0})
+					th.Colors["Light"], [4]float32{0, 0, 0, 0},
+					[4]float32{0, 0, 0, 0})
 				e := th.DuoUIeditor(label)
 				e.Font.Typeface = th.Fonts["Mono"]
 				// e.Font.Style = text.Italic

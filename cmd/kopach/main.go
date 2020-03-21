@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"syscall"
 	"time"
 
 	"github.com/urfave/cli"
@@ -78,10 +79,12 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			w.active.Store(false)
 			L.Debug("KopachHandle interrupt")
 			for i := range w.workers {
-				if err := wks[i].Stop(); L.Check(err) {
+				if err = wks[i].Process.Signal(syscall.SIGKILL); !L.Check(err) {
 				}
-				if err := wks[i].Kill(); L.Check(err) {
-				}
+				//if err := wks[i].Stop(); L.Check(err) {
+				//}
+				//if err := wks[i].Kill(); L.Check(err) {
+				//}
 				L.Debug("stopped worker", i)
 			}
 		})

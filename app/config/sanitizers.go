@@ -50,14 +50,14 @@ func initDictionary(cfg *pod.Config) {
 	if cfg.Language == nil || *cfg.Language == "" {
 		*cfg.Language = Lang("en")
 	}
-	L.Debug("lang set to", *cfg.Language)
+	L.Trace("lang set to", *cfg.Language)
 }
 
 func initDataDir(cfg *pod.Config) {
 	if cfg.DataDir == nil || *cfg.DataDir == "" {
 		*cfg.DataDir = appdata.Dir("pod", false)
 	}
-	L.Debug("datadir set to", *cfg.DataDir)
+	L.Trace("datadir set to", *cfg.DataDir)
 }
 
 func initWalletFile(cx *conte.Xt) {
@@ -66,7 +66,7 @@ func initWalletFile(cx *conte.Xt) {
 			Config.
 			WalletFile = *cx.Config.DataDir + string(os.PathSeparator) + cx.ActiveNet.Name + string(os.PathSeparator) + wallet.WalletDbName
 	}
-	L.Debug("walletfile set to", *cx.Config.WalletFile)
+	L.Trace("walletfile set to", *cx.Config.WalletFile)
 }
 
 func initConfigFile(cfg *pod.Config) {
@@ -74,7 +74,7 @@ func initConfigFile(cfg *pod.Config) {
 		*cfg.ConfigFile =
 			*cfg.DataDir + string(os.PathSeparator) + podConfigFilename
 	}
-	L.Debug("using config file:", *cfg.ConfigFile)
+	L.Trace("using config file:", *cfg.ConfigFile)
 }
 
 func initLogDir(cfg *pod.Config) {
@@ -138,13 +138,15 @@ func initListeners(cx *conte.Xt, commandName string) {
 	if len(*cfg.WalletRPCListeners) < 1 && !*cfg.DisableRPC {
 		*cfg.WalletRPCListeners = append(*cfg.WalletRPCListeners,
 			":"+cx.ActiveNet.WalletRPCServerPort)
-		L.Debug("setting save flag because wallet rpc listeners is empty and rpc is not disabled")
+		L.Trace("setting save flag because wallet rpc listeners is empty and" +
+			" rpc is not disabled")
 		cx.StateCfg.Save = true
 	}
 	if len(*cfg.RPCListeners) < 1 {
 		*cfg.RPCListeners = append(*cfg.RPCListeners,
 			":"+cx.ActiveNet.RPCClientPort)
-		L.Debug("setting save flag because rpc listeners is empty and rpc is not disabled")
+		L.Trace("setting save flag because rpc listeners is empty and rpc is" +
+			" not disabled")
 		cx.StateCfg.Save = true
 	}
 	msgBase := pause.GetPauseContainer(cx)
@@ -236,7 +238,7 @@ func initListeners(cx *conte.Xt, commandName string) {
 		peersFile := filepath.Join(filepath.Join(
 			*cfg.DataDir, cx.ActiveNet.Name), "peers.json")
 		os.Remove(peersFile)
-		L.Debug("removed", peersFile)
+		L.Trace("removed", peersFile)
 	}
 	*cfg.RPCConnect = (*cfg.RPCListeners)[0]
 	h, p, _ := net.SplitHostPort(*cfg.RPCConnect)

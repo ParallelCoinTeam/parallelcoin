@@ -28,6 +28,7 @@ type State struct {
 	MainList                  *layout.List
 	ModesList                 *layout.List
 	CloseButton               *gel.Button
+	RestartButton             *gel.Button
 	LogoButton                *gel.Button
 	RunMenuButton             *gel.Button
 	StopMenuButton            *gel.Button
@@ -37,14 +38,14 @@ type State struct {
 	RunModeFoldButton         *gel.Button
 	SettingsFoldButton        *gel.Button
 	SettingsCloseButton       *gel.Button
+	SettingsZoomButton        *gel.Button
 	SettingsTitleCloseButton  *gel.Button
 	BuildFoldButton           *gel.Button
 	BuildCloseButton          *gel.Button
+	BuildZoomButton           *gel.Button
 	BuildTitleCloseButton     *gel.Button
 	ModesButtons              map[string]*gel.Button
 	GroupsList                *layout.List
-	Running                   atomic.Bool
-	Pausing                   atomic.Bool
 	WindowWidth, WindowHeight int
 	Loggers                   *Node
 	SettingsFields            *layout.List
@@ -73,6 +74,7 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 			Alignment: layout.Start,
 		},
 		CloseButton:              new(gel.Button),
+		RestartButton:            new(gel.Button),
 		LogoButton:               new(gel.Button),
 		RunMenuButton:            new(gel.Button),
 		StopMenuButton:           new(gel.Button),
@@ -83,8 +85,10 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		RunModeFoldButton:        new(gel.Button),
 		BuildFoldButton:          new(gel.Button),
 		BuildCloseButton:         new(gel.Button),
+		BuildZoomButton:          new(gel.Button),
 		BuildTitleCloseButton:    new(gel.Button),
 		SettingsCloseButton:      new(gel.Button),
+		SettingsZoomButton:       new(gel.Button),
 		SettingsTitleCloseButton: new(gel.Button),
 		ModesButtons: map[string]*gel.Button{
 			"node":    new(gel.Button),
@@ -109,68 +113,90 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		InstallNewGoButton:   new(gel.Button),
 		RunCommandChan:       make(chan string),
 	}
-	s.Running.Store(false)
-	s.Pausing.Store(false)
 	s.Config.RunMode.Store("node")
 	s.Config.DarkTheme.Store(true)
 	return
 }
 
 type Config struct {
-	Width, Height atomic.Int32
-	RunMode       atomic.String
-	RunModeOpen   atomic.Bool
-	SettingsOpen  atomic.Bool
-	BuildOpen     atomic.Bool
-	DarkTheme     atomic.Bool
-	RunInRepo     atomic.Bool
-	UseBuiltinGo  atomic.Bool
+	Width, Height  atomic.Int32
+	RunMode        atomic.String
+	RunModeOpen    atomic.Bool
+	RunModeZoomed  atomic.Bool
+	SettingsOpen   atomic.Bool
+	SettingsZoomed atomic.Bool
+	SettingsTab    atomic.String
+	BuildOpen      atomic.Bool
+	BuildZoomed    atomic.Bool
+	DarkTheme      atomic.Bool
+	RunInRepo      atomic.Bool
+	UseBuiltinGo   atomic.Bool
+	Running        atomic.Bool
+	Pausing        atomic.Bool
 }
 
 func (c *Config) GetUnsafeConfig() (out *UnsafeConfig) {
 	out = &UnsafeConfig{
-		Width:        c.Width.Load(),
-		Height:       c.Height.Load(),
-		RunMode:      c.RunMode.Load(),
-		RunModeOpen:  c.RunModeOpen.Load(),
-		SettingsOpen: c.SettingsOpen.Load(),
-		BuildOpen:    c.BuildOpen.Load(),
-		DarkTheme:    c.DarkTheme.Load(),
-		RunInRepo:    c.RunInRepo.Load(),
-		UseBuiltinGo: c.UseBuiltinGo.Load(),
+		Width:          c.Width.Load(),
+		Height:         c.Height.Load(),
+		RunMode:        c.RunMode.Load(),
+		RunModeOpen:    c.RunModeOpen.Load(),
+		RunModeZoomed:  c.RunModeZoomed.Load(),
+		SettingsOpen:   c.SettingsOpen.Load(),
+		SettingsZoomed: c.SettingsZoomed.Load(),
+		SettingsTab:    c.SettingsTab.Load(),
+		BuildOpen:      c.BuildOpen.Load(),
+		BuildZoomed:    c.BuildZoomed.Load(),
+		DarkTheme:      c.DarkTheme.Load(),
+		RunInRepo:      c.RunInRepo.Load(),
+		UseBuiltinGo:   c.UseBuiltinGo.Load(),
+		Running:        c.Running.Load(),
+		Pausing:        c.Pausing.Load(),
 	}
 	return
 }
 
 type UnsafeConfig struct {
-	Width, Height int32
-	RunMode       string
-	RunModeOpen   bool
-	SettingsOpen  bool
-	BuildOpen     bool
-	DarkTheme     bool
-	RunInRepo     bool
-	UseBuiltinGo  bool
+	Width, Height  int32
+	RunMode        string
+	RunModeOpen    bool
+	RunModeZoomed  bool
+	SettingsOpen   bool
+	SettingsZoomed bool
+	SettingsTab    string
+	BuildOpen      bool
+	BuildZoomed    bool
+	DarkTheme      bool
+	RunInRepo      bool
+	UseBuiltinGo   bool
+	Running        bool
+	Pausing        bool
 }
 
 func (u *UnsafeConfig) LoadInto(c *Config) {
 	c.Width.Store(u.Width)
 	c.Height.Store(u.Height)
 	c.RunMode.Store(u.RunMode)
+	c.RunModeZoomed.Store(u.RunModeZoomed)
 	c.RunModeOpen.Store(u.RunModeOpen)
+	c.SettingsZoomed.Store(u.SettingsZoomed)
 	c.SettingsOpen.Store(u.SettingsOpen)
+	c.SettingsTab.Store(u.SettingsTab)
 	c.BuildOpen.Store(u.BuildOpen)
+	c.BuildZoomed.Store(u.BuildZoomed)
 	c.DarkTheme.Store(u.DarkTheme)
 	c.RunInRepo.Store(u.RunInRepo)
 	c.UseBuiltinGo.Store(u.UseBuiltinGo)
+	c.Running.Store(u.Running)
+	c.Pausing.Store(u.Pausing)
 }
 
 func (s *State) LoadConfig() {
 	L.Debug("loading config")
 	var err error
-	u := new(UnsafeConfig)
-	u.Width, u.Height = 800, 600
-	u.RunMode = "node"
+	u := s.Config.GetUnsafeConfig()
+	//u.Width, u.Height = 800, 600
+	//u.RunMode = "node"
 	//L.Debugs(u)
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if apputil.FileExists(filename) {
@@ -189,17 +215,29 @@ func (s *State) LoadConfig() {
 	} else {
 		L.Warn("creating new configuration")
 		u.LoadInto(s.Config)
+		s.Config.UseBuiltinGo.Store(s.HasGo)
+		s.Config.RunInRepo.Store(s.RunningInRepo)
 		//L.Debugs(s.Config)
 		s.SaveConfig()
 	}
+	if s.Config.Width.Load() < 1 || s.Config.Height.Load() < 1 {
+		s.Config.Width.Store(800)
+		s.Config.Height.Store(600)
+	}
+	if s.Config.SettingsTab.Load() == "" {
+		s.Config.SettingsTab.Store("config")
+	}
+	s.Rc.Settings.Tabs.Current = s.Config.SettingsTab.Load()
 	s.SetTheme(u.DarkTheme)
 }
 
 func (s *State) SaveConfig() {
-	// L.Debug("saving config")
+	L.Debug("saving config")
+	s.Config.Width.Store(int32(s.WindowWidth))
+	s.Config.Height.Store(int32(s.WindowHeight))
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	u := s.Config.GetUnsafeConfig()
-	// L.Debugs(u)
+	//L.Debugs(u)
 	if yp, e := json.MarshalIndent(u, "", "  "); !L.Check(e) {
 		//L.Debug(string(yp))
 		apputil.EnsureDir(filename)

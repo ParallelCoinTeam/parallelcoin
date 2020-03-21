@@ -72,6 +72,8 @@ func (s *State) DuoUIheader() layout.FlexChild {
 						"PanelBg", s.CloseButton)
 					for s.CloseButton.Clicked(s.Gtx) {
 						L.Debug("close button clicked")
+						s.SaveConfig()
+						s.RunCommandChan <- "stop"
 						close(s.Ctx.KillAll)
 					}
 				})

@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
+	"time"
 )
 
 func (s *State) RunControls() layout.FlexChild {
@@ -13,7 +14,7 @@ func (s *State) RunControls() layout.FlexChild {
 		if s.CannotRun {
 			return
 		}
-		if !s.Running.Load() {
+		if !s.Config.Running.Load() {
 			s.IconButton("Run", "PanelBg", "PanelText", s.RunMenuButton)
 			for s.RunMenuButton.Clicked(s.Gtx) {
 				L.Debug("clicked run button")
@@ -24,7 +25,7 @@ func (s *State) RunControls() layout.FlexChild {
 		} else {
 			ic := "Pause"
 			fg, bg := "PanelBg", "PanelText"
-			if s.Pausing.Load() {
+			if s.Config.Pausing.Load() {
 				ic = "Run"
 				fg, bg = "PanelText", "PanelBg"
 			}
@@ -38,7 +39,7 @@ func (s *State) RunControls() layout.FlexChild {
 			}), Rigid(func() {
 				s.IconButton(ic, fg, bg, s.PauseMenuButton)
 				for s.PauseMenuButton.Clicked(s.Gtx) {
-					if s.Pausing.Load() {
+					if s.Config.Pausing.Load() {
 						L.Debug("clicked on resume button")
 						s.RunCommandChan <- "resume"
 					} else {
@@ -69,41 +70,39 @@ func (s *State) RunControls() layout.FlexChild {
 func (s *State) Runner() {
 	var c *exec.Cmd
 	var err error
-	// var pid int
 	for cmd := range s.RunCommandChan {
 		switch cmd {
 		case "run":
 			L.Debug("run called")
-			if s.HasGo && !s.Running.Load() {
+			if s.HasGo && !s.Config.Running.Load() {
 				exePath := filepath.Join(*s.Ctx.Config.DataDir, "pod_mon")
-				c = exec.Command("go", "build", "-o",
-					exePath)
+				c = exec.Command("go", "build", "-x", "-v",
+					"-tags", "goterm", "-o", exePath)
 				c.Stdout = os.Stdout
 				c.Stderr = os.Stderr
 				if err = c.Run(); !L.Check(err) {
 					c = exec.Command(exePath,
 						"-D", *s.Ctx.Config.DataDir, s.Config.RunMode.Load())
-					c.Stdout = os.Stdout
 					c.Stderr = os.Stderr
 					if err = c.Start(); !L.Check(err) {
-						s.Running.Store(true)
-						s.Pausing.Store(false)
+						s.Config.Running.Store(true)
+						s.Config.Pausing.Store(false)
 						s.W.Invalidate()
 					}
-					//go func() {
-					//	if err = c.Wait(); L.Check(err) {
-					//	}
-					//	s.Running.Store(false)
-					//	s.Pausing.Store(false)
-					//	s.W.Invalidate()
-					//}()
+					go func() {
+						if err = c.Wait(); L.Check(err) {
+						}
+						s.Config.Running.Store(false)
+						s.Config.Pausing.Store(false)
+						s.W.Invalidate()
+					}()
 				}
 			}
 		case "stop":
 			L.Debug("stop called")
-			if s.HasGo && c != nil && s.Running.Load() {
+			if s.HasGo && c != nil && s.Config.Running.Load() {
 				if err = c.Process.Signal(syscall.SIGINT); !L.Check(err) {
-					s.Running.Store(false)
+					s.Config.Running.Store(false)
 					L.Debug("interrupted")
 				}
 				if err = c.Process.Release(); L.Check(err) {
@@ -112,28 +111,28 @@ func (s *State) Runner() {
 			}
 		case "pause":
 			L.Debug("pause called")
-			if s.HasGo && c != nil && s.Running.Load() && !s.Pausing.Load() {
-				s.Pausing.Toggle()
+			if s.HasGo && c != nil && s.Config.Running.Load() && !s.Config.Pausing.Load() {
+				s.Config.Pausing.Toggle()
 				if err = c.Process.Signal(syscall.SIGSTOP); !L.Check(err) {
-					s.Pausing.Store(true)
+					s.Config.Pausing.Store(true)
 					L.Debug("paused")
 				}
 			}
 		case "resume":
 			L.Debug("resume called")
-			if s.HasGo && c != nil && s.Running.Load() && s.Pausing.Load() {
-				s.Pausing.Toggle()
+			if s.HasGo && c != nil && s.Config.Running.Load() && s.Config.Pausing.Load() {
+				s.Config.Pausing.Toggle()
 				if err = c.Process.Signal(syscall.SIGCONT); !L.Check(err) {
-					s.Pausing.Store(false)
+					s.Config.Pausing.Store(false)
 					L.Debug("resumed")
 				}
 			}
 		case "kill":
 			L.Debug("kill called")
-			if s.HasGo && c != nil && s.Running.Load() {
+			if s.HasGo && c != nil && s.Config.Running.Load() {
 				if err = c.Process.Signal(syscall.SIGKILL); !L.Check(err) {
-					s.Pausing.Store(false)
-					s.Running.Store(false)
+					s.Config.Pausing.Store(false)
+					s.Config.Running.Store(false)
 					L.Debug("killed")
 				}
 			}
@@ -141,8 +140,9 @@ func (s *State) Runner() {
 			L.Debug("restart called")
 			if s.HasGo && c != nil {
 				if err = c.Process.Signal(syscall.SIGINT); !L.Check(err) {
-					s.Running.Store(false)
-					L.Debug("interrupted")
+					s.Config.Running.Store(false)
+					time.Sleep(time.Second * 1)
+					L.Debug("restarted")
 					s.W.Invalidate()
 				}
 			}
@@ -157,8 +157,8 @@ func (s *State) Runner() {
 				c.Stdout = os.Stdout
 				c.Stderr = os.Stderr
 				if err = c.Start(); !L.Check(err) {
-					s.Running.Store(true)
-					s.Pausing.Store(false)
+					s.Config.Running.Store(true)
+					s.Config.Pausing.Store(false)
 					s.W.Invalidate()
 				}
 			}

@@ -35,6 +35,8 @@ func (s *State) BuildPage() layout.FlexChild {
 	}
 	var weight float32 = 0.5
 	switch {
+	case s.Config.BuildZoomed.Load():
+		weight = 1
 	case s.WindowHeight < 1024 && s.WindowWidth < 1024:
 		weight = 1
 	case s.WindowHeight < 600 && s.WindowWidth > 1024:
@@ -47,7 +49,6 @@ func (s *State) BuildPage() layout.FlexChild {
 			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 			s.Inset(4, func() {})
 		}), Rigid(func() {
-
 			s.FlexH(Rigid(func() {
 				s.TextButton("Build Configuration", "Secondary",
 					23, "DocText", "DocBg",
@@ -59,7 +60,22 @@ func (s *State) BuildPage() layout.FlexChild {
 					s.SaveConfig()
 				}
 			}), Spacer(), Rigid(func() {
-				s.IconButton("minimize", "DocText", "DocBg",
+				if !(s.WindowHeight < 1024 && s.WindowWidth < 1024 ||
+					s.WindowHeight < 600 && s.WindowWidth > 1024) {
+					ic := "zoom"
+					if s.Config.BuildZoomed.Load() {
+						ic = "minimize"
+					}
+					s.IconButton(ic, "DocText", "DocBg",
+						s.BuildZoomButton)
+					for s.BuildZoomButton.Clicked(s.Gtx) {
+						L.Debug("settings panel fold button clicked")
+						s.Config.BuildZoomed.Toggle()
+						s.SaveConfig()
+					}
+				}
+			}), Spacer(), Rigid(func() {
+				s.IconButton("foldIn", "DocText", "DocBg",
 					s.BuildCloseButton)
 				for s.BuildCloseButton.Clicked(s.Gtx) {
 					L.Debug("settings panel close button clicked")
@@ -102,8 +118,11 @@ func (s *State) BuildConfigPage() {
 					s.TextButton("repo", "Primary", 16,
 						fg, bg, s.RunningInRepoButton)
 					for s.RunningInRepoButton.Clicked(s.Gtx) {
-						s.Config.RunInRepo.Store(true)
-						s.CannotRun = false
+						if !s.Config.Running.Load() {
+							s.Config.RunInRepo.Store(true)
+							s.CannotRun = false
+							s.SaveConfig()
+						}
 					}
 				}
 			}), Rigid(func() {
@@ -114,8 +133,11 @@ func (s *State) BuildConfigPage() {
 				s.TextButton("profile", "Primary", 16,
 					fg, bg, s.RunFromProfileButton)
 				for s.RunFromProfileButton.Clicked(s.Gtx) {
-					s.Config.RunInRepo.Store(false)
-					s.CannotRun = false
+					if !s.Config.Running.Load() {
+						s.Config.RunInRepo.Store(false)
+						s.CannotRun = false
+						s.SaveConfig()
+					}
 				}
 			}), Rigid(func() {
 				txt := "run pod in its repository"
@@ -144,10 +166,12 @@ func (s *State) BuildConfigPage() {
 					s.TextButton("builtin", "Primary", 16,
 						fg, bg, s.UseBuiltinGoButton)
 					for s.UseBuiltinGoButton.Clicked(s.Gtx) {
-						s.Config.UseBuiltinGo.Store(true)
-						s.CannotRun = false
-						if !s.HasGo {
-							s.CannotRun = true
+						if !s.Config.RunInRepo.Load() {
+							s.Config.UseBuiltinGo.Store(true)
+							s.CannotRun = false
+							if !s.HasGo {
+								s.CannotRun = true
+							}
 						}
 					}
 				}
@@ -159,10 +183,12 @@ func (s *State) BuildConfigPage() {
 				s.TextButton("install new", "Primary", 16,
 					fg, bg, s.InstallNewGoButton)
 				for s.InstallNewGoButton.Clicked(s.Gtx) {
-					s.Config.UseBuiltinGo.Store(false)
-					s.CannotRun = false
-					if !s.HasOtherGo {
-						s.CannotRun = true
+					if !s.Config.RunInRepo.Load() {
+						s.Config.UseBuiltinGo.Store(false)
+						s.CannotRun = false
+						if !s.HasOtherGo {
+							s.CannotRun = true
+						}
 					}
 				}
 			}), Rigid(func() {
