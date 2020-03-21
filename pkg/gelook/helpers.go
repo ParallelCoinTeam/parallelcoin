@@ -50,8 +50,15 @@ func DuoUIfill(gtx *layout.Context, col string) {
 	gtx.Dimensions = layout.Dimensions{Size: d}
 }
 
-func (t *DuoUItheme) DuoUIline(gtx *layout.Context, color string) func() {
+func (t *DuoUItheme) DuoUIline(gtx *layout.Context, verticalPadding, horizontalPadding float32, size int, color string) func() {
 	return func() {
-		DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, 1, t.Colors[color], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		layout.Inset{
+			Top:    unit.Dp(verticalPadding),
+			Right:  unit.Dp(horizontalPadding),
+			Bottom: unit.Dp(verticalPadding),
+			Left:   unit.Dp(horizontalPadding),
+		}.Layout(gtx, func() {
+			DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, size, color, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+		})
 	}
 }

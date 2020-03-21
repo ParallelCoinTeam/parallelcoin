@@ -130,7 +130,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *model.DuoUIblock) {
 	layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 		gelook.DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, gtx.Constraints.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		component.HorizontalLine(gtx, 1, th.Colors["Gray"])()
+		th.DuoUIline(gtx, 0, 0, 1, th.Colors["Gray"])()
 		layout.Flex{
 			Spacing: layout.SpaceBetween,
 		}.Layout(gtx,

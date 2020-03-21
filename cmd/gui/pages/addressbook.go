@@ -117,7 +117,7 @@ func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 						layout.Rigid(component.Button(gtx, th, t.QrCode, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["Info"], "QR", component.QrDialog(rc, gtx, t.Address))),
 					)
 				}),
-				layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Hint"])),
+				layout.Rigid(th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])),
 			)
 		})
 		// }).Layout(gtx, addressBookPanel)

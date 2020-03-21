@@ -89,7 +89,7 @@ func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 							Axis: layout.Vertical,
 						}.Layout(gtx,
 							layout.Rigid(SettingsItemRow(rc, gtx, th, &tl)),
-							layout.Rigid(component.HorizontalLine(gtx, 1, th.Colors["Dark"])))
+							layout.Rigid(th.DuoUIline(gtx, 4, 0, 1, th.Colors["LightGray"])))
 					})
 				}
 			}
