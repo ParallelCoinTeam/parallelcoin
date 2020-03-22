@@ -32,10 +32,16 @@ func Spacer() layout.FlexChild {
 	return Flexed(1, func() {})
 }
 
-func (s *State) Rectangle(width, height int, color string) {
+func (s *State) Rectangle(width, height int, color, opacity string, radius ...float32) {
+	col := s.Theme.Colors[color]
+	col = opacity + col[2:]
+	var r float32
+	if len(radius) > 0 {
+		r = radius[0]
+	}
 	gelook.DuoUIdrawRectangle(s.Gtx,
-		width, height, s.Theme.Colors[color],
-		[4]float32{0, 0, 0, 0},
+		width, height, col,
+		[4]float32{r, r, r, r},
 		[4]float32{0, 0, 0, 0},
 	)
 }
@@ -91,4 +97,3 @@ func Toggle(b *bool) bool {
 	*b = !*b
 	return *b
 }
-

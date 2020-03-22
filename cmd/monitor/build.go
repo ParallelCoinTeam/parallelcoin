@@ -44,9 +44,9 @@ func (s *State) BuildPage() layout.FlexChild {
 	}
 	return Flexed(weight, func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 		s.FlexV(Rigid(func() {
-			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 			s.Inset(4, func() {})
 		}), Rigid(func() {
 			s.FlexH(Rigid(func() {
@@ -86,7 +86,7 @@ func (s *State) BuildPage() layout.FlexChild {
 			)
 		}), Flexed(1, func() {
 			cs := s.Gtx.Constraints
-			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 			s.FlexV(Flexed(1, func() {
 				s.Inset(8, func() {
 					// cs := s.Gtx.Constraints
@@ -95,7 +95,7 @@ func (s *State) BuildPage() layout.FlexChild {
 				})
 			}))
 		}), Rigid(func() {
-			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 			s.Inset(4, func() {})
 		}),
 		)

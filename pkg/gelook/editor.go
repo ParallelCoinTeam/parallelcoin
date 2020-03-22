@@ -31,7 +31,7 @@ type DuoUIeditor struct {
 func (t *DuoUItheme) DuoUIeditor(hint, color string, width int) DuoUIeditor {
 	return DuoUIeditor{
 		TextSize:  t.TextSize,
-		Color:     HexARGB(t.Colors[color]),
+		Color:     HexARGB(color),
 		shaper:    t.Shaper,
 		Hint:      hint,
 		HintColor: HexARGB(t.Colors["Hint"]),
