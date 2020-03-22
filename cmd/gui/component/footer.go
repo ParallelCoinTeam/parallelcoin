@@ -76,22 +76,20 @@ func FooterLeftMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, a
 
 func FooterRightMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			navButtons := []func(){
-				// footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "networkIcon", buttonNetwork),
-				// footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount), "", buttonNetwork),
-				// footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonBlocks),
-				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "network", buttonNetwork),
-				footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount.Load()), "", buttonNetwork),
-				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonBlocks),
-				footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount.Load()), "", buttonBlocks),
-				footerMenuButton(rc, gtx, th, allPages.Theme["MINER"], "", "helpIcon", buttonHelp),
-				footerMenuButton(rc, gtx, th, allPages.Theme["CONSOLE"], "", "consoleIcon", buttonConsole),
-				footerMenuButton(rc, gtx, th, allPages.Theme["SETTINGS"], "", "settingsIcon", buttonSettings),
-			}
-			footerNav.Layout(gtx, len(navButtons), func(i int) {
-				layout.UniformInset(unit.Dp(0)).Layout(gtx, navButtons[i])
-			})
+		navButtons := []func(){
+			// footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "networkIcon", buttonNetwork),
+			// footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount), "", buttonNetwork),
+			// footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonBlocks),
+			footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "", "network", buttonNetwork),
+			footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"], "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount.Load()), "", buttonNetwork),
+			footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "", "DeviceWidgets", buttonBlocks),
+			footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"], "BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount.Load()), "", buttonBlocks),
+			footerMenuButton(rc, gtx, th, allPages.Theme["MINER"], "", "helpIcon", buttonHelp),
+			footerMenuButton(rc, gtx, th, allPages.Theme["CONSOLE"], "", "consoleIcon", buttonConsole),
+			footerMenuButton(rc, gtx, th, allPages.Theme["SETTINGS"], "", "settingsIcon", buttonSettings),
+		}
+		footerNav.Layout(gtx, len(navButtons), func(i int) {
+			layout.UniformInset(unit.Dp(0)).Layout(gtx, navButtons[i])
 		})
 	}
 }
