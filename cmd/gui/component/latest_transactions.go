@@ -66,7 +66,7 @@ func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoU
 												layout.Rigid(lTamount(gtx, th, t.Amount)),
 											)
 										}),
-										layout.Rigid(HorizontalLine(gtx, 1, th.Colors["Hint"])),
+										layout.Rigid(th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])),
 									)
 								})
 							})

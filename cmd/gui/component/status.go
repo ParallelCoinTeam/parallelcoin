@@ -24,26 +24,22 @@ var (
 
 func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		cs := gtx.Constraints
-		gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		in := layout.UniformInset(unit.Dp(16))
-		in.Layout(gtx, func() {
-			// cs := gtx.Constraints
+		th.DuoUIitem(8, th.Colors["Light"]).Layout(gtx, layout.NW, func() {
 			bigStatus := []func(){
 				listItem(gtx, th, 22, 6, "EditorMonetizationOn", "BALANCE :", rc.Status.Wallet.Balance.Load()+" "+rc.Settings.Abbrevation),
-				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				th.DuoUIline(gtx, 8, 0, 1, th.Colors["LightGray"]),
 				listItem(gtx, th, 22, 6, "MapsLayersClear", "UNCONFIRMED :", rc.Status.Wallet.Unconfirmed.Load()+" "+
 					rc.Settings.Abbrevation),
-				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				th.DuoUIline(gtx, 8, 0, 1, th.Colors["LightGray"]),
 				listItem(gtx, th, 22, 6, "CommunicationImportExport", "TRANSACTIONS :", fmt.Sprint(rc.Status.Wallet.TxsNumber.Load())),
 
-				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				th.DuoUIline(gtx, 8, 0, 1, th.Colors["LightGray"]),
 				listItem(gtx, th, 16, 4, "DeviceWidgets", "Block Count :", fmt.Sprint(rc.Status.Node.BlockCount.Load())),
 
-				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				th.DuoUIline(gtx, 4, 0, 1, th.Colors["LightGray"]),
 				listItem(gtx, th, 16, 4, "ImageTimer", "Difficulty :", fmt.Sprint(rc.Status.Node.Difficulty.Load())),
 
-				HorizontalLine(gtx, 1, th.Colors["LightGrayII"]),
+				th.DuoUIline(gtx, 4, 0, 1, th.Colors["LightGray"]),
 				listItem(gtx, th, 16, 4, "NotificationVPNLock", "Connections :", fmt.Sprint(rc.Status.Node.ConnectionCount.Load())),
 			}
 			itemsList.Layout(gtx, len(bigStatus), func(i int) {

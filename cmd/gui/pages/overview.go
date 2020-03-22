@@ -18,7 +18,7 @@ func Overview(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook
 		HeaderBgColor: "",
 		HeaderPadding: 0,
 		Body:          overviewBody(rc, gtx, th),
-		BodyBgColor:   "",
+		BodyBgColor:   th.Colors["Light"],
 		BodyPadding:   0,
 		Footer:        func() {},
 		FooterBgColor: "",

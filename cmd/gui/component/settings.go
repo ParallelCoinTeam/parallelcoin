@@ -58,17 +58,17 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 		case "stringSlice":
 			switch f.Field.InputType {
 			case "text":
-				//if f.Field.Model != "MinerPass" {
-				StringsArrayEditor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
-					(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
-					func(e gel.EditorEvent) {
-						rc.Settings.Daemon.Config[f.Field.Model] = strings.Fields((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
-						L.Debug()
-						if e != nil {
-							rc.SaveDaemonCfg()
-						}
-					})()
-				//}
+				if f.Field.Model != "MiningAddrs" {
+					StringsArrayEditor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
+						(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+						func(e gel.EditorEvent) {
+							rc.Settings.Daemon.Config[f.Field.Model] = strings.Fields((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
+							L.Debug()
+							if e != nil {
+								rc.SaveDaemonCfg()
+							}
+						})()
+				}
 			default:
 
 			}

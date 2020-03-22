@@ -15,7 +15,7 @@ func TransactionsList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme)
 	return func() {
 		rc.History.TransList.Layout(gtx, len(rc.History.Txs.Txs), func(i int) {
 			t := rc.History.Txs.Txs[i]
-			HorizontalLine(gtx, 1, th.Colors["Hint"])()
+			th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])()
 			layout.Flex{
 				Spacing: layout.SpaceBetween,
 			}.Layout(gtx,
