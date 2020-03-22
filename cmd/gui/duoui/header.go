@@ -23,22 +23,24 @@ var (
 
 func (ui *DuoUI) DuoUIheader() func() {
 	return func() {
-		layout.Flex{
-			Axis:      layout.Horizontal,
-			Spacing:   layout.SpaceBetween,
-			Alignment: layout.Middle,
-		}.Layout(ui.ly.Context,
-			layout.Rigid(func() {
-				var logoMeniItem gelook.DuoUIbutton
-				logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", ui.ly.Theme.Colors["Dark"], "", "", "logo", ui.ly.Theme.Colors["Light"], 16, 64, 96, 96, 8, 8)
-				for logoButton.Clicked(ui.ly.Context) {
-					ui.ly.Theme.ChangeLightDark()
-				}
-				logoMeniItem.IconLayout(ui.ly.Context, logoButton)
-			}),
-			layout.Flexed(1, component.HeaderMenu(ui.rc, ui.ly.Context, ui.ly.Theme, ui.ly.Pages)),
-			layout.Rigid(component.Label(ui.ly.Context, ui.ly.Theme, ui.ly.Theme.Fonts["Primary"], 12, ui.ly.Theme.Colors["Light"], ui.rc.Status.Wallet.Balance.Load()+" "+ui.rc.Settings.Abbrevation)),
-		)
+		ui.ly.Theme.DuoUIitem(0, ui.ly.Theme.Colors["Dark"]).Layout(ui.ly.Context, layout.NW, func() {
+			layout.Flex{
+				Axis:      layout.Horizontal,
+				Spacing:   layout.SpaceBetween,
+				Alignment: layout.Middle,
+			}.Layout(ui.ly.Context,
+				layout.Rigid(func() {
+					var logoMeniItem gelook.DuoUIbutton
+					logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", ui.ly.Theme.Colors["Dark"], "", "", "logo", ui.ly.Theme.Colors["Light"], 16, 64, 96, 96, 8, 8)
+					for logoButton.Clicked(ui.ly.Context) {
+						ui.ly.Theme.ChangeLightDark()
+					}
+					logoMeniItem.IconLayout(ui.ly.Context, logoButton)
+				}),
+				layout.Flexed(1, component.HeaderMenu(ui.rc, ui.ly.Context, ui.ly.Theme, ui.ly.Pages)),
+				layout.Rigid(component.Label(ui.ly.Context, ui.ly.Theme, ui.ly.Theme.Fonts["Primary"], 12, ui.ly.Theme.Colors["Light"], ui.rc.Status.Wallet.Balance.Load()+" "+ui.rc.Settings.Abbrevation)),
+			)
+		})
 	}
 }
 

@@ -113,19 +113,13 @@ func (s *State) Runner() {
 			L.Debug("pause called")
 			if s.HasGo && c != nil && s.Config.Running.Load() && !s.Config.Pausing.Load() {
 				s.Config.Pausing.Toggle()
-				if err = c.Process.Signal(syscall.SIGSTOP); !L.Check(err) {
-					s.Config.Pausing.Store(true)
-					L.Debug("paused")
-				}
+				pause(s, c)
 			}
 		case "resume":
 			L.Debug("resume called")
 			if s.HasGo && c != nil && s.Config.Running.Load() && s.Config.Pausing.Load() {
 				s.Config.Pausing.Toggle()
-				if err = c.Process.Signal(syscall.SIGCONT); !L.Check(err) {
-					s.Config.Pausing.Store(false)
-					L.Debug("resumed")
-				}
+				resume(s, c)
 			}
 		case "kill":
 			L.Debug("kill called")
