@@ -2,11 +2,6 @@ package monitor
 
 import (
 	"gioui.org/layout"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"syscall"
-	"time"
 )
 
 func (s *State) BottomBar() layout.FlexChild {
@@ -31,6 +26,7 @@ func (s *State) StatusBar() layout.FlexChild {
 			s.BuildButtons(),
 			s.SettingsButtons(),
 			Spacer(),
+			s.Filter(),
 		)
 	})
 }
@@ -43,8 +39,13 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				if s.Config.Running.Load() {
 					fg, bg = "DocBg", "DocText"
 				}
-				s.TextButton(s.Config.RunMode.Load(), "Secondary",
-					23, fg, bg,
+				txt := s.Config.RunMode.Load()
+				cs := s.Gtx.Constraints
+				if cs.Width.Max <= 240 {
+					txt = txt[:1]
+				}
+				s.TextButton(txt, "Secondary",
+					32, fg, bg,
 					s.RunModeFoldButton)
 				for s.RunModeFoldButton.Clicked(s.Gtx) {
 					if !s.Config.Running.Load() {
@@ -54,16 +55,23 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				}
 			} else {
 				modes := []string{
-					"node", "wallet", "shell", "gui", "monitor",
+					"node", "wallet", "shell", "gui", "mon",
 				}
 				s.ModesList.Layout(s.Gtx, len(modes), func(i int) {
-					s.TextButton(modes[i], "Secondary",
-						23, "ButtonText",
-						"ButtonBg", s.ModesButtons[modes[i]])
-					for s.ModesButtons[modes[i]].Clicked(s.Gtx) {
-						L.Debug(modes[i], "clicked")
+					mm := modes[i]
+					txt := mm
+					if s.WindowWidth <= 720 && s.Config.FilterOpen.Load() {
+						txt = txt[:1]
+					}
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+					s.TextButton(txt, "Secondary",
+						32, "DocText",
+						"DocBg", s.ModesButtons[mm])
+					for s.ModesButtons[mm].Clicked(s.Gtx) {
+						L.Debug(mm, "clicked")
 						if s.Config.RunModeOpen.Load() {
-							s.Config.RunMode.Store(modes[i])
+							s.Config.RunMode.Store(mm)
 							s.Config.RunModeOpen.Store(false)
 						}
 						s.SaveConfig()
@@ -75,34 +83,26 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 	})
 }
 
-func (s *State) RestartRunButton() layout.FlexChild {
+func (s *State) Filter() layout.FlexChild {
 	return Rigid(func() {
-		s.Inset(4, func() {
-			var c *exec.Cmd
-			var err error
-			s.IconButton("Restart", "PanelText", "PanelBg",
-				s.RestartButton)
-			for s.RestartButton.Clicked(s.Gtx) {
-				L.Debug("clicked restart button")
-				s.SaveConfig()
-				if s.HasGo {
-					go func() {
-						s.RunCommandChan <- "stop"
-						exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
-						c = exec.Command("go", "build", "-v",
-							"-tags", "goterm", "-o", exePath)
-						c.Stderr = os.Stderr
-						c.Stdout = os.Stdout
-						time.Sleep(time.Second)
-						if err = c.Run(); !L.Check(err) {
-							if err = syscall.Exec(exePath, os.Args,
-								os.Environ()); L.Check(err) {
-							}
-							os.Exit(0)
-						}
-					}()
+		fg, bg := "PanelText", "PanelBg"
+		if s.Config.FilterOpen.Load() {
+			fg, bg = "DocText", "DocBg"
+		}
+		if !(s.Config.FilterOpen.Load() && s.WindowWidth <= 720) ||
+			(!s.Config.FilterOpen.Load() && s.WindowWidth > 480) {
+			s.IconButton("Filter", fg, bg, s.FilterButton)
+			for s.FilterButton.Clicked(s.Gtx) {
+				L.Debug("clicked filter button")
+				if !s.Config.FilterOpen.Load() {
+					if s.WindowWidth < 1024 {
+						s.Config.SettingsOpen.Store(false)
+						s.Config.BuildOpen.Store(false)
+					}
 				}
+				s.Config.FilterOpen.Toggle()
+				s.SaveConfig()
 			}
-		})
+		}
 	})
 }

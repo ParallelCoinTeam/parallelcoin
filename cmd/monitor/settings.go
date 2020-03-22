@@ -24,17 +24,19 @@ func (s *State) SettingsButtons() layout.FlexChild {
 			if s.Config.SettingsOpen.Load() {
 				bg, fg = "DocBg", "DocText"
 			}
-			s.TextButton("Settings", "Secondary",
-				23, fg, bg, s.SettingsFoldButton)
+			//s.TextButton("Settings", "Secondary",
+			//	23, fg, bg, s.SettingsFoldButton)
+			s.IconButton("settingsIcon", fg, bg, s.SettingsFoldButton)
+
 			for s.SettingsFoldButton.Clicked(s.Gtx) {
 				L.Debug("settings folder clicked")
-				switch {
-				case !s.Config.SettingsOpen.Load():
+				if !s.Config.SettingsOpen.Load() {
+					if s.WindowWidth < 800 {
+						s.Config.FilterOpen.Store(false)
+					}
 					s.Config.BuildOpen.Store(false)
-					s.Config.SettingsOpen.Store(true)
-				case s.Config.SettingsOpen.Load():
-					s.Config.SettingsOpen.Store(false)
 				}
+				s.Config.SettingsOpen.Toggle()
 				s.SaveConfig()
 			}
 		}),
@@ -52,9 +54,9 @@ func (s *State) SettingsPage() layout.FlexChild {
 		weight = 1
 	//case s.WindowWidth < 1024 && s.WindowHeight > 1024:
 	// weight = 0.333
-	case s.WindowHeight < 800 && s.WindowWidth < 800:
+	case s.WindowHeight <= 800 && s.WindowWidth <= 800:
 		weight = 1
-	case s.WindowHeight < 600 && s.WindowWidth > 800:
+	case s.WindowHeight <= 600 && s.WindowWidth > 800:
 		weight = 1
 	}
 	return Flexed(weight, func() {
@@ -78,11 +80,11 @@ func (s *State) SettingsPage() layout.FlexChild {
 					}
 				}), Flexed(1, func() {
 					if s.WindowWidth > 800 {
-						s.SettingsTabs()
+						s.SettingsTabs(22)
 					}
 				}), Rigid(func() {
-					if !(s.WindowHeight < 800 && s.WindowWidth < 800 ||
-						s.WindowHeight < 600 && s.WindowWidth > 800) {
+					if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
+						s.WindowHeight <= 600 && s.WindowWidth > 800) {
 						ic := "zoom"
 						if s.Config.SettingsZoomed.Load() {
 							ic = "minimize"
@@ -106,10 +108,10 @@ func (s *State) SettingsPage() layout.FlexChild {
 				}),
 				)
 			}), Rigid(func() {
-				if s.WindowWidth < 800 {
+				if s.WindowWidth <= 800 {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
-					s.SettingsTabs()
+					s.SettingsTabs(14)
 				}
 			}), Flexed(1, func() {
 				cs := s.Gtx.Constraints
@@ -124,7 +126,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 	})
 }
 
-func (s *State) SettingsTabs() {
+func (s *State) SettingsTabs(size int) {
 	groupsNumber := len(s.Rc.Settings.Daemon.Schema.Groups)
 	s.GroupsList.Layout(s.Gtx, groupsNumber, func(i int) {
 		color := "DocText"
@@ -139,14 +141,8 @@ func (s *State) SettingsTabs() {
 			color = "PanelText"
 			bgColor = "PanelBg"
 		}
-		if s.WindowWidth < 800 {
-			s.TextButton(txt, "Primary", 14,
-				color, bgColor, s.Rc.Settings.Tabs.TabsList[txt])
-		} else {
-			s.TextButton(txt, "Primary", 16,
-				color, bgColor, s.Rc.Settings.Tabs.TabsList[txt])
-
-		}
+		s.TextButton(txt, "Primary", size,
+			color, bgColor, s.Rc.Settings.Tabs.TabsList[txt])
 	})
 }
 

@@ -15,7 +15,7 @@ func (s *State) RunControls() layout.FlexChild {
 			return
 		}
 		if !s.Config.Running.Load() {
-			s.IconButton("Run", "PanelBg", "PanelText", s.RunMenuButton)
+			s.IconButton("Run", "PanelBg", "PanelText", s.RunMenuButton )
 			for s.RunMenuButton.Clicked(s.Gtx) {
 				L.Debug("clicked run button")
 				if !s.Config.RunModeOpen.Load() {

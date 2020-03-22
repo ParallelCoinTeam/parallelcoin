@@ -44,6 +44,9 @@ type State struct {
 	BuildCloseButton          *gel.Button
 	BuildZoomButton           *gel.Button
 	BuildTitleCloseButton     *gel.Button
+	FilterButton              *gel.Button
+	FilterHeaderButton        *gel.Button
+	FilterClearButton         *gel.Button
 	ModesButtons              map[string]*gel.Button
 	GroupsList                *layout.List
 	WindowWidth, WindowHeight int
@@ -90,12 +93,15 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		SettingsCloseButton:      new(gel.Button),
 		SettingsZoomButton:       new(gel.Button),
 		SettingsTitleCloseButton: new(gel.Button),
+		FilterButton:             new(gel.Button),
+		FilterHeaderButton:       new(gel.Button),
+		FilterClearButton:        new(gel.Button),
 		ModesButtons: map[string]*gel.Button{
 			"node":    new(gel.Button),
 			"wallet":  new(gel.Button),
 			"shell":   new(gel.Button),
 			"gui":     new(gel.Button),
-			"monitor": new(gel.Button),
+			"mon": new(gel.Button),
 		},
 		Config:       &Config{},
 		WindowWidth:  0,
@@ -133,6 +139,7 @@ type Config struct {
 	UseBuiltinGo   atomic.Bool
 	Running        atomic.Bool
 	Pausing        atomic.Bool
+	FilterOpen     atomic.Bool
 }
 
 func (c *Config) GetUnsafeConfig() (out *UnsafeConfig) {
@@ -152,6 +159,7 @@ func (c *Config) GetUnsafeConfig() (out *UnsafeConfig) {
 		UseBuiltinGo:   c.UseBuiltinGo.Load(),
 		Running:        c.Running.Load(),
 		Pausing:        c.Pausing.Load(),
+		FilterOpen:     c.FilterOpen.Load(),
 	}
 	return
 }
@@ -171,6 +179,7 @@ type UnsafeConfig struct {
 	UseBuiltinGo   bool
 	Running        bool
 	Pausing        bool
+	FilterOpen     bool
 }
 
 func (u *UnsafeConfig) LoadInto(c *Config) {
@@ -189,6 +198,7 @@ func (u *UnsafeConfig) LoadInto(c *Config) {
 	c.UseBuiltinGo.Store(u.UseBuiltinGo)
 	c.Running.Store(u.Running)
 	c.Pausing.Store(u.Pausing)
+	c.FilterOpen.Store(u.FilterOpen)
 }
 
 func (s *State) LoadConfig() {
