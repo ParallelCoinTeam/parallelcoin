@@ -51,7 +51,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	mon.W = app.NewWindow(
 		app.Size(unit.Dp(float32(mon.Config.Width.Load())),
 			unit.Dp(float32(mon.Config.Height.Load()))),
-		app.Title("ParallelCoin Pod Monitor"),
+		app.Title("ParallelCoin Pod Monitor ["+*cx.Config.DataDir+"]"),
 	)
 	mon.Gtx = layout.NewContext(mon.W.Queue())
 	go mon.Runner()

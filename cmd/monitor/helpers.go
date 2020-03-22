@@ -46,11 +46,15 @@ func (s *State) Rectangle(width, height int, color, opacity string, radius ...fl
 	)
 }
 
-func (s *State) IconButton(icon, fg, bg string, button *gel.Button) {
+func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int) {
+	sz := 32
+	if len(size)>1{
+		sz = size[0]
+	}
 	s.Theme.DuoUIbutton("", "", "",
 		s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
-		s.Theme.Colors[fg], 0, 32, 41, 41,
-		8, 8).IconLayout(s.Gtx, button)
+		s.Theme.Colors[fg], 0, sz, sz+9, sz+9,
+		0, 0).IconLayout(s.Gtx, button)
 }
 
 func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
