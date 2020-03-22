@@ -52,9 +52,9 @@ func (s *State) SettingsPage() layout.FlexChild {
 		weight = 1
 	//case s.WindowWidth < 1024 && s.WindowHeight > 1024:
 	// weight = 0.333
-	case s.WindowHeight < 1024 && s.WindowWidth < 1024:
+	case s.WindowHeight < 800 && s.WindowWidth < 800:
 		weight = 1
-	case s.WindowHeight < 600 && s.WindowWidth > 1024:
+	case s.WindowHeight < 600 && s.WindowWidth > 800:
 		weight = 1
 	}
 	return Flexed(weight, func() {
@@ -77,12 +77,12 @@ func (s *State) SettingsPage() layout.FlexChild {
 						s.SaveConfig()
 					}
 				}), Flexed(1, func() {
-					if s.WindowWidth > 640 {
+					if s.WindowWidth > 800 {
 						s.SettingsTabs()
 					}
 				}), Rigid(func() {
-					if !(s.WindowHeight < 1024 && s.WindowWidth < 1024 ||
-						s.WindowHeight < 600 && s.WindowWidth > 1024) {
+					if !(s.WindowHeight < 800 && s.WindowWidth < 800 ||
+						s.WindowHeight < 600 && s.WindowWidth > 800) {
 						ic := "zoom"
 						if s.Config.SettingsZoomed.Load() {
 							ic = "minimize"
@@ -106,7 +106,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 				}),
 				)
 			}), Rigid(func() {
-				if s.WindowWidth < 640 {
+				if s.WindowWidth < 800 {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 					s.SettingsTabs()
@@ -139,7 +139,7 @@ func (s *State) SettingsTabs() {
 			color = "PanelText"
 			bgColor = "PanelBg"
 		}
-		if s.WindowWidth < 640 {
+		if s.WindowWidth < 800 {
 			s.TextButton(txt, "Primary", 14,
 				color, bgColor, s.Rc.Settings.Tabs.TabsList[txt])
 		} else {
@@ -159,12 +159,12 @@ func (s *State) SettingsBody() {
 						if fmt.Sprint(fields.Legend) == s.Rc.Settings.Tabs.Current {
 							s.SettingsFields.Layout(s.Gtx,
 								len(fields.Fields), func(il int) {
-									il = len(fields.Fields) - 1 - il
+									//il = len(fields.Fields) - 1 - il
 									tl := &Field{
 										Field: &fields.Fields[il],
 									}
 									s.FlexH(Flexed(1, func() {
-										s.Inset(4, func() {
+										s.Inset(8, func() {
 											s.FlexV(
 												//Flexed(0.2, func() {}),
 												Rigid(s.SettingsFieldLabel(tl)),
@@ -211,8 +211,8 @@ func (s *State) SettingsFieldLabel(f *Field) func() {
 	return func() {
 		layout.W.Layout(s.Gtx, func() {
 			name := s.Theme.H6(fmt.Sprint(f.Field.Label))
-			name.Color = s.Theme.Colors["PanelText"]
-			name.Font.Typeface = s.Theme.Fonts["Primary"]
+			name.Color = s.Theme.Colors["DocText"]
+			name.Font.Typeface = s.Theme.Fonts["Secondary"]
 			name.Layout(s.Gtx)
 		})
 	}
@@ -221,9 +221,9 @@ func (s *State) SettingsFieldLabel(f *Field) func() {
 func (s *State) SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
 		layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceAround}.Layout(s.Gtx, Rigid(func() {
-			desc := th.H6(fmt.Sprint(f.Field.Description))
+			desc := th.Body1(fmt.Sprint(f.Field.Description))
 			desc.Font.Typeface = th.Fonts["Primary"]
-			desc.Color = th.Colors["DocBg"]
+			desc.Color = th.Colors["DocText"]
 			desc.Layout(gtx)
 		}),
 		)
@@ -421,12 +421,12 @@ func (s *State) Editor(editorControler *gel.Editor, width int,
 			}
 			width++
 			s.Rectangle(width*textWidth+16, 40, outerColor, "bb", 4)
-			s.Inset(4, func() {
-				s.Rectangle(width*textWidth+8, 32, innerColor, "ff", 2)
+			s.Inset(3, func() {
+				s.Rectangle(width*textWidth+10, 34, innerColor, "ff", 2)
 				e := s.Theme.DuoUIeditor(editorControler.Text(),
 					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
 				e.Font.Typeface = s.Theme.Fonts["Mono"]
-				s.Inset(4, func() {
+				s.Inset(5, func() {
 					s.FlexH(Rigid(func() {
 						e.Layout(s.Gtx, editorControler)
 					}),
@@ -457,12 +457,12 @@ func (s *State) PasswordEditor(editorControler *gel.Editor, width int,
 			}
 			width++
 			s.Rectangle(width*textWidth+16, 40, outerColor, "bb", 4)
-			s.Inset(4, func() {
-				s.Rectangle(width*textWidth+8, 32, innerColor, "ff", 2)
+			s.Inset(3, func() {
+				s.Rectangle(width*textWidth+10, 34, innerColor, "ff", 2)
 				e := s.Theme.DuoUIeditor(editorControler.Text(),
 					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
 				e.Font.Typeface = s.Theme.Fonts["Mono"]
-				s.Inset(4, func() {
+				s.Inset(5, func() {
 					s.FlexH(Rigid(func() {
 						e.Layout(s.Gtx, editorControler)
 					}),
@@ -511,9 +511,9 @@ func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, w
 				width = 9
 			}
 			s.Rectangle(width*textWidth+16, height+16, outerColor, "bb", 4)
-			s.Inset(4, func() {
-				s.Rectangle(width*textWidth+8, height+8, innerColor, "ff", 2)
-				s.Inset(4, func() {
+			s.Inset(3, func() {
+				s.Rectangle(width*textWidth+10, height+10, innerColor, "ff", 2)
+				s.Inset(5, func() {
 					e := s.Theme.DuoUIeditor(label,
 						s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
 					e.Font.Typeface = s.Theme.Fonts["Mono"]

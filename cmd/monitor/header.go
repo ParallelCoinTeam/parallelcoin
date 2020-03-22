@@ -66,18 +66,19 @@ func (s *State) DuoUIheader() layout.FlexChild {
 					t.Font.Typeface = s.Theme.Fonts["Primary"]
 					t.Layout(s.Gtx)
 				})
-			}), Rigid(func() {
-				s.Inset(closeInsetSize, func() {
-					s.IconButton("closeIcon", "PanelText",
-						"PanelBg", s.CloseButton)
-					for s.CloseButton.Clicked(s.Gtx) {
-						L.Debug("close button clicked")
-						s.SaveConfig()
-						s.RunCommandChan <- "stop"
-						close(s.Ctx.KillAll)
-					}
-				})
-			}),
+			}), s.RestartRunButton(),
+				Rigid(func() {
+					s.Inset(closeInsetSize, func() {
+						s.IconButton("closeIcon", "PanelText",
+							"PanelBg", s.CloseButton)
+						for s.CloseButton.Clicked(s.Gtx) {
+							L.Debug("close button clicked")
+							s.SaveConfig()
+							s.RunCommandChan <- "stop"
+							close(s.Ctx.KillAll)
+						}
+					})
+				}),
 			)
 		}),
 		)

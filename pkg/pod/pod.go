@@ -26,6 +26,18 @@ type Group struct {
 
 type Fields []Field
 
+func (f Fields) Len() int {
+	return len(f)
+}
+
+func (f Fields) Less(i, j int) bool {
+	return f[i].Label < f[j].Label
+}
+
+func (f Fields) Swap(i, j int) {
+	f[i], f[j] = f[j], f[i]
+}
+
 type Field struct {
 	Group       string   `json:"group"`
 	Type        string   `json:"type"`
@@ -77,9 +89,10 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 		if f.Group != "" {
 			rawFields[f.Group] = append(rawFields[f.Group], f)
 		}
-		// groups = append(groups, f.Group)
 	}
-	//spew.Dump(groups)
+	for i := range rawFields {
+		sort.Sort(rawFields[i])
+	}
 	var outGroups Groups
 	var rf []string
 	for i := range rawFields {
