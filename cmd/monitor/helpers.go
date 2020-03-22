@@ -47,7 +47,7 @@ func (s *State) Rectangle(width, height int, color, opacity string, radius ...fl
 }
 
 func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int) {
-	sz := 32
+	sz := 40
 	if len(size)>1{
 		sz = size[0]
 	}

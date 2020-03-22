@@ -11,17 +11,18 @@ func (s *State) BuildButtons() layout.FlexChild {
 			if s.Config.BuildOpen.Load() {
 				bg, fg = "DocBg", "DocText"
 			}
-			s.TextButton("Build", "Secondary", 23,
-				fg, bg, s.BuildFoldButton)
+			//s.TextButton("Build", "Secondary", 23,
+			//	fg, bg, s.BuildFoldButton)
+			s.IconButton("Build", fg, bg, s.BuildFoldButton)
 			for s.BuildFoldButton.Clicked(s.Gtx) {
 				L.Debug("run mode folder clicked")
-				switch {
-				case !s.Config.BuildOpen.Load():
-					s.Config.BuildOpen.Store(true)
+				if !s.Config.BuildOpen.Load() {
+					if s.WindowWidth < 800 {
+						s.Config.FilterOpen.Store(false)
+					}
 					s.Config.SettingsOpen.Store(false)
-				case s.Config.BuildOpen.Load():
-					s.Config.BuildOpen.Store(false)
 				}
+				s.Config.BuildOpen.Toggle()
 				s.SaveConfig()
 			}
 		}),
@@ -37,9 +38,9 @@ func (s *State) BuildPage() layout.FlexChild {
 	switch {
 	case s.Config.BuildZoomed.Load():
 		weight = 1
-	case s.WindowHeight < 1024 && s.WindowWidth < 1024:
+	case s.WindowHeight <= 800 && s.WindowWidth <= 800:
 		weight = 1
-	case s.WindowHeight < 600 && s.WindowWidth > 1024:
+	case s.WindowHeight <= 600 && s.WindowWidth > 800:
 		weight = 1
 	}
 	return Flexed(weight, func() {
@@ -60,8 +61,8 @@ func (s *State) BuildPage() layout.FlexChild {
 					s.SaveConfig()
 				}
 			}), Spacer(), Rigid(func() {
-				if !(s.WindowHeight < 1024 && s.WindowWidth < 1024 ||
-					s.WindowHeight < 600 && s.WindowWidth > 1024) {
+				if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
+					s.WindowHeight <= 600 && s.WindowWidth > 800) {
 					ic := "zoom"
 					if s.Config.BuildZoomed.Load() {
 						ic = "minimize"

@@ -103,7 +103,16 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 func (s *State) TopLevelLayout() {
 	s.FlexV(
 		s.DuoUIheader(),
-		s.Body(),
-		s.BottomBar(),
+		Flexed(1, func() {
+			s.FlexH(Flexed(1, func() {
+				s.FlexV(Flexed(1, func() {
+					s.FlexH(
+						s.Body(),
+					)
+				}), s.BottomBar(),
+				)
+			}), s.Sidebar(),
+			)
+		}),
 	)
 }

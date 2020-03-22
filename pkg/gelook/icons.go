@@ -68,6 +68,13 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["Grab"] = mustIcon(NewDuoUIicon(icons.NavigationMenu))
 	i["Up"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropUp))
 	i["Down"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropDown))
+	i["iconGrab"] = mustIcon(NewDuoUIicon(icons.NavigationMenu))
+	i["iconUp"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropUp))
+	i["iconDown"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropDown))
+	i["Copy"] = mustIcon(NewDuoUIicon(icons.ContentContentCopy))
+	i["Paste"] = mustIcon(NewDuoUIicon(icons.ContentContentPaste))
+	i["Filter"] = mustIcon(NewDuoUIicon(icons.ContentFilterList))
+	i["Build"] = mustIcon(NewDuoUIicon(icons.ActionBuild))
 	return i
 }
 

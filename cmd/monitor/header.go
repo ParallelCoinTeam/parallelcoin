@@ -2,6 +2,11 @@ package monitor
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"syscall"
+	"time"
 
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -82,5 +87,37 @@ func (s *State) DuoUIheader() layout.FlexChild {
 			)
 		}),
 		)
+	})
+}
+
+func (s *State) RestartRunButton() layout.FlexChild {
+	return Rigid(func() {
+		s.Inset(4, func() {
+			var c *exec.Cmd
+			var err error
+			s.IconButton("Restart", "PanelText", "PanelBg",
+				s.RestartButton)
+			for s.RestartButton.Clicked(s.Gtx) {
+				L.Debug("clicked restart button")
+				s.SaveConfig()
+				if s.HasGo {
+					go func() {
+						s.RunCommandChan <- "stop"
+						exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
+						c = exec.Command("go", "build", "-v",
+							"-tags", "goterm", "-o", exePath)
+						c.Stderr = os.Stderr
+						c.Stdout = os.Stdout
+						time.Sleep(time.Second)
+						if err = c.Run(); !L.Check(err) {
+							if err = syscall.Exec(exePath, os.Args,
+								os.Environ()); L.Check(err) {
+							}
+							os.Exit(0)
+						}
+					}()
+				}
+			}
+		})
 	})
 }
