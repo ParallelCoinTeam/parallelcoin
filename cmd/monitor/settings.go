@@ -3,11 +3,10 @@ package monitor
 import (
 	"fmt"
 	"gioui.org/layout"
-	"gioui.org/text"
 	"gioui.org/unit"
 	"strconv"
+	"time"
 
-	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/pod"
@@ -59,11 +58,11 @@ func (s *State) SettingsPage() layout.FlexChild {
 	}
 	return Flexed(weight, func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 		s.FlexV(
 			Rigid(func() {
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 				s.Inset(4, func() {})
 			}),
 			Rigid(func() {
@@ -108,17 +107,16 @@ func (s *State) SettingsPage() layout.FlexChild {
 			}), Rigid(func() {
 				if s.WindowWidth < 640 {
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 					s.SettingsTabs()
 				}
 			}), Flexed(1, func() {
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max,
-					"PanelBg")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 				s.Inset(8, func() { s.SettingsBody() })
 			}), Rigid(func() {
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 				s.Inset(4, func() {})
 			}),
 		)
@@ -169,8 +167,8 @@ func (s *State) SettingsBody() {
 						if tl.Field.Type == "switch" {
 							s.FlexH(Flexed(1, func() {
 								s.FlexH(
-									s.SettingsItemInput(tl),
 									s.SettingsItemLabel(tl),
+									s.SettingsItemInput(tl),
 								)
 							}))
 						} else {
@@ -206,7 +204,7 @@ func (s *State) SettingsItemLabel(f *Field) layout.FlexChild {
 func (s *State) SettingsItemInput(f *Field) layout.FlexChild {
 	return Rigid(func() {
 		s.Inset(10,
-			DuoUIinputField(s.Rc, s.Gtx, s.Theme, &Field{Field: f.Field}),
+			s.InputField(&Field{Field: f.Field}),
 		)
 	})
 }
@@ -252,11 +250,11 @@ func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorContro
 	}
 }
 
-func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
+func (s *State) InputField(f *Field) func() {
 	return func() {
 		//gtx.Constraints.Width.Max = 8 + 32*16
-		gtx.Constraints.Width.Min = 8 + 32*16
-		rsd := rc.Settings.Daemon
+		s.Gtx.Constraints.Width.Min = 8 + 32*16
+		rsd := s.Rc.Settings.Daemon
 		fld := f.Field
 		fm := fld.Model
 		rwe, ok := rsd.Widgets[fm].(*gel.Editor)
@@ -289,60 +287,78 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 		case "input":
 			switch fld.InputType {
 			case "text":
-				Editor(gtx, th, rwe, rwe.Text(), 32, func(e gel.EditorEvent) {
+				s.Editor(rwe, rwe.Text(), 32, func(e gel.EditorEvent) {
 					txt := rwe.Text()
 					rsd.Config[fm] = txt
 					if e != nil {
-						rc.SaveDaemonCfg()
+						s.Rc.SaveDaemonCfg()
 					}
 				})()
 			case "number":
-				Editor(gtx, th, rwe, rwe.Text(), 15, func(e gel.EditorEvent) {
+				s.Editor(rwe, rwe.Text(), 15, func(e gel.EditorEvent) {
 					number, err := strconv.Atoi(rwe.Text())
 					if err == nil {
 					}
 					rsd.Config[fm] = number
 					if e != nil {
-						rc.SaveDaemonCfg()
+						s.Rc.SaveDaemonCfg()
+					}
+				})()
+			case "time":
+				s.Editor(rwe, rwe.Text(), 10, func(e gel.EditorEvent) {
+					duration, err := time.ParseDuration(rwe.Text())
+					if err == nil {
+					}
+					rsd.Config[fm] = duration
+					if e != nil {
+						s.Rc.SaveDaemonCfg()
 					}
 				})()
 			case "decimal":
-				Editor(gtx, th, rwe, rwe.Text(), 15, func(e gel.EditorEvent) {
+				s.Editor(rwe, rwe.Text(), 15, func(e gel.EditorEvent) {
 					decimal, err := strconv.ParseFloat(rwe.Text(), 64)
 					if err != nil {
 					}
 					rsd.Config[fm] = decimal
 					if e != nil {
-						rc.SaveDaemonCfg()
+						s.Rc.SaveDaemonCfg()
 					}
 				})()
 			case "password":
-				e := th.DuoUIeditor(fld.Label, "DocText", 32)
-				e.Font.Typeface = th.Fonts["Primary"]
-				e.Font.Style = text.Italic
-				e.Layout(gtx, rwe)
+				s.PasswordEditor(rwe, rwe.Text(), 32, func(e gel.EditorEvent) {
+					txt := rwe.Text()
+					rsd.Config[fm] = txt
+					if e != nil {
+						s.Rc.SaveDaemonCfg()
+					}
+				})()
 			default:
 			}
 		case "switch":
-			gtx.Constraints.Width.Max = 16*15 + 8
-			gtx.Constraints.Width.Min = 16*15 + 8
-			layout.E.Layout(gtx, func() {
-				th.DuoUIcheckBox("",
+			s.Gtx.Constraints.Width.Max = 32 //16*15 + 8
+			s.Gtx.Constraints.Width.Min = 16*15 + 8
+			layout.W.Layout(s.Gtx, func() {
+				//s.Rectangle(32, 32, "DocBg", "88")
+				color := "DocBg"
+				if *rsd.Config[fm].(*bool) {
+					color = "DocText"
+				}
+				s.Theme.DuoUIcheckBox("",
 					//fld.Label,
-					th.Colors["PanelText"],
-					th.Colors["PanelText"]).Layout(gtx,
+					s.Theme.Colors[color],
+					s.Theme.Colors[color]).Layout(s.Gtx,
 					(rsd.Widgets[fm]).(*gel.CheckBox))
-				if (rsd.Widgets[fm]).(*gel.CheckBox).Checked(gtx) {
+				if (rsd.Widgets[fm]).(*gel.CheckBox).Checked(s.Gtx) {
 					if !*rsd.Config[fm].(*bool) {
 						tt := true
 						rsd.Config[fm] = &tt
-						rc.SaveDaemonCfg()
+						s.Rc.SaveDaemonCfg()
 					}
 				} else {
 					if *rsd.Config[fm].(*bool) {
 						ff := false
 						rsd.Config[fm] = &ff
-						rc.SaveDaemonCfg()
+						s.Rc.SaveDaemonCfg()
 					}
 				}
 			})
@@ -368,25 +384,59 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 	}
 }
 
-func Editor(gtx *layout.Context, th *gelook.DuoUItheme,
-	editorControler *gel.Editor, content string, width int,
+func (s *State) Editor(editorControler *gel.Editor, content string, width int,
 	handler func(gel.EditorEvent)) func() {
 	return func() {
-		layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-			//cs := gtx.Constraints
-			gelook.DuoUIdrawRectangle(gtx, width*16+8, 40,
-				th.Colors["DocBg"],
-				[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-			layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-				//gelook.DuoUIdrawRectangle(gtx, width*16, 32,
-				//	th.Colors["DocBg"], [4]float32{0, 0, 0, 0},
-				//	[4]float32{0, 0, 0, 0})
-				e := th.DuoUIeditor(content, "DocText", width)
-				e.Font.Typeface = th.Fonts["Mono"]
-				layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-					e.Layout(gtx, editorControler)
+		layout.UniformInset(unit.Dp(4)).Layout(s.Gtx, func() {
+			outerColor := "DocBg"
+			innerColor := "PanelBg"
+			textColor := "PanelText"
+			if editorControler.Focused() {
+				outerColor = "DocText"
+				//innerColor = "DocBg"
+				//textColor = "PanelBg"
+			}
+			s.Rectangle(width*16+6, 38, outerColor, "bb", 4)
+			s.Inset(3, func() {
+				s.Rectangle(width*16, 32, innerColor, "ff", 2)
+				e := s.Theme.DuoUIeditor(content, s.Theme.Colors[textColor], width)
+				e.Font.Typeface = s.Theme.Fonts["Mono"]
+				s.Inset(4, func() {
+					e.Layout(s.Gtx, editorControler)
 				})
-				for _, e := range editorControler.Events(gtx) {
+				for _, e := range editorControler.Events(s.Gtx) {
+					switch e.(type) {
+					case gel.ChangeEvent:
+						handler(e)
+					}
+				}
+			})
+		})
+	}
+}
+
+func (s *State) PasswordEditor(editorControler *gel.Editor, content string, width int,
+	handler func(gel.EditorEvent)) func() {
+	return func() {
+		layout.UniformInset(unit.Dp(4)).Layout(s.Gtx, func() {
+			//cs := s.Gtx.Constraints
+			outerColor := "DocBg"
+			innerColor := "PanelBg"
+			textColor := ""
+			if editorControler.Focused() {
+				outerColor = "DocText"
+				innerColor = "DocBg"
+				textColor = "PanelBg"
+			}
+			s.Rectangle(width*16+6, 38, outerColor, "bb", 4)
+			s.Inset(3, func() {
+				s.Rectangle(width*16, 32, innerColor, "ff", 2)
+				e := s.Theme.DuoUIeditor(content, s.Theme.Colors[textColor], width)
+				e.Font.Typeface = s.Theme.Fonts["Mono"]
+				s.Inset(4, func() {
+					e.Layout(s.Gtx, editorControler)
+				})
+				for _, e := range editorControler.Events(s.Gtx) {
 					switch e.(type) {
 					case gel.ChangeEvent:
 						handler(e)

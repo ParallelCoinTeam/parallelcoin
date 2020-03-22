@@ -13,7 +13,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 	return Rigid(func() {
 		s.FlexH(Rigid(func() {
 			cs := s.Gtx.Constraints
-			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 			var (
 				textSize, iconSize       = 64, 64
 				width, height            = 72, 72

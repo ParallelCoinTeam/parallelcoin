@@ -12,7 +12,7 @@ import (
 func (s *State) BottomBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexV(
 			s.SettingsPage(),
 			s.BuildPage(),
@@ -24,7 +24,7 @@ func (s *State) BottomBar() layout.FlexChild {
 func (s *State) StatusBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexH(
 			s.RunControls(),
 			s.RunmodeButtons(),
