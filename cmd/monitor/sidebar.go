@@ -17,7 +17,7 @@ func (s *State) Sidebar() layout.FlexChild {
 			s.Gtx.Constraints.Width.Max = 480
 		}
 		if s.Config.FilterOpen.Load() && (s.Config.BuildOpen.Load() ||
-			s.Config.SettingsOpen.Load() && s.WindowWidth <= 1024) {
+			s.Config.SettingsOpen.Load() && s.WindowWidth <= 800) {
 			s.Config.FilterOpen.Store(false)
 		}
 		if s.Config.FilterOpen.Load() {

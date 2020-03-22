@@ -95,10 +95,8 @@ func (s *State) Filter() layout.FlexChild {
 			for s.FilterButton.Clicked(s.Gtx) {
 				L.Debug("clicked filter button")
 				if !s.Config.FilterOpen.Load() {
-					if s.WindowWidth < 1024 {
-						s.Config.SettingsOpen.Store(false)
-						s.Config.BuildOpen.Store(false)
-					}
+					s.Config.SettingsOpen.Store(false)
+					s.Config.BuildOpen.Store(false)
 				}
 				s.Config.FilterOpen.Toggle()
 				s.SaveConfig()
