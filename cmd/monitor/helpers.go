@@ -68,7 +68,7 @@ func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		s.Theme.Colors[fg],
 		"settingsIcon",
 		s.Theme.Colors["Light"],
-		fontSize, 0, 80, 32, 4, 4).
+		fontSize, 0, fontSize, fontSize, 0, 0).
 		Layout(s.Gtx, button)
 }
 
