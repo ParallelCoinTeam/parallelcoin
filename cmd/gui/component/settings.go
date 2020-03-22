@@ -107,7 +107,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 						}
 					})()
 			case "password":
-				e := th.DuoUIeditor(f.Field.Label, "DocText", 32)
+				e := th.DuoUIeditor(f.Field.Label, "DocText", "DocBg", 32)
 				e.Font.Typeface = th.Fonts["Primary"]
 				e.Font.Style = text.Italic
 				e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor))

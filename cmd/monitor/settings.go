@@ -5,6 +5,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/p9c/pod/pkg/gel"
@@ -227,29 +228,6 @@ func (s *State) SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUIth
 	}
 }
 
-func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
-	return func() {
-		layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-			cs := gtx.Constraints
-			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 32,
-				th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0,
-					0, 0})
-			e := th.DuoUIeditor(label, "DocText", 32)
-			e.Font.Typeface = th.Fonts["Mono"]
-			// e.Font.Style = text.Italic
-			layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-				e.Layout(gtx, editorControler)
-			})
-			for _, e := range editorControler.Events(gtx) {
-				switch e.(type) {
-				case gel.ChangeEvent:
-					handler(e)
-				}
-			}
-		})
-	}
-}
-
 func (s *State) InputField(f *Field) func() {
 	return func() {
 		//gtx.Constraints.Width.Max = 8 + 32*16
@@ -270,24 +248,22 @@ func (s *State) InputField(f *Field) func() {
 		case "stringSlice":
 			switch fld.InputType {
 			case "text":
-				//if fm != "MinerPass" {
-				//StringsArrayEditor(gtx, th, rsd.Widgets[fm].(*gel.
-				//Editor), (rsd.Widgets[fm]).(*gel.
-				//Editor).Text(),
-				//	func(e gel.EditorEvent) {
-				//		rsd.Config[fm] = Fields(rwe.Text())
-				//		if e != nil {
-				//			rc.SaveDaemonCfg()
-				//		}
-				//	})()
-				//}
+				if fm != "MiningAddrs" {
+					s.StringsArrayEditor(rsd.Widgets[fm].(*gel.
+					Editor), (rsd.Widgets[fm]).(*gel.Editor).Text(), 42,
+						func(e gel.EditorEvent) {
+							rsd.Config[fm] = strings.Fields(rwe.Text())
+							if e != nil {
+								s.Rc.SaveDaemonCfg()
+							}
+						})()
+				}
 			default:
-
 			}
 		case "input":
 			switch fld.InputType {
 			case "text":
-				s.Editor(rwe, rwe.Text(), 32, func(e gel.EditorEvent) {
+				s.Editor(rwe, 32, func(e gel.EditorEvent) {
 					txt := rwe.Text()
 					rsd.Config[fm] = txt
 					if e != nil {
@@ -295,37 +271,37 @@ func (s *State) InputField(f *Field) func() {
 					}
 				})()
 			case "number":
-				s.Editor(rwe, rwe.Text(), 15, func(e gel.EditorEvent) {
+				s.Editor(rwe, 15, func(e gel.EditorEvent) {
 					number, err := strconv.Atoi(rwe.Text())
 					if err == nil {
+						rsd.Config[fm] = number
 					}
-					rsd.Config[fm] = number
 					if e != nil {
 						s.Rc.SaveDaemonCfg()
 					}
 				})()
 			case "time":
-				s.Editor(rwe, rwe.Text(), 10, func(e gel.EditorEvent) {
+				s.Editor(rwe, 10, func(e gel.EditorEvent) {
 					duration, err := time.ParseDuration(rwe.Text())
 					if err == nil {
+						rsd.Config[fm] = duration
 					}
-					rsd.Config[fm] = duration
 					if e != nil {
 						s.Rc.SaveDaemonCfg()
 					}
 				})()
 			case "decimal":
-				s.Editor(rwe, rwe.Text(), 15, func(e gel.EditorEvent) {
+				s.Editor(rwe, 15, func(e gel.EditorEvent) {
 					decimal, err := strconv.ParseFloat(rwe.Text(), 64)
 					if err != nil {
+						rsd.Config[fm] = decimal
 					}
-					rsd.Config[fm] = decimal
 					if e != nil {
 						s.Rc.SaveDaemonCfg()
 					}
 				})()
 			case "password":
-				s.PasswordEditor(rwe, rwe.Text(), 32, func(e gel.EditorEvent) {
+				s.PasswordEditor(rwe, 32, func(e gel.EditorEvent) {
 					txt := rwe.Text()
 					rsd.Config[fm] = txt
 					if e != nil {
@@ -350,14 +326,14 @@ func (s *State) InputField(f *Field) func() {
 					(rsd.Widgets[fm]).(*gel.CheckBox))
 				if (rsd.Widgets[fm]).(*gel.CheckBox).Checked(s.Gtx) {
 					if !*rsd.Config[fm].(*bool) {
-						tt := true
-						rsd.Config[fm] = &tt
+						t := true
+						rsd.Config[fm] = &t
 						s.Rc.SaveDaemonCfg()
 					}
 				} else {
 					if *rsd.Config[fm].(*bool) {
-						ff := false
-						rsd.Config[fm] = &ff
+						f := false
+						rsd.Config[fm] = &f
 						s.Rc.SaveDaemonCfg()
 					}
 				}
@@ -384,7 +360,7 @@ func (s *State) InputField(f *Field) func() {
 	}
 }
 
-func (s *State) Editor(editorControler *gel.Editor, content string, width int,
+func (s *State) Editor(editorControler *gel.Editor, width int,
 	handler func(gel.EditorEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(4)).Layout(s.Gtx, func() {
@@ -399,10 +375,14 @@ func (s *State) Editor(editorControler *gel.Editor, content string, width int,
 			s.Rectangle(width*16+6, 38, outerColor, "bb", 4)
 			s.Inset(3, func() {
 				s.Rectangle(width*16, 32, innerColor, "ff", 2)
-				e := s.Theme.DuoUIeditor(content, s.Theme.Colors[textColor], width)
+				e := s.Theme.DuoUIeditor(editorControler.Text(),
+					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
 				e.Font.Typeface = s.Theme.Fonts["Mono"]
 				s.Inset(4, func() {
-					e.Layout(s.Gtx, editorControler)
+					s.FlexH(Rigid(func() {
+						e.Layout(s.Gtx, editorControler)
+					}),
+					)
 				})
 				for _, e := range editorControler.Events(s.Gtx) {
 					switch e.(type) {
@@ -415,14 +395,13 @@ func (s *State) Editor(editorControler *gel.Editor, content string, width int,
 	}
 }
 
-func (s *State) PasswordEditor(editorControler *gel.Editor, content string, width int,
+func (s *State) PasswordEditor(editorControler *gel.Editor, width int,
 	handler func(gel.EditorEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(4)).Layout(s.Gtx, func() {
-			//cs := s.Gtx.Constraints
 			outerColor := "DocBg"
 			innerColor := "PanelBg"
-			textColor := ""
+			textColor := "PanelBg"
 			if editorControler.Focused() {
 				outerColor = "DocText"
 				innerColor = "DocBg"
@@ -431,10 +410,14 @@ func (s *State) PasswordEditor(editorControler *gel.Editor, content string, widt
 			s.Rectangle(width*16+6, 38, outerColor, "bb", 4)
 			s.Inset(3, func() {
 				s.Rectangle(width*16, 32, innerColor, "ff", 2)
-				e := s.Theme.DuoUIeditor(content, s.Theme.Colors[textColor], width)
+				e := s.Theme.DuoUIeditor(editorControler.Text(),
+					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
 				e.Font.Typeface = s.Theme.Fonts["Mono"]
 				s.Inset(4, func() {
-					e.Layout(s.Gtx, editorControler)
+					s.FlexH(Rigid(func() {
+						e.Layout(s.Gtx, editorControler)
+					}),
+					)
 				})
 				for _, e := range editorControler.Events(s.Gtx) {
 					switch e.(type) {
@@ -442,6 +425,42 @@ func (s *State) PasswordEditor(editorControler *gel.Editor, content string, widt
 						handler(e)
 					}
 				}
+			})
+		})
+	}
+}
+func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, width int, handler func(gel.EditorEvent)) func() {
+	return func() {
+		split := strings.Split(label, "\n")
+		//if len(split[len(split)-1]) < 1 && len(split) > 1 {
+		//	split = split[:len(split)-1]
+		//}
+		height := 19*len(split) + 6
+		//L.Debug(len(split), height, split)
+		s.Theme.DuoUIitem(8, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.NW, func() {
+			outerColor := "DocBg"
+			innerColor := "PanelBg"
+			textColor := "PanelText"
+			if editorController.Focused() {
+				outerColor = "DocText"
+				innerColor = "PanelBg"
+				textColor = "PanelText"
+			}
+			s.Rectangle(width*16+12, height+12, outerColor, "ff", 4)
+			s.Inset(3, func() {
+				s.Rectangle(width*16+6, height+6, innerColor, "ff", 2)
+				s.Inset(6, func() {
+					e := s.Theme.DuoUIeditor(label,
+						s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
+					e.Font.Typeface = s.Theme.Fonts["Mono"]
+					e.Layout(s.Gtx, editorController)
+					for _, e := range editorController.Events(s.Gtx) {
+						switch e.(type) {
+						case gel.ChangeEvent:
+							handler(e)
+						}
+					}
+				})
 			})
 		})
 	}

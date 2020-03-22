@@ -79,7 +79,7 @@ func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorContro
 func ConsoleInput(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.SubmitEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			e := th.DuoUIeditor(label, "Dark", 120)
+			e := th.DuoUIeditor(label, "Dark", "Light", 120)
 			e.Font.Typeface = th.Fonts["Primary"]
 			e.Color = gelook.HexARGB(th.Colors["Light"])
 			e.Font.Style = text.Italic

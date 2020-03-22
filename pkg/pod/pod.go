@@ -10,8 +10,6 @@ import (
 	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/urfave/cli"
-
-	"github.com/p9c/pod/pkg/chain/fork"
 )
 
 const AppName = "pod"
@@ -45,13 +43,9 @@ type Field struct {
 
 func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 	t := reflect.TypeOf(*cfg)
-	var levelOptions, network, algos []string
+	var levelOptions, network []string
 	for _, i := range log.Levels {
 		levelOptions = append(levelOptions, i)
-	}
-	algos = append(algos, "random")
-	for _, x := range fork.P9AlgoVers {
-		algos = append(algos, x)
 	}
 	network = []string{"mainnet", "testnet", "regtestnet", "simnet"}
 
@@ -66,8 +60,6 @@ func GetConfigSchema(cfg *Config, cfgMap map[string]interface{}) Schema {
 			options = levelOptions
 		case field.Name == "Network":
 			options = network
-		case field.Name == "Algo":
-			options = algos
 		}
 		f := Field{
 			Group:       field.Tag.Get("group"),
@@ -149,7 +141,7 @@ type Config struct {
 	MaxOrphanTxs           *int             `group:"policy" label:"Max Orphan Txs" description:"max number of orphan transactions to keep in memory" type:"input" inputType:"number" json:"MaxOrphanTxs" hook:"restart"`
 	MaxPeers               *int             `group:"node" label:"Max Peers" description:"maximum number of peers to hold connections with" type:"input" inputType:"number" json:"MaxPeers" hook:"restart"`
 	MinerPass              *string          `group:"mining" label:"Miner Pass" description:"password that encrypts the connection to the mining controller" type:"input" inputType:"password" json:"MinerPass" hook:"restart"`
-	MiningAddrs            *cli.StringSlice `group:"mining" label:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"stringSlice" inputType:"text" json:"MiningAddrs" hook:"miningaddr"`
+	MiningAddrs            *cli.StringSlice `group:"" label:"Mining Addrs" description:"addresses to pay block rewards to (TODO, make this auto)" type:"stringSlice" inputType:"text" json:"MiningAddrs" hook:"miningaddr"`
 	MinRelayTxFee          *float64         `group:"policy" label:"Min Relay Tx Fee" description:"the minimum transaction fee in DUO/kB to be considered a non-zero fee" type:"input" inputType:"decimal" json:"MinRelayTxFee" hook:"restart"`
 	Network                *string          `group:"node" label:"Network" description:"connect to this network: mainnet, testnet)" type:"input" inputType:"text" json:"Network" hook:"restart"`
 	NoCFilters             *bool            `group:"node" label:"No CFilters" description:"disable committed filtering (CF) support" type:"switch" json:"NoCFilters" hook:"restart"`

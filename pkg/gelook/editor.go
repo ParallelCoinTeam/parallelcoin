@@ -19,6 +19,8 @@ type DuoUIeditor struct {
 	TextSize unit.Value
 	// Color is the text color.
 	Color color.RGBA
+	// Background colour
+	Background color.RGBA
 	// Hint contains the text displayed when the editor is empty.
 	Hint string
 	// HintColor is the color of hint text.
@@ -28,18 +30,22 @@ type DuoUIeditor struct {
 	shaper text.Shaper
 }
 
-func (t *DuoUItheme) DuoUIeditor(hint, color string, width int) DuoUIeditor {
+func (t *DuoUItheme) DuoUIeditor(hint, color, bg string, width int) DuoUIeditor {
 	return DuoUIeditor{
-		TextSize:  t.TextSize,
-		Color:     HexARGB(color),
-		shaper:    t.Shaper,
-		Hint:      hint,
-		HintColor: HexARGB(t.Colors["Hint"]),
-		Width:     width,
+		TextSize:   t.TextSize,
+		Color:      HexARGB(color),
+		Background: HexARGB(bg),
+		shaper:     t.Shaper,
+		Hint:       hint,
+		HintColor:  HexARGB(t.Colors["Hint"]),
+		Width:      width,
 	}
 }
 
 func (e DuoUIeditor) Layout(gtx *layout.Context, editor *gel.Editor) {
+	gtx.Constraints.Width.Max = 16 * e.Width
+	gtx.Constraints.Width.Min = 16 * e.Width
+	gtx.Constraints.Height.Min = 32
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	var macro op.MacroOp
@@ -55,12 +61,9 @@ func (e DuoUIeditor) Layout(gtx *layout.Context, editor *gel.Editor) {
 	//	gtx.Constraints.Height.Min = h
 	//}
 	//if w := gtx.Constraints.Width.Min; 16*e.Width < w {
-	gtx.Constraints.Width.Max = 16 * e.Width
-	gtx.Constraints.Width.Min = 16 * e.Width
 	//}
 	//if h := gtx.Dimensions.Size.Y; gtx.Constraints.Height.Min < h {
-	gtx.Constraints.Height.Max = 40
-	gtx.Constraints.Height.Min = 40
+	//gtx.Constraints.Height.Max = 40
 	//}
 	editor.Layout(gtx, e.shaper, e.Font, e.TextSize)
 	if editor.Len() > 0 {

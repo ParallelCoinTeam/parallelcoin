@@ -76,6 +76,9 @@ func settings(cx *conte.Xt) *model.DuoUIsettings {
 						(settingsFields[field.Model]).(*gel.Editor).SetText(
 							fmt.Sprint(*settings.
 								Daemon.Config[field.Model].(*time.Duration)))
+					case "password":
+						(settingsFields[field.Model]).(*gel.Editor).SetText(
+							fmt.Sprint(*settings.Daemon.Config[field.Model].(*string)))
 					}
 				}
 			case "switch":
