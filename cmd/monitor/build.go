@@ -17,9 +17,7 @@ func (s *State) BuildButtons() layout.FlexChild {
 			for s.BuildFoldButton.Clicked(s.Gtx) {
 				L.Debug("run mode folder clicked")
 				if !s.Config.BuildOpen.Load() {
-					if s.WindowWidth < 800 {
-						s.Config.FilterOpen.Store(false)
-					}
+					s.Config.FilterOpen.Store(false)
 					s.Config.SettingsOpen.Store(false)
 				}
 				s.Config.BuildOpen.Toggle()

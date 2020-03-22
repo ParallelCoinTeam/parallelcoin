@@ -31,9 +31,7 @@ func (s *State) SettingsButtons() layout.FlexChild {
 			for s.SettingsFoldButton.Clicked(s.Gtx) {
 				L.Debug("settings folder clicked")
 				if !s.Config.SettingsOpen.Load() {
-					if s.WindowWidth < 800 {
-						s.Config.FilterOpen.Store(false)
-					}
+					s.Config.FilterOpen.Store(false)
 					s.Config.BuildOpen.Store(false)
 				}
 				s.Config.SettingsOpen.Toggle()
