@@ -51,21 +51,21 @@ func (s *State) DuoUIheader() layout.FlexChild {
 					},
 				)
 			}), Rigid(func() {
-				if s.WindowWidth > 360 {
-					s.Inset(8, func() {
-						t := s.Theme.DuoUIlabel(unit.Dp(float32(32)), "Monitor")
-						t.Color = s.Theme.Colors["PanelText"]
-						t.Layout(s.Gtx)
-					})
-				}
+				//if s.WindowWidth > 360 {
+				s.Label("Monitor")
+				//s.Inset(12, func() {
+				//	t := s.Theme.DuoUIlabel(unit.Dp(float32(24)), "Monitor")
+				//	t.Color = s.Theme.Colors["PanelText"]
+				//	t.Layout(s.Gtx)
+				//})
+				//}
 			}),
 			)
 		}), Spacer(), Rigid(func() {
 			//s.Inset(closeInsetSize*2, func() {
 			t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
 				fmt.Sprintf("%dx%d",
-					s.WindowWidth,
-					s.WindowHeight))
+					s.WindowWidth, s.WindowHeight))
 			t.Color = s.Theme.Colors["PanelText"]
 			t.Font.Typeface = s.Theme.Fonts["Primary"]
 			t.Layout(s.Gtx)

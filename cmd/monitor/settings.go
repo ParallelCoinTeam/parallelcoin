@@ -20,22 +20,22 @@ type Field struct {
 func (s *State) SettingsButtons() layout.FlexChild {
 	return Flexed(1, func() {
 		s.FlexH(Rigid(func() {
-			bg, fg := "PanelBg", "PanelText"
-			if s.Config.SettingsOpen.Load() {
-				bg, fg = "DocBg", "DocText"
-			}
-			//s.TextButton("Settings", "Secondary",
-			//	23, fg, bg, s.SettingsFoldButton)
-			s.IconButton("settingsIcon", fg, bg, s.SettingsFoldButton)
-
-			for s.SettingsFoldButton.Clicked(s.Gtx) {
-				L.Debug("settings folder clicked")
-				if !s.Config.SettingsOpen.Load() {
-					s.Config.FilterOpen.Store(false)
-					s.Config.BuildOpen.Store(false)
+			if s.WindowWidth >= 360 || !s.Config.FilterOpen.Load() {
+				bg, fg := "PanelBg", "PanelText"
+				if s.Config.SettingsOpen.Load() {
+					bg, fg = "DocBg", "DocText"
 				}
-				s.Config.SettingsOpen.Toggle()
-				s.SaveConfig()
+				s.IconButton("settingsIcon", fg, bg, s.SettingsFoldButton)
+
+				for s.SettingsFoldButton.Clicked(s.Gtx) {
+					L.Debug("settings folder clicked")
+					if !s.Config.SettingsOpen.Load() {
+						s.Config.FilterOpen.Store(false)
+						s.Config.BuildOpen.Store(false)
+					}
+					s.Config.SettingsOpen.Toggle()
+					s.SaveConfig()
+				}
 			}
 		}),
 		)
@@ -68,17 +68,18 @@ func (s *State) SettingsPage() layout.FlexChild {
 			}),
 			Rigid(func() {
 				s.FlexH(Rigid(func() {
-					s.TextButton("Settings", "Secondary",
-						32, "DocText", "DocBg",
-						s.SettingsTitleCloseButton)
-					for s.SettingsTitleCloseButton.Clicked(s.Gtx) {
-						L.Debug("settings panel title close button clicked")
-						s.Config.SettingsOpen.Store(false)
-						s.SaveConfig()
-					}
+					s.Label("Settings")
+					//s.TextButton("Settings", "Secondary",
+					//	32, "DocText", "DocBg",
+					//	s.SettingsTitleCloseButton)
+					//for s.SettingsTitleCloseButton.Clicked(s.Gtx) {
+					//	L.Debug("settings panel title close button clicked")
+					//	s.Config.SettingsOpen.Store(false)
+					//	s.SaveConfig()
+					//}
 				}), Flexed(1, func() {
 					if s.WindowWidth > 800 {
-						s.SettingsTabs(22)
+						s.SettingsTabs(23)
 					}
 				}), Rigid(func() {
 					if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
@@ -109,7 +110,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 				if s.WindowWidth <= 800 {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
-					s.SettingsTabs(14)
+					s.SettingsTabs(15)
 				}
 			}), Flexed(1, func() {
 				cs := s.Gtx.Constraints
@@ -480,7 +481,7 @@ func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, w
 		s.Gtx.Constraints.Width.Max = maxLen*textWidth + 30
 		s.Gtx.Constraints.Width.Min = maxLen*textWidth + 30
 		width = maxLen
-		height := 19*len(split)
+		height := 19 * len(split)
 		//L.Debug(len(split), height, split)
 		s.Theme.DuoUIitem(0, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.N, func() {
 			outerColor := "DocBg"

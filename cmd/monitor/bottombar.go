@@ -37,7 +37,7 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 			if !s.Config.RunModeOpen.Load() {
 				fg, bg := "ButtonText", "ButtonBg"
 				if s.Config.Running.Load() {
-					fg, bg = "DocBg", "DocText"
+					fg, bg = "ButtonBg", "DocText"
 				}
 				txt := s.Config.RunMode.Load()
 				cs := s.Gtx.Constraints
@@ -59,16 +59,20 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				}
 				s.ModesList.Layout(s.Gtx, len(modes), func(i int) {
 					mm := modes[i]
+					fg := "DocBg"
+					if modes[i] == s.Config.RunMode.Load() {
+						fg = "DocText"
+					}
 					txt := mm
-					if s.WindowWidth <= 1100 && s.Config.FilterOpen.Load() ||
-						s.WindowWidth <= 720 {
+					if s.WindowWidth <= 880 && s.Config.FilterOpen.Load() ||
+						s.WindowWidth <= 640 && !s.Config.FilterOpen.Load() {
 						txt = txt[:1]
 					}
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg", "ff")
 					s.TextButton(txt, "Secondary",
-						32, "DocText",
-						"DocBg", s.ModesButtons[mm])
+						32, fg,
+						"ButtonBg", s.ModesButtons[mm])
 					for s.ModesButtons[mm].Clicked(s.Gtx) {
 						L.Debug(mm, "clicked")
 						if s.Config.RunModeOpen.Load() {

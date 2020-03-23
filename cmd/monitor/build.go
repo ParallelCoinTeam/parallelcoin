@@ -2,7 +2,6 @@ package monitor
 
 import (
 	"gioui.org/layout"
-	"gioui.org/unit"
 )
 
 func (s *State) BuildButtons() layout.FlexChild {
@@ -52,12 +51,13 @@ func (s *State) BuildPage() layout.FlexChild {
 			s.Inset(4, func() {})
 		}), Rigid(func() {
 			s.FlexH(Rigid(func() {
-				s.Inset(10, func() {
-					t := s.Theme.DuoUIlabel(unit.Dp(float32(32)), "Build Configuration")
-					t.Color = s.Theme.Colors["PanelText"]
-					t.Layout(s.Gtx)
-					//s.TextButton("Filter", "Secondary", 32,"DocText", "DocBg", s.FilterHeaderButton)
-				})
+				s.Label("Build Configuration")
+				//s.Inset(10, func() {
+				//	t := s.Theme.DuoUIlabel(unit.Dp(float32(32)), "Build Configuration")
+				//	t.Color = s.Theme.Colors["PanelText"]
+				//	t.Layout(s.Gtx)
+				//	//s.TextButton("Filter", "Secondary", 32,"DocText", "DocBg", s.FilterHeaderButton)
+				//})
 				//s.TextButton("Build Configuration", "Secondary",
 				//	32, "DocText", "DocBg",
 				//	s.BuildTitleCloseButton)
