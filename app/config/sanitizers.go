@@ -459,7 +459,7 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 					err = fmt.Errorf(str, funcName, addr)
 					L.Error(err)
 					fmt.Fprintln(os.Stderr, err)
-					os.Exit(1)
+					//os.Exit(1)
 				}
 				var bits int
 				if ip.To4() == nil {
@@ -485,7 +485,7 @@ func validatePeerLists(cfg *pod.Config) {
 			"%s: the --addpeer and --connect options can not be mixed",
 			funcName)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 }
 func configListener(cfg *pod.Config, params *netparams.Params) {
@@ -512,7 +512,7 @@ func validateUsers(cfg *pod.Config) {
 		str := "%s: --username and --limituser must not specify the same username"
 		err := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	// Check to make sure limited and admin users don't have the same password
 	L.Trace("checking limited and admin passwords are not the same")
@@ -521,7 +521,7 @@ func validateUsers(cfg *pod.Config) {
 		str := "%s: --password and --limitpass must not specify the same password"
 		err := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 }
 
@@ -541,7 +541,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 		addrs, err := net.LookupHost(node.DefaultRPCListener)
 		if err != nil {
 			L.Error(err)
-			os.Exit(1)
+			//os.Exit(1)
 		}
 		*cfg.RPCListeners = make([]string, 0, len(addrs))
 		L.Debug("setting listeners")
@@ -556,7 +556,7 @@ func configRPC(cfg *pod.Config, params *netparams.Params) {
 			" less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.RPCMaxConcurrentReqs)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	L.Trace("checking rpc listener addresses")
 	nrms := normalize.Addresses
@@ -580,7 +580,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: invalid minrelaytxfee: %v"
 		err := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	// Limit the max block size to a sane value.
 	L.Trace("checking max block size")
@@ -590,7 +590,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		err := fmt.Errorf(str, funcName, node.BlockMaxSizeMin,
 			node.BlockMaxSizeMax, *cfg.BlockMaxSize)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	// Limit the max block weight to a sane value.
 	L.Trace("checking max block weight")
@@ -600,7 +600,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		err := fmt.Errorf(str, funcName, node.BlockMaxWeightMin,
 			node.BlockMaxWeightMax, *cfg.BlockMaxWeight)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	// Limit the max orphan count to a sane vlue.
 	L.Trace("checking max orphan limit")
@@ -608,7 +608,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: The maxorphantx option may not be less than 0 -- parsed [%d]"
 		err := fmt.Errorf(str, funcName, *cfg.MaxOrphanTxs)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	// Limit the block priority and minimum block sizes to max block size.
 	L.Trace("validating block priority and minimum size/weight")
@@ -642,7 +642,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 				"appear in user agent comments: '/', ':', '(', ')'",
 				funcName)
 			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			//os.Exit(1)
 		}
 	}
 	// Check the checkpoints for syntax errors.
@@ -654,7 +654,7 @@ func validatePolicies(cfg *pod.Config, stateConfig *state.Config) {
 		str := "%s: Error parsing checkpoints: %v"
 		err := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 }
 func validateOnions(cfg *pod.Config) {
@@ -664,7 +664,7 @@ func validateOnions(cfg *pod.Config) {
 	if *cfg.Onion && *cfg.OnionProxy != "" {
 		L.Error("onion enabled but no onionproxy has been configured")
 		L.Fatal("halting to avoid exposing IP address")
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	// Tor stream isolation requires either proxy or onion proxy to be set.
 	if *cfg.TorIsolation &&
@@ -673,7 +673,7 @@ func validateOnions(cfg *pod.Config) {
 		str := "%s: Tor stream isolation requires either proxy or onionproxy to be set"
 		err := fmt.Errorf(str, funcName)
 		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		//os.Exit(1)
 	}
 	if !*cfg.Onion {
 		*cfg.OnionProxy = ""
@@ -736,7 +736,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			str := "%s: Proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.Proxy, err)
 			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			//os.Exit(1)
 		}
 		// Tor isolation flag means proxy credentials will be overridden unless
 		// there is also an onion proxy configured in which case that one will be
@@ -781,7 +781,7 @@ func setDiallers(cfg *pod.Config, stateConfig *state.Config) {
 			str := "%s: Onion proxy address '%s' is invalid: %v"
 			err := fmt.Errorf(str, funcName, *cfg.OnionProxy, err)
 			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+			//os.Exit(1)
 		}
 		// Tor isolation flag means onion proxy credentials will be overridden.
 		if *cfg.TorIsolation &&
