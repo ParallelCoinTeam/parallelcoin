@@ -39,25 +39,32 @@ func (p *Panel) panelLayout(gtx *layout.Context, panel *gel.Panel, row func(i in
 
 func (p *Panel) Layout(gtx *layout.Context, panel *gel.Panel, row func(i int, in interface{})) {
 	//p.PanelObjectsNumber = len(p.PanelObject)
+
 	layout.Flex{
 		Axis:    layout.Horizontal,
 		Spacing: layout.SpaceBetween,
 	}.Layout(gtx,
 		layout.Flexed(1, p.panelLayout(gtx, panel, row)),
 		layout.Rigid(func() {
-			//if p.totalOffset > 0 {
-			p.SliderLayout(gtx, panel)
-			//}
+			if panel.PanelObjectsNumber > panel.VisibleObjectsNumber {
+				p.SliderLayout(gtx, panel)
+			}
 		}),
 	)
-	panel.ScrollUnit = p.ScrollBar.body.Height / panel.PanelObjectsNumber
+	if panel.PanelObjectsNumber > 0 {
+		panel.ScrollUnit = p.ScrollBar.body.Height / panel.PanelObjectsNumber
+	}
+
 	cursorHeight := panel.VisibleObjectsNumber * panel.ScrollUnit
 	if cursorHeight > 30 {
 		p.ScrollBar.body.CursorHeight = cursorHeight
 	}
 
+	fmt.Println("cursorHeight:", cursorHeight)
 	fmt.Println("visibleObjectsNumber:", panel.VisibleObjectsNumber)
 	fmt.Println("scrollBarbodyPosition:", p.ScrollBar.body.Position)
+	fmt.Println("PanelObjectsNumber:", panel.PanelObjectsNumber)
+	fmt.Println("ScrollBar.body.Height:", p.ScrollBar.body.Height)
 	fmt.Println("scrollUnit:", panel.ScrollUnit)
 	fmt.Println("cursor:", panel.PanelContentLayout.Position.Offset)
 	fmt.Println("First:", panel.PanelContentLayout.Position.First)

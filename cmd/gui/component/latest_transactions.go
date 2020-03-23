@@ -2,6 +2,8 @@ package component
 
 import (
 	"fmt"
+	"github.com/p9c/pod/cmd/gui/model"
+	"github.com/p9c/pod/pkg/gel"
 
 	"gioui.org/layout"
 	"gioui.org/text"
@@ -12,8 +14,17 @@ import (
 )
 
 var (
-	latestTransList = &layout.List{
-		Axis: layout.Vertical,
+	latestTxsPanelElement = &gel.Panel{
+		PanelContentLayout: &layout.List{
+			Axis:        layout.Vertical,
+			ScrollToEnd: false,
+		},
+		ScrollBar: &gel.ScrollBar{
+			Size: 16,
+			Body: new(gel.ScrollBarBody),
+			Up:   new(gel.Button),
+			Down: new(gel.Button),
+		},
 	}
 )
 
@@ -39,9 +50,14 @@ func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoU
 				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func() {
-							cs := gtx.Constraints
-							latestTransList.Layout(gtx, len(rc.Status.Wallet.LastTxs.Txs), func(i int) {
-								t := rc.Status.Wallet.LastTxs.Txs[i]
+
+							latestTxsBookPanel := gelook.Panel{}
+							latestTxsBookPanel.PanelObject = rc.Status.Wallet.LastTxs.Txs
+							latestTxsBookPanel.ScrollBar = th.ScrollBar()
+							latestTxsPanelElement.PanelObjectsNumber = len(rc.Status.Wallet.LastTxs.Txs)
+							latestTxsBookPanel.Layout(gtx, latestTxsPanelElement, func(i int, in interface{}) {
+								txs := in.([]model.DuoUItransactionExcerpt)
+								t := txs[i]
 								gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 								layout.Inset{
 									Top:    unit.Dp(8),

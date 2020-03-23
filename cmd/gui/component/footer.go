@@ -30,8 +30,8 @@ var (
 	footerMenuItemHeight            = 48
 	footerMenuItemTextSize          = 16
 	footerMenuItemIconSize          = 32
-	footerMenuItemPaddingVertical   = 8
-	footerMenuItemPaddingHorizontal = 8
+	footerMenuItemPaddingVertical   = 0
+	footerMenuItemPaddingHorizontal = 0
 )
 
 func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {

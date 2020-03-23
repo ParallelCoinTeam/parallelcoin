@@ -2,7 +2,6 @@ package pages
 
 import (
 	"fmt"
-
 	"gioui.org/layout"
 	"gioui.org/unit"
 
