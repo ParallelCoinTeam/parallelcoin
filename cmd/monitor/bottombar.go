@@ -60,7 +60,8 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				s.ModesList.Layout(s.Gtx, len(modes), func(i int) {
 					mm := modes[i]
 					txt := mm
-					if s.WindowWidth <= 720 && s.Config.FilterOpen.Load() {
+					if s.WindowWidth <= 1100 && s.Config.FilterOpen.Load() ||
+						s.WindowWidth <= 720 {
 						txt = txt[:1]
 					}
 					cs := s.Gtx.Constraints
@@ -89,8 +90,9 @@ func (s *State) Filter() layout.FlexChild {
 		if s.Config.FilterOpen.Load() {
 			fg, bg = "DocText", "DocBg"
 		}
-		if !(s.Config.FilterOpen.Load() && s.WindowWidth <= 720) ||
-			(!s.Config.FilterOpen.Load() && s.WindowWidth > 480) {
+		//if !(s.Config.FilterOpen.Load() && s.WindowWidth <= 720) ||
+		//	(!s.Config.FilterOpen.Load() && s.WindowWidth > 480) {
+		if ! s.Config.FilterOpen.Load() {
 			s.IconButton("Filter", fg, bg, s.FilterButton)
 			for s.FilterButton.Clicked(s.Gtx) {
 				L.Debug("clicked filter button")
