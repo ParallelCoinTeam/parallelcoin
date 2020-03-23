@@ -229,6 +229,9 @@ func (t *DuoUItheme) DuoUIbutton(
 func (b DuoUIbutton) Layout(gtx *layout.Context, button *gel.Button) {
 	hmin := gtx.Constraints.Width.Min
 	vmin := gtx.Constraints.Height.Min
+	if b.Height > 0 {
+		//vmin = b.Height
+	}
 	txColor := b.TxColor
 	bgColor := b.BgColor
 	if button.Hover(gtx) {
@@ -291,7 +294,7 @@ func (b DuoUIbutton) IconLayout(gtx *layout.Context, button *gel.Button) {
 			gtx.Constraints.Width.Min = b.Width
 			gtx.Constraints.Height.Min = b.Height
 			layout.Center.Layout(gtx, func() {
-				layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+				layout.Inset{Top: b.PaddingVertical, Bottom: b.PaddingVertical, Left: b.PaddingHorizontal, Right: b.PaddingHorizontal}.Layout(gtx, func() {
 					b.Icon.Color = b.IconColor
 					b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
 				})

@@ -15,15 +15,16 @@ import (
 )
 
 var (
-	addressBookList = &layout.List{
-		Axis: layout.Vertical,
-		// ScrollToEnd: true,
-	}
-	addressBookPanel = &gel.Panel{
-		Name: "",
+	addressBookPanelElement = &gel.Panel{
 		PanelContentLayout: &layout.List{
 			Axis:        layout.Vertical,
 			ScrollToEnd: false,
+		},
+		ScrollBar: &gel.ScrollBar{
+			Size: 16,
+			Body: new(gel.ScrollBarBody),
+			Up:   new(gel.Button),
+			Down: new(gel.Button),
 		},
 	}
 	showMiningAddresses = &gel.CheckBox{}
@@ -101,9 +102,13 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 
 func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		// th.DuoUIpanel(func() {
-		addressBookList.Layout(gtx, len(rc.AddressBook.Addresses), func(i int) {
-			t := rc.AddressBook.Addresses[i]
+		addressBookPanel := gelook.Panel{}
+		addressBookPanel.PanelObject = rc.AddressBook.Addresses
+		addressBookPanel.ScrollBar = th.ScrollBar()
+		addressBookPanelElement.PanelObjectsNumber = len(rc.AddressBook.Addresses)
+		addressBookPanel.Layout(gtx, addressBookPanelElement, func(i int, in interface{}) {
+			addresses := in.([]model.DuoUIaddress)
+			t := addresses[i]
 			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 				layout.Rigid(func() {
 					layout.Flex{

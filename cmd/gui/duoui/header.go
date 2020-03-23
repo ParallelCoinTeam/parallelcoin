@@ -31,9 +31,7 @@ func (ui *DuoUI) DuoUIheader() func() {
 			}.Layout(ui.ly.Context,
 				layout.Rigid(func() {
 					var logoMeniItem gelook.DuoUIbutton
-					logoMeniItem = ui.ly.Theme.DuoUIbutton("", "",
-						"", ui.ly.Theme.Colors["Dark"], "", "",
-						"logo", ui.ly.Theme.Colors["Light"], 16, 64, 96, 96, 8, 8)
+					logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", ui.ly.Theme.Colors["Dark"], "", "", "logo", ui.ly.Theme.Colors["Light"], 0, 64, 96, 96, 6, 6)
 					for logoButton.Clicked(ui.ly.Context) {
 						ui.ly.Theme.ChangeLightDark()
 					}

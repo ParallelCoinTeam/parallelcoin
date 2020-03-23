@@ -2,6 +2,7 @@ package pages
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/gel"
 	"time"
 
 	"gioui.org/layout"
@@ -15,8 +16,17 @@ import (
 )
 
 var (
-	blocksList = &layout.List{
-		Axis: layout.Vertical,
+	explorerPanelElement = &gel.Panel{
+		PanelContentLayout: &layout.List{
+			Axis:        layout.Vertical,
+			ScrollToEnd: false,
+		},
+		ScrollBar: &gel.ScrollBar{
+			//OperateValue: nil,
+			Body: new(gel.ScrollBarBody),
+			Up:   new(gel.Button),
+			Down: new(gel.Button),
+		},
 	}
 	txwidth int
 )
@@ -48,9 +58,19 @@ func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 				blockRowCellLabels(rc, gtx, th)
 			}),
 			layout.Flexed(1, func() {
-				blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
-					b := rc.Explorer.Blocks[i]
+
+				explorerPanel := gelook.Panel{}
+				explorerPanel.PanelObject = rc.Explorer.Blocks
+				explorerPanel.ScrollBar = th.ScrollBar()
+				explorerPanelElement.PanelObjectsNumber = len(rc.Explorer.Blocks)
+				explorerPanel.Layout(gtx, explorerPanelElement, func(i int, in interface{}) {
+					blocks := in.([]model.DuoUIblock)
+					b := blocks[i]
+
+					//blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
+					//	b := rc.Explorer.Blocks[i]
 					blockRow(rc, gtx, th, &b)
+					//})
 				})
 			}),
 		)

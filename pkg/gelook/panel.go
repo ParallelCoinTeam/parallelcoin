@@ -1,60 +1,66 @@
 package gelook
 
 import (
+	"fmt"
 	"gioui.org/layout"
-
 	"github.com/p9c/pod/pkg/gel"
 )
 
-var (
-	c *gel.ScrollBar
-)
-
-type item struct {
-	i int
+type Panel struct {
+	//totalOffset       int
+	//PanelContentLayout *layout.List
+	PanelObject interface{}
+	//PanelObjectsNumber int
+	ScrollBar *ScrollBar
 }
 
-func (it *item) doSlide(n int) {
-	it.i = it.i + n
-}
+//func (t *DuoUItheme) DuoUIpanel(object interface{}) *Panel {
+//	return &Panel{
+//		PanelContentLayout: &layout.List{
+//			Axis:        layout.Vertical,
+//			ScrollToEnd: false,
+//		},
+//		PanelObject: object,
+//		Size:        16,
+//		ScrollBar:   t.ScrollBar(),
+//	}
+//}
 
-type DuoUIpanel struct {
-	Name        string
-	panelObject []func()
-	scrollBar   ScrollBar
-}
-
-func (t *DuoUItheme) DuoUIpanel(content func()) *DuoUIpanel {
-	return &DuoUIpanel{
-		Name: "OneDuoUIpanel",
-		panelObject: []func(){
-			content,
-		},
-		scrollBar: t.ScrollBar(c),
+func (p *Panel) panelLayout(gtx *layout.Context, panel *gel.Panel, row func(i int, in interface{})) func() {
+	return func() {
+		visibleObjectsNumber := 0
+		panel.PanelContentLayout.Layout(gtx, panel.PanelObjectsNumber, func(i int) {
+			row(i, p.PanelObject)
+			visibleObjectsNumber = visibleObjectsNumber + 1
+			panel.VisibleObjectsNumber = visibleObjectsNumber
+		})
 	}
 }
 
-func (p *DuoUIpanel) Layout(gtx *layout.Context, panel *gel.Panel) {
+func (p *Panel) Layout(gtx *layout.Context, panel *gel.Panel, row func(i int, in interface{})) {
+	//p.PanelObjectsNumber = len(p.PanelObject)
 	layout.Flex{
 		Axis:    layout.Horizontal,
 		Spacing: layout.SpaceBetween,
 	}.Layout(gtx,
-		layout.Flexed(1, func() {
-			panel.PanelContentLayout.Layout(gtx, len(p.panelObject), func(i int) {
-				p.panelObject[i]()
-				panel.TotalHeight = gtx.Dimensions.Size.Y
-			})
-			panel.VisibleHeight = gtx.Constraints.Height.Max
-		}),
+		layout.Flexed(1, p.panelLayout(gtx, panel, row)),
 		layout.Rigid(func() {
-			// if panel.TotalOffset > 0 {
-			// p.scrollBar = t.ScrollBar(32)
-			p.scrollBar.Layout(gtx,
-				panel.PanelContentLayout.Position.Offset,
-				panel.ScrollUnit,
-			)
-			// }
+			//if p.totalOffset > 0 {
+			p.SliderLayout(gtx, panel)
+			//}
 		}),
 	)
+	panel.ScrollUnit = p.ScrollBar.body.Height / panel.PanelObjectsNumber
+	cursorHeight := panel.VisibleObjectsNumber * panel.ScrollUnit
+	if cursorHeight > 30 {
+		p.ScrollBar.body.CursorHeight = cursorHeight
+	}
+
+	fmt.Println("visibleObjectsNumber:", panel.VisibleObjectsNumber)
+	fmt.Println("scrollBarbodyPosition:", p.ScrollBar.body.Position)
+	fmt.Println("scrollUnit:", panel.ScrollUnit)
+	fmt.Println("cursor:", panel.PanelContentLayout.Position.Offset)
+	fmt.Println("First:", panel.PanelContentLayout.Position.First)
+	fmt.Println("BeforeEnd:", panel.PanelContentLayout.Position.BeforeEnd)
 	panel.Layout(gtx)
 }

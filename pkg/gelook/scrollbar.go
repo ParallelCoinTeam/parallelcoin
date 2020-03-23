@@ -1,14 +1,11 @@
 package gelook
 
 import (
-	"image"
-
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/logi"
-
 	"github.com/p9c/pod/pkg/gel"
+	"image"
 )
 
 var (
@@ -20,25 +17,26 @@ type ScrollBar struct {
 	ColorBg      string
 	BorderRadius [4]float32
 	OperateValue interface{}
-	// Height       float32
-	// scrollUnit     float32
-	// positionOffset int
-	// cursor         float32
-	size       int
-	body       *ScrollBarBody
-	up         *ScrollBarButton
-	down       *ScrollBarButton
-	controller *gel.ScrollBar
+	//Height       float32
+	body *ScrollBarBody
+	up   *ScrollBarButton
+	down *ScrollBarButton
 }
 
 type ScrollBarBody struct {
-	ColorBg string
-	Height  int
-	Icon    DuoUIicon
+	pressed      bool
+	Do           func(interface{})
+	ColorBg      string
+	Position     int
+	Cursor       int
+	OperateValue interface{}
+	Height       int
+	CursorHeight int
+	Icon         DuoUIicon
 }
 
 type ScrollBarButton struct {
-	button      *IconButton
+	button      DuoUIbutton
 	Height      int
 	iconColor   string
 	iconBgColor string
@@ -46,133 +44,157 @@ type ScrollBarButton struct {
 	insetRight  float32
 	insetBottom float32
 	insetLeft   float32
-	size        int
+	iconSize    int
 	iconPadding float32
 }
 
-func (t *DuoUItheme) ScrollBar(c *gel.ScrollBar) ScrollBar {
-	buttonUp := t.IconButton(t.Icons["iconUp"])
-	buttonDown := t.IconButton(t.Icons["iconOK"])
+func (t *DuoUItheme) ScrollBar() *ScrollBar {
+	//itemValue := item{
+	//	i: 0,
+	//}
 	up := &ScrollBarButton{
-		button: &buttonUp,
-		// Height: w,
-		// size:   w,
+		button: t.DuoUIbutton(t.Fonts["Primary"], "", "", "", "", "", "Up", "ff558822", 0, 22, 0, 0, 0, 0),
+		//button:      t.DuoUIbutton(t.Icons["Up"]),
+		//Height:      p.size,
+		iconColor:   "ff445588",
+		iconBgColor: "ff882266",
+		insetTop:    0,
+		insetRight:  0,
+		insetBottom: 0,
+		insetLeft:   0,
+		//iconSize:    p.size,
+		iconPadding: 0,
 	}
 	down := &ScrollBarButton{
-		button: &buttonDown,
-		// Height: w,
-		// size:   w,
+		button: t.DuoUIbutton(t.Fonts["Primary"], "", "", "", "", "", "Down", "ff558822", 0, 22, 0, 0, 0, 0),
+		//button:      t.DuoUIbutton(t.Icons["Down"]),
+		Height:      16,
+		iconSize:    16,
+		iconColor:   "ff445588",
+		iconBgColor: "ff882266",
 	}
 	body := &ScrollBarBody{
-		ColorBg: "ff445588",
-		Icon:    *t.Icons["iconGrab"],
+		pressed:  false,
+		ColorBg:  "",
+		Position: 0,
+		Cursor:   0,
+		Icon:     *t.Icons["Grab"],
+		//Do: func(n interface{}) {
+		//	itemValue.doSlide(n.(int))
+		//},
+		OperateValue: 1,
 	}
-	return ScrollBar{
-		size:         t.scrollBarSize,
-		ColorBg:      "ff885566",
+	return &ScrollBar{
+		ColorBg:      "ff447733",
 		BorderRadius: [4]float32{},
 		OperateValue: 1,
-		// ListPosition: 0,
-		// Height: 16,
-		// scrollUnit:     scrollUnit,
-		// positionOffset: positionOffset,
-		// cursor:         cursor,
-		controller: c,
-		body:       body,
-		up:         up,
-		down:       down,
+		//ListPosition: 0,
+		//Height: 16,
+		body: body,
+		up:   up,
+		down: down,
 	}
 }
-
-func (s *ScrollBar) Layout(gtx *layout.Context, positionOffset int, scrollUnit float32) {
+func (s *ScrollBarButton) scrollBarButton() *DuoUIbutton {
+	button := s.button
+	//button.Inset.Top = unit.Dp(0)
+	//button.Inset.Bottom = unit.Dp(0)
+	//button.Inset.Right = unit.Dp(0)
+	//button.Inset.Left = unit.Dp(0)
+	//button.Size = unit.Dp(32)
+	//button.Padding = unit.Dp(0)
+	return &button
+}
+func (p *Panel) SliderLayout(gtx *layout.Context, panel *gel.Panel) {
 	layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(gtx,
 		layout.Rigid(func() {
 			for widgetButtonUp.Clicked(gtx) {
-				positionOffset = positionOffset - int(s.controller.CursorHeight)
+				if panel.PanelContentLayout.Position.First > 0 {
+					//p.panelContent.Position.First = p.panelContent.Position.First - int(p.ScrollBar.body.CursorHeight)
+					panel.PanelContentLayout.Position.First = panel.PanelContentLayout.Position.First - 1
+					panel.PanelContentLayout.Position.Offset = 0
+				}
 			}
-			s.up.scrollBarButton(s.size).Layout(gtx, widgetButtonUp)
+			p.ScrollBar.up.button.IconLayout(gtx, widgetButtonUp)
 		}),
-		layout.Flexed(1, s.bodyLayout(gtx,
-			positionOffset,
-			scrollUnit)),
+		layout.Flexed(1, func() {
+			p.bodyLayout(gtx, panel)
+		}),
 		layout.Rigid(func() {
 			for widgetButtonDown.Clicked(gtx) {
-				positionOffset = positionOffset + int(s.controller.CursorHeight)
+				if panel.PanelContentLayout.Position.BeforeEnd {
+					//p.panelContent.Position.First = p.panelContent.Position.First + int(p.ScrollBar.body.CursorHeight)
+					panel.PanelContentLayout.Position.First = panel.PanelContentLayout.Position.First + 1
+					panel.PanelContentLayout.Position.Offset = 0
+				}
 			}
-			s.down.scrollBarButton(s.size).Layout(gtx, widgetButtonDown)
+			p.ScrollBar.down.button.IconLayout(gtx, widgetButtonDown)
 		}),
 	)
 }
 
-func (s *ScrollBarButton) scrollBarButton(size int) *IconButton {
-	button := *s.button
-	// button..Inset.Top = unit.Dp(0)
-	// button.Inset.Bottom = unit.Dp(0)
-	// button.Inset.Right = unit.Dp(0)
-	// button.Inset.Left = unit.Dp(0)
-	button.Background = HexARGB("ffff0000")
-	button.Icon.Color = HexARGB("ff882266")
-	button.Icon.size = unit.Dp(float32(size))
-	button.Size = unit.Dp(float32(size))
-	button.Padding = unit.Dp(0)
-	return &button
-}
-func (s *ScrollBar) bodyLayout(gtx *layout.Context, positionOffset int, scrollUnit float32) func() {
-	return func() {
-
-		cs := gtx.Constraints
-		// sliderBg := "ff558899"
-		colorBg := "ff30cfcf"
-		colorBorder := "ffcf3030"
-		border := unit.Dp(0)
-		// if s.body.pressed {
-		// if s.controller.Position >= 0 && s.controller.Position <= float32(cs.Height.Max-s.controller.CursorHeight) {
-		//	s.controller.Cursor = s.controller.Position
-		//	positionOffset = int(float32(s.controller.Cursor) / scrollUnit)
-		// }
+func (p *Panel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
+	for _, e := range gtx.Events(p.ScrollBar.body) {
+		if e, ok := e.(pointer.Event); ok {
+			if e.Position.Y > 0 {
+				p.ScrollBar.body.Position = int(e.Position.Y) - (p.ScrollBar.body.CursorHeight / 2)
+			}
+			switch e.Type {
+			case pointer.Press:
+				p.ScrollBar.body.pressed = true
+				p.ScrollBar.body.Do(p.ScrollBar.body.OperateValue)
+			case pointer.Release:
+				p.ScrollBar.body.pressed = false
+			}
+		}
+	}
+	cs := gtx.Constraints
+	p.ScrollBar.body.Height = cs.Height.Max
+	sliderBg := "ff558899"
+	colorBg := "ff30cfcf"
+	colorBorder := "ffcf3030"
+	border := unit.Dp(0)
+	if p.ScrollBar.body.pressed {
+		if p.ScrollBar.body.Position >= 0 && p.ScrollBar.body.Position <= cs.Height.Max-p.ScrollBar.body.CursorHeight {
+			p.ScrollBar.body.Cursor = p.ScrollBar.body.Position
+			panel.PanelContentLayout.Position.First = p.ScrollBar.body.Position / panel.ScrollUnit
+			panel.PanelContentLayout.Position.Offset = 0
+			//p.panelContent.Position.First = int(p.ScrollBar.body.Cursor)
+		}
 		colorBg = "ffcf30cf"
 		colorBorder = "ff303030"
 		border = unit.Dp(0)
-		// }
-		pointer.Rect(
-			image.Rectangle{Max: image.Point{X: cs.Width.Max, Y: cs.Height.Max}},
-		).Add(gtx.Ops)
-		pointer.InputOp{Key: s.body}.Add(gtx.Ops)
-		DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, colorBorder, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		layout.UniformInset(border).Layout(gtx, func() {
-			cs := gtx.Constraints
-			DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, colorBg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
-			// cs := gtx.Constraints
-			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-				layout.Rigid(func() {
-					layout.Center.Layout(gtx, func() {
-						layout.Inset{
-							// Top: unit.Dp(s.controller.Cursor),
-						}.Layout(gtx, func() {
-							// cs := gtx.Constraints
-							// if s.controller.CursorHeight > s.size {
-							//	s.body.Height = s.controller.CursorHeight
-							// } else {
-							//	s.body.Height = s.size
-							// }
-
-							// DuoUIdrawRectangle(gtx, s.size, s.controller.CursorHeight, sliderBg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-							// DuoUIdrawRectangle(gtx, 30, 111, sliderBg, [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-
-							layout.Center.Layout(gtx, func() {
-								s.body.Icon.Color = HexARGB("ff554499")
-								s.body.Icon.Layout(gtx, unit.Px(float32(32)))
-							})
+	}
+	pointer.Rect(
+		image.Rectangle{Max: image.Point{X: cs.Width.Max, Y: cs.Height.Max}},
+	).Add(gtx.Ops)
+	pointer.InputOp{Key: p.ScrollBar.body}.Add(gtx.Ops)
+	DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, colorBorder, [4]float32{0, 0, 0, 0}, [4]float32{8, 8, 8, 8})
+	layout.UniformInset(border).Layout(gtx, func() {
+		cs := gtx.Constraints
+		DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, colorBg, [4]float32{0, 0, 0, 0}, [4]float32{8, 8, 8, 8})
+		//cs := gtx.Constraints
+		layout.Flex{
+			Axis: layout.Vertical,
+			//Alignment:layout.Middle,
+		}.Layout(gtx,
+			layout.Rigid(func() {
+				layout.Center.Layout(gtx, func() {
+					layout.Inset{
+						Top: unit.Dp(float32(panel.PanelContentLayout.Position.First * panel.ScrollUnit)),
+					}.Layout(gtx, func() {
+						//gtx.Dimensions.Size.Y= p.ScrollBar.body.CursorHeight
+						gtx.Constraints.Height.Min = p.ScrollBar.body.CursorHeight
+						DuoUIdrawRectangle(gtx, panel.ScrollBar.Size, p.ScrollBar.body.CursorHeight, sliderBg, [4]float32{8, 8, 8, 8}, [4]float32{8, 8, 8, 8})
+						layout.Center.Layout(gtx, func() {
+							p.ScrollBar.body.Icon.Color = HexARGB("ff554499")
+							p.ScrollBar.body.Icon.Layout(gtx, unit.Px(float32(panel.ScrollBar.Size)))
 						})
 					})
-				}),
-			)
-		})
-		s.controller.Layout(gtx)
-		logi.L.Info("RADI Constraints")
-		logi.L.Info(s.controller.BodyHeight)
-	}
+				})
+			}),
+		)
+	})
 }

@@ -5,28 +5,36 @@ import (
 	"gioui.org/layout"
 )
 
-type item struct {
-	i int
-}
-
-func (it *item) doSlide(n int) {
-	it.i = it.i + n
-}
-
 type ScrollBar struct {
-	// Height       float32
-	body *ScrollBarBody
-	// up   *ScrollBarButton
-	// down *ScrollBarButton
-	BodyHeight   int
-	CursorHeight int
-	Cursor       float32
-	Position     float32
+	Size         int
+	OperateValue interface{}
+	//Height       float32
+	Body *ScrollBarBody
+	Up   *Button
+	Down *Button
 }
+
 type ScrollBarBody struct {
 	pressed      bool
 	Do           func(interface{})
+	ColorBg      string
+	Position     int
+	Cursor       int
 	OperateValue interface{}
+	Height       int
+	CursorHeight int
+	//Icon         DuoUIicon
+}
+
+type ScrollBarButton struct {
+	//button      DuoUIbutton
+	Height      int
+	insetTop    float32
+	insetRight  float32
+	insetBottom float32
+	insetLeft   float32
+	iconSize    int
+	iconPadding float32
 }
 
 func (s *ScrollBar) Layout(gtx *layout.Context) {
@@ -48,17 +56,17 @@ func (s *ScrollBar) Layout(gtx *layout.Context) {
 }
 
 func (s *ScrollBar) processEvents(gtx *layout.Context) {
-	for _, e := range gtx.Events(s.body) {
+	for _, e := range gtx.Events(s.Body) {
 		if e, ok := e.(pointer.Event); ok {
-			s.Position = e.Position.Y - float32(s.CursorHeight/2)
+			//s.Body.Position = e.Position.Y - float32(s.CursorHeight/2)
 			switch e.Type {
 			case pointer.Press:
-				s.body.pressed = true
-				s.body.Do(s.body.OperateValue)
+				s.Body.pressed = true
+				s.Body.Do(s.Body.OperateValue)
 				// list.Position.First = int(s.Position)
 				L.Debug("RADI PRESS")
 			case pointer.Release:
-				s.body.pressed = false
+				s.Body.pressed = false
 			}
 		}
 	}
