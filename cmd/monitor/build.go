@@ -2,29 +2,32 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"gioui.org/unit"
 )
 
 func (s *State) BuildButtons() layout.FlexChild {
 	return Rigid(func() {
-		s.FlexH(Rigid(func() {
-			bg, fg := "PanelBg", "PanelText"
-			if s.Config.BuildOpen.Load() {
-				bg, fg = "DocBg", "DocText"
-			}
-			//s.TextButton("Build", "Secondary", 23,
-			//	fg, bg, s.BuildFoldButton)
-			s.IconButton("Build", fg, bg, s.BuildFoldButton)
-			for s.BuildFoldButton.Clicked(s.Gtx) {
-				L.Debug("run mode folder clicked")
-				if !s.Config.BuildOpen.Load() {
-					s.Config.FilterOpen.Store(false)
-					s.Config.SettingsOpen.Store(false)
+		if s.WindowWidth >= 360  || !s.Config.FilterOpen.Load() {
+			s.FlexH(Rigid(func() {
+				bg, fg := "PanelBg", "PanelText"
+				if s.Config.BuildOpen.Load() {
+					bg, fg = "DocBg", "DocText"
 				}
-				s.Config.BuildOpen.Toggle()
-				s.SaveConfig()
-			}
-		}),
-		)
+				//s.TextButton("Build", "Secondary", 23,
+				//	fg, bg, s.BuildFoldButton)
+				s.IconButton("Build", fg, bg, s.BuildFoldButton)
+				for s.BuildFoldButton.Clicked(s.Gtx) {
+					L.Debug("run mode folder clicked")
+					if !s.Config.BuildOpen.Load() {
+						s.Config.FilterOpen.Store(false)
+						s.Config.SettingsOpen.Store(false)
+					}
+					s.Config.BuildOpen.Toggle()
+					s.SaveConfig()
+				}
+			}),
+			)
+		}
 	})
 }
 
@@ -49,15 +52,21 @@ func (s *State) BuildPage() layout.FlexChild {
 			s.Inset(4, func() {})
 		}), Rigid(func() {
 			s.FlexH(Rigid(func() {
-				s.TextButton("Build Configuration", "Secondary",
-					23, "DocText", "DocBg",
-					s.BuildTitleCloseButton)
-				for s.BuildTitleCloseButton.Clicked(s.Gtx) {
-					L.Debug("build configuration panel title close" +
-						" button clicked")
-					s.Config.BuildOpen.Store(false)
-					s.SaveConfig()
-				}
+				s.Inset(10, func() {
+					t := s.Theme.DuoUIlabel(unit.Dp(float32(32)), "Build Configuration")
+					t.Color = s.Theme.Colors["PanelText"]
+					t.Layout(s.Gtx)
+					//s.TextButton("Filter", "Secondary", 32,"DocText", "DocBg", s.FilterHeaderButton)
+				})
+				//s.TextButton("Build Configuration", "Secondary",
+				//	32, "DocText", "DocBg",
+				//	s.BuildTitleCloseButton)
+				//for s.BuildTitleCloseButton.Clicked(s.Gtx) {
+				//	L.Debug("build configuration panel title close" +
+				//		" button clicked")
+				//	s.Config.BuildOpen.Store(false)
+				//	s.SaveConfig()
+				//}
 			}), Spacer(), Rigid(func() {
 				if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
 					s.WindowHeight <= 600 && s.WindowWidth > 800) {
@@ -106,7 +115,7 @@ func (s *State) BuildConfigPage() {
 		s.Inset(4, func() {
 			s.FlexH(Rigid(func() {
 				s.Inset(8,
-					s.Text("Run in", "PanelText", "Primary", "h6"),
+					s.Text("Run in", "PanelText", "PanelBg", "Primary", "h6"),
 				)
 			}), Rigid(func() {
 				if s.RunningInRepo {
@@ -145,7 +154,7 @@ func (s *State) BuildConfigPage() {
 					s.CannotRun = true
 				}
 				s.Inset(8,
-					s.Text(txt, "PanelText", "Primary", "h6"),
+					s.Text(txt, "PanelText", "PanelBg", "Primary", "h6"),
 				)
 			}),
 			)
@@ -154,7 +163,7 @@ func (s *State) BuildConfigPage() {
 		s.Inset(4, func() {
 			s.FlexH(Rigid(func() {
 				s.Inset(8,
-					s.Text("Use Go version", "PanelText", "Primary", "h6"),
+					s.Text("Use Go version", "PanelText", "PanelBg", "Primary", "h6"),
 				)
 			}), Rigid(func() {
 				if s.HasGo {
@@ -197,7 +206,7 @@ func (s *State) BuildConfigPage() {
 					s.CannotRun = true
 				}
 				s.Inset(8,
-					s.Text(txt, "PanelText", "Primary", "h6"),
+					s.Text(txt, "PanelText", "PanelBg", "Primary", "h6"),
 				)
 			}),
 			)

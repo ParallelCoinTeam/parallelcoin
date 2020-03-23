@@ -27,7 +27,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				closeInsetSize           = 4
 			)
 			if s.WindowWidth < 1024 || s.WindowHeight < 1280 {
-				textSize, iconSize = 24, 24
+				textSize, iconSize = 24, 32
 				width, height = 32, 32
 				paddingV, paddingH = 8, 8
 				insetSize = 10

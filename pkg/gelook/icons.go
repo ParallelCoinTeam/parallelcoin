@@ -73,7 +73,10 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["iconDown"] = mustIcon(NewDuoUIicon(icons.NavigationArrowDropDown))
 	i["Copy"] = mustIcon(NewDuoUIicon(icons.ContentContentCopy))
 	i["Paste"] = mustIcon(NewDuoUIicon(icons.ContentContentPaste))
+	i["Sidebar"] = mustIcon(NewDuoUIicon(icons.ActionChromeReaderMode))
 	i["Filter"] = mustIcon(NewDuoUIicon(icons.ContentFilterList))
+	i["FilterAll"] = mustIcon(NewDuoUIicon(icons.ActionDoneAll))
+	i["FilterNone"] = mustIcon(NewDuoUIicon(icons.ContentBlock))
 	i["Build"] = mustIcon(NewDuoUIicon(icons.ActionBuild))
 	return i
 }

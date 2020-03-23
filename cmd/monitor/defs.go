@@ -46,7 +46,8 @@ type State struct {
 	BuildTitleCloseButton     *gel.Button
 	FilterButton              *gel.Button
 	FilterHeaderButton        *gel.Button
-	FilterClearButton         *gel.Button
+	FilterAllButton           *gel.Button
+	FilterNoneButton          *gel.Button
 	ModesButtons              map[string]*gel.Button
 	GroupsList                *layout.List
 	WindowWidth, WindowHeight int
@@ -95,13 +96,14 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		SettingsTitleCloseButton: new(gel.Button),
 		FilterButton:             new(gel.Button),
 		FilterHeaderButton:       new(gel.Button),
-		FilterClearButton:        new(gel.Button),
+		FilterAllButton:          new(gel.Button),
+		FilterNoneButton:          new(gel.Button),
 		ModesButtons: map[string]*gel.Button{
-			"node":    new(gel.Button),
-			"wallet":  new(gel.Button),
-			"shell":   new(gel.Button),
-			"gui":     new(gel.Button),
-			"mon": new(gel.Button),
+			"node":   new(gel.Button),
+			"wallet": new(gel.Button),
+			"shell":  new(gel.Button),
+			"gui":    new(gel.Button),
+			"mon":    new(gel.Button),
 		},
 		Config:       &Config{},
 		WindowWidth:  0,
