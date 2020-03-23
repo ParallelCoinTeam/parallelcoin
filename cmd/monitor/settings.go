@@ -69,7 +69,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 			Rigid(func() {
 				s.FlexH(Rigid(func() {
 					s.TextButton("Settings", "Secondary",
-						23, "DocText", "DocBg",
+						32, "DocText", "DocBg",
 						s.SettingsTitleCloseButton)
 					for s.SettingsTitleCloseButton.Clicked(s.Gtx) {
 						L.Debug("settings panel title close button clicked")

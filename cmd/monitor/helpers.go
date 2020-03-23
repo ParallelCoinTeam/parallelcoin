@@ -3,7 +3,6 @@ package monitor
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
-
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
 )
@@ -46,9 +45,19 @@ func (s *State) Rectangle(width, height int, color, opacity string, radius ...fl
 	)
 }
 
+func (s *State) Icon(icon, fg, bg string, size int) {
+	cs := s.Gtx.Constraints
+	s.Rectangle(cs.Height.Max, cs.Height.Max, bg, "ff")
+	s.Inset(8, func() {
+		i := s.Theme.Icons[icon]
+		i.Color = gelook.HexARGB(fg)
+		i.Layout(s.Gtx, unit.Dp(float32(size)))
+	})
+}
+
 func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int) {
 	sz := 40
-	if len(size)>1{
+	if len(size) > 1 {
 		sz = size[0]
 	}
 	s.Theme.DuoUIbutton("", "", "",
@@ -72,14 +81,12 @@ func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		Layout(s.Gtx, button)
 }
 
-func (s *State) Text(txt, color, face, tag string) func() {
+func (s *State) Text(txt, fg, bg, face, tag string) func() {
 	return func() {
 		var desc gelook.DuoUIlabel
 		switch tag {
-		case "body1":
-			desc = s.Theme.Body1(txt)
-		case "body2":
-			desc = s.Theme.Body2(txt)
+		case "h1":
+			desc = s.Theme.H1(txt)
 		case "h2":
 			desc = s.Theme.H2(txt)
 		case "h3":
@@ -90,10 +97,19 @@ func (s *State) Text(txt, color, face, tag string) func() {
 			desc = s.Theme.H5(txt)
 		case "h6":
 			desc = s.Theme.H6(txt)
+		case "body1":
+			desc = s.Theme.Body1(txt)
+		case "body2":
+			desc = s.Theme.Body2(txt)
 		}
 		desc.Font.Typeface = s.Theme.Fonts[face]
-		desc.Color = s.Theme.Colors[color]
-		desc.Layout(s.Gtx)
+		desc.Color = s.Theme.Colors[fg]
+		s.Inset(8, func() {
+			cs := s.Gtx.Constraints
+			s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+			desc.Layout(s.Gtx)
+		})
+
 	}
 }
 
