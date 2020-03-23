@@ -19,25 +19,33 @@ type DuoUIeditor struct {
 	TextSize unit.Value
 	// Color is the text color.
 	Color color.RGBA
+	// Background colour
+	Background color.RGBA
 	// Hint contains the text displayed when the editor is empty.
 	Hint string
 	// HintColor is the color of hint text.
 	HintColor color.RGBA
-
+	// Width is the number of monospaced characters that will display
+	Width  int
 	shaper text.Shaper
 }
 
-func (t *DuoUItheme) DuoUIeditor(hint string) DuoUIeditor {
+func (t *DuoUItheme) DuoUIeditor(hint, color, bg string, width int) DuoUIeditor {
 	return DuoUIeditor{
-		TextSize:  t.TextSize,
-		Color:     HexARGB(t.Colors["Dark"]),
-		shaper:    t.Shaper,
-		Hint:      hint,
-		HintColor: HexARGB(t.Colors["Hint"]),
+		TextSize:   t.TextSize,
+		Color:      HexARGB(color),
+		Background: HexARGB(bg),
+		shaper:     t.Shaper,
+		Hint:       hint,
+		HintColor:  HexARGB(t.Colors["Hint"]),
+		Width:      width,
 	}
 }
 
 func (e DuoUIeditor) Layout(gtx *layout.Context, editor *gel.Editor) {
+	gtx.Constraints.Width.Max = 16 * e.Width
+	gtx.Constraints.Width.Min = 16 * e.Width
+	gtx.Constraints.Height.Min = 32
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	var macro op.MacroOp
@@ -46,12 +54,17 @@ func (e DuoUIeditor) Layout(gtx *layout.Context, editor *gel.Editor) {
 	tl := gel.Label{Alignment: editor.Alignment}
 	tl.Layout(gtx, e.shaper, e.Font, e.TextSize, e.Hint)
 	macro.Stop()
-	if w := gtx.Dimensions.Size.X; gtx.Constraints.Width.Min < w {
-		gtx.Constraints.Width.Min = w
-	}
-	if h := gtx.Dimensions.Size.Y; gtx.Constraints.Height.Min < h {
-		gtx.Constraints.Height.Min = h
-	}
+	//if w := gtx.Dimensions.Size.X; gtx.Constraints.Width.Min < w {
+	//	gtx.Constraints.Width.Min = w
+	//}
+	//if h := gtx.Dimensions.Size.Y; gtx.Constraints.Height.Min < h {
+	//	gtx.Constraints.Height.Min = h
+	//}
+	//if w := gtx.Constraints.Width.Min; 16*e.Width < w {
+	//}
+	//if h := gtx.Dimensions.Size.Y; gtx.Constraints.Height.Min < h {
+	//gtx.Constraints.Height.Max = 40
+	//}
 	editor.Layout(gtx, e.shaper, e.Font, e.TextSize)
 	if editor.Len() > 0 {
 		paint.ColorOp{Color: e.Color}.Add(gtx.Ops)

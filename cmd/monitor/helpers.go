@@ -8,7 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/gelook"
 )
 
-func (s *State) FlexV(children ...layout.FlexChild) () {
+func (s *State) FlexV(children ...layout.FlexChild) {
 	layout.Flex{Axis: layout.Vertical}.Layout(s.Gtx, children...)
 }
 
@@ -32,19 +32,29 @@ func Spacer() layout.FlexChild {
 	return Flexed(1, func() {})
 }
 
-func (s *State) Rectangle(width, height int, color string) {
+func (s *State) Rectangle(width, height int, color, opacity string, radius ...float32) {
+	col := s.Theme.Colors[color]
+	col = opacity + col[2:]
+	var r float32
+	if len(radius) > 0 {
+		r = radius[0]
+	}
 	gelook.DuoUIdrawRectangle(s.Gtx,
-		width, height, s.Theme.Colors[color],
-		[4]float32{0, 0, 0, 0},
+		width, height, col,
+		[4]float32{r, r, r, r},
 		[4]float32{0, 0, 0, 0},
 	)
 }
 
-func (s *State) IconButton(icon, fg, bg string, button *gel.Button) {
+func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int) {
+	sz := 32
+	if len(size) > 1 {
+		sz = size[0]
+	}
 	s.Theme.DuoUIbutton("", "", "",
 		s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
-		s.Theme.Colors[fg], 0, 32, 41, 41,
-		8, 8).IconLayout(s.Gtx, button)
+		s.Theme.Colors[fg], 0, sz, sz+9, sz+9,
+		0, 0).IconLayout(s.Gtx, button)
 }
 
 func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
@@ -58,7 +68,7 @@ func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		s.Theme.Colors[fg],
 		"settingsIcon",
 		s.Theme.Colors["Light"],
-		fontSize, 0, 80, 32, 4, 4).
+		fontSize, 0, fontSize, fontSize, 0, 0).
 		Layout(s.Gtx, button)
 }
 
@@ -91,4 +101,3 @@ func Toggle(b *bool) bool {
 	*b = !*b
 	return *b
 }
-

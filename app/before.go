@@ -222,9 +222,6 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("maxorphantx") {
 			*cx.Config.MaxOrphanTxs = c.Int("maxorphantx")
 		}
-		if c.IsSet("algo") {
-			*cx.Config.Algo = c.String("algo")
-		}
 		if c.IsSet("generate") {
 			*cx.Config.Generate = c.Bool("generate")
 		}

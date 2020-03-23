@@ -6,12 +6,13 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
+	"time"
 )
 
 func (s *State) BottomBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexV(
 			s.SettingsPage(),
 			s.BuildPage(),
@@ -23,7 +24,7 @@ func (s *State) BottomBar() layout.FlexChild {
 func (s *State) StatusBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexH(
 			s.RunControls(),
 			s.RunmodeButtons(),
@@ -88,15 +89,15 @@ func (s *State) RestartRunButton() layout.FlexChild {
 				go func() {
 					s.RunCommandChan <- "stop"
 					exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
-					c = exec.Command("go", "build", "-x", "-v",
+					c = exec.Command("go", "build", "-v",
 						"-tags", "goterm", "-o", exePath)
 					c.Stderr = os.Stderr
 					c.Stdout = os.Stdout
+					time.Sleep(time.Second)
 					if err = c.Run(); !L.Check(err) {
 						if err = syscall.Exec(exePath, os.Args,
 							os.Environ()); L.Check(err) {
 						}
-						//time.Sleep(time.Second)
 						os.Exit(0)
 					}
 				}()

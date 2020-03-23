@@ -76,7 +76,7 @@ func (s *State) Runner() {
 			L.Debug("run called")
 			if s.HasGo && !s.Config.Running.Load() {
 				exePath := filepath.Join(*s.Ctx.Config.DataDir, "pod_mon")
-				c = exec.Command("go", "build", "-x", "-v",
+				c = exec.Command("go", "build", "-v",
 					"-tags", "goterm", "-o", exePath)
 				c.Stdout = os.Stdout
 				c.Stderr = os.Stderr
