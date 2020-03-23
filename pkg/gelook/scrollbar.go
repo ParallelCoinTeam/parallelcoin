@@ -1,6 +1,7 @@
 package gelook
 
 import (
+	"fmt"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -24,15 +25,15 @@ type ScrollBar struct {
 }
 
 type ScrollBarBody struct {
-	pressed      bool
-	Do           func(interface{})
-	ColorBg      string
-	Position     int
-	Cursor       int
-	OperateValue interface{}
-	Height       int
-	CursorHeight int
-	Icon         DuoUIicon
+	//pressed      bool
+	//Do           func(interface{})
+	ColorBg string
+	//Position     int
+	//Cursor       int
+	//OperateValue interface{}
+	//Height       int
+	//CursorHeight int
+	Icon DuoUIicon
 }
 
 type ScrollBarButton struct {
@@ -74,15 +75,15 @@ func (t *DuoUItheme) ScrollBar() *ScrollBar {
 		iconBgColor: "ff882266",
 	}
 	body := &ScrollBarBody{
-		pressed:  false,
-		ColorBg:  "",
-		Position: 0,
-		Cursor:   0,
-		Icon:     *t.Icons["Grab"],
+		//pressed:  false,
+		ColorBg: "",
+		//Position: 0,
+		//Cursor:   0,
+		Icon: *t.Icons["Grab"],
 		//Do: func(n interface{}) {
 		//	itemValue.doSlide(n.(int))
 		//},
-		OperateValue: 1,
+		//OperateValue: 1,
 	}
 	return &ScrollBar{
 		ColorBg:      "ff447733",
@@ -136,37 +137,23 @@ func (p *Panel) SliderLayout(gtx *layout.Context, panel *gel.Panel) {
 }
 
 func (p *Panel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
-	for _, e := range gtx.Events(p.ScrollBar.body) {
-		if e, ok := e.(pointer.Event); ok {
-			if e.Position.Y > 0 {
-				p.ScrollBar.body.Position = int(e.Position.Y) - (p.ScrollBar.body.CursorHeight / 2)
-			}
-			switch e.Type {
-			case pointer.Press:
-				p.ScrollBar.body.pressed = true
-				p.ScrollBar.body.Do(p.ScrollBar.body.OperateValue)
-			case pointer.Release:
-				p.ScrollBar.body.pressed = false
-			}
-		}
-	}
 	cs := gtx.Constraints
-	p.ScrollBar.body.Height = cs.Height.Max
+	panel.ScrollBar.Body.Height = cs.Height.Max
 	sliderBg := "ff558899"
 	colorBg := "ff30cfcf"
 	colorBorder := "ffcf3030"
 	border := unit.Dp(0)
-	if p.ScrollBar.body.pressed {
-		if p.ScrollBar.body.Position >= 0 && p.ScrollBar.body.Position <= cs.Height.Max-p.ScrollBar.body.CursorHeight {
-			p.ScrollBar.body.Cursor = p.ScrollBar.body.Position
-			panel.PanelContentLayout.Position.First = p.ScrollBar.body.Position / panel.ScrollUnit
-			panel.PanelContentLayout.Position.Offset = 0
-			//p.panelContent.Position.First = int(p.ScrollBar.body.Cursor)
-		}
-		colorBg = "ffcf30cf"
-		colorBorder = "ff303030"
-		border = unit.Dp(0)
-	}
+	//if panel.ScrollBar.Body.pressed {
+	//	if panel.ScrollBar.Body.Position >= 0 && panel.ScrollBar.Body.Position <= cs.Height.Max-panel.ScrollBar.Body.CursorHeight {
+	//		panel.ScrollBar.Body.Cursor = panel.ScrollBar.Body.Position
+	//		panel.PanelContentLayout.Position.First = panel.ScrollBar.Body.Position / panel.ScrollUnit
+	//		panel.PanelContentLayout.Position.Offset = 0
+	//		//p.panelContent.Position.First = int(p.ScrollBar.body.Cursor)
+	//	}
+	//	colorBg = "ffcf30cf"
+	//	colorBorder = "ff303030"
+	//	border = unit.Dp(0)
+	//}
 	pointer.Rect(
 		image.Rectangle{Max: image.Point{X: cs.Width.Max, Y: cs.Height.Max}},
 	).Add(gtx.Ops)
@@ -185,9 +172,10 @@ func (p *Panel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 					layout.Inset{
 						Top: unit.Dp(float32(panel.PanelContentLayout.Position.First * panel.ScrollUnit)),
 					}.Layout(gtx, func() {
-						//gtx.Dimensions.Size.Y= p.ScrollBar.body.CursorHeight
-						gtx.Constraints.Height.Min = p.ScrollBar.body.CursorHeight
-						DuoUIdrawRectangle(gtx, panel.ScrollBar.Size, p.ScrollBar.body.CursorHeight, sliderBg, [4]float32{8, 8, 8, 8}, [4]float32{8, 8, 8, 8})
+						gtx.Constraints.Width.Max = panel.ScrollBar.Size
+						gtx.Constraints.Height.Min = panel.ScrollBar.Body.CursorHeight
+						DuoUIdrawRectangle(gtx, panel.ScrollBar.Size, panel.ScrollBar.Body.CursorHeight, sliderBg, [4]float32{8, 8, 8, 8}, [4]float32{8, 8, 8, 8})
+						fmt.Println("scrollBarbodCursorHeightSSSSSSSSSSSSSS:", panel.ScrollBar.Body.CursorHeight)
 						layout.Center.Layout(gtx, func() {
 							p.ScrollBar.body.Icon.Color = HexARGB("ff554499")
 							p.ScrollBar.body.Icon.Layout(gtx, unit.Px(float32(panel.ScrollBar.Size)))
@@ -197,4 +185,5 @@ func (p *Panel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 			}),
 		)
 	})
+	panel.ScrollBar.Layout(gtx)
 }
