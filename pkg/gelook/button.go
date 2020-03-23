@@ -260,7 +260,12 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *gel.Button) {
 			gtx.Constraints.Width.Min = hmin
 			gtx.Constraints.Height.Min = vmin
 			layout.Center.Layout(gtx, func() {
-				layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(10), Left: unit.Dp(12), Right: unit.Dp(12)}.Layout(gtx, func() {
+				layout.Inset{
+					Top:    b.PaddingVertical,
+					Bottom: b.PaddingVertical,
+					Left:   b.PaddingHorizontal,
+					Right:  b.PaddingHorizontal,
+				}.Layout(gtx, func() {
 
 					paint.ColorOp{Color: txColor}.Add(gtx.Ops)
 					gel.Label{
@@ -296,7 +301,7 @@ func (b DuoUIbutton) IconLayout(gtx *layout.Context, button *gel.Button) {
 			layout.Center.Layout(gtx, func() {
 				layout.Inset{Top: b.PaddingVertical, Bottom: b.PaddingVertical, Left: b.PaddingHorizontal, Right: b.PaddingHorizontal}.Layout(gtx, func() {
 					b.Icon.Color = b.IconColor
-					b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
+					b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)-2*b.PaddingVertical.V))
 				})
 				gtx.Dimensions = layout.Dimensions{
 					Size: image.Point{X: b.IconSize, Y: b.IconSize},

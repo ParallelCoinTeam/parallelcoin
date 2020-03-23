@@ -46,22 +46,22 @@ func (s *State) Rectangle(width, height int, color, opacity string, radius ...fl
 }
 
 func (s *State) Icon(icon, fg, bg string, size int) {
+	s.Gtx.Constraints.Width.Max = size
+	s.Gtx.Constraints.Height.Max = size
 	s.FlexH(Rigid(func() {
-		s.Gtx.Constraints.Width.Max = size
-		s.Gtx.Constraints.Height.Max = size
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Height.Max, cs.Width.Max, "Primary", "ff")
-		//s.Inset(8, func() {
-		//})
+		s.Rectangle(cs.Height.Max, cs.Width.Max, bg, "ff")
+		s.Inset(8, func() {
+			i := s.Theme.Icons[icon]
+			i.Color = gelook.HexARGB(s.Theme.Colors[fg])
+			i.Layout(s.Gtx, unit.Dp(float32(size-16)))
+		})
 		//cs := s.Gtx.Constraints
 		//s.Rectangle(cs.Height.Max, cs.Width.Max, bg, "ff")
 		//s.FlexH(Spacer(), Rigid(func() {
 		//layout.Center.Layout(s.Gtx, func() {
 		//cs := s.Gtx.Constraints
 		//s.Rectangle(cs.Width.Max, cs.Height.Max, "Primary", "ff")
-		i := s.Theme.Icons[icon]
-		i.Color = gelook.HexARGB(s.Theme.Colors[fg])
-		i.Layout(s.Gtx, unit.Dp(float32(size)))
 		//})
 		//}), Spacer())
 	}),
@@ -69,14 +69,19 @@ func (s *State) Icon(icon, fg, bg string, size int) {
 }
 
 func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int) {
-	sz := 40
+	sz := 48
 	if len(size) > 1 {
 		sz = size[0]
 	}
+	//sz -=16
+	//cs := s.Gtx.Constraints
+	s.Rectangle(sz, sz, fg, "ff")
+	//s.Inset(8, func() {
 	s.Theme.DuoUIbutton("", "", "",
 		s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
 		s.Theme.Colors[fg], 0, sz, sz, sz,
-		0, 0).IconLayout(s.Gtx, button)
+		8, 8).IconLayout(s.Gtx, button)
+	//})
 }
 
 func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
@@ -90,8 +95,16 @@ func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		s.Theme.Colors[fg],
 		"settingsIcon",
 		s.Theme.Colors["Light"],
-		fontSize, 0, fontSize, fontSize, 0, 0).
+		fontSize-1, fontSize-1, fontSize, fontSize, 10, 10).
 		Layout(s.Gtx, button)
+}
+
+func (s *State) Label(txt string) {
+	s.Inset(12, func() {
+		t := s.Theme.DuoUIlabel(unit.Dp(float32(24)), txt)
+		t.Color = s.Theme.Colors["PanelText"]
+		t.Layout(s.Gtx)
+	})
 }
 
 func (s *State) Text(txt, fg, bg, face, tag string) func() {
