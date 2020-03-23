@@ -1,12 +1,12 @@
 package gelook
 
 import (
+	"fmt"
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gel"
 )
 
 type Panel struct {
-	Size int
 	//totalOffset       int
 	//PanelContentLayout *layout.List
 	PanelObject interface{}
@@ -31,6 +31,7 @@ func (p *Panel) panelLayout(gtx *layout.Context, panel *gel.Panel, row func(i in
 		visibleObjectsNumber := 0
 		panel.PanelContentLayout.Layout(gtx, panel.PanelObjectsNumber, func(i int) {
 			row(i, p.PanelObject)
+			visibleObjectsNumber = visibleObjectsNumber + 1
 			panel.VisibleObjectsNumber = visibleObjectsNumber
 		})
 	}
@@ -55,12 +56,11 @@ func (p *Panel) Layout(gtx *layout.Context, panel *gel.Panel, row func(i int, in
 		p.ScrollBar.body.CursorHeight = cursorHeight
 	}
 
-	//fmt.Println("bodyHeight:", p.scrollBar.body.Height)
-	//fmt.Println("visibleObjectsNumber:", p.visibleObjectsNumber)
-	//fmt.Println("scrollBarbodyPosition:", p.scrollBar.body.Position)
-	//fmt.Println("scrollUnit:", p.scrollUnit)
-	//fmt.Println("cursor:", p.PanelContentLayout.Position.Offset)
-	//fmt.Println("First:", p.PanelContentLayout.Position.First)
-	//fmt.Println("BeforeEnd:", p.PanelContentLayout.Position.BeforeEnd)
+	fmt.Println("visibleObjectsNumber:", panel.VisibleObjectsNumber)
+	fmt.Println("scrollBarbodyPosition:", p.ScrollBar.body.Position)
+	fmt.Println("scrollUnit:", panel.ScrollUnit)
+	fmt.Println("cursor:", panel.PanelContentLayout.Position.Offset)
+	fmt.Println("First:", panel.PanelContentLayout.Position.First)
+	fmt.Println("BeforeEnd:", panel.PanelContentLayout.Position.BeforeEnd)
 	panel.Layout(gtx)
 }

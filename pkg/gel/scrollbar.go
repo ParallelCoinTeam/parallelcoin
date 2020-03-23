@@ -6,6 +6,7 @@ import (
 )
 
 type ScrollBar struct {
+	Size         int
 	OperateValue interface{}
 	//Height       float32
 	Body *ScrollBarBody

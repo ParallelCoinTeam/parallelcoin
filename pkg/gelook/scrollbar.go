@@ -187,10 +187,10 @@ func (p *Panel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 					}.Layout(gtx, func() {
 						//gtx.Dimensions.Size.Y= p.ScrollBar.body.CursorHeight
 						gtx.Constraints.Height.Min = p.ScrollBar.body.CursorHeight
-						DuoUIdrawRectangle(gtx, p.Size, p.ScrollBar.body.CursorHeight, sliderBg, [4]float32{8, 8, 8, 8}, [4]float32{8, 8, 8, 8})
+						DuoUIdrawRectangle(gtx, panel.ScrollBar.Size, p.ScrollBar.body.CursorHeight, sliderBg, [4]float32{8, 8, 8, 8}, [4]float32{8, 8, 8, 8})
 						layout.Center.Layout(gtx, func() {
 							p.ScrollBar.body.Icon.Color = HexARGB("ff554499")
-							p.ScrollBar.body.Icon.Layout(gtx, unit.Px(float32(p.Size)))
+							p.ScrollBar.body.Icon.Layout(gtx, unit.Px(float32(panel.ScrollBar.Size)))
 						})
 					})
 				})

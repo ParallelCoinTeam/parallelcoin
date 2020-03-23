@@ -15,17 +15,13 @@ import (
 )
 
 var (
-	//addressBookList = &layout.List{
-	//	Axis: layout.Vertical,
-	//	// ScrollToEnd: true,
-	//}
 	addressBookPanelElement = &gel.Panel{
 		PanelContentLayout: &layout.List{
 			Axis:        layout.Vertical,
 			ScrollToEnd: false,
 		},
 		ScrollBar: &gel.ScrollBar{
-			//OperateValue: nil,
+			Size: 16,
 			Body: new(gel.ScrollBarBody),
 			Up:   new(gel.Button),
 			Down: new(gel.Button),
