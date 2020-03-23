@@ -1,7 +1,6 @@
 package gelook
 
 import (
-	"fmt"
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gel"
 )
@@ -52,22 +51,23 @@ func (p *Panel) Layout(gtx *layout.Context, panel *gel.Panel, row func(i int, in
 		}),
 	)
 	if panel.PanelObjectsNumber > 0 {
-		panel.ScrollUnit = p.ScrollBar.body.Height / panel.PanelObjectsNumber
+		panel.ScrollUnit = panel.ScrollBar.Body.Height / panel.PanelObjectsNumber
 	}
 
 	cursorHeight := panel.VisibleObjectsNumber * panel.ScrollUnit
 	if cursorHeight > 30 {
-		p.ScrollBar.body.CursorHeight = cursorHeight
+		panel.ScrollBar.Body.CursorHeight = cursorHeight
 	}
 
-	fmt.Println("cursorHeight:", cursorHeight)
-	fmt.Println("visibleObjectsNumber:", panel.VisibleObjectsNumber)
-	fmt.Println("scrollBarbodyPosition:", p.ScrollBar.body.Position)
-	fmt.Println("PanelObjectsNumber:", panel.PanelObjectsNumber)
-	fmt.Println("ScrollBar.body.Height:", p.ScrollBar.body.Height)
-	fmt.Println("scrollUnit:", panel.ScrollUnit)
-	fmt.Println("cursor:", panel.PanelContentLayout.Position.Offset)
-	fmt.Println("First:", panel.PanelContentLayout.Position.First)
-	fmt.Println("BeforeEnd:", panel.PanelContentLayout.Position.BeforeEnd)
+	//fmt.Println("cursorHeight:", cursorHeight)
+	//fmt.Println("scrollUnit:", panel.ScrollUnit)
+	//fmt.Println("visibleObjectsNumber:", panel.VisibleObjectsNumber)
+	//fmt.Println("scrollBarbodCursorHeight:", panel.ScrollBar.Body.CursorHeight)
+	//fmt.Println("scrollBarbodyPosition:", panel.ScrollBar.Body.Position)
+	//fmt.Println("PanelObjectsNumber:", panel.PanelObjectsNumber)
+	//fmt.Println("ScrollBar.body.Height:", p.ScrollBar.body.Height)
+	//fmt.Println("cursor:", panel.PanelContentLayout.Position.Offset)
+	//fmt.Println("First:", panel.PanelContentLayout.Position.First)
+	//fmt.Println("BeforeEnd:", panel.PanelContentLayout.Position.BeforeEnd)
 	panel.Layout(gtx)
 }
