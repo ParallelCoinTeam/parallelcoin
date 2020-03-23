@@ -229,6 +229,9 @@ func (t *DuoUItheme) DuoUIbutton(
 func (b DuoUIbutton) Layout(gtx *layout.Context, button *gel.Button) {
 	hmin := gtx.Constraints.Width.Min
 	vmin := gtx.Constraints.Height.Min
+	if b.Height > 0 {
+		//vmin = b.Height
+	}
 	txColor := b.TxColor
 	bgColor := b.BgColor
 	if button.Hover(gtx) {

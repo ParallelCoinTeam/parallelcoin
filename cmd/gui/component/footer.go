@@ -48,6 +48,7 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 				footerMenuItem.IconLayout(gtx, footerButton)
 			} else {
 				footerMenuItem = th.DuoUIbutton(th.Fonts["Primary"], text, CurrentCurrentPageColor(rc.ShowPage, page.Title, th.Colors["Light"], th.Colors["Primary"]), "", "", "", "", "", footerMenuItemTextSize, footerMenuItemIconSize, 0, footerMenuItemHeight, footerMenuItemPaddingVertical, 0)
+				footerMenuItem.Height = 48
 				for footerButton.Clicked(gtx) {
 					rc.ShowPage = page.Title
 					page.Command()
