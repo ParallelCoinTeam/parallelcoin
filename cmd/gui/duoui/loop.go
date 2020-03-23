@@ -64,16 +64,16 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			case system.FrameEvent:
 				ui.ly.Context.Reset(e.Config, e.Size)
 				if ui.rc.Boot.IsBoot {
-					ui.DuoUIsplashScreen()
-					e.Frame(ui.ly.Context.Ops)
-				} else {
 					if ui.rc.Boot.IsFirstRun {
 						ui.DuoUIloaderCreateWallet()
 					} else {
+						ui.DuoUIsplashScreen()
+					}
+					e.Frame(ui.ly.Context.Ops)
+				} else {
 						ui.DuoUImainScreen()
 						if ui.rc.Dialog.Show {
 							component.DuoUIdialog(ui.rc, ui.ly.Context, ui.ly.Theme)
-						}
 						// ui.DuoUItoastSys()
 					}
 					e.Frame(ui.ly.Context.Ops)
