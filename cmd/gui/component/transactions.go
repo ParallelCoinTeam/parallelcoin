@@ -11,10 +11,31 @@ import (
 	"github.com/p9c/pod/pkg/gelook"
 )
 
+var (
+	transactionsPanelElement = &gel.Panel{
+		PanelContentLayout: &layout.List{
+			Axis:        layout.Vertical,
+			ScrollToEnd: false,
+		},
+		ScrollBar: &gel.ScrollBar{
+			Size: 16,
+			Body: new(gel.ScrollBarBody),
+			Up:   new(gel.Button),
+			Down: new(gel.Button),
+		},
+	}
+)
+
 func TransactionsList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		rc.History.TransList.Layout(gtx, len(rc.History.Txs.Txs), func(i int) {
-			t := rc.History.Txs.Txs[i]
+
+		transactionsPanel := gelook.Panel{}
+		transactionsPanel.PanelObject = rc.History.Txs.Txs
+		transactionsPanel.ScrollBar = th.ScrollBar()
+		transactionsPanelElement.PanelObjectsNumber = len(rc.History.Txs.Txs)
+		transactionsPanel.Layout(gtx, transactionsPanelElement, func(i int, in interface{}) {
+			txs := in.([]model.DuoUItransactionExcerpt)
+			t := txs[i]
 			th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])()
 			layout.Flex{
 				Spacing: layout.SpaceBetween,

@@ -22,7 +22,7 @@ var (
 			ScrollToEnd: false,
 		},
 		ScrollBar: &gel.ScrollBar{
-			//OperateValue: nil,
+			Size: 16,
 			Body: new(gel.ScrollBarBody),
 			Up:   new(gel.Button),
 			Down: new(gel.Button),

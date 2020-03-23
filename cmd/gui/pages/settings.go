@@ -2,6 +2,7 @@ package pages
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/pod"
 
 	"gioui.org/layout"
 
@@ -12,8 +13,17 @@ import (
 )
 
 var (
-	fieldsList = &layout.List{
-		Axis: layout.Vertical,
+	settingsPanelElement = &gel.Panel{
+		PanelContentLayout: &layout.List{
+			Axis:        layout.Vertical,
+			ScrollToEnd: false,
+		},
+		ScrollBar: &gel.ScrollBar{
+			Size: 16,
+			Body: new(gel.ScrollBarBody),
+			Up:   new(gel.Button),
+			Down: new(gel.Button),
+		},
 	}
 	buttonSettingsRestart = new(gel.Button)
 )
@@ -79,11 +89,20 @@ func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 		// layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 		th.DuoUIitem(16, th.Colors["Light"]).Layout(gtx, layout.N, func() {
 			for _, fields := range rc.Settings.Daemon.Schema.Groups {
+
 				if fmt.Sprint(fields.Legend) == rc.Settings.Tabs.Current {
-					fieldsList.Layout(gtx, len(fields.Fields), func(il int) {
-						il = len(fields.Fields) - 1 - il
+					settingsPanel := gelook.Panel{}
+					settingsPanel.PanelObject = fields.Fields
+					settingsPanel.ScrollBar = th.ScrollBar()
+					settingsPanelElement.PanelObjectsNumber = len(fields.Fields)
+					settingsPanel.Layout(gtx, settingsPanelElement, func(i int, in interface{}) {
+						settings := in.(pod.Fields)
+						//t := settings[i]
+
+						//fieldsList.Layout(gtx, len(fields.Fields), func(il int) {
+						i = settingsPanelElement.PanelObjectsNumber - 1 - i
 						tl := component.Field{
-							Field: &fields.Fields[il],
+							Field: &settings[i],
 						}
 						layout.Flex{
 							Axis: layout.Vertical,
