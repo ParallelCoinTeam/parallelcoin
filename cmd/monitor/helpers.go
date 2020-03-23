@@ -46,13 +46,26 @@ func (s *State) Rectangle(width, height int, color, opacity string, radius ...fl
 }
 
 func (s *State) Icon(icon, fg, bg string, size int) {
-	cs := s.Gtx.Constraints
-	s.Rectangle(cs.Height.Max, cs.Height.Max, bg, "ff")
-	s.Inset(8, func() {
+	s.FlexH(Rigid(func() {
+		s.Gtx.Constraints.Width.Max = size
+		s.Gtx.Constraints.Height.Max = size
+		cs := s.Gtx.Constraints
+		s.Rectangle(cs.Height.Max, cs.Width.Max, "Primary", "ff")
+		//s.Inset(8, func() {
+		//})
+		//cs := s.Gtx.Constraints
+		//s.Rectangle(cs.Height.Max, cs.Width.Max, bg, "ff")
+		//s.FlexH(Spacer(), Rigid(func() {
+		//layout.Center.Layout(s.Gtx, func() {
+		//cs := s.Gtx.Constraints
+		//s.Rectangle(cs.Width.Max, cs.Height.Max, "Primary", "ff")
 		i := s.Theme.Icons[icon]
-		i.Color = gelook.HexARGB(fg)
+		i.Color = gelook.HexARGB(s.Theme.Colors[fg])
 		i.Layout(s.Gtx, unit.Dp(float32(size)))
-	})
+		//})
+		//}), Spacer())
+	}),
+	)
 }
 
 func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int) {

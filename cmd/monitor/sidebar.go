@@ -10,10 +10,10 @@ func (s *State) Sidebar() layout.FlexChild {
 		if !(s.Config.BuildOpen.Load() || s.Config.SettingsOpen.Load()) {
 			s.Gtx.Constraints.Width.Max /= 2
 		} else {
-			s.Gtx.Constraints.Width.Max -= 480
+			s.Gtx.Constraints.Width.Max -= 360
 		}
-		if s.Gtx.Constraints.Width.Max > 480 {
-			s.Gtx.Constraints.Width.Max = 480
+		if s.Gtx.Constraints.Width.Max > 360 {
+			s.Gtx.Constraints.Width.Max = 360
 		}
 		if s.Config.FilterOpen.Load() && (s.Config.BuildOpen.Load() ||
 			s.Config.SettingsOpen.Load() && s.WindowWidth <= 800) {
@@ -26,16 +26,15 @@ func (s *State) Sidebar() layout.FlexChild {
 				cs := s.Gtx.Constraints
 				s.Rectangle(cs.Width.Max, cs.Width.Max, "DocBg", "ff")
 				s.FlexH(Rigid(func() {
-					if s.WindowWidth > 480 {
-						//s.Gtx.Constraints.Width.Min = 16
-						//s.Inset(16, func() {
-						//	s.Icon("Filter", "DocText", "PanelBg", 24)
-						//})
+					if s.WindowWidth > 360 {
+						s.Gtx.Constraints.Width.Min = 32
+						s.Icon("logo", "DocText", "DocBg", 48)
 					}
 				}), Rigid(func() {
+					//cs := s.Gtx.Constraints
+					//s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 					if s.WindowWidth > 640 {
-						s.Rectangle(cs.Width.Max, cs.Width.Max, "DocBg", "ff")
-						s.Inset(8, func() {
+						s.Inset(10, func() {
 							t := s.Theme.DuoUIlabel(unit.Dp(float32(32)), "Filter")
 							t.Color = s.Theme.Colors["PanelText"]
 							t.Layout(s.Gtx)
