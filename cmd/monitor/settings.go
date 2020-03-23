@@ -414,7 +414,7 @@ func (s *State) Editor(editorControler *gel.Editor, width int,
 				//textColor = "PanelBg"
 			}
 			width++
-			s.Rectangle(width*textWidth+16, 40, outerColor, "bb", 4)
+			s.Rectangle(width*textWidth+16, 40, outerColor, "ff", 4)
 			s.Inset(3, func() {
 				s.Rectangle(width*textWidth+10, 34, innerColor, "ff", 2)
 				e := s.Theme.DuoUIeditor(editorControler.Text(),
@@ -450,7 +450,7 @@ func (s *State) PasswordEditor(editorControler *gel.Editor, width int,
 				textColor = "PanelBg"
 			}
 			width++
-			s.Rectangle(width*textWidth+16, 40, outerColor, "bb", 4)
+			s.Rectangle(width*textWidth+16, 40, outerColor, "ff", 4)
 			s.Inset(3, func() {
 				s.Rectangle(width*textWidth+10, 34, innerColor, "ff", 2)
 				e := s.Theme.DuoUIeditor(editorControler.Text(),
@@ -481,16 +481,16 @@ func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, w
 				maxLen = len(split[i])
 			}
 		}
-		if len(split[len(split)-1]) < 1 && len(split) > 2 {
-			split = split[:len(split)-1]
-		}
+		//if len(split[len(split)-1]) < 1 && len(split) > 2 {
+		//	split = split[:len(split)-1]
+		//}
 		if maxLen < 9 {
 			maxLen = 9
 		}
-		s.Gtx.Constraints.Width.Max = maxLen*10 + 30
-		s.Gtx.Constraints.Width.Min = maxLen*10 + 30
+		s.Gtx.Constraints.Width.Max = maxLen*textWidth + 30
+		s.Gtx.Constraints.Width.Min = maxLen*textWidth + 30
 		width = maxLen
-		height := 18*len(split) + 6
+		height := 19*len(split)
 		//L.Debug(len(split), height, split)
 		s.Theme.DuoUIitem(0, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.N, func() {
 			outerColor := "DocBg"
@@ -504,7 +504,7 @@ func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, w
 			if width < 9 {
 				width = 9
 			}
-			s.Rectangle(width*textWidth+16, height+16, outerColor, "bb", 4)
+			s.Rectangle(width*textWidth+16, height+16, outerColor, "ff", 4)
 			s.Inset(3, func() {
 				s.Rectangle(width*textWidth+10, height+10, innerColor, "ff", 2)
 				s.Inset(5, func() {
