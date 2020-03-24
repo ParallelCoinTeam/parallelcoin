@@ -23,12 +23,18 @@ func NewDuoUIcolors() (c map[string]string) {
 	c["Warning"] = "ffcfcf30"
 	c["Info"] = "ff3080cf"
 	c["Hint"] = "ff888888"
-	c["InvText"] = "0xcfcfcf"
+	c["InvText"] = "ffcfcfcf"
 	c["ButtonText"] = "ffcfcfcf"
 	c["ButtonBg"] = "ff3080cf"
-	c["PanelText"] = c["Light"]
+	c["PanelText"] = "ffcfcfcf"
 	c["PanelBg"] = c["Dark"]
 	c["DocText"] = c["Dark"]
 	c["DocBg"] = c["Light"]
+	c["ButtonTextDim"] = c["LightGrayI"]
+	c["ButtonBgDim"] = "ff30809a"
+	c["PanelTextDim"] = c["LightGrayI"]
+	c["PanelBgDim"] = c["LightGrayIII"]
+	c["DocTextDim"] = c["LightGrayIII"]
+	c["DocBgDim"] = c["LightGrayI"]
 	return c
 }
