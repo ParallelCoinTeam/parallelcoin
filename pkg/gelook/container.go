@@ -26,7 +26,7 @@ type DuoUIcontainer struct {
 	FullWidth     bool
 	Width         int
 	Height        int
-	CornerRadius  unit.Value
+	CornerRadius  int
 	PaddingTop    int
 	PaddingRight  int
 	PaddingBottom int
@@ -60,7 +60,7 @@ func (d DuoUIcontainer) Layout(gtx *layout.Context, direction layout.Direction, 
 	}
 	layout.Stack{Alignment: layout.W}.Layout(gtx,
 		layout.Expanded(func() {
-			rr := float32(gtx.Px(unit.Dp(0)))
+			rr := float32(gtx.Px(unit.Dp(float32(d.CornerRadius))))
 			clip.Rect{
 				Rect: f32.Rectangle{Max: f32.Point{
 					X: float32(gtx.Constraints.Width.Min),

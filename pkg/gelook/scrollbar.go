@@ -33,7 +33,8 @@ func (t *DuoUItheme) ScrollBar() *ScrollBar {
 		container: t.DuoUIcontainer(0, t.Colors["Primary"]),
 		Icon:      *t.Icons["Grab"],
 	}
-	return &ScrollBar{
+	slider.container.CornerRadius = 8
+	scrollbar := &ScrollBar{
 		ColorBg:      t.Colors["DarkGrayII"],
 		BorderRadius: [4]float32{},
 		slider:       slider,
@@ -41,6 +42,8 @@ func (t *DuoUItheme) ScrollBar() *ScrollBar {
 		down:         t.IconButton(t.Icons["Down"]),
 		container:    t.DuoUIcontainer(0, t.Colors["Light"]),
 	}
+	scrollbar.container.PaddingLeft = 16
+	return scrollbar
 }
 
 func (p *DuoUIpanel) ScrollBarLayout(gtx *layout.Context, panel *gel.Panel) {
@@ -101,7 +104,7 @@ func (p *DuoUIpanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 			layout.Center.Layout(gtx, func() {
 
 				layout.Inset{
-					Top: unit.Dp(float32(panel.PanelContentLayout.Position.First * panel.ScrollUnit)),
+					Top: unit.Dp(float32(panel.PanelContentLayout.Position.First) * panel.ScrollUnit),
 				}.Layout(gtx, func() {
 
 					gtx.Constraints.Width.Min = panel.ScrollBar.Size
@@ -115,7 +118,7 @@ func (p *DuoUIpanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 					p.ScrollBar.slider.container.Layout(gtx, layout.Center, func() {
 
 						p.ScrollBar.slider.Icon.Color = HexARGB("ffcfcfcf")
-						p.ScrollBar.slider.Icon.op.Rect.Inset(0)
+						//p.ScrollBar.slider.Icon.op.Rect.Inset(0)
 						p.ScrollBar.slider.Icon.Layout(gtx, unit.Px(float32(panel.ScrollBar.Size/2)))
 					})
 					//})

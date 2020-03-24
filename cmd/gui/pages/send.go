@@ -31,7 +31,6 @@ var (
 	buttonPasteAddress = new(gel.Button)
 	buttonPasteAmount  = new(gel.Button)
 	buttonSend         = new(gel.Button)
-	sendStruct         = new(send)
 )
 
 type send struct {
@@ -62,6 +61,7 @@ func Send(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.Duo
 
 func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
+		sendStruct := new(send)
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
 				widgets := []func(){
