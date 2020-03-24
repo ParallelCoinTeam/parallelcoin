@@ -34,8 +34,8 @@ func NewDuoUIcolors() (c map[string]string) {
 	c["ButtonTextDim"] = c["LightGrayI"]
 	c["ButtonBgDim"] = "ff30809a"
 	c["PanelTextDim"] = c["LightGrayI"]
-	c["PanelBgDim"] = c["LightGrayIII"]
-	c["DocTextDim"] = c["LightGrayIII"]
+	c["PanelBgDim"] = c["LightGrayII"]
+	c["DocTextDim"] = c["LightGrayII"]
 	c["DocBgDim"] = c["LightGrayI"]
 	return c
 }
