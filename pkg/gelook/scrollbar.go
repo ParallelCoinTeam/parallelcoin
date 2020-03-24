@@ -24,14 +24,14 @@ type ScrollBar struct {
 }
 
 type ScrollBarSlider struct {
-	ColorBg string
-	Icon    DuoUIicon
+	container DuoUIcontainer
+	Icon      DuoUIicon
 }
 
 func (t *DuoUItheme) ScrollBar() *ScrollBar {
 	slider := &ScrollBarSlider{
-		ColorBg: t.Colors["Primary"],
-		Icon:    *t.Icons["Grab"],
+		container: t.DuoUIcontainer(0, t.Colors["Primary"]),
+		Icon:      *t.Icons["Grab"],
 	}
 	return &ScrollBar{
 		ColorBg:      t.Colors["DarkGrayII"],
@@ -39,7 +39,7 @@ func (t *DuoUItheme) ScrollBar() *ScrollBar {
 		slider:       slider,
 		up:           t.IconButton(t.Icons["Up"]),
 		down:         t.IconButton(t.Icons["Down"]),
-		container:    t.DuoUIcontainer(0, t.Colors["Gray"]),
+		container:    t.DuoUIcontainer(0, t.Colors["Light"]),
 	}
 }
 
@@ -96,7 +96,7 @@ func (p *DuoUIpanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 				image.Rectangle{Max: image.Point{X: cs.Width.Max, Y: cs.Height.Max}},
 			).Add(gtx.Ops)
 			pointer.InputOp{Key: panel.ScrollBar.Slider}.Add(gtx.Ops)
-			DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, p.ScrollBar.ColorBg, [4]float32{0, 0, 0, 0}, [4]float32{8, 8, 8, 8})
+			//DuoUIdrawRectangle(gtx, 16, 30, p.ScrollBar.ColorBg, [4]float32{0, 0, 0, 0}, [4]float32{8, 8, 8, 8})
 			//cs := gtx.Constraints
 			layout.Center.Layout(gtx, func() {
 
@@ -110,12 +110,15 @@ func (p *DuoUIpanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 					if panel.ScrollBar.Slider.CursorHeight < panel.ScrollBar.Size*2 {
 						panel.ScrollBar.Slider.CursorHeight = panel.ScrollBar.Size * 2
 					}
-					DuoUIdrawRectangle(gtx, panel.ScrollBar.Size, panel.ScrollBar.Slider.CursorHeight, p.ScrollBar.slider.ColorBg, [4]float32{8, 8, 8, 8}, [4]float32{8, 8, 8, 8})
-					layout.Center.Layout(gtx, func() {
+					//DuoUIdrawRectangle(gtx, panel.ScrollBar.Size, panel.ScrollBar.Slider.CursorHeight, p.ScrollBar.slider.ColorBg, [4]float32{8, 8, 8, 8}, [4]float32{8, 8, 8, 8})
+					//layout.Center.Layout(gtx, func() {
+					p.ScrollBar.slider.container.Layout(gtx, layout.Center, func() {
+
 						p.ScrollBar.slider.Icon.Color = HexARGB("ffcfcfcf")
 						p.ScrollBar.slider.Icon.op.Rect.Inset(0)
 						p.ScrollBar.slider.Icon.Layout(gtx, unit.Px(float32(panel.ScrollBar.Size/2)))
 					})
+					//})
 				})
 				panel.ScrollBar.Slider.Layout(gtx)
 			})
