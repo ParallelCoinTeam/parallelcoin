@@ -24,9 +24,9 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	for i := range logi.Loggers {
 		lgs = append(lgs, i)
 	}
-	mon.Loggers = GetTree(lgs)
+	//L.Debugs(mon.Loggers)
+	mon.Loggers = mon.GetTree(lgs)
 	mon.LoadConfig()
-	mon.Loggers.StoreState(mon)
 	_, _ = git.PlainClone("/tmp/foo", false,
 		&git.CloneOptions{
 			URL:      "https://github.com/src-d/go-git",

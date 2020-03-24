@@ -9,19 +9,30 @@ import (
 )
 
 type Node struct {
-	Name       string
-	FullName   string
-	Parent     *Node
-	Children   []*Node
-	Opened     bool
-	FoldButton *gel.Button
-	Hide       bool
-	ShowButton *gel.Button
+	Name     string
+	FullName string
+	parent   *Node
+	Children []*Node
+	Closed   bool
+	Hidden   bool
+	//Node       *TreeNode
+	foldButton *gel.Button
+	showButton *gel.Button
 }
 
-func GetTree(paths []string) (root *Node) {
+func (s *State) GetTree(paths []string) (root *Node) {
+
 	sort.Strings(paths)
-	root = &Node{FoldButton: new(gel.Button)}
+	root = &Node{
+		Name:       "root",
+		FullName:   string(os.PathSeparator),
+		parent:     nil,
+		Children:   nil,
+		Closed:     false,
+		Hidden:     false,
+		foldButton: new(gel.Button),
+		showButton: nil,
+	}
 	cursor := root
 	var prevLen int
 	for _, v := range paths {
@@ -35,9 +46,11 @@ func GetTree(paths []string) (root *Node) {
 			n = &Node{
 				Name:       name,
 				FullName:   v,
-				Parent:     cursor,
-				FoldButton: new(gel.Button),
-				ShowButton: new(gel.Button),
+				parent:     cursor,
+				foldButton: new(gel.Button),
+				showButton: new(gel.Button),
+				Closed:     false,
+				Hidden:     false,
 			}
 			cursor.Children = append(cursor.Children, n)
 		case splitLen == prevLen:
@@ -45,46 +58,50 @@ func GetTree(paths []string) (root *Node) {
 			n = &Node{
 				Name:       name,
 				FullName:   v,
-				Parent:     cursor.Parent,
-				FoldButton: new(gel.Button),
-				ShowButton: new(gel.Button),
+				parent:     cursor.parent,
+				foldButton: new(gel.Button),
+				showButton: new(gel.Button),
+				Closed:     false,
+				Hidden:     false,
 			}
-			cursor.Parent.Children = append(cursor.Parent.Children, n)
+			cursor.parent.Children = append(cursor.parent.Children, n)
 		case splitLen < prevLen:
-			cursor = cursor.Parent
+			cursor = cursor.parent
 			n = &Node{
 				Name:       name,
 				FullName:   v,
-				Parent:     cursor.Parent,
-				FoldButton: new(gel.Button),
-				ShowButton: new(gel.Button),
+				parent:     cursor.parent,
+				foldButton: new(gel.Button),
+				showButton: new(gel.Button),
+				Closed:     false,
+				Hidden:     false,
 			}
-			cursor.Parent.Children = append(cursor.Parent.Children, n)
+			cursor.parent.Children = append(cursor.parent.Children, n)
+		default:
+			n = &Node{
+				Closed: false,
+				Hidden: false,
+			}
 		}
+		s.Config.FilterNodes[v] = n
 		cursor = n
 		prevLen = splitLen
 	}
-	//root.CloseAllItems()
-	// spew.Config.Indent = "    "
-	// L.Debugs(root)
+	//root.ClearParents()
+	//root.CloseAllItems(s)
+	//spew.Config.Indent = "    "
+	//L.Debugs(root)
 	return
 }
 
 func (n *Node) GetWidget(s *State) {
-	//L.Debug("drawing filter list")
-	s.Loggers.LoadState(s)
 	nn := n.GetOpenItems()[1:]
+	//for i := range nn {
+	//	L.Debug(nn[i].FullName, nn[i].Closed, nn[i].Hidden)
+	//}
 	s.FilterList.Axis = layout.Vertical
 	s.FilterList.Layout(s.Gtx, len(nn), func(i int) {
 		s.FlexH(
-			//Rigid(func() {
-			//	ic := "ShowItem"
-			//	if nn[i].Show.Load() {
-			//		ic = "HideItem"
-			//	}
-			//	s.IconButton(ic, "DocBg", "PanelBg", nn[i].ShowButton)
-			//
-			//}),
 			Rigid(func() {
 				split := strings.Split(nn[i].FullName, string(os.PathSeparator))
 				joined := strings.Join(split[:len(split)-1], string(os.PathSeparator))
@@ -98,38 +115,36 @@ func (n *Node) GetWidget(s *State) {
 					name = "root"
 				}
 				fg := "PanelText"
-				if !nn[i].Hide {
+				if nn[i].Hidden {
 					fg = "DocBg"
 				}
-				//s.Text(name, fg, "PanelBg", "Primary", "h6")()
-				s.TextButton(name, "Primary", 24, fg, "PanelBg", nn[i].ShowButton)
-				if nn[i].ShowButton.Clicked(s.Gtx) {
-					nn[i].Hide = !nn[i].Hide
-					if !nn[i].Hide {
-						nn[i].ShowAllItems()
+				s.TextButton(name, "Primary", 24, fg, "PanelBg", nn[i].showButton)
+				if nn[i].showButton.Clicked(s.Gtx) {
+					nn[i].Hidden = !nn[i].Hidden
+					if !nn[i].Hidden {
+						nn[i].ShowAllItems(s)
 					} else {
-						nn[i].HideAllItems()
+						nn[i].HideAllItems(s)
 					}
 
-					nn[i].StoreState(s)
 					s.SaveConfig()
 				}
 			}),
 			Rigid(func() {
 				if len(nn[i].Children) > 0 {
-					ic := "Unfolded"
-					if nn[i].Opened {
-						ic = "Folded"
+					ic := "Folded"
+					if !nn[i].Closed {
+						ic = "Unfolded"
 					}
 					fg := "PanelText"
-					if nn[i].IsAnyShowing() {
+					if !nn[i].IsAnyShowing() {
 						fg = "DocBg"
 					}
-					s.IconButton(ic, fg, "PanelBg", nn[i].FoldButton)
-					if nn[i].FoldButton.Clicked(s.Gtx) {
-						nn[i].Opened = !nn[i].Opened
+					s.IconButton(ic, fg, "PanelBg", nn[i].foldButton)
+					if nn[i].foldButton.Clicked(s.Gtx) {
+						nn[i].Closed = !nn[i].Closed
 					}
-					nn[i].StoreState(s)
+
 					s.SaveConfig()
 				}
 			}),
@@ -143,68 +158,83 @@ func (n *Node) GetWidget(s *State) {
 	})
 }
 
-func (n *Node) LoadState(s *State) {
-	//s.Config.FilterTreeNodes = make(map[string]TreeNode)
-	for _, v := range n.Children {
-		s.Config.FilterTreeNodes[v.FullName] = &TreeNode{
-			IsOpen: n.Opened,
-			Hidden: n.Hide,
-		}
-		v.LoadState(s)
-	}
-}
+//func (n *Node) LoadState(s *State) {
+//	//s.Config.FilterNodes = make(map[string]TreeNode)
+//	for _, v := range n.Children {
+//		s.Config.FilterNodes[v.FullName] = &TreeNode{
+//			Closed: n.Closed,
+//			Hidden: n.Hidden,
+//		}
+//		v.LoadState(s)
+//	}
+//}
+//
+//func (n *Node) StoreState(s *State) {
+//	for j, w := range n.Children {
+//		s.Config.FilterNodes[n.Children[j].FullName].Closed =
+//			w.Closed
+//		s.Config.FilterNodes[n.Children[j].FullName].Hidden =
+//			w.Hidden
+//		w.StoreState(s)
+//	}
+//}
 
-func (n *Node) StoreState(s *State) {
-	for j, w := range n.Children {
-		s.Config.FilterTreeNodes[n.Children[j].FullName].IsOpen =
-			w.Opened
-		s.Config.FilterTreeNodes[n.Children[j].FullName].Hidden =
-			w.Hide
-		w.StoreState(s)
-	}
-}
+//func (n *Node) ClearParents() {
+//	for i := range n.Children {
+//		n.Children[i].parent = nil
+//		n.Children[i].ClearParents()
+//	}
+//}
 
 func (n *Node) GetOpenItems() (out []*Node) {
 	out = append(out, n)
+	//L.Debugs(n)
 	for _, v := range n.Children {
-		if !n.Opened {
+		if !n.Closed {
 			out = append(out, v.GetOpenItems()...)
 		}
 	}
+	//if n.Parent == nil {
+	//	L.Debugs(out)
+	//}
 	return
 }
 
-func (n *Node) OpenAllItems() {
+func (n *Node) OpenAllItems(s *State) {
 	for _, v := range n.Children {
-		v.Opened = true
-		v.OpenAllItems()
+		v.Closed = false
+		//s.Config.FilterNodes[v.FullName].Node.Closed=false
+		v.OpenAllItems(s)
 	}
 }
 
-func (n *Node) CloseAllItems() {
+func (n *Node) CloseAllItems(s *State) {
 	for _, v := range n.Children {
-		v.Opened = false
-		v.CloseAllItems()
+		v.Closed = true
+		//s.Config.FilterNodes[v.FullName].Closed=true
+		v.CloseAllItems(s)
 	}
 }
 
-func (n *Node) HideAllItems() {
+func (n *Node) HideAllItems(s *State) {
 	for _, v := range n.Children {
-		v.Hide = true
-		v.HideAllItems()
+		v.Hidden = true
+		//s.Config.FilterNodes[v.FullName].Hidden=true
+		v.HideAllItems(s)
 	}
 }
 
-func (n *Node) ShowAllItems() {
+func (n *Node) ShowAllItems(s *State) {
 	for _, v := range n.Children {
-		v.Hide = false
-		v.ShowAllItems()
+		v.Hidden = false
+		//s.Config.FilterNodes[v.FullName].Hidden=false
+		v.ShowAllItems(s)
 	}
 }
 
 func (n *Node) IsAnyShowing() bool {
 	for _, v := range n.Children {
-		if !v.Hide || !v.IsAnyShowing() {
+		if !v.Hidden || v.IsAnyShowing() {
 			return true
 		}
 	}
