@@ -9,7 +9,7 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"gopkg.in/src-d/go-git.v4"
 	"os"
@@ -21,14 +21,17 @@ import (
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	mon := NewMonitor(cx, nil, rc)
 	var lgs []string
-	for i := range log.Loggers {
+	for i := range logi.Loggers {
 		lgs = append(lgs, i)
 	}
 	mon.Loggers = GetTree(lgs)
-	_, _ = git.PlainClone("/tmp/foo", false, &git.CloneOptions{
-		URL:      "https://github.com/src-d/go-git",
-		Progress: os.Stderr,
-	})
+	mon.LoadConfig()
+	mon.Loggers.StoreState(mon)
+	_, _ = git.PlainClone("/tmp/foo", false,
+		&git.CloneOptions{
+			URL:      "https://github.com/src-d/go-git",
+			Progress: os.Stderr,
+		})
 	var cwd string
 	if cwd, err = os.Getwd(); L.Check(err) {
 	}
@@ -46,21 +49,18 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	if !strings.HasPrefix("go version", string(out)) {
 		mon.HasGo = true
 	}
-	mon.LoadConfig()
-	//L.Debugs(mon.Config)
 	mon.W = app.NewWindow(
-		app.Size(unit.Dp(float32(mon.Config.Width.Load())),
-			unit.Dp(float32(mon.Config.Height.Load()))),
+		app.Size(unit.Dp(float32(mon.Config.Width)),
+			unit.Dp(float32(mon.Config.Height))),
 		app.Title("ParallelCoin Pod Monitor ["+*cx.Config.DataDir+"]"),
 	)
 	mon.Gtx = layout.NewContext(mon.W.Queue())
 	go mon.Runner()
-	if mon.Config.Running.Load() {
+	if mon.Config.Running {
 		go func() {
 			time.Sleep(time.Second)
 			mon.RunCommandChan <- "restart"
-			if mon.Config.Pausing.Load() {
-				//time.Sleep(time.Second*3)
+			if mon.Config.Pausing {
 				mon.RunCommandChan <- "pause"
 			}
 		}()
@@ -92,7 +92,6 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 		L.Debug("gui shut down")
 		os.Exit(0)
 	}()
-	// w.Invalidate()
 	interrupt.AddHandler(func() {
 		close(cx.KillAll)
 	})

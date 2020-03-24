@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 
 	"gioui.org/layout"
-	"go.uber.org/atomic"
-
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
@@ -47,6 +45,8 @@ type State struct {
 	FilterButton              *gel.Button
 	FilterHeaderButton        *gel.Button
 	FilterAllButton           *gel.Button
+	FilterHideButton          *gel.Button
+	FilterShowButton          *gel.Button
 	FilterNoneButton          *gel.Button
 	ModesButtons              map[string]*gel.Button
 	GroupsList                *layout.List
@@ -62,6 +62,8 @@ type State struct {
 	InstallNewGoButton        *gel.Button
 	CannotRun                 bool
 	RunCommandChan            chan string
+	FilterButtons             []*gel.Button
+	FilterList                layout.List
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
@@ -97,7 +99,9 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		FilterButton:             new(gel.Button),
 		FilterHeaderButton:       new(gel.Button),
 		FilterAllButton:          new(gel.Button),
-		FilterNoneButton:          new(gel.Button),
+		FilterNoneButton:         new(gel.Button),
+		FilterHideButton:         new(gel.Button),
+		FilterShowButton:         new(gel.Button),
 		ModesButtons: map[string]*gel.Button{
 			"node":   new(gel.Button),
 			"wallet": new(gel.Button),
@@ -105,7 +109,7 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 			"gui":    new(gel.Button),
 			"mon":    new(gel.Button),
 		},
-		Config:       &Config{},
+		Config:       &Config{FilterTreeNodes: make(map[string]*TreeNode)},
 		WindowWidth:  0,
 		WindowHeight: 0,
 		GroupsList: &layout.List{
@@ -121,95 +125,41 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		InstallNewGoButton:   new(gel.Button),
 		RunCommandChan:       make(chan string),
 	}
-	s.Config.RunMode.Store("node")
-	s.Config.DarkTheme.Store(true)
+	s.Config.RunMode = "node"
+	s.Config.DarkTheme = true
 	return
+}
+
+type TreeNode struct {
+	IsOpen, Hidden bool
 }
 
 type Config struct {
-	Width, Height  atomic.Int32
-	RunMode        atomic.String
-	RunModeOpen    atomic.Bool
-	RunModeZoomed  atomic.Bool
-	SettingsOpen   atomic.Bool
-	SettingsZoomed atomic.Bool
-	SettingsTab    atomic.String
-	BuildOpen      atomic.Bool
-	BuildZoomed    atomic.Bool
-	DarkTheme      atomic.Bool
-	RunInRepo      atomic.Bool
-	UseBuiltinGo   atomic.Bool
-	Running        atomic.Bool
-	Pausing        atomic.Bool
-	FilterOpen     atomic.Bool
-}
-
-func (c *Config) GetUnsafeConfig() (out *UnsafeConfig) {
-	out = &UnsafeConfig{
-		Width:          c.Width.Load(),
-		Height:         c.Height.Load(),
-		RunMode:        c.RunMode.Load(),
-		RunModeOpen:    c.RunModeOpen.Load(),
-		RunModeZoomed:  c.RunModeZoomed.Load(),
-		SettingsOpen:   c.SettingsOpen.Load(),
-		SettingsZoomed: c.SettingsZoomed.Load(),
-		SettingsTab:    c.SettingsTab.Load(),
-		BuildOpen:      c.BuildOpen.Load(),
-		BuildZoomed:    c.BuildZoomed.Load(),
-		DarkTheme:      c.DarkTheme.Load(),
-		RunInRepo:      c.RunInRepo.Load(),
-		UseBuiltinGo:   c.UseBuiltinGo.Load(),
-		Running:        c.Running.Load(),
-		Pausing:        c.Pausing.Load(),
-		FilterOpen:     c.FilterOpen.Load(),
-	}
-	return
-}
-
-type UnsafeConfig struct {
-	Width, Height  int32
-	RunMode        string
-	RunModeOpen    bool
-	RunModeZoomed  bool
-	SettingsOpen   bool
-	SettingsZoomed bool
-	SettingsTab    string
-	BuildOpen      bool
-	BuildZoomed    bool
-	DarkTheme      bool
-	RunInRepo      bool
-	UseBuiltinGo   bool
-	Running        bool
-	Pausing        bool
-	FilterOpen     bool
-}
-
-func (u *UnsafeConfig) LoadInto(c *Config) {
-	c.Width.Store(u.Width)
-	c.Height.Store(u.Height)
-	c.RunMode.Store(u.RunMode)
-	c.RunModeZoomed.Store(u.RunModeZoomed)
-	c.RunModeOpen.Store(u.RunModeOpen)
-	c.SettingsZoomed.Store(u.SettingsZoomed)
-	c.SettingsOpen.Store(u.SettingsOpen)
-	c.SettingsTab.Store(u.SettingsTab)
-	c.BuildOpen.Store(u.BuildOpen)
-	c.BuildZoomed.Store(u.BuildZoomed)
-	c.DarkTheme.Store(u.DarkTheme)
-	c.RunInRepo.Store(u.RunInRepo)
-	c.UseBuiltinGo.Store(u.UseBuiltinGo)
-	c.Running.Store(u.Running)
-	c.Pausing.Store(u.Pausing)
-	c.FilterOpen.Store(u.FilterOpen)
+	Width, Height   int
+	RunMode         string
+	RunModeOpen     bool
+	RunModeZoomed   bool
+	SettingsOpen    bool
+	SettingsZoomed  bool
+	SettingsTab     string
+	BuildOpen       bool
+	BuildZoomed     bool
+	DarkTheme       bool
+	RunInRepo       bool
+	UseBuiltinGo    bool
+	Running         bool
+	Pausing         bool
+	FilterOpen      bool
+	FilterTreeNodes map[string]*TreeNode
 }
 
 func (s *State) LoadConfig() {
 	L.Debug("loading config")
 	var err error
-	u := s.Config.GetUnsafeConfig()
+	u := s.Config
 	//u.Width, u.Height = 800, 600
 	//u.RunMode = "node"
-	//L.Debugs(u)
+	L.Debugs(u)
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if apputil.FileExists(filename) {
 		//L.Debug("config file exists")
@@ -217,50 +167,39 @@ func (s *State) LoadConfig() {
 		if b, err = ioutil.ReadFile(filename); !L.Check(err) {
 			L.Warn(string(b))
 			if err = json.Unmarshal(b, u); L.Check(err) {
-				u.LoadInto(s.Config)
-				//L.Debugs(s.Config)
-				s.SaveConfig()
+				//s.SaveConfig()
 			}
-			u.LoadInto(s.Config)
-			//L.Debugs(s.Config)
+			L.Debugs(s.Config)
 		}
 	} else {
 		L.Warn("creating new configuration")
-		u.LoadInto(s.Config)
-		s.Config.UseBuiltinGo.Store(s.HasGo)
-		s.Config.RunInRepo.Store(s.RunningInRepo)
+		s.Config.UseBuiltinGo = s.HasGo
+		s.Config.RunInRepo = s.RunningInRepo
 		//L.Debugs(s.Config)
 		s.SaveConfig()
 	}
-	if s.Config.Width.Load() < 1 || s.Config.Height.Load() < 1 {
-		s.Config.Width.Store(800)
-		s.Config.Height.Store(600)
+	if s.Config.Width < 1 || s.Config.Height < 1 {
+		s.Config.Width = 800
+		s.Config.Height = 600
 	}
-	if s.Config.SettingsTab.Load() == "" {
-		s.Config.SettingsTab.Store("config")
+	if s.Config.SettingsTab == "" {
+		s.Config.SettingsTab = "config"
 	}
-	s.Rc.Settings.Tabs.Current = s.Config.SettingsTab.Load()
+	s.Rc.Settings.Tabs.Current = s.Config.SettingsTab
 	s.SetTheme(u.DarkTheme)
 }
 
 func (s *State) SaveConfig() {
-	L.Debug("saving config")
-	s.Config.Width.Store(int32(s.WindowWidth))
-	s.Config.Height.Store(int32(s.WindowHeight))
+	//L.Debug("saving config")
+	s.Config.Width = s.WindowWidth
+	s.Config.Height = s.WindowHeight
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
-	u := s.Config.GetUnsafeConfig()
 	//L.Debugs(u)
-	if yp, e := json.MarshalIndent(u, "", "  "); !L.Check(e) {
+	if yp, e := json.MarshalIndent(s.Config, "", "  "); !L.Check(e) {
 		//L.Debug(string(yp))
 		apputil.EnsureDir(filename)
 		if e := ioutil.WriteFile(filename, yp, 0600); L.Check(e) {
-			// panic(e)
+			panic(e)
 		}
-		u.LoadInto(s.Config)
-		// b, err := ioutil.ReadFile(filename)
-		// if string(b) != string(yp) {
-		// 	L.Fatal(err)
-		// 	panic(err)
-		// }
 	}
 }

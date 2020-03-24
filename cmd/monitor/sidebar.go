@@ -6,7 +6,8 @@ import (
 
 func (s *State) Sidebar() layout.FlexChild {
 	return Rigid(func() {
-		if !(s.Config.BuildOpen.Load() || s.Config.SettingsOpen.Load()) {
+		s.Loggers.StoreState(s)
+		if !(s.Config.BuildOpen || s.Config.SettingsOpen) {
 			s.Gtx.Constraints.Width.Max /= 2
 		} else {
 			s.Gtx.Constraints.Width.Max -= 360
@@ -14,72 +15,71 @@ func (s *State) Sidebar() layout.FlexChild {
 		if s.Gtx.Constraints.Width.Max > 360 {
 			s.Gtx.Constraints.Width.Max = 360
 		}
-		//if s.Config.FilterOpen.Load() && (s.Config.BuildOpen.Load() ||
-		//	s.Config.SettingsOpen.Load() && s.WindowWidth <= 800) {
-		//	s.Config.FilterOpen.Store(false)
-		//}
-		if s.Config.FilterOpen.Load() {
+		if s.Config.FilterOpen {
 			s.FlexV(Rigid(func() {
 				s.Gtx.Constraints.Height.Max = 48
 				s.Gtx.Constraints.Height.Min = 48
 				s.FlexH(
-					//Flexed(1, func() {
-					//	cs := s.Gtx.Constraints
-					//	s.Rectangle(cs.Width.Max, cs.Width.Max, "DocBg", "ff")
-					//	if s.WindowWidth > 360 {
-					//		//s.Gtx.Constraints.Width.Min = 32
-					//		s.Icon("Filter", "DocText", "DocBg", 48)
-					//	}
-					//}),
 					Flexed(1, func() {
 						cs := s.Gtx.Constraints
 						s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 						if s.WindowWidth > 640 {
 							s.Label("Filter")
 						}
-					}), //Spacer(),
-					Rigid(func() {
-						s.IconButton("FilterAll", "DocText", "DocBg", s.FilterAllButton)
-						for s.FilterAllButton.Clicked(s.Gtx) {
-							L.Debug("filter all")
-							//if !s.Config.FilterOpen.Load() {
-							//	s.Config.BuildOpen.Store(false)
-							//	s.Config.SettingsOpen.Store(false)
-							//}
-							//s.Config.FilterOpen.Toggle()
-							//s.SaveConfig()
+					}), Rigid(func() {
+						s.IconButton("HideAll", "DocText", "DocBg", s.FilterHideButton)
+						for s.FilterHideButton.Clicked(s.Gtx) {
+							L.Debug("hide all")
+							s.Loggers.CloseAllItems()
+							s.Loggers.LoadState(s)
+							s.SaveConfig()
 						}
 					}), Rigid(func() {
-						s.IconButton("FilterNone", "DocText", "DocBg", s.FilterNoneButton)
-						for s.FilterNoneButton.Clicked(s.Gtx) {
+						s.IconButton("ShowAll", "DocText", "DocBg", s.FilterShowButton)
+						for s.FilterShowButton.Clicked(s.Gtx) {
+							L.Debug("show all")
+							s.Loggers.OpenAllItems()
+							s.Loggers.LoadState(s)
+							s.SaveConfig()
+						}
+					}), Rigid(func() {
+						s.IconButton("ShowItem", "DocText", "DocBg", s.FilterAllButton)
+						for s.FilterAllButton.Clicked(s.Gtx) {
 							L.Debug("filter all")
-							//if !s.Config.FilterOpen.Load() {
-							//	s.Config.BuildOpen.Store(false)
-							//	s.Config.SettingsOpen.Store(false)
-							//}
-							//s.Config.FilterOpen.Toggle()
-							//s.SaveConfig()
+							s.Loggers.HideAllItems()
+							s.Loggers.LoadState(s)
+							s.SaveConfig()
+						}
+					}), Rigid(func() {
+						s.IconButton("HideItem", "DocText", "DocBg", s.FilterNoneButton)
+						for s.FilterNoneButton.Clicked(s.Gtx) {
+							L.Debug("filter none")
+							s.Loggers.ShowAllItems()
+							s.Loggers.LoadState(s)
+							s.SaveConfig()
 						}
 					}), Rigid(func() {
 						s.IconButton("Filter", "DocText", "DocBg", s.FilterButton)
 						for s.FilterButton.Clicked(s.Gtx) {
 							L.Debug("filter header clicked")
-							if !s.Config.FilterOpen.Load() {
-								s.Config.BuildOpen.Store(false)
-								s.Config.SettingsOpen.Store(false)
+							if !s.Config.FilterOpen {
+								s.Config.BuildOpen= false
+								s.Config.SettingsOpen= false
 							}
-							s.Config.FilterOpen.Toggle()
+							s.Config.FilterOpen=!s.Config.FilterOpen
 							s.SaveConfig()
 						}
 					}),
 				)
 			}), Flexed(1, func() {
-				s.FlexH(
-					Rigid(func() {
+				s.FlexV(
+					Flexed(1, func() {
 						s.Gtx.Constraints.Width.Min = 240
 						cs := s.Gtx.Constraints
 						s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
-
+						s.FlexV(Flexed(1, func() {
+							s.Loggers.GetWidget(s)
+						}))
 					}),
 				)
 			}),

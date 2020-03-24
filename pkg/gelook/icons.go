@@ -78,6 +78,12 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["FilterAll"] = mustIcon(NewDuoUIicon(icons.ActionDoneAll))
 	i["FilterNone"] = mustIcon(NewDuoUIicon(icons.ContentBlock))
 	i["Build"] = mustIcon(NewDuoUIicon(icons.ActionBuild))
+	i["Folded"] = mustIcon(NewDuoUIicon(icons.NavigationChevronRight))
+	i["Unfolded"] = mustIcon(NewDuoUIicon(icons.NavigationExpandMore))
+	i["HideAll"] = mustIcon(NewDuoUIicon(icons.NavigationUnfoldLess))
+	i["ShowAll"] = mustIcon(NewDuoUIicon(icons.NavigationUnfoldMore))
+	i["HideItem"] = mustIcon(NewDuoUIicon(icons.ActionVisibilityOff))
+	i["ShowItem"] = mustIcon(NewDuoUIicon(icons.ActionVisibility))
 	return i
 }
 

@@ -6,10 +6,10 @@ import (
 
 func (s *State) BuildButtons() layout.FlexChild {
 	return Rigid(func() {
-		if s.WindowWidth >= 360  || !s.Config.FilterOpen.Load() {
+		if s.WindowWidth >= 360  || !s.Config.FilterOpen {
 			s.FlexH(Rigid(func() {
 				bg, fg := "PanelBg", "PanelText"
-				if s.Config.BuildOpen.Load() {
+				if s.Config.BuildOpen {
 					bg, fg = "DocBg", "DocText"
 				}
 				//s.TextButton("Build", "Secondary", 23,
@@ -17,11 +17,11 @@ func (s *State) BuildButtons() layout.FlexChild {
 				s.IconButton("Build", fg, bg, s.BuildFoldButton)
 				for s.BuildFoldButton.Clicked(s.Gtx) {
 					L.Debug("run mode folder clicked")
-					if !s.Config.BuildOpen.Load() {
-						s.Config.FilterOpen.Store(false)
-						s.Config.SettingsOpen.Store(false)
+					if !s.Config.BuildOpen {
+						s.Config.FilterOpen= false
+						s.Config.SettingsOpen= false
 					}
-					s.Config.BuildOpen.Toggle()
+					s.Config.BuildOpen=!s.Config.BuildOpen
 					s.SaveConfig()
 				}
 			}),
@@ -31,12 +31,12 @@ func (s *State) BuildButtons() layout.FlexChild {
 }
 
 func (s *State) BuildPage() layout.FlexChild {
-	if !s.Config.BuildOpen.Load() {
+	if !s.Config.BuildOpen {
 		return Flexed(0, func() {})
 	}
 	var weight float32 = 0.5
 	switch {
-	case s.Config.BuildZoomed.Load():
+	case s.Config.BuildZoomed:
 		weight = 1
 	case s.WindowHeight <= 800 && s.WindowWidth <= 800:
 		weight = 1
@@ -71,14 +71,14 @@ func (s *State) BuildPage() layout.FlexChild {
 				if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
 					s.WindowHeight <= 600 && s.WindowWidth > 800) {
 					ic := "zoom"
-					if s.Config.BuildZoomed.Load() {
+					if s.Config.BuildZoomed {
 						ic = "minimize"
 					}
 					s.IconButton(ic, "DocText", "DocBg",
 						s.BuildZoomButton)
 					for s.BuildZoomButton.Clicked(s.Gtx) {
 						L.Debug("settings panel fold button clicked")
-						s.Config.BuildZoomed.Toggle()
+						s.Config.BuildZoomed=!s.Config.BuildZoomed
 						s.SaveConfig()
 					}
 				}
@@ -87,7 +87,7 @@ func (s *State) BuildPage() layout.FlexChild {
 					s.BuildCloseButton)
 				for s.BuildCloseButton.Clicked(s.Gtx) {
 					L.Debug("settings panel close button clicked")
-					s.Config.BuildOpen.Store(false)
+					s.Config.BuildOpen= false
 					s.SaveConfig()
 				}
 			}),
@@ -120,14 +120,14 @@ func (s *State) BuildConfigPage() {
 			}), Rigid(func() {
 				if s.RunningInRepo {
 					fg, bg := "DocText", "DocBg"
-					if s.Config.RunInRepo.Load() {
+					if s.Config.RunInRepo {
 						fg, bg = "ButtonText", "ButtonBg"
 					}
 					s.TextButton("repo", "Primary", 16,
 						fg, bg, s.RunningInRepoButton)
 					for s.RunningInRepoButton.Clicked(s.Gtx) {
-						if !s.Config.Running.Load() {
-							s.Config.RunInRepo.Store(true)
+						if !s.Config.Running {
+							s.Config.RunInRepo= true
 							s.CannotRun = false
 							s.SaveConfig()
 						}
@@ -135,21 +135,21 @@ func (s *State) BuildConfigPage() {
 				}
 			}), Rigid(func() {
 				fg, bg := "DocText", "DocBg"
-				if !s.Config.RunInRepo.Load() {
+				if !s.Config.RunInRepo {
 					fg, bg = "ButtonText", "ButtonBg"
 				}
 				s.TextButton("profile", "Primary", 16,
 					fg, bg, s.RunFromProfileButton)
 				for s.RunFromProfileButton.Clicked(s.Gtx) {
-					if !s.Config.Running.Load() {
-						s.Config.RunInRepo.Store(false)
+					if !s.Config.Running {
+						s.Config.RunInRepo= false
 						s.CannotRun = false
 						s.SaveConfig()
 					}
 				}
 			}), Rigid(func() {
 				txt := "run pod in its repository"
-				if !s.Config.RunInRepo.Load() {
+				if !s.Config.RunInRepo {
 					txt = "not implemented"
 					s.CannotRun = true
 				}
@@ -168,14 +168,14 @@ func (s *State) BuildConfigPage() {
 			}), Rigid(func() {
 				if s.HasGo {
 					fg, bg := "DocText", "DocBg"
-					if s.Config.UseBuiltinGo.Load() {
+					if s.Config.UseBuiltinGo {
 						fg, bg = "ButtonText", "ButtonBg"
 					}
 					s.TextButton("builtin", "Primary", 16,
 						fg, bg, s.UseBuiltinGoButton)
 					for s.UseBuiltinGoButton.Clicked(s.Gtx) {
-						if !s.Config.RunInRepo.Load() {
-							s.Config.UseBuiltinGo.Store(true)
+						if !s.Config.RunInRepo {
+							s.Config.UseBuiltinGo= true
 							s.CannotRun = false
 							if !s.HasGo {
 								s.CannotRun = true
@@ -185,14 +185,14 @@ func (s *State) BuildConfigPage() {
 				}
 			}), Rigid(func() {
 				fg, bg := "DocText", "DocBg"
-				if !s.Config.UseBuiltinGo.Load() {
+				if !s.Config.UseBuiltinGo {
 					fg, bg = "ButtonText", "ButtonBg"
 				}
 				s.TextButton("install new", "Primary", 16,
 					fg, bg, s.InstallNewGoButton)
 				for s.InstallNewGoButton.Clicked(s.Gtx) {
-					if !s.Config.RunInRepo.Load() {
-						s.Config.UseBuiltinGo.Store(false)
+					if !s.Config.RunInRepo {
+						s.Config.UseBuiltinGo= false
 						s.CannotRun = false
 						if !s.HasOtherGo {
 							s.CannotRun = true
@@ -201,7 +201,7 @@ func (s *State) BuildConfigPage() {
 				}
 			}), Rigid(func() {
 				txt := "build using built in go"
-				if !s.Config.UseBuiltinGo.Load() {
+				if !s.Config.UseBuiltinGo {
 					txt = "not implemented"
 					s.CannotRun = true
 				}

@@ -34,12 +34,12 @@ func (s *State) StatusBar() layout.FlexChild {
 func (s *State) RunmodeButtons() layout.FlexChild {
 	return Rigid(func() {
 		s.FlexH(Rigid(func() {
-			if !s.Config.RunModeOpen.Load() {
+			if !s.Config.RunModeOpen {
 				fg, bg := "ButtonText", "ButtonBg"
-				if s.Config.Running.Load() {
+				if s.Config.Running {
 					fg, bg = "ButtonBg", "DocText"
 				}
-				txt := s.Config.RunMode.Load()
+				txt := s.Config.RunMode
 				cs := s.Gtx.Constraints
 				if cs.Width.Max <= 240 {
 					txt = txt[:1]
@@ -48,8 +48,8 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 					32, fg, bg,
 					s.RunModeFoldButton)
 				for s.RunModeFoldButton.Clicked(s.Gtx) {
-					if !s.Config.Running.Load() {
-						s.Config.RunModeOpen.Store(true)
+					if !s.Config.Running {
+						s.Config.RunModeOpen= true
 						s.SaveConfig()
 					}
 				}
@@ -60,24 +60,23 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				s.ModesList.Layout(s.Gtx, len(modes), func(i int) {
 					mm := modes[i]
 					fg := "DocBg"
-					if modes[i] == s.Config.RunMode.Load() {
+					if modes[i] == s.Config.RunMode {
 						fg = "DocText"
 					}
 					txt := mm
-					if s.WindowWidth <= 880 && s.Config.FilterOpen.Load() ||
-						s.WindowWidth <= 640 && !s.Config.FilterOpen.Load() {
+					if s.WindowWidth <= 880 && s.Config.FilterOpen ||
+						s.WindowWidth <= 640 && !s.Config.FilterOpen {
 						txt = txt[:1]
 					}
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg", "ff")
-					s.TextButton(txt, "Secondary",
-						32, fg,
+					s.TextButton(txt, "Secondary", 32, fg,
 						"ButtonBg", s.ModesButtons[mm])
 					for s.ModesButtons[mm].Clicked(s.Gtx) {
 						L.Debug(mm, "clicked")
-						if s.Config.RunModeOpen.Load() {
-							s.Config.RunMode.Store(mm)
-							s.Config.RunModeOpen.Store(false)
+						if s.Config.RunModeOpen {
+							s.Config.RunMode= mm
+							s.Config.RunModeOpen= false
 						}
 						s.SaveConfig()
 					}
@@ -91,20 +90,20 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 func (s *State) Filter() layout.FlexChild {
 	return Rigid(func() {
 		fg, bg := "PanelText", "PanelBg"
-		if s.Config.FilterOpen.Load() {
+		if s.Config.FilterOpen {
 			fg, bg = "DocText", "DocBg"
 		}
 		//if !(s.Config.FilterOpen.Load() && s.WindowWidth <= 720) ||
 		//	(!s.Config.FilterOpen.Load() && s.WindowWidth > 480) {
-		if ! s.Config.FilterOpen.Load() {
+		if ! s.Config.FilterOpen {
 			s.IconButton("Filter", fg, bg, s.FilterButton)
 			for s.FilterButton.Clicked(s.Gtx) {
 				L.Debug("clicked filter button")
-				if !s.Config.FilterOpen.Load() {
-					s.Config.SettingsOpen.Store(false)
-					s.Config.BuildOpen.Store(false)
+				if !s.Config.FilterOpen {
+					s.Config.SettingsOpen= false
+					s.Config.BuildOpen= false
 				}
-				s.Config.FilterOpen.Toggle()
+				s.Config.FilterOpen=!s.Config.FilterOpen
 				s.SaveConfig()
 			}
 		}

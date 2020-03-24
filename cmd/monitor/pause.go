@@ -9,13 +9,13 @@ import (
 
 func pause(s *State, c *exec.Cmd) {
 	if err := c.Process.Signal(syscall.SIGSTOP); !L.Check(err) {
-		s.Config.Pausing.Store(true)
+		s.Config.Pausing=true
 		L.Debug("paused")
 	}
 }
 func resume(s *State, c *exec.Cmd) {
 	if err := c.Process.Signal(syscall.SIGCONT); !L.Check(err) {
-		s.Config.Pausing.Store(false)
+		s.Config.Pausing= false
 		L.Debug("resumed")
 	}
 }
