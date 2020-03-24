@@ -30,10 +30,10 @@ func (s *State) SettingsButtons() layout.FlexChild {
 				for s.SettingsFoldButton.Clicked(s.Gtx) {
 					L.Debug("settings folder clicked")
 					if !s.Config.SettingsOpen {
-						s.Config.FilterOpen= false
-						s.Config.BuildOpen= false
+						s.Config.FilterOpen = false
+						s.Config.BuildOpen = false
 					}
-					s.Config.SettingsOpen=!s.Config.SettingsOpen
+					s.Config.SettingsOpen = !s.Config.SettingsOpen
 					s.SaveConfig()
 				}
 			}
@@ -92,7 +92,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 							s.SettingsZoomButton)
 						for s.SettingsZoomButton.Clicked(s.Gtx) {
 							L.Debug("settings panel close button clicked")
-							s.Config.SettingsZoomed=!s.Config.SettingsZoomed
+							s.Config.SettingsZoomed = !s.Config.SettingsZoomed
 							s.SaveConfig()
 						}
 					}
@@ -101,7 +101,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 						s.SettingsCloseButton)
 					for s.SettingsCloseButton.Clicked(s.Gtx) {
 						L.Debug("settings panel close button clicked")
-						s.Config.SettingsOpen= false
+						s.Config.SettingsOpen = false
 						s.SaveConfig()
 					}
 				}),
@@ -134,7 +134,7 @@ func (s *State) SettingsTabs(size int) {
 		txt := s.Rc.Settings.Daemon.Schema.Groups[i].Legend
 		for s.Rc.Settings.Tabs.TabsList[txt].Clicked(s.Gtx) {
 			s.Rc.Settings.Tabs.Current = txt
-			s.Config.SettingsTab= txt
+			s.Config.SettingsTab = txt
 		}
 		if s.Rc.Settings.Tabs.Current == txt {
 			color = "PanelText"
@@ -177,9 +177,7 @@ func (s *State) SettingsBody() {
 						}
 					}
 				})
-		})
-	}),
-	)
+		}))
 }
 
 func (s *State) SettingsItemLabel(f *Field) func() {
@@ -493,7 +491,7 @@ func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, w
 		width = maxLen
 		height := 19 * len(split)
 		//L.Debug(len(split), height, split)
-		s.Theme.DuoUIitem(0, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.N, func() {
+		s.Theme.DuoUIcontainer(0, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.N, func() {
 			outerColor := "DocBg"
 			innerColor := "PanelBg"
 			textColor := "PanelText"
