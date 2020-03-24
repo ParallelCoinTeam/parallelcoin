@@ -68,12 +68,12 @@ func (s *State) Sidebar() layout.FlexChild {
 					}),
 				)
 			}), Flexed(1, func() {
+				cs := s.Gtx.Constraints
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 				s.Inset(16, func() {
 					s.FlexV(
 						Flexed(1, func() {
-							s.Gtx.Constraints.Width.Min = 240
-							cs := s.Gtx.Constraints
-							s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
+							//s.Gtx.Constraints.Width.Min = 240
 							s.FlexV(Flexed(1, func() {
 								s.Loggers.GetWidget(s)
 							}))

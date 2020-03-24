@@ -99,15 +99,19 @@ func (n *Node) GetWidget(s *State) {
 	//for i := range nn {
 	//	L.Debug(nn[i].FullName, nn[i].Closed, nn[i].Hidden)
 	//}
+	indent := 0
 	s.FilterList.Axis = layout.Vertical
 	s.FilterList.Layout(s.Gtx, len(nn), func(i int) {
 		s.FlexH(
 			Rigid(func() {
 				split := strings.Split(nn[i].FullName, string(os.PathSeparator))
-				joined := strings.Join(split[:len(split)-1], string(os.PathSeparator))
-				if joined != "" {
-					s.Text(joined+string(os.PathSeparator), "DocBg", "PanelBg", "Primary", "body2")()
-				}
+				//joined := strings.Join(split[:len(split)-1], string(os.PathSeparator))
+				indent = len(split)
+				//if joined != "" {
+				//	s.Text(joined+string(os.PathSeparator), "DocBg", "PanelBg", "Primary", "body2")()
+				//}
+				//s.Gtx.Constraints.Width.Max = 16 * indent
+				s.Inset(indent*8, func(){})
 			}),
 			Rigid(func() {
 				name := nn[i].Name
@@ -136,9 +140,12 @@ func (n *Node) GetWidget(s *State) {
 					if !nn[i].Closed {
 						ic = "Unfolded"
 					}
-					fg := "PanelText"
-					if !nn[i].IsAnyShowing() {
-						fg = "DocBg"
+					fg := "DocBg"
+					if nn[i].IsAnyShowing() {
+						fg = "DocTextDim"
+					}
+					if nn[i].IsAllShowing() {
+						fg = "PanelText"
 					}
 					s.IconButton(ic, fg, "PanelBg", nn[i].foldButton)
 					if nn[i].foldButton.Clicked(s.Gtx) {
@@ -203,7 +210,6 @@ func (n *Node) GetOpenItems() (out []*Node) {
 func (n *Node) OpenAllItems(s *State) {
 	for _, v := range n.Children {
 		v.Closed = false
-		//s.Config.FilterNodes[v.FullName].Node.Closed=false
 		v.OpenAllItems(s)
 	}
 }
@@ -211,7 +217,6 @@ func (n *Node) OpenAllItems(s *State) {
 func (n *Node) CloseAllItems(s *State) {
 	for _, v := range n.Children {
 		v.Closed = true
-		//s.Config.FilterNodes[v.FullName].Closed=true
 		v.CloseAllItems(s)
 	}
 }
@@ -219,7 +224,6 @@ func (n *Node) CloseAllItems(s *State) {
 func (n *Node) HideAllItems(s *State) {
 	for _, v := range n.Children {
 		v.Hidden = true
-		//s.Config.FilterNodes[v.FullName].Hidden=true
 		v.HideAllItems(s)
 	}
 }
@@ -227,7 +231,6 @@ func (n *Node) HideAllItems(s *State) {
 func (n *Node) ShowAllItems(s *State) {
 	for _, v := range n.Children {
 		v.Hidden = false
-		//s.Config.FilterNodes[v.FullName].Hidden=false
 		v.ShowAllItems(s)
 	}
 }
@@ -239,4 +242,13 @@ func (n *Node) IsAnyShowing() bool {
 		}
 	}
 	return false
+}
+
+func (n *Node) IsAllShowing() bool {
+	for _, v := range n.Children {
+		if v.Hidden || !v.IsAllShowing() {
+			return false
+		}
+	}
+	return true
 }

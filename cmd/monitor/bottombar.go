@@ -75,7 +75,7 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 					for s.ModesButtons[mm].Clicked(s.Gtx) {
 						L.Debug(mm, "clicked")
 						if s.Config.RunModeOpen {
-							s.Config.RunMode= mm
+							s.Config.RunMode= modes[i]
 							s.Config.RunModeOpen= false
 						}
 						s.SaveConfig()
