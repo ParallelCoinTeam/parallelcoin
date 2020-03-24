@@ -1,20 +1,19 @@
-package serve
+package consume
 
 import (
 	"errors"
-	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"io"
 	"net/rpc"
 )
 
-type Logs struct {
+type Consume struct {
 	*rpc.Client
 }
 
 // New creates a new client logi's ipcLogger
 // Note that any kind of connection can be used here, other than the StdConn
-func New(conn io.ReadWriteCloser) *Logs {
-	return &Logs{rpc.NewClient(conn)}
+func New(conn io.ReadWriteCloser) *Consume {
+	return &Consume{rpc.NewClient(conn)}
 }
 
 // The following are all blocking calls as they are all triggers rather than
@@ -25,10 +24,10 @@ func New(conn io.ReadWriteCloser) *Logs {
 // or alternatively as with the Controller just spew messages over UDP
 
 // Run the delivery of log entries
-func (c *Logs) Run(job *job.Container) (err error) {
+func (c *Consume) Run() (err error) {
 	L.Debug("starting logger feed")
 	var reply bool
-	err = c.Call("Serve.Run", job, &reply)
+	err = c.Call("API.Run", true, &reply)
 	if err != nil {
 		L.Error(err)
 		return
@@ -40,10 +39,10 @@ func (c *Logs) Run(job *job.Container) (err error) {
 }
 
 // Pause the delivery of log entries
-func (c *Logs) Pause(job *job.Container) (err error) {
+func (c *Consume) Pause() (err error) {
 	L.Debug("stopping logger feed")
 	var reply bool
-	err = c.Call("Serve.Pause", job, &reply)
+	err = c.Call("API.Pause", false, &reply)
 	if err != nil {
 		L.Error(err)
 		return
@@ -54,4 +53,13 @@ func (c *Logs) Pause(job *job.Container) (err error) {
 	return
 }
 
+type API struct {
 
+}
+
+// Log receives a log message
+func (a *API) Run(cmd bool, reply *bool) (err error) {
+	r := true
+	reply = &r
+	return
+}

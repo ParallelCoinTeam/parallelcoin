@@ -1,4 +1,4 @@
-package consume
+package serve
 
 import (
 	"errors"
@@ -7,17 +7,17 @@ import (
 	"net/rpc"
 )
 
-type Logs struct {
+type Serve struct {
 	*rpc.Client
 }
 
-func New(conn io.ReadWriteCloser) *Logs {
-	return &Logs{}
+func New(conn io.ReadWriteCloser) *Serve {
+	return &Serve{}
 }
 
 
-// Log receives a new log message
-func (c *Logs) Log(job *job.Container) (err error) {
+// Log sends a new log message
+func (c *Serve) Log(job *job.Container) (err error) {
 	L.Debug("starting logger feed")
 	var reply bool
 	err = c.Call("Consume.Log", job, &reply)
@@ -28,5 +28,24 @@ func (c *Logs) Log(job *job.Container) (err error) {
 	if reply != true {
 		err = errors.New("start signal not acknowledged")
 	}
+	return
+}
+
+type API struct {
+
+}
+
+// Run starts serving Log
+func (a *API) Run(cmd bool, reply *bool) (err error) {
+	r := true
+	reply = &r
+	return
+}
+
+
+// Pause pauses serving Log
+func (a *API) Pause(cmd bool, reply *bool) (err error) {
+	r := false
+	reply = &r
 	return
 }
