@@ -16,19 +16,8 @@ import (
 )
 
 var (
-	explorerPanelElement = &gel.Panel{
-		PanelContentLayout: &layout.List{
-			Axis:        layout.Vertical,
-			ScrollToEnd: false,
-		},
-		ScrollBar: &gel.ScrollBar{
-			Size: 16,
-			Body: new(gel.ScrollBarBody),
-			Up:   new(gel.Button),
-			Down: new(gel.Button),
-		},
-	}
-	txwidth int
+	explorerPanelElement = gel.NewPanel()
+	txwidth              int
 )
 
 func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
@@ -59,7 +48,7 @@ func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 			}),
 			layout.Flexed(1, func() {
 
-				explorerPanel := gelook.Panel{}
+				explorerPanel := th.DuoUIpanel()
 				explorerPanel.PanelObject = rc.Explorer.Blocks
 				explorerPanel.ScrollBar = th.ScrollBar()
 				explorerPanelElement.PanelObjectsNumber = len(rc.Explorer.Blocks)

@@ -14,7 +14,7 @@ var (
 
 func (ui *DuoUI) DuoUIfooter() func() {
 	return func() {
-		footer := ui.ly.Theme.DuoUIitem(0, ui.ly.Theme.Colors["Dark"])
+		footer := ui.ly.Theme.DuoUIcontainer(0, ui.ly.Theme.Colors["Dark"])
 		footer.FullWidth = true
 		footer.Layout(ui.ly.Context, layout.N, func() {
 			layout.Flex{Spacing: layout.SpaceBetween}.Layout(ui.ly.Context,

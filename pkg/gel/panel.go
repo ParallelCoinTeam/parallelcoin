@@ -1,14 +1,8 @@
 package gel
 
-import "gioui.org/layout"
-
-type item struct {
-	i int
-}
-
-func (it *item) doSlide(n int) {
-	it.i = it.i + n
-}
+import (
+	"gioui.org/layout"
+)
 
 type Panel struct {
 	Size                 int
@@ -21,18 +15,45 @@ type Panel struct {
 	ScrollUnit         int
 }
 
-func (p *Panel) Layout(gtx *layout.Context) {
-	if p.ScrollBar.Body.pressed {
-		cs := gtx.Constraints
-		if p.ScrollBar.Body.Position >= 0 && p.ScrollBar.Body.Position <= cs.Height.Max-p.ScrollBar.Body.CursorHeight {
-			p.ScrollBar.Body.Cursor = p.ScrollBar.Body.Position
-			p.PanelContentLayout.Position.First = p.ScrollBar.Body.Position / p.ScrollUnit
-			p.PanelContentLayout.Position.Offset = 0
-			//p.panelContent.Position.First = int(p.ScrollBar.body.Cursor)
-		}
-		//colorBg = "ffcf30cf"
-		//colorBorder = "ff303030"
-		//border = unit.Dp(0)
+func NewPanel() *Panel {
+	itemValue := item{
+		i: 0,
 	}
+	return &Panel{
+		PanelContentLayout: &layout.List{
+			Axis:        layout.Vertical,
+			ScrollToEnd: false,
+		},
+		ScrollBar: &ScrollBar{
+			Size: 16,
+			Slider: &Slider{
+				Do: func(n interface{}) {
+					itemValue.doSlide(n.(int))
+				},
+				OperateValue: 1,
+				pressed:      false,
+			},
+			Up:   new(Button),
+			Down: new(Button),
+		},
+	}
+}
 
+func (p *Panel) Layout(gtx *layout.Context) {
+	if p.PanelObjectsNumber > 0 {
+		p.ScrollUnit = p.ScrollBar.Slider.Height / p.PanelObjectsNumber
+	}
+	cursorHeight := p.VisibleObjectsNumber * p.ScrollUnit
+	if cursorHeight > p.Size {
+		p.ScrollBar.Slider.CursorHeight = cursorHeight
+	}
+	if p.ScrollBar.Slider.pressed {
+		cs := gtx.Constraints
+		if p.ScrollBar.Slider.Position >= 0 && p.ScrollBar.Slider.Position <= cs.Height.Max-p.ScrollBar.Slider.CursorHeight {
+			p.ScrollBar.Slider.Cursor = p.ScrollBar.Slider.Position
+			p.PanelContentLayout.Position.First = p.ScrollBar.Slider.Position / p.ScrollUnit
+			p.PanelContentLayout.Position.Offset = 0
+		}
+
+	}
 }

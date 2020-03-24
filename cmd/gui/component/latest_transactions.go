@@ -20,10 +20,10 @@ var (
 			ScrollToEnd: false,
 		},
 		ScrollBar: &gel.ScrollBar{
-			Size: 16,
-			Body: new(gel.ScrollBarBody),
-			Up:   new(gel.Button),
-			Down: new(gel.Button),
+			Size:   16,
+			Slider: new(gel.Slider),
+			Up:     new(gel.Button),
+			Down:   new(gel.Button),
 		},
 	}
 )
@@ -51,7 +51,7 @@ func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoU
 					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 						layout.Rigid(func() {
 
-							latestTxsBookPanel := gelook.Panel{}
+							latestTxsBookPanel := th.DuoUIpanel()
 							latestTxsBookPanel.PanelObject = rc.Status.Wallet.LastTxs.Txs
 							latestTxsBookPanel.ScrollBar = th.ScrollBar()
 							latestTxsPanelElement.PanelObjectsNumber = len(rc.Status.Wallet.LastTxs.Txs)

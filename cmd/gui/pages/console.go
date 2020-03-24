@@ -44,7 +44,7 @@ func Console(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.
 func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-			th.DuoUIitem(0, "ff000000").Layout(gtx, layout.N, func() {
+			th.DuoUIcontainer(0, "ff000000").Layout(gtx, layout.N, func() {
 				layout.Flex{}.Layout(gtx, layout.Flexed(1, func() {
 					layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 						layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceAround}.Layout(gtx,

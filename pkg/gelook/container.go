@@ -13,7 +13,7 @@ import (
 	"gioui.org/unit"
 )
 
-type DuoUIitem struct {
+type DuoUIcontainer struct {
 	// Color is the text color.
 	Color         string
 	Font          text.Font
@@ -36,8 +36,8 @@ type DuoUIitem struct {
 	hover         bool
 }
 
-func (t *DuoUItheme) DuoUIitem(padding int, background string) DuoUIitem {
-	return DuoUIitem{
+func (t *DuoUItheme) DuoUIcontainer(padding int, background string) DuoUIcontainer {
+	return DuoUIcontainer{
 		Font: text.Font{
 			Typeface: t.Fonts["Primary"],
 		},
@@ -52,7 +52,7 @@ func (t *DuoUItheme) DuoUIitem(padding int, background string) DuoUIitem {
 	}
 }
 
-func (d DuoUIitem) Layout(gtx *layout.Context, direction layout.Direction, itemContent func()) {
+func (d DuoUIcontainer) Layout(gtx *layout.Context, direction layout.Direction, itemContent func()) {
 	hmin := gtx.Constraints.Width.Min
 	vmin := gtx.Constraints.Height.Min
 	if d.FullWidth {

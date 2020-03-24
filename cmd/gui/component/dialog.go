@@ -23,7 +23,7 @@ var (
 
 func DuoUIdialog(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
 	// cs := gtx.Constraints
-	th.DuoUIitem(0, "ee000000").Layout(gtx, layout.Center, func() {
+	th.DuoUIcontainer(0, "ee000000").Layout(gtx, layout.Center, func() {
 		cs := gtx.Constraints
 		layout.Stack{Alignment: layout.Center}.Layout(gtx,
 			layout.Expanded(func() {

@@ -146,10 +146,10 @@ func (s *State) SettingsTabs(size int) {
 }
 
 func (s *State) SettingsBody() {
-	s.FlexH(Flexed(1, func() {
-		s.Inset(4, func() {
-			s.Theme.DuoUIitem(0, s.Theme.Colors["PanelBg"]).Layout(s.Gtx,
-				layout.NW, func() {
+	s.FlexH(
+		Rigid(func() {
+			s.Theme.DuoUIcontainer(4, s.Theme.Colors["PanelBg"]).
+				Layout(s.Gtx, layout.N, func() {
 					for _, fields := range s.Rc.Settings.Daemon.Schema.Groups {
 						if fmt.Sprint(fields.Legend) == s.Rc.Settings.Tabs.Current {
 							s.SettingsFields.Layout(s.Gtx,

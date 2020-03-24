@@ -40,8 +40,8 @@ func fill(gtx *layout.Context, col color.RGBA) {
 }
 func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	return func() {
-		th.DuoUIitem(8, "ffffffff").Layout(gtx, layout.NW, func() {
-			e := th.DuoUIeditor(label, "Dark", "Light", 32)
+		th.DuoUIcontainer(8, "ffffffff").Layout(gtx, layout.NW, func() {
+			e := th.DuoUIeditor(label)
 			e.Font.Typeface = th.Fonts["Mono"]
 			e.TextSize = unit.Dp(12)
 			layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
@@ -59,8 +59,8 @@ func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Ed
 
 func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	return func() {
-		th.DuoUIitem(8, "ffffffff").Layout(gtx, layout.NW, func() {
-			e := th.DuoUIeditor(label, "Dark", "Light", 32)
+		th.DuoUIcontainer(8, "ffffffff").Layout(gtx, layout.NW, func() {
+			e := th.DuoUIeditor(label)
 			e.Font.Typeface = th.Fonts["Mono"]
 			// e.Font.Style = text.Italic
 			layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
