@@ -56,15 +56,18 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	)
 	mon.Gtx = layout.NewContext(mon.W.Queue())
 	go mon.Runner()
-	if mon.Config.Running {
+	if mon.Config.Running && !(mon.Config.RunMode == "m" ||
+		mon.Config.RunMode == "mon" || mon.Config.RunMode == "monitor") {
 		go func() {
 			time.Sleep(time.Second)
 			mon.RunCommandChan <- "restart"
 			if mon.Config.Pausing {
+				time.Sleep(time.Second*3)
 				mon.RunCommandChan <- "pause"
 			}
 		}()
 	}
+	go mon.Consume()
 	go func() {
 		L.Debug("starting up GUI event loop")
 	out:

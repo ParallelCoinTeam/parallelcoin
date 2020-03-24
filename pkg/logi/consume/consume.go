@@ -8,7 +8,7 @@ import (
 )
 
 type Consume struct {
-	io.ReadWriteCloser
+	Conn io.ReadWriteCloser
 	*rpc.Client
 }
 
@@ -16,9 +16,9 @@ type Consume struct {
 // Note that any kind of connection can be used here, other than the StdConn
 func New(conn io.ReadWriteCloser) *Consume {
 	c := &Consume{
-		ReadWriteCloser: conn,
+		Conn: conn,
 	}
-	c.Client = rpc.NewClient(c)
+	c.Client = rpc.NewClient(conn)
 	return c
 }
 
