@@ -14,9 +14,9 @@ func (s *State) SetTheme(dark bool) {
 		s.Theme.Colors["DocBg"] = s.Theme.Colors["Light"]
 		s.Theme.Colors["PanelText"] = s.Theme.Colors["Dark"]
 		s.Theme.Colors["PanelBg"] = s.Theme.Colors["White"]
-		s.Theme.Colors["PanelTextDim"] = s.Theme.Colors["DarkGrayI"]
-		s.Theme.Colors["PanelBgDim"] = s.Theme.Colors["DarkGrayIII"]
-		s.Theme.Colors["DocTextDim"] = s.Theme.Colors["DarkGrayIII"]
+		s.Theme.Colors["PanelTextDim"] = s.Theme.Colors["DarkGray"]
+		s.Theme.Colors["PanelBgDim"] = s.Theme.Colors["DarkGrayI"]
+		s.Theme.Colors["DocTextDim"] = s.Theme.Colors["LightGrayII"]
 		s.Theme.Colors["DocBgDim"] = s.Theme.Colors["DarkGrayI"]
 	} else {
 		s.Theme.Colors["DocText"] = s.Theme.Colors["Light"]

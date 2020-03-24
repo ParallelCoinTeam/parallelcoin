@@ -128,7 +128,7 @@ type Logger struct {
 }
 
 // AddLogChan adds a channel that log entries are sent to
-func (l *Logger) AddLogChan() chan Entry {
+func (l *Logger) AddLogChan() (ch chan Entry) {
 	L.LogChan = append(L.LogChan, make(chan Entry))
 	return L.LogChan[len(L.LogChan)-1]
 }

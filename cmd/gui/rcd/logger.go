@@ -1,7 +1,7 @@
 package rcd
 
 import (
-	log "github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/logi"
 )
 
 var (
@@ -10,14 +10,14 @@ var (
 )
 
 func (r *RcVar) DuoUIloggerController() {
-	logChan := log.L.AddLogChan()
-	log.L.SetLevel(*r.cx.Config.LogLevel, true, "pod")
+	logChan := logi.L.AddLogChan()
+	logi.L.SetLevel(*r.cx.Config.LogLevel, true, "pod")
 	go func() {
 	out:
 		for {
 			select {
 			case n := <-logChan:
-				le, ok := r.Log.LogMessages.Load().([]log.Entry)
+				le, ok := r.Log.LogMessages.Load().([]logi.Entry)
 				if ok {
 					le = append(le, n)
 					// Once length exceeds MaxLogLength we trim off the start to keep it the same size
@@ -27,16 +27,17 @@ func (r *RcVar) DuoUIloggerController() {
 					}
 					r.Log.LogMessages.Store(le)
 				} else {
-					r.Log.LogMessages.Store([]log.Entry{n})
+					r.Log.LogMessages.Store([]logi.Entry{n})
 				}
 			case <-r.Log.StopLogger:
 				defer func() {
 					r.Log.StopLogger = make(chan struct{})
 				}()
-				r.Log.LogMessages.Store([]log.Entry{})
+				r.Log.LogMessages.Store([]logi.Entry{})
 				L.LogChan = nil
 				break out
 			}
 		}
+		close(logChan)
 	}()
 }
