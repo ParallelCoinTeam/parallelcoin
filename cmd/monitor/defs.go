@@ -109,7 +109,7 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 			"gui":    new(gel.Button),
 			"mon":    new(gel.Button),
 		},
-		Config:       &Config{FilterTreeNodes: make(map[string]*TreeNode)},
+		Config:       &Config{FilterNodes: make(map[string]*Node)},
 		WindowWidth:  0,
 		WindowHeight: 0,
 		GroupsList: &layout.List{
@@ -131,45 +131,70 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 }
 
 type TreeNode struct {
-	IsOpen, Hidden bool
+	Closed, Hidden bool
 }
 
 type Config struct {
-	Width, Height   int
-	RunMode         string
-	RunModeOpen     bool
-	RunModeZoomed   bool
-	SettingsOpen    bool
-	SettingsZoomed  bool
-	SettingsTab     string
-	BuildOpen       bool
-	BuildZoomed     bool
-	DarkTheme       bool
-	RunInRepo       bool
-	UseBuiltinGo    bool
-	Running         bool
-	Pausing         bool
-	FilterOpen      bool
-	FilterTreeNodes map[string]*TreeNode
+	Width          int
+	Height         int
+	RunMode        string
+	RunModeOpen    bool
+	RunModeZoomed  bool
+	SettingsOpen   bool
+	SettingsZoomed bool
+	SettingsTab    string
+	BuildOpen      bool
+	BuildZoomed    bool
+	DarkTheme      bool
+	RunInRepo      bool
+	UseBuiltinGo   bool
+	Running        bool
+	Pausing        bool
+	FilterOpen     bool
+	FilterNodes    map[string]*Node
 }
 
 func (s *State) LoadConfig() {
 	L.Debug("loading config")
 	var err error
-	u := s.Config
+	cnf := &Config{}
 	//u.Width, u.Height = 800, 600
 	//u.RunMode = "node"
-	L.Debugs(u)
+	//L.Debugs(u)
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if apputil.FileExists(filename) {
 		//L.Debug("config file exists")
 		var b []byte
 		if b, err = ioutil.ReadFile(filename); !L.Check(err) {
-			L.Warn(string(b))
-			if err = json.Unmarshal(b, u); L.Check(err) {
+			//L.Warn(string(b))
+			//L.Debug(s.Config)
+			if err = json.Unmarshal(b, cnf); L.Check(err) {
 				//s.SaveConfig()
 			}
-			L.Debugs(s.Config)
+			for i := range cnf.FilterNodes {
+				s.Config.FilterNodes[i].Hidden = cnf.FilterNodes[i].Hidden
+				s.Config.FilterNodes[i].Closed = cnf.FilterNodes[i].Closed
+			}
+			s.Config.Width = cnf.Width
+			s.Config.Height = cnf.Height
+			s.Config.RunMode = cnf.RunMode
+			s.Config.RunModeOpen = cnf.RunModeOpen
+			s.Config.RunModeZoomed = cnf.RunModeZoomed
+			s.Config.SettingsOpen = cnf.SettingsOpen
+			s.Config.SettingsZoomed = cnf.SettingsZoomed
+			s.Config.SettingsTab = cnf.SettingsTab
+			s.Config.BuildOpen = cnf.BuildOpen
+			s.Config.BuildZoomed = cnf.BuildZoomed
+			s.Config.DarkTheme = cnf.DarkTheme
+			s.Config.RunInRepo = cnf.RunInRepo
+			s.Config.UseBuiltinGo = cnf.UseBuiltinGo
+			s.Config.Running = cnf.Running
+			s.Config.Pausing = cnf.Pausing
+			s.Config.FilterOpen = cnf.FilterOpen
+			//L.Debugs(s.Config.FilterNodes)
+			//for i := range s.Config.FilterNodes {
+			//	L.Debug(s.Config.FilterNodes[i])
+			//}
 		}
 	} else {
 		L.Warn("creating new configuration")
@@ -186,11 +211,15 @@ func (s *State) LoadConfig() {
 		s.Config.SettingsTab = "config"
 	}
 	s.Rc.Settings.Tabs.Current = s.Config.SettingsTab
-	s.SetTheme(u.DarkTheme)
+	s.SetTheme(s.Config.DarkTheme)
 }
 
 func (s *State) SaveConfig() {
 	//L.Debug("saving config")
+	//for i, v := range s.Config.FilterNodes {
+	//	L.Debug(i, v)
+	//}
+	//L.Debugs(s.Config.FilterNodes)
 	s.Config.Width = s.WindowWidth
 	s.Config.Height = s.WindowHeight
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
