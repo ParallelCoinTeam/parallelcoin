@@ -13,7 +13,7 @@ import (
 
 // Main wallet screen
 func (ui *DuoUI) DuoUIsplashScreen() {
-	ui.ly.Theme.DuoUIitem(0, ui.ly.Theme.Colors["Dark"]).Layout(ui.ly.Context, layout.Center, func() {
+	ui.ly.Theme.DuoUIcontainer(0, ui.ly.Theme.Colors["Dark"]).Layout(ui.ly.Context, layout.Center, func() {
 		logo, _ := gelook.NewDuoUIicon(ico.ParallelCoin)
 		layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
@@ -47,7 +47,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 
 // Main wallet screen
 func (ui *DuoUI) DuoUImainScreen() {
-	ui.ly.Theme.DuoUIitem(0, ui.ly.Theme.Colors["Dark"]).Layout(ui.ly.Context, layout.Center, func() {
+	ui.ly.Theme.DuoUIcontainer(0, ui.ly.Theme.Colors["Dark"]).Layout(ui.ly.Context, layout.Center, func() {
 		layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
 			layout.Rigid(ui.DuoUIheader()),
 			layout.Flexed(1, ui.DuoUIbody()),

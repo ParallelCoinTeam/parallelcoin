@@ -24,7 +24,7 @@ var (
 
 func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		th.DuoUIitem(8, th.Colors["Light"]).Layout(gtx, layout.NW, func() {
+		th.DuoUIcontainer(8, th.Colors["Light"]).Layout(gtx, layout.NW, func() {
 			bigStatus := []func(){
 				listItem(gtx, th, 22, 6, "EditorMonetizationOn", "BALANCE :", rc.Status.Wallet.Balance.Load()+" "+rc.Settings.Abbrevation),
 				th.DuoUIline(gtx, 8, 0, 1, th.Colors["LightGray"]),

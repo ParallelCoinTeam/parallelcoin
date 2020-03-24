@@ -159,7 +159,7 @@ func (s *State) SettingsTabs() {
 func (s *State) SettingsBody() {
 	s.FlexH(
 		Rigid(func() {
-			s.Theme.DuoUIitem(4, s.Theme.Colors["PanelBg"]).
+			s.Theme.DuoUIcontainer(4, s.Theme.Colors["PanelBg"]).
 				Layout(s.Gtx, layout.N, func() {
 					for _, fields := range s.Rc.Settings.Daemon.Schema.Groups {
 						if fmt.Sprint(fields.Legend) == s.Rc.Settings.Tabs.Current {

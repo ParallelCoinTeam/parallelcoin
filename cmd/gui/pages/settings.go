@@ -13,18 +13,7 @@ import (
 )
 
 var (
-	settingsPanelElement = &gel.Panel{
-		PanelContentLayout: &layout.List{
-			Axis:        layout.Vertical,
-			ScrollToEnd: false,
-		},
-		ScrollBar: &gel.ScrollBar{
-			Size: 16,
-			Body: new(gel.ScrollBarBody),
-			Up:   new(gel.Button),
-			Down: new(gel.Button),
-		},
-	}
+	settingsPanelElement  = gel.NewPanel()
 	buttonSettingsRestart = new(gel.Button)
 )
 
@@ -87,11 +76,11 @@ func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) f
 func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		// layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-		th.DuoUIitem(16, th.Colors["Light"]).Layout(gtx, layout.N, func() {
+		th.DuoUIcontainer(16, th.Colors["Light"]).Layout(gtx, layout.N, func() {
 			for _, fields := range rc.Settings.Daemon.Schema.Groups {
 
 				if fmt.Sprint(fields.Legend) == rc.Settings.Tabs.Current {
-					settingsPanel := gelook.Panel{}
+					settingsPanel := th.DuoUIpanel()
 					settingsPanel.PanelObject = fields.Fields
 					settingsPanel.ScrollBar = th.ScrollBar()
 					settingsPanelElement.PanelObjectsNumber = len(fields.Fields)

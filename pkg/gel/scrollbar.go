@@ -5,22 +5,27 @@ import (
 	"gioui.org/layout"
 )
 
-type ScrollBar struct {
-	Size         int
-	OperateValue interface{}
-	//Height       float32
-	Body *ScrollBarBody
-	Up   *Button
-	Down *Button
+type item struct {
+	i int
 }
 
-type ScrollBarBody struct {
-	pressed      bool
+func (it *item) doSlide(n int) {
+	it.i = it.i + n
+}
+
+type ScrollBar struct {
+	Size   int
+	Slider *Slider
+	Up     *Button
+	Down   *Button
+}
+
+type Slider struct {
 	Do           func(interface{})
-	ColorBg      string
+	OperateValue interface{}
+	pressed      bool
 	Position     int
 	Cursor       int
-	OperateValue interface{}
 	Height       int
 	CursorHeight int
 	//Icon         DuoUIicon
@@ -37,37 +42,27 @@ type ScrollBarButton struct {
 	iconPadding float32
 }
 
-func (s *ScrollBar) Layout(gtx *layout.Context) {
-	// s.BodyHeight = gtx.Constraints.Height.Max
+func (s *Slider) Layout(gtx *layout.Context) {
+	//fmt.Println("He::", gtx.Constraints.Height.Max)
+	//fmt.Println("wi::", gtx.Constraints.Width.Max)
 
-	// // Flush clicks from before the previous frame.
-	// b.clicks -= b.prevClicks
-	// b.prevClicks = 0
-	s.processEvents(gtx)
-	// b.click.Add(gtx.Ops)
-	// for len(b.history) > 0 {
-	//	c := b.history[0]
-	//	if gtx.Now().Sub(c.Time) < 1*time.Second {
-	//		break
-	//	}
-	//	copy(b.history, b.history[1:])
-	//	b.history = b.history[:len(b.history)-1]
-	// }
-}
-
-func (s *ScrollBar) processEvents(gtx *layout.Context) {
-	for _, e := range gtx.Events(s.Body) {
+	for _, e := range gtx.Events(s) {
 		if e, ok := e.(pointer.Event); ok {
 			//s.Body.Position = e.Position.Y - float32(s.CursorHeight/2)
+			if e.Position.Y > 0 {
+				s.Position = int(e.Position.Y) - (s.CursorHeight / 2)
+			}
 			switch e.Type {
 			case pointer.Press:
-				s.Body.pressed = true
-				s.Body.Do(s.Body.OperateValue)
+				s.pressed = true
+				s.Do(s.OperateValue)
 				// list.Position.First = int(s.Position)
 				L.Debug("RADI PRESS")
 			case pointer.Release:
-				s.Body.pressed = false
+				s.pressed = false
 			}
 		}
 	}
+	cs := gtx.Constraints
+	s.Height = cs.Height.Max
 }

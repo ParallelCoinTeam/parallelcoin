@@ -12,24 +12,13 @@ import (
 )
 
 var (
-	transactionsPanelElement = &gel.Panel{
-		PanelContentLayout: &layout.List{
-			Axis:        layout.Vertical,
-			ScrollToEnd: false,
-		},
-		ScrollBar: &gel.ScrollBar{
-			Size: 16,
-			Body: new(gel.ScrollBarBody),
-			Up:   new(gel.Button),
-			Down: new(gel.Button),
-		},
-	}
+	transactionsPanelElement = gel.NewPanel()
 )
 
 func TransactionsList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 
-		transactionsPanel := gelook.Panel{}
+		transactionsPanel := th.DuoUIpanel()
 		transactionsPanel.PanelObject = rc.History.Txs.Txs
 		transactionsPanel.ScrollBar = th.ScrollBar()
 		transactionsPanelElement.PanelObjectsNumber = len(rc.History.Txs.Txs)

@@ -66,7 +66,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 			layout.Rigid(func() {
 				widgets := []func(){
 					func() {
-						th.DuoUIitem(1, th.Colors["Gray"]).Layout(gtx, layout.Center, func() {
+						th.DuoUIcontainer(1, th.Colors["Gray"]).Layout(gtx, layout.Center, func() {
 							layout.Flex{}.Layout(gtx,
 								layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address",
 									func(e gel.EditorEvent) {
@@ -79,7 +79,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 						})
 					},
 					func() {
-						th.DuoUIitem(1, th.Colors["Gray"]).Layout(gtx, layout.Center, func() {
+						th.DuoUIcontainer(1, th.Colors["Gray"]).Layout(gtx, layout.Center, func() {
 							layout.Flex{}.Layout(gtx,
 								layout.Flexed(1, component.Editor(gtx, th, amountLineEditor,
 									"DUO Amount", func(e gel.EditorEvent) {
