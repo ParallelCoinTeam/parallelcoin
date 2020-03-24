@@ -13,7 +13,7 @@ type DuoUIpanel struct {
 
 func (t *DuoUItheme) DuoUIpanel() DuoUIpanel {
 	return DuoUIpanel{
-		container: t.DuoUIcontainer(0, t.Colors["Gray"]),
+		container: t.DuoUIcontainer(0, t.Colors["Light"]),
 	}
 }
 func (p *DuoUIpanel) panelLayout(gtx *layout.Context, panel *gel.Panel, row func(i int, in interface{})) func() {
