@@ -14,18 +14,18 @@ func (s *State) RunControls() layout.FlexChild {
 		if s.CannotRun {
 			return
 		}
-		if !s.Config.Running.Load() {
+		if !s.Config.Running {
 			s.IconButton("Run", "PanelBg", "PanelText", s.RunMenuButton )
 			for s.RunMenuButton.Clicked(s.Gtx) {
 				L.Debug("clicked run button")
-				if !s.Config.RunModeOpen.Load() {
+				if !s.Config.RunModeOpen {
 					s.RunCommandChan <- "run"
 				}
 			}
 		} else {
 			ic := "Pause"
 			fg, bg := "PanelBg", "PanelText"
-			if s.Config.Pausing.Load() {
+			if s.Config.Pausing {
 				ic = "Run"
 				fg, bg = "PanelText", "PanelBg"
 			}
@@ -39,7 +39,7 @@ func (s *State) RunControls() layout.FlexChild {
 			}), Rigid(func() {
 				s.IconButton(ic, fg, bg, s.PauseMenuButton)
 				for s.PauseMenuButton.Clicked(s.Gtx) {
-					if s.Config.Pausing.Load() {
+					if s.Config.Pausing {
 						L.Debug("clicked on resume button")
 						s.RunCommandChan <- "resume"
 					} else {
@@ -74,7 +74,7 @@ func (s *State) Runner() {
 		switch cmd {
 		case "run":
 			L.Debug("run called")
-			if s.HasGo && !s.Config.Running.Load() {
+			if s.HasGo && !s.Config.Running {
 				exePath := filepath.Join(*s.Ctx.Config.DataDir, "pod_mon")
 				c = exec.Command("go", "build", "-v",
 					"-tags", "goterm", "-o", exePath)
@@ -82,27 +82,27 @@ func (s *State) Runner() {
 				c.Stderr = os.Stderr
 				if err = c.Run(); !L.Check(err) {
 					c = exec.Command(exePath,
-						"-D", *s.Ctx.Config.DataDir, s.Config.RunMode.Load())
+						"-D", *s.Ctx.Config.DataDir, s.Config.RunMode)
 					c.Stderr = os.Stderr
 					if err = c.Start(); !L.Check(err) {
-						s.Config.Running.Store(true)
-						s.Config.Pausing.Store(false)
+						s.Config.Running= true
+						s.Config.Pausing= false
 						s.W.Invalidate()
 					}
 					go func() {
 						if err = c.Wait(); L.Check(err) {
 						}
-						s.Config.Running.Store(false)
-						s.Config.Pausing.Store(false)
+						s.Config.Running= false
+						s.Config.Pausing= false
 						s.W.Invalidate()
 					}()
 				}
 			}
 		case "stop":
 			L.Debug("stop called")
-			if s.HasGo && c != nil && s.Config.Running.Load() {
+			if s.HasGo && c != nil && s.Config.Running {
 				if err = c.Process.Signal(syscall.SIGINT); !L.Check(err) {
-					s.Config.Running.Store(false)
+					s.Config.Running= false
 					L.Debug("interrupted")
 				}
 				if err = c.Process.Release(); L.Check(err) {
@@ -111,22 +111,22 @@ func (s *State) Runner() {
 			}
 		case "pause":
 			L.Debug("pause called")
-			if s.HasGo && c != nil && s.Config.Running.Load() && !s.Config.Pausing.Load() {
-				s.Config.Pausing.Toggle()
+			if s.HasGo && c != nil && s.Config.Running && !s.Config.Pausing {
+				s.Config.Pausing=!s.Config.Pausing
 				pause(s, c)
 			}
 		case "resume":
 			L.Debug("resume called")
-			if s.HasGo && c != nil && s.Config.Running.Load() && s.Config.Pausing.Load() {
-				s.Config.Pausing.Toggle()
+			if s.HasGo && c != nil && s.Config.Running && s.Config.Pausing {
+				s.Config.Pausing=!s.Config.Pausing
 				resume(s, c)
 			}
 		case "kill":
 			L.Debug("kill called")
-			if s.HasGo && c != nil && s.Config.Running.Load() {
+			if s.HasGo && c != nil && s.Config.Running {
 				if err = c.Process.Signal(syscall.SIGKILL); !L.Check(err) {
-					s.Config.Pausing.Store(false)
-					s.Config.Running.Store(false)
+					s.Config.Pausing= false
+					s.Config.Running= false
 					L.Debug("killed")
 				}
 			}
@@ -134,7 +134,7 @@ func (s *State) Runner() {
 			L.Debug("restart called")
 			if s.HasGo && c != nil {
 				if err = c.Process.Signal(syscall.SIGINT); !L.Check(err) {
-					s.Config.Running.Store(false)
+					s.Config.Running= false
 					time.Sleep(time.Second * 1)
 					L.Debug("restarted")
 					s.W.Invalidate()
@@ -147,12 +147,12 @@ func (s *State) Runner() {
 			c.Stderr = os.Stderr
 			if err = c.Run(); !L.Check(err) {
 				c = exec.Command(exePath,
-					"-D", *s.Ctx.Config.DataDir, s.Config.RunMode.Load())
+					"-D", *s.Ctx.Config.DataDir, s.Config.RunMode)
 				c.Stdout = os.Stdout
 				c.Stderr = os.Stderr
 				if err = c.Start(); !L.Check(err) {
-					s.Config.Running.Store(true)
-					s.Config.Pausing.Store(false)
+					s.Config.Running= true
+					s.Config.Pausing= false
 					s.W.Invalidate()
 				}
 			}

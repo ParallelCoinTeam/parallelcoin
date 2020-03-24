@@ -20,20 +20,20 @@ type Field struct {
 func (s *State) SettingsButtons() layout.FlexChild {
 	return Flexed(1, func() {
 		s.FlexH(Rigid(func() {
-			if s.WindowWidth >= 360 || !s.Config.FilterOpen.Load() {
+			if s.WindowWidth >= 360 || !s.Config.FilterOpen {
 				bg, fg := "PanelBg", "PanelText"
-				if s.Config.SettingsOpen.Load() {
+				if s.Config.SettingsOpen {
 					bg, fg = "DocBg", "DocText"
 				}
 				s.IconButton("settingsIcon", fg, bg, s.SettingsFoldButton)
 
 				for s.SettingsFoldButton.Clicked(s.Gtx) {
 					L.Debug("settings folder clicked")
-					if !s.Config.SettingsOpen.Load() {
-						s.Config.FilterOpen.Store(false)
-						s.Config.BuildOpen.Store(false)
+					if !s.Config.SettingsOpen {
+						s.Config.FilterOpen= false
+						s.Config.BuildOpen= false
 					}
-					s.Config.SettingsOpen.Toggle()
+					s.Config.SettingsOpen=!s.Config.SettingsOpen
 					s.SaveConfig()
 				}
 			}
@@ -43,12 +43,12 @@ func (s *State) SettingsButtons() layout.FlexChild {
 }
 
 func (s *State) SettingsPage() layout.FlexChild {
-	if !s.Config.SettingsOpen.Load() {
+	if !s.Config.SettingsOpen {
 		return Flexed(0, func() {})
 	}
 	var weight float32 = 0.5
 	switch {
-	case s.Config.SettingsZoomed.Load():
+	case s.Config.SettingsZoomed:
 		weight = 1
 	//case s.WindowWidth < 1024 && s.WindowHeight > 1024:
 	// weight = 0.333
@@ -85,14 +85,14 @@ func (s *State) SettingsPage() layout.FlexChild {
 					if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
 						s.WindowHeight <= 600 && s.WindowWidth > 800) {
 						ic := "zoom"
-						if s.Config.SettingsZoomed.Load() {
+						if s.Config.SettingsZoomed {
 							ic = "minimize"
 						}
 						s.IconButton(ic, "DocText", "DocBg",
 							s.SettingsZoomButton)
 						for s.SettingsZoomButton.Clicked(s.Gtx) {
 							L.Debug("settings panel close button clicked")
-							s.Config.SettingsZoomed.Toggle()
+							s.Config.SettingsZoomed=!s.Config.SettingsZoomed
 							s.SaveConfig()
 						}
 					}
@@ -101,7 +101,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 						s.SettingsCloseButton)
 					for s.SettingsCloseButton.Clicked(s.Gtx) {
 						L.Debug("settings panel close button clicked")
-						s.Config.SettingsOpen.Store(false)
+						s.Config.SettingsOpen= false
 						s.SaveConfig()
 					}
 				}),
@@ -134,7 +134,7 @@ func (s *State) SettingsTabs(size int) {
 		txt := s.Rc.Settings.Daemon.Schema.Groups[i].Legend
 		for s.Rc.Settings.Tabs.TabsList[txt].Clicked(s.Gtx) {
 			s.Rc.Settings.Tabs.Current = txt
-			s.Config.SettingsTab.Store(txt)
+			s.Config.SettingsTab= txt
 		}
 		if s.Rc.Settings.Tabs.Current == txt {
 			color = "PanelText"
