@@ -8,7 +8,7 @@ import (
 )
 
 type Worker struct {
-	*exec.Cmd
+	cmd *exec.Cmd
 	args    []string
 	StdConn stdconn.StdConn
 }
@@ -17,22 +17,22 @@ type Worker struct {
 // attaches a connection to its stdin/stdout
 func Spawn(args ...string) (w *Worker) {
 	w = &Worker{
-		Cmd:  exec.Command(args[0], args[1:]...),
+		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,
 	}
-	w.Stderr = os.Stdout
-	cmdOut, err := w.StdoutPipe()
+	//w.Stderr = os.Stderr
+	cmdOut, err := w.cmd.StdoutPipe()
 	if err != nil {
 		L.Error(err)
 		return
 	}
-	cmdIn, err := w.StdinPipe()
+	cmdIn, err := w.cmd.StdinPipe()
 	if err != nil {
 		L.Error(err)
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, make(chan struct{}))
-	err = w.Start()
+	err = w.cmd.Start()
 	if err != nil {
 		L.Error(err)
 		return nil
@@ -43,7 +43,7 @@ func Spawn(args ...string) (w *Worker) {
 
 // Kill forces the child process to shut down without cleanup
 func (w *Worker) Kill() (err error) {
-	return w.Process.Kill()
+	return w.cmd.Process.Kill()
 }
 
 // Stop signals the worker to shut down cleanly.
@@ -51,5 +51,5 @@ func (w *Worker) Kill() (err error) {
 // It is possible and neater to put a quit method in the IPC API and use the
 // quit channel built into the StdConn
 func (w *Worker) Stop() (err error) {
-	return w.Process.Signal(os.Interrupt)
+	return w.cmd.Process.Signal(os.Interrupt)
 }
