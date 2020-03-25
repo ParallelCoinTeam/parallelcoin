@@ -45,8 +45,8 @@ func (t *DuoUItheme) Button(txt string) Button {
 			Typeface: t.Fonts["Primary"],
 		},
 		Text:       txt,
-		Color:      rgb(0xffffff),
-		Background: HexARGB(t.Colors["Primary"]),
+		Color:      HexARGB(t.Colors["Light"]),
+		Background: HexARGB(t.Colors["ButtonBg"]),
 		TextSize:   t.TextSize.Scale(14.0 / 16.0),
 		shaper:     t.Shaper,
 	}
@@ -69,7 +69,7 @@ func (b Button) Layout(gtx *layout.Context, button *gel.Button) {
 	vmin := gtx.Constraints.Height.Min
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
-			rr := float32(gtx.Px(unit.Dp(4)))
+			rr := float32(gtx.Px(unit.Dp(2)))
 			clip.Rect{
 				Rect: f32.Rectangle{Max: f32.Point{
 					X: float32(gtx.Constraints.Width.Min),
@@ -260,7 +260,7 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *gel.Button) {
 			gtx.Constraints.Width.Min = hmin
 			gtx.Constraints.Height.Min = vmin
 			layout.Center.Layout(gtx, func() {
-				layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(10), Left: unit.Dp(12), Right: unit.Dp(12)}.Layout(gtx, func() {
+				layout.Inset{Top: unit.Px(13), Bottom: unit.Px(14), Left: unit.Px(16), Right: unit.Px(16)}.Layout(gtx, func() {
 
 					paint.ColorOp{Color: txColor}.Add(gtx.Ops)
 					gel.Label{

@@ -47,13 +47,11 @@ func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPa
 				headerMenuButton(rc, gtx, th, "", "NotificationSyncDisabled", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "NotificationSyncProblem", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "NotificationVPNLock", buttonHeader),
-				headerMenuButton(rc, gtx, th, "", "network", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "MapsLayers", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "MapsLayersClear", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "ImageTimer", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "ImageRemoveRedEye", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "DeviceSignalCellular0Bar", buttonHeader),
-				headerMenuButton(rc, gtx, th, "", "DeviceWidgets", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "ActionTimeline", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "HardwareWatch", buttonHeader),
 			}

@@ -39,7 +39,9 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 
 	// d.sys.Components["logger"].View
 
-	duo.Navigation = make(map[string]*gelook.DuoUIthemeNav)
+	duo.Navigation = &model.DuoUInav{
+		Items: make(map[string]*gelook.DuoUIthemeNav),
+	}
 	// navigations["mainMenu"] = mainMenu()
 
 	// Icons

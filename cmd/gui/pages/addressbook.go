@@ -73,7 +73,7 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 				// th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page, "PAGE", fmt.Sprint(rc.Explorer.Page.Value))
 			}),
 			// layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["ButtonText"], th.Colors["Dark"], "NEW ADDRESS", component.QrDialog(rc, gtx, rc.CreateNewAddress("")))))
-			layout.Rigid(component.Button(gtx, th, buttonNewAddress, th.Fonts["Secondary"], 12, th.Colors["Dark"], th.Colors["Light"], "NEW ADDRESS", func() {
+			layout.Rigid(component.MonoButton(gtx, th, buttonNewAddress, 12, "Primary", "Light", "Secondary", "NEW ADDRESS", func() {
 				rc.Dialog.Show = true
 				rc.Dialog = &model.DuoUIdialog{
 					Show: true,
@@ -103,17 +103,17 @@ func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 			layout.Flex{Axis: layout.Vertical}.Layout(gtx,
 				layout.Rigid(func() {
 					layout.Flex{
-						Alignment: layout.End,
+						Alignment: layout.Middle,
 					}.Layout(gtx,
 						layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprint(t.Index))),
 						layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], t.Account)),
-						layout.Rigid(component.Button(gtx, th, t.Copy, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["ButtonBg"], t.Address, func() { clipboard.Set(t.Address) })),
+						layout.Rigid(component.MonoButton(gtx, th, t.Copy, 12, "", "", "Mono", t.Address, func() { clipboard.Set(t.Address) })),
 						layout.Flexed(0.4, component.Label(gtx, th, th.Fonts["Primary"], 14, th.Colors["Dark"], t.Label)),
 						layout.Flexed(0.2, component.Label(gtx, th, th.Fonts["Primary"], 12, th.Colors["Dark"], fmt.Sprint(t.Amount))),
-						layout.Rigid(component.Button(gtx, th, t.QrCode, th.Fonts["Mono"], 12, th.Colors["ButtonText"], th.Colors["Info"], "QR", component.QrDialog(rc, gtx, t.Address))),
+						layout.Rigid(component.MonoButton(gtx, th, t.QrCode, 12, "", "", "Secondary", "QR", component.QrDialog(rc, gtx, t.Address))),
 					)
 				}),
-				layout.Rigid(th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])),
+				layout.Rigid(th.DuoUIline(gtx, 1, 0, 1, th.Colors["Gray"])),
 			)
 			//}
 		})

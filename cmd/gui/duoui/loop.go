@@ -59,6 +59,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				ui.ly.Window.Invalidate()
 			}
 		case e := <-ui.ly.Window.Events():
+			ui.ly.Viewport = ui.ly.Context.Constraints.Width.Max
 			switch e := e.(type) {
 			case system.DestroyEvent:
 				L.Debug("destroy event received")
