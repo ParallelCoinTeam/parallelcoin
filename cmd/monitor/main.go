@@ -59,10 +59,12 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	if mon.Config.Running && !(mon.Config.RunMode == "m" ||
 		mon.Config.RunMode == "mon" || mon.Config.RunMode == "monitor") {
 		go func() {
+			L.Debug("starting up as was running previously when shut down")
 			time.Sleep(time.Second)
-			mon.RunCommandChan <- "restart"
+			mon.Config.Running = false
+			mon.RunCommandChan <- "run"
 			if mon.Config.Pausing {
-				time.Sleep(time.Second*3)
+				time.Sleep(time.Second * 3)
 				mon.RunCommandChan <- "pause"
 			}
 		}()
