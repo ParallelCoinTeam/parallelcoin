@@ -3,6 +3,7 @@
 package gelook
 
 import (
+	"gioui.org/op"
 	"image"
 	"image/color"
 
@@ -11,7 +12,6 @@ import (
 	"gioui.org/f32"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
-	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
@@ -28,7 +28,15 @@ type Button struct {
 	TextSize     unit.Value
 	Background   color.RGBA
 	CornerRadius unit.Value
+	Inset        layout.Inset
 	shaper       text.Shaper
+}
+
+type ButtonLayout struct {
+	Background   color.RGBA
+	Color        color.RGBA
+	CornerRadius unit.Value
+	Inset        layout.Inset
 }
 
 type IconButton struct {
@@ -37,18 +45,30 @@ type IconButton struct {
 	Icon       *DuoUIicon
 	Size       unit.Value
 	Padding    unit.Value
+	Inset      layout.Inset
 }
 
 func (t *DuoUItheme) Button(txt string) Button {
 	return Button{
-		Font: text.Font{
-			Typeface: t.Fonts["Primary"],
+		Text:         txt,
+		Color:        HexARGB(t.Colors["ButtonText"]),
+		CornerRadius: unit.Dp(4),
+		Background:   HexARGB(t.Colors["ButtonBg"]),
+		TextSize:     t.TextSize.Scale(14.0 / 16.0),
+		Inset: layout.Inset{
+			Top: unit.Dp(10), Bottom: unit.Dp(10),
+			Left: unit.Dp(12), Right: unit.Dp(12),
 		},
-		Text:       txt,
-		Color:      HexARGB(t.Colors["Light"]),
-		Background: HexARGB(t.Colors["ButtonBg"]),
-		TextSize:   t.TextSize.Scale(14.0 / 16.0),
-		shaper:     t.Shaper,
+		shaper: t.Shaper,
+	}
+}
+
+func (t *DuoUItheme) ButtonLayout() ButtonLayout {
+	return ButtonLayout{
+		Background:   HexARGB(t.Colors["ButtonBg"]),
+		Color:        HexARGB(t.Colors["ButtonText"]),
+		CornerRadius: unit.Dp(4),
+		Inset:        layout.UniformInset(unit.Dp(12)),
 	}
 }
 
@@ -63,13 +83,22 @@ func (t *DuoUItheme) IconButton(icon *DuoUIicon) IconButton {
 }
 
 func (b Button) Layout(gtx *layout.Context, button *gel.Button) {
-	col := b.Color
-	bgcol := b.Background
+	ButtonLayout{
+		Background:   b.Background,
+		CornerRadius: b.CornerRadius,
+		Color:        b.Color,
+		Inset:        b.Inset,
+	}.Layout(gtx, button, func() {
+		gel.Label{}.Layout(gtx, b.shaper, b.Font, b.TextSize, b.Text)
+	})
+}
+
+func (b ButtonLayout) Layout(gtx *layout.Context, button *gel.Button, w layout.Widget) {
 	hmin := gtx.Constraints.Width.Min
 	vmin := gtx.Constraints.Height.Min
 	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
-			rr := float32(gtx.Px(unit.Dp(2)))
+			rr := float32(gtx.Px(b.CornerRadius))
 			clip.Rect{
 				Rect: f32.Rectangle{Max: f32.Point{
 					X: float32(gtx.Constraints.Width.Min),
@@ -77,18 +106,18 @@ func (b Button) Layout(gtx *layout.Context, button *gel.Button) {
 				}},
 				NE: rr, NW: rr, SE: rr, SW: rr,
 			}.Op(gtx.Ops).Add(gtx.Ops)
-			fill(gtx, bgcol)
+			fill(gtx, b.Background)
 			for _, c := range button.History() {
 				drawInk(gtx, c)
 			}
 		}),
 		layout.Stacked(func() {
-			gtx.Constraints.Width.Min = hmin
-			gtx.Constraints.Height.Min = vmin
 			layout.Center.Layout(gtx, func() {
-				layout.Inset{Top: unit.Dp(10), Bottom: unit.Dp(10), Left: unit.Dp(12), Right: unit.Dp(12)}.Layout(gtx, func() {
-					paint.ColorOp{Color: col}.Add(gtx.Ops)
-					gel.Label{}.Layout(gtx, b.shaper, b.Font, b.TextSize, b.Text)
+				gtx.Constraints.Width.Min = hmin
+				gtx.Constraints.Height.Min = vmin
+				b.Inset.Layout(gtx, func() {
+					paint.ColorOp{Color: b.Color}.Add(gtx.Ops)
+					w()
 				})
 			})
 			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
@@ -98,12 +127,13 @@ func (b Button) Layout(gtx *layout.Context, button *gel.Button) {
 }
 
 func (b IconButton) Layout(gtx *layout.Context, button *gel.Button) {
-	layout.Stack{}.Layout(gtx,
+	layout.Stack{Alignment: layout.Center}.Layout(gtx,
 		layout.Expanded(func() {
-			size := float32(gtx.Constraints.Width.Min)
-			rr := float32(size) * .5
+			size := gtx.Constraints.Width.Min
+			sizef := float32(size)
+			rr := sizef * .5
 			clip.Rect{
-				Rect: f32.Rectangle{Max: f32.Point{X: size, Y: size}},
+				Rect: f32.Rectangle{Max: f32.Point{X: sizef, Y: sizef}},
 				NE:   rr, NW: rr, SE: rr, SW: rr,
 			}.Op(gtx.Ops).Add(gtx.Ops)
 			fill(gtx, b.Background)
@@ -128,48 +158,6 @@ func (b IconButton) Layout(gtx *layout.Context, button *gel.Button) {
 	)
 }
 
-func toPointF(p image.Point) f32.Point {
-	return f32.Point{X: float32(p.X), Y: float32(p.Y)}
-}
-
-func toRectF(r image.Rectangle) f32.Rectangle {
-	return f32.Rectangle{
-		Min: toPointF(r.Min),
-		Max: toPointF(r.Max),
-	}
-}
-
-func drawInk(gtx *layout.Context, c gel.Click) {
-	d := gtx.Now().Sub(c.Time)
-	t := float32(d.Seconds())
-	const duration = 0.5
-	if t > duration {
-		return
-	}
-	t = t / duration
-	var stack op.StackOp
-	stack.Push(gtx.Ops)
-	size := float32(gtx.Px(unit.Dp(700))) * t
-	rr := size * .5
-	col := byte(0xaa * (1 - t*t))
-	ink := paint.ColorOp{Color: color.RGBA{A: col, R: col, G: col, B: col}}
-	ink.Add(gtx.Ops)
-	op.TransformOp{}.Offset(c.Position).Offset(f32.Point{
-		X: -rr,
-		Y: -rr,
-	}).Add(gtx.Ops)
-	clip.Rect{
-		Rect: f32.Rectangle{Max: f32.Point{
-			X: float32(size),
-			Y: float32(size),
-		}},
-		NE: rr, NW: rr, SE: rr, SW: rr,
-	}.Op(gtx.Ops).Add(gtx.Ops)
-	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(size), Y: float32(size)}}}.Add(gtx.Ops)
-	stack.Pop()
-	op.InvalidateOp{}.Add(gtx.Ops)
-}
-
 var (
 	buttonInsideLayoutList = &layout.List{
 		Axis: layout.Vertical,
@@ -179,22 +167,24 @@ var (
 type DuoUIbutton struct {
 	Text string
 	// Color is the text color.
-	TxColor           color.RGBA
-	BgColor           color.RGBA
-	TxColorHover      color.RGBA
-	BgColorHover      color.RGBA
-	Font              text.Font
-	TextSize          unit.Value
-	Width             int
-	Height            int
-	CornerRadius      unit.Value
-	Icon              *DuoUIicon
-	IconSize          int
-	IconColor         color.RGBA
-	PaddingVertical   unit.Value
-	PaddingHorizontal unit.Value
-	shaper            text.Shaper
-	hover             bool
+	TxColor       color.RGBA
+	BgColor       color.RGBA
+	TxColorHover  color.RGBA
+	BgColorHover  color.RGBA
+	Font          text.Font
+	TextSize      unit.Value
+	Width         int
+	Height        int
+	CornerRadius  unit.Value
+	Icon          *DuoUIicon
+	IconSize      int
+	IconColor     color.RGBA
+	PaddingTop    unit.Value
+	PaddingRight  unit.Value
+	PaddingBottom unit.Value
+	PaddingLeft   unit.Value
+	shaper        text.Shaper
+	hover         bool
 }
 
 func (t *DuoUItheme) DuoUIbutton(
@@ -204,25 +194,30 @@ func (t *DuoUItheme) DuoUIbutton(
 	icon, iconColor string,
 	textSize, iconSize,
 	width, height,
-	paddingVertical, paddingHorizontal int) DuoUIbutton {
+	paddingTop,
+	paddingRight,
+	paddingBottom,
+	paddingLeft int) DuoUIbutton {
 	return DuoUIbutton{
 		Text: txt,
 		Font: text.Font{
 			Typeface: txtFont,
 		},
-		TextSize:          unit.Dp(float32(textSize)),
-		Width:             width,
-		Height:            height,
-		TxColor:           HexARGB(txtColor),
-		BgColor:           HexARGB(bgColor),
-		TxColorHover:      HexARGB(txtHoverColor),
-		BgColorHover:      HexARGB(bgHoverColor),
-		Icon:              t.Icons[icon],
-		IconSize:          iconSize,
-		IconColor:         HexARGB(iconColor),
-		PaddingVertical:   unit.Dp(float32(paddingVertical)),
-		PaddingHorizontal: unit.Dp(float32(paddingHorizontal)),
-		shaper:            t.Shaper,
+		TextSize:      unit.Dp(float32(textSize)),
+		Width:         width,
+		Height:        height,
+		TxColor:       HexARGB(txtColor),
+		BgColor:       HexARGB(bgColor),
+		TxColorHover:  HexARGB(txtHoverColor),
+		BgColorHover:  HexARGB(bgHoverColor),
+		Icon:          t.Icons[icon],
+		IconSize:      iconSize,
+		IconColor:     HexARGB(iconColor),
+		PaddingTop:    unit.Dp(float32(paddingTop)),
+		PaddingRight:  unit.Dp(float32(paddingRight)),
+		PaddingBottom: unit.Dp(float32(paddingBottom)),
+		PaddingLeft:   unit.Dp(float32(paddingLeft)),
+		shaper:        t.Shaper,
 	}
 }
 
@@ -260,7 +255,7 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *gel.Button) {
 			gtx.Constraints.Width.Min = hmin
 			gtx.Constraints.Height.Min = vmin
 			layout.Center.Layout(gtx, func() {
-				layout.Inset{Top: unit.Px(13), Bottom: unit.Px(14), Left: unit.Px(16), Right: unit.Px(16)}.Layout(gtx, func() {
+				layout.Inset{Top: b.PaddingTop, Bottom: b.PaddingBottom, Left: b.PaddingLeft, Right: b.PaddingRight}.Layout(gtx, func() {
 
 					paint.ColorOp{Color: txColor}.Add(gtx.Ops)
 					gel.Label{
@@ -294,7 +289,7 @@ func (b DuoUIbutton) IconLayout(gtx *layout.Context, button *gel.Button) {
 			gtx.Constraints.Width.Min = b.Width
 			gtx.Constraints.Height.Min = b.Height
 			layout.Center.Layout(gtx, func() {
-				layout.Inset{Top: b.PaddingVertical, Bottom: b.PaddingVertical, Left: b.PaddingHorizontal, Right: b.PaddingHorizontal}.Layout(gtx, func() {
+				layout.Inset{Top: b.PaddingTop, Bottom: b.PaddingBottom, Left: b.PaddingLeft, Right: b.PaddingRight}.Layout(gtx, func() {
 					b.Icon.Color = b.IconColor
 					b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
 				})
@@ -353,4 +348,41 @@ func (b DuoUIbutton) MenuLayout(gtx *layout.Context, button *gel.Button) {
 			button.Layout(gtx)
 		}),
 	)
+}
+
+/////
+
+func toPointF(p image.Point) f32.Point {
+	return f32.Point{X: float32(p.X), Y: float32(p.Y)}
+}
+
+func drawInk(gtx *layout.Context, c gel.Click) {
+	d := gtx.Now().Sub(c.Time)
+	t := float32(d.Seconds())
+	const duration = 0.5
+	if t > duration {
+		return
+	}
+	t = t / duration
+	var stack op.StackOp
+	stack.Push(gtx.Ops)
+	size := float32(gtx.Px(unit.Dp(700))) * t
+	rr := size * .5
+	col := byte(0xaa * (1 - t*t))
+	ink := paint.ColorOp{Color: color.RGBA{A: col, R: col, G: col, B: col}}
+	ink.Add(gtx.Ops)
+	op.TransformOp{}.Offset(c.Position).Offset(f32.Point{
+		X: -rr,
+		Y: -rr,
+	}).Add(gtx.Ops)
+	clip.Rect{
+		Rect: f32.Rectangle{Max: f32.Point{
+			X: float32(size),
+			Y: float32(size),
+		}},
+		NE: rr, NW: rr, SE: rr, SW: rr,
+	}.Op(gtx.Ops).Add(gtx.Ops)
+	paint.PaintOp{Rect: f32.Rectangle{Max: f32.Point{X: float32(size), Y: float32(size)}}}.Add(gtx.Ops)
+	stack.Pop()
+	op.InvalidateOp{}.Add(gtx.Ops)
 }

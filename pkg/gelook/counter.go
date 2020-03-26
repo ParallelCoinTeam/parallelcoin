@@ -29,8 +29,8 @@ type DuoUIcounter struct {
 func (t *DuoUItheme) DuoUIcounter(pageFunction func()) DuoUIcounter {
 	return DuoUIcounter{
 		// ToDo Replace theme's buttons with counter exclusive buttons, set icons for increase/decrease
-		increase: t.DuoUIbutton("", "", "", t.Colors["Light"], "", t.Colors["Dark"], "counterPlusIcon", t.Colors["Primary"], 0, 24, 32, 32, 0, 0),
-		decrease: t.DuoUIbutton("", "", "", t.Colors["Light"], "", t.Colors["Dark"], "counterMinusIcon", t.Colors["Primary"], 0, 24, 32, 32, 0, 0),
+		increase: t.DuoUIbutton("", "", "", t.Colors["Light"], "", t.Colors["Dark"], "counterPlusIcon", t.Colors["Primary"], 0, 24, 32, 32, 0, 0, 0, 0),
+		decrease: t.DuoUIbutton("", "", "", t.Colors["Light"], "", t.Colors["Dark"], "counterMinusIcon", t.Colors["Primary"], 0, 24, 32, 32, 0, 0, 0, 0),
 		// reset:        t.DuoUIbutton(t.Font.Secondary, "RESET", t.Colors["Primary"], t.Colors["Light"], t.Colors["Light"], t.Colors["Primary"], "", "", 12, 0, 0, 48, 48, 0),
 		input:        t.DuoUIeditor(""),
 		pageFunction: pageFunction,

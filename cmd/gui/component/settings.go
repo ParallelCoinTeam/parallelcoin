@@ -46,7 +46,7 @@ func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 				}
 				th.DuoUIbutton(th.Fonts["Primary"],
 					txt, color, bgColor, "", "", "", "",
-					16, 0, 80, 32, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
+					16, 0, 80, 32, 4, 4, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
 			})
 		})
 	}

@@ -96,7 +96,7 @@ func dialogButon(gtx *layout.Context, th *gelook.DuoUItheme, f func(), t, bgColo
 		if f != nil {
 			var b gelook.DuoUIbutton
 			layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8), Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(gtx, func() {
-				b = th.DuoUIbutton(th.Fonts["Primary"], t, th.Colors["Dark"], bgColor, th.Colors["Info"], bgColor, icon, iconColor, 16, 32, 120, 64, 0, 0)
+				b = th.DuoUIbutton(th.Fonts["Primary"], t, th.Colors["Dark"], bgColor, th.Colors["Info"], bgColor, icon, iconColor, 16, 32, 120, 64, 0, 0, 0, 0)
 				for button.Clicked(gtx) {
 					f()
 				}

@@ -153,7 +153,7 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *
 				}.Layout(gtx,
 					layout.Rigid(func() {
 						var linkButton gelook.DuoUIbutton
-						linkButton = th.DuoUIbutton(th.Fonts["Mono"], fmt.Sprint(block.Height), th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Dark"], "", th.Colors["Dark"], 14, 0, 60, 24, 0, 0)
+						linkButton = th.DuoUIbutton(th.Fonts["Mono"], fmt.Sprint(block.Height), th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Dark"], "", th.Colors["Dark"], 14, 0, 60, 24, 5, 8, 6, 8)
 						for block.Link.Clicked(gtx) {
 							rc.ShowPage = fmt.Sprintf("BLOCK %s", block.BlockHash)
 							rc.GetSingleBlock(block.BlockHash)()

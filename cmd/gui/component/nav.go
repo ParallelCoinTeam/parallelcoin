@@ -59,7 +59,7 @@ func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, pa
 				CurrentCurrentPageColor(rc.ShowPage, title, navItemIconColor, th.Colors["Primary"]),
 				nav.TextSize, nav.IconSize,
 				nav.Width, nav.Height,
-				nav.PaddingVertical, nav.PaddingHorizontal)
+				nav.PaddingVertical, nav.PaddingHorizontal, nav.PaddingVertical, nav.PaddingHorizontal)
 			for navButton.Clicked(gtx) {
 				rc.ShowPage = title
 				page.Command()

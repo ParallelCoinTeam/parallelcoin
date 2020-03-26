@@ -19,7 +19,7 @@ func QuitButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func(
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var closeMeniItem gelook.DuoUIbutton
-			closeMeniItem = th.DuoUIbutton("", "", "", th.Colors["Dark"], "", "", "closeIcon", CurrentCurrentPageColor(rc.ShowPage, "CLOSE", th.Colors["Light"], th.Colors["Primary"]), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
+			closeMeniItem = th.DuoUIbutton("", "", "", th.Colors["Dark"], "", "", "closeIcon", CurrentCurrentPageColor(rc.ShowPage, "CLOSE", th.Colors["Light"], th.Colors["Primary"]), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, 0, 0, 0, 0)
 			for buttonQuit.Clicked(gtx) {
 				rc.Dialog.Show = true
 				rc.Dialog = &model.DuoUIdialog{

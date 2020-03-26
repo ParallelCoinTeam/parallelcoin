@@ -97,7 +97,7 @@ func ConsoleInput(gtx *layout.Context, th *gelook.DuoUItheme, editorControler *g
 func Button(gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Button, font text.Typeface, textSize int, color, bgColor, label string, handler func()) func() {
 	return func() {
 		th.DuoUIcontainer(0, th.Colors[""])
-		button := th.DuoUIbutton(font, label, color, bgColor, "", "", "", "", textSize, 0, 128, 48, 0, 0)
+		button := th.DuoUIbutton(font, label, color, bgColor, "", "", "", "", textSize, 0, 128, 48, 0, 0, 0, 0)
 		for buttonController.Clicked(gtx) {
 			handler()
 		}

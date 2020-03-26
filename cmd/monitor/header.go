@@ -40,7 +40,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 							"logo", s.Theme.Colors["PanelText"],
 							textSize, iconSize,
 							width, height,
-							paddingV, paddingH)
+							paddingV, paddingH, paddingV, paddingH)
 						for s.LogoButton.Clicked(s.Gtx) {
 							s.FlipTheme()
 						}
