@@ -172,8 +172,10 @@ func (s *State) LoadConfig() {
 				//s.SaveConfig()
 			}
 			for i := range cnf.FilterNodes {
-				s.Config.FilterNodes[i].Hidden = cnf.FilterNodes[i].Hidden
-				s.Config.FilterNodes[i].Closed = cnf.FilterNodes[i].Closed
+				s.Config.FilterNodes[i] = &Node{
+					Closed:     cnf.FilterNodes[i].Hidden,
+					Hidden:     cnf.FilterNodes[i].Closed,
+				}
 			}
 			s.Config.Width = cnf.Width
 			s.Config.Height = cnf.Height
@@ -191,10 +193,6 @@ func (s *State) LoadConfig() {
 			s.Config.Running = cnf.Running
 			s.Config.Pausing = cnf.Pausing
 			s.Config.FilterOpen = cnf.FilterOpen
-			//L.Debugs(s.Config.FilterNodes)
-			//for i := range s.Config.FilterNodes {
-			//	L.Debug(s.Config.FilterNodes[i])
-			//}
 		}
 	} else {
 		L.Warn("creating new configuration")

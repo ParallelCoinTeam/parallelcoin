@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"time"
 )
 
 func (s *State) RunControls() layout.FlexChild {
@@ -47,13 +48,13 @@ func (s *State) RunControls() layout.FlexChild {
 						s.RunCommandChan <- "pause"
 					}
 				}
-			}), Rigid(func() {
-				s.IconButton("Kill", "PanelBg", "PanelText",
-					s.KillMenuButton)
-				for s.KillMenuButton.Clicked(s.Gtx) {
-					L.Debug("clicked kill button")
-					s.RunCommandChan <- "kill"
-				}
+			//}), Rigid(func() {
+			//	s.IconButton("Kill", "PanelBg", "PanelText",
+			//		s.KillMenuButton)
+			//	for s.KillMenuButton.Clicked(s.Gtx) {
+			//		L.Debug("clicked kill button")
+			//		s.RunCommandChan <- "kill"
+			//	}
 			}), Rigid(func() {
 				s.IconButton("Restart", "PanelBg", "PanelText",
 					s.RestartMenuButton)
@@ -128,20 +129,21 @@ func (s *State) Runner() {
 				if err = w.Resume(); L.Check(err) {
 				}
 			}
-		case "kill":
-			L.Debug("kill called")
-			if s.HasGo && w != nil && s.Config.Running {
-				if err = w.Kill(); !L.Check(err) {
-					s.Config.Pausing = false
-					s.Config.Running = false
-				}
-			}
+		//case "kill":
+		//	L.Debug("kill called")
+		//	if s.HasGo && w != nil && s.Config.Running {
+		//		if err = w.Kill(); !L.Check(err) {
+		//			s.Config.Pausing = false
+		//			s.Config.Running = false
+		//		}
+		//	}
 		case "restart":
 			L.Debug("restart called")
 			if s.HasGo && w != nil {
 				go func() {
 					s.RunCommandChan <- "stop"
-					s.RunCommandChan <- "start"
+					time.Sleep(time.Second)
+					s.RunCommandChan <- "run"
 				}()
 			}
 		}
