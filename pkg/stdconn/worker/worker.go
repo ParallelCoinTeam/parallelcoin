@@ -3,12 +3,13 @@ package worker
 import (
 	"os"
 	"os/exec"
+	"syscall"
 
 	"github.com/p9c/pod/pkg/stdconn"
 )
 
 type Worker struct {
-	cmd *exec.Cmd
+	cmd     *exec.Cmd
 	args    []string
 	StdConn stdconn.StdConn
 }
@@ -20,7 +21,7 @@ func Spawn(args ...string) (w *Worker) {
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,
 	}
-	//w.Stderr = os.Stderr
+	w.cmd.Stderr = os.Stderr
 	cmdOut, err := w.cmd.StdoutPipe()
 	if err != nil {
 		L.Error(err)
@@ -41,9 +42,26 @@ func Spawn(args ...string) (w *Worker) {
 	}
 }
 
+func (w *Worker) Wait() (err error) {
+	return w.cmd.Wait()
+}
+
+func (w *Worker) Interrupt() (err error) {
+	if err = w.cmd.Process.Signal(syscall.SIGINT); !L.Check(err) {
+		L.Debug("interrupted")
+	}
+	if err = w.cmd.Process.Release(); !L.Check(err) {
+		L.Debug("released")
+	}
+	return
+}
+
 // Kill forces the child process to shut down without cleanup
 func (w *Worker) Kill() (err error) {
-	return w.cmd.Process.Kill()
+	if err = w.cmd.Process.Signal(syscall.SIGKILL); !L.Check(err) {
+		L.Debug("killed")
+	}
+	return
 }
 
 // Stop signals the worker to shut down cleanly.
