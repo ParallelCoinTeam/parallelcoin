@@ -92,11 +92,11 @@ func (s *State) RestartRunButton() layout.FlexChild {
 			L.Debug("clicked restart button")
 			s.SaveConfig()
 			if s.HasGo {
+				s.RunCommandChan <- "kill"
 				go func() {
-					s.RunCommandChan <- "stop"
 					exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
 					c = exec.Command("go", "build", "-v",
-						"-tags", "goterm", "-o", exePath)
+						"-o", exePath)
 					c.Stderr = os.Stderr
 					c.Stdout = os.Stdout
 					time.Sleep(time.Second)

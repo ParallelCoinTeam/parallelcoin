@@ -79,7 +79,7 @@ func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int)
 	//s.Inset(8, func() {
 	s.Theme.DuoUIbutton("", "", "",
 		s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
-		s.Theme.Colors[fg], 0, 32, 41, 41,
+		s.Theme.Colors[fg], 0, 32, 48, 48,
 		0, 0, 0, 0).IconLayout(s.Gtx, button)
 }
 
@@ -94,7 +94,7 @@ func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		s.Theme.Colors[fg],
 		"settingsIcon",
 		s.Theme.Colors["Light"],
-		fontSize, 0, 80, 32, 11, 10, 9, 10).
+		fontSize, 0, 80, 32, 10, 10, 9, 10).
 		Layout(s.Gtx, button)
 }
 

@@ -129,14 +129,12 @@ func (s *State) Runner() {
 				if err = w.Resume(); L.Check(err) {
 				}
 			}
-		//case "kill":
-		//	L.Debug("kill called")
-		//	if s.HasGo && w != nil && s.Config.Running {
-		//		if err = w.Kill(); !L.Check(err) {
-		//			s.Config.Pausing = false
-		//			s.Config.Running = false
-		//		}
-		//	}
+		case "kill":
+			L.Debug("kill called")
+			if s.HasGo && w != nil && s.Config.Running {
+				if err = w.Interrupt(); !L.Check(err) {
+				}
+			}
 		case "restart":
 			L.Debug("restart called")
 			if s.HasGo && w != nil {
