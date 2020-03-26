@@ -60,12 +60,12 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 		mon.Config.RunMode == "mon" || mon.Config.RunMode == "monitor") {
 		go func() {
 			L.Debug("starting up as was running previously when shut down")
-			time.Sleep(time.Second * 2)
+			time.Sleep(time.Second/2)
 			mon.Config.Running = false
 			//mon.RunCommandChan <- "stop"
 			mon.RunCommandChan <- "run"
 			if mon.Config.Pausing {
-				time.Sleep(time.Second * 2)
+				time.Sleep(time.Second/2)
 				mon.RunCommandChan <- "pause"
 			}
 		}()
@@ -79,12 +79,15 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			case <-cx.KillAll:
 				L.Debug("kill signal received")
 				mon.SaveConfig()
+				mon.RunCommandChan <- "kill"
 				break out
 			case e := <-mon.W.Events():
 				switch e := e.(type) {
 				case system.DestroyEvent:
 					L.Debug("destroy event received")
-					close(cx.KillAll)
+					mon.SaveConfig()
+					mon.RunCommandChan <- "kill"
+					close(mon.Ctx.KillAll)
 				case system.FrameEvent:
 					mon.Gtx.Reset(e.Config, e.Size)
 					cs := mon.Gtx.Constraints
@@ -95,11 +98,15 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 				}
 			}
 		}
+		mon.SaveConfig()
+		mon.RunCommandChan <- "kill"
 		L.Debug("gui shut down")
 		os.Exit(0)
 	}()
 	interrupt.AddHandler(func() {
-		close(cx.KillAll)
+		mon.SaveConfig()
+		mon.RunCommandChan <- "kill"
+		close(mon.Ctx.KillAll)
 	})
 	app.Main()
 	return

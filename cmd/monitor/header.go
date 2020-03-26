@@ -70,7 +70,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				for s.CloseButton.Clicked(s.Gtx) {
 					L.Debug("close button clicked")
 					s.SaveConfig()
-					s.RunCommandChan <- "stop"
+					s.RunCommandChan <- "kill"
 					close(s.Ctx.KillAll)
 				}
 				//})
