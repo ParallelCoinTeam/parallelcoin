@@ -96,9 +96,32 @@ func ConsoleInput(gtx *layout.Context, th *gelook.DuoUItheme, editorController *
 
 func Button(gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Button, font text.Typeface, textSize int, color, bgColor, label string, handler func()) func() {
 	return func() {
+		th.DuoUIcontainer(0, th.Colors[""])
+		button := th.DuoUIbutton(font, label, color, bgColor, "", "", "", "", textSize, 0, 128, 48, 0, 0, 0, 0)
+		for buttonController.Clicked(gtx) {
+			handler()
+		}
+		button.Layout(gtx, buttonController)
+	}
+}
+
+func MonoButton(gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Button, textSize int, color, bgColor, font, label string, handler func()) func() {
+	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			var button gelook.DuoUIbutton
-			button = th.DuoUIbutton(font, label, color, bgColor, "", "", "", "", textSize, 0, 128, 48, 0, 0)
+			//var button gelook.Button
+			button := th.Button(label)
+			if font != "" {
+				button.Font.Typeface = th.Fonts[font]
+			}
+			if color != "" {
+				button.Color = gelook.HexARGB(th.Colors[color])
+			}
+			if textSize != 0 {
+				button.TextSize = unit.Dp(float32(textSize))
+			}
+			if bgColor != "" {
+				button.Background = gelook.HexARGB(th.Colors[bgColor])
+			}
 			for buttonController.Clicked(gtx) {
 				handler()
 			}

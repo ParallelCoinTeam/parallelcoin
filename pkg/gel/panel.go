@@ -12,7 +12,7 @@ type Panel struct {
 	PanelObject        interface{}
 	PanelObjectsNumber int
 	ScrollBar          *ScrollBar
-	ScrollUnit         int
+	ScrollUnit         float32
 }
 
 func NewPanel() *Panel {
@@ -41,9 +41,9 @@ func NewPanel() *Panel {
 
 func (p *Panel) Layout(gtx *layout.Context) {
 	if p.PanelObjectsNumber > 0 {
-		p.ScrollUnit = p.ScrollBar.Slider.Height / p.PanelObjectsNumber
+		p.ScrollUnit = float32(p.ScrollBar.Slider.Height) / float32(p.PanelObjectsNumber)
 	}
-	cursorHeight := p.VisibleObjectsNumber * p.ScrollUnit
+	cursorHeight := int(float32(p.VisibleObjectsNumber) * p.ScrollUnit)
 	if cursorHeight > p.Size {
 		p.ScrollBar.Slider.CursorHeight = cursorHeight
 	}
@@ -51,7 +51,7 @@ func (p *Panel) Layout(gtx *layout.Context) {
 		cs := gtx.Constraints
 		if p.ScrollBar.Slider.Position >= 0 && p.ScrollBar.Slider.Position <= cs.Height.Max-p.ScrollBar.Slider.CursorHeight {
 			p.ScrollBar.Slider.Cursor = p.ScrollBar.Slider.Position
-			p.PanelContentLayout.Position.First = p.ScrollBar.Slider.Position / p.ScrollUnit
+			p.PanelContentLayout.Position.First = int(float32(p.ScrollBar.Slider.Position) / p.ScrollUnit)
 			p.PanelContentLayout.Position.Offset = 0
 		}
 

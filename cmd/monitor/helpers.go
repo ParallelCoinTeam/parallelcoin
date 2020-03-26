@@ -7,7 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/gelook"
 )
 
-func (s *State) FlexV(children ...layout.FlexChild) () {
+func (s *State) FlexV(children ...layout.FlexChild) {
 	layout.Flex{Axis: layout.Vertical}.Layout(s.Gtx, children...)
 }
 
@@ -79,9 +79,8 @@ func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int)
 	//s.Inset(8, func() {
 	s.Theme.DuoUIbutton("", "", "",
 		s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
-		s.Theme.Colors[fg], 0, sz, sz, sz,
-		8, 8).IconLayout(s.Gtx, button)
-	//})
+		s.Theme.Colors[fg], 0, 32, 41, 41,
+		0, 0, 0, 0).IconLayout(s.Gtx, button)
 }
 
 func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
@@ -95,7 +94,7 @@ func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		s.Theme.Colors[fg],
 		"settingsIcon",
 		s.Theme.Colors["Light"],
-		fontSize-1, fontSize-1, fontSize, fontSize, 10, 10).
+		fontSize, 0, 80, 32, 11, 10, 9, 10).
 		Layout(s.Gtx, button)
 }
 

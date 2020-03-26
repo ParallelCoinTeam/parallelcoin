@@ -96,7 +96,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				var createWalletbuttonComp gelook.DuoUIbutton
-				createWalletbuttonComp = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Fonts["Secondary"], "CREATE WALLET", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Light"], ui.ly.Theme.Colors["Light"], ui.ly.Theme.Colors["Dark"], "", ui.ly.Theme.Colors["Dark"], 16, 0, 125, 32, 4, 4)
+				createWalletbuttonComp = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Fonts["Secondary"], "CREATE WALLET", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Light"], ui.ly.Theme.Colors["Light"], ui.ly.Theme.Colors["Dark"], "", ui.ly.Theme.Colors["Dark"], 16, 0, 125, 32, 4, 4, 4, 4)
 				for buttonCreateWallet.Clicked(ui.ly.Context) {
 					if passPhrase != "" && passPhrase == confirmPassPhrase {
 						if testnet.Checked(ui.ly.Context) {

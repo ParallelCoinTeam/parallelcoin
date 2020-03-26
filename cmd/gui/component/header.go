@@ -47,13 +47,11 @@ func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPa
 				headerMenuButton(rc, gtx, th, "", "NotificationSyncDisabled", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "NotificationSyncProblem", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "NotificationVPNLock", buttonHeader),
-				headerMenuButton(rc, gtx, th, "", "network", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "MapsLayers", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "MapsLayersClear", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "ImageTimer", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "ImageRemoveRedEye", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "DeviceSignalCellular0Bar", buttonHeader),
-				headerMenuButton(rc, gtx, th, "", "DeviceWidgets", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "ActionTimeline", buttonHeader),
 				headerMenuButton(rc, gtx, th, "", "HardwareWatch", buttonHeader),
 			}
@@ -68,9 +66,7 @@ func headerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var footerMenuItem gelook.DuoUIbutton
-			footerMenuItem = th.DuoUIbutton("",
-				"", "", "", "",
-				th.Colors["Dark"], icon, CurrentCurrentPageColor(rc.ShowPage, text, navItemIconColor, th.Colors["Primary"]), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
+			footerMenuItem = th.DuoUIbutton("", "", "", "", "", th.Colors["Dark"], icon, CurrentCurrentPageColor(rc.ShowPage, text, navItemIconColor, th.Colors["Primary"]), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
 			for headerButton.Clicked(gtx) {
 				rc.ShowPage = text
 			}

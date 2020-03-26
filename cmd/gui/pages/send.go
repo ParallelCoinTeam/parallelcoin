@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"fmt"
 	"strconv"
 
 	"gioui.org/layout"
@@ -31,7 +30,6 @@ var (
 	buttonPasteAddress = new(gel.Button)
 	buttonPasteAmount  = new(gel.Button)
 	buttonSend         = new(gel.Button)
-	sendStruct         = new(send)
 )
 
 type send struct {
@@ -62,6 +60,7 @@ func Send(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.Duo
 
 func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
+		var sendStruct send
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
 				widgets := []func(){
@@ -98,9 +97,6 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 						layout.Flex{}.Layout(gtx,
 							layout.Rigid(component.Button(gtx, th, buttonSend, th.Fonts["Primary"], 12,
 								th.Colors["ButtonText"], th.Colors["ButtonBg"], "SEND", func() {
-									L.Info("passPharse:" + sendStruct.passPharse)
-									L.Info("address" + sendStruct.address)
-									L.Info("amount:" + fmt.Sprint(sendStruct.amount))
 									rc.Dialog.Show = true
 									rc.Dialog = &model.DuoUIdialog{
 										Show:       true,
@@ -125,5 +121,6 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 					layout.UniformInset(unit.Dp(8)).Layout(gtx, widgets[i])
 				})
 			}))
+		//L.Info("passPharse:" + sendStruct.passPharse)
 	}
 }

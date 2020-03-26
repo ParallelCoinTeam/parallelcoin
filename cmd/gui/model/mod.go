@@ -27,9 +27,10 @@ type DuoUI struct {
 	Context    *layout.Context
 	Theme      *gelook.DuoUItheme
 	Pages      *DuoUIpages
-	Navigation map[string]*gelook.DuoUIthemeNav
+	Navigation *DuoUInav
 	// Configuration *DuoUIconfiguration
-	IsReady bool
+	Viewport int
+	IsReady  bool
 }
 
 type DuoUIpages struct {
@@ -93,4 +94,14 @@ type DuoUIblock struct {
 type DuoUItoast struct {
 	Title   string
 	Message string
+}
+
+type DuoUInav struct {
+	Items             map[string]*gelook.DuoUIthemeNav
+	Width             int
+	Height            int
+	TextSize          int
+	IconSize          int
+	PaddingVertical   int
+	PaddingHorizontal int
 }

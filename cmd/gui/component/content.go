@@ -102,7 +102,7 @@ func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, p
 func pageNavButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, b *gel.Button, label, hash string) {
 	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
 		var blockButton gelook.DuoUIbutton
-		blockButton = th.DuoUIbutton(th.Fonts["Mono"], label+" "+hash, th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Light"], 16, 0, 60, 24, 0, 0)
+		blockButton = th.DuoUIbutton(th.Fonts["Mono"], label+" "+hash, th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Light"], "", th.Colors["Light"], 16, 0, 60, 24, 0, 0, 0, 0)
 		for b.Clicked(gtx) {
 			rc.ShowPage = fmt.Sprintf("BLOCK %s", hash)
 			rc.GetSingleBlock(hash)()

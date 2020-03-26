@@ -39,7 +39,10 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var footerMenuItem gelook.DuoUIbutton
 			if icon != "" {
-				footerMenuItem = th.DuoUIbutton("", "", "", "", "", th.Colors["Dark"], icon, CurrentCurrentPageColor(rc.ShowPage, page.Title, navItemIconColor, th.Colors["Primary"]), footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight, footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
+				footerMenuItem = th.DuoUIbutton("", "", "", "", "", th.Colors["Dark"], icon, CurrentCurrentPageColor(rc.ShowPage,
+					page.Title, navItemIconColor, th.Colors["Primary"]),
+					footerMenuItemTextSize, footerMenuItemIconSize, footerMenuItemWidth, footerMenuItemHeight,
+					0, 0, 0, 0)
 				for footerButton.Clicked(gtx) {
 					rc.ShowPage = page.Title
 					page.Command()
@@ -47,7 +50,9 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 				}
 				footerMenuItem.IconLayout(gtx, footerButton)
 			} else {
-				footerMenuItem = th.DuoUIbutton(th.Fonts["Primary"], text, CurrentCurrentPageColor(rc.ShowPage, page.Title, th.Colors["Light"], th.Colors["Primary"]), "", "", "", "", "", footerMenuItemTextSize, footerMenuItemIconSize, 0, footerMenuItemHeight, footerMenuItemPaddingVertical, 0)
+				footerMenuItem = th.DuoUIbutton(th.Fonts["Primary"], text, CurrentCurrentPageColor(rc.ShowPage, page.Title, th.Colors["Light"], th.Colors["Primary"]), "", "", "", "", "",
+					footerMenuItemTextSize, footerMenuItemIconSize, 0,
+					footerMenuItemHeight, 13, 16, 14, 16)
 				footerMenuItem.Height = 48
 				for footerButton.Clicked(gtx) {
 					rc.ShowPage = page.Title
