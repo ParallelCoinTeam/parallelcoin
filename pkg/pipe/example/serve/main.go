@@ -2,29 +2,17 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"os"
+	"github.com/p9c/pod/pkg/pipe"
 	"time"
 )
 
 func main() {
-	var n int
-	var err error
-	data := make([]byte, 1024)
-	go func() {
-		for {
-			n, err = os.Stdin.Read(data)
-			if n > 0 {
-				fmt.Print("from parent: ", string(data[:n]))
-			}
-
-			if err != nil && err != io.EOF {
-				fmt.Println("err: ", err)
-			}
-		}
-	}()
+	p := pipe.Parent(func(b []byte) (err error) {
+		fmt.Print("from parent: ", string(b))
+		return
+	}, make(chan struct{}))
 	for {
-		io.WriteString(os.Stdout, "ping")
+		p.Write([]byte("ping"))
 		time.Sleep(time.Second)
 	}
 }

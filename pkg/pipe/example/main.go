@@ -2,30 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/stdconn/worker"
-	"io"
+	"github.com/p9c/pod/pkg/pipe"
 	"time"
 )
 
 func main() {
-	var n int
-	var err error
-	w := worker.Spawn("go", "run", "serve/main.go")
-	data := make([]byte, 1024)
-	go func() {
-		for {
-			n, err = w.StdConn.Read(data)
-			if n > 0 {
-				fmt.Println("from child:", string(data[:n]))
-			}
-
-			if err != nil && err != io.EOF {
-				fmt.Println("err:",err)
-			}
-		}
-	}()
+	p := pipe.Child(func(b []byte) (err error) {
+		fmt.Println("from child:", string(b))
+		return
+	}, "go", "run", "serve/main.go")
 	for {
-		_, err = w.StdConn.Write([]byte("ping"))
+		_, err := p.Write([]byte("ping"))
 		if err != nil {
 			fmt.Println("err:", err)
 		}
