@@ -10,6 +10,7 @@ import (
 
 func // Configure loads and sanitises the configuration from urfave/cli
 Configure(cx *conte.Xt, commandName string) {
+	L.Debug("running Configure", commandName)
 	L.Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
 	cx.NodeChan = make(chan *rpc.Server)

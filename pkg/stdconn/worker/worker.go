@@ -21,7 +21,7 @@ func Spawn(args ...string) (w *Worker) {
 		cmd:  exec.Command(args[0], args[1:]...),
 		args: args,
 	}
-	w.cmd.Stderr = os.Stderr
+	//w.cmd.Stderr = os.Stderr
 	cmdOut, err := w.cmd.StdoutPipe()
 	if err != nil {
 		L.Error(err)

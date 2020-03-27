@@ -8,6 +8,7 @@ import (
 )
 
 func Log(quit chan struct{}) {
+	L.Debug("starting log server")
 	lc := logi.L.AddLogChan()
 	var logOn atomic.Bool
 	logOn.Store(false)
@@ -17,8 +18,10 @@ func Log(quit chan struct{}) {
 			magic := string(b[:4])
 			switch magic {
 			case "run ":
+				L.Debug("setting to run")
 				logOn.Store(true)
 			case "stop":
+				L.Debug("stopping")
 				logOn.Store(false)
 			}
 		}

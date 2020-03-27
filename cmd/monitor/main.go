@@ -76,7 +76,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			}
 		}()
 	}
-	go mon.Consume()
+	//go mon.Consume()
 	go func() {
 		L.Debug("starting up GUI event loop")
 	out:

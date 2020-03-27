@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/pkg/logi/serve"
 	"os"
 	"sync"
 
@@ -17,6 +18,7 @@ import (
 func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		var wg sync.WaitGroup
+		serve.Log(cx.KillAll)
 		config.Configure(cx, c.Command.Name)
 		dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
 			Params.Name + slash + wallet.WalletDbName

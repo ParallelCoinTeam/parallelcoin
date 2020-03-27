@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/p9c/pod/pkg/logi"
-	"github.com/p9c/pod/pkg/logi/serve"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
@@ -23,10 +22,7 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		switch c.Command.Name{
-		case "node", "wallet", "shell", "gui", "mon":
-			serve.Log(cx.KillAll)
-		}
+		L.Debug("running beforeFunc")
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {

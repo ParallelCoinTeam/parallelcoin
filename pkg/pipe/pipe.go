@@ -7,9 +7,10 @@ import (
 	"os"
 )
 
-func Consume(quit chan struct{}, handler func([]byte) error, args ...string) stdconn.StdConn {
+func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *worker.Worker {
 	var n int
 	var err error
+	L.Debug("spawning worker process")
 	w := worker.Spawn(args...)
 	data := make([]byte, 8192)
 	go func() {
@@ -30,7 +31,7 @@ func Consume(quit chan struct{}, handler func([]byte) error, args ...string) std
 
 		}
 	}()
-	return w.StdConn
+	return w
 }
 
 func Serve(quit chan struct{}, handler func([]byte) error) stdconn.StdConn {
@@ -38,6 +39,7 @@ func Serve(quit chan struct{}, handler func([]byte) error) stdconn.StdConn {
 	var err error
 	data := make([]byte, 8192)
 	go func() {
+		L.Debug("starting pipe server")
 	out:
 		for {
 			select {

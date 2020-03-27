@@ -13,7 +13,7 @@ func main() {
 		return
 	}, "go", "run", "serve/main.go")
 	for {
-		_, err := p.Write([]byte("ping"))
+		_, err := p.StdConn.Write([]byte("ping"))
 		if err != nil {
 			fmt.Println("err:", err)
 		}

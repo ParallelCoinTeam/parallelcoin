@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/pkg/logi/serve"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/cmd/node"
@@ -11,6 +12,7 @@ import (
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
 		L.Trace("running node handler")
+		serve.Log(cx.KillAll)
 		config.Configure(cx, c.Command.Name)
 		cx.NodeReady = make(chan struct{})
 		cx.Node.Store(false)
