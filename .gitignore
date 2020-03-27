@@ -48,3 +48,4 @@ yarn.lock
 npm.lock
 
 pod_mon*
+go_build*

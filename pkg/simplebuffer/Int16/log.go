@@ -1,4 +1,4 @@
-package consume
+package Int16
 
 import (
 	"runtime"
