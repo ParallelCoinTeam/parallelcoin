@@ -11,7 +11,7 @@ func Log(quit chan struct{}) {
 	lc := logi.L.AddLogChan()
 	var logOn atomic.Bool
 	logOn.Store(false)
-	p := pipe.Serve(func(b []byte) (err error) {
+	p := pipe.Serve(quit, func(b []byte) (err error) {
 		// listen for commands to enable/disable logging
 		if len(b) >= 4 {
 			magic := string(b[:4])
@@ -23,7 +23,7 @@ func Log(quit chan struct{}) {
 			}
 		}
 		return
-	}, quit)
+	})
 	go func() {
 	out:
 		for {

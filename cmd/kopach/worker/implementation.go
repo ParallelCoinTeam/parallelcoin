@@ -33,8 +33,6 @@ const RoundsPerAlgo = 69
 type Worker struct {
 	mx            sync.Mutex
 	pipeConn      *stdconn.StdConn
-	multicastConn net.Conn
-	unicastConn   net.Conn
 	dispatchConn  *transport.Channel
 	dispatchReady atomic.Bool
 	ciph          cipher.AEAD
@@ -369,8 +367,9 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	// sp := fmt.Sprint(rand.Intn(32767) + 1025)
 	// rp := fmt.Sprint(rand.Intn(32767) + 1025)
 	var conn *transport.Channel
-	conn, err = transport.NewBroadcastChannel("kopachworker", w, pass,
-		transport.DefaultPort, kopachctrl.MaxDatagramSize, transport.Handlers{}, w.Quit)
+	conn, err = transport.NewBroadcastChannel(
+		"kopachworker", w, pass,transport.DefaultPort,
+		kopachctrl.MaxDatagramSize, transport.Handlers{}, w.Quit)
 	if err != nil {
 		L.Error(err)
 	}

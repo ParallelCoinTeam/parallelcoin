@@ -7,10 +7,10 @@ import (
 )
 
 func main() {
-	p := pipe.Serve(func(b []byte) (err error) {
+	p := pipe.Serve(make(chan struct{}), func(b []byte) (err error) {
 		fmt.Print("from parent: ", string(b))
 		return
-	}, make(chan struct{}))
+	})
 	for {
 		_, err := p.Write([]byte("ping"))
 		if err != nil {

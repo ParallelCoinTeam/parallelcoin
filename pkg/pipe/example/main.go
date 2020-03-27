@@ -8,10 +8,10 @@ import (
 
 func main() {
 	quit := make(chan struct{})
-	p := pipe.Consume(func(b []byte) (err error) {
+	p := pipe.Consume(quit, func(b []byte) (err error) {
 		fmt.Println("from child:", string(b))
 		return
-	}, quit,"go", "run", "serve/main.go")
+	}, "go", "run", "serve/main.go")
 	for {
 		_, err := p.Write([]byte("ping"))
 		if err != nil {

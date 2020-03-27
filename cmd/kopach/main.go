@@ -80,10 +80,6 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 			for i := range w.workers {
 				if err = wks[i].Kill(); !L.Check(err) {
 				}
-				//if err := wks[i].Stop(); L.Check(err) {
-				//}
-				//if err := wks[i].Kill(); L.Check(err) {
-				//}
 				L.Debug("stopped worker", i)
 			}
 		})

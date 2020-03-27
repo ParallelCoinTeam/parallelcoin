@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func Consume(handler func([]byte) error, quit chan struct{}, args ...string) stdconn.StdConn {
+func Consume(quit chan struct{}, handler func([]byte) error, args ...string) stdconn.StdConn {
 	var n int
 	var err error
 	w := worker.Spawn(args...)
@@ -33,7 +33,7 @@ func Consume(handler func([]byte) error, quit chan struct{}, args ...string) std
 	return w.StdConn
 }
 
-func Serve(handler func([]byte) error, quit chan struct{}) stdconn.StdConn {
+func Serve(quit chan struct{}, handler func([]byte) error) stdconn.StdConn {
 	var n int
 	var err error
 	data := make([]byte, 8192)
