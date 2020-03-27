@@ -3,9 +3,11 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/pkg/logi"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/urfave/cli"
@@ -20,6 +22,10 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
+		switch {
+		case c.Command.Name != "worker" && c.Command.Name != "kopach":
+			//serve.Log(cx.KillAll)
+		}
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
@@ -53,6 +59,11 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.String("loglevel") != "" {
 			L.Trace("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
+			color := true
+			if runtime.GOOS == "windows" {
+				color = false
+			}
+			logi.L.SetLevel(*cx.Config.LogLevel, color, "pod")
 		}
 		if c.IsSet("network") {
 			*cx.Config.Network = c.String("network")

@@ -7,12 +7,15 @@ import (
 )
 
 func main() {
-	p := pipe.Parent(func(b []byte) (err error) {
+	p := pipe.Serve(func(b []byte) (err error) {
 		fmt.Print("from parent: ", string(b))
 		return
 	}, make(chan struct{}))
 	for {
-		p.Write([]byte("ping"))
+		_, err := p.Write([]byte("ping"))
+		if err != nil {
+			fmt.Println("err:", err)
+		}
 		time.Sleep(time.Second)
 	}
 }

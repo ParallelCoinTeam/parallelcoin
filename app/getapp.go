@@ -59,10 +59,6 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 					"l",
 				),
 			), nil, "c"),
-			apputil.NewCommand("ctlgui",
-				"GUI interface send RPC commands to a node or wallet and" +
-				" print the result", ctlGUIHandle(cx), apputil.SubCommands(),
-				nil, "C"),
 			apputil.NewCommand("node", "start parallelcoin full node",
 				nodeHandle(cx), apputil.SubCommands(
 				apputil.NewCommand("dropaddrindex",

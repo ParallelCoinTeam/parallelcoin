@@ -83,9 +83,9 @@ var wr LogWriter
 // Entry is a log entry to be printed as json to the log file
 type Entry struct {
 	Time         time.Time
+	Package      string
 	Level        string
 	CodeLocation string
-	Package      string
 	Text         string
 }
 

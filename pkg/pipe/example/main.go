@@ -7,10 +7,11 @@ import (
 )
 
 func main() {
-	p := pipe.Child(func(b []byte) (err error) {
+	quit := make(chan struct{})
+	p := pipe.Consume(func(b []byte) (err error) {
 		fmt.Println("from child:", string(b))
 		return
-	}, "go", "run", "serve/main.go")
+	}, quit,"go", "run", "serve/main.go")
 	for {
 		_, err := p.Write([]byte("ping"))
 		if err != nil {
