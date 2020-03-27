@@ -154,7 +154,7 @@ type Config struct {
 	FilterNodes    map[string]*Node
 }
 
-func (s *State) LoadConfig() {
+func (s *State) LoadConfig() (isNew bool){
 	L.Debug("loading config")
 	var err error
 	cnf := &Config{}
@@ -171,7 +171,13 @@ func (s *State) LoadConfig() {
 			if err = json.Unmarshal(b, cnf); L.Check(err) {
 				//s.SaveConfig()
 			}
+			if s.Config.FilterNodes == nil {
+				s.Config.FilterNodes = make(map[string]*Node)
+			}
 			for i := range cnf.FilterNodes {
+				if s.Config.FilterNodes[i] == nil {
+					s.Config.FilterNodes[i] = &Node{}
+				}
 				s.Config.FilterNodes[i].Hidden = cnf.FilterNodes[i].Hidden
 				s.Config.FilterNodes[i].Closed = cnf.FilterNodes[i].Closed
 			}
@@ -201,6 +207,7 @@ func (s *State) LoadConfig() {
 		s.Config.UseBuiltinGo = s.HasGo
 		s.Config.RunInRepo = s.RunningInRepo
 		//L.Debugs(s.Config)
+		isNew = true
 		s.SaveConfig()
 	}
 	if s.Config.Width < 1 || s.Config.Height < 1 {
@@ -212,6 +219,7 @@ func (s *State) LoadConfig() {
 	}
 	s.Rc.Settings.Tabs.Current = s.Config.SettingsTab
 	s.SetTheme(s.Config.DarkTheme)
+	return
 }
 
 func (s *State) SaveConfig() {

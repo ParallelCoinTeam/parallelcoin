@@ -52,21 +52,6 @@ func (s *State) BuildPage() layout.FlexChild {
 		}), Rigid(func() {
 			s.FlexH(Rigid(func() {
 				s.Label("Build Configuration")
-				//s.Inset(10, func() {
-				//	t := s.Theme.DuoUIlabel(unit.Dp(float32(32)), "Build Configuration")
-				//	t.Color = s.Theme.Colors["PanelText"]
-				//	t.Layout(s.Gtx)
-				//	//s.TextButton("Filter", "Secondary", 32,"DocText", "DocBg", s.FilterHeaderButton)
-				//})
-				//s.TextButton("Build Configuration", "Secondary",
-				//	32, "DocText", "DocBg",
-				//	s.BuildTitleCloseButton)
-				//for s.BuildTitleCloseButton.Clicked(s.Gtx) {
-				//	L.Debug("build configuration panel title close" +
-				//		" button clicked")
-				//	s.Config.BuildOpen.Store(false)
-				//	s.SaveConfig()
-				//}
 			}), Spacer(), Rigid(func() {
 				if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
 					s.WindowHeight <= 600 && s.WindowWidth > 800) {

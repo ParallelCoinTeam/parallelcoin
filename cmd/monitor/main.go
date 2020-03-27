@@ -26,7 +26,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	}
 	//L.Debugs(mon.Loggers)
 	mon.Loggers = mon.GetTree(lgs)
-	mon.LoadConfig()
+	isNew := mon.LoadConfig()
 	_, _ = git.PlainClone("/tmp/foo", false,
 		&git.CloneOptions{
 			URL:      "https://github.com/src-d/go-git",
@@ -42,12 +42,18 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 		L.Debug("running inside repo")
 		mon.RunningInRepo = true
 		L.Debug(repo.Remotes())
+		if isNew {
+			mon.Config.RunInRepo = true
+		}
 	}
 	cmd := exec.Command("go", "version")
 	var out []byte
 	out, err = cmd.CombinedOutput()
 	if !strings.HasPrefix("go version", string(out)) {
 		mon.HasGo = true
+		if isNew {
+			mon.Config.UseBuiltinGo = true
+		}
 	}
 	mon.W = app.NewWindow(
 		app.Size(unit.Dp(float32(mon.Config.Width)),

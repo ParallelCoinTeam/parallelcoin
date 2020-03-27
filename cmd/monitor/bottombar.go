@@ -44,12 +44,11 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				if cs.Width.Max <= 240 {
 					txt = txt[:1]
 				}
-				s.TextButton(txt, "Secondary",
-					32, fg, bg,
+				s.TextButton(txt, "Secondary", 34, fg, bg,
 					s.RunModeFoldButton)
 				for s.RunModeFoldButton.Clicked(s.Gtx) {
 					if !s.Config.Running {
-						s.Config.RunModeOpen= true
+						s.Config.RunModeOpen = true
 						s.SaveConfig()
 					}
 				}
@@ -70,13 +69,13 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 					}
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg", "ff")
-					s.TextButton(txt, "Secondary", 32, fg,
+					s.TextButton(txt, "Secondary", 34, fg,
 						"ButtonBg", s.ModesButtons[mm])
 					for s.ModesButtons[mm].Clicked(s.Gtx) {
 						L.Debug(mm, "clicked")
 						if s.Config.RunModeOpen {
-							s.Config.RunMode= modes[i]
-							s.Config.RunModeOpen= false
+							s.Config.RunMode = modes[i]
+							s.Config.RunModeOpen = false
 						}
 						s.SaveConfig()
 					}
@@ -100,10 +99,10 @@ func (s *State) Filter() layout.FlexChild {
 			for s.FilterButton.Clicked(s.Gtx) {
 				L.Debug("clicked filter button")
 				if !s.Config.FilterOpen {
-					s.Config.SettingsOpen= false
-					s.Config.BuildOpen= false
+					s.Config.SettingsOpen = false
+					s.Config.BuildOpen = false
 				}
-				s.Config.FilterOpen=!s.Config.FilterOpen
+				s.Config.FilterOpen = !s.Config.FilterOpen
 				s.SaveConfig()
 			}
 		}

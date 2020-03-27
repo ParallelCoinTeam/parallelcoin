@@ -14,6 +14,8 @@ import (
 
 func (s *State) DuoUIheader() layout.FlexChild {
 	return Rigid(func() {
+		s.Gtx.Constraints.Height.Max = 48
+		s.Gtx.Constraints.Height.Min = 48
 		s.FlexH(Rigid(func() {
 			//cs := s.Gtx.Constraints
 			//s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
@@ -36,21 +38,27 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				cs := s.Gtx.Constraints
 				s.Rectangle(cs.Width.Max, cs.Width.Max, "PanelBg", "ff")
 				s.FlexH(Rigid(func() {
-					//s.Gtx.Constraints.Width.Min = 32
-					s.IconButton("logo", "PanelText", "PanelBg", s.LogoButton, 64)
+					//sz := 64
+					fg, bg := "PanelText", "PanelBg"
+					icon := "logo"
+					//s.Rectangle(sz, sz, fg, "ff")
+					s.Theme.DuoUIbutton("", "", "",
+						s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
+						s.Theme.Colors[fg], 0, 40, 48, 48,
+						4, 4, 4, 4).IconLayout(s.Gtx, s.LogoButton)
+					//s.IconButton("logo", "PanelText", "PanelBg", s.LogoButton, 64)
 					if s.LogoButton.Clicked(s.Gtx) {
 						s.FlipTheme()
 					}
 				}))
 			}), Rigid(func() {
-				//if s.WindowWidth > 360 {
-				s.Label("Monitor")
-				//s.Inset(12, func() {
-				//	t := s.Theme.DuoUIlabel(unit.Dp(float32(24)), "Monitor")
-				//	t.Color = s.Theme.Colors["PanelText"]
-				//	t.Layout(s.Gtx)
-				//})
-				//}
+				s.FlexV(Flexed(1, func() {
+					layout.W.Layout(s.Gtx, func() {
+						t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), "Monitor")
+						t.Color = s.Theme.Colors["PanelText"]
+						t.Layout(s.Gtx)
+					})
+				}))
 			}),
 			)
 		}), Spacer(), Rigid(func() {

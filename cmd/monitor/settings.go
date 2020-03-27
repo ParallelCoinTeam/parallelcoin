@@ -42,6 +42,10 @@ func (s *State) SettingsButtons() layout.FlexChild {
 	})
 }
 
+const settingsTabBreak = 900
+const settingsTabBreakSmall = 512
+const settingsTabBreakMedium = 640
+
 func (s *State) SettingsPage() layout.FlexChild {
 	if !s.Config.SettingsOpen {
 		return Flexed(0, func() {})
@@ -78,8 +82,8 @@ func (s *State) SettingsPage() layout.FlexChild {
 					//	s.SaveConfig()
 					//}
 				}), Flexed(1, func() {
-					if s.WindowWidth > 800 {
-						s.SettingsTabs(23)
+					if s.WindowWidth > settingsTabBreak {
+						s.SettingsTabs(27)
 					}
 				}), Rigid(func() {
 					if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
@@ -107,10 +111,17 @@ func (s *State) SettingsPage() layout.FlexChild {
 				}),
 				)
 			}), Rigid(func() {
-				if s.WindowWidth <= 800 {
+				if s.WindowWidth <= settingsTabBreak {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
-					s.SettingsTabs(15)
+					si := 17
+					if s.WindowWidth >= settingsTabBreakSmall {
+						si = 20
+					}
+					if s.WindowWidth >= settingsTabBreakMedium {
+						si = 24
+					}
+					s.SettingsTabs(si)
 				}
 			}), Flexed(1, func() {
 				cs := s.Gtx.Constraints
