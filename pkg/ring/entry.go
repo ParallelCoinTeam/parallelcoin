@@ -17,29 +17,47 @@ func NewEntry(size int) *Entry {
 	return &Entry{
 		Sem:    semaphore.New(1),
 		Buf:    make([]*logi.Entry, size),
-		Cursor: -1,
+		Cursor: 0,
 	}
 }
 
-// Get returns the value at the given index or nil if nothing
-func (b *Entry) Get(index int) (out *logi.Entry) {
+// Len returns the length of the buffer
+func (b *Entry) Len() (out int) {
 	if err := b.Sem.Acquire(context.Background(), 1); !L.Check(err) {
-		bl := len(b.Buf)
-		if index < bl {
-			cursor := b.Cursor + index
-			if cursor > bl {
-				cursor = cursor - bl
-			}
-			return b.Buf[cursor]
+		defer b.Sem.Release(1)
+		if b.Full {
+			out = len(b.Buf)
+		} else {
+			out = b.Cursor
 		}
-		b.Sem.Release(1)
+	}
+	return
+}
+
+// Get returns the value at the given index or nil if nothing
+func (b *Entry) Get(i int) (out *logi.Entry) {
+	if err := b.Sem.Acquire(context.Background(), 1); !L.Check(err) {
+		defer b.Sem.Release(1)
+		bl := len(b.Buf)
+		cursor := i
+		if i < bl {
+			if b.Full {
+				cursor = i+b.Cursor
+				if cursor > bl {
+					cursor -= bl
+				}
+			}
+			//L.Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			//	cursor)
+			out = b.Buf[cursor]
+		}
 	}
 	return
 }
 
 func (b *Entry) Add(value *logi.Entry) {
 	if err := b.Sem.Acquire(context.Background(), 1); !L.Check(err) {
-		b.Cursor++
+		defer b.Sem.Release(1)
 		if b.Cursor == len(b.Buf) {
 			b.Cursor = 0
 			if !b.Full {
@@ -47,7 +65,7 @@ func (b *Entry) Add(value *logi.Entry) {
 			}
 		}
 		b.Buf[b.Cursor] = value
-		b.Sem.Release(1)
+		b.Cursor++
 	}
 }
 

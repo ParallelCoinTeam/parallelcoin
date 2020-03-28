@@ -3,6 +3,7 @@ package monitor
 import (
 	"encoding/json"
 	"gioui.org/app"
+	"github.com/p9c/pod/pkg/ring"
 	"io/ioutil"
 	"path/filepath"
 
@@ -65,6 +66,7 @@ type State struct {
 	FilterButtons             []gel.Button
 	FilterList                layout.List
 	LogList                   layout.List
+	EntryBuf                  *ring.Entry
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
@@ -91,7 +93,8 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		SettingsFields: layout.List{
 			Axis: layout.Vertical,
 		},
-		RunCommandChan:       make(chan string),
+		RunCommandChan: make(chan string),
+		EntryBuf:       ring.NewEntry(65536),
 	}
 	s.Config.RunMode = "node"
 	s.Config.DarkTheme = true
