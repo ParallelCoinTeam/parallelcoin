@@ -79,6 +79,7 @@ var (
 )
 
 var wr LogWriter
+var write = true
 
 // Entry is a log entry to be printed as json to the log file
 type Entry struct {
@@ -130,6 +131,7 @@ type Logger struct {
 // AddLogChan adds a channel that log entries are sent to
 func (l *Logger) AddLogChan() (ch chan Entry) {
 	L.LogChan = append(L.LogChan, make(chan Entry))
+	write = false
 	return L.LogChan[len(L.LogChan)-1]
 }
 
@@ -206,13 +208,17 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 		err := os.Rename(path, filepath.Join(logPath,
 			time.Now().Format(timeFormat)+".json"))
 		if err != nil {
-			wr.Println("error rotating log", err)
+			if write {
+				wr.Println("error rotating log", err)
+			}
 			return
 		}
 	}
 	logFileHandle, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
-		wr.Println("error opening log file", logFileName)
+		if write {
+			wr.Println("error opening log file", logFileName)
+		}
 	}
 	l.LogFileHandle = logFileHandle
 	_, _ = fmt.Fprintln(logFileHandle, "{")
@@ -223,15 +229,21 @@ type LogWriter struct {
 }
 
 func (w *LogWriter) Print(a ...interface{}) {
-	_, _ = fmt.Fprint(wr, a...)
+	if write {
+		_, _ = fmt.Fprint(wr, a...)
+	}
 }
 
 func (w *LogWriter) Printf(format string, a ...interface{}) {
-	_, _ = fmt.Fprintf(wr, format, a...)
+	if write {
+		_, _ = fmt.Fprintf(wr, format, a...)
+	}
 }
 
 func (w *LogWriter) Println(a ...interface{}) {
-	_, _ = fmt.Fprintln(wr, a...)
+	if write {
+		_, _ = fmt.Fprintln(wr, a...)
+	}
 }
 
 type PrintcFunc func(func() string)
@@ -553,7 +565,9 @@ func PickNoun(n int, singular, plural string) string {
 	return plural
 }
 func Print(a ...interface{}) {
-	wr.Print(a...)
+	if write {
+		wr.Print(a...)
+	}
 }
 
 // printcFunc prints from a closure returning a string
@@ -562,7 +576,9 @@ func printcFunc(level string, color bool, fh *os.File, ch []chan Entry,
 	f := func(fn func() string) {
 		t := fn()
 		text := trimReturn(t)
-		wr.Println(Composite(text, level, color, split))
+		if write {
+			wr.Println(Composite(text, level, color, split))
+		}
 		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			splitted := strings.Split(loc, string(os.PathSeparator))
@@ -573,7 +589,9 @@ func printcFunc(level string, color bool, fh *os.File, ch []chan Entry,
 			if fh != nil {
 				j, err := json.Marshal(out)
 				if err != nil {
-					wr.Println("logging error:", err)
+					if write {
+						wr.Println("logging error:", err)
+					}
 				}
 				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
@@ -588,7 +606,9 @@ func printcFunc(level string, color bool, fh *os.File, ch []chan Entry,
 }
 
 func Printf(format string, a ...interface{}) {
-	wr.Printf(format, a...)
+	if write {
+		wr.Printf(format, a...)
+	}
 }
 
 // printfFunc prints a log entry with formatting
@@ -596,7 +616,9 @@ func printfFunc(level string, color bool, fh *os.File, ch []chan Entry,
 	split string) PrintfFunc {
 	f := func(format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
-		wr.Println(Composite(text, level, color, split))
+		if write {
+			wr.Println(Composite(text, level, color, split))
+		}
 		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			splitted := strings.Split(loc, string(os.PathSeparator))
@@ -607,7 +629,9 @@ func printfFunc(level string, color bool, fh *os.File, ch []chan Entry,
 			if fh != nil {
 				j, err := json.Marshal(out)
 				if err != nil {
-					wr.Println("logging error:", err)
+					if write {
+						wr.Println("logging error:", err)
+					}
 				}
 				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
@@ -622,7 +646,9 @@ func printfFunc(level string, color bool, fh *os.File, ch []chan Entry,
 }
 
 func Println(a ...interface{}) {
-	wr.Println(a...)
+	if write {
+		wr.Println(a...)
+	}
 }
 
 // printlnFunc prints a log entry like Println
@@ -630,7 +656,9 @@ func printlnFunc(level string, color bool, fh *os.File,
 	ch []chan Entry, split string) PrintlnFunc {
 	f := func(a ...interface{}) {
 		text := trimReturn(fmt.Sprintln(a...))
-		wr.Println(Composite(text, level, color, split))
+		if write {
+			wr.Println(Composite(text, level, color, split))
+		}
 		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			splitted := strings.Split(loc, string(os.PathSeparator))
@@ -641,7 +669,9 @@ func printlnFunc(level string, color bool, fh *os.File,
 			if fh != nil {
 				j, err := json.Marshal(out)
 				if err != nil {
-					wr.Println("logging error:", err)
+					if write {
+						wr.Println("logging error:", err)
+					}
 				}
 				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
@@ -663,7 +693,9 @@ func checkFunc(color bool, fh *os.File, ch []chan Entry,
 			return false
 		}
 		text := err.Error()
-		wr.Println(Composite(text, "CHK", color, split))
+		if write {
+			wr.Println(Composite(text, "CHK", color, split))
+		}
 		if fh != nil || ch != nil {
 			_, loc, line, _ := runtime.Caller(3)
 			splitted := strings.Split(loc, string(os.PathSeparator))
@@ -674,7 +706,9 @@ func checkFunc(color bool, fh *os.File, ch []chan Entry,
 			if fh != nil {
 				j, err := json.Marshal(out)
 				if err != nil {
-					wr.Println("logging error:", err)
+					if write {
+						wr.Println("logging error:", err)
+					}
 				}
 				_, _ = fmt.Fprint(fh, string(j)+",")
 			}
@@ -695,7 +729,9 @@ func ps(level string, color bool, fh *os.File, split string) SpewFunc {
 		text := trimReturn(spew.Sdump(a))
 		o := "" + Composite("spew:", level, color, split)
 		o += "\n" + text + "\n"
-		wr.Print(o)
+		if write {
+			wr.Print(o)
+		}
 		if fh != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			splitted := strings.Split(loc, string(os.PathSeparator))
@@ -705,7 +741,9 @@ func ps(level string, color bool, fh *os.File, split string) SpewFunc {
 				text}
 			j, err := json.Marshal(out)
 			if err != nil {
-				wr.Println("logging error:", err)
+				if write {
+					wr.Println("logging error:", err)
+				}
 			}
 			_, _ = fmt.Fprint(fh, string(j)+",")
 		}
