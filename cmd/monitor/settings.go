@@ -25,7 +25,7 @@ func (s *State) SettingsButtons() layout.FlexChild {
 				if s.Config.SettingsOpen {
 					bg, fg = "DocBg", "DocText"
 				}
-				s.IconButton("settingsIcon", fg, bg, s.SettingsFoldButton)
+				s.IconButton("settingsIcon", fg, bg, &s.SettingsFoldButton)
 
 				for s.SettingsFoldButton.Clicked(s.Gtx) {
 					L.Debug("settings folder clicked")
@@ -93,7 +93,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 							ic = "minimize"
 						}
 						s.IconButton(ic, "DocText", "DocBg",
-							s.SettingsZoomButton)
+							&s.SettingsZoomButton)
 						for s.SettingsZoomButton.Clicked(s.Gtx) {
 							L.Debug("settings panel close button clicked")
 							s.Config.SettingsZoomed = !s.Config.SettingsZoomed
@@ -102,7 +102,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 					}
 				}), Rigid(func() {
 					s.IconButton("foldIn", "DocText", "DocBg",
-						s.SettingsCloseButton)
+						&s.SettingsCloseButton)
 					for s.SettingsCloseButton.Clicked(s.Gtx) {
 						L.Debug("settings panel close button clicked")
 						s.Config.SettingsOpen = false

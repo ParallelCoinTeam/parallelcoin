@@ -27,35 +27,40 @@ func (s *State) Sidebar() layout.FlexChild {
 							s.Label("Filter")
 						}
 					}), Rigid(func() {
-						s.IconButton("HideAll", "DocText", "DocBg", s.FilterHideButton)
+						s.IconButton("HideAll", "DocText", "DocBg",
+							&s.FilterHideButton)
 						for s.FilterHideButton.Clicked(s.Gtx) {
 							L.Debug("hide all")
 							s.Loggers.CloseAllItems(s)
 							s.SaveConfig()
 						}
 					}), Rigid(func() {
-						s.IconButton("ShowAll", "DocText", "DocBg", s.FilterShowButton)
+						s.IconButton("ShowAll", "DocText", "DocBg",
+							&s.FilterShowButton)
 						for s.FilterShowButton.Clicked(s.Gtx) {
 							L.Debug("show all")
 							s.Loggers.OpenAllItems(s)
 							s.SaveConfig()
 						}
 					}), Rigid(func() {
-						s.IconButton("ShowItem", "DocText", "DocBg", s.FilterAllButton)
+						s.IconButton("ShowItem", "DocText", "DocBg",
+							&s.FilterAllButton)
 						for s.FilterAllButton.Clicked(s.Gtx) {
 							L.Debug("filter all")
 							s.Loggers.ShowAllItems(s)
 							s.SaveConfig()
 						}
 					}), Rigid(func() {
-						s.IconButton("HideItem", "DocText", "DocBg", s.FilterNoneButton)
+						s.IconButton("HideItem", "DocText", "DocBg",
+							&s.FilterNoneButton)
 						for s.FilterNoneButton.Clicked(s.Gtx) {
 							L.Debug("filter none")
 							s.Loggers.HideAllItems(s)
 							s.SaveConfig()
 						}
 					}), Rigid(func() {
-						s.IconButton("Filter", "DocText", "DocBg", s.FilterButton)
+						s.IconButton("Filter", "DocText", "DocBg",
+							&s.FilterButton)
 						for s.FilterButton.Clicked(s.Gtx) {
 							L.Debug("filter header clicked")
 							if !s.Config.FilterOpen {

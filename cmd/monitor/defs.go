@@ -23,47 +23,48 @@ type State struct {
 	Rc                        *rcd.RcVar
 	Theme                     *gelook.DuoUItheme
 	Config                    *Config
-	MainList                  *layout.List
-	ModesList                 *layout.List
-	CloseButton               *gel.Button
-	RestartButton             *gel.Button
-	LogoButton                *gel.Button
-	RunMenuButton             *gel.Button
-	StopMenuButton            *gel.Button
-	PauseMenuButton           *gel.Button
-	RestartMenuButton         *gel.Button
-	KillMenuButton            *gel.Button
-	RunModeFoldButton         *gel.Button
-	SettingsFoldButton        *gel.Button
-	SettingsCloseButton       *gel.Button
-	SettingsZoomButton        *gel.Button
-	SettingsTitleCloseButton  *gel.Button
-	BuildFoldButton           *gel.Button
-	BuildCloseButton          *gel.Button
-	BuildZoomButton           *gel.Button
-	BuildTitleCloseButton     *gel.Button
-	FilterButton              *gel.Button
-	FilterHeaderButton        *gel.Button
-	FilterAllButton           *gel.Button
-	FilterHideButton          *gel.Button
-	FilterShowButton          *gel.Button
-	FilterNoneButton          *gel.Button
-	ModesButtons              map[string]*gel.Button
-	GroupsList                *layout.List
+	MainList                  layout.List
+	ModesList                 layout.List
+	CloseButton               gel.Button
+	RestartButton             gel.Button
+	LogoButton                gel.Button
+	RunMenuButton             gel.Button
+	StopMenuButton            gel.Button
+	PauseMenuButton           gel.Button
+	RestartMenuButton         gel.Button
+	KillMenuButton            gel.Button
+	RunModeFoldButton         gel.Button
+	SettingsFoldButton        gel.Button
+	SettingsCloseButton       gel.Button
+	SettingsZoomButton        gel.Button
+	SettingsTitleCloseButton  gel.Button
+	BuildFoldButton           gel.Button
+	BuildCloseButton          gel.Button
+	BuildZoomButton           gel.Button
+	BuildTitleCloseButton     gel.Button
+	FilterButton              gel.Button
+	FilterHeaderButton        gel.Button
+	FilterAllButton           gel.Button
+	FilterHideButton          gel.Button
+	FilterShowButton          gel.Button
+	FilterNoneButton          gel.Button
+	ModesButtons              map[string]gel.Button
+	GroupsList                layout.List
 	WindowWidth, WindowHeight int
 	Loggers                   *Node
-	SettingsFields            *layout.List
+	SettingsFields            layout.List
 	RunningInRepo             bool
-	RunningInRepoButton       *gel.Button
-	RunFromProfileButton      *gel.Button
+	RunningInRepoButton       gel.Button
+	RunFromProfileButton      gel.Button
 	HasGo                     bool
 	HasOtherGo                bool
-	UseBuiltinGoButton        *gel.Button
-	InstallNewGoButton        *gel.Button
+	UseBuiltinGoButton        gel.Button
+	InstallNewGoButton        gel.Button
 	CannotRun                 bool
 	RunCommandChan            chan string
-	FilterButtons             []*gel.Button
+	FilterButtons             []gel.Button
 	FilterList                layout.List
+	LogList                   layout.List
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
@@ -72,57 +73,57 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		Gtx:   gtx,
 		Rc:    rc,
 		Theme: gelook.NewDuoUItheme(),
-		MainList: &layout.List{
+		MainList: layout.List{
 			Axis: layout.Vertical,
 		},
-		ModesList: &layout.List{
+		ModesList: layout.List{
 			Axis:      layout.Horizontal,
 			Alignment: layout.Start,
 		},
-		CloseButton:              new(gel.Button),
-		RestartButton:            new(gel.Button),
-		LogoButton:               new(gel.Button),
-		RunMenuButton:            new(gel.Button),
-		StopMenuButton:           new(gel.Button),
-		PauseMenuButton:          new(gel.Button),
-		RestartMenuButton:        new(gel.Button),
-		KillMenuButton:           new(gel.Button),
-		SettingsFoldButton:       new(gel.Button),
-		RunModeFoldButton:        new(gel.Button),
-		BuildFoldButton:          new(gel.Button),
-		BuildCloseButton:         new(gel.Button),
-		BuildZoomButton:          new(gel.Button),
-		BuildTitleCloseButton:    new(gel.Button),
-		SettingsCloseButton:      new(gel.Button),
-		SettingsZoomButton:       new(gel.Button),
-		SettingsTitleCloseButton: new(gel.Button),
-		FilterButton:             new(gel.Button),
-		FilterHeaderButton:       new(gel.Button),
-		FilterAllButton:          new(gel.Button),
-		FilterNoneButton:         new(gel.Button),
-		FilterHideButton:         new(gel.Button),
-		FilterShowButton:         new(gel.Button),
-		ModesButtons: map[string]*gel.Button{
-			"node":   new(gel.Button),
-			"wallet": new(gel.Button),
-			"shell":  new(gel.Button),
-			"gui":    new(gel.Button),
-			"mon":    new(gel.Button),
+		//CloseButton:              new(gel.Button),
+		//RestartButton:            new(gel.Button),
+		//LogoButton:               new(gel.Button),
+		//RunMenuButton:            new(gel.Button),
+		//StopMenuButton:           new(gel.Button),
+		//PauseMenuButton:          new(gel.Button),
+		//RestartMenuButton:        new(gel.Button),
+		//KillMenuButton:           new(gel.Button),
+		//SettingsFoldButton:       new(gel.Button),
+		//RunModeFoldButton:        new(gel.Button),
+		//BuildFoldButton:          new(gel.Button),
+		//BuildCloseButton:         new(gel.Button),
+		//BuildZoomButton:          new(gel.Button),
+		//BuildTitleCloseButton:    new(gel.Button),
+		//SettingsCloseButton:      new(gel.Button),
+		//SettingsZoomButton:       new(gel.Button),
+		//SettingsTitleCloseButton: new(gel.Button),
+		//FilterButton:             new(gel.Button),
+		//FilterHeaderButton:       new(gel.Button),
+		//FilterAllButton:          new(gel.Button),
+		//FilterNoneButton:         new(gel.Button),
+		//FilterHideButton:         new(gel.Button),
+		//FilterShowButton:         new(gel.Button),
+		ModesButtons: map[string]gel.Button{
+			//"node":   new(gel.Button),
+			//"wallet": new(gel.Button),
+			//"shell":  new(gel.Button),
+			//"gui":    new(gel.Button),
+			//"mon":    new(gel.Button),
 		},
 		Config:       &Config{FilterNodes: make(map[string]*Node)},
 		WindowWidth:  0,
 		WindowHeight: 0,
-		GroupsList: &layout.List{
+		GroupsList: layout.List{
 			Axis:      layout.Horizontal,
 			Alignment: layout.Start,
 		},
-		SettingsFields: &layout.List{
+		SettingsFields: layout.List{
 			Axis: layout.Vertical,
 		},
-		RunningInRepoButton:  new(gel.Button),
-		RunFromProfileButton: new(gel.Button),
-		UseBuiltinGoButton:   new(gel.Button),
-		InstallNewGoButton:   new(gel.Button),
+		//RunningInRepoButton:  new(gel.Button),
+		//RunFromProfileButton: new(gel.Button),
+		//UseBuiltinGoButton:   new(gel.Button),
+		//InstallNewGoButton:   new(gel.Button),
 		RunCommandChan:       make(chan string),
 	}
 	s.Config.RunMode = "node"
@@ -154,7 +155,7 @@ type Config struct {
 	FilterNodes    map[string]*Node
 }
 
-func (s *State) LoadConfig() (isNew bool){
+func (s *State) LoadConfig() (isNew bool) {
 	L.Debug("loading config")
 	var err error
 	cnf := &Config{}

@@ -14,7 +14,7 @@ func (s *State) BuildButtons() layout.FlexChild {
 				}
 				//s.TextButton("Build", "Secondary", 23,
 				//	fg, bg, s.BuildFoldButton)
-				s.IconButton("Build", fg, bg, s.BuildFoldButton)
+				s.IconButton("Build", fg, bg, &s.BuildFoldButton)
 				for s.BuildFoldButton.Clicked(s.Gtx) {
 					L.Debug("run mode folder clicked")
 					if !s.Config.BuildOpen {
@@ -60,7 +60,7 @@ func (s *State) BuildPage() layout.FlexChild {
 						ic = "minimize"
 					}
 					s.IconButton(ic, "DocText", "DocBg",
-						s.BuildZoomButton)
+						&s.BuildZoomButton)
 					for s.BuildZoomButton.Clicked(s.Gtx) {
 						L.Debug("settings panel fold button clicked")
 						s.Config.BuildZoomed=!s.Config.BuildZoomed
@@ -69,7 +69,7 @@ func (s *State) BuildPage() layout.FlexChild {
 				}
 			}), Spacer(), Rigid(func() {
 				s.IconButton("foldIn", "DocText", "DocBg",
-					s.BuildCloseButton)
+					&s.BuildCloseButton)
 				for s.BuildCloseButton.Clicked(s.Gtx) {
 					L.Debug("settings panel close button clicked")
 					s.Config.BuildOpen= false
@@ -109,7 +109,7 @@ func (s *State) BuildConfigPage() {
 						fg, bg = "ButtonText", "ButtonBg"
 					}
 					s.TextButton("repo", "Primary", 16,
-						fg, bg, s.RunningInRepoButton)
+						fg, bg, &s.RunningInRepoButton)
 					for s.RunningInRepoButton.Clicked(s.Gtx) {
 						if !s.Config.Running {
 							s.Config.RunInRepo= true
@@ -124,7 +124,7 @@ func (s *State) BuildConfigPage() {
 					fg, bg = "ButtonText", "ButtonBg"
 				}
 				s.TextButton("profile", "Primary", 16,
-					fg, bg, s.RunFromProfileButton)
+					fg, bg, &s.RunFromProfileButton)
 				for s.RunFromProfileButton.Clicked(s.Gtx) {
 					if !s.Config.Running {
 						s.Config.RunInRepo= false
@@ -157,7 +157,7 @@ func (s *State) BuildConfigPage() {
 						fg, bg = "ButtonText", "ButtonBg"
 					}
 					s.TextButton("builtin", "Primary", 16,
-						fg, bg, s.UseBuiltinGoButton)
+						fg, bg, &s.UseBuiltinGoButton)
 					for s.UseBuiltinGoButton.Clicked(s.Gtx) {
 						if !s.Config.RunInRepo {
 							s.Config.UseBuiltinGo= true
@@ -174,7 +174,7 @@ func (s *State) BuildConfigPage() {
 					fg, bg = "ButtonText", "ButtonBg"
 				}
 				s.TextButton("install new", "Primary", 16,
-					fg, bg, s.InstallNewGoButton)
+					fg, bg, &s.InstallNewGoButton)
 				for s.InstallNewGoButton.Clicked(s.Gtx) {
 					if !s.Config.RunInRepo {
 						s.Config.UseBuiltinGo= false
