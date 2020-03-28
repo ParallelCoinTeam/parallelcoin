@@ -24,12 +24,12 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
 	github.com/kr/text v0.2.0 // indirect
+	github.com/marusama/semaphore v0.0.0-20190110074507-6952cef993b2
 	github.com/minio/highwayhash v1.0.0
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/p9c/goterm v0.0.3
-	github.com/p9c/logi v0.0.17
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect

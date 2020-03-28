@@ -17,7 +17,6 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 			switch magic {
 			case "entr":
 				e := Entry.LoadContainer(b)
-				//L.Debugs(e)
 				if err := handler((&e).Struct()); L.Check(
 					err) {
 				}

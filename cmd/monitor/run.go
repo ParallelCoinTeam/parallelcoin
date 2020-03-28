@@ -4,6 +4,7 @@ import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/logi/consume"
+	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/stdconn/worker"
 	"os"
 	"os/exec"
@@ -91,6 +92,7 @@ func (s *State) Runner() {
 	var exePath string
 	var w *worker.Worker
 	var quit chan struct{}
+	entryBuf := ring.NewEntry(65536)
 	for cmd := range s.RunCommandChan {
 		switch cmd {
 		case "run":
@@ -100,6 +102,7 @@ func (s *State) Runner() {
 					quit = make(chan struct{})
 					w = consume.Log(quit, func(ent *logi.Entry) (err error) {
 						L.Debugf("KOPACH %s %s", ent.Text, ent.Level)
+						entryBuf.Add(ent)
 						return
 					}, exePath, "-D", *s.Ctx.Config.DataDir, s.Config.RunMode)
 					consume.Start(w)
