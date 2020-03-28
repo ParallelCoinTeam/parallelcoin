@@ -76,6 +76,15 @@ var (
 	Levels = []string{
 		Off, Fatal, Error, Warn, Info, Check, Debug, Trace,
 	}
+	Tags = map[string]string{
+		Fatal: "FTL",
+		Error: "ERR",
+		Warn:  "WRN",
+		Info:  "INF",
+		Check: "CHK",
+		Debug: "DBG",
+		Trace: "TRC",
+	}
 )
 
 var wr LogWriter
@@ -139,7 +148,7 @@ func (l *Logger) AddLogChan() (ch chan Entry) {
 func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
 	// if this is called on the top level logger and there is other loggers
 	// set their levels as well
-	L.Warn("set log level", level)
+	//L.Warn("set log level", level)
 	if l.Pkg == "root" && len(Loggers) > 0 {
 		for _, v := range Loggers {
 			v.SetLevel(level, color, split)
@@ -150,17 +159,17 @@ func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
 	var fallen bool
 	switch {
 	case level == Trace || fallen:
-		l.Trace = printlnFunc("TRC", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Tracef = printfFunc("TRC", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Tracec = printcFunc("TRC", color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Trace = printlnFunc(Tags[Trace], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Tracef = printfFunc(Tags[Trace], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Tracec = printcFunc(Tags[Trace], color, l.LogFileHandle, l.LogChan, l.Split)
 		l.Traces = ps("TRC", color, l.LogFileHandle, l.Split)
 		fallen = true
 		fallthrough
 	case level == Debug || fallen:
-		l.Debug = printlnFunc("DBG", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Debugf = printfFunc("DBG", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Debugc = printcFunc("DBG", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Debugs = ps("DBG", color, l.LogFileHandle, l.Split)
+		l.Debug = printlnFunc(Tags[Debug], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Debugf = printfFunc(Tags[Debug], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Debugc = printcFunc(Tags[Debug], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Debugs = ps(Tags[Debug], color, l.LogFileHandle, l.Split)
 		fallen = true
 		fallthrough
 	case level == Check || fallen:
@@ -170,32 +179,31 @@ func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
 		fallen = true
 		fallthrough
 	case level == Info || fallen:
-		l.Info = printlnFunc("INF", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Infof = printfFunc("INF", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Infoc = printcFunc("INF", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Infos = ps("INF", color, l.LogFileHandle, l.Split)
+		l.Info = printlnFunc(Tags[Info], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Infof = printfFunc(Tags[Info], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Infoc = printcFunc(Tags[Info], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Infos = ps(Tags[Info], color, l.LogFileHandle, l.Split)
 		fallen = true
 		fallthrough
 	case level == Warn || fallen:
-		l.Warn = printlnFunc("WRN", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Warnf = printfFunc("WRN", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Warnc = printcFunc("WRN", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Warns = ps("WRN", color, l.LogFileHandle, l.Split)
+		l.Warn = printlnFunc(Tags[Warn], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Warnf = printfFunc(Tags[Warn], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Warnc = printcFunc(Tags[Warn], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Warns = ps(Tags[Warn], color, l.LogFileHandle, l.Split)
 		fallen = true
 		fallthrough
 	case level == Error || fallen:
-		l.Error = printlnFunc("ERR", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Errorf = printfFunc("ERR", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Errorc = printcFunc("ERR", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Errors = ps("ERR", color, l.LogFileHandle, l.Split)
+		l.Error = printlnFunc(Tags[Error], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Errorf = printfFunc(Tags[Error], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Errorc = printcFunc(Tags[Error], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Errors = ps(Tags[Error], color, l.LogFileHandle, l.Split)
 		fallen = true
 		fallthrough
 	case level == Fatal:
-		l.Fatal = printlnFunc("FTL", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Fatalf = printfFunc("FTL", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Fatalc = printcFunc("FTL", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Fatals = ps("FTL", color, l.LogFileHandle, l.Split)
-		fallen = true
+		l.Fatal = printlnFunc(Tags[Fatal], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Fatalf = printfFunc(Tags[Fatal], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Fatalc = printcFunc(Tags[Fatal], color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Fatals = ps(Tags[Fatal], color, l.LogFileHandle, l.Split)
 	}
 	return l
 }
