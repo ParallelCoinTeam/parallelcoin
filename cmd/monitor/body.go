@@ -1,7 +1,6 @@
 package monitor
 
 import (
-	"fmt"
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/logi"
 )
@@ -19,7 +18,7 @@ func (s *State) Body() layout.FlexChild {
 				color := "DocText"
 				switch b.Level {
 				case logi.Tags[logi.Trace]:
-					color = "Hint"
+					color = "Secondary"
 				case logi.Tags[logi.Debug]:
 					color = "Info"
 				case logi.Tags[logi.Info]:
@@ -33,9 +32,9 @@ func (s *State) Body() layout.FlexChild {
 					//	color = "Danger"
 				}
 				s.FlexH(
-					Rigid(
-						s.Text(fmt.Sprint(i), color, "DocBg", "Mono", "body1"),
-					),
+					//Rigid(
+					//	s.Text(fmt.Sprint(i), color, "DocBg", "Mono", "body1"),
+					//),
 					Rigid(
 						s.Text(b.Level, color, "DocBg", "Mono", "body1"),
 					),

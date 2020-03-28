@@ -84,6 +84,13 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["ShowAll"] = mustIcon(NewDuoUIicon(icons.NavigationUnfoldMore))
 	i["HideItem"] = mustIcon(NewDuoUIicon(icons.ActionVisibilityOff))
 	i["ShowItem"] = mustIcon(NewDuoUIicon(icons.ActionVisibility))
+	i["TRC"] = mustIcon(NewDuoUIicon(icons.ActionSearch))
+	i["DBG"] = mustIcon(NewDuoUIicon(icons.ActionBugReport))
+	i["INF"] = mustIcon(NewDuoUIicon(icons.ActionInfo))
+	i["WRN"] = mustIcon(NewDuoUIicon(icons.ActionHelp))
+	i["CHK"] = mustIcon(NewDuoUIicon(icons.AlertWarning))
+	i["ERR"] = mustIcon(NewDuoUIicon(icons.AlertError))
+	i["FTL"] = mustIcon(NewDuoUIicon(icons.NotificationPriorityHigh))
 	return i
 }
 

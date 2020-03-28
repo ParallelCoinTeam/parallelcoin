@@ -74,14 +74,22 @@ var (
 	Loggers = make(map[string]*Logger)
 
 	Levels = []string{
-		Off, Fatal, Error, Warn, Info, Check, Debug, Trace,
+		Off,
+		Fatal,
+		Error,
+		Check,
+		Warn,
+		Info,
+		Debug,
+		Trace,
 	}
 	Tags = map[string]string{
+		Off:   "",
 		Fatal: "FTL",
 		Error: "ERR",
+		Check: "CHK",
 		Warn:  "WRN",
 		Info:  "INF",
-		Check: "CHK",
 		Debug: "DBG",
 		Trace: "TRC",
 	}
@@ -140,7 +148,7 @@ type Logger struct {
 // AddLogChan adds a channel that log entries are sent to
 func (l *Logger) AddLogChan() (ch chan Entry) {
 	L.LogChan = append(L.LogChan, make(chan Entry))
-	write = false
+	//write = false
 	return L.LogChan[len(L.LogChan)-1]
 }
 

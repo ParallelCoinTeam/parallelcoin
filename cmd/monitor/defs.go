@@ -49,6 +49,8 @@ type State struct {
 	FilterHideButton          gel.Button
 	FilterShowButton          gel.Button
 	FilterNoneButton          gel.Button
+	FilterLevelsButtons       []gel.Button
+	FilterLevelList           layout.List
 	ModesButtons              map[string]gel.Button
 	GroupsList                layout.List
 	WindowWidth, WindowHeight int
@@ -93,8 +95,9 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		SettingsFields: layout.List{
 			Axis: layout.Vertical,
 		},
-		RunCommandChan: make(chan string),
-		EntryBuf:       ring.NewEntry(65536),
+		RunCommandChan:      make(chan string),
+		EntryBuf:            ring.NewEntry(65536),
+		FilterLevelsButtons: make([]gel.Button, 7),
 	}
 	s.Config.RunMode = "node"
 	s.Config.DarkTheme = true
@@ -123,6 +126,7 @@ type Config struct {
 	Pausing        bool
 	FilterOpen     bool
 	FilterNodes    map[string]*Node
+	FilterLevel    int
 }
 
 func (s *State) LoadConfig() (isNew bool) {
@@ -162,6 +166,7 @@ func (s *State) LoadConfig() (isNew bool) {
 			s.Config.Running = cnf.Running
 			s.Config.Pausing = cnf.Pausing
 			s.Config.FilterOpen = cnf.FilterOpen
+			s.Config.FilterLevel = cnf.FilterLevel
 		}
 	} else {
 		L.Warn("creating new configuration")

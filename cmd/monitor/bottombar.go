@@ -40,10 +40,10 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 					fg, bg = "ButtonBg", "DocText"
 				}
 				txt := s.Config.RunMode
-				cs := s.Gtx.Constraints
-				if cs.Width.Max <= 240 {
-					txt = txt[:1]
-				}
+				//cs := s.Gtx.Constraints
+				//if cs.Width.Max <= 240 {
+				//	txt = txt[:1]
+				//}
 				s.TextButton(txt, "Secondary", 34, fg, bg,
 					&s.RunModeFoldButton)
 				for s.RunModeFoldButton.Clicked(s.Gtx) {

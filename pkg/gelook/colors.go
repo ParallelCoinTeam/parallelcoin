@@ -23,6 +23,7 @@ func NewDuoUIcolors() (c map[string]string) {
 	c["Danger"] = "ffcf3030"
 	c["Warning"] = "ffcfcf30"
 	c["Info"] = "ff3080cf"
+	c["Check"] = "ffcf8030"
 	c["Hint"] = "ff888888"
 	c["InvText"] = "ffcfcfcf"
 	c["ButtonText"] = "ffcfcfcf"
