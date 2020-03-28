@@ -15,7 +15,7 @@ func (s *State) Body() layout.FlexChild {
 			s.LogList.Layout(s.Gtx, s.EntryBuf.Len(), func(i int) {
 				b := s.EntryBuf.Get(i)
 				//L.Debugs(b)
-				s.FlexH(Rigid(s.Text(b.Text, "DocText", "DocBg",
+				s.FlexH(Rigid(s.Text(b.Level+" "+b.Text, "DocText", "DocBg",
 					"Mono",
 					"body1")))
 			})

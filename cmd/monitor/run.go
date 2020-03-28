@@ -87,6 +87,7 @@ func (s *State) Build() (exePath string, err error) {
 }
 
 func (s *State) Runner() {
+	logi.L.SetLevel(*s.Ctx.Config.LogLevel, true, "pod")
 	var err error
 	var exePath string
 	var w *worker.Worker

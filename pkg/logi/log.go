@@ -84,8 +84,8 @@ var write = true
 // Entry is a log entry to be printed as json to the log file
 type Entry struct {
 	Time         time.Time
-	Package      string
 	Level        string
+	Package      string
 	CodeLocation string
 	Text         string
 }
@@ -139,6 +139,7 @@ func (l *Logger) AddLogChan() (ch chan Entry) {
 func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
 	// if this is called on the top level logger and there is other loggers
 	// set their levels as well
+	L.Warn("set log level", level)
 	if l.Pkg == "root" && len(Loggers) > 0 {
 		for _, v := range Loggers {
 			v.SetLevel(level, color, split)
@@ -149,9 +150,9 @@ func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
 	var fallen bool
 	switch {
 	case level == Trace || fallen:
-		l.Trace = printlnFunc("TRC", color, l.LogFileHandle, nil, l.Split)
-		l.Tracef = printfFunc("TRC", color, l.LogFileHandle, nil, l.Split)
-		l.Tracec = printcFunc("TRC", color, l.LogFileHandle, nil, l.Split)
+		l.Trace = printlnFunc("TRC", color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Tracef = printfFunc("TRC", color, l.LogFileHandle, l.LogChan, l.Split)
+		l.Tracec = printcFunc("TRC", color, l.LogFileHandle, l.LogChan, l.Split)
 		l.Traces = ps("TRC", color, l.LogFileHandle, l.Split)
 		fallen = true
 		fallthrough

@@ -25,8 +25,8 @@ func Get(ent *logi.Entry) Container {
 	}
 	return Container{*simplebuffer.Serializers{
 		Time.New().Put(ent.Time),
-		String.New().Put(ent.Package),
 		String.New().Put(ent.Level),
+		String.New().Put(ent.Package),
 		String.New().Put(ent.CodeLocation),
 		String.New().Put(ent.Text),
 	}.CreateContainer(EntryMagic)}
@@ -43,15 +43,18 @@ func (c *Container) GetTime() time.Time {
 	return Time.New().DecodeOne(c.Get(0)).Get()
 }
 
-func (c *Container) GetPackage() string {
+func (c *Container) GetLevel() string {
 	return String.New().DecodeOne(c.Get(1)).Get()
 }
-func (c *Container) GetLevel() string {
+
+func (c *Container) GetPackage() string {
 	return String.New().DecodeOne(c.Get(2)).Get()
 }
+
 func (c *Container) GetCodeLocation() string {
 	return String.New().DecodeOne(c.Get(3)).Get()
 }
+
 func (c *Container) GetText() string {
 	return String.New().DecodeOne(c.Get(4)).Get()
 }

@@ -53,7 +53,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			L.Debug("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
-		if c.String("loglevel") != "" {
+		if c.IsSet("loglevel")  {
 			L.Trace("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
 			color := true
