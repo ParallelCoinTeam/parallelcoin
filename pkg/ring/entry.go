@@ -42,8 +42,8 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 		cursor := i
 		if i < bl {
 			if b.Full {
-				cursor = i+b.Cursor
-				if cursor > bl {
+				cursor = i + b.Cursor
+				if cursor >= bl {
 					cursor -= bl
 				}
 			}
