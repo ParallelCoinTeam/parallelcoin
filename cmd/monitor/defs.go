@@ -80,36 +80,7 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 			Axis:      layout.Horizontal,
 			Alignment: layout.Start,
 		},
-		//CloseButton:              new(gel.Button),
-		//RestartButton:            new(gel.Button),
-		//LogoButton:               new(gel.Button),
-		//RunMenuButton:            new(gel.Button),
-		//StopMenuButton:           new(gel.Button),
-		//PauseMenuButton:          new(gel.Button),
-		//RestartMenuButton:        new(gel.Button),
-		//KillMenuButton:           new(gel.Button),
-		//SettingsFoldButton:       new(gel.Button),
-		//RunModeFoldButton:        new(gel.Button),
-		//BuildFoldButton:          new(gel.Button),
-		//BuildCloseButton:         new(gel.Button),
-		//BuildZoomButton:          new(gel.Button),
-		//BuildTitleCloseButton:    new(gel.Button),
-		//SettingsCloseButton:      new(gel.Button),
-		//SettingsZoomButton:       new(gel.Button),
-		//SettingsTitleCloseButton: new(gel.Button),
-		//FilterButton:             new(gel.Button),
-		//FilterHeaderButton:       new(gel.Button),
-		//FilterAllButton:          new(gel.Button),
-		//FilterNoneButton:         new(gel.Button),
-		//FilterHideButton:         new(gel.Button),
-		//FilterShowButton:         new(gel.Button),
-		ModesButtons: map[string]gel.Button{
-			//"node":   new(gel.Button),
-			//"wallet": new(gel.Button),
-			//"shell":  new(gel.Button),
-			//"gui":    new(gel.Button),
-			//"mon":    new(gel.Button),
-		},
+		ModesButtons: map[string]gel.Button{},
 		Config:       &Config{FilterNodes: make(map[string]*Node)},
 		WindowWidth:  0,
 		WindowHeight: 0,
@@ -120,10 +91,6 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		SettingsFields: layout.List{
 			Axis: layout.Vertical,
 		},
-		//RunningInRepoButton:  new(gel.Button),
-		//RunFromProfileButton: new(gel.Button),
-		//UseBuiltinGoButton:   new(gel.Button),
-		//InstallNewGoButton:   new(gel.Button),
 		RunCommandChan:       make(chan string),
 	}
 	s.Config.RunMode = "node"
@@ -159,18 +126,12 @@ func (s *State) LoadConfig() (isNew bool) {
 	L.Debug("loading config")
 	var err error
 	cnf := &Config{}
-	//u.Width, u.Height = 800, 600
-	//u.RunMode = "node"
-	//L.Debugs(u)
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if apputil.FileExists(filename) {
-		//L.Debug("config file exists")
 		var b []byte
 		if b, err = ioutil.ReadFile(filename); !L.Check(err) {
-			//L.Warn(string(b))
-			//L.Debug(s.Config)
 			if err = json.Unmarshal(b, cnf); L.Check(err) {
-				//s.SaveConfig()
+				s.SaveConfig()
 			}
 			if s.Config.FilterNodes == nil {
 				s.Config.FilterNodes = make(map[string]*Node)
@@ -198,16 +159,11 @@ func (s *State) LoadConfig() (isNew bool) {
 			s.Config.Running = cnf.Running
 			s.Config.Pausing = cnf.Pausing
 			s.Config.FilterOpen = cnf.FilterOpen
-			//L.Debugs(s.Config.FilterNodes)
-			//for i := range s.Config.FilterNodes {
-			//	L.Debug(s.Config.FilterNodes[i])
-			//}
 		}
 	} else {
 		L.Warn("creating new configuration")
 		s.Config.UseBuiltinGo = s.HasGo
 		s.Config.RunInRepo = s.RunningInRepo
-		//L.Debugs(s.Config)
 		isNew = true
 		s.SaveConfig()
 	}
@@ -224,17 +180,10 @@ func (s *State) LoadConfig() (isNew bool) {
 }
 
 func (s *State) SaveConfig() {
-	//L.Debug("saving config")
-	//for i, v := range s.Config.FilterNodes {
-	//	L.Debug(i, v)
-	//}
-	//L.Debugs(s.Config.FilterNodes)
 	s.Config.Width = s.WindowWidth
 	s.Config.Height = s.WindowHeight
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
-	//L.Debugs(u)
 	if yp, e := json.MarshalIndent(s.Config, "", "  "); !L.Check(e) {
-		//L.Debug(string(yp))
 		apputil.EnsureDir(filename)
 		if e := ioutil.WriteFile(filename, yp, 0600); L.Check(e) {
 			panic(e)
