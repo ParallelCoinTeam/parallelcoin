@@ -22,7 +22,6 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 						layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
 							size := ui.ly.Context.Px(unit.Dp(256)) - 2*ui.ly.Context.Px(unit.Dp(8))
 							if logo != nil {
-								logo.Color = gelook.HexARGB(ui.ly.Theme.Colors["Dark"])
 								logo.Color = gelook.HexARGB(ui.ly.Theme.Colors["Light"])
 								logo.Layout(ui.ly.Context, unit.Px(float32(size)))
 							}
@@ -34,6 +33,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 					layout.Flexed(1, func() {
 						layout.UniformInset(unit.Dp(60)).Layout(ui.ly.Context, func() {
 							txt := ui.ly.Theme.H1("PLAN NINE FROM FAR, FAR AWAY SPACE")
+							txt.Font.Typeface = ui.ly.Theme.Fonts["Secondary"]
 							txt.Color = ui.ly.Theme.Colors["Light"]
 							txt.Layout(ui.ly.Context)
 						})

@@ -91,7 +91,6 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme
 
 func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-
 		addressBookPanelElement.PanelObject = rc.AddressBook.Addresses
 		addressBookPanelElement.PanelObjectsNumber = len(rc.AddressBook.Addresses)
 		addressBookPanel := th.DuoUIpanel()
