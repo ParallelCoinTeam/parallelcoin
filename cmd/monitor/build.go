@@ -16,7 +16,7 @@ func (s *State) BuildButtons() layout.FlexChild {
 				//	fg, bg, s.BuildFoldButton)
 				s.IconButton("Build", fg, bg, &s.BuildFoldButton)
 				for s.BuildFoldButton.Clicked(s.Gtx) {
-					L.Debug("run mode folder clicked")
+					Debug("run mode folder clicked")
 					if !s.Config.BuildOpen {
 						s.Config.FilterOpen= false
 						s.Config.SettingsOpen= false
@@ -62,7 +62,7 @@ func (s *State) BuildPage() layout.FlexChild {
 					s.IconButton(ic, "DocText", "DocBg",
 						&s.BuildZoomButton)
 					for s.BuildZoomButton.Clicked(s.Gtx) {
-						L.Debug("settings panel fold button clicked")
+						Debug("settings panel fold button clicked")
 						s.Config.BuildZoomed=!s.Config.BuildZoomed
 						s.SaveConfig()
 					}
@@ -71,7 +71,7 @@ func (s *State) BuildPage() layout.FlexChild {
 				s.IconButton("foldIn", "DocText", "DocBg",
 					&s.BuildCloseButton)
 				for s.BuildCloseButton.Clicked(s.Gtx) {
-					L.Debug("settings panel close button clicked")
+					Debug("settings panel close button clicked")
 					s.Config.BuildOpen= false
 					s.SaveConfig()
 				}

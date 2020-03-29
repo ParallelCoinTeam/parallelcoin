@@ -73,14 +73,14 @@ type FutureGetAddedNodeInfoResult chan *response
 func (r FutureGetAddedNodeInfoResult) Receive() ([]btcjson.GetAddedNodeInfoResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal as an array of getaddednodeinfo result objects.
 	var nodeInfo []btcjson.GetAddedNodeInfoResult
 	err = js.Unmarshal(res, &nodeInfo)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return nodeInfo, nil
@@ -104,14 +104,14 @@ type FutureGetAddedNodeInfoNoDNSResult chan *response
 func (r FutureGetAddedNodeInfoNoDNSResult) Receive() ([]string, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as an array of strings.
 	var nodes []string
 	err = js.Unmarshal(res, &nodes)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return nodes, nil
@@ -135,14 +135,14 @@ type FutureGetConnectionCountResult chan *response
 func (r FutureGetConnectionCountResult) Receive() (int64, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, err
 	}
 	// Unmarshal result as an int64.
 	var count int64
 	err = js.Unmarshal(res, &count)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, err
 	}
 	return count, nil
@@ -186,14 +186,14 @@ type FutureGetPeerInfoResult chan *response
 func (r FutureGetPeerInfoResult) Receive() ([]btcjson.GetPeerInfoResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as an array of getpeerinfo result objects.
 	var peerInfo []btcjson.GetPeerInfoResult
 	err = js.Unmarshal(res, &peerInfo)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return peerInfo, nil
@@ -217,14 +217,14 @@ type FutureGetNetTotalsResult chan *response
 func (r FutureGetNetTotalsResult) Receive() (*btcjson.GetNetTotalsResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a getnettotals result object.
 	var totals btcjson.GetNetTotalsResult
 	err = js.Unmarshal(res, &totals)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &totals, nil

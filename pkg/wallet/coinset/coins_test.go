@@ -30,7 +30,7 @@ func NewCoin(index int64, value util.Amount, numConfs int64) coinset.Coin {
 	h := sha256.New()
 	_, err := h.Write([]byte(fmt.Sprintf("%d", index)))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	hash, _ := chainhash.NewHash(h.Sum(nil))
 	c := &TestCoin{

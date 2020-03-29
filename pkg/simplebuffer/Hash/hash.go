@@ -21,7 +21,7 @@ func (h *Hash) Decode(b []byte) (out []byte) {
 	if len(b) >= 32 {
 		err := h.Hash.SetBytes(b[:32])
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return
 		}
 		if len(b) > 32 {

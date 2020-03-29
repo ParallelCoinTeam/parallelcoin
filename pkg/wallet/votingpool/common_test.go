@@ -15,7 +15,7 @@ func init() {
 	// Log.SetLevel("debug")
 }
 
-// TstCheckError ensures the passed error is a votingpool.Error with an error
+// TstCheckError ensures the passed error is a votingpool.DBError with an error
 // code that matches the passed error code.
 func TstCheckError(t *testing.T, testName string, gotErr error, wantErrCode ErrorCode) {
 	vpErr, ok := gotErr.(Error)

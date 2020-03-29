@@ -47,22 +47,22 @@ type Connection struct {
 // 		config := &net.ListenConfig{Control: reusePort}
 // 		listenConn, err = config.ListenPacket(context.Background(), "udp4", listen)
 // 		if err != nil {
-// 			L.Error(err)
+// 			Error(err)
 // 		}
 // 	}
 // 	if send != "" {
 // 		// sendAddr, err = net.ResolveUDPAddr("udp4", send)
 // 		// if err != nil {
-// 		// 	L.Error(err)
+// 		// 	Error(err)
 // 		// }
 // 		sendConn, err = net.Dial("udp4", send)
 // 		if err != nil {
-// 			L.Error(err, sendAddr)
+// 			Error(err, sendAddr)
 // 		}
 // 		// L.Spew(sendConn)
 // 	}
 // 	var ciph cipher.AEAD
-// 	if ciph, err = gcm.GetCipher(preSharedKey); L.Check(err) {
+// 	if ciph, err = gcm.GetCipher(preSharedKey); Check(err) {
 // 	}
 // 	return &Connection{
 // 		maxDatagramSize: maxDatagramSize,
@@ -80,12 +80,12 @@ type Connection struct {
 func (c *Connection) SetSendConn(ad string) (err error) {
 	// c.sendAddress, err = net.ResolveUDPAddr("udp4", ad)
 	// if err != nil {
-	// 	L.Error(err)
+	// 	Error(err)
 	// }
 	var sC net.Conn
 	sC, err = net.Dial("udp4", ad)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	c.SendConn = sC
@@ -99,7 +99,7 @@ func (c *Connection) CreateShards(b, magic []byte) (shards [][]byte,
 	nonceLen := c.ciph.NonceSize()
 	nonce := make([]byte, nonceLen)
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// generate the shards
@@ -121,7 +121,7 @@ func send(shards [][]byte, sendConn net.Conn) (err error) {
 	for i := range shards {
 		_, err = sendConn.Write(shards[i])
 		if err != nil {
-			L.Error(err)
+			Error(err)
 		}
 	}
 	return
@@ -130,14 +130,14 @@ func send(shards [][]byte, sendConn net.Conn) (err error) {
 func (c *Connection) Send(b, magic []byte) (err error) {
 	if len(magic) != 4 {
 		err = errors.New("magic must be 4 bytes long")
-		L.Error(err)
+		Error(err)
 		return
 	}
 	var shards [][]byte
 	shards, err = c.CreateShards(b, magic)
 	err = send(shards, c.SendConn)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	return
 }
@@ -145,18 +145,18 @@ func (c *Connection) Send(b, magic []byte) (err error) {
 func (c *Connection) SendTo(addr *net.UDPAddr, b, magic []byte) (err error) {
 	if len(magic) != 4 {
 		err = errors.New("magic must be 4 bytes long")
-		L.Error(err)
+		Error(err)
 		return
 	}
 	sendConn, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	shards, err := c.CreateShards(b, magic)
 	err = send(shards, sendConn)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	return
 }
@@ -164,7 +164,7 @@ func (c *Connection) SendTo(addr *net.UDPAddr, b, magic []byte) (err error) {
 func (c *Connection) SendShards(shards [][]byte) (err error) {
 	err = send(shards, c.SendConn)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	return
 }
@@ -172,29 +172,29 @@ func (c *Connection) SendShards(shards [][]byte) (err error) {
 func (c *Connection) SendShardsTo(shards [][]byte, addr *net.UDPAddr) (err error) {
 	sendConn, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	err = send(shards, sendConn)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	return
 }
 
 func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 	lastSent *time.Time, firstSender *string) (err error) {
-	L.Trace("setting read buffer")
+	Trace("setting read buffer")
 	buffer := make([]byte, c.maxDatagramSize)
 	go func() {
-		L.Trace("starting connection handler")
+		Trace("starting connection handler")
 	out:
 		// read from socket until context is cancelled
 		for {
 			n, src, err := (*c.listenConn).ReadFrom(buffer)
 			buf := buffer[:n]
 			if err != nil {
-				// L.Error("ReadFromUDP failed:", err)
+				// Error("ReadFromUDP failed:", err)
 				continue
 			}
 			magic := string(buf[:4])
@@ -210,7 +210,7 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 				shard, err := c.ciph.Open(nil, nonceBytes,
 					buf[16:], nil)
 				if err != nil {
-					// L.Error(err)
+					// Error(err)
 					// corrupted or irrelevant message
 					continue
 				}
@@ -222,13 +222,13 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 							var cipherText []byte
 							cipherText, err = fec.Decode(bn.Buffers)
 							if err != nil {
-								L.Error(err)
+								Error(err)
 								continue
 							}
 							bn.Decoded = true
 							err = handlers[magic](ifc)(cipherText)
 							if err != nil {
-								L.Error(err)
+								Error(err)
 								continue
 							}
 						}
@@ -239,14 +239,14 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 								// buffers,
 								// we don't add more data for the already
 								// decoded.
-								// L.Trace("deleting superseded buffer",
+								// Trace("deleting superseded buffer",
 								// 	hex.EncodeToString([]byte(i)))
 								delete(c.buffers, i)
 							}
 						}
 					}
 				} else {
-					// L.Trace("new message arriving",
+					// Trace("new message arriving",
 					// 	hex.EncodeToString([]byte(nonce)))
 					c.buffers[nonce] = &MsgBuffer{[][]byte{},
 						time.Now(), false, src}
@@ -268,17 +268,17 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 // func GetUDPAddr(address string) (sendAddr *net.UDPAddr) {
 // 	sendHost, sendPort, err := net.SplitHostPort(address)
 // 	if err != nil {
-// 		L.Error(err)
+// 		Error(err)
 // 		return
 // 	}
 // 	sendPortI, err := strconv.ParseInt(sendPort, 10, 64)
 // 	if err != nil {
-// 		L.Error(err)
+// 		Error(err)
 // 		return
 // 	}
 // 	sendAddr = &net.UDPAddr{IP: net.ParseIP(sendHost),
 // 		Port: int(sendPortI)}
-// 	// L.Debug("multicast", Address)
+// 	// Debug("multicast", Address)
 // 	// L.Spew(sendAddr)
 // 	return
 // }

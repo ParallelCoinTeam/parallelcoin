@@ -27,13 +27,13 @@ func LoadSolContainer(b []byte) (out *SolContainer) {
 }
 
 func (sC *SolContainer) GetMsgBlock() *wire.MsgBlock {
-	// L.Traces(sC.Data)
+	// Traces(sC.Data)
 	buff := sC.Get(1)
-	// L.Traces(buff)
+	// Traces(buff)
 	decoded := Block.New().DecodeOne(buff)
-	// L.Traces(decoded)
+	// Traces(decoded)
 	got := decoded.Get()
-	// L.Traces(got)
+	// Traces(got)
 	return got
 }
 

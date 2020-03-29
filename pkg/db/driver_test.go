@@ -13,12 +13,12 @@ var (
 // ignoreDbTypes = map[string]bool{"createopenfail": true}
 )
 
-// checkDbError ensures the passed error is a database.Error with an error code that matches the passed  error code.
+// checkDbError ensures the passed error is a database.DBError with an error code that matches the passed  error code.
 func checkDbError(t *testing.T, testName string, gotErr error, wantErrCode database.ErrorCode) bool {
-	dbErr, ok := gotErr.(database.Error)
+	dbErr, ok := gotErr.(database.DBError)
 	if !ok {
 		t.Errorf("%s: unexpected error type - got %T, want %T",
-			testName, gotErr, database.Error{})
+			testName, gotErr, database.DBError{})
 		return false
 	}
 	if dbErr.ErrorCode != wantErrCode {

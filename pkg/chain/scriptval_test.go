@@ -15,7 +15,7 @@ func TestCheckBlockScripts(t *testing.T) {
 	blockDataFile := fmt.Sprintf("%d.dat.bz2", testBlockNum)
 	blocks, err := loadBlocks(blockDataFile)
 	if err != nil {
-		t.Errorf("Error loading file: %v\n", err)
+		t.Errorf("ScriptError loading file: %v\n", err)
 		return
 	}
 	if len(blocks) > 1 {
@@ -29,7 +29,7 @@ func TestCheckBlockScripts(t *testing.T) {
 	storeDataFile := fmt.Sprintf("%d.utxostore.bz2", testBlockNum)
 	view, err := loadUtxoView(storeDataFile)
 	if err != nil {
-		t.Errorf("Error loading txstore: %v\n", err)
+		t.Errorf("ScriptError loading txstore: %v\n", err)
 		return
 	}
 	scriptFlags := txscript.ScriptBip16

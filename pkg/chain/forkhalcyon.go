@@ -19,7 +19,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	nH := lastNode.height + 1
 	if lastNode == nil {
 		if l {
-			L.Debug("lastNode is nil")
+			Debug("lastNode is nil")
 		}
 		return newTargetBits, nil
 	}
@@ -30,7 +30,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	prevNode := lastNode.GetLastWithAlgo(algo)
 	if prevNode == nil {
 		if l {
-			L.Debug("prevNode is nil")
+			Debug("prevNode is nil")
 		}
 		return newTargetBits, nil
 	}
@@ -46,7 +46,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	actualTimespan := prevNode.timestamp - firstNode.timestamp
 	adjustedTimespan := actualTimespan
 	if l {
-		L.Tracef("actual %d", actualTimespan)
+		Tracef("actual %d", actualTimespan)
 	}
 	if actualTimespan < b.params.MinActualTimespan {
 		adjustedTimespan = b.params.MinActualTimespan
@@ -54,7 +54,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 		adjustedTimespan = b.params.MaxActualTimespan
 	}
 	if l {
-		L.Tracef("adjusted %d", adjustedTimespan)
+		Tracef("adjusted %d", adjustedTimespan)
 	}
 	oldTarget := CompactToBig(prevNode.bits)
 	newTarget := new(big.Int).
@@ -66,7 +66,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	}
 	newTargetBits = BigToCompact(newTarget)
 	if l {
-		L.Debugf(
+		Debugf(
 			"difficulty retarget at block height %d, old %08x new %08x",
 			lastNode.height+1,
 			prevNode.bits,
@@ -74,7 +74,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 		)
 	}
 	if l {
-		L.Tracec(func() string {
+		Tracec(func() string {
 			return fmt.Sprintf(
 				"actual timespan %v, adjusted timespan %v, target timespan %v"+
 					"\nOld %064x\nNew %064x",

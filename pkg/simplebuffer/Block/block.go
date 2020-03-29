@@ -22,10 +22,10 @@ func (B *Block) DecodeOne(b []byte) *Block {
 }
 
 func (B *Block) Decode(b []byte) (out []byte) {
-	// L.Traces(b)
+	// Traces(b)
 	if len(b) >= 4 {
 		B.Length = binary.BigEndian.Uint32(b[:4])
-		// L.Debug("length", B.Length)
+		// Debug("length", B.Length)
 		if len(b) >= 4+int(B.Length) {
 			B.Bytes = b[4 : 4+B.Length]
 			if len(b) > 4+int(B.Length) {
@@ -33,7 +33,7 @@ func (B *Block) Decode(b []byte) (out []byte) {
 			}
 		}
 	}
-	// L.Traces(out)
+	// Traces(out)
 	return
 }
 
@@ -49,7 +49,7 @@ func (B *Block) Get() (b *wire.MsgBlock) {
 	buffer := bytes.NewBuffer(B.Bytes)
 	err := b.Deserialize(buffer)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	return
 }
@@ -58,7 +58,7 @@ func (B *Block) Put(b *wire.MsgBlock) *Block {
 	var buffer bytes.Buffer
 	err := b.Serialize(&buffer)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return B
 	}
 	B.Bytes = buffer.Bytes()

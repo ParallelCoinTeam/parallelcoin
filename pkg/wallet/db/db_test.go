@@ -78,7 +78,7 @@ func TestCreateOpenFail(t *testing.T) {
 	}
 	err := walletdb.RegisterDriver(driver)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	// Ensure creating a database with the new type fails with the expected
 	// error.

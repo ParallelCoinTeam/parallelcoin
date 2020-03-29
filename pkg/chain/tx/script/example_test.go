@@ -19,19 +19,19 @@ func ExamplePayToAddrScript() {
 	addressStr := "12gpXQVcCL2qhTNQgyLVdCFG2Qs2px98nV"
 	address, err := util.DecodeAddress(addressStr, &netparams.MainNetParams)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// Create a public key script that pays to the address.
 	script, err := txscript.PayToAddrScript(address)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	fmt.Printf("Script Hex: %x\n", script)
 	disasm, err := txscript.DisasmString(script)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	fmt.Println("Script Disassembly:", disasm)
@@ -46,19 +46,19 @@ func ExamplePayToAddrScript() {
 // 	scriptHex := "76a914128004ff2fcaf13b2b91eb654b1dc2b674f7ec6188ac"
 // 	script, err := hex.DecodeString(scriptHex)
 // 	if err != nil {
-// 		L.Error(err)
+// 		L.ScriptError(err)
 // 		return
 // 	}
 // 	// Extract and print details from the script.
 // 	scriptClass, addresses, reqSigs, err := txscript.ExtractPkScriptAddrs(
 // 		script, &netparams.MainNetParams)
 // 	if err != nil {
-// 		L.Error(err)
+// 		L.ScriptError(err)
 // 		return
 // 	}
-// 	log.Println("Script Class:", scriptClass)
-// 	log.Println("Addresses:", addresses)
-// 	log.Println("Required Signatures:", reqSigs)
+// 	fmt.Println("Script Class:", scriptClass)
+// 	fmt.Println("Addresses:", addresses)
+// 	fmt.Println("Required Signatures:", reqSigs)
 // 	// Output:
 // 	// Script Class: pubkeyhash
 // 	// Addresses: [12gpXQVcCL2qhTNQgyLVdCFG2Qs2px98nV]
@@ -71,7 +71,7 @@ func ExampleSignTxOutput() {
 	privKeyBytes, err := hex.DecodeString("22a47fa09a223f2aa079edf85a7c2" +
 		"d4f8720ee63e502ee2869afab7de234b80c")
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	privKey, pubKey := ec.PrivKeyFromBytes(ec.S256(), privKeyBytes)
@@ -79,7 +79,7 @@ func ExampleSignTxOutput() {
 	addr, err := util.NewAddressPubKeyHash(pubKeyHash,
 		&netparams.MainNetParams)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// For this example, create a fake transaction that represents what would ordinarily be the real transaction that is being spent.  It contains a single output that pays to address in the amount of 1 DUO.
@@ -89,7 +89,7 @@ func ExampleSignTxOutput() {
 	originTx.AddTxIn(txIn)
 	pkScript, err := txscript.PayToAddrScript(addr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	txOut := wire.NewTxOut(100000000, pkScript)
@@ -117,7 +117,7 @@ func ExampleSignTxOutput() {
 		redeemTx, 0, originTx.TxOut[0].PkScript, txscript.SigHashAll,
 		txscript.KeyClosure(lookupKey), nil, nil)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	redeemTx.TxIn[0].SignatureScript = sigScript
@@ -128,11 +128,11 @@ func ExampleSignTxOutput() {
 	vm, err := txscript.NewEngine(originTx.TxOut[0].PkScript, redeemTx, 0,
 		flags, nil, nil, -1)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	if err := vm.Execute(); err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	fmt.Println("Transaction successfully signed")

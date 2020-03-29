@@ -633,17 +633,17 @@ func TestBestChainStateDeserializeErrors(t *testing.T) {
 		{
 			name:       "nothing serialized",
 			serialized: hexToBytes(""),
-			errType:    database.Error{ErrorCode: database.ErrCorruption},
+			errType:    database.DBError{ErrorCode: database.ErrCorruption},
 		},
 		{
 			name:       "short data in hash",
 			serialized: hexToBytes("0000"),
-			errType:    database.Error{ErrorCode: database.ErrCorruption},
+			errType:    database.DBError{ErrorCode: database.ErrCorruption},
 		},
 		{
 			name:       "short data in work sum",
 			serialized: hexToBytes("6fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d61900000000000000000001000000000000000500000001000100"),
-			errType:    database.Error{ErrorCode: database.ErrCorruption},
+			errType:    database.DBError{ErrorCode: database.ErrCorruption},
 		},
 	}
 	for _, test := range tests {
@@ -655,8 +655,8 @@ func TestBestChainStateDeserializeErrors(t *testing.T) {
 				test.name, err, test.errType)
 			continue
 		}
-		if derr, ok := err.(database.Error); ok {
-			tderr := test.errType.(database.Error)
+		if derr, ok := err.(database.DBError); ok {
+			tderr := test.errType.(database.DBError)
 			if derr.ErrorCode != tderr.ErrorCode {
 				t.Errorf("deserializeBestChainState (%s): "+
 					"wrong  error code got: %v, want: %v",

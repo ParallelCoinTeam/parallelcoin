@@ -94,14 +94,14 @@ func TestMain(m *testing.M) {
 	podCfg := []string{"--rejectnonstd"}
 	primaryHarness, err = rpctest.New(&netparams.SimNetParams, nil, podCfg)
 	if err != nil {
-		log.Println("unable to create primary harness: ", err)
+		fmt.Println("unable to create primary harness: ", err)
 		os.Exit(1)
 	}
 	// Initialize the primary mining node with a chain of length 125,
 	// providing 25 mature coinbases to allow spending from for testing
 	// purposes.
 	if err := primaryHarness.SetUp(true, 25); err != nil {
-		log.Println("unable to setup test chain: ", err)
+		fmt.Println("unable to setup test chain: ", err)
 		// Even though the harness was not fully setup,
 		// it still needs to be torn down to ensure all resources such as
 		// temp directories are cleaned up.
@@ -115,7 +115,7 @@ func TestMain(m *testing.M) {
 	// This includes removing all temporary directories,
 	// and shutting down any created processes.
 	if err := rpctest.TearDownAll(); err != nil {
-		log.Println("unable to tear down all harnesses: ", err)
+		fmt.Println("unable to tear down all harnesses: ", err)
 		os.Exit(1)
 	}
 	os.Exit(exitCode)
@@ -128,9 +128,9 @@ func TestRpcServer(t *testing.T) {
 		// goroutine, then tear down all the harnesses in order to avoid any
 		// leaked pod processes.
 		if r := recover(); r != nil {
-			log.Println("recovering from test panic: ", r)
+			fmt.Println("recovering from test panic: ", r)
 			if err := rpctest.TearDownAll(); err != nil {
-				log.Println("unable to tear down all harnesses: ", err)
+				fmt.Println("unable to tear down all harnesses: ", err)
 			}
 			t.Fatalf("test #%v panicked: %s", currentTestNum, debug.Stack())
 		}

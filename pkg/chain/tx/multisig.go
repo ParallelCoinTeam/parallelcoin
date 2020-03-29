@@ -23,7 +23,7 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 		if dbtx != nil {
 			err := dbtx.Rollback()
 			if err != nil {
-				L.Error(err)
+				Error(err)
 			}
 		}
 	}()
@@ -42,14 +42,14 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 				var err error
 				dbtx, err = w.db.BeginReadTx()
 				if err != nil {
-					L.Error(err)
+					Error(err)
 					return nil, err
 				}
 				addrmgrNs = dbtx.ReadBucket(waddrmgrNamespaceKey)
 			}
 			addrInfo, err := w.Manager.Address(addrmgrNs, addr)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return nil, err
 			}
 			serializedPubKey := addrInfo.(waddrmgr.ManagedPubKeyAddress).
@@ -57,7 +57,7 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 			pubKeyAddr, err := util.NewAddressPubKey(
 				serializedPubKey, w.chainParams)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return nil, err
 			}
 			pubKeys[i] = pubKeyAddr
@@ -82,12 +82,12 @@ func (w *Wallet) ImportP2SHRedeemScript(script []byte) (*util.AddressScriptHash,
 			waddrmgr.KeyScopeBIP0084,
 		)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		addrInfo, err := bip44Mgr.ImportScript(addrmgrNs, script, bs)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			// Don't care if it's already there, but still have to
 			// set the p2shAddr since the address manager didn't
 			// return anything useful.

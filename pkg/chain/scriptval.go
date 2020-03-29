@@ -73,7 +73,7 @@ out:
 				txVI.txInIndex, v.flags, v.sigCache, txVI.sigHashes,
 				inputAmount)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				str := fmt.Sprintf("failed to parse input "+
 					"%s:%d which references output %v - "+
 					"%v (input witness %x, input script "+
@@ -152,7 +152,7 @@ func // Validate validates the scripts for all of the passed transaction inputs
 		case err := <-v.resultChan:
 			processedItems++
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				close(v.quitChan)
 				return err
 			}
@@ -279,7 +279,7 @@ checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 		return err
 	}
 	// elapsed := time.Since(start)
-	// L.Tracec(func() string {
+	// Tracec(func() string {
 	//	return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
 	// })
 	// If the HashCache is present, once we have validated the block,

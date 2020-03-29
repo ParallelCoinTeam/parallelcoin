@@ -23,7 +23,7 @@ func NewEntry(size int) *Entry {
 
 // Len returns the length of the buffer
 func (b *Entry) Len() (out int) {
-	if err := b.Sem.Acquire(context.Background(), 1); !L.Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
 		defer b.Sem.Release(1)
 		if b.Full {
 			out = len(b.Buf)
@@ -36,7 +36,7 @@ func (b *Entry) Len() (out int) {
 
 // Get returns the value at the given index or nil if nothing
 func (b *Entry) Get(i int) (out *logi.Entry) {
-	if err := b.Sem.Acquire(context.Background(), 1); !L.Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
 		defer b.Sem.Release(1)
 		bl := len(b.Buf)
 		cursor := i
@@ -47,7 +47,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 					cursor -= bl
 				}
 			}
-			//L.Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = b.Buf[cursor]
 		}
@@ -56,7 +56,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 }
 
 func (b *Entry) Add(value *logi.Entry) {
-	if err := b.Sem.Acquire(context.Background(), 1); !L.Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
 		defer b.Sem.Release(1)
 		if b.Cursor == len(b.Buf) {
 			b.Cursor = 0
@@ -70,28 +70,28 @@ func (b *Entry) Add(value *logi.Entry) {
 }
 
 func (b *Entry) ForEach(fn func(v *logi.Entry) error) (err error) {
-	if err := b.Sem.Acquire(context.Background(), 1); !L.Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
 		c := b.Cursor
 		i := c + 1
 		if i == len(b.Buf) {
-			// L.Debug("hit the end")
+			// Debug("hit the end")
 			i = 0
 		}
 		if !b.Full {
-			// L.Debug("buffer not yet full")
+			// Debug("buffer not yet full")
 			i = 0
 		}
-		// L.Debug(b.Buf)
+		// Debug(b.Buf)
 		for ; ; i++ {
 			if i == len(b.Buf) {
-				// L.Debug("passed the end")
+				// Debug("passed the end")
 				i = 0
 			}
 			if i == c {
-				// L.Debug("reached cursor again")
+				// Debug("reached cursor again")
 				break
 			}
-			// L.Debug(i, b.Cursor)
+			// Debug(i, b.Cursor)
 			if err = fn(b.Buf[i]); err != nil {
 				break
 			}

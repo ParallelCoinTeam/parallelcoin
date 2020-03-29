@@ -124,7 +124,7 @@ homeDir = "."
 // sac), and extract the RPC user and password from it.
 func createDefaultConfigFile(destinationPath, serverConfigPath,
 	serverDataDir, walletDataDir string) error {
-// log.Println("server config path", serverConfigPath)
+// fmt.Println("server config path", serverConfigPath)
 	// Read the RPC server config
 	serverConfigFile, err := os.Open(serverConfigPath)
 	if err != nil {
@@ -167,19 +167,19 @@ return err
 	if err != nil {
 return err
 	}
-	// log.Println("config path", destinationPath)
+	// fmt.Println("config path", destinationPath)
 	// Create the destination file and write the rpcuser and rpcpass to it
 	dest, err := os.OpenFile(destinationPath,
 		os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-L.Error(err)
+Error(err)
 		return err
 	}
 	defer dest.Close()
 	destString := fmt.Sprintf("username=%s\npassword=%s\n",
 		string(userSubmatches[1]), string(passSubmatches[1]))
 	if TLSSubmatches != nil {
-	log.Println("TLS is enabled but more than likely the certificates will
+	fmt.Println("TLS is enabled but more than likely the certificates will
 fail verification because of the CA.
 Currently there is no adequate tool for this, but will be soon.")
 		destString += fmt.Sprintf("clienttls=%s\n", TLSSubmatches[1])
@@ -189,7 +189,7 @@ Currently there is no adequate tool for this, but will be soon.")
 	return nil
 }
 func copy(src, dst string) (int64, error) {
-// log.Println(src, dst)
+// fmt.Println(src, dst)
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
 return 0, err
@@ -308,7 +308,7 @@ preParser.WriteHelp(os.Stderr)
 		appName = strings.TrimSuffix(appName, filepath.Ext(appName))
 		usageMessage := fmt.Sprintf("Use %s -h to show usage", appName)
 		if preCfg.ShowVersion {
-log.Println(appName, "version", version())
+fmt.Println(appName, "version", version())
 				os.Exit(0)
 		}
 		// Load additional config from file.
@@ -368,7 +368,7 @@ cfg.RPCCert.Value = filepath.Join(cfg.AppDataDir.Value, "rpc.cert")
 // Create the destination directory if it does not exists
 									err = os.MkdirAll(cfg.DataDir.Value, 0700)
 									if err != nil {
-log.Println("ERROR", err)
+fmt.Println("ERROR", err)
 											return nil, nil, err
 										}
 									}
@@ -377,22 +377,22 @@ log.Println("ERROR", err)
 // If we can find a pod.conf in the standard location, copy
 				// copy the rpcuser and rpcpassword and TLS setting
 				c := cleanAndExpandPath("~/.pod/pod.conf")
-				// log.Println("server config path:", c)
+				// fmt.Println("server config path:", c)
 			// _, err := os.Stat(c)
-			// log.Println(err)
-			// log.Println(os.IsNotExist(err))
+			// fmt.Println(err)
+			// fmt.Println(os.IsNotExist(err))
 			if _, err := os.Stat(c); err == nil {
-log.Println("Creating config from pod config")
+fmt.Println("Creating config from pod config")
 					createDefaultConfigFile(cfg.ConfigFile.Value, c, cleanAndExpandPath("~/.pod"),
 						cfg.AppDataDir.Value)
 				} else {
 var bb bytes.Buffer
 						bb.Write(sampleModConf)
-				log.Println("Writing config file:", cfg.ConfigFile.Value)
+				fmt.Println("Writing config file:", cfg.ConfigFile.Value)
 				dest, err := os.OpenFile(cfg.ConfigFile.Value,
 						os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 					if err != nil {
-log.Println("ERROR", err)
+fmt.Println("ERROR", err)
 							return nil, nil, err
 						}
 						defer dest.Close()
@@ -457,7 +457,7 @@ str := "%s: The testnet and simnet netparams can't be used " +
 		cfg.LogDir = filepath.Join(cfg.LogDir, activeNet.Params.Name)
 		// Special show command to list supported subsystems and exit.
 		if cfg.DebugLevel == "show" {
-log.Println("Supported subsystems", supportedSubsystems())
+fmt.Println("Supported subsystems", supportedSubsystems())
 				os.Exit(0)
 			}
 			// Initialize log rotation.  After log rotation has been initialized, the
@@ -550,7 +550,7 @@ fmt.Fprintln(os.Stderr, err)
 // err = fmt.Errorf("The wallet does not exist.  Run with the " +
 				// "--create option to initialize and create it...")
 				// Ensure the data directory for the network exists.
-				log.Println("Existing wallet not found in", cfg.ConfigFile.Value)
+				fmt.Println("Existing wallet not found in", cfg.ConfigFile.Value)
 				if err := checkCreateDir(netDir); err != nil {
 fmt.Fprintln(os.Stderr, err)
 						return nil, nil, err

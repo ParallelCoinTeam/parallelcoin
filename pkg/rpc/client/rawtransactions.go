@@ -42,20 +42,20 @@ type FutureGetRawTransactionResult chan *response
 func (r FutureGetRawTransactionResult) Receive() (*util.Tx, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var txHex string
 	err = js.Unmarshal(res, &txHex)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Decode the serialized transaction hex to raw bytes.
 	serializedTx, err := hex.DecodeString(txHex)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Deserialize the transaction and return it.
@@ -88,14 +88,14 @@ type FutureGetRawTransactionVerboseResult chan *response
 func (r FutureGetRawTransactionVerboseResult) Receive() (*btcjson.TxRawResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a gettrawtransaction result object.
 	var rawTxResult btcjson.TxRawResult
 	err = js.Unmarshal(res, &rawTxResult)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &rawTxResult, nil
@@ -123,14 +123,14 @@ type FutureDecodeRawTransactionResult chan *response
 func (r FutureDecodeRawTransactionResult) Receive() (*btcjson.TxRawResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a decoderawtransaction result object.
 	var rawTxResult btcjson.TxRawResult
 	err = js.Unmarshal(res, &rawTxResult)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &rawTxResult, nil
@@ -155,20 +155,20 @@ type FutureCreateRawTransactionResult chan *response
 func (r FutureCreateRawTransactionResult) Receive() (*wire.MsgTx, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var txHex string
 	err = js.Unmarshal(res, &txHex)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Decode the serialized transaction hex to raw bytes.
 	serializedTx, err := hex.DecodeString(txHex)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Deserialize the transaction and return it.
@@ -203,14 +203,14 @@ type FutureSendRawTransactionResult chan *response
 func (r FutureSendRawTransactionResult) Receive() (*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var txHashStr string
 	err = js.Unmarshal(res, &txHashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return chainhash.NewHashFromStr(txHashStr)
@@ -243,20 +243,20 @@ type FutureSignRawTransactionResult chan *response
 func (r FutureSignRawTransactionResult) Receive() (*wire.MsgTx, bool, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, false, err
 	}
 	// Unmarshal as a signrawtransaction result.
 	var signRawTxResult btcjson.SignRawTransactionResult
 	err = js.Unmarshal(res, &signRawTxResult)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, false, err
 	}
 	// Decode the serialized transaction hex to raw bytes.
 	serializedTx, err := hex.DecodeString(signRawTxResult.Hex)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, false, err
 	}
 	// Deserialize the transaction and return it.
@@ -365,14 +365,14 @@ type FutureSearchRawTransactionsResult chan *response
 func (r FutureSearchRawTransactionsResult) Receive() ([]*wire.MsgTx, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal as an array of strings.
 	var searchRawTxnsResult []string
 	err = js.Unmarshal(res, &searchRawTxnsResult)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Decode and deserialize each transaction.
@@ -381,14 +381,14 @@ func (r FutureSearchRawTransactionsResult) Receive() ([]*wire.MsgTx, error) {
 		// Decode the serialized transaction hex to raw bytes.
 		serializedTx, err := hex.DecodeString(hexTx)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 		// Deserialize the transaction and add it to the result slice.
 		var msgTx wire.MsgTx
 		err = msgTx.Deserialize(bytes.NewReader(serializedTx))
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 		msgTxns = append(msgTxns, &msgTx)
@@ -417,14 +417,14 @@ type FutureSearchRawTransactionsVerboseResult chan *response
 func (r FutureSearchRawTransactionsVerboseResult) Receive() ([]*btcjson.SearchRawTransactionsResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal as an array of raw transaction results.
 	var result []*btcjson.SearchRawTransactionsResult
 	err = js.Unmarshal(res, &result)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return result, nil
@@ -458,14 +458,14 @@ type FutureDecodeScriptResult chan *response
 func (r FutureDecodeScriptResult) Receive() (*btcjson.DecodeScriptResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a decodescript result object.
 	var decodeScriptResult btcjson.DecodeScriptResult
 	err = js.Unmarshal(res, &decodeScriptResult)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &decodeScriptResult, nil

@@ -7,14 +7,14 @@ import (
 )
 
 func (w *Worker) Pause() (err error) {
-	if err = w.cmd.Process.Signal(syscall.SIGSTOP); !L.Check(err) {
-		L.Debug("paused")
+	if err = w.cmd.Process.Signal(syscall.SIGSTOP); !Check(err) {
+		Debug("paused")
 	}
 	return
 }
 func (w *Worker) Resume() (err error) {
-	if err = w.cmd.Process.Signal(syscall.SIGCONT); !L.Check(err) {
-		L.Debug("resumed")
+	if err = w.cmd.Process.Signal(syscall.SIGCONT); !Check(err) {
+		Debug("resumed")
 	}
 	return
 }

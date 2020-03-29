@@ -17,8 +17,8 @@ func main() {
 	fi, err := os.Create("secp256k1.go")
 
 	if err != nil {
-		L.Error(err)
-		L.Fatal(err)
+		Error(err)
+		Fatal(err)
 	}
 	defer fi.Close()
 
@@ -28,7 +28,7 @@ func main() {
 	w := zlib.NewWriter(&compressed)
 
 	if _, err := w.Write(serialized); err != nil {
-		L.Error(err)
+		Error(err)
 		os.Exit(1)
 	}
 	w.Close()
@@ -47,7 +47,7 @@ func main() {
 	log.Fprintln(fi)
 	log.Fprintf(fi, "var secp256k1BytePoints = %q\n", string(encoded))
 	a1, b1, a2, b2 := ec.S256().EndomorphismVectors()
-	log.Println("The following values are the computed linearly " +
+	fmt.Println("The following values are the computed linearly " +
 		"independent vectors needed to make use of the secp256k1 " +
 		"endomorphism:")
 	log.Printf("a1: %x\n", a1)

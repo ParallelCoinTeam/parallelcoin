@@ -80,9 +80,9 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 	// the formula below rolls through versions with blocks roundsPerAlgo
 	// long for each algorithm by its index
 	algs := c.Algos.Load().([]int32)
-	// L.Debug(algs)
+	// Debug(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
-		L.Debug("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
+		Debug("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
 		return 0
 	}
 	if len(algs) > 0 {
@@ -109,17 +109,17 @@ func (w *Worker) hashReport() {
 		}
 		i++
 		return nil
-	}); L.Check(err) {
+	}); Check(err) {
 	}
-	// L.Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
-	L.Tracef("average hashrate %.2f", av.Value())
+	// Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
+	Tracef("average hashrate %.2f", av.Value())
 }
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network
 // connection while retaining the same RPC API to allow a worker to be
 // configured to run on a bare metal system with a different launcher main
 func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker {
-	L.Debug("creating new worker")
+	Debug("creating new worker")
 	msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		pipeConn:      conn,
@@ -137,7 +137,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 	// tn := time.Now()
 	w.startNonce = uint32(w.roller.C.Load())
 	interrupt.AddHandler(func() {
-		L.Debug("worker quitting")
+		Debug("worker quitting")
 		close(w.Quit)
 		// w.pipeConn.Close()
 		w.dispatchReady.Store(false)
@@ -147,12 +147,12 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 }
 
 func worker(w *Worker) {
-	L.Debug("main work loop starting")
+	Debug("main work loop starting")
 	sampleTicker := time.NewTicker(time.Second)
 out:
 	for {
 		// Pause state
-		L.Debug("worker pausing")
+		Debug("worker pausing")
 	pausing:
 		for {
 			select {
@@ -160,19 +160,19 @@ out:
 				w.hashReport()
 				break
 			case <-w.stopChan:
-				L.Trace("received pause signal while paused")
+				Trace("received pause signal while paused")
 				// drain stop channel in pause
 				break
 			case <-w.startChan:
-				L.Trace("received start signal")
+				Trace("received start signal")
 				break pausing
 			case <-w.Quit:
-				L.Trace("quitting")
+				Trace("quitting")
 				break out
 			}
 		}
 		// Run state
-		L.Debug("worker running")
+		Debug("worker running")
 	running:
 		for {
 			select {
@@ -180,29 +180,29 @@ out:
 				w.hashReport()
 				break
 			case <-w.startChan:
-				L.Trace("received start signal while running")
+				Trace("received start signal while running")
 				// drain start channel in run mode
 				break
 			case <-w.stopChan:
-				L.Trace("received pause signal while running")
+				Trace("received pause signal while running")
 				// w.block.Store(&util.Block{})
 				// w.bitses.Store((blockchain.TargetBits)(nil))
 				// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 				break running
 			case <-w.Quit:
-				L.Trace("worker stopping while running")
+				Trace("worker stopping while running")
 				break out
 			default:
 				if w.block.Load() == nil || w.bitses.Load() == nil ||
 					w.hashes.Load() == nil || !w.dispatchReady.Load() {
-					// L.Info("stop was called before we started working")
+					// Info("stop was called before we started working")
 				} else {
 					// work
 					nH := w.block.Load().(*util.Block).Height()
 					hv := w.roller.GetAlgoVer()
-					// L.Debug(hv)
+					// Debug(hv)
 					h := w.hashes.Load().(map[int32]*chainhash.Hash)
-					// L.Debug("hashes", hv, h)
+					// Debug("hashes", hv, h)
 					mmb := w.msgBlock.Load().(wire.MsgBlock)
 					mb := &mmb
 					mb.Header.Version = hv
@@ -226,7 +226,7 @@ out:
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 						select {
 						case <-w.Quit:
-							L.Trace("worker stopping on pausing message")
+							Trace("worker stopping on pausing message")
 							break out
 						default:
 						}
@@ -237,7 +237,7 @@ out:
 						err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
 							transport.GetShards(hashReport.Data))
 						if err != nil {
-							L.Error(err)
+							Error(err)
 						}
 					}
 					hash := mb.Header.BlockHashWithAlgos(nH)
@@ -247,9 +247,9 @@ out:
 						err := w.dispatchConn.SendMany(sol.SolutionMagic,
 							transport.GetShards(srs.Data))
 						if err != nil {
-							L.Error(err)
+							Error(err)
 						}
-						L.Trace("sent solution")
+						Trace("sent solution")
 
 						break running
 					}
@@ -261,7 +261,7 @@ out:
 			}
 		}
 	}
-	L.Debug("worker finished")
+	Debug("worker finished")
 }
 
 // New initialises the state for a worker, loading the work
@@ -277,7 +277,7 @@ func New(quit chan struct{}) (w *Worker, conn net.Conn) {
 // makes the miner start mining from pause or pause,
 // prepare the work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
-	L.Trace("starting new job")
+	Trace("starting new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
 		*reply = true
 		return
@@ -286,7 +286,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 	w.bitses.Store(j.Bitses)
 	w.hashes.Store(j.Hashes)
 	if j.Hashes[5].IsEqual(w.lastMerkle) {
-		// L.Debug("not a new job")
+		// Debug("not a new job")
 		*reply = true
 		return
 	}
@@ -343,7 +343,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 // Pause signals the worker to stop working,
 // releases its semaphore and the worker is then idle
 func (w *Worker) Pause(_ int, reply *bool) (err error) {
-	L.Trace("pausing from IPC")
+	Trace("pausing from IPC")
 	w.running.Store(false)
 	w.stopChan <- struct{}{}
 	*reply = true
@@ -352,7 +352,7 @@ func (w *Worker) Pause(_ int, reply *bool) (err error) {
 
 // Stop signals the worker to quit
 func (w *Worker) Stop(_ int, reply *bool) (err error) {
-	L.Debug("stopping from IPC")
+	Debug("stopping from IPC")
 	w.stopChan <- struct{}{}
 	defer close(w.Quit)
 	*reply = true
@@ -362,7 +362,7 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 // SendPass gives the encryption key configured in the kopach controller (
 // pod) configuration to allow workers to dispatch their solutions
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
-	L.Debug("receiving dispatch password", pass)
+	Debug("receiving dispatch password", pass)
 	rand.Seed(time.Now().UnixNano())
 	// sp := fmt.Sprint(rand.Intn(32767) + 1025)
 	// rp := fmt.Sprint(rand.Intn(32767) + 1025)
@@ -371,7 +371,7 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 		"kopachworker", w, pass,transport.DefaultPort,
 		kopachctrl.MaxDatagramSize, transport.Handlers{}, w.Quit)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	w.dispatchConn = conn
 	w.dispatchReady.Store(true)

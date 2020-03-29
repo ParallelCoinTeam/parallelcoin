@@ -102,9 +102,9 @@ func TestMiscErrors(t *testing.T) {
 	}
 	// Force an error in MarshalResponse by giving it an id type that is not
 	// supported.
-	wantErr := btcjson.Error{ErrorCode: btcjson.ErrInvalidType}
+	wantErr := btcjson.BTCJSONError{ErrorCode: btcjson.ErrInvalidType}
 	_, err = btcjson.MarshalResponse(make(chan int), nil, nil)
-	if jerr, ok := err.(btcjson.Error); !ok || jerr.ErrorCode != wantErr.ErrorCode {
+	if jerr, ok := err.(btcjson.BTCJSONError); !ok || jerr.ErrorCode != wantErr.ErrorCode {
 		t.Errorf("MarshalResult: did not receive expected error - got "+
 			"%v (%[1]T), want %v (%[2]T)", err, wantErr)
 		return
@@ -133,7 +133,7 @@ func TestRPCError(t *testing.T) {
 	for i, test := range tests {
 		result := test.in.Error()
 		if result != test.want {
-			t.Errorf("Error #%d\n got: %s want: %s", i, result,
+			t.Errorf("BTCJSONError #%d\n got: %s want: %s", i, result,
 				test.want)
 			continue
 		}

@@ -3,6 +3,7 @@ package monitor
 import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/logi/consume"
 )
 
 func (s *State) Sidebar() layout.FlexChild {
@@ -12,8 +13,8 @@ func (s *State) Sidebar() layout.FlexChild {
 		//} else {
 		//	s.Gtx.Constraints.Width.Max -= 340
 		//}
-		s.Gtx.Constraints.Width.Min = 340
-		s.Gtx.Constraints.Width.Max = 340
+		s.Gtx.Constraints.Width.Min = 332
+		s.Gtx.Constraints.Width.Max = 332
 		//if s.Gtx.Constraints.Width.Max > 360 {
 		//	s.Gtx.Constraints.Width.Max = 360
 		//}
@@ -34,7 +35,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							s.IconButton("HideAll", "DocText", "DocBg",
 								&s.FilterHideButton)
 							for s.FilterHideButton.Clicked(s.Gtx) {
-								L.Debug("hide all")
+								Debug("hide all")
 								s.Loggers.CloseAllItems(s)
 								s.SaveConfig()
 							}
@@ -42,7 +43,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							s.IconButton("ShowAll", "DocText", "DocBg",
 								&s.FilterShowButton)
 							for s.FilterShowButton.Clicked(s.Gtx) {
-								L.Debug("show all")
+								Debug("show all")
 								s.Loggers.OpenAllItems(s)
 								s.SaveConfig()
 							}
@@ -50,7 +51,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							s.IconButton("ShowItem", "DocText", "DocBg",
 								&s.FilterAllButton)
 							for s.FilterAllButton.Clicked(s.Gtx) {
-								L.Debug("filter all")
+								Debug("filter all")
 								s.Loggers.ShowAllItems(s)
 								s.SaveConfig()
 							}
@@ -58,7 +59,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							s.IconButton("HideItem", "DocText", "DocBg",
 								&s.FilterNoneButton)
 							for s.FilterNoneButton.Clicked(s.Gtx) {
-								L.Debug("filter none")
+								Debug("filter none")
 								s.Loggers.HideAllItems(s)
 								s.SaveConfig()
 							}
@@ -66,7 +67,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							s.IconButton("Filter", "DocText", "DocBg",
 								&s.FilterButton)
 							for s.FilterButton.Clicked(s.Gtx) {
-								L.Debug("filter header clicked")
+								Debug("filter header clicked")
 								if !s.Config.FilterOpen {
 									s.Config.BuildOpen = false
 									s.Config.SettingsOpen = false
@@ -105,28 +106,32 @@ func (s *State) Sidebar() layout.FlexChild {
 func (s *State) LevelsButtons() {
 	s.FilterLevelList.Layout(s.Gtx, len(logi.Tags)-1, func(a int) {
 		bn := logi.Tags[logi.Levels[a+1]]
-		color := "PanelBg"
+		bg := "PanelBg"
+		color := "DocBg"
 		if s.Config.FilterLevel > a {
 			switch a + 1 {
-			case 2, 1:
-				color = "Danger"
+			case 1:
+				color, bg = "DocBg", "Danger"
+			case 2:
+				color, bg = "DocBg", "Danger"
 			case 3:
-				color = "Check"
+				color, bg = "DocBg", "Check"
 			case 4:
-				color = "Warning"
+				color, bg = "DocBg", "Warning"
 			case 5:
-				color = "Success"
+				color, bg = "DocBg", "Success"
 			case 6:
-				color = "Info"
+				color, bg = "DocBg", "Info"
 			case 7:
-				color = "Secondary"
+				color, bg = "DocBg", "Secondary"
 			}
 		}
 		bb := &s.FilterLevelsButtons[a]
-		s.IconButton(bn, color, "DocBg", bb)
+		s.IconButton(bn, color, bg, bb)
 		for bb.Clicked(s.Gtx) {
-			s.Config.FilterLevel = a+1
-			L.Debug("filter level", logi.Tags[logi.Levels[a+1]])
+			s.Config.FilterLevel = a + 1
+			consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
+			Debug("filter level", logi.Tags[logi.Levels[a+1]])
 			s.W.Invalidate()
 			s.SaveConfig()
 		}

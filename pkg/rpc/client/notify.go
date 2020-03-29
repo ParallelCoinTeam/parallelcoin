@@ -136,8 +136,8 @@ func // handleNotification examines the passed notification type,
 		}
 		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid block connected notification:", err)
+			Error(err)
+			Warn("received invalid block connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnBlockConnected(blockHash, blockHeight, blockTime)
@@ -150,8 +150,8 @@ func // handleNotification examines the passed notification type,
 		blockHeight, blockHeader, transactions, err :=
 			parseFilteredBlockConnectedParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid filtered block connected notification:",
+			Error(err)
+			Warn("received invalid filtered block connected notification:",
 				err)
 			return
 		}
@@ -165,8 +165,8 @@ func // handleNotification examines the passed notification type,
 		}
 		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid block connected notification:", err)
+			Error(err)
+			Warn("received invalid block connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnBlockDisconnected(blockHash, blockHeight, blockTime)
@@ -178,8 +178,8 @@ func // handleNotification examines the passed notification type,
 		}
 		blockHeight, blockHeader, err := parseFilteredBlockDisconnectedParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid filtered block disconnected"+
+			Error(err)
+			Warn("received invalid filtered block disconnected"+
 				" notification"+
 				":", err)
 			return
@@ -193,8 +193,8 @@ func // handleNotification examines the passed notification type,
 		}
 		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid recvtx notification:", err)
+			Error(err)
+			Warn("received invalid recvtx notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRecvTx(tx, block)
@@ -206,8 +206,8 @@ func // handleNotification examines the passed notification type,
 		}
 		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid redeemingtx notification:", err)
+			Error(err)
+			Warn("received invalid redeemingtx notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRedeemingTx(tx, block)
@@ -219,8 +219,8 @@ func // handleNotification examines the passed notification type,
 		}
 		transaction, err := parseRelevantTxAcceptedParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid relevanttxaccepted notification:", err)
+			Error(err)
+			Warn("received invalid relevanttxaccepted notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRelevantTxAccepted(transaction)
@@ -232,8 +232,8 @@ func // handleNotification examines the passed notification type,
 		}
 		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid rescanfinished notification:", err)
+			Error(err)
+			Warn("received invalid rescanfinished notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRescanFinished(hash, height, blkTime)
@@ -245,8 +245,8 @@ func // handleNotification examines the passed notification type,
 		}
 		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid rescanprogress notification:", err)
+			Error(err)
+			Warn("received invalid rescanprogress notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRescanProgress(hash, height, blkTime)
@@ -258,8 +258,8 @@ func // handleNotification examines the passed notification type,
 		}
 		hash, amt, err := parseTxAcceptedNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid tx accepted notification:", err)
+			Error(err)
+			Warn("received invalid tx accepted notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnTxAccepted(hash, amt)
@@ -271,8 +271,8 @@ func // handleNotification examines the passed notification type,
 		}
 		rawTx, err := parseTxAcceptedVerboseNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid tx accepted verbose notification:", err)
+			Error(err)
+			Warn("received invalid tx accepted verbose notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnTxAcceptedVerbose(rawTx)
@@ -284,8 +284,8 @@ func // handleNotification examines the passed notification type,
 		}
 		connected, err := parsePodConnectedNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid pod connected notification:", err)
+			Error(err)
+			Warn("received invalid pod connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnPodConnected(connected)
@@ -297,8 +297,8 @@ func // handleNotification examines the passed notification type,
 		}
 		account, bal, conf, err := parseAccountBalanceNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid account balance notification:", err)
+			Error(err)
+			Warn("received invalid account balance notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnAccountBalance(account, bal, conf)
@@ -311,8 +311,8 @@ func // handleNotification examines the passed notification type,
 		// The account name is not notified, so the return value is discarded.
 		_, locked, err := parseWalletLockStateNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid wallet lock state notification:", err)
+			Error(err)
+			Warn("received invalid wallet lock state notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnWalletLockState(locked)
@@ -331,7 +331,7 @@ type // wrongNumParams is an error type describing an unparseable JSON-RPC
 	// notification.
 	wrongNumParams int
 
-func // Error satisfies the builtin error interface.
+func // BTCJSONError satisfies the builtin error interface.
 (e wrongNumParams) Error() string {
 	return fmt.Sprintf("wrong number of parameters (%d)", e)
 }
@@ -347,27 +347,27 @@ parseChainNtfnParams(params []js.RawMessage) (*chainhash.Hash,
 	var blockHashStr string
 	err := js.Unmarshal(params[0], &blockHashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Unmarshal second parameter as an integer.
 	var blockHeight int32
 	err = js.Unmarshal(params[1], &blockHeight)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Unmarshal third parameter as unix time.
 	var blockTimeUnix int64
 	err = js.Unmarshal(params[2], &blockTimeUnix)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Create hash from block hash string.
 	blockHash, err := chainhash.NewHashFromStr(blockHashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Create time.Time from unix time.
@@ -388,27 +388,27 @@ func parseFilteredBlockConnectedParams(params []js.RawMessage) (int32,
 	var blockHeight int32
 	err := js.Unmarshal(params[0], &blockHeight)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, nil, err
 	}
 	// Unmarshal second parameter as a slice of bytes.
 	blockHeaderBytes, err := parseHexParam(params[1])
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, nil, err
 	}
 	// Deserialize block header from slice of bytes.
 	var blockHeader wire.BlockHeader
 	err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, nil, err
 	}
 	// Unmarshal third parameter as a slice of hex-encoded strings.
 	var hexTransactions []string
 	err = js.Unmarshal(params[2], &hexTransactions)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, nil, err
 	}
 	// Create slice of transactions from slice of strings by hex-decoding.
@@ -416,12 +416,12 @@ func parseFilteredBlockConnectedParams(params []js.RawMessage) (int32,
 	for i, hexTx := range hexTransactions {
 		transaction, err := hex.DecodeString(hexTx)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return 0, nil, nil, err
 		}
 		transactions[i], err = util.NewTxFromBytes(transaction)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return 0, nil, nil, err
 		}
 	}
@@ -441,20 +441,20 @@ parseFilteredBlockDisconnectedParams(params []js.RawMessage) (int32,
 	var blockHeight int32
 	err := js.Unmarshal(params[0], &blockHeight)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, err
 	}
 	// Unmarshal second parameter as a slice of bytes.
 	blockHeaderBytes, err := parseHexParam(params[1])
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, err
 	}
 	// Deserialize block header from slice of bytes.
 	var blockHeader wire.BlockHeader
 	err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, err
 	}
 	return blockHeight, &blockHeader, nil
@@ -464,7 +464,7 @@ func parseHexParam(param js.RawMessage) ([]byte, error) {
 	var s string
 	err := js.Unmarshal(param, &s)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return hex.DecodeString(s)
@@ -491,7 +491,7 @@ parseChainTxNtfnParams(params []js.RawMessage) (*util.Tx,
 	var txHex string
 	err := js.Unmarshal(params[0], &txHex)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	// If present, unmarshal second optional parameter as the block details JSON object.
@@ -499,20 +499,20 @@ parseChainTxNtfnParams(params []js.RawMessage) (*util.Tx,
 	if len(params) > 1 {
 		err = js.Unmarshal(params[1], &block)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, nil, err
 		}
 	}
 	// Hex decode and deserialize the transaction.
 	serializedTx, err := hex.DecodeString(txHex)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	var msgTx wire.MsgTx
 	err = msgTx.Deserialize(bytes.NewReader(serializedTx))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	// TODO: Change recvtx and redeemingtx callback signatures to use nicer
@@ -532,27 +532,27 @@ parseRescanProgressParams(params []js.RawMessage) (*chainhash.Hash, int32, time.
 	var hashStr string
 	err := js.Unmarshal(params[0], &hashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Unmarshal second parameter as an integer.
 	var height int32
 	err = js.Unmarshal(params[1], &height)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Unmarshal third parameter as an integer.
 	var blkTime int64
 	err = js.Unmarshal(params[2], &blkTime)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Decode string encoding of block hash.
 	hash, err := chainhash.NewHashFromStr(hashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	return hash, height, time.Unix(blkTime, 0), nil
@@ -569,26 +569,26 @@ parseTxAcceptedNtfnParams(params []js.RawMessage) (*chainhash.Hash,
 	var txHashStr string
 	err := js.Unmarshal(params[0], &txHashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	// Unmarshal second parameter as a floating point number.
 	var fAmt float64
 	err = js.Unmarshal(params[1], &fAmt)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	// Bounds check amount.
 	amt, err := util.NewAmount(fAmt)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	// Decode string encoding of transaction sha.
 	txHash, err := chainhash.NewHashFromStr(txHashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	return txHash, amt, nil
@@ -605,7 +605,7 @@ parseTxAcceptedVerboseNtfnParams(params []js.RawMessage) (*btcjson.TxRawResult,
 	var rawTx btcjson.TxRawResult
 	err := js.Unmarshal(params[0], &rawTx)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// TODO: change txacceptedverbose notification callbacks to use nicer
@@ -624,7 +624,7 @@ parsePodConnectedNtfnParams(params []js.RawMessage) (bool, error) {
 	var connected bool
 	err := js.Unmarshal(params[0], &connected)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return false, err
 	}
 	return connected, nil
@@ -641,26 +641,26 @@ parseAccountBalanceNtfnParams(params []js.RawMessage) (account string,
 	// Unmarshal first parameter as a string.
 	err = js.Unmarshal(params[0], &account)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", 0, false, err
 	}
 	// Unmarshal second parameter as a floating point number.
 	var fBal float64
 	err = js.Unmarshal(params[1], &fBal)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", 0, false, err
 	}
 	// Unmarshal third parameter as a boolean.
 	err = js.Unmarshal(params[2], &confirmed)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", 0, false, err
 	}
 	// Bounds check amount.
 	bal, err := util.NewAmount(fBal)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", 0, false, err
 	}
 	return account, bal, confirmed, nil
@@ -676,13 +676,13 @@ parseWalletLockStateNtfnParams(params []js.RawMessage) (account string,
 	// Unmarshal first parameter as a string.
 	err = js.Unmarshal(params[0], &account)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", false, err
 	}
 	// Unmarshal second parameter as a boolean.
 	err = js.Unmarshal(params[1], &locked)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", false, err
 	}
 	return account, locked, nil

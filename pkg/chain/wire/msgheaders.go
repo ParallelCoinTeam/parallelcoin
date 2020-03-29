@@ -28,7 +28,7 @@ func (msg *MsgHeaders) AddBlockHeader(bh *BlockHeader) error {
 func (msg *MsgHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Limit to max block headers per message.
@@ -44,12 +44,12 @@ func (msg *MsgHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		bh := &headers[i]
 		err := readBlockHeader(r, pver, bh)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		txCount, err := ReadVarInt(r, pver)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		// Ensure the transaction count is zero for headers.
@@ -60,7 +60,7 @@ func (msg *MsgHeaders) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		}
 		err = msg.AddBlockHeader(bh)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 		}
 	}
 	return nil
@@ -77,19 +77,19 @@ func (msg *MsgHeaders) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) 
 	}
 	err := WriteVarInt(w, pver, uint64(count))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	for _, bh := range msg.Headers {
 		err := writeBlockHeader(w, pver, bh)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		// The wire protocol encoding always includes a 0 for the number of transactions on header messages.  This is really just an artifact of the way the original implementation serializes block headers, but it is required.
 		err = WriteVarInt(w, pver, 0)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}

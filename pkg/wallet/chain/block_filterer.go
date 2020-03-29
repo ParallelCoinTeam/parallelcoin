@@ -133,8 +133,8 @@ func (bf *BlockFilterer) FilterTx(tx *wire.MsgTx) bool {
 			out.PkScript, bf.Params,
 		)
 		if err != nil {
-			L.Error(err)
-			L.Warnf(
+			Error(err)
+			Warnf(
 				"could not parse output script in %s:%d: %v",
 				tx.TxHash(), i, err,
 			)

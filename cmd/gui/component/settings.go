@@ -63,7 +63,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 						(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
 						func(e gel.EditorEvent) {
 							rc.Settings.Daemon.Config[f.Field.Model] = strings.Fields((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
-							L.Debug()
+							Debug()
 							if e != nil {
 								rc.SaveDaemonCfg()
 							}

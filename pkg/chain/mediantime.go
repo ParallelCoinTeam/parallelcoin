@@ -123,9 +123,9 @@ func // AddTimeSample adds a time sample that is used when determining the
 	copy(sortedOffsets, m.offsets)
 	sort.Sort(int64Sorter(sortedOffsets))
 	offsetDuration := time.Duration(offsetSecs) * time.Second
-	L.Tracef("Added time sample of %v (total: %v)", offsetDuration,
+	Tracef("Added time sample of %v (total: %v)", offsetDuration,
 		numOffsets)
-	L.Trace("samples:", sortedOffsets)
+	Trace("samples:", sortedOffsets)
 	// NOTE: The following code intentionally has a bug to mirror the buggy
 	// behavior in Bitcoin Core since the median time is used in the consensus
 	// rules. In particular, the offset is only updated when the number of
@@ -163,14 +163,14 @@ func // AddTimeSample adds a time sample that is used when determining the
 			}
 			// Warn if none of the time samples are close.
 			if !remoteHasCloseTime {
-				L.Warn("Please check your date and time are correct!  pod" +
+				Warn("Please check your date and time are correct!  pod" +
 					" will" +
 					" not work properly with an invalid time")
 			}
 		}
 	}
 	medianDuration := time.Duration(m.offsetSecs) * time.Second
-	L.Debug("new time offset:", medianDuration)
+	Debug("new time offset:", medianDuration)
 }
 
 func // Offset returns the number of seconds to adjust the local clock based

@@ -46,14 +46,14 @@ func // NotifyUnspentAndUnfound iterates through any requests for which no
 // this will be delivered signaling that no spend was detected.
 // If the original output could not be found, a nil spend report is returned.
 (b *batchSpendReporter) NotifyUnspentAndUnfound() {
-	L.Debugf(
+	Debugf(
 		"finished batch, %d unspent outpoints", len(b.requests),
 	)
 	for outpoint, requests := range b.requests {
 		// A nil SpendReport indicates the output was not found.
 		tx, ok := b.initialTxns[outpoint]
 		if !ok {
-			L.Warnf(
+			Warnf(
 				"unknown initial txn for getuxo request %v", outpoint,
 			)
 		}
@@ -97,7 +97,7 @@ func // addNewRequests adds a set of new GetUtxoRequests to the spend reporter's
 (b *batchSpendReporter) addNewRequests(reqs []*GetUtxoRequest) {
 	for _, req := range reqs {
 		outpoint := req.Input.OutPoint
-		L.Debugf(
+		Debugf(
 			"adding outpoint=%s height=%d to watchlist", outpoint,
 			req.BirthHeight,
 		)
@@ -151,7 +151,7 @@ func // findInitialTransactions searches the given block for the creation of the
 			// output on the transaction. If not, we will be unable
 			// to find the initial output.
 			if op.Index >= uint32(len(txOuts)) {
-				L.Errorf(
+				Errorf(
 					"failed to find outpoint %s -- invalid output index", op,
 				)
 				initialTxns[op] = nil
@@ -171,12 +171,12 @@ func // findInitialTransactions searches the given block for the creation of the
 		tx, ok := initialTxns[req.Input.OutPoint]
 		switch {
 		case !ok:
-			L.Errorf(
+			Errorf(
 				"failed to find outpoint %s -- txid not found in block",
 				req.Input.OutPoint)
 			initialTxns[req.Input.OutPoint] = nil
 		case tx != nil:
-			L.Tracef(
+			Tracef(
 				"block %d creates output %s", height, req.Input.OutPoint,
 			)
 		default:
@@ -219,7 +219,7 @@ func // notifySpends finds any transactions in the block that spend from our
 			if !ok {
 				continue
 			}
-			L.Debugf(
+			Debugf(
 				"UTXO %v spent by txn %v", outpoint, tx.TxHash(),
 			)
 			spend := &SpendReport{

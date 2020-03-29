@@ -234,7 +234,7 @@ func TestInvWireErrors(t *testing.T) {
 	baseInv := NewMsgInv()
 	err = baseInv.AddInvVect(iv)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	baseInvEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -249,7 +249,7 @@ func TestInvWireErrors(t *testing.T) {
 	for i := 0; i < MaxInvPerMsg; i++ {
 		err = maxInv.AddInvVect(iv)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 		}
 	}
 	maxInv.InvList = append(maxInv.InvList, iv)

@@ -60,7 +60,7 @@ func normalizeVerString(str string) string {
 			// Writing to a bytes.Buffer panics on OOM, and all
 			// errors are unexpected.
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				panic(err)
 			}
 		}

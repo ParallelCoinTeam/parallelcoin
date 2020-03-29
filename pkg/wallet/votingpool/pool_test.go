@@ -229,7 +229,7 @@ func TestLoadPool(t *testing.T) {
 	ns, _ := vp.TstRWNamespaces(dbtx)
 	pool2, err := vp.Load(ns, pool.Manager(), pool.ID)
 	if err != nil {
-		t.Errorf("Error loading Pool: %v", err)
+		t.Errorf("DBError loading Pool: %v", err)
 	}
 	if !bytes.Equal(pool2.ID, pool.ID) {
 		t.Errorf("Voting pool obtained from DB does not match the created one")
@@ -251,7 +251,7 @@ func TestCreatePool(t *testing.T) {
 	ns, _ := vp.TstRWNamespaces(dbtx)
 	pool2, err := vp.Create(ns, pool.Manager(), []byte{0x02})
 	if err != nil {
-		t.Errorf("Error creating Pool: %v", err)
+		t.Errorf("DBError creating Pool: %v", err)
 	}
 	if !bytes.Equal(pool2.ID, []byte{0x02}) {
 		t.Errorf("Pool ID mismatch: got %v, want %v", pool2.ID, []byte{0x02})
@@ -860,7 +860,7 @@ func TestBranchOrderZero(t *testing.T) {
 		wantKeys := reverse(inKeys)
 		resKeys, err := vp.TstBranchOrder(inKeys, 0)
 		if err != nil {
-			t.Fatalf("Error ordering keys: %v", err)
+			t.Fatalf("DBError ordering keys: %v", err)
 		}
 		if len(resKeys) != len(wantKeys) {
 			t.Errorf("BranchOrder: wrong no. of keys. Got: %d, want %d",
@@ -891,7 +891,7 @@ func TestBranchOrderNonZero(t *testing.T) {
 			wantKeys := append(append(pivot, first...), last...)
 			resKeys, err := vp.TstBranchOrder(inKeys, vp.Branch(branch))
 			if err != nil {
-				t.Fatalf("Error ordering keys: %v", err)
+				t.Fatalf("DBError ordering keys: %v", err)
 			}
 			if len(resKeys) != len(inKeys) {
 				t.Errorf("BranchOrder: wrong no. of keys. Got: %d, want %d",

@@ -165,13 +165,13 @@ type DB interface {
 func View(db DB, f func(tx ReadTx) error) error {
 	tx, err := db.BeginReadTx()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	err = f(tx)
 	rollbackErr := tx.Rollback()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	if rollbackErr != nil {
@@ -189,12 +189,12 @@ func View(db DB, f func(tx ReadTx) error) error {
 func Update(db DB, f func(tx ReadWriteTx) error) error {
 	tx, err := db.BeginReadWriteTx()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	err = f(tx)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		// Want to return the original error, not a rollback error if
 		// any occur.
 		_ = tx.Rollback()

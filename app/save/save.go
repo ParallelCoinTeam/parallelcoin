@@ -12,7 +12,7 @@ import (
 
 // Pod saves the configuration to the configured location
 func Pod(c *pod.Config) (success bool) {
-	L.Trace("saving configuration to", *c.ConfigFile)
+	Trace("saving configuration to", *c.ConfigFile)
 	var uac cli.StringSlice
 	if len(*c.UserAgentComments) > 0 {
 		uac = make(cli.StringSlice, len(*c.UserAgentComments))
@@ -22,7 +22,7 @@ func Pod(c *pod.Config) (success bool) {
 	if yp, e := json.MarshalIndent(c, "", "  "); e == nil {
 		apputil.EnsureDir(*c.ConfigFile)
 		if e := ioutil.WriteFile(*c.ConfigFile, yp, 0600); e != nil {
-			L.Error(e)
+			Error(e)
 			success = false
 		}
 		success = true

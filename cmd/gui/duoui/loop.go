@@ -13,7 +13,7 @@ import (
 )
 
 func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
-	L.Debug("starting up duo ui main loop")
+	Debug("starting up duo ui main loop")
 	ui := new(DuoUI)
 	ui = &DuoUI{
 		ly: d,
@@ -28,7 +28,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				for {
 					select {
 					case <-updateTrigger:
-						L.Trace("repaint forced")
+						Trace("repaint forced")
 						// ui.ly.Window.Invalidate()
 					case <-ui.rc.Quit:
 						break quitTrigger
@@ -39,7 +39,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			ui.rc.IsReady = true
 			r.Boot.IsBoot = false
 		case <-ui.rc.Quit:
-			L.Debug("quit signal received")
+			Debug("quit signal received")
 			if !interrupt.Requested() {
 				interrupt.Request()
 			}
@@ -49,7 +49,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			//interrupt signal  Probably nothing needs to be run between
 			//starting it and shutting down
 			<-interrupt.HandlersDone
-			L.Debug("closing GUI from interrupt/quit signal")
+			Debug("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
 			// TODO events of gui
 		case e := <-ui.rc.Commands.Events:
@@ -62,7 +62,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			ui.ly.Viewport = ui.ly.Context.Constraints.Width.Max
 			switch e := e.(type) {
 			case system.DestroyEvent:
-				L.Debug("destroy event received")
+				Debug("destroy event received")
 				interrupt.Request()
 				// Here do cleanup like are you sure (
 				//optional) modal or shutting down indefinite spinner

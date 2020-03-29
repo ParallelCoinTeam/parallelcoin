@@ -20,20 +20,20 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 	if duoSeed == "" {
 		seed, err = hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			panic(err)
 		}
 	} else {
 		seed, err = hex.DecodeString(duoSeed)
 		if err != nil {
 			// Need to make JS invocation to embed
-			L.Error(err)
+			Error(err)
 		}
 	}
 
 	_, err = l.CreateNewWallet([]byte(pubPassphrase), []byte(privPassphrase), seed, time.Now(), true, r.cx.Config)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		panic(err)
 	}
 
@@ -42,7 +42,7 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 	*r.cx.Config.WalletFile = walletDir
 
 	save.Pod(r.cx.Config)
-	// L.Info(rc)
+	// Info(rc)
 }
 
 func (r *RcVar) UseTestnet() {

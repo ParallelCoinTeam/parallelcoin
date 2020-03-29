@@ -40,7 +40,7 @@ func main() {
 				s, _ := base64.StdEncoding.DecodeString("`, base64.StdEncoding.EncodeToString(b)))
 			fmt.Fprint(fh, "\")\n")
 		}
-		log.Println("writing file", files[i]+".go")
+		fmt.Println("writing file", files[i]+".go")
 		fh.Close()
 	}
 }

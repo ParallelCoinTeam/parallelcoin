@@ -21,7 +21,7 @@ type Container struct {
 
 func Get(ent *logi.Entry) Container {
 	nonce := make([]byte, 4)
-	if _, err := io.ReadFull(rand.Reader, nonce); L.Check(err) {
+	if _, err := io.ReadFull(rand.Reader, nonce); Check(err) {
 	}
 	return Container{*simplebuffer.Serializers{
 		Time.New().Put(ent.Time),

@@ -60,12 +60,12 @@ func moveFileEx(from *uint16, to *uint16, flags uint32) error {
 func Atomic(oldpath, newpath string) error {
 	from, err := syscall.UTF16PtrFromString(oldpath)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	to, err := syscall.UTF16PtrFromString(newpath)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	return moveFileEx(from, to, _MOVEFILE_REPLACE_EXISTING)

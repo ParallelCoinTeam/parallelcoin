@@ -44,7 +44,7 @@ type Worker struct {
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-		L.Debug("miner controller starting")
+		Debug("miner controller starting")
 		ctx, cancel := context.WithCancel(context.Background())
 		w := &Worker{
 			ctx:           ctx,
@@ -54,21 +54,21 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
-		L.Debug("opening broadcast channel listener")
+		Debug("opening broadcast channel listener")
 		w.conn, err = transport.
 			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
 				transport.DefaultPort, kopachctrl.MaxDatagramSize, handlers,
 				cx.KillAll)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			cancel()
 			return
 		}
 		var wks []*worker.Worker
 		// start up the workers
-		L.Debug("starting up kopach workers")
+		Debug("starting up kopach workers")
 		for i := 0; i < *cx.Config.GenThreads; i++ {
-			L.Debug("starting worker", i)
+			Debug("starting worker", i)
 			cmd := worker.Spawn(os.Args[0], "worker",
 				cx.ActiveNet.Name, *cx.Config.LogLevel)
 			wks = append(wks, cmd)
@@ -76,24 +76,24 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		interrupt.AddHandler(func() {
 			w.active.Store(false)
-			L.Debug("KopachHandle interrupt")
+			Debug("KopachHandle interrupt")
 			for i := range w.workers {
-				if err = wks[i].Kill(); !L.Check(err) {
+				if err = wks[i].Kill(); !Check(err) {
 				}
-				L.Debug("stopped worker", i)
+				Debug("stopped worker", i)
 			}
 		})
 		for i := range w.workers {
-			L.Debug("sending pass to worker", i)
+			Debug("sending pass to worker", i)
 			err := w.workers[i].SendPass(*cx.Config.MinerPass)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 			}
 		}
 		w.active.Store(true)
 		// controller watcher thread
 		go func() {
-			L.Debug("starting controller watcher")
+			Debug("starting controller watcher")
 			ticker := time.NewTicker(time.Second)
 		out:
 			for {
@@ -105,16 +105,16 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
-						L.Debug("previous current controller has stopped"+
+						Debug("previous current controller has stopped"+
 							" broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be listened to
 						w.FirstSender.Store("")
 						// pause the workers
 						for i := range w.workers {
-							L.Trace("sending pause to worker", i)
+							Trace("sending pause to worker", i)
 							err := w.workers[i].Pause()
 							if err != nil {
-								L.Error(err)
+								Error(err)
 							}
 						}
 					}
@@ -123,9 +123,9 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 				}
 			}
 		}()
-		L.Debug("listening on", kopachctrl.UDP4MulticastAddress)
+		Debug("listening on", kopachctrl.UDP4MulticastAddress)
 		<-cx.KillAll
-		L.Info("kopach shutting down")
+		Info("kopach shutting down")
 		return
 	}
 }
@@ -136,7 +136,7 @@ var handlers = transport.Handlers{
 		b []byte) (err error) {
 		w := ctx.(*Worker)
 		if !w.active.Load() {
-			L.Debug("not active")
+			Debug("not active")
 			return
 		}
 		j := job.LoadContainer(b)
@@ -146,19 +146,19 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
-			// L.Debug("ignoring other controller job")
+			// Debug("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
 		}
 		if firstSender == "" {
-			L.Warn("new sender", addr)
+			Warn("new sender", addr)
 		}
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.workers {
 			err := w.workers[i].NewJob(&j)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 			}
 		}
 		return
@@ -172,10 +172,10 @@ var handlers = transport.Handlers{
 		ns := net.JoinHostPort(ni, fmt.Sprint(np))
 		if fs == ns {
 			for i := range w.workers {
-				L.Debug("sending pause to worker", i, fs, ns)
+				Debug("sending pause to worker", i, fs, ns)
 				err := w.workers[i].Pause()
 				if err != nil {
-					L.Error(err)
+					Error(err)
 				}
 			}
 		}
@@ -188,7 +188,7 @@ var handlers = transport.Handlers{
 		// j := sol.LoadSolContainer(b)
 		// senderPort := j.GetSenderPort()
 		// if fmt.Sprint(senderPort) == port {
-		// 	L.Warn("we found a solution")
+		// 	Warn("we found a solution")
 		// }
 		w.FirstSender.Store("")
 		return

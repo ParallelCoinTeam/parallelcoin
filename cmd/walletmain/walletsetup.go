@@ -33,21 +33,21 @@ func CreateSimulationWallet(activenet *netparams.Params, cfg *Config) error {
 	netDir := NetworkDir(*cfg.AppDataDir, activenet)
 	// Create the wallet.
 	dbPath := filepath.Join(netDir, WalletDbName)
-	L.Info("Creating the wallet...")
+	Info("Creating the wallet...")
 	// Create the wallet database backed by bolt db.
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	defer db.Close()
 	// Create the wallet.
 	err = wallet.Create(db, pubPass, privPass, nil, activenet, time.Now())
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
-	L.Info("The wallet has been created successfully.")
+	Info("The wallet has been created successfully.")
 	return nil
 }
 
@@ -72,7 +72,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 		// Keystore file exists.
 		legacyKeyStore, err = keystore.OpenDir(netDir)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
@@ -82,8 +82,8 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	reader := bufio.NewReader(os.Stdin)
 	privPass, err := prompt.PrivatePass(reader, legacyKeyStore)
 	if err != nil {
-		L.Error(err)
-		L.Debug(err)
+		Error(err)
+		Debug(err)
 		time.Sleep(time.Second * 3)
 		return err
 	}
@@ -92,7 +92,7 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	if legacyKeyStore != nil {
 		err = legacyKeyStore.Unlock(privPass)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		// Import the addresses in the legacy keystore to the new wallet if any
@@ -101,31 +101,31 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 			defer func() {
 				err := legacyKeyStore.Lock()
 				if err != nil {
-					L.Error(err)
-					L.Debug(err)
+					Error(err)
+					Debug(err)
 				}
 			}()
-			L.Info("Importing addresses from existing wallet...")
+			Info("Importing addresses from existing wallet...")
 			lockChan := make(chan time.Time, 1)
 			defer func() {
 				lockChan <- time.Time{}
 			}()
 			err := w.Unlock(privPass, lockChan)
 			if err != nil {
-				L.Errorf("ERR: Failed to unlock new wallet "+
+				Errorf("ERR: Failed to unlock new wallet "+
 					"during old wallet key import: %v", err)
 				return
 			}
 			err = convertLegacyKeystore(legacyKeyStore, w)
 			if err != nil {
-				L.Errorf("ERR: Failed to import keys from old "+
+				Errorf("ERR: Failed to import keys from old "+
 					"wallet format: %v %s", err)
 				return
 			}
 			// Remove the legacy key store.
 			err = os.Remove(keystorePath)
 			if err != nil {
-				L.Error("WARN: Failed to remove legacy wallet "+
+				Error("WARN: Failed to remove legacy wallet "+
 					"from'%s'\n", keystorePath)
 			}
 		})
@@ -136,8 +136,8 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	pubPass, err := prompt.PublicPass(reader, privPass, []byte(""),
 		[]byte(*config.WalletPass))
 	if err != nil {
-		L.Error(err)
-		L.Debug(err)
+		Error(err)
+		Debug(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
@@ -146,21 +146,21 @@ func CreateWallet(activenet *netparams.Params, config *pod.Config) error {
 	// value the user has entered which has already been validated.
 	seed, err := prompt.Seed(reader)
 	if err != nil {
-		L.Error(err)
-		L.Debug(err)
+		Error(err)
+		Debug(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
-	L.Debug("Creating the wallet")
+	Debug("Creating the wallet")
 	w, err := loader.CreateNewWallet(pubPass, privPass, seed, time.Now(), false, config)
 	if err != nil {
-		L.Error(err)
-		L.Debug(err)
+		Error(err)
+		Debug(err)
 		time.Sleep(time.Second * 5)
 		return err
 	}
 	w.Manager.Close()
-	L.Debug("The wallet has been created successfully.")
+	Debug("The wallet has been created successfully.")
 	return nil
 }
 
@@ -212,7 +212,7 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) err
 		case keystore.PubKeyAddress:
 			privKey, err := addr.PrivKey()
 			if err != nil {
-				L.Warnf("Failed to obtain private key "+
+				Warnf("Failed to obtain private key "+
 					"for address %v: %v", addr.Address(),
 					err)
 				continue
@@ -220,7 +220,7 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) err
 			wif, err := util.NewWIF((*ec.PrivateKey)(privKey),
 				netParams, addr.Compressed())
 			if err != nil {
-				L.Warn("Failed to create wallet "+
+				Warn("Failed to create wallet "+
 					"import format for address %v: %v",
 					addr.Address(), err)
 				continue
@@ -228,7 +228,7 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) err
 			_, err = w.ImportPrivateKey(waddrmgr.KeyScopeBIP0044,
 				wif, &blockStamp, false)
 			if err != nil {
-				L.Warnf("WARN: Failed to import private "+
+				Warnf("WARN: Failed to import private "+
 					"key for address %v: %v",
 					addr.Address(), err)
 				continue
@@ -236,13 +236,13 @@ func convertLegacyKeystore(legacyKeyStore *keystore.Store, w *wallet.Wallet) err
 		case keystore.ScriptAddress:
 			_, err := w.ImportP2SHRedeemScript(addr.Script())
 			if err != nil {
-				L.Warnf("WARN: Failed to import "+
+				Warnf("WARN: Failed to import "+
 					"pay-to-script-hash script for "+
 					"address %v: %v\n", addr.Address(), err)
 				continue
 			}
 		default:
-			L.Warnf("WARN: Skipping unrecognized legacy "+
+			Warnf("WARN: Skipping unrecognized legacy "+
 				"keystore type: %T\n", addr)
 			continue
 		}

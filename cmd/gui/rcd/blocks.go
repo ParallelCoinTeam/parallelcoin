@@ -22,7 +22,7 @@ func (r *RcVar) GetBlock(hash string) btcjson.GetBlockVerboseResult {
 	}
 	bl, err := rpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil)
 	if err != nil {
-		// dv.PushDuoVUEalert("Error", err.Error(), "error")
+		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
 	gbvr, ok := bl.(btcjson.GetBlockVerboseResult)
 	if ok {
@@ -45,7 +45,7 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	b = *new(model.DuoUIblock)
 	hashHeight, err := r.cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
 	if err != nil {
-		L.Error("Block Hash By Height:", err)
+		Error("Block Hash By Height:", err)
 	}
 
 	verbose, verbosetx := true, true
@@ -56,7 +56,7 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	}
 	bl, err := rpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil)
 	if err != nil {
-		// dv.PushDuoVUEalert("Error", err.Error(), "error")
+		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
 	block := bl.(btcjson.GetBlockVerboseResult)
 	b.Height = block.Height
@@ -78,15 +78,15 @@ func (r *RcVar) GetBlocksExcerpts() func() {
 		startBlock := r.Explorer.Page.Value * r.Explorer.PerPage.Value
 		endBlock := r.Explorer.Page.Value*r.Explorer.PerPage.Value + r.Explorer.PerPage.Value
 		height := int(r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
-		L.Debug("GetBlocksExcerpts", startBlock, endBlock, height)
+		Debug("GetBlocksExcerpts", startBlock, endBlock, height)
 		if endBlock > height {
 			endBlock = height
 		}
 		blocks := *new([]model.DuoUIblock)
 		for i := startBlock; i < endBlock; i++ {
 			blocks = append(blocks, r.GetBlockExcerpt(i))
-			// L.Info("trazo")
-			// L.Info(r.Status.Node.BlockHeight)
+			// Info("trazo")
+			// Info(r.Status.Node.BlockHeight)
 		}
 		r.Explorer.Blocks = blocks
 		return
@@ -96,7 +96,7 @@ func (r *RcVar) GetBlocksExcerpts() func() {
 func (r *RcVar) GetBlockCount() {
 	getBlockCount, err := rpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
 	if err != nil {
-		// dv.PushDuoVUEalert("Error", err.Error(), "error")
+		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
 	r.Status.Node.BlockCount.Store(uint64(getBlockCount.(int64)))
 	return
@@ -107,7 +107,7 @@ func (r *RcVar) GetBlockHash(blockHeight int) string {
 	}
 	hash, err := rpc.HandleGetBlockHash(r.cx.RPCServer, &hcmd, nil)
 	if err != nil {
-		// dv.PushDuoVUEalert("Error", err.Error(), "error")
+		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
 	return hash.(string)
 }
@@ -121,7 +121,7 @@ func (r *RcVar) GetDifficulty() {
 	c := btcjson.GetDifficultyCmd{}
 	diff, err := rpc.HandleGetDifficulty(r.cx.RPCServer, c, nil)
 	if err != nil {
-		// dv.PushDuoVUEalert("Error", err.Error(), "error")
+		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
 	r.Status.Node.Difficulty.Store(diff.(float64))
 	return

@@ -518,7 +518,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
@@ -536,7 +536,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}

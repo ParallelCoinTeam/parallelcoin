@@ -10,7 +10,7 @@ import (
 // with a more appropiate error from the json package.  Create a map of
 // these replacements so they can be handled once after an RPC handler has
 // returned and before the error is marshaled.
-// Error types to simplify the reporting of specific categories of
+// BTCJSONError types to simplify the reporting of specific categories of
 // errors, and their *json.RPCError creation.
 type (
 	// DeserializationError describes a failed deserializaion due to bad

@@ -16,7 +16,7 @@ func ExampleMarshalCmd() {
 	id := 1
 	marshalledBytes, err := btcjson.MarshalCmd(id, gbCmd)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// Display the marshalled command.  Ordinarily this would be sent across the wire to the RPC server, but for this example, just display it.
@@ -31,28 +31,28 @@ func ExampleUnmarshalCmd() {
 	// Unmarshal the raw bytes from the wire into a JSON-RPC request.
 	var request btcjson.Request
 	if err := json.Unmarshal(data, &request); err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// Typically there isn't any need to examine the request fields directly like this as the caller already knows what response to expect based on the command it sent.  However, this is done here to demonstrate why the unmarshal process is two steps.
 	if request.ID == nil {
-		L.Error("Unexpected notification")
+		Error("Unexpected notification")
 		return
 	}
 	if request.Method != "getblock" {
-		L.Error("Unexpected method")
+		Error("Unexpected method")
 		return
 	}
 	// Unmarshal the request into a concrete command.
 	cmd, err := btcjson.UnmarshalCmd(&request)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// Type assert the command to the appropriate type.
 	gbCmd, ok := cmd.(*btcjson.GetBlockCmd)
 	if !ok {
-		L.Errorf("Incorrect command type: %T\n", cmd)
+		Errorf("Incorrect command type: %T\n", cmd)
 		return
 	}
 	// Display the fields in the concrete command.
@@ -70,7 +70,7 @@ func ExampleMarshalResponse() {
 	// Marshal a new JSON-RPC response.  For example, this is a response to a getblockheight request.
 	marshalledBytes, err := btcjson.MarshalResponse(1, 350001, nil)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// Display the marshalled response.  Ordinarily this would be sent across the wire to the RPC client, but for this example, just display it.
@@ -85,18 +85,18 @@ func Example_unmarshalResponse() {
 	// Unmarshal the raw bytes from the wire into a JSON-RPC response.
 	var response btcjson.Response
 	if err := json.Unmarshal(data, &response); err != nil {
-		L.Error("Malformed JSON-RPC response:", err)
+		Error("Malformed JSON-RPC response:", err)
 		return
 	}
 	// Check the response for an error from the server.  For example, the server might return an error if an invalid/unknown block hash is requested.
 	if response.Error != nil {
-		L.Error(response.Error)
+		Error(response.Error)
 		return
 	}
 	// Unmarshal the result into the expected type for the response.
 	var blockHeight int32
 	if err := json.Unmarshal(response.Result, &blockHeight); err != nil {
-		L.Errorf("Unexpected result type: %T\n", response.Result)
+		Errorf("Unexpected result type: %T\n", response.Result)
 		return
 	}
 	fmt.Println("Block height:", blockHeight)

@@ -82,7 +82,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 		if filterHeaderTip == bestHeight {
 			return nil
 		}
-		L.Debugf(
+		Debugf(
 			"delivering backlog block notifications from height=%v, to height=%v",
 			bestHeight, filterHeaderTip,
 		)
@@ -97,7 +97,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 				currentHeight,
 			)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return fmt.Errorf(
 					"unable to read header at height: %v: %v",
 					currentHeight, err,
@@ -111,7 +111,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 		return nil
 	})
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &subscription, nil

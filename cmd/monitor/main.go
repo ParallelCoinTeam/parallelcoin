@@ -21,10 +21,10 @@ import (
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	mon := NewMonitor(cx, nil, rc)
 	var lgs []string
-	for i := range logi.Loggers {
+	for i := range logi.L.Packages {
 		lgs = append(lgs, i)
 	}
-	//L.Debugs(mon.Loggers)
+	//Debugs(mon.Loggers)
 	mon.Loggers = mon.GetTree(lgs)
 	isNew := mon.LoadConfig()
 	_, _ = git.PlainClone("/tmp/foo", false,
@@ -33,15 +33,15 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			Progress: os.Stderr,
 		})
 	var cwd string
-	if cwd, err = os.Getwd(); L.Check(err) {
+	if cwd, err = os.Getwd(); Check(err) {
 	}
 	var repo *git.Repository
-	if repo, err = git.PlainOpen(cwd); L.Check(err) {
+	if repo, err = git.PlainOpen(cwd); Check(err) {
 	}
 	if repo != nil {
-		L.Debug("running inside repo")
+		Debug("running inside repo")
 		mon.RunningInRepo = true
-		L.Debug(repo.Remotes())
+		Debug(repo.Remotes())
 		if isNew {
 			mon.Config.RunInRepo = true
 		}
@@ -65,7 +65,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	if mon.Config.Running && !(mon.Config.RunMode == "m" ||
 		mon.Config.RunMode == "mon" || mon.Config.RunMode == "monitor") {
 		go func() {
-			L.Debug("starting up as was running previously when shut down")
+			Debug("starting up as was running previously when shut down")
 			time.Sleep(time.Second/2)
 			mon.Config.Running = false
 			//mon.RunCommandChan <- "stop"
@@ -78,21 +78,20 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	}
 	//go mon.Consume()
 	go func() {
-		L.Debug("starting up GUI event loop")
+		Debug("starting up GUI event loop")
 	out:
 		for {
 			select {
 			case <-cx.KillAll:
-				L.Debug("kill signal received")
+				Debug("kill signal received")
 				mon.SaveConfig()
 				mon.RunCommandChan <- "kill"
 				break out
 			case e := <-mon.W.Events():
 				switch e := e.(type) {
 				case system.DestroyEvent:
-					L.Debug("destroy event received")
+					Debug("destroy event received")
 					mon.SaveConfig()
-					mon.RunCommandChan <- "kill"
 					close(mon.Ctx.KillAll)
 				case system.FrameEvent:
 					mon.Gtx.Reset(e.Config, e.Size)
@@ -106,7 +105,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 		}
 		mon.SaveConfig()
 		mon.RunCommandChan <- "kill"
-		L.Debug("gui shut down")
+		Debug("gui shut down")
 		os.Exit(0)
 	}()
 	interrupt.AddHandler(func() {

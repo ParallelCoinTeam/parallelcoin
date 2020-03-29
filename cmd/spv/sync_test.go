@@ -1049,7 +1049,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	db, err := walletdb.Create("bdb", tempDir+"/weks.db")
 // 	defer db.Close()
 // 	if err != nil {
-// 		t.Fatalf("Error opening DB: %s\n", err)
+// 		t.Fatalf("ScriptError opening DB: %s\n", err)
 // 	}
 // 	config := spv.Config{
 // 		DataDir:     tempDir,
@@ -1066,7 +1066,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	spv.QueryPeerConnectTimeout = 10 * time.Second
 // 	svc, err := spv.NewChainService(config)
 // 	if err != nil {
-// 		t.Fatalf("Error creating ChainService: %s", err)
+// 		t.Fatalf("ScriptError creating ChainService: %s", err)
 // 	}
 // 	svc.Start()
 // 	defer svc.Stop()

@@ -43,19 +43,19 @@ func TestErrorCodeStringer(t *testing.T) {
 	}
 }
 
-// TestError tests the error output for the Error type.
+// TestError tests the error output for the BTCJSONError type.
 func TestError(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		in   btcjson.Error
+		in   btcjson.BTCJSONError
 		want string
 	}{
 		{
-			btcjson.Error{Description: "some error"},
+			btcjson.BTCJSONError{Description: "some error"},
 			"some error",
 		},
 		{
-			btcjson.Error{Description: "human-readable error"},
+			btcjson.BTCJSONError{Description: "human-readable error"},
 			"human-readable error",
 		},
 	}
@@ -63,7 +63,7 @@ func TestError(t *testing.T) {
 	for i, test := range tests {
 		result := test.in.Error()
 		if result != test.want {
-			t.Errorf("Error #%d\n got: %s want: %s", i, result,
+			t.Errorf("BTCJSONError #%d\n got: %s want: %s", i, result,
 				test.want)
 			continue
 		}

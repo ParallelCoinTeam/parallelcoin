@@ -9,7 +9,7 @@ import (
 
 func (r *RcVar) GetDuoUIhashesPerSec() {
 	// r.Status.Wallet.Hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
-	L.Debug("centralise hash function stuff here") // cpuminer
+	Debug("centralise hash function stuff here") // cpuminer
 	r.Status.Kopach.Hashrate = r.cx.Hashrate.Load()
 	return
 }
@@ -41,10 +41,10 @@ func (r *RcVar) GetDuoUIdifficulty() {
 func (r *RcVar) GetDuoUIblockCount() {
 	getBlockCount, err := rpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
 	if err != nil {
-		// r.PushDuoUIalert("Error", err.Error(), "error")
+		// r.PushDuoUIalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
 	r.Status.Node.BlockCount.Store(uint64(getBlockCount.(int64)))
-	// L.Info(getBlockCount)
+	// Info(getBlockCount)
 	return
 }
 func (r *RcVar) GetDuoUInetworkLastBlock() {
@@ -90,7 +90,7 @@ func (r *RcVar) GetPeerInfo() func() {
 
 		getPeers, err := rpc.HandleGetPeerInfo(r.cx.RPCServer, nil, nil)
 		if err != nil {
-			// dV.PushDuoVUEalert("Error", err.Error(), "error")
+			// dV.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 		}
 		r.Network.Peers = getPeers.([]*btcjson.GetPeerInfoResult)
 	}

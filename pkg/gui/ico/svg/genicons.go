@@ -59,7 +59,7 @@ func main() {
 	out.WriteString("\n\n")
 
 	if err := genDir(iconsDir); err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 
 	fmt.Fprintf(out,
@@ -77,16 +77,16 @@ func main() {
 
 	if *outDir != "" {
 		if err := os.MkdirAll(*outDir, 0775); err != nil && !os.IsExist(err) {
-			L.Fatal(err)
+			Fatal(err)
 		}
 	}
 	raw := out.Bytes()
 	formatted, err := format.Source(raw)
 	if err != nil {
-		L.Fatalf("gofmt failed: %v\n\nGenerated code:\n%s", err, raw)
+		Fatalf("gofmt failed: %v\n\nGenerated code:\n%s", err, raw)
 	}
 	if err := ioutil.WriteFile(filepath.Join(*outDir, "data.go"), formatted, 0644); err != nil {
-		L.Fatalf("WriteFile failed: %s\n", err)
+		Fatalf("WriteFile failed: %s\n", err)
 	}
 
 	{
@@ -102,10 +102,10 @@ func main() {
 		raw := b.Bytes()
 		formatted, err := format.Source(raw)
 		if err != nil {
-			L.Fatalf("gofmt failed: %v\n\nGenerated code:\n%s", err, raw)
+			Fatalf("gofmt failed: %v\n\nGenerated code:\n%s", err, raw)
 		}
 		if err := ioutil.WriteFile(filepath.Join(*outDir, "data_test.go"), formatted, 0644); err != nil {
-			L.Fatalf("WriteFile failed: %s\n", err)
+			Fatalf("WriteFile failed: %s\n", err)
 		}
 	}
 }
@@ -120,7 +120,7 @@ func genDir(dirName string) error {
 
 	infos, err := f.Readdir(-1)
 	if err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 	baseNames, fileNames, sizes := []string{}, map[string]string{}, map[string]int{}
 	for _, info := range infos {

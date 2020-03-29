@@ -3,7 +3,7 @@ package monitor
 //
 //func (s *State) Consume() {
 //	sc := consume.Log(s.Ctx.KillAll, func(ent *logi.Entry) (err error) {
-//		L.Debugf("from child: %s '%s'", ent.Level, ent.Text)
+//		Debugf("from child: %s '%s'", ent.Level, ent.Text)
 //		return
 //	})
 //	consume.Start(sc)

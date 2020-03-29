@@ -152,7 +152,7 @@ func (s *blockStore) openWriteFile(fileNum uint32) (filer, error) {
 	filePath := blockFilePath(s.basePath, fileNum)
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("failed to open file %q: %v", filePath, err)
 		return nil, makeDbErr(database.ErrDriverSpecific, str, err)
 	}
@@ -166,7 +166,7 @@ func (s *blockStore) openFile(fileNum uint32) (*lockableFile, error) {
 	filePath := blockFilePath(s.basePath, fileNum)
 	file, err := os.Open(filePath)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, makeDbErr(database.ErrDriverSpecific, err.Error(),
 			err)
 	}
@@ -236,7 +236,7 @@ func (s *blockStore) blockFile(fileNum uint32) (*lockableFile, error) {
 	// The file isn't open, so open it while potentially closing the least recently used one as needed.
 	obf, err := s.openFileFunc(fileNum)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		s.obfMutex.Unlock()
 		return nil, err
 	}
@@ -253,7 +253,7 @@ func (s *blockStore) writeData(data []byte, fieldName string) error {
 	n, err := wc.curFile.file.WriteAt(data, int64(wc.curOffset))
 	wc.curOffset += uint32(n)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("failed to write %s to file %d at "+
 			"offset %d: %v", fieldName, wc.curFileNum,
 			wc.curOffset-uint32(n), err)
@@ -296,7 +296,7 @@ func (s *blockStore) writeBlock(rawBlock []byte) (blockLocation, error) {
 	if wc.curFile.file == nil {
 		file, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return blockLocation{}, err
 		}
 		wc.curFile.file = file
@@ -339,14 +339,14 @@ func (s *blockStore) readBlock(hash *chainhash.Hash, loc blockLocation) ([]byte,
 	// Get the referenced block file handle opening the file as needed.  The function also handles closing files as needed to avoid going over the max allowed open files.
 	blockFile, err := s.blockFile(loc.blockFileNum)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	serializedData := make([]byte, loc.blockLen)
 	n, err := blockFile.file.ReadAt(serializedData, int64(loc.fileOffset))
 	blockFile.RUnlock()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("failed to read block %s from file %d, "+
 			"offset %d: %v", hash, loc.blockFileNum, loc.fileOffset,
 			err)
@@ -378,7 +378,7 @@ func (s *blockStore) readBlockRegion(loc blockLocation, offset, numBytes uint32)
 	// Get the referenced block file handle opening the file as needed.  The function also handles closing files as needed to avoid going over the max allowed open files.
 	blockFile, err := s.blockFile(loc.blockFileNum)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Regions are offsets into the actual block, however the serialized data for a block includes an initial 4 bytes for network + 4 bytes for block length.  Thus, add 8 bytes to adjust.
@@ -387,7 +387,7 @@ func (s *blockStore) readBlockRegion(loc blockLocation, offset, numBytes uint32)
 	_, err = blockFile.file.ReadAt(serializedData, int64(readOffset))
 	blockFile.RUnlock()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("failed to read region from block file %d, "+
 			"offset %d, len %d: %v", loc.blockFileNum, readOffset,
 			numBytes, err)
@@ -439,7 +439,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		wc.curFileNum = oldBlockFileNum
 		wc.curOffset = oldBlockOffset
 	}()
-	L.Debugf(
+	Debugf(
 		"ROLLBACK: Rolling back to file %d, offset %d",
 		oldBlockFileNum,
 		oldBlockOffset)
@@ -454,7 +454,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	}
 	for ; wc.curFileNum > oldBlockFileNum; wc.curFileNum-- {
 		if err := s.deleteFileFunc(wc.curFileNum); err != nil {
-			L.Warn(
+			Warn(
 				"ROLLBACK: Failed to delete block file number %d: %v %s",
 				wc.curFileNum, err)
 			return
@@ -465,9 +465,9 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	if wc.curFile.file == nil {
 		obf, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			wc.curFile.Unlock()
-			L.Warn("ROLLBACK:", err)
+			Warn("ROLLBACK:", err)
 			return
 		}
 		wc.curFile.file = obf
@@ -475,7 +475,7 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	// Truncate the to the provided rollback offset.
 	if err := wc.curFile.file.Truncate(int64(oldBlockOffset)); err != nil {
 		wc.curFile.Unlock()
-		L.Warn(
+		Warn(
 			"ROLLBACK: Failed to truncate file %d: %v %s",
 			wc.curFileNum,
 			err)
@@ -485,8 +485,8 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	err := wc.curFile.file.Sync()
 	wc.curFile.Unlock()
 	if err != nil {
-		L.Error(err)
-		L.Warn(
+		Error(err)
+		Warn(
 			"ROLLBACK: Failed to sync file %d: %v %s",
 			wc.curFileNum,
 			err)
@@ -502,13 +502,13 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		filePath := blockFilePath(dbPath, uint32(i))
 		st, err := os.Stat(filePath)
 		if err != nil {
-			L.Trace(err)
+			Trace(err)
 			break
 		}
 		lastFile = i
 		fileLen = uint32(st.Size())
 	}
-	L.Tracef("Scan found latest block file #%d with length %d", lastFile, fileLen)
+	Tracef("Scan found latest block file #%d with length %d", lastFile, fileLen)
 	return lastFile, fileLen
 }
 

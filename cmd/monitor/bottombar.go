@@ -69,11 +69,10 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 					}
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg", "ff")
-					mb := s.ModesButtons[mm]
 					s.TextButton(txt, "Secondary", 34, fg,
-						"ButtonBg", &mb)
-					for (&mb).Clicked(s.Gtx) {
-						L.Debug(mm, "clicked")
+						"ButtonBg", s.ModesButtons[modes[i]])
+					for s.ModesButtons[modes[i]].Clicked(s.Gtx) {
+						Debug(mm, "clicked")
 						if s.Config.RunModeOpen {
 							s.Config.RunMode = modes[i]
 							s.Config.RunModeOpen = false
@@ -98,7 +97,7 @@ func (s *State) Filter() layout.FlexChild {
 		if ! s.Config.FilterOpen {
 			s.IconButton("Filter", fg, bg, &s.FilterButton)
 			for s.FilterButton.Clicked(s.Gtx) {
-				L.Debug("clicked filter button")
+				Debug("clicked filter button")
 				if !s.Config.FilterOpen {
 					s.Config.SettingsOpen = false
 					s.Config.BuildOpen = false

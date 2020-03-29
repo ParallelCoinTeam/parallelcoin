@@ -22,7 +22,7 @@ import (
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		L.Debug("running beforeFunc")
+		Debug("running beforeFunc")
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
@@ -41,20 +41,20 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				cx.Config, cx.ConfigMap = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
-					L.Error("error unmarshalling config", err)
+					Error("error unmarshalling config", err)
 					os.Exit(1)
 				}
 			} else {
-				L.Fatal("unexpected error reading configuration file:", err)
+				Fatal("unexpected error reading configuration file:", err)
 				os.Exit(1)
 			}
 		} else {
 			*cx.Config.ConfigFile = ""
-			L.Debug("will save config after configuration")
+			Debug("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("loglevel")  {
-			L.Trace("set loglevel", c.String("loglevel"))
+			Trace("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
 			color := true
 			if runtime.GOOS == "windows" {
@@ -78,7 +78,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			default:
 				if *cx.Config.Network != "mainnet" &&
 					*cx.Config.Network != "m" {
-					L.Warn("using mainnet for node")
+					Warn("using mainnet for node")
 				}
 				cx.ActiveNet = &netparams.MainNetParams
 			}
@@ -248,7 +248,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			// if LAN is turned on it means by default we are on testnet
 			cx.ActiveNet = &netparams.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
-				L.Warn("set lan", c.Bool("lan"))
+				Warn("set lan", c.Bool("lan"))
 				*cx.Config.LAN = c.Bool("lan")
 				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
 			} else {
@@ -345,7 +345,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.WalletOff = c.Bool("walletoff")
 		}
 		if c.IsSet("save") {
-			L.Info("saving configuration")
+			Info("saving configuration")
 			cx.StateCfg.Save = true
 		}
 		return nil

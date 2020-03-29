@@ -33,7 +33,7 @@ var opts = struct {
 func init() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		os.Exit(1)
 	}
 }
@@ -71,10 +71,10 @@ func main() {
 	os.Exit(mainInt())
 }
 func mainInt() int {
-	log.Println("Database path:", opts.DbPath)
+	fmt.Println("Database path:", opts.DbPath)
 	_, err := os.Stat(opts.DbPath)
 	if os.IsNotExist(err) {
-		log.Println("Database file does not exist")
+		fmt.Println("Database file does not exist")
 		return 1
 	}
 	for !opts.Force {
@@ -86,7 +86,7 @@ func mainInt() int {
 		}
 		err := scanner.Err()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return 1
 		}
 		resp := scanner.Text()
@@ -96,15 +96,15 @@ func mainInt() int {
 		if no(resp) || resp == "" {
 			return 0
 		}
-		log.Println("Enter yes or no.")
+		fmt.Println("Enter yes or no.")
 	}
 	db, err := walletdb.Open("bdb", opts.DbPath)
 	if err != nil {
-		log.Println("failed to open database:", err)
+		fmt.Println("failed to open database:", err)
 		return 1
 	}
 	defer db.Close()
-	log.Println("dropping wtxmgr namespace")
+	fmt.Println("dropping wtxmgr namespace")
 	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
 		err := tx.DeleteTopLevelBucket(wtxmgrNamespace)
 		if err != nil && err != walletdb.ErrBucketNotFound {
@@ -112,19 +112,19 @@ func mainInt() int {
 		}
 		ns, err := tx.CreateTopLevelBucket(wtxmgrNamespace)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		err = wtxmgr.Create(ns)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 		startBlock := ns.Get(startBlockName)
 		err = ns.Put(syncedToName, startBlock)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		recentBlocks := make([]byte, 40)
@@ -134,8 +134,8 @@ func mainInt() int {
 		return ns.Put(recentBlocksName, recentBlocks)
 	})
 	if err != nil {
-		L.Error(err)
-		log.Println("Failed to drop and re-create namespace:", err)
+		Error(err)
+		fmt.Println("Failed to drop and re-create namespace:", err)
 		return 1
 	}
 	return 0

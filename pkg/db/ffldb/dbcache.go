@@ -291,7 +291,7 @@ func (snap *dbCacheSnapshot) Get(key []byte) []byte {
 	// Consult the database.
 	value, err := snap.dbSnapshot.Get(key, nil)
 	if err != nil {
-		// L.Trace(err)
+		// Trace(err)
 		return nil
 	}
 	return value
@@ -363,7 +363,7 @@ type dbCache struct {
 func (c *dbCache) Snapshot() (*dbCacheSnapshot, error) {
 	dbSnapshot, err := c.ldb.GetSnapshot()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := "failed to open transaction"
 		return nil, convertErr(str, err)
 	}
@@ -390,7 +390,7 @@ func (c *dbCache) updateDB(fn func(ldbTx *leveldb.Transaction) error) error {
 	// Start a leveldb transaction.
 	ldbTx, err := c.ldb.OpenTransaction()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return convertErr("failed to open ldb transaction", err)
 	}
 	if err := fn(ldbTx); err != nil {
@@ -449,7 +449,7 @@ func (c *dbCache) commitTreaps(pendingKeys, pendingRemove TreapForEacher) error 
 // have been applied to the cache to the underlying database.
 // This function MUST be called with the database write lock held.
 func (c *dbCache) flush() error {
-	L.Trace("syncing database to disk")
+	Trace("syncing database to disk")
 	c.lastFlush = time.Now()
 	// Sync the current write file associated with the block store.
 	// This is necessary before writing the metadata to prevent the case
@@ -527,7 +527,7 @@ func (c *dbCache) commitTx(tx *transaction) error {
 		// Perform all leveldb updates using an atomic transaction.
 		err := c.commitTreaps(tx.pendingKeys, tx.pendingRemove)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		// Clear the transaction entries since they have been committed.

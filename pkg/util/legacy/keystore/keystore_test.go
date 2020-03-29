@@ -103,18 +103,18 @@ func TestWalletCreationSerialization(t *testing.T) {
 	w1, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	buf := new(bytes.Buffer)
 	if _, err := w1.WriteTo(buf); err != nil {
-		t.Error("Error writing new wallet: " + err.Error())
+		t.Error("ScriptError writing new wallet: " + err.Error())
 		return
 	}
 	w2 := new(Store)
 	_, err = w2.ReadFrom(buf)
 	if err != nil {
-		t.Error("Error reading newly written wallet: " + err.Error())
+		t.Error("ScriptError reading newly written wallet: " + err.Error())
 		return
 	}
 	err = w1.Lock()
@@ -134,7 +134,7 @@ func TestWalletCreationSerialization(t *testing.T) {
 		return
 	}
 	//	if !reflect.DeepEqual(w1, w2) {
-	//		t.Error("Created and read-in wallets do not match.")
+	//		t.ScriptError("Created and read-in wallets do not match.")
 	//		spew.Dump(w1, w2)
 	//		return
 	//	}
@@ -301,7 +301,7 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, makeBS(0))
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	if !w.IsLocked() {
@@ -344,13 +344,13 @@ func TestWalletPubkeyChaining(t *testing.T) {
 	serializedWallet := new(bytes.Buffer)
 	_, err = w.WriteTo(serializedWallet)
 	if err != nil {
-		t.Errorf("Error writing wallet with missing private key: %v", err)
+		t.Errorf("ScriptError writing wallet with missing private key: %v", err)
 		return
 	}
 	w2 := new(Store)
 	_, err = w2.ReadFrom(serializedWallet)
 	if err != nil {
-		t.Errorf("Error reading wallet with missing private key: %v", err)
+		t.Errorf("ScriptError reading wallet with missing private key: %v", err)
 		return
 	}
 	// Unlock wallet.  This should trigger creating the private key for
@@ -450,7 +450,7 @@ func TestWatchingWalletExport(t *testing.T) {
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	// Maintain a set of the active addresses in the wallet.
@@ -630,7 +630,7 @@ func TestImportPrivateKey(t *testing.T) {
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	if err = w.Unlock([]byte("banana")); err != nil {
@@ -639,7 +639,7 @@ func TestImportPrivateKey(t *testing.T) {
 	}
 	pk, err := ec.NewPrivateKey(ec.S256())
 	if err != nil {
-		t.Error("Error generating private key: " + err.Error())
+		t.Error("ScriptError generating private key: " + err.Error())
 		return
 	}
 	// verify that the entire wallet's sync height matches the
@@ -777,7 +777,7 @@ func TestImportScript(t *testing.T) {
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	if err = w.Unlock([]byte("banana")); err != nil {
@@ -1019,7 +1019,7 @@ func TestChangePassphrase(t *testing.T) {
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	// Changing the passphrase with a locked wallet must fail with ErrWalletLocked.

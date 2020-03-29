@@ -8,7 +8,7 @@ import (
 )
 
 func Log(quit chan struct{}) {
-	L.Debug("starting log server")
+	Debug("starting log server")
 	lc := logi.L.AddLogChan()
 	var logOn atomic.Bool
 	logOn.Store(false)
@@ -18,11 +18,14 @@ func Log(quit chan struct{}) {
 			magic := string(b[:4])
 			switch magic {
 			case "run ":
-				L.Debug("setting to run")
+				Debug("setting to run")
 				logOn.Store(true)
 			case "stop":
-				L.Debug("stopping")
+				Debug("stopping")
 				logOn.Store(false)
+			case "slvl":
+				Debug("setting level", logi.Levels[b[4]])
+				logi.L.SetLevel(logi.Tags[logi.Levels[b[4]]], false, "pod")
 			}
 		}
 		return
@@ -35,9 +38,9 @@ func Log(quit chan struct{}) {
 				break out
 			case e := <-lc:
 				if logOn.Load() {
-					if n, err := p.Write(Entry.Get(&e).Data); !L.Check(err) {
+					if n, err := p.Write(Entry.Get(&e).Data); !Check(err) {
 						if n < 1 {
-							L.Error("short write")
+							Error("short write")
 						}
 					}
 				}

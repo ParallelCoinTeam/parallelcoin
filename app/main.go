@@ -8,10 +8,10 @@
 package app
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/pod/pkg/logi"
 )
 
 const (
@@ -28,7 +28,7 @@ func Main() int {
 	cx.App = GetApp(cx)
 	e := cx.App.Run(os.Args)
 	if e != nil {
-		log.Println("Pod ERROR:", e)
+		fmt.Println("Pod ERROR:", e)
 		return 1
 	}
 	return 0

@@ -355,6 +355,6 @@ func TestErroredScript(t *testing.T) {
 	}
 	// Ensure the error has a message set.
 	if err.Error() == "" {
-		t.Fatal("ErrScriptNotCanonical.Error does not have any text")
+		t.Fatal("ErrScriptNotCanonical.ScriptError does not have any text")
 	}
 }

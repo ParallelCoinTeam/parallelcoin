@@ -37,7 +37,7 @@ func printGoHexes(in []byte) {
 		}
 		log.Printf("0x%02x, ", in[i])
 	}
-	log.Println()
+	fmt.Println()
 }
 func rev(in []byte) (out *[]byte) {
 	o := make([]byte, len(in))

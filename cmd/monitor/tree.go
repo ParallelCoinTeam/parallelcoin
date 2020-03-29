@@ -90,14 +90,14 @@ func (s *State) GetTree(paths []string) (root *Node) {
 	//root.ClearParents()
 	//root.CloseAllItems(s)
 	//spew.Config.Indent = "    "
-	//L.Debugs(root)
+	//Debugs(root)
 	return
 }
 
 func (n *Node) GetWidget(s *State) {
 	nn := n.GetOpenItems()[1:]
 	//for i := range nn {
-	//	L.Debug(nn[i].FullName, nn[i].Closed, nn[i].Hidden)
+	//	Debug(nn[i].FullName, nn[i].Closed, nn[i].Hidden)
 	//}
 	indent := 0
 	s.FilterList.Axis = layout.Vertical
@@ -195,14 +195,14 @@ func (n *Node) GetWidget(s *State) {
 
 func (n *Node) GetOpenItems() (out []*Node) {
 	out = append(out, n)
-	//L.Debugs(n)
+	//Debugs(n)
 	for _, v := range n.Children {
 		if !n.Closed {
 			out = append(out, v.GetOpenItems()...)
 		}
 	}
 	//if n.Parent == nil {
-	//	L.Debugs(out)
+	//	Debugs(out)
 	//}
 	return
 }

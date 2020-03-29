@@ -5,7 +5,7 @@ import "fmt"
 // ErrorCode identifies a kind of error.
 type ErrorCode int
 
-// These constants are used to identify a specific database Error.
+// These constants are used to identify a specific database DBError.
 const (
 	// Errors related to driver registration.
 	// ErrDbTypeRegistered indicates two different database drivers attempt to register with the name database type.
@@ -92,23 +92,23 @@ func (e ErrorCode) String() string {
 	return fmt.Sprintf("Unknown ErrorCode (%d)", int(e))
 }
 
-// Error provides a single type for errors that can happen during database operation.  It is used to indicate several types of failures including errors with caller requests such as specifying invalid block regions or attempting to access data against closed database transactions, driver errors, errors retrieving data, and errors communicating with database servers.
-// The caller can use type assertions to determine if an error is an Error and access the ErrorCode field to ascertain the specific reason for the failure. The ErrDriverSpecific error code will also have the Err field set with the underlying error.  Depending on the backend driver, the Err field might be set to the underlying error for other error codes as well.
-type Error struct {
+// DBError provides a single type for errors that can happen during database operation.  It is used to indicate several types of failures including errors with caller requests such as specifying invalid block regions or attempting to access data against closed database transactions, driver errors, errors retrieving data, and errors communicating with database servers.
+// The caller can use type assertions to determine if an error is an DBError and access the ErrorCode field to ascertain the specific reason for the failure. The ErrDriverSpecific error code will also have the Err field set with the underlying error.  Depending on the backend driver, the Err field might be set to the underlying error for other error codes as well.
+type DBError struct {
 	ErrorCode   ErrorCode // Describes the kind of error
 	Description string    // Human readable description of the issue
 	Err         error     // Underlying error
 }
 
-// Error satisfies the error interface and prints human-readable errors.
-func (e Error) Error() string {
+// DBError satisfies the error interface and prints human-readable errors.
+func (e DBError) Error() string {
 	if e.Err != nil {
 		return e.Description + ": " + e.Err.Error()
 	}
 	return e.Description
 }
 
-// makeError creates an Error given a set of arguments.  The error code must be one of the error codes provided by this package.
-func makeError(c ErrorCode, desc string, err error) Error {
-	return Error{ErrorCode: c, Description: desc, Err: err}
+// makeError creates an DBError given a set of arguments.  The error code must be one of the error codes provided by this package.
+func makeError(c ErrorCode, desc string, err error) DBError {
+	return DBError{ErrorCode: c, Description: desc, Err: err}
 }

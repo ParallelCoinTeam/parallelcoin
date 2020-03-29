@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"gioui.org/app"
 	"github.com/p9c/pod/pkg/ring"
+	"github.com/p9c/pod/pkg/stdconn/worker"
 	"io/ioutil"
 	"path/filepath"
 
@@ -21,6 +22,7 @@ type State struct {
 	Ctx                       *conte.Xt
 	Gtx                       *layout.Context
 	W                         *app.Window
+	Worker                    *worker.Worker
 	Rc                        *rcd.RcVar
 	Theme                     *gelook.DuoUItheme
 	Config                    *Config
@@ -51,7 +53,7 @@ type State struct {
 	FilterNoneButton          gel.Button
 	FilterLevelsButtons       []gel.Button
 	FilterLevelList           layout.List
-	ModesButtons              map[string]gel.Button
+	ModesButtons              map[string]*gel.Button
 	GroupsList                layout.List
 	WindowWidth, WindowHeight int
 	Loggers                   *Node
@@ -84,7 +86,7 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 			Axis:      layout.Horizontal,
 			Alignment: layout.Start,
 		},
-		ModesButtons: map[string]gel.Button{},
+		ModesButtons: make(map[string]*gel.Button),
 		Config:       &Config{FilterNodes: make(map[string]*Node)},
 		WindowWidth:  0,
 		WindowHeight: 0,
@@ -98,6 +100,12 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		RunCommandChan:      make(chan string),
 		EntryBuf:            ring.NewEntry(65536),
 		FilterLevelsButtons: make([]gel.Button, 7),
+	}
+	modes := []string{
+		"node", "wallet", "shell", "gui", "mon",
+	}
+	for i := range modes {
+		s.ModesButtons[modes[i]] = new(gel.Button)
 	}
 	s.Config.RunMode = "node"
 	s.Config.DarkTheme = true
@@ -130,14 +138,14 @@ type Config struct {
 }
 
 func (s *State) LoadConfig() (isNew bool) {
-	L.Debug("loading config")
+	Debug("loading config")
 	var err error
 	cnf := &Config{}
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if apputil.FileExists(filename) {
 		var b []byte
-		if b, err = ioutil.ReadFile(filename); !L.Check(err) {
-			if err = json.Unmarshal(b, cnf); L.Check(err) {
+		if b, err = ioutil.ReadFile(filename); !Check(err) {
+			if err = json.Unmarshal(b, cnf); Check(err) {
 				s.SaveConfig()
 			}
 			if s.Config.FilterNodes == nil {
@@ -169,7 +177,7 @@ func (s *State) LoadConfig() (isNew bool) {
 			s.Config.FilterLevel = cnf.FilterLevel
 		}
 	} else {
-		L.Warn("creating new configuration")
+		Warn("creating new configuration")
 		s.Config.UseBuiltinGo = s.HasGo
 		s.Config.RunInRepo = s.RunningInRepo
 		isNew = true
@@ -191,9 +199,9 @@ func (s *State) SaveConfig() {
 	s.Config.Width = s.WindowWidth
 	s.Config.Height = s.WindowHeight
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
-	if yp, e := json.MarshalIndent(s.Config, "", "  "); !L.Check(e) {
+	if yp, e := json.MarshalIndent(s.Config, "", "  "); !Check(e) {
 		apputil.EnsureDir(filename)
-		if e := ioutil.WriteFile(filename, yp, 0600); L.Check(e) {
+		if e := ioutil.WriteFile(filename, yp, 0600); Check(e) {
 			panic(e)
 		}
 	}

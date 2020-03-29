@@ -36,7 +36,7 @@ func (eft *estimateFeeTester) checkSaveAndRestore(
 	var err error
 	eft.ef, err = RestoreFeeEstimator(save)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		eft.t.Fatalf("Could not restore database: %s", err)
 	}
 	// Save again and check that it matches the previous one.
@@ -79,7 +79,7 @@ func (eft *estimateFeeTester) newBlock(txs []*wire.MsgTx) {
 	eft.last = &lastBlock{block.Hash(), eft.last}
 	e := eft.ef.RegisterBlock(block)
 	if e != nil {
-		L.Warn("failed to register block:", e)
+		Warn("failed to register block:", e)
 	}
 }
 
@@ -89,7 +89,7 @@ func (eft *estimateFeeTester) rollback() {
 	}
 	err := eft.ef.Rollback(eft.last.hash)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		eft.t.Errorf("Could not rollback: %v", err)
 	}
 	eft.height--

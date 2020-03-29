@@ -33,7 +33,7 @@ func PrivKeyFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey,
 func NewPrivateKey(curve elliptic.Curve) (*PrivateKey, error) {
 	key, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return (*PrivateKey)(key), nil

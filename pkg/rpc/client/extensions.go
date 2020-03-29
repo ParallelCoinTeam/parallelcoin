@@ -20,14 +20,14 @@ type FutureDebugLevelResult chan *response
 func (r FutureDebugLevelResult) Receive() (string, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", err
 	}
 	// Unmashal the result as a string.
 	var result string
 	err = js.Unmarshal(res, &result)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", err
 	}
 	return result, nil
@@ -75,14 +75,14 @@ type FutureListAddressTransactionsResult chan *response
 func (r FutureListAddressTransactionsResult) Receive() ([]btcjson.ListTransactionsResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal the result as an array of listtransactions objects.
 	var transactions []btcjson.ListTransactionsResult
 	err = js.Unmarshal(res, &transactions)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return transactions, nil
@@ -111,20 +111,20 @@ type FutureGetBestBlockResult chan *response
 func (r FutureGetBestBlockResult) Receive() (*chainhash.Hash, int32, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	// Unmarshal result as a getbestblock result object.
 	var bestBlock btcjson.GetBestBlockResult
 	err = js.Unmarshal(res, &bestBlock)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	// Convert to hash from string.
 	hash, err := chainhash.NewHashFromStr(bestBlock.Hash)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	return hash, bestBlock.Height, nil
@@ -148,14 +148,14 @@ type FutureGetCurrentNetResult chan *response
 func (r FutureGetCurrentNetResult) Receive() (wire.BitcoinNet, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, err
 	}
 	// Unmarshal result as an int64.
 	var net int64
 	err = js.Unmarshal(res, &net)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, err
 	}
 	return wire.BitcoinNet(net), nil
@@ -179,14 +179,14 @@ type FutureGetHeadersResult chan *response
 func (r FutureGetHeadersResult) Receive() ([]wire.BlockHeader, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a slice of strings.
 	var result []string
 	err = js.Unmarshal(res, &result)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Deserialize the []string into []wire.BlockHeader.
@@ -194,12 +194,12 @@ func (r FutureGetHeadersResult) Receive() ([]wire.BlockHeader, error) {
 	for i, headerHex := range result {
 		serialized, err := hex.DecodeString(headerHex)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 		err = headers[i].Deserialize(bytes.NewReader(serialized))
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 	}
@@ -232,14 +232,14 @@ type FutureExportWatchingWalletResult chan *response
 func (r FutureExportWatchingWalletResult) Receive() ([]byte, []byte, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	// Unmarshal result as a JSON object.
 	var obj map[string]interface{}
 	err = js.Unmarshal(res, &obj)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	// Check for the wallet and tx string fields in the object.
@@ -257,12 +257,12 @@ func (r FutureExportWatchingWalletResult) Receive() ([]byte, []byte, error) {
 	}
 	walletBytes, err := base64.StdEncoding.DecodeString(base64Wallet)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	txStoreBytes, err := base64.StdEncoding.DecodeString(base64TxStore)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	return walletBytes, txStoreBytes, nil
@@ -286,14 +286,14 @@ type FutureSessionResult chan *response
 func (r FutureSessionResult) Receive() (*btcjson.SessionResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a session result object.
 	var session btcjson.SessionResult
 	err = js.Unmarshal(res, &session)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &session, nil
@@ -322,14 +322,14 @@ func (r FutureVersionResult) Receive() (map[string]btcjson.VersionResult,
 	error) {
 	res, err := receiveFuture(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a version result object.
 	var vr map[string]btcjson.VersionResult
 	err = js.Unmarshal(res, &vr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return vr, nil

@@ -14,7 +14,7 @@ type CacheableFilter struct {
 func (c *CacheableFilter) Size() (uint64, error) {
 	f, err := c.Filter.NBytes()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, err
 	}
 	return uint64(len(f)), nil

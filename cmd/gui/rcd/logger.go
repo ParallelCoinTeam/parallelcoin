@@ -34,7 +34,7 @@ func (r *RcVar) DuoUIloggerController() {
 					r.Log.StopLogger = make(chan struct{})
 				}()
 				r.Log.LogMessages.Store([]logi.Entry{})
-				L.LogChan = nil
+				logi.L.LogChan = nil
 				break out
 			}
 		}

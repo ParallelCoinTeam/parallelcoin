@@ -31,13 +31,13 @@ const suffix = ".ttf"
 func main() {
 	ttfs, err := os.Open("ttfs")
 	if err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 	defer ttfs.Close()
 
 	infos, err := ttfs.Readdir(-1)
 	if err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 	for _, info := range infos {
 		ttfName := info.Name()
@@ -52,11 +52,11 @@ func do(ttfName string) {
 	fontName := fontName(ttfName)
 	pkgName := pkgName(ttfName)
 	if err := os.Mkdir(pkgName, 0777); err != nil && !os.IsExist(err) {
-		L.Fatal(err)
+		Fatal(err)
 	}
 	src, err := ioutil.ReadFile(filepath.Join("ttfs", ttfName))
 	if err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 
 	desc := "a proportional-width, sans-serif"
@@ -83,10 +83,10 @@ func do(ttfName string) {
 
 	dst, err := format.Source(b.Bytes())
 	if err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 	if err := ioutil.WriteFile(filepath.Join(pkgName, "data.go"), dst, 0666); err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 }
 

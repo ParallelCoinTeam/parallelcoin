@@ -10,8 +10,8 @@ import (
 
 func // Configure loads and sanitises the configuration from urfave/cli
 Configure(cx *conte.Xt, commandName string) {
-	L.Debug("running Configure", commandName)
-	L.Trace("configuring pod")
+	Debug("running Configure", commandName)
+	Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
 	cx.NodeChan = make(chan *rpc.Server)
 	// theoretically, the configuration should be accessed only when locked
@@ -45,7 +45,7 @@ Configure(cx *conte.Xt, commandName string) {
 	setDiallers(cfg, cx.StateCfg)
 	// if the user set the save flag, or file doesn't exist save the file now
 	if cx.StateCfg.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
-		L.Trace("saving configuration")
+		Trace("saving configuration")
 		save.Pod(cx.Config)
 	}
 }

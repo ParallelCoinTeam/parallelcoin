@@ -27,20 +27,20 @@ func Main() {
 	}
 	if os.Getenv("POD_TRACE") == "on" {
 		if f, err := os.Create("testtrace.out"); err != nil {
-			L.Error("tracing env POD_TRACE=on but we can't write to it",
+			Error("tracing env POD_TRACE=on but we can't write to it",
 				err)
 		} else {
-			L.Debug("tracing started")
+			Debug("tracing started")
 			err = trace.Start(f)
 			if err != nil {
-				L.Error("could not start tracing", err)
+				Error("could not start tracing", err)
 			} else {
 				interrupt.AddHandler(func() {
-					L.Debug("stopping trace")
+					Debug("stopping trace")
 					trace.Stop()
 					err := f.Close()
 					if err != nil {
-						L.Error(err)
+						Error(err)
 					}
 				},
 				)

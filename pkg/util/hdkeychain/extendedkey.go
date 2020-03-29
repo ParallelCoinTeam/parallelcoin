@@ -159,7 +159,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 	hmac512 := hmac.New(sha512.New, k.chainCode)
 	_, err := hmac512.Write(data)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	ilr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -198,7 +198,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 		// Convert the serialized compressed parent public key into X and Y coordinates so it can be added to the intermediate public key.
 		pubKey, err := ec.ParsePubKey(k.key, ec.S256())
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 		// Add the intermediate public key to the parent public key to derive the final child key.
@@ -223,7 +223,7 @@ func (k *ExtendedKey) Neuter() (*ExtendedKey, error) {
 	// Get the associated public extended key version bytes.
 	version, err := chaincfg.HDPrivateKeyToPublicKeyID(k.version)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Convert it to an extended public key.  The key for the new extended key will simply be the pubkey of the current extended private key.
@@ -336,7 +336,7 @@ func NewMaster(seed []byte, net *netparams.Params) (*ExtendedKey, error) {
 	hmac512 := hmac.New(sha512.New, masterKey)
 	_, err := hmac512.Write(seed)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	lr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -391,7 +391,7 @@ func NewKeyFromString(key string) (*ExtendedKey, error) {
 		// Ensure the public key parses correctly and is actually on the secp256k1 curve.
 		_, err := ec.ParsePubKey(keyData, ec.S256())
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 	}
@@ -408,7 +408,7 @@ func GenerateSeed(length uint8) ([]byte, error) {
 	buf := make([]byte, length)
 	_, err := rand.Read(buf)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return buf, nil

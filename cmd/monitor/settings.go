@@ -28,7 +28,7 @@ func (s *State) SettingsButtons() layout.FlexChild {
 				s.IconButton("settingsIcon", fg, bg, &s.SettingsFoldButton)
 
 				for s.SettingsFoldButton.Clicked(s.Gtx) {
-					L.Debug("settings folder clicked")
+					Debug("settings folder clicked")
 					if !s.Config.SettingsOpen {
 						s.Config.FilterOpen = false
 						s.Config.BuildOpen = false
@@ -77,7 +77,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 					//	32, "DocText", "DocBg",
 					//	s.SettingsTitleCloseButton)
 					//for s.SettingsTitleCloseButton.Clicked(s.Gtx) {
-					//	L.Debug("settings panel title close button clicked")
+					//	Debug("settings panel title close button clicked")
 					//	s.Config.SettingsOpen.Store(false)
 					//	s.SaveConfig()
 					//}
@@ -95,7 +95,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 						s.IconButton(ic, "DocText", "DocBg",
 							&s.SettingsZoomButton)
 						for s.SettingsZoomButton.Clicked(s.Gtx) {
-							L.Debug("settings panel close button clicked")
+							Debug("settings panel close button clicked")
 							s.Config.SettingsZoomed = !s.Config.SettingsZoomed
 							s.SaveConfig()
 						}
@@ -104,7 +104,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 					s.IconButton("foldIn", "DocText", "DocBg",
 						&s.SettingsCloseButton)
 					for s.SettingsCloseButton.Clicked(s.Gtx) {
-						L.Debug("settings panel close button clicked")
+						Debug("settings panel close button clicked")
 						s.Config.SettingsOpen = false
 						s.SaveConfig()
 					}
@@ -501,7 +501,7 @@ func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, w
 		s.Gtx.Constraints.Width.Min = maxLen*textWidth + 30
 		width = maxLen
 		height := 19 * len(split)
-		//L.Debug(len(split), height, split)
+		//Debug(len(split), height, split)
 		s.Theme.DuoUIcontainer(0, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.N, func() {
 			outerColor := "DocBg"
 			innerColor := "PanelBg"

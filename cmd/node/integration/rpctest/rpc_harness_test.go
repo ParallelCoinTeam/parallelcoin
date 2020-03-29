@@ -465,12 +465,12 @@ func TestMain(m *testing.M) {
 	var err error
 	mainHarness, err = New(&netparams.SimNetParams, nil, nil)
 	if err != nil {
-		log.Println("unable to create main harness: ", err)
+		fmt.Println("unable to create main harness: ", err)
 		os.Exit(1)
 	}
 	// Initialize the main mining node with a chain of length 125, providing 25 mature coinbases to allow spending from for testing purposes.
 	if err = mainHarness.SetUp(true, numMatureOutputs); err != nil {
-		log.Println("unable to setup test chain: ", err)
+		fmt.Println("unable to setup test chain: ", err)
 		// Even though the harness was not fully setup, it still needs to be torn down to ensure all resources such as temp directories are cleaned up.  The error is intentionally ignored since this is already an error path and nothing else could be done about it anyways.
 		_ = mainHarness.TearDown()
 		os.Exit(1)
@@ -479,7 +479,7 @@ func TestMain(m *testing.M) {
 	// Clean up any active harnesses that are still currently running.
 	if len(ActiveHarnesses()) > 0 {
 		if err := TearDownAll(); err != nil {
-			log.Println("unable to tear down chain: ", err)
+			fmt.Println("unable to tear down chain: ", err)
 			os.Exit(1)
 		}
 	}

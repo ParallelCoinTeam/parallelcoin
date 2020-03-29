@@ -10,7 +10,7 @@ import (
 func main() {
 	L.SetLevel("trace", true, "logi")
 	for {
-		L.Trace("testing")
+		Trace("testing")
 		logi.L.Debug("testing")
 		fmt.Println("'", logi.L.Check(errors.New("this is a test")), "'")
 		logi.L.Check(nil)

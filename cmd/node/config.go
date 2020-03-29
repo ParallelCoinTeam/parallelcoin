@@ -176,7 +176,7 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	}
 	height, err := strconv.ParseInt(parts[0], 10, 32)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed height", checkpoint)
 	}
@@ -186,7 +186,7 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 	}
 	hash, err := chainhash.NewHashFromStr(parts[1])
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed hash", checkpoint)
 	}
@@ -220,7 +220,7 @@ func ParseCheckpoints(checkpointStrings []string) ([]chaincfg.Checkpoint, error)
 	for i, cpString := range checkpointStrings {
 		checkpoint, err := NewCheckpointFromStr(cpString)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 		checkpoints[i] = checkpoint
@@ -263,20 +263,20 @@ func ValidLogLevel(logLevel string) bool {
 // 	// Create the destination directory if it does not exists
 // 	err := os.MkdirAll(filepath.Dir(destinationPath), 0700)
 // 	if err != nil {
-//		L.Error(err)
+//		DBError(err)
 // 		return err
 // 	}
 // 	// We generate a random user and password
 // 	randomBytes := make([]byte, 20)
 // 	_, err = rand.Read(randomBytes)
 // 	if err != nil {
-//		L.Error(err)
+//		DBError(err)
 // 		return err
 // 	}
 // 	generatedRPCUser := base64.StdEncoding.EncodeToString(randomBytes)
 // 	_, err = rand.Read(randomBytes)
 // 	if err != nil {
-//		L.Error(err)
+//		DBError(err)
 // 		return err
 // 	}
 // 	generatedRPCPass := base64.StdEncoding.EncodeToString(randomBytes)
@@ -285,7 +285,7 @@ func ValidLogLevel(logLevel string) bool {
 // 	dest, err := os.OpenFile(destinationPath,
 // 		os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 // 	if err != nil {
-//		L.Error(err)
+//		DBError(err)
 // 		return err
 // 	}
 // 	defer dest.Close()
@@ -356,8 +356,8 @@ func loadConfig() (
 	preParser := NewConfigParser(&preCfg, &serviceOpts, flags.HelpFlag)
 	_, err := preParser.Parse()
 	if err != nil {
-		if e, ok := err.(*flags.Error); ok && e.Type == flags.ErrHelp {
-			L.Error(err)
+		if e, ok := err.(*flags.DBError); ok && e.Type == flags.ErrHelp {
+			DBError(err)
 			return nil, nil, err
 		}
 	}
@@ -366,7 +366,7 @@ func loadConfig() (
 	appName = strings.TrimSuffix(appName, filepath.Ext(appName))
 	usageMessage := fmt.Sprintf("Use %s -h to show usage", appName)
 	if preCfg.ShowVersion {
-		log.Println(appName, "version", Version())
+		fmt.Println(appName, "version", Version())
 		os.Exit(0)
 	}
 	// Perform service command and exit if specified.  Invalid service commands show an appropriate error.  Only runs on Windows since the runServiceCommand function will be nil when not on Windows.
@@ -385,14 +385,14 @@ func loadConfig() (
 		if _, err := os.Stat(preCfg.ConfigFile); os.IsNotExist(err) {
 			err := createDefaultConfigFile(preCfg.ConfigFile)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error creating a "+
+				fmt.Fprintf(os.Stderr, "DBError creating a "+
 					"default config file: %v\n", err)
 			}
 		}
 		err := flags.NewIniParser(parser).ParseFile(preCfg.ConfigFile)
 		if err != nil {
 			if _, ok := err.(*os.PathError); !ok {
-				fmt.Fprintf(os.Stderr, "Error parsing config "+
+				fmt.Fprintf(os.Stderr, "DBError parsing config "+
 					"file: %v\n", err)
 				fmt.Fprintln(os.Stderr, usageMessage)
 				return nil, nil, err
@@ -407,7 +407,7 @@ func loadConfig() (
 	// Parse command line options again to ensure they take precedence.
 	remainingArgs, err := parser.Parse()
 	if err != nil {
-		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
+		if e, ok := err.(*flags.DBError); !ok || e.Type != flags.ErrHelp {
 			fmt.Fprintln(os.Stderr, usageMessage)
 		}
 		return nil, nil, err
@@ -766,7 +766,7 @@ func loadConfig() (
 	// Check the checkpoints for syntax errors.
 	StateCfg.AddedCheckpoints, err = ParseCheckpoints(cfg.AddCheckpoints)
 	if err != nil {
-		str := "%s: Error parsing checkpoints: %v"
+		str := "%s: DBError parsing checkpoints: %v"
 		err := fmt.Errorf(str, funcName, err)
 		fmt.Fprintln(os.Stderr, err)
 		fmt.Fprintln(os.Stderr, usageMessage)

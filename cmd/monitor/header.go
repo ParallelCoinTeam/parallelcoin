@@ -53,7 +53,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				s.IconButton("closeIcon", "PanelText",
 					"PanelBg", &s.CloseButton)
 				for s.CloseButton.Clicked(s.Gtx) {
-					L.Debug("close button clicked")
+					Debug("close button clicked")
 					s.SaveConfig()
 					s.RunCommandChan <- "kill"
 					close(s.Ctx.KillAll)
@@ -70,7 +70,7 @@ func (s *State) RestartRunButton() layout.FlexChild {
 		s.IconButton("Restart", "PanelText", "PanelBg",
 			&s.RestartButton)
 		for s.RestartButton.Clicked(s.Gtx) {
-			L.Debug("clicked restart button")
+			Debug("clicked restart button")
 			s.SaveConfig()
 			if s.HasGo {
 				s.RunCommandChan <- "kill"
@@ -81,9 +81,9 @@ func (s *State) RestartRunButton() layout.FlexChild {
 					c.Stderr = os.Stderr
 					c.Stdout = os.Stdout
 					time.Sleep(time.Second)
-					if err = c.Run(); !L.Check(err) {
+					if err = c.Run(); !Check(err) {
 						if err = syscall.Exec(exePath, os.Args,
-							os.Environ()); L.Check(err) {
+							os.Environ()); Check(err) {
 						}
 						os.Exit(0)
 					}

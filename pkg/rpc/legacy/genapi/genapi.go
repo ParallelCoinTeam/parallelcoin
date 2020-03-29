@@ -299,12 +299,12 @@ var handlers = handlersT{
 
 func main() {
 	log.log.L.SetLevel("trace", true, "pod")
-	if fd, err := os.Create("rpchandlers.go"); L.Check(err) {
+	if fd, err := os.Create("rpchandlers.go"); Check(err) {
 	} else {
 		defer fd.Close()
 		t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
 		sort.Sort(handlers)
-		if err = t.Execute(fd, handlers); L.Check(err) {
+		if err = t.Execute(fd, handlers); Check(err) {
 		}
 	}
 }
@@ -471,7 +471,7 @@ func RunAPI(chainRPC *chain.RPCClient, wallet *wallet.Wallet,
 	quit chan struct{}) {
 	nrh := ` + RPCMapName + `
 	go func() {
-		L.Debug("starting up wallet cAPI")
+		Debug("starting up wallet cAPI")
 		var err error
 		var res interface{}
 		for {
@@ -479,12 +479,12 @@ func RunAPI(chainRPC *chain.RPCClient, wallet *wallet.Wallet,
 			case msg := <-nrh["{{.Method}}"].Call:
 				if res, err = nrh["{{.Method}}"].
 					Handler(msg.Params.({{.Cmd}}), wallet, 
-						chainRPC); L.Check(err) {
+						chainRPC); Check(err) {
 				}
 				if r, ok := res.({{.ResType}}); ok { 
 					msg.Ch.(chan {{.Handler}}Res) <- {{.Handler}}Res{&r, err} } {{end}}
 			case <-quit:
-				L.Debug("stopping wallet cAPI")
+				Debug("stopping wallet cAPI")
 				return
 			}
 		}
@@ -513,7 +513,7 @@ func (r *CAPIClient) {{.Handler}}(cmd ...{{.Cmd}}) (res {{.ResType}}, err error)
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("` + Worker + `.{{.Handler}}", c, &res); L.Check(err) {
+	if err = r.Call("` + Worker + `.{{.Handler}}", c, &res); Check(err) {
 	}
 	return
 }

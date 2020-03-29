@@ -90,7 +90,7 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["WRN"] = mustIcon(NewDuoUIicon(icons.ActionHelp))
 	i["CHK"] = mustIcon(NewDuoUIicon(icons.AlertWarning))
 	i["ERR"] = mustIcon(NewDuoUIicon(icons.AlertError))
-	i["FTL"] = mustIcon(NewDuoUIicon(icons.NotificationPriorityHigh))
+	i["FTL"] = mustIcon(NewDuoUIicon(icons.ImageFlashOn))
 	return i
 }
 

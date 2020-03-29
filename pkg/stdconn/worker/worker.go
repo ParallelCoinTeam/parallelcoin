@@ -24,18 +24,18 @@ func Spawn(args ...string) (w *Worker) {
 	//w.cmd.Stderr = os.Stderr
 	cmdOut, err := w.cmd.StdoutPipe()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	cmdIn, err := w.cmd.StdinPipe()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	w.StdConn = stdconn.New(cmdOut, cmdIn, make(chan struct{}))
 	err = w.cmd.Start()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil
 	} else {
 		return
@@ -47,19 +47,19 @@ func (w *Worker) Wait() (err error) {
 }
 
 func (w *Worker) Interrupt() (err error) {
-	if err = w.cmd.Process.Signal(syscall.SIGINT); !L.Check(err) {
-		L.Debug("interrupted")
+	if err = w.cmd.Process.Signal(syscall.SIGINT); !Check(err) {
+		Debug("interrupted")
 	}
-	if err = w.cmd.Process.Release(); !L.Check(err) {
-		L.Debug("released")
+	if err = w.cmd.Process.Release(); !Check(err) {
+		Debug("released")
 	}
 	return
 }
 
 // Kill forces the child process to shut down without cleanup
 func (w *Worker) Kill() (err error) {
-	if err = w.cmd.Process.Signal(syscall.SIGKILL); !L.Check(err) {
-		L.Debug("killed")
+	if err = w.cmd.Process.Signal(syscall.SIGKILL); !Check(err) {
+		Debug("killed")
 	}
 	return
 }

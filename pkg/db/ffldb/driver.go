@@ -35,7 +35,7 @@ func parseArgs(funcName string, args ...interface{}) (string, wire.BitcoinNet, e
 func openDBDriver(args ...interface{}) (database.DB, error) {
 	dbPath, network, err := parseArgs("Open", args...)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, network, false)
@@ -45,7 +45,7 @@ func openDBDriver(args ...interface{}) (database.DB, error) {
 func createDBDriver(args ...interface{}) (database.DB, error) {
 	dbPath, network, err := parseArgs("Create", args...)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, network, true)

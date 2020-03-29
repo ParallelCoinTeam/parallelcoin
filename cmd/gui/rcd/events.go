@@ -22,7 +22,7 @@ type Event struct {
 var EventsChan = make(chan Event, 1)
 
 func (r *RcVar) ListenInit(trigger chan struct{}) {
-	L.Debug("listeninit")
+	Debug("listeninit")
 	r.Events = EventsChan
 	r.UpdateTrigger = trigger
 
@@ -62,7 +62,7 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 				}
 				r.GetDuoUIconnectionCount()
 				r.UpdateTrigger <- struct{}{}
-			// L.Warn("GetDuoUIconnectionCount")
+			// Warn("GetDuoUIconnectionCount")
 			case <-r.cx.WalletServer.Update:
 				update(r)
 			case <-r.cx.KillAll:
@@ -70,31 +70,31 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 			}
 		}
 	}()
-	L.Warn("event update listener started")
+	Warn("event update listener started")
 	return
 }
 
 func update(r *RcVar) {
-	// L.Warn("GetDuoUIbalance")
+	// Warn("GetDuoUIbalance")
 	r.GetDuoUIbalance()
-	// L.Warn("GetDuoUIunconfirmedBalance")
+	// Warn("GetDuoUIunconfirmedBalance")
 	r.GetDuoUIunconfirmedBalance()
-	// L.Warn("GetDuoUItransactionsNumber")
+	// Warn("GetDuoUItransactionsNumber")
 	r.GetDuoUItransactionsNumber()
 	// r.GetTransactions()
-	// L.Warn("GetLatestTransactions")
+	// Warn("GetLatestTransactions")
 	r.GetLatestTransactions()
-	// L.Info("")
-	// L.Info("UPDATE")
-	// L.Trace(r.History.PerPage)
-	// L.Info("")
+	// Info("")
+	// Info("UPDATE")
+	// Trace(r.History.PerPage)
+	// Info("")
 	// r.GetDuoUIstatus()
 	// r.GetDuoUIlocalLost()
 	// r.GetDuoUIblockHeight()
-	// L.Warn("GetDuoUIblockCount")
+	// Warn("GetDuoUIblockCount")
 	r.GetDuoUIdifficulty()
 	r.GetDuoUIblockCount()
 	r.GetPeerInfo()
-	// L.Warn("GetDuoUIdifficulty")
+	// Warn("GetDuoUIdifficulty")
 	r.UpdateTrigger <- struct{}{}
 }
