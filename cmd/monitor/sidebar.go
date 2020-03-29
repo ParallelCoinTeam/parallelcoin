@@ -112,30 +112,30 @@ func (s *State) LevelsButtons() {
 		if s.Config.FilterLevel > a {
 			switch a + 1 {
 			case 1:
-				color, bg = "DocBg", "Danger"
+				bg, color = "DocBg", "Danger"
 			case 2:
-				color, bg = "DocBg", "Danger"
+				bg, color = "DocBg", "Danger"
 			case 3:
-				color, bg = "DocBg", "Check"
+				bg, color = "DocBg", "Check"
 			case 4:
-				color, bg = "DocBg", "Warning"
+				bg, color = "DocBg", "Warning"
 			case 5:
-				color, bg = "DocBg", "Success"
+				bg, color = "DocBg", "Success"
 			case 6:
-				color, bg = "DocBg", "Info"
+				bg, color = "DocBg", "Info"
 			case 7:
-				color, bg = "DocBg", "Secondary"
+				bg, color = "DocBg", "Secondary"
 			}
 		}
 		bb := &s.FilterLevelsButtons[a]
 		s.IconButton(bn, color, bg, bb)
 		for bb.Clicked(s.Gtx) {
 			s.Config.FilterLevel = a + 1
-			*s.Ctx.Config.LogLevel = logi.Levels[a+1]
-			save.Pod(s.Ctx.Config)
+			*s.Ctx.Config.LogLevel = logi.Levels[s.Config.FilterLevel]
 			consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
 			Debug("filter level", logi.Tags[logi.Levels[a+1]])
 			s.W.Invalidate()
+			save.Pod(s.Ctx.Config)
 			s.SaveConfig()
 		}
 	})

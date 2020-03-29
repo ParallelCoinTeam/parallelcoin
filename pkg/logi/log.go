@@ -311,7 +311,10 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 			splitted := strings.Split(loc, string(os.PathSeparator))
 			pkg := strings.Join(splitted[:len(splitted)-1],
 				string(os.PathSeparator))
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
+			split := strings.Split(pkg, string(os.PathSeparator))
+			pkg = split[len(split)-1]
+			out := Entry{time.Now(), level,
+				pkg, fmt.Sprint(loc, ":", line),
 				text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out
@@ -336,8 +339,10 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 			_, loc, line, _ := runtime.Caller(2)
 			splitted := strings.Split(loc, string(os.PathSeparator))
 			pkg := strings.Join(splitted[:len(splitted)-1], string(os.PathSeparator))
+			split := strings.Split(pkg, string(os.PathSeparator))
+			pkg = split[len(split)-1]
 			out := Entry{time.Now(), level,
-				fmt.Sprint(loc, ":", line), pkg, text}
+				pkg, fmt.Sprint(loc, ":", line), text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out
 			}
@@ -361,7 +366,10 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 			splitted := strings.Split(loc, string(os.PathSeparator))
 			pkg := strings.Join(splitted[:len(splitted)-1],
 				string(os.PathSeparator))
-			out := Entry{time.Now(), l.Level, fmt.Sprint(loc, ":", line), pkg,
+			split := strings.Split(pkg, string(os.PathSeparator))
+			pkg = split[len(split)-1]
+			out := Entry{time.Now(), l.Level,
+				pkg, fmt.Sprint(loc, ":", line),
 				text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out
@@ -389,7 +397,10 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 			splitted := strings.Split(loc, string(os.PathSeparator))
 			pkg := strings.Join(splitted[:len(splitted)-1],
 				string(os.PathSeparator))
-			out := Entry{time.Now(), "CHK", fmt.Sprint(loc, ":", line), pkg,
+			split := strings.Split(pkg, string(os.PathSeparator))
+			pkg = split[len(split)-1]
+			out := Entry{time.Now(), "CHK",
+				pkg, fmt.Sprint(loc, ":", line),
 				text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out
@@ -417,7 +428,9 @@ func (l *Logger) ps(level string) SpewFunc {
 			splitted := strings.Split(loc, string(os.PathSeparator))
 			pkg := strings.Join(splitted[:len(splitted)-1],
 				string(os.PathSeparator))
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
+			split := strings.Split(pkg, string(os.PathSeparator))
+			pkg = split[len(split)-1]
+			out := Entry{time.Now(), level, pkg, fmt.Sprint(loc, ":", line),
 				text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out

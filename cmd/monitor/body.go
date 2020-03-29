@@ -16,17 +16,17 @@ func (s *State) Body() layout.FlexChild {
 			s.LogList.Layout(s.Gtx, s.EntryBuf.Len(), func(i int) {
 				b := s.EntryBuf.Get(i)
 				color := "DocText"
+				//fmt.Println("level", b.Level)
 				switch b.Level {
-				case logi.Tags[logi.Trace]:
+				case logi.Trace:
 					color = "Secondary"
-				case logi.Tags[logi.Debug]:
+				case logi.Debug:
 					color = "Info"
-				case logi.Tags[logi.Info]:
+				case logi.Info:
 					color = "Success"
-				case logi.Tags[logi.Warn]:
+				case logi.Warn:
 					color = "Warning"
-				case logi.Tags[logi.Check], logi.Tags[logi.Error],
-					logi.Tags[logi.Fatal]:
+				case logi.Check, logi.Error, logi.Fatal:
 					color = "Danger"
 					//case "FTL":
 					//	color = "Danger"
@@ -36,10 +36,24 @@ func (s *State) Body() layout.FlexChild {
 					//	s.Text(fmt.Sprint(i), color, "DocBg", "Mono", "body1"),
 					//),
 					Rigid(
-						s.Text(b.Level, color, "DocBg", "Mono", "body1"),
+						//s.Text(b.Level, color, "DocBg", "Mono", "body1"),
+						func() {
+							s.Icon(logi.Tags[b.Level], color, "DocBg", 32)
+						},
 					),
 					Rigid(
-						s.Text(b.Text, "DocText", "DocBg", "Mono", "body1"),
+						s.Text(b.Time.Format("15:04:05"), color, "DocBg",
+							"Mono",
+							"body1"),
+					),
+					Flexed(1,
+						s.Text(b.Text, "DocText", "DocBg", "Mono",
+							"body1"),
+					),
+					Spacer(),
+					Rigid(
+						s.Text(b.Package, "PanelBg", "DocBg", "Primary",
+							"h6"),
 					),
 				)
 			})

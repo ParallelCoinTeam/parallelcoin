@@ -48,13 +48,19 @@ func (s *State) Rectangle(width, height int, color, opacity string, radius ...fl
 func (s *State) Icon(icon, fg, bg string, size int) {
 	s.Gtx.Constraints.Width.Max = size
 	s.Gtx.Constraints.Height.Max = size
+	s.Gtx.Constraints.Width.Min = size
+	s.Gtx.Constraints.Height.Min = size
 	s.FlexH(Rigid(func() {
 		cs := s.Gtx.Constraints
 		s.Rectangle(cs.Height.Max, cs.Width.Max, bg, "ff")
-		s.Inset(8, func() {
+		insetSize := 8
+		if size >= 32 {
+			insetSize = 0
+		}
+		s.Inset(insetSize, func() {
 			i := s.Theme.Icons[icon]
 			i.Color = gelook.HexARGB(s.Theme.Colors[fg])
-			i.Layout(s.Gtx, unit.Dp(float32(size-16)))
+			i.Layout(s.Gtx, unit.Dp(float32(size-2*insetSize)))
 		})
 		//cs := s.Gtx.Constraints
 		//s.Rectangle(cs.Height.Max, cs.Width.Max, bg, "ff")
@@ -139,6 +145,31 @@ func (s *State) Text(txt, fg, bg, face, tag string) func() {
 	}
 }
 
+//func (s *State) Icon(icon *material.Icon, iconLabel string) func() {
+//	return func() {
+//		layout.Flex{
+//			Axis:    layout.Vertical,
+//			Spacing: layout.SpaceBetween,
+//		}.Layout(s.Gtx,
+//			layout.Rigid(func() {
+//
+//				layout.Flex{
+//					Spacing: layout.SpaceBetween,
+//				}.Layout(gtx,
+//					layout.Rigid(func() {
+//						icon.Color = helpers.HexARGB(scr.AccentColor)
+//						icon.Layout(gtx, unit.Dp(float32(scr.IconSize)))
+//					}),
+//					layout.Rigid(func() {
+//						th.Label(th.TextSize.Scale(14.0/float32(scr.TextSize)), iconLabel).Layout(gtx)
+//					}),
+//				)
+//			}),
+//			layout.Rigid(func() {
+//				DrawRectangle(gtx, gtx.Constraints.Width.Max, 1, color.RGBA{A: 0xff, R: 0xcf, G: 0x30, B: 0x30})
+//			}))
+//	}
+//}
 func Toggle(b *bool) bool {
 	*b = !*b
 	return *b
