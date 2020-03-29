@@ -25,7 +25,7 @@ func Log(quit chan struct{}) {
 				logOn.Store(false)
 			case "slvl":
 				Debug("setting level", logi.Levels[b[4]])
-				logi.L.SetLevel(logi.Tags[logi.Levels[b[4]]], false, "pod")
+				logi.L.SetLevel(logi.Levels[b[4]], false, "pod")
 			}
 		}
 		return

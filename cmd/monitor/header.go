@@ -43,7 +43,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 			)
 		}), Spacer(), Rigid(func() {
 			t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
-				fmt.Sprintf("%dx%d",
+				fmt.Sprintf("%s %dx%d", *s.Ctx.Config.DataDir,
 					s.WindowWidth, s.WindowHeight))
 			t.Color = s.Theme.Colors["PanelText"]
 			t.Font.Typeface = s.Theme.Fonts["Primary"]

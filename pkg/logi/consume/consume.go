@@ -43,12 +43,18 @@ func Stop(w *worker.Worker) {
 }
 
 func SetLevel(w *worker.Worker, level string) {
+	if w == nil {
+		return
+	}
 	Debug("sending set level", level)
 	lvl := 0
 	for i := range logi.Levels {
 		if level == logi.Levels[i] {
 			lvl = i
 		}
+	}
+	if w == nil {
+		return
 	}
 	if n, err := w.StdConn.Write([]byte("slvl" + string(byte(lvl)))); n < 1 ||
 		Check(err) {

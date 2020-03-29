@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/logi/consume"
 )
@@ -130,6 +131,8 @@ func (s *State) LevelsButtons() {
 		s.IconButton(bn, color, bg, bb)
 		for bb.Clicked(s.Gtx) {
 			s.Config.FilterLevel = a + 1
+			*s.Ctx.Config.LogLevel = logi.Levels[a+1]
+			save.Pod(s.Ctx.Config)
 			consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
 			Debug("filter level", logi.Tags[logi.Levels[a+1]])
 			s.W.Invalidate()

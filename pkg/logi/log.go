@@ -247,12 +247,14 @@ func FileExists(filePath string) bool {
 
 func (l *Logger) SetLevel(level string, color bool, split string) {
 	l.Level = sanitizeLoglevel(level)
-	l.Split = split
+	l.Split = split+string(os.PathSeparator)
 	l.Color = color
 }
 
 func (l *Logger) Register(pkg string) string {
-	split := strings.Split(pkg, string(os.PathSeparator))
+	split := strings.Split(pkg, l.Split)
+	pkg = split[1]
+	split = strings.Split(pkg, string(os.PathSeparator))
 	pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
 	l.Packages[pkg] = true
 	return pkg
