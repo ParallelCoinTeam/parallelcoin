@@ -38,22 +38,22 @@ func (s *State) Body() layout.FlexChild {
 					Rigid(
 						//s.Text(b.Level, color, "DocBg", "Mono", "body1"),
 						func() {
-							s.Icon(logi.Tags[b.Level], color, "DocBg", 32)
+							s.Icon(logi.Tags[b.Level], color, "DocBg", 24)
 						},
 					),
 					Rigid(
 						s.Text(b.Time.Format("15:04:05"), color, "DocBg",
 							"Mono",
-							"body1"),
+							"body2"),
 					),
 					Flexed(1,
 						s.Text(b.Text, "DocText", "DocBg", "Mono",
-							"body1"),
+							"body2"),
 					),
 					Spacer(),
 					Rigid(
 						s.Text(b.Package, "PanelBg", "DocBg", "Primary",
-							"h6"),
+							"body2"),
 					),
 				)
 			})

@@ -73,7 +73,6 @@ func (s *State) RestartRunButton() layout.FlexChild {
 			Debug("clicked restart button")
 			s.SaveConfig()
 			if s.HasGo {
-				s.SaveConfig()
 				s.RunCommandChan <- "kill"
 				go func() {
 					exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
@@ -86,6 +85,7 @@ func (s *State) RestartRunButton() layout.FlexChild {
 						if err = syscall.Exec(exePath, os.Args,
 							os.Environ()); Check(err) {
 						}
+						time.Sleep(time.Second/2)
 						os.Exit(0)
 					}
 				}()

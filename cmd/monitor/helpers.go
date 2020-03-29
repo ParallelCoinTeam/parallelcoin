@@ -53,23 +53,12 @@ func (s *State) Icon(icon, fg, bg string, size int) {
 	s.FlexH(Rigid(func() {
 		cs := s.Gtx.Constraints
 		s.Rectangle(cs.Height.Max, cs.Width.Max, bg, "ff")
-		insetSize := 8
-		if size >= 32 {
-			insetSize = 0
-		}
-		s.Inset(insetSize, func() {
+
+		s.Inset(0, func() {
 			i := s.Theme.Icons[icon]
 			i.Color = gelook.HexARGB(s.Theme.Colors[fg])
-			i.Layout(s.Gtx, unit.Dp(float32(size-2*insetSize)))
+			i.Layout(s.Gtx, unit.Dp(float32(size)))
 		})
-		//cs := s.Gtx.Constraints
-		//s.Rectangle(cs.Height.Max, cs.Width.Max, bg, "ff")
-		//s.FlexH(Spacer(), Rigid(func() {
-		//layout.Center.Layout(s.Gtx, func() {
-		//cs := s.Gtx.Constraints
-		//s.Rectangle(cs.Width.Max, cs.Height.Max, "Primary", "ff")
-		//})
-		//}), Spacer())
 	}),
 	)
 }
