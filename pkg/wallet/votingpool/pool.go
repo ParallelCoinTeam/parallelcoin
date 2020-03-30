@@ -76,7 +76,7 @@ type (
 func Create(ns walletdb.ReadWriteBucket, m *waddrmgr.Manager, poolID []byte) (*Pool, error) {
 	err := putPool(ns, poolID)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("unable to add voting pool %v to db", poolID)
 		return nil, newError(ErrPoolAlreadyExists, str, err)
 	}
@@ -112,12 +112,12 @@ func LoadAndGetDepositScript(ns walletdb.ReadBucket, m *waddrmgr.Manager, poolID
 	pid := []byte(poolID)
 	p, err := Load(ns, m, pid)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	script, err := p.DepositScript(seriesID, branch, index)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return script, nil
@@ -130,12 +130,12 @@ func LoadAndCreateSeries(ns walletdb.ReadWriteBucket, m *waddrmgr.Manager, versi
 	pid := []byte(poolID)
 	p, err := Load(ns, m, pid)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		vpErr := err.(Error)
 		if vpErr.ErrorCode == ErrPoolNotExists {
 			p, err = Create(ns, m, pid)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 		} else {
@@ -151,7 +151,7 @@ func LoadAndReplaceSeries(ns walletdb.ReadWriteBucket, m *waddrmgr.Manager, vers
 	pid := []byte(poolID)
 	p, err := Load(ns, m, pid)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	return p.ReplaceSeries(ns, version, seriesID, reqSigs, rawPubKeys)
@@ -163,7 +163,7 @@ func LoadAndEmpowerSeries(ns walletdb.ReadWriteBucket, m *waddrmgr.Manager, pool
 	pid := []byte(poolID)
 	pool, err := Load(ns, m, pid)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	return pool.EmpowerSeries(ns, seriesID, rawPrivKey)
@@ -195,7 +195,7 @@ func (p *Pool) saveSeriesToDisk(ns walletdb.ReadWriteBucket, seriesID uint32, da
 		encryptedPubKeys[i], err = p.manager.Encrypt(
 			waddrmgr.CKTPublic, []byte(pubKey.String()))
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			str := fmt.Sprintf("key %v failed encryption", pubKey)
 			return newError(ErrCrypto, str, err)
 		}
@@ -209,7 +209,7 @@ func (p *Pool) saveSeriesToDisk(ns walletdb.ReadWriteBucket, seriesID uint32, da
 				waddrmgr.CKTPrivate, []byte(privKey.String()))
 		}
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			str := fmt.Sprintf("key %v failed encryption", privKey)
 			return newError(ErrCrypto, str, err)
 		}
@@ -217,7 +217,7 @@ func (p *Pool) saveSeriesToDisk(ns walletdb.ReadWriteBucket, seriesID uint32, da
 	err = putSeries(ns, p.ID, data.version, seriesID, data.active,
 		data.reqSigs, encryptedPubKeys, encryptedPrivKeys)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("cannot put series #%d into db", seriesID)
 		return newError(ErrSeriesSerialization, str, err)
 	}
@@ -247,7 +247,7 @@ func convertAndValidatePubKeys(rawPubKeys []string) ([]*hdkeychain.ExtendedKey, 
 		seenKeys[rawPubKey] = true
 		key, err := hdkeychain.NewKeyFromString(rawPubKey)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			str := fmt.Sprintf("invalid extended public key %v", rawPubKey)
 			return nil, newError(ErrKeyChain, str, err)
 		}
@@ -281,7 +281,7 @@ func (p *Pool) putSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs
 	rawPubKeys := CanonicalKeyOrder(inRawPubKeys)
 	keys, err := convertAndValidatePubKeys(rawPubKeys)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	data := &SeriesData{
@@ -293,7 +293,7 @@ func (p *Pool) putSeries(ns walletdb.ReadWriteBucket, version, seriesID, reqSigs
 	}
 	err = p.saveSeriesToDisk(ns, seriesID, data)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	p.seriesLookup[seriesID] = data
@@ -333,7 +333,7 @@ func (p *Pool) ActivateSeries(ns walletdb.ReadWriteBucket, seriesID uint32) erro
 	series.active = true
 	err := p.saveSeriesToDisk(ns, seriesID, series)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	p.seriesLookup[seriesID] = series
@@ -364,14 +364,14 @@ func (p *Pool) ReplaceSeries(ns walletdb.ReadWriteBucket, version, seriesID, req
 func (p *Pool) decryptExtendedKey(keyType waddrmgr.CryptoKeyType, encrypted []byte) (*hdkeychain.ExtendedKey, error) {
 	decrypted, err := p.manager.Decrypt(keyType, encrypted)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("cannot decrypt key %v", encrypted)
 		return nil, newError(ErrCrypto, str, err)
 	}
 	result, err := hdkeychain.NewKeyFromString(string(decrypted))
 	zero.Bytes(decrypted)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("cannot get key from string %v", decrypted)
 		return nil, newError(ErrKeyChain, str, err)
 	}
@@ -394,7 +394,7 @@ func validateAndDecryptKeys(rawPubKeys, rawPrivKeys [][]byte, p *Pool) (pubKeys,
 	for i, encryptedPub := range rawPubKeys {
 		pubKey, err := p.decryptExtendedKey(waddrmgr.CKTPublic, encryptedPub)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, nil, err
 		}
 		pubKeys[i] = pubKey
@@ -405,7 +405,7 @@ func validateAndDecryptKeys(rawPubKeys, rawPrivKeys [][]byte, p *Pool) (pubKeys,
 		} else {
 			privKey, err = p.decryptExtendedKey(waddrmgr.CKTPrivate, encryptedPriv)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return nil, nil, err
 			}
 		}
@@ -413,7 +413,7 @@ func validateAndDecryptKeys(rawPubKeys, rawPrivKeys [][]byte, p *Pool) (pubKeys,
 		if privKey != nil {
 			checkPubKey, err := privKey.Neuter()
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				str := fmt.Sprintf("cannot neuter key %v", privKey)
 				return nil, nil, newError(ErrKeyNeuter, str, err)
 			}
@@ -439,14 +439,14 @@ func validateAndDecryptKeys(rawPubKeys, rawPrivKeys [][]byte, p *Pool) (pubKeys,
 func (p *Pool) LoadAllSeries(ns walletdb.ReadBucket) error {
 	series, err := loadAllSeries(ns, p.ID)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	for id, series := range series {
 		pubKeys, privKeys, err := validateAndDecryptKeys(
 			series.pubKeysEncrypted, series.privKeysEncrypted, p)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		p.seriesLookup[id] = &SeriesData{
@@ -501,7 +501,7 @@ func branchOrder(pks []*hdkeychain.ExtendedKey, branch Branch) ([]*hdkeychain.Ex
 func (p *Pool) DepositScriptAddress(seriesID uint32, branch Branch, index Index) (util.Address, error) {
 	script, err := p.DepositScript(seriesID, branch, index)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return p.addressFor(script)
@@ -522,7 +522,7 @@ func (p *Pool) DepositScript(seriesID uint32, branch Branch, index Index) ([]byt
 	}
 	pubKeys, err := branchOrder(series.publicKeys, branch)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	pks := make([]*util.AddressPubKey, len(pubKeys))
@@ -531,20 +531,20 @@ func (p *Pool) DepositScript(seriesID uint32, branch Branch, index Index) ([]byt
 		// TODO: implement getting the next index until we find a valid one,
 		// in case there is a hdkeychain.ErrInvalidChild.
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			str := fmt.Sprintf("child #%d for this pubkey %d does not exist", index, i)
 			return nil, newError(ErrKeyChain, str, err)
 		}
 		pubkey, err := child.ECPubKey()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			str := fmt.Sprintf("child #%d for this pubkey %d does not exist", index, i)
 			return nil, newError(ErrKeyChain, str, err)
 		}
 		pks[i], err = util.NewAddressPubKey(pubkey.SerializeCompressed(),
 			p.manager.ChainParams())
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			str := fmt.Sprintf(
 				"child #%d for this pubkey %d could not be converted to an address",
 				index, i)
@@ -553,7 +553,7 @@ func (p *Pool) DepositScript(seriesID uint32, branch Branch, index Index) ([]byt
 	}
 	script, err := txscript.MultiSigScript(pks, int(series.reqSigs))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("error while making multisig script hash, %d", len(pks))
 		return nil, newError(ErrScriptCreation, str, err)
 	}
@@ -575,12 +575,12 @@ func (p *Pool) ChangeAddress(seriesID uint32, index Index) (*ChangeAddress, erro
 	}
 	script, err := p.DepositScript(seriesID, Branch(0), index)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	pAddr, err := p.poolAddress(seriesID, Branch(0), index, script)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &ChangeAddress{poolAddress: pAddr}, nil
@@ -598,7 +598,7 @@ func (p *Pool) WithdrawalAddress(ns, addrmgrNs walletdb.ReadBucket, seriesID uin
 	// TODO: Ensure the given series is hot.
 	addr, err := p.getUsedAddr(ns, addrmgrNs, seriesID, branch, index)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	if addr == nil {
@@ -608,12 +608,12 @@ func (p *Pool) WithdrawalAddress(ns, addrmgrNs walletdb.ReadBucket, seriesID uin
 	}
 	script, err := addr.Script()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	pAddr, err := p.poolAddress(seriesID, branch, index, script)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &WithdrawalAddress{poolAddress: pAddr}, nil
@@ -622,7 +622,7 @@ func (p *Pool) poolAddress(seriesID uint32, branch Branch, index Index, script [
 	*poolAddress, error) {
 	addr, err := p.addressFor(script)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &poolAddress{
@@ -648,7 +648,7 @@ func (p *Pool) EmpowerSeries(ns walletdb.ReadWriteBucket, seriesID uint32, rawPr
 	// Check that the private key is valid.
 	privKey, err := hdkeychain.NewKeyFromString(rawPrivKey)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("invalid extended private key %v", rawPrivKey)
 		return newError(ErrKeyChain, str, err)
 	}
@@ -660,7 +660,7 @@ func (p *Pool) EmpowerSeries(ns walletdb.ReadWriteBucket, seriesID uint32, rawPr
 	}
 	pubKey, err := privKey.Neuter()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("invalid extended private key %v, can't convert to public key",
 			rawPrivKey)
 		return newError(ErrKeyNeuter, str, err)
@@ -692,7 +692,7 @@ func (p *Pool) EmpowerSeries(ns walletdb.ReadWriteBucket, seriesID uint32, rawPr
 func (p *Pool) EnsureUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID uint32, branch Branch, index Index) error {
 	lastIdx, err := p.highestUsedIndexFor(ns, seriesID, branch)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	if lastIdx == 0 {
@@ -719,7 +719,7 @@ func (p *Pool) EnsureUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID u
 func (p *Pool) addUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID uint32, branch Branch, index Index) error {
 	script, err := p.DepositScript(seriesID, branch, index)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// First ensure the address manager has our script. That way there's no way
@@ -728,7 +728,7 @@ func (p *Pool) addUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID uint
 	// BlockStamp height according to that.
 	manager, err := p.manager.FetchScopedKeyManager(waddrmgr.KeyScopeBIP0044)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	_, err = manager.ImportScript(addrmgrNs, script, &waddrmgr.BlockStamp{})
@@ -737,12 +737,12 @@ func (p *Pool) addUsedAddr(ns, addrmgrNs walletdb.ReadWriteBucket, seriesID uint
 	}
 	encryptedHash, err := p.manager.Encrypt(waddrmgr.CKTPublic, util.Hash160(script))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return newError(ErrCrypto, "failed to encrypt script hash", err)
 	}
 	err = putUsedAddrHash(ns, p.ID, seriesID, branch, index, encryptedHash)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return newError(ErrDatabase, "failed to store used addr script hash", err)
 	}
 	return nil
@@ -760,17 +760,17 @@ func (p *Pool) getUsedAddr(ns, addrmgrNs walletdb.ReadBucket, seriesID uint32, b
 	}
 	hash, err := p.manager.Decrypt(waddrmgr.CKTPublic, encryptedHash)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, newError(ErrCrypto, "failed to decrypt stored script hash", err)
 	}
 	addr, err := util.NewAddressScriptHashFromHash(hash, mgr.ChainParams())
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, newError(ErrInvalidScriptHash, "failed to parse script hash", err)
 	}
 	mAddr, err := mgr.Address(addrmgrNs, addr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return mAddr.(waddrmgr.ManagedScriptAddress), nil

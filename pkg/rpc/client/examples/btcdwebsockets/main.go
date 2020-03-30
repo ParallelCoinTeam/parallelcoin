@@ -28,7 +28,7 @@ func main() {
 	podHomeDir := appdata.Dir("pod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(podHomeDir, "rpc.cert"))
 	if err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 	connCfg := &rpcclient.ConnConfig{
 		Host:         "localhost:11048",
@@ -39,25 +39,25 @@ func main() {
 	}
 	client, err := rpcclient.New(connCfg, &ntfnHandlers)
 	if err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 	// Register for block connect and disconnect notifications.
 	if err := client.NotifyBlocks(); err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
-	log.Println("NotifyBlocks: Registration Complete")
+	fmt.Println("NotifyBlocks: Registration Complete")
 	// Get the current block count.
 	blockCount, err := client.GetBlockCount()
 	if err != nil {
-		L.Fatal(err)
+		Fatal(err)
 	}
 	log.Printf("Block count: %d", blockCount)
 	// For this example gracefully shutdown the client after 10 seconds. Ordinarily when to shutdown the client is highly application specific.
-	log.Println("Client shutdown in 10 seconds...")
+	fmt.Println("Client shutdown in 10 seconds...")
 	time.AfterFunc(time.Second*10, func() {
-		log.Println("Client shutting down...")
+		fmt.Println("Client shutting down...")
 		client.Shutdown()
-		log.Println("Client shutdown complete.")
+		fmt.Println("Client shutdown complete.")
 	})
 	// Wait until the client either shuts down gracefully (or the user terminates the process with Ctrl+C).
 	client.WaitForShutdown()

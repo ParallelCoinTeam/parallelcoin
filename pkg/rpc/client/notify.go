@@ -23,15 +23,15 @@ var ( // ErrWebsocketsRequired is an error to describe the condition where
 )
 
 type // notificationState is used to track the current state of successfully
-	// registered notification so the state can be automatically re-established
-	// on reconnect.
-	notificationState struct {
-		notifyBlocks       bool
-		notifyNewTx        bool
-		notifyNewTxVerbose bool
-		notifyReceived     map[string]struct{}
-		notifySpent        map[btcjson.OutPoint]struct{}
-	}
+// registered notification so the state can be automatically re-established
+// on reconnect.
+notificationState struct {
+	notifyBlocks       bool
+	notifyNewTx        bool
+	notifyNewTxVerbose bool
+	notifyReceived     map[string]struct{}
+	notifySpent        map[btcjson.OutPoint]struct{}
+}
 
 func // Copy returns a deep copy of the receiver.
 (s *notificationState) Copy() *notificationState {
@@ -70,53 +70,53 @@ newNilFutureResult() chan *response {
 }
 
 type // NotificationHandlers defines callback function pointers to invoke with
-	// notifications.  Since all of the functions are nil by default,
-	// all notifications are effectively ignored until their handlers are set to
-	// a concrete callback.
-	// NOTE: Unless otherwise documented,
-	// these handlers must NOT directly call any blocking calls on the client
-	// instance since the input reader goroutine blocks until the callback has
-	// completed.  Doing so will result in a deadlock situation.
-	NotificationHandlers struct {
-		// OnClientConnected is invoked when the client connects or reconnects to the RPC server.  This callback is run async with the rest of the notification handlers, and is safe for blocking client requests.
-		OnClientConnected func()
-		// OnBlockConnected is invoked when a block is connected to the longest (best) chain.  It will only be invoked if a preceding call to NotifyBlocks has been made to register for the notification and the function is non-nil. NOTE: Deprecated. Use OnFilteredBlockConnected instead.
-		OnBlockConnected func(hash *chainhash.Hash, height int32, t time.Time)
-		// OnFilteredBlockConnected is invoked when a block is connected to the longest (best) chain.  It will only be invoked if a preceding call to NotifyBlocks has been made to register for the notification and the function is non-nil.  Its parameters differ from OnBlockConnected: it receives the block's height, header, and relevant transactions.
-		OnFilteredBlockConnected func(height int32, header *wire.BlockHeader,
-			txs []*util.Tx)
-		// OnBlockDisconnected is invoked when a block is disconnected from the longest (best) chain.  It will only be invoked if a preceding call to NotifyBlocks has been made to register for the notification and the function is non-nil. NOTE: Deprecated. Use OnFilteredBlockDisconnected instead.
-		OnBlockDisconnected func(hash *chainhash.Hash, height int32, t time.Time)
-		// OnFilteredBlockDisconnected is invoked when a block is disconnected from the longest (best) chain.  It will only be invoked if a preceding NotifyBlocks has been made to register for the notification and the call to function is non-nil.  Its parameters differ from OnBlockDisconnected: it receives the block's height and header.
-		OnFilteredBlockDisconnected func(height int32, header *wire.BlockHeader)
-		// OnRecvTx is invoked when a transaction that receives funds to a registered address is received into the memory pool and also connected to the longest (best) chain.  It will only be invoked if a preceding call to NotifyReceived, Rescan, or RescanEndHeight has been made to register for the notification and the function is non-nil. NOTE: Deprecated. Use OnRelevantTxAccepted instead.
-		OnRecvTx func(transaction *util.Tx, details *btcjson.BlockDetails)
-		// OnRedeemingTx is invoked when a transaction that spends a registered outpoint is received into the memory pool and also connected to the longest (best) chain.  It will only be invoked if a preceding call to NotifySpent, Rescan, or RescanEndHeight has been made to register for the notification and the function is non-nil.
-		// NOTE: The NotifyReceived will automatically register notifications for the outpoints that are now "owned" as a result of receiving funds to the registered addresses.  This means it is possible for this to invoked indirectly as the result of a NotifyReceived call. NOTE: Deprecated. Use OnRelevantTxAccepted instead.
-		OnRedeemingTx func(transaction *util.Tx, details *btcjson.BlockDetails)
-		// OnRelevantTxAccepted is invoked when an unmined transaction passes the client's transaction filter.
-		// NOTE: This is a btcsuite extension ported from github.com/decred/dcrrpcclient.
-		OnRelevantTxAccepted func(transaction []byte)
-		// OnRescanFinished is invoked after a rescan finishes due to a previous call to Rescan or RescanEndHeight.  Finished rescans should be signaled on this notification, rather than relying on the return result of a rescan request, due to how pod may send various rescan notifications after the rescan request has already returned. NOTE: Deprecated. Not used with RescanBlocks.
-		OnRescanFinished func(hash *chainhash.Hash, height int32, blkTime time.Time)
-		// OnRescanProgress is invoked periodically when a rescan is underway. It will only be invoked if a preceding call to Rescan or RescanEndHeight has been made and the function is non-nil. NOTE: Deprecated. Not used with RescanBlocks.
-		OnRescanProgress func(hash *chainhash.Hash, height int32, blkTime time.Time)
-		// OnTxAccepted is invoked when a transaction is accepted into the memory pool.  It will only be invoked if a preceding call to NotifyNewTransactions with the verbose flag set to false has been made to register for the notification and the function is non-nil.
-		OnTxAccepted func(hash *chainhash.Hash, amount util.Amount)
-		// OnTxAccepted is invoked when a transaction is accepted into the memory pool.  It will only be invoked if a preceding call to NotifyNewTransactions with the verbose flag set to true has been made to register for the notification and the function is non-nil.
-		OnTxAcceptedVerbose func(txDetails *btcjson.TxRawResult)
-		// OnPodConnected is invoked when a wallet connects or disconnects from pod.
-		// This will only be available when client is connected to a wallet server such as btcwallet.
-		OnPodConnected func(connected bool)
-		// OnAccountBalance is invoked with account balance updates.
-		// This will only be available when speaking to a wallet server such as btcwallet.
-		OnAccountBalance func(account string, balance util.Amount, confirmed bool)
-		// OnWalletLockState is invoked when a wallet is locked or unlocked.
-		// This will only be available when client is connected to a wallet server such as btcwallet.
-		OnWalletLockState func(locked bool)
-		// OnUnknownNotification is invoked when an unrecognized notification is received.  This typically means the notification handling code for this package needs to be updated for a new notification type or the caller is using a custom notification this package does not know about.
-		OnUnknownNotification func(method string, params []js.RawMessage)
-	}
+// notifications.  Since all of the functions are nil by default,
+// all notifications are effectively ignored until their handlers are set to
+// a concrete callback.
+// NOTE: Unless otherwise documented,
+// these handlers must NOT directly call any blocking calls on the client
+// instance since the input reader goroutine blocks until the callback has
+// completed.  Doing so will result in a deadlock situation.
+NotificationHandlers struct {
+	// OnClientConnected is invoked when the client connects or reconnects to the RPC server.  This callback is run async with the rest of the notification handlers, and is safe for blocking client requests.
+	OnClientConnected func()
+	// OnBlockConnected is invoked when a block is connected to the longest (best) chain.  It will only be invoked if a preceding call to NotifyBlocks has been made to register for the notification and the function is non-nil. NOTE: Deprecated. Use OnFilteredBlockConnected instead.
+	OnBlockConnected func(hash *chainhash.Hash, height int32, t time.Time)
+	// OnFilteredBlockConnected is invoked when a block is connected to the longest (best) chain.  It will only be invoked if a preceding call to NotifyBlocks has been made to register for the notification and the function is non-nil.  Its parameters differ from OnBlockConnected: it receives the block's height, header, and relevant transactions.
+	OnFilteredBlockConnected func(height int32, header *wire.BlockHeader,
+		txs []*util.Tx)
+	// OnBlockDisconnected is invoked when a block is disconnected from the longest (best) chain.  It will only be invoked if a preceding call to NotifyBlocks has been made to register for the notification and the function is non-nil. NOTE: Deprecated. Use OnFilteredBlockDisconnected instead.
+	OnBlockDisconnected func(hash *chainhash.Hash, height int32, t time.Time)
+	// OnFilteredBlockDisconnected is invoked when a block is disconnected from the longest (best) chain.  It will only be invoked if a preceding NotifyBlocks has been made to register for the notification and the call to function is non-nil.  Its parameters differ from OnBlockDisconnected: it receives the block's height and header.
+	OnFilteredBlockDisconnected func(height int32, header *wire.BlockHeader)
+	// OnRecvTx is invoked when a transaction that receives funds to a registered address is received into the memory pool and also connected to the longest (best) chain.  It will only be invoked if a preceding call to NotifyReceived, Rescan, or RescanEndHeight has been made to register for the notification and the function is non-nil. NOTE: Deprecated. Use OnRelevantTxAccepted instead.
+	OnRecvTx func(transaction *util.Tx, details *btcjson.BlockDetails)
+	// OnRedeemingTx is invoked when a transaction that spends a registered outpoint is received into the memory pool and also connected to the longest (best) chain.  It will only be invoked if a preceding call to NotifySpent, Rescan, or RescanEndHeight has been made to register for the notification and the function is non-nil.
+	// NOTE: The NotifyReceived will automatically register notifications for the outpoints that are now "owned" as a result of receiving funds to the registered addresses.  This means it is possible for this to invoked indirectly as the result of a NotifyReceived call. NOTE: Deprecated. Use OnRelevantTxAccepted instead.
+	OnRedeemingTx func(transaction *util.Tx, details *btcjson.BlockDetails)
+	// OnRelevantTxAccepted is invoked when an unmined transaction passes the client's transaction filter.
+	// NOTE: This is a btcsuite extension ported from github.com/decred/dcrrpcclient.
+	OnRelevantTxAccepted func(transaction []byte)
+	// OnRescanFinished is invoked after a rescan finishes due to a previous call to Rescan or RescanEndHeight.  Finished rescans should be signaled on this notification, rather than relying on the return result of a rescan request, due to how pod may send various rescan notifications after the rescan request has already returned. NOTE: Deprecated. Not used with RescanBlocks.
+	OnRescanFinished func(hash *chainhash.Hash, height int32, blkTime time.Time)
+	// OnRescanProgress is invoked periodically when a rescan is underway. It will only be invoked if a preceding call to Rescan or RescanEndHeight has been made and the function is non-nil. NOTE: Deprecated. Not used with RescanBlocks.
+	OnRescanProgress func(hash *chainhash.Hash, height int32, blkTime time.Time)
+	// OnTxAccepted is invoked when a transaction is accepted into the memory pool.  It will only be invoked if a preceding call to NotifyNewTransactions with the verbose flag set to false has been made to register for the notification and the function is non-nil.
+	OnTxAccepted func(hash *chainhash.Hash, amount util.Amount)
+	// OnTxAccepted is invoked when a transaction is accepted into the memory pool.  It will only be invoked if a preceding call to NotifyNewTransactions with the verbose flag set to true has been made to register for the notification and the function is non-nil.
+	OnTxAcceptedVerbose func(txDetails *btcjson.TxRawResult)
+	// OnPodConnected is invoked when a wallet connects or disconnects from pod.
+	// This will only be available when client is connected to a wallet server such as btcwallet.
+	OnPodConnected func(connected bool)
+	// OnAccountBalance is invoked with account balance updates.
+	// This will only be available when speaking to a wallet server such as btcwallet.
+	OnAccountBalance func(account string, balance util.Amount, confirmed bool)
+	// OnWalletLockState is invoked when a wallet is locked or unlocked.
+	// This will only be available when client is connected to a wallet server such as btcwallet.
+	OnWalletLockState func(locked bool)
+	// OnUnknownNotification is invoked when an unrecognized notification is received.  This typically means the notification handling code for this package needs to be updated for a new notification type or the caller is using a custom notification this package does not know about.
+	OnUnknownNotification func(method string, params []js.RawMessage)
+}
 
 func // handleNotification examines the passed notification type,
 // performs conversions to get the raw notification types into higher level
@@ -136,8 +136,8 @@ func // handleNotification examines the passed notification type,
 		}
 		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid block connected notification:", err)
+			Error(err)
+			Warn("received invalid block connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnBlockConnected(blockHash, blockHeight, blockTime)
@@ -150,8 +150,8 @@ func // handleNotification examines the passed notification type,
 		blockHeight, blockHeader, transactions, err :=
 			parseFilteredBlockConnectedParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid filtered block connected notification:",
+			Error(err)
+			Warn("received invalid filtered block connected notification:",
 				err)
 			return
 		}
@@ -165,8 +165,8 @@ func // handleNotification examines the passed notification type,
 		}
 		blockHash, blockHeight, blockTime, err := parseChainNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid block connected notification:", err)
+			Error(err)
+			Warn("received invalid block connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnBlockDisconnected(blockHash, blockHeight, blockTime)
@@ -178,8 +178,8 @@ func // handleNotification examines the passed notification type,
 		}
 		blockHeight, blockHeader, err := parseFilteredBlockDisconnectedParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid filtered block disconnected"+
+			Error(err)
+			Warn("received invalid filtered block disconnected"+
 				" notification"+
 				":", err)
 			return
@@ -193,8 +193,8 @@ func // handleNotification examines the passed notification type,
 		}
 		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid recvtx notification:", err)
+			Error(err)
+			Warn("received invalid recvtx notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRecvTx(tx, block)
@@ -206,8 +206,8 @@ func // handleNotification examines the passed notification type,
 		}
 		tx, block, err := parseChainTxNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid redeemingtx notification:", err)
+			Error(err)
+			Warn("received invalid redeemingtx notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRedeemingTx(tx, block)
@@ -219,8 +219,8 @@ func // handleNotification examines the passed notification type,
 		}
 		transaction, err := parseRelevantTxAcceptedParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid relevanttxaccepted notification:", err)
+			Error(err)
+			Warn("received invalid relevanttxaccepted notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRelevantTxAccepted(transaction)
@@ -232,8 +232,8 @@ func // handleNotification examines the passed notification type,
 		}
 		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid rescanfinished notification:", err)
+			Error(err)
+			Warn("received invalid rescanfinished notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRescanFinished(hash, height, blkTime)
@@ -245,8 +245,8 @@ func // handleNotification examines the passed notification type,
 		}
 		hash, height, blkTime, err := parseRescanProgressParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid rescanprogress notification:", err)
+			Error(err)
+			Warn("received invalid rescanprogress notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnRescanProgress(hash, height, blkTime)
@@ -258,8 +258,8 @@ func // handleNotification examines the passed notification type,
 		}
 		hash, amt, err := parseTxAcceptedNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid tx accepted notification:", err)
+			Error(err)
+			Warn("received invalid tx accepted notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnTxAccepted(hash, amt)
@@ -271,8 +271,8 @@ func // handleNotification examines the passed notification type,
 		}
 		rawTx, err := parseTxAcceptedVerboseNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid tx accepted verbose notification:", err)
+			Error(err)
+			Warn("received invalid tx accepted verbose notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnTxAcceptedVerbose(rawTx)
@@ -284,8 +284,8 @@ func // handleNotification examines the passed notification type,
 		}
 		connected, err := parsePodConnectedNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid pod connected notification:", err)
+			Error(err)
+			Warn("received invalid pod connected notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnPodConnected(connected)
@@ -297,8 +297,8 @@ func // handleNotification examines the passed notification type,
 		}
 		account, bal, conf, err := parseAccountBalanceNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid account balance notification:", err)
+			Error(err)
+			Warn("received invalid account balance notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnAccountBalance(account, bal, conf)
@@ -311,8 +311,8 @@ func // handleNotification examines the passed notification type,
 		// The account name is not notified, so the return value is discarded.
 		_, locked, err := parseWalletLockStateNtfnParams(ntfn.Params)
 		if err != nil {
-			L.Error(err)
-			L.Warn("received invalid wallet lock state notification:", err)
+			Error(err)
+			Warn("received invalid wallet lock state notification:", err)
 			return
 		}
 		c.ntfnHandlers.OnWalletLockState(locked)
@@ -326,12 +326,12 @@ func // handleNotification examines the passed notification type,
 }
 
 type // wrongNumParams is an error type describing an unparseable JSON-RPC
-	// notification due to an incorrect number of parameters for the expected
-	// notification type.  The value is the number of parameters of the invalid
-	// notification.
-	wrongNumParams int
+// notification due to an incorrect number of parameters for the expected
+// notification type.  The value is the number of parameters of the invalid
+// notification.
+wrongNumParams int
 
-func // Error satisfies the builtin error interface.
+func // BTCJSONError satisfies the builtin error interface.
 (e wrongNumParams) Error() string {
 	return fmt.Sprintf("wrong number of parameters (%d)", e)
 }
@@ -347,27 +347,27 @@ parseChainNtfnParams(params []js.RawMessage) (*chainhash.Hash,
 	var blockHashStr string
 	err := js.Unmarshal(params[0], &blockHashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Unmarshal second parameter as an integer.
 	var blockHeight int32
 	err = js.Unmarshal(params[1], &blockHeight)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Unmarshal third parameter as unix time.
 	var blockTimeUnix int64
 	err = js.Unmarshal(params[2], &blockTimeUnix)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Create hash from block hash string.
 	blockHash, err := chainhash.NewHashFromStr(blockHashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Create time.Time from unix time.
@@ -388,27 +388,27 @@ func parseFilteredBlockConnectedParams(params []js.RawMessage) (int32,
 	var blockHeight int32
 	err := js.Unmarshal(params[0], &blockHeight)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, nil, err
 	}
 	// Unmarshal second parameter as a slice of bytes.
 	blockHeaderBytes, err := parseHexParam(params[1])
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, nil, err
 	}
 	// Deserialize block header from slice of bytes.
 	var blockHeader wire.BlockHeader
 	err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, nil, err
 	}
 	// Unmarshal third parameter as a slice of hex-encoded strings.
 	var hexTransactions []string
 	err = js.Unmarshal(params[2], &hexTransactions)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, nil, err
 	}
 	// Create slice of transactions from slice of strings by hex-decoding.
@@ -416,12 +416,12 @@ func parseFilteredBlockConnectedParams(params []js.RawMessage) (int32,
 	for i, hexTx := range hexTransactions {
 		transaction, err := hex.DecodeString(hexTx)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return 0, nil, nil, err
 		}
 		transactions[i], err = util.NewTxFromBytes(transaction)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return 0, nil, nil, err
 		}
 	}
@@ -441,20 +441,20 @@ parseFilteredBlockDisconnectedParams(params []js.RawMessage) (int32,
 	var blockHeight int32
 	err := js.Unmarshal(params[0], &blockHeight)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, err
 	}
 	// Unmarshal second parameter as a slice of bytes.
 	blockHeaderBytes, err := parseHexParam(params[1])
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, err
 	}
 	// Deserialize block header from slice of bytes.
 	var blockHeader wire.BlockHeader
 	err = blockHeader.Deserialize(bytes.NewReader(blockHeaderBytes))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, err
 	}
 	return blockHeight, &blockHeader, nil
@@ -464,7 +464,7 @@ func parseHexParam(param js.RawMessage) ([]byte, error) {
 	var s string
 	err := js.Unmarshal(param, &s)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return hex.DecodeString(s)
@@ -491,7 +491,7 @@ parseChainTxNtfnParams(params []js.RawMessage) (*util.Tx,
 	var txHex string
 	err := js.Unmarshal(params[0], &txHex)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	// If present, unmarshal second optional parameter as the block details JSON object.
@@ -499,20 +499,20 @@ parseChainTxNtfnParams(params []js.RawMessage) (*util.Tx,
 	if len(params) > 1 {
 		err = js.Unmarshal(params[1], &block)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, nil, err
 		}
 	}
 	// Hex decode and deserialize the transaction.
 	serializedTx, err := hex.DecodeString(txHex)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	var msgTx wire.MsgTx
 	err = msgTx.Deserialize(bytes.NewReader(serializedTx))
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, nil, err
 	}
 	// TODO: Change recvtx and redeemingtx callback signatures to use nicer
@@ -532,27 +532,27 @@ parseRescanProgressParams(params []js.RawMessage) (*chainhash.Hash, int32, time.
 	var hashStr string
 	err := js.Unmarshal(params[0], &hashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Unmarshal second parameter as an integer.
 	var height int32
 	err = js.Unmarshal(params[1], &height)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Unmarshal third parameter as an integer.
 	var blkTime int64
 	err = js.Unmarshal(params[2], &blkTime)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	// Decode string encoding of block hash.
 	hash, err := chainhash.NewHashFromStr(hashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, time.Time{}, err
 	}
 	return hash, height, time.Unix(blkTime, 0), nil
@@ -569,26 +569,26 @@ parseTxAcceptedNtfnParams(params []js.RawMessage) (*chainhash.Hash,
 	var txHashStr string
 	err := js.Unmarshal(params[0], &txHashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	// Unmarshal second parameter as a floating point number.
 	var fAmt float64
 	err = js.Unmarshal(params[1], &fAmt)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	// Bounds check amount.
 	amt, err := util.NewAmount(fAmt)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	// Decode string encoding of transaction sha.
 	txHash, err := chainhash.NewHashFromStr(txHashStr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, 0, err
 	}
 	return txHash, amt, nil
@@ -605,7 +605,7 @@ parseTxAcceptedVerboseNtfnParams(params []js.RawMessage) (*btcjson.TxRawResult,
 	var rawTx btcjson.TxRawResult
 	err := js.Unmarshal(params[0], &rawTx)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// TODO: change txacceptedverbose notification callbacks to use nicer
@@ -624,7 +624,7 @@ parsePodConnectedNtfnParams(params []js.RawMessage) (bool, error) {
 	var connected bool
 	err := js.Unmarshal(params[0], &connected)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return false, err
 	}
 	return connected, nil
@@ -641,26 +641,26 @@ parseAccountBalanceNtfnParams(params []js.RawMessage) (account string,
 	// Unmarshal first parameter as a string.
 	err = js.Unmarshal(params[0], &account)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", 0, false, err
 	}
 	// Unmarshal second parameter as a floating point number.
 	var fBal float64
 	err = js.Unmarshal(params[1], &fBal)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", 0, false, err
 	}
 	// Unmarshal third parameter as a boolean.
 	err = js.Unmarshal(params[2], &confirmed)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", 0, false, err
 	}
 	// Bounds check amount.
 	bal, err := util.NewAmount(fBal)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", 0, false, err
 	}
 	return account, bal, confirmed, nil
@@ -676,21 +676,21 @@ parseWalletLockStateNtfnParams(params []js.RawMessage) (account string,
 	// Unmarshal first parameter as a string.
 	err = js.Unmarshal(params[0], &account)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", false, err
 	}
 	// Unmarshal second parameter as a boolean.
 	err = js.Unmarshal(params[1], &locked)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", false, err
 	}
 	return account, locked, nil
 }
 
 type // FutureNotifyBlocksResult is a future promise to deliver the result of
-	// a NotifyBlocksAsync RPC invocation (or an applicable error).
-	FutureNotifyBlocksResult chan *response
+// a NotifyBlocksAsync RPC invocation (or an applicable error).
+FutureNotifyBlocksResult chan *response
 
 func // Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
@@ -731,9 +731,9 @@ func // NotifyBlocks registers the client to receive notifications when
 }
 
 type // FutureNotifySpentResult is a future promise to deliver the result of
-	// a NotifySpentAsync RPC invocation (or an applicable error).
-	// NOTE: Deprecated. Use FutureLoadTxFilterResult instead.
-	FutureNotifySpentResult chan *response
+// a NotifySpentAsync RPC invocation (or an applicable error).
+// NOTE: Deprecated. Use FutureLoadTxFilterResult instead.
+FutureNotifySpentResult chan *response
 
 func // Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
@@ -804,9 +804,9 @@ func // NotifySpent registers the client to receive notifications when the
 }
 
 type // FutureNotifyNewTransactionsResult is a future promise to deliver the
-	// result of a NotifyNewTransactionsAsync RPC invocation (
-	// or an applicable error).
-	FutureNotifyNewTransactionsResult chan *response
+// result of a NotifyNewTransactionsAsync RPC invocation (
+// or an applicable error).
+FutureNotifyNewTransactionsResult chan *response
 
 func // Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
@@ -848,9 +848,9 @@ func // NotifyNewTransactions registers the client to receive notifications
 }
 
 type // FutureNotifyReceivedResult is a future promise to deliver the result
-	// of a NotifyReceivedAsync RPC invocation (or an applicable error).
-	// NOTE: Deprecated. Use FutureLoadTxFilterResult instead.
-	FutureNotifyReceivedResult chan *response
+// of a NotifyReceivedAsync RPC invocation (or an applicable error).
+// NOTE: Deprecated. Use FutureLoadTxFilterResult instead.
+FutureNotifyReceivedResult chan *response
 
 func // Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.
@@ -922,10 +922,10 @@ func // NotifyReceived registers the client to receive notifications every
 }
 
 type // FutureRescanResult is a future promise to deliver the result of a
-	// RescanAsync or RescanEndHeightAsync RPC invocation (
-	// or an applicable error). NOTE: Deprecated.
-	// Use FutureRescanBlocksResult instead.
-	FutureRescanResult chan *response
+// RescanAsync or RescanEndHeightAsync RPC invocation (
+// or an applicable error). NOTE: Deprecated.
+// Use FutureRescanBlocksResult instead.
+FutureRescanResult chan *response
 
 func // Receive waits for the response promised by the future and returns an
 // error if the rescan was not successful.
@@ -1064,10 +1064,10 @@ func // RescanEndHeight rescans the block chain starting from the provided
 }
 
 type // FutureLoadTxFilterResult is a future promise to deliver the result of
-	// a LoadTxFilterAsync RPC invocation (or an applicable error).
-	// NOTE: This is a pod extension ported from github.com/decred/dcrrpcclient
-	// and requires a websocket connection.
-	FutureLoadTxFilterResult chan *response
+// a LoadTxFilterAsync RPC invocation (or an applicable error).
+// NOTE: This is a pod extension ported from github.com/decred/dcrrpcclient
+// and requires a websocket connection.
+FutureLoadTxFilterResult chan *response
 
 func // Receive waits for the response promised by the future and returns an
 // error if the registration was not successful.

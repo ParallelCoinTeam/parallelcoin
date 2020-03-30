@@ -10,11 +10,11 @@ import (
 )
 
 func (r *RcVar) StartServices() (err error) {
-	L.Debug("starting up services")
+	Debug("starting up services")
 	// Start Node
 	err = r.DuoNodeService()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	r.cx.RPCServer = <-r.cx.NodeChan
 	r.cx.Node.Store(true)
@@ -22,7 +22,7 @@ func (r *RcVar) StartServices() (err error) {
 	// Start wallet
 	err = r.DuoWalletService()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	r.cx.WalletServer = <-r.cx.WalletChan
 	r.cx.Wallet.Store(true)
@@ -37,7 +37,7 @@ func (r *RcVar) DuoWalletService() error {
 	var err error
 	if !*r.cx.Config.WalletOff {
 		go func() {
-			L.Info("starting wallet")
+			Info("starting wallet")
 			// utils.GetBiosMessage(view, "starting wallet")
 			err = walletmain.Main(r.cx)
 			if err != nil {
@@ -47,7 +47,7 @@ func (r *RcVar) DuoWalletService() error {
 		}()
 	}
 	interrupt.AddHandler(func() {
-		L.Warn("interrupt received, " +
+		Warn("interrupt received, " +
 			"shutting down shell modules")
 		close(r.cx.WalletKill)
 	})
@@ -60,17 +60,17 @@ func (r *RcVar) DuoNodeService() error {
 	var err error
 	if !*r.cx.Config.NodeOff {
 		go func() {
-			L.Info(r.cx.Language.RenderText("goApp_STARTINGNODE"))
+			Info(r.cx.Language.RenderText("goApp_STARTINGNODE"))
 			// utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
 			err = node.Main(r.cx, nil)
 			if err != nil {
-				L.Info("error running node:", err)
+				Info("error running node:", err)
 				os.Exit(1)
 			}
 		}()
 	}
 	interrupt.AddHandler(func() {
-		L.Warn("interrupt received, " +
+		Warn("interrupt received, " +
 			"shutting down node")
 		close(r.cx.NodeKill)
 	})

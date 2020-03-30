@@ -60,13 +60,13 @@ func initTransaction() (t transaction) {
 func main() {
 	args := os.Args
 	if len(args) != 4 {
-		log.Println("Bitcoin fork genesis block generator")
-		log.Println("Usage:")
-		log.Println("    ", args[0], "<pubkey> <timestamp> <nBits>")
-		log.Println("Example:")
-		log.Println("    ", args[0],
+		fmt.Println("Bitcoin fork genesis block generator")
+		fmt.Println("Usage:")
+		fmt.Println("    ", args[0], "<pubkey> <timestamp> <nBits>")
+		fmt.Println("Example:")
+		fmt.Println("    ", args[0],
 			"04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f \"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks\" 486604799")
-		log.Println("\nIf you execute this without parameters another one in" +
+		fmt.Println("\nIf you execute this without parameters another one in" +
 			" the source code will be generated, using a random public key")
 		args = []string{
 			os.Args[0],
@@ -80,36 +80,36 @@ func main() {
 		pubkey = make([]byte, 65)
 		n, err := rand.Read(pubkey)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			os.Exit(1)
 		}
 		if n != 65 {
-			L.Error("For some reason did not get 65 random bytes")
+			Error("For some reason did not get 65 random bytes")
 			os.Exit(1)
 		}
 		log.Printf("\nGenerated random public key:\n0x%x\n", pubkey)
 	} else {
 		if len(args[1]) != 130 {
-			L.Error("Invalid public key length. Should be 130 hex digits,")
+			Error("Invalid public key length. Should be 130 hex digits,")
 			os.Exit(1)
 		}
 		var err error
 		pubkey, err = hex.DecodeString(args[1])
 		if err != nil {
-			L.Error(err)
-			log.Println("Public key had invalid characters")
+			Error(err)
+			fmt.Println("Public key had invalid characters")
 		}
 	}
 	timestamp := args[2]
 	if len(timestamp) > 254 || len(timestamp) < 1 {
-		L.Error("Timestamp was either longer than 254 characters or zero" +
+		Error("Timestamp was either longer than 254 characters or zero" +
 			" length")
 		os.Exit(1)
 	}
 	tx := initTransaction()
 	nbits, err := strconv.ParseInt(args[3], 10, 32)
 	if err != nil {
-		L.Error("nBits was not a decimal number or exceeded the precision of 32 bits")
+		Error("nBits was not a decimal number or exceeded the precision of 32 bits")
 		os.Exit(0)
 	}
 	nBits := uint32(nbits)
@@ -177,7 +177,7 @@ func main() {
 		bytes = bytes - bits/8
 		bits = bits % 8
 	}
-	L.Info("\nSearching for nonce/unixtime combination that satisfies "+
+	Info("\nSearching for nonce/unixtime combination that satisfies "+
 		"minimum target %d with %d threads on %d cores...\nPlease wait... ",
 		nBits, runtime.GOMAXPROCS(-1), runtime.NumCPU())
 	start := time.Now()
@@ -201,7 +201,7 @@ func findNonce(b []byte, bytes, bits uint32, start time.Time) []byte {
 			byteswap(blockhash2[:])
 			log.Printf("Block found!\n\nHash:\n0x%x\n\nNonce:\n%d\n\nUnix time:\n%d\n", blockhash2, startNonce, unixtime)
 			log.Printf("\nBlock header encoded in hex:\n0x%x\n", blockHeader)
-			log.Println("\nTime for nonce search:", time.Since(start))
+			fmt.Println("\nTime for nonce search:", time.Since(start))
 			os.Exit(1)
 		}
 		startNonce++
@@ -229,9 +229,9 @@ func joinBytes(segment ...[]byte) (joined []byte) {
 }
 func undertarget(hash []byte, bits uint32) bool {
 	// for i:=len(hash)-1; i>0; i-- { hash[i]=0 }
-	// log.Println(hash)
+	// fmt.Println(hash)
 	for i := len(hash) - 1; i > 0; i-- {
-		// log.Println(hash[i])
+		// fmt.Println(hash[i])
 		if hash[i] != 0 {
 			return false
 		}

@@ -90,7 +90,7 @@ func NewTxFromReader(r io.Reader) (*Tx, error) {
 	var msgTx wire.MsgTx
 	err := msgTx.Deserialize(r)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	t := Tx{

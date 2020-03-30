@@ -59,7 +59,7 @@ func NewHash(newHash []byte) (*Hash, error) {
 	var sh Hash
 	err := sh.SetBytes(newHash)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return &sh, err
@@ -70,7 +70,7 @@ func NewHashFromStr(hash string) (*Hash, error) {
 	ret := new(Hash)
 	err := Decode(ret, hash)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return ret, nil
@@ -95,7 +95,7 @@ func Decode(dst *Hash, src string) error {
 	var reversedHash Hash
 	_, err := hex.Decode(reversedHash[HashSize-hex.DecodedLen(len(srcBytes)):], srcBytes)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Reverse copy from the temporary hash to destination.  Because the temporary was zeroed, the written result will be correctly padded.

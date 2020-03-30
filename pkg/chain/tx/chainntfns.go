@@ -15,8 +15,8 @@ func (w *Wallet) handleChainNotifications() {
 	defer w.wg.Done()
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		L.Error(err)
-		L.Error("handleChainNotifications called without RPC client", err)
+		Error(err)
+		Error("handleChainNotifications called without RPC client", err)
 		return
 	}
 	sync := func(w *Wallet) {
@@ -26,7 +26,7 @@ func (w *Wallet) handleChainNotifications() {
 		// to be out of date.
 		err := w.syncWithChain()
 		if err != nil && !w.ShuttingDown() {
-			L.Warn("unable to synchronize wallet to chain:", err)
+			Warn("unable to synchronize wallet to chain:", err)
 		}
 	}
 	catchUpHashes := func(w *Wallet, client chain.Interface,
@@ -41,7 +41,7 @@ func (w *Wallet) handleChainNotifications() {
 		// if it doesn't match the original hash returned by
 		// the notification, to roll back and restart the
 		// rescan.
-		L.Infof("catching up block hashes to height %d, this might take a while, %s",
+		Infof("catching up block hashes to height %d, this might take a while, %s",
 			height)
 		err := walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
 			ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
@@ -49,12 +49,12 @@ func (w *Wallet) handleChainNotifications() {
 			for i := startBlock.Height + 1; i <= height; i++ {
 				hash, err := client.GetBlockHash(int64(i))
 				if err != nil {
-					L.Error(err)
+					Error(err)
 					return err
 				}
 				header, err := chainClient.GetBlockHeader(hash)
 				if err != nil {
-					L.Error(err)
+					Error(err)
 					return err
 				}
 				bs := waddrmgr.BlockStamp{
@@ -64,18 +64,18 @@ func (w *Wallet) handleChainNotifications() {
 				}
 				err = w.Manager.SetSyncedTo(ns, &bs)
 				if err != nil {
-					L.Error(err)
+					Error(err)
 					return err
 				}
 			}
 			return nil
 		})
 		if err != nil {
-			L.Error(err)
-			L.Errorf("failed to update address manager sync state for height %d"+
+			Error(err)
+			Errorf("failed to update address manager sync state for height %d"+
 				": %v", height, err)
 		}
-		L.Info("done catching up block hashes")
+		Info("done catching up block hashes")
 		return err
 	}
 	for {
@@ -92,7 +92,7 @@ func (w *Wallet) handleChainNotifications() {
 			case chain.BlockConnected:
 				err = walletdb.Update(w.db, func(tx walletdb.ReadWriteTx) error {
 					err := w.connectBlock(tx, wtxmgr.BlockMeta(n))
-					L.Debug("connect block error ", err)
+					Debug("connect block error ", err)
 					return err
 				})
 				notificationName = "blockconnected"
@@ -116,7 +116,7 @@ func (w *Wallet) handleChainNotifications() {
 							err = w.addRelevantTx(tx, rec,
 								n.Block)
 							if err != nil {
-								L.Error(err)
+								Error(err)
 								return err
 							}
 						}
@@ -145,7 +145,7 @@ func (w *Wallet) handleChainNotifications() {
 				}
 			}
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				// On out-of-sync blockconnected notifications, only
 				// send a debug message.
 				errStr := "failed to process consensus server " +
@@ -153,9 +153,9 @@ func (w *Wallet) handleChainNotifications() {
 				if notificationName == "blockconnected" &&
 					strings.Contains(err.Error(),
 						"couldn't get hash from database") {
-					L.Debug(errStr, notificationName, err)
+					Debug(errStr, notificationName, err)
 				} else {
-					L.Error(errStr, notificationName, err)
+					Error(errStr, notificationName, err)
 				}
 			}
 		case <-w.quit:
@@ -176,7 +176,7 @@ func (w *Wallet) connectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) err
 	}
 	err := w.Manager.SetSyncedTo(addrmgrNs, &bs)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Notify interested clients of the connected block.
@@ -200,7 +200,7 @@ func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) 
 	if b.Height <= w.Manager.SyncedTo().Height {
 		hash, err := w.Manager.BlockHash(addrmgrNs, b.Height)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		if bytes.Equal(hash[:], b.Hash[:]) {
@@ -209,25 +209,25 @@ func (w *Wallet) disconnectBlock(dbtx walletdb.ReadWriteTx, b wtxmgr.BlockMeta) 
 			}
 			hash, err = w.Manager.BlockHash(addrmgrNs, bs.Height)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 			b.Hash = *hash
 			client := w.ChainClient()
 			header, err := client.GetBlockHeader(hash)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 			bs.Timestamp = header.Timestamp
 			err = w.Manager.SetSyncedTo(addrmgrNs, &bs)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 			err = w.TxStore.Rollback(txmgrNs, b.Height)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 		}
@@ -245,7 +245,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 	// should either be one or more relevant inputs or outputs.
 	err := w.TxStore.InsertTx(txmgrNs, rec, block)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Check every output to determine whether it is controlled by a wallet
@@ -254,7 +254,7 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 		_, addrs, _, err := txscript.ExtractPkScriptAddrs(output.PkScript,
 			w.chainParams)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			// Non-standard outputs are skipped.
 			continue
 		}
@@ -267,15 +267,15 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 				err = w.TxStore.AddCredit(txmgrNs, rec, block, uint32(i),
 					ma.Internal())
 				if err != nil {
-					L.Error(err)
+					Error(err)
 					return err
 				}
 				err = w.Manager.MarkUsed(addrmgrNs, addr)
 				if err != nil {
-					L.Error(err)
+					Error(err)
 					return err
 				}
-				L.Debugf("marked address %v used", addr)
+				Debugf("marked address %v used", addr)
 				continue
 			}
 			// Missing addresses are skipped.  Other errors should
@@ -292,8 +292,8 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 	if block == nil {
 		details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, nil)
 		if err != nil {
-			L.Error(err)
-			// L.Error("cannot query transaction details for notification:",				err)
+			Error(err)
+			// L.ScriptError("cannot query transaction details for notification:",				err)
 			// It's possible that the transaction was not found within the
 			// wallet's set of unconfirmed transactions due to it already
 			// being confirmed, so we'll avoid notifying it.
@@ -307,8 +307,8 @@ func (w *Wallet) addRelevantTx(dbtx walletdb.ReadWriteTx, rec *wtxmgr.TxRecord, 
 		} else {
 			details, err := w.TxStore.UniqueTxDetails(txmgrNs, &rec.Hash, &block.Block)
 			if err != nil {
-				L.Error(err)
-				L.Error("cannot query transaction details for notification:", err)
+				Error(err)
+				Error("cannot query transaction details for notification:", err)
 			}
 			// We'll only notify the transaction if it was found within the
 			// wallet's set of confirmed transactions.

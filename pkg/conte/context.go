@@ -108,9 +108,9 @@ func (cx *Xt) IsCurrent() (is bool) {
 	othernodes := cx.OtherNodes.Load()
 	if !*cx.Config.LAN {
 		cc -= othernodes
-		// L.Debug("LAN disabled, non-lan node count:", cc)
+		// Debug("LAN disabled, non-lan node count:", cc)
 	}
-	// L.Debug("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
+	// Debug("LAN enabled", *cx.Config.LAN, "othernodes", othernodes, "node's connect count", cc)
 	connected := cc > 0
 	if *cx.Config.Solo {
 		connected = true
@@ -119,7 +119,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load()
-	L.Trace("is current:", is, "-", cx.
+	Trace("is current:", is, "-", cx.
 		RealNode.Chain.IsCurrent(), cx.
 		RealNode.SyncManager.IsCurrent(), !*cx.
 		Config.Solo,

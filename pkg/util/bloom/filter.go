@@ -202,7 +202,7 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 	for i, txOut := range tx.MsgTx().TxOut {
 		pushedData, err := txscript.PushedData(txOut.PkScript)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			continue
 		}
 		for _, data := range pushedData {
@@ -225,7 +225,7 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 		}
 		pushedData, err := txscript.PushedData(txin.SignatureScript)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			continue
 		}
 		for _, data := range pushedData {

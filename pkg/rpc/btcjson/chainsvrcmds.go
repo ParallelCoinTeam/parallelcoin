@@ -205,14 +205,14 @@ func (t *TemplateRequest) UnmarshalJSON(data []byte) error {
 	// The SigOpLimit field can only be nil, bool, or int64.
 	val, err := convertTemplateRequestField("sigoplimit", request.SigOpLimit)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	request.SigOpLimit = val
 	// The SizeLimit field can only be nil, bool, or int64.
 	val, err = convertTemplateRequestField("sizelimit", request.SizeLimit)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	request.SizeLimit = val

@@ -175,7 +175,7 @@ func (vm *Engine) validPC() (E error) {
 func (vm *Engine) curPC() (script int, off int, err error) {
 	err = vm.validPC()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, 0, err
 	}
 	return int(vm.scriptIdx.Load()), int(vm.scriptOff.Load()), nil
@@ -200,12 +200,12 @@ func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
 			// Now we'll resume execution as if it were a regular p2pkh transaction.
 			pkScript, err := payToPubKeyHashScript(vm.witnessProgram)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 			pops, err := parseScript(pkScript)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 			// Set the stack to the provided witness stack, then append the pkScript generated above as the next script to execute.
@@ -234,7 +234,7 @@ func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
 			// With all the validity checks passed, parse the script into individual op-codes so w can execute it as the next script.
 			pops, err := parseScript(witnessScript)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 			// The hash matched successfully, so use the witness as the stack, and set the witnessScript to be the next script executed.
@@ -274,7 +274,7 @@ func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
 func (vm *Engine) DisasmPC() (string, error) {
 	scriptIdx, scriptOff, err := vm.curPC()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", err
 	}
 	return vm.disasm(scriptIdx, scriptOff), nil
@@ -317,7 +317,7 @@ func (vm *Engine) CheckErrorCondition(finalScript bool) error {
 	}
 	v, err := vm.dstack.PopBool()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	if !v {
@@ -385,14 +385,14 @@ func (vm *Engine) Step() (done bool, e error) {
 			// Check script ran successfully and pull the script out of the first stack and execute that.
 			err := vm.CheckErrorCondition(false)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				done, e = false, err
 				return
 			}
 			script := vm.savedFirstStack[len(vm.savedFirstStack)-1]
 			pops, err := parseScript(script)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				done, e = false, err
 				return
 			}
@@ -431,15 +431,15 @@ func (vm *Engine) Execute() (err error) {
 	for !done {
 		done, err = vm.Step()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		// log <- cl.Tracec(func() string {
 		// 	var o string
 		// 	dis, err := vm.DisasmPC()
 		// 	if err != nil {
-		// L.Error(err)
-		// 		o += "c stepping (" + err.Error() + ")"
+		// L.ScriptError(err)
+		// 		o += "c stepping (" + err.ScriptError() + ")"
 		// 	}
 		// 	o += "oo stepping " + dis
 		// 	var dstr, astr string
@@ -717,7 +717,7 @@ func NewEngine(scriptPubKey []byte, tx *wire.MsgTx, txIdx int, flags ScriptFlags
 		var err error
 		vm.scripts[i], err = parseScript(scr)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 	}
@@ -770,7 +770,7 @@ func NewEngine(scriptPubKey []byte, tx *wire.MsgTx, txIdx int, flags ScriptFlags
 			var err error
 			vm.witnessVersion, vm.witnessProgram, err = ExtractWitnessProgramInfo(witProgram)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return nil, err
 			}
 		} else {

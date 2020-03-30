@@ -35,24 +35,24 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 		if len(os.Args) > 3 {
 			log.L.SetLevel(os.Args[3], true, "pod")
 		}
-		L.Debug("miner worker starting")
+		Debug("miner worker starting")
 		w, conn := worker.New(cx.KillAll)
 		interrupt.AddHandler(func() {
-			L.Debug("KopachWorkerHandle interrupt")
-			if err := conn.Close(); L.Check(err) {
+			Debug("KopachWorkerHandle interrupt")
+			if err := conn.Close(); Check(err) {
 			}
 		})
 		err := rpc.Register(w)
 		if err != nil {
-			L.Debug(err)
+			Debug(err)
 			return err
 		}
-		L.Debug("starting up worker IPC")
+		Debug("starting up worker IPC")
 		rpc.ServeConn(conn)
-		L.Debug("stopping worker IPC")
-		if err := conn.Close(); L.Check(err) {
+		Debug("stopping worker IPC")
+		if err := conn.Close(); Check(err) {
 		}
-		L.Debug("finished")
+		Debug("finished")
 		return nil
 	}
 }

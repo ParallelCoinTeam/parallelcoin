@@ -13,7 +13,7 @@ const (
 // ErrScriptNotCanonical identifies a non-canonical script.  The caller can use a type assertion to detect this error type.
 type ErrScriptNotCanonical string
 
-// Error implements the error interface.
+// ScriptError implements the error interface.
 func (e ErrScriptNotCanonical) Error() string {
 	return string(e)
 }
@@ -26,7 +26,7 @@ func (e ErrScriptNotCanonical) Error() string {
 // 	builder.AddOp(txscript.OP_CHECKMULTISIG)
 // 	script, err := builder.Script()
 // 	if err != nil {
-//	L.Error(err)
+//	L.ScriptError(err)
 // 		// Handle the error.
 // 		return
 // 	}

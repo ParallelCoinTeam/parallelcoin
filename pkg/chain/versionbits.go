@@ -22,14 +22,14 @@ const (
 )
 
 type // bitConditionChecker provides a thresholdConditionChecker which can be
-	// used to test whether or not a specific bit is set when it's not supposed
-	// to be according to the expected version based on the known deployments and
-	// the current state of the chain.
-	// This is useful for detecting and warning about unknown rule activations.
-	bitConditionChecker struct {
-		bit   uint32
-		chain *BlockChain
-	}
+// used to test whether or not a specific bit is set when it's not supposed
+// to be according to the expected version based on the known deployments and
+// the current state of the chain.
+// This is useful for detecting and warning about unknown rule activations.
+bitConditionChecker struct {
+	bit   uint32
+	chain *BlockChain
+}
 
 // Ensure the bitConditionChecker type implements the
 // thresholdConditionChecker interface.
@@ -87,24 +87,24 @@ func // Condition returns true when the specific bit associated with the checker
 	}
 	expectedVersion, err := c.chain.calcNextBlockVersion(node.parent)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return false, err
 	}
 	return expectedVersion&conditionMask == 0, nil
 }
 
 type // deploymentChecker provides a thresholdConditionChecker which can be used
-	// to test a specific deployment rule.
-	// This is required for properly detecting and activating consensus rule
-	// changes.
-	deploymentChecker struct {
-		deployment *chaincfg.ConsensusDeployment
-		chain      *BlockChain
-	}
+// to test a specific deployment rule.
+// This is required for properly detecting and activating consensus rule
+// changes.
+deploymentChecker struct {
+	deployment *chaincfg.ConsensusDeployment
+	chain      *BlockChain
+}
 
 var // Ensure the deploymentChecker type implements the
-	// thresholdConditionChecker interface.
-	_ thresholdConditionChecker = deploymentChecker{}
+// thresholdConditionChecker interface.
+_ thresholdConditionChecker = deploymentChecker{}
 
 func // BeginTime returns the unix timestamp for the median block time after
 // which voting on a rule change starts (at the next window).
@@ -169,7 +169,7 @@ func // calcNextBlockVersion calculates the expected version of the block after
 		checker := deploymentChecker{deployment: deployment, chain: b}
 		state, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return 0, err
 		}
 		if state == ThresholdStarted || state == ThresholdLockedIn {
@@ -201,19 +201,19 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 		cache := &b.warningCaches[bit]
 		state, err := b.thresholdState(node.parent, checker, cache)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		switch state {
 		case ThresholdActive:
 			if !b.unknownRulesWarned {
-				L.Warnf("unknown new rules activated (bit %d)", bit)
+				Warnf("unknown new rules activated (bit %d)", bit)
 				b.unknownRulesWarned = true
 			}
 		case ThresholdLockedIn:
 			window := int32(checker.MinerConfirmationWindow())
 			activationHeight := window - (node.height % window)
-			L.Warnf("Unknown new rules are about to activate in %d blocks ("+
+			Warnf("Unknown new rules are about to activate in %d blocks ("+
 				"bit %d)", activationHeight, bit)
 		}
 	}
@@ -233,7 +233,7 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 // 	for i := uint32(0); i < unknownVerNumToCheck && node != nil; i++ {
 // 		expectedVersion, err := b.calcNextBlockVersion(node.parent)
 // 		if err != nil {
-// L.Error(err)
+// Error(err)
 // 			return err
 // 		}
 // 		if expectedVersion > vbLegacyBlockVersion &&

@@ -25,7 +25,7 @@ func ExampleCreate() {
 	dbPath := filepath.Join(os.TempDir(), "examplecreate.db")
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	defer os.Remove(dbPath)
@@ -60,19 +60,19 @@ func ExampleDB_createTopLevelBucket() {
 	// details on what this step is doing.
 	db, teardownFunc, err := exampleLoadDB()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	defer teardownFunc()
 	dbtx, err := db.BeginReadWriteTx()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 		}
 	}()
 	// Get or create a bucket in the database as needed.  This bucket
@@ -81,7 +81,7 @@ func ExampleDB_createTopLevelBucket() {
 	bucketKey := []byte("walletsubpackage")
 	bucket, err := dbtx.CreateTopLevelBucket(bucketKey)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// Prevent unused error.
@@ -106,7 +106,7 @@ func Example_basicUsage() {
 	dbPath := filepath.Join(os.TempDir(), "exampleusage.db")
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	defer os.Remove(dbPath)
@@ -126,7 +126,7 @@ func Example_basicUsage() {
 		return nil
 	})
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// Use the Update function of the namespace to perform a managed
@@ -163,7 +163,7 @@ func Example_basicUsage() {
 		return nil
 	})
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return
 	}
 	// Output:

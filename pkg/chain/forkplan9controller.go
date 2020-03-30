@@ -60,12 +60,12 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 				nTB[v.Params.Version], _, err = b.CalcNextRequiredDifficultyPlan9(lastNode, v.Name, true)
 			}
 			newTargetBits = nTB
-			// L.Traces(newTargetBits)
+			// Traces(newTargetBits)
 		} else {
 			newTargetBits = b.DifficultyBits.Load().(TargetBits)
 		}
 		return
 	}
-	L.Trace("should not fall through here")
+	Trace("should not fall through here")
 	return
 }

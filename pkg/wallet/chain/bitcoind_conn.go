@@ -67,7 +67,7 @@ func NewBitcoindConn(chainParams *netparams.Params,
 	}
 	client, err := rpcclient.New(clientCfg, nil)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	conn := &BitcoindConn{
@@ -94,7 +94,7 @@ func (c *BitcoindConn) Start() error {
 	// Verify that the node is running on the expected network.
 	net, err := c.getCurrentNet()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		c.client.Disconnect()
 		return err
 	}
@@ -110,7 +110,7 @@ func (c *BitcoindConn) Start() error {
 	zmqBlockConn, err := gozmq.Subscribe(
 		c.zmqBlockHost, []string{"rawblock"})
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		c.client.Disconnect()
 		return fmt.Errorf("unable to subscribe for zmq block events: "+
 			"%v", err)
@@ -118,7 +118,7 @@ func (c *BitcoindConn) Start() error {
 	zmqTxConn, err := gozmq.Subscribe(
 		c.zmqTxHost, []string{"rawtx"})
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		c.client.Disconnect()
 		return fmt.Errorf("unable to subscribe for zmq tx events: %v",
 			err)
@@ -151,7 +151,7 @@ func (c *BitcoindConn) Stop() {
 func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
 	defer conn.Close()
-	L.Info(
+	Info(
 		"started listening for bitcoind block notifications via ZMQ on", c.zmqBlockHost,
 	)
 	for {
@@ -165,7 +165,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 		// Poll an event from the ZMQ socket.
 		msgBytes, err := conn.Receive()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			// It's possible that the connection to the socket
 			// continuously times out, so we'll prevent logging this
 			// error to prevent spamming the logs.
@@ -173,7 +173,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			if ok && netErr.Timeout() {
 				continue
 			}
-			L.Error(
+			Error(
 				"unable to receive ZMQ rawblock message:", err,
 			)
 			continue
@@ -187,7 +187,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			block := &wire.MsgBlock{}
 			r := bytes.NewReader(msgBytes[1])
 			if err := block.Deserialize(r); err != nil {
-				L.Error(
+				Error(
 					"unable to deserialize block:", err,
 				)
 				continue
@@ -211,7 +211,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			if eventType == "" || !isASCII(eventType) {
 				continue
 			}
-			L.Warn(
+			Warn(
 				"received unexpected event type from rawblock subscription:",
 				eventType,
 			)
@@ -226,7 +226,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
 	defer conn.Close()
-	L.Info(
+	Info(
 		"started listening for bitcoind transaction notifications via ZMQ on",
 		c.zmqTxHost,
 	)
@@ -241,7 +241,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 		// Poll an event from the ZMQ socket.
 		msgBytes, err := conn.Receive()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			// It's possible that the connection to the socket
 			// continuously times out, so we'll prevent logging this
 			// error to prevent spamming the logs.
@@ -249,7 +249,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			if ok && netErr.Timeout() {
 				continue
 			}
-			L.Error(
+			Error(
 				"unable to receive ZMQ rawtx message:", err,
 			)
 			continue
@@ -263,7 +263,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			tx := &wire.MsgTx{}
 			r := bytes.NewReader(msgBytes[1])
 			if err := tx.Deserialize(r); err != nil {
-				L.Error(
+				Error(
 					"unable to deserialize transaction:", err,
 				)
 				continue
@@ -287,7 +287,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			if eventType == "" || !isASCII(eventType) {
 				continue
 			}
-			L.Warn(
+			Warn(
 				"received unexpected event type from rawtx subscription:",
 				eventType,
 			)
@@ -299,7 +299,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 func (c *BitcoindConn) getCurrentNet() (wire.BitcoinNet, error) {
 	hash, err := c.client.GetBlockHash(0)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, err
 	}
 	switch *hash {

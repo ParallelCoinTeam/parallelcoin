@@ -7,7 +7,7 @@ import (
 
 func main() {
 	interrupt.AddHandler(func() {
-		log.Println("IT'S THE END OF THE WORLD!")
+		fmt.Println("IT'S THE END OF THE WORLD!")
 	})
 	<-interrupt.HandlersDone
 }

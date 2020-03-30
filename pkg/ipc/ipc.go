@@ -110,7 +110,7 @@ func (c *Conn) Read(p []byte) (n int, err error) {
 	u32 := binary.LittleEndian.Uint32
 	n, err = r(p[:4])
 	if err != nil || n != 4 {
-		L.Error(err)
+		Error(err)
 	}
 	c.printlnE("read", p[:4])
 	bLen := u32(p[:4])

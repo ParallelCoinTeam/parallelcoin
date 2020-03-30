@@ -21,9 +21,9 @@ func GetHashrate(hrb *ring.Ring) (hr float64, hrp map[int32]float64) {
 	var started bool
 	hrb.Do(func(entry interface{}) {
 		e, ok := entry.(hashrate.Hashrate)
-		// L.Debug("iterating hashrate buffer", entry)
+		// Debug("iterating hashrate buffer", entry)
 		if ok {
-			L.Debug("got entry in hashrate buffer")
+			Debug("got entry in hashrate buffer")
 			if !started {
 				started = true
 				firstHashTime = e.Time
@@ -33,7 +33,7 @@ func GetHashrate(hrb *ring.Ring) (hr float64, hrp map[int32]float64) {
 			lastHashTime = e.Time
 		}
 	})
-	L.Debug(hashTotal, hashPerVersion, firstHashTime, lastHashTime)
+	Debug(hashTotal, hashPerVersion, firstHashTime, lastHashTime)
 	hashDuration := lastHashTime.Sub(firstHashTime)
 	hr = float64(hashDuration) / float64(hashTotal)
 	for i := range hashPerVersion {

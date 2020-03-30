@@ -49,7 +49,7 @@ func (p *Uint16) Put(i uint16) *Uint16 {
 }
 
 func GetPort(listener string) simplebuffer.Serializer {
-	// L.Debug(listener)
+	// Debug(listener)
 	oI := GetActualPort(listener)
 	port := &Uint16{}
 	port.Put(uint16(oI))
@@ -59,11 +59,11 @@ func GetPort(listener string) simplebuffer.Serializer {
 func GetActualPort(listener string) uint16 {
 	_, p, err := net.SplitHostPort(listener)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	oI, err := strconv.ParseUint(p, 10, 16)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 	}
 	return uint16(oI)
 }

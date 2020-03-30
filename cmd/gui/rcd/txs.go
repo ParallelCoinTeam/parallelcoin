@@ -9,12 +9,12 @@ import (
 )
 
 func (r *RcVar) GetDuoUItransactionsNumber() {
-	L.Debug("getting transaction count")
+	Debug("getting transaction count")
 	// account, txcount, startnum, watchonly := "*", n, f, false
 	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 	lt, err := r.cx.WalletServer.ListTransactions(0, 999999999)
 	if err != nil {
-		// r.PushDuoUIalert("Error", err.Error(), "error")
+		// r.PushDuoUIalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
 	r.Status.Wallet.TxsNumber.Store(uint64(len(lt)))
 	return
@@ -25,12 +25,12 @@ func (r *RcVar) GetDuoUItransactions() func() {
 		r.History.Page.To = int(r.Status.Wallet.TxsNumber.Load()) / r.History.PerPage.Value
 		startTx := r.History.Page.Value * r.History.PerPage.Value
 		// endTx := r.History.Page.Value*r.History.PerPage.Value + r.History.PerPage.Value
-		L.Debug("getting transactions")
+		Debug("getting transactions")
 		// account, txcount, startnum, watchonly := "*", n, f, false
 		// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
 		lt, err := r.cx.WalletServer.ListTransactions(startTx, r.History.PerPage.Value)
 		if err != nil {
-			L.Info(err)
+			Info(err)
 		}
 		r.History.Txs.TxsNumber = len(lt)
 		txsArray := *new([]model.DuoUItransactionExcerpt)
@@ -80,10 +80,10 @@ func txs(t btcjson.ListTransactionsResult) model.DuoUItransactionExcerpt {
 
 }
 func (r *RcVar) GetLatestTransactions() {
-	L.Trace("getting latest transactions")
+	Trace("getting latest transactions")
 	lt, err := r.cx.WalletServer.ListTransactions(0, 10)
 	if err != nil {
-		// //r.PushDuoUIalert("Error", err.Error(), "error")
+		// //r.PushDuoUIalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
 	r.Status.Wallet.LastTxs.TxsNumber = len(lt)
 	// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {
@@ -120,10 +120,10 @@ func (r *RcVar) GetLatestTransactions() {
 
 // func (r *RcVar) GetTransactions() func() {
 //	return func() {
-//		L.Debug("getting transactions")
+//		Debug("getting transactions")
 //		lt, err := r.cx.WalletServer.ListTransactions(0, r.History.Txs.TxsListNumber)
 //		if err != nil {
-//			// //r.PushDuoUIalert("Error", err.Error(), "error")
+//			// //r.PushDuoUIalert("BTCJSONError", err.BTCJSONError(), "error")
 //		}
 //		r.History.Txs.TxsNumber = len(lt)
 //		// for i, j := 0, len(lt)-1; i < j; i, j = i+1, j-1 {

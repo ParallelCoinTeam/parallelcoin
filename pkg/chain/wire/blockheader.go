@@ -47,7 +47,7 @@ func (h *BlockHeader) BlockHashWithAlgos(height int32) (out chainhash.Hash) {
 	buf := bytes.NewBuffer(make([]byte, 0, MaxBlockHeaderPayload))
 	err := writeBlockHeader(buf, 0, h)
 	if err != nil {
-		L.Error("error writing block header to buffer", err)
+		Error("error writing block header to buffer", err)
 	}
 	vers := h.Version
 	algo := fork.GetAlgoName(vers, height)

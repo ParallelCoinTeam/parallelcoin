@@ -16,7 +16,7 @@ var monitorHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name)
 		rc := rcd.RcInit(cx)
-		L.Warn("starting monitor GUI")
+		Warn("starting monitor GUI")
 		return monitor.Run(cx, rc)
 	}
 }

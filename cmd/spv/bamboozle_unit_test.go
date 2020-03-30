@@ -412,20 +412,20 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 	defer os.RemoveAll(tempDir)
 	db, err := walletdb.Create("bdb", tempDir+"/weks.db")
 	if err != nil {
-		t.Fatalf("Error opening DB: %s", err)
+		t.Fatalf("DBError opening DB: %s", err)
 	}
 	defer db.Close()
 	hdrStore, err := headerfs.NewBlockHeaderStore(
 		tempDir, db, &netparams.SimNetParams,
 	)
 	if err != nil {
-		t.Fatalf("Error creating block header store: %s", err)
+		t.Fatalf("DBError creating block header store: %s", err)
 	}
 	cfStore, err := headerfs.NewFilterHeaderStore(
 		tempDir, db, headerfs.RegularFilter, &netparams.SimNetParams,
 	)
 	if err != nil {
-		t.Fatalf("Error creating filter header store: %s", err)
+		t.Fatalf("DBError creating filter header store: %s", err)
 	}
 	var (
 		height uint32
@@ -459,10 +459,10 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 			Height:     height,
 		})
 		if err = hdrStore.WriteHeaders(hdrBatch...); err != nil {
-			t.Fatalf("Error writing batch of headers: %s", err)
+			t.Fatalf("DBError writing batch of headers: %s", err)
 		}
 		if err = cfStore.WriteHeaders(cfBatch...); err != nil {
-			t.Fatalf("Error writing batch of cfheaders: %s", err)
+			t.Fatalf("DBError writing batch of cfheaders: %s", err)
 		}
 	}
 	for i := 0; i < testCase.storeAddHeight; i++ {
@@ -473,19 +473,19 @@ func runCheckCFCheckptSanityTestCase(t *testing.T, testCase *cfCheckptTestCase) 
 			BlockHeader: header,
 			Height:      height,
 		}); err != nil {
-			t.Fatalf("Error writing single block header: %s", err)
+			t.Fatalf("DBError writing single block header: %s", err)
 		}
 		if err = cfStore.WriteHeaders(headerfs.FilterHeader{
 			FilterHash: zeroHash,
 			HeaderHash: zeroHash,
 			Height:     height,
 		}); err != nil {
-			t.Fatalf("Error writing single cfheader: %s", err)
+			t.Fatalf("DBError writing single cfheader: %s", err)
 		}
 	}
 	heightDiff, err := checkCFCheckptSanity(testCase.checkpoints, cfStore)
 	if err != nil {
-		t.Fatalf("Error from checkCFCheckptSanity: %s", err)
+		t.Fatalf("DBError from checkCFCheckptSanity: %s", err)
 	}
 	if heightDiff != testCase.heightDiff {
 		t.Fatalf("Height difference mismatch. Expected: %d, got: %d",

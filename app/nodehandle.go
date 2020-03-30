@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/pkg/logi/serve"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/cmd/node"
@@ -10,7 +11,8 @@ import (
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-		L.Trace("running node handler")
+		Trace("running node handler")
+		serve.Log(cx.KillAll)
 		config.Configure(cx, c.Command.Name)
 		cx.NodeReady = make(chan struct{})
 		cx.Node.Store(false)
@@ -28,7 +30,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
 			err := runServiceCommand(serviceOpts.ServiceCommand)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 			return nil
@@ -37,10 +39,10 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		go func() {
 			err := node.Main(cx, shutdownChan)
 			if err != nil {
-				L.Error("error starting node ", err)
+				Error("error starting node ", err)
 			}
 		}()
-		L.Debug("sending back node rpc server handler")
+		Debug("sending back node rpc server handler")
 		cx.RPCServer = <-cx.NodeChan
 		close(cx.NodeReady)
 		cx.Node.Store(true)

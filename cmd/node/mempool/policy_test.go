@@ -96,7 +96,7 @@ func TestCheckPkScriptStandard(t *testing.T) {
 	for i := 0; i < 4; i++ {
 		pk, err := ec.NewPrivateKey(ec.S256())
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			t.Fatalf("TestCheckPkScriptStandard NewPrivateKey failed: %v",
 				err)
 			return

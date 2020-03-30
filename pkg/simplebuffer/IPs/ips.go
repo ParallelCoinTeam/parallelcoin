@@ -73,7 +73,7 @@ func GetListenable() simplebuffer.Serializer {
 	for i := range rI {
 		l, err := rI[i].Addrs()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil
 		}
 		lA = append(lA, l...)

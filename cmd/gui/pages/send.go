@@ -121,6 +121,6 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 					layout.UniformInset(unit.Dp(8)).Layout(gtx, widgets[i])
 				})
 			}))
-		//L.Info("passPharse:" + sendStruct.passPharse)
+		//Info("passPharse:" + sendStruct.passPharse)
 	}
 }

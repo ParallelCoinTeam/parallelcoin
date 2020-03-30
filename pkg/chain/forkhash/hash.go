@@ -43,7 +43,7 @@ func X11(bytes []byte) (out []byte) {
 	hf := x11.New()
 	out = make([]byte, 32)
 	hf.Hash(bytes, out)
-	// L.Debugf("x11 %x", out)
+	// Debugf("x11 %x", out)
 	return
 	// return cryptonight.Sum(bytes, 2)
 }
@@ -194,7 +194,7 @@ func Scrypt(bytes []byte) []byte {
 	copy(c, b)
 	dk, err := scrypt.Key(c, c, 1024, 1, 1, 32)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return make([]byte, 32)
 	}
 	o := make([]byte, 32)

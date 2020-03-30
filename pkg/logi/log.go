@@ -1,16 +1,15 @@
 package logi
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
 	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -25,34 +24,36 @@ const (
 )
 
 var (
-	// NoClosure is a noop for a closure print function
-	NoClosure = func() PrintcFunc {
-		f := func(_ func() string) {}
-		return f
+	Levels = []string{
+		Off,
+		Fatal,
+		Error,
+		Check,
+		Warn,
+		Info,
+		Debug,
+		Trace,
 	}
-	// NoPrintf is a noop for a closure printf function
-	NoPrintf = func() PrintfFunc {
-		f := func(_ string, _ ...interface{}) {}
-		return f
+	Tags = map[string]string{
+		Off:   "",
+		Fatal: "FTL",
+		Error: "ERR",
+		Check: "CHK",
+		Warn:  "WRN",
+		Info:  "INF",
+		Debug: "DBG",
+		Trace: "TRC",
 	}
-	// NoPrintln is a noop for a println function
-	NoPrintln = func() PrintlnFunc {
-		f := func(_ ...interface{}) {}
-		return f
+	LevelsMap = map[string]int{
+		Off:   0,
+		Fatal: 1,
+		Error: 2,
+		Check: 3,
+		Warn:  4,
+		Info:  5,
+		Debug: 6,
+		Trace: 7,
 	}
-	// NoPrintln is a noop for a println function
-	NoCheck = func() CheckFunc {
-		f := func(_ error) bool {
-			return true
-		}
-		return f
-	}
-	// NoSpew is a noop for a spew function
-	NoSpew = func() SpewFunc {
-		f := func(_ interface{}) {}
-		return f
-	}
-	// StartupTime allows a shorter log prefix as time since start
 	StartupTime    = time.Now()
 	BackgroundGrey = "\u001b[48;5;240m"
 	ColorBlue      = "\u001b[38;5;33m"
@@ -69,132 +70,150 @@ var (
 	ColorUnderline = "\u001b[4m"
 	ColorViolet    = "\u001b[38;5;201m"
 	ColorYellow    = "\u001b[38;5;226m"
-
-	L       = Empty("root")
-	Loggers = make(map[string]*Logger)
-
-	Levels = []string{
-		Off, Fatal, Error, Warn, Info, Check, Debug, Trace,
-	}
 )
 
-var wr LogWriter
+type LogWriter struct {
+	io.Writer
+	write bool
+}
+
+// DirectionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
+func DirectionString(inbound bool) string {
+	if inbound {
+		return "inbound"
+	}
+	return "outbound"
+}
+
+func PickNoun(n int, singular, plural string) string {
+	if n == 1 {
+		return singular
+	}
+	return plural
+}
+
+func (w *LogWriter) Print(a ...interface{}) {
+	if w.write {
+		_, _ = fmt.Fprint(w.Writer, a...)
+	}
+}
+
+func (w *LogWriter) Printf(format string, a ...interface{}) {
+	if w.write {
+		_, _ = fmt.Fprintf(w.Writer, format, a...)
+	}
+}
+
+func (w *LogWriter) Println(a ...interface{}) {
+	if w.write {
+		_, _ = fmt.Fprintln(w.Writer, a...)
+	}
+}
 
 // Entry is a log entry to be printed as json to the log file
 type Entry struct {
 	Time         time.Time
 	Level        string
-	CodeLocation string
 	Package      string
+	CodeLocation string
 	Text         string
 }
 
-// Logger is a struct containing all the functions with nice handy names
-type Logger struct {
-	Pkg           string
-	Fatal         PrintlnFunc
-	Error         PrintlnFunc
-	Warn          PrintlnFunc
-	Info          PrintlnFunc
-	Check         CheckFunc
-	Debug         PrintlnFunc
-	Trace         PrintlnFunc
-	Fatalf        PrintfFunc
-	Errorf        PrintfFunc
-	Warnf         PrintfFunc
-	Infof         PrintfFunc
-	Checkf        CheckFunc
-	Debugf        PrintfFunc
-	Tracef        PrintfFunc
-	Fatalc        PrintcFunc
-	Errorc        PrintcFunc
-	Warnc         PrintcFunc
-	Infoc         PrintcFunc
-	Checkc        CheckFunc
-	Debugc        PrintcFunc
-	Tracec        PrintcFunc
-	Fatals        SpewFunc
-	Errors        SpewFunc
-	Warns         SpewFunc
-	Infos         SpewFunc
-	Debugs        SpewFunc
-	Traces        SpewFunc
-	LogFileHandle *os.File
-	Writer        LogWriter
-	Color         bool
-	Split         string
-	// If this channel is loaded log entries are composed and sent to it
-	LogChan []chan Entry
-}
+type (
+	PrintcFunc  func(pkg string, fn func() string)
+	PrintfFunc  func(pkg string, format string, a ...interface{})
+	PrintlnFunc func(pkg string, a ...interface{})
+	CheckFunc   func(pkg string, err error) bool
+	SpewFunc    func(pkg string, a interface{})
+
+	// Logger is a struct containing all the functions with nice handy names
+	Logger struct {
+		Packages      Pk.Package
+		Level         string
+		Fatal         PrintlnFunc
+		Error         PrintlnFunc
+		Warn          PrintlnFunc
+		Info          PrintlnFunc
+		Check         CheckFunc
+		Debug         PrintlnFunc
+		Trace         PrintlnFunc
+		Fatalf        PrintfFunc
+		Errorf        PrintfFunc
+		Warnf         PrintfFunc
+		Infof         PrintfFunc
+		Debugf        PrintfFunc
+		Tracef        PrintfFunc
+		Fatalc        PrintcFunc
+		Errorc        PrintcFunc
+		Warnc         PrintcFunc
+		Infoc         PrintcFunc
+		Debugc        PrintcFunc
+		Tracec        PrintcFunc
+		Fatals        SpewFunc
+		Errors        SpewFunc
+		Warns         SpewFunc
+		Infos         SpewFunc
+		Debugs        SpewFunc
+		Traces        SpewFunc
+		LogFileHandle *os.File
+		Writer        LogWriter
+		Write         bool
+		Color         bool
+		Split         string
+		LogChan       []chan Entry
+	}
+)
+
+var L = NewLogger()
 
 // AddLogChan adds a channel that log entries are sent to
-func (l *Logger) AddLogChan() chan Entry {
+func (l *Logger) AddLogChan() (ch chan Entry) {
 	L.LogChan = append(L.LogChan, make(chan Entry))
+	//L.Write = false
 	return L.LogChan[len(L.LogChan)-1]
 }
 
-// SetLevel enables or disables the various print functions
-func (l *Logger) SetLevel(level string, color bool, split string) *Logger {
-	// if this is called on the top level logger and there is other loggers
-	// set their levels as well
-	if l.Pkg == "root" && len(Loggers) > 0 {
-		for _, v := range Loggers {
-			v.SetLevel(level, color, split)
-		}
+func NewLogger() (l *Logger) {
+	l = &Logger{
+		Packages:      make(map[string]bool),
+		Level:         "trace",
+		LogFileHandle: os.Stderr,
+		Write:         true,
+		Color:         true,
+		Split:         "pod",
+		LogChan:       nil,
 	}
-	l.Split = split + string(os.PathSeparator)
-	level = sanitizeLoglevel(level)
-	var fallen bool
-	switch {
-	case level == Trace || fallen:
-		l.Trace = printlnFunc("TRC", color, l.LogFileHandle, nil, l.Split)
-		l.Tracef = printfFunc("TRC", color, l.LogFileHandle, nil, l.Split)
-		l.Tracec = printcFunc("TRC", color, l.LogFileHandle, nil, l.Split)
-		l.Traces = ps("TRC", color, l.LogFileHandle, l.Split)
-		fallen = true
-		fallthrough
-	case level == Debug || fallen:
-		l.Debug = printlnFunc("DBG", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Debugf = printfFunc("DBG", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Debugc = printcFunc("DBG", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Debugs = ps("DBG", color, l.LogFileHandle, l.Split)
-		fallen = true
-		fallthrough
-	case level == Check || fallen:
-		l.Check = checkFunc(color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Checkf = checkFunc(color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Checkc = checkFunc(color, l.LogFileHandle, l.LogChan, l.Split)
-		fallen = true
-		fallthrough
-	case level == Info || fallen:
-		l.Info = printlnFunc("INF", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Infof = printfFunc("INF", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Infoc = printcFunc("INF", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Infos = ps("INF", color, l.LogFileHandle, l.Split)
-		fallen = true
-		fallthrough
-	case level == Warn || fallen:
-		l.Warn = printlnFunc("WRN", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Warnf = printfFunc("WRN", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Warnc = printcFunc("WRN", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Warns = ps("WRN", color, l.LogFileHandle, l.Split)
-		fallen = true
-		fallthrough
-	case level == Error || fallen:
-		l.Error = printlnFunc("ERR", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Errorf = printfFunc("ERR", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Errorc = printcFunc("ERR", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Errors = ps("ERR", color, l.LogFileHandle, l.Split)
-		fallen = true
-		fallthrough
-	case level == Fatal:
-		l.Fatal = printlnFunc("FTL", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Fatalf = printfFunc("FTL", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Fatalc = printcFunc("FTL", color, l.LogFileHandle, l.LogChan, l.Split)
-		l.Fatals = ps("FTL", color, l.LogFileHandle, l.Split)
-		fallen = true
-	}
-	return l
+	l.Fatal = l.printlnFunc(Fatal)
+	l.Error = l.printlnFunc(Error)
+	l.Warn = l.printlnFunc(Warn)
+	l.Info = l.printlnFunc(Info)
+	l.Check = l.checkFunc(Check)
+	l.Debug = l.printlnFunc(Debug)
+	l.Trace = l.printlnFunc(Trace)
+	l.Fatalf = l.printfFunc(Fatal)
+	l.Errorf = l.printfFunc(Error)
+	l.Warnf = l.printfFunc(Warn)
+	l.Infof = l.printfFunc(Info)
+	l.Debugf = l.printfFunc(Debug)
+	l.Tracef = l.printfFunc(Trace)
+	l.Fatalc = l.printcFunc(Fatal)
+	l.Errorc = l.printcFunc(Error)
+	l.Warnc = l.printcFunc(Warn)
+	l.Infoc = l.printcFunc(Info)
+	l.Debugc = l.printcFunc(Debug)
+	l.Tracec = l.printcFunc(Trace)
+	l.Fatals = l.ps(Fatal)
+	l.Errors = l.ps(Error)
+	l.Warns = l.ps(Warn)
+	l.Infos = l.ps(Info)
+	l.Debugs = l.ps(Debug)
+	l.Traces = l.ps(Trace)
+
+	return
+}
+
+func (wr *LogWriter) SetLogWriter(w io.Writer) {
+	wr.Writer = w
 }
 
 // SetLogPaths sets a file path to write logs
@@ -206,41 +225,211 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 		err := os.Rename(path, filepath.Join(logPath,
 			time.Now().Format(timeFormat)+".json"))
 		if err != nil {
-			wr.Println("error rotating log", err)
+			if L.Write {
+				L.Writer.Println("error rotating log", err)
+			}
 			return
 		}
 	}
 	logFileHandle, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
-		wr.Println("error opening log file", logFileName)
+		if L.Write {
+			L.Writer.Println("error opening log file", logFileName)
+		}
 	}
 	l.LogFileHandle = logFileHandle
 	_, _ = fmt.Fprintln(logFileHandle, "{")
 }
 
-type LogWriter struct {
-	io.Writer
+func FileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
 }
 
-func (w *LogWriter) Print(a ...interface{}) {
-	_, _ = fmt.Fprint(wr, a...)
+func (l *Logger) SetLevel(level string, color bool, split string) {
+	l.Level = sanitizeLoglevel(level)
+	l.Split = split + string(os.PathSeparator)
+	l.Color = color
 }
 
-func (w *LogWriter) Printf(format string, a ...interface{}) {
-	_, _ = fmt.Fprintf(wr, format, a...)
+func (l *Logger) LocToPkg(pkg string) (out string) {
+	split := strings.Split(pkg, l.Split)
+	pkg = split[1]
+	split = strings.Split(pkg, string(os.PathSeparator))
+	return strings.Join(split[:len(split)-1], string(os.PathSeparator))
 }
 
-func (w *LogWriter) Println(a ...interface{}) {
-	_, _ = fmt.Fprintln(wr, a...)
+func (l *Logger) Register(pkg string) string {
+	//split := strings.Split(pkg, l.Split)
+	//pkg = split[1]
+	//split = strings.Split(pkg, string(os.PathSeparator))
+	//pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
+	pkg = l.LocToPkg(pkg)
+	l.Packages[pkg] = true
+	return pkg
 }
 
-type PrintcFunc func(func() string)
-type PrintfFunc func(format string, a ...interface{})
-type PrintlnFunc func(a ...interface{})
-type CheckFunc func(err error) bool
-type SpewFunc func(interface{})
+func init() {
+	L.SetLevel("trace", true, "pod")
+	L.Writer.SetLogWriter(os.Stderr)
+	L.Trace("starting up logger")
+}
 
-var TermWidth = func() int { return 120 }
+func sanitizeLoglevel(level string) string {
+	found := false
+	for i := range Levels {
+		if level == Levels[i] {
+			found = true
+			break
+		}
+	}
+	if !found {
+		level = "info"
+	}
+	return level
+}
+
+func trimReturn(s string) string {
+	if s[len(s)-1] == '\n' {
+		return s[:len(s)-1]
+	}
+	return s
+}
+
+func (l *Logger) LevelIsActive(level string) (out bool) {
+	if LevelsMap[l.Level] >= LevelsMap[level] {
+		out = true
+	}
+	return
+}
+
+var TermWidth = func() int { return 80 }
+
+// printfFunc prints a log entry with formatting
+func (l *Logger) printfFunc(level string) PrintfFunc {
+	f := func(pkg, format string, a ...interface{}) {
+		text := fmt.Sprintf(format, a...)
+		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+			return
+		}
+		if l.Write || l.Packages[pkg] {
+			l.Writer.Println(Composite(text, level, l.Color, l.Split))
+		}
+		if l.LogChan != nil {
+			_, loc, line, _ := runtime.Caller(2)
+			pkg := l.LocToPkg(loc)
+			out := Entry{time.Now(), level,
+				pkg, fmt.Sprint(loc, ":", line),
+				text}
+			for i := range l.LogChan {
+				l.LogChan[i] <- out
+			}
+		}
+	}
+	return f
+}
+
+// printcFunc prints from a closure returning a string
+func (l *Logger) printcFunc(level string) PrintcFunc {
+	f := func(pkg string, fn func() string) {
+		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+			return
+		}
+		t := fn()
+		text := trimReturn(t)
+		if l.Write {
+			l.Writer.Println(Composite(text, level, l.Color, l.Split))
+		}
+		if l.LogChan != nil {
+			_, loc, line, _ := runtime.Caller(2)
+			pkg := l.LocToPkg(loc)
+			out := Entry{time.Now(), level,
+				pkg, fmt.Sprint(loc, ":", line), text}
+			for i := range l.LogChan {
+				l.LogChan[i] <- out
+			}
+		}
+	}
+	return f
+}
+
+// printlnFunc prints a log entry like Println
+func (l *Logger) printlnFunc(level string) PrintlnFunc {
+	f := func(pkg string, a ...interface{}) {
+		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+			return
+		}
+		text := trimReturn(fmt.Sprintln(a...))
+		if l.Write {
+			l.Writer.Println(Composite(text, l.Level, l.Color, l.Split))
+		}
+		if l.LogChan != nil {
+			_, loc, line, _ := runtime.Caller(2)
+			pkg := l.LocToPkg(loc)
+			out := Entry{time.Now(), l.Level,
+				pkg, fmt.Sprint(loc, ":", line),
+				text}
+			for i := range l.LogChan {
+				l.LogChan[i] <- out
+			}
+		}
+	}
+	return f
+}
+
+func (l *Logger) checkFunc(level string) CheckFunc {
+	f := func(pkg string, err error) (out bool) {
+		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+			return
+		}
+		n := err == nil
+		if n {
+			return false
+		}
+		text := err.Error()
+		if l.Write {
+			l.Writer.Println(Composite(text, "CHK", l.Color, l.Split))
+		}
+		if l.LogChan != nil {
+			_, loc, line, _ := runtime.Caller(3)
+			pkg := l.LocToPkg(loc)
+			out := Entry{time.Now(), "CHK",
+				pkg, fmt.Sprint(loc, ":", line),
+				text}
+			for i := range l.LogChan {
+				l.LogChan[i] <- out
+			}
+		}
+		return true
+	}
+	return f
+}
+
+// ps spews a variable
+func (l *Logger) ps(level string) SpewFunc {
+	f := func(pkg string, a interface{}) {
+		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+			return
+		}
+		text := trimReturn(spew.Sdump(a))
+		o := "" + Composite("spew:", level, l.Color, l.Split)
+		o += "\n" + text + "\n"
+		if l.Write {
+			l.Writer.Print(o)
+		}
+		if l.LogChan != nil {
+			_, loc, line, _ := runtime.Caller(2)
+			pkg := l.LocToPkg(loc)
+			out := Entry{time.Now(), level, pkg, fmt.Sprint(loc, ":", line),
+				text}
+			for i := range l.LogChan {
+				l.LogChan[i] <- out
+			}
+
+		}
+	}
+	return f
+}
 
 func Composite(text, level string, color bool, split string) string {
 	dots := "."
@@ -421,333 +610,4 @@ func Composite(text, level string, color bool, split string) string {
 			file, line)
 	}
 	return final
-}
-
-// DirectionString is a helper function that returns a string that represents the direction of a connection (inbound or outbound).
-func DirectionString(inbound bool) string {
-	if inbound {
-		return "inbound"
-	}
-	return "outbound"
-}
-
-// PickNoun returns the singular or plural form of a noun depending
-// on the count n.
-func Empty(pkg string) *Logger {
-	return &Logger{
-		Pkg:    pkg,
-		Fatal:  NoPrintln(),
-		Error:  NoPrintln(),
-		Warn:   NoPrintln(),
-		Info:   NoPrintln(),
-		Check:  NoCheck(),
-		Debug:  NoPrintln(),
-		Trace:  NoPrintln(),
-		Fatalf: NoPrintf(),
-		Errorf: NoPrintf(),
-		Warnf:  NoPrintf(),
-		Infof:  NoPrintf(),
-		Checkf: NoCheck(),
-		Debugf: NoPrintf(),
-		Tracef: NoPrintf(),
-		Fatalc: NoClosure(),
-		Errorc: NoClosure(),
-		Warnc:  NoClosure(),
-		Infoc:  NoClosure(),
-		Checkc: NoCheck(),
-		Debugc: NoClosure(),
-		Tracec: NoClosure(),
-		Fatals: NoSpew(),
-		Errors: NoSpew(),
-		Warns:  NoSpew(),
-		Infos:  NoSpew(),
-		Debugs: NoSpew(),
-		Traces: NoSpew(),
-		Writer: wr,
-	}
-
-}
-
-// sanitizeLoglevel accepts a string and returns a
-// default if the input is not in the Levels slice
-func FileExists(filePath string) bool {
-	_, err := os.Stat(filePath)
-	return err == nil
-}
-
-type IPCLogger struct {
-	Start chan struct{}
-	Stop  chan struct{}
-	Quit  chan struct{}
-}
-
-func (il *IPCLogger) Run(_ *int, reply *bool) (err error) {
-	il.Start <- struct{}{}
-	*reply = true
-	return
-}
-func (il *IPCLogger) Pause(_ *int, reply *bool) (err error) {
-	il.Stop <- struct{}{}
-	*reply = false
-	return
-}
-
-func init() {
-	SetLogWriter(os.Stderr)
-	L.SetLevel("debug", true, "pod")
-	//// set up a listener on stdin/out that has a method to enable sending the
-	//// entries as RPC messages
-	//quit := make(chan struct{})
-	//lC := L.AddLogChan()
-	//sc := stdconn.New(os.Stdin, os.Stdout, quit)
-	//ipcL := &IPCLogger{
-	//	Start: make(chan struct{}),
-	//	Stop:  make(chan struct{}),
-	//	Quit:  make(chan struct{}),
-	//}
-	//err := rpc.Register(ipcL)
-	//if err != nil {
-	//	L.Debug(err)
-	//}
-	//// ipc logger startup
-	//go func() {
-	//	L.Debug("starting up logger IPC")
-	//	rpc.ServeConn(sc)
-	//	L.Debug("stopping logger IPC")
-	//}()
-	//// listener
-	//go func() {
-	//out:
-	//	for {
-	//	pausing:
-	//		select {
-	//		case <-lC:
-	//			//fmt.Fprintln(os.Stderr, "log message", lm.Text)
-	//			// ignore log messages when paused
-	//		case <-ipcL.Quit:
-	//			break out
-	//		case <-ipcL.Start:
-	//			break pausing
-	//		case <-ipcL.Stop:
-	//		}
-	//	running:
-	//		select {
-	//		case ent := <-lC:
-	//			// encode and write message
-	//			_ = ent
-	//		case <-ipcL.Quit:
-	//			break out
-	//		case <-ipcL.Start:
-	//		case <-ipcL.Stop:
-	//			break running
-	//		}
-	//	}
-	//}()
-	L.Trace("starting up logger")
-}
-
-func PickNoun(n int, singular, plural string) string {
-	if n == 1 {
-		return singular
-	}
-	return plural
-}
-func Print(a ...interface{}) {
-	wr.Print(a...)
-}
-
-// printcFunc prints from a closure returning a string
-func printcFunc(level string, color bool, fh *os.File, ch []chan Entry,
-	split string) PrintcFunc {
-	f := func(fn func() string) {
-		t := fn()
-		text := trimReturn(t)
-		wr.Println(Composite(text, level, color, split))
-		if fh != nil || ch != nil {
-			_, loc, line, _ := runtime.Caller(2)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1],
-				string(os.PathSeparator))
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
-				text}
-			if fh != nil {
-				j, err := json.Marshal(out)
-				if err != nil {
-					wr.Println("logging error:", err)
-				}
-				_, _ = fmt.Fprint(fh, string(j)+",")
-			}
-			if ch != nil {
-				for i := range ch {
-					ch[i] <- out
-				}
-			}
-		}
-	}
-	return f
-}
-
-func Printf(format string, a ...interface{}) {
-	wr.Printf(format, a...)
-}
-
-// printfFunc prints a log entry with formatting
-func printfFunc(level string, color bool, fh *os.File, ch []chan Entry,
-	split string) PrintfFunc {
-	f := func(format string, a ...interface{}) {
-		text := fmt.Sprintf(format, a...)
-		wr.Println(Composite(text, level, color, split))
-		if fh != nil || ch != nil {
-			_, loc, line, _ := runtime.Caller(2)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1],
-				string(os.PathSeparator))
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
-				text}
-			if fh != nil {
-				j, err := json.Marshal(out)
-				if err != nil {
-					wr.Println("logging error:", err)
-				}
-				_, _ = fmt.Fprint(fh, string(j)+",")
-			}
-			if ch != nil {
-				for i := range ch {
-					ch[i] <- out
-				}
-			}
-		}
-	}
-	return f
-}
-
-func Println(a ...interface{}) {
-	wr.Println(a...)
-}
-
-// printlnFunc prints a log entry like Println
-func printlnFunc(level string, color bool, fh *os.File,
-	ch []chan Entry, split string) PrintlnFunc {
-	f := func(a ...interface{}) {
-		text := trimReturn(fmt.Sprintln(a...))
-		wr.Println(Composite(text, level, color, split))
-		if fh != nil || ch != nil {
-			_, loc, line, _ := runtime.Caller(2)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1],
-				string(os.PathSeparator))
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
-				text}
-			if fh != nil {
-				j, err := json.Marshal(out)
-				if err != nil {
-					wr.Println("logging error:", err)
-				}
-				_, _ = fmt.Fprint(fh, string(j)+",")
-			}
-			if ch != nil {
-				for i := range ch {
-					ch[i] <- out
-				}
-			}
-		}
-	}
-	return f
-}
-
-func checkFunc(color bool, fh *os.File, ch []chan Entry,
-	split string) CheckFunc {
-	f := func(err error) bool {
-		n := err == nil
-		if n {
-			return false
-		}
-		text := err.Error()
-		wr.Println(Composite(text, "CHK", color, split))
-		if fh != nil || ch != nil {
-			_, loc, line, _ := runtime.Caller(3)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1],
-				string(os.PathSeparator))
-			out := Entry{time.Now(), "CHK", fmt.Sprint(loc, ":", line), pkg,
-				text}
-			if fh != nil {
-				j, err := json.Marshal(out)
-				if err != nil {
-					wr.Println("logging error:", err)
-				}
-				_, _ = fmt.Fprint(fh, string(j)+",")
-			}
-			if ch != nil {
-				for i := range ch {
-					ch[i] <- out
-				}
-			}
-		}
-		return true
-	}
-	return f
-}
-
-// ps spews a variable
-func ps(level string, color bool, fh *os.File, split string) SpewFunc {
-	f := func(a interface{}) {
-		text := trimReturn(spew.Sdump(a))
-		o := "" + Composite("spew:", level, color, split)
-		o += "\n" + text + "\n"
-		wr.Print(o)
-		if fh != nil {
-			_, loc, line, _ := runtime.Caller(2)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1],
-				string(os.PathSeparator))
-			out := Entry{time.Now(), level, fmt.Sprint(loc, ":", line), pkg,
-				text}
-			j, err := json.Marshal(out)
-			if err != nil {
-				wr.Println("logging error:", err)
-			}
-			_, _ = fmt.Fprint(fh, string(j)+",")
-		}
-	}
-	return f
-}
-
-// Register adds a logger to Loggers
-func Register(root, loc string, l *Logger) {
-	files := strings.Split(loc, root+string(os.PathSeparator))
-	var pkg string
-	if len(files) > 1 {
-		pkg = files[1]
-	}
-	splitted := strings.Split(pkg, string(os.PathSeparator))
-	pkg = strings.Join(splitted[:len(splitted)-1], string(os.PathSeparator))
-	l = Empty(pkg).SetLevel("info", true, root)
-	Loggers[pkg] = l
-}
-
-// FileExists reports whether the named file or directory exists.
-func sanitizeLoglevel(level string) string {
-	found := false
-	for i := range Levels {
-		if level == Levels[i] {
-			found = true
-			break
-		}
-	}
-	if !found {
-		level = "info"
-	}
-	return level
-}
-
-func SetLogWriter(w io.Writer) {
-	wr.Writer = w
-}
-
-func trimReturn(s string) string {
-	if s[len(s)-1] == '\n' {
-		return s[:len(s)-1]
-	}
-	return s
 }

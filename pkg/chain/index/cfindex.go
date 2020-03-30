@@ -94,27 +94,27 @@ func (idx *CFIndex) Create(dbTx database.Tx) error {
 	meta := dbTx.Metadata()
 	cfIndexParentBucket, err := meta.CreateBucket(cfIndexParentBucketKey)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	for _, bucketName := range cfIndexKeys {
 		_, err = cfIndexParentBucket.CreateBucket(bucketName)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
 	for _, bucketName := range cfHeaderKeys {
 		_, err = cfIndexParentBucket.CreateBucket(bucketName)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
 	for _, bucketName := range cfHashKeys {
 		_, err = cfIndexParentBucket.CreateBucket(bucketName)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
@@ -135,23 +135,23 @@ func storeFilter(dbTx database.Tx, block *util.Block, f *gcs.Filter,
 	h := block.Hash()
 	filterBytes, err := f.NBytes()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	err = dbStoreFilterIdxEntry(dbTx, fkey, h, filterBytes)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Next store the filter hash.
 	filterHash, err := builder.GetFilterHash(f)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	err = dbStoreFilterIdxEntry(dbTx, hashkey, h, filterHash[:])
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Then fetch the previous block's filter header.
@@ -162,19 +162,19 @@ func storeFilter(dbTx database.Tx, block *util.Block, f *gcs.Filter,
 	} else {
 		pfh, err := dbFetchFilterIdxEntry(dbTx, hkey, ph)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		// Construct the new block's filter header, and store it.
 		prevHeader, err = chainhash.NewHash(pfh)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
 	fh, err := builder.MakeHeaderForFilter(f, *prevHeader)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	return dbStoreFilterIdxEntry(dbTx, hkey, h, fh[:])
@@ -189,7 +189,7 @@ func (idx *CFIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 	}
 	f, err := builder.BuildBasicFilter(block.MsgBlock(), prevScripts)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	return storeFilter(dbTx, block, f, wire.GCSFilterRegular)
@@ -201,21 +201,21 @@ func (idx *CFIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
 	for _, key := range cfIndexKeys {
 		err := dbDeleteFilterIdxEntry(dbTx, key, block.Hash())
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
 	for _, key := range cfHeaderKeys {
 		err := dbDeleteFilterIdxEntry(dbTx, key, block.Hash())
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
 	for _, key := range cfHashKeys {
 		err := dbDeleteFilterIdxEntry(dbTx, key, block.Hash())
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
@@ -250,7 +250,7 @@ func (idx *CFIndex) entriesByBlockHashes(filterTypeKeys [][]byte,
 		for _, blockHash := range blockHashes {
 			entry, err := dbFetchFilterIdxEntry(dbTx, key, blockHash)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return err
 			}
 			entries = append(entries, entry)

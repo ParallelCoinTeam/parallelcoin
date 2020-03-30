@@ -58,7 +58,7 @@ type secretSource struct {
 func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
 	ma, err := s.Address(s.addrmgrNs, addr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, false, err
 	}
 	mpka, ok := ma.(waddrmgr.ManagedPubKeyAddress)
@@ -69,7 +69,7 @@ func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
 	}
 	privKey, err := mpka.PrivKey()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, false, err
 	}
 	return privKey, ma.Compressed(), nil
@@ -77,7 +77,7 @@ func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
 func (s secretSource) GetScript(addr util.Address) ([]byte, error) {
 	ma, err := s.Address(s.addrmgrNs, addr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	msa, ok := ma.(waddrmgr.ManagedScriptAddress)
@@ -98,7 +98,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 	minconf int32, feeSatPerKb util.Amount) (tx *txauthor.AuthoredTx, err error) {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	err = walletdb.Update(w.db, func(dbtx walletdb.ReadWriteTx) error {
@@ -106,12 +106,12 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 		// Get current block's height and hash.
 		bs, err := chainClient.BlockStamp()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		eligible, err := w.findEligibleOutputs(dbtx, account, minconf, bs)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		inputSource := makeInputSource(eligible)
@@ -127,7 +127,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 				changeAddr, err = w.newChangeAddress(addrmgrNs, account)
 			}
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return nil, err
 			}
 			return txscript.PayToAddrScript(changeAddr)
@@ -135,7 +135,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 		tx, err = txauthor.NewUnsignedTransaction(outputs, feeSatPerKb,
 			inputSource, changeSource)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 		// Randomize change position, if change exists, before signing.
@@ -147,17 +147,17 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 		return tx.AddAllInputScripts(secretSource{w.Manager, addrmgrNs})
 	})
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	err = validateMsgTx(tx.Tx, tx.PrevScripts, tx.PrevInputValues)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	if tx.ChangeIndex >= 0 && account == waddrmgr.ImportedAddrAccount {
 		changeAmount := util.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
-		L.Warnf(
+		Warnf(
 			"spend from imported account produced change: "+
 				"moving %v from imported account into default account.",
 			changeAmount,
@@ -170,7 +170,7 @@ func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minco
 	txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)
 	unspent, err := w.TxStore.UnspentOutputs(txmgrNs)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// TODO: Eventually all of these filters (except perhaps output locking)
@@ -225,12 +225,12 @@ func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amou
 		vm, err := txscript.NewEngine(prevScript, tx, i,
 			txscript.StandardVerifyFlags, nil, hashCache, int64(inputValues[i]))
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return fmt.Errorf("cannot create script engine: %s", err)
 		}
 		err = vm.Execute()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return fmt.Errorf("cannot validate transaction: %s", err)
 		}
 	}

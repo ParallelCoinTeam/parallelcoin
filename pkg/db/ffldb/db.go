@@ -109,15 +109,15 @@ func // Less returns whether the item with index i should sort before the
 	return s[i].fileOffset < s[j].fileOffset
 }
 
-func // makeDbErr creates a database.Error given a set of arguments.
-makeDbErr(c database.ErrorCode, desc string, err error) database.Error {
-	return database.Error{ErrorCode: c, Description: desc, Err: err}
+func // makeDbErr creates a database.DBError given a set of arguments.
+makeDbErr(c database.ErrorCode, desc string, err error) database.DBError {
+	return database.DBError{ErrorCode: c, Description: desc, Err: err}
 }
 
 func // convertErr converts the passed leveldb error into a database error
 // with an equivalent error code  and the passed description.
 // It also sets the passed error as the underlying error.
-convertErr(desc string, ldbErr error) database.Error {
+convertErr(desc string, ldbErr error) database.DBError {
 	// Use the driver-specific error code by default.
 	// The code below will update this with the converted error if it's
 	// recognized.
@@ -135,7 +135,7 @@ convertErr(desc string, ldbErr error) database.Error {
 	case ldbErr == leveldb.ErrIterReleased:
 		code = database.ErrTxClosed
 	}
-	return database.Error{ErrorCode: code, Description: desc, Err: ldbErr}
+	return database.DBError{ErrorCode: code, Description: desc, Err: ldbErr}
 }
 
 func // copySlice returns a copy of the passed slice.
@@ -186,7 +186,7 @@ func // Delete removes the current key/value pair the cursor is at without
 	if err := c.bucket.tx.checkClosed(); err != nil {
 		return err
 	}
-	// Error if the cursor is exhausted.
+	// DBError if the cursor is exhausted.
 	if c.currentIter == nil {
 		str := "cursor is exhausted"
 		return makeDbErr(database.ErrIncompatibleValue, str, nil)
@@ -586,7 +586,7 @@ func // CreateBucket creates and returns a new nested bucket with the given key.
 		var err error
 		childID, err = b.tx.nextBucketID()
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 	}
@@ -724,7 +724,7 @@ func // ForEach invokes the passed function with every key/value pair in the
 	for ok := c.First(); ok; ok = c.Next() {
 		err := fn(c.Key(), c.Value())
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
@@ -758,7 +758,7 @@ func // ForEachBucket invokes the passed function with the key of every
 	for ok := c.First(); ok; ok = c.Next() {
 		err := fn(c.Key())
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
@@ -1060,7 +1060,7 @@ func // StoreBlock stores the provided block into the database.
 	}
 	blockBytes, err := block.Bytes()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		str := fmt.Sprintf("failed to get serialized bytes for block %s",
 			blockHash)
 		return makeDbErr(database.ErrDriverSpecific, str, err)
@@ -1077,7 +1077,7 @@ func // StoreBlock stores the provided block into the database.
 		hash:  blockHash,
 		bytes: blockBytes,
 	})
-	// L.Tracef("added block %s to pending blocks", blockHash)
+	// Tracef("added block %s to pending blocks", blockHash)
 	return nil
 }
 
@@ -1194,7 +1194,7 @@ func // FetchBlock returns the raw serialized bytes for the block identified
 	// Lookup the location of the block in the files from the block index.
 	blockRow, err := tx.fetchBlockRow(hash)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	location := deserializeBlockLoc(blockRow)
@@ -1203,7 +1203,7 @@ func // FetchBlock returns the raw serialized bytes for the block identified
 	// corruption.
 	blockBytes, err := tx.db.store.readBlock(hash, location)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return blockBytes, nil
@@ -1234,7 +1234,7 @@ func // FetchBlocks returns the raw serialized bytes for the blocks
 		var err error
 		blocks[i], err = tx.FetchBlock(&hashes[i])
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 	}
@@ -1287,7 +1287,7 @@ func // FetchBlockRegion returns the raw serialized bytes for the given block
 	if tx.pendingBlocks != nil {
 		regionBytes, err := tx.fetchPendingRegion(region)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 		if regionBytes != nil {
@@ -1297,7 +1297,7 @@ func // FetchBlockRegion returns the raw serialized bytes for the given block
 	// Lookup the location of the block in the files from the block index.
 	blockRow, err := tx.fetchBlockRow(region.Hash)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	location := deserializeBlockLoc(blockRow)
@@ -1313,7 +1313,7 @@ func // FetchBlockRegion returns the raw serialized bytes for the given block
 	regionBytes, err := tx.db.store.readBlockRegion(location, region.Offset,
 		region.Len)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	return regionBytes, nil
@@ -1360,7 +1360,7 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 		if tx.pendingBlocks != nil {
 			regionBytes, err := tx.fetchPendingRegion(region)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return nil, err
 			}
 			if regionBytes != nil {
@@ -1372,7 +1372,7 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 		// index.
 		blockRow, err := tx.fetchBlockRow(region.Hash)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 		location := deserializeBlockLoc(blockRow)
@@ -1396,7 +1396,7 @@ func // FetchBlockRegions returns the raw serialized bytes for the given
 		regionBytes, err := tx.db.store.readBlockRegion(*location,
 			region.Offset, region.Len)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 		blockRegions[ri] = regionBytes
@@ -1452,10 +1452,10 @@ func // writePendingAndCommit writes pending block data to the flat block
 	}
 	// Loop through all of the pending blocks to store and write them.
 	for _, blockData := range tx.pendingBlockData {
-		// L.Tracef("storing block %s", blockData.hash)
+		// Tracef("storing block %s", blockData.hash)
 		location, err := tx.db.store.writeBlock(blockData.bytes)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			rollback()
 			return err
 		}
@@ -1466,7 +1466,7 @@ func // writePendingAndCommit writes pending block data to the flat block
 		blockRow := serializeBlockLoc(location)
 		err = tx.blockIdxBucket.Put(blockData.hash[:], blockRow)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			rollback()
 			return err
 		}
@@ -1580,7 +1580,7 @@ func // begin is the implementation function for the Begin database method.
 	// which in turn also handles the underlying database).
 	snapshot, err := db.cache.Snapshot()
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		db.closeLock.RUnlock()
 		if writable {
 			db.writeLock.Unlock()
@@ -1642,7 +1642,7 @@ func // View invokes the passed function in the context of a managed read
 	// Start a read-only transaction.
 	tx, err := db.begin(false)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Since the user-provided function might panic,
@@ -1655,7 +1655,7 @@ func // View invokes the passed function in the context of a managed read
 	err = fn(tx)
 	tx.managed = false
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		// The error is ignored here because nothing was written yet and
 		// regardless of a rollback failure, the tx is closed now anyways.
 		_ = tx.Rollback()
@@ -1675,7 +1675,7 @@ func // Update invokes the passed function in the context of a managed read
 	// Start a read-write transaction.
 	tx, err := db.begin(true)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Since the user-provided function might panic,
@@ -1688,7 +1688,7 @@ func // Update invokes the passed function in the context of a managed read
 	err = fn(tx)
 	tx.managed = false
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		// The error is ignored here because nothing was written yet and
 		// regardless of a rollback failure, the tx is closed now anyways.
 		_ = tx.Rollback()
@@ -1770,7 +1770,7 @@ func // openDB opens the database at the provided path
 // ErrDbDoesNotExist is returned if the database doesn't exist and the create
 // flag is not set.
 openDB(dbPath string, network wire.BitcoinNet, create bool) (database.DB, error) {
-	// Error if the database doesn't exist and the create flag is not set.
+	// DBError if the database doesn't exist and the create flag is not set.
 	metadataDbPath := filepath.Join(dbPath, metadataDbName)
 	dbExists := fileExists(metadataDbPath)
 	if !create && !dbExists {
@@ -1792,7 +1792,7 @@ openDB(dbPath string, network wire.BitcoinNet, create bool) (database.DB, error)
 	}
 	ldb, err := leveldb.OpenFile(metadataDbPath, &opts)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, convertErr(err.Error(), err)
 	}
 	// Create the block store which includes scanning the existing flat block

@@ -70,19 +70,19 @@ func readNetAddress(r io.Reader, pver uint32, na *NetAddress, ts bool) error {
 	if ts && pver >= NetAddressTimeVersion {
 		err := readElement(r, (*uint32Time)(&na.Timestamp))
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
 	err := readElements(r, &na.Services, &ip)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Sigh.  Bitcoin protocol mixes little and big endian.
 	port, err := binarySerializer.Uint16(r, bigEndian)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	*na = NetAddress{
@@ -100,7 +100,7 @@ func writeNetAddress(w io.Writer, pver uint32, na *NetAddress, ts bool) error {
 	if ts && pver >= NetAddressTimeVersion {
 		err := writeElement(w, uint32(na.Timestamp.Unix()))
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return err
 		}
 	}
@@ -111,7 +111,7 @@ func writeNetAddress(w io.Writer, pver uint32, na *NetAddress, ts bool) error {
 	}
 	err := writeElements(w, na.Services, ip)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return err
 	}
 	// Sigh.  Bitcoin protocol mixes little and big endian.

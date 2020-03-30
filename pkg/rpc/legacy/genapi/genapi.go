@@ -30,92 +30,92 @@ var handlers = handlersT{
 	{
 		Method:  "addmultisigaddress",
 		Handler: "AddMultiSigAddress",
-		Cmd:     "btcjson.AddMultisigAddressCmd",
-		ResType: "string",
+		Cmd:     "*btcjson.AddMultisigAddressCmd",
+		ResType: "*string",
 	},
 	{
 		Method:  "createmultisig",
 		Handler: "CreateMultiSig",
-		Cmd:     "btcjson.CreateMultisigCmd",
-		ResType: "btcjson.CreateMultiSigResult",
+		Cmd:     "*btcjson.CreateMultisigCmd",
+		ResType: "*btcjson.CreateMultiSigResult",
 	},
 	{
 		Method:  "dumpprivkey",
 		Handler: "DumpPrivKey",
-		Cmd:     "btcjson.DumpPrivKeyCmd",
-		ResType: "string",
+		Cmd:     "*btcjson.DumpPrivKeyCmd",
+		ResType: "*string",
 	},
 	{
 		Method:  "getaccount",
 		Handler: "GetAccount",
-		Cmd:     "btcjson.GetAccountCmd",
-		ResType: "string",
+		Cmd:     "*btcjson.GetAccountCmd",
+		ResType: "*string",
 	},
 	{
 		Method:  "getaccountaddress",
 		Handler: "GetAccountAddress",
-		Cmd:     "btcjson.GetAccountAddressCmd",
-		ResType: "string",
+		Cmd:     "*btcjson.GetAccountAddressCmd",
+		ResType: "*string",
 	},
 	{
 		Method:  "getaddressesbyaccount",
 		Handler: "GetAddressesByAccount",
-		Cmd:     "btcjson.GetAddressesByAccountCmd",
-		ResType: "[]string",
+		Cmd:     "*btcjson.GetAddressesByAccountCmd",
+		ResType: "*[]string",
 	},
 	{
 		Method:  "getbalance",
 		Handler: "GetBalance",
-		Cmd:     "btcjson.GetBalanceCmd",
-		ResType: "float64",
+		Cmd:     "*btcjson.GetBalanceCmd",
+		ResType: "*float64",
 	},
 	{
 		Method:  "getbestblockhash",
 		Handler: "GetBestBlockHash",
-		Cmd:     "None",
-		ResType: "string",
+		Cmd:     "*None",
+		ResType: "*string",
 	},
 	{
 		Method:  "getblockcount",
 		Handler: "GetBlockCount",
-		Cmd:     "None",
-		ResType: "int32",
+		Cmd:     "*None",
+		ResType: "*int32",
 	},
 	{
 		Method:  "getinfo",
 		Handler: "GetInfo",
-		Cmd:     "None",
-		ResType: "btcjson.InfoWalletResult",
+		Cmd:     "*None",
+		ResType: "*btcjson.InfoWalletResult",
 	},
 	{
 		Method:  "getnewaddress",
 		Handler: "GetNewAddress",
-		Cmd:     "btcjson.GetNewAddressCmd",
-		ResType: "string",
+		Cmd:     "*btcjson.GetNewAddressCmd",
+		ResType: "*string",
 	},
 	{
 		Method:  "getrawchangeaddress",
 		Handler: "GetRawChangeAddress",
-		Cmd:     "btcjson.GetRawChangeAddressCmd",
-		ResType: "string",
+		Cmd:     "*btcjson.GetRawChangeAddressCmd",
+		ResType: "*string",
 	},
 	{
 		Method:  "getreceivedbyaccount",
 		Handler: "GetReceivedByAccount",
-		Cmd:     "btcjson.GetReceivedByAccountCmd",
-		ResType: "float64",
+		Cmd:     "*btcjson.GetReceivedByAccountCmd",
+		ResType: "*float64",
 	},
 	{
 		Method:  "getreceivedbyaddress",
 		Handler: "GetReceivedByAddress",
-		Cmd:     "btcjson.GetReceivedByAddressCmd",
-		ResType: "float64",
+		Cmd:     "*btcjson.GetReceivedByAddressCmd",
+		ResType: "*float64",
 	},
 	{
 		Method:  "gettransaction",
 		Handler: "GetTransaction",
-		Cmd:     "btcjson.GetTransactionCmd",
-		ResType: "btcjson.GetTransactionResult",
+		Cmd:     "*btcjson.GetTransactionCmd",
+		ResType: "*btcjson.GetTransactionResult",
 	},
 	{
 		Method:           "help",
@@ -127,38 +127,38 @@ var handlers = handlersT{
 	{
 		Method:  "importprivkey",
 		Handler: "ImportPrivKey",
-		Cmd:     "btcjson.ImportPrivKeyCmd",
-		ResType: "None",
+		Cmd:     "*btcjson.ImportPrivKeyCmd",
+		ResType: "*None",
 	},
 	{
 		Method:  "keypoolrefill",
 		Handler: "KeypoolRefill",
-		Cmd:     "None",
-		ResType: "None",
+		Cmd:     "*None",
+		ResType: "*None",
 	},
 	{
 		Method:  "listaccounts",
 		Handler: "ListAccounts",
-		Cmd:     "btcjson.ListAccountsCmd",
-		ResType: "map[string]float64",
+		Cmd:     "*btcjson.ListAccountsCmd",
+		ResType: "*map[string]float64",
 	},
 	{
 		Method:  "listlockunspent",
 		Handler: "ListLockUnspent",
-		Cmd:     "None",
-		ResType: "[]btcjson.TransactionInput",
+		Cmd:     "*None",
+		ResType: "*[]btcjson.TransactionInput",
 	},
 	{
 		Method:  "listreceivedbyaccount",
 		Handler: "ListReceivedByAccount",
-		Cmd:     "btcjson.ListReceivedByAccountCmd",
-		ResType: "[]btcjson.ListReceivedByAccountResult",
+		Cmd:     "*btcjson.ListReceivedByAccountCmd",
+		ResType: "*[]btcjson.ListReceivedByAccountResult",
 	},
 	{
 		Method:  "listreceivedbyaddress",
 		Handler: "ListReceivedByAddress",
-		Cmd:     "btcjson.ListReceivedByAddressCmd",
-		ResType: "btcjson.ListReceivedByAddressResult",
+		Cmd:     "*btcjson.ListReceivedByAddressCmd",
+		ResType: "*btcjson.ListReceivedByAddressResult",
 	},
 	{
 		Method:           "listsinceblock",
@@ -170,14 +170,14 @@ var handlers = handlersT{
 	{
 		Method:  "listtransactions",
 		Handler: "ListTransactions",
-		Cmd:     "btcjson.ListTransactionsCmd",
-		ResType: "[]btcjson.ListTransactionsResult",
+		Cmd:     "*btcjson.ListTransactionsCmd",
+		ResType: "*[]btcjson.ListTransactionsResult",
 	},
 	{
 		Method:  "listunspent",
 		Handler: "ListUnspent",
-		Cmd:     "btcjson.ListUnspentCmd",
-		ResType: "[]btcjson.ListUnspentResult",
+		Cmd:     "*btcjson.ListUnspentCmd",
+		ResType: "*[]btcjson.ListUnspentResult",
 	},
 	{
 		Method:           "sendfrom",
@@ -189,26 +189,26 @@ var handlers = handlersT{
 	{
 		Method:  "sendmany",
 		Handler: "SendMany",
-		Cmd:     "btcjson.SendManyCmd",
-		ResType: "string",
+		Cmd:     "*btcjson.SendManyCmd",
+		ResType: "*string",
 	},
 	{
 		Method:  "sendtoaddress",
 		Handler: "SendToAddress",
-		Cmd:     "btcjson.SendToAddressCmd",
-		ResType: "string",
+		Cmd:     "*btcjson.SendToAddressCmd",
+		ResType: "*string",
 	},
 	{
 		Method:  "settxfee",
 		Handler: "SetTxFee",
-		Cmd:     "btcjson.SetTxFeeCmd",
-		ResType: "bool",
+		Cmd:     "*btcjson.SetTxFeeCmd",
+		ResType: "*bool",
 	},
 	{
 		Method:  "signmessage",
 		Handler: "SignMessage",
-		Cmd:     "btcjson.SignMessageCmd",
-		ResType: "string",
+		Cmd:     "*btcjson.SignMessageCmd",
+		ResType: "*string",
 	},
 	{
 		Method:           "signrawtransaction",
@@ -220,91 +220,91 @@ var handlers = handlersT{
 	{
 		Method:  "validateaddress",
 		Handler: "ValidateAddress",
-		Cmd:     "btcjson.ValidateAddressCmd",
-		ResType: "btcjson.ValidateAddressWalletResult",
+		Cmd:     "*btcjson.ValidateAddressCmd",
+		ResType: "*btcjson.ValidateAddressWalletResult",
 	},
 	{
 		Method:  "verifymessage",
 		Handler: "VerifyMessage",
-		Cmd:     "btcjson.VerifyMessageCmd",
-		ResType: "bool",
+		Cmd:     "*btcjson.VerifyMessageCmd",
+		ResType: "*bool",
 	},
 	{
 		Method:  "walletlock",
 		Handler: "WalletLock",
-		Cmd:     "None",
-		ResType: "None",
+		Cmd:     "*None",
+		ResType: "*None",
 	},
 	{
 		Method:  "walletpassphrase",
 		Handler: "WalletPassphrase",
-		Cmd:     "btcjson.WalletPassphraseCmd",
-		ResType: "None",
+		Cmd:     "*btcjson.WalletPassphraseCmd",
+		ResType: "*None",
 	},
 	{
 		Method:  "walletpassphrasechange",
 		Handler: "WalletPassphraseChange",
-		Cmd:     "btcjson.WalletPassphraseChangeCmd",
-		ResType: "None",
+		Cmd:     "*btcjson.WalletPassphraseChangeCmd",
+		ResType: "*None",
 	},
 	{
 		Method:  "createnewaccount",
 		Handler: "CreateNewAccount",
-		Cmd:     "btcjson.CreateNewAccountCmd",
-		ResType: "None",
+		Cmd:     "*btcjson.CreateNewAccountCmd",
+		ResType: "*None",
 	},
 	{
 		Method:  "getbestblock",
 		Handler: "GetBestBlock",
-		Cmd:     "None",
-		ResType: "btcjson.GetBestBlockResult",
+		Cmd:     "*None",
+		ResType: "*btcjson.GetBestBlockResult",
 	},
 	{
 		Method:  "getunconfirmedbalance",
 		Handler: "GetUnconfirmedBalance",
-		Cmd:     "btcjson.GetUnconfirmedBalanceCmd",
-		ResType: "float64",
+		Cmd:     "*btcjson.GetUnconfirmedBalanceCmd",
+		ResType: "*float64",
 	},
 	{
 		Method:  "listaddresstransactions",
 		Handler: "ListAddressTransactions",
-		Cmd:     "btcjson.ListAddressTransactionsCmd",
-		ResType: "[]btcjson.ListTransactionsResult",
+		Cmd:     "*btcjson.ListAddressTransactionsCmd",
+		ResType: "*[]btcjson.ListTransactionsResult",
 	},
 	{
 		Method:  "listalltransactions",
 		Handler: "ListAllTransactions",
-		Cmd:     "btcjson.ListAllTransactionsCmd",
-		ResType: "[]btcjson.ListTransactionsResult",
+		Cmd:     "*btcjson.ListAllTransactionsCmd",
+		ResType: "*[]btcjson.ListTransactionsResult",
 	},
 	{
 		Method:  "renameaccount",
 		Handler: "RenameAccount",
-		Cmd:     "btcjson.RenameAccountCmd",
-		ResType: "None",
+		Cmd:     "*btcjson.RenameAccountCmd",
+		ResType: "*None",
 	},
 	{
 		Method:  "walletislocked",
 		Handler: "WalletIsLocked",
-		Cmd:     "None",
-		ResType: "bool",
+		Cmd:     "*None",
+		ResType: "*bool",
 	},
 	{
 		Method:  "dropwallethistory",
 		Handler: "HandleDropWalletHistory",
-		Cmd:     "None",
-		ResType: "string",
+		Cmd:     "*None",
+		ResType: "*string",
 	},
 }
 
 func main() {
-	log.log.L.SetLevel("trace", true, "pod")
-	if fd, err := os.Create("rpchandlers.go"); L.Check(err) {
+	log.L.SetLevel("trace", true, "pod")
+	if fd, err := os.Create("rpchandlers.go"); Check(err) {
 	} else {
 		defer fd.Close()
 		t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
 		sort.Sort(handlers)
-		if err = t.Execute(fd, handlers); L.Check(err) {
+		if err = t.Execute(fd, handlers); Check(err) {
 		}
 	}
 }
@@ -323,8 +323,6 @@ import (
 	"io"
 	"net/rpc"
 	"time"
-
-	log "github.com/p9c/pod/pkg/logi"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/wallet"
@@ -471,7 +469,7 @@ func RunAPI(chainRPC *chain.RPCClient, wallet *wallet.Wallet,
 	quit chan struct{}) {
 	nrh := ` + RPCMapName + `
 	go func() {
-		L.Debug("starting up wallet cAPI")
+		Debug("starting up wallet cAPI")
 		var err error
 		var res interface{}
 		for {
@@ -479,12 +477,12 @@ func RunAPI(chainRPC *chain.RPCClient, wallet *wallet.Wallet,
 			case msg := <-nrh["{{.Method}}"].Call:
 				if res, err = nrh["{{.Method}}"].
 					Handler(msg.Params.({{.Cmd}}), wallet, 
-						chainRPC); L.Check(err) {
+						chainRPC); Check(err) {
 				}
 				if r, ok := res.({{.ResType}}); ok { 
 					msg.Ch.(chan {{.Handler}}Res) <- {{.Handler}}Res{&r, err} } {{end}}
 			case <-quit:
-				L.Debug("stopping wallet cAPI")
+				Debug("stopping wallet cAPI")
 				return
 			}
 		}
@@ -513,7 +511,7 @@ func (r *CAPIClient) {{.Handler}}(cmd ...{{.Cmd}}) (res {{.ResType}}, err error)
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("` + Worker + `.{{.Handler}}", c, &res); L.Check(err) {
+	if err = r.Call("` + Worker + `.{{.Handler}}", c, &res); Check(err) {
 	}
 	return
 }

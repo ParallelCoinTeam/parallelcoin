@@ -19,11 +19,11 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	if toMake < 3 {
 		return
 	}
-	L.Warn("refilling mining addresses")
+	Warn("refilling mining addresses")
 	account, err := w.AccountNumber(wm.KeyScopeBIP0044,
 		"default")
 	if err != nil {
-		L.Error("error getting account number ", err)
+		Error("error getting account number ", err)
 	}
 	for i := 0; i < toMake; i++ {
 		addr, err := w.NewAddress(account, wm.KeyScopeBIP0044,
@@ -36,14 +36,14 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 			stateCfg.ActiveMiningAddrs = append(stateCfg.
 				ActiveMiningAddrs, addr)
 		} else {
-			L.Error("error adding new address ", err)
+			Error("error adding new address ", err)
 		}
 	}
 	if save.Pod(cfg) {
-		L.Warn("saved config with new addresses")
-		// L.Info("you can now start up a node in the same config folder with fresh addresses ready to mine with")
+		Warn("saved config with new addresses")
+		// Info("you can now start up a node in the same config folder with fresh addresses ready to mine with")
 		// os.Exit(0)
 	} else {
-		L.Error("error adding new addresses", err)
+		Error("error adding new addresses", err)
 	}
 }

@@ -63,7 +63,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 						(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
 						func(e gel.EditorEvent) {
 							rc.Settings.Daemon.Config[f.Field.Model] = strings.Fields((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
-							L.Debug()
+							Debug()
 							if e != nil {
 								rc.SaveDaemonCfg()
 							}
@@ -107,7 +107,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 						}
 					})()
 			case "password":
-				e := th.DuoUIeditor(f.Field.Label)
+				e := th.DuoUIeditor(f.Field.Label, "DocText", "DocBg", 32)
 				e.Font.Typeface = th.Fonts["Primary"]
 				e.Font.Style = text.Italic
 				e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor))

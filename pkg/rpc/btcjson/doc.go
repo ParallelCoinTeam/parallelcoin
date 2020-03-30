@@ -26,7 +26,7 @@ Unmarshalling a received Request object is a two step process:
 This approach is used since it provides the caller with access to the additional fields in the request that are not part of the command such as the ID. Unmarshalling a received Response object is also a two step process:
   1) Unmarhsal the raw bytes into a Response struct instance via json.Unmarshal
   2) Depending on the ID, unmarshal the Result field of the unmarshalled Response to create a concrete type instance
-As above, this approach is used since it provides the caller with access to the fields in the response such as the ID and Error.
+As above, this approach is used since it provides the caller with access to the fields in the response such as the ID and BTCJSONError.
 Command Creation
 This package provides two approaches for creating a new command.  This first, and preferred, method is to use one of the New<Foo>Cmd functions.  This allows static compile-time checking to help ensure the parameters stay in sync with the struct definitions.
 The second approach is the NewCmd function which takes a method (command) name and variable arguments.  The function includes full checking to ensure the parameters are accurate according to provided method, however these checks are, obviously, run-time which means any mistakes won't be found until the code is actually executed.  However, it is quite useful for user-supplied commands that are intentionally dynamic.
@@ -40,10 +40,10 @@ To facilitate providing consistent help to users of the RPC server, this package
 In addition, the MethodUsageText function is provided to generate consistent one-line usage for registered commands and notifications using reflection.
 Errors
 There are 2 distinct type of errors supported by this package:
-- General errors related to marshalling or unmarshalling or improper use of the package (type Error)
+- General errors related to marshalling or unmarshalling or improper use of the package (type BTCJSONError)
 - RPC errors which are intended to be returned across the wire as a part of the JSON-RPC response (type RPCError)
-The first category of errors (type Error) typically indicates a programmer error and can be avoided by properly using the API.  Errors of this type will be returned from the various functions available in this package.  They identify issues such as unsupported field types, attempts to register malformed commands, and attempting to create a new command with an improper number of parameters.
-The specific reason for the error can be detected by type asserting it to a *btcjson.Error and accessing the ErrorCode field.
+The first category of errors (type BTCJSONError) typically indicates a programmer error and can be avoided by properly using the API.  Errors of this type will be returned from the various functions available in this package.  They identify issues such as unsupported field types, attempts to register malformed commands, and attempting to create a new command with an improper number of parameters.
+The specific reason for the error can be detected by type asserting it to a *btcjson.BTCJSONError and accessing the ErrorCode field.
 The second category of errors (type RPCError), on the other hand, are useful for returning errors to RPC clients.  Consequently, they are used in the previously described Response type.
 */
 package btcjson

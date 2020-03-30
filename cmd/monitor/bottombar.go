@@ -2,16 +2,12 @@ package monitor
 
 import (
 	"gioui.org/layout"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"syscall"
 )
 
 func (s *State) BottomBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexV(
 			s.SettingsPage(),
 			s.BuildPage(),
@@ -23,14 +19,14 @@ func (s *State) BottomBar() layout.FlexChild {
 func (s *State) StatusBar() layout.FlexChild {
 	return Rigid(func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexH(
 			s.RunControls(),
 			s.RunmodeButtons(),
 			s.BuildButtons(),
 			s.SettingsButtons(),
 			Spacer(),
-			s.RestartRunButton(),
+			s.Filter(),
 		)
 	})
 }
@@ -38,33 +34,48 @@ func (s *State) StatusBar() layout.FlexChild {
 func (s *State) RunmodeButtons() layout.FlexChild {
 	return Rigid(func() {
 		s.FlexH(Rigid(func() {
-			if !s.Config.RunModeOpen.Load() {
+			if !s.Config.RunModeOpen {
 				fg, bg := "ButtonText", "ButtonBg"
-				if s.Config.Running.Load() {
-					fg, bg = "DocBg", "DocText"
+				if s.Config.Running {
+					fg, bg = "ButtonBg", "DocText"
 				}
-				s.TextButton(s.Config.RunMode.Load(), "Secondary",
-					23, fg, bg,
-					s.RunModeFoldButton)
+				txt := s.Config.RunMode
+				//cs := s.Gtx.Constraints
+				//if cs.Width.Max <= 240 {
+				//	txt = txt[:1]
+				//}
+				s.TextButton(txt, "Secondary", 34, fg, bg,
+					&s.RunModeFoldButton)
 				for s.RunModeFoldButton.Clicked(s.Gtx) {
-					if !s.Config.Running.Load() {
-						s.Config.RunModeOpen.Store(true)
+					if !s.Config.Running {
+						s.Config.RunModeOpen = true
 						s.SaveConfig()
 					}
 				}
 			} else {
 				modes := []string{
-					"node", "wallet", "shell", "gui", "monitor",
+					"node", "wallet", "shell", "gui", "mon",
 				}
 				s.ModesList.Layout(s.Gtx, len(modes), func(i int) {
-					s.TextButton(modes[i], "Secondary",
-						23, "ButtonText",
+					mm := modes[i]
+					fg := "DocBg"
+					if modes[i] == s.Config.RunMode {
+						fg = "DocText"
+					}
+					txt := mm
+					if s.WindowWidth <= 880 && s.Config.FilterOpen ||
+						s.WindowWidth <= 640 && !s.Config.FilterOpen {
+						txt = txt[:1]
+					}
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg", "ff")
+					s.TextButton(txt, "Secondary", 34, fg,
 						"ButtonBg", s.ModesButtons[modes[i]])
 					for s.ModesButtons[modes[i]].Clicked(s.Gtx) {
-						L.Debug(modes[i], "clicked")
-						if s.Config.RunModeOpen.Load() {
-							s.Config.RunMode.Store(modes[i])
-							s.Config.RunModeOpen.Store(false)
+						Debug(mm, "clicked")
+						if s.Config.RunModeOpen {
+							s.Config.RunMode = modes[i]
+							s.Config.RunModeOpen = false
 						}
 						s.SaveConfig()
 					}
@@ -75,31 +86,24 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 	})
 }
 
-func (s *State) RestartRunButton() layout.FlexChild {
+func (s *State) Filter() layout.FlexChild {
 	return Rigid(func() {
-		var c *exec.Cmd
-		var err error
-		s.IconButton("Restart", "PanelText", "PanelBg",
-			s.RestartButton)
-		for s.RestartButton.Clicked(s.Gtx) {
-			L.Debug("clicked restart button")
-			s.SaveConfig()
-			if s.HasGo {
-				go func() {
-					s.RunCommandChan <- "stop"
-					exePath := filepath.Join(*s.Ctx.Config.DataDir, "mon")
-					c = exec.Command("go", "build", "-x", "-v",
-						"-tags", "goterm", "-o", exePath)
-					c.Stderr = os.Stderr
-					c.Stdout = os.Stdout
-					if err = c.Run(); !L.Check(err) {
-						if err = syscall.Exec(exePath, os.Args,
-							os.Environ()); L.Check(err) {
-						}
-						//time.Sleep(time.Second)
-						os.Exit(0)
-					}
-				}()
+		fg, bg := "PanelText", "PanelBg"
+		if s.Config.FilterOpen {
+			fg, bg = "DocText", "DocBg"
+		}
+		//if !(s.Config.FilterOpen.Load() && s.WindowWidth <= 720) ||
+		//	(!s.Config.FilterOpen.Load() && s.WindowWidth > 480) {
+		if !s.Config.FilterOpen {
+			s.IconButton("Filter", fg, bg, &s.FilterButton)
+			for s.FilterButton.Clicked(s.Gtx) {
+				Debug("clicked filter button")
+				if !s.Config.FilterOpen {
+					s.Config.SettingsOpen = false
+					s.Config.BuildOpen = false
+				}
+				s.Config.FilterOpen = !s.Config.FilterOpen
+				s.SaveConfig()
 			}
 		}
 	})

@@ -10,7 +10,7 @@ import (
 	log "github.com/p9c/pod/pkg/logi"
 )
 
-// tstCheckScriptError ensures the type of the two passed errors are of the same type (either both nil or both of type Error) and their error codes match when not nil.
+// tstCheckScriptError ensures the type of the two passed errors are of the same type (either both nil or both of type ScriptError) and their error codes match when not nil.
 func tstCheckScriptError(gotErr, wantErr error) error {
 	// Ensure the error code is of the expected type and the error code matches the value specified in the test instance.
 	if reflect.TypeOf(gotErr) != reflect.TypeOf(wantErr) {
@@ -21,12 +21,12 @@ func tstCheckScriptError(gotErr, wantErr error) error {
 		return nil
 	}
 	// Ensure the want error type is a script error.
-	werr, ok := wantErr.(Error)
+	werr, ok := wantErr.(ScriptError)
 	if !ok {
 		return fmt.Errorf("unexpected test error type %T", wantErr)
 	}
 	// Ensure the error codes match.  It's safe to use a raw type assert here since the code above already proved they are the same type and the want error is a script error.
-	gotErrorCode := gotErr.(Error).ErrorCode
+	gotErrorCode := gotErr.(ScriptError).ErrorCode
 	if gotErrorCode != werr.ErrorCode {
 		return fmt.Errorf("mismatched error code - got %v (%v), want %v",
 			gotErrorCode, gotErr, werr.ErrorCode)

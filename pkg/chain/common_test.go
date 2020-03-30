@@ -96,7 +96,7 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 		// read block
 		_, err = dr.Read(rbytes)
 		if err != nil {
-			log.Println(err)
+			fmt.Println(err)
 		}
 		block, err = util.NewBlockFromBytes(rbytes)
 		if err != nil {

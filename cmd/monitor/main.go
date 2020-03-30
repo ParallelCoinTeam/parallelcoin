@@ -9,7 +9,7 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"gopkg.in/src-d/go-git.v4"
 	"os"
@@ -21,64 +21,78 @@ import (
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	mon := NewMonitor(cx, nil, rc)
 	var lgs []string
-	for i := range log.Loggers {
+	for i := range logi.L.Packages {
 		lgs = append(lgs, i)
 	}
-	mon.Loggers = GetTree(lgs)
-	_, _ = git.PlainClone("/tmp/foo", false, &git.CloneOptions{
-		URL:      "https://github.com/src-d/go-git",
-		Progress: os.Stderr,
-	})
+	Debugs(lgs)
+	mon.Loggers = mon.GetTree(lgs)
+	isNew := mon.LoadConfig()
+	_, _ = git.PlainClone("/tmp/foo", false,
+		&git.CloneOptions{
+			URL:      "https://github.com/src-d/go-git",
+			Progress: os.Stderr,
+		})
 	var cwd string
-	if cwd, err = os.Getwd(); L.Check(err) {
+	if cwd, err = os.Getwd(); Check(err) {
 	}
 	var repo *git.Repository
-	if repo, err = git.PlainOpen(cwd); L.Check(err) {
+	if repo, err = git.PlainOpen(cwd); Check(err) {
 	}
 	if repo != nil {
-		L.Debug("running inside repo")
+		Debug("running inside repo")
 		mon.RunningInRepo = true
-		L.Debug(repo.Remotes())
+		Debug(repo.Remotes())
+		if isNew {
+			mon.Config.RunInRepo = true
+		}
 	}
 	cmd := exec.Command("go", "version")
 	var out []byte
 	out, err = cmd.CombinedOutput()
 	if !strings.HasPrefix("go version", string(out)) {
 		mon.HasGo = true
+		if isNew {
+			mon.Config.UseBuiltinGo = true
+		}
 	}
-	mon.LoadConfig()
-	//L.Debugs(mon.Config)
 	mon.W = app.NewWindow(
-		app.Size(unit.Dp(float32(mon.Config.Width.Load())),
-			unit.Dp(float32(mon.Config.Height.Load()))),
-		app.Title("ParallelCoin Pod Monitor"),
+		app.Size(unit.Dp(float32(mon.Config.Width)),
+			unit.Dp(float32(mon.Config.Height))),
+		app.Title("ParallelCoin Pod Monitor ["+*cx.Config.DataDir+"]"),
 	)
 	mon.Gtx = layout.NewContext(mon.W.Queue())
 	go mon.Runner()
-	if mon.Config.Running.Load() {
+	if mon.Config.Running && !(mon.Config.RunMode == "m" ||
+		mon.Config.RunMode == "mon" || mon.Config.RunMode == "monitor") {
 		go func() {
-			time.Sleep(time.Second)
-			mon.RunCommandChan <- "restart"
-			if mon.Config.Pausing.Load() {
-				//time.Sleep(time.Second*3)
+			Debug("starting up as was running previously when shut down")
+			time.Sleep(time.Second / 2)
+			mon.Config.Running = false
+			//mon.RunCommandChan <- "stop"
+			mon.RunCommandChan <- "run"
+			if mon.Config.Pausing {
+				time.Sleep(time.Second / 2)
 				mon.RunCommandChan <- "pause"
 			}
 		}()
 	}
+	//go mon.Consume()
 	go func() {
-		L.Debug("starting up GUI event loop")
+		Debug("starting up GUI event loop")
 	out:
 		for {
 			select {
 			case <-cx.KillAll:
-				L.Debug("kill signal received")
+				Debug("kill signal received")
 				mon.SaveConfig()
+				mon.RunCommandChan <- "kill"
 				break out
 			case e := <-mon.W.Events():
 				switch e := e.(type) {
 				case system.DestroyEvent:
-					L.Debug("destroy event received")
-					close(cx.KillAll)
+					Debug("destroy event received")
+					mon.SaveConfig()
+					close(mon.Ctx.KillAll)
 				case system.FrameEvent:
 					mon.Gtx.Reset(e.Config, e.Size)
 					cs := mon.Gtx.Constraints
@@ -89,12 +103,15 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 				}
 			}
 		}
-		L.Debug("gui shut down")
+		mon.SaveConfig()
+		mon.RunCommandChan <- "kill"
+		Debug("gui shut down")
 		os.Exit(0)
 	}()
-	// w.Invalidate()
 	interrupt.AddHandler(func() {
-		close(cx.KillAll)
+		mon.SaveConfig()
+		mon.RunCommandChan <- "kill"
+		close(mon.Ctx.KillAll)
 	})
 	app.Main()
 	return
@@ -103,7 +120,16 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 func (s *State) TopLevelLayout() {
 	s.FlexV(
 		s.DuoUIheader(),
-		s.Body(),
-		s.BottomBar(),
+		Flexed(1, func() {
+			s.FlexH(Flexed(1, func() {
+				s.FlexV(Flexed(1, func() {
+					s.FlexH(
+						s.Body(),
+					)
+				}), s.BottomBar(),
+				)
+			}), s.Sidebar(),
+			)
+		}),
 	)
 }

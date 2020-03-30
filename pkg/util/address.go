@@ -50,7 +50,7 @@ func encodeSegWitAddress(hrp string, witnessVersion byte, witnessProgram []byte)
 	// Group the address bytes into 5 bit groups, as this is what is used to encode each character in the address string.
 	converted, err := bech32.ConvertBits(witnessProgram, 8, 5, true)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", err
 	}
 	// Concatenate the witness version and program, and encode the resulting bytes using bech32 encoding.
@@ -59,13 +59,13 @@ func encodeSegWitAddress(hrp string, witnessVersion byte, witnessProgram []byte)
 	copy(combined[1:], converted)
 	bech, err := bech32.Encode(hrp, combined)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", err
 	}
 	// Check validity by decoding the created address.
 	version, program, err := decodeSegWitAddress(bech)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return "", fmt.Errorf("invalid segwit address: %v", err)
 	}
 	if version != witnessVersion || !bytes.Equal(program, witnessProgram) {
@@ -106,7 +106,7 @@ func DecodeAddress(addr string, defaultNet *netparams.Params) (Address, error) {
 		if chaincfg.IsBech32SegwitPrefix(prefix) {
 			witnessVer, witnessProg, err := decodeSegWitAddress(addr)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return nil, err
 			}
 			// We currently only support P2WPKH and P2WSH, which is witness version 0.
@@ -129,7 +129,7 @@ func DecodeAddress(addr string, defaultNet *netparams.Params) (Address, error) {
 	if len(addr) == 130 || len(addr) == 66 {
 		serializedPubKey, err := hex.DecodeString(addr)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return nil, err
 		}
 		return NewAddressPubKey(serializedPubKey, defaultNet)
@@ -137,7 +137,7 @@ func DecodeAddress(addr string, defaultNet *netparams.Params) (Address, error) {
 	// Switch on decoded length to determine the type.
 	decoded, netID, err := base58.CheckDecode(addr)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		if err == base58.ErrChecksum {
 			return nil, ErrChecksumMismatch
 		}
@@ -167,7 +167,7 @@ func decodeSegWitAddress(address string) (byte, []byte, error) {
 	// Decode the bech32 encoded address.
 	_, data, err := bech32.Decode(address)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, err
 	}
 	// The first byte of the decoded address is the witness version, it must exist.
@@ -182,7 +182,7 @@ func decodeSegWitAddress(address string) (byte, []byte, error) {
 	// The remaining characters of the address returned are grouped into words of 5 bits. In order to restore the original witness program bytes, we'll need to regroup into 8 bit words.
 	regrouped, err := bech32.ConvertBits(data[1:], 5, 8, false)
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return 0, nil, err
 	}
 	// The regrouped data must be between 2 and 40 bytes.
@@ -320,7 +320,7 @@ type AddressPubKey struct {
 func NewAddressPubKey(serializedPubKey []byte, net *netparams.Params) (*AddressPubKey, error) {
 	pubKey, err := ec.ParsePubKey(serializedPubKey, ec.S256())
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 	// Set the format of the pubkey.  This probably should be returned from ec, but do it here to avoid API churn.  We already know the pubkey is valid since it parsed above, so it's safe to simply examine the leading byte to get the format.
@@ -427,7 +427,7 @@ func (a *AddressWitnessPubKeyHash) EncodeAddress() string {
 	str, err := encodeSegWitAddress(a.hrp, a.witnessVersion,
 		a.witnessProgram[:])
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return ""
 	}
 	return str
@@ -500,7 +500,7 @@ func (a *AddressWitnessScriptHash) EncodeAddress() string {
 	str, err := encodeSegWitAddress(a.hrp, a.witnessVersion,
 		a.witnessProgram[:])
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return ""
 	}
 	return str

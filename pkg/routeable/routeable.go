@@ -11,20 +11,20 @@ func GetInterface() (lanInterface []*net.Interface) {
 	var interfaces []net.Interface
 	interfaces, err = net.Interfaces()
 	if err != nil {
-		L.Error("error:", err)
+		Error("error:", err)
 	}
-	// L.Traces(interfaces)
+	// Traces(interfaces)
 	for ifi := range interfaces {
 		if interfaces[ifi].Flags&net.FlagLoopback == 0 && interfaces[ifi].
 			HardwareAddr != nil {
 			// iads, _ := interfaces[ifi].Addrs()
 			// for i := range iads {
-			//	//L.Traces(iads[i].Network())
+			//	//Traces(iads[i].Network())
 			// }
-			// L.Debug(interfaces[ifi].MulticastAddrs())
+			// Debug(interfaces[ifi].MulticastAddrs())
 			lanInterface = append(lanInterface, &interfaces[ifi])
 		}
 	}
-	// L.Traces(lanInterface)
+	// Traces(lanInterface)
 	return
 }

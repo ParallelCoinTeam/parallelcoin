@@ -91,7 +91,7 @@ func (h *blockHeaderStore) readHeaderRange(startHeight uint32,
 	_, err := h.file.ReadAt(rawHeaderBytes, int64(seekDistance))
 
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 
@@ -129,7 +129,7 @@ func (h *blockHeaderStore) readHeader(height uint32) (wire.BlockHeader, error) {
 	rawHeader, err := h.readRaw(seekDistance)
 
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return header, err
 	}
 
@@ -153,7 +153,7 @@ func (f *FilterHeaderStore) readHeader(height uint32) (*chainhash.Hash, error) {
 	rawHeader, err := f.readRaw(seekDistance)
 
 	if err != nil {
-		L.Error(err)
+		Error(err)
 		return nil, err
 	}
 

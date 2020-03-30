@@ -27,10 +27,10 @@ func main() {
 		bbb := make([]byte, len(blockbytes))
 		copy(bbb, blockbytes)
 		bl := big.NewInt(0).SetBytes(bbb)
-		L.Debug("bl", len(fmt.Sprint(bl)), bl)
+		Debug("bl", len(fmt.Sprint(bl)), bl)
 		fh := big.NewInt(0).SetBytes(fhc)
-		L.Traces(fhc)
-		L.Debug("fh", len(fmt.Sprint(fh)), fh)
+		Traces(fhc)
+		Debug("fh", len(fmt.Sprint(fh)), fh)
 		sh := big.NewInt(0).SetBytes(shc)
 		sqfh := fh.Mul(fh, fh)
 		sqsh := sh.Mul(sh, sh)
@@ -41,8 +41,8 @@ func main() {
 		ddd := make([]byte, dlen)
 		copy(ddd, reverse(divdb))
 		dddB := big.NewInt(0).SetBytes(ddd)
-		L.Traces(ddd)
-		L.Debug(dddB)
+		Traces(ddd)
+		Debug(dddB)
 	}
 }
 

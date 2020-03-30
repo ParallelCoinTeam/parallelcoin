@@ -12,25 +12,25 @@ import (
 )
 
 type // txValidateItem holds a transaction along with which input to validate.
-	txValidateItem struct {
-		txInIndex int
-		txIn      *wire.TxIn
-		tx        *util.Tx
-		sigHashes *txscript.TxSigHashes
-	}
+txValidateItem struct {
+	txInIndex int
+	txIn      *wire.TxIn
+	tx        *util.Tx
+	sigHashes *txscript.TxSigHashes
+}
 
 type // txValidator provides a type which asynchronously validates transaction
-	// inputs.  It provides several channels for communication and a processing
-	// function that is intended to be in run multiple goroutines.
-	txValidator struct {
-		validateChan chan *txValidateItem
-		quitChan     chan struct{}
-		resultChan   chan error
-		utxoView     *UtxoViewpoint
-		flags        txscript.ScriptFlags
-		sigCache     *txscript.SigCache
-		hashCache    *txscript.HashCache
-	}
+// inputs.  It provides several channels for communication and a processing
+// function that is intended to be in run multiple goroutines.
+txValidator struct {
+	validateChan chan *txValidateItem
+	quitChan     chan struct{}
+	resultChan   chan error
+	utxoView     *UtxoViewpoint
+	flags        txscript.ScriptFlags
+	sigCache     *txscript.SigCache
+	hashCache    *txscript.HashCache
+}
 
 func // sendResult sends the result of a script pair validation on the internal
 // result channel while respecting the quit channel.
@@ -73,7 +73,7 @@ out:
 				txVI.txInIndex, v.flags, v.sigCache, txVI.sigHashes,
 				inputAmount)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				str := fmt.Sprintf("failed to parse input "+
 					"%s:%d which references output %v - "+
 					"%v (input witness %x, input script "+
@@ -152,7 +152,7 @@ func // Validate validates the scripts for all of the passed transaction inputs
 		case err := <-v.resultChan:
 			processedItems++
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				close(v.quitChan)
 				return err
 			}
@@ -279,7 +279,7 @@ checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 		return err
 	}
 	// elapsed := time.Since(start)
-	// L.Tracec(func() string {
+	// Tracec(func() string {
 	//	return fmt.Sprintf("block %v took %v to verify", block.Hash(), elapsed)
 	// })
 	// If the HashCache is present, once we have validated the block,

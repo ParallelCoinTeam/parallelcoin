@@ -1,7 +1,9 @@
 package app
 
 import (
+	"fmt"
 	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/pkg/logi/serve"
 	"os"
 
 	"github.com/urfave/cli"
@@ -10,14 +12,14 @@ import (
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/walletmain"
 	"github.com/p9c/pod/pkg/conte"
-	log "github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name)
-		L.Debug("starting shell")
+		serve.Log(cx.KillAll)
+		Debug("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
@@ -28,34 +30,34 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 				cx.ActiveNet.Params.Name + slash +
 				wallet.WalletDbName
 		if !apputil.FileExists(dbFilename) {
-			// log.L.SetLevel("off", false)
+			// log.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				L.Error("failed to create wallet", err)
+				Error("failed to create wallet", err)
 			}
-			log.Println("restart to complete initial setup")
+			fmt.Println("restart to complete initial setup")
 			os.Exit(1)
 		}
-		L.Warn("starting node")
+		Warn("starting node")
 		if !*cx.Config.NodeOff {
 			go func() {
 				err = node.Main(cx, shutdownChan)
 				if err != nil {
-					L.Error("error starting node ", err)
+					Error("error starting node ", err)
 				}
 			}()
 			cx.RPCServer = <-cx.NodeChan
 		}
-		L.Warn("starting wallet")
+		Warn("starting wallet")
 		if !*cx.Config.WalletOff {
 			go func() {
 				err = walletmain.Main(cx)
 				if err != nil {
-					log.Println("error running wallet:", err)
+					fmt.Println("error running wallet:", err)
 				}
 			}()
 			cx.WalletServer = <-cx.WalletChan
 		}
-		L.Debug("shell started")
+		Debug("shell started")
 		cx.WaitGroup.Wait()
 		return nil
 	}

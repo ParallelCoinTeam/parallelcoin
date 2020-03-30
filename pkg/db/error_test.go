@@ -52,23 +52,23 @@ func TestErrorCodeStringer(t *testing.T) {
 	}
 }
 
-// TestError tests the error output for the Error type.
+// TestError tests the error output for the DBError type.
 func TestError(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		in   database.Error
+		in   database.DBError
 		want string
 	}{
 		{
-			database.Error{Description: "some error"},
+			database.DBError{Description: "some error"},
 			"some error",
 		},
 		{
-			database.Error{Description: "human-readable error"},
+			database.DBError{Description: "human-readable error"},
 			"human-readable error",
 		},
 		{
-			database.Error{
+			database.DBError{
 				ErrorCode:   database.ErrDriverSpecific,
 				Description: "some error",
 				Err:         errors.New("driver-specific error"),
@@ -80,7 +80,7 @@ func TestError(t *testing.T) {
 	for i, test := range tests {
 		result := test.in.Error()
 		if result != test.want {
-			t.Errorf("Error #%d\n got: %s want: %s", i, result,
+			t.Errorf("DBError #%d\n got: %s want: %s", i, result,
 				test.want)
 			continue
 		}

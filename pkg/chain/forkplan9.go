@@ -26,13 +26,13 @@ func GetAlgStamps(algoName string, startHeight int32, lastNode *BlockNode) (last
 			}
 		}
 	}
-	// L.Debug(algStamps)
+	// Debug(algStamps)
 	// reverse order of stamps
 	for i := 0; i < len(algStamps)/2; i++ {
 		algStamps[i], algStamps[len(algStamps)-i-1] = algStamps[len(
 			algStamps)-i-1], algStamps[i]
 	}
-	// L.Debug(algStamps)
+	// Debug(algStamps)
 	return
 }
 
@@ -42,13 +42,13 @@ func GetAllStamps(startHeight int32, lastNode *BlockNode) (allStamps []int64) {
 		len(allStamps) <= int(fork.List[1].AveragingInterval); ln = ln.RelativeAncestor(1) {
 		allStamps = append(allStamps, ln.timestamp)
 	}
-	// L.Debug(allStamps)
+	// Debug(allStamps)
 	// reverse order of stamps
 	for i := 0; i < len(allStamps)/2; i++ {
 		allStamps[i], allStamps[len(allStamps)-i-1] =
 			allStamps[len(allStamps)-i-1], allStamps[i]
 	}
-	// L.Debug(allStamps)
+	// Debug(allStamps)
 	return
 }
 
@@ -63,14 +63,14 @@ func GetAll(allStamps []int64) (allAv, allAdj float64) {
 			allIntervals[i-1] = float64(r)
 		}
 	}
-	// L.Debug(allStamps)
+	// Debug(allStamps)
 	// calculate exponential weighted moving average from intervals
 	aewma := ewma.NewMovingAverage()
 	for _, x := range allIntervals {
 		aewma.Add(x)
 	}
 	allAv = aewma.Value()
-	// L.Warn(allAv)
+	// Warn(allAv)
 	if allAv != 0 {
 		allAdj = allAv / fork.P9Average
 	}
@@ -86,7 +86,7 @@ func GetAlg(algStamps []int64, targetTimePerBlock float64) (algAv, algAdj float6
 			algIntervals[i-1] = r
 		}
 	}
-	// L.Debug(algStamps)
+	// Debug(algStamps)
 	// calculate exponential weighted moving average from intervals
 	gewma := ewma.NewMovingAverage()
 	for _, x := range algIntervals {
@@ -111,7 +111,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	adjustment = 1
 	var algAdj, allAdj, algAv, allAv float64 = 1, 1, ttpb, fork.P9Average
 	if lastNode == nil {
-		L.Warn("lastNode is nil")
+		Warn("lastNode is nil")
 	}
 	// algoInterval := fork.P9Algos[algoname].VersionInterval
 	startHeight := fork.List[1].ActivationHeight
@@ -130,7 +130,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	if last != nil {
 		bits = last.bits
 	}
-	//L.Debug(
+	//Debug(
 	//	"allAv", allAv,
 	//	"fork.P9Average", fork.P9Average,
 	//	"allAv/fork.P9Average", allAv/fork.P9Average,
@@ -144,16 +144,16 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9(lastNodeP *BlockNode, algoN
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
-		L.Info("newTarget is nil ")
+		Info("newTarget is nil ")
 		return
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
 		newTargetBits = BigToCompact(newTarget)
-		// L.Tracef("newTarget %064x %08x", newTarget, newTargetBits)
+		// Tracef("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
 		// if lastNode.version == algoVer {
-		L.Debugc(func() string {
+		Debugc(func() string {
 			an := fork.List[1].AlgoVers[algoVer]
 			pad := 8 - len(an)
 			if pad > 0 {
@@ -204,7 +204,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		return
 	}
 	allTimeAv, allTimeDiv, qhourDiv, hourDiv,
-	dayDiv := b.GetCommonP9Averages(lastNode, nH)
+		dayDiv := b.GetCommonP9Averages(lastNode, nH)
 	algoVer := fork.GetAlgoVer(algoName, nH)
 	since, ttpb, timeSinceAlgo, startHeight, last := b.GetP9Since(lastNode, algoVer)
 	if last == nil {
@@ -218,12 +218,12 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 	bigNewTargetFloat := big.NewFloat(1.0).Mul(bigAdjustment, bigOldTarget)
 	newTarget, _ := bigNewTargetFloat.Int(nil)
 	if newTarget == nil {
-		L.Info("newTarget is nil ")
+		Info("newTarget is nil ")
 		return
 	}
 	if newTarget.Cmp(&fork.FirstPowLimit) < 0 {
 		newTargetBits = BigToCompact(newTarget)
-		L.Tracef("newTarget %064x %08x", newTarget, newTargetBits)
+		Tracef("newTarget %064x %08x", newTarget, newTargetBits)
 	}
 	if l {
 		an := fork.List[1].AlgoVers[algoVer]
@@ -231,7 +231,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9old(lastNode *BlockNode, alg
 		if pad > 0 {
 			an += strings.Repeat(" ", pad)
 		}
-		L.Debugc(func() string {
+		Debugc(func() string {
 			return fmt.Sprintf("hght: %d %08x %s %s %s %s %s %s %s"+
 				" %s %s %08x",
 				lastNode.height+1,

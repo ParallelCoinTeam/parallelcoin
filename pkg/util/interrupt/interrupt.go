@@ -31,24 +31,24 @@ var (
 func Listener() {
 	var interruptCallbacks []func()
 	invokeCallbacks := func() {
-		L.Debug("running interrupt callbacks")
+		Debug("running interrupt callbacks")
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i
 			interruptCallbacks[idx]()
 		}
 		close(HandlersDone)
-		L.Debug("interrupt handlers finished")
+		Debug("interrupt handlers finished")
 		if Restart {
-			L.Debug("restarting")
+			Debug("restarting")
 			file, err := osext.Executable()
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return
 			}
 			err = syscall.Exec(file, os.Args, os.Environ())
 			if err != nil {
-				L.Fatal(err)
+				Fatal(err)
 			}
 			// return
 		}
@@ -59,17 +59,17 @@ func Listener() {
 		select {
 		case sig := <-Chan:
 			// L.Printf("\r>>> received signal (%s)\n", sig)
-			L.Debug("received interrupt signal", sig)
+			Debug("received interrupt signal", sig)
 			requested = true
 			invokeCallbacks()
 			return
 		case <-ShutdownRequestChan:
-			L.Warn("received shutdown request - shutting down...")
+			Warn("received shutdown request - shutting down...")
 			requested = true
 			invokeCallbacks()
 			return
 		case handler := <-AddHandlerChan:
-			L.Debug("adding handler")
+			Debug("adding handler")
 			interruptCallbacks = append(interruptCallbacks, handler)
 		}
 	}
@@ -89,14 +89,14 @@ func AddHandler(handler func()) {
 
 // Request programatically requests a shutdown
 func Request() {
-	L.Debug("interrupt requested")
+	Debug("interrupt requested")
 	ShutdownRequestChan <- struct{}{}
 	// var ok bool
 	// select {
 	// case _, ok = <-ShutdownRequestChan:
 	// default:
 	// }
-	// L.Debug("shutdownrequestchan", ok)
+	// Debug("shutdownrequestchan", ok)
 	// if ok {
 	// 	close(ShutdownRequestChan)
 	// }
@@ -105,7 +105,7 @@ func Request() {
 // RequestRestart sets the reset flag and requests a restart
 func RequestRestart() {
 	Restart = true
-	L.Debug("requesting restart")
+	Debug("requesting restart")
 	Request()
 }
 

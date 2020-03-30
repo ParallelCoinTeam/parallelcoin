@@ -12,9 +12,9 @@ import (
 func GetCipher(password string) (gcm cipher.AEAD, err error) {
 	bytes := []byte(password)
 	var c cipher.Block
-	if c, err = aes.NewCipher(argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 4, 32)); L.Check(err) {
+	if c, err = aes.NewCipher(argon2.IDKey(reverse(bytes), bytes, 1, 64*1024, 4, 32)); Check(err) {
 	}
-	if gcm, err = cipher.NewGCM(c); L.Check(err) {
+	if gcm, err = cipher.NewGCM(c); Check(err) {
 	}
 	return
 }

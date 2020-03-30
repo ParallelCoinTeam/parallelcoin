@@ -22,7 +22,7 @@ type Container struct {
 // the data into bytes
 func (srs Serializers) CreateContainer(magic []byte) (out *Container) {
 	if len(magic) != 4 {
-		L.Error("magic must be 4 bytes")
+		Error("magic must be 4 bytes")
 		return
 	}
 	out = &Container{}
@@ -31,26 +31,26 @@ func (srs Serializers) CreateContainer(magic []byte) (out *Container) {
 	var nodes []uint32
 	for i := range srs {
 		b := srs[i].Encode()
-		// L.Debug(i, len(b), hex.EncodeToString(b))
+		// Debug(i, len(b), hex.EncodeToString(b))
 		length++
 		nodes = append(nodes, offset)
 		offset += uint32(len(b))
 		out.Data = append(out.Data, b...)
 	}
 	// L.Spew(out.Data)
-	// L.Debug(offset, len(out.Data))
+	// Debug(offset, len(out.Data))
 	nodeB := make([]byte, len(nodes)*4+2)
 	start := uint32(len(nodeB) + 8)
 	binary.BigEndian.PutUint16(nodeB[:2], length)
 	for i := range nodes {
 		b := nodeB[i*4+2 : i*4+4+2]
 		binary.BigEndian.PutUint32(b, nodes[i]+start)
-		// L.Debug(i, len(b), hex.EncodeToString(b))
+		// Debug(i, len(b), hex.EncodeToString(b))
 	}
 	// L.Spew(nodeB)
 	out.Data = append(nodeB, out.Data...)
 	size := offset + uint32(len(nodeB)) + 8
-	// L.Debug("size", size, len(out.Data))
+	// Debug("size", size, len(out.Data))
 	sB := make([]byte, 4)
 	binary.BigEndian.PutUint32(sB, size)
 	out.Data = append(append(magic[:], sB...), out.Data...)
@@ -59,7 +59,7 @@ func (srs Serializers) CreateContainer(magic []byte) (out *Container) {
 
 func (c *Container) Count() uint16 {
 	size := binary.BigEndian.Uint32(c.Data[4:8])
-	// L.Debug("size", size)
+	// Debug("size", size)
 	if len(c.Data) >= int(size) {
 		// we won't touch it if it's not at least as big so we don't get
 		// bounds errors
@@ -83,24 +83,24 @@ func (c *Container) Get(idx uint16) (out []byte) {
 	length := c.Count()
 	size := len(c.Data)
 	if length > idx {
-		// L.Debug("length", length, "idx", idx)
+		// Debug("length", length, "idx", idx)
 		if idx < length {
 			offset := binary.BigEndian.Uint32(c.
 				Data[10+idx*4 : 10+idx*4+4])
-			// L.Debug("offset", offset)
+			// Debug("offset", offset)
 			if idx < length-1 {
 				nextOffset := binary.BigEndian.Uint32(c.
 					Data[10+((idx+1)*4) : 10+((idx+1)*4)+4])
-				// L.Debug("nextOffset", nextOffset)
+				// Debug("nextOffset", nextOffset)
 				out = c.Data[offset:nextOffset]
 			} else {
 				nextOffset := len(c.Data)
-				// L.Debug("last nextOffset", nextOffset)
+				// Debug("last nextOffset", nextOffset)
 				out = c.Data[offset:nextOffset]
 			}
 		}
 	} else {
-		L.Error("size mismatch", length, size)
+		Error("size mismatch", length, size)
 	}
 	return
 }

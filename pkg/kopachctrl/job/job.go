@@ -66,9 +66,9 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// tH := &tth
 	// tbh := tH.BlockHash()
 	// if tbh.IsEqual(mB.Hash()) {
-	//	L.Debug("notification block is tip block")
+	//	Debug("notification block is tip block")
 	// } else {
-	//	L.Debug("notification block is not tip block")
+	//	Debug("notification block is not tip block")
 	// }
 	bitsMap := make(blockchain.TargetBits)
 	var err error
@@ -78,14 +78,14 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		bitsMap, err = cx.RealNode.Chain.
 			CalcNextRequiredDifficultyPlan9Controller(tip)
 		if err != nil {
-			L.Error(err)
+			Error(err)
 			return
 		}
 		tip.Diffs.Store(bitsMap)
 	} else {
 		bitsMap = tip.Diffs.Load().(blockchain.TargetBits)
 	}
-	// L.Traces(*bitsMap)
+	// Traces(*bitsMap)
 	bitses := Bitses.NewBitses()
 	bitses.Put(bitsMap)
 	msg = append(msg, bitses)
@@ -112,16 +112,16 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		txc := txs.MsgTx().Copy()
 		txc.TxOut[len(txc.TxOut)-1].Value = val
 		txx := util.NewTx(txc.Copy())
-		// L.Traces(txs)
+		// Traces(txs)
 		(*cbs)[i] = txx
-		// L.Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
+		// Trace("coinbase for version", i, txx.MsgTx().TxOut[len(txx.MsgTx().TxOut)-1].Value)
 		mTree := blockchain.BuildMerkleTreeStore(
 			append([]*util.Tx{txx}, txr...), false)
-		// L.Traces(mTree[len(mTree)-1].CloneBytes())
+		// Traces(mTree[len(mTree)-1].CloneBytes())
 		mTS[i] = &chainhash.Hash{}
 		mTS[i].SetBytes(mTree[len(mTree)-1].CloneBytes())
 	}
-	// L.Traces(mTS)
+	// Traces(mTS)
 	mHashes := Hashes.NewHashes()
 	mHashes.Put(mTS)
 	msg = append(msg, mHashes)
@@ -132,7 +132,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 	// 	t := (&Transaction.Transaction{}).Put(txs[i])
 	// 	msg = append(msg, t)
 	// }
-	// L.Traces(msg)
+	// Traces(msg)
 	return Container{*msg.CreateContainer(Magic)}, txr
 }
 

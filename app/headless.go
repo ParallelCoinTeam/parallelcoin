@@ -12,7 +12,7 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		L.Warn("GUI was disabled for this build (server only version)")
+		Warn("GUI was disabled for this build (server only version)")
 		os.Exit(1)
 		return nil
 	}
@@ -20,7 +20,7 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 
 var monitorHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		L.Warn("GUI was disabled for this build (server only version)")
+		Warn("GUI was disabled for this build (server only version)")
 		os.Exit(1)
 		return nil
 	}

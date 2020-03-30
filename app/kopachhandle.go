@@ -16,20 +16,20 @@ import (
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		L.Info("starting up kopach standalone miner for parallelcoin")
+		Info("starting up kopach standalone miner for parallelcoin")
 		config.Configure(cx, c.Command.Name)
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true
 		}
 		quit := make(chan struct{})
 		interrupt.AddHandler(func() {
-			L.Debug("KopachHandle interrupt")
+			Debug("KopachHandle interrupt")
 			close(quit)
 			os.Exit(0)
 		})
 		err = kopach.KopachHandle(cx)(c)
 		<-quit
-		L.Debug("kopach main finished")
+		Debug("kopach main finished")
 		return
 	}
 }

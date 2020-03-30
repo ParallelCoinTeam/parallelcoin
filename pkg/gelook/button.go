@@ -291,7 +291,7 @@ func (b DuoUIbutton) IconLayout(gtx *layout.Context, button *gel.Button) {
 			layout.Center.Layout(gtx, func() {
 				layout.Inset{Top: b.PaddingTop, Bottom: b.PaddingBottom, Left: b.PaddingLeft, Right: b.PaddingRight}.Layout(gtx, func() {
 					b.Icon.Color = b.IconColor
-					b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)))
+					b.Icon.Layout(gtx, unit.Dp(float32(b.IconSize)-b.PaddingTop.V-b.PaddingBottom.V))
 				})
 				gtx.Dimensions = layout.Dimensions{
 					Size: image.Point{X: b.IconSize, Y: b.IconSize},

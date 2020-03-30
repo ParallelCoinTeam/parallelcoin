@@ -32,11 +32,11 @@ var (
 // block after the end of the current best chain based on the difficulty
 // retarget rules. This function is safe for concurrent access.
 func (b *BlockChain) CalcNextRequiredDifficulty(workerNumber uint32, timestamp time.
-Time, algo string) (difficulty uint32, err error) {
+	Time, algo string) (difficulty uint32, err error) {
 	b.chainLock.Lock()
 	difficulty, err = b.calcNextRequiredDifficulty(workerNumber, b.BestChain.
 		Tip(), timestamp, algo, false)
-	// L.Trace("CalcNextRequiredDifficulty", difficulty)
+	// Trace("CalcNextRequiredDifficulty", difficulty)
 	b.chainLock.Unlock()
 	return
 }
@@ -77,11 +77,11 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 	nH := lastNode.height + 1
 	cF := fork.GetCurrent(nH)
 	newTargetBits = fork.GetMinBits(algoname, nH)
-	// L.Tracef("calcNextRequiredDifficulty %08x", newTargetBits)
+	// Tracef("calcNextRequiredDifficulty %08x", newTargetBits)
 	switch cF {
 	// Legacy difficulty adjustment
 	case 0:
-		// L.Trace("before hardfork")
+		// Trace("before hardfork")
 		return b.CalcNextRequiredDifficultyHalcyon(workerNumber, lastNode, algoname, l)
 	// Plan 9 from Crypto Space
 	case 1:
@@ -93,12 +93,12 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 		if bits[version] == 0 {
 			bits, err = b.CalcNextRequiredDifficultyPlan9Controller(lastNode)
 			if err != nil {
-				L.Error(err)
+				Error(err)
 				return
 			}
-			// L.Debug(bits, reflect.TypeOf(bits))
+			// Debug(bits, reflect.TypeOf(bits))
 			b.DifficultyBits.Store(bits)
-			// L.Debugf("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
+			// Debugf("got difficulty %d %08x %+v", version, (*b.DifficultyBits)[version], *bits)
 		}
 		newTargetBits = bits[version]
 		return
