@@ -342,7 +342,8 @@ func (a API) AddNodeGetRes() (out *None, err error) {
 }
 
 // AddNodeWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) AddNodeWait() (out *None, err error) {
+func (a API) AddNodeWait(cmd *btcjson.AddNodeCmd) (out *None, err error) {
+	RPCHandlers["addnode"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -382,7 +383,8 @@ func (a API) CreateRawTransactionGetRes() (out *string, err error) {
 }
 
 // CreateRawTransactionWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) CreateRawTransactionWait() (out *string, err error) {
+func (a API) CreateRawTransactionWait(cmd *btcjson.CreateRawTransactionCmd) (out *string, err error) {
+	RPCHandlers["createrawtransaction"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -422,7 +424,8 @@ func (a API) DecodeRawTransactionGetRes() (out *btcjson.TxRawDecodeResult, err e
 }
 
 // DecodeRawTransactionWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) DecodeRawTransactionWait() (out *btcjson.TxRawDecodeResult, err error) {
+func (a API) DecodeRawTransactionWait(cmd *btcjson.DecodeRawTransactionCmd) (out *btcjson.TxRawDecodeResult, err error) {
+	RPCHandlers["decoderawtransaction"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -462,7 +465,8 @@ func (a API) DecodeScriptGetRes() (out *btcjson.DecodeScriptResult, err error) {
 }
 
 // DecodeScriptWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) DecodeScriptWait() (out *btcjson.DecodeScriptResult, err error) {
+func (a API) DecodeScriptWait(cmd *btcjson.DecodeScriptCmd) (out *btcjson.DecodeScriptResult, err error) {
+	RPCHandlers["decodescript"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -502,7 +506,8 @@ func (a API) EstimateFeeGetRes() (out *float64, err error) {
 }
 
 // EstimateFeeWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) EstimateFeeWait() (out *float64, err error) {
+func (a API) EstimateFeeWait(cmd *btcjson.EstimateFeeCmd) (out *float64, err error) {
+	RPCHandlers["estimatefee"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -542,7 +547,8 @@ func (a API) GenerateGetRes() (out *[]string, err error) {
 }
 
 // GenerateWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GenerateWait() (out *[]string, err error) {
+func (a API) GenerateWait(cmd *None) (out *[]string, err error) {
+	RPCHandlers["generate"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -582,7 +588,8 @@ func (a API) GetAddedNodeInfoGetRes() (out *[]btcjson.GetAddedNodeInfoResultAddr
 }
 
 // GetAddedNodeInfoWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetAddedNodeInfoWait() (out *[]btcjson.GetAddedNodeInfoResultAddr, err error) {
+func (a API) GetAddedNodeInfoWait(cmd *btcjson.GetAddedNodeInfoCmd) (out *[]btcjson.GetAddedNodeInfoResultAddr, err error) {
+	RPCHandlers["getaddednodeinfo"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -622,7 +629,8 @@ func (a API) GetBestBlockGetRes() (out *btcjson.GetBestBlockResult, err error) {
 }
 
 // GetBestBlockWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetBestBlockWait() (out *btcjson.GetBestBlockResult, err error) {
+func (a API) GetBestBlockWait(cmd *None) (out *btcjson.GetBestBlockResult, err error) {
+	RPCHandlers["getbestblock"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -662,7 +670,8 @@ func (a API) GetBestBlockHashGetRes() (out *string, err error) {
 }
 
 // GetBestBlockHashWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetBestBlockHashWait() (out *string, err error) {
+func (a API) GetBestBlockHashWait(cmd *None) (out *string, err error) {
+	RPCHandlers["getbestblockhash"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -702,7 +711,8 @@ func (a API) GetBlockGetRes() (out *btcjson.GetBlockVerboseResult, err error) {
 }
 
 // GetBlockWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetBlockWait() (out *btcjson.GetBlockVerboseResult, err error) {
+func (a API) GetBlockWait(cmd *btcjson.GetBlockCmd) (out *btcjson.GetBlockVerboseResult, err error) {
+	RPCHandlers["getblock"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -742,7 +752,8 @@ func (a API) GetBlockChainInfoGetRes() (out *btcjson.GetBlockChainInfoResult, er
 }
 
 // GetBlockChainInfoWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetBlockChainInfoWait() (out *btcjson.GetBlockChainInfoResult, err error) {
+func (a API) GetBlockChainInfoWait(cmd *None) (out *btcjson.GetBlockChainInfoResult, err error) {
+	RPCHandlers["getblockchaininfo"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -782,7 +793,8 @@ func (a API) GetBlockCountGetRes() (out *int64, err error) {
 }
 
 // GetBlockCountWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetBlockCountWait() (out *int64, err error) {
+func (a API) GetBlockCountWait(cmd *None) (out *int64, err error) {
+	RPCHandlers["getblockcount"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -822,7 +834,8 @@ func (a API) GetBlockHashGetRes() (out *string, err error) {
 }
 
 // GetBlockHashWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetBlockHashWait() (out *string, err error) {
+func (a API) GetBlockHashWait(cmd *btcjson.GetBlockHashCmd) (out *string, err error) {
+	RPCHandlers["getblockhash"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -862,7 +875,8 @@ func (a API) GetBlockHeaderGetRes() (out *btcjson.GetBlockHeaderVerboseResult, e
 }
 
 // GetBlockHeaderWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetBlockHeaderWait() (out *btcjson.GetBlockHeaderVerboseResult, err error) {
+func (a API) GetBlockHeaderWait(cmd *btcjson.GetBlockHeaderCmd) (out *btcjson.GetBlockHeaderVerboseResult, err error) {
+	RPCHandlers["getblockheader"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -902,7 +916,8 @@ func (a API) GetBlockTemplateGetRes() (out *string, err error) {
 }
 
 // GetBlockTemplateWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetBlockTemplateWait() (out *string, err error) {
+func (a API) GetBlockTemplateWait(cmd *btcjson.GetBlockTemplateCmd) (out *string, err error) {
+	RPCHandlers["getblocktemplate"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -942,7 +957,8 @@ func (a API) GetCFilterGetRes() (out *string, err error) {
 }
 
 // GetCFilterWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetCFilterWait() (out *string, err error) {
+func (a API) GetCFilterWait(cmd *btcjson.GetCFilterCmd) (out *string, err error) {
+	RPCHandlers["getcfilter"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -982,7 +998,8 @@ func (a API) GetCFilterHeaderGetRes() (out *string, err error) {
 }
 
 // GetCFilterHeaderWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetCFilterHeaderWait() (out *string, err error) {
+func (a API) GetCFilterHeaderWait(cmd *btcjson.GetCFilterHeaderCmd) (out *string, err error) {
+	RPCHandlers["getcfilterheader"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1022,7 +1039,8 @@ func (a API) GetConnectionCountGetRes() (out *int32, err error) {
 }
 
 // GetConnectionCountWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetConnectionCountWait() (out *int32, err error) {
+func (a API) GetConnectionCountWait(cmd *None) (out *int32, err error) {
+	RPCHandlers["getconnectioncount"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1062,7 +1080,8 @@ func (a API) GetCurrentNetGetRes() (out *string, err error) {
 }
 
 // GetCurrentNetWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetCurrentNetWait() (out *string, err error) {
+func (a API) GetCurrentNetWait(cmd *None) (out *string, err error) {
+	RPCHandlers["getcurrentnet"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1102,7 +1121,8 @@ func (a API) GetDifficultyGetRes() (out *float64, err error) {
 }
 
 // GetDifficultyWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetDifficultyWait() (out *float64, err error) {
+func (a API) GetDifficultyWait(cmd *btcjson.GetDifficultyCmd) (out *float64, err error) {
+	RPCHandlers["getdifficulty"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1142,7 +1162,8 @@ func (a API) GetGenerateGetRes() (out *bool, err error) {
 }
 
 // GetGenerateWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetGenerateWait() (out *bool, err error) {
+func (a API) GetGenerateWait(cmd *btcjson.GetHeadersCmd) (out *bool, err error) {
+	RPCHandlers["getgenerate"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1182,7 +1203,8 @@ func (a API) GetHashesPerSecGetRes() (out *float64, err error) {
 }
 
 // GetHashesPerSecWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetHashesPerSecWait() (out *float64, err error) {
+func (a API) GetHashesPerSecWait(cmd *None) (out *float64, err error) {
+	RPCHandlers["gethashespersec"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1222,7 +1244,8 @@ func (a API) GetHeadersGetRes() (out *[]string, err error) {
 }
 
 // GetHeadersWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetHeadersWait() (out *[]string, err error) {
+func (a API) GetHeadersWait(cmd *btcjson.GetHeadersCmd) (out *[]string, err error) {
+	RPCHandlers["getheaders"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1262,7 +1285,8 @@ func (a API) GetInfoGetRes() (out *btcjson.InfoChainResult0, err error) {
 }
 
 // GetInfoWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetInfoWait() (out *btcjson.InfoChainResult0, err error) {
+func (a API) GetInfoWait(cmd *None) (out *btcjson.InfoChainResult0, err error) {
+	RPCHandlers["getinfo"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1302,7 +1326,8 @@ func (a API) GetMempoolInfoGetRes() (out *btcjson.GetMempoolInfoResult, err erro
 }
 
 // GetMempoolInfoWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetMempoolInfoWait() (out *btcjson.GetMempoolInfoResult, err error) {
+func (a API) GetMempoolInfoWait(cmd *None) (out *btcjson.GetMempoolInfoResult, err error) {
+	RPCHandlers["getmempoolinfo"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1342,7 +1367,8 @@ func (a API) GetMiningInfoGetRes() (out *btcjson.GetMiningInfoResult, err error)
 }
 
 // GetMiningInfoWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetMiningInfoWait() (out *btcjson.GetMiningInfoResult, err error) {
+func (a API) GetMiningInfoWait(cmd *None) (out *btcjson.GetMiningInfoResult, err error) {
+	RPCHandlers["getmininginfo"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1382,7 +1408,8 @@ func (a API) GetNetTotalsGetRes() (out *btcjson.GetNetTotalsResult, err error) {
 }
 
 // GetNetTotalsWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetNetTotalsWait() (out *btcjson.GetNetTotalsResult, err error) {
+func (a API) GetNetTotalsWait(cmd *None) (out *btcjson.GetNetTotalsResult, err error) {
+	RPCHandlers["getnettotals"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1422,7 +1449,8 @@ func (a API) GetNetworkHashPSGetRes() (out *[]btcjson.GetPeerInfoResult, err err
 }
 
 // GetNetworkHashPSWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetNetworkHashPSWait() (out *[]btcjson.GetPeerInfoResult, err error) {
+func (a API) GetNetworkHashPSWait(cmd *btcjson.GetNetworkHashPSCmd) (out *[]btcjson.GetPeerInfoResult, err error) {
+	RPCHandlers["getnetworkhashps"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1462,7 +1490,8 @@ func (a API) GetPeerInfoGetRes() (out *[]btcjson.GetPeerInfoResult, err error) {
 }
 
 // GetPeerInfoWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetPeerInfoWait() (out *[]btcjson.GetPeerInfoResult, err error) {
+func (a API) GetPeerInfoWait(cmd *None) (out *[]btcjson.GetPeerInfoResult, err error) {
+	RPCHandlers["getpeerinfo"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1502,7 +1531,8 @@ func (a API) GetRawMempoolGetRes() (out *[]string, err error) {
 }
 
 // GetRawMempoolWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetRawMempoolWait() (out *[]string, err error) {
+func (a API) GetRawMempoolWait(cmd *btcjson.GetRawMempoolCmd) (out *[]string, err error) {
+	RPCHandlers["getrawmempool"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1542,7 +1572,8 @@ func (a API) GetRawTransactionGetRes() (out *string, err error) {
 }
 
 // GetRawTransactionWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetRawTransactionWait() (out *string, err error) {
+func (a API) GetRawTransactionWait(cmd *btcjson.GetRawTransactionCmd) (out *string, err error) {
+	RPCHandlers["getrawtransaction"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1582,7 +1613,8 @@ func (a API) GetTxOutGetRes() (out *string, err error) {
 }
 
 // GetTxOutWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) GetTxOutWait() (out *string, err error) {
+func (a API) GetTxOutWait(cmd *btcjson.GetTxOutCmd) (out *string, err error) {
+	RPCHandlers["gettxout"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1622,7 +1654,8 @@ func (a API) HelpGetRes() (out *string, err error) {
 }
 
 // HelpWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) HelpWait() (out *string, err error) {
+func (a API) HelpWait(cmd *btcjson.HelpCmd) (out *string, err error) {
+	RPCHandlers["help"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1662,7 +1695,8 @@ func (a API) NodeGetRes() (out *None, err error) {
 }
 
 // NodeWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) NodeWait() (out *None, err error) {
+func (a API) NodeWait(cmd *btcjson.NodeCmd) (out *None, err error) {
+	RPCHandlers["node"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1702,7 +1736,8 @@ func (a API) PingGetRes() (out *None, err error) {
 }
 
 // PingWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) PingWait() (out *None, err error) {
+func (a API) PingWait(cmd *None) (out *None, err error) {
+	RPCHandlers["ping"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1742,7 +1777,8 @@ func (a API) ResetChainGetRes() (out *None, err error) {
 }
 
 // ResetChainWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) ResetChainWait() (out *None, err error) {
+func (a API) ResetChainWait(cmd *None) (out *None, err error) {
+	RPCHandlers["resetchain"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1782,7 +1818,8 @@ func (a API) RestartGetRes() (out *None, err error) {
 }
 
 // RestartWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) RestartWait() (out *None, err error) {
+func (a API) RestartWait(cmd *None) (out *None, err error) {
+	RPCHandlers["restart"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1822,7 +1859,8 @@ func (a API) SearchRawTransactionsGetRes() (out *[]btcjson.SearchRawTransactions
 }
 
 // SearchRawTransactionsWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) SearchRawTransactionsWait() (out *[]btcjson.SearchRawTransactionsResult, err error) {
+func (a API) SearchRawTransactionsWait(cmd *btcjson.SearchRawTransactionsCmd) (out *[]btcjson.SearchRawTransactionsResult, err error) {
+	RPCHandlers["searchrawtransactions"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1862,7 +1900,8 @@ func (a API) SendRawTransactionGetRes() (out *None, err error) {
 }
 
 // SendRawTransactionWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) SendRawTransactionWait() (out *None, err error) {
+func (a API) SendRawTransactionWait(cmd *btcjson.SendRawTransactionCmd) (out *None, err error) {
+	RPCHandlers["sendrawtransaction"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1902,7 +1941,8 @@ func (a API) SetGenerateGetRes() (out *None, err error) {
 }
 
 // SetGenerateWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) SetGenerateWait() (out *None, err error) {
+func (a API) SetGenerateWait(cmd *btcjson.SetGenerateCmd) (out *None, err error) {
+	RPCHandlers["setgenerate"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1942,7 +1982,8 @@ func (a API) StopGetRes() (out *None, err error) {
 }
 
 // StopWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) StopWait() (out *None, err error) {
+func (a API) StopWait(cmd *None) (out *None, err error) {
+	RPCHandlers["stop"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -1982,7 +2023,8 @@ func (a API) SubmitBlockGetRes() (out *string, err error) {
 }
 
 // SubmitBlockWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) SubmitBlockWait() (out *string, err error) {
+func (a API) SubmitBlockWait(cmd *btcjson.SubmitBlockCmd) (out *string, err error) {
+	RPCHandlers["submitblock"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -2022,7 +2064,8 @@ func (a API) UptimeGetRes() (out *btcjson.GetMempoolInfoResult, err error) {
 }
 
 // UptimeWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) UptimeWait() (out *btcjson.GetMempoolInfoResult, err error) {
+func (a API) UptimeWait(cmd *None) (out *btcjson.GetMempoolInfoResult, err error) {
+	RPCHandlers["uptime"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -2062,7 +2105,8 @@ func (a API) ValidateAddressGetRes() (out *btcjson.ValidateAddressChainResult, e
 }
 
 // ValidateAddressWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) ValidateAddressWait() (out *btcjson.ValidateAddressChainResult, err error) {
+func (a API) ValidateAddressWait(cmd *btcjson.ValidateAddressCmd) (out *btcjson.ValidateAddressChainResult, err error) {
+	RPCHandlers["validateaddress"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -2102,7 +2146,8 @@ func (a API) VerifyChainGetRes() (out *bool, err error) {
 }
 
 // VerifyChainWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) VerifyChainWait() (out *bool, err error) {
+func (a API) VerifyChainWait(cmd *btcjson.VerifyChainCmd) (out *bool, err error) {
+	RPCHandlers["verifychain"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -2142,7 +2187,8 @@ func (a API) VerifyMessageGetRes() (out *bool, err error) {
 }
 
 // VerifyMessageWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) VerifyMessageWait() (out *bool, err error) {
+func (a API) VerifyMessageWait(cmd *btcjson.VerifyMessageCmd) (out *bool, err error) {
+	RPCHandlers["verifymessage"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
@@ -2182,7 +2228,8 @@ func (a API) VersionGetRes() (out *map[string]btcjson.VersionResult, err error) 
 }
 
 // VersionWait calls the method and blocks until it returns or 5 seconds passes
-func (a API) VersionWait() (out *map[string]btcjson.VersionResult, err error) {
+func (a API) VersionWait(cmd *btcjson.VersionCmd) (out *map[string]btcjson.VersionResult, err error) {
+	RPCHandlers["version"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break

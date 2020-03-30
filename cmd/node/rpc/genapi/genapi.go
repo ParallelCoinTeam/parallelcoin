@@ -431,7 +431,8 @@ func (a API) {{.Handler}}GetRes() (out *{{.ResType}}, err error) {
 }
 
 // {{.Handler}}Wait calls the method and blocks until it returns or 5 seconds passes
-func (a API) {{.Handler}}Wait() (out *{{.ResType}}, err error) {
+func (a API) {{.Handler}}Wait(cmd {{.Cmd}}) (out *{{.ResType}}, err error) {
+	` + RPCMapName + `["{{.Method}}"].Call <- API{a.Ch, cmd, nil}
 	select {
 	case <-time.After(time.Second*5):
 		break
