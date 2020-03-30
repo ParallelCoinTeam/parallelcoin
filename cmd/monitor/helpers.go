@@ -97,6 +97,7 @@ func (s *State) Label(txt string) {
 	s.Inset(8, func() {
 		t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), txt)
 		t.Color = s.Theme.Colors["PanelText"]
+		t.Font.Typeface = s.Theme.Fonts["Secondary"]
 		//t.TextSize = unit.Dp(32)
 		t.Layout(s.Gtx)
 	})
