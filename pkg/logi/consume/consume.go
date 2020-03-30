@@ -19,8 +19,27 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 				//Debug(b)
 				e := Entry.LoadContainer(b).Struct()
 				//Debugs(e)
-				if err := handler(e); Check(
-					err) {
+				color := logi.ColorYellow
+				//Debug(e.Level)
+				switch e.Level {
+				case logi.Fatal:
+					color = logi.ColorRed
+				case logi.Error:
+					color = logi.ColorOrange
+				case logi.Warn:
+					color = logi.ColorYellow
+				case logi.Info:
+					color = logi.ColorGreen
+				case logi.Check:
+					color = logi.ColorCyan
+				case logi.Debug:
+					color = logi.ColorBlue
+				case logi.Trace:
+					color = logi.ColorViolet
+				}
+				Debugf("%s%s %s%s", color, e.Text,
+					logi.ColorOff, e.CodeLocation)
+				if err := handler(e); Check(err) {
 				}
 			}
 		}

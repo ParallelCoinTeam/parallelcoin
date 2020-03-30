@@ -157,7 +157,6 @@ type (
 		Traces        SpewFunc
 		LogFileHandle *os.File
 		Writer        LogWriter
-		Write         bool
 		Color         bool
 		Split         string
 		LogChan       []chan Entry
@@ -178,7 +177,6 @@ func NewLogger() (l *Logger) {
 		Packages:      make(map[string]bool),
 		Level:         "trace",
 		LogFileHandle: os.Stderr,
-		Write:         true,
 		Color:         true,
 		Split:         "pod",
 		LogChan:       nil,
@@ -225,7 +223,7 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 		err := os.Rename(path, filepath.Join(logPath,
 			time.Now().Format(timeFormat)+".json"))
 		if err != nil {
-			if L.Write {
+			if L.Writer.write {
 				L.Writer.Println("error rotating log", err)
 			}
 			return
@@ -233,7 +231,7 @@ func (l *Logger) SetLogPaths(logPath, logFileName string) {
 	}
 	logFileHandle, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
-		if L.Write {
+		if L.Writer.write {
 			L.Writer.Println("error opening log file", logFileName)
 		}
 	}
@@ -272,6 +270,7 @@ func (l *Logger) Register(pkg string) string {
 func init() {
 	L.SetLevel("trace", true, "pod")
 	L.Writer.SetLogWriter(os.Stderr)
+	L.Writer.write = true
 	L.Trace("starting up logger")
 }
 
@@ -305,6 +304,15 @@ func (l *Logger) LevelIsActive(level string) (out bool) {
 
 var TermWidth = func() int { return 80 }
 
+func (l *Logger) GetLoc(loc string, line int) (out string) {
+	split := strings.Split(loc, l.Split)
+	if len(split) < 2 {
+		out = loc
+	}
+	out = split[1]
+	return out + fmt.Sprint(":", line)
+}
+
 // printfFunc prints a log entry with formatting
 func (l *Logger) printfFunc(level string) PrintfFunc {
 	f := func(pkg, format string, a ...interface{}) {
@@ -312,15 +320,14 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 		if !l.LevelIsActive(level) || !l.Packages[pkg] {
 			return
 		}
-		if l.Write || l.Packages[pkg] {
+		if l.Writer.write || l.Packages[pkg] {
 			l.Writer.Println(Composite(text, level, l.Color, l.Split))
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
 			out := Entry{time.Now(), level,
-				pkg, fmt.Sprint(loc, ":", line),
-				text}
+				pkg, l.GetLoc(loc, line), text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out
 			}
@@ -337,14 +344,14 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 		}
 		t := fn()
 		text := trimReturn(t)
-		if l.Write {
+		if l.Writer.write {
 			l.Writer.Println(Composite(text, level, l.Color, l.Split))
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
 			out := Entry{time.Now(), level,
-				pkg, fmt.Sprint(loc, ":", line), text}
+				pkg, l.GetLoc(loc, line), text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out
 			}
@@ -360,15 +367,14 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 			return
 		}
 		text := trimReturn(fmt.Sprintln(a...))
-		if l.Write {
+		if l.Writer.write {
 			l.Writer.Println(Composite(text, l.Level, l.Color, l.Split))
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
-			out := Entry{time.Now(), l.Level,
-				pkg, fmt.Sprint(loc, ":", line),
-				text}
+			out := Entry{time.Now(), level, pkg,
+				l.GetLoc(loc, line), text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out
 			}
@@ -387,15 +393,14 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 			return false
 		}
 		text := err.Error()
-		if l.Write {
+		if l.Writer.write {
 			l.Writer.Println(Composite(text, "CHK", l.Color, l.Split))
 		}
 		if l.LogChan != nil {
-			_, loc, line, _ := runtime.Caller(3)
+			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
-			out := Entry{time.Now(), "CHK",
-				pkg, fmt.Sprint(loc, ":", line),
-				text}
+			out := Entry{time.Now(), level,
+				pkg, l.GetLoc(loc, line), text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out
 			}
@@ -414,14 +419,14 @@ func (l *Logger) ps(level string) SpewFunc {
 		text := trimReturn(spew.Sdump(a))
 		o := "" + Composite("spew:", level, l.Color, l.Split)
 		o += "\n" + text + "\n"
-		if l.Write {
+		if l.Writer.write {
 			l.Writer.Print(o)
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
 			pkg := l.LocToPkg(loc)
-			out := Entry{time.Now(), level, pkg, fmt.Sprint(loc, ":", line),
-				text}
+			out := Entry{time.Now(), level, pkg,
+				l.GetLoc(loc, line), text}
 			for i := range l.LogChan {
 				l.LogChan[i] <- out
 			}
@@ -434,12 +439,12 @@ func (l *Logger) ps(level string) SpewFunc {
 func Composite(text, level string, color bool, split string) string {
 	dots := "."
 	terminalWidth := TermWidth()
-	if TermWidth() <= 120 {
-		terminalWidth = 120
+	if TermWidth() <= 80 {
+		terminalWidth = 80
 	}
-	skip := 2
+	skip := 3
 	if level == Check {
-		skip = 3
+		skip = 4
 	}
 	_, loc, iline, _ := runtime.Caller(skip)
 	line := fmt.Sprint(iline)
@@ -482,7 +487,7 @@ func Composite(text, level string, color bool, split string) string {
 	default:
 		since = fmt.Sprint(time.Now())[:19]
 	}
-	levelLen := len(level) + 1
+	levelLen := 4 // len(level) + 1
 	sinceLen := len(since) + 1
 	textLen := len(text) + 1
 	fileLen := len(file) + 1
@@ -491,43 +496,45 @@ func Composite(text, level string, color bool, split string) string {
 		file += ":"
 	}
 	if color {
-		switch level {
+		switch Tags[level] {
 		case "FTL":
-			level = ColorBold + ColorRed + level + ColorOff
+			level = ColorBold + ColorRed + Tags[level] + ColorOff
 			since = ColorRed + since + ColorOff
 			file = ColorItalic + ColorBlue + file
 			line = line + ColorOff
 		case "ERR":
-			level = ColorBold + ColorOrange + level + ColorOff
+			level = ColorBold + ColorOrange + Tags[level] + ColorOff
 			since = ColorOrange + since + ColorOff
 			file = ColorItalic + ColorBlue + file
 			line = line + ColorOff
 		case "WRN":
-			level = ColorBold + ColorYellow + level + ColorOff
+			level = ColorBold + ColorYellow + Tags[level] + ColorOff
 			since = ColorYellow + since + ColorOff
 			file = ColorItalic + ColorBlue + file
 			line = line + ColorOff
 		case "INF":
-			level = ColorBold + ColorGreen + level + ColorOff
+			level = ColorBold + ColorGreen + Tags[level] + ColorOff
 			since = ColorGreen + since + ColorOff
 			file = ColorItalic + ColorBlue + file
 			line = line + ColorOff
 		case "CHK":
-			level = ColorBold + ColorCyan + level + ColorOff
+			level = ColorBold + ColorCyan + Tags[level] + ColorOff
 			since = since
 			file = ColorItalic + ColorBlue + file
 			line = line + ColorOff
 		case "DBG":
-			level = ColorBold + ColorBlue + level + ColorOff
+			level = ColorBold + ColorBlue + Tags[level] + ColorOff
 			since = ColorBlue + since + ColorOff
 			file = ColorItalic + ColorBlue + file
 			line = line + ColorOff
 		case "TRC":
-			level = ColorBold + ColorViolet + level + ColorOff
+			level = ColorBold + ColorViolet + Tags[level] + ColorOff
 			since = ColorViolet + since + ColorOff
 			file = ColorItalic + ColorBlue + file
 			line = line + ColorOff
 		}
+	} else {
+		level = Tags[level]
 	}
 	final := ""
 	if levelLen+sinceLen+textLen+fileLen+lineLen > terminalWidth {
@@ -538,7 +545,7 @@ func Composite(text, level string, color bool, split string) string {
 		if len(lines) > 1 {
 			final = fmt.Sprintf("%s %s %s %s%s", level, since,
 				strings.Repeat(".",
-					terminalWidth-levelLen-sinceLen-fileLen-lineLen),
+					terminalWidth-levelLen-sinceLen-fileLen-lineLen-4),
 				file, line)
 			final += text[:len(text)-1]
 		} else {
