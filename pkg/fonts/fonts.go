@@ -21,8 +21,8 @@ import (
 )
 
 func Register() {
-	register(text.Font{Typeface: "plan9"}, plan9.TTF)
 	register(text.Font{Typeface: "bariol"}, bariolregular.TTF)
+	register(text.Font{Typeface: "plan9"}, plan9.TTF)
 	register(text.Font{Typeface: "bariol", Style: text.Italic}, bariolregularitalic.TTF)
 	register(text.Font{Typeface: "bariol", Weight: text.Bold}, bariolbold.TTF)
 	register(text.Font{Typeface: "bariol", Style: text.Italic, Weight: text.Bold}, bariolbolditalic.TTF)

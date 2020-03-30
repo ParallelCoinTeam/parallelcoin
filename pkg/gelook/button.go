@@ -350,8 +350,38 @@ func (b DuoUIbutton) MenuLayout(gtx *layout.Context, button *gel.Button) {
 	)
 }
 
-/////
-
+func (b DuoUIbutton) InsideLayout(gtx *layout.Context, button *gel.Button, inside func()) {
+	hmin := gtx.Constraints.Width.Min
+	vmin := gtx.Constraints.Height.Min
+	bgColor := b.BgColor
+	layout.Stack{Alignment: layout.Center}.Layout(gtx,
+		layout.Expanded(func() {
+			rr := float32(gtx.Px(unit.Dp(0)))
+			clip.Rect{
+				Rect: f32.Rectangle{Max: f32.Point{
+					X: float32(gtx.Constraints.Width.Min),
+					Y: float32(gtx.Constraints.Height.Min),
+				}},
+				NE: rr, NW: rr, SE: rr, SW: rr,
+			}.Op(gtx.Ops).Add(gtx.Ops)
+			fill(gtx, bgColor)
+			for _, c := range button.History() {
+				drawInk(gtx, c)
+			}
+		}),
+		layout.Stacked(func() {
+			gtx.Constraints.Width.Min = hmin
+			gtx.Constraints.Height.Min = vmin
+			layout.Center.Layout(gtx, func() {
+				layout.Inset{Top: b.PaddingTop, Bottom: b.PaddingBottom, Left: b.PaddingLeft, Right: b.PaddingRight}.Layout(gtx, func() {
+					inside()
+				})
+			})
+			pointer.Rect(image.Rectangle{Max: gtx.Dimensions.Size}).Add(gtx.Ops)
+			button.Layout(gtx)
+		}),
+	)
+}
 func toPointF(p image.Point) f32.Point {
 	return f32.Point{X: float32(p.X), Y: float32(p.Y)}
 }

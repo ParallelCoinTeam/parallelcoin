@@ -142,12 +142,16 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 }
 
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *model.DuoUIblock) {
-	layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-		gelook.DuoUIdrawRectangle(gtx, gtx.Constraints.Width.Max, gtx.Constraints.Height.Max, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	width := gtx.Constraints.Width.Max
+	button := th.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0)
+	//th.DuoUIbutton("", "", "", "", "", th.Colors["Dark"], "", "", 0, 0, 0, 0, 0, 0)
+	button.InsideLayout(gtx, block.Link, func() {
+
 		layout.Flex{
 			Axis: layout.Vertical,
 		}.Layout(gtx,
 			layout.Rigid(func() {
+				gtx.Constraints.Width.Min = width
 				layout.Flex{
 					Spacing: layout.SpaceBetween,
 				}.Layout(gtx,
