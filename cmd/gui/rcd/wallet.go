@@ -8,7 +8,7 @@ import (
 )
 
 func (r *RcVar) GetDuoUIbalance() {
-	L.Trace("getting balance")
+	Trace("getting balance")
 	acct := "default"
 	minconf := 0
 	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
@@ -25,7 +25,7 @@ func (r *RcVar) GetDuoUIbalance() {
 }
 
 func (r *RcVar) GetDuoUIunconfirmedBalance() {
-	L.Trace("getting unconfirmed balance")
+	Trace("getting unconfirmed balance")
 	acct := "default"
 	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
 	if err != nil {
@@ -46,7 +46,7 @@ func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 			Passphrase: "aaa",
 			Timeout:    3,
 		})
-		pass.WalletPassphraseWait()
+		pass.WalletPassphraseWait(nil)
 		send := legacy.RPCHandlers["sendtoaddress"].Result()
 		send.SendToAddress(&btcjson.SendToAddressCmd{
 			Address:   ad,
@@ -54,6 +54,6 @@ func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 			Comment:   nil,
 			CommentTo: nil,
 		})
-		send.SendToAddressWait()
+		send.SendToAddressWait(nil)
 	}
 }
