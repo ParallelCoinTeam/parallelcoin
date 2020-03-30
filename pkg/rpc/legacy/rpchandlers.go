@@ -281,7 +281,7 @@ type (
 // the JSON-RPC appropiate error code.  All other errors use the wallet
 // catch-all error code, json.ErrRPCWallet.
 type RequestHandler func(interface{}, *wallet.Wallet,
-...*chain.RPCClient) (interface{}, error)
+	...*chain.RPCClient) (interface{}, error)
 
 // RPCHandlers is all of the RPC calls available
 //
@@ -1646,7 +1646,7 @@ func (a API) SendManyWait() (out *string, err error) {
 }
 
 // SendToAddress calls the method with the given parameters
-func (a API) SendToAddress(cmd btcjson.SendToAddressCmd) (err error) {
+func (a API) SendToAddress(cmd *btcjson.SendToAddressCmd) (err error) {
 	RPCHandlers["sendtoaddress"].Call <- API{a.Ch, cmd, nil}
 	return
 }
@@ -1926,7 +1926,7 @@ func (a API) WalletLockWait() (out *None, err error) {
 }
 
 // WalletPassphrase calls the method with the given parameters
-func (a API) WalletPassphrase(cmd btcjson.WalletPassphraseCmd) (err error) {
+func (a API) WalletPassphrase(cmd *btcjson.WalletPassphraseCmd) (err error) {
 	RPCHandlers["walletpassphrase"].Call <- API{a.Ch, cmd, nil}
 	return
 }
@@ -2281,7 +2281,7 @@ func RunAPI(chainRPC *chain.RPCClient, wallet *wallet.Wallet,
 				}
 			case msg := <-nrh["sendtoaddress"].Call:
 				if res, err = nrh["sendtoaddress"].
-					Handler(msg.Params.(btcjson.SendToAddressCmd), wallet,
+					Handler(msg.Params.(*btcjson.SendToAddressCmd), wallet,
 						chainRPC); L.Check(err) {
 				}
 				if r, ok := res.(string); ok {
@@ -2345,7 +2345,7 @@ func RunAPI(chainRPC *chain.RPCClient, wallet *wallet.Wallet,
 				}
 			case msg := <-nrh["walletpassphrase"].Call:
 				if res, err = nrh["walletpassphrase"].
-					Handler(msg.Params.(btcjson.WalletPassphraseCmd), wallet,
+					Handler(msg.Params.(*btcjson.WalletPassphraseCmd), wallet,
 						chainRPC); L.Check(err) {
 				}
 				if r, ok := res.(None); ok {

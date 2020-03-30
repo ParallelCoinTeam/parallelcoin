@@ -30,6 +30,7 @@ var (
 	buttonPasteAddress = new(gel.Button)
 	buttonPasteAmount  = new(gel.Button)
 	buttonSend         = new(gel.Button)
+	sendStruct         = new(send)
 )
 
 type send struct {
@@ -60,7 +61,6 @@ func Send(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.Duo
 
 func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
-		var sendStruct send
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
 				widgets := []func(){
@@ -71,7 +71,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 									func(e gel.EditorEvent) {
 										sendStruct.address = addressLineEditor.Text()
 									})),
-								layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Fonts["Primary"], 14,
+								layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Fonts["Primary"], 10, 13, 8, 12, 8,
 									th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE ADDRESS", func() {
 										addressLineEditor.SetText(clipboard.Get())
 									})))
@@ -87,7 +87,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 										}
 										sendStruct.amount = f
 									})),
-								layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Fonts["Primary"], 14,
+								layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Fonts["Primary"], 10, 13, 8, 12, 8,
 									th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE AMOUNT", func() {
 										amountLineEditor.SetText(clipboard.Get())
 									})))
@@ -95,7 +95,7 @@ func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() 
 					},
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Rigid(component.Button(gtx, th, buttonSend, th.Fonts["Primary"], 12,
+							layout.Rigid(component.Button(gtx, th, buttonSend, th.Fonts["Primary"], 14, 10, 10, 9, 10,
 								th.Colors["ButtonText"], th.Colors["ButtonBg"], "SEND", func() {
 									rc.Dialog.Show = true
 									rc.Dialog = &model.DuoUIdialog{
