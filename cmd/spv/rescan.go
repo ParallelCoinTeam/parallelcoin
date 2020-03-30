@@ -21,29 +21,29 @@ import (
 )
 
 var // ErrRescanExit is an error returned to the caller in case the ongoing
-	// rescan exits.
-	ErrRescanExit = errors.New("rescan exited")
+// rescan exits.
+ErrRescanExit = errors.New("rescan exited")
 
 type // rescanOptions holds the set of functional parameters for Rescan.
-	rescanOptions struct {
-		chain        *ChainService
-		queryOptions []QueryOption
-		ntfn         rpcclient.NotificationHandlers
-		startTime    time.Time
-		startBlock   *waddrmgr.BlockStamp
-		endBlock     *waddrmgr.BlockStamp
-		watchAddrs   []util.Address
-		watchInputs  []InputWithScript
-		watchList    [][]byte
-		txIdx        uint32
-		update       <-chan *updateOptions
-		quit         <-chan struct{}
-	}
+rescanOptions struct {
+	chain        *ChainService
+	queryOptions []QueryOption
+	ntfn         rpcclient.NotificationHandlers
+	startTime    time.Time
+	startBlock   *waddrmgr.BlockStamp
+	endBlock     *waddrmgr.BlockStamp
+	watchAddrs   []util.Address
+	watchInputs  []InputWithScript
+	watchList    [][]byte
+	txIdx        uint32
+	update       <-chan *updateOptions
+	quit         <-chan struct{}
+}
 
 type // RescanOption is a functional option argument to any of the rescan and
-	// notification subscription methods. These are always processed in order, with
-	// later options overriding earlier ones.
-	RescanOption func(ro *rescanOptions)
+// notification subscription methods. These are always processed in order, with
+// later options overriding earlier ones.
+RescanOption func(ro *rescanOptions)
 
 func defaultRescanOptions() *rescanOptions {
 	return &rescanOptions{}
@@ -112,15 +112,15 @@ WatchAddrs(watchAddrs ...util.Address) RescanOption {
 }
 
 type // InputWithScript couples an previous outpoint along with its input
-	// script.
-	// We'll use the prev script to match the filter itself, but then scan for the
-	// particular outpoint when we need to make a notification decision.
-	InputWithScript struct {
-		// OutPoint identifies the previous output to watch.
-		OutPoint wire.OutPoint
-		// PkScript is the script of the previous output.
-		PkScript []byte
-	}
+// script.
+// We'll use the prev script to match the filter itself, but then scan for the
+// particular outpoint when we need to make a notification decision.
+InputWithScript struct {
+	// OutPoint identifies the previous output to watch.
+	OutPoint wire.OutPoint
+	// PkScript is the script of the previous output.
+	PkScript []byte
+}
 
 // WatchInputs specifies the outpoints to watch for on-chain spends. We also
 // require the script as we'll match on the script, but then notify based on
@@ -1089,34 +1089,34 @@ func // Update sends an update to a long-running rescan/notification goroutine.
 }
 
 type // SpendReport is a struct which describes the current spentness state of a
-	// particular output. In the case that an output is spent, then the spending
-	// transaction and related details will be populated. Otherwise, only the
-	// target unspent output in the chain will be returned.
-	SpendReport struct {
-		// SpendingTx is the transaction that spent the output that a spend
-		// report was requested for.
-		//
-		// NOTE: This field will only be populated if the target output has
-		// been spent.
-		SpendingTx *wire.MsgTx
-		// SpendingTxIndex is the input index of the transaction above which
-		// spends the target output.
-		//
-		// NOTE: This field will only be populated if the target output has
-		// been spent.
-		SpendingInputIndex uint32
-		// SpendingTxHeight is the hight of the block that included the
-		// transaction  above which spent the target output.
-		//
-		// NOTE: This field will only be populated if the target output has
-		// been spent.
-		SpendingTxHeight uint32
-		// Output is the raw output of the target outpoint.
-		//
-		// NOTE: This field will only be populated if the target is still
-		// unspent.
-		Output *wire.TxOut
-	}
+// particular output. In the case that an output is spent, then the spending
+// transaction and related details will be populated. Otherwise, only the
+// target unspent output in the chain will be returned.
+SpendReport struct {
+	// SpendingTx is the transaction that spent the output that a spend
+	// report was requested for.
+	//
+	// NOTE: This field will only be populated if the target output has
+	// been spent.
+	SpendingTx *wire.MsgTx
+	// SpendingTxIndex is the input index of the transaction above which
+	// spends the target output.
+	//
+	// NOTE: This field will only be populated if the target output has
+	// been spent.
+	SpendingInputIndex uint32
+	// SpendingTxHeight is the hight of the block that included the
+	// transaction  above which spent the target output.
+	//
+	// NOTE: This field will only be populated if the target output has
+	// been spent.
+	SpendingTxHeight uint32
+	// Output is the raw output of the target outpoint.
+	//
+	// NOTE: This field will only be populated if the target is still
+	// unspent.
+	Output *wire.TxOut
+}
 
 func // GetUtxo gets the appropriate TxOut or errors if it's spent. The option
 // WatchOutPoints (with a single outpoint) is required. StartBlock can be used

@@ -6,7 +6,7 @@ import (
 
 func (s *State) BuildButtons() layout.FlexChild {
 	return Rigid(func() {
-		if s.WindowWidth >= 360  || !s.Config.FilterOpen {
+		if s.WindowWidth >= 360 || !s.Config.FilterOpen {
 			s.FlexH(Rigid(func() {
 				bg, fg := "PanelBg", "PanelText"
 				if s.Config.BuildOpen {
@@ -18,10 +18,10 @@ func (s *State) BuildButtons() layout.FlexChild {
 				for s.BuildFoldButton.Clicked(s.Gtx) {
 					Debug("run mode folder clicked")
 					if !s.Config.BuildOpen {
-						s.Config.FilterOpen= false
-						s.Config.SettingsOpen= false
+						s.Config.FilterOpen = false
+						s.Config.SettingsOpen = false
 					}
-					s.Config.BuildOpen=!s.Config.BuildOpen
+					s.Config.BuildOpen = !s.Config.BuildOpen
 					s.SaveConfig()
 				}
 			}),
@@ -63,7 +63,7 @@ func (s *State) BuildPage() layout.FlexChild {
 						&s.BuildZoomButton)
 					for s.BuildZoomButton.Clicked(s.Gtx) {
 						Debug("settings panel fold button clicked")
-						s.Config.BuildZoomed=!s.Config.BuildZoomed
+						s.Config.BuildZoomed = !s.Config.BuildZoomed
 						s.SaveConfig()
 					}
 				}
@@ -72,7 +72,7 @@ func (s *State) BuildPage() layout.FlexChild {
 					&s.BuildCloseButton)
 				for s.BuildCloseButton.Clicked(s.Gtx) {
 					Debug("settings panel close button clicked")
-					s.Config.BuildOpen= false
+					s.Config.BuildOpen = false
 					s.SaveConfig()
 				}
 			}),
@@ -112,7 +112,7 @@ func (s *State) BuildConfigPage() {
 						fg, bg, &s.RunningInRepoButton)
 					for s.RunningInRepoButton.Clicked(s.Gtx) {
 						if !s.Config.Running {
-							s.Config.RunInRepo= true
+							s.Config.RunInRepo = true
 							s.CannotRun = false
 							s.SaveConfig()
 						}
@@ -127,7 +127,7 @@ func (s *State) BuildConfigPage() {
 					fg, bg, &s.RunFromProfileButton)
 				for s.RunFromProfileButton.Clicked(s.Gtx) {
 					if !s.Config.Running {
-						s.Config.RunInRepo= false
+						s.Config.RunInRepo = false
 						s.CannotRun = false
 						s.SaveConfig()
 					}
@@ -160,7 +160,7 @@ func (s *State) BuildConfigPage() {
 						fg, bg, &s.UseBuiltinGoButton)
 					for s.UseBuiltinGoButton.Clicked(s.Gtx) {
 						if !s.Config.RunInRepo {
-							s.Config.UseBuiltinGo= true
+							s.Config.UseBuiltinGo = true
 							s.CannotRun = false
 							if !s.HasGo {
 								s.CannotRun = true
@@ -177,7 +177,7 @@ func (s *State) BuildConfigPage() {
 					fg, bg, &s.InstallNewGoButton)
 				for s.InstallNewGoButton.Clicked(s.Gtx) {
 					if !s.Config.RunInRepo {
-						s.Config.UseBuiltinGo= false
+						s.Config.UseBuiltinGo = false
 						s.CannotRun = false
 						if !s.HasOtherGo {
 							s.CannotRun = true

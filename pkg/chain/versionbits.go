@@ -22,14 +22,14 @@ const (
 )
 
 type // bitConditionChecker provides a thresholdConditionChecker which can be
-	// used to test whether or not a specific bit is set when it's not supposed
-	// to be according to the expected version based on the known deployments and
-	// the current state of the chain.
-	// This is useful for detecting and warning about unknown rule activations.
-	bitConditionChecker struct {
-		bit   uint32
-		chain *BlockChain
-	}
+// used to test whether or not a specific bit is set when it's not supposed
+// to be according to the expected version based on the known deployments and
+// the current state of the chain.
+// This is useful for detecting and warning about unknown rule activations.
+bitConditionChecker struct {
+	bit   uint32
+	chain *BlockChain
+}
 
 // Ensure the bitConditionChecker type implements the
 // thresholdConditionChecker interface.
@@ -94,17 +94,17 @@ func // Condition returns true when the specific bit associated with the checker
 }
 
 type // deploymentChecker provides a thresholdConditionChecker which can be used
-	// to test a specific deployment rule.
-	// This is required for properly detecting and activating consensus rule
-	// changes.
-	deploymentChecker struct {
-		deployment *chaincfg.ConsensusDeployment
-		chain      *BlockChain
-	}
+// to test a specific deployment rule.
+// This is required for properly detecting and activating consensus rule
+// changes.
+deploymentChecker struct {
+	deployment *chaincfg.ConsensusDeployment
+	chain      *BlockChain
+}
 
 var // Ensure the deploymentChecker type implements the
-	// thresholdConditionChecker interface.
-	_ thresholdConditionChecker = deploymentChecker{}
+// thresholdConditionChecker interface.
+_ thresholdConditionChecker = deploymentChecker{}
 
 func // BeginTime returns the unix timestamp for the median block time after
 // which voting on a rule change starts (at the next window).

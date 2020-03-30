@@ -45,7 +45,7 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
-					e := ui.ly.Theme.DuoUIeditor("Enter Passphrase", "Dark", "Light",32)
+					e := ui.ly.Theme.DuoUIeditor("Enter Passphrase", "Dark", "Light", 32)
 					e.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
 					e.Font.Style = text.Regular
 					e.Layout(ui.ly.Context, passEditor)

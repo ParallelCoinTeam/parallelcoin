@@ -38,8 +38,8 @@ func LoadContainer(b []byte) (out *Container) {
 func (c *Container) GetPackages() (out Pk.Package) {
 	out = make(Pk.Package)
 	for i := 0; i <= int(c.Count()/2); i++ {
-		s := String.New().DecodeOne(c.Get(uint16(i*2))).Get()
-		b := Byte.New().DecodeOne(c.Get(uint16(1+i*2))).Get()
+		s := String.New().DecodeOne(c.Get(uint16(i * 2))).Get()
+		b := Byte.New().DecodeOne(c.Get(uint16(1 + i*2))).Get()
 		boo := false
 		if b != 0 {
 			boo = true

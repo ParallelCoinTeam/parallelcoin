@@ -252,14 +252,14 @@ dbRemoveTxIndexEntries(dbTx database.Tx, block *util.Block) error {
 }
 
 type // TxIndex implements a transaction by hash index.  That is to say,
-	// it supports querying all transactions by their hash.
-	TxIndex struct {
-		db         database.DB
-		curBlockID uint32
-	}
+// it supports querying all transactions by their hash.
+TxIndex struct {
+	db         database.DB
+	curBlockID uint32
+}
 
 var // Ensure the TxIndex type implements the Indexer interface.
-	_ Indexer = (*TxIndex)(nil)
+_ Indexer = (*TxIndex)(nil)
 
 func // Init initializes the hash-based transaction index.  In particular,
 // it finds the highest used block ID and stores it for later use when

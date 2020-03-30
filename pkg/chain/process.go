@@ -11,8 +11,8 @@ import (
 )
 
 type // BehaviorFlags is a bitmask defining tweaks to the normal behavior when
-	// performing chain processing and consensus rules checks.
-	BehaviorFlags uint32
+// performing chain processing and consensus rules checks.
+BehaviorFlags uint32
 
 const (
 	// BFFastAdd may be set to indicate that several checks can be avoided

@@ -64,10 +64,10 @@ type GBTWorkState struct {
 	MinTimestamp  time.Time
 	Template      *mining.BlockTemplate
 	NotifyMap     map[chainhash.Hash]map[int64]chan struct{}
-	TimeSource blockchain.MedianTimeSource
-	Algo       string
-	StateCfg   *state.Config
-	Config     *pod.Config
+	TimeSource    blockchain.MedianTimeSource
+	Algo          string
+	StateCfg      *state.Config
+	Config        *pod.Config
 }
 
 // ParsedRPCCmd represents a JSON-RPC request object that has been parsed
@@ -2044,7 +2044,7 @@ func MessageToHex(msg wire.Message) (string, error) {
 func NewGbtWorkState(timeSource blockchain.MedianTimeSource,
 	algoName string) *GBTWorkState {
 	return &GBTWorkState{
-		NotifyMap: make(map[chainhash.Hash]map[int64]chan struct{}),
+		NotifyMap:  make(map[chainhash.Hash]map[int64]chan struct{}),
 		TimeSource: timeSource,
 		Algo:       algoName,
 	}

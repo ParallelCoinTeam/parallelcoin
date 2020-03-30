@@ -368,7 +368,7 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	// rp := fmt.Sprint(rand.Intn(32767) + 1025)
 	var conn *transport.Channel
 	conn, err = transport.NewBroadcastChannel(
-		"kopachworker", w, pass,transport.DefaultPort,
+		"kopachworker", w, pass, transport.DefaultPort,
 		kopachctrl.MaxDatagramSize, transport.Handlers{}, w.Quit)
 	if err != nil {
 		Error(err)

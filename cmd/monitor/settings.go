@@ -268,7 +268,7 @@ func (s *State) InputField(f *Field) func() {
 				if fm != "MiningAddrs" {
 					w := len((rsd.Widgets[fm]).(*gel.Editor).Text())
 					s.StringsArrayEditor(rsd.Widgets[fm].(*gel.
-					Editor), (rsd.Widgets[fm]).(*gel.Editor).Text(), w,
+						Editor), (rsd.Widgets[fm]).(*gel.Editor).Text(), w,
 						func(e gel.EditorEvent) {
 							rsd.Config[fm] = strings.Fields(rwe.Text())
 							if e != nil {

@@ -12,25 +12,25 @@ import (
 )
 
 type // txValidateItem holds a transaction along with which input to validate.
-	txValidateItem struct {
-		txInIndex int
-		txIn      *wire.TxIn
-		tx        *util.Tx
-		sigHashes *txscript.TxSigHashes
-	}
+txValidateItem struct {
+	txInIndex int
+	txIn      *wire.TxIn
+	tx        *util.Tx
+	sigHashes *txscript.TxSigHashes
+}
 
 type // txValidator provides a type which asynchronously validates transaction
-	// inputs.  It provides several channels for communication and a processing
-	// function that is intended to be in run multiple goroutines.
-	txValidator struct {
-		validateChan chan *txValidateItem
-		quitChan     chan struct{}
-		resultChan   chan error
-		utxoView     *UtxoViewpoint
-		flags        txscript.ScriptFlags
-		sigCache     *txscript.SigCache
-		hashCache    *txscript.HashCache
-	}
+// inputs.  It provides several channels for communication and a processing
+// function that is intended to be in run multiple goroutines.
+txValidator struct {
+	validateChan chan *txValidateItem
+	quitChan     chan struct{}
+	resultChan   chan error
+	utxoView     *UtxoViewpoint
+	flags        txscript.ScriptFlags
+	sigCache     *txscript.SigCache
+	hashCache    *txscript.HashCache
+}
 
 func // sendResult sends the result of a script pair validation on the internal
 // result channel while respecting the quit channel.

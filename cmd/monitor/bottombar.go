@@ -94,7 +94,7 @@ func (s *State) Filter() layout.FlexChild {
 		}
 		//if !(s.Config.FilterOpen.Load() && s.WindowWidth <= 720) ||
 		//	(!s.Config.FilterOpen.Load() && s.WindowWidth > 480) {
-		if ! s.Config.FilterOpen {
+		if !s.Config.FilterOpen {
 			s.IconButton("Filter", fg, bg, &s.FilterButton)
 			for s.FilterButton.Clicked(s.Gtx) {
 				Debug("clicked filter button")

@@ -20,7 +20,7 @@ func (b *String) Decode(by []byte) (out []byte) {
 	if len(by) >= 4 {
 		length := binary.BigEndian.Uint32(by[:4])
 		if len(by) >= 4+int(length) {
-			out = by[4:4+length]
+			out = by[4 : 4+length]
 			b.Bytes = out
 		}
 	}

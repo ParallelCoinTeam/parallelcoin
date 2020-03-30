@@ -106,12 +106,12 @@ func (n *Node) GetWidget(s *State) {
 			Rigid(func() {
 				split := strings.Split(nn[i].FullName, string(os.PathSeparator))
 				//joined := strings.Join(split[:len(split)-1], string(os.PathSeparator))
-				indent = len(split)-1
+				indent = len(split) - 1
 				//if joined != "" {
 				//	s.Text(joined+string(os.PathSeparator), "DocBg", "PanelBg", "Primary", "body2")()
 				//}
 				//s.Gtx.Constraints.Width.Max = 16 * indent
-				s.Inset(0, func(){
+				s.Inset(0, func() {
 					//cs := s.Gtx.Constraints
 					s.Rectangle(indent*16, 32, "PanelBg", "ff")
 				})
