@@ -3,6 +3,8 @@ package serve
 import (
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/logi/Entry"
+	"github.com/p9c/pod/pkg/logi/Pkg"
+	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
 	"github.com/p9c/pod/pkg/pipe"
 	"go.uber.org/atomic"
 )
@@ -10,6 +12,7 @@ import (
 func Log(quit chan struct{}) {
 	Debug("starting log server")
 	lc := logi.L.AddLogChan()
+	pkgChan := make(chan Pk.Package)
 	var logOn atomic.Bool
 	logOn.Store(false)
 	p := pipe.Serve(quit, func(b []byte) (err error) {
@@ -26,6 +29,9 @@ func Log(quit chan struct{}) {
 			case "slvl":
 				Debug("setting level", logi.Levels[b[4]])
 				logi.L.SetLevel(logi.Levels[b[4]], false, "pod")
+			case "pkgs":
+				Debugs(logi.L.Packages)
+				pkgChan <- logi.L.Packages
 			}
 		}
 		return
@@ -42,6 +48,12 @@ func Log(quit chan struct{}) {
 						if n < 1 {
 							Error("short write")
 						}
+					}
+				}
+			case pk := <-pkgChan:
+				if n, err := p.Write(Pkg.Get(pk).Data); !Check(err) {
+					if n < 1 {
+						Error("short write")
 					}
 				}
 			}

@@ -53,7 +53,7 @@ func (s *State) Body() layout.FlexChild {
 					Spacer(),
 					Rigid(
 						s.Text(b.Package, "PanelBg", "DocBg", "Primary",
-							"body2"),
+							"h6"),
 					),
 				)
 			})

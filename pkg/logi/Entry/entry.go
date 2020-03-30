@@ -2,11 +2,9 @@
 package Entry
 
 import (
-	"crypto/rand"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/simplebuffer/String"
-	"io"
 	"time"
 
 	"github.com/p9c/pod/pkg/simplebuffer"
@@ -20,9 +18,6 @@ type Container struct {
 }
 
 func Get(ent *logi.Entry) Container {
-	nonce := make([]byte, 4)
-	if _, err := io.ReadFull(rand.Reader, nonce); Check(err) {
-	}
 	return Container{*simplebuffer.Serializers{
 		Time.New().Put(ent.Time),
 		String.New().Put(ent.Level),

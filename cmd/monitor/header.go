@@ -26,17 +26,19 @@ func (s *State) DuoUIheader() layout.FlexChild {
 					s.Theme.DuoUIbutton("", "", "",
 						s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
 						s.Theme.Colors[fg], 0, 40, 48, 48,
-						4, 4, 4, 4).IconLayout(s.Gtx, &s.LogoButton)
+						6, 2, 2, 6).IconLayout(s.Gtx, &s.LogoButton)
 					if s.LogoButton.Clicked(s.Gtx) {
 						s.FlipTheme()
 					}
 				}))
 			}), Rigid(func() {
 				s.FlexV(Flexed(1, func() {
-					layout.W.Layout(s.Gtx, func() {
-						t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), "Monitor")
-						t.Color = s.Theme.Colors["PanelText"]
-						t.Layout(s.Gtx)
+					s.Inset(4, func() {
+						layout.W.Layout(s.Gtx, func() {
+							t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), "Monitor")
+							t.Color = s.Theme.Colors["PanelText"]
+							t.Layout(s.Gtx)
+						})
 					})
 				}))
 			}),
@@ -85,8 +87,9 @@ func (s *State) RestartRunButton() layout.FlexChild {
 						if err = syscall.Exec(exePath, os.Args,
 							os.Environ()); Check(err) {
 						}
-						time.Sleep(time.Second/2)
-						os.Exit(0)
+						close(s.Ctx.KillAll)
+						//time.Sleep(time.Second/2)
+						//os.Exit(0)
 					}
 				}()
 			}

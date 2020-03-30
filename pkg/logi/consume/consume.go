@@ -53,9 +53,6 @@ func SetLevel(w *worker.Worker, level string) {
 			lvl = i
 		}
 	}
-	if w == nil {
-		return
-	}
 	if n, err := w.StdConn.Write([]byte("slvl" + string(byte(lvl)))); n < 1 ||
 		Check(err) {
 		Debug("failed to write")

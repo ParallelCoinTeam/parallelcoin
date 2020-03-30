@@ -3,6 +3,7 @@ package logi
 import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
 	"io"
 	"os"
 	"path/filepath"
@@ -127,7 +128,7 @@ type (
 
 	// Logger is a struct containing all the functions with nice handy names
 	Logger struct {
-		Packages      map[string]bool
+		Packages      Pk.Package
 		Level         string
 		Fatal         PrintlnFunc
 		Error         PrintlnFunc
@@ -168,7 +169,7 @@ var L = NewLogger()
 // AddLogChan adds a channel that log entries are sent to
 func (l *Logger) AddLogChan() (ch chan Entry) {
 	L.LogChan = append(L.LogChan, make(chan Entry))
-	L.Write = false
+	//L.Write = false
 	return L.LogChan[len(L.LogChan)-1]
 }
 
@@ -176,10 +177,10 @@ func NewLogger() (l *Logger) {
 	l = &Logger{
 		Packages:      make(map[string]bool),
 		Level:         "trace",
-		LogFileHandle: nil,
-		Write:         false,
-		Color:         false,
-		Split:         "",
+		LogFileHandle: os.Stderr,
+		Write:         true,
+		Color:         true,
+		Split:         "pod",
 		LogChan:       nil,
 	}
 	l.Fatal = l.printlnFunc(Fatal)
@@ -247,15 +248,23 @@ func FileExists(filePath string) bool {
 
 func (l *Logger) SetLevel(level string, color bool, split string) {
 	l.Level = sanitizeLoglevel(level)
-	l.Split = split+string(os.PathSeparator)
+	l.Split = split + string(os.PathSeparator)
 	l.Color = color
 }
 
-func (l *Logger) Register(pkg string) string {
+func (l *Logger) LocToPkg(pkg string) (out string) {
 	split := strings.Split(pkg, l.Split)
 	pkg = split[1]
 	split = strings.Split(pkg, string(os.PathSeparator))
-	pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
+	return strings.Join(split[:len(split)-1], string(os.PathSeparator))
+}
+
+func (l *Logger) Register(pkg string) string {
+	//split := strings.Split(pkg, l.Split)
+	//pkg = split[1]
+	//split = strings.Split(pkg, string(os.PathSeparator))
+	//pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
+	pkg = l.LocToPkg(pkg)
 	l.Packages[pkg] = true
 	return pkg
 }
@@ -303,16 +312,12 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 		if !l.LevelIsActive(level) || !l.Packages[pkg] {
 			return
 		}
-		//if l.Write || l.Packages[package] {
-		//	l.Writer.Println(Composite(text, level, l.Color, l.Split))
-		//}
+		if l.Write || l.Packages[pkg] {
+			l.Writer.Println(Composite(text, level, l.Color, l.Split))
+		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1],
-				string(os.PathSeparator))
-			split := strings.Split(pkg, string(os.PathSeparator))
-			pkg = split[len(split)-1]
+			pkg := l.LocToPkg(loc)
 			out := Entry{time.Now(), level,
 				pkg, fmt.Sprint(loc, ":", line),
 				text}
@@ -337,10 +342,7 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1], string(os.PathSeparator))
-			split := strings.Split(pkg, string(os.PathSeparator))
-			pkg = split[len(split)-1]
+			pkg := l.LocToPkg(loc)
 			out := Entry{time.Now(), level,
 				pkg, fmt.Sprint(loc, ":", line), text}
 			for i := range l.LogChan {
@@ -363,11 +365,7 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1],
-				string(os.PathSeparator))
-			split := strings.Split(pkg, string(os.PathSeparator))
-			pkg = split[len(split)-1]
+			pkg := l.LocToPkg(loc)
 			out := Entry{time.Now(), l.Level,
 				pkg, fmt.Sprint(loc, ":", line),
 				text}
@@ -394,11 +392,7 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(3)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1],
-				string(os.PathSeparator))
-			split := strings.Split(pkg, string(os.PathSeparator))
-			pkg = split[len(split)-1]
+			pkg := l.LocToPkg(loc)
 			out := Entry{time.Now(), "CHK",
 				pkg, fmt.Sprint(loc, ":", line),
 				text}
@@ -425,11 +419,7 @@ func (l *Logger) ps(level string) SpewFunc {
 		}
 		if l.LogChan != nil {
 			_, loc, line, _ := runtime.Caller(2)
-			splitted := strings.Split(loc, string(os.PathSeparator))
-			pkg := strings.Join(splitted[:len(splitted)-1],
-				string(os.PathSeparator))
-			split := strings.Split(pkg, string(os.PathSeparator))
-			pkg = split[len(split)-1]
+			pkg := l.LocToPkg(loc)
 			out := Entry{time.Now(), level, pkg, fmt.Sprint(loc, ":", line),
 				text}
 			for i := range l.LogChan {

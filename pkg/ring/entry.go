@@ -21,6 +21,15 @@ func NewEntry(size int) *Entry {
 	}
 }
 
+// Clear sets the buffer back to initial state
+func (b *Entry) Clear() {
+	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+		defer b.Sem.Release(1)
+		b.Cursor = 0
+		b.Full = false
+	}
+}
+
 // Len returns the length of the buffer
 func (b *Entry) Len() (out int) {
 	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {

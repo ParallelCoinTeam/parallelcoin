@@ -51,6 +51,8 @@ type State struct {
 	FilterHideButton          gel.Button
 	FilterShowButton          gel.Button
 	FilterNoneButton          gel.Button
+	FilterClearButton         gel.Button
+	FilterSendButton          gel.Button
 	FilterLevelsButtons       []gel.Button
 	FilterLevelList           layout.List
 	ModesButtons              map[string]*gel.Button

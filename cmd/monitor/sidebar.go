@@ -31,8 +31,21 @@ func (s *State) Sidebar() layout.FlexChild {
 							//if s.WindowWidth > 640 {
 							//	s.Label("Filter")
 							//}
-						}),
-						Rigid(func() {
+						}), Rigid(func() {
+							s.IconButton("Send", "DocText", "DocBg",
+								&s.FilterSendButton)
+							for s.FilterSendButton.Clicked(s.Gtx) {
+								Debug("send current log buffer")
+								//s.EntryBuf.Clear()
+							}
+						}), Rigid(func() {
+							s.IconButton("Delete", "DocText", "DocBg",
+								&s.FilterClearButton)
+							for s.FilterClearButton.Clicked(s.Gtx) {
+								Debug("clear all")
+								s.EntryBuf.Clear()
+							}
+						}), Rigid(func() {
 							s.IconButton("HideAll", "DocText", "DocBg",
 								&s.FilterHideButton)
 							for s.FilterHideButton.Clicked(s.Gtx) {
@@ -124,7 +137,7 @@ func (s *State) LevelsButtons() {
 			case 6:
 				bg, color = "DocBg", "Info"
 			case 7:
-				bg, color = "DocBg", "Secondary"
+				color, bg = "DocBg", "Secondary"
 			}
 		}
 		bb := &s.FilterLevelsButtons[a]
