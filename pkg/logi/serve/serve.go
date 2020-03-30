@@ -30,8 +30,15 @@ func Log(quit chan struct{}) {
 				Debug("setting level", logi.Levels[b[4]])
 				logi.L.SetLevel(logi.Levels[b[4]], false, "pod")
 			case "pkgs":
-				Debugs(logi.L.Packages)
-				pkgChan <- logi.L.Packages
+				pkgs := Pkg.LoadContainer(b).GetPackages()
+				//Debugs(pkgs)
+				//logi.L.Packages = pkgs
+				for i := range pkgs {
+					Debug(i, pkgs[i])
+					logi.L.Packages[i] = pkgs[i]
+				}
+				//Debugs(logi.L.Packages)
+				//pkgChan <- logi.L.Packages
 			}
 		}
 		return

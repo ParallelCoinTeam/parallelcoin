@@ -3,6 +3,8 @@ package monitor
 import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
+	"github.com/p9c/pod/pkg/logi/consume"
 	"os"
 	"sort"
 	"strings"
@@ -21,9 +23,8 @@ type Node struct {
 }
 
 func (s *State) GetTree(paths []string) (root *Node) {
-
 	sort.Strings(paths)
-	root = &Node{
+	s.FilterRoot = &Node{
 		Name:       "root",
 		FullName:   string(os.PathSeparator),
 		parent:     nil,
@@ -33,7 +34,7 @@ func (s *State) GetTree(paths []string) (root *Node) {
 		foldButton: new(gel.Button),
 		showButton: nil,
 	}
-	cursor := root
+	cursor := s.FilterRoot
 	var prevLen int
 	for _, v := range paths {
 		split := strings.Split(v, string(os.PathSeparator))
@@ -91,28 +92,19 @@ func (s *State) GetTree(paths []string) (root *Node) {
 	//root.CloseAllItems(s)
 	//spew.Config.Indent = "    "
 	//Debugs(root)
-	return
+	return s.FilterRoot
 }
 
 func (n *Node) GetWidget(s *State) {
 	nn := n.GetOpenItems()[1:]
-	//for i := range nn {
-	//	Debug(nn[i].FullName, nn[i].Closed, nn[i].Hidden)
-	//}
 	indent := 0
 	s.FilterList.Axis = layout.Vertical
 	s.FilterList.Layout(s.Gtx, len(nn), func(i int) {
 		s.FlexH(
 			Rigid(func() {
 				split := strings.Split(nn[i].FullName, string(os.PathSeparator))
-				//joined := strings.Join(split[:len(split)-1], string(os.PathSeparator))
 				indent = len(split) - 1
-				//if joined != "" {
-				//	s.Text(joined+string(os.PathSeparator), "DocBg", "PanelBg", "Primary", "body2")()
-				//}
-				//s.Gtx.Constraints.Width.Max = 16 * indent
 				s.Inset(0, func() {
-					//cs := s.Gtx.Constraints
 					s.Rectangle(indent*16, 32, "PanelBg", "ff")
 				})
 			}),
@@ -133,7 +125,7 @@ func (n *Node) GetWidget(s *State) {
 					} else {
 						nn[i].HideAllItems(s)
 					}
-
+					consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 					s.SaveConfig()
 				}
 			}),
@@ -152,61 +144,47 @@ func (n *Node) GetWidget(s *State) {
 					}
 					s.IconButton(ic, fg, "PanelBg", nn[i].foldButton)
 					if nn[i].foldButton.Clicked(s.Gtx) {
+						if nn[i].Closed {
+							//nn[i].OpenAllItems(s)
+						} else {
+							nn[i].CloseAllItems(s)
+						}
 						nn[i].Closed = !nn[i].Closed
 					}
-
 					s.SaveConfig()
 				}
 			}),
 			Flexed(1, func() {
 
 			}),
-			//Rigid(func() {
-			//	s.Label("x")
-			//}),
 		)
 	})
 }
 
-//func (n *Node) LoadState(s *State) {
-//	//s.Config.FilterNodes = make(map[string]TreeNode)
-//	for _, v := range n.Children {
-//		s.Config.FilterNodes[v.FullName] = &TreeNode{
-//			Closed: n.Closed,
-//			Hidden: n.Hidden,
-//		}
-//		v.LoadState(s)
-//	}
-//}
-//
-//func (n *Node) StoreState(s *State) {
-//	for j, w := range n.Children {
-//		s.Config.FilterNodes[n.Children[j].FullName].Closed =
-//			w.Closed
-//		s.Config.FilterNodes[n.Children[j].FullName].Hidden =
-//			w.Hidden
-//		w.StoreState(s)
-//	}
-//}
+func (n *Node) GetPackages() (out Pk.Package) {
+	out = make(Pk.Package)
+	all := n.GetAllItems()
+	for i := range all {
+		out[all[i].FullName] = !all[i].Hidden
+	}
+	return
+}
 
-//func (n *Node) ClearParents() {
-//	for i := range n.Children {
-//		n.Children[i].parent = nil
-//		n.Children[i].ClearParents()
-//	}
-//}
+func (n *Node) GetAllItems() (out []*Node) {
+	out = append(out, n)
+	for _, v := range n.Children {
+		out = append(out, v.GetOpenItems()...)
+	}
+	return
+}
 
 func (n *Node) GetOpenItems() (out []*Node) {
 	out = append(out, n)
-	//Debugs(n)
 	for _, v := range n.Children {
 		if !n.Closed {
 			out = append(out, v.GetOpenItems()...)
 		}
 	}
-	//if n.Parent == nil {
-	//	Debugs(out)
-	//}
 	return
 }
 

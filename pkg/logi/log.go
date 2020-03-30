@@ -439,8 +439,8 @@ func (l *Logger) ps(level string) SpewFunc {
 func Composite(text, level string, color bool, split string) string {
 	dots := "."
 	terminalWidth := TermWidth()
-	if TermWidth() <= 80 {
-		terminalWidth = 80
+	if TermWidth() <= 120 {
+		terminalWidth = 120
 	}
 	skip := 3
 	if level == Check {

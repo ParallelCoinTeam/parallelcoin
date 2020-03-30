@@ -73,6 +73,7 @@ type State struct {
 	FilterList                layout.List
 	LogList                   layout.List
 	EntryBuf                  *ring.Entry
+	FilterRoot                *Node
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {

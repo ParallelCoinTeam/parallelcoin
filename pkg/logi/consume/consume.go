@@ -3,6 +3,8 @@ package consume
 import (
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/logi/Entry"
+	"github.com/p9c/pod/pkg/logi/Pkg"
+	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
 	"github.com/p9c/pod/pkg/pipe"
 	"github.com/p9c/pod/pkg/stdconn/worker"
 )
@@ -73,6 +75,17 @@ func SetLevel(w *worker.Worker, level string) {
 		}
 	}
 	if n, err := w.StdConn.Write([]byte("slvl" + string(byte(lvl)))); n < 1 ||
+		Check(err) {
+		Debug("failed to write")
+	}
+}
+
+func SetFilter(w *worker.Worker, pkgs Pk.Package) {
+	if w == nil {
+		return
+	}
+	Info("sending set filter")
+	if n, err := w.StdConn.Write(Pkg.Get(pkgs).Data); n < 1 ||
 		Check(err) {
 		Debug("failed to write")
 	}

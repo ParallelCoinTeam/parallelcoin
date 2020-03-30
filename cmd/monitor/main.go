@@ -1,5 +1,3 @@
-// +build !headless
-
 package monitor
 
 import (

@@ -67,6 +67,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							for s.FilterAllButton.Clicked(s.Gtx) {
 								Debug("filter all")
 								s.Loggers.ShowAllItems(s)
+								consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 								s.SaveConfig()
 							}
 						}), Rigid(func() {
@@ -75,6 +76,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							for s.FilterNoneButton.Clicked(s.Gtx) {
 								Debug("filter none")
 								s.Loggers.HideAllItems(s)
+								consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 								s.SaveConfig()
 							}
 						}), Rigid(func() {
