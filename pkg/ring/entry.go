@@ -8,19 +8,21 @@ import (
 )
 
 type Entry struct {
-	Sem    semaphore.Semaphore
-	Buf    []*logi.Entry
-	Cursor int
-	Full   bool
+	Sem     semaphore.Semaphore
+	Buf     []*logi.Entry
+	Cursor  int
+	Full    bool
 	Buttons []gel.Button
+	Hiders  []gel.Button
 }
 
 func NewEntry(size int) *Entry {
 	return &Entry{
-		Sem:    semaphore.New(1),
-		Buf:    make([]*logi.Entry, size),
-		Cursor: 0,
+		Sem:     semaphore.New(1),
+		Buf:     make([]*logi.Entry, size),
+		Cursor:  0,
 		Buttons: make([]gel.Button, size),
+		Hiders:  make([]gel.Button, size),
 	}
 }
 
@@ -83,6 +85,27 @@ func (b *Entry) GetButton(i int) (out *gel.Button) {
 			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = &b.Buttons[cursor]
+		}
+	}
+	return
+}
+
+// GetHider returns the gel.Button of the entry
+func (b *Entry) GetHider(i int) (out *gel.Button) {
+	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+		defer b.Sem.Release(1)
+		bl := len(b.Buf)
+		cursor := i
+		if i < bl {
+			if b.Full {
+				cursor = i + b.Cursor
+				if cursor >= bl {
+					cursor -= bl
+				}
+			}
+			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			//	cursor)
+			out = &b.Hiders[cursor]
 		}
 	}
 	return

@@ -137,7 +137,7 @@ func (s *State) LevelsButtons() {
 			case 6:
 				bg, color = "DocBg", "Info"
 			case 7:
-				color, bg = "DocBg", "Secondary"
+				bg, color = "DocBg", "Secondary"
 			}
 		}
 		bb := &s.FilterLevelsButtons[a]

@@ -34,51 +34,63 @@ func (s *State) Body() layout.FlexChild {
 					//	color = "Danger"
 				}
 				button := s.EntryBuf.GetButton(i)
-				s.ButtonArea(func() {
-					s.FlexH(
-						//Rigid(
-						//	s.Text(fmt.Sprint(i), color, "DocBg", "Mono", "body1"),
-						//),
-						Rigid(
-							//s.Text(b.Level, color, "DocBg", "Mono", "body1"),
-							func() {
-								s.Icon(logi.Tags[b.Level], color, "Transparent",
-									24)
-							},
-						),
-						Rigid(
-							s.Text(b.Time.Format("15:04:05"), color, "Transparent",
-								"Mono",
-								"body2"),
-						),
-						Flexed(1,
-							s.Text(b.Text, "DocText", "Transparent", "Mono",
-								"body2"),
-						),
-						Spacer(),
-						Rigid(
-							s.Text(b.Package, "PanelBg", "Transparent", "Primary",
-								"h6"),
-						),
-					)
-				}, button)
-				for button.Clicked(s.Gtx) {
-					go func() {
-						if s.Config.ClickCommand == "" {
-							return
+				hider := s.EntryBuf.GetHider(i)
+				s.FlexH(
+					Flexed(1, func() {
+						s.ButtonArea(func() {
+							s.FlexH(
+								//Rigid(
+								//	s.Text(fmt.Sprint(i), color, "DocBg", "Mono", "body1"),
+								//),
+								Rigid(
+									//s.Text(b.Level, color, "DocBg", "Mono", "body1"),
+									func() {
+										s.Icon(logi.Tags[b.Level], color, "Transparent",
+											24)
+									},
+								),
+								Rigid(
+									s.Text(b.Time.Format("15:04:05"), color, "Transparent",
+										"Mono",
+										"body2"),
+								),
+								Flexed(1,
+									s.Text(b.Text, "DocText", "Transparent", "Mono",
+										"body2"),
+								),
+								Spacer(),
+								//Rigid(
+								//	s.Text(b.Package, "PanelBg", "Transparent", "Primary",
+								//		"h6"),
+								//),
+							)
+						}, button)
+						for button.Clicked(s.Gtx) {
+							go func() {
+								if s.Config.ClickCommand == "" {
+									return
+								}
+								split := strings.Split(b.CodeLocation, ":")
+								v1 := split[0]
+								v2 := split[1]
+								c := strings.Replace(s.Config.ClickCommand, "$1", v1, 1)
+								c = strings.Replace(c, "$2", v2, 1)
+								Debug("running command", c)
+								args := strings.Split(c, " ")
+								cmd := exec.Command(args[0], args[1:]...)
+								_ = cmd.Run()
+								//s.Config.ClickCommand
+							}()
 						}
-						split := strings.Split(b.CodeLocation, ":")
-						v1 := split[0]
-						v2 := split[1]
-						c := strings.Replace(s.Config.ClickCommand, "$1", v1, 1)
-						c = strings.Replace(c, "$2", v2, 1)
-						Debug("running command", c)
-						args := strings.Split(c, " ")
-						cmd := exec.Command(args[0], args[1:]...)
-						_ = cmd.Run()
-						//s.Config.ClickCommand
-					}()
-				}
+					}), Rigid(func() {
+						s.IconButton("HideItem", "DocText", "DocBg",
+							hider)
+						for hider.Clicked(s.Gtx) {
+							s.Config.FilterNodes[s.EntryBuf.Get(i).
+								Package].Hidden = true
+						}
+					}),
+				)
 			})
 		})
 		s.W.Invalidate()
