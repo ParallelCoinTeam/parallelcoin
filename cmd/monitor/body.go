@@ -64,6 +64,9 @@ func (s *State) Body() layout.FlexChild {
 				}, button)
 				for button.Clicked(s.Gtx) {
 					go func() {
+						if s.Config.ClickCommand == "" {
+							return
+						}
 						split := strings.Split(b.CodeLocation, ":")
 						v1 := split[0]
 						v2 := split[1]
