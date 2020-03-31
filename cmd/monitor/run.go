@@ -4,6 +4,7 @@ import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/logi/consume"
+	"go.uber.org/atomic"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -90,6 +91,8 @@ func (s *State) Runner() {
 	var err error
 	var exePath string
 	var quit chan struct{}
+	run := &atomic.Bool{}
+	run.Store(false)
 	for cmd := range s.RunCommandChan {
 		switch cmd {
 		case "run":
@@ -102,12 +105,21 @@ func (s *State) Runner() {
 						//Debugf("KOPACH %s %s", ent.Text, ent.Level)
 						s.EntryBuf.Add(ent)
 						return
-					}, exePath, "-D", *s.Ctx.Config.DataDir, s.Config.RunMode)
+					}, func(pkg string) (out bool) {
+						if s.Config.FilterNodes[pkg].Hidden {
+							return true
+						}
+						return false
+					}, exePath, "-D",
+						*s.Ctx.Config.DataDir,
+						s.Config.RunMode)
 					consume.Start(s.Worker)
 					s.Config.Running = true
 					s.Config.Pausing = false
+					consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 					s.W.Invalidate()
 					go func() {
+						//time.Sleep(time.Second/10)
 						if err = s.Worker.Wait(); !Check(err) {
 							s.Config.Running = false
 							s.Config.Pausing = false

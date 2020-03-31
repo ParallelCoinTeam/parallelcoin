@@ -207,7 +207,7 @@ func (n *Node) GetPackages() (out Pk.Package) {
 func (n *Node) GetAllItems() (out []*Node) {
 	out = append(out, n)
 	for _, v := range n.Children {
-		out = append(out, v.GetOpenItems()...)
+		out = append(out, v.GetAllItems()...)
 	}
 	return
 }

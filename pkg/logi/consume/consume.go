@@ -10,7 +10,8 @@ import (
 )
 
 func Log(quit chan struct{}, handler func(ent *logi.Entry) (
-	err error), args ...string) *worker.Worker {
+	err error), filter func(pkg string) (out bool),
+args ...string) *worker.Worker {
 	Debug("starting log consumer")
 	return pipe.Consume(quit, func(b []byte) (err error) {
 		// we are only listening for entries
@@ -20,6 +21,9 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 			case "entr":
 				//Debug(b)
 				e := Entry.LoadContainer(b).Struct()
+				if filter(e.Package) {
+					return
+				}
 				//Debugs(e)
 				color := logi.ColorYellow
 				//Debug(e.Level)

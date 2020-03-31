@@ -34,7 +34,7 @@ func Log(quit chan struct{}) {
 				//Debugs(pkgs)
 				//logi.L.Packages = pkgs
 				for i := range pkgs {
-					Debug(i, pkgs[i])
+					//Debug(i, pkgs[i])
 					logi.L.Packages[i] = pkgs[i]
 				}
 				//Debugs(logi.L.Packages)
