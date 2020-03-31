@@ -119,15 +119,11 @@ func (s *State) TopLevelLayout() {
 	s.FlexV(
 		s.DuoUIheader(),
 		Flexed(1, func() {
-			s.FlexH(Flexed(1, func() {
-				s.FlexV(Flexed(1, func() {
-					s.FlexH(
-						s.Body(),
-					)
-				}), s.BottomBar(),
-				)
-			}), s.Sidebar(),
+			s.FlexH(
+				s.Body(),
+				s.Sidebar(),
 			)
 		}),
+		s.BottomBar(),
 	)
 }

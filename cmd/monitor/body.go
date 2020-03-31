@@ -35,6 +35,10 @@ func (s *State) Body() layout.FlexChild {
 				}
 				button := s.EntryBuf.GetButton(i)
 				hider := s.EntryBuf.GetHider(i)
+				ww := s.WindowWidth
+				if s.Config.FilterOpen {
+					ww -= 332
+				}
 				s.FlexH(
 					Flexed(1, func() {
 						s.ButtonArea(func() {
@@ -45,19 +49,30 @@ func (s *State) Body() layout.FlexChild {
 								Rigid(
 									//s.Text(b.Level, color, "DocBg", "Mono", "body1"),
 									func() {
-										s.Icon(logi.Tags[b.Level], color, "Transparent",
-											24)
+										if ww > 480 {
+											s.Icon(logi.Tags[b.Level], color, "Transparent",
+												32)
+										}
 									},
 								),
 								Rigid(
-									s.Text(b.Time.Format("15:04:05"), color, "Transparent",
-										"Mono",
-										"body2"),
-								),
-								Flexed(1,
-									s.Text(b.Text, "DocText", "Transparent", "Mono",
-										"body2"),
-								),
+									func() {
+										if ww > 960 {
+											s.FlexH(Rigid(
+												s.Text(b.Time.Format("15:04:05"), color, "Transparent", "Mono", "body2"),
+											))
+										}
+									}),
+								Flexed(1, func() {
+									tc := "DocText"
+									if ww <= 480 {
+										tc = color
+									}
+									s.FlexH(Rigid(
+										s.Text(b.Text, tc, "Transparent",
+											"Mono", "body2"),
+									))
+								}),
 								Spacer(),
 								//Rigid(
 								//	s.Text(b.Package, "PanelBg", "Transparent", "Primary",
@@ -83,11 +98,14 @@ func (s *State) Body() layout.FlexChild {
 							}()
 						}
 					}), Rigid(func() {
-						s.IconButton("HideItem", "DocText", "DocBg",
-							hider)
-						for hider.Clicked(s.Gtx) {
-							s.Config.FilterNodes[s.EntryBuf.Get(i).
-								Package].Hidden = true
+						if ww > 640 {
+							s.ButtonArea(func() {
+								s.Icon("HideItem", "PanelBg", "DocBg", 32)
+							}, hider)
+							for hider.Clicked(s.Gtx) {
+								s.Config.FilterNodes[s.EntryBuf.Get(i).
+									Package].Hidden = true
+							}
 						}
 					}),
 				)

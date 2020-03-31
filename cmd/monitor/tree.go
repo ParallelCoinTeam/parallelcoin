@@ -168,7 +168,7 @@ func (n *Node) GetWidget(s *State) {
 			}),
 			Rigid(func() {
 				if len(nn[i].Children) > 0 && nn[i].IsAnyHiding() {
-					s.IconButton("ShowItem", "DocText", "PanelBg",
+					s.IconButton("ShowItem", "DocBg", "PanelBg",
 						nn[i].showChildrenButton)
 					for nn[i].showChildrenButton.Clicked(s.Gtx) {
 						Debug("filter all")
@@ -180,7 +180,7 @@ func (n *Node) GetWidget(s *State) {
 				}
 			}), Rigid(func() {
 				if len(nn[i].Children) > 0 && nn[i].IsAnyShowing() {
-					s.IconButton("HideItem", "DocText", "PanelBg",
+					s.IconButton("HideItem", "DocBg", "PanelBg",
 						nn[i].hideChildrenButton)
 					for nn[i].hideChildrenButton.Clicked(s.Gtx) {
 						Debug("filter none")

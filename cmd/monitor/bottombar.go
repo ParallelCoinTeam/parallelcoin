@@ -68,7 +68,8 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 						txt = txt[:1]
 					}
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg", "ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg",
+						"ff")
 					s.TextButton(txt, "Secondary", 34, fg,
 						"ButtonBg", s.ModesButtons[modes[i]])
 					for s.ModesButtons[modes[i]].Clicked(s.Gtx) {
@@ -90,21 +91,21 @@ func (s *State) Filter() layout.FlexChild {
 	return Rigid(func() {
 		fg, bg := "PanelText", "PanelBg"
 		if s.Config.FilterOpen {
-			fg, bg = "DocText", "DocBg"
+			fg, bg = "DocBg", "DocText"
 		}
 		//if !(s.Config.FilterOpen.Load() && s.WindowWidth <= 720) ||
 		//	(!s.Config.FilterOpen.Load() && s.WindowWidth > 480) {
-		if !s.Config.FilterOpen {
-			s.IconButton("Filter", fg, bg, &s.FilterButton)
-			for s.FilterButton.Clicked(s.Gtx) {
-				Debug("clicked filter button")
-				if !s.Config.FilterOpen {
-					s.Config.SettingsOpen = false
-					s.Config.BuildOpen = false
-				}
-				s.Config.FilterOpen = !s.Config.FilterOpen
-				s.SaveConfig()
+		//if !s.Config.FilterOpen {
+		s.IconButton("Filter", fg, bg, &s.FilterButton)
+		for s.FilterButton.Clicked(s.Gtx) {
+			Debug("clicked filter button")
+			if !s.Config.FilterOpen {
+				s.Config.SettingsOpen = false
+				s.Config.BuildOpen = false
 			}
+			s.Config.FilterOpen = !s.Config.FilterOpen
+			s.SaveConfig()
 		}
+		//}
 	})
 }

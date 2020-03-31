@@ -132,7 +132,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 	go rebroadcaster(ctrl)
 	go submitter(ctrl)
 	go advertiser(ctrl)
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(time.Second*3)
 	cont := true
 	for cont {
 		select {
