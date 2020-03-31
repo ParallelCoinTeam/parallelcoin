@@ -173,16 +173,18 @@ func (n *Node) GetWidget(s *State) {
 					for nn[i].showChildrenButton.Clicked(s.Gtx) {
 						Debug("filter all")
 						nn[i].ShowAllItems(s)
+						nn[i].Hidden = false
 						consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 						s.SaveConfig()
 					}
 				}
 			}), Rigid(func() {
-				if len(nn[i].Children) > 0 && nn[i].IsAnyShowing()  {
+				if len(nn[i].Children) > 0 && nn[i].IsAnyShowing() {
 					s.IconButton("HideItem", "DocText", "PanelBg",
 						nn[i].hideChildrenButton)
 					for nn[i].hideChildrenButton.Clicked(s.Gtx) {
 						Debug("filter none")
+						nn[i].Hidden = true
 						nn[i].HideAllItems(s)
 						consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 						s.SaveConfig()
