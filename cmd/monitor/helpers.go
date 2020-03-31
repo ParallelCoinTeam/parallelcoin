@@ -33,6 +33,9 @@ func Spacer() layout.FlexChild {
 
 func (s *State) Rectangle(width, height int, color, opacity string, radius ...float32) {
 	col := s.Theme.Colors[color]
+	if col == "" || col[:2] == "00"{
+		return
+	}
 	col = opacity + col[2:]
 	var r float32
 	if len(radius) > 0 {
@@ -52,7 +55,13 @@ func (s *State) Icon(icon, fg, bg string, size int) {
 	s.Gtx.Constraints.Height.Min = size
 	s.FlexH(Rigid(func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Height.Max, cs.Width.Max, bg, "ff")
+		tp := "ff"
+		bg := s.Theme.Colors[bg]
+		if len(bg) == 0 {
+			bg = "00000000"
+			tp = "00"
+		}
+		s.Rectangle(cs.Height.Max, cs.Width.Max, bg, tp)
 
 		s.Inset(0, func() {
 			i := s.Theme.Icons[icon]
@@ -91,6 +100,12 @@ func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		s.Theme.Colors["Light"],
 		fontSize, 0, 32, 32, 10, 8, 7, 10).
 		Layout(s.Gtx, button)
+}
+
+func (s *State) ButtonArea(content func(), button *gel.Button) {
+	b :=s.Theme.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0,
+		0, 0)
+	b.InsideLayout(s.Gtx, button, content)
 }
 
 func (s *State) Label(txt string) {

@@ -144,9 +144,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *model.DuoUIblock) {
 	width := gtx.Constraints.Width.Max
 	button := th.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0)
-	//th.DuoUIbutton("", "", "", "", "", th.Colors["Dark"], "", "", 0, 0, 0, 0, 0, 0)
 	button.InsideLayout(gtx, block.Link, func() {
-
 		layout.Flex{
 			Axis: layout.Vertical,
 		}.Layout(gtx,

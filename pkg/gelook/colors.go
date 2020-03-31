@@ -38,5 +38,6 @@ func NewDuoUIcolors() (c map[string]string) {
 	c["PanelBgDim"] = c["LightGrayII"]
 	c["DocTextDim"] = c["LightGrayII"]
 	c["DocBgDim"] = c["LightGrayI"]
+	c["Transparent"] = c["00000000"]
 	return c
 }

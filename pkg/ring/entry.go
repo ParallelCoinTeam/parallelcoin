@@ -2,15 +2,17 @@ package ring
 
 import (
 	"context"
+	"github.com/marusama/semaphore"
+	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/logi"
 )
-import "github.com/marusama/semaphore"
 
 type Entry struct {
 	Sem    semaphore.Semaphore
 	Buf    []*logi.Entry
 	Cursor int
 	Full   bool
+	Buttons []gel.Button
 }
 
 func NewEntry(size int) *Entry {
@@ -18,6 +20,7 @@ func NewEntry(size int) *Entry {
 		Sem:    semaphore.New(1),
 		Buf:    make([]*logi.Entry, size),
 		Cursor: 0,
+		Buttons: make([]gel.Button, size),
 	}
 }
 
@@ -59,6 +62,27 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = b.Buf[cursor]
+		}
+	}
+	return
+}
+
+// GetButton returns the gel.Button of the entry
+func (b *Entry) GetButton(i int) (out *gel.Button) {
+	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+		defer b.Sem.Release(1)
+		bl := len(b.Buf)
+		cursor := i
+		if i < bl {
+			if b.Full {
+				cursor = i + b.Cursor
+				if cursor >= bl {
+					cursor -= bl
+				}
+			}
+			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			//	cursor)
+			out = &b.Buttons[cursor]
 		}
 	}
 	return
