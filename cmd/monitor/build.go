@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/pod/pkg/gel"
 )
 
 func (s *State) BuildButtons() layout.FlexChild {
@@ -84,7 +85,9 @@ func (s *State) BuildPage() layout.FlexChild {
 				s.Inset(8, func() {
 					// cs := s.Gtx.Constraints
 					// s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
+					//if s.Config.BuildOpen {
 					s.BuildConfigPage()
+					//}
 				})
 			}))
 		}), Rigid(func() {
@@ -96,106 +99,150 @@ func (s *State) BuildPage() layout.FlexChild {
 }
 
 func (s *State) BuildConfigPage() {
-	s.FlexV(Rigid(func() {
-		s.Inset(4, func() {
-			s.FlexH(Rigid(func() {
-				s.Inset(8,
-					s.Text("Run in", "PanelText", "PanelBg", "Primary", "h6"),
+	s.FlexV(
+		//s.FlexH(
+		Rigid(func() {
+			s.Inset(4, func() {
+				s.FlexH(
+					Rigid(func() {
+						s.Inset(8,
+							s.Text("Run in", "PanelText", "PanelBg", "Primary", "h6"),
+						)
+					}), Rigid(func() {
+						if s.RunningInRepo {
+							fg, bg := "DocText", "DocBg"
+							if s.Config.RunInRepo {
+								fg, bg = "ButtonText", "ButtonBg"
+							}
+							s.TextButton("repo", "Primary", 16,
+								fg, bg, &s.RunningInRepoButton)
+							for s.RunningInRepoButton.Clicked(s.Gtx) {
+								if !s.Config.Running {
+									s.Config.RunInRepo = true
+									s.CannotRun = false
+									s.SaveConfig()
+								}
+							}
+						}
+					}), Rigid(func() {
+						fg, bg := "DocText", "DocBg"
+						if !s.Config.RunInRepo {
+							fg, bg = "ButtonText", "ButtonBg"
+						}
+						s.TextButton("profile", "Primary", 16,
+							fg, bg, &s.RunFromProfileButton)
+						for s.RunFromProfileButton.Clicked(s.Gtx) {
+							if !s.Config.Running {
+								s.Config.RunInRepo = false
+								s.CannotRun = false
+								s.SaveConfig()
+							}
+						}
+					}), Rigid(func() {
+						txt := "run pod in its repository"
+						if !s.Config.RunInRepo {
+							txt = "not implemented"
+							s.CannotRun = true
+						}
+						s.Inset(8,
+							s.Text(txt, "PanelText", "PanelBg", "Primary", "h6"),
+						)
+					}),
 				)
-			}), Rigid(func() {
-				if s.RunningInRepo {
-					fg, bg := "DocText", "DocBg"
-					if s.Config.RunInRepo {
-						fg, bg = "ButtonText", "ButtonBg"
-					}
-					s.TextButton("repo", "Primary", 16,
-						fg, bg, &s.RunningInRepoButton)
-					for s.RunningInRepoButton.Clicked(s.Gtx) {
-						if !s.Config.Running {
-							s.Config.RunInRepo = true
-							s.CannotRun = false
-							s.SaveConfig()
+			})
+		}),
+		Rigid(func() {
+			s.Inset(4, func() {
+				s.FlexH(Rigid(func() {
+					s.Inset(8,
+						s.Text("Use Go version", "PanelText", "PanelBg", "Primary", "h6"),
+					)
+				}), Rigid(func() {
+					if s.HasGo {
+						fg, bg := "DocText", "DocBg"
+						if s.Config.UseBuiltinGo {
+							fg, bg = "ButtonText", "ButtonBg"
+						}
+						s.TextButton("builtin", "Primary", 16,
+							fg, bg, &s.UseBuiltinGoButton)
+						for s.UseBuiltinGoButton.Clicked(s.Gtx) {
+							if !s.Config.RunInRepo {
+								s.Config.UseBuiltinGo = true
+								s.CannotRun = false
+								if !s.HasGo {
+									s.CannotRun = true
+								}
+							}
 						}
 					}
-				}
-			}), Rigid(func() {
-				fg, bg := "DocText", "DocBg"
-				if !s.Config.RunInRepo {
-					fg, bg = "ButtonText", "ButtonBg"
-				}
-				s.TextButton("profile", "Primary", 16,
-					fg, bg, &s.RunFromProfileButton)
-				for s.RunFromProfileButton.Clicked(s.Gtx) {
-					if !s.Config.Running {
-						s.Config.RunInRepo = false
-						s.CannotRun = false
-						s.SaveConfig()
-					}
-				}
-			}), Rigid(func() {
-				txt := "run pod in its repository"
-				if !s.Config.RunInRepo {
-					txt = "not implemented"
-					s.CannotRun = true
-				}
-				s.Inset(8,
-					s.Text(txt, "PanelText", "PanelBg", "Primary", "h6"),
-				)
-			}),
-			)
-		})
-	}), Rigid(func() {
-		s.Inset(4, func() {
-			s.FlexH(Rigid(func() {
-				s.Inset(8,
-					s.Text("Use Go version", "PanelText", "PanelBg", "Primary", "h6"),
-				)
-			}), Rigid(func() {
-				if s.HasGo {
+				}), Rigid(func() {
 					fg, bg := "DocText", "DocBg"
-					if s.Config.UseBuiltinGo {
+					if !s.Config.UseBuiltinGo {
 						fg, bg = "ButtonText", "ButtonBg"
 					}
-					s.TextButton("builtin", "Primary", 16,
-						fg, bg, &s.UseBuiltinGoButton)
-					for s.UseBuiltinGoButton.Clicked(s.Gtx) {
+					s.TextButton("install new", "Primary", 16,
+						fg, bg, &s.InstallNewGoButton)
+					for s.InstallNewGoButton.Clicked(s.Gtx) {
 						if !s.Config.RunInRepo {
-							s.Config.UseBuiltinGo = true
+							s.Config.UseBuiltinGo = false
 							s.CannotRun = false
-							if !s.HasGo {
+							if !s.HasOtherGo {
 								s.CannotRun = true
 							}
 						}
 					}
-				}
-			}), Rigid(func() {
-				fg, bg := "DocText", "DocBg"
-				if !s.Config.UseBuiltinGo {
-					fg, bg = "ButtonText", "ButtonBg"
-				}
-				s.TextButton("install new", "Primary", 16,
-					fg, bg, &s.InstallNewGoButton)
-				for s.InstallNewGoButton.Clicked(s.Gtx) {
-					if !s.Config.RunInRepo {
-						s.Config.UseBuiltinGo = false
-						s.CannotRun = false
-						if !s.HasOtherGo {
-							s.CannotRun = true
-						}
+				}), Rigid(func() {
+					txt := "build using built in go"
+					if !s.Config.UseBuiltinGo {
+						txt = "not implemented"
+						s.CannotRun = true
 					}
-				}
-			}), Rigid(func() {
-				txt := "build using built in go"
-				if !s.Config.UseBuiltinGo {
-					txt = "not implemented"
-					s.CannotRun = true
-				}
-				s.Inset(8,
-					s.Text(txt, "PanelText", "PanelBg", "Primary", "h6"),
+					s.Inset(8,
+						s.Text(txt, "PanelText", "PanelBg", "Primary", "h6"),
+					)
+				}),
 				)
-			}),
-			)
-		})
-	}),
+			})
+		}), Rigid(func() {
+			s.Inset(4, func() {
+				s.FlexH(
+					Rigid(func() {
+						s.Inset(8,
+							s.Text("Log entry click command", "PanelText",
+								"PanelBg",
+								"Primary", "h6"),
+						)
+					}), Rigid(func() {
+						ww := len(s.Config.ClickCommand)
+						//if ww < 12 {
+						//	ww = 12
+						//}
+						s.Gtx.Constraints.Width.Max = ww*10 + 30
+						s.Gtx.Constraints.Width.Min = ww*10 + 30
+						s.Editor(&s.CommandEditor, ww, func(e gel.EditorEvent) {
+							if e != nil {
+								txt := s.CommandEditor.Text()
+								if s.Config.ClickCommand == txt {
+									return
+								}
+								s.Config.ClickCommand = txt
+								Debug(s.Config.ClickCommand)
+								s.SaveConfig()
+							}
+						})()
+					}), Rigid(func() {
+						s.Inset(8,
+							s.Text("When a log entry is clicked run this"+
+								" command with variables substituted for"+
+								" values from the log entry:\n\n"+
+								"$1 is the source code file location\n"+
+								"$2 is the line number", "PanelText",
+								"PanelBg",
+								"Primary", "h6"),
+						)
+					}),
+				)
+			})
+		}),
 	)
 }

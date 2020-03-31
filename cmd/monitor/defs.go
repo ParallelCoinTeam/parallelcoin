@@ -3,17 +3,16 @@ package monitor
 import (
 	"encoding/json"
 	"gioui.org/app"
-	"github.com/p9c/pod/pkg/ring"
-	"github.com/p9c/pod/pkg/stdconn/worker"
-	"io/ioutil"
-	"path/filepath"
-
 	"gioui.org/layout"
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gel"
 	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/ring"
+	"github.com/p9c/pod/pkg/stdconn/worker"
+	"io/ioutil"
+	"path/filepath"
 )
 
 const ConfigFileName = "monitor.json"
@@ -74,6 +73,7 @@ type State struct {
 	LogList                   layout.List
 	EntryBuf                  *ring.Entry
 	FilterRoot                *Node
+	CommandEditor             gel.Editor
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
@@ -138,6 +138,7 @@ type Config struct {
 	FilterOpen     bool
 	FilterNodes    map[string]*Node
 	FilterLevel    int
+	ClickCommand   string
 }
 
 func (s *State) LoadConfig() (isNew bool) {
@@ -178,6 +179,8 @@ func (s *State) LoadConfig() (isNew bool) {
 			s.Config.Pausing = cnf.Pausing
 			s.Config.FilterOpen = cnf.FilterOpen
 			s.Config.FilterLevel = cnf.FilterLevel
+			s.Config.ClickCommand = cnf.ClickCommand
+			s.CommandEditor.SetText(s.Config.ClickCommand)
 		}
 	} else {
 		Warn("creating new configuration")
@@ -199,6 +202,7 @@ func (s *State) LoadConfig() (isNew bool) {
 }
 
 func (s *State) SaveConfig() {
+	Debug("saving monitor config")
 	s.Config.Width = s.WindowWidth
 	s.Config.Height = s.WindowHeight
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
@@ -208,4 +212,5 @@ func (s *State) SaveConfig() {
 			panic(e)
 		}
 	}
+	//s.LoadConfig()
 }

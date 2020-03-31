@@ -159,8 +159,8 @@ func (n *Node) GetWidget(s *State) {
 							nn[i].CloseAllItems(s)
 						}
 						nn[i].Closed = !nn[i].Closed
+						s.SaveConfig()
 					}
-					s.SaveConfig()
 				}
 			}),
 			Flexed(1, func() {

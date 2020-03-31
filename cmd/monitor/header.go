@@ -33,7 +33,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				}))
 			}), Rigid(func() {
 				s.FlexV(Flexed(1, func() {
-					s.Inset(4, func() {
+					s.Inset(8, func() {
 						layout.W.Layout(s.Gtx, func() {
 							t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), "Monitor")
 							t.Color = s.Theme.Colors["PanelText"]
