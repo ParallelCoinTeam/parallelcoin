@@ -91,7 +91,7 @@ func (s *State) Filter() layout.FlexChild {
 	return Rigid(func() {
 		fg, bg := "PanelText", "PanelBg"
 		if s.Config.FilterOpen {
-			fg, bg = "DocBg", "DocText"
+			fg, bg = "DocText", "DocBg"
 		}
 		//if !(s.Config.FilterOpen.Load() && s.WindowWidth <= 720) ||
 		//	(!s.Config.FilterOpen.Load() && s.WindowWidth > 480) {

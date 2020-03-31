@@ -19,15 +19,42 @@ func (s *State) Sidebar() layout.FlexChild {
 		//if s.Gtx.Constraints.Width.Max > 360 {
 		//	s.Gtx.Constraints.Width.Max = 360
 		//}
+		cs := s.Gtx.Constraints
 		if s.Config.FilterOpen {
 			s.FlexV(
 				Rigid(func() {
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+					s.Inset(4, func() {})
+				}),
+				Flexed(1, func() {
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
+					s.Inset(16, func() {
+						s.FlexV(
+							Flexed(1, func() {
+								//s.Gtx.Constraints.Width.Min = 240
+								s.FlexV(Flexed(1, func() {
+									s.Loggers.GetWidget(s)
+								}),
+								)
+							}),
+						)
+					})
+				}), Rigid(func() {
 					s.Gtx.Constraints.Height.Max = 48
 					s.Gtx.Constraints.Height.Min = 48
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocText",
 						"ff")
 					s.FlexH(
+						Rigid(func() {
+							s.IconButton("Delete", "PanelBg", "DocText",
+								&s.FilterClearButton)
+							for s.FilterClearButton.Clicked(s.Gtx) {
+								Debug("clear all")
+								s.EntryBuf.Clear()
+							}
+						}),
 						Flexed(1, func() {
 							//if s.WindowWidth > 640 {
 							//	s.Label("Filter")
@@ -39,14 +66,8 @@ func (s *State) Sidebar() layout.FlexChild {
 							//		Debug("send current log buffer")
 							//		//s.EntryBuf.Clear()
 							//	}
-						}), Rigid(func() {
-							s.IconButton("Delete", "PanelBg", "DocText",
-								&s.FilterClearButton)
-							for s.FilterClearButton.Clicked(s.Gtx) {
-								Debug("clear all")
-								s.EntryBuf.Clear()
-							}
-						}), Rigid(func() {
+						}),
+						Rigid(func() {
 							s.IconButton("HideAll", "PanelBg", "DocText",
 								&s.FilterHideButton)
 							for s.FilterHideButton.Clicked(s.Gtx) {
@@ -54,7 +75,8 @@ func (s *State) Sidebar() layout.FlexChild {
 								s.Loggers.CloseAllItems(s)
 								s.SaveConfig()
 							}
-						}), Rigid(func() {
+						}),
+						Rigid(func() {
 							s.IconButton("ShowAll", "PanelBg", "DocText",
 								&s.FilterShowButton)
 							for s.FilterShowButton.Clicked(s.Gtx) {
@@ -62,7 +84,8 @@ func (s *State) Sidebar() layout.FlexChild {
 								s.Loggers.OpenAllItems(s)
 								s.SaveConfig()
 							}
-						}), Rigid(func() {
+						}),
+						Rigid(func() {
 							s.IconButton("ShowItem", "PanelBg", "DocText",
 								&s.FilterAllButton)
 							for s.FilterAllButton.Clicked(s.Gtx) {
@@ -71,7 +94,8 @@ func (s *State) Sidebar() layout.FlexChild {
 								consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 								s.SaveConfig()
 							}
-						}), Rigid(func() {
+						}),
+						Rigid(func() {
 							s.IconButton("HideItem", "PanelBg", "DocText",
 								&s.FilterNoneButton)
 							for s.FilterNoneButton.Clicked(s.Gtx) {
@@ -81,6 +105,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								s.SaveConfig()
 							}
 						}),
+
 						//Rigid(func() {
 						//	s.IconButton("Filter", "DocBg", "DocText",
 						//		&s.FilterButton)
@@ -101,19 +126,6 @@ func (s *State) Sidebar() layout.FlexChild {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 					s.LevelsButtons()
-				}), Flexed(1, func() {
-					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
-					s.Inset(16, func() {
-						s.FlexV(
-							Flexed(1, func() {
-								//s.Gtx.Constraints.Width.Min = 240
-								s.FlexV(Flexed(1, func() {
-									s.Loggers.GetWidget(s)
-								}))
-							}),
-						)
-					})
 				}),
 			)
 		}
@@ -123,8 +135,7 @@ func (s *State) Sidebar() layout.FlexChild {
 func (s *State) LevelsButtons() {
 	s.FilterLevelList.Layout(s.Gtx, len(logi.Tags)-1, func(a int) {
 		bn := logi.Tags[logi.Levels[a+1]]
-		bg := "PanelBg"
-		color := "DocBg"
+		color, bg := "PanelBg", "DocBg"
 		if s.Config.FilterLevel > a {
 			switch a + 1 {
 			case 1:
@@ -144,15 +155,19 @@ func (s *State) LevelsButtons() {
 			}
 		}
 		bb := &s.FilterLevelsButtons[a]
-		s.IconButton(bn, color, bg, bb)
-		for bb.Clicked(s.Gtx) {
-			s.Config.FilterLevel = a + 1
-			*s.Ctx.Config.LogLevel = logi.Levels[s.Config.FilterLevel]
-			consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
-			Debug("filter level", logi.Tags[logi.Levels[a+1]])
-			s.W.Invalidate()
-			save.Pod(s.Ctx.Config)
-			s.SaveConfig()
-		}
+		s.Inset(8, func() {
+			s.ButtonArea(func() {
+				s.Icon(bn, color, bg, 32)
+			}, bb)
+			for bb.Clicked(s.Gtx) {
+				s.Config.FilterLevel = a + 1
+				*s.Ctx.Config.LogLevel = logi.Levels[s.Config.FilterLevel]
+				consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
+				Debug("filter level", logi.Tags[logi.Levels[a+1]])
+				s.W.Invalidate()
+				save.Pod(s.Ctx.Config)
+				s.SaveConfig()
+			}
+		})
 	})
 }

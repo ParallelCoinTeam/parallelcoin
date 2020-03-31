@@ -221,7 +221,7 @@ func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers H
 		magics = append(magics, i)
 	}
 	// DEBUG("magics", magics, PrevCallers())
-	Info("starting broadcast listener", channel.Creator, address, magics)
+	Debug("starting broadcast listener", channel.Creator, address, magics)
 	if err = conn.SetReadBuffer(maxDatagramSize); Check(err) {
 	}
 	channel.Receiver = conn
@@ -246,7 +246,7 @@ func handleNetworkError(address string, err error) (result int) {
 func Handle(address string, channel *Channel,
 	handlers Handlers, maxDatagramSize int, quit chan struct{}) {
 	buffer := make([]byte, maxDatagramSize)
-	Warn("starting handler for", channel.Creator, "listener")
+	Debug("starting handler for", channel.Creator, "listener")
 	// Loop forever reading from the socket until it is closed
 	// seenNonce := ""
 	var err error

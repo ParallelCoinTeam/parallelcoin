@@ -139,7 +139,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		case <-ticker.C:
 			if !ctrl.Ready.Load() {
 				if cx.IsCurrent() {
-					Warn("READY!")
+					Info("ready to mine!")
 					ctrl.Ready.Store(true)
 					ctrl.active.Store(true)
 				}
@@ -273,7 +273,7 @@ var handlersMulticast = transport.Handlers{
 					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
 					// recommended).
 					// go func() {
-					Warn("connecting to lan peer with same PSK", o)
+					Info("connecting to lan peer with same PSK", o)
 					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
 					}
 				}

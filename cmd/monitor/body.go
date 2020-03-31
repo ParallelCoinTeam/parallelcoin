@@ -74,10 +74,6 @@ func (s *State) Body() layout.FlexChild {
 									))
 								}),
 								Spacer(),
-								//Rigid(
-								//	s.Text(b.Package, "PanelBg", "Transparent", "Primary",
-								//		"h6"),
-								//),
 							)
 						}, button)
 						for button.Clicked(s.Gtx) {
@@ -97,7 +93,16 @@ func (s *State) Body() layout.FlexChild {
 								//s.Config.ClickCommand
 							}()
 						}
-					}), Rigid(func() {
+					}),
+					Rigid(func() {
+						if ww > 720 {
+							s.FlexH(Rigid(
+								s.Text(b.Package, "PanelBg", "Transparent", "Primary",
+									"h6"),
+							))
+						}
+					}),
+					Rigid(func() {
 						if ww > 640 {
 							s.ButtonArea(func() {
 								s.Icon("HideItem", "PanelBg", "DocBg", 32)
