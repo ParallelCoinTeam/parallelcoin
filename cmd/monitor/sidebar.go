@@ -44,32 +44,36 @@ func (s *State) Sidebar() layout.FlexChild {
 					s.Gtx.Constraints.Height.Max = 48
 					s.Gtx.Constraints.Height.Min = 48
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocText",
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+					s.LevelsButtons()
+				}), Rigid(func() {
+					s.Gtx.Constraints.Height.Max = 48
+					s.Gtx.Constraints.Height.Min = 48
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg",
 						"ff")
 					s.FlexH(
 						Rigid(func() {
 							b := s.Buttons["FilterClear"]
-							s.IconButton("Delete", "PanelBg", "DocText", b)
+							s.ButtonArea(func() {
+								s.Inset(8, func() {
+									s.Icon("Delete", "DocText", "DocBg", 32)
+								})
+							}, b)
 							for b.Clicked(s.Gtx) {
 								Debug("clear all")
 								s.EntryBuf.Clear()
 							}
 						}),
 						Flexed(1, func() {
-							//if s.WindowWidth > 640 {
-							//	s.Label("Filter")
-							//}
-							//}), Rigid(func() {
-							//	s.IconButton("Send", "DocText", "DocBg",
-							//		&s.FilterSendButton)
-							//	for s.FilterSendButton.Clicked(s.Gtx) {
-							//		Debug("send current log buffer")
-							//		//s.EntryBuf.Clear()
-							//	}
 						}),
 						Rigid(func() {
 							b := s.Buttons["FilterHide"]
-							s.IconButton("HideAll", "PanelBg", "DocText", b)
+							s.ButtonArea(func() {
+								s.Inset(8, func() {
+									s.Icon("HideAll", "DocText", "DocBg", 32)
+								})
+							}, b)
 							for b.Clicked(s.Gtx) {
 								Debug("hide all")
 								s.Loggers.CloseAllItems(s)
@@ -78,7 +82,12 @@ func (s *State) Sidebar() layout.FlexChild {
 						}),
 						Rigid(func() {
 							b := s.Buttons["FilterShow"]
-							s.IconButton("ShowAll", "PanelBg", "DocText", b)
+							//s.IconButton("ShowAll", "DocText", "DocBg", b)
+							s.ButtonArea(func() {
+								s.Inset(8, func() {
+									s.Icon("ShowAll", "DocText", "DocBg", 32)
+								})
+							}, b)
 							for b.Clicked(s.Gtx) {
 								Debug("show all")
 								s.Loggers.OpenAllItems(s)
@@ -87,7 +96,12 @@ func (s *State) Sidebar() layout.FlexChild {
 						}),
 						Rigid(func() {
 							b := s.Buttons["FilterAll"]
-							s.IconButton("ShowItem", "PanelBg", "DocText", b)
+							//s.IconButton("ShowItem", "DocText", "DocBg", b)
+							s.ButtonArea(func() {
+								s.Inset(8, func() {
+									s.Icon("ShowItem", "DocText", "DocBg", 32)
+								})
+							}, b)
 							for b.Clicked(s.Gtx) {
 								Debug("filter all")
 								s.Loggers.ShowAllItems(s)
@@ -97,7 +111,12 @@ func (s *State) Sidebar() layout.FlexChild {
 						}),
 						Rigid(func() {
 							b := s.Buttons["FilterNone"]
-							s.IconButton("HideItem", "PanelBg", "DocText", b)
+							s.ButtonArea(func() {
+								s.Inset(8, func() {
+									s.Icon("HideItem", "DocText", "DocBg", 32)
+								})
+							}, b)
+							//s.IconButton("HideItem", "DocText", "DocBg", b)
 							for b.Clicked(s.Gtx) {
 								Debug("filter none")
 								s.Loggers.HideAllItems(s)
@@ -120,12 +139,6 @@ func (s *State) Sidebar() layout.FlexChild {
 						//	}
 						//}),
 					)
-				}), Rigid(func() {
-					s.Gtx.Constraints.Height.Max = 48
-					s.Gtx.Constraints.Height.Min = 48
-					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
-					s.LevelsButtons()
 				}),
 			)
 		}
@@ -139,35 +152,40 @@ func (s *State) LevelsButtons() {
 		if s.Config.FilterLevel > a {
 			switch a + 1 {
 			case 1:
-				bg, color = "PanelBg", "Fatal"
+				bg, color = "DocBgHilite", "Fatal"
 			case 2:
-				bg, color = "PanelBg", "Danger"
+				bg, color = "DocBgHilite", "Danger"
 			case 3:
-				bg, color = "PanelBg", "Check"
+				bg, color = "DocBgHilite", "Check"
 			case 4:
-				bg, color = "PanelBg", "Warning"
+				bg, color = "DocBgHilite", "Warning"
 			case 5:
-				bg, color = "PanelBg", "Success"
+				bg, color = "DocBgHilite", "Success"
 			case 6:
-				bg, color = "PanelBg", "Info"
+				bg, color = "DocBgHilite", "Info"
 			case 7:
-				bg, color = "PanelBg", "Secondary"
+				bg, color = "DocBgHilite", "Secondary"
 			}
 		}
 		bb := &s.FilterLevelsButtons[a]
-		s.Inset(8, func() {
-			s.ButtonArea(func() {
+		s.ButtonArea(func() {
+			cs := s.Gtx.Constraints
+			cs.Width.Max = 48
+			cs.Height.Max = 48
+			s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+			s.Inset(8, func() {
+				//cs := s.Gtx.Constraints
 				s.Icon(bn, color, bg, 32)
-			}, bb)
-			for bb.Clicked(s.Gtx) {
-				s.Config.FilterLevel = a + 1
-				*s.Ctx.Config.LogLevel = logi.Levels[s.Config.FilterLevel]
-				consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
-				Debug("filter level", logi.Tags[logi.Levels[a+1]])
-				s.W.Invalidate()
-				save.Pod(s.Ctx.Config)
-				s.SaveConfig()
-			}
-		})
+			})
+		}, bb)
+		for bb.Clicked(s.Gtx) {
+			s.Config.FilterLevel = a + 1
+			*s.Ctx.Config.LogLevel = logi.Levels[s.Config.FilterLevel]
+			consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
+			Debug("filter level", logi.Tags[logi.Levels[a+1]])
+			s.W.Invalidate()
+			save.Pod(s.Ctx.Config)
+			s.SaveConfig()
+		}
 	})
 }

@@ -27,8 +27,8 @@ func Flexed(weight float32, widget func()) layout.FlexChild {
 	return layout.Flexed(weight, widget)
 }
 
-func Spacer() layout.FlexChild {
-	return Flexed(1, func() {})
+func (s *State) Spacer() layout.FlexChild {
+	return Flexed(1, func() {s.Inset(0,func(){})})
 }
 
 func (s *State) Rectangle(width, height int, color, opacity string, radius ...float32) {

@@ -45,7 +45,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				}))
 			}),
 			)
-		}), Spacer(), Rigid(func() {
+		}), s.Spacer(), Rigid(func() {
 			t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
 				fmt.Sprintf("%s %dx%d", *s.Ctx.Config.DataDir,
 					s.WindowWidth, s.WindowHeight))

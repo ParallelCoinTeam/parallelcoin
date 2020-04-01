@@ -5,6 +5,7 @@ package gelook
 func NewDuoUIcolors() (c map[string]string) {
 	c = map[string]string{
 		"black":                 "ff000000",
+		"light-black":           "ff222222",
 		"blue":                  "ff3030cf",
 		"blue-lite-blue":        "ff3080cf",
 		"blue-orange":           "ff80a830",
@@ -60,6 +61,7 @@ func NewDuoUIcolors() (c map[string]string) {
 		"purple":                "ffcf30cf",
 		"red":                   "ffcf3030",
 		"white":                 "ffffffff",
+		"dark-white":            "ffdddddd",
 		"yellow":                "ffcfcf30",
 	}
 

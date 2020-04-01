@@ -18,33 +18,39 @@ type Field struct {
 }
 
 func (s *State) SettingsButtons() layout.FlexChild {
-	return Flexed(1, func() {
-		s.FlexH(Rigid(func() {
-			if s.WindowWidth >= 360 || !s.Config.FilterOpen {
-				bg, fg := "PanelBg", "PanelText"
-				if s.Config.SettingsOpen {
-					bg, fg = "DocBg", "DocText"
-				}
-				b := s.Buttons["SettingsFold"]
-				s.IconButton("settingsIcon", fg, bg, b)
-				for b.Clicked(s.Gtx) {
-					Debug("settings folder clicked")
-					if !s.Config.SettingsOpen {
-						s.Config.FilterOpen = false
-						s.Config.BuildOpen = false
-					}
-					s.Config.SettingsOpen = !s.Config.SettingsOpen
-					s.SaveConfig()
-				}
+	return Rigid(func() {
+		if s.WindowWidth >= 360 || !s.Config.FilterOpen {
+			bg, fg := "PanelBg", "PanelText"
+			if s.Config.SettingsOpen {
+				bg, fg = "DocBg", "DocText"
 			}
-		}),
-		)
+			b := s.Buttons["SettingsFold"]
+			s.ButtonArea(func() {
+				s.Gtx.Constraints.Width.Max = 48
+				s.Gtx.Constraints.Height.Max = 48
+				cs := s.Gtx.Constraints
+				s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+				s.Inset(8, func() {
+					s.Icon("settingsIcon", fg, bg, 32)
+				})
+			}, b)
+			//s.IconButton("settingsIcon", fg, bg, b)
+			for b.Clicked(s.Gtx) {
+				Debug("settings folder clicked")
+				if !s.Config.SettingsOpen {
+					s.Config.FilterOpen = false
+					s.Config.BuildOpen = false
+				}
+				s.Config.SettingsOpen = !s.Config.SettingsOpen
+				s.SaveConfig()
+			}
+		}
 	})
 }
 
-const settingsTabBreak = 900
-const settingsTabBreakSmall = 512
+const settingsTabBreak = 960
 const settingsTabBreakMedium = 640
+const settingsTabBreakSmall = 512
 
 func (s *State) SettingsPage() layout.FlexChild {
 	if !s.Config.SettingsOpen {
@@ -56,9 +62,9 @@ func (s *State) SettingsPage() layout.FlexChild {
 		weight = 1
 	//case s.WindowWidth < 1024 && s.WindowHeight > 1024:
 	// weight = 0.333
-	case s.WindowHeight <= 800 && s.WindowWidth <= 800:
+	case s.WindowHeight <= 960 && s.WindowWidth <= 960:
 		weight = 1
-	case s.WindowHeight <= 600 && s.WindowWidth > 800:
+	case s.WindowHeight <= 600 && s.WindowWidth > 960:
 		weight = 1
 	}
 	return Flexed(weight, func() {
@@ -72,7 +78,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 			}),
 			Rigid(func() {
 				s.FlexH(Rigid(func() {
-					s.Label("Settings")
+					s.Label("Pod Settings")
 				}), Flexed(1, func() {
 					if s.WindowWidth > settingsTabBreak {
 						s.SettingsTabs(27)
@@ -85,7 +91,12 @@ func (s *State) SettingsPage() layout.FlexChild {
 							ic = "minimize"
 						}
 						b := s.Buttons["SettingsZoom"]
-						s.IconButton(ic, "DocText", "DocBg", b)
+						//s.IconButton(ic, "DocText", "DocBg", b)
+						s.ButtonArea(func() {
+							s.Inset(8, func() {
+								s.Icon(ic, "DocText", "DocBg", 32)
+							})
+						}, b)
 						for b.Clicked(s.Gtx) {
 							Debug("settings panel close button clicked")
 							s.Config.SettingsZoomed = !s.Config.SettingsZoomed
@@ -94,7 +105,12 @@ func (s *State) SettingsPage() layout.FlexChild {
 					}
 				}), Rigid(func() {
 					b := s.Buttons["SettingsClose"]
-					s.IconButton("foldIn", "DocText", "DocBg", b)
+					s.ButtonArea(func() {
+						s.Inset(8, func() {
+							s.Icon("foldIn", "DocText", "DocBg", 32)
+						})
+					}, b)
+					//s.IconButton("foldIn", "DocText", "DocBg", b)
 					for b.Clicked(s.Gtx) {
 						Debug("settings panel close button clicked")
 						s.Config.SettingsOpen = false

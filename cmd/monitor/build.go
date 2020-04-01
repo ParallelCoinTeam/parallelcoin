@@ -14,7 +14,16 @@ func (s *State) BuildButtons() layout.FlexChild {
 					bg, fg = "DocBg", "DocText"
 				}
 				b := s.Buttons["BuildFold"]
-				s.IconButton("Build", fg, bg, b)
+				//s.IconButton("Build", fg, bg, b)
+				s.ButtonArea(func() {
+					s.Gtx.Constraints.Width.Max=48
+					s.Gtx.Constraints.Height.Max=48
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+					s.Inset(8, func() {
+						s.Icon("Build", fg, bg, 32)
+					})
+				}, b)
 				for b.Clicked(s.Gtx) {
 					Debug("run mode folder clicked")
 					if !s.Config.BuildOpen {
@@ -51,8 +60,8 @@ func (s *State) BuildPage() layout.FlexChild {
 			s.Inset(4, func() {})
 		}), Rigid(func() {
 			s.FlexH(Rigid(func() {
-				s.Label("Build Configuration")
-			}), Spacer(), Rigid(func() {
+				s.Label("Monitor Configuration")
+			}), s.Spacer(), Rigid(func() {
 				if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
 					s.WindowHeight <= 600 && s.WindowWidth > 800) {
 					ic := "zoom"
@@ -67,7 +76,7 @@ func (s *State) BuildPage() layout.FlexChild {
 						s.SaveConfig()
 					}
 				}
-			}), Spacer(), Rigid(func() {
+			}), s.Spacer(), Rigid(func() {
 				b := s.Buttons["BuildClose"]
 				s.IconButton("foldIn", "DocText", "DocBg", b)
 				for b.Clicked(s.Gtx) {
@@ -182,7 +191,7 @@ func (s *State) BuildConfigPage() {
 					if !s.Config.UseBuiltinGo {
 						fg, bg = "ButtonText", "ButtonBg"
 					}
-					b := s.Buttons["InstallNew"]
+					b := s.Buttons["InstallNewGo"]
 					s.TextButton("install new", "Primary", 16,
 						fg, bg, b)
 					for b.Clicked(s.Gtx) {

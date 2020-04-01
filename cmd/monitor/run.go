@@ -19,7 +19,16 @@ func (s *State) RunControls() layout.FlexChild {
 		}
 		if !s.Config.Running {
 			b := s.Buttons["RunMenu"]
-			s.IconButton("Run", "PanelBg", "PanelText", b)
+			s.ButtonArea(func() {
+				s.Gtx.Constraints.Width.Max = 48
+				s.Gtx.Constraints.Height.Max = 48
+				cs := s.Gtx.Constraints
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocText", "ff")
+				s.Inset(8, func() {
+					s.Icon("Run", "ButtonBg", "DocText", 32)
+				})
+			}, b)
+			//s.IconButton("Run", "PanelBg", "PanelText", b)
 			for b.Clicked(s.Gtx) {
 				Debug("clicked run button")
 				if !s.Config.RunModeOpen {
@@ -35,14 +44,32 @@ func (s *State) RunControls() layout.FlexChild {
 			}
 			s.FlexH(Rigid(func() {
 				b := s.Buttons["StopMenu"]
-				s.IconButton("Stop", "PanelBg", "PanelText", b)
+				s.ButtonArea(func() {
+					s.Gtx.Constraints.Width.Max = 48
+					s.Gtx.Constraints.Height.Max = 48
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+					s.Inset(8, func() {
+						s.Icon("Stop", fg, bg, 32)
+					})
+				}, b)
+				//s.IconButton("Stop", "PanelBg", "PanelText", b)
 				for b.Clicked(s.Gtx) {
 					Debug("clicked stop button")
 					s.RunCommandChan <- "stop"
 				}
 			}), Rigid(func() {
 				b := s.Buttons["PauseMenu"]
-				s.IconButton(ic, fg, bg, b)
+				s.ButtonArea(func() {
+					s.Gtx.Constraints.Width.Max = 48
+					s.Gtx.Constraints.Height.Max = 48
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+					s.Inset(8, func() {
+						s.Icon(ic, fg, bg, 32)
+					})
+				}, b)
+				//s.IconButton(ic, fg, bg, b)
 				for b.Clicked(s.Gtx) {
 					if s.Config.Pausing {
 						Debug("clicked on resume button")
@@ -61,7 +88,16 @@ func (s *State) RunControls() layout.FlexChild {
 				//	}
 			}), Rigid(func() {
 				b := s.Buttons["RestartMenu"]
-				s.IconButton("Restart", "PanelBg", "PanelText", b)
+				s.ButtonArea(func() {
+					s.Gtx.Constraints.Width.Max = 48
+					s.Gtx.Constraints.Height.Max = 48
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+					s.Inset(8, func() {
+						s.Icon("Restart", fg, bg, 32)
+					})
+				}, b)
+				//s.IconButton("Restart", "PanelBg", "PanelText", b)
 				for b.Clicked(s.Gtx) {
 					Debug("clicked restart button")
 					s.RunCommandChan <- "restart"
