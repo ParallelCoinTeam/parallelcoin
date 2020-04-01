@@ -1,23 +1,23 @@
 package txscript
 
 import (
-   "bytes"
-   "encoding/hex"
-   "encoding/json"
-   "errors"
-   "fmt"
-   "io/ioutil"
-   "strconv"
-   "strings"
-   "testing"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
+	"bytes"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"strconv"
+	"strings"
+	"testing"
+
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // scriptTestName returns a descriptive test name for the given reference script test data.
-func scriptTestName(	test []interface{}) (string, error) {
+func scriptTestName(test []interface{}) (string, error) {
 	// Account for any optional leading witness data.
 	var witnessOffset int
 	if _, ok := test[0].([]interface{}); ok {
@@ -39,7 +39,7 @@ func scriptTestName(	test []interface{}) (string, error) {
 }
 
 // parse hex string into a []byte.
-func parseHex(	tok string) ([]byte, error) {
+func parseHex(tok string) ([]byte, error) {
 	if !strings.HasPrefix(tok, "0x") {
 		return nil, errors.New("not a hex number")
 	}
@@ -47,7 +47,7 @@ func parseHex(	tok string) ([]byte, error) {
 }
 
 // parseWitnessStack parses a json array of witness items encoded as hex into a slice of witness elements.
-func parseWitnessStack(	elements []interface{}) ([][]byte, error) {
+func parseWitnessStack(elements []interface{}) ([][]byte, error) {
 	witness := make([][]byte, len(elements))
 	for i, e := range elements {
 		witElement, err := hex.DecodeString(e.(string))
@@ -69,7 +69,7 @@ var shortFormOps map[string]byte
 //   - Numbers beginning with 0x are inserted into the []byte as-is (so 0x14 is OP_DATA_20)
 //   - Single quoted strings are pushed as data
 //   - Anything else is an error
-func parseShortForm(	script string) ([]byte, error) {
+func parseShortForm(script string) ([]byte, error) {
 	// Only create the short form opcode map once.
 	if shortFormOps == nil {
 		ops := make(map[string]byte)
@@ -118,7 +118,7 @@ func parseShortForm(	script string) ([]byte, error) {
 }
 
 // parseScriptFlags parses the provided flags string from the format used in the reference tests into ScriptFlags suitable for use in the script engine.
-func parseScriptFlags(	flagStr string) (ScriptFlags, error) {
+func parseScriptFlags(flagStr string) (ScriptFlags, error) {
 	var flags ScriptFlags
 	sFlags := strings.Split(flagStr, ",")
 	for _, flag := range sFlags {
@@ -167,7 +167,7 @@ func parseScriptFlags(	flagStr string) (ScriptFlags, error) {
 }
 
 // parseExpectedResult parses the provided expected result string into allowed script error codes.  An error is returned if the expected result string is not supported.
-func parseExpectedResult(	expected string) ([]ErrorCode, error) {
+func parseExpectedResult(expected string) ([]ErrorCode, error) {
 	switch expected {
 	case "OK":
 		return nil, nil
@@ -256,7 +256,7 @@ func parseExpectedResult(	expected string) ([]ErrorCode, error) {
 }
 
 // createSpendTx generates a basic spending transaction given the passed signature, witness and public key scripts.
-func createSpendingTx(	witness [][]byte, sigScript, pkScript []byte,
+func createSpendingTx(witness [][]byte, sigScript, pkScript []byte,
 	outputValue int64) *wire.MsgTx {
 	coinbaseTx := wire.NewMsgTx(wire.TxVersion)
 	outPoint := wire.NewOutPoint(&chainhash.Hash{}, ^uint32(0))
@@ -281,7 +281,7 @@ type scriptWithInputVal struct {
 }
 
 // testScripts ensures all of the passed script tests execute with the expected results with or without using a signature cache, as specified by the parameter.
-func testScripts(	t *testing.T, tests [][]interface{}, useSigCache bool) {
+func testScripts(t *testing.T, tests [][]interface{}, useSigCache bool) {
 	// Create a signature cache to use only if requested.
 	var sigCache *SigCache
 	if useSigCache {
@@ -393,7 +393,7 @@ func testScripts(	t *testing.T, tests [][]interface{}, useSigCache bool) {
 			}
 		}
 		if !success {
-			if serr, ok := err.(Error); ok {
+			if serr, ok := err.(ScriptError); ok {
 				t.Errorf("%s: want error codes %v, got %v", name,
 					allowedErrorCodes, serr.ErrorCode)
 				continue
@@ -406,7 +406,7 @@ func testScripts(	t *testing.T, tests [][]interface{}, useSigCache bool) {
 }
 
 // TestScripts ensures all of the tests in script_tests.json execute with the expected results as defined in the test data.
-func TestScripts(	t *testing.T) {
+func TestScripts(t *testing.T) {
 	file, err := ioutil.ReadFile("data/script_tests.json")
 	if err != nil {
 		t.Fatalf("TestScripts: %v\n", err)
@@ -422,12 +422,12 @@ func TestScripts(	t *testing.T) {
 }
 
 // testVecF64ToUint32 properly handles conversion of float64s read from the JSON test data to unsigned 32-bit integers.  This is necessary because some of the test data uses -1 as a shortcut to mean max uint32 and direct conversion of a negative float to an unsigned int is implementation dependent and therefore doesn't result in the expected value on all platforms.  This function woks around that limitation by converting to a 32-bit signed integer first and then to a 32-bit unsigned integer which results in the expected behavior on all platforms.
-func testVecF64ToUint32(	f float64) uint32 {
+func testVecF64ToUint32(f float64) uint32 {
 	return uint32(int32(f))
 }
 
 // TestTxInvalidTests ensures all of the tests in tx_invalid.json fail as expected.
-func TestTxInvalidTests(	t *testing.T) {
+func TestTxInvalidTests(t *testing.T) {
 	file, err := ioutil.ReadFile("data/tx_invalid.json")
 	if err != nil {
 		t.Fatalf("TestTxInvalidTests: %v\n", err)
@@ -562,7 +562,7 @@ testloop:
 }
 
 // TestTxValidTests ensures all of the tests in tx_valid.json pass as expected.
-func TestTxValidTests(	t *testing.T) {
+func TestTxValidTests(t *testing.T) {
 	file, err := ioutil.ReadFile("data/tx_valid.json")
 	if err != nil {
 		t.Fatalf("TestTxValidTests: %v\n", err)
@@ -699,7 +699,7 @@ testloop:
 
 // TestCalcSignatureHash runs the Bitcoin Core signature hash calculation tests in sighash.json.
 // https://github.com/bitcoin/bitcoin/blob/master/src/test/data/sighash.json
-func TestCalcSignatureHash(	t *testing.T) {
+func TestCalcSignatureHash(t *testing.T) {
 	file, err := ioutil.ReadFile("data/sighash.json")
 	if err != nil {
 		t.Fatalf("TestCalcSignatureHash: %v\n", err)

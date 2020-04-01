@@ -6,12 +6,11 @@ import (
 	"sort"
 	"testing"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 var (
@@ -29,7 +28,7 @@ var (
 // 	defer func() {
 // 	err := dbtx.Commit()
 // 	if err != nil {
-// 		t.Log(cl.Ine(), err)
+// 		t.Log( err)
 // 	}
 // }()
 // 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -74,7 +73,7 @@ var (
 // 	// Check that all credits are unique
 // 	checkUniqueness(t, eligibles)
 // }
-func TestNextAddrWithVaryingHighestIndices(	t *testing.T) {
+func TestNextAddrWithVaryingHighestIndices(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -84,7 +83,7 @@ func TestNextAddrWithVaryingHighestIndices(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -129,7 +128,7 @@ func TestNextAddrWithVaryingHighestIndices(	t *testing.T) {
 		t.Fatalf("Wrong next addr; got '%s', want 'nil'", addr.addrIdentifier())
 	}
 }
-func TestNextAddr(	t *testing.T) {
+func TestNextAddr(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -139,7 +138,7 @@ func TestNextAddr(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns, addrmgrNs := TstRWNamespaces(dbtx)
@@ -208,7 +207,7 @@ func TestNextAddr(	t *testing.T) {
 		t.Fatalf("Wrong WithdrawalAddress; got %s, want nil", addr.addrIdentifier())
 	}
 }
-func TestEligibleInputsAreEligible(	t *testing.T) {
+func TestEligibleInputsAreEligible(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -218,7 +217,7 @@ func TestEligibleInputsAreEligible(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	var chainHeight int32 = 1000
@@ -230,7 +229,7 @@ func TestEligibleInputsAreEligible(	t *testing.T) {
 		t.Errorf("Input is not eligible and it should be.")
 	}
 }
-func TestNonEligibleInputsAreNotEligible(	t *testing.T) {
+func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 	tearDown, db, pool := TstCreatePool(t)
 	defer tearDown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -240,7 +239,7 @@ func TestNonEligibleInputsAreNotEligible(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	var chainHeight int32 = 1000
@@ -263,7 +262,7 @@ func TestNonEligibleInputsAreNotEligible(	t *testing.T) {
 		t.Errorf("Input is eligible and it should not be.")
 	}
 }
-func TestCreditSortingByAddress(	t *testing.T) {
+func TestCreditSortingByAddress(t *testing.T) {
 	teardown, db, pool := TstCreatePool(t)
 	defer teardown()
 	dbtx, err := db.BeginReadWriteTx()
@@ -273,7 +272,7 @@ func TestCreditSortingByAddress(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	series := []TstSeriesDef{
@@ -316,7 +315,7 @@ func TestCreditSortingByAddress(	t *testing.T) {
 // newDummyCredit creates a new credit with the given hash and outpointIdx,
 // locked to the votingpool address identified by the given
 // series/index/branch.
-func newDummyCredit(	t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, series uint32, index Index, branch Branch,
+func newDummyCredit(t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, series uint32, index Index, branch Branch,
 	txHash []byte, outpointIdx uint32) Credit {
 	var hash chainhash.Hash
 	if err := hash.SetBytes(txHash); err != nil {
@@ -369,7 +368,7 @@ func newDummyCredit(	t *testing.T, dbtx walletdb.ReadWriteTx, pool *Pool, series
 // 	}
 // 	return pkScripts
 // }
-func checkWithdrawalAddressMatches(	t *testing.T, addr *WithdrawalAddress, seriesID uint32,
+func checkWithdrawalAddressMatches(t *testing.T, addr *WithdrawalAddress, seriesID uint32,
 	branch Branch, index Index) {
 	if addr.SeriesID() != seriesID {
 		t.Fatalf("Wrong seriesID; got %d, want %d", addr.SeriesID(), seriesID)

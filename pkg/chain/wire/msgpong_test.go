@@ -10,7 +10,7 @@ import (
 )
 
 // TestPongLatest tests the MsgPong API against the latest protocol version.
-func TestPongLatest(	t *testing.T) {
+func TestPongLatest(t *testing.T) {
 	enc := BaseEncoding
 	pver := ProtocolVersion
 	nonce, err := RandomUint64()
@@ -55,7 +55,7 @@ func TestPongLatest(	t *testing.T) {
 }
 
 // TestPongBIP0031 tests the MsgPong API against the protocol version BIP0031Version.
-func TestPongBIP0031(	t *testing.T) {
+func TestPongBIP0031(t *testing.T) {
 	// Use the protocol version just prior to BIP0031Version changes.
 	pver := BIP0031Version
 	enc := BaseEncoding
@@ -94,7 +94,7 @@ func TestPongBIP0031(	t *testing.T) {
 }
 
 // TestPongCrossProtocol tests the MsgPong API when encoding with the latest protocol version and decoding with BIP0031Version.
-func TestPongCrossProtocol(	t *testing.T) {
+func TestPongCrossProtocol(t *testing.T) {
 	nonce, err := RandomUint64()
 	if err != nil {
 		t.Errorf("Error generating nonce: %v", err)
@@ -123,7 +123,7 @@ func TestPongCrossProtocol(	t *testing.T) {
 }
 
 // TestPongWire tests the MsgPong wire encode and decode for various protocol versions.
-func TestPongWire(	t *testing.T) {
+func TestPongWire(t *testing.T) {
 	tests := []struct {
 		in   MsgPong         // Message to encode
 		out  MsgPong         // Expected decoded message
@@ -179,7 +179,7 @@ func TestPongWire(	t *testing.T) {
 }
 
 // TestPongWireErrors performs negative tests against wire encode and decode of MsgPong to confirm error paths work correctly.
-func TestPongWireErrors(	t *testing.T) {
+func TestPongWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverNoPong := BIP0031Version
 	wireErr := &MessageError{}

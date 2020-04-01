@@ -27,12 +27,12 @@ type treapNode struct {
 }
 
 // nodeSize returns the number of bytes the specified node occupies including the struct fields and the contents of the key and value.
-func nodeSize(	node *treapNode) uint64 {
+func nodeSize(node *treapNode) uint64 {
 	return nodeFieldsSize + uint64(len(node.key)+len(node.value))
 }
 
 // newTreapNode returns a new node from the given key, value, and priority.  The node is not initially linked to any others.
-func newTreapNode(	key, value []byte, priority int) *treapNode {
+func newTreapNode(key, value []byte, priority int) *treapNode {
 	return &treapNode{key: key, value: value, priority: priority}
 }
 

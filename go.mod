@@ -1,48 +1,53 @@
-module github.com/parallelcointeam/parallelcoin
+module github.com/p9c/pod
 
-go 1.13
+go 1.14
 
 require (
-	git.parallelcoin.io/dev/cryptonight v0.3.1
-	git.parallelcoin.io/dev/kcp9 v5.2.8+incompatible
-	git.parallelcoin.io/dev/rpcx v0.0.0-20190829033934-d995e874b384
-	github.com/GlenDC/go-external-ip v0.0.0-20170425150139-139229dcdddd
-	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
+	gioui.org v0.0.0-20200311164516-7024a0e6914d
+	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
 	github.com/VividCortex/ewma v1.1.1
 	github.com/aead/siphash v1.0.1
-	github.com/aead/skein v0.0.0-20160722084837-9365ae6e95d2 // indirect
-	github.com/bitgoin/lyra2rev2 v0.0.0-20161212102046-bae9ad2043bb
+	github.com/bitbandi/go-x11 v0.0.0-20171024232457-5fddbc9b2b09
 	github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd
 	github.com/btcsuite/golangcrypto v0.0.0-20150304025918-53f62d9b43e8
 	github.com/btcsuite/goleveldb v1.0.0
 	github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792
 	github.com/conformal/fastsha256 v0.0.0-20160815193821-637e65642941
 	github.com/coreos/bbolt v1.3.3
-	github.com/dave/dst v0.23.1
 	github.com/davecgh/go-spew v1.1.1
-	github.com/dchest/blake256 v1.1.0
 	github.com/enceve/crypto v0.0.0-20160707101852-34d48bb93815
-	github.com/go-ole/go-ole v1.2.4 // indirect
-	github.com/golang/protobuf v1.3.2
-	github.com/grandcat/zeroconf v0.0.0-20190424104450-85eadb44205c
-	github.com/jackpal/gateway v1.0.5
+	github.com/fsnotify/fsnotify v1.4.7 // indirect
+	github.com/golang/protobuf v1.3.3 // indirect
+	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/jcelliott/lumber v0.0.0-20160324203708-dd349441af25 // indirect
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/kkdai/bstream v1.0.0
-	github.com/lightninglabs/gozmq v0.0.0-20190710231225-cea2a031735d
+	github.com/kr/text v0.2.0 // indirect
+	github.com/marusama/semaphore v0.0.0-20190110074507-6952cef993b2
 	github.com/minio/highwayhash v1.0.0
-	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db
 	github.com/nanobox-io/golang-scribble v0.0.0-20190309225732-aa3e7c118975
-	github.com/pelletier/go-toml v1.4.0
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/p9c/goterm v0.0.3
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
-	github.com/shirou/gopsutil v2.18.12+incompatible
+	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/spacemonkeygo/errors v0.0.0-20171212215202-9064522e9fd1 // indirect
-	github.com/urfave/cli v1.22.1
+	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
+	github.com/urfave/cli v1.22.2
 	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
-	github.com/zserge/webview v0.0.0-20190123072648-16c93bcaeaeb
-	go.uber.org/atomic v1.4.0
-	golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7
-	golang.org/x/net v0.0.0-20190918130420-a8b05e9114ab
+	go.etcd.io/bbolt v1.3.3 // indirect
+	go.uber.org/atomic v1.5.1
+	golang.org/x/crypto v0.0.0-20200317142112-1b76d66859c6
+	golang.org/x/exp v0.0.0-20200228211341-fcea875c7e85
+	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a // indirect
+	golang.org/x/sys v0.0.0-20200317113312-5766fd39f98d // indirect
 	golang.org/x/text v0.3.2
-	google.golang.org/grpc v1.23.1
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
+	gopkg.in/fsnotify.v1 v1.4.7 // indirect
+	gopkg.in/src-d/go-git.v4 v4.13.1
+	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
+	lukechampine.com/blake3 v1.0.0
+
 )

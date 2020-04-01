@@ -1,6 +1,6 @@
 package upnp
 
-// Upnp code taken from Taipei Torrent license is below:
+// UPNP code taken from Taipei Torrent license is below:
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
@@ -62,16 +62,19 @@ type upnpNAT struct {
 func Discover() (nat NAT, err error) {
 	ssdp, err := net.ResolveUDPAddr("udp4", "239.255.255.250:1900")
 	if err != nil {
+		Error(err)
 		return
 	}
 	conn, err := net.ListenPacket("udp4", ":0")
 	if err != nil {
+		Error(err)
 		return
 	}
 	socket := conn.(*net.UDPConn)
 	defer socket.Close()
 	err = socket.SetDeadline(time.Now().Add(3 * time.Second))
 	if err != nil {
+		Error(err)
 		return
 	}
 	st := "ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n"
@@ -86,11 +89,13 @@ func Discover() (nat NAT, err error) {
 	for i := 0; i < 3; i++ {
 		_, err = socket.WriteToUDP(message, ssdp)
 		if err != nil {
+			Error(err)
 			return
 		}
 		var n int
 		n, _, err = socket.ReadFromUDP(answerBytes)
 		if err != nil {
+			Error(err)
 			continue
 			// socket.Close()
 			// return
@@ -114,17 +119,19 @@ func Discover() (nat NAT, err error) {
 		var serviceURL string
 		serviceURL, err = getServiceURL(locURL)
 		if err != nil {
+			Error(err)
 			return
 		}
 		var ourIP string
 		ourIP, err = getOurIP()
 		if err != nil {
+			Error(err)
 			return
 		}
 		nat = &upnpNAT{serviceURL: serviceURL, ourIP: ourIP}
 		return
 	}
-	err = errors.New("UPnP port discovery failed")
+	err = errors.New("UPnP port routeable failed")
 	return
 }
 
@@ -182,7 +189,7 @@ type root struct {
 
 // getChildDevice searches the children of device for a device with the given
 // type.
-func getChildDevice(	d *device, deviceType string) *device {
+func getChildDevice(d *device, deviceType string) *device {
 	for i := range d.DeviceList.Device {
 		if d.DeviceList.Device[i].DeviceType == deviceType {
 			return &d.DeviceList.Device[i]
@@ -193,7 +200,7 @@ func getChildDevice(	d *device, deviceType string) *device {
 
 // getChildDevice searches the service list of device for a service with the
 // given type.
-func getChildService(	d *device, serviceType string) *service {
+func getChildService(d *device, serviceType string) *service {
 	for i := range d.ServiceList.Service {
 		if d.ServiceList.Service[i].ServiceType == serviceType {
 			return &d.ServiceList.Service[i]
@@ -206,6 +213,7 @@ func getChildService(	d *device, serviceType string) *service {
 func getOurIP() (ip string, err error) {
 	hostname, err := os.Hostname()
 	if err != nil {
+		Error(err)
 		return
 	}
 	return net.LookupCNAME(hostname)
@@ -213,9 +221,10 @@ func getOurIP() (ip string, err error) {
 
 // getServiceURL parses the xml description at the given root url to find the
 // url for the WANIPConnection service to be used for port forwarding.
-func getServiceURL(	rootURL string) (url string, err error) {
+func getServiceURL(rootURL string) (url string, err error) {
 	r, err := http.Get(rootURL)
 	if err != nil {
+		Error(err)
 		return
 	}
 	defer r.Body.Close()
@@ -226,6 +235,7 @@ func getServiceURL(	rootURL string) (url string, err error) {
 	var root root
 	err = xml.NewDecoder(r.Body).Decode(&root)
 	if err != nil {
+		Error(err)
 		return
 	}
 	a := &root.Device
@@ -253,7 +263,7 @@ func getServiceURL(	rootURL string) (url string, err error) {
 }
 
 // combineURL appends subURL onto rootURL.
-func combineURL(	rootURL, subURL string) string {
+func combineURL(rootURL, subURL string) string {
 	protocolEnd := "://"
 	protoEndIndex := strings.Index(rootURL, protocolEnd)
 	a := rootURL[protoEndIndex+len(protocolEnd):]
@@ -278,7 +288,7 @@ type soapEnvelope struct {
 // soapRequests performs a soap request with the given parameters and returns
 // the xml replied stripped of the soap headers.
 // in the case that the request is unsuccessful the an error is returned.
-func soapRequest(	url, function, message string) (replyXML []byte, err error) {
+func soapRequest(url, function, message string) (replyXML []byte, err error) {
 	fullMessage := "<?xml version=\"1.0\" ?>" +
 		"<s:Envelope xmlns:s=\"http://schemas.xmlsoap." +
 		"org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap." +
@@ -286,24 +296,26 @@ func soapRequest(	url, function, message string) (replyXML []byte, err error) {
 		"<s:Body>" + message + "</s:Body></s:Envelope>"
 	req, err := http.NewRequest("POST", url, strings.NewReader(fullMessage))
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "text/xml ; charset=\"utf-8\"")
 	req.Header.Set("User-Agent", "Darwin/10.0.0, UPnP/1.0, MiniUPnPc/1.3")
-	//req.Header.Set("Transfer-Encoding", "chunked")
+	// req.Header.Set("Transfer-Encoding", "chunked")
 	req.Header.Set("SOAPAction", "\"urn:schemas-upnp-org:service:WANIPConnection:1#"+function+"\"")
 	req.Header.Set("Connection", "Close")
 	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("Pragma", "no-cache")
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	if r.Body != nil {
 		defer r.Body.Close()
 	}
 	if r.StatusCode >= 400 {
-		// log.Stderr(function, r.StatusCode)
+		// L.Stderr(function, r.StatusCode)
 		err = errors.New("Error " + strconv.Itoa(r.StatusCode) + " for " + function)
 		r = nil
 		return
@@ -311,6 +323,7 @@ func soapRequest(	url, function, message string) (replyXML []byte, err error) {
 	var reply soapEnvelope
 	err = xml.NewDecoder(r.Body).Decode(&reply)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return reply.Body.Data, nil
@@ -329,11 +342,13 @@ func (n *upnpNAT) GetExternalAddress() (addr net.IP, err error) {
 	message := "<u:GetExternalIPAddress xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\"/>\r\n"
 	response, err := soapRequest(n.serviceURL, "GetExternalIPAddress", message)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	var reply getExternalIPAddressResponse
 	err = xml.Unmarshal(response, &reply)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	addr = net.ParseIP(reply.ExternalIPAddress)
@@ -359,6 +374,7 @@ func (n *upnpNAT) AddPortMapping(protocol string, externalPort, internalPort int
 		"</NewLeaseDuration></u:AddPortMapping>"
 	response, err := soapRequest(n.serviceURL, "AddPortMapping", message)
 	if err != nil {
+		Error(err)
 		return
 	}
 	// TODO: check response to see if the port was forwarded
@@ -380,9 +396,10 @@ func (n *upnpNAT) DeletePortMapping(protocol string, externalPort, internalPort 
 		"</u:DeletePortMapping>"
 	response, err := soapRequest(n.serviceURL, "DeletePortMapping", message)
 	if err != nil {
+		Error(err)
 		return
 	}
-	// TODO: check response to see if the port was deleted log.Println(
+	// TODO: check response to see if the port was deleted L.Println(
 	//  message, response)
 	_ = response
 	return

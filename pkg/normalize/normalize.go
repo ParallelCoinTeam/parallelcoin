@@ -2,7 +2,7 @@ package normalize
 
 import (
 	"net"
-	
+
 	"github.com/urfave/cli"
 )
 
@@ -10,6 +10,7 @@ import (
 func Address(addr, defaultPort string) string {
 	_, _, err := net.SplitHostPort(addr)
 	if err != nil {
+		Error(err)
 		return net.JoinHostPort(addr, defaultPort)
 	}
 	return addr
@@ -36,19 +37,6 @@ func removeDuplicateAddresses(addrs []string) []string {
 	}
 	return result
 }
-
-// // CleanAndExpandPath expands environment variables and leading ~ in the passed
-// // path, cleans the result, and returns it.
-// func CleanAndExpandPath(datadir, path string) string {
-// 	// Expand initial ~ to OS specific home directory.
-// 	if strings.HasPrefix(path, "~") {
-// 		homeDir := filepath.Dir(datadir)
-// 		path = strings.Replace(path, "~", homeDir, 1)
-// 	}
-// 	// NOTE: The os.ExpandEnv doesn't work with Windows-style %VARIABLE%, but
-// 	// they variables can still be expanded via POSIX-style $VARIABLE.
-// 	return filepath.Clean(os.ExpandEnv(path))
-// }
 
 // StringSliceAddresses normalizes a slice of addresses
 func StringSliceAddresses(a *cli.StringSlice, port string) {

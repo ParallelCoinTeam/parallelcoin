@@ -32,7 +32,7 @@ A quick overview of the major features peer provides are as follows:
 
  - Automatic periodic keep-alive pinging and pong responses
 
- - Random nonce generation and self connection detection
+ - Random Nonce generation and self connection detection
 
  - Proper handling of bloom filter related commands when the caller does not specify the related flag to signal support
 
@@ -105,6 +105,6 @@ This package provides extensive logging capabilities through the UseLogger funct
 
 Bitcoin Improvement Proposals
 
-This package supports all BIPS supported by the wire package. (https://godoc.org/github.com/parallelcointeam/parallelcoin/wire#hdr-Bitcoin_Improvement_Proposals)
+This package supports all BIPS supported by the wire package. (https://godoc.org/github.com/p9c/pod/wire#hdr-Bitcoin_Improvement_Proposals)
 */
 package peer

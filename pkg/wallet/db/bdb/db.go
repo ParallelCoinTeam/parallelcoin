@@ -1,16 +1,16 @@
 package bdb
 
 import (
-   "io"
-   "os"
-   
-   bolt "github.com/coreos/bbolt"
-   
-   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	"io"
+	"os"
+
+	bolt "github.com/coreos/bbolt"
+
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // convertErr converts some bolt errors to the equivalent walletdb error.
-func convertErr(	err error) error {
+func convertErr(err error) error {
 	switch err {
 	// Database open/create errors.
 	case bolt.ErrDatabaseNotOpen:
@@ -62,6 +62,7 @@ func (tx *transaction) ReadWriteBucket(key []byte) walletdb.ReadWriteBucket {
 func (tx *transaction) CreateTopLevelBucket(key []byte) (walletdb.ReadWriteBucket, error) {
 	boltBucket, err := tx.boltTx.CreateBucket(key)
 	if err != nil {
+		Error(err)
 		return nil, convertErr(err)
 	}
 	return (*bucket)(boltBucket), nil
@@ -69,6 +70,7 @@ func (tx *transaction) CreateTopLevelBucket(key []byte) (walletdb.ReadWriteBucke
 func (tx *transaction) DeleteTopLevelBucket(key []byte) error {
 	err := tx.boltTx.DeleteBucket(key)
 	if err != nil {
+		Error(err)
 		return convertErr(err)
 	}
 	return nil
@@ -122,6 +124,7 @@ func (b *bucket) NestedReadBucket(key []byte) walletdb.ReadBucket {
 func (b *bucket) CreateBucket(key []byte) (walletdb.ReadWriteBucket, error) {
 	boltBucket, err := (*bolt.Bucket)(b).CreateBucket(key)
 	if err != nil {
+		Error(err)
 		return nil, convertErr(err)
 	}
 	return (*bucket)(boltBucket), nil
@@ -135,6 +138,7 @@ func (b *bucket) CreateBucket(key []byte) (walletdb.ReadWriteBucket, error) {
 func (b *bucket) CreateBucketIfNotExists(key []byte) (walletdb.ReadWriteBucket, error) {
 	boltBucket, err := (*bolt.Bucket)(b).CreateBucketIfNotExists(key)
 	if err != nil {
+		Error(err)
 		return nil, convertErr(err)
 	}
 	return (*bucket)(boltBucket), nil
@@ -269,6 +273,7 @@ var _ walletdb.DB = (*db)(nil)
 func (db *db) beginTx(writable bool) (*transaction, error) {
 	boltTx, err := (*bolt.DB)(db).Begin(writable)
 	if err != nil {
+		Error(err)
 		return nil, convertErr(err)
 	}
 	return &transaction{boltTx: boltTx}, nil
@@ -298,7 +303,7 @@ func (db *db) Close() error {
 }
 
 // filesExists reports whether the named file or directory exists.
-func fileExists(	name string) bool {
+func fileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
 			return false

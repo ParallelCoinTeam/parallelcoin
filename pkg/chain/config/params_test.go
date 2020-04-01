@@ -3,7 +3,7 @@ package chaincfg
 import "testing"
 
 // TestInvalidHashStr ensures the newShaHashFromStr function panics when used to with an invalid hash string.
-func TestInvalidHashStr(	t *testing.T) {
+func TestInvalidHashStr(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("Expected panic for invalid hash, got nil")
@@ -14,7 +14,7 @@ func TestInvalidHashStr(	t *testing.T) {
 
 // TestMustRegisterPanic ensures the mustRegister function panics when used to
 // register an invalid network.
-func TestMustRegisterPanic(	t *testing.T) {
+func TestMustRegisterPanic(t *testing.T) {
 	t.Parallel()
 	// Setup a defer to catch the expected panic to ensure it actually
 	// paniced.

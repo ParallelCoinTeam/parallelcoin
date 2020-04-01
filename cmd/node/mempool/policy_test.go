@@ -5,16 +5,16 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // TestCalcMinRequiredTxRelayFee tests the calcMinRequiredTxRelayFee API.
-func TestCalcMinRequiredTxRelayFee(	t *testing.T) {
+func TestCalcMinRequiredTxRelayFee(t *testing.T) {
 
 	tests := []struct {
 		name     string      // test description.
@@ -46,7 +46,7 @@ func TestCalcMinRequiredTxRelayFee(	t *testing.T) {
 			"max standard tx size with max satoshi relay fee",
 			maxStandardTxWeight / 4,
 			util.MaxSatoshi,
-			util.MaxSatoshi,
+			util.MaxSatoshi.Int64(),
 		},
 		{
 			"1500 bytes with 5000 relay fee",
@@ -91,11 +91,12 @@ func TestCalcMinRequiredTxRelayFee(	t *testing.T) {
 }
 
 // TestCheckPkScriptStandard tests the checkPkScriptStandard API.
-func TestCheckPkScriptStandard(	t *testing.T) {
+func TestCheckPkScriptStandard(t *testing.T) {
 	var pubKeys [][]byte
 	for i := 0; i < 4; i++ {
 		pk, err := ec.NewPrivateKey(ec.S256())
 		if err != nil {
+			Error(err)
 			t.Fatalf("TestCheckPkScriptStandard NewPrivateKey failed: %v",
 				err)
 			return
@@ -193,7 +194,6 @@ func TestCheckPkScriptStandard(	t *testing.T) {
 		got := checkPkScriptStandard(script, scriptClass)
 
 		if (test.isStandard && got != nil) ||
-
 			(!test.isStandard && got == nil) {
 
 			t.Fatalf("TestCheckPkScriptStandard test '%s' failed",
@@ -204,7 +204,7 @@ func TestCheckPkScriptStandard(	t *testing.T) {
 }
 
 // TestDust tests the isDust API.
-func TestDust(	t *testing.T) {
+func TestDust(t *testing.T) {
 
 	pkScript := []byte{0x76, 0xa9, 0x21, 0x03, 0x2f, 0x7e, 0x43,
 		0x0a, 0xa4, 0xc9, 0xd1, 0x59, 0x43, 0x7e, 0x84, 0xb9,
@@ -246,7 +246,7 @@ func TestDust(	t *testing.T) {
 		{
 			// Maximum allowed value is never dust.
 			"max satoshi amount is never dust",
-			wire.TxOut{Value: util.MaxSatoshi, PkScript: pkScript},
+			wire.TxOut{Value: util.MaxSatoshi.Int64(), PkScript: pkScript},
 			util.MaxSatoshi,
 			false,
 		},
@@ -279,7 +279,7 @@ func TestDust(	t *testing.T) {
 }
 
 // TestCheckTransactionStandard tests the checkTransactionStandard API.
-func TestCheckTransactionStandard(	t *testing.T) {
+func TestCheckTransactionStandard(t *testing.T) {
 
 	// Create some dummy, but otherwise standard, data for transactions.
 	prevOutHash, err := chainhash.NewHashFromStr("01")
@@ -296,7 +296,7 @@ func TestCheckTransactionStandard(	t *testing.T) {
 	}
 	addrHash := [20]byte{0x01}
 	addr, err := util.NewAddressPubKeyHash(addrHash[:],
-		&chaincfg.TestNet3Params)
+		&netparams.TestNet3Params)
 
 	if err != nil {
 		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", err)

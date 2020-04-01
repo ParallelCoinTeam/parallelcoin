@@ -6,19 +6,20 @@ import (
 	"net"
 	"strconv"
 	"time"
-   
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 const (
-	// These constants are used by the DNS seed code to pick a random last seen time.
+	// These constants are used by the DNS seed code to pick a random last
+	// seen time.
 	secondsIn3Days int32 = 24 * 60 * 60 * 3
 	secondsIn4Days int32 = 24 * 60 * 60 * 4
 )
 
-// OnSeed is the signature of the callback function which is invoked when DNS seeding is succesfull.
+// OnSeed is the signature of the callback function which is invoked when DNS
+// seeding is succesful
 type OnSeed func(addrs []*wire.NetAddress)
 
 // LookupFunc is the signature of the DNS lookup function.
@@ -38,11 +39,11 @@ func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
 			randSource := mrand.New(mrand.NewSource(time.Now().UnixNano()))
 			seedpeers, err := lookupFn(host)
 			if err != nil {
-				log <- cl.Infof{"DNS discovery failed on seed %s: %v", host, err}
+				Error("DNS routeable failed on seed %s: %v", host, err)
 				return
 			}
 			numPeers := len(seedpeers)
-			log <- cl.Debugf{"%d addresses found from DNS seed %s %s", numPeers, host, cl.Ine()}
+			Debugf("%d addresses found from DNS seed %s", numPeers, host)
 			if numPeers == 0 {
 				return
 			}
@@ -51,7 +52,8 @@ func SeedFromDNS(chainParams *netparams.Params, reqServices wire.ServiceFlag,
 			intPort, _ := strconv.Atoi(chainParams.DefaultPort)
 			for i, peer := range seedpeers {
 				addresses[i] = wire.NewNetAddressTimestamp(
-					// bitcoind seeds with addresses from a time randomly selected between 3 and 7 days ago.
+					// bitcoind seeds with addresses from a time randomly
+					// selected between 3 and 7 days ago.
 					time.Now().Add(-1*time.Second*time.Duration(secondsIn3Days+
 						randSource.Int31n(secondsIn4Days))),
 					0, peer, uint16(intPort))

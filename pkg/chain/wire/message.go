@@ -6,8 +6,7 @@ import (
 	"io"
 	"unicode/utf8"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // MessageHeaderSize is the number of bytes in a bitcoin message header. Bitcoin network (magic) 4 bytes + command 12 bytes + payload length 4 bytes + checksum 4 bytes.
@@ -160,6 +159,7 @@ func readMessageHeader(r io.Reader) (int, *messageHeader, error) {
 	var headerBytes [MessageHeaderSize]byte
 	n, err := io.ReadFull(r, headerBytes[:])
 	if err != nil {
+		Trace(err)
 		return n, nil, err
 	}
 	hr := bytes.NewReader(headerBytes[:])
@@ -168,7 +168,7 @@ func readMessageHeader(r io.Reader) (int, *messageHeader, error) {
 	var command [CommandSize]byte
 	err = readElements(hr, &hdr.magic, &command, &hdr.length, &hdr.checksum)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		Error(err)
 	}
 	// Strip trailing zeros from command string.
 	hdr.command = string(bytes.TrimRight(command[:], string(0)))
@@ -185,7 +185,7 @@ func discardInput(r io.Reader, n uint32) {
 		for i := uint32(0); i < numReads; i++ {
 			_, err := io.ReadFull(r, buf)
 			if err != nil {
-				fmt.Println(err, cl.Ine())
+				Error(err)
 			}
 		}
 	}
@@ -193,7 +193,7 @@ func discardInput(r io.Reader, n uint32) {
 		buf := make([]byte, bytesRemaining)
 		_, err := io.ReadFull(r, buf)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			Error(err)
 		}
 	}
 }
@@ -226,6 +226,7 @@ func WriteMessageWithEncodingN(w io.Writer, msg Message, pver uint32,
 	var bw bytes.Buffer
 	err := msg.BtcEncode(&bw, pver, encoding)
 	if err != nil {
+		Error(err)
 		return totalBytes, err
 	}
 	payload := bw.Bytes()
@@ -257,12 +258,13 @@ func WriteMessageWithEncodingN(w io.Writer, msg Message, pver uint32,
 	hw := bytes.NewBuffer(make([]byte, 0, MessageHeaderSize))
 	err = writeElements(hw, hdr.magic, command, hdr.length, hdr.checksum)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		Error(err)
 	}
 	// Write header.
 	n, err := w.Write(hw.Bytes())
 	totalBytes += n
 	if err != nil {
+		Error(err)
 		return totalBytes, err
 	}
 	// Write payload.
@@ -272,12 +274,12 @@ func WriteMessageWithEncodingN(w io.Writer, msg Message, pver uint32,
 }
 
 // ReadMessageWithEncodingN reads, validates, and parses the next bitcoin Message from r for the provided protocol version and bitcoin network.  It returns the number of bytes read in addition to the parsed Message and raw bytes which comprise the message.  This function is the same as ReadMessageN except it allows the caller to specify which message encoding is to to consult when decoding wire messages.
-func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet,
-	enc MessageEncoding) (int, Message, []byte, error) {
+func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc MessageEncoding) (int, Message, []byte, error) {
 	totalBytes := 0
 	n, hdr, err := readMessageHeader(r)
 	totalBytes += n
 	if err != nil {
+		Trace(err)
 		return totalBytes, nil, nil, err
 	}
 	// Enforce maximum message payload.
@@ -303,6 +305,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet,
 	// Create struct of appropriate message type based on the command.
 	msg, err := makeEmptyMessage(command)
 	if err != nil {
+		Error(err)
 		discardInput(r, hdr.length)
 		return totalBytes, nil, nil, messageError("ReadMessage",
 			err.Error())
@@ -323,6 +326,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet,
 	n, err = io.ReadFull(r, payload)
 	totalBytes += n
 	if err != nil {
+		Error(err)
 		return totalBytes, nil, nil, err
 	}
 	// Test checksum.
@@ -338,6 +342,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet,
 	pr := bytes.NewBuffer(payload)
 	err = msg.BtcDecode(pr, pver, enc)
 	if err != nil {
+		Error(err)
 		return totalBytes, nil, nil, err
 	}
 	return totalBytes, msg, payload, nil

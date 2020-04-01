@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"io"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // TxIndexUnknown is the value returned for a transaction index that is unknown. This is typically because the transaction has not been inserted into a block yet.
@@ -71,7 +71,7 @@ func (t *Tx) SetIndex(index int) {
 }
 
 // NewTx returns a new instance of a bitcoin transaction given an underlying wire.MsgTx.  See Tx.
-func NewTx(	msgTx *wire.MsgTx) *Tx {
+func NewTx(msgTx *wire.MsgTx) *Tx {
 	return &Tx{
 		msgTx:   msgTx,
 		txIndex: TxIndexUnknown,
@@ -79,17 +79,18 @@ func NewTx(	msgTx *wire.MsgTx) *Tx {
 }
 
 // NewTxFromBytes returns a new instance of a bitcoin transaction given the serialized bytes.  See Tx.
-func NewTxFromBytes(	serializedTx []byte) (*Tx, error) {
+func NewTxFromBytes(serializedTx []byte) (*Tx, error) {
 	br := bytes.NewReader(serializedTx)
 	return NewTxFromReader(br)
 }
 
 // NewTxFromReader returns a new instance of a bitcoin transaction given a Reader to deserialize the transaction.  See Tx.
-func NewTxFromReader(	r io.Reader) (*Tx, error) {
+func NewTxFromReader(r io.Reader) (*Tx, error) {
 	// Deserialize the bytes into a MsgTx.
 	var msgTx wire.MsgTx
 	err := msgTx.Deserialize(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	t := Tx{

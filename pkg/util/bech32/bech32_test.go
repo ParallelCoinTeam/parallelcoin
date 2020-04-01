@@ -4,10 +4,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/bech32"
+	"github.com/p9c/pod/pkg/util/bech32"
 )
 
-func TestBech32(	t *testing.T) {
+func TestBech32(t *testing.T) {
 	tests := []struct {
 		str   string
 		valid bool
@@ -51,7 +51,7 @@ func TestBech32(	t *testing.T) {
 		}
 		// Flip a bit in the string an make sure it is caught.
 		pos := strings.LastIndexAny(str, "1")
-		flipped := str[:pos+1] + string(str[pos+1] ^ 1) + str[pos+2:]
+		flipped := str[:pos+1] + string(str[pos+1]^1) + str[pos+2:]
 		_, _, err = bech32.Decode(flipped)
 		if err == nil {
 			t.Error("expected decoding to fail")

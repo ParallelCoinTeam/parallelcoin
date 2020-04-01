@@ -1,15 +1,16 @@
 package main
 
 import (
-   "io/ioutil"
-   "log"
-   "path/filepath"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
+	"io/ioutil"
+	"log"
+	"path/filepath"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	"github.com/p9c/pod/app/appdata"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func main() {
@@ -21,10 +22,10 @@ func main() {
 		},
 	}
 	// Connect to local btcwallet RPC server using websockets.
-	certHomeDir := util.AppDataDir("mod", false)
+	certHomeDir := appdata.Dir("mod", false)
 	certs, err := ioutil.ReadFile(filepath.Join(certHomeDir, "rpc.cert"))
 	if err != nil {
-		log.Fatal(err)
+		Fatal(err)
 	}
 	connCfg := &rpcclient.ConnConfig{
 		Host:         "localhost:11046",
@@ -35,23 +36,23 @@ func main() {
 	}
 	client, err := rpcclient.New(connCfg, &ntfnHandlers)
 	if err != nil {
-		log.Fatal(err)
+		Fatal(err)
 	}
 	// Get the list of unspent transaction outputs (utxos) that the connected wallet has at least one private key for.
 	unspent, err := client.ListUnspent()
 	if err != nil {
-		log.Fatal(err)
+		Fatal(err)
 	}
 	log.Printf("Num unspent outputs (utxos): %d", len(unspent))
 	if len(unspent) > 0 {
 		log.Printf("First utxo:\n%v", spew.Sdump(unspent[0]))
 	}
 	// For this example gracefully shutdown the client after 10 seconds. Ordinarily when to shutdown the client is highly application specific.
-	log.Println("Client shutdown in 10 seconds...")
+	fmt.Println("Client shutdown in 10 seconds...")
 	time.AfterFunc(time.Second*10, func() {
-		log.Println("Client shutting down...")
+		fmt.Println("Client shutting down...")
 		client.Shutdown()
-		log.Println("Client shutdown complete.")
+		fmt.Println("Client shutdown complete.")
 	})
 	// Wait until the client either shuts down gracefully (or the user terminates the process with Ctrl+C).
 	client.WaitForShutdown()

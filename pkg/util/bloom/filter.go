@@ -5,17 +5,17 @@ import (
 	"math"
 	"sync"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // ln2Squared is simply the square of the natural log of 2.
 const ln2Squared = math.Ln2 * math.Ln2
 
 // minUint32 is a convenience function to return the minimum value of the two passed uint32 values.
-func minUint32(	a, b uint32) uint32 {
+func minUint32(a, b uint32) uint32 {
 	if a < b {
 		return a
 	}
@@ -31,7 +31,7 @@ type Filter struct {
 // NewFilter creates a new bloom filter instance, mainly to be used by SPV clients.  The tweak parameter is a random value added to the seed value.
 // The false positive rate is the probability of a false positive where 1.0 is "match everything" and zero is unachievable.  Thus, providing any false positive rates less than 0 or greater than 1 will be adjusted to the valid range.
 // For more information on what values to use for both elements and fprate, see https://en.wikipedia.org/wiki/Bloom_filter.
-func NewFilter(	elements, tweak uint32, fprate float64, flags wire.BloomUpdateType) *Filter {
+func NewFilter(elements, tweak uint32, fprate float64, flags wire.BloomUpdateType) *Filter {
 	// Massage the false positive rate to sane values.
 	if fprate > 1.0 {
 		fprate = 1.0
@@ -55,7 +55,7 @@ func NewFilter(	elements, tweak uint32, fprate float64, flags wire.BloomUpdateTy
 }
 
 // LoadFilter creates a new Filter instance with the given underlying wire.MsgFilterLoad.
-func LoadFilter(	filter *wire.MsgFilterLoad) *Filter {
+func LoadFilter(filter *wire.MsgFilterLoad) *Filter {
 	return &Filter{
 		msgFilterLoad: filter,
 	}
@@ -98,7 +98,7 @@ func (bf *Filter) matches(data []byte) bool {
 	// The bloom filter does not contain the data if any of the bit offsets which result from hashing the data using each independent hash  are not set.  The shifts and masks below are a faster equivalent of:
 	//   arrayIndex := idx / 8     (idx >> 3)
 	//   bitOffset := idx % 8      (idx & 7)
-	///  if filter[arrayIndex] & 1<<bitOffset == 0 { ... }
+	// /  if filter[arrayIndex] & 1<<bitOffset == 0 { ... }
 	for i := uint32(0); i < bf.msgFilterLoad.HashFuncs; i++ {
 		idx := bf.hash(i, data)
 		if bf.msgFilterLoad.Filter[idx>>3]&(1<<(idx&7)) == 0 {
@@ -141,7 +141,7 @@ func (bf *Filter) add(data []byte) {
 	// Adding data to a bloom filter consists of setting all of the bit offsets which result from hashing the data using each independent hash function.  The shifts and masks below are a faster equivalent of:
 	//   arrayIndex := idx / 8    (idx >> 3)
 	//   bitOffset := idx % 8     (idx & 7)
-	///  filter[arrayIndex] |= 1<<bitOffset
+	// /  filter[arrayIndex] |= 1<<bitOffset
 	// editors note: most CPUs now implement power of two multiplication and division as shifts anyway
 	for i := uint32(0); i < bf.msgFilterLoad.HashFuncs; i++ {
 		idx := bf.hash(i, data)
@@ -202,6 +202,7 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 	for i, txOut := range tx.MsgTx().TxOut {
 		pushedData, err := txscript.PushedData(txOut.PkScript)
 		if err != nil {
+			Error(err)
 			continue
 		}
 		for _, data := range pushedData {
@@ -224,6 +225,7 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 		}
 		pushedData, err := txscript.PushedData(txin.SignatureScript)
 		if err != nil {
+			Error(err)
 			continue
 		}
 		for _, data := range pushedData {

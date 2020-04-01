@@ -112,6 +112,7 @@ func (alert *Alert) Serialize(w io.Writer, pver uint32) error {
 	err := writeElements(w, alert.Version, alert.RelayUntil,
 		alert.Expiration, alert.ID, alert.Cancel)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	count := len(alert.SetCancel)
@@ -122,16 +123,19 @@ func (alert *Alert) Serialize(w io.Writer, pver uint32) error {
 	}
 	err = WriteVarInt(w, pver, uint64(count))
 	if err != nil {
+		Error(err)
 		return err
 	}
 	for i := 0; i < count; i++ {
 		err = writeElement(w, alert.SetCancel[i])
 		if err != nil {
+			Error(err)
 			return err
 		}
 	}
 	err = writeElements(w, alert.MinVer, alert.MaxVer)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	count = len(alert.SetSubVer)
@@ -142,24 +146,29 @@ func (alert *Alert) Serialize(w io.Writer, pver uint32) error {
 	}
 	err = WriteVarInt(w, pver, uint64(count))
 	if err != nil {
+		Error(err)
 		return err
 	}
 	for i := 0; i < count; i++ {
 		err = WriteVarString(w, pver, alert.SetSubVer[i])
 		if err != nil {
+			Error(err)
 			return err
 		}
 	}
 	err = writeElement(w, alert.Priority)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	err = WriteVarString(w, pver, alert.Comment)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	err = WriteVarString(w, pver, alert.StatusBar)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	return WriteVarString(w, pver, alert.Reserved)
@@ -170,12 +179,14 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
 	err := readElements(r, &alert.Version, &alert.RelayUntil,
 		&alert.Expiration, &alert.ID, &alert.Cancel)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	// SetCancel: first read a VarInt that contains count - the number of Cancel IDs, then
 	// iterate count times and read them
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	if count > maxCountSetCancel {
@@ -187,16 +198,19 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
 	for i := 0; i < int(count); i++ {
 		err := readElement(r, &alert.SetCancel[i])
 		if err != nil {
+			Error(err)
 			return err
 		}
 	}
 	err = readElements(r, &alert.MinVer, &alert.MaxVer)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	// SetSubVer: similar to SetCancel but read count number of sub-version strings
 	count, err = ReadVarInt(r, pver)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	if count > maxCountSetSubVer {
@@ -208,19 +222,23 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
 	for i := 0; i < int(count); i++ {
 		alert.SetSubVer[i], err = ReadVarString(r, pver)
 		if err != nil {
+			Error(err)
 			return err
 		}
 	}
 	err = readElement(r, &alert.Priority)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	alert.Comment, err = ReadVarString(r, pver)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	alert.StatusBar, err = ReadVarString(r, pver)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	alert.Reserved, err = ReadVarString(r, pver)
@@ -228,7 +246,7 @@ func (alert *Alert) Deserialize(r io.Reader, pver uint32) error {
 }
 
 // NewAlert returns an new Alert with values provided.
-func NewAlert(	version int32, relayUntil int64, expiration int64,
+func NewAlert(version int32, relayUntil int64, expiration int64,
 	id int32, cancel int32, setCancel []int32, minVer int32,
 	maxVer int32, setSubVer []string, priority int32, comment string,
 	statusBar string) *Alert {
@@ -250,11 +268,12 @@ func NewAlert(	version int32, relayUntil int64, expiration int64,
 }
 
 // NewAlertFromPayload returns an Alert with values deserialized from the serialized payload.
-func NewAlertFromPayload(	serializedPayload []byte, pver uint32) (*Alert, error) {
+func NewAlertFromPayload(serializedPayload []byte, pver uint32) (*Alert, error) {
 	var alert Alert
 	r := bytes.NewReader(serializedPayload)
 	err := alert.Deserialize(r, pver)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &alert, nil
@@ -276,10 +295,12 @@ func (msg *MsgAlert) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) er
 	msg.SerializedPayload, err = ReadVarBytes(r, pver, MaxMessagePayload,
 		"alert serialized payload")
 	if err != nil {
+		Error(err)
 		return err
 	}
 	msg.Payload, err = NewAlertFromPayload(msg.SerializedPayload, pver)
 	if err != nil {
+		Error(err)
 		msg.Payload = nil
 	}
 	msg.Signature, err = ReadVarBytes(r, pver, MaxMessagePayload,
@@ -296,6 +317,7 @@ func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) er
 		r := new(bytes.Buffer)
 		err = msg.Payload.Serialize(r, pver)
 		if err != nil {
+			Error(err)
 			// Serialize failed - ignore & fallback to SerializedPayload
 			serializedpayload = msg.SerializedPayload
 		} else {
@@ -310,6 +332,7 @@ func (msg *MsgAlert) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) er
 	}
 	err = WriteVarBytes(w, pver, serializedpayload)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	return WriteVarBytes(w, pver, msg.Signature)
@@ -327,7 +350,7 @@ func (msg *MsgAlert) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgAlert returns a new bitcoin alert message that conforms to the Message interface.  See MsgAlert for details.
-func NewMsgAlert(	serializedPayload []byte, signature []byte) *MsgAlert {
+func NewMsgAlert(serializedPayload []byte, signature []byte) *MsgAlert {
 	return &MsgAlert{
 		SerializedPayload: serializedPayload,
 		Signature:         signature,

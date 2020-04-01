@@ -5,9 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 // var (
@@ -79,7 +78,7 @@ func TestCreateOpenFail(t *testing.T) {
 	}
 	err := walletdb.RegisterDriver(driver)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		Error(err)
 	}
 	// Ensure creating a database with the new type fails with the expected
 	// error.

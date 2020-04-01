@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 var (
@@ -14,12 +13,12 @@ var (
 // ignoreDbTypes = map[string]bool{"createopenfail": true}
 )
 
-// checkDbError ensures the passed error is a database.Error with an error code that matches the passed  error code.
-func checkDbError(	t *testing.T, testName string, gotErr error, wantErrCode database.ErrorCode) bool {
-	dbErr, ok := gotErr.(database.Error)
+// checkDbError ensures the passed error is a database.DBError with an error code that matches the passed  error code.
+func checkDbError(t *testing.T, testName string, gotErr error, wantErrCode database.ErrorCode) bool {
+	dbErr, ok := gotErr.(database.DBError)
 	if !ok {
 		t.Errorf("%s: unexpected error type - got %T, want %T",
-			testName, gotErr, database.Error{})
+			testName, gotErr, database.DBError{})
 		return false
 	}
 	if dbErr.ErrorCode != wantErrCode {
@@ -32,7 +31,7 @@ func checkDbError(	t *testing.T, testName string, gotErr error, wantErrCode data
 }
 
 // TestAddDuplicateDriver ensures that adding a duplicate driver does not overwrite an existing one.
-func TestAddDuplicateDriver(	t *testing.T) {
+func TestAddDuplicateDriver(t *testing.T) {
 	supportedDrivers := database.SupportedDrivers()
 	if len(supportedDrivers) == 0 {
 		t.Errorf("no backends to test")
@@ -59,7 +58,7 @@ func TestAddDuplicateDriver(	t *testing.T) {
 }
 
 // TestCreateOpenFail ensures that errors which occur while opening or closing a database are handled properly.
-func TestCreateOpenFail(	t *testing.T) {
+func TestCreateOpenFail(t *testing.T) {
 	// bogusCreateDB is a function which acts as a bogus create and open driver function that intentionally returns a failure which can be detected.
 	dbType := "createopenfail"
 	openError := fmt.Errorf("failed to create or open database for "+
@@ -75,7 +74,7 @@ func TestCreateOpenFail(	t *testing.T) {
 	}
 	err := database.RegisterDriver(driver)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	// Ensure creating a database with the new type fails with the expected error.
 	_, err = database.Create(dbType)
@@ -94,7 +93,7 @@ func TestCreateOpenFail(	t *testing.T) {
 }
 
 // TestCreateOpenUnsupported ensures that attempting to create or open an unsupported database type is handled properly.
-func TestCreateOpenUnsupported(	t *testing.T) {
+func TestCreateOpenUnsupported(t *testing.T) {
 	// Ensure creating a database with an unsupported type fails with the expected error.
 	testName := "create with unsupported database type"
 	dbType := "unsupported"

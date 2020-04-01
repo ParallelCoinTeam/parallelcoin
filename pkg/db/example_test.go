@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 // This example demonstrates creating a new database.
@@ -16,8 +16,8 @@ func ExampleCreate() {
 	// This example assumes the ffldb driver is imported.
 	//
 	// import (
-	// 	"github.com/parallelcointeam/parallelcoin/pkg/db"
-	// 	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+	// 	"github.com/p9c/pod/pkg/db"
+	// 	_ "github.com/p9c/pod/pkg/db/ffldb"
 	// )
 	// Create a database and schedule it to be closed and removed on exit.
 	// Typically you wouldn't want to remove the database right away like
@@ -26,7 +26,7 @@ func ExampleCreate() {
 	dbPath := filepath.Join(os.TempDir(), "examplecreate")
 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 	if err != nil {
-		fmt.Println(err)
+		Error(err)
 		return
 	}
 	defer os.RemoveAll(dbPath)
@@ -40,8 +40,8 @@ func Example_basicUsage() {
 	// This example assumes the ffldb driver is imported.
 	//
 	// import (
-	// 	"github.com/parallelcointeam/parallelcoin/pkg/db"
-	// 	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+	// 	"github.com/p9c/pod/pkg/db"
+	// 	_ "github.com/p9c/pod/pkg/db/ffldb"
 	// )
 	// Create a database and schedule it to be closed and removed on exit.
 	// Typically you wouldn't want to remove the database right away like
@@ -50,7 +50,7 @@ func Example_basicUsage() {
 	dbPath := filepath.Join(os.TempDir(), "exampleusage")
 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 	if err != nil {
-		fmt.Println(err)
+		Error(err)
 		return
 	}
 	defer os.RemoveAll(dbPath)
@@ -86,7 +86,7 @@ func Example_basicUsage() {
 		return nil
 	})
 	if err != nil {
-		fmt.Println(err)
+		Error(err)
 		return
 	}
 	// Output:
@@ -99,8 +99,8 @@ func Example_basicUsage() {
 // 	// This example assumes the ffldb driver is imported.
 // 	//
 // 	// import (
-// 	// 	"github.com/parallelcointeam/parallelcoin/pkg/db"
-// 	// 	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+// 	// 	"github.com/p9c/pod/pkg/db"
+// 	// 	_ "github.com/p9c/pod/pkg/db/ffldb"
 // 	// )
 // 	// Create a database and schedule it to be closed and removed on exit.
 // 	// Typically you wouldn't want to remove the database right away like
@@ -109,7 +109,7 @@ func Example_basicUsage() {
 // 	dbPath := filepath.Join(os.TempDir(), "exampleblkstorage")
 // 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 // 	if err != nil {
-// 		fmt.Println(err)
+// 		DBError(err)
 // 		return
 // 	}
 // 	defer os.RemoveAll(dbPath)
@@ -122,7 +122,7 @@ func Example_basicUsage() {
 // 		return tx.StoreBlock(util.NewBlock(genesisBlock))
 // 	})
 // 	if err != nil {
-// 		fmt.Println(err)
+// 		DBError(err)
 // 		return
 // 	}
 // 	// Use the View function of the database to perform a managed read-only
@@ -143,7 +143,7 @@ func Example_basicUsage() {
 // 		return nil
 // 	})
 // 	if err != nil {
-// 		fmt.Println(err)
+// 		DBError(err)
 // 		return
 // 	}
 // 	// Typically at this point, the block could be deserialized via the

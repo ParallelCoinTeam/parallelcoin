@@ -1,18 +1,16 @@
 package wire
 
 import (
-   "net"
-   "reflect"
-   "strings"
-   "testing"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"net"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // TestVersion tests the MsgVersion API.
-func TestVersion(	t *testing.T) {
+func TestVersion(t *testing.T) {
 	pver := ProtocolVersion
 	// Create version message data.
 	lastBlock := int32(234234)
@@ -56,7 +54,7 @@ func TestVersion(	t *testing.T) {
 	}
 	err = msg.AddUserAgent("myclient", "1.2.3", "optional", "comments")
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	customUserAgent := DefaultUserAgent + "myclient:1.2.3(optional; comments)/"
 	if msg.UserAgent != customUserAgent {
@@ -65,7 +63,7 @@ func TestVersion(	t *testing.T) {
 	}
 	err = msg.AddUserAgent("mygui", "3.4.5")
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	customUserAgent += "mygui:3.4.5/"
 	if msg.UserAgent != customUserAgent {
@@ -194,9 +192,9 @@ func TestVersion(	t *testing.T) {
 // 			t.Errorf("BtcEncode #%d error %v", i, err)
 // 			continue
 // 		}
-// 		if !bytes.Equal(buf.Bytes(), test.buf) {
+// 		if !bytes.Equal(buf.Hash(), test.buf) {
 // 			t.Errorf("BtcEncode #%d\n got: %s want: %s", i,
-// 				spew.Sdump(buf.Bytes()), spew.Sdump(test.buf))
+// 				spew.Sdump(buf.Hash()), spew.Sdump(test.buf))
 // 			continue
 // 		}
 // 		// Decode the message from wire format.
@@ -240,10 +238,10 @@ func TestVersion(	t *testing.T) {
 // 	}
 // 	// Make a new buffer big enough to hold the base version plus the new bytes for the bigger varint to hold the new size of the user agent and the new user agent string.  Then stich it all together.
 // 	newLen := len(baseVersionEncoded) - len(baseVersion.UserAgent)
-// 	newLen = newLen + len(newUAVarIntBuf.Bytes()) - 1 + len(newUA)
+// 	newLen = newLen + len(newUAVarIntBuf.Hash()) - 1 + len(newUA)
 // 	exceedUAVerEncoded := make([]byte, newLen)
 // 	copy(exceedUAVerEncoded, baseVersionEncoded[0:80])
-// 	copy(exceedUAVerEncoded[80:], newUAVarIntBuf.Bytes())
+// 	copy(exceedUAVerEncoded[80:], newUAVarIntBuf.Hash())
 // 	copy(exceedUAVerEncoded[83:], []byte(newUA))
 // 	copy(exceedUAVerEncoded[83+len(newUA):], baseVersionEncoded[97:100])
 // 	tests := []struct {

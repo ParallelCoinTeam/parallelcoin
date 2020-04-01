@@ -3,8 +3,6 @@ package wire
 import (
 	"fmt"
 	"io"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // MsgGetData implements the Message interface and represents a bitcoin getdata message.  It is used to request data such as blocks and transactions from another peer.  It should be used in response to the inv (MsgInv) message to request the actual data referenced by each inventory vector the receiving peer doesn't already have.  Each message is limited to a maximum number of inventory vectors, which is currently 50,000.  As a result, multiple messages must be used to request larger amounts of data. Use the AddInvVect function to build up the list of inventory vectors when sending a getdata message to another peer.
@@ -27,6 +25,7 @@ func (msg *MsgGetData) AddInvVect(iv *InvVect) error {
 func (msg *MsgGetData) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) error {
 	count, err := ReadVarInt(r, pver)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	// Limit to max inventory vectors per message.
@@ -41,11 +40,12 @@ func (msg *MsgGetData) BtcDecode(r io.Reader, pver uint32, enc MessageEncoding) 
 		iv := &invList[i]
 		err := readInvVect(r, pver, iv)
 		if err != nil {
+			Error(err)
 			return err
 		}
 		err = msg.AddInvVect(iv)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			Error(err)
 		}
 	}
 	return nil
@@ -61,11 +61,13 @@ func (msg *MsgGetData) BtcEncode(w io.Writer, pver uint32, enc MessageEncoding) 
 	}
 	err := WriteVarInt(w, pver, uint64(count))
 	if err != nil {
+		Error(err)
 		return err
 	}
 	for _, iv := range msg.InvList {
 		err := writeInvVect(w, pver, iv)
 		if err != nil {
+			Error(err)
 			return err
 		}
 	}

@@ -3,11 +3,11 @@ package blockchain
 import (
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // TestMerkle tests the BuildMerkleTreeStore API.
-func TestMerkle(	t *testing.T) {
+func TestMerkle(t *testing.T) {
 	block := util.NewBlock(&Block100000)
 	merkles := BuildMerkleTreeStore(block.Transactions(), false)
 	calculatedMerkleRoot := merkles[len(merkles)-1]

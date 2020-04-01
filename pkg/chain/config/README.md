@@ -1,7 +1,7 @@
 # chaincfg
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/parallelcointeam/parallelcoin/chaincfg)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/p9c/pod/chaincfg)
 
 Package chaincfg defines chain configuration parameters for the three standard Parallelcoin networks and provides the ability for callers to define their own custom networks.
 
@@ -14,45 +14,39 @@ package main
 import (
 "flag"
 "fmt"
+"github.com/p9c/pod/pkg/chain/config/netparams"
 "log"
 
 
 
 
-"github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+"github.com/p9c/pod/pkg/chain/config"
 "git.parallelcoin.io/util"
 )
 var testnet = flag.Bool("testnet", false, "operate on the testnet Bitcoin network")
 // By default (without -testnet), use mainnet.
-var chainParams = &chaincfg.MainNetParamsRPC
+var chainParams = &netparams.MainNetParams
 func main(	) {
-
-
 	flag.Parse()
-
 	// Modify active network parameters if operating on testnet.
 	if *testnet {
-		
-chainParams = &chaincfg.TestNet3ParamsRPC
+        chainParams = &netparams.TestNet3Params 
 	}
-
 	// later...
-
 	// Create and print new payment address, specific to the active network.
 	pubKeyHash := make([]byte, 20)
-	addr, err := btcutil.NewAddressPubKeyHash(pubKeyHash, chainParams)
+	addr, err := util.NewAddressPubKeyHash(pubKeyHash, chainParams)
 	if err != nil {
-		
-log.Fatal(err)
+		L.Error(err)
 	}
-	fmt.Println(addr)
+	log.Println(addr)
 }
 ```
 
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/parallelcointeam/parallelcoin/chaincfg
+$ go get -u github.com/p9c/pod/chaincfg
 ```
 
 ## License

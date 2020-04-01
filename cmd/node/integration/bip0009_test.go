@@ -1,5 +1,3 @@
-// +build rpctest
-
 package integration
 
 import (
@@ -8,10 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/integration/rpctest"
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"github.com/p9c/pod/cmd/node/integration/rpctest"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 const (
@@ -173,7 +172,7 @@ func testBIP0009(t *testing.T, forkKey string, deploymentID uint32) {
 	activationThreshold := r.ActiveNet.RuleChangeActivationThreshold
 	signalForkVersion := int32(1<<deployment.BitNumber) | vbTopBits
 	for i := uint32(0); i < activationThreshold-1; i++ {
-		_, err := r.GenerateAndSubmitBlock(nil, signalForkVersion,
+		_, err := r.GenerateAndSubmitBlock(nil, uint32(signalForkVersion),
 			time.Time{})
 		if err != nil {
 			t.Fatalf("failed to generated block %d: %v", i, err)
@@ -195,7 +194,7 @@ func testBIP0009(t *testing.T, forkKey string, deploymentID uint32) {
 	// Assert the chain height is the expected value and the soft fork status
 	// moved to locked in.
 	for i := uint32(0); i < activationThreshold; i++ {
-		_, err := r.GenerateAndSubmitBlock(nil, signalForkVersion,
+		_, err := r.GenerateAndSubmitBlock(nil, uint32(signalForkVersion),
 			time.Time{})
 		if err != nil {
 			t.Fatalf("failed to generated block %d: %v", i, err)
@@ -281,7 +280,7 @@ func TestBIP0009(t *testing.T) {
 func TestBIP0009Mining(t *testing.T) {
 	t.Parallel()
 	// Initialize the primary mining node with only the genesis block.
-	r, err := rpctest.New(&chaincfg.SimNetParams, nil, nil)
+	r, err := rpctest.New(&netparams.SimNetParams, nil, nil)
 	if err != nil {
 		t.Fatalf("unable to create primary harness: %v", err)
 	}

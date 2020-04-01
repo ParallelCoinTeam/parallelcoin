@@ -1,18 +1,18 @@
 package snacl
 
 import (
-   "crypto/rand"
-   "crypto/sha256"
-   "crypto/subtle"
-   "encoding/binary"
-   "errors"
-   "io"
-   "runtime/debug"
-   
-   "github.com/btcsuite/golangcrypto/nacl/secretbox"
-   "github.com/btcsuite/golangcrypto/scrypt"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util/zero"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/binary"
+	"errors"
+	"io"
+	"runtime/debug"
+
+	"github.com/btcsuite/golangcrypto/nacl/secretbox"
+	"github.com/btcsuite/golangcrypto/scrypt"
+
+	"github.com/p9c/pod/pkg/util/zero"
 )
 
 var (
@@ -43,6 +43,7 @@ func (ck *CryptoKey) Encrypt(in []byte) ([]byte, error) {
 	var nonce [NonceSize]byte
 	_, err := io.ReadFull(prng, nonce[:])
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	blob := secretbox.Seal(nil, in, &nonce, (*[KeySize]byte)(ck))
@@ -78,6 +79,7 @@ func GenerateCryptoKey() (*CryptoKey, error) {
 	var key CryptoKey
 	_, err := io.ReadFull(prng, key[:])
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &key, nil
@@ -107,6 +109,7 @@ func (sk *SecretKey) deriveKey(password *[]byte) error {
 		sk.Parameters.P,
 		len(sk.Key))
 	if err != nil {
+		Error(err)
 		return err
 	}
 	copy(sk.Key[:], key)
@@ -202,7 +205,7 @@ func (sk *SecretKey) Decrypt(in []byte) ([]byte, error) {
 }
 
 // NewSecretKey returns a SecretKey structure based on the passed parameters.
-func NewSecretKey(	password *[]byte, N, r, p int) (*SecretKey, error) {
+func NewSecretKey(password *[]byte, N, r, p int) (*SecretKey, error) {
 	sk := SecretKey{
 		Key: (*CryptoKey)(&[KeySize]byte{}),
 	}
@@ -212,11 +215,13 @@ func NewSecretKey(	password *[]byte, N, r, p int) (*SecretKey, error) {
 	sk.Parameters.P = p
 	_, err := io.ReadFull(prng, sk.Parameters.Salt[:])
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// derive key
 	err = sk.deriveKey(password)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// store digest

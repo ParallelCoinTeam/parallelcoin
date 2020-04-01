@@ -1,21 +1,20 @@
 package wire
 
 import (
-   "bytes"
-   "crypto/rand"
-   "io"
-   "reflect"
-   "testing"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"crypto/rand"
+	"io"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // TestMerkleBlock tests the MsgMerkleBlock API.
-func TestMerkleBlock(	t *testing.T) {
+func TestMerkleBlock(t *testing.T) {
 	pver := ProtocolVersion
 	enc := BaseEncoding
 	// Block 1 header.
@@ -96,7 +95,7 @@ func TestMerkleBlock(	t *testing.T) {
 }
 
 // TestMerkleBlockCrossProtocol tests the MsgMerkleBlock API when encoding with the latest protocol version and decoding with BIP0031Version.
-func TestMerkleBlockCrossProtocol(	t *testing.T) {
+func TestMerkleBlockCrossProtocol(t *testing.T) {
 	// Block 1 header.
 	prevHash := &blockOne.Header.PrevBlock
 	merkleHash := &blockOne.Header.MerkleRoot
@@ -121,7 +120,7 @@ func TestMerkleBlockCrossProtocol(	t *testing.T) {
 }
 
 // TestMerkleBlockWire tests the MsgMerkleBlock wire encode and decode for various numbers of transaction hashes and protocol versions.
-func TestMerkleBlockWire(	t *testing.T) {
+func TestMerkleBlockWire(t *testing.T) {
 	tests := []struct {
 		in   *MsgMerkleBlock // Message to encode
 		out  *MsgMerkleBlock // Expected decoded message
@@ -171,7 +170,7 @@ func TestMerkleBlockWire(	t *testing.T) {
 }
 
 // TestMerkleBlockWireErrors performs negative tests against wire encode and decode of MsgBlock to confirm error paths work correctly.
-func TestMerkleBlockWireErrors(	t *testing.T) {
+func TestMerkleBlockWireErrors(t *testing.T) {
 	// Use protocol version 70001 specifically here instead of the latest because the test data is using bytes encoded with that protocol version.
 	pver := uint32(70001)
 	pverNoMerkleBlock := BIP0037Version - 1
@@ -292,7 +291,7 @@ func TestMerkleBlockOverflowErrors(t *testing.T) {
 	var buf bytes.Buffer
 	err := WriteVarInt(&buf, pver, maxTxPerBlock+1)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	numHashesOffset := 84
 	exceedMaxHashes := make([]byte, numHashesOffset)
@@ -302,7 +301,7 @@ func TestMerkleBlockOverflowErrors(t *testing.T) {
 	buf.Reset()
 	err = WriteVarInt(&buf, pver, maxFlagsPerMerkleBlock+1)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	numFlagBytesOffset := 117
 	exceedMaxFlagBytes := make([]byte, numFlagBytesOffset)

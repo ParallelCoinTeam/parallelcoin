@@ -1,13 +1,10 @@
 package bloom
 
 import (
-	"fmt"
-
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // merkleBlock is used to house intermediate information needed to generate a wire.MsgMerkleBlock according to a filter.
@@ -96,7 +93,7 @@ func NewMerkleBlock(block *util.Block, filter *Filter) (*wire.MsgMerkleBlock, []
 	for _, hash := range mBlock.finalHashes {
 		err := msgMerkleBlock.AddTxHash(hash)
 		if err != nil {
-			fmt.Println(err, cl.Ine())
+			Error(err)
 		}
 	}
 	for i := uint32(0); i < uint32(len(mBlock.bits)); i++ {

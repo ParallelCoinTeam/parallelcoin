@@ -3,7 +3,7 @@ package hdkeychain_test
 import (
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
 // bip0032MasterPriv1 is the master private extended key from the first set of test vectors in BIP0032.
@@ -11,7 +11,7 @@ const bip0032MasterPriv1 = "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbP" +
 	"y6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
 
 // BenchmarkDeriveHardened benchmarks how long it takes to derive a hardened child from a master private extended key.
-func BenchmarkDeriveHardened(	b *testing.B) {
+func BenchmarkDeriveHardened(b *testing.B) {
 	b.StopTimer()
 	masterKey, err := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
 	if err != nil {
@@ -24,7 +24,7 @@ func BenchmarkDeriveHardened(	b *testing.B) {
 }
 
 // BenchmarkDeriveNormal benchmarks how long it takes to derive a normal (non-hardened) child from a master private extended key.
-func BenchmarkDeriveNormal(	b *testing.B) {
+func BenchmarkDeriveNormal(b *testing.B) {
 	b.StopTimer()
 	masterKey, err := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
 	if err != nil {
@@ -37,7 +37,7 @@ func BenchmarkDeriveNormal(	b *testing.B) {
 }
 
 // BenchmarkPrivToPub benchmarks how long it takes to convert a private extended key to a public extended key.
-func BenchmarkPrivToPub(	b *testing.B) {
+func BenchmarkPrivToPub(b *testing.B) {
 	b.StopTimer()
 	masterKey, err := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
 	if err != nil {
@@ -50,7 +50,7 @@ func BenchmarkPrivToPub(	b *testing.B) {
 }
 
 // BenchmarkDeserialize benchmarks how long it takes to deserialize a private extended key.
-func BenchmarkDeserialize(	b *testing.B) {
+func BenchmarkDeserialize(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		_, _ = hdkeychain.NewKeyFromString(bip0032MasterPriv1)
 
@@ -58,7 +58,7 @@ func BenchmarkDeserialize(	b *testing.B) {
 }
 
 // BenchmarkSerialize benchmarks how long it takes to serialize a private extended key.
-func BenchmarkSerialize(	b *testing.B) {
+func BenchmarkSerialize(b *testing.B) {
 	b.StopTimer()
 	masterKey, err := hdkeychain.NewKeyFromString(bip0032MasterPriv1)
 	if err != nil {

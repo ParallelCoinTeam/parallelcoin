@@ -7,7 +7,7 @@ import (
 )
 
 // TestDynamicBanScoreDecay tests the exponential decay implemented in DynamicBanScore.
-func TestDynamicBanScoreDecay(	t *testing.T) {
+func TestDynamicBanScoreDecay(t *testing.T) {
 	var bs DynamicBanScore
 	base := time.Now()
 	r := bs.increase(100, 50, base)
@@ -25,7 +25,7 @@ func TestDynamicBanScoreDecay(	t *testing.T) {
 }
 
 // TestDynamicBanScoreLifetime tests that DynamicBanScore properly yields zero once the maximum age is reached.
-func TestDynamicBanScoreLifetime(	t *testing.T) {
+func TestDynamicBanScoreLifetime(t *testing.T) {
 	var bs DynamicBanScore
 	base := time.Now()
 	_ = bs.increase(0, math.MaxUint32, base)
@@ -40,7 +40,7 @@ func TestDynamicBanScoreLifetime(	t *testing.T) {
 }
 
 // TestDynamicBanScore tests exported functions of DynamicBanScore. Exponential decay or other time based behavior is tested by other functions.
-func TestDynamicBanScoreReset(	t *testing.T) {
+func TestDynamicBanScoreReset(t *testing.T) {
 	var bs DynamicBanScore
 	if bs.Int() != 0 {
 		t.Errorf("Initial state is not zero.")

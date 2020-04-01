@@ -1,21 +1,21 @@
 package wire
 
 import (
-   "bytes"
-   "encoding/binary"
-   "io"
-   "net"
-   "reflect"
-   "testing"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"bytes"
+	"encoding/binary"
+	"io"
+	"net"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // makeHeader is a convenience function to make a message header in the form of a byte slice.  It is used to force errors when reading messages.
-func makeHeader(	btcnet BitcoinNet, command string,
+func makeHeader(btcnet BitcoinNet, command string,
 	payloadLen uint32, checksum uint32) []byte {
 	// The length of a bitcoin message header is 24 bytes.
 	// 4 byte magic number of the bitcoin network + 12 byte command + 4 byte
@@ -29,7 +29,7 @@ func makeHeader(	btcnet BitcoinNet, command string,
 }
 
 // TestMessage tests the Read/WriteMessage and Read/WriteMessageN API.
-func TestMessage(	t *testing.T) {
+func TestMessage(t *testing.T) {
 	pver := ProtocolVersion
 	// Create the various types of messages to test.
 	// MsgVersion.
@@ -165,7 +165,7 @@ func TestMessage(	t *testing.T) {
 
 // TestReadMessageWireErrors performs negative tests against wire decoding into
 // concrete messages to confirm error paths work correctly.
-func TestReadMessageWireErrors(	t *testing.T) {
+func TestReadMessageWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	btcnet := MainNet
 	// Ensure message errors are as expected with no function specified.
@@ -342,7 +342,7 @@ func TestReadMessageWireErrors(	t *testing.T) {
 
 // TestWriteMessageWireErrors performs negative tests against wire encoding from
 // concrete messages to confirm error paths work correctly.
-func TestWriteMessageWireErrors(	t *testing.T) {
+func TestWriteMessageWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	btcnet := MainNet
 	wireErr := &MessageError{}

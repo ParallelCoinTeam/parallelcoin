@@ -15,27 +15,26 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 var (
 	// blockDataNet is the expected network in the test block data.
 	blockDataNet = wire.MainNet
 	// blockDataFile is the path to a file containing the first 256 blocks of the block chain.
-	//nolint
+	// nolint
 	blockDataFile = filepath.Join("..", "testdata", "blocks1-256.bz2")
 	// errSubTestFail is used to signal that a sub test returned false.
-	//nolint
+	// nolint
 	errSubTestFail = fmt.Errorf("sub test failure")
 )
 
 // loadBlocks loads the blocks contained in the testdata directory and returns a slice of them.
-//nolint
-func loadBlocks(	t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util.Block, error) {
+func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util.Block, error) {
 	// Open the file that contains the blocks for reading.
 	fi, err := os.Open(dataFile)
 	if err != nil {
@@ -96,12 +95,12 @@ func loadBlocks(	t *testing.T, dataFile string, network wire.BitcoinNet) ([]*uti
 	return blocks, nil
 }
 
-// checkDbError ensures the passed error is a database.Error with an error code that matches the passed  error code.
-func checkDbError(	t *testing.T, testName string, gotErr error, wantErrCode database.ErrorCode) bool {
-	dbErr, ok := gotErr.(database.Error)
+// checkDbError ensures the passed error is a database.DBError with an error code that matches the passed  error code.
+func checkDbError(t *testing.T, testName string, gotErr error, wantErrCode database.ErrorCode) bool {
+	dbErr, ok := gotErr.(database.DBError)
 	if !ok {
 		t.Errorf("%s: unexpected error type - got %T, want %T",
-			testName, gotErr, database.Error{})
+			testName, gotErr, database.DBError{})
 		return false
 	}
 	if dbErr.ErrorCode != wantErrCode {
@@ -114,7 +113,7 @@ func checkDbError(	t *testing.T, testName string, gotErr error, wantErrCode data
 }
 
 // testContext is used to store context information about a running test which is passed into helper functions.
-//nolint
+// nolint
 type testContext struct {
 	t           *testing.T
 	db          database.DB
@@ -124,15 +123,15 @@ type testContext struct {
 }
 
 // keyPair houses a key/value pair.  It is used over maps so ordering can be maintained.
-//nolint
+// nolint
 type keyPair struct {
 	key   []byte
 	value []byte
 }
 
 // lookupKey is a convenience method to lookup the requested key from the provided keypair slice along with whether or not the key was found.
-//nolint
-func lookupKey(	key []byte, values []keyPair) ([]byte, bool) {
+// nolint
+func lookupKey(key []byte, values []keyPair) ([]byte, bool) {
 	for _, item := range values {
 		if bytes.Equal(item.key, key) {
 			return item.value, true
@@ -142,8 +141,8 @@ func lookupKey(	key []byte, values []keyPair) ([]byte, bool) {
 }
 
 // toGetValues returns a copy of the provided keypairs with all of the nil values set to an empty byte slice.  This is used to ensure that keys set to nil values result in empty byte slices when retrieved instead of nil.
-//nolint
-func toGetValues(	values []keyPair) []keyPair {
+// nolint
+func toGetValues(values []keyPair) []keyPair {
 	ret := make([]keyPair, len(values))
 	copy(ret, values)
 	for i := range ret {
@@ -155,8 +154,8 @@ func toGetValues(	values []keyPair) []keyPair {
 }
 
 // rollbackValues returns a copy of the provided keypairs with all values set to nil.  This is used to test that values are properly rolled back.
-//nolint
-func rollbackValues(	values []keyPair) []keyPair {
+// nolint
+func rollbackValues(values []keyPair) []keyPair {
 	ret := make([]keyPair, len(values))
 	copy(ret, values)
 	for i := range ret {
@@ -166,8 +165,8 @@ func rollbackValues(	values []keyPair) []keyPair {
 }
 
 // testCursorKeyPair checks that the provide key and value match the expected keypair at the provided index.  It also ensures the index is in range for the provided slice of expected keypairs.
-//nolint
-func testCursorKeyPair(	tc *testContext, k, v []byte, index int, values []keyPair) bool {
+// nolint
+func testCursorKeyPair(tc *testContext, k, v []byte, index int, values []keyPair) bool {
 	if index >= len(values) || index < 0 {
 		tc.t.Errorf("Cursor: exceeded the expected range of values - "+
 			"index %d, num values %d", index, len(values))
@@ -190,8 +189,8 @@ func testCursorKeyPair(	tc *testContext, k, v []byte, index int, values []keyPai
 }
 
 // testGetValues checks that all of the provided key/value pairs can be retrieved from the database and the retrieved values match the provided values.
-//nolint
-func testGetValues(	tc *testContext, bucket database.Bucket, values []keyPair) bool {
+// nolint
+func testGetValues(tc *testContext, bucket database.Bucket, values []keyPair) bool {
 	for _, item := range values {
 		gotValue := bucket.Get(item.key)
 		if !reflect.DeepEqual(gotValue, item.value) {
@@ -204,8 +203,8 @@ func testGetValues(	tc *testContext, bucket database.Bucket, values []keyPair) b
 }
 
 // testPutValues stores all of the provided key/value pairs in the provided bucket while checking for errors.
-//nolint
-func testPutValues(	tc *testContext, bucket database.Bucket, values []keyPair) bool {
+// nolint
+func testPutValues(tc *testContext, bucket database.Bucket, values []keyPair) bool {
 	for _, item := range values {
 		if err := bucket.Put(item.key, item.value); err != nil {
 			tc.t.Errorf("Put: unexpected error: %v", err)
@@ -216,8 +215,8 @@ func testPutValues(	tc *testContext, bucket database.Bucket, values []keyPair) b
 }
 
 // testDeleteValues removes all of the provided key/value pairs from the provided bucket.
-//nolint
-func testDeleteValues(	tc *testContext, bucket database.Bucket, values []keyPair) bool {
+// nolint
+func testDeleteValues(tc *testContext, bucket database.Bucket, values []keyPair) bool {
 	for _, item := range values {
 		if err := bucket.Delete(item.key); err != nil {
 			tc.t.Errorf("Delete: unexpected error: %v", err)
@@ -228,8 +227,8 @@ func testDeleteValues(	tc *testContext, bucket database.Bucket, values []keyPair
 }
 
 // testCursorInterface ensures the cursor itnerface is working properly by exercising all of its functions on the passed bucket.
-//nolint
-func testCursorInterface(	tc *testContext, bucket database.Bucket) bool {
+// nolint
+func testCursorInterface(tc *testContext, bucket database.Bucket) bool {
 	// Ensure a cursor can be obtained for the bucket.
 	cursor := bucket.Cursor()
 	if cursor == nil {
@@ -345,8 +344,8 @@ func testCursorInterface(	tc *testContext, bucket database.Bucket) bool {
 
 // testNestedBucket reruns the testBucketInterface against a nested bucket along with a counter to only test a couple of level deep.
 
-//nolint
-func testNestedBucket(	tc *testContext, testBucket database.Bucket) bool {
+// nolint
+func testNestedBucket(tc *testContext, testBucket database.Bucket) bool {
 	// Don't go more than 2 nested levels deep.
 	if tc.bucketDepth > 1 {
 		return true
@@ -360,8 +359,8 @@ func testNestedBucket(	tc *testContext, testBucket database.Bucket) bool {
 
 // testBucketInterface ensures the bucket interface is working properly by exercising all of its functions.  This includes the cursor interface for the cursor returned from the bucket.
 
-//nolint
-func testBucketInterface(	tc *testContext, bucket database.Bucket) bool {
+// nolint
+func testBucketInterface(tc *testContext, bucket database.Bucket) bool {
 	if bucket.Writable() != tc.isWritable {
 		tc.t.Errorf("Bucket writable state does not match.")
 		return false
@@ -549,8 +548,8 @@ func testBucketInterface(	tc *testContext, bucket database.Bucket) bool {
 
 // rollbackOnPanic rolls the passed transaction back if the code in the calling function panics.  This is useful in case the tests unexpectedly panic which would leave any manually created transactions with the database mutex locked thereby leading to a deadlock and masking the real reason for the panic.  It also logs a test error and repanics so the original panic can be traced.
 
-//nolint
-func rollbackOnPanic(	t *testing.T, tx database.Tx) {
+// nolint
+func rollbackOnPanic(t *testing.T, tx database.Tx) {
 	if err := recover(); err != nil {
 		t.Errorf("Unexpected panic: %v", err)
 		_ = tx.Rollback()
@@ -560,8 +559,8 @@ func rollbackOnPanic(	t *testing.T, tx database.Tx) {
 
 // testMetadataManualTxInterface ensures that the manual transactions metadata interface works as expected.
 
-//nolint
-func testMetadataManualTxInterface(	tc *testContext) bool {
+// nolint
+func testMetadataManualTxInterface(tc *testContext) bool {
 	// populateValues tests that populating values works as expected.
 	// When the writable flag is false, a read-only tranasction is created, standard bucket tests for read-only transactions are performed, and the Commit function is checked to ensure it fails as expected.
 	// Otherwise, a read-write transaction is created, the values are written, standard bucket tests for read-write transactions are performed, and then the transaction is either committed or rolled back depending on the flag.
@@ -720,8 +719,8 @@ func testMetadataManualTxInterface(	tc *testContext) bool {
 
 // testManagedTxPanics ensures calling Rollback of Commit inside a managed transaction panics.
 
-//nolint
-func testManagedTxPanics(	tc *testContext) bool {
+// nolint
+func testManagedTxPanics(tc *testContext) bool {
 	testPanic := func(fn func()) (paniced bool) {
 		// Setup a defer to catch the expected panic and update the return variable.
 		defer func() {
@@ -781,8 +780,8 @@ func testManagedTxPanics(	tc *testContext) bool {
 
 // testMetadataTxInterface tests all facets of the managed read/write and manual transaction metadata interfaces as well as the bucket interfaces under them.
 
-//nolint
-func testMetadataTxInterface(	tc *testContext) bool {
+// nolint
+func testMetadataTxInterface(tc *testContext) bool {
 	if !testManagedTxPanics(tc) {
 		return false
 	}
@@ -951,8 +950,8 @@ func testMetadataTxInterface(	tc *testContext) bool {
 
 // testFetchBlockIOMissing ensures that all of the block retrieval API functions work as expected when requesting blocks that don't exist.
 
-//nolint
-func testFetchBlockIOMissing(	tc *testContext, tx database.Tx) bool {
+// nolint
+func testFetchBlockIOMissing(tc *testContext, tx database.Tx) bool {
 	wantErrCode := database.ErrBlockNotFound
 	// Non-bulk Block IO API
 	// Test the individual block APIs one block at a time to ensure they return the expected error.  Also, build the data needed to test the bulk APIs below while looping.
@@ -1037,8 +1036,8 @@ func testFetchBlockIOMissing(	tc *testContext, tx database.Tx) bool {
 
 // testFetchBlockIO ensures all of the block retrieval API functions work as expected for the provide set of blocks.  The blocks must already be stored in the database, or at least stored into the the passed transaction.  It also tests several error conditions such as ensuring the expected errors are returned when fetching blocks, headers, and regions that don't exist.
 
-//nolint
-func testFetchBlockIO(	tc *testContext, tx database.Tx) bool {
+// nolint
+func testFetchBlockIO(tc *testContext, tx database.Tx) bool {
 	// Non-bulk Block IO API
 	// Test the individual block APIs one block at a time.  Also, build the data needed to test the bulk APIs below while looping.
 	allBlockHashes := make([]chainhash.Hash, len(tc.blocks))
@@ -1050,7 +1049,7 @@ func testFetchBlockIO(	tc *testContext, tx database.Tx) bool {
 		allBlockHashes[i] = *blockHash
 		blockBytes, err := block.Bytes()
 		if err != nil {
-			tc.t.Errorf("block.Bytes(%d): unexpected error: %v", i,
+			tc.t.Errorf("block.Hash(%d): unexpected error: %v", i,
 				err)
 			return false
 		}
@@ -1281,8 +1280,8 @@ func testFetchBlockIO(	tc *testContext, tx database.Tx) bool {
 
 // testBlockIOTxInterface ensures that the block IO interface works as expected for both managed read/write and manual transactions.  This function leaves all of the stored blocks in the database.
 
-//nolint
-func testBlockIOTxInterface(	tc *testContext) bool {
+// nolint
+func testBlockIOTxInterface(tc *testContext) bool {
 	// Ensure attempting to store a block with a read-only transaction fails with the expected error.
 	err := tc.db.View(func(tx database.Tx) error {
 		wantErrCode := database.ErrTxNotWritable
@@ -1427,8 +1426,8 @@ func testBlockIOTxInterface(	tc *testContext) bool {
 
 // testClosedTxInterface ensures that both the metadata and block IO API functions behave as expected when attempted against a closed transaction.
 
-//nolint
-func testClosedTxInterface(	tc *testContext, tx database.Tx) bool {
+// nolint
+func testClosedTxInterface(tc *testContext, tx database.Tx) bool {
 	wantErrCode := database.ErrTxClosed
 	bucket := tx.Metadata()
 	cursor := tx.Metadata().Cursor()
@@ -1636,8 +1635,8 @@ func testClosedTxInterface(	tc *testContext, tx database.Tx) bool {
 
 // testTxClosed ensures that both the metadata and block IO API functions behave as expected when attempted against both read-only and read-write transactions.
 
-//nolint
-func testTxClosed(	tc *testContext) bool {
+// nolint
+func testTxClosed(tc *testContext) bool {
 	bucketName := []byte("closedtxbucket")
 	keyName := []byte("closedtxkey")
 	// Start a transaction, create a bucket and key used for testing, and immediately perform a commit on it so it is closed.
@@ -1680,8 +1679,8 @@ func testTxClosed(	tc *testContext) bool {
 
 // testConcurrecy ensure the database properly supports concurrent readers and only a single writer.  It also ensures views act as snapshots at the time they are acquired.
 
-//nolint
-func testConcurrecy(	tc *testContext) bool {
+// nolint
+func testConcurrecy(tc *testContext) bool {
 	// sleepTime is how long each of the concurrent readers should sleep to aid in detection of whether or not the data is actually being read concurrently.  It starts with a sane lower bound.
 	var sleepTime = time.Millisecond * 250
 	// Determine about how long it takes for a single block read.  When it's longer than the default minimum sleep time, adjust the sleep time to help prevent durations that are too short which would cause erroneous test failures on slower systems.
@@ -1840,8 +1839,8 @@ func testConcurrecy(	tc *testContext) bool {
 // testConcurrentClose ensures that closing the database with open transactions blocks until the transactions are finished.
 // The database will be closed upon returning from this function.
 
-//nolint
-func testConcurrentClose(	tc *testContext) bool {
+// nolint
+func testConcurrentClose(tc *testContext) bool {
 	// Start up a few readers and wait for them to acquire views.  Each reader waits for a signal to complete to ensure the transactions stay open until they are explicitly signalled to be closed.
 	var activeReaders int32
 	numReaders := 3
@@ -1904,8 +1903,8 @@ func testConcurrentClose(	tc *testContext) bool {
 
 // testInterface tests performs tests for the various interfaces of the database package which require state in the database for the given database type.
 
-//nolint
-func testInterface(	t *testing.T, db database.DB) {
+// nolint
+func testInterface(t *testing.T, db database.DB) {
 	// Create a test context to pass around.
 	context := testContext{t: t, db: db}
 	// Load the test blocks and store in the test context for use throughout the tests.

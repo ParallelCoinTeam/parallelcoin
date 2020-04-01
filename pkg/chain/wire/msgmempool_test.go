@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestMemPool(	t *testing.T) {
+func TestMemPool(t *testing.T) {
 	pver := ProtocolVersion
 	enc := BaseEncoding
 	// Ensure the command is expected value.

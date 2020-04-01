@@ -11,11 +11,11 @@ import (
 	"os"
 	"testing"
 
-	walletdbtest "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/test"
+	walletdbtest "github.com/p9c/pod/pkg/wallet/db/test"
 )
 
 // TestInterface performs all interfaces tests for this database driver.
-func TestInterface(	t *testing.T) {
+func TestInterface(t *testing.T) {
 
 	dbPath := "interfacetest.db"
 	defer os.RemoveAll(dbPath)

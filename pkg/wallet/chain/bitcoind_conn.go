@@ -1,21 +1,20 @@
 package chain
 
 import (
-   "bytes"
-   "fmt"
-   "net"
-   "sync"
-   "sync/atomic"
-   "time"
-   
-   "github.com/lightninglabs/gozmq"
-   
-   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"fmt"
+	"net"
+	"sync"
+	"sync/atomic"
+	"time"
+
+	"github.com/tstranex/gozmq"
+
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
 // BitcoindConn represents a persistent client connection to a bitcoind node
@@ -68,6 +67,7 @@ func NewBitcoindConn(chainParams *netparams.Params,
 	}
 	client, err := rpcclient.New(clientCfg, nil)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	conn := &BitcoindConn{
@@ -94,6 +94,7 @@ func (c *BitcoindConn) Start() error {
 	// Verify that the node is running on the expected network.
 	net, err := c.getCurrentNet()
 	if err != nil {
+		Error(err)
 		c.client.Disconnect()
 		return err
 	}
@@ -107,17 +108,17 @@ func (c *BitcoindConn) Start() error {
 	// concern to ensure one type of event isn't dropped from the connection
 	// queue due to another type of event filling it up.
 	zmqBlockConn, err := gozmq.Subscribe(
-		c.zmqBlockHost, []string{"rawblock"}, c.zmqPollInterval,
-	)
+		c.zmqBlockHost, []string{"rawblock"})
 	if err != nil {
+		Error(err)
 		c.client.Disconnect()
 		return fmt.Errorf("unable to subscribe for zmq block events: "+
 			"%v", err)
 	}
 	zmqTxConn, err := gozmq.Subscribe(
-		c.zmqTxHost, []string{"rawtx"}, c.zmqPollInterval,
-	)
+		c.zmqTxHost, []string{"rawtx"})
 	if err != nil {
+		Error(err)
 		c.client.Disconnect()
 		return fmt.Errorf("unable to subscribe for zmq tx events: %v",
 			err)
@@ -150,9 +151,9 @@ func (c *BitcoindConn) Stop() {
 func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
 	defer conn.Close()
-	log <- cl.Info{
+	Info(
 		"started listening for bitcoind block notifications via ZMQ on", c.zmqBlockHost,
-	}
+	)
 	for {
 		// Before attempting to read from the ZMQ socket, we'll make
 		// sure to check if we've been requested to shut down.
@@ -164,6 +165,7 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 		// Poll an event from the ZMQ socket.
 		msgBytes, err := conn.Receive()
 		if err != nil {
+			Error(err)
 			// It's possible that the connection to the socket
 			// continuously times out, so we'll prevent logging this
 			// error to prevent spamming the logs.
@@ -171,8 +173,9 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			if ok && netErr.Timeout() {
 				continue
 			}
-			log <- cl.Error{
-				"unable to receive ZMQ rawblock message:", err, cl.Ine()}
+			Error(
+				"unable to receive ZMQ rawblock message:", err,
+			)
 			continue
 		}
 		// We have an event! We'll now ensure it is a block event,
@@ -184,8 +187,9 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			block := &wire.MsgBlock{}
 			r := bytes.NewReader(msgBytes[1])
 			if err := block.Deserialize(r); err != nil {
-				log <- cl.Error{
-					"unable to deserialize block:", err, cl.Ine()}
+				Error(
+					"unable to deserialize block:", err,
+				)
 				continue
 			}
 			c.rescanClientsMtx.Lock()
@@ -207,10 +211,10 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 			if eventType == "" || !isASCII(eventType) {
 				continue
 			}
-			log <- cl.Warn{
+			Warn(
 				"received unexpected event type from rawblock subscription:",
 				eventType,
-			}
+			)
 		}
 	}
 }
@@ -222,10 +226,10 @@ func (c *BitcoindConn) blockEventHandler(conn *gozmq.Conn) {
 func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 	defer c.wg.Done()
 	defer conn.Close()
-	log <- cl.Info{
+	Info(
 		"started listening for bitcoind transaction notifications via ZMQ on",
 		c.zmqTxHost,
-	}
+	)
 	for {
 		// Before attempting to read from the ZMQ socket, we'll make
 		// sure to check if we've been requested to shut down.
@@ -237,6 +241,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 		// Poll an event from the ZMQ socket.
 		msgBytes, err := conn.Receive()
 		if err != nil {
+			Error(err)
 			// It's possible that the connection to the socket
 			// continuously times out, so we'll prevent logging this
 			// error to prevent spamming the logs.
@@ -244,8 +249,9 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			if ok && netErr.Timeout() {
 				continue
 			}
-			log <- cl.Error{
-				"unable to receive ZMQ rawtx message:", err, cl.Ine()}
+			Error(
+				"unable to receive ZMQ rawtx message:", err,
+			)
 			continue
 		}
 		// We have an event! We'll now ensure it is a transaction event,
@@ -257,8 +263,9 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			tx := &wire.MsgTx{}
 			r := bytes.NewReader(msgBytes[1])
 			if err := tx.Deserialize(r); err != nil {
-				log <- cl.Error{
-					"unable to deserialize transaction:", err, cl.Ine()}
+				Error(
+					"unable to deserialize transaction:", err,
+				)
 				continue
 			}
 			c.rescanClientsMtx.Lock()
@@ -280,10 +287,10 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 			if eventType == "" || !isASCII(eventType) {
 				continue
 			}
-			log <- cl.Warn{
+			Warn(
 				"received unexpected event type from rawtx subscription:",
 				eventType,
-			}
+			)
 		}
 	}
 }
@@ -292,6 +299,7 @@ func (c *BitcoindConn) txEventHandler(conn *gozmq.Conn) {
 func (c *BitcoindConn) getCurrentNet() (wire.BitcoinNet, error) {
 	hash, err := c.client.GetBlockHash(0)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	switch *hash {

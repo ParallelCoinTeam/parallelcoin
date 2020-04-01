@@ -1,33 +1,32 @@
 package keystore
 
 import (
-   "bytes"
-   "crypto/rand"
-   "math/big"
-   "reflect"
-   "testing"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-   ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	"bytes"
+	"crypto/rand"
+	"math/big"
+	"reflect"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 const dummyDir = ""
 
-var tstNetParams = &chaincfg.MainNetParams
+var tstNetParams = &netparams.MainNetParams
 
-func makeBS(	height int32) *BlockStamp {
+func makeBS(height int32) *BlockStamp {
 	return &BlockStamp{
 		Hash:   new(chainhash.Hash),
 		Height: height,
 	}
 }
-func TestBtcAddressSerializer(	t *testing.T) {
+func TestBtcAddressSerializer(t *testing.T) {
 	fakeWallet := &Store{net: (*netParams)(tstNetParams)}
 	kdfp := &kdfParameters{
 		mem:   1024,
@@ -74,7 +73,7 @@ func TestBtcAddressSerializer(	t *testing.T) {
 		t.Error("Original and read btcAddress differ.")
 	}
 }
-func TestScriptAddressSerializer(	t *testing.T) {
+func TestScriptAddressSerializer(t *testing.T) {
 	fakeWallet := &Store{net: (*netParams)(tstNetParams)}
 	script := []byte{txscript.OP_TRUE, txscript.OP_DUP,
 		txscript.OP_DROP}
@@ -99,32 +98,32 @@ func TestScriptAddressSerializer(	t *testing.T) {
 		t.Error("Original and read btcAddress differ.")
 	}
 }
-func TestWalletCreationSerialization(	t *testing.T) {
+func TestWalletCreationSerialization(t *testing.T) {
 	createdAt := makeBS(0)
 	w1, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	buf := new(bytes.Buffer)
 	if _, err := w1.WriteTo(buf); err != nil {
-		t.Error("Error writing new wallet: " + err.Error())
+		t.Error("ScriptError writing new wallet: " + err.Error())
 		return
 	}
 	w2 := new(Store)
 	_, err = w2.ReadFrom(buf)
 	if err != nil {
-		t.Error("Error reading newly written wallet: " + err.Error())
+		t.Error("ScriptError reading newly written wallet: " + err.Error())
 		return
 	}
 	err = w1.Lock()
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	err = w2.Lock()
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	if err = w1.Unlock([]byte("banana")); err != nil {
 		t.Error("Decrypting original wallet failed: " + err.Error())
@@ -135,12 +134,12 @@ func TestWalletCreationSerialization(	t *testing.T) {
 		return
 	}
 	//	if !reflect.DeepEqual(w1, w2) {
-	//		t.Error("Created and read-in wallets do not match.")
+	//		t.ScriptError("Created and read-in wallets do not match.")
 	//		spew.Dump(w1, w2)
 	//		return
 	//	}
 }
-func TestChaining(	t *testing.T) {
+func TestChaining(t *testing.T) {
 	tests := []struct {
 		name                       string
 		cc                         []byte
@@ -298,11 +297,11 @@ func TestChaining(	t *testing.T) {
 		}
 	}
 }
-func TestWalletPubkeyChaining(	t *testing.T) {
+func TestWalletPubkeyChaining(t *testing.T) {
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, makeBS(0))
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	if !w.IsLocked() {
@@ -345,13 +344,13 @@ func TestWalletPubkeyChaining(	t *testing.T) {
 	serializedWallet := new(bytes.Buffer)
 	_, err = w.WriteTo(serializedWallet)
 	if err != nil {
-		t.Errorf("Error writing wallet with missing private key: %v", err)
+		t.Errorf("ScriptError writing wallet with missing private key: %v", err)
 		return
 	}
 	w2 := new(Store)
 	_, err = w2.ReadFrom(serializedWallet)
 	if err != nil {
-		t.Errorf("Error reading wallet with missing private key: %v", err)
+		t.Errorf("ScriptError reading wallet with missing private key: %v", err)
 		return
 	}
 	// Unlock wallet.  This should trigger creating the private key for
@@ -434,11 +433,11 @@ func TestWalletPubkeyChaining(	t *testing.T) {
 	buf := new(bytes.Buffer)
 	_, err = w2.WriteTo(buf)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	_, err = w2.ReadFrom(buf)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	err = w2.Unlock([]byte("banana"))
 	if err != nil {
@@ -446,12 +445,12 @@ func TestWalletPubkeyChaining(	t *testing.T) {
 		return
 	}
 }
-func TestWatchingWalletExport(	t *testing.T) {
+func TestWatchingWalletExport(t *testing.T) {
 	createdAt := makeBS(0)
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	// Maintain a set of the active addresses in the wallet.
@@ -625,13 +624,13 @@ func TestWatchingWalletExport(	t *testing.T) {
 		return
 	}
 }
-func TestImportPrivateKey(	t *testing.T) {
+func TestImportPrivateKey(t *testing.T) {
 	createHeight := int32(100)
 	createdAt := makeBS(createHeight)
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	if err = w.Unlock([]byte("banana")); err != nil {
@@ -640,7 +639,7 @@ func TestImportPrivateKey(	t *testing.T) {
 	}
 	pk, err := ec.NewPrivateKey(ec.S256())
 	if err != nil {
-		t.Error("Error generating private key: " + err.Error())
+		t.Error("ScriptError generating private key: " + err.Error())
 		return
 	}
 	// verify that the entire wallet's sync height matches the
@@ -772,13 +771,13 @@ func TestImportPrivateKey(	t *testing.T) {
 		return
 	}
 }
-func TestImportScript(	t *testing.T) {
+func TestImportScript(t *testing.T) {
 	createHeight := int32(100)
 	createdAt := makeBS(createHeight)
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	if err = w.Unlock([]byte("banana")); err != nil {
@@ -1015,12 +1014,12 @@ func TestImportScript(	t *testing.T) {
 		return
 	}
 }
-func TestChangePassphrase(	t *testing.T) {
+func TestChangePassphrase(t *testing.T) {
 	createdAt := makeBS(0)
 	w, err := New(dummyDir, "A wallet for testing.",
 		[]byte("banana"), tstNetParams, createdAt)
 	if err != nil {
-		t.Error("Error creating new wallet: " + err.Error())
+		t.Error("ScriptError creating new wallet: " + err.Error())
 		return
 	}
 	// Changing the passphrase with a locked wallet must fail with ErrWalletLocked.

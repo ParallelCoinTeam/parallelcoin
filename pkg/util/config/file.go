@@ -1,11 +1,14 @@
 package cfgutil
 
-import "os"
+import (
+	"os"
+)
 
 // FileExists reports whether the named file or directory exists.
-func FileExists(	filePath string) (bool, error) {
+func FileExists(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
+		Error(err)
 		if os.IsNotExist(err) {
 			return false, nil
 		}

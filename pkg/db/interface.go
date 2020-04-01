@@ -1,8 +1,8 @@
 package database
 
 import (
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Cursor represents a cursor over key/value pairs and nested buckets of a

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // addrIndexBucket provides a mock address index database bucket by implementing the internalBucket interface.
@@ -140,7 +140,7 @@ func (b *addrIndexBucket) sanityCheck(addrKey [addrKeySize]byte, expectedTotal i
 }
 
 // TestAddrIndexLevels ensures that adding and deleting entries to the address index creates multiple levels as described by the address index documentation.
-func TestAddrIndexLevels(	t *testing.T) {
+func TestAddrIndexLevels(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name        string

@@ -7,60 +7,45 @@ import (
 	"os"
 	"runtime"
 	"runtime/debug"
+	"runtime/trace"
 
-	"github.com/parallelcointeam/parallelcoin/app"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/limits"
+	"github.com/p9c/pod/pkg/util/interrupt"
+
+	"github.com/p9c/pod/app"
+	"github.com/p9c/pod/pkg/util/limits"
 )
 
 // Main is the main entry point for pod
 func Main() {
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	runtime.GOMAXPROCS(runtime.NumCPU() * 3)
 	debug.SetGCPercent(10)
-	if err := limits.SetLimits(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
-		os.Exit(1)
+	if runtime.GOOS != "darwin" {
+		if err := limits.SetLimits(); err != nil { // todo: doesn't work on non-linux
+			_, _ = fmt.Fprintf(os.Stderr, "failed to set limits: %v\n", err)
+			os.Exit(1)
+		}
 	}
-	os.Exit(app.Main())
-	/*
-		_=func() {
-			f, err := os.Create("trace.out")
-			if err != nil {
-				panic(err)
-			}
+	if os.Getenv("POD_TRACE") == "on" {
+		if f, err := os.Create("testtrace.out"); err != nil {
+			Error("tracing env POD_TRACE=on but we can't write to it",
+				err)
+		} else {
+			Debug("tracing started")
 			err = trace.Start(f)
 			if err != nil {
-				panic(err)
-			}
-			mf, err := os.Create("mem.prof")
-			if err != nil {
-				log.Fatal("could not create memory profile: ", err)
+				Error("could not start tracing", err)
+			} else {
+				interrupt.AddHandler(func() {
+					Debug("stopping trace")
+					trace.Stop()
+					err := f.Close()
+					if err != nil {
+						Error(err)
+					}
+				},
+				)
 			}
 		}
-		go func() {
-			time.Sleep(time.Minute)
-			runtime.GC() // get up-to-date statistics
-			if err := pprof.WriteHeapProfile(mf); err != nil {
-				log.Fatal("could not write memory profile: ", err)
-			}
-		}()
-		cf, err := os.Create("cpu.prof")
-		if err != nil {
-			log.Fatal("could not create CPU profile: ", err)
-		}
-		if err := pprof.StartCPUProfile(cf); err != nil {
-			log.Fatal("could not start CPU profile: ", err)
-		}
-		go func() {
-			log.Println(http.ListenAndServe("localhost:6060", nil))
-		}()
-		interrupt.AddHandler(
-			func() {
-				fmt.Println("stopping trace")
-				trace.Stop()
-				pprof.StopCPUProfile()
-				f.Close()
-				mf.Close()
-			},
-		)
-	*/
+	}
+	app.Main()
 }

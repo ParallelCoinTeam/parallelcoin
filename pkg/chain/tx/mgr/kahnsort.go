@@ -2,7 +2,7 @@
 
 package wtxmgr
 
-import chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+import chainhash "github.com/p9c/pod/pkg/chain/hash"
 
 type graphNode struct {
 	value    *TxRecord
@@ -12,7 +12,7 @@ type graphNode struct {
 
 type hashGraph map[chainhash.Hash]graphNode
 
-func makeGraph(	set map[chainhash.Hash]*TxRecord) hashGraph {
+func makeGraph(set map[chainhash.Hash]*TxRecord) hashGraph {
 
 	graph := make(hashGraph)
 
@@ -80,7 +80,7 @@ func makeGraph(	set map[chainhash.Hash]*TxRecord) hashGraph {
 
 // graphRoots returns the roots of the graph.  That is, it returns the node's
 // values for all nodes which contain an input degree of 0.
-func graphRoots(	graph hashGraph) []*TxRecord {
+func graphRoots(graph hashGraph) []*TxRecord {
 
 	roots := make([]*TxRecord, 0, len(graph))
 
@@ -96,7 +96,7 @@ func graphRoots(	graph hashGraph) []*TxRecord {
 
 // dependencySort topologically sorts a set of transaction records by their
 // dependency order.  It is implemented using Kahn's algorithm.
-func dependencySort(	txs map[chainhash.Hash]*TxRecord) []*TxRecord {
+func dependencySort(txs map[chainhash.Hash]*TxRecord) []*TxRecord {
 
 	graph := makeGraph(txs)
 	s := graphRoots(graph)

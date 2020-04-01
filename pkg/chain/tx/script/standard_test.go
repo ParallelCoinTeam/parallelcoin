@@ -6,14 +6,13 @@ import (
 	"reflect"
 	"testing"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // mustParseShortForm parses the passed short form script and returns the resulting bytes.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
-func mustParseShortForm(	script string) []byte {
+func mustParseShortForm(script string) []byte {
 	s, err := parseShortForm(script)
 	if err != nil {
 		panic("invalid short form script in test source: err " +
@@ -23,9 +22,9 @@ func mustParseShortForm(	script string) []byte {
 }
 
 // newAddressPubKey returns a new util.AddressPubKey from the provided serialized public key.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
-func newAddressPubKey(	serializedPubKey []byte) util.Address {
+func newAddressPubKey(serializedPubKey []byte) util.Address {
 	addr, err := util.NewAddressPubKey(serializedPubKey,
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		panic("invalid public key in test source")
 	}
@@ -33,8 +32,8 @@ func newAddressPubKey(	serializedPubKey []byte) util.Address {
 }
 
 // newAddressPubKeyHash returns a new util.AddressPubKeyHash from the provided hash.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
-func newAddressPubKeyHash(	pkHash []byte) util.Address {
-	addr, err := util.NewAddressPubKeyHash(pkHash, &chaincfg.MainNetParams)
+func newAddressPubKeyHash(pkHash []byte) util.Address {
+	addr, err := util.NewAddressPubKeyHash(pkHash, &netparams.MainNetParams)
 	if err != nil {
 		panic("invalid public key hash in test source")
 	}
@@ -42,9 +41,9 @@ func newAddressPubKeyHash(	pkHash []byte) util.Address {
 }
 
 // newAddressScriptHash returns a new util.AddressScriptHash from the provided hash.  It panics if an error occurs.  This is only used in the tests as a helper since the only way it can fail is if there is an error in the test source code.
-func newAddressScriptHash(	scriptHash []byte) util.Address {
+func newAddressScriptHash(scriptHash []byte) util.Address {
 	addr, err := util.NewAddressScriptHashFromHash(scriptHash,
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		panic("invalid script hash in test source")
 	}
@@ -52,7 +51,7 @@ func newAddressScriptHash(	scriptHash []byte) util.Address {
 }
 
 // TestExtractPkScriptAddrs ensures that extracting the type, addresses, and number of required signatures from PkScripts works as intended.
-func TestExtractPkScriptAddrs(	t *testing.T) {
+func TestExtractPkScriptAddrs(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name    string
@@ -314,9 +313,9 @@ func TestExtractPkScriptAddrs(	t *testing.T) {
 	t.Logf("Running %d tests.", len(tests))
 	for i, test := range tests {
 		class, addrs, reqSigs, err := ExtractPkScriptAddrs(
-			test.script, &chaincfg.MainNetParams)
+			test.script, &netparams.MainNetParams)
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 		if !reflect.DeepEqual(addrs, test.addrs) {
 			t.Errorf("ExtractPkScriptAddrs #%d (%s) unexpected "+
@@ -340,7 +339,7 @@ func TestExtractPkScriptAddrs(	t *testing.T) {
 }
 
 // TestCalcScriptInfo ensures the CalcScriptInfo provides the expected results for various valid and invalid script pairs.
-func TestCalcScriptInfo(	t *testing.T) {
+func TestCalcScriptInfo(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name          string
@@ -543,31 +542,31 @@ func (b *bogusAddress) String() string {
 }
 
 // TestPayToAddrScript ensures the PayToAddrScript function generates the correct scripts for the various types of addresses.
-func TestPayToAddrScript(	t *testing.T) {
+func TestPayToAddrScript(t *testing.T) {
 	t.Parallel()
 	// 1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX
 	p2pkhMain, err := util.NewAddressPubKeyHash(hexToBytes("e34cce70c86"+
-		"373273efcc54ce7d2a491bb4a0e84"), &chaincfg.MainNetParams)
+		"373273efcc54ce7d2a491bb4a0e84"), &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create public key hash address: %v", err)
 	}
 	// Taken from transaction: b0539a45de13b3e0403909b8bd1a555b8cbe45fd4e3f3fda76f3a5f52835c29d
 	p2shMain, _ := util.NewAddressScriptHashFromHash(hexToBytes("e8c300"+
-		"c87986efa84c37c0519929019ef86eb5b4"), &chaincfg.MainNetParams)
+		"c87986efa84c37c0519929019ef86eb5b4"), &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create script hash address: %v", err)
 	}
 	//  mainnet p2pk 13CG6SJ3yHUXo4Cr2RY4THLLJrNFuG3gUg
 	p2pkCompressedMain, err := util.NewAddressPubKey(hexToBytes("02192d"+
 		"74d0cb94344c9569c2e77901573d8d7903c3ebec3a957724895dca52c6b4"),
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (compressed): %v",
 			err)
 	}
 	p2pkCompressed2Main, err := util.NewAddressPubKey(hexToBytes("03b0b"+
 		"d634234abbb1ba1e986e884185c61cf43e001f9137f23c2c409273eb16e65"),
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (compressed 2): %v",
 			err)
@@ -575,7 +574,7 @@ func TestPayToAddrScript(	t *testing.T) {
 	p2pkUncompressedMain, err := util.NewAddressPubKey(hexToBytes("0411"+
 		"db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5"+
 		"cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b4"+
-		"12a3"), &chaincfg.MainNetParams)
+		"12a3"), &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (uncompressed): %v",
 			err)
@@ -649,19 +648,19 @@ func TestPayToAddrScript(	t *testing.T) {
 }
 
 // TestMultiSigScript ensures the MultiSigScript function returns the expected scripts and errors.
-func TestMultiSigScript(	t *testing.T) {
+func TestMultiSigScript(t *testing.T) {
 	t.Parallel()
 	//  mainnet p2pk 13CG6SJ3yHUXo4Cr2RY4THLLJrNFuG3gUg
 	p2pkCompressedMain, err := util.NewAddressPubKey(hexToBytes("02192d"+
 		"74d0cb94344c9569c2e77901573d8d7903c3ebec3a957724895dca52c6b4"),
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (compressed): %v",
 			err)
 	}
 	p2pkCompressed2Main, err := util.NewAddressPubKey(hexToBytes("03b0b"+
 		"d634234abbb1ba1e986e884185c61cf43e001f9137f23c2c409273eb16e65"),
-		&chaincfg.MainNetParams)
+		&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (compressed 2): %v",
 			err)
@@ -669,7 +668,7 @@ func TestMultiSigScript(	t *testing.T) {
 	p2pkUncompressedMain, err := util.NewAddressPubKey(hexToBytes("0411"+
 		"db93e1dcdb8a016b49840f8c53bc1eb68a382e97b1482ecad7b148a6909a5"+
 		"cb2e0eaddfb84ccf9744464f82e160bfa9b8b64f9d4c03f999b8643f656b4"+
-		"12a3"), &chaincfg.MainNetParams)
+		"12a3"), &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Unable to create pubkey address (uncompressed): %v",
 			err)
@@ -750,7 +749,7 @@ func TestMultiSigScript(	t *testing.T) {
 }
 
 // TestCalcMultiSigStats ensures the CalcMutliSigStats function returns the expected errors.
-func TestCalcMultiSigStats(	t *testing.T) {
+func TestCalcMultiSigStats(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name   string
@@ -965,7 +964,7 @@ var scriptClassTests = []struct {
 }
 
 // TestScriptClass ensures all the scripts in scriptClassTests have the expected class.
-func TestScriptClass(	t *testing.T) {
+func TestScriptClass(t *testing.T) {
 	t.Parallel()
 	for _, test := range scriptClassTests {
 		script := mustParseShortForm(test.script)
@@ -979,7 +978,7 @@ func TestScriptClass(	t *testing.T) {
 }
 
 // TestStringifyClass ensures the script class string returns the expected string for each script class.
-func TestStringifyClass(	t *testing.T) {
+func TestStringifyClass(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name     string
@@ -1042,7 +1041,7 @@ func TestStringifyClass(	t *testing.T) {
 }
 
 // TestNullDataScript tests whether NullDataScript returns a valid script.
-func TestNullDataScript(	t *testing.T) {
+func TestNullDataScript(t *testing.T) {
 	tests := []struct {
 		name     string
 		data     []byte

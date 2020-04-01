@@ -5,7 +5,7 @@ import (
 	"os"
 	"reflect"
 
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // errSubTestFail is used to signal that a sub test returned false.
@@ -518,6 +518,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
+		Error(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
@@ -535,6 +536,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
+		Error(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}

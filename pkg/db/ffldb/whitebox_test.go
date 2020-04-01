@@ -2,38 +2,38 @@ package ffldb
 
 // This file is part of the ffldb package rather than the ffldb_test package as it provides whitebox testing.
 import (
-   "compress/bzip2"
-   "encoding/binary"
-   "fmt"
-   "hash/crc32"
-   "io"
-   "os"
-   "path/filepath"
-   "testing"
-   
-   "github.com/btcsuite/goleveldb/leveldb"
-   ldberrors "github.com/btcsuite/goleveldb/leveldb/errors"
-   
-   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   database "github.com/parallelcointeam/parallelcoin/pkg/db"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
+	"compress/bzip2"
+	"encoding/binary"
+	"fmt"
+	"hash/crc32"
+	"io"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/btcsuite/goleveldb/leveldb"
+	ldberrors "github.com/btcsuite/goleveldb/leveldb/errors"
+
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 var (
 	// blockDataNet is the expected network in the test block data.
 	blockDataNet = wire.MainNet
 	// blockDataFile is the path to a file containing the first 256 blocks of the block chain.
-	//nolint
+	// nolint
 	blockDataFile = filepath.Join("..", "testdata", "blocks1-256.bz2")
 	// errSubTestFail is used to signal that a sub test returned false.
-	//nolint
+	// nolint
 	errSubTestFail = fmt.Errorf("sub test failure")
 )
 
 // loadBlocks loads the blocks contained in the testdata directory and returns a slice of them.
-//nolint
-func loadBlocks(	t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util.Block, error) {
+// nolint
+func loadBlocks(t *testing.T, dataFile string, network wire.BitcoinNet) ([]*util.Block, error) {
 	// Open the file that contains the blocks for reading.
 	fi, err := os.Open(dataFile)
 	if err != nil {
@@ -94,12 +94,12 @@ func loadBlocks(	t *testing.T, dataFile string, network wire.BitcoinNet) ([]*uti
 	return blocks, nil
 }
 
-// checkDbError ensures the passed error is a database.Error with an error code that matches the passed  error code.
-func checkDbError(	t *testing.T, testName string, gotErr error, wantErrCode database.ErrorCode) bool {
-	dbErr, ok := gotErr.(database.Error)
+// checkDbError ensures the passed error is a database.DBError with an error code that matches the passed  error code.
+func checkDbError(t *testing.T, testName string, gotErr error, wantErrCode database.ErrorCode) bool {
+	dbErr, ok := gotErr.(database.DBError)
 	if !ok {
 		t.Errorf("%s: unexpected error type - got %T, want %T",
-			testName, gotErr, database.Error{})
+			testName, gotErr, database.DBError{})
 		return false
 	}
 	if dbErr.ErrorCode != wantErrCode {
@@ -112,7 +112,7 @@ func checkDbError(	t *testing.T, testName string, gotErr error, wantErrCode data
 }
 
 // testContext is used to store context information about a running test which is passed into helper functions.
-//nolint
+// nolint
 type testContext struct {
 	t            *testing.T
 	db           database.DB
@@ -122,7 +122,7 @@ type testContext struct {
 }
 
 // TestConvertErr ensures the leveldb error to database error conversion works as expected.
-func TestConvertErr(	t *testing.T) {
+func TestConvertErr(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		err         error
@@ -144,7 +144,7 @@ func TestConvertErr(	t *testing.T) {
 }
 
 // TestCornerCases ensures several corner cases which can happen when opening a database and/or block files work as expected.
-func TestCornerCases(	t *testing.T) {
+func TestCornerCases(t *testing.T) {
 	t.Parallel()
 	// Create a file at the datapase path to force the open below to fail.
 	dbPath := filepath.Join(os.TempDir(), "ffldb-errors")
@@ -218,8 +218,8 @@ func TestCornerCases(	t *testing.T) {
 }
 
 // resetDatabase removes everything from the opened database associated with the test context including all metadata and the mock files.
-//nolint
-func resetDatabase(	tc *testContext) bool {
+// nolint
+func resetDatabase(tc *testContext) bool {
 	// Reset the metadata.
 	err := tc.db.Update(func(tx database.Tx) error {
 		// Remove all the keys using a cursor while also generating a list of buckets.  It's not safe to remove keys during ForEach iteration nor is it safe to remove buckets during cursor iteration, so this dual approach is needed.
@@ -266,8 +266,8 @@ func resetDatabase(	tc *testContext) bool {
 }
 
 // testWriteFailures tests various failures paths when writing to the block files.
-//nolint
-func testWriteFailures(	tc *testContext) bool {
+// nolint
+func testWriteFailures(tc *testContext) bool {
 	if !resetDatabase(tc) {
 		return false
 	}
@@ -350,8 +350,8 @@ func testWriteFailures(	tc *testContext) bool {
 }
 
 // testBlockFileErrors ensures the database returns expected errors with various file-related issues such as closed and missing files.
-//nolint
-func testBlockFileErrors(	tc *testContext) bool {
+// nolint
+func testBlockFileErrors(tc *testContext) bool {
 	if !resetDatabase(tc) {
 		return false
 	}
@@ -439,8 +439,8 @@ func testBlockFileErrors(	tc *testContext) bool {
 }
 
 // testCorruption ensures the database returns expected errors under various corruption scenarios.
-//nolint
-func testCorruption(	tc *testContext) bool {
+// nolint
+func testCorruption(tc *testContext) bool {
 	if !resetDatabase(tc) {
 		return false
 	}

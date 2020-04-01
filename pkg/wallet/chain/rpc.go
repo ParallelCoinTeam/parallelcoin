@@ -5,17 +5,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
+	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // RPCClient represents a persistent client connection to a bitcoin RPC server
@@ -27,7 +26,7 @@ type RPCClient struct {
 	reconnectAttempts   int
 	enqueueNotification chan interface{}
 	dequeueNotification chan interface{}
-	currentBlock        chan *waddrmgr.BlockStamp
+	currentBlock        chan *wm.BlockStamp
 	quit                chan struct{}
 	wg                  sync.WaitGroup
 	started             bool
@@ -40,8 +39,9 @@ type RPCClient struct {
 // but must be done using the Start method.  If the remote server does not
 // operate on the same bitcoin network as described by the passed chain
 // parameters, the connection will be disconnected.
-func NewRPCClient(chainParams *netparams.Params, connect, user, pass string, certs []byte,
-	disableTLS bool, reconnectAttempts int) (*RPCClient, error) {
+func NewRPCClient(chainParams *netparams.Params, connect, user, pass string,
+	certs []byte, disableTLS bool, reconnectAttempts int) (*RPCClient, error) {
+	Warn("creating new RPC client")
 	if reconnectAttempts < 0 {
 		return nil, errors.New("reconnectAttempts must be positive")
 	}
@@ -60,7 +60,7 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string, cer
 		reconnectAttempts:   reconnectAttempts,
 		enqueueNotification: make(chan interface{}),
 		dequeueNotification: make(chan interface{}),
-		currentBlock:        make(chan *waddrmgr.BlockStamp),
+		currentBlock:        make(chan *wm.BlockStamp),
 		quit:                make(chan struct{}),
 	}
 	ntfnCallbacks := &rpcclient.NotificationHandlers{
@@ -72,10 +72,13 @@ func NewRPCClient(chainParams *netparams.Params, connect, user, pass string, cer
 		OnRescanFinished:    client.onRescanFinished,
 		OnRescanProgress:    client.onRescanProgress,
 	}
+	// Warn("*actually* creating rpc client")
 	rpcClient, err := rpcclient.New(client.connConfig, ntfnCallbacks)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
+	// defer Warn("*succeeded* in making rpc client")
 	client.Client = rpcClient
 	return client, nil
 }
@@ -91,13 +94,16 @@ func (c *RPCClient) BackEnd() string {
 // function gives up, and therefore will not block forever waiting for the
 // connection to be established to a server that may not exist.
 func (c *RPCClient) Start() error {
+	// Debug(c.connConfig)
 	err := c.Connect(c.reconnectAttempts)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	// Verify that the server is running on the expected network.
 	net, err := c.GetCurrentNet()
 	if err != nil {
+		Error(err)
 		c.Disconnect()
 		return err
 	}
@@ -129,8 +135,8 @@ func (c *RPCClient) Stop() {
 	c.quitMtx.Unlock()
 }
 
-// Rescan wraps the normal Rescan command with an additional paramter that
-// allows us to map an oupoint to the address in the chain that it pays to.
+// Rescan wraps the normal Rescan command with an additional parameter that
+// allows us to map an outpoint to the address in the chain that it pays to.
 // This is useful when using BIP 158 filters as they include the prev pkScript
 // rather than the full outpoint.
 func (c *RPCClient) Rescan(startHash *chainhash.Hash, addrs []util.Address,
@@ -159,7 +165,7 @@ func (c *RPCClient) Notifications() <-chan interface{} {
 
 // BlockStamp returns the latest block notified by the client, or an error
 // if the client has been shut down.
-func (c *RPCClient) BlockStamp() (*waddrmgr.BlockStamp, error) {
+func (c *RPCClient) BlockStamp() (*wm.BlockStamp, error) {
 	select {
 	case bs := <-c.currentBlock:
 		return bs, nil
@@ -171,8 +177,8 @@ func (c *RPCClient) BlockStamp() (*waddrmgr.BlockStamp, error) {
 // FilterBlocks scans the blocks contained in the FilterBlocksRequest for any
 // addresses of interest. For each requested block, the corresponding compact
 // filter will first be checked for matches, skipping those that do not report
-// anything. If the filter returns a postive match, the full block will be
-// fetched and filtered. This method returns a FilterBlocksReponse for the first
+// anything. If the filter returns a positive match, the full block will be
+// fetched and filtered. This method returns a FilterBlocksResponse for the first
 // block containing a matching address. If no matches are found in the range of
 // blocks requested, the returned response will be nil.
 func (c *RPCClient) FilterBlocks(
@@ -182,6 +188,7 @@ func (c *RPCClient) FilterBlocks(
 	// in the filter blocks request.
 	watchList, err := buildFilterBlocksWatchList(req)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Iterate over the requested blocks, fetching the compact filter for
@@ -191,6 +198,7 @@ func (c *RPCClient) FilterBlocks(
 	for i, blk := range req.Blocks {
 		rawFilter, err := c.GetCFilter(&blk.Hash, wire.GCSFilterRegular)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		// Ensure the filter is large enough to be deserialized.
@@ -201,6 +209,7 @@ func (c *RPCClient) FilterBlocks(
 			builder.DefaultP, builder.DefaultM, rawFilter.Data,
 		)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		// Skip any empty filters.
@@ -210,16 +219,18 @@ func (c *RPCClient) FilterBlocks(
 		key := builder.DeriveKey(&blk.Hash)
 		matched, err := filter.MatchAny(key, watchList)
 		if err != nil {
+			Error(err)
 			return nil, err
 		} else if !matched {
 			continue
 		}
-		log <- cl.Tracef{
+		Tracef(
 			"fetching block height=%d hash=%v",
 			blk.Height, blk.Hash,
-		}
+		)
 		rawBlock, err := c.GetBlock(&blk.Hash)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		if !blockFilterer.FilterBlock(rawBlock) {
@@ -245,18 +256,19 @@ func (c *RPCClient) FilterBlocks(
 }
 
 // parseBlock parses a btcws definition of the block a tx is mined it to the
-// Block structure of the wtxmgr package, and the block index.  This is done
+// Block structure of the tm package, and the block index.  This is done
 // here since rpcclient doesn't parse this nicely for us.
-func parseBlock(block *json.BlockDetails) (*wtxmgr.BlockMeta, error) {
+func parseBlock(block *btcjson.BlockDetails) (*tm.BlockMeta, error) {
 	if block == nil {
 		return nil, nil
 	}
 	blkHash, err := chainhash.NewHashFromStr(block.Hash)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
-	blk := &wtxmgr.BlockMeta{
-		Block: wtxmgr.Block{
+	blk := &tm.BlockMeta{
+		Block: tm.Block{
 			Height: block.Height,
 			Hash:   *blkHash,
 		},
@@ -273,7 +285,7 @@ func (c *RPCClient) onClientConnect() {
 func (c *RPCClient) onBlockConnected(hash *chainhash.Hash, height int32, time time.Time) {
 	select {
 	case c.enqueueNotification <- BlockConnected{
-		Block: wtxmgr.Block{
+		Block: tm.Block{
 			Hash:   *hash,
 			Height: height,
 		},
@@ -285,7 +297,7 @@ func (c *RPCClient) onBlockConnected(hash *chainhash.Hash, height int32, time ti
 func (c *RPCClient) onBlockDisconnected(hash *chainhash.Hash, height int32, time time.Time) {
 	select {
 	case c.enqueueNotification <- BlockDisconnected{
-		Block: wtxmgr.Block{
+		Block: tm.Block{
 			Hash:   *hash,
 			Height: height,
 		},
@@ -294,18 +306,22 @@ func (c *RPCClient) onBlockDisconnected(hash *chainhash.Hash, height int32, time
 	case <-c.quit:
 	}
 }
-func (c *RPCClient) onRecvTx(tx *util.Tx, block *json.BlockDetails) {
+func (c *RPCClient) onRecvTx(tx *util.Tx, block *btcjson.BlockDetails) {
 	blk, err := parseBlock(block)
 	if err != nil {
+		Error(err)
 		// Log and drop improper notification.
-		log <- cl.Error{
-			"recvtx notification bad block:", err, cl.Ine()}
+		Error(
+			"recvtx notification bad block:", err,
+		)
 		return
 	}
-	rec, err := wtxmgr.NewTxRecordFromMsgTx(tx.MsgTx(), time.Now())
+	rec, err := tm.NewTxRecordFromMsgTx(tx.MsgTx(), time.Now())
 	if err != nil {
-		log <- cl.Error{
-			"cannot create transaction record for relevant tx:", err, cl.Ine()}
+		Error(err)
+		Error(
+			"cannot create transaction record for relevant tx:", err,
+		)
 		return
 	}
 	select {
@@ -313,7 +329,7 @@ func (c *RPCClient) onRecvTx(tx *util.Tx, block *json.BlockDetails) {
 	case <-c.quit:
 	}
 }
-func (c *RPCClient) onRedeemingTx(tx *util.Tx, block *json.BlockDetails) {
+func (c *RPCClient) onRedeemingTx(tx *util.Tx, block *btcjson.BlockDetails) {
 	// Handled exactly like recvtx notifications.
 	c.onRecvTx(tx, block)
 }
@@ -335,13 +351,15 @@ func (c *RPCClient) onRescanFinished(hash *chainhash.Hash, height int32, blkTime
 func (c *RPCClient) handler() {
 	hash, height, err := c.GetBestBlock()
 	if err != nil {
-		log <- cl.Error{
-			"failed to receive best block from chain server:", err, cl.Ine()}
+		Error(err)
+		Error(
+			"failed to receive best block from chain server:", err,
+		)
 		c.Stop()
 		c.wg.Done()
 		return
 	}
-	bs := &waddrmgr.BlockStamp{Hash: *hash, Height: height}
+	bs := &wm.BlockStamp{Hash: *hash, Height: height}
 	// TODO: Rather than leaving this as an unbounded queue for all types of
 	// notifications, try dropping ones where a later enqueued notification
 	// can fully invalidate one waiting to be processed.  For example,
@@ -373,7 +391,7 @@ out:
 			notifications = append(notifications, n)
 		case dequeue <- next:
 			if n, ok := next.(BlockConnected); ok {
-				bs = &waddrmgr.BlockStamp{
+				bs = &wm.BlockStamp{
 					Height: n.Height,
 					Hash:   n.Hash,
 				}

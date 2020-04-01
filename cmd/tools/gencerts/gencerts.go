@@ -1,16 +1,17 @@
 package main
 
 import (
-   "fmt"
-   "io/ioutil"
-   "os"
-   "path/filepath"
-   "strings"
-   "time"
-   
-   "github.com/jessevdk/go-flags"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/jessevdk/go-flags"
+
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/util"
 )
 
 type config struct {
@@ -29,6 +30,7 @@ func main() {
 	parser := flags.NewParser(&cfg, flags.Default)
 	_, err := parser.Parse()
 	if err != nil {
+		Error(err)
 		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}
@@ -38,12 +40,14 @@ func main() {
 		var err error
 		cfg.Directory, err = os.Getwd()
 		if err != nil {
+			Error(err)
 			fmt.Fprintf(os.Stderr, "no directory specified and cannot get working directory\n")
 			os.Exit(1)
 		}
 	}
 	cfg.Directory = cleanAndExpandPath(cfg.Directory)
 	certFile := filepath.Join(cfg.Directory, "rpc.cert")
+	caFile := filepath.Join(cfg.Directory, "ca.cert")
 	keyFile := filepath.Join(cfg.Directory, "rpc.key")
 	if !cfg.Force {
 		if fileExists(certFile) || fileExists(keyFile) {
@@ -54,12 +58,18 @@ func main() {
 	validUntil := time.Now().Add(time.Duration(cfg.Years) * 365 * 24 * time.Hour)
 	cert, key, err := util.NewTLSCertPair(cfg.Organization, validUntil, cfg.ExtraHosts)
 	if err != nil {
+		Error(err)
 		fmt.Fprintf(os.Stderr, "cannot generate certificate pair: %v\n", err)
 		os.Exit(1)
 	}
 	// Write cert and key files.
 	if err = ioutil.WriteFile(certFile, cert, 0666); err != nil {
 		fmt.Fprintf(os.Stderr, "cannot write cert: %v\n", err)
+		os.Exit(1)
+	}
+	// Write cert and key files.
+	if err = ioutil.WriteFile(caFile, cert, 0666); err != nil {
+		fmt.Fprintf(os.Stderr, "cannot write ca cert: %v\n", err)
 		os.Exit(1)
 	}
 	if err = ioutil.WriteFile(keyFile, key, 0600); err != nil {
@@ -74,7 +84,7 @@ func cleanAndExpandPath(
 	path string) string {
 	// Expand initial ~ to OS specific home directory.
 	if strings.HasPrefix(path, "~") {
-		appHomeDir := util.AppDataDir("gencerts", false)
+		appHomeDir := appdata.Dir("gencerts", false)
 		homeDir := filepath.Dir(appHomeDir)
 		path = strings.Replace(path, "~", homeDir, 1)
 	}

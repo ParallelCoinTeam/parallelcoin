@@ -20,6 +20,7 @@ func (h *headerStore) singleTruncate() error {
 	fileInfo, err := h.file.Stat()
 
 	if err != nil {
+		Error(err)
 		return err
 	}
 

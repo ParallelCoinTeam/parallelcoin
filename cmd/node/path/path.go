@@ -2,19 +2,14 @@ package path
 
 import (
 	"path/filepath"
-	
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
+
+	"github.com/p9c/pod/pkg/conte"
 )
 
-// BlockDbNamePrefix is the prefix for the block database name.
-// The database type is appended to this value to form the full block
-// database name.
-const BlockDbNamePrefix = "blocks"
-
 // BlockDb returns the path to the block database given a database type.
-func BlockDb(cx *conte.Xt, dbType string) string {
+func BlockDb(cx *conte.Xt, dbType string, namePrefix string) string {
 	// The database name is based on the database type.
-	dbName := BlockDbNamePrefix + "_" + dbType
+	dbName := namePrefix + "_" + dbType
 	if dbType == "sqlite" {
 		dbName += ".db"
 	}

@@ -3,26 +3,26 @@ package blockchain_test
 import (
 	"os"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 const (
 	// testDbType is the database backend type to use for the tests.
-	//nolint
+	// nolint
 	testDbType = "ffldb"
 	// testDbRoot is the root directory used to create all test databases.
-	//nolint
+	// nolint
 	testDbRoot = "testdbs"
 	// blockDataNet is the expected network in the test block data.
-	//nolint
+	// nolint
 	blockDataNet = wire.MainNet
 )
 
 // filesExists returns whether or not the named file or directory exists.
-//nolint
-func fileExists(	name string) bool {
+// nolint
+func fileExists(name string) bool {
 	if _, err := os.Stat(name); err != nil {
 		if os.IsNotExist(err) {
 			return false
@@ -32,8 +32,8 @@ func fileExists(	name string) bool {
 }
 
 // isSupportedDbType returns whether or not the passed database type is currently supported.
-//nolint
-func isSupportedDbType(	dbType string) bool {
+// nolint
+func isSupportedDbType(dbType string) bool {
 	supportedDrivers := database.SupportedDrivers()
 	for _, driver := range supportedDrivers {
 		if dbType == driver {

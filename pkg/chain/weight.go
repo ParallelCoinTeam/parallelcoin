@@ -3,9 +3,9 @@ package blockchain
 import (
 	"fmt"
 
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (
@@ -24,7 +24,7 @@ const (
 )
 
 // GetBlockWeight computes the value of the weight metric for a given block. Currently the weight metric is simply the sum of the block's serialized size without any witness data scaled proportionally by the WitnessScaleFactor, and the block's serialized size including any witness data.
-func GetBlockWeight(	blk *util.Block) int64 {
+func GetBlockWeight(blk *util.Block) int64 {
 	msgBlock := blk.MsgBlock()
 	baseSize := msgBlock.SerializeSizeStripped()
 	totalSize := msgBlock.SerializeSize()
@@ -33,7 +33,7 @@ func GetBlockWeight(	blk *util.Block) int64 {
 }
 
 // GetTransactionWeight computes the value of the weight metric for a given transaction. Currently the weight metric is simply the sum of the transactions's serialized size without any witness data scaled proportionally by the WitnessScaleFactor, and the transaction's serialized size including any witness data.
-func GetTransactionWeight(	tx *util.Tx) int64 {
+func GetTransactionWeight(tx *util.Tx) int64 {
 	msgTx := tx.MsgTx()
 	baseSize := msgTx.SerializeSizeStripped()
 	totalSize := msgTx.SerializeSize()
@@ -42,11 +42,12 @@ func GetTransactionWeight(	tx *util.Tx) int64 {
 }
 
 // GetSigOpCost returns the unified sig op cost for the passed transaction respecting current active soft-forks which modified sig op cost counting. The unified sig op cost for a transaction is computed as the sum of: the legacy sig op count scaled according to the WitnessScaleFactor, the sig op count for all p2sh inputs scaled by the WitnessScaleFactor, and finally the unscaled sig op count for any inputs spending witness programs.
-func GetSigOpCost(	tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16, segWit bool) (int, error) {
+func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16, segWit bool) (int, error) {
 	numSigOps := CountSigOps(tx) * WitnessScaleFactor
 	if bip16 {
 		numP2SHSigOps, err := CountP2SHSigOps(tx, isCoinBaseTx, utxoView)
 		if err != nil {
+			Error(err)
 			return 0, nil
 		}
 		numSigOps += numP2SHSigOps * WitnessScaleFactor

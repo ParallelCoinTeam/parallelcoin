@@ -6,13 +6,13 @@ import (
 	"math/big"
 	"runtime"
 	"time"
-	
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // solveBlock attempts to find a nonce which makes the passed block header
@@ -90,12 +90,11 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 
 // createCoinbaseTx returns a coinbase transaction paying an appropriate
 // subsidy based on the passed block height to the provided address.
-func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32,
-	addr util.Address, mineTo []wire.TxOut,
-	net *netparams.Params) (*util.Tx, error) {
+func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Address, mineTo []wire.TxOut, net *netparams.Params, version int32) (*util.Tx, error) {
 	// Create the script to pay to the provided payment address.
 	pkScript, err := txscript.PayToAddrScript(addr)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -109,7 +108,7 @@ func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32,
 	})
 	if len(mineTo) == 0 {
 		tx.AddTxOut(&wire.TxOut{
-			Value:    blockchain.CalcBlockSubsidy(nextBlockHeight, net),
+			Value:    blockchain.CalcBlockSubsidy(nextBlockHeight, net, version),
 			PkScript: pkScript,
 		})
 	} else {
@@ -159,11 +158,13 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	extraNonce := uint64(0)
 	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
-	coinbaseTx, err := createCoinbaseTx(
-		coinbaseScript, blockHeight, miningAddr, mineTo, net)
+	coinbaseTx, err := createCoinbaseTx(coinbaseScript, blockHeight, miningAddr,
+		mineTo, net, blockVersion)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Create a new block ready to be solved.

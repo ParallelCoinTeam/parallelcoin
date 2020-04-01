@@ -1,19 +1,18 @@
 package wire
 
 import (
-   "bytes"
-   "io"
-   "reflect"
-   "testing"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"io"
+	"reflect"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // TestGetData tests the MsgGetData API.
-func TestGetData(	t *testing.T) {
+func TestGetData(t *testing.T) {
 	pver := ProtocolVersion
 	// Ensure the command is expected value.
 	wantCmd := "getdata"
@@ -59,7 +58,7 @@ func TestGetData(	t *testing.T) {
 }
 
 // TestGetDataWire tests the MsgGetData wire encode and decode for various numbers of inventory vectors and protocol versions.
-func TestGetDataWire(	t *testing.T) {
+func TestGetDataWire(t *testing.T) {
 	// Block 203707 hash.
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
 	blockHash, err := chainhash.NewHashFromStr(hashStr)
@@ -83,11 +82,11 @@ func TestGetDataWire(	t *testing.T) {
 	MultiInv := NewMsgGetData()
 	err = MultiInv.AddInvVect(iv)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	err = MultiInv.AddInvVect(iv2)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	MultiInvEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -221,7 +220,7 @@ func TestGetDataWire(	t *testing.T) {
 }
 
 // TestGetDataWireErrors performs negative tests against wire encode and decode of MsgGetData to confirm error paths work correctly.
-func TestGetDataWireErrors(	t *testing.T) {
+func TestGetDataWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	wireErr := &MessageError{}
 	// Block 203707 hash.
@@ -235,7 +234,7 @@ func TestGetDataWireErrors(	t *testing.T) {
 	baseGetData := NewMsgGetData()
 	err = baseGetData.AddInvVect(iv)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	baseGetDataEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -251,7 +250,7 @@ func TestGetDataWireErrors(	t *testing.T) {
 	for i := 0; i < MaxInvPerMsg; i++ {
 		err = maxGetData.AddInvVect(iv)
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}
 	maxGetData.InvList = append(maxGetData.InvList, iv)

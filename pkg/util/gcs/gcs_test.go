@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 	// Modulus value for the tests.
 	M uint64 = 784931
 	// Filters are conserved between tests but we must define with an interface which functions we're testing because the gcsFilter type isn't exported
-	filter, filter2, filter3/*, filter4, filter5*/ *gcs.Filter
+	filter, filter2, filter3 /*, filter4, filter5*/ *gcs.Filter
 	// We need to use the same key for building and querying the filters
 	key [gcs.KeySize]byte
 	// List of values for building a filter
@@ -63,7 +63,7 @@ var (
 )
 
 // TestGCSFilterBuild builds a test filter with a randomized key. For Bitcoin use, deterministic filter generation is desired. Therefore, a key that's derived deterministically would be required.
-func TestGCSFilterBuild(	t *testing.T) {
+func TestGCSFilterBuild(t *testing.T) {
 	for i := 0; i < gcs.KeySize; i += 4 {
 		binary.BigEndian.PutUint32(key[i:], rand.Uint32())
 	}
@@ -74,10 +74,10 @@ func TestGCSFilterBuild(	t *testing.T) {
 }
 
 // TestGCSFilterCopy deserializes and serializes a filter to create a copy.
-func TestGCSFilterCopy(	t *testing.T) {
+func TestGCSFilterCopy(t *testing.T) {
 	serialized2, err := filter.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	filter2, err = gcs.FromBytes(filter.N(), P, M, serialized2)
 	if err != nil {
@@ -94,7 +94,7 @@ func TestGCSFilterCopy(	t *testing.T) {
 }
 
 // TestGCSFilterMetadata checks that the filter metadata is built and copied correctly.
-func TestGCSFilterMetadata(	t *testing.T) {
+func TestGCSFilterMetadata(t *testing.T) {
 	if filter.P() != P {
 		t.Fatal("P not correctly stored in filter metadata")
 	}
@@ -115,33 +115,33 @@ func TestGCSFilterMetadata(	t *testing.T) {
 	}
 	serialized, err := filter.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	serialized2, err := filter2.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	if !bytes.Equal(serialized, serialized2) {
-		t.Fatal("Bytes don't match between copied filters")
+		t.Fatal("Hash don't match between copied filters")
 	}
 	serialized3, err := filter3.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	if !bytes.Equal(serialized, serialized3) {
-		t.Fatal("Bytes don't match between copied filters")
+		t.Fatal("Hash don't match between copied filters")
 	}
 	serialized4, err := filter3.Bytes()
 	if err != nil {
-		t.Fatalf("Filter Bytes() failed: %v", err)
+		t.Fatalf("Filter Hash() failed: %v", err)
 	}
 	if !bytes.Equal(serialized, serialized4) {
-		t.Fatal("Bytes don't match between copied filters")
+		t.Fatal("Hash don't match between copied filters")
 	}
 }
 
 // TestGCSFilterMatch checks that both the built and copied filters match correctly, logging any false positives without failing on them.
-func TestGCSFilterMatch(	t *testing.T) {
+func TestGCSFilterMatch(t *testing.T) {
 	match, err := filter.Match(key, []byte("Nate"))
 	if err != nil {
 		t.Fatalf("Filter match failed: %s", err.Error())
@@ -201,7 +201,7 @@ func TestGCSFilterMatch(	t *testing.T) {
 }
 
 // TestGCSFilterMatchAny checks that both the built and copied filters match a list correctly, logging any false positives without failing on them.
-func TestGCSFilterMatchAny(	t *testing.T) {
+func TestGCSFilterMatchAny(t *testing.T) {
 	match, err := filter.MatchAny(key, contents2)
 	if err != nil {
 		t.Fatalf("Filter match any failed: %s", err.Error())

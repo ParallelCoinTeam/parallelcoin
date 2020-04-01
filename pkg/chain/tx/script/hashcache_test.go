@@ -1,13 +1,13 @@
 package txscript
 
 import (
-   "math/rand"
-   "testing"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"math/rand"
+	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // genTestTx creates a random transaction for uses within test cases.
@@ -43,7 +43,7 @@ func genTestTx() (*wire.MsgTx, error) {
 }
 
 // TestHashCacheAddContainsHashes tests that after items have been added to the hash cache, the ContainsHashes method returns true for all the items inserted.  Conversely, ContainsHashes should return false for any items _not_ in the hash cache.
-func TestHashCacheAddContainsHashes(	t *testing.T) {
+func TestHashCacheAddContainsHashes(t *testing.T) {
 	t.Parallel()
 	rand.Seed(time.Now().Unix())
 	cache := NewHashCache(10)
@@ -82,7 +82,7 @@ func TestHashCacheAddContainsHashes(	t *testing.T) {
 }
 
 // TestHashCacheAddGet tests that the sighashes for a particular transaction are properly retrieved by the GetSigHashes function.
-func TestHashCacheAddGet(	t *testing.T) {
+func TestHashCacheAddGet(t *testing.T) {
 	t.Parallel()
 	rand.Seed(time.Now().Unix())
 	cache := NewHashCache(10)
@@ -108,7 +108,7 @@ func TestHashCacheAddGet(	t *testing.T) {
 }
 
 // TestHashCachePurge tests that items are able to be properly removed from the hash cache.
-func TestHashCachePurge(	t *testing.T) {
+func TestHashCachePurge(t *testing.T) {
 	t.Parallel()
 	rand.Seed(time.Now().Unix())
 	cache := NewHashCache(10)

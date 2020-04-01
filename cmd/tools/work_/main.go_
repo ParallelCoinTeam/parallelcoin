@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	l "github.com/parallelcointeam/parallelcoin/clog"
+	l "github.com/p9c/pod/clog"
 )
 
 type nodeCfg struct {
@@ -103,6 +103,7 @@ func (n *node) send(b []byte) {
 func check(	err error) {
 
 	if err != nil {
-		*le <- err.Error()
+		L.Error(err)
+*le <- err.Error()
 	}
 }

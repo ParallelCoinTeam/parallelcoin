@@ -6,8 +6,8 @@ import (
 	"math/big"
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 var (
@@ -33,7 +33,7 @@ var (
 	// mainPowLimit is the highest proof of work value a Parallelcoin block can have for the main network.
 	mainPowLimit = func() big.Int {
 		mplb, _ := hex.DecodeString("00000fffff000000000000000000000000000000000000000000000000000000")
-		return *big.NewInt(0).SetBytes(mplb) //AllOnes.Rsh(&AllOnes, 0)
+		return *big.NewInt(0).SetBytes(mplb) // AllOnes.Rsh(&AllOnes, 0)
 	}()
 	// MainPowLimit is the pre-hardfork pow limit
 	MainPowLimit = mainPowLimit
@@ -41,7 +41,7 @@ var (
 	MainPowLimitBits = BigToCompact(&MainPowLimit)
 	scryptPowLimit   = func() big.Int {
 		mplb, _ := hex.DecodeString("0000fffff0000000000000000000000000000000000000000000000000000000")
-		return *big.NewInt(0).SetBytes(mplb) //AllOnes.Rsh(&AllOnes, 0)
+		return *big.NewInt(0).SetBytes(mplb) // AllOnes.Rsh(&AllOnes, 0)
 	}()
 	// ScryptPowLimit is the pre-hardfork maximum hash for Scrypt algorithm
 	ScryptPowLimit = scryptPowLimit

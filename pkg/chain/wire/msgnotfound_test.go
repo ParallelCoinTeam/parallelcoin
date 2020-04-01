@@ -1,19 +1,18 @@
 package wire
 
 import (
-   "bytes"
-   "io"
-   "reflect"
-   "testing"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"io"
+	"reflect"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // TestNotFound tests the MsgNotFound API.
-func TestNotFound(	t *testing.T) {
+func TestNotFound(t *testing.T) {
 	pver := ProtocolVersion
 	// Ensure the command is expected value.
 	wantCmd := "notfound"
@@ -52,7 +51,7 @@ func TestNotFound(	t *testing.T) {
 }
 
 // TestNotFoundWire tests the MsgNotFound wire encode and decode for various numbers of inventory vectors and protocol versions.
-func TestNotFoundWire(	t *testing.T) {
+func TestNotFoundWire(t *testing.T) {
 	// Block 203707 hash.
 	hashStr := "3264bc2ac36a60840790ba1d475d01367e7c723da941069e9dc"
 	blockHash, err := chainhash.NewHashFromStr(hashStr)
@@ -76,11 +75,11 @@ func TestNotFoundWire(	t *testing.T) {
 	MultiInv := NewMsgNotFound()
 	err = MultiInv.AddInvVect(iv)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	err = MultiInv.AddInvVect(iv2)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	MultiInvEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -214,7 +213,7 @@ func TestNotFoundWire(	t *testing.T) {
 }
 
 // TestNotFoundWireErrors performs negative tests against wire encode and decode of MsgNotFound to confirm error paths work correctly.
-func TestNotFoundWireErrors(	t *testing.T) {
+func TestNotFoundWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	wireErr := &MessageError{}
 	// Block 203707 hash.
@@ -228,7 +227,7 @@ func TestNotFoundWireErrors(	t *testing.T) {
 	baseNotFound := NewMsgNotFound()
 	err = baseNotFound.AddInvVect(iv)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	baseNotFoundEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -243,7 +242,7 @@ func TestNotFoundWireErrors(	t *testing.T) {
 	for i := 0; i < MaxInvPerMsg; i++ {
 		err = maxNotFound.AddInvVect(iv)
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}
 	maxNotFound.InvList = append(maxNotFound.InvList, iv)

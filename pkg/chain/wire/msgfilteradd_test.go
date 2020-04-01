@@ -8,7 +8,7 @@ import (
 )
 
 // TestFilterAddLatest tests the MsgFilterAdd API against the latest protocol version.
-func TestFilterAddLatest(	t *testing.T) {
+func TestFilterAddLatest(t *testing.T) {
 	enc := BaseEncoding
 	pver := ProtocolVersion
 	data := []byte{0x01, 0x02}
@@ -42,7 +42,7 @@ func TestFilterAddLatest(	t *testing.T) {
 }
 
 // TestFilterAddCrossProtocol tests the MsgFilterAdd API when encoding with the latest protocol version and decoding with BIP0031Version.
-func TestFilterAddCrossProtocol(	t *testing.T) {
+func TestFilterAddCrossProtocol(t *testing.T) {
 	data := []byte{0x01, 0x02}
 	msg := NewMsgFilterAdd(data)
 	if !bytes.Equal(msg.Data, data) {
@@ -68,7 +68,7 @@ func TestFilterAddCrossProtocol(	t *testing.T) {
 }
 
 // TestFilterAddMaxDataSize tests the MsgFilterAdd API maximum data size.
-func TestFilterAddMaxDataSize(	t *testing.T) {
+func TestFilterAddMaxDataSize(t *testing.T) {
 	data := bytes.Repeat([]byte{0xff}, 521)
 	msg := NewMsgFilterAdd(data)
 	// Encode with latest protocol version.
@@ -88,7 +88,7 @@ func TestFilterAddMaxDataSize(	t *testing.T) {
 }
 
 // TestFilterAddWireErrors performs negative tests against wire encode and decode of MsgFilterAdd to confirm error paths work correctly.
-func TestFilterAddWireErrors(	t *testing.T) {
+func TestFilterAddWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	pverNoFilterAdd := BIP0037Version - 1
 	wireErr := &MessageError{}

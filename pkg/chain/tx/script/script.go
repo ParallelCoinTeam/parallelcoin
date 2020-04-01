@@ -6,19 +6,19 @@ import (
 	"fmt"
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
-// Bip16Activation is the timestamp where BIP0016 is valid to use in the blockchain.  To be used to determine if BIP0016 should be called for or not. This timestamp corresponds to Sun Apr 1 00:00:00 UTC 2012.
+// Bip16Activation is the timestamp where BIP0016 is valid to use in the
+// blockchain.  To be used to determine if BIP0016 should be called for or
+// not. This timestamp corresponds to Sun Apr 1 00:00:00 UTC 2012.
 var Bip16Activation = time.Unix(1333238400, 0)
 
-// SigHashType represents hash type bits at the end of a signature.
-type SigHashType uint32
+type // SigHashType represents hash type bits at the end of a signature.
+SigHashType uint32
 
-// Hash type bits from the end of a signature.
-const (
+const ( // Hash type bits from the end of a signature.
 	SigHashOld          SigHashType = 0x0
 	SigHashAll          SigHashType = 0x1
 	SigHashNone         SigHashType = 0x2
@@ -32,7 +32,8 @@ const (
 	MaxScriptElementSize  = 520 // Max bytes pushable to the stack.
 )
 
-// isSmallInt returns whether or not the opcode is considered a small integer, which is an OP_0, or OP_1 through OP_16.
+// isSmallInt returns whether or not the opcode is considered a small
+// integer, which is an OP_0, or OP_1 through OP_16.
 func isSmallInt(op *opcode) bool {
 	if op.value == OP_0 || (op.value >= OP_1 && op.value <= OP_16) {
 		return true
@@ -40,7 +41,8 @@ func isSmallInt(op *opcode) bool {
 	return false
 }
 
-// isScriptHash returns true if the script passed is a pay-to-script-hash transaction, false otherwise.
+// isScriptHash returns true if the script passed is a pay-to-script
+// -hash transaction, false otherwise.
 func isScriptHash(pops []parsedOpcode) bool {
 	return len(pops) == 3 &&
 		pops[0].opcode.value == OP_HASH160 &&
@@ -48,48 +50,59 @@ func isScriptHash(pops []parsedOpcode) bool {
 		pops[2].opcode.value == OP_EQUAL
 }
 
-// IsPayToScriptHash returns true if the script is in the standard pay-to-script-hash (P2SH) format, false otherwise.
+// IsPayToScriptHash returns true if the script is in the standard pay
+// -to-script-hash (P2SH) format, false otherwise.
 func IsPayToScriptHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
+		Error(err)
 		return false
 	}
 	return isScriptHash(pops)
 }
 
-// isWitnessScriptHash returns true if the passed script is a pay-to-witness-script-hash transaction, false otherwise.
+// isWitnessScriptHash returns true if the passed script is a pay-to
+// -witness-script-hash transaction, false otherwise.
 func isWitnessScriptHash(pops []parsedOpcode) bool {
 	return len(pops) == 2 &&
 		pops[0].opcode.value == OP_0 &&
 		pops[1].opcode.value == OP_DATA_32
 }
 
-// IsPayToWitnessScriptHash returns true if the is in the standard pay-to-witness-script-hash (P2WSH) format, false otherwise.
+// IsPayToWitnessScriptHash returns true if the is in the standard pay
+// -to-witness-script-hash (P2WSH) format, false otherwise.
 func IsPayToWitnessScriptHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
+		Error(err)
 		return false
 	}
 	return isWitnessScriptHash(pops)
 }
 
-// IsPayToWitnessPubKeyHash returns true if the is in the standard pay-to-witness-pubkey-hash (P2WKH) format, false otherwise.
+// IsPayToWitnessPubKeyHash returns true if the is in the standard pay
+// -to-witness-pubkey-hash (P2WKH) format, false otherwise.
 func IsPayToWitnessPubKeyHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
+		Error(err)
 		return false
 	}
 	return isWitnessPubKeyHash(pops)
 }
 
-// isWitnessPubKeyHash returns true if the passed script is a pay-to-witness-pubkey-hash, and false otherwise.
+// isWitnessPubKeyHash returns true if the passed script is a pay-to
+// -witness-pubkey-hash, and false otherwise.
 func isWitnessPubKeyHash(pops []parsedOpcode) bool {
 	return len(pops) == 2 &&
 		pops[0].opcode.value == OP_0 &&
 		pops[1].opcode.value == OP_DATA_20
 }
 
-// IsWitnessProgram returns true if the passed script is a valid witness program which is encoded according to the passed witness program version. A witness program must be a small integer (from 0-16), followed by 2-40 bytes of pushed data.
+// IsWitnessProgram returns true if the passed script is a valid witness
+// program which is encoded according to the passed witness program version.
+// A witness program must be a small integer (from 0-16),
+// followed by 2-40 bytes of pushed data.
 func IsWitnessProgram(script []byte) bool {
 	// The length of the script must be between 4 and 42 bytes. The smallest program is the witness version, followed by a data push of 2 bytes.  The largest allowed witness program has a data push of 40-bytes.
 	if len(script) < 4 || len(script) > 42 {
@@ -97,12 +110,19 @@ func IsWitnessProgram(script []byte) bool {
 	}
 	pops, err := parseScript(script)
 	if err != nil {
+		Error(err)
 		return false
 	}
 	return isWitnessProgram(pops)
 }
 
-// isWitnessProgram returns true if the passed script is a witness program, and false otherwise. A witness program MUST adhere to the following constraints: there must be exactly two pops (program version and the program itself), the first opcode MUST be a small integer (0-16), the push data MUST be canonical, and finally the size of the push data must be between 2 and 40 bytes.
+// isWitnessProgram returns true if the passed script is a witness
+// program, and false otherwise.
+// A witness program MUST adhere to the following constraints: there must be
+// exactly two pops (program version and the program itself),
+// the first opcode MUST be a small integer (0-16),
+// the push data MUST be canonical,
+// and finally the size of the push data must be between 2 and 40 bytes.
 func isWitnessProgram(pops []parsedOpcode) bool {
 	return len(pops) == 2 &&
 		isSmallInt(pops[0].opcode) &&
@@ -110,13 +130,17 @@ func isWitnessProgram(pops []parsedOpcode) bool {
 		(len(pops[1].data) >= 2 && len(pops[1].data) <= 40)
 }
 
-// ExtractWitnessProgramInfo attempts to extract the witness program version, as well as the witness program itself from the passed script.
+// ExtractWitnessProgramInfo attempts to extract the witness program
+// version, as well as the witness program itself from the passed script.
 func ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
 	pops, err := parseScript(script)
 	if err != nil {
+		Error(err)
 		return 0, nil, err
 	}
-	// If at this point, the scripts doesn't resemble a witness program, then we'll exit early as there isn't a valid version or program to extract.
+	// If at this point, the scripts doesn't resemble a witness program,
+	// then we'll exit early as there isn't a valid version or program to
+	// extract.
 	if !isWitnessProgram(pops) {
 		return 0, nil, fmt.Errorf("script is not a witness program, " +
 			"unable to extract version or witness program")
@@ -126,11 +150,16 @@ func ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
 	return witnessVersion, witnessProgram, nil
 }
 
-// isPushOnly returns true if the script only pushes data, false otherwise.
 func isPushOnly(pops []parsedOpcode) bool {
-	// NOTE: This function does NOT verify opcodes directly since it is internal and is only called with parsed opcodes for scripts that did not have any parse errors.  Thus, consensus is properly maintained.
+	// isPushOnly returns true if the script only pushes data, false otherwise.
+	// NOTE: This function does NOT verify opcodes directly since it is
+	// internal and is only called with parsed opcodes for scripts that did
+	// not have any parse errors.  Thus, consensus is properly maintained.
 	for _, pop := range pops {
-		// All opcodes up to OP_16 are data push instructions. NOTE: This does consider OP_RESERVED to be a data push instruction, but execution of OP_RESERVED will fail anyways and matches the behavior required by consensus.
+		// All opcodes up to OP_16 are data push instructions.
+		// NOTE: This does consider OP_RESERVED to be a data push
+		// instruction but execution of OP_RESERVED will fail anyways and
+		// matches the behavior required by consensus.
 		if pop.opcode.value > OP_16 {
 			return false
 		}
@@ -138,16 +167,21 @@ func isPushOnly(pops []parsedOpcode) bool {
 	return true
 }
 
-// IsPushOnlyScript returns whether or not the passed script only pushes data. False will be returned when the script does not parse.
 func IsPushOnlyScript(script []byte) bool {
+	// IsPushOnlyScript returns whether or not the passed script only pushes
+	// data. False will be returned when the script does not parse.
 	pops, err := parseScript(script)
 	if err != nil {
+		Error(err)
 		return false
 	}
 	return isPushOnly(pops)
 }
 
-// ParseScriptTemplate is the same as parseScript but allows the passing of the template list for testing purposes.  When there are parse errors, it returns the list of parsed opcodes up to the point of failure along with the error.
+// ParseScriptTemplate is the same as parseScript but allows the passing
+// of the template list for testing purposes.  When there are parse errors,
+// it returns the list of parsed opcodes up to the point of failure along
+// with the error.
 func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, error) {
 	retScript := make([]parsedOpcode, 0, len(script))
 	for i := 0; i < len(script); {
@@ -156,7 +190,9 @@ func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, e
 		pop := parsedOpcode{opcode: op}
 		// Parse data out of instruction.
 		switch {
-		// No additional data.  Note that some of the opcodes, notably OP_1NEGATE, OP_0, and OP_[1-16] represent the data themselves.
+		// No additional data. Note that some of the opcodes,
+		// notably OP_1NEGATE, OP_0,
+		// and OP_[1-16] represent the data themselves.
 		case op.length == 1:
 			i++
 		// Data pushes of specific lengths -- OP_DATA_[1-75].
@@ -188,12 +224,12 @@ func ParseScriptTemplate(script []byte, opcodes *[256]opcode) ([]parsedOpcode, e
 				l = uint(script[off])
 			case -2:
 				l = (uint(script[off+1]) << 8) |
-								 uint(script[off])
+					uint(script[off])
 			case -4:
 				l = (uint(script[off+3]) << 24) |
-								 (uint(script[off+2]) << 16) |
-								 (uint(script[off+1]) << 8) |
-								 uint(script[off])
+					(uint(script[off+2]) << 16) |
+					(uint(script[off+1]) << 8) |
+					uint(script[off])
 			default:
 				str := fmt.Sprintf("invalid opcode length %d",
 					op.length)
@@ -223,12 +259,14 @@ func parseScript(script []byte) ([]parsedOpcode, error) {
 	return ParseScriptTemplate(script, &OpcodeArray)
 }
 
-// unparseScript reversed the action of parseScript and returns the parsedOpcodes as a list of bytes
+// unparseScript reversed the action of parseScript and returns the
+// parsedOpcodes as a list of bytes
 func unparseScript(pops []parsedOpcode) ([]byte, error) {
 	script := make([]byte, 0, len(pops))
 	for _, pop := range pops {
 		b, err := pop.bytes()
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		script = append(script, b...)
@@ -236,7 +274,12 @@ func unparseScript(pops []parsedOpcode) ([]byte, error) {
 	return script, nil
 }
 
-// DisasmString formats a disassembled script for one line printing.  When the script fails to parse, the returned string will contain the disassembled script up to the point the failure occurred along with the string '[error]' appended.  In addition, the reason the script failed to parse is returned if the caller wants more information about the failure.
+// DisasmString formats a disassembled script for one line printing.
+// When the script fails to parse,
+// the returned string will contain the disassembled script up to the point
+// the failure occurred along with the string '[error]' appended.
+// In addition, the reason the script failed to parse is returned if the
+// caller wants more information about the failure.
 func DisasmString(buf []byte) (string, error) {
 	var disbuf bytes.Buffer
 	opcodes, err := parseScript(buf)
@@ -248,12 +291,14 @@ func DisasmString(buf []byte) (string, error) {
 		disbuf.Truncate(disbuf.Len() - 1)
 	}
 	if err != nil {
+		Error(err)
 		disbuf.WriteString("[error]")
 	}
 	return disbuf.String(), err
 }
 
-// removeOpcode will remove any opcode matching ``opcode'' from the opcode stream in pkscript
+// removeOpcode will remove any opcode matching ``opcode'' from the
+// opcode stream in pkscript
 func removeOpcode(pkscript []parsedOpcode, opcode byte) []parsedOpcode {
 	retScript := make([]parsedOpcode, 0, len(pkscript))
 	for _, pop := range pkscript {
@@ -264,7 +309,10 @@ func removeOpcode(pkscript []parsedOpcode, opcode byte) []parsedOpcode {
 	return retScript
 }
 
-// canonicalPush returns true if the object is either not a push instruction or the push instruction contained wherein is matches the canonical form or using the smallest instruction to do the job. False otherwise.
+// canonicalPush returns true if the object is either not a push
+// instruction or the push instruction contained wherein is matches the
+// canonical form or using the smallest instruction to do the job.
+// False otherwise.
 func canonicalPush(pop parsedOpcode) bool {
 	opcode := pop.opcode.value
 	data := pop.data
@@ -287,7 +335,8 @@ func canonicalPush(pop parsedOpcode) bool {
 	return true
 }
 
-// removeOpcodeByData will return the script minus any opcodes that would push the passed data to the stack.
+// removeOpcodeByData will return the script minus any opcodes that
+// would push the passed data to the stack.
 func removeOpcodeByData(pkscript []parsedOpcode, data []byte) []parsedOpcode {
 	retScript := make([]parsedOpcode, 0, len(pkscript))
 	for _, pop := range pkscript {
@@ -298,13 +347,20 @@ func removeOpcodeByData(pkscript []parsedOpcode, data []byte) []parsedOpcode {
 	return retScript
 }
 
-// calcHashPrevOuts calculates a single hash of all the previous outputs (txid:index) referenced within the passed transaction. This calculated hash can be re-used when validating all inputs spending segwit outputs, with a signature hash type of SigHashAll. This allows validation to re-use previous hashing computation, reducing the complexity of validating SigHashAll inputs from  O(N^2) to O(N).
+// calcHashPrevOuts calculates a single hash of all the previous outputs
+// (txid:index) referenced within the passed transaction.
+// This calculated hash can be re-used when validating all inputs spending
+// segwit outputs, with a signature hash type of SigHashAll.
+// This allows validation to re-use previous hashing computation,
+// reducing the complexity of validating SigHashAll inputs from  O(N^2) to O(N).
 func calcHashPrevOuts(tx *wire.MsgTx) chainhash.Hash {
 	var b bytes.Buffer
 	for _, in := range tx.TxIn {
-		// First write out the 32-byte transaction ID one of whose outputs are being referenced by this input.
+		// First write out the 32-byte transaction ID one of whose outputs
+		// are being referenced by this input.
 		b.Write(in.PreviousOutPoint.Hash[:])
-		// Next, we'll encode the index of the referenced output as a little endian integer.
+		// Next, we'll encode the index of the referenced output as a little
+		// endian integer.
 		var buf [4]byte
 		binary.LittleEndian.PutUint32(buf[:], in.PreviousOutPoint.Index)
 		b.Write(buf[:])
@@ -312,7 +368,12 @@ func calcHashPrevOuts(tx *wire.MsgTx) chainhash.Hash {
 	return chainhash.DoubleHashH(b.Bytes())
 }
 
-// calcHashSequence computes an aggregated hash of each of the sequence numbers within the inputs of the passed transaction. This single hash can be re-used when validating all inputs spending segwit outputs, which include signatures using the SigHashAll sighash type. This allows validation to re-use previous hashing computation, reducing the complexity of validating SigHashAll inputs from O(N^2) to O(N).
+// calcHashSequence computes an aggregated hash of each of the sequence
+// numbers within the inputs of the passed transaction.
+// This single hash can be re-used when validating all inputs spending segwit
+// outputs, which include signatures using the SigHashAll sighash type.
+// This allows validation to re-use previous hashing computation,
+// reducing the complexity of validating SigHashAll inputs from O(N^2) to O(N).
 func calcHashSequence(tx *wire.MsgTx) chainhash.Hash {
 	var b bytes.Buffer
 	for _, in := range tx.TxIn {
@@ -323,39 +384,61 @@ func calcHashSequence(tx *wire.MsgTx) chainhash.Hash {
 	return chainhash.DoubleHashH(b.Bytes())
 }
 
-// calcHashOutputs computes a hash digest of all outputs created by the transaction encoded using the wire format. This single hash can be re-used when validating all inputs spending witness programs, which include signatures using the SigHashAll sighash type. This allows computation to be cached, reducing the total hashing complexity from O(N^2) to O(N).
+// calcHashOutputs computes a hash digest of all outputs created by the
+// transaction encoded using the wire format.
+// This single hash can be re-used when validating all inputs spending
+// witness programs,
+// which include signatures using the SigHashAll sighash type.
+// This allows computation to be cached,
+// reducing the total hashing complexity from O(N^2) to O(N).
 func calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
 	var b bytes.Buffer
 	for _, out := range tx.TxOut {
 		err := wire.WriteTxOut(&b, 0, 0, out)
 		if err != nil {
-			log <- cl.Debug{err, cl.Ine()}
+			Error(err)
 		}
 	}
 	return chainhash.DoubleHashH(b.Bytes())
 }
 
-// calcWitnessSignatureHash computes the sighash digest of a transaction's segwit input using the new, optimized digest calculation algorithm defined in BIP0143: https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki. This function makes use of pre-calculated sighash fragments stored within the passed HashCache to eliminate duplicate hashing computations when calculating the final digest, reducing the complexity from O(N^2) to O(N). Additionally, signatures now cover the input value of the referenced unspent output. This allows offline, or hardware wallets to compute the exact amount being spent, in addition to the final transaction fee. In the case the wallet if fed an invalid input amount, the real sighash will differ causing the produced signature to be invalid.
+// calcWitnessSignatureHash computes the sighash digest of a transaction's
+// segwit input using the new optimized digest calculation algorithm defined
+// in BIP0143: https://github.// com/bitcoin/bips/blob/master/bip-0143.mediawiki
+// This function makes use of pre-calculated sighash fragments stored within
+// the passed HashCache to eliminate duplicate hashing computations when
+// calculating the final digest, reducing the complexity from O(N^2) to O(N).
+// Additionally, signatures now cover the input value of the referenced
+// unspent output. This allows offline or hardware wallets to compute the
+// exact amount being spent in addition to the final transaction fee.
+// In the case the wallet if fed an invalid input amount,
+// the real sighash will differ causing the produced signature to be invalid.
 func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, hashType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
-	// As a sanity check, ensure the passed input index for the transaction is valid.
+	// As a sanity check,
+	// ensure the passed input index for the transaction is valid.
 	if idx > len(tx.TxIn)-1 {
 		return nil, fmt.Errorf("idx %d but %d txins", idx, len(tx.TxIn))
 	}
-	// We'll utilize this buffer throughout to incrementally calculate the signature hash for this transaction.
+	// We'll utilize this buffer throughout to incrementally calculate the
+	// signature hash for this transaction.
 	var sigHash bytes.Buffer
 	// First write out, then encode the transaction's version number.
 	var bVersion [4]byte
 	binary.LittleEndian.PutUint32(bVersion[:], uint32(tx.Version))
 	sigHash.Write(bVersion[:])
-	// Next write out the possibly pre-calculated hashes for the sequence numbers of all inputs, and the hashes of the previous outs for all outputs.
+	// Next write out the possibly pre-calculated hashes for the sequence
+	// numbers of all inputs, and the hashes of the previous outs for all outputs.
 	var zeroHash chainhash.Hash
-	// If anyone can pay isn't active, then we can use the cached hashPrevOuts, otherwise we just write zeroes for the prev outs.
+	// If anyone can pay isn't active,
+	// then we can use the cached hashPrevOuts, otherwise we just write zeroes for the prev outs.
 	if hashType&SigHashAnyOneCanPay == 0 {
 		sigHash.Write(sigHashes.HashPrevOuts[:])
 	} else {
 		sigHash.Write(zeroHash[:])
 	}
-	// If the sighash isn't anyone can pay, single, or none, the use the cached hash sequences, otherwise write all zeroes for the hashSequence.
+	// If the sighash isn't anyone can pay, single, or none,
+	// the use the cached hash sequences,
+	// otherwise write all zeroes for the hashSequence.
 	if hashType&SigHashAnyOneCanPay == 0 &&
 		hashType&sigHashMask != SigHashSingle &&
 		hashType&sigHashMask != SigHashNone {
@@ -370,7 +453,8 @@ func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, 
 	binary.LittleEndian.PutUint32(bIndex[:], txIn.PreviousOutPoint.Index)
 	sigHash.Write(bIndex[:])
 	if isWitnessPubKeyHash(subScript) {
-		// The script code for a p2wkh is a length prefix varint for the next 25 bytes, followed by a re-creation of the original p2pkh pk script.
+		// The script code for a p2wkh is a length prefix varint for the next
+		// 25 bytes, followed by a re-creation of the original p2pkh pk script.
 		sigHash.Write([]byte{0x19})
 		sigHash.Write([]byte{OP_DUP})
 		sigHash.Write([]byte{OP_HASH160})
@@ -379,21 +463,28 @@ func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, 
 		sigHash.Write([]byte{OP_EQUALVERIFY})
 		sigHash.Write([]byte{OP_CHECKSIG})
 	} else {
-		// For p2wsh outputs, and future outputs, the script code is the original script, with all code separators removed, serialized with a var int length prefix.
+		// For p2wsh outputs, and future outputs,
+		// the script code is the original script,
+		// with all code separators removed,
+		// serialized with a var int length prefix.
 		rawScript, _ := unparseScript(subScript)
 		err := wire.WriteVarBytes(&sigHash, 0, rawScript)
 		if err != nil {
-			log <- cl.Debug{err, cl.Ine()}
+			Error(err)
 		}
 	}
-	// Next, add the input amount, and sequence number of the input being signed.
+	// Next, add the input amount,
+	// and sequence number of the input being signed.
 	var bAmount [8]byte
 	binary.LittleEndian.PutUint64(bAmount[:], uint64(amt))
 	sigHash.Write(bAmount[:])
 	var bSequence [4]byte
 	binary.LittleEndian.PutUint32(bSequence[:], txIn.Sequence)
 	sigHash.Write(bSequence[:])
-	// If the current signature mode isn't single, or none, then we can re-use the pre-generated hashoutputs sighash fragment. Otherwise, we'll serialize and add only the target output index to the signature pre-image.
+	// If the current signature mode isn't single, or none,
+	// then we can re-use the pre-generated hashoutputs sighash fragment.
+	// Otherwise, we'll serialize and add only the target output index to the
+	// signature pre-image.
 	if hashType&SigHashSingle != SigHashSingle &&
 		hashType&SigHashNone != SigHashNone {
 		sigHash.Write(sigHashes.HashOutputs[:])
@@ -401,7 +492,7 @@ func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, 
 		var b bytes.Buffer
 		err := wire.WriteTxOut(&b, 0, 0, tx.TxOut[idx])
 		if err != nil {
-			log <- cl.Debug{err, cl.Ine()}
+			Error(err)
 		}
 		sigHash.Write(chainhash.DoubleHashB(b.Bytes()))
 	} else {
@@ -417,17 +508,23 @@ func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, 
 	return chainhash.DoubleHashB(sigHash.Bytes()), nil
 }
 
-// CalcWitnessSigHash computes the sighash digest for the specified input of the target transaction observing the desired sig hash type.
+// CalcWitnessSigHash computes the sighash digest for the specified
+// input of the target transaction observing the desired sig hash type.
 func CalcWitnessSigHash(script []byte, sigHashes *TxSigHashes, hType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
 	parsedScript, err := parseScript(script)
 	if err != nil {
+		Error(err)
 		return nil, fmt.Errorf("cannot parse output script: %v", err)
 	}
 	return calcWitnessSignatureHash(parsedScript, sigHashes, hType, tx, idx,
 		amt)
 }
 
-// shallowCopyTx creates a shallow copy of the transaction for use when calculating the signature hash.  It is used over the Copy method on the transaction itself since that is a deep copy and therefore does more work and allocates much more space than needed.
+// shallowCopyTx creates a shallow copy of the transaction for use when
+// calculating the signature hash.
+// It is used over the Copy method on the transaction itself since that is a
+// deep copy and therefore does more work and allocates much more space than
+// needed.
 func shallowCopyTx(tx *wire.MsgTx) wire.MsgTx {
 	// As an additional memory optimization, use contiguous backing arrays for the copied inputs and outputs and point the final slice of pointers into the contiguous arrays.  This avoids a lot of small allocations.
 	txCopy := wire.MsgTx{
@@ -449,21 +546,41 @@ func shallowCopyTx(tx *wire.MsgTx) wire.MsgTx {
 	return txCopy
 }
 
-// CalcSignatureHash will, given a script and hash type for the current script engine instance, calculate the signature hash to be used for signing and verification.
+// CalcSignatureHash will given a script and hash type for the current
+// script engine instance calculate the signature hash to be used for signing
+// and verification.
 func CalcSignatureHash(script []byte, hashType SigHashType, tx *wire.MsgTx, idx int) ([]byte, error) {
 	parsedScript, err := parseScript(script)
 	if err != nil {
+		Error(err)
 		return nil, fmt.Errorf("cannot parse output script: %v", err)
 	}
 	return calcSignatureHash(parsedScript, hashType, tx, idx), nil
 }
 
-// calcSignatureHash will, given a script and hash type for the current script engine instance, calculate the signature hash to be used for signing and verification.
+// calcSignatureHash will given a script and hash type for the current
+// script engine instance calculate the signature hash to be used for signing
+// and verification.
 func calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.MsgTx, idx int) []byte {
-	// The SigHashSingle signature type signs only the corresponding input and output (the output with the same index number as the input).
-	// Since transactions can have more inputs than outputs, this means it is improper to use SigHashSingle on input indices that don't have a corresponding output.
-	// A bug in the original Satoshi client implementation means specifying an index that is out of range results in a signature hash of 1 (as a uint256 little endian).  The original intent appeared to be to indicate failure, but unfortunately, it was never checked and thus is treated as the actual signature hash.  This buggy behavior is now part of the consensus and a hard fork would be required to fix it.
-	// Due to this, care must be taken by software that creates transactions which make use of SigHashSingle because it can lead to an extremely dangerous situation where the invalid inputs will end up signing a hash of 1.  This in turn presents an opportunity for attackers to cleverly construct transactions which can steal those coins provided they can reuse signatures.
+	// The SigHashSingle signature type signs only the corresponding input
+	// and output (the output with the same index number as the input).
+	// Since transactions can have more inputs than outputs,
+	// this means it is improper to use SigHashSingle on input indices that
+	// don't have a corresponding output.
+	// A bug in the original Satoshi client implementation means specifying
+	// an index that is out of range results in a signature hash of 1 (
+	// as a uint256 little endian).
+	// The original intent appeared to be to indicate failure,
+	// but unfortunately,
+	// it was never checked and thus is treated as the actual signature hash.
+	// This buggy behavior is now part of the consensus and a hard fork would
+	// be required to fix it.
+	// Due to this, care must be taken by software that creates transactions
+	// which make use of SigHashSingle because it can lead to an extremely
+	// dangerous situation where the invalid inputs will end up signing a
+	// hash of 1.  This in turn presents an opportunity for attackers to
+	// cleverly construct transactions which can steal those coins provided
+	// they can reuse signatures.
 	if hashType&sigHashMask == SigHashSingle && idx >= len(tx.TxOut) {
 		var hash chainhash.Hash
 		hash[0] = 0x01
@@ -471,11 +588,14 @@ func calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.Msg
 	}
 	// Remove all instances of OP_CODESEPARATOR from the script.
 	script = removeOpcode(script, OP_CODESEPARATOR)
-	// Make a shallow copy of the transaction, zeroing out the script for all inputs that are not currently being processed.
+	// Make a shallow copy of the transaction,
+	// zeroing out the script for all inputs that are not currently being
+	// processed.
 	txCopy := shallowCopyTx(tx)
 	for i := range txCopy.TxIn {
 		if i == idx {
-			// UnparseScript cannot fail here because removeOpcode above only returns a valid script.
+			// UnparseScript cannot fail here because removeOpcode above only
+			// returns a valid script.
 			sigScript, _ := unparseScript(script)
 			txCopy.TxIn[idx].SignatureScript = sigScript
 		} else {
@@ -505,7 +625,8 @@ func calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.Msg
 			}
 		}
 	default:
-		// Consensus treats undefined hashtypes like normal SigHashAll for purposes of hash generation.
+		// Consensus treats undefined hashtypes like normal SigHashAll for
+		// purposes of hash generation.
 		fallthrough
 	case SigHashOld:
 		fallthrough
@@ -515,20 +636,23 @@ func calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.Msg
 	if hashType&SigHashAnyOneCanPay != 0 {
 		txCopy.TxIn = txCopy.TxIn[idx : idx+1]
 	}
-	// The final hash is the double sha256 of both the serialized modified transaction and the hash type (encoded as a 4-byte little-endian value) appended.
+	// The final hash is the double sha256 of both the serialized modified
+	// transaction and the hash type (
+	// encoded as a 4-byte little-endian value) appended.
 	wbuf := bytes.NewBuffer(make([]byte, 0, txCopy.SerializeSizeStripped()+4))
 	err := txCopy.SerializeNoWitness(wbuf)
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		Error(err)
 	}
 	err = binary.Write(wbuf, binary.LittleEndian, hashType)
 	if err != nil {
-		log <- cl.Debug{err, cl.Ine()}
+		Error(err)
 	}
 	return chainhash.DoubleHashB(wbuf.Bytes())
 }
 
-// asSmallInt returns the passed opcode, which must be true according to isSmallInt(), as an integer.
+// asSmallInt returns the passed opcode which must be true according to
+// isSmallInt(), as an integer.
 func asSmallInt(op *opcode) int {
 	if op.value == OP_0 {
 		return 0
@@ -536,7 +660,10 @@ func asSmallInt(op *opcode) int {
 	return int(op.value - (OP_1 - 1))
 }
 
-// getSigOpCount is the implementation function for counting the number of signature operations in the script provided by pops. If precise mode is requested then we attempt to count the number of operations for a multisig op. Otherwise we use the maximum.
+// getSigOpCount is the implementation function for counting the number of
+// signature operations in the script provided by pops.
+// If precise mode is requested then we attempt to count the number of
+// operations for a multisig op. Otherwise we use the maximum.
 func getSigOpCount(pops []parsedOpcode, precise bool) int {
 	nSigs := 0
 	for i, pop := range pops {
@@ -548,7 +675,9 @@ func getSigOpCount(pops []parsedOpcode, precise bool) int {
 		case OP_CHECKMULTISIG:
 			fallthrough
 		case OP_CHECKMULTISIGVERIFY:
-			// If we are being precise then look for familiar patterns for multisig, for now all we recognize is OP_1 - OP_16 to signify the number of pubkeys. Otherwise, we use the max of 20.
+			// If we are being precise then look for familiar patterns for
+			// multisig, for now all we recognize is OP_1 - OP_16 to signify
+			// the number of pubkeys. Otherwise, we use the max of 20.
 			if precise && i > 0 &&
 				pops[i-1].opcode.value >= OP_1 &&
 				pops[i-1].opcode.value <= OP_16 {
@@ -563,49 +692,77 @@ func getSigOpCount(pops []parsedOpcode, precise bool) int {
 	return nSigs
 }
 
-// GetSigOpCount provides a quick count of the number of signature operations in a script. a CHECKSIG operations counts for 1, and a CHECK_MULTISIG for 20. If the script fails to parse, then the count up to the point of failure is returned.
+// GetSigOpCount provides a quick count of the number of signature
+// operations in a script. a CHECKSIG operations counts for 1,
+// and a CHECK_MULTISIG for 20. If the script fails to parse,
+// then the count up to the point of failure is returned.
 func GetSigOpCount(script []byte) int {
-	// Don't check error since parseScript returns the parsed-up-to-error list of pops.
+	// Don't check error since parseScript returns the parsed-up-to-error
+	// list of pops.
 	pops, _ := parseScript(script)
 	return getSigOpCount(pops, false)
 }
 
-// GetPreciseSigOpCount returns the number of signature operations in scriptPubKey.  If bip16 is true then scriptSig may be searched for the Pay-To-Script-Hash script in order to find the precise number of signature operations in the transaction.  If the script fails to parse, then the count up to the point of failure is returned.
+// GetPreciseSigOpCount returns the number of signature operations in
+// scriptPubKey.  If bip16 is true then scriptSig may be searched for the Pay
+// -To-Script-Hash script in order to find the precise number of signature
+// operations in the transaction.  If the script fails to parse,
+// then the count up to the point of failure is returned.
 func GetPreciseSigOpCount(scriptSig, scriptPubKey []byte, bip16 bool) int {
-	// Don't check error since parseScript returns the parsed-up-to-error list of pops.
+	// Don't check error since parseScript returns the parsed-up-to-error
+	// list of pops.
 	pops, _ := parseScript(scriptPubKey)
 	// Treat non P2SH transactions as normal.
 	if !(bip16 && isScriptHash(pops)) {
 		return getSigOpCount(pops, true)
 	}
-	// The public key script is a pay-to-script-hash, so parse the signature script to get the final item.  Scripts that fail to fully parse count as 0 signature operations.
+	// The public key script is a pay-to-script-hash,
+	// so parse the signature script to get the final item.
+	// Scripts that fail to fully parse count as 0 signature operations.
 	sigPops, err := parseScript(scriptSig)
 	if err != nil {
+		Error(err)
 		return 0
 	}
-	// The signature script must only push data to the stack for P2SH to be a valid pair, so the signature operation count is 0 when that is not the case.
+	// The signature script must only push data to the stack for P2SH to be a
+	// valid pair, so the signature operation count is 0 when that is not the
+	// case.
 	if !isPushOnly(sigPops) || len(sigPops) == 0 {
 		return 0
 	}
-	// The P2SH script is the last item the signature script pushes to the stack.  When the script is empty, there are no signature operations.
+	// The P2SH script is the last item the signature script pushes to the
+	// stack.  When the script is empty, there are no signature operations.
 	shScript := sigPops[len(sigPops)-1].data
 	if len(shScript) == 0 {
 		return 0
 	}
-	// Parse the P2SH script and don't check the error since parseScript returns the parsed-up-to-error list of pops and the consensus rules dictate signature operations are counted up to the first parse failure.
+	// Parse the P2SH script and don't check the error since parseScript
+	// returns the parsed-up-to-error list of pops and the consensus rules
+	// dictate signature operations are counted up to the first parse failure.
 	shPops, _ := parseScript(shScript)
 	return getSigOpCount(shPops, true)
 }
 
-// GetWitnessSigOpCount returns the number of signature operations generated by spending the passed pkScript with the specified witness, or sigScript. Unlike GetPreciseSigOpCount, this function is able to accurately count the number of signature operations generated by spending witness programs, and nested p2sh witness programs. If the script fails to parse, then the count up to the point of failure is returned.
+// GetWitnessSigOpCount returns the number of signature operations
+// generated by spending the passed pkScript with the specified witness,
+// or sigScript. Unlike GetPreciseSigOpCount,
+// this function is able to accurately count the number of signature
+// operations generated by spending witness programs,
+// and nested p2sh witness programs. If the script fails to parse,
+// then the count up to the point of failure is returned.
 func GetWitnessSigOpCount(sigScript, pkScript []byte, witness wire.TxWitness) int {
-	// If this is a regular witness program, then we can proceed directly to counting its signature operations without any further processing.
+	// If this is a regular witness program,
+	// then we can proceed directly to counting its signature operations
+	// without any further processing.
 	if IsWitnessProgram(pkScript) {
 		return getWitnessSigOps(pkScript, witness)
 	}
-	// Next, we'll check the sigScript to see if this is a nested p2sh witness program. This is a case wherein the sigScript is actually a datapush of a p2wsh witness program.
+	// Next, we'll check the sigScript to see if this is a nested p2sh
+	// witness program. This is a case wherein the sigScript is actually a
+	// datapush of a p2wsh witness program.
 	sigPops, err := parseScript(sigScript)
 	if err != nil {
+		Error(err)
 		return 0
 	}
 	if IsPayToScriptHash(pkScript) && isPushOnly(sigPops) &&
@@ -615,13 +772,18 @@ func GetWitnessSigOpCount(sigScript, pkScript []byte, witness wire.TxWitness) in
 	return 0
 }
 
-// getWitnessSigOps returns the number of signature operations generated by spending the passed witness program wit the passed witness. The exact signature counting heuristic is modified by the version of the passed witness program. If the version of the witness program is unable to be extracted, then 0 is returned for the sig op count.
+// getWitnessSigOps returns the number of signature operations generated
+// by spending the passed witness program wit the passed witness.
+// The exact signature counting heuristic is modified by the version of the
+// passed witness program. If the version of the witness program is unable to
+// be extracted, then 0 is returned for the sig op count.
 func getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
 	// Attempt to extract the witness program version.
 	witnessVersion, witnessProgram, err := ExtractWitnessProgramInfo(
 		pkScript,
 	)
 	if err != nil {
+		Error(err)
 		return 0
 	}
 	switch witnessVersion {
@@ -639,10 +801,13 @@ func getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
 	return 0
 }
 
-// IsUnspendable returns whether the passed public key script is unspendable, or guaranteed to fail at execution.  This allows inputs to be pruned instantly when entering the UTXO set.
+// IsUnspendable returns whether the passed public key script is unspendable,
+// or guaranteed to fail at execution.
+// This allows inputs to be pruned instantly when entering the UTXO set.
 func IsUnspendable(pkScript []byte) bool {
 	pops, err := parseScript(pkScript)
 	if err != nil {
+		Error(err)
 		return true
 	}
 	return len(pops) > 0 && pops[0].opcode.value == OP_RETURN

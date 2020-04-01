@@ -1,13 +1,13 @@
 package spv
 
 import (
-	"github.com/parallelcointeam/parallelcoin/cmd/spv/headerfs"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/cmd/spv/headerfs"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // headers wraps the different headers and filters used throughout the tests.
-//nolint
+// nolint
 type headers struct {
 	blockHeaders []headerfs.BlockHeader
 	cfHeaders    []headerfs.FilterHeader
@@ -16,7 +16,7 @@ type headers struct {
 }
 
 // maxHeight is the height we will generate filter headers up to.
-//nolint
+// nolint
 const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 
 // // TestBlockManagerInitialInterval tests that the block manager is able to
@@ -471,7 +471,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 			err)
 // 	}
 // 	hdrStore, err := headerfs.NewBlockHeaderStore(
-// 		tempDir, db, &chaincfg.SimNetParams,
+// 		tempDir, db, &netparams.SimNetParams,
 // 	)
 // 	if err != nil {
 // 		db.Close()
@@ -484,7 +484,7 @@ const maxHeight = 20 * uint32(wire.CFCheckptInterval)
 // 	}
 // 	cfStore, err := headerfs.NewFilterHeaderStore(
 // 		tempDir, db, headerfs.RegularFilter,
-// 		&chaincfg.SimNetParams,
+// 		&netparams.SimNetParams,
 // 	)
 // 	if err != nil {
 // 		cleanUp()

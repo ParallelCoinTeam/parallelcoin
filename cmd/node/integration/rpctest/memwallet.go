@@ -5,16 +5,16 @@ import (
 	"encoding/binary"
 	"fmt"
 	"sync"
-	
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	`github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
 var (
@@ -106,20 +106,24 @@ func newMemWallet(net *netparams.Params, harnessID uint32) (*memWallet, error) {
 	binary.BigEndian.PutUint32(harnessHDSeed[:chainhash.HashSize], harnessID)
 	hdRoot, err := hdkeychain.NewMaster(harnessHDSeed[:], net)
 	if err != nil {
+		Error(err)
 		return nil, nil
 	}
 	// The first child key from the hd root is reserved as the coinbase
 	// generation address.
 	coinbaseChild, err := hdRoot.Child(0)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	coinbaseKey, err := coinbaseChild.ECPrivKey()
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	coinbaseAddr, err := keyToAddr(coinbaseKey, net)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Track the coinbase generation address to ensure we properly track
@@ -312,18 +316,22 @@ func (m *memWallet) newAddress() (util.Address, error) {
 	index := m.hdIndex
 	childKey, err := m.hdRoot.Child(index)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	privKey, err := childKey.ECPrivKey()
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	addr, err := keyToAddr(privKey, m.net)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	err = m.rpc.LoadTxFilter(false, []util.Address{addr}, nil)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	m.addrs[index] = addr
@@ -384,10 +392,12 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 		if changeVal > 0 && change {
 			addr, err := m.newAddress()
 			if err != nil {
+				Error(err)
 				return err
 			}
 			pkScript, err := txscript.PayToAddrScript(addr)
 			if err != nil {
+				Error(err)
 				return err
 			}
 			changeOutput := &wire.TxOut{
@@ -410,6 +420,7 @@ func (m *memWallet) SendOutputs(outputs []*wire.TxOut,
 	feeRate util.Amount) (*chainhash.Hash, error) {
 	tx, err := m.CreateTransaction(outputs, feeRate, true)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return m.rpc.SendRawTransaction(tx, true)
@@ -423,6 +434,7 @@ func (m *memWallet) SendOutputsWithoutChange(outputs []*wire.TxOut,
 	feeRate util.Amount) (*chainhash.Hash, error) {
 	tx, err := m.CreateTransaction(outputs, feeRate, false)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return m.rpc.SendRawTransaction(tx, true)
@@ -459,15 +471,18 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 		utxo := m.utxos[outPoint]
 		extendedKey, err := m.hdRoot.Child(utxo.keyIndex)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		privKey, err := extendedKey.ECPrivKey()
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		sigScript, err := txscript.SignatureScript(tx, i, utxo.pkScript,
 			txscript.SigHashAll, privKey, true)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		txIn.SignatureScript = sigScript
@@ -521,6 +536,7 @@ func keyToAddr(key *ec.PrivateKey, net *netparams.Params) (util.Address, error) 
 	serializedKey := key.PubKey().SerializeCompressed()
 	pubKeyAddr, err := util.NewAddressPubKey(serializedKey, net)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return pubKeyAddr.AddressPubKeyHash(), nil

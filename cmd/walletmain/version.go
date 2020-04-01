@@ -52,7 +52,7 @@ func Version() string {
 // are not valid according to the semantic versioning guidelines for pre-release
 // version and build metadata strings.  In particular they MUST only contain
 // characters in semanticAlphabet.
-func normalizeVerString(	str string) string {
+func normalizeVerString(str string) string {
 	result := bytes.Buffer{}
 	for _, r := range str {
 		if strings.ContainsRune(semanticAlphabet, r) {
@@ -60,6 +60,7 @@ func normalizeVerString(	str string) string {
 			// Writing to a bytes.Buffer panics on OOM, and all
 			// errors are unexpected.
 			if err != nil {
+				Error(err)
 				panic(err)
 			}
 		}

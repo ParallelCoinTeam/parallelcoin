@@ -3,9 +3,9 @@ package chaincfg
 import (
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // genesisCoinbaseTx is the coinbase transaction for the genesis blocks for the main network, regression test network, and test network (version 3).
@@ -119,12 +119,13 @@ var testNet3GenesisMerkleRoot = genesisMerkleRoot
 // serves as the public transaction ledger for the test network (version 3).
 var testNet3GenesisBlock = wire.MsgBlock{
 	Header: wire.BlockHeader{
-		Version:    5,
+		Version:    2,
 		PrevBlock:  chainhash.Hash{}, // 0000000000000000000000000000000000000000000000000000000000000000
 		MerkleRoot: testNet3GenesisMerkleRoot,
-		Timestamp:  time.Unix(0x53c9ea84, 0),
-		Bits:       fork.P9Algos["sha256d"].MinBits, //0x1e00f1ea, //testnetBits, // 0x1e0fffff, // 486604799 [00000000ffff0000000000000000000000000000000000000000000000000000]
-		Nonce:      0x001adf18,                      // 417274368
+		Timestamp:  time.Unix(0x5dda3362, 0),
+		Bits:       fork.SecondPowLimitBits, // 0x1e00f1ea, //testnetBits, // 0x1e0fffff,
+		// 486604799 [00000000ffff0000000000000000000000000000000000000000000000000000]
+		Nonce: 0x001adf18, // 417274368
 	},
 	Transactions: []*wire.MsgTx{&genesisCoinbaseTx},
 }

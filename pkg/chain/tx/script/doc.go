@@ -12,6 +12,6 @@ One benefit of using a scripting language is added flexibility in specifying wha
 
 Errors
 
-Errors returned by this package are of type txscript.Error.  This allows the caller to programmatically determine the specific error by examining the ErrorCode field of the type asserted txscript.Error while still providing rich error messages with contextual information.  A convenience function named IsErrorCode is also provided to allow callers to easily check for a specific error code.  See ErrorCode in the package documentation for a full list.
+Errors returned by this package are of type txscript.ScriptError.  This allows the caller to programmatically determine the specific error by examining the ErrorCode field of the type asserted txscript.ScriptError while still providing rich error messages with contextual information.  A convenience function named IsErrorCode is also provided to allow callers to easily check for a specific error code.  See ErrorCode in the package documentation for a full list.
 */
 package txscript

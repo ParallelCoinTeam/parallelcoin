@@ -3,11 +3,11 @@ package blockchain
 import (
 	"fmt"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // txoFlags is a bitmask defining additional information and state for a
@@ -250,6 +250,7 @@ func (view *UtxoViewpoint) connectTransactions(block *util.Block, stxos *[]Spent
 	for _, tx := range block.Transactions() {
 		err := view.connectTransaction(tx, block.Height(), stxos)
 		if err != nil {
+			Error(err)
 			return err
 		}
 	}
@@ -379,6 +380,7 @@ func (view *UtxoViewpoint) disconnectTransactions(db database.DB, block *util.Bl
 			if stxo.Height == 0 {
 				utxo, err := view.fetchEntryByHash(db, txHash)
 				if err != nil {
+					Error(err)
 					return err
 				}
 				if utxo == nil {
@@ -452,6 +454,7 @@ func (view *UtxoViewpoint) fetchUtxosMain(db database.DB, outpoints map[wire.Out
 		for outpoint := range outpoints {
 			entry, err := dbFetchUtxoEntry(dbTx, outpoint)
 			if err != nil {
+				Error(err)
 				return err
 			}
 			view.entries[outpoint] = entry
@@ -585,6 +588,7 @@ func (b *BlockChain) FetchUtxoEntry(outpoint wire.OutPoint) (*UtxoEntry, error) 
 		return err
 	})
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return entry, nil

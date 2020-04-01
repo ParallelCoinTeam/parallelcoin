@@ -1,9 +1,8 @@
 package spv
 
 import (
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // batchSpendReporter orchestrates the delivery of spend reports to
@@ -25,7 +24,7 @@ type batchSpendReporter struct {
 	// allocations when reconstructing the current filterEntries.
 	outpoints map[wire.OutPoint][]byte
 	// filterEntries holds the current set of watched outpoint, and is
-	// applied to cfilters to guage whether we should download the block.
+	// applied to cfilters to gauge whether we should download the block.
 	//
 	// NOTE: This watchlist is updated during each call to ProcessBlock.
 	filterEntries [][]byte
@@ -42,32 +41,34 @@ func (b *batchSpendReporter) FailRemaining(err error) error {
 	return err
 }
 
-// NotifyUnspentAndUnfound iterates through any requests for which no spends
-// were detected. If we were able to find the initial output, this will be
-// delivered signaling that no spend was detected. If the original output could
-// not be found, a nil spend report is returned.
-func (b *batchSpendReporter) NotifyUnspentAndUnfound() {
-	log <- cl.Debugf{
-		"finished batch, %d unspent outpoints %s", len(b.requests), cl.Ine()}
+func // NotifyUnspentAndUnfound iterates through any requests for which no
+// spends were detected. If we were able to find the initial output,
+// this will be delivered signaling that no spend was detected.
+// If the original output could not be found, a nil spend report is returned.
+(b *batchSpendReporter) NotifyUnspentAndUnfound() {
+	Debugf(
+		"finished batch, %d unspent outpoints", len(b.requests),
+	)
 	for outpoint, requests := range b.requests {
 		// A nil SpendReport indicates the output was not found.
 		tx, ok := b.initialTxns[outpoint]
 		if !ok {
-			log <- cl.Warnf{
+			Warnf(
 				"unknown initial txn for getuxo request %v", outpoint,
-			}
+			)
 		}
 		b.notifyRequests(&outpoint, requests, tx, nil)
 	}
 }
 
-// ProcessBlock accepts a block, block height, and any new requests whose start
-// height matches the provided height. If a non-zero number of new requests are
-// presented, the block will first be checked for the initial outputs from which
+func // ProcessBlock accepts a block, block height,
+// and any new requests whose start height matches the provided height.
+// If a non-zero number of new requests are presented,
+// the block will first be checked for the initial outputs from which
 // spends may occur. Afterwards, any spends detected in the block are
 // immediately dispatched, and the watchlist updated in preparation of filtering
 // the next block.
-func (b *batchSpendReporter) ProcessBlock(blk *wire.MsgBlock,
+(b *batchSpendReporter) ProcessBlock(blk *wire.MsgBlock,
 	newReqs []*GetUtxoRequest, height uint32) {
 	// If any requests want the UTXOs at this height, scan the block to find
 	// the original outputs that might be spent from.
@@ -90,15 +91,16 @@ func (b *batchSpendReporter) ProcessBlock(blk *wire.MsgBlock,
 	}
 }
 
-// addNewRequests adds a set of new GetUtxoRequests to the spend reporter's
+func // addNewRequests adds a set of new GetUtxoRequests to the spend reporter's
 // state. This method immediately adds the request's outpoints to the reporter's
 // watchlist.
-func (b *batchSpendReporter) addNewRequests(reqs []*GetUtxoRequest) {
+(b *batchSpendReporter) addNewRequests(reqs []*GetUtxoRequest) {
 	for _, req := range reqs {
 		outpoint := req.Input.OutPoint
-		log <- cl.Debugf{
-			"adding outpoint=%s height=%d to watchlist %s", outpoint,
-			req.BirthHeight, cl.Ine()}
+		Debugf(
+			"adding outpoint=%s height=%d to watchlist", outpoint,
+			req.BirthHeight,
+		)
 		b.requests[outpoint] = append(b.requests[outpoint], req)
 		// Build the filter entry only if it is the first time seeing
 		// the outpoint.
@@ -110,13 +112,13 @@ func (b *batchSpendReporter) addNewRequests(reqs []*GetUtxoRequest) {
 	}
 }
 
-// findInitialTransactions searches the given block for the creation of the
+func // findInitialTransactions searches the given block for the creation of the
 // UTXOs that are supposed to be birthed in this block. If any are found, a
 // spend report containing the initial outpoint will be saved in case the
 // outpoint is not spent later on. Requests corresponding to outpoints that are
 // not found in the block will return a nil spend report to indicate that the
 // UTXO was not found.
-func (b *batchSpendReporter) findInitialTransactions(block *wire.MsgBlock,
+(b *batchSpendReporter) findInitialTransactions(block *wire.MsgBlock,
 	newReqs []*GetUtxoRequest, height uint32) map[wire.OutPoint]*SpendReport {
 	// First, construct  a reverse index from txid to all a list of requests
 	// whose outputs share the same txid.
@@ -149,9 +151,9 @@ func (b *batchSpendReporter) findInitialTransactions(block *wire.MsgBlock,
 			// output on the transaction. If not, we will be unable
 			// to find the initial output.
 			if op.Index >= uint32(len(txOuts)) {
-				log <- cl.Errorf{
+				Errorf(
 					"failed to find outpoint %s -- invalid output index", op,
-					cl.Ine()}
+				)
 				initialTxns[op] = nil
 				continue
 			}
@@ -169,14 +171,14 @@ func (b *batchSpendReporter) findInitialTransactions(block *wire.MsgBlock,
 		tx, ok := initialTxns[req.Input.OutPoint]
 		switch {
 		case !ok:
-			log <- cl.Errorf{
+			Errorf(
 				"failed to find outpoint %s -- txid not found in block",
-				req.Input.OutPoint, cl.Ine()}
+				req.Input.OutPoint)
 			initialTxns[req.Input.OutPoint] = nil
 		case tx != nil:
-			log <- cl.Tracef{
+			Tracef(
 				"block %d creates output %s", height, req.Input.OutPoint,
-			}
+			)
 		default:
 		}
 		b.initialTxns[req.Input.OutPoint] = tx
@@ -184,11 +186,11 @@ func (b *batchSpendReporter) findInitialTransactions(block *wire.MsgBlock,
 	return initialTxns
 }
 
-// notifyRequests delivers the same final response to the given requests, and
-// cleans up any remaining state for the outpoint.
+func // notifyRequests delivers the same final response to the given
+// requests, and cleans up any remaining state for the outpoint.
 //
 // NOTE: AT MOST ONE of `report` or `err` may be non-nil.
-func (b *batchSpendReporter) notifyRequests(
+(b *batchSpendReporter) notifyRequests(
 	outpoint *wire.OutPoint,
 	requests []*GetUtxoRequest,
 	report *SpendReport,
@@ -201,10 +203,10 @@ func (b *batchSpendReporter) notifyRequests(
 	}
 }
 
-// notifySpends finds any transactions in the block that spend from our watched
-// outpoints. If a spend is detected, it is immediately delivered and cleaned up
-// from the reporter's internal state.
-func (b *batchSpendReporter) notifySpends(block *wire.MsgBlock,
+func // notifySpends finds any transactions in the block that spend from our
+// watched outpoints. If a spend is detected it is immediately delivered and
+// cleaned up from the reporter's internal state.
+(b *batchSpendReporter) notifySpends(block *wire.MsgBlock,
 	height uint32) map[wire.OutPoint]*SpendReport {
 	spends := make(map[wire.OutPoint]*SpendReport)
 	for _, tx := range block.Transactions {
@@ -217,8 +219,9 @@ func (b *batchSpendReporter) notifySpends(block *wire.MsgBlock,
 			if !ok {
 				continue
 			}
-			log <- cl.Debugf{
-				"UTXO %v spent by txn %v %s", outpoint, tx.TxHash(), cl.Ine()}
+			Debugf(
+				"UTXO %v spent by txn %v", outpoint, tx.TxHash(),
+			)
 			spend := &SpendReport{
 				SpendingTx:         tx,
 				SpendingInputIndex: uint32(i),
@@ -235,8 +238,8 @@ func (b *batchSpendReporter) notifySpends(block *wire.MsgBlock,
 	return spends
 }
 
-// newBatchSpendReporter instantiates a fresh batchSpendReporter.
-func newBatchSpendReporter() *batchSpendReporter {
+func // newBatchSpendReporter instantiates a fresh batchSpendReporter.
+newBatchSpendReporter() *batchSpendReporter {
 	return &batchSpendReporter{
 		requests:    make(map[wire.OutPoint][]*GetUtxoRequest),
 		initialTxns: make(map[wire.OutPoint]*SpendReport),

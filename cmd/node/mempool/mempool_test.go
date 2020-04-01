@@ -8,14 +8,13 @@ import (
 	"testing"
 	"time"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // fakeChain is used by the pool harness to provide generated test utxos and
@@ -135,12 +134,13 @@ type poolHarness struct {
 // to the address associated with the harness.
 // It automatically uses a standard signature script that starts with the
 // block height that is required by version 2 blocks.
-func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32) (*util.Tx, error) {
+func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32, version int32) (*util.Tx, error) {
 	// Create standard coinbase script.
 	extraNonce := int64(0)
 	coinbaseScript, err := txscript.NewScriptBuilder().
 		AddInt64(int64(blockHeight)).AddInt64(extraNonce).Script()
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -151,7 +151,7 @@ func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32) (*u
 		SignatureScript: coinbaseScript,
 		Sequence:        wire.MaxTxInSequenceNum,
 	})
-	totalInput := blockchain.CalcBlockSubsidy(blockHeight, p.chainParams)
+	totalInput := blockchain.CalcBlockSubsidy(blockHeight, p.chainParams, version)
 	amountPerOutput := totalInput / int64(numOutputs)
 	remainder := totalInput - amountPerOutput*int64(numOutputs)
 	for i := uint32(0); i < numOutputs; i++ {
@@ -207,6 +207,7 @@ func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32
 		sigScript, err := txscript.SignatureScript(tx, i, p.payScript,
 			txscript.SigHashAll, p.signKey, true)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		tx.TxIn[i].SignatureScript = sigScript
@@ -241,6 +242,7 @@ func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32)
 		sigScript, err := txscript.SignatureScript(tx, 0, p.payScript,
 			txscript.SigHashAll, p.signKey, true)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		tx.TxIn[0].SignatureScript = sigScript
@@ -261,6 +263,7 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 	keyBytes, err := hex.DecodeString("700868df1838811ffbdf918fb482c1f7e" +
 		"ad62db4b97bd7012c23e726485e577d")
 	if err != nil {
+		Error(err)
 		return nil, nil, err
 	}
 	signKey, signPub := ec.PrivKeyFromBytes(ec.S256(), keyBytes)
@@ -269,11 +272,13 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 	pubKeyBytes := signPub.SerializeCompressed()
 	payPubKeyAddr, err := util.NewAddressPubKey(pubKeyBytes, chainParams)
 	if err != nil {
+		Error(err)
 		return nil, nil, err
 	}
 	payAddr := payPubKeyAddr.AddressPubKeyHash()
 	pkScript, err := txscript.PayToAddrScript(payAddr)
 	if err != nil {
+		Error(err)
 		return nil, nil, err
 	}
 	// Create a new fake chain and harness bound to it.
@@ -311,8 +316,9 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 	numOutputs := uint32(1)
 	outputs := make([]spendableOutput, 0, numOutputs)
 	curHeight := harness.chain.BestHeight()
-	coinbase, err := harness.CreateCoinbaseTx(curHeight+1, numOutputs)
+	coinbase, err := harness.CreateCoinbaseTx(curHeight+1, numOutputs, 0)
 	if err != nil {
+		Error(err)
 		return nil, nil, err
 	}
 	harness.chain.utxos.AddTxOuts(coinbase, curHeight+1)
@@ -357,7 +363,7 @@ func testPoolMembership(tc *testContext, tx *util.Tx, inOrphanPool, inTxPool boo
 // TestSimpleOrphanChain ensures that a simple chain of orphans is handled properly.  In particular, it generates a chain of single input, single output transactions and inserts them while skipping the first linking transaction so they are all orphans.  Finally, it adds the linking transaction and ensures the entire orphan chain is moved to the transaction pool.
 func TestSimpleOrphanChain(t *testing.T) {
 	t.Parallel()
-	harness, spendableOuts, err := newPoolHarness(&chaincfg.MainNetParams)
+	harness, spendableOuts, err := newPoolHarness(&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}
@@ -406,7 +412,7 @@ func TestSimpleOrphanChain(t *testing.T) {
 // TestOrphanReject ensures that orphans are properly rejected when the allow orphans flag is not set on ProcessTransaction.
 func TestOrphanReject(t *testing.T) {
 	t.Parallel()
-	harness, outputs, err := newPoolHarness(&chaincfg.MainNetParams)
+	harness, outputs, err := newPoolHarness(&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}
@@ -453,7 +459,7 @@ func TestOrphanReject(t *testing.T) {
 // TestOrphanEviction ensures that exceeding the maximum number of orphans evicts entries to make room for the new ones.
 func TestOrphanEviction(t *testing.T) {
 	t.Parallel()
-	harness, outputs, err := newPoolHarness(&chaincfg.MainNetParams)
+	harness, outputs, err := newPoolHarness(&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}
@@ -503,7 +509,7 @@ func TestOrphanEviction(t *testing.T) {
 func TestBasicOrphanRemoval(t *testing.T) {
 	t.Parallel()
 	const maxOrphans = 4
-	harness, spendableOuts, err := newPoolHarness(&chaincfg.MainNetParams)
+	harness, spendableOuts, err := newPoolHarness(&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}
@@ -561,7 +567,7 @@ func TestBasicOrphanRemoval(t *testing.T) {
 func TestOrphanChainRemoval(t *testing.T) {
 	t.Parallel()
 	const maxOrphans = 10
-	harness, spendableOuts, err := newPoolHarness(&chaincfg.MainNetParams)
+	harness, spendableOuts, err := newPoolHarness(&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}
@@ -610,7 +616,7 @@ func TestOrphanChainRemoval(t *testing.T) {
 func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 	t.Parallel()
 	const maxOrphans = 4
-	harness, outputs, err := newPoolHarness(&chaincfg.MainNetParams)
+	harness, outputs, err := newPoolHarness(&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}
@@ -677,7 +683,7 @@ func TestMultiInputOrphanDoubleSpend(t *testing.T) {
 // TestCheckSpend tests that CheckSpend returns the expected spends found in the mempool.
 func TestCheckSpend(t *testing.T) {
 	t.Parallel()
-	harness, outputs, err := newPoolHarness(&chaincfg.MainNetParams)
+	harness, outputs, err := newPoolHarness(&netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("unable to create test pool: %v", err)
 	}

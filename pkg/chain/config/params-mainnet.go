@@ -1,6 +1,6 @@
 package chaincfg
 
-import "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+import "github.com/p9c/pod/pkg/chain/wire"
 
 // MainNetParams defines the network parameters for the main Bitcoin network.
 var MainNetParams = Params{
@@ -18,7 +18,7 @@ var MainNetParams = Params{
 	GenesisBlock:             &genesisBlock,
 	GenesisHash:              &genesisHash,
 	PowLimit:                 &mainPowLimit,
-	PowLimitBits:             MainPowLimitBits, //0x1e0fffff,
+	PowLimitBits:             MainPowLimitBits, // 0x1e0fffff,
 	BIP0034Height:            100000000,        // Reserved for future change
 	BIP0065Height:            100000000,
 	BIP0066Height:            100000000,

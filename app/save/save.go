@@ -1,21 +1,33 @@
 package save
 
 import (
-   "io/ioutil"
-   
-   "github.com/pelletier/go-toml"
-   
-   "github.com/parallelcointeam/parallelcoin/app/apputil"
-   "github.com/parallelcointeam/parallelcoin/pkg/pod"
+	"encoding/json"
+	"io/ioutil"
+
+	"github.com/urfave/cli"
+
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/pkg/pod"
 )
 
+// Pod saves the configuration to the configured location
 func Pod(c *pod.Config) (success bool) {
-	if yp, e := toml.Marshal(c); e == nil {
+	Trace("saving configuration to", *c.ConfigFile)
+	var uac cli.StringSlice
+	if len(*c.UserAgentComments) > 0 {
+		uac = make(cli.StringSlice, len(*c.UserAgentComments))
+		copy(uac, *c.UserAgentComments)
+		*c.UserAgentComments = uac[1:]
+	}
+	if yp, e := json.MarshalIndent(c, "", "  "); e == nil {
 		apputil.EnsureDir(*c.ConfigFile)
 		if e := ioutil.WriteFile(*c.ConfigFile, yp, 0600); e != nil {
-			return
+			Error(e)
+			success = false
 		}
-		return true
+		success = true
 	}
+	*c.UserAgentComments = uac
+
 	return
 }

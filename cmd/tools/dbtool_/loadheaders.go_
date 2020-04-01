@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/db"
 )
 
 // headersCmd defines the configuration options for the loadheaders command.
@@ -28,7 +28,8 @@ func (cmd *headersCmd) Execute(args []string) error {
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		return err
+		L.Error(err)
+return err
 	}
 	defer db.Close()
 	// NOTE: This code will only work for ffldb.  Ideally the package using the database would keep a metadata index of its own.
@@ -41,7 +42,7 @@ func (cmd *headersCmd) Execute(args []string) error {
 				totalHdrs++
 				return nil
 			})
-			log.Infof("Loading headers for %d blocks...", totalHdrs)
+			L.Infof("Loading headers for %d blocks...", totalHdrs)
 			numLoaded := 0
 			startTime := time.Now()
 			blockIdxBucket.ForEach(func(k, v []byte) error {
@@ -49,12 +50,13 @@ func (cmd *headersCmd) Execute(args []string) error {
 				copy(hash[:], k)
 				_, err := tx.FetchBlockHeader(&hash)
 				if err != nil {
-					return err
+		L.Error(err)
+return err
 				}
 				numLoaded++
 				return nil
 			})
-			log.Infof("Loaded %d headers in %v", numLoaded,
+			L.Infof("Loaded %d headers in %v", numLoaded,
 				time.Since(startTime))
 			return nil
 		})
@@ -70,13 +72,14 @@ func (cmd *headersCmd) Execute(args []string) error {
 			hashes = append(hashes, hash)
 			return nil
 		})
-		log.Infof("Loading headers for %d blocks...", len(hashes))
+		L.Infof("Loading headers for %d blocks...", len(hashes))
 		startTime := time.Now()
 		hdrs, err := tx.FetchBlockHeaders(hashes)
 		if err != nil {
-			return err
+		L.Error(err)
+return err
 		}
-		log.Infof("Loaded %d headers in %v", len(hdrs),
+		L.Infof("Loaded %d headers in %v", len(hdrs),
 			time.Since(startTime))
 		return nil
 	})

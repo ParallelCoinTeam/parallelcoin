@@ -1,17 +1,17 @@
 package prompt
 
 import (
-   "bufio"
-   "bytes"
-   "encoding/hex"
-   "fmt"
-   "os"
-   "strings"
-   
-   "github.com/btcsuite/golangcrypto/ssh/terminal"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/legacy/keystore"
+	"bufio"
+	"bytes"
+	"encoding/hex"
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/btcsuite/golangcrypto/ssh/terminal"
+
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/legacy/keystore"
 )
 
 // ProvideSeed is used to prompt for the wallet seed which maybe required during
@@ -22,14 +22,16 @@ func ProvideSeed() ([]byte, error) {
 		fmt.Print("Enter existing wallet seed: ")
 		seedStr, err := reader.ReadString('\n')
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		seedStr = strings.TrimSpace(strings.ToLower(seedStr))
 		seed, err := hex.DecodeString(seedStr)
 		if err != nil || len(seed) < hdkeychain.MinSeedBytes ||
 			len(seed) > hdkeychain.MaxSeedBytes {
-			fmt.Printf(
-				"Invalid seed specified.  Must be a hexadecimal value that is at least %d bits and at most %d bits\n", hdkeychain.MinSeedBytes*8,
+			Errorf("Invalid seed specified.  "+
+				"Must be a hexadecimal value that is at least %d bits and at"+
+				" most %d bits", hdkeychain.MinSeedBytes*8,
 				hdkeychain.MaxSeedBytes*8)
 			continue
 		}
@@ -45,6 +47,7 @@ func ProvidePrivPassphrase() ([]byte, error) {
 		fmt.Print(prompt)
 		pass, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		fmt.Print("\n")
@@ -59,7 +62,7 @@ func ProvidePrivPassphrase() ([]byte, error) {
 // promptList prompts the user with the given prefix, list of valid responses,
 // and default list entry to use.  The function will repeat the prompt to the
 // user until they enter a valid response.
-func promptList(	reader *bufio.Reader, prefix string, validResponses []string, defaultEntry string) (string, error) {
+func promptList(reader *bufio.Reader, prefix string, validResponses []string, defaultEntry string) (string, error) {
 	// Setup the prompt according to the parameters.
 	validStrings := strings.Join(validResponses, "/")
 	var prompt string
@@ -74,6 +77,7 @@ func promptList(	reader *bufio.Reader, prefix string, validResponses []string, d
 		fmt.Print(prompt)
 		reply, err := reader.ReadString('\n')
 		if err != nil {
+			Error(err)
 			return "", err
 		}
 		reply = strings.TrimSpace(strings.ToLower(reply))
@@ -91,11 +95,12 @@ func promptList(	reader *bufio.Reader, prefix string, validResponses []string, d
 // promptListBool prompts the user for a boolean (yes/no) with the given prefix.
 // The function will repeat the prompt to the user until they enter a valid
 // reponse.
-func promptListBool(	reader *bufio.Reader, prefix string, defaultEntry string) (bool, error) {
+func promptListBool(reader *bufio.Reader, prefix string, defaultEntry string) (bool, error) {
 	// Setup the valid responses.
 	valid := []string{"n", "no", "y", "yes"}
 	response, err := promptList(reader, prefix, valid, defaultEntry)
 	if err != nil {
+		Error(err)
 		return false, err
 	}
 	return response == "yes" || response == "y", nil
@@ -104,13 +109,14 @@ func promptListBool(	reader *bufio.Reader, prefix string, defaultEntry string) (
 // promptPass prompts the user for a passphrase with the given prefix.  The
 // function will ask the user to confirm the passphrase and will repeat the
 // prompts until they enter a matching response.
-func promptPass(	reader *bufio.Reader, prefix string, confirm bool) ([]byte, error) {
+func promptPass(reader *bufio.Reader, prefix string, confirm bool) ([]byte, error) {
 	// Prompt the user until they enter a passphrase.
 	prompt := fmt.Sprintf("%s: ", prefix)
 	for {
 		fmt.Print(prompt)
 		pass, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		fmt.Print("\n")
@@ -124,12 +130,13 @@ func promptPass(	reader *bufio.Reader, prefix string, confirm bool) ([]byte, err
 		fmt.Print("Confirm passphrase: ")
 		confirm, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		fmt.Print("\n")
 		confirm = bytes.TrimSpace(confirm)
 		if !bytes.Equal(pass, confirm) {
-			fmt.Println("The entered passphrases do not match")
+			Error("The entered passphrases do not match")
 			continue
 		}
 		return pass, nil
@@ -142,7 +149,7 @@ func promptPass(	reader *bufio.Reader, prefix string, confirm bool) ([]byte, err
 // On the other hand, when the legacy keystore is nil, the user is prompted for
 // a new private passphrase.  All prompts are repeated until the user enters a
 // valid response.
-func PrivatePass(	reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, error) {
+func PrivatePass(reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte, error) {
 	// When there is not an existing legacy wallet, simply prompt the user
 	// for a new private passphase and return it.
 	if legacyKeyStore == nil {
@@ -152,16 +159,19 @@ func PrivatePass(	reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte,
 	// At this point, there is an existing legacy wallet, so prompt the user
 	// for the existing private passphrase and ensure it properly unlocks
 	// the legacy wallet so all of the addresses can later be imported.
-	fmt.Println("You have an existing legacy wallet.  All addresses from your existing legacy wallet will be imported into the new wallet format.")
+	Warn("You have an existing legacy wallet.  " +
+		"All addresses from your existing legacy wallet will be imported into" +
+		" the new wallet format.")
 	for {
 		privPass, err := promptPass(reader, "Enter the private passphrase for your existing wallet", false)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		// Keep prompting the user until the passphrase is correct.
 		if err := legacyKeyStore.Unlock([]byte(privPass)); err != nil {
 			if err == keystore.ErrWrongPassphrase {
-				fmt.Println(err)
+				Error(err)
 				continue
 			}
 			return nil, err
@@ -177,13 +187,14 @@ func PrivatePass(	reader *bufio.Reader, legacyKeyStore *keystore.Store) ([]byte,
 // passphrase is used for the private and public passphrase and prompt the user
 // if they are sure they want to use the same passphrase for both.  Finally, all
 // prompts are repeated until the user enters a valid response.
-func PublicPass(	reader *bufio.Reader, privPass []byte,
+func PublicPass(reader *bufio.Reader, privPass []byte,
 	defaultPubPassphrase, configPubPassphrase []byte) ([]byte, error) {
 	pubPass := defaultPubPassphrase
 	usePubPass, err := promptListBool(reader, "Do you want "+
 		"to add an additional layer of encryption for public "+
 		"data?", "no")
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	if !usePubPass {
@@ -194,6 +205,7 @@ func PublicPass(	reader *bufio.Reader, privPass []byte,
 			"existing configured public passphrase for encryption "+
 			"of public data?", "no")
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		if useExisting {
@@ -204,6 +216,7 @@ func PublicPass(	reader *bufio.Reader, privPass []byte,
 		pubPass, err = promptPass(reader, "Enter the public "+
 			"passphrase for your new wallet", true)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		if bytes.Equal(pubPass, privPass) {
@@ -211,6 +224,7 @@ func PublicPass(	reader *bufio.Reader, privPass []byte,
 				"Are you sure want to use the same passphrase "+
 					"for public and private data?", "no")
 			if err != nil {
+				Error(err)
 				return nil, err
 			}
 			if useSamePass {
@@ -230,27 +244,32 @@ func PublicPass(	reader *bufio.Reader, privPass []byte,
 // the user along with prompting them for confirmation.  When the user answers
 // yes, a the user is prompted for it.  All prompts are repeated until the user
 // enters a valid response.
-func Seed(	reader *bufio.Reader) ([]byte, error) {
+func Seed(reader *bufio.Reader) ([]byte, error) {
 	// Ascertain the wallet generation seed.
 	useUserSeed, err := promptListBool(reader, "Do you have an "+
 		"existing wallet seed you want to use?", "no")
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	if !useUserSeed {
 		seed, err := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		fmt.Println("\nYour wallet generation seed is:")
 		fmt.Printf("\n%x\n\n", seed)
-		fmt.Print("IMPORTANT: Keep the seed in a safe place as you will NOT be able to restore your wallet without it.\n\n")
-		fmt.Print("Please keep in mind that anyone who has access to the seed can also restore your wallet thereby giving them access to all your funds, so it is imperative that you keep it in a secure location.\n\n")
+		fmt.Print("IMPORTANT: Keep the seed in a safe place as you will NOT be" +
+			" able to restore your wallet without it.\n\n")
+		fmt.Print("Please keep in mind that anyone who has access to the seed" +
+			" can also restore your wallet thereby giving them access to all your funds, so it is imperative that you keep it in a secure location.\n\n")
 		for {
 			fmt.Print(`Once you have stored the seed in a safe ` +
 				`and secure location, enter "OK" to continue: `)
 			confirmSeed, err := reader.ReadString('\n')
 			if err != nil {
+				Error(err)
 				return nil, err
 			}
 			confirmSeed = strings.TrimSpace(confirmSeed)
@@ -265,13 +284,14 @@ func Seed(	reader *bufio.Reader) ([]byte, error) {
 		fmt.Print("Enter existing wallet seed: ")
 		seedStr, err := reader.ReadString('\n')
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		seedStr = strings.TrimSpace(strings.ToLower(seedStr))
 		seed, err := hex.DecodeString(seedStr)
 		if err != nil || len(seed) < hdkeychain.MinSeedBytes ||
 			len(seed) > hdkeychain.MaxSeedBytes {
-			fmt.Printf("Invalid seed specified.  Must be a "+
+			Errorf("Invalid seed specified.  Must be a "+
 				"hexadecimal value that is at least %d bits and "+
 				"at most %d bits\n", hdkeychain.MinSeedBytes*8,
 				hdkeychain.MaxSeedBytes*8)

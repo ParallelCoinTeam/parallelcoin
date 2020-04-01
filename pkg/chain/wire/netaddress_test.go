@@ -6,7 +6,7 @@ import (
 )
 
 // TestNetAddress tests the NetAddress API.
-func TestNetAddress(	t *testing.T) {
+func TestNetAddress(t *testing.T) {
 	ip := net.ParseIP("127.0.0.1")
 	port := 11047
 	// Test NewNetAddress.
@@ -148,9 +148,9 @@ func TestNetAddress(	t *testing.T) {
 // 			t.Errorf("writeNetAddress #%d error %v", i, err)
 // 			continue
 // 		}
-// 		if !bytes.Equal(buf.Bytes(), test.buf) {
+// 		if !bytes.Equal(buf.Hash(), test.buf) {
 // 			t.Errorf("writeNetAddress #%d\n got: %s want: %s", i,
-// 				spew.Sdump(buf.Bytes()), spew.Sdump(test.buf))
+// 				spew.Sdump(buf.Hash()), spew.Sdump(test.buf))
 // 			continue
 // 		}
 // 		// Decode the message from wire format.

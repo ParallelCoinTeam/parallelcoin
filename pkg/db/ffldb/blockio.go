@@ -10,19 +10,25 @@ import (
 	"path/filepath"
 	"sync"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
 )
 
 const (
-	// The Bitcoin protocol encodes block height as int32, so max number of blocks is 2^31.  Max block size per the protocol is 32MiB per block. So the theoretical max at the time this comment was written is 64PiB (pebibytes).  With files @ 512MiB each, this would require a maximum of 134,217,728 files.  Thus, choose 9 digits of precision for the filenames.  An additional benefit is 9 digits provides 10^9 files @ 512MiB each for a total of ~476.84PiB (roughly 7.4 times the current theoretical max), so there is room for the max block size to grow in the future.
+	// The Bitcoin protocol encodes block height as int32, so max number of blocks is 2^31.  Max block size per the
+	// protocol is 32MiB per block. So the theoretical max at the time this comment was written is 64PiB (pebibytes).
+	// With files @ 512MiB each, this would require a maximum of 134,217,728 files.  Thus, choose 9 digits of precision
+	// for the filenames.  An additional benefit is 9 digits provides 10^9 files @ 512MiB each for a total of ~476.84PiB
+	// (roughly 7.4 times the current theoretical max), so there is room for the max block size to grow in the future.
 	blockFilenameTemplate = "%09d.fdb"
-	// maxOpenFiles is the max number of open files to maintain in the open blocks cache.  Note that this does not include the current write file, so there will typically be one more than this value open.
+	// maxOpenFiles is the max number of open files to maintain in the open blocks cache.  Note that this does not include
+	// the current write file, so there will typically be one more than this value open.
 	maxOpenFiles = 25
 	// maxBlockFileSize is the maximum size for each file used to store blocks.
-	// NOTE: The current code uses uint32 for all offsets, so this value must be less than 2^32 (4 GiB).  This is also why it's a typed constant.
+	// NOTE: The current code uses uint32 for all offsets,
+	// so this value must be less than 2^32 (4 GiB).
+	// This is also why it's a typed constant.
 	maxBlockFileSize uint32 = 512 * 1024 * 1024 // 512 MiB
 	// blockLocSize is the number of bytes the serialized block location data that is stored in the block index.
 	//
@@ -33,7 +39,7 @@ const (
 	//  [4:8]  File offset (4 bytes)
 	//
 	//  [8:12] Block length (4 bytes)
-	//nolint
+	// nolint
 	blockLocSize = 12
 )
 
@@ -146,6 +152,7 @@ func (s *blockStore) openWriteFile(fileNum uint32) (filer, error) {
 	filePath := blockFilePath(s.basePath, fileNum)
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
+		Error(err)
 		str := fmt.Sprintf("failed to open file %q: %v", filePath, err)
 		return nil, makeDbErr(database.ErrDriverSpecific, str, err)
 	}
@@ -159,6 +166,7 @@ func (s *blockStore) openFile(fileNum uint32) (*lockableFile, error) {
 	filePath := blockFilePath(s.basePath, fileNum)
 	file, err := os.Open(filePath)
 	if err != nil {
+		Error(err)
 		return nil, makeDbErr(database.ErrDriverSpecific, err.Error(),
 			err)
 	}
@@ -228,6 +236,7 @@ func (s *blockStore) blockFile(fileNum uint32) (*lockableFile, error) {
 	// The file isn't open, so open it while potentially closing the least recently used one as needed.
 	obf, err := s.openFileFunc(fileNum)
 	if err != nil {
+		Error(err)
 		s.obfMutex.Unlock()
 		return nil, err
 	}
@@ -244,6 +253,7 @@ func (s *blockStore) writeData(data []byte, fieldName string) error {
 	n, err := wc.curFile.file.WriteAt(data, int64(wc.curOffset))
 	wc.curOffset += uint32(n)
 	if err != nil {
+		Error(err)
 		str := fmt.Sprintf("failed to write %s to file %d at "+
 			"offset %d: %v", fieldName, wc.curFileNum,
 			wc.curOffset-uint32(n), err)
@@ -286,6 +296,7 @@ func (s *blockStore) writeBlock(rawBlock []byte) (blockLocation, error) {
 	if wc.curFile.file == nil {
 		file, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
+			Error(err)
 			return blockLocation{}, err
 		}
 		wc.curFile.file = file
@@ -328,12 +339,14 @@ func (s *blockStore) readBlock(hash *chainhash.Hash, loc blockLocation) ([]byte,
 	// Get the referenced block file handle opening the file as needed.  The function also handles closing files as needed to avoid going over the max allowed open files.
 	blockFile, err := s.blockFile(loc.blockFileNum)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	serializedData := make([]byte, loc.blockLen)
 	n, err := blockFile.file.ReadAt(serializedData, int64(loc.fileOffset))
 	blockFile.RUnlock()
 	if err != nil {
+		Error(err)
 		str := fmt.Sprintf("failed to read block %s from file %d, "+
 			"offset %d: %v", hash, loc.blockFileNum, loc.fileOffset,
 			err)
@@ -365,6 +378,7 @@ func (s *blockStore) readBlockRegion(loc blockLocation, offset, numBytes uint32)
 	// Get the referenced block file handle opening the file as needed.  The function also handles closing files as needed to avoid going over the max allowed open files.
 	blockFile, err := s.blockFile(loc.blockFileNum)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Regions are offsets into the actual block, however the serialized data for a block includes an initial 4 bytes for network + 4 bytes for block length.  Thus, add 8 bytes to adjust.
@@ -373,6 +387,7 @@ func (s *blockStore) readBlockRegion(loc blockLocation, offset, numBytes uint32)
 	_, err = blockFile.file.ReadAt(serializedData, int64(readOffset))
 	blockFile.RUnlock()
 	if err != nil {
+		Error(err)
 		str := fmt.Sprintf("failed to read region from block file %d, "+
 			"offset %d, len %d: %v", loc.blockFileNum, readOffset,
 			numBytes, err)
@@ -424,12 +439,10 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 		wc.curFileNum = oldBlockFileNum
 		wc.curOffset = oldBlockOffset
 	}()
-	log <- cl.Debugf{
-		"ROLLBACK: Rolling back to file %d, offset %d %s",
+	Debugf(
+		"ROLLBACK: Rolling back to file %d, offset %d",
 		oldBlockFileNum,
-		oldBlockOffset,
-		cl.Ine(),
-	}
+		oldBlockOffset)
 	// Close the current write file if it needs to be deleted.  Then delete all files that are newer than the provided rollback file while also moving the write cursor file backwards accordingly.
 	if wc.curFileNum > oldBlockFileNum {
 		wc.curFile.Lock()
@@ -441,10 +454,9 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	}
 	for ; wc.curFileNum > oldBlockFileNum; wc.curFileNum-- {
 		if err := s.deleteFileFunc(wc.curFileNum); err != nil {
-			log <- cl.Warnf{
+			Warn(
 				"ROLLBACK: Failed to delete block file number %d: %v %s",
-				wc.curFileNum, err, cl.Ine(),
-			}
+				wc.curFileNum, err)
 			return
 		}
 	}
@@ -453,8 +465,9 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	if wc.curFile.file == nil {
 		obf, err := s.openWriteFileFunc(wc.curFileNum)
 		if err != nil {
+			Error(err)
 			wc.curFile.Unlock()
-			log <- cl.Warn{"ROLLBACK:", err, cl.Ine()}
+			Warn("ROLLBACK:", err)
 			return
 		}
 		wc.curFile.file = obf
@@ -462,24 +475,21 @@ func (s *blockStore) handleRollback(oldBlockFileNum, oldBlockOffset uint32) {
 	// Truncate the to the provided rollback offset.
 	if err := wc.curFile.file.Truncate(int64(oldBlockOffset)); err != nil {
 		wc.curFile.Unlock()
-		log <- cl.Warnf{
+		Warn(
 			"ROLLBACK: Failed to truncate file %d: %v %s",
 			wc.curFileNum,
-			err,
-			cl.Ine(),
-		}
+			err)
 		return
 	}
 	// Sync the file to disk.
 	err := wc.curFile.file.Sync()
 	wc.curFile.Unlock()
 	if err != nil {
-		log <- cl.Warnf{
+		Error(err)
+		Warn(
 			"ROLLBACK: Failed to sync file %d: %v %s",
 			wc.curFileNum,
-			err,
-			cl.Ine(),
-		}
+			err)
 		return
 	}
 }
@@ -492,16 +502,13 @@ func scanBlockFiles(dbPath string) (int, uint32) {
 		filePath := blockFilePath(dbPath, uint32(i))
 		st, err := os.Stat(filePath)
 		if err != nil {
+			Trace(err)
 			break
 		}
 		lastFile = i
 		fileLen = uint32(st.Size())
 	}
-	log <- cl.Tracef{
-		"Scan found latest block file #%d with length %d",
-		lastFile,
-		fileLen,
-	}
+	Tracef("Scan found latest block file #%d with length %d", lastFile, fileLen)
 	return lastFile, fileLen
 }
 

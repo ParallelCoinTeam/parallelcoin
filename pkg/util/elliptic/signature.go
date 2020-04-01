@@ -10,8 +10,6 @@ import (
 	"fmt"
 	"hash"
 	"math/big"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
 )
 
 // Errors returned by canonicalPadding.
@@ -229,6 +227,7 @@ func recoverKeyFromSignature(curve *KoblitzCurve, sig *Signature, msg []byte,
 	// convert 02<Rx> to point R. (step 1.2 and 1.3). If we are on an odd iteration then 1.6 will be done with -R, so we calculate the other term when uncompressing the point.
 	Ry, err := decompressPoint(curve, Rx, iter%2 == 1)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// 1.4 Check n*R is point at infinity
@@ -254,7 +253,7 @@ func recoverKeyFromSignature(curve *KoblitzCurve, sig *Signature, msg []byte,
 	e.Mod(e, curve.Params().N)
 	minuseGx, minuseGy := curve.ScalarBaseMult(e.Bytes())
 	// TODO: this would be faster if we did a mult and add in one
-	// step to prevent the jacobian conversion back and forth.
+	//  step to prevent the jacobian conversion back and forth.
 	Qx, Qy := curve.Add(sRx, sRy, minuseGx, minuseGy)
 	return &PublicKey{
 		Curve: curve,
@@ -270,6 +269,7 @@ func SignCompact(curve *KoblitzCurve, key *PrivateKey,
 	hash []byte, isCompressedKey bool) ([]byte, error) {
 	sig, err := key.Sign(hash)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// bitcoind checks the bit length of R and S here. The ecdsa signature algorithm returns R and S mod N therefore they will be the bitsize of the curve, and thus correctly sized.
@@ -318,6 +318,7 @@ func RecoverCompact(curve *KoblitzCurve, signature,
 	// The iteration used here was encoded
 	key, err := recoverKeyFromSignature(curve, sig, hash, iteration, false)
 	if err != nil {
+		Error(err)
 		return nil, false, err
 	}
 	return key, ((signature[0] - 27) & 4) == 4, nil
@@ -397,7 +398,7 @@ func mac(alg func() hash.Hash, k, m []byte) []byte {
 	h := hmac.New(alg, k)
 	_, err := h.Write(m)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		Error(err)
 	}
 	return h.Sum(nil)
 }

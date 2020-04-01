@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"testing"
 
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 // dbType is the database type name for this driver.
@@ -15,7 +15,7 @@ const dbType = "bdb"
 
 // TestCreateOpenFail ensures that errors related to creating and opening a
 // database are handled properly.
-func TestCreateOpenFail(	t *testing.T) {
+func TestCreateOpenFail(t *testing.T) {
 	// Ensure that attempting to open a database that doesn't exist returns
 	// the expected error.
 	wantErr := walletdb.ErrDbDoesNotExist
@@ -80,7 +80,7 @@ func TestCreateOpenFail(	t *testing.T) {
 
 // TestPersistence ensures that values stored are still valid after closing and
 // reopening the database.
-func TestPersistence(	t *testing.T) {
+func TestPersistence(t *testing.T) {
 	// Create a new database to run tests against.
 	dbPath := "persistencetest.db"
 	db, err := walletdb.Create(dbType, dbPath)

@@ -3,7 +3,7 @@ package addrmgr
 import (
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // KnownAddress tracks information about a known network address that is used

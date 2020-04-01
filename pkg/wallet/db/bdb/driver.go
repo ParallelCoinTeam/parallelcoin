@@ -3,7 +3,7 @@ package bdb
 import (
 	"fmt"
 
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 const (
@@ -11,7 +11,7 @@ const (
 )
 
 // parseArgs parses the arguments from the walletdb Open/Create methods.
-func parseArgs(	funcName string, args ...interface{}) (string, error) {
+func parseArgs(funcName string, args ...interface{}) (string, error) {
 	if len(args) != 1 {
 		return "", fmt.Errorf("invalid arguments to %s.%s -- "+
 			"expected database path", dbType, funcName)
@@ -29,6 +29,7 @@ func parseArgs(	funcName string, args ...interface{}) (string, error) {
 func openDBDriver(args ...interface{}) (walletdb.DB, error) {
 	dbPath, err := parseArgs("Open", args...)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, false)
@@ -39,6 +40,7 @@ func openDBDriver(args ...interface{}) (walletdb.DB, error) {
 func createDBDriver(args ...interface{}) (walletdb.DB, error) {
 	dbPath, err := parseArgs("Create", args...)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, true)

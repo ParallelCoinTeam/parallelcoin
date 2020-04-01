@@ -7,17 +7,17 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/parallelcointeam/parallelcoin/pkg/util/zero"
+	. "github.com/p9c/pod/pkg/util/zero"
 )
 
-func makeOneBytes(	n int) []byte {
+func makeOneBytes(n int) []byte {
 	b := make([]byte, n)
 	for i := range b {
 		b[i] = 1
 	}
 	return b
 }
-func checkZeroBytes(	b []byte) error {
+func checkZeroBytes(b []byte) error {
 	for i, v := range b {
 		if v != 0 {
 			return fmt.Errorf("b[%d] = %d", i, v)
@@ -25,7 +25,7 @@ func checkZeroBytes(	b []byte) error {
 	}
 	return nil
 }
-func TestBytes(	t *testing.T) {
+func TestBytes(t *testing.T) {
 	tests := []int{
 		0,
 		31,
@@ -55,7 +55,7 @@ func TestBytes(	t *testing.T) {
 		}
 	}
 }
-func checkZeroWords(	b []big.Word) error {
+func checkZeroWords(b []big.Word) error {
 	for i, v := range b {
 		if v != 0 {
 			return fmt.Errorf("b[%d] = %d", i, v)
@@ -66,7 +66,7 @@ func checkZeroWords(	b []big.Word) error {
 
 var bigZero = new(big.Int)
 
-func TestBigInt(	t *testing.T) {
+func TestBigInt(t *testing.T) {
 	tests := []string{
 		// 16 0xFFFFFFFF 32-bit uintptrs
 		strings.Repeat("FFFFFFFF", 16),
@@ -103,7 +103,7 @@ func TestBigInt(	t *testing.T) {
 		}
 	}
 }
-func TestBytea32(	t *testing.T) {
+func TestBytea32(t *testing.T) {
 	const sz = 32
 	var b [sz]byte
 	copy(b[:], makeOneBytes(sz))
@@ -113,7 +113,7 @@ func TestBytea32(	t *testing.T) {
 		t.Error(err)
 	}
 }
-func TestBytea64(	t *testing.T) {
+func TestBytea64(t *testing.T) {
 	const sz = 64
 	var b [sz]byte
 	copy(b[:], makeOneBytes(sz))

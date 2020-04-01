@@ -3,7 +3,7 @@ package wire
 import (
 	"io"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // MaxGetCFiltersReqRange the maximum number of filters that may be requested in a getcfheaders message.
@@ -20,10 +20,12 @@ type MsgGetCFilters struct {
 func (msg *MsgGetCFilters) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) error {
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	err = readElement(r, &msg.StartHeight)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	return readElement(r, &msg.StopHash)
@@ -33,10 +35,12 @@ func (msg *MsgGetCFilters) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding
 func (msg *MsgGetCFilters) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) error {
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	err = writeElement(w, &msg.StartHeight)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	return writeElement(w, &msg.StopHash)
@@ -54,7 +58,7 @@ func (msg *MsgGetCFilters) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgGetCFilters returns a new bitcoin getcfilters message that conforms to the Message interface using the passed parameters and defaults for the remaining fields.
-func NewMsgGetCFilters(	filterType FilterType, startHeight uint32,
+func NewMsgGetCFilters(filterType FilterType, startHeight uint32,
 	stopHash *chainhash.Hash) *MsgGetCFilters {
 	return &MsgGetCFilters{
 		FilterType:  filterType,

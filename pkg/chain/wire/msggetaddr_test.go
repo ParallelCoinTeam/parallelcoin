@@ -9,7 +9,7 @@ import (
 )
 
 // TestGetAddr tests the MsgGetAddr API.
-func TestGetAddr(	t *testing.T) {
+func TestGetAddr(t *testing.T) {
 	pver := ProtocolVersion
 	// Ensure the command is expected value.
 	wantCmd := "getaddr"
@@ -29,7 +29,7 @@ func TestGetAddr(	t *testing.T) {
 }
 
 // TestGetAddrWire tests the MsgGetAddr wire encode and decode for various protocol versions.
-func TestGetAddrWire(	t *testing.T) {
+func TestGetAddrWire(t *testing.T) {
 	msgGetAddr := NewMsgGetAddr()
 	msgGetAddrEncoded := []byte{}
 	tests := []struct {

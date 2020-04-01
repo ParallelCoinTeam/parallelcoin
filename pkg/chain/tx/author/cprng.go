@@ -21,6 +21,7 @@ func init() {
 	buf := make([]byte, 8)
 	_, err := rand.Read(buf)
 	if err != nil {
+		Error(err)
 		panic("Failed to seed prng: " + err.Error())
 	}
 	seed := int64(binary.LittleEndian.Uint64(buf))

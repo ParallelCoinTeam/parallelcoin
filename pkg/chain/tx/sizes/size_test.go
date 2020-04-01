@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	. "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/sizes"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	. "github.com/p9c/pod/pkg/chain/tx/sizes"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 const (
@@ -14,14 +14,14 @@ const (
 	p2shScriptSize  = 23
 )
 
-func makeInts(	value int, n int) []int {
+func makeInts(value int, n int) []int {
 	v := make([]int, n)
 	for i := range v {
 		v[i] = value
 	}
 	return v
 }
-func TestEstimateSerializeSize(	t *testing.T) {
+func TestEstimateSerializeSize(t *testing.T) {
 	tests := []struct {
 		InputCount           int
 		OutputScriptLengths  []int
@@ -59,7 +59,7 @@ func TestEstimateSerializeSize(	t *testing.T) {
 		}
 	}
 }
-func TestEstimateVirtualSize(	t *testing.T) {
+func TestEstimateVirtualSize(t *testing.T) {
 	type estimateVSizeTest struct {
 		tx              func() (*wire.MsgTx, error)
 		p2wpkhIns       int

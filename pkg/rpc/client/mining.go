@@ -5,9 +5,9 @@ import (
 	js "encoding/json"
 	"errors"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // FutureGenerateResult is a future promise to deliver the result of a GenerateAsync RPC invocation (or an applicable error).
@@ -17,12 +17,14 @@ type FutureGenerateResult chan *response
 func (r FutureGenerateResult) Receive() ([]*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a list of strings.
 	var result []string
 	err = js.Unmarshal(res, &result)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Convert each block hash to a chainhash.Hash and store a pointer to each.
@@ -30,6 +32,7 @@ func (r FutureGenerateResult) Receive() ([]*chainhash.Hash, error) {
 	for i, hashString := range result {
 		convertedResult[i], err = chainhash.NewHashFromStr(hashString)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 	}
@@ -38,7 +41,7 @@ func (r FutureGenerateResult) Receive() ([]*chainhash.Hash, error) {
 
 // GenerateAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See Generate for the blocking version and more details.
 func (c *Client) GenerateAsync(numBlocks uint32) FutureGenerateResult {
-	cmd := json.NewGenerateCmd(numBlocks)
+	cmd := btcjson.NewGenerateCmd(numBlocks)
 	return c.sendCmd(cmd)
 }
 
@@ -54,12 +57,14 @@ type FutureGetGenerateResult chan *response
 func (r FutureGetGenerateResult) Receive() (bool, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return false, err
 	}
 	// Unmarshal result as a boolean.
 	var result bool
 	err = js.Unmarshal(res, &result)
 	if err != nil {
+		Error(err)
 		return false, err
 	}
 	return result, nil
@@ -67,7 +72,7 @@ func (r FutureGetGenerateResult) Receive() (bool, error) {
 
 // GetGenerateAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetGenerate for the blocking version and more details.
 func (c *Client) GetGenerateAsync() FutureGetGenerateResult {
-	cmd := json.NewGetGenerateCmd()
+	cmd := btcjson.NewGetGenerateCmd()
 	return c.sendCmd(cmd)
 }
 
@@ -87,7 +92,7 @@ func (r FutureSetGenerateResult) Receive() error {
 
 // SetGenerateAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See SetGenerate for the blocking version and more details.
 func (c *Client) SetGenerateAsync(enable bool, numCPUs int) FutureSetGenerateResult {
-	cmd := json.NewSetGenerateCmd(enable, &numCPUs)
+	cmd := btcjson.NewSetGenerateCmd(enable, &numCPUs)
 	return c.sendCmd(cmd)
 }
 
@@ -103,12 +108,14 @@ type FutureGetHashesPerSecResult chan *response
 func (r FutureGetHashesPerSecResult) Receive() (int64, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return -1, err
 	}
 	// Unmarshal result as an int64.
 	var result int64
 	err = js.Unmarshal(res, &result)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	return result, nil
@@ -116,7 +123,7 @@ func (r FutureGetHashesPerSecResult) Receive() (int64, error) {
 
 // GetHashesPerSecAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetHashesPerSec for the blocking version and more details.
 func (c *Client) GetHashesPerSecAsync() FutureGetHashesPerSecResult {
-	cmd := json.NewGetHashesPerSecCmd()
+	cmd := btcjson.NewGetHashesPerSecCmd()
 	return c.sendCmd(cmd)
 }
 
@@ -129,15 +136,17 @@ func (c *Client) GetHashesPerSec() (int64, error) {
 type FutureGetMiningInfoResult chan *response
 
 // Receive waits for the response promised by the future and returns the mining information.
-func (r FutureGetMiningInfoResult) Receive() (*json.GetMiningInfoResult, error) {
+func (r FutureGetMiningInfoResult) Receive() (*btcjson.GetMiningInfoResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a getmininginfo result object.
-	var infoResult json.GetMiningInfoResult
+	var infoResult btcjson.GetMiningInfoResult
 	err = js.Unmarshal(res, &infoResult)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &infoResult, nil
@@ -145,12 +154,12 @@ func (r FutureGetMiningInfoResult) Receive() (*json.GetMiningInfoResult, error) 
 
 // GetMiningInfoAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetMiningInfo for the blocking version and more details.
 func (c *Client) GetMiningInfoAsync() FutureGetMiningInfoResult {
-	cmd := json.NewGetMiningInfoCmd()
+	cmd := btcjson.NewGetMiningInfoCmd()
 	return c.sendCmd(cmd)
 }
 
 // GetMiningInfo returns mining information.
-func (c *Client) GetMiningInfo() (*json.GetMiningInfoResult, error) {
+func (c *Client) GetMiningInfo() (*btcjson.GetMiningInfoResult, error) {
 	return c.GetMiningInfoAsync().Receive()
 }
 
@@ -161,12 +170,14 @@ type FutureGetNetworkHashPS chan *response
 func (r FutureGetNetworkHashPS) Receive() (int64, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return -1, err
 	}
 	// Unmarshal result as an int64.
 	var result int64
 	err = js.Unmarshal(res, &result)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	return result, nil
@@ -174,7 +185,7 @@ func (r FutureGetNetworkHashPS) Receive() (int64, error) {
 
 // GetNetworkHashPSAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetNetworkHashPS for the blocking version and more details.
 func (c *Client) GetNetworkHashPSAsync() FutureGetNetworkHashPS {
-	cmd := json.NewGetNetworkHashPSCmd(nil, nil)
+	cmd := btcjson.NewGetNetworkHashPSCmd(nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -185,7 +196,7 @@ func (c *Client) GetNetworkHashPS() (int64, error) {
 
 // GetNetworkHashPS2Async returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetNetworkHashPS2 for the blocking version and more details.
 func (c *Client) GetNetworkHashPS2Async(blocks int) FutureGetNetworkHashPS {
-	cmd := json.NewGetNetworkHashPSCmd(&blocks, nil)
+	cmd := btcjson.NewGetNetworkHashPSCmd(&blocks, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -196,7 +207,7 @@ func (c *Client) GetNetworkHashPS2(blocks int) (int64, error) {
 
 // GetNetworkHashPS3Async returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetNetworkHashPS3 for the blocking version and more details.
 func (c *Client) GetNetworkHashPS3Async(blocks, height int) FutureGetNetworkHashPS {
-	cmd := json.NewGetNetworkHashPSCmd(&blocks, &height)
+	cmd := btcjson.NewGetNetworkHashPSCmd(&blocks, &height)
 	return c.sendCmd(cmd)
 }
 
@@ -209,15 +220,17 @@ func (c *Client) GetNetworkHashPS3(blocks, height int) (int64, error) {
 type FutureGetWork chan *response
 
 // Receive waits for the response promised by the future and returns the hash data to work on.
-func (r FutureGetWork) Receive() (*json.GetWorkResult, error) {
+func (r FutureGetWork) Receive() (*btcjson.GetWorkResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a getwork result object.
-	var result json.GetWorkResult
+	var result btcjson.GetWorkResult
 	err = js.Unmarshal(res, &result)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &result, nil
@@ -225,12 +238,12 @@ func (r FutureGetWork) Receive() (*json.GetWorkResult, error) {
 
 // GetWorkAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetWork for the blocking version and more details.
 func (c *Client) GetWorkAsync() FutureGetWork {
-	cmd := json.NewGetWorkCmd(nil)
+	cmd := btcjson.NewGetWorkCmd(nil)
 	return c.sendCmd(cmd)
 }
 
 // GetWork returns hash data to work on. See GetWorkSubmit to submit the found solution.
-func (c *Client) GetWork() (*json.GetWorkResult, error) {
+func (c *Client) GetWork() (*btcjson.GetWorkResult, error) {
 	return c.GetWorkAsync().Receive()
 }
 
@@ -241,12 +254,14 @@ type FutureGetWorkSubmit chan *response
 func (r FutureGetWorkSubmit) Receive() (bool, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return false, err
 	}
 	// Unmarshal result as a boolean.
 	var accepted bool
 	err = js.Unmarshal(res, &accepted)
 	if err != nil {
+		Error(err)
 		return false, err
 	}
 	return accepted, nil
@@ -254,7 +269,7 @@ func (r FutureGetWorkSubmit) Receive() (bool, error) {
 
 // GetWorkSubmitAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See GetWorkSubmit for the blocking version and more details.
 func (c *Client) GetWorkSubmitAsync(data string) FutureGetWorkSubmit {
-	cmd := json.NewGetWorkCmd(&data)
+	cmd := btcjson.NewGetWorkCmd(&data)
 	return c.sendCmd(cmd)
 }
 
@@ -270,12 +285,14 @@ type FutureSubmitBlockResult chan *response
 func (r FutureSubmitBlockResult) Receive() error {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	if string(res) != "null" {
 		var result string
 		err = js.Unmarshal(res, &result)
 		if err != nil {
+			Error(err)
 			return err
 		}
 		return errors.New(result)
@@ -284,21 +301,22 @@ func (r FutureSubmitBlockResult) Receive() error {
 }
 
 // SubmitBlockAsync returns an instance of a type that can be used to get the result of the RPC at some future time by invoking the Receive function on the returned instance. See SubmitBlock for the blocking version and more details.
-func (c *Client) SubmitBlockAsync(block *util.Block, options *json.SubmitBlockOptions) FutureSubmitBlockResult {
+func (c *Client) SubmitBlockAsync(block *util.Block, options *btcjson.SubmitBlockOptions) FutureSubmitBlockResult {
 	blockHex := ""
 	if block != nil {
 		blockBytes, err := block.Bytes()
 		if err != nil {
+			Error(err)
 			return newFutureError(err)
 		}
 		blockHex = hex.EncodeToString(blockBytes)
 	}
-	cmd := json.NewSubmitBlockCmd(blockHex, options)
+	cmd := btcjson.NewSubmitBlockCmd(blockHex, options)
 	return c.sendCmd(cmd)
 }
 
 // SubmitBlock attempts to submit a new block into the bitcoin network.
-func (c *Client) SubmitBlock(block *util.Block, options *json.SubmitBlockOptions) error {
+func (c *Client) SubmitBlock(block *util.Block, options *btcjson.SubmitBlockOptions) error {
 	return c.SubmitBlockAsync(block, options).Receive()
 }
 

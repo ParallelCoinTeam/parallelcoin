@@ -1,9 +1,9 @@
 package mining
 
 import (
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (
@@ -36,7 +36,7 @@ func minInt(a, b int) int {
 }
 
 // calcInputValueAge is a helper function used to calculate the input age of a transaction.  The input age for a txin is the number of confirmations since the referenced txout multiplied by its output value.  The total input age is the sum of this value for each txin.  Any inputs to the transaction which are currently in the mempool and hence not mined into a block yet, contribute no additional input age to the transaction.
-func calcInputValueAge(	tx *wire.MsgTx, utxoView *blockchain.UtxoViewpoint, nextBlockHeight int32) float64 {
+func calcInputValueAge(tx *wire.MsgTx, utxoView *blockchain.UtxoViewpoint, nextBlockHeight int32) float64 {
 	var totalInputAge float64
 	for _, txIn := range tx.TxIn {
 		// Don't attempt to accumulate the total input age if the referenced transaction output doesn't exist.
@@ -59,7 +59,7 @@ func calcInputValueAge(	tx *wire.MsgTx, utxoView *blockchain.UtxoViewpoint, next
 }
 
 // CalcPriority returns a transaction priority given a transaction and the sum of each of its input values multiplied by their age (# of confirmations). Thus, the final formula for the priority is: sum(inputValue * inputAge) / adjustedTxSize
-func CalcPriority(	tx *wire.MsgTx, utxoView *blockchain.UtxoViewpoint, nextBlockHeight int32) float64 {
+func CalcPriority(tx *wire.MsgTx, utxoView *blockchain.UtxoViewpoint, nextBlockHeight int32) float64 {
 	// In order to encourage spending multiple old unspent transaction outputs thereby reducing the total set, don't count the constant overhead for each input as well as enough bytes of the signature script to cover a pay-to-script-hash redemption with a compressed pubkey.  This makes additional inputs free by boosting the priority of the transaction accordingly.  No more incentive is given to avoid encouraging gaming future transactions through the use of junk outputs.  This is the same logic used in the reference implementation.
 	// The constant overhead for a txin is 41 bytes since the previous outpoint is 36 bytes + 4 bytes for the sequence + 1 byte the signature script length.
 	// A compressed pubkey pay-to-script-hash redemption with a maximum len signature is of the form: [OP_DATA_73 <73-byte sig> + OP_DATA_35 + {OP_DATA_33 <33 byte compresed pubkey> + OP_CHECKSIG}]

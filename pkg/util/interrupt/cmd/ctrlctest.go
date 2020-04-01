@@ -1,9 +1,8 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/interrupt"
+	log "github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func main() {

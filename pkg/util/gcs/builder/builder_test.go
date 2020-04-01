@@ -4,13 +4,13 @@ import (
 	"encoding/hex"
 	"testing"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
 )
 
 var (
@@ -55,7 +55,7 @@ var (
 )
 
 // TestUseBlockHash tests using a block hash as a filter key.
-func TestUseBlockHash(	t *testing.T) {
+func TestUseBlockHash(t *testing.T) {
 	// Block hash #448710, pretty high difficulty.
 	hash, err := chainhash.NewHashFromStr(testHash)
 	if err != nil {
@@ -67,7 +67,7 @@ func TestUseBlockHash(	t *testing.T) {
 		Index: 4321,
 	}
 	// util.Address
-	addr, err := util.DecodeAddress(testAddr, &chaincfg.MainNetParams)
+	addr, err := util.DecodeAddress(testAddr, &netparams.MainNetParams)
 	if err != nil {
 		t.Fatalf("Address decode failed: %s", err.Error())
 	}
@@ -165,7 +165,7 @@ func TestUseBlockHash(	t *testing.T) {
 		t.Fatalf("No error on P too big!")
 	}
 }
-func BuilderTest(	b *builder.GCSBuilder, hash *chainhash.Hash, p uint8,
+func BuilderTest(b *builder.GCSBuilder, hash *chainhash.Hash, p uint8,
 	outPoint wire.OutPoint, addrBytes []byte, witness wire.TxWitness,
 	t *testing.T) {
 	key, err := b.Key()

@@ -1,20 +1,17 @@
 package util
 
 import (
-   "crypto/sha256"
-   "fmt"
-   "hash"
-   
-   "golang.org/x/crypto/ripemd160"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"crypto/sha256"
+	"hash"
+
+	"golang.org/x/crypto/ripemd160"
 )
 
 // Calculate the hash of hasher over buf.
 func calcHash(buf []byte, hasher hash.Hash) []byte {
 	_, err := hasher.Write(buf)
 	if err != nil {
-		fmt.Println(err, cl.Ine())
+		Error(err)
 	}
 	return hasher.Sum(nil)
 }

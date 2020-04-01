@@ -7,7 +7,7 @@ import (
 )
 
 // hexToBytes converts the passed hex string into bytes and will panic if there is an error.  This is only provided for the hard-coded constants so errors in the source code can be detected. It will only (and must only) be called with hard-coded values.
-func hexToBytes(	s string) []byte {
+func hexToBytes(s string) []byte {
 	b, err := hex.DecodeString(s)
 	if err != nil {
 		panic("invalid hex in source file: " + s)
@@ -16,7 +16,7 @@ func hexToBytes(	s string) []byte {
 }
 
 // TestScriptNumBytes ensures that converting from integral script numbers to byte representations works as expected.
-func TestScriptNumBytes(	t *testing.T) {
+func TestScriptNumBytes(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		num        scriptNum
@@ -66,7 +66,7 @@ func TestScriptNumBytes(	t *testing.T) {
 	for _, test := range tests {
 		gotBytes := test.num.Bytes()
 		if !bytes.Equal(gotBytes, test.serialized) {
-			t.Errorf("Bytes: did not get expected bytes for %d - "+
+			t.Errorf("Hash: did not get expected bytes for %d - "+
 				"got %x, want %x", test.num, gotBytes,
 				test.serialized)
 			continue
@@ -75,7 +75,7 @@ func TestScriptNumBytes(	t *testing.T) {
 }
 
 // TestMakeScriptNum ensures that converting from byte representations to integral script numbers works as expected.
-func TestMakeScriptNum(	t *testing.T) {
+func TestMakeScriptNum(t *testing.T) {
 	t.Parallel()
 	// Errors used in the tests below defined here for convenience and to keep the horizontal test size shorter.
 	errNumTooBig := scriptError(ErrNumberTooBig, "")
@@ -183,7 +183,7 @@ func TestMakeScriptNum(	t *testing.T) {
 }
 
 // TestScriptNumInt32 ensures that the Int32 function on script number behaves as expected.
-func TestScriptNumInt32(	t *testing.T) {
+func TestScriptNumInt32(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		in   scriptNum

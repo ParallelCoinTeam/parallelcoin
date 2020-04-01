@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/indexers"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/indexers"
+	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 var zeroHash = chainhash.Hash{}
@@ -51,7 +51,8 @@ func (bi *blockImporter) readBlock() ([]byte, error) {
 	var net uint32
 	err := binary.Read(bi.r, binary.LittleEndian, &net)
 	if err != nil {
-		if err != io.EOF {
+		L.Error(err)
+if err != io.EOF {
 			return nil, err
 		}
 		// No block and no error means there are no more blocks to read.
@@ -85,7 +86,8 @@ func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 	// Deserialize the block which includes checks for malformed blocks.
 	block, err := util.NewBlockFromBytes(serializedBlock)
 	if err != nil {
-		return false, err
+		L.Error(err)
+return false, err
 	}
 	// update progress statistics
 	bi.lastBlockTime = block.MsgBlock().Header.Timestamp
@@ -94,7 +96,8 @@ func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 	blockHash := block.Hash()
 	exists, err := bi.chain.HaveBlock(blockHash)
 	if err != nil {
-		return false, err
+		L.Error(err)
+return false, err
 	}
 	if exists {
 		return false, nil
@@ -105,7 +108,8 @@ func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 
 		exists, err := bi.chain.HaveBlock(prevHash)
 		if err != nil {
-			return false, err
+		L.Error(err)
+return false, err
 		}
 		if !exists {
 			return false, fmt.Errorf("import file contains block "+
@@ -117,7 +121,8 @@ func (bi *blockImporter) processBlock(serializedBlock []byte) (bool, error) {
 	isMainChain, isOrphan, err := bi.chain.ProcessBlock(block,
 		blockchain.BFFastAdd, block.Height())
 	if err != nil {
-		return false, err
+		L.Error(err)
+return false, err
 	}
 	if !isMainChain {
 		return false, fmt.Errorf("import file contains an block that "+
@@ -138,7 +143,8 @@ out:
 		// Read the next block from the file and if anything goes wrong notify the status handler with the error and bail.
 		serializedBlock, err := bi.readBlock()
 		if err != nil {
-			bi.errChan <- fmt.Errorf("Error reading from input "+
+		L.Error(err)
+bi.errChan <- fmt.Errorf("Error reading from input "+
 				"file: %v", err.Error())
 			break out
 		}
@@ -180,7 +186,7 @@ func (bi *blockImporter) logProgress() {
 	if bi.receivedLogTx == 1 {
 		txStr = "transaction"
 	}
-	log.Infof("Processed %d %s in the last %s (%d %s, height %d, %s)",
+	L.Infof("Processed %d %s in the last %s (%d %s, height %d, %s)",
 		bi.receivedLogBlocks, blockStr, tDuration, bi.receivedLogTx,
 		txStr, bi.lastHeight, bi.lastBlockTime)
 	bi.receivedLogBlocks = 0
@@ -203,7 +209,8 @@ out:
 			bi.lastHeight++
 			imported, err := bi.processBlock(serializedBlock)
 			if err != nil {
-				bi.errChan <- err
+		L.Error(err)
+bi.errChan <- err
 				break out
 			}
 			if imported {
@@ -277,16 +284,16 @@ func newBlockImporter(	db database.DB, r io.ReadSeeker) (*blockImporter, error) 
 		// Enable transaction index if address index is enabled since it
 		// requires it.
 		if !cfg.TxIndex {
-			log.Infof("Transaction index enabled because it is " +
+			L.Infof("Transaction index enabled because it is " +
 				"required by the address index")
 			cfg.TxIndex = true
 		} else {
-			log.Info("Transaction index is enabled")
+			L.Info("Transaction index is enabled")
 		}
 		indexes = append(indexes, indexers.NewTxIndex(db))
 	}
 	if cfg.AddrIndex {
-		log.Info("Address index is enabled")
+		L.Info("Address index is enabled")
 		indexes = append(indexes, indexers.NewAddrIndex(db, activeNetParams))
 	}
 	// Create an index manager if any of the optional indexes are enabled.
@@ -301,7 +308,8 @@ func newBlockImporter(	db database.DB, r io.ReadSeeker) (*blockImporter, error) 
 		IndexManager: indexManager,
 	})
 	if err != nil {
-		return nil, err
+		L.Error(err)
+return nil, err
 	}
 	return &blockImporter{
 		db:           db,

@@ -20,7 +20,7 @@ type ConcurrentQueue struct {
 // the capacity of the output channel. When the size of the queue is below this
 // threshold, pushes do not incur the overhead of the less efficient overflow
 // structure.
-func NewConcurrentQueue(	bufferSize int) *ConcurrentQueue {
+func NewConcurrentQueue(bufferSize int) *ConcurrentQueue {
 	return &ConcurrentQueue{
 		chanIn:   make(chan interface{}),
 		chanOut:  make(chan interface{}, bufferSize),

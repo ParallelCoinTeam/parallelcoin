@@ -2,23 +2,24 @@
 package main
 
 import (
-   "bufio"
-   "encoding/binary"
-   "fmt"
-   "os"
-   "path/filepath"
-   
-   "github.com/jessevdk/go-flags"
-   
-   wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
-   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-   _ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	"bufio"
+	"encoding/binary"
+	"os"
+	"path/filepath"
+
+	log "github.com/p9c/pod/pkg/logi"
+
+	"github.com/jessevdk/go-flags"
+
+	"github.com/p9c/pod/app/appdata"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 const defaultNet = "mainnet"
 
-var datadir = util.AppDataDir("mod", false)
+var datadir = appdata.Dir("mod", false)
 
 // Flags.
 var opts = struct {
@@ -32,6 +33,7 @@ var opts = struct {
 func init() {
 	_, err := flags.Parse(&opts)
 	if err != nil {
+		Error(err)
 		os.Exit(1)
 	}
 }
@@ -76,7 +78,7 @@ func mainInt() int {
 		return 1
 	}
 	for !opts.Force {
-		fmt.Print("Drop all mod transaction history? [y/N] ")
+		log.Print("Drop all mod transaction history? [y/N] ")
 		scanner := bufio.NewScanner(bufio.NewReader(os.Stdin))
 		if !scanner.Scan() {
 			// Exit on EOF.
@@ -84,8 +86,7 @@ func mainInt() int {
 		}
 		err := scanner.Err()
 		if err != nil {
-			fmt.Println()
-			fmt.Println(err)
+			Error(err)
 			return 1
 		}
 		resp := scanner.Text()
@@ -111,16 +112,19 @@ func mainInt() int {
 		}
 		ns, err := tx.CreateTopLevelBucket(wtxmgrNamespace)
 		if err != nil {
+			Error(err)
 			return err
 		}
 		err = wtxmgr.Create(ns)
 		if err != nil {
+			Error(err)
 			return err
 		}
 		ns = tx.ReadWriteBucket(waddrmgrNamespace).NestedReadWriteBucket(syncBucketName)
 		startBlock := ns.Get(startBlockName)
 		err = ns.Put(syncedToName, startBlock)
 		if err != nil {
+			Error(err)
 			return err
 		}
 		recentBlocks := make([]byte, 40)
@@ -130,6 +134,7 @@ func mainInt() int {
 		return ns.Put(recentBlocksName, recentBlocks)
 	})
 	if err != nil {
+		Error(err)
 		fmt.Println("Failed to drop and re-create namespace:", err)
 		return 1
 	}

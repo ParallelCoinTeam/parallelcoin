@@ -1,3 +1,5 @@
+// +build ignore
+
 package spv_test
 
 import (
@@ -12,22 +14,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/cmd/node/integration/rpctest"
-	"github.com/parallelcointeam/parallelcoin/cmd/spv"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txauthor "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/author"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/log"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	"github.com/p9c/pod/cmd/node/integration/rpctest"
+	"github.com/p9c/pod/cmd/spv"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txauthor "github.com/p9c/pod/pkg/chain/tx/author"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	log "github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 var (
@@ -420,7 +421,7 @@ func testStartRescan(harness *neutrinoHarness, t *testing.T) {
 	// Ensure the ChainService instance stays caught up.
 	_, err = harness.h1.Node.Generate(124)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	err = waitForSync(t, harness.svc, harness.h1)
 	if err != nil {
@@ -949,7 +950,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 
 // func TestNeutrinoSync(// 	t *testing.T) {
 // 	// Set up logging.
-// 	logger := log.NewBackend(os.Stdout)
+// 	logger := log.NewBackend(os.Out)
 // 	chainLogger := logger.Logger("CHAIN")
 // 	chainLogger.SetLevel(logLevel)
 // 	// spv.UseLogger(chainLogger)
@@ -958,7 +959,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	// rpcclient.UseLogger(rpcLogger)
 // 	// Create a btcd SimNet node and generate 800 blocks
 // 	h1, err := rpctest.New(
-// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
+// 		&netparams.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if err != nil {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -974,7 +975,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	}
 // 	// Create a second btcd SimNet node
 // 	h2, err := rpctest.New(
-// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
+// 		&netparams.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if err != nil {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -986,7 +987,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	}
 // 	// Create a third btcd SimNet node and generate 1200 blocks
 // 	h3, err := rpctest.New(
-// 		&chaincfg.SimNetParams, nil, []string{"--txindex"},
+// 		&netparams.SimNetParams, nil, []string{"--txindex"},
 // 	)
 // 	if err != nil {
 // 		t.Fatalf("Couldn't create harness: %s", err)
@@ -1048,7 +1049,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	db, err := walletdb.Create("bdb", tempDir+"/weks.db")
 // 	defer db.Close()
 // 	if err != nil {
-// 		t.Fatalf("Error opening DB: %s\n", err)
+// 		t.Fatalf("ScriptError opening DB: %s\n", err)
 // 	}
 // 	config := spv.Config{
 // 		DataDir:     tempDir,
@@ -1065,7 +1066,7 @@ func testRandomBlocks(harness *neutrinoHarness, t *testing.T) {
 // 	spv.QueryPeerConnectTimeout = 10 * time.Second
 // 	svc, err := spv.NewChainService(config)
 // 	if err != nil {
-// 		t.Fatalf("Error creating ChainService: %s", err)
+// 		t.Fatalf("ScriptError creating ChainService: %s", err)
 // 	}
 // 	svc.Start()
 // 	defer svc.Stop()
@@ -1302,7 +1303,7 @@ func startRescan(t *testing.T, svc *spv.ChainService, addr util.Address,
 					rescanMtx.Unlock()
 				},
 				OnRecvTx: func(tx *util.Tx,
-					details *json.BlockDetails) {
+					details *btcjson.BlockDetails) {
 					rescanMtx.Lock()
 					hash, err := chainhash.
 						NewHashFromStr(
@@ -1322,7 +1323,7 @@ func startRescan(t *testing.T, svc *spv.ChainService, addr util.Address,
 					rescanMtx.Unlock()
 				},
 				OnRedeemingTx: func(tx *util.Tx,
-					details *json.BlockDetails) {
+					details *btcjson.BlockDetails) {
 					rescanMtx.Lock()
 					hash, err := chainhash.
 						NewHashFromStr(

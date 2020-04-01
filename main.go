@@ -5,7 +5,10 @@
 package main
 
 import (
-	"github.com/parallelcointeam/parallelcoin/cmd"
+	_ "github.com/p9c/pod/pkg"
+	_ "net/http/pprof"
+
+	"github.com/p9c/pod/cmd"
 )
 
 func main() {

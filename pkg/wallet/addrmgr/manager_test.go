@@ -2,22 +2,23 @@
 package waddrmgr_test
 
 import (
-   "bytes"
-   "encoding/hex"
-   "fmt"
-   "os"
-   "reflect"
-   "testing"
-   "time"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
-   "github.com/parallelcointeam/parallelcoin/pkg/util/snacl"
-   waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-   walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	"bytes"
+	"encoding/hex"
+	"fmt"
+	"os"
+	"reflect"
+	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util/snacl"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // // newHash converts the passed big-endian hex string into a chainhash.Hash.
@@ -34,7 +35,7 @@ import (
 
 // failingSecretKeyGen is a waddrmgr.SecretKeyGenerator that always returns
 // snacl.ErrDecryptFailed.
-//nolint
+// nolint
 func failingSecretKeyGen(passphrase *[]byte,
 	config *waddrmgr.ScryptOptions) (*snacl.SecretKey, error) {
 	return nil, snacl.ErrDecryptFailed
@@ -48,7 +49,7 @@ func failingSecretKeyGen(passphrase *[]byte,
 // none of the outputs can be spent yet.  However, on subsequent runs, all
 // blocks have been inserted and therefore some of the transaction outputs are
 // spent.
-//nolint
+// nolint
 type testContext struct {
 	t            *testing.T
 	db           walletdb.DB
@@ -64,15 +65,15 @@ type testContext struct {
 type addrType byte
 
 const (
-	//nolint
+	// nolint
 	addrPubKeyHash addrType = iota
-	//nolint
+	// nolint
 	addrScriptHash
 )
 
 // expectedAddr is used to house the expected return values from a managed
 // address.  Not all fields for used for all managed address types.
-//nolint
+// nolint
 type expectedAddr struct {
 	address     string
 	addressHash []byte
@@ -89,7 +90,7 @@ type expectedAddr struct {
 
 // testNamePrefix is a helper to return a prefix to show for test errors based
 // on the state of the test context.
-//nolint
+// nolint
 func testNamePrefix(tc *testContext) string {
 	prefix := "Open "
 	if tc.create {
@@ -105,7 +106,7 @@ func testNamePrefix(tc *testContext) string {
 // When the test context indicates the manager is unlocked, the private data
 // will also be tested, otherwise, the functions which deal with private data
 // are checked to ensure they return the correct error.
-//nolint
+// nolint
 func testManagedPubKeyAddress(tc *testContext, prefix string,
 	gotAddr waddrmgr.ManagedPubKeyAddress, wantAddr *expectedAddr) bool {
 	// Ensure pubkey is the expected value for the managed address.
@@ -220,7 +221,7 @@ func testManagedPubKeyAddress(tc *testContext, prefix string,
 // When the test context indicates the manager is unlocked, the private data
 // will also be tested, otherwise, the functions which deal with private data
 // are checked to ensure they return the correct error.
-//nolint
+// nolint
 func testManagedScriptAddress(tc *testContext, prefix string, gotAddr waddrmgr.ManagedScriptAddress, wantAddr *expectedAddr) bool {
 	// Ensure script is the expected value for the managed address.
 	// Ensure script is the expected value for the managed address.  Since
@@ -263,7 +264,7 @@ func testManagedScriptAddress(tc *testContext, prefix string, gotAddr waddrmgr.M
 // When the test context indicates the manager is unlocked, the private data
 // will also be tested, otherwise, the functions which deal with private data
 // are checked to ensure they return the correct error.
-//nolint
+// nolint
 func testAddress(tc *testContext, prefix string, gotAddr waddrmgr.ManagedAddress, wantAddr *expectedAddr) bool {
 	if gotAddr.Account() != tc.account {
 		tc.t.Errorf("ManagedAddress.Account: unexpected account - got "+
@@ -315,7 +316,7 @@ func testAddress(tc *testContext, prefix string, gotAddr waddrmgr.ManagedAddress
 // generating multiple addresses via NextExternalAddresses, ensuring they can be
 // retrieved by Address, and that they work properly when the manager is locked
 // and unlocked.
-//nolint
+// nolint
 func testExternalAddresses(tc *testContext) bool {
 	prefix := testNamePrefix(tc) + " testExternalAddresses"
 	var addrs []waddrmgr.ManagedAddress
@@ -439,7 +440,7 @@ func testExternalAddresses(tc *testContext) bool {
 // generating multiple addresses via NextInternalAddresses, ensuring they can be
 // retrieved by Address, and that they work properly when the manager is locked
 // and unlocked.
-//nolint
+// nolint
 func testInternalAddresses(tc *testContext) bool {
 	// When the address manager is not in watching-only mode, unlocked it
 	// first to ensure that address generation works correctly when the
@@ -574,7 +575,7 @@ func testInternalAddresses(tc *testContext) bool {
 // testLocking tests the basic locking semantics of the address manager work
 // as expected.  Other tests ensure addresses behave as expected under locked
 // and unlocked conditions.
-//nolint
+// nolint
 func testLocking(tc *testContext) bool {
 	if tc.unlocked {
 		tc.t.Error("testLocking called with an unlocked manager")
@@ -662,7 +663,7 @@ func testLocking(tc *testContext) bool {
 //
 // This function expects the manager is already locked when called and returns
 // with the manager locked.
-//nolint
+// nolint
 func testImportPrivateKey(tc *testContext) bool {
 	tests := []struct {
 		name       string
@@ -820,7 +821,7 @@ func testImportPrivateKey(tc *testContext) bool {
 //
 // This function expects the manager is already locked when called and returns
 // with the manager locked.
-//nolint
+// nolint
 func testImportScript(tc *testContext) bool {
 	tests := []struct {
 		name       string
@@ -974,7 +975,7 @@ func testImportScript(tc *testContext) bool {
 }
 
 // testMarkUsed ensures used addresses are flagged as such.
-//nolint
+// nolint
 func testMarkUsed(tc *testContext) bool {
 	tests := []struct {
 		name string
@@ -1046,7 +1047,7 @@ func testMarkUsed(tc *testContext) bool {
 
 // testChangePassphrase ensures changes both the public and private passphrases
 // works as intended.
-//nolint
+// nolint
 func testChangePassphrase(tc *testContext) bool {
 	// Force an error when changing the passphrase due to failure to
 	// generate a new secret key by replacing the generation function one
@@ -1177,7 +1178,7 @@ func testChangePassphrase(tc *testContext) bool {
 
 // testNewAccount tests the new account creation func of the address manager works
 // as expected.
-//nolint
+// nolint
 func testNewAccount(tc *testContext) bool {
 	if tc.watchingOnly {
 		// Creating new accounts in watching-only mode should return ErrWatchingOnly
@@ -1276,7 +1277,7 @@ func testNewAccount(tc *testContext) bool {
 
 // testLookupAccount tests the basic account lookup func of the address manager
 // works as expected.
-//nolint
+// nolint
 func testLookupAccount(tc *testContext) bool {
 	// Lookup accounts created earlier in testNewAccount
 	expectedAccounts := map[string]uint32{
@@ -1365,7 +1366,7 @@ func testLookupAccount(tc *testContext) bool {
 
 // testRenameAccount tests the rename account func of the address manager works
 // as expected.
-//nolint
+// nolint
 func testRenameAccount(tc *testContext) bool {
 	var acctName string
 	err := walletdb.View(tc.db, func(tx walletdb.ReadTx) error {
@@ -1428,7 +1429,7 @@ func testRenameAccount(tc *testContext) bool {
 
 // testForEachAccount tests the retrieve all accounts func of the address
 // manager works as expected.
-//nolint
+// nolint
 func testForEachAccount(tc *testContext) bool {
 	prefix := testNamePrefix(tc) + " testForEachAccount"
 	expectedAccounts := []uint32{0, 1}
@@ -1468,7 +1469,7 @@ func testForEachAccount(tc *testContext) bool {
 
 // testForEachAccountAddress tests that iterating through the given
 // account addresses using the manager API works as expected.
-//nolint
+// nolint
 func testForEachAccountAddress(tc *testContext) bool {
 	prefix := testNamePrefix(tc) + " testForEachAccountAddress"
 	// Make a map of expected addresses
@@ -1509,7 +1510,7 @@ func testForEachAccountAddress(tc *testContext) bool {
 // testManagerAPI tests the functions provided by the Manager API as well as
 // the ManagedAddress, ManagedPubKeyAddress, and ManagedScriptAddress
 // interfaces.
-//nolint
+// nolint
 func testManagerAPI(tc *testContext) {
 	testLocking(tc)
 	testExternalAddresses(tc)
@@ -1532,7 +1533,7 @@ func testManagerAPI(tc *testContext) {
 // testWatchingOnly tests various facets of a watching-only address
 // manager such as running the full set of API tests against a newly converted
 // copy as well as when it is opened from an existing namespace.
-//nolint
+// nolint
 func testWatchingOnly(tc *testContext) bool {
 	// Make a copy of the current database so the copy can be converted to
 	// watching only.
@@ -1562,7 +1563,7 @@ func testWatchingOnly(tc *testContext) bool {
 	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
 		var err error
-		mgr, err = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
+		mgr, err = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
 		return err
 	})
 	if err != nil {
@@ -1599,7 +1600,7 @@ func testWatchingOnly(tc *testContext) bool {
 	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
 		var err error
-		mgr, err = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
+		mgr, err = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
 		return err
 	})
 	if err != nil {
@@ -1625,7 +1626,7 @@ func testWatchingOnly(tc *testContext) bool {
 }
 
 // testSync tests various facets of setting the manager sync state.
-//nolint
+// nolint
 func testSync(tc *testContext) bool {
 	// Ensure syncing the manager to nil results in the synced to state
 	// being the earliest block (genesis block in this case).
@@ -1687,7 +1688,7 @@ func testSync(tc *testContext) bool {
 // 	// returned.
 // 	err := walletdb.View(db, func(tx walletdb.ReadTx) error {
 // 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
-// 		_, err := waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
+// 		_, err := waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
 // 		return err
 // 	})
 // 	if !checkManagerError(t, "Open non-existent", err, waddrmgr.ErrNoExist) {
@@ -1702,12 +1703,12 @@ func testSync(tc *testContext) bool {
 // 		}
 // 		err = waddrmgr.Create(
 // 			ns, seed, pubPassphrase, privPassphrase,
-// 			&chaincfg.MainNetParams, fastScrypt, time.Time{},
+// 			&netparams.MainNetParams, fastScrypt, time.Time{},
 // 		)
 // 		if err != nil {
 // 			return err
 // 		}
-// 		mgr, err = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
+// 		mgr, err = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
 // 		return err
 // 	})
 // 	if err != nil {
@@ -1721,7 +1722,7 @@ func testSync(tc *testContext) bool {
 // 	err = walletdb.Update(db, func(tx walletdb.ReadWriteTx) error {
 // 		ns := tx.ReadWriteBucket(waddrmgrNamespaceKey)
 // 		return waddrmgr.Create(ns, seed, pubPassphrase, privPassphrase,
-// 			&chaincfg.MainNetParams, fastScrypt, time.Time{})
+// 			&netparams.MainNetParams, fastScrypt, time.Time{})
 // 	})
 // 	if !checkManagerError(t, "Create existing", err, waddrmgr.ErrAlreadyExists) {
 // 		mgr.Close()
@@ -1748,7 +1749,7 @@ func testSync(tc *testContext) bool {
 // 	*waddrmgr.TstLatestMgrVersion++
 // 	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
 // 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
-// 		_, err := waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
+// 		_, err := waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
 // 		return err
 // 	})
 // 	if !checkManagerError(t, "Upgrade needed", err, waddrmgr.ErrUpgrade) {
@@ -1760,7 +1761,7 @@ func testSync(tc *testContext) bool {
 // 	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
 // 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
 // 		var err error
-// 		mgr, err = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
+// 		mgr, err = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
 // 		return err
 // 	})
 // 	if err != nil {
@@ -1895,13 +1896,13 @@ func TestScopedKeyManagerManagement(t *testing.T) {
 		}
 		err = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
-			&chaincfg.MainNetParams, fastScrypt, time.Time{},
+			&netparams.MainNetParams, fastScrypt, time.Time{},
 		)
 		if err != nil {
 			return err
 		}
 		mgr, err = waddrmgr.Open(
-			ns, pubPassphrase, &chaincfg.MainNetParams,
+			ns, pubPassphrase, &netparams.MainNetParams,
 		)
 		if err != nil {
 			return err
@@ -2035,7 +2036,7 @@ func TestScopedKeyManagerManagement(t *testing.T) {
 	err = walletdb.View(db, func(tx walletdb.ReadTx) error {
 		ns := tx.ReadBucket(waddrmgrNamespaceKey)
 		var err error
-		mgr, err = waddrmgr.Open(ns, pubPassphrase, &chaincfg.MainNetParams)
+		mgr, err = waddrmgr.Open(ns, pubPassphrase, &netparams.MainNetParams)
 		if err != nil {
 			return err
 		}
@@ -2114,13 +2115,13 @@ func TestRootHDKeyNeutering(t *testing.T) {
 		}
 		err = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
-			&chaincfg.MainNetParams, fastScrypt, time.Time{},
+			&netparams.MainNetParams, fastScrypt, time.Time{},
 		)
 		if err != nil {
 			return err
 		}
 		mgr, err = waddrmgr.Open(
-			ns, pubPassphrase, &chaincfg.MainNetParams,
+			ns, pubPassphrase, &netparams.MainNetParams,
 		)
 		if err != nil {
 			return err
@@ -2196,13 +2197,13 @@ func TestNewRawAccount(t *testing.T) {
 		}
 		err = waddrmgr.Create(
 			ns, seed, pubPassphrase, privPassphrase,
-			&chaincfg.MainNetParams, fastScrypt, time.Time{},
+			&netparams.MainNetParams, fastScrypt, time.Time{},
 		)
 		if err != nil {
 			return err
 		}
 		mgr, err = waddrmgr.Open(
-			ns, pubPassphrase, &chaincfg.MainNetParams,
+			ns, pubPassphrase, &netparams.MainNetParams,
 		)
 		if err != nil {
 			return err

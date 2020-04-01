@@ -2,13 +2,11 @@ package wallet
 
 import (
 	"errors"
-	"fmt"
 
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/util"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // MakeMultiSigScript creates a multi-signature script that can be redeemed with
@@ -25,7 +23,7 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 		if dbtx != nil {
 			err := dbtx.Rollback()
 			if err != nil {
-				fmt.Println(err, cl.Ine())
+				Error(err)
 			}
 		}
 	}()
@@ -44,12 +42,14 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 				var err error
 				dbtx, err = w.db.BeginReadTx()
 				if err != nil {
+					Error(err)
 					return nil, err
 				}
 				addrmgrNs = dbtx.ReadBucket(waddrmgrNamespaceKey)
 			}
 			addrInfo, err := w.Manager.Address(addrmgrNs, addr)
 			if err != nil {
+				Error(err)
 				return nil, err
 			}
 			serializedPubKey := addrInfo.(waddrmgr.ManagedPubKeyAddress).
@@ -57,6 +57,7 @@ func (w *Wallet) MakeMultiSigScript(addrs []util.Address, nRequired int) ([]byte
 			pubKeyAddr, err := util.NewAddressPubKey(
 				serializedPubKey, w.chainParams)
 			if err != nil {
+				Error(err)
 				return nil, err
 			}
 			pubKeys[i] = pubKeyAddr
@@ -81,10 +82,12 @@ func (w *Wallet) ImportP2SHRedeemScript(script []byte) (*util.AddressScriptHash,
 			waddrmgr.KeyScopeBIP0084,
 		)
 		if err != nil {
+			Error(err)
 			return err
 		}
 		addrInfo, err := bip44Mgr.ImportScript(addrmgrNs, script, bs)
 		if err != nil {
+			Error(err)
 			// Don't care if it's already there, but still have to
 			// set the p2shAddr since the address manager didn't
 			// return anything useful.

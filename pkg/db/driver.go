@@ -2,8 +2,7 @@ package database
 
 import (
 	"fmt"
-
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"log"
 )
 
 // Driver defines a structure for backend drivers to use when they registered themselves as a backend which implements the DB interface.
@@ -15,14 +14,14 @@ type Driver struct {
 	// Open is the function that will be invoked with all user-specified arguments to open the database.  This function must return ErrDbDoesNotExist if the database has not already been created.
 	Open func(args ...interface{}) (DB, error)
 	// UseLogger uses a specified Logger to output package logging info.
-	UseLogger func(logger cl.SubSystem)
+	UseLogger func(logger log.Logger)
 }
 
 // driverList holds all of the registered database backends.
 var drivers = make(map[string]*Driver)
 
 // Create initializes and opens a database for the specified type.  The arguments are specific to the database type driver.  See the documentation for the database driver for further details. ErrDbUnknownType will be returned if the the database type is not registered.
-func Create(	dbType string, args ...interface{}) (DB, error) {
+func Create(dbType string, args ...interface{}) (DB, error) {
 	drv, exists := drivers[dbType]
 	if !exists {
 		str := fmt.Sprintf("driver %q is not registered", dbType)
@@ -32,7 +31,7 @@ func Create(	dbType string, args ...interface{}) (DB, error) {
 }
 
 // Open opens an existing database for the specified type.  The arguments are specific to the database type driver.  See the documentation for the database driver for further details. ErrDbUnknownType will be returned if the the database type is not registered.
-func Open(	dbType string, args ...interface{}) (DB, error) {
+func Open(dbType string, args ...interface{}) (DB, error) {
 	drv, exists := drivers[dbType]
 	if !exists {
 		str := fmt.Sprintf("driver %q is not registered", dbType)
@@ -42,7 +41,7 @@ func Open(	dbType string, args ...interface{}) (DB, error) {
 }
 
 // RegisterDriver adds a backend database driver to available interfaces. ErrDbTypeRegistered will be returned if the database type for the driver has already been registered.
-func RegisterDriver(	driver Driver) error {
+func RegisterDriver(driver Driver) error {
 	if _, exists := drivers[driver.DbType]; exists {
 		str := fmt.Sprintf("driver %q is already registered",
 			driver.DbType)

@@ -7,7 +7,7 @@ import (
 )
 
 // TestMedianTime tests the medianTime implementation.
-func TestMedianTime(	t *testing.T) {
+func TestMedianTime(t *testing.T) {
 	tests := []struct {
 		in         []int64
 		wantOffset int64

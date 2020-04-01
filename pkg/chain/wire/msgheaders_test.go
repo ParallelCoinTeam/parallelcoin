@@ -1,18 +1,16 @@
 package wire
 
 import (
-   "bytes"
-   "io"
-   "reflect"
-   "testing"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   "github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"bytes"
+	"io"
+	"reflect"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 // TestHeaders tests the MsgHeaders API.
-func TestHeaders(	t *testing.T) {
+func TestHeaders(t *testing.T) {
 	pver := uint32(60002)
 	// Ensure the command is expected value.
 	wantCmd := "headers"
@@ -33,7 +31,7 @@ func TestHeaders(	t *testing.T) {
 	bh := &blockOne.Header
 	err := msg.AddBlockHeader(bh)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	if !reflect.DeepEqual(msg.Headers[0], bh) {
 		t.Errorf("AddHeader: wrong header - got %v, want %v",
@@ -51,7 +49,7 @@ func TestHeaders(	t *testing.T) {
 }
 
 // TestHeadersWire tests the MsgHeaders wire encode and decode for various numbers of headers and protocol versions.
-func TestHeadersWire(	t *testing.T) {
+func TestHeadersWire(t *testing.T) {
 	hash := mainNetGenesisHash
 	merkleHash := blockOne.Header.MerkleRoot
 	bits := uint32(0x1d00ffff)
@@ -68,7 +66,7 @@ func TestHeadersWire(	t *testing.T) {
 	oneHeader := NewMsgHeaders()
 	err := oneHeader.AddBlockHeader(bh)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	oneHeaderEncoded := []byte{
 		0x01,                   // VarInt for number of headers.
@@ -205,7 +203,7 @@ func TestHeadersWire(	t *testing.T) {
 }
 
 // TestHeadersWireErrors performs negative tests against wire encode and decode of MsgHeaders to confirm error paths work correctly.
-func TestHeadersWireErrors(	t *testing.T) {
+func TestHeadersWireErrors(t *testing.T) {
 	pver := ProtocolVersion
 	wireErr := &MessageError{}
 	hash := mainNetGenesisHash
@@ -219,7 +217,7 @@ func TestHeadersWireErrors(	t *testing.T) {
 	oneHeader := NewMsgHeaders()
 	err := oneHeader.AddBlockHeader(bh)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	oneHeaderEncoded := []byte{
 		0x01,                   // VarInt for number of headers.
@@ -242,7 +240,7 @@ func TestHeadersWireErrors(	t *testing.T) {
 	for i := 0; i < MaxBlockHeadersPerMsg; i++ {
 		err = maxHeaders.AddBlockHeader(bh)
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}
 	maxHeaders.Headers = append(maxHeaders.Headers, bh)
@@ -256,7 +254,7 @@ func TestHeadersWireErrors(	t *testing.T) {
 	transHeader := NewMsgHeaders()
 	err = transHeader.AddBlockHeader(bhTrans)
 	if err != nil {
-		t.Log(cl.Ine(), err)
+		t.Log(err)
 	}
 	transHeaderEncoded := []byte{
 		0x01,                   // VarInt for number of headers.

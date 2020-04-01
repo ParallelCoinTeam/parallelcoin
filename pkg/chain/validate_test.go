@@ -6,15 +6,15 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // TestSequenceLocksActive tests the SequenceLockActive function to ensure it
 // works as expected in all possible combinations/scenarios.
-func TestSequenceLocksActive(	t *testing.T) {
+func TestSequenceLocksActive(t *testing.T) {
 	seqLock := func(h int32, s int64) *SequenceLock {
 		return &SequenceLock{
 			Seconds:     s,
@@ -56,7 +56,7 @@ func TestSequenceLocksActive(	t *testing.T) {
 // func TestCheckConnectBlockTemplate(// 	t *testing.T) {
 // 	// Create a new database and chain instance to run tests against.
 // 	chain, teardownFunc, err := chainSetup("checkconnectblocktemplate",
-// 		&chaincfg.MainNetParams)
+// 		&netparams.MainNetParams)
 // 	if err != nil {
 // 		t.Errorf("Failed to setup chain instance: %v", err)
 // 		return
@@ -129,11 +129,11 @@ func TestSequenceLocksActive(	t *testing.T) {
 // }
 
 // TestCheckBlockSanity tests the CheckBlockSanity function to ensure it works as expected.
-func TestCheckBlockSanity(	t *testing.T) {
+func TestCheckBlockSanity(t *testing.T) {
 	powLimit := chaincfg.MainNetParams.PowLimit
 	block := util.NewBlock(&Block100000)
 	timeSource := NewMedianTime()
-	err := CheckBlockSanity(block, powLimit, timeSource, false, 1, false)
+	err := CheckBlockSanity(block, powLimit, timeSource, false, 1)
 	if err != nil {
 		t.Errorf("CheckBlockSanity: %v", err)
 	}
@@ -141,7 +141,7 @@ func TestCheckBlockSanity(	t *testing.T) {
 	// second fails.
 	timestamp := block.MsgBlock().Header.Timestamp
 	block.MsgBlock().Header.Timestamp = timestamp.Add(time.Nanosecond)
-	err = CheckBlockSanity(block, powLimit, timeSource, false, 1, false)
+	err = CheckBlockSanity(block, powLimit, timeSource, false, 1)
 	if err == nil {
 		t.Errorf("CheckBlockSanity: error is nil when it shouldn't be")
 	}
@@ -150,7 +150,7 @@ func TestCheckBlockSanity(	t *testing.T) {
 // TestCheckSerializedHeight tests the checkSerializedHeight function with
 // various serialized heights and also does negative tests to ensure errors
 // and handled properly.
-func TestCheckSerializedHeight(	t *testing.T) {
+func TestCheckSerializedHeight(t *testing.T) {
 	// Create an empty coinbase template to be used in the tests below.
 	coinbaseOutpoint := wire.NewOutPoint(&chainhash.Hash{}, math.MaxUint32)
 	coinbaseTx := wire.NewMsgTx(1)
@@ -223,7 +223,7 @@ var Block100000 = wire.MsgBlock{
 			0xb2, 0x94, 0x09, 0x96, 0xec, 0xff, 0x95, 0x22,
 			0x28, 0xc3, 0x06, 0x7c, 0xc3, 0x8d, 0x48, 0x85,
 			0xef, 0xb5, 0xa4, 0xac, 0x42, 0x47, 0xe9, 0xf3,
-		}), // f3e94742aca4b5ef85488dc37c06c3282295ffec960994b2c0d5ac2a25a95766
+		}),                                  // f3e94742aca4b5ef85488dc37c06c3282295ffec960994b2c0d5ac2a25a95766
 		Timestamp: time.Unix(1293623863, 0), // 2010-12-29 11:57:43 +0000 UTC
 		Bits:      0x1b04864c,               // 453281356
 		Nonce:     0x10572b0f,               // 274148111

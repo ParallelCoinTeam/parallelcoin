@@ -3,7 +3,7 @@ package wire
 import (
 	"io"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // MsgGetCFCheckpt is a request for filter headers at evenly spaced intervals throughout the blockchain history. It allows to set the FilterType field to get headers in the chain of basic (0x00) or extended (0x01) headers.
@@ -16,6 +16,7 @@ type MsgGetCFCheckpt struct {
 func (msg *MsgGetCFCheckpt) BtcDecode(r io.Reader, pver uint32, _ MessageEncoding) error {
 	err := readElement(r, &msg.FilterType)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	return readElement(r, &msg.StopHash)
@@ -25,6 +26,7 @@ func (msg *MsgGetCFCheckpt) BtcDecode(r io.Reader, pver uint32, _ MessageEncodin
 func (msg *MsgGetCFCheckpt) BtcEncode(w io.Writer, pver uint32, _ MessageEncoding) error {
 	err := writeElement(w, msg.FilterType)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	return writeElement(w, &msg.StopHash)
@@ -42,7 +44,7 @@ func (msg *MsgGetCFCheckpt) MaxPayloadLength(pver uint32) uint32 {
 }
 
 // NewMsgGetCFCheckpt returns a new bitcoin getcfcheckpt message that conforms to the Message interface using the passed parameters and defaults for the remaining fields.
-func NewMsgGetCFCheckpt(	filterType FilterType, stopHash *chainhash.Hash) *MsgGetCFCheckpt {
+func NewMsgGetCFCheckpt(filterType FilterType, stopHash *chainhash.Hash) *MsgGetCFCheckpt {
 	return &MsgGetCFCheckpt{
 		FilterType: filterType,
 		StopHash:   *stopHash,

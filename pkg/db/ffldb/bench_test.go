@@ -5,13 +5,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
-// BenchmarkBlockHeader benchmarks how long it takes to load the mainnet genesis
-// block header.
+// BenchmarkBlockHeader benchmarks how long it takes to load the mainnet genesis block header.
 func BenchmarkBlockHeader(b *testing.B) {
 	// Start by creating a new database and populating it with the mainnet genesis block.
 	dbPath := filepath.Join(os.TempDir(), "ffldb-benchblkhdr")

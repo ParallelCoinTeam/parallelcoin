@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // // TestHaveBlock tests the HaveBlock API to ensure proper functionality.
@@ -31,7 +32,7 @@ import (
 // 	}
 // 	// Create a new database and chain instance to run tests against.
 // 	chain, teardownFunc, err := chainSetup("haveblock",
-// 		&chaincfg.MainNetParams)
+// 		&netparams.MainNetParams)
 // 	if err != nil {
 // 		t.Errorf("Failed to setup chain instance: %v", err)
 // 		return
@@ -96,20 +97,20 @@ import (
 // }
 // TestCalcSequenceLock tests the LockTimeToSequence function, and the CalcSequenceLock method of a Chain instance. The tests exercise several combinations of inputs to the CalcSequenceLock function in order to ensure the returned SequenceLocks are correct for each test instance.
 func TestCalcSequenceLock(t *testing.T) {
-	netParams := &chaincfg.SimNetParams
+	netParams := &netparams.SimNetParams
 	// We need to activate CSV in order to test the processing logic, so manually craft the block version that's used to signal the soft-fork activation.
 	csvBit := netParams.Deployments[chaincfg.DeploymentCSV].BitNumber
 	blockVersion := int32(0x20000000 | (uint32(1) << csvBit))
 	// Generate enough synthetic blocks to activate CSV.
 	chain := newFakeChain(netParams)
-	node := chain.bestChain.Tip()
+	node := chain.BestChain.Tip()
 	blockTime := node.Header().Timestamp
 	numBlocksToActivate := netParams.MinerConfirmationWindow * 3
 	for i := uint32(0); i < numBlocksToActivate; i++ {
 		blockTime = blockTime.Add(time.Second)
 		node = newFakeNode(node, blockVersion, 0, blockTime)
 		chain.Index.AddNode(node)
-		chain.bestChain.SetTip(node)
+		chain.BestChain.SetTip(node)
 	}
 	// Create a utxo view with a fake utxo for the inputs used in the transactions created below.  This utxo is added such that it has an age of 4 blocks.
 	targetTx := util.NewTx(&wire.MsgTx{
@@ -367,7 +368,7 @@ func TestCalcSequenceLock(t *testing.T) {
 }
 
 // nodeHashes is a convenience function that returns the hashes for all of the passed indexes of the provided nodes.  It is used to construct expected hash slices in the tests.
-func nodeHashes(nodes []*blockNode, indexes ...int) []chainhash.Hash {
+func nodeHashes(nodes []*BlockNode, indexes ...int) []chainhash.Hash {
 	hashes := make([]chainhash.Hash, 0, len(indexes))
 	for _, idx := range indexes {
 		hashes = append(hashes, nodes[idx].hash)
@@ -376,7 +377,7 @@ func nodeHashes(nodes []*blockNode, indexes ...int) []chainhash.Hash {
 }
 
 // nodeHeaders is a convenience function that returns the headers for all of the passed indexes of the provided nodes.  It is used to construct expected located headers in the tests.
-func nodeHeaders(nodes []*blockNode, indexes ...int) []wire.BlockHeader {
+func nodeHeaders(nodes []*BlockNode, indexes ...int) []wire.BlockHeader {
 	headers := make([]wire.BlockHeader, 0, len(indexes))
 	for _, idx := range indexes {
 		headers = append(headers, nodes[idx].Header())
@@ -390,8 +391,8 @@ func TestLocateInventory(t *testing.T) {
 	// 	genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
 	// 	                              \-> 16a -> 17a
 	tip := tstTip
-	chain := newFakeChain(&chaincfg.MainNetParams)
-	branch0Nodes := chainedNodes(chain.bestChain.Genesis(), 18)
+	chain := newFakeChain(&netparams.MainNetParams)
+	branch0Nodes := chainedNodes(chain.BestChain.Genesis(), 18)
 	branch1Nodes := chainedNodes(branch0Nodes[14], 2)
 	for _, node := range branch0Nodes {
 		chain.Index.AddNode(node)
@@ -399,7 +400,7 @@ func TestLocateInventory(t *testing.T) {
 	for _, node := range branch1Nodes {
 		chain.Index.AddNode(node)
 	}
-	chain.bestChain.SetTip(tip(branch0Nodes))
+	chain.BestChain.SetTip(tip(branch0Nodes))
 	// Create chain views for different branches of the overall chain to simulate a local and remote node on different parts of the chain.
 	localView := newChainView(tip(branch0Nodes))
 	remoteView := newChainView(tip(branch1Nodes))
@@ -645,8 +646,8 @@ func TestHeightToHashRange(t *testing.T) {
 	// 	genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
 	// 	                              \-> 16a -> 17a -> 18a (unvalidated)
 	tip := tstTip
-	chain := newFakeChain(&chaincfg.MainNetParams)
-	branch0Nodes := chainedNodes(chain.bestChain.Genesis(), 18)
+	chain := newFakeChain(&netparams.MainNetParams)
+	branch0Nodes := chainedNodes(chain.BestChain.Genesis(), 18)
 	branch1Nodes := chainedNodes(branch0Nodes[14], 3)
 	for _, node := range branch0Nodes {
 		chain.Index.SetStatusFlags(node, statusValid)
@@ -658,7 +659,7 @@ func TestHeightToHashRange(t *testing.T) {
 		}
 		chain.Index.AddNode(node)
 	}
-	chain.bestChain.SetTip(tip(branch0Nodes))
+	chain.BestChain.SetTip(tip(branch0Nodes))
 	tests := []struct {
 		name string
 		// locator for requested inventory
@@ -737,8 +738,8 @@ func TestIntervalBlockHashes(t *testing.T) {
 	// 	genesis -> 1 -> 2 -> ... -> 15 -> 16  -> 17  -> 18
 	// 	                              \-> 16a -> 17a -> 18a (unvalidated)
 	tip := tstTip
-	chain := newFakeChain(&chaincfg.MainNetParams)
-	branch0Nodes := chainedNodes(chain.bestChain.Genesis(), 18)
+	chain := newFakeChain(&netparams.MainNetParams)
+	branch0Nodes := chainedNodes(chain.BestChain.Genesis(), 18)
 	branch1Nodes := chainedNodes(branch0Nodes[14], 3)
 	for _, node := range branch0Nodes {
 		chain.Index.SetStatusFlags(node, statusValid)
@@ -750,7 +751,7 @@ func TestIntervalBlockHashes(t *testing.T) {
 		}
 		chain.Index.AddNode(node)
 	}
-	chain.bestChain.SetTip(tip(branch0Nodes))
+	chain.BestChain.SetTip(tip(branch0Nodes))
 	tests := []struct {
 		name        string
 		endHash     chainhash.Hash

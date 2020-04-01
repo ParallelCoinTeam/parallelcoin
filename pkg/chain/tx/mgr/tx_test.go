@@ -9,15 +9,15 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	. "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	wtxmgr "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/mgr"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	. "github.com/p9c/pod/pkg/chain/tx/mgr"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 // Received transaction output for mainnet outpoint
@@ -82,12 +82,12 @@ func testStore() (*Store, walletdb.DB, func(), error) {
 		if err != nil {
 			return err
 		}
-		s, err = Open(ns, &chaincfg.TestNet3Params)
+		s, err = Open(ns, &netparams.TestNet3Params)
 		return err
 	})
 	return s, db, teardown, err
 }
-func serializeTx(	tx *util.Tx) []byte {
+func serializeTx(tx *util.Tx) []byte {
 	var buf bytes.Buffer
 	err := tx.MsgTx().Serialize(&buf)
 	if err != nil {
@@ -95,7 +95,7 @@ func serializeTx(	tx *util.Tx) []byte {
 	}
 	return buf.Bytes()
 }
-func TestInsertsCreditsDebitsRollbacks(	t *testing.T) {
+func TestInsertsCreditsDebitsRollbacks(t *testing.T) {
 	t.Parallel()
 	// Create a double spend of the received blockchain transaction.
 	dupRecvTx, _ := util.NewTxFromBytes(TstRecvSerializedTx)
@@ -537,7 +537,7 @@ func TestInsertsCreditsDebitsRollbacks(	t *testing.T) {
 		}
 	}
 }
-func TestFindingSpentCredits(	t *testing.T) {
+func TestFindingSpentCredits(t *testing.T) {
 	t.Parallel()
 	s, db, teardown, err := testStore()
 	if err != nil {
@@ -551,7 +551,7 @@ func TestFindingSpentCredits(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns := dbtx.ReadWriteBucket(namespaceKey)
@@ -601,7 +601,7 @@ func TestFindingSpentCredits(	t *testing.T) {
 		t.Fatal("has more than one unspent credit")
 	}
 }
-func newCoinBase(	outputValues ...int64) *wire.MsgTx {
+func newCoinBase(outputValues ...int64) *wire.MsgTx {
 	tx := wire.MsgTx{
 		TxIn: []*wire.TxIn{
 			{
@@ -614,7 +614,7 @@ func newCoinBase(	outputValues ...int64) *wire.MsgTx {
 	}
 	return &tx
 }
-func spendOutput(	txHash *chainhash.Hash, index uint32, outputValues ...int64) *wire.MsgTx {
+func spendOutput(txHash *chainhash.Hash, index uint32, outputValues ...int64) *wire.MsgTx {
 	tx := wire.MsgTx{
 		TxIn: []*wire.TxIn{
 			{
@@ -627,7 +627,7 @@ func spendOutput(	txHash *chainhash.Hash, index uint32, outputValues ...int64) *
 	}
 	return &tx
 }
-func spendOutputs(	outputs []wire.OutPoint, outputValues ...int64) *wire.MsgTx {
+func spendOutputs(outputs []wire.OutPoint, outputValues ...int64) *wire.MsgTx {
 	tx := &wire.MsgTx{}
 	for _, output := range outputs {
 		tx.TxIn = append(tx.TxIn, &wire.TxIn{PreviousOutPoint: output})
@@ -637,7 +637,7 @@ func spendOutputs(	outputs []wire.OutPoint, outputValues ...int64) *wire.MsgTx {
 	}
 	return tx
 }
-func TestCoinbases(	t *testing.T) {
+func TestCoinbases(t *testing.T) {
 	t.Parallel()
 	s, db, teardown, err := testStore()
 	if err != nil {
@@ -651,7 +651,7 @@ func TestCoinbases(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns := dbtx.ReadWriteBucket(namespaceKey)
@@ -1029,7 +1029,7 @@ func TestCoinbases(	t *testing.T) {
 }
 
 // Test moving multiple transactions from unmined buckets to the same block.
-func TestMoveMultipleToSameBlock(	t *testing.T) {
+func TestMoveMultipleToSameBlock(t *testing.T) {
 	t.Parallel()
 	s, db, teardown, err := testStore()
 	if err != nil {
@@ -1043,7 +1043,7 @@ func TestMoveMultipleToSameBlock(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns := dbtx.ReadWriteBucket(namespaceKey)
@@ -1200,7 +1200,7 @@ func TestMoveMultipleToSameBlock(	t *testing.T) {
 // Test the optional-ness of the serialized transaction in a TxRecord.
 // NewTxRecord and NewTxRecordFromMsgTx both save the serialized transaction, so
 // manually strip it out to test this code path.
-func TestInsertUnserializedTx(	t *testing.T) {
+func TestInsertUnserializedTx(t *testing.T) {
 	t.Parallel()
 	s, db, teardown, err := testStore()
 	if err != nil {
@@ -1214,7 +1214,7 @@ func TestInsertUnserializedTx(	t *testing.T) {
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns := dbtx.ReadWriteBucket(namespaceKey)
@@ -1267,7 +1267,7 @@ func TestInsertUnserializedTx(	t *testing.T) {
 // able to remove that unmined transaction later along with any of its
 // descendants. Any balance modifications due to the unmined transaction should
 // be revered.
-func TestRemoveUnminedTx(	t *testing.T) {
+func TestRemoveUnminedTx(t *testing.T) {
 	t.Parallel()
 	store, db, teardown, err := testStore()
 	if err != nil {
@@ -1401,7 +1401,7 @@ func TestRemoveUnminedTx(	t *testing.T) {
 
 // commitDBTx is a helper function that allows us to perform multiple operations
 // on a specific database's bucket as a single atomic operation.
-func commitDBTx(	t *testing.T, store *Store, db walletdb.DB,
+func commitDBTx(t *testing.T, store *Store, db walletdb.DB,
 	f func(walletdb.ReadWriteBucket)) {
 	t.Helper()
 	dbTx, err := db.BeginReadWriteTx()
@@ -1411,7 +1411,7 @@ func commitDBTx(	t *testing.T, store *Store, db walletdb.DB,
 	defer func() {
 		err := dbTx.Commit()
 		if err != nil {
-			t.Log(cl.Ine(), err)
+			t.Log(err)
 		}
 	}()
 	ns := dbTx.ReadWriteBucket(namespaceKey)
@@ -1424,7 +1424,7 @@ func commitDBTx(	t *testing.T, store *Store, db walletdb.DB,
 // spending transactions are present in the mempool, if one of them confirms,
 // then the remaining conflicting transactions within the mempool should be
 // removed from the wallet's store.
-func testInsertMempoolDoubleSpendTx(	t *testing.T, first bool) {
+func testInsertMempoolDoubleSpendTx(t *testing.T, first bool) {
 	store, db, teardown, err := testStore()
 	if err != nil {
 		t.Fatal(err)
@@ -1554,7 +1554,7 @@ func testInsertMempoolDoubleSpendTx(	t *testing.T, first bool) {
 // occurs and both spending transactions are present in the mempool, if the
 // first spend seen is confirmed, then the second spend transaction within the
 // mempool should be removed from the wallet's store.
-func TestInsertMempoolDoubleSpendConfirmedFirstTx(	t *testing.T) {
+func TestInsertMempoolDoubleSpendConfirmedFirstTx(t *testing.T) {
 	t.Parallel()
 	testInsertMempoolDoubleSpendTx(t, true)
 }
@@ -1563,7 +1563,7 @@ func TestInsertMempoolDoubleSpendConfirmedFirstTx(	t *testing.T) {
 // occurs and both spending transactions are present in the mempool, if the
 // second spend seen is confirmed, then the first spend transaction within the
 // mempool should be removed from the wallet's store.
-func TestInsertMempoolDoubleSpendConfirmSecondTx(	t *testing.T) {
+func TestInsertMempoolDoubleSpendConfirmSecondTx(t *testing.T) {
 	t.Parallel()
 	testInsertMempoolDoubleSpendTx(t, false)
 }
@@ -1572,7 +1572,7 @@ func TestInsertMempoolDoubleSpendConfirmSecondTx(	t *testing.T) {
 // occur and a spending transaction confirms that was not known to the wallet,
 // then the unconfirmed double spends within the mempool should be removed from
 // the wallet's store.
-func TestInsertConfirmedDoubleSpendTx(	t *testing.T) {
+func TestInsertConfirmedDoubleSpendTx(t *testing.T) {
 	t.Parallel()
 	store, db, teardown, err := testStore()
 	if err != nil {
@@ -1736,7 +1736,7 @@ func TestInsertConfirmedDoubleSpendTx(	t *testing.T) {
 // unconfirmed credit is added to the store after the intial credit has already
 // confirmed. This can lead to outputs being duplicated in the store, which can
 // lead to creating double spends when querying the wallet's UTXO set.
-func TestAddDuplicateCreditAfterConfirm(	t *testing.T) {
+func TestAddDuplicateCreditAfterConfirm(t *testing.T) {
 	t.Parallel()
 	store, db, teardown, err := testStore()
 	if err != nil {

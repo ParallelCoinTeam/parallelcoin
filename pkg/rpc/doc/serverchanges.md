@@ -33,7 +33,7 @@ Core.
 ## Step 1: Modify the `.proto`
 
 Once the developer dependencies have been met, changes can be made to the API by
-modifying the Protocol Buffers descriptor file [`api.proto`](../api.proto).
+modifying the Protocol Buffers descriptor file [`api.proto`](../api.proto_).
 
 The API is versioned according to the rules of [Semantic Versioning
 2.0](http://semver.org/).  After any changes, bump the API version in the [API

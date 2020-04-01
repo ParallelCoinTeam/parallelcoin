@@ -89,7 +89,7 @@ func TestVLQ(t *testing.T) {
 }
 
 // TestScriptCompression ensures the domain-specific script compression and decompression works as expected.
-func TestScriptCompression(	t *testing.T) {
+func TestScriptCompression(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name         string
@@ -205,7 +205,7 @@ func TestScriptCompression(	t *testing.T) {
 }
 
 // TestScriptCompressionErrors ensures calling various functions related to script compression with incorrect data returns the expected results.
-func TestScriptCompressionErrors(	t *testing.T) {
+func TestScriptCompressionErrors(t *testing.T) {
 	t.Parallel()
 	// A nil script must result in a decoded size of 0.
 	if gotSize := decodeCompressedScriptSize(nil); gotSize != 0 {
@@ -228,7 +228,7 @@ func TestScriptCompressionErrors(	t *testing.T) {
 }
 
 // TestAmountCompression ensures the domain-specific transaction output amount compression and decompression works as expected.
-func TestAmountCompression(	t *testing.T) {
+func TestAmountCompression(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name         string
@@ -302,7 +302,7 @@ func TestAmountCompression(	t *testing.T) {
 }
 
 // TestCompressedTxOut ensures the transaction output serialization and deserialization works as expected.
-func TestCompressedTxOut(	t *testing.T) {
+func TestCompressedTxOut(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name       string
@@ -385,7 +385,7 @@ func TestCompressedTxOut(	t *testing.T) {
 }
 
 // TestTxOutCompressionErrors ensures calling various functions related to txout compression with incorrect data returns the expected results.
-func TestTxOutCompressionErrors(	t *testing.T) {
+func TestTxOutCompressionErrors(t *testing.T) {
 	t.Parallel()
 	// A compressed txout with missing compressed script must error.
 	compressedTxOut := hexToBytes("00")

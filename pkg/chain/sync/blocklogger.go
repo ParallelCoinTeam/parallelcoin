@@ -5,31 +5,38 @@ import (
 	"sync"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	log "github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/util"
 )
 
-// blockProgressLogger provides periodic logging for other services in order to show users progress of certain "actions" involving some or all current blocks. Ex: syncing to best chain, indexing all blocks, etc.
-type blockProgressLogger struct {
+type // blockProgressLogger provides periodic logging for other services in
+// order to show users progress of certain "actions" involving some or all
+// current blocks. Ex: syncing to best chain, indexing all blocks, etc.
+blockProgressLogger struct {
 	receivedLogBlocks int64
 	receivedLogTx     int64
 	lastBlockLogTime  time.Time
-	subsystemLogger   *cl.SubSystem
+	subsystemLogger   *log.Logger
 	progressAction    string
 	sync.Mutex
 }
 
-// newBlockProgressLogger returns a new block progress logger. The progress message is templated as follows:  {progressAction} {numProcessed} {blocks|block} in the last {timePeriod}  ({numTxs}, height {lastBlockHeight}, {lastBlockTimeStamp})
-func newBlockProgressLogger(	progressMessage string, logger *cl.SubSystem) *blockProgressLogger {
+func // newBlockProgressLogger returns a new block progress logger.
+// The progress message is templated as follows:  {progressAction }
+// {numProcessed} {blocks|block} in the last {timePeriod}
+// ({numTxs}, height {lastBlockHeight}, {lastBlockTimeStamp})
+newBlockProgressLogger(progressMessage string) *blockProgressLogger {
 	return &blockProgressLogger{
 		lastBlockLogTime: time.Now(),
 		progressAction:   progressMessage,
-		subsystemLogger:  Log,
 	}
 }
 
-// LogBlockHeight logs a new block height as an information message to show progress to the user. In order to prevent spam, it limits logging to one message every 10 seconds with duration and totals included.
-func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
+func // LogBlockHeight logs a new block height as an information message to
+// show progress to the user. In order to prevent spam,
+// it limits logging to one message every 10 seconds with duration and totals
+// included.
+(b *blockProgressLogger) LogBlockHeight(block *util.Block) {
 	b.Lock()
 	defer b.Unlock()
 	b.receivedLogBlocks++
@@ -51,16 +58,18 @@ func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
 	if b.receivedLogTx == 1 {
 		txStr = "transaction "
 	}
-	b.subsystemLogger.Ch <- cl.Infof{
-		"%s %6d %s in the last %s (%6d %s, height %8d, %s)",
+	tD := tDuration.Seconds()
+	Infof(
+		"%s %6d %s in the last %s (%6d %s, height %8d, %s) %0.2f tx/s",
 		b.progressAction,
 		b.receivedLogBlocks,
 		blockStr,
-		fmt.Sprintf("%0.1fs", tDuration.Seconds()),
+		fmt.Sprintf("%0.1fs", tD),
 		b.receivedLogTx,
 		txStr, block.Height(),
 		block.MsgBlock().Header.Timestamp,
-	}
+		float64(b.receivedLogTx)/tD,
+	)
 	b.receivedLogBlocks = 0
 	b.receivedLogTx = 0
 	b.lastBlockLogTime = now

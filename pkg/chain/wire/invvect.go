@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"io"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 const (
 	// MaxInvPerMsg is the maximum number of inventory vectors that can be in a
 	// single bitcoin inv message.
-	MaxInvPerMsg = 50000
+	MaxInvPerMsg = 5000
 	// Maximum payload size for an inventory vector.
 	maxInvVectPayload = 4 + chainhash.HashSize
 	// InvWitnessFlag denotes that the inventory vector type is requesting,

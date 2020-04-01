@@ -5,10 +5,10 @@ import "fmt"
 // ErrorCode identifies a category of error.
 type ErrorCode uint8
 
-// These constants are used to identify a specific Error.
+// These constants are used to identify a specific TxMgrError.
 const (
 	// ErrDatabase indicates an error with the underlying database.  When
-	// this error code is set, the Err field of the Error will be
+	// this error code is set, the Err field of the TxMgrError will be
 	// set to the underlying error returned from the database.
 	ErrDatabase ErrorCode = iota
 	// ErrData describes an error where data stored in the transaction
@@ -58,28 +58,28 @@ func (e ErrorCode) String() string {
 	return fmt.Sprintf("ErrorCode(%d)", e)
 }
 
-// Error provides a single type for errors that can happen during Store
+// TxMgrError provides a single type for errors that can happen during Store
 // operation.
-type Error struct {
+type TxMgrError struct {
 	Code ErrorCode // Describes the kind of error
 	Desc string    // Human readable description of the issue
 	Err  error     // Underlying error, optional
 }
 
-// Error satisfies the error interface and prints human-readable errors.
-func (e Error) Error() string {
+// TxMgrError satisfies the error interface and prints human-readable errors.
+func (e TxMgrError) Error() string {
 	if e.Err != nil {
 		return e.Desc + ": " + e.Err.Error()
 	}
 	return e.Desc
 }
-func storeError(	c ErrorCode, desc string, err error) Error {
-	return Error{Code: c, Desc: desc, Err: err}
+func storeError(c ErrorCode, desc string, err error) TxMgrError {
+	return TxMgrError{Code: c, Desc: desc, Err: err}
 }
 
-// IsNoExists returns whether an error is a Error with the ErrNoExists error
+// IsNoExists returns whether an error is a TxMgrError with the ErrNoExists error
 // code.
-func IsNoExists(	err error) bool {
-	serr, ok := err.(Error)
+func IsNoExists(err error) bool {
+	serr, ok := err.(TxMgrError)
 	return ok && serr.Code == ErrNoExists
 }

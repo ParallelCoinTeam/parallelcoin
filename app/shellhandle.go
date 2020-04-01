@@ -2,59 +2,63 @@ package app
 
 import (
 	"fmt"
-	"sync"
+	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/pkg/logi/serve"
+	"os"
 
 	"github.com/urfave/cli"
 
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/cmd/node"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/rpc"
-	"github.com/parallelcointeam/parallelcoin/cmd/walletmain"
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/wallet"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		var wg sync.WaitGroup
-		Configure(cx)
+		config.Configure(cx, c.Command.Name)
+		serve.Log(cx.KillAll)
+		Debug("starting shell")
+		if *cx.Config.TLS || *cx.Config.ServerTLS {
+			// generate the tls certificate if configured
+			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
+		}
 		shutdownChan := make(chan struct{})
 		dbFilename :=
 			*cx.Config.DataDir + slash +
 				cx.ActiveNet.Params.Name + slash +
 				wallet.WalletDbName
 		if !apputil.FileExists(dbFilename) {
-			cl.Register.SetAllLevels("off")
+			// log.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				cx.Log <- cl.Error{"failed to create wallet", err}
+				Error("failed to create wallet", err)
 			}
-			cl.Register.SetAllLevels(*cx.Config.LogLevel)
+			fmt.Println("restart to complete initial setup")
+			os.Exit(1)
 		}
-		nodeChan := make(chan *rpc.Server)
-		walletChan := make(chan *wallet.Wallet)
-		kill := make(chan struct{})
+		Warn("starting node")
 		if !*cx.Config.NodeOff {
 			go func() {
-				err = node.Main(cx, shutdownChan, kill, nodeChan, &wg)
+				err = node.Main(cx, shutdownChan)
 				if err != nil {
-					log <- cl.Error{"error starting node ", err,
-						cl.Ine()}
+					Error("error starting node ", err)
 				}
 			}()
-			cx.RPCServer = <-nodeChan
+			cx.RPCServer = <-cx.NodeChan
 		}
+		Warn("starting wallet")
 		if !*cx.Config.WalletOff {
 			go func() {
-				err = walletmain.Main(cx.Config, cx.StateCfg,
-					cx.ActiveNet, walletChan, kill, &wg)
+				err = walletmain.Main(cx)
 				if err != nil {
 					fmt.Println("error running wallet:", err)
 				}
 			}()
-			cx.WalletServer = <-walletChan
+			cx.WalletServer = <-cx.WalletChan
 		}
-		wg.Wait()
+		Debug("shell started")
+		cx.WaitGroup.Wait()
 		return nil
 	}
 }

@@ -6,8 +6,8 @@ import (
 )
 
 // TestMruNonceMap ensures the mruNonceMap behaves as expected including limiting, eviction of least-recently used entries, specific entry removal, and existence tests.
-func TestMruNonceMap(	t *testing.T) {
-	// Create a bunch of fake nonces to use in testing the mru nonce code.
+func TestMruNonceMap(t *testing.T) {
+	// Create a bunch of fake nonces to use in testing the mru Nonce code.
 	numNonces := 10
 	nonces := make([]uint64, 0, numNonces)
 	for i := 0; i < numNonces; i++ {
@@ -26,7 +26,7 @@ func TestMruNonceMap(	t *testing.T) {
 	}
 testLoop:
 	for i, test := range tests {
-		// Create a new mru nonce map limited by the specified test limit and add all of the test nonces.  This will cause evicition since there are more test nonces than the limits.
+		// Create a new mru Nonce map limited by the specified test limit and add all of the test nonces.  This will cause evicition since there are more test nonces than the limits.
 		mruNonceMap := newMruNonceMap(uint(test.limit))
 		for j := 0; j < numNonces; j++ {
 			mruNonceMap.Add(nonces[j])
@@ -80,11 +80,11 @@ testLoop:
 }
 
 // TestMruNonceMapStringer tests the stringized output for the mruNonceMap type.
-func TestMruNonceMapStringer(	t *testing.T) {
-	// Create a couple of fake nonces to use in testing the mru nonce stringer code.
+func TestMruNonceMapStringer(t *testing.T) {
+	// Create a couple of fake nonces to use in testing the mru Nonce stringer code.
 	nonce1 := uint64(10)
 	nonce2 := uint64(20)
-	// Create new mru nonce map and add the nonces.
+	// Create new mru Nonce map and add the nonces.
 	mruNonceMap := newMruNonceMap(uint(2))
 	mruNonceMap.Add(nonce1)
 	mruNonceMap.Add(nonce2)
@@ -98,9 +98,9 @@ func TestMruNonceMapStringer(	t *testing.T) {
 	}
 }
 
-// BenchmarkMruNonceList performs basic benchmarks on the most recently used nonce handling.
-func BenchmarkMruNonceList(	b *testing.B) {
-	// Create a bunch of fake nonces to use in benchmarking the mru nonce code.
+// BenchmarkMruNonceList performs basic benchmarks on the most recently used Nonce handling.
+func BenchmarkMruNonceList(b *testing.B) {
+	// Create a bunch of fake nonces to use in benchmarking the mru Nonce code.
 	b.StopTimer()
 	numNonces := 100000
 	nonces := make([]uint64, 0, numNonces)

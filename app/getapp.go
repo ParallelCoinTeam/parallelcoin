@@ -2,145 +2,206 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/app/config"
+	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/p9c/pod/cmd/kopach/kopach_worker"
+	"github.com/p9c/pod/cmd/node/blockdb"
+	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/rpc/legacy"
+	"github.com/p9c/pod/pkg/util/interrupt"
+
 	"github.com/urfave/cli"
-	"github.com/urfave/cli/altsrc"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-
-	"github.com/parallelcointeam/parallelcoin/app/apputil"
-	"github.com/parallelcointeam/parallelcoin/cmd/node"
-	"github.com/parallelcointeam/parallelcoin/cmd/node/mempool"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/base58"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/node/mempool"
+	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/util/base58"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
-// getApp defines the pod app
-func getApp(cx *conte.Xt) (a *cli.App) {
+func // GetApp defines the pod app
+GetApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
-		Name:    "pod",
-		Version: "v0.0.1",
-		Description: "Parallelcoin Pod Suite -- All-in-one everything" +
-			" for Parallelcoin!",
-		Copyright: "Legacy portions derived from btcsuite/btcd under" +
-			" ISC licence. The remainder is already in your" +
-			" possession. Use it wisely.",
-		Action: func(c *cli.Context) error {
-			fmt.Println("no subcommand requested")
-			cli.ShowAppHelpAndExit(c, 1)
-			return nil
-		},
-		Before: beforeFunc(cx),
+		Name:        "pod",
+		Version:     "v0.0.1",
+		Description: cx.Language.RenderText("goApp_DESCRIPTION"),
+		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
+		Action:      guiHandle(cx),
+		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			log <- cl.Trace{"subcommand completed", cl.Ine()}
+			Trace("subcommand completed")
+			if interrupt.Restart {
+			}
 			return nil
 		},
 		Commands: []cli.Command{
-			apputil.NewCommand("version",
-				"print version and exit",
+			apputil.NewCommand("version", "print version and exit",
 				func(c *cli.Context) error {
 					fmt.Println(c.App.Name, c.App.Version)
 					return nil
-				},
-				apputil.SubCommands(),
-				"v"),
+				}, apputil.SubCommands(), nil, "v"),
+			apputil.NewCommand("monitor", "run monitor GUI",
+				monitorHandle(cx), apputil.SubCommands(), nil, "mon"),
 			apputil.NewCommand("ctl",
 				"send RPC commands to a node or wallet and print the result",
-				ctlHandle(cx),
-				apputil.SubCommands(
+				ctlHandle(cx), apputil.SubCommands(
 					apputil.NewCommand(
 						"listcommands",
 						"list commands available at endpoint",
 						ctlHandleList,
+						apputil.SubCommands(),
 						nil,
-						"list", "l",
+						"list",
+						"l",
 					),
-				),
-				"c"),
-			apputil.NewCommand("node",
-				"start parallelcoin full node",
-				nodeHandle(cx),
-				apputil.SubCommands(
+				), nil, "c"),
+			apputil.NewCommand("node", "start parallelcoin full node",
+				nodeHandle(cx), apputil.SubCommands(
 					apputil.NewCommand("dropaddrindex",
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropAddrIndex = true
-							return nodeHandle(cx)(c)
+							// return nodeHandle(cx)(c)
+							return nil
 						},
 						apputil.SubCommands(),
+						nil,
 					),
 					apputil.NewCommand("droptxindex",
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropTxIndex = true
-							return nodeHandle(cx)(c)
+							// return nodeHandle(cx)(c)
+							return nil
 						},
 						apputil.SubCommands(),
+						nil,
+					),
+					apputil.NewCommand("dropindexes",
+						"drop all of the indexes",
+						func(c *cli.Context) error {
+							cx.StateCfg.DropAddrIndex = true
+							cx.StateCfg.DropTxIndex = true
+							cx.StateCfg.DropCfIndex = true
+							// return nodeHandle(cx)(c)
+							return nil
+						},
+						apputil.SubCommands(),
+						nil,
 					),
 					apputil.NewCommand("dropcfindex",
 						"drop the address search index",
 						func(c *cli.Context) error {
 							cx.StateCfg.DropCfIndex = true
-							return nodeHandle(cx)(c)
+							// return nodeHandle(cx)(c)
+							return nil
 						},
 						apputil.SubCommands(),
+						nil,
 					),
-				),
-				"n",
-			),
-			apputil.NewCommand("wallet",
-				"start parallelcoin wallet server",
-				walletHandle(cx),
+					apputil.NewCommand("resetchain",
+						"reset the chain",
+						func(c *cli.Context) (err error) {
+							dbName := blockdb.NamePrefix + "_" + *cx.Config.DbType
+							if *cx.Config.DbType == "sqlite" {
+								dbName += ".db"
+							}
+							dbPath := filepath.Join(filepath.Join(*cx.Config.DataDir,
+								cx.ActiveNet.Name), dbName)
+							if err = os.RemoveAll(dbPath); Check(err) {
+							}
+							// return nodeHandle(cx)(c)
+							return nil
+						},
+						apputil.SubCommands(),
+						nil,
+					),
+				), nil, "n"),
+			apputil.NewCommand("wallet", "start parallelcoin wallet server",
+				WalletHandle(cx), apputil.SubCommands(
+					apputil.NewCommand("drophistory",
+						"drop the transaction history in the wallet ("+
+							"for development and testing as well as clearing up"+
+							" transaction mess)",
+						func(c *cli.Context) (err error) {
+							config.Configure(cx, c.Command.Name)
+							Info("dropping wallet history")
+							go func() {
+								Warn("starting wallet")
+								if err = walletmain.Main(cx); Check(err) {
+									os.Exit(1)
+								} else {
+									Debug("wallet started")
+								}
+							}()
+							Debug("waiting for walletChan")
+							cx.WalletServer = <-cx.WalletChan
+							Debug("walletChan sent")
+							err = legacy.DropWalletHistory(cx.WalletServer)(c)
+							return
+						},
+						apputil.SubCommands(),
+						nil,
+					),
+				), nil, "w"),
+			apputil.NewCommand("shell", "start combined wallet/node shell",
+				shellHandle(cx), apputil.SubCommands(), nil, "s"),
+			apputil.NewCommand("gui", "start GUI", guiHandle(cx),
+				apputil.SubCommands(), nil),
+			apputil.NewCommand("kopach", "standalone miner for clusters",
+				KopachHandle(cx), apputil.SubCommands(), nil, "k"),
+			apputil.NewCommand("worker",
+				"single thread parallelcoin miner controlled with binary IPC"+
+					" interface on stdin/stdout; internal use, "+
+					"must have network name string as second arg after worker and"+
+					"nothing before; communicates via net/rpc encoding/gob as"+
+					" default over stdio", kopach_worker.KopachWorkerHandle(cx),
+				apputil.SubCommands(), nil),
+			apputil.NewCommand("init",
+				"steps through creation of new wallet and initialization for"+
+					" a network with these specified in the main",
+				initHandle(cx),
 				apputil.SubCommands(),
-				"w",
-			),
-			apputil.NewCommand("shell",
-				"start combined wallet/node shell",
-				shellHandle(cx),
-				apputil.SubCommands(),
-				"s",
-			),
-			apputil.NewCommand(
-				"gui",
-				"start GUI",
-				guiHandle(cx),
-				apputil.SubCommands(),
-			),
-			apputil.NewCommand("kopach",
-				"standalone miner for clusters",
-				kopachHandle(cx),
-				apputil.SubCommands(
-					// apputil.NewCommand("bench",
-					// 	"generate a set of benchmarks of each algorithm",
-					// 	func(c *cli.Context) error {
-					// 		return bench.Benchmark(cx)(c)
-					// 	},
-					// 	apputil.SubCommands(),
-					// ),
-				),
-			),
+				nil,
+				"I"),
 		},
 		Flags: []cli.Flag{
-			altsrc.NewStringFlag(cli.StringFlag{
+			cli.StringFlag{
+				Name:        "lang, L",
+				Value:       *cx.Config.Language,
+				Usage:       "sets the data directory base for a pod instance",
+				EnvVar:      "POD_LANGUAGE",
+				Destination: cx.Config.Language,
+			},
+			cli.StringFlag{
 				Name:        "datadir, D",
 				Value:       *cx.Config.DataDir,
 				Usage:       "sets the data directory base for a pod instance",
 				EnvVar:      "POD_DATADIR",
 				Destination: cx.Config.DataDir,
-			}),
+			},
+			cli.StringFlag{
+				Name:        "walletfile, WF",
+				Value:       *cx.Config.WalletFile,
+				Usage:       "sets the data directory base for a pod instance",
+				EnvVar:      "POD_WALLETFILE",
+				Destination: cx.Config.WalletFile,
+			},
 			apputil.BoolTrue("save, i",
 				"save settings as effective from invocation",
 				&cx.StateCfg.Save,
 			),
-			altsrc.NewStringFlag(cli.StringFlag{
+			cli.StringFlag{
 				Name:        "loglevel, l",
 				Value:       *cx.Config.LogLevel,
 				Usage:       "sets the base for all subsystem logging",
 				EnvVar:      "POD_LOGLEVEL",
 				Destination: cx.Config.LogLevel,
-			}),
+			},
 			apputil.String(
 				"network, n",
 				"connect to mainnet/testnet/regtest/simnet",
@@ -173,30 +234,30 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.LimitUser),
 			apputil.String(
 				"limitpass",
-				"sets the password for clients of services",
+				"sets the limited rpc password",
 				genPassword(),
 				cx.Config.LimitPass),
 			apputil.String(
 				"rpccert",
 				"File containing the certificate file",
-				apputil.Join(*cx.Config.DataDir, "rpc.cert"),
+				"",
 				cx.Config.RPCCert),
 			apputil.String(
 				"rpckey",
 				"File containing the certificate key",
-				apputil.Join(*cx.Config.DataDir, "rpc.key"),
+				"",
 				cx.Config.RPCKey),
 			apputil.String(
 				"cafile",
-				"File containing root certificates to authenticate a TLS" +
+				"File containing root certificates to authenticate a TLS"+
 					" connections with pod",
-				apputil.Join(*cx.Config.DataDir, "cafile"),
+				"",
 				cx.Config.CAFile),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"clienttls",
 				"Enable TLS for client connections",
 				cx.Config.TLS),
-			apputil.Bool(
+			apputil.BoolTrue(
 				"servertls",
 				"Enable TLS for server connections",
 				cx.Config.ServerTLS),
@@ -221,7 +282,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.Onion),
 			apputil.String(
 				"onionproxy",
-				"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0." +
+				"Connect to tor hidden services via SOCKS5 proxy (eg. 127.0."+
 					"0.1:9050)",
 				"127.0.0.1:9050",
 				cx.Config.OnionProxy),
@@ -237,18 +298,9 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.OnionProxyPass),
 			apputil.Bool(
 				"torisolation",
-				"Enable Tor stream isolation by randomizing user credentials" +
+				"Enable Tor stream isolation by randomizing user credentials"+
 					" for each connection.",
 				cx.Config.TorIsolation),
-			apputil.String(
-				"group",
-				"zeroconf testnet group identifier (whitelist connections)",
-				"",
-				cx.Config.Group),
-			apputil.Bool(
-				"nodiscovery",
-				"disable zeroconf peer discovery",
-				cx.Config.NoDiscovery),
 			apputil.StringSlice(
 				"addpeer",
 				"Add a peer to connect with at startup",
@@ -290,13 +342,13 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				cx.Config.BanThreshold),
 			apputil.StringSlice(
 				"whitelist",
-				"Add an IP network or IP that will not be banned. (eg. 192." +
+				"Add an IP network or IP that will not be banned. (eg. 192."+
 					"168.1.0/24 or ::1)",
 				cx.Config.Whitelists),
 			apputil.String(
 				"rpcconnect",
 				"Hostname/IP and port of pod RPC server to connect to",
-				"127.0.0.1:11048",
+				"",
 				cx.Config.RPCConnect),
 			apputil.StringSlice(
 				"rpclisten",
@@ -367,7 +419,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 			apputil.Bool(
 				"upnp",
 				"Use UPnP to map our listening port outside of NAT",
-				cx.Config.Upnp),
+				cx.Config.UPNP),
 			apputil.Float64(
 				"minrelaytxfee",
 				"The minimum transaction fee in DUO/kB to be"+
@@ -396,32 +448,34 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				"Max number of orphan transactions to keep in memory",
 				node.DefaultMaxOrphanTransactions,
 				cx.Config.MaxOrphanTxs),
-			apputil.String(
-				"algo",
-				"Sets the algorithm for the CPU miner ( blake14lr,"+
-					" cryptonight7v2, keccak, lyra2rev2, scrypt, sha256d, stribog,"+
-					" skein, x11 default is 'random')",
-				"random",
-				cx.Config.Algo),
 			apputil.Bool(
-				"generate",
+				"generate, g",
 				"Generate (mine) DUO using the CPU",
 				cx.Config.Generate),
 			apputil.Int(
-				"genthreads",
+				"genthreads, G",
 				"Number of CPU threads to use with CPU miner"+
 					" -1 = all cores",
 				-1,
 				cx.Config.GenThreads),
+			apputil.Bool(
+				"solo",
+				"mine DUO even if not connected to the network",
+				cx.Config.Solo),
+			apputil.Bool(
+				"lan",
+				"mine duo if not connected to nodes on internet",
+				cx.Config.LAN),
 			apputil.String(
 				"controller",
-				"address to bind miner controller listener",
-				genPassword(),
+				"port controller listens on for solutions from workers"+
+					" and other node peers",
+				":0",
 				cx.Config.Controller),
 			apputil.Bool(
-				"nocontroller",
-				"disable zeroconf kcp miner controller",
-				cx.Config.NoController),
+				"autoports",
+				"uses random automatic ports for p2p, rpc and controller",
+				cx.Config.AutoPorts),
 			apputil.StringSlice(
 				"miningaddr",
 				"Add the specified payment address to the list of"+
@@ -486,12 +540,12 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				"blocksonly",
 				"Do not accept transactions from remote peers.",
 				cx.Config.BlocksOnly),
-			apputil.BoolTrue(
+			apputil.Bool(
 				"notxindex",
 				"Disable the transaction index which makes all transactions"+
 					" available via the getrawtransaction RPC",
 				cx.Config.TxIndex),
-			apputil.BoolTrue(
+			apputil.Bool(
 				"noaddrindex",
 				"Disable address-based transaction index which"+
 					" makes the searchrawtransactions RPC available",
@@ -499,7 +553,7 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 			),
 			apputil.Bool(
 				"relaynonstd",
-				"Relay non-standard transactions regardless of the default" +
+				"Relay non-standard transactions regardless of the default"+
 					" settings for the active network.",
 				cx.Config.RelayNonStd), apputil.Bool("rejectnonstd",
 				"Reject non-standard transactions regardless of"+
@@ -552,18 +606,14 @@ func getApp(cx *conte.Xt) (a *cli.App) {
 				8,
 				cx.Config.WalletRPCMaxWebsockets,
 			),
-			apputil.StringSlice(
-				"experimentalrpclisten",
-				"Listen for RPC connections on this interface/port",
-				cx.Config.ExperimentalRPCListeners),
+			// apputil.StringSlice(
+			// 	"experimentalrpclisten",
+			// 	"Listen for RPC connections on this interface/port",
+			// 	cx.Config.ExperimentalRPCListeners),
 			apputil.Bool(
 				"nodeoff",
 				"Starts GUI with node turned off",
 				cx.Config.NodeOff),
-			apputil.Bool( // TODO remove this
-				"testnodeoff",
-				"Starts GUI with testnode turned off",
-				cx.Config.TestNodeOff),
 			apputil.Bool(
 				"walletoff",
 				"Starts GUI with wallet turned off",

@@ -4,13 +4,14 @@ import (
 	"math/big"
 	"sort"
 	"sync"
+	"sync/atomic"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/fork"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
 )
 
 // blockStatus is a bit field representing the validation state of the block.
@@ -32,45 +33,73 @@ const (
 	statusNone blockStatus = 0
 )
 
-// HaveData returns whether the full block data is stored in the database. This will return false for a block node where only the header is downloaded or kept.
+// HaveData returns whether the full block data is stored in the database.
+// This will return false for a block node where only the header is
+// downloaded or kept.
 func (status blockStatus) HaveData() bool {
 	return status&statusDataStored != 0
 }
 
-// KnownValid returns whether the block is known to be valid. This will return false for a valid block that has not been fully validated yet.
+// KnownValid returns whether the block is known to be valid.
+// This will return false for a valid block that has not been fully validated
+// yet.
 func (status blockStatus) KnownValid() bool {
 	return status&statusValid != 0
 }
 
-// KnownInvalid returns whether the block is known to be invalid. This may be because the block itself failed validation or any of its ancestors is invalid. This will return false for invalid blocks that have not been proven invalid yet.
+// KnownInvalid returns whether the block is known to be invalid.
+// This may be because the block itself failed validation or any of its
+// ancestors is invalid. This will return false for invalid blocks that have
+// not been proven invalid yet.
 func (status blockStatus) KnownInvalid() bool {
 	return status&(statusValidateFailed|statusInvalidAncestor) != 0
 }
 
-// blockNode represents a block within the block chain and is primarily used to aid in selecting the best chain to be the main chain.  The main chain is stored into the block database.
-type blockNode struct {
-	// NOTE: Additions, deletions, or modifications to the order of the definitions in this struct should not be changed without considering how it affects alignment on 64-bit platforms.  The current order is specifically crafted to result in minimal padding.  There will be hundreds of thousands of these in memory, so a few extra bytes of padding adds up.
+// BlockNode represents a block within the block chain and is primarily used
+// to aid in selecting the best chain to be the main chain.
+// The main chain is stored into the block database.
+type BlockNode struct {
+	// NOTE: Additions, deletions,
+	// or modifications to the order of the definitions in this struct should
+	// not be changed without considering how it affects alignment on 64-bit
+	// platforms. The current order is specifically crafted to result in
+	// minimal padding. There will be hundreds of thousands of these in
+	// memory, so a few extra bytes of padding adds up.
 	// parent is the parent block for this node.
-	parent *blockNode
+	parent *BlockNode
 	// hash is the double sha 256 of the block.
 	hash chainhash.Hash
-	// workSum is the total amount of work in the chain up to and including this node.
+	// workSum is the total amount of work in the chain up to and including
+	// this node.
 	workSum *big.Int
 	// height is the position in the block chain.
 	height int32
-	// Some fields from block headers to aid in best chain selection and reconstructing headers from memory.  These must be treated as immutable and are intentionally ordered to avoid padding on 64-bit platforms.
+	// Some fields from block headers to aid in best chain selection and
+	// reconstructing headers from memory.
+	// These must be treated as immutable and are intentionally ordered to
+	// avoid padding on 64-bit platforms.
 	version    int32
 	bits       uint32
 	nonce      uint32
 	timestamp  int64
 	merkleRoot chainhash.Hash
-	// status is a bitfield representing the validation state of the block. The status field, unlike the other fields, may be written to and so should only be accessed using the concurrent-safe NodeStatus method on blockIndex once the node has been added to the global index.
+	// status is a bitfield representing the validation state of the block.
+	// The status field, unlike the other fields,
+	// may be written to and so should only be accessed using the concurrent
+	// -safe NodeStatus method on blockIndex once the node has been added to
+	// the global index.
 	status blockStatus
+	// Diffs is the computed difficulty targets for a block to be connected
+	// to this one
+	Diffs atomic.Value
 }
 
-// initBlockNode initializes a block node from the given header and parent node, calculating the height and workSum from the respective fields on the parent. This function is NOT safe for concurrent access.  It must only be called when initially creating a node.
-func initBlockNode(node *blockNode, blockHeader *wire.BlockHeader, parent *blockNode) {
-	*node = blockNode{
+// initBlockNode initializes a block node from the given header and parent
+// node, calculating the height and workSum from the respective fields on the
+// parent. This function is NOT safe for concurrent access.
+// It must only be called when initially creating a node.
+func initBlockNode(node *BlockNode, blockHeader *wire.BlockHeader, parent *BlockNode) {
+	*node = BlockNode{
 		hash:       blockHeader.BlockHash(),
 		version:    blockHeader.Version,
 		bits:       blockHeader.Bits,
@@ -87,15 +116,18 @@ func initBlockNode(node *blockNode, blockHeader *wire.BlockHeader, parent *block
 	}
 }
 
-// newBlockNode returns a new block node for the given block header and parent node, calculating the height and workSum from the respective fields on the parent. This function is NOT safe for concurrent access.
-func newBlockNode(blockHeader *wire.BlockHeader, parent *blockNode) *blockNode {
-	var node blockNode
+// NewBlockNode returns a new block node for the given block header and
+// parent node, calculating the height and workSum from the respective fields
+// on the parent. This function is NOT safe for concurrent access.
+func NewBlockNode(blockHeader *wire.BlockHeader, parent *BlockNode) *BlockNode {
+	var node BlockNode
 	initBlockNode(&node, blockHeader, parent)
 	return &node
 }
 
-// Header constructs a block header from the node and returns it. This function is safe for concurrent access.
-func (node *blockNode) Header() wire.BlockHeader {
+// Header constructs a block header from the node and returns it.
+// This function is safe for concurrent access.
+func (node *BlockNode) Header() wire.BlockHeader {
 	// No lock is needed because all accessed fields are immutable.
 	prevHash := &zeroHash
 	if node.parent != nil {
@@ -112,7 +144,7 @@ func (node *blockNode) Header() wire.BlockHeader {
 }
 
 // Ancestor returns the ancestor block node at the provided height by following the chain backwards from this node.  The returned block will be nil when a height is requested that is after the height of the passed node or is less than zero. This function is safe for concurrent access.
-func (node *blockNode) Ancestor(height int32) *blockNode {
+func (node *BlockNode) Ancestor(height int32) *BlockNode {
 	if height < 0 || height > node.height {
 		return nil
 	}
@@ -125,12 +157,12 @@ func (node *blockNode) Ancestor(height int32) *blockNode {
 
 // RelativeAncestor returns the ancestor block node a relative 'distance' blocks before this node.  This is equivalent to calling Ancestor with the node's height minus provided distance.
 // This function is safe for concurrent access.
-func (node *blockNode) RelativeAncestor(distance int32) *blockNode {
+func (node *BlockNode) RelativeAncestor(distance int32) *BlockNode {
 	return node.Ancestor(node.height - distance)
 }
 
 // CalcPastMedianTime calculates the median time of the previous few blocks prior to, and including, the block node. This function is safe for concurrent access.
-func (node *blockNode) CalcPastMedianTime() time.Time {
+func (node *BlockNode) CalcPastMedianTime() time.Time {
 	// Create a slice of the previous few block timestamps used to calculate the median per the number defined by the constant medianTimeBlocks.
 	timestamps := make([]int64, medianTimeBlocks)
 	numNodes := 0
@@ -155,8 +187,8 @@ type blockIndex struct {
 	db          database.DB
 	chainParams *netparams.Params
 	sync.RWMutex
-	index map[chainhash.Hash]*blockNode
-	dirty map[*blockNode]struct{}
+	index map[chainhash.Hash]*BlockNode
+	dirty map[*BlockNode]struct{}
 }
 
 // newBlockIndex returns a new empty instance of a block index.  The index will be dynamically populated as block nodes are loaded from the database and manually added.
@@ -164,8 +196,8 @@ func newBlockIndex(db database.DB, chainParams *netparams.Params) *blockIndex {
 	return &blockIndex{
 		db:          db,
 		chainParams: chainParams,
-		index:       make(map[chainhash.Hash]*blockNode),
-		dirty:       make(map[*blockNode]struct{}),
+		index:       make(map[chainhash.Hash]*BlockNode),
+		dirty:       make(map[*BlockNode]struct{}),
 	}
 }
 
@@ -178,7 +210,7 @@ func (bi *blockIndex) HaveBlock(hash *chainhash.Hash) bool {
 }
 
 // LookupNode returns the block node identified by the provided hash.  It will return nil if there is no entry for the hash. This function is safe for concurrent access.
-func (bi *blockIndex) LookupNode(hash *chainhash.Hash) *blockNode {
+func (bi *blockIndex) LookupNode(hash *chainhash.Hash) *BlockNode {
 	bi.RLock()
 	node := bi.index[*hash]
 	bi.RUnlock()
@@ -186,7 +218,7 @@ func (bi *blockIndex) LookupNode(hash *chainhash.Hash) *blockNode {
 }
 
 // AddNode adds the provided node to the block index and marks it as dirty. Duplicate entries are not checked so it is up to caller to avoid adding them. This function is safe for concurrent access.
-func (bi *blockIndex) AddNode(node *blockNode) {
+func (bi *blockIndex) AddNode(node *BlockNode) {
 	bi.Lock()
 	bi.addNode(node)
 	bi.dirty[node] = struct{}{}
@@ -194,12 +226,12 @@ func (bi *blockIndex) AddNode(node *blockNode) {
 }
 
 // addNode adds the provided node to the block index, but does not mark it as dirty. This can be used while initializing the block index. This function is NOT safe for concurrent access.
-func (bi *blockIndex) addNode(node *blockNode) {
+func (bi *blockIndex) addNode(node *BlockNode) {
 	bi.index[node.hash] = node
 }
 
 // NodeStatus provides concurrent-safe access to the status field of a node. This function is safe for concurrent access.
-func (bi *blockIndex) NodeStatus(node *blockNode) blockStatus {
+func (bi *blockIndex) NodeStatus(node *BlockNode) blockStatus {
 	bi.RLock()
 	status := node.status
 	bi.RUnlock()
@@ -207,7 +239,7 @@ func (bi *blockIndex) NodeStatus(node *blockNode) blockStatus {
 }
 
 // SetStatusFlags flips the provided status flags on the block node to on, regardless of whether they were on or off previously. This does not unset any flags currently on. This function is safe for concurrent access.
-func (bi *blockIndex) SetStatusFlags(node *blockNode, flags blockStatus) {
+func (bi *blockIndex) SetStatusFlags(node *BlockNode, flags blockStatus) {
 	bi.Lock()
 	node.status |= flags
 	bi.dirty[node] = struct{}{}
@@ -215,7 +247,7 @@ func (bi *blockIndex) SetStatusFlags(node *blockNode, flags blockStatus) {
 }
 
 // UnsetStatusFlags flips the provided status flags on the block node to off, regardless of whether they were on or off previously. This function is safe for concurrent access.
-func (bi *blockIndex) UnsetStatusFlags(node *blockNode, flags blockStatus) {
+func (bi *blockIndex) UnsetStatusFlags(node *BlockNode, flags blockStatus) {
 	bi.Lock()
 	node.status &^= flags
 	bi.dirty[node] = struct{}{}
@@ -235,6 +267,7 @@ func (bi *blockIndex) flushToDB() error {
 				for node := range bi.dirty {
 					err := dbStoreBlockNode(dbTx, node)
 					if err != nil {
+						Error(err)
 						return err
 					}
 				}
@@ -243,31 +276,27 @@ func (bi *blockIndex) flushToDB() error {
 		)
 	// If write was successful, clear the dirty set.
 	if err == nil {
-		bi.dirty = make(map[*blockNode]struct{})
+		bi.dirty = make(map[*BlockNode]struct{})
 	}
 	bi.Unlock()
 	return err
 }
 
 // GetAlgo returns the algorithm of a block node
-func (node *blockNode) GetAlgo() int32 {
+func (node *BlockNode) GetAlgo() int32 {
 	return node.version
 }
 
 // GetLastWithAlgo returns the newest block from node with specified algo
-func (node *blockNode) GetLastWithAlgo(algo int32) (prev *blockNode) {
+func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 	if node == nil {
-		return nil
+		return
 	}
-	prev = node.Ancestor(1)
-	if prev == nil {
-		return nil
-	}
-	prevfork := fork.GetCurrent(prev.height)
-	if prevfork == 0 {
-
+	if fork.GetCurrent(node.height+1) == 0 {
+		// Trace("checking pre-hardfork algo versions")
 		if algo != 514 &&
 			algo != 2 {
+			Debug("irregular version", algo, "block, assuming 2 (sha256d)")
 			algo = 2
 		}
 	}
@@ -276,17 +305,70 @@ func (node *blockNode) GetLastWithAlgo(algo int32) (prev *blockNode) {
 		if prev == nil {
 			return nil
 		}
+		// Tracef("node %d %d %8x", prev.height, prev.version, prev.bits)
 		prevversion := prev.version
 		if fork.GetCurrent(prev.height) == 0 {
+			// Trace("checking pre-hardfork algo versions")
 			if prev.version != 514 &&
 				prev.version != 2 {
+				Debug("irregular version block", prev.version, ", assuming 2 (sha256d)")
 				prevversion = 2
 			}
 		}
 		if prevversion == algo {
+			// Tracef(
+			//	"found height %d version %d prev version %d prev bits %8x",
+			//	prev.height, prev.version, prevversion, prev.bits)
 			return
 		}
 		prev = prev.RelativeAncestor(1)
-
 	}
 }
+
+// if node == nil {
+// 	Trace("this node is nil")
+// 	return nil
+// }
+// prev = node.RelativeAncestor(1)
+// if prev == nil {
+// 	Trace("the previous node was nil")
+// 	return nil
+// }
+// prevFork := fork.GetCurrent(prev.height)
+// if prevFork == 0 {
+// 	if algo != 514 &&
+// 		algo != 2 {
+// 		Trace("bogus version halcyon", algo)
+// 		algo = 2
+// 	}
+// }
+// if prev.version == algo {
+// 	Tracef("found previous %d %d %08x", prev.height, prev.version,
+// 	prev.bits)
+// 	return prev
+// }
+// prev = prev.RelativeAncestor(1)
+// for {
+// 	if prev == nil {
+// 		Trace("passed through genesis")
+// 		return nil
+// 	}
+// 	Trace(prev.height)
+// 	prevVersion := prev.version
+// 	if fork.GetCurrent(prev.height) == 0 {
+// 		if prevVersion != 514 &&
+// 			prevVersion != 2 {
+// 			Trace("bogus version", prevVersion)
+// 			prevVersion = 2
+// 		}
+// 	}
+// 	if prevVersion == algo {
+// 		Tracef("found previous %d %d %08x", prev.height, prev.version,
+// 			prev.bits)
+// 		return prev
+// 	} else {
+// 		Trace(prev.height)
+// 		prev = prev.RelativeAncestor(1)
+// 	}
+// }
+// }

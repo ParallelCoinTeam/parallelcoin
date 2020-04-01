@@ -1,19 +1,19 @@
 package wire
 
 import (
-   "bytes"
-   "fmt"
-   "io"
-   "reflect"
-   "testing"
-   
-   "github.com/davecgh/go-spew/spew"
-   
-   chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
+	"bytes"
+	"fmt"
+	"io"
+	"reflect"
+	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // TestTx tests the MsgTx API.
-func TestTx(	t *testing.T) {
+func TestTx(t *testing.T) {
 	pver := ProtocolVersion
 	// Block 100000 hash.
 	hashStr := "3ba27aa200b1cecaad478d2b00432346c3f1f3986da1afd33e506"
@@ -120,7 +120,7 @@ func TestTx(	t *testing.T) {
 }
 
 // TestTxHash tests the ability to generate the hash of a transaction accurately.
-func TestTxHash(	t *testing.T) {
+func TestTxHash(t *testing.T) {
 	// Hash of first transaction from block 113875.
 	hashStr := "f051e59b5e2503ac626d03aaeac8ab7be2d72ba4b7e97119c5852d70d52dcb86"
 	wantHash, err := chainhash.NewHashFromStr(hashStr)
@@ -166,7 +166,7 @@ func TestTxHash(	t *testing.T) {
 }
 
 // TestTxSha tests the ability to generate the wtxid, and txid of a transaction with witness inputs accurately.
-func TestWTxSha(	t *testing.T) {
+func TestWTxSha(t *testing.T) {
 	hashStrTxid := "0f167d1385a84d1518cfee208b653fc9163b605ccf1b75347e2850b3e2eb19f3"
 	wantHashTxid, err := chainhash.NewHashFromStr(hashStrTxid)
 	if err != nil {
@@ -240,7 +240,7 @@ func TestWTxSha(	t *testing.T) {
 }
 
 // TestTxWire tests the MsgTx wire encode and decode for various numbers of transaction inputs and outputs and protocol versions.
-func TestTxWire(	t *testing.T) {
+func TestTxWire(t *testing.T) {
 	// Empty tx message.
 	noTx := NewMsgTx(1)
 	noTx.Version = 1
@@ -368,7 +368,7 @@ func TestTxWire(	t *testing.T) {
 }
 
 // TestTxWireErrors performs negative tests against wire encode and decode of MsgTx to confirm error paths work correctly.
-func TestTxWireErrors(	t *testing.T) {
+func TestTxWireErrors(t *testing.T) {
 	// Use protocol version 60002 specifically here instead of the latest because the test data is using bytes encoded with that protocol version.
 	pver := uint32(60002)
 	tests := []struct {
@@ -428,7 +428,7 @@ func TestTxWireErrors(	t *testing.T) {
 }
 
 // TestTxSerialize tests MsgTx serialize and deserialize.
-func TestTxSerialize(	t *testing.T) {
+func TestTxSerialize(t *testing.T) {
 	noTx := NewMsgTx(1)
 	noTx.Version = 1
 	noTxEncoded := []byte{
@@ -522,7 +522,7 @@ func TestTxSerialize(	t *testing.T) {
 }
 
 // TestTxSerializeErrors performs negative tests against wire encode and decode of MsgTx to confirm error paths work correctly.
-func TestTxSerializeErrors(	t *testing.T) {
+func TestTxSerializeErrors(t *testing.T) {
 	tests := []struct {
 		in       *MsgTx // Value to encode
 		buf      []byte // Serialized data
@@ -578,7 +578,7 @@ func TestTxSerializeErrors(	t *testing.T) {
 }
 
 // TestTxOverflowErrors performs tests to ensure deserializing transactions which are intentionally crafted to use large values for the variable number of inputs and outputs are handled properly.  This could otherwise potentially be used as an attack vector.
-func TestTxOverflowErrors(	t *testing.T) {
+func TestTxOverflowErrors(t *testing.T) {
 	// Use protocol version 70001 and transaction version 1 specifically here instead of the latest values because the test data is using bytes encoded with those versions.
 	pver := uint32(70001)
 	txVer := uint32(1)
@@ -662,7 +662,7 @@ func TestTxOverflowErrors(	t *testing.T) {
 }
 
 // TestTxSerializeSizeStripped performs tests to ensure the serialize size for various transactions is accurate.
-func TestTxSerializeSizeStripped(	t *testing.T) {
+func TestTxSerializeSizeStripped(t *testing.T) {
 	// Empty tx message.
 	noTx := NewMsgTx(1)
 	noTx.Version = 1
@@ -689,7 +689,7 @@ func TestTxSerializeSizeStripped(	t *testing.T) {
 }
 
 // TestTxWitnessSize performs tests to ensure that the serialized size for various types of transactions that include witness data is accurate.
-func TestTxWitnessSize(	t *testing.T) {
+func TestTxWitnessSize(t *testing.T) {
 	tests := []struct {
 		in   *MsgTx // Tx to encode
 		size int    // Expected serialized size w/ witnesses

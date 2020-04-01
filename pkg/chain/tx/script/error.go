@@ -7,7 +7,7 @@ import (
 // ErrorCode identifies a kind of script error.
 type ErrorCode int
 
-// These constants are used to identify a specific Error.
+// These constants are used to identify a specific ScriptError.
 const (
 	// ErrInternal is returned if internal consistency checks fail.  In practice this error should never be seen as it would mean there is an error in the engine logic.
 	ErrInternal ErrorCode = iota
@@ -227,28 +227,28 @@ func (e ErrorCode) String() string {
 	return fmt.Sprintf("Unknown ErrorCode (%d)", int(e))
 }
 
-// Error identifies a script-related error.  It is used to indicate three classes of errors:
+// ScriptError identifies a script-related error.  It is used to indicate three classes of errors:
 // 1) Script execution failures due to violating one of the many requirements imposed by the script engine or evaluating to false
 // 2) Improper API usage by callers
 // 3) Internal consistency check failures
 // The caller can use type assertions on the returned errors to access the ErrorCode field to ascertain the specific reason for the error.  As an additional convenience, the caller may make use of the IsErrorCode function to check for a specific error code.
-type Error struct {
+type ScriptError struct {
 	ErrorCode   ErrorCode
 	Description string
 }
 
-// Error satisfies the error interface and prints human-readable errors.
-func (e Error) Error() string {
+// ScriptError satisfies the error interface and prints human-readable errors.
+func (e ScriptError) Error() string {
 	return e.Description
 }
 
-// scriptError creates an Error given a set of arguments.
-func scriptError(	c ErrorCode, desc string) Error {
-	return Error{ErrorCode: c, Description: desc}
+// scriptError creates an ScriptError given a set of arguments.
+func scriptError(c ErrorCode, desc string) ScriptError {
+	return ScriptError{ErrorCode: c, Description: desc}
 }
 
 // IsErrorCode returns whether or not the provided error is a script error with the provided error code.
-func IsErrorCode(	err error, c ErrorCode) bool {
-	serr, ok := err.(Error)
+func IsErrorCode(err error, c ErrorCode) bool {
+	serr, ok := err.(ScriptError)
 	return ok && serr.ErrorCode == c
 }

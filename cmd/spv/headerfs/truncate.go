@@ -2,7 +2,9 @@
 
 package headerfs
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // singleTruncate truncates a single header from the end of the header file.
 // This can be used in the case of a re-org to remove the last header from the
@@ -18,6 +20,7 @@ func (h *headerStore) singleTruncate() error {
 	fileInfo, err := h.file.Stat()
 
 	if err != nil {
+		Error(err)
 		return err
 	}
 

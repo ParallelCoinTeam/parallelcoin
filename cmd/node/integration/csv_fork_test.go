@@ -1,5 +1,3 @@
-// +build rpctest
-
 package integration
 
 import (
@@ -8,15 +6,15 @@ import (
 	"strings"
 	"testing"
 	"time"
-	
-	"github.com/parallelcointeam/parallelcoin/cmd/node/integration/rpctest"
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	txscript "github.com/parallelcointeam/parallelcoin/pkg/chain/tx/script"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	ec "github.com/parallelcointeam/parallelcoin/pkg/util/elliptic"
+
+	"github.com/p9c/pod/cmd/node/integration/rpctest"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 const (
@@ -90,7 +88,7 @@ func makeTestOutput(r *rpctest.Harness, t *testing.T,
 func TestBIP0113Activation(t *testing.T) {
 	t.Parallel()
 	podCfg := []string{"--rejectnonstd"}
-	r, err := rpctest.New(&chaincfg.SimNetParams, nil, podCfg)
+	r, err := rpctest.New(&netparams.SimNetParams, nil, podCfg)
 	if err != nil {
 		t.Fatal("unable to create primary harness: ", err)
 	}
@@ -123,7 +121,7 @@ func TestBIP0113Activation(t *testing.T) {
 	})
 	tx.AddTxOut(&wire.TxOut{
 		PkScript: addrScript,
-		Value:    outputValue - 1000,
+		Value:    int64(outputValue) - 1000,
 	})
 	// We set the lock-time of the transaction to just one minute after the
 	// current MTP of the chain.
@@ -205,7 +203,7 @@ func TestBIP0113Activation(t *testing.T) {
 		})
 		tx.AddTxOut(&wire.TxOut{
 			PkScript: addrScript,
-			Value:    outputValue - 1000,
+			Value:    int64(outputValue) - 1000,
 		})
 		tx.LockTime = uint32(medianTimePast + timeLockDelta)
 		sigScript, err = txscript.SignatureScript(tx, 0, testPkScript,
@@ -352,7 +350,7 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 	// sequence locks) and BIP 112 rule-sets which add input-age based
 	// relative lock times.
 	podCfg := []string{"--rejectnonstd"}
-	r, err := rpctest.New(&chaincfg.SimNetParams, nil, podCfg)
+	r, err := rpctest.New(&netparams.SimNetParams, nil, podCfg)
 	if err != nil {
 		t.Fatal("unable to create primary harness: ", err)
 	}
@@ -374,7 +372,7 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 		relativeBlockLock = 10
 	)
 	sweepOutput := &wire.TxOut{
-		Value:    outputAmt - 5000,
+		Value:    int64(outputAmt) - 5000,
 		PkScript: harnessScript,
 	}
 	// As the soft-fork hasn't yet activated _any_ transaction version which

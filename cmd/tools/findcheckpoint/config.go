@@ -1,17 +1,17 @@
 package main
 
 import (
-   "fmt"
-   "os"
-   "path/filepath"
-   
-   "github.com/jessevdk/go-flags"
-   
-   `github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams`
-   "github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-   database "github.com/parallelcointeam/parallelcoin/pkg/db"
-   _ "github.com/parallelcointeam/parallelcoin/pkg/db/ffldb"
-   "github.com/parallelcointeam/parallelcoin/pkg/util"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/jessevdk/go-flags"
+
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	podHomeDir      = util.AppDataDir("pod", false)
+	podHomeDir      = appdata.Dir("pod", false)
 	defaultDataDir  = filepath.Join(podHomeDir, "data")
 	knownDbTypes    = database.SupportedDrivers()
 	activeNetParams = &netparams.MainNetParams
@@ -73,6 +73,7 @@ func loadConfig() (*config, []string, error) {
 	parser := flags.NewParser(&cfg, flags.Default)
 	remainingArgs, err := parser.Parse()
 	if err != nil {
+		Error(err)
 		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}

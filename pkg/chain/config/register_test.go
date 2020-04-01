@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
+	. "github.com/p9c/pod/pkg/chain/config"
 )
 
 // Define some of the required parameters for a user-registered network.  This is necessary to test the registration of and lookup of encoding magics from the network.
@@ -20,7 +20,7 @@ var mockNetParams = Params{
 	HDPublicKeyID:    [4]byte{0x05, 0x06, 0x07, 0x08},
 }
 
-func TestRegister(	t *testing.T) {
+func TestRegister(t *testing.T) {
 	type registerTest struct {
 		name   string
 		params *Params

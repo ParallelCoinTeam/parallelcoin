@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
 // ErrorCode identifies a kind of error.
@@ -106,7 +106,7 @@ const (
 var (
 	// Break is a global err used to signal a break from the callback
 	// function by returning an error with the code ErrCallBackBreak
-	//nolint
+	// nolint
 	Break = managerError(ErrCallBackBreak, "callback break", nil)
 	// errAcctTooHigh is the common error description used for the
 	// ErrAccountNumTooHigh error code.

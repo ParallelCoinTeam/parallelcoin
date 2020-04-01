@@ -3,8 +3,7 @@ package spv
 import (
 	"fmt"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 type (
@@ -53,14 +52,14 @@ func (s *ChainService) sendSubscribedMsg(bm *blockMessage) {
 	s.mtxSubscribers.RUnlock()
 }
 
-// subscribeBlockMsg handles adding block subscriptions to the ChainService.
+func // subscribeBlockMsg handles adding block subscriptions to the
+// ChainService.
 // The best known height to the caller should be passed in, such that we can
 // send a backlog of notifications to the caller if they're behind the current
 // best tip.
-//
 // TODO(aakselrod): move this to its own package and refactor so that we're not
 // modifying an object held by the caller.
-func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
+(s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 	onDisconnect chan<- wire.BlockHeader,
 	quit <-chan struct{}) (*blockSubscription, error) {
 	subscription := blockSubscription{
@@ -83,9 +82,10 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 		if filterHeaderTip == bestHeight {
 			return nil
 		}
-		log <- cl.Debugf{
-			"delivering backlog block notifications from height=%v, to height=%v %s",
-			bestHeight, filterHeaderTip, cl.Ine()}
+		Debugf(
+			"delivering backlog block notifications from height=%v, to height=%v",
+			bestHeight, filterHeaderTip,
+		)
 		// Otherwise, we need to read block headers from disk to
 		// deliver a backlog to the caller before we proceed. We'll use
 		// this synchronization method to ensure the filter header
@@ -97,6 +97,7 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 				currentHeight,
 			)
 			if err != nil {
+				Error(err)
 				return fmt.Errorf(
 					"unable to read header at height: %v: %v",
 					currentHeight, err,
@@ -110,18 +111,18 @@ func (s *ChainService) subscribeBlockMsg(bestHeight uint32, onConnectBasic,
 		return nil
 	})
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &subscription, nil
 }
 
-// unsubscribeBlockMsgs handles removing block subscriptions from the
+func // unsubscribeBlockMsgs handles removing block subscriptions from the
 // ChainService.
-//
 // TODO(aakselrod): move this to its own package and refactor so that we're
 // not depending on the caller to not modify the argument between subscribe and
 // unsubscribe.
-func (s *ChainService) unsubscribeBlockMsgs(subscription *blockSubscription) {
+(s *ChainService) unsubscribeBlockMsgs(subscription *blockSubscription) {
 	s.mtxSubscribers.Lock()
 	delete(s.blockSubscribers, subscription)
 	s.mtxSubscribers.Unlock()
@@ -137,9 +138,9 @@ cleanup:
 	}
 }
 
-// subscriptionHandler must be run as a goroutine and queues notification
+func // subscriptionHandler must be run as a goroutine and queues notification
 // messages from the chain service to the subscriber.
-func (s *blockSubscription) subscriptionHandler() {
+(s *blockSubscription) subscriptionHandler() {
 	// Start with a small queue; it will grow if needed.
 	ntfns := make([]*blockMessage, 0, 5)
 	var next *blockMessage
@@ -206,10 +207,10 @@ func (s *blockSubscription) subscriptionHandler() {
 	}
 }
 
-// sendMsgToSubscriber is a helper function that sends the target message to
-// the subscription client over the proper channel based on the type of the new
-// block notification.
-func sendMsgToSubscriber(sub *blockSubscription, bm *blockMessage) {
+func // sendMsgToSubscriber is a helper function that sends the target
+// message to the subscription client over the proper channel based on the
+// type of the new block notification.
+sendMsgToSubscriber(sub *blockSubscription, bm *blockMessage) {
 	var subChan chan<- wire.BlockHeader
 	switch bm.msgType {
 	case connectBasic:

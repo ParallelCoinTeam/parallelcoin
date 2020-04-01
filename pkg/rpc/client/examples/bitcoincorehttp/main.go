@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	rpcclient "github.com/parallelcointeam/parallelcoin/pkg/rpc/client"
+	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 )
 
 func main() {
@@ -18,13 +18,13 @@ func main() {
 	// Notice the notification parameter is nil since notifications are not supported in HTTP POST mode.
 	client, err := rpcclient.New(connCfg, nil)
 	if err != nil {
-		log.Fatal(err)
+		Fatal(err)
 	}
 	defer client.Shutdown()
 	// Get the current block count.
 	blockCount, err := client.GetBlockCount()
 	if err != nil {
-		log.Fatal(err)
+		Fatal(err)
 	}
 	log.Printf("Block count: %d", blockCount)
 }

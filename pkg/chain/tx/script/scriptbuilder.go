@@ -13,7 +13,7 @@ const (
 // ErrScriptNotCanonical identifies a non-canonical script.  The caller can use a type assertion to detect this error type.
 type ErrScriptNotCanonical string
 
-// Error implements the error interface.
+// ScriptError implements the error interface.
 func (e ErrScriptNotCanonical) Error() string {
 	return string(e)
 }
@@ -26,10 +26,11 @@ func (e ErrScriptNotCanonical) Error() string {
 // 	builder.AddOp(txscript.OP_CHECKMULTISIG)
 // 	script, err := builder.Script()
 // 	if err != nil {
+//	L.ScriptError(err)
 // 		// Handle the error.
 // 		return
 // 	}
-// 	fmt.Printf("Final multi-sig script: %x\n", script)
+// 	log.Printf("Final multi-sig script: %x\n", script)
 type ScriptBuilder struct {
 	script []byte
 	err    error
@@ -68,7 +69,7 @@ func (b *ScriptBuilder) AddOps(opcodes []byte) *ScriptBuilder {
 }
 
 // canonicalDataSize returns the number of bytes the canonical encoding of the data will take.
-func canonicalDataSize(	data []byte) int {
+func canonicalDataSize(data []byte) int {
 	dataLen := len(data)
 	// When the data consists of a single number that can be represented by one of the "small integer" opcodes, that opcode will be instead of a data push opcode followed by the number.
 	if dataLen == 0 {

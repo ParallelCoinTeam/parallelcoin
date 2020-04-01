@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/db"
+	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/db"
 )
 
 // fetchBlockCmd defines the configuration options for the fetchblock command.
@@ -29,23 +29,26 @@ func (cmd *fetchBlockCmd) Execute(args []string) error {
 	}
 	blockHash, err := chainhash.NewHashFromStr(args[0])
 	if err != nil {
-		return err
+		L.Error(err)
+return err
 	}
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		return err
+		L.Error(err)
+return err
 	}
 	defer db.Close()
 	return db.View(func(tx database.Tx) error {
-		log.Infof("Fetching block %s", blockHash)
+		L.Infof("Fetching block %s", blockHash)
 		startTime := time.Now()
 		blockBytes, err := tx.FetchBlock(blockHash)
 		if err != nil {
-			return err
+		L.Error(err)
+return err
 		}
-		log.Infof("Loaded block in %v", time.Since(startTime))
-		log.Infof("Block Hex: %s", hex.EncodeToString(blockBytes))
+		L.Infof("Loaded block in %v", time.Since(startTime))
+		L.Infof("Block Hex: %s", hex.EncodeToString(blockBytes))
 		return nil
 	})
 }

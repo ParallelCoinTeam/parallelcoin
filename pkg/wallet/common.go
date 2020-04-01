@@ -3,9 +3,9 @@ package wallet
 import (
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Note: The following common types should never reference the Wallet type.
@@ -46,8 +46,8 @@ type TransactionOutput struct {
 	OutputKind OutputKind
 	// These should be added later when the DB can return them more
 	// efficiently:
-	//TxLockTime      uint32
-	//TxExpiry        uint32
+	// TxLockTime      uint32
+	// TxExpiry        uint32
 	ContainingBlock BlockIdentity
 	ReceiveTime     time.Time
 }

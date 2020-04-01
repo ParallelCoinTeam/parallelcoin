@@ -3,9 +3,9 @@ package wtxmgr
 import (
 	"fmt"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // CreditRecord contains metadata regarding a transaction credit for a known
@@ -44,14 +44,17 @@ func (s *Store) minedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash, r
 	// block time, and read all matching credits, debits.
 	err := readRawTxRecord(txHash, recVal, &details.TxRecord)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	err = readRawTxRecordBlock(recKey, &details.Block.Block)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	details.Block.Time, err = fetchBlockTime(ns, details.Block.Height)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	credIter := makeReadCreditIterator(ns, recKey)
@@ -91,6 +94,7 @@ func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 	}
 	err := readRawTxRecord(txHash, v, &details.TxRecord)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	it := makeReadUnminedCreditIterator(ns, txHash)
@@ -120,6 +124,7 @@ func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 			v := existsRawCredit(ns, credKey)
 			amount, err := fetchRawCreditAmount(v)
 			if err != nil {
+				Error(err)
 				return nil, err
 			}
 			details.Debits = append(details.Debits, DebitRecord{
@@ -134,6 +139,7 @@ func (s *Store) unminedTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 		}
 		amount, err := fetchRawCreditAmount(v)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		details.Debits = append(details.Debits, DebitRecord{
@@ -190,12 +196,15 @@ func (s *Store) UniqueTxDetails(ns walletdb.ReadBucket, txHash *chainhash.Hash,
 
 // rangeUnminedTransactions executes the function f with TxDetails for every
 // unmined transaction.  f is not executed if no unmined transactions exist.
-// Error returns from f (if any) are propigated to the caller.  Returns true
+// DBError returns from f (if any) are propigated to the caller.  Returns true
 // (signaling breaking out of a RangeTransactions) iff f executes and returns
 // true.
-func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket, f func([]TxDetails) (bool, error)) (bool, error) {
+func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket,
+	f func([]TxDetails) (bool, error)) (bool, error) {
+	Trace("rangeUnminedTransactions")
 	var details []TxDetails
 	err := ns.NestedReadBucket(bucketUnmined).ForEach(func(k, v []byte) error {
+		// Debug("k", k, "v", v)
 		if len(k) < 32 {
 			str := fmt.Sprintf("%s: short key (expected %d "+
 				"bytes, read %d)", bucketUnmined, 32, len(k))
@@ -205,6 +214,7 @@ func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket, f func([]TxDeta
 		copy(txHash[:], k)
 		detail, err := s.unminedTxDetails(ns, &txHash, v)
 		if err != nil {
+			Error(err)
 			return err
 		}
 		// Because the key was created while foreach-ing over the
@@ -225,6 +235,7 @@ func (s *Store) rangeUnminedTransactions(ns walletdb.ReadBucket, f func([]TxDeta
 // f executes and returns true.
 func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error)) (bool, error) {
+	Trace("rangeBlockTransactions", begin, end)
 	// Mempool height is considered a high bound.
 	if begin < 0 {
 		begin = int32(^uint32(0) >> 1)
@@ -232,6 +243,7 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 	if end < 0 {
 		end = int32(^uint32(0) >> 1)
 	}
+	Trace("begin", begin, "end", end)
 	var blockIter blockIterator
 	var advance func(*blockIterator) bool
 	if begin < end {
@@ -239,6 +251,7 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 		blockIter = makeReadBlockIterator(ns, begin)
 		advance = func(it *blockIterator) bool {
 			if !it.next() {
+				Debug("end of blocks")
 				return false
 			}
 			return it.elem.Height <= end
@@ -277,6 +290,7 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 			}
 			err := readRawTxRecord(&txHash, v, &detail.TxRecord)
 			if err != nil {
+				Error(err)
 				return false, err
 			}
 			credIter := makeReadCreditIterator(ns, k)
@@ -336,15 +350,19 @@ func (s *Store) rangeBlockTransactions(ns walletdb.ReadBucket, begin, end int32,
 // use it after the loop iteration it was acquired.
 func (s *Store) RangeTransactions(ns walletdb.ReadBucket, begin, end int32,
 	f func([]TxDetails) (bool, error)) error {
-	var addedUnmined bool
+	Trace("RangeTransactions")
+	var addedUnmined, brk bool
+	var err error
 	if begin < 0 {
-		brk, err := s.rangeUnminedTransactions(ns, f)
+		brk, err = s.rangeUnminedTransactions(ns, f)
 		if err != nil || brk {
+			Error(err)
 			return err
 		}
 		addedUnmined = true
 	}
-	brk, err := s.rangeBlockTransactions(ns, begin, end, f)
+	if brk, err = s.rangeBlockTransactions(ns, begin, end, f); Check(err) {
+	}
 	if err == nil && !brk && !addedUnmined && end < 0 {
 		_, err = s.rangeUnminedTransactions(ns, f)
 	}
@@ -373,6 +391,7 @@ func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *
 				pkScript, err := fetchRawTxRecordPkScript(
 					prevOut.Hash[:], v, prevOut.Index)
 				if err != nil {
+					Error(err)
 					return nil, err
 				}
 				pkScripts = append(pkScripts, pkScript)
@@ -385,6 +404,7 @@ func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *
 				pkScript, err := fetchRawTxRecordPkScript(k, v,
 					prevOut.Index)
 				if err != nil {
+					Error(err)
 					return nil, err
 				}
 				pkScripts = append(pkScripts, pkScript)
@@ -402,6 +422,7 @@ func (s *Store) PreviousPkScripts(ns walletdb.ReadBucket, rec *TxRecord, block *
 		v := existsRawTxRecord(ns, k)
 		pkScript, err := fetchRawTxRecordPkScript(k, v, index)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		pkScripts = append(pkScripts, pkScript)

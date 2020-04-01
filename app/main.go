@@ -4,34 +4,28 @@
 //
 // This is the heart of configuration and coordination of
 // the parts that compose the parallelcoin Pod - Ctl, Node and Wallet, and
-// the extended, combined Shell and the webview GUI.
+// the extended, combined Shell and the Gio GUI.
 package app
 
 import (
 	"fmt"
 	"os"
-	
-	"github.com/parallelcointeam/parallelcoin/pkg/conte"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
+
+	"github.com/p9c/pod/pkg/conte"
 )
 
 const (
 	appName           = "pod"
-	confExt           = ".toml"
+	confExt           = ".json"
+	appLanguage       = "en"
 	podConfigFilename = appName + confExt
-	// ctlAppName           = "ctl"
-	// ctlConfigFilename    = ctlAppName + confExt
-	// nodeAppName          = "node"
-	// nodeConfigFilename   = nodeAppName + confExt
-	// walletAppName        = "wallet"
-	// walletConfigFilename = walletAppName + confExt
+	PARSER            = "json"
 )
 
 // Main is the entrypoint for the pod AiO suite
 func Main() int {
-	cx := conte.GetNewContext(appName, "main")
-	cx.App = getApp(cx)
-	cx.Log <- cl.Debug{"running App"}
+	cx := conte.GetNewContext(appName, appLanguage, "main")
+	cx.App = GetApp(cx)
 	e := cx.App.Run(os.Args)
 	if e != nil {
 		fmt.Println("Pod ERROR:", e)

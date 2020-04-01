@@ -4,11 +4,11 @@ import (
 	js "encoding/json"
 	"strconv"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/wire"
-	"github.com/parallelcointeam/parallelcoin/pkg/rpc/json"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // *****************************
@@ -21,15 +21,17 @@ type FutureGetTransactionResult chan *response
 
 // Receive waits for the response promised by the future and returns detailed
 // information about a wallet transaction.
-func (r FutureGetTransactionResult) Receive() (*json.GetTransactionResult, error) {
+func (r FutureGetTransactionResult) Receive() (*btcjson.GetTransactionResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a gettransaction result object
-	var getTx json.GetTransactionResult
+	var getTx btcjson.GetTransactionResult
 	err = js.Unmarshal(res, &getTx)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &getTx, nil
@@ -44,13 +46,13 @@ func (c *Client) GetTransactionAsync(txHash *chainhash.Hash) FutureGetTransactio
 	if txHash != nil {
 		hash = txHash.String()
 	}
-	cmd := json.NewGetTransactionCmd(hash, nil)
+	cmd := btcjson.NewGetTransactionCmd(hash, nil)
 	return c.sendCmd(cmd)
 }
 
 // GetTransaction returns detailed information about a wallet transaction.
 // See GetRawTransaction to return the raw transaction instead.
-func (c *Client) GetTransaction(txHash *chainhash.Hash) (*json.GetTransactionResult, error) {
+func (c *Client) GetTransaction(txHash *chainhash.Hash) (*btcjson.GetTransactionResult, error) {
 	return c.GetTransactionAsync(txHash).Receive()
 }
 
@@ -61,15 +63,17 @@ type FutureListTransactionsResult chan *response
 
 // Receive waits for the response promised by the future and returns a list of
 // the most recent transactions.
-func (r FutureListTransactionsResult) Receive() ([]json.ListTransactionsResult, error) {
+func (r FutureListTransactionsResult) Receive() ([]btcjson.ListTransactionsResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as an array of listtransaction result objects.
-	var transactions []json.ListTransactionsResult
+	var transactions []btcjson.ListTransactionsResult
 	err = js.Unmarshal(res, &transactions)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return transactions, nil
@@ -80,14 +84,14 @@ func (r FutureListTransactionsResult) Receive() ([]json.ListTransactionsResult, 
 // the returned instance.
 // See ListTransactions for the blocking version and more details.
 func (c *Client) ListTransactionsAsync(account string) FutureListTransactionsResult {
-	cmd := json.NewListTransactionsCmd(&account, nil, nil, nil)
+	cmd := btcjson.NewListTransactionsCmd(&account, nil, nil, nil)
 	return c.sendCmd(cmd)
 }
 
 // ListTransactions returns a list of the most recent transactions.
 // See the ListTransactionsCount and ListTransactionsCountFrom to control the
 // number of transactions returned and starting point, respectively.
-func (c *Client) ListTransactions(account string) ([]json.ListTransactionsResult, error) {
+func (c *Client) ListTransactions(account string) ([]btcjson.ListTransactionsResult, error) {
 	return c.ListTransactionsAsync(account).Receive()
 }
 
@@ -96,7 +100,7 @@ func (c *Client) ListTransactions(account string) ([]json.ListTransactionsResult
 // function on the returned instance.
 // See ListTransactionsCount for the blocking version and more details.
 func (c *Client) ListTransactionsCountAsync(account string, count int) FutureListTransactionsResult {
-	cmd := json.NewListTransactionsCmd(&account, &count, nil, nil)
+	cmd := btcjson.NewListTransactionsCmd(&account, &count, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -104,7 +108,7 @@ func (c *Client) ListTransactionsCountAsync(account string, count int) FutureLis
 // to the passed count.
 // See the ListTransactions and ListTransactionsCountFrom functions for
 // different options.
-func (c *Client) ListTransactionsCount(account string, count int) ([]json.ListTransactionsResult, error) {
+func (c *Client) ListTransactionsCount(account string, count int) ([]btcjson.ListTransactionsResult, error) {
 	return c.ListTransactionsCountAsync(account, count).Receive()
 }
 
@@ -113,14 +117,14 @@ func (c *Client) ListTransactionsCount(account string, count int) ([]json.ListTr
 // function on the returned instance.
 // See ListTransactionsCountFrom for the blocking version and more details.
 func (c *Client) ListTransactionsCountFromAsync(account string, count, from int) FutureListTransactionsResult {
-	cmd := json.NewListTransactionsCmd(&account, &count, &from, nil)
+	cmd := btcjson.NewListTransactionsCmd(&account, &count, &from, nil)
 	return c.sendCmd(cmd)
 }
 
 // ListTransactionsCountFrom returns a list of the most recent transactions up
 // to the passed count while skipping the first 'from' transactions.
 // See the ListTransactions and ListTransactionsCount functions to use defaults.
-func (c *Client) ListTransactionsCountFrom(account string, count, from int) ([]json.ListTransactionsResult, error) {
+func (c *Client) ListTransactionsCountFrom(account string, count, from int) ([]btcjson.ListTransactionsResult, error) {
 	return c.ListTransactionsCountFromAsync(account, count, from).Receive()
 }
 
@@ -134,15 +138,17 @@ type FutureListUnspentResult chan *response
 // future wac returned by a call to ListUnspentMinAsync, ListUnspentMinMaxAsync,
 // or ListUnspentMinMaxAddressesAsync, the range may be limited by the
 // parameters of the RPC invocation.
-func (r FutureListUnspentResult) Receive() ([]json.ListUnspentResult, error) {
+func (r FutureListUnspentResult) Receive() ([]btcjson.ListUnspentResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as an array of listunspent results.
-	var unspent []json.ListUnspentResult
+	var unspent []btcjson.ListUnspentResult
 	err = js.Unmarshal(res, &unspent)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return unspent, nil
@@ -153,7 +159,7 @@ func (r FutureListUnspentResult) Receive() ([]json.ListUnspentResult, error) {
 // on the returned instance.
 // See ListUnspent for the blocking version and more details.
 func (c *Client) ListUnspentAsync() FutureListUnspentResult {
-	cmd := json.NewListUnspentCmd(nil, nil, nil)
+	cmd := btcjson.NewListUnspentCmd(nil, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -162,7 +168,7 @@ func (c *Client) ListUnspentAsync() FutureListUnspentResult {
 // on the returned instance.
 // See ListUnspentMin for the blocking version and more details.
 func (c *Client) ListUnspentMinAsync(minConf int) FutureListUnspentResult {
-	cmd := json.NewListUnspentCmd(&minConf, nil, nil)
+	cmd := btcjson.NewListUnspentCmd(&minConf, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -171,7 +177,7 @@ func (c *Client) ListUnspentMinAsync(minConf int) FutureListUnspentResult {
 // on the returned instance.
 // See ListUnspentMinMax for the blocking version and more details.
 func (c *Client) ListUnspentMinMaxAsync(minConf, maxConf int) FutureListUnspentResult {
-	cmd := json.NewListUnspentCmd(&minConf, &maxConf, nil)
+	cmd := btcjson.NewListUnspentCmd(&minConf, &maxConf, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -184,35 +190,35 @@ func (c *Client) ListUnspentMinMaxAddressesAsync(minConf, maxConf int, addrs []u
 	for _, a := range addrs {
 		addrStrs = append(addrStrs, a.EncodeAddress())
 	}
-	cmd := json.NewListUnspentCmd(&minConf, &maxConf, &addrStrs)
+	cmd := btcjson.NewListUnspentCmd(&minConf, &maxConf, &addrStrs)
 	return c.sendCmd(cmd)
 }
 
 // ListUnspent returns all unspent transaction outputs known to a wallet, using
 // the default number of minimum and maximum number of confirmations as a
 // filter (1 and 999999, respectively).
-func (c *Client) ListUnspent() ([]json.ListUnspentResult, error) {
+func (c *Client) ListUnspent() ([]btcjson.ListUnspentResult, error) {
 	return c.ListUnspentAsync().Receive()
 }
 
 // ListUnspentMin returns all unspent transaction outputs known to a wallet,
 // using the specified number of minimum conformations and default number of
 // maximum confiramtions (999999) as a filter.
-func (c *Client) ListUnspentMin(minConf int) ([]json.ListUnspentResult, error) {
+func (c *Client) ListUnspentMin(minConf int) ([]btcjson.ListUnspentResult, error) {
 	return c.ListUnspentMinAsync(minConf).Receive()
 }
 
 // ListUnspentMinMax returns all unspent transaction outputs known to a wallet,
 // using the specified number of minimum and maximum number of confirmations as
 // a filter.
-func (c *Client) ListUnspentMinMax(minConf, maxConf int) ([]json.ListUnspentResult, error) {
+func (c *Client) ListUnspentMinMax(minConf, maxConf int) ([]btcjson.ListUnspentResult, error) {
 	return c.ListUnspentMinMaxAsync(minConf, maxConf).Receive()
 }
 
 // ListUnspentMinMaxAddresses returns all unspent transaction outputs that pay
 // to any of specified addresses in a wallet using the specified number of
 // minimum and maximum number of confirmations as a filter.
-func (c *Client) ListUnspentMinMaxAddresses(minConf, maxConf int, addrs []util.Address) ([]json.ListUnspentResult, error) {
+func (c *Client) ListUnspentMinMaxAddresses(minConf, maxConf int, addrs []util.Address) ([]btcjson.ListUnspentResult, error) {
 	return c.ListUnspentMinMaxAddressesAsync(minConf, maxConf, addrs).Receive()
 }
 
@@ -224,15 +230,17 @@ type FutureListSinceBlockResult chan *response
 // Receive waits for the response promised by the future and returns all
 // transactions added in blocks since the specified block hash, or all
 // transactions if it is nil.
-func (r FutureListSinceBlockResult) Receive() (*json.ListSinceBlockResult, error) {
+func (r FutureListSinceBlockResult) Receive() (*btcjson.ListSinceBlockResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a listsinceblock result object.
-	var listResult json.ListSinceBlockResult
+	var listResult btcjson.ListSinceBlockResult
 	err = js.Unmarshal(res, &listResult)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &listResult, nil
@@ -245,9 +253,9 @@ func (r FutureListSinceBlockResult) Receive() (*json.ListSinceBlockResult, error
 func (c *Client) ListSinceBlockAsync(blockHash *chainhash.Hash) FutureListSinceBlockResult {
 	var hash *string
 	if blockHash != nil {
-		hash = json.String(blockHash.String())
+		hash = btcjson.String(blockHash.String())
 	}
-	cmd := json.NewListSinceBlockCmd(hash, nil, nil)
+	cmd := btcjson.NewListSinceBlockCmd(hash, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -255,7 +263,7 @@ func (c *Client) ListSinceBlockAsync(blockHash *chainhash.Hash) FutureListSinceB
 // block hash, or all transactions if it is nil, using the default number of
 // minimum confirmations as a filter.
 // See ListSinceBlockMinConf to override the minimum number of confirmations.
-func (c *Client) ListSinceBlock(blockHash *chainhash.Hash) (*json.ListSinceBlockResult, error) {
+func (c *Client) ListSinceBlock(blockHash *chainhash.Hash) (*btcjson.ListSinceBlockResult, error) {
 	return c.ListSinceBlockAsync(blockHash).Receive()
 }
 
@@ -266,9 +274,9 @@ func (c *Client) ListSinceBlock(blockHash *chainhash.Hash) (*json.ListSinceBlock
 func (c *Client) ListSinceBlockMinConfAsync(blockHash *chainhash.Hash, minConfirms int) FutureListSinceBlockResult {
 	var hash *string
 	if blockHash != nil {
-		hash = json.String(blockHash.String())
+		hash = btcjson.String(blockHash.String())
 	}
-	cmd := json.NewListSinceBlockCmd(hash, &minConfirms, nil)
+	cmd := btcjson.NewListSinceBlockCmd(hash, &minConfirms, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -276,7 +284,7 @@ func (c *Client) ListSinceBlockMinConfAsync(blockHash *chainhash.Hash, minConfir
 // specified block hash, or all transactions if it is nil, using the specified
 // number of minimum confirmations as a filter.
 // See ListSinceBlock to use the default minimum number of confirmations.
-func (c *Client) ListSinceBlockMinConf(blockHash *chainhash.Hash, minConfirms int) (*json.ListSinceBlockResult, error) {
+func (c *Client) ListSinceBlockMinConf(blockHash *chainhash.Hash, minConfirms int) (*btcjson.ListSinceBlockResult, error) {
 	return c.ListSinceBlockMinConfAsync(blockHash, minConfirms).Receive()
 }
 
@@ -300,14 +308,14 @@ func (r FutureLockUnspentResult) Receive() error {
 // returned instance.
 // See LockUnspent for the blocking version and more details.
 func (c *Client) LockUnspentAsync(unlock bool, ops []*wire.OutPoint) FutureLockUnspentResult {
-	outputs := make([]json.TransactionInput, len(ops))
+	outputs := make([]btcjson.TransactionInput, len(ops))
 	for i, op := range ops {
-		outputs[i] = json.TransactionInput{
+		outputs[i] = btcjson.TransactionInput{
 			Txid: op.Hash.String(),
 			Vout: op.Index,
 		}
 	}
-	cmd := json.NewLockUnspentCmd(unlock, outputs)
+	cmd := btcjson.NewLockUnspentCmd(unlock, outputs)
 	return c.sendCmd(cmd)
 }
 
@@ -338,12 +346,14 @@ type FutureListLockUnspentResult chan *response
 func (r FutureListLockUnspentResult) Receive() ([]*wire.OutPoint, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal as an array of transaction inputs.
-	var inputs []json.TransactionInput
+	var inputs []btcjson.TransactionInput
 	err = js.Unmarshal(res, &inputs)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Create a slice of outpoints from the transaction input structs.
@@ -351,6 +361,7 @@ func (r FutureListLockUnspentResult) Receive() ([]*wire.OutPoint, error) {
 	for i, input := range inputs {
 		sha, err := chainhash.NewHashFromStr(input.Txid)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		ops[i] = wire.NewOutPoint(sha, input.Vout)
@@ -363,7 +374,7 @@ func (r FutureListLockUnspentResult) Receive() ([]*wire.OutPoint, error) {
 // the returned instance.
 // See ListLockUnspent for the blocking version and more details.
 func (c *Client) ListLockUnspentAsync() FutureListLockUnspentResult {
-	cmd := json.NewListLockUnspentCmd()
+	cmd := btcjson.NewListLockUnspentCmd()
 	return c.sendCmd(cmd)
 }
 
@@ -391,7 +402,7 @@ func (r FutureSetTxFeeResult) Receive() error {
 // returned instance.
 // See SetTxFee for the blocking version and more details.
 func (c *Client) SetTxFeeAsync(fee util.Amount) FutureSetTxFeeResult {
-	cmd := json.NewSetTxFeeCmd(fee.ToDUO())
+	cmd := btcjson.NewSetTxFeeCmd(fee.ToDUO())
 	return c.sendCmd(cmd)
 }
 
@@ -410,12 +421,14 @@ type FutureSendToAddressResult chan *response
 func (r FutureSendToAddressResult) Receive() (*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var txHash string
 	err = js.Unmarshal(res, &txHash)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return chainhash.NewHashFromStr(txHash)
@@ -427,7 +440,7 @@ func (r FutureSendToAddressResult) Receive() (*chainhash.Hash, error) {
 // See SendToAddress for the blocking version and more details.
 func (c *Client) SendToAddressAsync(address util.Address, amount util.Amount) FutureSendToAddressResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewSendToAddressCmd(addr, amount.ToDUO(), nil, nil)
+	cmd := btcjson.NewSendToAddressCmd(addr, amount.ToDUO(), nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -449,7 +462,7 @@ func (c *Client) SendToAddressCommentAsync(address util.Address,
 	amount util.Amount, comment,
 	commentTo string) FutureSendToAddressResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewSendToAddressCmd(addr, amount.ToDUO(), &comment,
+	cmd := btcjson.NewSendToAddressCmd(addr, amount.ToDUO(), &comment,
 		&commentTo)
 	return c.sendCmd(cmd)
 }
@@ -479,12 +492,14 @@ type FutureSendFromResult chan *response
 func (r FutureSendFromResult) Receive() (*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var txHash string
 	err = js.Unmarshal(res, &txHash)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return chainhash.NewHashFromStr(txHash)
@@ -496,7 +511,7 @@ func (r FutureSendFromResult) Receive() (*chainhash.Hash, error) {
 // See SendFrom for the blocking version and more details.
 func (c *Client) SendFromAsync(fromAccount string, toAddress util.Address, amount util.Amount) FutureSendFromResult {
 	addr := toAddress.EncodeAddress()
-	cmd := json.NewSendFromCmd(fromAccount, addr, amount.ToDUO(), nil,
+	cmd := btcjson.NewSendFromCmd(fromAccount, addr, amount.ToDUO(), nil,
 		nil, nil)
 	return c.sendCmd(cmd)
 }
@@ -517,7 +532,7 @@ func (c *Client) SendFrom(fromAccount string, toAddress util.Address, amount uti
 // See SendFromMinConf for the blocking version and more details.
 func (c *Client) SendFromMinConfAsync(fromAccount string, toAddress util.Address, amount util.Amount, minConfirms int) FutureSendFromResult {
 	addr := toAddress.EncodeAddress()
-	cmd := json.NewSendFromCmd(fromAccount, addr, amount.ToDUO(),
+	cmd := btcjson.NewSendFromCmd(fromAccount, addr, amount.ToDUO(),
 		&minConfirms, nil, nil)
 	return c.sendCmd(cmd)
 }
@@ -542,7 +557,7 @@ func (c *Client) SendFromCommentAsync(fromAccount string,
 	toAddress util.Address, amount util.Amount, minConfirms int,
 	comment, commentTo string) FutureSendFromResult {
 	addr := toAddress.EncodeAddress()
-	cmd := json.NewSendFromCmd(fromAccount, addr, amount.ToDUO(),
+	cmd := btcjson.NewSendFromCmd(fromAccount, addr, amount.ToDUO(),
 		&minConfirms, &comment, &commentTo)
 	return c.sendCmd(cmd)
 }
@@ -574,12 +589,14 @@ type FutureSendManyResult chan *response
 func (r FutureSendManyResult) Receive() (*chainhash.Hash, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmashal result as a string.
 	var txHash string
 	err = js.Unmarshal(res, &txHash)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return chainhash.NewHashFromStr(txHash)
@@ -594,7 +611,7 @@ func (c *Client) SendManyAsync(fromAccount string, amounts map[util.Address]util
 	for addr, amount := range amounts {
 		convertedAmounts[addr.EncodeAddress()] = amount.ToDUO()
 	}
-	cmd := json.NewSendManyCmd(fromAccount, convertedAmounts, nil, nil)
+	cmd := btcjson.NewSendManyCmd(fromAccount, convertedAmounts, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -619,7 +636,7 @@ func (c *Client) SendManyMinConfAsync(fromAccount string,
 	for addr, amount := range amounts {
 		convertedAmounts[addr.EncodeAddress()] = amount.ToDUO()
 	}
-	cmd := json.NewSendManyCmd(fromAccount, convertedAmounts,
+	cmd := btcjson.NewSendManyCmd(fromAccount, convertedAmounts,
 		&minConfirms, nil)
 	return c.sendCmd(cmd)
 }
@@ -648,7 +665,7 @@ func (c *Client) SendManyCommentAsync(fromAccount string,
 	for addr, amount := range amounts {
 		convertedAmounts[addr.EncodeAddress()] = amount.ToDUO()
 	}
-	cmd := json.NewSendManyCmd(fromAccount, convertedAmounts,
+	cmd := btcjson.NewSendManyCmd(fromAccount, convertedAmounts,
 		&minConfirms, &comment)
 	return c.sendCmd(cmd)
 }
@@ -682,12 +699,14 @@ type FutureAddMultisigAddressResult chan *response
 func (r FutureAddMultisigAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
@@ -702,7 +721,7 @@ func (c *Client) AddMultisigAddressAsync(requiredSigs int, addresses []util.Addr
 	for _, addr := range addresses {
 		addrs = append(addrs, addr.String())
 	}
-	cmd := json.NewAddMultisigAddressCmd(requiredSigs, addrs, &account)
+	cmd := btcjson.NewAddMultisigAddressCmd(requiredSigs, addrs, &account)
 	return c.sendCmd(cmd)
 }
 
@@ -719,15 +738,17 @@ type FutureCreateMultisigResult chan *response
 
 // Receive waits for the response promised by the future and returns the
 // multisignature address and script needed to redeem it.
-func (r FutureCreateMultisigResult) Receive() (*json.CreateMultiSigResult, error) {
+func (r FutureCreateMultisigResult) Receive() (*btcjson.CreateMultiSigResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a createmultisig result object.
-	var multisigRes json.CreateMultiSigResult
+	var multisigRes btcjson.CreateMultiSigResult
 	err = js.Unmarshal(res, &multisigRes)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &multisigRes, nil
@@ -742,14 +763,14 @@ func (c *Client) CreateMultisigAsync(requiredSigs int, addresses []util.Address)
 	for _, addr := range addresses {
 		addrs = append(addrs, addr.String())
 	}
-	cmd := json.NewCreateMultisigCmd(requiredSigs, addrs)
+	cmd := btcjson.NewCreateMultisigCmd(requiredSigs, addrs)
 	return c.sendCmd(cmd)
 }
 
 // CreateMultisig creates a multisignature address that requires the specified
 // number of signatures for the provided addresses and returns the
 // multisignature address and script needed to redeem it.
-func (c *Client) CreateMultisig(requiredSigs int, addresses []util.Address) (*json.CreateMultiSigResult, error) {
+func (c *Client) CreateMultisig(requiredSigs int, addresses []util.Address) (*btcjson.CreateMultiSigResult, error) {
 	return c.CreateMultisigAsync(requiredSigs, addresses).Receive()
 }
 
@@ -769,7 +790,7 @@ func (r FutureCreateNewAccountResult) Receive() error {
 // returned instance.
 // See CreateNewAccount for the blocking version and more details.
 func (c *Client) CreateNewAccountAsync(account string) FutureCreateNewAccountResult {
-	cmd := json.NewCreateNewAccountCmd(account)
+	cmd := btcjson.NewCreateNewAccountCmd(account)
 	return c.sendCmd(cmd)
 }
 
@@ -787,12 +808,14 @@ type FutureGetNewAddressResult chan *response
 func (r FutureGetNewAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
@@ -803,7 +826,7 @@ func (r FutureGetNewAddressResult) Receive() (util.Address, error) {
 // returned instance.
 // See GetNewAddress for the blocking version and more details.
 func (c *Client) GetNewAddressAsync(account string) FutureGetNewAddressResult {
-	cmd := json.NewGetNewAddressCmd(&account)
+	cmd := btcjson.NewGetNewAddressCmd(&account)
 	return c.sendCmd(cmd)
 }
 
@@ -822,12 +845,14 @@ type FutureGetRawChangeAddressResult chan *response
 func (r FutureGetRawChangeAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
@@ -838,7 +863,7 @@ func (r FutureGetRawChangeAddressResult) Receive() (util.Address, error) {
 // function on the returned instance.
 // See GetRawChangeAddress for the blocking version and more details.
 func (c *Client) GetRawChangeAddressAsync(account string) FutureGetRawChangeAddressResult {
-	cmd := json.NewGetRawChangeAddressCmd(&account)
+	cmd := btcjson.NewGetRawChangeAddressCmd(&account)
 	return c.sendCmd(cmd)
 }
 
@@ -858,12 +883,14 @@ type FutureAddWitnessAddressResult chan *response
 func (r FutureAddWitnessAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
@@ -874,7 +901,7 @@ func (r FutureAddWitnessAddressResult) Receive() (util.Address, error) {
 // the returned instance.
 // See AddWitnessAddress for the blocking version and more details.
 func (c *Client) AddWitnessAddressAsync(address string) FutureAddWitnessAddressResult {
-	cmd := json.NewAddWitnessAddressCmd(address)
+	cmd := btcjson.NewAddWitnessAddressCmd(address)
 	return c.sendCmd(cmd)
 }
 
@@ -893,12 +920,14 @@ type FutureGetAccountAddressResult chan *response
 func (r FutureGetAccountAddressResult) Receive() (util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var addr string
 	err = js.Unmarshal(res, &addr)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return util.DecodeAddress(addr, &netparams.MainNetParams)
@@ -909,7 +938,7 @@ func (r FutureGetAccountAddressResult) Receive() (util.Address, error) {
 // the returned instance.
 // See GetAccountAddress for the blocking version and more details.
 func (c *Client) GetAccountAddressAsync(account string) FutureGetAccountAddressResult {
-	cmd := json.NewGetAccountAddressCmd(account)
+	cmd := btcjson.NewGetAccountAddressCmd(account)
 	return c.sendCmd(cmd)
 }
 
@@ -928,12 +957,14 @@ type FutureGetAccountResult chan *response
 func (r FutureGetAccountResult) Receive() (string, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return "", err
 	}
 	// Unmarshal result as a string.
 	var account string
 	err = js.Unmarshal(res, &account)
 	if err != nil {
+		Error(err)
 		return "", err
 	}
 	return account, nil
@@ -945,7 +976,7 @@ func (r FutureGetAccountResult) Receive() (string, error) {
 // See GetAccount for the blocking version and more details.
 func (c *Client) GetAccountAsync(address util.Address) FutureGetAccountResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewGetAccountCmd(addr)
+	cmd := btcjson.NewGetAccountCmd(addr)
 	return c.sendCmd(cmd)
 }
 
@@ -971,7 +1002,7 @@ func (r FutureSetAccountResult) Receive() error {
 // See SetAccount for the blocking version and more details.
 func (c *Client) SetAccountAsync(address util.Address, account string) FutureSetAccountResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewSetAccountCmd(addr, account)
+	cmd := btcjson.NewSetAccountCmd(addr, account)
 	return c.sendCmd(cmd)
 }
 
@@ -989,12 +1020,14 @@ type FutureGetAddressesByAccountResult chan *response
 func (r FutureGetAddressesByAccountResult) Receive() ([]util.Address, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmashal result as an array of string.
 	var addrStrings []string
 	err = js.Unmarshal(res, &addrStrings)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	addrs := make([]util.Address, 0, len(addrStrings))
@@ -1002,6 +1035,7 @@ func (r FutureGetAddressesByAccountResult) Receive() ([]util.Address, error) {
 		addr, err := util.DecodeAddress(addrStr,
 			&netparams.MainNetParams)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		addrs = append(addrs, addr)
@@ -1014,7 +1048,7 @@ func (r FutureGetAddressesByAccountResult) Receive() ([]util.Address, error) {
 // function on the returned instance.
 // See GetAddressesByAccount for the blocking version and more details.
 func (c *Client) GetAddressesByAccountAsync(account string) FutureGetAddressesByAccountResult {
-	cmd := json.NewGetAddressesByAccountCmd(account)
+	cmd := btcjson.NewGetAddressesByAccountCmd(account)
 	return c.sendCmd(cmd)
 }
 
@@ -1034,12 +1068,14 @@ type FutureMoveResult chan *response
 func (r FutureMoveResult) Receive() (bool, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return false, err
 	}
 	// Unmarshal result as a boolean.
 	var moveResult bool
 	err = js.Unmarshal(res, &moveResult)
 	if err != nil {
+		Error(err)
 		return false, err
 	}
 	return moveResult, nil
@@ -1050,7 +1086,7 @@ func (r FutureMoveResult) Receive() (bool, error) {
 // instance.
 // See Move for the blocking version and more details.
 func (c *Client) MoveAsync(fromAccount, toAccount string, amount util.Amount) FutureMoveResult {
-	cmd := json.NewMoveCmd(fromAccount, toAccount, amount.ToDUO(), nil,
+	cmd := btcjson.NewMoveCmd(fromAccount, toAccount, amount.ToDUO(), nil,
 		nil)
 	return c.sendCmd(cmd)
 }
@@ -1068,7 +1104,7 @@ func (c *Client) Move(fromAccount, toAccount string, amount util.Amount) (bool, 
 // See MoveMinConf for the blocking version and more details.
 func (c *Client) MoveMinConfAsync(fromAccount, toAccount string,
 	amount util.Amount, minConfirms int) FutureMoveResult {
-	cmd := json.NewMoveCmd(fromAccount, toAccount, amount.ToDUO(),
+	cmd := btcjson.NewMoveCmd(fromAccount, toAccount, amount.ToDUO(),
 		&minConfirms, nil)
 	return c.sendCmd(cmd)
 }
@@ -1088,7 +1124,7 @@ func (c *Client) MoveMinConf(fromAccount, toAccount string, amount util.Amount, 
 // See MoveComment for the blocking version and more details.
 func (c *Client) MoveCommentAsync(fromAccount, toAccount string,
 	amount util.Amount, minConfirms int, comment string) FutureMoveResult {
-	cmd := json.NewMoveCmd(fromAccount, toAccount, amount.ToDUO(),
+	cmd := btcjson.NewMoveCmd(fromAccount, toAccount, amount.ToDUO(),
 		&minConfirms, &comment)
 	return c.sendCmd(cmd)
 }
@@ -1120,7 +1156,7 @@ func (r FutureRenameAccountResult) Receive() error {
 // returned instance.
 // See RenameAccount for the blocking version and more details.
 func (c *Client) RenameAccountAsync(oldAccount, newAccount string) FutureRenameAccountResult {
-	cmd := json.NewRenameAccountCmd(oldAccount, newAccount)
+	cmd := btcjson.NewRenameAccountCmd(oldAccount, newAccount)
 	return c.sendCmd(cmd)
 }
 
@@ -1135,15 +1171,17 @@ type FutureValidateAddressResult chan *response
 
 // Receive waits for the response promised by the future and returns information
 // about the given bitcoin address.
-func (r FutureValidateAddressResult) Receive() (*json.ValidateAddressWalletResult, error) {
+func (r FutureValidateAddressResult) Receive() (*btcjson.ValidateAddressWalletResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a validateaddress result object.
-	var addrResult json.ValidateAddressWalletResult
+	var addrResult btcjson.ValidateAddressWalletResult
 	err = js.Unmarshal(res, &addrResult)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &addrResult, nil
@@ -1155,12 +1193,12 @@ func (r FutureValidateAddressResult) Receive() (*json.ValidateAddressWalletResul
 // See ValidateAddress for the blocking version and more details.
 func (c *Client) ValidateAddressAsync(address util.Address) FutureValidateAddressResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewValidateAddressCmd(addr)
+	cmd := btcjson.NewValidateAddressCmd(addr)
 	return c.sendCmd(cmd)
 }
 
 // ValidateAddress returns information about the given bitcoin address.
-func (c *Client) ValidateAddress(address util.Address) (*json.ValidateAddressWalletResult, error) {
+func (c *Client) ValidateAddress(address util.Address) (*btcjson.ValidateAddressWalletResult, error) {
 	return c.ValidateAddressAsync(address).Receive()
 }
 
@@ -1180,7 +1218,7 @@ func (r FutureKeyPoolRefillResult) Receive() error {
 // returned instance.
 // See KeyPoolRefill for the blocking version and more details.
 func (c *Client) KeyPoolRefillAsync() FutureKeyPoolRefillResult {
-	cmd := json.NewKeyPoolRefillCmd(nil)
+	cmd := btcjson.NewKeyPoolRefillCmd(nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1195,7 +1233,7 @@ func (c *Client) KeyPoolRefill() error {
 // the returned instance.
 // See KeyPoolRefillSize for the blocking version and more details.
 func (c *Client) KeyPoolRefillSizeAsync(newSize uint) FutureKeyPoolRefillResult {
-	cmd := json.NewKeyPoolRefillCmd(&newSize)
+	cmd := btcjson.NewKeyPoolRefillCmd(&newSize)
 	return c.sendCmd(cmd)
 }
 
@@ -1219,18 +1257,21 @@ type FutureListAccountsResult chan *response
 func (r FutureListAccountsResult) Receive() (map[string]util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a json object.
 	var accounts map[string]float64
 	err = js.Unmarshal(res, &accounts)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	accountsMap := make(map[string]util.Amount)
 	for k, v := range accounts {
 		amount, err := util.NewAmount(v)
 		if err != nil {
+			Error(err)
 			return nil, err
 		}
 		accountsMap[k] = amount
@@ -1243,7 +1284,7 @@ func (r FutureListAccountsResult) Receive() (map[string]util.Amount, error) {
 // returned instance.
 // See ListAccounts for the blocking version and more details.
 func (c *Client) ListAccountsAsync() FutureListAccountsResult {
-	cmd := json.NewListAccountsCmd(nil)
+	cmd := btcjson.NewListAccountsCmd(nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1259,7 +1300,7 @@ func (c *Client) ListAccounts() (map[string]util.Amount, error) {
 // function on the returned instance.
 // See ListAccountsMinConf for the blocking version and more details.
 func (c *Client) ListAccountsMinConfAsync(minConfirms int) FutureListAccountsResult {
-	cmd := json.NewListAccountsCmd(&minConfirms)
+	cmd := btcjson.NewListAccountsCmd(&minConfirms)
 	return c.sendCmd(cmd)
 }
 
@@ -1280,16 +1321,19 @@ type FutureGetBalanceResult chan *response
 func (r FutureGetBalanceResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	// Unmarshal result as a floating point number.
 	var balance float64
 	err = js.Unmarshal(res, &balance)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	return amount, nil
@@ -1306,20 +1350,24 @@ type FutureGetBalanceParseResult chan *response
 func (r FutureGetBalanceParseResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	// Unmarshal result as a string
 	var balanceString string
 	err = js.Unmarshal(res, &balanceString)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	balance, err := strconv.ParseFloat(balanceString, 64)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	return amount, nil
@@ -1330,7 +1378,7 @@ func (r FutureGetBalanceParseResult) Receive() (util.Amount, error) {
 // returned instance.
 // See GetBalance for the blocking version and more details.
 func (c *Client) GetBalanceAsync(account string) FutureGetBalanceResult {
-	cmd := json.NewGetBalanceCmd(&account, nil)
+	cmd := btcjson.NewGetBalanceCmd(&account, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1347,7 +1395,7 @@ func (c *Client) GetBalance(account string) (util.Amount, error) {
 // the returned instance.
 // See GetBalanceMinConf for the blocking version and more details.
 func (c *Client) GetBalanceMinConfAsync(account string, minConfirms int) FutureGetBalanceResult {
-	cmd := json.NewGetBalanceCmd(&account, &minConfirms)
+	cmd := btcjson.NewGetBalanceCmd(&account, &minConfirms)
 	return c.sendCmd(cmd)
 }
 
@@ -1373,16 +1421,19 @@ type FutureGetReceivedByAccountResult chan *response
 func (r FutureGetReceivedByAccountResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	// Unmarshal result as a floating point number.
 	var balance float64
 	err = js.Unmarshal(res, &balance)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	return amount, nil
@@ -1393,7 +1444,7 @@ func (r FutureGetReceivedByAccountResult) Receive() (util.Amount, error) {
 // function on the returned instance.
 // See GetReceivedByAccount for the blocking version and more details.
 func (c *Client) GetReceivedByAccountAsync(account string) FutureGetReceivedByAccountResult {
-	cmd := json.NewGetReceivedByAccountCmd(account, nil)
+	cmd := btcjson.NewGetReceivedByAccountCmd(account, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1410,7 +1461,7 @@ func (c *Client) GetReceivedByAccount(account string) (util.Amount, error) {
 // function on the returned instance.
 // See GetReceivedByAccountMinConf for the blocking version and more details.
 func (c *Client) GetReceivedByAccountMinConfAsync(account string, minConfirms int) FutureGetReceivedByAccountResult {
-	cmd := json.NewGetReceivedByAccountCmd(account, &minConfirms)
+	cmd := btcjson.NewGetReceivedByAccountCmd(account, &minConfirms)
 	return c.sendCmd(cmd)
 }
 
@@ -1431,16 +1482,19 @@ type FutureGetUnconfirmedBalanceResult chan *response
 func (r FutureGetUnconfirmedBalanceResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	// Unmarshal result as a floating point number.
 	var balance float64
 	err = js.Unmarshal(res, &balance)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	return amount, nil
@@ -1451,7 +1505,7 @@ func (r FutureGetUnconfirmedBalanceResult) Receive() (util.Amount, error) {
 // function on the returned instance.
 // See GetUnconfirmedBalance for the blocking version and more details.
 func (c *Client) GetUnconfirmedBalanceAsync(account string) FutureGetUnconfirmedBalanceResult {
-	cmd := json.NewGetUnconfirmedBalanceCmd(&account)
+	cmd := btcjson.NewGetUnconfirmedBalanceCmd(&account)
 	return c.sendCmd(cmd)
 }
 
@@ -1471,16 +1525,19 @@ type FutureGetReceivedByAddressResult chan *response
 func (r FutureGetReceivedByAddressResult) Receive() (util.Amount, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	// Unmarshal result as a floating point number.
 	var balance float64
 	err = js.Unmarshal(res, &balance)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	amount, err := util.NewAmount(balance)
 	if err != nil {
+		Error(err)
 		return 0, err
 	}
 	return amount, nil
@@ -1492,7 +1549,7 @@ func (r FutureGetReceivedByAddressResult) Receive() (util.Amount, error) {
 // See GetReceivedByAddress for the blocking version and more details.
 func (c *Client) GetReceivedByAddressAsync(address util.Address) FutureGetReceivedByAddressResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewGetReceivedByAddressCmd(addr, nil)
+	cmd := btcjson.NewGetReceivedByAddressCmd(addr, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1510,7 +1567,7 @@ func (c *Client) GetReceivedByAddress(address util.Address) (util.Amount, error)
 // See GetReceivedByAddressMinConf for the blocking version and more details.
 func (c *Client) GetReceivedByAddressMinConfAsync(address util.Address, minConfirms int) FutureGetReceivedByAddressResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewGetReceivedByAddressCmd(addr, &minConfirms)
+	cmd := btcjson.NewGetReceivedByAddressCmd(addr, &minConfirms)
 	return c.sendCmd(cmd)
 }
 
@@ -1529,15 +1586,17 @@ type FutureListReceivedByAccountResult chan *response
 
 // Receive waits for the response promised by the future and returns a list of
 // balances by account.
-func (r FutureListReceivedByAccountResult) Receive() ([]json.ListReceivedByAccountResult, error) {
+func (r FutureListReceivedByAccountResult) Receive() ([]btcjson.ListReceivedByAccountResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal as an array of listreceivedbyaccount result objects.
-	var received []json.ListReceivedByAccountResult
+	var received []btcjson.ListReceivedByAccountResult
 	err = js.Unmarshal(res, &received)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return received, nil
@@ -1548,7 +1607,7 @@ func (r FutureListReceivedByAccountResult) Receive() ([]json.ListReceivedByAccou
 // function on the returned instance.
 // See ListReceivedByAccount for the blocking version and more details.
 func (c *Client) ListReceivedByAccountAsync() FutureListReceivedByAccountResult {
-	cmd := json.NewListReceivedByAccountCmd(nil, nil, nil)
+	cmd := btcjson.NewListReceivedByAccountCmd(nil, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1558,7 +1617,7 @@ func (c *Client) ListReceivedByAccountAsync() FutureListReceivedByAccountResult 
 // See ListReceivedByAccountMinConf to override the minimum number of
 // confirmations and ListReceivedByAccountIncludeEmpty to filter accounts that
 // haven't received any payments from the results.
-func (c *Client) ListReceivedByAccount() ([]json.ListReceivedByAccountResult, error) {
+func (c *Client) ListReceivedByAccount() ([]btcjson.ListReceivedByAccountResult, error) {
 	return c.ListReceivedByAccountAsync().Receive()
 }
 
@@ -1567,7 +1626,7 @@ func (c *Client) ListReceivedByAccount() ([]json.ListReceivedByAccountResult, er
 // function on the returned instance.
 // See ListReceivedByAccountMinConf for the blocking version and more details.
 func (c *Client) ListReceivedByAccountMinConfAsync(minConfirms int) FutureListReceivedByAccountResult {
-	cmd := json.NewListReceivedByAccountCmd(&minConfirms, nil, nil)
+	cmd := btcjson.NewListReceivedByAccountCmd(&minConfirms, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1577,7 +1636,7 @@ func (c *Client) ListReceivedByAccountMinConfAsync(minConfirms int) FutureListRe
 // See ListReceivedByAccount to use the default minimum number of confirmations
 // and ListReceivedByAccountIncludeEmpty to also include accounts that haven't
 // received any payments in the results.
-func (c *Client) ListReceivedByAccountMinConf(minConfirms int) ([]json.ListReceivedByAccountResult, error) {
+func (c *Client) ListReceivedByAccountMinConf(minConfirms int) ([]btcjson.ListReceivedByAccountResult, error) {
 	return c.ListReceivedByAccountMinConfAsync(minConfirms).Receive()
 }
 
@@ -1586,7 +1645,7 @@ func (c *Client) ListReceivedByAccountMinConf(minConfirms int) ([]json.ListRecei
 // Receive function on the returned instance.
 // See ListReceivedByAccountIncludeEmpty for the blocking version and more details.
 func (c *Client) ListReceivedByAccountIncludeEmptyAsync(minConfirms int, includeEmpty bool) FutureListReceivedByAccountResult {
-	cmd := json.NewListReceivedByAccountCmd(&minConfirms, &includeEmpty,
+	cmd := btcjson.NewListReceivedByAccountCmd(&minConfirms, &includeEmpty,
 		nil)
 	return c.sendCmd(cmd)
 }
@@ -1595,7 +1654,7 @@ func (c *Client) ListReceivedByAccountIncludeEmptyAsync(minConfirms int, include
 // specified number of minimum confirmations and including accounts that
 // haven't received any payments depending on specified flag.
 // See ListReceivedByAccount and ListReceivedByAccountMinConf to use defaults.
-func (c *Client) ListReceivedByAccountIncludeEmpty(minConfirms int, includeEmpty bool) ([]json.ListReceivedByAccountResult, error) {
+func (c *Client) ListReceivedByAccountIncludeEmpty(minConfirms int, includeEmpty bool) ([]btcjson.ListReceivedByAccountResult, error) {
 	return c.ListReceivedByAccountIncludeEmptyAsync(minConfirms,
 		includeEmpty).Receive()
 }
@@ -1608,15 +1667,17 @@ type FutureListReceivedByAddressResult chan *response
 
 // Receive waits for the response promised by the future and returns a list of
 // balances by address.
-func (r FutureListReceivedByAddressResult) Receive() ([]json.ListReceivedByAddressResult, error) {
+func (r FutureListReceivedByAddressResult) Receive() ([]btcjson.ListReceivedByAddressResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal as an array of listreceivedbyaddress result objects.
-	var received []json.ListReceivedByAddressResult
+	var received []btcjson.ListReceivedByAddressResult
 	err = js.Unmarshal(res, &received)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return received, nil
@@ -1627,7 +1688,7 @@ func (r FutureListReceivedByAddressResult) Receive() ([]json.ListReceivedByAddre
 // function on the returned instance.
 // See ListReceivedByAddress for the blocking version and more details.
 func (c *Client) ListReceivedByAddressAsync() FutureListReceivedByAddressResult {
-	cmd := json.NewListReceivedByAddressCmd(nil, nil, nil)
+	cmd := btcjson.NewListReceivedByAddressCmd(nil, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1637,7 +1698,7 @@ func (c *Client) ListReceivedByAddressAsync() FutureListReceivedByAddressResult 
 // See ListReceivedByAddressMinConf to override the minimum number of
 // confirmations and ListReceivedByAddressIncludeEmpty to also include addresses
 // that haven't received any payments in the results.
-func (c *Client) ListReceivedByAddress() ([]json.ListReceivedByAddressResult, error) {
+func (c *Client) ListReceivedByAddress() ([]btcjson.ListReceivedByAddressResult, error) {
 	return c.ListReceivedByAddressAsync().Receive()
 }
 
@@ -1646,7 +1707,7 @@ func (c *Client) ListReceivedByAddress() ([]json.ListReceivedByAddressResult, er
 // function on the returned instance.
 // See ListReceivedByAddressMinConf for the blocking version and more details.
 func (c *Client) ListReceivedByAddressMinConfAsync(minConfirms int) FutureListReceivedByAddressResult {
-	cmd := json.NewListReceivedByAddressCmd(&minConfirms, nil, nil)
+	cmd := btcjson.NewListReceivedByAddressCmd(&minConfirms, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1656,7 +1717,7 @@ func (c *Client) ListReceivedByAddressMinConfAsync(minConfirms int) FutureListRe
 // See ListReceivedByAddress to use the default minimum number of confirmations
 // and ListReceivedByAddressIncludeEmpty to also include addresses that haven't
 // received any payments in the results.
-func (c *Client) ListReceivedByAddressMinConf(minConfirms int) ([]json.ListReceivedByAddressResult, error) {
+func (c *Client) ListReceivedByAddressMinConf(minConfirms int) ([]btcjson.ListReceivedByAddressResult, error) {
 	return c.ListReceivedByAddressMinConfAsync(minConfirms).Receive()
 }
 
@@ -1665,7 +1726,7 @@ func (c *Client) ListReceivedByAddressMinConf(minConfirms int) ([]json.ListRecei
 // Receive function on the returned instance.
 // See ListReceivedByAccountIncludeEmpty for the blocking version and more details.
 func (c *Client) ListReceivedByAddressIncludeEmptyAsync(minConfirms int, includeEmpty bool) FutureListReceivedByAddressResult {
-	cmd := json.NewListReceivedByAddressCmd(&minConfirms, &includeEmpty,
+	cmd := btcjson.NewListReceivedByAddressCmd(&minConfirms, &includeEmpty,
 		nil)
 	return c.sendCmd(cmd)
 }
@@ -1674,7 +1735,7 @@ func (c *Client) ListReceivedByAddressIncludeEmptyAsync(minConfirms int, include
 // specified number of minimum confirmations and including addresses that
 // haven't received any payments depending on specified flag.
 // See ListReceivedByAddress and ListReceivedByAddressMinConf to use defaults.
-func (c *Client) ListReceivedByAddressIncludeEmpty(minConfirms int, includeEmpty bool) ([]json.ListReceivedByAddressResult, error) {
+func (c *Client) ListReceivedByAddressIncludeEmpty(minConfirms int, includeEmpty bool) ([]btcjson.ListReceivedByAddressResult, error) {
 	return c.ListReceivedByAddressIncludeEmptyAsync(minConfirms,
 		includeEmpty).Receive()
 }
@@ -1699,7 +1760,7 @@ func (r FutureWalletLockResult) Receive() error {
 // returned instance.
 // See WalletLock for the blocking version and more details.
 func (c *Client) WalletLockAsync() FutureWalletLockResult {
-	cmd := json.NewWalletLockCmd()
+	cmd := btcjson.NewWalletLockCmd()
 	return c.sendCmd(cmd)
 }
 
@@ -1715,7 +1776,7 @@ func (c *Client) WalletLock() error {
 // decryption key which is then stored in memory for the specified timeout
 // (in seconds).
 func (c *Client) WalletPassphrase(passphrase string, timeoutSecs int64) error {
-	cmd := json.NewWalletPassphraseCmd(passphrase, timeoutSecs)
+	cmd := btcjson.NewWalletPassphraseCmd(passphrase, timeoutSecs)
 	_, err := c.sendCmdAndWait(cmd)
 	return err
 }
@@ -1736,7 +1797,7 @@ func (r FutureWalletPassphraseChangeResult) Receive() error {
 // function on the returned instance.
 // See WalletPassphraseChange for the blocking version and more details.
 func (c *Client) WalletPassphraseChangeAsync(old, new string) FutureWalletPassphraseChangeResult {
-	cmd := json.NewWalletPassphraseChangeCmd(old, new)
+	cmd := btcjson.NewWalletPassphraseChangeCmd(old, new)
 	return c.sendCmd(cmd)
 }
 
@@ -1759,12 +1820,14 @@ type FutureSignMessageResult chan *response
 func (r FutureSignMessageResult) Receive() (string, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return "", err
 	}
 	// Unmarshal result as a string.
 	var b64 string
 	err = js.Unmarshal(res, &b64)
 	if err != nil {
+		Error(err)
 		return "", err
 	}
 	return b64, nil
@@ -1776,7 +1839,7 @@ func (r FutureSignMessageResult) Receive() (string, error) {
 // See SignMessage for the blocking version and more details.
 func (c *Client) SignMessageAsync(address util.Address, message string) FutureSignMessageResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewSignMessageCmd(addr, message)
+	cmd := btcjson.NewSignMessageCmd(addr, message)
 	return c.sendCmd(cmd)
 }
 
@@ -1796,12 +1859,14 @@ type FutureVerifyMessageResult chan *response
 func (r FutureVerifyMessageResult) Receive() (bool, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return false, err
 	}
 	// Unmarshal result as a boolean.
 	var verified bool
 	err = js.Unmarshal(res, &verified)
 	if err != nil {
+		Error(err)
 		return false, err
 	}
 	return verified, nil
@@ -1813,7 +1878,7 @@ func (r FutureVerifyMessageResult) Receive() (bool, error) {
 // See VerifyMessage for the blocking version and more details.
 func (c *Client) VerifyMessageAsync(address util.Address, signature, message string) FutureVerifyMessageResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewVerifyMessageCmd(addr, signature, message)
+	cmd := btcjson.NewVerifyMessageCmd(addr, signature, message)
 	return c.sendCmd(cmd)
 }
 
@@ -1838,12 +1903,14 @@ type FutureDumpPrivKeyResult chan *response
 func (r FutureDumpPrivKeyResult) Receive() (*util.WIF, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a string.
 	var privKeyWIF string
 	err = js.Unmarshal(res, &privKeyWIF)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return util.DecodeWIF(privKeyWIF)
@@ -1855,7 +1922,7 @@ func (r FutureDumpPrivKeyResult) Receive() (*util.WIF, error) {
 // See DumpPrivKey for the blocking version and more details.
 func (c *Client) DumpPrivKeyAsync(address util.Address) FutureDumpPrivKeyResult {
 	addr := address.EncodeAddress()
-	cmd := json.NewDumpPrivKeyCmd(addr)
+	cmd := btcjson.NewDumpPrivKeyCmd(addr)
 	return c.sendCmd(cmd)
 }
 
@@ -1883,7 +1950,7 @@ func (r FutureImportAddressResult) Receive() error {
 // returned instance.
 // See ImportAddress for the blocking version and more details.
 func (c *Client) ImportAddressAsync(address string) FutureImportAddressResult {
-	cmd := json.NewImportAddressCmd(address, "", nil)
+	cmd := btcjson.NewImportAddressCmd(address, "", nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1897,7 +1964,7 @@ func (c *Client) ImportAddress(address string) error {
 // returned instance.
 // See ImportAddress for the blocking version and more details.
 func (c *Client) ImportAddressRescanAsync(address string, account string, rescan bool) FutureImportAddressResult {
-	cmd := json.NewImportAddressCmd(address, account, &rescan)
+	cmd := btcjson.NewImportAddressCmd(address, account, &rescan)
 	return c.sendCmd(cmd)
 }
 
@@ -1928,7 +1995,7 @@ func (c *Client) ImportPrivKeyAsync(privKeyWIF *util.WIF) FutureImportPrivKeyRes
 	if privKeyWIF != nil {
 		wif = privKeyWIF.String()
 	}
-	cmd := json.NewImportPrivKeyCmd(wif, nil, nil)
+	cmd := btcjson.NewImportPrivKeyCmd(wif, nil, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1947,7 +2014,7 @@ func (c *Client) ImportPrivKeyLabelAsync(privKeyWIF *util.WIF, label string) Fut
 	if privKeyWIF != nil {
 		wif = privKeyWIF.String()
 	}
-	cmd := json.NewImportPrivKeyCmd(wif, &label, nil)
+	cmd := btcjson.NewImportPrivKeyCmd(wif, &label, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -1966,7 +2033,7 @@ func (c *Client) ImportPrivKeyRescanAsync(privKeyWIF *util.WIF, label string, re
 	if privKeyWIF != nil {
 		wif = privKeyWIF.String()
 	}
-	cmd := json.NewImportPrivKeyCmd(wif, &label, &rescan)
+	cmd := btcjson.NewImportPrivKeyCmd(wif, &label, &rescan)
 	return c.sendCmd(cmd)
 }
 
@@ -1993,7 +2060,7 @@ func (r FutureImportPubKeyResult) Receive() error {
 // returned instance.
 // See ImportPubKey for the blocking version and more details.
 func (c *Client) ImportPubKeyAsync(pubKey string) FutureImportPubKeyResult {
-	cmd := json.NewImportPubKeyCmd(pubKey, nil)
+	cmd := btcjson.NewImportPubKeyCmd(pubKey, nil)
 	return c.sendCmd(cmd)
 }
 
@@ -2007,7 +2074,7 @@ func (c *Client) ImportPubKey(pubKey string) error {
 // returned instance.
 // See ImportPubKey for the blocking version and more details.
 func (c *Client) ImportPubKeyRescanAsync(pubKey string, rescan bool) FutureImportPubKeyResult {
-	cmd := json.NewImportPubKeyCmd(pubKey, &rescan)
+	cmd := btcjson.NewImportPubKeyCmd(pubKey, &rescan)
 	return c.sendCmd(cmd)
 }
 
@@ -2030,15 +2097,17 @@ type FutureGetInfoResult chan *response
 
 // Receive waits for the response promised by the future and returns the info
 // provided by the server.
-func (r FutureGetInfoResult) Receive() (*json.InfoWalletResult, error) {
+func (r FutureGetInfoResult) Receive() (*btcjson.InfoWalletResult, error) {
 	res, err := receiveFuture(r)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	// Unmarshal result as a getinfo result object.
-	var infoRes json.InfoWalletResult
+	var infoRes btcjson.InfoWalletResult
 	err = js.Unmarshal(res, &infoRes)
 	if err != nil {
+		Error(err)
 		return nil, err
 	}
 	return &infoRes, nil
@@ -2049,14 +2118,14 @@ func (r FutureGetInfoResult) Receive() (*json.InfoWalletResult, error) {
 // returned instance.
 // See GetInfo for the blocking version and more details.
 func (c *Client) GetInfoAsync() FutureGetInfoResult {
-	cmd := json.NewGetInfoCmd()
+	cmd := btcjson.NewGetInfoCmd()
 	return c.sendCmd(cmd)
 }
 
 // GetInfo returns miscellaneous info regarding the RPC server.  The returned
 // info object may be void of wallet information if the remote server does
 // not include wallet functionality.
-func (c *Client) GetInfo() (*json.InfoWalletResult, error) {
+func (c *Client) GetInfo() (*btcjson.InfoWalletResult, error) {
 	return c.GetInfoAsync().Receive()
 }
 

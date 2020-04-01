@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // AmountFlag embeds a util.Amount and implements the flags.Marshaler and
@@ -14,7 +14,7 @@ type AmountFlag struct {
 }
 
 // NewAmountFlag creates an AmountFlag with a default util.Amount.
-func NewAmountFlag(	defaultValue util.Amount) *AmountFlag {
+func NewAmountFlag(defaultValue util.Amount) *AmountFlag {
 	return &AmountFlag{defaultValue}
 }
 
@@ -28,10 +28,12 @@ func (a *AmountFlag) UnmarshalFlag(value string) error {
 	value = strings.TrimSuffix(value, " DUO")
 	valueF64, err := strconv.ParseFloat(value, 64)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	amount, err := util.NewAmount(valueF64)
 	if err != nil {
+		Error(err)
 		return err
 	}
 	a.Amount = amount

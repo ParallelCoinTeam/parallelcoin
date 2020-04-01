@@ -7,13 +7,13 @@ import (
 	"reflect"
 	"testing"
 
-	chaincfg "github.com/parallelcointeam/parallelcoin/pkg/chain/config"
-	"github.com/parallelcointeam/parallelcoin/pkg/chain/config/netparams"
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/gcs/builder"
-	walletdb "github.com/parallelcointeam/parallelcoin/pkg/wallet/db"
-	_ "github.com/parallelcointeam/parallelcoin/pkg/wallet/db/bdb"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util/gcs"
+	"github.com/p9c/pod/pkg/util/gcs/builder"
+	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 func createTestDatabase() (func(), FilterDatabase, error) {
@@ -44,7 +44,7 @@ func createTestDatabase() (func(), FilterDatabase, error) {
 
 	return cleanUp, filterDB, nil
 }
-func TestGenesisFilterCreation(	t *testing.T) {
+func TestGenesisFilterCreation(t *testing.T) {
 
 	cleanUp, database, err := createTestDatabase()
 	defer cleanUp()
@@ -71,7 +71,7 @@ func TestGenesisFilterCreation(	t *testing.T) {
 	}
 
 }
-func genRandFilter(	numElements uint32) (*gcs.Filter, error) {
+func genRandFilter(numElements uint32) (*gcs.Filter, error) {
 
 	elements := make([][]byte, numElements)
 
@@ -102,7 +102,7 @@ func genRandFilter(	numElements uint32) (*gcs.Filter, error) {
 
 	return filter, nil
 }
-func TestFilterStorage(	t *testing.T) {
+func TestFilterStorage(t *testing.T) {
 
 	// TODO(roasbeef): use testing.Quick
 	cleanUp, database, err := createTestDatabase()

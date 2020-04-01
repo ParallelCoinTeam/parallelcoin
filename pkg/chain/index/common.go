@@ -5,9 +5,9 @@ import (
 	"encoding/binary"
 	"errors"
 
-	blockchain "github.com/parallelcointeam/parallelcoin/pkg/chain"
-	database "github.com/parallelcointeam/parallelcoin/pkg/db"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
 )
 
 var (
@@ -41,7 +41,7 @@ type Indexer interface {
 // AssertError identifies an error that indicates an internal code consistency issue and should be treated as a critical and unrecoverable error.
 type AssertError string
 
-// Error returns the assertion error as a huma-readable string and satisfies the error interface.
+// DBError returns the assertion error as a huma-readable string and satisfies the error interface.
 func (e AssertError) Error() string {
 	return "assertion failed: " + string(e)
 }
@@ -49,13 +49,13 @@ func (e AssertError) Error() string {
 // errDeserialize signifies that a problem was encountered when deserializing data.
 type errDeserialize string
 
-// Error implements the error interface.
+// DBError implements the error interface.
 func (e errDeserialize) Error() string {
 	return string(e)
 }
 
 // isDeserializeErr returns whether or not the passed error is an errDeserialize error.
-func isDeserializeErr(	err error) bool {
+func isDeserializeErr(err error) bool {
 	_, ok := err.(errDeserialize)
 	return ok
 }
@@ -68,7 +68,7 @@ type internalBucket interface {
 }
 
 // interruptRequested returns true when the provided channel has been closed. This simplifies early shutdown slightly since the caller can just use an if statement instead of a select.
-func interruptRequested(	interrupted <-chan struct{}) bool {
+func interruptRequested(interrupted <-chan struct{}) bool {
 	select {
 	case <-interrupted:
 		return true

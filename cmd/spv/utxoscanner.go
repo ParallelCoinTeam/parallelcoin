@@ -6,10 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	chainhash "github.com/parallelcointeam/parallelcoin/pkg/chain/hash"
-	"github.com/parallelcointeam/parallelcoin/pkg/util"
-	"github.com/parallelcointeam/parallelcoin/pkg/util/cl"
-	waddrmgr "github.com/parallelcointeam/parallelcoin/pkg/wallet/addrmgr"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/util"
+	am "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 type (
@@ -57,7 +56,7 @@ type (
 	// UtxoScannerConfig exposes configurable methods for interacting with the blockchain.
 	UtxoScannerConfig struct {
 		// BestSnapshot returns the block stamp of the current chain tip.
-		BestSnapshot func() (*waddrmgr.BlockStamp, error)
+		BestSnapshot func() (*am.BlockStamp, error)
 		// GetBlockHash returns the block hash at given height in main chain.
 		GetBlockHash func(height int64) (*chainhash.Hash, error)
 		// BlockFilterMatches checks the cfilter for the block hash for matches
@@ -73,8 +72,8 @@ type (
 	}
 )
 
-// Result is callback returning either a spend report or an error.
-func (r *GetUtxoRequest) Result(cancel <-chan struct{}) (*SpendReport, error) {
+func // Result is callback returning either a spend report or an error.
+(r *GetUtxoRequest) Result(cancel <-chan struct{}) (*SpendReport, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	select {
@@ -92,33 +91,33 @@ func (r *GetUtxoRequest) Result(cancel <-chan struct{}) (*SpendReport, error) {
 	}
 }
 
-// deliver tries to deliver the report or error to any subscribers. If
+func // deliver tries to deliver the report or error to any subscribers. If
 // resultChan cannot accept a new update, this method will not block.
-func (r *GetUtxoRequest) deliver(report *SpendReport, err error) {
+(r *GetUtxoRequest) deliver(report *SpendReport, err error) {
 	select {
 	case r.resultChan <- &getUtxoResult{report, err}:
 	default:
-		log <- cl.Warnf{
+		Warnf(
 			"duplicate getutxo result delivered for outpoint=%v, spend=%v, err=%v",
 			r.Input.OutPoint, report, err,
-		}
+		)
 	}
 }
 
-// IsEmpty returns true if the queue has no elements.
-func (pq *GetUtxoRequestPQ) IsEmpty() bool {
+func // IsEmpty returns true if the queue has no elements.
+(pq *GetUtxoRequestPQ) IsEmpty() bool {
 	return pq.Len() == 0
 }
 
-// Peek returns the least height element in the queue without removing it.
-func (pq *GetUtxoRequestPQ) Peek() *GetUtxoRequest {
+func // Peek returns the least height element in the queue without removing it.
+(pq *GetUtxoRequestPQ) Peek() *GetUtxoRequest {
 	return (*pq)[0]
 }
 
-// Pop is called by the heap.Interface implementation to remove an element from
-// the end of the backing store. The heap library will then maintain the heap
-// invariant.
-func (pq *GetUtxoRequestPQ) Pop() interface{} {
+func // Pop is called by the heap.
+// Interface implementation to remove an element from the end of the backing
+// store. The heap library will then maintain the heap invariant.
+(pq *GetUtxoRequestPQ) Pop() interface{} {
 	old := *pq
 	n := len(old)
 	item := old[n-1]
@@ -126,20 +125,21 @@ func (pq *GetUtxoRequestPQ) Pop() interface{} {
 	return item
 }
 
-// Push is called by the heap.Interface implementation to add an element to the
-// end of the backing store. The heap library will then maintain the heap
-// invariant.
-func (pq *GetUtxoRequestPQ) Push(x interface{}) {
+func // Push is called by the heap.
+// Interface implementation to add an element to the end of the backing
+// store. The heap library will then maintain the heap invariant.
+(pq *GetUtxoRequestPQ) Push(x interface{}) {
 	item := x.(*GetUtxoRequest)
 	*pq = append(*pq, item)
 }
 
-// Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
-func (s *UtxoScanner) Enqueue(input *InputWithScript,
+func // Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
+(s *UtxoScanner) Enqueue(input *InputWithScript,
 	birthHeight uint32) (*GetUtxoRequest, error) {
-	log <- cl.Debugf{
+	Debugf(
 		"enqueuing request for %s with birth height %d %s",
-		input.OutPoint.String(), birthHeight, cl.Ine()}
+		input.OutPoint.String(), birthHeight,
+	)
 	req := &GetUtxoRequest{
 		Input:       input,
 		BirthHeight: birthHeight,
@@ -161,8 +161,8 @@ func (s *UtxoScanner) Enqueue(input *InputWithScript,
 	return req, nil
 }
 
-// Start begins running scan batches.
-func (s *UtxoScanner) Start() error {
+func // Start begins running scan batches.
+(s *UtxoScanner) Start() error {
 	if !atomic.CompareAndSwapUint32(&s.started, 0, 1) {
 		return nil
 	}
@@ -171,8 +171,8 @@ func (s *UtxoScanner) Start() error {
 	return nil
 }
 
-// Stop any in-progress scan.
-func (s *UtxoScanner) Stop() error {
+func // Stop any in-progress scan.
+(s *UtxoScanner) Stop() error {
 	if !atomic.CompareAndSwapUint32(&s.stopped, 0, 1) {
 		return nil
 	}
@@ -195,12 +195,12 @@ batchShutdown:
 	return nil
 }
 
-// batchManager is responsible for scheduling batches of UTXOs to scan. Any
+func // batchManager is responsible for scheduling batches of UTXOs to scan. Any
 // incoming requests whose start height has already been passed will be added to
 // the next batch, which gets scheduled after the current batch finishes.
 //
 // NOTE: This method MUST be spawned as a goroutine.
-func (s *UtxoScanner) batchManager() {
+(s *UtxoScanner) batchManager() {
 	defer close(s.shutdown)
 	for {
 		s.cv.L.Lock()
@@ -232,15 +232,17 @@ func (s *UtxoScanner) batchManager() {
 		// least-height request currently in the queue.
 		err := s.scanFromHeight(req.BirthHeight)
 		if err != nil {
-			log <- cl.Errorf{
-				"UXTO scan failed: %v", err, cl.Ine()}
+			Error(err)
+			Errorf(
+				"UXTO scan failed: %v", err,
+			)
 		}
 	}
 }
 
-// dequeueAtHeight returns all GetUtxoRequests that have starting height of the
-// given height.
-func (s *UtxoScanner) dequeueAtHeight(height uint32) []*GetUtxoRequest {
+func // dequeueAtHeight returns all GetUtxoRequests that have starting height
+// of the given height.
+(s *UtxoScanner) dequeueAtHeight(height uint32) []*GetUtxoRequest {
 	s.cv.L.Lock()
 	defer s.cv.L.Unlock()
 	// Take any requests that are too old to go in this batch and keep them for
@@ -257,15 +259,16 @@ func (s *UtxoScanner) dequeueAtHeight(height uint32) []*GetUtxoRequest {
 	return requests
 }
 
-// scanFromHeight runs a single batch, pulling in any requests that get added
-// above the batch's last processed height. If there was an error, then return
-// the outstanding requests.
-func (s *UtxoScanner) scanFromHeight(initHeight uint32) error {
+func // scanFromHeight runs a single batch,
+// pulling in any requests that get added above the batch's last processed
+// height. If there was an error, then return the outstanding requests.
+(s *UtxoScanner) scanFromHeight(initHeight uint32) error {
 	// Before beginning the scan, grab the best block stamp we know of,
 	// which will serve as an initial estimate for the end height of the
 	// scan.
 	bestStamp, err := s.cfg.BestSnapshot()
 	if err != nil {
+		Error(err)
 		return err
 	}
 	var (
@@ -290,6 +293,7 @@ scanToEnd:
 		}
 		hash, err := s.cfg.GetBlockHash(int64(height))
 		if err != nil {
+			Error(err)
 			return reporter.FailRemaining(err)
 		}
 		// If there are any new requests that can safely be added to this batch,
@@ -305,6 +309,7 @@ scanToEnd:
 			}
 			match, err := s.cfg.BlockFilterMatches(&options, hash)
 			if err != nil {
+				Error(err)
 				return reporter.FailRemaining(err)
 			}
 			// If still no match is found, we have no reason to
@@ -324,10 +329,12 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		log <- cl.Tracef{
-			"fetching block height=%d hash=%s %s", height, hash, cl.Ine()}
+		Tracef(
+			"fetching block height=%d hash=%s %s", height, hash,
+		)
 		block, err := s.cfg.GetBlock(*hash)
 		if err != nil {
+			Error(err)
 			return reporter.FailRemaining(err)
 		}
 		// Check again to see if the utxoscanner has been signaled to exit.
@@ -336,7 +343,7 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		log <- cl.Debugf{"processing block height=%d hash=%s %s", height, hash, cl.Ine()}
+		Debugf("processing block height=%d hash=%s %s", height, hash)
 		reporter.ProcessBlock(block.MsgBlock(), newReqs, height)
 	}
 	// We've scanned up to the end height, now perform a check to see if we
@@ -345,6 +352,7 @@ scanToEnd:
 	// scan started.
 	currStamp, err := s.cfg.BestSnapshot()
 	if err != nil {
+		Error(err)
 		return reporter.FailRemaining(err)
 	}
 	// If the returned height is higher, we still have more blocks to go.
@@ -357,18 +365,15 @@ scanToEnd:
 	reporter.NotifyUnspentAndUnfound()
 	return nil
 }
-func (pq GetUtxoRequestPQ) Len() int { return len(pq) }
-func (pq GetUtxoRequestPQ) Less(i, j int) bool {
-	// We want Pop to give us the least BirthHeight.
-	return pq[i].BirthHeight < pq[j].BirthHeight
-}
-func (pq GetUtxoRequestPQ) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-}
 
-// NewUtxoScanner creates a new instance of UtxoScanner using the given chain
-// interface.
-func NewUtxoScanner(cfg *UtxoScannerConfig) *UtxoScanner {
+// We want Pop to give us the least BirthHeight.
+func (pq GetUtxoRequestPQ) Len() int           { return len(pq) }
+func (pq GetUtxoRequestPQ) Less(i, j int) bool { return pq[i].BirthHeight < pq[j].BirthHeight }
+func (pq GetUtxoRequestPQ) Swap(i, j int)      { pq[i], pq[j] = pq[j], pq[i] }
+
+func // NewUtxoScanner creates a new instance of UtxoScanner using the given
+// chain interface.
+NewUtxoScanner(cfg *UtxoScannerConfig) *UtxoScanner {
 	scanner := &UtxoScanner{
 		cfg:      cfg,
 		quit:     make(chan struct{}),

@@ -1,4 +1,4 @@
-//+build !generate
+// +build !generate
 
 package rpchelp
 

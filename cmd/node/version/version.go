@@ -12,8 +12,8 @@ const (
 	// These constants define the application version and follow the semantic
 	// versioning 2.0.0 spec (http://semver.org/).
 	AppMajor uint = 0
-	AppMinor uint = 1
-	AppPatch uint = 4
+	AppMinor uint = 2
+	AppPatch uint = 2
 	// appPreRelease MUST only contain characters from semanticAlphabet per
 	// the semantic versioning spec.
 	AppPreRelease = "beta"
@@ -55,7 +55,7 @@ func Version() string {
 // which are not valid according to the semantic versioning guidelines for
 // pre-release version and build metadata strings.
 // In particular they MUST only contain characters in semanticAlphabet.
-func NormalizeVerString(	str string) string {
+func NormalizeVerString(str string) string {
 	var result bytes.Buffer
 	for _, r := range str {
 		if strings.ContainsRune(semanticAlphabet, r) {
