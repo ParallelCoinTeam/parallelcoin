@@ -107,8 +107,8 @@ func (s *State) GetTree(paths []string) (root *Node) {
 func (n *Node) GetWidget(s *State) {
 	nn := n.GetOpenItems()[1:]
 	indent := 0
-	s.FilterList.Axis = layout.Vertical
-	s.FilterList.Layout(s.Gtx, len(nn), func(i int) {
+	s.Lists["Filter"].Axis = layout.Vertical
+	s.Lists["Filter"].Layout(s.Gtx, len(nn), func(i int) {
 		s.FlexH(
 			Rigid(func() {
 				split := strings.Split(nn[i].FullName, string(os.PathSeparator))

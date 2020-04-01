@@ -18,6 +18,7 @@ func (s *State) SetTheme(dark bool) {
 		s.Theme.Colors["PanelBgDim"] = s.Theme.Colors["DarkGrayI"]
 		s.Theme.Colors["DocTextDim"] = s.Theme.Colors["LightGrayII"]
 		s.Theme.Colors["DocBgDim"] = s.Theme.Colors["DarkGrayI"]
+
 	} else {
 		s.Theme.Colors["DocText"] = s.Theme.Colors["Light"]
 		s.Theme.Colors["DocBg"] = s.Theme.Colors["Black"]
@@ -27,5 +28,6 @@ func (s *State) SetTheme(dark bool) {
 		s.Theme.Colors["PanelBgDim"] = s.Theme.Colors["LightGrayIII"]
 		s.Theme.Colors["DocTextDim"] = s.Theme.Colors["LightGrayIII"]
 		s.Theme.Colors["DocBgDim"] = s.Theme.Colors["LightGrayI"]
+
 	}
 }

@@ -18,8 +18,9 @@ func (s *State) RunControls() layout.FlexChild {
 			return
 		}
 		if !s.Config.Running {
-			s.IconButton("Run", "PanelBg", "PanelText", &s.RunMenuButton)
-			for s.RunMenuButton.Clicked(s.Gtx) {
+			b := s.Buttons["RunMenu"]
+			s.IconButton("Run", "PanelBg", "PanelText", b)
+			for b.Clicked(s.Gtx) {
 				Debug("clicked run button")
 				if !s.Config.RunModeOpen {
 					s.RunCommandChan <- "run"
@@ -33,15 +34,16 @@ func (s *State) RunControls() layout.FlexChild {
 				fg, bg = "PanelText", "PanelBg"
 			}
 			s.FlexH(Rigid(func() {
-				s.IconButton("Stop", "PanelBg", "PanelText",
-					&s.StopMenuButton)
-				for s.StopMenuButton.Clicked(s.Gtx) {
+				b := s.Buttons["StopMenu"]
+				s.IconButton("Stop", "PanelBg", "PanelText", b)
+				for b.Clicked(s.Gtx) {
 					Debug("clicked stop button")
 					s.RunCommandChan <- "stop"
 				}
 			}), Rigid(func() {
-				s.IconButton(ic, fg, bg, &s.PauseMenuButton)
-				for s.PauseMenuButton.Clicked(s.Gtx) {
+				b := s.Buttons["PauseMenu"]
+				s.IconButton(ic, fg, bg, b)
+				for b.Clicked(s.Gtx) {
 					if s.Config.Pausing {
 						Debug("clicked on resume button")
 						s.RunCommandChan <- "resume"
@@ -58,9 +60,9 @@ func (s *State) RunControls() layout.FlexChild {
 				//		s.RunCommandChan <- "kill"
 				//	}
 			}), Rigid(func() {
-				s.IconButton("Restart", "PanelBg", "PanelText",
-					&s.RestartMenuButton)
-				for s.RestartMenuButton.Clicked(s.Gtx) {
+				b := s.Buttons["RestartMenu"]
+				s.IconButton("Restart", "PanelBg", "PanelText", b)
+				for b.Clicked(s.Gtx) {
 					Debug("clicked restart button")
 					s.RunCommandChan <- "restart"
 				}

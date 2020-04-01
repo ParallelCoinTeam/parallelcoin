@@ -13,9 +13,9 @@ func (s *State) Body() layout.FlexChild {
 		cs.Width.Min = cs.Width.Max / 2
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 		s.Inset(8, func() {
-			s.LogList.Axis = layout.Vertical
-			s.LogList.ScrollToEnd = true
-			s.LogList.Layout(s.Gtx, s.EntryBuf.Len(), func(i int) {
+			s.Lists["Log"].Axis = layout.Vertical
+			s.Lists["Log"].ScrollToEnd = true
+			s.Lists["Log"].Layout(s.Gtx, s.EntryBuf.Len(), func(i int) {
 				b := s.EntryBuf.Get(i)
 				color := "DocText"
 				//fmt.Println("level", b.Level)
@@ -28,10 +28,12 @@ func (s *State) Body() layout.FlexChild {
 					color = "Success"
 				case logi.Warn:
 					color = "Warning"
-				case logi.Check, logi.Error, logi.Fatal:
+				case logi.Check:
+					color = "Check"
+				case logi.Error:
 					color = "Danger"
-					//case "FTL":
-					//	color = "Danger"
+				case logi.Fatal:
+					color = "Fatal"
 				}
 				button := s.EntryBuf.GetButton(i)
 				hider := s.EntryBuf.GetHider(i)
@@ -43,26 +45,19 @@ func (s *State) Body() layout.FlexChild {
 					Flexed(1, func() {
 						s.ButtonArea(func() {
 							s.FlexH(
-								//Rigid(
-								//	s.Text(fmt.Sprint(i), color, "DocBg", "Mono", "body1"),
-								//),
-								Rigid(
-									//s.Text(b.Level, color, "DocBg", "Mono", "body1"),
-									func() {
-										if ww > 480 {
-											s.Icon(logi.Tags[b.Level], color, "Transparent",
-												32)
-										}
-									},
-								),
-								Rigid(
-									func() {
-										if ww > 960 {
-											s.FlexH(Rigid(
-												s.Text(b.Time.Format("15:04:05"), color, "Transparent", "Mono", "body2"),
-											))
-										}
-									}),
+								Rigid(func() {
+									if ww > 480 {
+										s.Icon(logi.Tags[b.Level], color, "Transparent",
+											32)
+									}
+								}),
+								Rigid(func() {
+									if ww > 960 {
+										s.FlexH(Rigid(
+											s.Text(b.Time.Format("15:04:05"), color, "Transparent", "Mono", "body2"),
+										))
+									}
+								}),
 								Flexed(1, func() {
 									tc := "DocText"
 									if ww <= 480 {

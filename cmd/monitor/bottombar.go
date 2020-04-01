@@ -44,9 +44,9 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				//if cs.Width.Max <= 240 {
 				//	txt = txt[:1]
 				//}
-				s.TextButton(txt, "Secondary", 34, fg, bg,
-					&s.RunModeFoldButton)
-				for s.RunModeFoldButton.Clicked(s.Gtx) {
+				b := s.Buttons["RunModeFold"]
+				s.TextButton(txt, "Secondary", 34, fg, bg, b)
+				for b.Clicked(s.Gtx) {
 					if !s.Config.Running {
 						s.Config.RunModeOpen = true
 						s.SaveConfig()
@@ -56,7 +56,7 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				modes := []string{
 					"node", "wallet", "shell", "gui", "mon",
 				}
-				s.ModesList.Layout(s.Gtx, len(modes), func(i int) {
+				s.Lists["Modes"].Layout(s.Gtx, len(modes), func(i int) {
 					mm := modes[i]
 					fg := "DocBg"
 					if modes[i] == s.Config.RunMode {
@@ -96,8 +96,9 @@ func (s *State) Filter() layout.FlexChild {
 		//if !(s.Config.FilterOpen.Load() && s.WindowWidth <= 720) ||
 		//	(!s.Config.FilterOpen.Load() && s.WindowWidth > 480) {
 		//if !s.Config.FilterOpen {
-		s.IconButton("Filter", fg, bg, &s.FilterButton)
-		for s.FilterButton.Clicked(s.Gtx) {
+		b := s.Buttons["Filter"]
+		s.IconButton("Filter", fg, bg, b)
+		for b.Clicked(s.Gtx) {
 			Debug("clicked filter button")
 			if !s.Config.FilterOpen {
 				s.Config.SettingsOpen = false

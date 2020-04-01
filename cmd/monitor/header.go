@@ -23,11 +23,12 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				s.FlexH(Rigid(func() {
 					fg, bg := "PanelText", "PanelBg"
 					icon := "logo"
+					b := s.Buttons["Logo"]
 					s.Theme.DuoUIbutton("", "", "",
 						s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
 						s.Theme.Colors[fg], 0, 40, 48, 48,
-						6, 2, 2, 6).IconLayout(s.Gtx, &s.LogoButton)
-					if s.LogoButton.Clicked(s.Gtx) {
+						6, 2, 2, 6).IconLayout(s.Gtx, b)
+					if b.Clicked(s.Gtx) {
 						s.FlipTheme()
 					}
 				}))
@@ -53,9 +54,10 @@ func (s *State) DuoUIheader() layout.FlexChild {
 			t.Layout(s.Gtx)
 		}), s.RestartRunButton(),
 			Rigid(func() {
+				b := s.Buttons["Close"]
 				s.IconButton("closeIcon", "PanelText",
-					"PanelBg", &s.CloseButton)
-				for s.CloseButton.Clicked(s.Gtx) {
+					"PanelBg", b)
+				for b.Clicked(s.Gtx) {
 					Debug("close button clicked")
 					s.SaveConfig()
 					s.RunCommandChan <- "kill"
@@ -70,9 +72,9 @@ func (s *State) RestartRunButton() layout.FlexChild {
 	return Rigid(func() {
 		var c *exec.Cmd
 		var err error
-		s.IconButton("Restart", "PanelText", "PanelBg",
-			&s.RestartButton)
-		for s.RestartButton.Clicked(s.Gtx) {
+		b := s.Buttons["Restart"]
+		s.IconButton("Restart", "PanelText", "PanelBg", b)
+		for b.Clicked(s.Gtx) {
 			Debug("clicked restart button")
 			s.SaveConfig()
 			if s.HasGo {

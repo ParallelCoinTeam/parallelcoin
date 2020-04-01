@@ -48,9 +48,9 @@ func (s *State) Sidebar() layout.FlexChild {
 						"ff")
 					s.FlexH(
 						Rigid(func() {
-							s.IconButton("Delete", "PanelBg", "DocText",
-								&s.FilterClearButton)
-							for s.FilterClearButton.Clicked(s.Gtx) {
+							b := s.Buttons["FilterClear"]
+							s.IconButton("Delete", "PanelBg", "DocText", b)
+							for b.Clicked(s.Gtx) {
 								Debug("clear all")
 								s.EntryBuf.Clear()
 							}
@@ -68,27 +68,27 @@ func (s *State) Sidebar() layout.FlexChild {
 							//	}
 						}),
 						Rigid(func() {
-							s.IconButton("HideAll", "PanelBg", "DocText",
-								&s.FilterHideButton)
-							for s.FilterHideButton.Clicked(s.Gtx) {
+							b := s.Buttons["FilterHide"]
+							s.IconButton("HideAll", "PanelBg", "DocText", b)
+							for b.Clicked(s.Gtx) {
 								Debug("hide all")
 								s.Loggers.CloseAllItems(s)
 								s.SaveConfig()
 							}
 						}),
 						Rigid(func() {
-							s.IconButton("ShowAll", "PanelBg", "DocText",
-								&s.FilterShowButton)
-							for s.FilterShowButton.Clicked(s.Gtx) {
+							b := s.Buttons["FilterShow"]
+							s.IconButton("ShowAll", "PanelBg", "DocText", b)
+							for b.Clicked(s.Gtx) {
 								Debug("show all")
 								s.Loggers.OpenAllItems(s)
 								s.SaveConfig()
 							}
 						}),
 						Rigid(func() {
-							s.IconButton("ShowItem", "PanelBg", "DocText",
-								&s.FilterAllButton)
-							for s.FilterAllButton.Clicked(s.Gtx) {
+							b := s.Buttons["FilterAll"]
+							s.IconButton("ShowItem", "PanelBg", "DocText", b)
+							for b.Clicked(s.Gtx) {
 								Debug("filter all")
 								s.Loggers.ShowAllItems(s)
 								consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
@@ -96,9 +96,9 @@ func (s *State) Sidebar() layout.FlexChild {
 							}
 						}),
 						Rigid(func() {
-							s.IconButton("HideItem", "PanelBg", "DocText",
-								&s.FilterNoneButton)
-							for s.FilterNoneButton.Clicked(s.Gtx) {
+							b := s.Buttons["FilterNone"]
+							s.IconButton("HideItem", "PanelBg", "DocText", b)
+							for b.Clicked(s.Gtx) {
 								Debug("filter none")
 								s.Loggers.HideAllItems(s)
 								consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
@@ -133,13 +133,13 @@ func (s *State) Sidebar() layout.FlexChild {
 }
 
 func (s *State) LevelsButtons() {
-	s.FilterLevelList.Layout(s.Gtx, len(logi.Tags)-1, func(a int) {
+	s.Lists["FilterLevel"].Layout(s.Gtx, len(logi.Tags)-1, func(a int) {
 		bn := logi.Tags[logi.Levels[a+1]]
 		color, bg := "PanelBg", "DocBg"
 		if s.Config.FilterLevel > a {
 			switch a + 1 {
 			case 1:
-				bg, color = "PanelBg", "Danger"
+				bg, color = "PanelBg", "Fatal"
 			case 2:
 				bg, color = "PanelBg", "Danger"
 			case 3:

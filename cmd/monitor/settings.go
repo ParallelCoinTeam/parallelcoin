@@ -25,9 +25,9 @@ func (s *State) SettingsButtons() layout.FlexChild {
 				if s.Config.SettingsOpen {
 					bg, fg = "DocBg", "DocText"
 				}
-				s.IconButton("settingsIcon", fg, bg, &s.SettingsFoldButton)
-
-				for s.SettingsFoldButton.Clicked(s.Gtx) {
+				b := s.Buttons["SettingsFold"]
+				s.IconButton("settingsIcon", fg, bg, b)
+				for b.Clicked(s.Gtx) {
 					Debug("settings folder clicked")
 					if !s.Config.SettingsOpen {
 						s.Config.FilterOpen = false
@@ -73,14 +73,6 @@ func (s *State) SettingsPage() layout.FlexChild {
 			Rigid(func() {
 				s.FlexH(Rigid(func() {
 					s.Label("Settings")
-					//s.TextButton("Settings", "Secondary",
-					//	32, "DocText", "DocBg",
-					//	s.SettingsTitleCloseButton)
-					//for s.SettingsTitleCloseButton.Clicked(s.Gtx) {
-					//	Debug("settings panel title close button clicked")
-					//	s.Config.SettingsOpen.Store(false)
-					//	s.SaveConfig()
-					//}
 				}), Flexed(1, func() {
 					if s.WindowWidth > settingsTabBreak {
 						s.SettingsTabs(27)
@@ -92,18 +84,18 @@ func (s *State) SettingsPage() layout.FlexChild {
 						if s.Config.SettingsZoomed {
 							ic = "minimize"
 						}
-						s.IconButton(ic, "DocText", "DocBg",
-							&s.SettingsZoomButton)
-						for s.SettingsZoomButton.Clicked(s.Gtx) {
+						b := s.Buttons["SettingsZoom"]
+						s.IconButton(ic, "DocText", "DocBg", b)
+						for b.Clicked(s.Gtx) {
 							Debug("settings panel close button clicked")
 							s.Config.SettingsZoomed = !s.Config.SettingsZoomed
 							s.SaveConfig()
 						}
 					}
 				}), Rigid(func() {
-					s.IconButton("foldIn", "DocText", "DocBg",
-						&s.SettingsCloseButton)
-					for s.SettingsCloseButton.Clicked(s.Gtx) {
+					b := s.Buttons["SettingsClose"]
+					s.IconButton("foldIn", "DocText", "DocBg", b)
+					for b.Clicked(s.Gtx) {
 						Debug("settings panel close button clicked")
 						s.Config.SettingsOpen = false
 						s.SaveConfig()
@@ -138,7 +130,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 
 func (s *State) SettingsTabs(size int) {
 	groupsNumber := len(s.Rc.Settings.Daemon.Schema.Groups)
-	s.GroupsList.Layout(s.Gtx, groupsNumber, func(i int) {
+	s.Lists["Groups"].Layout(s.Gtx, groupsNumber, func(i int) {
 		color := "DocText"
 		bgColor := "DocBg"
 		i = groupsNumber - 1 - i
@@ -163,7 +155,7 @@ func (s *State) SettingsBody() {
 				Layout(s.Gtx, layout.N, func() {
 					for _, fields := range s.Rc.Settings.Daemon.Schema.Groups {
 						if fmt.Sprint(fields.Legend) == s.Rc.Settings.Tabs.Current {
-							s.SettingsFields.Layout(s.Gtx,
+							s.Lists["SettingsFields"].Layout(s.Gtx,
 								len(fields.Fields), func(il int) {
 									//il = len(fields.Fields) - 1 - il
 									tl := &Field{
@@ -239,22 +231,17 @@ func (s *State) InputField(f *Field) func() {
 		rsd := s.Rc.Settings.Daemon
 		fld := f.Field
 		fm := fld.Model
+		//var rwc *gel.CheckBox
 		rwe, ok := rsd.Widgets[fm].(*gel.Editor)
-		var rwc *gel.CheckBox
-		if !ok {
-			rwc, ok = rsd.Widgets[fm].(*gel.CheckBox)
-			if !ok {
-				return
-			}
+		if !ok || rwe == nil {
+			return
 		}
-		_ = rwc
-		w := 0
-		if rwe != nil {
-			w = len(rwe.Text())
-		}
-		//if w < 9 {
-		//	w = 9
+		//rwc, ok = rsd.Widgets[fm].(*gel.CheckBox)
+		//if !ok {
+		//	return
 		//}
+		w := 0
+		w = len(rwe.Text())
 		switch fld.Type {
 		case "stringSlice":
 			switch fld.InputType {
@@ -268,7 +255,7 @@ func (s *State) InputField(f *Field) func() {
 				if fm != "MiningAddrs" {
 					w := len((rsd.Widgets[fm]).(*gel.Editor).Text())
 					s.StringsArrayEditor(rsd.Widgets[fm].(*gel.
-						Editor), (rsd.Widgets[fm]).(*gel.Editor).Text(), w,
+					Editor), (rsd.Widgets[fm]).(*gel.Editor).Text(), w,
 						func(e gel.EditorEvent) {
 							rsd.Config[fm] = strings.Fields(rwe.Text())
 							if e != nil {
@@ -411,14 +398,14 @@ func (s *State) InputField(f *Field) func() {
 
 const textWidth = 10
 
-func (s *State) Editor(editorControler *gel.Editor, width int,
+func (s *State) Editor(editorController *gel.Editor, width int,
 	handler func(gel.EditorEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(4)).Layout(s.Gtx, func() {
 			outerColor := "DocBg"
 			innerColor := "PanelBg"
 			textColor := "PanelText"
-			if editorControler.Focused() {
+			if editorController.Focused() {
 				outerColor = "DocText"
 				//innerColor = "DocBg"
 				//textColor = "PanelBg"
@@ -427,16 +414,16 @@ func (s *State) Editor(editorControler *gel.Editor, width int,
 			s.Rectangle(width*textWidth+16, 40, outerColor, "ff", 4)
 			s.Inset(3, func() {
 				s.Rectangle(width*textWidth+10, 34, innerColor, "ff", 2)
-				e := s.Theme.DuoUIeditor(editorControler.Text(),
+				e := s.Theme.DuoUIeditor(editorController.Text(),
 					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
 				e.Font.Typeface = s.Theme.Fonts["Mono"]
 				s.Inset(5, func() {
 					s.FlexH(Rigid(func() {
-						e.Layout(s.Gtx, editorControler)
+						e.Layout(s.Gtx, editorController)
 					}),
 					)
 				})
-				for _, e := range editorControler.Events(s.Gtx) {
+				for _, e := range editorController.Events(s.Gtx) {
 					switch e.(type) {
 					case gel.ChangeEvent:
 						handler(e)
@@ -447,14 +434,14 @@ func (s *State) Editor(editorControler *gel.Editor, width int,
 	}
 }
 
-func (s *State) PasswordEditor(editorControler *gel.Editor, width int,
+func (s *State) PasswordEditor(editorController *gel.Editor, width int,
 	handler func(gel.EditorEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(4)).Layout(s.Gtx, func() {
 			outerColor := "DocBg"
 			innerColor := "PanelBg"
 			textColor := "PanelBg"
-			if editorControler.Focused() {
+			if editorController.Focused() {
 				outerColor = "DocText"
 				innerColor = "DocBg"
 				textColor = "PanelBg"
@@ -463,16 +450,16 @@ func (s *State) PasswordEditor(editorControler *gel.Editor, width int,
 			s.Rectangle(width*textWidth+16, 40, outerColor, "ff", 4)
 			s.Inset(3, func() {
 				s.Rectangle(width*textWidth+10, 34, innerColor, "ff", 2)
-				e := s.Theme.DuoUIeditor(editorControler.Text(),
+				e := s.Theme.DuoUIeditor(editorController.Text(),
 					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
 				e.Font.Typeface = s.Theme.Fonts["Mono"]
 				s.Inset(5, func() {
 					s.FlexH(Rigid(func() {
-						e.Layout(s.Gtx, editorControler)
+						e.Layout(s.Gtx, editorController)
 					}),
 					)
 				})
-				for _, e := range editorControler.Events(s.Gtx) {
+				for _, e := range editorController.Events(s.Gtx) {
 					switch e.(type) {
 					case gel.ChangeEvent:
 						handler(e)

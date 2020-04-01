@@ -25,90 +25,78 @@ type State struct {
 	Rc                        *rcd.RcVar
 	Theme                     *gelook.DuoUItheme
 	Config                    *Config
-	MainList                  layout.List
-	ModesList                 layout.List
-	CloseButton               gel.Button
-	RestartButton             gel.Button
-	LogoButton                gel.Button
-	RunMenuButton             gel.Button
-	StopMenuButton            gel.Button
-	PauseMenuButton           gel.Button
-	RestartMenuButton         gel.Button
-	KillMenuButton            gel.Button
-	RunModeFoldButton         gel.Button
-	SettingsFoldButton        gel.Button
-	SettingsCloseButton       gel.Button
-	SettingsZoomButton        gel.Button
-	SettingsTitleCloseButton  gel.Button
-	BuildFoldButton           gel.Button
-	BuildCloseButton          gel.Button
-	BuildZoomButton           gel.Button
-	BuildTitleCloseButton     gel.Button
-	FilterButton              gel.Button
-	FilterHeaderButton        gel.Button
-	FilterAllButton           gel.Button
-	FilterHideButton          gel.Button
-	FilterShowButton          gel.Button
-	FilterNoneButton          gel.Button
-	FilterClearButton         gel.Button
-	FilterSendButton          gel.Button
+	Buttons                   map[string]*gel.Button
 	FilterLevelsButtons       []gel.Button
-	FilterLevelList           layout.List
+	FilterButtons             []gel.Button
+	Lists                     map[string]*layout.List
 	ModesButtons              map[string]*gel.Button
-	GroupsList                layout.List
+	CommandEditor             gel.Editor
 	WindowWidth, WindowHeight int
 	Loggers                   *Node
-	SettingsFields            layout.List
 	RunningInRepo             bool
-	RunningInRepoButton       gel.Button
-	RunFromProfileButton      gel.Button
 	HasGo                     bool
 	HasOtherGo                bool
-	UseBuiltinGoButton        gel.Button
-	InstallNewGoButton        gel.Button
 	CannotRun                 bool
 	RunCommandChan            chan string
-	FilterButtons             []gel.Button
-	FilterList                layout.List
-	LogList                   layout.List
 	EntryBuf                  *ring.Entry
 	FilterRoot                *Node
-	CommandEditor             gel.Editor
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 	s = &State{
-		Ctx:   cx,
-		Gtx:   gtx,
-		Rc:    rc,
-		Theme: gelook.NewDuoUItheme(),
-		MainList: layout.List{
-			Axis: layout.Vertical,
-		},
-		ModesList: layout.List{
-			Axis:      layout.Horizontal,
-			Alignment: layout.Start,
-		},
-		ModesButtons: make(map[string]*gel.Button),
-		Config:       &Config{FilterNodes: make(map[string]*Node)},
-		WindowWidth:  0,
-		WindowHeight: 0,
-		GroupsList: layout.List{
-			Axis:      layout.Horizontal,
-			Alignment: layout.Start,
-		},
-		SettingsFields: layout.List{
-			Axis: layout.Vertical,
-		},
+		Ctx:                 cx,
+		Gtx:                 gtx,
+		Rc:                  rc,
+		Theme:               gelook.NewDuoUItheme(),
+		ModesButtons:        make(map[string]*gel.Button),
+		Config:              &Config{FilterNodes: make(map[string]*Node)},
+		WindowWidth:         800,
+		WindowHeight:        600,
 		RunCommandChan:      make(chan string),
 		EntryBuf:            ring.NewEntry(65536),
 		FilterLevelsButtons: make([]gel.Button, 7),
+		Buttons:             make(map[string]*gel.Button),
+		Lists:               make(map[string]*layout.List),
 	}
 	modes := []string{
 		"node", "wallet", "shell", "gui", "mon",
 	}
 	for i := range modes {
 		s.ModesButtons[modes[i]] = new(gel.Button)
+	}
+	buttons := []string{
+		"Close", "Restart", "Logo", "RunMenu", "StopMenu", "PauseMenu",
+		"RestartMenu", "KillMenu", "RunModeFold", "SettingsFold",
+		"SettingsClose", "SettingsZoom", "BuildFold",
+		"BuildClose", "BuildZoom", "BuildTitleClose", "Filter",
+		"FilterHeader", "FilterAll", "FilterHide", "FilterShow",
+		"FilterNone", "FilterClear", "FilterSend", "RunningInRepo",
+		"RunFromProfile", "UseBuiltinGo", "InstallNewGo",}
+	for i := range buttons {
+		s.Buttons[buttons[i]] = new(gel.Button)
+	}
+	lists := []string{
+		"Modes", "FilterLevel", "Groups", "Filter", "Log",
+		"SettingsFields",
+	}
+	for i := range lists {
+		s.Lists[lists[i]] = new(layout.List)
+	}
+	s.Lists = map[string]*layout.List{
+		"Modes": {
+			Axis:      layout.Horizontal,
+			Alignment: layout.Start,
+		},
+		"Groups": {
+			Axis:      layout.Horizontal,
+			Alignment: layout.Start,
+		},
+		"SettingsFields": {
+			Axis: layout.Vertical,
+		},
+		"Filter":      {},
+		"FilterLevel": {},
+		"Log":         {},
 	}
 	s.Config.RunMode = "node"
 	s.Config.DarkTheme = true
@@ -212,5 +200,4 @@ func (s *State) SaveConfig() {
 			panic(e)
 		}
 	}
-	//s.LoadConfig()
 }

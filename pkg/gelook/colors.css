@@ -1,0 +1,249 @@
+main{
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+section{
+    flex: 1;
+}
+table{
+    width:100%;
+}
+svg{
+    max-width:100%;
+    flex:1 0 100%;
+}
+.colors{
+    disply:flex;
+    width:100%;
+    flex-direction:row;
+}
+h3{
+    width:100%;
+}
+div{
+    display:flex;
+    flex: 1 0 auto;
+    padding:1rem;
+    text-align:center;
+}
+.blue{
+    background:#3030cf;
+    fill:#3030cf;
+}
+.light-blue{
+    background: #8080cf;
+    fill: #8080cf;
+}
+.dark-blue{
+    background: #303080;
+    fill: #303080;
+}
+.lite-blue{
+    background:#30cfcf;
+    fill:#30cfcf;
+}
+.light-lite-blue{
+    background: #80cfcf;
+    fill: #80cfcf;
+}
+.dark-lite-blue{
+    background: #308080;
+    fill: #308080;
+}
+.green{
+    background:#30cf30;
+    fill:#30cf30;
+}
+.light-green{
+    background:#80cf80;
+    fill:#80cf80;
+}
+.dark-green{
+    background:#308030;
+    fill:#308030;
+}
+.orange{
+    background:#cf8030;
+    fill:#cf8030;
+}
+.light-orange{
+    background:#cfa880;
+    fill:#cfa880;
+}
+.dark-orange{
+    background:#805830;
+    fill:#805830;
+}
+.yellow{
+    background:#cfcf30;
+    fill:#cfcf30;
+}
+.light-yellow{
+    background:#cfcf80;
+    fill:#cfcf80;
+}
+.dark-yellow{
+    background:#808030;
+    fill:#808030;
+}
+.red{
+    background:#cf3030;
+    fill:#cf3030;
+}
+.light-red{
+    background:#cf8080;
+    fill:#cf8080;
+}
+.dark-red{
+    background:#803030;
+    fill:#803030;
+}
+.purple{
+    background:#cf30cf;
+    fill:#cf30cf;
+}
+.light-purple{
+    background:#cf80cf;
+    fill:#cf80cf;
+}
+.dark-purple{
+    background:#803080;
+    fill:#803080;
+}
+.green-blue{
+    background:#308080;
+    fill:#308080;
+}
+.light-green-blue{
+    background:#80a8a8;
+    fill:#80a8a8;
+}
+.dark-green-blue{
+    background:#305858;
+    fill:#305858;
+}
+.green-lite-blue{
+    background:#30cf80;
+    fill:#30cf80;
+}
+.light-green-lite-blue{
+    background:#80cfa8;
+    fill:#80cfa8;
+}
+.dark-green-lite-blue{
+    background:#308058;
+    fill:#308058;
+}
+.green-orange{
+    background:#80a830;
+    fill:#80a830;
+}
+.light-green-orange{
+    background:#a8bc80;
+    fill:#a8bc80;
+}
+.dark-green-orange{
+    background:#586c30;
+    fill:#586c30;
+}
+.green-yellow{
+    background:#80cf30;
+    fill:#80cf30;
+}
+.light-green-yellow{
+    background:#a8cf80;
+    fill:#a8cf80;
+}
+.dark-green-yellow{
+    background:#588030;
+    fill:#588030;
+}
+.green-red{
+    background:#808030;
+    fill:#808030;
+}
+.light-green-red{
+    background:#a8a880;
+    fill:#a8a880;
+}
+.dark-green-red{
+    background:#585830;
+    fill:#585830;
+}
+.blue-lite-blue{
+    background:#3080cf;
+    fill:#3080cf;
+}
+.light-blue-lite-blue{
+    background:#80a8cf;
+    fill:#80a8cf;
+}
+.dark-blue-lite-blue{
+    background:#305880;
+    fill:#305880;
+}
+.blue-orange{
+    background:#80a830;
+    fill:#80a830;
+}
+.light-blue-orange{
+    background:#a894a8;
+    fill:#a894a8;
+}
+.dark-blue-orange{
+    background:#584458;
+    fill:#584458;
+}
+.blue-red{
+    background:#803080;
+    fill:#803080;
+}
+.light-blue-red{
+    background:#a880a8;
+    fill:#a880a8;
+}
+.dark-blue-red{
+    background:#583058;
+    fill:#583058;
+}
+.dark{
+    background:#303030;
+    fill:#303030;
+}
+.dark-grayii{
+    background:#424242;
+    fill:#424242;
+}
+.dark-grayi{
+    background:#535353;
+    fill:#535353;
+}
+.dark-gray{
+    background:#656565;
+    fill:#656565;
+}
+.gray{
+    background:#808080;
+    fill:#808080;
+}
+.light-gray{
+    background: #888888;
+    fill: #888888;
+}
+.light-grayi{
+    background: #9a9a9a;
+    fill: #9a9a9a;
+}
+.light-grayii{
+    background: #acacac;
+    fill: #acacac;
+}
+.light-grayiii{
+    background: #bdbdbd;
+    fill: #bdbdbd;
+}
+.light{
+    background:#cfcfcf;
+    fill:#cfcfcf;
+}

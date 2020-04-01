@@ -62,7 +62,6 @@ func (s *State) Icon(icon, fg, bg string, size int) {
 			tp = "00"
 		}
 		s.Rectangle(cs.Height.Max, cs.Width.Max, bg, tp)
-
 		s.Inset(0, func() {
 			i := s.Theme.Icons[icon]
 			i.Color = gelook.HexARGB(s.Theme.Colors[fg])
@@ -77,10 +76,7 @@ func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int)
 	if len(size) > 1 {
 		sz = size[0]
 	}
-	//sz -=16
-	//cs := s.Gtx.Constraints
 	s.Rectangle(sz, sz, fg, "ff")
-	//s.Inset(8, func() {
 	s.Theme.DuoUIbutton("", "", "",
 		s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
 		s.Theme.Colors[fg], 0, sz-8, sz, sz,
@@ -150,31 +146,6 @@ func (s *State) Text(txt, fg, bg, face, tag string) func() {
 	}
 }
 
-//func (s *State) Icon(icon *material.Icon, iconLabel string) func() {
-//	return func() {
-//		layout.Flex{
-//			Axis:    layout.Vertical,
-//			Spacing: layout.SpaceBetween,
-//		}.Layout(s.Gtx,
-//			layout.Rigid(func() {
-//
-//				layout.Flex{
-//					Spacing: layout.SpaceBetween,
-//				}.Layout(gtx,
-//					layout.Rigid(func() {
-//						icon.Color = helpers.HexARGB(scr.AccentColor)
-//						icon.Layout(gtx, unit.Dp(float32(scr.IconSize)))
-//					}),
-//					layout.Rigid(func() {
-//						th.Label(th.TextSize.Scale(14.0/float32(scr.TextSize)), iconLabel).Layout(gtx)
-//					}),
-//				)
-//			}),
-//			layout.Rigid(func() {
-//				DrawRectangle(gtx, gtx.Constraints.Width.Max, 1, color.RGBA{A: 0xff, R: 0xcf, G: 0x30, B: 0x30})
-//			}))
-//	}
-//}
 func Toggle(b *bool) bool {
 	*b = !*b
 	return *b
