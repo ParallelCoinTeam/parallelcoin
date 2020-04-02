@@ -14,18 +14,7 @@ import (
 )
 
 var (
-	latestTxsPanelElement = &gel.Panel{
-		PanelContentLayout: &layout.List{
-			Axis:        layout.Vertical,
-			ScrollToEnd: false,
-		},
-		ScrollBar: &gel.ScrollBar{
-			Size:   16,
-			Slider: new(gel.Slider),
-			Up:     new(gel.Button),
-			Down:   new(gel.Button),
-		},
-	}
+	latestTxsPanelElement = gel.NewPanel()
 )
 
 func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
