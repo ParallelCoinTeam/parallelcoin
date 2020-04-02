@@ -246,14 +246,24 @@ func FileExists(filePath string) bool {
 
 func (l *Logger) SetLevel(level string, color bool, split string) {
 	l.Level = sanitizeLoglevel(level)
-	l.Split = split + string(os.PathSeparator)
+	sep := string(os.PathSeparator)
+	if runtime.GOOS == "windows" {
+		sep = "/"
+	}
+	l.Split = split + sep
 	l.Color = color
 }
 
 func (l *Logger) LocToPkg(pkg string) (out string) {
+	fmt.Println("pkg",pkg)
+	sep := string(os.PathSeparator)
+	if runtime.GOOS == "windows" {
+		sep = "/"
+	}
 	split := strings.Split(pkg, l.Split)
+	fmt.Println("split",split, l.Split)
 	pkg = split[1]
-	split = strings.Split(pkg, string(os.PathSeparator))
+	split = strings.Split(pkg, sep)
 	return strings.Join(split[:len(split)-1], string(os.PathSeparator))
 }
 
@@ -262,6 +272,9 @@ func (l *Logger) Register(pkg string) string {
 	//pkg = split[1]
 	//split = strings.Split(pkg, string(os.PathSeparator))
 	//pkg = strings.Join(split[:len(split)-1], string(os.PathSeparator))
+	// if runtime.GOOS == "windows" {
+	// 	pkg = strings.Replace(pkg, "/", string(os.PathSeparator), -1)
+	// }
 	pkg = l.LocToPkg(pkg)
 	l.Packages[pkg] = true
 	return pkg
