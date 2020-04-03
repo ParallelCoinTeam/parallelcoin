@@ -6,8 +6,8 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
 
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/conte"
@@ -226,7 +226,7 @@ func RcInit(cx *conte.Xt) (r *RcVar) {
 				Balance:            0,
 				BalanceHeight:      0,
 			},
-			SingleTx: btcjson.GetTransactionDetailsResult{},
+			SingleTx: btcjson.GetTransactionResult{},
 		},
 		Quit:  make(chan struct{}),
 		Ready: make(chan struct{}),

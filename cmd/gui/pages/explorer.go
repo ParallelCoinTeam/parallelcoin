@@ -2,17 +2,17 @@ package pages
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/cmd/gui/component"
+	"github.com/p9c/pod/pkg/gui/gel"
 	"time"
 
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
 var (
@@ -142,6 +142,11 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 }
 
 func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *model.DuoUIblock) {
+	for block.Link.Clicked(gtx) {
+		rc.ShowPage = fmt.Sprintf("BLOCK %s", block.BlockHash)
+		rc.GetSingleBlock(block.BlockHash)()
+		component.SetPage(rc, blockPage(rc, gtx, th, block.BlockHash))
+	}
 	width := gtx.Constraints.Width.Max
 	button := th.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0)
 	button.InsideLayout(gtx, block.Link, func() {
@@ -156,11 +161,6 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *
 					layout.Rigid(func() {
 						var linkButton gelook.DuoUIbutton
 						linkButton = th.DuoUIbutton(th.Fonts["Mono"], fmt.Sprint(block.Height), th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Dark"], "", th.Colors["Dark"], 14, 0, 60, 24, 5, 8, 6, 8)
-						for block.Link.Clicked(gtx) {
-							rc.ShowPage = fmt.Sprintf("BLOCK %s", block.BlockHash)
-							rc.GetSingleBlock(block.BlockHash)()
-							component.SetPage(rc, blockPage(rc, gtx, th, block.BlockHash))
-						}
 						linkButton.Layout(gtx, block.Link)
 					}),
 					layout.Rigid(func() {

@@ -5,7 +5,6 @@ import (
 )
 
 type Panel struct {
-	Size                 int
 	VisibleObjectsNumber int
 	//totalOffset       int
 	PanelContentLayout *layout.List
@@ -44,7 +43,7 @@ func (p *Panel) Layout(gtx *layout.Context) {
 		p.ScrollUnit = float32(p.ScrollBar.Slider.Height) / float32(p.PanelObjectsNumber)
 	}
 	cursorHeight := int(float32(p.VisibleObjectsNumber) * p.ScrollUnit)
-	if cursorHeight > p.Size {
+	if cursorHeight > p.ScrollBar.Size {
 		p.ScrollBar.Slider.CursorHeight = cursorHeight
 	}
 	if p.ScrollBar.Slider.pressed {

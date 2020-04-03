@@ -3,7 +3,7 @@ package model
 import (
 	"gioui.org/layout"
 
-	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
@@ -21,7 +21,7 @@ type DuoUIhistory struct {
 	Page       *gel.DuoUIcounter
 	PerPage    *gel.DuoUIcounter
 	Txs        *DuoUItransactionsExcerpts
-	SingleTx   btcjson.GetTransactionDetailsResult
+	SingleTx   btcjson.GetTransactionResult
 }
 type DuoUIhistoryCategories struct {
 	AllTxs      *gel.CheckBox

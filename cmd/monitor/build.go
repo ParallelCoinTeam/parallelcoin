@@ -2,7 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 )
 
 func (s *State) BuildButtons() layout.FlexChild {
@@ -16,8 +16,8 @@ func (s *State) BuildButtons() layout.FlexChild {
 				b := s.Buttons["BuildFold"]
 				//s.IconButton("Build", fg, bg, b)
 				s.ButtonArea(func() {
-					s.Gtx.Constraints.Width.Max=48
-					s.Gtx.Constraints.Height.Max=48
+					s.Gtx.Constraints.Width.Max = 48
+					s.Gtx.Constraints.Height.Max = 48
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
 					s.Inset(8, func() {

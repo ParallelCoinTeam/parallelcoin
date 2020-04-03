@@ -1,7 +1,7 @@
 package component
 
 import (
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
 type DuoUIcomponent struct {

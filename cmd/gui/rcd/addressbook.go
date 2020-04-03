@@ -9,7 +9,7 @@ import (
 	"github.com/p9c/pod/cmd/gui/model"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/wallet"

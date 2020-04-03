@@ -3,7 +3,7 @@ package model
 import (
 	"gioui.org/op/paint"
 
-	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 )
 
 type DuoUIbalance struct {
@@ -32,6 +32,7 @@ type DuoUItransactionExcerpt struct {
 	Time          string  `json:"time"`
 	TxID          string  `json:"txid"`
 	Comment       string  `json:"comment,omitempty"`
+	Link          *gel.Button
 }
 
 type DuoUIaddress struct {

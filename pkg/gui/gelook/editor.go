@@ -5,7 +5,7 @@ package gelook
 import (
 	"image/color"
 
-	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 
 	"gioui.org/layout"
 	"gioui.org/op"

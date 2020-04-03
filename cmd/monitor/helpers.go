@@ -3,8 +3,8 @@ package monitor
 import (
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
 func (s *State) FlexV(children ...layout.FlexChild) {
@@ -28,12 +28,12 @@ func Flexed(weight float32, widget func()) layout.FlexChild {
 }
 
 func (s *State) Spacer() layout.FlexChild {
-	return Flexed(1, func() {s.Inset(0,func(){})})
+	return Flexed(1, func() { s.Inset(0, func() {}) })
 }
 
 func (s *State) Rectangle(width, height int, color, opacity string, radius ...float32) {
 	col := s.Theme.Colors[color]
-	if col == "" || col[:2] == "00"{
+	if col == "" || col[:2] == "00" {
 		return
 	}
 	col = opacity + col[2:]
@@ -99,7 +99,7 @@ func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 }
 
 func (s *State) ButtonArea(content func(), button *gel.Button) {
-	b :=s.Theme.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0,
+	b := s.Theme.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0,
 		0, 0)
 	b.InsideLayout(s.Gtx, button, content)
 }

@@ -2,7 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
 	"github.com/p9c/pod/pkg/logi/consume"
 	"os"

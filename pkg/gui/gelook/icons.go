@@ -6,7 +6,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/p9c/pod/pkg/gelook/ico"
+	"github.com/p9c/pod/pkg/gui/gelook/ico"
 
 	"gioui.org/f32"
 	"gioui.org/layout"

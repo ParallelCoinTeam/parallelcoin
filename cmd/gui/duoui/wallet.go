@@ -5,8 +5,8 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 

@@ -12,7 +12,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 )
 
 type checkable struct {

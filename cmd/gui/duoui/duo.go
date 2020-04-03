@@ -6,8 +6,8 @@ import (
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/cmd/gui/pages"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gelook"
 	"github.com/p9c/pod/pkg/gui/clipboard"
+	"github.com/p9c/pod/pkg/gui/gelook"
 
 	"gioui.org/app"
 	"gioui.org/layout"

@@ -6,7 +6,7 @@ import (
 	"gioui.org/layout"
 
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 

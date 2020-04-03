@@ -2,40 +2,44 @@ package component
 
 import (
 	"fmt"
-
 	"gioui.org/layout"
 
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
-var (
-	transactionsPanelElement = gel.NewPanel()
-)
+//func TransactionsList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+//	return func() {
+//		transactionsPanel := th.DuoUIpanel()
+//		transactionsPanel.PanelObject = rc.History.Txs.Txs
+//		transactionsPanel.ScrollBar = th.ScrollBar()
+//		transactionsPanelElement.PanelObjectsNumber = len(rc.History.Txs.Txs)
+//		transactionsPanel.Layout(gtx, transactionsPanelElement, func(i int, in interface{}) {
+//			txs := in.([]model.DuoUItransactionExcerpt)
+//			t := txs[i]
+//			th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])()
+//			for t.Link.Clicked(gtx) {
+//				rc.ShowPage = fmt.Sprintf("TRANSACTION %s", t.TxID)
+//				rc.GetSingleTx(t.TxID)()
+//				//SetPage(rc, txPage(rc, gtx, th, t.TxID))
+//			}
+//			width := gtx.Constraints.Width.Max
+//			button := th.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0)
+//			button.InsideLayout(gtx, t.Link, func() {
+//				gtx.Constraints.Width.Min = width
+//				layout.Flex{
+//					Spacing: layout.SpaceBetween,
+//				}.Layout(gtx,
+//					layout.Rigid(txsDetails(gtx, th, i, &t)),
+//					layout.Rigid(Label(gtx, th, th.Fonts["Mono"], 12, th.Colors["Secondary"], fmt.Sprintf("%0.8f", t.Amount))))
+//			})
+//		})
+//	}
+//}
 
-func TransactionsList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
-	return func() {
-
-		transactionsPanel := th.DuoUIpanel()
-		transactionsPanel.PanelObject = rc.History.Txs.Txs
-		transactionsPanel.ScrollBar = th.ScrollBar()
-		transactionsPanelElement.PanelObjectsNumber = len(rc.History.Txs.Txs)
-		transactionsPanel.Layout(gtx, transactionsPanelElement, func(i int, in interface{}) {
-			txs := in.([]model.DuoUItransactionExcerpt)
-			t := txs[i]
-			th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])()
-			layout.Flex{
-				Spacing: layout.SpaceBetween,
-			}.Layout(gtx,
-				layout.Rigid(txsDetails(gtx, th, i, &t)),
-				layout.Rigid(Label(gtx, th, th.Fonts["Mono"], 12, th.Colors["Secondary"], fmt.Sprintf("%0.8f", t.Amount))))
-		})
-	}
-}
-
-func txsDetails(gtx *layout.Context, th *gelook.DuoUItheme, i int, t *model.DuoUItransactionExcerpt) func() {
+func TxsDetails(gtx *layout.Context, th *gelook.DuoUItheme, i int, t *model.DuoUItransactionExcerpt) func() {
 	return func() {
 		layout.Flex{
 			Axis: layout.Vertical,

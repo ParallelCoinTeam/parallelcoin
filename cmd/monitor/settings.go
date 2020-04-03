@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/pod"
 )
 
@@ -270,8 +270,7 @@ func (s *State) InputField(f *Field) func() {
 				s.Gtx.Constraints.Width.Max = ww
 				if fm != "MiningAddrs" {
 					w := len((rsd.Widgets[fm]).(*gel.Editor).Text())
-					s.StringsArrayEditor(rsd.Widgets[fm].(*gel.
-					Editor), (rsd.Widgets[fm]).(*gel.Editor).Text(), w,
+					s.StringsArrayEditor(rsd.Widgets[fm].(*gel.Editor), (rsd.Widgets[fm]).(*gel.Editor).Text(), w,
 						func(e gel.EditorEvent) {
 							rsd.Config[fm] = strings.Fields(rwe.Text())
 							if e != nil {

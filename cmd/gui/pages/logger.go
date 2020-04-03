@@ -8,7 +8,7 @@ import (
 
 	"gioui.org/layout"
 
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
 var (

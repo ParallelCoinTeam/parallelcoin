@@ -1,12 +1,39 @@
 package rcd
 
 import (
+	"fmt"
+	"github.com/p9c/pod/cmd/node/rpc"
+	"github.com/p9c/pod/pkg/gui/gel"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/helpers"
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
+
+func (r *RcVar) GetSingleTx(txid string) func() {
+	return func() {
+		r.History.SingleTx = r.GetTx(txid)
+	}
+}
+
+func (r *RcVar) GetTx(txid string) btcjson.GetTransactionResult {
+	verbose := 1
+	tcmd := btcjson.GetRawTransactionCmd{
+		Txid:    txid,
+		Verbose: &verbose,
+	}
+	tx, err := rpc.HandleGetRawTransaction(r.cx.RPCServer, &tcmd, nil)
+	if err != nil {
+		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
+	}
+	gbvr, ok := tx.(btcjson.GetTransactionResult)
+	if ok {
+		return gbvr
+	}
+	fmt.Println(txid)
+	return btcjson.GetTransactionResult{}
+}
 
 func (r *RcVar) GetDuoUItransactionsNumber() {
 	Debug("getting transaction count")
@@ -76,6 +103,7 @@ func txs(t btcjson.ListTransactionsResult) model.DuoUItransactionExcerpt {
 		Amount:   t.Amount,
 		Category: t.Category,
 		Time:     helpers.FormatTime(time.Unix(t.Time, 0)),
+		Link:     new(gel.Button),
 	}
 
 }
@@ -101,6 +129,7 @@ func (r *RcVar) GetLatestTransactions() {
 			Confirmations: txRaw.Confirmations,
 			Time:          unixTimeUTC.Format(time.RFC3339),
 			TxID:          txRaw.TxID,
+			Link:          new(gel.Button),
 		})
 	}
 	var balance float64
@@ -114,6 +143,7 @@ func (r *RcVar) GetLatestTransactions() {
 		}
 
 	}
+
 	r.Status.Wallet.LastTxs.Txs = txs
 	r.Status.Wallet.LastTxs.BalanceHeight = balanceHeight
 }

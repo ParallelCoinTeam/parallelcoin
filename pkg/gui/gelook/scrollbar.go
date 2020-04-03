@@ -1,10 +1,11 @@
 package gelook
 
 import (
+	"fmt"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 	"image"
 )
 
@@ -110,7 +111,9 @@ func (p *DuoUIpanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 					gtx.Constraints.Width.Min = panel.ScrollBar.Size
 					//gtx.Constraints.Width.Max = panel.ScrollBar.Size
 					gtx.Constraints.Height.Min = panel.ScrollBar.Slider.CursorHeight
-					if panel.ScrollBar.Slider.CursorHeight < panel.ScrollBar.Size*2 {
+					fmt.Println(".ScrollBar.Slider.CursorHeight", panel.ScrollBar.Slider.CursorHeight)
+					fmt.Println(" ScrollBar.Size", panel.ScrollBar.Size)
+					if panel.ScrollBar.Slider.CursorHeight < panel.ScrollBar.Size {
 						panel.ScrollBar.Slider.CursorHeight = panel.ScrollBar.Size * 2
 					}
 					//DuoUIdrawRectangle(gtx, panel.ScrollBar.Size, panel.ScrollBar.Slider.CursorHeight, p.ScrollBar.slider.ColorBg, [4]float32{8, 8, 8, 8}, [4]float32{8, 8, 8, 8})

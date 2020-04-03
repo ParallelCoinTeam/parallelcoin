@@ -7,8 +7,8 @@ import (
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/gel"
-	"github.com/p9c/pod/pkg/gelook"
+	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/stdconn/worker"
 	"io/ioutil"
@@ -71,7 +71,7 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		"BuildClose", "BuildZoom", "BuildTitleClose", "Filter",
 		"FilterHeader", "FilterAll", "FilterHide", "FilterShow",
 		"FilterNone", "FilterClear", "FilterSend", "RunningInRepo",
-		"RunFromProfile", "UseBuiltinGo", "InstallNewGo",}
+		"RunFromProfile", "UseBuiltinGo", "InstallNewGo"}
 	for i := range buttons {
 		s.Buttons[buttons[i]] = new(gel.Button)
 	}
