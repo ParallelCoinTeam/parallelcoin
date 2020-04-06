@@ -29,7 +29,7 @@ func (s *State) Sidebar() layout.FlexChild {
 				Flexed(1, func() {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
-					s.Inset(16, func() {
+					s.Inset(8, func() {
 						s.FlexV(
 							Flexed(1, func() {
 								//s.Gtx.Constraints.Width.Min = 240

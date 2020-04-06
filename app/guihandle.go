@@ -4,6 +4,7 @@ package app
 
 import (
 	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/logi/serve"
 	"github.com/urfave/cli"
 
@@ -17,7 +18,7 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		serve.Log(cx.KillAll)
+		serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir))
 		config.Configure(cx, c.Command.Name)
 		Warn("starting GUI")
 		rc := rcd.RcInit(cx)

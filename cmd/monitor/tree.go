@@ -21,20 +21,45 @@ type Node struct {
 	showButton         *gel.Button
 	showChildrenButton *gel.Button
 	hideChildrenButton *gel.Button
+	empty              bool
 }
 
 func (s *State) GetTree(paths []string) (root *Node) {
 	sort.Strings(paths)
+	var sliced [][]string
+	for i := range paths {
+		sliced = append(sliced, strings.Split(paths[i], "/"))
+	}
+	slicedPaths := make(map[string]bool)
+	for i := range sliced {
+		var s string
+		for j := range sliced[i] {
+			empty := true
+			if j == len(sliced[i])+1 {
+				empty = false
+			} else {
+				s = strings.Join(sliced[i][:j+1], "/")
+				//Debug(s)
+			}
+			slicedPaths[s] = empty
+		}
+	}
+	paths = make([]string, len(slicedPaths))
+	counter := 0
+	for i := range slicedPaths {
+		paths[counter] = i
+		counter++
+	}
+	Debugs(slicedPaths)
+	sort.Strings(paths)
+	Debugs(paths)
 	s.FilterRoot = &Node{
-		Name:     "root",
-		FullName: string(os.PathSeparator),
-		parent:   nil,
-		Children: nil,
-		Closed:   false,
-		Hidden:   false,
-		//foldButton: new(gel.Button),
-		//showChildrenButton: new(gel.Button),
-		//hideChildrenButton: new(gel.Button),
+		Name:       "root",
+		FullName:   string(os.PathSeparator),
+		parent:     nil,
+		Children:   nil,
+		Closed:     false,
+		Hidden:     false,
 		showButton: nil,
 	}
 	cursor := s.FilterRoot

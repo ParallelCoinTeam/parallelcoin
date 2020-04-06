@@ -19,7 +19,7 @@ import (
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	mon := NewMonitor(cx, nil, rc)
 	var lgs []string
-	for i := range logi.L.Packages {
+	for i := range *logi.L.Packages {
 		lgs = append(lgs, i)
 	}
 	//Debugs(lgs)

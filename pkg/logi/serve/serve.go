@@ -9,7 +9,7 @@ import (
 	"go.uber.org/atomic"
 )
 
-func Log(quit chan struct{}) {
+func Log(quit chan struct{}, saveFunc func(p Pk.Package) (success bool)) {
 	Debug("starting log server")
 	lc := logi.L.AddLogChan()
 	pkgChan := make(chan Pk.Package)
@@ -31,14 +31,13 @@ func Log(quit chan struct{}) {
 				logi.L.SetLevel(logi.Levels[b[4]], false, "pod")
 			case "pkgs":
 				pkgs := Pkg.LoadContainer(b).GetPackages()
-				//Debugs(pkgs)
-				//logi.L.Packages = pkgs
 				for i := range pkgs {
-					//Debug(i, pkgs[i])
-					logi.L.Packages[i] = pkgs[i]
+					(*logi.L.Packages)[i] = pkgs[i]
 				}
-				//Debugs(logi.L.Packages)
-				//pkgChan <- logi.L.Packages
+				// save settings
+				if !saveFunc(pkgs) {
+					Error("failed to save log filter configuration")
+				}
 			}
 		}
 		return

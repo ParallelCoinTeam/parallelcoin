@@ -1,6 +1,7 @@
 package logi
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
@@ -128,7 +129,7 @@ type (
 
 	// Logger is a struct containing all the functions with nice handy names
 	Logger struct {
-		Packages      Pk.Package
+		Packages      *Pk.Package
 		Level         string
 		Fatal         PrintlnFunc
 		Error         PrintlnFunc
@@ -173,8 +174,9 @@ func (l *Logger) AddLogChan() (ch chan Entry) {
 }
 
 func NewLogger() (l *Logger) {
+	p := make(Pk.Package)
 	l = &Logger{
-		Packages:      make(map[string]bool),
+		Packages:      &p,
 		Level:         "trace",
 		LogFileHandle: os.Stderr,
 		Color:         true,
@@ -200,12 +202,12 @@ func NewLogger() (l *Logger) {
 	l.Infoc = l.printcFunc(Info)
 	l.Debugc = l.printcFunc(Debug)
 	l.Tracec = l.printcFunc(Trace)
-	l.Fatals = l.ps(Fatal)
-	l.Errors = l.ps(Error)
-	l.Warns = l.ps(Warn)
-	l.Infos = l.ps(Info)
-	l.Debugs = l.ps(Debug)
-	l.Traces = l.ps(Trace)
+	l.Fatals = l.spewFunc(Fatal)
+	l.Errors = l.spewFunc(Error)
+	l.Warns = l.spewFunc(Warn)
+	l.Infos = l.spewFunc(Info)
+	l.Debugs = l.spewFunc(Debug)
+	l.Traces = l.spewFunc(Trace)
 
 	return
 }
@@ -255,13 +257,13 @@ func (l *Logger) SetLevel(level string, color bool, split string) {
 }
 
 func (l *Logger) LocToPkg(pkg string) (out string) {
-	fmt.Println("pkg",pkg)
+	//fmt.Println("pkg",pkg)
 	sep := string(os.PathSeparator)
 	if runtime.GOOS == "windows" {
 		sep = "/"
 	}
 	split := strings.Split(pkg, l.Split)
-	fmt.Println("split",split, l.Split)
+	//fmt.Println("split",split, l.Split)
 	pkg = split[1]
 	split = strings.Split(pkg, sep)
 	return strings.Join(split[:len(split)-1], string(os.PathSeparator))
@@ -276,8 +278,15 @@ func (l *Logger) Register(pkg string) string {
 	// 	pkg = strings.Replace(pkg, "/", string(os.PathSeparator), -1)
 	// }
 	pkg = l.LocToPkg(pkg)
-	l.Packages[pkg] = true
+	(*l.Packages)[pkg] = true
 	return pkg
+}
+
+func (l *Logger) LoadConfig(configFile []byte) {
+	var p Pk.Package
+	if err := json.Unmarshal(configFile, &p); !l.Check("internal", err) {
+		*l.Packages = p
+	}
 }
 
 func init() {
@@ -330,10 +339,10 @@ func (l *Logger) GetLoc(loc string, line int) (out string) {
 func (l *Logger) printfFunc(level string) PrintfFunc {
 	f := func(pkg, format string, a ...interface{}) {
 		text := fmt.Sprintf(format, a...)
-		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
 			return
 		}
-		if l.Writer.write || l.Packages[pkg] {
+		if l.Writer.write || (*l.Packages)[pkg] {
 			l.Writer.Println(Composite(text, level, l.Color, l.Split))
 		}
 		if l.LogChan != nil {
@@ -352,7 +361,7 @@ func (l *Logger) printfFunc(level string) PrintfFunc {
 // printcFunc prints from a closure returning a string
 func (l *Logger) printcFunc(level string) PrintcFunc {
 	f := func(pkg string, fn func() string) {
-		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
 			return
 		}
 		t := fn()
@@ -376,7 +385,7 @@ func (l *Logger) printcFunc(level string) PrintcFunc {
 // printlnFunc prints a log entry like Println
 func (l *Logger) printlnFunc(level string) PrintlnFunc {
 	f := func(pkg string, a ...interface{}) {
-		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
 			return
 		}
 		text := trimReturn(fmt.Sprintln(a...))
@@ -398,7 +407,7 @@ func (l *Logger) printlnFunc(level string) PrintlnFunc {
 
 func (l *Logger) checkFunc(level string) CheckFunc {
 	f := func(pkg string, err error) (out bool) {
-		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
 			return
 		}
 		n := err == nil
@@ -423,10 +432,10 @@ func (l *Logger) checkFunc(level string) CheckFunc {
 	return f
 }
 
-// ps spews a variable
-func (l *Logger) ps(level string) SpewFunc {
+// spewFunc spews a variable
+func (l *Logger) spewFunc(level string) SpewFunc {
 	f := func(pkg string, a interface{}) {
-		if !l.LevelIsActive(level) || !l.Packages[pkg] {
+		if !l.LevelIsActive(level) || !(*l.Packages)[pkg] {
 			return
 		}
 		text := trimReturn(spew.Sdump(a))

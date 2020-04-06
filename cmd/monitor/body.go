@@ -61,6 +61,9 @@ func (s *State) Body() layout.FlexChild {
 									}
 								}),
 								Flexed(1, func() {
+									//cs := s.Gtx.Constraints
+									//s.Rectangle(cs.Width.Max, cs.Height.Max,
+									//	"PanelBg", "ff")
 									tc := "DocText"
 									if ww <= 480 {
 										tc = color

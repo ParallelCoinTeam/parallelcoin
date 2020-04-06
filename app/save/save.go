@@ -2,7 +2,9 @@ package save
 
 import (
 	"encoding/json"
+	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
 	"io/ioutil"
+	"path/filepath"
 
 	"github.com/urfave/cli"
 
@@ -30,4 +32,20 @@ func Pod(c *pod.Config) (success bool) {
 	*c.UserAgentComments = uac
 
 	return
+}
+
+// Filters saves the logger per-package logging configuration
+func Filters(dataDir string) func(pkgs Pk.Package) (success bool) {
+	return func(pkgs Pk.Package) (success bool) {
+		if filterJSON, e := json.MarshalIndent(pkgs, "", "  "); e == nil {
+			Trace("Saving log filter:\n```", string(filterJSON), "\n```")
+			apputil.EnsureDir(dataDir)
+			if e := ioutil.WriteFile(filepath.Join(dataDir, "log-filter.json"), filterJSON,
+				0600); Check(e) {
+				success = false
+			}
+			success = true
+		}
+		return
+	}
 }

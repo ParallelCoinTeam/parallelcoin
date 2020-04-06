@@ -103,10 +103,6 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 	return
 }
 
-type TreeNode struct {
-	Closed, Hidden bool
-}
-
 type Config struct {
 	Width          int
 	Height         int
@@ -194,9 +190,10 @@ func (s *State) SaveConfig() {
 	s.Config.Width = s.WindowWidth
 	s.Config.Height = s.WindowHeight
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
-	if yp, e := json.MarshalIndent(s.Config, "", "  "); !Check(e) {
+	if cfgJSON, e := json.MarshalIndent(s.Config, "", "  "); !Check(e) {
+		//Debug(string(cfgJSON))
 		apputil.EnsureDir(filename)
-		if e := ioutil.WriteFile(filename, yp, 0600); Check(e) {
+		if e := ioutil.WriteFile(filename, cfgJSON, 0600); Check(e) {
 			panic(e)
 		}
 	}

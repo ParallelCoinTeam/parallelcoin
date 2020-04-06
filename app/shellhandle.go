@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/logi/serve"
 	"os"
 
@@ -18,7 +19,7 @@ import (
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name)
-		serve.Log(cx.KillAll)
+		serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir))
 		Debug("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
