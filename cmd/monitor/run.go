@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/logi/consume"
 	"go.uber.org/atomic"
@@ -13,7 +14,7 @@ import (
 )
 
 func (s *State) RunControls() layout.FlexChild {
-	return Rigid(func() {
+	return gui.Rigid(func() {
 		if s.CannotRun {
 			return
 		}
@@ -42,7 +43,7 @@ func (s *State) RunControls() layout.FlexChild {
 				ic = "Run"
 				fg, bg = "PanelText", "PanelBg"
 			}
-			s.FlexH(Rigid(func() {
+			s.FlexH(gui.Rigid(func() {
 				b := s.Buttons["StopMenu"]
 				s.ButtonArea(func() {
 					s.Gtx.Constraints.Width.Max = 48
@@ -58,7 +59,7 @@ func (s *State) RunControls() layout.FlexChild {
 					Debug("clicked stop button")
 					s.RunCommandChan <- "stop"
 				}
-			}), Rigid(func() {
+			}), gui.Rigid(func() {
 				b := s.Buttons["PauseMenu"]
 				s.ButtonArea(func() {
 					s.Gtx.Constraints.Width.Max = 48
@@ -86,7 +87,7 @@ func (s *State) RunControls() layout.FlexChild {
 				//		Debug("clicked kill button")
 				//		s.RunCommandChan <- "kill"
 				//	}
-			}), Rigid(func() {
+			}), gui.Rigid(func() {
 				b := s.Buttons["RestartMenu"]
 				s.ButtonArea(func() {
 					s.Gtx.Constraints.Width.Max = 48

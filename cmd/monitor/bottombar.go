@@ -2,10 +2,11 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/pod/pkg/gui"
 )
 
 func (s *State) BottomBar() layout.FlexChild {
-	return Rigid(func() {
+	return gui.Rigid(func() {
 		cs := s.Gtx.Constraints
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexV(
@@ -17,7 +18,7 @@ func (s *State) BottomBar() layout.FlexChild {
 }
 
 func (s *State) StatusBar() layout.FlexChild {
-	return Rigid(func() {
+	return gui.Rigid(func() {
 		cs := s.Gtx.Constraints
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexH(
@@ -32,20 +33,24 @@ func (s *State) StatusBar() layout.FlexChild {
 }
 
 func (s *State) RunmodeButtons() layout.FlexChild {
-	return Rigid(func() {
-		s.FlexH(Rigid(func() {
+	fg, bg := "ButtonText", "ButtonBg"
+	return gui.Rigid(func() {
+		s.FlexH(gui.Rigid(func() {
 			if !s.Config.RunModeOpen {
-				fg, bg := "ButtonText", "ButtonBg"
-				if s.Config.Running {
-					fg, bg = "ButtonBg", "DocText"
-				}
 				txt := s.Config.RunMode
-				b := s.Buttons["RunModeFold"]
-				s.TextButton(txt, "Secondary", 34, fg, bg, b)
-				for b.Clicked(s.Gtx) {
-					if !s.Config.Running {
-						s.Config.RunModeOpen = true
-						s.SaveConfig()
+				if s.Config.Running {
+					cs := s.Gtx.Constraints
+					s.Rectangle(cs.Width.Min, 48, bg, "ff")
+					fg, bg = "ButtonBg", "DocText"
+					s.Label(txt)
+				} else {
+					b := s.Buttons["RunModeFold"]
+					s.TextButton(txt, "Secondary", 34, fg, bg, b)
+					for b.Clicked(s.Gtx) {
+						if !s.Config.Running {
+							s.Config.RunModeOpen = true
+							s.SaveConfig()
+						}
 					}
 				}
 			} else {
@@ -88,7 +93,7 @@ func (s *State) Filter() layout.FlexChild {
 	if s.Config.FilterOpen {
 		fg, bg = "DocText", "DocBg"
 	}
-	return Rigid(func() {
+	return gui.Rigid(func() {
 		b := s.Buttons["Filter"]
 		s.ButtonArea(func() {
 			cs := s.Gtx.Constraints

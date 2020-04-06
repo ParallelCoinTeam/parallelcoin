@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/gui"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,14 +14,14 @@ import (
 )
 
 func (s *State) DuoUIheader() layout.FlexChild {
-	return Rigid(func() {
+	return gui.Rigid(func() {
 		s.Gtx.Constraints.Height.Max = 48
 		s.Gtx.Constraints.Height.Min = 48
-		s.FlexH(Rigid(func() {
-			s.FlexH(Rigid(func() {
+		s.FlexH(gui.Rigid(func() {
+			s.FlexH(gui.Rigid(func() {
 				cs := s.Gtx.Constraints
 				s.Rectangle(cs.Width.Max, cs.Width.Max, "PanelBg", "ff")
-				s.FlexH(Rigid(func() {
+				s.FlexH(gui.Rigid(func() {
 					fg, bg := "PanelText", "PanelBg"
 					icon := "logo"
 					b := s.Buttons["Logo"]
@@ -32,8 +33,8 @@ func (s *State) DuoUIheader() layout.FlexChild {
 						s.FlipTheme()
 					}
 				}))
-			}), Rigid(func() {
-				s.FlexV(Flexed(1, func() {
+			}), gui.Rigid(func() {
+				s.FlexV(gui.Flexed(1, func() {
 					s.Inset(8, func() {
 						layout.W.Layout(s.Gtx, func() {
 							t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), "Monitor")
@@ -45,7 +46,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				}))
 			}),
 			)
-		}), s.Spacer(), Rigid(func() {
+		}), s.Spacer(), gui.Rigid(func() {
 			t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
 				fmt.Sprintf("%s %dx%d", *s.Ctx.Config.DataDir,
 					s.WindowWidth, s.WindowHeight))
@@ -53,7 +54,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 			t.Font.Typeface = s.Theme.Fonts["Primary"]
 			t.Layout(s.Gtx)
 		}), s.RestartRunButton(),
-			Rigid(func() {
+			gui.Rigid(func() {
 				b := s.Buttons["Close"]
 				s.IconButton("closeIcon", "PanelText",
 					"PanelBg", b)
@@ -69,7 +70,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 }
 
 func (s *State) RestartRunButton() layout.FlexChild {
-	return Rigid(func() {
+	return gui.Rigid(func() {
 		var c *exec.Cmd
 		var err error
 		b := s.Buttons["Restart"]

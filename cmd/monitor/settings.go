@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/pod/pkg/gui"
 	"strconv"
 	"strings"
 	"time"
@@ -18,7 +19,7 @@ type Field struct {
 }
 
 func (s *State) SettingsButtons() layout.FlexChild {
-	return Rigid(func() {
+	return gui.Rigid(func() {
 		if s.WindowWidth >= 360 || !s.Config.FilterOpen {
 			bg, fg := "PanelBg", "PanelText"
 			if s.Config.SettingsOpen {
@@ -54,7 +55,7 @@ const settingsTabBreakSmall = 512
 
 func (s *State) SettingsPage() layout.FlexChild {
 	if !s.Config.SettingsOpen {
-		return Flexed(0, func() {})
+		return gui.Flexed(0, func() {})
 	}
 	var weight float32 = 0.5
 	switch {
@@ -67,23 +68,23 @@ func (s *State) SettingsPage() layout.FlexChild {
 	case s.WindowHeight <= 600 && s.WindowWidth > 960:
 		weight = 1
 	}
-	return Flexed(weight, func() {
+	return gui.Flexed(weight, func() {
 		cs := s.Gtx.Constraints
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 		s.FlexV(
-			Rigid(func() {
+			gui.Rigid(func() {
 				cs := s.Gtx.Constraints
 				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 				s.Inset(4, func() {})
 			}),
-			Rigid(func() {
-				s.FlexH(Rigid(func() {
+			gui.Rigid(func() {
+				s.FlexH(gui.Rigid(func() {
 					s.Label("Pod Settings")
-				}), Flexed(1, func() {
+				}), gui.Flexed(1, func() {
 					if s.WindowWidth > settingsTabBreak {
 						s.SettingsTabs(27)
 					}
-				}), Rigid(func() {
+				}), gui.Rigid(func() {
 					if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
 						s.WindowHeight <= 600 && s.WindowWidth > 800) {
 						ic := "zoom"
@@ -103,7 +104,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 							s.SaveConfig()
 						}
 					}
-				}), Rigid(func() {
+				}), gui.Rigid(func() {
 					b := s.Buttons["SettingsClose"]
 					s.ButtonArea(func() {
 						s.Inset(8, func() {
@@ -118,7 +119,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 					}
 				}),
 				)
-			}), Rigid(func() {
+			}), gui.Rigid(func() {
 				if s.WindowWidth <= settingsTabBreak {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
@@ -131,11 +132,11 @@ func (s *State) SettingsPage() layout.FlexChild {
 					}
 					s.SettingsTabs(si)
 				}
-			}), Flexed(1, func() {
+			}), gui.Flexed(1, func() {
 				cs := s.Gtx.Constraints
 				s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 				s.Inset(8, func() { s.SettingsBody() })
-			}), Rigid(func() {
+			}), gui.Rigid(func() {
 				cs := s.Gtx.Constraints
 				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 				s.Inset(4, func() {})
@@ -166,7 +167,7 @@ func (s *State) SettingsTabs(size int) {
 
 func (s *State) SettingsBody() {
 	s.FlexH(
-		Rigid(func() {
+		gui.Rigid(func() {
 			s.Theme.DuoUIcontainer(4, s.Theme.Colors["PanelBg"]).
 				Layout(s.Gtx, layout.N, func() {
 					for _, fields := range s.Rc.Settings.Daemon.Schema.Groups {
@@ -177,16 +178,16 @@ func (s *State) SettingsBody() {
 									tl := &Field{
 										Field: &fields.Fields[il],
 									}
-									s.FlexH(Flexed(1, func() {
+									s.FlexH(gui.Flexed(1, func() {
 										s.Inset(8, func() {
 											s.FlexV(
 												//Flexed(0.2, func() {}),
-												Rigid(s.SettingsFieldLabel(tl)),
-												Rigid(func() {
+												gui.Rigid(s.SettingsFieldLabel(tl)),
+												gui.Rigid(func() {
 													s.FlexH(
 														//Rigid(func() {}),
-														Rigid(s.SettingsItemInput(tl)),
-														Rigid(s.SettingsFieldDescription(s.Gtx, s.Theme, tl)),
+														gui.Rigid(s.SettingsItemInput(tl)),
+														gui.Rigid(s.SettingsFieldDescription(s.Gtx, s.Theme, tl)),
 													)
 												}),
 											)
@@ -205,7 +206,7 @@ func (s *State) SettingsItemLabel(f *Field) func() {
 		s.Gtx.Constraints.Width.Min = 32 * 10
 		s.Inset(4, func() {
 			s.FlexV(
-				Rigid(s.SettingsFieldLabel(f)),
+				gui.Rigid(s.SettingsFieldLabel(f)),
 			)
 		})
 	}
@@ -232,7 +233,7 @@ func (s *State) SettingsFieldLabel(f *Field) func() {
 
 func (s *State) SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
-		layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceAround}.Layout(s.Gtx, Rigid(func() {
+		layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceAround}.Layout(s.Gtx, gui.Rigid(func() {
 			desc := th.Body1(fmt.Sprint(f.Field.Description))
 			desc.Font.Typeface = th.Fonts["Primary"]
 			desc.Color = th.Colors["DocText"]
@@ -433,7 +434,7 @@ func (s *State) Editor(editorController *gel.Editor, width int,
 					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
 				e.Font.Typeface = s.Theme.Fonts["Mono"]
 				s.Inset(5, func() {
-					s.FlexH(Rigid(func() {
+					s.FlexH(gui.Rigid(func() {
 						e.Layout(s.Gtx, editorController)
 					}),
 					)
@@ -469,7 +470,7 @@ func (s *State) PasswordEditor(editorController *gel.Editor, width int,
 					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
 				e.Font.Typeface = s.Theme.Fonts["Mono"]
 				s.Inset(5, func() {
-					s.FlexH(Rigid(func() {
+					s.FlexH(gui.Rigid(func() {
 						e.Layout(s.Gtx, editorController)
 					}),
 					)

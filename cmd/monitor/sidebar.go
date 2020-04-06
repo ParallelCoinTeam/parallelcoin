@@ -3,12 +3,13 @@ package monitor
 import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/logi/consume"
 )
 
 func (s *State) Sidebar() layout.FlexChild {
-	return Rigid(func() {
+	return gui.Rigid(func() {
 		//if !(s.Config.BuildOpen || s.Config.SettingsOpen) {
 		//	s.Gtx.Constraints.Width.Max /= 2
 		//} else {
@@ -22,38 +23,38 @@ func (s *State) Sidebar() layout.FlexChild {
 		cs := s.Gtx.Constraints
 		if s.Config.FilterOpen {
 			s.FlexV(
-				Rigid(func() {
+				gui.Rigid(func() {
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 					s.Inset(4, func() {})
 				}),
-				Flexed(1, func() {
+				gui.Flexed(1, func() {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 					s.Inset(8, func() {
 						s.FlexV(
-							Flexed(1, func() {
+							gui.Flexed(1, func() {
 								//s.Gtx.Constraints.Width.Min = 240
-								s.FlexV(Flexed(1, func() {
+								s.FlexV(gui.Flexed(1, func() {
 									s.Loggers.GetWidget(s)
 								}),
 								)
 							}),
 						)
 					})
-				}), Rigid(func() {
+				}), gui.Rigid(func() {
 					s.Gtx.Constraints.Height.Max = 48
 					s.Gtx.Constraints.Height.Min = 48
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 					s.LevelsButtons()
-				}), Rigid(func() {
+				}), gui.Rigid(func() {
 					s.Gtx.Constraints.Height.Max = 48
 					s.Gtx.Constraints.Height.Min = 48
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg",
 						"ff")
 					s.FlexH(
-						Rigid(func() {
+						gui.Rigid(func() {
 							b := s.Buttons["FilterClear"]
 							s.ButtonArea(func() {
 								s.Inset(8, func() {
@@ -65,9 +66,9 @@ func (s *State) Sidebar() layout.FlexChild {
 								s.EntryBuf.Clear()
 							}
 						}),
-						Flexed(1, func() {
+						gui.Flexed(1, func() {
 						}),
-						Rigid(func() {
+						gui.Rigid(func() {
 							b := s.Buttons["FilterHide"]
 							s.ButtonArea(func() {
 								s.Inset(8, func() {
@@ -80,7 +81,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								s.SaveConfig()
 							}
 						}),
-						Rigid(func() {
+						gui.Rigid(func() {
 							b := s.Buttons["FilterShow"]
 							//s.IconButton("ShowAll", "DocText", "DocBg", b)
 							s.ButtonArea(func() {
@@ -94,7 +95,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								s.SaveConfig()
 							}
 						}),
-						Rigid(func() {
+						gui.Rigid(func() {
 							b := s.Buttons["FilterAll"]
 							//s.IconButton("ShowItem", "DocText", "DocBg", b)
 							s.ButtonArea(func() {
@@ -109,7 +110,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								s.SaveConfig()
 							}
 						}),
-						Rigid(func() {
+						gui.Rigid(func() {
 							b := s.Buttons["FilterNone"]
 							s.ButtonArea(func() {
 								s.Inset(8, func() {

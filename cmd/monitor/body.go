@@ -2,13 +2,14 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/logi"
 	"os/exec"
 	"strings"
 )
 
 func (s *State) Body() layout.FlexChild {
-	return Flexed(1, func() {
+	return gui.Flexed(1, func() {
 		cs := s.Gtx.Constraints
 		cs.Width.Min = cs.Width.Max / 2
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
@@ -42,25 +43,25 @@ func (s *State) Body() layout.FlexChild {
 					ww -= 332
 				}
 				s.FlexH(
-					Flexed(1, func() {
+					gui.Flexed(1, func() {
 						s.ButtonArea(func() {
 							s.FlexH(
-								Rigid(func() {
+								gui.Rigid(func() {
 									if ww > 480 {
 										s.Icon(logi.Tags[b.Level], color,
 											"Transparent", 32)
 									}
 								}),
-								Rigid(func() {
+								gui.Rigid(func() {
 									if ww > 960 {
-										s.FlexH(Rigid(
+										s.FlexH(gui.Rigid(
 											s.Text(b.Time.Format("15:04:05"),
 												color, "Transparent",
 												"Mono", "body2"),
 										))
 									}
 								}),
-								Flexed(1, func() {
+								gui.Flexed(1, func() {
 									//cs := s.Gtx.Constraints
 									//s.Rectangle(cs.Width.Max, cs.Height.Max,
 									//	"PanelBg", "ff")
@@ -68,15 +69,15 @@ func (s *State) Body() layout.FlexChild {
 									if ww <= 480 {
 										tc = color
 									}
-									s.FlexH(Rigid(
+									s.FlexH(gui.Rigid(
 										s.Text(b.Text, tc, "Transparent",
 											"Mono", "body2"),
 									))
 								}),
 								s.Spacer(),
-								Rigid(func() {
+								gui.Rigid(func() {
 									if ww > 720 {
-										s.FlexH(Rigid(
+										s.FlexH(gui.Rigid(
 											s.Text(b.Package, "PanelBg",
 												"Transparent", "Primary",
 												"h6"),
@@ -103,7 +104,7 @@ func (s *State) Body() layout.FlexChild {
 							}()
 						}
 					}),
-					Rigid(func() {
+					gui.Rigid(func() {
 						if ww > 640 {
 							s.ButtonArea(func() {
 								s.Inset(4, func() {

@@ -7,6 +7,7 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"gopkg.in/src-d/go-git.v4"
@@ -118,7 +119,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 func (s *State) TopLevelLayout() {
 	s.FlexV(
 		s.DuoUIheader(),
-		Flexed(1, func() {
+		gui.Flexed(1, func() {
 			s.FlexH(
 				s.Body(),
 				s.Sidebar(),

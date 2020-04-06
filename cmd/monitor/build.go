@@ -2,13 +2,14 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 )
 
 func (s *State) BuildButtons() layout.FlexChild {
-	return Rigid(func() {
+	return gui.Rigid(func() {
 		if s.WindowWidth >= 360 || !s.Config.FilterOpen {
-			s.FlexH(Rigid(func() {
+			s.FlexH(gui.Rigid(func() {
 				bg, fg := "PanelBg", "PanelText"
 				if s.Config.BuildOpen {
 					bg, fg = "DocBg", "DocText"
@@ -41,7 +42,7 @@ func (s *State) BuildButtons() layout.FlexChild {
 
 func (s *State) BuildPage() layout.FlexChild {
 	if !s.Config.BuildOpen {
-		return Flexed(0, func() {})
+		return gui.Flexed(0, func() {})
 	}
 	var weight float32 = 0.5
 	switch {
@@ -52,16 +53,16 @@ func (s *State) BuildPage() layout.FlexChild {
 	case s.WindowHeight <= 600 && s.WindowWidth > 800:
 		weight = 1
 	}
-	return Flexed(weight, func() {
+	return gui.Flexed(weight, func() {
 		cs := s.Gtx.Constraints
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
-		s.FlexV(Rigid(func() {
+		s.FlexV(gui.Rigid(func() {
 			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 			s.Inset(4, func() {})
-		}), Rigid(func() {
-			s.FlexH(Rigid(func() {
+		}), gui.Rigid(func() {
+			s.FlexH(gui.Rigid(func() {
 				s.Label("Monitor Configuration")
-			}), s.Spacer(), Rigid(func() {
+			}), s.Spacer(), gui.Rigid(func() {
 				if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
 					s.WindowHeight <= 600 && s.WindowWidth > 800) {
 					ic := "zoom"
@@ -76,7 +77,7 @@ func (s *State) BuildPage() layout.FlexChild {
 						s.SaveConfig()
 					}
 				}
-			}), s.Spacer(), Rigid(func() {
+			}), s.Spacer(), gui.Rigid(func() {
 				b := s.Buttons["BuildClose"]
 				s.IconButton("foldIn", "DocText", "DocBg", b)
 				for b.Clicked(s.Gtx) {
@@ -86,10 +87,10 @@ func (s *State) BuildPage() layout.FlexChild {
 				}
 			}),
 			)
-		}), Flexed(1, func() {
+		}), gui.Flexed(1, func() {
 			cs := s.Gtx.Constraints
 			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
-			s.FlexV(Flexed(1, func() {
+			s.FlexV(gui.Flexed(1, func() {
 				s.Inset(8, func() {
 					// cs := s.Gtx.Constraints
 					// s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
@@ -98,7 +99,7 @@ func (s *State) BuildPage() layout.FlexChild {
 					//}
 				})
 			}))
-		}), Rigid(func() {
+		}), gui.Rigid(func() {
 			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 			s.Inset(4, func() {})
 		}),
@@ -109,14 +110,14 @@ func (s *State) BuildPage() layout.FlexChild {
 func (s *State) BuildConfigPage() {
 	s.FlexV(
 		//s.FlexH(
-		Rigid(func() {
+		gui.Rigid(func() {
 			s.Inset(4, func() {
 				s.FlexH(
-					Rigid(func() {
+					gui.Rigid(func() {
 						s.Inset(8,
 							s.Text("Run in", "PanelText", "PanelBg", "Primary", "h6"),
 						)
-					}), Rigid(func() {
+					}), gui.Rigid(func() {
 						if s.RunningInRepo {
 							fg, bg := "DocText", "DocBg"
 							if s.Config.RunInRepo {
@@ -133,7 +134,7 @@ func (s *State) BuildConfigPage() {
 								}
 							}
 						}
-					}), Rigid(func() {
+					}), gui.Rigid(func() {
 						fg, bg := "DocText", "DocBg"
 						if !s.Config.RunInRepo {
 							fg, bg = "ButtonText", "ButtonBg"
@@ -148,7 +149,7 @@ func (s *State) BuildConfigPage() {
 								s.SaveConfig()
 							}
 						}
-					}), Rigid(func() {
+					}), gui.Rigid(func() {
 						txt := "run pod in its repository"
 						if !s.Config.RunInRepo {
 							txt = "not implemented"
@@ -161,13 +162,13 @@ func (s *State) BuildConfigPage() {
 				)
 			})
 		}),
-		Rigid(func() {
+		gui.Rigid(func() {
 			s.Inset(4, func() {
-				s.FlexH(Rigid(func() {
+				s.FlexH(gui.Rigid(func() {
 					s.Inset(8,
 						s.Text("Use Go version", "PanelText", "PanelBg", "Primary", "h6"),
 					)
-				}), Rigid(func() {
+				}), gui.Rigid(func() {
 					if s.HasGo {
 						fg, bg := "DocText", "DocBg"
 						if s.Config.UseBuiltinGo {
@@ -186,7 +187,7 @@ func (s *State) BuildConfigPage() {
 							}
 						}
 					}
-				}), Rigid(func() {
+				}), gui.Rigid(func() {
 					fg, bg := "DocText", "DocBg"
 					if !s.Config.UseBuiltinGo {
 						fg, bg = "ButtonText", "ButtonBg"
@@ -203,7 +204,7 @@ func (s *State) BuildConfigPage() {
 							}
 						}
 					}
-				}), Rigid(func() {
+				}), gui.Rigid(func() {
 					txt := "build using built in go"
 					if !s.Config.UseBuiltinGo {
 						txt = "not implemented"
@@ -215,16 +216,16 @@ func (s *State) BuildConfigPage() {
 				}),
 				)
 			})
-		}), Rigid(func() {
+		}), gui.Rigid(func() {
 			s.Inset(4, func() {
 				s.FlexH(
-					Rigid(func() {
+					gui.Rigid(func() {
 						s.Inset(8,
 							s.Text("Log entry click command", "PanelText",
 								"PanelBg",
 								"Primary", "h6"),
 						)
-					}), Rigid(func() {
+					}), gui.Rigid(func() {
 						ww := len(s.Config.ClickCommand)
 						//if ww < 12 {
 						//	ww = 12
@@ -242,7 +243,7 @@ func (s *State) BuildConfigPage() {
 								s.SaveConfig()
 							}
 						})()
-					}), Rigid(func() {
+					}), gui.Rigid(func() {
 						s.Inset(8,
 							s.Text("When a log entry is clicked run this"+
 								" command with variables substituted for"+

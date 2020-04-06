@@ -1,11 +1,20 @@
-package monitor
+package gui
 
 import (
+	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
 )
+
+type State struct {
+	Gtx   *layout.Context
+	W     *app.Window
+	Rc    *rcd.RcVar
+	Theme *gelook.DuoUItheme
+}
 
 func (s *State) FlexV(children ...layout.FlexChild) {
 	layout.Flex{Axis: layout.Vertical}.Layout(s.Gtx, children...)
@@ -76,11 +85,12 @@ func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int)
 	if len(size) > 1 {
 		sz = size[0]
 	}
-	s.Rectangle(sz, sz, fg, "ff")
-	s.Theme.DuoUIbutton("", "", "",
-		s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
-		s.Theme.Colors[fg], 0, sz-8, sz, sz,
-		0, 0, 0, 0).IconLayout(s.Gtx, button)
+	s.Rectangle(sz, sz, bg, "ff")
+	s.ButtonArea(func() {
+		s.Inset(8, func() {
+			s.Icon(icon, fg, "Transparent", sz-16)
+		})
+	}, button)
 }
 
 func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
@@ -106,7 +116,7 @@ func (s *State) ButtonArea(content func(), button *gel.Button) {
 
 func (s *State) Label(txt string) {
 	s.Inset(8, func() {
-		t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), txt)
+		t := s.Theme.DuoUIlabel(unit.Dp(float32(39)), txt)
 		t.Color = s.Theme.Colors["PanelText"]
 		t.Font.Typeface = s.Theme.Fonts["Secondary"]
 		//t.TextSize = unit.Dp(32)

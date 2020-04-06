@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
 	"github.com/p9c/pod/pkg/logi/consume"
@@ -135,14 +136,14 @@ func (n *Node) GetWidget(s *State) {
 	s.Lists["Filter"].Axis = layout.Vertical
 	s.Lists["Filter"].Layout(s.Gtx, len(nn), func(i int) {
 		s.FlexH(
-			Rigid(func() {
+			gui.Rigid(func() {
 				split := strings.Split(nn[i].FullName, string(os.PathSeparator))
 				indent = len(split) - 1
 				s.Inset(0, func() {
 					s.Rectangle(indent*16, 32, "PanelBg", "ff")
 				})
 			}),
-			Rigid(func() {
+			gui.Rigid(func() {
 				name := nn[i].Name
 				if name == "" {
 					name = "root"
@@ -163,7 +164,7 @@ func (n *Node) GetWidget(s *State) {
 					s.SaveConfig()
 				}
 			}),
-			Rigid(func() {
+			gui.Rigid(func() {
 				if len(nn[i].Children) > 0 {
 					ic := "Folded"
 					if !nn[i].Closed {
@@ -188,10 +189,10 @@ func (n *Node) GetWidget(s *State) {
 					}
 				}
 			}),
-			Flexed(1, func() {
+			gui.Flexed(1, func() {
 
 			}),
-			Rigid(func() {
+			gui.Rigid(func() {
 				if len(nn[i].Children) > 0 && nn[i].IsAnyHiding() {
 					s.IconButton("ShowItem", "DocBg", "PanelBg",
 						nn[i].showChildrenButton)
@@ -203,7 +204,7 @@ func (n *Node) GetWidget(s *State) {
 						s.SaveConfig()
 					}
 				}
-			}), Rigid(func() {
+			}), gui.Rigid(func() {
 				if len(nn[i].Children) > 0 && nn[i].IsAnyShowing() {
 					s.IconButton("HideItem", "DocBg", "PanelBg",
 						nn[i].hideChildrenButton)

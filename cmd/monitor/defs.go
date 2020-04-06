@@ -2,11 +2,11 @@ package monitor
 
 import (
 	"encoding/json"
-	"gioui.org/app"
 	"gioui.org/layout"
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/ring"
@@ -18,12 +18,9 @@ import (
 const ConfigFileName = "monitor.json"
 
 type State struct {
+	gui.State
 	Ctx                       *conte.Xt
-	Gtx                       *layout.Context
-	W                         *app.Window
 	Worker                    *worker.Worker
-	Rc                        *rcd.RcVar
-	Theme                     *gelook.DuoUItheme
 	Config                    *Config
 	Buttons                   map[string]*gel.Button
 	FilterLevelsButtons       []gel.Button
@@ -44,10 +41,12 @@ type State struct {
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 	s = &State{
-		Ctx:                 cx,
-		Gtx:                 gtx,
-		Rc:                  rc,
-		Theme:               gelook.NewDuoUItheme(),
+		Ctx: cx,
+		State: gui.State{
+			Gtx:   gtx,
+			Rc:    rc,
+			Theme: gelook.NewDuoUItheme(),
+		},
 		ModesButtons:        make(map[string]*gel.Button),
 		Config:              &Config{FilterNodes: make(map[string]*Node)},
 		WindowWidth:         800,
