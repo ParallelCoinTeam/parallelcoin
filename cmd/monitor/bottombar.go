@@ -5,46 +5,58 @@ import (
 	"github.com/p9c/pod/pkg/gui"
 )
 
-func (s *State) BottomBar() layout.FlexChild {
+func (s *State) BottomBar(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	return gui.Rigid(func() {
-		cs := s.Gtx.Constraints
+		cs := gtx.Constraints
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexV(
-			s.SettingsPage(),
-			s.BuildPage(),
-			s.StatusBar(),
+			s.SettingsPage(headless),
+			s.BuildPage(headless),
+			s.StatusBar(headless),
 		)
 	})
 }
 
-func (s *State) StatusBar() layout.FlexChild {
+func (s *State) StatusBar(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	return gui.Rigid(func() {
-		cs := s.Gtx.Constraints
+		cs := gtx.Constraints
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 		s.FlexH(
-			s.RunControls(),
-			s.RunmodeButtons(),
+			s.RunControls(headless),
+			s.RunmodeButtons(headless),
 			//s.Spacer("PanelBg"),
 			gui.Flexed(1, func() {
-				s.Gtx.Constraints.Height.Max = 48
-				cs := s.Gtx.Constraints
+				gtx.Constraints.Height.Max = 48
+				cs := gtx.Constraints
 				s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "FF")
 			}),
-			s.BuildButtons(),
-			s.SettingsButtons(),
-			s.Filter(),
+			s.BuildButtons(headless),
+			s.SettingsButtons(headless),
+			s.Filter(headless),
 		)
 	})
 }
 
-func (s *State) RunmodeButtons() layout.FlexChild {
-	fg, bg := "ButtonText", "ButtonBg"
+func (s *State) RunmodeButtons(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	return gui.Rigid(func() {
+		fg, bg := "ButtonText", "ButtonBg"
 		s.FlexH(gui.Rigid(func() {
 			if !s.Config.RunModeOpen {
 				txt := s.Config.RunMode
 				if s.Config.Running {
-					cs := s.Gtx.Constraints
+					cs := gtx.Constraints
 					bg, fg = "DocBg", "DocText"
 					s.Rectangle(cs.Width.Min, 48, bg, "ff")
 					s.Label(txt, fg, bg)
@@ -73,7 +85,7 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 						s.WindowWidth <= 640 && !s.Config.FilterOpen {
 						txt = txt[:1]
 					}
-					cs := s.Gtx.Constraints
+					cs := gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg",
 						"ff")
 					s.TextButton(txt, "Secondary", 34, fg,
@@ -93,15 +105,19 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 	})
 }
 
-func (s *State) Filter() layout.FlexChild {
-	fg, bg := "PanelText", "PanelBg"
-	if s.Config.FilterOpen {
-		fg, bg = "DocText", "DocBg"
+func (s *State) Filter(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
 	}
 	return gui.Rigid(func() {
+		fg, bg := "PanelText", "PanelBg"
+		if s.Config.FilterOpen {
+			fg, bg = "DocText", "DocBg"
+		}
 		b := s.Buttons["Filter"]
 		s.ButtonArea(func() {
-			cs := s.Gtx.Constraints
+			cs := gtx.Constraints
 			s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
 			s.Inset(8, func() {
 				s.Icon("Filter", fg, bg, 32)

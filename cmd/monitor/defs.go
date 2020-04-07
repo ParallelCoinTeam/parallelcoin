@@ -19,38 +19,38 @@ const ConfigFileName = "monitor.json"
 
 type State struct {
 	gui.State
-	Ctx                       *conte.Xt
-	Worker                    *worker.Worker
-	Config                    *Config
-	Buttons                   map[string]*gel.Button
-	FilterLevelsButtons       []gel.Button
-	FilterButtons             []gel.Button
-	Lists                     map[string]*layout.List
-	ModesButtons              map[string]*gel.Button
-	CommandEditor             gel.Editor
-	WindowWidth, WindowHeight int
-	Loggers                   *Node
-	RunningInRepo             bool
-	HasGo                     bool
-	HasOtherGo                bool
-	CannotRun                 bool
-	RunCommandChan            chan string
-	EntryBuf                  *ring.Entry
-	FilterRoot                *Node
+	Ctx                 *conte.Xt
+	Worker              *worker.Worker
+	Config              *Config
+	Buttons             map[string]*gel.Button
+	FilterLevelsButtons []gel.Button
+	FilterButtons       []gel.Button
+	Lists               map[string]*layout.List
+	ModesButtons        map[string]*gel.Button
+	CommandEditor       gel.Editor
+	Loggers             *Node
+	RunningInRepo       bool
+	HasGo               bool
+	HasOtherGo          bool
+	CannotRun           bool
+	RunCommandChan      chan string
+	EntryBuf            *ring.Entry
+	FilterRoot          *Node
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 	s = &State{
 		Ctx: cx,
 		State: gui.State{
-			Gtx:   gtx,
-			Rc:    rc,
-			Theme: gelook.NewDuoUItheme(),
+			Gtx:          gtx,
+			Htx:          new(layout.Context),
+			Rc:           rc,
+			Theme:        gelook.NewDuoUItheme(),
+			WindowWidth:  800,
+			WindowHeight: 600,
 		},
 		ModesButtons:        make(map[string]*gel.Button),
 		Config:              &Config{FilterNodes: make(map[string]*Node)},
-		WindowWidth:         800,
-		WindowHeight:        600,
 		RunCommandChan:      make(chan string),
 		EntryBuf:            ring.NewEntry(65536),
 		FilterLevelsButtons: make([]gel.Button, 7),

@@ -13,7 +13,11 @@ import (
 	"time"
 )
 
-func (s *State) RunControls() layout.FlexChild {
+func (s *State) RunControls(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	return gui.Rigid(func() {
 		if s.CannotRun || s.Config.RunModeOpen {
 			return
@@ -21,9 +25,9 @@ func (s *State) RunControls() layout.FlexChild {
 		if !s.Config.Running {
 			b := s.Buttons["RunMenu"]
 			s.ButtonArea(func() {
-				s.Gtx.Constraints.Width.Max = 48
-				s.Gtx.Constraints.Height.Max = 48
-				cs := s.Gtx.Constraints
+				gtx.Constraints.Width.Max = 48
+				gtx.Constraints.Height.Max = 48
+				cs := gtx.Constraints
 				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocText", "ff")
 				s.Inset(8, func() {
 					s.Icon("Run", "ButtonBg", "DocText", 32)
@@ -46,9 +50,9 @@ func (s *State) RunControls() layout.FlexChild {
 			s.FlexH(gui.Rigid(func() {
 				b := s.Buttons["StopMenu"]
 				s.ButtonArea(func() {
-					s.Gtx.Constraints.Width.Max = 48
-					s.Gtx.Constraints.Height.Max = 48
-					cs := s.Gtx.Constraints
+					gtx.Constraints.Width.Max = 48
+					gtx.Constraints.Height.Max = 48
+					cs := gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
 					s.Inset(8, func() {
 						s.Icon("Stop", fg, bg, 32)
@@ -62,9 +66,9 @@ func (s *State) RunControls() layout.FlexChild {
 			}), gui.Rigid(func() {
 				b := s.Buttons["PauseMenu"]
 				s.ButtonArea(func() {
-					s.Gtx.Constraints.Width.Max = 48
-					s.Gtx.Constraints.Height.Max = 48
-					cs := s.Gtx.Constraints
+					gtx.Constraints.Width.Max = 48
+					gtx.Constraints.Height.Max = 48
+					cs := gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
 					s.Inset(8, func() {
 						s.Icon(ic, fg, bg, 32)
@@ -90,9 +94,9 @@ func (s *State) RunControls() layout.FlexChild {
 			}), gui.Rigid(func() {
 				b := s.Buttons["RestartMenu"]
 				s.ButtonArea(func() {
-					s.Gtx.Constraints.Width.Max = 48
-					s.Gtx.Constraints.Height.Max = 48
-					cs := s.Gtx.Constraints
+					gtx.Constraints.Width.Max = 48
+					gtx.Constraints.Height.Max = 48
+					cs := gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
 					s.Inset(8, func() {
 						s.Icon("Restart", fg, bg, 32)
@@ -110,6 +114,10 @@ func (s *State) RunControls() layout.FlexChild {
 }
 
 func (s *State) Build() (exePath string, err error) {
+	//gtx := s.Gtx
+	//if headless {
+	//	gtx = s.Htx
+	//}
 	var c *exec.Cmd
 	gt := "goterm"
 	if runtime.GOOS == "windows" {

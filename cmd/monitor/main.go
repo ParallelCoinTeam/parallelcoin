@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/app"
+	"gioui.org/app/headless"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -76,6 +77,8 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 		}()
 	}
 	//go mon.Consume()
+	var prevH, prevW int
+	lastChanged := time.Now()
 	go func() {
 		Debug("starting up GUI event loop")
 	out:
@@ -94,11 +97,23 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 					close(mon.Ctx.KillAll)
 				case system.FrameEvent:
 					mon.Gtx.Reset(e.Config, e.Size)
+					// update config and gui state for window so everything is
+					// correctly sized (gui needs it internally and when the
+					// app closes it saves this value for next run)
 					cs := mon.Gtx.Constraints
-					mon.WindowWidth, mon.WindowHeight =
-						cs.Width.Max, cs.Height.Max
-					mon.TopLevelLayout()
+					w, h := cs.Width.Max, cs.Height.Max
+					mon.WindowWidth, mon.WindowHeight = w, h
+					mon.Config.Width, mon.Config.Height = w, h
+					mon.TopLevelLayout(false)
 					e.Frame(mon.Gtx.Ops)
+					if w != prevW || h != prevH {
+						if time.Now().Sub(lastChanged) > time.Second {
+							if mon.HW, err = headless.NewWindow(w, h); Check(err) {
+								return
+							}
+							lastChanged = time.Now()
+						}
+					}
 				}
 			}
 		}
@@ -116,15 +131,15 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	return
 }
 
-func (s *State) TopLevelLayout() {
+func (s *State) TopLevelLayout(headless bool) {
 	s.FlexV(
-		s.DuoUIheader(),
+		s.DuoUIheader(headless),
 		gui.Flexed(1, func() {
 			s.FlexH(
-				s.Body(),
-				s.Sidebar(),
+				s.Body(headless),
+				s.Sidebar(headless),
 			)
 		}),
-		s.BottomBar(),
+		s.BottomBar(headless),
 	)
 }
