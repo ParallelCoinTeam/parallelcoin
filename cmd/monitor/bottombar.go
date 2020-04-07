@@ -24,9 +24,14 @@ func (s *State) StatusBar() layout.FlexChild {
 		s.FlexH(
 			s.RunControls(),
 			s.RunmodeButtons(),
+			//s.Spacer("PanelBg"),
+			gui.Flexed(1, func() {
+				s.Gtx.Constraints.Height.Max = 48
+				cs := s.Gtx.Constraints
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "FF")
+			}),
 			s.BuildButtons(),
 			s.SettingsButtons(),
-			s.Spacer(),
 			s.Filter(),
 		)
 	})
@@ -40,9 +45,9 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				txt := s.Config.RunMode
 				if s.Config.Running {
 					cs := s.Gtx.Constraints
+					bg, fg = "DocBg", "DocText"
 					s.Rectangle(cs.Width.Min, 48, bg, "ff")
-					fg, bg = "ButtonBg", "DocText"
-					s.Label(txt)
+					s.Label(txt, fg, bg)
 				} else {
 					b := s.Buttons["RunModeFold"]
 					s.TextButton(txt, "Secondary", 34, fg, bg, b)

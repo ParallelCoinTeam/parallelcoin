@@ -15,7 +15,7 @@ import (
 
 func (s *State) RunControls() layout.FlexChild {
 	return gui.Rigid(func() {
-		if s.CannotRun {
+		if s.CannotRun || s.Config.RunModeOpen {
 			return
 		}
 		if !s.Config.Running {

@@ -24,7 +24,8 @@ func (s *State) Sidebar() layout.FlexChild {
 		if s.Config.FilterOpen {
 			s.FlexV(
 				gui.Rigid(func() {
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max,
+						"DocBg", "ff")
 					s.Inset(4, func() {})
 				}),
 				gui.Flexed(1, func() {

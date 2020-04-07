@@ -12,6 +12,7 @@ type Entry struct {
 	Buf     []*logi.Entry
 	Cursor  int
 	Full    bool
+	Clicked int
 	Buttons []gel.Button
 	Hiders  []gel.Button
 }
@@ -21,6 +22,7 @@ func NewEntry(size int) *Entry {
 		Sem:     semaphore.New(1),
 		Buf:     make([]*logi.Entry, size),
 		Cursor:  0,
+		Clicked: -1,
 		Buttons: make([]gel.Button, size),
 		Hiders:  make([]gel.Button, size),
 	}

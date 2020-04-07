@@ -46,7 +46,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				}))
 			}),
 			)
-		}), s.Spacer(), gui.Rigid(func() {
+		}), s.Spacer("PanelBg"), gui.Rigid(func() {
 			t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
 				fmt.Sprintf("%s %dx%d", *s.Ctx.Config.DataDir,
 					s.WindowWidth, s.WindowHeight))

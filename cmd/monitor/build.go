@@ -61,8 +61,8 @@ func (s *State) BuildPage() layout.FlexChild {
 			s.Inset(4, func() {})
 		}), gui.Rigid(func() {
 			s.FlexH(gui.Rigid(func() {
-				s.Label("Monitor Configuration")
-			}), s.Spacer(), gui.Rigid(func() {
+				s.Label("Monitor Configuration", "DocText", "DocBg")
+			}), s.Spacer("DocBg"), gui.Rigid(func() {
 				if !(s.WindowHeight <= 800 && s.WindowWidth <= 800 ||
 					s.WindowHeight <= 600 && s.WindowWidth > 800) {
 					ic := "zoom"
@@ -77,7 +77,7 @@ func (s *State) BuildPage() layout.FlexChild {
 						s.SaveConfig()
 					}
 				}
-			}), s.Spacer(), gui.Rigid(func() {
+			}), s.Spacer("DocBg"), gui.Rigid(func() {
 				b := s.Buttons["BuildClose"]
 				s.IconButton("foldIn", "DocText", "DocBg", b)
 				for b.Clicked(s.Gtx) {

@@ -36,8 +36,11 @@ func Flexed(weight float32, widget func()) layout.FlexChild {
 	return layout.Flexed(weight, widget)
 }
 
-func (s *State) Spacer() layout.FlexChild {
-	return Flexed(1, func() { s.Inset(0, func() {}) })
+func (s *State) Spacer(bg string) layout.FlexChild {
+	return Flexed(1, func() {
+		//cs := s.Gtx.Constraints
+		//s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "FF")
+	})
 }
 
 func (s *State) Rectangle(width, height int, color, opacity string, radius ...float32) {
@@ -114,10 +117,13 @@ func (s *State) ButtonArea(content func(), button *gel.Button) {
 	b.InsideLayout(s.Gtx, button, content)
 }
 
-func (s *State) Label(txt string) {
-	s.Inset(8, func() {
-		t := s.Theme.DuoUIlabel(unit.Dp(float32(39)), txt)
-		t.Color = s.Theme.Colors["PanelText"]
+func (s *State) Label(txt, fg, bg string) {
+	s.Gtx.Constraints.Height.Max = 48
+	cs := s.Gtx.Constraints
+	s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+	s.Inset(10, func() {
+		t := s.Theme.DuoUIlabel(unit.Dp(float32(36)), txt)
+		t.Color = s.Theme.Colors[fg]
 		t.Font.Typeface = s.Theme.Fonts["Secondary"]
 		//t.TextSize = unit.Dp(32)
 		t.Layout(s.Gtx)

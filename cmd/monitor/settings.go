@@ -79,7 +79,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 			}),
 			gui.Rigid(func() {
 				s.FlexH(gui.Rigid(func() {
-					s.Label("Pod Settings")
+					s.Label("Pod Settings", "DocText", "DocBg")
 				}), gui.Flexed(1, func() {
 					if s.WindowWidth > settingsTabBreak {
 						s.SettingsTabs(27)
