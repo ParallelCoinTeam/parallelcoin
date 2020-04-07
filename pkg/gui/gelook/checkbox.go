@@ -36,3 +36,8 @@ func (c DuoUIcheckBox) Layout(gtx *layout.Context, checkBox *gel.CheckBox) {
 	c.layout(gtx, checkBox.Checked(gtx))
 	checkBox.Layout(gtx)
 }
+
+func (c DuoUIcheckBox) DrawLayout(gtx *layout.Context, checkBox *gel.CheckBox) {
+	c.drawLayout(gtx, checkBox.Checked(gtx))
+	checkBox.Layout(gtx)
+}
