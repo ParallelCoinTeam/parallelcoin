@@ -94,7 +94,7 @@ func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 		addressBookPanelElement.PanelObject = rc.AddressBook.Addresses
 		addressBookPanelElement.PanelObjectsNumber = len(rc.AddressBook.Addresses)
 		addressBookPanel := th.DuoUIpanel()
-		addressBookPanel.ScrollBar = th.ScrollBar()
+		addressBookPanel.ScrollBar = th.ScrollBar(16)
 		addressBookPanel.Layout(gtx, addressBookPanelElement, func(i int, in interface{}) {
 			//if in != nil {
 			//addresses := in.([]model.DuoUIaddress)

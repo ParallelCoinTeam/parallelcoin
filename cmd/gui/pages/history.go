@@ -72,7 +72,7 @@ func historyBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 					func() {
 						transactionsPanel := th.DuoUIpanel()
 						transactionsPanel.PanelObject = rc.History.Txs.Txs
-						transactionsPanel.ScrollBar = th.ScrollBar()
+						transactionsPanel.ScrollBar = th.ScrollBar(16)
 						transactionsPanelElement.PanelObjectsNumber = len(rc.History.Txs.Txs)
 						transactionsPanel.Layout(gtx, transactionsPanelElement, func(i int, in interface{}) {
 							txs := in.([]model.DuoUItransactionExcerpt)
