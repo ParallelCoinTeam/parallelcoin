@@ -410,7 +410,7 @@ func (s *State) InputField(f *Field, headless bool) func() {
 				if *rsd.Config[fm].(*bool) {
 					color = "DocText"
 				}
-				s.Theme.DuoUIcheckBox("",
+				s.Theme.DuoUIcheckBox("aaa",
 					//fld.Label,
 					s.Theme.Colors[color],
 					s.Theme.Colors[color]).Layout(gtx,

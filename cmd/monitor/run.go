@@ -204,7 +204,9 @@ func (s *State) Runner() {
 		case "kill":
 			Debug("kill called")
 			if s.HasGo && s.Worker != nil && s.Config.Running {
-				close(quit)
+				//if quit != nil {
+				//	close(quit)
+				//}
 				if err = s.Worker.Interrupt(); !Check(err) {
 				}
 			}

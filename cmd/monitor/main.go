@@ -9,6 +9,7 @@ import (
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/gui/clipboard"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
 	"gopkg.in/src-d/go-git.v4"
@@ -19,6 +20,8 @@ import (
 )
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
+	clipboard.Start()
+
 	mon := NewMonitor(cx, nil, rc)
 	var lgs []string
 	for i := range *logi.L.Packages {
@@ -132,6 +135,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 }
 
 func (s *State) TopLevelLayout(headless bool) {
+	//if !s.ScreenShooting {
 	s.FlexV(
 		s.DuoUIheader(headless),
 		gui.Flexed(1, func() {
@@ -142,4 +146,11 @@ func (s *State) TopLevelLayout(headless bool) {
 		}),
 		s.BottomBar(headless),
 	)
+	//} else {
+	//	s.FlexV(gui.Rigid(func(){
+	//		cs := s.Gtx.Constraints
+	//		s.Rectangle(cs.Width.Max, cs.Height.Max, s.Theme.Colors["White"],
+	//			"ff")
+	//	}))
+	//}
 }

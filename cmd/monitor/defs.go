@@ -64,7 +64,8 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		s.ModesButtons[modes[i]] = new(gel.Button)
 	}
 	buttons := []string{
-		"Close", "Restart", "Logo", "RunMenu", "StopMenu", "PauseMenu",
+		"Close", "Restart", "Screenshot", "Logo", "RunMenu", "StopMenu",
+		"PauseMenu",
 		"RestartMenu", "KillMenu", "RunModeFold", "SettingsFold",
 		"SettingsClose", "SettingsZoom", "BuildFold",
 		"BuildClose", "BuildZoom", "BuildTitleClose", "Filter",
