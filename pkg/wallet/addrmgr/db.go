@@ -8,7 +8,7 @@ import (
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	"github.com/p9c/pod/pkg/db/walletdb"
 )
 
 const (

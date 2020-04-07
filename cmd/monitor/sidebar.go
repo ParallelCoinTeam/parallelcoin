@@ -4,23 +4,27 @@ import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/logi"
-	"github.com/p9c/pod/pkg/logi/consume"
+	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 )
 
-func (s *State) Sidebar() layout.FlexChild {
+func (s *State) Sidebar(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	return gui.Rigid(func() {
 		//if !(s.Config.BuildOpen || s.Config.SettingsOpen) {
-		//	s.Gtx.Constraints.Width.Max /= 2
+		//	gtx.Constraints.Width.Max /= 2
 		//} else {
-		//	s.Gtx.Constraints.Width.Max -= 340
+		//	gtx.Constraints.Width.Max -= 340
 		//}
-		s.Gtx.Constraints.Width.Min = 332
-		s.Gtx.Constraints.Width.Max = 332
-		//if s.Gtx.Constraints.Width.Max > 360 {
-		//	s.Gtx.Constraints.Width.Max = 360
+		gtx.Constraints.Width.Min = 332
+		gtx.Constraints.Width.Max = 332
+		//if gtx.Constraints.Width.Max > 360 {
+		//	gtx.Constraints.Width.Max = 360
 		//}
-		cs := s.Gtx.Constraints
+		cs := gtx.Constraints
 		if s.Config.FilterOpen {
 			s.FlexV(
 				gui.Rigid(func() {
@@ -29,29 +33,29 @@ func (s *State) Sidebar() layout.FlexChild {
 					s.Inset(4, func() {})
 				}),
 				gui.Flexed(1, func() {
-					cs := s.Gtx.Constraints
+					cs := gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 					s.Inset(8, func() {
 						s.FlexV(
 							gui.Flexed(1, func() {
-								//s.Gtx.Constraints.Width.Min = 240
+								//gtx.Constraints.Width.Min = 240
 								s.FlexV(gui.Flexed(1, func() {
-									s.Loggers.GetWidget(s)
+									s.Loggers.GetWidget(s, headless)
 								}),
 								)
 							}),
 						)
 					})
 				}), gui.Rigid(func() {
-					s.Gtx.Constraints.Height.Max = 48
-					s.Gtx.Constraints.Height.Min = 48
-					cs := s.Gtx.Constraints
+					gtx.Constraints.Height.Max = 48
+					gtx.Constraints.Height.Min = 48
+					cs := gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
-					s.LevelsButtons()
+					s.LevelsButtons(headless)
 				}), gui.Rigid(func() {
-					s.Gtx.Constraints.Height.Max = 48
-					s.Gtx.Constraints.Height.Min = 48
-					cs := s.Gtx.Constraints
+					gtx.Constraints.Height.Max = 48
+					gtx.Constraints.Height.Min = 48
+					cs := gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg",
 						"ff")
 					s.FlexH(
@@ -62,7 +66,7 @@ func (s *State) Sidebar() layout.FlexChild {
 									s.Icon("Delete", "DocText", "DocBg", 32)
 								})
 							}, b)
-							for b.Clicked(s.Gtx) {
+							for b.Clicked(gtx) {
 								Debug("clear all")
 								s.EntryBuf.Clear()
 							}
@@ -76,7 +80,7 @@ func (s *State) Sidebar() layout.FlexChild {
 									s.Icon("HideAll", "DocText", "DocBg", 32)
 								})
 							}, b)
-							for b.Clicked(s.Gtx) {
+							for b.Clicked(gtx) {
 								Debug("hide all")
 								s.Loggers.CloseAllItems(s)
 								s.SaveConfig()
@@ -90,7 +94,7 @@ func (s *State) Sidebar() layout.FlexChild {
 									s.Icon("ShowAll", "DocText", "DocBg", 32)
 								})
 							}, b)
-							for b.Clicked(s.Gtx) {
+							for b.Clicked(gtx) {
 								Debug("show all")
 								s.Loggers.OpenAllItems(s)
 								s.SaveConfig()
@@ -104,7 +108,7 @@ func (s *State) Sidebar() layout.FlexChild {
 									s.Icon("ShowItem", "DocText", "DocBg", 32)
 								})
 							}, b)
-							for b.Clicked(s.Gtx) {
+							for b.Clicked(gtx) {
 								Debug("filter all")
 								s.Loggers.ShowAllItems(s)
 								consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
@@ -119,7 +123,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								})
 							}, b)
 							//s.IconButton("HideItem", "DocText", "DocBg", b)
-							for b.Clicked(s.Gtx) {
+							for b.Clicked(gtx) {
 								Debug("filter none")
 								s.Loggers.HideAllItems(s)
 								consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
@@ -130,7 +134,7 @@ func (s *State) Sidebar() layout.FlexChild {
 						//Rigid(func() {
 						//	s.IconButton("Filter", "DocBg", "DocText",
 						//		&s.FilterButton)
-						//	for s.FilterButton.Clicked(s.Gtx) {
+						//	for s.FilterButton.Clicked(gtx) {
 						//		Debug("filter header clicked")
 						//		if !s.Config.FilterOpen {
 						//			s.Config.BuildOpen = false
@@ -147,8 +151,12 @@ func (s *State) Sidebar() layout.FlexChild {
 	})
 }
 
-func (s *State) LevelsButtons() {
-	s.Lists["FilterLevel"].Layout(s.Gtx, len(logi.Tags)-1, func(a int) {
+func (s *State) LevelsButtons(headless bool) {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
+	s.Lists["FilterLevel"].Layout(gtx, len(logi.Tags)-1, func(a int) {
 		bn := logi.Tags[logi.Levels[a+1]]
 		color, bg := "PanelBg", "DocBg"
 		if s.Config.FilterLevel > a {
@@ -171,16 +179,16 @@ func (s *State) LevelsButtons() {
 		}
 		bb := &s.FilterLevelsButtons[a]
 		s.ButtonArea(func() {
-			cs := s.Gtx.Constraints
+			cs := gtx.Constraints
 			cs.Width.Max = 48
 			cs.Height.Max = 48
 			s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
 			s.Inset(8, func() {
-				//cs := s.Gtx.Constraints
+				//cs := gtx.Constraints
 				s.Icon(bn, color, bg, 32)
 			})
 		}, bb)
-		for bb.Clicked(s.Gtx) {
+		for bb.Clicked(gtx) {
 			s.Config.FilterLevel = a + 1
 			*s.Ctx.Config.LogLevel = logi.Levels[s.Config.FilterLevel]
 			consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])

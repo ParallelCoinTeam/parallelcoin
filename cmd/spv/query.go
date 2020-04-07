@@ -13,9 +13,9 @@ import (
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/p9c/pod/pkg/coding/gcs/builder"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/gcs"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
 )
 
 var (
@@ -765,8 +765,7 @@ func // GetCFilter gets a cfilter from the database. Failing that,
 				// for the header _after_ the filter in the
 				// chain checks out. If not, we can ignore this
 				// response.
-				if gotHeader, err := builder.
-					MakeHeaderForFilter(gotFilter,
+				if gotHeader, err := builder.MakeHeaderForFilter(gotFilter,
 						*prevHeader); err != nil ||
 					gotHeader != *curHeader {
 					return

@@ -5,8 +5,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/p9c/pod/pkg/db/walletdb"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 func init() {

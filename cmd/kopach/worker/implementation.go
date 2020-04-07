@@ -3,10 +3,10 @@ package worker
 import (
 	"crypto/cipher"
 	"errors"
+	"github.com/p9c/pod/cmd/kopach/control/hashrate"
+	"github.com/p9c/pod/cmd/kopach/control/sol"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
-	"github.com/p9c/pod/pkg/kopachctrl/sol"
 	"math/rand"
 	"net"
 	"os"
@@ -16,14 +16,13 @@ import (
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 
+	"github.com/p9c/pod/cmd/kopach/control"
+	"github.com/p9c/pod/cmd/kopach/control/job"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/kopachctrl"
-	"github.com/p9c/pod/pkg/kopachctrl/job"
-	"github.com/p9c/pod/pkg/ring"
-	"github.com/p9c/pod/pkg/sem"
-	"github.com/p9c/pod/pkg/stdconn"
-	"github.com/p9c/pod/pkg/transport"
+	"github.com/p9c/pod/pkg/comm/stdconn"
+	"github.com/p9c/pod/pkg/comm/transport"
+	"github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
@@ -37,7 +36,6 @@ type Worker struct {
 	dispatchReady atomic.Bool
 	ciph          cipher.AEAD
 	Quit          chan struct{}
-	run           sem.T
 	block         atomic.Value
 	senderPort    atomic.Uint32
 	msgBlock      atomic.Value // *wire.MsgBlock
@@ -369,7 +367,7 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 	var conn *transport.Channel
 	conn, err = transport.NewBroadcastChannel(
 		"kopachworker", w, pass, transport.DefaultPort,
-		kopachctrl.MaxDatagramSize, transport.Handlers{}, w.Quit)
+		control.MaxDatagramSize, transport.Handlers{}, w.Quit)
 	if err != nil {
 		Error(err)
 	}

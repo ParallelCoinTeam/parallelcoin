@@ -20,15 +20,15 @@ import (
 	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 const (

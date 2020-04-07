@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/rcd"
-	log "github.com/p9c/pod/pkg/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 
 	"gioui.org/layout"
 	"gioui.org/op"

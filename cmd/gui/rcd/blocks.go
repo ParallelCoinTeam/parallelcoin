@@ -2,9 +2,9 @@ package rcd
 
 import (
 	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 )
 
 func (r *RcVar) GetSingleBlock(hash string) func() {
@@ -20,7 +20,7 @@ func (r *RcVar) GetBlock(hash string) btcjson.GetBlockVerboseResult {
 		Verbose:   &verbose,
 		VerboseTx: &verbosetx,
 	}
-	bl, err := rpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil)
+	bl, err := chainrpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil)
 	if err != nil {
 		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
@@ -54,7 +54,7 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 		Verbose:   &verbose,
 		VerboseTx: &verbosetx,
 	}
-	bl, err := rpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil)
+	bl, err := chainrpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil)
 	if err != nil {
 		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
@@ -94,7 +94,7 @@ func (r *RcVar) GetBlocksExcerpts() func() {
 }
 
 func (r *RcVar) GetBlockCount() {
-	getBlockCount, err := rpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
+	getBlockCount, err := chainrpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
 	if err != nil {
 		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
@@ -105,7 +105,7 @@ func (r *RcVar) GetBlockHash(blockHeight int) string {
 	hcmd := btcjson.GetBlockHashCmd{
 		Index: int64(blockHeight),
 	}
-	hash, err := rpc.HandleGetBlockHash(r.cx.RPCServer, &hcmd, nil)
+	hash, err := chainrpc.HandleGetBlockHash(r.cx.RPCServer, &hcmd, nil)
 	if err != nil {
 		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
@@ -119,7 +119,7 @@ func (r *RcVar) GetConnectionCount() {
 
 func (r *RcVar) GetDifficulty() {
 	c := btcjson.GetDifficultyCmd{}
-	diff, err := rpc.HandleGetDifficulty(r.cx.RPCServer, c, nil)
+	diff, err := chainrpc.HandleGetDifficulty(r.cx.RPCServer, c, nil)
 	if err != nil {
 		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
@@ -169,7 +169,7 @@ func (r *RcVar) GetDifficulty() {
 // 	return
 // }
 func (r *RcVar) GetUptime() {
-	rRaw, err := rpc.HandleUptime(r.cx.RPCServer, nil, nil)
+	rRaw, err := chainrpc.HandleUptime(r.cx.RPCServer, nil, nil)
 	if err != nil {
 	}
 	// rRaw = int64(0)
@@ -191,7 +191,7 @@ func (r *RcVar) GetUptime() {
 // 	return
 // }
 func (r *RcVar) GetWalletVersion() map[string]btcjson.VersionResult {
-	v, err := rpc.HandleVersion(r.cx.RPCServer, nil, nil)
+	v, err := chainrpc.HandleVersion(r.cx.RPCServer, nil, nil)
 	if err != nil {
 	}
 	return v.(map[string]btcjson.VersionResult)

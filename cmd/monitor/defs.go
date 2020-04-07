@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"gioui.org/layout"
 	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
-	"github.com/p9c/pod/pkg/ring"
-	"github.com/p9c/pod/pkg/stdconn/worker"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -19,38 +19,38 @@ const ConfigFileName = "monitor.json"
 
 type State struct {
 	gui.State
-	Ctx                       *conte.Xt
-	Worker                    *worker.Worker
-	Config                    *Config
-	Buttons                   map[string]*gel.Button
-	FilterLevelsButtons       []gel.Button
-	FilterButtons             []gel.Button
-	Lists                     map[string]*layout.List
-	ModesButtons              map[string]*gel.Button
-	CommandEditor             gel.Editor
-	WindowWidth, WindowHeight int
-	Loggers                   *Node
-	RunningInRepo             bool
-	HasGo                     bool
-	HasOtherGo                bool
-	CannotRun                 bool
-	RunCommandChan            chan string
-	EntryBuf                  *ring.Entry
-	FilterRoot                *Node
+	Ctx                 *conte.Xt
+	Worker              *worker.Worker
+	Config              *Config
+	Buttons             map[string]*gel.Button
+	FilterLevelsButtons []gel.Button
+	FilterButtons       []gel.Button
+	Lists               map[string]*layout.List
+	ModesButtons        map[string]*gel.Button
+	CommandEditor       gel.Editor
+	Loggers             *Node
+	RunningInRepo       bool
+	HasGo               bool
+	HasOtherGo          bool
+	CannotRun           bool
+	RunCommandChan      chan string
+	EntryBuf            *ring.Entry
+	FilterRoot          *Node
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 	s = &State{
 		Ctx: cx,
 		State: gui.State{
-			Gtx:   gtx,
-			Rc:    rc,
-			Theme: gelook.NewDuoUItheme(),
+			Gtx:          gtx,
+			Htx:          new(layout.Context),
+			Rc:           rc,
+			Theme:        gelook.NewDuoUItheme(),
+			WindowWidth:  800,
+			WindowHeight: 600,
 		},
 		ModesButtons:        make(map[string]*gel.Button),
 		Config:              &Config{FilterNodes: make(map[string]*Node)},
-		WindowWidth:         800,
-		WindowHeight:        600,
 		RunCommandChan:      make(chan string),
 		EntryBuf:            ring.NewEntry(65536),
 		FilterLevelsButtons: make([]gel.Button, 7),
@@ -64,7 +64,8 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		s.ModesButtons[modes[i]] = new(gel.Button)
 	}
 	buttons := []string{
-		"Close", "Restart", "Logo", "RunMenu", "StopMenu", "PauseMenu",
+		"Close", "Restart", "Screenshot", "Logo", "RunMenu", "StopMenu",
+		"PauseMenu",
 		"RestartMenu", "KillMenu", "RunModeFold", "SettingsFold",
 		"SettingsClose", "SettingsZoom", "BuildFold",
 		"BuildClose", "BuildZoom", "BuildTitleClose", "Filter",

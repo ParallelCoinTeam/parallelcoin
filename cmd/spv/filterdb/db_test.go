@@ -10,10 +10,10 @@ import (
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/util/gcs"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
-	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
+	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
 
 func createTestDatabase() (func(), FilterDatabase, error) {

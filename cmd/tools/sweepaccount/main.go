@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	log "github.com/p9c/pod/pkg/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/jessevdk/go-flags"
 	"golang.org/x/crypto/ssh/terminal"

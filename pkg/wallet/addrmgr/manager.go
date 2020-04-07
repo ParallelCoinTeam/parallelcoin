@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/coding/snacl"
+	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
-	"github.com/p9c/pod/pkg/util/snacl"
 	"github.com/p9c/pod/pkg/util/zero"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 const (

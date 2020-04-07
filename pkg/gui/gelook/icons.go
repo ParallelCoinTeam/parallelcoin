@@ -93,6 +93,9 @@ func NewDuoUIicons() (i map[string]*DuoUIicon) {
 	i["FTL"] = mustIcon(NewDuoUIicon(icons.ImageFlashOn))
 	i["Delete"] = mustIcon(NewDuoUIicon(icons.ActionDelete))
 	i["Send"] = mustIcon(NewDuoUIicon(icons.ContentSend))
+	i["Screenshot"] = mustIcon(NewDuoUIicon(icons.ContentSelectAll))
+	i["ToggleOn"] = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonChecked))
+	i["ToggleOff"] = mustIcon(NewDuoUIicon(icons.ToggleRadioButtonUnchecked))
 	return i
 }
 

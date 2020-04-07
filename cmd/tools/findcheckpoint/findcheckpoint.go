@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	log "github.com/p9c/pod/pkg/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 
 	blockchain "github.com/p9c/pod/pkg/chain"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"

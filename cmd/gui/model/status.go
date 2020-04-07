@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/atomic"
 
-	"github.com/p9c/pod/pkg/ring"
+	"github.com/p9c/pod/pkg/data/ring"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 

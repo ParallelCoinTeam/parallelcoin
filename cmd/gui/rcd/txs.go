@@ -2,8 +2,8 @@ package rcd
 
 import (
 	"fmt"
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/helpers"
@@ -23,7 +23,7 @@ func (r *RcVar) GetTx(txid string) btcjson.GetTransactionResult {
 		Txid:    txid,
 		Verbose: &verbose,
 	}
-	tx, err := rpc.HandleGetRawTransaction(r.cx.RPCServer, &tcmd, nil)
+	tx, err := chainrpc.HandleGetRawTransaction(r.cx.RPCServer, &tcmd, nil)
 	if err != nil {
 		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}

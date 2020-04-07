@@ -4,8 +4,8 @@ import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
-	"github.com/p9c/pod/pkg/logi/consume"
+	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 	"os"
 	"sort"
 	"strings"
@@ -130,11 +130,15 @@ func (s *State) GetTree(paths []string) (root *Node) {
 	return s.FilterRoot
 }
 
-func (n *Node) GetWidget(s *State) {
+func (n *Node) GetWidget(s *State, headless bool) {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	nn := n.GetOpenItems()[1:]
 	indent := 0
 	s.Lists["Filter"].Axis = layout.Vertical
-	s.Lists["Filter"].Layout(s.Gtx, len(nn), func(i int) {
+	s.Lists["Filter"].Layout(gtx, len(nn), func(i int) {
 		s.FlexH(
 			gui.Rigid(func() {
 				split := strings.Split(nn[i].FullName, string(os.PathSeparator))
@@ -153,7 +157,7 @@ func (n *Node) GetWidget(s *State) {
 					fg = "DocBg"
 				}
 				s.TextButton(name, "Primary", 24, fg, "PanelBg", nn[i].showButton)
-				if nn[i].showButton.Clicked(s.Gtx) {
+				if nn[i].showButton.Clicked(gtx) {
 					nn[i].Hidden = !nn[i].Hidden
 					//if !nn[i].Hidden {
 					//	nn[i].ShowAllItems(s)
@@ -178,7 +182,7 @@ func (n *Node) GetWidget(s *State) {
 						fg = "PanelText"
 					}
 					s.IconButton(ic, fg, "PanelBg", nn[i].foldButton)
-					if nn[i].foldButton.Clicked(s.Gtx) {
+					if nn[i].foldButton.Clicked(gtx) {
 						if nn[i].Closed {
 							//nn[i].OpenAllItems(s)
 						} else {
@@ -196,7 +200,7 @@ func (n *Node) GetWidget(s *State) {
 				if len(nn[i].Children) > 0 && nn[i].IsAnyHiding() {
 					s.IconButton("ShowItem", "DocBg", "PanelBg",
 						nn[i].showChildrenButton)
-					for nn[i].showChildrenButton.Clicked(s.Gtx) {
+					for nn[i].showChildrenButton.Clicked(gtx) {
 						Debug("filter all")
 						nn[i].ShowAllItems(s)
 						nn[i].Hidden = false
@@ -208,7 +212,7 @@ func (n *Node) GetWidget(s *State) {
 				if len(nn[i].Children) > 0 && nn[i].IsAnyShowing() {
 					s.IconButton("HideItem", "DocBg", "PanelBg",
 						nn[i].hideChildrenButton)
-					for nn[i].hideChildrenButton.Clicked(s.Gtx) {
+					for nn[i].hideChildrenButton.Clicked(gtx) {
 						Debug("filter none")
 						nn[i].Hidden = true
 						nn[i].HideAllItems(s)

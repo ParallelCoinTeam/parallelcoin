@@ -13,52 +13,64 @@ import (
 	"gioui.org/unit"
 )
 
-func (s *State) DuoUIheader() layout.FlexChild {
+func (s *State) DuoUIheader(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	return gui.Rigid(func() {
-		s.Gtx.Constraints.Height.Max = 48
-		s.Gtx.Constraints.Height.Min = 48
-		s.FlexH(gui.Rigid(func() {
-			s.FlexH(gui.Rigid(func() {
-				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Width.Max, "PanelBg", "ff")
-				s.FlexH(gui.Rigid(func() {
-					fg, bg := "PanelText", "PanelBg"
-					icon := "logo"
-					b := s.Buttons["Logo"]
-					s.Theme.DuoUIbutton("", "", "",
-						s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
-						s.Theme.Colors[fg], 0, 40, 48, 48,
-						6, 2, 2, 6).IconLayout(s.Gtx, b)
-					if b.Clicked(s.Gtx) {
-						s.FlipTheme()
-					}
-				}))
-			}), gui.Rigid(func() {
-				s.FlexV(gui.Flexed(1, func() {
-					s.Inset(8, func() {
-						layout.W.Layout(s.Gtx, func() {
-							t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), "Monitor")
-							t.Color = s.Theme.Colors["PanelText"]
-							t.Font.Typeface = s.Theme.Fonts["Secondary"]
-							t.Layout(s.Gtx)
-						})
-					})
-				}))
+		gtx.Constraints.Height.Max = 48
+		gtx.Constraints.Height.Min = 48
+		s.FlexH(
+			gui.Rigid(func() {
+				s.FlexH(
+					gui.Rigid(func() {
+						cs := gtx.Constraints
+						s.Rectangle(cs.Width.Max, cs.Width.Max, "PanelBg", "ff")
+						s.FlexH(
+							gui.Rigid(func() {
+								fg, bg := "PanelText", "PanelBg"
+								icon := "logo"
+								b := s.Buttons["Logo"]
+								s.Theme.DuoUIbutton("", "", "",
+									s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
+									s.Theme.Colors[fg], 0, 40, 48, 48,
+									6, 2, 2, 6).IconLayout(gtx, b)
+								if b.Clicked(gtx) {
+									s.FlipTheme(&s.Config.DarkTheme, s.SaveConfig)
+								}
+							}))
+					}),
+					gui.Rigid(func() {
+						s.FlexV(gui.Flexed(1, func() {
+							s.Inset(8, func() {
+								layout.W.Layout(gtx, func() {
+									t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), "Monitor")
+									t.Color = s.Theme.Colors["PanelText"]
+									t.Font.Typeface = s.Theme.Fonts["Secondary"]
+									t.Layout(gtx)
+								})
+							})
+						}))
+					}),
+				)
 			}),
-			)
-		}), s.Spacer("PanelBg"), gui.Rigid(func() {
-			t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
-				fmt.Sprintf("%s %dx%d", *s.Ctx.Config.DataDir,
-					s.WindowWidth, s.WindowHeight))
-			t.Color = s.Theme.Colors["PanelText"]
-			t.Font.Typeface = s.Theme.Fonts["Primary"]
-			t.Layout(s.Gtx)
-		}), s.RestartRunButton(),
+			s.Spacer("PanelBg"),
+			gui.Rigid(func() {
+				t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
+					fmt.Sprintf("%s %dx%d", *s.Ctx.Config.DataDir,
+						s.WindowWidth, s.WindowHeight))
+				t.Color = s.Theme.Colors["PanelText"]
+				t.Font.Typeface = s.Theme.Fonts["Primary"]
+				t.Layout(gtx)
+			}),
+			s.ScreenshotButton(headless),
+			s.RestartRunButton(headless),
 			gui.Rigid(func() {
 				b := s.Buttons["Close"]
 				s.IconButton("closeIcon", "PanelText",
 					"PanelBg", b)
-				for b.Clicked(s.Gtx) {
+				for b.Clicked(gtx) {
 					Debug("close button clicked")
 					s.SaveConfig()
 					s.RunCommandChan <- "kill"
@@ -69,13 +81,35 @@ func (s *State) DuoUIheader() layout.FlexChild {
 	})
 }
 
-func (s *State) RestartRunButton() layout.FlexChild {
+func (s *State) ScreenshotButton(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
+	return gui.Rigid(func() {
+		b := s.Buttons["Screenshot"]
+		s.IconButton("Screenshot", "PanelText", "PanelBg", b)
+		for b.Clicked(gtx) {
+			Debug("clicked screenshot button")
+			if err := s.Screenshot(func() {
+				s.TopLevelLayout(true)
+			}); Check(err) {
+			}
+		}
+	})
+}
+
+func (s *State) RestartRunButton(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	return gui.Rigid(func() {
 		var c *exec.Cmd
 		var err error
 		b := s.Buttons["Restart"]
 		s.IconButton("Restart", "PanelText", "PanelBg", b)
-		for b.Clicked(s.Gtx) {
+		for b.Clicked(gtx) {
 			Debug("clicked restart button")
 			s.SaveConfig()
 			if s.HasGo {

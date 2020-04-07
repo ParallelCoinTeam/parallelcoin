@@ -8,9 +8,9 @@ import (
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/snacl"
+	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/snacl"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // These constants define the serialized length for a given encrypted extended

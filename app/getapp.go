@@ -8,18 +8,18 @@ import (
 	"time"
 
 	"github.com/p9c/pod/cmd/kopach/kopach_worker"
-	"github.com/p9c/pod/cmd/node/blockdb"
 	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/db/blockdb"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/interrupt"
 
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/node/mempool"
-	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/util/base58"
+	"github.com/p9c/pod/pkg/coding/base58"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 

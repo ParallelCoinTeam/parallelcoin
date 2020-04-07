@@ -1,19 +1,79 @@
 package gui
 
 import (
+	"bytes"
+	"encoding/base64"
 	"gioui.org/app"
+	"gioui.org/app/headless"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/gui/clipboard"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
+	"image"
+	"image/png"
+	"math"
+	"time"
 )
 
+type ScaledConfig struct {
+	Scale float32
+}
+
+func (s *ScaledConfig) Now() time.Time {
+	return time.Now()
+}
+
+func (s *ScaledConfig) Px(v unit.Value) int {
+	scale := s.Scale
+	if v.U == unit.UnitPx {
+		scale = 1
+	}
+	return int(math.Round(float64(scale * v.V)))
+}
+
+// State stores the state for a gui
 type State struct {
 	Gtx   *layout.Context
+	Htx   *layout.Context
 	W     *app.Window
+	HW    *headless.Window
 	Rc    *rcd.RcVar
 	Theme *gelook.DuoUItheme
+	// these two values need to be updated by the main render pipeline loop
+	WindowWidth, WindowHeight int
+	DarkTheme                 bool
+	ScreenShooting            bool
+}
+
+func (s *State) Screenshot(widget func()) (err error) {
+	Debug("capturing screenshot")
+	s.ScreenShooting = true
+	sz := image.Point{X: s.WindowWidth, Y: s.WindowHeight}
+	s.Htx.Reset(&ScaledConfig{1}, sz)
+	widget()
+	s.HW.Frame(s.Htx.Ops)
+	var img *image.RGBA
+	if img, err = s.HW.Screenshot(); Check(err) {
+	}
+	Debug("image captured", len(img.Pix))
+	//Debugs(img)
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+	}
+	Debug("png", buf.Len())
+	b64 := buf.Bytes()
+	Debug("bytes", len(b64))
+	clip := make([]byte, len(b64)*2)
+
+	base64.StdEncoding.Encode(clip, b64)
+	Debug("clip", len(clip))
+	st := "data:image/png;base64," + string(clip)
+	clipboard.Set(st)
+	time.Sleep(time.Second / 2)
+	s.ScreenShooting = false
+	return
 }
 
 func (s *State) FlexV(children ...layout.FlexChild) {

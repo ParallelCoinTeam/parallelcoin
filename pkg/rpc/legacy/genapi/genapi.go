@@ -5,7 +5,7 @@ import (
 	"sort"
 	"text/template"
 
-	log "github.com/p9c/pod/pkg/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 type handler struct {

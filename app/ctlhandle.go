@@ -8,8 +8,8 @@ import (
 
 	"github.com/urfave/cli"
 
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/ctl"
-	"github.com/p9c/pod/pkg/conte"
 )
 
 const slash = string(os.PathSeparator)

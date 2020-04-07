@@ -7,8 +7,8 @@ import (
 	// _ "net/http/pprof"
 	"sync"
 
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/chain/mining/addresses"
-	"github.com/p9c/pod/pkg/conte"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/pod"

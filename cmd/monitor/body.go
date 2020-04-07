@@ -3,21 +3,25 @@ package monitor
 import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/util/logi"
 	"os/exec"
 	"strings"
 )
 
-func (s *State) Body() layout.FlexChild {
+func (s *State) Body(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	return gui.Flexed(1, func() {
-		cs := s.Gtx.Constraints
+		cs := gtx.Constraints
 		cs.Width.Min = cs.Width.Max / 2
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 		s.Lists["Log"].Axis = layout.Vertical
 		s.Lists["Log"].ScrollToEnd = true
-		s.Lists["Log"].Layout(s.Gtx, s.EntryBuf.Len(), func(i int) {
+		s.Lists["Log"].Layout(gtx, s.EntryBuf.Len(), func(i int) {
 			if s.EntryBuf.Clicked == i {
-				cs := s.Gtx.Constraints
+				cs := gtx.Constraints
 				//cs.Height.Max = 48
 				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBgHilite", "ff")
 			}
@@ -67,7 +71,7 @@ func (s *State) Body() layout.FlexChild {
 									}
 								}),
 								gui.Flexed(1, func() {
-									//cs := s.Gtx.Constraints
+									//cs := gtx.Constraints
 									//s.Rectangle(cs.Width.Max, cs.Height.Max,
 									//	"PanelBg", "ff")
 									tc := "DocText"
@@ -93,7 +97,7 @@ func (s *State) Body() layout.FlexChild {
 
 						})
 					}, button)
-					for button.Clicked(s.Gtx) {
+					for button.Clicked(gtx) {
 						go func() {
 							if s.Config.ClickCommand == "" {
 								return
@@ -119,7 +123,7 @@ func (s *State) Body() layout.FlexChild {
 								s.Icon("HideItem", "PanelBg", "DocBg", 32)
 							})
 						}, hider)
-						for hider.Clicked(s.Gtx) {
+						for hider.Clicked(gtx) {
 							s.Config.FilterNodes[s.EntryBuf.Get(i).
 								Package].Hidden = true
 						}

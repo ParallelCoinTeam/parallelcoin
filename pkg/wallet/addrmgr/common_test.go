@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
-	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 var (

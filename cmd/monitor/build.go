@@ -6,7 +6,11 @@ import (
 	"github.com/p9c/pod/pkg/gui/gel"
 )
 
-func (s *State) BuildButtons() layout.FlexChild {
+func (s *State) BuildButtons(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	return gui.Rigid(func() {
 		if s.WindowWidth >= 360 || !s.Config.FilterOpen {
 			s.FlexH(gui.Rigid(func() {
@@ -17,9 +21,9 @@ func (s *State) BuildButtons() layout.FlexChild {
 				b := s.Buttons["BuildFold"]
 				//s.IconButton("Build", fg, bg, b)
 				s.ButtonArea(func() {
-					s.Gtx.Constraints.Width.Max = 48
-					s.Gtx.Constraints.Height.Max = 48
-					cs := s.Gtx.Constraints
+					gtx.Constraints.Width.Max = 48
+					gtx.Constraints.Height.Max = 48
+					cs := gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
 					s.Inset(8, func() {
 						s.Icon("Build", fg, bg, 32)
@@ -40,7 +44,11 @@ func (s *State) BuildButtons() layout.FlexChild {
 	})
 }
 
-func (s *State) BuildPage() layout.FlexChild {
+func (s *State) BuildPage(headless bool) layout.FlexChild {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	if !s.Config.BuildOpen {
 		return gui.Flexed(0, func() {})
 	}
@@ -54,7 +62,7 @@ func (s *State) BuildPage() layout.FlexChild {
 		weight = 1
 	}
 	return gui.Flexed(weight, func() {
-		cs := s.Gtx.Constraints
+		cs := gtx.Constraints
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
 		s.FlexV(gui.Rigid(func() {
 			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
@@ -88,14 +96,14 @@ func (s *State) BuildPage() layout.FlexChild {
 			}),
 			)
 		}), gui.Flexed(1, func() {
-			cs := s.Gtx.Constraints
+			cs := gtx.Constraints
 			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
 			s.FlexV(gui.Flexed(1, func() {
 				s.Inset(8, func() {
-					// cs := s.Gtx.Constraints
+					// cs := gtx.Constraints
 					// s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 					//if s.Config.BuildOpen {
-					s.BuildConfigPage()
+					s.BuildConfigPage(headless)
 					//}
 				})
 			}))
@@ -107,7 +115,11 @@ func (s *State) BuildPage() layout.FlexChild {
 	})
 }
 
-func (s *State) BuildConfigPage() {
+func (s *State) BuildConfigPage(headless bool) {
+	gtx := s.Gtx
+	if headless {
+		gtx = s.Htx
+	}
 	s.FlexV(
 		//s.FlexH(
 		gui.Rigid(func() {
@@ -230,8 +242,8 @@ func (s *State) BuildConfigPage() {
 						//if ww < 12 {
 						//	ww = 12
 						//}
-						s.Gtx.Constraints.Width.Max = ww*10 + 30
-						s.Gtx.Constraints.Width.Min = ww*10 + 30
+						gtx.Constraints.Width.Max = ww*10 + 30
+						gtx.Constraints.Width.Min = ww*10 + 30
 						s.Editor(&s.CommandEditor, ww, func(e gel.EditorEvent) {
 							if e != nil {
 								txt := s.CommandEditor.Text()
@@ -242,7 +254,7 @@ func (s *State) BuildConfigPage() {
 								Debug(s.Config.ClickCommand)
 								s.SaveConfig()
 							}
-						})()
+						}, headless)()
 					}), gui.Rigid(func() {
 						s.Inset(8,
 							s.Text("When a log entry is clicked run this"+

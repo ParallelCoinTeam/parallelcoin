@@ -6,9 +6,9 @@ import (
 
 	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/db/walletdb"
 	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 func (w *Wallet) handleChainNotifications() {

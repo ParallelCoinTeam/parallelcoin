@@ -11,9 +11,9 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
