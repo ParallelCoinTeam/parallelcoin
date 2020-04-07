@@ -23,6 +23,12 @@ func (r *RcVar) GetTx(txid string) btcjson.GetTransactionResult {
 		Txid:    txid,
 		Verbose: &verbose,
 	}
+
+	//lt, err := r.cx.RPCServer .(startTx, r.History.PerPage.Value)
+	//if err != nil {
+	//	Info(err)
+	//}
+
 	tx, err := chainrpc.HandleGetRawTransaction(r.cx.RPCServer, &tcmd, nil)
 	if err != nil {
 		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
@@ -32,6 +38,8 @@ func (r *RcVar) GetTx(txid string) btcjson.GetTransactionResult {
 		return gbvr
 	}
 	fmt.Println(txid)
+	fmt.Println("txtxtx", tx)
+	fmt.Println("zekr", gbvr)
 	return btcjson.GetTransactionResult{}
 }
 
