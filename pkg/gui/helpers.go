@@ -2,18 +2,18 @@ package gui
 
 import (
 	"bytes"
-	"encoding/base64"
 	"gioui.org/app"
 	"gioui.org/app/headless"
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/clipboard"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"image"
 	"image/png"
+	"io/ioutil"
 	"math"
+	"os/exec"
 	"time"
 )
 
@@ -47,7 +47,8 @@ type State struct {
 	ScreenShooting            bool
 }
 
-func (s *State) Screenshot(widget func()) (err error) {
+func (s *State) Screenshot(widget func(),
+	path string) (err error) {
 	Debug("capturing screenshot")
 	s.ScreenShooting = true
 	sz := image.Point{X: s.WindowWidth, Y: s.WindowHeight}
@@ -64,14 +65,21 @@ func (s *State) Screenshot(widget func()) (err error) {
 	}
 	Debug("png", buf.Len())
 	b64 := buf.Bytes()
-	Debug("bytes", len(b64))
-	clip := make([]byte, len(b64)*2)
-
-	base64.StdEncoding.Encode(clip, b64)
-	Debug("clip", len(clip))
-	st := "data:image/png;base64," + string(clip)
-	clipboard.Set(st)
-	time.Sleep(time.Second / 2)
+	if err := ioutil.WriteFile(path, b64, 0600); !Check(err) {
+		cmd := exec.Command("chromium", path)
+		err = cmd.Run()
+	}
+	//Debug("bytes", len(b64))
+	//clip := make([]byte, len(b64)*2)
+	//base64.StdEncoding.Encode(clip, b64)
+	//Debug("clip", len(clip))
+	//st := "data:image/png;base64," + string(clip)
+	//Debug(st)
+	//if cmdIn, err := cmd.StdinPipe(); !Check(err) {
+	//	cmdIn.Write([]byte(st))
+	//}
+	//clipboard.Set(st)
+	//time.Sleep(time.Second / 2)
 	s.ScreenShooting = false
 	return
 }
