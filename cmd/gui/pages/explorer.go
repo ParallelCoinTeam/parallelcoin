@@ -50,7 +50,7 @@ func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 
 				explorerPanel := th.DuoUIpanel()
 				explorerPanel.PanelObject = rc.Explorer.Blocks
-				explorerPanel.ScrollBar = th.ScrollBar()
+				explorerPanel.ScrollBar = th.ScrollBar(16)
 				explorerPanelElement.PanelObjectsNumber = len(rc.Explorer.Blocks)
 				explorerPanel.Layout(gtx, explorerPanelElement, func(i int, in interface{}) {
 					blocks := in.([]model.DuoUIblock)

@@ -82,7 +82,7 @@ func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 				if fmt.Sprint(fields.Legend) == rc.Settings.Tabs.Current {
 					settingsPanel := th.DuoUIpanel()
 					settingsPanel.PanelObject = fields.Fields
-					settingsPanel.ScrollBar = th.ScrollBar()
+					settingsPanel.ScrollBar = th.ScrollBar(16)
 					settingsPanelElement.PanelObjectsNumber = len(fields.Fields)
 					settingsPanel.Layout(gtx, settingsPanelElement, func(i int, in interface{}) {
 						settings := in.(pod.Fields)
