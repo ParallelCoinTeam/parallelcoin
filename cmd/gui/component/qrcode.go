@@ -11,7 +11,7 @@ import (
 
 	"github.com/p9c/pod/cmd/gui/model"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/qrcode"
+	"github.com/p9c/pod/pkg/coding/qrcode"
 )
 
 // func DuoUIqrCode(pubAddr string) {

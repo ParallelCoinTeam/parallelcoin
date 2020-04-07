@@ -5,12 +5,12 @@ import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/ring"
-	"github.com/p9c/pod/pkg/stdconn/worker"
 	"io/ioutil"
 	"path/filepath"
 )

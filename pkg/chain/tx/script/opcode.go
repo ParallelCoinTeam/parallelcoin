@@ -12,7 +12,7 @@ import (
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 )
 
 type // An opcode defines the information related to a txscript opcode.  opfunc,

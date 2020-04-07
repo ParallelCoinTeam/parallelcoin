@@ -17,6 +17,8 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/mining"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/simplebuffer/Uint16"
+	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/kopachctrl/hashrate"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
@@ -24,8 +26,6 @@ import (
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
 	rav "github.com/p9c/pod/pkg/ring"
-	"github.com/p9c/pod/pkg/simplebuffer/Uint16"
-	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )

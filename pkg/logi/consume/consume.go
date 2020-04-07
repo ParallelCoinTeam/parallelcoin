@@ -1,12 +1,12 @@
 package consume
 
 import (
+	"github.com/p9c/pod/pkg/comm/pipe"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/logi"
 	"github.com/p9c/pod/pkg/logi/Entry"
 	"github.com/p9c/pod/pkg/logi/Pkg"
 	"github.com/p9c/pod/pkg/logi/Pkg/Pk"
-	"github.com/p9c/pod/pkg/pipe"
-	"github.com/p9c/pod/pkg/stdconn/worker"
 )
 
 func Log(quit chan struct{}, handler func(ent *logi.Entry) (

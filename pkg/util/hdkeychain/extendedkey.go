@@ -15,9 +15,9 @@ import (
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/coding/base58"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/base58"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 const (

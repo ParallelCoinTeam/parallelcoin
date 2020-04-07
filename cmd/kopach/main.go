@@ -12,13 +12,13 @@ import (
 
 	"github.com/p9c/pod/cmd/kopach/client"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/kopachctrl"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/kopachctrl/pause"
 	"github.com/p9c/pod/pkg/kopachctrl/sol"
-	"github.com/p9c/pod/pkg/stdconn/worker"
-	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -55,9 +55,8 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
 		Debug("opening broadcast channel listener")
-		w.conn, err = transport.
-			NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
-				transport.DefaultPort, kopachctrl.MaxDatagramSize, handlers,
+		w.conn, err = transport.NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
+			transport.DefaultPort, kopachctrl.MaxDatagramSize, handlers,
 				cx.KillAll)
 		if err != nil {
 			Error(err)

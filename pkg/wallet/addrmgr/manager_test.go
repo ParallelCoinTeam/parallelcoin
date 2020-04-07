@@ -15,8 +15,8 @@ import (
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/coding/snacl"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/snacl"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )

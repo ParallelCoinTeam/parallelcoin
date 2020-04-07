@@ -13,10 +13,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/p9c/pod/pkg/simplebuffer"
-	"github.com/p9c/pod/pkg/simplebuffer/IPs"
-	"github.com/p9c/pod/pkg/simplebuffer/Int32"
-	"github.com/p9c/pod/pkg/simplebuffer/Time"
+	"github.com/p9c/pod/pkg/coding/simplebuffer"
+	"github.com/p9c/pod/pkg/coding/simplebuffer/IPs"
+	"github.com/p9c/pod/pkg/coding/simplebuffer/Int32"
+	"github.com/p9c/pod/pkg/coding/simplebuffer/Time"
 )
 
 var HashrateMagic = []byte{'h', 'a', 's', 'h'}
