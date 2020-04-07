@@ -15,9 +15,9 @@ import (
 	. "github.com/p9c/pod/pkg/chain/tx/mgr"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 	"github.com/p9c/pod/pkg/util"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
-	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 // Received transaction output for mainnet outpoint

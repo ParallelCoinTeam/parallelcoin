@@ -8,8 +8,8 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/util"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 const eligibleInputMinConfirmations = 100

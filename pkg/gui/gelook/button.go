@@ -7,7 +7,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/util/logi"
 
 	"gioui.org/f32"
 	"gioui.org/io/pointer"

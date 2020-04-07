@@ -2,9 +2,9 @@ package config
 
 import (
 	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/cmd/node/rpc"
-	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/wallet"
 )
 
@@ -13,7 +13,7 @@ Configure(cx *conte.Xt, commandName string) {
 	Debug("running Configure", commandName)
 	Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
-	cx.NodeChan = make(chan *rpc.Server)
+	cx.NodeChan = make(chan *chainrpc.Server)
 	// theoretically, the configuration should be accessed only when locked
 	cfg := cx.Config
 	initLogLevel(cfg)

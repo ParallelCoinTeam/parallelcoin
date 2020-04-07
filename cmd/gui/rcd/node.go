@@ -3,8 +3,8 @@ package rcd
 import (
 	"fmt"
 
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 )
 
 func (r *RcVar) GetDuoUIhashesPerSec() {
@@ -14,7 +14,7 @@ func (r *RcVar) GetDuoUIhashesPerSec() {
 	return
 }
 func (r *RcVar) GetDuoUInetworkHashesPerSec() {
-	networkHashesPerSecIface, err := rpc.HandleGetNetworkHashPS(r.cx.RPCServer, btcjson.NewGetNetworkHashPSCmd(nil, nil), nil)
+	networkHashesPerSecIface, err := chainrpc.HandleGetNetworkHashPS(r.cx.RPCServer, btcjson.NewGetNetworkHashPSCmd(nil, nil), nil)
 	if err != nil {
 	}
 	networkHashesPerSec, ok := networkHashesPerSecIface.(int64)
@@ -34,12 +34,12 @@ func (r *RcVar) GetDuoUIbestBlockHash() {
 }
 func (r *RcVar) GetDuoUIdifficulty() {
 	r.Status.Node.Difficulty.Store(
-		rpc.GetDifficultyRatio(
+		chainrpc.GetDifficultyRatio(
 			r.cx.RPCServer.Cfg.Chain.BestSnapshot().Bits, r.cx.RPCServer.Cfg.ChainParams, 2))
 	return
 }
 func (r *RcVar) GetDuoUIblockCount() {
-	getBlockCount, err := rpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
+	getBlockCount, err := chainrpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
 	if err != nil {
 		// r.PushDuoUIalert("BTCJSONError", err.BTCJSONError(), "error")
 	}
@@ -88,7 +88,7 @@ func (r *RcVar) GetDuoUIhashesPerSecList() {
 func (r *RcVar) GetPeerInfo() func() {
 	return func() {
 
-		getPeers, err := rpc.HandleGetPeerInfo(r.cx.RPCServer, nil, nil)
+		getPeers, err := chainrpc.HandleGetPeerInfo(r.cx.RPCServer, nil, nil)
 		if err != nil {
 			// dV.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 		}

@@ -6,8 +6,8 @@ import (
 	"github.com/urfave/cli"
 
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/wallet"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 func DropWalletHistory(w *wallet.Wallet) func(c *cli.Context) error {

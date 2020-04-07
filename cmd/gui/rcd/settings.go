@@ -7,9 +7,9 @@ import (
 	"github.com/urfave/cli"
 	"time"
 
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/pod"
 )

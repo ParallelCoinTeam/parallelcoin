@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/p9c/pod/app/appdata"
-	log "github.com/p9c/pod/pkg/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/urfave/cli"
 )

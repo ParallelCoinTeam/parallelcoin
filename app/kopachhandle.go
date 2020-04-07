@@ -10,7 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 
-	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 

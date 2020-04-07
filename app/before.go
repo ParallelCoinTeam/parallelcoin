@@ -3,7 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/util/logi"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
@@ -13,10 +13,10 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/app/conte"
 	chaincfg "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/conte"
 	"github.com/p9c/pod/pkg/pod"
 )
 

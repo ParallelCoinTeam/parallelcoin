@@ -3,7 +3,7 @@ package keystore
 import (
 	"runtime"
 
-	"github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/util/logi"
 )
 
 var pkg string

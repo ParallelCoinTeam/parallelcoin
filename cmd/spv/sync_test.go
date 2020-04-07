@@ -23,12 +23,12 @@ import (
 	"github.com/p9c/pod/pkg/chain/wire"
 	ec "github.com/p9c/pod/pkg/coding/elliptic"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	log "github.com/p9c/pod/pkg/logi"
+	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	rpcclient "github.com/p9c/pod/pkg/rpc/client"
 	"github.com/p9c/pod/pkg/util"
+	log "github.com/p9c/pod/pkg/util/logi"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
 )
 
 var (

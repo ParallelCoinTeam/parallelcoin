@@ -3,7 +3,7 @@ package monitor
 import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/logi"
+	"github.com/p9c/pod/pkg/util/logi"
 	"os/exec"
 	"strings"
 )

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/p9c/pod/pkg/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
