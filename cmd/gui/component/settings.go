@@ -114,8 +114,13 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 			default:
 			}
 		case "switch":
-			th.DuoUIcheckBox(f.Field.Label, th.Colors["Primary"],
-				th.Colors["Primary"]).Layout(gtx,
+			sw := th.DuoUIcheckBox(f.Field.Label, th.Colors["Primary"],
+				th.Colors["Primary"])
+			sw.PillColor = th.Colors["LightGray"]
+			sw.PillColorChecked = th.Colors["LightGrayI"]
+			sw.CircleColor = th.Colors["LightGrayII"]
+			sw.CircleColorChecked = th.Colors["Primary"]
+			sw.DrawLayout(gtx,
 				(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox))
 			if (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox).Checked(gtx) {
 				if !*rc.Settings.Daemon.Config[f.Field.Model].(*bool) {

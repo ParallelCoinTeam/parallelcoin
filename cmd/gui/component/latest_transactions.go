@@ -26,9 +26,7 @@ func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoU
 			Axis: layout.Vertical,
 		}.Layout(gtx,
 			layout.Rigid(func() {
-				cs := gtx.Constraints
-				gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, 48, th.Colors["Primary"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-				layout.UniformInset(unit.Dp(16)).Layout(gtx, func() {
+				th.DuoUIcontainer(16, th.Colors["Primary"]).Layout(gtx, layout.N, func() {
 					latestx := th.H5("LATEST TRANSACTIONS")
 					latestx.Color = th.Colors["Light"]
 					latestx.Alignment = text.Start

@@ -181,7 +181,7 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *
 						})
 					}),
 					layout.Rigid(func() {
-						layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+						gelook.DuoUIcontainer{}.Layout(gtx, layout.Center, func() {
 							l := th.Body2(fmt.Sprint(block.TxNum))
 							l.Font.Typeface = th.Fonts["Mono"]
 							l.Color = th.Colors["Dark"]

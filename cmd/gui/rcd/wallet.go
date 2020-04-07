@@ -2,6 +2,7 @@ package rcd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/p9c/pod/pkg/rpc/legacy"
@@ -44,7 +45,7 @@ func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 		pass := legacy.RPCHandlers["walletpassphrase"].Result()
 		pass.WalletPassphrase(&btcjson.WalletPassphraseCmd{
 			Passphrase: "aaa",
-			Timeout:    3,
+			Timeout:    int64(time.Second),
 		})
 		pass.WalletPassphraseWait(nil)
 		send := legacy.RPCHandlers["sendtoaddress"].Result()
