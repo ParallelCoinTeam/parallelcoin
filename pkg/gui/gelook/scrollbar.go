@@ -1,7 +1,6 @@
 package gelook
 
 import (
-	"fmt"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -111,8 +110,6 @@ func (p *DuoUIpanel) bodyLayout(gtx *layout.Context, panel *gel.Panel) {
 					gtx.Constraints.Width.Min = panel.ScrollBar.Size
 					//gtx.Constraints.Width.Max = panel.ScrollBar.Size
 					gtx.Constraints.Height.Min = panel.ScrollBar.Slider.CursorHeight
-					fmt.Println(".ScrollBar.Slider.CursorHeight", panel.ScrollBar.Slider.CursorHeight)
-					fmt.Println(" ScrollBar.Size", panel.ScrollBar.Size)
 					if panel.ScrollBar.Slider.CursorHeight < panel.ScrollBar.Size {
 						panel.ScrollBar.Slider.CursorHeight = panel.ScrollBar.Size * 2
 					}

@@ -72,7 +72,7 @@ func Main(cx *conte.Xt) (err error) {
 		}()
 		go rpcClientConnectLoop(cx, legacyServer, loader)
 		loader.Wallet = w
-		legacy.RunAPI(nil, w, cx.WalletKill)
+		legacy.RunAPI(cx.ChainClient, w, cx.WalletKill)
 		Trace("sending back wallet")
 		cx.WalletChan <- w
 		Trace("adding interrupt handler to unload wallet")
