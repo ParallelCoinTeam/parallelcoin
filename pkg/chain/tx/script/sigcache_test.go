@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 )
 
 // genRandomSig returns a random message, a signature of the message under the public key and the public key. This function is used to generate randomized test data.

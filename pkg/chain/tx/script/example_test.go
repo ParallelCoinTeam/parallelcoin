@@ -8,8 +8,8 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 	"github.com/p9c/pod/pkg/util"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // This example demonstrates creating a script which pays to a bitcoin address. It also prints the created script hex and uses the DisasmString function to display the disassembled script.

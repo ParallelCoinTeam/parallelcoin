@@ -10,7 +10,7 @@ import (
 
 	"go.uber.org/atomic"
 
-	ec "github.com/p9c/pod/pkg/util/elliptic"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 )
 
 // ScriptFlags is a bitmask defining additional operations or tests that will be done when executing a script pair.

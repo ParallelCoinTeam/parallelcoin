@@ -12,7 +12,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util/gcs/builder"
+	"github.com/p9c/pod/pkg/coding/gcs/builder"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )

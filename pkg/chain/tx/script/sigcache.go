@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 )
 
 // sigCacheEntry represents an entry in the SigCache. Entries within the

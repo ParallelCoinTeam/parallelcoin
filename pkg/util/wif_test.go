@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 	. "github.com/p9c/pod/pkg/util"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 func TestEncodeDecodeWIF(t *testing.T) {

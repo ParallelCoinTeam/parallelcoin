@@ -18,12 +18,12 @@ import (
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/comm/stdconn"
+	"github.com/p9c/pod/pkg/comm/transport"
 	"github.com/p9c/pod/pkg/kopachctrl"
 	"github.com/p9c/pod/pkg/kopachctrl/job"
 	"github.com/p9c/pod/pkg/ring"
 	"github.com/p9c/pod/pkg/sem"
-	"github.com/p9c/pod/pkg/stdconn"
-	"github.com/p9c/pod/pkg/transport"
 	"github.com/p9c/pod/pkg/util"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )

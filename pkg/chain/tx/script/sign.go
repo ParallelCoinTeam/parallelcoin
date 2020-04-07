@@ -6,8 +6,8 @@ import (
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/wire"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 	"github.com/p9c/pod/pkg/util"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
 )
 
 // RawTxInWitnessSignature returns the serialized ECDSA signature for the input idx of the given transaction, with the

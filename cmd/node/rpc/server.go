@@ -36,13 +36,13 @@ import (
 	netsync "github.com/p9c/pod/pkg/chain/sync"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/bloom"
 	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/peer"
 	"github.com/p9c/pod/pkg/peer/addrmgr"
 	"github.com/p9c/pod/pkg/peer/connmgr"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/bloom"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 

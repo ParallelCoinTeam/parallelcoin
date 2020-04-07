@@ -3,12 +3,12 @@ package Entry
 
 import (
 	"github.com/davecgh/go-spew/spew"
+	"github.com/p9c/pod/pkg/coding/simplebuffer/String"
 	"github.com/p9c/pod/pkg/logi"
-	"github.com/p9c/pod/pkg/simplebuffer/String"
 	"time"
 
-	"github.com/p9c/pod/pkg/simplebuffer"
-	"github.com/p9c/pod/pkg/simplebuffer/Time"
+	"github.com/p9c/pod/pkg/coding/simplebuffer"
+	"github.com/p9c/pod/pkg/coding/simplebuffer/Time"
 )
 
 var EntryMagic = []byte{'e', 'n', 't', 'r'}

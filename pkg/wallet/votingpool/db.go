@@ -8,8 +8,8 @@ import (
 
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/snacl"
 	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/snacl"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 

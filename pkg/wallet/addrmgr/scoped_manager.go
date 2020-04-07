@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"github.com/p9c/pod/pkg/chain/config/netparams"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 	"github.com/p9c/pod/pkg/util"
-	ec "github.com/p9c/pod/pkg/util/elliptic"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/zero"
 	walletdb "github.com/p9c/pod/pkg/wallet/db"
