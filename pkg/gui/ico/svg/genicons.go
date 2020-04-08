@@ -4,7 +4,7 @@
 
 // +build ignore
 
-package icons
+package main
 
 import (
 	"bytes"
@@ -26,7 +26,7 @@ import (
 )
 
 var outDir = flag.String("o", "", "output directory")
-var pkgName = flag.String("pkg", "icons", "package name")
+var pkgName = flag.String("pkg", "svg", "package name")
 
 var (
 	out      = new(bytes.Buffer)

@@ -4,12 +4,16 @@ import (
 	"bytes"
 	"gioui.org/app"
 	"gioui.org/app/headless"
+	"gioui.org/f32"
 	"gioui.org/layout"
+	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
+	"golang.org/x/exp/shiny/iconvg"
 	"image"
+	"image/draw"
 	"image/png"
 	"io/ioutil"
 	"math"
@@ -84,16 +88,28 @@ func (s *State) Screenshot(widget func(),
 	return
 }
 
-func (s *State) FlexV(children ...layout.FlexChild) {
-	layout.Flex{Axis: layout.Vertical}.Layout(s.Gtx, children...)
+func (s *State) FlexV(hl bool, children ...layout.FlexChild) {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
+	}
+	layout.Flex{Axis: layout.Vertical}.Layout(gtx, children...)
 }
 
-func (s *State) FlexH(children ...layout.FlexChild) {
-	layout.Flex{Axis: layout.Horizontal}.Layout(s.Gtx, children...)
+func (s *State) FlexH(hl bool, children ...layout.FlexChild) {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
+	}
+	layout.Flex{Axis: layout.Horizontal}.Layout(gtx, children...)
 }
 
-func (s *State) Inset(size int, fn func()) {
-	layout.UniformInset(unit.Dp(float32(size))).Layout(s.Gtx, fn)
+func (s *State) Inset(hl bool, size int, fn func()) {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
+	}
+	layout.UniformInset(unit.Dp(float32(size))).Layout(gtx, fn)
 }
 
 func Rigid(widget func()) layout.FlexChild {
@@ -104,64 +120,89 @@ func Flexed(weight float32, widget func()) layout.FlexChild {
 	return layout.Flexed(weight, widget)
 }
 
-func (s *State) Spacer(bg string) layout.FlexChild {
-	return Flexed(1, func() {
-		//cs := s.Gtx.Constraints
-		//s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "FF")
-	})
+func (s *State) Spacer(hl bool) layout.FlexChild {
+	return Flexed(1, func() {})
 }
 
-func (s *State) Rectangle(width, height int, color, opacity string, radius ...float32) {
-	col := s.Theme.Colors[color]
-	if col == "" || col[:2] == "00" {
-		return
+func (s *State) Rectangle(width, height int, color string, hl bool,
+	radius ...float32) {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
 	}
-	col = opacity + col[2:]
+	col := s.Theme.Colors[color]
 	var r float32
 	if len(radius) > 0 {
 		r = radius[0]
 	}
-	gelook.DuoUIdrawRectangle(s.Gtx,
+	gelook.DuoUIdrawRectangle(gtx,
 		width, height, col,
 		[4]float32{r, r, r, r},
 		[4]float32{0, 0, 0, 0},
 	)
 }
 
-func (s *State) Icon(icon, fg, bg string, size int) {
-	s.Gtx.Constraints.Width.Max = size
-	s.Gtx.Constraints.Height.Max = size
-	s.Gtx.Constraints.Width.Min = size
-	s.Gtx.Constraints.Height.Min = size
-	s.FlexH(Rigid(func() {
-		cs := s.Gtx.Constraints
-		tp := "ff"
-		bg := s.Theme.Colors[bg]
-		if len(bg) == 0 {
-			bg = "00000000"
-			tp = "00"
-		}
-		s.Rectangle(cs.Height.Max, cs.Width.Max, bg, tp)
-		s.Inset(0, func() {
-			i := s.Theme.Icons[icon]
-			i.Color = gelook.HexARGB(s.Theme.Colors[fg])
-			i.Layout(s.Gtx, unit.Dp(float32(size)))
+func (s *State) Icon(icon []byte, fg string, size, inset int,
+	hl bool) func() {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
+	}
+	return func() {
+		gtx.Constraints.Width.Min = size  //+ inset*2
+		gtx.Constraints.Height.Min = size //+ inset*2
+		s.Inset(hl, inset, func() {
+			var m iconvg.Metadata
+			var err error
+			if m, err = iconvg.DecodeMetadata(icon); Check(err) {
+			}
+			dx, dy := m.ViewBox.AspectRatio()
+			img := image.NewRGBA(
+				image.Rectangle{
+					Max: image.Point{
+						X: size,
+						Y: int(float32(size) * dy / dx),
+					},
+				},
+			)
+			var ico iconvg.Rasterizer
+			ico.SetDstImage(img, img.Bounds(), draw.Src)
+			m.Palette[0] = gelook.HexARGB(s.Theme.Colors[fg])
+			iconvg.Decode(&ico, icon, &iconvg.DecodeOptions{
+				Palette: &m.Palette,
+			})
+			op := paint.NewImageOp(img)
+			sz := op.Size()
+			op.Add(gtx.Ops)
+			paint.PaintOp{
+				Rect: f32.Rectangle{
+					Max: toPointF(sz),
+				},
+			}.Add(gtx.Ops)
 		})
-	}),
-	)
+	}
 }
 
-func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int) {
+func toPointF(p image.Point) f32.Point {
+	return f32.Point{X: float32(p.X), Y: float32(p.Y)}
+}
+
+func (s *State) IconButton(icon []byte, fg string, button *gel.Button,
+	hl bool, hook func(), size ...int) {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
+	}
 	sz := 48
 	if len(size) > 1 {
 		sz = size[0]
 	}
-	s.Rectangle(sz, sz, bg, "ff")
-	s.ButtonArea(func() {
-		s.Inset(8, func() {
-			s.Icon(icon, fg, "Transparent", sz-16)
-		})
+	s.ButtonArea(hl, func() {
+		s.Icon(icon, fg, sz-16, 8, hl)()
 	}, button)
+	if button.Clicked(gtx) {
+		hook()
+	}
 }
 
 func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
@@ -179,55 +220,69 @@ func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 		Layout(s.Gtx, button)
 }
 
-func (s *State) ButtonArea(content func(), button *gel.Button) {
-	b := s.Theme.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0,
+func (s *State) ButtonArea(hl bool, content func(), button *gel.Button) {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
+	}
+	b := s.Theme.DuoUIbutton("", "", "",
+		"", "", "", "", "",
+		0, 0, 0, 0, 0, 0,
 		0, 0)
-	b.InsideLayout(s.Gtx, button, content)
+	b.InsideLayout(gtx, button, content)
 }
 
-func (s *State) Label(txt, fg, bg string) {
-	s.Gtx.Constraints.Height.Max = 48
-	cs := s.Gtx.Constraints
-	s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
-	s.Inset(10, func() {
+func (s *State) Label(hl bool, txt, fg, bg string) {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
+	}
+	s.Inset(hl, 10, func() {
 		t := s.Theme.DuoUIlabel(unit.Dp(float32(36)), txt)
 		t.Color = s.Theme.Colors[fg]
 		t.Font.Typeface = s.Theme.Fonts["Secondary"]
 		//t.TextSize = unit.Dp(32)
-		t.Layout(s.Gtx)
+		t.Layout(gtx)
 	})
 }
 
-func (s *State) Text(txt, fg, bg, face, tag string) func() {
-	return func() {
-		var desc gelook.DuoUIlabel
-		switch tag {
-		case "h1":
-			desc = s.Theme.H1(txt)
-		case "h2":
-			desc = s.Theme.H2(txt)
-		case "h3":
-			desc = s.Theme.H3(txt)
-		case "h4":
-			desc = s.Theme.H4(txt)
-		case "h5":
-			desc = s.Theme.H5(txt)
-		case "h6":
-			desc = s.Theme.H6(txt)
-		case "body1":
-			desc = s.Theme.Body1(txt)
-		case "body2":
-			desc = s.Theme.Body2(txt)
-		}
-		desc.Font.Typeface = s.Theme.Fonts[face]
-		desc.Color = s.Theme.Colors[fg]
-		s.Inset(8, func() {
-			cs := s.Gtx.Constraints
-			s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
-			desc.Layout(s.Gtx)
-		})
-
+func (s *State) Text(hl bool, txt, fg, face, tag string, height int) {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
 	}
+	s.FlexH(hl, Rigid(func() {
+		gtx.Constraints.Height.Min = height
+		gtx.Constraints.Height.Max = height
+		layout.SW.Layout(gtx, func() {
+			var desc gelook.DuoUIlabel
+			switch tag {
+			case "h1":
+				desc = s.Theme.H1(txt)
+			case "h2":
+				desc = s.Theme.H2(txt)
+			case "h3":
+				desc = s.Theme.H3(txt)
+			case "h4":
+				desc = s.Theme.H4(txt)
+			case "h5":
+				desc = s.Theme.H5(txt)
+			case "h6":
+				desc = s.Theme.H6(txt)
+			case "body1":
+				desc = s.Theme.Body1(txt)
+			case "body2":
+				desc = s.Theme.Body2(txt)
+			}
+			desc.Font.Typeface = s.Theme.Fonts[face]
+			desc.Color = s.Theme.Colors[fg]
+			desc.Layout(gtx)
+		})
+	}),
+		Rigid(func() {
+			s.Inset(hl, 4, func() {})
+		}),
+	)
 }
 
 func Toggle(b *bool) bool {

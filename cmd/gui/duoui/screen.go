@@ -1,6 +1,7 @@
 package duoui
 
 import (
+	svg "github.com/p9c/pod/pkg/gui/ico/svg"
 	"image"
 
 	"gioui.org/layout"
@@ -8,13 +9,12 @@ import (
 
 	"github.com/p9c/pod/cmd/gui/component"
 	"github.com/p9c/pod/pkg/gui/gelook"
-	"github.com/p9c/pod/pkg/gui/ico"
 )
 
 // Main wallet screen
 func (ui *DuoUI) DuoUIsplashScreen() {
 	ui.ly.Theme.DuoUIcontainer(0, ui.ly.Theme.Colors["Dark"]).Layout(ui.ly.Context, layout.Center, func() {
-		logo, _ := gelook.NewDuoUIicon(ico.ParallelCoin)
+		logo, _ := gelook.NewDuoUIicon(svg.ParallelCoin)
 		layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
 			layout.Rigid(func() {
 				layout.Flex{Axis: layout.Horizontal}.Layout(ui.ly.Context,

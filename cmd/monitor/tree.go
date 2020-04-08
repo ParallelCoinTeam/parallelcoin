@@ -1,11 +1,8 @@
 package monitor
 
 import (
-	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
-	"github.com/p9c/pod/pkg/util/logi/consume"
 	"os"
 	"sort"
 	"strings"
@@ -131,98 +128,98 @@ func (s *State) GetTree(paths []string) (root *Node) {
 }
 
 func (n *Node) GetWidget(s *State, headless bool) {
-	gtx := s.Gtx
-	if headless {
-		gtx = s.Htx
-	}
-	nn := n.GetOpenItems()[1:]
-	indent := 0
-	s.Lists["Filter"].Axis = layout.Vertical
-	s.Lists["Filter"].Layout(gtx, len(nn), func(i int) {
-		s.FlexH(
-			gui.Rigid(func() {
-				split := strings.Split(nn[i].FullName, string(os.PathSeparator))
-				indent = len(split) - 1
-				s.Inset(0, func() {
-					s.Rectangle(indent*16, 32, "PanelBg", "ff")
-				})
-			}),
-			gui.Rigid(func() {
-				name := nn[i].Name
-				if name == "" {
-					name = "root"
-				}
-				fg := "PanelText"
-				if nn[i].Hidden {
-					fg = "DocBg"
-				}
-				s.TextButton(name, "Primary", 24, fg, "PanelBg", nn[i].showButton)
-				if nn[i].showButton.Clicked(gtx) {
-					nn[i].Hidden = !nn[i].Hidden
-					//if !nn[i].Hidden {
-					//	nn[i].ShowAllItems(s)
-					//} else {
-					//	nn[i].HideAllItems(s)
-					//}
-					consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
-					s.SaveConfig()
-				}
-			}),
-			gui.Rigid(func() {
-				if len(nn[i].Children) > 0 {
-					ic := "Folded"
-					if !nn[i].Closed {
-						ic = "Unfolded"
-					}
-					fg := "DocBg"
-					if nn[i].IsAnyShowing() {
-						fg = "DocTextDim"
-					}
-					if nn[i].IsAllShowing() {
-						fg = "PanelText"
-					}
-					s.IconButton(ic, fg, "PanelBg", nn[i].foldButton)
-					if nn[i].foldButton.Clicked(gtx) {
-						if nn[i].Closed {
-							//nn[i].OpenAllItems(s)
-						} else {
-							nn[i].CloseAllItems(s)
-						}
-						nn[i].Closed = !nn[i].Closed
-						s.SaveConfig()
-					}
-				}
-			}),
-			gui.Flexed(1, func() {
-
-			}),
-			gui.Rigid(func() {
-				if len(nn[i].Children) > 0 && nn[i].IsAnyHiding() {
-					s.IconButton("ShowItem", "DocBg", "PanelBg",
-						nn[i].showChildrenButton)
-					for nn[i].showChildrenButton.Clicked(gtx) {
-						Debug("filter all")
-						nn[i].ShowAllItems(s)
-						nn[i].Hidden = false
-						consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
-						s.SaveConfig()
-					}
-				}
-			}), gui.Rigid(func() {
-				if len(nn[i].Children) > 0 && nn[i].IsAnyShowing() {
-					s.IconButton("HideItem", "DocBg", "PanelBg",
-						nn[i].hideChildrenButton)
-					for nn[i].hideChildrenButton.Clicked(gtx) {
-						Debug("filter none")
-						nn[i].Hidden = true
-						nn[i].HideAllItems(s)
-						consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
-						s.SaveConfig()
-					}
-				}
-			}),
-		)
-	})
+	//gtx := s.Gtx
+	//if headless {
+	//	gtx = s.Htx
+	//}
+	//nn := n.GetOpenItems()[1:]
+	//indent := 0
+	//s.Lists["Filter"].Axis = layout.Vertical
+	//s.Lists["Filter"].Layout(gtx, len(nn), func(i int) {
+	//	s.FlexH(
+	//		gui.Rigid(func() {
+	//			split := strings.Split(nn[i].FullName, string(os.PathSeparator))
+	//			indent = len(split) - 1
+	//			s.Inset(0, func() {
+	//				s.Rectangle(indent*16, 32, "PanelBg", "ff")
+	//			})
+	//		}),
+	//		gui.Rigid(func() {
+	//			name := nn[i].Name
+	//			if name == "" {
+	//				name = "root"
+	//			}
+	//			fg := "PanelText"
+	//			if nn[i].Hidden {
+	//				fg = "DocBg"
+	//			}
+	//			s.TextButton(name, "Primary", 24, fg, "PanelBg", nn[i].showButton)
+	//			if nn[i].showButton.Clicked(gtx) {
+	//				nn[i].Hidden = !nn[i].Hidden
+	//				//if !nn[i].Hidden {
+	//				//	nn[i].ShowAllItems(s)
+	//				//} else {
+	//				//	nn[i].HideAllItems(s)
+	//				//}
+	//				consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
+	//				s.SaveConfig()
+	//			}
+	//		}),
+	//		gui.Rigid(func() {
+	//			if len(nn[i].Children) > 0 {
+	//				ic := "Folded"
+	//				if !nn[i].Closed {
+	//					ic = "Unfolded"
+	//				}
+	//				fg := "DocBg"
+	//				if nn[i].IsAnyShowing() {
+	//					fg = "DocTextDim"
+	//				}
+	//				if nn[i].IsAllShowing() {
+	//					fg = "PanelText"
+	//				}
+	//				s.IconButton(ic, fg, "PanelBg", nn[i].foldButton)
+	//				if nn[i].foldButton.Clicked(gtx) {
+	//					if nn[i].Closed {
+	//						//nn[i].OpenAllItems(s)
+	//					} else {
+	//						nn[i].CloseAllItems(s)
+	//					}
+	//					nn[i].Closed = !nn[i].Closed
+	//					s.SaveConfig()
+	//				}
+	//			}
+	//		}),
+	//		gui.Flexed(1, func() {
+	//
+	//		}),
+	//		gui.Rigid(func() {
+	//			if len(nn[i].Children) > 0 && nn[i].IsAnyHiding() {
+	//				s.IconButton("ShowItem", "DocBg", "PanelBg",
+	//					nn[i].showChildrenButton)
+	//				for nn[i].showChildrenButton.Clicked(gtx) {
+	//					Debug("filter all")
+	//					nn[i].ShowAllItems(s)
+	//					nn[i].Hidden = false
+	//					consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
+	//					s.SaveConfig()
+	//				}
+	//			}
+	//		}), gui.Rigid(func() {
+	//			if len(nn[i].Children) > 0 && nn[i].IsAnyShowing() {
+	//				s.IconButton("HideItem", "DocBg", "PanelBg",
+	//					nn[i].hideChildrenButton)
+	//				for nn[i].hideChildrenButton.Clicked(gtx) {
+	//					Debug("filter none")
+	//					nn[i].Hidden = true
+	//					nn[i].HideAllItems(s)
+	//					consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
+	//					s.SaveConfig()
+	//				}
+	//			}
+	//		}),
+	//	)
+	//})
 }
 
 func (n *Node) GetPackages() (out Pk.Package) {

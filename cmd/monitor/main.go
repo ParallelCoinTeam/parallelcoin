@@ -8,7 +8,6 @@ import (
 	"gioui.org/unit"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/clipboard"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
@@ -134,23 +133,18 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	return
 }
 
-func (s *State) TopLevelLayout(headless bool) {
-	//if !s.ScreenShooting {
-	s.FlexV(
-		s.DuoUIheader(headless),
-		gui.Flexed(1, func() {
-			s.FlexH(
-				s.Body(headless),
-				s.Sidebar(headless),
-			)
-		}),
-		s.BottomBar(headless),
+func (s *State) TopLevelLayout(hl bool) {
+	gtx := s.Gtx
+	if hl {
+		gtx = s.Htx
+	}
+	cs := gtx.Constraints
+	s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", hl)
+	//s.FlexV(
+	//	gui.Rigid(func() {
+	s.FlexV(hl,
+		s.Header(hl),
 	)
-	//} else {
-	//	s.FlexV(gui.Rigid(func(){
-	//		cs := s.Gtx.Constraints
-	//		s.Rectangle(cs.Width.Max, cs.Height.Max, s.Theme.Colors["White"],
-	//			"ff")
-	//	}))
-	//}
+	//}),
+	//)
 }

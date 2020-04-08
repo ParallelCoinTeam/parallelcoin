@@ -1,103 +1,91 @@
 package monitor
 
 import (
-	"fmt"
+	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/gui/ico/svg"
+	"golang.org/x/exp/shiny/materialdesign/icons"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"syscall"
 	"time"
-
-	"gioui.org/layout"
-	"gioui.org/unit"
 )
 
-func (s *State) DuoUIheader(headless bool) layout.FlexChild {
+func (s *State) Header(hl bool) layout.FlexChild {
 	gtx := s.Gtx
-	if headless {
+	if hl {
 		gtx = s.Htx
 	}
 	return gui.Rigid(func() {
-		//gtx.Constraints.Height.Max = 48
-		//gtx.Constraints.Height.Min = 48
-		s.FlexH(
+		s.Rectangle(gtx.Constraints.Width.Max,
+			48, "PanelBg", hl)
+		s.FlexH(hl,
 			gui.Rigid(func() {
-				cs := gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Width.Max, "PanelBg", "ff")
-				fg, bg := "PanelText", "PanelBg"
-				icon := "logo"
 				b := s.Buttons["Logo"]
-				s.Theme.DuoUIbutton("", "", "",
-					s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
-					s.Theme.Colors[fg], 0, 40, 48, 48,
-					6, 2, 2, 6).IconLayout(gtx, b)
-				if b.Clicked(gtx) {
-					s.FlipTheme(&s.Config.DarkTheme, s.SaveConfig)
-				}
+				//s.IconButton(svg.ParallelCoin, "PanelText",
+				//	b, hl, func() {
+				//	})
+				s.ButtonArea(hl, func() {
+					s.FlexH(hl,
+						gui.Rigid(func() {
+							s.Icon(svg.ParallelCoin,
+								"PanelText", 32, 8, hl)()
+							if b.Clicked(gtx) {
+								s.FlipTheme(
+									&s.Config.DarkTheme, s.SaveConfig)
+							}
+						}),
+						gui.Rigid(func() {
+							s.Text(hl, "Monitor", "PanelText",
+								"Secondary", "h3", 48)
+						}),
+					)
+				}, b)
 			}),
-			gui.Rigid(func() {
-				layout.W.Layout(gtx, func() {
-					s.Label("Monitor", "PanelText", "PanelBg")
-				})
-			}),
-			s.Spacer("PanelBg"),
-			gui.Rigid(func() {
-				cs := gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Width.Max, "PanelBg", "ff")
-				t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
-					fmt.Sprintf("%s %dx%d", *s.Ctx.Config.DataDir,
-						s.WindowWidth, s.WindowHeight))
-				t.Color = s.Theme.Colors["PanelText"]
-				t.Font.Typeface = s.Theme.Fonts["Primary"]
-				t.Layout(gtx)
-			}),
-			s.ScreenshotButton(headless),
-			s.RestartRunButton(headless),
+			s.Spacer(hl),
+			s.RestartRunButton(hl),
 			gui.Rigid(func() {
 				b := s.Buttons["Close"]
-				s.IconButton("closeIcon", "PanelText",
-					"PanelBg", b)
-				for b.Clicked(gtx) {
-					Debug("close button clicked")
-					s.SaveConfig()
-					s.RunCommandChan <- "kill"
-					close(s.Ctx.KillAll)
-				}
+				s.IconButton(icons.NavigationClose, "PanelText",
+					b, hl, func() {
+						Debug("close button clicked")
+						s.SaveConfig()
+						s.RunCommandChan <- "kill"
+						close(s.Ctx.KillAll)
+					})
 			}),
 		)
 	})
+	//s.ScreenshotButton(hl),
+	//)
 }
 
-func (s *State) ScreenshotButton(headless bool) layout.FlexChild {
-	gtx := s.Gtx
-	if headless {
-		gtx = s.Htx
-	}
-	return gui.Rigid(func() {
-		b := s.Buttons["Screenshot"]
-		s.IconButton("Screenshot", "PanelText", "PanelBg", b)
-		for b.Clicked(gtx) {
-			Debug("clicked screenshot button")
-			if err := s.Screenshot(func() {
-				s.TopLevelLayout(true)
-			}, *s.Ctx.Config.DataDir+"screenshot.png"); Check(err) {
-			}
-		}
-	})
-}
-
-func (s *State) RestartRunButton(headless bool) layout.FlexChild {
-	gtx := s.Gtx
-	if headless {
-		gtx = s.Htx
-	}
+//
+//func (s *State) ScreenshotButton(headless bool) layout.FlexChild {
+//	gtx := s.Gtx
+//	if headless {
+//		gtx = s.Htx
+//	}
+//	return gui.Rigid(func() {
+//		b := s.Buttons["Screenshot"]
+//		s.IconButton("Screenshot", "PanelText", "PanelBg", b)
+//		for b.Clicked(gtx) {
+//			Debug("clicked screenshot button")
+//			if err := s.Screenshot(func() {
+//				s.TopLevelLayout(true)
+//			}, *s.Ctx.Config.DataDir+"screenshot.png"); Check(err) {
+//			}
+//		}
+//	})
+//}
+//
+func (s *State) RestartRunButton(hl bool) layout.FlexChild {
 	return gui.Rigid(func() {
 		var c *exec.Cmd
 		var err error
 		b := s.Buttons["Restart"]
-		s.IconButton("Restart", "PanelText", "PanelBg", b)
-		for b.Clicked(gtx) {
+		s.IconButton(icons.NavigationRefresh, "PanelText", b, hl, func() {
 			Debug("clicked restart button")
 			s.SaveConfig()
 			if s.HasGo {
@@ -114,11 +102,9 @@ func (s *State) RestartRunButton(headless bool) layout.FlexChild {
 							os.Environ()); Check(err) {
 						}
 						close(s.Ctx.KillAll)
-						//time.Sleep(time.Second/2)
-						//os.Exit(0)
 					}
 				}()
 			}
-		}
+		})
 	})
 }

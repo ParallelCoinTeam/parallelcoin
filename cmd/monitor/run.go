@@ -1,8 +1,6 @@
 package monitor
 
 import (
-	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/logi"
 	"github.com/p9c/pod/pkg/util/logi/consume"
 	"go.uber.org/atomic"
@@ -13,105 +11,119 @@ import (
 	"time"
 )
 
-func (s *State) RunControls(headless bool) layout.FlexChild {
-	gtx := s.Gtx
-	if headless {
-		gtx = s.Htx
-	}
-	return gui.Rigid(func() {
-		if s.CannotRun || s.Config.RunModeOpen {
-			return
-		}
-		if !s.Config.Running {
-			b := s.Buttons["RunMenu"]
-			s.ButtonArea(func() {
-				gtx.Constraints.Width.Max = 48
-				gtx.Constraints.Height.Max = 48
-				cs := gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocText", "ff")
-				s.Inset(8, func() {
-					s.Icon("Run", "ButtonBg", "DocText", 32)
-				})
-			}, b)
-			//s.IconButton("Run", "PanelBg", "PanelText", b)
-			for b.Clicked(s.Gtx) {
-				Debug("clicked run button")
-				if !s.Config.RunModeOpen {
-					s.RunCommandChan <- "run"
-				}
-			}
-		} else {
-			ic := "Pause"
-			fg, bg := "PanelBg", "PanelText"
-			if s.Config.Pausing {
-				ic = "Run"
-				fg, bg = "PanelText", "PanelBg"
-			}
-			s.FlexH(gui.Rigid(func() {
-				b := s.Buttons["StopMenu"]
-				s.ButtonArea(func() {
-					gtx.Constraints.Width.Max = 48
-					gtx.Constraints.Height.Max = 48
-					cs := gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
-					s.Inset(8, func() {
-						s.Icon("Stop", fg, bg, 32)
-					})
-				}, b)
-				//s.IconButton("Stop", "PanelBg", "PanelText", b)
-				for b.Clicked(s.Gtx) {
-					Debug("clicked stop button")
-					s.RunCommandChan <- "stop"
-				}
-			}), gui.Rigid(func() {
-				b := s.Buttons["PauseMenu"]
-				s.ButtonArea(func() {
-					gtx.Constraints.Width.Max = 48
-					gtx.Constraints.Height.Max = 48
-					cs := gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
-					s.Inset(8, func() {
-						s.Icon(ic, fg, bg, 32)
-					})
-				}, b)
-				//s.IconButton(ic, fg, bg, b)
-				for b.Clicked(s.Gtx) {
-					if s.Config.Pausing {
-						Debug("clicked on resume button")
-						s.RunCommandChan <- "resume"
-					} else {
-						Debug("clicked pause button")
-						s.RunCommandChan <- "pause"
-					}
-				}
-				//}), Rigid(func() {
-				//	s.IconButton("Kill", "PanelBg", "PanelText",
-				//		s.KillMenuButton)
-				//	for s.KillMenuButton.Clicked(s.Gtx) {
-				//		Debug("clicked kill button")
-				//		s.RunCommandChan <- "kill"
-				//	}
-			}), gui.Rigid(func() {
-				b := s.Buttons["RestartMenu"]
-				s.ButtonArea(func() {
-					gtx.Constraints.Width.Max = 48
-					gtx.Constraints.Height.Max = 48
-					cs := gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
-					s.Inset(8, func() {
-						s.Icon("Restart", fg, bg, 32)
-					})
-				}, b)
-				//s.IconButton("Restart", "PanelBg", "PanelText", b)
-				for b.Clicked(s.Gtx) {
-					Debug("clicked restart button")
-					s.RunCommandChan <- "restart"
-				}
-			}),
-			)
-		}
-	})
-}
+//
+//import (
+//	"gioui.org/layout"
+//	"github.com/p9c/pod/pkg/gui"
+//	"github.com/p9c/pod/pkg/util/logi"
+//	"github.com/p9c/pod/pkg/util/logi/consume"
+//	"go.uber.org/atomic"
+//	"os"
+//	"os/exec"
+//	"path/filepath"
+//	"runtime"
+//	"time"
+//)
+//
+//func (s *State) RunControls(headless bool) layout.FlexChild {
+//	gtx := s.Gtx
+//	if headless {
+//		gtx = s.Htx
+//	}
+//	return gui.Rigid(func() {
+//		if s.CannotRun || s.Config.RunModeOpen {
+//			return
+//		}
+//		if !s.Config.Running {
+//			b := s.Buttons["RunMenu"]
+//			s.ButtonArea(func() {
+//				gtx.Constraints.Width.Max = 48
+//				gtx.Constraints.Height.Max = 48
+//				cs := gtx.Constraints
+//				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocText", "ff")
+//				s.Inset(8, func() {
+//					s.Icon("Run", "ButtonBg", "DocText", 32)
+//				})
+//			}, b)
+//			//s.IconButton("Run", "PanelBg", "PanelText", b)
+//			for b.Clicked(s.Gtx) {
+//				Debug("clicked run button")
+//				if !s.Config.RunModeOpen {
+//					s.RunCommandChan <- "run"
+//				}
+//			}
+//		} else {
+//			ic := "Pause"
+//			fg, bg := "PanelBg", "PanelText"
+//			if s.Config.Pausing {
+//				ic = "Run"
+//				fg, bg = "PanelText", "PanelBg"
+//			}
+//			s.FlexH(gui.Rigid(func() {
+//				b := s.Buttons["StopMenu"]
+//				s.ButtonArea(func() {
+//					gtx.Constraints.Width.Max = 48
+//					gtx.Constraints.Height.Max = 48
+//					cs := gtx.Constraints
+//					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+//					s.Inset(8, func() {
+//						s.Icon("Stop", fg, bg, 32)
+//					})
+//				}, b)
+//				//s.IconButton("Stop", "PanelBg", "PanelText", b)
+//				for b.Clicked(s.Gtx) {
+//					Debug("clicked stop button")
+//					s.RunCommandChan <- "stop"
+//				}
+//			}), gui.Rigid(func() {
+//				b := s.Buttons["PauseMenu"]
+//				s.ButtonArea(func() {
+//					gtx.Constraints.Width.Max = 48
+//					gtx.Constraints.Height.Max = 48
+//					cs := gtx.Constraints
+//					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+//					s.Inset(8, func() {
+//						s.Icon(ic, fg, bg, 32)
+//					})
+//				}, b)
+//				//s.IconButton(ic, fg, bg, b)
+//				for b.Clicked(s.Gtx) {
+//					if s.Config.Pausing {
+//						Debug("clicked on resume button")
+//						s.RunCommandChan <- "resume"
+//					} else {
+//						Debug("clicked pause button")
+//						s.RunCommandChan <- "pause"
+//					}
+//				}
+//				//}), Rigid(func() {
+//				//	s.IconButton("Kill", "PanelBg", "PanelText",
+//				//		s.KillMenuButton)
+//				//	for s.KillMenuButton.Clicked(s.Gtx) {
+//				//		Debug("clicked kill button")
+//				//		s.RunCommandChan <- "kill"
+//				//	}
+//			}), gui.Rigid(func() {
+//				b := s.Buttons["RestartMenu"]
+//				s.ButtonArea(func() {
+//					gtx.Constraints.Width.Max = 48
+//					gtx.Constraints.Height.Max = 48
+//					cs := gtx.Constraints
+//					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+//					s.Inset(8, func() {
+//						s.Icon("Restart", fg, bg, 32)
+//					})
+//				}, b)
+//				//s.IconButton("Restart", "PanelBg", "PanelText", b)
+//				for b.Clicked(s.Gtx) {
+//					Debug("clicked restart button")
+//					s.RunCommandChan <- "restart"
+//				}
+//			}),
+//			)
+//		}
+//	})
+//}
 
 func (s *State) Build() (exePath string, err error) {
 	//gtx := s.Gtx
