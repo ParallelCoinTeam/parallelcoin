@@ -2,7 +2,6 @@ package monitor
 
 import (
 	"gioui.org/app"
-	"gioui.org/app/headless"
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -20,13 +19,11 @@ import (
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	clipboard.Start()
-
 	mon := NewMonitor(cx, nil, rc)
 	var lgs []string
 	for i := range *logi.L.Packages {
 		lgs = append(lgs, i)
 	}
-	//Debugs(lgs)
 	mon.Loggers = mon.GetTree(lgs)
 	isNew := mon.LoadConfig()
 	_, _ = git.PlainClone("/tmp/foo", false,
@@ -78,9 +75,6 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			}
 		}()
 	}
-	//go mon.Consume()
-	var prevH, prevW int
-	lastChanged := time.Now()
 	go func() {
 		Debug("starting up GUI event loop")
 	out:
@@ -108,14 +102,6 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 					mon.Config.Width, mon.Config.Height = w, h
 					mon.TopLevelLayout(false)
 					e.Frame(mon.Gtx.Ops)
-					if w != prevW || h != prevH {
-						if time.Now().Sub(lastChanged) > time.Second {
-							if mon.HW, err = headless.NewWindow(w, h); Check(err) {
-								return
-							}
-							lastChanged = time.Now()
-						}
-					}
 				}
 			}
 		}
@@ -139,12 +125,8 @@ func (s *State) TopLevelLayout(hl bool) {
 		gtx = s.Htx
 	}
 	cs := gtx.Constraints
-	s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", hl)
-	//s.FlexV(
-	//	gui.Rigid(func() {
-	s.FlexV(hl,
+	s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")(hl)()
+	s.FlexV(
 		s.Header(hl),
-	)
-	//}),
-	//)
+	)(hl)
 }

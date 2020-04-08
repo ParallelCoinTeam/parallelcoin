@@ -1,10 +1,12 @@
 package gui
 
-func (s *State) FlipTheme(isDark *bool, hook func()) {
-	*isDark = !*isDark
-	//Debug(s.Config.DarkTheme)
-	s.SetTheme(*isDark)
-	hook()
+func (s *State) FlipTheme(isDark *bool, hook func()) func() {
+	return func() {
+		*isDark = !*isDark
+		//Debug(s.Config.DarkTheme)
+		s.SetTheme(*isDark)
+		hook()
+	}
 }
 
 func (s *State) SetTheme(dark bool) {
