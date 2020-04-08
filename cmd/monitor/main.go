@@ -127,6 +127,6 @@ func (s *State) TopLevelLayout(hl bool) {
 	cs := gtx.Constraints
 	s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")(hl)()
 	s.FlexV(
-		s.Header(hl),
+		s.Widgets["header"](hl),
 	)(hl)
 }
