@@ -43,9 +43,7 @@ func (t *DuoUItheme) DuoUIeditor(hint, color, bg string, width int) DuoUIeditor 
 }
 
 func (e DuoUIeditor) Layout(gtx *layout.Context, editor *gel.Editor) {
-	gtx.Constraints.Width.Max = 16 * e.Width
-	gtx.Constraints.Width.Min = 16 * e.Width
-	gtx.Constraints.Height.Min = 32
+	gtx.Constraints.Width.Min = e.Width
 	var stack op.StackOp
 	stack.Push(gtx.Ops)
 	var macro op.MacroOp
@@ -54,17 +52,6 @@ func (e DuoUIeditor) Layout(gtx *layout.Context, editor *gel.Editor) {
 	tl := gel.Label{Alignment: editor.Alignment}
 	tl.Layout(gtx, e.shaper, e.Font, e.TextSize, e.Hint)
 	macro.Stop()
-	//if w := gtx.Dimensions.Size.X; gtx.Constraints.Width.Min < w {
-	//	gtx.Constraints.Width.Min = w
-	//}
-	//if h := gtx.Dimensions.Size.Y; gtx.Constraints.Height.Min < h {
-	//	gtx.Constraints.Height.Min = h
-	//}
-	//if w := gtx.Constraints.Width.Min; 16*e.Width < w {
-	//}
-	//if h := gtx.Dimensions.Size.Y; gtx.Constraints.Height.Min < h {
-	//gtx.Constraints.Height.Max = 40
-	//}
 	editor.Layout(gtx, e.shaper, e.Font, e.TextSize)
 	if editor.Len() > 0 {
 		paint.ColorOp{Color: e.Color}.Add(gtx.Ops)
