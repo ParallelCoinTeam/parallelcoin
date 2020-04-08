@@ -45,7 +45,6 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 					0, 0, 0, 0)
 				for footerButton.Clicked(gtx) {
 					rc.ShowPage = page.Title
-					page.Command()
 					SetPage(rc, page)
 				}
 				footerMenuItem.IconLayout(gtx, footerButton)
@@ -56,7 +55,6 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 				footerMenuItem.Height = 48
 				for footerButton.Clicked(gtx) {
 					rc.ShowPage = page.Title
-					page.Command()
 					SetPage(rc, page)
 				}
 				footerMenuItem.Layout(gtx, footerButton)

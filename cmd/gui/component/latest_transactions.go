@@ -19,64 +19,62 @@ var (
 
 func DuoUIlatestTransactions(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
+		width := gtx.Constraints.Width.Max
+		//cs := gtx.Constraints
+		th.DuoUIcontainer(0, th.Colors["DarkGray"]).Layout(gtx, layout.NW, func() {
+			layout.Flex{
+				Axis: layout.Vertical,
+			}.Layout(gtx,
+				layout.Rigid(func() {
+					th.DuoUIcontainer(8, th.Colors["Primary"]).Layout(gtx, layout.N, func() {
+						gtx.Constraints.Width.Min = width
+						latestx := th.H5("LATEST TRANSACTIONS")
+						latestx.Color = th.Colors["Light"]
+						latestx.Alignment = text.Start
+						latestx.Layout(gtx)
+					})
+				}),
+				layout.Flexed(1, func() {
+					layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
+						layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+							layout.Rigid(func() {
 
-		cs := gtx.Constraints
-		gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["DarkGray"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-		layout.Flex{
-			Axis: layout.Vertical,
-		}.Layout(gtx,
-			layout.Rigid(func() {
-				th.DuoUIcontainer(16, th.Colors["Primary"]).Layout(gtx, layout.N, func() {
-					latestx := th.H5("LATEST TRANSACTIONS")
-					latestx.Color = th.Colors["Light"]
-					latestx.Alignment = text.Start
-					latestx.Layout(gtx)
-				})
-			}),
-			layout.Flexed(1, func() {
-				layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-					layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-						layout.Rigid(func() {
-
-							latestTxsBookPanel := th.DuoUIpanel()
-							latestTxsBookPanel.PanelObject = rc.Status.Wallet.LastTxs.Txs
-							latestTxsBookPanel.ScrollBar = th.ScrollBar()
-							latestTxsPanelElement.PanelObjectsNumber = len(rc.Status.Wallet.LastTxs.Txs)
-							latestTxsBookPanel.Layout(gtx, latestTxsPanelElement, func(i int, in interface{}) {
-								txs := in.([]model.DuoUItransactionExcerpt)
-								t := txs[i]
-								gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-								layout.Inset{
-									Top:    unit.Dp(8),
-									Right:  unit.Dp(16),
-									Bottom: unit.Dp(8),
-									Left:   unit.Dp(16),
-								}.Layout(gtx, func() {
-									layout.Flex{Axis: layout.Vertical}.Layout(gtx,
-										layout.Rigid(lTtxid(gtx, th, t.TxID)),
-										layout.Rigid(func() {
-											layout.Flex{
-												Spacing: layout.SpaceBetween,
-											}.Layout(gtx,
-												layout.Rigid(func() {
-													layout.Flex{
-														Axis: layout.Vertical,
-													}.Layout(gtx,
-														layout.Rigid(lTcategory(gtx, th, t.Category)),
-														layout.Rigid(lTtime(gtx, th, t.Time)),
-													)
-												}),
-												layout.Rigid(lTamount(gtx, th, t.Amount)),
-											)
-										}),
-										layout.Rigid(th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])),
-									)
+								latestTxsBookPanel := th.DuoUIpanel()
+								latestTxsBookPanel.PanelObject = rc.Status.Wallet.LastTxs.Txs
+								latestTxsBookPanel.ScrollBar = th.ScrollBar(0)
+								latestTxsPanelElement.PanelObjectsNumber = len(rc.Status.Wallet.LastTxs.Txs)
+								latestTxsBookPanel.Layout(gtx, latestTxsPanelElement, func(i int, in interface{}) {
+									txs := in.([]model.DuoUItransactionExcerpt)
+									t := txs[i]
+									th.DuoUIcontainer(16, th.Colors["Dark"]).Layout(gtx, layout.NW, func() {
+										width := gtx.Constraints.Width.Max
+										layout.Flex{Axis: layout.Vertical}.Layout(gtx,
+											layout.Rigid(lTtxid(gtx, th, t.TxID)),
+											layout.Rigid(func() {
+												gtx.Constraints.Width.Min = width
+												layout.Flex{
+													Spacing: layout.SpaceBetween,
+												}.Layout(gtx,
+													layout.Rigid(func() {
+														layout.Flex{
+															Axis: layout.Vertical,
+														}.Layout(gtx,
+															layout.Rigid(lTcategory(gtx, th, t.Category)),
+															layout.Rigid(lTtime(gtx, th, t.Time)),
+														)
+													}),
+													layout.Rigid(lTamount(gtx, th, t.Amount)),
+												)
+											}),
+											layout.Rigid(th.DuoUIline(gtx, 0, 0, 1, th.Colors["Hint"])),
+										)
+									})
 								})
-							})
-						}))
-				})
-			}),
-		)
+							}))
+					})
+				}),
+			)
+		})
 	}
 }
 
