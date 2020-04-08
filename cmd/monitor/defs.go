@@ -28,6 +28,7 @@ type State struct {
 	Lists               map[string]*layout.List
 	ModesButtons        map[string]*gel.Button
 	CommandEditor       gel.Editor
+	Widgets             map[string]gui.WidgetFunc
 	Loggers             *Node
 	RunningInRepo       bool
 	HasGo               bool
@@ -98,6 +99,16 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		"FilterLevel": {},
 		"Log":         {},
 	}
+	leftW := []gui.WidgetFunc{
+		s.ThemeButton(),
+	}
+	rightW := []gui.WidgetFunc{
+		s.ScreenshotButton(),
+		s.RebuildButton(),
+		s.CloseButton(),
+	}
+	s.Widgets = make(map[string]gui.WidgetFunc)
+	s.Widgets["header"] = s.Header(leftW, rightW)
 	s.Config.RunMode = "node"
 	s.Config.DarkTheme = true
 	return

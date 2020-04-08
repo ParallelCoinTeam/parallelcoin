@@ -21,13 +21,26 @@ import (
 	"time"
 )
 
-type IconFunc func(ins int) func(hl bool) layout.FlexChild
-
-type WidgetFunc func(hl bool) layout.FlexChild
-
-type ScaledConfig struct {
-	Scale float32
-}
+type (
+	WidgetFunc func(hl bool) layout.FlexChild
+	IconFunc func(ins int) WidgetFunc
+	ScaledConfig struct {
+		Scale float32
+	}
+	// State stores the state for a gui
+	State struct {
+		Gtx   *layout.Context
+		Htx   *layout.Context
+		W     *app.Window
+		HW    *headless.Window
+		Rc    *rcd.RcVar
+		Theme *gelook.DuoUItheme
+		// these two values need to be updated by the main render pipeline loop
+		WindowWidth, WindowHeight int
+		DarkTheme                 bool
+		ScreenShooting            bool
+	}
+)
 
 func (s *ScaledConfig) Now() time.Time {
 	return time.Now()
@@ -39,20 +52,6 @@ func (s *ScaledConfig) Px(v unit.Value) int {
 		scale = 1
 	}
 	return int(math.Round(float64(scale * v.V)))
-}
-
-// State stores the state for a gui
-type State struct {
-	Gtx   *layout.Context
-	Htx   *layout.Context
-	W     *app.Window
-	HW    *headless.Window
-	Rc    *rcd.RcVar
-	Theme *gelook.DuoUItheme
-	// these two values need to be updated by the main render pipeline loop
-	WindowWidth, WindowHeight int
-	DarkTheme                 bool
-	ScreenShooting            bool
 }
 
 func (s *State) Screenshot(widget func(),
@@ -132,7 +131,7 @@ func Flexed(weight float32, widget func()) layout.FlexChild {
 	return layout.Flexed(weight, widget)
 }
 
-func (s *State) Spacer() layout.FlexChild {
+func (s *State) Spacer(hl bool) layout.FlexChild {
 	return Flexed(1, func() {})
 }
 
@@ -177,8 +176,7 @@ func (s *State) IconSVGtoImage(icon []byte, fg string, size int) (render IconFun
 	_ = iconvg.Decode(&ico, icon, &iconvg.DecodeOptions{
 		Palette: &m.Palette,
 	})
-	//return
-	return func(ins int) func(hl bool) layout.FlexChild {
+	return func(ins int) WidgetFunc {
 		return func(hl bool) layout.FlexChild {
 			return Rigid(func() {
 				gtx := s.Gtx
@@ -224,20 +222,6 @@ func (s *State) ButtonArea(content func(hl bool) func(),
 			}
 		})
 	}
-}
-
-func (s *State) Label(hl bool, txt, fg, bg string) {
-	gtx := s.Gtx
-	if hl {
-		gtx = s.Htx
-	}
-	s.Inset(hl, 10, func() {
-		t := s.Theme.DuoUIlabel(unit.Dp(float32(36)), txt)
-		t.Color = s.Theme.Colors[fg]
-		t.Font.Typeface = s.Theme.Fonts["Secondary"]
-		//t.TextSize = unit.Dp(32)
-		t.Layout(gtx)
-	})
 }
 
 func (s *State) Text(txt, fg, face, tag string,
