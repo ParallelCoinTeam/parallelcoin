@@ -518,53 +518,57 @@ func (s *State) DuoUIstatus() func() {
 func (s *State) FooterLeftMenu(allPages *model.DuoUIpages) func() {
 	g := s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
-			cornerButtons := []func(){
-				s.QuitButton(),
-				// s.footerMenuButton(allPages.Theme["EXPLORER"],
-				//"BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
-				s.footerMenuButton(allPages.Theme["LOG"], "LOG",
-					"traceIcon", buttonLog),
-			}
-			cornerNav.Layout(g, len(cornerButtons), func(i int) {
-				layout.UniformInset(unit.Dp(0)).Layout(g, cornerButtons[i])
-			})
+		cornerButtons := []func(){
+			s.QuitButton(),
+			// s.footerMenuButton(allPages.Theme["EXPLORER"],
+			//"BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
+			s.footerMenuButton(allPages.Theme["LOG"], "LOG", "traceIcon",
+				buttonLog),
+		}
+		cornerNav.Layout(g, len(cornerButtons), func(i int) {
+			layout.UniformInset(unit.Dp(0)).Layout(g, cornerButtons[i])
 		})
 	}
 }
 
 func (s *State) footerMenuButton(page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {
-	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
+		layout.UniformInset(unit.Dp(0)).Layout(s.Gtx, func() {
 			var footerMenuItem gelook.DuoUIbutton
 			if icon != "" {
-				footerMenuItem = t.DuoUIbutton("", "",
-					"", "", "", t.Colors["Dark"], icon,
-					CurrentCurrentPageColor(s.Rc.ShowPage,
-						page.Title, navItemIconColor, t.Colors["Primary"]),
-					footerMenuItemTextSize, footerMenuItemIconSize,
-					footerMenuItemWidth, footerMenuItemHeight,
-					0, 0, 0, 0)
-				for footerButton.Clicked(g) {
+				footerMenuItem = s.Thm.DuoUIbutton(gelook.ButtonParams{
+					BgHoverColor: s.Thm.Colors["Dark"],
+					Icon:         icon,
+					IconColor: CurrentCurrentPageColor(s.Rc.ShowPage,
+						page.Title, navItemIconColor, s.Thm.Colors["Primary"]),
+					TextSize: footerMenuItemTextSize, IconSize: footerMenuItemIconSize,
+					Width: footerMenuItemWidth, Height: footerMenuItemHeight})
+				for footerButton.Clicked(s.Gtx) {
 					s.Rc.ShowPage = page.Title
 					SetPage(s.Rc, page)
 				}
+				footerMenuItem.IconLayout(s.Gtx, footerButton)
 			} else {
-				footerMenuItem = t.DuoUIbutton(t.Fonts["Primary"], text,
-					CurrentCurrentPageColor(s.Rc.ShowPage, page.Title,
-						t.Colors["Light"], t.Colors["Primary"]),
-					"", "", "", "", "",
-					footerMenuItemTextSize, footerMenuItemIconSize,
-					0, footerMenuItemHeight,
-					13, 16, 14, 16)
+				footerMenuItem = s.Thm.DuoUIbutton(gelook.ButtonParams{
+					TxtFont: s.Thm.Fonts["Primary"],
+					Txt:     text,
+					TxtColor: CurrentCurrentPageColor(s.Rc.ShowPage, page.Title,
+						s.Thm.Colors["Light"], s.Thm.Colors["Primary"]),
+					TextSize:      footerMenuItemTextSize,
+					IconSize:      footerMenuItemIconSize,
+					Height:        footerMenuItemHeight,
+					PaddingTop:    13,
+					PaddingRight:  16,
+					PaddingBottom: 14,
+					PaddingLeft:   16,
+				})
 				footerMenuItem.Height = 48
-				for footerButton.Clicked(g) {
+				for footerButton.Clicked(s.Gtx) {
 					s.Rc.ShowPage = page.Title
 					SetPage(s.Rc, page)
 				}
+				footerMenuItem.Layout(s.Gtx, footerButton)
 			}
-			footerMenuItem.Layout(g, footerButton)
 		})
 	}
 }
@@ -648,15 +652,19 @@ func (s *State) headerMenuButton(text, icon string, headerButton *gel.Button) fu
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
 			var footerMenuItem gelook.DuoUIbutton
-			footerMenuItem = t.DuoUIbutton("", "",
-				"", "", "",
-				t.Colors["Dark"], icon,
-				CurrentCurrentPageColor(s.Rc.ShowPage, text, navItemIconColor,
-					t.Colors["Primary"]),
-				footerMenuItemTextSize, footerMenuItemIconSize,
-				footerMenuItemWidth, footerMenuItemHeight,
-				footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal,
-				footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
+			footerMenuItem = t.DuoUIbutton(gelook.ButtonParams{
+				BgHoverColor: t.Colors["Dark"],
+				Icon:         icon,
+				IconColor: CurrentCurrentPageColor(
+					s.Rc.ShowPage, text, navItemIconColor, t.Colors["Primary"]),
+				TextSize:      footerMenuItemTextSize,
+				IconSize:      footerMenuItemIconSize,
+				Width:         footerMenuItemWidth,
+				Height:        footerMenuItemHeight,
+				PaddingTop:    footerMenuItemPaddingVertical,
+				PaddingRight:  footerMenuItemPaddingHorizontal,
+				PaddingBottom: footerMenuItemPaddingVertical,
+				PaddingLeft:   footerMenuItemPaddingHorizontal})
 			for headerButton.Clicked(g) {
 				s.Rc.ShowPage = text
 			}
@@ -669,14 +677,20 @@ func (s *State) iconButton(page *gelook.DuoUIpage) func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
 		var logMenuItem gelook.DuoUIbutton
-		logMenuItem = t.DuoUIbutton("", "", "",
-			t.Colors["Dark"], "", "", "traceIcon",
-			CurrentCurrentPageColor(s.Rc.ShowPage, "LOG",
-				t.Colors["Light"], t.Colors["Primary"]),
-			footerMenuItemTextSize, footerMenuItemIconSize,
-			footerMenuItemWidth, footerMenuItemHeight,
-			footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal,
-			footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
+		logMenuItem = t.DuoUIbutton(gelook.ButtonParams{
+			BgColor: t.Colors["Dark"],
+			Icon:    "traceIcon",
+			IconColor: CurrentCurrentPageColor(
+				s.Rc.ShowPage, "LOG", t.Colors["Light"], t.Colors["Primary"]),
+			TextSize:      footerMenuItemTextSize,
+			IconSize:      footerMenuItemIconSize,
+			Width:         footerMenuItemWidth,
+			Height:        footerMenuItemHeight,
+			PaddingTop:    footerMenuItemPaddingVertical,
+			PaddingRight:  footerMenuItemPaddingHorizontal,
+			PaddingBottom: footerMenuItemPaddingVertical,
+			PaddingLeft:   footerMenuItemPaddingHorizontal,
+		})
 		for buttonLog.Clicked(g) {
 			SetPage(s.Rc, page)
 			s.Rc.ShowPage = "LOG"
@@ -727,15 +741,25 @@ func (s *State) navMenuButton(page *gelook.DuoUIpage, nav *model.DuoUInav, title
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
 			var menuItem gelook.DuoUIbutton
-			menuItem = t.DuoUIbutton(t.Fonts["Secondary"],
-				title, t.Colors["Dark"],
-				t.Colors["LightGrayII"],
-				t.Colors["LightGrayII"],
-				t.Colors["Dark"], icon,
-				CurrentCurrentPageColor(s.Rc.ShowPage, title, navItemIconColor,
-					t.Colors["Primary"]), nav.TextSize, nav.IconSize,
-				nav.Width, nav.Height, nav.PaddingVertical,
-				nav.PaddingHorizontal, nav.PaddingVertical, nav.PaddingHorizontal)
+			menuItem = t.DuoUIbutton(gelook.ButtonParams{TxtFont: t.Fonts["Secondary"],
+				Txt:           title,
+				TxtColor:      t.Colors["Dark"],
+				BgColor:       t.Colors["LightGrayII"],
+				TxtHoverColor: t.Colors["LightGrayII"],
+				BgHoverColor:  t.Colors["Dark"],
+				Icon:          icon,
+				IconColor: CurrentCurrentPageColor(
+					s.Rc.ShowPage, title, navItemIconColor,
+					t.Colors["Primary"]),
+				TextSize:      nav.TextSize,
+				IconSize:      nav.IconSize,
+				Width:         nav.Width,
+				Height:        nav.Height,
+				PaddingTop:    nav.PaddingVertical,
+				PaddingRight:  nav.PaddingHorizontal,
+				PaddingBottom: nav.PaddingVertical,
+				PaddingLeft:   nav.PaddingHorizontal,
+			})
 			for navButton.Clicked(g) {
 				s.Rc.ShowPage = title
 				SetPage(s.Rc, page)
@@ -749,11 +773,17 @@ func (s *State) pageNavButton(page *gelook.DuoUIpage, b *gel.Button, label, hash
 	t, g := s.Thm, s.Gtx
 	layout.UniformInset(unit.Dp(4)).Layout(g, func() {
 		var blockButton gelook.DuoUIbutton
-		blockButton = t.DuoUIbutton(t.Fonts["Mono"], label+" "+hash,
-			t.Colors["Light"], t.Colors["Info"],
-			t.Colors["Info"], t.Colors["Light"], "", t.Colors["Light"],
-			16, 0, 60, 24,
-			0, 0, 0, 0)
+		blockButton = t.DuoUIbutton(gelook.ButtonParams{TxtFont: t.Fonts["Mono"],
+			Txt:           label + " " + hash,
+			TxtColor:      t.Colors["Light"],
+			BgColor:       t.Colors["Info"],
+			TxtHoverColor: t.Colors["Info"],
+			BgHoverColor:  t.Colors["Light"],
+			IconColor:     t.Colors["Light"],
+			TextSize:      16,
+			Width:         60,
+			Height:        24,
+		})
 		for b.Clicked(g) {
 			s.Rc.ShowPage = fmt.Sprintf("BLOCK %s", hash)
 			s.Rc.GetSingleBlock(hash)()
@@ -770,9 +800,8 @@ func (s *State) PageNavButtons(previousBlockHash, nextBlockHash string, prevPage
 			layout.Flexed(0.5, func() {
 				eh := chainhash.Hash{}
 				if previousBlockHash != eh.String() {
-					s.pageNavButton(nextPage,
-						previousBlockHashButton, "Previous Block",
-						previousBlockHash)
+					s.pageNavButton(nextPage, previousBlockHashButton,
+						"Previous Block", previousBlockHash)
 				}
 			}),
 			layout.Flexed(0.5, func() {
@@ -780,7 +809,8 @@ func (s *State) PageNavButtons(previousBlockHash, nextBlockHash string, prevPage
 					s.pageNavButton(nextPage, nextBlockHashButton,
 						"Next Block", nextBlockHash)
 				}
-			}))
+			}),
+		)
 	}
 }
 
@@ -796,8 +826,8 @@ func (s *State) PeersList() func() {
 				layout.Flex{
 					Spacing: layout.SpaceBetween,
 				}.Layout(g,
-					layout.Rigid(s.Context.Label(t.Fonts["Mono"],
-						14, c, fmt.Sprint(np.ID))),
+					layout.Rigid(s.Context.Label(t.Fonts["Mono"], 14, c,
+						fmt.Sprint(np.ID))),
 					layout.Flexed(1, s.peerDetails(i, np)),
 					layout.Rigid(s.Label(t.Fonts["Mono"], 14, c, np.Addr)))
 			})
@@ -808,16 +838,18 @@ func (s *State) QuitButton() func() {
 	t, g := s.Thm, s.Gtx
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
-			var closeMeniItem gelook.DuoUIbutton
-			closeMeniItem = t.DuoUIbutton("", "", "",
-				t.Colors["Dark"], "", "",
-				"closeIcon",
-				CurrentCurrentPageColor(
+			var closeMenuItem gelook.DuoUIbutton
+			closeMenuItem = t.DuoUIbutton(gelook.ButtonParams{
+				BgColor: t.Colors["Dark"],
+				Icon:    "closeIcon",
+				IconColor: CurrentCurrentPageColor(
 					s.Rc.ShowPage, "CLOSE", t.Colors["Light"],
 					t.Colors["Primary"]),
-				footerMenuItemTextSize, footerMenuItemIconSize,
-				footerMenuItemWidth, footerMenuItemHeight,
-				0, 0, 0, 0)
+				TextSize: footerMenuItemTextSize,
+				IconSize: footerMenuItemIconSize,
+				Width:    footerMenuItemWidth,
+				Height:   footerMenuItemHeight,
+			})
 			for buttonQuit.Clicked(g) {
 				s.Rc.Dialog.Show = true
 				s.Rc.Dialog = &model.DuoUIdialog{
@@ -841,7 +873,7 @@ func (s *State) QuitButton() func() {
 					Text:        "Confirm ParallelCoin close",
 				}
 			}
-			closeMeniItem.IconLayout(g, buttonQuit)
+			closeMenuItem.IconLayout(g, buttonQuit)
 		})
 	}
 }
@@ -865,11 +897,19 @@ func (s *State) SettingsTabs() func() {
 					color = t.Colors["Dark"]
 					bgColor = t.Colors["Light"]
 				}
-				t.DuoUIbutton(t.Fonts["Primary"],
-					txt, color, bgColor, "", "",
-					"", "", 16, 0, 80, 32,
-					4, 4, 4, 4,
-				).Layout(g, rcs.Tabs.TabsList[txt])
+				t.DuoUIbutton(gelook.ButtonParams{
+					TxtFont:       t.Fonts["Primary"],
+					Txt:           txt,
+					TxtColor:      color,
+					BgColor:       bgColor,
+					TextSize:      16,
+					Width:         80,
+					Height:        32,
+					PaddingTop:    4,
+					PaddingRight:  4,
+					PaddingBottom: 4,
+					PaddingLeft:   4,
+				}).Layout(g, rcs.Tabs.TabsList[txt])
 			})
 		})
 	}
@@ -906,10 +946,19 @@ func (s *Context) Button(buttonController *gel.Button, font text.Typeface, textS
 	t, g := s.Thm, s.Gtx
 	return func() {
 		t.DuoUIcontainer(0, t.Colors[""])
-		button := t.DuoUIbutton(font, label, color, bgColor,
-			"", "", "", "",
-			textSize, 0, 128, 48,
-			padT, padR, padB, padL)
+		button := t.DuoUIbutton(gelook.ButtonParams{
+			TxtFont:       font,
+			Txt:           label,
+			TxtColor:      color,
+			BgColor:       bgColor,
+			TextSize:      textSize,
+			Width:         128,
+			Height:        48,
+			PaddingTop:    padT,
+			PaddingRight:  padR,
+			PaddingBottom: padB,
+			PaddingLeft:   padL,
+		})
 		for buttonController.Clicked(g) {
 			handler()
 		}
@@ -997,11 +1046,20 @@ func (s *Context) dialogButton(f func(), txt, bgColor, icon, iconColor string,
 			var b gelook.DuoUIbutton
 			layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8),
 				Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(g, func() {
-				b = t.DuoUIbutton(t.Fonts["Primary"], txt,
-					t.Colors["Dark"], bgColor, t.Colors["Info"], bgColor,
-					icon, iconColor, 16, 32,
-					120, 64,
-					0, 0, 0, 0)
+				b = t.DuoUIbutton(gelook.ButtonParams{
+					TxtFont:       t.Fonts["Primary"],
+					Txt:           txt,
+					TxtColor:      t.Colors["Dark"],
+					BgColor:       bgColor,
+					TxtHoverColor: t.Colors["Info"],
+					BgHoverColor:  bgColor,
+					Icon:          icon,
+					IconColor:     iconColor,
+					TextSize:      16,
+					IconSize:      32,
+					Width:         120,
+					Height:        64,
+				})
 				for button.Clicked(g) {
 					f()
 				}

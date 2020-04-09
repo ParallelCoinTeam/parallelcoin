@@ -22,8 +22,8 @@ import (
 )
 
 type (
-	WidgetFunc func(hl bool) layout.FlexChild
-	IconFunc func(ins int) WidgetFunc
+	WidgetFunc   func(hl bool) layout.FlexChild
+	IconFunc     func(ins int) WidgetFunc
 	ScaledConfig struct {
 		Scale float32
 	}
@@ -212,10 +212,7 @@ func (s *State) ButtonArea(content func(hl bool) func(),
 			if hl {
 				gtx = s.Htx
 			}
-			b := s.Theme.DuoUIbutton("", "", "",
-				"", "", "", "", "",
-				0, 0, 0, 0, 0, 0,
-				0, 0)
+			b := s.Theme.DuoUIbutton(gelook.ButtonParams{})
 			b.InsideLayout(gtx, button, content(hl))
 			for button.Clicked(gtx) {
 				hook()

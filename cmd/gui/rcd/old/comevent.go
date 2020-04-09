@@ -1,4 +1,4 @@
-package rcd
+package old
 
 type DuoUIcommands struct {
 	Events  chan DuoUIcommandsEvent

@@ -1,4 +1,4 @@
-package rcd
+package old
 
 import (
 	"time"
@@ -91,7 +91,7 @@ func update(r *RcVar) {
 	// Trace(r.History.PerPage)
 	// Info("")
 	// r.GetDuoUIstatus()
-	// r.GetDuoUIlocalLost()
+	// r.GetDuoUIlocalHost()
 	// r.GetDuoUIblockHeight()
 	// Warn("GetDuoUIblockCount")
 	r.GetDuoUIdifficulty()

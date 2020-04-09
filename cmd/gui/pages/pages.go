@@ -8,6 +8,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"runtime/debug"
 	"strconv"
 	"time"
 
@@ -49,8 +50,8 @@ var (
 	//	//CounterDecrease: new(controller.Button),
 	//	CounterReset: new(gel.Button),
 	// }
-	transactionsPanelElement = gel.NewPanel()
-	consoleInputField        = &gel.Editor{
+	txsPanelElement   = gel.NewPanel()
+	consoleInputField = &gel.Editor{
 		SingleLine: true,
 		Submit:     true,
 	}
@@ -233,18 +234,18 @@ func blockPage(c *component.State, block string) *gelook.DuoUIpage {
 }
 
 func blockRow(c *component.State, block *model.DuoUIblock) {
+	if block == nil || block.Link == nil {
+		Debug("blockRow empty result")
+		debug.PrintStack()
+		return
+	}
 	for block.Link.Clicked(c.Gtx) {
 		c.Rc.ShowPage = fmt.Sprintf("BLOCK %s", block.BlockHash)
 		c.Rc.GetSingleBlock(block.BlockHash)()
 		component.SetPage(c.Rc, blockPage(c, block.BlockHash))
 	}
 	width := c.Gtx.Constraints.Width.Max
-	button := c.Thm.DuoUIbutton("", "",
-		"", "",
-		"", "",
-		"", "",
-		0, 0, 0, 0,
-		0, 0, 0, 0)
+	button := c.Thm.DuoUIbutton(gelook.ButtonParams{})
 	button.InsideLayout(c.Gtx, block.Link, func() {
 		layout.Flex{
 			Axis: layout.Vertical,
@@ -256,12 +257,22 @@ func blockRow(c *component.State, block *model.DuoUIblock) {
 				}.Layout(c.Gtx,
 					layout.Rigid(func() {
 						var linkButton gelook.DuoUIbutton
-						linkButton = c.Thm.DuoUIbutton(c.Thm.Fonts["Mono"],
-							fmt.Sprint(block.Height), c.Thm.Colors["Light"],
-							c.Thm.Colors["Info"], c.Thm.Colors["Info"],
-							c.Thm.Colors["Dark"], "", c.Thm.Colors["Dark"],
-							14, 0, 60, 24,
-							5, 8, 6, 8)
+						linkButton = c.Thm.DuoUIbutton(gelook.ButtonParams{
+							TxtFont:       c.Thm.Fonts["Mono"],
+							Txt:           fmt.Sprint(block.Height),
+							TxtColor:      c.Thm.Colors["Light"],
+							BgColor:       c.Thm.Colors["Info"],
+							TxtHoverColor: c.Thm.Colors["Info"],
+							BgHoverColor:  c.Thm.Colors["Dark"],
+							IconColor:     c.Thm.Colors["Dark"],
+							TextSize:      14,
+							Width:         60,
+							Height:        24,
+							PaddingTop:    5,
+							PaddingRight:  8,
+							PaddingBottom: 6,
+							PaddingLeft:   8,
+						})
 						linkButton.Layout(c.Gtx, block.Link)
 					}),
 					layout.Rigid(func() {
@@ -419,8 +430,8 @@ func consoleBody(c *component.State) func() {
 		layout.UniformInset(unit.Dp(8)).Layout(c.Gtx, func() {
 			c.Thm.DuoUIcontainer(0, "ff000000").
 				Layout(c.Gtx, layout.N, func() {
-					layout.Flex{}.Layout(c.Gtx, layout.Flexed(1, func() {
-						layout.UniformInset(unit.Dp(0)).Layout(c.Gtx, func() {
+					layout.Flex{}.Layout(c.Gtx,
+						layout.Flexed(1, func() {
 							layout.Flex{
 								Axis:    layout.Vertical,
 								Spacing: layout.SpaceAround,
@@ -449,19 +460,24 @@ func consoleBody(c *component.State) func() {
 									c.ConsoleInput(
 										consoleInputField, "Run command",
 										func(e gel.SubmitEvent) {
-											c.Rc.ConsoleHistory.Commands = append(
-												c.Rc.ConsoleHistory.Commands,
-												model.DuoUIconsoleCommand{
-													ComID: e.Text,
-													Time:  time.Time{},
-													Out:   c.Rc.ConsoleCmd(e.Text),
-												})
+											outC := c.Rc.ConsoleCmd(e.Text)
+											go func() {
+												select {
+												case out := <-outC:
+													c.Rc.ConsoleHistory.Commands = append(
+														c.Rc.ConsoleHistory.Commands,
+														model.DuoUIconsoleCommand{
+															ComID: e.Text,
+															Time:  time.Time{},
+															Out:   out,
+														})
+												}
+											}()
 										},
 									),
 								),
 							)
-						})
-					}),
+						}),
 					)
 				})
 		})
@@ -582,37 +598,32 @@ func historyBody(c *component.State) func() {
 				Axis: layout.Vertical,
 			}.Layout(c.Gtx,
 				layout.Rigid(func() {
-					transactionsPanel := c.Thm.DuoUIpanel()
-					transactionsPanel.PanelObject = c.Rc.History.Txs.Txs
-					transactionsPanel.ScrollBar = c.Thm.ScrollBar(16)
-					transactionsPanelElement.PanelObjectsNumber = len(c.Rc.History.Txs.Txs)
-					transactionsPanel.Layout(c.Gtx, transactionsPanelElement,
-						func(i int, in interface{}) {
-							txs := in.([]model.DuoUItransactionExcerpt)
-							t := txs[i]
-							c.Thm.DuoUIline(c.Gtx, 0, 0, 1, c.Thm.Colors["Hint"])()
-							for t.Link.Clicked(c.Gtx) {
-								c.Rc.ShowPage = fmt.Sprintf("TRANSACTION %s", t.TxID)
-								c.Rc.GetSingleTx(t.TxID)()
-								component.SetPage(c.Rc, txPage(c, t.TxID))
-							}
-							width := c.Gtx.Constraints.Width.Max
-							button := c.Thm.DuoUIbutton("", "",
-								"", "", "", "",
-								"", "", 0, 0,
-								0, 0, 0, 0,
-								0, 0)
-							button.InsideLayout(c.Gtx, t.Link, func() {
-								c.Gtx.Constraints.Width.Min = width
-								layout.Flex{
-									Spacing: layout.SpaceBetween,
-								}.Layout(c.Gtx,
-									layout.Rigid(c.TxsDetails(i, &t)),
-									layout.Rigid(c.Label(c.Thm.Fonts["Mono"], 12,
-										c.Thm.Colors["Secondary"],
-										fmt.Sprintf("%0.8f", t.Amount))))
-							})
-						},
+					txsPanel := c.Thm.DuoUIpanel()
+					txsPanel.PanelObject = c.Rc.History.Txs.Txs
+					txsPanel.ScrollBar = c.Thm.ScrollBar(16)
+					txsPanelElement.PanelObjectsNumber = len(c.Rc.History.Txs.Txs)
+					txsPanel.Layout(c.Gtx, txsPanelElement, func(i int, in interface{}) {
+						txs := in.([]model.DuoUItransactionExcerpt)
+						t := txs[i]
+						c.Thm.DuoUIline(c.Gtx, 0, 0, 1, c.Thm.Colors["Hint"])()
+						for t.Link.Clicked(c.Gtx) {
+							c.Rc.ShowPage = fmt.Sprintf("TRANSACTION %s", t.TxID)
+							c.Rc.GetSingleTx(t.TxID)()
+							component.SetPage(c.Rc, txPage(c, t.TxID))
+						}
+						width := c.Gtx.Constraints.Width.Max
+						button := c.Thm.DuoUIbutton(gelook.ButtonParams{})
+						button.InsideLayout(c.Gtx, t.Link, func() {
+							c.Gtx.Constraints.Width.Min = width
+							layout.Flex{
+								Spacing: layout.SpaceBetween,
+							}.Layout(c.Gtx,
+								layout.Rigid(c.TxsDetails(i, &t)),
+								layout.Rigid(c.Label(c.Thm.Fonts["Mono"], 12,
+									c.Thm.Colors["Secondary"],
+									fmt.Sprintf("%0.8f", t.Amount))))
+						})
+					},
 					)
 				}),
 			)
@@ -798,91 +809,101 @@ func Send(c *component.State) *gelook.DuoUIpage {
 	return c.Thm.DuoUIpage(page)
 }
 
+func getSendBodyWidgets(c *component.State) []func() {
+	return []func(){
+		func() {
+			c.Thm.DuoUIcontainer(1,
+				c.Thm.Colors["Gray"]).Layout(c.Gtx, layout.Center, func() {
+				layout.Flex{}.Layout(c.Gtx,
+					layout.Flexed(1,
+						c.Editor(addressLineEditor, "DUO address",
+							func(e gel.EditorEvent) {
+								sendStruct.address = addressLineEditor.Text()
+							}),
+					),
+					layout.Rigid(
+						c.Button(
+							buttonPasteAddress, c.Thm.Fonts["Primary"],
+							10, 13, 8, 12, 8,
+							c.Thm.Colors["ButtonText"], c.Thm.Colors["ButtonBg"],
+							"PASTE ADDRESS", func() {
+								addressLineEditor.SetText(clipboard.Get())
+							}),
+					),
+				)
+			})
+		},
+		func() {
+			c.Thm.DuoUIcontainer(1, c.Thm.Colors["Gray"]).Layout(c.Gtx,
+				layout.Center, func() {
+					layout.Flex{}.Layout(c.Gtx,
+						layout.Flexed(1, c.Editor(
+							amountLineEditor, "DUO Amount",
+							func(e gel.EditorEvent) {
+								f, err := strconv.ParseFloat(
+									amountLineEditor.Text(), 64)
+								if err != nil {
+								}
+								sendStruct.amount = f
+							}),
+						),
+						layout.Rigid(c.Button(
+							buttonPasteAmount, c.Thm.Fonts["Primary"],
+							10, 13, 8, 12, 8,
+							c.Thm.Colors["ButtonText"],
+							c.Thm.Colors["ButtonBg"],
+							"PASTE AMOUNT",
+							func() {
+								amountLineEditor.SetText(clipboard.Get())
+							}),
+						),
+					)
+				})
+		},
+		func() {
+			layout.Flex{}.Layout(c.Gtx,
+				layout.Rigid(c.Button(
+					buttonSend, c.Thm.Fonts["Primary"],
+					14, 10, 10, 9, 10,
+					c.Thm.Colors["ButtonText"], c.Thm.Colors["ButtonBg"],
+					"SEND", func() {
+						c.Rc.Dialog.Show = true
+						c.Rc.Dialog = &model.DuoUIdialog{
+							Show: true,
+							Green: c.Rc.DuoSend(sendStruct.passPhrase,
+								sendStruct.address, 11),
+							GreenLabel: "SEND",
+							CustomField: func() {
+								layout.Flex{}.Layout(c.Gtx,
+									layout.Flexed(1,
+										c.Editor(
+											passLineEditor,
+											"Enter your password",
+											func(e gel.EditorEvent) {
+												sendStruct.passPhrase =
+													passLineEditor.Text()
+											},
+										),
+									),
+								)
+							},
+							Red:      func() { c.Rc.Dialog.Show = false },
+							RedLabel: "CANCEL",
+							Title:    "Are you sure?",
+							Text:     "Confirm ParallelCoin send",
+						}
+					}),
+				),
+			)
+		},
+	}
+}
+
 func sendBody(c *component.State) func() {
 	return func() {
 		layout.Flex{}.Layout(c.Gtx,
 			layout.Rigid(func() {
-				widgets := []func(){
-					func() {
-						c.Thm.DuoUIcontainer(1,
-							c.Thm.Colors["Gray"]).Layout(c.Gtx, layout.Center, func() {
-							layout.Flex{}.Layout(c.Gtx,
-								layout.Flexed(1, c.Editor(
-									addressLineEditor, "DUO address",
-									func(e gel.EditorEvent) {
-										sendStruct.address = addressLineEditor.Text()
-									})),
-								layout.Rigid(c.Button(
-									buttonPasteAddress, c.Thm.Fonts["Primary"],
-									10, 13, 8, 12, 8,
-									c.Thm.Colors["ButtonText"], c.Thm.Colors["ButtonBg"],
-									"PASTE ADDRESS", func() {
-										addressLineEditor.SetText(clipboard.Get())
-									})))
-						})
-					},
-					func() {
-						c.Thm.DuoUIcontainer(1, c.Thm.Colors["Gray"]).Layout(c.Gtx,
-							layout.Center, func() {
-								layout.Flex{}.Layout(c.Gtx,
-									layout.Flexed(1,
-										c.Editor(amountLineEditor, "DUO Amount",
-										func(e gel.EditorEvent) {
-											f, err := strconv.ParseFloat(amountLineEditor.Text(), 64)
-											if err != nil {
-											}
-											sendStruct.amount = f
-										}),
-									),
-									layout.Rigid(c.Button(
-										buttonPasteAmount, c.Thm.Fonts["Primary"],
-										10, 13, 8, 12, 8,
-										c.Thm.Colors["ButtonText"],
-										c.Thm.Colors["ButtonBg"],
-										"PASTE AMOUNT",
-										func() {
-											amountLineEditor.SetText(clipboard.Get())
-										}),
-									),
-								)
-							})
-					},
-					func() {
-						layout.Flex{}.Layout(c.Gtx,
-							layout.Rigid(c.Button(
-								buttonSend, c.Thm.Fonts["Primary"],
-								14, 10, 10, 9, 10,
-								c.Thm.Colors["ButtonText"], c.Thm.Colors["ButtonBg"],
-								"SEND", func() {
-									c.Rc.Dialog.Show = true
-									c.Rc.Dialog = &model.DuoUIdialog{
-										Show: true,
-										Green: c.Rc.DuoSend(sendStruct.passPhrase,
-											sendStruct.address, 11),
-										GreenLabel: "SEND",
-										CustomField: func() {
-											layout.Flex{}.Layout(c.Gtx,
-												layout.Flexed(1,
-													c.Editor(
-														passLineEditor,
-														"Enter your password",
-														func(e gel.EditorEvent) {
-															sendStruct.passPhrase = passLineEditor.Text()
-														},
-													),
-												),
-											)
-										},
-										Red:      func() { c.Rc.Dialog.Show = false },
-										RedLabel: "CANCEL",
-										Title:    "Are you sure?",
-										Text:     "Confirm ParallelCoin send",
-									}
-								}),
-							),
-						)
-					},
-				}
+				widgets := getSendBodyWidgets(c)
 				layautList.Layout(c.Gtx, len(widgets), func(i int) {
 					layout.UniformInset(unit.Dp(8)).Layout(c.Gtx, widgets[i])
 				})
@@ -935,21 +956,23 @@ func SettingsBody(c *component.State) func() {
 					settingsPanel.PanelObject = fields.Fields
 					settingsPanel.ScrollBar = c.Thm.ScrollBar(16)
 					settingsPanelElement.PanelObjectsNumber = len(fields.Fields)
-					settingsPanel.Layout(c.Gtx, settingsPanelElement, func(i int, in interface{}) {
-						settings := in.(pod.Fields)
-						//t := settings[i]
-						//fieldsList.Layout(c.Gtx, len(fields.Fields), func(il int) {
-						i = settingsPanelElement.PanelObjectsNumber - 1 - i
-						tl := component.Field{
-							Field: &settings[i],
-						}
-						layout.Flex{
-							Axis: layout.Vertical,
-						}.Layout(c.Gtx,
-							layout.Rigid(SettingsItemRow(c, &tl)),
-							layout.Rigid(c.Thm.DuoUIline(c.Gtx,
-								4, 0, 1, c.Thm.Colors["LightGray"])))
-					})
+					settingsPanel.Layout(c.Gtx, settingsPanelElement,
+						func(i int, in interface{}) {
+							settings := in.(pod.Fields)
+							//t := settings[i]
+							//fieldsList.Layout(c.Gtx, len(fields.Fields), func(il int) {
+							i = settingsPanelElement.PanelObjectsNumber - 1 - i
+							tl := component.Field{
+								Field: &settings[i],
+							}
+							layout.Flex{
+								Axis: layout.Vertical,
+							}.Layout(c.Gtx,
+								layout.Rigid(SettingsItemRow(c, &tl)),
+								layout.Rigid(c.Thm.DuoUIline(c.Gtx,
+									4, 0, 1, c.Thm.Colors["LightGray"])))
+						},
+					)
 				}
 			}
 		})

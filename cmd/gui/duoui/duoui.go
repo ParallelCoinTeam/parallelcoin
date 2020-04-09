@@ -82,9 +82,9 @@ func (ui *DuoUI) DuoUIcontent() func() {
 }
 
 func (ui *DuoUI) DuoUIfooter() func() {
-	ctx := ui.ly.Context
-	th := ui.ly.Theme
 	return func() {
+		ctx := ui.ly.Context
+		th := ui.ly.Theme
 		footer := th.DuoUIcontainer(0, th.Colors["Dark"])
 		footer.FullWidth = true
 		footer.Layout(ctx, layout.N, func() {
@@ -123,10 +123,18 @@ func (ui *DuoUI) DuoUIheader() func() {
 			}.Layout(ctx,
 				layout.Rigid(func() {
 					var logoMeniItem gelook.DuoUIbutton
-					logoMeniItem = th.DuoUIbutton("", "", "",
-						th.Colors["Dark"], "", "", "logo",
-						th.Colors["Light"], 0, iSize, iWidth,
-						iHeight, iPadV, iPadH, iPadV, iPadH)
+					logoMeniItem = th.DuoUIbutton(gelook.ButtonParams{
+						BgColor:       th.Colors["Dark"],
+						Icon:          "logo",
+						IconColor:     th.Colors["Light"],
+						IconSize:      iSize,
+						Width:         iWidth,
+						Height:        iHeight,
+						PaddingTop:    iPadV,
+						PaddingRight:  iPadH,
+						PaddingBottom: iPadV,
+						PaddingLeft:   iPadH,
+					})
 					for logoButton.Clicked(ctx) {
 						th.ChangeLightDark()
 					}
@@ -220,11 +228,22 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 			},
 			func() {
 				var createWalletbuttonComp gelook.DuoUIbutton
-				createWalletbuttonComp = th.DuoUIbutton(th.
-					Fonts["Secondary"], "CREATE WALLET", th.Colors["Dark"],
-					th.Colors["Light"], th.Colors["Light"],
-					th.Colors["Dark"], "", th.Colors["Dark"], 16, 0,
-					125, 32, 4, 4, 4, 4)
+				createWalletbuttonComp = th.DuoUIbutton(gelook.ButtonParams{
+					TxtFont:       th.Fonts["Secondary"],
+					Txt:           "CREATE WALLET",
+					TxtColor:      th.Colors["Dark"],
+					BgColor:       th.Colors["Light"],
+					TxtHoverColor: th.Colors["Light"],
+					BgHoverColor:  th.Colors["Dark"],
+					IconColor:     th.Colors["Dark"],
+					TextSize:      16,
+					Width:         125,
+					Height:        32,
+					PaddingTop:    4,
+					PaddingRight:  4,
+					PaddingBottom: 4,
+					PaddingLeft:   4,
+				})
 				for buttonCreateWallet.Clicked(ctx) {
 					if passPhrase != "" && passPhrase == confirmPassPhrase {
 						if testnet.Checked(ctx) {
@@ -255,7 +274,8 @@ func (ui *DuoUI) DuoUImainScreen() {
 				layout.Flexed(1, ui.DuoUIbody()),
 				layout.Rigid(ui.DuoUIfooter()),
 			)
-		})
+		},
+	)
 }
 
 func (ui *DuoUI) DuoUImenu() func() {
@@ -352,10 +372,20 @@ func (ui *DuoUI) toastButton(text, txtColor, bgColor, txtHoverColor, bgHoverColo
 			Top: unit.Dp(8), Bottom: unit.Dp(8),
 			Left: unit.Dp(8), Right: unit.Dp(8),
 		}.Layout(ui.ly.Context, func() {
-			b = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Fonts["Primary"], text,
-				txtColor, bgColor, txtHoverColor, bgHoverColor,
-				icon, iconColor, 16, 24, 120, 60,
-				0, 0, 0, 0)
+			b = ui.ly.Theme.DuoUIbutton(gelook.ButtonParams{
+				TxtFont:       ui.ly.Theme.Fonts["Primary"],
+				Txt:           text,
+				TxtColor:      txtColor,
+				BgColor:       bgColor,
+				TxtHoverColor: txtHoverColor,
+				BgHoverColor:  bgHoverColor,
+				Icon:          icon,
+				IconColor:     iconColor,
+				TextSize:      16,
+				IconSize:      24,
+				Width:         120,
+				Height:        60,
+			})
 			for button.Clicked(ui.ly.Context) {
 				// ui.rc.ShowToast = false
 			}
@@ -385,7 +415,7 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 	// duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
 	duo.Pages = &model.DuoUIpages{
 		Controller: nil,
-		Theme:      pages.LoadPages(component.NewState(rc, duo.Context,
+		Theme: pages.LoadPages(component.NewState(rc, duo.Context,
 			duo.Theme)),
 	}
 	component.SetPage(rc, duo.Pages.Theme["OVERVIEW"])
@@ -441,7 +471,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			// TODO events of gui
 		case e := <-ui.rc.Commands.Events:
 			switch e := e.(type) {
-			case rcd.DuoUIcommandEvent:
+			case rcd.CommandEvent:
 				ui.rc.Commands.History = append(ui.rc.Commands.History, e.Command)
 				ui.ly.Window.Invalidate()
 			}

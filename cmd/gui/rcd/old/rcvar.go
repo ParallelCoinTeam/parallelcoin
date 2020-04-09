@@ -1,4 +1,4 @@
-package rcd
+package old
 
 import (
 	"time"
@@ -15,7 +15,6 @@ import (
 )
 
 type RcVar struct {
-
 	cx             *conte.Xt
 	db             *DuoUIdb
 	Boot           *Boot
