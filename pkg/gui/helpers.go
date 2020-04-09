@@ -43,12 +43,11 @@ func (s *State) Spacer(bg string) layout.FlexChild {
 	})
 }
 
-func (s *State) Rectangle(width, height int, color, opacity string, radius ...float32) {
+func (s *State) Rectangle(width, height int, color string, radius ...float32) {
 	col := s.Theme.Colors[color]
-	if col == "" || col[:2] == "00" {
+	if col == "" {
 		return
 	}
-	col = opacity + col[2:]
 	var r float32
 	if len(radius) > 0 {
 		r = radius[0]
@@ -67,13 +66,11 @@ func (s *State) Icon(icon, fg, bg string, size int) {
 	s.Gtx.Constraints.Height.Min = size
 	s.FlexH(Rigid(func() {
 		cs := s.Gtx.Constraints
-		tp := "ff"
 		bg := s.Theme.Colors[bg]
 		if len(bg) == 0 {
 			bg = "00000000"
-			tp = "00"
 		}
-		s.Rectangle(cs.Height.Max, cs.Width.Max, bg, tp)
+		s.Rectangle(cs.Height.Max, cs.Width.Max, bg)
 		s.Inset(0, func() {
 			i := s.Theme.Icons[icon]
 			i.Color = gelook.HexARGB(s.Theme.Colors[fg])
@@ -88,7 +85,7 @@ func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int)
 	if len(size) > 1 {
 		sz = size[0]
 	}
-	s.Rectangle(sz, sz, bg, "ff")
+	s.Rectangle(sz, sz, bg)
 	s.ButtonArea(func() {
 		s.Inset(8, func() {
 			s.Icon(icon, fg, "Transparent", sz-16)
@@ -125,7 +122,7 @@ func (s *State) ButtonArea(content func(), button *gel.Button) {
 func (s *State) Label(txt, fg, bg string) {
 	s.Gtx.Constraints.Height.Max = 48
 	cs := s.Gtx.Constraints
-	s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+	s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 	s.Inset(10, func() {
 		t := s.Theme.DuoUIlabel(unit.Dp(float32(36)), txt)
 		t.Color = s.Theme.Colors[fg]
@@ -160,7 +157,7 @@ func (s *State) Text(txt, fg, bg, face, tag string) func() {
 		desc.Color = s.Theme.Colors[fg]
 		s.Inset(8, func() {
 			cs := s.Gtx.Constraints
-			s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 			desc.Layout(s.Gtx)
 		})
 

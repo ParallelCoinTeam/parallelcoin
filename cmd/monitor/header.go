@@ -21,7 +21,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 		s.FlexH(gui.Rigid(func() {
 			s.FlexH(gui.Rigid(func() {
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Width.Max, "PanelBg", "ff")
+				s.Rectangle(cs.Width.Max, cs.Width.Max, "PanelBg")
 				s.FlexH(gui.Rigid(func() {
 					fg, bg := "PanelText", "PanelBg"
 					icon := "logo"

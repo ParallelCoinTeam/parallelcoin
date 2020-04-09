@@ -8,7 +8,7 @@ import (
 func (s *State) BottomBar() layout.FlexChild {
 	return gui.Rigid(func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 		s.FlexV(
 			s.SettingsPage(),
 			s.BuildPage(),
@@ -20,7 +20,7 @@ func (s *State) BottomBar() layout.FlexChild {
 func (s *State) StatusBar() layout.FlexChild {
 	return gui.Rigid(func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 		s.FlexH(
 			s.RunControls(),
 			s.RunmodeButtons(),
@@ -28,7 +28,7 @@ func (s *State) StatusBar() layout.FlexChild {
 			gui.Flexed(1, func() {
 				s.Gtx.Constraints.Height.Max = 48
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "FF")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 			}),
 			s.BuildButtons(),
 			s.SettingsButtons(),
@@ -46,7 +46,7 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 				if s.Config.Running {
 					cs := s.Gtx.Constraints
 					bg, fg = "DocBg", "DocText"
-					s.Rectangle(cs.Width.Min, 48, bg, "ff")
+					s.Rectangle(cs.Width.Min, 48, bg)
 					s.Label(txt, fg, bg)
 				} else {
 					b := s.Buttons["RunModeFold"]
@@ -74,8 +74,7 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 						txt = txt[:1]
 					}
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg",
-						"ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "ButtonBg")
 					s.TextButton(txt, "Secondary", 34, fg,
 						"ButtonBg", s.ModesButtons[modes[i]])
 					for s.ModesButtons[modes[i]].Clicked(s.Gtx) {
@@ -102,7 +101,7 @@ func (s *State) Filter() layout.FlexChild {
 		b := s.Buttons["Filter"]
 		s.ButtonArea(func() {
 			cs := s.Gtx.Constraints
-			s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 			s.Inset(8, func() {
 				s.Icon("Filter", fg, bg, 32)
 			})

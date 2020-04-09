@@ -130,7 +130,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 			sw := th.DuoUIcheckBox(f.Field.Label, th.Colors["Primary"],
 				th.Colors["Primary"])
 			sw.PillColor = th.Colors["LightGray"]
-			sw.PillColorChecked = th.Colors["LightGrayI"]
+			sw.PillColorChecked = th.Colors["PrimaryDim"]
 			sw.CircleColor = th.Colors["LightGrayII"]
 			sw.CircleColorChecked = th.Colors["Primary"]
 			sw.DrawLayout(gtx,

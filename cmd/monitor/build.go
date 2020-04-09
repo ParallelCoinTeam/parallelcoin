@@ -20,7 +20,7 @@ func (s *State) BuildButtons() layout.FlexChild {
 					s.Gtx.Constraints.Width.Max = 48
 					s.Gtx.Constraints.Height.Max = 48
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 					s.Inset(8, func() {
 						s.Icon("Build", fg, bg, 32)
 					})
@@ -55,9 +55,9 @@ func (s *State) BuildPage() layout.FlexChild {
 	}
 	return gui.Flexed(weight, func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 		s.FlexV(gui.Rigid(func() {
-			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 			s.Inset(4, func() {})
 		}), gui.Rigid(func() {
 			s.FlexH(gui.Rigid(func() {
@@ -89,7 +89,7 @@ func (s *State) BuildPage() layout.FlexChild {
 			)
 		}), gui.Flexed(1, func() {
 			cs := s.Gtx.Constraints
-			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 			s.FlexV(gui.Flexed(1, func() {
 				s.Inset(8, func() {
 					// cs := s.Gtx.Constraints
@@ -100,7 +100,7 @@ func (s *State) BuildPage() layout.FlexChild {
 				})
 			}))
 		}), gui.Rigid(func() {
-			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 			s.Inset(4, func() {})
 		}),
 		)
@@ -232,7 +232,7 @@ func (s *State) BuildConfigPage() {
 						//}
 						s.Gtx.Constraints.Width.Max = ww*10 + 30
 						s.Gtx.Constraints.Width.Min = ww*10 + 30
-						s.Editor(&s.CommandEditor, ww, func(e gel.EditorEvent) {
+						s.Editor(&s.CommandEditor, "", func(e gel.EditorEvent) {
 							if e != nil {
 								txt := s.CommandEditor.Text()
 								if s.Config.ClickCommand == txt {

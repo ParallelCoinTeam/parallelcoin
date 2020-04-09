@@ -70,11 +70,11 @@ func (c *checkable) layout(gtx *layout.Context, checked bool) {
 }
 
 func (c *checkable) drawLayout(gtx *layout.Context, checked bool) {
-	state := layout.E
+	state := layout.W
 	pillColor := c.PillColor
 	circleColor := c.CircleColor
 	if checked {
-		state = layout.W
+		state = layout.E
 		pillColor = c.PillColorChecked
 		circleColor = c.CircleColorChecked
 	}
@@ -106,7 +106,7 @@ func (c *checkable) drawLayout(gtx *layout.Context, checked bool) {
 		layout.Rigid(func() {
 			gtx.Constraints.Width.Min = hmin
 			gtx.Constraints.Height.Min = vmin
-			layout.W.Layout(gtx, func() {
+			layout.E.Layout(gtx, func() {
 				layout.UniformInset(unit.Dp(2)).Layout(gtx, func() {
 					paint.ColorOp{Color: c.Color}.Add(gtx.Ops)
 					gel.Label{}.Layout(gtx, c.shaper, c.Font, c.TextSize, c.Label)

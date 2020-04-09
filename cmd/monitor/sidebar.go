@@ -25,35 +25,34 @@ func (s *State) Sidebar() layout.FlexChild {
 			s.FlexV(
 				gui.Rigid(func() {
 					s.Rectangle(cs.Width.Max, cs.Height.Max,
-						"DocBg", "ff")
+						"DocBg")
 					s.Inset(4, func() {})
 				}),
 				gui.Flexed(1, func() {
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
-					s.Inset(8, func() {
-						s.FlexV(
-							gui.Flexed(1, func() {
-								//s.Gtx.Constraints.Width.Min = 240
-								s.FlexV(gui.Flexed(1, func() {
-									s.Loggers.GetWidget(s)
-								}),
-								)
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
+					//s.Inset(8, func() {
+					s.FlexV(
+						gui.Flexed(1, func() {
+							//s.Gtx.Constraints.Width.Min = 240
+							s.FlexV(gui.Flexed(1, func() {
+								s.Loggers.GetWidget(s)
 							}),
-						)
-					})
+							)
+						}),
+					)
+					//})
 				}), gui.Rigid(func() {
 					s.Gtx.Constraints.Height.Max = 48
 					s.Gtx.Constraints.Height.Min = 48
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 					s.LevelsButtons()
 				}), gui.Rigid(func() {
 					s.Gtx.Constraints.Height.Max = 48
 					s.Gtx.Constraints.Height.Min = 48
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg",
-						"ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 					s.FlexH(
 						gui.Rigid(func() {
 							b := s.Buttons["FilterClear"]
@@ -174,7 +173,7 @@ func (s *State) LevelsButtons() {
 			cs := s.Gtx.Constraints
 			cs.Width.Max = 48
 			cs.Height.Max = 48
-			s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+			s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 			s.Inset(8, func() {
 				//cs := s.Gtx.Constraints
 				s.Icon(bn, color, bg, 32)

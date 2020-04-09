@@ -140,29 +140,8 @@ func (n *Node) GetWidget(s *State) {
 				split := strings.Split(nn[i].FullName, string(os.PathSeparator))
 				indent = len(split) - 1
 				s.Inset(0, func() {
-					s.Rectangle(indent*16, 32, "PanelBg", "ff")
+					s.Rectangle((indent-1)*24+24, 32, "PanelBg")
 				})
-			}),
-			gui.Rigid(func() {
-				name := nn[i].Name
-				if name == "" {
-					name = "root"
-				}
-				fg := "PanelText"
-				if nn[i].Hidden {
-					fg = "DocBg"
-				}
-				s.TextButton(name, "Primary", 24, fg, "PanelBg", nn[i].showButton)
-				if nn[i].showButton.Clicked(s.Gtx) {
-					nn[i].Hidden = !nn[i].Hidden
-					//if !nn[i].Hidden {
-					//	nn[i].ShowAllItems(s)
-					//} else {
-					//	nn[i].HideAllItems(s)
-					//}
-					consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
-					s.SaveConfig()
-				}
 			}),
 			gui.Rigid(func() {
 				if len(nn[i].Children) > 0 {
@@ -187,8 +166,34 @@ func (n *Node) GetWidget(s *State) {
 						nn[i].Closed = !nn[i].Closed
 						s.SaveConfig()
 					}
+				} else {
+					s.Inset(0, func() {
+						s.Rectangle(48, 32, "PanelBg")
+					})
 				}
 			}),
+			gui.Rigid(func() {
+				name := nn[i].Name
+				if name == "" {
+					name = "root"
+				}
+				fg := "PanelText"
+				if nn[i].Hidden {
+					fg = "DocBg"
+				}
+				s.TextButton(name, "Primary", 24, fg, "PanelBg", nn[i].showButton)
+				if nn[i].showButton.Clicked(s.Gtx) {
+					nn[i].Hidden = !nn[i].Hidden
+					//if !nn[i].Hidden {
+					//	nn[i].ShowAllItems(s)
+					//} else {
+					//	nn[i].HideAllItems(s)
+					//}
+					consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
+					s.SaveConfig()
+				}
+			}),
+
 			gui.Flexed(1, func() {
 
 			}),

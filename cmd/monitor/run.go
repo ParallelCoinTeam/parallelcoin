@@ -24,7 +24,7 @@ func (s *State) RunControls() layout.FlexChild {
 				s.Gtx.Constraints.Width.Max = 48
 				s.Gtx.Constraints.Height.Max = 48
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocText", "ff")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocText")
 				s.Inset(8, func() {
 					s.Icon("Run", "ButtonBg", "DocText", 32)
 				})
@@ -49,7 +49,7 @@ func (s *State) RunControls() layout.FlexChild {
 					s.Gtx.Constraints.Width.Max = 48
 					s.Gtx.Constraints.Height.Max = 48
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 					s.Inset(8, func() {
 						s.Icon("Stop", fg, bg, 32)
 					})
@@ -65,7 +65,7 @@ func (s *State) RunControls() layout.FlexChild {
 					s.Gtx.Constraints.Width.Max = 48
 					s.Gtx.Constraints.Height.Max = 48
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 					s.Inset(8, func() {
 						s.Icon(ic, fg, bg, 32)
 					})
@@ -93,7 +93,7 @@ func (s *State) RunControls() layout.FlexChild {
 					s.Gtx.Constraints.Width.Max = 48
 					s.Gtx.Constraints.Height.Max = 48
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 					s.Inset(8, func() {
 						s.Icon("Restart", fg, bg, 32)
 					})
@@ -196,7 +196,7 @@ func (s *State) Runner() {
 		case "kill":
 			Debug("kill called")
 			if s.HasGo && s.Worker != nil && s.Config.Running {
-				close(quit)
+				//close(quit)
 				if err = s.Worker.Interrupt(); !Check(err) {
 				}
 			}

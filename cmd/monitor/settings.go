@@ -5,13 +5,12 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 	"github.com/p9c/pod/pkg/gui"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
 	"github.com/p9c/pod/pkg/pod"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type Field struct {
@@ -30,7 +29,7 @@ func (s *State) SettingsButtons() layout.FlexChild {
 				s.Gtx.Constraints.Width.Max = 48
 				s.Gtx.Constraints.Height.Max = 48
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "ff")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 				s.Inset(8, func() {
 					s.Icon("settingsIcon", fg, bg, 32)
 				})
@@ -70,11 +69,11 @@ func (s *State) SettingsPage() layout.FlexChild {
 	}
 	return gui.Flexed(weight, func() {
 		cs := s.Gtx.Constraints
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 		s.FlexV(
 			gui.Rigid(func() {
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 				s.Inset(4, func() {})
 			}),
 			gui.Rigid(func() {
@@ -122,7 +121,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 			}), gui.Rigid(func() {
 				if s.WindowWidth <= settingsTabBreak {
 					cs := s.Gtx.Constraints
-					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 					si := 17
 					if s.WindowWidth >= settingsTabBreakSmall {
 						si = 20
@@ -134,11 +133,11 @@ func (s *State) SettingsPage() layout.FlexChild {
 				}
 			}), gui.Flexed(1, func() {
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg", "ff")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
 				s.Inset(8, func() { s.SettingsBody() })
 			}), gui.Rigid(func() {
 				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 				s.Inset(4, func() {})
 			}),
 		)
@@ -164,375 +163,308 @@ func (s *State) SettingsTabs(size int) {
 			color, bgColor, s.Rc.Settings.Tabs.TabsList[txt])
 	})
 }
+func (s *State) SettingsItem(fields pod.Group) func(il int) {
+	return func(il int) {
+		//il = len(fields.Fields) - 1 - il
+		tl := &Field{
+			Field: &fields.Fields[il],
+		}
+		s.FlexH(gui.Flexed(1, func() {
+			s.Inset(8, func() {
+				s.FlexV(
+					gui.Rigid(s.SettingsFieldLabel(tl)),
+					gui.Rigid(func() {
+						s.FlexH(
+							gui.Rigid(s.SettingsItemInput(tl)),
+							gui.Rigid(s.SettingsFieldDescription(s.Gtx, s.Theme, tl)),
+						)
+					}),
+				)
+			})
+		}),
+		)
+	}
+}
 
 func (s *State) SettingsBody() {
-	s.FlexH(
-		gui.Rigid(func() {
-			s.Theme.DuoUIcontainer(4, s.Theme.Colors["PanelBg"]).
-				Layout(s.Gtx, layout.N, func() {
-					for _, fields := range s.Rc.Settings.Daemon.Schema.Groups {
-						if fmt.Sprint(fields.Legend) == s.Rc.Settings.Tabs.Current {
-							s.Lists["SettingsFields"].Layout(s.Gtx,
-								len(fields.Fields), func(il int) {
-									//il = len(fields.Fields) - 1 - il
-									tl := &Field{
-										Field: &fields.Fields[il],
-									}
-									s.FlexH(gui.Flexed(1, func() {
-										s.Inset(8, func() {
-											s.FlexV(
-												//Flexed(0.2, func() {}),
-												gui.Rigid(s.SettingsFieldLabel(tl)),
-												gui.Rigid(func() {
-													s.FlexH(
-														//Rigid(func() {}),
-														gui.Rigid(s.SettingsItemInput(tl)),
-														gui.Rigid(s.SettingsFieldDescription(s.Gtx, s.Theme, tl)),
-													)
-												}),
-											)
-										})
-									}))
-								})
-						}
-					}
-				})
-		}))
+	s.FlexH(gui.Rigid(func() {
+		s.Theme.DuoUIcontainer(4, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.N, func() {
+			for _, fields := range s.Rc.Settings.Daemon.Schema.Groups {
+				if fmt.Sprint(fields.Legend) == s.Rc.Settings.Tabs.Current {
+					s.Lists["SettingsFields"].Layout(s.Gtx,
+						len(fields.Fields), s.SettingsItem(fields))
+				}
+			}
+		})
+	}))
 }
 
 func (s *State) SettingsItemLabel(f *Field) func() {
 	return func() {
 		//s.Gtx.Constraints.Width.Max = 32 * 10
 		s.Gtx.Constraints.Width.Min = 32 * 10
-		s.Inset(4, func() {
-			s.FlexV(
-				gui.Rigid(s.SettingsFieldLabel(f)),
-			)
+		s.Inset(8, func() {
+			s.FlexV(gui.Rigid(s.SettingsFieldLabel(f)))
 		})
 	}
 }
 
 func (s *State) SettingsItemInput(f *Field) func() {
 	return func() {
-		s.Inset(4,
-			s.InputField(&Field{Field: f.Field}),
-		)
+		s.Inset(4, s.InputField(&Field{Field: f.Field}))
 	}
 }
 
 func (s *State) SettingsFieldLabel(f *Field) func() {
 	return func() {
-		layout.W.Layout(s.Gtx, func() {
-			name := s.Theme.H6(fmt.Sprint(f.Field.Label))
-			name.Color = s.Theme.Colors["DocText"]
-			name.Font.Typeface = s.Theme.Fonts["Secondary"]
-			name.Layout(s.Gtx)
+		s.Inset(4, func() {
+			layout.W.Layout(s.Gtx, func() {
+				name := s.Theme.H6(fmt.Sprint(f.Field.Label))
+				name.Color = s.Theme.Colors["DocText"]
+				name.Font.Typeface = s.Theme.Fonts["Secondary"]
+				name.Layout(s.Gtx)
+			})
 		})
 	}
 }
 
 func (s *State) SettingsFieldDescription(gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
 	return func() {
-		layout.Flex{Axis: layout.Horizontal, Spacing: layout.SpaceAround}.Layout(s.Gtx, gui.Rigid(func() {
-			desc := th.Body1(fmt.Sprint(f.Field.Description))
-			desc.Font.Typeface = th.Fonts["Primary"]
-			desc.Color = th.Colors["DocText"]
-			desc.Layout(gtx)
-		}),
-		)
+		s.Inset(4, func() {
+			layout.Flex{
+				Axis:    layout.Horizontal,
+				Spacing: layout.SpaceAround,
+			}.Layout(s.Gtx, gui.Rigid(func() {
+				desc := th.Body1(fmt.Sprint(f.Field.Description))
+				desc.Font.Typeface = th.Fonts["Primary"]
+				desc.Color = th.Colors["DocText"]
+				desc.Layout(gtx)
+			}),
+			)
+		})
 	}
 }
 
 func (s *State) InputField(f *Field) func() {
+	rcs := s.Rc.Settings
+	rdw, rdCfg := rcs.Daemon.Widgets, rcs.Daemon.Config
 	return func() {
-		rsd := s.Rc.Settings.Daemon
-		fld := f.Field
-		fm := fld.Model
-		//var rwc *gel.CheckBox
-		rwe, ok := rsd.Widgets[fm].(*gel.Editor)
-		if !ok || rwe == nil {
-			return
-		}
-		//rwc, ok = rsd.Widgets[fm].(*gel.CheckBox)
-		//if !ok {
-		//	return
-		//}
-		w := 0
-		w = len(rwe.Text())
-		switch fld.Type {
+		switch f.Field.Type {
 		case "stringSlice":
-			switch fld.InputType {
+			switch f.Field.InputType {
 			case "text":
-				//s.Gtx.Constraints.Width.Min = (len(rwe.Text())-3)*10
-				ww := len(rwe.Text())*10 + 40
-				//if ww < 12 {
-				//	ww = 12
-				//}
-				s.Gtx.Constraints.Width.Max = ww
-				if fm != "MiningAddrs" {
-					w := len((rsd.Widgets[fm]).(*gel.Editor).Text())
-					s.StringsArrayEditor(rsd.Widgets[fm].(*gel.Editor), (rsd.Widgets[fm]).(*gel.Editor).Text(), w,
+				if f.Field.Model != "MiningAddrs" {
+					s.StringsArrayEditor(
+						(rdw[f.Field.Model]).(*gel.Editor),
+						(rdw[f.Field.Model]).(*gel.Editor).Text(),
 						func(e gel.EditorEvent) {
-							rsd.Config[fm] = strings.Fields(rwe.Text())
+							rdCfg[f.Field.Model] =
+								strings.Fields((rdw[f.Field.Model]).(*gel.Editor).Text())
+							Debug()
 							if e != nil {
 								s.Rc.SaveDaemonCfg()
 							}
-						})()
+						},
+					)()
 				}
 			default:
 			}
 		case "input":
-			switch fld.InputType {
+			switch f.Field.InputType {
 			case "text":
-				ww := len(rwe.Text())
-				//if ww < 12 {
-				//	ww = 12
-				//}
-				s.Gtx.Constraints.Width.Max = ww*10 + 30
-				s.Gtx.Constraints.Width.Min = ww*10 + 30
-				s.Editor(rwe, w, func(e gel.EditorEvent) {
-					txt := rwe.Text()
-					rsd.Config[fm] = txt
-					if e != nil {
-						s.Rc.SaveDaemonCfg()
-					}
-				})()
+				s.Editor(
+					(rdw[f.Field.Model]).(*gel.Editor),
+					(rdw[f.Field.Model]).(*gel.Editor).Text(),
+					func(e gel.EditorEvent) {
+						txt := rdw[f.Field.Model].(*gel.Editor).Text()
+						rdCfg[f.Field.Model] = txt
+						if e != nil {
+							s.Rc.SaveDaemonCfg()
+						}
+					},
+				)()
 			case "number":
-				ww := len(rwe.Text())
-				//if ww < 12 {
-				//	ww = 12
-				//}
-				s.Gtx.Constraints.Width.Max = ww*10 + 30
-				s.Gtx.Constraints.Width.Min = ww*10 + 30
-				s.Editor(rwe, w, func(e gel.EditorEvent) {
-					number, err := strconv.Atoi(rwe.Text())
-					if err == nil {
-						rsd.Config[fm] = number
-					}
+				s.Editor(
+					(rdw[f.Field.Model]).(*gel.Editor),
+					(rdw[f.Field.Model]).(*gel.Editor).Text(),
+					func(e gel.EditorEvent) {
+						number, err :=
+							strconv.Atoi((rdw[f.Field.Model]).(*gel.Editor).Text())
+						if err == nil {
+						}
+						rdCfg[f.Field.Model] = number
+						if e != nil {
+							s.Rc.SaveDaemonCfg()
+						}
+					},
+				)()
+			case "decimal":
+				s.Editor(
+					(rdw[f.Field.Model]).(*gel.Editor),
+					(rdw[f.Field.Model]).(*gel.Editor).Text(),
+					func(e gel.EditorEvent) {
+						decimal, err :=
+							strconv.ParseFloat(
+								(rdw[f.Field.Model]).(*gel.Editor).Text(), 64)
+						if err != nil {
+						}
+						rdCfg[f.Field.Model] = decimal
+						if e != nil {
+							s.Rc.SaveDaemonCfg()
+						}
+					})()
+			case "password":
+				s.PasswordEditor((rdw[f.Field.Model]).(*gel.Editor), func(e gel.EditorEvent) {
+					txt := rdw[f.Field.Model].(*gel.Editor).Text()
+					rdCfg[f.Field.Model] = txt
 					if e != nil {
 						s.Rc.SaveDaemonCfg()
 					}
 				})()
 			case "time":
-				ww := len(rwe.Text())
-				//if ww < 12 {
-				//	ww = 12
-				//}
-				s.Gtx.Constraints.Width.Max = ww*10 + 30
-				s.Gtx.Constraints.Width.Min = ww*10 + 30
-				s.Editor(rwe, w, func(e gel.EditorEvent) {
-					duration, err := time.ParseDuration(rwe.Text())
-					if err == nil {
-						rsd.Config[fm] = duration
-					}
-					if e != nil {
-						s.Rc.SaveDaemonCfg()
-					}
-				})()
-			case "decimal":
-				ww := len(rwe.Text())
-				//if ww < 12 {
-				//	ww = 12
-				//}
-				s.Gtx.Constraints.Width.Max = ww*10 + 30
-				s.Gtx.Constraints.Width.Min = ww*10 + 30
-				s.Editor(rwe, w, func(e gel.EditorEvent) {
-					decimal, err := strconv.ParseFloat(rwe.Text(), 64)
-					if err != nil {
-						rsd.Config[fm] = decimal
-					}
-					if e != nil {
-						s.Rc.SaveDaemonCfg()
-					}
-				})()
-			case "password":
-				ww := len(rwe.Text())
-				//if ww < 12 {
-				//	ww = 12
-				//}
-				s.Gtx.Constraints.Width.Max = ww*10 + 30
-				s.Gtx.Constraints.Width.Min = ww*10 + 30
-				s.PasswordEditor(rwe, w, func(e gel.EditorEvent) {
-					txt := rwe.Text()
-					rsd.Config[fm] = txt
-					if e != nil {
-						s.Rc.SaveDaemonCfg()
-					}
-				})()
+				//Debug("rendering duration")
+				s.Editor(
+					(rdw[f.Field.Model]).(*gel.Editor),
+					(rdw[f.Field.Model]).(*gel.Editor).Text(),
+					func(e gel.EditorEvent) {
+						txt := rdw[f.Field.Model].(*gel.Editor).Text()
+						var err error
+						if rdCfg[f.Field.Model], err = time.ParseDuration(
+							txt); Check(err) {
+						}
+						if e != nil {
+							s.Rc.SaveDaemonCfg()
+						}
+					},
+				)()
 			default:
 			}
 		case "switch":
-			ww := 3
-			s.Gtx.Constraints.Width.Max = ww * 10
-			s.Gtx.Constraints.Width.Min = ww * 10
-			layout.W.Layout(s.Gtx, func() {
-				//s.Rectangle(32, 32, "DocBg", "88")
-				color := "DocBg"
-				if *rsd.Config[fm].(*bool) {
-					color = "DocText"
+			sw := s.Theme.DuoUIcheckBox("",
+				//f.Field.Label,
+				s.Theme.Colors["Primary"],
+				s.Theme.Colors["Primary"])
+			sw.PillColor = s.Theme.Colors["LightGray"]
+			sw.PillColorChecked = s.Theme.Colors["PrimaryDim"]
+			sw.CircleColor = s.Theme.Colors["LightGrayII"]
+			sw.CircleColorChecked = s.Theme.Colors["Primary"]
+			sw.DrawLayout(s.Gtx, rdw[f.Field.Model].(*gel.CheckBox))
+			if (rdw[f.Field.Model]).(*gel.CheckBox).Checked(s.Gtx) {
+				if !*rdCfg[f.Field.Model].(*bool) {
+					tt := true
+					rdCfg[f.Field.Model] = &tt
+					s.Rc.SaveDaemonCfg()
 				}
-				s.Theme.DuoUIcheckBox("",
-					//fld.Label,
-					s.Theme.Colors[color],
-					s.Theme.Colors[color]).Layout(s.Gtx,
-					(rsd.Widgets[fm]).(*gel.CheckBox))
-				if (rsd.Widgets[fm]).(*gel.CheckBox).Checked(s.Gtx) {
-					if !*rsd.Config[fm].(*bool) {
-						t := true
-						rsd.Config[fm] = &t
-						s.Rc.SaveDaemonCfg()
-					}
-				} else {
-					if *rsd.Config[fm].(*bool) {
-						f := false
-						rsd.Config[fm] = &f
-						s.Rc.SaveDaemonCfg()
-					}
+			} else {
+				if *rdCfg[f.Field.Model].(*bool) {
+					ff := false
+					rdCfg[f.Field.Model] = &ff
+					s.Rc.SaveDaemonCfg()
 				}
-			})
+			}
 		case "radio":
-			// radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
-			// layout.Flex{}.Layout(gtx,
-			//	layout.Rigid(func() {
-			//		duo.Theme.RadioButton("r1", "RadioButton1").Layout(gtx,  radioButtonsGroup)
-			//
-			//	}),
-			//	layout.Rigid(func() {
-			//		duo.Theme.RadioButton("r2", "RadioButton2").Layout(gtx, radioButtonsGroup)
-			//
-			//	}),
-			//	layout.Rigid(func() {
-			//		duo.Theme.RadioButton("r3", "RadioButton3").Layout(gtx, radioButtonsGroup)
-			//
-			//	}))
+		// radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
+		// layout.Flex{}.Layout(g,
+		//	layout.Rigid(func() {
+		//		duo.Theme.RadioButton("r1", "RadioButton1").Layout(g,
+		//		radioButtonsGroup)
+		//
+		//	}),
+		//	layout.Rigid(func() {
+		//		duo.Theme.RadioButton("r2", "RadioButton2").Layout(g,
+		//		radioButtonsGroup)
+		//
+		//	}),
+		//	layout.Rigid(func() {
+		//		duo.Theme.RadioButton("r3", "RadioButton3").Layout(g,
+		//		radioButtonsGroup)
+		//
+		//	}))
 		default:
-			// duo.Theme.CheckBox("Checkbox").Layout(gtx, (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
-
+			// duo.Theme.CheckBox("Checkbox").Layout(g,
+			//(duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
 		}
 	}
 }
 
 const textWidth = 10
 
-func (s *State) Editor(editorController *gel.Editor, width int,
-	handler func(gel.EditorEvent)) func() {
+func (s *State) Editor(editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+	t, g := s.Theme, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(4)).Layout(s.Gtx, func() {
-			outerColor := "DocBg"
-			innerColor := "PanelBg"
-			textColor := "PanelText"
-			if editorController.Focused() {
-				outerColor = "DocText"
-				//innerColor = "DocBg"
-				//textColor = "PanelBg"
-			}
-			width++
-			s.Rectangle(width*textWidth+16, 40, outerColor, "ff", 4)
-			s.Inset(3, func() {
-				s.Rectangle(width*textWidth+10, 34, innerColor, "ff", 2)
-				e := s.Theme.DuoUIeditor(editorController.Text(),
-					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
-				e.Font.Typeface = s.Theme.Fonts["Mono"]
-				s.Inset(5, func() {
-					s.FlexH(gui.Rigid(func() {
-						e.Layout(s.Gtx, editorController)
-					}),
-					)
+		t.DuoUIcontainer(8, "ffffffff").
+			Layout(g, layout.NW, func() {
+				width := g.Constraints.Width.Max / 2
+				if width > 320 {
+					width = 320
+				}
+				e := t.DuoUIeditor(label, t.Colors["Black"],
+					t.Colors["White"], width)
+				e.Font.Typeface = t.Fonts["Mono"]
+				e.TextSize = unit.Dp(16)
+				layout.UniformInset(unit.Dp(4)).Layout(g, func() {
+					e.Layout(g, editorController)
 				})
-				for _, e := range editorController.Events(s.Gtx) {
+				for _, e := range editorController.Events(g) {
 					switch e.(type) {
 					case gel.ChangeEvent:
 						handler(e)
 					}
 				}
 			})
+	}
+}
+
+func (s *State) PasswordEditor(editorController *gel.Editor, handler func(gel.EditorEvent)) func() {
+	t, g := s.Theme, s.Gtx
+	fg := t.Colors["Gray"]
+	if !editorController.Focused() {
+		fg = t.Colors["Transparent"]
+	}
+	return func() {
+		t.DuoUIcontainer(8, "ffffffff").Layout(g, layout.NW, func() {
+			width := g.Constraints.Width.Max / 2
+			if width > 320 {
+				width = 320
+			}
+			e := t.DuoUIeditor("", fg,
+				t.Colors["White"], width)
+			e.Font.Typeface = t.Fonts["Mono"]
+			e.TextSize = unit.Dp(16)
+			layout.UniformInset(unit.Dp(4)).Layout(g, func() {
+				e.Layout(g, editorController)
+			})
+			for _, e := range editorController.Events(g) {
+				switch e.(type) {
+				case gel.ChangeEvent:
+					handler(e)
+				}
+			}
 		})
 	}
 }
 
-func (s *State) PasswordEditor(editorController *gel.Editor, width int,
-	handler func(gel.EditorEvent)) func() {
+func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+	t, g := s.Theme, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(4)).Layout(s.Gtx, func() {
-			outerColor := "DocBg"
-			innerColor := "PanelBg"
-			textColor := "PanelBg"
-			if editorController.Focused() {
-				outerColor = "DocText"
-				innerColor = "DocBg"
-				textColor = "PanelBg"
-			}
-			width++
-			s.Rectangle(width*textWidth+16, 40, outerColor, "ff", 4)
-			s.Inset(3, func() {
-				s.Rectangle(width*textWidth+10, 34, innerColor, "ff", 2)
-				e := s.Theme.DuoUIeditor(editorController.Text(),
-					s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
-				e.Font.Typeface = s.Theme.Fonts["Mono"]
-				s.Inset(5, func() {
-					s.FlexH(gui.Rigid(func() {
-						e.Layout(s.Gtx, editorController)
-					}),
-					)
+		t.DuoUIcontainer(8, t.Colors["White"]).Layout(g, layout.NW,
+			func() {
+				width := g.Constraints.Width.Max / 2
+				if width > 320 {
+					width = 320
+				}
+				e := t.DuoUIeditor(label, t.Colors["Black"],
+					t.Colors["White"], width)
+				e.Font.Typeface = t.Fonts["Mono"]
+				layout.UniformInset(unit.Dp(4)).Layout(g, func() {
+					e.Layout(g, editorController)
 				})
-				for _, e := range editorController.Events(s.Gtx) {
+				for _, e := range editorController.Events(g) {
 					switch e.(type) {
 					case gel.ChangeEvent:
 						handler(e)
 					}
 				}
 			})
-		})
-	}
-}
-func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, width int, handler func(gel.EditorEvent)) func() {
-	return func() {
-		split := strings.Split(label, "\n")
-		maxLen := 0
-		for i := range split {
-			if len(split[i]) > maxLen {
-				maxLen = len(split[i])
-			}
-		}
-		//if len(split[len(split)-1]) < 1 && len(split) > 2 {
-		//	split = split[:len(split)-1]
-		//}
-		if maxLen < 9 {
-			maxLen = 9
-		}
-		s.Gtx.Constraints.Width.Max = maxLen*textWidth + 30
-		s.Gtx.Constraints.Width.Min = maxLen*textWidth + 30
-		width = maxLen
-		height := 19 * len(split)
-		//Debug(len(split), height, split)
-		s.Theme.DuoUIcontainer(0, s.Theme.Colors["PanelBg"]).Layout(s.Gtx, layout.N, func() {
-			outerColor := "DocBg"
-			innerColor := "PanelBg"
-			textColor := "PanelText"
-			if editorController.Focused() {
-				outerColor = "DocText"
-				innerColor = "PanelBg"
-				textColor = "PanelText"
-			}
-			if width < 9 {
-				width = 9
-			}
-			s.Rectangle(width*textWidth+16, height+16, outerColor, "ff", 4)
-			s.Inset(3, func() {
-				s.Rectangle(width*textWidth+10, height+10, innerColor, "ff", 2)
-				s.Inset(5, func() {
-					e := s.Theme.DuoUIeditor(label,
-						s.Theme.Colors[textColor], s.Theme.Colors[innerColor], width)
-					e.Font.Typeface = s.Theme.Fonts["Mono"]
-					e.Layout(s.Gtx, editorController)
-					for _, e := range editorController.Events(s.Gtx) {
-						switch e.(type) {
-						case gel.ChangeEvent:
-							handler(e)
-						}
-					}
-				})
-			})
-		})
 	}
 }

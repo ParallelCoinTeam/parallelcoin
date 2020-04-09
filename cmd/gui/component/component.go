@@ -304,7 +304,7 @@ func (s *State) DuoUIinputField(f *Field) func() {
 			sw := t.DuoUIcheckBox(
 				f.Field.Label, t.Colors["Primary"], t.Colors["Primary"])
 			sw.PillColor = t.Colors["LightGray"]
-			sw.PillColorChecked = t.Colors["LightGrayI"]
+			sw.PillColorChecked = t.Colors["PrimaryDim"]
 			sw.CircleColor = t.Colors["LightGrayII"]
 			sw.CircleColorChecked = t.Colors["Primary"]
 			sw.DrawLayout(g, rdw[f.Field.Model].(*gel.CheckBox))

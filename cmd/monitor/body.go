@@ -12,14 +12,14 @@ func (s *State) Body() layout.FlexChild {
 	return gui.Flexed(1, func() {
 		cs := s.Gtx.Constraints
 		cs.Width.Min = cs.Width.Max / 2
-		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg", "ff")
+		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 		s.Lists["Log"].Axis = layout.Vertical
 		s.Lists["Log"].ScrollToEnd = true
 		s.Lists["Log"].Layout(s.Gtx, s.EntryBuf.Len(), func(i int) {
 			if s.EntryBuf.Clicked == i {
 				cs := s.Gtx.Constraints
 				//cs.Height.Max = 48
-				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBgHilite", "ff")
+				s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBgHilite")
 			}
 			b := s.EntryBuf.Get(i)
 			color := "DocText"
