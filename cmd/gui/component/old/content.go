@@ -34,6 +34,7 @@ func UnoField(gtx *layout.Context, field func()) func() {
 
 	}
 }
+
 func DuoFields(gtx *layout.Context, axis layout.Axis, left, right func()) func() {
 	return func() {
 		layout.Flex{
@@ -46,11 +47,7 @@ func DuoFields(gtx *layout.Context, axis layout.Axis, left, right func()) func()
 	}
 }
 
-func TrioFields(gtx *layout.Context, th *gelook.DuoUItheme, axis layout.Axis,
-	labelTextSize, valueTextSize float32, unoLabel, unoValue, unoHeadcolor,
-	unoHeadbgColor, unoColor, unoBgColor, duoLabel, duoValue, duoHeadcolor,
-	duoHeadbgColor, duoColor, duoBgColor, treLabel, treValue, treHeadcolor,
-	treHeadbgColor, treColor, treBgColor string) func() {
+func TrioFields(gtx *layout.Context, th *gelook.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, unoLabel, unoValue, unoHeadcolor, unoHeadbgColor, unoColor, unoBgColor, duoLabel, duoValue, duoHeadcolor, duoHeadbgColor, duoColor, duoBgColor, treLabel, treValue, treHeadcolor, treHeadbgColor, treColor, treBgColor string) func() {
 	return func() {
 		layout.Flex{
 			Axis:    axis,
@@ -80,9 +77,7 @@ func fieldAxis(axis layout.Axis, field func(), size float32) layout.FlexChild {
 	return f
 }
 
-func ContentLabeledField(gtx *layout.Context, th *gelook.DuoUItheme,
-	axis layout.Axis, margin, labelTextSize, valueTextSize float32,
-	label, headcolor, headbgColor, color, bgColor, value string) func() {
+func ContentLabeledField(gtx *layout.Context, th *gelook.DuoUItheme, axis layout.Axis, margin, labelTextSize, valueTextSize float32, label, headcolor, headbgColor, color, bgColor, value string) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(margin)).Layout(gtx, func() {
 			layout.Flex{
@@ -98,8 +93,7 @@ func ContentLabeledField(gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	previousBlockHash, nextBlockHash string, prevPage, nextPage *gelook.DuoUIpage) func() {
+func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, previousBlockHash, nextBlockHash string, prevPage, nextPage *gelook.DuoUIpage) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Flexed(0.5, func() {
@@ -120,8 +114,7 @@ func PageNavButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func pageNavButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	page *gelook.DuoUIpage, b *gel.Button, label, hash string) {
+func pageNavButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, b *gel.Button, label, hash string) {
 	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
 		var blockButton gelook.DuoUIbutton
 		blockButton = th.DuoUIbutton(th.Fonts["Mono"], label+" "+hash,
@@ -138,8 +131,7 @@ func pageNavButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 	})
 }
 
-func contentField(gtx *layout.Context, th *gelook.DuoUItheme,
-	text, color, bgColor string, font text.Typeface, padding, textSize float32) func() {
+func contentField(gtx *layout.Context, th *gelook.DuoUItheme, text, color, bgColor string, font text.Typeface, padding, textSize float32) func() {
 	return func() {
 		hmin := gtx.Constraints.Width.Min
 		vmin := gtx.Constraints.Height.Min

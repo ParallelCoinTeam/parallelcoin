@@ -29,8 +29,7 @@ func txPage(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, tx string
 	return th.DuoUIpage(page)
 }
 
-func singleTxBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	tx btcjson.GetTransactionResult) func() {
+func singleTxBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, tx btcjson.GetTransactionResult) func() {
 	return func() {
 
 		//duo := layout.Horizontal

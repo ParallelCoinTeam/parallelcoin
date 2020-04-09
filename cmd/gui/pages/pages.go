@@ -7,8 +7,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
-func LoadPages(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) (p map[string]*gelook.DuoUIpage) {
+func LoadPages(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) (p map[string]*gelook.DuoUIpage) {
 	p = make(map[string]*gelook.DuoUIpage)
 	p["OVERVIEW"] = Overview(rc, gtx, th)
 	p["SEND"] = Send(rc, gtx, th)

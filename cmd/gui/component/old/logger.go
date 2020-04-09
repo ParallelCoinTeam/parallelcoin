@@ -14,12 +14,10 @@ import (
 	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
-var (
-	logOutputList = &layout.List{
-		Axis:        layout.Vertical,
-		ScrollToEnd: true,
-	}
-)
+var logOutputList = &layout.List{
+	Axis:        layout.Vertical,
+	ScrollToEnd: true,
+}
 
 var StartupTime = time.Now()
 

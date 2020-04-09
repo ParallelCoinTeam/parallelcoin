@@ -34,8 +34,7 @@ var (
 	footerMenuItemPaddingHorizontal = 0
 )
 
-func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {
+func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var footerMenuItem gelook.DuoUIbutton
@@ -71,8 +70,7 @@ func footerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func FooterLeftMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	allPages *model.DuoUIpages) func() {
+func FooterLeftMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			cornerButtons := []func(){
@@ -89,8 +87,7 @@ func FooterLeftMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func FooterRightMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	allPages *model.DuoUIpages) func() {
+func FooterRightMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {
 		navButtons := []func(){
 			// footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"],

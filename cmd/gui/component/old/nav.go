@@ -21,8 +21,7 @@ var (
 	}
 )
 
-func MainNavigation(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	allPages *model.DuoUIpages, nav *model.DuoUInav) func() {
+func MainNavigation(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages, nav *model.DuoUInav) func() {
 	return func() {
 		navButtons := navButtons(rc, gtx, th, allPages, nav)
 		gtx.Constraints.Width.Max = nav.Width
@@ -34,8 +33,7 @@ func MainNavigation(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func navButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	allPages *model.DuoUIpages, nav *model.DuoUInav) []func() {
+func navButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages, nav *model.DuoUInav) []func() {
 	return []func(){
 		navMenuButton(rc, gtx, th, allPages.Theme["OVERVIEW"], nav,
 			"OVERVIEW", "overviewIcon", navButtonOverview),
@@ -57,9 +55,7 @@ func navButtons(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	page *gelook.DuoUIpage, nav *model.DuoUInav, title, icon string,
-	navButton *gel.Button) func() {
+func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, nav *model.DuoUInav, title, icon string, navButton *gel.Button) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var menuItem gelook.DuoUIbutton

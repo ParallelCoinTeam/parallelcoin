@@ -16,12 +16,10 @@ import (
 	"github.com/p9c/pod/pkg/pod"
 )
 
-var (
-	groupsList = &layout.List{
-		Axis:      layout.Horizontal,
-		Alignment: layout.Start,
-	}
-)
+var groupsList = &layout.List{
+	Axis:      layout.Horizontal,
+	Alignment: layout.Start,
+}
 
 type Field struct {
 	Field *pod.Field
@@ -70,7 +68,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 						(rdw[f.Field.Model]).(*gel.Editor).Text(),
 						func(e gel.EditorEvent) {
 							rdCfg[f.Field.Model] = strings.Fields((rdw[f.Field.Model]).(*gel.
-								Editor).Text())
+							Editor).Text())
 							Debug()
 							if e != nil {
 								rc.SaveDaemonCfg()
@@ -95,7 +93,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 					})()
 			case "number":
 				Editor(gtx, th, (rdw[f.Field.Model]).(*gel.
-					Editor), (rdw[f.Field.Model]).(*gel.Editor).
+				Editor), (rdw[f.Field.Model]).(*gel.Editor).
 					Text(),
 					func(e gel.EditorEvent) {
 						number, err := strconv.Atoi((rdw[f.
@@ -109,7 +107,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 					})()
 			case "decimal":
 				Editor(gtx, th, (rdw[f.Field.Model]).(*gel.
-					Editor), (rdw[f.Field.Model]).(*gel.Editor).
+				Editor), (rdw[f.Field.Model]).(*gel.Editor).
 					Text(),
 					func(e gel.EditorEvent) {
 						decimal, err := strconv.ParseFloat((rcs.Daemon.

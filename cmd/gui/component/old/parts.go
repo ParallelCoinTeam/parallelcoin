@@ -40,9 +40,7 @@ func fill(gtx *layout.Context, col color.RGBA) {
 	gtx.Dimensions = layout.Dimensions{Size: d}
 }
 
-func Editor(gtx *layout.Context, th *gelook.DuoUItheme,
-	editorController *gel.Editor, label string,
-	handler func(gel.EditorEvent)) func() {
+func Editor(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	return func() {
 		th.DuoUIcontainer(8, "ffffffff").
 			Layout(gtx, layout.NW, func() {
@@ -64,8 +62,7 @@ func Editor(gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme,
-	editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	return func() {
 		th.DuoUIcontainer(8, th.Colors["White"]).Layout(gtx, layout.NW, func() {
 			e := th.DuoUIeditor(label,
@@ -84,8 +81,7 @@ func StringsArrayEditor(gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func ConsoleInput(gtx *layout.Context, th *gelook.DuoUItheme,
-	editorController *gel.Editor, label string, handler func(gel.SubmitEvent)) func() {
+func ConsoleInput(gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.SubmitEvent)) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			e := th.DuoUIeditor(label, "Dark", "Light", 120)
@@ -103,10 +99,7 @@ func ConsoleInput(gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func Button(gtx *layout.Context, th *gelook.DuoUItheme,
-	buttonController *gel.Button, font text.Typeface,
-	textSize, pt, pr, pb, pl int, color, bgColor,
-	label string, handler func()) func() {
+func Button(gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Button, font text.Typeface, textSize, pt, pr, pb, pl int, color, bgColor, label string, handler func()) func() {
 	return func() {
 		th.DuoUIcontainer(0, th.Colors[""])
 		button := th.DuoUIbutton(font, label, color, bgColor,
@@ -119,9 +112,7 @@ func Button(gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func MonoButton(gtx *layout.Context, th *gelook.DuoUItheme,
-	buttonController *gel.Button, textSize int,
-	color, bgColor, font, label string, handler func()) func() {
+func MonoButton(gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Button, textSize int, color, bgColor, font, label string, handler func()) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			//var button gelook.Button
@@ -146,8 +137,7 @@ func MonoButton(gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func Label(gtx *layout.Context, th *gelook.DuoUItheme,
-	font text.Typeface, size float32, color, label string) func() {
+func Label(gtx *layout.Context, th *gelook.DuoUItheme, font text.Typeface, size float32, color, label string) func() {
 	return func() {
 		l := th.DuoUIlabel(unit.Dp(size), label)
 		l.Font.Typeface = font

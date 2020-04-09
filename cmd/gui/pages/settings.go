@@ -17,8 +17,7 @@ var (
 	buttonSettingsRestart = new(gel.Button)
 )
 
-func Settings(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "SETTINGS",
 		TxColor:       "",
@@ -50,8 +49,7 @@ func Settings(rc *rcd.RcVar, gtx *layout.Context,
 	// })
 }
 
-func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) func() {
+func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(gtx,
 			layout.Rigid(component.SettingsTabs(rc, gtx, th)),
@@ -75,8 +73,7 @@ func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context,
 	}
 }
 
-func SettingsBody(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) func() {
+func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		// layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
 		th.DuoUIcontainer(16,
@@ -111,8 +108,7 @@ func SettingsBody(rc *rcd.RcVar, gtx *layout.Context,
 	}
 }
 
-func SettingsItemRow(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme, f *component.Field) func() {
+func SettingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *component.Field) func() {
 	return func() {
 		layout.Flex{
 			Axis:      layout.Horizontal,
