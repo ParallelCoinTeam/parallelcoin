@@ -39,8 +39,7 @@ type send struct {
 	passPharse string
 }
 
-func Send(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func Send(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "SEND",
 		TxColor:       "",
@@ -60,8 +59,7 @@ func Send(rc *rcd.RcVar, gtx *layout.Context,
 	return th.DuoUIpage(page)
 }
 
-func sendBody(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) func() {
+func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {

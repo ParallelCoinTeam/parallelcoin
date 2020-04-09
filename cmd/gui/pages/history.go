@@ -29,8 +29,7 @@ var (
 	transactionsPanelElement = gel.NewPanel()
 )
 
-func History(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func History(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "HISTORY",
 		Command:       rc.GetDuoUItransactions(),
@@ -47,8 +46,7 @@ func History(rc *rcd.RcVar, gtx *layout.Context,
 	return th.DuoUIpage(page)
 }
 
-func historyHeader(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) func() {
+func historyHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{
 			Spacing: layout.SpaceBetween,

@@ -71,9 +71,7 @@ func DuoUIdialog(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
 									)
 								}),
 									layout.Rigid(func() {
-
 										rc.Dialog.CustomField()
-
 									}),
 									layout.Rigid(func() {
 										layout.Flex{
@@ -103,8 +101,7 @@ func DuoUIdialog(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
 
 }
 
-func dialogButon(gtx *layout.Context, th *gelook.DuoUItheme, f func(),
-	t, bgColor, icon, iconColor string, button *gel.Button) func() {
+func dialogButon(gtx *layout.Context, th *gelook.DuoUItheme, f func(), t, bgColor, icon, iconColor string, button *gel.Button) func() {
 	return func() {
 		if f != nil {
 			var b gelook.DuoUIbutton

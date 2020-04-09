@@ -10,9 +10,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
-var (
-	buttonHeader = new(gel.Button)
-)
+var buttonHeader = new(gel.Button)
 
 // func ContentHeader(gtx *layout.Context, th *gelook.DuoUItheme, b func()) func() {
 //	return func() {
@@ -37,8 +35,7 @@ var (
 //	}
 // }
 
-func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	allPages *model.DuoUIpages) func() {
+func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			headerNav := []func(){
@@ -76,8 +73,7 @@ func HeaderMenu(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 	}
 }
 
-func headerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	text, icon string, headerButton *gel.Button) func() {
+func headerMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, text, icon string, headerButton *gel.Button) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 			var footerMenuItem gelook.DuoUIbutton

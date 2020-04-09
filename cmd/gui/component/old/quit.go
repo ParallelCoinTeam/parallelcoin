@@ -11,9 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
-var (
-	buttonQuit = new(gel.Button)
-)
+var buttonQuit = new(gel.Button)
 
 func QuitButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {

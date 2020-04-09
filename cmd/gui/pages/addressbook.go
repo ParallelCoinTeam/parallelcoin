@@ -21,8 +21,7 @@ var (
 	address                 string
 )
 
-func DuoUIaddressBook(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func DuoUIaddressBook(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "ADDRESSBOOK",
 		Command:       rc.GetAddressBook(),
@@ -39,8 +38,7 @@ func DuoUIaddressBook(rc *rcd.RcVar, gtx *layout.Context,
 	return th.DuoUIpage(page)
 }
 
-func addressBookBody(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) func() {
+func addressBookBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Flexed(1, func() {
@@ -55,8 +53,7 @@ func addressBookBody(rc *rcd.RcVar, gtx *layout.Context,
 	}
 }
 
-func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme, pageFunc func()) func() {
+func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, pageFunc func()) func() {
 	return func() {
 		layout.Flex{
 			Spacing:   layout.SpaceBetween,
@@ -100,8 +97,7 @@ func addressBookHeader(rc *rcd.RcVar, gtx *layout.Context,
 	}
 }
 
-func addressBookContent(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) func() {
+func addressBookContent(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		addressBookPanelElement.PanelObject = rc.AddressBook.Addresses
 		addressBookPanelElement.PanelObjectsNumber = len(rc.AddressBook.Addresses)

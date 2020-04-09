@@ -20,8 +20,7 @@ var (
 	txwidth              int
 )
 
-func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "EXPLORER",
 		TxColor:       "",
@@ -40,8 +39,8 @@ func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context,
 	}
 	return th.DuoUIpage(page)
 }
-func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) func() {
+
+func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		rc.GetBlocksExcerpts()
 		layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -149,8 +148,7 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 	})
 }
 
-func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	block *model.DuoUIblock) {
+func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *model.DuoUIblock) {
 	for block.Link.Clicked(gtx) {
 		rc.ShowPage = fmt.Sprintf("BLOCK %s", block.BlockHash)
 		rc.GetSingleBlock(block.BlockHash)()

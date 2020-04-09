@@ -29,8 +29,7 @@ func PeersList(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func()
 	}
 }
 
-func peerDetails(gtx *layout.Context, th *gelook.DuoUItheme,
-	i int, t *btcjson.GetPeerInfoResult) func() {
+func peerDetails(gtx *layout.Context, th *gelook.DuoUItheme, i int, t *btcjson.GetPeerInfoResult) func() {
 	prim := th.Fonts["Primary"]
 	c := th.Colors["Dark"]
 	return func() {

@@ -20,8 +20,7 @@ var (
 
 var StartupTime = time.Now()
 
-func Logger(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func Logger(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "LOG",
 		Command:       func() {},

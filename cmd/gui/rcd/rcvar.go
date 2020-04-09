@@ -15,6 +15,7 @@ import (
 )
 
 type RcVar struct {
+
 	cx             *conte.Xt
 	db             *DuoUIdb
 	Boot           *Boot

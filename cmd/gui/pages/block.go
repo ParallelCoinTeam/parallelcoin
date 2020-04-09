@@ -21,8 +21,7 @@ var (
 	algoHeadColor, algoHeadBgColor, algoColor, algoBgColor string
 )
 
-func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	block string) *gelook.DuoUIpage {
+func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block string) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "BLOCK",
 		TxColor:       "",
@@ -42,8 +41,7 @@ func blockPage(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
 	return th.DuoUIpage(page)
 }
 
-func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
-	block btcjson.GetBlockVerboseResult) func() {
+func singleBlockBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block btcjson.GetBlockVerboseResult) func() {
 	return func() {
 		switch block.PowAlgo {
 		case "argon2i":

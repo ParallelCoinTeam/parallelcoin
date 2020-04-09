@@ -27,8 +27,7 @@ var (
 // }
 )
 
-func Network(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func Network(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "NETWORK",
 		TxColor:       "",
@@ -68,8 +67,7 @@ func networkHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fu
 	}
 }
 
-func networkBody(rc *rcd.RcVar, gtx *layout.Context,
-	th *gelook.DuoUItheme) func() {
+func networkBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(16)).Layout(gtx, func() {
 			layout.Flex{
