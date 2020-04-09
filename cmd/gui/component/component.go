@@ -28,18 +28,27 @@ import (
 	"time"
 )
 
-type DuoUIcomponent struct {
-	Name    string
-	Version string
-	Theme   *gelook.DuoUItheme
-	M       interface{}
-	V       func()
-	C       func()
-}
-
-type Field struct {
-	Field *pod.Field
-}
+type (
+	Context struct {
+		Gtx *layout.Context
+		Thm *gelook.DuoUItheme
+	}
+	State struct {
+		Context
+		Rc *rcd.RcVar
+	}
+	DuoUIcomponent struct {
+		Name    string
+		Version string
+		Theme   *gelook.DuoUItheme
+		M       interface{}
+		V       func()
+		C       func()
+	}
+	Field struct {
+		Field *pod.Field
+	}
+)
 
 var (
 	previousBlockHashButton = new(gel.Button)
@@ -98,86 +107,109 @@ var (
 	}
 )
 
+func NewContext(gtx *layout.Context, th *gelook.DuoUItheme) (cx *Context) {
+	return &Context{
+		Gtx: gtx,
+		Thm: th,
+	}
+}
+
+func NewState(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) (cx *State) {
+	return &State{
+		Context: *NewContext(gtx, th),
+		Rc:      rc,
+	}
+}
+
 // rc, gtx, th
 
-func DuoUIdialog(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) {
-	// cs := gtx.Constraints
-	th.DuoUIcontainer(0, "ee000000").
-		Layout(gtx, layout.Center, func() {
-			cs := gtx.Constraints
+func (s *State) DuoUIdialog() {
+	t, g := s.Thm, s.Gtx
+	// cs := g.Constraints
+	t.DuoUIcontainer(0, "ee000000").
+		Layout(g, layout.Center, func() {
+			cs := g.Constraints
 			layout.Stack{
 				Alignment: layout.Center,
-			}.Layout(gtx,
+			}.Layout(g,
 				layout.Expanded(func() {
-					rr := float32(gtx.Px(unit.Dp(0)))
+					rr := float32(g.Px(unit.Dp(0)))
 					clip.Rect{
-						Rect: f32.Rectangle{Max: f32.Point{
-							X: float32(cs.Width.Max),
-							Y: float32(cs.Height.Max),
-						}},
+						Rect: f32.Rectangle{
+							Max: f32.Point{
+								X: float32(cs.Width.Max),
+								Y: float32(cs.Height.Max),
+							},
+						},
 						NE: rr, NW: rr, SE: rr, SW: rr,
-					}.Op(gtx.Ops).Add(gtx.Ops)
-					fill(gtx, gelook.HexARGB("ff888888"))
+					}.Op(g.Ops).Add(g.Ops)
+					fill(g, gelook.HexARGB("ff888888"))
 					pointer.Rect(image.Rectangle{
-						Max: gtx.Dimensions.Size,
-					}).Add(gtx.Ops)
+						Max: g.Dimensions.Size,
+					}).Add(g.Ops)
 				}),
 				layout.Stacked(func() {
-					if gtx.Constraints.Width.Max > 500 {
-						gtx.Constraints.Width.Max = 500
+					if g.Constraints.Width.Max > 500 {
+						g.Constraints.Width.Max = 500
 					}
-					layout.Center.Layout(gtx, func() {
+					layout.Center.Layout(g, func() {
 						layout.Inset{
 							Top: unit.Dp(16), Bottom: unit.Dp(16),
 							Left: unit.Dp(8), Right: unit.Dp(8),
-						}.Layout(gtx, func() {
+						}.Layout(g, func() {
 							layout.Flex{
 								Axis:      layout.Vertical,
 								Alignment: layout.Middle,
-							}.Layout(gtx, layout.Rigid(func() {
-								layout.Flex{
-									Axis:      layout.Horizontal,
-									Alignment: layout.Middle,
-								}.Layout(gtx, layout.Rigid(func() {
-									layout.Inset{
-										Top:    unit.Dp(0),
-										Bottom: unit.Dp(8),
-										Left:   unit.Dp(4),
-										Right:  unit.Dp(4)}.
-										Layout(gtx, func() {
-											cur := th.DuoUIlabel(unit.Dp(14), rc.Dialog.Text)
-											cur.Font.Typeface = th.Fonts["Primary"]
-											cur.Color = th.Colors["Dark"]
-											cur.Alignment = text.Start
-											cur.Layout(gtx)
-										})
-								}),
-								)
-							}),
+							}.Layout(g,
 								layout.Rigid(func() {
-									rc.Dialog.CustomField()
+									layout.Flex{
+										Axis:      layout.Horizontal,
+										Alignment: layout.Middle,
+									}.Layout(g, layout.Rigid(func() {
+										layout.Inset{
+											Top:    unit.Dp(0),
+											Bottom: unit.Dp(8),
+											Left:   unit.Dp(4),
+											Right:  unit.Dp(4)}.
+											Layout(g, func() {
+												cur := t.DuoUIlabel(unit.Dp(
+													14), s.Rc.Dialog.Text)
+												cur.Font.Typeface = t.
+													Fonts["Primary"]
+												cur.Color = t.Colors["Dark"]
+												cur.Alignment = text.Start
+												cur.Layout(g)
+											})
+									}),
+									)
+								}),
+								layout.Rigid(func() {
+									s.Rc.Dialog.CustomField()
 								}),
 								layout.Rigid(func() {
 									layout.Flex{
 										Axis:      layout.Horizontal,
 										Alignment: layout.Middle,
-									}.Layout(gtx,
+									}.Layout(g,
 										layout.Rigid(
-											dialogButton(gtx, th,
-												rc.Dialog.Red, rc.Dialog.RedLabel,
+											s.Context.dialogButton(
+												s.Rc.Dialog.Red,
+												s.Rc.Dialog.RedLabel,
 												"ffcf3030", "iconCancel", "ffcf8080",
 												buttonDialogCancel),
 										),
 										layout.Rigid(
-											dialogButton(gtx, th,
-												rc.Dialog.Green, rc.Dialog.GreenLabel,
+											s.dialogButton(
+												s.Rc.Dialog.Green,
+												s.Rc.Dialog.GreenLabel,
 												"ff30cf30", "iconOK",
 												"ff80cf80", buttonDialogOK),
 										),
 										layout.Rigid(
-											dialogButton(gtx, th,
-												rc.Dialog.Orange, rc.Dialog.OrangeLabel,
+											s.dialogButton(
+												s.Rc.Dialog.Orange,
+												s.Rc.Dialog.OrangeLabel,
 												"ffcf8030", "iconClose",
 												"ffcfa880",
 												buttonDialogClose),
@@ -192,9 +224,9 @@ func DuoUIdialog(
 
 }
 
-func DuoUIinputField(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
-	rcs := rc.Settings
+func (s *State) DuoUIinputField(f *Field) func() {
+	t, g := s.Thm, s.Gtx
+	rcs := s.Rc.Settings
 	rdw, rdCfg := rcs.Daemon.Widgets, rcs.Daemon.Config
 	return func() {
 		switch f.Field.Type {
@@ -202,7 +234,7 @@ func DuoUIinputField(
 			switch f.Field.InputType {
 			case "text":
 				if f.Field.Model != "MiningAddrs" {
-					StringsArrayEditor(gtx, th,
+					s.StringsArrayEditor(
 						(rdw[f.Field.Model]).(*gel.Editor),
 						(rdw[f.Field.Model]).(*gel.Editor).Text(),
 						func(e gel.EditorEvent) {
@@ -210,7 +242,7 @@ func DuoUIinputField(
 								strings.Fields((rdw[f.Field.Model]).(*gel.Editor).Text())
 							Debug()
 							if e != nil {
-								rc.SaveDaemonCfg()
+								s.Rc.SaveDaemonCfg()
 							}
 						},
 					)()
@@ -220,19 +252,19 @@ func DuoUIinputField(
 		case "input":
 			switch f.Field.InputType {
 			case "text":
-				Editor(gtx, th,
+				s.Editor(
 					(rdw[f.Field.Model]).(*gel.Editor),
 					(rdw[f.Field.Model]).(*gel.Editor).Text(),
 					func(e gel.EditorEvent) {
 						txt := rdw[f.Field.Model].(*gel.Editor).Text()
 						rdCfg[f.Field.Model] = txt
 						if e != nil {
-							rc.SaveDaemonCfg()
+							s.Rc.SaveDaemonCfg()
 						}
 					},
 				)()
 			case "number":
-				Editor(gtx, th,
+				s.Editor(
 					(rdw[f.Field.Model]).(*gel.Editor),
 					(rdw[f.Field.Model]).(*gel.Editor).Text(),
 					func(e gel.EditorEvent) {
@@ -242,12 +274,12 @@ func DuoUIinputField(
 						}
 						rdCfg[f.Field.Model] = number
 						if e != nil {
-							rc.SaveDaemonCfg()
+							s.Rc.SaveDaemonCfg()
 						}
 					},
 				)()
 			case "decimal":
-				Editor(gtx, th,
+				s.Editor(
 					(rdw[f.Field.Model]).(*gel.Editor),
 					(rdw[f.Field.Model]).(*gel.Editor).Text(),
 					func(e gel.EditorEvent) {
@@ -258,128 +290,143 @@ func DuoUIinputField(
 						}
 						rdCfg[f.Field.Model] = decimal
 						if e != nil {
-							rc.SaveDaemonCfg()
+							s.Rc.SaveDaemonCfg()
 						}
 					})()
 			case "password":
-				e := th.DuoUIeditor(f.Field.Label, "DocText", "DocBg", 32)
-				e.Font.Typeface = th.Fonts["Primary"]
+				e := t.DuoUIeditor(f.Field.Label, "DocText", "DocBg", 32)
+				e.Font.Typeface = t.Fonts["Primary"]
 				e.Font.Style = text.Italic
-				e.Layout(gtx, rdw[f.Field.Model].(*gel.Editor))
+				e.Layout(g, rdw[f.Field.Model].(*gel.Editor))
 			default:
 			}
 		case "switch":
-			sw := th.DuoUIcheckBox(
-				f.Field.Label, th.Colors["Primary"], th.Colors["Primary"])
-			sw.PillColor = th.Colors["LightGray"]
-			sw.PillColorChecked = th.Colors["LightGrayI"]
-			sw.CircleColor = th.Colors["LightGrayII"]
-			sw.CircleColorChecked = th.Colors["Primary"]
-			sw.DrawLayout(gtx, rdw[f.Field.Model].(*gel.CheckBox))
-			if (rdw[f.Field.Model]).(*gel.CheckBox).Checked(gtx) {
+			sw := t.DuoUIcheckBox(
+				f.Field.Label, t.Colors["Primary"], t.Colors["Primary"])
+			sw.PillColor = t.Colors["LightGray"]
+			sw.PillColorChecked = t.Colors["LightGrayI"]
+			sw.CircleColor = t.Colors["LightGrayII"]
+			sw.CircleColorChecked = t.Colors["Primary"]
+			sw.DrawLayout(g, rdw[f.Field.Model].(*gel.CheckBox))
+			if (rdw[f.Field.Model]).(*gel.CheckBox).Checked(g) {
 				if !*rdCfg[f.Field.Model].(*bool) {
 					tt := true
 					rdCfg[f.Field.Model] = &tt
-					rc.SaveDaemonCfg()
+					s.Rc.SaveDaemonCfg()
 				}
 			} else {
 				if *rdCfg[f.Field.Model].(*bool) {
 					ff := false
 					rdCfg[f.Field.Model] = &ff
-					rc.SaveDaemonCfg()
+					s.Rc.SaveDaemonCfg()
 				}
 			}
 		case "radio":
 			// radioButtonsGroup := (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.Enum)
-			// layout.Flex{}.Layout(gtx,
+			// layout.Flex{}.Layout(g,
 			//	layout.Rigid(func() {
-			//		duo.Theme.RadioButton("r1", "RadioButton1").Layout(gtx,  radioButtonsGroup)
+			//		duo.Theme.RadioButton("r1", "RadioButton1").Layout(g,
+			//		radioButtonsGroup)
 			//
 			//	}),
 			//	layout.Rigid(func() {
-			//		duo.Theme.RadioButton("r2", "RadioButton2").Layout(gtx, radioButtonsGroup)
+			//		duo.Theme.RadioButton("r2", "RadioButton2").Layout(g,
+			//		radioButtonsGroup)
 			//
 			//	}),
 			//	layout.Rigid(func() {
-			//		duo.Theme.RadioButton("r3", "RadioButton3").Layout(gtx, radioButtonsGroup)
+			//		duo.Theme.RadioButton("r3", "RadioButton3").Layout(g,
+			//		radioButtonsGroup)
 			//
 			//	}))
 		default:
-			// duo.Theme.CheckBox("Checkbox").Layout(gtx, (duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
+			// duo.Theme.CheckBox("Checkbox").Layout(g,
+			//(duo.Configuration.Settings.Daemon.Widgets[fieldName]).(*widget.CheckBox))
 		}
 	}
 }
 
-func DuoUIlatestTransactions(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func (s *State) DuoUIlatestTransactions() func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		width := gtx.Constraints.Width.Max
-		//cs := gtx.Constraints
-		th.DuoUIcontainer(0, th.Colors["DarkGray"]).
-			Layout(gtx, layout.NW, func() {
+		width := g.Constraints.Width.Max
+		//cs := g.Constraints
+		t.DuoUIcontainer(0, t.Colors["DarkGray"]).
+			Layout(g, layout.NW, func() {
 				layout.Flex{
 					Axis: layout.Vertical,
-				}.Layout(gtx,
+				}.Layout(g,
 					layout.Rigid(func() {
-						th.DuoUIcontainer(8, th.Colors["Primary"]).
-							Layout(gtx, layout.N,
+						t.DuoUIcontainer(8, t.Colors["Primary"]).
+							Layout(g, layout.N,
 								func() {
-									gtx.Constraints.Width.Min = width
-									latestx := th.H5("LATEST TRANSACTIONS")
-									latestx.Color = th.Colors["Light"]
+									g.Constraints.Width.Min = width
+									latestx := t.H5("LATEST TRANSACTIONS")
+									latestx.Color = t.Colors["Light"]
 									latestx.Alignment = text.Start
-									latestx.Layout(gtx)
+									latestx.Layout(g)
 								},
 							)
 					}),
 					layout.Flexed(1, func() {
-						layout.UniformInset(unit.Dp(8)).Layout(gtx,
+						layout.UniformInset(unit.Dp(8)).Layout(g,
 							func() {
 								layout.Flex{
 									Axis: layout.Vertical,
-								}.Layout(gtx,
+								}.Layout(g,
 									layout.Rigid(func() {
-										latestTxsBookPanel := th.DuoUIpanel()
+										latestTxsBookPanel := t.DuoUIpanel()
 										latestTxsBookPanel.PanelObject =
-											rc.Status.Wallet.LastTxs.Txs
+											s.Rc.Status.Wallet.LastTxs.Txs
 										latestTxsBookPanel.ScrollBar =
-											th.ScrollBar(0)
+											t.ScrollBar(0)
 										latestTxsPanelElement.PanelObjectsNumber =
-											len(rc.Status.Wallet.LastTxs.Txs)
-										latestTxsBookPanel.Layout(gtx,
+											len(s.Rc.Status.Wallet.LastTxs.Txs)
+										latestTxsBookPanel.Layout(g,
 											latestTxsPanelElement, func(i int, in interface{}) {
 												txs := in.([]model.DuoUItransactionExcerpt)
-												t := txs[i]
-												th.DuoUIcontainer(16, th.Colors["Dark"]).
-													Layout(gtx, layout.NW, func() {
-														width := gtx.Constraints.Width.Max
-														layout.Flex{
-															Axis: layout.
-																Vertical,
-														}.Layout(gtx,
-															layout.Rigid(lTtxid(gtx, th, t.TxID)),
-															layout.Rigid(func() {
-																gtx.Constraints.Width.Min = width
-																layout.Flex{
-																	Spacing: layout.SpaceBetween,
-																}.Layout(gtx,
-																	layout.Rigid(func() {
-																		layout.Flex{
-																			Axis: layout.Vertical,
-																		}.Layout(gtx,
-																			layout.Rigid(lTcategory(gtx, th, t.Category)),
-																			layout.Rigid(lTtime(gtx, th, t.Time)),
-																		)
-																	}),
-																	layout.Rigid(lTamount(gtx, th, t.Amount)),
-																)
-															}),
-															layout.Rigid(th.DuoUIline(gtx,
-																0, 0, 1,
-																th.Colors["Hint"]),
-															),
-														)
-													})
+												tx := txs[i]
+												t.DuoUIcontainer(16,
+													t.Colors["Dark"]).
+													Layout(g, layout.NW,
+														func() {
+															width := g.Constraints.Width.Max
+															layout.Flex{
+																Axis: layout.
+																	Vertical,
+															}.Layout(g,
+																layout.Rigid(
+																	s.lTtxid(
+																		tx.TxID)),
+																layout.Rigid(func() {
+																	g.
+																		Constraints.Width.Min = width
+																	layout.Flex{
+																		Spacing: layout.SpaceBetween,
+																	}.Layout(g,
+																		layout.Rigid(func() {
+																			layout.Flex{
+																				Axis: layout.Vertical,
+																			}.
+																				Layout(g,
+																					layout.Rigid(s.lTcategory(tx.Category)),
+																					layout.Rigid(s.lTtime(tx.Time)),
+																				)
+																		}),
+																		layout.
+																			Rigid(
+																				s.lTamount(tx.Amount)),
+																	)
+																}),
+																layout.Rigid(s.
+																	Thm.
+																	DuoUIline(g,
+																		0, 0, 1,
+																		t.
+																			Colors["Hint"]),
+																),
+															)
+														})
 											})
 									}))
 							})
@@ -389,498 +436,497 @@ func DuoUIlatestTransactions(
 	}
 }
 
-func DuoUIlogger(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func (s *State) DuoUIlogger() func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
 		// const buflen = 9
-		layout.UniformInset(unit.Dp(10)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(10)).Layout(g, func() {
 			// const n = 1e6
-			cs := gtx.Constraints
-			gelook.DuoUIdrawRectangle(gtx,
-				cs.Width.Max, cs.Height.Max, th.Colors["Dark"],
+			cs := g.Constraints
+			gelook.DuoUIdrawRectangle(g,
+				cs.Width.Max, cs.Height.Max, t.Colors["Dark"],
 				[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-			lm := rc.Log.LogMessages.Load().([]log.Entry)
-			logOutputList.Layout(gtx, len(lm), func(i int) {
-				t := lm[i]
-				logText := th.Caption(
+			lm := s.Rc.Log.LogMessages.Load().([]log.Entry)
+			logOutputList.Layout(g, len(lm), func(i int) {
+				tt := lm[i]
+				logText := t.Caption(
 					fmt.Sprintf("%-12s",
-						t.Time.Sub(StartupTime)/time.Second*time.Second) +
-						" " + fmt.Sprint(t.Text))
-				logText.Font.Typeface = th.Fonts["Mono"]
-				logText.Color = th.Colors["Primary"]
-				switch t.Level {
+						tt.Time.Sub(StartupTime)/time.Second*time.Second) +
+						" " + fmt.Sprint(tt.Text))
+				logText.Font.Typeface = t.Fonts["Mono"]
+				logText.Color = t.Colors["Primary"]
+				switch tt.Level {
 				case "TRC":
-					logText.Color = th.Colors["Success"]
+					logText.Color = t.Colors["Success"]
 				case "DBG":
-					logText.Color = th.Colors["Secondary"]
+					logText.Color = t.Colors["Secondary"]
 				case "INF":
-					logText.Color = th.Colors["Info"]
+					logText.Color = t.Colors["Info"]
 				case "WRN":
-					logText.Color = th.Colors["Warning"]
+					logText.Color = t.Colors["Warning"]
 				case "ERROR":
-					logText.Color = th.Colors["Danger"]
+					logText.Color = t.Colors["Danger"]
 				case "FTL":
-					logText.Color = th.Colors["Primary"]
+					logText.Color = t.Colors["Primary"]
 				}
-				logText.Layout(gtx)
+				logText.Layout(g)
 			})
-			op.InvalidateOp{}.Add(gtx.Ops)
+			op.InvalidateOp{}.Add(g.Ops)
 		})
 	}
 }
 
-func DuoUIstatus(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
-	wall := rc.Status.Wallet
-	nod := rc.Status.Node
+func (s *State) DuoUIstatus() func() {
+	t, g := s.Thm, s.Gtx
+	wall := s.Rc.Status.Wallet
+	nod := s.Rc.Status.Node
 	return func() {
-		th.DuoUIcontainer(8, th.Colors["Light"]).Layout(gtx, layout.NW, func() {
-			bigStatus := []func(){
-				listItem(gtx, th,
-					22, 6, "EditorMonetizationOn",
-					"BALANCE :", wall.Balance.Load()+" "+rc.Settings.Abbrevation),
-				th.DuoUIline(gtx,
-					8, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th,
-					22, 6, "MapsLayersClear", "UNCONFIRMED :",
-					wall.Unconfirmed.Load()+" "+rc.Settings.Abbrevation),
-				th.DuoUIline(gtx,
-					8, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th,
-					22, 6, "CommunicationImportExport",
-					"TRANSACTIONS :", fmt.Sprint(wall.TxsNumber.Load())),
-				th.DuoUIline(gtx,
-					8, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th,
-					16, 4, "DeviceWidgets",
-					"Block Count :", fmt.Sprint(nod.BlockCount.Load())),
-				th.DuoUIline(gtx,
-					4, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th,
-					16, 4, "ImageTimer",
-					"Difficulty :", fmt.Sprint(nod.Difficulty.Load())),
-				th.DuoUIline(gtx,
-					4, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th,
-					16, 4, "NotificationVPNLock",
-					"Connections :", fmt.Sprint(nod.ConnectionCount.Load())),
-			}
-			itemsList.Layout(gtx, len(bigStatus), func(i int) {
-				layout.UniformInset(unit.Dp(0)).Layout(gtx, bigStatus[i])
+		t.DuoUIcontainer(8, t.Colors["Light"]).Layout(g, layout.NW,
+			func() {
+				bigStatus := []func(){
+					s.listItem(22, 6, "EditorMonetizationOn",
+						"BALANCE :", wall.Balance.Load()+" "+s.Rc.Settings.
+							Abbrevation),
+					t.DuoUIline(g,
+						8, 0, 1, t.Colors["LightGray"]),
+					s.listItem(22, 6, "MapsLayersClear", "UNCONFIRMED :",
+						wall.Unconfirmed.Load()+" "+s.Rc.Settings.Abbrevation),
+					t.DuoUIline(g,
+						8, 0, 1, t.Colors["LightGray"]),
+					s.listItem(22, 6, "CommunicationImportExport",
+						"TRANSACTIONS :", fmt.Sprint(wall.TxsNumber.Load())),
+					t.DuoUIline(g,
+						8, 0, 1, t.Colors["LightGray"]),
+					s.listItem(16, 4, "DeviceWidgets",
+						"Block Count :", fmt.Sprint(nod.BlockCount.Load())),
+					t.DuoUIline(g,
+						4, 0, 1, t.Colors["LightGray"]),
+					s.listItem(16, 4, "ImageTimer",
+						"Difficulty :", fmt.Sprint(nod.Difficulty.Load())),
+					t.DuoUIline(g,
+						4, 0, 1, t.Colors["LightGray"]),
+					s.listItem(16, 4, "NotificationVPNLock",
+						"Connections :", fmt.Sprint(nod.ConnectionCount.Load())),
+				}
+				itemsList.Layout(g, len(bigStatus), func(i int) {
+					layout.UniformInset(unit.Dp(0)).Layout(g, bigStatus[i])
+				})
 			})
-		})
 	}
 }
 
-func FooterLeftMenu(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
+func (s *State) FooterLeftMenu(allPages *model.DuoUIpages) func() {
+	g := s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
 			cornerButtons := []func(){
-				QuitButton(rc, gtx, th),
-				// footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"],
+				s.QuitButton(),
+				// s.footerMenuButton(allPages.Theme["EXPLORER"],
 				//"BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount), "", buttonBlocks),
-				footerMenuButton(rc, gtx, th, allPages.Theme["LOG"], "LOG",
+				s.footerMenuButton(allPages.Theme["LOG"], "LOG",
 					"traceIcon", buttonLog),
 			}
-			cornerNav.Layout(gtx, len(cornerButtons), func(i int) {
-				layout.UniformInset(unit.Dp(0)).Layout(gtx, cornerButtons[i])
+			cornerNav.Layout(g, len(cornerButtons), func(i int) {
+				layout.UniformInset(unit.Dp(0)).Layout(g, cornerButtons[i])
 			})
 		})
 	}
 }
 
-func footerMenuButton(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {
+func (s *State) footerMenuButton(page *gelook.DuoUIpage, text, icon string, footerButton *gel.Button) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
 			var footerMenuItem gelook.DuoUIbutton
 			if icon != "" {
-				footerMenuItem = th.DuoUIbutton("", "",
-					"", "", "", th.Colors["Dark"], icon,
-					CurrentCurrentPageColor(rc.ShowPage,
-						page.Title, navItemIconColor, th.Colors["Primary"]),
+				footerMenuItem = t.DuoUIbutton("", "",
+					"", "", "", t.Colors["Dark"], icon,
+					CurrentCurrentPageColor(s.Rc.ShowPage,
+						page.Title, navItemIconColor, t.Colors["Primary"]),
 					footerMenuItemTextSize, footerMenuItemIconSize,
 					footerMenuItemWidth, footerMenuItemHeight,
 					0, 0, 0, 0)
-				for footerButton.Clicked(gtx) {
-					rc.ShowPage = page.Title
-					SetPage(rc, page)
+				for footerButton.Clicked(g) {
+					s.Rc.ShowPage = page.Title
+					SetPage(s.Rc, page)
 				}
 			} else {
-				footerMenuItem = th.DuoUIbutton(th.Fonts["Primary"], text,
-					CurrentCurrentPageColor(rc.ShowPage, page.Title,
-						th.Colors["Light"], th.Colors["Primary"]),
+				footerMenuItem = t.DuoUIbutton(t.Fonts["Primary"], text,
+					CurrentCurrentPageColor(s.Rc.ShowPage, page.Title,
+						t.Colors["Light"], t.Colors["Primary"]),
 					"", "", "", "", "",
 					footerMenuItemTextSize, footerMenuItemIconSize,
 					0, footerMenuItemHeight,
 					13, 16, 14, 16)
 				footerMenuItem.Height = 48
-				for footerButton.Clicked(gtx) {
-					rc.ShowPage = page.Title
-					SetPage(rc, page)
+				for footerButton.Clicked(g) {
+					s.Rc.ShowPage = page.Title
+					SetPage(s.Rc, page)
 				}
 			}
-			footerMenuItem.Layout(gtx, footerButton)
+			footerMenuItem.Layout(g, footerButton)
 		})
 	}
 }
 
-func FooterRightMenu(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
+func (s *State) FooterRightMenu(allPages *model.DuoUIpages) func() {
+	g := s.Gtx
 	return func() {
 		navButtons := []func(){
-			// footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"],
+			// s.footerMenuButton(allPages.Theme["NETWORK"],
 			// "", "networkIcon", buttonNetwork),
-			// footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"],
+			// s.footerMenuButton(allPages.Theme["NETWORK"],
 			// "CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount),
 			//"", buttonNetwork),
-			// footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"],
+			// s.footerMenuButton(allPages.Theme["EXPLORER"],
 			// "", "DeviceWidgets", buttonBlocks),
-			footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"],
+			s.footerMenuButton(allPages.Theme["NETWORK"],
 				"", "network", buttonNetwork),
-			footerMenuButton(rc, gtx, th, allPages.Theme["NETWORK"],
-				"CONNECTIONS: "+fmt.Sprint(rc.Status.Node.ConnectionCount.Load()), "", buttonNetwork),
-			footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"],
+			s.footerMenuButton(allPages.Theme["NETWORK"],
+				"CONNECTIONS: "+
+					fmt.Sprint(s.Rc.Status.Node.ConnectionCount.Load()),
+				"", buttonNetwork),
+			s.footerMenuButton(allPages.Theme["EXPLORER"],
 				"", "DeviceWidgets", buttonBlocks),
-			footerMenuButton(rc, gtx, th, allPages.Theme["EXPLORER"],
-				"BLOCKS: "+fmt.Sprint(rc.Status.Node.BlockCount.Load()), "", buttonBlocks),
-			footerMenuButton(rc, gtx, th, allPages.Theme["MINER"],
+			s.footerMenuButton(allPages.Theme["EXPLORER"],
+				"BLOCKS: "+fmt.Sprint(s.Rc.Status.Node.BlockCount.Load()), "",
+				buttonBlocks),
+			s.footerMenuButton(allPages.Theme["MINER"],
 				"", "helpIcon", buttonHelp),
-			footerMenuButton(rc, gtx, th, allPages.Theme["CONSOLE"],
+			s.footerMenuButton(allPages.Theme["CONSOLE"],
 				"", "consoleIcon", buttonConsole),
-			footerMenuButton(rc, gtx, th, allPages.Theme["SETTINGS"],
+			s.footerMenuButton(allPages.Theme["SETTINGS"],
 				"", "settingsIcon", buttonSettings),
 		}
-		footerNav.Layout(gtx, len(navButtons), func(i int) {
-			layout.UniformInset(unit.Dp(0)).Layout(gtx, navButtons[i])
+		footerNav.Layout(g, len(navButtons), func(i int) {
+			layout.UniformInset(unit.Dp(0)).Layout(g, navButtons[i])
 		})
 	}
 }
 
-func HeaderMenu(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages) func() {
+func (s *State) HeaderMenu(allPages *model.DuoUIpages) func() {
+	g := s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
 			headerNav := []func(){
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"CommunicationImportExport", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"NotificationNetworkCheck", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"NotificationSync", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"NotificationSyncDisabled", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"NotificationSyncProblem", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"NotificationVPNLock", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"MapsLayers", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"MapsLayersClear", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"ImageTimer", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"ImageRemoveRedEye", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"DeviceSignalCellular0Bar", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"ActionTimeline", buttonHeader),
-				headerMenuButton(rc, gtx, th, "",
+				s.headerMenuButton("",
 					"HardwareWatch", buttonHeader),
 			}
-			footerNav.Layout(gtx, len(headerNav), func(i int) {
-				layout.UniformInset(unit.Dp(0)).Layout(gtx, headerNav[i])
+			footerNav.Layout(g, len(headerNav), func(i int) {
+				layout.UniformInset(unit.Dp(0)).Layout(g, headerNav[i])
 			})
 		})
 	}
 }
 
-func headerMenuButton(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, text, icon string, headerButton *gel.Button) func() {
+func (s *State) headerMenuButton(text, icon string, headerButton *gel.Button) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
 			var footerMenuItem gelook.DuoUIbutton
-			footerMenuItem = th.DuoUIbutton("", "",
+			footerMenuItem = t.DuoUIbutton("", "",
 				"", "", "",
-				th.Colors["Dark"], icon,
-				CurrentCurrentPageColor(rc.ShowPage, text, navItemIconColor,
-					th.Colors["Primary"]),
+				t.Colors["Dark"], icon,
+				CurrentCurrentPageColor(s.Rc.ShowPage, text, navItemIconColor,
+					t.Colors["Primary"]),
 				footerMenuItemTextSize, footerMenuItemIconSize,
 				footerMenuItemWidth, footerMenuItemHeight,
 				footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal,
 				footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
-			for headerButton.Clicked(gtx) {
-				rc.ShowPage = text
+			for headerButton.Clicked(g) {
+				s.Rc.ShowPage = text
 			}
-			footerMenuItem.IconLayout(gtx, headerButton)
+			footerMenuItem.IconLayout(g, headerButton)
 		})
 	}
 }
 
-func iconButton(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage) func() {
+func (s *State) iconButton(page *gelook.DuoUIpage) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
 		var logMenuItem gelook.DuoUIbutton
-		logMenuItem = th.DuoUIbutton("", "", "",
-			th.Colors["Dark"], "", "", "traceIcon",
-			CurrentCurrentPageColor(rc.ShowPage, "LOG",
-				th.Colors["Light"], th.Colors["Primary"]),
+		logMenuItem = t.DuoUIbutton("", "", "",
+			t.Colors["Dark"], "", "", "traceIcon",
+			CurrentCurrentPageColor(s.Rc.ShowPage, "LOG",
+				t.Colors["Light"], t.Colors["Primary"]),
 			footerMenuItemTextSize, footerMenuItemIconSize,
 			footerMenuItemWidth, footerMenuItemHeight,
 			footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal,
 			footerMenuItemPaddingVertical, footerMenuItemPaddingHorizontal)
-		for buttonLog.Clicked(gtx) {
-			SetPage(rc, page)
-			rc.ShowPage = "LOG"
+		for buttonLog.Clicked(g) {
+			SetPage(s.Rc, page)
+			s.Rc.ShowPage = "LOG"
 		}
-		logMenuItem.IconLayout(gtx, buttonLog)
+		logMenuItem.IconLayout(g, buttonLog)
 	}
 }
 
-func MainNavigation(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages, nav *model.DuoUInav) func() {
+func (s *State) MainNavigation(allPages *model.DuoUIpages, nav *model.DuoUInav) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		navButtons := navButtons(rc, gtx, th, allPages, nav)
-		gtx.Constraints.Width.Max = nav.Width
-		th.DuoUIcontainer(0, th.Colors["Dark"]).Layout(gtx, layout.NW, func() {
-			mainNav.Layout(gtx, len(navButtons), func(i int) {
-				layout.UniformInset(unit.Dp(0)).Layout(gtx, navButtons[i])
+		navButtons := s.navButtons(allPages, nav)
+		g.Constraints.Width.Max = nav.Width
+		t.DuoUIcontainer(0, t.Colors["Dark"]).Layout(g, layout.NW,
+			func() {
+				mainNav.Layout(g, len(navButtons), func(i int) {
+					layout.UniformInset(unit.Dp(0)).Layout(g, navButtons[i])
+				})
 			})
-		})
 	}
 }
 
-func navButtons(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, allPages *model.DuoUIpages, nav *model.DuoUInav) []func() {
+func (s *State) navButtons(allPages *model.DuoUIpages, nav *model.DuoUInav) []func() {
+	t, g := s.Thm, s.Gtx
 	return []func(){
-		navMenuButton(rc, gtx, th, allPages.Theme["OVERVIEW"], nav,
+		s.navMenuButton(allPages.Theme["OVERVIEW"], nav,
 			"OVERVIEW", "overviewIcon", navButtonOverview),
-		th.DuoUIline(gtx, 0, 0, 1,
-			th.Colors["LightGrayIII"]),
-		navMenuButton(rc, gtx, th, allPages.Theme["SEND"], nav,
-			"SEND", "sendIcon", navButtonSend),
-		// navMenuLine(gtx, th),
-		// navMenuButton(rc, gtx, th, allPages.Theme["RECEIVE"], "RECEIVE",
+		t.DuoUIline(g, 0, 0, 1,
+			t.Colors["LightGrayIII"]),
+		s.navMenuButton(allPages.Theme["SEND"], nav, "SEND", "sendIcon",
+			navButtonSend),
+		// navMenuLine(g, th),
+		// navMenuButton(rc, g, t, allPages.Theme["RECEIVE"], "RECEIVE",
 		//"receiveIcon", navButtonReceive),
-		th.DuoUIline(gtx, 0, 0, 1,
-			th.Colors["LightGrayIII"]),
-		navMenuButton(rc, gtx, th, allPages.Theme["ADDRESSBOOK"], nav,
+		t.DuoUIline(g, 0, 0, 1,
+			t.Colors["LightGrayIII"]),
+		s.navMenuButton(allPages.Theme["ADDRESSBOOK"], nav,
 			"ADDRESSBOOK", "addressBookIcon", navButtonAddressBook),
-		th.DuoUIline(gtx, 0, 0, 1,
-			th.Colors["LightGrayIII"]),
-		navMenuButton(rc, gtx, th, allPages.Theme["HISTORY"], nav,
+		t.DuoUIline(g, 0, 0, 1,
+			t.Colors["LightGrayIII"]),
+		s.navMenuButton(allPages.Theme["HISTORY"], nav,
 			"HISTORY", "historyIcon", navButtonHistory),
 	}
 }
 
-func navMenuButton(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, nav *model.DuoUInav, title, icon string, navButton *gel.Button) func() {
+func (s *State) navMenuButton(page *gelook.DuoUIpage, nav *model.DuoUInav, title, icon string, navButton *gel.Button) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
 			var menuItem gelook.DuoUIbutton
-			menuItem = th.DuoUIbutton(th.Fonts["Secondary"],
-				title, th.Colors["Dark"],
-				th.Colors["LightGrayII"],
-				th.Colors["LightGrayII"],
-				th.Colors["Dark"], icon,
-				CurrentCurrentPageColor(rc.ShowPage, title, navItemIconColor,
-					th.Colors["Primary"]), nav.TextSize, nav.IconSize,
+			menuItem = t.DuoUIbutton(t.Fonts["Secondary"],
+				title, t.Colors["Dark"],
+				t.Colors["LightGrayII"],
+				t.Colors["LightGrayII"],
+				t.Colors["Dark"], icon,
+				CurrentCurrentPageColor(s.Rc.ShowPage, title, navItemIconColor,
+					t.Colors["Primary"]), nav.TextSize, nav.IconSize,
 				nav.Width, nav.Height, nav.PaddingVertical,
 				nav.PaddingHorizontal, nav.PaddingVertical, nav.PaddingHorizontal)
-			for navButton.Clicked(gtx) {
-				rc.ShowPage = title
-				SetPage(rc, page)
+			for navButton.Clicked(g) {
+				s.Rc.ShowPage = title
+				SetPage(s.Rc, page)
 			}
-			menuItem.MenuLayout(gtx, navButton)
+			menuItem.MenuLayout(g, navButton)
 		})
 	}
 }
 
-func pageNavButton(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, page *gelook.DuoUIpage, b *gel.Button, label, hash string) {
-	layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
+func (s *State) pageNavButton(page *gelook.DuoUIpage, b *gel.Button, label, hash string) {
+	t, g := s.Thm, s.Gtx
+	layout.UniformInset(unit.Dp(4)).Layout(g, func() {
 		var blockButton gelook.DuoUIbutton
-		blockButton = th.DuoUIbutton(th.Fonts["Mono"], label+" "+hash,
-			th.Colors["Light"], th.Colors["Info"],
-			th.Colors["Info"], th.Colors["Light"], "", th.Colors["Light"],
+		blockButton = t.DuoUIbutton(t.Fonts["Mono"], label+" "+hash,
+			t.Colors["Light"], t.Colors["Info"],
+			t.Colors["Info"], t.Colors["Light"], "", t.Colors["Light"],
 			16, 0, 60, 24,
 			0, 0, 0, 0)
-		for b.Clicked(gtx) {
-			rc.ShowPage = fmt.Sprintf("BLOCK %s", hash)
-			rc.GetSingleBlock(hash)()
-			SetPage(rc, page)
+		for b.Clicked(g) {
+			s.Rc.ShowPage = fmt.Sprintf("BLOCK %s", hash)
+			s.Rc.GetSingleBlock(hash)()
+			SetPage(s.Rc, page)
 		}
-		blockButton.Layout(gtx, b)
+		blockButton.Layout(g, b)
 	})
 }
 
-func PageNavButtons(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, previousBlockHash, nextBlockHash string, prevPage, nextPage *gelook.DuoUIpage) func() {
+func (s *State) PageNavButtons(previousBlockHash, nextBlockHash string, prevPage, nextPage *gelook.DuoUIpage) func() {
+	g := s.Gtx
 	return func() {
-		layout.Flex{}.Layout(gtx,
+		layout.Flex{}.Layout(g,
 			layout.Flexed(0.5, func() {
 				eh := chainhash.Hash{}
 				if previousBlockHash != eh.String() {
-					pageNavButton(rc, gtx, th, nextPage,
+					s.pageNavButton(nextPage,
 						previousBlockHashButton, "Previous Block",
 						previousBlockHash)
 				}
 			}),
 			layout.Flexed(0.5, func() {
 				if nextBlockHash != "" {
-					pageNavButton(rc, gtx,
-						th, nextPage, nextBlockHashButton,
+					s.pageNavButton(nextPage, nextBlockHashButton,
 						"Next Block", nextBlockHash)
 				}
 			}))
 	}
 }
 
-func PeersList(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
-	c := th.Colors["Dark"]
+func (s *State) PeersList() func() {
+	t, g := s.Thm, s.Gtx
+	c := t.Colors["Dark"]
 	return func() {
-		rc.Network.PeersList.Layout(gtx, len(rc.Network.Peers), func(i int) {
-			t := rc.Network.Peers[i]
-			th.DuoUIline(gtx, 0, 0, 1,
-				th.Colors["Hint"])()
-			layout.Flex{
-				Spacing: layout.SpaceBetween,
-			}.Layout(gtx,
-				layout.Rigid(Label(gtx, th, th.Fonts["Mono"], 14,
-					c, fmt.Sprint(t.ID))),
-				layout.Flexed(1, peerDetails(gtx, th, i, t)),
-				layout.Rigid(Label(gtx, th, th.Fonts["Mono"], 14,
-					c, t.Addr)))
-		})
+		s.Rc.Network.PeersList.Layout(g, len(s.Rc.Network.Peers),
+			func(i int) {
+				np := s.Rc.Network.Peers[i]
+				t.DuoUIline(g, 0, 0, 1,
+					t.Colors["Hint"])()
+				layout.Flex{
+					Spacing: layout.SpaceBetween,
+				}.Layout(g,
+					layout.Rigid(s.Context.Label(t.Fonts["Mono"],
+						14, c, fmt.Sprint(np.ID))),
+					layout.Flexed(1, s.peerDetails(i, np)),
+					layout.Rigid(s.Label(t.Fonts["Mono"], 14, c, np.Addr)))
+			})
 	}
 }
 
-func QuitButton(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func (s *State) QuitButton() func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
 			var closeMeniItem gelook.DuoUIbutton
-			closeMeniItem = th.DuoUIbutton("", "", "",
-				th.Colors["Dark"], "", "",
+			closeMeniItem = t.DuoUIbutton("", "", "",
+				t.Colors["Dark"], "", "",
 				"closeIcon",
 				CurrentCurrentPageColor(
-					rc.ShowPage, "CLOSE", th.Colors["Light"],
-					th.Colors["Primary"]),
+					s.Rc.ShowPage, "CLOSE", t.Colors["Light"],
+					t.Colors["Primary"]),
 				footerMenuItemTextSize, footerMenuItemIconSize,
 				footerMenuItemWidth, footerMenuItemHeight,
 				0, 0, 0, 0)
-			for buttonQuit.Clicked(gtx) {
-				rc.Dialog.Show = true
-				rc.Dialog = &model.DuoUIdialog{
+			for buttonQuit.Clicked(g) {
+				s.Rc.Dialog.Show = true
+				s.Rc.Dialog = &model.DuoUIdialog{
 					Show: true,
 					Green: func() {
 						interrupt.Request()
 						// TODO make this close the window or at least switch to a shutdown screen
-						rc.Dialog.Show = false
+						s.Rc.Dialog.Show = false
 					},
 					GreenLabel: "QUIT",
 					Orange: func() {
 						interrupt.RequestRestart()
 						// TODO make this close the window or at least switch to a shutdown screen
-						rc.Dialog.Show = false
+						s.Rc.Dialog.Show = false
 					},
 					OrangeLabel: "RESTART",
-					Red:         func() { rc.Dialog.Show = false },
+					Red:         func() { s.Rc.Dialog.Show = false },
 					RedLabel:    "CANCEL",
 					CustomField: func() {},
 					Title:       "Are you sure?",
 					Text:        "Confirm ParallelCoin close",
 				}
 			}
-			closeMeniItem.IconLayout(gtx, buttonQuit)
+			closeMeniItem.IconLayout(g, buttonQuit)
 		})
 	}
 }
 
-func SettingsTabs(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
-	rcs := rc.Settings
+func (s *State) SettingsTabs() func() {
+	t, g := s.Thm, s.Gtx
+	rcs := s.Rc.Settings
 	return func() {
 		groupsNumber := len(rcs.Daemon.Schema.Groups)
-		groupsList.Layout(gtx, groupsNumber, func(i int) {
-			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-				color := th.Colors["Light"]
-				bgColor := th.Colors["Dark"]
+		groupsList.Layout(g, groupsNumber, func(i int) {
+			layout.UniformInset(unit.Dp(0)).Layout(g, func() {
+				color := t.Colors["Light"]
+				bgColor := t.Colors["Dark"]
 				i = groupsNumber - 1 - i
-				t := rcs.Daemon.Schema.Groups[i]
-				txt := fmt.Sprint(t.Legend)
-				for rcs.Tabs.TabsList[txt].Clicked(gtx) {
+				tt := rcs.Daemon.Schema.Groups[i]
+				txt := fmt.Sprint(tt.Legend)
+				for rcs.Tabs.TabsList[txt].Clicked(g) {
 					rcs.Tabs.Current = txt
 				}
 				if rcs.Tabs.Current == txt {
-					color = th.Colors["Dark"]
-					bgColor = th.Colors["Light"]
+					color = t.Colors["Dark"]
+					bgColor = t.Colors["Light"]
 				}
-				th.DuoUIbutton(th.Fonts["Primary"],
+				t.DuoUIbutton(t.Fonts["Primary"],
 					txt, color, bgColor, "", "",
 					"", "", 16, 0, 80, 32,
 					4, 4, 4, 4,
-				).Layout(gtx, rcs.Tabs.TabsList[txt])
+				).Layout(g, rcs.Tabs.TabsList[txt])
 			})
 		})
 	}
 }
 
-func TransactionsFilter(
-	rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
-	cats := rc.History.Categories
+func (s *State) TransactionsFilter() func() {
+	g := s.Gtx
+	cats := s.Rc.History.Categories
 	return func() {
-		layout.Flex{}.Layout(gtx,
-			layout.Rigid(txsFilterItem(gtx, th, "ALL", cats.AllTxs)),
-			layout.Rigid(txsFilterItem(gtx, th, "MINTED", cats.MintedTxs)),
-			layout.Rigid(txsFilterItem(gtx, th, "IMATURE", cats.ImmatureTxs)),
-			layout.Rigid(txsFilterItem(gtx, th, "SENT", cats.SentTxs)),
-			layout.Rigid(txsFilterItem(gtx, th, "RECEIVED", cats.ReceivedTxs)))
+		layout.Flex{}.Layout(g,
+			layout.Rigid(s.txsFilterItem("ALL", cats.AllTxs)),
+			layout.Rigid(s.txsFilterItem("MINTED", cats.MintedTxs)),
+			layout.Rigid(s.txsFilterItem("IMATURE", cats.ImmatureTxs)),
+			layout.Rigid(s.txsFilterItem("SENT", cats.SentTxs)),
+			layout.Rigid(s.txsFilterItem("RECEIVED", cats.ReceivedTxs)))
 		switch {
-		case cats.AllTxs.Checked(gtx):
-			rc.History.Category = "all"
-		case cats.MintedTxs.Checked(gtx):
-			rc.History.Category = "generate"
-		case cats.ImmatureTxs.Checked(gtx):
-			rc.History.Category = "immature"
-		case cats.SentTxs.Checked(gtx):
-			rc.History.Category = "sent"
-		case cats.ReceivedTxs.Checked(gtx):
-			rc.History.Category = "received"
+		case cats.AllTxs.Checked(g):
+			s.Rc.History.Category = "all"
+		case cats.MintedTxs.Checked(g):
+			s.Rc.History.Category = "generate"
+		case cats.ImmatureTxs.Checked(g):
+			s.Rc.History.Category = "immature"
+		case cats.SentTxs.Checked(g):
+			s.Rc.History.Category = "sent"
+		case cats.ReceivedTxs.Checked(g):
+			s.Rc.History.Category = "received"
 		}
 	}
 }
 
 // gtx, th
 
-func Button(
-	gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Button, font text.Typeface, textSize, padT, padR, padB, padL int, color, bgColor, label string, handler func()) func() {
+func (s *Context) Button(buttonController *gel.Button, font text.Typeface, textSize, padT, padR, padB, padL int, color, bgColor, label string, handler func()) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		th.DuoUIcontainer(0, th.Colors[""])
-		button := th.DuoUIbutton(font, label, color, bgColor,
+		t.DuoUIcontainer(0, t.Colors[""])
+		button := t.DuoUIbutton(font, label, color, bgColor,
 			"", "", "", "",
 			textSize, 0, 128, 48,
 			padT, padR, padB, padL)
-		for buttonController.Clicked(gtx) {
+		for buttonController.Clicked(g) {
 			handler()
 		}
-		button.Layout(gtx, buttonController)
+		button.Layout(g, buttonController)
 	}
 }
 
-func ConsoleInput(
-	gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.SubmitEvent)) func() {
+func (s *Context) ConsoleInput(editorController *gel.Editor, label string, handler func(gel.SubmitEvent)) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			e := th.DuoUIeditor(label, "Dark", "Light", 120)
-			e.Font.Typeface = th.Fonts["Primary"]
-			e.Color = gelook.HexARGB(th.Colors["Light"])
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
+			e := t.DuoUIeditor(label, "Dark", "Light", 120)
+			e.Font.Typeface = t.Fonts["Primary"]
+			e.Color = gelook.HexARGB(t.Colors["Light"])
 			e.Font.Style = text.Italic
-			e.Layout(gtx, editorController)
-			for _, e := range editorController.Events(gtx) {
+			e.Layout(g, editorController)
+			for _, e := range editorController.Events(g) {
 				if e, ok := e.(gel.SubmitEvent); ok {
 					handler(e)
 					editorController.SetText("")
@@ -890,32 +936,32 @@ func ConsoleInput(
 	}
 }
 
-func contentField(
-	gtx *layout.Context, th *gelook.DuoUItheme, text, color, bgColor string, font text.Typeface, padding, textSize float32) func() {
+func (s *Context) contentField(text, color, bgColor string, font text.Typeface, padding, textSize float32) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		hmin := gtx.Constraints.Width.Min
-		vmin := gtx.Constraints.Height.Min
-		layout.Stack{Alignment: layout.W}.Layout(gtx,
+		hmin := g.Constraints.Width.Min
+		vmin := g.Constraints.Height.Min
+		layout.Stack{Alignment: layout.W}.Layout(g,
 			layout.Expanded(func() {
-				rr := float32(gtx.Px(unit.Dp(0)))
+				rr := float32(g.Px(unit.Dp(0)))
 				clip.Rect{
 					Rect: f32.Rectangle{Max: f32.Point{
-						X: float32(gtx.Constraints.Width.Min),
-						Y: float32(gtx.Constraints.Height.Min),
+						X: float32(g.Constraints.Width.Min),
+						Y: float32(g.Constraints.Height.Min),
 					}},
 					NE: rr, NW: rr, SE: rr, SW: rr,
-				}.Op(gtx.Ops).Add(gtx.Ops)
-				fill(gtx, gelook.HexARGB(bgColor))
+				}.Op(g.Ops).Add(g.Ops)
+				fill(g, gelook.HexARGB(bgColor))
 			}),
 			layout.Stacked(func() {
-				gtx.Constraints.Width.Min = hmin
-				gtx.Constraints.Height.Min = vmin
-				layout.Center.Layout(gtx, func() {
-					layout.UniformInset(unit.Dp(padding)).Layout(gtx, func() {
-						l := th.DuoUIlabel(unit.Dp(textSize), text)
+				g.Constraints.Width.Min = hmin
+				g.Constraints.Height.Min = vmin
+				layout.Center.Layout(g, func() {
+					layout.UniformInset(unit.Dp(padding)).Layout(g, func() {
+						l := t.DuoUIlabel(unit.Dp(textSize), text)
 						l.Font.Typeface = font
 						l.Color = color
-						l.Layout(gtx)
+						l.Layout(g)
 					})
 				})
 			}),
@@ -923,60 +969,62 @@ func contentField(
 	}
 }
 
-func ContentLabeledField(
-	gtx *layout.Context, th *gelook.DuoUItheme, axis layout.Axis, margin, labelTextSize, valueTextSize float32, label, headcolor, headbgColor, color, bgColor, value string) func() {
+func (s *Context) ContentLabeledField(axis layout.Axis, margin, labelTextSize, valueTextSize float32, label, headcolor, headbgColor, color, bgColor, value string) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(margin)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(margin)).Layout(g, func() {
 			layout.Flex{
 				Axis: axis,
-			}.Layout(gtx,
-				layout.Rigid(contentField(gtx, th, label,
-					th.Colors[headcolor], th.Colors[headbgColor],
-					th.Fonts["Primary"], 4, labelTextSize),
+			}.Layout(g,
+				layout.Rigid(s.contentField(label,
+					t.Colors[headcolor], t.Colors[headbgColor],
+					t.Fonts["Primary"], 4, labelTextSize),
 				),
-				layout.Rigid(contentField(gtx, th, value,
-					th.Colors[color], th.Colors[bgColor],
-					th.Fonts["Mono"], 4, valueTextSize),
+				layout.Rigid(s.contentField(value,
+					t.Colors[color], t.Colors[bgColor],
+					t.Fonts["Mono"], 4, valueTextSize),
 				),
 			)
 		})
 	}
 }
 
-func dialogButton(
-	gtx *layout.Context, th *gelook.DuoUItheme, f func(), t, bgColor, icon, iconColor string, button *gel.Button) func() {
+func (s *Context) dialogButton(f func(), txt, bgColor, icon, iconColor string,
+	button *gel.Button) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
 		if f != nil {
 			var b gelook.DuoUIbutton
 			layout.Inset{Top: unit.Dp(8), Bottom: unit.Dp(8),
-				Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(gtx, func() {
-				b = th.DuoUIbutton(th.Fonts["Primary"], t,
-					th.Colors["Dark"], bgColor, th.Colors["Info"], bgColor,
+				Left: unit.Dp(8), Right: unit.Dp(8)}.Layout(g, func() {
+				b = t.DuoUIbutton(t.Fonts["Primary"], txt,
+					t.Colors["Dark"], bgColor, t.Colors["Info"], bgColor,
 					icon, iconColor, 16, 32,
 					120, 64,
 					0, 0, 0, 0)
-				for button.Clicked(gtx) {
+				for button.Clicked(g) {
 					f()
 				}
-				b.MenuLayout(gtx, button)
+				b.MenuLayout(g, button)
 			})
 		}
 	}
 }
 
-func Editor(
-	gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+func (s *Context) Editor(editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		th.DuoUIcontainer(8, "ffffffff").
-			Layout(gtx, layout.NW, func() {
-				width := gtx.Constraints.Width.Max
-				e := th.DuoUIeditor(label, th.Colors["Black"], th.Colors["White"], width)
-				e.Font.Typeface = th.Fonts["Mono"]
+		t.DuoUIcontainer(8, "ffffffff").
+			Layout(g, layout.NW, func() {
+				width := g.Constraints.Width.Max
+				e := t.DuoUIeditor(label, t.Colors["Black"],
+					t.Colors["White"], width)
+				e.Font.Typeface = t.Fonts["Mono"]
 				e.TextSize = unit.Dp(12)
-				layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-					e.Layout(gtx, editorController)
+				layout.UniformInset(unit.Dp(4)).Layout(g, func() {
+					e.Layout(g, editorController)
 				})
-				for _, e := range editorController.Events(gtx) {
+				for _, e := range editorController.Events(g) {
 					switch e.(type) {
 					case gel.ChangeEvent:
 						handler(e)
@@ -986,224 +1034,225 @@ func Editor(
 	}
 }
 
-func Label(
-	gtx *layout.Context, th *gelook.DuoUItheme, font text.Typeface, size float32, color, label string) func() {
+func (s *Context) Label(font text.Typeface, size float32, color, label string) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		l := th.DuoUIlabel(unit.Dp(size), label)
+		l := t.DuoUIlabel(unit.Dp(size), label)
 		l.Font.Typeface = font
 		l.Color = color
-		l.Layout(gtx)
+		l.Layout(g)
 	}
 }
 
-func listItem(
-	gtx *layout.Context, th *gelook.DuoUItheme, size, top int, iconName, name, value string) func() {
+func (s *Context) listItem(size, top int, iconName, name, value string) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		icon := th.Icons[iconName]
+		icon := t.Icons[iconName]
 		layout.Flex{
 			Axis:    layout.Horizontal,
 			Spacing: layout.SpaceBetween,
-		}.Layout(gtx,
+		}.Layout(g,
 			layout.Rigid(func() {
-				layout.Flex{}.Layout(gtx,
+				layout.Flex{}.Layout(g,
 					layout.Rigid(func() {
 						layout.Inset{
 							Top:    unit.Dp(float32(top)),
 							Bottom: unit.Dp(0), Left: unit.Dp(0),
-							Right: unit.Dp(0)}.Layout(gtx, func() {
+							Right: unit.Dp(0)}.Layout(g, func() {
 							if icon != nil {
-								icon.Color = gelook.HexARGB(th.Colors["Dark"])
-								icon.Layout(gtx, unit.Px(float32(size)))
+								icon.Color = gelook.HexARGB(t.Colors["Dark"])
+								icon.Layout(g, unit.Px(float32(size)))
 							}
-							gtx.Dimensions = layout.Dimensions{
+							g.Dimensions = layout.Dimensions{
 								Size: image.Point{X: size, Y: size},
 							}
 						})
 					}),
 					layout.Rigid(func() {
-						txt := th.DuoUIlabel(unit.Dp(float32(size)), name)
-						txt.Font.Typeface = th.Fonts["Primary"]
-						txt.Color = th.Colors["Primary"]
-						txt.Layout(gtx)
+						txt := t.DuoUIlabel(unit.Dp(float32(size)), name)
+						txt.Font.Typeface = t.Fonts["Primary"]
+						txt.Color = t.Colors["Primary"]
+						txt.Layout(g)
 					}),
 				)
 			}),
 			layout.Rigid(func() {
-				v := th.H5(value)
+				v := t.H5(value)
 				v.TextSize = unit.Dp(float32(size))
-				v.Font.Typeface = th.Fonts["Primary"]
-				v.Color = th.Colors["Dark"]
+				v.Font.Typeface = t.Fonts["Primary"]
+				v.Color = t.Colors["Dark"]
 				v.Alignment = text.End
-				v.Layout(gtx)
+				v.Layout(g)
 			}),
 		)
 	}
 }
 
-func lTamount(
-	gtx *layout.Context, th *gelook.DuoUItheme, v float64) func() {
+func (s *Context) lTamount(v float64) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			sat := th.Body1(fmt.Sprintf("%0.8f", v))
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
+			sat := t.Body1(fmt.Sprintf("%0.8f", v))
 			sat.Font.Typeface = "bariol"
-			sat.Color = th.Colors["Light"]
-			sat.Layout(gtx)
+			sat.Color = t.Colors["Light"]
+			sat.Layout(g)
 		})
 	}
 }
 
-func lTcategory(
-	gtx *layout.Context, th *gelook.DuoUItheme, v string) func() {
+func (s *Context) lTcategory(v string) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		sat := th.Body1(v)
-		sat.Color = th.Colors["Light"]
+		sat := t.Body1(v)
+		sat.Color = t.Colors["Light"]
 		sat.Font.Typeface = "bariol"
-		sat.Layout(gtx)
+		sat.Layout(g)
 	}
 }
 
-func lTtime(
-	gtx *layout.Context, th *gelook.DuoUItheme, v string) func() {
+func (s *Context) lTtime(v string) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		l := th.Body1(v)
+		l := t.Body1(v)
 		l.Font.Typeface = "bariol"
-		l.Color = th.Colors["Light"]
-		l.Color = th.Colors["Hint"]
-		l.Layout(gtx)
+		l.Color = t.Colors["Light"]
+		l.Color = t.Colors["Hint"]
+		l.Layout(g)
 	}
 }
 
-func lTtxid(
-	gtx *layout.Context, th *gelook.DuoUItheme, v string) func() {
+func (s *Context) lTtxid(v string) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		tim := th.Caption(v)
-		tim.Font.Typeface = th.Fonts["Mono"]
-		tim.Color = th.Colors["Light"]
-		tim.Layout(gtx)
+		tim := t.Caption(v)
+		tim.Font.Typeface = t.Fonts["Mono"]
+		tim.Color = t.Colors["Light"]
+		tim.Layout(g)
 	}
 }
 
-func MonoButton(
-	gtx *layout.Context, th *gelook.DuoUItheme, buttonController *gel.Button, textSize int, color, bgColor, font, label string, handler func()) func() {
+func (s *Context) MonoButton(buttonController *gel.Button, textSize int, color, bgColor, font, label string, handler func()) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
 			//var button gelook.Button
-			button := th.Button(label)
+			button := t.Button(label)
 			switch {
 			case font != "":
-				button.Font.Typeface = th.Fonts[font]
+				button.Font.Typeface = t.Fonts[font]
 			case color != "":
-				button.Color = gelook.HexARGB(th.Colors[color])
+				button.Color = gelook.HexARGB(t.Colors[color])
 			case textSize != 0:
 				button.TextSize = unit.Dp(float32(textSize))
 			case bgColor != "":
-				button.Background = gelook.HexARGB(th.Colors[bgColor])
+				button.Background = gelook.HexARGB(t.Colors[bgColor])
 			}
-			for buttonController.Clicked(gtx) {
+			for buttonController.Clicked(g) {
 				handler()
 			}
-			button.Layout(gtx, buttonController)
+			button.Layout(g, buttonController)
 		})
 	}
 }
 
-func peerDetails(
-	gtx *layout.Context, th *gelook.DuoUItheme, i int, t *btcjson.GetPeerInfoResult) func() {
-	prim := th.Fonts["Primary"]
-	c := th.Colors["Dark"]
+func (s *Context) peerDetails(i int, pi *btcjson.GetPeerInfoResult) func() {
+	t, g := s.Thm, s.Gtx
+	prim := t.Fonts["Primary"]
+	c := t.Colors["Dark"]
 	return func() {
 		layout.Flex{
 			Axis:    layout.Horizontal,
 			Spacing: layout.SpaceAround,
-		}.Layout(gtx,
-			layout.Rigid(Label(gtx, th, prim, 12, c, t.AddrLocal)),
-			layout.Rigid(Label(gtx, th, prim, 12, c, t.Services)),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.RelayTxes))),
-			// layout.Rigid(Label(gtx, th, prim, 12, c
+		}.Layout(g,
+			layout.Rigid(s.Label(prim, 12, c, pi.AddrLocal)),
+			layout.Rigid(s.Label(prim, 12, c, pi.Services)),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.RelayTxes))),
+			// layout.Rigid(s.Label(prim, 12, c
 			//fmt.Sprint(t.LastSend))),
-			// layout.Rigid(Label(gtx, th, prim, 12, c
+			// layout.Rigid(s.Label(prim, 12, c
 			//fmt.Sprint(t.LastRecv))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.BytesSent))),
-			layout.Rigid(Label(gtx, th, prim, 12, c,
-				fmt.Sprint(t.BytesRecv))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.ConnTime))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.TimeOffset))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.PingTime))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.PingWait))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.Version))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, t.SubVer)),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.Inbound))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.StartingHeight))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.CurrentHeight))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.BanScore))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.FeeFilter))),
-			layout.Rigid(Label(gtx, th, prim, 12, c, fmt.Sprint(t.SyncNode))))
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.BytesSent))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.BytesRecv))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.ConnTime))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.TimeOffset))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.PingTime))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.PingWait))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.Version))),
+			layout.Rigid(s.Label(prim, 12, c, pi.SubVer)),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.Inbound))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.StartingHeight))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.CurrentHeight))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.BanScore))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.FeeFilter))),
+			layout.Rigid(s.Label(prim, 12, c, fmt.Sprint(pi.SyncNode))))
 	}
 }
 
-func SettingsFieldDescription(
-	gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
+func (s *Context) SettingsFieldDescription(f *Field) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			desc := th.Body2(fmt.Sprint(f.Field.Description))
-			desc.Font.Typeface = th.Fonts["Primary"]
-			desc.Color = th.Colors["Dark"]
-			desc.Layout(gtx)
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
+			desc := t.Body2(fmt.Sprint(f.Field.Description))
+			desc.Font.Typeface = t.Fonts["Primary"]
+			desc.Color = t.Colors["Dark"]
+			desc.Layout(g)
 		})
 	}
 }
 
-func SettingsFieldLabel(
-	gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
+func (s *Context) SettingsFieldLabel(f *Field) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-			name := th.H6(fmt.Sprint(f.Field.Label))
-			name.Color = th.Colors["Dark"]
-			name.Font.Typeface = th.Fonts["Primary"]
-			name.Layout(gtx)
+		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
+			name := t.H6(fmt.Sprint(f.Field.Label))
+			name.Color = t.Colors["Dark"]
+			name.Font.Typeface = t.Fonts["Primary"]
+			name.Layout(g)
 		})
 	}
 }
 
-func StringsArrayEditor(
-	gtx *layout.Context, th *gelook.DuoUItheme, editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+func (s *Context) StringsArrayEditor(editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		th.DuoUIcontainer(8, th.Colors["White"]).Layout(gtx, layout.NW, func() {
-			e := th.DuoUIeditor(label, th.Colors["Black"], th.Colors["White"], 16)
-			e.Font.Typeface = th.Fonts["Mono"]
-			layout.UniformInset(unit.Dp(4)).Layout(gtx, func() {
-				e.Layout(gtx, editorController)
-			})
-			for _, e := range editorController.Events(gtx) {
-				switch e.(type) {
-				case gel.ChangeEvent:
-					handler(e)
+		t.DuoUIcontainer(8, t.Colors["White"]).Layout(g, layout.NW,
+			func() {
+				e := t.DuoUIeditor(label, t.Colors["Black"],
+					t.Colors["White"], 16)
+				e.Font.Typeface = t.Fonts["Mono"]
+				layout.UniformInset(unit.Dp(4)).Layout(g, func() {
+					e.Layout(g, editorController)
+				})
+				for _, e := range editorController.Events(g) {
+					switch e.(type) {
+					case gel.ChangeEvent:
+						handler(e)
+					}
 				}
-			}
-		})
+			})
 	}
 }
 
-func TrioFields(
-	gtx *layout.Context, th *gelook.DuoUItheme, axis layout.Axis, labelTextSize, valueTextSize float32, unoLabel, unoValue, unoHeadcolor, unoHeadbgColor, unoColor, unoBgColor, duoLabel, duoValue, duoHeadcolor, duoHeadbgColor, duoColor, duoBgColor, treLabel, treValue, treHeadcolor, treHeadbgColor, treColor, treBgColor string) func() {
+func (s *Context) TrioFields(axis layout.Axis, labelTextSize, valueTextSize float32, unoLabel, unoValue, unoHeadcolor, unoHeadbgColor, unoColor, unoBgColor, duoLabel, duoValue, duoHeadcolor, duoHeadbgColor, duoColor, duoBgColor, treLabel, treValue, treHeadcolor, treHeadbgColor, treColor, treBgColor string) func() {
+	g := s.Gtx
 	return func() {
 		layout.Flex{
 			Axis:    axis,
 			Spacing: layout.SpaceAround,
-		}.Layout(gtx,
-			fieldAxis(axis, ContentLabeledField(gtx, th,
+		}.Layout(g,
+			fieldAxis(axis, s.ContentLabeledField(
 				layout.Vertical, 4,
 				labelTextSize, valueTextSize,
 				unoLabel, unoHeadcolor, unoHeadbgColor,
 				unoColor, unoBgColor,
 				fmt.Sprint(unoValue)), 0.3333),
-			fieldAxis(axis, ContentLabeledField(gtx, th,
+			fieldAxis(axis, s.ContentLabeledField(
 				layout.Vertical, 4,
 				labelTextSize, valueTextSize,
 				duoLabel, duoHeadcolor, duoHeadbgColor,
 				duoColor, duoBgColor,
 				fmt.Sprint(duoValue)), 0.3333),
-			fieldAxis(axis, ContentLabeledField(gtx, th,
+			fieldAxis(axis, s.ContentLabeledField(
 				layout.Vertical, 4,
 				labelTextSize, valueTextSize,
 				treLabel, treHeadbgColor, treHeadcolor,
@@ -1213,30 +1262,31 @@ func TrioFields(
 	}
 }
 
-func TxsDetails(
-	gtx *layout.Context, th *gelook.DuoUItheme, i int, t *model.DuoUItransactionExcerpt) func() {
+func (s *Context) TxsDetails(i int, te *model.DuoUItransactionExcerpt) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
 		layout.Flex{
 			Axis: layout.Vertical,
-		}.Layout(gtx,
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12,
-				th.Colors["Dark"], fmt.Sprint(i))),
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12,
-				th.Colors["Dark"], t.TxID)),
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12,
-				th.Colors["Dark"], fmt.Sprintf("%0.8f", t.Amount))),
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12,
-				th.Colors["Dark"], t.Category)),
-			layout.Rigid(Label(gtx, th, th.Fonts["Primary"], 12,
-				th.Colors["Dark"], t.Time)),
+		}.Layout(g,
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
+				t.Colors["Dark"], fmt.Sprint(i))),
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
+				t.Colors["Dark"], te.TxID)),
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
+				t.Colors["Dark"], fmt.Sprintf("%0.8f", te.Amount))),
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
+				t.Colors["Dark"], te.Category)),
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
+				t.Colors["Dark"], te.Time)),
 		)
 	}
 }
 
-func txsFilterItem(
-	gtx *layout.Context, th *gelook.DuoUItheme, id string, c *gel.CheckBox) func() {
+func (s *Context) txsFilterItem(id string, c *gel.CheckBox) func() {
+	t, g := s.Thm, s.Gtx
 	return func() {
-		th.DuoUIcheckBox(id, th.Colors["Light"], th.Colors["Light"]).Layout(gtx, c)
+		t.DuoUIcheckBox(id, t.Colors["Light"],
+			t.Colors["Light"]).Layout(g, c)
 	}
 }
 

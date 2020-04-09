@@ -26,6 +26,7 @@ import (
 type DuoUI struct {
 	ly *model.DuoUI
 	rc *rcd.RcVar
+	c  *component.State
 }
 
 var (
@@ -89,10 +90,10 @@ func (ui *DuoUI) DuoUIfooter() func() {
 		footer.Layout(ctx, layout.N, func() {
 			layout.Flex{Spacing: layout.SpaceBetween}.Layout(ctx,
 				layout.Rigid(
-					component.FooterLeftMenu(ui.rc, ctx, th, ui.ly.Pages)),
+					ui.c.FooterLeftMenu(ui.ly.Pages)),
 				layout.Flexed(1, func() {}),
 				layout.Rigid(
-					component.FooterRightMenu(ui.rc, ctx, th, ui.ly.Pages)),
+					ui.c.FooterRightMenu(ui.ly.Pages)),
 			)
 		})
 	}
@@ -132,16 +133,16 @@ func (ui *DuoUI) DuoUIheader() func() {
 					logoMeniItem.IconLayout(ctx, logoButton)
 				}),
 				layout.Flexed(1,
-					component.HeaderMenu(ui.rc, ctx, th, ui.ly.Pages),
+					ui.c.HeaderMenu(ui.ly.Pages),
 				),
 				layout.Rigid(
-					component.Label(ctx, th, th.Fonts["Primary"], 12,
+					ui.c.Label(th.Fonts["Primary"], 12,
 						th.Colors["Light"],
 						ui.rc.Status.Wallet.Balance.Load()+" "+ui.rc.
 							Settings.Abbrevation),
 				),
 				layout.Rigid(
-					component.Label(ctx, th, th.Fonts["Primary"], 12,
+					ui.c.Label(th.Fonts["Primary"], 12,
 						th.Colors["Light"], fmt.Sprint(ui.ly.Viewport)),
 				),
 			)
@@ -279,8 +280,7 @@ func (ui *DuoUI) DuoUImenu() func() {
 			Alignment: layout.Middle,
 			Spacing:   layout.SpaceEvenly}.
 			Layout(ui.ly.Context, layout.Rigid(
-				component.MainNavigation(ui.rc, ui.ly.Context,
-					ui.ly.Theme, ui.ly.Pages, nav)),
+				ui.c.MainNavigation(ui.ly.Pages, nav)),
 			)
 	}
 }
@@ -339,7 +339,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 						}),
 					)
 				}),
-				layout.Flexed(1, component.DuoUIlogger(ui.rc, ctx, th)),
+				layout.Flexed(1, ui.c.DuoUIlogger()),
 			)
 		})
 }
@@ -385,7 +385,8 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 	// duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
 	duo.Pages = &model.DuoUIpages{
 		Controller: nil,
-		Theme:      pages.LoadPages(rc, duo.Context, duo.Theme),
+		Theme:      pages.LoadPages(component.NewState(rc, duo.Context,
+			duo.Theme)),
 	}
 	component.SetPage(rc, duo.Pages.Theme["OVERVIEW"])
 	clipboardMu.Lock()
@@ -399,7 +400,11 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 
 func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 	Debug("starting up duo ui main loop")
-	ui := &DuoUI{ly: d, rc: r}
+	ui := &DuoUI{
+		ly: d,
+		rc: r,
+		c:  component.NewState(r, d.Context, d.Theme),
+	}
 	ctx := ui.ly.Context
 	for {
 		select {
@@ -462,7 +467,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				} else {
 					ui.DuoUImainScreen()
 					if ui.rc.Dialog.Show {
-						component.DuoUIdialog(ui.rc, ctx, ui.ly.Theme)
+						component.NewState(ui.rc, ctx, ui.ly.Theme).DuoUIdialog()
 						// ui.DuoUItoastSys()
 					}
 					e.Frame(ctx.Ops)
