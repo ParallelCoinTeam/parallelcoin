@@ -27,7 +27,8 @@ var (
 // }
 )
 
-func Network(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func Network(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "NETWORK",
 		TxColor:       "",
@@ -54,16 +55,21 @@ func networkHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fu
 		}.Layout(gtx,
 			// layout.Rigid(component.TransactionsFilter(rc, gtx, th)),
 			layout.Rigid(func() {
-				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx, rc.Network.PerPage, "Peers per page: ", fmt.Sprint(rc.Network.PerPage.Value))
+				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx,
+					rc.Network.PerPage, "Peers per page: ",
+					fmt.Sprint(rc.Network.PerPage.Value))
 			}),
 			layout.Rigid(func() {
-				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx, rc.Network.Page, "Peers page: ", fmt.Sprint(rc.Network.Page.Value))
+				th.DuoUIcounter(rc.GetPeerInfo()).Layout(gtx,
+					rc.Network.Page, "Peers page: ",
+					fmt.Sprint(rc.Network.Page.Value))
 			}),
 		)
 	}
 }
 
-func networkBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func networkBody(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(16)).Layout(gtx, func() {
 			layout.Flex{

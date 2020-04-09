@@ -17,7 +17,8 @@ var (
 	buttonSettingsRestart = new(gel.Button)
 )
 
-func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func Settings(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "SETTINGS",
 		TxColor:       "",
@@ -49,7 +50,8 @@ func Settings(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook
 	// })
 }
 
-func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{Spacing: layout.SpaceBetween}.Layout(gtx,
 			layout.Rigid(component.SettingsTabs(rc, gtx, th)),
@@ -73,10 +75,12 @@ func SettingsHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) f
 	}
 }
 
-func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func SettingsBody(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) func() {
 	return func() {
 		// layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-		th.DuoUIcontainer(16, th.Colors["Light"]).Layout(gtx, layout.N, func() {
+		th.DuoUIcontainer(16,
+			th.Colors["Light"]).Layout(gtx, layout.N, func() {
 			for _, fields := range rc.Settings.Daemon.Schema.Groups {
 
 				if fmt.Sprint(fields.Legend) == rc.Settings.Tabs.Current {
@@ -97,7 +101,8 @@ func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 							Axis: layout.Vertical,
 						}.Layout(gtx,
 							layout.Rigid(SettingsItemRow(rc, gtx, th, &tl)),
-							layout.Rigid(th.DuoUIline(gtx, 4, 0, 1, th.Colors["LightGray"])))
+							layout.Rigid(th.DuoUIline(gtx,
+								4, 0, 1, th.Colors["LightGray"])))
 					})
 				}
 			}
@@ -106,14 +111,16 @@ func SettingsBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 	}
 }
 
-func SettingsItemRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *component.Field) func() {
+func SettingsItemRow(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme, f *component.Field) func() {
 	return func() {
 		layout.Flex{
 			Axis:      layout.Horizontal,
 			Alignment: layout.Middle,
 		}.Layout(gtx,
 			// layout.Rigid(func() {
-			//	gelook.DuoUIdrawRectangle(gtx, 30, 3, th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			//	gelook.DuoUIdrawRectangle(gtx, 30, 3, th.Colors["Light"],
+			//	[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			// }),
 			layout.Flexed(0.62, func() {
 				layout.Flex{

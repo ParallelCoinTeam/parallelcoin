@@ -12,8 +12,8 @@ func (r *RcVar) GetDuoUIbalance() {
 	Trace("getting balance")
 	acct := "default"
 	minconf := 0
-	getBalance, err := legacy.GetBalance(&btcjson.GetBalanceCmd{Account: &acct,
-		MinConf: &minconf}, r.cx.WalletServer)
+	getBalance, err := legacy.GetBalance(
+		&btcjson.GetBalanceCmd{Account: &acct, MinConf: &minconf}, r.cx.WalletServer)
 	if err != nil {
 		// r.PushDuoUIalert("Error", err.Error(), "error")
 	}
@@ -28,7 +28,8 @@ func (r *RcVar) GetDuoUIbalance() {
 func (r *RcVar) GetDuoUIunconfirmedBalance() {
 	Trace("getting unconfirmed balance")
 	acct := "default"
-	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
+	getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(
+		&btcjson.GetUnconfirmedBalanceCmd{Account: &acct}, r.cx.WalletServer)
 	if err != nil {
 		// r.PushDuoUIalert("Error", err.Error(), "error")
 	}

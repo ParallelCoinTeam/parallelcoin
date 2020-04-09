@@ -54,23 +54,24 @@ func TxsDetails(gtx *layout.Context, th *gelook.DuoUItheme, i int, t *model.DuoU
 }
 
 func TransactionsFilter(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+	cats := rc.History.Categories
 	return func() {
 		layout.Flex{}.Layout(gtx,
-			layout.Rigid(txsFilterItem(gtx, th, "ALL", rc.History.Categories.AllTxs)),
-			layout.Rigid(txsFilterItem(gtx, th, "MINTED", rc.History.Categories.MintedTxs)),
-			layout.Rigid(txsFilterItem(gtx, th, "IMATURE", rc.History.Categories.ImmatureTxs)),
-			layout.Rigid(txsFilterItem(gtx, th, "SENT", rc.History.Categories.SentTxs)),
-			layout.Rigid(txsFilterItem(gtx, th, "RECEIVED", rc.History.Categories.ReceivedTxs)))
+			layout.Rigid(txsFilterItem(gtx, th, "ALL", cats.AllTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "MINTED", cats.MintedTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "IMATURE", cats.ImmatureTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "SENT", cats.SentTxs)),
+			layout.Rigid(txsFilterItem(gtx, th, "RECEIVED", cats.ReceivedTxs)))
 		switch c := true; c {
-		case rc.History.Categories.AllTxs.Checked(gtx):
+		case cats.AllTxs.Checked(gtx):
 			rc.History.Category = "all"
-		case rc.History.Categories.MintedTxs.Checked(gtx):
+		case cats.MintedTxs.Checked(gtx):
 			rc.History.Category = "generate"
-		case rc.History.Categories.ImmatureTxs.Checked(gtx):
+		case cats.ImmatureTxs.Checked(gtx):
 			rc.History.Category = "immature"
-		case rc.History.Categories.SentTxs.Checked(gtx):
+		case cats.SentTxs.Checked(gtx):
 			rc.History.Category = "sent"
-		case rc.History.Categories.ReceivedTxs.Checked(gtx):
+		case cats.ReceivedTxs.Checked(gtx):
 			rc.History.Category = "received"
 		}
 	}

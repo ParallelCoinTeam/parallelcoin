@@ -14,7 +14,9 @@ func (r *RcVar) GetDuoUIhashesPerSec() {
 	return
 }
 func (r *RcVar) GetDuoUInetworkHashesPerSec() {
-	networkHashesPerSecIface, err := chainrpc.HandleGetNetworkHashPS(r.cx.RPCServer, btcjson.NewGetNetworkHashPSCmd(nil, nil), nil)
+	networkHashesPerSecIface, err := chainrpc.HandleGetNetworkHashPS(
+		r.cx.RPCServer, btcjson.NewGetNetworkHashPSCmd(
+			nil, nil), nil)
 	if err != nil {
 	}
 	networkHashesPerSec, ok := networkHashesPerSecIface.(int64)

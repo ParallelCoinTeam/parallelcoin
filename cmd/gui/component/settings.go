@@ -28,41 +28,49 @@ type Field struct {
 }
 
 func SettingsTabs(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+	rcs := rc.Settings
 	return func() {
-		groupsNumber := len(rc.Settings.Daemon.Schema.Groups)
+		groupsNumber := len(rcs.Daemon.Schema.Groups)
 		groupsList.Layout(gtx, groupsNumber, func(i int) {
 			layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
 				color := th.Colors["Light"]
 				bgColor := th.Colors["Dark"]
 				i = groupsNumber - 1 - i
-				t := rc.Settings.Daemon.Schema.Groups[i]
+				t := rcs.Daemon.Schema.Groups[i]
 				txt := fmt.Sprint(t.Legend)
-				for rc.Settings.Tabs.TabsList[txt].Clicked(gtx) {
-					rc.Settings.Tabs.Current = txt
+				for rcs.Tabs.TabsList[txt].Clicked(gtx) {
+					rcs.Tabs.Current = txt
 				}
-				if rc.Settings.Tabs.Current == txt {
+				if rcs.Tabs.Current == txt {
 					color = th.Colors["Dark"]
 					bgColor = th.Colors["Light"]
 				}
 				th.DuoUIbutton(th.Fonts["Primary"],
 					txt, color, bgColor, "", "", "", "",
-					16, 0, 80, 32, 4, 4, 4, 4).Layout(gtx, rc.Settings.Tabs.TabsList[txt])
+					16, 0, 80, 32,
+					4, 4, 4, 4).Layout(gtx,
+					rcs.Tabs.TabsList[txt])
 			})
 		})
 	}
 }
 
 func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, f *Field) func() {
+	rcs := rc.Settings
+	rdw := rcs.Daemon.Widgets
+	rdCfg := rcs.Daemon.Config
 	return func() {
 		switch f.Field.Type {
 		case "stringSlice":
 			switch f.Field.InputType {
 			case "text":
 				if f.Field.Model != "MiningAddrs" {
-					StringsArrayEditor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
-						(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+					StringsArrayEditor(gtx, th, (rdw[f.Field.
+						Model]).(*gel.Editor),
+						(rdw[f.Field.Model]).(*gel.Editor).Text(),
 						func(e gel.EditorEvent) {
-							rc.Settings.Daemon.Config[f.Field.Model] = strings.Fields((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
+							rdCfg[f.Field.Model] = strings.Fields((rdw[f.Field.Model]).(*gel.
+								Editor).Text())
 							Debug()
 							if e != nil {
 								rc.SaveDaemonCfg()
@@ -75,33 +83,40 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 		case "input":
 			switch f.Field.InputType {
 			case "text":
-				Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor),
-					(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+				Editor(gtx, th, (rdw[f.Field.Model]).(*gel.Editor),
+					(rdw[f.Field.Model]).(*gel.Editor).Text(),
 					func(e gel.EditorEvent) {
-						txt := rc.Settings.Daemon.Widgets[f.Field.Model].(*gel.Editor).Text()
-						rc.Settings.Daemon.Config[f.Field.Model] = txt
+						txt := rdw[f.Field.Model].(*gel.Editor).
+							Text()
+						rdCfg[f.Field.Model] = txt
 						if e != nil {
 							rc.SaveDaemonCfg()
 						}
 					})()
 			case "number":
-				Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+				Editor(gtx, th, (rdw[f.Field.Model]).(*gel.
+					Editor), (rdw[f.Field.Model]).(*gel.Editor).
+					Text(),
 					func(e gel.EditorEvent) {
-						number, err := strconv.Atoi((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text())
+						number, err := strconv.Atoi((rdw[f.
+							Field.Model]).(*gel.Editor).Text())
 						if err == nil {
 						}
-						rc.Settings.Daemon.Config[f.Field.Model] = number
+						rdCfg[f.Field.Model] = number
 						if e != nil {
 							rc.SaveDaemonCfg()
 						}
 					})()
 			case "decimal":
-				Editor(gtx, th, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor), (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(),
+				Editor(gtx, th, (rdw[f.Field.Model]).(*gel.
+					Editor), (rdw[f.Field.Model]).(*gel.Editor).
+					Text(),
 					func(e gel.EditorEvent) {
-						decimal, err := strconv.ParseFloat((rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor).Text(), 64)
+						decimal, err := strconv.ParseFloat((rcs.Daemon.
+							Widgets[f.Field.Model]).(*gel.Editor).Text(), 64)
 						if err != nil {
 						}
-						rc.Settings.Daemon.Config[f.Field.Model] = decimal
+						rdCfg[f.Field.Model] = decimal
 						if e != nil {
 							rc.SaveDaemonCfg()
 						}
@@ -110,7 +125,7 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 				e := th.DuoUIeditor(f.Field.Label, "DocText", "DocBg", 32)
 				e.Font.Typeface = th.Fonts["Primary"]
 				e.Font.Style = text.Italic
-				e.Layout(gtx, (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.Editor))
+				e.Layout(gtx, (rdw[f.Field.Model]).(*gel.Editor))
 			default:
 			}
 		case "switch":
@@ -121,17 +136,17 @@ func DuoUIinputField(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, 
 			sw.CircleColor = th.Colors["LightGrayII"]
 			sw.CircleColorChecked = th.Colors["Primary"]
 			sw.DrawLayout(gtx,
-				(rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox))
-			if (rc.Settings.Daemon.Widgets[f.Field.Model]).(*gel.CheckBox).Checked(gtx) {
-				if !*rc.Settings.Daemon.Config[f.Field.Model].(*bool) {
+				(rdw[f.Field.Model]).(*gel.CheckBox))
+			if (rdw[f.Field.Model]).(*gel.CheckBox).Checked(gtx) {
+				if !*rdCfg[f.Field.Model].(*bool) {
 					tt := true
-					rc.Settings.Daemon.Config[f.Field.Model] = &tt
+					rdCfg[f.Field.Model] = &tt
 					rc.SaveDaemonCfg()
 				}
 			} else {
-				if *rc.Settings.Daemon.Config[f.Field.Model].(*bool) {
+				if *rdCfg[f.Field.Model].(*bool) {
 					ff := false
-					rc.Settings.Daemon.Config[f.Field.Model] = &ff
+					rdCfg[f.Field.Model] = &ff
 					rc.SaveDaemonCfg()
 				}
 			}

@@ -74,9 +74,11 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 
 func (r *RcVar) GetBlocksExcerpts() func() {
 	return func() {
-		r.Explorer.Page.To = int(r.Status.Node.BlockCount.Load()) / r.Explorer.PerPage.Value
+		r.Explorer.Page.To = int(r.Status.Node.BlockCount.Load()) /
+			r.Explorer.PerPage.Value
 		startBlock := r.Explorer.Page.Value * r.Explorer.PerPage.Value
-		endBlock := r.Explorer.Page.Value*r.Explorer.PerPage.Value + r.Explorer.PerPage.Value
+		endBlock := r.Explorer.Page.Value*r.Explorer.PerPage.Value +
+			r.Explorer.PerPage.Value
 		height := int(r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
 		Debug("GetBlocksExcerpts", startBlock, endBlock, height)
 		if endBlock > height {
@@ -94,7 +96,8 @@ func (r *RcVar) GetBlocksExcerpts() func() {
 }
 
 func (r *RcVar) GetBlockCount() {
-	getBlockCount, err := chainrpc.HandleGetBlockCount(r.cx.RPCServer, nil, nil)
+	getBlockCount, err := chainrpc.HandleGetBlockCount(r.cx.RPCServer,
+		nil, nil)
 	if err != nil {
 		// dv.PushDuoVUEalert("BTCJSONError", err.BTCJSONError(), "error")
 	}

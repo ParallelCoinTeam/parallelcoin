@@ -20,7 +20,8 @@ func (r *RcVar) DuoUIloggerController() {
 				le, ok := r.Log.LogMessages.Load().([]logi.Entry)
 				if ok {
 					le = append(le, n)
-					// Once length exceeds MaxLogLength we trim off the start to keep it the same size
+					// Once length exceeds MaxLogLength we trim off the start
+					// to keep it the same size
 					ll := len(le)
 					if ll > MaxLogLength {
 						le = le[ll-MaxLogLength:]

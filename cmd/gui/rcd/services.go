@@ -2,6 +2,7 @@ package rcd
 
 import (
 	"fmt"
+	"github.com/p9c/pod/pkg/rpc/legacy"
 	"os"
 
 	"github.com/p9c/pod/cmd/node"
@@ -12,21 +13,18 @@ import (
 func (r *RcVar) StartServices() (err error) {
 	Debug("starting up services")
 	// Start Node
-	err = r.DuoNodeService()
-	if err != nil {
-		Error(err)
+	if err = r.DuoNodeService(); Check(err) {
 	}
 	r.cx.RPCServer = <-r.cx.NodeChan
 	r.cx.Node.Store(true)
 
 	// Start wallet
-	err = r.DuoWalletService()
-	if err != nil {
-		Error(err)
+	if err = r.DuoWalletService(); Check(err) {
 	}
 	r.cx.WalletServer = <-r.cx.WalletChan
 	r.cx.Wallet.Store(true)
 	r.cx.WalletServer.Rescan(nil, nil)
+	legacy.RunAPI(r.cx.ChainClient, r.cx.WalletServer, r.cx.KillAll)
 	r.Ready <- struct{}{}
 	return
 }

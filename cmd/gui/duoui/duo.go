@@ -25,7 +25,6 @@ type DuoUI struct {
 }
 
 func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
-
 	duo = &model.DuoUI{
 		Window: app.NewWindow(
 			app.Size(unit.Dp(1024), unit.Dp(640)),
@@ -33,27 +32,21 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 		),
 	}
 	duo.Context = layout.NewContext(duo.Window.Queue())
-
 	// rc.StartLogger()
 	// sys.Components["logger"].View()
-
 	// d.sys.Components["logger"].View
-
 	duo.Navigation = &model.DuoUInav{
 		Items: make(map[string]*gelook.DuoUIthemeNav),
 	}
 	// navigations["mainMenu"] = mainMenu()
-
 	// Icons
 	// rc.Settings.Daemon = rcd.GetCoreSettings()
-
 	duo.Theme = gelook.NewDuoUItheme()
 	// duo.Pages = components.LoadPages(duo.Context, duo.Theme, rc)
 	duo.Pages = &model.DuoUIpages{
 		Controller: nil,
 		Theme:      pages.LoadPages(rc, duo.Context, duo.Theme),
 	}
-
 	component.SetPage(rc, duo.Pages.Theme["OVERVIEW"])
 	clipboardMu.Lock()
 	if !clipboardStarted {
@@ -61,6 +54,5 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 		clipboard.Start()
 	}
 	clipboardMu.Unlock()
-
 	return
 }
