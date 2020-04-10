@@ -1,4 +1,4 @@
-package lgio
+package fui
 
 import (
 	"gioui.org/app"
@@ -42,6 +42,8 @@ func (w *window) set() (out *window) {
 }
 
 // These override app.window methods to ensure the options are set first
+
+// Queue returns the window's event queue
 func (w *window) Queue() (out *app.Queue) {
 	w.set()
 	return w.w.Queue()

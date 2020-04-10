@@ -1,4 +1,4 @@
-package lgio
+package fui
 
 import "gioui.org/layout"
 
@@ -35,7 +35,7 @@ func (s *stack) Layout(c *layout.Context) {
 	s.Stack.Layout(c, s.children...)
 }
 
-// Prepare the ops queue configured in the stack
-func (s *stack) Prepare(c *layout.Context) func() {
+// Prep the ops queue configured in the stack
+func (s *stack) Prep(c *layout.Context) func() {
 	return func() { s.Layout(c) }
 }

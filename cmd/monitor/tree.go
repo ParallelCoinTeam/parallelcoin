@@ -1,4 +1,4 @@
-package old
+package monitor
 
 import (
 	"github.com/p9c/pod/pkg/gui/gel"

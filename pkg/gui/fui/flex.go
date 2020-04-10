@@ -1,4 +1,4 @@
-package lgio
+package fui
 
 import "gioui.org/layout"
 
@@ -103,7 +103,7 @@ func (f *flex) Layout(c *layout.Context) {
 	f.flex.Layout(c, f.children...)
 }
 
-// Prepare a layout but return it instead of running it (return a layout.Widget)
-func (f *flex) Prepare(c *layout.Context) func() {
+// Prep a layout but return it instead of running it (return a layout.Widget)
+func (f *flex) Prep(c *layout.Context) func() {
 	return func() { f.flex.Layout(c, f.children...) }
 }

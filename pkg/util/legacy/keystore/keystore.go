@@ -2508,7 +2508,7 @@ func (a *p2SHScript) ReadFrom(r io.Reader) (n int64, err error) {
 // WriteTo implements the WriterTo interface by writing the P2SH script to w in
 // the format <4 bytes little endian length><script bytes>
 func (a *p2SHScript) WriteTo(w io.Writer) (n int64, err error) {
-	// Prepare and write 32-bit little-endian length header
+	// Prep and write 32-bit little-endian length header
 	var lenBytes [4]byte
 	binary.LittleEndian.PutUint32(lenBytes[:], uint32(len(*a)))
 	written, err := w.Write(lenBytes[:])

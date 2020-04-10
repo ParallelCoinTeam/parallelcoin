@@ -1,4 +1,4 @@
-package lgio
+package fui
 
 import (
 	"gioui.org/f32"
@@ -46,13 +46,13 @@ func (w *widget) Fill(r, g, b, a byte) (out *widget) {
 }
 
 // Paint renders the widgets
-func (w *widget) Paint(ctx *layout.Context) {
+func (w *widget) Paint(c *layout.Context) {
 	for i := range w.fn {
-		w.fn[i](ctx)
+		w.fn[i](c)
 	}
 }
 
-// Prepare the widgets to render later
-func (w *widget) Prepare(ctx *layout.Context) func() {
-	return func() { w.Paint(ctx) }
+// Prep the widgets to render later
+func (w *widget) Prep(c *layout.Context) func() {
+	return func() { w.Paint(c) }
 }

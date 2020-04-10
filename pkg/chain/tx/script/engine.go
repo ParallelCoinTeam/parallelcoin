@@ -362,7 +362,7 @@ func (vm *Engine) Step() (done bool, e error) {
 	if e != nil {
 		return
 	}
-	// Prepare for next instruction.
+	// Prep for next instruction.
 	if int(vm.scriptOff.Load()) >= len(vm.scripts[vm.scriptIdx.Load()]) {
 		// Illegal to have an `if' that straddles two scripts.
 		if len(vm.condStack) != 0 {

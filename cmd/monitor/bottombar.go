@@ -1,4 +1,4 @@
-package old
+package monitor
 
 //
 //func (s *State) BottomBar(headless bool) layout.FlexChild {

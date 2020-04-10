@@ -1,4 +1,4 @@
-package lgio
+package fui
 
 import (
 	"gioui.org/layout"
@@ -22,7 +22,7 @@ func (in *inset) Layout(c *layout.Context, w layout.Widget) {
 	in.in.Layout(c, w)
 }
 
-// Prepare the given widget with the configured context and padding
-func (in *inset) Prepare(c *layout.Context, w layout.Widget) func() {
+// Prep the given widget with the configured context and padding
+func (in *inset) Prep(c *layout.Context, w layout.Widget) func() {
 	return func() { in.in.Layout(c, w) }
 }

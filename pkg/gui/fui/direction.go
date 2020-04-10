@@ -1,4 +1,4 @@
-package lgio
+package fui
 
 import "gioui.org/layout"
 
@@ -74,7 +74,7 @@ func (d *direction) Layout(c *layout.Context, w layout.Widget) {
 	d.Direction.Layout(c, w)
 }
 
-// Prepare the given widget given the context and direction
-func (d *direction) Prepare(c *layout.Context, w layout.Widget) func() {
+// Prep the given widget given the context and direction
+func (d *direction) Prep(c *layout.Context, w layout.Widget) func() {
 	return func() { d.Direction.Layout(c, w) }
 }

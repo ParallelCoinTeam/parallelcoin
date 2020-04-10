@@ -1,4 +1,4 @@
-package lgio
+package fui
 
 import "gioui.org/layout"
 
@@ -33,8 +33,8 @@ func (l *list) Layout(c *layout.Context, length int, w layout.ListElement) {
 	l.List.Layout(c, length, w)
 }
 
-// Prepare the layout in the configured context. The ListElement function
+// Prep the layout in the configured context. The ListElement function
 // returns the widget at the given index.
-func (l *list) Prepare(c *layout.Context, length int, w layout.ListElement) func() {
+func (l *list) Prep(c *layout.Context, length int, w layout.ListElement) func() {
 	return func() { l.List.Layout(c, length, w) }
 }
