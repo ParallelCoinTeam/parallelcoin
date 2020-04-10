@@ -78,7 +78,7 @@ var (
 	footerMenuItemIconSize          = 32
 	footerMenuItemPaddingVertical   = 0
 	footerMenuItemPaddingHorizontal = 0
-	latestTxsPanelElement           = gel.NewPanel()
+	latestPanelElem                 = gel.NewPanel()
 	navButtonOverview               = new(gel.Button)
 	navButtonSend                   = new(gel.Button)
 	navButtonReceive                = new(gel.Button)
@@ -369,67 +369,52 @@ func (s *State) DuoUIlatestTransactions() func() {
 							)
 					}),
 					layout.Flexed(1, func() {
-						layout.UniformInset(unit.Dp(8)).Layout(g,
-							func() {
-								layout.Flex{
-									Axis: layout.Vertical,
-								}.Layout(g,
-									layout.Rigid(func() {
-										latestTxsBookPanel := t.DuoUIpanel()
-										latestTxsBookPanel.PanelObject =
-											s.Rc.Status.Wallet.LastTxs.Txs
-										latestTxsBookPanel.ScrollBar =
-											t.ScrollBar(0)
-										latestTxsPanelElement.PanelObjectsNumber =
-											len(s.Rc.Status.Wallet.LastTxs.Txs)
-										latestTxsBookPanel.Layout(g,
-											latestTxsPanelElement, func(i int, in interface{}) {
-												txs := in.([]model.DuoUItransactionExcerpt)
-												tx := txs[i]
-												t.DuoUIcontainer(16,
-													t.Colors["Dark"]).
-													Layout(g, layout.NW,
-														func() {
-															width := g.Constraints.Width.Max
-															layout.Flex{
-																Axis: layout.
-																	Vertical,
-															}.Layout(g,
-																layout.Rigid(
-																	s.lTtxid(
-																		tx.TxID)),
-																layout.Rigid(func() {
-																	g.
-																		Constraints.Width.Min = width
-																	layout.Flex{
-																		Spacing: layout.SpaceBetween,
-																	}.Layout(g,
-																		layout.Rigid(func() {
-																			layout.Flex{
-																				Axis: layout.Vertical,
-																			}.
-																				Layout(g,
-																					layout.Rigid(s.lTcategory(tx.Category)),
-																					layout.Rigid(s.lTtime(tx.Time)),
-																				)
-																		}),
-																		layout.
-																			Rigid(
-																				s.lTamount(tx.Amount)),
-																	)
-																}),
-																layout.Rigid(s.
-																	Thm.
-																	DuoUIline(g,
-																		0, 0, 1,
-																		t.
-																			Colors["Hint"]),
-																),
-															)
-														})
-											})
-									}))
-							})
+						layout.UniformInset(unit.Dp(8)).Layout(g, func() {
+							layout.Flex{
+								Axis: layout.Vertical,
+							}.Layout(g, layout.Rigid(func() {
+								latestPanel := t.DuoUIpanel()
+								latestPanel.PanelObject =
+									s.Rc.Status.Wallet.LastTxs.Txs
+								latestPanel.ScrollBar =
+									t.ScrollBar(0)
+								latestPanelElem.PanelObjectsNumber =
+									len(s.Rc.Status.Wallet.LastTxs.Txs)
+								latestPanel.Layout(g, latestPanelElem, func(i int, in interface{}) {
+									txs := in.([]model.DuoUItransactionExcerpt)
+									tx := txs[i]
+									t.DuoUIcontainer(16,
+										t.Colors["Dark"]).
+										Layout(g, layout.NW, func() {
+											width := g.Constraints.Width.Max
+											layout.Flex{
+												Axis: layout.
+													Vertical,
+											}.Layout(g,
+												layout.Rigid(s.lTtxid(tx.TxID)),
+												layout.Rigid(func() {
+													g.Constraints.Width.Min = width
+													layout.Flex{
+														Spacing: layout.SpaceBetween,
+													}.Layout(g, layout.Rigid(func() {
+														layout.Flex{
+															Axis: layout.Vertical,
+														}.Layout(g,
+															layout.Rigid(s.lTcategory(tx.Category)),
+															layout.Rigid(s.lTtime(tx.Time)),
+														)
+													}), layout.
+														Rigid(
+															s.lTamount(tx.Amount)),
+													)
+												}), layout.Rigid(s.Thm.DuoUIline(g, 0, 0, 1,
+													t.Colors["Hint"]),
+												),
+											)
+										})
+								})
+							}))
+						})
 					}),
 				)
 			})
@@ -449,10 +434,9 @@ func (s *State) DuoUIlogger() func() {
 			lm := s.Rc.Log.LogMessages.Load().([]log.Entry)
 			logOutputList.Layout(g, len(lm), func(i int) {
 				tt := lm[i]
-				logText := t.Caption(
-					fmt.Sprintf("%-12s",
-						tt.Time.Sub(StartupTime)/time.Second*time.Second) +
-						" " + fmt.Sprint(tt.Text))
+				logText := t.Caption(fmt.Sprintf("%-12s",
+					tt.Time.Sub(StartupTime)/time.Second*time.Second) +
+					" " + fmt.Sprint(tt.Text))
 				logText.Font.Typeface = t.Fonts["Mono"]
 				logText.Color = t.Colors["Primary"]
 				switch tt.Level {
@@ -539,10 +523,14 @@ func (s *State) footerMenuButton(page *gelook.DuoUIpage, text, icon string, foot
 				footerMenuItem = s.Thm.DuoUIbutton(gelook.ButtonParams{
 					BgHoverColor: s.Thm.Colors["Dark"],
 					Icon:         icon,
-					IconColor: CurrentCurrentPageColor(s.Rc.ShowPage,
-						page.Title, navItemIconColor, s.Thm.Colors["Primary"]),
-					TextSize: footerMenuItemTextSize, IconSize: footerMenuItemIconSize,
-					Width: footerMenuItemWidth, Height: footerMenuItemHeight})
+					IconColor: CurrentCurrentPageColor(
+						s.Rc.ShowPage, page.Title, navItemIconColor,
+						s.Thm.Colors["Primary"]),
+					TextSize: footerMenuItemTextSize,
+					IconSize: footerMenuItemIconSize,
+					Width:    footerMenuItemWidth,
+					Height:   footerMenuItemHeight,
+				})
 				for footerButton.Clicked(s.Gtx) {
 					s.Rc.ShowPage = page.Title
 					SetPage(s.Rc, page)
@@ -576,6 +564,8 @@ func (s *State) footerMenuButton(page *gelook.DuoUIpage, text, icon string, foot
 func (s *State) FooterRightMenu(allPages *model.DuoUIpages) func() {
 	g := s.Gtx
 	return func() {
+		aT := allPages.Theme
+		fmb := s.footerMenuButton
 		navButtons := []func(){
 			// s.footerMenuButton(allPages.Theme["NETWORK"],
 			// "", "networkIcon", buttonNetwork),
@@ -584,23 +574,17 @@ func (s *State) FooterRightMenu(allPages *model.DuoUIpages) func() {
 			//"", buttonNetwork),
 			// s.footerMenuButton(allPages.Theme["EXPLORER"],
 			// "", "DeviceWidgets", buttonBlocks),
-			s.footerMenuButton(allPages.Theme["NETWORK"],
-				"", "network", buttonNetwork),
-			s.footerMenuButton(allPages.Theme["NETWORK"],
-				"CONNECTIONS: "+
-					fmt.Sprint(s.Rc.Status.Node.ConnectionCount.Load()),
+			fmb(aT["NETWORK"], "", "network", buttonNetwork),
+			fmb(aT["NETWORK"], "CONNECTIONS: "+
+				fmt.Sprint(s.Rc.Status.Node.ConnectionCount.Load()),
 				"", buttonNetwork),
-			s.footerMenuButton(allPages.Theme["EXPLORER"],
-				"", "DeviceWidgets", buttonBlocks),
-			s.footerMenuButton(allPages.Theme["EXPLORER"],
-				"BLOCKS: "+fmt.Sprint(s.Rc.Status.Node.BlockCount.Load()), "",
+			fmb(aT["EXPLORER"], "", "DeviceWidgets", buttonBlocks),
+			fmb(aT["EXPLORER"], "BLOCKS: "+
+				fmt.Sprint(s.Rc.Status.Node.BlockCount.Load()), "",
 				buttonBlocks),
-			s.footerMenuButton(allPages.Theme["MINER"],
-				"", "helpIcon", buttonHelp),
-			s.footerMenuButton(allPages.Theme["CONSOLE"],
-				"", "consoleIcon", buttonConsole),
-			s.footerMenuButton(allPages.Theme["SETTINGS"],
-				"", "settingsIcon", buttonSettings),
+			fmb(aT["MINER"], "", "helpIcon", buttonHelp),
+			fmb(aT["CONSOLE"], "", "consoleIcon", buttonConsole),
+			fmb(aT["SETTINGS"], "", "settingsIcon", buttonSettings),
 		}
 		footerNav.Layout(g, len(navButtons), func(i int) {
 			layout.UniformInset(unit.Dp(0)).Layout(g, navButtons[i])
@@ -612,33 +596,21 @@ func (s *State) HeaderMenu(allPages *model.DuoUIpages) func() {
 	g := s.Gtx
 	return func() {
 		layout.UniformInset(unit.Dp(0)).Layout(g, func() {
+			hmb := s.headerMenuButton
 			headerNav := []func(){
-				s.headerMenuButton("",
-					"CommunicationImportExport", buttonHeader),
-				s.headerMenuButton("",
-					"NotificationNetworkCheck", buttonHeader),
-				s.headerMenuButton("",
-					"NotificationSync", buttonHeader),
-				s.headerMenuButton("",
-					"NotificationSyncDisabled", buttonHeader),
-				s.headerMenuButton("",
-					"NotificationSyncProblem", buttonHeader),
-				s.headerMenuButton("",
-					"NotificationVPNLock", buttonHeader),
-				s.headerMenuButton("",
-					"MapsLayers", buttonHeader),
-				s.headerMenuButton("",
-					"MapsLayersClear", buttonHeader),
-				s.headerMenuButton("",
-					"ImageTimer", buttonHeader),
-				s.headerMenuButton("",
-					"ImageRemoveRedEye", buttonHeader),
-				s.headerMenuButton("",
-					"DeviceSignalCellular0Bar", buttonHeader),
-				s.headerMenuButton("",
-					"ActionTimeline", buttonHeader),
-				s.headerMenuButton("",
-					"HardwareWatch", buttonHeader),
+				hmb("", "CommunicationImportExport", buttonHeader),
+				hmb("", "NotificationNetworkCheck", buttonHeader),
+				hmb("", "NotificationSync", buttonHeader),
+				hmb("", "NotificationSyncDisabled", buttonHeader),
+				hmb("", "NotificationSyncProblem", buttonHeader),
+				hmb("", "NotificationVPNLock", buttonHeader),
+				hmb("", "MapsLayers", buttonHeader),
+				hmb("", "MapsLayersClear", buttonHeader),
+				hmb("", "ImageTimer", buttonHeader),
+				hmb("", "ImageRemoveRedEye", buttonHeader),
+				hmb("", "DeviceSignalCellular0Bar", buttonHeader),
+				hmb("", "ActionTimeline", buttonHeader),
+				hmb("", "HardwareWatch", buttonHeader),
 			}
 			footerNav.Layout(g, len(headerNav), func(i int) {
 				layout.UniformInset(unit.Dp(0)).Layout(g, headerNav[i])
@@ -716,8 +688,8 @@ func (s *State) MainNavigation(allPages *model.DuoUIpages, nav *model.DuoUInav) 
 func (s *State) navButtons(allPages *model.DuoUIpages, nav *model.DuoUInav) []func() {
 	t, g := s.Thm, s.Gtx
 	return []func(){
-		s.navMenuButton(allPages.Theme["OVERVIEW"], nav,
-			"OVERVIEW", "overviewIcon", navButtonOverview),
+		s.navMenuButton(allPages.Theme["OVERVIEW"], nav, "OVERVIEW",
+			"overviewIcon", navButtonOverview),
 		t.DuoUIline(g, 0, 0, 1,
 			t.Colors["LightGrayIII"]),
 		s.navMenuButton(allPages.Theme["SEND"], nav, "SEND", "sendIcon",
@@ -727,12 +699,12 @@ func (s *State) navButtons(allPages *model.DuoUIpages, nav *model.DuoUInav) []fu
 		//"receiveIcon", navButtonReceive),
 		t.DuoUIline(g, 0, 0, 1,
 			t.Colors["LightGrayIII"]),
-		s.navMenuButton(allPages.Theme["ADDRESSBOOK"], nav,
-			"ADDRESSBOOK", "addressBookIcon", navButtonAddressBook),
+		s.navMenuButton(allPages.Theme["ADDRESSBOOK"], nav, "ADDRESSBOOK",
+			"addressBookIcon", navButtonAddressBook),
 		t.DuoUIline(g, 0, 0, 1,
 			t.Colors["LightGrayIII"]),
-		s.navMenuButton(allPages.Theme["HISTORY"], nav,
-			"HISTORY", "historyIcon", navButtonHistory),
+		s.navMenuButton(allPages.Theme["HISTORY"], nav, "HISTORY",
+			"historyIcon", navButtonHistory),
 	}
 }
 
@@ -796,20 +768,18 @@ func (s *State) pageNavButton(page *gelook.DuoUIpage, b *gel.Button, label, hash
 func (s *State) PageNavButtons(previousBlockHash, nextBlockHash string, prevPage, nextPage *gelook.DuoUIpage) func() {
 	g := s.Gtx
 	return func() {
-		layout.Flex{}.Layout(g,
-			layout.Flexed(0.5, func() {
-				eh := chainhash.Hash{}
-				if previousBlockHash != eh.String() {
-					s.pageNavButton(nextPage, previousBlockHashButton,
-						"Previous Block", previousBlockHash)
-				}
-			}),
-			layout.Flexed(0.5, func() {
-				if nextBlockHash != "" {
-					s.pageNavButton(nextPage, nextBlockHashButton,
-						"Next Block", nextBlockHash)
-				}
-			}),
+		layout.Flex{}.Layout(g, layout.Flexed(0.5, func() {
+			eh := chainhash.Hash{}
+			if previousBlockHash != eh.String() {
+				s.pageNavButton(nextPage, previousBlockHashButton,
+					"Previous Block", previousBlockHash)
+			}
+		}), layout.Flexed(0.5, func() {
+			if nextBlockHash != "" {
+				s.pageNavButton(nextPage, nextBlockHashButton,
+					"Next Block", nextBlockHash)
+			}
+		}),
 		)
 	}
 }
@@ -818,19 +788,18 @@ func (s *State) PeersList() func() {
 	t, g := s.Thm, s.Gtx
 	c := t.Colors["Dark"]
 	return func() {
-		s.Rc.Network.PeersList.Layout(g, len(s.Rc.Network.Peers),
-			func(i int) {
-				np := s.Rc.Network.Peers[i]
-				t.DuoUIline(g, 0, 0, 1,
-					t.Colors["Hint"])()
-				layout.Flex{
-					Spacing: layout.SpaceBetween,
-				}.Layout(g,
-					layout.Rigid(s.Context.Label(t.Fonts["Mono"], 14, c,
-						fmt.Sprint(np.ID))),
-					layout.Flexed(1, s.peerDetails(i, np)),
-					layout.Rigid(s.Label(t.Fonts["Mono"], 14, c, np.Addr)))
-			})
+		s.Rc.Network.PeersList.Layout(g, len(s.Rc.Network.Peers), func(i int) {
+			np := s.Rc.Network.Peers[i]
+			t.DuoUIline(g, 0, 0, 1,
+				t.Colors["Hint"])()
+			layout.Flex{
+				Spacing: layout.SpaceBetween,
+			}.Layout(g,
+				layout.Rigid(s.Context.Label(t.Fonts["Mono"], 14, c,
+					fmt.Sprint(np.ID))),
+				layout.Flexed(1, s.peerDetails(i, np)),
+				layout.Rigid(s.Label(t.Fonts["Mono"], 14, c, np.Addr)))
+		})
 	}
 }
 
@@ -1326,16 +1295,16 @@ func (s *Context) TxsDetails(i int, te *model.DuoUItransactionExcerpt) func() {
 		layout.Flex{
 			Axis: layout.Vertical,
 		}.Layout(g,
-			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
-				t.Colors["Dark"], fmt.Sprint(i))),
-			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
-				t.Colors["Dark"], te.TxID)),
-			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
-				t.Colors["Dark"], fmt.Sprintf("%0.8f", te.Amount))),
-			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
-				t.Colors["Dark"], te.Category)),
-			layout.Rigid(s.Label(t.Fonts["Primary"], 12,
-				t.Colors["Dark"], te.Time)),
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12, t.Colors["Dark"],
+				fmt.Sprint(i))),
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12, t.Colors["Dark"],
+				te.TxID)),
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12, t.Colors["Dark"],
+				fmt.Sprintf("%0.8f", te.Amount))),
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12, t.Colors["Dark"],
+				te.Category)),
+			layout.Rigid(s.Label(t.Fonts["Primary"], 12, t.Colors["Dark"],
+				te.Time)),
 		)
 	}
 }

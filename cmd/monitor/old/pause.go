@@ -1,6 +1,6 @@
 // +build !windows
 
-package monitor
+package old
 
 import (
 	"os/exec"

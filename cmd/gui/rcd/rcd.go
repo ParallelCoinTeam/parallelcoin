@@ -175,15 +175,9 @@ var (
 )
 
 // sorter implementation for AddressSlice
-func (a AddressSlice) Len() int {
-	return len(a)
-}
-func (a AddressSlice) Less(i, j int) bool {
-	return a[i].Index < a[j].Index
-}
-func (a AddressSlice) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
-}
+func (a AddressSlice) Len() int           { return len(a) }
+func (a AddressSlice) Less(i, j int) bool { return a[i].Index < a[j].Index }
+func (a AddressSlice) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 func (d *DuoUIcommands) Run() {
 	d.Events <- CommandEvent{

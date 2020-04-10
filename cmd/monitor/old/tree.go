@@ -1,4 +1,4 @@
-package monitor
+package old
 
 import (
 	"github.com/p9c/pod/pkg/gui/gel"
@@ -166,7 +166,7 @@ func (n *Node) GetWidget(s *State, headless bool) {
 	//			}
 	//		}),
 	//		gui.Rigid(func() {
-	//			if len(nn[i].Children) > 0 {
+	//			if len(nn[i].children) > 0 {
 	//				ic := "Folded"
 	//				if !nn[i].Closed {
 	//					ic = "Unfolded"
@@ -194,7 +194,7 @@ func (n *Node) GetWidget(s *State, headless bool) {
 	//
 	//		}),
 	//		gui.Rigid(func() {
-	//			if len(nn[i].Children) > 0 && nn[i].IsAnyHiding() {
+	//			if len(nn[i].children) > 0 && nn[i].IsAnyHiding() {
 	//				s.IconButton("ShowItem", "DocBg", "PanelBg",
 	//					nn[i].showChildrenButton)
 	//				for nn[i].showChildrenButton.Clicked(gtx) {
@@ -206,7 +206,7 @@ func (n *Node) GetWidget(s *State, headless bool) {
 	//				}
 	//			}
 	//		}), gui.Rigid(func() {
-	//			if len(nn[i].Children) > 0 && nn[i].IsAnyShowing() {
+	//			if len(nn[i].children) > 0 && nn[i].IsAnyShowing() {
 	//				s.IconButton("HideItem", "DocBg", "PanelBg",
 	//					nn[i].hideChildrenButton)
 	//				for nn[i].hideChildrenButton.Clicked(gtx) {

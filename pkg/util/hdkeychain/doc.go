@@ -13,7 +13,7 @@ The Master Node
 
 As previously mentioned, the extended keys are hierarchical meaning they are used to form a tree.  The root of that tree is called the master node and this package provides the NewMaster function to create it from a cryptographically random seed.  The GenerateSeed function is provided as a convenient way to create a random seed for use with the NewMaster function.
 
-Deriving Children
+Deriving children
 
 Once you have created a tree root (or have deserialized an extended key as discussed later), the child extended keys can be derived by using the Child function.  The Child function supports deriving both normal (non-hardened) and hardened child extended keys.  In order to derive a hardened extended key, use the  HardenedKeyStart constant + the hardened key number as the index to the Child function.  This provides the ability to cascade the keys into a tree and hence generate the hierarchical deterministic key chains.
 
