@@ -6,11 +6,30 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"math"
+	"time"
 )
 
+type scaledConfig struct {
+	Scale float32
+}
+
+func (s *scaledConfig) Now() time.Time {
+	return time.Now()
+}
+
+func (s *scaledConfig) Px(v unit.Value) int {
+	scale := s.Scale
+	if v.U == unit.UnitPx {
+		scale = 1
+	}
+	return int(math.Round(float64(scale * v.V)))
+}
+
 type window struct {
-	w    *app.Window
-	opts []app.Option
+	w     *app.Window
+	opts  []app.Option
+	scale *scaledConfig
 }
 
 // Window creates a new window
@@ -32,11 +51,20 @@ func (w *window) Size(width, height int) (out *window) {
 	return w
 }
 
+// Scale sets the scale factor for rendering
+func (w *window) Scale(s float32) *window {
+	w.scale = &scaledConfig{s}
+	return w
+}
+
 // Set the window options and initialise the app.window
 func (w *window) set() (out *window) {
 	if w.opts != nil {
 		w.w = app.NewWindow(w.opts...)
 		w.opts = nil
+	}
+	if w.scale == nil {
+		w.Scale(1)
 	}
 	return w
 }
@@ -72,7 +100,7 @@ func (w *window) Run(frame func(ctx *layout.Context), destroy func()) {
 				case system.DestroyEvent:
 					destroy()
 				case system.FrameEvent:
-					ctx.Reset(e.Config, e.Size)
+					ctx.Reset(w.scale, e.Size)
 					frame(ctx)
 					e.Frame(ctx.Ops)
 				}
