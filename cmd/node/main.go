@@ -9,16 +9,16 @@ import (
 	"runtime/pprof"
 	"time"
 
-	"github.com/p9c/pod/cmd/node/blockdb"
-	"github.com/p9c/pod/pkg/kopachctrl"
+	"github.com/p9c/pod/cmd/kopach/control"
+	"github.com/p9c/pod/pkg/db/blockdb"
 
 	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/node/path"
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/cmd/node/version"
 	indexers "github.com/p9c/pod/pkg/chain/index"
-	"github.com/p9c/pod/pkg/conte"
 	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -145,7 +145,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		return nil
 	}
 	// create server and start it
-	server, err := rpc.NewNode(*cx.Config.Listeners, db,
+	server, err := chainrpc.NewNode(*cx.Config.Listeners, db,
 		interrupt.ShutdownRequestChan, conte.GetContext(cx))
 	if err != nil {
 		Errorf("unable to start server on %v: %v",
@@ -156,7 +156,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 	server.Start()
 	cx.RealNode = server
 	if len(server.RPCServers) > 0 {
-		rpc.RunAPI(server.RPCServers[0], cx.NodeKill)
+		chainrpc.RunAPI(server.RPCServers[0], cx.NodeKill)
 		Trace("propagating rpc server handle (node has started)")
 		cx.RPCServer = server.RPCServers[0]
 		if cx.NodeChan != nil {
@@ -165,7 +165,7 @@ func Main(cx *conte.Xt, shutdownChan chan struct{}) (err error) {
 		}
 	}
 	// set up interrupt shutdown handlers to stop servers
-	stopController := kopachctrl.Run(cx)
+	stopController := control.Run(cx)
 	cx.Controller.Store(true)
 	gracefulShutdown := func() {
 		Info("gracefully shutting down the server...")

@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/rpc"
 
-	"github.com/p9c/pod/pkg/kopachctrl/job"
+	"github.com/p9c/pod/cmd/kopach/control/job"
 )
 
 type Client struct {

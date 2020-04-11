@@ -7,14 +7,14 @@ import (
 	"os"
 	"path/filepath"
 
-	log "github.com/p9c/pod/pkg/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/jessevdk/go-flags"
 
 	"github.com/p9c/pod/app/appdata"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
-	_ "github.com/p9c/pod/pkg/wallet/db/bdb"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
 
 const defaultNet = "mainnet"

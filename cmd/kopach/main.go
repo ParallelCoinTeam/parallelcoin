@@ -10,15 +10,15 @@ import (
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/kopach/client"
+	"github.com/p9c/pod/cmd/kopach/control"
+	"github.com/p9c/pod/cmd/kopach/control/job"
+	"github.com/p9c/pod/cmd/kopach/control/pause"
+	"github.com/p9c/pod/cmd/kopach/control/sol"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 	"github.com/p9c/pod/pkg/comm/transport"
-	"github.com/p9c/pod/pkg/conte"
-	"github.com/p9c/pod/pkg/kopachctrl"
-	"github.com/p9c/pod/pkg/kopachctrl/job"
-	"github.com/p9c/pod/pkg/kopachctrl/pause"
-	"github.com/p9c/pod/pkg/kopachctrl/sol"
 	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
@@ -56,8 +56,8 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		w.active.Store(false)
 		Debug("opening broadcast channel listener")
 		w.conn, err = transport.NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
-			transport.DefaultPort, kopachctrl.MaxDatagramSize, handlers,
-				cx.KillAll)
+			transport.DefaultPort, control.MaxDatagramSize, handlers,
+			cx.KillAll)
 		if err != nil {
 			Error(err)
 			cancel()
@@ -122,7 +122,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 				}
 			}
 		}()
-		Debug("listening on", kopachctrl.UDP4MulticastAddress)
+		Debug("listening on", control.UDP4MulticastAddress)
 		<-cx.KillAll
 		Info("kopach shutting down")
 		return

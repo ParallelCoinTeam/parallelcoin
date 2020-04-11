@@ -9,7 +9,7 @@ import (
 
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
-	log "github.com/p9c/pod/pkg/logi"
+	log "github.com/p9c/pod/pkg/util/logi"
 
 	"github.com/p9c/pod/pkg/pod"
 )

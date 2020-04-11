@@ -2,8 +2,8 @@ package rcd
 
 import (
 	"fmt"
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/helpers"

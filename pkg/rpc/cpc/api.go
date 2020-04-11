@@ -1,15 +1,15 @@
 package api
 
 import (
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 )
 
 // StartAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result
 // Note that the parameters are type asserted to prevent the consumer of the API from sending wrong message types not
 // because it's necessary since they are interfaces end to end
-func StartAPI(server *rpc.Server, quit chan struct{}) {
-	nrh := rpc.RPCHandlers
+func StartAPI(server *chainrpc.Server, quit chan struct{}) {
+	nrh := chainrpc.RPCHandlers
 	go func() {
 		var err error
 		var res interface{}
@@ -20,14 +20,14 @@ func StartAPI(server *rpc.Server, quit chan struct{}) {
 					Fn(server, msg.Params.(btcjson.AddNodeCmd),
 						nil); Check(err) {
 				}
-				msg.Ch.(chan rpc.AddNodeRes) <- rpc.AddNodeRes{
+				msg.Ch.(chan chainrpc.AddNodeRes) <- chainrpc.AddNodeRes{
 					Res: nil, Err: err}
 			case msg := <-nrh["createrawtransaction"].Call:
 				if res, err = nrh["createrawtransaction"].
 					Fn(server, msg.Params.(btcjson.CreateRawTransactionCmd),
 						nil); Check(err) {
 				}
-				msg.Ch.(chan rpc.CreateRawTransactionRes) <- rpc.CreateRawTransactionRes{
+				msg.Ch.(chan chainrpc.CreateRawTransactionRes) <- chainrpc.CreateRawTransactionRes{
 					Res: res.(string), Err: err}
 			case msg := <-nrh["decoderawtransaction"].Call:
 				var ret btcjson.TxRawDecodeResult
@@ -37,21 +37,21 @@ func StartAPI(server *rpc.Server, quit chan struct{}) {
 				} else {
 					ret = res.(btcjson.TxRawDecodeResult)
 				}
-				msg.Ch.(chan rpc.DecodeRawTransactionRes) <- rpc.DecodeRawTransactionRes{
+				msg.Ch.(chan chainrpc.DecodeRawTransactionRes) <- chainrpc.DecodeRawTransactionRes{
 					Res: ret, Err: err}
 			case msg := <-nrh["decodescript"].Call:
 				if res, err = nrh["decodescript"].
 					Fn(server, msg.Params.(btcjson.DecodeScriptCmd),
 						nil); Check(err) {
 				}
-				msg.Ch.(chan rpc.DecodeScriptRes) <- rpc.DecodeScriptRes{
+				msg.Ch.(chan chainrpc.DecodeScriptRes) <- chainrpc.DecodeScriptRes{
 					Res: res.(btcjson.DecodeScriptResult), Err: err}
 			case msg := <-nrh["estimatefee"].Call:
 				if res, err = nrh["estimatefee"].
 					Fn(server, msg.Params.(btcjson.EstimateFeeCmd),
 						nil); Check(err) {
 				}
-				msg.Ch.(chan rpc.EstimateFeeRes) <- rpc.EstimateFeeRes{
+				msg.Ch.(chan chainrpc.EstimateFeeRes) <- chainrpc.EstimateFeeRes{
 					Res: res.(float64), Err: err}
 			case <-quit:
 				return

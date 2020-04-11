@@ -3,8 +3,8 @@ package monitor
 import (
 	"gioui.org/layout"
 	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/logi"
-	"github.com/p9c/pod/pkg/logi/consume"
+	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 	"go.uber.org/atomic"
 	"os"
 	"os/exec"

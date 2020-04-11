@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/rpc/legacy"
 )
 
@@ -22,7 +22,7 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 		if len(args) < 1 {
 			method = ""
 			cmd = &btcjson.HelpCmd{Command: &method}
-			if res, err = rpc.RPCHandlers["help"].Fn(r.cx.RPCServer, cmd, nil); Check(err) {
+			if res, err = chainrpc.RPCHandlers["help"].Fn(r.cx.RPCServer, cmd, nil); Check(err) {
 				errString += fmt.Sprintln(err)
 			}
 			o += fmt.Sprintln(res)
@@ -81,7 +81,7 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 	if cmd, err = btcjson.NewCmd(method, params...); Check(err) {
 		o += fmt.Sprintln(err)
 	}
-	if x, ok := rpc.RPCHandlers[method]; !ok {
+	if x, ok := chainrpc.RPCHandlers[method]; !ok {
 		if x, ok := legacy.RPCHandlers[method]; ok {
 			if res, err = x.Handler(cmd, r.cx.WalletServer,
 				r.cx.ChainClient); Check(err) {

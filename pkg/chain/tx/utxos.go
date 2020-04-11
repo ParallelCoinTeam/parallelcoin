@@ -3,7 +3,7 @@ package wallettx
 import (
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	"github.com/p9c/pod/pkg/db/walletdb"
 )
 
 // OutputSelectionPolicy describes the rules for selecting an output from the

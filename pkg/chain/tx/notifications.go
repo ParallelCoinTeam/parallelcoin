@@ -7,9 +7,9 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // TODO: It would be good to send errors during notification creation to the rpc

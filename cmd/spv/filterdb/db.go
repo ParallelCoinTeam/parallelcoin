@@ -7,7 +7,7 @@ import (
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/coding/gcs"
 	"github.com/p9c/pod/pkg/coding/gcs/builder"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
+	"github.com/p9c/pod/pkg/db/walletdb"
 )
 
 var (

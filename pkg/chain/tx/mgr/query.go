@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/util"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 // CreditRecord contains metadata regarding a transaction credit for a known

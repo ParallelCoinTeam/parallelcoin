@@ -6,7 +6,7 @@ import (
 
 	"github.com/p9c/pod/pkg/coding/simplebuffer"
 	"github.com/p9c/pod/pkg/coding/simplebuffer/IP"
-	"github.com/p9c/pod/pkg/routeable"
+	"github.com/p9c/pod/pkg/util/routeable"
 )
 
 type IPs struct {

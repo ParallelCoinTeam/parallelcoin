@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/cmd/node/blockdb"
-	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/db/blockdb"
 )
 
 // dirEmpty returns whether or not the specified directory path is empty

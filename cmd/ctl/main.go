@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/p9c/pod/pkg/conte"
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 

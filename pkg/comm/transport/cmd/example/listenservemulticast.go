@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/p9c/pod/pkg/comm/transport"
-	log "github.com/p9c/pod/pkg/logi"
-	"github.com/p9c/pod/pkg/loop"
+	log "github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/loop"
 )
 
 const (

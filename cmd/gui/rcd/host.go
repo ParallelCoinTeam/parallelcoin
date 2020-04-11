@@ -4,14 +4,14 @@ import (
 	"time"
 
 	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/cmd/node/rpc"
 	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
 )
 
 // System Ststus
 
 func (r *RcVar) GetDuoUIstatus() {
-	v, err := rpc.HandleVersion(r.cx.RPCServer, nil, nil)
+	v, err := chainrpc.HandleVersion(r.cx.RPCServer, nil, nil)
 	if err != nil {
 	}
 	r.Status.Version = "0.0.1"

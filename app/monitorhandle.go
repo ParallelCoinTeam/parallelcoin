@@ -7,9 +7,9 @@ import (
 
 	"github.com/p9c/pod/app/config"
 
+	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
 	"github.com/p9c/pod/cmd/monitor"
-	"github.com/p9c/pod/pkg/conte"
 )
 
 var monitorHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {

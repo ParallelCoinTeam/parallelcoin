@@ -6,7 +6,7 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/peer"
+	"github.com/p9c/pod/pkg/comm/peer"
 	"github.com/p9c/pod/pkg/util"
 )
 

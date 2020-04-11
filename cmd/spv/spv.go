@@ -17,12 +17,12 @@ import (
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/peer"
-	"github.com/p9c/pod/pkg/peer/addrmgr"
-	"github.com/p9c/pod/pkg/peer/connmgr"
+	"github.com/p9c/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
+	"github.com/p9c/pod/pkg/comm/peer/connmgr"
+	"github.com/p9c/pod/pkg/db/walletdb"
 	"github.com/p9c/pod/pkg/util"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	walletdb "github.com/p9c/pod/pkg/wallet/db"
 )
 
 type (
