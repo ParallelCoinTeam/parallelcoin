@@ -16,6 +16,7 @@ import (
 )
 
 func SetPage(rc *rcd.RcVar, page *gelook.DuoUIpage) {
+	page.Command()
 	rc.CurrentPage = page
 }
 

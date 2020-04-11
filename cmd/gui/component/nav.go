@@ -62,7 +62,6 @@ func navMenuButton(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, pa
 				nav.PaddingVertical, nav.PaddingHorizontal, nav.PaddingVertical, nav.PaddingHorizontal)
 			for navButton.Clicked(gtx) {
 				rc.ShowPage = title
-				page.Command()
 				SetPage(rc, page)
 			}
 			menuItem.MenuLayout(gtx, navButton)
