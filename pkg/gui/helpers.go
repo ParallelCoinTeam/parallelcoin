@@ -98,22 +98,27 @@ func (s *State) IconButton(icon, fg, bg string, button *gel.Button, size ...int)
 
 func (s *State) TextButton(label, fontFace string, fontSize int, fg, bg string,
 	button *gel.Button) {
-	s.Theme.DuoUIbutton(
-		s.Theme.Fonts[fontFace],
-		label,
-		s.Theme.Colors[fg],
-		s.Theme.Colors[bg],
-		s.Theme.Colors[bg],
-		s.Theme.Colors[fg],
-		"settingsIcon",
-		s.Theme.Colors["Light"],
-		fontSize, 0, 32, 32, 10, 8, 7, 10).
-		Layout(s.Gtx, button)
+	s.Theme.DuoUIbutton(gelook.ButtonParams{
+		TxtFont:       s.Theme.Fonts[fontFace],
+		Txt:           label,
+		TxtColor:      s.Theme.Colors[fg],
+		BgColor:       s.Theme.Colors[bg],
+		TxtHoverColor: s.Theme.Colors[bg],
+		BgHoverColor:  s.Theme.Colors[fg],
+		Icon:          "settingsIcon",
+		IconColor:     s.Theme.Colors["Light"],
+		TextSize:      fontSize,
+		Width:         32,
+		Height:        32,
+		PaddingTop:    10,
+		PaddingRight:  8,
+		PaddingBottom: 7,
+		PaddingLeft:   10,
+	}).Layout(s.Gtx, button)
 }
 
 func (s *State) ButtonArea(content func(), button *gel.Button) {
-	b := s.Theme.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0,
-		0, 0)
+	b := s.Theme.DuoUIbutton(gelook.ButtonParams{})
 	b.InsideLayout(s.Gtx, button, content)
 }
 

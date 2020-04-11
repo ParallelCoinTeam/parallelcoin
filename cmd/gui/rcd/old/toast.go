@@ -1,4 +1,4 @@
-package rcd
+package old
 
 import (
 	"github.com/p9c/pod/cmd/gui/model"

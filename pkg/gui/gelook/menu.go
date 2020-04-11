@@ -28,13 +28,13 @@ type DuoUIthemeNav struct {
 	// theme         DuoUItheme
 }
 
-// func (t *DuoUItheme) DuoUIthemeNav(txt string, items *map[string]*DuoUIbutton) DuoUIthemeNav {
+// func (t *DuoUItheme) DuoUIthemeNav(Txt string, items *map[string]*DuoUIbutton) DuoUIthemeNav {
 //	//for it, item := range items {
 //	//	items[it] = t.DuoUIbutton(item.Text, item.Icon)
 //	//}
 //
 //	return DuoUIthemeNav{
-//		Title: txt,
+//		Title: Txt,
 //		Font: text.Font{
 //			Size: t.TextSize.Scale(14.0 / 16.0),
 //		},

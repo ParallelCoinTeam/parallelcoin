@@ -51,7 +51,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			// TODO events of gui
 		case e := <-ui.rc.Commands.Events:
 			switch e := e.(type) {
-			case rcd.DuoUIcommandEvent:
+			case rcd.CommandEvent:
 				ui.rc.Commands.History = append(ui.rc.Commands.History, e.Command)
 				ui.ly.Window.Invalidate()
 			}

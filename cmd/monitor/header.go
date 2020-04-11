@@ -3,6 +3,7 @@ package monitor
 import (
 	"fmt"
 	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/gui/gelook"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,10 +26,19 @@ func (s *State) DuoUIheader() layout.FlexChild {
 					fg, bg := "PanelText", "PanelBg"
 					icon := "logo"
 					b := s.Buttons["Logo"]
-					s.Theme.DuoUIbutton("", "", "",
-						s.Theme.Colors[bg], "", s.Theme.Colors[fg], icon,
-						s.Theme.Colors[fg], 0, 40, 48, 48,
-						6, 2, 2, 6).IconLayout(s.Gtx, b)
+					s.Theme.DuoUIbutton(gelook.ButtonParams{
+						BgColor:       s.Theme.Colors[bg],
+						BgHoverColor:  s.Theme.Colors[fg],
+						Icon:          icon,
+						IconColor:     s.Theme.Colors[fg],
+						IconSize:      40,
+						Width:         48,
+						Height:        48,
+						PaddingTop:    6,
+						PaddingRight:  2,
+						PaddingBottom: 2,
+						PaddingLeft:   6,
+					}).IconLayout(s.Gtx, b)
 					if b.Clicked(s.Gtx) {
 						s.FlipTheme()
 					}

@@ -190,7 +190,7 @@ func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
 			continue
 		}
 		cx.ChainClient = cc
-		cx.ChainClientReady.Store(true)
+		close(cx.ChainClientReady)
 		chainClient = cc
 		// }
 		// Rather than inlining this logic directly into the loader

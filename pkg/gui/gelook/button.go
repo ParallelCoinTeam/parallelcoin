@@ -187,36 +187,37 @@ type DuoUIbutton struct {
 	hover         bool
 }
 
-func (t *DuoUItheme) DuoUIbutton(
-	txtFont text.Typeface, txt,
-	txtColor, bgColor,
-	txtHoverColor, bgHoverColor,
-	icon, iconColor string,
-	textSize, iconSize,
-	width, height,
-	paddingTop,
-	paddingRight,
-	paddingBottom,
-	paddingLeft int) DuoUIbutton {
+type ButtonParams struct {
+	TxtFont text.Typeface
+	Txt,
+	TxtColor, BgColor string
+	TxtHoverColor, BgHoverColor                          string
+	Icon, IconColor                                      string
+	TextSize, IconSize                                   int
+	Width, Height                                        int
+	PaddingTop, PaddingRight, PaddingBottom, PaddingLeft int
+}
+
+func (t *DuoUItheme) DuoUIbutton(p ButtonParams) DuoUIbutton {
 	return DuoUIbutton{
-		Text: txt,
+		Text: p.Txt,
 		Font: text.Font{
-			Typeface: txtFont,
+			Typeface: p.TxtFont,
 		},
-		TextSize:      unit.Dp(float32(textSize)),
-		Width:         width,
-		Height:        height,
-		TxColor:       HexARGB(txtColor),
-		BgColor:       HexARGB(bgColor),
-		TxColorHover:  HexARGB(txtHoverColor),
-		BgColorHover:  HexARGB(bgHoverColor),
-		Icon:          t.Icons[icon],
-		IconSize:      iconSize,
-		IconColor:     HexARGB(iconColor),
-		PaddingTop:    unit.Dp(float32(paddingTop)),
-		PaddingRight:  unit.Dp(float32(paddingRight)),
-		PaddingBottom: unit.Dp(float32(paddingBottom)),
-		PaddingLeft:   unit.Dp(float32(paddingLeft)),
+		TextSize:      unit.Dp(float32(p.TextSize)),
+		Width:         p.Width,
+		Height:        p.Height,
+		TxColor:       HexARGB(p.TxtColor),
+		BgColor:       HexARGB(p.BgColor),
+		TxColorHover:  HexARGB(p.TxtHoverColor),
+		BgColorHover:  HexARGB(p.BgHoverColor),
+		Icon:          t.Icons[p.Icon],
+		IconSize:      p.IconSize,
+		IconColor:     HexARGB(p.IconColor),
+		PaddingTop:    unit.Dp(float32(p.PaddingTop)),
+		PaddingRight:  unit.Dp(float32(p.PaddingRight)),
+		PaddingBottom: unit.Dp(float32(p.PaddingBottom)),
+		PaddingLeft:   unit.Dp(float32(p.PaddingLeft)),
 		shaper:        t.Shaper,
 	}
 }
@@ -256,7 +257,6 @@ func (b DuoUIbutton) Layout(gtx *layout.Context, button *gel.Button) {
 			gtx.Constraints.Height.Min = vmin
 			layout.Center.Layout(gtx, func() {
 				layout.Inset{Top: b.PaddingTop, Bottom: b.PaddingBottom, Left: b.PaddingLeft, Right: b.PaddingRight}.Layout(gtx, func() {
-
 					paint.ColorOp{Color: txColor}.Add(gtx.Ops)
 					gel.Label{
 						Alignment: text.Middle,
