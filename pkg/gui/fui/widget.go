@@ -10,7 +10,6 @@ import (
 )
 
 type widget struct {
-	ctx *layout.Context
 	fn  []func(ctx *layout.Context)
 }
 
