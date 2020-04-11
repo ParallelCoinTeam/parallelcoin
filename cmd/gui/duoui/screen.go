@@ -47,11 +47,14 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 
 // Main wallet screen
 func (ui *DuoUI) DuoUImainScreen() {
-	ui.ly.Theme.DuoUIcontainer(0, ui.ly.Theme.Colors["Dark"]).Layout(ui.ly.Context, layout.Center, func() {
-		layout.Flex{Axis: layout.Vertical}.Layout(ui.ly.Context,
-			layout.Rigid(ui.DuoUIheader()),
-			layout.Flexed(1, ui.DuoUIbody()),
-			layout.Rigid(ui.DuoUIfooter()),
-		)
-	})
+	ctx := ui.ly.Context
+	th := ui.ly.Theme
+	th.DuoUIcontainer(0, th.Colors["Dark"]).Layout(ctx,
+		layout.Center, func() {
+			layout.Flex{Axis: layout.Vertical}.Layout(ctx,
+				layout.Rigid(ui.DuoUIheader()),
+				layout.Flexed(1, ui.DuoUIbody()),
+				layout.Rigid(ui.DuoUIfooter()),
+			)
+		})
 }

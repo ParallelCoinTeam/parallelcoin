@@ -41,7 +41,9 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 				return
 			}
 			update(r)
-			// go r.toastAdd("New block: "+fmt.Sprint(callback.Data.(*util.Block).Height()), callback.Data.(*util.Block).Hash().String())
+			// go r.toastAdd("New block: "+
+			// fmt.Sprint(callback.Data.(*util.Block).Height()),
+			// callback.Data.(*util.Block).Hash().String())
 		}
 	})
 	go func() {

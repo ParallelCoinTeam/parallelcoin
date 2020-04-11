@@ -22,7 +22,8 @@ func (r *RcVar) ConsoleCmd(com string) (o string) {
 		if len(args) < 1 {
 			method = ""
 			cmd = &btcjson.HelpCmd{Command: &method}
-			if res, err = chainrpc.RPCHandlers["help"].Fn(r.cx.RPCServer, cmd, nil); Check(err) {
+			if res, err = chainrpc.RPCHandlers["help"].
+				Fn(r.cx.RPCServer, cmd, nil); Check(err) {
 				errString += fmt.Sprintln(err)
 			}
 			o += fmt.Sprintln(res)

@@ -13,14 +13,18 @@ var (
 )
 
 func (ui *DuoUI) DuoUIfooter() func() {
+	ctx := ui.ly.Context
+	th := ui.ly.Theme
 	return func() {
-		footer := ui.ly.Theme.DuoUIcontainer(0, ui.ly.Theme.Colors["Dark"])
+		footer := th.DuoUIcontainer(0, th.Colors["Dark"])
 		footer.FullWidth = true
-		footer.Layout(ui.ly.Context, layout.N, func() {
-			layout.Flex{Spacing: layout.SpaceBetween}.Layout(ui.ly.Context,
-				layout.Rigid(component.FooterLeftMenu(ui.rc, ui.ly.Context, ui.ly.Theme, ui.ly.Pages)),
+		footer.Layout(ctx, layout.N, func() {
+			layout.Flex{Spacing: layout.SpaceBetween}.Layout(ctx,
+				layout.Rigid(component.FooterLeftMenu(ui.rc, ctx, th,
+					ui.ly.Pages)),
 				layout.Flexed(1, func() {}),
-				layout.Rigid(component.FooterRightMenu(ui.rc, ui.ly.Context, ui.ly.Theme, ui.ly.Pages)),
+				layout.Rigid(component.FooterRightMenu(ui.rc, ctx, th,
+					ui.ly.Pages)),
 			)
 		})
 	}

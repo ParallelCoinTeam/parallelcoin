@@ -39,7 +39,8 @@ type send struct {
 	passPharse string
 }
 
-func Send(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func Send(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "SEND",
 		TxColor:       "",
@@ -59,55 +60,74 @@ func Send(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.Duo
 	return th.DuoUIpage(page)
 }
 
-func sendBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func sendBody(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.Flex{}.Layout(gtx,
 			layout.Rigid(func() {
 				widgets := []func(){
 					func() {
-						th.DuoUIcontainer(1, th.Colors["Gray"]).Layout(gtx, layout.Center, func() {
+						th.DuoUIcontainer(1,
+							th.Colors["Gray"]).Layout(gtx, layout.Center, func() {
 							layout.Flex{}.Layout(gtx,
-								layout.Flexed(1, component.Editor(gtx, th, addressLineEditor, "DUO address",
+								layout.Flexed(1, component.Editor(gtx, th,
+									addressLineEditor, "DUO address",
 									func(e gel.EditorEvent) {
 										sendStruct.address = addressLineEditor.Text()
 									})),
-								layout.Rigid(component.Button(gtx, th, buttonPasteAddress, th.Fonts["Primary"], 10, 13, 8, 12, 8,
-									th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE ADDRESS", func() {
+								layout.Rigid(component.Button(gtx, th,
+									buttonPasteAddress, th.Fonts["Primary"],
+									10, 13, 8, 12, 8,
+									th.Colors["ButtonText"], th.Colors["ButtonBg"],
+									"PASTE ADDRESS", func() {
 										addressLineEditor.SetText(clipboard.Get())
 									})))
 						})
 					},
 					func() {
-						th.DuoUIcontainer(1, th.Colors["Gray"]).Layout(gtx, layout.Center, func() {
-							layout.Flex{}.Layout(gtx,
-								layout.Flexed(1, component.Editor(gtx, th, amountLineEditor,
-									"DUO Amount", func(e gel.EditorEvent) {
-										f, err := strconv.ParseFloat(amountLineEditor.Text(), 64)
-										if err != nil {
-										}
-										sendStruct.amount = f
-									})),
-								layout.Rigid(component.Button(gtx, th, buttonPasteAmount, th.Fonts["Primary"], 10, 13, 8, 12, 8,
-									th.Colors["ButtonText"], th.Colors["ButtonBg"], "PASTE AMOUNT", func() {
-										amountLineEditor.SetText(clipboard.Get())
-									})))
-						})
+						th.DuoUIcontainer(1, th.Colors["Gray"]).Layout(gtx,
+							layout.Center, func() {
+								layout.Flex{}.Layout(gtx,
+									layout.Flexed(1, component.Editor(gtx,
+										th, amountLineEditor, "DUO Amount",
+										func(e gel.EditorEvent) {
+											f, err := strconv.ParseFloat(amountLineEditor.Text(), 64)
+											if err != nil {
+											}
+											sendStruct.amount = f
+										})),
+									layout.Rigid(component.Button(gtx, th,
+										buttonPasteAmount, th.Fonts["Primary"],
+										10, 13, 8, 12, 8,
+										th.Colors["ButtonText"],
+										th.Colors["ButtonBg"],
+										"PASTE AMOUNT",
+										func() {
+											amountLineEditor.SetText(clipboard.Get())
+										})))
+							})
 					},
 					func() {
 						layout.Flex{}.Layout(gtx,
-							layout.Rigid(component.Button(gtx, th, buttonSend, th.Fonts["Primary"], 14, 10, 10, 9, 10,
-								th.Colors["ButtonText"], th.Colors["ButtonBg"], "SEND", func() {
+							layout.Rigid(component.Button(gtx, th, buttonSend,
+								th.Fonts["Primary"],
+								14, 10, 10, 9, 10,
+								th.Colors["ButtonText"], th.Colors["ButtonBg"],
+								"SEND", func() {
 									rc.Dialog.Show = true
 									rc.Dialog = &model.DuoUIdialog{
-										Show:       true,
-										Green:      rc.DuoSend(sendStruct.passPharse, sendStruct.address, 11),
+										Show: true,
+										Green: rc.DuoSend(sendStruct.passPharse,
+											sendStruct.address, 11),
 										GreenLabel: "SEND",
 										CustomField: func() {
 											layout.Flex{}.Layout(gtx,
-												layout.Flexed(1, component.Editor(gtx, th, passLineEditor, "Enter your password",
-													func(e gel.EditorEvent) {
-														sendStruct.passPharse = passLineEditor.Text()
-													})))
+												layout.Flexed(1,
+													component.Editor(gtx, th, passLineEditor,
+														"Enter your password",
+														func(e gel.EditorEvent) {
+															sendStruct.passPharse = passLineEditor.Text()
+														})))
 										},
 										Red:      func() { rc.Dialog.Show = false },
 										RedLabel: "CANCEL",

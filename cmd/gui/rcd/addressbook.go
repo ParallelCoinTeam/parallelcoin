@@ -56,7 +56,8 @@ func (r *RcVar) labelMiningAddreses() {
 }
 
 func (r *RcVar) CreateNewAddress(acctName string) string {
-	account, err := r.cx.WalletServer.AccountNumber(waddrmgr.KeyScopeBIP0044, acctName)
+	account, err := r.cx.WalletServer.AccountNumber(
+		waddrmgr.KeyScopeBIP0044, acctName)
 	if err != nil {
 	}
 	addr, err := r.cx.WalletServer.NewAddress(account,
@@ -130,32 +131,33 @@ func (r *RcVar) GetAddressBook() func() {
 		} else {
 			endHeight = syncBlock.Height - int32(minConf) + 1
 		}
-		err = wallet.ExposeUnstableAPI(r.cx.WalletServer).RangeTransactions(0, endHeight, func(details []wtxmgr.TxDetails) (bool, error) {
-			for _, tx := range details {
-				for _, cred := range tx.Credits {
-					pkScript := tx.MsgTx.TxOut[cred.Index].PkScript
-					_, addrs, _, err := txscript.ExtractPkScriptAddrs(
-						pkScript, r.cx.WalletServer.ChainParams())
-					if err != nil {
-						// Non standard script, skip.
-						continue
-					}
-					for _, addr := range addrs {
-						addrStr := addr.EncodeAddress()
-						addrData, ok := allAddrData[addrStr]
-						if ok {
-							addrData.amount += cred.Amount
-						} else {
-							addrData = AddrData{
-								amount: cred.Amount,
-							}
+		err = wallet.ExposeUnstableAPI(r.cx.WalletServer).RangeTransactions(
+			0, endHeight, func(details []wtxmgr.TxDetails) (bool, error) {
+				for _, tx := range details {
+					for _, cred := range tx.Credits {
+						pkScript := tx.MsgTx.TxOut[cred.Index].PkScript
+						_, addrs, _, err := txscript.ExtractPkScriptAddrs(
+							pkScript, r.cx.WalletServer.ChainParams())
+						if err != nil {
+							// Non standard script, skip.
+							continue
 						}
-						allAddrData[addrStr] = addrData
+						for _, addr := range addrs {
+							addrStr := addr.EncodeAddress()
+							addrData, ok := allAddrData[addrStr]
+							if ok {
+								addrData.amount += cred.Amount
+							} else {
+								addrData = AddrData{
+									amount: cred.Amount,
+								}
+							}
+							allAddrData[addrStr] = addrData
+						}
 					}
 				}
-			}
-			return false, nil
-		})
+				return false, nil
+			})
 		if err != nil {
 		}
 		var addrs AddressSlice
@@ -166,7 +168,8 @@ func (r *RcVar) GetAddressBook() func() {
 				Address: address,
 				Amount:  addrData.amount.ToDUO(),
 			}
-			if r.AddressBook.ShowMiningAddresses == false && ab[addr.Address] == "Mining" {
+			if r.AddressBook.ShowMiningAddresses == false &&
+				ab[addr.Address] == "Mining" {
 			} else {
 				addrs = append(addrs, model.DuoUIaddress{
 					Index:   addrData.index,

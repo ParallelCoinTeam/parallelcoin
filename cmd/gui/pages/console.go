@@ -44,11 +44,14 @@ func Console(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.
 func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
 	return func() {
 		layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-			th.DuoUIcontainer(0, "ff000000").Layout(gtx, layout.N, func() {
-				layout.Flex{}.Layout(gtx, layout.Flexed(1, func() {
-					layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
-						layout.Flex{Axis: layout.Vertical, Spacing: layout.SpaceAround}.Layout(gtx,
-							layout.Flexed(1, func() {
+			th.DuoUIcontainer(0, "ff000000").Layout(gtx,
+				layout.N, func() {
+					layout.Flex{}.Layout(gtx, layout.Flexed(1, func() {
+						layout.UniformInset(unit.Dp(0)).Layout(gtx, func() {
+							layout.Flex{
+								Axis:    layout.Vertical,
+								Spacing: layout.SpaceAround,
+							}.Layout(gtx, layout.Flexed(1, func() {
 								consoleOutputList.Layout(gtx,
 									len(rc.ConsoleHistory.Commands), func(i int) {
 										t := rc.ConsoleHistory.Commands[i]
@@ -58,31 +61,33 @@ func consoleBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 										}.Layout(gtx,
 											layout.Rigid(component.Label(
 												gtx, th, th.Fonts["Mono"],
-												12, th.Colors["Light"], "ds://"+t.ComID)),
+												12, th.Colors["Light"],
+												"ds://"+t.ComID)),
 											layout.Rigid(component.Label(
 												gtx, th, th.Fonts["Mono"],
-												12, th.Colors["Light"], t.Out)),
+												12, th.Colors["Light"],
+												t.Out)),
 										)
 									})
 							}),
-							layout.Rigid(
-								component.ConsoleInput(gtx, th,
-									consoleInputField, "Run command",
-									func(e gel.SubmitEvent) {
-										rc.ConsoleHistory.Commands = append(
-											rc.ConsoleHistory.Commands,
-											model.DuoUIconsoleCommand{
-												ComID: e.Text,
-												Time:  time.Time{},
-												Out:   rc.ConsoleCmd(e.Text),
-											})
-									}),
-							),
-						)
-					})
-				}),
-				)
-			})
+								layout.Rigid(
+									component.ConsoleInput(gtx, th,
+										consoleInputField, "Run command",
+										func(e gel.SubmitEvent) {
+											rc.ConsoleHistory.Commands = append(
+												rc.ConsoleHistory.Commands,
+												model.DuoUIconsoleCommand{
+													ComID: e.Text,
+													Time:  time.Time{},
+													Out:   rc.ConsoleCmd(e.Text),
+												})
+										}),
+								),
+							)
+						})
+					}),
+					)
+				})
 		})
 	}
 }

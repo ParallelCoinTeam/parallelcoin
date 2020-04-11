@@ -32,24 +32,26 @@ var (
 
 func (ui *DuoUI) DuoUIloaderCreateWallet() {
 	cs := ui.ly.Context.Constraints
-	gelook.DuoUIdrawRectangle(ui.ly.Context, cs.Width.Max,
-		cs.Height.Max, ui.ly.Theme.Colors["Light"],
-		[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-	layout.Center.Layout(ui.ly.Context, func() {
+	th := ui.ly.Theme
+	ctx := ui.ly.Context
+	gelook.DuoUIdrawRectangle(ctx, cs.Width.Max, cs.Height.Max,
+		th.Colors["Light"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+	layout.Center.Layout(ctx, func() {
 		controllers := []func(){
 			func() {
-				bal := ui.ly.Theme.H5("Enter the private passphrase for your new wallet:")
-				bal.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
-				bal.Color = ui.ly.Theme.Colors["Dark"]
-				bal.Layout(ui.ly.Context)
+				bal := th.H5("Enter the private passphrase for your new" +
+					" wallet:")
+				bal.Font.Typeface = th.Fonts["Primary"]
+				bal.Color = th.Colors["Dark"]
+				bal.Layout(ctx)
 			},
 			func() {
-				layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
-					e := ui.ly.Theme.DuoUIeditor("Enter Passphrase", "Dark", "Light", 32)
-					e.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
+				layout.UniformInset(unit.Dp(8)).Layout(ctx, func() {
+					e := th.DuoUIeditor("Enter Passphrase", "Dark", "Light", 32)
+					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Regular
-					e.Layout(ui.ly.Context, passEditor)
-					for _, e := range passEditor.Events(ui.ly.Context) {
+					e.Layout(ctx, passEditor)
+					for _, e := range passEditor.Events(ctx) {
 						switch e.(type) {
 						case gel.ChangeEvent:
 							passPhrase = passEditor.Text()
@@ -58,12 +60,12 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 				})
 			},
 			func() {
-				layout.UniformInset(unit.Dp(8)).Layout(ui.ly.Context, func() {
-					e := ui.ly.Theme.DuoUIeditor("Repeat Passphrase", "Dark", "Light", 32)
-					e.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
+				layout.UniformInset(unit.Dp(8)).Layout(ctx, func() {
+					e := th.DuoUIeditor("Repeat Passphrase", "Dark", "Light", 32)
+					e.Font.Typeface = th.Fonts["Primary"]
 					e.Font.Style = text.Regular
-					e.Layout(ui.ly.Context, confirmPassEditor)
-					for _, e := range confirmPassEditor.Events(ui.ly.Context) {
+					e.Layout(ctx, confirmPassEditor)
+					for _, e := range confirmPassEditor.Events(ctx) {
 						switch e.(type) {
 						case gel.ChangeEvent:
 							confirmPassPhrase = confirmPassEditor.Text()
@@ -72,47 +74,53 @@ func (ui *DuoUI) DuoUIloaderCreateWallet() {
 				})
 			},
 			func() {
-				encryptionCheckBox := ui.ly.Theme.DuoUIcheckBox(
+				encryptionCheckBox := th.DuoUIcheckBox(
 					"Do you want to add an additional layer of encryption"+
-						" for public data?", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
-				encryptionCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
-				encryptionCheckBox.Color = gelook.HexARGB(ui.ly.Theme.Colors["Dark"])
-				encryptionCheckBox.Layout(ui.ly.Context, encryption)
+						" for public data?", th.Colors["Dark"],
+					th.Colors["Dark"])
+				encryptionCheckBox.Font.Typeface = th.Fonts["Primary"]
+				encryptionCheckBox.Color = gelook.HexARGB(th.Colors["Dark"])
+				encryptionCheckBox.Layout(ctx, encryption)
 			},
 			func() {
-				seedCheckBox := ui.ly.Theme.DuoUIcheckBox(
+				// TODO: needs input box for seed
+				seedCheckBox := th.DuoUIcheckBox(
 					"Do you have an existing wallet seed you want to use?",
-					ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
-				seedCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
-				seedCheckBox.Color = gelook.HexARGB(ui.ly.Theme.Colors["Dark"])
-				seedCheckBox.Layout(ui.ly.Context, seed)
+					th.Colors["Dark"], th.Colors["Dark"])
+				seedCheckBox.Font.Typeface = th.Fonts["Primary"]
+				seedCheckBox.Color = gelook.HexARGB(th.Colors["Dark"])
+				seedCheckBox.Layout(ctx, seed)
 			},
 			func() {
-				testnetCheckBox := ui.ly.Theme.DuoUIcheckBox(
-					"Use testnet?", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Dark"])
-				testnetCheckBox.Font.Typeface = ui.ly.Theme.Fonts["Primary"]
-				testnetCheckBox.Color = gelook.HexARGB(ui.ly.Theme.Colors["Dark"])
-				testnetCheckBox.Layout(ui.ly.Context, testnet)
+				testnetCheckBox := th.DuoUIcheckBox(
+					"Use testnet?", th.Colors["Dark"], th.Colors["Dark"])
+				testnetCheckBox.Font.Typeface = th.Fonts["Primary"]
+				testnetCheckBox.Color = gelook.HexARGB(th.Colors["Dark"])
+				testnetCheckBox.Layout(ctx, testnet)
 			},
 			func() {
 				var createWalletbuttonComp gelook.DuoUIbutton
-				createWalletbuttonComp = ui.ly.Theme.DuoUIbutton(ui.ly.Theme.Fonts["Secondary"], "CREATE WALLET", ui.ly.Theme.Colors["Dark"], ui.ly.Theme.Colors["Light"], ui.ly.Theme.Colors["Light"], ui.ly.Theme.Colors["Dark"], "", ui.ly.Theme.Colors["Dark"], 16, 0, 125, 32, 4, 4, 4, 4)
-				for buttonCreateWallet.Clicked(ui.ly.Context) {
+				createWalletbuttonComp = th.DuoUIbutton(th.
+					Fonts["Secondary"], "CREATE WALLET", th.Colors["Dark"],
+					th.Colors["Light"], th.Colors["Light"],
+					th.Colors["Dark"], "", th.Colors["Dark"], 16, 0,
+					125, 32, 4, 4, 4, 4)
+				for buttonCreateWallet.Clicked(ctx) {
 					if passPhrase != "" && passPhrase == confirmPassPhrase {
-						if testnet.Checked(ui.ly.Context) {
+						if testnet.Checked(ctx) {
 							ui.rc.UseTestnet()
 						}
 						ui.rc.CreateWallet(passPhrase, "", "", "")
-						if testnet.Checked(ui.ly.Context) {
+						if testnet.Checked(ctx) {
 							interrupt.RequestRestart()
 						}
 					}
 				}
-				createWalletbuttonComp.Layout(ui.ly.Context, buttonCreateWallet)
+				createWalletbuttonComp.Layout(ctx, buttonCreateWallet)
 			},
 		}
-		listWallet.Layout(ui.ly.Context, len(controllers), func(i int) {
-			layout.UniformInset(unit.Dp(10)).Layout(ui.ly.Context, controllers[i])
+		listWallet.Layout(ctx, len(controllers), func(i int) {
+			layout.UniformInset(unit.Dp(10)).Layout(ctx, controllers[i])
 		})
 	})
 }

@@ -23,24 +23,32 @@ var (
 )
 
 func DuoUIstatus(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+	wall := rc.Status.Wallet
+	nod := rc.Status.Node
 	return func() {
 		th.DuoUIcontainer(8, th.Colors["Light"]).Layout(gtx, layout.NW, func() {
 			bigStatus := []func(){
-				listItem(gtx, th, 22, 6, "EditorMonetizationOn", "BALANCE :", rc.Status.Wallet.Balance.Load()+" "+rc.Settings.Abbrevation),
+				listItem(gtx, th, 22, 6, "EditorMonetizationOn", "BALANCE :",
+					wall.Balance.Load()+" "+rc.Settings.Abbrevation),
 				th.DuoUIline(gtx, 8, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th, 22, 6, "MapsLayersClear", "UNCONFIRMED :", rc.Status.Wallet.Unconfirmed.Load()+" "+
-					rc.Settings.Abbrevation),
+				listItem(gtx, th, 22, 6, "MapsLayersClear", "UNCONFIRMED :",
+					wall.Unconfirmed.Load()+" "+
+						rc.Settings.Abbrevation),
 				th.DuoUIline(gtx, 8, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th, 22, 6, "CommunicationImportExport", "TRANSACTIONS :", fmt.Sprint(rc.Status.Wallet.TxsNumber.Load())),
+				listItem(gtx, th, 22, 6, "CommunicationImportExport",
+					"TRANSACTIONS :", fmt.Sprint(wall.TxsNumber.Load())),
 
 				th.DuoUIline(gtx, 8, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th, 16, 4, "DeviceWidgets", "Block Count :", fmt.Sprint(rc.Status.Node.BlockCount.Load())),
+				listItem(gtx, th, 16, 4, "DeviceWidgets", "Block Count :",
+					fmt.Sprint(nod.BlockCount.Load())),
 
 				th.DuoUIline(gtx, 4, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th, 16, 4, "ImageTimer", "Difficulty :", fmt.Sprint(rc.Status.Node.Difficulty.Load())),
+				listItem(gtx, th, 16, 4, "ImageTimer", "Difficulty :",
+					fmt.Sprint(nod.Difficulty.Load())),
 
 				th.DuoUIline(gtx, 4, 0, 1, th.Colors["LightGray"]),
-				listItem(gtx, th, 16, 4, "NotificationVPNLock", "Connections :", fmt.Sprint(rc.Status.Node.ConnectionCount.Load())),
+				listItem(gtx, th, 16, 4, "NotificationVPNLock",
+					"Connections :", fmt.Sprint(nod.ConnectionCount.Load())),
 			}
 			itemsList.Layout(gtx, len(bigStatus), func(i int) {
 				layout.UniformInset(unit.Dp(0)).Layout(gtx, bigStatus[i])
@@ -59,7 +67,10 @@ func listItem(gtx *layout.Context, th *gelook.DuoUItheme, size, top int, iconNam
 			layout.Rigid(func() {
 				layout.Flex{}.Layout(gtx,
 					layout.Rigid(func() {
-						layout.Inset{Top: unit.Dp(float32(top)), Bottom: unit.Dp(0), Left: unit.Dp(0), Right: unit.Dp(0)}.Layout(gtx, func() {
+						layout.Inset{
+							Top:    unit.Dp(float32(top)),
+							Bottom: unit.Dp(0), Left: unit.Dp(0),
+							Right: unit.Dp(0)}.Layout(gtx, func() {
 							if icon != nil {
 								icon.Color = gelook.HexARGB(th.Colors["Dark"])
 								icon.Layout(gtx, unit.Px(float32(size)))
@@ -78,12 +89,12 @@ func listItem(gtx *layout.Context, th *gelook.DuoUItheme, size, top int, iconNam
 				)
 			}),
 			layout.Rigid(func() {
-				value := th.H5(value)
-				value.TextSize = unit.Dp(float32(size))
-				value.Font.Typeface = th.Fonts["Primary"]
-				value.Color = th.Colors["Dark"]
-				value.Alignment = text.End
-				value.Layout(gtx)
+				v := th.H5(value)
+				v.TextSize = unit.Dp(float32(size))
+				v.Font.Typeface = th.Fonts["Primary"]
+				v.Color = th.Colors["Dark"]
+				v.Alignment = text.End
+				v.Layout(gtx)
 			}),
 		)
 	}

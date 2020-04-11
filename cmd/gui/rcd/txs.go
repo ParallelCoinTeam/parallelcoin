@@ -46,7 +46,10 @@ func (r *RcVar) GetTx(txid string) btcjson.GetTransactionResult {
 func (r *RcVar) GetDuoUItransactionsNumber() {
 	Debug("getting transaction count")
 	// account, txcount, startnum, watchonly := "*", n, f, false
-	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
+	// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{
+	// Account: &account, Count: &txcount, From: &startnum,
+	// IncludeWatchOnly: &watchonly,
+	// }, v.ws)
 	lt, err := r.cx.WalletServer.ListTransactions(0, 999999999)
 	if err != nil {
 		// r.PushDuoUIalert("BTCJSONError", err.BTCJSONError(), "error")
@@ -62,7 +65,9 @@ func (r *RcVar) GetDuoUItransactions() func() {
 		// endTx := r.History.Page.Value*r.History.PerPage.Value + r.History.PerPage.Value
 		Debug("getting transactions")
 		// account, txcount, startnum, watchonly := "*", n, f, false
-		// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{Account: &account, Count: &txcount, From: &startnum, IncludeWatchOnly: &watchonly}, v.ws)
+		// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{
+		// Account: &account, Count: &txcount, From: &startnum,
+		// IncludeWatchOnly: &watchonly}, v.ws)
 		lt, err := r.cx.WalletServer.ListTransactions(startTx, r.History.PerPage.Value)
 		if err != nil {
 			Info(err)

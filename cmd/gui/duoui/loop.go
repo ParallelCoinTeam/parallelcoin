@@ -14,11 +14,8 @@ import (
 
 func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 	Debug("starting up duo ui main loop")
-	ui := new(DuoUI)
-	ui = &DuoUI{
-		ly: d,
-		rc: r,
-	}
+	ui := &DuoUI{ly: d, rc: r}
+	ctx := ui.ly.Context
 	for {
 		select {
 		case <-ui.rc.Ready:
@@ -29,7 +26,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 					select {
 					case <-updateTrigger:
 						Trace("repaint forced")
-						// ui.ly.Window.Invalidate()
+						ui.ly.Window.Invalidate()
 					case <-ui.rc.Quit:
 						break quitTrigger
 					}
@@ -59,7 +56,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				ui.ly.Window.Invalidate()
 			}
 		case e := <-ui.ly.Window.Events():
-			ui.ly.Viewport = ui.ly.Context.Constraints.Width.Max
+			ui.ly.Viewport = ctx.Constraints.Width.Max
 			switch e := e.(type) {
 			case system.DestroyEvent:
 				Debug("destroy event received")
@@ -69,23 +66,23 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:
-				ui.ly.Context.Reset(e.Config, e.Size)
+				ctx.Reset(e.Config, e.Size)
 				if ui.rc.Boot.IsBoot {
 					if ui.rc.Boot.IsFirstRun {
 						ui.DuoUIloaderCreateWallet()
 					} else {
 						ui.DuoUIsplashScreen()
 					}
-					e.Frame(ui.ly.Context.Ops)
+					e.Frame(ctx.Ops)
 				} else {
 					ui.DuoUImainScreen()
 					if ui.rc.Dialog.Show {
-						component.DuoUIdialog(ui.rc, ui.ly.Context, ui.ly.Theme)
+						component.DuoUIdialog(ui.rc, ctx, ui.ly.Theme)
 						// ui.DuoUItoastSys()
 					}
-					e.Frame(ui.ly.Context.Ops)
+					e.Frame(ctx.Ops)
 				}
-				ui.ly.Window.Invalidate()
+				//ui.ly.Window.Invalidate()
 			}
 		}
 	}

@@ -20,7 +20,8 @@ var (
 	txwidth              int
 )
 
-func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "EXPLORER",
 		TxColor:       "",
@@ -39,7 +40,8 @@ func DuoUIexplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *g
 	}
 	return th.DuoUIpage(page)
 }
-func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) func() {
 	return func() {
 		rc.GetBlocksExcerpts()
 		layout.Flex{Axis: layout.Vertical}.Layout(gtx,
@@ -51,16 +53,18 @@ func bodyExplorer(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) fun
 				explorerPanel := th.DuoUIpanel()
 				explorerPanel.PanelObject = rc.Explorer.Blocks
 				explorerPanel.ScrollBar = th.ScrollBar(16)
-				explorerPanelElement.PanelObjectsNumber = len(rc.Explorer.Blocks)
-				explorerPanel.Layout(gtx, explorerPanelElement, func(i int, in interface{}) {
-					blocks := in.([]model.DuoUIblock)
-					b := blocks[i]
+				explorerPanelElement.PanelObjectsNumber =
+					len(rc.Explorer.Blocks)
+				explorerPanel.Layout(gtx, explorerPanelElement,
+					func(i int, in interface{}) {
+						blocks := in.([]model.DuoUIblock)
+						b := blocks[i]
 
-					//blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
-					//	b := rc.Explorer.Blocks[i]
-					blockRow(rc, gtx, th, &b)
-					//})
-				})
+						//blocksList.Layout(gtx, len(rc.Explorer.Blocks), func(i int) {
+						//	b := rc.Explorer.Blocks[i]
+						blockRow(rc, gtx, th, &b)
+						//})
+					})
 			}),
 		)
 	}
@@ -74,10 +78,14 @@ func explorerHeader(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) f
 			Alignment: layout.Middle,
 		}.Layout(gtx,
 			layout.Rigid(func() {
-				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.Page, "PAGE", fmt.Sprint(rc.Explorer.Page.Value))
+				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx,
+					rc.Explorer.Page, "PAGE",
+					fmt.Sprint(rc.Explorer.Page.Value))
 			}),
 			layout.Rigid(func() {
-				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx, rc.Explorer.PerPage, "PER PAGE", fmt.Sprint(rc.Explorer.PerPage.Value))
+				th.DuoUIcounter(rc.GetBlocksExcerpts()).Layout(gtx,
+					rc.Explorer.PerPage, "PER PAGE",
+					fmt.Sprint(rc.Explorer.PerPage.Value))
 			}),
 		)
 	}
@@ -141,14 +149,20 @@ func blockRowCellLabels(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUIthem
 	})
 }
 
-func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *model.DuoUIblock) {
+func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme,
+	block *model.DuoUIblock) {
 	for block.Link.Clicked(gtx) {
 		rc.ShowPage = fmt.Sprintf("BLOCK %s", block.BlockHash)
 		rc.GetSingleBlock(block.BlockHash)()
 		component.SetPage(rc, blockPage(rc, gtx, th, block.BlockHash))
 	}
 	width := gtx.Constraints.Width.Max
-	button := th.DuoUIbutton("", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0)
+	button := th.DuoUIbutton("", "",
+		"", "",
+		"", "",
+		"", "",
+		0, 0, 0, 0,
+		0, 0, 0, 0)
 	button.InsideLayout(gtx, block.Link, func() {
 		layout.Flex{
 			Axis: layout.Vertical,
@@ -160,12 +174,19 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *
 				}.Layout(gtx,
 					layout.Rigid(func() {
 						var linkButton gelook.DuoUIbutton
-						linkButton = th.DuoUIbutton(th.Fonts["Mono"], fmt.Sprint(block.Height), th.Colors["Light"], th.Colors["Info"], th.Colors["Info"], th.Colors["Dark"], "", th.Colors["Dark"], 14, 0, 60, 24, 5, 8, 6, 8)
+						linkButton = th.DuoUIbutton(th.Fonts["Mono"],
+							fmt.Sprint(block.Height), th.Colors["Light"],
+							th.Colors["Info"], th.Colors["Info"],
+							th.Colors["Dark"], "", th.Colors["Dark"],
+							14, 0, 60, 24,
+							5, 8, 6, 8)
 						linkButton.Layout(gtx, block.Link)
 					}),
 					layout.Rigid(func() {
 						layout.UniformInset(unit.Dp(8)).Layout(gtx, func() {
-							l := th.Body2(fmt.Sprint(time.Unix(block.Time, 0).Format("2006-01-02 15:04:05")))
+							l := th.Body2(
+								fmt.Sprint(time.Unix(block.Time, 0).
+									Format("2006-01-02 15:04:05")))
 							l.Font.Typeface = th.Fonts["Mono"]
 							l.Alignment = text.Middle
 							l.Color = th.Colors["Dark"]
@@ -199,8 +220,8 @@ func blockRow(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, block *
 					}))
 			}),
 			layout.Rigid(func() {
-				th.DuoUIline(gtx, 0, 0, 1, th.Colors["Gray"])()
-
+				th.DuoUIline(gtx, 0, 0, 1,
+					th.Colors["Gray"])()
 			}))
 	})
 }

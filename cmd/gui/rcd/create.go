@@ -9,7 +9,8 @@ import (
 	"github.com/p9c/pod/pkg/wallet"
 )
 
-func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir string) {
+func (r *RcVar) CreateWallet(privPassphrase, duoSeed,
+	pubPassphrase, walletDir string) {
 	var err error
 	var seed []byte
 	if walletDir == "" {
@@ -31,7 +32,8 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 		}
 	}
 
-	_, err = l.CreateNewWallet([]byte(pubPassphrase), []byte(privPassphrase), seed, time.Now(), true, r.cx.Config)
+	_, err = l.CreateNewWallet([]byte(pubPassphrase),
+		[]byte(privPassphrase), seed, time.Now(), true, r.cx.Config)
 	if err != nil {
 		Error(err)
 		panic(err)

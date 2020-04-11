@@ -23,36 +23,46 @@ var (
 )
 
 func (ui *DuoUI) DuoUIheader() func() {
+	th := ui.ly.Theme
+	ctx := ui.ly.Context
 	return func() {
-		iconSize := 32
-		iconWidth := 48
-		iconHeight := 48
-		iconPaddingVertical := 3
-		iconPaddingHorizontal := 3
+		iSize := 32
+		iWidth := 48
+		iHeight := 48
+		iPadV := 3
+		iPadH := 3
 		if ui.ly.Viewport > 740 {
-			iconSize = 64
-			iconWidth = 96
-			iconHeight = 96
-			iconPaddingVertical = 6
-			iconPaddingHorizontal = 6
+			iSize = 64
+			iWidth = 96
+			iHeight = 96
+			iPadV = 6
+			iPadH = 6
 		}
-		ui.ly.Theme.DuoUIcontainer(0, ui.ly.Theme.Colors["Dark"]).Layout(ui.ly.Context, layout.NW, func() {
+		th.DuoUIcontainer(0, th.Colors["Dark"]).Layout(ctx, layout.NW, func() {
 			layout.Flex{
 				Axis:      layout.Horizontal,
 				Spacing:   layout.SpaceBetween,
 				Alignment: layout.Middle,
-			}.Layout(ui.ly.Context,
+			}.Layout(ctx,
 				layout.Rigid(func() {
 					var logoMeniItem gelook.DuoUIbutton
-					logoMeniItem = ui.ly.Theme.DuoUIbutton("", "", "", ui.ly.Theme.Colors["Dark"], "", "", "logo", ui.ly.Theme.Colors["Light"], 0, iconSize, iconWidth, iconHeight, iconPaddingVertical, iconPaddingHorizontal, iconPaddingVertical, iconPaddingHorizontal)
-					for logoButton.Clicked(ui.ly.Context) {
-						ui.ly.Theme.ChangeLightDark()
+					logoMeniItem = th.DuoUIbutton("", "", "",
+						th.Colors["Dark"], "", "", "logo",
+						th.Colors["Light"], 0, iSize, iWidth,
+						iHeight, iPadV, iPadH, iPadV, iPadH)
+					for logoButton.Clicked(ctx) {
+						th.ChangeLightDark()
 					}
-					logoMeniItem.IconLayout(ui.ly.Context, logoButton)
+					logoMeniItem.IconLayout(ctx, logoButton)
 				}),
-				layout.Flexed(1, component.HeaderMenu(ui.rc, ui.ly.Context, ui.ly.Theme, ui.ly.Pages)),
-				layout.Rigid(component.Label(ui.ly.Context, ui.ly.Theme, ui.ly.Theme.Fonts["Primary"], 12, ui.ly.Theme.Colors["Light"], ui.rc.Status.Wallet.Balance.Load()+" "+ui.rc.Settings.Abbrevation)),
-				layout.Rigid(component.Label(ui.ly.Context, ui.ly.Theme, ui.ly.Theme.Fonts["Primary"], 12, ui.ly.Theme.Colors["Light"], fmt.Sprint(ui.ly.Viewport))),
+				layout.Flexed(1, component.HeaderMenu(ui.rc,
+					ctx, th, ui.ly.Pages)),
+				layout.Rigid(component.Label(ctx, th,
+					th.Fonts["Primary"], 12, th.Colors["Light"],
+					ui.rc.Status.Wallet.Balance.Load()+" "+ui.rc.Settings.Abbrevation)),
+				layout.Rigid(component.Label(ctx, th,
+					th.Fonts["Primary"], 12, th.Colors["Light"],
+					fmt.Sprint(ui.ly.Viewport))),
 			)
 		})
 	}

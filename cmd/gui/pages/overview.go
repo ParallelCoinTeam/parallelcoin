@@ -9,7 +9,8 @@ import (
 	"github.com/p9c/pod/pkg/gui/gelook"
 )
 
-func Overview(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook.DuoUIpage {
+func Overview(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) *gelook.DuoUIpage {
 	page := gelook.DuoUIpage{
 		Title:         "OVERVIEW",
 		Border:        0,
@@ -27,15 +28,18 @@ func Overview(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) *gelook
 	return th.DuoUIpage(page)
 }
 
-func overviewBody(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func() {
+func overviewBody(rc *rcd.RcVar, gtx *layout.Context,
+	th *gelook.DuoUItheme) func() {
 	return func() {
 		viewport := layout.Flex{Axis: layout.Horizontal}
 		if gtx.Constraints.Width.Max < 780 {
 			viewport = layout.Flex{Axis: layout.Vertical}
 		}
 		viewport.Layout(gtx,
-			layout.Flexed(0.5, component.DuoUIstatus(rc, gtx, th)),
-			layout.Flexed(0.5, component.DuoUIlatestTransactions(rc, gtx, th)),
+			layout.Flexed(0.5,
+				component.DuoUIstatus(rc, gtx, th)),
+			layout.Flexed(0.5,
+				component.DuoUIlatestTransactions(rc, gtx, th)),
 		)
 		op.InvalidateOp{}.Add(gtx.Ops)
 	}

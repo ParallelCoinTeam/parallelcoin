@@ -29,11 +29,14 @@ func DuoUIlogger(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme) func
 		layout.UniformInset(unit.Dp(10)).Layout(gtx, func() {
 			// const n = 1e6
 			cs := gtx.Constraints
-			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max, th.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
+			gelook.DuoUIdrawRectangle(gtx, cs.Width.Max, cs.Height.Max,
+				th.Colors["Dark"], [4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
 			lm := rc.Log.LogMessages.Load().([]log.Entry)
 			logOutputList.Layout(gtx, len(lm), func(i int) {
 				t := lm[i]
-				logText := th.Caption(fmt.Sprintf("%-12s", t.Time.Sub(StartupTime)/time.Second*time.Second) + " " + fmt.Sprint(t.Text))
+				logText := th.Caption(
+					fmt.Sprintf("%-12s", t.Time.Sub(StartupTime)/time.Second*time.Second) +
+						" " + fmt.Sprint(t.Text))
 				logText.Font.Typeface = th.Fonts["Mono"]
 
 				logText.Color = th.Colors["Primary"]
