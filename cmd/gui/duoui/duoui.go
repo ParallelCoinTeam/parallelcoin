@@ -16,7 +16,7 @@ import (
 	"github.com/p9c/pod/pkg/gui/clipboard"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
-	"github.com/p9c/pod/pkg/gui/ico/svg"
+	"github.com/p9c/pod/pkg/gui/gelook/ico"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"image"
 	"image/color"
@@ -305,7 +305,7 @@ func (ui *DuoUI) DuoUIsplashScreen() {
 	th := ui.ly.Theme
 	th.DuoUIcontainer(0, th.Colors["Dark"]).
 		Layout(ctx, layout.Center, func() {
-			logo, _ := gelook.NewDuoUIicon(svg.ParallelCoin)
+			logo, _ := gelook.NewDuoUIicon(ico.ParallelCoin)
 			layout.Flex{
 				Axis: layout.Vertical,
 			}.Layout(ctx,
