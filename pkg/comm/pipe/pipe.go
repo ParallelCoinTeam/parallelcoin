@@ -10,7 +10,7 @@ import (
 func Consume(quit chan struct{}, handler func([]byte) error, args ...string) *worker.Worker {
 	var n int
 	var err error
-	Debug("spawning worker process")
+	Debug("spawning worker process", args)
 	w := worker.Spawn(args...)
 	data := make([]byte, 8192)
 	go func() {

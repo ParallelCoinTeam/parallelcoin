@@ -294,10 +294,33 @@ func (s *State) DuoUIinputField(f *Field) func() {
 						}
 					})()
 			case "password":
-				e := t.DuoUIeditor(f.Field.Label, "DocText", "DocBg", 32)
-				e.Font.Typeface = t.Fonts["Primary"]
-				e.Font.Style = text.Italic
-				e.Layout(g, rdw[f.Field.Model].(*gel.Editor))
+				s.Editor(
+					(rdw[f.Field.Model]).(*gel.Editor),
+					(rdw[f.Field.Model]).(*gel.Editor).Text(),
+					func(e gel.EditorEvent) {
+						txt := rdw[f.Field.Model].(*gel.Editor).Text()
+						rdCfg[f.Field.Model] = txt
+						if e != nil {
+							s.Rc.SaveDaemonCfg()
+						}
+					},
+				)()
+			case "time":
+				//Debug("rendering duration")
+				s.Editor(
+					(rdw[f.Field.Model]).(*gel.Editor),
+					(rdw[f.Field.Model]).(*gel.Editor).Text(),
+					func(e gel.EditorEvent) {
+						txt := rdw[f.Field.Model].(*gel.Editor).Text()
+						var err error
+						if rdCfg[f.Field.Model], err = time.ParseDuration(
+							txt); Check(err) {
+						}
+						if e != nil {
+							s.Rc.SaveDaemonCfg()
+						}
+					},
+				)()
 			default:
 			}
 		case "switch":
@@ -818,19 +841,18 @@ func (s *State) PeersList() func() {
 	t, g := s.Thm, s.Gtx
 	c := t.Colors["Dark"]
 	return func() {
-		s.Rc.Network.PeersList.Layout(g, len(s.Rc.Network.Peers),
-			func(i int) {
-				np := s.Rc.Network.Peers[i]
-				t.DuoUIline(g, 0, 0, 1,
-					t.Colors["Hint"])()
-				layout.Flex{
-					Spacing: layout.SpaceBetween,
-				}.Layout(g,
-					layout.Rigid(s.Context.Label(t.Fonts["Mono"], 14, c,
-						fmt.Sprint(np.ID))),
-					layout.Flexed(1, s.peerDetails(i, np)),
-					layout.Rigid(s.Label(t.Fonts["Mono"], 14, c, np.Addr)))
-			})
+		s.Rc.Network.PeersList.Layout(g, len(s.Rc.Network.Peers), func(i int) {
+			np := s.Rc.Network.Peers[i]
+			t.DuoUIline(g, 0, 0, 1,
+				t.Colors["Hint"])()
+			layout.Flex{
+				Spacing: layout.SpaceBetween,
+			}.Layout(g,
+				layout.Rigid(s.Context.Label(t.Fonts["Mono"], 14, c,
+					fmt.Sprint(np.ID))),
+				layout.Flexed(1, s.peerDetails(i, np)),
+				layout.Rigid(s.Label(t.Fonts["Mono"], 14, c, np.Addr)))
+		})
 	}
 }
 

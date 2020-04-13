@@ -3,12 +3,8 @@ package app
 import (
 	"fmt"
 	"github.com/p9c/pod/app/config"
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/logi/serve"
-	"os"
-	"sync"
-
 	"github.com/urfave/cli"
+	"os"
 
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
@@ -18,8 +14,6 @@ import (
 
 func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		var wg sync.WaitGroup
-		serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir))
 		config.Configure(cx, c.Command.Name)
 		dbFilename := *cx.Config.DataDir + slash + cx.ActiveNet.
 			Params.Name + slash + wallet.WalletDbName
@@ -40,7 +34,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}
 		}()
 		cx.WalletServer = <-walletChan
-		wg.Wait()
+		cx.WaitGroup.Wait()
 		return
 	}
 }

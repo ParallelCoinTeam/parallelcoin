@@ -168,6 +168,7 @@ type Config struct {
 	OnionProxyPass         *string          `group:"proxy" label:"Onion Proxy Pass" description:"password for tor proxy" type:"input" inputType:"password" json:"OnionProxyPass" hook:"restart"`
 	OnionProxyUser         *string          `group:"proxy" label:"Onion Proxy User" description:"tor proxy username" type:"input" inputType:"text" json:"OnionProxyUser" hook:"restart"`
 	Password               *string          `group:"rpc" label:"Password" description:"password for client RPC connections" type:"input" inputType:"password" json:"Password" hook:"restart"`
+	PipeLog                *bool            `group:"" label:"" description:"enable pipe based loggerIPC" type:"switch" json:"PipeLog" hook:""`
 	Profile                *string          `group:"debug" label:"Profile" description:"http profiling on given port (1024-40000)" type:"input" inputType:"text" json:"Profile" hook:"restart"`
 	Proxy                  *string          `group:"proxy" label:"Proxy" description:"address of proxy to connect to for outbound connections" type:"input" inputType:"text" json:"Proxy" hook:"restart"`
 	ProxyPass              *string          `group:"proxy" label:"Proxy Pass" description:"proxy password, if required" type:"input" inputType:"password" json:"ProxyPass" hook:"restart"`
@@ -235,7 +236,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		DisableListen:          newbool(),
 		DisableRPC:             newbool(),
 		ExternalIPs:            newStringSlice(),
-		FreeTxRelayLimit:       new(float64),
+		FreeTxRelayLimit:       newfloat64(),
 		Generate:               newbool(),
 		GenThreads:             newint(),
 		LAN:                    newbool(),
@@ -249,7 +250,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		MaxPeers:               newint(),
 		MinerPass:              newstring(),
 		MiningAddrs:            newStringSlice(),
-		MinRelayTxFee:          new(float64),
+		MinRelayTxFee:          newfloat64(),
 		Network:                newstring(),
 		NoCFilters:             newbool(),
 		NodeOff:                newbool(),
@@ -262,6 +263,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		OnionProxyPass:         newstring(),
 		OnionProxyUser:         newstring(),
 		Password:               newstring(),
+		PipeLog:                newbool(),
 		Profile:                newstring(),
 		Proxy:                  newstring(),
 		ProxyPass:              newstring(),
@@ -352,6 +354,7 @@ func EmptyConfig() (c *Config, conf map[string]interface{}) {
 		"OnionProxyPass":         c.OnionProxyPass,
 		"OnionProxyUser":         c.OnionProxyUser,
 		"Password":               c.Password,
+		"PipeLog":                c.PipeLog,
 		"Profile":                c.Profile,
 		"Proxy":                  c.Proxy,
 		"ProxyPass":              c.ProxyPass,

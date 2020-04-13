@@ -2,29 +2,26 @@ package app
 
 import (
 	"fmt"
+	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/cmd/kopach/kopach_worker"
+	"github.com/p9c/pod/cmd/node"
+	"github.com/p9c/pod/cmd/node/mempool"
+	"github.com/p9c/pod/cmd/walletmain"
+	"github.com/p9c/pod/pkg/coding/base58"
+	"github.com/p9c/pod/pkg/db/blockdb"
+	"github.com/p9c/pod/pkg/rpc/legacy"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/urfave/cli"
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/p9c/pod/cmd/kopach/kopach_worker"
-	"github.com/p9c/pod/cmd/walletmain"
-	"github.com/p9c/pod/pkg/db/blockdb"
-	"github.com/p9c/pod/pkg/rpc/legacy"
-	"github.com/p9c/pod/pkg/util/interrupt"
-
-	"github.com/urfave/cli"
-
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/node"
-	"github.com/p9c/pod/cmd/node/mempool"
-	"github.com/p9c/pod/pkg/coding/base58"
-	"github.com/p9c/pod/pkg/util/hdkeychain"
 )
 
-func // GetApp defines the pod app
-GetApp(cx *conte.Xt) (a *cli.App) {
+// GetApp defines the pod app
+func GetApp(cx *conte.Xt) (a *cli.App) {
 	return &cli.App{
 		Name:        "pod",
 		Version:     "v0.0.1",
@@ -171,18 +168,26 @@ GetApp(cx *conte.Xt) (a *cli.App) {
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
-				Name:        "lang, L",
-				Value:       *cx.Config.Language,
-				Usage:       "sets the data directory base for a pod instance",
-				EnvVar:      "POD_LANGUAGE",
-				Destination: cx.Config.Language,
-			},
-			cli.StringFlag{
 				Name:        "datadir, D",
 				Value:       *cx.Config.DataDir,
 				Usage:       "sets the data directory base for a pod instance",
 				EnvVar:      "POD_DATADIR",
 				Destination: cx.Config.DataDir,
+			},
+			cli.BoolFlag{
+				Name:        "pipelog, P",
+				Usage:       "enables pipe logger (" +
+					"setting only activates on use of cli flag or environment" +
+					" variable as it alters stdin/out behaviour)",
+				EnvVar:      "POD_PIPELOG",
+				Destination: cx.Config.PipeLog,
+			},
+			cli.StringFlag{
+				Name:        "lang, L",
+				Value:       *cx.Config.Language,
+				Usage:       "sets the data directory base for a pod instance",
+				EnvVar:      "POD_LANGUAGE",
+				Destination: cx.Config.Language,
 			},
 			cli.StringFlag{
 				Name:        "walletfile, WF",

@@ -149,8 +149,7 @@ func (s *State) Runner() {
 							return true
 						}
 						return false
-					}, exePath, "-D",
-						*s.Ctx.Config.DataDir,
+					}, exePath, "-D", *s.Ctx.Config.DataDir, "--pipelog",
 						s.Config.RunMode)
 					consume.Start(s.Worker)
 					s.Config.Running = true

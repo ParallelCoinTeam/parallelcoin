@@ -340,13 +340,14 @@ func (s *State) InputField(f *Field) func() {
 			default:
 			}
 		case "switch":
+			bg, fg := s.Theme.Colors["DocBg"], s.Theme.Colors["DocText"]
 			sw := s.Theme.DuoUIcheckBox("",
 				//f.Field.Label,
 				s.Theme.Colors["Primary"],
 				s.Theme.Colors["Primary"])
-			sw.PillColor = s.Theme.Colors["LightGray"]
+			sw.PillColor = bg
+			sw.CircleColor = fg
 			sw.PillColorChecked = s.Theme.Colors["PrimaryDim"]
-			sw.CircleColor = s.Theme.Colors["LightGrayII"]
 			sw.CircleColorChecked = s.Theme.Colors["Primary"]
 			sw.DrawLayout(s.Gtx, rdw[f.Field.Model].(*gel.CheckBox))
 			if (rdw[f.Field.Model]).(*gel.CheckBox).Checked(s.Gtx) {
@@ -391,44 +392,14 @@ const textWidth = 10
 
 func (s *State) Editor(editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	t, g := s.Theme, s.Gtx
+	bg, fg := t.Colors["DocBg"], t.Colors["DocText"]
 	return func() {
-		t.DuoUIcontainer(8, "ffffffff").
-			Layout(g, layout.NW, func() {
-				width := g.Constraints.Width.Max / 2
-				if width > 320 {
-					width = 320
-				}
-				e := t.DuoUIeditor(label, t.Colors["Black"],
-					t.Colors["White"], width)
-				e.Font.Typeface = t.Fonts["Mono"]
-				e.TextSize = unit.Dp(16)
-				layout.UniformInset(unit.Dp(4)).Layout(g, func() {
-					e.Layout(g, editorController)
-				})
-				for _, e := range editorController.Events(g) {
-					switch e.(type) {
-					case gel.ChangeEvent:
-						handler(e)
-					}
-				}
-			})
-	}
-}
-
-func (s *State) PasswordEditor(editorController *gel.Editor, handler func(gel.EditorEvent)) func() {
-	t, g := s.Theme, s.Gtx
-	fg := t.Colors["Gray"]
-	if !editorController.Focused() {
-		fg = t.Colors["Transparent"]
-	}
-	return func() {
-		t.DuoUIcontainer(8, "ffffffff").Layout(g, layout.NW, func() {
+		t.DuoUIcontainer(8, bg).Layout(g, layout.NW, func() {
 			width := g.Constraints.Width.Max / 2
 			if width > 320 {
 				width = 320
 			}
-			e := t.DuoUIeditor("", fg,
-				t.Colors["White"], width)
+			e := t.DuoUIeditor(label, fg, bg, width)
 			e.Font.Typeface = t.Fonts["Mono"]
 			e.TextSize = unit.Dp(16)
 			layout.UniformInset(unit.Dp(4)).Layout(g, func() {
@@ -436,7 +407,37 @@ func (s *State) PasswordEditor(editorController *gel.Editor, handler func(gel.Ed
 			})
 			for _, e := range editorController.Events(g) {
 				switch e.(type) {
-				case gel.ChangeEvent:
+				case gel.EditorEvent:
+					//case gel.ChangeEvent:
+					handler(e)
+				}
+			}
+		})
+	}
+}
+
+func (s *State) PasswordEditor(editorController *gel.Editor, handler func(gel.EditorEvent)) func() {
+	t, g := s.Theme, s.Gtx
+	bg, fg := t.Colors["DocBg"], t.Colors["DocText"]
+	if !editorController.Focused() {
+		fg = t.Colors["Transparent"]
+	}
+	return func() {
+		t.DuoUIcontainer(8, bg).Layout(g, layout.NW, func() {
+			width := g.Constraints.Width.Max / 2
+			if width > 320 {
+				width = 320
+			}
+			e := t.DuoUIeditor("", fg, bg, width)
+			e.Font.Typeface = t.Fonts["Mono"]
+			e.TextSize = unit.Dp(16)
+			layout.UniformInset(unit.Dp(4)).Layout(g, func() {
+				e.Layout(g, editorController)
+			})
+			for _, e := range editorController.Events(g) {
+				switch e.(type) {
+				//case gel.ChangeEvent:
+				case gel.EditorEvent:
 					handler(e)
 				}
 			}
@@ -446,15 +447,15 @@ func (s *State) PasswordEditor(editorController *gel.Editor, handler func(gel.Ed
 
 func (s *State) StringsArrayEditor(editorController *gel.Editor, label string, handler func(gel.EditorEvent)) func() {
 	t, g := s.Theme, s.Gtx
+	bg, fg := t.Colors["DocBg"], t.Colors["DocText"]
 	return func() {
-		t.DuoUIcontainer(8, t.Colors["White"]).Layout(g, layout.NW,
+		t.DuoUIcontainer(8, bg).Layout(g, layout.NW,
 			func() {
 				width := g.Constraints.Width.Max / 2
 				if width > 320 {
 					width = 320
 				}
-				e := t.DuoUIeditor(label, t.Colors["Black"],
-					t.Colors["White"], width)
+				e := t.DuoUIeditor(label, fg, bg, width)
 				e.Font.Typeface = t.Fonts["Mono"]
 				layout.UniformInset(unit.Dp(4)).Layout(g, func() {
 					e.Layout(g, editorController)

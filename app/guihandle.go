@@ -4,8 +4,6 @@ package app
 
 import (
 	"github.com/p9c/pod/app/config"
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/logi/serve"
 	"github.com/urfave/cli"
 
 	"github.com/p9c/pod/app/apputil"
@@ -18,7 +16,6 @@ import (
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir))
 		config.Configure(cx, c.Command.Name)
 		Warn("starting GUI")
 		rc := rcd.RcInit(cx)
@@ -31,22 +28,26 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 			Debug("guiHandle interrupt")
 			close(rc.Quit)
 		})
-		Info("IsFirstRun? ", rc.Boot.IsFirstRun)
+		Debug("IsFirstRun? ", rc.Boot.IsFirstRun)
 		// signal the GUI that the back end is ready
 		Debug("sending ready signal")
-		// we can do this without blocking because the channel has 1 buffer this way it falls immediately the GUI starts
+		// we can do this without blocking because the channel has 1 buffer this
+		// way it falls immediately the GUI starts
 		if !rc.Boot.IsFirstRun {
 			go rc.StartServices()
 		}
 		// Start up GUI
 		Debug("starting up GUI")
+		cx.WaitGroup.Add(1)
 		err = gui.WalletGUI(duo, rc)
 		if err != nil {
 			Error(err)
 		}
+		cx.WaitGroup.Done()
 		Debug("wallet GUI finished")
 		// wait for stop signal
 		<-rc.Quit
+		cx.WaitGroup.Wait()
 		Debug("shutting down node")
 		if !cx.Node.Load() {
 			close(cx.WalletKill)

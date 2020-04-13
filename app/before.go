@@ -3,7 +3,9 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/serve"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
@@ -28,6 +30,11 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("datadir") {
 			*cx.Config.DataDir = c.String("datadir")
 			cx.DataDir = c.String("datadir")
+		}
+		if c.IsSet("pipelog") {
+			Warn("pipe logger enabled")
+			*cx.Config.PipeLog = c.Bool("pipelog")
+			serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir))
 		}
 		if c.IsSet("walletfile") {
 			*cx.Config.WalletFile = c.String("walletfile")
