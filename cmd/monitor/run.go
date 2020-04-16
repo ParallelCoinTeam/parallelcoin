@@ -29,7 +29,7 @@ func (s *State) RunControls() layout.FlexChild {
 					s.Icon("Run", "ButtonBg", "DocText", 32)
 				})
 			}, b)
-			//s.IconButton("Run", "PanelBg", "PanelText", b)
+			// s.IconButton("Run", "PanelBg", "PanelText", b)
 			for b.Clicked(s.Gtx) {
 				Debug("clicked run button")
 				if !s.Config.RunModeOpen {
@@ -54,7 +54,7 @@ func (s *State) RunControls() layout.FlexChild {
 						s.Icon("Stop", fg, bg, 32)
 					})
 				}, b)
-				//s.IconButton("Stop", "PanelBg", "PanelText", b)
+				// s.IconButton("Stop", "PanelBg", "PanelText", b)
 				for b.Clicked(s.Gtx) {
 					Debug("clicked stop button")
 					s.RunCommandChan <- "stop"
@@ -70,7 +70,7 @@ func (s *State) RunControls() layout.FlexChild {
 						s.Icon(ic, fg, bg, 32)
 					})
 				}, b)
-				//s.IconButton(ic, fg, bg, b)
+				// s.IconButton(ic, fg, bg, b)
 				for b.Clicked(s.Gtx) {
 					if s.Config.Pausing {
 						Debug("clicked on resume button")
@@ -80,7 +80,7 @@ func (s *State) RunControls() layout.FlexChild {
 						s.RunCommandChan <- "pause"
 					}
 				}
-				//}), Rigid(func() {
+				// }), Rigid(func() {
 				//	s.IconButton("Kill", "PanelBg", "PanelText",
 				//		s.KillMenuButton)
 				//	for s.KillMenuButton.Clicked(s.Gtx) {
@@ -98,7 +98,7 @@ func (s *State) RunControls() layout.FlexChild {
 						s.Icon("Restart", fg, bg, 32)
 					})
 				}, b)
-				//s.IconButton("Restart", "PanelBg", "PanelText", b)
+				// s.IconButton("Restart", "PanelBg", "PanelText", b)
 				for b.Clicked(s.Gtx) {
 					Debug("clicked restart button")
 					s.RunCommandChan <- "restart"
@@ -141,12 +141,16 @@ func (s *State) Runner() {
 					quit = make(chan struct{})
 					s.Worker = consume.Log(quit, func(ent *logi.Entry) (
 						err error) {
-						//Debugf("KOPACH %s %s", ent.Text, ent.Level)
+						// Debugf("KOPACH %s %s", ent.Text, ent.Level)
 						s.EntryBuf.Add(ent)
 						return
 					}, func(pkg string) (out bool) {
-						if s.Config.FilterNodes[pkg].Hidden {
-							return true
+						if x, ok := s.
+							Config.
+							FilterNodes[pkg]; ok {
+							if x.Hidden {
+								return true
+							}
 						}
 						return false
 					}, exePath, "-D", *s.Ctx.Config.DataDir, "--pipelog",
@@ -157,7 +161,7 @@ func (s *State) Runner() {
 					consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 					s.W.Invalidate()
 					go func() {
-						//time.Sleep(time.Second/10)
+						// time.Sleep(time.Second/10)
 						if err = s.Worker.Wait(); !Check(err) {
 							s.Config.Running = false
 							s.Config.Pausing = false
@@ -195,7 +199,7 @@ func (s *State) Runner() {
 		case "kill":
 			Debug("kill called")
 			if s.HasGo && s.Worker != nil && s.Config.Running {
-				//close(quit)
+				// close(quit)
 				if err = s.Worker.Interrupt(); !Check(err) {
 				}
 			}

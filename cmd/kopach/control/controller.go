@@ -264,9 +264,10 @@ var handlersMulticast = transport.Handlers{
 		}
 		j := p2padvt.LoadContainer(b)
 		otherIPs := j.GetIPs()
-		Debugs(otherIPs)
-		otherPort := fmt.Sprint(j.GetControllerListenerPort())
-		Debug(otherPort, j.GetP2PListenersPort(), j.GetRPCListenersPort())
+		Debug("otherIPs", otherIPs)
+		otherPort := fmt.Sprint(j.GetP2PListenersPort())
+		Debug("ctrl", j.GetControllerListenerPort(), "P2P", j.GetP2PListenersPort(),
+			"rpc", j.GetRPCListenersPort())
 		myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
 		Debug("myPort", myPort)
 		for i := range otherIPs {

@@ -25,6 +25,11 @@ func (s *State) FlexH(children ...layout.FlexChild) {
 		children...)
 }
 
+func (s *State) FlexHStart(children ...layout.FlexChild) {
+	layout.Flex{Axis: layout.Horizontal, Alignment: layout.Start}.Layout(s.Gtx,
+		children...)
+}
+
 func (s *State) Inset(size int, fn func()) {
 	layout.UniformInset(unit.Dp(float32(size))).Layout(s.Gtx, fn)
 }
@@ -39,8 +44,8 @@ func Flexed(weight float32, widget func()) layout.FlexChild {
 
 func (s *State) Spacer(bg string) layout.FlexChild {
 	return Flexed(1, func() {
-		//cs := s.Gtx.Constraints
-		//s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "FF")
+		// cs := s.Gtx.Constraints
+		// s.Rectangle(cs.Width.Max, cs.Height.Max, bg, "FF")
 	})
 }
 
@@ -72,11 +77,13 @@ func (s *State) Icon(icon, fg, bg string, size int) {
 			bg = "00000000"
 		}
 		s.Rectangle(cs.Height.Max, cs.Width.Max, bg)
-		s.Inset(0, func() {
-			i := s.Theme.Icons[icon]
-			i.Color = gelook.HexARGB(s.Theme.Colors[fg])
-			i.Layout(s.Gtx, unit.Dp(float32(size)))
-		})
+		// s.Inset(0, func() {
+		i := s.Theme.Icons[icon]
+		// Debug(fg)
+		// _ = fg
+		i.Color = gelook.HexARGB(s.Theme.Colors[fg])
+		i.Layout(s.Gtx, unit.Dp(float32(size)))
+		// })
 	}),
 	)
 }
@@ -128,7 +135,7 @@ func (s *State) Label(txt, fg, bg string) {
 		t := s.Theme.DuoUIlabel(unit.Dp(float32(36)), txt)
 		t.Color = s.Theme.Colors[fg]
 		t.Font.Typeface = s.Theme.Fonts["Secondary"]
-		//t.TextSize = unit.Dp(32)
+		// t.TextSize = unit.Dp(32)
 		t.Layout(s.Gtx)
 	})
 }

@@ -124,7 +124,7 @@ func (s *State) TopLevelLayout() {
 	s.FlexV(
 		s.Header(),
 		gui.Flexed(1, func() {
-			s.FlexH(
+			s.FlexHStart(
 				s.Body(),
 				s.Sidebar(),
 			)

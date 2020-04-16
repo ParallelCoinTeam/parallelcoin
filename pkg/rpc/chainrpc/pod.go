@@ -27,7 +27,7 @@ var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, error) {
 			DefaultConnectTimeout)
 		conn, er := stateCfg.Dial(addr.Network(), addr.String(), DefaultConnectTimeout)
 		if er != nil {
-			Trace("connection error:", conn, er)
+			Error("connection error:", conn, er)
 		}
 		return conn, er
 	}

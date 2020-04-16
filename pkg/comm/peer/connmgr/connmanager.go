@@ -379,9 +379,9 @@ func (cm *ConnManager) Connect(c *ConnReq) {
 	}
 	Traces(cm.Cfg.Dial)
 	conn, err := cm.Cfg.Dial(c.Addr)
-	Trace(err, c.Addr)
+	Error(err, c.Addr)
 	if err != nil {
-		Trace(err)
+		Error(err)
 		select {
 		case cm.requests <- handleFailed{c, err}:
 		case <-cm.quit:
