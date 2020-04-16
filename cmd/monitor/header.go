@@ -14,16 +14,16 @@ import (
 	"gioui.org/unit"
 )
 
-func (s *State) DuoUIheader() layout.FlexChild {
+func (s *State) Header() layout.FlexChild {
+	bg, fg := "PanelBg", "PanelText"
 	return gui.Rigid(func() {
 		s.Gtx.Constraints.Height.Max = 48
-		s.Gtx.Constraints.Height.Min = 48
+		// s.Gtx.Constraints.Height.Min = 48
+		cs := s.Gtx.Constraints
+		s.Rectangle(cs.Width.Max, cs.Width.Max, bg)
 		s.FlexH(gui.Rigid(func() {
 			s.FlexH(gui.Rigid(func() {
-				cs := s.Gtx.Constraints
-				s.Rectangle(cs.Width.Max, cs.Width.Max, "PanelBg")
 				s.FlexH(gui.Rigid(func() {
-					fg, bg := "PanelText", "PanelBg"
 					icon := "logo"
 					b := s.Buttons["Logo"]
 					s.Theme.DuoUIbutton(gelook.ButtonParams{
@@ -48,7 +48,7 @@ func (s *State) DuoUIheader() layout.FlexChild {
 					s.Inset(8, func() {
 						layout.W.Layout(s.Gtx, func() {
 							t := s.Theme.DuoUIlabel(unit.Dp(float32(40)), "Monitor")
-							t.Color = s.Theme.Colors["PanelText"]
+							t.Color = s.Theme.Colors[fg]
 							t.Font.Typeface = s.Theme.Fonts["Secondary"]
 							t.Layout(s.Gtx)
 						})
@@ -56,18 +56,25 @@ func (s *State) DuoUIheader() layout.FlexChild {
 				}))
 			}),
 			)
-		}), s.Spacer("PanelBg"), gui.Rigid(func() {
-			t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
-				fmt.Sprintf("%s %dx%d", *s.Ctx.Config.DataDir,
-					s.WindowWidth, s.WindowHeight))
-			t.Color = s.Theme.Colors["PanelText"]
-			t.Font.Typeface = s.Theme.Fonts["Primary"]
-			t.Layout(s.Gtx)
-		}), s.RestartRunButton(),
+		}),
+			gui.Flexed(1, func() {
+				// cs := s.Gtx.Constraints
+				// s.Rectangle(cs.Width.Max, cs.Width.Max, "Primary")
+				layout.E.Layout(s.Gtx, func() {
+					t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
+						fmt.Sprintf("%s %s %dx%d", s.Ctx.Config.Listeners.String(),
+							*s.Ctx.Config.DataDir,
+							s.WindowWidth, s.WindowHeight))
+					t.Color = s.Theme.Colors[fg]
+					t.Font.Typeface = s.Theme.Fonts["Primary"]
+					t.Layout(s.Gtx)
+				})
+			}),
+			s.RestartRunButton(fg, bg),
 			gui.Rigid(func() {
 				b := s.Buttons["Close"]
-				s.IconButton("closeIcon", "PanelText",
-					"PanelBg", b)
+				s.IconButton("closeIcon", fg,
+					bg, b)
 				for b.Clicked(s.Gtx) {
 					Debug("close button clicked")
 					s.SaveConfig()
@@ -79,12 +86,12 @@ func (s *State) DuoUIheader() layout.FlexChild {
 	})
 }
 
-func (s *State) RestartRunButton() layout.FlexChild {
+func (s *State) RestartRunButton(fg, bg string) layout.FlexChild {
 	return gui.Rigid(func() {
 		var c *exec.Cmd
 		var err error
 		b := s.Buttons["Restart"]
-		s.IconButton("Restart", "PanelText", "PanelBg", b)
+		s.IconButton("Restart", fg, bg, b)
 		for b.Clicked(s.Gtx) {
 			Debug("clicked restart button")
 			s.SaveConfig()
@@ -102,8 +109,8 @@ func (s *State) RestartRunButton() layout.FlexChild {
 							os.Environ()); Check(err) {
 						}
 						close(s.Ctx.KillAll)
-						//time.Sleep(time.Second/2)
-						//os.Exit(0)
+						// time.Sleep(time.Second/2)
+						// os.Exit(0)
 					}
 				}()
 			}

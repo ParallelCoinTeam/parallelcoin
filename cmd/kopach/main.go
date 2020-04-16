@@ -110,7 +110,7 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 						w.FirstSender.Store("")
 						// pause the workers
 						for i := range w.workers {
-							Trace("sending pause to worker", i)
+							Debug("sending pause to worker", i)
 							err := w.workers[i].Pause()
 							if err != nil {
 								Error(err)
@@ -145,7 +145,7 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
-			// Debug("ignoring other controller job")
+			Debug("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
 		}

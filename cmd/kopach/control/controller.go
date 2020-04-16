@@ -259,13 +259,16 @@ var handlersMulticast = transport.Handlers{
 		b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
-			// Debug("not active")
+			Debug("not active")
 			return
 		}
 		j := p2padvt.LoadContainer(b)
 		otherIPs := j.GetIPs()
-		otherPort := fmt.Sprint(j.GetP2PListenersPort())
+		Debugs(otherIPs)
+		otherPort := fmt.Sprint(j.GetControllerListenerPort())
+		Debug(otherPort, j.GetP2PListenersPort(), j.GetRPCListenersPort())
 		myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
+		Debug("myPort", myPort)
 		for i := range otherIPs {
 			o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
 			if otherPort != myPort {
@@ -273,7 +276,7 @@ var handlersMulticast = transport.Handlers{
 					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
 					// recommended).
 					// go func() {
-					Info("connecting to lan peer with same PSK", o)
+					Info("connecting to lan peer with same PSK", o, otherIPs)
 					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
 					}
 				}

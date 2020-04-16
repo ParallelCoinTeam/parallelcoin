@@ -23,7 +23,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	for i := range *logi.L.Packages {
 		lgs = append(lgs, i)
 	}
-	//Debugs(lgs)
+	// Debugs(lgs)
 	mon.Loggers = mon.GetTree(lgs)
 	isNew := mon.LoadConfig()
 	_, _ = git.PlainClone("/tmp/foo", false,
@@ -67,7 +67,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			Debug("starting up as was running previously when shut down")
 			time.Sleep(time.Second / 2)
 			mon.Config.Running = false
-			//mon.RunCommandChan <- "stop"
+			// mon.RunCommandChan <- "stop"
 			mon.RunCommandChan <- "run"
 			if mon.Config.Pausing {
 				time.Sleep(time.Second / 2)
@@ -75,7 +75,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			}
 		}()
 	}
-	//go mon.Consume()
+	// go mon.Consume()
 	go func() {
 		Debug("starting up GUI event loop")
 	out:
@@ -97,6 +97,10 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 					cs := mon.Gtx.Constraints
 					mon.WindowWidth, mon.WindowHeight =
 						cs.Width.Max, cs.Height.Max
+					// title := "ParallelCoin Pod Monitor ["+*cx.Config.
+					// 	DataDir+"] "+
+					// 	fmt.Sprintf("%s %dx%d", *mon.Ctx.Config.DataDir,
+					// 		mon.WindowWidth, mon.WindowHeight)
 					mon.TopLevelLayout()
 					e.Frame(mon.Gtx.Ops)
 				}
@@ -118,7 +122,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 
 func (s *State) TopLevelLayout() {
 	s.FlexV(
-		s.DuoUIheader(),
+		s.Header(),
 		gui.Flexed(1, func() {
 			s.FlexH(
 				s.Body(),

@@ -21,7 +21,8 @@ func (s *State) FlexV(children ...layout.FlexChild) {
 }
 
 func (s *State) FlexH(children ...layout.FlexChild) {
-	layout.Flex{Axis: layout.Horizontal}.Layout(s.Gtx, children...)
+	layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}.Layout(s.Gtx,
+		children...)
 }
 
 func (s *State) Inset(size int, fn func()) {

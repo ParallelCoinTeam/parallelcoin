@@ -10,16 +10,16 @@ import (
 
 func (s *State) Sidebar() layout.FlexChild {
 	return gui.Rigid(func() {
-		//if !(s.Config.BuildOpen || s.Config.SettingsOpen) {
+		// if !(s.Config.BuildOpen || s.Config.SettingsOpen) {
 		//	s.Gtx.Constraints.Width.Max /= 2
-		//} else {
+		// } else {
 		//	s.Gtx.Constraints.Width.Max -= 340
-		//}
+		// }
 		s.Gtx.Constraints.Width.Min = 332
 		s.Gtx.Constraints.Width.Max = 332
-		//if s.Gtx.Constraints.Width.Max > 360 {
+		// if s.Gtx.Constraints.Width.Max > 360 {
 		//	s.Gtx.Constraints.Width.Max = 360
-		//}
+		// }
 		cs := s.Gtx.Constraints
 		if s.Config.FilterOpen {
 			s.FlexV(

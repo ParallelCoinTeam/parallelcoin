@@ -33,6 +33,7 @@ func (b *Entry) Clear() {
 	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
 		defer b.Sem.Release(1)
 		b.Cursor = 0
+		b.Clicked = -1
 		b.Full = false
 	}
 }
