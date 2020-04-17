@@ -34,7 +34,6 @@ func (s *State) SettingsButtons() layout.FlexChild {
 					s.Icon("settingsIcon", fg, bg, 32)
 				})
 			}, b)
-			//s.IconButton("settingsIcon", fg, bg, b)
 			for b.Clicked(s.Gtx) {
 				Debug("settings folder clicked")
 				if !s.Config.SettingsOpen {

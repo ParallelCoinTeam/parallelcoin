@@ -115,6 +115,5 @@ func (s *State) Filter() layout.FlexChild {
 			s.Config.FilterOpen = !s.Config.FilterOpen
 			s.SaveConfig()
 		}
-		//}
 	})
 }

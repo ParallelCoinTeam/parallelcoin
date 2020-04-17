@@ -27,6 +27,7 @@ type State struct {
 	FilterButtons             []gel.Button
 	Lists                     map[string]*layout.List
 	ModesButtons              map[string]*gel.Button
+	CheckBoxes                map[string]*gel.CheckBox
 	CommandEditor             gel.Editor
 	WindowWidth, WindowHeight int
 	Loggers                   *Node
@@ -73,6 +74,13 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		"RunFromProfile", "UseBuiltinGo", "InstallNewGo"}
 	for i := range buttons {
 		s.Buttons[buttons[i]] = new(gel.Button)
+	}
+	checkboxes := []string{
+		"FilterMode",
+	}
+	s.CheckBoxes = make(map[string]*gel.CheckBox)
+	for i := range checkboxes {
+		s.CheckBoxes[checkboxes[i]] = new(gel.CheckBox)
 	}
 	lists := []string{
 		"Modes", "FilterLevel", "Groups", "Filter", "Log",
@@ -121,6 +129,7 @@ type Config struct {
 	FilterOpen     bool
 	FilterNodes    map[string]*Node
 	FilterLevel    int
+	FilterMode     bool
 	ClickCommand   string
 }
 
@@ -162,6 +171,7 @@ func (s *State) LoadConfig() (isNew bool) {
 			s.Config.Pausing = cnf.Pausing
 			s.Config.FilterOpen = cnf.FilterOpen
 			s.Config.FilterLevel = cnf.FilterLevel
+			s.Config.FilterMode = cnf.FilterMode
 			s.Config.ClickCommand = cnf.ClickCommand
 			s.CommandEditor.SetText(s.Config.ClickCommand)
 		}
@@ -190,7 +200,7 @@ func (s *State) SaveConfig() {
 	s.Config.Height = s.WindowHeight
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if cfgJSON, e := json.MarshalIndent(s.Config, "", "  "); !Check(e) {
-		//Debug(string(cfgJSON))
+		// Debug(string(cfgJSON))
 		apputil.EnsureDir(filename)
 		if e := ioutil.WriteFile(filename, cfgJSON, 0600); Check(e) {
 			panic(e)
