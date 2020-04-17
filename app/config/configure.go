@@ -9,7 +9,7 @@ import (
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli
-Configure(cx *conte.Xt, commandName string) {
+Configure(cx *conte.Xt, commandName string, initial bool) {
 	Debug("running Configure", commandName)
 	Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
@@ -24,7 +24,7 @@ Configure(cx *conte.Xt, commandName string) {
 	initConfigFile(cfg)
 	initLogDir(cfg)
 	initWalletFile(cx)
-	initListeners(cx, commandName)
+	initListeners(cx, commandName, initial)
 	// Don't add peers from the config file when in regression test mode.
 	if ((*cfg.Network)[0] == 'r') && len(*cfg.AddPeers) > 0 {
 		*cfg.AddPeers = nil

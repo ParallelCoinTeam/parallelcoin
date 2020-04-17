@@ -1164,7 +1164,7 @@ func (r *RcVar) SaveDaemonCfg() {
 	config, _ := pod.EmptyConfig()
 	if err := json.Unmarshal(marshalled, config); err != nil {
 	}
-	config2.Configure(r.cx, r.cx.AppContext.Command.Name)
+	config2.Configure(r.cx, r.cx.AppContext.Command.Name, false)
 	save.Pod(config)
 }
 

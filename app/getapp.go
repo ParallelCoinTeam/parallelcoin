@@ -125,7 +125,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 							"for development and testing as well as clearing up"+
 							" transaction mess)",
 						func(c *cli.Context) (err error) {
-							config.Configure(cx, c.Command.Name)
+							config.Configure(cx, c.Command.Name, true)
 							Info("dropping wallet history")
 							go func() {
 								Warn("starting wallet")

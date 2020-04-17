@@ -13,7 +13,7 @@ import (
 var initHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
 		Info("running configuration and wallet initialiser")
-		config.Configure(cx, c.Command.Name)
+		config.Configure(cx, c.Command.Name, true)
 		command := os.Args[0]
 		args := append(os.Args[1:len(os.Args)-1], "wallet")
 		Debug(args)

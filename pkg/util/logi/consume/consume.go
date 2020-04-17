@@ -26,7 +26,7 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 					// printing
 					return
 				}
-				//Debugs(e)
+				// Debugs(e)
 				color := logi.ColorYellow
 				//Debug(e.Level)
 				switch e.Level {
@@ -44,6 +44,9 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 					color = logi.ColorBlue
 				case logi.Trace:
 					color = logi.ColorViolet
+				default:
+					Debug("got an empty log entry")
+					return
 				}
 				Debugf("%s%s %s%s", color, e.Text,
 					logi.ColorOff, e.CodeLocation)

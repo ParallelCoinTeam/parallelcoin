@@ -64,7 +64,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 					cursor -= bl
 				}
 			}
-			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = b.Buf[cursor]
 		}
@@ -85,7 +85,7 @@ func (b *Entry) GetButton(i int) (out *gel.Button) {
 					cursor -= bl
 				}
 			}
-			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = &b.Buttons[cursor]
 		}
@@ -106,7 +106,7 @@ func (b *Entry) GetHider(i int) (out *gel.Button) {
 					cursor -= bl
 				}
 			}
-			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = &b.Hiders[cursor]
 		}

@@ -264,16 +264,16 @@ var handlersMulticast = transport.Handlers{
 		}
 		j := p2padvt.LoadContainer(b)
 		otherIPs := j.GetIPs()
-		Debug("otherIPs", otherIPs)
+		// Trace("otherIPs", otherIPs)
 		otherPort := fmt.Sprint(j.GetP2PListenersPort())
-		Debug("ctrl", j.GetControllerListenerPort(), "P2P", j.GetP2PListenersPort(),
-			"rpc", j.GetRPCListenersPort())
 		myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
-		Debug("myPort", myPort)
+		// Trace("myPort", myPort,*c.cx.Config.Listeners)
 		for i := range otherIPs {
 			o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
 			if otherPort != myPort {
 				if _, ok := c.otherNodes[o]; !ok {
+					Debug("ctrl", j.GetControllerListenerPort(), "P2P",
+						j.GetP2PListenersPort(), "rpc", j.GetRPCListenersPort())
 					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
 					// recommended).
 					// go func() {
@@ -322,7 +322,9 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	msgB := template.Block
 	c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
-	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), p2padvt.Get(c.cx), &c.coinbases)
+	adv := p2padvt.Get(c.cx)
+	Traces(adv)
+	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, &c.coinbases)
 	jobShards := transport.GetShards(fMC.Data)
 	shardsLen := len(jobShards)
 	if shardsLen < 1 {

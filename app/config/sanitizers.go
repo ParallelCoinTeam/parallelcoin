@@ -124,7 +124,7 @@ func validatePort(port string) bool {
 	return true
 }
 
-func initListeners(cx *conte.Xt, commandName string) {
+func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	cfg := cx.Config
 	var fP int
 	var e error
@@ -159,7 +159,7 @@ func initListeners(cx *conte.Xt, commandName string) {
 		*cfg.Listeners = cli.StringSlice{listenHost}
 		*cfg.RPCListeners = cli.StringSlice{listenHost}
 	}
-	if *cx.Config.AutoPorts {
+	if *cx.Config.AutoPorts && !initial{
 		if fP, e = GetFreePort(); Check(e) {
 		}
 		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}

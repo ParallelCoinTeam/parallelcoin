@@ -81,7 +81,7 @@ func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
 				// debug.PrintStack()
 			}
 		}
-		Debug(c.Creator, "sent packets", string(magic),
+		Trace(c.Creator, "sent packets", string(magic),
 			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
 			c.Sender.RemoteAddr())
 	}
@@ -307,7 +307,7 @@ out:
 						}
 						bn.Decoded = true
 						// DEBUG(numBytes, src, err)
-						Debugf("received packet with magic %s from %s",
+						Tracef("received packet with magic %s from %s",
 							magic, src.String())
 						if err = handler(channel.context, src, address, cipherText); Check(err) {
 							continue
