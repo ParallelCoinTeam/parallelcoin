@@ -198,8 +198,7 @@ func (s *State) BuildConfigPage() {
 							fg, bg = "ButtonText", "ButtonBg"
 						}
 						b := s.Buttons["InstallNewGo"]
-						s.TextButton("install new", "Primary", 16,
-							fg, bg, b)
+						s.TextButton("install new", "Primary", 16, fg, bg, b)
 						for b.Clicked(s.Gtx) {
 							if !s.Config.RunInRepo {
 								s.Config.UseBuiltinGo = false
@@ -233,20 +232,24 @@ func (s *State) BuildConfigPage() {
 						cb := s.Theme.DuoUIcheckBox("", fg, bg)
 						cb.PillColor = bg
 						cb.CircleColor = fg
-						cb.PillColorChecked = s.Theme.Colors["PrimaryDim"]
+						cb.PillColorChecked = bg
 						cb.CircleColorChecked = s.Theme.Colors["Primary"]
 						isChecked := s.CheckBoxes["FilterMode"].Checked(s.Gtx)
 						if isChecked != s.Config.FilterMode {
 							s.Config.FilterMode = !s.Config.FilterMode
 							s.SaveConfig()
+							if s.Config.FilterMode {
+								go s.RegenerateFilterBuf()
+								s.FilterFunc = s.FilterOn
+							} else {
+								s.FilterFunc = NoFilter
+							}
 						}
 						cb.DrawLayout(s.Gtx, s.CheckBoxes["FilterMode"])
 					}),
-					gui.Rigid(s.Text("Sets logger to trace but dynamically" +
-						" filters log view according to filter settings on" +
-						" sidebar", "PanelText",
-						"PanelBg",
-						"Primary", "h6"),
+					gui.Rigid(s.Text("Sets logger to trace but dynamically"+
+						" filters log view according to filter settings on"+
+						" sidebar", "PanelText", "PanelBg", "Primary", "h6"),
 					),
 				)
 			})

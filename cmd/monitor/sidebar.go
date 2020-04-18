@@ -53,6 +53,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							for b.Clicked(s.Gtx) {
 								Debug("clear all")
 								s.EntryBuf.Clear()
+								s.FilterBuf.Clear()
 							}
 						}),
 						gui.Flexed(1, func() {
@@ -112,7 +113,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							}
 						}),
 
-						//Rigid(func() {
+						// Rigid(func() {
 						//	s.IconButton("Filter", "DocBg", "DocText",
 						//		&s.FilterButton)
 						//	for s.FilterButton.Clicked(s.Gtx) {
@@ -124,7 +125,7 @@ func (s *State) Sidebar() layout.FlexChild {
 						//		s.Config.FilterOpen = !s.Config.FilterOpen
 						//		s.SaveConfig()
 						//	}
-						//}),
+						// }),
 					)
 				}),
 			)
@@ -161,14 +162,16 @@ func (s *State) LevelsButtons() {
 			cs.Height.Max = 48
 			s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 			s.Inset(8, func() {
-				//cs := s.Gtx.Constraints
+				// cs := s.Gtx.Constraints
 				s.Icon(bn, color, bg, 32)
 			})
 		}, bb)
 		for bb.Clicked(s.Gtx) {
 			s.Config.FilterLevel = a + 1
 			*s.Ctx.Config.LogLevel = logi.Levels[s.Config.FilterLevel]
-			consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
+			if !s.Config.FilterMode {
+				consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
+			}
 			Debug("filter level", logi.Tags[logi.Levels[a+1]])
 			s.W.Invalidate()
 			save.Pod(s.Ctx.Config)

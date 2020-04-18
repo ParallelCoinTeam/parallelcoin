@@ -346,7 +346,7 @@ func (s *State) InputField(f *Field) func() {
 				s.Theme.Colors["Primary"])
 			sw.PillColor = bg
 			sw.CircleColor = fg
-			sw.PillColorChecked = s.Theme.Colors["PrimaryDim"]
+			sw.PillColorChecked = bg
 			sw.CircleColorChecked = s.Theme.Colors["Primary"]
 			sw.DrawLayout(s.Gtx, rdw[f.Field.Model].(*gel.CheckBox))
 			if (rdw[f.Field.Model]).(*gel.CheckBox).Checked(s.Gtx) {

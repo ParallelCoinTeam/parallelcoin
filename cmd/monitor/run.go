@@ -29,7 +29,6 @@ func (s *State) RunControls() layout.FlexChild {
 					s.Icon("Run", "ButtonBg", "DocText", 32)
 				})
 			}, b)
-			// s.IconButton("Run", "PanelBg", "PanelText", b)
 			for b.Clicked(s.Gtx) {
 				Debug("clicked run button")
 				if !s.Config.RunModeOpen {
@@ -54,7 +53,6 @@ func (s *State) RunControls() layout.FlexChild {
 						s.Icon("Stop", fg, bg, 32)
 					})
 				}, b)
-				// s.IconButton("Stop", "PanelBg", "PanelText", b)
 				for b.Clicked(s.Gtx) {
 					Debug("clicked stop button")
 					s.RunCommandChan <- "stop"
@@ -80,13 +78,6 @@ func (s *State) RunControls() layout.FlexChild {
 						s.RunCommandChan <- "pause"
 					}
 				}
-				// }), Rigid(func() {
-				//	s.IconButton("Kill", "PanelBg", "PanelText",
-				//		s.KillMenuButton)
-				//	for s.KillMenuButton.Clicked(s.Gtx) {
-				//		Debug("clicked kill button")
-				//		s.RunCommandChan <- "kill"
-				//	}
 			}), gui.Rigid(func() {
 				b := s.Buttons["RestartMenu"]
 				s.ButtonArea(func() {
@@ -143,11 +134,12 @@ func (s *State) Runner() {
 						err error) {
 						// Debugf("KOPACH %s %s", ent.Text, ent.Level)
 						s.EntryBuf.Add(ent)
+						if s.FilterFunc(ent) {
+							s.FilterBuf.Add(ent)
+						}
 						return
 					}, func(pkg string) (out bool) {
-						if x, ok := s.
-							Config.
-							FilterNodes[pkg]; ok {
+						if x, ok := s.Config.FilterNodes[pkg]; ok {
 							if x.Hidden {
 								return true
 							}

@@ -11,6 +11,7 @@ import (
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/p9c/pod/pkg/util/logi"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -37,7 +38,36 @@ type State struct {
 	CannotRun                 bool
 	RunCommandChan            chan string
 	EntryBuf                  *ring.Entry
+	FilterBuf                 *ring.Entry
+	FilterFunc                func(ent *logi.Entry) bool
 	FilterRoot                *Node
+}
+
+func NoFilter(_ *logi.Entry) bool { return true }
+
+func (s *State) FilterOn(ent *logi.Entry) (out bool) {
+	if s.Config.FilterNodes == nil || ent == nil {
+		return true
+	}
+	if x, ok := s.Config.FilterNodes[ent.Package]; ok {
+		if !x.Hidden {
+			out = true
+		}
+	}
+	cfgLevel := 0
+	level := 0
+	for i := range logi.Levels {
+		if *s.Ctx.Config.LogLevel == logi.Levels[i] {
+			cfgLevel = i
+		}
+		if ent.Level == logi.Levels[i] {
+			level = i
+		}
+	}
+	if level <= cfgLevel {
+		out = true
+	}
+	return
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
@@ -54,6 +84,8 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		WindowHeight:        600,
 		RunCommandChan:      make(chan string),
 		EntryBuf:            ring.NewEntry(65536),
+		FilterBuf:           ring.NewEntry(65536),
+		FilterFunc:          NoFilter,
 		FilterLevelsButtons: make([]gel.Button, 7),
 		Buttons:             make(map[string]*gel.Button),
 		Lists:               make(map[string]*layout.List),
