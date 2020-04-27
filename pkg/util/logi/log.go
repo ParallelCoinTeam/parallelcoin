@@ -263,7 +263,7 @@ func (l *Logger) LocToPkg(pkg string) (out string) {
 		sep = "/"
 	}
 	split := strings.Split(pkg, l.Split)
-	if len(split) < 1 {
+	if len(split) < 2 {
 		return pkg
 	}
 	//fmt.Println("split",split, l.Split)
