@@ -18,6 +18,7 @@ import (
 
 const ConfigFileName = "monitor.json"
 
+// State stores the state of the monitor
 type State struct {
 	gui.State
 	Ctx                       *conte.Xt
@@ -107,9 +108,7 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 	for i := range buttons {
 		s.Buttons[buttons[i]] = new(gel.Button)
 	}
-	checkboxes := []string{
-		"FilterMode",
-	}
+	checkboxes := []string{"FilterMode"}
 	s.CheckBoxes = make(map[string]*gel.CheckBox)
 	for i := range checkboxes {
 		s.CheckBoxes[checkboxes[i]] = new(gel.CheckBox)
@@ -205,6 +204,7 @@ func (s *State) LoadConfig() (isNew bool) {
 			s.Config.FilterLevel = cnf.FilterLevel
 			s.Config.FilterMode = cnf.FilterMode
 			s.Config.ClickCommand = cnf.ClickCommand
+			s.Config.FilterMode = cnf.FilterMode
 			s.CommandEditor.SetText(s.Config.ClickCommand)
 		}
 	} else {

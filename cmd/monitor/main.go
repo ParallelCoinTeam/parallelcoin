@@ -23,7 +23,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	for i := range *logi.L.Packages {
 		lgs = append(lgs, i)
 	}
-	// Debugs(lgs)
+	Debugs(lgs)
 	mon.Loggers = mon.GetTree(lgs)
 	isNew := mon.LoadConfig()
 	_, _ = git.PlainClone("/tmp/foo", false,

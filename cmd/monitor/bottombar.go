@@ -24,7 +24,7 @@ func (s *State) StatusBar() layout.FlexChild {
 		s.FlexH(
 			s.RunControls(),
 			s.RunmodeButtons(),
-			//s.Spacer("PanelBg"),
+			// s.Spacer("PanelBg"),
 			gui.Flexed(1, func() {
 				s.Gtx.Constraints.Height.Max = 48
 				cs := s.Gtx.Constraints

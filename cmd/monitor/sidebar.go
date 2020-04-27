@@ -32,6 +32,9 @@ func (s *State) Sidebar() layout.FlexChild {
 						}),
 					)
 				}), gui.Rigid(func() {
+					// if s.Config.FilterMode {
+					// 	return
+					// }
 					s.Gtx.Constraints.Height.Max = 48
 					s.Gtx.Constraints.Height.Min = 48
 					cs := s.Gtx.Constraints
@@ -171,10 +174,10 @@ func (s *State) LevelsButtons() {
 			*s.Ctx.Config.LogLevel = logi.Levels[s.Config.FilterLevel]
 			if !s.Config.FilterMode {
 				consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
+				save.Pod(s.Ctx.Config)
 			}
 			Debug("filter level", logi.Tags[logi.Levels[a+1]])
 			s.W.Invalidate()
-			save.Pod(s.Ctx.Config)
 			s.SaveConfig()
 		}
 	})

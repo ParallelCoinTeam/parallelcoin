@@ -8,11 +8,15 @@ import (
 	"strings"
 )
 
+// LogViewer renders the log view
 func (s *State) LogViewer() layout.FlexChild {
 	return gui.Flexed(1, func() {
 		cs := s.Gtx.Constraints
 		cs.Width.Min = cs.Width.Max / 2
 		eb := s.EntryBuf
+		if s.Config.FilterMode {
+			eb = s.FilterBuf
+		}
 		s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBg")
 		s.Inset(4, func() {
 			l := s.Lists["Log"]
@@ -21,12 +25,13 @@ func (s *State) LogViewer() layout.FlexChild {
 			l.Layout(s.Gtx, eb.Len(), func(i int) {
 				if eb.Clicked == i {
 					cs := s.Gtx.Constraints
-					// cs.Height.Max = 48
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "DocBgHilite")
 				}
 				b := eb.Get(i)
+				if b == nil {
+					return
+				}
 				color := "DocText"
-				// fmt.Println("level", b.Level)
 				switch b.Level {
 				case logi.Trace:
 					color = "Secondary"
@@ -71,9 +76,6 @@ func (s *State) LogViewer() layout.FlexChild {
 									}
 								}),
 								gui.Flexed(1, func() {
-									// cs := s.Gtx.Constraints
-									// s.Rectangle(cs.Width.Max, cs.Height.Max,
-									//	"PanelBg", "ff")
 									tc := "DocText"
 									if ww <= 480 {
 										tc = color
@@ -137,7 +139,7 @@ func (s *State) RegenerateFilterBuf() {
 	s.FilterBuf.Clear()
 	// set all filters to not filter anything
 	*s.Ctx.Config.LogLevel = logi.Trace
-	for _,i := range s.Config.FilterNodes {
+	for _, i := range s.Config.FilterNodes {
 		i.Hidden = false
 	}
 	// regenerate the filter buffer

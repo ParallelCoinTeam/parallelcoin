@@ -52,9 +52,7 @@ func (s *State) GetTree(paths []string) (root *Node) {
 		paths[counter] = i
 		counter++
 	}
-	Debugs(slicedPaths)
 	sort.Strings(paths)
-	Debugs(paths)
 	s.FilterRoot = &Node{
 		Name:       "root",
 		FullName:   string(os.PathSeparator),
