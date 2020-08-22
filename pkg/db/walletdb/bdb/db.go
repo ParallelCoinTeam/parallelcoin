@@ -6,7 +6,7 @@ import (
 
 	bolt "github.com/coreos/bbolt"
 
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
 )
 
 // convertErr converts some bolt errors to the equivalent walletdb error.

@@ -3,8 +3,8 @@ package hdkeychain_test
 import (
 	"fmt"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/util/hdkeychain"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/util/hdkeychain"
 )
 
 // This example demonstrates how to generate a cryptographically random seed then use it to create a new master node (extended key).

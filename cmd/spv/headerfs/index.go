@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"sort"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
 )
 
 var (

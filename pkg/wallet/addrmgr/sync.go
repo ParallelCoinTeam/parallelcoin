@@ -3,8 +3,8 @@ package waddrmgr
 import (
 	"time"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
 )
 
 // BlockStamp defines a block (by height and a unique hash) and is used to mark

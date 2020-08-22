@@ -1,6 +1,6 @@
 package chaincfg
 
-import "github.com/p9c/pod/pkg/chain/wire"
+import "github.com/stalker-loki/pod/pkg/chain/wire"
 
 // MainNetParams defines the network parameters for the main Bitcoin network.
 var MainNetParams = Params{

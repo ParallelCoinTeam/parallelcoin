@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/p9c/pod/pkg/coding/base58"
+	"github.com/stalker-loki/pod/pkg/coding/base58"
 )
 
 var stringTests = []struct {

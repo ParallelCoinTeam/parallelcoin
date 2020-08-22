@@ -10,8 +10,8 @@ import (
 
 	"github.com/jessevdk/go-flags"
 
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/stalker-loki/pod/app/appdata"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 type config struct {

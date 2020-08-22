@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
 // HelpDescsEnUS defines the English descriptions used for the help strings.

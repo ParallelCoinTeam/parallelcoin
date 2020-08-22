@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
 )
 
 // This example demonstrates decrypting a message using a private key that is

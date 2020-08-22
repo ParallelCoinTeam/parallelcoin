@@ -20,13 +20,13 @@ import (
 
 	"golang.org/x/crypto/ripemd160"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/legacy/rename"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
+	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/util/legacy/rename"
 )
 
 // A bunch of constants

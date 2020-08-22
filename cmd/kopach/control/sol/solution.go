@@ -1,10 +1,10 @@
 package sol
 
 import (
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/coding/simplebuffer"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Block"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Int32"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/Block"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/Int32"
 )
 
 // SolutionMagic is the marker for packets containing a solution

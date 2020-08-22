@@ -7,14 +7,14 @@ import (
 	"os"
 	"path/filepath"
 
-	log "github.com/p9c/pod/pkg/util/logi"
+	log "github.com/stalker-loki/pod/pkg/util/logi"
 
 	"github.com/jessevdk/go-flags"
 
-	"github.com/p9c/pod/app/appdata"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	"github.com/stalker-loki/pod/app/appdata"
+	wtxmgr "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	_ "github.com/stalker-loki/pod/pkg/db/walletdb/bdb"
 )
 
 const defaultNet = "mainnet"

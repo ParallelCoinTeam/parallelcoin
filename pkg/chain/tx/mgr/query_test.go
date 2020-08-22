@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	. "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	"github.com/p9c/pod/pkg/util"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	. "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 type queryState struct {

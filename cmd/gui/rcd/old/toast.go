@@ -1,7 +1,7 @@
 package old
 
 import (
-	"github.com/p9c/pod/cmd/gui/model"
+	"github.com/stalker-loki/pod/cmd/gui/model"
 )
 
 func (r *RcVar) toastAdd(t, m string) {

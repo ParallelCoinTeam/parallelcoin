@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"sort"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
 
 // Provides functions for sorting tx inputs and outputs according to BIP 69

@@ -9,9 +9,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/cmd/gui/component"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/gui/gelook"
 )
 
 var (

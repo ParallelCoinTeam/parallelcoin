@@ -7,14 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/p9c/pod/cmd/node/integration/rpctest"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/stalker-loki/pod/cmd/node/integration/rpctest"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 const (

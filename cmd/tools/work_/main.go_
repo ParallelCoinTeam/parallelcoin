@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	l "github.com/p9c/pod/clog"
+	l "github.com/stalker-loki/pod/clog"
 )
 
 type nodeCfg struct {

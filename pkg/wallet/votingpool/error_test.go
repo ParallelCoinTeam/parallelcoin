@@ -3,7 +3,7 @@ package votingpool_test
 import (
 	"testing"
 
-	vp "github.com/p9c/pod/pkg/wallet/votingpool"
+	vp "github.com/stalker-loki/pod/pkg/wallet/votingpool"
 )
 
 // TestErrorCodeStringer tests that all error codes has a text

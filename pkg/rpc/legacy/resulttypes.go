@@ -2,7 +2,7 @@ package legacy
 
 //
 // import (
-// 	"github.com/p9c/pod/pkg/rpc/btcjson"
+// 	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 // )
 //
 // // errors are returned as *btcjson.RPCError type

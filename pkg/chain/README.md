@@ -1,7 +1,7 @@
 # blockchain
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/p9c/pod/blockchain)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/stalker-loki/pod/blockchain)
 
 Package blockchain implements bitcoin block handling and chain selection rules.
 
@@ -13,7 +13,7 @@ This package has intentionally been designed so it can be used as a standalone p
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/p9c/pod/blockchain
+$ go get -u github.com/stalker-loki/pod/blockchain
 ```
 
 ## Bitcoin Chain Processing Overview
@@ -42,15 +42,15 @@ Before a block is allowed into the block chain, it must go through an intensive 
 
 ## Examples
 
-- [ProcessBlock Example](http://godoc.org/github.com/p9c/pod/blockchain#example-BlockChain-ProcessBlock)  
+- [ProcessBlock Example](http://godoc.org/github.com/stalker-loki/pod/blockchain#example-BlockChain-ProcessBlock)  
   Demonstrates how to create a new chain instance and use ProcessBlock to attempt to add a block to the chain. This example intentionally attempts to insert a duplicate genesis block to illustrate how an invalid block is handled.
 
-- [CompactToBig Example](http://godoc.org/github.com/p9c/pod/blockchain#example-CompactToBig)  
+- [CompactToBig Example](http://godoc.org/github.com/stalker-loki/pod/blockchain#example-CompactToBig)  
   Demonstrates how to convert the compact "bits" in a block header which
   represent the target difficulty to a big integer and display it using the
   typical hex notation.
 
-- [BigToCompact Example](http://godoc.org/github.com/p9c/pod/blockchain#example-BigToCompact)  
+- [BigToCompact Example](http://godoc.org/github.com/stalker-loki/pod/blockchain#example-BigToCompact)  
   Demonstrates how to convert a target difficulty into the
   compact "bits" in a block header which represent that target difficulty.
 

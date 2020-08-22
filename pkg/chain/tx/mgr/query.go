@@ -3,9 +3,9 @@ package wtxmgr
 import (
 	"fmt"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	"github.com/p9c/pod/pkg/util"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 // CreditRecord contains metadata regarding a transaction credit for a known

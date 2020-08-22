@@ -2,14 +2,14 @@ package app
 
 import (
 	"fmt"
-	"github.com/p9c/pod/app/config"
+	"github.com/stalker-loki/pod/app/config"
 	"github.com/urfave/cli"
 	"os"
 
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/walletmain"
-	"github.com/p9c/pod/pkg/wallet"
+	"github.com/stalker-loki/pod/app/apputil"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/cmd/walletmain"
+	"github.com/stalker-loki/pod/pkg/wallet"
 )
 
 func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {

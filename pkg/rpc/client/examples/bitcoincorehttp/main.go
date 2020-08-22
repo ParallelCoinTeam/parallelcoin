@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	rpcclient "github.com/p9c/pod/pkg/rpc/client"
+	rpcclient "github.com/stalker-loki/pod/pkg/rpc/client"
 )
 
 func main() {

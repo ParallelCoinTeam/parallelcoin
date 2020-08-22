@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/comm/peer/addrmgr"
 )
 
 // naTest is used to describe a test to be performed against the NetAddressKey method.

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 const (

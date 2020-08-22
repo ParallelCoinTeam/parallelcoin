@@ -4,9 +4,9 @@ import (
 	"encoding/hex"
 	"time"
 
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/hdkeychain"
-	"github.com/p9c/pod/pkg/wallet"
+	"github.com/stalker-loki/pod/app/save"
+	"github.com/stalker-loki/pod/pkg/util/hdkeychain"
+	"github.com/stalker-loki/pod/pkg/wallet"
 )
 
 func (r *RcVar) CreateWallet(privPassphrase, duoSeed,

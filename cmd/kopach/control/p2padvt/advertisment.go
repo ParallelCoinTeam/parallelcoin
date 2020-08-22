@@ -3,10 +3,10 @@ package p2padvt
 import (
 	"net"
 
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/pkg/coding/simplebuffer"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/IPs"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Uint16"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/IPs"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/Uint16"
 )
 
 var Magic = []byte{'a', 'd', 'v', 't'}

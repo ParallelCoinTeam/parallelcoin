@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"syscall"
 
-	"github.com/p9c/pod/pkg/comm/stdconn"
+	"github.com/stalker-loki/pod/pkg/comm/stdconn"
 )
 
 type Worker struct {

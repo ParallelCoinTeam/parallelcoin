@@ -2,9 +2,9 @@ package gui
 
 import (
 	"gioui.org/app"
-	"github.com/p9c/pod/cmd/gui/duoui"
-	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/stalker-loki/pod/cmd/gui/duoui"
+	"github.com/stalker-loki/pod/cmd/gui/model"
+	"github.com/stalker-loki/pod/cmd/gui/rcd"
 	"os"
 )
 

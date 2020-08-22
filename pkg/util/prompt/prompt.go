@@ -10,8 +10,8 @@ import (
 
 	"github.com/btcsuite/golangcrypto/ssh/terminal"
 
-	"github.com/p9c/pod/pkg/util/hdkeychain"
-	"github.com/p9c/pod/pkg/util/legacy/keystore"
+	"github.com/stalker-loki/pod/pkg/util/hdkeychain"
+	"github.com/stalker-loki/pod/pkg/util/legacy/keystore"
 )
 
 // ProvideSeed is used to prompt for the wallet seed which maybe required during

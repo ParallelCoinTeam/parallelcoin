@@ -5,9 +5,9 @@ import (
 	"encoding/binary"
 	"errors"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	database "github.com/p9c/pod/pkg/db"
-	"github.com/p9c/pod/pkg/util"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
+	database "github.com/stalker-loki/pod/pkg/db"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 var (

@@ -2,9 +2,9 @@
 package txsizes
 
 import (
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/wire"
-	h "github.com/p9c/pod/pkg/util/helpers"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	h "github.com/stalker-loki/pod/pkg/util/helpers"
 )
 
 // Worst case script and input/output size estimates.

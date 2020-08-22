@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/app/conte"
+	"github.com/stalker-loki/pod/app/conte"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) error {

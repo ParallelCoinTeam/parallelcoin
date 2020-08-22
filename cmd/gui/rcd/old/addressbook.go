@@ -6,14 +6,14 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/cmd/gui/model"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/stalker-loki/pod/cmd/gui/model"
+	wtxmgr "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/wallet"
+	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
 )
 
 type DuoUItemplates struct {

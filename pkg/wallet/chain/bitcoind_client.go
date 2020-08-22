@@ -9,14 +9,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/util"
-	am "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	tm "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/util"
+	am "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
 )
 
 var (

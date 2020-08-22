@@ -1,7 +1,7 @@
 # ffldb
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://godoc.org/github.com/p9c/pod/database/ffldb?status.png)](http://godoc.org/github.com/p9c/pod/database/ffldb)
+[![GoDoc](https://godoc.org/github.com/stalker-loki/pod/database/ffldb?status.png)](http://godoc.org/github.com/stalker-loki/pod/database/ffldb)
 
 Package ffldb implements a driver for the database package that uses leveldb for the backing metadata and flat files for block storage.
 

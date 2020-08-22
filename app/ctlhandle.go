@@ -2,14 +2,14 @@ package app
 
 import (
 	"fmt"
-	"github.com/p9c/pod/app/config"
+	"github.com/stalker-loki/pod/app/config"
 	"os"
 	"time"
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/ctl"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/cmd/ctl"
 )
 
 const slash = string(os.PathSeparator)

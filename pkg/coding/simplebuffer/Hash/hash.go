@@ -1,7 +1,7 @@
 package Hash
 
 import (
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 )
 
 type Hash struct {

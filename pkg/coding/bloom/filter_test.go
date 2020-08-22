@@ -5,10 +5,10 @@ import (
 	"encoding/hex"
 	"testing"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/coding/bloom"
-	"github.com/p9c/pod/pkg/util"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/coding/bloom"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 // TestFilterLarge ensures a maximum sized filter can be created.

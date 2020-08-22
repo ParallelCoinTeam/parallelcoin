@@ -3,7 +3,7 @@ package spv
 import (
 	"fmt"
 
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
 
 type (

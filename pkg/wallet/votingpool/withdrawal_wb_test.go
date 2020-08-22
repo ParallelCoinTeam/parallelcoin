@@ -6,14 +6,14 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/hdkeychain"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	wtxmgr "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/util/hdkeychain"
+	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
 )
 
 // TestOutputSplittingNotEnoughInputs checks that an output will get split if we

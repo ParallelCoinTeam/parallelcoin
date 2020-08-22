@@ -3,7 +3,7 @@ package blockchain
 import (
 	"testing"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 )
 
 // TestNotifications ensures that notification callbacks are fired on events.

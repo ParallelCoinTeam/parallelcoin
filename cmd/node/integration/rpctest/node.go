@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"time"
 
-	rpc "github.com/p9c/pod/pkg/rpc/client"
-	"github.com/p9c/pod/pkg/util"
+	rpc "github.com/stalker-loki/pod/pkg/rpc/client"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 // nodeConfig contains all the args and data required to launch a pod process

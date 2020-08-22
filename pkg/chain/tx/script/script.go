@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
 
 // Bip16Activation is the timestamp where BIP0016 is valid to use in the

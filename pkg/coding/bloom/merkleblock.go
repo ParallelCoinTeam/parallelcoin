@@ -1,10 +1,10 @@
 package bloom
 
 import (
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 // merkleBlock is used to house intermediate information needed to generate a wire.MsgMerkleBlock according to a filter.

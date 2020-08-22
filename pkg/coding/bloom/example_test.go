@@ -5,9 +5,9 @@ import (
 	"math/rand"
 	"time"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/coding/bloom"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/coding/bloom"
 )
 
 // This example demonstrates how to create a new bloom filter, add a transaction hash to it, and check if the filter matches the transaction.

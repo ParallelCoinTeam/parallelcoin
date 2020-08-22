@@ -6,8 +6,8 @@
 //  import (
 //          "flag"
 //          "fmt"
-//          "github.com/p9c/pod/pkg/util"
-//          "github.com/p9c/pod/pkg/chain/config"
+//          "github.com/stalker-loki/pod/pkg/util"
+//          "github.com/stalker-loki/pod/pkg/chain/config"
 //  )
 //  var testnet = flag.Bool("testnet", false, "operate on the testnet Bitcoin network")
 //  // By default (without -testnet), use mainnet.

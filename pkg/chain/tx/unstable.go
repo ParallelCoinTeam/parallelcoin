@@ -1,9 +1,9 @@
 package wallettx
 
 import (
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	"github.com/p9c/pod/pkg/db/walletdb"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	wtxmgr "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
 )
 
 // UnstableAPI exports unstable API

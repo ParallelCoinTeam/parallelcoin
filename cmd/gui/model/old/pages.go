@@ -3,8 +3,8 @@ package model
 import (
 	"gioui.org/layout"
 
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
 type DuoUIexplorer struct {

@@ -2,13 +2,13 @@ package old
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/rpc/chainrpc"
 	"time"
 
-	"github.com/p9c/pod/cmd/gui/helpers"
-	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/cmd/gui/helpers"
+	"github.com/stalker-loki/pod/cmd/gui/model"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
 func (r *RcVar) GetSingleTx(txid string) func() {

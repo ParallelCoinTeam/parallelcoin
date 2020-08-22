@@ -3,8 +3,8 @@ package old
 import (
 	"fmt"
 
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/rpc/chainrpc"
 )
 
 func (r *RcVar) GetDuoUIhashesPerSec() {
