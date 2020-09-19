@@ -91,7 +91,7 @@ It is common practise in business financial databases to use 128 bit
 precision, and with variable length encoding many numbers will
 still end up being only 64 bits long anyway.
 
-## Upgrading to a latency minimising network transport
+### Upgrading to a latency minimising network transport
 
 Latency is a major structural limit on distributed systems as they 
 differ from centralised systems by the greater number of hops that
