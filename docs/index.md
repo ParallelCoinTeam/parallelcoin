@@ -6,11 +6,11 @@ The Plan 9 from Crypto Space hardfork is resuming development.
 
 The hard fork includes the following new features:
 
-- **New Proof of work hash function** - uses very large integer long 
+- **New Proof of Work hash function** - uses very large integer long 
   division to avert the centralisation of hash power by using
   the slowest and most expensive integer mathematical operation
-  already being most optimally implemented in CPUs. GPU dividers
-  are slower and no ASIC could do it faster.
+  already being most optimally implemented in CPUs - long division. 
+  GPU dividers are slower and no ASIC could do it faster.
   
 - **9 way parallel prime based block intervals** - The blocks come
   in randomly anyway so why not make the schedule semi-random?
@@ -35,7 +35,7 @@ The hard fork includes the following new features:
   nodes and the workers just listen to whoever is also using the
   same key. A customised live linux USB will be available for 
   both functions with an easy configuration file readable by
-  windows for setting the password.
+  windows for setting the password and payment addresses.
   
 ## Future directions
 
@@ -73,3 +73,75 @@ When transactions are propagating with lots of cosigners finalising them
 the transaction data can be considered immediately current even before it
 gets into a block so the chain servers can return them as results in
 RPC queries.
+
+With tight integration of mempool and chain data, and immediate
+finality the most cited disadvantage of proof of work as a means
+of distributing new tokens randomly and evenly is eliminated.
+
+### Increasing precision of token
+
+Parallelcoin has a very small number of tokens in total, and as such
+the need to extend its precision will arise sooner than tokens with
+tens and millions more tokens. As such, the current 64 bit long fixed
+integer format for currency values will be extended to a variable 
+length up to 128 bit long value, allowing plenty of room for more 
+zeros.
+
+It is common practise in business financial databases to use 128 bit 
+precision, and with variable length encoding many numbers will
+still end up being only 64 bits long anyway.
+
+## Upgrading to a latency minimising network transport
+
+Latency is a major structural limit on distributed systems as they 
+differ from centralised systems by the greater number of hops that
+data will make between nodes, and latency delays stack up like
+cars in gridlock.
+
+A currently in-development, latency minimising, bad-network-aware
+network transport will be used to replace all inter-node internet
+data transmission that strongly avoids retransmit latency and 
+copes with transient changes in network paths more reliably than
+standard TCP/IP sessions.
+
+### Relay routing
+
+In order to reduce the attack surface of the network, all transactions
+should be broadcast over a chain of proxies in the same manner as
+with Tor network, obscuring the physical origin of the transaction.
+
+There has been more than a few instances already of robberies taking
+based on transaction origin and without going all the way into full
+privacy protection the quickly expiring value of location data is 
+eliminated from the options of attackers intending to rob a user
+of the network.
+
+### Mimblewimble private transactions
+
+Ultimately all transactions should be 100% private, and the best 
+design for protecting the privacy of transactions currently
+available is the Mimblewimble protocol, which uses advanced
+cryptographic techniques to provide only provable confirmation
+without giving either the value or the sources of the transaction
+to potential attackers.
+
+Mimblewimble is a complex addition to the protocol so obviously will
+be done quite a bit later than most of the other items in this list.
+
+### Integrated agorised secure forgery-resistant low latency message relay network
+
+Ultimately entirely replacing the mempool in exchange for a complete
+secure, censorship resistant self healing peer to peer message exchange
+network system, with a means to charge for relay service without
+revealing the identity of the user requesting relay service.
+
+With such a system in place it is simple to enable the negotiation of 
+any kind of collaborative workspace for users, from instant messaging
+to shared creative environments from software repositories to org charts,
+to audio and video conferencing and anything that users of the network
+come up with.
+
+#### Namespace
+
+As part of the relay network there should be a market in namespaces to 
+make human-friendly labels for resources on the network.
