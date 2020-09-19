@@ -1,4 +1,4 @@
-# ![Logo](https://git.parallelcoin.io/dev/legacy/raw/commit/f709194e16960103834b0d0e25aec06c3d84f85b/logo/logo48x48.png) Parallelcoin Pod 
+# ![Logo](https://raw.githubusercontent.com/stalker-loki/pod/master/pkg/gui/logo/logo.svg) Parallelcoin Pod 
 
 
 [![GoDoc](https://img.shields.io/badge/godoc-documentation-blue.svg)](https://godoc.org/github.com/stalker-loki/pod) 
@@ -19,7 +19,7 @@ Fully integrated all-in-one cli client, full node, wallet server, miner and GUI 
 ~~~~
 ## Installation
 
-Straight to business, this is the part I am looking for so it's here at the top.
+Straight to business, this is the part I am looking for, so it's here at the top.
 
 First, you need a working [Go 1.11+ installation for the platform you are using](https://golang.org).
 
