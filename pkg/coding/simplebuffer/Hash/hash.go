@@ -1,6 +1,7 @@
 package Hash
 
 import (
+	"github.com/stalker-loki/app/slog"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 )
 
@@ -21,7 +22,7 @@ func (h *Hash) Decode(b []byte) (out []byte) {
 	if len(b) >= 32 {
 		err := h.Hash.SetBytes(b[:32])
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return
 		}
 		if len(b) > 32 {

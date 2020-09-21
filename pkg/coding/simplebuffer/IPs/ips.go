@@ -1,6 +1,7 @@
 package IPs
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"net"
 	"strings"
 
@@ -73,7 +74,7 @@ func GetListenable() simplebuffer.Serializer {
 	for i := range rI {
 		l, err := rI[i].Addrs()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil
 		}
 		lA = append(lA, l...)

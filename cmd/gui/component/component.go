@@ -11,6 +11,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 	"github.com/nfnt/resize"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/cmd/gui/model"
 	"github.com/stalker-loki/pod/cmd/gui/rcd"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -240,7 +241,7 @@ func (s *State) DuoUIinputField(f *Field) func() {
 						func(e gel.EditorEvent) {
 							rdCfg[f.Field.Model] =
 								strings.Fields((rdw[f.Field.Model]).(*gel.Editor).Text())
-							Debug()
+							slog.Debug()
 							if e != nil {
 								s.Rc.SaveDaemonCfg()
 							}
@@ -314,7 +315,7 @@ func (s *State) DuoUIinputField(f *Field) func() {
 						txt := rdw[f.Field.Model].(*gel.Editor).Text()
 						var err error
 						if rdCfg[f.Field.Model], err = time.ParseDuration(
-							txt); Check(err) {
+							txt); slog.Check(err) {
 						}
 						if e != nil {
 							s.Rc.SaveDaemonCfg()
@@ -469,7 +470,10 @@ func (s *State) DuoUIlogger() func() {
 			gelook.DuoUIdrawRectangle(g,
 				cs.Width.Max, cs.Height.Max, t.Colors["Dark"],
 				[4]float32{0, 0, 0, 0}, [4]float32{0, 0, 0, 0})
-			lm := s.Rc.Log.LogMessages.Load().([]log.Entry)
+			lm, ok := s.Rc.Log.LogMessages.Load().([]log.Entry)
+			if !ok {
+				return
+			}
 			logOutputList.Layout(g, len(lm), func(i int) {
 				tt := lm[i]
 				logText := t.Caption(
@@ -907,7 +911,7 @@ func (s *State) SettingsTabs() func() {
 		groupsNumber := len(rcs.Daemon.Schema.Groups)
 		groupsList.Layout(g, groupsNumber, func(i int) {
 			layout.UniformInset(unit.Dp(0)).Layout(g, func() {
-				color := t.Colors["Light"]
+				col := t.Colors["Light"]
 				bgColor := t.Colors["Dark"]
 				i = groupsNumber - 1 - i
 				tt := rcs.Daemon.Schema.Groups[i]
@@ -916,13 +920,13 @@ func (s *State) SettingsTabs() func() {
 					rcs.Tabs.Current = txt
 				}
 				if rcs.Tabs.Current == txt {
-					color = t.Colors["Dark"]
+					col = t.Colors["Dark"]
 					bgColor = t.Colors["Light"]
 				}
 				t.DuoUIbutton(gelook.ButtonParams{
 					TxtFont:       t.Fonts["Primary"],
 					Txt:           txt,
-					TxtColor:      color,
+					TxtColor:      col,
 					BgColor:       bgColor,
 					TextSize:      16,
 					Width:         80,

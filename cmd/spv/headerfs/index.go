@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"sort"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -152,7 +153,7 @@ func (h *headerIndex) addHeaders(batch headerBatch) error {
 			binary.BigEndian.PutUint32(heightBytes[:], header.height)
 			err := rootBucket.Put(header.hash[:], heightBytes[:])
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			// TODO(roasbeef): need to remedy if side-chain
@@ -183,7 +184,7 @@ func (h *headerIndex) heightFromHash(hash *chainhash.Hash) (uint32, error) {
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return 0, err
 	}
 	return height, nil
@@ -221,7 +222,7 @@ func (h *headerIndex) chainTip() (*chainhash.Hash, uint32, error) {
 		// parameters.
 		h, err := chainhash.NewHash(tipHashBytes)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		tipHash = h
@@ -229,13 +230,13 @@ func (h *headerIndex) chainTip() (*chainhash.Hash, uint32, error) {
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, err
 	}
 	return tipHash, tipHeight, nil
 }
 
-// truncateIndex truncates the index for a particluar header type by a single
+// truncateIndex truncates the index for a particular header type by a single
 // header entry. The passed newTip pointer should point to the hash of the new
 // chain tip. Optionally, if the entry is to be deleted as well, then the
 // delete flag should be set to true.

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"path/filepath"
 	"sync"
@@ -65,7 +66,7 @@ var headerBufPool = sync.Pool{
 }
 
 // headerStore combines a on-disk set of headers within a flat file in addition
-// to a databse which indexes that flat file. Together, these two abstractions
+// to a database which indexes that flat file. Together, these two abstractions
 // can be used in order to build an indexed header store for any type of
 // "header" as it deals only with raw bytes, and leaves it to a higher layer to
 // interpret those raw bytes accordingly.
@@ -99,14 +100,14 @@ func newHeaderStore(db walletdb.DB, filePath string,
 	fileFlags := os.O_RDWR | os.O_APPEND | os.O_CREATE
 	headerFile, err := os.OpenFile(flatFileName, fileFlags, 0644)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// With the file open, we'll then create the header index so we can
 	// have random access into the flat files.
 	index, err := newHeaderIndex(db, hType)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return &headerStore{
@@ -138,14 +139,14 @@ func NewBlockHeaderStore(filePath string, db walletdb.DB,
 	netParams *netparams.Params) (BlockHeaderStore, error) {
 	hStore, err := newHeaderStore(db, filePath, Block)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// With the header store created, we'll fetch the file size to see if
 	// we need to initialize it with the first header or not.
 	fileInfo, err := hStore.file.Stat()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	bhs := &blockHeaderStore{
@@ -168,7 +169,7 @@ func NewBlockHeaderStore(filePath string, db walletdb.DB,
 	// out database index.
 	tipHash, tipHeight, err := bhs.chainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// First, we'll compute the size of the current file so we can
@@ -177,7 +178,7 @@ func NewBlockHeaderStore(filePath string, db walletdb.DB,
 	// Using the file's current height, fetch the latest on-disk header.
 	latestFileHeader, err := bhs.readHeader(fileHeight)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// If the index's tip hash, and the file on-disk match, then we're
@@ -212,13 +213,13 @@ func (h *blockHeaderStore) FetchHeader(hash *chainhash.Hash) (*wire.BlockHeader,
 	// passed block hash.
 	height, err := h.heightFromHash(hash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, err
 	}
 	// With the height known, we can now read the header from disk.
 	header, err := h.readHeader(height)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, err
 	}
 	return &header, height, nil
@@ -238,7 +239,7 @@ func (h *blockHeaderStore) FetchHeaderByHeight(height uint32) (*wire.
 	// the full header.
 	header, err := h.readHeader(height)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return &header, nil
@@ -258,13 +259,13 @@ func (h *blockHeaderStore) FetchHeaderAncestors(numHeaders uint32,
 	// ending height of our scan.
 	endHeight, err := h.heightFromHash(stopHash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, err
 	}
 	startHeight := endHeight - numHeaders
 	headers, err := h.readHeaderRange(startHeight, endHeight)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, err
 	}
 	return headers, startHeight, nil
@@ -278,7 +279,7 @@ func (h *blockHeaderStore) HeightFromHash(hash *chainhash.Hash) (uint32, error) 
 	return h.heightFromHash(hash)
 }
 
-// RollbackLastBlock rollsback both the index, and on-disk header file by a
+// RollbackLastBlock rolls back both the index, and on-disk header file by a
 // _single_ header. This method is meant to be used in the case of re-org which
 // disconnects the latest block header from the end of the main chain. The
 // information about the new header tip after truncation is returned.
@@ -291,7 +292,7 @@ func (h *blockHeaderStore) RollbackLastBlock() (*waddrmgr.BlockStamp, error) {
 	// First, we'll obtain the latest height that the index knows of.
 	_, chainTipHeight, err := h.chainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// With this height obtained, we'll use it to read the latest header
@@ -299,7 +300,7 @@ func (h *blockHeaderStore) RollbackLastBlock() (*waddrmgr.BlockStamp, error) {
 	// prev header hash.
 	bestHeader, err := h.readHeader(chainTipHeight)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	prevHeaderHash := bestHeader.PrevBlock
@@ -340,7 +341,7 @@ func (b *BlockHeader) toIndexEntry() headerEntry {
 // single atomic transaction.
 //
 // NOTE: Part of the BlockHeaderStore interface.
-func (h *blockHeaderStore) WriteHeaders(hdrs ...BlockHeader) error {
+func (h *blockHeaderStore) WriteHeaders(headers ...BlockHeader) error {
 	// Lock store for write.
 	h.mtx.Lock()
 	defer h.mtx.Unlock()
@@ -352,7 +353,7 @@ func (h *blockHeaderStore) WriteHeaders(hdrs ...BlockHeader) error {
 	defer headerBufPool.Put(headerBuf)
 	// Next, we'll write out all the passed headers in series into the
 	// buffer we just extracted from the pool.
-	for _, header := range hdrs {
+	for _, header := range headers {
 		if err := header.Serialize(headerBuf); err != nil {
 			return err
 		}
@@ -365,11 +366,11 @@ func (h *blockHeaderStore) WriteHeaders(hdrs ...BlockHeader) error {
 	// Once those are written, we'll then collate all the headers into
 	// headerEntry instances so we can write them all into the index in a
 	// single atomic batch.
-	headerLocs := make([]headerEntry, len(hdrs))
-	for i, header := range hdrs {
-		headerLocs[i] = header.toIndexEntry()
+	headerLocations := make([]headerEntry, len(headers))
+	for i, header := range headers {
+		headerLocations[i] = header.toIndexEntry()
 	}
-	return h.addHeaders(headerLocs)
+	return h.addHeaders(headerLocations)
 }
 
 // blockLocatorFromHash takes a given block hash and then creates a block
@@ -403,7 +404,7 @@ func (h *blockHeaderStore) blockLocatorFromHash(hash *chainhash.Hash) (
 		}
 		blockHeader, err := h.FetchHeaderByHeight(height)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return locator, err
 		}
 		headerHash := blockHeader.BlockHash()
@@ -423,7 +424,7 @@ func (h *blockHeaderStore) LatestBlockLocator() (blockchain.BlockLocator, error)
 	var locator blockchain.BlockLocator
 	chainTipHash, _, err := h.chainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return locator, err
 	}
 	return h.blockLocatorFromHash(chainTipHash)
@@ -461,7 +462,7 @@ func (h *blockHeaderStore) CheckConnectivity() error {
 		tipHeight := binary.BigEndian.Uint32(tipHeightBytes)
 		header, err := h.readHeader(tipHeight)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// We'll now cycle backwards, seeking backwards along the
@@ -474,8 +475,8 @@ func (h *blockHeaderStore) CheckConnectivity() error {
 			// and also compute the block hash for it.
 			newHeader, err = h.readHeader(height)
 			if err != nil {
-				Error(err)
-				return fmt.Errorf("Couldn't retrieve header %s:"+
+				slog.Error(err)
+				return fmt.Errorf("couldn't retrieve header %s:"+
 					" %s", header.PrevBlock, err)
 			}
 			newHeaderHash := newHeader.BlockHash()
@@ -499,7 +500,7 @@ func (h *blockHeaderStore) CheckConnectivity() error {
 			// actually the prev header of the target header from
 			// the last loop. This ensures connectivity.
 			if newHeader.BlockHash() != header.PrevBlock {
-				return fmt.Errorf("Block %s doesn't match "+
+				return fmt.Errorf("block %s doesn't match "+
 					"block %s's PrevBlock (%s)",
 					newHeader.BlockHash(),
 					header.BlockHash(), header.PrevBlock)
@@ -523,12 +524,12 @@ func (h *blockHeaderStore) ChainTip() (*wire.BlockHeader, uint32, error) {
 	defer h.mtx.RUnlock()
 	_, tipHeight, err := h.chainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, err
 	}
 	latestHeader, err := h.readHeader(tipHeight)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, err
 	}
 	return &latestHeader, tipHeight, nil
@@ -551,20 +552,20 @@ func NewFilterHeaderStore(filePath string, db walletdb.DB,
 	filterType HeaderType, netParams *netparams.Params) (*FilterHeaderStore, error) {
 	fStore, err := newHeaderStore(db, filePath, filterType)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
-	// With the header store created, we'll fetch the fiie size to see if
+	// With the header store created, we'll fetch the file size to see if
 	// we need to initialize it with the first header or not.
 	fileInfo, err := fStore.file.Stat()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	fhs := &FilterHeaderStore{
 		fStore,
 	}
-	// TODO(roasbeef): also reconsile with block header state due to way
+	// TODO(roasbeef): also reconcile with block header state due to way
 	// roll back works atm
 	// If the size of the file is zero, then this means that we haven't yet
 	// written the initial genesis header to disk, so we'll do so now.
@@ -576,7 +577,7 @@ func NewFilterHeaderStore(filePath string, db walletdb.DB,
 				netParams.GenesisBlock, nil,
 			)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return nil, err
 			}
 			genesisFilterHash, err = builder.MakeHeaderForFilter(
@@ -584,7 +585,7 @@ func NewFilterHeaderStore(filePath string, db walletdb.DB,
 				netParams.GenesisBlock.Header.PrevBlock,
 			)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return nil, err
 			}
 		default:
@@ -604,7 +605,7 @@ func NewFilterHeaderStore(filePath string, db walletdb.DB,
 	// within the flat files, is in sync with out database index.
 	tipHash, tipHeight, err := fhs.chainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// First, we'll compute the size of the current file so we can
@@ -613,7 +614,7 @@ func NewFilterHeaderStore(filePath string, db walletdb.DB,
 	// Using the file's current height, fetch the latest on-disk header.
 	latestFileHeader, err := fhs.readHeader(fileHeight)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// If the index's tip hash, and the file on-disk match, then we're
@@ -642,7 +643,7 @@ func (f *FilterHeaderStore) FetchHeader(hash *chainhash.Hash) (*chainhash.
 	defer f.mtx.RUnlock()
 	height, err := f.heightFromHash(hash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return f.readHeader(height)
@@ -681,15 +682,15 @@ func (f *FilterHeader) toIndexEntry() headerEntry {
 
 // WriteHeaders writes a batch of filter headers to persistent storage. The
 // headers themselves are appended to the flat file, and then the index updated
-// to reflect the new entires.
-func (f *FilterHeaderStore) WriteHeaders(hdrs ...FilterHeader) error {
+// to reflect the new entries.
+func (f *FilterHeaderStore) WriteHeaders(headers ...FilterHeader) error {
 	// Lock store for write.
 	f.mtx.Lock()
 	defer f.mtx.Unlock()
 	// If there are 0 headers to be written, return immediately. This
 	// prevents the newTip assignment from panicking because of an index
 	// of -1.
-	if len(hdrs) == 0 {
+	if len(headers) == 0 {
 		return nil
 	}
 	// First, we'll grab a buffer from the write buffer pool so we an
@@ -700,7 +701,7 @@ func (f *FilterHeaderStore) WriteHeaders(hdrs ...FilterHeader) error {
 	defer headerBufPool.Put(headerBuf)
 	// Next, we'll write out all the passed headers in series into the
 	// buffer we just extracted from the pool.
-	for _, header := range hdrs {
+	for _, header := range headers {
 		if _, err := headerBuf.Write(header.FilterHash[:]); err != nil {
 			return err
 		}
@@ -712,7 +713,7 @@ func (f *FilterHeaderStore) WriteHeaders(hdrs ...FilterHeader) error {
 	}
 	// As the block headers should already be written, we only need to
 	// update the tip pointer for this particular header type.
-	newTip := hdrs[len(hdrs)-1].toIndexEntry().hash
+	newTip := headers[len(headers)-1].toIndexEntry().hash
 	return f.truncateIndex(&newTip, false)
 }
 
@@ -724,18 +725,18 @@ func (f *FilterHeaderStore) ChainTip() (*chainhash.Hash, uint32, error) {
 	defer f.mtx.RUnlock()
 	_, tipHeight, err := f.chainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, fmt.Errorf("unable to fetch chain tip: %v", err)
 	}
 	latestHeader, err := f.readHeader(tipHeight)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, fmt.Errorf("unable to read header: %v", err)
 	}
 	return latestHeader, tipHeight, nil
 }
 
-// RollbackLastBlock rollsback both the index, and on-disk header file by a
+// RollbackLastBlock rolls back both the index, and on-disk header file by a
 // _single_ filter header. This method is meant to be used in the case of
 // re-org which disconnects the latest filter header from the end of the main
 // chain. The information about the latest header tip after truncation is
@@ -748,7 +749,7 @@ func (f *FilterHeaderStore) RollbackLastBlock(newTip *chainhash.Hash) (
 	// First, we'll obtain the latest height that the index knows of.
 	_, chainTipHeight, err := f.chainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// With this height obtained, we'll use it to read what will be the new
@@ -756,7 +757,7 @@ func (f *FilterHeaderStore) RollbackLastBlock(newTip *chainhash.Hash) (
 	newHeightTip := chainTipHeight - 1
 	newHeaderTip, err := f.readHeader(newHeightTip)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// Now that we have the information we need to return from this

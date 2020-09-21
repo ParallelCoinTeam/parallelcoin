@@ -2,6 +2,7 @@ package indexers
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -62,7 +63,7 @@ func dbIndexConnectBlock(dbTx database.Tx, indexer Indexer, block *util.Block,
 	idxKey := indexer.Key()
 	curTipHash, _, err := dbFetchIndexerTip(dbTx, idxKey)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	if !curTipHash.IsEqual(&block.MsgBlock().Header.PrevBlock) {
@@ -89,7 +90,7 @@ func dbIndexDisconnectBlock(dbTx database.Tx, indexer Indexer, block *util.Block
 	idxKey := indexer.Key()
 	curTipHash, _, err := dbFetchIndexerTip(dbTx, idxKey)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	if !curTipHash.IsEqual(block.Hash()) {
@@ -153,7 +154,7 @@ func (m *Manager) maybeFinishDrops(interrupt <-chan struct{}) error {
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	if interruptRequested(interrupt) {
@@ -165,12 +166,12 @@ func (m *Manager) maybeFinishDrops(interrupt <-chan struct{}) error {
 		if !indexNeedsDrop[i] {
 			continue
 		}
-		Infoc(func() string {
+		slog.Info(func() string {
 			return fmt.Sprintf("Resuming %s drop", indexer.Name())
-		})
+		}())
 		err := dropIndex(m.db, indexer.Key(), indexer.Name(), interrupt)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
@@ -197,7 +198,7 @@ func (m *Manager) maybeCreateIndexes(dbTx database.Tx) error {
 		// uninitialized index.
 		err := dbPutIndexerTip(dbTx, idxKey, &chainhash.Hash{}, -1)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
@@ -229,13 +230,13 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 		meta := dbTx.Metadata()
 		_, err := meta.CreateBucketIfNotExists(indexTipsBucketName)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		return m.maybeCreateIndexes(dbTx)
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Initialize each of the enabled indexes.
@@ -260,7 +261,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			return err
 		})
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Nothing to do if the index does not have any entries yet.
@@ -280,26 +281,26 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			err := m.db.View(func(dbTx database.Tx) error {
 				blockBytes, err := dbTx.FetchBlock(hash)
 				if err != nil {
-					Error(err)
+					slog.Error(err)
 					return err
 				}
 				block, err = util.NewBlockFromBytes(blockBytes)
 				if err != nil {
-					Error(err)
+					slog.Error(err)
 					return err
 				}
 				block.SetHeight(height)
 				return err
 			})
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			// We'll also grab the set of outputs spent by this block so we
 			// can remove them from the index.
 			spentTxos, err := chain.FetchSpendJournal(block)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			// With the block and stxo set for that block retrieved,
@@ -311,7 +312,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 					dbTx, indexer, block, spentTxos,
 				)
 				if err != nil {
-					Error(err)
+					slog.Error(err)
 					return err
 				}
 				// Update the tip to the previous block.
@@ -320,7 +321,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 				return nil
 			})
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			if interruptRequested(interrupt) {
@@ -328,7 +329,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			}
 		}
 		if initialHeight != height {
-			Infof(
+			slog.Infof(
 				"removed %d orphaned blocks from %s (heights %d to %d)",
 				initialHeight-height,
 				indexer.Name(),
@@ -349,10 +350,10 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			idxKey := indexer.Key()
 			_, height, err := dbFetchIndexerTip(dbTx, idxKey)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
-			Tracef(
+			slog.Tracef(
 				"current %s tip (height %d, hash %v)",
 				indexer.Name(),
 				height,
@@ -366,7 +367,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Nothing to index if all of the indexes are caught up.
@@ -380,7 +381,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 	// one or more indexes are behind the current best chain tip and need to
 	// be caught up,
 	// so log the details and loop through each block that needs to be indexed.
-	Infof(
+	slog.Infof(
 		"catching up indexes from height %d to %d",
 		lowestHeight,
 		bestHeight,
@@ -389,7 +390,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 		// Load the block for the height since it is required to index it.
 		block, err := chain.BlockByHeight(height)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		if interruptRequested(interrupt) {
@@ -408,7 +409,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			if spentTxos == nil && indexNeedsInputs(indexer) {
 				spentTxos, err = chain.FetchSpendJournal(block)
 				if err != nil {
-					Error(err)
+					slog.Error(err)
 					return err
 				}
 			}
@@ -418,7 +419,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 				)
 			})
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			indexerHeights[i] = height
@@ -429,7 +430,7 @@ func (m *Manager) Init(chain *blockchain.BlockChain, interrupt <-chan struct{}) 
 			return errInterruptRequested
 		}
 	}
-	Info("indexes caught up to height", bestHeight)
+	slog.Info("indexes caught up to height", bestHeight)
 	return nil
 }
 
@@ -482,7 +483,7 @@ func (m *Manager) ConnectBlock(dbTx database.Tx, block *util.Block,
 	for _, index := range m.enabledIndexes {
 		err := dbIndexConnectBlock(dbTx, index, block, stxos)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
@@ -502,7 +503,7 @@ func (m *Manager) DisconnectBlock(dbTx database.Tx, block *util.Block,
 	for _, index := range m.enabledIndexes {
 		err := dbIndexDisconnectBlock(dbTx, index, block, stxo)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
@@ -537,23 +538,23 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	if !needsDelete {
-		Warnf("not dropping %s because it does not exist", idxName)
+		slog.Warnf("not dropping %s because it does not exist", idxName)
 		return nil
 	}
 	// Mark that the index is in the process of being dropped so that it can
 	// be resumed on the next start if interrupted before the process is
 	// complete.
-	Infof("dropping all %s entries.  This might take a while...", idxName)
+	slog.Infof("dropping all %s entries.  This might take a while...", idxName)
 	err = db.Update(func(dbTx database.Tx) error {
 		indexesBucket := dbTx.Metadata().Bucket(indexTipsBucketName)
 		return indexesBucket.Put(indexDropKey(idxKey), idxKey)
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Since the indexes can be so large,
@@ -592,7 +593,7 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 		return subBucketClosure(dbTx, idxKey, nil)
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil
 	}
 	// Iterate through each sub-bucket in reverse, deepest-first,
@@ -618,12 +619,12 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 				return nil
 			})
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			if numDeleted > 0 {
 				totalDeleted += uint64(numDeleted)
-				Infof("deleted %d keys (%d total) from %s", numDeleted,
+				slog.Infof("deleted %d keys (%d total) from %s", numDeleted,
 					totalDeleted, idxName)
 			}
 		}
@@ -639,7 +640,7 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 			return bucket.DeleteBucket(bucketName[len(bucketName)-1])
 		})
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}
 	// Call extra index specific deinitialization for the transaction index.
@@ -659,9 +660,9 @@ func dropIndex(db database.DB, idxKey []byte, idxName string, interrupt <-chan s
 		return indexesBucket.Delete(indexDropKey(idxKey))
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
-	Info("dropped", idxName)
+	slog.Info("dropped", idxName)
 	return nil
 }

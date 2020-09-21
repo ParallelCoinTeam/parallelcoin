@@ -18,7 +18,9 @@ type ExportWatchingWalletCmd struct {
 	Download *bool `jsonrpcdefault:"false"`
 }
 
-// NewExportWatchingWalletCmd returns a new instance which can be used to issue a exportwatchingwallet JSON-RPC command. The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the default value.
+// NewExportWatchingWalletCmd returns a new instance which can be used to issue a exportwatchingwallet JSON-RPC command.
+// The parameters which are pointers indicate they are optional.  Passing nil for optional parameters will use the
+// default value.
 func NewExportWatchingWalletCmd(account *string, download *bool) *ExportWatchingWalletCmd {
 	return &ExportWatchingWalletCmd{
 		Account:  account,

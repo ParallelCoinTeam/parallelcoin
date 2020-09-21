@@ -43,13 +43,13 @@ func TestPongLatest(t *testing.T) {
 		t.Errorf("encode of MsgPong failed %v err <%v>", msg, err)
 	}
 	// Test decode with latest protocol version.
-	readmsg := NewMsgPong(0)
-	err = readmsg.BtcDecode(&buf, pver, enc)
+	readMsg := NewMsgPong(0)
+	err = readMsg.BtcDecode(&buf, pver, enc)
 	if err != nil {
 		t.Errorf("decode of MsgPong failed [%v] err <%v>", buf, err)
 	}
 	// Ensure nonce is the same.
-	if msg.Nonce != readmsg.Nonce {
+	if msg.Nonce != readMsg.Nonce {
 		t.Errorf("Should get same nonce for protocol version %d", pver)
 	}
 }
@@ -81,14 +81,14 @@ func TestPongBIP0031(t *testing.T) {
 			msg)
 	}
 	// Test decode with old protocol version.
-	readmsg := NewMsgPong(0)
-	err = readmsg.BtcDecode(&buf, pver, enc)
+	readMsg := NewMsgPong(0)
+	err = readMsg.BtcDecode(&buf, pver, enc)
 	if err == nil {
 		t.Errorf("decode of MsgPong succeeded when it shouldn't have %v",
 			spew.Sdump(buf))
 	}
 	// Since this protocol version doesn't support pong, make sure the nonce didn't get encoded and decoded back out.
-	if msg.Nonce == readmsg.Nonce {
+	if msg.Nonce == readMsg.Nonce {
 		t.Errorf("Should not get same nonce for protocol version %d", pver)
 	}
 }
@@ -110,14 +110,14 @@ func TestPongCrossProtocol(t *testing.T) {
 		t.Errorf("encode of MsgPong failed %v err <%v>", msg, err)
 	}
 	// Decode with old protocol version.
-	readmsg := NewMsgPong(0)
-	err = readmsg.BtcDecode(&buf, BIP0031Version, BaseEncoding)
+	readMsg := NewMsgPong(0)
+	err = readMsg.BtcDecode(&buf, BIP0031Version, BaseEncoding)
 	if err == nil {
 		t.Errorf("encode of MsgPong succeeded when it shouldn't have %v",
 			msg)
 	}
 	// Since one of the protocol versions doesn't support the pong message, make sure the nonce didn't get encoded and decoded back out.
-	if msg.Nonce == readmsg.Nonce {
+	if msg.Nonce == readMsg.Nonce {
 		t.Error("Should not get same nonce for cross protocol")
 	}
 }

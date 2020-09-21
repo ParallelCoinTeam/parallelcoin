@@ -80,7 +80,7 @@ memory.
 
 Managed Addresses
 
-Each address returned by the address manager satisifies the ManagedAddress
+Each address returned by the address manager satisfies the ManagedAddress
 interface as well as either the ManagedPubKeyAddress or ManagedScriptAddress
 interfaces.  These interfaces provide the means to obtain relevant information
 about the addresses such as their private keys and scripts.

@@ -8,7 +8,7 @@ import (
 
 	"github.com/stalker-loki/pod/cmd/node/integration/rpctest"
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 )
@@ -258,8 +258,8 @@ func testBIP0009(t *testing.T, forkKey string, deploymentID uint32) {
 //   - Assert chain height is expected and state moved to ThresholdActive
 func TestBIP0009(t *testing.T) {
 	t.Parallel()
-	testBIP0009(t, "dummy", chaincfg.DeploymentTestDummy)
-	testBIP0009(t, "segwit", chaincfg.DeploymentSegwit)
+	testBIP0009(t, "dummy", config.DeploymentTestDummy)
+	testBIP0009(t, "segwit", config.DeploymentSegwit)
 }
 
 // TestBIP0009Mining ensures blocks built via pod's CPU miner follow the
@@ -288,13 +288,13 @@ func TestBIP0009Mining(t *testing.T) {
 		t.Fatalf("unable to setup test chain: %v", err)
 	}
 	defer r.TearDown()
-	// Assert the chain only consists of the gensis block.
+	// Assert the chain only consists of the genesis block.
 	assertChainHeight(r, t, 0)
 	// *** ThresholdDefined ***
 	// Generate a block that extends the genesis block.
 	// It should not have the test dummy bit set in the version since the
 	// first window is in the defined threshold state.
-	deployment := &r.ActiveNet.Deployments[chaincfg.DeploymentTestDummy]
+	deployment := &r.ActiveNet.Deployments[config.DeploymentTestDummy]
 	testDummyBitNum := deployment.BitNumber
 	hashes, err := r.Node.Generate(1)
 	if err != nil {

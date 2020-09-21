@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"github.com/VividCortex/ewma"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/fork"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
@@ -17,7 +18,7 @@ func (b *BlockChain) GetCommonP9Averages(lastNode *BlockNode,
 		startHeight = fork.List[1].TestnetStart
 	}
 	if nH <= startHeight {
-		Debug("on hard fork", nH, startHeight)
+		slog.Debug("on hard fork", nH, startHeight)
 		return
 	}
 	var oldestStamp int64

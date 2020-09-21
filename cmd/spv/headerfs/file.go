@@ -3,6 +3,7 @@ package headerfs
 import (
 	"bytes"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
@@ -10,11 +11,9 @@ import (
 
 // appendRaw appends a new raw header to the end of the flat file.
 func (h *headerStore) appendRaw(header []byte) error {
-
 	if _, err := h.file.Write(header); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -91,7 +90,7 @@ func (h *blockHeaderStore) readHeaderRange(startHeight uint32,
 	_, err := h.file.ReadAt(rawHeaderBytes, int64(seekDistance))
 
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 
@@ -115,7 +114,7 @@ func (h *blockHeaderStore) readHeaderRange(startHeight uint32,
 }
 
 // readHeader reads a full block header from the flat-file. The header read is
-// determined by the hight value.
+// determined by the height value.
 func (h *blockHeaderStore) readHeader(height uint32) (wire.BlockHeader, error) {
 
 	var header wire.BlockHeader
@@ -129,7 +128,7 @@ func (h *blockHeaderStore) readHeader(height uint32) (wire.BlockHeader, error) {
 	rawHeader, err := h.readRaw(seekDistance)
 
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return header, err
 	}
 
@@ -153,7 +152,7 @@ func (f *FilterHeaderStore) readHeader(height uint32) (*chainhash.Hash, error) {
 	rawHeader, err := f.readRaw(seekDistance)
 
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 

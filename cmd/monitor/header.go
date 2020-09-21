@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/gui"
 	"github.com/stalker-loki/pod/pkg/gui/gelook"
 	"os"
@@ -79,7 +80,7 @@ func (s *State) Header() layout.FlexChild {
 				s.IconButton("closeIcon", fg,
 					bg, b)
 				for b.Clicked(s.Gtx) {
-					Debug("close button clicked")
+					slog.Debug("close button clicked")
 					s.SaveConfig()
 					s.RunCommandChan <- "kill"
 					close(s.Ctx.KillAll)
@@ -96,7 +97,7 @@ func (s *State) RestartRunButton(fg, bg string) layout.FlexChild {
 		b := s.Buttons["Restart"]
 		s.IconButton("Restart", fg, bg, b)
 		for b.Clicked(s.Gtx) {
-			Debug("clicked restart button")
+			slog.Debug("clicked restart button")
 			s.SaveConfig()
 			if s.HasGo {
 				s.RunCommandChan <- "kill"
@@ -107,9 +108,9 @@ func (s *State) RestartRunButton(fg, bg string) layout.FlexChild {
 					c.Stderr = os.Stderr
 					c.Stdout = os.Stdout
 					time.Sleep(time.Second)
-					if err = c.Run(); !Check(err) {
+					if err = c.Run(); !slog.Check(err) {
 						if err = syscall.Exec(exePath, os.Args,
-							os.Environ()); Check(err) {
+							os.Environ()); slog.Check(err) {
 						}
 						close(s.Ctx.KillAll)
 						// time.Sleep(time.Second/2)

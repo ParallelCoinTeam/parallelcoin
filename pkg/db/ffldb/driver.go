@@ -2,6 +2,7 @@ package ffldb
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	database "github.com/stalker-loki/pod/pkg/db"
@@ -35,7 +36,7 @@ func parseArgs(funcName string, args ...interface{}) (string, wire.BitcoinNet, e
 func openDBDriver(args ...interface{}) (database.DB, error) {
 	dbPath, network, err := parseArgs("Open", args...)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, network, false)
@@ -45,7 +46,7 @@ func openDBDriver(args ...interface{}) (database.DB, error) {
 func createDBDriver(args ...interface{}) (database.DB, error) {
 	dbPath, network, err := parseArgs("Create", args...)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, network, true)

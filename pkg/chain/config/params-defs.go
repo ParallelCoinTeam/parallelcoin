@@ -111,11 +111,14 @@ type ConsensusDeployment struct {
 const (
 	// DeploymentTestDummy defines the rule change deployment ID for testing purposes.
 	DeploymentTestDummy = iota
-	// DeploymentCSV defines the rule change deployment ID for the CSV soft-fork package. The CSV package includes the deployment of BIPS 68, 112, and 113.
+	// DeploymentCSV defines the rule change deployment ID for the CSV soft-fork package. The CSV package includes the
+	//deployment of BIPS 68, 112, and 113.
 	DeploymentCSV
-	// DeploymentSegwit defines the rule change deployment ID for the Segregated Witness (segwit) soft-fork package. The segwit package includes the deployment of BIPS 141, 142, 144, 145, 147 and 173.
+	// DeploymentSegwit defines the rule change deployment ID for the Segregated Witness (segwit) soft-fork package.
+	//The segwit package includes the deployment of BIPS 141, 142, 144, 145, 147 and 173.
 	DeploymentSegwit
-	// NOTE: DefinedDeployments must always come last since it is used to determine how many defined deployments there currently are. DefinedDeployments is the number of currently defined deployments.
+	// NOTE: DefinedDeployments must always come last since it is used to determine how many defined deployments there
+	//currently are. DefinedDeployments is the number of currently defined deployments.
 	DefinedDeployments
 )
 

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
@@ -69,7 +69,7 @@ import (
 // 		want bool
 // 	}{
 // 		// Genesis block should be present (in the main chain).
-// 		{hash: chaincfg.MainNetParams.GenesisHash.String(), want: true},
+// 		{hash: config.MainNetParams.GenesisHash.String(), want: true},
 // 		// Block 3a should be present (on a side chain).
 // 		{hash: "00000000474284d20067a4d33f6a02284e6ef70764a3a26d6a5b9df52ef663dd", want: true},
 // 		// Block 100000 should be present (as an orphan).
@@ -99,7 +99,7 @@ import (
 func TestCalcSequenceLock(t *testing.T) {
 	netParams := &netparams.SimNetParams
 	// We need to activate CSV in order to test the processing logic, so manually craft the block version that's used to signal the soft-fork activation.
-	csvBit := netParams.Deployments[chaincfg.DeploymentCSV].BitNumber
+	csvBit := netParams.Deployments[config.DeploymentCSV].BitNumber
 	blockVersion := int32(0x20000000 | (uint32(1) << csvBit))
 	// Generate enough synthetic blocks to activate CSV.
 	chain := newFakeChain(netParams)

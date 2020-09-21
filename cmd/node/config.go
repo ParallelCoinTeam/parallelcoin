@@ -2,13 +2,14 @@ package node
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/stalker-loki/pod/app/appdata"
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	database "github.com/stalker-loki/pod/pkg/db"
 
@@ -111,7 +112,7 @@ const (
 	// DefaultAddress               = "127.0.0.1"
 	DefaultPort = "11047"
 	// DefaultRPCPort               = "11048"
-	// DefalutRPCAddr               = "127.0.0.1"
+	// DefaultRPCAddr               = "127.0.0.1"
 	// DefaultRPCServer             = "127.0.0.1:11048"
 	// DefaultListener              = "127.0.0.1:11047"
 	DefaultRPCListener  = "127.0.0.1"
@@ -167,30 +168,30 @@ var (
 )
 
 // NewCheckpointFromStr parses checkpoints in the '<height>:<hash>' format.
-func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
+func NewCheckpointFromStr(checkpoint string) (config.Checkpoint, error) {
 	parts := strings.Split(checkpoint, ":")
 	if len(parts) != 2 {
-		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
+		return config.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q -- use the syntax <height>:<hash>",
 			checkpoint)
 	}
 	height, err := strconv.ParseInt(parts[0], 10, 32)
 	if err != nil {
-		Error(err)
-		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
+		slog.Error(err)
+		return config.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed height", checkpoint)
 	}
 	if len(parts[1]) == 0 {
-		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
+		return config.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to missing hash", checkpoint)
 	}
 	hash, err := chainhash.NewHashFromStr(parts[1])
 	if err != nil {
-		Error(err)
-		return chaincfg.Checkpoint{}, fmt.Errorf("unable to parse "+
+		slog.Error(err)
+		return config.Checkpoint{}, fmt.Errorf("unable to parse "+
 			"checkpoint %q due to malformed hash", checkpoint)
 	}
-	return chaincfg.Checkpoint{
+	return config.Checkpoint{
 			Height: int32(height),
 			Hash:   hash,
 		},
@@ -211,16 +212,16 @@ func NewCheckpointFromStr(checkpoint string) (chaincfg.Checkpoint, error) {
 // }
 
 // ParseCheckpoints checks the checkpoint strings for valid syntax (
-// '<height>:<hash>') and parses them to chaincfg.Checkpoint instances.
-func ParseCheckpoints(checkpointStrings []string) ([]chaincfg.Checkpoint, error) {
+// '<height>:<hash>') and parses them to config.Checkpoint instances.
+func ParseCheckpoints(checkpointStrings []string) ([]config.Checkpoint, error) {
 	if len(checkpointStrings) == 0 {
 		return nil, nil
 	}
-	checkpoints := make([]chaincfg.Checkpoint, len(checkpointStrings))
+	checkpoints := make([]config.Checkpoint, len(checkpointStrings))
 	for i, cpString := range checkpointStrings {
 		checkpoint, err := NewCheckpointFromStr(cpString)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		checkpoints[i] = checkpoint

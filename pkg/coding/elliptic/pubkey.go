@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 )
 
@@ -20,7 +21,7 @@ func isOdd(a *big.Int) bool {
 
 // decompressPoint decompresses a point on the given curve given the X point and
 // the solution to use.
-func decompressPoint(curve *KoblitzCurve, x *big.Int, ybit bool) (*big.Int, error) {
+func decompressPoint(curve *KoblitzCurve, x *big.Int, yBit bool) (*big.Int, error) {
 	// TODO: This will probably only work for secp256k1 due to
 	// optimizations.
 	// Y = +-sqrt(x^3 + B)
@@ -33,7 +34,7 @@ func decompressPoint(curve *KoblitzCurve, x *big.Int, ybit bool) (*big.Int, erro
 	// but this was replaced by the algorithms referenced in
 	// https://bitcointalk.org/index.php?topic=162805.msg1712294#msg1712294
 	y := new(big.Int).Exp(x3, curve.QPlus1Div4(), curve.Params().P)
-	if ybit != isOdd(y) {
+	if yBit != isOdd(y) {
 		y.Sub(curve.Params().P, y)
 	}
 	// Check that y is a square root of x^3 + B.
@@ -43,8 +44,8 @@ func decompressPoint(curve *KoblitzCurve, x *big.Int, ybit bool) (*big.Int, erro
 		return nil, fmt.Errorf("invalid square root")
 	}
 	// Verify that y-coord has expected parity.
-	if ybit != isOdd(y) {
-		return nil, fmt.Errorf("ybit doesn't match oddness")
+	if yBit != isOdd(y) {
+		return nil, fmt.Errorf("yBit doesn't match oddness")
 	}
 	return y, nil
 }
@@ -74,7 +75,7 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 		return nil, errors.New("pubkey string is empty")
 	}
 	format := pubKeyStr[0]
-	ybit := (format & 0x1) == 0x1
+	yBit := (format & 0x1) == 0x1
 	format &= ^byte(0x1)
 	switch len(pubKeyStr) {
 	case PubKeyBytesLenUncompressed:
@@ -85,8 +86,8 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 		pubkey.X = new(big.Int).SetBytes(pubKeyStr[1:33])
 		pubkey.Y = new(big.Int).SetBytes(pubKeyStr[33:])
 		// hybrid keys have extra information, make use of it.
-		if format == pubkeyHybrid && ybit != isOdd(pubkey.Y) {
-			return nil, fmt.Errorf("ybit doesn't match oddness")
+		if format == pubkeyHybrid && yBit != isOdd(pubkey.Y) {
+			return nil, fmt.Errorf("yBit doesn't match oddness")
 		}
 	case PubKeyBytesLenCompressed:
 		// format is 0x2 | solution, <X coordinate>
@@ -97,9 +98,9 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 				"pubkey string: %d", pubKeyStr[0])
 		}
 		pubkey.X = new(big.Int).SetBytes(pubKeyStr[1:33])
-		pubkey.Y, err = decompressPoint(curve, pubkey.X, ybit)
+		pubkey.Y, err = decompressPoint(curve, pubkey.X, yBit)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 	default: // wrong!

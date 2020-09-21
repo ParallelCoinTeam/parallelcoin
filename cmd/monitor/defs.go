@@ -3,6 +3,7 @@ package monitor
 import (
 	"encoding/json"
 	"gioui.org/layout"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/apputil"
 	"github.com/stalker-loki/pod/app/conte"
 	"github.com/stalker-loki/pod/cmd/gui/rcd"
@@ -165,14 +166,14 @@ type Config struct {
 }
 
 func (s *State) LoadConfig() (isNew bool) {
-	Debug("loading config")
+	slog.Debug("loading config")
 	var err error
 	cnf := &Config{}
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if apputil.FileExists(filename) {
 		var b []byte
-		if b, err = ioutil.ReadFile(filename); !Check(err) {
-			if err = json.Unmarshal(b, cnf); Check(err) {
+		if b, err = ioutil.ReadFile(filename); !slog.Check(err) {
+			if err = json.Unmarshal(b, cnf); slog.Check(err) {
 				s.SaveConfig()
 			}
 			if s.Config.FilterNodes == nil {
@@ -208,7 +209,7 @@ func (s *State) LoadConfig() (isNew bool) {
 			s.CommandEditor.SetText(s.Config.ClickCommand)
 		}
 	} else {
-		Warn("creating new configuration")
+		slog.Warn("creating new configuration")
 		s.Config.UseBuiltinGo = s.HasGo
 		s.Config.RunInRepo = s.RunningInRepo
 		isNew = true
@@ -227,14 +228,14 @@ func (s *State) LoadConfig() (isNew bool) {
 }
 
 func (s *State) SaveConfig() {
-	Debug("saving monitor config")
+	slog.Debug("saving monitor config")
 	s.Config.Width = s.WindowWidth
 	s.Config.Height = s.WindowHeight
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
-	if cfgJSON, e := json.MarshalIndent(s.Config, "", "  "); !Check(e) {
+	if cfgJSON, e := json.MarshalIndent(s.Config, "", "  "); !slog.Check(e) {
 		// Debug(string(cfgJSON))
 		apputil.EnsureDir(filename)
-		if e := ioutil.WriteFile(filename, cfgJSON, 0600); Check(e) {
+		if e := ioutil.WriteFile(filename, cfgJSON, 0600); slog.Check(e) {
 			panic(e)
 		}
 	}

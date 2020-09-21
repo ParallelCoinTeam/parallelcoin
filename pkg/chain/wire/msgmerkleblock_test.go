@@ -70,8 +70,8 @@ func TestMerkleBlock(t *testing.T) {
 		t.Errorf("encode of MsgMerkleBlock failed %v err <%v>", msg, err)
 	}
 	// Test decode with latest protocol version.
-	readmsg := MsgMerkleBlock{}
-	err = readmsg.BtcDecode(&buf, pver, enc)
+	readMsg := MsgMerkleBlock{}
+	err = readMsg.BtcDecode(&buf, pver, enc)
 	if err != nil {
 		t.Errorf("decode of MsgMerkleBlock failed [%v] err <%v>", buf, err)
 	}
@@ -111,8 +111,8 @@ func TestMerkleBlockCrossProtocol(t *testing.T) {
 			err)
 	}
 	// Decode with old protocol version.
-	var readmsg MsgFilterLoad
-	err = readmsg.BtcDecode(&buf, BIP0031Version, BaseEncoding)
+	var readMsg MsgFilterLoad
+	err = readMsg.BtcDecode(&buf, BIP0031Version, BaseEncoding)
 	if err == nil {
 		t.Errorf("decode of MsgFilterLoad succeeded when it shouldn't have %v",
 			msg)

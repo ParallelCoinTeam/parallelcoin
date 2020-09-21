@@ -38,7 +38,8 @@ func Start() {
 
 	setup := xproto.Setup(X)
 	s := setup.DefaultScreen(X)
-	err = xproto.CreateWindowChecked(X, s.RootDepth, win, s.Root, 100, 100, 1, 1, 0, xproto.WindowClassInputOutput, s.RootVisual, 0, []uint32{}).Check()
+	err = xproto.CreateWindowChecked(X, s.RootDepth, win, s.Root, 100, 100, 1, 1, 0,
+		xproto.WindowClassInputOutput, s.RootVisual, 0, []uint32{}).Check()
 	if err != nil {
 		panic(err)
 	}
@@ -115,7 +116,8 @@ func eventLoop() {
 		case xproto.SelectionRequestEvent:
 			if debugClipboardRequests {
 				tgtname := lookupAtom(e.Target)
-				fmt.Fprintln(os.Stderr, "SelectionRequest", e, textAtom, tgtname, "isPrimary:", e.Selection == primaryAtom, "isClipboard:", e.Selection == clipboardAtom)
+				fmt.Fprintln(os.Stderr, "SelectionRequest", e, textAtom, tgtname, "isPrimary:", e.Selection ==
+					primaryAtom, "isClipboard:", e.Selection == clipboardAtom)
 			}
 			t := clipboardText
 
@@ -124,7 +126,8 @@ func eventLoop() {
 				if debugClipboardRequests {
 					fmt.Fprintln(os.Stderr, "Sending as text")
 				}
-				cpc := xproto.ChangePropertyChecked(X, xproto.PropModeReplace, e.Requestor, e.Property, textAtom, 8, uint32(len(t)), []byte(t))
+				cpc := xproto.ChangePropertyChecked(X, xproto.PropModeReplace, e.Requestor, e.Property, textAtom,
+					8, uint32(len(t)), []byte(t))
 				err := cpc.Check()
 				if err == nil {
 					sendSelectionNotify(e)
@@ -141,7 +144,8 @@ func eventLoop() {
 					xgb.Put32(buf[i*4:], uint32(atom))
 				}
 
-				xproto.ChangePropertyChecked(X, xproto.PropModeReplace, e.Requestor, e.Property, atomAtom, 32, uint32(len(targetAtoms)), buf).Check()
+				xproto.ChangePropertyChecked(X, xproto.PropModeReplace, e.Requestor, e.Property, atomAtom, 32,
+					uint32(len(targetAtoms)), buf).Check()
 				if err == nil {
 					sendSelectionNotify(e)
 				} else {

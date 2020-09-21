@@ -6,7 +6,8 @@ import (
 	"testing"
 )
 
-// TestMutableIterator ensures that the general behavior of mutable treap iterators is as expected including tests for first, last, ordered and reverse ordered iteration, limiting the range, seeking, and initially unpositioned.
+// TestMutableIterator ensures that the general behavior of mutable treap iterators is as expected including tests for
+// first, last, ordered and reverse ordered iteration, limiting the range, seeking, and initially unpositioned.
 func TestMutableIterator(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

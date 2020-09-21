@@ -61,8 +61,8 @@ func chainRuleError(chainErr blockchain.RuleError) RuleError {
 // It will return true if a code was successfully extracted.
 func extractRejectCode(err error) (wire.RejectCode, bool) {
 	// Pull the underlying error out of a RuleError.
-	if rerr, ok := err.(RuleError); ok {
-		err = rerr.Err
+	if ruleError, ok := err.(RuleError); ok {
+		err = ruleError.Err
 	}
 	switch err := err.(type) {
 	case blockchain.RuleError:

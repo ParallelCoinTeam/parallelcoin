@@ -2,6 +2,7 @@ package job
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"net"
 	"sort"
 	"time"
@@ -78,7 +79,7 @@ func Get(cx *conte.Xt, mB *util.Block, msg simplebuffer.Serializers, cbs *map[in
 		bitsMap, err = cx.RealNode.Chain.
 			CalcNextRequiredDifficultyPlan9Controller(tip)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return
 		}
 		tip.Diffs.Store(bitsMap)

@@ -3,6 +3,7 @@
 package app
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"github.com/urfave/cli"
 
 	"github.com/stalker-loki/pod/app/config"
@@ -16,7 +17,7 @@ var monitorHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
 		rc := rcd.RcInit(cx)
-		Warn("starting monitor GUI")
+		slog.Warn("starting monitor GUI")
 		return monitor.Run(cx, rc)
 	}
 }

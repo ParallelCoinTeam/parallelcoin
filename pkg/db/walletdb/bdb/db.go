@@ -1,6 +1,7 @@
 package bdb
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"os"
 
@@ -62,7 +63,7 @@ func (tx *transaction) ReadWriteBucket(key []byte) walletdb.ReadWriteBucket {
 func (tx *transaction) CreateTopLevelBucket(key []byte) (walletdb.ReadWriteBucket, error) {
 	boltBucket, err := tx.boltTx.CreateBucket(key)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, convertErr(err)
 	}
 	return (*bucket)(boltBucket), nil
@@ -70,7 +71,7 @@ func (tx *transaction) CreateTopLevelBucket(key []byte) (walletdb.ReadWriteBucke
 func (tx *transaction) DeleteTopLevelBucket(key []byte) error {
 	err := tx.boltTx.DeleteBucket(key)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return convertErr(err)
 	}
 	return nil
@@ -124,7 +125,7 @@ func (b *bucket) NestedReadBucket(key []byte) walletdb.ReadBucket {
 func (b *bucket) CreateBucket(key []byte) (walletdb.ReadWriteBucket, error) {
 	boltBucket, err := (*bolt.Bucket)(b).CreateBucket(key)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, convertErr(err)
 	}
 	return (*bucket)(boltBucket), nil
@@ -138,7 +139,7 @@ func (b *bucket) CreateBucket(key []byte) (walletdb.ReadWriteBucket, error) {
 func (b *bucket) CreateBucketIfNotExists(key []byte) (walletdb.ReadWriteBucket, error) {
 	boltBucket, err := (*bolt.Bucket)(b).CreateBucketIfNotExists(key)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, convertErr(err)
 	}
 	return (*bucket)(boltBucket), nil
@@ -273,7 +274,7 @@ var _ walletdb.DB = (*db)(nil)
 func (db *db) beginTx(writable bool) (*transaction, error) {
 	boltTx, err := (*bolt.DB)(db).Begin(writable)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, convertErr(err)
 	}
 	return &transaction{boltTx: boltTx}, nil

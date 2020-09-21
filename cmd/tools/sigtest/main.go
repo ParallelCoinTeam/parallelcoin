@@ -27,15 +27,15 @@ func main() {
 
 func ProcessSignal() {
 
-	sigch := make(chan os.Signal)
+	signalChan := make(chan os.Signal)
 
-	// the case statement below will mute if not binded to signal.Notify
+	// the case statement below will mute if not bound to signal.Notify
 	// will purposely leave out SIGABRT(abort) as an example
 
-	signal.Notify(sigch, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGHUP, os.Interrupt)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, syscall.SIGHUP, os.Interrupt)
 
 	for {
-		signalType := <-sigch
+		signalType := <-signalChan
 		fmt.Println("Received signal from channel : ", signalType)
 
 		switch signalType {

@@ -3,6 +3,7 @@ package builder
 import (
 	"crypto/rand"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"math"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -36,7 +37,7 @@ func RandomKey() ([gcs.KeySize]byte, error) {
 	_, err := rand.Read(randKey)
 	// This shouldn't happen unless the user is on a system that doesn't have a system CSPRNG. OK to panic in this case.
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return key, err
 	}
 	// Copy the byte slice to a [gcs.KeySize]byte array and return it.
@@ -44,7 +45,8 @@ func RandomKey() ([gcs.KeySize]byte, error) {
 	return key, nil
 }
 
-// DeriveKey is a utility function that derives a key from a chainhash.Hash by truncating the bytes of the hash to the appopriate key size.
+// DeriveKey is a utility function that derives a key from a chainhash.Hash by truncating the bytes of the hash to the
+// appropriate key size.
 func DeriveKey(keyHash *chainhash.Hash) [gcs.KeySize]byte {
 	var key [gcs.KeySize]byte
 	copy(key[:], keyHash.CloneBytes()[:])
@@ -94,7 +96,7 @@ func (b *GCSBuilder) SetP(p uint8) *GCSBuilder {
 	return b
 }
 
-// SetM sets the filter's modulous value after calling Builder().
+// SetM sets the filter's modulus value after calling Builder().
 func (b *GCSBuilder) SetM(m uint64) *GCSBuilder {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
@@ -109,7 +111,8 @@ func (b *GCSBuilder) SetM(m uint64) *GCSBuilder {
 	return b
 }
 
-// Preallocate sets the estimated filter size after calling Builder() to reduce the probability of memory reallocations. If the builder has already had data added to it, Preallocate has no effect.
+// Preallocate sets the estimated filter size after calling Builder() to reduce the probability of memory reallocations.
+// If the builder has already had data added to it, Preallocate has no effect.
 func (b *GCSBuilder) Preallocate(n uint32) *GCSBuilder {
 	// Do nothing if the builder's already errored out.
 	if b.err != nil {
@@ -167,7 +170,7 @@ func (b *GCSBuilder) Build() (*gcs.Filter, error) {
 	if b.err != nil {
 		return nil, b.err
 	}
-	// We'll ensure that all the parmaters we need to actually build the filter properly are set.
+	// We'll ensure that all the parameters we need to actually build the filter properly are set.
 	if b.p == 0 {
 		return nil, fmt.Errorf("p value is not set, cannot build")
 	}
@@ -217,7 +220,7 @@ func WithKeyHash(keyHash *chainhash.Hash) *GCSBuilder {
 func WithRandomKeyPNM(p uint8, n uint32, m uint64) *GCSBuilder {
 	key, err := RandomKey()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		b := GCSBuilder{err: err}
 		return &b
 	}
@@ -241,7 +244,7 @@ func BuildBasicFilter(block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filte
 	// If the filter had an issue with the specified key, then we force it to bubble up here by calling the Key() function.
 	_, err := b.Key()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// In order to build a basic filter, we'll range over the entire block, adding each whole script itself.
@@ -251,7 +254,8 @@ func BuildBasicFilter(block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filte
 			if len(txOut.PkScript) == 0 {
 				continue
 			}
-			// In order to allow the filters to later be committed to within an OP_RETURN output, we ignore all OP_RETURNs to avoid a circular dependency.
+			// In order to allow the filters to later be committed to within an OP_RETURN output, we ignore all
+			// OP_RETURNs to avoid a circular dependency.
 			if txOut.PkScript[0] == txscript.OP_RETURN &&
 				txscript.IsPushOnlyScript(txOut.PkScript[1:]) {
 				continue
@@ -273,7 +277,7 @@ func BuildBasicFilter(block *wire.MsgBlock, prevOutScripts [][]byte) (*gcs.Filte
 func GetFilterHash(filter *gcs.Filter) (chainhash.Hash, error) {
 	filterData, err := filter.NBytes()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return chainhash.Hash{}, err
 	}
 	return chainhash.DoubleHashH(filterData), nil
@@ -284,7 +288,7 @@ func MakeHeaderForFilter(filter *gcs.Filter, prevHeader chainhash.Hash) (chainha
 	filterTip := make([]byte, 2*chainhash.HashSize)
 	filterHash, err := GetFilterHash(filter)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return chainhash.Hash{}, err
 	}
 	// In the buffer we created above we'll compute hash || prevHash as an intermediate value.

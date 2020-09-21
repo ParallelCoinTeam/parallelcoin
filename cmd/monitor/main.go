@@ -5,6 +5,7 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/conte"
 	"github.com/stalker-loki/pod/cmd/gui/rcd"
 	"github.com/stalker-loki/pod/pkg/gui"
@@ -23,7 +24,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	for i := range *logi.L.Packages {
 		lgs = append(lgs, i)
 	}
-	Debugs(lgs)
+	slog.Debugs(lgs)
 	mon.Loggers = mon.GetTree(lgs)
 	isNew := mon.LoadConfig()
 	_, _ = git.PlainClone("/tmp/foo", false,
@@ -32,15 +33,15 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 			Progress: os.Stderr,
 		})
 	var cwd string
-	if cwd, err = os.Getwd(); Check(err) {
+	if cwd, err = os.Getwd(); slog.Check(err) {
 	}
 	var repo *git.Repository
-	if repo, err = git.PlainOpen(cwd); Check(err) {
+	if repo, err = git.PlainOpen(cwd); slog.Check(err) {
 	}
 	if repo != nil {
-		Debug("running inside repo")
+		slog.Debug("running inside repo")
 		mon.RunningInRepo = true
-		Debug(repo.Remotes())
+		slog.Debug(repo.Remotes())
 		if isNew {
 			mon.Config.RunInRepo = true
 		}
@@ -64,7 +65,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	if mon.Config.Running && !(mon.Config.RunMode == "m" ||
 		mon.Config.RunMode == "mon" || mon.Config.RunMode == "monitor") {
 		go func() {
-			Debug("starting up as was running previously when shut down")
+			slog.Debug("starting up as was running previously when shut down")
 			time.Sleep(time.Second / 2)
 			mon.Config.Running = false
 			// mon.RunCommandChan <- "stop"
@@ -77,19 +78,19 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	}
 	// go mon.Consume()
 	go func() {
-		Debug("starting up GUI event loop")
+		slog.Debug("starting up GUI event loop")
 	out:
 		for {
 			select {
 			case <-cx.KillAll:
-				Debug("kill signal received")
+				slog.Debug("kill signal received")
 				mon.SaveConfig()
 				mon.RunCommandChan <- "kill"
 				break out
 			case e := <-mon.W.Events():
 				switch e := e.(type) {
 				case system.DestroyEvent:
-					Debug("destroy event received")
+					slog.Debug("destroy event received")
 					mon.SaveConfig()
 					close(mon.Ctx.KillAll)
 				case system.FrameEvent:
@@ -108,7 +109,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 		}
 		mon.SaveConfig()
 		mon.RunCommandChan <- "kill"
-		Debug("gui shut down")
+		slog.Debug("gui shut down")
 		os.Exit(0)
 	}()
 	interrupt.AddHandler(func() {

@@ -6,7 +6,9 @@ import (
 	"strconv"
 )
 
-// AmountUnit describes a method of converting an Amount to something other than the base unit of a bitcoin.  The value of the AmountUnit is the exponent component of the decadic multiple to convert from an amount in bitcoin to an amount counted in units.
+// AmountUnit describes a method of converting an Amount to something other than the base unit of a bitcoin.  The value
+// of the AmountUnit is the exponent component of the decadic multiple to convert from an amount in bitcoin to an amount
+// counted in units.
 type AmountUnit int
 
 // These constants define various units used when describing a bitcoin monetary amount.
@@ -78,7 +80,9 @@ func (a Amount) ToDUO() float64 {
 	return a.ToUnit(AmountDUO)
 }
 
-// Format formats a monetary amount counted in bitcoin base units as a string for a given unit.  The conversion will succeed for any unit, however, known units will be formated with an appended label describing the units with SI notation, or "Satoshi" for the base unit.
+// Format formats a monetary amount counted in bitcoin base units as a string for a given unit.  The conversion will
+// succeed for any unit, however, known units will be formatted with an appended label describing the units with SI
+// notation, or "Satoshi" for the base unit.
 func (a Amount) Format(u AmountUnit) string {
 	units := " " + u.String()
 	return strconv.FormatFloat(a.ToUnit(u), 'f', -int(u+8), 64) + units

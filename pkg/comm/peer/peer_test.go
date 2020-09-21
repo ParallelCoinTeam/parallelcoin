@@ -22,27 +22,27 @@ type conn struct {
 	io.Writer
 	io.Closer
 	// local network, address for the connection.
-	lnet, laddr string
+	lNet, lAddr string
 	// remote network, address for the connection.
-	rnet, raddr string
+	rNet, rAddr string
 	// mocks socks proxy if true
 	proxy bool
 }
 
 // LocalAddr returns the local address for the connection.
 func (c conn) LocalAddr() net.Addr {
-	return &addr{c.lnet, c.laddr}
+	return &addr{c.lNet, c.lAddr}
 }
 
 // Remote returns the remote address for the connection.
 func (c conn) RemoteAddr() net.Addr {
 	if !c.proxy {
-		return &addr{c.rnet, c.raddr}
+		return &addr{c.rNet, c.rAddr}
 	}
-	host, strPort, _ := net.SplitHostPort(c.raddr)
+	host, strPort, _ := net.SplitHostPort(c.rAddr)
 	port, _ := strconv.Atoi(strPort)
 	return &socks.ProxiedAddr{
-		Net:  c.rnet,
+		Net:  c.rNet,
 		Host: host,
 		Port: port,
 	}
@@ -253,8 +253,8 @@ func TestPeerConnection(t *testing.T) {
 			"basic handshake",
 			func() (*peer.Peer, *peer.Peer, error) {
 				inConn, outConn := pipe(
-					&conn{raddr: "10.0.0.1:11047"},
-					&conn{raddr: "10.0.0.2:11047"},
+					&conn{rAddr: "10.0.0.1:11047"},
+					&conn{rAddr: "10.0.0.2:11047"},
 				)
 				inPeer := peer.NewInboundPeer(peer1Cfg)
 				inPeer.AssociateConnection(inConn)
@@ -277,8 +277,8 @@ func TestPeerConnection(t *testing.T) {
 			"socks proxy",
 			func() (*peer.Peer, *peer.Peer, error) {
 				inConn, outConn := pipe(
-					&conn{raddr: "10.0.0.1:11047", proxy: true},
-					&conn{raddr: "10.0.0.2:11047"},
+					&conn{rAddr: "10.0.0.1:11047", proxy: true},
+					&conn{rAddr: "10.0.0.2:11047"},
 				)
 				inPeer := peer.NewInboundPeer(peer1Cfg)
 				inPeer.AssociateConnection(inConn)
@@ -414,8 +414,8 @@ func TestPeerListeners(t *testing.T) {
 		TrickleInterval:   time.Second * 10,
 	}
 	inConn, outConn := pipe(
-		&conn{raddr: "10.0.0.1:11047"},
-		&conn{raddr: "10.0.0.2:11047"},
+		&conn{rAddr: "10.0.0.1:11047"},
+		&conn{rAddr: "10.0.0.2:11047"},
 	)
 	inPeer := peer.NewInboundPeer(peerCfg)
 	inPeer.AssociateConnection(inConn)
@@ -580,7 +580,7 @@ func TestOutboundPeer(t *testing.T) {
 		TrickleInterval:   time.Second * 10,
 	}
 	r, w := io.Pipe()
-	c := &conn{raddr: "10.0.0.1:11047", Writer: w, Reader: r}
+	c := &conn{rAddr: "10.0.0.1:11047", Writer: w, Reader: r}
 	p, err := peer.NewOutboundPeer(peerCfg, "10.0.0.1:11047")
 	if err != nil {
 		t.Errorf("NewOutboundPeer: unexpected err - %v\n", err)
@@ -627,7 +627,7 @@ func TestOutboundPeer(t *testing.T) {
 	}
 	peerCfg.NewestBlock = newestBlock
 	r1, w1 := io.Pipe()
-	c1 := &conn{raddr: "10.0.0.1:11047", Writer: w1, Reader: r1}
+	c1 := &conn{rAddr: "10.0.0.1:11047", Writer: w1, Reader: r1}
 	p1, err := peer.NewOutboundPeer(peerCfg, "10.0.0.1:11047")
 	if err != nil {
 		t.Errorf("NewOutboundPeer: unexpected err - %v\n", err)
@@ -654,7 +654,7 @@ func TestOutboundPeer(t *testing.T) {
 	peerCfg.ChainParams = &netparams.RegressionTestParams
 	peerCfg.Services = wire.SFNodeBloom
 	r2, w2 := io.Pipe()
-	c2 := &conn{raddr: "10.0.0.1:11047", Writer: w2, Reader: r2}
+	c2 := &conn{rAddr: "10.0.0.1:11047", Writer: w2, Reader: r2}
 	p2, err := peer.NewOutboundPeer(peerCfg, "10.0.0.1:11047")
 	if err != nil {
 		t.Errorf("NewOutboundPeer: unexpected err - %v\n", err)
@@ -712,8 +712,8 @@ func TestOutboundPeer(t *testing.T) {
 // 		wire.SFNodeNetwork,
 // 	)
 // 	localConn, remoteConn := pipe(
-// 		&conn{laddr: "10.0.0.1:11047", raddr: "10.0.0.2:11047"},
-// 		&conn{laddr: "10.0.0.2:11047", raddr: "10.0.0.1:11047"},
+// 		&conn{lAddr: "10.0.0.1:11047", rAddr: "10.0.0.2:11047"},
+// 		&conn{lAddr: "10.0.0.2:11047", rAddr: "10.0.0.1:11047"},
 // 	)
 // 	p, err := peer.NewOutboundPeer(peerCfg, "10.0.0.1:11047")
 // 	if err != nil {
@@ -800,10 +800,10 @@ func TestDuplicateVersionMsg(t *testing.T) {
 		Services:         0,
 	}
 	inConn, outConn := pipe(
-		&conn{laddr: "10.0.0.1:9108", raddr: "10.0.0.2:9108"},
-		&conn{laddr: "10.0.0.2:9108", raddr: "10.0.0.1:9108"},
+		&conn{lAddr: "10.0.0.1:9108", rAddr: "10.0.0.2:9108"},
+		&conn{lAddr: "10.0.0.2:9108", rAddr: "10.0.0.1:9108"},
 	)
-	outPeer, err := peer.NewOutboundPeer(peerCfg, inConn.laddr)
+	outPeer, err := peer.NewOutboundPeer(peerCfg, inConn.lAddr)
 	if err != nil {
 		t.Fatalf("NewOutboundPeer: unexpected err: %v\n", err)
 	}

@@ -186,7 +186,7 @@ type RelevantTxAcceptedNtfn struct {
 	Transaction string `json:"transaction"`
 }
 
-// NewRelevantTxAcceptedNtfn returns a new instance which can be used to issue a relevantxaccepted JSON-RPC notification.
+// NewRelevantTxAcceptedNtfn returns a new instance which can be used to issue a relevanttxaccepted JSON-RPC notification.
 func NewRelevantTxAcceptedNtfn(txHex string) *RelevantTxAcceptedNtfn {
 	return &RelevantTxAcceptedNtfn{Transaction: txHex}
 }

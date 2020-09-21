@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/gui"
 )
 
@@ -78,7 +79,7 @@ func (s *State) RunmodeButtons() layout.FlexChild {
 					s.TextButton(txt, "Secondary", 34, fg,
 						"ButtonBg", s.ModesButtons[modes[i]])
 					for s.ModesButtons[modes[i]].Clicked(s.Gtx) {
-						Debug(mm, "clicked")
+						slog.Debug(mm, "clicked")
 						if s.Config.RunModeOpen {
 							s.Config.RunMode = modes[i]
 							s.Config.RunModeOpen = false
@@ -107,7 +108,7 @@ func (s *State) Filter() layout.FlexChild {
 			})
 		}, b)
 		for b.Clicked(s.Gtx) {
-			Debug("clicked filter button")
+			slog.Debug("clicked filter button")
 			if !s.Config.FilterOpen {
 				s.Config.SettingsOpen = false
 				s.Config.BuildOpen = false

@@ -1,4 +1,4 @@
-/*Package database provides a block and metadata storage database.
+/* Package database provides a block and metadata storage database.
 
 Overview
 

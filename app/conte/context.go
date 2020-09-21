@@ -3,6 +3,7 @@
 package conte
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"sync"
 
 	"go.uber.org/atomic"
@@ -118,7 +119,7 @@ func (cx *Xt) IsCurrent() (is bool) {
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load()
-	Trace("is current:", is, "-", rn.Chain.IsCurrent(),
+	slog.Trace("is current:", is, "-", rn.Chain.IsCurrent(),
 		rn.SyncManager.IsCurrent(), !*cx.Config.Solo,
 		"connected", rn.HighestKnown.Load(),
 		rn.Chain.BestChain.Height(),

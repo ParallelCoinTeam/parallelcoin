@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/config"
 	"os"
 	"time"
@@ -31,7 +32,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 		ctl.HelpPrint = func() {
 			err := cli.ShowSubcommandHelp(c)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 			}
 		}
 		ctl.Main(args, cx)

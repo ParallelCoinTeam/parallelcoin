@@ -2,6 +2,7 @@ package bech32
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"strings"
 )
 
@@ -43,7 +44,7 @@ func Decode(bech string) (string, []byte, error) {
 	// Each character corresponds to the byte with value of the index in 'charset'.
 	decoded, err := toBytes(data)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return "", nil, fmt.Errorf("failed converting data to bytes: "+
 			"%v", err)
 	}
@@ -70,14 +71,14 @@ func Encode(hrp string, data []byte) (string, error) {
 	// The resulting bech32 string is the concatenation of the hrp, the separator 1, data and checksum. Everything after the separator is represented using the specified charset.
 	dataChars, err := toChars(combined)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return "", fmt.Errorf("unable to convert data bytes to chars: "+
 			"%v", err)
 	}
 	return hrp + "1" + dataChars, nil
 }
 
-// toBytes converts each character in the string 'chars' to the value of the index of the correspoding character in 'charset'.
+// toBytes converts each character in the string 'chars' to the value of the index of the corresponding character in 'charset'.
 func toBytes(chars string) ([]byte, error) {
 	decoded := make([]byte, 0, len(chars))
 	for i := 0; i < len(chars); i++ {
@@ -163,15 +164,15 @@ func bech32Checksum(hrp string, data []byte) []byte {
 	}
 	values := append(bech32HrpExpand(hrp), integers...)
 	values = append(values, []int{0, 0, 0, 0, 0, 0}...)
-	polymod := bech32Polymod(values) ^ 1
+	polyMod := bech32Polymod(values) ^ 1
 	var res []byte
 	for i := 0; i < 6; i++ {
-		res = append(res, byte((polymod>>uint(5*(5-i)))&31))
+		res = append(res, byte((polyMod>>uint(5*(5-i)))&31))
 	}
 	return res
 }
 
-// For more details on the polymod calculation, please refer to BIP 173.
+// For more details on the polyMod calculation, please refer to BIP 173.
 func bech32Polymod(values []int) int {
 	chk := 1
 	for _, v := range values {

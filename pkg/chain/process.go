@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"time"
 
 	"github.com/stalker-loki/pod/pkg/chain/fork"
@@ -64,7 +65,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// The block must not already exist in the main chain or side chains.
 	exists, err := b.blockExists(blockHash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, false, err
 	}
 	if exists {
@@ -97,7 +98,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// 	fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
 	err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight)
 	if err != nil {
-		Error("block processing error: ", err)
+		slog.Error("block processing error: ", err)
 		return false, false, err
 	}
 	// Warn("searching back to checkpoints")
@@ -111,7 +112,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	blockHeader := &block.MsgBlock().Header
 	checkpointNode, err := b.findPreviousCheckpoint()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, false, err
 	}
 	if checkpointNode != nil {
@@ -147,7 +148,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	prevHash := &blockHeader.PrevBlock
 	prevHashExists, err := b.blockExists(prevHash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, false, err
 	}
 	if !prevHashExists {
@@ -166,21 +167,21 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// Warn("maybe accept block")
 	isMainChain, err := b.maybeAcceptBlock(workerNumber, block, flags)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, false, err
 	}
 	// Accept any orphan blocks that depend on this block (they are no longer
 	// orphans) and repeat for those accepted blocks until there are no more.
 	if isMainChain {
-		Trace("new block on main chain")
+		slog.Trace("new block on main chain")
 		// Traces(block)
 	}
 	err = b.processOrphans(workerNumber, blockHash, flags)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, false, err
 	}
-	Tracef("accepted block %d %v %s",
+	slog.Tracef("accepted block %d %v %s",
 		blockHeight, bhwa(blockHeight).String(), fork.GetAlgoName(block.MsgBlock().
 			Header.Version, blockHeight))
 	// Warn("finished blockchain.ProcessBlock")
@@ -250,7 +251,7 @@ func // processOrphans determines if there are any orphans which depend on the
 		for i := 0; i < len(b.prevOrphans[*processHash]); i++ {
 			orphan := b.prevOrphans[*processHash][i]
 			if orphan == nil {
-				Tracef("found a nil entry at index %d in the orphan"+
+				slog.Tracef("found a nil entry at index %d in the orphan"+
 					" dependency list for block %v", i, processHash)
 				continue
 			}
@@ -261,7 +262,7 @@ func // processOrphans determines if there are any orphans which depend on the
 			// Potentially accept the block into the block chain.
 			_, err := b.maybeAcceptBlock(workerNumber, orphan.block, flags)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			// Add this block to the list of blocks to process so any orphan

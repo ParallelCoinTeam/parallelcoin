@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"time"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -55,7 +56,7 @@ func isScriptHash(pops []parsedOpcode) bool {
 func IsPayToScriptHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false
 	}
 	return isScriptHash(pops)
@@ -74,7 +75,7 @@ func isWitnessScriptHash(pops []parsedOpcode) bool {
 func IsPayToWitnessScriptHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false
 	}
 	return isWitnessScriptHash(pops)
@@ -85,7 +86,7 @@ func IsPayToWitnessScriptHash(script []byte) bool {
 func IsPayToWitnessPubKeyHash(script []byte) bool {
 	pops, err := parseScript(script)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false
 	}
 	return isWitnessPubKeyHash(pops)
@@ -110,7 +111,7 @@ func IsWitnessProgram(script []byte) bool {
 	}
 	pops, err := parseScript(script)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false
 	}
 	return isWitnessProgram(pops)
@@ -135,7 +136,7 @@ func isWitnessProgram(pops []parsedOpcode) bool {
 func ExtractWitnessProgramInfo(script []byte) (int, []byte, error) {
 	pops, err := parseScript(script)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return 0, nil, err
 	}
 	// If at this point, the scripts doesn't resemble a witness program,
@@ -172,7 +173,7 @@ func IsPushOnlyScript(script []byte) bool {
 	// data. False will be returned when the script does not parse.
 	pops, err := parseScript(script)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false
 	}
 	return isPushOnly(pops)
@@ -266,7 +267,7 @@ func unparseScript(pops []parsedOpcode) ([]byte, error) {
 	for _, pop := range pops {
 		b, err := pop.bytes()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		script = append(script, b...)
@@ -291,7 +292,7 @@ func DisasmString(buf []byte) (string, error) {
 		disbuf.Truncate(disbuf.Len() - 1)
 	}
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		disbuf.WriteString("[error]")
 	}
 	return disbuf.String(), err
@@ -396,7 +397,7 @@ func calcHashOutputs(tx *wire.MsgTx) chainhash.Hash {
 	for _, out := range tx.TxOut {
 		err := wire.WriteTxOut(&b, 0, 0, out)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}
 	return chainhash.DoubleHashH(b.Bytes())
@@ -470,7 +471,7 @@ func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, 
 		rawScript, _ := unparseScript(subScript)
 		err := wire.WriteVarBytes(&sigHash, 0, rawScript)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}
 	// Next, add the input amount,
@@ -492,7 +493,7 @@ func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, 
 		var b bytes.Buffer
 		err := wire.WriteTxOut(&b, 0, 0, tx.TxOut[idx])
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 		sigHash.Write(chainhash.DoubleHashB(b.Bytes()))
 	} else {
@@ -513,7 +514,7 @@ func calcWitnessSignatureHash(subScript []parsedOpcode, sigHashes *TxSigHashes, 
 func CalcWitnessSigHash(script []byte, sigHashes *TxSigHashes, hType SigHashType, tx *wire.MsgTx, idx int, amt int64) ([]byte, error) {
 	parsedScript, err := parseScript(script)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, fmt.Errorf("cannot parse output script: %v", err)
 	}
 	return calcWitnessSignatureHash(parsedScript, sigHashes, hType, tx, idx,
@@ -552,7 +553,7 @@ func shallowCopyTx(tx *wire.MsgTx) wire.MsgTx {
 func CalcSignatureHash(script []byte, hashType SigHashType, tx *wire.MsgTx, idx int) ([]byte, error) {
 	parsedScript, err := parseScript(script)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, fmt.Errorf("cannot parse output script: %v", err)
 	}
 	return calcSignatureHash(parsedScript, hashType, tx, idx), nil
@@ -642,11 +643,11 @@ func calcSignatureHash(script []parsedOpcode, hashType SigHashType, tx *wire.Msg
 	wbuf := bytes.NewBuffer(make([]byte, 0, txCopy.SerializeSizeStripped()+4))
 	err := txCopy.SerializeNoWitness(wbuf)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	err = binary.Write(wbuf, binary.LittleEndian, hashType)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	return chainhash.DoubleHashB(wbuf.Bytes())
 }
@@ -721,7 +722,7 @@ func GetPreciseSigOpCount(scriptSig, scriptPubKey []byte, bip16 bool) int {
 	// Scripts that fail to fully parse count as 0 signature operations.
 	sigPops, err := parseScript(scriptSig)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return 0
 	}
 	// The signature script must only push data to the stack for P2SH to be a
@@ -762,7 +763,7 @@ func GetWitnessSigOpCount(sigScript, pkScript []byte, witness wire.TxWitness) in
 	// datapush of a p2wsh witness program.
 	sigPops, err := parseScript(sigScript)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return 0
 	}
 	if IsPayToScriptHash(pkScript) && isPushOnly(sigPops) &&
@@ -783,7 +784,7 @@ func getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
 		pkScript,
 	)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return 0
 	}
 	switch witnessVersion {
@@ -807,7 +808,7 @@ func getWitnessSigOps(pkScript []byte, witness wire.TxWitness) int {
 func IsUnspendable(pkScript []byte) bool {
 	pops, err := parseScript(pkScript)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return true
 	}
 	return len(pops) > 0 && pops[0].opcode.value == OP_RETURN

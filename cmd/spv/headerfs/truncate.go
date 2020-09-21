@@ -4,6 +4,7 @@ package headerfs
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 )
 
 // singleTruncate truncates a single header from the end of the header file.
@@ -20,7 +21,7 @@ func (h *headerStore) singleTruncate() error {
 	fileInfo, err := h.file.Stat()
 
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 

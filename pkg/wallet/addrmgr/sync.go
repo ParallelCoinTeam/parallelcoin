@@ -1,6 +1,7 @@
 package waddrmgr
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"time"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -53,7 +54,7 @@ func (m *Manager) SetSyncedTo(ns walletdb.ReadWriteBucket, bs *BlockStamp) error
 	// Update the database.
 	err := putSyncedTo(ns, bs)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Update memory now that the database is updated.

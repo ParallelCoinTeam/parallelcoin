@@ -12,7 +12,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/coding/snacl"
@@ -1640,7 +1640,7 @@ func testSync(tc *testContext) bool {
 	}
 	blockStamp := waddrmgr.BlockStamp{
 		Height: 0,
-		Hash:   *chaincfg.MainNetParams.GenesisHash,
+		Hash:   *config.MainNetParams.GenesisHash,
 	}
 	gotBlockStamp := tc.rootManager.SyncedTo()
 	if gotBlockStamp != blockStamp {

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	"github.com/stalker-loki/pod/pkg/util"
@@ -130,7 +130,7 @@ func TestSequenceLocksActive(t *testing.T) {
 
 // TestCheckBlockSanity tests the CheckBlockSanity function to ensure it works as expected.
 func TestCheckBlockSanity(t *testing.T) {
-	powLimit := chaincfg.MainNetParams.PowLimit
+	powLimit := config.MainNetParams.PowLimit
 	block := util.NewBlock(&Block100000)
 	timeSource := NewMedianTime()
 	err := CheckBlockSanity(block, powLimit, timeSource, false, 1)

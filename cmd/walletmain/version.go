@@ -3,6 +3,7 @@ package walletmain
 import (
 	"bytes"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"strings"
 )
 
@@ -60,7 +61,7 @@ func normalizeVerString(str string) string {
 			// Writing to a bytes.Buffer panics on OOM, and all
 			// errors are unexpected.
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				panic(err)
 			}
 		}

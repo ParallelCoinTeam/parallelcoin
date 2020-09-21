@@ -1,6 +1,7 @@
 package interrupt
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -31,24 +32,24 @@ var (
 func Listener() {
 	var interruptCallbacks []func()
 	invokeCallbacks := func() {
-		Debug("running interrupt callbacks")
+		slog.Debug("running interrupt callbacks")
 		// run handlers in LIFO order.
 		for i := range interruptCallbacks {
 			idx := len(interruptCallbacks) - 1 - i
 			interruptCallbacks[idx]()
 		}
 		close(HandlersDone)
-		Debug("interrupt handlers finished")
+		slog.Debug("interrupt handlers finished")
 		if Restart {
-			Debug("restarting")
+			slog.Debug("restarting")
 			file, err := osext.Executable()
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return
 			}
 			err = syscall.Exec(file, os.Args, os.Environ())
 			if err != nil {
-				Fatal(err)
+				slog.Fatal(err)
 			}
 			// return
 		}
@@ -59,17 +60,17 @@ func Listener() {
 		select {
 		case sig := <-Chan:
 			// L.Printf("\r>>> received signal (%s)\n", sig)
-			Debug("received interrupt signal", sig)
+			slog.Debug("received interrupt signal", sig)
 			requested = true
 			invokeCallbacks()
 			return
 		case <-ShutdownRequestChan:
-			Warn("received shutdown request - shutting down...")
+			slog.Warn("received shutdown request - shutting down...")
 			requested = true
 			invokeCallbacks()
 			return
 		case handler := <-AddHandlerChan:
-			Debug("adding handler")
+			slog.Debug("adding handler")
 			interruptCallbacks = append(interruptCallbacks, handler)
 		}
 	}
@@ -89,7 +90,7 @@ func AddHandler(handler func()) {
 
 // Request programatically requests a shutdown
 func Request() {
-	Debug("interrupt requested")
+	slog.Debug("interrupt requested")
 	ShutdownRequestChan <- struct{}{}
 	// var ok bool
 	// select {
@@ -105,7 +106,7 @@ func Request() {
 // RequestRestart sets the reset flag and requests a restart
 func RequestRestart() {
 	Restart = true
-	Debug("requesting restart")
+	slog.Debug("requesting restart")
 	Request()
 }
 

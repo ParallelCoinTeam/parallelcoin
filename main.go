@@ -5,7 +5,6 @@
 package main
 
 import (
-	_ "github.com/stalker-loki/pod/pkg"
 	_ "net/http/pprof"
 
 	"github.com/stalker-loki/pod/cmd"

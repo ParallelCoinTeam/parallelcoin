@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"errors"
+	"github.com/stalker-loki/app/slog"
 	"io"
 )
 
@@ -35,8 +36,8 @@ var (
 // GenerateSharedSecret generates a shared secret based on a private key and a
 // public key using Diffie-Hellman key exchange (ECDH) (RFC 4753).
 // RFC5903 Section 9 states we should only return x.
-func GenerateSharedSecret(privkey *PrivateKey, pubkey *PublicKey) []byte {
-	x, _ := pubkey.Curve.ScalarMult(pubkey.X, pubkey.Y, privkey.D.Bytes())
+func GenerateSharedSecret(privKey *PrivateKey, pubkey *PublicKey) []byte {
+	x, _ := pubkey.Curve.ScalarMult(pubkey.X, pubkey.Y, privKey.D.Bytes())
 	return x.Bytes()
 }
 
@@ -60,7 +61,7 @@ func GenerateSharedSecret(privkey *PrivateKey, pubkey *PublicKey) []byte {
 func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	ephemeral, err := NewPrivateKey(S256())
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	ecdhKey := GenerateSharedSecret(ephemeral, pubkey)
@@ -92,7 +93,7 @@ func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	// start encryption
 	block, err := aes.NewCipher(keyE)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	mode := cipher.NewCBCEncrypter(block, iv)
@@ -101,7 +102,7 @@ func Encrypt(pubkey *PublicKey, in []byte) ([]byte, error) {
 	hm := hmac.New(sha256.New, keyM)
 	_, err = hm.Write(out[:len(out)-sha256.Size]) // everything is hashed
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	copy(out[len(out)-sha256.Size:], hm.Sum(nil)) // write checksum
 	return out, nil
@@ -140,7 +141,7 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	// check if (X, Y) lies on the curve and create a Pubkey if it does
 	pubkey, err := ParsePubKey(pb, S256())
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// check for cipher text length
@@ -158,7 +159,7 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	hm := hmac.New(sha256.New, keyM)
 	_, err = hm.Write(in[:len(in)-sha256.Size]) // everything is hashed
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	expectedMAC := hm.Sum(nil)
 	if !hmac.Equal(messageMAC, expectedMAC) {
@@ -167,7 +168,7 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 	// start decryption
 	block, err := aes.NewCipher(keyE)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	mode := cipher.NewCBCDecrypter(block, iv)
@@ -181,8 +182,8 @@ func Decrypt(priv *PrivateKey, in []byte) ([]byte, error) {
 // addPKCSPadding adds padding to a block of data
 func addPKCSPadding(src []byte) []byte {
 	padding := aes.BlockSize - len(src)%aes.BlockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(src, padtext...)
+	padText := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(src, padText...)
 }
 
 // removePKCSPadding removes padding from data that was added with addPKCSPadding

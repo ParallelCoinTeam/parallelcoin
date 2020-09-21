@@ -3,6 +3,7 @@ package database_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"path/filepath"
 
@@ -26,7 +27,7 @@ func ExampleCreate() {
 	dbPath := filepath.Join(os.TempDir(), "examplecreate")
 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	defer os.RemoveAll(dbPath)
@@ -50,7 +51,7 @@ func Example_basicUsage() {
 	dbPath := filepath.Join(os.TempDir(), "exampleusage")
 	db, err := database.Create("ffldb", dbPath, wire.MainNet)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	defer os.RemoveAll(dbPath)
@@ -86,7 +87,7 @@ func Example_basicUsage() {
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Output:

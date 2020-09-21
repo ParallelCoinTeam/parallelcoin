@@ -4,19 +4,20 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"math"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	"github.com/stalker-loki/pod/pkg/chain/hardfork"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	indexers "github.com/stalker-loki/pod/pkg/chain/index"
 	"github.com/stalker-loki/pod/pkg/chain/mining"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	script "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	"github.com/stalker-loki/pod/pkg/util/logi"
 
@@ -52,9 +53,9 @@ Config struct {
 	// the mempool or not.
 	IsDeploymentActive func(deploymentID uint32) (bool, error)
 	// SigCache defines a signature cache to use.
-	SigCache *txscript.SigCache
+	SigCache *script.SigCache
 	// HashCache defines the transaction hash mid-state cache to use.
-	HashCache *txscript.HashCache
+	HashCache *script.HashCache
 	// AddrIndex defines the optional address index instance to use for
 	// indexing the unconfirmed transactions in the memory pool.
 	// This can be nil if the address index is not enabled.
@@ -299,7 +300,7 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 // This function is safe for concurrent access.
 (mp *TxPool) ProcessTransaction(b *blockchain.BlockChain, tx *util.Tx,
 	allowOrphan, rateLimit bool, tag Tag) ([]*TxDesc, error) {
-	Trace("processing transaction", tx.Hash())
+	slog.Trace("processing transaction", tx.Hash())
 	// Protect concurrent access.
 	mp.mtx.Lock()
 	defer mp.mtx.Unlock()
@@ -307,7 +308,7 @@ func // ProcessTransaction is the main workhorse for handling insertion of new
 	missingParents, txD, err := mp.maybeAcceptTransaction(b, tx, true,
 		rateLimit, true)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	if len(missingParents) == 0 {
@@ -482,7 +483,7 @@ func // addOrphan adds an orphan transaction to the orphan pool.
 	// orphan if space is still needed.
 	e := mp.limitNumOrphans()
 	if e != nil {
-		Warn("failed to set orphan limit", e)
+		slog.Warn("failed to set orphan limit", e)
 	}
 	mp.orphans[*tx.Hash()] = &orphanTx{
 		tx:         tx,
@@ -496,7 +497,7 @@ func // addOrphan adds an orphan transaction to the orphan pool.
 		}
 		mp.orphansByPrev[txIn.PreviousOutPoint][*tx.Hash()] = tx
 	}
-	Debug(
+	slog.Debug(
 		"stored orphan transaction", tx.Hash(), "(total:", len(mp.orphans), ")",
 	)
 }
@@ -560,7 +561,7 @@ func // fetchInputUtxos loads utxo details about the input transactions
 (mp *TxPool) fetchInputUtxos(tx *util.Tx) (*blockchain.UtxoViewpoint, error) {
 	utxoView, err := mp.cfg.FetchUtxoView(tx)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// Attempt to populate any missing inputs from the transaction pool.
@@ -630,7 +631,7 @@ func // limitNumOrphans limits the number of orphan transactions by evicting a
 		mp.nextExpireScan = now.Add(orphanExpireScanInterval)
 		numOrphans := len(mp.orphans)
 		if numExpired := origNumOrphans - numOrphans; numExpired > 0 {
-			Debugf("Expired %d %s (remaining: %d)",
+			slog.Debugf("Expired %d %s (remaining: %d)",
 				numExpired, logi.PickNoun(numExpired, "orphan", "orphans"),
 				numOrphans,
 			)
@@ -667,9 +668,9 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// If segwit isn't active yet,
 	// then we won't accept it into the mempool as it can't be mined yet.
 	if tx.MsgTx().HasWitness() {
-		segwitActive, err := mp.cfg.IsDeploymentActive(chaincfg.DeploymentSegwit)
+		segwitActive, err := mp.cfg.IsDeploymentActive(config.DeploymentSegwit)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, nil, err
 		}
 		if !segwitActive {
@@ -695,7 +696,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// what transactions are allowed into blocks.
 	err := blockchain.CheckTransactionSanity(tx)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -720,7 +721,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 			medianTimePast, mp.cfg.Policy.MinRelayTxFee,
 			mp.cfg.Policy.MaxTxVersion)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.
 			// When not possible, fall back to a non standard error.
@@ -745,7 +746,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// actual spend data and prevents double spends.
 	err = mp.checkPoolDoubleSpend(tx)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, nil, err
 	}
 	// Fetch all of the unspent transaction outputs referenced by the inputs
@@ -755,7 +756,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// lookup.
 	utxoView, err := mp.fetchInputUtxos(tx)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -796,7 +797,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// respect to its defined relative lock times.
 	sequenceLock, err := mp.cfg.CalcSequenceLock(tx, utxoView)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -814,7 +815,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	txFee, err := blockchain.CheckTransactionInputs(tx, nextBlockHeight,
 		utxoView, mp.cfg.ChainParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -825,7 +826,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	if !mp.cfg.Policy.AcceptNonStd {
 		err := checkInputsStandard(tx, utxoView)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.  When not possible, fall back to a non standard error.
 			rejectCode, found := extractRejectCode(err)
@@ -848,7 +849,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// TODO(roasbeef): last bool should be conditional on segwit activation
 	sigOpCost, err := blockchain.GetSigOpCost(tx, false, utxoView, true, true)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -911,7 +912,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 		}
 		oldTotal := mp.pennyTotal
 		mp.pennyTotal += float64(serializedSize)
-		Tracef(
+		slog.Tracef(
 			"rate limit: curTotal %v, nextTotal: %v, limit %v",
 			oldTotal,
 			mp.pennyTotal,
@@ -921,10 +922,10 @@ func // maybeAcceptTransaction is the internal function which implements the
 	// Verify crypto signatures for each input and reject the transaction if
 	// any don't verify.
 	err = blockchain.ValidateTransactionScripts(b, tx, utxoView,
-		txscript.StandardVerifyFlags, mp.cfg.SigCache,
+		script.StandardVerifyFlags, mp.cfg.SigCache,
 		mp.cfg.HashCache)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if cErr, ok := err.(blockchain.RuleError); ok {
 			return nil, nil, chainRuleError(cErr)
 		}
@@ -932,7 +933,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 	}
 	// Add to transaction pool.
 	txD := mp.addTransaction(utxoView, tx, bestHeight, txFee)
-	Debugf(
+	slog.Debugf(
 		"accepted transaction %v (pool size: %v) %s",
 		txHash,
 		len(mp.pool),
@@ -1001,7 +1002,7 @@ func // processOrphans is the internal function which implements the public
 				missing, txD, err := mp.maybeAcceptTransaction(
 					b, tx, true, true, false)
 				if err != nil {
-					Error(err)
+					slog.Error(err)
 					// The orphan is now invalid so there is no way any other
 					// orphans which redeem any of its outputs can be
 					// accepted.  Remove them.

@@ -2,6 +2,7 @@ package filterdb
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -71,7 +72,7 @@ func New(db walletdb.DB, params netparams.Params) (*FilterStore, error) {
 		// exit early.
 		filters, err := tx.CreateTopLevelBucket(filterBucket)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// If the main bucket doesn't already exist, then we'll need to
@@ -82,14 +83,14 @@ func New(db walletdb.DB, params netparams.Params) (*FilterStore, error) {
 		// First we'll create the bucket for the regular filters.
 		regFilters, err := filters.CreateBucketIfNotExists(regBucket)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// With the bucket created, we'll now construct the initial
 		// basic genesis filter and store it within the database.
 		basicFilter, err := builder.BuildBasicFilter(genesisBlock, nil)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		return putFilter(regFilters, genesisHash, basicFilter)
@@ -113,7 +114,7 @@ func putFilter(bucket walletdb.ReadWriteBucket, hash *chainhash.Hash,
 	}
 	bytes, err := filter.NBytes()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	return bucket.Put(hash[:], bytes)
@@ -139,7 +140,7 @@ func (f *FilterStore) PutFilter(hash *chainhash.Hash,
 		}
 		bytes, err := filter.NBytes()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		return targetBucket.Put(hash[:], bytes)
@@ -173,14 +174,14 @@ func (f *FilterStore) FetchFilter(blockHash *chainhash.Hash,
 			builder.DefaultP, builder.DefaultM, filterBytes,
 		)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		filter = dbFilter
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return filter, nil

@@ -4,6 +4,7 @@ package wallet
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"sort"
 
 	txauthor "github.com/stalker-loki/pod/pkg/chain/tx/author"
@@ -58,7 +59,7 @@ type secretSource struct {
 func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
 	ma, err := s.Address(s.addrmgrNs, addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, false, err
 	}
 	mpka, ok := ma.(waddrmgr.ManagedPubKeyAddress)
@@ -69,7 +70,7 @@ func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
 	}
 	privKey, err := mpka.PrivKey()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, false, err
 	}
 	return privKey, ma.Compressed(), nil
@@ -77,7 +78,7 @@ func (s secretSource) GetKey(addr util.Address) (*ec.PrivateKey, bool, error) {
 func (s secretSource) GetScript(addr util.Address) ([]byte, error) {
 	ma, err := s.Address(s.addrmgrNs, addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	msa, ok := ma.(waddrmgr.ManagedScriptAddress)
@@ -90,7 +91,7 @@ func (s secretSource) GetScript(addr util.Address) ([]byte, error) {
 }
 
 // txToOutputs creates a signed transaction which includes each output from
-// outputs.  Previous outputs to reedeem are chosen from the passed account's
+// outputs.  Previous outputs to redeem are chosen from the passed account's
 // UTXO set and minconf policy. An additional output may be added to return
 // change to the wallet.  An appropriate fee is included based on the wallet's
 // current relay fee.  The wallet must be unlocked to create the transaction.
@@ -98,7 +99,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 	minconf int32, feeSatPerKb util.Amount) (tx *txauthor.AuthoredTx, err error) {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	err = walletdb.Update(w.db, func(dbtx walletdb.ReadWriteTx) error {
@@ -106,12 +107,12 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 		// Get current block's height and hash.
 		bs, err := chainClient.BlockStamp()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		eligible, err := w.findEligibleOutputs(dbtx, account, minconf, bs)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		inputSource := makeInputSource(eligible)
@@ -127,7 +128,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 				changeAddr, err = w.newChangeAddress(addrmgrNs, account)
 			}
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return nil, err
 			}
 			return txscript.PayToAddrScript(changeAddr)
@@ -135,7 +136,7 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 		tx, err = txauthor.NewUnsignedTransaction(outputs, feeSatPerKb,
 			inputSource, changeSource)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Randomize change position, if change exists, before signing.
@@ -147,17 +148,17 @@ func (w *Wallet) txToOutputs(outputs []*wire.TxOut, account uint32,
 		return tx.AddAllInputScripts(secretSource{w.Manager, addrmgrNs})
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	err = validateMsgTx(tx.Tx, tx.PrevScripts, tx.PrevInputValues)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	if tx.ChangeIndex >= 0 && account == waddrmgr.ImportedAddrAccount {
 		changeAmount := util.Amount(tx.Tx.TxOut[tx.ChangeIndex].Value)
-		Warnf(
+		slog.Warnf(
 			"spend from imported account produced change: "+
 				"moving %v from imported account into default account.",
 			changeAmount,
@@ -170,14 +171,14 @@ func (w *Wallet) findEligibleOutputs(dbtx walletdb.ReadTx, account uint32, minco
 	txmgrNs := dbtx.ReadBucket(wtxmgrNamespaceKey)
 	unspent, err := w.TxStore.UnspentOutputs(txmgrNs)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// TODO: Eventually all of these filters (except perhaps output locking)
 	// should be handled by the call to UnspentOutputs (or similar).
 	// Because one of these filters requires matching the output script to
 	// the desired account, this change depends on making wtxmgr a waddrmgr
-	// dependancy and requesting unspent outputs for a single account.
+	// dependency and requesting unspent outputs for a single account.
 	eligible := make([]wtxmgr.Credit, 0, len(unspent))
 	for i := range unspent {
 		output := &unspent[i]
@@ -225,12 +226,12 @@ func validateMsgTx(tx *wire.MsgTx, prevScripts [][]byte, inputValues []util.Amou
 		vm, err := txscript.NewEngine(prevScript, tx, i,
 			txscript.StandardVerifyFlags, nil, hashCache, int64(inputValues[i]))
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return fmt.Errorf("cannot create script engine: %s", err)
 		}
 		err = vm.Execute()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return fmt.Errorf("cannot validate transaction: %s", err)
 		}
 	}

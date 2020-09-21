@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"sort"
 	"text/template"
@@ -299,12 +300,12 @@ var handlers = handlersT{
 
 func main() {
 	log.L.SetLevel("trace", true, "pod")
-	if fd, err := os.Create("rpchandlers.go"); Check(err) {
+	if fd, err := os.Create("rpchandlers.go"); slog.Check(err) {
 	} else {
 		defer fd.Close()
 		t := template.Must(template.New("noderpc").Parse(NodeRPCHandlerTpl))
 		sort.Sort(handlers)
-		if err = t.Execute(fd, handlers); Check(err) {
+		if err = t.Execute(fd, handlers); slog.Check(err) {
 		}
 	}
 }

@@ -7,24 +7,24 @@ import (
 	"github.com/stalker-loki/pod/pkg/util/logi"
 	"github.com/stalker-loki/pod/pkg/util/logi/serve"
 	"io/ioutil"
-	prand "math/rand"
+	pseudo "math/rand"
 	"os"
 	"runtime"
 	"time"
 
-	"github.com/urfave/cli"
-
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/apputil"
 	"github.com/stalker-loki/pod/app/conte"
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	"github.com/stalker-loki/pod/pkg/chain/fork"
 	"github.com/stalker-loki/pod/pkg/pod"
+	"github.com/urfave/cli"
 )
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		Debug("running beforeFunc")
+		slog.Debug("running beforeFunc")
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
 		if c.IsSet("datadir") {
@@ -32,7 +32,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			cx.DataDir = c.String("datadir")
 		}
 		if c.IsSet("pipelog") {
-			Warn("pipe logger enabled")
+			slog.Warn("pipe logger enabled")
 			*cx.Config.PipeLog = c.Bool("pipelog")
 			serve.Log(cx.KillAll, save.Filters(*cx.Config.DataDir))
 		}
@@ -48,20 +48,20 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 				cx.Config, cx.ConfigMap = pod.EmptyConfig()
 				err = json.Unmarshal(b, cx.Config)
 				if err != nil {
-					Error("error unmarshalling config", err)
+					slog.Error("error unmarshalling config", err)
 					os.Exit(1)
 				}
 			} else {
-				Fatal("unexpected error reading configuration file:", err)
+				slog.Fatal("unexpected error reading configuration file:", err)
 				os.Exit(1)
 			}
 		} else {
 			*cx.Config.ConfigFile = ""
-			Debug("will save config after configuration")
+			slog.Debug("will save config after configuration")
 			cx.StateCfg.Save = true
 		}
 		if c.IsSet("loglevel") {
-			Trace("set loglevel", c.String("loglevel"))
+			slog.Trace("set loglevel", c.String("loglevel"))
 			*cx.Config.LogLevel = c.String("loglevel")
 			color := true
 			if runtime.GOOS == "windows" {
@@ -85,7 +85,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			default:
 				if *cx.Config.Network != "mainnet" &&
 					*cx.Config.Network != "m" {
-					Warn("using mainnet for node")
+					slog.Warn("using mainnet for node")
 				}
 				cx.ActiveNet = &netparams.MainNetParams
 			}
@@ -255,9 +255,9 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			// if LAN is turned on it means by default we are on testnet
 			cx.ActiveNet = &netparams.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {
-				Warn("set lan", c.Bool("lan"))
+				slog.Warn("set lan", c.Bool("lan"))
 				*cx.Config.LAN = c.Bool("lan")
-				cx.ActiveNet.DNSSeeds = []chaincfg.DNSSeed{}
+				cx.ActiveNet.DNSSeeds = []config.DNSSeed{}
 			} else {
 				*cx.Config.LAN = false
 			}
@@ -286,8 +286,8 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 		if c.IsSet("blockprioritysize") {
 			*cx.Config.BlockPrioritySize = c.Int("blockprioritysize")
 		}
-		prand.Seed(time.Now().UnixNano())
-		nonce := fmt.Sprintf("nonce%0x", prand.Uint32())
+		pseudo.Seed(time.Now().UnixNano())
+		nonce := fmt.Sprintf("nonce%0x", pseudo.Uint32())
 		if cx.Config.UserAgentComments == nil {
 			cx.Config.UserAgentComments = &cli.StringSlice{nonce}
 		} else {
@@ -352,7 +352,7 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.WalletOff = c.Bool("walletoff")
 		}
 		if c.IsSet("save") {
-			Info("saving configuration")
+			slog.Info("saving configuration")
 			cx.StateCfg.Save = true
 		}
 		return nil

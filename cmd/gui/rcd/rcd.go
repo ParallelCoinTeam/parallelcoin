@@ -7,6 +7,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	scribble "github.com/nanobox-io/golang-scribble"
+	"github.com/stalker-loki/app/slog"
 	config2 "github.com/stalker-loki/pod/app/config"
 	"github.com/stalker-loki/pod/app/conte"
 	"github.com/stalker-loki/pod/app/save"
@@ -193,14 +194,14 @@ func (d *DuoUIcommands) Run() {
 
 func (d *DB) DbRead(folder, name string) {
 	item := DuoUIitem{}
-	if err := d.DB.Read(folder, name, &item); !Check(err) {
+	if err := d.DB.Read(folder, name, &item); !slog.Check(err) {
 		d.Data = item
 	}
 }
 
 func (d *DB) DbReadAddressBook() (addressbook map[string]string) {
 	addressbook = make(map[string]string)
-	if err := d.DB.Read("user", "addressbook", &addressbook); !Check(err) {
+	if err := d.DB.Read("user", "addressbook", &addressbook); !slog.Check(err) {
 		return addressbook
 	}
 	return
@@ -208,13 +209,13 @@ func (d *DB) DbReadAddressBook() (addressbook map[string]string) {
 
 func (d *DB) DbReadAll(folder string) DuoUIitems {
 	items := make(map[string]DuoUIitem)
-	if itemsRaw, err := d.DB.ReadAll(folder); Check(err) {
+	if itemsRaw, err := d.DB.ReadAll(folder); slog.Check(err) {
 		if err != nil {
 			fmt.Println("Error", err)
 		}
 		for _, bt := range itemsRaw {
 			item := DuoUIitem{}
-			if err := json.Unmarshal([]byte(bt), &item); !Check(err) {
+			if err := json.Unmarshal([]byte(bt), &item); !slog.Check(err) {
 				items[item.Slug] = item
 			}
 		}
@@ -233,7 +234,7 @@ func (d *DB) DbReadAllTypes() {
 		items[t] = d.DbReadAll(t)
 	}
 	d.Data = items
-	Debug("ooooooooooooooooooooooooooooodaaa", d.Data)
+	slog.Debug("ooooooooooooooooooooooooooooodaaa", d.Data)
 
 }
 
@@ -272,11 +273,11 @@ func (r *RcVar) ConsoleCmd(com string) (out chan string) {
 			if len(args) < 1 {
 				method = ""
 				cmd = &btcjson.HelpCmd{Command: &method}
-				if res, err = chainrpc.RPCHandlers["help"].Fn(rpcSrv, cmd, nil); Check(err) {
+				if res, err = chainrpc.RPCHandlers["help"].Fn(rpcSrv, cmd, nil); slog.Check(err) {
 					errString += fmt.Sprintln(err)
 				}
 				o += fmt.Sprintln(res)
-				if res, err = lrpcHnd["help"].Handler(cmd, ws, cc); Check(err) {
+				if res, err = lrpcHnd["help"].Handler(cmd, ws, cc); slog.Check(err) {
 					errString += fmt.Sprintln(err)
 				}
 				o += fmt.Sprintln(res)
@@ -298,13 +299,13 @@ func (r *RcVar) ConsoleCmd(com string) (out chan string) {
 				}
 			} else {
 				method = args[0]
-				Debug("finding help for command", method)
-				if help, err := rpcSrv.HelpCacher.RPCMethodHelp(method); Check(err) {
+				slog.Debug("finding help for command", method)
+				if help, err := rpcSrv.HelpCacher.RPCMethodHelp(method); slog.Check(err) {
 					o += err.Error() + "\n"
 					o += fmt.Sprintln(res)
 					cmd = &btcjson.HelpCmd{Command: &method}
 					if res, err = lrpcHnd["help"].
-						Handler(cmd, ws, cc); Check(err) {
+						Handler(cmd, ws, cc); slog.Check(err) {
 						errString += fmt.Sprintln(err)
 					}
 					o += fmt.Sprintln(res)
@@ -326,23 +327,23 @@ func (r *RcVar) ConsoleCmd(com string) (out chan string) {
 			for _, arg := range args {
 				params = append(params, arg)
 			}
-			if cmd, err = btcjson.NewCmd(method, params...); Check(err) {
+			if cmd, err = btcjson.NewCmd(method, params...); slog.Check(err) {
 				o += fmt.Sprintln(err)
 			}
 			if x, ok := chainrpc.RPCHandlers[method]; !ok {
 				if x, ok := lrpcHnd[method]; ok {
-					if res, err = x.Handler(cmd, ws, cc); Check(err) {
+					if res, err = x.Handler(cmd, ws, cc); slog.Check(err) {
 						o += err.Error()
 					}
 				}
 			} else {
-				if res, err = x.Fn(rpcSrv, cmd, nil); Check(err) {
+				if res, err = x.Fn(rpcSrv, cmd, nil); slog.Check(err) {
 					o += err.Error()
 				}
 			}
 			if res != nil {
 				if j, err := json.MarshalIndent(res, "",
-					"  "); !Check(err) {
+					"  "); !slog.Check(err) {
 					o += string(j)
 				}
 			}
@@ -354,13 +355,13 @@ func (r *RcVar) ConsoleCmd(com string) (out chan string) {
 
 func (r *RcVar) CreateNewAddress(acctName string) string {
 	if account, err := r.cx.WalletServer.AccountNumber(waddrmgr.
-		KeyScopeBIP0044, acctName); !Check(err) {
+		KeyScopeBIP0044, acctName); !slog.Check(err) {
 		if addr, err := r.cx.WalletServer.NewAddress(account,
-			waddrmgr.KeyScopeBIP0044, true); !Check(err) {
+			waddrmgr.KeyScopeBIP0044, true); !slog.Check(err) {
 			if addr == nil {
 				return ""
 			}
-			Debug("low", addr.EncodeAddress())
+			slog.Debug("low", addr.EncodeAddress())
 			return addr.EncodeAddress()
 		}
 	}
@@ -378,13 +379,13 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 		seed, err = hex.DecodeString(duoSeed)
 		if err != nil {
 			// Need to make JS invocation to embed
-			Error(err)
+			slog.Error(err)
 		}
-	} else if seed, err = hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen); Check(err) {
+	} else if seed, err = hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen); slog.Check(err) {
 	}
 	if _, err = l.CreateNewWallet([]byte(pubPassphrase),
 		[]byte(privPassphrase), seed, time.Now(), true,
-		r.cx.Config); Check(err) {
+		r.cx.Config); slog.Check(err) {
 	}
 
 	r.Boot.IsFirstRun = false
@@ -399,17 +400,17 @@ func (r *RcVar) DuoNodeService() error {
 	var err error
 	if !*r.cx.Config.NodeOff {
 		go func() {
-			Info(r.cx.Language.RenderText("goApp_STARTINGNODE"))
+			slog.Info(r.cx.Language.RenderText("goApp_STARTINGNODE"))
 			// utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
 			err = node.Main(r.cx, nil)
 			if err != nil {
-				Info("error running node:", err)
+				slog.Info("error running node:", err)
 				os.Exit(1)
 			}
 		}()
 	}
 	interrupt.AddHandler(func() {
-		Warn("interrupt received, shutting down node")
+		slog.Warn("interrupt received, shutting down node")
 		close(r.cx.NodeKill)
 	})
 	return err
@@ -421,14 +422,14 @@ func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
 		if _, err := pass.WalletPassphraseWait(&btcjson.WalletPassphraseCmd{
 			Passphrase: wp,
 			Timeout:    int64(time.Second * 2),
-		}); !Check(err) {
+		}); !slog.Check(err) {
 			send := legacy.RPCHandlers["sendtoaddress"].Result()
 			if _, err = send.SendToAddressWait(&btcjson.SendToAddressCmd{
 				Address:   ad,
 				Amount:    am,
 				Comment:   nil,
 				CommentTo: nil,
-			}); Check(err) {
+			}); slog.Check(err) {
 			}
 		}
 	}
@@ -565,7 +566,7 @@ func (r *RcVar) GetAddressBook() func() {
 func (r *RcVar) GetBlock(hash string) btcjson.GetBlockVerboseResult {
 	verbose, verbosetx := true, true
 	bcmd := btcjson.GetBlockCmd{hash, &verbose, &verbosetx}
-	if bl, err := chainrpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil); !Check(err) {
+	if bl, err := chainrpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil); !slog.Check(err) {
 		if gbvr, ok := bl.(btcjson.GetBlockVerboseResult); ok {
 			return gbvr
 		}
@@ -576,7 +577,7 @@ func (r *RcVar) GetBlock(hash string) btcjson.GetBlockVerboseResult {
 func (r *RcVar) GetBlockCount() {
 	go func() {
 		if getBlockCount, err := chainrpc.HandleGetBlockCount(r.cx.RPCServer,
-			nil, nil); Check(err) {
+			nil, nil); slog.Check(err) {
 			r.Status.Node.BlockCount.Store(uint64(getBlockCount.(int64)))
 		}
 	}()
@@ -587,12 +588,12 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	b = *new(model.DuoUIblock)
 	hashHeight, err := r.cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
 	if err != nil {
-		Error("Block Hash By Height:", err)
+		slog.Error("Block Hash By Height:", err)
 	}
 	verbose, verbosetx := true, true
 	bcmd := btcjson.GetBlockCmd{hashHeight.String(), &verbose, &verbosetx}
 	if bl, err := chainrpc.HandleGetBlock(r.cx.RPCServer, &bcmd,
-		nil); Check(err) {
+		nil); slog.Check(err) {
 		block := bl.(btcjson.GetBlockVerboseResult)
 		b.Height = block.Height
 		b.BlockHash = block.Hash
@@ -608,7 +609,7 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 
 func (r *RcVar) GetBlockHash(blockHeight int) string {
 	hcmd := btcjson.GetBlockHashCmd{Index: int64(blockHeight)}
-	if hash, err := chainrpc.HandleGetBlockHash(r.cx.RPCServer, &hcmd, nil); !Check(err) {
+	if hash, err := chainrpc.HandleGetBlockHash(r.cx.RPCServer, &hcmd, nil); !slog.Check(err) {
 		return hash.(string)
 	} else {
 		return err.Error()
@@ -624,7 +625,7 @@ func (r *RcVar) GetBlocksExcerpts() func() {
 		endBlock := re.Page.Value*re.PerPage.Value +
 			re.PerPage.Value
 		height := int(r.cx.RPCServer.Cfg.Chain.BestSnapshot().Height)
-		Debug("GetBlocksExcerpts", startBlock, endBlock, height)
+		slog.Debug("GetBlocksExcerpts", startBlock, endBlock, height)
 		if endBlock > height {
 			endBlock = height
 		}
@@ -699,12 +700,12 @@ func (r *RcVar) GetDifficulty() {
 // }
 func (r *RcVar) GetDuoUIbalance() {
 	go func() {
-		Trace("getting balance")
+		slog.Trace("getting balance")
 		acct := "default"
 		minconf := 0
 		if getBalance, err := legacy.GetBalance(
 			&btcjson.GetBalanceCmd{Account: &acct, MinConf: &minconf},
-			r.cx.WalletServer); !Check(err) {
+			r.cx.WalletServer); !slog.Check(err) {
 			// r.PushDuoUIalert("Error", err.Error(), "error")
 			if gb, ok := getBalance.(float64); ok {
 				bb := fmt.Sprintf("%0.8f", gb)
@@ -723,7 +724,7 @@ func (r *RcVar) GetDuoUIbestBlockHash() {
 func (r *RcVar) GetDuoUIblockCount() {
 	go func() {
 		if getBlockCount, err := chainrpc.HandleGetBlockCount(r.cx.RPCServer, nil,
-			nil); !Check(err) {
+			nil); !slog.Check(err) {
 			r.Status.Node.BlockCount.Store(uint64(getBlockCount.(int64)))
 		} else {
 			// r.PushDuoUIalert("BTCJSONError", err.BTCJSONError(), "error")
@@ -750,7 +751,7 @@ func (r *RcVar) GetDuoUIdifficulty() {
 func (r *RcVar) GetDuoUIhashesPerSec() {
 	// r.Status.Wallet.Hashes = int64(r.cx.RPCServer.Cfg.CPUMiner.HashesPerSecond())
 	go func() {
-		Debug("centralise hash function stuff here") // cpuminer
+		slog.Debug("centralise hash function stuff here") // cpuminer
 		r.Status.Kopach.Hashrate = r.cx.Hashrate.Load()
 	}()
 }
@@ -797,7 +798,7 @@ func (r *RcVar) GetDuoUInetworkHashesPerSec() {
 			chainrpc.HandleGetNetworkHashPS(
 				r.cx.RPCServer,
 				btcjson.NewGetNetworkHashPSCmd(nil, nil), nil,
-			); !Check(err) {
+			); !slog.Check(err) {
 			if networkHashesPerSec, ok := networkHashesPerSecIface.(int64); ok {
 				r.Status.Node.NetHash.Store(uint64(networkHashesPerSec))
 			}
@@ -819,7 +820,7 @@ func (r *RcVar) GetDuoUInetworkLastBlock() {
 
 func (r *RcVar) GetDuoUIstatus() {
 	go func() {
-		if v, err := chainrpc.HandleVersion(r.cx.RPCServer, nil, nil); Check(err) {
+		if v, err := chainrpc.HandleVersion(r.cx.RPCServer, nil, nil); slog.Check(err) {
 			r.Status.Version = "0.0.1"
 			r.Status.Wallet.WalletVersion = v.(map[string]btcjson.VersionResult)
 			r.Status.StartTime = time.Unix(0, r.cx.RPCServer.Cfg.StartupTime)
@@ -836,14 +837,14 @@ func (r *RcVar) GetDuoUItransactions() func() {
 			rh.PerPage.Value
 		startTx := rh.Page.Value * rh.PerPage.Value
 		// endTx := rh.Page.Value*rh.PerPage.Value + rh.PerPage.Value
-		Debug("getting transactions")
+		slog.Debug("getting transactions")
 		// account, txcount, startnum, watchonly := "*", n, f, false
 		// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{
 		// Account: &account, Count: &txcount, From: &startnum,
 		// IncludeWatchOnly: &watchonly}, v.ws)
 		lt, err := r.cx.WalletServer.ListTransactions(startTx, rh.PerPage.Value)
 		if err != nil {
-			Info(err)
+			slog.Info(err)
 		}
 		rh.Txs.TxsNumber = len(lt)
 		txsArray := *new([]model.DuoUItransactionExcerpt)
@@ -885,14 +886,14 @@ func (r *RcVar) GetDuoUItransactions() func() {
 
 func (r *RcVar) GetDuoUItransactionsNumber() {
 	go func() {
-		Debug("getting transaction count")
+		slog.Debug("getting transaction count")
 		// account, txcount, startnum, watchonly := "*", n, f, false
 		// listTransactions, err := legacy.ListTransactions(&json.ListTransactionsCmd{
 		// Account: &account, Count: &txcount, From: &startnum,
 		// IncludeWatchOnly: &watchonly,
 		// }, v.ws)
 		if lt, err := r.cx.WalletServer.ListTransactions(0,
-			999999999); Check(err) {
+			999999999); slog.Check(err) {
 			r.Status.Wallet.TxsNumber.Store(uint64(len(lt)))
 		}
 	}()
@@ -900,11 +901,11 @@ func (r *RcVar) GetDuoUItransactionsNumber() {
 
 func (r *RcVar) GetDuoUIunconfirmedBalance() {
 	go func() {
-		Trace("getting unconfirmed balance")
+		slog.Trace("getting unconfirmed balance")
 		acct := "default"
 		if getUnconfirmedBalance, err := legacy.GetUnconfirmedBalance(
 			&btcjson.GetUnconfirmedBalanceCmd{Account: &acct},
-			r.cx.WalletServer); !Check(err) {
+			r.cx.WalletServer); !slog.Check(err) {
 			if ub, ok := getUnconfirmedBalance.(float64); ok {
 				ubb := fmt.Sprintf("%0.8f", ub)
 				r.Status.Wallet.Unconfirmed.Store(ubb)
@@ -916,7 +917,7 @@ func (r *RcVar) GetDuoUIunconfirmedBalance() {
 func (r *RcVar) GetLatestTransactions() {
 	go func() {
 		ltx := r.Status.Wallet.LastTxs
-		Trace("getting latest transactions")
+		slog.Trace("getting latest transactions")
 		lt, err := r.cx.WalletServer.ListTransactions(0, 10)
 		if err != nil {
 			// //r.PushDuoUIalert("BTCJSONError", err.BTCJSONError(), "error")
@@ -1009,7 +1010,7 @@ func (r *RcVar) GetNetworkLastBlock() (out int32) {
 func (r *RcVar) GetPeerInfo() func() {
 	return func() {
 		if getPeers, err := chainrpc.HandleGetPeerInfo(r.cx.RPCServer, nil,
-			nil); !Check(err) {
+			nil); !slog.Check(err) {
 			r.Network.Peers = getPeers.([]*btcjson.GetPeerInfoResult)
 		}
 	}
@@ -1040,11 +1041,11 @@ func (r *RcVar) GetTx(txid string) btcjson.GetTransactionResult {
 	//}
 
 	if tx, err := chainrpc.HandleGetRawTransaction(r.cx.RPCServer, &tcmd,
-		nil); !Check(err) {
+		nil); !slog.Check(err) {
 		if gbvr, ok := tx.(btcjson.GetTransactionResult); ok {
-			Debug("zekr", gbvr)
-			Debug(txid)
-			Debug("txtxtx", tx)
+			slog.Debug("zekr", gbvr)
+			slog.Debug(txid)
+			slog.Debug("txtxtx", tx)
 			return gbvr
 		}
 	}
@@ -1053,7 +1054,7 @@ func (r *RcVar) GetTx(txid string) btcjson.GetTransactionResult {
 
 func (r *RcVar) GetUptime() {
 	if rRaw, err := chainrpc.HandleUptime(r.cx.RPCServer, nil,
-		nil); !Check(err) {
+		nil); !slog.Check(err) {
 		// rRaw = int64(0)
 		r.Uptime = rRaw.(int)
 	}
@@ -1094,7 +1095,7 @@ func (r *RcVar) labelMiningAddreses() {
 }
 
 func (r *RcVar) ListenInit(trigger chan struct{}) {
-	Debug("listeninit")
+	slog.Debug("listeninit")
 	r.Events = EventsChan
 	r.UpdateTrigger = trigger
 
@@ -1144,7 +1145,7 @@ func (r *RcVar) ListenInit(trigger chan struct{}) {
 			}
 		}
 	}()
-	Warn("event update listener started")
+	slog.Warn("event update listener started")
 	return
 }
 
@@ -1175,14 +1176,14 @@ func (r *RcVar) ShowAddressBook() func() {
 }
 
 func (r *RcVar) StartServices() (err error) {
-	Debug("starting up services")
+	slog.Debug("starting up services")
 	// Start Node
-	if err = r.DuoNodeService(); Check(err) {
+	if err = r.DuoNodeService(); slog.Check(err) {
 	}
 	r.cx.RPCServer = <-r.cx.NodeChan
 	r.cx.Node.Store(true)
 	// Start wallet
-	if err = r.StartWallet(); Check(err) {
+	if err = r.StartWallet(); slog.Check(err) {
 	}
 	r.cx.WalletServer = <-r.cx.WalletChan
 	r.cx.Wallet.Store(true)
@@ -1199,7 +1200,7 @@ func (r *RcVar) StartWallet() error {
 	var err error
 	if !*r.cx.Config.WalletOff {
 		go func() {
-			Info("starting wallet")
+			slog.Info("starting wallet")
 			// utils.GetBiosMessage(view, "starting wallet")
 			err = walletmain.Main(r.cx)
 			if err != nil {
@@ -1209,7 +1210,7 @@ func (r *RcVar) StartWallet() error {
 		}()
 	}
 	interrupt.AddHandler(func() {
-		Warn("interrupt received, " +
+		slog.Warn("interrupt received, " +
 			"shutting down shell modules")
 		close(r.cx.WalletKill)
 	})

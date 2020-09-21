@@ -30,9 +30,11 @@ type Indexer interface {
 	Name() string
 	// Create is invoked when the indexer manager determines the index needs to be created for the first time.
 	Create(dbTx database.Tx) error
-	// Init is invoked when the index manager is first initializing the index.  This differs from the Create method in that it is called on every load, including the case the index was just created.
+	// Init is invoked when the index manager is first initializing the index.  This differs from the Create method in
+	// that it is called on every load, including the case the index was just created.
 	Init() error
-	// ConnectBlock is invoked when a new block has been connected to the main chain. The set of output spent within a block is also passed in so indexers can access the pevious output scripts input spent if required.
+	// ConnectBlock is invoked when a new block has been connected to the main chain. The set of output spent within a
+	// block is also passed in so indexers can access the previous output scripts input spent if required.
 	ConnectBlock(database.Tx, *util.Block, []blockchain.SpentTxOut) error
 	// DisconnectBlock is invoked when a block has been disconnected from the main chain. The set of outputs scripts that were spent within this block is also returned so indexers can clean up the prior index state for this block
 	DisconnectBlock(database.Tx, *util.Block, []blockchain.SpentTxOut) error
@@ -41,7 +43,7 @@ type Indexer interface {
 // AssertError identifies an error that indicates an internal code consistency issue and should be treated as a critical and unrecoverable error.
 type AssertError string
 
-// DBError returns the assertion error as a huma-readable string and satisfies the error interface.
+// DBError returns the assertion error as a human-readable string and satisfies the error interface.
 func (e AssertError) Error() string {
 	return "assertion failed: " + string(e)
 }

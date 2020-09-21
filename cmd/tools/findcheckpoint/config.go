@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"path/filepath"
 
@@ -28,8 +29,8 @@ var (
 	activeNetParams = &netparams.MainNetParams
 )
 
-// config defines the configuration options for findcheckpoint. See loadConfig for details on the configuration load process.
-type config struct {
+// Config defines the configuration options for findcheckpoint. See loadConfig for details on the configuration load process.
+type Config struct {
 	DataDir        string `short:"b" long:"datadir" description:"Location of the pod data directory"`
 	DbType         string `long:"dbtype" description:"Database backend to use for the Block Chain"`
 	TestNet3       bool   `long:"testnet" description:"Use the test network"`
@@ -61,10 +62,10 @@ func netName(
 	}
 }
 
-// loadConfig initializes and parses the config using command line options.
-func loadConfig() (*config, []string, error) {
-	// Default config.
-	cfg := config{
+// loadConfig initializes and parses the Config using command line options.
+func loadConfig() (*Config, []string, error) {
+	// Default Config.
+	cfg := Config{
 		DataDir:       defaultDataDir,
 		DbType:        defaultDbType,
 		NumCandidates: defaultNumCandidates,
@@ -73,7 +74,7 @@ func loadConfig() (*config, []string, error) {
 	parser := flags.NewParser(&cfg, flags.Default)
 	remainingArgs, err := parser.Parse()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if e, ok := err.(*flags.Error); !ok || e.Type != flags.ErrHelp {
 			parser.WriteHelp(os.Stderr)
 		}

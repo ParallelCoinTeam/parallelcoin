@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	database "github.com/stalker-loki/pod/pkg/db"
 	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
@@ -20,7 +20,7 @@ func ExampleBlockChain_ProcessBlock() {
 	// Create a new database to store the accepted blocks into.  Typically this would be opening an existing database and would not be deleting and creating a new database like this, but it is done here so this is a complete working example and does not leave temporary files laying around.
 	dbPath := filepath.Join(os.TempDir(), "exampleprocessblock")
 	_ = os.RemoveAll(dbPath)
-	db, err := database.Create("ffldb", dbPath, chaincfg.MainNetParams.Net)
+	db, err := database.Create("ffldb", dbPath, config.MainNetParams.Net)
 	if err != nil {
 		log.Printf("Failed to create database: %v\n", err)
 		return
@@ -38,7 +38,7 @@ func ExampleBlockChain_ProcessBlock() {
 		return
 	}
 	// Process a block.  For this example, we are going to intentionally cause an error by trying to process the genesis block which already exists.
-	genesisBlock := util.NewBlock(chaincfg.MainNetParams.GenesisBlock)
+	genesisBlock := util.NewBlock(config.MainNetParams.GenesisBlock)
 	isMainChain, isOrphan, err := chain.ProcessBlock(0, genesisBlock,
 		blockchain.BFNone, 0)
 	if err != nil {

@@ -2,6 +2,7 @@ package save
 
 import (
 	"encoding/json"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/util/logi/Pkg/Pk"
 	"io/ioutil"
 	"path/filepath"
@@ -14,7 +15,7 @@ import (
 
 // Pod saves the configuration to the configured location
 func Pod(c *pod.Config) (success bool) {
-	Trace("saving configuration to", *c.ConfigFile)
+	slog.Trace("saving configuration to", *c.ConfigFile)
 	var uac cli.StringSlice
 	if len(*c.UserAgentComments) > 0 {
 		uac = make(cli.StringSlice, len(*c.UserAgentComments))
@@ -28,7 +29,7 @@ func Pod(c *pod.Config) (success bool) {
 	if yp, e := json.MarshalIndent(c, "", "  "); e == nil {
 		apputil.EnsureDir(*c.ConfigFile)
 		if e := ioutil.WriteFile(*c.ConfigFile, yp, 0600); e != nil {
-			Error(e)
+			slog.Error(e)
 			success = false
 		}
 		success = true
@@ -42,10 +43,10 @@ func Pod(c *pod.Config) (success bool) {
 func Filters(dataDir string) func(pkgs Pk.Package) (success bool) {
 	return func(pkgs Pk.Package) (success bool) {
 		if filterJSON, e := json.MarshalIndent(pkgs, "", "  "); e == nil {
-			Trace("Saving log filter:\n```", string(filterJSON), "\n```")
+			slog.Trace("Saving log filter:\n```", string(filterJSON), "\n```")
 			apputil.EnsureDir(dataDir)
 			if e := ioutil.WriteFile(filepath.Join(dataDir, "log-filter.json"), filterJSON,
-				0600); Check(e) {
+				0600); slog.Check(e) {
 				success = false
 			}
 			success = true

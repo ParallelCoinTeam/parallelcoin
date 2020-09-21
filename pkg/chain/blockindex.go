@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 	"sort"
 	"sync"
@@ -267,7 +268,7 @@ func (bi *blockIndex) flushToDB() error {
 				for node := range bi.dirty {
 					err := dbStoreBlockNode(dbTx, node)
 					if err != nil {
-						Error(err)
+						slog.Error(err)
 						return err
 					}
 				}
@@ -296,7 +297,7 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		// Trace("checking pre-hardfork algo versions")
 		if algo != 514 &&
 			algo != 2 {
-			Debug("irregular version", algo, "block, assuming 2 (sha256d)")
+			slog.Debug("irregular version", algo, "block, assuming 2 (sha256d)")
 			algo = 2
 		}
 	}
@@ -305,20 +306,20 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 		if prev == nil {
 			return nil
 		}
-		// Tracef("node %d %d %8x", prev.height, prev.version, prev.bits)
-		prevversion := prev.version
+		// slog.Tracef("node %d %d %8x", prev.height, prev.version, prev.bits)
+		prevVersion := prev.version
 		if fork.GetCurrent(prev.height) == 0 {
 			// Trace("checking pre-hardfork algo versions")
 			if prev.version != 514 &&
 				prev.version != 2 {
-				Debug("irregular version block", prev.version, ", assuming 2 (sha256d)")
-				prevversion = 2
+				slog.Debug("irregular version block", prev.version, ", assuming 2 (sha256d)")
+				prevVersion = 2
 			}
 		}
-		if prevversion == algo {
-			// Tracef(
+		if prevVersion == algo {
+			// slog.Tracef(
 			//	"found height %d version %d prev version %d prev bits %8x",
-			//	prev.height, prev.version, prevversion, prev.bits)
+			//	prev.height, prev.version, prevVersion, prev.bits)
 			return
 		}
 		prev = prev.RelativeAncestor(1)
@@ -343,7 +344,7 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 // 	}
 // }
 // if prev.version == algo {
-// 	Tracef("found previous %d %d %08x", prev.height, prev.version,
+// 	slog.Tracef("found previous %d %d %08x", prev.height, prev.version,
 // 	prev.bits)
 // 	return prev
 // }
@@ -363,7 +364,7 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 // 		}
 // 	}
 // 	if prevVersion == algo {
-// 		Tracef("found previous %d %d %08x", prev.height, prev.version,
+// 		slog.Tracef("found previous %d %d %08x", prev.height, prev.version,
 // 			prev.bits)
 // 		return prev
 // 	} else {

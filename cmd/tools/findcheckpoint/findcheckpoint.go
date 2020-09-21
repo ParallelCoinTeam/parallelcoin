@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"path/filepath"
-
-	log "github.com/stalker-loki/pod/pkg/util/logi"
 
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
 	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
@@ -15,7 +14,7 @@ import (
 const blockDbNamePrefix = "blocks"
 
 var (
-	cfg *config
+	cfg *Config
 )
 
 // loadBlockDB opens the block database and returns a handle to it.
@@ -23,10 +22,10 @@ func loadBlockDB() (database.DB, error) {
 	// The database name is based on the database type.
 	dbName := blockDbNamePrefix + "_" + cfg.DbType
 	dbPath := filepath.Join(cfg.DataDir, dbName)
-	Infof("Loading block database from '%s'\n", dbPath)
+	slog.Infof("Loading block database from '%s'\n", dbPath)
 	db, err := database.Open(cfg.DbType, dbPath, activeNetParams.Net)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return db, nil
@@ -42,7 +41,7 @@ func findCandidates(
 	// Start with the latest block of the main chain.
 	block, err := chain.BlockByHash(latestHash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// Get the latest known checkpoint.
@@ -50,7 +49,7 @@ func findCandidates(
 	if latestCheckpoint == nil {
 		// Set the latest checkpoint to the genesis block if there isn't
 		// already one.
-		latestCheckpoint = &netparams.Checkpoint{
+		latestCheckpoint = &chaincfg.Checkpoint{
 			Hash:   activeNetParams.GenesisHash,
 			Height: 0,
 		}
@@ -76,7 +75,7 @@ func findCandidates(
 	// Indeterminate progress setup.
 	numBlocksToTest := block.Height() - requiredHeight
 	progressInterval := (numBlocksToTest / 100) + 1 // min 1
-	log.Print("Searching for candidates")
+	fmt.Print("Searching for candidates")
 	defer fmt.Println()
 	// Loop backwards through the chain to find checkpoint candidates.
 	candidates := make([]*chaincfg.Checkpoint, 0, cfg.NumCandidates)
@@ -84,12 +83,12 @@ func findCandidates(
 	for len(candidates) < cfg.NumCandidates && block.Height() > requiredHeight {
 		// Display progress.
 		if numTested%progressInterval == 0 {
-			log.Print(".")
+			fmt.Print(".")
 		}
 		// Determine if this block is a checkpoint candidate.
 		isCandidate, err := chain.IsCheckpointCandidate(block)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		// All checks passed, so this node seems like a reasonable checkpoint candidate.
@@ -103,7 +102,7 @@ func findCandidates(
 		prevHash := &block.MsgBlock().Header.PrevBlock
 		block, err = chain.BlockByHash(prevHash)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		numTested++
@@ -115,25 +114,25 @@ func findCandidates(
 func showCandidate(
 	candidateNum int, checkpoint *chaincfg.Checkpoint) {
 	if cfg.UseGoOutput {
-		Infof("Candidate %d -- {%d, newShaHashFromStr(\"%v\")},\n",
+		slog.Infof("Candidate %d -- {%d, newShaHashFromStr(\"%v\")},\n",
 			candidateNum, checkpoint.Height, checkpoint.Hash)
 		return
 	}
-	Infof("Candidate %d -- Height: %d, Hash: %v\n", candidateNum,
+	slog.Infof("Candidate %d -- Height: %d, Hash: %v\n", candidateNum,
 		checkpoint.Height, checkpoint.Hash)
 }
 func main() {
 	// Load configuration and parse command line.
 	tcfg, _, err := loadConfig()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	cfg = tcfg
 	// Load the block database.
 	db, err := loadBlockDB()
 	if err != nil {
-		Error("failed to load database:", err)
+		slog.Error("failed to load database:", err)
 		return
 	}
 	defer db.Close()
@@ -144,21 +143,21 @@ func main() {
 		TimeSource:  blockchain.NewMedianTime(),
 	})
 	if err != nil {
-		Error("failed to initialize chain: %v\n", err)
+		slog.Error("failed to initialize chain: %v\n", err)
 		return
 	}
 	// Get the latest block hash and height from the database and report status.
 	best := chain.BestSnapshot()
-	Infof("Block database loaded with block height %d\n", best.Height)
+	slog.Infof("Block database loaded with block height %d\n", best.Height)
 	// Find checkpoint candidates.
 	candidates, err := findCandidates(chain, &best.Hash)
 	if err != nil {
-		Error("Unable to identify candidates:", err)
+		slog.Error("Unable to identify candidates:", err)
 		return
 	}
 	// No candidates.
 	if len(candidates) == 0 {
-		Error("No candidates found.")
+		slog.Error("No candidates found.")
 		return
 	}
 	// Show the candidates.

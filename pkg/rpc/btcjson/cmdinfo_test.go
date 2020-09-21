@@ -7,7 +7,7 @@ import (
 	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
-// TestCmdMethod tests the CmdMethod function to ensure it retunrs the expected methods and errors.
+// TestCmdMethod tests the CmdMethod function to ensure it returns the expected methods and errors.
 func TestCmdMethod(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -19,7 +19,7 @@ func TestCmdMethod(t *testing.T) {
 		{
 			name: "unregistered type",
 			cmd:  (*int)(nil),
-			err:  btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnregisteredMethod},
+			err:  btcjson.Error{ErrorCode: btcjson.ErrUnregisteredMethod},
 		},
 		{
 			name:   "nil pointer of registered type",
@@ -41,12 +41,12 @@ func TestCmdMethod(t *testing.T) {
 			continue
 		}
 		if err != nil {
-			gotErrorCode := err.(btcjson.BTCJSONError).ErrorCode
-			if gotErrorCode != test.err.(btcjson.BTCJSONError).ErrorCode {
+			gotErrorCode := err.(btcjson.Error).ErrorCode
+			if gotErrorCode != test.err.(btcjson.Error).ErrorCode {
 				t.Errorf("Test #%d (%s) mismatched error code "+
 					"- got %v (%v), want %v", i, test.name,
 					gotErrorCode, err,
-					test.err.(btcjson.BTCJSONError).ErrorCode)
+					test.err.(btcjson.Error).ErrorCode)
 				continue
 			}
 			continue
@@ -72,7 +72,7 @@ func TestMethodUsageFlags(t *testing.T) {
 		{
 			name:   "unregistered type",
 			method: "bogusmethod",
-			err:    btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnregisteredMethod},
+			err:    btcjson.Error{ErrorCode: btcjson.ErrUnregisteredMethod},
 		},
 		{
 			name:   "getblock",
@@ -94,12 +94,12 @@ func TestMethodUsageFlags(t *testing.T) {
 			continue
 		}
 		if err != nil {
-			gotErrorCode := err.(btcjson.BTCJSONError).ErrorCode
-			if gotErrorCode != test.err.(btcjson.BTCJSONError).ErrorCode {
+			gotErrorCode := err.(btcjson.Error).ErrorCode
+			if gotErrorCode != test.err.(btcjson.Error).ErrorCode {
 				t.Errorf("Test #%d (%s) mismatched error code "+
 					"- got %v (%v), want %v", i, test.name,
 					gotErrorCode, err,
-					test.err.(btcjson.BTCJSONError).ErrorCode)
+					test.err.(btcjson.Error).ErrorCode)
 				continue
 			}
 			continue
@@ -125,7 +125,7 @@ func TestMethodUsageText(t *testing.T) {
 		{
 			name:   "unregistered type",
 			method: "bogusmethod",
-			err:    btcjson.BTCJSONError{ErrorCode: btcjson.ErrUnregisteredMethod},
+			err:    btcjson.Error{ErrorCode: btcjson.ErrUnregisteredMethod},
 		},
 		{
 			name:     "getblockcount",
@@ -147,12 +147,12 @@ func TestMethodUsageText(t *testing.T) {
 			continue
 		}
 		if err != nil {
-			gotErrorCode := err.(btcjson.BTCJSONError).ErrorCode
-			if gotErrorCode != test.err.(btcjson.BTCJSONError).ErrorCode {
+			gotErrorCode := err.(btcjson.Error).ErrorCode
+			if gotErrorCode != test.err.(btcjson.Error).ErrorCode {
 				t.Errorf("Test #%d (%s) mismatched error code "+
 					"- got %v (%v), want %v", i, test.name,
 					gotErrorCode, err,
-					test.err.(btcjson.BTCJSONError).ErrorCode)
+					test.err.(btcjson.Error).ErrorCode)
 				continue
 			}
 			continue

@@ -174,7 +174,7 @@ func TestGetBlocksWire(t *testing.T) {
 			BIP0031Version,
 			BaseEncoding,
 		},
-		// Protocol version BIP0031Versionwith multiple block locators.
+		// Protocol version BIP0031Version with multiple block locators.
 		{
 			multiLocators,
 			multiLocators,

@@ -52,34 +52,34 @@ func (l *lineIterator) Next() (int, int, []text.Glyph, f32.Point, bool) {
 		if (off.Y + line.Bounds.Min.Y).Floor() > l.Clip.Max.Y {
 			break
 		}
-		layout := line.Layout
+		layOut := line.Layout
 		start := l.txtOff
 		l.txtOff += line.Len
 		if (off.Y + line.Bounds.Max.Y).Ceil() < l.Clip.Min.Y {
 			continue
 		}
-		for len(layout) > 0 {
-			g := layout[0]
+		for len(layOut) > 0 {
+			g := layOut[0]
 			adv := g.Advance
 			if (off.X + adv + line.Bounds.Max.X - line.Width).Ceil() >= l.Clip.Min.X {
 				break
 			}
 			off.X += adv
-			layout = layout[1:]
+			layOut = layOut[1:]
 			start += utf8.RuneLen(g.Rune)
 		}
 		end := start
 		endx := off.X
-		for i, g := range layout {
+		for i, g := range layOut {
 			if (endx + line.Bounds.Min.X).Floor() > l.Clip.Max.X {
-				layout = layout[:i]
+				layOut = layOut[:i]
 				break
 			}
 			end += utf8.RuneLen(g.Rune)
 			endx += g.Advance
 		}
 		offf := f32.Point{X: float32(off.X) / 64, Y: float32(off.Y) / 64}
-		return start, end, layout, offf, true
+		return start, end, layOut, offf, true
 	}
 	return 0, 0, nil, f32.Point{}, false
 }
@@ -102,7 +102,7 @@ func (l Label) Layout(gtx *layout.Context, s text.Shaper, font text.Font, size u
 		Width:     dims.Size.X,
 	}
 	for {
-		start, end, layout, off, ok := it.Next()
+		start, end, layOut, off, ok := it.Next()
 		if !ok {
 			break
 		}
@@ -111,7 +111,7 @@ func (l Label) Layout(gtx *layout.Context, s text.Shaper, font text.Font, size u
 		stack.Push(gtx.Ops)
 		op.TransformOp{}.Offset(off).Add(gtx.Ops)
 		str := txt[start:end]
-		s.ShapeString(font, textSize, str, layout).Add(gtx.Ops)
+		s.ShapeString(font, textSize, str, layOut).Add(gtx.Ops)
 		paint.PaintOp{Rect: lclip}.Add(gtx.Ops)
 		stack.Pop()
 	}

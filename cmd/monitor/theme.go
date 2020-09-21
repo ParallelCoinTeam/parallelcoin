@@ -1,7 +1,9 @@
 package monitor
 
+import "github.com/stalker-loki/app/slog"
+
 func (s *State) FlipTheme() {
-	Debug("dark theme:", s.Config.DarkTheme)
+	slog.Debug("dark theme:", s.Config.DarkTheme)
 	s.Config.DarkTheme = !s.Config.DarkTheme
 	//Debug(s.Config.DarkTheme)
 	s.SetTheme(s.Config.DarkTheme)

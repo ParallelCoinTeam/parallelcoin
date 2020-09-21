@@ -1,11 +1,12 @@
 package rpctest
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"reflect"
 	"time"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	rpcclient "github.com/stalker-loki/pod/pkg/rpc/client"
+	client "github.com/stalker-loki/pod/pkg/rpc/client"
 )
 
 // JoinType is an enum representing a particular type of "node join". A node
@@ -44,7 +45,7 @@ retry:
 	for !poolsMatch {
 		firstPool, err := nodes[0].Node.GetRawMempool()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// If all nodes have an identical mempool with respect to the first
@@ -53,7 +54,7 @@ retry:
 		for _, node := range nodes[1:] {
 			nodePool, err := node.Node.GetRawMempool()
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			if !reflect.DeepEqual(firstPool, nodePool) {
@@ -77,7 +78,7 @@ retry:
 		for _, node := range nodes {
 			blockHash, blockHeight, err := node.Node.GetBestBlock()
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			if prevHash != nil && (*blockHash != *prevHash ||
@@ -100,24 +101,24 @@ retry:
 func ConnectNode(from *Harness, to *Harness) error {
 	peerInfo, err := from.Node.GetPeerInfo()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	numPeers := len(peerInfo)
 	targetAddr := to.node.config.listen
-	if err := from.Node.AddNode(targetAddr, rpcclient.ANAdd); err != nil {
+	if err := from.Node.AddNode(targetAddr, client.ANAdd); err != nil {
 		return err
 	}
 	// Block until a new connection has been established.
 	peerInfo, err = from.Node.GetPeerInfo()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	for len(peerInfo) <= numPeers {
 		peerInfo, err = from.Node.GetPeerInfo()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}

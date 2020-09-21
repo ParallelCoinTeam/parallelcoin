@@ -26,7 +26,8 @@ func TestMruNonceMap(t *testing.T) {
 	}
 testLoop:
 	for i, test := range tests {
-		// Create a new mru Nonce map limited by the specified test limit and add all of the test nonces.  This will cause evicition since there are more test nonces than the limits.
+		// Create a new mru Nonce map limited by the specified test limit and add all of the test nonces.  This will
+		// cause eviction since there are more test nonces than the limits.
 		mruNonceMap := newMruNonceMap(uint(test.limit))
 		for j := 0; j < numNonces; j++ {
 			mruNonceMap.Add(nonces[j])
@@ -108,7 +109,7 @@ func BenchmarkMruNonceList(b *testing.B) {
 		nonces = append(nonces, uint64(i))
 	}
 	b.StartTimer()
-	// Benchmark the add plus evicition code.
+	// Benchmark the add plus eviction code.
 	limit := 20000
 	mruNonceMap := newMruNonceMap(uint(limit))
 	for i := 0; i < b.N; i++ {

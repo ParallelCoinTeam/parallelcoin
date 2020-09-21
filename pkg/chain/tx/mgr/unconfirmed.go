@@ -1,6 +1,7 @@
 package wtxmgr
 
 import (
+	"github.com/stalker-loki/app/slog"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	"github.com/stalker-loki/pod/pkg/db/walletdb"
@@ -26,15 +27,15 @@ func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) erro
 			return nil
 		}
 	}
-	Info("inserting unconfirmed transaction", rec.Hash)
+	slog.Info("inserting unconfirmed transaction", rec.Hash)
 	v, err := valueTxRecord(rec)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	err = putRawUnmined(ns, rec.Hash[:], v)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	for _, input := range rec.MsgTx.TxIn {
@@ -42,7 +43,7 @@ func (s *Store) insertMemPoolTx(ns walletdb.ReadWriteBucket, rec *TxRecord) erro
 		k := canonicalOutPoint(&prevOut.Hash, prevOut.Index)
 		err = putRawUnminedInput(ns, k, rec.Hash[:])
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
@@ -76,10 +77,10 @@ func (s *Store) removeDoubleSpends(ns walletdb.ReadWriteBucket, rec *TxRecord) e
 				&doubleSpend.Hash, doubleSpendVal, &doubleSpend,
 			)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
-			Debug(
+			slog.Debug(
 				"removing double spending transaction", doubleSpend.Hash)
 			if err := RemoveConflict(ns, &doubleSpend); err != nil {
 				return err
@@ -115,10 +116,10 @@ RemoveConflict(ns walletdb.ReadWriteBucket, rec *TxRecord) error {
 			spender.Hash = spenderHash
 			err := readRawTxRecord(&spender.Hash, spenderVal, &spender)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
-			Debugf(
+			slog.Debugf(
 				"transaction %v is part of a removed conflict chain -- removing as well %s",
 				spender.Hash)
 			if err := RemoveConflict(ns, &spender); err != nil {
@@ -148,7 +149,7 @@ func // UnminedTxs returns the underlying transactions for all unmined
 (s *Store) UnminedTxs(ns walletdb.ReadBucket) ([]*wire.MsgTx, error) {
 	recSet, err := s.unminedTxRecords(ns)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	recs := dependencySort(recSet)
@@ -164,13 +165,13 @@ func (s *Store) unminedTxRecords(ns walletdb.ReadBucket) (map[chainhash.Hash]*Tx
 		var txHash chainhash.Hash
 		err := readRawUnminedHash(k, &txHash)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		rec := new(TxRecord)
 		err = readRawTxRecord(&txHash, v, rec)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		unmined[rec.Hash] = rec

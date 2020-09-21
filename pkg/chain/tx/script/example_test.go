@@ -3,6 +3,7 @@ package txscript_test
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -19,19 +20,19 @@ func ExamplePayToAddrScript() {
 	addressStr := "12gpXQVcCL2qhTNQgyLVdCFG2Qs2px98nV"
 	address, err := util.DecodeAddress(addressStr, &netparams.MainNetParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Create a public key script that pays to the address.
 	script, err := txscript.PayToAddrScript(address)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	fmt.Printf("Script Hex: %x\n", script)
 	disasm, err := txscript.DisasmString(script)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	fmt.Println("Script Disassembly:", disasm)
@@ -71,7 +72,7 @@ func ExampleSignTxOutput() {
 	privKeyBytes, err := hex.DecodeString("22a47fa09a223f2aa079edf85a7c2" +
 		"d4f8720ee63e502ee2869afab7de234b80c")
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	privKey, pubKey := ec.PrivKeyFromBytes(ec.S256(), privKeyBytes)
@@ -79,7 +80,7 @@ func ExampleSignTxOutput() {
 	addr, err := util.NewAddressPubKeyHash(pubKeyHash,
 		&netparams.MainNetParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// For this example, create a fake transaction that represents what would ordinarily be the real transaction that is being spent.  It contains a single output that pays to address in the amount of 1 DUO.
@@ -89,7 +90,7 @@ func ExampleSignTxOutput() {
 	originTx.AddTxIn(txIn)
 	pkScript, err := txscript.PayToAddrScript(addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	txOut := wire.NewTxOut(100000000, pkScript)
@@ -117,7 +118,7 @@ func ExampleSignTxOutput() {
 		redeemTx, 0, originTx.TxOut[0].PkScript, txscript.SigHashAll,
 		txscript.KeyClosure(lookupKey), nil, nil)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	redeemTx.TxIn[0].SignatureScript = sigScript
@@ -128,11 +129,11 @@ func ExampleSignTxOutput() {
 	vm, err := txscript.NewEngine(originTx.TxOut[0].PkScript, redeemTx, 0,
 		flags, nil, nil, -1)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	if err := vm.Execute(); err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	fmt.Println("Transaction successfully signed")

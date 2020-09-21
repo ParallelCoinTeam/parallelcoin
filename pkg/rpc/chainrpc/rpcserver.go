@@ -9,6 +9,7 @@ import (
 	js "encoding/json"
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"io/ioutil"
 	"math/big"
@@ -985,7 +986,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 		// their own coinbase which pays to the appropriate address(es).
 		blkTemplate, err := generator.NewBlockTemplate(0, payAddr, state.Algo)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return InternalRPCError("(rpcserver.go) Failed to create new block "+
 				"template: "+err.Error(), "")
 		}
@@ -1004,7 +1005,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 		state.LastTxUpdate = lastTxUpdate
 		state.prevHash = latestHash
 		state.MinTimestamp = minTimestamp
-		Debugf(
+		slog.Debugf(
 			"generated block template (timestamp %v, target %s, merkle root %s)",
 			msgBlock.Header.Timestamp,
 			targetDifficulty,
@@ -1030,7 +1031,7 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 			// randomly selected payment address.
 			pkScript, err := txscript.PayToAddrScript(payToAddr)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				context := "Failed to create pay-to-addr script"
 				return InternalRPCError(err.Error(), context)
 			}
@@ -1050,12 +1051,12 @@ func (state *GBTWorkState) UpdateBlockTemplate(s *Server,
 		// chain consensus rules.
 		err := generator.UpdateBlockTime(0, msgBlock)
 		if err != nil {
-			Error(err)
-			Debug(err)
+			slog.Error(err)
+			slog.Debug(err)
 
 		}
 		msgBlock.Header.Nonce = 0
-		Debugf(
+		slog.Debugf(
 			"updated block template (timestamp %v, target %s)",
 			msgBlock.Header.Timestamp,
 			targetDifficulty)
@@ -1109,7 +1110,7 @@ func (s *Server) Start() {
 		defer s.DecrementClients()
 		_, isAdmin, err := s.CheckAuth(r, true)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			JSONAuthFail(w)
 			return
 		}
@@ -1120,7 +1121,7 @@ func (s *Server) Start() {
 	rpcServeMux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		authenticated, isAdmin, err := s.CheckAuth(r, false)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			JSONAuthFail(w)
 			return
 		}
@@ -1128,9 +1129,9 @@ func (s *Server) Start() {
 		// default size for read/write buffers.
 		ws, err := websocket.Upgrade(w, r, nil, 0, 0)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			if _, ok := err.(websocket.HandshakeError); !ok {
-				Error("unexpected websocket error:", err)
+				slog.Error("unexpected websocket error:", err)
 
 			}
 			http.Error(w, "400 Bad Request.", http.StatusBadRequest)
@@ -1141,12 +1142,12 @@ func (s *Server) Start() {
 	for _, listener := range s.Cfg.Listeners {
 		s.WG.Add(1)
 		go func(listener net.Listener) {
-			Info("chain RPC server listening on ", listener.Addr())
+			slog.Info("chain RPC server listening on ", listener.Addr())
 			err := httpServer.Serve(listener)
 			if err != nil {
-				Trace(err)
+				slog.Trace(err)
 			}
-			Trace("chain RPC listener done for", listener.Addr())
+			slog.Trace("chain RPC listener done for", listener.Addr())
 
 			s.WG.Done()
 		}(listener)
@@ -1158,16 +1159,16 @@ func (s *Server) Start() {
 // Stop is used by server.go_ to stop the rpc listener.
 func (s *Server) Stop() error {
 	if atomic.AddInt32(&s.Shutdown, 1) != 1 {
-		Warn("RPC server is already in the process of shutting down")
+		slog.Warn("RPC server is already in the process of shutting down")
 		return nil
 	}
-	Trace("RPC server shutting down")
+	slog.Trace("RPC server shutting down")
 
 	for _, listener := range s.Cfg.Listeners {
 		err := listener.Close()
 		if err != nil {
-			Error(err)
-			Error("problem shutting down RPC:", err)
+			slog.Error(err)
+			slog.Error("problem shutting down RPC:", err)
 
 			return err
 		}
@@ -1176,7 +1177,7 @@ func (s *Server) Stop() error {
 	s.NtfnMgr.WaitForShutdown()
 	// close(s.Quit)
 	s.WG.Wait()
-	Debug("RPC server shutdown complete")
+	slog.Debug("RPC server shutdown complete")
 	return nil
 }
 
@@ -1192,7 +1193,7 @@ func (s *Server) CheckAuth(r *http.Request, require bool) (bool, bool, error) {
 	authhdr := r.Header["Authorization"]
 	if len(authhdr) == 0 {
 		if require {
-			Warn("RPC authentication failure from", r.RemoteAddr)
+			slog.Warn("RPC authentication failure from", r.RemoteAddr)
 
 			return false, false, errors.New("auth failure")
 		}
@@ -1211,7 +1212,7 @@ func (s *Server) CheckAuth(r *http.Request, require bool) (bool, bool, error) {
 		return true, true, nil
 	}
 	// Request's auth doesn't match either user
-	Warn("RPC authentication failure from", r.RemoteAddr)
+	slog.Warn("RPC authentication failure from", r.RemoteAddr)
 
 	return false, false, errors.New("auth failure")
 }
@@ -1232,7 +1233,7 @@ func (s *Server) HandleBlockchainNotification(notification *blockchain.Notificat
 		case blockchain.NTBlockAccepted:
 			block, ok := notification.Data.(*util.Block)
 			if !ok {
-				Warn("chain accepted notification is not a block")
+				slog.Warn("chain accepted notification is not a block")
 				break
 			}
 			// Allow any clients performing long polling via the getblocktemplate RPC
@@ -1242,7 +1243,7 @@ func (s *Server) HandleBlockchainNotification(notification *blockchain.Notificat
 		case blockchain.NTBlockConnected:
 			block, ok := notification.Data.(*util.Block)
 			if !ok {
-				Warn("chain connected notification is not a block")
+				slog.Warn("chain connected notification is not a block")
 				break
 			}
 			// Notify registered websocket clients of incoming block.
@@ -1250,7 +1251,7 @@ func (s *Server) HandleBlockchainNotification(notification *blockchain.Notificat
 		case blockchain.NTBlockDisconnected:
 			block, ok := notification.Data.(*util.Block)
 			if !ok {
-				Warn("chain disconnected notification is not a block.")
+				slog.Warn("chain disconnected notification is not a block.")
 				break
 			}
 			// Notify registered websocket clients.
@@ -1310,7 +1311,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	body, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		errCode := http.StatusBadRequest
 		http.Error(w, fmt.Sprintf("%d error reading JSON message: %v",
 			errCode, err), errCode)
@@ -1325,7 +1326,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	hj, ok := w.(http.Hijacker)
 	if !ok {
 		errMsg := "webserver doesn't support hijacking"
-		Warnf(errMsg)
+		slog.Warnf(errMsg)
 
 		errCode := http.StatusInternalServerError
 		http.Error(w, strconv.Itoa(errCode)+" "+errMsg, errCode)
@@ -1333,8 +1334,8 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	}
 	conn, buf, err := hj.Hijack()
 	if err != nil {
-		Error(err)
-		Warn("failed to hijack HTTP connection:", err)
+		slog.Error(err)
+		slog.Warn("failed to hijack HTTP connection:", err)
 
 		errCode := http.StatusInternalServerError
 		http.Error(w, strconv.Itoa(errCode)+" "+err.Error(), errCode)
@@ -1344,8 +1345,8 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	defer buf.Flush()
 	err = conn.SetReadDeadline(TimeZeroVal)
 	if err != nil {
-		Error(err)
-		Debug(err)
+		slog.Error(err)
+		slog.Debug(err)
 
 	}
 	// Attempt to parse the raw body into a JSON-RPC request.
@@ -1413,26 +1414,26 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 	// Marshal the response.
 	msg, err := CreateMarshalledReply(responseID, result, jsonErr)
 	if err != nil {
-		Error(err)
-		Error("failed to marshal reply:", err)
+		slog.Error(err)
+		slog.Error("failed to marshal reply:", err)
 
 		return
 	}
 	// Write the response.
 	err = s.WriteHTTPResponseHeaders(r, w.Header(), http.StatusOK, buf)
 	if err != nil {
-		Error(err)
-		Error(err.Error())
+		slog.Error(err)
+		slog.Error(err.Error())
 
 		return
 	}
 	if _, err := buf.Write(msg); err != nil {
-		Error("failed to write marshalled reply:", err)
+		slog.Error("failed to write marshalled reply:", err)
 
 	}
 	// Terminate with newline to maintain compatibility with Bitcoin Core.
 	if err := buf.WriteByte('\n'); err != nil {
-		Error("failed to append terminating newline to reply:", err)
+		slog.Error("failed to append terminating newline to reply:", err)
 
 	}
 }
@@ -1442,7 +1443,7 @@ func (s *Server) JSONRPCRead(w http.ResponseWriter, r *http.Request, isAdmin boo
 // function is safe for concurrent access.
 func (s *Server) LimitConnections(w http.ResponseWriter, remoteAddr string) bool {
 	if int(atomic.LoadInt32(&s.NumClients)+1) > *s.Config.RPCMaxClients {
-		Infof(
+		slog.Infof(
 			"max RPC clients exceeded [%d] - disconnecting client %s",
 			s.Config.RPCMaxClients, remoteAddr)
 
@@ -1485,12 +1486,12 @@ func (s *Server) WriteHTTPResponseHeaders(req *http.Request,
 	headers http.Header, code int, w io.Writer) error {
 	_, err := io.WriteString(w, s.HTTPStatusLine(req, code))
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	err = headers.Write(w)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	_, err = io.WriteString(w, "\r\n")
@@ -1504,7 +1505,7 @@ func (s *Server) WriteHTTPResponseHeaders(req *http.Request,
 func BuilderScript(builder *txscript.ScriptBuilder) []byte {
 	script, err := builder.Script()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		panic(err)
 	}
 	return script
@@ -1634,7 +1635,7 @@ func CreateTxRawResult(chainParams *netparams.Params, mtx *wire.MsgTx,
 	chainHeight int32) (*btcjson.TxRawResult, error) {
 	mtxHex, err := MessageToHex(mtx)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	txReply := &btcjson.TxRawResult{
@@ -1717,7 +1718,7 @@ func CreateVinListPrevOut(s *Server, mtx *wire.MsgTx,
 		var err error
 		originOutputs, err = FetchInputTxos(s, mtx)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 	}
@@ -1846,12 +1847,12 @@ func DecodeTemplateID(templateID string) (*chainhash.Hash, int64, error) {
 	}
 	prevHash, err := chainhash.NewHashFromStr(fields[0])
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, errors.New("invalid longpollid format")
 	}
 	lastGenerated, err := strconv.ParseInt(fields[1], 10, 64)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, errors.New("invalid longpollid format")
 	}
 	return prevHash, lastGenerated, nil
@@ -1887,7 +1888,7 @@ func FetchInputTxos(s *Server, tx *wire.MsgTx) (map[wire.OutPoint]wire.TxOut, er
 		// Look up the location of the transaction.
 		blockRegion, err := s.Cfg.TxIndex.TxBlockRegion(&origin.Hash)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			context := "Failed to retrieve transaction location"
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -1902,14 +1903,14 @@ func FetchInputTxos(s *Server, tx *wire.MsgTx) (map[wire.OutPoint]wire.TxOut, er
 			return err
 		})
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, NoTxInfoError(&origin.Hash)
 		}
 		// Deserialize the transaction
 		var msgTx wire.MsgTx
 		err = msgTx.Deserialize(bytes.NewReader(txBytes))
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			context := deserialfail
 			return nil, InternalRPCError(err.Error(), context)
 		}
@@ -1948,12 +1949,12 @@ func FetchMempoolTxnsForAddress(s *Server, addr util.Address, numToSkip,
 
 // GenCertPair generates a key/cert pair to the paths provided.
 func GenCertPair(certFile, keyFile string) error {
-	Info("generating TLS certificates...")
+	slog.Info("generating TLS certificates...")
 	org := "pod autogenerated cert"
 	validUntil := time.Now().Add(10 * 365 * 24 * time.Hour)
 	cert, key, err := util.NewTLSCertPair(org, validUntil, nil)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Write cert and key files.
@@ -1964,7 +1965,7 @@ func GenCertPair(certFile, keyFile string) error {
 		os.Remove(certFile)
 		return err
 	}
-	Info("Done generating TLS certificates")
+	slog.Info("Done generating TLS certificates")
 	return nil
 }
 
@@ -1982,8 +1983,8 @@ func GetDifficultyRatio(bits uint32, params *netparams.Params,
 	outString := difficulty.FloatString(8)
 	diff, err := strconv.ParseFloat(outString, 64)
 	if err != nil {
-		Error(err)
-		Error("cannot get difficulty:", err)
+		slog.Error(err)
+		slog.Error("cannot get difficulty:", err)
 
 		return 0
 	}
@@ -1995,7 +1996,7 @@ func GetDifficultyRatio(bits uint32, params *netparams.Params,
 func NormalizeAddress(addr, defaultPort string) string {
 	_, _, err := net.SplitHostPort(addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return net.JoinHostPort(addr, defaultPort)
 	}
 	return addr
@@ -2016,7 +2017,7 @@ func InternalRPCError(errStr, context string) *btcjson.RPCError {
 	if context != "" {
 		logStr = context + ": " + errStr
 	}
-	Error(logStr)
+	slog.Error(logStr)
 
 	return btcjson.NewRPCError(btcjson.ErrRPCInternal.Code, errStr)
 }
@@ -2088,10 +2089,10 @@ func ParseCmd(request *btcjson.Request) *ParsedRPCCmd {
 	parsedCmd.Method = request.Method
 	cmd, err := btcjson.UnmarshalCmd(request)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		// When the error is because the method is not registered,
 		// produce a method not found RPC error.
-		if jerr, ok := err.(btcjson.BTCJSONError); ok &&
+		if jerr, ok := err.(btcjson.Error); ok &&
 			jerr.ErrorCode == btcjson.ErrUnregisteredMethod {
 			parsedCmd.Err = btcjson.ErrRPCMethodNotFound
 			return &parsedCmd
@@ -2161,7 +2162,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 	if finishHeight < 0 {
 		finishHeight = 0
 	}
-	Infof(
+	slog.Infof(
 		"verifying chain for %d blocks at level %d",
 		best.Height-finishHeight,
 		level,
@@ -2171,7 +2172,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 		// Level 0 just looks up the block.
 		block, err := s.Cfg.Chain.BlockByHeight(height)
 		if err != nil {
-			Errorf(
+			slog.Errorf(
 				"verify is unable to fetch block at height %d: %v",
 				height,
 				err,
@@ -2186,7 +2187,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 			err := blockchain.CheckBlockSanity(block, powLimit, s.Cfg.TimeSource,
 				true, block.Height())
 			if err != nil {
-				Errorf(
+				slog.Errorf(
 					"verify is unable to validate block at hash %v height %d: %v %s",
 					block.Hash(), height, err)
 
@@ -2194,7 +2195,7 @@ func VerifyChain(s *Server, level, depth int32) error {
 			}
 		}
 	}
-	Info("chain verify completed successfully")
+	slog.Info("chain verify completed successfully")
 	return nil
 }
 

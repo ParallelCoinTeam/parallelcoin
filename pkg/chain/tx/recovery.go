@@ -1,6 +1,7 @@
 package wallettx
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"time"
 
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
@@ -66,7 +67,7 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 			ns, waddrmgr.DefaultAccountNum,
 		)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Fetch the external key count, which bounds the indexes we
@@ -121,7 +122,7 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 			credit.PkScript, rm.chainParams,
 		)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		rm.state.AddWatchedOutPoint(&credit.OutPoint, addrs[0])
@@ -134,7 +135,7 @@ func (rm *RecoveryManager) Resurrect(ns walletdb.ReadBucket,
 func (rm *RecoveryManager) AddToBlockBatch(hash *chainhash.Hash, height int32,
 	timestamp time.Time) {
 	if !rm.started {
-		Tracef(
+		slog.Tracef(
 			"seed birthday surpassed, "+
 				"starting recovery of wallet from height=%d hash=%v "+
 				"with recovery-window=%d",

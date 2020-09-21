@@ -1,6 +1,7 @@
 package kopach_worker
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"net/rpc"
 	"os"
 
@@ -35,24 +36,24 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 		if len(os.Args) > 3 {
 			log.L.SetLevel(os.Args[3], true, "pod")
 		}
-		Debug("miner worker starting")
+		slog.Debug("miner worker starting")
 		w, conn := worker.New(cx.KillAll)
 		interrupt.AddHandler(func() {
-			Debug("KopachWorkerHandle interrupt")
-			if err := conn.Close(); Check(err) {
+			slog.Debug("KopachWorkerHandle interrupt")
+			if err := conn.Close(); slog.Check(err) {
 			}
 		})
 		err := rpc.Register(w)
 		if err != nil {
-			Debug(err)
+			slog.Debug(err)
 			return err
 		}
-		Debug("starting up worker IPC")
+		slog.Debug("starting up worker IPC")
 		rpc.ServeConn(conn)
-		Debug("stopping worker IPC")
-		if err := conn.Close(); Check(err) {
+		slog.Debug("stopping worker IPC")
+		if err := conn.Close(); slog.Check(err) {
 		}
-		Debug("finished")
+		slog.Debug("finished")
 		return nil
 	}
 }

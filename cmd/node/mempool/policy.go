@@ -2,10 +2,11 @@ package mempool
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"time"
 
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	script "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	"github.com/stalker-loki/pod/pkg/util"
 )
@@ -80,8 +81,8 @@ func // checkInputsStandard performs a series of checks on a transaction's
 // have a clean stack after execution and only contain pushed data in their
 // signature scripts.
 // This function does not perform those checks because the script engine
-// already does this more accurately and concisely via the txscript.
-// ScriptVerifyCleanStack and txscript.ScriptVerifySigPushOnly flags.
+// already does this more accurately and concisely via the script.
+// ScriptVerifyCleanStack and script.ScriptVerifySigPushOnly flags.
 checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) error {
 	// NOTE: The reference implementation also does a coinbase check here,
 	// but coinbases have already been rejected prior to calling this
@@ -91,9 +92,9 @@ checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) error {
 		// have already been checked prior to calling this function.
 		entry := utxoView.LookupEntry(txIn.PreviousOutPoint)
 		originPkScript := entry.PkScript()
-		switch txscript.GetScriptClass(originPkScript) {
-		case txscript.ScriptHashTy:
-			numSigOps := txscript.GetPreciseSigOpCount(
+		switch script.GetScriptClass(originPkScript) {
+		case script.ScriptHashTy:
+			numSigOps := script.GetPreciseSigOpCount(
 				txIn.SignatureScript, originPkScript, true)
 			if numSigOps > maxStandardP2SHSigOps {
 				str := fmt.Sprintf("transaction input #%d has %d signature"+
@@ -101,7 +102,7 @@ checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) error {
 					i, numSigOps, maxStandardP2SHSigOps)
 				return txRuleError(wire.RejectNonstandard, str)
 			}
-		case txscript.NonStandardTy:
+		case script.NonStandardTy:
 			str := fmt.Sprintf("transaction input #%d has a non-standard"+
 				" script form", i)
 			return txRuleError(wire.RejectNonstandard, str)
@@ -116,12 +117,12 @@ func // checkPkScriptStandard performs a series of checks on a transaction
 // A standard public key script is one that is a recognized form,
 // and for multi-signature scripts only contains from 1 to
 // maxStandardMultiSigKeys public keys.
-checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) error {
+checkPkScriptStandard(pkScript []byte, scriptClass script.ScriptClass) error {
 	switch scriptClass {
-	case txscript.MultiSigTy:
-		numPubKeys, numSigs, err := txscript.CalcMultiSigStats(pkScript)
+	case script.MultiSigTy:
+		numPubKeys, numSigs, err := script.CalcMultiSigStats(pkScript)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			str := fmt.Sprintf("multi-signature script parse "+
 				"failure: %v", err)
 			return txRuleError(wire.RejectNonstandard, str)
@@ -150,7 +151,7 @@ checkPkScriptStandard(pkScript []byte, scriptClass txscript.ScriptClass) error {
 				numPubKeys)
 			return txRuleError(wire.RejectNonstandard, str)
 		}
-	case txscript.NonStandardTy:
+	case script.NonStandardTy:
 		return txRuleError(wire.RejectNonstandard, "non-standard script form")
 	}
 	return nil
@@ -163,7 +164,7 @@ func // isDust returns whether or not the passed transaction output amount is
 // of the minimum transaction relay fee, it is considered dust.
 isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 	// Unspendable outputs are considered dust.
-	if txscript.IsUnspendable(txOut.PkScript) {
+	if script.IsUnspendable(txOut.PkScript) {
 		return true
 	}
 	// The total serialized size consists of the output and the associated
@@ -220,7 +221,7 @@ isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 	// Both cases share a 41 byte preamble required to reference the input being
 	// spent and the sequence number of the input.
 	totalSize := txOut.SerializeSize() + 41
-	if txscript.IsWitnessProgram(txOut.PkScript) {
+	if script.IsWitnessProgram(txOut.PkScript) {
 		totalSize += 107 / blockchain.WitnessScaleFactor
 	} else {
 		totalSize += 107
@@ -286,7 +287,7 @@ checkTransactionStandard(tx *util.Tx, height int32,
 		}
 		// Each transaction input signature script must only contain opcodes
 		// which push data onto the stack.
-		if !txscript.IsPushOnlyScript(txIn.SignatureScript) {
+		if !script.IsPushOnlyScript(txIn.SignatureScript) {
 			str := fmt.Sprintf("transaction input %d: signature "+
 				"script is not push only", i)
 			return txRuleError(wire.RejectNonstandard, str)
@@ -296,10 +297,10 @@ checkTransactionStandard(tx *util.Tx, height int32,
 	// be "dust" (except when the script is a null data script).
 	numNullDataOutputs := 0
 	for i, txOut := range msgTx.TxOut {
-		scriptClass := txscript.GetScriptClass(txOut.PkScript)
+		scriptClass := script.GetScriptClass(txOut.PkScript)
 		err := checkPkScriptStandard(txOut.PkScript, scriptClass)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			// Attempt to extract a reject code from the error so it can be
 			// retained.  When not possible, fall back to a non standard error.
 			rejectCode := wire.RejectNonstandard
@@ -311,7 +312,7 @@ checkTransactionStandard(tx *util.Tx, height int32,
 		}
 		// Accumulate the number of outputs which only carry data.
 		// For all other script types, ensure the output value is not "dust".
-		if scriptClass == txscript.NullDataTy {
+		if scriptClass == script.NullDataTy {
 			numNullDataOutputs++
 		} else if isDust(txOut, minRelayTxFee) {
 			str := fmt.Sprintf("transaction output %d: payment of %d is dust"+

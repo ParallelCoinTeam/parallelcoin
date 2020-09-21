@@ -3,6 +3,7 @@ package coinset
 import (
 	"container/list"
 	"errors"
+	"github.com/stalker-loki/app/slog"
 	"sort"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -218,7 +219,7 @@ func (s MinPriorityCoinSelector) CoinSelect(targetValue util.Amount, coins []Coi
 			MinChangeAmount: s.MinChangeAmount,
 		}).CoinSelect(targetValue, possibleHighCoins)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			// attempt to add available low priority to make a solution
 			for numLow := 1; numLow <= cutoffIndex && numLow+(i-cutoffIndex) <= s.MaxInputs; numLow++ {
 				allHigh := NewCoinSet(possibleCoins[cutoffIndex : i+1])
@@ -235,7 +236,7 @@ func (s MinPriorityCoinSelector) CoinSelect(targetValue util.Amount, coins []Coi
 					MinAvgValueAgePerInput: newMinAvgValueAge,
 				}).CoinSelect(newTargetValue, possibleCoins[0:cutoffIndex])
 				if err != nil {
-					Error(err)
+					slog.Error(err)
 					continue
 				}
 				for _, coin := range lowSelect.Coins() {

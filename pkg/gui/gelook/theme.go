@@ -22,6 +22,7 @@ type DuoUItheme struct {
 func init() {
 	fonts.Register()
 }
+
 func NewDuoUItheme() *DuoUItheme {
 	t := &DuoUItheme{
 		Shaper: font.Default(),

@@ -1,6 +1,7 @@
 package normalize
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"net"
 
 	"github.com/urfave/cli"
@@ -10,7 +11,7 @@ import (
 func Address(addr, defaultPort string) string {
 	_, _, err := net.SplitHostPort(addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return net.JoinHostPort(addr, defaultPort)
 	}
 	return addr

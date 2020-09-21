@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/apputil"
 	"github.com/stalker-loki/pod/app/conte"
 	"github.com/stalker-loki/pod/app/save"
@@ -10,8 +11,8 @@ import (
 
 func // Configure loads and sanitises the configuration from urfave/cli
 Configure(cx *conte.Xt, commandName string, initial bool) {
-	Debug("running Configure", commandName)
-	Trace("configuring pod")
+	slog.Debug("running Configure", commandName)
+	slog.Trace("configuring pod")
 	cx.WalletChan = make(chan *wallet.Wallet)
 	cx.NodeChan = make(chan *chainrpc.Server)
 	// theoretically, the configuration should be accessed only when locked
@@ -45,7 +46,7 @@ Configure(cx *conte.Xt, commandName string, initial bool) {
 	setDiallers(cfg, cx.StateCfg)
 	// if the user set the save flag, or file doesn't exist save the file now
 	if cx.StateCfg.Save || !apputil.FileExists(*cx.Config.ConfigFile) {
-		Trace("saving configuration")
+		slog.Trace("saving configuration")
 		save.Pod(cx.Config)
 	}
 }

@@ -7,7 +7,8 @@ import (
 	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
-// TestPodExtCustomResults ensures any results that have custom marshalling work as intedned and unmarshal code of results are as expected.
+// TestPodExtCustomResults ensures any results that have custom marshalling work as intended and unmarshal code of
+// results are as expected.
 func TestPodExtCustomResults(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

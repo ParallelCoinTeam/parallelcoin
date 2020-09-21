@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/gui"
 	"github.com/stalker-loki/pod/pkg/util/logi"
 	"os/exec"
@@ -106,7 +107,7 @@ func (s *State) LogViewer() layout.FlexChild {
 								v2 := split[1]
 								c := strings.Replace(s.Config.ClickCommand, "$1", v1, 1)
 								c = strings.Replace(c, "$2", v2, 1)
-								Debug("running command", c)
+								slog.Debug("running command", c)
 								args := strings.Split(c, " ")
 								cmd := exec.Command(args[0], args[1:]...)
 								_ = cmd.Run()

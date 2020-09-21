@@ -205,7 +205,7 @@ func TestImmutableReverseSequential(t *testing.T) {
 	}
 }
 
-// TestImmutableUnordered ensures that putting keys into an immutable treap in no paritcular order works as expected.
+// TestImmutableUnordered ensures that putting keys into an immutable treap in no particular order works as expected.
 func TestImmutableUnordered(t *testing.T) {
 	t.Parallel()
 	// Insert a bunch of out-of-order keys while checking several of the treap functions work as expected.
@@ -343,7 +343,8 @@ func TestImmutableForEachStopIterator(t *testing.T) {
 	}
 }
 
-// TestImmutableSnapshot ensures that immutable treaps are actually immutable by keeping a reference to the previous treap, performing a mutation, and then ensuring the referenced treap does not have the mutation applied.
+// TestImmutableSnapshot ensures that immutable treaps are actually immutable by keeping a reference to the previous
+// treap, performing a mutation, and then ensuring the referenced treap does not have the mutation applied.
 func TestImmutableSnapshot(t *testing.T) {
 	t.Parallel()
 	// Insert a bunch of sequential keys while checking several of the treap functions work as expected.

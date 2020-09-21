@@ -8,10 +8,10 @@ import (
 // EnsureDir checks a file could be written to a path, creates the directories as needed
 func EnsureDir(fileName string) {
 	dirName := filepath.Dir(fileName)
-	if _, serr := os.Stat(dirName); serr != nil {
-		merr := os.MkdirAll(dirName, os.ModePerm)
-		if merr != nil {
-			panic(merr)
+	if _, err := os.Stat(dirName); err != nil {
+		err := os.MkdirAll(dirName, os.ModePerm)
+		if err != nil {
+			panic(err)
 		}
 	}
 }

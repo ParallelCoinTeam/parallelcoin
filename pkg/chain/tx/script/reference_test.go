@@ -452,12 +452,12 @@ testloop:
 			t.Errorf("bad test (bad length) %d: %v", i, test)
 			continue
 		}
-		serializedhex, ok := test[1].(string)
+		serializedHex, ok := test[1].(string)
 		if !ok {
 			t.Errorf("bad test (arg 2 not string) %d: %v", i, test)
 			continue
 		}
-		serializedTx, err := hex.DecodeString(serializedhex)
+		serializedTx, err := hex.DecodeString(serializedHex)
 		if err != nil {
 			t.Errorf("bad test (arg 2 not hex %v) %d: %v", err, i,
 				test)
@@ -492,13 +492,13 @@ testloop:
 					"%d: %v", j, i, test)
 				continue testloop
 			}
-			previoustx, ok := input[0].(string)
+			previousTx, ok := input[0].(string)
 			if !ok {
 				t.Errorf("bad test (%dth input hash not string)"+
 					"%d: %v", j, i, test)
 				continue testloop
 			}
-			prevhash, err := chainhash.NewHashFromStr(previoustx)
+			prevHash, err := chainhash.NewHashFromStr(previousTx)
 			if err != nil {
 				t.Errorf("bad test (%dth input hash not hash %v)"+
 					"%d: %v", j, err, i, test)
@@ -536,7 +536,7 @@ testloop:
 				inputVal: int64(inputValue),
 				pkScript: script,
 			}
-			prevOuts[*wire.NewOutPoint(prevhash, idx)] = v
+			prevOuts[*wire.NewOutPoint(prevHash, idx)] = v
 		}
 		for k, txin := range tx.MsgTx().TxIn {
 			prevOut, ok := prevOuts[txin.PreviousOutPoint]
@@ -587,12 +587,12 @@ testloop:
 			t.Errorf("bad test (bad length) %d: %v", i, test)
 			continue
 		}
-		serializedhex, ok := test[1].(string)
+		serializedHex, ok := test[1].(string)
 		if !ok {
 			t.Errorf("bad test (arg 2 not string) %d: %v", i, test)
 			continue
 		}
-		serializedTx, err := hex.DecodeString(serializedhex)
+		serializedTx, err := hex.DecodeString(serializedHex)
 		if err != nil {
 			t.Errorf("bad test (arg 2 not hex %v) %d: %v", err, i,
 				test)
@@ -627,13 +627,13 @@ testloop:
 					"%d: %v", j, i, test)
 				continue
 			}
-			previoustx, ok := input[0].(string)
+			previousTx, ok := input[0].(string)
 			if !ok {
 				t.Errorf("bad test (%dth input hash not string)"+
 					"%d: %v", j, i, test)
 				continue
 			}
-			prevhash, err := chainhash.NewHashFromStr(previoustx)
+			prevHash, err := chainhash.NewHashFromStr(previousTx)
 			if err != nil {
 				t.Errorf("bad test (%dth input hash not hash %v)"+
 					"%d: %v", j, err, i, test)
@@ -671,7 +671,7 @@ testloop:
 				inputVal: int64(inputValue),
 				pkScript: script,
 			}
-			prevOuts[*wire.NewOutPoint(prevhash, idx)] = v
+			prevOuts[*wire.NewOutPoint(prevHash, idx)] = v
 		}
 		for k, txin := range tx.MsgTx().TxIn {
 			prevOut, ok := prevOuts[txin.PreviousOutPoint]

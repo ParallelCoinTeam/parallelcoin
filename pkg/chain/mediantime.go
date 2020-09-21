@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"math"
 	"sort"
 	"sync"
@@ -15,7 +16,7 @@ const (
 	// network is outside of this range, no offset will be applied.
 	maxAllowedOffsetSecs = 70 * 60 // 1 hour 10 minutes
 	// similarTimeSecs is the number of seconds in either direction from the
-	// local clock that is used to determine that it is likley wrong and hence
+	// local clock that is used to determine that it is likely wrong and hence
 	// to show a warning.
 	similarTimeSecs = 5 * 60 // 5 minutes
 )
@@ -123,9 +124,9 @@ func // AddTimeSample adds a time sample that is used when determining the
 	copy(sortedOffsets, m.offsets)
 	sort.Sort(int64Sorter(sortedOffsets))
 	offsetDuration := time.Duration(offsetSecs) * time.Second
-	Tracef("Added time sample of %v (total: %v)", offsetDuration,
+	slog.Tracef("Added time sample of %v (total: %v)", offsetDuration,
 		numOffsets)
-	Trace("samples:", sortedOffsets)
+	slog.Trace("samples:", sortedOffsets)
 	// NOTE: The following code intentionally has a bug to mirror the buggy
 	// behavior in Bitcoin Core since the median time is used in the consensus
 	// rules. In particular, the offset is only updated when the number of
@@ -163,14 +164,14 @@ func // AddTimeSample adds a time sample that is used when determining the
 			}
 			// Warn if none of the time samples are close.
 			if !remoteHasCloseTime {
-				Warn("Please check your date and time are correct!  pod" +
+				slog.Warn("Please check your date and time are correct!  pod" +
 					" will" +
 					" not work properly with an invalid time")
 			}
 		}
 	}
 	medianDuration := time.Duration(m.offsetSecs) * time.Second
-	Debug("new time offset:", medianDuration)
+	slog.Debug("new time offset:", medianDuration)
 }
 
 func // Offset returns the number of seconds to adjust the local clock based

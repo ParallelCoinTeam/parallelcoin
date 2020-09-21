@@ -1,9 +1,10 @@
 package blockchain
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"math"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 )
 
 const (
@@ -87,7 +88,7 @@ func // Condition returns true when the specific bit associated with the checker
 	}
 	expectedVersion, err := c.chain.calcNextBlockVersion(node.parent)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, err
 	}
 	return expectedVersion&conditionMask == 0, nil
@@ -98,7 +99,7 @@ type // deploymentChecker provides a thresholdConditionChecker which can be used
 // This is required for properly detecting and activating consensus rule
 // changes.
 deploymentChecker struct {
-	deployment *chaincfg.ConsensusDeployment
+	deployment *config.ConsensusDeployment
 	chain      *BlockChain
 }
 
@@ -169,7 +170,7 @@ func // calcNextBlockVersion calculates the expected version of the block after
 		checker := deploymentChecker{deployment: deployment, chain: b}
 		state, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return 0, err
 		}
 		if state == ThresholdStarted || state == ThresholdLockedIn {
@@ -201,19 +202,19 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 		cache := &b.warningCaches[bit]
 		state, err := b.thresholdState(node.parent, checker, cache)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		switch state {
 		case ThresholdActive:
 			if !b.unknownRulesWarned {
-				Warnf("unknown new rules activated (bit %d)", bit)
+				slog.Warnf("unknown new rules activated (bit %d)", bit)
 				b.unknownRulesWarned = true
 			}
 		case ThresholdLockedIn:
 			window := int32(checker.MinerConfirmationWindow())
 			activationHeight := window - (node.height % window)
-			Warnf("Unknown new rules are about to activate in %d blocks ("+
+			slog.Warnf("Unknown new rules are about to activate in %d blocks ("+
 				"bit %d)", activationHeight, bit)
 		}
 	}

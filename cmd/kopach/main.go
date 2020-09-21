@@ -3,6 +3,7 @@ package kopach
 import (
 	"context"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"net"
 	"os"
 	"time"
@@ -42,9 +43,9 @@ type Worker struct {
 	LastHash      *chainhash.Hash
 }
 
-func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
+func Handle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-		Debug("miner controller starting")
+		slog.Debug("miner controller starting")
 		ctx, cancel := context.WithCancel(context.Background())
 		w := &Worker{
 			ctx:           ctx,
@@ -54,20 +55,20 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
-		Debug("opening broadcast channel listener")
+		slog.Debug("opening broadcast channel listener")
 		w.conn, err = transport.NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
 			transport.DefaultPort, control.MaxDatagramSize, handlers,
 			cx.KillAll)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			cancel()
 			return
 		}
 		var wks []*worker.Worker
 		// start up the workers
-		Debug("starting up kopach workers")
+		slog.Debug("starting up kopach workers")
 		for i := 0; i < *cx.Config.GenThreads; i++ {
-			Debug("starting worker", i)
+			slog.Debug("starting worker", i)
 			cmd := worker.Spawn(os.Args[0], "worker",
 				cx.ActiveNet.Name, *cx.Config.LogLevel)
 			wks = append(wks, cmd)
@@ -75,24 +76,24 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 		}
 		interrupt.AddHandler(func() {
 			w.active.Store(false)
-			Debug("KopachHandle interrupt")
+			slog.Debug("KopachHandle interrupt")
 			for i := range w.workers {
-				if err = wks[i].Kill(); !Check(err) {
+				if err = wks[i].Kill(); !slog.Check(err) {
 				}
-				Debug("stopped worker", i)
+				slog.Debug("stopped worker", i)
 			}
 		})
 		for i := range w.workers {
-			Debug("sending pass to worker", i)
+			slog.Debug("sending pass to worker", i)
 			err := w.workers[i].SendPass(*cx.Config.MinerPass)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 			}
 		}
 		w.active.Store(true)
 		// controller watcher thread
 		go func() {
-			Debug("starting controller watcher")
+			slog.Debug("starting controller watcher")
 			ticker := time.NewTicker(time.Second)
 		out:
 			for {
@@ -104,16 +105,16 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 					since := time.Now().Sub(time.Unix(0, w.lastSent.Load()))
 					wasSending := since > time.Second*3 && w.FirstSender.Load() != ""
 					if wasSending {
-						Debug("previous current controller has stopped"+
+						slog.Debug("previous current controller has stopped"+
 							" broadcasting", since, w.FirstSender.Load())
 						// when this string is clear other broadcasts will be listened to
 						w.FirstSender.Store("")
 						// pause the workers
 						for i := range w.workers {
-							Debug("sending pause to worker", i)
+							slog.Debug("sending pause to worker", i)
 							err := w.workers[i].Pause()
 							if err != nil {
-								Error(err)
+								slog.Error(err)
 							}
 						}
 					}
@@ -122,9 +123,9 @@ func KopachHandle(cx *conte.Xt) func(c *cli.Context) error {
 				}
 			}
 		}()
-		Debug("listening on", control.UDP4MulticastAddress)
+		slog.Debug("listening on", control.UDP4MulticastAddress)
 		<-cx.KillAll
-		Info("kopach shutting down")
+		slog.Info("kopach shutting down")
 		return
 	}
 }
@@ -135,7 +136,7 @@ var handlers = transport.Handlers{
 		b []byte) (err error) {
 		w := ctx.(*Worker)
 		if !w.active.Load() {
-			Debug("not active")
+			slog.Debug("not active")
 			return
 		}
 		j := job.LoadContainer(b)
@@ -145,24 +146,24 @@ var handlers = transport.Handlers{
 		firstSender := w.FirstSender.Load()
 		otherSent := firstSender != addr && firstSender != ""
 		if otherSent {
-			Debug("ignoring other controller job")
+			slog.Debug("ignoring other controller job")
 			// ignore other controllers while one is active and received first
 			return
 		}
 		if firstSender == "" {
-			Warn("new sender", addr)
+			slog.Warn("new sender", addr)
 		}
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.workers {
 			err := w.workers[i].NewJob(&j)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 			}
 		}
 		return
 	},
-	string(pause.PauseMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
+	string(pause.Magic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		w := ctx.(*Worker)
 		p := pause.LoadPauseContainer(b)
 		fs := w.FirstSender.Load()
@@ -171,10 +172,10 @@ var handlers = transport.Handlers{
 		ns := net.JoinHostPort(ni, fmt.Sprint(np))
 		if fs == ns {
 			for i := range w.workers {
-				Debug("sending pause to worker", i, fs, ns)
+				slog.Debug("sending pause to worker", i, fs, ns)
 				err := w.workers[i].Pause()
 				if err != nil {
-					Error(err)
+					slog.Error(err)
 				}
 			}
 		}

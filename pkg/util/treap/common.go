@@ -36,7 +36,11 @@ func newTreapNode(key, value []byte, priority int) *treapNode {
 	return &treapNode{key: key, value: value, priority: priority}
 }
 
-// parentStack represents a stack of parent treap nodes that are used during iteration.  It consists of a static array for holding the parents and a dynamic overflow slice.  It is extremely unlikely the overflow will ever be hit during normal operation, however, since a treap's height is probabilistic, the overflow case needs to be handled properly.  This approach is used because it is much more efficient for the majority case than dynamically allocating heap space every time the treap is iterated.
+// parentStack represents a stack of parent treap nodes that are used during iteration.  It consists of a static array
+// for holding the parents and a dynamic overflow slice.  It is extremely unlikely the overflow will ever be hit during
+// normal operation, however, since a treap's height is probabilistic, the overflow case needs to be handled properly.
+// This approach is used because it is much more efficient for the majority case than dynamically allocating heap space
+// every time the treap is iterated.
 type parentStack struct {
 	index    int
 	items    [staticDepth]*treapNode
@@ -83,7 +87,10 @@ func (s *parentStack) Push(node *treapNode) {
 		s.index++
 		return
 	}
-	// This approach is used over append because reslicing the slice to pop the item causes the compiler to make unneeded allocations.  Also, since the max number of items is related to the tree depth which requires expontentially more items to increase, only increase the cap one item at a time.  This is more intelligent than the generic append expansion algorithm which often doubles the cap.
+	// This approach is used over append because reslicing the slice to pop the item causes the compiler to make
+	// unneeded allocations.  Also, since the max number of items is related to the tree depth which requires
+	// exponentially more items to increase, only increase the cap one item at a time.  This is more intelligent than
+	// the generic append expansion algorithm which often doubles the cap.
 	index := s.index - staticDepth
 	if index+1 > cap(s.overflow) {
 		overflow := make([]*treapNode, index+1)

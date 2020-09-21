@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/save"
 	"github.com/stalker-loki/pod/pkg/gui"
 	"github.com/stalker-loki/pod/pkg/util/logi"
@@ -54,7 +55,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								})
 							}, b)
 							for b.Clicked(s.Gtx) {
-								Debug("clear all")
+								slog.Debug("clear all")
 								s.EntryBuf.Clear()
 								s.FilterBuf.Clear()
 							}
@@ -69,7 +70,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								})
 							}, b)
 							for b.Clicked(s.Gtx) {
-								Debug("hide all")
+								slog.Debug("hide all")
 								s.Loggers.CloseAllItems(s)
 								s.SaveConfig()
 							}
@@ -82,7 +83,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								})
 							}, b)
 							for b.Clicked(s.Gtx) {
-								Debug("show all")
+								slog.Debug("show all")
 								s.Loggers.OpenAllItems(s)
 								s.SaveConfig()
 							}
@@ -95,7 +96,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								})
 							}, b)
 							for b.Clicked(s.Gtx) {
-								Debug("filter all")
+								slog.Debug("filter all")
 								s.Loggers.ShowAllItems(s)
 								consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 								s.SaveConfig()
@@ -109,7 +110,7 @@ func (s *State) Sidebar() layout.FlexChild {
 								})
 							}, b)
 							for b.Clicked(s.Gtx) {
-								Debug("filter none")
+								slog.Debug("filter none")
 								s.Loggers.HideAllItems(s)
 								consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 								s.SaveConfig()
@@ -176,7 +177,7 @@ func (s *State) LevelsButtons() {
 				consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
 				save.Pod(s.Ctx.Config)
 			}
-			Debug("filter level", logi.Tags[logi.Levels[a+1]])
+			slog.Debug("filter level", logi.Tags[logi.Levels[a+1]])
 			s.W.Invalidate()
 			s.SaveConfig()
 		}

@@ -2,6 +2,7 @@ package walletdbtest
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"reflect"
 
@@ -518,7 +519,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}
@@ -536,7 +537,7 @@ func testNamespaceAndTxInterfaces(
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if err != errSubTestFail {
 			tc.t.Errorf("%v", err)
 		}

@@ -3374,7 +3374,7 @@ func TestUnparsingInvalidOpcodes(t *testing.T) {
 			expectedErr: scriptError(ErrInternal, ""),
 		},
 		{
-			name: "OP_CODESAPERATOR",
+			name: "OP_CODESEPARATOR",
 			pop: &parsedOpcode{
 				opcode: &OpcodeArray[OP_CODESEPARATOR],
 				data:   nil,
@@ -3838,7 +3838,7 @@ func TestGetWitnessSigOpCount(t *testing.T) {
 		witness   wire.TxWitness
 		numSigOps int
 	}{
-		// A regualr p2wkh witness program. The output being spent should only have a single sig-op counted.
+		// A regular p2wkh witness program. The output being spent should only have a single sig-op counted.
 		{
 			name: "p2wkh",
 			pkScript: mustParseShortForm("OP_0 DATA_20 " +
@@ -3956,7 +3956,8 @@ func TestRemoveOpcodes(t *testing.T) {
 			err:    scriptError(ErrMalformedPush, ""),
 		},
 	}
-	// tstRemoveOpcode is a convenience function to parse the provided raw script, remove the passed opcode, then unparse the result back into a raw script.
+	// tstRemoveOpcode is a convenience function to parse the provided raw script, remove the passed opcode, then
+	// unparse the result back into a raw script.
 	tstRemoveOpcode := func(script []byte, opcode byte) ([]byte, error) {
 		pops, err := parseScript(script)
 		if err != nil {
@@ -4028,7 +4029,7 @@ func TestRemoveOpcodeByData(t *testing.T) {
 				[]byte{1, 2, 3, 4}...),
 		},
 		{
-			name:   "simple case (pushdata1 miss noncanonical)",
+			name:   "simple case (pushdata1 miss non-canonical)",
 			before: []byte{OP_PUSHDATA1, 4, 1, 2, 3, 4},
 			remove: []byte{1, 2, 3, 4},
 			after:  []byte{OP_PUSHDATA1, 4, 1, 2, 3, 4},
@@ -4052,7 +4053,7 @@ func TestRemoveOpcodeByData(t *testing.T) {
 				[]byte{1, 2, 3, 4}...),
 		},
 		{
-			name:   "simple case (pushdata2 miss noncanonical)",
+			name:   "simple case (pushdata2 miss non-canonical)",
 			before: []byte{OP_PUSHDATA2, 4, 0, 1, 2, 3, 4},
 			remove: []byte{1, 2, 3, 4},
 			after:  []byte{OP_PUSHDATA2, 4, 0, 1, 2, 3, 4},
@@ -4067,7 +4068,7 @@ func TestRemoveOpcodeByData(t *testing.T) {
 			after:  nil,
 		},
 		{
-			name:   "simple case (pushdata4 miss noncanonical)",
+			name:   "simple case (pushdata4 miss non-canonical)",
 			before: []byte{OP_PUSHDATA4, 4, 0, 0, 0, 1, 2, 3, 4},
 			remove: []byte{1, 2, 3, 4},
 			after:  []byte{OP_PUSHDATA4, 4, 0, 0, 0, 1, 2, 3, 4},
@@ -4100,7 +4101,8 @@ func TestRemoveOpcodeByData(t *testing.T) {
 			err:    scriptError(ErrMalformedPush, ""),
 		},
 	}
-	// tstRemoveOpcodeByData is a convenience function to parse the provided raw script, remove the passed data, then unparse the result back into a raw script.
+	// tstRemoveOpcodeByData is a convenience function to parse the provided raw script, remove the passed data, then
+	// unparse the result back into a raw script.
 	tstRemoveOpcodeByData := func(script []byte, data []byte) ([]byte, error) {
 		pops, err := parseScript(script)
 		if err != nil {

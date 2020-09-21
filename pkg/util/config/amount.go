@@ -1,6 +1,7 @@
 package cfgutil
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"strconv"
 	"strings"
 
@@ -28,12 +29,12 @@ func (a *AmountFlag) UnmarshalFlag(value string) error {
 	value = strings.TrimSuffix(value, " DUO")
 	valueF64, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	amount, err := util.NewAmount(valueF64)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	a.Amount = amount

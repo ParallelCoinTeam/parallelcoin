@@ -2,9 +2,10 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"time"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/util"
@@ -29,7 +30,7 @@ func // Checkpoints returns a slice of checkpoints (
 // regardless of whether they are already known).
 // When there are no checkpoints for the chain,
 // it will return nil. This function is safe for concurrent access.
-(b *BlockChain) Checkpoints() []chaincfg.Checkpoint {
+(b *BlockChain) Checkpoints() []config.Checkpoint {
 	return b.checkpoints
 }
 
@@ -43,7 +44,7 @@ func // LatestCheckpoint returns the most recent checkpoint
 // (regardless of whether it is already known).
 // When there are no defined checkpoints for the active chain instance,
 // it will return nil. This function is safe for concurrent access.
-(b *BlockChain) LatestCheckpoint() *chaincfg.Checkpoint {
+(b *BlockChain) LatestCheckpoint() *config.Checkpoint {
 	if !b.HasCheckpoints() {
 		return nil
 	}
@@ -66,7 +67,7 @@ func // verifyCheckpoint returns whether the passed block height and hash
 	if !checkpoint.Hash.IsEqual(hash) {
 		return false
 	}
-	Infof("Verified checkpoint at height %d/block %s", checkpoint.Height,
+	slog.Infof("Verified checkpoint at height %d/block %s", checkpoint.Height,
 		checkpoint.Hash)
 	return true
 }

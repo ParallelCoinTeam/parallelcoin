@@ -47,15 +47,15 @@ func TestErrorCodeStringer(t *testing.T) {
 func TestError(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		in   btcjson.BTCJSONError
+		in   btcjson.Error
 		want string
 	}{
 		{
-			btcjson.BTCJSONError{Description: "some error"},
+			btcjson.Error{Description: "some error"},
 			"some error",
 		},
 		{
-			btcjson.BTCJSONError{Description: "human-readable error"},
+			btcjson.Error{Description: "human-readable error"},
 			"human-readable error",
 		},
 	}

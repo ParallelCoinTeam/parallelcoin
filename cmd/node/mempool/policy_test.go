@@ -2,12 +2,13 @@ package mempool
 
 import (
 	"bytes"
+	"github.com/stalker-loki/app/slog"
 	"testing"
 	"time"
 
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	script "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
 	"github.com/stalker-loki/pod/pkg/util"
@@ -96,7 +97,7 @@ func TestCheckPkScriptStandard(t *testing.T) {
 	for i := 0; i < 4; i++ {
 		pk, err := ec.NewPrivateKey(ec.S256())
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			t.Fatalf("TestCheckPkScriptStandard NewPrivateKey failed: %v",
 				err)
 			return
@@ -105,93 +106,93 @@ func TestCheckPkScriptStandard(t *testing.T) {
 	}
 	tests := []struct {
 		name       string // test description.
-		script     *txscript.ScriptBuilder
+		script     *script.ScriptBuilder
 		isStandard bool
 	}{
 		{
 			"key1 and key2",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_2).
+			script.NewScriptBuilder().AddOp(script.OP_2).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_2).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(script.OP_2).AddOp(script.OP_CHECKMULTISIG),
 			true,
 		},
 		{
 			"key1 or key2",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			script.NewScriptBuilder().AddOp(script.OP_1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_2).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(script.OP_2).AddOp(script.OP_CHECKMULTISIG),
 			true,
 		},
 		{
 			"escrow",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_2).
+			script.NewScriptBuilder().AddOp(script.OP_2).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
 				AddData(pubKeys[2]).
-				AddOp(txscript.OP_3).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(script.OP_3).AddOp(script.OP_CHECKMULTISIG),
 			true,
 		},
 		{
 			"one of four",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			script.NewScriptBuilder().AddOp(script.OP_1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
 				AddData(pubKeys[2]).AddData(pubKeys[3]).
-				AddOp(txscript.OP_4).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(script.OP_4).AddOp(script.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed1",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_3).
+			script.NewScriptBuilder().AddOp(script.OP_3).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_2).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(script.OP_2).AddOp(script.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed2",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_2).
+			script.NewScriptBuilder().AddOp(script.OP_2).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_3).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(script.OP_3).AddOp(script.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed3",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_0).
+			script.NewScriptBuilder().AddOp(script.OP_0).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_2).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(script.OP_2).AddOp(script.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed4",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			script.NewScriptBuilder().AddOp(script.OP_1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_0).AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(script.OP_0).AddOp(script.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed5",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			script.NewScriptBuilder().AddOp(script.OP_1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]).
-				AddOp(txscript.OP_CHECKMULTISIG),
+				AddOp(script.OP_CHECKMULTISIG),
 			false,
 		},
 		{
 			"malformed6",
-			txscript.NewScriptBuilder().AddOp(txscript.OP_1).
+			script.NewScriptBuilder().AddOp(script.OP_1).
 				AddData(pubKeys[0]).AddData(pubKeys[1]),
 			false,
 		},
 	}
 
 	for _, test := range tests {
-		script, err := test.script.Script()
+		scrip, err := test.script.Script()
 
 		if err != nil {
 
 			t.Fatalf("TestCheckPkScriptStandard test '%s' "+
 				"failed: %v", test.name, err)
-			continue
+			//continue
 		}
-		scriptClass := txscript.GetScriptClass(script)
-		got := checkPkScriptStandard(script, scriptClass)
+		scriptClass := script.GetScriptClass(scrip)
+		got := checkPkScriptStandard(scrip, scriptClass)
 
 		if (test.isStandard && got != nil) ||
 			(!test.isStandard && got == nil) {
@@ -273,7 +274,7 @@ func TestDust(t *testing.T) {
 
 			t.Fatalf("Dust test '%s' failed: want %v got %v",
 				test.name, test.isDust, res)
-			continue
+			//continue
 		}
 	}
 }
@@ -301,7 +302,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewAddressPubKeyHash: unexpected error: %v", err)
 	}
-	dummyPkScript, err := txscript.PayToAddrScript(addr)
+	dummyPkScript, err := script.PayToAddrScript(addr)
 
 	if err != nil {
 		t.Fatalf("PayToAddrScript: unexpected error: %v", err)
@@ -396,7 +397,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 				TxIn: []*wire.TxIn{{
 					PreviousOutPoint: dummyPrevOut,
 					SignatureScript: []byte{
-						txscript.OP_CHECKSIGVERIFY},
+						script.OP_CHECKSIGVERIFY},
 					Sequence: wire.MaxTxInSequenceNum,
 				}},
 				TxOut:    []*wire.TxOut{&dummyTxOut},
@@ -413,7 +414,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 				TxIn:    []*wire.TxIn{&dummyTxIn},
 				TxOut: []*wire.TxOut{{
 					Value:    100000000,
-					PkScript: []byte{txscript.OP_TRUE},
+					PkScript: []byte{script.OP_TRUE},
 				}},
 				LockTime: 0,
 			},
@@ -428,10 +429,10 @@ func TestCheckTransactionStandard(t *testing.T) {
 				TxIn:    []*wire.TxIn{&dummyTxIn},
 				TxOut: []*wire.TxOut{{
 					Value:    0,
-					PkScript: []byte{txscript.OP_RETURN},
+					PkScript: []byte{script.OP_RETURN},
 				}, {
 					Value:    0,
-					PkScript: []byte{txscript.OP_RETURN},
+					PkScript: []byte{script.OP_RETURN},
 				}},
 				LockTime: 0,
 			},
@@ -461,7 +462,7 @@ func TestCheckTransactionStandard(t *testing.T) {
 				TxIn:    []*wire.TxIn{&dummyTxIn},
 				TxOut: []*wire.TxOut{{
 					Value:    0,
-					PkScript: []byte{txscript.OP_RETURN},
+					PkScript: []byte{script.OP_RETURN},
 				}},
 				LockTime: 0,
 			},
@@ -491,23 +492,23 @@ func TestCheckTransactionStandard(t *testing.T) {
 			continue
 		}
 		// Ensure error type is a TxRuleError inside of a RuleError.
-		rerr, ok := err.(RuleError)
+		ruleError, ok := err.(RuleError)
 		if !ok {
 			t.Errorf("checkTransactionStandard (%s): unexpected "+
 				"error type - got %T", test.name, err)
 			continue
 		}
-		txrerr, ok := rerr.Err.(TxRuleError)
+		txRuleError, ok := ruleError.Err.(TxRuleError)
 		if !ok {
 			t.Errorf("checkTransactionStandard (%s): unexpected "+
-				"error type - got %T", test.name, rerr.Err)
+				"error type - got %T", test.name, ruleError.Err)
 			continue
 		}
 		// Ensure the reject code is the expected one.
-		if txrerr.RejectCode != test.code {
+		if txRuleError.RejectCode != test.code {
 			t.Errorf("checkTransactionStandard (%s): unexpected "+
 				"error code - got %v, want %v", test.name,
-				txrerr.RejectCode, test.code)
+				txRuleError.RejectCode, test.code)
 			continue
 		}
 	}

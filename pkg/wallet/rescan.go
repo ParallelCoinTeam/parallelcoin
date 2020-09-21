@@ -1,11 +1,11 @@
 package wallet
 
 import (
+	"github.com/stalker-loki/app/slog"
 	tm "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
 	txs "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	"github.com/stalker-loki/pod/pkg/util"
-	log "github.com/stalker-loki/pod/pkg/util/logi"
 	wm "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
 	"github.com/stalker-loki/pod/pkg/wallet/chain"
 )
@@ -122,7 +122,7 @@ out:
 			switch n := n.(type) {
 			case *chain.RescanProgress:
 				if curBatch == nil {
-					Warn(
+					slog.Warn(
 						"received rescan progress notification but no rescan currently running",
 					)
 					continue
@@ -133,7 +133,7 @@ out:
 				}
 			case *chain.RescanFinished:
 				if curBatch == nil {
-					Warn(
+					slog.Warn(
 						"received rescan finished notification but no rescan currently running",
 					)
 					continue
@@ -163,20 +163,20 @@ func (w *Wallet) rescanProgressHandler() {
 	quit := w.quitChan()
 out:
 	for {
-		// These can't be processed out of order since both chans are unbuffured and are sent from same context (the
+		// These can't be processed out of order since both chans are unbuffered and are sent from same context (the
 		// batch handler).
 		select {
 		case msg := <-w.rescanProgress:
 			n := msg.Notification
-			Infof(
+			slog.Infof(
 				"rescanned through block %v (height %d)",
 				n.Hash, n.Height,
 			)
 		case msg := <-w.rescanFinished:
 			n := msg.Notification
 			addrs := msg.Addresses
-			noun := log.PickNoun(len(addrs), "address", "addresses")
-			Infof(
+			noun := "address(es)" // log.PickNoun(len(addrs), "address", "addresses")
+			slog.Infof(
 				"finished rescan for %d %s (synced to block %s, height %d)",
 				len(addrs), noun, n.Hash, n.Height,
 			)
@@ -194,8 +194,8 @@ out:
 func (w *Wallet) rescanRPCHandler() {
 	chainClient, err := w.requireChainClient()
 	if err != nil {
-		Error(err)
-		Error("rescanRPCHandler called without an RPC client", err)
+		slog.Error(err)
+		slog.Error("rescanRPCHandler called without an RPC client", err)
 		w.wg.Done()
 		return
 	}
@@ -206,16 +206,17 @@ out:
 		case batch := <-w.rescanBatch:
 			// Log the newly-started rescan.
 			numAddrs := len(batch.addrs)
-			noun := log.PickNoun(numAddrs, "address", "addresses")
-			Infof(
+			//noun := log.PickNoun(numAddrs, "address", "addresses")
+			noun := "address(es)"
+			slog.Infof(
 				"started rescan from block %v (height %d) for %d %s",
 				batch.bs.Hash, batch.bs.Height, numAddrs, noun,
 			)
 			err := chainClient.Rescan(&batch.bs.Hash, batch.addrs,
 				batch.outpoints)
 			if err != nil {
-				Error(err)
-				Errorf(
+				slog.Error(err)
+				slog.Errorf(
 					"rescan for %d %s failed: %v", numAddrs, noun, err)
 			}
 			batch.done(err)
@@ -244,7 +245,7 @@ func (w *Wallet) rescanWithTarget(addrs []util.Address,
 			output.PkScript, w.chainParams,
 		)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		outpoints[output.OutPoint] = outputAddrs[0]

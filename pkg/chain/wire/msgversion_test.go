@@ -236,7 +236,8 @@ func TestVersion(t *testing.T) {
 // 	if err != nil {
 // 		t.Errorf("WriteVarInt: error %v", err)
 // 	}
-// 	// Make a new buffer big enough to hold the base version plus the new bytes for the bigger varint to hold the new size of the user agent and the new user agent string.  Then stich it all together.
+// 	// Make a new buffer big enough to hold the base version plus the new bytes for the bigger varint to hold the new
+//	size of the user agent and the new user agent string.  Then stitch it all together.
 // 	newLen := len(baseVersionEncoded) - len(baseVersion.UserAgent)
 // 	newLen = newLen + len(newUAVarIntBuf.Hash()) - 1 + len(newUA)
 // 	exceedUAVerEncoded := make([]byte, newLen)

@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"hash"
 	"io"
 	"os"
@@ -110,7 +111,7 @@ func (c *Conn) Read(p []byte) (n int, err error) {
 	u32 := binary.LittleEndian.Uint32
 	n, err = r(p[:4])
 	if err != nil || n != 4 {
-		Error(err)
+		slog.Error(err)
 	}
 	c.printlnE("read", p[:4])
 	bLen := u32(p[:4])

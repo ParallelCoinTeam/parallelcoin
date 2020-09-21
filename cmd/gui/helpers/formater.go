@@ -23,7 +23,7 @@ type formatError string
 // Format lays out widgets according to a format string, similar to
 // how fmt.Printf interpolates a string.
 //
-// The format string is an epxression where layouts are similar to
+// The format string is an expression where layouts are similar to
 // function calls, and the underscore denotes a widget from the
 // arguments. The ith _ invokes the ith widget from the arguments.
 //

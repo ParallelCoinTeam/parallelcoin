@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"sort"
 
 	"github.com/stalker-loki/pod/pkg/chain/fork"
@@ -66,6 +67,6 @@ func (b *BlockChain) CalcNextRequiredDifficultyPlan9Controller(
 		}
 		return
 	}
-	Trace("should not fall through here")
+	slog.Trace("should not fall through here")
 	return
 }

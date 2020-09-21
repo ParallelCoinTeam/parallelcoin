@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"github.com/stalker-loki/app/slog"
 	"io"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -11,7 +12,8 @@ import (
 // TxIndexUnknown is the value returned for a transaction index that is unknown. This is typically because the transaction has not been inserted into a block yet.
 const TxIndexUnknown = -1
 
-// Tx defines a bitcoin transaction that provides easier and more efficient manipulation of raw transactions.  It also memoizes the hash for the transaction on its first access so subsequent accesses don't have to repeat the relatively expensive hashing operations.
+// Tx defines a bitcoin transaction that provides easier and more efficient manipulation of raw transactions.  It also
+// memorizes the hash for the transaction on its first access so subsequent accesses don't have to repeat the relatively expensive hashing operations.
 type Tx struct {
 	msgTx         *wire.MsgTx     // Underlying MsgTx
 	txHash        *chainhash.Hash // Cached transaction hash
@@ -90,7 +92,7 @@ func NewTxFromReader(r io.Reader) (*Tx, error) {
 	var msgTx wire.MsgTx
 	err := msgTx.Deserialize(r)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	t := Tx{

@@ -10,9 +10,10 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/coding/base58"
@@ -23,7 +24,9 @@ import (
 const (
 	// RecommendedSeedLen is the recommended length in bytes for a seed to a master node.
 	RecommendedSeedLen = 32 // 256 bits
-	// HardenedKeyStart is the index at which a hardended key starts.  Each extended key has 2^31 normal child keys and 2^31 hardned child keys. Thus the range for normal child keys is [0, 2^31 - 1] and the range for hardened child keys is [2^31, 2^32 - 1].
+	// HardenedKeyStart is the index at which a hardened key starts.  Each extended key has 2^31 normal child keys and
+	// 2^31 hardened child keys. Thus the range for normal child keys is [0, 2^31 - 1] and the range for hardened child
+	// keys is [2^31, 2^32 - 1].
 	HardenedKeyStart = 0x80000000 // 2^31
 	// MinSeedBytes is the minimum number of bytes allowed for a seed to a master node.
 	MinSeedBytes = 16 // 128 bits
@@ -119,9 +122,19 @@ func (k *ExtendedKey) ParentFingerprint() uint32 {
 	return binary.BigEndian.Uint32(k.parentFP)
 }
 
-// Child returns a derived child extended key at the given index.  When this extended key is a private extended key (as determined by the IsPrivate function), a private extended key will be derived.  Otherwise, the derived extended key will be also be a public extended key.
-// When the index is greater to or equal than the HardenedKeyStart constant, the derived extended key will be a hardened extended key.  It is only possible to derive a hardended extended key from a private extended key.  Consequently, this function will return ErrDeriveHardFromPublic if a hardened child extended key is requested from a public extended key.
-// A hardened extended key is useful since, as previously mentioned, it requires a parent private extended key to derive.  In other words, normal child extended public keys can be derived from a parent public extended key (no knowledge of the parent private key) whereas hardened extended keys may not be. NOTE: There is an extremely small chance (< 1 in 2^127) the specific child index does not derive to a usable child.  The ErrInvalidChild error will be returned if this should occur, and the caller is expected to ignore the invalid child and simply increment to the next index.
+// Child returns a derived child extended key at the given index.  When this extended key is a private extended key (as
+// determined by the IsPrivate function), a private extended key will be derived.  Otherwise, the derived extended key
+// will be also be a public extended key.
+// When the index is greater to or equal than the HardenedKeyStart constant, the derived extended key will be a hardened
+// extended key.  It is only possible to derive a hardened extended key from a private extended key.  Consequently,
+// this function will return ErrDeriveHardFromPublic if a hardened child extended key is requested from a public
+// extended key.
+// A hardened extended key is useful since, as previously mentioned, it requires a parent private extended key to
+// derive.  In other words, normal child extended public keys can be derived from a parent public extended key (no
+// knowledge of the parent private key) whereas hardened extended keys may not be. NOTE: There is an extremely small
+// chance (< 1 in 2^127) the specific child index does not derive to a usable child.  The ErrInvalidChild error will be
+// returned if this should occur, and the caller is expected to ignore the invalid child and simply increment to the
+// next index.
 func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 	// Prevent derivation of children beyond the max allowed depth.
 	if k.depth == maxUint8 {
@@ -147,10 +160,12 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 	data := make([]byte, keyLen+4)
 	if isChildHardened {
 		// Case #1.
-		// When the child is a hardened child, the key is known to be a private key due to the above early return.  Pad it with a leading zero as required by [BIP32] for deriving the child.(data[1:], k.key)
+		// When the child is a hardened child, the key is known to be a private key due to the above early return.  Pad
+		//it with a leading zero as required by [BIP32] for deriving the child.(data[1:], k.key)
 	} else {
 		// Case #2 or #3.
-		// This is either a public or private extended key, but in either case, the data which is used to derive the child key starts with the secp256k1 compressed public key bytes.
+		// This is either a public or private extended key, but in either case, the data which is used to derive the
+		//child key starts with the secp256k1 compressed public key bytes.
 		copy(data, k.pubKeyBytes())
 	}
 	binary.BigEndian.PutUint32(data[keyLen:], i)
@@ -159,7 +174,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 	hmac512 := hmac.New(sha512.New, k.chainCode)
 	_, err := hmac512.Write(data)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	ilr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -167,7 +182,10 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 	//   Ir = child chain code
 	il := ilr[:len(ilr)/2]
 	childChainCode := ilr[len(ilr)/2:]
-	// Both derived public or private keys rely on treating the left 32-byte sequence calculated above (Il) as a 256-bit integer that must be within the valid range for a secp256k1 private key.  There is a small chance (< 1 in 2^127) this condition will not hold, and in that case, a child extended key can't be created for this index and the caller should simply increment to the next index.
+	// Both derived public or private keys rely on treating the left 32-byte sequence calculated above (Il) as a 256-bit
+	//integer that must be within the valid range for a secp256k1 private key.  There is a small chance (< 1 in 2^127)
+	//this condition will not hold, and in that case, a child extended key can't be created for this index and the
+	//caller should simply increment to the next index.
 	ilNum := new(big.Int).SetBytes(il)
 	if ilNum.Cmp(ec.S256().N) >= 0 || ilNum.Sign() == 0 {
 		return nil, ErrInvalidChild
@@ -195,10 +213,11 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 		if ilx.Sign() == 0 || ily.Sign() == 0 {
 			return nil, ErrInvalidChild
 		}
-		// Convert the serialized compressed parent public key into X and Y coordinates so it can be added to the intermediate public key.
+		// Convert the serialized compressed parent public key into X and Y coordinates so it can be added to the
+		//intermediate public key.
 		pubKey, err := ec.ParsePubKey(k.key, ec.S256())
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		// Add the intermediate public key to the parent public key to derive the final child key.
@@ -213,20 +232,24 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 		k.depth+1, i, isPrivate), nil
 }
 
-// Neuter returns a new extended public key from this extended private key.  The same extended key will be returned unaltered if it is already an extended public key.
-// As the name implies, an extended public key does not have access to the private key, so it is not capable of signing transactions or deriving child extended private keys.  However, it is capable of deriving further child extended public keys.
+// Neuter returns a new extended public key from this extended private key.  The same extended key will be returned
+//unaltered if it is already an extended public key.
+// As the name implies, an extended public key does not have access to the private key, so it is not capable of signing
+//transactions or deriving child extended private keys.  However, it is capable of deriving further child extended
+//public keys.
 func (k *ExtendedKey) Neuter() (*ExtendedKey, error) {
 	// Already an extended public key.
 	if !k.isPrivate {
 		return k, nil
 	}
 	// Get the associated public extended key version bytes.
-	version, err := chaincfg.HDPrivateKeyToPublicKeyID(k.version)
+	version, err := config.HDPrivateKeyToPublicKeyID(k.version)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
-	// Convert it to an extended public key.  The key for the new extended key will simply be the pubkey of the current extended private key.
+	// Convert it to an extended public key.  The key for the new extended key will simply be the pubkey of the current
+	//extended private key.
 	// This is the function N((k,c)) -> (K, c) from [BIP32].
 	return NewExtendedKey(version, k.pubKeyBytes(), k.chainCode, k.parentFP,
 		k.depth, k.childNum, false), nil
@@ -237,7 +260,9 @@ func (k *ExtendedKey) ECPubKey() (*ec.PublicKey, error) {
 	return ec.ParsePubKey(k.pubKeyBytes(), ec.S256())
 }
 
-// ECPrivKey converts the extended key to a ec private key and returns it. As you might imagine this is only possible if the extended key is a private extended key (as determined by the IsPrivate function).  The ErrNotPrivExtKey error will be returned if this function is called on a public extended key.
+// ECPrivKey converts the extended key to a ec private key and returns it. As you might imagine this is only possible
+//if the extended key is a private extended key (as determined by the IsPrivate function).  The ErrNotPrivExtKey error
+//will be returned if this function is called on a public extended key.
 func (k *ExtendedKey) ECPrivKey() (*ec.PrivateKey, error) {
 	if !k.isPrivate {
 		return nil, ErrNotPrivExtKey
@@ -252,7 +277,8 @@ func (k *ExtendedKey) Address(net *netparams.Params) (*util.AddressPubKeyHash, e
 	return util.NewAddressPubKeyHash(pkHash, net)
 }
 
-// paddedAppend appends the src byte slice to dst, returning the new slice. If the length of the source is smaller than the passed size, leading zero bytes are appended to the dst slice before appending src.
+// paddedAppend appends the src byte slice to dst, returning the new slice. If the length of the source is smaller than
+//the passed size, leading zero bytes are appended to the dst slice before appending src.
 func paddedAppend(size uint, dst, src []byte) []byte {
 	for i := 0; i < int(size)-len(src); i++ {
 		dst = append(dst, 0)
@@ -304,13 +330,15 @@ func (k *ExtendedKey) SetNet(net *netparams.Params) {
 
 // zero sets all bytes in the passed slice to zero.  This is used to explicitly clear private key material from memory.
 func zero(b []byte) {
-	lenb := len(b)
-	for i := 0; i < lenb; i++ {
+	lenB := len(b)
+	for i := 0; i < lenB; i++ {
 		b[i] = 0
 	}
 }
 
-// Zero manually clears all fields and bytes in the extended key.  This can be used to explicitly clear key material from memory for enhanced security against memory scraping.  This function only clears this particular key and not any children that have already been derived.
+// Zero manually clears all fields and bytes in the extended key.  This can be used to explicitly clear key material
+//from memory for enhanced security against memory scraping.  This function only clears this particular key and not any
+//children that have already been derived.
 func (k *ExtendedKey) Zero() {
 	zero(k.key)
 	zero(k.pubKey)
@@ -323,8 +351,10 @@ func (k *ExtendedKey) Zero() {
 	k.isPrivate = false
 }
 
-// NewMaster creates a new master node for use in creating a hierarchical deterministic key chain.  The seed must be between 128 and 512 bits and should be generated by a cryptographically secure random generation source.
-// NOTE: There is an extremely small chance (< 1 in 2^127) the provided seed will derive to an unusable secret key.  The ErrUnusable error will be returned if this should occur, so the caller must check for it and generate a
+// NewMaster creates a new master node for use in creating a hierarchical deterministic key chain.  The seed must be
+//between 128 and 512 bits and should be generated by a cryptographically secure random generation source.
+// NOTE: There is an extremely small chance (< 1 in 2^127) the provided seed will derive to an unusable secret key.
+//The ErrUnusable error will be returned if this should occur, so the caller must check for it and generate a
 // new seed accordingly.
 func NewMaster(seed []byte, net *netparams.Params) (*ExtendedKey, error) {
 	// Per [BIP32], the seed must be in range [MinSeedBytes, MaxSeedBytes].
@@ -336,7 +366,7 @@ func NewMaster(seed []byte, net *netparams.Params) (*ExtendedKey, error) {
 	hmac512 := hmac.New(sha512.New, masterKey)
 	_, err := hmac512.Write(seed)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	lr := hmac512.Sum(nil)
 	// Split "I" into two 32-byte sequences Il and Ir where:
@@ -378,10 +408,12 @@ func NewKeyFromString(key string) (*ExtendedKey, error) {
 	childNum := binary.BigEndian.Uint32(payload[9:13])
 	chainCode := payload[13:45]
 	keyData := payload[45:78]
-	// The key data is a private key if it starts with 0x00.  Serialized compressed pubkeys either start with 0x02 or 0x03.
+	// The key data is a private key if it starts with 0x00.  Serialized compressed pubkeys either start with 0x02 or
+	// 0x03.
 	isPrivate := keyData[0] == 0x00
 	if isPrivate {
-		// Ensure the private key is valid.  It must be within the range of the order of the secp256k1 curve and not be 0.
+		// Ensure the private key is valid.  It must be within the range of the order of the secp256k1 curve and not be
+		// 0.
 		keyData = keyData[1:]
 		keyNum := new(big.Int).SetBytes(keyData)
 		if keyNum.Cmp(ec.S256().N) >= 0 || keyNum.Sign() == 0 {
@@ -391,7 +423,7 @@ func NewKeyFromString(key string) (*ExtendedKey, error) {
 		// Ensure the public key parses correctly and is actually on the secp256k1 curve.
 		_, err := ec.ParsePubKey(keyData, ec.S256())
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 	}
@@ -399,7 +431,9 @@ func NewKeyFromString(key string) (*ExtendedKey, error) {
 		childNum, isPrivate), nil
 }
 
-// GenerateSeed returns a cryptographically secure random seed that can be used as the input for the NewMaster function to generate a new master node. The length is in bytes and it must be between 16 and 64 (128 to 512 bits). The recommended length is 32 (256 bits) as defined by the RecommendedSeedLen constant.
+// GenerateSeed returns a cryptographically secure random seed that can be used as the input for the NewMaster function
+// to generate a new master node. The length is in bytes and it must be between 16 and 64 (128 to 512 bits). The
+// recommended length is 32 (256 bits) as defined by the RecommendedSeedLen constant.
 func GenerateSeed(length uint8) ([]byte, error) {
 	// Per [BIP32], the seed must be in range [MinSeedBytes, MaxSeedBytes].
 	if length < MinSeedBytes || length > MaxSeedBytes {
@@ -408,7 +442,7 @@ func GenerateSeed(length uint8) ([]byte, error) {
 	buf := make([]byte, length)
 	_, err := rand.Read(buf)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return buf, nil

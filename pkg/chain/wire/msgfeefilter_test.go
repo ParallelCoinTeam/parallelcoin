@@ -40,13 +40,13 @@ func TestFeeFilterLatest(t *testing.T) {
 		t.Errorf("encode of MsgFeeFilter failed %v err <%v>", msg, err)
 	}
 	// Test decode with latest protocol version.
-	readmsg := NewMsgFeeFilter(0)
-	err = readmsg.BtcDecode(&buf, pver, BaseEncoding)
+	readMsg := NewMsgFeeFilter(0)
+	err = readMsg.BtcDecode(&buf, pver, BaseEncoding)
 	if err != nil {
 		t.Errorf("decode of MsgFeeFilter failed [%v] err <%v>", buf, err)
 	}
 	// Ensure minfee is the same.
-	if msg.MinFee != readmsg.MinFee {
+	if msg.MinFee != readMsg.MinFee {
 		t.Errorf("Should get same minfee for protocol version %d", pver)
 	}
 }

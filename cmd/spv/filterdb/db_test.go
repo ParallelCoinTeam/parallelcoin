@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/coding/gcs"
@@ -53,7 +53,7 @@ func TestGenesisFilterCreation(t *testing.T) {
 		t.Fatalf("unable to create test db: %v", err)
 	}
 
-	genesisHash := chaincfg.SimNetParams.GenesisHash
+	genesisHash := config.SimNetParams.GenesisHash
 
 	// With the database initialized, we should be able to fetch the
 	// regular filter for the genesis block.

@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/config"
 	"os"
 
@@ -17,7 +18,7 @@ import (
 func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
-		Debug("starting shell")
+		slog.Debug("starting shell")
 		if *cx.Config.TLS || *cx.Config.ServerTLS {
 			// generate the tls certificate if configured
 			_, _ = walletmain.GenerateRPCKeyPair(cx.Config, true)
@@ -30,22 +31,22 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		if !apputil.FileExists(dbFilename) {
 			// log.SetLevel("off", false)
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				Error("failed to create wallet", err)
+				slog.Error("failed to create wallet", err)
 			}
 			fmt.Println("restart to complete initial setup")
 			os.Exit(1)
 		}
-		Warn("starting node")
+		slog.Warn("starting node")
 		if !*cx.Config.NodeOff {
 			go func() {
 				err = node.Main(cx, shutdownChan)
 				if err != nil {
-					Error("error starting node ", err)
+					slog.Error("error starting node ", err)
 				}
 			}()
 			cx.RPCServer = <-cx.NodeChan
 		}
-		Warn("starting wallet")
+		slog.Warn("starting wallet")
 		if !*cx.Config.WalletOff {
 			go func() {
 				err = walletmain.Main(cx)
@@ -55,7 +56,7 @@ func shellHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			}()
 			cx.WalletServer = <-cx.WalletChan
 		}
-		Debug("shell started")
+		slog.Debug("shell started")
 		cx.WaitGroup.Wait()
 		return nil
 	}

@@ -1,6 +1,7 @@
 package routeable
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"net"
 )
 
@@ -11,7 +12,7 @@ func GetInterface() (lanInterface []*net.Interface) {
 	var interfaces []net.Interface
 	interfaces, err = net.Interfaces()
 	if err != nil {
-		Error("error:", err)
+		slog.Error("error:", err)
 	}
 	// Traces(interfaces)
 	for ifi := range interfaces {

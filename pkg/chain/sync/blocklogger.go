@@ -2,6 +2,7 @@ package netsync
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"sync"
 	"time"
 
@@ -59,7 +60,7 @@ func // LogBlockHeight logs a new block height as an information message to
 		txStr = "transaction "
 	}
 	tD := tDuration.Seconds()
-	Infof(
+	slog.Infof(
 		"%s %6d %s in the last %s (%6d %s, height %8d, %s) %0.2f tx/s",
 		b.progressAction,
 		b.receivedLogBlocks,

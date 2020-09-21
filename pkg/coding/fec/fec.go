@@ -4,6 +4,7 @@ package fec
 
 import (
 	"encoding/binary"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/vivint/infectious"
 )
@@ -14,7 +15,7 @@ var (
 	rsFEC      = func() *infectious.FEC {
 		fec, err := infectious.NewFEC(rsRequired, rsTotal)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 		return fec
 	}()
@@ -52,7 +53,7 @@ func Encode(data []byte) (chunks [][]byte, err error) {
 	}
 	err = rsFEC.Encode(data, output)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	for i := range shares {

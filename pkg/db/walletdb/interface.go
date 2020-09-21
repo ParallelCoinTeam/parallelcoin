@@ -3,6 +3,7 @@ package walletdb
 // This interface was inspired heavily by the excellent boltdb project at
 // https://github.com/boltdb/bolt by Ben B. Johnson.
 import (
+	"github.com/stalker-loki/app/slog"
 	"io"
 )
 
@@ -165,13 +166,13 @@ type DB interface {
 func View(db DB, f func(tx ReadTx) error) error {
 	tx, err := db.BeginReadTx()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	err = f(tx)
 	rollbackErr := tx.Rollback()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	if rollbackErr != nil {
@@ -189,12 +190,12 @@ func View(db DB, f func(tx ReadTx) error) error {
 func Update(db DB, f func(tx ReadWriteTx) error) error {
 	tx, err := db.BeginReadWriteTx()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	err = f(tx)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		// Want to return the original error, not a rollback error if
 		// any occur.
 		_ = tx.Rollback()

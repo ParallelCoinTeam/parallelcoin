@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 )
 
@@ -809,7 +809,7 @@ func TestErrors(t *testing.T) {
 			key:       "xbad4LfUL9eKmA66w2GJdVMqhvDmYGJpTGjWRAtjHqoUY17sGaymoMV9Cm3ocn9Ud6Hh2vLFVC7KSKCRVVrqc6dsEdsTjRV1WUmkK85YEUujAPX",
 			err:       nil,
 			neuter:    true,
-			neuterErr: chaincfg.ErrUnknownHDKeyID,
+			neuterErr: config.ErrUnknownHDKeyID,
 		},
 	}
 	for i, test := range tests {

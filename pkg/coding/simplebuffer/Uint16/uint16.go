@@ -2,6 +2,7 @@ package Uint16
 
 import (
 	"encoding/binary"
+	"github.com/stalker-loki/app/slog"
 	"net"
 	"strconv"
 
@@ -59,11 +60,11 @@ func GetPort(listener string) simplebuffer.Serializer {
 func GetActualPort(listener string) uint16 {
 	_, p, err := net.SplitHostPort(listener)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	oI, err := strconv.ParseUint(p, 10, 16)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	return uint16(oI)
 }

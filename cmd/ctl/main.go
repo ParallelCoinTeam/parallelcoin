@@ -5,6 +5,7 @@ import (
 	"bytes"
 	js "encoding/json"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"os"
 	"strings"
@@ -25,7 +26,7 @@ func Main(args []string, cx *conte.Xt) {
 	method := args[0]
 	usageFlags, err := btcjson.MethodUsageFlags(method)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		fmt.Fprintf(os.Stderr, "Unrecognized command '%s'\n", method)
 		HelpPrint()
 		os.Exit(1)
@@ -68,11 +69,11 @@ func Main(args []string, cx *conte.Xt) {
 	// by the user.
 	cmd, err := btcjson.NewCmd(method, params...)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		// Show the error along with its error code when it's a json.
 		// BTCJSONError as it realistically will always be since the NewCmd function
 		// is only supposed to return errors of that type.
-		if jerr, ok := err.(btcjson.BTCJSONError); ok {
+		if jerr, ok := err.(btcjson.Error); ok {
 			fmt.Fprintf(os.Stderr, "%s command: %v (code: %s)\n",
 				method, err, jerr.ErrorCode)
 			CommandUsage(method)
@@ -89,7 +90,7 @@ func Main(args []string, cx *conte.Xt) {
 	// it to the RPC server.
 	marshalledJSON, err := btcjson.MarshalCmd(1, cmd)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -97,7 +98,7 @@ func Main(args []string, cx *conte.Xt) {
 	// connection configuration.
 	result, err := sendPostRequest(marshalledJSON, cx)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		os.Exit(1)
 	}
 	// Choose how to display the result based on its type.
@@ -127,7 +128,7 @@ func Main(args []string, cx *conte.Xt) {
 func CommandUsage(method string) {
 	usage, err := btcjson.MethodUsageText(method)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		// This should never happen since the method was already checked
 		// before calling this function, but be safe.
 		fmt.Println("Failed to obtain command usage:", err)

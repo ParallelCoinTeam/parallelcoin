@@ -2,6 +2,7 @@ package spv
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
@@ -82,7 +83,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 		if filterHeaderTip == bestHeight {
 			return nil
 		}
-		Debugf(
+		slog.Debugf(
 			"delivering backlog block notifications from height=%v, to height=%v",
 			bestHeight, filterHeaderTip,
 		)
@@ -97,7 +98,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 				currentHeight,
 			)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return fmt.Errorf(
 					"unable to read header at height: %v: %v",
 					currentHeight, err,
@@ -111,7 +112,7 @@ func // subscribeBlockMsg handles adding block subscriptions to the
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return &subscription, nil

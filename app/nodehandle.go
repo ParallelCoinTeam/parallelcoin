@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/config"
 	"github.com/urfave/cli"
 
@@ -10,7 +11,7 @@ import (
 
 func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) (err error) {
-		Trace("running node handler")
+		slog.Trace("running node handler")
 		config.Configure(cx, c.Command.Name, true)
 		cx.NodeReady = make(chan struct{})
 		cx.Node.Store(false)
@@ -28,7 +29,7 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		if serviceOpts.ServiceCommand != "" && runServiceCommand != nil {
 			err := runServiceCommand(serviceOpts.ServiceCommand)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			return nil
@@ -37,10 +38,10 @@ func nodeHandle(cx *conte.Xt) func(c *cli.Context) error {
 		go func() {
 			err := node.Main(cx, shutdownChan)
 			if err != nil {
-				Error("error starting node ", err)
+				slog.Error("error starting node ", err)
 			}
 		}()
-		Debug("sending back node rpc server handler")
+		slog.Debug("sending back node rpc server handler")
 		cx.RPCServer = <-cx.NodeChan
 		close(cx.NodeReady)
 		cx.Node.Store(true)

@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 )
 
@@ -33,7 +34,7 @@ func PrivKeyFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey,
 func NewPrivateKey(curve elliptic.Curve) (*PrivateKey, error) {
 	key, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return (*PrivateKey)(key), nil

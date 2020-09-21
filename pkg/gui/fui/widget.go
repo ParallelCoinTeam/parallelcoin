@@ -22,7 +22,7 @@ func Widget() (out *widget) {
 
 // Fill the widget's bounds with a given colour
 func (w *widget) Fill(r, g, b, a byte) (out *widget) {
-	col := color.RGBA{r, g, b, a}
+	col := color.RGBA{R: r, G: g, B: b, A: a}
 	w.fn = append(w.fn, func(ctx *layout.Context) {
 		cs := ctx.Constraints
 		d := image.Point{

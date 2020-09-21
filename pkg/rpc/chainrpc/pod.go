@@ -2,6 +2,7 @@ package chainrpc
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"net"
 	"strings"
 	"time"
@@ -23,11 +24,11 @@ var Dial = func(stateCfg *state.Config) func(addr net.Addr) (net.Conn, error) {
 			return stateCfg.Oniondial(addr.Network(), addr.String(),
 				DefaultConnectTimeout)
 		}
-		Trace("StateCfg.Dial", addr.Network(), addr.String(),
+		slog.Trace("StateCfg.Dial", addr.Network(), addr.String(),
 			DefaultConnectTimeout)
 		conn, er := stateCfg.Dial(addr.Network(), addr.String(), DefaultConnectTimeout)
 		if er != nil {
-			Error("connection error:", conn, er)
+			slog.Error("connection error:", conn, er)
 		}
 		return conn, er
 	}

@@ -2,6 +2,7 @@ package indexers
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"sync"
 	"time"
 
@@ -55,7 +56,7 @@ func (b *blockProgressLogger) LogBlockHeight(block *util.Block) {
 	if b.receivedLogTx == 1 {
 		txStr = "transaction "
 	}
-	Infof("%s %6d %s in the last %s (%6d %s, height %6d, %s)",
+	slog.Infof("%s %6d %s in the last %s (%6d %s, height %6d, %s)",
 		b.progressAction, b.receivedLogBlocks, blockStr, fmt.Sprintf("%0.1fs", tDuration.Seconds()), b.receivedLogTx,
 		txStr, block.Height(), block.MsgBlock().Header.Timestamp)
 	b.receivedLogBlocks = 0

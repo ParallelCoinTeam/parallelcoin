@@ -3,6 +3,7 @@ package chainhash
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 )
 
 // HashSize of array used to store hashes.  See Hash.
@@ -34,9 +35,9 @@ func (hash *Hash) CloneBytes() []byte {
 
 // SetBytes sets the bytes which represent the hash.  An error is returned if the number of bytes passed in is not HashSize.
 func (hash *Hash) SetBytes(newHash []byte) error {
-	nhlen := len(newHash)
-	if nhlen != HashSize {
-		return fmt.Errorf("invalid hash length of %v, want %v", nhlen,
+	newHashLen := len(newHash)
+	if newHashLen != HashSize {
+		return fmt.Errorf("invalid hash length of %v, want %v", newHashLen,
 			HashSize)
 	}
 	copy(hash[:], newHash)
@@ -59,7 +60,7 @@ func NewHash(newHash []byte) (*Hash, error) {
 	var sh Hash
 	err := sh.SetBytes(newHash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return &sh, err
@@ -70,7 +71,7 @@ func NewHashFromStr(hash string) (*Hash, error) {
 	ret := new(Hash)
 	err := Decode(ret, hash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return ret, nil
@@ -95,7 +96,7 @@ func Decode(dst *Hash, src string) error {
 	var reversedHash Hash
 	_, err := hex.Decode(reversedHash[HashSize-hex.DecodedLen(len(srcBytes)):], srcBytes)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Reverse copy from the temporary hash to destination.  Because the temporary was zeroed, the written result will be correctly padded.

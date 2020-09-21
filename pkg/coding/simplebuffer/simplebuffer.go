@@ -2,6 +2,7 @@ package simplebuffer
 
 import (
 	"encoding/binary"
+	"github.com/stalker-loki/app/slog"
 )
 
 type Serializer interface {
@@ -22,7 +23,7 @@ type Container struct {
 // the data into bytes
 func (srs Serializers) CreateContainer(magic []byte) (out *Container) {
 	if len(magic) != 4 {
-		Error("magic must be 4 bytes")
+		slog.Error("magic must be 4 bytes")
 		return
 	}
 	out = &Container{}
@@ -100,7 +101,7 @@ func (c *Container) Get(idx uint16) (out []byte) {
 			}
 		}
 	} else {
-		Error("size mismatch", length, size)
+		slog.Error("size mismatch", length, size)
 	}
 	return
 }

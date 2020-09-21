@@ -64,7 +64,8 @@ func TestWalletSvrWsNtfns(t *testing.T) {
 		{
 			name: "newtx",
 			newNtfn: func() (interface{}, error) {
-				return btcjson.NewCmd("newtx", "acct", `{"account":"acct","address":"1Address","category":"send","amount":1.5,"bip125-replaceable":"unknown","fee":0.0001,"confirmations":1,"trusted":true,"txid":"456","walletconflicts":[],"time":12345678,"timereceived":12345876,"vout":789,"otheraccount":"otheracct"}`)
+				return btcjson.NewCmd("newtx", "acct", `{"account":"acct","address":"1Address",`+
+					`"category":"send","amount":1.5,"bip125-replaceable":"unknown","fee":0.0001,"confirmations":1,"trusted":true,"txid":"456","walletconflicts":[],"time":12345678,"timereceived":12345876,"vout":789,"otheraccount":"otheracct"}`)
 			},
 			staticNtfn: func() interface{} {
 				result := btcjson.ListTransactionsResult{

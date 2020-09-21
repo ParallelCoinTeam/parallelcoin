@@ -65,13 +65,13 @@ StartWithdrawal method:
 
 	roundID: the unique identifier of a given consensus round
 	requests: a list with outputs requested by users of the voting pool
-	startAddress: the seriesID, branch and indes where we should start looking for inputs
+	startAddress: the seriesID, branch and indexes where we should start looking for inputs
 	lastSeriesID: the ID of the last series where we should take inputs from
 	changeStart: the first change address to use
 	dustThreshold: the minimum amount of satoshis an input needs to be considered eligible
 
 StartWithdrawal will then select all eligible inputs in the given address
-range (following the algorithim at <http://opentransactions.org/wiki/index.php/Input_Selection_Algorithm_(voting_pools)>)
+range (following the algorithm at <http://opentransactions.org/wiki/index.php/Input_Selection_Algorithm_(voting_pools)>)
 and use them to construct transactions (<http://opentransactions.org/wiki/index.php/Category:Transaction_Construction_Algorithm_(voting_pools)>)
 that fulfill the output requests. It returns a WithdrawalStatus containing
 the state of every requested output, the raw signatures for the constructed

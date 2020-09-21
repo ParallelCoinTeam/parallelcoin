@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/config"
 	"os"
 
@@ -16,20 +17,20 @@ import (
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		Info("starting up kopach standalone miner for parallelcoin")
+		slog.Info("starting up kopach standalone miner for parallelcoin")
 		config.Configure(cx, c.Command.Name, true)
 		if cx.ActiveNet.Name == netparams.TestNet3Params.Name {
 			fork.IsTestnet = true
 		}
 		quit := make(chan struct{})
 		interrupt.AddHandler(func() {
-			Debug("KopachHandle interrupt")
+			slog.Debug("KopachHandle interrupt")
 			close(quit)
 			os.Exit(0)
 		})
-		err = kopach.KopachHandle(cx)(c)
+		err = kopach.Handle(cx)(c)
 		<-quit
-		Debug("kopach main finished")
+		slog.Debug("kopach main finished")
 		return
 	}
 }

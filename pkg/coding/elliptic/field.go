@@ -148,7 +148,7 @@ func (f *fieldVal) Set(val *fieldVal) *fieldVal {
 }
 
 // SetInt sets the field value to the passed integer.  This is a convenience
-// function since it is fairly common to perform some arithemetic with small
+// function since it is fairly common to perform some arithmetic with small
 // native integers.
 // The field value is returned to support chaining.  This enables syntax such
 // as f := new(fieldVal).SetInt(2).Mul(f2) so that f = 2 * f2.
@@ -419,7 +419,7 @@ func (f *fieldVal) IsOdd() bool {
 // the correct result.
 func (f *fieldVal) Equals(val *fieldVal) bool {
 	// Xor only sets bits when they are different, so the two field values
-	// can only be the same if no bits are set after xoring each word.
+	// can only be the same if no bits are set after XORing each word.
 	// This is a constant time implementation.
 	bits := (f.n[0] ^ val.n[0]) | (f.n[1] ^ val.n[1]) | (f.n[2] ^ val.n[2]) |
 		(f.n[3] ^ val.n[3]) | (f.n[4] ^ val.n[4]) | (f.n[5] ^ val.n[5]) |
@@ -448,8 +448,8 @@ func (f *fieldVal) NegateVal(val *fieldVal, magnitude uint32) *fieldVal {
 	// already larger than the modulus and congruent to 7 (mod 12).  When a
 	// value is already in the desired range, its magnitude is 1.  Since 19
 	// is an additional "step", its magnitude (mod 12) is 2.  Since any
-	// multiple of the modulus is conguent to zero (mod m), the answer can
-	// be shortcut by simply mulplying the magnitude by the modulus and
+	// multiple of the modulus is congruent to zero (mod m), the answer can
+	// be shortcut by simply multiplying the magnitude by the modulus and
 	// subtracting.  Keeping with the example, this would be (2*12)-19 = 5.
 	f.n[0] = (magnitude+1)*fieldPrimeWordZero - val.n[0]
 	f.n[1] = (magnitude+1)*fieldPrimeWordOne - val.n[1]
@@ -474,7 +474,7 @@ func (f *fieldVal) Negate(magnitude uint32) *fieldVal {
 
 // AddInt adds the passed integer to the existing field value and stores the
 // result in f.  This is a convenience function since it is fairly common to
-// perform some arithemetic with small native integers.
+// perform some arithmetic with small native integers.
 // The field value is returned to support chaining.  This enables syntax like:
 // f.AddInt(1).Add(f2) so that f = f + 1 + f2.
 func (f *fieldVal) AddInt(ui uint) *fieldVal {
@@ -825,7 +825,7 @@ func (f *fieldVal) Square() *fieldVal {
 // SquareVal squares the passed value and stores the result in f.  Note that
 // this function can overflow if multiplying any of the individual words
 // exceeds a max uint32.  In practice, this means the magnitude of the field
-// being squred must be a max of 8 to prevent overflow.
+// being squared must be a max of 8 to prevent overflow.
 // The field value is returned to support chaining.  This enables syntax like:
 // f3.SquareVal(f).Mul(f) so that f3 = f^2 * f = f^3.
 func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
@@ -1026,12 +1026,12 @@ func (f *fieldVal) SquareVal(val *fieldVal) *fieldVal {
 // f.Inverse().Mul(f2) so that f = f^-1 * f2.
 func (f *fieldVal) Inverse() *fieldVal {
 	// Fermat's little theorem states that for a nonzero number a and prime
-	// prime p, a^(p-1) = 1 (mod p).  Since the multipliciative inverse is
+	// prime p, a^(p-1) = 1 (mod p).  Since the multiplicative inverse is
 	// a*b = 1 (mod p), it follows that b = a*a^(p-2) = a^(p-1) = 1 (mod p).
 	// Thus, a^(p-2) is the multiplicative inverse.
 	//
 	// In order to efficiently compute a^(p-2), p-2 needs to be split into
-	// a sequence of squares and multipications that minimizes the number of
+	// a sequence of squares and multiplications that minimizes the number of
 	// multiplications needed (since they are more costly than squarings).
 	// Intermediate results are saved and reused as well.
 	//

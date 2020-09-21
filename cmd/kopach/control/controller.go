@@ -4,6 +4,7 @@ import (
 	"container/ring"
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"math/rand"
 	"net"
 	"strings"
@@ -65,15 +66,15 @@ type Controller struct {
 
 func Run(cx *conte.Xt) (quit chan struct{}) {
 	if len(cx.StateCfg.ActiveMiningAddrs) < 1 {
-		Warn("no mining addresses, not starting controller")
+		slog.Warn("no mining addresses, not starting controller")
 		return
 	}
 	if len(*cx.Config.RPCListeners) < 1 || *cx.Config.DisableRPC {
-		Warn("not running controller without RPC enabled")
+		slog.Warn("not running controller without RPC enabled")
 		return
 	}
 	if len(*cx.Config.Listeners) < 1 || *cx.Config.DisableListen {
-		Warn("not running controller without p2p listener enabled")
+		slog.Warn("not running controller without p2p listener enabled")
 		return
 	}
 	ctrl := &Controller{
@@ -100,31 +101,31 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		transport.DefaultPort, MaxDatagramSize, handlersMulticast,
 		ctrl.quit)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		close(ctrl.quit)
 		return
 	}
 	pM := pause.GetPauseContainer(cx)
 	var pauseShards [][]byte
-	if pauseShards = transport.GetShards(pM.Data); Check(err) {
+	if pauseShards = transport.GetShards(pM.Data); slog.Check(err) {
 	} else {
 		ctrl.active.Store(true)
 	}
 	// ctrl.oldBlocks.Store(pauseShards)
 	interrupt.AddHandler(func() {
-		Debug("miner controller shutting down")
+		slog.Debug("miner controller shutting down")
 		ctrl.active.Store(false)
-		err := ctrl.multiConn.SendMany(pause.PauseMagic, pauseShards)
+		err := ctrl.multiConn.SendMany(pause.Magic, pauseShards)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
-		if err = ctrl.multiConn.Close(); Check(err) {
+		if err = ctrl.multiConn.Close(); slog.Check(err) {
 		}
 	})
-	Debug("sending broadcasts to:", UDP4MulticastAddress)
+	slog.Debug("sending broadcasts to:", UDP4MulticastAddress)
 	err = ctrl.sendNewBlockTemplate()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	} else {
 		ctrl.active.Store(true)
 	}
@@ -139,12 +140,12 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 		case <-ticker.C:
 			if !ctrl.Ready.Load() {
 				if cx.IsCurrent() {
-					Info("ready to mine!")
+					slog.Info("ready to mine!")
 					ctrl.Ready.Store(true)
 					ctrl.active.Store(true)
 				}
 			}
-			Trace("network hashrate", ctrl.HashReport())
+			slog.Trace("network hashrate", ctrl.HashReport())
 		case <-ctrl.quit:
 			cont = false
 			ctrl.active.Store(false)
@@ -152,7 +153,7 @@ func Run(cx *conte.Xt) (quit chan struct{}) {
 			cont = false
 		}
 	}
-	Trace("controller exiting")
+	slog.Trace("controller exiting")
 	return
 }
 
@@ -171,7 +172,7 @@ func (c *Controller) HashReport() float64 {
 		}
 		i++
 		return nil
-	}); Check(err) {
+	}); slog.Check(err) {
 	}
 	return av.Value()
 }
@@ -180,10 +181,10 @@ var handlersMulticast = transport.Handlers{
 	// Solutions submitted by workers
 	string(sol.SolutionMagic): func(ctx interface{}, src net.Addr, dst string,
 		b []byte) (err error) {
-		Trace("received solution")
+		slog.Trace("received solution")
 		c := ctx.(*Controller)
 		if !c.active.Load() { // || !c.cx.Node.Load() {
-			Debug("not active yet")
+			slog.Debug("not active yet")
 			return
 		}
 		j := sol.LoadSolContainer(b)
@@ -194,14 +195,14 @@ var handlersMulticast = transport.Handlers{
 		msgBlock := j.GetMsgBlock()
 		if !msgBlock.Header.PrevBlock.IsEqual(&c.cx.RPCServer.Cfg.Chain.
 			BestSnapshot().Hash) {
-			Debug("block submitted by kopach miner worker is stale")
+			slog.Debug("block submitted by kopach miner worker is stale")
 			// c.UpdateAndSendTemplate()
 			return
 		}
 		// Warn(msgBlock.Header.Version)
 		cb, ok := c.coinbases[msgBlock.Header.Version]
 		if !ok {
-			Debug("coinbases not found", cb)
+			slog.Debug("coinbases not found", cb)
 			return
 		}
 		cbs := []*util.Tx{cb}
@@ -212,9 +213,9 @@ var handlersMulticast = transport.Handlers{
 		}
 		// set old blocks to pause and send pause directly as block is
 		// probably a solution
-		err = c.multiConn.SendMany(pause.PauseMagic, c.pauseShards)
+		err = c.multiConn.SendMany(pause.Magic, c.pauseShards)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return
 		}
 		block := util.NewBlock(msgBlock)
@@ -224,27 +225,27 @@ var handlersMulticast = transport.Handlers{
 			// Anything other than a rule violation is an unexpected error, so log
 			// that error as an internal error.
 			if _, ok := err.(blockchain.RuleError); !ok {
-				Warnf(
+				slog.Warnf(
 					"Unexpected error while processing block submitted"+
 						" via kopach miner:", err)
 				return
 			} else {
-				Warn("block submitted via kopach miner rejected:", err)
+				slog.Warn("block submitted via kopach miner rejected:", err)
 				if isOrphan {
-					Warn("block is an orphan")
+					slog.Warn("block is an orphan")
 					return
 				}
 				return
 			}
 		}
-		Trace("the block was accepted")
+		slog.Trace("the block was accepted")
 		coinbaseTx := block.MsgBlock().Transactions[0].TxOut[0]
 		prevHeight := block.Height() - 1
 		prevBlock, _ := c.cx.RealNode.Chain.BlockByHeight(prevHeight)
 		prevTime := prevBlock.MsgBlock().Header.Timestamp.Unix()
 		since := block.MsgBlock().Header.Timestamp.Unix() - prevTime
 		bHash := block.MsgBlock().BlockHashWithAlgos(block.Height())
-		Warnf("new block height %d %08x %s%10d %08x %v %s %ds since prev",
+		slog.Warnf("new block height %d %08x %s%10d %08x %v %s %ds since prev",
 			block.Height(),
 			prevBlock.MsgBlock().Header.Bits,
 			bHash,
@@ -259,7 +260,7 @@ var handlersMulticast = transport.Handlers{
 		b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
-			Debug("not active")
+			slog.Debug("not active")
 			return
 		}
 		j := p2padvt.LoadContainer(b)
@@ -272,13 +273,13 @@ var handlersMulticast = transport.Handlers{
 			o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
 			if otherPort != myPort {
 				if _, ok := c.otherNodes[o]; !ok {
-					Debug("ctrl", j.GetControllerListenerPort(), "P2P",
+					slog.Debug("ctrl", j.GetControllerListenerPort(), "P2P",
 						j.GetP2PListenersPort(), "rpc", j.GetRPCListenersPort())
 					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
 					// recommended).
 					// go func() {
-					Info("connecting to lan peer with same PSK", o, otherIPs)
-					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); Check(err) {
+					slog.Info("connecting to lan peer with same PSK", o, otherIPs)
+					if err = c.cx.RPCServer.Cfg.ConnMgr.Connect(o, true); slog.Check(err) {
 					}
 				}
 				c.otherNodes[o] = time.Now()
@@ -296,7 +297,7 @@ var handlersMulticast = transport.Handlers{
 	string(hashrate.HashrateMagic): func(ctx interface{}, src net.Addr, dst string, b []byte) (err error) {
 		c := ctx.(*Controller)
 		if !c.active.Load() {
-			Debug("not active")
+			slog.Debug("not active")
 			return
 		}
 		hp := hashrate.LoadContainer(b)
@@ -316,24 +317,24 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	template := getNewBlockTemplate(c.cx, c.blockTemplateGenerator)
 	if template == nil {
 		err = errors.New("could not get template")
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	msgB := template.Block
 	c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
 	adv := p2padvt.Get(c.cx)
-	Traces(adv)
+	slog.Traces(adv)
 	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, &c.coinbases)
 	jobShards := transport.GetShards(fMC.Data)
 	shardsLen := len(jobShards)
 	if shardsLen < 1 {
-		Warn("jobShards", shardsLen)
+		slog.Warn("jobShards", shardsLen)
 		return fmt.Errorf("jobShards len %d", shardsLen)
 	}
 	err = c.multiConn.SendMany(job.Magic, jobShards)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	c.prevHash.Store(&template.Block.Header.PrevBlock)
 	c.oldBlocks.Store(jobShards)
@@ -344,20 +345,20 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 
 func getNewBlockTemplate(cx *conte.Xt, bTG *mining.BlkTmplGenerator,
 ) (template *mining.BlockTemplate) {
-	Trace("getting new block template")
+	slog.Trace("getting new block template")
 	if len(*cx.Config.MiningAddrs) < 1 {
-		Debug("no mining addresses")
+		slog.Debug("no mining addresses")
 		return
 	}
 	// Choose a payment address at random.
 	rand.Seed(time.Now().UnixNano())
 	payToAddr := cx.StateCfg.ActiveMiningAddrs[rand.Intn(len(*cx.Config.
 		MiningAddrs))]
-	Trace("calling new block template")
+	slog.Trace("calling new block template")
 	template, err := bTG.NewBlockTemplate(0, payToAddr,
 		fork.SHA256d)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	} else {
 		// Debug("got new block template")
 	}
@@ -389,7 +390,7 @@ out:
 		case <-advertismentTicker.C:
 			err := ctrl.multiConn.SendMany(p2padvt.Magic, ad)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 			}
 		case <-ctrl.quit:
 			break out
@@ -409,7 +410,7 @@ out:
 			// The current block is stale if the best block has changed.
 			best := c.blockTemplateGenerator.BestSnapshot()
 			if !c.prevHash.Load().(*chainhash.Hash).IsEqual(&best.Hash) {
-				Debug("new best block hash")
+				slog.Debug("new best block hash")
 				c.UpdateAndSendTemplate()
 				break
 			}
@@ -419,20 +420,20 @@ out:
 			if c.lastTxUpdate.Load() != c.blockTemplateGenerator.GetTxSource().
 				LastUpdated() && time.Now().After(time.Unix(0,
 				c.lastGenerated.Load().(int64)+int64(time.Minute))) {
-				Debug("block is stale")
+				slog.Debug("block is stale")
 				c.UpdateAndSendTemplate()
 				break
 			}
 			oB, ok := c.oldBlocks.Load().([][]byte)
 			if len(oB) == 0 {
-				Warn("template is zero length")
+				slog.Warn("template is zero length")
 			}
 			if !ok {
-				Debug("template is nil")
+				slog.Debug("template is nil")
 			}
 			err := c.multiConn.SendMany(job.Magic, oB)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 			}
 			c.oldBlocks.Store(oB)
 			break
@@ -447,13 +448,13 @@ out:
 	for {
 		select {
 		case msg := <-c.submitChan:
-			Traces(msg)
+			slog.Traces(msg)
 			decodedB, err := util.NewBlockFromBytes(msg)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				break
 			}
-			Traces(decodedB)
+			slog.Traces(decodedB)
 		case <-c.quit:
 			break out
 		}
@@ -463,7 +464,7 @@ out:
 func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 	return func(n *blockchain.Notification) {
 		if !c.active.Load() {
-			Debug("not active")
+			slog.Debug("not active")
 			return
 		}
 		if !c.Ready.Load() {
@@ -473,11 +474,11 @@ func (c *Controller) getNotifier() func(n *blockchain.Notification) {
 		// First to arrive locks out any others while processing
 		switch n.Type {
 		case blockchain.NTBlockConnected:
-			Trace("received new chain notification")
+			slog.Trace("received new chain notification")
 			// construct work message
 			_, ok := n.Data.(*util.Block)
 			if !ok {
-				Warn("chain accepted notification is not a block")
+				slog.Warn("chain accepted notification is not a block")
 				break
 			}
 			c.UpdateAndSendTemplate()
@@ -499,17 +500,17 @@ func (c *Controller) UpdateAndSendTemplate() {
 			p2padvt.Get(c.cx), &c.coinbases)
 		nH := mC.GetNewHeight()
 		if c.height.Load() < uint64(nH) {
-			Trace("new height", nH)
+			slog.Trace("new height", nH)
 			c.height.Store(uint64(nH))
 		}
 		shards := transport.GetShards(mC.Data)
 		c.oldBlocks.Store(shards)
-		if err := c.multiConn.SendMany(job.Magic, shards); Check(err) {
+		if err := c.multiConn.SendMany(job.Magic, shards); slog.Check(err) {
 		}
 		c.prevHash.Store(&template.Block.Header.PrevBlock)
 		c.lastGenerated.Store(time.Now().UnixNano())
 		c.lastTxUpdate.Store(time.Now().UnixNano())
 	} else {
-		Debug("got nil template")
+		slog.Debug("got nil template")
 	}
 }

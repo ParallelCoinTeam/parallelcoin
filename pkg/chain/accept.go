@@ -2,13 +2,14 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/hardfork"
 	database "github.com/stalker-loki/pod/pkg/db"
 	"github.com/stalker-loki/pod/pkg/util"
 )
 
-func // maybeAcceptBlock potentially accepts a block into the block chain
+// maybeAcceptBlock potentially accepts a block into the block chain
 // and, if accepted, returns whether or not it is on the main chain.
 // It performs several validation checks which depend on its position within
 // the block chain before adding it.
@@ -17,7 +18,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 // The flags are also passed to checkBlockContext and connectBestChain.
 // See their documentation for how the flags modify their behavior.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block,
+func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block,
 	flags BehaviorFlags) (bool, error) {
 	// Warn("maybeAcceptBlock")
 	// Info(block.MsgBlock())
@@ -26,11 +27,11 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	prevNode := b.Index.LookupNode(prevHash)
 	if prevNode == nil {
 		str := fmt.Sprintf("previous block %s is unknown", prevHash)
-		Error(str)
+		slog.Error(str)
 		return false, ruleError(ErrPreviousBlockUnknown, str)
 	} else if b.Index.NodeStatus(prevNode).KnownInvalid() {
 		str := fmt.Sprintf("previous block %s is known to be invalid", prevHash)
-		Error(str)
+		slog.Error(str)
 		return false, ruleError(ErrInvalidAncestorBlock, str)
 	}
 	blockHeight := prevNode.height + 1
@@ -74,7 +75,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 		err = b.checkBlockContext(workerNumber, block, prevNode, flags,
 			DoNotCheckPow)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return false, err
 		}
 	}
@@ -92,7 +93,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 		return dbStoreBlock(dbTx, block)
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, err
 	}
 	// Warn("creating new block node for new block")
@@ -105,7 +106,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	b.Index.AddNode(newNode)
 	err = b.Index.flushToDB()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, err
 	}
 	// Connect the passed block to the chain while respecting proper chain
@@ -113,7 +114,7 @@ func // maybeAcceptBlock potentially accepts a block into the block chain
 	// This also handles validation of the transaction scripts.
 	isMainChain, err := b.connectBestChain(newNode, block, flags)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, err
 	}
 	// Notify the caller that the new block was accepted into the block

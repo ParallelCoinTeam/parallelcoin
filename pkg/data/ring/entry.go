@@ -3,6 +3,7 @@ package ring
 import (
 	"context"
 	"github.com/marusama/semaphore"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/gui/gel"
 	"github.com/stalker-loki/pod/pkg/util/logi"
 )
@@ -30,7 +31,7 @@ func NewEntry(size int) *Entry {
 
 // Clear sets the buffer back to initial state
 func (b *Entry) Clear() {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !slog.Check(err) {
 		defer b.Sem.Release(1)
 		b.Cursor = 0
 		b.Clicked = -1
@@ -40,7 +41,7 @@ func (b *Entry) Clear() {
 
 // Len returns the length of the buffer
 func (b *Entry) Len() (out int) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !slog.Check(err) {
 		defer b.Sem.Release(1)
 		if b.Full {
 			out = len(b.Buf)
@@ -53,7 +54,7 @@ func (b *Entry) Len() (out int) {
 
 // Get returns the value at the given index or nil if nothing
 func (b *Entry) Get(i int) (out *logi.Entry) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !slog.Check(err) {
 		defer b.Sem.Release(1)
 		bl := len(b.Buf)
 		cursor := i
@@ -74,7 +75,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 
 // GetButton returns the gel.Button of the entry
 func (b *Entry) GetButton(i int) (out *gel.Button) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !slog.Check(err) {
 		defer b.Sem.Release(1)
 		bl := len(b.Buf)
 		cursor := i
@@ -95,7 +96,7 @@ func (b *Entry) GetButton(i int) (out *gel.Button) {
 
 // GetHider returns the gel.Button of the entry
 func (b *Entry) GetHider(i int) (out *gel.Button) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !slog.Check(err) {
 		defer b.Sem.Release(1)
 		bl := len(b.Buf)
 		cursor := i
@@ -115,7 +116,7 @@ func (b *Entry) GetHider(i int) (out *gel.Button) {
 }
 
 func (b *Entry) Add(value *logi.Entry) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !slog.Check(err) {
 		defer b.Sem.Release(1)
 		if b.Cursor == len(b.Buf) {
 			b.Cursor = 0
@@ -129,7 +130,7 @@ func (b *Entry) Add(value *logi.Entry) {
 }
 
 func (b *Entry) ForEach(fn func(v *logi.Entry) error) (err error) {
-	if err := b.Sem.Acquire(context.Background(), 1); !Check(err) {
+	if err := b.Sem.Acquire(context.Background(), 1); !slog.Check(err) {
 		c := b.Cursor
 		i := c + 1
 		if i == len(b.Buf) {

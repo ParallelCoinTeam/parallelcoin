@@ -2,6 +2,7 @@ package wire
 
 import (
 	"bytes"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"reflect"
 	"testing"
@@ -106,7 +107,7 @@ func TestInvWire(t *testing.T) {
 		out  *MsgInv         // Expected decoded message
 		buf  []byte          // Wire encoding pver uint32
 		pver uint32          // Protocol version for wire encoding
-		enc  MessageEncoding // Message encodinf format
+		enc  MessageEncoding // Message encoding format
 	}{
 		// Latest protocol version with no inv vectors.
 		{
@@ -234,7 +235,7 @@ func TestInvWireErrors(t *testing.T) {
 	baseInv := NewMsgInv()
 	err = baseInv.AddInvVect(iv)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	baseInvEncoded := []byte{
 		0x02,                   // Varint for number of inv vectors
@@ -249,7 +250,7 @@ func TestInvWireErrors(t *testing.T) {
 	for i := 0; i < MaxInvPerMsg; i++ {
 		err = maxInv.AddInvVect(iv)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}
 	maxInv.InvList = append(maxInv.InvList, iv)

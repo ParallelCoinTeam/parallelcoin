@@ -2,6 +2,7 @@ package rpctest
 
 import (
 	"errors"
+	"github.com/stalker-loki/app/slog"
 	"math"
 	"math/big"
 	"runtime"
@@ -10,7 +11,7 @@ import (
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	script "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	"github.com/stalker-loki/pod/pkg/util"
 )
@@ -84,7 +85,7 @@ func solveBlock(header *wire.BlockHeader, targetDifficulty *big.Int) bool {
 // In particular, it starts with the block height that is required by version
 // 2 blocks.
 func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, error) {
-	return txscript.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
+	return script.NewScriptBuilder().AddInt64(int64(nextBlockHeight)).
 		AddInt64(int64(extraNonce)).Script()
 }
 
@@ -92,9 +93,9 @@ func standardCoinbaseScript(nextBlockHeight int32, extraNonce uint64) ([]byte, e
 // subsidy based on the passed block height to the provided address.
 func createCoinbaseTx(coinbaseScript []byte, nextBlockHeight int32, addr util.Address, mineTo []wire.TxOut, net *netparams.Params, version int32) (*util.Tx, error) {
 	// Create the script to pay to the provided payment address.
-	pkScript, err := txscript.PayToAddrScript(addr)
+	pkScript, err := script.PayToAddrScript(addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -158,13 +159,13 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	extraNonce := uint64(0)
 	coinbaseScript, err := standardCoinbaseScript(blockHeight, extraNonce)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	coinbaseTx, err := createCoinbaseTx(coinbaseScript, blockHeight, miningAddr,
 		mineTo, net, blockVersion)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// Create a new block ready to be solved.
@@ -188,7 +189,7 @@ func CreateBlock(prevBlock *util.Block, inclusionTxs []*util.Tx,
 	}
 	found := solveBlock(&block.Header, net.PowLimit)
 	if !found {
-		return nil, errors.New("Unable to solve block")
+		return nil, errors.New("unable to solve block")
 	}
 	utilBlock := util.NewBlock(&block)
 	utilBlock.SetHeight(blockHeight)

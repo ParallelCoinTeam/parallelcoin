@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/config"
 	"github.com/urfave/cli"
 	"os"
@@ -19,7 +20,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 			Params.Name + slash + wallet.WalletDbName
 		if !apputil.FileExists(dbFilename) {
 			if err := walletmain.CreateWallet(cx.ActiveNet, cx.Config); err != nil {
-				Error("failed to create wallet", err)
+				slog.Error("failed to create wallet", err)
 				return err
 			}
 			fmt.Println("restart to complete initial setup")
@@ -30,7 +31,7 @@ func WalletHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
 		go func() {
 			err = walletmain.Main(cx)
 			if err != nil {
-				Error("failed to start up wallet", err)
+				slog.Error("failed to start up wallet", err)
 			}
 		}()
 		cx.WalletServer = <-walletChan

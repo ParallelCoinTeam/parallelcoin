@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"net"
 	"runtime"
 	"runtime/debug"
@@ -50,8 +51,8 @@ type (
 
 // SetDestination changes the address the outbound connection of a channel directs to
 func (c *Channel) SetDestination(dst string) (err error) {
-	Debug("sending to", dst)
-	if c.Sender, err = NewSender(dst, c.MaxDatagramSize); Check(err) {
+	slog.Debug("sending to", dst)
+	if c.Sender, err = NewSender(dst, c.MaxDatagramSize); slog.Check(err) {
 	}
 	return
 }
@@ -60,11 +61,11 @@ func (c *Channel) SetDestination(dst string) (err error) {
 func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, err error) {
 	if len(data) == 0 {
 		err = errors.New("not sending empty packet")
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	var msg []byte
-	if msg, err = EncryptMessage(c.Creator, c.sendCiph, magic, nonce, data); Check(err) {
+	if msg, err = EncryptMessage(c.Creator, c.sendCiph, magic, nonce, data); slog.Check(err) {
 	}
 	n, err = c.Sender.Write(msg)
 	// DEBUG(msg)
@@ -73,15 +74,15 @@ func (c *Channel) Send(magic []byte, nonce []byte, data []byte) (n int, err erro
 
 // SendMany sends a BufIter of shards as produced by GetShards
 func (c *Channel) SendMany(magic []byte, b [][]byte) (err error) {
-	if nonce, err := GetNonce(c.sendCiph); Check(err) {
+	if nonce, err := GetNonce(c.sendCiph); slog.Check(err) {
 	} else {
 		for i := 0; i < len(b); i++ {
 			// DEBUG(i)
-			if _, err = c.Send(magic, nonce, b[i]); Check(err) {
+			if _, err = c.Send(magic, nonce, b[i]); slog.Check(err) {
 				// debug.PrintStack()
 			}
 		}
-		Trace(c.Creator, "sent packets", string(magic),
+		slog.Trace(c.Creator, "sent packets", string(magic),
 			hex.EncodeToString(nonce), c.Sender.LocalAddr(),
 			c.Sender.RemoteAddr())
 	}
@@ -101,7 +102,7 @@ func (c *Channel) Close() (err error) {
 // fec encoded shards built from the provided buffer
 func GetShards(data []byte) (shards [][]byte) {
 	var err error
-	if shards, err = fec.Encode(data); Check(err) {
+	if shards, err = fec.Encode(data); slog.Check(err) {
 	}
 	return
 }
@@ -120,30 +121,30 @@ func NewUnicastChannel(creator string, ctx interface{}, key, sender, receiver st
 	for i := range handlers {
 		magics = append(magics, i)
 	}
-	if channel.sendCiph, err = gcm.GetCipher(key); Check(err) {
+	if channel.sendCiph, err = gcm.GetCipher(key); slog.Check(err) {
 	}
-	if channel.receiveCiph, err = gcm.GetCipher(key); Check(err) {
+	if channel.receiveCiph, err = gcm.GetCipher(key); slog.Check(err) {
 	}
 	channel.Receiver, err = Listen(receiver, channel, maxDatagramSize, handlers, quit)
 	channel.Sender, err = NewSender(sender, maxDatagramSize)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
-	Warn("starting unicast channel:", channel.Creator, sender, receiver, magics)
+	slog.Warn("starting unicast channel:", channel.Creator, sender, receiver, magics)
 	return
 }
 
 // NewSender creates a new UDP connection to a specified address
 func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err error) {
 	var addr *net.UDPAddr
-	if addr, err = net.ResolveUDPAddr("udp4", address); Check(err) {
+	if addr, err = net.ResolveUDPAddr("udp4", address); slog.Check(err) {
 		return
-	} else if conn, err = net.DialUDP("udp4", nil, addr); Check(err) {
+	} else if conn, err = net.DialUDP("udp4", nil, addr); slog.Check(err) {
 		debug.PrintStack()
 		return
 	}
-	Debug("started new sender on", conn.LocalAddr(), "->", conn.RemoteAddr())
-	if err = conn.SetWriteBuffer(maxDatagramSize); Check(err) {
+	slog.Debug("started new sender on", conn.LocalAddr(), "->", conn.RemoteAddr())
+	if err = conn.SetWriteBuffer(maxDatagramSize); slog.Check(err) {
 	}
 	return
 }
@@ -153,15 +154,15 @@ func NewSender(address string, maxDatagramSize int) (conn *net.UDPConn, err erro
 func Listen(address string, channel *Channel, maxDatagramSize int, handlers Handlers,
 	quit chan struct{}) (conn *net.UDPConn, err error) {
 	var addr *net.UDPAddr
-	if addr, err = net.ResolveUDPAddr("udp4", address); Check(err) {
+	if addr, err = net.ResolveUDPAddr("udp4", address); slog.Check(err) {
 		return
-	} else if conn, err = net.ListenUDP("udp4", addr); Check(err) {
+	} else if conn, err = net.ListenUDP("udp4", addr); slog.Check(err) {
 		return
 	} else if conn == nil {
 		return nil, errors.New("unable to start connection ")
 	}
-	Debug("starting listener on", conn.LocalAddr(), "->", conn.RemoteAddr())
-	if err = conn.SetReadBuffer(maxDatagramSize); Check(err) {
+	slog.Debug("starting listener on", conn.LocalAddr(), "->", conn.RemoteAddr())
+	if err = conn.SetReadBuffer(maxDatagramSize); slog.Check(err) {
 		// not a critical error but should not happen
 	}
 	go Handle(address, channel, handlers, maxDatagramSize, quit)
@@ -175,19 +176,19 @@ func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, 
 	quit chan struct{}) (channel *Channel, err error) {
 	channel = &Channel{Creator: creator, MaxDatagramSize: maxDatagramSize,
 		buffers: make(map[string]*MsgBuffer), context: ctx, Ready: make(chan struct{})}
-	if channel.sendCiph, err = gcm.GetCipher(key); Check(err) {
+	if channel.sendCiph, err = gcm.GetCipher(key); slog.Check(err) {
 	}
 	if channel.sendCiph == nil {
 		panic("nil send cipher")
 	}
-	if channel.receiveCiph, err = gcm.GetCipher(key); Check(err) {
+	if channel.receiveCiph, err = gcm.GetCipher(key); slog.Check(err) {
 	}
 	if channel.receiveCiph == nil {
 		panic("nil receive cipher")
 	}
-	if channel.Receiver, err = ListenBroadcast(port, channel, maxDatagramSize, handlers, quit); Check(err) {
+	if channel.Receiver, err = ListenBroadcast(port, channel, maxDatagramSize, handlers, quit); slog.Check(err) {
 	}
-	if channel.Sender, err = NewBroadcaster(port, maxDatagramSize); Check(err) {
+	if channel.Sender, err = NewBroadcaster(port, maxDatagramSize); slog.Check(err) {
 	}
 	close(channel.Ready)
 	return
@@ -196,7 +197,7 @@ func NewBroadcastChannel(creator string, ctx interface{}, key string, port int, 
 // NewBroadcaster creates a new UDP multicast connection on which to broadcast
 func NewBroadcaster(port int, maxDatagramSize int) (conn *net.UDPConn, err error) {
 	address := net.JoinHostPort(UDPMulticastAddress, fmt.Sprint(port))
-	if conn, err = NewSender(address, maxDatagramSize); Check(err) {
+	if conn, err = NewSender(address, maxDatagramSize); slog.Check(err) {
 	}
 	return
 }
@@ -208,10 +209,10 @@ func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers H
 	address := net.JoinHostPort(UDPMulticastAddress, fmt.Sprint(port))
 	var addr *net.UDPAddr
 	// Parse the string Address
-	if addr, err = net.ResolveUDPAddr("udp4", address); Check(err) {
+	if addr, err = net.ResolveUDPAddr("udp4", address); slog.Check(err) {
 		return
 		// Open up a connection
-	} else if conn, err = net.ListenMulticastUDP("udp4", nil, addr); Check(err) {
+	} else if conn, err = net.ListenMulticastUDP("udp4", nil, addr); slog.Check(err) {
 		return
 	} else if conn == nil {
 		return nil, errors.New("unable to start connection ")
@@ -221,8 +222,8 @@ func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers H
 		magics = append(magics, i)
 	}
 	// DEBUG("magics", magics, PrevCallers())
-	Debug("starting broadcast listener", channel.Creator, address, magics)
-	if err = conn.SetReadBuffer(maxDatagramSize); Check(err) {
+	slog.Debug("starting broadcast listener", channel.Creator, address, magics)
+	if err = conn.SetReadBuffer(maxDatagramSize); slog.Check(err) {
 	}
 	channel.Receiver = conn
 	go Handle(address, channel, handlers, maxDatagramSize, quit)
@@ -231,10 +232,10 @@ func ListenBroadcast(port int, channel *Channel, maxDatagramSize int, handlers H
 
 func handleNetworkError(address string, err error) (result int) {
 	if len(strings.Split(err.Error(), "use of closed network connection")) >= 2 {
-		Debug("connection closed", address)
+		slog.Debug("connection closed", address)
 		result = closed
 	} else {
-		Errorf("ReadFromUDP failed: '%s'", err)
+		slog.Errorf("ReadFromUDP failed: '%s'", err)
 		result = other
 	}
 	return
@@ -246,7 +247,7 @@ func handleNetworkError(address string, err error) (result int) {
 func Handle(address string, channel *Channel,
 	handlers Handlers, maxDatagramSize int, quit chan struct{}) {
 	buffer := make([]byte, maxDatagramSize)
-	Debug("starting handler for", channel.Creator, "listener")
+	slog.Debug("starting handler for", channel.Creator, "listener")
 	// Loop forever reading from the socket until it is closed
 	// seenNonce := ""
 	var err error
@@ -261,7 +262,7 @@ out:
 			break out
 		default:
 		}
-		if numBytes, src, err = channel.Receiver.ReadFromUDP(buffer); Check(err) {
+		if numBytes, src, err = channel.Receiver.ReadFromUDP(buffer); slog.Check(err) {
 			switch handleNetworkError(address, err) {
 			case closed:
 				break out
@@ -302,14 +303,14 @@ out:
 						var cipherText []byte
 						cipherText, err = fec.Decode(bn.Buffers)
 						if err != nil {
-							Error(err)
+							slog.Error(err)
 							continue
 						}
 						bn.Decoded = true
 						// DEBUG(numBytes, src, err)
-						Tracef("received packet with magic %s from %s",
+						slog.Tracef("received packet with magic %s from %s",
 							magic, src.String())
-						if err = handler(channel.context, src, address, cipherText); Check(err) {
+						if err = handler(channel.context, src, address, cipherText); slog.Check(err) {
 							continue
 						}
 						// src = nil

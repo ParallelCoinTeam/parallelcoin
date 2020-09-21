@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"encoding/hex"
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 	"strings"
 	"time"
@@ -93,7 +94,7 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 		if bits[version] == 0 {
 			bits, err = b.CalcNextRequiredDifficultyPlan9Controller(lastNode)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return
 			}
 			// Debug(bits, reflect.TypeOf(bits))
@@ -172,7 +173,7 @@ func // CalcWork calculates a work value from difficulty bits.
 // in order to avoid potential division by zero and really small floating
 // point numbers, the result adds 1 to the denominator and multiplies the
 // numerator by 2^256.
-CalcWork(bits uint32, height int32, algover int32) *big.Int {
+CalcWork(bits uint32, height int32, algoVer int32) *big.Int {
 	// Return a work value of zero if the passed difficulty bits represent a
 	// negative number. Note this should not happen in practice with valid
 	// blocks, but an invalid block could trigger it.

@@ -2,6 +2,7 @@ package util
 
 import (
 	"crypto/sha256"
+	"github.com/stalker-loki/app/slog"
 	"hash"
 
 	"golang.org/x/crypto/ripemd160"
@@ -11,7 +12,7 @@ import (
 func calcHash(buf []byte, hasher hash.Hash) []byte {
 	_, err := hasher.Write(buf)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	return hasher.Sum(nil)
 }

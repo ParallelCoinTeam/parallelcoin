@@ -3,6 +3,7 @@ package rpcclient
 import (
 	js "encoding/json"
 	"errors"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
@@ -35,7 +36,7 @@ func (c *Client) RawRequestAsync(method string, params []js.RawMessage) FutureRa
 	}
 	marshalledJSON, err := js.Marshal(rawRequest)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return newFutureError(err)
 	}
 	// Generate the request and send it along with a channel to respond on.
@@ -51,7 +52,9 @@ func (c *Client) RawRequestAsync(method string, params []js.RawMessage) FutureRa
 	return responseChan
 }
 
-// RawRequest allows the caller to send a raw or custom request to the server. This method may be used to send and receive requests and responses for requests that are not handled by this client package, or to proxy partially unmarshaled requests to another JSON-RPC server if a request cannot be handled directly.
+// RawRequest allows the caller to send a raw or custom request to the server. This method may be used to send and
+// receive requests and responses for requests that are not handled by this client package, or to proxy partially
+// unmarshalled requests to another JSON-RPC server if a request cannot be handled directly.
 func (c *Client) RawRequest(method string, params []js.RawMessage) (js.RawMessage, error) {
 	return c.RawRequestAsync(method, params).Receive()
 }

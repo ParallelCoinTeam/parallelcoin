@@ -2,6 +2,7 @@ package peer_test
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"net"
 	"time"
 
@@ -10,7 +11,8 @@ import (
 	"github.com/stalker-loki/pod/pkg/comm/peer"
 )
 
-// mockRemotePeer creates a basic inbound peer listening on the simnet port for use with Example_peerConnection.  It does not return until the listner is active.
+// mockRemotePeer creates a basic inbound peer listening on the simnet port for use with Example_peerConnection.  It
+//does not return until the listener is active.
 func mockRemotePeer() error {
 	// Configure peer to act as a simnet node that offers no services.
 	peerCfg := &peer.Config{
@@ -27,7 +29,7 @@ func mockRemotePeer() error {
 	go func() {
 		conn, err := listener.Accept()
 		if err != nil {
-			Errorf("Accept: error %v", err)
+			slog.Errorf("Accept: error %v", err)
 			return
 		}
 		// Create and start the inbound peer.
@@ -41,7 +43,7 @@ func mockRemotePeer() error {
 func Example_newOutboundPeer() {
 	// Ordinarily this will not be needed since the outbound peer will be connecting to a remote peer, however, since this example is executed and tested, a mock remote peer is needed to listen for the outbound peer.
 	if err := mockRemotePeer(); err != nil {
-		Errorf("mockRemotePeer: unexpected error %v", err)
+		slog.Errorf("mockRemotePeer: unexpected error %v", err)
 		return
 	}
 	// Create an outbound peer that is configured to act as a simnet node that offers no services and has listeners for the version and verack messages.  The verack listener is used here to signal the code below when the handshake has been finished by signalling a channel.
@@ -64,13 +66,13 @@ func Example_newOutboundPeer() {
 	}
 	p, err := peer.NewOutboundPeer(peerCfg, "127.0.0.1:18555")
 	if err != nil {
-		Errorf("NewOutboundPeer: error %v", err)
+		slog.Errorf("NewOutboundPeer: error %v", err)
 		return
 	}
 	// Establish the connection to the peer address and mark it connected.
 	conn, err := net.Dial("tcp", p.Addr())
 	if err != nil {
-		Errorf("net.Dial: error %v", err)
+		slog.Errorf("net.Dial: error %v", err)
 		return
 	}
 	p.AssociateConnection(conn)
@@ -78,7 +80,7 @@ func Example_newOutboundPeer() {
 	select {
 	case <-verack:
 	case <-time.After(time.Second * 1):
-		Error("Example_peerConnection: verack timeout")
+		slog.Error("Example_peerConnection: verack timeout")
 	}
 	// Disconnect the peer.
 	p.Disconnect()

@@ -2,6 +2,7 @@ package spv
 
 import (
 	"container/heap"
+	"github.com/stalker-loki/app/slog"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -97,7 +98,7 @@ func // deliver tries to deliver the report or error to any subscribers. If
 	select {
 	case r.resultChan <- &getUtxoResult{report, err}:
 	default:
-		Warnf(
+		slog.Warnf(
 			"duplicate getutxo result delivered for outpoint=%v, spend=%v, err=%v",
 			r.Input.OutPoint, report, err,
 		)
@@ -136,7 +137,7 @@ func // Push is called by the heap.
 func // Enqueue takes a GetUtxoRequest and adds it to the next applicable batch.
 (s *UtxoScanner) Enqueue(input *InputWithScript,
 	birthHeight uint32) (*GetUtxoRequest, error) {
-	Debugf(
+	slog.Debugf(
 		"enqueuing request for %s with birth height %d %s",
 		input.OutPoint.String(), birthHeight,
 	)
@@ -232,8 +233,8 @@ func // batchManager is responsible for scheduling batches of UTXOs to scan. Any
 		// least-height request currently in the queue.
 		err := s.scanFromHeight(req.BirthHeight)
 		if err != nil {
-			Error(err)
-			Errorf(
+			slog.Error(err)
+			slog.Errorf(
 				"UXTO scan failed: %v", err,
 			)
 		}
@@ -268,7 +269,7 @@ func // scanFromHeight runs a single batch,
 	// scan.
 	bestStamp, err := s.cfg.BestSnapshot()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	var (
@@ -293,7 +294,7 @@ scanToEnd:
 		}
 		hash, err := s.cfg.GetBlockHash(int64(height))
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return reporter.FailRemaining(err)
 		}
 		// If there are any new requests that can safely be added to this batch,
@@ -309,7 +310,7 @@ scanToEnd:
 			}
 			match, err := s.cfg.BlockFilterMatches(&options, hash)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return reporter.FailRemaining(err)
 			}
 			// If still no match is found, we have no reason to
@@ -329,12 +330,12 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		Tracef(
+		slog.Tracef(
 			"fetching block height=%d hash=%s %s", height, hash,
 		)
 		block, err := s.cfg.GetBlock(*hash)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return reporter.FailRemaining(err)
 		}
 		// Check again to see if the utxoscanner has been signaled to exit.
@@ -343,7 +344,7 @@ scanToEnd:
 			return reporter.FailRemaining(ErrShuttingDown)
 		default:
 		}
-		Debugf("processing block height=%d hash=%s %s", height, hash)
+		slog.Debugf("processing block height=%d hash=%s %s", height, hash)
 		reporter.ProcessBlock(block.MsgBlock(), newReqs, height)
 	}
 	// We've scanned up to the end height, now perform a check to see if we
@@ -352,7 +353,7 @@ scanToEnd:
 	// scan started.
 	currStamp, err := s.cfg.BestSnapshot()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return reporter.FailRemaining(err)
 	}
 	// If the returned height is higher, we still have more blocks to go.

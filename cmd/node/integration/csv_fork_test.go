@@ -11,7 +11,7 @@ import (
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	script "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
 	"github.com/stalker-loki/pod/pkg/util"
@@ -36,7 +36,7 @@ func makeTestOutput(r *rpctest.Harness, t *testing.T,
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	selfAddrScript, err := txscript.PayToAddrScript(a.AddressPubKeyHash())
+	selfAddrScript, err := script.PayToAddrScript(a.AddressPubKeyHash())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -109,7 +109,7 @@ func TestBIP0113Activation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to generate address: %v", err)
 	}
-	addrScript, err := txscript.PayToAddrScript(addr)
+	addrScript, err := script.PayToAddrScript(addr)
 	if err != nil {
 		t.Fatalf("unable to generate addr script: %v", err)
 	}
@@ -130,8 +130,8 @@ func TestBIP0113Activation(t *testing.T) {
 		t.Fatalf("unable to query for chain info: %v", err)
 	}
 	tx.LockTime = uint32(chainInfo.MedianTime) + 1
-	sigScript, err := txscript.SignatureScript(tx, 0, testPkScript,
-		txscript.SigHashAll, outputKey, true)
+	sigScript, err := script.SignatureScript(tx, 0, testPkScript,
+		script.SigHashAll, outputKey, true)
 	if err != nil {
 		t.Fatalf("unable to generate sig: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestBIP0113Activation(t *testing.T) {
 	// Next mine ensure blocks to ensure that the soft-fork becomes active.
 	// We're at height 103 and we need 200 blocks to be mined after the
 	// genesis target period, so we mine 196 blocks.
-	// This'll put us at height 299.
+	// This will put us at height 299.
 	// The getblockchaininfo call checks the state for the block AFTER the
 	// current height.
 	numBlocks := (r.ActiveNet.MinerConfirmationWindow * 2) - 4
@@ -206,8 +206,8 @@ func TestBIP0113Activation(t *testing.T) {
 			Value:    int64(outputValue) - 1000,
 		})
 		tx.LockTime = uint32(medianTimePast + timeLockDelta)
-		sigScript, err = txscript.SignatureScript(tx, 0, testPkScript,
-			txscript.SigHashAll, outputKey, true)
+		sigScript, err = script.SignatureScript(tx, 0, testPkScript,
+			script.SigHashAll, outputKey, true)
 		if err != nil {
 			t.Fatalf("unable to generate sig: %v", err)
 		}
@@ -247,10 +247,10 @@ func createCSVOutput(r *rpctest.Harness, t *testing.T,
 	sequenceLock := blockchain.LockTimeToSequence(isSeconds,
 		uint32(timeLock))
 	// Our CSV script is simply: <sequenceLock> OP_CSV OP_DROP
-	b := txscript.NewScriptBuilder().
+	b := script.NewScriptBuilder().
 		AddInt64(int64(sequenceLock)).
-		AddOp(txscript.OP_CHECKSEQUENCEVERIFY).
-		AddOp(txscript.OP_DROP)
+		AddOp(script.OP_CHECKSEQUENCEVERIFY).
+		AddOp(script.OP_DROP)
 	csvScript, err := b.Script()
 	if err != nil {
 		return nil, nil, nil, err
@@ -261,7 +261,7 @@ func createCSVOutput(r *rpctest.Harness, t *testing.T,
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	p2shScript, err := txscript.PayToAddrScript(p2shAddr)
+	p2shScript, err := script.PayToAddrScript(p2shAddr)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -299,8 +299,8 @@ func spendCSVOutput(redeemScript []byte, csvUTXO *wire.OutPoint,
 		Sequence:         sequence,
 	})
 	tx.AddTxOut(targetOutput)
-	b := txscript.NewScriptBuilder().
-		AddOp(txscript.OP_TRUE).
+	b := script.NewScriptBuilder().
+		AddOp(script.OP_TRUE).
 		AddData(redeemScript)
 	sigScript, err := b.Script()
 	if err != nil {
@@ -363,7 +363,7 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to obtain harness address: %v", err)
 	}
-	harnessScript, err := txscript.PayToAddrScript(harnessAddr)
+	harnessScript, err := script.PayToAddrScript(harnessAddr)
 	if err != nil {
 		t.Fatalf("unable to generate pkScript: %v", err)
 	}
@@ -427,7 +427,7 @@ func TestBIP0068AndBIP0112Activation(t *testing.T) {
 	assertChainHeight(r, t, 107)
 	// With the height at 107 we need 200 blocks to be mined after the
 	// genesis target period, so we mine 192 blocks.
-	// This'll put us at height 299.
+	// This will put us at height 299.
 	// The getblockchaininfo call checks the state for the block AFTER the
 	// current height.
 	numBlocks := (r.ActiveNet.MinerConfirmationWindow * 2) - 8

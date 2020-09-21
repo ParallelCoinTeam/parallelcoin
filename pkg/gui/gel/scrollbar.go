@@ -3,6 +3,7 @@ package gel
 import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
+	"github.com/stalker-loki/app/slog"
 )
 
 type item struct {
@@ -57,7 +58,7 @@ func (s *Slider) Layout(gtx *layout.Context) {
 				s.pressed = true
 				s.Do(s.OperateValue)
 				// list.Position.First = int(s.Position)
-				Debug("RADI PRESS")
+				slog.Debug(" PRESS")
 			case pointer.Release:
 				s.pressed = false
 			}

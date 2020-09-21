@@ -2,6 +2,7 @@ package spv
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 	"math/rand"
 	"testing"
@@ -42,18 +43,18 @@ func TestBigFilterEvictsEverything(t *testing.T) {
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
 	err := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
 	if err != nil {
-		Debug(err)
+		slog.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	err = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
 	if err != nil {
-		Debug(err)
+		slog.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
 	// Insert the big filter and check all previous filters are evicted.
 	err = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
 	if err != nil {
-		Debug(err)
+		slog.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	assertEqual(t, getFilter(cs, b3, t), f3, "")
@@ -212,17 +213,17 @@ func TestCacheBigEnoughHoldsAllFilter(t *testing.T) {
 	assertEqual(t, cs.FilterCache.Len(), 0, "")
 	err := cs.putFilterToCache(b1, filterdb.RegularFilter, f1)
 	if err != nil {
-		Debug(err)
+		slog.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 1, "")
 	err = cs.putFilterToCache(b2, filterdb.RegularFilter, f2)
 	if err != nil {
-		Debug(err)
+		slog.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 2, "")
 	err = cs.putFilterToCache(b3, filterdb.RegularFilter, f3)
 	if err != nil {
-		Debug(err)
+		slog.Debug(err)
 	}
 	assertEqual(t, cs.FilterCache.Len(), 3, "")
 	// Check that we can get those filters back independent of Get order.

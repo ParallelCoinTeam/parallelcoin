@@ -3,12 +3,13 @@ package blockchain
 import (
 	"container/list"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"sync"
 	"time"
 
 	"go.uber.org/atomic"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	"github.com/stalker-loki/pod/pkg/chain/fork"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -89,8 +90,8 @@ BlockChain struct {
 	// The following fields are set when the instance is created and can't be
 	// changed afterwards so there is no need to protect them with a separate
 	// mutex.
-	checkpoints         []chaincfg.Checkpoint
-	checkpointsByHeight map[int32]*chaincfg.Checkpoint
+	checkpoints         []config.Checkpoint
+	checkpointsByHeight map[int32]*config.Checkpoint
 	db                  database.DB
 	params              *netparams.Params
 	timeSource          MedianTimeSource
@@ -126,7 +127,7 @@ BlockChain struct {
 	oldestOrphan *orphanBlock
 	// These fields are related to checkpoint handling.
 	// They are protected by the chain lock.
-	nextCheckpoint *chaincfg.Checkpoint
+	nextCheckpoint *config.Checkpoint
 	checkpointNode *BlockNode
 	// The state is used as a fairly efficient way to cache information about
 	// the current best chain state that is returned to callers when
@@ -181,7 +182,7 @@ func // HaveBlock returns whether or not the chain instance has the block
 (b *BlockChain) HaveBlock(hash *chainhash.Hash) (bool, error) {
 	exists, err := b.blockExists(hash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, err
 	}
 	return exists || b.IsKnownOrphan(hash), nil
@@ -353,9 +354,9 @@ func // calcSequenceLock computes the relative lock-times for the passed
 		// Obtain the latest BIP9 version bits state for the CSV-package soft
 		// -fork deployment. The adherence of sequence locks depends on the
 		// current soft-fork state.
-		csvState, err := b.deploymentState(node.parent, chaincfg.DeploymentCSV)
+		csvState, err := b.deploymentState(node.parent, config.DeploymentCSV)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		csvSoftforkActive = csvState == ThresholdActive
@@ -530,14 +531,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	if !prevHash.IsEqual(&b.BestChain.Tip().hash) {
 		str := "connectBlock must be called with a block that extends the" +
 			" main chain"
-		Debug(str)
+		slog.Debug(str)
 		return AssertError(str)
 	}
 	// Sanity check the correct number of stxos are provided.
 	if len(stxos) != countSpentOutputs(block) {
 		str := "connectBlock called with inconsistent spent transaction out" +
 			" information"
-		Debug(str)
+		slog.Debug(str)
 		return AssertError(str)
 	}
 
@@ -546,7 +547,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// Warn if any unknown new rules are either about to activate or have
 		// already been activated.
 		if err := b.warnUnknownRuleActivations(node); err != nil {
-			Trace("warnUnknownRuleActivations ", err)
+			slog.Trace("warnUnknownRuleActivations ", err)
 			return err
 		}
 	}
@@ -554,7 +555,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 	// Write any block status changes to DB before updating best state.
 	err := b.Index.flushToDB()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Traces(node.Diffs)
@@ -573,14 +574,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
 		if err != nil {
-			Trace("dbPutBestState", err)
+			slog.Trace("dbPutBestState", err)
 			return err
 		}
 		// Add the block hash and height to the block index which tracks the
 		// main chain.
 		err = dbPutBlockIndex(dbTx, block.Hash(), node.height)
 		if err != nil {
-			Trace("dbPutBlockIndex", err)
+			slog.Trace("dbPutBlockIndex", err)
 			return err
 		}
 		// update the utxo set using the state of the utxo view.
@@ -588,7 +589,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// ones created by the block.
 		err = dbPutUtxoView(dbTx, view)
 		if err != nil {
-			Trace("dbPutUtxoView", err)
+			slog.Trace("dbPutUtxoView", err)
 			return err
 		}
 
@@ -596,7 +597,7 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		// block that contains all txos spent by it.
 		err = dbPutSpendJournalEntry(dbTx, block.Hash(), stxos)
 		if err != nil {
-			Trace("dbPutSpendJournalEntry", err)
+			slog.Trace("dbPutSpendJournalEntry", err)
 			return err
 		}
 		// Allow the index manager to call each of the currently active
@@ -605,14 +606,14 @@ func // connectBlock handles connecting the passed node/block to the end of the
 		if b.indexManager != nil {
 			err := b.indexManager.ConnectBlock(dbTx, block, stxos)
 			if err != nil {
-				Trace("connectBlock ", err)
+				slog.Trace("connectBlock ", err)
 				return err
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		Trace("error updating database ", err)
+		slog.Trace("error updating database ", err)
 		return err
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified
@@ -666,13 +667,13 @@ func // disconnectBlock handles disconnecting the passed node/block from the end
 		return err
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Write any block status changes to DB before updating best state.
 	err = b.Index.flushToDB()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Generate a new best state snapshot that will be used to update the
@@ -690,14 +691,14 @@ func // disconnectBlock handles disconnecting the passed node/block from the end
 		// Update best block state.
 		err := dbPutBestState(dbTx, state, node.workSum)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Remove the block hash and height from the block index which tracks
 		// the main chain.
 		err = dbRemoveBlockIndex(dbTx, block.Hash(), node.height)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Update the utxo set using the state of the utxo view.
@@ -705,21 +706,21 @@ func // disconnectBlock handles disconnecting the passed node/block from the end
 		// ones created by the block.
 		err = dbPutUtxoView(dbTx, view)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Before we delete the spend journal entry for this back,
 		// we'll fetch it as is so the indexers can utilize if needed.
 		stxos, err := dbFetchSpendJournalEntry(dbTx, block)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Update the transaction spend journal by removing the record that
 		// contains all txos spent by the block.
 		err = dbRemoveSpendJournalEntry(dbTx, block.Hash())
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Allow the index manager to call each of the currently active
@@ -728,14 +729,14 @@ func // disconnectBlock handles disconnecting the passed node/block from the end
 		if b.indexManager != nil {
 			err := b.indexManager.DisconnectBlock(dbTx, block, stxos)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Prune fully spent entries and mark all entries in the view unmodified
@@ -834,7 +835,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 			return err
 		})
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		if n.hash != *block.Hash() {
@@ -848,7 +849,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		// in the view.
 		err = view.fetchInputUtxos(b.db, block)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Load all of the spent txos for the block from the spend journal.
@@ -858,7 +859,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 			return err
 		})
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Store the loaded block and spend journal entry for later.
@@ -866,7 +867,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		detachSpentTxOuts = append(detachSpentTxOuts, stxos)
 		err = view.disconnectTransactions(b.db, block, stxos)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		newBest = n.parent
@@ -897,7 +898,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 			return err
 		})
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Store the loaded block for later.
@@ -908,12 +909,12 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		if b.Index.NodeStatus(n).KnownValid() {
 			err = view.fetchInputUtxos(b.db, block)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			err = view.connectTransactions(block, nil)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			newBest = n
@@ -928,7 +929,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		// having an invalid ancestor.
 		err = b.checkConnectBlock(n, block, view, nil)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			if _, ok := err.(RuleError); ok {
 				b.Index.SetStatusFlags(n, statusValidateFailed)
 				for de := e.Next(); de != nil; de = de.Next() {
@@ -956,7 +957,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		// in the view.
 		err := view.fetchInputUtxos(b.db, block)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Update the view to unspend all of the spent txos and remove the
@@ -964,13 +965,13 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		err = view.disconnectTransactions(b.db, block,
 			detachSpentTxOuts[i])
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Update the database and chain state.
 		err = b.disconnectBlock(n, block, view)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
@@ -982,7 +983,7 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		// in the view.
 		err := view.fetchInputUtxos(b.db, block)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Update the view to mark all utxos referenced by the block as spent
@@ -991,25 +992,25 @@ func // reorganizeChain reorganizes the block chain by disconnecting the
 		stxos := make([]SpentTxOut, 0, countSpentOutputs(block))
 		err = view.connectTransactions(block, &stxos)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// Update the database and chain state.
 		err = b.connectBlock(n, block, view, stxos)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
 	// Log the point where the chain forked and old and new best chain
 	// heads.
 	if forkNode != nil {
-		Infof("REORGANIZE: Chain forks at %v (height %v)",
+		slog.Infof("REORGANIZE: Chain forks at %v (height %v)",
 			forkNode.hash, forkNode.height)
 	}
-	Infof("REORGANIZE: Old best chain head was %v (height %v)",
+	slog.Infof("REORGANIZE: Old best chain head was %v (height %v)",
 		&oldBest.hash, oldBest.height)
-	Infof("REORGANIZE: New best chain head is %v (height %v)",
+	slog.Infof("REORGANIZE: New best chain head is %v (height %v)",
 		newBest.hash, newBest.height)
 	return nil
 }
@@ -1039,7 +1040,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 		// we flush in connectBlock and if the block is invalid,
 		// the worst that can happen is we revalidate the block after a restart.
 		if writeErr := b.Index.flushToDB(); writeErr != nil {
-			Trace("ScriptError flushing block index changes to disk:", writeErr)
+			slog.Trace("ScriptError flushing block index changes to disk:", writeErr)
 		}
 	}
 	// We are extending the main (best) chain with a new block.
@@ -1062,14 +1063,14 @@ func // connectBestChain handles connecting the passed block to the chain while
 				b.Index.SetStatusFlags(node, statusValid)
 			} else if _, ok := err.(RuleError); ok {
 				b.Index.SetStatusFlags(node, statusValidateFailed)
-				Error(err)
+				slog.Error(err)
 			} else {
-				Error(err)
+				slog.Error(err)
 				return false, err
 			}
 			flushIndexState()
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return false, err
 			}
 		}
@@ -1079,19 +1080,19 @@ func // connectBestChain handles connecting the passed block to the chain while
 		if fastAdd {
 			err := view.fetchInputUtxos(b.db, block)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return false, err
 			}
 			err = view.connectTransactions(block, &stxos)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return false, err
 			}
 		}
 		// Connect the block to the main chain.
 		err := b.connectBlock(node, block, view, stxos)
 		if err != nil {
-			Trace("connect block error: ", err)
+			slog.Trace("connect block error: ", err)
 			// If we got hit with a rule error,
 			// then we'll mark that status of the block as invalid and flush
 			// the index state to disk before returning with the error.
@@ -1108,7 +1109,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 			flushIndexState()
 		}
 		if fastAdd {
-			Warnf("fastAdd set in the side chain case? %v\n", block.Hash())
+			slog.Warnf("fastAdd set in the side chain case? %v\n", block.Hash())
 		}
 		return true, nil
 	}
@@ -1120,11 +1121,11 @@ func // connectBestChain handles connecting the passed block to the chain while
 		// Log information about how the block is forking the chain.
 		f := b.BestChain.FindFork(node)
 		if f.hash.IsEqual(parentHash) {
-			Tracef("FORK: Block %v forks the chain at height %d/block %v, "+
+			slog.Tracef("FORK: Block %v forks the chain at height %d/block %v, "+
 				"but does not cause a reorganize. workSum=%d",
 				node.hash, f.height, f.hash, f.workSum)
 		} else {
-			Tracef("EXTEND FORK: Height %7d Block %v extends a side chain which"+
+			slog.Tracef("EXTEND FORK: Height %7d Block %v extends a side chain which"+
 				" forks the chain at height %d/block %v. workSum=%d",
 				node.height, node.hash, f.height, f.hash, f.workSum,
 			)
@@ -1142,7 +1143,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// starting at the common ancestor (the point where the chain forked).
 	detachNodes, attachNodes := b.getReorganizeNodes(node)
 	// Reorganize the chain.
-	Infof("REORGANIZE: block %v is causing a reorganize", node.hash)
+	slog.Infof("REORGANIZE: block %v is causing a reorganize", node.hash)
 	err := b.reorganizeChain(detachNodes, attachNodes)
 	// Either getReorganizeNodes or reorganizeChain could have made unsaved
 	// changes to the block index,
@@ -1150,7 +1151,7 @@ func // connectBestChain handles connecting the passed block to the chain while
 	// The index would only be dirty if the block failed to connect,
 	// so we can ignore any errors writing.
 	if writeErr := b.Index.flushToDB(); writeErr != nil {
-		Trace("ScriptError flushing block index changes to disk:", writeErr)
+		slog.Trace("ScriptError flushing block index changes to disk:", writeErr)
 	}
 	return err == nil, err
 }
@@ -1557,7 +1558,7 @@ Config struct {
 	// Checkpoints must be sorted by height.
 	// This field can be nil if the caller does not wish to specify any
 	// checkpoints.
-	Checkpoints []chaincfg.Checkpoint
+	Checkpoints []config.Checkpoint
 	// TimeSource defines the median time source to use for things such as
 	// block processing and determining whether or not the chain is current.
 	// The caller is expected to keep a reference to the time source as well
@@ -1587,25 +1588,25 @@ Config struct {
 
 func // New returns a BlockChain instance using the provided configuration
 // details.
-New(config *Config) (*BlockChain, error) {
-	// Enforce required config fields.
-	if config.DB == nil {
+New(c *Config) (*BlockChain, error) {
+	// Enforce required c fields.
+	if c.DB == nil {
 		return nil, AssertError("blockchain.New database is nil")
 	}
-	if config.ChainParams == nil {
+	if c.ChainParams == nil {
 		return nil, AssertError("blockchain.New chain parameters nil")
 	}
-	if config.TimeSource == nil {
+	if c.TimeSource == nil {
 		return nil, AssertError("blockchain.New timesource is nil")
 	}
 	// Generate a checkpoint by height map from the provided checkpoints and
 	// assert the provided checkpoints are sorted by height as required.
-	var checkpointsByHeight map[int32]*chaincfg.Checkpoint
+	var checkpointsByHeight map[int32]*config.Checkpoint
 	var prevCheckpointHeight int32
-	if len(config.Checkpoints) > 0 {
-		checkpointsByHeight = make(map[int32]*chaincfg.Checkpoint)
-		for i := range config.Checkpoints {
-			checkpoint := &config.Checkpoints[i]
+	if len(c.Checkpoints) > 0 {
+		checkpointsByHeight = make(map[int32]*config.Checkpoint)
+		for i := range c.Checkpoints {
+			checkpoint := &c.Checkpoints[i]
 			if checkpoint.Height <= prevCheckpointHeight {
 				return nil, AssertError(
 					"blockchain.New checkpoints are not sorted by height")
@@ -1614,28 +1615,28 @@ New(config *Config) (*BlockChain, error) {
 			prevCheckpointHeight = checkpoint.Height
 		}
 	}
-	params := config.ChainParams
+	params := c.ChainParams
 	targetTimespan := params.TargetTimespan
 	targetTimePerBlock := params.TargetTimePerBlock
 	adjustmentFactor := params.RetargetAdjustmentFactor
 	b := BlockChain{
-		checkpoints:           config.Checkpoints,
+		checkpoints:           c.Checkpoints,
 		checkpointsByHeight:   checkpointsByHeight,
-		db:                    config.DB,
+		db:                    c.DB,
 		params:                params,
-		timeSource:            config.TimeSource,
-		sigCache:              config.SigCache,
-		indexManager:          config.IndexManager,
+		timeSource:            c.TimeSource,
+		sigCache:              c.SigCache,
+		indexManager:          c.IndexManager,
 		minRetargetTimespan:   targetTimespan / adjustmentFactor,
 		maxRetargetTimespan:   targetTimespan * adjustmentFactor,
 		blocksPerRetarget:     int32(targetTimespan / targetTimePerBlock),
-		Index:                 newBlockIndex(config.DB, params),
-		hashCache:             config.HashCache,
+		Index:                 newBlockIndex(c.DB, params),
+		hashCache:             c.HashCache,
 		BestChain:             newChainView(nil),
 		orphans:               make(map[chainhash.Hash]*orphanBlock),
 		prevOrphans:           make(map[chainhash.Hash][]*orphanBlock),
 		warningCaches:         newThresholdCaches(vbNumBits),
-		deploymentCaches:      newThresholdCaches(chaincfg.DefinedDeployments),
+		deploymentCaches:      newThresholdCaches(config.DefinedDeployments),
 		DifficultyAdjustments: make(map[string]float64),
 	}
 	b.DifficultyBits.Store(make(TargetBits))
@@ -1647,15 +1648,15 @@ New(config *Config) (*BlockChain, error) {
 		return nil, err
 	}
 	// Perform any upgrades to the various chain-specific buckets as needed.
-	if err := b.maybeUpgradeDbBuckets(config.Interrupt); err != nil {
+	if err := b.maybeUpgradeDbBuckets(c.Interrupt); err != nil {
 		return nil, err
 	}
 	// Initialize and catch up all of the currently active optional indexes
 	// as needed.
-	if config.IndexManager != nil {
-		err := config.IndexManager.Init(&b, config.Interrupt)
+	if c.IndexManager != nil {
+		err := c.IndexManager.Init(&b, c.Interrupt)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 	}
@@ -1669,11 +1670,11 @@ New(config *Config) (*BlockChain, error) {
 		len(df) != len(fork.List[1].AlgoVers) {
 		bitsMap, err := b.CalcNextRequiredDifficultyPlan9Controller(bestNode)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 		bestNode.Diffs.Store(bitsMap)
 	}
-	Infof("chain state (height %d, hash %v, totaltx %d, work %v)",
+	slog.Infof("chain state (height %d, hash %v, totaltx %d, work %v)",
 		bestNode.height, bestNode.hash, b.stateSnapshot.TotalTxns,
 		bestNode.workSum)
 	return &b, nil

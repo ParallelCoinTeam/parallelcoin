@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/stalker-loki/pod/pkg/util/interrupt"
 )
 

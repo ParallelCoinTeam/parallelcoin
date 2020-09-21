@@ -1,6 +1,7 @@
 package spv
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"sync"
 	"time"
 
@@ -41,7 +42,7 @@ func (b *headerProgressLogger) LogBlockHeight(timestamp time.Time, height int32)
 	if b.receivedLogBlocks > 1 {
 		entityStr += "s"
 	}
-	Infof(
+	slog.Infof(
 		"%s %d %s in the last %s (height %d, %s)",
 		b.progressAction, b.receivedLogBlocks, entityStr, tDuration,
 		height, timestamp,

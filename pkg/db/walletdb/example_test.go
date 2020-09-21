@@ -3,6 +3,7 @@ package walletdb_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"path/filepath"
 
@@ -25,7 +26,7 @@ func ExampleCreate() {
 	dbPath := filepath.Join(os.TempDir(), "examplecreate.db")
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	defer os.Remove(dbPath)
@@ -60,19 +61,19 @@ func ExampleDB_createTopLevelBucket() {
 	// details on what this step is doing.
 	db, teardownFunc, err := exampleLoadDB()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	defer teardownFunc()
 	dbtx, err := db.BeginReadWriteTx()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}()
 	// Get or create a bucket in the database as needed.  This bucket
@@ -81,7 +82,7 @@ func ExampleDB_createTopLevelBucket() {
 	bucketKey := []byte("walletsubpackage")
 	bucket, err := dbtx.CreateTopLevelBucket(bucketKey)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Prevent unused error.
@@ -106,7 +107,7 @@ func Example_basicUsage() {
 	dbPath := filepath.Join(os.TempDir(), "exampleusage.db")
 	db, err := walletdb.Create("bdb", dbPath)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	defer os.Remove(dbPath)
@@ -126,7 +127,7 @@ func Example_basicUsage() {
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Use the Update function of the namespace to perform a managed
@@ -163,7 +164,7 @@ func Example_basicUsage() {
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Output:

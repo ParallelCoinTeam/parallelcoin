@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/apputil"
 	"github.com/stalker-loki/pod/app/config"
 	"github.com/stalker-loki/pod/app/conte"
@@ -30,7 +31,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		Action:      guiHandle(cx),
 		Before:      beforeFunc(cx),
 		After: func(c *cli.Context) error {
-			Trace("subcommand completed")
+			slog.Trace("subcommand completed")
 			if interrupt.Restart {
 			}
 			return nil
@@ -109,7 +110,7 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 							}
 							dbPath := filepath.Join(filepath.Join(*cx.Config.DataDir,
 								cx.ActiveNet.Name), dbName)
-							if err = os.RemoveAll(dbPath); Check(err) {
+							if err = os.RemoveAll(dbPath); slog.Check(err) {
 							}
 							// return nodeHandle(cx)(c)
 							return nil
@@ -126,18 +127,18 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 							" transaction mess)",
 						func(c *cli.Context) (err error) {
 							config.Configure(cx, c.Command.Name, true)
-							Info("dropping wallet history")
+							slog.Info("dropping wallet history")
 							go func() {
-								Warn("starting wallet")
-								if err = walletmain.Main(cx); Check(err) {
+								slog.Warn("starting wallet")
+								if err = walletmain.Main(cx); slog.Check(err) {
 									os.Exit(1)
 								} else {
-									Debug("wallet started")
+									slog.Debug("wallet started")
 								}
 							}()
-							Debug("waiting for walletChan")
+							slog.Debug("waiting for walletChan")
 							cx.WalletServer = <-cx.WalletChan
-							Debug("walletChan sent")
+							slog.Debug("walletChan sent")
 							err = legacy.DropWalletHistory(cx.WalletServer)(c)
 							return
 						},

@@ -2,6 +2,7 @@ package wire
 
 import (
 	"bytes"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"time"
 
@@ -47,7 +48,7 @@ func (h *BlockHeader) BlockHashWithAlgos(height int32) (out chainhash.Hash) {
 	buf := bytes.NewBuffer(make([]byte, 0, MaxBlockHeaderPayload))
 	err := writeBlockHeader(buf, 0, h)
 	if err != nil {
-		Error("error writing block header to buffer", err)
+		slog.Error("error writing block header to buffer", err)
 	}
 	vers := h.Version
 	algo := fork.GetAlgoName(vers, height)

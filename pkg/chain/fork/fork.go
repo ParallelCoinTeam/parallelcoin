@@ -4,6 +4,7 @@ package fork
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 	"math/rand"
 	"sort"
@@ -38,7 +39,7 @@ type HardForks struct {
 const IntervalBase = 36
 
 func init() {
-	Trace("running fork data init")
+	slog.Trace("running fork data init")
 	for i := range p9AlgosNumeric {
 		List[1].AlgoVers[i] = fmt.Sprintf("Div%d", p9AlgosNumeric[i].VersionInterval)
 	}
@@ -61,20 +62,20 @@ func init() {
 	}
 	sort.Sort(AlgoSlices[0])
 	sort.Sort(AlgoSlices[1])
-	Trace(P9AlgoVers)
+	slog.Trace(P9AlgoVers)
 	baseVersionName := AlgoSlices[1][0].Name
 	baseVersionInterval := float64(P9Algos[baseVersionName].VersionInterval)
-	Trace(baseVersionName, baseVersionInterval)
+	slog.Trace(baseVersionName, baseVersionInterval)
 	P9Average = 0
 	for _, i := range AlgoSlices[1] {
 		vi := float64(P9Algos[i.Name].VersionInterval)
 		p9a := baseVersionInterval / vi
 		P9Average += p9a
-		Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
+		slog.Tracef("P9Average %4.4f %4.4f %d %4.4f", p9a, P9Average, IntervalBase, vi)
 	}
-	Trace(P9Average)
+	slog.Trace(P9Average)
 	P9Average = baseVersionInterval / P9Average
-	Trace(P9Average)
+	slog.Trace(P9Average)
 }
 
 type AlgoSpec struct {

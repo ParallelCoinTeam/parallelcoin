@@ -816,12 +816,12 @@ func (curve *KoblitzCurve) ScalarBaseMult(k []byte) (*big.Int, *big.Int) {
 }
 
 // QPlus1Div4 returns the Q+1/4 constant for the curve for use in calculating
-// square roots via exponention.
+// square roots via exponentiation.
 func (curve *KoblitzCurve) QPlus1Div4() *big.Int {
 	return curve.q
 }
 
-var initonce sync.Once
+var initOnce sync.Once
 var secp256k1 KoblitzCurve
 
 func initAll() {
@@ -884,6 +884,6 @@ func initS256() {
 
 // S256 returns a Curve which implements secp256k1.
 func S256() *KoblitzCurve {
-	initonce.Do(initAll)
+	initOnce.Do(initAll)
 	return &secp256k1
 }

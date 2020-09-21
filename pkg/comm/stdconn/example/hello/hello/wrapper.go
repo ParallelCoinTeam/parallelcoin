@@ -1,6 +1,7 @@
 package hello
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"net/rpc"
 )
@@ -17,7 +18,7 @@ func NewClient(conn io.ReadWriteCloser) *Client {
 func (h *Client) Say(name string) (reply string) {
 	err := h.Call("Hello.Say", "worker", &reply)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return "error: " + err.Error()
 	}
 	return
@@ -26,7 +27,7 @@ func (h *Client) Say(name string) (reply string) {
 func (h *Client) Bye() (reply string) {
 	err := h.Call("Hello.Bye", 1, &reply)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return "error: " + err.Error()
 	}
 	return

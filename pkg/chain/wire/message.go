@@ -3,6 +3,7 @@ package wire
 import (
 	"bytes"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"unicode/utf8"
 
@@ -159,7 +160,7 @@ func readMessageHeader(r io.Reader) (int, *messageHeader, error) {
 	var headerBytes [MessageHeaderSize]byte
 	n, err := io.ReadFull(r, headerBytes[:])
 	if err != nil {
-		Trace(err)
+		slog.Trace(err)
 		return n, nil, err
 	}
 	hr := bytes.NewReader(headerBytes[:])
@@ -168,7 +169,7 @@ func readMessageHeader(r io.Reader) (int, *messageHeader, error) {
 	var command [CommandSize]byte
 	err = readElements(hr, &hdr.magic, &command, &hdr.length, &hdr.checksum)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	// Strip trailing zeros from command string.
 	hdr.command = string(bytes.TrimRight(command[:], string(0)))
@@ -185,7 +186,7 @@ func discardInput(r io.Reader, n uint32) {
 		for i := uint32(0); i < numReads; i++ {
 			_, err := io.ReadFull(r, buf)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 			}
 		}
 	}
@@ -193,7 +194,7 @@ func discardInput(r io.Reader, n uint32) {
 		buf := make([]byte, bytesRemaining)
 		_, err := io.ReadFull(r, buf)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}
 }
@@ -226,7 +227,7 @@ func WriteMessageWithEncodingN(w io.Writer, msg Message, pver uint32,
 	var bw bytes.Buffer
 	err := msg.BtcEncode(&bw, pver, encoding)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return totalBytes, err
 	}
 	payload := bw.Bytes()
@@ -258,13 +259,13 @@ func WriteMessageWithEncodingN(w io.Writer, msg Message, pver uint32,
 	hw := bytes.NewBuffer(make([]byte, 0, MessageHeaderSize))
 	err = writeElements(hw, hdr.magic, command, hdr.length, hdr.checksum)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	// Write header.
 	n, err := w.Write(hw.Bytes())
 	totalBytes += n
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return totalBytes, err
 	}
 	// Write payload.
@@ -279,7 +280,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc M
 	n, hdr, err := readMessageHeader(r)
 	totalBytes += n
 	if err != nil {
-		Trace(err)
+		slog.Trace(err)
 		return totalBytes, nil, nil, err
 	}
 	// Enforce maximum message payload.
@@ -305,7 +306,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc M
 	// Create struct of appropriate message type based on the command.
 	msg, err := makeEmptyMessage(command)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		discardInput(r, hdr.length)
 		return totalBytes, nil, nil, messageError("ReadMessage",
 			err.Error())
@@ -326,7 +327,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc M
 	n, err = io.ReadFull(r, payload)
 	totalBytes += n
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return totalBytes, nil, nil, err
 	}
 	// Test checksum.
@@ -342,7 +343,7 @@ func ReadMessageWithEncodingN(r io.Reader, pver uint32, btcnet BitcoinNet, enc M
 	pr := bytes.NewBuffer(payload)
 	err = msg.BtcDecode(pr, pver, enc)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return totalBytes, nil, nil, err
 	}
 	return totalBytes, msg, payload, nil

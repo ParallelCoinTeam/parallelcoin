@@ -1,6 +1,7 @@
 package cfgutil
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"os"
 )
 
@@ -8,7 +9,7 @@ import (
 func FileExists(filePath string) (bool, error) {
 	_, err := os.Stat(filePath)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		if os.IsNotExist(err) {
 			return false, nil
 		}

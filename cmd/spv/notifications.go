@@ -2,6 +2,7 @@ package spv
 
 import (
 	"errors"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/comm/peer/addrmgr"
 	"github.com/stalker-loki/pod/pkg/comm/peer/connmgr"
@@ -44,16 +45,16 @@ type (
 
 // handleQuery is the central handler for all queries and commands from other
 // goroutines related to peer state.
-func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
-	switch msg := querymsg.(type) {
+func (s *ChainService) handleQuery(state *peerState, queryMsg interface{}) {
+	switch msg := queryMsg.(type) {
 	case getConnCountMsg:
-		nconnected := int32(0)
+		numConnected := int32(0)
 		state.forAllPeers(func(sp *ServerPeer) {
 			if sp.Connected() {
-				nconnected++
+				numConnected++
 			}
 		})
-		msg.reply <- nconnected
+		msg.reply <- numConnected
 	case getPeersMsg:
 		peers := make([]*ServerPeer, 0, state.Count())
 		state.forAllPeers(func(sp *ServerPeer) {
@@ -82,7 +83,7 @@ func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 		}
 		netAddr, err := s.addrStringToNetAddr(msg.addr)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			msg.reply <- err
 			return
 		}
@@ -112,7 +113,7 @@ func (s *ChainService) handleQuery(state *peerState, querymsg interface{}) {
 		}
 	// Request a list of the persistent (added) peers.
 	case getAddedNodesMsg:
-		// Respond with a slice of the relavent peers.
+		// Respond with a slice of the relevant peers.
 		peers := make([]*ServerPeer, 0, len(state.persistentPeers))
 		for _, sp := range state.persistentPeers {
 			peers = append(peers, sp)

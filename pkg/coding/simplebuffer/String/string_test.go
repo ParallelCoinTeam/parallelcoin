@@ -5,7 +5,7 @@ import (
 )
 
 func TestBytes(t *testing.T) {
-	by := []byte("this is a test")
+	by := "this is a test"
 	bt := New()
 	bt.Put(by)
 	bt2 := New()

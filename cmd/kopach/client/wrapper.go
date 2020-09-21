@@ -2,6 +2,7 @@ package client
 
 import (
 	"errors"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"net/rpc"
 
@@ -31,7 +32,7 @@ func (c *Client) NewJob(job *job.Container) (err error) {
 	var reply bool
 	err = c.Call("Worker.NewJob", job, &reply)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	if reply != true {
@@ -47,7 +48,7 @@ func (c *Client) Pause() (err error) {
 	var reply bool
 	err = c.Call("Worker.Pause", 1, &reply)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	if reply != true {
@@ -57,11 +58,11 @@ func (c *Client) Pause() (err error) {
 }
 
 func (c *Client) Stop() (err error) {
-	Debug("stop working (exit)")
+	slog.Debug("stop working (exit)")
 	var reply bool
 	err = c.Call("Worker.Stop", 1, &reply)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	if reply != true {
@@ -71,11 +72,11 @@ func (c *Client) Stop() (err error) {
 }
 
 func (c *Client) SendPass(pass string) (err error) {
-	Debug("sending dispatch password")
+	slog.Debug("sending dispatch password")
 	var reply bool
 	err = c.Call("Worker.SendPass", pass, &reply)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	if reply != true {

@@ -3,6 +3,7 @@ package Block
 import (
 	"bytes"
 	"encoding/binary"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
@@ -49,7 +50,7 @@ func (B *Block) Get() (b *wire.MsgBlock) {
 	buffer := bytes.NewBuffer(B.Bytes)
 	err := b.Deserialize(buffer)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	return
 }
@@ -58,7 +59,7 @@ func (B *Block) Put(b *wire.MsgBlock) *Block {
 	var buffer bytes.Buffer
 	err := b.Serialize(&buffer)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return B
 	}
 	B.Bytes = buffer.Bytes()

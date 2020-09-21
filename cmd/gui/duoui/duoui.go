@@ -9,6 +9,7 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 	"gioui.org/unit"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/cmd/gui/component"
 	"github.com/stalker-loki/pod/cmd/gui/model"
 	"github.com/stalker-loki/pod/cmd/gui/pages"
@@ -429,7 +430,7 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 }
 
 func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
-	Debug("starting up duo ui main loop")
+	slog.Debug("starting up duo ui main loop")
 	ui := &DuoUI{
 		ly: d,
 		rc: r,
@@ -445,7 +446,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				for {
 					select {
 					case <-updateTrigger:
-						Trace("repaint forced")
+						slog.Trace("repaint forced")
 						ui.ly.Window.Invalidate()
 					case <-ui.rc.Quit:
 						break quitTrigger
@@ -456,7 +457,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			ui.rc.IsReady = true
 			r.Boot.IsBoot = false
 		case <-ui.rc.Quit:
-			Debug("quit signal received")
+			slog.Debug("quit signal received")
 			if !interrupt.Requested() {
 				interrupt.Request()
 			}
@@ -466,7 +467,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			//interrupt signal  Probably nothing needs to be run between
 			//starting it and shutting down
 			<-interrupt.HandlersDone
-			Debug("closing GUI from interrupt/quit signal")
+			slog.Debug("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
 			// TODO events of gui
 		case e := <-ui.rc.Commands.Events:
@@ -479,7 +480,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			ui.ly.Viewport = ctx.Constraints.Width.Max
 			switch e := e.(type) {
 			case system.DestroyEvent:
-				Debug("destroy event received")
+				slog.Debug("destroy event received")
 				interrupt.Request()
 				// Here do cleanup like are you sure (
 				//optional) modal or shutting down indefinite spinner

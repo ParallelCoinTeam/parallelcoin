@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 )
@@ -151,7 +152,7 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 			for i := int32(0); i < confirmationWindow; i++ {
 				condition, err := checker.Condition(countNode)
 				if err != nil {
-					Error(err)
+					slog.Error(err)
 					return ThresholdFailed, err
 				}
 				if condition {
@@ -191,7 +192,7 @@ func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (bool, error) {
 	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
 	b.chainLock.Unlock()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return false, err
 	}
 	return state == ThresholdActive, nil
@@ -223,7 +224,7 @@ func (b *BlockChain) initThresholdCaches() error {
 		cache := &b.warningCaches[bit]
 		_, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
@@ -233,7 +234,7 @@ func (b *BlockChain) initThresholdCaches() error {
 		checker := deploymentChecker{deployment: deployment, chain: b}
 		_, err := b.thresholdState(prevNode, checker, cache)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
@@ -244,7 +245,7 @@ func (b *BlockChain) initThresholdCaches() error {
 		// if err := b.warnUnknownVersions(bestNode); err != nil {
 		// 	return err
 		// }
-		// Warn if any unknown new rules are either about to activate orhave already been activated.
+		// Warn if any unknown new rules are either about to activate or have already been activated.
 		if err := b.warnUnknownRuleActivations(bestNode); err != nil {
 			return err
 		}

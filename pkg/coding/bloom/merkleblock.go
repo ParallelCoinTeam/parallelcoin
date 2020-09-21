@@ -1,6 +1,7 @@
 package bloom
 
 import (
+	"github.com/stalker-loki/app/slog"
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
@@ -93,7 +94,7 @@ func NewMerkleBlock(block *util.Block, filter *Filter) (*wire.MsgMerkleBlock, []
 	for _, hash := range mBlock.finalHashes {
 		err := msgMerkleBlock.AddTxHash(hash)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}
 	for i := uint32(0); i < uint32(len(mBlock.bits)); i++ {

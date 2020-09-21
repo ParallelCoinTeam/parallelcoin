@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 
 	"github.com/stalker-loki/pod/pkg/chain/fork"
@@ -12,25 +13,25 @@ import (
 // rules. This function differs from the exported  CalcNextRequiredDifficulty
 // in that the exported version uses the current best chain as the previous
 // block node while this function accepts any block node.
-func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, lastNode *BlockNode, algoname string, l bool) (newTargetBits uint32, err error) {
+func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, lastNode *BlockNode, algorithm string, l bool) (newTargetBits uint32, err error) {
 	if workerNumber != 0 {
 		l = false
 	}
 	nH := lastNode.height + 1
 	if lastNode == nil {
 		if l {
-			Debug("lastNode is nil")
+			slog.Debug("lastNode is nil")
 		}
 		return newTargetBits, nil
 	}
 	// this sanitises invalid block versions according to legacy consensus quirks
-	algo := fork.GetAlgoVer(algoname, nH)
+	algo := fork.GetAlgoVer(algorithm, nH)
 	algoName := fork.GetAlgoName(algo, nH)
 	newTargetBits = fork.GetMinBits(algoName, nH)
 	prevNode := lastNode.GetLastWithAlgo(algo)
 	if prevNode == nil {
 		if l {
-			Debug("prevNode is nil")
+			slog.Debug("prevNode is nil")
 		}
 		return newTargetBits, nil
 	}
@@ -46,7 +47,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	actualTimespan := prevNode.timestamp - firstNode.timestamp
 	adjustedTimespan := actualTimespan
 	if l {
-		Tracef("actual %d", actualTimespan)
+		slog.Tracef("actual %d", actualTimespan)
 	}
 	if actualTimespan < b.params.MinActualTimespan {
 		adjustedTimespan = b.params.MinActualTimespan
@@ -54,7 +55,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 		adjustedTimespan = b.params.MaxActualTimespan
 	}
 	if l {
-		Tracef("adjusted %d", adjustedTimespan)
+		slog.Tracef("adjusted %d", adjustedTimespan)
 	}
 	oldTarget := CompactToBig(prevNode.bits)
 	newTarget := new(big.Int).
@@ -66,7 +67,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	}
 	newTargetBits = BigToCompact(newTarget)
 	if l {
-		Debugf(
+		slog.Debugf(
 			"difficulty retarget at block height %d, old %08x new %08x",
 			lastNode.height+1,
 			prevNode.bits,
@@ -74,7 +75,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 		)
 	}
 	if l {
-		Tracec(func() string {
+		slog.Trace(func() string {
 			return fmt.Sprintf(
 				"actual timespan %v, adjusted timespan %v, target timespan %v"+
 					"\nOld %064x\nNew %064x",
@@ -84,7 +85,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 				oldTarget,
 				CompactToBig(newTargetBits),
 			)
-		})
+		}())
 	}
 	return newTargetBits, nil
 }

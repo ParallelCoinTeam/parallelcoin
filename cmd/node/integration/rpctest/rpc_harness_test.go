@@ -1,14 +1,14 @@
 package rpctest
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	script "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	"github.com/stalker-loki/pod/pkg/util"
 )
@@ -22,7 +22,7 @@ func testSendOutputs(r *Harness, t *testing.T) {
 		}
 		// Next, send amt DUO to this address,
 		// spending from one of our mature coinbase outputs.
-		addrScript, err := txscript.PayToAddrScript(addr)
+		addrScript, err := script.PayToAddrScript(addr)
 		if err != nil {
 			t.Fatalf("unable to generate pkscript to addr: %v", err)
 		}
@@ -160,7 +160,7 @@ func testJoinMempools(r *Harness, t *testing.T) {
 	}
 	// Generate a coinbase spend to a new address within the main harness' mempool.
 	addr, err := r.NewAddress()
-	addrScript, err := txscript.PayToAddrScript(addr)
+	addrScript, err := script.PayToAddrScript(addr)
 	if err != nil {
 		t.Fatalf("unable to generate pkscript to addr: %v", err)
 	}
@@ -264,7 +264,7 @@ func testGenerateAndSubmitBlock(r *Harness, t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to generate new address: %v", err)
 	}
-	pkScript, err := txscript.PayToAddrScript(addr)
+	pkScript, err := script.PayToAddrScript(addr)
 	if err != nil {
 		t.Fatalf("unable to create script: %v", err)
 	}
@@ -320,7 +320,7 @@ func testGenerateAndSubmitBlockWithCustomCoinbaseOutputs(r *Harness,
 	if err != nil {
 		t.Fatalf("unable to generate new address: %v", err)
 	}
-	pkScript, err := txscript.PayToAddrScript(addr)
+	pkScript, err := script.PayToAddrScript(addr)
 	if err != nil {
 		t.Fatalf("unable to create script: %v", err)
 	}
@@ -418,7 +418,7 @@ func testMemWalletLockedOutputs(r *Harness, t *testing.T) {
 	if err != nil {
 		t.Fatalf("unable to generate new address: %v", err)
 	}
-	pkScript, err := txscript.PayToAddrScript(addr)
+	pkScript, err := script.PayToAddrScript(addr)
 	if err != nil {
 		t.Fatalf("unable to create script: %v", err)
 	}

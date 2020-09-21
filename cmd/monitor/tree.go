@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/gui"
 	"github.com/stalker-loki/pod/pkg/gui/gel"
 	"github.com/stalker-loki/pod/pkg/util/logi/Pkg/Pk"
@@ -206,7 +207,7 @@ func (n *Node) GetWidget(s *State) {
 					s.IconButton("ShowItem", "DocBg", "PanelBg",
 						nn[i].showChildrenButton)
 					for nn[i].showChildrenButton.Clicked(s.Gtx) {
-						Debug("filter all")
+						slog.Debug("filter all")
 						nn[i].ShowAllItems(s)
 						nn[i].Hidden = false
 						consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
@@ -218,7 +219,7 @@ func (n *Node) GetWidget(s *State) {
 					s.IconButton("HideItem", "DocBg", "PanelBg",
 						nn[i].hideChildrenButton)
 					for nn[i].hideChildrenButton.Clicked(s.Gtx) {
-						Debug("filter none")
+						slog.Debug("filter none")
 						nn[i].Hidden = true
 						nn[i].HideAllItems(s)
 						consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())

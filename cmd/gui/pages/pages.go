@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gioui.org/op"
 	"gioui.org/text"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/chain/fork"
 	"github.com/stalker-loki/pod/pkg/pod"
 	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
@@ -235,7 +236,7 @@ func blockPage(c *component.State, block string) *gelook.DuoUIpage {
 
 func blockRow(c *component.State, block *model.DuoUIblock) {
 	if block == nil || block.Link == nil {
-		Debug("blockRow empty result")
+		slog.Debug("blockRow empty result")
 		debug.PrintStack()
 		return
 	}

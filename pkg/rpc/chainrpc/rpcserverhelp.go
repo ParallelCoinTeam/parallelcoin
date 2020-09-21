@@ -2,6 +2,7 @@ package chainrpc
 
 import (
 	"errors"
+	"github.com/stalker-loki/app/slog"
 	"sort"
 	"strings"
 	"sync"
@@ -375,7 +376,7 @@ var HelpDescsEnUS = map[string]string{
 
 	// GetCurrentNetCmd help.
 	"getcurrentnet--synopsis": "Get bitcoin network the server is running on.",
-	"getcurrentnet--result0":  "The network identifer",
+	"getcurrentnet--result0":  "The network identifier",
 
 	// GetDifficultyCmd help.
 	"getdifficulty--synopsis": "Returns the proof-of-work difficulty as a multiple of the minimum difficulty.",
@@ -791,7 +792,7 @@ func (c *HelpCacher) RPCMethodHelp(method string) (string, error) {
 	// Generate, cache, and return the help.
 	help, err := btcjson.GenerateHelp(method, HelpDescsEnUS, resultTypes...)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return "", err
 	}
 	c.methodHelp[method] = help
@@ -811,7 +812,7 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 	for k := range RPCHandlers {
 		usage, err := btcjson.MethodUsageText(k)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return "", err
 		}
 		usageTexts = append(usageTexts, usage)
@@ -821,7 +822,7 @@ func (c *HelpCacher) RPCUsage(includeWebsockets bool) (string, error) {
 		for k := range WSHandlers {
 			usage, err := btcjson.MethodUsageText(k)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return "", err
 			}
 			usageTexts = append(usageTexts, usage)

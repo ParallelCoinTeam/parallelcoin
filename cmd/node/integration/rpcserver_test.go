@@ -2,7 +2,7 @@ package integration
 
 import (
 	"bytes"
-	"log"
+	"fmt"
 	"os"
 	"runtime/debug"
 	"testing"
@@ -12,7 +12,7 @@ import (
 )
 
 func testGetBestBlock(r *rpctest.Harness, t *testing.T) {
-	_, prevbestHeight, err := r.Node.GetBestBlock()
+	_, previousBestHeight, err := r.Node.GetBestBlock()
 	if err != nil {
 		t.Fatalf("Call to `getbestblock` failed: %v", err)
 	}
@@ -31,9 +31,9 @@ func testGetBestBlock(r *rpctest.Harness, t *testing.T) {
 			"hash %v", bestHash, generatedBlockHashes[0][:])
 	}
 	// Block height should now reflect newest height.
-	if bestHeight != prevbestHeight+1 {
+	if bestHeight != previousBestHeight+1 {
 		t.Fatalf("Block heights do not match. Got %v, wanted %v",
-			bestHeight, prevbestHeight+1)
+			bestHeight, previousBestHeight+1)
 	}
 }
 

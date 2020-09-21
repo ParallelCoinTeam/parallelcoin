@@ -2,6 +2,8 @@ package fullblocktests
 
 import (
 	"encoding/hex"
+	"github.com/stalker-loki/app/slog"
+	"github.com/stalker-loki/pod/pkg/chain/config"
 	"math/big"
 	"time"
 
@@ -14,7 +16,7 @@ import (
 func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		panic(err)
 	}
 	return hash
@@ -24,7 +26,7 @@ func newHashFromStr(hexStr string) *chainhash.Hash {
 func fromHex(s string) []byte {
 	r, err := hex.DecodeString(s)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		panic("invalid hex in source file: " + s)
 	}
 	return r
@@ -76,7 +78,7 @@ var (
 //
 // NOTE: The test generator intentionally does not use the existing definitions in the chaincfg package since the intent is to be able to generate known good tests which exercise that code.  Using the chaincfg parameters would allow them to change out from under the tests potentially invalidating them.
 var regressionNetParams = &netparams.Params{
-	Params: &netparams.Params{
+	Params: &chaincfg.Params{
 		Name:        "regtest",
 		Net:         wire.TestNet,
 		DefaultPort: "18444",

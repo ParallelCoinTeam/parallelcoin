@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"container/ring"
+	"github.com/stalker-loki/app/slog"
 	"time"
 
 	"github.com/stalker-loki/pod/cmd/kopach/control/hashrate"
@@ -23,7 +24,7 @@ func GetHashrate(hrb *ring.Ring) (hr float64, hrp map[int32]float64) {
 		e, ok := entry.(hashrate.Hashrate)
 		// Debug("iterating hashrate buffer", entry)
 		if ok {
-			Debug("got entry in hashrate buffer")
+			slog.Debug("got entry in hashrate buffer")
 			if !started {
 				started = true
 				firstHashTime = e.Time
@@ -33,7 +34,7 @@ func GetHashrate(hrb *ring.Ring) (hr float64, hrp map[int32]float64) {
 			lastHashTime = e.Time
 		}
 	})
-	Debug(hashTotal, hashPerVersion, firstHashTime, lastHashTime)
+	slog.Debug(hashTotal, hashPerVersion, firstHashTime, lastHashTime)
 	hashDuration := lastHashTime.Sub(firstHashTime)
 	hr = float64(hashDuration) / float64(hashTotal)
 	for i := range hashPerVersion {

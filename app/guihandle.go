@@ -3,6 +3,7 @@
 package app
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/config"
 	"github.com/urfave/cli"
 
@@ -17,7 +18,7 @@ import (
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
-		Warn("starting GUI")
+		slog.Warn("starting GUI")
 		rc := rcd.RcInit(cx)
 		if !apputil.FileExists(*cx.Config.WalletFile) {
 			rc.Boot.IsFirstRun = true
@@ -25,34 +26,34 @@ var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 		duo, err := duoui.DuOuI(rc)
 		rc.DuoUIloggerController()
 		interrupt.AddHandler(func() {
-			Debug("guiHandle interrupt")
+			slog.Debug("guiHandle interrupt")
 			close(rc.Quit)
 		})
-		Debug("IsFirstRun? ", rc.Boot.IsFirstRun)
+		slog.Debug("IsFirstRun? ", rc.Boot.IsFirstRun)
 		// signal the GUI that the back end is ready
-		Debug("sending ready signal")
+		slog.Debug("sending ready signal")
 		// we can do this without blocking because the channel has 1 buffer this
 		// way it falls immediately the GUI starts
 		if !rc.Boot.IsFirstRun {
 			go rc.StartServices()
 		}
 		// Start up GUI
-		Debug("starting up GUI")
+		slog.Debug("starting up GUI")
 		cx.WaitGroup.Add(1)
 		err = gui.WalletGUI(duo, rc)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 		cx.WaitGroup.Done()
-		Debug("wallet GUI finished")
+		slog.Debug("wallet GUI finished")
 		// wait for stop signal
 		<-rc.Quit
 		cx.WaitGroup.Wait()
-		Debug("shutting down node")
+		slog.Debug("shutting down node")
 		if !cx.Node.Load() {
 			close(cx.WalletKill)
 		}
-		Debug("shutting down wallet")
+		slog.Debug("shutting down wallet")
 		if !cx.Wallet.Load() {
 			close(cx.NodeKill)
 		}

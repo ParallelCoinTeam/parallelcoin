@@ -57,7 +57,8 @@ type GetBlockChainInfoResult struct {
 	Bip9SoftForks        map[string]*Bip9SoftForkDescription `json:"bip9_softforks"`
 }
 
-// GetBlockHeaderVerboseResult models the data from the getblockheader command when the verbose flag is set.  When the verbose flag is not set, getblockheader returns a hex-encoded string.
+// GetBlockHeaderVerboseResult models the data from the getblockheader command when the verbose flag is set.  When the
+// verbose flag is not set, getblockheader returns a hex-encoded string.
 type GetBlockHeaderVerboseResult struct {
 	Hash          string  `json:"hash"`
 	Confirmations int64   `json:"confirmations"`
@@ -104,8 +105,8 @@ type GetBlockTemplateResult struct {
 	Mutable    []string `json:"mutable,omitempty"`
 	NonceRange string   `json:"noncerange,omitempty"`
 	// Block proposal from BIP 0023.
-	Capabilities  []string `json:"capabilities,omitempty"`
-	RejectReasion string   `json:"reject-reason,omitempty"`
+	Capabilities []string `json:"capabilities,omitempty"`
+	RejectReason string   `json:"reject-reason,omitempty"`
 }
 
 // GetBlockTemplateResultAux models the coinbaseaux field of the getblocktemplate command.
@@ -123,7 +124,8 @@ type GetBlockTemplateResultTx struct {
 	Weight  int64   `json:"weight"`
 }
 
-// GetBlockVerboseResult models the data from the getblock command when the verbose flag is set.  When the verbose flag is not set, getblock returns a hex-encoded string.
+// GetBlockVerboseResult models the data from the getblock command when the verbose flag is set.  When the verbose flag
+// is not set, getblock returns a hex-encoded string.
 type GetBlockVerboseResult struct {
 	Hash          string        `json:"hash"`
 	Confirmations int64         `json:"confirmations"`
@@ -268,7 +270,8 @@ type GetPeerInfoResult struct {
 	SyncNode       bool    `json:"syncnode"`
 }
 
-// GetRawMempoolVerboseResult models the data returned from the getrawmempool command when the verbose flag is set.  When the verbose flag is not set, getrawmempool returns an array of transaction hashes.
+// GetRawMempoolVerboseResult models the data returned from the getrawmempool command when the verbose flag is set.
+// When the verbose flag is not set, getrawmempool returns an array of transaction hashes.
 type GetRawMempoolVerboseResult struct {
 	Size             int32    `json:"size"`
 	Vsize            int32    `json:"vsize"`

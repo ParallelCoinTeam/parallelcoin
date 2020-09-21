@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,7 +15,7 @@ import (
 	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/util"
 
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	database "github.com/stalker-loki/pod/pkg/db"
 	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
@@ -76,8 +75,8 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 	var block *util.Block
 	err = nil
 	for height := int64(1); err == nil; height++ {
-		var rintbuf uint32
-		err = binary.Read(dr, binary.LittleEndian, &rintbuf)
+		var readBuf uint32
+		err = binary.Read(dr, binary.LittleEndian, &readBuf)
 		if err == io.EOF {
 			// hit end of file at expected offset: no warning
 			// height--
@@ -87,11 +86,11 @@ func loadBlocks(filename string) (blocks []*util.Block, err error) {
 		if err != nil {
 			break
 		}
-		if rintbuf != uint32(network) {
+		if readBuf != uint32(network) {
 			break
 		}
-		err = binary.Read(dr, binary.LittleEndian, &rintbuf)
-		blocklen := rintbuf
+		err = binary.Read(dr, binary.LittleEndian, &readBuf)
+		blocklen := readBuf
 		rbytes := make([]byte, blocklen)
 		// read block
 		_, err = dr.Read(rbytes)
@@ -316,7 +315,7 @@ func newFakeChain(params *netparams.Params) *BlockChain {
 		Index:               index,
 		BestChain:           newChainView(node),
 		warningCaches:       newThresholdCaches(vbNumBits),
-		deploymentCaches:    newThresholdCaches(chaincfg.DefinedDeployments),
+		deploymentCaches:    newThresholdCaches(config.DefinedDeployments),
 	}
 }
 

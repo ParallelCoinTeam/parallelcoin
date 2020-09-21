@@ -254,7 +254,7 @@ func TestNonEligibleInputsAreNotEligible(t *testing.T) {
 	// Check that a credit with not enough confirmations is rejected.
 	_, credits = TstCreateCreditsOnNewSeries(t, dbtx, pool, []int64{int64(dustThreshold)})
 	c = credits[0]
-	// The calculation of if it has been confirmed does this: chainheigt - bh +
+	// The calculation of if it has been confirmed does this: chainheight - bh +
 	// 1 >= target, which is quite weird, but the reason why I need to put 902
 	// is *that* makes 1000 - 902 +1 = 99 >= 100 false
 	c.BlockMeta.Height = int32(902)

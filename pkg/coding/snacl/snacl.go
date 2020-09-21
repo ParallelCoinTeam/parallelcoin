@@ -6,6 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/binary"
 	"errors"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"runtime/debug"
 
@@ -43,7 +44,7 @@ func (ck *CryptoKey) Encrypt(in []byte) ([]byte, error) {
 	var nonce [NonceSize]byte
 	_, err := io.ReadFull(prng, nonce[:])
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	blob := secretbox.Seal(nil, in, &nonce, (*[KeySize]byte)(ck))
@@ -74,12 +75,12 @@ func (ck *CryptoKey) Zero() {
 	zero.Bytea32((*[KeySize]byte)(ck))
 }
 
-// GenerateCryptoKey generates a new crypotgraphically random key.
+// GenerateCryptoKey generates a new cryptographically random key.
 func GenerateCryptoKey() (*CryptoKey, error) {
 	var key CryptoKey
 	_, err := io.ReadFull(prng, key[:])
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return &key, nil
@@ -109,7 +110,7 @@ func (sk *SecretKey) deriveKey(password *[]byte) error {
 		sk.Parameters.P,
 		len(sk.Key))
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	copy(sk.Key[:], key)
@@ -215,13 +216,13 @@ func NewSecretKey(password *[]byte, N, r, p int) (*SecretKey, error) {
 	sk.Parameters.P = p
 	_, err := io.ReadFull(prng, sk.Parameters.Salt[:])
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// derive key
 	err = sk.deriveKey(password)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// store digest

@@ -2,6 +2,7 @@ package wire
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io"
 )
 
@@ -42,12 +43,12 @@ func (msg *MsgFilterLoad) BtcDecode(r io.Reader, pver uint32, enc MessageEncodin
 	msg.Filter, err = ReadVarBytes(r, pver, MaxFilterLoadFilterSize,
 		"filterload filter size")
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	err = readElements(r, &msg.HashFuncs, &msg.Tweak, &msg.Flags)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	if msg.HashFuncs > MaxFilterLoadHashFuncs {
@@ -78,7 +79,7 @@ func (msg *MsgFilterLoad) BtcEncode(w io.Writer, pver uint32, enc MessageEncodin
 	}
 	err := WriteVarBytes(w, pver, msg.Filter)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	return writeElements(w, msg.HashFuncs, msg.Tweak, msg.Flags)

@@ -67,13 +67,13 @@ func TestPingBIP0031(t *testing.T) {
 		t.Errorf("encode of MsgPing failed %v err <%v>", msg, err)
 	}
 	// Test decode with old protocol version.
-	readmsg := NewMsgPing(0)
-	err = readmsg.BtcDecode(&buf, pver, enc)
+	readMsg := NewMsgPing(0)
+	err = readMsg.BtcDecode(&buf, pver, enc)
 	if err != nil {
 		t.Errorf("decode of MsgPing failed [%v] err <%v>", buf, err)
 	}
 	// Since this protocol version doesn't support the nonce, make sure it didn't get encoded and decoded back out.
-	if msg.Nonce == readmsg.Nonce {
+	if msg.Nonce == readMsg.Nonce {
 		t.Errorf("Should not get same nonce for protocol version %d", pver)
 	}
 }
@@ -96,13 +96,13 @@ func TestPingCrossProtocol(t *testing.T) {
 		t.Errorf("encode of MsgPing failed %v err <%v>", msg, err)
 	}
 	// Decode with old protocol version.
-	readmsg := NewMsgPing(0)
-	err = readmsg.BtcDecode(&buf, BIP0031Version, BaseEncoding)
+	readMsg := NewMsgPing(0)
+	err = readMsg.BtcDecode(&buf, BIP0031Version, BaseEncoding)
 	if err != nil {
 		t.Errorf("decode of MsgPing failed [%v] err <%v>", buf, err)
 	}
 	// Since one of the protocol versions doesn't support the nonce, make sure it didn't get encoded and decoded back out.
-	if msg.Nonce == readmsg.Nonce {
+	if msg.Nonce == readMsg.Nonce {
 		t.Error("Should not get same nonce for cross protocol")
 	}
 }

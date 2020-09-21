@@ -34,8 +34,8 @@ func TestFilterLoadLatest(t *testing.T) {
 		t.Errorf("encode of MsgFilterLoad failed %v err <%v>", msg, err)
 	}
 	// Test decode with latest protocol version.
-	readmsg := MsgFilterLoad{}
-	err = readmsg.BtcDecode(&buf, pver, enc)
+	readMsg := MsgFilterLoad{}
+	err = readMsg.BtcDecode(&buf, pver, enc)
 	if err != nil {
 		t.Errorf("decode of MsgFilterLoad failed [%v] err <%v>", buf, err)
 	}
@@ -53,8 +53,8 @@ func TestFilterLoadCrossProtocol(t *testing.T) {
 			err)
 	}
 	// Decode with old protocol version.
-	var readmsg MsgFilterLoad
-	err = readmsg.BtcDecode(&buf, BIP0031Version, BaseEncoding)
+	var readMsg MsgFilterLoad
+	err = readMsg.BtcDecode(&buf, BIP0031Version, BaseEncoding)
 	if err == nil {
 		t.Errorf("decode of MsgFilterLoad succeeded when it shouldn't have %v",
 			msg)
@@ -73,8 +73,8 @@ func TestFilterLoadMaxFilterSize(t *testing.T) {
 			"have %v", msg)
 	}
 	// Decode with latest protocol version.
-	readbuf := bytes.NewReader(data)
-	err = msg.BtcDecode(readbuf, ProtocolVersion, BaseEncoding)
+	readBuf := bytes.NewReader(data)
+	err = msg.BtcDecode(readBuf, ProtocolVersion, BaseEncoding)
 	if err == nil {
 		t.Errorf("decode of MsgFilterLoad succeeded when it shouldn't "+
 			"have %v", msg)
@@ -100,8 +100,8 @@ func TestFilterLoadMaxHashFuncsSize(t *testing.T) {
 		0x00, // update Type
 	}
 	// Decode with latest protocol version.
-	readbuf := bytes.NewReader(newBuf)
-	err = msg.BtcDecode(readbuf, ProtocolVersion, BaseEncoding)
+	readBuf := bytes.NewReader(newBuf)
+	err = msg.BtcDecode(readBuf, ProtocolVersion, BaseEncoding)
 	if err == nil {
 		t.Errorf("decode of MsgFilterLoad succeeded when it shouldn't have %v",
 			msg)

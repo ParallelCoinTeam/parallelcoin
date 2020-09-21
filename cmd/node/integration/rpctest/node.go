@@ -2,6 +2,7 @@ package rpctest
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -38,7 +39,7 @@ type nodeConfig struct {
 func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, error) {
 	podPath, err := podExecutablePath()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		podPath = "pod"
 	}
 	a := &nodeConfig{
@@ -65,19 +66,19 @@ func newConfig(prefix, certFile, keyFile string, extra []string) (*nodeConfig, e
 func (n *nodeConfig) setDefaults() error {
 	datadir, err := ioutil.TempDir("", n.prefix+"-data")
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	n.dataDir = datadir
-	logdir, err := ioutil.TempDir("", n.prefix+"-logs")
+	logDir, err := ioutil.TempDir("", n.prefix+"-logs")
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
-	n.logDir = logdir
+	n.logDir = logDir
 	cert, err := ioutil.ReadFile(n.certFile)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	n.certificates = cert
@@ -164,7 +165,7 @@ func (n *nodeConfig) cleanup() error {
 	var err error
 	for _, dir := range dirs {
 		if err = os.RemoveAll(dir); err != nil {
-			Errorf("Cannot remove dir %s: %v", dir, err)
+			slog.Errorf("Cannot remove dir %s: %v", dir, err)
 		}
 	}
 	return err
@@ -202,7 +203,7 @@ func (n *node) start() error {
 	pid, err := os.Create(filepath.Join(n.dataDir,
 		fmt.Sprintf("%s.pid", n.config)))
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	n.pidFile = pid.Name()
@@ -226,7 +227,7 @@ func (n *node) stop() error {
 	defer func() {
 		err := n.cmd.Wait()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}()
 	if runtime.GOOS == "windows" {
@@ -241,7 +242,7 @@ func (n *node) stop() error {
 func (n *node) cleanup() error {
 	if n.pidFile != "" {
 		if err := os.Remove(n.pidFile); err != nil {
-			Errorf("unable to remove file %s: %v", n.pidFile, err)
+			slog.Errorf("unable to remove file %s: %v", n.pidFile, err)
 		}
 	}
 	return n.config.cleanup()
@@ -265,7 +266,7 @@ func genCertPair(certFile, keyFile string) error {
 	validUntil := time.Now().Add(10 * 365 * 24 * time.Hour)
 	cert, key, err := util.NewTLSCertPair(org, validUntil, nil)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Write cert and key files.

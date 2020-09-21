@@ -4,6 +4,7 @@
 package chainrpc
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"net/rpc"
 	"time"
@@ -2384,342 +2385,342 @@ func (a API) VersionWait(cmd *btcjson.VersionCmd) (out *map[string]btcjson.Versi
 func RunAPI(server *Server, quit chan struct{}) {
 	nrh := RPCHandlers
 	go func() {
-		Debug("starting up node cAPI")
+		slog.Debug("starting up node cAPI")
 		var err error
 		var res interface{}
 		for {
 			select {
 			case msg := <-nrh["addnode"].Call:
 				if res, err = nrh["addnode"].
-					Fn(server, msg.Params.(*btcjson.AddNodeCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.AddNodeCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(None); ok {
 					msg.Ch.(chan AddNodeRes) <- AddNodeRes{&r, err}
 				}
 			case msg := <-nrh["createrawtransaction"].Call:
 				if res, err = nrh["createrawtransaction"].
-					Fn(server, msg.Params.(*btcjson.CreateRawTransactionCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.CreateRawTransactionCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan CreateRawTransactionRes) <- CreateRawTransactionRes{&r, err}
 				}
 			case msg := <-nrh["decoderawtransaction"].Call:
 				if res, err = nrh["decoderawtransaction"].
-					Fn(server, msg.Params.(*btcjson.DecodeRawTransactionCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.DecodeRawTransactionCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.TxRawDecodeResult); ok {
 					msg.Ch.(chan DecodeRawTransactionRes) <- DecodeRawTransactionRes{&r, err}
 				}
 			case msg := <-nrh["decodescript"].Call:
 				if res, err = nrh["decodescript"].
-					Fn(server, msg.Params.(*btcjson.DecodeScriptCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.DecodeScriptCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.DecodeScriptResult); ok {
 					msg.Ch.(chan DecodeScriptRes) <- DecodeScriptRes{&r, err}
 				}
 			case msg := <-nrh["estimatefee"].Call:
 				if res, err = nrh["estimatefee"].
-					Fn(server, msg.Params.(*btcjson.EstimateFeeCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.EstimateFeeCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(float64); ok {
 					msg.Ch.(chan EstimateFeeRes) <- EstimateFeeRes{&r, err}
 				}
 			case msg := <-nrh["generate"].Call:
 				if res, err = nrh["generate"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.([]string); ok {
 					msg.Ch.(chan GenerateRes) <- GenerateRes{&r, err}
 				}
 			case msg := <-nrh["getaddednodeinfo"].Call:
 				if res, err = nrh["getaddednodeinfo"].
-					Fn(server, msg.Params.(*btcjson.GetAddedNodeInfoCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetAddedNodeInfoCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.([]btcjson.GetAddedNodeInfoResultAddr); ok {
 					msg.Ch.(chan GetAddedNodeInfoRes) <- GetAddedNodeInfoRes{&r, err}
 				}
 			case msg := <-nrh["getbestblock"].Call:
 				if res, err = nrh["getbestblock"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.GetBestBlockResult); ok {
 					msg.Ch.(chan GetBestBlockRes) <- GetBestBlockRes{&r, err}
 				}
 			case msg := <-nrh["getbestblockhash"].Call:
 				if res, err = nrh["getbestblockhash"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan GetBestBlockHashRes) <- GetBestBlockHashRes{&r, err}
 				}
 			case msg := <-nrh["getblock"].Call:
 				if res, err = nrh["getblock"].
-					Fn(server, msg.Params.(*btcjson.GetBlockCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetBlockCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.GetBlockVerboseResult); ok {
 					msg.Ch.(chan GetBlockRes) <- GetBlockRes{&r, err}
 				}
 			case msg := <-nrh["getblockchaininfo"].Call:
 				if res, err = nrh["getblockchaininfo"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.GetBlockChainInfoResult); ok {
 					msg.Ch.(chan GetBlockChainInfoRes) <- GetBlockChainInfoRes{&r, err}
 				}
 			case msg := <-nrh["getblockcount"].Call:
 				if res, err = nrh["getblockcount"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(int64); ok {
 					msg.Ch.(chan GetBlockCountRes) <- GetBlockCountRes{&r, err}
 				}
 			case msg := <-nrh["getblockhash"].Call:
 				if res, err = nrh["getblockhash"].
-					Fn(server, msg.Params.(*btcjson.GetBlockHashCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetBlockHashCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan GetBlockHashRes) <- GetBlockHashRes{&r, err}
 				}
 			case msg := <-nrh["getblockheader"].Call:
 				if res, err = nrh["getblockheader"].
-					Fn(server, msg.Params.(*btcjson.GetBlockHeaderCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetBlockHeaderCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.GetBlockHeaderVerboseResult); ok {
 					msg.Ch.(chan GetBlockHeaderRes) <- GetBlockHeaderRes{&r, err}
 				}
 			case msg := <-nrh["getblocktemplate"].Call:
 				if res, err = nrh["getblocktemplate"].
-					Fn(server, msg.Params.(*btcjson.GetBlockTemplateCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetBlockTemplateCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan GetBlockTemplateRes) <- GetBlockTemplateRes{&r, err}
 				}
 			case msg := <-nrh["getcfilter"].Call:
 				if res, err = nrh["getcfilter"].
-					Fn(server, msg.Params.(*btcjson.GetCFilterCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetCFilterCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan GetCFilterRes) <- GetCFilterRes{&r, err}
 				}
 			case msg := <-nrh["getcfilterheader"].Call:
 				if res, err = nrh["getcfilterheader"].
-					Fn(server, msg.Params.(*btcjson.GetCFilterHeaderCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetCFilterHeaderCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan GetCFilterHeaderRes) <- GetCFilterHeaderRes{&r, err}
 				}
 			case msg := <-nrh["getconnectioncount"].Call:
 				if res, err = nrh["getconnectioncount"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(int32); ok {
 					msg.Ch.(chan GetConnectionCountRes) <- GetConnectionCountRes{&r, err}
 				}
 			case msg := <-nrh["getcurrentnet"].Call:
 				if res, err = nrh["getcurrentnet"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan GetCurrentNetRes) <- GetCurrentNetRes{&r, err}
 				}
 			case msg := <-nrh["getdifficulty"].Call:
 				if res, err = nrh["getdifficulty"].
-					Fn(server, msg.Params.(*btcjson.GetDifficultyCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetDifficultyCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(float64); ok {
 					msg.Ch.(chan GetDifficultyRes) <- GetDifficultyRes{&r, err}
 				}
 			case msg := <-nrh["getgenerate"].Call:
 				if res, err = nrh["getgenerate"].
-					Fn(server, msg.Params.(*btcjson.GetHeadersCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetHeadersCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(bool); ok {
 					msg.Ch.(chan GetGenerateRes) <- GetGenerateRes{&r, err}
 				}
 			case msg := <-nrh["gethashespersec"].Call:
 				if res, err = nrh["gethashespersec"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(float64); ok {
 					msg.Ch.(chan GetHashesPerSecRes) <- GetHashesPerSecRes{&r, err}
 				}
 			case msg := <-nrh["getheaders"].Call:
 				if res, err = nrh["getheaders"].
-					Fn(server, msg.Params.(*btcjson.GetHeadersCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetHeadersCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.([]string); ok {
 					msg.Ch.(chan GetHeadersRes) <- GetHeadersRes{&r, err}
 				}
 			case msg := <-nrh["getinfo"].Call:
 				if res, err = nrh["getinfo"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.InfoChainResult0); ok {
 					msg.Ch.(chan GetInfoRes) <- GetInfoRes{&r, err}
 				}
 			case msg := <-nrh["getmempoolinfo"].Call:
 				if res, err = nrh["getmempoolinfo"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.GetMempoolInfoResult); ok {
 					msg.Ch.(chan GetMempoolInfoRes) <- GetMempoolInfoRes{&r, err}
 				}
 			case msg := <-nrh["getmininginfo"].Call:
 				if res, err = nrh["getmininginfo"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.GetMiningInfoResult); ok {
 					msg.Ch.(chan GetMiningInfoRes) <- GetMiningInfoRes{&r, err}
 				}
 			case msg := <-nrh["getnettotals"].Call:
 				if res, err = nrh["getnettotals"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.GetNetTotalsResult); ok {
 					msg.Ch.(chan GetNetTotalsRes) <- GetNetTotalsRes{&r, err}
 				}
 			case msg := <-nrh["getnetworkhashps"].Call:
 				if res, err = nrh["getnetworkhashps"].
-					Fn(server, msg.Params.(*btcjson.GetNetworkHashPSCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetNetworkHashPSCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.([]btcjson.GetPeerInfoResult); ok {
 					msg.Ch.(chan GetNetworkHashPSRes) <- GetNetworkHashPSRes{&r, err}
 				}
 			case msg := <-nrh["getpeerinfo"].Call:
 				if res, err = nrh["getpeerinfo"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.([]btcjson.GetPeerInfoResult); ok {
 					msg.Ch.(chan GetPeerInfoRes) <- GetPeerInfoRes{&r, err}
 				}
 			case msg := <-nrh["getrawmempool"].Call:
 				if res, err = nrh["getrawmempool"].
-					Fn(server, msg.Params.(*btcjson.GetRawMempoolCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetRawMempoolCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.([]string); ok {
 					msg.Ch.(chan GetRawMempoolRes) <- GetRawMempoolRes{&r, err}
 				}
 			case msg := <-nrh["getrawtransaction"].Call:
 				if res, err = nrh["getrawtransaction"].
-					Fn(server, msg.Params.(*btcjson.GetRawTransactionCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetRawTransactionCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan GetRawTransactionRes) <- GetRawTransactionRes{&r, err}
 				}
 			case msg := <-nrh["gettxout"].Call:
 				if res, err = nrh["gettxout"].
-					Fn(server, msg.Params.(*btcjson.GetTxOutCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.GetTxOutCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan GetTxOutRes) <- GetTxOutRes{&r, err}
 				}
 			case msg := <-nrh["help"].Call:
 				if res, err = nrh["help"].
-					Fn(server, msg.Params.(*btcjson.HelpCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.HelpCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan HelpRes) <- HelpRes{&r, err}
 				}
 			case msg := <-nrh["node"].Call:
 				if res, err = nrh["node"].
-					Fn(server, msg.Params.(*btcjson.NodeCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.NodeCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(None); ok {
 					msg.Ch.(chan NodeRes) <- NodeRes{&r, err}
 				}
 			case msg := <-nrh["ping"].Call:
 				if res, err = nrh["ping"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(None); ok {
 					msg.Ch.(chan PingRes) <- PingRes{&r, err}
 				}
 			case msg := <-nrh["resetchain"].Call:
 				if res, err = nrh["resetchain"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(None); ok {
 					msg.Ch.(chan ResetChainRes) <- ResetChainRes{&r, err}
 				}
 			case msg := <-nrh["restart"].Call:
 				if res, err = nrh["restart"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(None); ok {
 					msg.Ch.(chan RestartRes) <- RestartRes{&r, err}
 				}
 			case msg := <-nrh["searchrawtransactions"].Call:
 				if res, err = nrh["searchrawtransactions"].
-					Fn(server, msg.Params.(*btcjson.SearchRawTransactionsCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.SearchRawTransactionsCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.([]btcjson.SearchRawTransactionsResult); ok {
 					msg.Ch.(chan SearchRawTransactionsRes) <- SearchRawTransactionsRes{&r, err}
 				}
 			case msg := <-nrh["sendrawtransaction"].Call:
 				if res, err = nrh["sendrawtransaction"].
-					Fn(server, msg.Params.(*btcjson.SendRawTransactionCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.SendRawTransactionCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(None); ok {
 					msg.Ch.(chan SendRawTransactionRes) <- SendRawTransactionRes{&r, err}
 				}
 			case msg := <-nrh["setgenerate"].Call:
 				if res, err = nrh["setgenerate"].
-					Fn(server, msg.Params.(*btcjson.SetGenerateCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.SetGenerateCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(None); ok {
 					msg.Ch.(chan SetGenerateRes) <- SetGenerateRes{&r, err}
 				}
 			case msg := <-nrh["stop"].Call:
 				if res, err = nrh["stop"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(None); ok {
 					msg.Ch.(chan StopRes) <- StopRes{&r, err}
 				}
 			case msg := <-nrh["submitblock"].Call:
 				if res, err = nrh["submitblock"].
-					Fn(server, msg.Params.(*btcjson.SubmitBlockCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.SubmitBlockCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(string); ok {
 					msg.Ch.(chan SubmitBlockRes) <- SubmitBlockRes{&r, err}
 				}
 			case msg := <-nrh["uptime"].Call:
 				if res, err = nrh["uptime"].
-					Fn(server, msg.Params.(*None), nil); Check(err) {
+					Fn(server, msg.Params.(*None), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.GetMempoolInfoResult); ok {
 					msg.Ch.(chan UptimeRes) <- UptimeRes{&r, err}
 				}
 			case msg := <-nrh["validateaddress"].Call:
 				if res, err = nrh["validateaddress"].
-					Fn(server, msg.Params.(*btcjson.ValidateAddressCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.ValidateAddressCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(btcjson.ValidateAddressChainResult); ok {
 					msg.Ch.(chan ValidateAddressRes) <- ValidateAddressRes{&r, err}
 				}
 			case msg := <-nrh["verifychain"].Call:
 				if res, err = nrh["verifychain"].
-					Fn(server, msg.Params.(*btcjson.VerifyChainCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.VerifyChainCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(bool); ok {
 					msg.Ch.(chan VerifyChainRes) <- VerifyChainRes{&r, err}
 				}
 			case msg := <-nrh["verifymessage"].Call:
 				if res, err = nrh["verifymessage"].
-					Fn(server, msg.Params.(*btcjson.VerifyMessageCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.VerifyMessageCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(bool); ok {
 					msg.Ch.(chan VerifyMessageRes) <- VerifyMessageRes{&r, err}
 				}
 			case msg := <-nrh["version"].Call:
 				if res, err = nrh["version"].
-					Fn(server, msg.Params.(*btcjson.VersionCmd), nil); Check(err) {
+					Fn(server, msg.Params.(*btcjson.VersionCmd), nil); slog.Check(err) {
 				}
 				if r, ok := res.(map[string]btcjson.VersionResult); ok {
 					msg.Ch.(chan VersionRes) <- VersionRes{&r, err}
 				}
 			case <-quit:
-				Debug("stopping wallet cAPI")
+				slog.Debug("stopping wallet cAPI")
 				return
 			}
 		}
@@ -3346,7 +3347,7 @@ func (r *CAPIClient) AddNode(cmd ...*btcjson.AddNodeCmd) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.AddNode", c, &res); Check(err) {
+	if err = r.Call("CAPI.AddNode", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3356,7 +3357,7 @@ func (r *CAPIClient) CreateRawTransaction(cmd ...*btcjson.CreateRawTransactionCm
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.CreateRawTransaction", c, &res); Check(err) {
+	if err = r.Call("CAPI.CreateRawTransaction", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3366,7 +3367,7 @@ func (r *CAPIClient) DecodeRawTransaction(cmd ...*btcjson.DecodeRawTransactionCm
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.DecodeRawTransaction", c, &res); Check(err) {
+	if err = r.Call("CAPI.DecodeRawTransaction", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3376,7 +3377,7 @@ func (r *CAPIClient) DecodeScript(cmd ...*btcjson.DecodeScriptCmd) (res btcjson.
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.DecodeScript", c, &res); Check(err) {
+	if err = r.Call("CAPI.DecodeScript", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3386,7 +3387,7 @@ func (r *CAPIClient) EstimateFee(cmd ...*btcjson.EstimateFeeCmd) (res float64, e
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.EstimateFee", c, &res); Check(err) {
+	if err = r.Call("CAPI.EstimateFee", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3396,7 +3397,7 @@ func (r *CAPIClient) Generate(cmd ...*None) (res []string, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Generate", c, &res); Check(err) {
+	if err = r.Call("CAPI.Generate", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3406,7 +3407,7 @@ func (r *CAPIClient) GetAddedNodeInfo(cmd ...*btcjson.GetAddedNodeInfoCmd) (res 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetAddedNodeInfo", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetAddedNodeInfo", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3416,7 +3417,7 @@ func (r *CAPIClient) GetBestBlock(cmd ...*None) (res btcjson.GetBestBlockResult,
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBestBlock", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetBestBlock", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3426,7 +3427,7 @@ func (r *CAPIClient) GetBestBlockHash(cmd ...*None) (res string, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBestBlockHash", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetBestBlockHash", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3436,7 +3437,7 @@ func (r *CAPIClient) GetBlock(cmd ...*btcjson.GetBlockCmd) (res btcjson.GetBlock
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlock", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetBlock", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3446,7 +3447,7 @@ func (r *CAPIClient) GetBlockChainInfo(cmd ...*None) (res btcjson.GetBlockChainI
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockChainInfo", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetBlockChainInfo", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3456,7 +3457,7 @@ func (r *CAPIClient) GetBlockCount(cmd ...*None) (res int64, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockCount", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetBlockCount", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3466,7 +3467,7 @@ func (r *CAPIClient) GetBlockHash(cmd ...*btcjson.GetBlockHashCmd) (res string, 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockHash", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetBlockHash", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3476,7 +3477,7 @@ func (r *CAPIClient) GetBlockHeader(cmd ...*btcjson.GetBlockHeaderCmd) (res btcj
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockHeader", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetBlockHeader", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3486,7 +3487,7 @@ func (r *CAPIClient) GetBlockTemplate(cmd ...*btcjson.GetBlockTemplateCmd) (res 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetBlockTemplate", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetBlockTemplate", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3496,7 +3497,7 @@ func (r *CAPIClient) GetCFilter(cmd ...*btcjson.GetCFilterCmd) (res string, err 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetCFilter", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetCFilter", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3506,7 +3507,7 @@ func (r *CAPIClient) GetCFilterHeader(cmd ...*btcjson.GetCFilterHeaderCmd) (res 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetCFilterHeader", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetCFilterHeader", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3516,7 +3517,7 @@ func (r *CAPIClient) GetConnectionCount(cmd ...*None) (res int32, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetConnectionCount", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetConnectionCount", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3526,7 +3527,7 @@ func (r *CAPIClient) GetCurrentNet(cmd ...*None) (res string, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetCurrentNet", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetCurrentNet", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3536,7 +3537,7 @@ func (r *CAPIClient) GetDifficulty(cmd ...*btcjson.GetDifficultyCmd) (res float6
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetDifficulty", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetDifficulty", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3546,7 +3547,7 @@ func (r *CAPIClient) GetGenerate(cmd ...*btcjson.GetHeadersCmd) (res bool, err e
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetGenerate", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetGenerate", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3556,7 +3557,7 @@ func (r *CAPIClient) GetHashesPerSec(cmd ...*None) (res float64, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetHashesPerSec", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetHashesPerSec", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3566,7 +3567,7 @@ func (r *CAPIClient) GetHeaders(cmd ...*btcjson.GetHeadersCmd) (res []string, er
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetHeaders", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetHeaders", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3576,7 +3577,7 @@ func (r *CAPIClient) GetInfo(cmd ...*None) (res btcjson.InfoChainResult0, err er
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetInfo", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetInfo", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3586,7 +3587,7 @@ func (r *CAPIClient) GetMempoolInfo(cmd ...*None) (res btcjson.GetMempoolInfoRes
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetMempoolInfo", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetMempoolInfo", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3596,7 +3597,7 @@ func (r *CAPIClient) GetMiningInfo(cmd ...*None) (res btcjson.GetMiningInfoResul
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetMiningInfo", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetMiningInfo", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3606,7 +3607,7 @@ func (r *CAPIClient) GetNetTotals(cmd ...*None) (res btcjson.GetNetTotalsResult,
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetNetTotals", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetNetTotals", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3616,7 +3617,7 @@ func (r *CAPIClient) GetNetworkHashPS(cmd ...*btcjson.GetNetworkHashPSCmd) (res 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetNetworkHashPS", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetNetworkHashPS", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3626,7 +3627,7 @@ func (r *CAPIClient) GetPeerInfo(cmd ...*None) (res []btcjson.GetPeerInfoResult,
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetPeerInfo", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetPeerInfo", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3636,7 +3637,7 @@ func (r *CAPIClient) GetRawMempool(cmd ...*btcjson.GetRawMempoolCmd) (res []stri
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetRawMempool", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetRawMempool", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3646,7 +3647,7 @@ func (r *CAPIClient) GetRawTransaction(cmd ...*btcjson.GetRawTransactionCmd) (re
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetRawTransaction", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetRawTransaction", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3656,7 +3657,7 @@ func (r *CAPIClient) GetTxOut(cmd ...*btcjson.GetTxOutCmd) (res string, err erro
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.GetTxOut", c, &res); Check(err) {
+	if err = r.Call("CAPI.GetTxOut", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3666,7 +3667,7 @@ func (r *CAPIClient) Help(cmd ...*btcjson.HelpCmd) (res string, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Help", c, &res); Check(err) {
+	if err = r.Call("CAPI.Help", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3676,7 +3677,7 @@ func (r *CAPIClient) Node(cmd ...*btcjson.NodeCmd) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Node", c, &res); Check(err) {
+	if err = r.Call("CAPI.Node", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3686,7 +3687,7 @@ func (r *CAPIClient) Ping(cmd ...*None) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Ping", c, &res); Check(err) {
+	if err = r.Call("CAPI.Ping", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3696,7 +3697,7 @@ func (r *CAPIClient) ResetChain(cmd ...*None) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.ResetChain", c, &res); Check(err) {
+	if err = r.Call("CAPI.ResetChain", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3706,7 +3707,7 @@ func (r *CAPIClient) Restart(cmd ...*None) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Restart", c, &res); Check(err) {
+	if err = r.Call("CAPI.Restart", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3716,7 +3717,7 @@ func (r *CAPIClient) SearchRawTransactions(cmd ...*btcjson.SearchRawTransactions
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.SearchRawTransactions", c, &res); Check(err) {
+	if err = r.Call("CAPI.SearchRawTransactions", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3726,7 +3727,7 @@ func (r *CAPIClient) SendRawTransaction(cmd ...*btcjson.SendRawTransactionCmd) (
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.SendRawTransaction", c, &res); Check(err) {
+	if err = r.Call("CAPI.SendRawTransaction", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3736,7 +3737,7 @@ func (r *CAPIClient) SetGenerate(cmd ...*btcjson.SetGenerateCmd) (res None, err 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.SetGenerate", c, &res); Check(err) {
+	if err = r.Call("CAPI.SetGenerate", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3746,7 +3747,7 @@ func (r *CAPIClient) Stop(cmd ...*None) (res None, err error) {
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Stop", c, &res); Check(err) {
+	if err = r.Call("CAPI.Stop", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3756,7 +3757,7 @@ func (r *CAPIClient) SubmitBlock(cmd ...*btcjson.SubmitBlockCmd) (res string, er
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.SubmitBlock", c, &res); Check(err) {
+	if err = r.Call("CAPI.SubmitBlock", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3766,7 +3767,7 @@ func (r *CAPIClient) Uptime(cmd ...*None) (res btcjson.GetMempoolInfoResult, err
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Uptime", c, &res); Check(err) {
+	if err = r.Call("CAPI.Uptime", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3776,7 +3777,7 @@ func (r *CAPIClient) ValidateAddress(cmd ...*btcjson.ValidateAddressCmd) (res bt
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.ValidateAddress", c, &res); Check(err) {
+	if err = r.Call("CAPI.ValidateAddress", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3786,7 +3787,7 @@ func (r *CAPIClient) VerifyChain(cmd ...*btcjson.VerifyChainCmd) (res bool, err 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.VerifyChain", c, &res); Check(err) {
+	if err = r.Call("CAPI.VerifyChain", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3796,7 +3797,7 @@ func (r *CAPIClient) VerifyMessage(cmd ...*btcjson.VerifyMessageCmd) (res bool, 
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.VerifyMessage", c, &res); Check(err) {
+	if err = r.Call("CAPI.VerifyMessage", c, &res); slog.Check(err) {
 	}
 	return
 }
@@ -3806,7 +3807,7 @@ func (r *CAPIClient) Version(cmd ...*btcjson.VersionCmd) (res map[string]btcjson
 	if len(cmd) > 0 {
 		c = cmd[0]
 	}
-	if err = r.Call("CAPI.Version", c, &res); Check(err) {
+	if err = r.Call("CAPI.Version", c, &res); slog.Check(err) {
 	}
 	return
 }

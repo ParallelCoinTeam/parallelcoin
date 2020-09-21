@@ -2,6 +2,7 @@ package wire
 
 import (
 	"encoding/binary"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"net"
 	"time"
@@ -10,13 +11,13 @@ import (
 // maxNetAddressPayload returns the max payload size for a bitcoin NetAddress based on the protocol version.
 func maxNetAddressPayload(pver uint32) uint32 {
 	// Services 8 bytes + ip 16 bytes + port 2 bytes.
-	plen := uint32(26)
+	pLen := uint32(26)
 	// NetAddressTimeVersion added a timestamp field.
 	if pver >= NetAddressTimeVersion {
 		// Timestamp 4 bytes.
-		plen += 4
+		pLen += 4
 	}
-	return plen
+	return pLen
 }
 
 // NetAddress defines information about a peer on the network including the time it was last seen, the services it supports, its IP address, and port.
@@ -70,19 +71,19 @@ func readNetAddress(r io.Reader, pver uint32, na *NetAddress, ts bool) error {
 	if ts && pver >= NetAddressTimeVersion {
 		err := readElement(r, (*uint32Time)(&na.Timestamp))
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
 	err := readElements(r, &na.Services, &ip)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Sigh.  Bitcoin protocol mixes little and big endian.
 	port, err := binarySerializer.Uint16(r, bigEndian)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	*na = NetAddress{
@@ -100,7 +101,7 @@ func writeNetAddress(w io.Writer, pver uint32, na *NetAddress, ts bool) error {
 	if ts && pver >= NetAddressTimeVersion {
 		err := writeElement(w, uint32(na.Timestamp.Unix()))
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
@@ -111,7 +112,7 @@ func writeNetAddress(w io.Writer, pver uint32, na *NetAddress, ts bool) error {
 	}
 	err := writeElements(w, na.Services, ip)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Sigh.  Bitcoin protocol mixes little and big endian.

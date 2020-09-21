@@ -3,6 +3,7 @@ package votingpool_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -38,43 +39,43 @@ func ExampleCreate() {
 	// to do that.
 	db, dbTearDown, err := createWalletDB()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	defer dbTearDown()
 	dbtx, err := db.BeginReadWriteTx()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	defer func() {
 		err := dbtx.Commit()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}()
 	// Create a new walletdb namespace for the address manager.
 	mgrNamespace, err := dbtx.CreateTopLevelBucket([]byte("waddrmgr"))
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Create the address manager.
 	mgr, err := createWaddrmgr(mgrNamespace, &netparams.MainNetParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Create a walletdb namespace for votingpools.
 	vpNamespace, err := dbtx.CreateTopLevelBucket([]byte("votingpool"))
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Create a voting pool.
 	_, err = votingpool.Create(vpNamespace, mgr, []byte{0x00})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Output:
@@ -116,7 +117,7 @@ func Example_depositAddress() {
 		return nil
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Output:
@@ -145,14 +146,14 @@ func Example_empowerSeries() {
 		defer func() {
 			err := mgr.Lock()
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 			}
 		}()
 		privKey := "xprv9s21ZrQH143K2j9PK4CXkCu8sgxkpUxCF7p1KVwiV5tdnkeYzJXReUkxz5iB2FUzTXC1L15abCDG4RMxSYT5zhm67uvsnLYxuDhZfoFcB6a"
 		return pool.EmpowerSeries(ns, seriesID, privKey)
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Output:
@@ -182,7 +183,7 @@ func Example_startWithdrawal() {
 		defer func() {
 			err := mgr.Lock()
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 			}
 		}()
 		addr, _ := util.DecodeAddress("1MirQ9bwyQcGVJPwKUgapu5ouK2E2Ey4gX", mgr.ChainParams())
@@ -221,7 +222,7 @@ func Example_startWithdrawal() {
 		return err
 	})
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// Output:

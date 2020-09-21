@@ -1,6 +1,7 @@
 package addresses
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/app/save"
 	"github.com/stalker-loki/pod/cmd/node/state"
 	"github.com/stalker-loki/pod/pkg/pod"
@@ -19,11 +20,11 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 	if toMake < 3 {
 		return
 	}
-	Warn("refilling mining addresses")
+	slog.Warn("refilling mining addresses")
 	account, err := w.AccountNumber(wm.KeyScopeBIP0044,
 		"default")
 	if err != nil {
-		Error("error getting account number ", err)
+		slog.Error("error getting account number ", err)
 	}
 	for i := 0; i < toMake; i++ {
 		addr, err := w.NewAddress(account, wm.KeyScopeBIP0044,
@@ -36,14 +37,14 @@ func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Co
 			stateCfg.ActiveMiningAddrs = append(stateCfg.
 				ActiveMiningAddrs, addr)
 		} else {
-			Error("error adding new address ", err)
+			slog.Error("error adding new address ", err)
 		}
 	}
 	if save.Pod(cfg) {
-		Warn("saved config with new addresses")
+		slog.Warn("saved config with new addresses")
 		// Info("you can now start up a node in the same config folder with fresh addresses ready to mine with")
 		// os.Exit(0)
 	} else {
-		Error("error adding new addresses", err)
+		slog.Error("error adding new addresses", err)
 	}
 }

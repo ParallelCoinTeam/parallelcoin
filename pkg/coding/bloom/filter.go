@@ -2,6 +2,7 @@ package bloom
 
 import (
 	"encoding/binary"
+	"github.com/stalker-loki/app/slog"
 	"math"
 	"sync"
 
@@ -83,7 +84,8 @@ func (bf *Filter) Unload() {
 	bf.mtx.Unlock()
 }
 
-// hash returns the bit offset in the bloom filter which corresponds to the passed data for the given indepedent hash function number.
+// hash returns the bit offset in the bloom filter which corresponds to the passed data for the given independent hash
+// function number.
 func (bf *Filter) hash(hashNum uint32, data []byte) uint32 {
 	// bitcoind: 0xfba4c795 chosen as it guarantees a reasonable bit difference between hashNum values. Note that << 3 is equivalent to multiplying by 8, but is faster. Thus the returned hash is brought into range of the number of bits the filter has and returned.
 	mm := MurmurHash3(hashNum*0xfba4c795+bf.msgFilterLoad.Tweak, data)
@@ -198,11 +200,15 @@ func (bf *Filter) maybeAddOutpoint(pkScript []byte, outHash *chainhash.Hash, out
 func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 	// Check if the filter matches the hash of the transaction. This is useful for finding transactions when they appear in a block.
 	matched := bf.matches(tx.Hash()[:])
-	// Check if the filter matches any data elements in the public key scripts of any of the outputs.  When it does, add the outpoint that matched so transactions which spend from the matched transaction are also included in the filter.  This removes the burden of updating the filter for this scenario from the client. It is also more efficient on the network since it avoids the need for another filteradd message from the client and avoids some potential races that could otherwise occur.
+	// Check if the filter matches any data elements in the public key scripts of any of the outputs.  When it does, add
+	// the outpoint that matched so transactions which spend from the matched transaction are also included in the
+	// filter.  This removes the burden of updating the filter for this scenario from the client. It is also more
+	// efficient on the network since it avoids the need for another filteradd message from the client and avoids some
+	// potential races that could otherwise occur.
 	for i, txOut := range tx.MsgTx().TxOut {
 		pushedData, err := txscript.PushedData(txOut.PkScript)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			continue
 		}
 		for _, data := range pushedData {
@@ -225,7 +231,7 @@ func (bf *Filter) matchTxAndUpdate(tx *util.Tx) bool {
 		}
 		pushedData, err := txscript.PushedData(txin.SignatureScript)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			continue
 		}
 		for _, data := range pushedData {

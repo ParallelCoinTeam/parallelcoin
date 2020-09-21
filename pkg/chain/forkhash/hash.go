@@ -1,6 +1,7 @@
 package forkhash
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 
 	"github.com/bitbandi/go-x11"
@@ -194,7 +195,7 @@ func Scrypt(bytes []byte) []byte {
 	copy(c, b)
 	dk, err := scrypt.Key(c, c, 1024, 1, 1, 32)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return make([]byte, 32)
 	}
 	o := make([]byte, 32)

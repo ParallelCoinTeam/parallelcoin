@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
-	rpchelp "github.com/stalker-loki/pod/pkg/rpc/help"
+	help "github.com/stalker-loki/pod/pkg/rpc/help"
 )
 
 func serverMethods() map[string]struct{} {
@@ -30,13 +30,13 @@ func TestRPCMethodHelpGeneration(t *testing.T) {
 			t.Log("Regenerate help texts with 'go generate' after fixing")
 		}
 	}()
-	for i := range rpchelp.HelpDescs {
+	for i := range help.HelpDescs {
 		svrMethods := serverMethods()
-		locale := rpchelp.HelpDescs[i].Locale
+		locale := help.HelpDescs[i].Locale
 		generatedDescs := LocaleHelpDescs[locale]()
-		for _, m := range rpchelp.Methods {
+		for _, m := range help.Methods {
 			delete(svrMethods, m.Method)
-			helpText, err := btcjson.GenerateHelp(m.Method, rpchelp.HelpDescs[i].Descs, m.ResultTypes...)
+			helpText, err := btcjson.GenerateHelp(m.Method, help.HelpDescs[i].Descs, m.ResultTypes...)
 			if err != nil {
 				t.Errorf("Cannot generate '%s' help for method '%s': missing description for '%s'",
 					locale, m.Method, err)
@@ -66,8 +66,8 @@ func TestRPCMethodUsageGeneration(t *testing.T) {
 		}
 	}()
 	svrMethods := serverMethods()
-	usageStrs := make([]string, 0, len(rpchelp.Methods))
-	for _, m := range rpchelp.Methods {
+	usageStrs := make([]string, 0, len(help.Methods))
+	for _, m := range help.Methods {
 		delete(svrMethods, m.Method)
 		usage, err := btcjson.MethodUsageText(m.Method)
 		if err != nil {

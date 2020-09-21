@@ -41,7 +41,8 @@ const (
 	ErrTimeTooNew
 	// ErrDifficultyTooLow indicates the difficulty for the block is lower than the difficulty required by the most recent checkpoint.
 	ErrDifficultyTooLow
-	// ErrUnexpectedDifficulty indicates specified bits do not align with the expected value either because it doesn't match the calculated valued based on difficulty regarted rules or it is out of the valid range.
+	// ErrUnexpectedDifficulty indicates specified bits do not align with the expected value either because it doesn't
+	// match the calculated valued based on difficulty regulation rules or it is out of the valid range.
 	ErrUnexpectedDifficulty
 	// ErrHighHash indicates the block does not hash to a value which is lower than the required target difficultly.
 	ErrHighHash

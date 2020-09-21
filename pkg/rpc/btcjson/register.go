@@ -3,6 +3,7 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"reflect"
 	"sort"
 	"strconv"
@@ -26,11 +27,15 @@ type MethodInfo struct {
 const (
 	// UFWalletOnly indicates that the command can only be used with an RPC server that supports wallet commands.
 	UFWalletOnly UsageFlag = 1 << iota
-	// UFWebsocketOnly indicates that the command can only be used when communicating with an RPC server over websockets.  This typically applies to notifications and notification registration functions since neiher makes since when using a single-shot HTTP-POST request.
+	// UFWebsocketOnly indicates that the command can only be used when communicating with an RPC server over
+	// websockets.  This typically applies to notifications and notification registration functions since neither makes
+	// since when using a single-shot HTTP-POST request.
 	UFWebsocketOnly
-	// UFNotification indicates that the command is actually a notification. This means when it is marshalled, the ID must be nil.
+	// UFNotification indicates that the command is actually a notification. This means when it is marshalled, the ID
+	// must be nil.
 	UFNotification
-	// highestUsageFlagBit is the maximum usage flag bit and is used in the stringer and tests to ensure all of the above constants have been tested.
+	// highestUsageFlagBit is the maximum usage flag bit and is used in the stringer and tests to ensure all of the
+	// above constants have been tested.
 	highestUsageFlagBit
 )
 
@@ -164,7 +169,7 @@ func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
 				return makeError(ErrNonOptionalField, str)
 			}
 		}
-		// Ensure the default value can be unsmarshalled into the type and that
+		// Ensure the default value can be unmarshalled into the type and that
 		// defaults are only specified for optional fields.
 		if tag := rtf.Tag.Get("jsonrpcdefault"); tag != "" {
 			if !isOptional {
@@ -176,7 +181,7 @@ func RegisterCmd(method string, cmd interface{}, flags UsageFlag) error {
 			rvf := reflect.New(rtf.Type.Elem())
 			err := json.Unmarshal([]byte(tag), rvf.Interface())
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				str := fmt.Sprintf("default value of %q is "+
 					"the wrong type (field name %q)", tag,
 					rtf.Name)

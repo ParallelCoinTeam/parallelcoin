@@ -9,6 +9,7 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"net"
 	"time"
@@ -36,7 +37,7 @@ type Hashrate struct {
 
 func Get(count int32, version int32, height int32) Container {
 	nonce := make([]byte, 4)
-	if _, err := io.ReadFull(rand.Reader, nonce); Check(err) {
+	if _, err := io.ReadFull(rand.Reader, nonce); slog.Check(err) {
 	}
 	return Container{*simplebuffer.Serializers{
 		Time.New().Put(time.Now()),

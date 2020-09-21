@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"math/big"
 
 	"github.com/stalker-loki/pod/pkg/chain/wire"
@@ -29,9 +30,9 @@ const (
 	ScriptVerifyCheckSequenceVerify
 	// ScriptVerifyCleanStack defines that the stack must contain only one stack element after evaluation and that the element must be true if interpreted as a boolean.  This is rule 6 of BIP0062. This flag should never be used without the ScriptBip16 flag nor the ScriptVerifyWitness flag.
 	ScriptVerifyCleanStack
-	// ScriptVerifyDERSignatures defines that signatures are required to compily with the DER format.
+	// ScriptVerifyDERSignatures defines that signatures are required to comply with the DER format.
 	ScriptVerifyDERSignatures
-	// ScriptVerifyLowS defines that signtures are required to comply with the DER format and whose S value is <= order / 2.  This is rule 5
+	// ScriptVerifyLowS defines that signatures are required to comply with the DER format and whose S value is <= order / 2.  This is rule 5
 	// of BIP0062.
 	ScriptVerifyLowS
 	// ScriptVerifyMinimalData defines that signatures must use the smallest push operator. This is both rules 3 and 4 of BIP0062.
@@ -98,7 +99,7 @@ func (vm *Engine) isBranchExecuting() bool {
 	return vm.condStack[len(vm.condStack)-1] == OpCondTrue
 }
 
-// executeOpcode peforms execution on the passed opcode.  It takes into account whether or not it is hidden by conditionals, but some rules still must be tested in this case.
+// executeOpcode performs execution on the passed opcode.  It takes into account whether or not it is hidden by conditionals, but some rules still must be tested in this case.
 func (vm *Engine) executeOpcode(pop *parsedOpcode) error {
 	// Disabled opcodes are fail on program counter.
 	if pop.isDisabled() {
@@ -175,7 +176,7 @@ func (vm *Engine) validPC() (E error) {
 func (vm *Engine) curPC() (script int, off int, err error) {
 	err = vm.validPC()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return 0, 0, err
 	}
 	return int(vm.scriptIdx.Load()), int(vm.scriptOff.Load()), nil
@@ -200,12 +201,12 @@ func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
 			// Now we'll resume execution as if it were a regular p2pkh transaction.
 			pkScript, err := payToPubKeyHashScript(vm.witnessProgram)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			pops, err := parseScript(pkScript)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			// Set the stack to the provided witness stack, then append the pkScript generated above as the next script to execute.
@@ -234,7 +235,7 @@ func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
 			// With all the validity checks passed, parse the script into individual op-codes so w can execute it as the next script.
 			pops, err := parseScript(witnessScript)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			// The hash matched successfully, so use the witness as the stack, and set the witnessScript to be the next script executed.
@@ -274,7 +275,7 @@ func (vm *Engine) verifyWitnessProgram(witness [][]byte) error {
 func (vm *Engine) DisasmPC() (string, error) {
 	scriptIdx, scriptOff, err := vm.curPC()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return "", err
 	}
 	return vm.disasm(scriptIdx, scriptOff), nil
@@ -287,11 +288,11 @@ func (vm *Engine) DisasmScript(idx int) (string, error) {
 			len(vm.scripts))
 		return "", scriptError(ErrInvalidIndex, str)
 	}
-	var disstr string
+	var disStr string
 	for i := range vm.scripts[idx] {
-		disstr = disstr + vm.disasm(idx, i) + "\n"
+		disStr = disStr + vm.disasm(idx, i) + "\n"
 	}
-	return disstr, nil
+	return disStr, nil
 }
 
 // CheckErrorCondition returns nil if the running script has ended and was successful, leaving a a true boolean on the stack.  An error otherwise, including if the script has not finished.
@@ -317,7 +318,7 @@ func (vm *Engine) CheckErrorCondition(finalScript bool) error {
 	}
 	v, err := vm.dstack.PopBool()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	if !v {
@@ -385,14 +386,14 @@ func (vm *Engine) Step() (done bool, e error) {
 			// Check script ran successfully and pull the script out of the first stack and execute that.
 			err := vm.CheckErrorCondition(false)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				done, e = false, err
 				return
 			}
 			script := vm.savedFirstStack[len(vm.savedFirstStack)-1]
 			pops, err := parseScript(script)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				done, e = false, err
 				return
 			}
@@ -431,7 +432,7 @@ func (vm *Engine) Execute() (err error) {
 	for !done {
 		done, err = vm.Step()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 		// log <- cl.Tracec(func() string {
@@ -717,7 +718,7 @@ func NewEngine(scriptPubKey []byte, tx *wire.MsgTx, txIdx int, flags ScriptFlags
 		var err error
 		vm.scripts[i], err = parseScript(scr)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 	}
@@ -770,7 +771,7 @@ func NewEngine(scriptPubKey []byte, tx *wire.MsgTx, txIdx int, flags ScriptFlags
 			var err error
 			vm.witnessVersion, vm.witnessProgram, err = ExtractWitnessProgramInfo(witProgram)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return nil, err
 			}
 		} else {

@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"math/rand"
 	"net"
@@ -188,7 +189,7 @@ func // updateAddress is a helper function to either update an address
 	// Add to new bucket.
 	ka.refs++
 	a.addrNew[bucket][addr] = ka
-	Tracef("added new address %s for a total of %d addresses", addr,
+	slog.Tracef("added new address %s for a total of %d addresses", addr,
 		a.nTried+a.nNew)
 }
 
@@ -203,7 +204,7 @@ func // expireNew makes space in the new buckets by expiring the really bad entr
 	var oldest *KnownAddress
 	for k, v := range a.addrNew[bucket] {
 		if v.isBad() {
-			Tracef("expiring bad address %v", k)
+			slog.Tracef("expiring bad address %v", k)
 			delete(a.addrNew[bucket], k)
 			v.refs--
 			if v.refs == 0 {
@@ -220,7 +221,7 @@ func // expireNew makes space in the new buckets by expiring the really bad entr
 	}
 	if oldest != nil {
 		key := NetAddressKey(oldest.na)
-		Tracef("expiring oldest address %v", key)
+		slog.Tracef("expiring oldest address %v", key)
 		delete(a.addrNew[bucket], key)
 		oldest.refs--
 		if oldest.refs == 0 {
@@ -289,14 +290,14 @@ func (a *AddrManager) getTriedBucket(netAddr *wire.NetAddress) int {
 func // addressHandler is the main handler for the address manager.
 // It must be run as a goroutine.
 (a *AddrManager) addressHandler() {
-	Trace("starting address handler")
+	slog.Trace("starting address handler")
 	dumpAddressTicker := time.NewTicker(dumpAddressInterval)
 	defer dumpAddressTicker.Stop()
 out:
 	for {
 		select {
 		case <-dumpAddressTicker.C:
-			Trace("saving peers data")
+			slog.Trace("saving peers data")
 			a.savePeers()
 		case <-a.quit:
 			break out
@@ -304,7 +305,7 @@ out:
 	}
 	a.savePeers()
 	a.wg.Done()
-	Trace("address handler done")
+	slog.Trace("address handler done")
 }
 
 // savePeers saves all the known addresses to a file so they can be read back
@@ -349,14 +350,14 @@ func (a *AddrManager) savePeers() {
 	}
 	w, err := os.Create(a.PeersFile)
 	if err != nil {
-		Error(err)
-		Errorf("error opening file %s: %v", a.PeersFile, err)
+		slog.Error(err)
+		slog.Errorf("error opening file %s: %v", a.PeersFile, err)
 		return
 	}
 	enc := json.NewEncoder(w)
 	defer w.Close()
 	if err := enc.Encode(&sam); err != nil {
-		Errorf("failed to encode file %s: %v", a.PeersFile, err)
+		slog.Errorf("failed to encode file %s: %v", a.PeersFile, err)
 		return
 	}
 }
@@ -364,19 +365,19 @@ func (a *AddrManager) savePeers() {
 // loadPeers loads the known address from the saved file.  If empty, missing,
 // or malformed file, just don't load anything and start fresh
 func (a *AddrManager) loadPeers() {
-	Trace("loading peers")
+	slog.Trace("loading peers")
 
 	a.mtx.Lock()
 	defer a.mtx.Unlock()
 	err := a.deserializePeers(a.PeersFile)
 	if err != nil {
-		Error(err)
-		Errorf("failed to parse file %s: %v", a.PeersFile, err)
+		slog.Error(err)
+		slog.Errorf("failed to parse file %s: %v", a.PeersFile, err)
 		// if it is invalid we nuke the old one unconditionally.
 		err = os.Remove(a.PeersFile)
 		if err != nil {
-			Error(err)
-			Warnf("failed to remove corrupt peers file %s: %v", a.PeersFile,
+			slog.Error(err)
+			slog.Warnf("failed to remove corrupt peers file %s: %v", a.PeersFile,
 				err)
 		}
 		a.reset()
@@ -396,7 +397,7 @@ func (a *AddrManager) deserializePeers(filePath string) error {
 	}
 	r, err := os.Open(filePath)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return fmt.Errorf("%s error opening file: %v", filePath, err)
 	}
 	defer r.Close()
@@ -404,7 +405,7 @@ func (a *AddrManager) deserializePeers(filePath string) error {
 	dec := json.NewDecoder(r)
 	err = dec.Decode(&sam)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return fmt.Errorf("error reading %s: %v", filePath, err)
 	}
 	if sam.Version != serialisationVersion {
@@ -418,13 +419,13 @@ func (a *AddrManager) deserializePeers(filePath string) error {
 		ka := new(KnownAddress)
 		ka.na, err = a.DeserializeNetAddress(v.Addr)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return fmt.Errorf("failed to deserialize netaddress "+
 				"%s: %v", v.Addr, err)
 		}
 		ka.srcAddr, err = a.DeserializeNetAddress(v.Src)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return fmt.Errorf("failed to deserialize netaddress "+
 				"%s: %v", v.Src, err)
 		}
@@ -479,12 +480,12 @@ func // DeserializeNetAddress converts a given address string to a *wire.NetAddr
 (a *AddrManager) DeserializeNetAddress(addr string) (*wire.NetAddress, error) {
 	host, portStr, err := net.SplitHostPort(addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	port, err := strconv.ParseUint(portStr, 10, 16)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return a.HostToNetAddress(host, uint16(port), wire.SFNodeNetwork)
@@ -498,7 +499,7 @@ func // Start begins the core address handler which manages a pool of known
 		return
 	}
 	// Load peers we already know about from file.
-	Trace("loading peers data")
+	slog.Trace("loading peers data")
 	a.loadPeers()
 	// Start the address ticker to save addresses periodically.
 	a.wg.Add(1)
@@ -508,7 +509,7 @@ func // Start begins the core address handler which manages a pool of known
 func // Stop gracefully shuts down the address manager by stopping the main handler.
 (a *AddrManager) Stop() error {
 	if atomic.AddInt32(&a.shutdown, 1) != 1 {
-		Warn("address manager is already in the process of shutting down")
+		slog.Warn("address manager is already in the process of shutting down")
 		return nil
 	}
 	// Debug("address manager shutting down"}
@@ -543,7 +544,7 @@ func // AddAddressByIP adds an address where we are given an ip:port and not a
 	// Split IP and port
 	addr, portStr, err := net.SplitHostPort(addrIP)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// Put it in wire.Netaddress
@@ -553,7 +554,7 @@ func // AddAddressByIP adds an address where we are given an ip:port and not a
 	}
 	port, err := strconv.ParseUint(portStr, 10, 0)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return fmt.Errorf("invalid port %s: %v", portStr, err)
 	}
 	na := wire.NewNetAddressIPPort(ip, uint16(port), 0)
@@ -617,7 +618,7 @@ func // reset resets the address manager by reinitialising the random source and
 	// fill key with bytes from a good random source.
 	_, err := io.ReadFull(crand.Reader, a.key[:])
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	for i := range a.addrNew {
 		a.addrNew[i] = make(map[string]*KnownAddress)
@@ -640,7 +641,7 @@ func // HostToNetAddress returns a netaddress given a host address.
 		data, err := base32.StdEncoding.DecodeString(
 			strings.ToUpper(host[:16]))
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		prefix := []byte{0xfd, 0x87, 0xd8, 0x7e, 0xeb, 0x43}
@@ -648,7 +649,7 @@ func // HostToNetAddress returns a netaddress given a host address.
 	} else if ip = net.ParseIP(host); ip == nil {
 		ips, err := a.lookupFunc(host)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		if len(ips) == 0 {
@@ -707,11 +708,11 @@ func // GetAddress returns a single address that should be routable.  It picks a
 				e = e.Next()
 			}
 			ka := e.Value.(*KnownAddress)
-			randval := a.rand.Intn(large)
-			if float64(randval) < (factor * ka.chance() * float64(large)) {
-				Tracec(func() string {
+			randVal := a.rand.Intn(large)
+			if float64(randVal) < (factor * ka.chance() * float64(large)) {
+				slog.Trace(func() string {
 					return fmt.Sprintf("selected %v from tried bucket", NetAddressKey(ka.na))
-				})
+				}())
 				return ka
 			}
 			factor *= 1.2
@@ -738,10 +739,10 @@ func // GetAddress returns a single address that should be routable.  It picks a
 			}
 			randval := a.rand.Intn(large)
 			if float64(randval) < (factor * ka.chance() * float64(large)) {
-				Tracec(func() string {
+				slog.Trace(func() string {
 					return fmt.Sprintf("Selected %v from new bucket",
 						NetAddressKey(ka.na))
-				})
+				}())
 				return ka
 			}
 			factor *= 1.2
@@ -854,7 +855,7 @@ func (a *AddrManager) Good(addr *wire.NetAddress) {
 	// back.
 	a.nNew++
 	rmkey := NetAddressKey(rmka.na)
-	Tracef("replacing %s with %s in tried", rmkey, addrKey)
+	slog.Tracef("replacing %s with %s in tried", rmkey, addrKey)
 
 	// We made sure there is space here just above.
 	a.addrNew[newBucket][rmkey] = rmka
@@ -983,10 +984,10 @@ func // GetBestLocalAddress returns the most appropriate local address to use
 		}
 	}
 	if bestAddress != nil {
-		Tracef("suggesting address %s:%d for %s:%d", bestAddress.IP,
+		slog.Tracef("suggesting address %s:%d for %s:%d", bestAddress.IP,
 			bestAddress.Port, remoteAddr.IP, remoteAddr.Port)
 	} else {
-		Tracef("no worthy address for %s:%d", remoteAddr.IP,
+		slog.Tracef("no worthy address for %s:%d", remoteAddr.IP,
 			remoteAddr.Port)
 		// Send something unroutable if nothing suitable.
 		var ip net.IP

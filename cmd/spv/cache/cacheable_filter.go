@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/coding/gcs"
 )
 
@@ -14,7 +15,7 @@ type CacheableFilter struct {
 func (c *CacheableFilter) Size() (uint64, error) {
 	f, err := c.Filter.NBytes()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return 0, err
 	}
 	return uint64(len(f)), nil

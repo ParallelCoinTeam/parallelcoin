@@ -2,6 +2,7 @@ package mempool
 
 import (
 	"encoding/hex"
+	"github.com/stalker-loki/app/slog"
 	"reflect"
 	"runtime"
 	"sync"
@@ -11,7 +12,7 @@ import (
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	script "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
 	"github.com/stalker-loki/pod/pkg/util"
@@ -137,10 +138,10 @@ type poolHarness struct {
 func (p *poolHarness) CreateCoinbaseTx(blockHeight int32, numOutputs uint32, version int32) (*util.Tx, error) {
 	// Create standard coinbase script.
 	extraNonce := int64(0)
-	coinbaseScript, err := txscript.NewScriptBuilder().
+	coinbaseScript, err := script.NewScriptBuilder().
 		AddInt64(int64(blockHeight)).AddInt64(extraNonce).Script()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	tx := wire.NewMsgTx(wire.TxVersion)
@@ -204,10 +205,10 @@ func (p *poolHarness) CreateSignedTx(inputs []spendableOutput, numOutputs uint32
 	}
 	// Sign the new transaction.
 	for i := range tx.TxIn {
-		sigScript, err := txscript.SignatureScript(tx, i, p.payScript,
-			txscript.SigHashAll, p.signKey, true)
+		sigScript, err := script.SignatureScript(tx, i, p.payScript,
+			script.SigHashAll, p.signKey, true)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		tx.TxIn[i].SignatureScript = sigScript
@@ -239,10 +240,10 @@ func (p *poolHarness) CreateTxChain(firstOutput spendableOutput, numTxns uint32)
 			Value:    int64(spendableAmount),
 		})
 		// Sign the new transaction.
-		sigScript, err := txscript.SignatureScript(tx, 0, p.payScript,
-			txscript.SigHashAll, p.signKey, true)
+		sigScript, err := script.SignatureScript(tx, 0, p.payScript,
+			script.SigHashAll, p.signKey, true)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		tx.TxIn[0].SignatureScript = sigScript
@@ -263,7 +264,7 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 	keyBytes, err := hex.DecodeString("700868df1838811ffbdf918fb482c1f7e" +
 		"ad62db4b97bd7012c23e726485e577d")
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, nil, err
 	}
 	signKey, signPub := ec.PrivKeyFromBytes(ec.S256(), keyBytes)
@@ -272,13 +273,13 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 	pubKeyBytes := signPub.SerializeCompressed()
 	payPubKeyAddr, err := util.NewAddressPubKey(pubKeyBytes, chainParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, nil, err
 	}
 	payAddr := payPubKeyAddr.AddressPubKeyHash()
-	pkScript, err := txscript.PayToAddrScript(payAddr)
+	pkScript, err := script.PayToAddrScript(payAddr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, nil, err
 	}
 	// Create a new fake chain and harness bound to it.
@@ -318,7 +319,7 @@ func newPoolHarness(chainParams *netparams.Params) (*poolHarness, []spendableOut
 	curHeight := harness.chain.BestHeight()
 	coinbase, err := harness.CreateCoinbaseTx(curHeight+1, numOutputs, 0)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, nil, err
 	}
 	harness.chain.utxos.AddTxOuts(coinbase, curHeight+1)

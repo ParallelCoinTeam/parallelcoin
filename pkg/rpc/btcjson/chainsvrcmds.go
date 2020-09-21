@@ -3,6 +3,7 @@ package btcjson
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
@@ -205,14 +206,14 @@ func (t *TemplateRequest) UnmarshalJSON(data []byte) error {
 	// The SigOpLimit field can only be nil, bool, or int64.
 	val, err := convertTemplateRequestField("sigoplimit", request.SigOpLimit)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	request.SigOpLimit = val
 	// The SizeLimit field can only be nil, bool, or int64.
 	val, err = convertTemplateRequestField("sizelimit", request.SizeLimit)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	request.SizeLimit = val

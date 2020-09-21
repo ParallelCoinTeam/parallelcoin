@@ -3,6 +3,7 @@ package txauthor
 
 import (
 	"errors"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	txrules "github.com/stalker-loki/pod/pkg/chain/tx/rules"
@@ -98,7 +99,7 @@ func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
 	for {
 		inputAmount, inputs, inputValues, scripts, err := fetchInputs(targetAmount + targetFee)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		if inputAmount < targetAmount+targetFee {
@@ -139,7 +140,7 @@ func NewUnsignedTransaction(outputs []*wire.TxOut, relayFeePerKb util.Amount,
 			txsizes.P2WPKHPkScriptSize, relayFeePerKb) {
 			changeScript, err := fetchChange()
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return nil, err
 			}
 			if len(changeScript) > txsizes.P2WPKHPkScriptSize {
@@ -202,7 +203,7 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 				int64(inputValues[i]), chainParams, secrets,
 				tx, hashCache, i)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 		case txscript.IsPayToWitnessPubKeyHash(pkScript):
@@ -210,7 +211,7 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 				int64(inputValues[i]), chainParams, secrets,
 				tx, hashCache, i)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 		default:
@@ -219,7 +220,7 @@ func AddAllInputScripts(tx *wire.MsgTx, prevPkScripts [][]byte, inputValues []ut
 				pkScript, txscript.SigHashAll, secrets, secrets,
 				sigScript)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return err
 			}
 			inputs[i].SignatureScript = script
@@ -240,12 +241,12 @@ func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
 	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
 		chainParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	privKey, compressed, err := secrets.GetKey(addrs[0])
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	pubKey := privKey.PubKey()
@@ -259,7 +260,7 @@ func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
 	}
 	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	// With the concrete address type, we can now generate the
@@ -267,13 +268,13 @@ func spendWitnessKeyHash(txIn *wire.TxIn, pkScript []byte,
 	// which will allow us to spend this output.
 	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	witnessScript, err := txscript.WitnessSignature(tx, hashCache, idx,
 		inputValue, witnessProgram, txscript.SigHashAll, privKey, true)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	txIn.Witness = witnessScript
@@ -294,12 +295,12 @@ func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
 	_, addrs, _, err := txscript.ExtractPkScriptAddrs(pkScript,
 		chainParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	privKey, compressed, err := secrets.GetKey(addrs[0])
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	pubKey := privKey.PubKey()
@@ -315,19 +316,19 @@ func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
 	// of this address.
 	p2wkhAddr, err := util.NewAddressWitnessPubKeyHash(pubKeyHash, chainParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	witnessProgram, err := txscript.PayToAddrScript(p2wkhAddr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	bldr := txscript.NewScriptBuilder()
 	bldr.AddData(witnessProgram)
 	sigScript, err := bldr.Script()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	txIn.SignatureScript = sigScript
@@ -336,7 +337,7 @@ func spendNestedWitnessPubKeyHash(txIn *wire.TxIn, pkScript []byte,
 	witnessScript, err := txscript.WitnessSignature(tx, hashCache, idx,
 		inputValue, witnessProgram, txscript.SigHashAll, privKey, compressed)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	txIn.Witness = witnessScript

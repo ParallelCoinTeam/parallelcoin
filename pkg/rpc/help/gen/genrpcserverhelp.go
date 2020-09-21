@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"strings"
 
@@ -13,8 +14,8 @@ import (
 var outputFile = func() *os.File {
 	fi, err := os.Create("../rpcserverhelp.go")
 	if err != nil {
-		Error(err)
-		Fatal(err)
+		slog.Error(err)
+		slog.Fatal(err)
 	}
 	return fi
 }()
@@ -22,13 +23,13 @@ var outputFile = func() *os.File {
 func writefln(format string, args ...interface{}) {
 	_, err := fmt.Fprintf(outputFile, format, args...)
 	if err != nil {
-		Error(err)
-		Fatal(err)
+		slog.Error(err)
+		slog.Fatal(err)
 	}
 	_, err = outputFile.Write([]byte{'\n'})
 	if err != nil {
-		Error(err)
-		Fatal(err)
+		slog.Error(err)
+		slog.Fatal(err)
 	}
 }
 func writeLocaleHelp(locale, goLocale string, descs map[string]string) {
@@ -39,8 +40,8 @@ func writeLocaleHelp(locale, goLocale string, descs map[string]string) {
 		m := &rpchelp.Methods[i]
 		helpText, err := btcjson.GenerateHelp(m.Method, descs, m.ResultTypes...)
 		if err != nil {
-			Error(err)
-			Fatal(err)
+			slog.Error(err)
+			slog.Fatal(err)
 		}
 		writefln("%q: %q,", m.Method, helpText)
 	}
@@ -60,8 +61,8 @@ func writeUsage() {
 	for i := range rpchelp.Methods {
 		usageStrs[i], err = btcjson.MethodUsageText(rpchelp.Methods[i].Method)
 		if err != nil {
-			Error(err)
-			Fatal(err)
+			slog.Error(err)
+			slog.Fatal(err)
 		}
 	}
 	usages := strings.Join(usageStrs, "\n")

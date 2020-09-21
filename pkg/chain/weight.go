@@ -2,6 +2,7 @@ package blockchain
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
@@ -32,7 +33,9 @@ func GetBlockWeight(blk *util.Block) int64 {
 	return int64((baseSize * (WitnessScaleFactor - 1)) + totalSize)
 }
 
-// GetTransactionWeight computes the value of the weight metric for a given transaction. Currently the weight metric is simply the sum of the transactions's serialized size without any witness data scaled proportionally by the WitnessScaleFactor, and the transaction's serialized size including any witness data.
+// GetTransactionWeight computes the value of the weight metric for a given transaction. Currently the weight metric is
+// simply the sum of the transaction's serialized size without any witness data scaled proportionally by the
+// WitnessScaleFactor, and the transaction's serialized size including any witness data.
 func GetTransactionWeight(tx *util.Tx) int64 {
 	msgTx := tx.MsgTx()
 	baseSize := msgTx.SerializeSizeStripped()
@@ -47,7 +50,7 @@ func GetSigOpCost(tx *util.Tx, isCoinBaseTx bool, utxoView *UtxoViewpoint, bip16
 	if bip16 {
 		numP2SHSigOps, err := CountP2SHSigOps(tx, isCoinBaseTx, utxoView)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return 0, nil
 		}
 		numSigOps += numP2SHSigOps * WitnessScaleFactor

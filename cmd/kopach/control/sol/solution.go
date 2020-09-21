@@ -10,23 +10,23 @@ import (
 // SolutionMagic is the marker for packets containing a solution
 var SolutionMagic = []byte{'s', 'o', 'l', 'v'}
 
-type SolContainer struct {
+type Container struct {
 	simplebuffer.Container
 }
 
-func GetSolContainer(port uint32, b *wire.MsgBlock) *SolContainer {
+func GetSolContainer(port uint32, b *wire.MsgBlock) *Container {
 	mB := Block.New().Put(b)
 	srs := simplebuffer.Serializers{Int32.New().Put(int32(port)), mB}.CreateContainer(SolutionMagic)
-	return &SolContainer{*srs}
+	return &Container{*srs}
 }
 
-func LoadSolContainer(b []byte) (out *SolContainer) {
-	out = &SolContainer{}
+func LoadSolContainer(b []byte) (out *Container) {
+	out = &Container{}
 	out.Data = b
 	return
 }
 
-func (sC *SolContainer) GetMsgBlock() *wire.MsgBlock {
+func (sC *Container) GetMsgBlock() *wire.MsgBlock {
 	// Traces(sC.Data)
 	buff := sC.Get(1)
 	// Traces(buff)
@@ -37,7 +37,7 @@ func (sC *SolContainer) GetMsgBlock() *wire.MsgBlock {
 	return got
 }
 
-func (sC *SolContainer) GetSenderPort() int32 {
+func (sC *Container) GetSenderPort() int32 {
 	buff := sC.Get(0)
 	decoded := Int32.New().DecodeOne(buff)
 	got := decoded.Get()

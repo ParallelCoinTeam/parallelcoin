@@ -29,14 +29,14 @@ type mockConn struct {
 	io.Writer
 	io.Closer
 	// local network, address for the connection.
-	lnet, laddr string
+	lNet, lAddr string
 	// remote network, address for the connection.
 	rAddr net.Addr
 }
 
 // LocalAddr returns the local address for the connection.
 func (c mockConn) LocalAddr() net.Addr {
-	return &mockAddr{c.lnet, c.laddr}
+	return &mockAddr{c.lNet, c.lAddr}
 }
 
 // RemoteAddr returns the remote address for the connection.
@@ -518,8 +518,8 @@ func (m *mockListener) Addr() net.Addr {
 // mock listener.
 func (m *mockListener) Connect(ip string, port int) {
 	m.provideConn <- &mockConn{
-		laddr: m.localAddr,
-		lnet:  "tcp",
+		lAddr: m.localAddr,
+		lNet:  "tcp",
 		rAddr: &net.TCPAddr{
 			IP:   net.ParseIP(ip),
 			Port: port,

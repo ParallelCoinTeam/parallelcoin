@@ -1,6 +1,7 @@
 package spv
 
 import (
+	"github.com/stalker-loki/app/slog"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
@@ -46,14 +47,14 @@ func // NotifyUnspentAndUnfound iterates through any requests for which no
 // this will be delivered signaling that no spend was detected.
 // If the original output could not be found, a nil spend report is returned.
 (b *batchSpendReporter) NotifyUnspentAndUnfound() {
-	Debugf(
+	slog.Debugf(
 		"finished batch, %d unspent outpoints", len(b.requests),
 	)
 	for outpoint, requests := range b.requests {
 		// A nil SpendReport indicates the output was not found.
 		tx, ok := b.initialTxns[outpoint]
 		if !ok {
-			Warnf(
+			slog.Warnf(
 				"unknown initial txn for getuxo request %v", outpoint,
 			)
 		}
@@ -97,7 +98,7 @@ func // addNewRequests adds a set of new GetUtxoRequests to the spend reporter's
 (b *batchSpendReporter) addNewRequests(reqs []*GetUtxoRequest) {
 	for _, req := range reqs {
 		outpoint := req.Input.OutPoint
-		Debugf(
+		slog.Debugf(
 			"adding outpoint=%s height=%d to watchlist", outpoint,
 			req.BirthHeight,
 		)
@@ -151,7 +152,7 @@ func // findInitialTransactions searches the given block for the creation of the
 			// output on the transaction. If not, we will be unable
 			// to find the initial output.
 			if op.Index >= uint32(len(txOuts)) {
-				Errorf(
+				slog.Errorf(
 					"failed to find outpoint %s -- invalid output index", op,
 				)
 				initialTxns[op] = nil
@@ -171,12 +172,12 @@ func // findInitialTransactions searches the given block for the creation of the
 		tx, ok := initialTxns[req.Input.OutPoint]
 		switch {
 		case !ok:
-			Errorf(
+			slog.Errorf(
 				"failed to find outpoint %s -- txid not found in block",
 				req.Input.OutPoint)
 			initialTxns[req.Input.OutPoint] = nil
 		case tx != nil:
-			Tracef(
+			slog.Tracef(
 				"block %d creates output %s", height, req.Input.OutPoint,
 			)
 		default:
@@ -219,7 +220,7 @@ func // notifySpends finds any transactions in the block that spend from our
 			if !ok {
 				continue
 			}
-			Debugf(
+			slog.Debugf(
 				"UTXO %v spent by txn %v", outpoint, tx.TxHash(),
 			)
 			spend := &SpendReport{

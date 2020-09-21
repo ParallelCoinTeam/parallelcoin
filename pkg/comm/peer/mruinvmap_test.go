@@ -3,6 +3,7 @@ package peer
 import (
 	"crypto/rand"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"testing"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -32,7 +33,8 @@ func TestMruInventoryMap(t *testing.T) {
 	}
 testLoop:
 	for i, test := range tests {
-		// Create a new mru inventory map limited by the specified test limit and add all of the test inventory vectors.  This will cause evicition since there are more test inventory vectors than the limits.
+		// Create a new mru inventory map limited by the specified test limit and add all of the test inventory vectors.
+		// This will cause eviction since there are more test inventory vectors than the limits.
 		mruInvMap := newMruInventoryMap(uint(test.limit))
 		for j := 0; j < numInvVects; j++ {
 			mruInvMap.Add(invVects[j])
@@ -53,7 +55,9 @@ testLoop:
 				continue testLoop
 			}
 		}
-		// Readd the entry that should currently be the least-recently used entry so it becomes the most-recently used entry, then force an eviction by adding an entry that doesn't exist and ensure the evicted entry is the new least-recently used entry.
+		// Readd the entry that should currently be the least-recently used entry so it becomes the most-recently used
+		// entry, then force an eviction by adding an entry that doesn't exist and ensure the evicted entry is the new
+		// least-recently used entry.
 		// This check needs at least 2 entries.
 		if test.limit > 1 {
 			origLruIndex := numInvVects - test.limit
@@ -75,7 +79,8 @@ testLoop:
 				continue testLoop
 			}
 		}
-		// Delete all of the entries in the inventory vector list, including those that don't exist in the map, and ensure they no longer exist.
+		// Delete all of the entries in the inventory vector list, including those that don't exist in the map, and
+		// ensure they no longer exist.
 		for j := 0; j < numInvVects; j++ {
 			mruInvMap.Delete(invVects[j])
 			if mruInvMap.Exists(invVects[j]) {
@@ -98,7 +103,8 @@ func TestMruInventoryMapStringer(t *testing.T) {
 	mruInvMap := newMruInventoryMap(uint(2))
 	mruInvMap.Add(iv1)
 	mruInvMap.Add(iv2)
-	// Ensure the stringer gives the expected result.  Since map iteration is not ordered, either entry could be first, so account for both cases.
+	// Ensure the stringer gives the expected result.  Since map iteration is not ordered, either entry could be first,
+	// so account for both cases.
 	wantStr1 := fmt.Sprintf("<%d>[%s, %s]", 2, *iv1, *iv2)
 	wantStr2 := fmt.Sprintf("<%d>[%s, %s]", 2, *iv2, *iv1)
 	gotStr := mruInvMap.String()
@@ -118,14 +124,14 @@ func BenchmarkMruInventoryList(b *testing.B) {
 		hashBytes := make([]byte, chainhash.HashSize)
 		_, err := rand.Read(hashBytes)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 		hash, _ := chainhash.NewHash(hashBytes)
 		iv := wire.NewInvVect(wire.InvTypeBlock, hash)
 		invVects = append(invVects, iv)
 	}
 	b.StartTimer()
-	// Benchmark the add plus evicition code.
+	// Benchmark the add plus eviction code.
 	limit := 20000
 	mruInvMap := newMruInventoryMap(uint(limit))
 	for i := 0; i < b.N; i++ {

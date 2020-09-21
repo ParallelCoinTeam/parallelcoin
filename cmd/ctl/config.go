@@ -2,6 +2,7 @@ package ctl
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"path/filepath"
 
 	"github.com/stalker-loki/pod/app/appdata"
@@ -47,7 +48,7 @@ func ListCommands() {
 	for _, method := range cmdMethods {
 		flags, err := btcjson.MethodUsageFlags(method)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue
@@ -58,7 +59,7 @@ func ListCommands() {
 		}
 		usage, err := btcjson.MethodUsageText(method)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			// This should never happen since the method was just returned
 			// from the package, but be safe.
 			continue

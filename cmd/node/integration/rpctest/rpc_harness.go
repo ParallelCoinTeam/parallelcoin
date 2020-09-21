@@ -2,6 +2,7 @@ package rpctest
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io/ioutil"
 	"net"
 	"os"
@@ -14,7 +15,7 @@ import (
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
-	rpcclient "github.com/stalker-loki/pod/pkg/rpc/client"
+	client "github.com/stalker-loki/pod/pkg/rpc/client"
 	"github.com/stalker-loki/pod/pkg/util"
 )
 
@@ -69,9 +70,9 @@ type HarnessTestCase func(r *Harness, t *testing.T)
 type Harness struct {
 	// ActiveNet is the parameters of the blockchain the Harness belongs to.
 	ActiveNet      *netparams.Params
-	Node           *rpcclient.Client
+	Node           *client.Client
 	node           *node
-	handlers       *rpcclient.NotificationHandlers
+	handlers       *client.NotificationHandlers
 	wallet         *memWallet
 	testNodeDir    string
 	maxConnRetries int
@@ -84,7 +85,7 @@ type Harness struct {
 // passed. In the case that a nil config is passed,
 // a default configuration will be used.
 // NOTE: This function is safe for concurrent access.
-func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
+func New(activeNet *netparams.Params, handlers *client.NotificationHandlers,
 	extraArgs []string) (*Harness, error) {
 	harnessStateMtx.Lock()
 	defer harnessStateMtx.Unlock()
@@ -104,13 +105,13 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 	}
 	testDir, err := baseDir()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	harnessID := strconv.Itoa(numTestInstances)
 	nodeTestData, err := ioutil.TempDir(testDir, "harness-"+harnessID)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	certFile := filepath.Join(nodeTestData, "rpc.cert")
@@ -120,14 +121,14 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 	}
 	wallet, err := newMemWallet(activeNet, uint32(numTestInstances))
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	miningAddr := fmt.Sprintf("--miningaddr=%s", wallet.coinbaseAddr)
 	extraArgs = append(extraArgs, miningAddr)
 	config, err := newConfig("rpctest", certFile, keyFile, extraArgs)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// Generate p2p+rpc listening addresses.
@@ -135,13 +136,13 @@ func New(activeNet *netparams.Params, handlers *rpcclient.NotificationHandlers,
 	// Create the testing node bounded to the simnet.
 	node, err := newNode(config, nodeTestData)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	nodeNum := numTestInstances
 	numTestInstances++
 	if handlers == nil {
-		handlers = &rpcclient.NotificationHandlers{}
+		handlers = &client.NotificationHandlers{}
 	}
 	// If a handler for the OnFilteredBlock{Connected,
 	// Disconnected} callback callback has already been set,
@@ -213,14 +214,14 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
 			numMatureOutputs
 		_, err := h.Node.Generate(numToGenerate)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return err
 		}
 	}
 	// Block until the wallet has fully synced up to the tip of the main chain.
 	_, height, err := h.Node.GetBestBlock()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return err
 	}
 	ticker := time.NewTicker(time.Millisecond * 100)
@@ -268,21 +269,21 @@ func (h *Harness) TearDown() error {
 // If after h.maxConnRetries attempts we're not able to establish a connection,
 // this function returns with an error.
 func (h *Harness) connectRPCClient() error {
-	var client *rpcclient.Client
+	var cl *client.Client
 	var err error
 	rpcConf := h.node.config.rpcConnConfig()
 	for i := 0; i < h.maxConnRetries; i++ {
-		if client, err = rpcclient.New(&rpcConf, h.handlers); err != nil {
+		if cl, err = client.New(&rpcConf, h.handlers); err != nil {
 			time.Sleep(time.Duration(i) * 50 * time.Millisecond)
 			continue
 		}
 		break
 	}
-	if client == nil {
+	if cl == nil {
 		return fmt.Errorf("connection timeout")
 	}
-	h.Node = client
-	h.wallet.SetRPCClient(client)
+	h.Node = cl
+	h.wallet.SetRPCClient(cl)
 	return nil
 }
 
@@ -337,7 +338,7 @@ func (h *Harness) CreateTransaction(targetOutputs []*wire.TxOut,
 	return h.wallet.CreateTransaction(targetOutputs, feeRate, change)
 }
 
-// UnlockOutputs unlocks any outputs which were previously marked as unspendabe
+// UnlockOutputs unlocks any outputs which were previously marked as undependable
 // due to being selected to fund a transaction via the CreateTransaction
 // method.
 // This function is safe for concurrent access.
@@ -348,7 +349,7 @@ func (h *Harness) UnlockOutputs(inputs []*wire.TxIn) {
 // RPCConfig returns the harnesses current rpc configuration.
 // This allows other potential RPC clients created within tests to connect to
 // a given test harness instance.
-func (h *Harness) RPCConfig() rpcclient.ConnConfig {
+func (h *Harness) RPCConfig() client.ConnConfig {
 	return h.node.config.rpcConnConfig()
 }
 
@@ -400,12 +401,12 @@ func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	}
 	prevBlockHash, prevBlockHeight, err := h.Node.GetBestBlock()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	mBlock, err := h.Node.GetBlock(prevBlockHash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	prevBlock := util.NewBlock(mBlock)
@@ -414,7 +415,7 @@ func (h *Harness) GenerateAndSubmitBlockWithCustomCoinbaseOutputs(
 	newBlock, err := CreateBlock(prevBlock, txns, int32(blockVersion),
 		blockTime, h.wallet.coinbaseAddr, mineTo, h.ActiveNet)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// Submit the block to the simnet node.

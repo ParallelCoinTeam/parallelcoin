@@ -3,6 +3,7 @@ package spv
 import (
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"net"
 	"strconv"
 	"sync"
@@ -13,7 +14,7 @@ import (
 	"github.com/stalker-loki/pod/cmd/spv/filterdb"
 	"github.com/stalker-loki/pod/cmd/spv/headerfs"
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/stalker-loki/pod/pkg/chain/config"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
@@ -236,12 +237,12 @@ func (s *ChainService) BanPeer(sp *ServerPeer) {
 func (s *ChainService) BestBlock() (*waddrmgr.BlockStamp, error) {
 	bestHeader, bestHeight, err := s.BlockHeaders.ChainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	_, filterHeight, err := s.RegFilterHeaders.ChainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	// Filter headers might lag behind block headers, so we can can fetch a
@@ -252,7 +253,7 @@ func (s *ChainService) BestBlock() (*waddrmgr.BlockStamp, error) {
 			bestHeight,
 		)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 	}
@@ -272,7 +273,7 @@ func (s *ChainService) ChainParams() netparams.Params {
 func (s *ChainService) GetBlockHash(height int64) (*chainhash.Hash, error) {
 	header, err := s.BlockHeaders.FetchHeaderByHeight(uint32(height))
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	hash := header.BlockHash()
@@ -292,7 +293,7 @@ func (s *ChainService) GetBlockHeader(
 func (s *ChainService) GetBlockHeight(hash *chainhash.Hash) (int32, error) {
 	_, height, err := s.BlockHeaders.FetchHeader(hash)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return 0, err
 	}
 	return int32(height), nil
@@ -375,7 +376,7 @@ func (s *ChainService) UpdatePeerHeights(latestBlkHash *chainhash.Hash, latestHe
 func (s *ChainService) addrStringToNetAddr(addr string) (net.Addr, error) {
 	host, strPort, err := net.SplitHostPort(addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		switch err.(type) {
 		case *net.AddrError:
 			host = addr
@@ -387,7 +388,7 @@ func (s *ChainService) addrStringToNetAddr(addr string) (net.Addr, error) {
 	// Attempt to look up an IP address associated with the parsed host.
 	ips, err := s.nameResolver(host)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	if len(ips) == 0 {
@@ -395,7 +396,7 @@ func (s *ChainService) addrStringToNetAddr(addr string) (net.Addr, error) {
 	}
 	port, err := strconv.Atoi(strPort)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return &net.TCPAddr{
@@ -413,28 +414,28 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 	}
 	// Ignore new peers if we're shutting down.
 	if atomic.LoadInt32(&s.shutdown) != 0 {
-		Infof("new peer %s ignored - server is shutting down", sp)
+		slog.Infof("new peer %s ignored - server is shutting down", sp)
 		sp.Disconnect()
 		return false
 	}
 	// Disconnect banned peers.
 	host, _, err := net.SplitHostPort(sp.Addr())
 	if err != nil {
-		Error(err)
-		Debug("can't split host/port:", err)
+		slog.Error(err)
+		slog.Debug("can't split host/port:", err)
 		sp.Disconnect()
 		return false
 	}
 	if banEnd, ok := state.banned[host]; ok {
 		if time.Now().Before(banEnd) {
-			Debugf(
+			slog.Debugf(
 				"peer %s is banned for another %v - disconnecting %s",
 				host, time.Until(banEnd),
 			)
 			sp.Disconnect()
 			return false
 		}
-		Infof(
+		slog.Infof(
 			"peer %s is no longer banned", host,
 		)
 		delete(state.banned, host)
@@ -442,7 +443,7 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 	// TODO: Check for max peers from a single IP.
 	//  Limit max number of total peers.
 	if state.Count() >= MaxPeers {
-		Infof(
+		slog.Infof(
 			"max peers reached [%d] - disconnecting peer %s",
 			MaxPeers, sp,
 		)
@@ -452,7 +453,7 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 		return false
 	}
 	// Add the new peer and start it.
-	Debug("new peer", sp)
+	slog.Debug("new peer", sp)
 	state.outboundGroups[addrmgr.GroupKey(sp.NA())]++
 	if sp.persistent {
 		state.persistentPeers[sp.ID()] = sp
@@ -467,14 +468,14 @@ func (s *ChainService) handleAddPeerMsg(state *peerState, sp *ServerPeer) bool {
 func (s *ChainService) handleBanPeerMsg(state *peerState, sp *ServerPeer) {
 	host, _, err := net.SplitHostPort(sp.Addr())
 	if err != nil {
-		Error(err)
-		Debugf(
+		slog.Error(err)
+		slog.Debugf(
 			"can't split ban peer %s: %s %s",
 			sp.Addr(), err,
 		)
 		return
 	}
-	Infof("banned peer %s for %v", host, BanDuration)
+	slog.Infof("banned peer %s for %v", host, BanDuration)
 	state.banned[host] = time.Now().Add(BanDuration)
 }
 
@@ -495,7 +496,7 @@ func (s *ChainService) handleDonePeerMsg(state *peerState, sp *ServerPeer) {
 			s.connManager.Disconnect(sp.connReq.ID())
 		}
 		delete(list, sp.ID())
-		Debug("removed peer", sp)
+		slog.Debug("removed peer", sp)
 		return
 	}
 	if sp.connReq != nil {
@@ -544,7 +545,7 @@ func (s *ChainService) outboundPeerConnected(c *connmgr.ConnReq, conn net.Conn) 
 	sp := newServerPeer(s, c.Permanent)
 	p, err := peer.NewOutboundPeer(newPeerConfig(sp), c.Addr.String())
 	if err != nil {
-		Debugf(
+		slog.Debugf(
 			"cannot create outbound peer %s: %s %s", c.Addr, err,
 		)
 		s.connManager.Disconnect(c.ID())
@@ -581,7 +582,7 @@ func (s *ChainService) peerHandler() {
 	s.blockManager.Start()
 	err := s.utxoScanner.Start()
 	if err != nil {
-		Debug(err)
+		slog.Debug(err)
 	}
 	state := &peerState{
 		persistentPeers: make(map[int32]*ServerPeer),
@@ -623,7 +624,7 @@ out:
 		case <-s.quit:
 			// Disconnect all peers on server shutdown.
 			state.forAllPeers(func(sp *ServerPeer) {
-				Trace("shutdown peer", sp)
+				slog.Trace("shutdown peer", sp)
 				sp.Disconnect()
 			})
 			break out
@@ -632,18 +633,18 @@ out:
 	s.connManager.Stop()
 	err = s.utxoScanner.Stop()
 	if err != nil {
-		Error(err)
-		Debug(err)
+		slog.Error(err)
+		slog.Debug(err)
 	}
 	err = s.blockManager.Stop()
 	if err != nil {
-		Error(err)
-		Debug(err)
+		slog.Error(err)
+		slog.Debug(err)
 	}
 	err = s.addrManager.Stop()
 	if err != nil {
-		Error(err)
-		Debug(err)
+		slog.Error(err)
+		slog.Debug(err)
 	}
 	// Drain channels before exiting so nothing is left waiting around
 	// to send.
@@ -667,7 +668,7 @@ cleanup:
 func (s *ChainService) rollBackToHeight(height uint32) (*waddrmgr.BlockStamp, error) {
 	header, headerHeight, err := s.BlockHeaders.ChainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	bs := &waddrmgr.BlockStamp{
@@ -676,13 +677,13 @@ func (s *ChainService) rollBackToHeight(height uint32) (*waddrmgr.BlockStamp, er
 	}
 	_, regHeight, err := s.RegFilterHeaders.ChainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	for uint32(bs.Height) > height {
 		header, _, err := s.BlockHeaders.FetchHeader(&bs.Hash)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		newTip := &header.PrevBlock
@@ -690,14 +691,14 @@ func (s *ChainService) rollBackToHeight(height uint32) (*waddrmgr.BlockStamp, er
 		if uint32(bs.Height) <= regHeight {
 			newFilterTip, err := s.RegFilterHeaders.RollbackLastBlock(newTip)
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return nil, err
 			}
 			regHeight = uint32(newFilterTip.Height)
 		}
 		bs, err = s.BlockHeaders.RollbackLastBlock()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		// Notifications are asynchronous, so we include the previous
@@ -709,7 +710,7 @@ func (s *ChainService) rollBackToHeight(height uint32) (*waddrmgr.BlockStamp, er
 		// factored out into their own package.
 		lastHeader, _, err := s.BlockHeaders.FetchHeader(newTip)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		s.mtxReorgHeader.Lock()
@@ -731,7 +732,7 @@ func (sp *ServerPeer) OnAddr(_ *peer.Peer, msg *wire.MsgAddr) {
 	// helps prevent the network from becoming another public test network
 	// since it will not be able to learn about other peers that have not
 	// specifically been provided.
-	if sp.server.chainParams.Net == chaincfg.SimNetParams.Net {
+	if sp.server.chainParams.Net == config.SimNetParams.Net {
 		return
 	}
 	// Ignore old style addresses which don't include a timestamp.
@@ -740,7 +741,7 @@ func (sp *ServerPeer) OnAddr(_ *peer.Peer, msg *wire.MsgAddr) {
 	}
 	// A message that has no addresses is invalid.
 	if len(msg.AddrList) == 0 {
-		Errorf(
+		slog.Errorf(
 			"command [%s] from %s does not contain any addresses",
 			msg.Command(), sp.Addr(),
 		)
@@ -777,7 +778,7 @@ func (sp *ServerPeer) OnAddr(_ *peer.Peer, msg *wire.MsgAddr) {
 func (sp *ServerPeer) OnFeeFilter(_ *peer.Peer, msg *wire.MsgFeeFilter) {
 	// Check that the passed minimum fee is a valid amount.
 	if msg.MinFee < 0 || msg.MinFee > int64(util.MaxSatoshi) {
-		Debugf(
+		slog.Debugf(
 			"peer %v sent an invalid feefilter '%v' -- disconnecting %s",
 			sp, util.Amount(msg.MinFee),
 		)
@@ -790,7 +791,7 @@ func (sp *ServerPeer) OnFeeFilter(_ *peer.Peer, msg *wire.MsgFeeFilter) {
 // OnHeaders is invoked when a peer receives a headers bitcoin
 // message.  The message is passed down to the block manager.
 func (sp *ServerPeer) OnHeaders(p *peer.Peer, msg *wire.MsgHeaders) {
-	Tracef(
+	slog.Tracef(
 		"got headers with %d items from %s",
 		len(msg.Headers), p.Addr(),
 	)
@@ -802,18 +803,18 @@ func (sp *ServerPeer) OnHeaders(p *peer.Peer, msg *wire.MsgHeaders) {
 // accordingly.  We pass the message down to blockmanager which will call
 // QueueMessage with any appropriate responses.
 func (sp *ServerPeer) OnInv(p *peer.Peer, msg *wire.MsgInv) {
-	Tracef(
+	slog.Tracef(
 		"got inv with %d items from %s", len(msg.InvList), p.Addr(),
 	)
 	newInv := wire.NewMsgInvSizeHint(uint(len(msg.InvList)))
 	for _, invVect := range msg.InvList {
 		if invVect.Type == wire.InvTypeTx {
-			Tracef(
+			slog.Tracef(
 				"ignoring tx %s in inv from %v -- SPV mode",
 				invVect.Hash, sp,
 			)
 			if sp.ProtocolVersion() >= wire.BIP0037Version {
-				Infof(
+				slog.Infof(
 					"peer %v is announcing transactions -- disconnecting", sp,
 				)
 				sp.Disconnect()
@@ -823,8 +824,8 @@ func (sp *ServerPeer) OnInv(p *peer.Peer, msg *wire.MsgInv) {
 		}
 		err := newInv.AddInvVect(invVect)
 		if err != nil {
-			Error(err)
-			Error("failed to add inventory vector:", err)
+			slog.Error(err)
+			slog.Error("failed to add inventory vector:", err)
 			break
 		}
 	}
@@ -868,7 +869,7 @@ func (sp *ServerPeer) OnReject(_ *peer.Peer, msg *wire.MsgReject) {
 func (sp *ServerPeer) OnVerAck(_ *peer.Peer, msg *wire.MsgVerAck) {
 	err := sp.pushSendHeadersMsg()
 	if err != nil {
-		Debug(err)
+		slog.Debug(err)
 	}
 }
 
@@ -885,7 +886,7 @@ func (sp *ServerPeer) OnVersion(_ *peer.Peer, msg *wire.MsgVersion) *wire.MsgRej
 	peerServices := sp.Services()
 	if peerServices&wire.SFNodeWitness != wire.SFNodeWitness ||
 		peerServices&wire.SFNodeCF != wire.SFNodeCF {
-		Infof(
+		slog.Infof(
 			"disconnecting peer %v, cannot serve compact filters", sp,
 		)
 		sp.Disconnect()
@@ -898,7 +899,7 @@ func (sp *ServerPeer) OnVersion(_ *peer.Peer, msg *wire.MsgVersion) *wire.MsgRej
 	// on the simulation test network since it is only intended to connect
 	// to specified peers and actively avoids advertising and connecting to
 	// discovered peers.
-	if sp.server.chainParams.Net != chaincfg.SimNetParams.Net {
+	if sp.server.chainParams.Net != config.SimNetParams.Net {
 		addrManager := sp.server.addrManager
 		// Request known addresses if the server address manager needs
 		// more and the peer has a protocol version new enough to
@@ -978,7 +979,7 @@ func (sp *ServerPeer) addKnownAddresses(addresses []*wire.NetAddress) {
 func (sp *ServerPeer) newestBlock() (*chainhash.Hash, int32, error) {
 	bestHeader, bestHeight, err := sp.server.BlockHeaders.ChainTip()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, 0, err
 	}
 	bestHash := bestHeader.BlockHash()
@@ -1097,7 +1098,7 @@ func NewChainService(cfg Config) (*ChainService, error) {
 	var err error
 	s.FilterDB, err = filterdb.New(cfg.Database, cfg.ChainParams)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	filterCacheSize := DefaultFilterCacheSize
@@ -1114,19 +1115,19 @@ func NewChainService(cfg Config) (*ChainService, error) {
 		cfg.DataDir, cfg.Database, &cfg.ChainParams,
 	)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	s.RegFilterHeaders, err = headerfs.NewFilterHeaderStore(
 		cfg.DataDir, cfg.Database, headerfs.RegularFilter, &cfg.ChainParams,
 	)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	bm, err := newBlockManager(&s)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	s.blockManager = bm
@@ -1136,7 +1137,7 @@ func NewChainService(cfg Config) (*ChainService, error) {
 	// peers and actively avoid advertising and connecting to discovered
 	// peers in order to prevent it from becoming a public test network.
 	var newAddressFunc func() (net.Addr, error)
-	if s.chainParams.Net != chaincfg.SimNetParams.Net {
+	if s.chainParams.Net != config.SimNetParams.Net {
 		newAddressFunc = func() (net.Addr, error) {
 			for tries := 0; tries < 100; tries++ {
 				addr := s.addrManager.GetAddress()
@@ -1184,7 +1185,7 @@ func NewChainService(cfg Config) (*ChainService, error) {
 	}
 	cmgr, err := connmgr.New(cmgrCfg)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	s.connManager = cmgr
@@ -1196,7 +1197,7 @@ func NewChainService(cfg Config) (*ChainService, error) {
 	for _, addr := range permanentPeers {
 		tcpAddr, err := s.addrStringToNetAddr(addr)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		go s.connManager.Connect(&connmgr.ConnReq{

@@ -2,6 +2,7 @@ package hardfork
 
 import (
 	"encoding/hex"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	"github.com/stalker-loki/pod/pkg/util"
@@ -73,7 +74,7 @@ var (
 func Amt(f float64) (amt util.Amount) {
 	amt, err := util.NewAmount(f)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		panic(err)
 	}
 	return
@@ -82,7 +83,7 @@ func Amt(f float64) (amt util.Amount) {
 func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
 	out, err := util.DecodeAddress(addr, defaultNet)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		panic(err)
 	}
 	return
@@ -91,7 +92,7 @@ func Addr(addr string, defaultNet *netparams.Params) (out util.Address) {
 func Key(key string) (out []byte) {
 	out, err := hex.DecodeString(key)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		panic(err)
 	}
 	return

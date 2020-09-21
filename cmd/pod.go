@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
+
 	// This enables pprof
 	_ "net/http/pprof"
 	"os"
@@ -27,20 +29,20 @@ func Main() {
 	}
 	if os.Getenv("POD_TRACE") == "on" {
 		if f, err := os.Create("testtrace.out"); err != nil {
-			Error("tracing env POD_TRACE=on but we can't write to it",
+			slog.Error("tracing env POD_TRACE=on but we can't write to it",
 				err)
 		} else {
-			Debug("tracing started")
+			slog.Debug("tracing started")
 			err = trace.Start(f)
 			if err != nil {
-				Error("could not start tracing", err)
+				slog.Error("could not start tracing", err)
 			} else {
 				interrupt.AddHandler(func() {
-					Debug("stopping trace")
+					slog.Debug("stopping trace")
 					trace.Stop()
 					err := f.Close()
 					if err != nil {
-						Error(err)
+						slog.Error(err)
 					}
 				},
 				)

@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/gui"
 	"github.com/stalker-loki/pod/pkg/util/logi"
 	"github.com/stalker-loki/pod/pkg/util/logi/consume"
@@ -30,7 +31,7 @@ func (s *State) RunControls() layout.FlexChild {
 				})
 			}, b)
 			for b.Clicked(s.Gtx) {
-				Debug("clicked run button")
+				slog.Debug("clicked run button")
 				if !s.Config.RunModeOpen {
 					s.RunCommandChan <- "run"
 				}
@@ -54,7 +55,7 @@ func (s *State) RunControls() layout.FlexChild {
 					})
 				}, b)
 				for b.Clicked(s.Gtx) {
-					Debug("clicked stop button")
+					slog.Debug("clicked stop button")
 					s.RunCommandChan <- "stop"
 				}
 			}), gui.Rigid(func() {
@@ -71,10 +72,10 @@ func (s *State) RunControls() layout.FlexChild {
 				// s.IconButton(ic, fg, bg, b)
 				for b.Clicked(s.Gtx) {
 					if s.Config.Pausing {
-						Debug("clicked on resume button")
+						slog.Debug("clicked on resume button")
 						s.RunCommandChan <- "resume"
 					} else {
-						Debug("clicked pause button")
+						slog.Debug("clicked pause button")
 						s.RunCommandChan <- "pause"
 					}
 				}
@@ -91,7 +92,7 @@ func (s *State) RunControls() layout.FlexChild {
 				}, b)
 				// s.IconButton("Restart", "PanelBg", "PanelText", b)
 				for b.Clicked(s.Gtx) {
-					Debug("clicked restart button")
+					slog.Debug("clicked restart button")
 					s.RunCommandChan <- "restart"
 				}
 			}),
@@ -111,7 +112,7 @@ func (s *State) Build() (exePath string, err error) {
 		"-tags", gt, "-o", exePath)
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
-	if err = c.Run(); !Check(err) {
+	if err = c.Run(); !slog.Check(err) {
 	}
 	return
 }
@@ -126,13 +127,13 @@ func (s *State) Runner() {
 	for cmd := range s.RunCommandChan {
 		switch cmd {
 		case "run":
-			Debug("run called")
+			slog.Debug("run called")
 			if s.HasGo && !s.Config.Running {
-				if exePath, err = s.Build(); !Check(err) {
+				if exePath, err = s.Build(); !slog.Check(err) {
 					quit = make(chan struct{})
 					s.Worker = consume.Log(quit, func(ent *logi.Entry) (
 						err error) {
-						// Debugf("KOPACH %s %s", ent.Text, ent.Level)
+						slog.Debugf("KOPACH %s %s", ent.Text, ent.Level)
 						s.EntryBuf.Add(ent)
 						if s.FilterFunc(ent) {
 							s.FilterBuf.Add(ent)
@@ -154,7 +155,7 @@ func (s *State) Runner() {
 					s.W.Invalidate()
 					go func() {
 						// time.Sleep(time.Second/10)
-						if err = s.Worker.Wait(); !Check(err) {
+						if err = s.Worker.Wait(); !slog.Check(err) {
 							s.Config.Running = false
 							s.Config.Pausing = false
 							s.W.Invalidate()
@@ -163,40 +164,40 @@ func (s *State) Runner() {
 				}
 			}
 		case "stop":
-			Debug("stop called")
+			slog.Debug("stop called")
 			if s.HasGo && s.Worker != nil && s.Config.Running {
 				close(quit)
-				if err = s.Worker.Interrupt(); !Check(err) {
+				if err = s.Worker.Interrupt(); !slog.Check(err) {
 					s.Config.Running = false
 				}
 			}
 		case "pause":
-			Debug("pause called")
+			slog.Debug("pause called")
 			if s.HasGo && s.Worker != nil && s.Config.Running && !s.Config.
 				Pausing {
 				s.Config.Pausing = !s.Config.Pausing
 				consume.Stop(s.Worker)
-				if err = s.Worker.Pause(); Check(err) {
+				if err = s.Worker.Pause(); slog.Check(err) {
 				}
 			}
 		case "resume":
-			Debug("resume called")
+			slog.Debug("resume called")
 			if s.HasGo && s.Worker != nil && s.Config.Running && s.Config.
 				Pausing {
 				s.Config.Pausing = !s.Config.Pausing
-				if err = s.Worker.Resume(); Check(err) {
+				if err = s.Worker.Resume(); slog.Check(err) {
 				}
 				consume.Start(s.Worker)
 			}
 		case "kill":
-			Debug("kill called")
+			slog.Debug("kill called")
 			if s.HasGo && s.Worker != nil && s.Config.Running {
 				// close(quit)
-				if err = s.Worker.Interrupt(); !Check(err) {
+				if err = s.Worker.Interrupt(); !slog.Check(err) {
 				}
 			}
 		case "restart":
-			Debug("restart called")
+			slog.Debug("restart called")
 			if s.HasGo && s.Worker != nil {
 				go func() {
 					s.RunCommandChan <- "stop"

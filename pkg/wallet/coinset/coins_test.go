@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"testing"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -30,7 +31,7 @@ func NewCoin(index int64, value util.Amount, numConfs int64) coinset.Coin {
 	h := sha256.New()
 	_, err := h.Write([]byte(fmt.Sprintf("%d", index)))
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	hash, _ := chainhash.NewHash(h.Sum(nil))
 	c := &TestCoin{
@@ -243,7 +244,7 @@ func TestSimpleCoin(t *testing.T) {
 		t.Error("Different value of coin pkScript than expected")
 	}
 	if testSimpleCoin.NumConfs() != 1 {
-		t.Error("Differet value of num confs than expected")
+		t.Error("Different value of num confs than expected")
 	}
 	if testSimpleCoin.ValueAge() != testSimpleCoinTxValueAge0 {
 		t.Error("Different value of coin value * age than expected")

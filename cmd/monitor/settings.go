@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/gui"
 	"github.com/stalker-loki/pod/pkg/gui/gel"
 	"github.com/stalker-loki/pod/pkg/gui/gelook"
@@ -35,7 +36,7 @@ func (s *State) SettingsButtons() layout.FlexChild {
 				})
 			}, b)
 			for b.Clicked(s.Gtx) {
-				Debug("settings folder clicked")
+				slog.Debug("settings folder clicked")
 				if !s.Config.SettingsOpen {
 					s.Config.FilterOpen = false
 					s.Config.BuildOpen = false
@@ -97,7 +98,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 							})
 						}, b)
 						for b.Clicked(s.Gtx) {
-							Debug("settings panel close button clicked")
+							slog.Debug("settings panel close button clicked")
 							s.Config.SettingsZoomed = !s.Config.SettingsZoomed
 							s.SaveConfig()
 						}
@@ -111,7 +112,7 @@ func (s *State) SettingsPage() layout.FlexChild {
 					}, b)
 					//s.IconButton("foldIn", "DocText", "DocBg", b)
 					for b.Clicked(s.Gtx) {
-						Debug("settings panel close button clicked")
+						slog.Debug("settings panel close button clicked")
 						s.Config.SettingsOpen = false
 						s.SaveConfig()
 					}
@@ -259,7 +260,7 @@ func (s *State) InputField(f *Field) func() {
 						func(e gel.EditorEvent) {
 							rdCfg[f.Field.Model] =
 								strings.Fields((rdw[f.Field.Model]).(*gel.Editor).Text())
-							Debug()
+							slog.Debug()
 							if e != nil {
 								s.Rc.SaveDaemonCfg()
 							}
@@ -329,7 +330,7 @@ func (s *State) InputField(f *Field) func() {
 						txt := rdw[f.Field.Model].(*gel.Editor).Text()
 						var err error
 						if rdCfg[f.Field.Model], err = time.ParseDuration(
-							txt); Check(err) {
+							txt); slog.Check(err) {
 						}
 						if e != nil {
 							s.Rc.SaveDaemonCfg()

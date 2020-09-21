@@ -3,6 +3,7 @@ package txauthor
 import (
 	"crypto/rand"
 	"encoding/binary"
+	"github.com/stalker-loki/app/slog"
 	mrand "math/rand"
 	"sync"
 )
@@ -21,7 +22,7 @@ func init() {
 	buf := make([]byte, 8)
 	_, err := rand.Read(buf)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		panic("Failed to seed prng: " + err.Error())
 	}
 	seed := int64(binary.LittleEndian.Uint64(buf))

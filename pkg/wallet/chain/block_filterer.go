@@ -1,6 +1,7 @@
 package chain
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
 	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
 	"github.com/stalker-loki/pod/pkg/chain/wire"
@@ -133,8 +134,8 @@ func (bf *BlockFilterer) FilterTx(tx *wire.MsgTx) bool {
 			out.PkScript, bf.Params,
 		)
 		if err != nil {
-			Error(err)
-			Warnf(
+			slog.Error(err)
+			slog.Warnf(
 				"could not parse output script in %s:%d: %v",
 				tx.TxHash(), i, err,
 			)

@@ -2,6 +2,7 @@ package bdb
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 
 	"github.com/stalker-loki/pod/pkg/db/walletdb"
 )
@@ -29,7 +30,7 @@ func parseArgs(funcName string, args ...interface{}) (string, error) {
 func openDBDriver(args ...interface{}) (walletdb.DB, error) {
 	dbPath, err := parseArgs("Open", args...)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, false)
@@ -40,7 +41,7 @@ func openDBDriver(args ...interface{}) (walletdb.DB, error) {
 func createDBDriver(args ...interface{}) (walletdb.DB, error) {
 	dbPath, err := parseArgs("Create", args...)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	return openDB(dbPath, true)

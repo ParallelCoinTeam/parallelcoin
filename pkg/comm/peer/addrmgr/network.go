@@ -139,7 +139,8 @@ func IsRFC6052(na *wire.NetAddress) bool {
 	return rfc6052Net.Contains(na.IP)
 }
 
-// IsRFC6145 returns whether or not the passed address is part of the IPv6 to IPv4 translated address range as defined by RFC6145 (::FFFF:0:0:0/96).
+// IsRFC6145 returns whether or not the passed address is part of the IPv6 to IPv4 translated address range as defined
+// by RFC6145 (::FFFF:0:0:0/96).
 func IsRFC6145(na *wire.NetAddress) bool {
 	return rfc6145Net.Contains(na.IP)
 }
@@ -158,12 +159,15 @@ func IsValid(na *wire.NetAddress) bool {
 		na.IP.Equal(net.IPv4bcast))
 }
 
-// IsRoutable returns whether or not the passed address is routable over the public internet.  This is true as long as the address is valid and is not in any reserved ranges.
+// IsRoutable returns whether or not the passed address is routable over the public internet.  This is true as long as
+// the address is valid and is not in any reserved ranges.
 func IsRoutable(na *wire.NetAddress) bool {
 	return IsValid(na) && !(IsRFC1918(na) || IsRFC2544(na) || IsRFC3927(na) || IsRFC4862(na) || IsRFC3849(na) || IsRFC4843(na) || IsRFC5737(na) || IsRFC6598(na) || IsLocal(na) || (IsRFC4193(na) && !IsOnionCatTor(na)))
 }
 
-// GroupKey returns a string representing the network group an address is part of.  This is the /16 for IPv4, the /32 (/36 for he.net) for IPv6, the string "local" for a local address, the string "tor:key" where key is the /4 of the onion address for Tor address, and the string "unroutable" for an unroutable address.
+// GroupKey returns a string representing the network group an address is part of.  This is the /16 for IPv4, the /32
+// (/36 for he.net) for IPv6, the string "local" for a local address, the string "tor:key" where key is the /4 of the
+// onion address for Tor address, and the string "unroutable" for an unroutable address.
 func GroupKey(na *wire.NetAddress) string {
 	if IsLocal(na) {
 		return "local"
@@ -186,8 +190,8 @@ func GroupKey(na *wire.NetAddress) string {
 	if IsRFC4380(na) {
 		// teredo tunnels have the last 4 bytes as the v4 address XOR 0xff.
 		ip := net.IP(make([]byte, 4))
-		for i, byte := range na.IP[12:16] {
-			ip[i] = byte ^ 0xff
+		for i, b := range na.IP[12:16] {
+			ip[i] = b ^ 0xff
 		}
 		return ip.Mask(net.CIDRMask(16, 32)).String()
 	}
@@ -195,7 +199,8 @@ func GroupKey(na *wire.NetAddress) string {
 		// group is keyed off the first 4 bits of the actual onion key.
 		return fmt.Sprintf("tor:%d", na.IP[6]&((1<<4)-1))
 	}
-	// OK, so now we know ourselves to be a IPv6 address. bitcoind uses /32 for everything, except for Hurricane Electric's (he.net) IP range, which it uses /36 for.
+	// OK, so now we know ourselves to be a IPv6 address. bitcoind uses /32 for everything, except for Hurricane
+	// Electric's (he.net) IP range, which it uses /36 for.
 	bits := 32
 	if heNet.Contains(na.IP) {
 		bits = 36

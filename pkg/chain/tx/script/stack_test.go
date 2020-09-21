@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	log "github.com/stalker-loki/pod/pkg/util/logi"
 )
 
 // tstCheckScriptError ensures the type of the two passed errors are of the same type (either both nil or both of type ScriptError) and their error codes match when not nil.
@@ -21,15 +19,15 @@ func tstCheckScriptError(gotErr, wantErr error) error {
 		return nil
 	}
 	// Ensure the want error type is a script error.
-	werr, ok := wantErr.(ScriptError)
+	wantError, ok := wantErr.(ScriptError)
 	if !ok {
 		return fmt.Errorf("unexpected test error type %T", wantErr)
 	}
 	// Ensure the error codes match.  It's safe to use a raw type assert here since the code above already proved they are the same type and the want error is a script error.
 	gotErrorCode := gotErr.(ScriptError).ErrorCode
-	if gotErrorCode != werr.ErrorCode {
+	if gotErrorCode != wantError.ErrorCode {
 		return fmt.Errorf("mismatched error code - got %v (%v), want %v",
-			gotErrorCode, gotErr, werr.ErrorCode)
+			gotErrorCode, gotErr, wantError.ErrorCode)
 	}
 	return nil
 }
@@ -228,7 +226,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != 1 {
-					log.Printf("%v != %v\n", v, 1)
+					fmt.Printf("%v != %v\n", v, 1)
 					return errors.New("1 != 1 on popInt")
 				}
 				return nil
@@ -261,7 +259,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != -1 {
-					log.Printf("%v != %v\n", v, -1)
+					fmt.Printf("%v != %v\n", v, -1)
 					return errors.New("-1 != -1 on popInt")
 				}
 				return nil
@@ -279,7 +277,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != -513 {
-					log.Printf("%v != %v\n", v, -513)
+					fmt.Printf("%v != %v\n", v, -513)
 					return errors.New("1 != 1 on popInt")
 				}
 				return nil
@@ -297,7 +295,7 @@ func TestStack(t *testing.T) {
 					return err
 				}
 				if v != -1 {
-					log.Printf("%v != %v\n", v, -1)
+					fmt.Printf("%v != %v\n", v, -1)
 					return errors.New("-1 != -1 on popInt")
 				}
 				return nil
@@ -350,7 +348,7 @@ func TestStack(t *testing.T) {
 			"PushInt leading zeros",
 			nil,
 			func(s *stack) error {
-				// this will have the highbit set
+				// this will have the high bit set
 				s.PushInt(scriptNum(128))
 				return nil
 			},

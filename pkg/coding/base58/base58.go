@@ -23,16 +23,16 @@ func Decode(b string) []byte {
 		answer.Add(answer, scratch)
 		j.Mul(j, bigRadix)
 	}
-	tmpval := answer.Bytes()
+	tmpVal := answer.Bytes()
 	var numZeros int
 	for numZeros = 0; numZeros < len(b); numZeros++ {
 		if b[numZeros] != alphabetIdx0 {
 			break
 		}
 	}
-	flen := numZeros + len(tmpval)
-	val := make([]byte, flen)
-	copy(val[numZeros:], tmpval)
+	fLen := numZeros + len(tmpVal)
+	val := make([]byte, fLen)
+	copy(val[numZeros:], tmpVal)
 	return val
 }
 

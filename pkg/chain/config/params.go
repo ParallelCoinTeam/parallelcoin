@@ -1,6 +1,7 @@
 package chaincfg
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"strings"
 
 	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
@@ -38,7 +39,10 @@ func IsPubKeyHashAddrID(id byte) bool {
 	return ok
 }
 
-// IsScriptHashAddrID returns whether the id is an identifier known to prefix a pay-to-script-hash address on any default or registered network.  This is used when decoding an address string into a specific address type.  It is up to the caller to check both this and IsPubKeyHashAddrID and decide whether an address is a pubkey hash address, script hash address, neither, or undeterminable (if both return true).
+// IsScriptHashAddrID returns whether the id is an identifier known to prefix a pay-to-script-hash address on any
+//default or registered network.  This is used when decoding an address string into a specific address type.  It is up
+//to the caller to check both this and IsPubKeyHashAddrID and decide whether an address is a pubkey hash address,
+//script hash address, neither, or undeterminable (if both return true).
 func IsScriptHashAddrID(id byte) bool {
 	_, ok := scriptHashAddrIDs[id]
 	return ok
@@ -69,7 +73,7 @@ func HDPrivateKeyToPublicKeyID(id []byte) ([]byte, error) {
 func newHashFromStr(hexStr string) *chainhash.Hash {
 	hash, err := chainhash.NewHashFromStr(hexStr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		// Ordinarily I don't like panics in library code since it can take applications down without them having a chance to recover which is extremely annoying, however an exception is being made in this case because the only way this can panic is if there is an error in the hard-coded hashes.  Thus it will only ever potentially panic on init and therefore is 100% predictable.
 		// loki: Panics are good when the condition should not happen!
 		panic(err)

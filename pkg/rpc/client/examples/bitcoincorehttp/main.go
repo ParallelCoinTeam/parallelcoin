@@ -1,14 +1,15 @@
 package main
 
 import (
+	"github.com/stalker-loki/app/slog"
 	"log"
 
-	rpcclient "github.com/stalker-loki/pod/pkg/rpc/client"
+	client "github.com/stalker-loki/pod/pkg/rpc/client"
 )
 
 func main() {
 	// Connect to local bitcoin core RPC server using HTTP POST mode.
-	connCfg := &rpcclient.ConnConfig{
+	connCfg := &client.ConnConfig{
 		Host:         "localhost:11046",
 		User:         "yourrpcuser",
 		Pass:         "yourrpcpass",
@@ -16,15 +17,15 @@ func main() {
 		TLS:          false, // Bitcoin core does not provide TLS by default
 	}
 	// Notice the notification parameter is nil since notifications are not supported in HTTP POST mode.
-	client, err := rpcclient.New(connCfg, nil)
+	cl, err := client.New(connCfg, nil)
 	if err != nil {
-		Fatal(err)
+		slog.Fatal(err)
 	}
-	defer client.Shutdown()
+	defer cl.Shutdown()
 	// Get the current block count.
-	blockCount, err := client.GetBlockCount()
+	blockCount, err := cl.GetBlockCount()
 	if err != nil {
-		Fatal(err)
+		slog.Fatal(err)
 	}
 	log.Printf("Block count: %d", blockCount)
 }

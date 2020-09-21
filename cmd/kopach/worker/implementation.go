@@ -3,6 +3,7 @@ package worker
 import (
 	"crypto/cipher"
 	"errors"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/cmd/kopach/control/hashrate"
 	"github.com/stalker-loki/pod/cmd/kopach/control/sol"
 	blockchain "github.com/stalker-loki/pod/pkg/chain"
@@ -80,7 +81,7 @@ func (c *Counter) GetAlgoVer() (ver int32) {
 	algs := c.Algos.Load().([]int32)
 	// Debug(algs)
 	if c.RoundsPerAlgo.Load() < 1 {
-		Debug("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
+		slog.Debug("RoundsPerAlgo is", c.RoundsPerAlgo.Load(), len(algs))
 		return 0
 	}
 	if len(algs) > 0 {
@@ -107,17 +108,17 @@ func (w *Worker) hashReport() {
 		}
 		i++
 		return nil
-	}); Check(err) {
+	}); slog.Check(err) {
 	}
 	// Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)
-	Tracef("average hashrate %.2f", av.Value())
+	slog.Tracef("average hashrate %.2f", av.Value())
 }
 
 // NewWithConnAndSemaphore is exposed to enable use an actual network
 // connection while retaining the same RPC API to allow a worker to be
 // configured to run on a bare metal system with a different launcher main
 func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker {
-	Debug("creating new worker")
+	slog.Debug("creating new worker")
 	msgBlock := wire.MsgBlock{Header: wire.BlockHeader{}}
 	w := &Worker{
 		pipeConn:      conn,
@@ -135,7 +136,7 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 	// tn := time.Now()
 	w.startNonce = uint32(w.roller.C.Load())
 	interrupt.AddHandler(func() {
-		Debug("worker quitting")
+		slog.Debug("worker quitting")
 		close(w.Quit)
 		// w.pipeConn.Close()
 		w.dispatchReady.Store(false)
@@ -145,12 +146,12 @@ func NewWithConnAndSemaphore(conn *stdconn.StdConn, quit chan struct{}) *Worker 
 }
 
 func worker(w *Worker) {
-	Debug("main work loop starting")
+	slog.Debug("main work loop starting")
 	sampleTicker := time.NewTicker(time.Second)
 out:
 	for {
 		// Pause state
-		Debug("worker pausing")
+		slog.Debug("worker pausing")
 	pausing:
 		for {
 			select {
@@ -158,19 +159,19 @@ out:
 				w.hashReport()
 				break
 			case <-w.stopChan:
-				Trace("received pause signal while paused")
+				slog.Trace("received pause signal while paused")
 				// drain stop channel in pause
 				break
 			case <-w.startChan:
-				Trace("received start signal")
+				slog.Trace("received start signal")
 				break pausing
 			case <-w.Quit:
-				Trace("quitting")
+				slog.Trace("quitting")
 				break out
 			}
 		}
 		// Run state
-		Debug("worker running")
+		slog.Debug("worker running")
 	running:
 		for {
 			select {
@@ -178,17 +179,17 @@ out:
 				w.hashReport()
 				break
 			case <-w.startChan:
-				Trace("received start signal while running")
+				slog.Trace("received start signal while running")
 				// drain start channel in run mode
 				break
 			case <-w.stopChan:
-				Trace("received pause signal while running")
+				slog.Trace("received pause signal while running")
 				// w.block.Store(&util.Block{})
 				// w.bitses.Store((blockchain.TargetBits)(nil))
 				// w.hashes.Store((map[int32]*chainhash.Hash)(nil))
 				break running
 			case <-w.Quit:
-				Trace("worker stopping while running")
+				slog.Trace("worker stopping while running")
 				break out
 			default:
 				if w.block.Load() == nil || w.bitses.Load() == nil ||
@@ -224,7 +225,7 @@ out:
 					if w.roller.C.Load()%w.roller.RoundsPerAlgo.Load() == 0 {
 						select {
 						case <-w.Quit:
-							Trace("worker stopping on pausing message")
+							slog.Trace("worker stopping on pausing message")
 							break out
 						default:
 						}
@@ -235,7 +236,7 @@ out:
 						err := w.dispatchConn.SendMany(hashrate.HashrateMagic,
 							transport.GetShards(hashReport.Data))
 						if err != nil {
-							Error(err)
+							slog.Error(err)
 						}
 					}
 					hash := mb.Header.BlockHashWithAlgos(nH)
@@ -245,9 +246,9 @@ out:
 						err := w.dispatchConn.SendMany(sol.SolutionMagic,
 							transport.GetShards(srs.Data))
 						if err != nil {
-							Error(err)
+							slog.Error(err)
 						}
-						Trace("sent solution")
+						slog.Trace("sent solution")
 
 						break running
 					}
@@ -259,7 +260,7 @@ out:
 			}
 		}
 	}
-	Debug("worker finished")
+	slog.Debug("worker finished")
 }
 
 // New initialises the state for a worker, loading the work
@@ -275,7 +276,7 @@ func New(quit chan struct{}) (w *Worker, conn net.Conn) {
 // makes the miner start mining from pause or pause,
 // prepare the work and restart
 func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
-	Trace("starting new job")
+	slog.Trace("starting new job")
 	if !w.dispatchReady.Load() { // || !w.running.Load() {
 		*reply = true
 		return
@@ -341,7 +342,7 @@ func (w *Worker) NewJob(job *job.Container, reply *bool) (err error) {
 // Pause signals the worker to stop working,
 // releases its semaphore and the worker is then idle
 func (w *Worker) Pause(_ int, reply *bool) (err error) {
-	Trace("pausing from IPC")
+	slog.Trace("pausing from IPC")
 	w.running.Store(false)
 	w.stopChan <- struct{}{}
 	*reply = true
@@ -350,7 +351,7 @@ func (w *Worker) Pause(_ int, reply *bool) (err error) {
 
 // Stop signals the worker to quit
 func (w *Worker) Stop(_ int, reply *bool) (err error) {
-	Debug("stopping from IPC")
+	slog.Debug("stopping from IPC")
 	w.stopChan <- struct{}{}
 	defer close(w.Quit)
 	*reply = true
@@ -360,7 +361,7 @@ func (w *Worker) Stop(_ int, reply *bool) (err error) {
 // SendPass gives the encryption key configured in the kopach controller (
 // pod) configuration to allow workers to dispatch their solutions
 func (w *Worker) SendPass(pass string, reply *bool) (err error) {
-	Debug("receiving dispatch password", pass)
+	slog.Debug("receiving dispatch password", pass)
 	rand.Seed(time.Now().UnixNano())
 	// sp := fmt.Sprint(rand.Intn(32767) + 1025)
 	// rp := fmt.Sprint(rand.Intn(32767) + 1025)
@@ -369,7 +370,7 @@ func (w *Worker) SendPass(pass string, reply *bool) (err error) {
 		"kopachworker", w, pass, transport.DefaultPort,
 		control.MaxDatagramSize, transport.Handlers{}, w.Quit)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	w.dispatchConn = conn
 	w.dispatchReady.Store(true)

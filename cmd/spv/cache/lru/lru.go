@@ -3,6 +3,7 @@ package lru
 import (
 	"container/list"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"sync"
 
 	"github.com/stalker-loki/pod/cmd/spv/cache"
@@ -24,7 +25,7 @@ type Cache struct {
 	// capacity represents how much this cache can hold. It could be number
 	// of elements or a number of bytes, decided by the cache.Value's Size.
 	capacity uint64
-	// size represents the size of all the elements currenty in the cache.
+	// size represents the size of all the elements currently in the cache.
 	size uint64
 	// ll is a doubly linked list which keeps track of recency of used
 	// elements by moving them to the front.
@@ -68,7 +69,7 @@ func (c *Cache) evict(needed uint64) error {
 			ce := elr.Value.(*entry)
 			es, err := ce.value.Size()
 			if err != nil {
-				Error(err)
+				slog.Error(err)
 				return fmt.Errorf("couldn't determine size of "+
 					"existing cache value %v", err)
 			}
@@ -88,7 +89,7 @@ func (c *Cache) evict(needed uint64) error {
 func (c *Cache) Put(key interface{}, value cache.Value) error {
 	vs, err := value.Size()
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return fmt.Errorf("couldn't determine size of cache value: %v",
 			err)
 	}
@@ -103,7 +104,7 @@ func (c *Cache) Put(key interface{}, value cache.Value) error {
 	if ok {
 		es, err := el.Value.(*entry).value.Size()
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return fmt.Errorf("couldn't determine size of existing"+
 				"cache value %v", err)
 		}

@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"errors"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"net"
 	"sync"
@@ -85,7 +86,7 @@ func (c *Connection) SetSendConn(ad string) (err error) {
 	var sC net.Conn
 	sC, err = net.Dial("udp4", ad)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	c.SendConn = sC
@@ -99,7 +100,7 @@ func (c *Connection) CreateShards(b, magic []byte) (shards [][]byte,
 	nonceLen := c.ciph.NonceSize()
 	nonce := make([]byte, nonceLen)
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	// generate the shards
@@ -121,7 +122,7 @@ func send(shards [][]byte, sendConn net.Conn) (err error) {
 	for i := range shards {
 		_, err = sendConn.Write(shards[i])
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 		}
 	}
 	return
@@ -130,14 +131,14 @@ func send(shards [][]byte, sendConn net.Conn) (err error) {
 func (c *Connection) Send(b, magic []byte) (err error) {
 	if len(magic) != 4 {
 		err = errors.New("magic must be 4 bytes long")
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	var shards [][]byte
 	shards, err = c.CreateShards(b, magic)
 	err = send(shards, c.SendConn)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	return
 }
@@ -145,18 +146,18 @@ func (c *Connection) Send(b, magic []byte) (err error) {
 func (c *Connection) SendTo(addr *net.UDPAddr, b, magic []byte) (err error) {
 	if len(magic) != 4 {
 		err = errors.New("magic must be 4 bytes long")
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	sendConn, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	shards, err := c.CreateShards(b, magic)
 	err = send(shards, sendConn)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	return
 }
@@ -164,7 +165,7 @@ func (c *Connection) SendTo(addr *net.UDPAddr, b, magic []byte) (err error) {
 func (c *Connection) SendShards(shards [][]byte) (err error) {
 	err = send(shards, c.SendConn)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	return
 }
@@ -172,22 +173,22 @@ func (c *Connection) SendShards(shards [][]byte) (err error) {
 func (c *Connection) SendShardsTo(shards [][]byte, addr *net.UDPAddr) (err error) {
 	sendConn, err := net.DialUDP("udp", nil, addr)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return
 	}
 	err = send(shards, sendConn)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 	}
 	return
 }
 
 func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 	lastSent *time.Time, firstSender *string) (err error) {
-	Trace("setting read buffer")
+	slog.Trace("setting read buffer")
 	buffer := make([]byte, c.maxDatagramSize)
 	go func() {
-		Trace("starting connection handler")
+		slog.Trace("starting connection handler")
 	out:
 		// read from socket until context is cancelled
 		for {
@@ -222,13 +223,13 @@ func (c *Connection) Listen(handlers HandleFunc, ifc interface{},
 							var cipherText []byte
 							cipherText, err = fec.Decode(bn.Buffers)
 							if err != nil {
-								Error(err)
+								slog.Error(err)
 								continue
 							}
 							bn.Decoded = true
 							err = handlers[magic](ifc)(cipherText)
 							if err != nil {
-								Error(err)
+								slog.Error(err)
 								continue
 							}
 						}

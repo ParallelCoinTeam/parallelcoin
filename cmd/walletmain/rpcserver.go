@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io/ioutil"
 	"net"
 	"os"
@@ -26,19 +27,19 @@ type listenFunc func(net string, laddr string) (net.Listener, error)
 // possibly also the key in PEM format to the paths specified by the config.  If
 // successful, the new keypair is returned.
 func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, error) {
-	Info("generating TLS certificates")
+	slog.Info("generating TLS certificates")
 	// Create directories for cert and key files if they do not yet exist.
-	Warn("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
+	slog.Warn("rpc tls ", *config.RPCCert, " ", *config.RPCKey)
 	certDir, _ := filepath.Split(*config.RPCCert)
 	keyDir, _ := filepath.Split(*config.RPCKey)
 	err := os.MkdirAll(certDir, 0700)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return tls.Certificate{}, err
 	}
 	err = os.MkdirAll(keyDir, 0700)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return tls.Certificate{}, err
 	}
 	// Generate cert pair.
@@ -46,12 +47,12 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	validUntil := time.Now().Add(time.Hour * 24 * 365 * 10)
 	cert, key, err := util.NewTLSCertPair(org, validUntil, nil)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return tls.Certificate{}, err
 	}
 	keyPair, err := tls.X509KeyPair(cert, key)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return tls.Certificate{}, err
 	}
 	// Write cert and (potentially) the key files.
@@ -59,7 +60,7 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	if err != nil {
 		rmErr := os.Remove(*config.RPCCert)
 		if rmErr != nil {
-			Warn("cannot remove written certificates:", rmErr)
+			slog.Warn("cannot remove written certificates:", rmErr)
 		}
 		return tls.Certificate{}, err
 	}
@@ -67,26 +68,26 @@ func GenerateRPCKeyPair(config *pod.Config, writeKey bool) (tls.Certificate, err
 	if err != nil {
 		rmErr := os.Remove(*config.RPCCert)
 		if rmErr != nil {
-			Warn("cannot remove written certificates:", rmErr)
+			slog.Warn("cannot remove written certificates:", rmErr)
 		}
 		return tls.Certificate{}, err
 	}
 	if writeKey {
 		err = ioutil.WriteFile(*config.RPCKey, key, 0600)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			rmErr := os.Remove(*config.RPCCert)
 			if rmErr != nil {
-				Warn("cannot remove written certificates:", rmErr)
+				slog.Warn("cannot remove written certificates:", rmErr)
 			}
 			rmErr = os.Remove(*config.CAFile)
 			if rmErr != nil {
-				Warn("cannot remove written certificates:", rmErr)
+				slog.Warn("cannot remove written certificates:", rmErr)
 			}
 			return tls.Certificate{}, err
 		}
 	}
-	Info("done generating TLS certificates")
+	slog.Info("done generating TLS certificates")
 	return keyPair, nil
 }
 
@@ -99,9 +100,9 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range normalizedListenAddrs {
 		host, _, err := net.SplitHostPort(addr)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			// Shouldn't happen due to already being normalized.
-			Errorf(
+			slog.Errorf(
 				"`%s` is not a normalized listener address", addr)
 			continue
 		}
@@ -123,7 +124,7 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 		ip := net.ParseIP(host)
 		switch {
 		case ip == nil:
-			Warnf("`%s` is not a valid IP address", host)
+			slog.Warnf("`%s` is not a valid IP address", host)
 		case ip.To4() == nil:
 			ipv6Addrs = append(ipv6Addrs, addr)
 		default:
@@ -134,8 +135,8 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range ipv4Addrs {
 		listener, err := listen("tcp4", addr)
 		if err != nil {
-			Error(err)
-			Warnf(
+			slog.Error(err)
+			slog.Warnf(
 				"Can't listen on %s: %v", addr, err,
 			)
 			continue
@@ -145,8 +146,8 @@ func makeListeners(normalizedListenAddrs []string, listen listenFunc) []net.List
 	for _, addr := range ipv6Addrs {
 		listener, err := listen("tcp6", addr)
 		if err != nil {
-			Error(err)
-			Warnf(
+			slog.Error(err)
+			slog.Warnf(
 				"Can't listen on %s: %v", addr, err,
 			)
 			continue
@@ -185,7 +186,7 @@ func openRPCKeyPair(config *pod.Config) (tls.Certificate, error) {
 }
 func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netparams.Params,
 	walletLoader *wallet.Loader) (*legacy.Server, error) {
-	Trace("startRPCServers")
+	slog.Trace("startRPCServers")
 	var (
 		legacyServer *legacy.Server
 		walletListen = net.Listen
@@ -193,11 +194,11 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 		err          error
 	)
 	if !*config.TLS {
-		Info("server TLS is disabled - only legacy RPC may be used")
+		slog.Info("server TLS is disabled - only legacy RPC may be used")
 	} else {
 		keyPair, err = openRPCKeyPair(config)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return nil, err
 		}
 		// Change the standard net.Listen function to the tls one.
@@ -212,7 +213,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 		}
 	}
 	if *config.Username == "" || *config.Password == "" {
-		Info("legacy RPC server disabled (requires username and password)")
+		slog.Info("legacy RPC server disabled (requires username and password)")
 	} else if len(*config.WalletRPCListeners) != 0 {
 		listeners := makeListeners(*config.WalletRPCListeners, walletListen)
 		if len(listeners) == 0 {
@@ -239,7 +240,7 @@ func startRPCServers(config *pod.Config, stateCfg *state.Config, activeNet *netp
 // enables methods that require a loaded wallet.
 func startWalletRPCServices(wallet *wallet.Wallet, legacyServer *legacy.Server) {
 	if legacyServer != nil {
-		Warn("starting legacy wallet rpc server")
+		slog.Warn("starting legacy wallet rpc server")
 		legacyServer.RegisterWallet(wallet)
 	}
 }

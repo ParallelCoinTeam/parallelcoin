@@ -27,16 +27,16 @@ func TestGenerateSharedSecret(t *testing.T) {
 
 // Test 1: Encryption and decryption
 func TestCipheringBasic(t *testing.T) {
-	privkey, err := NewPrivateKey(S256())
+	privKey, err := NewPrivateKey(S256())
 	if err != nil {
 		t.Fatal("failed to generate private key")
 	}
 	in := []byte("Hey there dude. How are you doing? This is a test.")
-	out, err := Encrypt(privkey.PubKey(), in)
+	out, err := Encrypt(privKey.PubKey(), in)
 	if err != nil {
 		t.Fatal("failed to encrypt:", err)
 	}
-	dec, err := Decrypt(privkey, out)
+	dec, err := Decrypt(privKey, out)
 	if err != nil {
 		t.Fatal("failed to decrypt:", err)
 	}
@@ -49,14 +49,14 @@ func TestCipheringBasic(t *testing.T) {
 func TestCiphering(t *testing.T) {
 	pb, _ := hex.DecodeString("fe38240982f313ae5afb3e904fb8215fb11af1200592b" +
 		"fca26c96c4738e4bf8f")
-	privkey, _ := PrivKeyFromBytes(S256(), pb)
+	privKey, _ := PrivKeyFromBytes(S256(), pb)
 	in := []byte("This is just a test.")
 	out, _ := hex.DecodeString("b0d66e5adaa5ed4e2f0ca68e17b8f2fc02ca002009e3" +
 		"3487e7fa4ab505cf34d98f131be7bd258391588ca7804acb30251e71a04e0020ecf" +
 		"df0f84608f8add82d7353af780fbb28868c713b7813eb4d4e61f7b75d7534dd9856" +
 		"9b0ba77cf14348fcff80fee10e11981f1b4be372d93923e9178972f69937ec850ed" +
 		"6c3f11ff572ddd5b2bedf9f9c0b327c54da02a28fcdce1f8369ffec")
-	dec, err := Decrypt(privkey, out)
+	dec, err := Decrypt(privKey, out)
 	if err != nil {
 		t.Fatal("failed to decrypt:", err)
 	}
@@ -65,7 +65,7 @@ func TestCiphering(t *testing.T) {
 	}
 }
 func TestCipheringErrors(t *testing.T) {
-	privkey, err := NewPrivateKey(S256())
+	privKey, err := NewPrivateKey(S256())
 	if err != nil {
 		t.Fatal("failed to generate private key")
 	}
@@ -136,7 +136,7 @@ func TestCipheringErrors(t *testing.T) {
 		}}, // ErrInvalidMAC
 	}
 	for i, test := range tests1 {
-		_, err = Decrypt(privkey, test.ciphertext)
+		_, err = Decrypt(privKey, test.ciphertext)
 		if err == nil {
 			t.Errorf("Decrypt #%d did not get error", i)
 		}

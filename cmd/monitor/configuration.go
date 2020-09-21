@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
+	"github.com/stalker-loki/app/slog"
 	"github.com/stalker-loki/pod/pkg/gui"
 	"github.com/stalker-loki/pod/pkg/gui/gel"
 )
@@ -26,7 +27,7 @@ func (s *State) BuildButtons() layout.FlexChild {
 					})
 				}, b)
 				for b.Clicked(s.Gtx) {
-					Debug("run mode folder clicked")
+					slog.Debug("run mode folder clicked")
 					if !s.Config.BuildOpen {
 						s.Config.FilterOpen = false
 						s.Config.SettingsOpen = false
@@ -77,7 +78,7 @@ func (s *State) BuildPage() layout.FlexChild {
 							b := s.Buttons["BuildZoom"]
 							s.IconButton(ic, "DocText", "DocBg", b)
 							for b.Clicked(s.Gtx) {
-								Debug("settings panel fold button clicked")
+								slog.Debug("settings panel fold button clicked")
 								s.Config.BuildZoomed = !s.Config.BuildZoomed
 								s.SaveConfig()
 							}
@@ -87,7 +88,7 @@ func (s *State) BuildPage() layout.FlexChild {
 						b := s.Buttons["BuildClose"]
 						s.IconButton("foldIn", "DocText", "DocBg", b)
 						for b.Clicked(s.Gtx) {
-							Debug("settings panel close button clicked")
+							slog.Debug("settings panel close button clicked")
 							s.Config.BuildOpen = false
 							s.SaveConfig()
 						}
@@ -272,7 +273,7 @@ func (s *State) BuildConfigPage() {
 									return
 								}
 								s.Config.ClickCommand = txt
-								Debug(s.Config.ClickCommand)
+								slog.Debug(s.Config.ClickCommand)
 								s.SaveConfig()
 							}
 						})()

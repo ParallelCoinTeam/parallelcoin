@@ -2,6 +2,7 @@ package walletmain
 
 import (
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io/ioutil"
 	// This enables pprof
 	// _ "net/http/pprof"
@@ -24,7 +25,7 @@ import (
 // any defers have already run, and if the error is non-nil, the program can be
 // exited with an error exit status.
 func Main(cx *conte.Xt) (err error) {
-	Info("starting wallet")
+	slog.Info("starting wallet")
 	cx.WaitGroup.Add(1)
 
 	// if *config.Profile != "" {
@@ -41,22 +42,22 @@ func Main(cx *conte.Xt) (err error) {
 	// Create and start HTTP server to serve wallet client connections.
 	// This will be updated with the wallet and chain server RPC client
 	// created below after each is created.
-	Trace("starting RPC servers")
+	slog.Trace("starting RPC servers")
 	legacyServer, err := startRPCServers(cx.Config, cx.StateCfg, cx.ActiveNet,
 		loader)
 	if err != nil {
-		Error("unable to create RPC servers:", err)
+		slog.Error("unable to create RPC servers:", err)
 		return
 	}
 	loader.RunAfterLoad(func(w *wallet.Wallet) {
-		Warn("starting wallet RPC services", w != nil)
+		slog.Warn("starting wallet RPC services", w != nil)
 		startWalletRPCServices(w, legacyServer)
 	})
 	if !*cx.Config.NoInitialLoad {
-		Trace("starting rpc client connection handler")
+		slog.Trace("starting rpc client connection handler")
 		// Create and start chain RPC client so it's ready to connect to
 		// the wallet when loaded later.
-		Trace("loading database")
+		slog.Trace("loading database")
 		// Load the wallet database.  It must have been created already
 		// or this will return an appropriate error.
 		var w *wallet.Wallet
@@ -64,7 +65,7 @@ func Main(cx *conte.Xt) (err error) {
 			true, cx.Config)
 		// Warn("wallet", w)
 		if err != nil {
-			Error(err)
+			slog.Error(err)
 			return
 		}
 		go func() {
@@ -72,24 +73,24 @@ func Main(cx *conte.Xt) (err error) {
 		}()
 		go rpcClientConnectLoop(cx, legacyServer, loader)
 		loader.Wallet = w
-		Trace("sending back wallet")
+		slog.Trace("sending back wallet")
 		cx.WalletChan <- w
-		Trace("adding interrupt handler to unload wallet")
+		slog.Trace("adding interrupt handler to unload wallet")
 		// Add interrupt handlers to shutdown the various process components
 		// before exiting.  Interrupt handlers run in LIFO order, so the wallet
 		// (which should be closed last) is added first.
 		interrupt.AddHandler(func() {
-			Debug("wallet.Main interrupt")
+			slog.Debug("wallet.Main interrupt")
 			err := loader.UnloadWallet()
 			if err != nil && err != wallet.ErrNotLoaded {
-				Error("failed to close wallet:", err)
+				slog.Error("failed to close wallet:", err)
 			}
 		})
 		if legacyServer != nil {
 			interrupt.AddHandler(func() {
-				Trace("stopping wallet RPC server")
+				slog.Trace("stopping wallet RPC server")
 				legacyServer.Stop()
-				Trace("wallet RPC server shutdown")
+				slog.Trace("wallet RPC server shutdown")
 			})
 		}
 		go func() {
@@ -99,19 +100,19 @@ func Main(cx *conte.Xt) (err error) {
 	}
 	select {
 	case <-cx.WalletKill:
-		Warn("wallet killswitch activated")
+		slog.Warn("wallet killswitch activated")
 		if legacyServer != nil {
-			Warn("stopping wallet RPC server")
+			slog.Warn("stopping wallet RPC server")
 			legacyServer.Stop()
-			Info("stopped wallet RPC server")
+			slog.Info("stopped wallet RPC server")
 		}
-		Info("wallet shutdown from killswitch complete")
+		slog.Info("wallet shutdown from killswitch complete")
 		cx.WaitGroup.Done()
 		return
 		// <-legacyServer.RequestProcessShutdownChan()
 	case <-interrupt.HandlersDone:
 	}
-	Info("wallet shutdown complete")
+	slog.Info("wallet shutdown complete")
 	cx.WaitGroup.Done()
 	return
 }
@@ -123,13 +124,13 @@ func ReadCAFile(config *pod.Config) []byte {
 		var err error
 		certs, err = ioutil.ReadFile(*config.CAFile)
 		if err != nil {
-			Error("cannot open CA file:", err)
+			slog.Error("cannot open CA file:", err)
 			// If there's an error reading the CA file, continue
 			// with nil certs and without the client connection.
 			certs = nil
 		}
 	} else {
-		Info("chain server RPC TLS is disabled")
+		slog.Info("chain server RPC TLS is disabled")
 	}
 	return certs
 }
@@ -185,7 +186,7 @@ func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
 		var cc *chain.RPCClient
 		cc, err = startChainRPC(cx.Config, cx.ActiveNet, certs)
 		if err != nil {
-			Error(
+			slog.Error(
 				"unable to open connection to consensus RPC server:", err)
 			continue
 		}
@@ -241,14 +242,14 @@ func rpcClientConnectLoop(cx *conte.Xt, legacyServer *legacy.Server,
 // there is no recovery in case the server is not available or if there is an
 // authentication error.  Instead, all requests to the client will simply error.
 func startChainRPC(config *pod.Config, activeNet *netparams.Params, certs []byte) (*chain.RPCClient, error) {
-	Tracef(
+	slog.Tracef(
 		"attempting RPC client connection to %v, TLS: %s",
 		*config.RPCConnect, fmt.Sprint(*config.TLS),
 	)
 	rpcC, err := chain.NewRPCClient(activeNet, *config.RPCConnect,
 		*config.Username, *config.Password, certs, !*config.TLS, 0)
 	if err != nil {
-		Error(err)
+		slog.Error(err)
 		return nil, err
 	}
 	err = rpcC.Start()

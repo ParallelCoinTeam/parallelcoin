@@ -13,13 +13,13 @@ import (
 func TestMsgAlert(t *testing.T) {
 	pver := ProtocolVersion
 	encoding := BaseEncoding
-	serializedpayload := []byte("some message")
+	serializedPayload := []byte("some message")
 	signature := []byte("some sig")
 	// Ensure we get the same payload and signature back out.
-	msg := NewMsgAlert(serializedpayload, signature)
-	if !reflect.DeepEqual(msg.SerializedPayload, serializedpayload) {
-		t.Errorf("NewMsgAlert: wrong serializedpayload - got %v, want %v",
-			msg.SerializedPayload, serializedpayload)
+	msg := NewMsgAlert(serializedPayload, signature)
+	if !reflect.DeepEqual(msg.SerializedPayload, serializedPayload) {
+		t.Errorf("NewMsgAlert: wrong serializedPayload - got %v, want %v",
+			msg.SerializedPayload, serializedPayload)
 	}
 	if !reflect.DeepEqual(msg.Signature, signature) {
 		t.Errorf("NewMsgAlert: wrong signature - got %v, want %v",
@@ -45,8 +45,8 @@ func TestMsgAlert(t *testing.T) {
 	if err != nil {
 		t.Error(err.Error())
 	}
-	// expected = 0x0c + serializedpayload + 0x08 + signature
-	expectedBuf := append([]byte{0x0c}, serializedpayload...)
+	// expected = 0x0c + serializedPayload + 0x08 + signature
+	expectedBuf := append([]byte{0x0c}, serializedPayload...)
 	expectedBuf = append(expectedBuf, []byte{0x08}...)
 	expectedBuf = append(expectedBuf, signature...)
 	if !bytes.Equal(buf.Bytes(), expectedBuf) {

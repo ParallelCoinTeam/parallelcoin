@@ -34,8 +34,8 @@ func TestFilterAddLatest(t *testing.T) {
 		t.Errorf("encode of MsgFilterAdd failed %v err <%v>", msg, err)
 	}
 	// Test decode with latest protocol version.
-	var readmsg MsgFilterAdd
-	err = readmsg.BtcDecode(&buf, pver, enc)
+	var readMsg MsgFilterAdd
+	err = readMsg.BtcDecode(&buf, pver, enc)
 	if err != nil {
 		t.Errorf("decode of MsgFilterAdd failed [%v] err <%v>", buf, err)
 	}
@@ -55,14 +55,14 @@ func TestFilterAddCrossProtocol(t *testing.T) {
 		t.Errorf("encode of MsgFilterAdd failed %v err <%v>", msg, err)
 	}
 	// Decode with old protocol version.
-	var readmsg MsgFilterAdd
-	err = readmsg.BtcDecode(&buf, BIP0031Version, LatestEncoding)
+	var readMsg MsgFilterAdd
+	err = readMsg.BtcDecode(&buf, BIP0031Version, LatestEncoding)
 	if err == nil {
 		t.Errorf("decode of MsgFilterAdd succeeded when it shouldn't "+
 			"have %v", msg)
 	}
 	// Since one of the protocol versions doesn't support the filteradd message, make sure the data didn't get encoded and decoded back out.
-	if bytes.Equal(msg.Data, readmsg.Data) {
+	if bytes.Equal(msg.Data, readMsg.Data) {
 		t.Error("should not get same data for cross protocol")
 	}
 }
@@ -79,8 +79,8 @@ func TestFilterAddMaxDataSize(t *testing.T) {
 			"have %v", msg)
 	}
 	// Decode with latest protocol version.
-	readbuf := bytes.NewReader(data)
-	err = msg.BtcDecode(readbuf, ProtocolVersion, LatestEncoding)
+	readBuf := bytes.NewReader(data)
+	err = msg.BtcDecode(readBuf, ProtocolVersion, LatestEncoding)
 	if err == nil {
 		t.Errorf("decode of MsgFilterAdd succeeded when it shouldn't "+
 			"have %v", msg)
