@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/wallet/chain"
 )
 
 var Block100000 = wire.MsgBlock{

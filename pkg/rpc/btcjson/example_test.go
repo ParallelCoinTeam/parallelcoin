@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
 // This example demonstrates how to create and marshal a command into a JSON-RPC request.

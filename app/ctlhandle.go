@@ -2,14 +2,14 @@ package app
 
 import (
 	"fmt"
-	"github.com/p9c/pod/app/config"
+	"github.com/stalker-loki/pod/app/config"
 	"os"
 	"time"
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/ctl"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/cmd/ctl"
 )
 
 const slash = string(os.PathSeparator)
@@ -23,7 +23,7 @@ func ctlHandleList(c *cli.Context) error {
 
 func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		config.Configure(cx, c.Command.Name)
+		config.Configure(cx, c.Command.Name, true)
 		args := c.Args()
 		if len(args) < 1 {
 			return cli.ShowSubcommandHelp(c)
@@ -41,7 +41,7 @@ func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
 
 func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		config.Configure(cx, c.Command.Name)
+		config.Configure(cx, c.Command.Name, true)
 
 		return nil
 	}

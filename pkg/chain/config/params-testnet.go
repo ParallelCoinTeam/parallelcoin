@@ -3,8 +3,8 @@ package chaincfg
 import (
 	"math"
 
-	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/chain/fork"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
 
 // TestNet3Params defines the network parameters for the test Bitcoin network (version 3).  Not to be confused with the regression test network, this network is sometimes simply called "testnet".

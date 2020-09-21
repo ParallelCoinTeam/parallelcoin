@@ -5,7 +5,7 @@ import (
 
 	"go.uber.org/atomic"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
 )
 
 const (

@@ -3,9 +3,9 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/serve"
+	"github.com/stalker-loki/pod/app/save"
+	"github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/stalker-loki/pod/pkg/util/logi/serve"
 	"io/ioutil"
 	prand "math/rand"
 	"os"
@@ -14,12 +14,12 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/pod"
+	"github.com/stalker-loki/pod/app/apputil"
+	"github.com/stalker-loki/pod/app/conte"
+	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/chain/fork"
+	"github.com/stalker-loki/pod/pkg/pod"
 )
 
 func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
@@ -250,8 +250,8 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.AutoPorts = c.Bool("autoports")
 		}
 		if c.IsSet("lan") {
-			// if LAN is turned on we need to remove the seeds from netparams not on mainnet mainnet is never in lan
-			// mode
+			// if LAN is turned on we need to remove the seeds from netparams not on mainnet
+			// mainnet is never in lan mode
 			// if LAN is turned on it means by default we are on testnet
 			cx.ActiveNet = &netparams.TestNet3Params
 			if cx.ActiveNet.Name != "mainnet" {

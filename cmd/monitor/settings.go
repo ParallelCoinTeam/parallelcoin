@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/gui/gelook"
-	"github.com/p9c/pod/pkg/pod"
+	"github.com/stalker-loki/pod/pkg/gui"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/pkg/pod"
 	"strconv"
 	"strings"
 	"time"
@@ -34,7 +34,6 @@ func (s *State) SettingsButtons() layout.FlexChild {
 					s.Icon("settingsIcon", fg, bg, 32)
 				})
 			}, b)
-			//s.IconButton("settingsIcon", fg, bg, b)
 			for b.Clicked(s.Gtx) {
 				Debug("settings folder clicked")
 				if !s.Config.SettingsOpen {
@@ -347,7 +346,7 @@ func (s *State) InputField(f *Field) func() {
 				s.Theme.Colors["Primary"])
 			sw.PillColor = bg
 			sw.CircleColor = fg
-			sw.PillColorChecked = s.Theme.Colors["PrimaryDim"]
+			sw.PillColorChecked = bg
 			sw.CircleColorChecked = s.Theme.Colors["Primary"]
 			sw.DrawLayout(s.Gtx, rdw[f.Field.Model].(*gel.CheckBox))
 			if (rdw[f.Field.Model]).(*gel.CheckBox).Checked(s.Gtx) {

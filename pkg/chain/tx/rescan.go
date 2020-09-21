@@ -1,13 +1,13 @@
 package wallettx
 
 import (
-	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
-	log "github.com/p9c/pod/pkg/util/logi"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	wtxmgr "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/util"
+	log "github.com/stalker-loki/pod/pkg/util/logi"
+	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	"github.com/stalker-loki/pod/pkg/wallet/chain"
 )
 
 type (

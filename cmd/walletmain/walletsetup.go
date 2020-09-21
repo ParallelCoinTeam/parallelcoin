@@ -6,19 +6,19 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/legacy/keystore"
-	"github.com/p9c/pod/pkg/util/prompt"
-	"github.com/p9c/pod/pkg/wallet"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	"github.com/stalker-loki/pod/pkg/pod"
+	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/util/legacy/keystore"
+	"github.com/stalker-loki/pod/pkg/util/prompt"
+	"github.com/stalker-loki/pod/pkg/wallet"
+	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
 
 	// This initializes the bdb driver
-	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
+	_ "github.com/stalker-loki/pod/pkg/db/walletdb/bdb"
 )
 
 const slash = string(os.PathSeparator)

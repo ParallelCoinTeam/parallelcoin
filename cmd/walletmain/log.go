@@ -3,7 +3,7 @@ package walletmain
 import (
 	"runtime"
 
-	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/stalker-loki/pod/pkg/util/logi"
 )
 
 var pkg string

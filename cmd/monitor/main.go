@@ -5,11 +5,11 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/cmd/gui/rcd"
+	"github.com/stalker-loki/pod/pkg/gui"
+	"github.com/stalker-loki/pod/pkg/util/interrupt"
+	"github.com/stalker-loki/pod/pkg/util/logi"
 	"gopkg.in/src-d/go-git.v4"
 	"os"
 	"os/exec"
@@ -23,7 +23,7 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	for i := range *logi.L.Packages {
 		lgs = append(lgs, i)
 	}
-	// Debugs(lgs)
+	Debugs(lgs)
 	mon.Loggers = mon.GetTree(lgs)
 	isNew := mon.LoadConfig()
 	_, _ = git.PlainClone("/tmp/foo", false,
@@ -125,7 +125,7 @@ func (s *State) TopLevelLayout() {
 		s.Header(),
 		gui.Flexed(1, func() {
 			s.FlexHStart(
-				s.Body(),
+				s.LogViewer(),
 				s.Sidebar(),
 			)
 		}),

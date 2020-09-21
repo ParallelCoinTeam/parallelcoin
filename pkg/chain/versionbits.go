@@ -3,7 +3,7 @@ package blockchain
 import (
 	"math"
 
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
 )
 
 const (

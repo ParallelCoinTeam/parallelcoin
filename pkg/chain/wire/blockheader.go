@@ -5,9 +5,9 @@ import (
 	"io"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/chain/forkhash"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/fork"
+	"github.com/stalker-loki/pod/pkg/chain/forkhash"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 )
 
 // MaxBlockHeaderPayload is the maximum number of bytes a block header can be. Version 4 bytes + Timestamp 4 bytes + Bits 4 bytes + Nonce 4 bytes + PrevBlock and MerkleRoot hashes.

@@ -2,24 +2,16 @@ package monitor
 
 import (
 	"gioui.org/layout"
-	"github.com/p9c/pod/app/save"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/consume"
+	"github.com/stalker-loki/pod/app/save"
+	"github.com/stalker-loki/pod/pkg/gui"
+	"github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/stalker-loki/pod/pkg/util/logi/consume"
 )
 
 func (s *State) Sidebar() layout.FlexChild {
 	return gui.Rigid(func() {
-		// if !(s.Config.BuildOpen || s.Config.SettingsOpen) {
-		//	s.Gtx.Constraints.Width.Max /= 2
-		// } else {
-		//	s.Gtx.Constraints.Width.Max -= 340
-		// }
 		s.Gtx.Constraints.Width.Min = 332
 		s.Gtx.Constraints.Width.Max = 332
-		// if s.Gtx.Constraints.Width.Max > 360 {
-		//	s.Gtx.Constraints.Width.Max = 360
-		// }
 		cs := s.Gtx.Constraints
 		if s.Config.FilterOpen {
 			s.FlexV(
@@ -31,18 +23,18 @@ func (s *State) Sidebar() layout.FlexChild {
 				gui.Flexed(1, func() {
 					cs := s.Gtx.Constraints
 					s.Rectangle(cs.Width.Max, cs.Height.Max, "PanelBg")
-					//s.Inset(8, func() {
 					s.FlexV(
 						gui.Flexed(1, func() {
-							//s.Gtx.Constraints.Width.Min = 240
 							s.FlexV(gui.Flexed(1, func() {
 								s.Loggers.GetWidget(s)
 							}),
 							)
 						}),
 					)
-					//})
 				}), gui.Rigid(func() {
+					// if s.Config.FilterMode {
+					// 	return
+					// }
 					s.Gtx.Constraints.Height.Max = 48
 					s.Gtx.Constraints.Height.Min = 48
 					cs := s.Gtx.Constraints
@@ -64,6 +56,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							for b.Clicked(s.Gtx) {
 								Debug("clear all")
 								s.EntryBuf.Clear()
+								s.FilterBuf.Clear()
 							}
 						}),
 						gui.Flexed(1, func() {
@@ -83,7 +76,6 @@ func (s *State) Sidebar() layout.FlexChild {
 						}),
 						gui.Rigid(func() {
 							b := s.Buttons["FilterShow"]
-							//s.IconButton("ShowAll", "DocText", "DocBg", b)
 							s.ButtonArea(func() {
 								s.Inset(8, func() {
 									s.Icon("ShowAll", "DocText", "DocBg", 32)
@@ -97,7 +89,6 @@ func (s *State) Sidebar() layout.FlexChild {
 						}),
 						gui.Rigid(func() {
 							b := s.Buttons["FilterAll"]
-							//s.IconButton("ShowItem", "DocText", "DocBg", b)
 							s.ButtonArea(func() {
 								s.Inset(8, func() {
 									s.Icon("ShowItem", "DocText", "DocBg", 32)
@@ -117,7 +108,6 @@ func (s *State) Sidebar() layout.FlexChild {
 									s.Icon("HideItem", "DocText", "DocBg", 32)
 								})
 							}, b)
-							//s.IconButton("HideItem", "DocText", "DocBg", b)
 							for b.Clicked(s.Gtx) {
 								Debug("filter none")
 								s.Loggers.HideAllItems(s)
@@ -126,7 +116,7 @@ func (s *State) Sidebar() layout.FlexChild {
 							}
 						}),
 
-						//Rigid(func() {
+						// Rigid(func() {
 						//	s.IconButton("Filter", "DocBg", "DocText",
 						//		&s.FilterButton)
 						//	for s.FilterButton.Clicked(s.Gtx) {
@@ -138,7 +128,7 @@ func (s *State) Sidebar() layout.FlexChild {
 						//		s.Config.FilterOpen = !s.Config.FilterOpen
 						//		s.SaveConfig()
 						//	}
-						//}),
+						// }),
 					)
 				}),
 			)
@@ -175,17 +165,19 @@ func (s *State) LevelsButtons() {
 			cs.Height.Max = 48
 			s.Rectangle(cs.Width.Max, cs.Height.Max, bg)
 			s.Inset(8, func() {
-				//cs := s.Gtx.Constraints
+				// cs := s.Gtx.Constraints
 				s.Icon(bn, color, bg, 32)
 			})
 		}, bb)
 		for bb.Clicked(s.Gtx) {
 			s.Config.FilterLevel = a + 1
 			*s.Ctx.Config.LogLevel = logi.Levels[s.Config.FilterLevel]
-			consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
+			if !s.Config.FilterMode {
+				consume.SetLevel(s.Worker, logi.Levels[s.Config.FilterLevel])
+				save.Pod(s.Ctx.Config)
+			}
 			Debug("filter level", logi.Tags[logi.Levels[a+1]])
 			s.W.Invalidate()
-			save.Pod(s.Ctx.Config)
 			s.SaveConfig()
 		}
 	})

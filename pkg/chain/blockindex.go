@@ -7,11 +7,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/chain/fork"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	database "github.com/stalker-loki/pod/pkg/db"
 )
 
 // blockStatus is a bit field representing the validation state of the block.

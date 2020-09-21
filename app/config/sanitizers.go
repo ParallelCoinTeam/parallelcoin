@@ -13,27 +13,27 @@ import (
 	"strings"
 	"time"
 
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/cmd/kopach/control/pause"
-	"github.com/p9c/pod/cmd/node"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/forkhash"
-	"github.com/p9c/pod/pkg/comm/peer/connmgr"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/interrupt"
-	"github.com/p9c/pod/pkg/util/normalize"
-	"github.com/p9c/pod/pkg/wallet"
+	"github.com/stalker-loki/pod/app/apputil"
+	"github.com/stalker-loki/pod/cmd/kopach/control/pause"
+	"github.com/stalker-loki/pod/cmd/node"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
+	"github.com/stalker-loki/pod/pkg/chain/forkhash"
+	"github.com/stalker-loki/pod/pkg/comm/peer/connmgr"
+	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/util/interrupt"
+	"github.com/stalker-loki/pod/pkg/util/normalize"
+	"github.com/stalker-loki/pod/pkg/wallet"
 
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/stalker-loki/pod/app/appdata"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/cmd/node/state"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/chain/fork"
+	"github.com/stalker-loki/pod/pkg/pod"
+	"github.com/stalker-loki/pod/pkg/util/logi"
 )
 
 const (
@@ -124,7 +124,7 @@ func validatePort(port string) bool {
 	return true
 }
 
-func initListeners(cx *conte.Xt, commandName string) {
+func initListeners(cx *conte.Xt, commandName string, initial bool) {
 	cfg := cx.Config
 	var fP int
 	var e error
@@ -159,7 +159,7 @@ func initListeners(cx *conte.Xt, commandName string) {
 		*cfg.Listeners = cli.StringSlice{listenHost}
 		*cfg.RPCListeners = cli.StringSlice{listenHost}
 	}
-	if *cx.Config.AutoPorts {
+	if *cx.Config.AutoPorts && !initial{
 		if fP, e = GetFreePort(); Check(e) {
 		}
 		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}

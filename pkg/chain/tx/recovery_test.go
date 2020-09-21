@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/p9c/pod/pkg/wallet"
+	"github.com/stalker-loki/pod/pkg/wallet"
 )
 
 // Harness holds the BranchRecoveryState being tested, the recovery window being

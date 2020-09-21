@@ -1,7 +1,7 @@
 package Pkg
 
 import (
-	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
+	"github.com/stalker-loki/pod/pkg/util/logi/Pkg/Pk"
 	"testing"
 )
 

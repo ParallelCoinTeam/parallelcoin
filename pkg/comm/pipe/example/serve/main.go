@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/comm/pipe"
+	"github.com/stalker-loki/pod/pkg/comm/pipe"
 	"time"
 )
 

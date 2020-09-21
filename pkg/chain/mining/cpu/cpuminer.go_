@@ -10,14 +10,14 @@ import (
 
 	"go.uber.org/atomic"
 
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/mining"
-	"github.com/p9c/pod/pkg/chain/wire"
-	log "github.com/p9c/pod/pkg/logi"
-	"github.com/p9c/pod/pkg/util"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/chain/fork"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/mining"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	log "github.com/stalker-loki/pod/pkg/logi"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 var tn = time.Now()

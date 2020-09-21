@@ -1,9 +1,9 @@
 package blockchain
 
 import (
-	"github.com/p9c/pod/pkg/chain/fork"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/chain/fork"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 // ContainsBlacklisted returns true if one of the given addresses

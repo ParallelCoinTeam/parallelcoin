@@ -9,11 +9,11 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 const dummyDir = ""

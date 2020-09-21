@@ -3,20 +3,20 @@
 package app
 
 import (
-	"github.com/p9c/pod/app/config"
+	"github.com/stalker-loki/pod/app/config"
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/gui"
-	"github.com/p9c/pod/cmd/gui/duoui"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/stalker-loki/pod/app/apputil"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/cmd/gui"
+	"github.com/stalker-loki/pod/cmd/gui/duoui"
+	"github.com/stalker-loki/pod/cmd/gui/rcd"
+	"github.com/stalker-loki/pod/pkg/util/interrupt"
 )
 
 var guiHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
-		config.Configure(cx, c.Command.Name)
+		config.Configure(cx, c.Command.Name, true)
 		Warn("starting GUI")
 		rc := rcd.RcInit(cx)
 		if !apputil.FileExists(*cx.Config.WalletFile) {

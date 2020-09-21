@@ -3,8 +3,8 @@ package ring
 import (
 	"context"
 	"github.com/marusama/semaphore"
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/util/logi"
 )
 
 type Entry struct {
@@ -64,7 +64,7 @@ func (b *Entry) Get(i int) (out *logi.Entry) {
 					cursor -= bl
 				}
 			}
-			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = b.Buf[cursor]
 		}
@@ -85,7 +85,7 @@ func (b *Entry) GetButton(i int) (out *gel.Button) {
 					cursor -= bl
 				}
 			}
-			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = &b.Buttons[cursor]
 		}
@@ -106,7 +106,7 @@ func (b *Entry) GetHider(i int) (out *gel.Button) {
 					cursor -= bl
 				}
 			}
-			//Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
+			// Debug("get entry", i, "len", bl, "cursor", b.Cursor, "position",
 			//	cursor)
 			out = &b.Hiders[cursor]
 		}

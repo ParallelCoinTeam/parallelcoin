@@ -3,7 +3,7 @@ package wire
 import (
 	"io"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 )
 
 // MaxGetCFiltersReqRange the maximum number of filters that may be requested in a getcfheaders message.

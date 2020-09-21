@@ -3,9 +3,9 @@ package blockchain_test
 import (
 	"os"
 
-	"github.com/p9c/pod/pkg/chain/wire"
-	database "github.com/p9c/pod/pkg/db"
-	_ "github.com/p9c/pod/pkg/db/ffldb"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	database "github.com/stalker-loki/pod/pkg/db"
+	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
 )
 
 const (

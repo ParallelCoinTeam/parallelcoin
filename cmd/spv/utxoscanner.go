@@ -6,9 +6,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/util"
-	am "github.com/p9c/pod/pkg/wallet/addrmgr"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/util"
+	am "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
 )
 
 type (

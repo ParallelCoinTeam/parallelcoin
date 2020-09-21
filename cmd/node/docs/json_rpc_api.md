@@ -50,10 +50,10 @@
 
 pod provides a [JSON-RPC](http://json-rpc.org/wiki/specification) API that is fully compatible with the original bitcoind/bitcoin-qt. There are a few key differences between pod and bitcoind as far as how RPCs are serviced:
 
-- Unlike bitcoind that has the wallet and chain intermingled in the same process which leads to several issues, pod intentionally splits the wallet and chain services into independent processes. See the blog post [here](https://blog.conformal.com/pod-not-your-moms-bitcoin-daemon/) for further details on why they were separated. This means that if you aretalking directly to pod, only chain-related RPCs are available. However both chain-related and wallet-related RPCs are available via [mod](https://github.com/p9c/pod/walletmain).
+- Unlike bitcoind that has the wallet and chain intermingled in the same process which leads to several issues, pod intentionally splits the wallet and chain services into independent processes. See the blog post [here](https://blog.conformal.com/pod-not-your-moms-bitcoin-daemon/) for further details on why they were separated. This means that if you aretalking directly to pod, only chain-related RPCs are available. However both chain-related and wallet-related RPCs are available via [mod](https://github.com/stalker-loki/pod/walletmain).
 
 - pod provides access to the API through both [HTTP POST](http://en.wikipedia.org/wiki/POST_%28HTTP%29) requests and
-  [Websockets](http://en.wikipedia.org/wiki/WebSocket) Websockets are the preferred transport for pod RPC and are used by applications such as [mod](https://github.com/p9c/pod/walletmain) for inter-process communication with pod. The websocket connection endpoint for pod is `wss://your_ip_or_domain:11048/ws`.
+  [Websockets](http://en.wikipedia.org/wiki/WebSocket) Websockets are the preferred transport for pod RPC and are used by applications such as [mod](https://github.com/stalker-loki/pod/walletmain) for inter-process communication with pod. The websocket connection endpoint for pod is `wss://your_ip_or_domain:11048/ws`.
 
   In addition to the [standard API](#Methods), an [extension API](#WSExtMethods) has been developed that is exclusive to clients using Websockets. In its current state, this API attempts to cover features found missing in the standard API during the development of btcwallet.
 
@@ -1131,7 +1131,7 @@ This section provides example code for interacting with the JSON-RPC API in vari
 **9.1 Go**
 
  is section provides examples of using the RPC interface using Go and  he
-[ pcclient](https://github.com/p9c/pod/rpcclient) package.
+[ pcclient](https://github.com/stalker-loki/pod/rpcclient) package.
 
 
 * [Using getblockcount to Retrieve the Current Block Height](#ExampleGetBlockCount)
@@ -1144,7 +1144,7 @@ This section provides example code for interacting with the JSON-RPC API in vari
 
 **9.1.1 Using getblockcount to Retrieve the Current Block Height**<br />
 
-The following is an example Go application which uses the [rpcclient](https://github.com/p9c/pod/rpcclient) package to connect with a pod instance via Websockets, issues [getblockcount](#getblockcount) to retrieve the current block height, and displays it.
+The following is an example Go application which uses the [rpcclient](https://github.com/stalker-loki/pod/rpcclient) package to connect with a pod instance via Websockets, issues [getblockcount](#getblockcount) to retrieve the current block height, and displays it.
 
 ```Go
 package main
@@ -1153,8 +1153,8 @@ import (
 "log"
 "path/filepath"
 
-"github.com/p9c/pod/btcutil"
-"github.com/p9c/pod/pkg/rpc/client"
+"github.com/stalker-loki/pod/btcutil"
+"github.com/stalker-loki/pod/pkg/rpc/client"
 
 
 
@@ -1204,14 +1204,14 @@ Block count: 276978
 
 **9.1.2 Using getblock to Retrieve the Genesis Block**<br />
 
-The following is an example Go application which uses the [rpcclient](https://github.com/p9c/pod/rpcclient) package to connect with a pod instance via Websockets, issues [getblock](#getblock) to retrieve information about the Genesis block, and display a few details about it.
+The following is an example Go application which uses the [rpcclient](https://github.com/stalker-loki/pod/rpcclient) package to connect with a pod instance via Websockets, issues [getblock](#getblock) to retrieve information about the Genesis block, and display a few details about it.
 
 ```Go
 package main
 import (
-	"github.com/p9c/pod/pkg/rpc/client" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/rpc/client" 	"git.parallelcoin.io/btcutil" 	"github.com/stalker-loki/pod/pkg/chain/hash"
 
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -1289,14 +1289,14 @@ Num transactions: 1
 
 Notifications (Websocket-specific)**<br />
 
-The following is an example Go application which uses the [rpcclient](https://github.com/p9c/pod/rpcclient) package to connect with a pod instance via Websockets and registers for [blockconnected](#blockconnected) and [blockdisconnected](#blockdisconnected) notifications with [notifyblocks](#notifyblocks).  It also sets up handlers for the notifications.
+The following is an example Go application which uses the [rpcclient](https://github.com/stalker-loki/pod/rpcclient) package to connect with a pod instance via Websockets and registers for [blockconnected](#blockconnected) and [blockdisconnected](#blockdisconnected) notifications with [notifyblocks](#notifyblocks).  It also sets up handlers for the notifications.
 
 ```Go
 package main
 import (
-	"github.com/p9c/pod/pkg/rpc/client" 	"git.parallelcoin.io/btcutil" 	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/rpc/client" 	"git.parallelcoin.io/btcutil" 	"github.com/stalker-loki/pod/pkg/chain/hash"
 
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
 	"io/ioutil"
 	"log"
 	"path/filepath"

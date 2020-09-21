@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"gioui.org/op"
 	"gioui.org/text"
-	"github.com/p9c/pod/pkg/chain/fork"
-	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/chain/fork"
+	"github.com/stalker-loki/pod/pkg/pod"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 	"runtime/debug"
 	"strconv"
 	"time"
@@ -15,11 +15,11 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/pkg/gui/clipboard"
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/cmd/gui/component"
+	"github.com/stalker-loki/pod/cmd/gui/model"
+	"github.com/stalker-loki/pod/pkg/gui/clipboard"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/gui/gelook"
 )
 
 type send struct {

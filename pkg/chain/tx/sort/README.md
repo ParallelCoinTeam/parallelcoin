@@ -1,7 +1,7 @@
 # txsort
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/p9c/pod/btcutil/txsort)
+[![GoDoc](http://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/stalker-loki/pod/btcutil/txsort)
 
 Package txsort provides the transaction sorting according to [BIP 69](https://github.com/bitcoin/bips/blob/master/bip-0069.mediawiki).
 
@@ -10,7 +10,7 @@ BIP 69 defines a standard lexicographical sort order of transaction inputs andou
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/p9c/pod/btcutil/txsort
+$ go get -u github.com/stalker-loki/pod/btcutil/txsort
 ```
 
 ## License

@@ -3,20 +3,22 @@ package monitor
 import (
 	"encoding/json"
 	"gioui.org/layout"
-	"github.com/p9c/pod/app/apputil"
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
-	"github.com/p9c/pod/pkg/data/ring"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/app/apputil"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/cmd/gui/rcd"
+	"github.com/stalker-loki/pod/pkg/comm/stdconn/worker"
+	"github.com/stalker-loki/pod/pkg/data/ring"
+	"github.com/stalker-loki/pod/pkg/gui"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/pkg/util/logi"
 	"io/ioutil"
 	"path/filepath"
 )
 
 const ConfigFileName = "monitor.json"
 
+// State stores the state of the monitor
 type State struct {
 	gui.State
 	Ctx                       *conte.Xt
@@ -27,6 +29,7 @@ type State struct {
 	FilterButtons             []gel.Button
 	Lists                     map[string]*layout.List
 	ModesButtons              map[string]*gel.Button
+	CheckBoxes                map[string]*gel.CheckBox
 	CommandEditor             gel.Editor
 	WindowWidth, WindowHeight int
 	Loggers                   *Node
@@ -36,7 +39,36 @@ type State struct {
 	CannotRun                 bool
 	RunCommandChan            chan string
 	EntryBuf                  *ring.Entry
+	FilterBuf                 *ring.Entry
+	FilterFunc                func(ent *logi.Entry) bool
 	FilterRoot                *Node
+}
+
+func NoFilter(_ *logi.Entry) bool { return true }
+
+func (s *State) FilterOn(ent *logi.Entry) (out bool) {
+	if s.Config.FilterNodes == nil || ent == nil {
+		return true
+	}
+	if x, ok := s.Config.FilterNodes[ent.Package]; ok {
+		if !x.Hidden {
+			out = true
+		}
+	}
+	cfgLevel := 0
+	level := 0
+	for i := range logi.Levels {
+		if *s.Ctx.Config.LogLevel == logi.Levels[i] {
+			cfgLevel = i
+		}
+		if ent.Level == logi.Levels[i] {
+			level = i
+		}
+	}
+	if level <= cfgLevel {
+		out = true
+	}
+	return
 }
 
 func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
@@ -53,6 +85,8 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		WindowHeight:        600,
 		RunCommandChan:      make(chan string),
 		EntryBuf:            ring.NewEntry(65536),
+		FilterBuf:           ring.NewEntry(65536),
+		FilterFunc:          NoFilter,
 		FilterLevelsButtons: make([]gel.Button, 7),
 		Buttons:             make(map[string]*gel.Button),
 		Lists:               make(map[string]*layout.List),
@@ -73,6 +107,11 @@ func NewMonitor(cx *conte.Xt, gtx *layout.Context, rc *rcd.RcVar) (s *State) {
 		"RunFromProfile", "UseBuiltinGo", "InstallNewGo"}
 	for i := range buttons {
 		s.Buttons[buttons[i]] = new(gel.Button)
+	}
+	checkboxes := []string{"FilterMode"}
+	s.CheckBoxes = make(map[string]*gel.CheckBox)
+	for i := range checkboxes {
+		s.CheckBoxes[checkboxes[i]] = new(gel.CheckBox)
 	}
 	lists := []string{
 		"Modes", "FilterLevel", "Groups", "Filter", "Log",
@@ -121,6 +160,7 @@ type Config struct {
 	FilterOpen     bool
 	FilterNodes    map[string]*Node
 	FilterLevel    int
+	FilterMode     bool
 	ClickCommand   string
 }
 
@@ -162,7 +202,9 @@ func (s *State) LoadConfig() (isNew bool) {
 			s.Config.Pausing = cnf.Pausing
 			s.Config.FilterOpen = cnf.FilterOpen
 			s.Config.FilterLevel = cnf.FilterLevel
+			s.Config.FilterMode = cnf.FilterMode
 			s.Config.ClickCommand = cnf.ClickCommand
+			s.Config.FilterMode = cnf.FilterMode
 			s.CommandEditor.SetText(s.Config.ClickCommand)
 		}
 	} else {
@@ -190,7 +232,7 @@ func (s *State) SaveConfig() {
 	s.Config.Height = s.WindowHeight
 	filename := filepath.Join(*s.Ctx.Config.DataDir, ConfigFileName)
 	if cfgJSON, e := json.MarshalIndent(s.Config, "", "  "); !Check(e) {
-		//Debug(string(cfgJSON))
+		// Debug(string(cfgJSON))
 		apputil.EnsureDir(filename)
 		if e := ioutil.WriteFile(filename, cfgJSON, 0600); Check(e) {
 			panic(e)

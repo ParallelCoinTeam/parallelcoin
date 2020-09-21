@@ -4,9 +4,9 @@ import (
 	"net"
 	"strings"
 
-	"github.com/p9c/pod/pkg/coding/simplebuffer"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/IP"
-	"github.com/p9c/pod/pkg/util/routeable"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/IP"
+	"github.com/stalker-loki/pod/pkg/util/routeable"
 )
 
 type IPs struct {

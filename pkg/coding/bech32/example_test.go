@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/p9c/pod/pkg/coding/bech32"
+	"github.com/stalker-loki/pod/pkg/coding/bech32"
 )
 
 // This example demonstrates how to decode a bech32 encoded string.

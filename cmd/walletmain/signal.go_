@@ -4,7 +4,7 @@ import (
 	"os"
 	"os/signal"
 
-	cl "github.com/p9c/pod/pkg/util/cl"
+	cl "github.com/stalker-loki/pod/pkg/util/cl"
 )
 
 

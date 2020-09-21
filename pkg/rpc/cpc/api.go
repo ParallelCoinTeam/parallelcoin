@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/rpc/chainrpc"
 )
 
 // StartAPI starts up the api handler server that receives rpc.API messages and runs the handler and returns the result

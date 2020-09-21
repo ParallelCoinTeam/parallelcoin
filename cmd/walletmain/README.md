@@ -60,9 +60,9 @@ Wallet clients can use one of two RPC servers:
 
 Install the latest MSIs available here:
 
-https://github.com/p9c/pod/releases
+https://github.com/stalker-loki/pod/releases
 
-https://github.com/p9c/pod/walletmain/releases
+https://github.com/stalker-loki/pod/walletmain/releases
 
 ### Windows/Linux/BSD/POSIX - Build from source
 
@@ -96,8 +96,8 @@ For a first time installation, the project and dependency sources can be
 obtained manually with `git` and `glide` (create directories as needed):
 
 ```
-git clone https://github.com/p9c/pod/walletmain $GOPATH/src/github.com/p9c/pod/walletmain
-cd $GOPATH/src/github.com/p9c/pod/walletmain
+git clone https://github.com/stalker-loki/pod/walletmain $GOPATH/src/github.com/stalker-loki/pod/walletmain
+cd $GOPATH/src/github.com/stalker-loki/pod/walletmain
 glide install
 ```
 
@@ -105,7 +105,7 @@ To update an existing source tree, pull the latest changes and install the
 matching dependencies:
 
 ```
-cd $GOPATH/src/github.com/p9c/pod/walletmain
+cd $GOPATH/src/github.com/stalker-loki/pod/walletmain
 git pull
 glide install
 ```
@@ -182,15 +182,15 @@ PS> $editor $env:LOCALAPPDATA\Btcwallet\btcwallet.conf
 
 Linux/BSD/POSIX (Installed from source):
 ```bash
-$ cp $GOPATH/src/github.com/p9c/pod/sample-pod.conf ~/.pod/pod.conf
-$ cp $GOPATH/src/github.com/p9c/pod/walletmain/sample-btcwallet.conf ~/.btcwallet/btcwallet.conf
+$ cp $GOPATH/src/github.com/stalker-loki/pod/sample-pod.conf ~/.pod/pod.conf
+$ cp $GOPATH/src/github.com/stalker-loki/pod/walletmain/sample-btcwallet.conf ~/.btcwallet/btcwallet.conf
 $ $EDITOR ~/.pod/pod.conf
 $ $EDITOR ~/.btcwallet/btcwallet.conf
 ```
 
 ## Issue Tracker
 
-The [integrated github issue tracker](https://github.com/p9c/pod/walletmain/issues)
+The [integrated github issue tracker](https://github.com/stalker-loki/pod/walletmain/issues)
 is used for this project.
 
 ## GPG Verification Key

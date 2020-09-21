@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	database "github.com/p9c/pod/pkg/db"
+	database "github.com/stalker-loki/pod/pkg/db"
 )
 
 // TestErrorCodeStringer tests the stringized output for the ErrorCode type.

@@ -1,8 +1,8 @@
 package database
 
 import (
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/util"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 // Cursor represents a cursor over key/value pairs and nested buckets of a

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/stalker-loki/pod/pkg/util/interrupt"
 )
 
 func main() {

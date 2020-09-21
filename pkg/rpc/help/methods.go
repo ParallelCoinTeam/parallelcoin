@@ -3,7 +3,7 @@
 package rpchelp
 
 import (
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
 // HelpDescs contains the locale-specific help strings along with the locale.

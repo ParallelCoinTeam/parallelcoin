@@ -1,12 +1,12 @@
 package consume
 
 import (
-	"github.com/p9c/pod/pkg/comm/pipe"
-	"github.com/p9c/pod/pkg/comm/stdconn/worker"
-	"github.com/p9c/pod/pkg/util/logi"
-	"github.com/p9c/pod/pkg/util/logi/Entry"
-	"github.com/p9c/pod/pkg/util/logi/Pkg"
-	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
+	"github.com/stalker-loki/pod/pkg/comm/pipe"
+	"github.com/stalker-loki/pod/pkg/comm/stdconn/worker"
+	"github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/stalker-loki/pod/pkg/util/logi/Entry"
+	"github.com/stalker-loki/pod/pkg/util/logi/Pkg"
+	"github.com/stalker-loki/pod/pkg/util/logi/Pkg/Pk"
 )
 
 func Log(quit chan struct{}, handler func(ent *logi.Entry) (
@@ -26,7 +26,7 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 					// printing
 					return
 				}
-				//Debugs(e)
+				// Debugs(e)
 				color := logi.ColorYellow
 				//Debug(e.Level)
 				switch e.Level {
@@ -44,6 +44,9 @@ func Log(quit chan struct{}, handler func(ent *logi.Entry) (
 					color = logi.ColorBlue
 				case logi.Trace:
 					color = logi.ColorViolet
+				default:
+					Debug("got an empty log entry")
+					return
 				}
 				Debugf("%s%s %s%s", color, e.Text,
 					logi.ColorOff, e.CodeLocation)

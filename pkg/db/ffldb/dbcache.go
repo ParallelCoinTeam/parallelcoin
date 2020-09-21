@@ -10,7 +10,7 @@ import (
 	"github.com/btcsuite/goleveldb/leveldb/iterator"
 	"github.com/btcsuite/goleveldb/leveldb/util"
 
-	"github.com/p9c/pod/pkg/util/treap"
+	"github.com/stalker-loki/pod/pkg/util/treap"
 )
 
 const (

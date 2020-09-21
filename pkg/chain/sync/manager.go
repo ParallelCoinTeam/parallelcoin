@@ -8,15 +8,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/p9c/pod/cmd/node/mempool"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	chaincfg "github.com/p9c/pod/pkg/chain/config"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	peerpkg "github.com/p9c/pod/pkg/comm/peer"
-	database "github.com/p9c/pod/pkg/db"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/stalker-loki/pod/cmd/node/mempool"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
+	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	peerpkg "github.com/stalker-loki/pod/pkg/comm/peer"
+	database "github.com/stalker-loki/pod/pkg/db"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 type (

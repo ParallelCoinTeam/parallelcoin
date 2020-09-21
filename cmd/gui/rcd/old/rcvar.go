@@ -6,12 +6,12 @@ import (
 	"gioui.org/layout"
 	"gioui.org/text"
 
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/gui/gelook"
 
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/gui/model"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/cmd/gui/model"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
 type RcVar struct {

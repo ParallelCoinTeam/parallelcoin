@@ -10,9 +10,9 @@ import (
 
 	"golang.org/x/crypto/ripemd160"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
 )
 
 type // An opcode defines the information related to a txscript opcode.  opfunc,

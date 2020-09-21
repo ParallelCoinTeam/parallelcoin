@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/stalker-loki/pod/pkg/coding/gcs"
 )
 
 func genRandFilterElements(numElements uint) ([][]byte, error) {

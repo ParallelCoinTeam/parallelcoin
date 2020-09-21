@@ -6,9 +6,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/p9c/pod/pkg/rpc/btcjson"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
-	"github.com/p9c/pod/pkg/rpc/legacy"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/rpc/chainrpc"
+	"github.com/stalker-loki/pod/pkg/rpc/legacy"
 )
 
 func (r *RcVar) ConsoleCmd(com string) (o string) {

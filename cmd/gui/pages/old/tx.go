@@ -4,9 +4,9 @@ import (
 	"gioui.org/layout"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/gelook"
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/cmd/gui/rcd"
+	"github.com/stalker-loki/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
 func txPage(rc *rcd.RcVar, gtx *layout.Context, th *gelook.DuoUItheme, tx string) *gelook.DuoUIpage {

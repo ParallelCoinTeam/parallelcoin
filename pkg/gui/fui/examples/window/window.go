@@ -3,7 +3,7 @@ package main
 import (
 	"gioui.org/app"
 	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gui/fui"
+	"github.com/stalker-loki/pod/pkg/gui/fui"
 )
 
 func main() {

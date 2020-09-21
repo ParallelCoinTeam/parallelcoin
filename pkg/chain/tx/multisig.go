@@ -3,10 +3,10 @@ package wallettx
 import (
 	"errors"
 
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	"github.com/p9c/pod/pkg/util"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	"github.com/stalker-loki/pod/pkg/util"
+	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
 )
 
 // MakeMultiSigScript creates a multi-signature script that can be redeemed with

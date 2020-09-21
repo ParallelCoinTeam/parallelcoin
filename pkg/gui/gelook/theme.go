@@ -7,7 +7,7 @@ import (
 	"gioui.org/text"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/pkg/gui/fonts"
+	"github.com/stalker-loki/pod/pkg/gui/fonts"
 )
 
 type DuoUItheme struct {

@@ -3,12 +3,12 @@ package Entry
 
 import (
 	"github.com/davecgh/go-spew/spew"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/String"
-	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/String"
+	"github.com/stalker-loki/pod/pkg/util/logi"
 	"time"
 
-	"github.com/p9c/pod/pkg/coding/simplebuffer"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Time"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/Time"
 )
 
 var EntryMagic = []byte{'e', 'n', 't', 'r'}

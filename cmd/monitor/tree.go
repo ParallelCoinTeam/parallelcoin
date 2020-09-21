@@ -2,10 +2,10 @@ package monitor
 
 import (
 	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/gui/gel"
-	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
-	"github.com/p9c/pod/pkg/util/logi/consume"
+	"github.com/stalker-loki/pod/pkg/gui"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/util/logi/Pkg/Pk"
+	"github.com/stalker-loki/pod/pkg/util/logi/consume"
 	"os"
 	"sort"
 	"strings"
@@ -31,6 +31,7 @@ func (s *State) GetTree(paths []string) (root *Node) {
 	for i := range paths {
 		sliced = append(sliced, strings.Split(paths[i], "/"))
 	}
+	// Fill in any nodes that are without children
 	slicedPaths := make(map[string]bool)
 	for i := range sliced {
 		var s string
@@ -40,7 +41,7 @@ func (s *State) GetTree(paths []string) (root *Node) {
 				empty = false
 			} else {
 				s = strings.Join(sliced[i][:j+1], "/")
-				//Debug(s)
+				// Debug(s)
 			}
 			slicedPaths[s] = empty
 		}
@@ -51,9 +52,7 @@ func (s *State) GetTree(paths []string) (root *Node) {
 		paths[counter] = i
 		counter++
 	}
-	Debugs(slicedPaths)
 	sort.Strings(paths)
-	Debugs(paths)
 	s.FilterRoot = &Node{
 		Name:       "root",
 		FullName:   string(os.PathSeparator),
@@ -73,6 +72,8 @@ func (s *State) GetTree(paths []string) (root *Node) {
 		switch {
 		case splitLen > prevLen:
 			// attach child
+			// because of the loop above that fills in childless nodes this
+			// works
 			n = &Node{
 				Name:               name,
 				FullName:           v,
@@ -100,7 +101,10 @@ func (s *State) GetTree(paths []string) (root *Node) {
 			}
 			cursor.parent.Children = append(cursor.parent.Children, n)
 		case splitLen < prevLen:
-			cursor = cursor.parent
+			broken := prevLen - splitLen
+			for i := broken; i > 0; i-- {
+				cursor = cursor.parent
+			}
 			n = &Node{
 				Name:               name,
 				FullName:           v,
@@ -123,10 +127,10 @@ func (s *State) GetTree(paths []string) (root *Node) {
 		cursor = n
 		prevLen = splitLen
 	}
-	//root.ClearParents()
-	//root.CloseAllItems(s)
-	//spew.Config.Indent = "    "
-	//Debugs(root)
+	// root.ClearParents()
+	// root.CloseAllItems(s)
+	// spew.Config.Indent = "    "
+	// Debugs(root)
 	return s.FilterRoot
 }
 
@@ -159,7 +163,7 @@ func (n *Node) GetWidget(s *State) {
 					s.IconButton(ic, fg, "PanelBg", nn[i].foldButton)
 					if nn[i].foldButton.Clicked(s.Gtx) {
 						if nn[i].Closed {
-							//nn[i].OpenAllItems(s)
+							// nn[i].OpenAllItems(s)
 						} else {
 							nn[i].CloseAllItems(s)
 						}
@@ -184,11 +188,11 @@ func (n *Node) GetWidget(s *State) {
 				s.TextButton(name, "Primary", 24, fg, "PanelBg", nn[i].showButton)
 				if nn[i].showButton.Clicked(s.Gtx) {
 					nn[i].Hidden = !nn[i].Hidden
-					//if !nn[i].Hidden {
+					// if !nn[i].Hidden {
 					//	nn[i].ShowAllItems(s)
-					//} else {
+					// } else {
 					//	nn[i].HideAllItems(s)
-					//}
+					// }
 					consume.SetFilter(s.Worker, s.FilterRoot.GetPackages())
 					s.SaveConfig()
 				}

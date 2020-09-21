@@ -9,14 +9,14 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/p9c/pod/app/appdata"
-	"github.com/p9c/pod/cmd/node/state"
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/pod"
-	"github.com/p9c/pod/pkg/rpc/chainrpc"
-	"github.com/p9c/pod/pkg/util/lang"
-	"github.com/p9c/pod/pkg/wallet"
-	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/stalker-loki/pod/app/appdata"
+	"github.com/stalker-loki/pod/cmd/node/state"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/pod"
+	"github.com/stalker-loki/pod/pkg/rpc/chainrpc"
+	"github.com/stalker-loki/pod/pkg/util/lang"
+	"github.com/stalker-loki/pod/pkg/wallet"
+	"github.com/stalker-loki/pod/pkg/wallet/chain"
 )
 
 type _dtype int
@@ -118,10 +118,8 @@ func (cx *Xt) IsCurrent() (is bool) {
 		rn.SyncManager.IsCurrent() &&
 		connected &&
 		rn.Chain.BestChain.Height() >= rn.HighestKnown.Load()
-	Trace("is current:", is, "-", cx.
-		RealNode.Chain.IsCurrent(), cx.
-		RealNode.SyncManager.IsCurrent(), !*cx.
-		Config.Solo,
+	Trace("is current:", is, "-", rn.Chain.IsCurrent(),
+		rn.SyncManager.IsCurrent(), !*cx.Config.Solo,
 		"connected", rn.HighestKnown.Load(),
 		rn.Chain.BestChain.Height(),
 	)

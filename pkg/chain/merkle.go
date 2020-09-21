@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"math"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	txscript "github.com/p9c/pod/pkg/chain/tx/script"
-	"github.com/p9c/pod/pkg/util"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 const (

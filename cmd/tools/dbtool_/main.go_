@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/p9c/pod/pkg/db"
+	"github.com/stalker-loki/pod/pkg/db"
 	flags "github.com/jessevdk/go-flags"
 )
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
 )
 
 // TestGetHeaders tests the MsgGetHeader API.

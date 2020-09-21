@@ -2,7 +2,7 @@
 
 Overview
 
-This client provides a robust and easy to use client for interfacing with a Bitcoin RPC server that uses a pod/bitcoin core compatible Bitcoin JSON-RPC API.  This client has been tested with pod (https://github.com/p9c/pod), btcwallet (https://github.com/p9c/pod/wallet), and bitcoin core (https://github.com/bitcoin).
+This client provides a robust and easy to use client for interfacing with a Bitcoin RPC server that uses a pod/bitcoin core compatible Bitcoin JSON-RPC API.  This client has been tested with pod (https://github.com/stalker-loki/pod), btcwallet (https://github.com/stalker-loki/pod/wallet), and bitcoin core (https://github.com/bitcoin).
 
 In addition to the compatible standard HTTP POST JSON-RPC API, pod and btcwallet provide a websocket interface that is more efficient than the standard HTTP POST method of accessing RPC.  The section below discusses the differences between HTTP POST and websockets.
 

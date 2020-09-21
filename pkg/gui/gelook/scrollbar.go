@@ -4,7 +4,7 @@ import (
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/p9c/pod/pkg/gui/gel"
+	"github.com/stalker-loki/pod/pkg/gui/gel"
 	"image"
 )
 

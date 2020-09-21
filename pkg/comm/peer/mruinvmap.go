@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
 
 // mruInventoryMap provides a concurrency safe map that is limited to a maximum number of items with eviction for the oldest entry when the limit is exceeded.

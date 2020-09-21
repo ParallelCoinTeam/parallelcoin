@@ -1,7 +1,7 @@
 # txscript
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://godoc.org/github.com/p9c/pod/txscript?status.png)](http://godoc.org/github.com/p9c/pod/txscript)
+[![GoDoc](https://godoc.org/github.com/stalker-loki/pod/txscript?status.png)](http://godoc.org/github.com/stalker-loki/pod/txscript)
 
 Package txscript implements the bitcoin transaction script language. There is a comprehensive test suite.
 
@@ -14,18 +14,18 @@ Bitcoin provides a stack-based, FORTH-like language for the scripts in the bitco
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/p9c/pod/txscript
+$ go get -u github.com/stalker-loki/pod/txscript
 ```
 
 ## Examples
 
-- [Standard Pay-to-pubkey-hash Script](http://godoc.org/github.com/p9c/pod/txscript#example-PayToAddrScript)  
+- [Standard Pay-to-pubkey-hash Script](http://godoc.org/github.com/stalker-loki/pod/txscript#example-PayToAddrScript)  
   Demonstrates creating a script which pays to a bitcoin address. It also prints the created script hex and uses the DisasmString function to display the disassembled script.
 
-- [Extracting Details from Standard Scripts](http://godoc.org/github.com/p9c/pod/txscript#example-ExtractPkScriptAddrs)  
+- [Extracting Details from Standard Scripts](http://godoc.org/github.com/stalker-loki/pod/txscript#example-ExtractPkScriptAddrs)  
   Demonstrates extracting information from a standard public key script.
 
-- [Manually Signing a Transaction Output](http://godoc.org/github.com/p9c/pod/txscript#example-SignTxOutput)  
+- [Manually Signing a Transaction Output](http://godoc.org/github.com/stalker-loki/pod/txscript#example-SignTxOutput)  
   Demonstrates manually creating and signing a redeem transaction.
 
 ## License

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"unicode"
 
-	"github.com/p9c/pod/app/appdata"
+	"github.com/stalker-loki/pod/app/appdata"
 )
 
 // TestAppDataDir tests the API for Dir to ensure it gives expected results for various operating systems.

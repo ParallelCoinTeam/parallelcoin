@@ -3,17 +3,17 @@ package duoui
 import (
 	"sync"
 
-	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/cmd/gui/pages"
-	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui/clipboard"
-	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/cmd/gui/component"
+	"github.com/stalker-loki/pod/cmd/gui/pages"
+	"github.com/stalker-loki/pod/cmd/gui/rcd"
+	"github.com/stalker-loki/pod/pkg/gui/clipboard"
+	"github.com/stalker-loki/pod/pkg/gui/gelook"
 
 	"gioui.org/app"
 	"gioui.org/layout"
 	"gioui.org/unit"
 
-	"github.com/p9c/pod/cmd/gui/model"
+	"github.com/stalker-loki/pod/cmd/gui/model"
 )
 
 var clipboardStarted bool

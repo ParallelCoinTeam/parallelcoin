@@ -3,12 +3,12 @@ package pages
 import (
 	"time"
 
-	"github.com/p9c/pod/cmd/gui/component"
-	"github.com/p9c/pod/cmd/gui/rcd"
+	"github.com/stalker-loki/pod/cmd/gui/component"
+	"github.com/stalker-loki/pod/cmd/gui/rcd"
 
 	"gioui.org/layout"
 
-	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/pkg/gui/gelook"
 )
 
 var (

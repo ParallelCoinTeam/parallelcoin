@@ -1,6 +1,6 @@
 package cache
 
-import "github.com/p9c/pod/pkg/util"
+import "github.com/stalker-loki/pod/pkg/util"
 
 // CacheableBlock is a wrapper around the util.Block type which provides a
 // Size method used by the cache to target certain memory usage.

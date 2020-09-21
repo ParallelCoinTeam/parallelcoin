@@ -3,8 +3,8 @@ package txscript
 import (
 	"testing"
 
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/wire"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
 
 // TestBadPC sets the pc to a deliberately bad result then confirms that Step() and Disasm fail correctly.

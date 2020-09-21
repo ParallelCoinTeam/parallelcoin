@@ -3,9 +3,9 @@ package txscript
 import (
 	"fmt"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/util"
 )
 
 // ScriptClass is an enumeration for the list of standard types of script.

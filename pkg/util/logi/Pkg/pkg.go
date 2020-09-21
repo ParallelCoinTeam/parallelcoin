@@ -3,10 +3,10 @@ package Pkg
 
 import (
 	"github.com/davecgh/go-spew/spew"
-	"github.com/p9c/pod/pkg/coding/simplebuffer"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Byte"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/String"
-	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/Byte"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/String"
+	"github.com/stalker-loki/pod/pkg/util/logi/Pkg/Pk"
 )
 
 var PackageMagic = []byte{'p', 'k', 'g', 's'}

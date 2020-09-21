@@ -2,7 +2,7 @@ package monitor
 
 import (
 	"gioui.org/layout"
-	"github.com/p9c/pod/pkg/gui"
+	"github.com/stalker-loki/pod/pkg/gui"
 )
 
 func (s *State) BottomBar() layout.FlexChild {
@@ -24,7 +24,7 @@ func (s *State) StatusBar() layout.FlexChild {
 		s.FlexH(
 			s.RunControls(),
 			s.RunmodeButtons(),
-			//s.Spacer("PanelBg"),
+			// s.Spacer("PanelBg"),
 			gui.Flexed(1, func() {
 				s.Gtx.Constraints.Height.Max = 48
 				cs := s.Gtx.Constraints
@@ -115,6 +115,5 @@ func (s *State) Filter() layout.FlexChild {
 			s.Config.FilterOpen = !s.Config.FilterOpen
 			s.SaveConfig()
 		}
-		//}
 	})
 }

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/p9c/pod/cmd/spv/cache"
+	"github.com/stalker-loki/pod/cmd/spv/cache"
 )
 
 func assertEqual(t *testing.T, a interface{}, b interface{}, message string) {

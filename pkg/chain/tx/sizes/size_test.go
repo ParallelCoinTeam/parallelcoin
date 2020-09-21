@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	. "github.com/p9c/pod/pkg/chain/tx/sizes"
-	"github.com/p9c/pod/pkg/chain/wire"
+	. "github.com/stalker-loki/pod/pkg/chain/tx/sizes"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
 )
 
 const (

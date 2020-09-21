@@ -3,7 +3,7 @@ package bdb
 import (
 	"fmt"
 
-	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
 )
 
 const (

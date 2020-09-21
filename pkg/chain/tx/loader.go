@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	"github.com/p9c/pod/pkg/db/walletdb"
-	"github.com/p9c/pod/pkg/util/prompt"
-	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	"github.com/stalker-loki/pod/pkg/util/prompt"
+	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
 )
 
 // A bunch of constants

@@ -5,7 +5,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/p9c/pod/pkg/coding/simplebuffer"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer"
 )
 
 type Uint16 struct {

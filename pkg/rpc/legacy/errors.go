@@ -3,7 +3,7 @@ package legacy
 import (
 	"errors"
 
-	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
 )
 
 // TODO(jrick): There are several error paths which 'replace' various errors

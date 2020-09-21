@@ -12,22 +12,22 @@ import (
 	"github.com/VividCortex/ewma"
 	"go.uber.org/atomic"
 
-	"github.com/p9c/pod/app/conte"
-	"github.com/p9c/pod/cmd/kopach/control/hashrate"
-	"github.com/p9c/pod/cmd/kopach/control/job"
-	"github.com/p9c/pod/cmd/kopach/control/p2padvt"
-	"github.com/p9c/pod/cmd/kopach/control/pause"
-	"github.com/p9c/pod/cmd/kopach/control/sol"
-	blockchain "github.com/p9c/pod/pkg/chain"
-	"github.com/p9c/pod/pkg/chain/fork"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/chain/mining"
-	"github.com/p9c/pod/pkg/chain/wire"
-	"github.com/p9c/pod/pkg/coding/simplebuffer/Uint16"
-	"github.com/p9c/pod/pkg/comm/transport"
-	rav "github.com/p9c/pod/pkg/data/ring"
-	"github.com/p9c/pod/pkg/util"
-	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/stalker-loki/pod/app/conte"
+	"github.com/stalker-loki/pod/cmd/kopach/control/hashrate"
+	"github.com/stalker-loki/pod/cmd/kopach/control/job"
+	"github.com/stalker-loki/pod/cmd/kopach/control/p2padvt"
+	"github.com/stalker-loki/pod/cmd/kopach/control/pause"
+	"github.com/stalker-loki/pod/cmd/kopach/control/sol"
+	blockchain "github.com/stalker-loki/pod/pkg/chain"
+	"github.com/stalker-loki/pod/pkg/chain/fork"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/chain/mining"
+	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/stalker-loki/pod/pkg/coding/simplebuffer/Uint16"
+	"github.com/stalker-loki/pod/pkg/comm/transport"
+	rav "github.com/stalker-loki/pod/pkg/data/ring"
+	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/stalker-loki/pod/pkg/util/interrupt"
 )
 
 const (
@@ -264,16 +264,16 @@ var handlersMulticast = transport.Handlers{
 		}
 		j := p2padvt.LoadContainer(b)
 		otherIPs := j.GetIPs()
-		Debug("otherIPs", otherIPs)
+		// Trace("otherIPs", otherIPs)
 		otherPort := fmt.Sprint(j.GetP2PListenersPort())
-		Debug("ctrl", j.GetControllerListenerPort(), "P2P", j.GetP2PListenersPort(),
-			"rpc", j.GetRPCListenersPort())
 		myPort := strings.Split((*c.cx.Config.Listeners)[0], ":")[1]
-		Debug("myPort", myPort)
+		// Trace("myPort", myPort,*c.cx.Config.Listeners)
 		for i := range otherIPs {
 			o := fmt.Sprintf("%s:%s", otherIPs[i], otherPort)
 			if otherPort != myPort {
 				if _, ok := c.otherNodes[o]; !ok {
+					Debug("ctrl", j.GetControllerListenerPort(), "P2P",
+						j.GetP2PListenersPort(), "rpc", j.GetRPCListenersPort())
 					// because nodes can be set to change their port each launch this always reconnects (for lan, autoports is
 					// recommended).
 					// go func() {
@@ -322,7 +322,9 @@ func (c *Controller) sendNewBlockTemplate() (err error) {
 	msgB := template.Block
 	c.coinbases = make(map[int32]*util.Tx)
 	var fMC job.Container
-	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), p2padvt.Get(c.cx), &c.coinbases)
+	adv := p2padvt.Get(c.cx)
+	Traces(adv)
+	fMC, c.transactions = job.Get(c.cx, util.NewBlock(msgB), adv, &c.coinbases)
 	jobShards := transport.GetShards(fMC.Data)
 	shardsLen := len(jobShards)
 	if shardsLen < 1 {

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/p9c/pod/pkg/util/zero"
+	. "github.com/stalker-loki/pod/pkg/util/zero"
 )
 
 func makeOneBytes(n int) []byte {

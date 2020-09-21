@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/p9c/pod/pkg/chain/config/netparams"
-	chainhash "github.com/p9c/pod/pkg/chain/hash"
-	"github.com/p9c/pod/pkg/coding/base58"
-	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
+	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/stalker-loki/pod/pkg/coding/base58"
+	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
 )
 
 // ErrMalformedPrivateKey describes an error where a WIF-encoded private key cannot be decoded due to being improperly formatted.  This may occur if the byte length is incorrect or an unexpected magic number was encountered.

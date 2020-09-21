@@ -2,8 +2,8 @@ package monitor
 
 import (
 	"fmt"
-	"github.com/p9c/pod/pkg/gui"
-	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/pod/pkg/gui"
+	"github.com/stalker-loki/pod/pkg/gui/gelook"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -62,7 +62,10 @@ func (s *State) Header() layout.FlexChild {
 				// s.Rectangle(cs.Width.Max, cs.Width.Max, "Primary")
 				layout.E.Layout(s.Gtx, func() {
 					t := s.Theme.DuoUIlabel(unit.Dp(float32(16)),
-						fmt.Sprintf("%s %s %dx%d", s.Ctx.Config.Listeners.String(),
+						fmt.Sprintf("p2p %s rpc %s ctl %s %s %dx%d",
+							(*s.Ctx.Config.Listeners)[0],
+							(*s.Ctx.Config.RPCListeners)[0],
+							*s.Ctx.Config.Controller,
 							*s.Ctx.Config.DataDir,
 							s.WindowWidth, s.WindowHeight))
 					t.Color = s.Theme.Colors[fg]

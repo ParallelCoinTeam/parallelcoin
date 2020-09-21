@@ -9,7 +9,7 @@ This example also sets a timer to shutdown the client after 10 seconds to demons
 The first step is to use `go get` to download and install the rpcclient package:
 
 ```bash
-$ go get github.com/p9c/pod/rpcclient
+$ go get github.com/stalker-loki/pod/rpcclient
 ```
 
 Next, modify the `main.go` source to specify the correct RPC username and password for the RPC server:
@@ -22,7 +22,7 @@ Next, modify the `main.go` source to specify the correct RPC username and passwo
 Finally, navigate to the example's directory and run it with:
 
 ```bash
-$ cd $GOPATH/src/github.com/p9c/pod/rpcclient/examples/podwebsockets
+$ cd $GOPATH/src/github.com/stalker-loki/pod/rpcclient/examples/podwebsockets
 $ go run *.go
 ```
 
