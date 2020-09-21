@@ -30,7 +30,7 @@ require (
 	github.com/p9c/goterm v0.0.3
 	github.com/programmer10110/gostreebog v0.0.0-20170704145444-a3e1d28291b2
 	github.com/sergi/go-diff v1.1.0 // indirect
-	github.com/stalker-loki/app v0.0.5
+	github.com/stalker-loki/app v0.0.6
 	github.com/tstranex/gozmq v0.0.0-20160831212417-0daa84a596ba
 	github.com/urfave/cli v1.22.4
 	github.com/vivint/infectious v0.0.0-20190108171102-2455b059135b
