@@ -13,12 +13,12 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"math/big"
 
-	config "github.com/stalker-loki/pod/pkg/chain/config"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/coding/base58"
-	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
-	"github.com/stalker-loki/pod/pkg/util"
+	config "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/coding/base58"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (

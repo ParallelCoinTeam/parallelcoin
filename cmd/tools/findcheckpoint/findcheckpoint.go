@@ -5,10 +5,10 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"path/filepath"
 
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chaincfg "github.com/stalker-loki/pod/pkg/chain/config"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	database "github.com/stalker-loki/pod/pkg/db"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chaincfg "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	database "github.com/p9c/pod/pkg/db"
 )
 
 const blockDbNamePrefix = "blocks"

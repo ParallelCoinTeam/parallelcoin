@@ -3,11 +3,11 @@ package spv
 import (
 	"fmt"
 
-	"github.com/stalker-loki/pod/cmd/spv/headerfs"
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/cmd/spv/headerfs"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // mockBlockHeaderStore is an implementation of the BlockHeaderStore backed by

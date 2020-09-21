@@ -4,7 +4,7 @@ import (
 	"gioui.org/op/paint"
 	"gioui.org/text"
 	"gioui.org/unit"
-	"github.com/stalker-loki/pod/pkg/gui/fonts"
+	"github.com/p9c/pod/pkg/gui/fonts"
 	"image/color"
 )
 

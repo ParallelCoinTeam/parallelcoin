@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/stalker-loki/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func main() {

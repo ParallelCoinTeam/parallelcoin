@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"testing"
 
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 )
 
 // TestCheckBlockScripts ensures that validating the all of the scripts in a known-good block doesn't return an error.

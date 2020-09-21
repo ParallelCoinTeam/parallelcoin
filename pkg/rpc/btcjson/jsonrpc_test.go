@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // TestIsValidIDType ensures the IsValidIDType function behaves as expected.

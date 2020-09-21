@@ -6,9 +6,9 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"sort"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Coin represents a spendable transaction outpoint

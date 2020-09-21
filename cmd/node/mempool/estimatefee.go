@@ -13,9 +13,9 @@ import (
 	"strings"
 	"sync"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/mining"
-	"github.com/stalker-loki/pod/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/mining"
+	"github.com/p9c/pod/pkg/util"
 )
 
 type // DUOPerKilobyte is number with units of parallelcoins per kilobyte.

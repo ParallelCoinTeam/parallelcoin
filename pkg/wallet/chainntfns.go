@@ -5,11 +5,11 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"strings"
 
-	tm "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
-	wm "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
-	"github.com/stalker-loki/pod/pkg/wallet/chain"
+	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 func (w *Wallet) handleChainNotifications() {

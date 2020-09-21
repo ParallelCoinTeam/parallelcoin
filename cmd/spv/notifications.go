@@ -4,8 +4,8 @@ import (
 	"errors"
 	"github.com/stalker-loki/app/slog"
 
-	"github.com/stalker-loki/pod/pkg/comm/peer/addrmgr"
-	"github.com/stalker-loki/pod/pkg/comm/peer/connmgr"
+	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
+	"github.com/p9c/pod/pkg/comm/peer/connmgr"
 )
 
 type (

@@ -6,10 +6,10 @@ import (
 	"math"
 	"sync"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // ln2Squared is simply the square of the natural log of 2.

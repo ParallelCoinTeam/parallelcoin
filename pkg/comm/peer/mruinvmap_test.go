@@ -6,8 +6,8 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"testing"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // TestMruInventoryMap ensures the MruInventoryMap behaves as expected including limiting, eviction of least-recently used entries, specific entry removal, and existence tests.

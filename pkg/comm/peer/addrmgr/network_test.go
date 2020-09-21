@@ -4,8 +4,8 @@ import (
 	"net"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/comm/peer/addrmgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/comm/peer/addrmgr"
 )
 
 // TestIPTypes ensures the various functions which determine the type of an IP

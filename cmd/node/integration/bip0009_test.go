@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stalker-loki/pod/cmd/node/integration/rpctest"
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	config "github.com/stalker-loki/pod/pkg/chain/config"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	"github.com/p9c/pod/cmd/node/integration/rpctest"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	config "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 const (

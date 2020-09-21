@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/stalker-loki/app/slog"
 
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // FutureRawResult is a future promise to deliver the result of a RawRequest RPC invocation (or an applicable error).

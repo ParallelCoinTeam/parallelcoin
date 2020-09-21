@@ -8,15 +8,15 @@ import (
 	// _ "net/http/pprof"
 	"sync"
 
-	"github.com/stalker-loki/pod/app/conte"
-	"github.com/stalker-loki/pod/pkg/chain/mining/addresses"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/chain/mining/addresses"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/pod"
-	"github.com/stalker-loki/pod/pkg/rpc/legacy"
-	"github.com/stalker-loki/pod/pkg/util/interrupt"
-	"github.com/stalker-loki/pod/pkg/wallet"
-	"github.com/stalker-loki/pod/pkg/wallet/chain"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/legacy"
+	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/wallet"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 // Main is a work-around main function that is required since deferred

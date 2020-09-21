@@ -10,7 +10,7 @@ import (
 	"github.com/aead/siphash"
 	"github.com/kkdai/bstream"
 
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // Inspired by https://github.com/rasky/gcs

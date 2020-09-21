@@ -7,12 +7,12 @@ import (
 	"os"
 	"path/filepath"
 
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	config "github.com/stalker-loki/pod/pkg/chain/config"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	database "github.com/stalker-loki/pod/pkg/db"
-	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
-	"github.com/stalker-loki/pod/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	config "github.com/p9c/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // This example demonstrates how to create a new chain instance and use ProcessBlock to attempt to add a block to the chain.  As the package overview documentation describes, this includes all of the Bitcoin consensus rules.  This example intentionally attempts to insert a duplicate genesis block to illustrate how an invalid block is handled.

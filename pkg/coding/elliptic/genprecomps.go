@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 
-	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 )
 
 func main() {

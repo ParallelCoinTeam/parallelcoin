@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/pkg/comm/stdconn/example/hello/hello"
-	"github.com/stalker-loki/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/comm/stdconn/example/hello/hello"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
 )
 
 func main() {

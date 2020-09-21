@@ -3,8 +3,8 @@ package txscript
 import (
 	"sync"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // TxSigHashes houses the partial set of sighashes introduced within BIP0143. This partial set of sighashes may be re-used within each input across a transaction when validating all inputs. As a result, validation complexity for SigHashAll can be reduced by a polynomial factor.

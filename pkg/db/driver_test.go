@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	database "github.com/stalker-loki/pod/pkg/db"
-	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
+	database "github.com/p9c/pod/pkg/db"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 var (

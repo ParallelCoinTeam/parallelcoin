@@ -5,7 +5,7 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"time"
 
-	"github.com/stalker-loki/pod/cmd/kopach/control/hashrate"
+	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 )
 
 // GetHashrate returns the exponential weighted moving average of the total hashrate and

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	wtxmgr "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/db/walletdb"
 )
 
 var (

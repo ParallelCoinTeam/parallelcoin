@@ -8,11 +8,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
-	"github.com/stalker-loki/pod/pkg/pod"
-	"github.com/stalker-loki/pod/pkg/util/prompt"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/util/prompt"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 // Loader implements the creating of new and opening of existing wallets, while

@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/coding/fec"
+	"github.com/p9c/pod/pkg/coding/fec"
 )
 
 type HandleFunc map[string]func(ctx interface{}) func(b []byte) (err error)

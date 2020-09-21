@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/comm/transport"
+	"github.com/p9c/pod/pkg/comm/transport"
 )
 
 const (

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
 
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // AddNodeSubCmd defines the type used in the addnode JSON-RPC command for the sub command field.

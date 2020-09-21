@@ -4,7 +4,7 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"log"
 
-	client "github.com/stalker-loki/pod/pkg/rpc/client"
+	client "github.com/p9c/pod/pkg/rpc/client"
 )
 
 func main() {

@@ -6,9 +6,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/comm/peer"
 )
 
 // mockRemotePeer creates a basic inbound peer listening on the simnet port for use with Example_peerConnection.  It

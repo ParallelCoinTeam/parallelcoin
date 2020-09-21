@@ -5,7 +5,7 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"hash/crc32"
 
-	database "github.com/stalker-loki/pod/pkg/db"
+	database "github.com/p9c/pod/pkg/db"
 )
 
 func // serializeWriteRow serialize the current block file and offset where

@@ -2,12 +2,12 @@ package wallet
 
 import (
 	"github.com/stalker-loki/app/slog"
-	tm "github.com/stalker-loki/pod/pkg/chain/tx/mgr"
-	txs "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
-	wm "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
-	"github.com/stalker-loki/pod/pkg/wallet/chain"
+	tm "github.com/p9c/pod/pkg/chain/tx/mgr"
+	txs "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/wallet/chain"
 )
 
 // RescanProgressMsg reports the current progress made by a rescan for a

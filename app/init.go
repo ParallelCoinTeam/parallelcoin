@@ -2,13 +2,13 @@ package app
 
 import (
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/app/config"
+	"github.com/p9c/pod/app/config"
 	"os"
 	"os/exec"
 
 	"github.com/urfave/cli"
 
-	"github.com/stalker-loki/pod/app/conte"
+	"github.com/p9c/pod/app/conte"
 )
 
 var initHandle = func(cx *conte.Xt) func(c *cli.Context) error {

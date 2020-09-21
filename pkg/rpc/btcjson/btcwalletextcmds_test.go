@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // TestBtcWalletExtCmds tests all of the btcwallet extended commands marshal and unmarshal into valid results include handling of optional fields being omitted in the marshalled command, while optional fields with defaults have the default assigned on unmarshalled commands.

@@ -12,12 +12,12 @@ import (
 
 	"github.com/conformal/fastsha256"
 
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	"github.com/stalker-loki/pod/pkg/chain/fork"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
-	"github.com/stalker-loki/pod/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/fork"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // Uint256Size is the number of bytes needed to represent an unsigned 256-bit

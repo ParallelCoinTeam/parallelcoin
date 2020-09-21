@@ -3,14 +3,14 @@ package save
 import (
 	"encoding/json"
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/pkg/util/logi/Pkg/Pk"
+	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 	"io/ioutil"
 	"path/filepath"
 
 	"github.com/urfave/cli"
 
-	"github.com/stalker-loki/pod/app/apputil"
-	"github.com/stalker-loki/pod/pkg/pod"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/pkg/pod"
 )
 
 // Pod saves the configuration to the configured location

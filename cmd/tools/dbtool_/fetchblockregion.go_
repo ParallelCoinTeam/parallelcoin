@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/db"
+	"github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/db"
 )
 
 // blockRegionCmd defines the configuration options for the fetchblockregion command.

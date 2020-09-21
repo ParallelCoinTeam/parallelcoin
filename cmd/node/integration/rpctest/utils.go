@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"time"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	client "github.com/stalker-loki/pod/pkg/rpc/client"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	client "github.com/p9c/pod/pkg/rpc/client"
 )
 
 // JoinType is an enum representing a particular type of "node join". A node

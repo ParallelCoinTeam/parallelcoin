@@ -8,9 +8,9 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"time"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	database "github.com/stalker-loki/pod/pkg/db"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
 )
 
 const // blockHdrOffset defines the offsets into a v1 block index row for the

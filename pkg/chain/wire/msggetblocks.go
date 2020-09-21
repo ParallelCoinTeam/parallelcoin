@@ -5,7 +5,7 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"io"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // MaxBlockLocatorsPerMsg is the maximum number of block locator hashes allowed per message.

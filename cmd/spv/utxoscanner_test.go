@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/coding/gcs"
-	"github.com/stalker-loki/pod/pkg/util"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/p9c/pod/pkg/util"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 type MockChainClient struct {

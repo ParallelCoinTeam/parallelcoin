@@ -23,7 +23,7 @@ import (
 	"github.com/btcsuite/go-socks/socks"
 	"github.com/btcsuite/websocket"
 
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 var (

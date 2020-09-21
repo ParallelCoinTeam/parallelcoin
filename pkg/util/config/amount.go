@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // AmountFlag embeds a util.Amount and implements the flags.Marshaler and

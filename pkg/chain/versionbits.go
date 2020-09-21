@@ -4,7 +4,7 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"math"
 
-	config "github.com/stalker-loki/pod/pkg/chain/config"
+	config "github.com/p9c/pod/pkg/chain/config"
 )
 
 const (

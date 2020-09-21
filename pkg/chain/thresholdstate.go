@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // ThresholdState define the various threshold states used when voting on consensus changes.

@@ -2,17 +2,17 @@ package app
 
 import (
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/app/config"
+	"github.com/p9c/pod/app/config"
 	"os"
 
 	"github.com/urfave/cli"
 
-	"github.com/stalker-loki/pod/cmd/kopach"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/chain/fork"
+	"github.com/p9c/pod/cmd/kopach"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/chain/fork"
 
-	"github.com/stalker-loki/pod/app/conte"
-	"github.com/stalker-loki/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 func KopachHandle(cx *conte.Xt) func(c *cli.Context) (err error) {

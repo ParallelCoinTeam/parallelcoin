@@ -8,10 +8,10 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"testing"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
-	"github.com/stalker-loki/pod/pkg/wallet/coinset"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wallet/coinset"
 )
 
 type TestCoin struct {

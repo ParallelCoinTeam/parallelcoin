@@ -7,15 +7,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stalker-loki/pod/app/appdata"
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	config "github.com/stalker-loki/pod/pkg/chain/config"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	database "github.com/stalker-loki/pod/pkg/db"
+	"github.com/p9c/pod/app/appdata"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	config "github.com/p9c/pod/pkg/chain/config"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	database "github.com/p9c/pod/pkg/db"
 
-	"github.com/stalker-loki/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/comm/peer"
 	// This ensures the database drivers get registered
-	_ "github.com/stalker-loki/pod/pkg/db/ffldb"
+	_ "github.com/p9c/pod/pkg/db/ffldb"
 )
 
 //

@@ -13,12 +13,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stalker-loki/pod/cmd/node/state"
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	"github.com/stalker-loki/pod/pkg/pod"
-	"github.com/stalker-loki/pod/pkg/rpc/legacy"
-	"github.com/stalker-loki/pod/pkg/util"
-	"github.com/stalker-loki/pod/pkg/wallet"
+	"github.com/p9c/pod/cmd/node/state"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/legacy"
+	"github.com/p9c/pod/pkg/util"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 type listenFunc func(net string, laddr string) (net.Listener, error)

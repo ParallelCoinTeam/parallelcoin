@@ -13,7 +13,7 @@ import (
 	"github.com/btcsuite/golangcrypto/nacl/secretbox"
 	"github.com/btcsuite/golangcrypto/scrypt"
 
-	"github.com/stalker-loki/pod/pkg/util/zero"
+	"github.com/p9c/pod/pkg/util/zero"
 )
 
 var (

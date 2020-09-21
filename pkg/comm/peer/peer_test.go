@@ -10,10 +10,10 @@ import (
 
 	"github.com/btcsuite/go-socks/socks"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/comm/peer"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/comm/peer"
 )
 
 // conn mocks a network connection by implementing the net.Conn interface.  It is used to test peer connection without actually opening a network connection.

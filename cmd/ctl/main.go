@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/stalker-loki/pod/app/conte"
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // HelpPrint is the uninitialized help print function

@@ -3,8 +3,8 @@ package monitor
 import (
 	"gioui.org/layout"
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/pkg/gui"
-	"github.com/stalker-loki/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/util/logi"
 	"os/exec"
 	"strings"
 )

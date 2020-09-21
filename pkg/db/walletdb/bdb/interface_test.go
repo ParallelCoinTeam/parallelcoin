@@ -11,7 +11,7 @@ import (
 	"os"
 	"testing"
 
-	walletdbtest "github.com/stalker-loki/pod/pkg/db/walletdb/ci"
+	walletdbtest "github.com/p9c/pod/pkg/db/walletdb/ci"
 )
 
 // TestInterface performs all interfaces tests for this database driver.

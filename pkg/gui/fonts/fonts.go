@@ -11,13 +11,13 @@ import (
 	"golang.org/x/image/font/gofont/gomonobolditalic"
 	"golang.org/x/image/font/gofont/gomonoitalic"
 
-	"github.com/stalker-loki/pod/pkg/gui/fonts/bariolbold"
-	"github.com/stalker-loki/pod/pkg/gui/fonts/bariolbolditalic"
-	"github.com/stalker-loki/pod/pkg/gui/fonts/bariollight"
-	"github.com/stalker-loki/pod/pkg/gui/fonts/bariollightitalic"
-	"github.com/stalker-loki/pod/pkg/gui/fonts/bariolregular"
-	"github.com/stalker-loki/pod/pkg/gui/fonts/bariolregularitalic"
-	"github.com/stalker-loki/pod/pkg/gui/fonts/plan9"
+	"github.com/p9c/pod/pkg/gui/fonts/bariolbold"
+	"github.com/p9c/pod/pkg/gui/fonts/bariolbolditalic"
+	"github.com/p9c/pod/pkg/gui/fonts/bariollight"
+	"github.com/p9c/pod/pkg/gui/fonts/bariollightitalic"
+	"github.com/p9c/pod/pkg/gui/fonts/bariolregular"
+	"github.com/p9c/pod/pkg/gui/fonts/bariolregularitalic"
+	"github.com/p9c/pod/pkg/gui/fonts/plan9"
 )
 
 func Register() {

@@ -2,9 +2,9 @@ package wallet
 
 import (
 	"github.com/stalker-loki/app/slog"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/db/walletdb"
 )
 
 // OutputSelectionPolicy describes the rules for selecting an output from the

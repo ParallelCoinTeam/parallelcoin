@@ -3,8 +3,8 @@ package monitor
 import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/pkg/gui"
-	"github.com/stalker-loki/pod/pkg/gui/gelook"
+	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/gui/gelook"
 	"os"
 	"os/exec"
 	"path/filepath"

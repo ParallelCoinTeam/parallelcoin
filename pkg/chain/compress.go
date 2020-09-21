@@ -2,8 +2,8 @@ package blockchain
 
 import (
 	"github.com/stalker-loki/app/slog"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
 )
 
 // In order to reduce the size of stored scripts, a domain specific compression algorithm is used which recognizes standard scripts and stores them using less bytes than the original script.  The compression algorithm used here was obtained from Bitcoin Core, so all credits for the algorithm go to it.

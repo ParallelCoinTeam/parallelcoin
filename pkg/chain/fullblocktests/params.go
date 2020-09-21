@@ -3,13 +3,13 @@ package fullblocktests
 import (
 	"encoding/hex"
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/pkg/chain/config"
+	"github.com/p9c/pod/pkg/chain/config"
 	"math/big"
 	"time"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // newHashFromStr converts the passed big-endian hex string into a wire.Hash.  It only differs from the one available in chainhash in that it panics on an error since it will only (and must only) be called with hard-coded, and therefore known good, hashes.

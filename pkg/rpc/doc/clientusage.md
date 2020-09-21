@@ -50,7 +50,7 @@ package main
 
 import (
 	"fmt"
-	log "github.com/stalker-loki/pod/pkg/logi"
+	log "github.com/p9c/pod/pkg/logi"
 "path/filepath"
 
 	pb "git.parallelcoin.io/mod/rpc/walletrpc"

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
+	"github.com/p9c/pod/pkg/db/walletdb"
 )
 
 func TestPutUsedAddrHash(t *testing.T) {

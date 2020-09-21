@@ -5,8 +5,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 func init() {

@@ -11,16 +11,16 @@ import (
 	"github.com/urfave/cli"
 	"go.uber.org/atomic"
 
-	"github.com/stalker-loki/pod/app/conte"
-	"github.com/stalker-loki/pod/cmd/kopach/client"
-	"github.com/stalker-loki/pod/cmd/kopach/control"
-	"github.com/stalker-loki/pod/cmd/kopach/control/job"
-	"github.com/stalker-loki/pod/cmd/kopach/control/pause"
-	"github.com/stalker-loki/pod/cmd/kopach/control/sol"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/comm/stdconn/worker"
-	"github.com/stalker-loki/pod/pkg/comm/transport"
-	"github.com/stalker-loki/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/cmd/kopach/client"
+	"github.com/p9c/pod/cmd/kopach/control"
+	"github.com/p9c/pod/cmd/kopach/control/job"
+	"github.com/p9c/pod/cmd/kopach/control/pause"
+	"github.com/p9c/pod/cmd/kopach/control/sol"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/comm/transport"
+	"github.com/p9c/pod/pkg/util/interrupt"
 )
 
 type HashCount struct {

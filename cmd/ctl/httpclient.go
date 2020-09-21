@@ -13,9 +13,9 @@ import (
 
 	"github.com/btcsuite/go-socks/socks"
 
-	"github.com/stalker-loki/pod/app/conte"
-	"github.com/stalker-loki/pod/pkg/pod"
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/pkg/pod"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 )
 
 // newHTTPClient returns a new HTTP client that is configured according to the

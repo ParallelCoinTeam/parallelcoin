@@ -11,10 +11,10 @@ import (
 	"runtime/debug"
 	"runtime/trace"
 
-	"github.com/stalker-loki/pod/pkg/util/interrupt"
+	"github.com/p9c/pod/pkg/util/interrupt"
 
-	"github.com/stalker-loki/pod/app"
-	"github.com/stalker-loki/pod/pkg/util/limits"
+	"github.com/p9c/pod/app"
+	"github.com/p9c/pod/pkg/util/limits"
 )
 
 // Main is the main entry point for pod

@@ -6,10 +6,10 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"math"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/coding/gcs"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/gcs"
 )
 
 const (

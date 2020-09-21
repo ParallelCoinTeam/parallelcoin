@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/db/walletdb"
-	_ "github.com/stalker-loki/pod/pkg/db/walletdb/bdb"
+	"github.com/p9c/pod/pkg/db/walletdb"
+	_ "github.com/p9c/pod/pkg/db/walletdb/bdb"
 )
 
 // var (

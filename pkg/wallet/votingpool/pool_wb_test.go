@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/util/hdkeychain"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/pkg/util/hdkeychain"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 func TestPoolEnsureUsedAddr(t *testing.T) {

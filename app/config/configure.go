@@ -2,11 +2,11 @@ package config
 
 import (
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/app/apputil"
-	"github.com/stalker-loki/pod/app/conte"
-	"github.com/stalker-loki/pod/app/save"
-	"github.com/stalker-loki/pod/pkg/rpc/chainrpc"
-	"github.com/stalker-loki/pod/pkg/wallet"
+	"github.com/p9c/pod/app/apputil"
+	"github.com/p9c/pod/app/conte"
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/rpc/chainrpc"
+	"github.com/p9c/pod/pkg/wallet"
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli

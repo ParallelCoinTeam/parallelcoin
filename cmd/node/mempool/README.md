@@ -1,7 +1,7 @@
 # mempool
 
 [![ISC License](http://img.shields.io/badge/license-ISC-blue.svg)](http://copyfree.org)
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/stalker-loki/pod/mempool)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](http://godoc.org/github.com/p9c/pod/mempool)
 
 Package mempool provides a policy-enforced pool of unmined bitcoin transactions.
 
@@ -75,7 +75,7 @@ The following is a quick overview of the major features. It is not intended to b
 ## Installation and Updating
 
 ```bash
-$ go get -u github.com/stalker-loki/pod/mempool
+$ go get -u github.com/p9c/pod/mempool
 ```
 
 ## License

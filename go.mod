@@ -1,4 +1,4 @@
-module github.com/stalker-loki/pod
+module github.com/p9c/pod
 
 go 1.14
 

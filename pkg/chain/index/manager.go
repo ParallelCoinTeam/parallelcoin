@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
 
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	database "github.com/stalker-loki/pod/pkg/db"
-	"github.com/stalker-loki/pod/pkg/util"
-	log "github.com/stalker-loki/pod/pkg/util/logi"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	database "github.com/p9c/pod/pkg/db"
+	"github.com/p9c/pod/pkg/util"
+	log "github.com/p9c/pod/pkg/util/logi"
 )
 
 var (

@@ -1,8 +1,8 @@
 package mempool
 
 import (
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // RuleError identifies a rule violation.

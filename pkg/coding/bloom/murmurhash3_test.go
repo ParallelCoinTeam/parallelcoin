@@ -3,7 +3,7 @@ package bloom_test
 import (
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/coding/bloom"
+	"github.com/p9c/pod/pkg/coding/bloom"
 )
 
 // TestMurmurHash3 ensure the MurmurHash3 function produces the correct hash when given various seeds and data.

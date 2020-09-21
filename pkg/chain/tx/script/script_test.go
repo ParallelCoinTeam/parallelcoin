@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // TestParseOpcode tests for opcode parsing with bad data templates.

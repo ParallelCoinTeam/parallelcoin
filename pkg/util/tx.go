@@ -5,8 +5,8 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"io"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/p9c/pod/pkg/chain/wire"
 )
 
 // TxIndexUnknown is the value returned for a transaction index that is unknown. This is typically because the transaction has not been inserted into a block yet.

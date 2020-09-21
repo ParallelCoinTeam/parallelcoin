@@ -3,10 +3,10 @@ package monitor
 import (
 	"gioui.org/layout"
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/app/save"
-	"github.com/stalker-loki/pod/pkg/gui"
-	"github.com/stalker-loki/pod/pkg/util/logi"
-	"github.com/stalker-loki/pod/pkg/util/logi/consume"
+	"github.com/p9c/pod/app/save"
+	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/consume"
 )
 
 func (s *State) Sidebar() layout.FlexChild {

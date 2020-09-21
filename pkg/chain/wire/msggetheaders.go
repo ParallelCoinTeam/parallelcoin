@@ -5,7 +5,7 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"io"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // MsgGetHeaders implements the Message interface and represents a bitcoin getheaders message.  It is used to request a list of block headers for blocks starting after the last known hash in the slice of block locator hashes.  The list is returned via a headers message (MsgHeaders) and is limited by a specific hash to stop at or the maximum number of block headers per message, which is currently 2000. Set the HashStop field to the hash at which to stop and use AddBlockLocatorHash to build up the list of block locator hashes. The algorithm for building the block locator hashes should be to add the hashes in reverse order until you reach the genesis block.  In order to keep the list of locator hashes to a resonable number of entries, first add the most recent 10 block hashes, then double the step each loop iteration to exponentially decrease the number of hashes the further away from head and closer to the genesis block you get.

@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 func TestHash(t *testing.T) {

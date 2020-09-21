@@ -4,11 +4,11 @@ package txauthor_test
 import (
 	"testing"
 
-	. "github.com/stalker-loki/pod/pkg/chain/tx/author"
-	txrules "github.com/stalker-loki/pod/pkg/chain/tx/rules"
-	txsizes "github.com/stalker-loki/pod/pkg/chain/tx/sizes"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
+	. "github.com/p9c/pod/pkg/chain/tx/author"
+	txrules "github.com/p9c/pod/pkg/chain/tx/rules"
+	txsizes "github.com/p9c/pod/pkg/chain/tx/sizes"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func p2pkhOutputs(amounts ...util.Amount) []*wire.TxOut {

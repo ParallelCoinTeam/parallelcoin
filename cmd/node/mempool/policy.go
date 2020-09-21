@@ -5,10 +5,10 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"time"
 
-	blockchain "github.com/stalker-loki/pod/pkg/chain"
-	script "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/util"
+	blockchain "github.com/p9c/pod/pkg/chain"
+	script "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/util"
 )
 
 const (

@@ -3,7 +3,7 @@
 package gelook
 
 import (
-	"github.com/stalker-loki/pod/pkg/gui/gel"
+	"github.com/p9c/pod/pkg/gui/gel"
 
 	"gioui.org/layout"
 	"gioui.org/op/paint"

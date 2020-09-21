@@ -3,7 +3,7 @@ package monitor
 import (
 	"gioui.org/layout"
 	"github.com/stalker-loki/app/slog"
-	"github.com/stalker-loki/pod/pkg/gui"
+	"github.com/p9c/pod/pkg/gui"
 )
 
 func (s *State) BottomBar() layout.FlexChild {

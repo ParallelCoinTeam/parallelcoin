@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
 
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	database "github.com/stalker-loki/pod/pkg/db"
+	"github.com/p9c/pod/pkg/chain/wire"
+	database "github.com/p9c/pod/pkg/db"
 )
 
 const (

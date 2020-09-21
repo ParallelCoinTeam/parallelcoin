@@ -1,12 +1,12 @@
 package consume
 
 import (
-	"github.com/stalker-loki/pod/pkg/comm/pipe"
-	"github.com/stalker-loki/pod/pkg/comm/stdconn/worker"
-	"github.com/stalker-loki/pod/pkg/util/logi"
-	"github.com/stalker-loki/pod/pkg/util/logi/Entry"
-	"github.com/stalker-loki/pod/pkg/util/logi/Pkg"
-	"github.com/stalker-loki/pod/pkg/util/logi/Pkg/Pk"
+	"github.com/p9c/pod/pkg/comm/pipe"
+	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/p9c/pod/pkg/util/logi/Entry"
+	"github.com/p9c/pod/pkg/util/logi/Pkg"
+	"github.com/p9c/pod/pkg/util/logi/Pkg/Pk"
 )
 
 func Log(quit chan struct{}, handler func(ent *logi.Entry) (

@@ -4,7 +4,7 @@ import (
 	"github.com/stalker-loki/app/slog"
 	"io"
 
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 )
 
 // MaxGetCFiltersReqRange the maximum number of filters that may be requested in a getcfheaders message.

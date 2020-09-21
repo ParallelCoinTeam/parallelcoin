@@ -7,7 +7,7 @@ package main
 import (
 	_ "net/http/pprof"
 
-	"github.com/stalker-loki/pod/cmd"
+	"github.com/p9c/pod/cmd"
 )
 
 func main() {

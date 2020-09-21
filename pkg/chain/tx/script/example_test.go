@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
 
-	"github.com/stalker-loki/pod/pkg/chain/config/netparams"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	txscript "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	ec "github.com/stalker-loki/pod/pkg/coding/elliptic"
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/pkg/chain/config/netparams"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	txscript "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	ec "github.com/p9c/pod/pkg/coding/elliptic"
+	"github.com/p9c/pod/pkg/util"
 )
 
 // This example demonstrates creating a script which pays to a bitcoin address. It also prints the created script hex and uses the DisasmString function to display the disassembled script.

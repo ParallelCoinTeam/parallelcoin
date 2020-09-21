@@ -9,16 +9,16 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/stalker-loki/pod/cmd/spv/headerfs"
-	chainhash "github.com/stalker-loki/pod/pkg/chain/hash"
-	script "github.com/stalker-loki/pod/pkg/chain/tx/script"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	"github.com/stalker-loki/pod/pkg/coding/gcs"
-	"github.com/stalker-loki/pod/pkg/coding/gcs/builder"
-	"github.com/stalker-loki/pod/pkg/rpc/btcjson"
-	client "github.com/stalker-loki/pod/pkg/rpc/client"
-	"github.com/stalker-loki/pod/pkg/util"
-	waddrmgr "github.com/stalker-loki/pod/pkg/wallet/addrmgr"
+	"github.com/p9c/pod/cmd/spv/headerfs"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	script "github.com/p9c/pod/pkg/chain/tx/script"
+	"github.com/p9c/pod/pkg/chain/wire"
+	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/p9c/pod/pkg/coding/gcs/builder"
+	"github.com/p9c/pod/pkg/rpc/btcjson"
+	client "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
+	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 )
 
 var // ErrRescanExit is an error returned to the caller in case the ongoing

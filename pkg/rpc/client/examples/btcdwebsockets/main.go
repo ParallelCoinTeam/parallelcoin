@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/stalker-loki/pod/app/appdata"
-	"github.com/stalker-loki/pod/pkg/chain/wire"
-	client "github.com/stalker-loki/pod/pkg/rpc/client"
-	"github.com/stalker-loki/pod/pkg/util"
+	"github.com/p9c/pod/app/appdata"
+	"github.com/p9c/pod/pkg/chain/wire"
+	client "github.com/p9c/pod/pkg/rpc/client"
+	"github.com/p9c/pod/pkg/util"
 )
 
 func main() {
