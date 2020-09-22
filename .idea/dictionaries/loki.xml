@@ -1,12 +1,15 @@
 <component name="ProjectDictionaryState">
   <dictionary name="loki">
     <words>
+      <w>advertisment</w>
       <w>algo</w>
       <w>algos</w>
+      <w>autoports</w>
       <w>bitses</w>
       <w>blockchain</w>
       <w>chainhash</w>
       <w>ciph</w>
+      <w>coinbases</w>
       <w>datagram</w>
       <w>ffffffff</w>
       <w>hashcount</w>
@@ -17,6 +20,8 @@
       <w>marshaler</w>
       <w>merkle</w>
       <w>multicast</w>
+      <w>othernodes</w>
+      <w>rebroadcaster</w>
       <w>routeable</w>
       <w>rpc</w>
       <w>unicast</w>
