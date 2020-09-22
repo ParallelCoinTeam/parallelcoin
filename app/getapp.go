@@ -30,17 +30,17 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 		Copyright:   cx.Language.RenderText("goApp_COPYRIGHT"),
 		Action:      guiHandle(cx),
 		Before:      beforeFunc(cx),
-		After: func(c *cli.Context) error {
+		After: func(c *cli.Context) (err error) {
 			slog.Trace("subcommand completed")
 			if interrupt.Restart {
 			}
-			return nil
+			return
 		},
 		Commands: []cli.Command{
 			apputil.NewCommand("version", "print version and exit",
-				func(c *cli.Context) error {
+				func(c *cli.Context) (err error) {
 					fmt.Println(c.App.Name, c.App.Version)
-					return nil
+					return
 				}, apputil.SubCommands(), nil, "v"),
 			apputil.NewCommand("monitor", "run monitor GUI",
 				monitorHandle(cx), apputil.SubCommands(), nil, "mon"),
@@ -61,42 +61,40 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				nodeHandle(cx), apputil.SubCommands(
 					apputil.NewCommand("dropaddrindex",
 						"drop the address search index",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (err error) {
 							cx.StateCfg.DropAddrIndex = true
 							// return nodeHandle(cx)(c)
-							return nil
+							return
 						},
 						apputil.SubCommands(),
 						nil,
 					),
 					apputil.NewCommand("droptxindex",
 						"drop the address search index",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (err error) {
 							cx.StateCfg.DropTxIndex = true
 							// return nodeHandle(cx)(c)
-							return nil
+							return
 						},
 						apputil.SubCommands(),
 						nil,
 					),
 					apputil.NewCommand("dropindexes",
 						"drop all of the indexes",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (err error) {
 							cx.StateCfg.DropAddrIndex = true
 							cx.StateCfg.DropTxIndex = true
 							cx.StateCfg.DropCfIndex = true
-							// return nodeHandle(cx)(c)
-							return nil
+							return nodeHandle(cx)(c)
 						},
 						apputil.SubCommands(),
 						nil,
 					),
 					apputil.NewCommand("dropcfindex",
 						"drop the address search index",
-						func(c *cli.Context) error {
+						func(c *cli.Context) (err error) {
 							cx.StateCfg.DropCfIndex = true
-							// return nodeHandle(cx)(c)
-							return nil
+							return nodeHandle(cx)(c)
 						},
 						apputil.SubCommands(),
 						nil,

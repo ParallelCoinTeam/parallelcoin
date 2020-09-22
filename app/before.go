@@ -22,8 +22,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
+func beforeFunc(cx *conte.Xt) func(c *cli.Context) (err error) {
+	return func(c *cli.Context) (err error) {
 		slog.Debug("running beforeFunc")
 		cx.AppContext = c
 		// if user set datadir this is first thing to configure
@@ -43,12 +43,10 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			*cx.Config.DataDir + string(os.PathSeparator) + podConfigFilename
 		// we are going to assume the config is not manually misedited
 		if apputil.FileExists(*cx.Config.ConfigFile) {
-			b, err := ioutil.ReadFile(*cx.Config.ConfigFile)
-			if err == nil {
+			var b []byte
+			if b, err = ioutil.ReadFile(*cx.Config.ConfigFile); slog.Check(err) {
 				cx.Config, cx.ConfigMap = pod.EmptyConfig()
-				err = json.Unmarshal(b, cx.Config)
-				if err != nil {
-					slog.Error("error unmarshalling config", err)
+				if err = json.Unmarshal(b, cx.Config); slog.Check(err) {
 					os.Exit(1)
 				}
 			} else {
@@ -355,6 +353,6 @@ func beforeFunc(cx *conte.Xt) func(c *cli.Context) error {
 			slog.Info("saving configuration")
 			cx.StateCfg.Save = true
 		}
-		return nil
+		return
 	}
 }

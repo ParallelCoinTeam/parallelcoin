@@ -40,6 +40,9 @@ const (
 	txEntrySize = 4 + 4 + 4
 )
 
+type AddressKey [addrKeySize]byte
+type LevelKey [levelKeySize]byte
+
 var (
 	// addrIndexKey is the key of the address index and the db bucket used to house it.
 	addrIndexKey = []byte("txbyaddridx")
@@ -98,15 +101,14 @@ func deserializeAddrIndexEntry(serialized []byte, region *database.BlockRegion, 
 }
 
 // keyForLevel returns the key for a specific address and level in the address index entry.
-func keyForLevel(addrKey [addrKeySize]byte, level uint8) [levelKeySize]byte {
-	var key [levelKeySize]byte
+func keyForLevel(addrKey AddressKey, level uint8) (key LevelKey) {
 	copy(key[:], addrKey[:])
 	key[levelOffset] = level
-	return key
+	return
 }
 
 // dbPutAddrIndexEntry updates the address index to include the provided entry according to the level-based scheme described in detail above.
-func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, blockID uint32, txLoc wire.TxLoc) (err error) {
+func dbPutAddrIndexEntry(bucket internalBucket, addrKey AddressKey, blockID uint32, txLoc wire.TxLoc) (err error) {
 	// Start with level 0 and its initial max number of entries.
 	curLevel := uint8(0)
 	maxLevelBytes := level0MaxEntries * txEntrySize
@@ -141,8 +143,7 @@ func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, block
 		// The current level has room for the data in the previous one, so merge the data from previous level into it.
 		mergedData := prevLevelData
 		if len(curLevelData) > 0 {
-			mergedData = make([]byte, len(curLevelData)+
-				len(prevLevelData))
+			mergedData = make([]byte, len(curLevelData)+len(prevLevelData))
 			copy(mergedData, curLevelData)
 			copy(mergedData[len(curLevelData):], prevLevelData)
 		}
@@ -168,7 +169,7 @@ func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, block
 // dbFetchAddrIndexEntries returns block regions for transactions referenced by the given address key and the number of
 // entries skipped since it could have been less in the case where there are less total entries than the requested
 // number of entries to skip.
-func dbFetchAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, numToSkip, numRequested uint32,
+func dbFetchAddrIndexEntries(bucket internalBucket, addrKey AddressKey, numToSkip, numRequested uint32,
 	reverse bool, fetchBlockHash fetchBlockHashFunc) (region []database.BlockRegion, numEntries uint32, err error) {
 	// When the reverse flag is not set, all levels need to be fetched because numToSkip and numRequested are counted from the oldest transactions (highest level) and thus the total count is needed. However, when the reverse flag is set, only enough records to satisfy the requested amount are needed.
 	var level uint8
@@ -228,14 +229,14 @@ func dbFetchAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, n
 }
 
 // minEntriesToReachLevel returns the minimum number of entries that are required to reach the given address index level.
-func minEntriesToReachLevel(level uint8) int {
+func minEntriesToReachLevel(level uint8) (minRequired int) {
 	maxEntriesForLevel := level0MaxEntries
-	minRequired := 1
+	minRequired = 1
 	for l := uint8(1); l <= level; l++ {
 		minRequired += maxEntriesForLevel
 		maxEntriesForLevel *= 2
 	}
-	return minRequired
+	return
 }
 
 // maxEntriesForLevel returns the maximum number of entries allowed for the given address index level.
@@ -424,12 +425,14 @@ var _ Indexer = (*AddrIndex)(nil)
 // Ensure the AddrIndex type implements the NeedsInputser interface.
 var _ NeedsInputser = (*AddrIndex)(nil)
 
-// NeedsInputs signals that the index requires the referenced inputs in order to properly create the index. This implements the NeedsInputser interface.
+// NeedsInputs signals that the index requires the referenced inputs in order to properly create the index. This
+// implements the NeedsInputser interface.
 func (idx *AddrIndex) NeedsInputs() bool {
 	return true
 }
 
-// Init is only provided to satisfy the Indexer interface as there is nothing to initialize for this index. This is part of the Indexer interface.
+// Init is only provided to satisfy the Indexer interface as there is nothing to initialize for this index. This is part
+// of the Indexer interface.
 func (idx *AddrIndex) Init() error {
 	// Nothing to do.
 	return nil
@@ -445,10 +448,11 @@ func (idx *AddrIndex) Name() string {
 	return addrIndexName
 }
 
-// Create is invoked when the indexer manager determines the index needs to be created for the first time.  It creates the bucket for the address index. This is part of the Indexer interface.
-func (idx *AddrIndex) Create(dbTx database.Tx) error {
-	_, err := dbTx.Metadata().CreateBucket(addrIndexKey)
-	return err
+// Create is invoked when the indexer manager determines the index needs to be created for the first time.  It creates
+// the bucket for the address index. This is part of the Indexer interface.
+func (idx *AddrIndex) Create(dbTx database.Tx) (err error) {
+	_, err = dbTx.Metadata().CreateBucket(addrIndexKey)
+	return
 }
 
 // writeIndexData represents the address index data to be written for one block. It consists of the address mapped to an ordered list of the transactions that involve the address in block.  It is ordered so the transactions can be stored in the order they appear in the block.
@@ -458,13 +462,15 @@ type writeIndexData map[[addrKeySize]byte][]int
 // map.
 func (idx *AddrIndex) indexPkScript(data writeIndexData, pkScript []byte, txIdx int) {
 	// Nothing to index if the script is non-standard or otherwise doesn't contain any addresses.
-	_, addrs, _, err := script.ExtractPkScriptAddrs(pkScript,
-		idx.chainParams)
+	var addrs []util.Address
+	var err error
+	_, addrs, _, err = script.ExtractPkScriptAddrs(pkScript, idx.chainParams)
 	if err != nil || len(addrs) == 0 {
 		return
 	}
 	for _, addr := range addrs {
-		addrKey, err := addrToKey(addr)
+		var addrKey AddressKey
+		addrKey, err = addrToKey(addr)
 		if err != nil {
 			slog.Error(err)
 			// Ignore unsupported address types.
@@ -482,8 +488,7 @@ func (idx *AddrIndex) indexPkScript(data writeIndexData, pkScript []byte, txIdx 
 }
 
 // indexBlock extract all of the standard addresses from all of the transactions in the passed block and maps each of them to the associated transaction using the passed map.
-func (idx *AddrIndex) indexBlock(data writeIndexData, block *util.Block,
-	stxos []blockchain.SpentTxOut) {
+func (idx *AddrIndex) indexBlock(data writeIndexData, block *util.Block, stxos []blockchain.SpentTxOut) {
 	stxoIndex := 0
 	for txIdx, tx := range block.Transactions() {
 		// Coinbases do not reference any inputs.  Since the block is required to have already gone through full validation, it has already been proven on the first transaction in the block is a coinbase.
@@ -503,19 +508,16 @@ func (idx *AddrIndex) indexBlock(data writeIndexData, block *util.Block,
 }
 
 // ConnectBlock is invoked by the index manager when a new block has been connected to the main chain.  This indexer adds a mapping for each address the transactions in the block involve. This is part of the Indexer interface.
-func (idx *AddrIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
-	stxos []blockchain.SpentTxOut) error {
+func (idx *AddrIndex) ConnectBlock(dbTx database.Tx, block *util.Block, stxos []blockchain.SpentTxOut) (err error) {
 	// The offset and length of the transactions within the serialized block.
-	txLocs, err := block.TxLoc()
-	if err != nil {
-		slog.Error(err)
-		return err
+	var txLocs []wire.TxLoc
+	if txLocs, err = block.TxLoc(); slog.Check(err) {
+		return
 	}
 	// Get the internal block ID associated with the block.
-	blockID, err := dbFetchBlockIDByHash(dbTx, block.Hash())
-	if err != nil {
-		slog.Error(err)
-		return err
+	var blockID uint32
+	if blockID, err = dbFetchBlockIDByHash(dbTx, block.Hash()); slog.Check(err) {
+		return
 	}
 	// Build all of the address to transaction mappings in a local map.
 	addrsToTxns := make(writeIndexData)
@@ -524,70 +526,65 @@ func (idx *AddrIndex) ConnectBlock(dbTx database.Tx, block *util.Block,
 	addrIdxBucket := dbTx.Metadata().Bucket(addrIndexKey)
 	for addrKey, txIdxs := range addrsToTxns {
 		for _, txIdx := range txIdxs {
-			err := dbPutAddrIndexEntry(addrIdxBucket, addrKey,
-				blockID, txLocs[txIdx])
-			if err != nil {
-				slog.Error(err)
-				return err
+			if err = dbPutAddrIndexEntry(addrIdxBucket, addrKey, blockID, txLocs[txIdx]); slog.Check(err) {
+				return
 			}
 		}
 	}
-	return nil
+	return
 }
 
 // DisconnectBlock is invoked by the index manager when a block has been disconnected from the main chain.  This indexer removes the address mappings each transaction in the block involve. This is part of the Indexer interface.
-func (idx *AddrIndex) DisconnectBlock(dbTx database.Tx, block *util.Block,
-	stxos []blockchain.SpentTxOut) error {
+func (idx *AddrIndex) DisconnectBlock(dbTx database.Tx, block *util.Block, stxos []blockchain.SpentTxOut) (err error) {
 	// Build all of the address to transaction mappings in a local map.
 	addrsToTxns := make(writeIndexData)
 	idx.indexBlock(addrsToTxns, block, stxos)
 	// Remove all of the index entries for each address.
 	bucket := dbTx.Metadata().Bucket(addrIndexKey)
 	for addrKey, txIdxs := range addrsToTxns {
-		err := dbRemoveAddrIndexEntries(bucket, addrKey, len(txIdxs))
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = dbRemoveAddrIndexEntries(bucket, addrKey, len(txIdxs)); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
-// TxRegionsForAddress returns a slice of block regions which identify each transaction that involves the passed address according to the specified number to skip, number requested, and whether or not the results should be reversed.  It also returns the number actually skipped since it could be less in the case where there are not enough entries. NOTE: These results only include transactions confirmed in blocks.  See the UnconfirmedTxnsForAddress method for obtaining unconfirmed transactions that involve a given address. This function is safe for concurrent access.
-func (idx *AddrIndex) TxRegionsForAddress(dbTx database.Tx, addr util.Address, numToSkip, numRequested uint32, reverse bool) ([]database.BlockRegion, uint32, error) {
-	addrKey, err := addrToKey(addr)
-	if err != nil {
-		slog.Error(err)
-		return nil, 0, err
+// TxRegionsForAddress returns a slice of block regions which identify each transaction that involves the passed address
+// according to the specified number to skip, number requested, and whether or not the results should be reversed.  It
+// also returns the number actually skipped since it could be less in the case where there are not enough entries.
+// NOTE: These results only include transactions confirmed in blocks.  See the UnconfirmedTxnsForAddress method for
+// obtaining unconfirmed transactions that involve a given address. This function is safe for concurrent access.
+func (idx *AddrIndex) TxRegionsForAddress(dbTx database.Tx, addr util.Address, numToSkip, numRequested uint32,
+	reverse bool) (regions []database.BlockRegion, skipped uint32, err error) {
+	var addrKey AddressKey
+	if addrKey, err = addrToKey(addr); slog.Check(err) {
+		return
 	}
-	var regions []database.BlockRegion
-	var skipped uint32
-	err = idx.db.View(func(dbTx database.Tx) error {
+	err = idx.db.View(func(dbTx database.Tx) (err error) {
 		// Create closure to lookup the block hash given the ID using the database transaction.
-		fetchBlockHash := func(id []byte) (*chainhash.Hash, error) {
-			// Deserialize and populate the result.
-			return dbFetchBlockHashBySerializedID(dbTx, id)
-		}
-		var err error
 		addrIdxBucket := dbTx.Metadata().Bucket(addrIndexKey)
-		regions, skipped, err = dbFetchAddrIndexEntries(addrIdxBucket,
-			addrKey, numToSkip, numRequested, reverse,
-			fetchBlockHash)
-		return err
+		regions, skipped, err = dbFetchAddrIndexEntries(addrIdxBucket, addrKey, numToSkip, numRequested, reverse,
+			func(id []byte) (*chainhash.Hash, error) {
+				// Deserialize and populate the result.
+				return dbFetchBlockHashBySerializedID(dbTx, id)
+			})
+		return
 	})
-	return regions, skipped, err
+	return
 }
 
-// indexUnconfirmedAddresses modifies the unconfirmed (memory-only) address index to include mappings for the addresses encoded by the passed public key script to the transaction. This function is safe for concurrent access.
+// indexUnconfirmedAddresses modifies the unconfirmed (memory-only) address index to include mappings for the addresses
+// encoded by the passed public key script to the transaction. This function is safe for concurrent access.
 func (idx *AddrIndex) indexUnconfirmedAddresses(pkScript []byte, tx *util.Tx) {
-	// The error is ignored here since the only reason it can fail is if the script fails to parse and it was already validated before being admitted to the mempool.
+	// The error is ignored here since the only reason it can fail is if the script fails to parse and it was already
+	// validated before being admitted to the mempool.
 	_, addresses, _, _ := script.ExtractPkScriptAddrs(pkScript,
 		idx.chainParams)
+	var err error
 	for _, addr := range addresses {
 		// Ignore unsupported address types.
-		addrKey, err := addrToKey(addr)
-		if err != nil {
-			slog.Error(err)
+		var addrKey AddressKey
+		if addrKey, err = addrToKey(addr); slog.Check(err) {
 			continue
 		}
 		// Add a mapping from the address to the transaction.
@@ -645,9 +642,9 @@ func (idx *AddrIndex) RemoveUnconfirmedTx(hash *chainhash.Hash) {
 // UnconfirmedTxnsForAddress returns all transactions currently in the unconfirmed (memory-only) address index that involve the passed address. Unsupported address types are ignored and will result in no results. This function is safe for concurrent access.
 func (idx *AddrIndex) UnconfirmedTxnsForAddress(addr util.Address) []*util.Tx {
 	// Ignore unsupported address types.
-	addrKey, err := addrToKey(addr)
-	if err != nil {
-		slog.Error(err)
+	var err error
+	var addrKey AddressKey
+	if addrKey, err = addrToKey(addr); slog.Check(err) {
 		return nil
 	}
 	// Protect concurrent access.

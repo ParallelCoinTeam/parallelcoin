@@ -15,35 +15,32 @@ import (
 
 const slash = string(os.PathSeparator)
 
-func ctlHandleList(c *cli.Context) error {
+func ctlHandleList(c *cli.Context) (err error) {
 	fmt.Println("Here are the available commands. Pausing a moment as it is a long list...")
 	time.Sleep(2 * time.Second)
 	ctl.ListCommands()
-	return nil
+	return
 }
 
-func ctlHandle(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
+func ctlHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
+	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
 		args := c.Args()
 		if len(args) < 1 {
 			return cli.ShowSubcommandHelp(c)
 		}
 		ctl.HelpPrint = func() {
-			err := cli.ShowSubcommandHelp(c)
-			if err != nil {
-				slog.Error(err)
+			if err = cli.ShowSubcommandHelp(c); slog.Check(err) {
 			}
 		}
 		ctl.Main(args, cx)
-		return nil
+		return
 	}
 }
 
-func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
+func ctlGUIHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
+	return func(c *cli.Context) (err error) {
 		config.Configure(cx, c.Command.Name, true)
-
 		return nil
 	}
 }

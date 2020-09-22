@@ -11,8 +11,8 @@ import (
 	"github.com/p9c/pod/app/conte"
 )
 
-var initHandle = func(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
+var initHandle = func(cx *conte.Xt) func(c *cli.Context) (err error) {
+	return func(c *cli.Context) (err error) {
 		slog.Info("running configuration and wallet initialiser")
 		config.Configure(cx, c.Command.Name, true)
 		command := os.Args[0]
@@ -22,7 +22,7 @@ var initHandle = func(cx *conte.Xt) func(c *cli.Context) error {
 		firstWallet.Stdin = os.Stdin
 		firstWallet.Stdout = os.Stdout
 		firstWallet.Stderr = os.Stderr
-		err := firstWallet.Run()
+		err = firstWallet.Run()
 		slog.Debug("running it a second time for mining addresses")
 		firstWallet = exec.Command(command, args...)
 		firstWallet.Stdin = os.Stdin

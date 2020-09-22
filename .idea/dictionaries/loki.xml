@@ -1,55 +1,127 @@
 <component name="ProjectDictionaryState">
   <dictionary name="loki">
     <words>
+      <w>addcheckpoint</w>
+      <w>addpeer</w>
+      <w>addressbook</w>
       <w>addrs</w>
       <w>advertisment</w>
       <w>algo</w>
       <w>algos</w>
       <w>autoports</w>
       <w>backfill</w>
+      <w>banduration</w>
+      <w>banthreshold</w>
       <w>bitses</w>
       <w>blockchain</w>
+      <w>blockmaxsize</w>
+      <w>blockmaxweight</w>
+      <w>blockminsize</w>
+      <w>blockminweight</w>
+      <w>blockprioritysize</w>
+      <w>blocksonly</w>
+      <w>cafile</w>
       <w>chainhash</w>
       <w>checksig</w>
       <w>ciph</w>
+      <w>clienttls</w>
       <w>coinbases</w>
+      <w>cpuprofile</w>
+      <w>datadir</w>
       <w>datagram</w>
+      <w>dbtype</w>
+      <w>dropcfindex</w>
+      <w>externalip</w>
       <w>ffffffff</w>
+      <w>gbvr</w>
+      <w>genthreads</w>
       <w>hardfork</w>
       <w>hashcount</w>
       <w>hashrate</w>
+      <w>idxs</w>
+      <w>ilogger</w>
       <w>infof</w>
       <w>inputser</w>
       <w>intn</w>
       <w>kopach</w>
       <w>kopachworker</w>
+      <w>limitfreerelay</w>
+      <w>limitpass</w>
+      <w>limituser</w>
       <w>locktime</w>
+      <w>mainnet</w>
       <w>marshaler</w>
+      <w>maxorphantx</w>
+      <w>maxpeers</w>
       <w>mempool</w>
       <w>merkle</w>
       <w>merkles</w>
+      <w>minerpass</w>
+      <w>miningaddrs</w>
+      <w>minrelaytxfee</w>
+      <w>misedited</w>
       <w>multicast</w>
       <w>multisig</w>
+      <w>noaddrindex</w>
+      <w>nobanning</w>
+      <w>nocfilters</w>
+      <w>nocheckpoints</w>
+      <w>nodeoff</w>
+      <w>nodnsseed</w>
+      <w>noinitialload</w>
+      <w>nolisten</w>
+      <w>nopeerbloomfilters</w>
+      <w>norelaypriority</w>
+      <w>norpc</w>
+      <w>notxindex</w>
+      <w>onetimetlskey</w>
+      <w>onionpass</w>
+      <w>onionproxy</w>
+      <w>onionuser</w>
       <w>othernodes</w>
+      <w>pipelog</w>
       <w>pkscript</w>
       <w>powlimit</w>
+      <w>proxyuser</w>
       <w>pubkey</w>
       <w>rebroadcaster</w>
+      <w>regressiontest</w>
+      <w>regtestnet</w>
+      <w>rejectnonstd</w>
+      <w>relaynonstd</w>
       <w>reserialize</w>
       <w>reserialized</w>
       <w>routeable</w>
       <w>rpc</w>
+      <w>rpccert</w>
+      <w>rpcconnect</w>
+      <w>rpckey</w>
+      <w>rpclisten</w>
+      <w>rpcmaxclients</w>
+      <w>rpcmaxconcurrentreqs</w>
+      <w>rpcmaxwebsockets</w>
+      <w>rpcquirks</w>
       <w>segwit</w>
+      <w>sendtoaddress</w>
+      <w>serverpass</w>
+      <w>servertls</w>
+      <w>serveruser</w>
+      <w>sigcachemaxsize</w>
+      <w>simnet</w>
       <w>softfork</w>
       <w>stxo</w>
       <w>stxos</w>
       <w>timesource</w>
+      <w>tlsskipverify</w>
+      <w>torisolation</w>
       <w>totaltx</w>
+      <w>trickleinterval</w>
       <w>ttpb</w>
       <w>txns</w>
       <w>txos</w>
       <w>txout</w>
       <w>txouts</w>
+      <w>uacomment</w>
       <w>unicast</w>
       <w>unmarshalling</w>
       <w>unspend</w>
@@ -61,6 +133,15 @@
       <w>utxoset</w>
       <w>utxosetv</w>
       <w>uxtos</w>
+      <w>walletconnect</w>
+      <w>walletfile</w>
+      <w>walletoff</w>
+      <w>walletpass</w>
+      <w>walletpassphrase</w>
+      <w>walletrpclisten</w>
+      <w>walletrpcmaxclients</w>
+      <w>walletrpcmaxwebsockets</w>
+      <w>walletserver</w>
       <w>websockets</w>
     </words>
   </dictionary>

@@ -43,7 +43,7 @@ type Worker struct {
 	LastHash      *chainhash.Hash
 }
 
-func Handle(cx *conte.Xt) func(c *cli.Context) error {
+func Handle(cx *conte.Xt) func(c *cli.Context) (err error) {
 	return func(c *cli.Context) (err error) {
 		slog.Debug("miner controller starting")
 		ctx, cancel := context.WithCancel(context.Background())
@@ -56,11 +56,8 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		w.lastSent.Store(time.Now().UnixNano())
 		w.active.Store(false)
 		slog.Debug("opening broadcast channel listener")
-		w.conn, err = transport.NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
-			transport.DefaultPort, control.MaxDatagramSize, handlers,
-			cx.KillAll)
-		if err != nil {
-			slog.Error(err)
+		if w.conn, err = transport.NewBroadcastChannel("kopachmain", w, *cx.Config.MinerPass,
+			transport.DefaultPort, control.MaxDatagramSize, handlers, cx.KillAll); slog.Check(err) {
 			cancel()
 			return
 		}
@@ -75,6 +72,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 			w.workers = append(w.workers, client.New(cmd.StdConn))
 		}
 		interrupt.AddHandler(func() {
+			var err error
 			w.active.Store(false)
 			slog.Debug("KopachHandle interrupt")
 			for i := range w.workers {
@@ -85,9 +83,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 		})
 		for i := range w.workers {
 			slog.Debug("sending pass to worker", i)
-			err := w.workers[i].SendPass(*cx.Config.MinerPass)
-			if err != nil {
-				slog.Error(err)
+			if err = w.workers[i].SendPass(*cx.Config.MinerPass); slog.Check(err) {
 			}
 		}
 		w.active.Store(true)
@@ -112,9 +108,7 @@ func Handle(cx *conte.Xt) func(c *cli.Context) error {
 						// pause the workers
 						for i := range w.workers {
 							slog.Debug("sending pause to worker", i)
-							err := w.workers[i].Pause()
-							if err != nil {
-								slog.Error(err)
+							if err = w.workers[i].Pause(); slog.Check(err) {
 							}
 						}
 					}
@@ -156,9 +150,7 @@ var handlers = transport.Handlers{
 		w.FirstSender.Store(addr)
 		w.lastSent.Store(time.Now().UnixNano())
 		for i := range w.workers {
-			err := w.workers[i].NewJob(&j)
-			if err != nil {
-				slog.Error(err)
+			if err = w.workers[i].NewJob(&j); slog.Check(err) {
 			}
 		}
 		return
@@ -173,9 +165,7 @@ var handlers = transport.Handlers{
 		if fs == ns {
 			for i := range w.workers {
 				slog.Debug("sending pause to worker", i, fs, ns)
-				err := w.workers[i].Pause()
-				if err != nil {
-					slog.Error(err)
+				if err = w.workers[i].Pause(); slog.Check(err) {
 				}
 			}
 		}

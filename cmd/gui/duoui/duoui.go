@@ -429,7 +429,7 @@ func DuOuI(rc *rcd.RcVar) (duo *model.DuoUI, err error) {
 	return
 }
 
-func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
+func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) (err error) {
 	slog.Debug("starting up duo ui main loop")
 	ui := &DuoUI{
 		ly: d,
@@ -462,10 +462,10 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 				interrupt.Request()
 			}
 			// This case is for handling when some external application is
-			//controlling the GUI and to gracefully handle the back-end
-			//servers being shut down by the interrupt library receiving an
-			//interrupt signal  Probably nothing needs to be run between
-			//starting it and shutting down
+			// controlling the GUI and to gracefully handle the back-end
+			// servers being shut down by the interrupt library receiving an
+			// interrupt signal  Probably nothing needs to be run between
+			// starting it and shutting down
 			<-interrupt.HandlersDone
 			slog.Debug("closing GUI from interrupt/quit signal")
 			return errors.New("shutdown triggered from back end")
@@ -482,8 +482,7 @@ func DuoUImainLoop(d *model.DuoUI, r *rcd.RcVar) error {
 			case system.DestroyEvent:
 				slog.Debug("destroy event received")
 				interrupt.Request()
-				// Here do cleanup like are you sure (
-				//optional) modal or shutting down indefinite spinner
+				// Here do cleanup like are you sure (optional) modal or shutting down indefinite spinner
 				<-interrupt.HandlersDone
 				return e.Err
 			case system.FrameEvent:

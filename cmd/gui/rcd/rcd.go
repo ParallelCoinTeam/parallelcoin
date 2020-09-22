@@ -15,6 +15,7 @@ import (
 	"github.com/p9c/pod/cmd/node"
 	"github.com/p9c/pod/cmd/walletmain"
 	blockchain "github.com/p9c/pod/pkg/chain"
+	chainhash "github.com/p9c/pod/pkg/chain/hash"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/gui/gel"
@@ -394,12 +395,11 @@ func (r *RcVar) CreateWallet(privPassphrase, duoSeed, pubPassphrase, walletDir s
 	save.Pod(r.cx.Config)
 }
 
-func (r *RcVar) DuoNodeService() error {
+func (r *RcVar) DuoNodeService() (err error) {
 	r.cx.NodeKill = make(chan struct{})
 	r.cx.Node.Store(false)
-	var err error
 	if !*r.cx.Config.NodeOff {
-		go func() {
+		go func(err error) {
 			slog.Info(r.cx.Language.RenderText("goApp_STARTINGNODE"))
 			// utils.GetBiosMessage(view, cx.Language.RenderText("goApp_STARTINGNODE"))
 			err = node.Main(r.cx, nil)
@@ -407,13 +407,13 @@ func (r *RcVar) DuoNodeService() error {
 				slog.Info("error running node:", err)
 				os.Exit(1)
 			}
-		}()
+		}(err)
 	}
 	interrupt.AddHandler(func() {
 		slog.Warn("interrupt received, shutting down node")
 		close(r.cx.NodeKill)
 	})
-	return err
+	return
 }
 
 func (r *RcVar) DuoSend(wp string, ad string, am float64) func() {
@@ -471,6 +471,7 @@ func (r *RcVar) DuoUIloggerController() {
 
 func (r *RcVar) GetAddressBook() func() {
 	return func() {
+		var err error
 		ab := r.db.DbReadAddressBook()
 		addressbook := &model.DuoUIaddressBook{}
 		minConf := 1
@@ -488,8 +489,8 @@ func (r *RcVar) GetAddressBook() func() {
 		allAddrData := make(map[string]AddrData)
 		// Create an AddrData entry for each active address in the account.
 		// Otherwise we'll just get addresses from transactions later.
-		sortedAddrs, err := r.cx.WalletServer.SortedActivePaymentAddresses()
-		if err != nil {
+		var sortedAddrs []string
+		if sortedAddrs, err = r.cx.WalletServer.SortedActivePaymentAddresses(); slog.Check(err) {
 		}
 		idx := 0
 		for _, address := range sortedAddrs {
@@ -505,7 +506,7 @@ func (r *RcVar) GetAddressBook() func() {
 		} else {
 			endHeight = syncBlock.Height - int32(minConf) + 1
 		}
-		err = wallet.ExposeUnstableAPI(r.cx.WalletServer).RangeTransactions(
+		if err = wallet.ExposeUnstableAPI(r.cx.WalletServer).RangeTransactions(
 			0, endHeight, func(details []wtxmgr.TxDetails) (bool, error) {
 				for _, tx := range details {
 					for _, cred := range tx.Credits {
@@ -531,8 +532,7 @@ func (r *RcVar) GetAddressBook() func() {
 					}
 				}
 				return false, nil
-			})
-		if err != nil {
+			}); slog.Check(err) {
 		}
 		var addrs AddressSlice
 		// Massage address data into output format.
@@ -564,9 +564,9 @@ func (r *RcVar) GetAddressBook() func() {
 }
 
 func (r *RcVar) GetBlock(hash string) btcjson.GetBlockVerboseResult {
-	verbose, verbosetx := true, true
-	bcmd := btcjson.GetBlockCmd{hash, &verbose, &verbosetx}
-	if bl, err := chainrpc.HandleGetBlock(r.cx.RPCServer, &bcmd, nil); !slog.Check(err) {
+	verbose, verboseTx := true, true
+	bCmd := btcjson.GetBlockCmd{hash, &verbose, &verboseTx}
+	if bl, err := chainrpc.HandleGetBlock(r.cx.RPCServer, &bCmd, nil); !slog.Check(err) {
 		if gbvr, ok := bl.(btcjson.GetBlockVerboseResult); ok {
 			return gbvr
 		}
@@ -586,13 +586,14 @@ func (r *RcVar) GetBlockCount() {
 
 func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 	b = *new(model.DuoUIblock)
-	hashHeight, err := r.cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height))
-	if err != nil {
-		slog.Error("Block Hash By Height:", err)
+	var err error
+	var hashHeight *chainhash.Hash
+	if hashHeight, err = r.cx.RPCServer.Cfg.Chain.BlockHashByHeight(int32(height)); slog.Check(err) {
 	}
-	verbose, verbosetx := true, true
-	bcmd := btcjson.GetBlockCmd{hashHeight.String(), &verbose, &verbosetx}
-	if bl, err := chainrpc.HandleGetBlock(r.cx.RPCServer, &bcmd,
+	verbose, verboseTx := true, true
+	bCmd := btcjson.GetBlockCmd{hashHeight.String(), &verbose, &verboseTx}
+	var bl interface{}
+	if bl, err = chainrpc.HandleGetBlock(r.cx.RPCServer, &bCmd,
 		nil); slog.Check(err) {
 		block := bl.(btcjson.GetBlockVerboseResult)
 		b.Height = block.Height
@@ -608,8 +609,10 @@ func (r *RcVar) GetBlockExcerpt(height int) (b model.DuoUIblock) {
 }
 
 func (r *RcVar) GetBlockHash(blockHeight int) string {
-	hcmd := btcjson.GetBlockHashCmd{Index: int64(blockHeight)}
-	if hash, err := chainrpc.HandleGetBlockHash(r.cx.RPCServer, &hcmd, nil); !slog.Check(err) {
+	hCmd := btcjson.GetBlockHashCmd{Index: int64(blockHeight)}
+	var err error
+	var hash interface{}
+	if hash, err = chainrpc.HandleGetBlockHash(r.cx.RPCServer, &hCmd, nil); !slog.Check(err) {
 		return hash.(string)
 	} else {
 		return err.Error()
@@ -1194,10 +1197,9 @@ func (r *RcVar) StartServices() (err error) {
 	return
 }
 
-func (r *RcVar) StartWallet() error {
+func (r *RcVar) StartWallet() (err error) {
 	r.cx.WalletKill = make(chan struct{})
 	r.cx.Wallet.Store(false)
-	var err error
 	if !*r.cx.Config.WalletOff {
 		go func() {
 			slog.Info("starting wallet")
@@ -1214,7 +1216,7 @@ func (r *RcVar) StartWallet() error {
 			"shutting down shell modules")
 		close(r.cx.WalletKill)
 	})
-	return err
+	return
 }
 
 func (r *RcVar) toastAdd(t, m string) {
