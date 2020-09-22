@@ -1,8 +1,8 @@
 package Hash
 
 import (
-	"github.com/stalker-loki/app/slog"
 	chainhash "github.com/p9c/pod/pkg/chain/hash"
+	"github.com/stalker-loki/app/slog"
 )
 
 type Hash struct {

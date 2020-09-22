@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/pkg/coding/gcs"
+	"github.com/stalker-loki/app/slog"
 )
 
 // CacheableFilter is a wrapper around Filter type which provides a Size method

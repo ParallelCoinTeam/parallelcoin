@@ -2,8 +2,8 @@ package app
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/app/config"
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"time"
 

@@ -1,10 +1,14 @@
-package monitor
+// Package monitor is a log viewer and filter and configuration interface
+//
+// +build !headless
+
+package pkg
 
 import (
 	"gioui.org/layout"
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/stalker-loki/app/slog"
 	"os/exec"
 	"strings"
 )

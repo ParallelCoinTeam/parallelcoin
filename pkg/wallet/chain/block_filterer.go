@@ -1,12 +1,12 @@
 package chain
 
 import (
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util"
 	am "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/stalker-loki/app/slog"
 )
 
 // BlockFilterer is used to iteratively scan blocks for a set of addresses of

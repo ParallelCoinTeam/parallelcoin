@@ -387,7 +387,7 @@ func // checkConnectBlock performs several checks to confirm connecting the
 // of work requirement. The block must connect to the current tip of the main
 // chain. This function is safe for concurrent access.
 func (b *BlockChain) CheckConnectBlockTemplate(workerNumber uint32, block *util.
-	Block) error {
+Block) error {
 	algo := block.MsgBlock().Header.Version
 	// Trace("algo ", algo)
 	height := block.Height()
@@ -575,7 +575,7 @@ func // checkBlockHeaderContext performs several validation checks on the block
 //  against the checkpoints are not performed.
 // This function MUST be called with the chain state lock held (for writes).
 (b *BlockChain) checkBlockHeaderContext(workerNumber uint32, header *wire.
-	BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
+BlockHeader, prevNode *BlockNode, flags BehaviorFlags) error {
 	// Warn("checking block header context")
 	if prevNode == nil {
 		return nil

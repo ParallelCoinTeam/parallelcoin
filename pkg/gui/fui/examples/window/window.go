@@ -8,6 +8,6 @@ import (
 
 func main() {
 	fui.Window().Title("Parallelcoin").Size(640, 480).
-		Run(func(*layout.Context){}, func() {})
+		Run(func(*layout.Context) {}, func() {})
 	app.Main()
 }

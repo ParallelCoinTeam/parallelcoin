@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/app/config"
+	"github.com/stalker-loki/app/slog"
 	"os"
 
 	"github.com/urfave/cli"

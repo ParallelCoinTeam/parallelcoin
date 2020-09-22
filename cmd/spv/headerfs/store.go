@@ -230,7 +230,7 @@ func (h *blockHeaderStore) FetchHeader(hash *chainhash.Hash) (*wire.BlockHeader,
 //
 // NOTE: Part of the BlockHeaderStore interface.
 func (h *blockHeaderStore) FetchHeaderByHeight(height uint32) (*wire.
-	BlockHeader, error) {
+BlockHeader, error) {
 	// Lock store for read.
 	h.mtx.RLock()
 	defer h.mtx.RUnlock()
@@ -637,7 +637,7 @@ func NewFilterHeaderStore(filePath string, db walletdb.DB,
 // FetchHeader returns the filter header that corresponds to the passed block
 // height.
 func (f *FilterHeaderStore) FetchHeader(hash *chainhash.Hash) (*chainhash.
-	Hash, error) {
+Hash, error) {
 	// Lock store for read.
 	f.mtx.RLock()
 	defer f.mtx.RUnlock()
@@ -651,7 +651,7 @@ func (f *FilterHeaderStore) FetchHeader(hash *chainhash.Hash) (*chainhash.
 
 // FetchHeaderByHeight returns the filter header for a particular block height.
 func (f *FilterHeaderStore) FetchHeaderByHeight(height uint32) (*chainhash.
-	Hash, error) {
+Hash, error) {
 	// Lock store for read.
 	f.mtx.RLock()
 	defer f.mtx.RUnlock()

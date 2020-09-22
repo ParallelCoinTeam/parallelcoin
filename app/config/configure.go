@@ -1,12 +1,12 @@
 package config
 
 import (
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/pkg/rpc/chainrpc"
 	"github.com/p9c/pod/pkg/wallet"
+	"github.com/stalker-loki/app/slog"
 )
 
 func // Configure loads and sanitises the configuration from urfave/cli

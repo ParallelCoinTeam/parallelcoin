@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/config"
 	"github.com/p9c/pod/app/conte"
@@ -15,6 +14,7 @@ import (
 	"github.com/p9c/pod/pkg/rpc/legacy"
 	"github.com/p9c/pod/pkg/util/hdkeychain"
 	"github.com/p9c/pod/pkg/util/interrupt"
+	"github.com/stalker-loki/app/slog"
 	"github.com/urfave/cli"
 	"os"
 	"path/filepath"
@@ -176,8 +176,8 @@ func GetApp(cx *conte.Xt) (a *cli.App) {
 				Destination: cx.Config.DataDir,
 			},
 			cli.BoolFlag{
-				Name:        "pipelog, P",
-				Usage:       "enables pipe logger (" +
+				Name: "pipelog, P",
+				Usage: "enables pipe logger (" +
 					"setting only activates on use of cli flag or environment" +
 					" variable as it alters stdin/out behaviour)",
 				EnvVar:      "POD_PIPELOG",

@@ -1,9 +1,9 @@
 package pipe
 
 import (
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/pkg/comm/stdconn"
 	"github.com/p9c/pod/pkg/comm/stdconn/worker"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"os"
 )

@@ -1,6 +1,8 @@
-// +build !windows
+// Package monitor is a log viewer and filter and configuration interface
+//
+// +build !headless !windows
 
-package monitor
+package pkg
 
 import (
 	"github.com/stalker-loki/app/slog"

@@ -160,7 +160,7 @@ func initListeners(cx *conte.Xt, commandName string, initial bool) {
 		*cfg.Listeners = cli.StringSlice{listenHost}
 		*cfg.RPCListeners = cli.StringSlice{listenHost}
 	}
-	if *cx.Config.AutoPorts && !initial{
+	if *cx.Config.AutoPorts && !initial {
 		if fP, e = GetFreePort(); slog.Check(e) {
 		}
 		*cfg.Listeners = cli.StringSlice{":" + fmt.Sprint(fP)}

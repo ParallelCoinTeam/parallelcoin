@@ -3,11 +3,11 @@ package worker
 import (
 	"crypto/cipher"
 	"errors"
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/cmd/kopach/control/hashrate"
 	"github.com/p9c/pod/cmd/kopach/control/sol"
 	blockchain "github.com/p9c/pod/pkg/chain"
 	"github.com/p9c/pod/pkg/chain/fork"
+	"github.com/stalker-loki/app/slog"
 	"math/rand"
 	"net"
 	"os"

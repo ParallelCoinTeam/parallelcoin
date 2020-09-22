@@ -12,13 +12,13 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/app/apputil"
 	"github.com/p9c/pod/app/conte"
 	config "github.com/p9c/pod/pkg/chain/config"
 	"github.com/p9c/pod/pkg/chain/config/netparams"
 	"github.com/p9c/pod/pkg/chain/fork"
 	"github.com/p9c/pod/pkg/pod"
+	"github.com/stalker-loki/app/slog"
 	"github.com/urfave/cli"
 )
 

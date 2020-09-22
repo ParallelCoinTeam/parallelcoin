@@ -1,4 +1,8 @@
-package monitor
+// Package monitor is a log viewer and filter and configuration interface
+//
+// +build !headless
+
+package pkg
 
 import "github.com/stalker-loki/app/slog"
 

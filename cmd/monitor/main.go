@@ -1,3 +1,7 @@
+// Package monitor is a log viewer and filter and configuration interface
+//
+// +build !headless
+
 package monitor
 
 import (
@@ -5,12 +9,12 @@ import (
 	"gioui.org/io/system"
 	"gioui.org/layout"
 	"gioui.org/unit"
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/app/conte"
 	"github.com/p9c/pod/cmd/gui/rcd"
-	"github.com/p9c/pod/pkg/gui"
+	"github.com/p9c/pod/cmd/monitor/pkg"
 	"github.com/p9c/pod/pkg/util/interrupt"
 	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/stalker-loki/app/slog"
 	"gopkg.in/src-d/go-git.v4"
 	"os"
 	"os/exec"
@@ -19,7 +23,7 @@ import (
 )
 
 func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
-	mon := NewMonitor(cx, nil, rc)
+	mon := pkg.NewMonitor(cx, nil, rc)
 	var lgs []string
 	for i := range *logi.L.Packages {
 		lgs = append(lgs, i)
@@ -119,17 +123,4 @@ func Run(cx *conte.Xt, rc *rcd.RcVar) (err error) {
 	})
 	app.Main()
 	return
-}
-
-func (s *State) TopLevelLayout() {
-	s.FlexV(
-		s.Header(),
-		gui.Flexed(1, func() {
-			s.FlexHStart(
-				s.LogViewer(),
-				s.Sidebar(),
-			)
-		}),
-		s.BottomBar(),
-	)
 }

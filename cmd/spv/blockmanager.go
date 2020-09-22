@@ -48,8 +48,8 @@ const (
 // }
 
 var // zeroHash is the zero value hash (all zeros).
-// It is defined as a convenience.
-zeroHash chainhash.Hash
+	// It is defined as a convenience.
+	zeroHash chainhash.Hash
 
 type (
 	// filterStoreLookup
@@ -1582,7 +1582,7 @@ func // findPreviousHeaderCheckpoint returns the last checkpoint before the
 // for the current network. This is used for resetting state when a malicious
 // peer sends us headers that don't lead up to a known checkpoint.
 (b *blockManager) findPreviousHeaderCheckpoint(height int32) *config.
-	Checkpoint {
+Checkpoint {
 	// Start with the genesis block - earliest checkpoint to which our code
 	// will want to reset
 	prevCheckpoint := &config.Checkpoint{

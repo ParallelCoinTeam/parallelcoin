@@ -17,7 +17,7 @@ import (
 var Bip16Activation = time.Unix(1333238400, 0)
 
 type // SigHashType represents hash type bits at the end of a signature.
-SigHashType uint32
+	SigHashType uint32
 
 const ( // Hash type bits from the end of a signature.
 	SigHashOld          SigHashType = 0x0

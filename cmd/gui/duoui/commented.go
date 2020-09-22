@@ -1,6 +1,5 @@
 package duoui
 
-
 // func (ui *DuoUI) DuoUItoastSys() {
 //	layout.Align(layout.NE).Layout(ui.ly.Context, func() {
 //		listToasts.Layout(ui.ly.Context, len(ui.rc.Toasts), func(i int) {
@@ -52,4 +51,3 @@ package duoui
 //		op.InvalidateOp{}.Add(ui.ly.Context.Ops)
 //	}(ui)
 // }
-

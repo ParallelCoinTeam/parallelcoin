@@ -3,9 +3,9 @@ package ring
 import (
 	"context"
 	"github.com/marusama/semaphore"
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/pkg/gui/gel"
 	"github.com/p9c/pod/pkg/util/logi"
+	"github.com/stalker-loki/app/slog"
 )
 
 type Entry struct {

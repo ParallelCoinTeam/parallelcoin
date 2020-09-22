@@ -1,7 +1,6 @@
 package wallettx
 
 import (
-	"github.com/stalker-loki/app/slog"
 	wtxmgr "github.com/p9c/pod/pkg/chain/tx/mgr"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
@@ -9,6 +8,7 @@ import (
 	log "github.com/p9c/pod/pkg/util/logi"
 	waddrmgr "github.com/p9c/pod/pkg/wallet/addrmgr"
 	"github.com/p9c/pod/pkg/wallet/chain"
+	"github.com/stalker-loki/app/slog"
 )
 
 type (

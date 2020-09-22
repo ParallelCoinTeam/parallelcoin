@@ -1,12 +1,12 @@
 package addresses
 
 import (
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/app/save"
 	"github.com/p9c/pod/cmd/node/state"
 	"github.com/p9c/pod/pkg/pod"
 	"github.com/p9c/pod/pkg/wallet"
 	wm "github.com/p9c/pod/pkg/wallet/addrmgr"
+	"github.com/stalker-loki/app/slog"
 )
 
 func RefillMiningAddresses(w *wallet.Wallet, cfg *pod.Config, stateCfg *state.Config) {

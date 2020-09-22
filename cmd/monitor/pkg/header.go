@@ -1,10 +1,14 @@
-package monitor
+// Package monitor is a log viewer and filter and configuration interface
+//
+// +build !headless
+
+package pkg
 
 import (
 	"fmt"
-	"github.com/stalker-loki/app/slog"
 	"github.com/p9c/pod/pkg/gui"
 	"github.com/p9c/pod/pkg/gui/gelook"
+	"github.com/stalker-loki/app/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
