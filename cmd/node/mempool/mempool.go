@@ -541,28 +541,27 @@ func // checkPoolDoubleSpend checks whether or not the passed transaction is
 // Note it does not check for double spends against transactions already in
 // the main chain.
 // This function MUST be called with the mempool lock held (for reads).
-(mp *TxPool) checkPoolDoubleSpend(tx *util.Tx) error {
+(mp *TxPool) checkPoolDoubleSpend(tx *util.Tx) (err error) {
 	for _, txIn := range tx.MsgTx().TxIn {
 		if txR, exists := mp.outpoints[txIn.PreviousOutPoint]; exists {
-			str := fmt.Sprintf("output %v already spent by "+
-				"transaction %v in the memory pool",
-				txIn.PreviousOutPoint, txR.Hash())
-			return txRuleError(wire.RejectDuplicate, str)
+			err = txRuleError(wire.RejectDuplicate, fmt.Sprintf(
+				"output %v already spent by transaction %v in the memory pool",
+				txIn.PreviousOutPoint, txR.Hash()))
+			slog.Debug(err)
+			return
 		}
 	}
-	return nil
+	return
 }
 
-func // fetchInputUtxos loads utxo details about the input transactions
+// fetchInputUtxos loads utxo details about the input transactions
 // referenced by the passed transaction.
 // First it loads the details form the viewpoint of the main chain,
 // then it adjusts them based upon the contents of the transaction pool.
 // This function MUST be called with the mempool lock held (for reads).
-(mp *TxPool) fetchInputUtxos(tx *util.Tx) (*blockchain.UtxoViewpoint, error) {
-	utxoView, err := mp.cfg.FetchUtxoView(tx)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+func (mp *TxPool) fetchInputUtxos(tx *util.Tx) (utxoView *blockchain.UtxoViewpoint, err error) {
+	if utxoView, err = mp.cfg.FetchUtxoView(tx); slog.Check(err) {
+		return
 	}
 	// Attempt to populate any missing inputs from the transaction pool.
 	for _, txIn := range tx.MsgTx().TxIn {
@@ -574,46 +573,44 @@ func // fetchInputUtxos loads utxo details about the input transactions
 		if poolTxDesc, exists := mp.pool[prevOut.Hash]; exists {
 			// AddTxOut ignores out of range index values,
 			// so it is safe to call without bounds checking here.
-			utxoView.AddTxOut(poolTxDesc.Tx, prevOut.Index,
-				mining.UnminedHeight)
+			utxoView.AddTxOut(poolTxDesc.Tx, prevOut.Index, mining.UnminedHeight)
 		}
 	}
-	return utxoView, nil
+	return
 }
 
-func // haveTransaction returns whether or not the passed transaction already
+// haveTransaction returns whether or not the passed transaction already
 // exists in the main pool or in the orphan pool.
 // This function MUST be called with the mempool lock held (for reads).
-(mp *TxPool) haveTransaction(
-	hash *chainhash.Hash) bool {
+func (mp *TxPool) haveTransaction(hash *chainhash.Hash) bool {
 	return mp.isTransactionInPool(hash) || mp.isOrphanInPool(hash)
 }
 
-func // isOrphanInPool returns whether or not the passed transaction already
+// isOrphanInPool returns whether or not the passed transaction already
 // exists in the orphan pool.
 // This function MUST be called with the mempool lock held (for reads).
-(mp *TxPool) isOrphanInPool(hash *chainhash.Hash) bool {
+func (mp *TxPool) isOrphanInPool(hash *chainhash.Hash) (result bool) {
 	if _, exists := mp.orphans[*hash]; exists {
-		return true
+		result = true
 	}
-	return false
+	return
 }
 
-func // isTransactionInPool returns whether or not the passed transaction
+// isTransactionInPool returns whether or not the passed transaction
 // already exists in the main pool.
 // This function MUST be called with the mempool lock held (for reads).
-(mp *TxPool) isTransactionInPool(hash *chainhash.Hash) bool {
+func (mp *TxPool) isTransactionInPool(hash *chainhash.Hash) (result bool) {
 	if _, exists := mp.pool[*hash]; exists {
-		return true
+		result = true
 	}
-	return false
+	return
 }
 
-func // limitNumOrphans limits the number of orphan transactions by evicting a
+// limitNumOrphans limits the number of orphan transactions by evicting a
 // random orphan if adding a new one would cause it to overflow the max
 // allowed.
 // This function MUST be called with the mempool lock held (for writes).
-(mp *TxPool) limitNumOrphans() error {
+func (mp *TxPool) limitNumOrphans() (err error) {
 	// Scan through the orphan pool and remove any expired orphans when it's
 	// time.  This is done for efficiency so the scan only happens
 	// periodically instead of on every orphan added to the pool.
@@ -641,7 +638,7 @@ func // limitNumOrphans limits the number of orphan transactions by evicting a
 	// Nothing to do if adding another orphan will not cause the pool to
 	// exceed the limit.
 	if len(mp.orphans)+1 <= mp.cfg.Policy.MaxOrphanTxs {
-		return nil
+		return
 	}
 	// Remove a random entry from the map.  For most compilers,
 	// Go's range statement iterates starting at a random item although that
@@ -655,7 +652,7 @@ func // limitNumOrphans limits the number of orphan transactions by evicting a
 		mp.removeOrphan(otx.tx, false)
 		break
 	}
-	return nil
+	return
 }
 
 func // maybeAcceptTransaction is the internal function which implements the

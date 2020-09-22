@@ -355,7 +355,7 @@ func (m *memWallet) NewAddress() (util.Address, error) {
 // The transaction being funded can optionally include a change output
 // indicated by the change boolean. NOTE: The memWallet's mutex must be held when this function is called.
 func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
-	feeRate util.Amount, change bool) error {
+	feeRate util.Amount, change bool) (err error) {
 	const (
 		// spendSize is the largest number of bytes of a sigScript which
 		// spends a p2pkh output: OP_DATA_73 <sig> OP_DATA_33 <pubkey>
@@ -391,15 +391,13 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 		// for it.
 		changeVal := amtSelected - amt - reqFee
 		if changeVal > 0 && change {
-			addr, err := m.newAddress()
-			if err != nil {
-				slog.Error(err)
-				return err
+			var addr util.Address
+			var pkScript []byte
+			if addr, err = m.newAddress(); slog.Check(err) {
+				return
 			}
-			pkScript, err := script.PayToAddrScript(addr)
-			if err != nil {
-				slog.Error(err)
-				return err
+			if pkScript, err = script.PayToAddrScript(addr); slog.Check(err) {
+				return
 			}
 			changeOutput := &wire.TxOut{
 				Value:    int64(changeVal),
@@ -407,7 +405,7 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 			}
 			tx.AddTxOut(changeOutput)
 		}
-		return nil
+		return
 	}
 	// If we've reached this point,
 	// then coin selection failed due to an insufficient amount of coins.
@@ -418,11 +416,10 @@ func (m *memWallet) fundTx(tx *wire.MsgTx, amt util.Amount,
 // output while observing the passed fee rate.
 // The passed fee rate should be expressed in satoshis-per-byte.
 func (m *memWallet) SendOutputs(outputs []*wire.TxOut,
-	feeRate util.Amount) (*chainhash.Hash, error) {
-	tx, err := m.CreateTransaction(outputs, feeRate, true)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	feeRate util.Amount) (h *chainhash.Hash, err error) {
+	var tx *wire.MsgTx
+	if tx, err = m.CreateTransaction(outputs, feeRate, true); slog.Check(err) {
+		return
 	}
 	return m.rpc.SendRawTransaction(tx, true)
 }
@@ -432,11 +429,10 @@ func (m *memWallet) SendOutputs(outputs []*wire.TxOut,
 // change output.
 // The passed fee rate should be expressed in sat/b.
 func (m *memWallet) SendOutputsWithoutChange(outputs []*wire.TxOut,
-	feeRate util.Amount) (*chainhash.Hash, error) {
-	tx, err := m.CreateTransaction(outputs, feeRate, false)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	feeRate util.Amount) (h *chainhash.Hash, err error) {
+	var tx *wire.MsgTx
+	if tx, err = m.CreateTransaction(outputs, feeRate, false); slog.Check(err) {
+		return
 	}
 	return m.rpc.SendRawTransaction(tx, true)
 }
@@ -448,10 +444,10 @@ func (m *memWallet) SendOutputsWithoutChange(outputs []*wire.TxOut,
 // indicated by the change boolean.
 // This function is safe for concurrent access.
 func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
-	feeRate util.Amount, change bool) (*wire.MsgTx, error) {
+	feeRate util.Amount, change bool) (tx *wire.MsgTx, err error) {
 	m.Lock()
 	defer m.Unlock()
-	tx := wire.NewMsgTx(wire.TxVersion)
+	tx = wire.NewMsgTx(wire.TxVersion)
 	// Tally up the total amount to be sent in order to perform coin
 	// selection shortly below.
 	var outputAmt util.Amount
@@ -460,8 +456,7 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 		tx.AddTxOut(output)
 	}
 	// Attempt to fund the transaction with spendable utxos.
-	if err := m.fundTx(tx, outputAmt, feeRate, change); err != nil {
-		return nil, err
+	if err = m.fundTx(tx, outputAmt, feeRate, change); slog.Check(err) {
 	}
 	// Populate all the selected inputs with valid sigScript for spending.
 	// Along the way record all outputs being spent in order to avoid a
@@ -470,21 +465,17 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 	for i, txIn := range tx.TxIn {
 		outPoint := txIn.PreviousOutPoint
 		utxo := m.utxos[outPoint]
-		extendedKey, err := m.hdRoot.Child(utxo.keyIndex)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var extendedKey *hdkeychain.ExtendedKey
+		if extendedKey, err = m.hdRoot.Child(utxo.keyIndex); slog.Check(err) {
+			return
 		}
-		privKey, err := extendedKey.ECPrivKey()
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var privateKey *ec.PrivateKey
+		if privateKey, err = extendedKey.ECPrivKey(); slog.Check(err) {
+			return
 		}
-		sigScript, err := script.SignatureScript(tx, i, utxo.pkScript,
-			script.SigHashAll, privKey, true)
-		if err != nil {
-			slog.Error(err)
-			return nil, err
+		var sigScript []byte
+		if sigScript, err = script.SignatureScript(tx, i, utxo.pkScript, script.SigHashAll, privateKey, true); slog.Check(err) {
+			return
 		}
 		txIn.SignatureScript = sigScript
 		spentOutputs = append(spentOutputs, utxo)
@@ -497,7 +488,7 @@ func (m *memWallet) CreateTransaction(outputs []*wire.TxOut,
 	for _, utxo := range spentOutputs {
 		utxo.isLocked = true
 	}
-	return tx, nil
+	return
 }
 
 // UnlockOutputs unlocks any outputs which were previously locked due to
@@ -533,12 +524,11 @@ func (m *memWallet) ConfirmedBalance() util.Amount {
 }
 
 // keyToAddr maps the passed private to corresponding p2pkh address.
-func keyToAddr(key *ec.PrivateKey, net *netparams.Params) (util.Address, error) {
+func keyToAddr(key *ec.PrivateKey, net *netparams.Params) (addr util.Address, err error) {
 	serializedKey := key.PubKey().SerializeCompressed()
-	pubKeyAddr, err := util.NewAddressPubKey(serializedKey, net)
-	if err != nil {
-		slog.Error(err)
-		return nil, err
+	var pubKeyAddr *util.AddressPubKey
+	if pubKeyAddr, err = util.NewAddressPubKey(serializedKey, net); slog.Check(err) {
+		return
 	}
 	return pubKeyAddr.AddressPubKeyHash(), nil
 }

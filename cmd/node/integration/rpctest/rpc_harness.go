@@ -189,40 +189,37 @@ func New(activeNet *netparams.Params, handlers *client.NotificationHandlers,
 // configurable number of mature coinbase outputs coinbase outputs.
 // NOTE: This method and TearDown should always be called from the same
 // goroutine as they are not concurrent safe.
-func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
+func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) (err error) {
 	// Start the pod node itself. This spawns a new process which will be managed
-	if err := h.node.start(); err != nil {
-		return err
+	if err = h.node.start(); slog.Check(err) {
+		return
 	}
-	if err := h.connectRPCClient(); err != nil {
-		return err
+	if err = h.connectRPCClient(); slog.Check(err) {
+		return
 	}
 	h.wallet.Start()
 	// Filter transactions that pay to the coinbase associated with the wallet.
 	filterAddrs := []util.Address{h.wallet.coinbaseAddr}
-	if err := h.Node.LoadTxFilter(true, filterAddrs, nil); err != nil {
-		return err
+	if err = h.Node.LoadTxFilter(true, filterAddrs, nil); slog.Check(err) {
+		return
 	}
 	// Ensure pod properly dispatches our registered call-back for each new
 	// block. Otherwise, the memWallet won't function properly.
-	if err := h.Node.NotifyBlocks(); err != nil {
-		return err
+	if err = h.Node.NotifyBlocks(); slog.Check(err) {
+		return
 	}
 	// Create a test chain with the desired number of mature coinbase outputs.
 	if createTestChain && numMatureOutputs != 0 {
 		numToGenerate := uint32(h.ActiveNet.CoinbaseMaturity) +
 			numMatureOutputs
-		_, err := h.Node.Generate(numToGenerate)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if _, err = h.Node.Generate(numToGenerate); slog.Check(err) {
+			return
 		}
 	}
 	// Block until the wallet has fully synced up to the tip of the main chain.
-	_, height, err := h.Node.GetBestBlock()
-	if err != nil {
-		slog.Error(err)
-		return err
+	var height int32
+	if _, height, err = h.Node.GetBestBlock(); slog.Check(err) {
+		return
 	}
 	ticker := time.NewTicker(time.Millisecond * 100)
 	for range ticker.C {
@@ -232,31 +229,31 @@ func (h *Harness) SetUp(createTestChain bool, numMatureOutputs uint32) error {
 		}
 	}
 	ticker.Stop()
-	return nil
+	return
 }
 
 // tearDown stops the running rpc test instance.
 // All created processes are killed, and temporary directories removed.
 // This function MUST be called with the harness state mutex held (for writes).
-func (h *Harness) tearDown() error {
+func (h *Harness) tearDown() (err error) {
 	if h.Node != nil {
 		h.Node.Shutdown()
 	}
-	if err := h.node.shutdown(); err != nil {
-		return err
+	if err = h.node.shutdown(); slog.Check(err) {
+		return
 	}
-	if err := os.RemoveAll(h.testNodeDir); err != nil {
-		return err
+	if err = os.RemoveAll(h.testNodeDir); slog.Check(err) {
+		return
 	}
 	delete(testInstances, h.testNodeDir)
-	return nil
+	return
 }
 
 // TearDown stops the running rpc test instance.
 // All created processes are killed, and temporary directories removed.
 // NOTE: This method and SetUp should always be called from the same
 // goroutine as they are not concurrent safe.
-func (h *Harness) TearDown() error {
+func (h *Harness) TearDown() (err error) {
 	harnessStateMtx.Lock()
 	defer harnessStateMtx.Unlock()
 	return h.tearDown()
@@ -268,9 +265,8 @@ func (h *Harness) TearDown() error {
 // maxConnRetries times, backing off the time between subsequent attempts.
 // If after h.maxConnRetries attempts we're not able to establish a connection,
 // this function returns with an error.
-func (h *Harness) connectRPCClient() error {
+func (h *Harness) connectRPCClient() (err error) {
 	var cl *client.Client
-	var err error
 	rpcConf := h.node.config.rpcConnConfig()
 	for i := 0; i < h.maxConnRetries; i++ {
 		if cl, err = client.New(&rpcConf, h.handlers); err != nil {
@@ -280,11 +276,12 @@ func (h *Harness) connectRPCClient() error {
 		break
 	}
 	if cl == nil {
-		return fmt.Errorf("connection timeout")
+		err = fmt.Errorf("connection timeout")
+		return
 	}
 	h.Node = cl
 	h.wallet.SetRPCClient(cl)
-	return nil
+	return
 }
 
 // NewAddress returns a fresh address spendable by the Harness' internal
@@ -294,8 +291,7 @@ func (h *Harness) NewAddress() (util.Address, error) {
 	return h.wallet.NewAddress()
 }
 
-// ConfirmedBalance returns the confirmed balance of the Harness' internal
-// wallet.
+// ConfirmedBalance returns the confirmed balance of the Harness' internal wallet.
 // This function is safe for concurrent access.
 func (h *Harness) ConfirmedBalance() util.Amount {
 	return h.wallet.ConfirmedBalance()
@@ -305,8 +301,7 @@ func (h *Harness) ConfirmedBalance() util.Amount {
 // the harness' available mature coinbase outputs creating new outputs
 // according to targetOutputs.
 // This function is safe for concurrent access.
-func (h *Harness) SendOutputs(targetOutputs []*wire.TxOut,
-	feeRate util.Amount) (*chainhash.Hash, error) {
+func (h *Harness) SendOutputs(targetOutputs []*wire.TxOut, feeRate util.Amount) (*chainhash.Hash, error) {
 	return h.wallet.SendOutputs(targetOutputs, feeRate)
 }
 

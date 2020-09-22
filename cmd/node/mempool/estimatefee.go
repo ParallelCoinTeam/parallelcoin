@@ -178,8 +178,7 @@ func // ObserveTransaction is called when a new transaction is observed in the
 
 func // RegisterBlock informs the fee estimator of a new block to take into
 // account.
-(ef *FeeEstimator) RegisterBlock(
-	block *util.Block) error {
+(ef *FeeEstimator) RegisterBlock(block *util.Block) (err error) {
 	ef.mtx.Lock()
 	defer ef.mtx.Unlock()
 	// The previous sorted list is invalid, so delete it.
@@ -209,8 +208,9 @@ func // RegisterBlock informs the fee estimator of a new block to take into
 	for t := range transactions {
 		hash := *t.Hash()
 		// Have we observed this tx in the mempool?
-		o, ok := ef.observed[hash]
-		if !ok {
+		var ok bool
+		var o *observedTransaction
+		if o, ok = ef.observed[hash]; !ok {
 			continue
 		}
 		// Put the observed tx in the appropriate bin.
@@ -218,12 +218,8 @@ func // RegisterBlock informs the fee estimator of a new block to take into
 		// This shouldn't happen if the fee estimator works correctly,
 		// but return an error if it does.
 		if o.mined != mining.UnminedHeight {
-			slog.Error(
-				"Estimate fee: transaction ",
-				hash,
-				" has already been mined",
-			)
-			return errors.New("transaction has already been mined")
+			err = fmt.Errorf("estimate fee: transaction %s has already been mined", hash.String())
+			return
 		}
 		// This shouldn't happen but check just in case to avoid an out-of
 		// -bounds array index later.
@@ -258,24 +254,24 @@ func // RegisterBlock informs the fee estimator of a new block to take into
 	}
 	// Add dropped list to history.
 	if ef.maxRollback == 0 {
-		return nil
+		return
 	}
 	if uint32(len(ef.dropped)) == ef.maxRollback {
 		ef.dropped = append(ef.dropped[1:], dropped)
 	} else {
 		ef.dropped = append(ef.dropped, dropped)
 	}
-	return nil
+	return
 }
 
-func // Rollback unregisters a recently registered block from the FeeEstimator.
+// Rollback unregisters a recently registered block from the FeeEstimator.
 // This can be used to reverse the effect of an orphaned block on the fee
 // estimator. The maximum number of rollbacks allowed is given by maxRollbacks.
 // Note: not everything can be rolled back because some transactions are
 // deleted if they have been observed too long ago.
 // That means the result of Rollback won't always be exactly the same as if
 // the last block had not happened, but it should be close enough.
-(ef *FeeEstimator) Rollback(hash *chainhash.Hash) error {
+func (ef *FeeEstimator) Rollback(hash *chainhash.Hash) (err error) {
 	ef.mtx.Lock()
 	defer ef.mtx.Unlock()
 	// Find this block in the stack of recent registered blocks.
@@ -286,17 +282,19 @@ func // Rollback unregisters a recently registered block from the FeeEstimator.
 		}
 	}
 	if n > len(ef.dropped) {
-		return errors.New("no such block was recently registered")
+		err = errors.New("no such block was recently registered")
+		slog.Error(err)
+		return
 	}
 	for i := 0; i < n; i++ {
 		ef.rollback()
 	}
-	return nil
+	return
 }
 
-func // Save records the current state of the FeeEstimator to a []byte that
+// Save records the current state of the FeeEstimator to a []byte that
 // can be restored later.
-(ef *FeeEstimator) Save() FeeEstimatorState {
+func (ef *FeeEstimator) Save() FeeEstimatorState {
 	ef.mtx.Lock()
 	defer ef.mtx.Unlock()
 	// TODO figure out what the capacity should be.
@@ -307,29 +305,17 @@ func // Save records the current state of the FeeEstimator to a []byte that
 		slog.Trace("failed to write fee estimates", e)
 	}
 	// Insert basic parameters.
-	e = binary.Write(w, binary.BigEndian, &ef.maxRollback)
-	if e != nil {
-		slog.Trace("failed to write fee estimates", e)
+	if e = binary.Write(w, binary.BigEndian, &ef.maxRollback); slog.Check(e) {
 	}
-	e = binary.Write(w, binary.BigEndian, &ef.binSize)
-	if e != nil {
-		slog.Trace("failed to write fee estimates", e)
+	if e = binary.Write(w, binary.BigEndian, &ef.binSize); slog.Check(e) {
 	}
-	e = binary.Write(w, binary.BigEndian, &ef.maxReplacements)
-	if e != nil {
-		slog.Trace("failed to write fee estimates", e)
+	if e = binary.Write(w, binary.BigEndian, &ef.maxReplacements); slog.Check(e) {
 	}
-	e = binary.Write(w, binary.BigEndian, &ef.minRegisteredBlocks)
-	if e != nil {
-		slog.Trace("failed to write fee estimates", e)
+	if e = binary.Write(w, binary.BigEndian, &ef.minRegisteredBlocks); slog.Check(e) {
 	}
-	e = binary.Write(w, binary.BigEndian, &ef.lastKnownHeight)
-	if e != nil {
-		slog.Trace("failed to write fee estimates", e)
+	if e = binary.Write(w, binary.BigEndian, &ef.lastKnownHeight); slog.Check(e) {
 	}
-	e = binary.Write(w, binary.BigEndian, &ef.numBlocksRegistered)
-	if e != nil {
-		slog.Trace("failed to write fee estimates", e)
+	if e = binary.Write(w, binary.BigEndian, &ef.numBlocksRegistered); slog.Check(e) {
 	}
 	// Put all the observed transactions in a sorted list.
 	var txCount uint32
@@ -341,9 +327,7 @@ func // Save records the current state of the FeeEstimator to a []byte that
 	sort.Sort(observedTxSet(ots))
 	txCount = 0
 	observed := make(map[*observedTransaction]uint32)
-	e = binary.Write(w, binary.BigEndian, uint32(len(ef.observed)))
-	if e != nil {
-		slog.Trace("failed to write:", e)
+	if e = binary.Write(w, binary.BigEndian, uint32(len(ef.observed))); slog.Check(e) {
 	}
 	for _, ot := range ots {
 		ot.Serialize(w)
@@ -352,21 +336,15 @@ func // Save records the current state of the FeeEstimator to a []byte that
 	}
 	// Save all the right bins.
 	for _, list := range ef.bin {
-		e = binary.Write(w, binary.BigEndian, uint32(len(list)))
-		if e != nil {
-			slog.Trace("failed to write:", e)
+		if e = binary.Write(w, binary.BigEndian, uint32(len(list))); slog.Check(e) {
 		}
 		for _, o := range list {
-			e = binary.Write(w, binary.BigEndian, observed[o])
-			if e != nil {
-				slog.Trace("failed to write:", e)
+			if e = binary.Write(w, binary.BigEndian, observed[o]); slog.Check(e) {
 			}
 		}
 	}
 	// Dropped transactions.
-	e = binary.Write(w, binary.BigEndian, uint32(len(ef.dropped)))
-	if e != nil {
-		slog.Trace("failed to write:", e)
+	if e = binary.Write(w, binary.BigEndian, uint32(len(ef.dropped))); slog.Check(e) {
 	}
 	for _, registered := range ef.dropped {
 		registered.serialize(w, observed)
@@ -375,9 +353,9 @@ func // Save records the current state of the FeeEstimator to a []byte that
 	return w.Bytes()
 }
 
-func // estimates returns the set of all fee estimates from 1 to
+// estimates returns the set of all fee estimates from 1 to
 // estimateFeeDepth confirmations from now.
-(ef *FeeEstimator) estimates() []SatoshiPerByte {
+func (ef *FeeEstimator) estimates() []SatoshiPerByte {
 	set := ef.newEstimateFeeSet()
 	estimates := make([]SatoshiPerByte, estimateFeeDepth)
 	for i := 0; i < estimateFeeDepth; i++ {
@@ -386,9 +364,9 @@ func // estimates returns the set of all fee estimates from 1 to
 	return estimates
 }
 
-func // newEstimateFeeSet creates a temporary data structure that can be
+// newEstimateFeeSet creates a temporary data structure that can be
 // used to find all fee estimates.
-(ef *FeeEstimator) newEstimateFeeSet() *estimateFeeSet {
+func (ef *FeeEstimator) newEstimateFeeSet() *estimateFeeSet {
 	set := &estimateFeeSet{}
 	capacity := 0
 	for i, b := range ef.bin {
@@ -408,9 +386,9 @@ func // newEstimateFeeSet creates a temporary data structure that can be
 	return set
 }
 
-func // rollback rolls back the effect of the last block in the stack of
+// rollback rolls back the effect of the last block in the stack of
 // registered blocks.
-(ef *FeeEstimator) rollback() {
+func (ef *FeeEstimator) rollback() {
 	// The previous sorted list is invalid, so delete it.
 	ef.cached = nil
 	// pop the last list of dropped txs from the stack.

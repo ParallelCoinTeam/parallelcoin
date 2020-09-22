@@ -260,14 +260,14 @@ func loadBlockDB(cx *conte.Xt) (database.DB, error) {
 
 // removeRegressionDB removes the existing regression test database if
 // running in regression test mode and it already exists.
-func removeRegressionDB(cx *conte.Xt, dbPath string) error {
+func removeRegressionDB(cx *conte.Xt, dbPath string) (err error) {
 	// don't do anything if not in regression test mode
 	if !((*cx.Config.Network)[0] == 'r') {
-		return nil
+		return
 	}
 	// remove the old regression test database if it already exists
-	fi, err := os.Stat(dbPath)
-	if err == nil {
+	var fi os.FileInfo
+	if fi, err = os.Stat(dbPath); !slog.Check(err) {
 		slog.Infof("removing regression test database from '%s' %s", dbPath)
 		if fi.IsDir() {
 			if err = os.RemoveAll(dbPath); err != nil {
@@ -279,7 +279,7 @@ func removeRegressionDB(cx *conte.Xt, dbPath string) error {
 			}
 		}
 	}
-	return nil
+	return
 }
 
 // warnMultipleDBs shows a warning if multiple block database types are

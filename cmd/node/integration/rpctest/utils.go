@@ -1,6 +1,7 @@
 package rpctest
 
 import (
+	"github.com/p9c/pod/pkg/rpc/btcjson"
 	"github.com/stalker-loki/app/slog"
 	"reflect"
 	"time"
@@ -28,34 +29,32 @@ const (
 // JoinType. This function be used to to ensure all active test harnesses are
 // at a consistent state before proceeding to an assertion or check within
 // rpc tests.
-func JoinNodes(nodes []*Harness, joinType JoinType) error {
+func JoinNodes(nodes []*Harness, joinType JoinType) (err error) {
 	switch joinType {
 	case Blocks:
 		return syncBlocks(nodes)
 	case Mempools:
 		return syncMempools(nodes)
 	}
-	return nil
+	return
 }
 
 // syncMempools blocks until all nodes have identical mempools.
-func syncMempools(nodes []*Harness) error {
+func syncMempools(nodes []*Harness) (err error) {
 	poolsMatch := false
 retry:
 	for !poolsMatch {
-		firstPool, err := nodes[0].Node.GetRawMempool()
-		if err != nil {
-			slog.Error(err)
-			return err
+		var firstPool []*chainhash.Hash
+		if firstPool, err = nodes[0].Node.GetRawMempool(); slog.Check(err) {
+			return
 		}
 		// If all nodes have an identical mempool with respect to the first
 		// node, then we're done. Otherwise drop back to the top of the loop
 		// and retry after a short wait period.
 		for _, node := range nodes[1:] {
-			nodePool, err := node.Node.GetRawMempool()
-			if err != nil {
-				slog.Error(err)
-				return err
+			var nodePool []*chainhash.Hash
+			if nodePool, err = node.Node.GetRawMempool(); slog.Check(err) {
+				return
 			}
 			if !reflect.DeepEqual(firstPool, nodePool) {
 				time.Sleep(time.Millisecond * 100)
@@ -68,18 +67,15 @@ retry:
 }
 
 // syncBlocks blocks until all nodes report the same best chain.
-func syncBlocks(nodes []*Harness) error {
+func syncBlocks(nodes []*Harness) (err error) {
 	blocksMatch := false
 retry:
 	for !blocksMatch {
-		var prevHash *chainhash.Hash
-		var prevHeight int32
-
+		var prevHash, blockHash *chainhash.Hash
+		var prevHeight, blockHeight int32
 		for _, node := range nodes {
-			blockHash, blockHeight, err := node.Node.GetBestBlock()
-			if err != nil {
-				slog.Error(err)
-				return err
+			if blockHash, blockHeight, err = node.Node.GetBestBlock(); slog.Check(err) {
+				return
 			}
 			if prevHash != nil && (*blockHash != *prevHash ||
 				blockHeight != prevHeight) {
@@ -90,7 +86,7 @@ retry:
 		}
 		blocksMatch = true
 	}
-	return nil
+	return
 }
 
 // ConnectNode establishes a new peer-to-peer connection between the "from"
@@ -98,43 +94,38 @@ retry:
 // The connection made is flagged as persistent therefore in the case of
 // disconnects, "from" will attempt to reestablish a connection to the "to"
 // harness.
-func ConnectNode(from *Harness, to *Harness) error {
-	peerInfo, err := from.Node.GetPeerInfo()
-	if err != nil {
-		slog.Error(err)
-		return err
+func ConnectNode(from *Harness, to *Harness) (err error) {
+	var peerInfo []btcjson.GetPeerInfoResult
+	if peerInfo, err = from.Node.GetPeerInfo(); slog.Check(err) {
+		return
 	}
 	numPeers := len(peerInfo)
 	targetAddr := to.node.config.listen
-	if err := from.Node.AddNode(targetAddr, client.ANAdd); err != nil {
-		return err
+	if err = from.Node.AddNode(targetAddr, client.ANAdd); slog.Check(err) {
+		return
 	}
 	// Block until a new connection has been established.
-	peerInfo, err = from.Node.GetPeerInfo()
-	if err != nil {
-		slog.Error(err)
+	if peerInfo, err = from.Node.GetPeerInfo(); slog.Check(err) {
 		return err
 	}
 	for len(peerInfo) <= numPeers {
-		peerInfo, err = from.Node.GetPeerInfo()
-		if err != nil {
-			slog.Error(err)
-			return err
+		if peerInfo, err = from.Node.GetPeerInfo(); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // TearDownAll tears down all active test harnesses.
-func TearDownAll() error {
+func TearDownAll() (err error) {
 	harnessStateMtx.Lock()
 	defer harnessStateMtx.Unlock()
 	for _, harness := range testInstances {
-		if err := harness.tearDown(); err != nil {
-			return err
+		if err = harness.tearDown(); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // ActiveHarnesses returns a slice of all currently active test harnesses.

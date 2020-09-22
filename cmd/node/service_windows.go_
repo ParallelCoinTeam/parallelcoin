@@ -100,13 +100,14 @@ eL.Error(1, err.Error())
 // installService attempts to install the pod service.
 // Typically this should be done by the msi installer,
 // but it is provided here since it can be useful for development.
-func installService() error {
+func installService() (err error) {
 	// Get the path of the current executable.  This is needed because os.
 	// Args[0] can vary depending on how the application was launched.
 	// For example, under cmd.exe it will only be the name of the app without
 	// the path or extension but under mingw it will be the full path
 	// including the extension.
-	exePath, err := filepath.Abs(os.Args[0])
+
+	exePath, err = filepath.Abs(os.Args[0])
 	if err != nil {
 		L.Error(err)
 return err

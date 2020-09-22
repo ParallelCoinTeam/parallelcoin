@@ -101,6 +101,8 @@
       <w>rpcmaxconcurrentreqs</w>
       <w>rpcmaxwebsockets</w>
       <w>rpcquirks</w>
+      <w>rpctest</w>
+      <w>satoshis</w>
       <w>segwit</w>
       <w>sendtoaddress</w>
       <w>serverpass</w>

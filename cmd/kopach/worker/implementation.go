@@ -98,7 +98,7 @@ func (w *Worker) hashReport() {
 	av := ewma.NewMovingAverage(15)
 	var i int
 	var prev uint64
-	if err := w.hashSampleBuf.ForEach(func(v uint64) error {
+	if err := w.hashSampleBuf.ForEach(func(v uint64) (err error) {
 		if i < 1 {
 			prev = v
 		} else {
@@ -107,7 +107,7 @@ func (w *Worker) hashReport() {
 			prev = v
 		}
 		i++
-		return nil
+		return
 	}); slog.Check(err) {
 	}
 	// Info("kopach",w.hashSampleBuf.Cursor, w.hashSampleBuf.Buf)

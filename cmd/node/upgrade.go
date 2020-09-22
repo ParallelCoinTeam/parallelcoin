@@ -31,11 +31,9 @@ func dirEmpty(dirPath string) (bool, error) {
 }
 
 // doUpgrades performs upgrades to pod as new versions require it
-func doUpgrades(cx *conte.Xt) error {
-	err := upgradeDBPaths(cx)
-	if err != nil {
-		slog.Error(err)
-		return err
+func doUpgrades(cx *conte.Xt) (err error) {
+	if err = upgradeDBPaths(cx); slog.Check(err) {
+		return
 	}
 	return upgradeDataPaths()
 }
@@ -62,13 +60,13 @@ func oldPodHomeDir() string {
 // upgradeDBPathNet moves the database for a specific network from its
 // location prior to pod version 0.2.0 and uses heuristics to ascertain the old
 // database type to rename to the new format.
-func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) error {
+func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) (err error) {
 	// Prior to version 0.2.0,
 	// the database was named the same thing for both sqlite and leveldb.
 	// Use heuristics to figure out the type of the database and move it to
 	// the new path and name introduced with version 0.2.0 accordingly.
-	fi, err := os.Stat(oldDbPath)
-	if err == nil {
+	var fi os.FileInfo
+	if fi, err = os.Stat(oldDbPath); slog.Check(err) {
 		oldDbType := "sqlite"
 		if fi.IsDir() {
 			oldDbType = "leveldb"
@@ -83,47 +81,32 @@ func upgradeDBPathNet(cx *conte.Xt, oldDbPath, netName string) error {
 		newDbPath := filepath.Join(newDbRoot, newDbName)
 		// Create the new path if needed
 		//
-		err = os.MkdirAll(newDbRoot, 0700)
-		if err != nil {
-			slog.Error(err)
+		if err = os.MkdirAll(newDbRoot, 0700); slog.Check(err) {
 			return err
 		}
 		// Move and rename the old database
 		//
-		err := os.Rename(oldDbPath, newDbPath)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = os.Rename(oldDbPath, newDbPath); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }
 
 // upgradeDBPaths moves the databases from their locations prior to pod
 // version 0.2.0 to their new locations
 //
-func upgradeDBPaths(cx *conte.Xt) error {
+func upgradeDBPaths(cx *conte.Xt) (err error) {
 	// Prior to version 0.2.0 the databases were in the "db" directory and
 	// their names were suffixed by "testnet" and "regtest" for their
 	// respective networks.  Check for the old database and update it
 	// to the new path introduced with version 0.2.0 accordingly.
 	oldDbRoot := filepath.Join(oldPodHomeDir(), "db")
-	err := upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet")
-	if err != nil {
-		slog.Error(err)
-		slog.Debug(err)
+	if err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod.db"), "mainnet"); slog.Check(err) {
 	}
-	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_testnet.db"),
-		"testnet")
-	if err != nil {
-		slog.Error(err)
-		slog.Debug(err)
+	if err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_testnet.db"), "testnet"); slog.Check(err) {
 	}
-	err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_regtest.db"),
-		"regtest")
-	if err != nil {
-		slog.Error(err)
-		slog.Debug(err)
+	if err = upgradeDBPathNet(cx, filepath.Join(oldDbRoot, "pod_regtest.db"), "regtest"); slog.Check(err) {
 	}
 	// Remove the old db directory
 	//
@@ -132,54 +115,45 @@ func upgradeDBPaths(cx *conte.Xt) error {
 
 // upgradeDataPaths moves the application data from its location prior to pod
 // version 0.3.3 to its new location.
-func upgradeDataPaths() error {
+func upgradeDataPaths() (err error) {
 	// No need to migrate if the old and new home paths are the same.
 	oldHomePath := oldPodHomeDir()
 	newHomePath := DefaultHomeDir
 	if oldHomePath == newHomePath {
-		return nil
+		return
 	}
 	// Only migrate if the old path exists and the new one doesn't
 	if apputil.FileExists(oldHomePath) && !apputil.FileExists(newHomePath) {
 		// Create the new path
 		slog.Infof("migrating application home path from '%s' to '%s'",
 			oldHomePath, newHomePath)
-		err := os.MkdirAll(newHomePath, 0700)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = os.MkdirAll(newHomePath, 0700); slog.Check(err) {
+			return
 		}
 		// Move old pod.conf into new location if needed
 		oldConfPath := filepath.Join(oldHomePath, DefaultConfigFilename)
 		newConfPath := filepath.Join(newHomePath, DefaultConfigFilename)
 		if apputil.FileExists(oldConfPath) && !apputil.FileExists(newConfPath) {
-			err := os.Rename(oldConfPath, newConfPath)
-			if err != nil {
-				slog.Error(err)
-				return err
+			if err = os.Rename(oldConfPath, newConfPath); slog.Check(err) {
+				return
 			}
 		}
 		// Move old data directory into new location if needed
 		oldDataPath := filepath.Join(oldHomePath, DefaultDataDirname)
 		newDataPath := filepath.Join(newHomePath, DefaultDataDirname)
 		if apputil.FileExists(oldDataPath) && !apputil.FileExists(newDataPath) {
-			err := os.Rename(oldDataPath, newDataPath)
-			if err != nil {
-				slog.Error(err)
-				return err
+			if err = os.Rename(oldDataPath, newDataPath); slog.Check(err) {
+				return
 			}
 		}
+		var ohpEmpty bool
 		// Remove the old home if it is empty or show a warning if not
-		ohpEmpty, err := dirEmpty(oldHomePath)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if ohpEmpty, err = dirEmpty(oldHomePath); slog.Check(err) {
+			return
 		}
 		if ohpEmpty {
-			err := os.Remove(oldHomePath)
-			if err != nil {
-				slog.Error(err)
-				return err
+			if err = os.Remove(oldHomePath); slog.Check(err) {
+				return
 			}
 		} else {
 			slog.Warnf("not removing '%s' since it contains files not created by"+
@@ -187,5 +161,5 @@ func upgradeDataPaths() error {
 				" delete them.", oldHomePath)
 		}
 	}
-	return nil
+	return
 }

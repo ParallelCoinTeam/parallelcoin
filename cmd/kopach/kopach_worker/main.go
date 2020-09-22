@@ -15,8 +15,8 @@ import (
 	log "github.com/p9c/pod/pkg/util/logi"
 )
 
-func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
+func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) (err error) {
+	return func(c *cli.Context) (err error) {
 		// we take one parameter, name of the network,
 		// as this does not change during the lifecycle of the miner worker and
 		// is required to get the correct hash functions due to differing hard
@@ -43,17 +43,15 @@ func KopachWorkerHandle(cx *conte.Xt) func(c *cli.Context) error {
 			if err := conn.Close(); slog.Check(err) {
 			}
 		})
-		err := rpc.Register(w)
-		if err != nil {
-			slog.Debug(err)
-			return err
+		if err = rpc.Register(w); slog.Check(err) {
+			return
 		}
 		slog.Debug("starting up worker IPC")
 		rpc.ServeConn(conn)
 		slog.Debug("stopping worker IPC")
-		if err := conn.Close(); slog.Check(err) {
+		if err = conn.Close(); slog.Check(err) {
 		}
 		slog.Debug("finished")
-		return nil
+		return
 	}
 }
