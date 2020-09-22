@@ -532,9 +532,9 @@ func // Fee returns the fee for a transaction of a given size for the given
 	return util.Amount(float64(rate) * float64(size))
 }
 
-func // ToBtcPerKb returns a float value that represents the given
+// ToBtcPerKb returns a float value that represents the given
 // SatoshiPerByte converted to satoshis per kb.
-(rate SatoshiPerByte) ToBtcPerKb() DUOPerKilobyte {
+func (rate SatoshiPerByte) ToBtcPerKb() DUOPerKilobyte {
 	// If our rate is the error value, return that.
 	if rate == SatoshiPerByte(-1.0) {
 		return -1.0

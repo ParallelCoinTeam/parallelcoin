@@ -940,7 +940,7 @@ func // maybeAcceptTransaction is the internal function which implements the
 
 func // maybeAddOrphan potentially adds an orphan to the orphan pool.
 // This function MUST be called with the mempool lock held (for writes).
-(mp *TxPool) maybeAddOrphan(tx *util.Tx, tag Tag) error {
+(mp *TxPool) maybeAddOrphan(tx *util.Tx, tag Tag) (err error) {
 	// Ignore orphan transactions that are too large.
 	// This helps avoid a memory exhaustion attack based on sending a lot of
 	// really large orphans.
@@ -954,21 +954,22 @@ func // maybeAddOrphan potentially adds an orphan to the orphan pool.
 	// written).
 	serializedLen := tx.MsgTx().SerializeSize()
 	if serializedLen > mp.cfg.Policy.MaxOrphanTxSize {
-		str := fmt.Sprintf("orphan transaction size of %d bytes is larger"+
-			" than max allowed size of %d bytes",
-			serializedLen, mp.cfg.Policy.MaxOrphanTxSize)
-		return txRuleError(wire.RejectNonstandard, str)
+		err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+			"orphan transaction size of %d bytes is larger than max allowed size of %d bytes",
+			serializedLen, mp.cfg.Policy.MaxOrphanTxSize))
+		slog.Debug(err)
+		return
 	}
 	// Add the orphan if the none of the above disqualified it.
 	mp.addOrphan(tx, tag)
-	return nil
+	return
 }
 
-func // processOrphans is the internal function which implements the public
+// processOrphans is the internal function which implements the public
 // ProcessOrphans.
 // See the comment for ProcessOrphans for more details.
 // This function MUST be called with the mempool lock held (for writes).
-(mp *TxPool) processOrphans(b *blockchain.BlockChain, acceptedTx *util.Tx) []*TxDesc {
+func (mp *TxPool) processOrphans(b *blockchain.BlockChain, acceptedTx *util.Tx) []*TxDesc {
 	var acceptedTxns []*TxDesc
 	// Start with processing at least the passed transaction.
 	processList := list.New()

@@ -83,7 +83,7 @@ func // checkInputsStandard performs a series of checks on a transaction's
 // This function does not perform those checks because the script engine
 // already does this more accurately and concisely via the script.
 // ScriptVerifyCleanStack and script.ScriptVerifySigPushOnly flags.
-checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) error {
+checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) (err error) {
 	// NOTE: The reference implementation also does a coinbase check here,
 	// but coinbases have already been rejected prior to calling this
 	// function so no need to recheck.
@@ -97,72 +97,80 @@ checkInputsStandard(tx *util.Tx, utxoView *blockchain.UtxoViewpoint) error {
 			numSigOps := script.GetPreciseSigOpCount(
 				txIn.SignatureScript, originPkScript, true)
 			if numSigOps > maxStandardP2SHSigOps {
-				str := fmt.Sprintf("transaction input #%d has %d signature"+
-					" operations which is more than the allowed max amount of %d",
-					i, numSigOps, maxStandardP2SHSigOps)
-				return txRuleError(wire.RejectNonstandard, str)
+				err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+					"transaction input #%d has %d signature"+
+						" operations which is more than the allowed max amount of %d",
+					i, numSigOps, maxStandardP2SHSigOps))
+				slog.Debug(err)
+				return
 			}
 		case script.NonStandardTy:
-			str := fmt.Sprintf("transaction input #%d has a non-standard"+
-				" script form", i)
-			return txRuleError(wire.RejectNonstandard, str)
+			err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+				"transaction input #%d has a non-standard script form", i))
+			return
 		}
 	}
-	return nil
+	return
 }
 
-func // checkPkScriptStandard performs a series of checks on a transaction
+// checkPkScriptStandard performs a series of checks on a transaction
 // output script (public key script) to ensure it is a "standard" public key
 // script.
 // A standard public key script is one that is a recognized form,
 // and for multi-signature scripts only contains from 1 to
 // maxStandardMultiSigKeys public keys.
-checkPkScriptStandard(pkScript []byte, scriptClass script.ScriptClass) error {
+func checkPkScriptStandard(pkScript []byte, scriptClass script.ScriptClass) (err error) {
 	switch scriptClass {
 	case script.MultiSigTy:
-		numPubKeys, numSigs, err := script.CalcMultiSigStats(pkScript)
-		if err != nil {
-			slog.Error(err)
-			str := fmt.Sprintf("multi-signature script parse "+
-				"failure: %v", err)
-			return txRuleError(wire.RejectNonstandard, str)
+		var numPubKeys, numSigs int
+		if numPubKeys, numSigs, err = script.CalcMultiSigStats(pkScript); slog.Check(err) {
+			err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+				"multi-signature script parse failure: %v", err))
+			slog.Debug(err)
+			return
 		}
 		// A standard multi-signature public key script must contain from 1
 		// to maxStandardMultiSigKeys public keys.
 		if numPubKeys < 1 {
-			str := "multi-signature script with no pubkeys"
-			return txRuleError(wire.RejectNonstandard, str)
+			err = txRuleError(wire.RejectNonstandard, "multi-signature script with no public keys")
+			slog.Debug(err)
+			return
 		}
 		if numPubKeys > maxStandardMultiSigKeys {
-			str := fmt.Sprintf("multi-signature script with %d public keys"+
-				" which is more than the allowed max of %d", numPubKeys,
-				maxStandardMultiSigKeys)
-			return txRuleError(wire.RejectNonstandard, str)
+			err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+				"multi-signature script with %d public keys which is more than the allowed max of %d",
+				numPubKeys, maxStandardMultiSigKeys))
+			slog.Debug(err)
+			return
 		}
 		// A standard multi-signature public key script must have at least 1
 		// signature and no more signatures than available public keys.
 		if numSigs < 1 {
-			return txRuleError(wire.RejectNonstandard,
-				"multi-signature script with no signatures")
+			err = txRuleError(wire.RejectNonstandard, "multi-signature script with no signatures")
+			slog.Debug(err)
+			return
 		}
 		if numSigs > numPubKeys {
-			str := fmt.Sprintf("multi-signature script with %d signatures"+
-				" which is more than the available %d public keys", numSigs,
-				numPubKeys)
-			return txRuleError(wire.RejectNonstandard, str)
+			err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+				"multi-signature script with %d signatures which is more than the available %d public keys",
+				numSigs, numPubKeys))
+			slog.Debug(err)
+			return
 		}
 	case script.NonStandardTy:
-		return txRuleError(wire.RejectNonstandard, "non-standard script form")
+		err = txRuleError(wire.RejectNonstandard, "non-standard script form")
+		slog.Debug(err)
+		return
 	}
-	return nil
+	return
 }
 
-func // isDust returns whether or not the passed transaction output amount is
+// isDust returns whether or not the passed transaction output amount is
 // considered dust or not based on the passed minimum transaction relay fee.
 // Dust is defined in terms of the minimum transaction relay fee.
 // In particular, if the cost to the network to spend coins is more than 1/3
 // of the minimum transaction relay fee, it is considered dust.
-isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
+func isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 	// Unspendable outputs are considered dust.
 	if script.IsUnspendable(txOut.PkScript) {
 		return true
@@ -238,7 +246,7 @@ isDust(txOut *wire.TxOut, minRelayTxFee util.Amount) bool {
 	return txOut.Value*1000/(3*int64(totalSize)) < int64(minRelayTxFee)
 }
 
-func // checkTransactionStandard performs a series of checks on a transaction to
+// checkTransactionStandard performs a series of checks on a transaction to
 // ensure it is a "standard" transaction.
 // A standard transaction is one that conforms to several additional limiting
 // cases over what is considered a "sane" transaction such as having a
@@ -246,22 +254,22 @@ func // checkTransactionStandard performs a series of checks on a transaction to
 // conforming to more stringent size constraints,
 // having scripts of recognized forms, and not containing "dust" outputs
 // (those that are so small it costs more to process them than they are worth).
-checkTransactionStandard(tx *util.Tx, height int32,
-	medianTimePast time.Time, minRelayTxFee util.Amount,
-	maxTxVersion int32) error {
+func checkTransactionStandard(tx *util.Tx, height int32, medianTimePast time.Time, minRelayTxFee util.Amount,
+	maxTxVersion int32) (err error) {
 	// The transaction must be a currently supported version.
 	msgTx := tx.MsgTx()
 	if msgTx.Version > maxTxVersion || msgTx.Version < 1 {
-		str := fmt.Sprintf("transaction version %d is not in the "+
-			"valid range of %d-%d", msgTx.Version, 1,
-			maxTxVersion)
-		return txRuleError(wire.RejectNonstandard, str)
+		err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+			"transaction version %d is not in the valid range of %d-%d", msgTx.Version, 1, maxTxVersion))
+		slog.Debug(err)
+		return
 	}
 	// The transaction must be finalized to be standard and therefore
 	// considered for inclusion in a block.
 	if !blockchain.IsFinalizedTransaction(tx, height, medianTimePast) {
-		return txRuleError(wire.RejectNonstandard,
-			"transaction is not finalized")
+		err = txRuleError(wire.RejectNonstandard, "transaction is not finalized")
+		slog.Debug(err)
+		return
 	}
 	// Since extremely large transactions with a lot of inputs can cost
 	// almost as much to process as the sender fees,
@@ -269,9 +277,10 @@ checkTransactionStandard(tx *util.Tx, height int32,
 	// This also helps mitigate CPU exhaustion attacks.
 	txWeight := blockchain.GetTransactionWeight(tx)
 	if txWeight > maxStandardTxWeight {
-		str := fmt.Sprintf("weight of transaction %v is larger than max "+
-			"allowed weight of %v", txWeight, maxStandardTxWeight)
-		return txRuleError(wire.RejectNonstandard, str)
+		err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+			"weight of transaction %v is larger than max allowed weight of %v", txWeight, maxStandardTxWeight))
+		slog.Debug(err)
+		return
 	}
 	for i, txIn := range msgTx.TxIn {
 		// Each transaction input signature script must not exceed the
@@ -279,18 +288,19 @@ checkTransactionStandard(tx *util.Tx, height int32,
 		// See the comment on maxStandardSigScriptSize for more details.
 		sigScriptLen := len(txIn.SignatureScript)
 		if sigScriptLen > maxStandardSigScriptSize {
-			str := fmt.Sprintf("transaction input %d: signature "+
-				"script size of %d bytes is large than max "+
-				"allowed size of %d bytes", i, sigScriptLen,
-				maxStandardSigScriptSize)
-			return txRuleError(wire.RejectNonstandard, str)
+			err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+				"transaction input %d: signature script size of %d bytes is large than max "+
+					"allowed size of %d bytes", i, sigScriptLen, maxStandardSigScriptSize))
+			slog.Debug(err)
+			return
 		}
 		// Each transaction input signature script must only contain opcodes
 		// which push data onto the stack.
 		if !script.IsPushOnlyScript(txIn.SignatureScript) {
-			str := fmt.Sprintf("transaction input %d: signature "+
-				"script is not push only", i)
-			return txRuleError(wire.RejectNonstandard, str)
+			err = txRuleError(wire.RejectNonstandard, fmt.Sprintf(
+				"transaction input %d: signature script is not push only", i))
+			slog.Debug(err)
+			return
 		}
 	}
 	// None of the output public key scripts can be a non-standard script or
@@ -298,42 +308,44 @@ checkTransactionStandard(tx *util.Tx, height int32,
 	numNullDataOutputs := 0
 	for i, txOut := range msgTx.TxOut {
 		scriptClass := script.GetScriptClass(txOut.PkScript)
-		err := checkPkScriptStandard(txOut.PkScript, scriptClass)
-		if err != nil {
-			slog.Error(err)
+		if err = checkPkScriptStandard(txOut.PkScript, scriptClass); slog.Check(err) {
 			// Attempt to extract a reject code from the error so it can be
 			// retained.  When not possible, fall back to a non standard error.
 			rejectCode := wire.RejectNonstandard
 			if rejCode, found := extractRejectCode(err); found {
 				rejectCode = rejCode
 			}
-			str := fmt.Sprintf("transaction output %d: %v", i, err)
-			return txRuleError(rejectCode, str)
+			err = txRuleError(rejectCode, fmt.Sprintf("transaction output %d: %v", i, err))
+			slog.Debug(err)
+			return
 		}
 		// Accumulate the number of outputs which only carry data.
 		// For all other script types, ensure the output value is not "dust".
 		if scriptClass == script.NullDataTy {
 			numNullDataOutputs++
 		} else if isDust(txOut, minRelayTxFee) {
-			str := fmt.Sprintf("transaction output %d: payment of %d is dust"+
-				"", i, txOut.Value)
-			return txRuleError(wire.RejectDust, str)
+			err = txRuleError(wire.RejectDust, fmt.Sprintf(
+				"transaction output %d: payment of %d is dust", i, txOut.Value))
+			slog.Debug(err)
+			return
 		}
 	}
 	// A standard transaction must not have more than one output script that
 	// only carries data.
 	if numNullDataOutputs > 1 {
-		str := "more than one transaction output in a nulldata script"
-		return txRuleError(wire.RejectNonstandard, str)
+		err = txRuleError(wire.RejectNonstandard,
+			"more than one transaction output in a nulldata script")
+		slog.Debug(err)
+		return
 	}
-	return nil
+	return
 }
 
-func // GetTxVirtualSize computes the virtual size of a given transaction.
+// GetTxVirtualSize computes the virtual size of a given transaction.
 // A transaction's virtual size is based off its weight,
 // creating a discount for any witness data it contains,
 // proportional to the current blockchain.WitnessScaleFactor value.
-GetTxVirtualSize(tx *util.Tx) int64 {
+func GetTxVirtualSize(tx *util.Tx) int64 {
 	// vSize := (weight(tx) + 3) / 4
 	//       := (((baseSize * 3) + totalSize) + 3) / 4
 	// We add 3 here as a way to compute the ceiling of the prior arithmetic
