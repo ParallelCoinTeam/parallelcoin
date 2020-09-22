@@ -195,15 +195,14 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 // This will only happen once when new rules have been activated and every
 // block for those about to be activated.
 // This function MUST be called with the chain state lock held (for writes)
-(b *BlockChain) warnUnknownRuleActivations(node *BlockNode) error {
+(b *BlockChain) warnUnknownRuleActivations(node *BlockNode) (err error) {
 	// Warn if any unknown new rules are either about to activate or have already been activated.
 	for bit := uint32(0); bit < vbNumBits; bit++ {
 		checker := bitConditionChecker{bit: bit, chain: b}
 		cache := &b.warningCaches[bit]
-		state, err := b.thresholdState(node.parent, checker, cache)
-		if err != nil {
-			slog.Error(err)
-			return err
+		var state ThresholdState
+		if state, err = b.thresholdState(node.parent, checker, cache); slog.Check(err) {
+			return
 		}
 		switch state {
 		case ThresholdActive:
@@ -214,11 +213,10 @@ func // warnUnknownRuleActivations displays a warning when any unknown new rules
 		case ThresholdLockedIn:
 			window := int32(checker.MinerConfirmationWindow())
 			activationHeight := window - (node.height % window)
-			slog.Warnf("Unknown new rules are about to activate in %d blocks ("+
-				"bit %d)", activationHeight, bit)
+			slog.Warnf("Unknown new rules are about to activate in %d blocks (bit %d)", activationHeight, bit)
 		}
 	}
-	return nil
+	return
 }
 
 // warnUnknownVersions logs a warning if a high enough percentage of the last

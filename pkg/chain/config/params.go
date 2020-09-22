@@ -13,9 +13,10 @@ func (d DNSSeed) String() string {
 }
 
 // Register registers the network parameters for a Bitcoin network.  This may error with ErrDuplicateNet if the network is already registered (either due to a previous Register call, or the network being one of the default networks). Network parameters should be registered into this package by a main package as early as possible.  Then, library packages may lookup networks or network parameters based on inputs and work regardless of the network being standard or not.
-func Register(params *Params) error {
+func Register(params *Params) (err error) {
 	if _, ok := registeredNets[params.Net]; ok {
-		return ErrDuplicateNet
+		err = ErrDuplicateNet
+		return
 	}
 	registeredNets[params.Net] = struct{}{}
 	pubKeyHashAddrIDs[params.PubKeyHashAddrID] = struct{}{}
@@ -23,7 +24,7 @@ func Register(params *Params) error {
 	hdPrivToPubKeyIDs[params.HDPrivateKeyID] = params.HDPublicKeyID[:]
 	// A valid Bech32 encoded segwit address always has as prefix the human-readable part for the given net followed by '1'.
 	bech32SegwitPrefixes[params.Bech32HRPSegwit+"1"] = struct{}{}
-	return nil
+	return
 }
 
 // mustRegister performs the same function as Register except it panics if there is an error.  This should only be called from package init functions.
@@ -56,26 +57,30 @@ func IsBech32SegwitPrefix(prefix string) bool {
 }
 
 // HDPrivateKeyToPublicKeyID accepts a private hierarchical deterministic extended key id and returns the associated public key id.  When the provided id is not registered, the ErrUnknownHDKeyID error will be returned.
-func HDPrivateKeyToPublicKeyID(id []byte) ([]byte, error) {
+func HDPrivateKeyToPublicKeyID(id []byte) (pubBytes []byte, err error) {
 	if len(id) != 4 {
-		return nil, ErrUnknownHDKeyID
+		err = ErrUnknownHDKeyID
+		return
 	}
 	var key [4]byte
 	copy(key[:], id)
 	pubBytes, ok := hdPrivToPubKeyIDs[key]
 	if !ok {
-		return nil, ErrUnknownHDKeyID
+		err = ErrUnknownHDKeyID
+		return
 	}
-	return pubBytes, nil
+	return
 }
 
 // newHashFromStr converts the passed big-endian hex string into a chainhash.Hash.  It only differs from the one available in chainhash in that it panics on an error since it will only (and must only) be called with hard-coded, and therefore known good, hashes.
-func newHashFromStr(hexStr string) *chainhash.Hash {
-	hash, err := chainhash.NewHashFromStr(hexStr)
-	if err != nil {
-		slog.Error(err)
-		// Ordinarily I don't like panics in library code since it can take applications down without them having a chance to recover which is extremely annoying, however an exception is being made in this case because the only way this can panic is if there is an error in the hard-coded hashes.  Thus it will only ever potentially panic on init and therefore is 100% predictable.
-		// loki: Panics are good when the condition should not happen!
+func newHashFromStr(hexStr string) (hash *chainhash.Hash) {
+	var err error
+	if hash, err = chainhash.NewHashFromStr(hexStr); slog.Check(err) {
+		// Ordinarily I don't like panics in library code since it can take applications down without them having a
+		// chance to recover which is extremely annoying, however an exception is being made in this case because the
+		// only way this can panic is if there is an error in the hard-coded hashes.  Thus it will only ever
+		// potentially panic on init and therefore is 100% predictable.
+		// loki: Panics are good when the condition should not ever happen!
 		panic(err)
 	}
 	return hash

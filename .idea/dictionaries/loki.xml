@@ -24,6 +24,7 @@
       <w>marshaler</w>
       <w>mempool</w>
       <w>merkle</w>
+      <w>merkles</w>
       <w>multicast</w>
       <w>multisig</w>
       <w>othernodes</w>
