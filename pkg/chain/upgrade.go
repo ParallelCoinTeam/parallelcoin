@@ -51,58 +51,53 @@ func // migrateBlockIndex migrates all block entries from the v1 block index
 // bucket to the v2 bucket. The v1 bucket stores all block entries keyed by
 // block hash, whereas the v2 bucket stores the exact same values,
 // but keyed instead by block height + hash.
-migrateBlockIndex(db database.DB) error {
+migrateBlockIndex(db database.DB) (err error) {
 	// Hardcoded bucket names so updates to the global values do not affect
 	// old upgrades.
 	v1BucketName := []byte("ffldb-blockidx")
 	v2BucketName := []byte("blockheaderidx")
-	err := db.Update(func(dbTx database.Tx) error {
+	if err = db.Update(func(dbTx database.Tx) (err error) {
 		v1BlockIdxBucket := dbTx.Metadata().Bucket(v1BucketName)
 		if v1BlockIdxBucket == nil {
-			return fmt.Errorf("bucket %s does not exist", v1BucketName)
+			err = fmt.Errorf("bucket %s does not exist", v1BucketName)
+			return
 		}
 		slog.Info("Re-indexing block information in the database. " +
 			"This might take a while")
-		v2BlockIdxBucket, err :=
-			dbTx.Metadata().CreateBucketIfNotExists(v2BucketName)
-		if err != nil {
-			slog.Error(err)
-			return err
+		var v2BlockIdxBucket database.Bucket
+		if v2BlockIdxBucket, err = dbTx.Metadata().CreateBucketIfNotExists(v2BucketName); slog.Check(err) {
+			return
 		}
 		// Get tip of the main chain.
 		serializedData := dbTx.Metadata().Get(chainStateKeyName)
-		state, err := deserializeBestChainState(serializedData)
-		if err != nil {
-			slog.Error(err)
-			return err
+		var state bestChainState
+		if state, err = deserializeBestChainState(serializedData); slog.Check(err) {
+			return
 		}
 		tip := &state.hash
 		// Scan the old block index bucket and construct a mapping of each block
 		// to parent block and all child blocks.
-		blocksMap, err := readBlockTree(v1BlockIdxBucket)
-		if err != nil {
-			slog.Error(err)
-			return err
+		var blocksMap map[chainhash.Hash]*blockChainContext
+		if blocksMap, err = readBlockTree(v1BlockIdxBucket); slog.Check(err) {
+			return
 		}
 		// Use the block graph to calculate the height of each block.
-		err = determineBlockHeights(blocksMap)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = determineBlockHeights(blocksMap); slog.Check(err) {
+			return
 		}
 		// Find blocks on the main chain with the block graph and current tip.
 		determineMainChainBlocks(blocksMap, tip)
 		// Now that we have heights for all blocks, scan the old block index
 		// bucket and insert all rows into the new one.
-		return v1BlockIdxBucket.ForEach(func(hashBytes, blockRow []byte) error {
+		return v1BlockIdxBucket.ForEach(func(hashBytes, blockRow []byte) (err error) {
 			endOffset := blockHdrOffset + blockHdrSize
 			headerBytes := blockRow[blockHdrOffset:endOffset:endOffset]
-			var hash chainhash.Hash
-			copy(hash[:], hashBytes[0:chainhash.HashSize])
-			chainContext := blocksMap[hash]
+			var h chainhash.Hash
+			copy(h[:], hashBytes[0:chainhash.HashSize])
+			chainContext := blocksMap[h]
 			if chainContext.height == -1 {
-				return fmt.Errorf("unable to calculate chain height for "+
-					"stored block %s", hash)
+				err = fmt.Errorf("unable to calculate chain height for stored block %s", h)
+				return
 			}
 			// Mark blocks as valid if they are part of the main chain.
 			status := statusDataStored
@@ -113,40 +108,34 @@ migrateBlockIndex(db database.DB) error {
 			value := make([]byte, blockHdrSize+1)
 			copy(value[0:blockHdrSize], headerBytes)
 			value[blockHdrSize] = byte(status)
-			key := blockIndexKey(&hash, uint32(chainContext.height))
-			err := v2BlockIdxBucket.Put(key, value)
-			if err != nil {
-				slog.Error(err)
-				return err
+			key := blockIndexKey(&h, uint32(chainContext.height))
+			if err = v2BlockIdxBucket.Put(key, value); slog.Check(err) {
+				return
 			}
 			// Delete header from v1 bucket
 			truncatedRow := blockRow[0:blockHdrOffset:blockHdrOffset]
 			return v1BlockIdxBucket.Put(hashBytes, truncatedRow)
 		})
-	})
-	if err != nil {
-		slog.Error(err)
-		return err
+	}); slog.Check(err) {
+		return
 	}
 	slog.Info("Block database migration complete")
-	return nil
+	return
 }
 
-func // readBlockTree reads the old block index bucket and constructs a
+// readBlockTree reads the old block index bucket and constructs a
 // mapping of
 // each block to its parent block and all child blocks. This mapping represents
 // the full tree of blocks. This function does not populate the height or
 // mainChain fields of the returned blockChainContext values.
-readBlockTree(v1BlockIdxBucket database.Bucket) (map[chainhash.Hash]*blockChainContext, error) {
-	blocksMap := make(map[chainhash.Hash]*blockChainContext)
-	err := v1BlockIdxBucket.ForEach(func(_, blockRow []byte) error {
+func readBlockTree(v1BlockIdxBucket database.Bucket) (blocksMap map[chainhash.Hash]*blockChainContext, err error) {
+	blocksMap = make(map[chainhash.Hash]*blockChainContext)
+	err = v1BlockIdxBucket.ForEach(func(_, blockRow []byte) (err error) {
 		var header wire.BlockHeader
 		endOffset := blockHdrOffset + blockHdrSize
 		headerBytes := blockRow[blockHdrOffset:endOffset:endOffset]
-		err := header.Deserialize(bytes.NewReader(headerBytes))
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = header.Deserialize(bytes.NewReader(headerBytes)); slog.Check(err) {
+			return
 		}
 		blockHash := header.BlockHash()
 		prevHash := header.PrevBlock
@@ -159,24 +148,25 @@ readBlockTree(v1BlockIdxBucket database.Bucket) (map[chainhash.Hash]*blockChainC
 		blocksMap[blockHash].parent = &prevHash
 		blocksMap[prevHash].children =
 			append(blocksMap[prevHash].children, &blockHash)
-		return nil
+		return
 	})
-	return blocksMap, err
+	return
 }
 
-func // determineBlockHeights takes a map of block hashes to a slice of child
+// determineBlockHeights takes a map of block hashes to a slice of child
 // hashes and uses it to compute the height for each block.
 // The function assigns a height of 0 to the genesis hash and explores the
 // tree of blocks breadth-first,
 // assigning a height to every block with a path back to the genesis block.
 // This function modifies the height field on the blocksMap entries.
-determineBlockHeights(blocksMap map[chainhash.Hash]*blockChainContext) error {
+func determineBlockHeights(blocksMap map[chainhash.Hash]*blockChainContext) (err error) {
 	queue := list.New()
 	// The genesis block is included in blocksMap as a child of the zero hash
 	// because that is the value of the PrevBlock field in the genesis header.
 	preGenesisContext, exists := blocksMap[zeroHash]
 	if !exists || len(preGenesisContext.children) == 0 {
-		return fmt.Errorf("unable to find genesis block")
+		err = fmt.Errorf("unable to find genesis block")
+		return
 	}
 	for _, genesisHash := range preGenesisContext.children {
 		blocksMap[*genesisHash].height = 0
@@ -193,19 +183,19 @@ determineBlockHeights(blocksMap map[chainhash.Hash]*blockChainContext) error {
 			queue.PushBack(childHash)
 		}
 	}
-	return nil
+	return
 }
 
-func // determineMainChainBlocks traverses the block graph down from the tip to
+// determineMainChainBlocks traverses the block graph down from the tip to
 // determine which block hashes that are part of the main chain. This function
 // modifies the mainChain field on the blocksMap entries.
-determineMainChainBlocks(blocksMap map[chainhash.Hash]*blockChainContext, tip *chainhash.Hash) {
+func determineMainChainBlocks(blocksMap map[chainhash.Hash]*blockChainContext, tip *chainhash.Hash) {
 	for nextHash := tip; *nextHash != zeroHash; nextHash = blocksMap[*nextHash].parent {
 		blocksMap[*nextHash].mainChain = true
 	}
 }
 
-func // deserializeUtxoEntryV0 decodes a utxo entry from the passed
+// deserializeUtxoEntryV0 decodes a utxo entry from the passed
 // serialized byte slice according to the legacy version 0 format into a map
 // of utxos keyed by the output index within the transaction.
 // The map is necessary because the previous format encoded all unspent
@@ -299,25 +289,28 @@ func // deserializeUtxoEntryV0 decodes a utxo entry from the passed
 //    66875659 DUO)
 //    - 0x01: special script type pay-to-script-hash
 //    - 0x1d...e6: script hash
-deserializeUtxoEntryV0(serialized []byte) (map[uint32]*UtxoEntry, error) {
+func deserializeUtxoEntryV0(serialized []byte) (entries map[uint32]*UtxoEntry, err error) {
 	// Deserialize the version.
 	// NOTE: Ignore version since it is no longer used in the new format.
 	_, bytesRead := deserializeVLQ(serialized)
 	offset := bytesRead
 	if offset >= len(serialized) {
-		return nil, errDeserialize("unexpected end of data after version")
+		err = errDeserialize("unexpected end of data after version")
+		return
 	}
 	// Deserialize the block height.
 	blockHeight, bytesRead := deserializeVLQ(serialized[offset:])
 	offset += bytesRead
 	if offset >= len(serialized) {
-		return nil, errDeserialize("unexpected end of data after height")
+		err = errDeserialize("unexpected end of data after height")
+		return
 	}
 	// Deserialize the header code.
 	code, bytesRead := deserializeVLQ(serialized[offset:])
 	offset += bytesRead
 	if offset >= len(serialized) {
-		return nil, errDeserialize("unexpected end of data after header")
+		err = errDeserialize("unexpected end of data after header")
+		return
 	}
 	// Decode the header code.
 	//
@@ -336,8 +329,8 @@ deserializeUtxoEntryV0(serialized []byte) (map[uint32]*UtxoEntry, error) {
 	// Ensure there are enough bytes left to deserialize the unspentness
 	// bitmap.
 	if uint64(len(serialized[offset:])) < numBitmapBytes {
-		return nil, errDeserialize("unexpected end of data for " +
-			"unspentness bitmap")
+		err = errDeserialize("unexpected end of data for unspentness bitmap")
+		return
 	}
 	// Add sparse output for unspent outputs 0 and 1 as needed based on the
 	// details provided by the header code.
@@ -365,7 +358,7 @@ deserializeUtxoEntryV0(serialized []byte) (map[uint32]*UtxoEntry, error) {
 		offset++
 	}
 	// Map to hold all of the converted outputs.
-	entries := make(map[uint32]*UtxoEntry)
+	entries = make(map[uint32]*UtxoEntry)
 	// All entries will need to potentially be marked as a coinbase.
 	var packedFlags txoFlags
 	if isCoinBase {
@@ -374,12 +367,11 @@ deserializeUtxoEntryV0(serialized []byte) (map[uint32]*UtxoEntry, error) {
 	// Decode and add all of the utxos.
 	for i, outputIndex := range outputIndexes {
 		// Decode the next utxo.
-		amount, pkScript, bytesRead, err := decodeCompressedTxOut(
-			serialized[offset:])
-		if err != nil {
-			slog.Error(err)
-			return nil, errDeserialize(fmt.Sprintf("unable to "+
-				"decode utxo at index %d: %v", i, err))
+		var amount uint64
+		var pkScript []byte
+		if amount, pkScript, bytesRead, err = decodeCompressedTxOut(serialized[offset:]); slog.Check(err) {
+			err = errDeserialize(fmt.Sprintf("unable to decode utxo at index %d: %v", i, err))
+			return
 		}
 		offset += bytesRead
 		// Create a new utxo entry with the details deserialized above.
@@ -390,12 +382,12 @@ deserializeUtxoEntryV0(serialized []byte) (map[uint32]*UtxoEntry, error) {
 			packedFlags: packedFlags,
 		}
 	}
-	return entries, nil
+	return
 }
 
-func // upgradeUtxoSetToV2 migrates the utxo set entries from version 1 to 2 in
+// upgradeUtxoSetToV2 migrates the utxo set entries from version 1 to 2 in
 // batches.  It is guaranteed to updated if this returns without failure.
-upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
+func upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) (err error) {
 	// Hardcoded bucket names so updates to the global values do not affect
 	// old upgrades.
 	var (
@@ -405,13 +397,12 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 	slog.Info("Upgrading utxo set to v2.  This will take a while")
 	start := time.Now()
 	// Create the new utxo set bucket as needed.
-	err := db.Update(func(dbTx database.Tx) error {
-		_, err := dbTx.Metadata().CreateBucketIfNotExists(v2BucketName)
-		return err
-	})
-	if err != nil {
-		slog.Error(err)
-		return err
+	if err = db.Update(
+		func(dbTx database.Tx) (err error) {
+			_, err = dbTx.Metadata().CreateBucketIfNotExists(v2BucketName)
+			return
+		}); slog.Check(err) {
+		return
 	}
 	// doBatch contains the primary logic for upgrading the utxo set from
 	// version 1 to 2 in batches.  This is done because the utxo set can be
@@ -420,54 +411,48 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 	// many systems due to ulimits.
 	// It returns the number of utxos processed.
 	const maxUtxos = 200000
-	doBatch := func(dbTx database.Tx) (uint32, error) {
+	doBatch := func(dbTx database.Tx) (numUtxos uint32, err error) {
 		v1Bucket := dbTx.Metadata().Bucket(v1BucketName)
 		v2Bucket := dbTx.Metadata().Bucket(v2BucketName)
 		v1Cursor := v1Bucket.Cursor()
 		// Migrate utxos so long as the max number of utxos for this
 		// batch has not been exceeded.
-		var numUtxos uint32
-		for ok := v1Cursor.First(); ok && numUtxos < maxUtxos; ok =
-			v1Cursor.Next() {
+		for ok := v1Cursor.First(); ok && numUtxos < maxUtxos; ok = v1Cursor.Next() {
 			// Old key was the transaction hash.
 			oldKey := v1Cursor.Key()
 			var txHash chainhash.Hash
 			copy(txHash[:], oldKey)
 			// Deserialize the old entry which included all utxos
 			// for the given transaction.
-			utxos, err := deserializeUtxoEntryV0(v1Cursor.Value())
-			if err != nil {
-				slog.Error(err)
-				return 0, err
+			var utxos map[uint32]*UtxoEntry
+			var txOutIdx uint32
+			var utxo *UtxoEntry
+			if utxos, err = deserializeUtxoEntryV0(v1Cursor.Value()); slog.Check(err) {
+				return
 			}
 			// Add an entry for each utxo into the new bucket using
 			// the new format.
-			for txOutIdx, utxo := range utxos {
-				reserialized, err := serializeUtxoEntry(utxo)
-				if err != nil {
-					slog.Error(err)
-					return 0, err
+			for txOutIdx, utxo = range utxos {
+				var reserialized []byte
+				if reserialized, err = serializeUtxoEntry(utxo); slog.Check(err) {
+					return
 				}
 				key := outpointKey(wire.OutPoint{
 					Hash:  txHash,
 					Index: txOutIdx,
 				})
-				err = v2Bucket.Put(*key, reserialized)
-				// NOTE: The key is intentionally not recycled
-				// here since the database interface contract
-				// prohibits modifications.  It will be garbage
-				// collected normally when the database is done
-				// with it.
-				if err != nil {
-					slog.Error(err)
-					return 0, err
+				if err = v2Bucket.Put(*key, reserialized); slog.Check(err) {
+					// NOTE: The key is intentionally not recycled
+					// here since the database interface contract
+					// prohibits modifications.  It will be garbage
+					// collected normally when the database is done
+					// with it.
+					return
 				}
 			}
 			// Remove old entry.
-			err = v1Bucket.Delete(oldKey)
-			if err != nil {
-				slog.Error(err)
-				return 0, err
+			if err = v1Bucket.Delete(oldKey); slog.Check(err) {
+				return
 			}
 			numUtxos += uint32(len(utxos))
 			if interruptRequested(interrupt) {
@@ -477,23 +462,21 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 				break
 			}
 		}
-		return numUtxos, nil
+		return
 	}
 	// Migrate all entries in batches for the reasons mentioned above.
 	var totalUtxos uint64
+	var numUtxos uint32
 	for {
-		var numUtxos uint32
-		err := db.Update(func(dbTx database.Tx) error {
-			var err error
+		if err = db.Update(func(dbTx database.Tx) (err error) {
 			numUtxos, err = doBatch(dbTx)
-			return err
-		})
-		if err != nil {
-			slog.Error(err)
-			return err
+			return
+		}); slog.Check(err) {
+			return
 		}
 		if interruptRequested(interrupt) {
-			return errInterruptRequested
+			err = errInterruptRequested
+			return
 		}
 		if numUtxos == 0 {
 			break
@@ -503,48 +486,40 @@ upgradeUtxoSetToV2(db database.DB, interrupt <-chan struct{}) error {
 	}
 	// Remove the old bucket and update the utxo set version once it has
 	// been fully migrated.
-	err = db.Update(func(dbTx database.Tx) error {
-		err := dbTx.Metadata().DeleteBucket(v1BucketName)
-		if err != nil {
-			slog.Error(err)
-			return err
+	if err = db.Update(func(dbTx database.Tx) (err error) {
+		if err = dbTx.Metadata().DeleteBucket(v1BucketName); slog.Check(err) {
+			return
 		}
 		return dbPutVersion(dbTx, utxoSetVersionKeyName, 2)
-	})
-	if err != nil {
-		slog.Error(err)
-		return err
+	}); slog.Check(err) {
+		return
 	}
 	seconds := int64(time.Since(start) / time.Second)
 	slog.Infof("Done upgrading utxo set.  Total utxos: %d in %d seconds",
 		totalUtxos, seconds)
-	return nil
+	return
 }
 
-func // maybeUpgradeDbBuckets checks the database version of the buckets used
+// maybeUpgradeDbBuckets checks the database version of the buckets used
 // by this package and performs any needed upgrades to bring them to the latest
 // version. All buckets used by this package are guaranteed to be the latest
 // version if this function returns without error.
-(b *BlockChain) maybeUpgradeDbBuckets(interrupt <-chan struct{}) error {
+func (b *BlockChain) maybeUpgradeDbBuckets(interrupt <-chan struct{}) (err error) {
 	// Load or create bucket versions as needed.
 	var utxoSetVersion uint32
-	err := b.db.Update(func(dbTx database.Tx) error {
+	if err = b.db.Update(func(dbTx database.Tx) (err error) {
 		// Load the utxo set version from the database or create it and
 		// initialize it to version 1 if it doesn't exist.
-		var err error
-		utxoSetVersion, err = dbFetchOrCreateVersion(dbTx,
-			utxoSetVersionKeyName, 1)
-		return err
-	})
-	if err != nil {
-		slog.Error(err)
+		utxoSetVersion, err = dbFetchOrCreateVersion(dbTx, utxoSetVersionKeyName, 1)
+		return
+	}); slog.Check(err) {
 		return err
 	}
 	// Update the utxo set to v2 if needed.
 	if utxoSetVersion < 2 {
-		if err := upgradeUtxoSetToV2(b.db, interrupt); err != nil {
-			return err
+		if err = upgradeUtxoSetToV2(b.db, interrupt); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }

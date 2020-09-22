@@ -8,25 +8,55 @@
       <w>bitses</w>
       <w>blockchain</w>
       <w>chainhash</w>
+      <w>checksig</w>
       <w>ciph</w>
       <w>coinbases</w>
       <w>datagram</w>
       <w>ffffffff</w>
+      <w>hardfork</w>
       <w>hashcount</w>
       <w>hashrate</w>
+      <w>infof</w>
       <w>intn</w>
       <w>kopach</w>
       <w>kopachworker</w>
+      <w>locktime</w>
       <w>marshaler</w>
+      <w>mempool</w>
       <w>merkle</w>
       <w>multicast</w>
+      <w>multisig</w>
       <w>othernodes</w>
+      <w>pkscript</w>
+      <w>powlimit</w>
+      <w>pubkey</w>
       <w>rebroadcaster</w>
+      <w>reserialize</w>
+      <w>reserialized</w>
       <w>routeable</w>
       <w>rpc</w>
+      <w>segwit</w>
+      <w>softfork</w>
+      <w>stxo</w>
+      <w>stxos</w>
+      <w>timesource</w>
+      <w>totaltx</w>
+      <w>ttpb</w>
+      <w>txns</w>
+      <w>txos</w>
+      <w>txout</w>
+      <w>txouts</w>
       <w>unicast</w>
       <w>unmarshalling</w>
+      <w>unspend</w>
+      <w>unspendable</w>
+      <w>unspentness</w>
       <w>upnp</w>
+      <w>utxo</w>
+      <w>utxos</w>
+      <w>utxoset</w>
+      <w>utxosetv</w>
+      <w>uxtos</w>
       <w>websockets</w>
     </words>
   </dictionary>

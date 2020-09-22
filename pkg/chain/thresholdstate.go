@@ -148,11 +148,11 @@ func (b *BlockChain) thresholdState(prevNode *BlockNode, checker thresholdCondit
 			}
 			// At this point, the rule change is still being voted on by the miners, so iterate backwards through the confirmation window to count all of the votes in it.
 			var count uint32
+			var err error
+			var condition bool
 			countNode := prevNode
 			for i := int32(0); i < confirmationWindow; i++ {
-				condition, err := checker.Condition(countNode)
-				if err != nil {
-					slog.Error(err)
+				if condition, err = checker.Condition(countNode); slog.Check(err) {
 					return ThresholdFailed, err
 				}
 				if condition {
@@ -191,8 +191,7 @@ func (b *BlockChain) IsDeploymentActive(deploymentID uint32) (bool, error) {
 	b.chainLock.Lock()
 	state, err := b.deploymentState(b.BestChain.Tip(), deploymentID)
 	b.chainLock.Unlock()
-	if err != nil {
-		slog.Error(err)
+	if slog.Check(err) {
 		return false, err
 	}
 	return state == ThresholdActive, nil
@@ -216,26 +215,22 @@ func (b *BlockChain) deploymentState(prevNode *BlockNode, deploymentID uint32) (
 }
 
 // initThresholdCaches initializes the threshold state caches for each warning bit and defined deployment and provides warnings if the chain is current per the warnUnknownVersions and warnUnknownRuleActivations functions.
-func (b *BlockChain) initThresholdCaches() error {
+func (b *BlockChain) initThresholdCaches() (err error) {
 	// Initialize the warning and deployment caches by calculating the threshold state for each of them.  This will ensure the caches are populated and any states that needed to be recalculated due to definition changes is done now.
 	prevNode := b.BestChain.Tip().parent
 	for bit := uint32(0); bit < vbNumBits; bit++ {
 		checker := bitConditionChecker{bit: bit, chain: b}
 		cache := &b.warningCaches[bit]
-		_, err := b.thresholdState(prevNode, checker, cache)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if _, err = b.thresholdState(prevNode, checker, cache); slog.Check(err) {
+			return
 		}
 	}
 	for id := 0; id < len(b.params.Deployments); id++ {
 		deployment := &b.params.Deployments[id]
 		cache := &b.deploymentCaches[id]
 		checker := deploymentChecker{deployment: deployment, chain: b}
-		_, err := b.thresholdState(prevNode, checker, cache)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if _, err = b.thresholdState(prevNode, checker, cache); slog.Check(err) {
+			return
 		}
 	}
 	// No warnings about unknown rules or versions until the chain is current.
@@ -246,9 +241,9 @@ func (b *BlockChain) initThresholdCaches() error {
 		// 	return err
 		// }
 		// Warn if any unknown new rules are either about to activate or have already been activated.
-		if err := b.warnUnknownRuleActivations(bestNode); err != nil {
-			return err
+		if err = b.warnUnknownRuleActivations(bestNode); slog.Check(err) {
+			return
 		}
 	}
-	return nil
+	return
 }

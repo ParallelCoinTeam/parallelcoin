@@ -6,7 +6,6 @@ import (
 	"math"
 	"runtime"
 
-	"github.com/p9c/pod/pkg/chain/hardfork"
 	txscript "github.com/p9c/pod/pkg/chain/tx/script"
 	"github.com/p9c/pod/pkg/chain/wire"
 	"github.com/p9c/pod/pkg/util"
@@ -73,8 +72,7 @@ out:
 			vm, err := txscript.NewEngine(pkScript, txVI.tx.MsgTx(),
 				txVI.txInIndex, v.flags, v.sigCache, txVI.sigHashes,
 				inputAmount)
-			if err != nil {
-				slog.Error(err)
+			if slog.Check(err) {
 				str := fmt.Sprintf("failed to parse input "+
 					"%s:%d which references output %v - "+
 					"%v (input witness %x, input script "+
@@ -82,7 +80,7 @@ out:
 					txVI.tx.Hash(), txVI.txInIndex,
 					txIn.PreviousOutPoint, err, witness,
 					sigScript, pkScript)
-				err := ruleError(ErrScriptMalformed, str)
+				err = ruleError(ErrScriptMalformed, str)
 				v.sendResult(err)
 				break out
 			}
@@ -109,9 +107,9 @@ out:
 
 func // Validate validates the scripts for all of the passed transaction inputs
 // using multiple goroutines.
-(v *txValidator) Validate(items []*txValidateItem) error {
+(v *txValidator) Validate(items []*txValidateItem) (err error) {
 	if len(items) == 0 {
-		return nil
+		return
 	}
 	// Limit the number of goroutines to do script validation based on the
 	// number of processor cores.
@@ -138,6 +136,7 @@ func // Validate validates the scripts for all of the passed transaction inputs
 	numInputs := len(items)
 	currentItem := 0
 	processedItems := 0
+out:
 	for processedItems < numInputs {
 		// Only send items while there are still items that need to be
 		// processed.  The select statement will never select a nil channel.
@@ -146,16 +145,15 @@ func // Validate validates the scripts for all of the passed transaction inputs
 		if currentItem < numInputs {
 			validateChan = v.validateChan
 			item = items[currentItem]
-		}
-		select {
-		case validateChan <- item:
-			currentItem++
-		case err := <-v.resultChan:
-			processedItems++
-			if err != nil {
-				slog.Error(err)
-				close(v.quitChan)
-				return err
+			select {
+			case validateChan <- item:
+				currentItem++
+			case err = <-v.resultChan:
+				if slog.Check(err) {
+					break out
+				}
+				// TODO: put this afterwards because it seems it should not count a failed process
+				processedItems++
 			}
 		}
 	}
@@ -163,9 +161,9 @@ func // Validate validates the scripts for all of the passed transaction inputs
 	return nil
 }
 
-func // newTxValidator returns a new instance of txValidator to be used for
+// newTxValidator returns a new instance of txValidator to be used for
 // validating transaction scripts asynchronously.
-newTxValidator(utxoView *UtxoViewpoint, flags txscript.ScriptFlags,
+func newTxValidator(utxoView *UtxoViewpoint, flags txscript.ScriptFlags,
 	sigCache *txscript.SigCache, hashCache *txscript.HashCache) *txValidator {
 	return &txValidator{
 		validateChan: make(chan *txValidateItem),
@@ -178,10 +176,10 @@ newTxValidator(utxoView *UtxoViewpoint, flags txscript.ScriptFlags,
 	}
 }
 
-func // ValidateTransactionScripts validates the scripts for the passed
+// ValidateTransactionScripts validates the scripts for the passed
 // transaction using multiple goroutines.
-ValidateTransactionScripts(b *BlockChain, tx *util.Tx, utxoView *UtxoViewpoint, flags txscript.ScriptFlags, sigCache *txscript.SigCache,
-	hashCache *txscript.HashCache) error {
+func ValidateTransactionScripts(b *BlockChain, tx *util.Tx, utxoView *UtxoViewpoint, flags txscript.ScriptFlags, sigCache *txscript.SigCache,
+	hashCache *txscript.HashCache) (err error) {
 	// First determine if segwit is active according to the scriptFlags.
 	// If it isn't then we don't need to interact with the HashCache.
 	segwitActive := flags&txscript.ScriptVerifyWitness == txscript.ScriptVerifyWitness
@@ -200,9 +198,11 @@ ValidateTransactionScripts(b *BlockChain, tx *util.Tx, utxoView *UtxoViewpoint, 
 		// we ensure the sighashes are only computed once.
 		cachedHashes, _ = hashCache.GetSigHashes(tx.Hash())
 	}
-	if ContainsBlacklisted(b, tx, hardfork.Blacklist) {
-		return ruleError(ErrBlacklisted, "transaction contains blacklisted address ")
-	}
+	// TODO: removing the blacklist because it is expensive really and unnecessary
+	//if ContainsBlacklisted(b, tx, hardfork.Blacklist) {
+	//	err = ruleError(ErrBlacklisted, "transaction contains blacklisted address ")
+	//	return
+	//}
 	// Collect all of the transaction inputs and required information for
 	// validation.
 	txIns := tx.MsgTx().TxIn
@@ -222,14 +222,16 @@ ValidateTransactionScripts(b *BlockChain, tx *util.Tx, utxoView *UtxoViewpoint, 
 	}
 	// Validate all of the inputs.
 	validator := newTxValidator(utxoView, flags, sigCache, hashCache)
-	return validator.Validate(txValItems)
+	err = validator.Validate(txValItems)
+	slog.Check(err)
+	return
 }
 
-func // checkBlockScripts executes and validates the scripts for all
+// checkBlockScripts executes and validates the scripts for all
 // transactions in the passed block using multiple goroutines.
-checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
+func checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 	scriptFlags txscript.ScriptFlags, sigCache *txscript.SigCache,
-	hashCache *txscript.HashCache) error {
+	hashCache *txscript.HashCache) (err error) {
 	// First determine if segwit is active according to the scriptFlags.
 	// If it isn't then we don't need to interact with the HashCache.
 	segwitActive := scriptFlags&txscript.ScriptVerifyWitness == txscript.ScriptVerifyWitness
@@ -276,8 +278,8 @@ checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 	// Validate all of the inputs.
 	validator := newTxValidator(utxoView, scriptFlags, sigCache, hashCache)
 	// start := time.Now()
-	if err := validator.Validate(txValItems); err != nil {
-		return err
+	if err = validator.Validate(txValItems); slog.Check(err) {
+		return
 	}
 	// elapsed := time.Since(start)
 	// Tracec(func() string {
@@ -293,5 +295,5 @@ checkBlockScripts(block *util.Block, utxoView *UtxoViewpoint,
 			}
 		}
 	}
-	return nil
+	return
 }

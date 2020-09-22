@@ -256,27 +256,23 @@ func (bi *blockIndex) UnsetStatusFlags(node *BlockNode, flags blockStatus) {
 }
 
 // flushToDB writes all dirty block nodes to the database. If all writes succeed, this clears the dirty set.
-func (bi *blockIndex) flushToDB() error {
+func (bi *blockIndex) flushToDB() (err error) {
 	bi.Lock()
 	if len(bi.dirty) == 0 {
 		bi.Unlock()
 		return nil
 	}
-	err :=
-		bi.db.Update(
-			func(dbTx database.Tx) error {
-				for node := range bi.dirty {
-					err := dbStoreBlockNode(dbTx, node)
-					if err != nil {
-						slog.Error(err)
-						return err
-					}
+	if err = bi.db.Update(
+		func(dbTx database.Tx) (err error) {
+			for node := range bi.dirty {
+				if err = dbStoreBlockNode(dbTx, node); slog.Check(err) {
+					return
 				}
-				return nil
-			},
-		)
-	// If write was successful, clear the dirty set.
-	if err == nil {
+			}
+			return
+		},
+	); slog.Check(err) {
+		// If write was successful, clear the dirty set.
 		bi.dirty = make(map[*BlockNode]struct{})
 	}
 	bi.Unlock()
@@ -295,8 +291,7 @@ func (node *BlockNode) GetLastWithAlgo(algo int32) (prev *BlockNode) {
 	}
 	if fork.GetCurrent(node.height+1) == 0 {
 		// Trace("checking pre-hardfork algo versions")
-		if algo != 514 &&
-			algo != 2 {
+		if algo != 514 && algo != 2 {
 			slog.Debug("irregular version", algo, "block, assuming 2 (sha256d)")
 			algo = 2
 		}

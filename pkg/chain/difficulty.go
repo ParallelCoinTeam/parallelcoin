@@ -92,9 +92,7 @@ func (b *BlockChain) calcNextRequiredDifficulty(
 		}
 		version := fork.GetAlgoVer(algoname, lastNode.height+1)
 		if bits[version] == 0 {
-			bits, err = b.CalcNextRequiredDifficultyPlan9Controller(lastNode)
-			if err != nil {
-				slog.Error(err)
+			if bits, err = b.CalcNextRequiredDifficultyPlan9Controller(lastNode); slog.Check(err) {
 				return
 			}
 			// Debug(bits, reflect.TypeOf(bits))

@@ -67,8 +67,7 @@ func // verifyCheckpoint returns whether the passed block height and hash
 	if !checkpoint.Hash.IsEqual(hash) {
 		return false
 	}
-	slog.Infof("Verified checkpoint at height %d/block %s", checkpoint.Height,
-		checkpoint.Hash)
+	slog.Infof("Verified checkpoint at height %d/block %s", checkpoint.Height, checkpoint.Hash)
 	return true
 }
 

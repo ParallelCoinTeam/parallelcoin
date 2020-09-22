@@ -164,8 +164,7 @@ func // AddTimeSample adds a time sample that is used when determining the
 			}
 			// Warn if none of the time samples are close.
 			if !remoteHasCloseTime {
-				slog.Warn("Please check your date and time are correct!  pod" +
-					" will" +
+				slog.Warn("Please check your date and time are correct!  pod will" +
 					" not work properly with an invalid time")
 			}
 		}

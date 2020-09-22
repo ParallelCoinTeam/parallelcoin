@@ -63,9 +63,9 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		algo = block.MsgBlock().Header.Version
 	}
 	// The block must not already exist in the main chain or side chains.
-	exists, err := b.blockExists(blockHash)
-	if err != nil {
-		slog.Error(err)
+	var err error
+	var exists bool
+	if exists, err = b.blockExists(blockHash); slog.Check(err) {
 		return false, false, err
 	}
 	if exists {
@@ -96,9 +96,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	}
 	// Warnf("checkBlockSanity powLimit %d %s %d %064x", algo,
 	// 	fork.GetAlgoName(algo, blockHeight), blockHeight, pl)
-	err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight)
-	if err != nil {
-		slog.Error("block processing error: ", err)
+	if err = checkBlockSanity(block, pl, b.timeSource, flags, DoNotCheckPow, blockHeight); slog.Check(err) {
 		return false, false, err
 	}
 	// Warn("searching back to checkpoints")
@@ -110,9 +108,8 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// and ensuring expected (versus claimed) proof of
 	// work requirements since the previous checkpoint are met.
 	blockHeader := &block.MsgBlock().Header
-	checkpointNode, err := b.findPreviousCheckpoint()
-	if err != nil {
-		slog.Error(err)
+	var checkpointNode *BlockNode
+	if checkpointNode, err = b.findPreviousCheckpoint(); slog.Check(err) {
 		return false, false, err
 	}
 	if checkpointNode != nil {
@@ -146,9 +143,8 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// Warn("handling orphans")
 	// Handle orphan blocks.
 	prevHash := &blockHeader.PrevBlock
-	prevHashExists, err := b.blockExists(prevHash)
-	if err != nil {
-		slog.Error(err)
+	var prevHashExists bool
+	if prevHashExists, err = b.blockExists(prevHash); slog.Check(err) {
 		return false, false, err
 	}
 	if !prevHashExists {
@@ -165,9 +161,8 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 	// The block has passed all context independent checks and appears sane
 	// enough to potentially accept it into the block chain.
 	// Warn("maybe accept block")
-	isMainChain, err := b.maybeAcceptBlock(workerNumber, block, flags)
-	if err != nil {
-		slog.Error(err)
+	var isMainChain bool
+	if isMainChain, err = b.maybeAcceptBlock(workerNumber, block, flags); slog.Check(err) {
 		return false, false, err
 	}
 	// Accept any orphan blocks that depend on this block (they are no longer
@@ -176,9 +171,7 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 		slog.Trace("new block on main chain")
 		// Traces(block)
 	}
-	err = b.processOrphans(workerNumber, blockHash, flags)
-	if err != nil {
-		slog.Error(err)
+	if err = b.processOrphans(workerNumber, blockHash, flags); slog.Check(err) {
 		return false, false, err
 	}
 	slog.Tracef("accepted block %d %v %s",
@@ -191,18 +184,16 @@ func // ProcessBlock is the main workhorse for handling insertion of new blocks
 func // blockExists determines whether a block with the given hash exists
 // either in the main chain or any side chains.
 // This function is safe for concurrent access.
-(b *BlockChain) blockExists(hash *chainhash.Hash) (bool, error) {
+(b *BlockChain) blockExists(hash *chainhash.Hash) (exists bool, err error) {
 	// Check block index first (could be main chain or side chain blocks).
 	if b.Index.HaveBlock(hash) {
 		return true, nil
 	}
 	// Check in the database.
-	var exists bool
-	err := b.db.View(func(dbTx database.Tx) error {
-		var err error
+	err = b.db.View(func(dbTx database.Tx) (err error) {
 		exists, err = dbTx.HasBlock(hash)
-		if err != nil || !exists {
-			return err
+		if slog.Check(err) || !exists {
+			return
 		}
 		// Ignore side chain blocks in the database.
 		// This is necessary because there is not currently any record of the
@@ -211,25 +202,24 @@ func // blockExists determines whether a block with the given hash exists
 		// anything useful with it.
 		// Ultimately the entire block index should be serialized instead of
 		// only the current main chain so it can be consulted directly.
-		_, err = dbFetchHeightByHash(dbTx, hash)
-		if isNotInMainChainErr(err) {
+		if _, err = dbFetchHeightByHash(dbTx, hash); isNotInMainChainErr(err) {
 			exists = false
 			return nil
 		}
-		return err
+		return
 	})
-	return exists, err
+	return
 }
 
-func // processOrphans determines if there are any orphans which depend on the
+// processOrphans determines if there are any orphans which depend on the
 // passed block hash (they are no longer orphans if true) and potentially
 // accepts them. It repeats the process for the newly accepted blocks (
 // to detect further orphans which may no longer be orphans) until there are
 // no more. The flags do not modify the behavior of this function directly,
 // however they are needed to pass along to maybeAcceptBlock.
 // This function MUST be called with the chain state lock held (for writes).
-(b *BlockChain) processOrphans(workerNumber uint32, hash *chainhash.Hash,
-	flags BehaviorFlags) error {
+func (b *BlockChain) processOrphans(workerNumber uint32, hash *chainhash.Hash,
+	flags BehaviorFlags) (err error) {
 	// Start with processing at least the passed hash.
 	// Leave a little room for additional orphan blocks that need to be
 	// processed without needing to grow the array in the common case.
@@ -260,15 +250,13 @@ func // processOrphans determines if there are any orphans which depend on the
 			b.removeOrphanBlock(orphan)
 			i--
 			// Potentially accept the block into the block chain.
-			_, err := b.maybeAcceptBlock(workerNumber, orphan.block, flags)
-			if err != nil {
-				slog.Error(err)
-				return err
+			if _, err = b.maybeAcceptBlock(workerNumber, orphan.block, flags); slog.Check(err) {
+				return
 			}
 			// Add this block to the list of blocks to process so any orphan
 			// blocks that depend on this block are handled too.
 			processHashes = append(processHashes, orphanHash)
 		}
 	}
-	return nil
+	return
 }

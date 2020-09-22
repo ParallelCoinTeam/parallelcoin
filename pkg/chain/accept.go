@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/stalker-loki/app/slog"
 
-	"github.com/p9c/pod/pkg/chain/hardfork"
 	database "github.com/p9c/pod/pkg/db"
 	"github.com/p9c/pod/pkg/util"
 )
@@ -19,7 +18,7 @@ import (
 // See their documentation for how the flags modify their behavior.
 // This function MUST be called with the chain state lock held (for writes).
 func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block,
-	flags BehaviorFlags) (bool, error) {
+	flags BehaviorFlags) (isMainChain bool, err error) {
 	// Warn("maybeAcceptBlock")
 	// Info(block.MsgBlock())
 	// The height of this block is one more than the referenced previous block.
@@ -61,22 +60,19 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block,
 		}
 	}
 	// Warn("check for blacklisted addresses")
-	txs := block.Transactions()
-	for i := range txs {
-		if ContainsBlacklisted(b, txs[i], hardfork.Blacklist) {
-			return false, ruleError(ErrBlacklisted, "block contains a blacklisted address ")
-		}
-	}
+	// *** TODO: this blacklist is expensive and really unnecessary
+	//txs := block.Transactions()
+	//for i := range txs {
+	//	if ContainsBlacklisted(b, txs[i], hardfork.Blacklist) {
+	//		return false, ruleError(ErrBlacklisted, "block contains a blacklisted address ")
+	//	}
+	//}
 	// Warn("found no blacklisted addresses")
-	var err error
 	if pn != nil {
 		// The block must pass all of the validation rules which depend on
 		// the  position of the block within the block chain.
-		err = b.checkBlockContext(workerNumber, block, prevNode, flags,
-			DoNotCheckPow)
-		if err != nil {
-			slog.Error(err)
-			return false, err
+		if err = b.checkBlockContext(workerNumber, block, prevNode, flags, DoNotCheckPow); slog.Check(err) {
+			return
 		}
 	}
 	// Insert the block into the database if it's not already there.
@@ -89,12 +85,10 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block,
 	// It also has some other nice properties such as making blocks that
 	// never become part of the main chain or blocks that fail to connect
 	// available for further analysis.
-	err = b.db.Update(func(dbTx database.Tx) error {
+	if err = b.db.Update(func(dbTx database.Tx) (err error) {
 		return dbStoreBlock(dbTx, block)
-	})
-	if err != nil {
-		slog.Error(err)
-		return false, err
+	}); slog.Check(err) {
+		return
 	}
 	// Warn("creating new block node for new block")
 	// Create a new block node for the block and add it to the node index.
@@ -104,18 +98,14 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block,
 	newNode := NewBlockNode(blockHeader, prevNode)
 	newNode.status = statusDataStored
 	b.Index.AddNode(newNode)
-	err = b.Index.flushToDB()
-	if err != nil {
-		slog.Error(err)
-		return false, err
+	if err = b.Index.flushToDB(); slog.Check(err) {
+		return
 	}
 	// Connect the passed block to the chain while respecting proper chain
 	// selection according to the chain with the most proof of work.
 	// This also handles validation of the transaction scripts.
-	isMainChain, err := b.connectBestChain(newNode, block, flags)
-	if err != nil {
-		slog.Error(err)
-		return false, err
+	if isMainChain, err = b.connectBestChain(newNode, block, flags); slog.Check(err) {
+		return
 	}
 	// Notify the caller that the new block was accepted into the block
 	// chain.  The caller would typically want to react by relaying the
@@ -123,5 +113,5 @@ func (b *BlockChain) maybeAcceptBlock(workerNumber uint32, block *util.Block,
 	b.chainLock.Unlock()
 	b.sendNotification(NTBlockAccepted, block)
 	b.chainLock.Lock()
-	return isMainChain, nil
+	return
 }

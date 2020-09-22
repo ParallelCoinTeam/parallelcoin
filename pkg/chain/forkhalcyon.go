@@ -69,9 +69,7 @@ func (b *BlockChain) CalcNextRequiredDifficultyHalcyon(workerNumber uint32, last
 	if l {
 		slog.Debugf(
 			"difficulty retarget at block height %d, old %08x new %08x",
-			lastNode.height+1,
-			prevNode.bits,
-			newTargetBits,
+			lastNode.height+1, prevNode.bits, newTargetBits,
 		)
 	}
 	if l {

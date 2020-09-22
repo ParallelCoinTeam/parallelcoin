@@ -4,6 +4,7 @@ import (
 	"compress/bzip2"
 	"encoding/binary"
 	"fmt"
+	"github.com/stalker-loki/app/slog"
 	"io"
 	"os"
 	"path/filepath"
@@ -225,73 +226,6 @@ func loadUtxoView(filename string) (*UtxoViewpoint, error) {
 	return view, nil
 }
 
-// convertUtxoStore reads a utxostore from the legacy format and writes it back out using the latest format.  It is only useful for converting utxostore data used in the tests, which has already been done.  However, the code is left available for future reference.
-func convertUtxoStore(r io.Reader, w io.Writer) error {
-	// The old utxostore file format was:
-	// <tx hash><serialized utxo len><serialized utxo>
-	//
-	// The serialized utxo len was a little endian uint32 and the serialized utxo uses the format described in upgrade.go.
-	littleEndian := binary.LittleEndian
-	for {
-		// Hash of the utxo entry.
-		var hash chainhash.Hash
-		_, err := io.ReadAtLeast(r, hash[:], len(hash[:]))
-		if err != nil {
-			// Expected EOF at the right offset.
-			if err == io.EOF {
-				break
-			}
-			return err
-		}
-		// Num of serialized utxo entry bytes.
-		var numBytes uint32
-		err = binary.Read(r, littleEndian, &numBytes)
-		if err != nil {
-			return err
-		}
-		// Serialized utxo entry.
-		serialized := make([]byte, numBytes)
-		_, err = io.ReadAtLeast(r, serialized, int(numBytes))
-		if err != nil {
-			return err
-		}
-		// Deserialize the entry.
-		entries, err := deserializeUtxoEntryV0(serialized)
-		if err != nil {
-			return err
-		}
-		// Loop through all of the utxos and write them out in the new format.
-		for outputIdx, entry := range entries {
-			// Reserialize the entries using the new format.
-			serialized, err := serializeUtxoEntry(entry)
-			if err != nil {
-				return err
-			}
-			// Write the hash of the utxo entry.
-			_, err = w.Write(hash[:])
-			if err != nil {
-				return err
-			}
-			// Write the output index of the utxo entry.
-			err = binary.Write(w, littleEndian, outputIdx)
-			if err != nil {
-				return err
-			}
-			// Write num of serialized utxo entry bytes.
-			err = binary.Write(w, littleEndian, uint32(len(serialized)))
-			if err != nil {
-				return err
-			}
-			// Write the serialized utxo.
-			_, err = w.Write(serialized)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 // TstSetCoinbaseMaturity makes the ability to set the coinbase maturity available when running tests.
 func (b *BlockChain) TstSetCoinbaseMaturity(maturity uint16) {
 	b.params.CoinbaseMaturity = maturity
@@ -329,4 +263,64 @@ func newFakeNode(parent *BlockNode, blockVersion int32, bits uint32, timestamp t
 		Timestamp: timestamp,
 	}
 	return NewBlockNode(header, parent)
+}
+
+// convertUtxoStore reads a utxostore from the legacy format and writes it back out using the latest format.  It is only useful for converting utxostore data used in the tests, which has already been done.  However, the code is left available for future reference.
+func convertUtxoStore(r io.Reader, w io.Writer) (err error) {
+	// The old utxostore file format was:
+	// <tx hash><serialized utxo len><serialized utxo>
+	//
+	// The serialized utxo len was a little endian uint32 and the serialized utxo uses the format described in upgrade.go.
+	littleEndian := binary.LittleEndian
+	for {
+		// Hash of the utxo entry.
+		var hash chainhash.Hash
+		_, err = io.ReadAtLeast(r, hash[:], len(hash[:]))
+		if slog.Check(err) {
+			// Expected EOF at the right offset.
+			if err == io.EOF {
+				break
+			}
+			return
+		}
+		// Num of serialized utxo entry bytes.
+		var numBytes uint32
+		if err = binary.Read(r, littleEndian, &numBytes); slog.Check(err) {
+			return
+		}
+		// Serialized utxo entry.
+		serialized := make([]byte, numBytes)
+		if _, err = io.ReadAtLeast(r, serialized, int(numBytes)); slog.Check(err) {
+			return
+		}
+		// Deserialize the entry.
+		var entries map[uint32]*UtxoEntry
+		if entries, err = deserializeUtxoEntryV0(serialized); slog.Check(err) {
+			return
+		}
+		// Loop through all of the utxos and write them out in the new format.
+		for outputIdx, entry := range entries {
+			// Reserialize the entries using the new format.
+			if serialized, err = serializeUtxoEntry(entry); slog.Check(err) {
+				return err
+			}
+			// Write the hash of the utxo entry.
+			if _, err = w.Write(hash[:]); slog.Check(err) {
+				return err
+			}
+			// Write the output index of the utxo entry.
+			if err = binary.Write(w, littleEndian, outputIdx); slog.Check(err) {
+				return
+			}
+			// Write num of serialized utxo entry bytes.
+			if err = binary.Write(w, littleEndian, uint32(len(serialized))); slog.Check(err) {
+				return
+			}
+			// Write the serialized utxo.
+			if _, err = w.Write(serialized); slog.Check(err) {
+				return
+			}
+		}
+	}
+	return
 }
