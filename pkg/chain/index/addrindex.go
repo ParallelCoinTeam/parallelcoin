@@ -81,20 +81,20 @@ func serializeAddrIndexEntry(blockID uint32, txLoc wire.TxLoc) []byte {
 }
 
 // deserializeAddrIndexEntry decodes the passed serialized byte slice into the provided region struct according to the format described in detail above and uses the passed block hash fetching function in order to conver the block ID to the associated block hash.
-func deserializeAddrIndexEntry(serialized []byte, region *database.BlockRegion, fetchBlockHash fetchBlockHashFunc) error {
+func deserializeAddrIndexEntry(serialized []byte, region *database.BlockRegion, fetchBlockHash fetchBlockHashFunc) (err error) {
 	// Ensure there are enough bytes to decode.
 	if len(serialized) < txEntrySize {
-		return errDeserialize("unexpected end of data")
+		err = errDeserialize("unexpected end of data")
+		return
 	}
-	hash, err := fetchBlockHash(serialized[0:4])
-	if err != nil {
-		slog.Error(err)
-		return err
+	var h *chainhash.Hash
+	if h, err = fetchBlockHash(serialized[0:4]); slog.Check(err) {
+		return
 	}
-	region.Hash = hash
+	region.Hash = h
 	region.Offset = byteOrder.Uint32(serialized[4:8])
 	region.Len = byteOrder.Uint32(serialized[8:12])
-	return nil
+	return
 }
 
 // keyForLevel returns the key for a specific address and level in the address index entry.
@@ -106,7 +106,7 @@ func keyForLevel(addrKey [addrKeySize]byte, level uint8) [levelKeySize]byte {
 }
 
 // dbPutAddrIndexEntry updates the address index to include the provided entry according to the level-based scheme described in detail above.
-func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, blockID uint32, txLoc wire.TxLoc) error {
+func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, blockID uint32, txLoc wire.TxLoc) (err error) {
 	// Start with level 0 and its initial max number of entries.
 	curLevel := uint8(0)
 	maxLevelBytes := level0MaxEntries * txEntrySize
@@ -121,7 +121,9 @@ func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, block
 			copy(mergedData, level0Data)
 			copy(mergedData[len(level0Data):], newData)
 		}
-		return bucket.Put(level0Key[:], mergedData)
+		if err = bucket.Put(level0Key[:], mergedData); slog.Check(err) {
+		}
+		return
 	}
 	// At this point, level 0 is full, so merge each level into higher levels as many times as needed to free up level 0.
 	prevLevelData := level0Data
@@ -144,30 +146,30 @@ func dbPutAddrIndexEntry(bucket internalBucket, addrKey [addrKeySize]byte, block
 			copy(mergedData, curLevelData)
 			copy(mergedData[len(curLevelData):], prevLevelData)
 		}
-		err := bucket.Put(curLevelKey[:], mergedData)
-		if err != nil {
-			slog.Error(err)
-			return err
+		if err = bucket.Put(curLevelKey[:], mergedData); slog.Check(err) {
+			return
 		}
 		// Move all of the levels before the previous one up a level.
 		for mergeLevel := curLevel - 1; mergeLevel > 0; mergeLevel-- {
 			mergeLevelKey := keyForLevel(addrKey, mergeLevel)
 			prevLevelKey := keyForLevel(addrKey, mergeLevel-1)
 			prevData := bucket.Get(prevLevelKey[:])
-			err := bucket.Put(mergeLevelKey[:], prevData)
-			if err != nil {
-				slog.Error(err)
-				return err
+			if err = bucket.Put(mergeLevelKey[:], prevData); slog.Check(err) {
+				return
 			}
 		}
 		break
 	}
 	// Finally, insert the new entry into level 0 now that it is empty.
-	return bucket.Put(level0Key[:], newData)
+	err = bucket.Put(level0Key[:], newData)
+	return
 }
 
-// dbFetchAddrIndexEntries returns block regions for transactions referenced by the given address key and the number of entries skipped since it could have been less in the case where there are less total entries than the requested number of entries to skip.
-func dbFetchAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, numToSkip, numRequested uint32, reverse bool, fetchBlockHash fetchBlockHashFunc) ([]database.BlockRegion, uint32, error) {
+// dbFetchAddrIndexEntries returns block regions for transactions referenced by the given address key and the number of
+// entries skipped since it could have been less in the case where there are less total entries than the requested
+// number of entries to skip.
+func dbFetchAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, numToSkip, numRequested uint32,
+	reverse bool, fetchBlockHash fetchBlockHashFunc) (region []database.BlockRegion, numEntries uint32, err error) {
 	// When the reverse flag is not set, all levels need to be fetched because numToSkip and numRequested are counted from the oldest transactions (highest level) and thus the total count is needed. However, when the reverse flag is set, only enough records to satisfy the requested amount are needed.
 	var level uint8
 	var serialized []byte
@@ -186,13 +188,13 @@ func dbFetchAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, n
 		level++
 	}
 	// When the requested number of entries to skip is larger than the number available, skip them all and return now with the actual number skipped.
-	numEntries := uint32(len(serialized) / txEntrySize)
+	numEntries = uint32(len(serialized) / txEntrySize)
 	if numToSkip >= numEntries {
-		return nil, numEntries, nil
+		return
 	}
 	// Nothing more to do when there are no requested entries.
 	if numRequested == 0 {
-		return nil, numToSkip, nil
+		return
 	}
 	// Limit the number to load based on the number of available entries, the number to skip, and the number requested.
 	numToLoad := numEntries - numToSkip
@@ -210,23 +212,19 @@ func dbFetchAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, n
 			offset = (numToSkip + i) * txEntrySize
 		}
 		// Deserialize and populate the result.
-		err := deserializeAddrIndexEntry(serialized[offset:],
-			&results[i], fetchBlockHash)
-		if err != nil {
-			slog.Error(err)
+		if err = deserializeAddrIndexEntry(serialized[offset:], &results[i], fetchBlockHash); slog.Check(err) {
 			// Ensure any deserialization errors are returned as database corruption errors.
 			if isDeserializeErr(err) {
 				err = database.DBError{
 					ErrorCode: database.ErrCorruption,
-					Description: fmt.Sprintf("failed to "+
-						"deserialized address index "+
-						"for key %x: %v", addrKey, err),
+					Description: fmt.Sprintf(
+						"failed to deserialized address index for key %x: %v", addrKey, err),
 				}
 			}
-			return nil, 0, err
+			return
 		}
 	}
-	return results, numToSkip, nil
+	return
 }
 
 // minEntriesToReachLevel returns the minimum number of entries that are required to reach the given address index level.
@@ -250,31 +248,27 @@ func maxEntriesForLevel(level uint8) int {
 }
 
 // dbRemoveAddrIndexEntries removes the specified number of entries from from the address index for the provided key. An assertion error will be returned if the count exceeds the total number of entries in the index.
-func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, count int) error {
+func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, count int) (err error) {
 	// Nothing to do if no entries are being deleted.
 	if count <= 0 {
-		return nil
+		return
 	}
 	// Make use of a local map to track pending updates and define a closure to apply it to the database.  This is done in order to reduce the number of database reads and because there is more than one exit path that needs to apply the updates.
 	pendingUpdates := make(map[uint8][]byte)
-	applyPending := func() error {
+	applyPending := func() (err error) {
 		for level, data := range pendingUpdates {
 			curLevelKey := keyForLevel(addrKey, level)
 			if len(data) == 0 {
-				err := bucket.Delete(curLevelKey[:])
-				if err != nil {
-					slog.Error(err)
-					return err
+				if err = bucket.Delete(curLevelKey[:]); slog.Check(err) {
+					return
 				}
 				continue
 			}
-			err := bucket.Put(curLevelKey[:], data)
-			if err != nil {
-				slog.Error(err)
-				return err
+			if err = bucket.Put(curLevelKey[:], data); slog.Check(err) {
+				return
 			}
 		}
-		return nil
+		return
 	}
 	// Loop forwards through the levels while removing entries until the specified number has been removed.  This will potentially result in  entirely empty lower levels which will be backfilled below.
 	var highestLoadedLevel uint8
@@ -284,9 +278,11 @@ func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, 
 		curLevelKey := keyForLevel(addrKey, level)
 		curLevelData := bucket.Get(curLevelKey[:])
 		if len(curLevelData) == 0 && numRemaining > 0 {
-			return AssertError(fmt.Sprintf("dbRemoveAddrIndexEntries "+
-				"not enough entries for address key %x to "+
-				"delete %d entries", addrKey, count))
+			err = AssertError(fmt.Sprintf(
+				"dbRemoveAddrIndexEntries not enough entries for address key %x to delete %d entries",
+				addrKey, count))
+			slog.Error(err)
+			return
 		}
 		pendingUpdates[level] = curLevelData
 		highestLoadedLevel = level
@@ -304,7 +300,8 @@ func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, 
 	}
 	// When all elements in level 0 were not removed there is nothing left to do other than updating the database.
 	if len(pendingUpdates[0]) != 0 {
-		return applyPending()
+		err = applyPending()
+		return
 	}
 	// At this point there are one or more empty levels before the current level which need to be backfilled and the current level might have had some entries deleted from it as well.  Since all levels after/ level 0 are required to either be empty, half full, or completely full, the current level must be adjusted accordingly by backfilling each previous levels in a way which satisfies the requirements.  Any entries that are left are assigned to level 0 after the loop as they are guaranteed to fit by the logic in the loop.  In other words, this effectively squashes all remaining entries in the current level into the lowest possible levels while following the level rules.
 	// Note that the level after the current level might also have entries and gaps are not allowed, so this also keeps track of the lowest empty level so the code below knows how far to backfill in case it is required.
@@ -347,7 +344,10 @@ func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, 
 		}
 		pendingUpdates[level] = levelData
 		highestLoadedLevel = level
-		// At this point the highest level is not empty, but it might be half full.  When that is the case, move it up a level to simplify the code below which backfills all lower levels that are still empty.  This also means the current level will be empty, so the loop will perform another another iteration to potentially backfill this level with data from the next one.
+		// At this point the highest level is not empty, but it might be half full.  When that is the case, move it up a
+		// level to simplify the code below which backfills all lower levels that are still empty.  This also means the
+		// current level will be empty, so the loop will perform another another iteration to potentially backfill this
+		// level with data from the next one.
 		curLevelMaxEntries := maxEntriesForLevel(level)
 		if len(levelData)/txEntrySize != curLevelMaxEntries {
 			pendingUpdates[level] = nil
@@ -355,7 +355,8 @@ func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, 
 			level--
 			curLevelMaxEntries /= 2
 		}
-		// Backfill all lower levels that are still empty by iteratively halfing the data until the lowest empty level is filled.
+		// Backfill all lower levels that are still empty by iteratively halving the data until the lowest empty level
+		// is filled.
 		for level > lowestEmptyLevel {
 			offset := (curLevelMaxEntries / 2) * txEntrySize
 			pendingUpdates[level] = levelData[:offset]
@@ -368,40 +369,40 @@ func dbRemoveAddrIndexEntries(bucket internalBucket, addrKey [addrKeySize]byte, 
 		lowestEmptyLevel = highestLoadedLevel
 	}
 	// Apply the pending updates.
-	return applyPending()
+	err = applyPending()
+	return
 }
 
 // addrToKey converts known address types to an addrindex key.  An error is returned for unsupported types.
-func addrToKey(addr util.Address) ([addrKeySize]byte, error) {
+func addrToKey(addr util.Address) (ak [addrKeySize]byte, err error) {
+	var result [addrKeySize]byte
 	switch addr := addr.(type) {
 	case *util.AddressPubKeyHash:
-		var result [addrKeySize]byte
 		result[0] = addrKeyTypePubKeyHash
 		copy(result[1:], addr.Hash160()[:])
-		return result, nil
+		ak = result
 	case *util.AddressScriptHash:
-		var result [addrKeySize]byte
 		result[0] = addrKeyTypeScriptHash
 		copy(result[1:], addr.Hash160()[:])
-		return result, nil
+		ak = result
 	case *util.AddressPubKey:
-		var result [addrKeySize]byte
 		result[0] = addrKeyTypePubKeyHash
 		copy(result[1:], addr.AddressPubKeyHash().Hash160()[:])
-		return result, nil
+		ak = result
 	case *util.AddressWitnessScriptHash:
-		var result [addrKeySize]byte
 		result[0] = addrKeyTypeWitnessScriptHash
 		// P2WSH outputs utilize a 32-byte data push created by hashing the script with sha256 instead of hash160. In order to keep all address entries within the database uniform and compact, we use a hash160 here to reduce the size of the salient data push to 20-bytes.
 		copy(result[1:], util.Hash160(addr.ScriptAddress()))
-		return result, nil
+		ak = result
 	case *util.AddressWitnessPubKeyHash:
-		var result [addrKeySize]byte
 		result[0] = addrKeyTypeWitnessPubKeyHash
 		copy(result[1:], addr.Hash160()[:])
-		return result, nil
+		ak = result
+	default:
+		ak = [addrKeySize]byte{}
+		err = errUnsupportedAddressType
 	}
-	return [addrKeySize]byte{}, errUnsupportedAddressType
+	return
 }
 
 // AddrIndex implements a transaction by address index.  That is to say, it supports querying all transactions that reference a given address because they are either crediting or debiting the address.  The returned transactions are ordered according to their order of appearance in the blockchain.  In other words, first by block height and then by offset inside the block. In addition, support is provided for a memory-only index of unconfirmed transactions such as those which are kept in the memory pool before inclusion in a block.

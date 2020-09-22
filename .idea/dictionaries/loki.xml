@@ -1,10 +1,12 @@
 <component name="ProjectDictionaryState">
   <dictionary name="loki">
     <words>
+      <w>addrs</w>
       <w>advertisment</w>
       <w>algo</w>
       <w>algos</w>
       <w>autoports</w>
+      <w>backfill</w>
       <w>bitses</w>
       <w>blockchain</w>
       <w>chainhash</w>
@@ -17,6 +19,7 @@
       <w>hashcount</w>
       <w>hashrate</w>
       <w>infof</w>
+      <w>inputser</w>
       <w>intn</w>
       <w>kopach</w>
       <w>kopachworker</w>
