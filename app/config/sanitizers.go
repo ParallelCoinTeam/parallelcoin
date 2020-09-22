@@ -453,7 +453,7 @@ func validateWhitelists(cfg *pod.Config, st *state.Config) {
 			_, ipnet, err := net.ParseCIDR(addr)
 			if err != nil {
 				slog.Error(err)
-				err = fmt.Errorf("%s '%s'", err.Error())
+				err = fmt.Errorf("error '%s'", err.Error())
 				ip = net.ParseIP(addr)
 				if ip == nil {
 					str := err.Error() + " %s: The whitelist value of '%s' is invalid"

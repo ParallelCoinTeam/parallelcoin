@@ -34,7 +34,7 @@ func printGoHexes(in []byte) {
 		if i%8 == 0 && i != 0 {
 			fmt.Print("\n\t")
 		}
-		fmt.Print("0x%02x, ", in[i])
+		fmt.Printf("0x%02x, ", in[i])
 	}
 	fmt.Println()
 }
